@@ -281,7 +281,6 @@ public class TxServiceImpl implements TxService {
             throw new NulsException(TxErrorCode.TX_TYPE_INVALID);
         }
         if (tx.getTime() == 0L) {
-            LoggerUtil.LOG.error("#####################time is 0");
             throw new NulsException(TxErrorCode.TX_DATA_VALIDATION_ERROR);
         }
         if (tx.size() > chain.getConfig().getTxMaxSize()) {
@@ -290,7 +289,7 @@ public class TxServiceImpl implements TxService {
         //验证签名
         validateTxSignature(tx, txRegister, chain);
         //如果有coinData, 则进行验证,有一些交易(黄牌)没有coinData数据
-        if (tx.getType() == TxType.YELLOW_PUNISH || tx.getType() == TxType.VERIFIER_CHANGE) {
+        if (tx.getType() == TxType.YELLOW_PUNISH || tx.getType() == TxType.VERIFIER_CHANGE || tx.getType() == TxType.VERIFIER_INIT) {
             return;
         }
         //coinData基础验证以及手续费 (from中所有的nuls资产-to中所有nuls资产)

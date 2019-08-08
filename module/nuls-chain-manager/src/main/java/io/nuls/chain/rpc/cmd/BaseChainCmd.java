@@ -123,6 +123,7 @@ public class BaseChainCmd extends BaseCmd {
         txSize += to.size();
         txSize += from.size();
         BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
+        //手续费从抵押里扣除
         to.setAmount(lockAmount.subtract(fee));
         return coinData;
     }

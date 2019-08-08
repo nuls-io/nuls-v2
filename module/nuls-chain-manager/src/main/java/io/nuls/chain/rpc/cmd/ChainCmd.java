@@ -281,6 +281,7 @@ public class ChainCmd extends BaseChainCmd {
                 return failed(CmErrorCode.ERROR_MAGIC_NUMBER_EXIST);
             }
             if (chainService.hadExistChainName(blockChain.getChainName()) && !dbChain.isDelete()) {
+                LoggerUtil.COMMON_LOG.debug("######### delete={}",dbChain.isDelete());
                 return failed(CmErrorCode.ERROR_CHAIN_NAME_EXIST);
             }
             /* 组装交易发送 (Send transaction) */

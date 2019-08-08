@@ -72,10 +72,10 @@ public class ValidateServiceImpl implements ValidateService {
                     AddressTool.getStringAddressByBytes(dbAsset.getAddress()));
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_ADDRESS_ERROR);
         }
-        if (!asset.getTxHash().equalsIgnoreCase(dbAsset.getTxHash())) {
-            LoggerUtil.logger().error("txHash={},dbHash={} ERROR_TX_HASH", asset.getTxHash(), dbAsset.getTxHash());
-            return ChainEventResult.getResultFail(CmErrorCode.ERROR_TX_HASH);
-        }
+//        if (!asset.getTxHash().equalsIgnoreCase(dbAsset.getTxHash())) {
+//            LoggerUtil.logger().error("txHash={},dbHash={} ERROR_TX_HASH", asset.getTxHash(), dbAsset.getTxHash());
+//            return ChainEventResult.getResultFail(CmErrorCode.ERROR_TX_HASH);
+//        }
         if (asset.getChainId() != dbAsset.getChainId()) {
             LoggerUtil.logger().error("chainId={},dbChainId={} ERROR_CHAIN_ASSET_NOT_MATCH", asset.getChainId(), dbAsset.getChainId());
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_CHAIN_ASSET_NOT_MATCH);
@@ -88,6 +88,8 @@ public class ValidateServiceImpl implements ValidateService {
         double actual = currentNumber.divide(initAsset, 8, RoundingMode.HALF_DOWN).doubleValue();
         double config = Double.parseDouble(nulsChainConfig.getAssetRecoveryRate());
         if (actual < config) {
+            LoggerUtil.logger().error("chainId={},assetId={} actual={},config={},==={}-{}-{}", asset.getChainId(), asset.getAssetId(),
+                    actual, config, initAsset, inAsset, outAsset);
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_RECOVERY_RATE);
         }
         return ChainEventResult.getResultSuccess();
@@ -124,15 +126,17 @@ public class ValidateServiceImpl implements ValidateService {
             判断链ID是否已经存在
             Determine if the chain ID already exists
              */
+        BlockChain dbChain = chainService.getChain(blockChain.getChainId());
+        boolean isChainDisable = (dbChain != null && dbChain.isDelete()) ? true : false;
         if (ChainManagerUtil.duplicateChainId(blockChain, tempChains) || chainService.chainExist(blockChain.getChainId())) {
             LoggerUtil.logger().error("chainId={} exist", blockChain.getChainId());
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_CHAIN_ID_EXIST);
         }
-        if (ChainManagerUtil.duplicateMagicNumber(blockChain, tempChains) || chainService.hadExistMagicNumber(blockChain.getMagicNumber())) {
+        if (ChainManagerUtil.duplicateMagicNumber(blockChain, tempChains) || (chainService.hadExistMagicNumber(blockChain.getMagicNumber()) && !isChainDisable)) {
             LoggerUtil.logger().error("magicNumber={} exist", blockChain.getMagicNumber());
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_MAGIC_NUMBER_EXIST);
         }
-        if (ChainManagerUtil.duplicateChainName(blockChain, tempChains) || chainService.hadExistChainName(blockChain.getChainName())) {
+        if (ChainManagerUtil.duplicateChainName(blockChain, tempChains) || (chainService.hadExistChainName(blockChain.getChainName()) && !isChainDisable)) {
             LoggerUtil.logger().error("chainName={} exist", blockChain.getChainName());
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_CHAIN_NAME_EXIST);
         }

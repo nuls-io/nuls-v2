@@ -173,7 +173,7 @@ public class NativeUtils {
         ObjectRef objectRef = (ObjectRef) methodArgs.invokeArgs[0];
         //String str = frame.heap.runToString(objectRef);
         ClassCode classCode = frame.methodArea.loadClass(objectRef.getVariableType().getType());
-        Map<String, Object> jsonMap = toJson(objectRef, frame);
+        Map<String, Object> jsonMap = (Map<String, Object>) toJson(objectRef, frame.heap, frame.methodArea);
         EventJson eventJson = new EventJson();
         eventJson.setContractAddress(frame.vm.getProgramInvoke().getAddress());
         eventJson.setBlockNumber(frame.vm.getProgramInvoke().getNumber() + 1);
@@ -185,30 +185,12 @@ public class NativeUtils {
         return result;
     }
 
-    private static Map<String, Object> toJson(ObjectRef objectRef, Frame frame) {
-        return toJson(objectRef, frame, 1);
+    private static Object toJson(ObjectRef objectRef, Heap heap, MethodArea methodArea) {
+        //return toJson(objectRef, heap, methodArea, 1);
+        return toJson(objectRef.getVariableType(), objectRef, heap, methodArea, 0);
     }
 
-    private static Map<String, Object> toJson(ObjectRef objectRef, Frame frame, int depth) {
-        if (objectRef == null) {
-            return null;
-        }
-
-        Map<String, FieldCode> fields = frame.methodArea.allFields(objectRef.getVariableType().getType());
-        Map<String, Object> map = frame.heap.getFields(objectRef);
-        Map<String, Object> jsonMap = new LinkedHashMap<>(hashMapInitialCapacity(map.size()));
-        for (Map.Entry<String, Object> entry : map.entrySet()) {
-            String name = entry.getKey();
-            FieldCode fieldCode = fields.get(name);
-            if (fieldCode != null && !fieldCode.isSynthetic) {
-                Object value = entry.getValue();
-                jsonMap.put(name, toJson(fieldCode.variableType, value, frame, depth));
-            }
-        }
-        return jsonMap;
-    }
-
-    private static Object toJson(VariableType variableType, Object value, Frame frame, int depth) {
+    private static Object toJson(VariableType variableType, Object value, Heap heap, MethodArea methodArea, int depth) {
         if (value == null) {
             return null;
         }
@@ -217,23 +199,23 @@ public class NativeUtils {
                 return variableType.getPrimitiveValue(value);
             }
             ObjectRef ref = (ObjectRef) value;
-            return frame.heap.runToString(ref);
+            return heap.runToString(ref);
         }
         if (variableType.isPrimitive()) {
             return variableType.getPrimitiveValue(value);
         } else if (variableType.isArray()) {
             ObjectRef ref = (ObjectRef) value;
             if (variableType.isPrimitiveType() && variableType.getDimensions() == 1) {
-                return frame.heap.getObject(ref);
+                return heap.getObject(ref);
             } else {
                 int length = ref.getDimensions()[0];
                 Object[] array = new Object[length];
                 for (int i = 0; i < length; i++) {
-                    Object item = frame.heap.getArray(ref, i);
+                    Object item = heap.getArray(ref, i);
                     if (item != null) {
                         ObjectRef itemRef = (ObjectRef) item;
                         //item = frame.heap.runToString(itemRef);
-                        item = toJson(itemRef.getVariableType(), itemRef, frame, depth + 1);
+                        item = toJson(itemRef.getVariableType(), itemRef, heap, methodArea, depth + 1);
                     }
                     array[i] = item;
                 }
@@ -241,7 +223,7 @@ public class NativeUtils {
             }
         } else if (variableType.isWrapperType()) {
             ObjectRef ref = (ObjectRef) value;
-            return frame.heap.runToString(ref);
+            return heap.runToString(ref);
         } else {
             String type = variableType.getType();
             boolean isCollection = false;
@@ -252,7 +234,7 @@ public class NativeUtils {
                 case "java/math/BigDecimal":
                 case "io/nuls/contract/sdk/Address":
                     ObjectRef ref = (ObjectRef) value;
-                    return frame.heap.runToString(ref);
+                    return heap.runToString(ref);
                 case "java/util/Map":
                 case "java/util/HashMap":
                 case "java/util/LinkedHashMap":
@@ -274,34 +256,52 @@ public class NativeUtils {
                 do {
                     // 获取集合的值
                     if (isCollection) {
-                        ObjectRef resultRef = frame.heap.getCollectionArrayRef(ref);
-                        return toJson(resultRef.getVariableType(), resultRef, frame, depth);
+                        ObjectRef resultRef = heap.getCollectionArrayRef(ref);
+                        return toJson(resultRef.getVariableType(), resultRef, heap, methodArea, depth);
                     }
                     if (isMap) {
-                        ObjectRef setResultRef = frame.heap.getMapEntrySetRef(ref);
-                        ObjectRef arrayResultRef = frame.heap.getCollectionArrayRef(setResultRef);
+                        ObjectRef setResultRef = heap.getMapEntrySetRef(ref);
+                        ObjectRef arrayResultRef = heap.getCollectionArrayRef(setResultRef);
                         int length = arrayResultRef.getDimensions()[0];
                         Map<String, Object> resultMap = new HashMap<>();
                         for (int i = 0; i < length; i++) {
-                            Object item = frame.heap.getArray(arrayResultRef, i);
+                            Object item = heap.getArray(arrayResultRef, i);
                             if (item != null) {
                                 ObjectRef itemRef = (ObjectRef) item;
-                                ObjectRef keyRef = frame.heap.getMapEntryKeyRef(itemRef);
-                                String key = frame.heap.runToString(keyRef);
+                                ObjectRef keyRef = heap.getMapEntryKeyRef(itemRef);
+                                String key = heap.runToString(keyRef);
 
-                                ObjectRef valueRef = frame.heap.getMapEntryValueRef(itemRef);
-                                resultMap.put(key, toJson(valueRef.getVariableType(), valueRef, frame, depth + 1));
+                                ObjectRef valueRef = heap.getMapEntryValueRef(itemRef);
+                                resultMap.put(key, toJson(valueRef.getVariableType(), valueRef, heap, methodArea, depth + 1));
                             }
                         }
                         return resultMap;
                     }
-                    return frame.heap.runToString(ref);
+                    return heap.runToString(ref);
                 } while (false);
             } else {
                 ObjectRef ref = (ObjectRef) value;
-                return toJson(ref, frame, depth + 1);
+                return toJson(ref, heap, methodArea, depth + 1);
             }
         }
+    }
+
+    private static Map<String, Object> toJson(ObjectRef objectRef, Heap heap, MethodArea methodArea, int depth) {
+        if (objectRef == null) {
+            return null;
+        }
+        Map<String, FieldCode> fields = methodArea.allFields(objectRef.getVariableType().getType());
+        Map<String, Object> map = heap.getFields(objectRef);
+        Map<String, Object> jsonMap = new LinkedHashMap<>(hashMapInitialCapacity(map.size()));
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            String name = entry.getKey();
+            FieldCode fieldCode = fields.get(name);
+            if (fieldCode != null && !fieldCode.isSynthetic) {
+                Object value = entry.getValue();
+                jsonMap.put(name, toJson(fieldCode.variableType, value, heap, methodArea, depth));
+            }
+        }
+        return jsonMap;
     }
 
     static class EventJson {
@@ -680,19 +680,29 @@ public class NativeUtils {
 
     /**
      * native
-     *
-     * @see Utils#obj2Json(Object)
+     *s
+     * @see io.nuls.contract.sdk.Utils#obj2Json(Object)
      */
     private static Result obj2Json(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         frame.vm.addGasUsed(GasCost.OBJ_TO_JSON);
         ObjectRef objectRef = (ObjectRef) methodArgs.invokeArgs[0];
         ObjectRef ref = null;
         if (objectRef != null) {
-            Map<String, Object> objectMap = toJson(objectRef, frame);
-            String json = JsonUtils.toJson(objectMap);
+            String json = objectRef2Json(objectRef, frame.heap, frame.methodArea);
             ref = frame.heap.newString(json);
         }
         Result result = NativeMethod.result(methodCode, ref, frame);
         return result;
     }
+
+    public static String objectRef2Json(ObjectRef objectRef, Heap heap, MethodArea methodArea) {
+        if (objectRef != null) {
+            Object objectMap = toJson(objectRef, heap, methodArea);
+            String json = JsonUtils.toJson(objectMap);
+            return json;
+        } else {
+            return null;
+        }
+    }
+
 }

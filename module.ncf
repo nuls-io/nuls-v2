@@ -32,6 +32,8 @@ crossPort=18002
 packetMagic=2019073101
 #种子节点
 selfSeedIps=192.168.1.192:18001
+#主网的跨链种子节点
+moonSeedIps=192.168.1.192:18002
 #最大入网连接数
 maxInCount=100
 #最大出网连接数
