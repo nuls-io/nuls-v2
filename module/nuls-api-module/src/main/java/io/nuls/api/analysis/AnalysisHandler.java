@@ -459,6 +459,7 @@ public class AnalysisHandler {
             method.setView((boolean) map1.get("view"));
             method.setPayable((boolean) map1.get("payable"));
             method.setEvent((boolean) map1.get("event"));
+            method.setJsonSerializable((boolean) map1.get("jsonSerializable"));
             argsList = (List<Map<String, Object>>) map1.get("args");
             paramList = new ArrayList<>();
             for (Map<String, Object> arg : argsList) {

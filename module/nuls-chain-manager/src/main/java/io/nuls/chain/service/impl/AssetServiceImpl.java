@@ -58,7 +58,6 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public void deleteAsset(Asset asset) throws Exception {
         String assetKey = CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId());
-        String key = CmRuntimeInfo.getChainAssetKey(asset.getChainId(), assetKey);
         asset.setAvailable(false);
         assetStorage.save(assetKey,asset);
 //        assetStorage.delete(assetKey);
