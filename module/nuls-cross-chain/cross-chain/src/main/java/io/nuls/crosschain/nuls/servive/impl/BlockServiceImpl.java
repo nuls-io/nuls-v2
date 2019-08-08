@@ -127,13 +127,14 @@ public class BlockServiceImpl implements BlockService {
         if (chain == null) {
             return Result.getFailed(CHAIN_NOT_EXIST);
         }
-        if(!chainManager.isCrossNetUseAble()){
-            return Result.getSuccess(SUCCESS);
-        }
         try {
             BlockHeader blockHeader = new BlockHeader();
             String headerHex = (String) params.get(ParamConstant.PARAM_BLOCK_HEADER);
             blockHeader.parse(RPCUtil.decode(headerHex), 0);
+            if(!chainManager.isCrossNetUseAble()){
+                chainManager.getChainHeaderMap().put(chainId, blockHeader);
+                return Result.getSuccess(SUCCESS);
+            }
             if(config.isMainNet() && chainManager.getRegisteredCrossChainList().size() <= 1){
                 chainManager.getChainHeaderMap().put(chainId, blockHeader);
                 return Result.getSuccess(SUCCESS);
