@@ -12,6 +12,8 @@ addressPrefix=tNULS
 assetId=1
 #默认链名称
 chainName=nuls2
+#默认资产小数位数
+decimals=8
 #本链默认资产符号
 symbol=NULS
 #默认资产的小数精确位数
