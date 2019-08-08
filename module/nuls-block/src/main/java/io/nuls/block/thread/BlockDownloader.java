@@ -26,6 +26,7 @@ import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.NodeEnum;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.HeightRangeMessage;
+import io.nuls.block.model.BlockDownloaderParams;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.model.Node;

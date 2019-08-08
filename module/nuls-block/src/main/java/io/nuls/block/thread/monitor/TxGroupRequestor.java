@@ -21,16 +21,16 @@
 package io.nuls.block.thread.monitor;
 
 import io.nuls.base.data.*;
-import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.HashListMessage;
 import io.nuls.block.model.CachedSmallBlock;
 import io.nuls.block.model.ChainContext;
+import io.nuls.block.model.TxGroupTask;
 import io.nuls.block.rpc.call.NetworkCall;
 import io.nuls.block.rpc.call.TransactionCall;
 import io.nuls.block.service.BlockService;
-import io.nuls.block.thread.TxGroupTask;
 import io.nuls.block.utils.BlockUtil;
+import io.nuls.block.utils.SmallBlockCacher;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.CollectionUtils;
