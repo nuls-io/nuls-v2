@@ -50,7 +50,7 @@ public class ChainManageProviderForRpc extends BaseRpcService implements ChainMa
     }
     @Override
     public Result<Map> updateChain(RegisterChainReq req) {
-        return callResutlMap("cm_chainUpdate",req);
+        return callResutlMap("cm_chainActive",req);
     }
     @Override
     public Result<String> disableCrossAsset(DisableAssetReq req) {
@@ -60,11 +60,6 @@ public class ChainManageProviderForRpc extends BaseRpcService implements ChainMa
     @Override
     public Result<String> addCrossAsset(AddCrossAssetReq req) {
         return callReturnString("cm_assetReg",req,"txHash");
-    }
-
-    @Override
-    public Result<String> disCrossChain(DisableAssetReq req) {
-        return callReturnString("cm_assetDisable",req,"txHash");
     }
 
     private <T> Result<T> _call(String method, Object req, Function<Map, Result> callback){

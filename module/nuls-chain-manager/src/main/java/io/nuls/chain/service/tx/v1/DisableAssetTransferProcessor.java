@@ -50,7 +50,7 @@ public class DisableAssetTransferProcessor implements TransactionProcessor {
             ChainEventResult chainEventResult = ChainEventResult.getResultSuccess();
             for (Transaction tx : txs) {
                 String txHash = tx.getHash().toHex();
-                asset = TxUtil.buildAssetWithTxChain(tx);
+                asset = TxUtil.buildAssetWithTxAsset(tx);
                 chainEventResult = validateService.assetDisableValidator(asset);
                 if (chainEventResult.isSuccess()) {
                     LoggerUtil.logger().debug("txHash = {},assetKey={} disable batchValidate success!", txHash, CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
@@ -79,7 +79,7 @@ public class DisableAssetTransferProcessor implements TransactionProcessor {
         List<Map<String, Object>> chainAssetIds = new ArrayList<>();
         try {
             for (Transaction tx : txs) {
-                asset = TxUtil.buildAssetWithTxChain(tx);
+                asset = TxUtil.buildAssetWithTxAsset(tx);
                 assetService.deleteAsset(asset);
                 Map<String, Object> chainAssetId = new HashMap<>(2);
                 chainAssetId.put("chainId", asset.getChainId());

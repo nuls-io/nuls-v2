@@ -127,16 +127,18 @@ public class BlockServiceImpl implements BlockService {
         if (chain == null) {
             return Result.getFailed(CHAIN_NOT_EXIST);
         }
-        if(!chainManager.isCrossNetUseAble()){
-            return Result.getSuccess(SUCCESS);
-        }
-        if(config.isMainNet() && chainManager.getRegisteredCrossChainList().size() <= 1){
-            return Result.getSuccess(SUCCESS);
-        }
-        BlockHeader blockHeader = new BlockHeader();
         try {
+            BlockHeader blockHeader = new BlockHeader();
             String headerHex = (String) params.get(ParamConstant.PARAM_BLOCK_HEADER);
             blockHeader.parse(RPCUtil.decode(headerHex), 0);
+            if(!chainManager.isCrossNetUseAble()){
+                chainManager.getChainHeaderMap().put(chainId, blockHeader);
+                return Result.getSuccess(SUCCESS);
+            }
+            if(config.isMainNet() && chainManager.getRegisteredCrossChainList().size() <= 1){
+                chainManager.getChainHeaderMap().put(chainId, blockHeader);
+                return Result.getSuccess(SUCCESS);
+            }
             /*
             检测是否有轮次变化，如果有轮次变化，查询共识模块共识节点是否有变化，如果有变化则创建验证人变更交易
             */
@@ -146,6 +148,7 @@ public class BlockServiceImpl implements BlockService {
                 BlockExtendsData blockExtendsData = new BlockExtendsData(blockHeader.getExtend());
                 BlockExtendsData localExtendsData = new BlockExtendsData(localHeader.getExtend());
                 if(blockExtendsData.getRoundIndex() == localExtendsData.getRoundIndex()){
+                    chainManager.getChainHeaderMap().put(chainId, blockHeader);
                     return Result.getSuccess(SUCCESS);
                 }
                 agentChangeMap = ConsensusCall.getAgentChangeInfo(chain, localHeader.getExtend(), blockHeader.getExtend());

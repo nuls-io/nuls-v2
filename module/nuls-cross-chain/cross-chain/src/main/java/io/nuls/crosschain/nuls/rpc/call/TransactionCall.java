@@ -42,8 +42,7 @@ public class TransactionCall {
         }catch (NulsException e){
             throw e;
         }catch (Exception e) {
-            chain.getLogger().error(e);
-            return false;
+            throw new NulsException(NulsCrossChainErrorCode.INTERFACE_CALL_FAILED);
         }
     }
 }

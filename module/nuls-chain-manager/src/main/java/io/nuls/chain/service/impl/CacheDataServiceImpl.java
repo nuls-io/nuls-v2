@@ -185,12 +185,12 @@ public class CacheDataServiceImpl implements CacheDataService {
                     blockChains.put(String.valueOf(blockChain2.getChainId()), 1);
                     break;
                 case TxType.ADD_ASSET_TO_CHAIN:
-                    Asset asset2 = TxUtil.buildAssetWithTxChain(tx);
+                    Asset asset2 = TxUtil.buildAssetWithTxAsset(tx);
                     assets.put(CmRuntimeInfo.getAssetKey(asset2.getChainId(), asset2.getAssetId()), 1);
                     chainAssets.put(CmRuntimeInfo.getChainAssetKey(asset2.getChainId(), CmRuntimeInfo.getAssetKey(asset2.getChainId(), asset2.getAssetId())), 1);
                     break;
                 case TxType.REMOVE_ASSET_FROM_CHAIN:
-                    Asset asset3 = TxUtil.buildAssetWithTxChain(tx);
+                    Asset asset3 = TxUtil.buildAssetWithTxAsset(tx);
                     assets.put(CmRuntimeInfo.getAssetKey(asset3.getChainId(), asset3.getAssetId()), 1);
                     chainAssets.put(CmRuntimeInfo.getChainAssetKey(asset3.getChainId(), CmRuntimeInfo.getAssetKey(asset3.getChainId(), asset3.getAssetId())), 1);
                     break;

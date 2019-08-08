@@ -68,6 +68,7 @@ public class VerifierInitServiceImpl implements VerifierInitService {
 
                 if(!config.isMainNet()){
                     verifierList = new ArrayList<>(Arrays.asList(config.getVerifiers().split(NulsCrossChainConstant.VERIFIER_SPLIT)));
+                    verifierChainId = config.getMainChainId();
                     minPassCount = verifierList.size() * config.getMainByzantineRatio()/ CrossChainConstant.MAGIC_NUM_100;
                     if(minPassCount == 0){
                         minPassCount = 1;

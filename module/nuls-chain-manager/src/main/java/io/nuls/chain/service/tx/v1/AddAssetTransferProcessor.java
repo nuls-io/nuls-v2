@@ -52,7 +52,7 @@ public class AddAssetTransferProcessor implements TransactionProcessor {
             ChainEventResult chainEventResult = ChainEventResult.getResultSuccess();
             for (Transaction tx : txs) {
                 String txHash = tx.getHash().toHex();
-                asset = TxUtil.buildAssetWithTxChain(tx);
+                asset = TxUtil.buildAssetWithTxAsset(tx);
                 String assetKey = CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId());
                 chainEventResult = validateService.batchAssetRegValidator(asset, assetMap);
                 if (chainEventResult.isSuccess()) {
@@ -78,7 +78,7 @@ public class AddAssetTransferProcessor implements TransactionProcessor {
         Asset asset = null;
         try {
             for (Transaction tx : txs) {
-                asset = TxUtil.buildAssetWithTxChain(tx);
+                asset = TxUtil.buildAssetWithTxAsset(tx);
                 assetService.registerAsset(asset);
                 assets.add(asset);
             }

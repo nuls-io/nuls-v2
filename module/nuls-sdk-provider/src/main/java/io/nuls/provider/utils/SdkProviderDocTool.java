@@ -27,6 +27,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -38,6 +39,8 @@ import java.util.stream.Collectors;
  * @Description: 生成rpc接口文档
  */
 public class SdkProviderDocTool {
+
+    static String appName = "nuls-sdk-provider";
 
     static Set<String> exclusion = Set.of("io.nuls.base.protocol.cmd", "io.nuls.core.rpc.cmd.kernel", "io.nuls.core.rpc.modulebootstrap");
 
@@ -602,10 +605,10 @@ public class SdkProviderDocTool {
         }
 
         public static String createJSONConfig(List<CmdDes> cmdDesList, ApiType apiType, String tempFile) throws IOException {
-            ConfigurationLoader configurationLoader = SpringLiteContext.getBean(ConfigurationLoader.class);
-            ConfigurationLoader.ConfigItem configItem = configurationLoader.getConfigItem("APP_NAME");
-            String appName = configItem.getValue();
-            File file = new File(tempFile);
+            URL resource = SdkProviderDocTool.class.getClassLoader().getResource(".");
+            File temp = new File(resource.getFile());
+            String parent = temp.getParentFile().getParent();
+            File file = new File(parent + File.separator + tempFile);
             if (!file.exists()) {
                 throw new RuntimeException("模板文件不存在");
             }
@@ -634,10 +637,10 @@ public class SdkProviderDocTool {
         }
 
         public static String createPostmanJSONConfig(List<CmdDes> cmdDesList, ApiType apiType, String tempFile) throws IOException {
-            ConfigurationLoader configurationLoader = SpringLiteContext.getBean(ConfigurationLoader.class);
-            ConfigurationLoader.ConfigItem configItem = configurationLoader.getConfigItem("APP_NAME");
-            String appName = configItem.getValue();
-            File file = new File(tempFile);
+            URL resource = SdkProviderDocTool.class.getClassLoader().getResource(".");
+            File temp = new File(resource.getFile());
+            String parent = temp.getParentFile().getParent();
+            File file = new File(parent + File.separator + tempFile);
             if (!file.exists()) {
                 throw new RuntimeException("模板文件不存在");
             }
@@ -668,9 +671,10 @@ public class SdkProviderDocTool {
         }
 
         public static String createMarketDownDoc(List<CmdDes> cmdDesList, ApiType apiType, String tempFile) throws IOException {
-            ConfigurationLoader configurationLoader = SpringLiteContext.getBean(ConfigurationLoader.class);
-            String appName = configurationLoader.getConfigItem("APP_NAME").getValue();
-            File file = new File(tempFile);
+            URL resource = SdkProviderDocTool.class.getClassLoader().getResource(".");
+            File temp = new File(resource.getFile());
+            String parent = temp.getParentFile().getParent();
+            File file = new File(parent + File.separator + tempFile);
             if (!file.exists()) {
                 throw new RuntimeException("模板文件不存在");
             }

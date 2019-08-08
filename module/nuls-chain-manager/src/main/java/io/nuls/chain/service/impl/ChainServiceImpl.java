@@ -261,7 +261,6 @@ public class ChainServiceImpl implements ChainService {
         dbChain.setDelAddress(blockChain.getDelAddress());
         dbChain.setDelAssetId(blockChain.getDelAssetId());
         dbChain.setDelTxHash(blockChain.getDelTxHash());
-        dbChain.removeCreateAssetId(CmRuntimeInfo.getAssetKey(blockChain.getChainId(), blockChain.getDelAssetId()));
         dbChain.setDelete(true);
         updateChain(dbChain);
         //通知销毁链
