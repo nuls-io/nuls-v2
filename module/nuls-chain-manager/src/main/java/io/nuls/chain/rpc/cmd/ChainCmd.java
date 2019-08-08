@@ -125,8 +125,8 @@ public class ChainCmd extends BaseChainCmd {
     @ResponseData(name = "返回值", description = "返回一个Map对象",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
                     @Key(name = "txHash", valueType = String.class, description = "交易hash值"),
-                    @Key(name = "mainNetVerifierList", valueType = String.class,description = "主网验证人列表,逗号分隔"),
-                    @Key(name = "mainNetCrossSeedList", valueType = String.class,description = "主网验种子节点列表,逗号分隔")
+                    @Key(name = "mainNetVerifierList", valueType = String.class, description = "主网验证人列表,逗号分隔"),
+                    @Key(name = "mainNetCrossSeedList", valueType = String.class, description = "主网验种子节点列表,逗号分隔")
 
             })
     )
@@ -162,7 +162,7 @@ public class ChainCmd extends BaseChainCmd {
             asset.setDestroyNuls(new BigInteger(nulsChainConfig.getAssetDepositNuls()).multiply(BigInteger.valueOf(rateToPercent)).divide(BigInteger.valueOf(100)));
             asset.setAvailable(true);
             BlockChain dbChain = chainService.getChain(blockChain.getChainId());
-            if(null != dbChain && dbChain.isDelete()){
+            if (null != dbChain && dbChain.isDelete()) {
                 return failed(CmErrorCode.ERROR_CHAIN_REG_CMD);
             }
             if (null != dbChain) {
@@ -237,8 +237,8 @@ public class ChainCmd extends BaseChainCmd {
     @ResponseData(name = "返回值", description = "返回一个Map对象",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
                     @Key(name = "txHash", valueType = String.class, description = "交易hash值"),
-                    @Key(name = "mainNetVerifierSeeds", valueType = String.class,description = "主网验证人种子列表,逗号分隔"),
-                    @Key(name = "mainNetCrossConnectSeeds", valueType = String.class,description = "主网验种子节点列表,逗号分隔")
+                    @Key(name = "mainNetVerifierSeeds", valueType = String.class, description = "主网验证人种子列表,逗号分隔"),
+                    @Key(name = "mainNetCrossConnectSeeds", valueType = String.class, description = "主网验种子节点列表,逗号分隔")
 
             })
     )
@@ -274,14 +274,17 @@ public class ChainCmd extends BaseChainCmd {
             asset.setDestroyNuls(new BigInteger(nulsChainConfig.getAssetDepositNuls()).multiply(BigInteger.valueOf(rateToPercent)).divide(BigInteger.valueOf(100)));
             asset.setAvailable(true);
             BlockChain dbChain = chainService.getChain(blockChain.getChainId());
+            if (null == dbChain) {
+                return failed(CmErrorCode.ERROR_CHAIN_NOT_FOUND);
+            }
             if (null != dbChain && !dbChain.isDelete()) {
-                return failed(CmErrorCode.ERROR_CHAIN_ID_EXIST);
+                return failed(CmErrorCode.ERROR_CHAIN_ACTIVE);
             }
             if (chainService.hadExistMagicNumber(blockChain.getMagicNumber()) && !dbChain.isDelete()) {
                 return failed(CmErrorCode.ERROR_MAGIC_NUMBER_EXIST);
             }
             if (chainService.hadExistChainName(blockChain.getChainName()) && !dbChain.isDelete()) {
-                LoggerUtil.COMMON_LOG.debug("######### delete={}",dbChain.isDelete());
+                LoggerUtil.COMMON_LOG.debug("######### delete={}", dbChain.isDelete());
                 return failed(CmErrorCode.ERROR_CHAIN_NAME_EXIST);
             }
             /* 组装交易发送 (Send transaction) */
@@ -322,6 +325,7 @@ public class ChainCmd extends BaseChainCmd {
         }
         return success(rtMap);
     }
+
     @CmdAnnotation(cmd = RpcConstants.CMD_GET_CROSS_CHAIN_INFOS, version = 1.0,
             description = "获取跨链注册资产信息")
 
