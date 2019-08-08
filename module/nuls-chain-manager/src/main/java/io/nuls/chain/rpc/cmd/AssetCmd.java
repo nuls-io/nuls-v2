@@ -83,6 +83,13 @@ public class AssetCmd extends BaseChainCmd {
             int rateToPercent = new BigDecimal(nulsChainConfig.getAssetDepositNulsDestroyRate()).multiply(BigDecimal.valueOf(100)).intValue();
             asset.setDestroyNuls(new BigInteger(nulsChainConfig.getAssetDepositNuls()).multiply(BigInteger.valueOf(rateToPercent)).divide(BigInteger.valueOf(100)));
             asset.setAvailable(true);
+            BlockChain dbChain = chainService.getChain(asset.getChainId());
+            if(null==dbChain){
+                return failed(CmErrorCode.ERROR_CHAIN_NOT_FOUND);
+            }
+            if(dbChain.isDelete()){
+                return failed(CmErrorCode.ERROR_CHAIN_REG_CMD);
+            }
             if (assetService.assetExist(asset) && asset.isAvailable()) {
                 return failed(CmErrorCode.ERROR_ASSET_ID_EXIST);
             }
