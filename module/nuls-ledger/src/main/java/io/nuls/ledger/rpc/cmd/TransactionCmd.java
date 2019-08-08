@@ -96,6 +96,7 @@ public class TransactionCmd extends BaseLedgerCmd {
                 response = failed(validateResult.toErrorCode());
                 LoggerUtil.logger(chainId).error("####commitUnconfirmedTx chainId={},txHash={},value={}=={}", chainId, tx.getHash().toHex(), validateResult.getValidateCode(), validateResult.getValidateDesc());
             }
+            LoggerUtil.logger(chainId).debug("####commitUnconfirmedTx chainId={},txHash={},value={}=={}", chainId, tx.getHash().toHex(), validateResult.getValidateCode(), validateResult.getValidateDesc());
         } catch (Exception e) {
             LoggerUtil.logger(chainId).error("commitUnconfirmedTx exception ={}", e);
             return failed(LedgerErrorCode.SYS_UNKOWN_EXCEPTION);
@@ -146,7 +147,7 @@ public class TransactionCmd extends BaseLedgerCmd {
                 } else {
                     failList.add(txHash);
                 }
-                LoggerUtil.logger(chainId).debug("####commitUnconfirmedTx chainId={},txHash={},value={}=={}", chainId, tx.getHash().toHex(), validateResult.getValidateCode(), validateResult.getValidateDesc());
+                LoggerUtil.logger(chainId).debug("####batch-commitUnconfirmedTx chainId={},txHash={},value={}=={}", chainId, tx.getHash().toHex(), validateResult.getValidateCode(), validateResult.getValidateDesc());
             }
             Map<String, Object> rtMap = new HashMap<>(2);
             rtMap.put("fail", failList);
