@@ -5,17 +5,18 @@ logPath=Logs
 logLevel=INFO
 dataPath=data
 #默认本链ID
-chainId=2
+chainId=10
 #地址前缀
-addressPrefix=tNULS
+addressPrefix=tNBTC
 #默认本链主资产ID
 assetId=1
 #默认资产小数位数
 decimals=8
 #默认链名称
-chainName=nuls2
+chainName=nbtc
+
 #本链默认资产符号
-symbol=NULS
+symbol=BTC
 #默认资产的小数精确位数
 decimals=8
 #主网链id
@@ -30,12 +31,9 @@ blackHolePublicKey=0298f88c3cae67385ce3cbee00f78816db3e56e566b62bd0f4c5b45f205d3
 port=18001
 crossPort=18002
 #魔法参数
-packetMagic=20190804
+packetMagic=2019073102
 #种子节点
-#selfSeedIps=39.98.226.51:18001,47.244.186.65:18001,18.216.165.46:18001,47.74.86.85:18001
-selfSeedIps=47.252.86.42:18001,149.129.176.20:18001,172.21.149.246:18001,118.31.33.156:18001
-#主网的跨链种子连接节点
-moonSeedIps=47.252.86.42:18002,149.129.176.20:18002,172.21.149.246:18002,118.31.33.156:18002
+selfSeedIps=149.129.176.20:18001,47.252.86.42:18001,18.216.165.46:18001
 #最大入网连接数
 maxInCount=100
 #最大出网连接数
@@ -70,13 +68,13 @@ genesisBlockPath=genesis-block.json
 
 [consensus]
 #种子节点列表
-seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMmShSTVwbU4rHkZjpD98JgFgg6rmhF,tNULSeBaMpTj8qEQ8CFDxiP69hGFB27u9nmMUc
+seedNodes=M9busmSTRpnWc4W2vkL6t4TDKDTdY7LTx1Q,M9busmJfFVEhCsdenDfj462LnPaU4urs9j6
 #出块地址密码
 password=nuls123456
 #出块间隔时间(单位：s)
 packingInterval=10
 #共识委托抵押资产链ID
-agentChainId=2
+agentChainId=10
 #共识委托抵押资产ID
 agentAssetId=1
 #共识奖励资产ID(共识奖励必须为本链资产)
@@ -91,6 +89,7 @@ initTime=1563951658
 deflationRatio=100
 #通缩间隔时间(单位：S)
 deflationTimeInterval=31536000
+
 
 [smart_contract]
 #合约视图方法调用最大消耗的Gas
@@ -122,7 +121,7 @@ byzantineRatio=50
 #主网跨链种子节点列表
 crossSeedIps=39.98.226.51:18002,47.244.186.65:18002,172.21.149.246:18002,47.74.86.85:18002
 #主网验证人列表
-verifiers=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMmShSTVwbU4rHkZjpD98JgFgg6rmhF,tNULSeBaMpTj8qEQ8CFDxiP69hGFB27u9nmMUc
+verifiers=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
 #主网签名拜占庭比列
 mainByzantineRatio=66
 #主网最大签名数

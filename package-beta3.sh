@@ -11,7 +11,7 @@ if [ -n "$1" ]; then
 fi
 if [ -n "$2" ];
 then
-./package -Nb $version -J $2 -O $TARGET_OS
+./package -Nb $version -J $2 -O $TARGET_OS  -o ./$OUT_DIR
 else
 ./package  -O $TARGET_OS -Nb $version -o ./$OUT_DIR
 fi
@@ -28,9 +28,9 @@ rm -rf ${OUT_DIR}
 ./package -r chain-manager
 if [ -n "$2" ];
 then
-./package -O $TARGET_OS -Nb $version -J $2
+./package -O $TARGET_OS -Nb $version -J $2 -o ./$OUT_DIR
 else
-./package -O $TARGET_OS -Nb $version
+./package -O $TARGET_OS -Nb $version -o ./$OUT_DIR
 fi
 cp -f ./nuls-chain-10-$version.ncf ./${OUT_DIR}/nuls.ncf
 cp -f ./genesis-block-10-$version.json ./${OUT_DIR}/genesis-block.json
