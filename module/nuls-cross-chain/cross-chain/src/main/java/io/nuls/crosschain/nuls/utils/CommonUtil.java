@@ -122,7 +122,7 @@ public class CommonUtil {
         if(minPassCount == 0){
             minPassCount = 1;
         }
-        chain.getLogger().info("当前共识节点数量为：{},最少签名数量为:{}",agentCount,minPassCount );
+        chain.getLogger().debug("当前共识节点数量为：{},最少签名数量为:{}",agentCount,minPassCount );
         return minPassCount;
     }
 

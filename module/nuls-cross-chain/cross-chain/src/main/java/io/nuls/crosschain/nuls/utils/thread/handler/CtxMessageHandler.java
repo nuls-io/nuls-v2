@@ -28,12 +28,12 @@ public class CtxMessageHandler implements Runnable {
                 NewCtxMessage messageBody = (NewCtxMessage) untreatedMessage.getMessage();
                 localHash = untreatedMessage.getCacheHash();
                 String nativeHex = localHash.toHex();
-                chain.getLogger().info("开始处理链内节点：{}发送的跨链交易,Hash:{}", untreatedMessage.getNodeId(), nativeHex);
+                chain.getLogger().debug("开始处理链内节点：{}发送的跨链交易,Hash:{}", untreatedMessage.getNodeId(), nativeHex);
                 boolean handleResult = MessageUtil.handleInChainCtx(messageBody.getCtx(), chain);
                 if (!handleResult && chain.getHashNodeIdMap().get(localHash) != null && !chain.getHashNodeIdMap().get(localHash).isEmpty()) {
                     MessageUtil.regainCtx(chain, untreatedMessage.getChainId(), localHash,nativeHex,true);
                 }
-                chain.getLogger().info("新交易处理完成,Hash:{}\n\n", nativeHex);
+                chain.getLogger().debug("新交易处理完成,Hash:{}\n\n", nativeHex);
             } catch (Exception e) {
                 chain.getLogger().error(e);
             } finally {

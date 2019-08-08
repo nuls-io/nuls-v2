@@ -133,7 +133,7 @@ public class VerifierInitServiceImpl implements VerifierInitService {
                 }
                 ChainInfo chainInfo = chainManager.getChainInfo(verifierChainId);
                 chainInfo.setVerifierList(new HashSet<>(initVerifierList));
-                chain.getLogger().info("链{}初始化后的验证列表为{}", verifierChainId, chainInfo.getVerifierList().toString());
+                chain.getLogger().info("链{}初始化验证人列表为{}", verifierChainId, chainInfo.getVerifierList().toString());
                 RegisteredChainMessage registeredChainMessage = new RegisteredChainMessage();
                 registeredChainMessage.setChainInfoList(chainManager.getRegisteredCrossChainList());
                 if (!registeredCrossChainService.save(registeredChainMessage)) {

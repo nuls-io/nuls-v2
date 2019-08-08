@@ -111,7 +111,7 @@ public class BlockServiceImpl implements BlockService {
                 }
             }
         }
-        chain.getLogger().info("区块高度更新消息处理完成,Height:{}\n\n",height);
+        chain.getLogger().debug("区块高度更新消息处理完成,Height:{}\n\n",height);
         return Result.getSuccess(SUCCESS);
     }
 
