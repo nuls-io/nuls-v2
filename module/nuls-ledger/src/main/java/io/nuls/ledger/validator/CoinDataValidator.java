@@ -401,6 +401,7 @@ public class CoinDataValidator {
             return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{address, fromNonceStr, "exception:" + e.getMessage()});
         }
         //孤儿交易了，这笔交易不清楚状况，是孤儿
+        logger(addressChainId).debug("#############address={},fromNonceStr={},dbNonce={}", address, fromNonceStr, LedgerUtil.getNonceEncode(preNonce));
         return ValidateResult.getResult(LedgerErrorCode.ORPHAN, new String[]{address, fromNonceStr, LedgerUtil.getNonceEncode(preNonce)});
     }
 
