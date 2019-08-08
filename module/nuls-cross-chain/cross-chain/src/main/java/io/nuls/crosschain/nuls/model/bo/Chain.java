@@ -13,6 +13,7 @@ import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -103,6 +104,11 @@ public class Chain {
     private LinkedBlockingQueue<UntreatedMessage> signMessageQueue;
 
     /**
+     * 未处理的本链节点广播来的跨链交易签名消息
+     * */
+    private LinkedBlockingQueue<UntreatedMessage> signMessageByzantineQueue;
+
+    /**
      * 未处理的本链节点广播来的完整跨链交易消息
      * */
     private LinkedBlockingQueue<UntreatedMessage> otherCtxMessageQueue;
@@ -140,6 +146,7 @@ public class Chain {
         hashMessageQueue = new LinkedBlockingQueue<>();
         ctxMessageQueue = new LinkedBlockingQueue<>();
         signMessageQueue = new LinkedBlockingQueue<>();
+        signMessageByzantineQueue = new LinkedBlockingQueue<>();
         otherCtxMessageQueue = new LinkedBlockingQueue<>();
         getCtxStateQueue = new LinkedBlockingQueue<>();
         mainChain = false;
@@ -235,6 +242,14 @@ public class Chain {
 
     public void setSignMessageQueue(LinkedBlockingQueue<UntreatedMessage> signMessageQueue) {
         this.signMessageQueue = signMessageQueue;
+    }
+
+    public LinkedBlockingQueue<UntreatedMessage> getSignMessageByzantineQueue() {
+        return signMessageByzantineQueue;
+    }
+
+    public void setSignMessageByzantineQueue(LinkedBlockingQueue<UntreatedMessage> signMessageByzantineQueue) {
+        this.signMessageByzantineQueue = signMessageByzantineQueue;
     }
 
     public LinkedBlockingQueue<UntreatedMessage> getOtherCtxMessageQueue() {
