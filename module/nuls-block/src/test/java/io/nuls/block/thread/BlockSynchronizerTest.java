@@ -21,6 +21,7 @@
 package io.nuls.block.thread;
 
 import io.nuls.base.data.NulsHash;
+import io.nuls.block.model.BlockDownloaderParams;
 import io.nuls.block.model.Node;
 import io.nuls.block.utils.ConfigLoader;
 import org.junit.After;

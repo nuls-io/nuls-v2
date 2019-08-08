@@ -18,7 +18,7 @@
  * SOFTWARE.
  */
 
-package io.nuls.block.cache;
+package io.nuls.block.utils;
 
 import io.nuls.base.cache.DataCacher;
 import io.nuls.base.data.Block;
@@ -55,7 +55,7 @@ public class SingleBlockCacher {
     /**
      * 下载单个区块任务开始时,添加缓存
      *
-     * @param chainId 链Id/chain id
+     * @param chainId     链Id/chain id
      * @param requestHash
      * @return
      */

@@ -1,4 +1,4 @@
-package io.nuls.block.thread;
+package io.nuls.block.model;
 
 import io.nuls.block.message.HashListMessage;
 
@@ -21,6 +21,15 @@ public class TxGroupTask implements Delayed {
      * 延迟时长,这个是必须的属性因为要按照这个判断延时时长。
      */
     private long excuteTime;
+
+    public TxGroupTask() {
+    }
+
+    public TxGroupTask(long id, HashListMessage request, long delayTime) {
+        this.id = id;
+        this.request = request;
+        this.excuteTime = TimeUnit.NANOSECONDS.convert(delayTime, TimeUnit.MILLISECONDS) + System.nanoTime();
+    }
 
     public long getId() {
         return id;
@@ -53,16 +62,6 @@ public class TxGroupTask implements Delayed {
     public void setExcuteTime(long excuteTime) {
         this.excuteTime = excuteTime;
     }
-
-    public TxGroupTask() {
-    }
-
-    public TxGroupTask(long id, HashListMessage request, long delayTime) {
-        this.id = id;
-        this.request = request;
-        this.excuteTime = TimeUnit.NANOSECONDS.convert(delayTime, TimeUnit.MILLISECONDS) + System.nanoTime();
-    }
-
 
     /**
      * 自定义实现比较方法返回 1 0 -1三个参数

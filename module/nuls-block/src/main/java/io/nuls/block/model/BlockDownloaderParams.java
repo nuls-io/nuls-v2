@@ -18,10 +18,9 @@
  * SOFTWARE.
  */
 
-package io.nuls.block.thread;
+package io.nuls.block.model;
 
 import io.nuls.base.data.NulsHash;
-import io.nuls.block.model.Node;
 
 import java.util.List;
 import java.util.Map;
