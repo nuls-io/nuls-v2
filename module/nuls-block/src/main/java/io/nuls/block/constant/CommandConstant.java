@@ -140,4 +140,8 @@ public interface CommandConstant {
      * 提供给协议升级模块的批量接口
      */
     String GET_BLOCK_HEADERS_FOR_PROTOCOL = "getBlockHeadersForProtocol";
+    /**
+     * 接收本地节点新打包的区块
+     */
+    String GET_STATUS = "getStatus";
 }

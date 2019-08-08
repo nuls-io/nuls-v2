@@ -145,12 +145,4 @@ public interface AssetService {
      */
     void registerAsset(Asset asset) throws Exception;
 
-    /**
-     * 回滚注册资产
-     * Rollback the registered Asset
-     *
-     * @param asset The Asset be rollback
-     * @throws Exception Any error will throw an exception
-     */
-    void registerAssetRollback(Asset asset) throws Exception;
 }

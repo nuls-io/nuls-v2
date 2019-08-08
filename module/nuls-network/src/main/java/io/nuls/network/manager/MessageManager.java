@@ -368,6 +368,9 @@ public class MessageManager extends BaseManager {
             Collections.shuffle(nodes);
             double d = BigDecimal.valueOf(percent).divide(BigDecimal.valueOf(NetworkConstant.FULL_BROADCAST_PERCENT), 2, RoundingMode.HALF_DOWN).doubleValue();
             int toIndex = (int) (nodes.size() * d);
+            if (toIndex < NetworkConstant.MIN_PEER_NUMBER) {
+                toIndex = NetworkConstant.MIN_PEER_NUMBER;
+            }
             nodes = nodes.subList(0, toIndex);
         }
         for (Node node : nodes) {

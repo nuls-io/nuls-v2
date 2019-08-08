@@ -74,11 +74,6 @@ public class ContractServiceImpl implements ContractService {
             Log.error(ConsensusErrorCode.CHAIN_NOT_EXIST.getMsg());
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
-        if (!AddressTool.validContractAddress(AddressTool.getAddress(dto.getContractAddress()), dto.getChainId())
-                || !AddressTool.validAddress(dto.getChainId(), dto.getContractSender())) {
-            return Result.getFailed(ConsensusErrorCode.ADDRESS_ERROR);
-        }
-
         Transaction tx = new Transaction(TxType.CONTRACT_CREATE_AGENT);
         tx.setTime(dto.getBlockTime());
         Agent agent = new Agent();
@@ -121,10 +116,6 @@ public class ContractServiceImpl implements ContractService {
         if (chain == null) {
             Log.error(ConsensusErrorCode.CHAIN_NOT_EXIST.getMsg());
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
-        }
-        if (!AddressTool.validContractAddress(AddressTool.getAddress(dto.getContractAddress()), dto.getChainId())
-                || !AddressTool.validAddress(dto.getChainId(), dto.getContractSender())) {
-            return Result.getFailed(ConsensusErrorCode.ADDRESS_ERROR);
         }
         Transaction tx = new Transaction(TxType.CONTRACT_STOP_AGENT);
         StopAgent stopAgent = new StopAgent();
@@ -183,10 +174,6 @@ public class ContractServiceImpl implements ContractService {
         if (!NulsHash.validHash(dto.getAgentHash())) {
             return Result.getFailed(ConsensusErrorCode.AGENT_NOT_EXIST);
         }
-        if (!AddressTool.validContractAddress(AddressTool.getAddress(dto.getContractAddress()), dto.getChainId())
-                || !AddressTool.validAddress(dto.getChainId(), dto.getContractSender())) {
-            return Result.getFailed(ConsensusErrorCode.ADDRESS_ERROR);
-        }
         Transaction tx = new Transaction(TxType.CONTRACT_DEPOSIT);
         Deposit deposit = new Deposit();
         deposit.setAddress(AddressTool.getAddress(dto.getContractAddress()));
@@ -230,10 +217,6 @@ public class ContractServiceImpl implements ContractService {
         }
         if (!NulsHash.validHash(dto.getJoinAgentHash())) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
-        }
-        if (!AddressTool.validContractAddress(AddressTool.getAddress(dto.getContractAddress()), dto.getChainId())
-                || !AddressTool.validAddress(dto.getChainId(), dto.getContractSender())) {
-            return Result.getFailed(ConsensusErrorCode.ADDRESS_ERROR);
         }
         try {
             byte[] hash = NulsHash.fromHex(dto.getJoinAgentHash()).getBytes();

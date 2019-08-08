@@ -44,6 +44,7 @@ public class MethodCode {
     public static final String VIEW_ANNOTATION_DESC = "Lio/nuls/contract/sdk/annotation/View;";
     public static final String PAYABLE_ANNOTATION_DESC = "Lio/nuls/contract/sdk/annotation/Payable;";
     public static final String REQUIRED_ANNOTATION_DESC = "Lio/nuls/contract/sdk/annotation/Required;";
+    public static final String JSONSERIALIZABLE_ANNOTATION_DESC = "Lio/nuls/contract/sdk/annotation/JSONSerializable;";
 
     /**
      * The method's access flags (see {@link Opcodes}). This field also indicates if the method is
@@ -314,6 +315,10 @@ public class MethodCode {
 
     public boolean hasViewAnnotation() {
         return hasAnnotation(VIEW_ANNOTATION_DESC);
+    }
+
+    public boolean hasJSONSerializableAnnotation() {
+        return hasAnnotation(JSONSERIALIZABLE_ANNOTATION_DESC);
     }
 
     public boolean hasPayableAnnotation() {

@@ -14,6 +14,7 @@ import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.model.bo.config.ConfigBean;
+import io.nuls.crosschain.nuls.rpc.call.BlockCall;
 import io.nuls.crosschain.nuls.srorage.ConfigService;
 import io.nuls.crosschain.nuls.srorage.RegisteredCrossChainService;
 import io.nuls.crosschain.nuls.utils.LoggerUtil;
@@ -95,7 +96,6 @@ public class ChainManager {
             Initialize linked database tables
             */
             initTable(chain);
-
             chainMap.put(chainId, chain);
             ProtocolLoader.load(chainId);
         }
@@ -126,6 +126,8 @@ public class ChainManager {
             chain.getThreadPool().execute(new SignMessageHandler(chain));
             chain.getThreadPool().execute(new OtherCtxMessageHandler(chain));
             chain.getThreadPool().execute(new GetCtxStateHandler(chain));
+            chainHeaderMap.put(chain.getChainId(), BlockCall.getLatestBlockHeader(chain));
+
         }
         if(!config.isMainNet()){
             scheduledThreadPoolExecutor.scheduleAtFixedRate(new GetRegisteredChainTask(this),  20L, 10 * 60L, TimeUnit.SECONDS );

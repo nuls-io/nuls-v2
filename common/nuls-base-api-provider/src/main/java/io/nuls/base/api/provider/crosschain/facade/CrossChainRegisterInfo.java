@@ -50,6 +50,8 @@ public class CrossChainRegisterInfo {
     String mainNetVerifierSeeds = "";
     String mainNetCrossConnectSeeds = "";
 
+    private boolean enable = true;
+
 
     public int getChainId() {
         return chainId;
@@ -186,5 +188,13 @@ public class CrossChainRegisterInfo {
 
     public void setMainNetCrossConnectSeeds(String mainNetCrossConnectSeeds) {
         this.mainNetCrossConnectSeeds = mainNetCrossConnectSeeds;
+    }
+
+    public boolean isEnable() {
+        return enable;
+    }
+
+    public void setEnable(boolean enable) {
+        this.enable = enable;
     }
 }
