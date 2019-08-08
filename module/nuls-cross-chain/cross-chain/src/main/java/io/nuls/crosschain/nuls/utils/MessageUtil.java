@@ -248,7 +248,7 @@ public class MessageUtil {
                         sendCtxHashPo.getHashList().add(ctx.getHash());
                     }
                     sendHeightService.save(sendHeight, sendCtxHashPo, chain.getChainId());
-                    chain.getLogger().info("签名拜占庭验证通过,将交易广播给其他链节点，最小验证人数:{}，签名数量为：{}", byzantineCount,signCount);
+                    chain.getLogger().info("签名拜占庭验证通过,将交易广播给其他链节点，最小验证人数:{}，签名数量为：{},发送高度{}", byzantineCount,signCount,sendHeight);
                 }
                 return true;
             } else {
@@ -399,7 +399,7 @@ public class MessageUtil {
                 chain.getLogger().error("接收链验证人变更交易验证完成，发送给交易模块处理，hash:{}",otherHashHex);
             }else{
                 TransactionCall.sendTx(chain, RPCUtil.encode(ctx.serialize()));
-                chain.getLogger().error("接收链验证人变更交易验证完成，发送给交易模块处理，hash:{}",otherHashHex);
+                chain.getLogger().debug("接收链验证人变更交易验证完成，发送给交易模块处理，hash:{}",otherHashHex);
             }
         }catch (Exception e){
             chain.getLogger().error("跨链交易处理失败，hash:{}",otherHashHex);
