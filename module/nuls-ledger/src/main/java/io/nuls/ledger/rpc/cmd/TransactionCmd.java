@@ -146,8 +146,8 @@ public class TransactionCmd extends BaseLedgerCmd {
                 } else {
                     failList.add(txHash);
                 }
+                LoggerUtil.logger(chainId).debug("####commitUnconfirmedTx chainId={},txHash={},value={}=={}", chainId, tx.getHash().toHex(), validateResult.getValidateCode(), validateResult.getValidateDesc());
             }
-
             Map<String, Object> rtMap = new HashMap<>(2);
             rtMap.put("fail", failList);
             rtMap.put("orphan", orphanList);
