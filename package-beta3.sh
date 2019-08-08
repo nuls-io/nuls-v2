@@ -1,6 +1,7 @@
 #!/bin/bash
 cd `dirname $0`
-OUT_DIR=NULS-Wallet-linux64-beta2
+version=beta3
+OUT_DIR=NULS_Wallet_$version
 ./package -a smart-contract
 ./package -a chain-manager
 ./package -a cross-chain
@@ -10,13 +11,13 @@ if [ -n "$1" ]; then
 fi
 if [ -n "$2" ];
 then
-./package -Nb beta2 -J $2 -O $TARGET_OS
+./package -Nb $version -J $2 -O $TARGET_OS
 else
-./package  -O $TARGET_OS -Nb beta2
+./package  -O $TARGET_OS -Nb $version -o ./$OUT_DIR
 fi
 #mv NULS-Wallet-linux64-beta1 NULS-Wallet-linux64-
-cp -f ./nuls-main-beta2.ncf ./${OUT_DIR}/nuls.ncf
-cp -f ./genesis-block-main.json ./${OUT_DIR}/genesis-block.json
+cp -f ./nuls-main-$version.ncf ./${OUT_DIR}/nuls.ncf
+cp -f ./genesis-block-main-$version.json ./${OUT_DIR}/genesis-block.json
 if [ "$TARGET_OS" == "window" ];
 then
     zip -r ${OUT_DIR}-main-${TARGET_OS}.zip ./${OUT_DIR}
@@ -27,12 +28,12 @@ rm -rf ${OUT_DIR}
 ./package -r chain-manager
 if [ -n "$2" ];
 then
-./package -O $TARGET_OS -Nb beta2 -J $2
+./package -O $TARGET_OS -Nb $version -J $2
 else
-./package -O $TARGET_OS -Nb beta2
+./package -O $TARGET_OS -Nb $version
 fi
-cp -f ./nuls-chain-10-beta2.ncf ./${OUT_DIR}/nuls.ncf
-cp -f ./genesis-block-10.json ./${OUT_DIR}/genesis-block.json
+cp -f ./nuls-chain-10-$version.ncf ./${OUT_DIR}/nuls.ncf
+cp -f ./genesis-block-10-$version.json ./${OUT_DIR}/genesis-block.json
 if [ "$TARGET_OS" == "window" ];
 then
     zip -r ${OUT_DIR}-NBTC-${TARGET_OS}.zip ./${OUT_DIR}
