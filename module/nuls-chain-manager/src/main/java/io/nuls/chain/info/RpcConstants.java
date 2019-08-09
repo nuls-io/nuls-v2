@@ -42,6 +42,9 @@ public interface RpcConstants {
     String CMD_CHAIN_ACTIVE = "cm_chainActive";
     String CMD_CHAIN = "cm_chain";
     String CMD_GET_CROSS_CHAIN_INFOS = "getCrossChainInfos";
+    String CMD_GET_CROSS_CHAIN_SIMPLE_INFOS = "cm_getChainsSimpleInfo";
+
+
     String CMD_GET_CIRCULATE_CHAIN_ASSET = "cm_getCirculateChainAsset";
     String CMD_ASSET_CIRCULATE_VALIDATOR = "cm_assetCirculateValidator";
     String CMD_ASSET_CIRCULATE_COMMIT = "cm_assetCirculateCommit";
