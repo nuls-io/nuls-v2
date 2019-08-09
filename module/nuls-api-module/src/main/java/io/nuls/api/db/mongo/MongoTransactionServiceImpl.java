@@ -12,6 +12,7 @@ import io.nuls.api.model.po.db.mini.MiniTransactionInfo;
 import io.nuls.api.model.rpc.BalanceInfo;
 import io.nuls.api.utils.DBUtil;
 import io.nuls.api.utils.DocumentTransferTool;
+import io.nuls.base.basic.AddressTool;
 import io.nuls.core.basic.InitializingBean;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
@@ -289,7 +290,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         Set<TxRelationInfo> txRelationInfoSet = new HashSet<>();
         if (tx.getType() == TxType.COIN_BASE) {
             processCoinBaseTx(chainId, tx, txRelationInfoSet);
-        } else if (tx.getType() == TxType.TRANSFER) {
+        } else if (tx.getType() == TxType.TRANSFER || tx.getType() == TxType.CROSS_CHAIN) {
             processTransferTx(chainId, tx, txRelationInfoSet);
         } else if (tx.getType() == TxType.ACCOUNT_ALIAS) {
             processAliasTx(chainId, tx, txRelationInfoSet);
@@ -354,6 +355,27 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         }
         if (tx.getCoinTos() != null) {
             for (CoinToInfo output : tx.getCoinTos()) {
+                BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
+                txRelationInfoSet.add(new TxRelationInfo(output, tx, balanceInfo.getTotalBalance()));
+            }
+        }
+    }
+
+    private void processCrossTransferTx(int chainId, TransactionInfo tx, Set<TxRelationInfo> txRelationInfoSet) {
+        if (tx.getCoinFroms() != null) {
+            for (CoinFromInfo input : tx.getCoinFroms()) {
+                if (chainId != AddressTool.getChainIdByAddress(input.getAddress())) {
+                    continue;
+                }
+                BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, input.getAddress(), input.getChainId(), input.getAssetsId());
+                txRelationInfoSet.add(new TxRelationInfo(input, tx, balanceInfo.getTotalBalance()));
+            }
+        }
+        if (tx.getCoinTos() != null) {
+            for (CoinToInfo output : tx.getCoinTos()) {
+                if (chainId != AddressTool.getChainIdByAddress(output.getAddress())) {
+                    continue;
+                }
                 BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
                 txRelationInfoSet.add(new TxRelationInfo(output, tx, balanceInfo.getTotalBalance()));
             }

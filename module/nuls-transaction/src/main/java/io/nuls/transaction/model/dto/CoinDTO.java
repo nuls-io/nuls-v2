@@ -30,6 +30,7 @@ import java.math.BigInteger;
 import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 /**
+ * 交易参数传输类
  * @author: Charlie
  * @date: 2018-12-04
  */
