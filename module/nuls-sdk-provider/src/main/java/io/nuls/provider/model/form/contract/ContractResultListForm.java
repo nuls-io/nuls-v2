@@ -22,41 +22,34 @@
  * SOFTWARE.
  *
  */
-
-package io.nuls.provider.model.form;
+package io.nuls.provider.model.form.contract;
 
 
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
 import io.nuls.core.rpc.model.TypeDescriptor;
+import io.nuls.provider.model.form.Base;
 
 import java.util.List;
 
 /**
- * @author: Charlie
+ * @author: PierreLuo
+ * @date: 2018/4/20
  */
-@ApiModel(name = "创建多签账户表单数据")
-public class MultiSignAccountCreateForm extends Base{
+@ApiModel
+public class ContractResultListForm extends Base {
 
-    @ApiModelProperty(description = "账户公钥集合", type = @TypeDescriptor(value = List.class, collectionElement = String.class))
-    private List<String> pubKeys;
+    @ApiModelProperty(description = "交易hash列表", type = @TypeDescriptor(value = List.class, collectionElement = String.class), required = true)
+    private List<String> hashList;
 
-    @ApiModelProperty(description = "最小签名数")
-    private int minSigns;
-
-    public List<String> getPubKeys() {
-        return pubKeys;
+    public ContractResultListForm() {
     }
 
-    public void setPubKeys(List<String> pubKeys) {
-        this.pubKeys = pubKeys;
+    public List<String> getHashList() {
+        return hashList;
     }
 
-    public int getMinSigns() {
-        return minSigns;
-    }
-
-    public void setMinSigns(int minSigns) {
-        this.minSigns = minSigns;
+    public void setHashList(List<String> hashList) {
+        this.hashList = hashList;
     }
 }

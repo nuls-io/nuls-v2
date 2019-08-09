@@ -289,11 +289,30 @@ public class ContractResource {
         return clientResult;
     }
 
+    @POST
+    @Path("/result/list")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(description = "获取智能合约执行结果列表", order = 409)
+    @Parameters({
+            @Parameter(parameterName = "获取智能合约执行结果列表", parameterDes = "获取智能合约执行结果列表表单", requestType = @TypeDescriptor(value = ContractResultListForm.class))
+    })
+    @ResponseData(name = "返回值", description = "返回交易的合约执行结果列表", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "hash1 or hash2 or hash3...", valueType = ContractResultDto.class, description = "以交易hash列表中的hash值作为key，这里的key name是动态的")
+    }))
+    public RpcClientResult getContractResultList(ContractResultListForm form) {
+        if (form == null) {
+            return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "form is empty"));
+        }
+        Result<Map> result = contractTools.getContractResultList(config.getChainId(), form.getHashList());
+        RpcClientResult clientResult = ResultUtil.getRpcClientResult(result);
+        return clientResult;
+    }
+
 
     @POST
     @Path("/constructor")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "获取合约代码构造函数", order = 409)
+    @ApiOperation(description = "获取合约代码构造函数", order = 410)
     @Parameters({
         @Parameter(parameterName = "获取合约代码构造函数", parameterDes = "获取合约代码构造函数表单", requestType = @TypeDescriptor(value = ContractCode.class))
     })
@@ -311,7 +330,7 @@ public class ContractResource {
     @POST
     @Path("/method")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "获取已发布合约指定函数的信息", order = 410)
+    @ApiOperation(description = "获取已发布合约指定函数的信息", order = 411)
     @Parameters({
         @Parameter(parameterName = "获取已发布合约指定函数的信息", parameterDes = "获取已发布合约指定函数的信息表单", requestType = @TypeDescriptor(value = ContractMethodForm.class))
     })
@@ -358,7 +377,7 @@ public class ContractResource {
     @POST
     @Path("/method/argstypes")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "获取已发布合约指定函数的参数类型列表", order = 411)
+    @ApiOperation(description = "获取已发布合约指定函数的参数类型列表", order = 412)
     @Parameters({
         @Parameter(parameterName = "获取已发布合约指定函数的参数类型列表", parameterDes = "获取已发布合约指定函数的参数类型表单", requestType = @TypeDescriptor(value = ContractMethodForm.class))
     })
@@ -390,7 +409,7 @@ public class ContractResource {
     @POST
     @Path("/validate/create")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "验证发布合约", order = 412)
+    @ApiOperation(description = "验证发布合约", order = 413)
     @Parameters(value = {
         @Parameter(parameterName = "验证发布合约", parameterDes = "验证发布合约表单", requestType = @TypeDescriptor(value = ContractValidateCreate.class))
     })
@@ -422,7 +441,7 @@ public class ContractResource {
     @POST
     @Path("/validate/call")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "验证调用合约", order = 413)
+    @ApiOperation(description = "验证调用合约", order = 414)
     @Parameters(value = {
         @Parameter(parameterName = "验证调用合约", parameterDes = "验证调用合约表单", requestType = @TypeDescriptor(value = ContractValidateCall.class))
     })
@@ -457,7 +476,7 @@ public class ContractResource {
     @POST
     @Path("/validate/delete")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "验证删除合约", order = 414)
+    @ApiOperation(description = "验证删除合约", order = 415)
     @Parameters(value = {
         @Parameter(parameterName = "验证删除合约", parameterDes = "验证删除合约表单", requestType = @TypeDescriptor(value = ContractValidateDelete.class))
     })
@@ -480,7 +499,7 @@ public class ContractResource {
     @POST
     @Path("/imputedgas/create")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "估算发布合约交易的GAS", order = 415)
+    @ApiOperation(description = "估算发布合约交易的GAS", order = 416)
     @Parameters(value = {
         @Parameter(parameterName = "估算发布合约交易的GAS", parameterDes = "估算发布合约交易的GAS表单", requestType = @TypeDescriptor(value = ImputedGasContractCreate.class))
     })
@@ -502,7 +521,7 @@ public class ContractResource {
     @POST
     @Path("/imputedgas/call")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "估算调用合约交易的GAS", order = 416)
+    @ApiOperation(description = "估算调用合约交易的GAS", order = 417)
     @Parameters(value = {
         @Parameter(parameterName = "估算调用合约交易的GAS", parameterDes = "估算调用合约交易的GAS表单", requestType = @TypeDescriptor(value = ImputedGasContractCall.class))
     })
@@ -527,7 +546,7 @@ public class ContractResource {
     @POST
     @Path("/view")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "调用合约不上链方法", order = 417)
+    @ApiOperation(description = "调用合约不上链方法", order = 418)
     @Parameters(value = {
         @Parameter(parameterName = "调用合约不上链方法", parameterDes = "调用合约不上链方法表单", requestType = @TypeDescriptor(value = ContractViewCall.class))
     })
