@@ -65,7 +65,6 @@ import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.storage.ConfirmedTxStorageService;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
 import io.nuls.transaction.task.StatisticsTask;
-import io.nuls.transaction.utils.LoggerUtil;
 import io.nuls.transaction.utils.TxDuplicateRemoval;
 import io.nuls.transaction.utils.TxUtil;
 
@@ -183,8 +182,14 @@ public class TxServiceImpl implements TxService {
             unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
             //广播完整交易
             boolean broadcastResult = false;
+            TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
             for (int i = 0; i < 3; i++) {
-                broadcastResult = NetworkCall.broadcastTx(chain, tx);
+                if (txRegister.getModuleCode().equals(ModuleE.CC.abbr)) {
+                    broadcastResult = NetworkCall.forwardTxHash(chain, tx.getHash());
+                } else {
+                    broadcastResult = NetworkCall.broadcastTx(chain, tx);
+                }
+
                 if (broadcastResult) {
                     break;
                 }
@@ -364,7 +369,7 @@ public class TxServiceImpl implements TxService {
                 //判断from中地址和签名的地址是否匹配
                 for (CoinFrom coinFrom : coinData.getFrom()) {
                     if (tx.isMultiSignTx()) {
-                        if(!Arrays.equals(coinFrom.getAddress(), multiSignAddress)){
+                        if (!Arrays.equals(coinFrom.getAddress(), multiSignAddress)) {
                             throw new NulsException(TxErrorCode.SIGNATURE_ERROR);
                         }
                     } else if (!addressSet.contains(AddressTool.getStringAddressByBytes(coinFrom.getAddress()))
@@ -448,7 +453,7 @@ public class TxServiceImpl implements TxService {
         if (null != existMultiSignAddress) {
             //如果from中含有多签地址,则表示该交易是多签交易,则必须满足,froms中只存在这一个多签地址
             for (CoinFrom coinFrom : listFrom) {
-                if(!Arrays.equals(existMultiSignAddress, coinFrom.getAddress())){
+                if (!Arrays.equals(existMultiSignAddress, coinFrom.getAddress())) {
                     throw new NulsException(TxErrorCode.MULTI_SIGN_TX_ONLY_SAME_ADDRESS);
                 }
             }
@@ -684,14 +689,14 @@ public class TxServiceImpl implements TxService {
                             }
                         } else {
                             TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
-                            if(txRegister.getModuleCode().equals(ModuleE.CC.abbr)){
-                                if(corssTxCount + (++batchCorssTxCount) >= TxConstant.PACKAGE_CROSS_TX_MAX_COUNT){
+                            if (txRegister.getModuleCode().equals(ModuleE.CC.abbr)) {
+                                if (corssTxCount + (++batchCorssTxCount) >= TxConstant.PACKAGE_CROSS_TX_MAX_COUNT) {
                                     //限制单个区块包含的跨链交易总数，超过跨链交易最大个数，放回去, 然后停止获取交易
                                     packablePool.add(chain, tx);
                                     if (batchProcessListSize > 0) {
                                         //达到处理该批次的条件
                                         process = true;
-                                    }else {
+                                    } else {
                                         break;
                                     }
                                 }
@@ -745,7 +750,7 @@ public class TxServiceImpl implements TxService {
                             totalSize += transaction.getSize();
                             TxRegister txRegister = TxManager.getTxRegister(chain, transaction.getType());
                             //计算跨链交易的数量
-                            if(txRegister.getModuleCode().equals(ModuleE.CC.abbr)){
+                            if (txRegister.getModuleCode().equals(ModuleE.CC.abbr)) {
                                 corssTxCount++;
                             }
                             //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
@@ -855,7 +860,7 @@ public class TxServiceImpl implements TxService {
             long totalTime = NulsDateUtils.getCurrentTimeMillis() - startTime;
             nulsLogger.info("[打包时间统计]  总执行时间:{}, 剩余时间:{}, 打包可用时间:{}, 获取交易(循环)总等待时间:{}, " +
                             "获取交易(循环)执行时间:{}, 获取交易(循环)验证账本总时间:{}, 模块统一验证执行时间:{}, " +
-                            "合约执行时间:{},",totalTime, endtimestamp - NulsDateUtils.getCurrentTimeMillis(),
+                            "合约执行时间:{},", totalTime, endtimestamp - NulsDateUtils.getCurrentTimeMillis(),
                     packingTime, allSleepTime, whileTime, totalLedgerTime, batchModuleTime,
                     contractTime);
 
