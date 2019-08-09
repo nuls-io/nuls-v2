@@ -10,6 +10,5 @@
   "selfSeedIps": "192.168.1.57:8888",
   "crossPort": 9999,
   "crossMaxInCount": 100,
-  "crossMaxOutCount": 10,
-  "moonSeedIps": "192.168.1.192:8088"
+  "crossMaxOutCount": 10
 }
