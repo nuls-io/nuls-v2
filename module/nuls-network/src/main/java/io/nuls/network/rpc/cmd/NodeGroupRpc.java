@@ -157,6 +157,7 @@ public class NodeGroupRpc extends BaseCmd {
         }
         NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
         String seedIps = String.valueOf(params.get("seedIps"));
+        LoggerUtil.logger(chainId).info("chainId={},seedIps={}",chainId,seedIps);
         //友链的跨链协议调用
         NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByChainId(chainId);
         if (null == nodeGroup) {

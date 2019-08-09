@@ -88,6 +88,7 @@ public class NodeMaintenanceTask implements Runnable {
                         LoggerUtil.logger(nodeGroup.getChainId()).error("chainId={} cross connect process stop.blockHeight={}", nodeGroup.getChainId(), bestBlockInfo.getBlockHeight());
                         return;
                     } else {
+                        LoggerUtil.logger(nodeGroup.getChainId()).error("chainId={} cross connect process active.blockHeight={}", nodeGroup.getChainId(), bestBlockInfo.getBlockHeight());
                         nodeGroup.setHadBlockHeigh(true);
                     }
                 }
