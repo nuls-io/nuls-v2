@@ -119,7 +119,7 @@ sendHeight=5
 #跨链交易拜占庭比例
 byzantineRatio=50
 #主网跨链种子节点列表
-crossSeedIps=39.98.226.51:18002,47.244.186.65:18002,172.21.149.246:18002,47.74.86.85:18002
+crossSeedIps=39.98.226.51:18002,47.244.186.65:18002,47.254.234.223:18002,47.74.86.85:18002
 #主网验证人列表
 verifiers=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMmShSTVwbU4rHkZjpD98JgFgg6rmhF,tNULSeBaMpTj8qEQ8CFDxiP69hGFB27u9nmMUc
 #主网签名拜占庭比列
