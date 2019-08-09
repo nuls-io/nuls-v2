@@ -69,6 +69,7 @@ public class TransactionConfirmedPO extends BaseNulsData {
         this.tx = byteBuffer.readTransaction();
         this.blockHeight = byteBuffer.readUint32();
         this.status = byteBuffer.readByte();
+
     }
 
     @Override

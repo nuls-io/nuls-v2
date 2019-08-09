@@ -21,7 +21,6 @@
 package io.nuls.block.constant;
 
 import io.nuls.base.data.Block;
-import io.nuls.block.model.Node;
 
 import java.util.Comparator;
 
@@ -60,21 +59,17 @@ public interface Constant {
     String CACHED_BLOCK = "cached_block_";
 
     /**
-     * 共识工作状态
+     * 工作状态
      */
-    int CONSENSUS_WORKING = 1;
+    int MODULE_WORKING = 1;
     /**
-     * 共识等待状态
+     * 等待状态
      */
-    int CONSENSUS_WAITING = 0;
+    int MODULE_WAITING = 0;
 
     /**
      * 区块排序器
      */
     Comparator<Block> BLOCK_COMPARATOR = (o1, o2) -> (int) (o1.getHeader().getHeight() - o2.getHeader().getHeight());
 
-    /**
-     * 节点比较器,默认按信用值排序
-     */
-    Comparator<Node> NODE_COMPARATOR = Comparator.comparingInt(Node::getCredit).reversed();
 }

@@ -25,19 +25,25 @@
  */
 package io.nuls.network.model;
 
+import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.log.Log;
 import io.nuls.network.cfg.NetworkConfig;
+import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NodeConnectStatusEnum;
 import io.nuls.network.constant.NodeStatusEnum;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.model.dto.Dto;
+import io.nuls.network.model.dto.RpcCacheMessage;
 import io.nuls.network.model.po.*;
 import io.nuls.network.netty.container.NodesContainer;
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.core.core.ioc.SpringLiteContext;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -49,6 +55,11 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class NodeGroup implements Dto {
     NetworkConfig networkConfig = SpringLiteContext.getBean(NetworkConfig.class);
+    /**
+     * 缓存网络组种无法及时处理的信息
+     */
+    private BlockingDeque<RpcCacheMessage> cacheMsgQueue = new LinkedBlockingDeque<>(NetworkConstant.INIT_CACHE_MSG_QUEUE_NUMBER);
+
     private long magicNumber;
     private int chainId;
     private int maxOut;
@@ -78,7 +89,10 @@ public class NodeGroup implements Dto {
      */
     private NodesContainer crossNodeContainer = new NodesContainer();
 
+    private Map<String, Node> localShareToCrossUncheckNodes = new ConcurrentHashMap<>();
+    private Map<String, Node> localShareToCrossCanConnectNodes = new ConcurrentHashMap<>();
 
+    private boolean hadBlockHeigh = false;
     private Lock locker = new ReentrantLock();
     /**
      * GROUP  STATUS
@@ -91,6 +105,8 @@ public class NodeGroup implements Dto {
     public final static int OK = 3;
     private final static int DESTROY = -1;
     private final static int RECONNECT = -2;
+
+
     public static Map<String, String> statusMap = new HashMap<>();
 
     static {
@@ -107,6 +123,15 @@ public class NodeGroup implements Dto {
 
     public String getCrossStatus() {
         return statusMap.get(String.valueOf(crossNodeContainer.getStatus()));
+    }
+
+    public NodeGroup() {
+        this.magicNumber = networkConfig.getPacketMagic();
+        this.chainId = networkConfig.getChainId();
+        this.maxIn = networkConfig.getMaxInCount();
+        this.maxOut = networkConfig.getMaxOutCount();
+        this.minAvailableCount = 0;
+
     }
 
     public NodeGroup(long magicNumber, int chainId, int maxIn, int maxOut, int minAvailableCount) {
@@ -138,6 +163,22 @@ public class NodeGroup implements Dto {
         this.crossNodeContainer = crossNodeContainer;
     }
 
+    public Map<String, Node> getLocalShareToCrossUncheckNodes() {
+        return localShareToCrossUncheckNodes;
+    }
+
+    public void setLocalShareToCrossUncheckNodes(Map<String, Node> localShareToCrossUncheckNodes) {
+        this.localShareToCrossUncheckNodes = localShareToCrossUncheckNodes;
+    }
+
+    public Map<String, Node> getLocalShareToCrossCanConnectNodes() {
+        return localShareToCrossCanConnectNodes;
+    }
+
+    public void setLocalShareToCrossCanConnectNodes(Map<String, Node> localShareToCrossCanConnectNodes) {
+        this.localShareToCrossCanConnectNodes = localShareToCrossCanConnectNodes;
+    }
+
     public boolean isCrossActive() {
         return isCrossActive;
     }
@@ -146,6 +187,13 @@ public class NodeGroup implements Dto {
         isCrossActive = crossActive;
     }
 
+    public boolean isHadBlockHeigh() {
+        return hadBlockHeigh;
+    }
+
+    public void setHadBlockHeigh(boolean hadBlockHeigh) {
+        this.hadBlockHeigh = hadBlockHeigh;
+    }
 
     public long getMagicNumber() {
         return magicNumber;
@@ -216,6 +264,14 @@ public class NodeGroup implements Dto {
         return false;
     }
 
+    public BlockingDeque<RpcCacheMessage> getCacheMsgQueue() {
+        return cacheMsgQueue;
+    }
+
+    public void setCacheMsgQueue(BlockingDeque<RpcCacheMessage> cacheMsgQueue) {
+        this.cacheMsgQueue = cacheMsgQueue;
+    }
+
     /**
      * 1.在可用连接充足情况下，保留一个种子连接，其他的种子连接需要断开
      * 2.在可用连接不够取代种子情况下，按可用连接数来断开种子连接
@@ -237,7 +293,6 @@ public class NodeGroup implements Dto {
             //连接的种子数量大于1，并且可用连接数量大于0
             if (nodes.size() > 1 && canConnectNodesNum > 0) {
                 Collections.shuffle(nodes);
-                nodes.remove(0);
                 while (canConnectNodesNum < nodes.size()) {
                     nodes.remove(0);
                 }
@@ -249,7 +304,7 @@ public class NodeGroup implements Dto {
                 node.close();
             }
         } catch (Exception e) {
-            LoggerUtil.logger().error("", e);
+            Log.error(e);
         }
     }
 
@@ -263,6 +318,10 @@ public class NodeGroup implements Dto {
             return true;
         }
         return false;
+    }
+
+    public boolean isMoonNode() {
+        return networkConfig.isMoonNode();
     }
 
     public int getSameIpMaxCount(boolean isCross) {
@@ -287,6 +346,12 @@ public class NodeGroup implements Dto {
         }
     }
 
+    public void addCrossCheckNodes(String ip, int port, int crossPort) {
+        Node shareToCrossCheckNode = new Node(magicNumber, ip, crossPort, crossPort, Node.OUT, true);
+        if (null == localShareToCrossUncheckNodes.get(shareToCrossCheckNode.getId()) && null == localShareToCrossCanConnectNodes.get(shareToCrossCheckNode.getId())) {
+            localShareToCrossUncheckNodes.put(shareToCrossCheckNode.getId(), shareToCrossCheckNode);
+        }
+    }
 
     private void loadNodes(NodesContainer nodesContainer, NodesContainerPo nodesContainerPo) {
         loadNodes(nodesContainer.getDisconnectNodes(), nodesContainerPo.getDisConnectNodes());
@@ -308,7 +373,12 @@ public class NodeGroup implements Dto {
                 return crossNodeContainer.addNeedCheckNode(newNode);
             } else {
                 Node newNode = new Node(magicNumber, ip, port, crossPort, Node.OUT, isCross);
-                return localNetNodeContainer.addNeedCheckNode(newNode);
+                boolean localAdd = localNetNodeContainer.addNeedCheckNode(newNode);
+                if (crossPort > 0 && localAdd) {
+                    /*是本地新增节点 并且 跨链端口存在，则放入跨链待检测队列中*/
+                    addCrossCheckNodes(ip, crossPort, crossPort);
+                }
+                return localAdd;
             }
         } finally {
             locker.unlock();
@@ -327,8 +397,8 @@ public class NodeGroup implements Dto {
             connectedNodes = localNetNodeContainer.getConnectedNodes();
         }
         for (Node node : allNodes) {
+            //排除已经连接的信息,作为server存在in连接了
             if (node.getStatus() == NodeStatusEnum.CONNECTABLE) {
-                //排除已经连接的信息
                 if (null == connectedNodes.get(node.getId())) {
                     nodeList.add(node);
                 }
@@ -389,19 +459,19 @@ public class NodeGroup implements Dto {
     }
 
     public void reconnect(boolean isCross) {
-        if(isCross){
+        if (isCross) {
             this.crossNodeContainer.setStatus(RECONNECT);
             Collection<Node> crossNodes = this.crossNodeContainer.getConnectedNodes().values();
             for (Node node : crossNodes) {
-                LoggerUtil.logger(chainId).info("cross chainId={} node={} reconnect",chainId,node.getId());
+                LoggerUtil.logger(chainId).info("cross chainId={} node={} reconnect", chainId, node.getId());
                 node.close();
             }
             this.crossNodeContainer.setStatus(WAIT2);
-        }else{
+        } else {
             this.localNetNodeContainer.setStatus(RECONNECT);
             Collection<Node> nodes = this.localNetNodeContainer.getConnectedNodes().values();
             for (Node node : nodes) {
-                LoggerUtil.logger(chainId).info("local chainId={} node={} reconnect",chainId,node.getId());
+                LoggerUtil.logger(chainId).info("local chainId={} node={} reconnect", chainId, node.getId());
                 node.close();
             }
             this.localNetNodeContainer.setStatus(WAIT2);

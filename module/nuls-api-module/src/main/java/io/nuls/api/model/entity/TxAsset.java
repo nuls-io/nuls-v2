@@ -2,13 +2,12 @@ package io.nuls.api.model.entity;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.basic.TransactionLogicData;
+import io.nuls.base.data.BaseNulsData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.Set;
 
 /**
  * @author tangyi
@@ -16,23 +15,26 @@ import java.util.Set;
  * @description
  */
 
-public class TxAsset extends TransactionLogicData {
+public class TxAsset extends BaseNulsData {
     private int chainId;
     private int assetId;
     private String symbol;
     private String name;
     private BigInteger depositNuls;
+    private BigInteger destroyNuls;
     private BigInteger initNumber;
     private short decimalPlaces;
     private byte[] address;
 
+
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint16(chainId);
-        stream.writeUint32(assetId);
+        stream.writeUint16(assetId);
         stream.writeString(symbol);
         stream.writeString(name);
         stream.writeBigInteger(depositNuls);
+        stream.writeBigInteger(destroyNuls);
         stream.writeBigInteger(initNumber);
         stream.writeShort(decimalPlaces);
         stream.writeBytesWithLength(address);
@@ -45,6 +47,7 @@ public class TxAsset extends TransactionLogicData {
         this.symbol = byteBuffer.readString();
         this.name = byteBuffer.readString();
         this.depositNuls = byteBuffer.readBigInteger();
+        this.destroyNuls = byteBuffer.readBigInteger();
         this.initNumber = byteBuffer.readBigInteger();
         this.decimalPlaces = byteBuffer.readShort();
         this.address = byteBuffer.readByLengthByte();
@@ -61,6 +64,8 @@ public class TxAsset extends TransactionLogicData {
         size += SerializeUtils.sizeOfString(name);
         // depositNuls
         size += SerializeUtils.sizeOfBigInteger();
+        // destroyNuls
+        size += SerializeUtils.sizeOfBigInteger();
         // initNumber
         size += SerializeUtils.sizeOfBigInteger();
         // decimalPlaces
@@ -68,11 +73,6 @@ public class TxAsset extends TransactionLogicData {
         size += SerializeUtils.sizeOfBytes(address);
 
         return size;
-    }
-
-    @Override
-    public Set<byte[]> getAddresses() {
-        return null;
     }
 
     public int getChainId() {
@@ -137,5 +137,13 @@ public class TxAsset extends TransactionLogicData {
 
     public void setAddress(byte[] address) {
         this.address = address;
+    }
+
+    public BigInteger getDestroyNuls() {
+        return destroyNuls;
+    }
+
+    public void setDestroyNuls(BigInteger destroyNuls) {
+        this.destroyNuls = destroyNuls;
     }
 }

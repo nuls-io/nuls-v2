@@ -20,6 +20,8 @@
 
 package io.nuls.api;
 
+import io.nuls.api.analysis.WalletRpcHandler;
+import io.nuls.api.cache.ApiCache;
 import io.nuls.api.db.mongo.MongoDBTableServiceImpl;
 import io.nuls.api.manager.ScheduleManager;
 import io.nuls.api.model.po.config.ApiConfig;
@@ -28,6 +30,8 @@ import io.nuls.api.rpc.jsonRpc.JsonRpcServer;
 import io.nuls.api.utils.LoggerUtil;
 import io.nuls.base.api.provider.Provider;
 import io.nuls.base.api.provider.ServiceManager;
+import io.nuls.base.basic.AddressTool;
+import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.config.ConfigurationLoader;
@@ -38,9 +42,13 @@ import io.nuls.core.rpc.modulebootstrap.Module;
 import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.AddressPrefixDatas;
+import org.bouncycastle.util.encoders.Hex;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import static io.nuls.api.constant.ApiConstant.DEFAULT_SCAN_PACKAGE;
 
@@ -57,6 +65,8 @@ public class ApiModuleBootstrap extends RpcModule {
 
     @Autowired
     private ApiConfig apiConfig;
+    @Autowired
+    private AddressPrefixDatas addressPrefixDatas;
 
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
@@ -75,18 +85,17 @@ public class ApiModuleBootstrap extends RpcModule {
     @Override
     public Module[] declareDependent() {
         return new Module[]{
-                new Module(ModuleE.CS.abbr, "1.0"),
-                new Module(ModuleE.BL.abbr, "1.0"),
-                new Module(ModuleE.AC.abbr, "1.0"),
-                new Module(ModuleE.TX.abbr, "1.0"),
-                new Module(ModuleE.LG.abbr, "1.0"),
-                new Module(ModuleE.SC.abbr, "1.0")
+                new Module(ModuleE.CS.abbr, ROLE),
+                new Module(ModuleE.BL.abbr, ROLE),
+                new Module(ModuleE.AC.abbr, ROLE),
+                new Module(ModuleE.TX.abbr, ROLE),
+                new Module(ModuleE.LG.abbr, ROLE)
         };
     }
 
     @Override
     public Module moduleInfo() {
-        return new Module(ModuleE.AP.abbr, "1.0");
+        return new Module(ModuleE.AP.abbr, ROLE);
     }
 
     @Override
@@ -95,7 +104,11 @@ public class ApiModuleBootstrap extends RpcModule {
             super.init();
             //初始化配置项
             initCfg();
-            LoggerUtil.init(ApiContext.defaultChainId, ApiContext.logLevel);
+            /**
+             * 地址工具初始化
+             */
+            AddressTool.init(addressPrefixDatas);
+//            LoggerUtil.init(ApiContext.defaultChainId, ApiContext.logLevel);
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);
         }
@@ -106,32 +119,69 @@ public class ApiModuleBootstrap extends RpcModule {
      * 有关mongoDB的连接初始化见：MongoDBService.afterPropertiesSet();
      */
     private void initCfg() {
-        ApiContext.databaseUrl = apiConfig.getDatabaseUrl();
-        ApiContext.databasePort = apiConfig.getDatabasePort();
+        ApiContext.mainChainId = apiConfig.getMainChainId();
+        ApiContext.mainAssetId = apiConfig.getMainAssetId();
+        ApiContext.mainSymbol = apiConfig.getMainSymbol();
         ApiContext.defaultChainId = apiConfig.getChainId();
         ApiContext.defaultAssetId = apiConfig.getAssetId();
         ApiContext.defaultSymbol = apiConfig.getSymbol();
+        ApiContext.defaultChainName = apiConfig.getChainName();
+        ApiContext.defaultDecimals = apiConfig.getDecimals();
+
+        ApiContext.databaseUrl = apiConfig.getDatabaseUrl();
+        ApiContext.databasePort = apiConfig.getDatabasePort();
         ApiContext.listenerIp = apiConfig.getListenerIp();
         ApiContext.rpcPort = apiConfig.getRpcPort();
         ApiContext.logLevel = apiConfig.getLogLevel();
         ApiContext.maxWaitTime = apiConfig.getMaxWaitTime();
         ApiContext.maxAliveConnect = apiConfig.getMaxAliveConnect();
         ApiContext.connectTimeOut = apiConfig.getConnectTimeOut();
+
+
+        ApiContext.blackHolePublicKey = Hex.decode(apiConfig.getBlackHolePublicKey());
+        if (apiConfig.getDeveloperNodeAddress() != null) {
+            ApiContext.DEVELOPER_NODE_ADDRESS = new HashSet(Arrays.asList(apiConfig.getDeveloperNodeAddress().split(",")));
+        }
+        if(apiConfig.getAmbassadorNodeAddress() != null) {
+            ApiContext.AMBASSADOR_NODE_ADDRESS = new HashSet(Arrays.asList(apiConfig.getAmbassadorNodeAddress().split(",")));
+        }
+        if(apiConfig.getMappingAddress() != null) {
+            ApiContext.MAPPING_ADDRESS = new HashSet(Arrays.asList(apiConfig.getMappingAddress().split(",")));
+        }
+        ApiContext.BUSINESS_ADDRESS = apiConfig.getBusinessAddress();
+        ApiContext.TEAM_ADDRESS = apiConfig.getTeamAddress();
+        ApiContext.COMMUNITY_ADDRESS = apiConfig.getCommunityAddress();
+
     }
 
     @Override
     public boolean doStart() {
-        initDB();
         return true;
     }
 
     @Override
     public RpcModuleState onDependenciesReady() {
         try {
+            Result<Map> result = WalletRpcHandler.getConsensusConfig(ApiContext.defaultChainId);
+            if (result.isSuccess()) {
+                Map<String, Object> configMap = result.getData();
+                ApiContext.agentChainId = (int) configMap.get("agentChainId");
+                ApiContext.agentAssetId = (int) configMap.get("agentAssetId");
+                ApiContext.awardAssetId = (int) configMap.get("awardAssetId");
+            }
+            initDB();
+
+            if (hasDependent(ModuleE.SC)) {
+                ApiContext.isRunSmartContract = true;
+            }
+            if (hasDependent(ModuleE.CC)) {
+                ApiContext.isRunCrossChain = true;
+            }
+
+            ScheduleManager scheduleManager = SpringLiteContext.getBean(ScheduleManager.class);
             JsonRpcServer server = new JsonRpcServer();
             server.startServer(ApiContext.listenerIp, ApiContext.rpcPort);
-            TimeUtils.getInstance().start();
-            ScheduleManager scheduleManager = SpringLiteContext.getBean(ScheduleManager.class);
+            Thread.sleep(3000);
             scheduleManager.start();
         } catch (Exception e) {
             LoggerUtil.commonLog.error("------------------------api-module running failed---------------------------");
@@ -149,7 +199,7 @@ public class ApiModuleBootstrap extends RpcModule {
         MongoDBTableServiceImpl tableService = SpringLiteContext.getBean(MongoDBTableServiceImpl.class);
         List<ChainInfo> chainList = tableService.getChainList();
         if (chainList == null) {
-            tableService.addDefaultChain();
+            tableService.addDefaultChainCache();
         } else {
             tableService.initCache();
         }
@@ -158,5 +208,10 @@ public class ApiModuleBootstrap extends RpcModule {
     @Override
     public RpcModuleState onDependenciesLoss(Module dependenciesModule) {
         return RpcModuleState.Ready;
+    }
+
+    @Override
+    protected long getTryRuningTimeout() {
+        return 360;
     }
 }

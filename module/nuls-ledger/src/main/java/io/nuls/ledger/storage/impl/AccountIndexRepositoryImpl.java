@@ -25,13 +25,13 @@
  */
 package io.nuls.ledger.storage.impl;
 
+import io.nuls.core.basic.InitializingBean;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.ByteUtils;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.ledger.storage.AccountIndexRepository;
 import io.nuls.ledger.storage.DataBaseArea;
-import io.nuls.core.basic.InitializingBean;
-import io.nuls.core.core.annotation.Service;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.model.ByteUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -42,7 +42,7 @@ import static io.nuls.ledger.utils.LoggerUtil.logger;
  * @author lanjinsheng
  * @date 2018/11/19
  */
-@Service
+@Component
 public class AccountIndexRepositoryImpl implements AccountIndexRepository, InitializingBean {
 
 
@@ -85,7 +85,6 @@ public class AccountIndexRepositoryImpl implements AccountIndexRepository, Initi
         try {
             RocksDBService.put(table,key,value);
         } catch (Exception e) {
-            e.printStackTrace();
             logger(addressChainId).error(e);
         }
     }
@@ -96,7 +95,6 @@ public class AccountIndexRepositoryImpl implements AccountIndexRepository, Initi
         try {
             RocksDBService.put(table,addressKey,value);
         } catch (Exception e) {
-            e.printStackTrace();
             logger(addressChainId).error(e);
         }
     }
@@ -106,7 +104,6 @@ public class AccountIndexRepositoryImpl implements AccountIndexRepository, Initi
         try {
             RocksDBService.batchPut(table,kvs);
         } catch (Exception e) {
-            e.printStackTrace();
             logger(addressChainId).error(e);
         }
     }

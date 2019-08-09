@@ -23,6 +23,7 @@
  */
 package io.nuls.contract.helper;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
@@ -42,7 +43,6 @@ import io.nuls.contract.vm.program.impl.ProgramExecutorImpl;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.rpc.util.RPCUtil;
 import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigInteger;

@@ -28,13 +28,13 @@ package io.nuls.ledger.rpc.cmd;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.Parameter;
+import io.nuls.core.rpc.model.*;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.ledger.constant.CmdConstant;
 import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.model.ValidateResult;
 import io.nuls.ledger.service.TransactionService;
+import io.nuls.ledger.service.UnconfirmedStateService;
 import io.nuls.ledger.utils.LoggerUtil;
 
 import java.util.ArrayList;
@@ -53,6 +53,8 @@ public class TransactionCmd extends BaseLedgerCmd {
 
     @Autowired
     private TransactionService transactionService;
+    @Autowired
+    private UnconfirmedStateService unconfirmedStateService;
 
     /**
      * 未确认交易提交
@@ -60,11 +62,18 @@ public class TransactionCmd extends BaseLedgerCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = CmdConstant.CMD_COMMIT_UNCONFIRMED_TX,
-            version = 1.0,
-            description = "")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "tx", parameterType = "String")
+
+    @CmdAnnotation(cmd = CmdConstant.CMD_COMMIT_UNCONFIRMED_TX, version = 1.0,
+            description = "未确认交易提交账本(校验并更新nonce值)")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "交易Hex值")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象",
+            responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+                    @Key(name = "orphan", valueType = Boolean.class, description = "true 孤儿交易，false 非孤儿交易")
+            })
+    )
     public Response commitUnconfirmedTx(Map params) {
         Integer chainId = (Integer) params.get("chainId");
         if (!chainHanlder(chainId)) {
@@ -85,14 +94,12 @@ public class TransactionCmd extends BaseLedgerCmd {
                 response = success(rtMap);
             } else {
                 response = failed(validateResult.toErrorCode());
+                LoggerUtil.logger(chainId).error("####commitUnconfirmedTx chainId={},txHash={},value={}=={}", chainId, tx.getHash().toHex(), validateResult.getValidateCode(), validateResult.getValidateDesc());
             }
-            if (!validateResult.isSuccess()) {
-                LoggerUtil.logger(chainId).debug("####commitUnconfirmedTx chainId={},txHash={},value={}=={}", chainId, tx.getHash().toString(), validateResult.getValidateCode(), validateResult.getValidateDesc());
-            }
+            LoggerUtil.logger(chainId).debug("####commitUnconfirmedTx chainId={},txHash={},value={}=={}", chainId, tx.getHash().toHex(), validateResult.getValidateCode(), validateResult.getValidateDesc());
         } catch (Exception e) {
-            e.printStackTrace();
-            LoggerUtil.logger(chainId).error("commitUnconfirmedTx exception ={}", e.getMessage());
-            return failed(e.getMessage());
+            LoggerUtil.logger(chainId).error("commitUnconfirmedTx exception ={}", e);
+            return failed(LedgerErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         return response;
     }
@@ -103,11 +110,18 @@ public class TransactionCmd extends BaseLedgerCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = CmdConstant.CMD_COMMIT_UNCONFIRMED_TXS,
-            version = 1.0,
-            description = "")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "txList", parameterType = "List")
+    @CmdAnnotation(cmd = CmdConstant.CMD_COMMIT_UNCONFIRMED_TXS, version = 1.0,
+            description = "未确认交易批量提交账本(校验并更新nonce值)")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "txList", parameterType = "List", parameterDes = "[]交易Hex值列表")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象",
+            responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+                    @Key(name = "orphan", valueType = List.class, valueElement = String.class, description = "孤儿交易Hash列表"),
+                    @Key(name = "fail", valueType = List.class, valueElement = String.class, description = "校验失败交易Hash列表")
+            })
+    )
     public Response commitBatchUnconfirmedTxs(Map params) {
         Integer chainId = (Integer) params.get("chainId");
         if (!chainHanlder(chainId)) {
@@ -118,30 +132,30 @@ public class TransactionCmd extends BaseLedgerCmd {
             List<Transaction> txList = new ArrayList<>();
             Response parseResponse = parseTxs(txStrList, txList, chainId);
             if (!parseResponse.isSuccess()) {
-                LoggerUtil.logger(chainId).debug("commitBlockTxs response={}", parseResponse);
+                LoggerUtil.logger(chainId).debug("commitBatchUnconfirmedTxs response={}", parseResponse);
                 return parseResponse;
             }
             List<String> orphanList = new ArrayList<>();
             List<String> failList = new ArrayList<>();
             for (Transaction tx : txList) {
+                String txHash = tx.getHash().toHex();
                 ValidateResult validateResult = transactionService.unConfirmTxProcess(chainId, tx);
                 if (validateResult.isSuccess()) {
                     //success
                 } else if (validateResult.isOrphan()) {
-                    orphanList.add(tx.getHash().toString());
+                    orphanList.add(txHash);
                 } else {
-                    failList.add(tx.getHash().toString());
+                    failList.add(txHash);
                 }
+                LoggerUtil.logger(chainId).debug("####batch-commitUnconfirmedTx chainId={},txHash={},value={}=={}", chainId, tx.getHash().toHex(), validateResult.getValidateCode(), validateResult.getValidateDesc());
             }
-
             Map<String, Object> rtMap = new HashMap<>(2);
             rtMap.put("fail", failList);
             rtMap.put("orphan", orphanList);
             return success(rtMap);
         } catch (Exception e) {
-            e.printStackTrace();
-            LoggerUtil.logger(chainId).error("commitBatchUnconfirmedTxs exception ={}", e.getMessage());
-            return failed(e.getMessage());
+            LoggerUtil.logger(chainId).error("commitBatchUnconfirmedTxs exception ={}", e);
+            return failed(LedgerErrorCode.SYS_UNKOWN_EXCEPTION);
         }
 
     }
@@ -152,12 +166,18 @@ public class TransactionCmd extends BaseLedgerCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = CmdConstant.CMD_COMMIT_BLOCK_TXS,
-            version = 1.0,
-            description = "")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "txList", parameterType = "List")
-    @Parameter(parameterName = "blockHeight", parameterType = "long")
+    @CmdAnnotation(cmd = CmdConstant.CMD_COMMIT_BLOCK_TXS, priority = CmdPriority.HIGH, version = 1.0,
+            description = "提交区块")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "txList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "交易Hex值列表"),
+            @Parameter(parameterName = "blockHeight", requestType = @TypeDescriptor(value = long.class), parameterDes = "区块高度")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象",
+            responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+                    @Key(name = "value", valueType = Boolean.class, description = "true 成功，false 失败")
+            })
+    )
     public Response commitBlockTxs(Map params) {
         Map<String, Object> rtData = new HashMap<>(1);
         Integer chainId = (Integer) params.get("chainId");
@@ -171,10 +191,12 @@ public class TransactionCmd extends BaseLedgerCmd {
             LoggerUtil.logger(chainId).error("txList is blank");
             return failed("txList is blank");
         }
-        LoggerUtil.logger(chainId).debug("commitBlockTxs txHexList={}", txStrList.size());
         boolean value = false;
+        long time1 = System.currentTimeMillis();
         List<Transaction> txList = new ArrayList<>();
         Response parseResponse = parseTxs(txStrList, txList, chainId);
+        long time2 = System.currentTimeMillis();
+        LoggerUtil.logger(chainId).debug("commitBlockTxs txHexList={} parseTxsTime={}", txStrList.size(), time2 - time1);
         if (!parseResponse.isSuccess()) {
             LoggerUtil.logger(chainId).debug("commitBlockTxs response={}", parseResponse);
             return parseResponse;
@@ -195,11 +217,17 @@ public class TransactionCmd extends BaseLedgerCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = CmdConstant.CMD_ROLLBACK_UNCONFIRMED_TX,
-            version = 1.0,
-            description = "")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "tx", parameterType = "String")
+    @CmdAnnotation(cmd = CmdConstant.CMD_ROLLBACK_UNCONFIRMED_TX, version = 1.0,
+            description = "回滚提交的未确认交易")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "tx", requestType = @TypeDescriptor(value = String.class), parameterDes = "交易Hex值")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象",
+            responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+                    @Key(name = "value", valueType = Boolean.class, description = "true 成功，false 失败")
+            })
+    )
     public Response rollBackUnconfirmTx(Map params) {
         Map<String, Object> rtData = new HashMap<>(1);
         boolean value = false;
@@ -214,12 +242,12 @@ public class TransactionCmd extends BaseLedgerCmd {
                 LoggerUtil.logger(chainId).debug("tx is invalid chainId={},txHex={}", chainId, txStr);
                 return failed("tx is invalid");
             }
-            LoggerUtil.txUnconfirmedRollBackLog(chainId).debug("rollBackUnconfirmTx chainId={},txHash={}", chainId, tx.getHash().toString());
+            LoggerUtil.logger(chainId).debug("rollBackUnconfirmTx chainId={},txHash={}", chainId, tx.getHash().toHex());
             if (transactionService.rollBackUnconfirmTx(chainId, tx)) {
                 value = true;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger(chainId).error(e);
         }
         rtData.put("value", value);
         Response response = success(rtData);
@@ -228,6 +256,36 @@ public class TransactionCmd extends BaseLedgerCmd {
 
     }
 
+    @CmdAnnotation(cmd = CmdConstant.CMD_CLEAR_UNCONFIRMED_TXS, version = 1.0,
+            description = "清除所有账户未确认交易")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象",
+            responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+                    @Key(name = "value", valueType = Boolean.class, description = "true 成功，false 失败")
+            })
+    )
+    public Response clearUnconfirmTxs(Map params) {
+        Map<String, Object> rtData = new HashMap<>(1);
+        boolean value = false;
+        Integer chainId = (Integer) params.get("chainId");
+        if (!chainHanlder(chainId)) {
+            return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
+        }
+        try {
+            LoggerUtil.logger(chainId).debug("clearUnconfirmTxs chainId={}", chainId);
+            unconfirmedStateService.clearAllAccountUnconfirmed(chainId);
+            value = true;
+        } catch (Exception e) {
+            LoggerUtil.logger(chainId).error(e);
+        }
+        rtData.put("value", value);
+        Response response = success(rtData);
+        LoggerUtil.logger(chainId).debug("response={}", response);
+        return response;
+
+    }
 
     /**
      * 回滚区块交易
@@ -235,12 +293,18 @@ public class TransactionCmd extends BaseLedgerCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = CmdConstant.CMD_ROLLBACK_BLOCK_TXS,
-            version = 1.0,
-            description = "")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "blockHeight", parameterType = "long")
-    @Parameter(parameterName = "txList", parameterType = "List")
+    @CmdAnnotation(cmd = CmdConstant.CMD_ROLLBACK_BLOCK_TXS, priority = CmdPriority.HIGH, version = 1.0,
+            description = "区块回滚")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "txList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "[]交易Hex值列表"),
+            @Parameter(parameterName = "blockHeight", parameterType = "long", parameterDes = "区块高度")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象",
+            responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+                    @Key(name = "value", valueType = Boolean.class, description = "true 成功，false 失败")
+            })
+    )
     public Response rollBackBlockTxs(Map params) {
         Map<String, Object> rtData = new HashMap<>(1);
         boolean value = false;
@@ -255,21 +319,16 @@ public class TransactionCmd extends BaseLedgerCmd {
                 LoggerUtil.logger(chainId).error("txList is blank");
                 return failed("txList is blank");
             }
-            LoggerUtil.logger(chainId).debug("rollBackBlockTxs txStrList={}", txStrList.size());
             List<Transaction> txList = new ArrayList<>();
             Response parseResponse = parseTxs(txStrList, txList, chainId);
             if (!parseResponse.isSuccess()) {
                 LoggerUtil.logger(chainId).debug("commitBlockTxs response={}", parseResponse);
                 return parseResponse;
             }
-
-            LoggerUtil.txRollBackLog(chainId).debug("rollBackBlockTxs chainId={},blockHeight={}", chainId, blockHeight);
-            if (transactionService.rollBackConfirmTxs(chainId, blockHeight, txList)) {
-                value = true;
-            }
+            LoggerUtil.logger(chainId).debug("rollBackBlockTxs chainId={},blockHeight={},txStrList={}", chainId, blockHeight, txStrList.size());
+            value = transactionService.rollBackConfirmTxs(chainId, blockHeight, txList);
         } catch (Exception e) {
             LoggerUtil.logger(chainId).error(e);
-            e.printStackTrace();
         }
         rtData.put("value", value);
         Response response = success(rtData);

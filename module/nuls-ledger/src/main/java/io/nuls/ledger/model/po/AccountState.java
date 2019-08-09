@@ -31,8 +31,10 @@ import io.nuls.base.data.BaseNulsData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.core.parse.SerializeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.ledger.constant.LedgerConstant;
-import io.nuls.ledger.utils.TimeUtil;
+import io.nuls.ledger.model.po.sub.FreezeHeightState;
+import io.nuls.ledger.model.po.sub.FreezeLockTimeState;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -40,30 +42,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 用户地址资产账号对应的账本信息
- *
+ * 1.用户地址资产账号对应的账本信息
+ * 2.该持久化对象是区块确认后的,最终信息：包含nonce值，余额，以及冻结信息。
+ * 3.key值:address-assetChainId-assetId
  * @author lanjinsheng
  */
 
 public class AccountState extends BaseNulsData {
 
-    private String address;
-
-    private int addressChainId;
-
-    private int assetChainId;
-
-    private int assetId;
-
-
     private byte[] nonce = LedgerConstant.getInitNonceByte();
-
-
-    private String txHash = "";
-
-    private long height = 0;
     /**
-     * 最近一次的账本数据处理时间,存储毫秒
+     * 最近一次的账本冻结数据的处理时间,存储秒
      */
     private long latestUnFreezeTime = 0;
     /**
@@ -93,11 +82,7 @@ public class AccountState extends BaseNulsData {
         super();
     }
 
-    public AccountState(String address, int addressChainId, int assetChainId, int assetId, byte[] pNonce) {
-        this.address = address;
-        this.addressChainId = addressChainId;
-        this.assetChainId = assetChainId;
-        this.assetId = assetId;
+    public AccountState(byte[] pNonce) {
         System.arraycopy(pNonce,0,this.nonce,0,LedgerConstant.NONCE_LENGHT);
     }
 
@@ -130,13 +115,7 @@ public class AccountState extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeString(address);
-        stream.writeUint16(addressChainId);
-        stream.writeUint16(assetChainId);
-        stream.writeUint16(assetId);
         stream.write(nonce);
-        stream.writeString(txHash);
-        stream.writeUint32(height);
         stream.writeUint32(latestUnFreezeTime);
         stream.writeBigInteger(totalFromAmount);
         stream.writeBigInteger(totalToAmount);
@@ -152,13 +131,7 @@ public class AccountState extends BaseNulsData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.address = byteBuffer.readString();
-        this.addressChainId = byteBuffer.readUint16();
-        this.assetChainId = byteBuffer.readUint16();
-        this.assetId = byteBuffer.readUint16();
         this.nonce = byteBuffer.readBytes(8);
-        this.txHash = byteBuffer.readString();
-        this.height = byteBuffer.readUint32();
         this.latestUnFreezeTime = byteBuffer.readUint32();
         this.totalFromAmount = byteBuffer.readBigInteger();
         this.totalToAmount = byteBuffer.readBigInteger();
@@ -189,16 +162,7 @@ public class AccountState extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        //address
-        size += SerializeUtils.sizeOfString(address);
-        //chainId
-        size += SerializeUtils.sizeOfInt16();
-        size += SerializeUtils.sizeOfInt16();
-        //assetId
-        size += SerializeUtils.sizeOfInt16();
         size += nonce.length;
-        size += SerializeUtils.sizeOfString(txHash);
-        size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfUint32();
         //totalFromAmount
         size += SerializeUtils.sizeOfBigInteger();
@@ -235,12 +199,6 @@ public class AccountState extends BaseNulsData {
 
     public AccountState deepClone() {
         AccountState orgAccountState = new AccountState();
-        orgAccountState.setHeight(this.getHeight());
-        orgAccountState.setTxHash(this.getTxHash());
-        orgAccountState.setAddress(this.getAddress());
-        orgAccountState.setAssetChainId(this.getAssetChainId());
-        orgAccountState.setAddressChainId(this.getAddressChainId());
-        orgAccountState.setAssetId(this.getAssetId());
         orgAccountState.setNonce(ByteUtils.copyOf(this.getNonce(), 8));
         orgAccountState.setLatestUnFreezeTime(this.getLatestUnFreezeTime());
         orgAccountState.setTotalFromAmount(this.getTotalFromAmount());
@@ -254,60 +212,12 @@ public class AccountState extends BaseNulsData {
         return orgAccountState;
     }
 
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public int getAddressChainId() {
-        return addressChainId;
-    }
-
-    public void setAddressChainId(int addressChainId) {
-        this.addressChainId = addressChainId;
-    }
-
-    public int getAssetChainId() {
-        return assetChainId;
-    }
-
-    public void setAssetChainId(int assetChainId) {
-        this.assetChainId = assetChainId;
-    }
-
-    public int getAssetId() {
-        return assetId;
-    }
-
-    public void setAssetId(int assetId) {
-        this.assetId = assetId;
-    }
-
     public byte[] getNonce() {
         return nonce;
     }
 
     public void setNonce(byte[] nonce) {
         this.nonce = nonce;
-    }
-
-    public String getTxHash() {
-        return txHash;
-    }
-
-    public void setTxHash(String txHash) {
-        this.txHash = txHash;
-    }
-
-    public long getHeight() {
-        return height;
-    }
-
-    public void setHeight(long height) {
-        this.height = height;
     }
 
     public long getLatestUnFreezeTime() {
@@ -351,7 +261,7 @@ public class AccountState extends BaseNulsData {
     }
 
     public boolean timeAllow() {
-        long now = TimeUtil.getCurrentTime();
+        long now = NulsDateUtils.getCurrentTimeSeconds();
         if ((now - latestUnFreezeTime) > LedgerConstant.TIME_RECALCULATE_FREEZE) {
             return true;
         }

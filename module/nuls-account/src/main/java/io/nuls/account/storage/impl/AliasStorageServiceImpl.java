@@ -28,16 +28,16 @@ package io.nuls.account.storage.impl;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.AccountStorageConstant;
 import io.nuls.account.model.bo.tx.txdata.Alias;
-import io.nuls.account.model.po.AliasPo;
+import io.nuls.account.model.po.AliasPO;
 import io.nuls.account.storage.AliasStorageService;
 import io.nuls.account.util.LoggerUtil;
 import io.nuls.base.basic.AddressTool;
-import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.basic.InitializingBean;
-import io.nuls.core.core.annotation.Service;
-import io.nuls.core.model.StringUtils;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.model.StringUtils;
+import io.nuls.core.rockdb.service.RocksDBService;
 
 /**
  * @author EdwardChan
@@ -46,7 +46,7 @@ import io.nuls.core.exception.NulsRuntimeException;
  * <p>
  * the operation about alias
  */
-@Service
+@Component
 public class AliasStorageServiceImpl implements AliasStorageService, InitializingBean {
 
     /**
@@ -61,7 +61,7 @@ public class AliasStorageServiceImpl implements AliasStorageService, Initializin
                 RocksDBService.createTable(AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS);
             } catch (Exception e) {
                 if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
-                    LoggerUtil.logger.tilUtil.error(e.getMessage());
+                    LoggerUtil.LOG.tilUtil.error(e.getMessage());
                     throw new NulsRuntimeException(AccountErrorCode.DB_TABLE_CREATE_ERROR);
                 }
             }
@@ -76,7 +76,7 @@ public class AliasStorageServiceImpl implements AliasStorageService, Initializin
      * @return AliasPo
      */
     @Override
-    public AliasPo getAlias(int chainId,String alias) {
+    public AliasPO getAlias(int chainId, String alias) {
         if (alias == null || "".equals(alias.trim())) {
             return null;
         }
@@ -84,34 +84,34 @@ public class AliasStorageServiceImpl implements AliasStorageService, Initializin
         if (null == aliasBytes) {
             return null;
         }
-        AliasPo aliasPo = new AliasPo();
+        AliasPO aliasPo = new AliasPO();
         try {
             //将byte数组反序列化为AliasPo返回
             aliasPo.parse(aliasBytes, 0);
         } catch (Exception e) {
-            LoggerUtil.logger.error("",e);
+            LoggerUtil.LOG.error("",e);
             throw new NulsRuntimeException(AccountErrorCode.DB_QUERY_ERROR);
         }
         return aliasPo;
     }
 
     @Override
-    public AliasPo getAliasByAddress(int chainId, String address) {
-        AliasPo aliasPo;
+    public AliasPO getAliasByAddress(int chainId, String address) {
+        AliasPO aliasPo;
         if (!AddressTool.validAddress(chainId, address)) {
-            LoggerUtil.logger.debug("the address is illegal,chainId:{},address:{}", chainId, address);
+            LoggerUtil.LOG.debug("the address is illegal,chainId:{},address:{}", chainId, address);
             throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
         }
         try {
-            byte[] aliasBytes = RocksDBService.get(AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS_KEY_ADRESS + chainId, AddressTool.getAddress(address));
+            byte[] aliasBytes = RocksDBService.get(AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS_KEY_ADDRESS + chainId, AddressTool.getAddress(address));
             if (null == aliasBytes) {
                 return null;
             }
-            aliasPo = new AliasPo();
+            aliasPo = new AliasPO();
             //将byte数组反序列化为AliasPo返回
             aliasPo.parse(aliasBytes, 0);
         } catch (Exception e) {
-            LoggerUtil.logger.error("",e);
+            LoggerUtil.LOG.error("",e);
             throw new NulsRuntimeException(AccountErrorCode.DB_QUERY_ERROR, e);
         }
         return aliasPo;
@@ -125,12 +125,12 @@ public class AliasStorageServiceImpl implements AliasStorageService, Initializin
      */
     @Override
     public boolean saveAlias(int chainId, Alias alias) {
-        AliasPo aliasPo = new AliasPo();
+        AliasPO aliasPo = new AliasPO();
         aliasPo.setAlias(alias.getAlias());
         aliasPo.setAddress(alias.getAddress());
         aliasPo.setChainId(chainId);
         String tableNameKeyIsAlias = AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS_KEY_ALIAS + chainId;
-        String tableNameKeyIsAddress = AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS_KEY_ADRESS + chainId;
+        String tableNameKeyIsAddress = AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS_KEY_ADDRESS + chainId;
         boolean result = false;
         try {
             //check if the table is exist
@@ -153,7 +153,7 @@ public class AliasStorageServiceImpl implements AliasStorageService, Initializin
             result = RocksDBService.put(tableNameKeyIsAddress, aliasPo.getAddress(), aliasPo.serialize());
             return result;
         } catch (Exception e) {
-            LoggerUtil.logger.error("", e);
+            LoggerUtil.LOG.error("", e);
             throw new NulsRuntimeException(AccountErrorCode.DB_SAVE_ERROR);
         }
     }
@@ -172,7 +172,7 @@ public class AliasStorageServiceImpl implements AliasStorageService, Initializin
         try {
             return RocksDBService.delete(AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS_KEY_ALIAS + chainId, StringUtils.bytes(alias));
         } catch (Exception e) {
-            LoggerUtil.logger.error("",e);
+            LoggerUtil.LOG.error("",e);
             throw new NulsRuntimeException(AccountErrorCode.DB_DELETE_ERROR,e);
         }
     }

@@ -24,6 +24,7 @@
 
 package io.nuls.account.util.validator;
 
+import io.nuls.account.config.NulsConfig;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Chain;
@@ -32,20 +33,21 @@ import io.nuls.account.service.TransactionService;
 import io.nuls.account.util.TxUtil;
 import io.nuls.account.util.manager.ChainManager;
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.basic.TransactionFeeCalculator;
-import io.nuls.base.data.*;
-import io.nuls.base.signture.MultiSignTxSignature;
-import io.nuls.base.signture.SignatureUtil;
-import io.nuls.core.constant.TxType;
+import io.nuls.base.data.CoinData;
+import io.nuls.base.data.CoinFrom;
+import io.nuls.base.data.CoinTo;
+import io.nuls.base.data.Transaction;
+import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.model.BigIntegerUtils;
 
-import java.io.IOException;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static io.nuls.account.util.TxUtil.getSuccess;
 
 /**
  * 交易验证工具类
@@ -64,42 +66,6 @@ public class TxValidator {
     private MultiSignAccountService multiSignAccountService;
 
     /**
-     * 验证交易
-     * Verifying transactions
-     *
-     * @param chainId 链ID/chain id
-     * @param tx      交易/transaction info
-     * @return boolean
-     */
-    public boolean validateTx(int chainId, Transaction tx) throws NulsException, IOException {
-        switch (tx.getType()) {
-            case (TxType.TRANSFER):
-                return transferTxValidate(chainId, tx);
-            default:
-                return false;
-        }
-    }
-
-    /**
-     * 转账交易验证
-     * transfer transaction validation
-     *
-     * @param chainId 链ID/chain id
-     * @param tx      转账交易/transfer transaction
-     * @return boolean
-     */
-    private boolean transferTxValidate(int chainId, Transaction tx) throws NulsException {
-        Chain chain = chainManager.getChainMap().get(chainId);
-        if (chain == null) {
-            throw new NulsException(AccountErrorCode.CHAIN_NOT_EXIST);
-        }
-        if (!txValidate(chain, tx)) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
      * 交易类型
      * from的地址必须是发起链的地址（from里面的资产是否存在）
      * to的地址必须是发起链的地址（to里面的资产是否存在）
@@ -112,62 +78,63 @@ public class TxValidator {
      * @param tx
      * @return Result
      */
-    private boolean txValidate(Chain chain, Transaction tx) throws NulsException {
-        //coinData基础验证以及手续费 (from中所有的当前链主资产-to中所有的当前链主资产)
+    public Result validate(Chain chain, Transaction tx) throws NulsException {
         CoinData coinData = TxUtil.getCoinData(tx);
-        if (!validateCoinFromBase(chain, coinData.getFrom())) {
-            return false;
+        Result result = validateCoinFromBase(chain, coinData.getFrom());
+        if (result.isFailed()) {
+            return result;
         }
-        if (!validateCoinToBase(chain, coinData.getTo())) {
-            return false;
+        result = validateCoinToBase(chain, coinData.getTo());
+        if (result.isFailed()) {
+            return result;
         }
-         /*交易模块基础校验已验证
-        if (!validateFee(chain, tx.size(), coinData)) {
-            return false;
+        result = validateCoinDataAsset(chain, coinData);
+        if (result.isFailed()) {
+            return result;
         }
-
-        if (!validateSign(chain, tx, coinData)) {
-            return false;
-        }*/
-        return true;
+        return result;
     }
 
     /**
-     * 交易签名验证
-     * Transaction signature verification
-     *
-     * @param chain
-     * @param tx    交易/transaction
-     * @return boolean
+     * 验证除了手续费以外的资产 from中的资产金额是否大于等于to中的资产金额要对应相等
+     * @return
      */
-    private boolean validateSign(Chain chain, Transaction tx, CoinData coinData) throws NulsException {
-        int chainId = chain.getConfig().getChainId();
-        // 确认验证签名正确性
-        if (!SignatureUtil.validateTransactionSignture(tx)) {
-            throw new NulsException(AccountErrorCode.SIGNATURE_ERROR);
-        }
-
-        // 判断from中地址和签名的地址是否匹配
+    public Result validateCoinDataAsset(Chain chain, CoinData coinData) throws NulsException{
+        //from中资产id-资产链id作为key，存一个资产的金额总和
+        Map<String, BigInteger> mapFrom = new HashMap<>(AccountConstant.INIT_CAPACITY_8);
         for (CoinFrom coinFrom : coinData.getFrom()) {
-            //多签交易
-            if (tx.isMultiSignTx()) {
-                MultiSignTxSignature txSignature = new MultiSignTxSignature();
-                txSignature.parse(tx.getTransactionSignature(), 0);
-                List<String> pubKeyList = new ArrayList<>();
-                for (byte[] pubKey : txSignature.getPubKeyList()) {
-                    pubKeyList.add(HexUtil.encode(pubKey));
+            if (!TxUtil.isChainAssetExist(chain, coinFrom)) {
+                String key = coinFrom.getAssetsChainId() + "-" + coinFrom.getAssetsId();
+                BigInteger amount = mapFrom.get(key);
+                if(null != amount) {
+                    amount = amount.add(coinFrom.getAmount());
+                }else{
+                    amount = coinFrom.getAmount();
                 }
-                //根据签名对象中的公钥列表、最小签名数生成多签账户
-                MultiSigAccount multiSigAccount = multiSignAccountService.createMultiSigAccount(chainId, pubKeyList, txSignature.getM());
-                //校验from地址是否与多重签名公钥列表生成的多签地址一致
-                if (!Arrays.equals(multiSigAccount.getAddress().getAddressBytes(), coinFrom.getAddress())) {
-                    throw new NulsException(AccountErrorCode.SIGN_ADDRESS_NOT_MATCH);
-                }
-            } else if (!SignatureUtil.containsAddress(tx, coinFrom.getAddress(), chainId)) {
-                throw new NulsException(AccountErrorCode.SIGN_ADDRESS_NOT_MATCH);
+                mapFrom.put(key, amount);
             }
         }
-        return true;
+        //to中资产id-资产链id作为key，存一个资产的金额总和
+        Map<String, BigInteger> mapTo = new HashMap<>(AccountConstant.INIT_CAPACITY_8);
+        for (CoinTo coinTO : coinData.getTo()) {
+            if (!TxUtil.isChainAssetExist(chain, coinTO)) {
+                String key = coinTO.getAssetsChainId() + "-" + coinTO.getAssetsId();
+                BigInteger amount = mapTo.get(key);
+                if(null != amount) {
+                    amount = amount.add(coinTO.getAmount());
+                }else{
+                    amount = coinTO.getAmount();
+                }
+                mapTo.put(key, amount);
+            }
+        }
+        //比较from和to相同资产的值是否相等
+        for(Map.Entry<String, BigInteger> entry : mapFrom.entrySet()){
+            if(entry.getValue().compareTo(mapTo.get(entry.getKey())) == -1){
+                return Result.getFailed(AccountErrorCode.COINFROM_UNDERPAYMENT);
+            }
+        }
+        return getSuccess();
     }
 
     /**
@@ -179,30 +146,23 @@ public class TxValidator {
      * @param listFrom
      * @return Result
      */
-    public boolean validateCoinFromBase(Chain chain, List<CoinFrom> listFrom) throws NulsException {
+    public Result validateCoinFromBase(Chain chain, List<CoinFrom> listFrom) throws NulsException {
         if (null == listFrom || listFrom.size() == 0) {
-            throw new NulsException(AccountErrorCode.TX_COINFROM_NOT_FOUND);
+            return Result.getFailed(AccountErrorCode.TX_COINFROM_NOT_FOUND);
         }
         int chainId = chain.getConfig().getChainId();
         for (CoinFrom coinFrom : listFrom) {
             int addrChainId = AddressTool.getChainIdByAddress(coinFrom.getAddress());
-            int assetsChainId = coinFrom.getAssetsChainId();
-            int assetsId = coinFrom.getAssetsId();
             //黑洞地址不能发起转账
-            if(Arrays.equals(AccountConstant.BLACK_HOLE_ADDRESS, coinFrom.getAddress())){
-                throw new NulsException(AccountErrorCode.ADDRESS_TRANSFER_BAN);
+            if(AddressTool.isBlackHoleAddress(NulsConfig.BLACK_HOLE_PUB_KEY,addrChainId,coinFrom.getAddress())){
+                return Result.getFailed(AccountErrorCode.ADDRESS_TRANSFER_BAN);
             }
-            // 发送方from中地址和资产对应的链id必须是发起链的id
-            if (chainId != addrChainId || chainId != assetsChainId) {
-                throw new NulsException(AccountErrorCode.CHAINID_ERROR);
-            }
-            // 链中是否存在该资产
-            // TODO: 2019/3/23 如果链本身支持多个资产, 那需要修改此验证
-            if (chain.getConfig().getAssetsId() != assetsId) {
-                throw new NulsException(AccountErrorCode.ASSETID_ERROR);
+            // 发送方from中地址对应的链id必须是发起链的id
+            if (chainId != addrChainId) {
+                return Result.getFailed(AccountErrorCode.CHAINID_ERROR);
             }
         }
-        return true;
+        return getSuccess();
     }
 
     /**
@@ -213,80 +173,19 @@ public class TxValidator {
      * @param listTo
      * @return Result
      */
-    public boolean validateCoinToBase(Chain chain, List<CoinTo> listTo) throws NulsException {
+    public Result validateCoinToBase(Chain chain, List<CoinTo> listTo) throws NulsException {
         if (null == listTo || listTo.size() == 0) {
-            throw new NulsException(AccountErrorCode.TX_COINTO_NOT_FOUND);
+            return Result.getFailed(AccountErrorCode.TX_COINTO_NOT_FOUND);
         }
-        Set<String> uniqueCoin = new HashSet<>();
         int chainId = chain.getConfig().getChainId();
         for (CoinTo coinTo : listTo) {
             int addrChainId = AddressTool.getChainIdByAddress(coinTo.getAddress());
-            int assetsChainId = coinTo.getAssetsChainId();
-            int assetsId = coinTo.getAssetsId();
-            // 接收方to中地址和资产对应的链id必须发起链id
-            if (chainId != addrChainId || chainId != assetsChainId) {
-                throw new NulsException(AccountErrorCode.CHAINID_ERROR);
-            }
-            // 链中是否存在该资产
-            if (chain.getConfig().getAssetsId() != assetsId) {
-                throw new NulsException(AccountErrorCode.ASSETID_ERROR);
-            }
-            //验证账户地址,资产链id,资产id的组合唯一性
-            boolean rs = uniqueCoin.add(AddressTool.getStringAddressByBytes(coinTo.getAddress()) + "-" + assetsChainId + "-" + assetsId);
-            if (!rs) {
-                throw new NulsException(AccountErrorCode.COINTO_DUPLICATE_COIN);
+            // 接收方to中地址对应的链id必须发起链id
+            if (chainId != addrChainId) {
+                return Result.getFailed(AccountErrorCode.CHAINID_ERROR);
             }
         }
-
-        return true;
-    }
-
-    /**
-     * 验证交易手续费是否正确
-     *
-     * @param chain    链id
-     * @param txSize   tx size
-     * @param coinData
-     * @return Result
-     */
-    private boolean validateFee(Chain chain, int txSize, CoinData coinData) throws NulsException {
-        BigInteger feeFrom = BigInteger.ZERO;
-        for (CoinFrom coinFrom : coinData.getFrom()) {
-            feeFrom = feeFrom.add(accrueFee(chain, coinFrom));
-        }
-        BigInteger feeTo = BigInteger.ZERO;
-        for (CoinTo coinTo : coinData.getTo()) {
-            feeTo = feeTo.add(accrueFee(chain, coinTo));
-        }
-        //交易中实际的手续费
-        BigInteger fee = feeFrom.subtract(feeTo);
-        if (BigIntegerUtils.isEqualOrLessThan(fee, BigInteger.ZERO)) {
-            ///修改Bug,为了对比暂时不移除，后续再移除 Result.getFailed(AccountErrorCode.INSUFFICIENT_FEE);
-            throw new NulsException(AccountErrorCode.INSUFFICIENT_FEE);
-        }
-        //根据交易大小重新计算手续费，用来验证实际手续费
-        BigInteger targetFee = TransactionFeeCalculator.getNormalTxFee(txSize);
-        if (BigIntegerUtils.isLessThan(fee, targetFee)) {
-            ///修改Bug,为了对比暂时不移除，后续再移除 Result.getFailed(AccountErrorCode.INSUFFICIENT_FEE);
-            throw new NulsException(AccountErrorCode.INSUFFICIENT_FEE);
-        }
-        return true;
-    }
-
-    /**
-     * 累积计算当前coinfrom中可用于计算手续费的资产
-     *
-     * @param chain chain id
-     * @param coin  coinfrom
-     * @return BigInteger
-     */
-    private BigInteger accrueFee(Chain chain, Coin coin) {
-        BigInteger fee = BigInteger.ZERO;
-        //所有链内交易，只算发起链的主资产
-        if (TxUtil.isChainAssetExist(chain, coin)) {
-            fee = fee.add(coin.getAmount());
-        }
-        return fee;
+        return getSuccess();
     }
 
 }

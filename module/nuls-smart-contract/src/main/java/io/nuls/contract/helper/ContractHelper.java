@@ -34,7 +34,7 @@ import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.manager.ContractTempBalanceManager;
 import io.nuls.contract.manager.ContractTokenBalanceManager;
 import io.nuls.contract.model.bo.*;
-import io.nuls.contract.model.dto.ContractInfoDto;
+import io.nuls.contract.model.dto.ContractConstructorInfoDto;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.contract.model.txdata.ContractData;
@@ -53,9 +53,8 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.StringUtils;
-import org.spongycastle.util.Arrays;
+import org.bouncycastle.util.Arrays;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
@@ -106,9 +105,9 @@ public class ContractHelper {
         return this.getMethodInfo(methodName, methodDesc, methods);
     }
 
-    public ContractInfoDto getConstructor(int chainId, byte[] contractCode) {
+    public ContractConstructorInfoDto getConstructor(int chainId, byte[] contractCode) {
         try {
-            ContractInfoDto dto = new ContractInfoDto();
+            ContractConstructorInfoDto dto = new ContractConstructorInfoDto();
             List<ProgramMethod> programMethods = this.getAllMethods(chainId, contractCode);
             if (programMethods == null || programMethods.size() == 0) {
                 return null;
@@ -191,7 +190,8 @@ public class ContractHelper {
             return false;
         }
         for (ProgramMethod method : methods) {
-            if (ContractConstant.BALANCE_TRIGGER_METHOD_NAME.equals(method.getName())) {
+            if (BALANCE_TRIGGER_METHOD_NAME.equals(method.getName())
+                && BALANCE_TRIGGER_METHOD_DESC.equals(method.getDesc())) {
                 return method.isPayable();
             }
         }
@@ -531,7 +531,7 @@ public class ContractHelper {
                     tokenTransferInfoPo.setDecimals(contractAddressInfo.getDecimals());
                     tokenTransferInfoPo.setTime(tx.getTime());
                     tokenTransferInfoPo.setBlockHeight(tx.getBlockHeight());
-                    txHashBytes = tx.getHash().serialize();
+                    txHashBytes = tx.getHash().getBytes();
                     tokenTransferInfoPo.setTxHash(txHashBytes);
                     tokenTransferInfoPo.setStatus((byte) (contractResult.isSuccess() ? 1 : 2));
 
@@ -547,17 +547,14 @@ public class ContractHelper {
             }
         } catch (Exception e) {
             Log.warn("contract event parse error.", e);
+            throw new RuntimeException(e);
         }
     }
 
     public void rollbackNrc20Events(int chainId, Transaction tx, ContractResult contractResult) {
         try {
             byte[] txHashBytes = null;
-            try {
-                txHashBytes = tx.getHash().serialize();
-            } catch (IOException e) {
-                Log.error(e);
-            }
+            txHashBytes = tx.getHash().getBytes();
 
             List<String> events = contractResult.getEvents();
             int size = events.size();
@@ -600,6 +597,7 @@ public class ContractHelper {
             }
         } catch (Exception e) {
             Log.warn("contract event parse error.", e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -623,6 +621,7 @@ public class ContractHelper {
         } catch (Exception e) {
             // skip it
             Log.error(e);
+            throw new RuntimeException(e);
         }
     }
 

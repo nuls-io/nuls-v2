@@ -28,7 +28,7 @@ package io.nuls.ledger.service;
 
 import io.nuls.base.data.Transaction;
 import io.nuls.ledger.model.ValidateResult;
-import io.nuls.ledger.model.po.AccountStateSnapshot;
+import io.nuls.ledger.model.po.sub.AccountStateSnapshot;
 
 import java.util.List;
 
@@ -95,7 +95,7 @@ public interface TransactionService {
      * @return
      * @throws Exception
      */
-    boolean hadCommit(int addressChainId, String accountNonceKey) throws Exception;
+    boolean fromNonceExist(int addressChainId, String accountNonceKey) throws Exception;
 
     /**
      *是否已存在hash

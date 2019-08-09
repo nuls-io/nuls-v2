@@ -27,12 +27,17 @@ package io.nuls.ledger.rpc.cmd;
 
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.Parameter;
+import io.nuls.core.rpc.model.*;
 import io.nuls.core.rpc.model.message.Response;
+import io.nuls.ledger.constant.CmdConstant;
+import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.service.ChainAssetsService;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -45,21 +50,35 @@ import java.util.Map;
 public class ChainAssetCmd extends BaseLedgerCmd {
     @Autowired
     ChainAssetsService chainAssetsService;
-    @CmdAnnotation(cmd = "getAssetsById",
-            version = 1.0,
-            description = "")
-    @Parameter(parameterName = "addressChainId", parameterType = "int")
-    @Parameter(parameterName = "assetChainId", parameterType = "int")
-    @Parameter(parameterName = "assetId", parameterType = "int")
+
+    @CmdAnnotation(cmd = CmdConstant.CMD_GET_ASSETS_BY_ID, version = 1.0,
+            description = "查询链下指定资产集合的金额信息")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "assetIds", requestType = @TypeDescriptor(value = String.class), parameterDes = "资产id,逗号分隔")
+    })
+    @ResponseData(name = "返回值", description = "返回一个List对象",
+            responseType = @TypeDescriptor(value = List.class, collectionElement = Map.class, mapKeys = {
+                    @Key(name = "assetId", valueType = Integer.class, description = "资产id"),
+                    @Key(name = "availableAmount", valueType = BigInteger.class, description = "可用金额"),
+                    @Key(name = "freeze", valueType = BigInteger.class, description = "冻结金额")
+            })
+    )
     public Response getAssetsById(Map params) {
-        Integer addressChainId = (Integer) params.get("addressChainId");
-        Integer assetChainId = (Integer) params.get("assetChainId");
-        Integer assetId = (Integer) params.get("assetId");
+        List<Map<String, Object>> rtAssetList = new ArrayList<>();
+        Integer addressChainId = (Integer) params.get("chainId");
+        Integer assetChainId = addressChainId;
         if (!chainHanlder(addressChainId)) {
             return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
         }
-        Map<String, Object> map = chainAssetsService.getAssetByChainAssetId(addressChainId, assetChainId, assetId);
-        return success(map);
+        String assetIds = params.get("assetIds").toString();
+        String[] assetIdList = assetIds.split(LedgerConstant.COMMA);
+        for (String assetIdStr : assetIdList) {
+            Map<String, Object> map = chainAssetsService.getAssetByChainAssetId(addressChainId, assetChainId, Integer.valueOf(assetIdStr));
+            rtAssetList.add(map);
+        }
+        Map<String, Object> rtMap = new HashMap<>();
+        rtMap.put("assets", rtAssetList);
+        return success(rtMap);
     }
-
 }

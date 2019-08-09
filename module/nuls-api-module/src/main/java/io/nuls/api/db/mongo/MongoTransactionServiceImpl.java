@@ -1,6 +1,8 @@
 package io.nuls.api.db.mongo;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.client.model.*;
+import io.nuls.api.ApiContext;
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.db.TransactionService;
@@ -8,12 +10,13 @@ import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.*;
 import io.nuls.api.model.po.db.mini.MiniTransactionInfo;
 import io.nuls.api.model.rpc.BalanceInfo;
+import io.nuls.api.utils.DBUtil;
 import io.nuls.api.utils.DocumentTransferTool;
 import io.nuls.core.basic.InitializingBean;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
@@ -34,6 +37,8 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
     private MongoBlockServiceImpl mongoBlockServiceImpl;
 
     Map<String, List<Document>> relationMap;
+    Map<String, List<String>> deleteRelationMap;
+//    Map<String, List<DeleteManyModel<Document>>> deleteRelationMap;
 
     @Override
     public void afterPropertiesSet() {
@@ -42,21 +47,48 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
             List<Document> documentList = new ArrayList<>();
             relationMap.put("relation_" + i, documentList);
         }
+
+        deleteRelationMap = new HashMap<>();
+        for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
+            List<String> modelList = new ArrayList<>();
+            deleteRelationMap.put("relation_" + i, modelList);
+        }
+
+//        deleteRelationMap = new HashMap<>();
+//        for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
+//            List<DeleteManyModel<Document>> modelList = new ArrayList<>();
+//            deleteRelationMap.put("relation_" + i, modelList);
+//        }
     }
 
+    //tx_table只存储最近100万条数据
     public void saveTxList(int chainId, List<TransactionInfo> txList) {
         if (txList.isEmpty()) {
             return;
         }
+
         List<Document> documentList = new ArrayList<>();
         for (TransactionInfo transactionInfo : txList) {
             documentList.add(transactionInfo.toDocument());
             deleteUnConfirmTx(chainId, transactionInfo.getHash());
         }
+
+        long totalCount = mongoDBService.getCount(TX_TABLE + chainId);
+        totalCount += documentList.size();
+        if (totalCount > 1000000) {
+            int deleteCount = (int) (totalCount - 1000000);
+            BasicDBObject fields = new BasicDBObject();
+            fields.append("_id", 1);
+            List<Document> docList = this.mongoDBService.pageQuery(TX_TABLE + chainId, null, fields, Sorts.ascending("createTime"), 1, deleteCount);
+            List<String> hashList = new ArrayList<>();
+            for (Document document : docList) {
+                hashList.add(document.getString("_id"));
+            }
+            mongoDBService.delete(TX_TABLE + chainId, Filters.in("_id", hashList));
+        }
         InsertManyOptions options = new InsertManyOptions();
         options.ordered(false);
         mongoDBService.insertMany(TX_TABLE + chainId, documentList, options);
-
     }
 
     public void saveCoinDataList(int chainId, List<CoinDataInfo> coinDataList) {
@@ -76,21 +108,22 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         if (relationInfos.isEmpty()) {
             return;
         }
-        clear();
+        relationMapClear();
 
         for (TxRelationInfo relationInfo : relationInfos) {
-            Document document = DocumentTransferTool.toDocument(relationInfo);
+            Document document = relationInfo.toDocument();
             int i = Math.abs(relationInfo.getAddress().hashCode()) % TX_RELATION_SHARDING_COUNT;
             List<Document> documentList = relationMap.get("relation_" + i);
             documentList.add(document);
         }
+
+        InsertManyOptions options = new InsertManyOptions();
+        options.ordered(false);
         for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
             List<Document> documentList = relationMap.get("relation_" + i);
             if (documentList.size() == 0) {
                 continue;
             }
-            InsertManyOptions options = new InsertManyOptions();
-            options.ordered(false);
             mongoDBService.insertMany(TX_RELATION_TABLE + chainId + "_" + i, documentList, options);
         }
     }
@@ -106,7 +139,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         List<Document> docList = this.mongoDBService.pageQuery(TX_TABLE + chainId, filter, Sorts.descending("createTime"), pageIndex, pageSize);
         List<MiniTransactionInfo> txList = new ArrayList<>();
         for (Document document : docList) {
-            txList.add(DocumentTransferTool.toInfo(document, "hash", MiniTransactionInfo.class));
+            txList.add(MiniTransactionInfo.toInfo(document));
         }
 
         PageInfo<MiniTransactionInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, totalCount, txList);
@@ -124,7 +157,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         return txHexInfoList;
     }
 
-    public PageInfo<TransactionInfo> getBlockTxList(int chainId, int pageIndex, int pageSize, long blockHeight, int type) {
+    public PageInfo<MiniTransactionInfo> getBlockTxList(int chainId, int pageIndex, int pageSize, long blockHeight, int type) {
         Bson filter = null;
         if (type == 0) {
             filter = eq("height", blockHeight);
@@ -136,12 +169,12 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
             return null;
         }
         long count = mongoDBService.getCount(TX_TABLE + chainId, filter);
-        List<TransactionInfo> txList = new ArrayList<>();
+        List<MiniTransactionInfo> txList = new ArrayList<>();
         List<Document> docList = this.mongoDBService.pageQuery(TX_TABLE + chainId, filter, Sorts.descending("createTime"), pageIndex, pageSize);
         for (Document document : docList) {
-            txList.add(TransactionInfo.fromDocument(document));
+            txList.add(MiniTransactionInfo.toInfo(document));
         }
-        PageInfo<TransactionInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, count, txList);
+        PageInfo<MiniTransactionInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, count, txList);
         return pageInfo;
     }
 
@@ -158,32 +191,97 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         return txInfo;
     }
 
-    public void rollbackTxRelationList(int chainId, List<String> txHashList) {
-        if (txHashList.isEmpty()) {
+//    public void rollbackTxRelationList(int chainId, Set<TxRelationInfo> relationInfos) {
+//        if (relationInfos.isEmpty()) {
+//            return;
+//        }
+//
+//        long time1, time2;
+//        time1 = System.currentTimeMillis();
+//        rollbackClear();
+//
+//        for (TxRelationInfo relationInfo : relationInfos) {
+//            DeleteManyModel model = new DeleteManyModel(Filters.eq("txHash", relationInfo.getTxHash()));
+//            int i = Math.abs(relationInfo.getAddress().hashCode()) % TX_RELATION_SHARDING_COUNT;
+//            List<DeleteManyModel<Document>> list = deleteRelationMap.get("relation_" + i);
+//            list.add(model);
+//        }
+//
+//        BulkWriteOptions options = new BulkWriteOptions();
+//        options.ordered(false);
+//        for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
+//            List<DeleteManyModel<Document>> list = deleteRelationMap.get("relation_" + i);
+//            if (list.size() == 0) {
+//                continue;
+//            }
+//            mongoDBService.bulkWrite(TX_RELATION_TABLE + chainId + "_" + i, list, options);
+//        }
+//
+//        time2 = System.currentTimeMillis();
+//        System.out.println("----------rollbackTxRelationList, count:" + relationInfos.size() + "-----------use:" + (time2 - time1));
+//    }
+
+
+    public void rollbackTxRelationList(int chainId, Set<TxRelationInfo> relationInfos) {
+        if (relationInfos.isEmpty()) {
             return;
         }
+        relationRollbackClear();
 
-        List<DeleteManyModel<Document>> list = new ArrayList<>();
-        for (String hash : txHashList) {
-            DeleteManyModel model = new DeleteManyModel(Filters.eq("txHash", hash));
-            list.add(model);
+        for (TxRelationInfo relationInfo : relationInfos) {
+            int i = Math.abs(relationInfo.getAddress().hashCode()) % TX_RELATION_SHARDING_COUNT;
+            List<String> list = deleteRelationMap.get("relation_" + i);
+            list.add(relationInfo.getTxHash());
         }
+
         for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
-            mongoDBService.bulkWrite(TX_RELATION_TABLE + chainId + "_" + i, list);
+            List<String> list = deleteRelationMap.get("relation_" + i);
+            if (list.size() == 0) {
+                continue;
+            }
+            mongoDBService.delete(TX_RELATION_TABLE + chainId + "_" + i, Filters.in("txHash", list));
         }
     }
 
+
+    /**
+     * 这种实现方式，效率低些
+     * @param chainId
+     * @param txHashList
+     */
+//    public void rollbackTx(int chainId, List<String> txHashList) {
+//        if (txHashList.isEmpty()) {
+//            return;
+//        }
+//        List<DeleteOneModel<Document>> list = new ArrayList<>();
+//        for (String hash : txHashList) {
+//            DeleteOneModel<Document> model = new DeleteOneModel(Filters.eq("_id", hash));
+//            list.add(model);
+//        }
+//        BulkWriteOptions options = new BulkWriteOptions();
+//        options.ordered(false);
+//
+//        long time1, time2;
+//        time1 = System.currentTimeMillis();
+//        mongoDBService.bulkWrite(COINDATA_TABLE + chainId, list, options);
+//        mongoDBService.bulkWrite(TX_TABLE + chainId, list, options);
+//        time2 = System.currentTimeMillis();
+//
+//        System.out.println("---------rollbackTx count:" + list.size() + ",----use:" + (time2 - time1));
+//    }
+
+    /**
+     * 这种实现方式，效率高些
+     *
+     * @param chainId
+     * @param txHashList
+     */
     public void rollbackTx(int chainId, List<String> txHashList) {
         if (txHashList.isEmpty()) {
             return;
         }
-        List<DeleteOneModel<Document>> list = new ArrayList<>();
-        for (String hash : txHashList) {
-            DeleteOneModel<Document> model = new DeleteOneModel(Filters.eq("_id", hash));
-            list.add(model);
-        }
-        mongoDBService.bulkWrite(COINDATA_TABLE + chainId, list);
-        mongoDBService.bulkWrite(TX_TABLE + chainId, list);
+        //   mongoDBService.delete(COINDATA_TABLE + chainId, Filters.in("_id", txHashList));
+        mongoDBService.delete(TX_TABLE + chainId, Filters.in("_id", txHashList));
     }
 
     @Override
@@ -217,14 +315,13 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
 
         List<Document> documentList = new ArrayList<>();
         for (TxRelationInfo relationInfo : txRelationInfoSet) {
-            Document document = DocumentTransferTool.toDocument(relationInfo);
-            documentList.add(document);
+            documentList.add(relationInfo.toDocument());
         }
         mongoDBService.insertMany(TX_UNCONFIRM_RELATION_TABLE + chainId, documentList);
         TxHexInfo hexInfo = new TxHexInfo();
         hexInfo.setTxHash(tx.getHash());
         hexInfo.setTxHex(txHex);
-        hexInfo.setTime(TimeUtils.getCurrentTimeMillis());
+        hexInfo.setTime(NulsDateUtils.getCurrentTimeMillis());
 
         Document document = DocumentTransferTool.toDocument(hexInfo, "txHash");
         mongoDBService.insertOne(TX_UNCONFIRM_TABLE + chainId, document);
@@ -232,9 +329,10 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
 
     @Override
     public void deleteUnConfirmTx(int chainId, String txHash) {
-        Bson filter = Filters.eq("txHash", txHash);
-        mongoDBService.delete(TX_UNCONFIRM_TABLE + chainId, filter);
-        mongoDBService.delete(TX_UNCONFIRM_RELATION_TABLE + chainId, filter);
+        Bson filter1 = Filters.eq("_id", txHash);
+        Bson filter2 = Filters.eq("txHash", txHash);
+        mongoDBService.delete(TX_UNCONFIRM_TABLE + chainId, filter1);
+        mongoDBService.delete(TX_UNCONFIRM_RELATION_TABLE + chainId, filter2);
     }
 
     private void processCoinBaseTx(int chainId, TransactionInfo tx, Set<TxRelationInfo> txRelationInfoSet) {
@@ -243,7 +341,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         }
         for (CoinToInfo output : tx.getCoinTos()) {
             BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
-            txRelationInfoSet.add(new TxRelationInfo(output.getAddress(), tx, output.getChainId(), output.getAssetsId(), output.getSymbol(), output.getAmount(), TRANSFER_TO_TYPE, balanceInfo.getTotalBalance()));
+            txRelationInfoSet.add(new TxRelationInfo(output, tx, balanceInfo.getTotalBalance()));
         }
     }
 
@@ -251,13 +349,13 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         if (tx.getCoinFroms() != null) {
             for (CoinFromInfo input : tx.getCoinFroms()) {
                 BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, input.getAddress(), input.getChainId(), input.getAssetsId());
-                txRelationInfoSet.add(new TxRelationInfo(input.getAddress(), tx, input.getChainId(), input.getAssetsId(), input.getSymbol(), input.getAmount(), TRANSFER_FROM_TYPE, balanceInfo.getTotalBalance()));
+                txRelationInfoSet.add(new TxRelationInfo(input, tx, balanceInfo.getTotalBalance()));
             }
         }
         if (tx.getCoinTos() != null) {
             for (CoinToInfo output : tx.getCoinTos()) {
                 BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
-                txRelationInfoSet.add(new TxRelationInfo(output.getAddress(), tx, output.getChainId(), output.getAssetsId(), output.getSymbol(), output.getAmount(), TRANSFER_TO_TYPE, balanceInfo.getTotalBalance()));
+                txRelationInfoSet.add(new TxRelationInfo(output, tx, balanceInfo.getTotalBalance()));
             }
         }
     }
@@ -266,13 +364,13 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         if (tx.getCoinFroms() != null) {
             for (CoinFromInfo input : tx.getCoinFroms()) {
                 BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, input.getAddress(), input.getChainId(), input.getAssetsId());
-                txRelationInfoSet.add(new TxRelationInfo(input.getAddress(), tx, input.getChainId(), input.getAssetsId(), input.getSymbol(), input.getAmount(), TRANSFER_FROM_TYPE, balanceInfo.getTotalBalance()));
+                txRelationInfoSet.add(new TxRelationInfo(input, tx, balanceInfo.getTotalBalance()));
             }
         }
         if (tx.getCoinTos() != null) {
             for (CoinToInfo output : tx.getCoinTos()) {
                 BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
-                txRelationInfoSet.add(new TxRelationInfo(output.getAddress(), tx, output.getChainId(), output.getAssetsId(), output.getSymbol(), output.getAmount(), TRANSFER_TO_TYPE, balanceInfo.getTotalBalance()));
+                txRelationInfoSet.add(new TxRelationInfo(output, tx, balanceInfo.getTotalBalance()));
             }
         }
     }
@@ -280,44 +378,46 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
     private void processCreateAgentTx(int chainId, TransactionInfo tx, Set<TxRelationInfo> txRelationInfoSet) {
         CoinFromInfo input = tx.getCoinFroms().get(0);
         BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, input.getAddress(), input.getChainId(), input.getAssetsId());
-        txRelationInfoSet.add(new TxRelationInfo(input.getAddress(), tx, input.getChainId(), input.getAssetsId(), input.getSymbol(), input.getAmount(), TRANSFER_NO_TYPE, balanceInfo.getTotalBalance()));
+        txRelationInfoSet.add(new TxRelationInfo(input, tx, tx.getFee().getValue(), balanceInfo.getTotalBalance()));
     }
 
     private void processDepositTx(int chainId, TransactionInfo tx, Set<TxRelationInfo> txRelationInfoSet) {
         CoinFromInfo input = tx.getCoinFroms().get(0);
         BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, input.getAddress(), input.getChainId(), input.getAssetsId());
-        txRelationInfoSet.add(new TxRelationInfo(input.getAddress(), tx, input.getChainId(), input.getAssetsId(), input.getSymbol(), input.getAmount(), TRANSFER_NO_TYPE, balanceInfo.getTotalBalance()));
+        txRelationInfoSet.add(new TxRelationInfo(input, tx, tx.getFee().getValue(), balanceInfo.getTotalBalance()));
     }
 
     private void processCancelDepositTx(int chainId, TransactionInfo tx, Set<TxRelationInfo> txRelationInfoSet) {
         CoinFromInfo input = tx.getCoinFroms().get(0);
         BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, input.getAddress(), input.getChainId(), input.getAssetsId());
-        txRelationInfoSet.add(new TxRelationInfo(input.getAddress(), tx, input.getChainId(), input.getAssetsId(), input.getSymbol(), input.getAmount(), TRANSFER_NO_TYPE, balanceInfo.getTotalBalance()));
+        txRelationInfoSet.add(new TxRelationInfo(input, tx, tx.getFee().getValue(), balanceInfo.getTotalBalance()));
     }
 
     private void processStopAgentTx(int chainId, TransactionInfo tx, Set<TxRelationInfo> txRelationInfoSet) {
-        Map<String, BigInteger> maps = new HashMap<>();
+        CoinToInfo agentOutput = null;
+        //处理代理节点地址相关数据
+        for (CoinToInfo output : tx.getCoinTos()) {
+            if (output.getLockTime() > 0) {
+                agentOutput = output;
+                break;
+            }
+        }
+        BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, agentOutput.getAddress(), agentOutput.getChainId(), agentOutput.getAssetsId());
+        txRelationInfoSet.add(new TxRelationInfo(agentOutput, tx, tx.getFee().getValue(), balanceInfo.getTotalBalance()));
+        //处理其他委托的地址相关数据
         for (int i = 0; i < tx.getCoinTos().size(); i++) {
             CoinToInfo output = tx.getCoinTos().get(i);
-            BigInteger values = maps.get(output.getAddress());
-            if (values == null) {
-                values = BigInteger.ZERO;
+            if (!output.getAddress().equals(agentOutput.getAddress())) {
+                balanceInfo = WalletRpcHandler.getAccountBalance(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
+                txRelationInfoSet.add(new TxRelationInfo(output, tx, BigInteger.ZERO, balanceInfo.getTotalBalance()));
             }
-            values = values.add(output.getAmount());
-            maps.put(output.getAddress(), values);
-        }
-        ApiCache apiCache = CacheManager.getCache(chainId);
-        AssetInfo defaultAsset = apiCache.getChainInfo().getDefaultAsset();
-        for (Map.Entry<String, BigInteger> entry : maps.entrySet()) {
-            BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, entry.getKey(), defaultAsset.getChainId(), defaultAsset.getAssetId());
-            txRelationInfoSet.add(new TxRelationInfo(entry.getKey(), tx, defaultAsset.getChainId(), defaultAsset.getAssetId(), defaultAsset.getSymbol(), entry.getValue(), TRANSFER_NO_TYPE, balanceInfo.getTotalBalance()));
         }
     }
 
     private void processCreateContract(int chainId, TransactionInfo tx, Set<TxRelationInfo> txRelationInfoSet) {
         CoinFromInfo input = tx.getCoinFroms().get(0);
         BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, input.getAddress(), input.getChainId(), input.getAssetsId());
-        txRelationInfoSet.add(new TxRelationInfo(input.getAddress(), tx, input.getChainId(), input.getAssetsId(), input.getSymbol(), BigInteger.ZERO, TRANSFER_NO_TYPE, balanceInfo.getTotalBalance()));
+        txRelationInfoSet.add(new TxRelationInfo(input, tx, tx.getFee().getValue(), balanceInfo.getTotalBalance()));
     }
 
     private void processCallContract(int chainId, TransactionInfo tx, Set<TxRelationInfo> txRelationInfoSet) {
@@ -327,13 +427,21 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
     private void processDeleteContract(int chainId, TransactionInfo tx, Set<TxRelationInfo> txRelationInfoSet) {
         CoinFromInfo input = tx.getCoinFroms().get(0);
         BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, input.getAddress(), input.getChainId(), input.getAssetsId());
-        txRelationInfoSet.add(new TxRelationInfo(input.getAddress(), tx, input.getChainId(), input.getAssetsId(), input.getSymbol(), BigInteger.ZERO, TRANSFER_NO_TYPE, balanceInfo.getTotalBalance()));
+        txRelationInfoSet.add(new TxRelationInfo(input, tx, tx.getFee().getValue(), balanceInfo.getTotalBalance()));
     }
 
-    private void clear() {
+    private void relationMapClear() {
         for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
             List list = relationMap.get("relation_" + i);
             list.clear();
         }
     }
+
+    private void relationRollbackClear() {
+        for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
+            List list = deleteRelationMap.get("relation_" + i);
+            list.clear();
+        }
+    }
+
 }

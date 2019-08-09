@@ -1,5 +1,9 @@
 package io.nuls.block;
 
+import io.nuls.base.basic.AddressTool;
+import io.nuls.base.protocol.ModuleHelper;
+import io.nuls.base.protocol.ProtocolGroupManager;
+import io.nuls.base.protocol.RegisterHelper;
 import io.nuls.block.constant.StatusEnum;
 import io.nuls.block.manager.ChainManager;
 import io.nuls.block.manager.ContextManager;
@@ -16,10 +20,8 @@ import io.nuls.core.rpc.modulebootstrap.Module;
 import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
-import io.nuls.core.rpc.protocol.ProtocolGroupManager;
-import io.nuls.core.rpc.util.ModuleHelper;
-import io.nuls.core.rpc.util.RegisterHelper;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.AddressPrefixDatas;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.core.thread.ThreadUtils;
 import io.nuls.core.thread.commom.NulsThreadFactory;
 
@@ -41,6 +43,8 @@ public class BlockBootstrap extends RpcModule {
 
     @Autowired
     public static BlockConfig blockConfig;
+    @Autowired
+    private AddressPrefixDatas addressPrefixDatas;
 
     @Autowired
     private ChainManager chainManager;
@@ -56,7 +60,13 @@ public class BlockBootstrap extends RpcModule {
 
     @Override
     public Module[] declareDependent() {
-        return new Module[0];
+        return new Module[]{
+                Module.build(ModuleE.TX),
+                Module.build(ModuleE.AC),
+                Module.build(ModuleE.LG),
+                Module.build(ModuleE.CS),
+                Module.build(ModuleE.NW)
+        };
     }
 
     /**
@@ -76,7 +86,11 @@ public class BlockBootstrap extends RpcModule {
     public void init() {
         try {
             super.init();
-            initDB();
+            /**
+             * 地址工具初始化
+             */
+            AddressTool.init(addressPrefixDatas);
+            initDb();
             chainManager.initChain();
             ModuleHelper.init(this);
         } catch (Exception e) {
@@ -89,7 +103,7 @@ public class BlockBootstrap extends RpcModule {
      * 初始化数据库
      * Initialization database
      */
-    private void initDB() throws Exception {
+    private void initDb() throws Exception {
         //读取配置文件,数据存储根目录,初始化打开该目录下所有表连接并放入缓存
         RocksDBService.init(blockConfig.getDataFolder());
         RocksDBService.createTable(CHAIN_LATEST_HEIGHT);
@@ -124,15 +138,16 @@ public class BlockBootstrap extends RpcModule {
     @Override
     public RpcModuleState onDependenciesReady() {
         Log.info("block onDependenciesReady");
-        TimeUtils.getInstance().start();
+        NulsDateUtils.getInstance().start();
         if (started) {
-            List<Integer> chainIds = ContextManager.chainIds;
+            List<Integer> chainIds = ContextManager.CHAIN_ID_LIST;
             for (Integer chainId : chainIds) {
-                ContextManager.getContext(chainId).setStatus(StatusEnum.RUNNING);
+                BlockSynchronizer.syn(chainId);
+//                ContextManager.getContext(chainId).setStatus(StatusEnum.RUNNING);
             }
         } else {
             //开启区块同步线程
-            List<Integer> chainIds = ContextManager.chainIds;
+            List<Integer> chainIds = ContextManager.CHAIN_ID_LIST;
             for (Integer chainId : chainIds) {
                 BlockSynchronizer.syn(chainId);
             }
@@ -169,7 +184,7 @@ public class BlockBootstrap extends RpcModule {
      */
     @Override
     public RpcModuleState onDependenciesLoss(Module module) {
-        List<Integer> chainIds = ContextManager.chainIds;
+        List<Integer> chainIds = ContextManager.CHAIN_ID_LIST;
         for (Integer chainId : chainIds) {
             ContextManager.getContext(chainId).setStatus(StatusEnum.INITIALIZING);
         }
@@ -182,7 +197,7 @@ public class BlockBootstrap extends RpcModule {
             RegisterHelper.registerMsg(ProtocolGroupManager.getOneProtocol());
         }
         if (ModuleE.PU.abbr.equals(module.getName())) {
-            ContextManager.chainIds.forEach(RegisterHelper::registerProtocol);
+            ContextManager.CHAIN_ID_LIST.forEach(RegisterHelper::registerProtocol);
         }
     }
 }

@@ -65,7 +65,7 @@ public @interface CmdAnnotation {
      *
      * @return String
      */
-    String scope() default Constants.PRIVATE;
+    String scope() default Constants.PUBLIC;
 
     /**
      * 返回结果的改变次数
@@ -82,6 +82,12 @@ public @interface CmdAnnotation {
      * @return int
      */
     int minPeriod() default 0;
+
+    /**
+     * 接口优先级
+     * interface priority
+     * */
+    CmdPriority priority() default CmdPriority.DEFAULT;
 
     /**
      * 方法描述信息

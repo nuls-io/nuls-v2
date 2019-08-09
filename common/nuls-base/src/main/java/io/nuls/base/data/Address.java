@@ -26,12 +26,10 @@
 package io.nuls.base.data;
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.core.constant.BaseConstant;
-import io.nuls.core.crypto.Base58;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.ByteUtils;
-import io.nuls.core.parse.SerializeUtils;
+import io.nuls.core.model.StringUtils;
 
 /**
  * @author: Chralie
@@ -56,6 +54,11 @@ public class Address {
     private int chainId;
 
     /**
+     * 字符串格式表示的地址
+     */
+    private String addressStr;
+
+    /**
      * address type
      */
     private byte addressType;
@@ -70,7 +73,6 @@ public class Address {
     public Address(String address) {
         try {
             byte[] bytes = AddressTool.getAddress(address);
-
             Address addressTmp = Address.fromHashs(bytes);
             this.chainId = addressTmp.getChainId();
             this.addressType = addressTmp.getAddressType();
@@ -87,14 +89,7 @@ public class Address {
         this.addressType = addressType;
         this.hash160 = hash160;
         this.addressBytes = calcAddressbytes();
-        if (chainId == BaseConstant.MAINNET_CHAIN_ID) {
-            this.prefix = AddressTool.MAINNET_PREFIX;
-        } else if (chainId == BaseConstant.TESTNET_CHAIN_ID) {
-            this.prefix = AddressTool.TESTNET_PREFIX;
-        } else {
-            this.prefix = Base58.encode(SerializeUtils.int16ToBytes(chainId)).toUpperCase();
-        }
-
+        this.prefix = AddressTool.getPrefix(chainId);
     }
 
     public Address(int chainId, String prefix, byte addressType, byte[] hash160) {
@@ -132,11 +127,10 @@ public class Address {
         byte[] content = new byte[RIPEMD160_LENGTH];
         System.arraycopy(hashs, 3, content, 0, RIPEMD160_LENGTH);
 
-        Address address = new Address(chainId, addressType, content);
-        return address;
+        return new Address(chainId, addressType, content);
     }
 
-    public byte[] calcAddressbytes() {
+    private byte[] calcAddressbytes() {
         byte[] body = new byte[ADDRESS_LENGTH];
         System.arraycopy(ByteUtils.shortToBytes((short) chainId), 0, body, 0, 2);
         body[2] = this.addressType;
@@ -176,12 +170,20 @@ public class Address {
         return ADDRESS_LENGTH;
     }
 
+    /**
+     * 默认返回base58编码的地址
+     *
+     * @return
+     */
     @Override
     public String toString() {
-        return AddressTool.getStringAddressByBytes(this.addressBytes);
+        return getBase58();
     }
 
     public String getBase58() {
-        return AddressTool.getStringAddressByBytes(this.addressBytes);
+        if (StringUtils.isBlank(addressStr)) {
+            addressStr = AddressTool.getStringAddressByBytes(this.addressBytes);
+        }
+        return addressStr;
     }
 }

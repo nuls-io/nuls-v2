@@ -30,14 +30,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.script.Script;
-import io.nuls.base.signture.SignatureUtil;
-import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.ByteArrayWrapper;
 import io.nuls.core.parse.SerializeUtils;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.*;
 
 /**
@@ -142,10 +140,6 @@ public class CoinData extends BaseNulsData {
         if (null == to) {
             to = new ArrayList<>();
         }
-        if (coinTo.getAddress().length == 23 && coinTo.getAddress()[0] == BaseConstant.P2SH_ADDRESS_TYPE) {
-            Script scriptPubkey = SignatureUtil.createOutputScript(coinTo.getAddress());
-            coinTo.setAddress(scriptPubkey.getProgram());
-        }
         to.add(coinTo);
     }
 
@@ -187,11 +181,43 @@ public class CoinData extends BaseNulsData {
         return addressSet;
     }
 
+    public Set<String> getFromAddressList(){
+        Set<String> fromAddressList = new HashSet<>();
+        if(from != null && !from.isEmpty()){
+            for (CoinFrom coinFrom:from) {
+                fromAddressList.add(AddressTool.getStringAddressByBytes(coinFrom.getAddress()));
+            }
+        }
+        return fromAddressList;
+    }
+
     public int getFromAddressCount(){
         Set<String> addressSet = new HashSet<>();
         for (CoinFrom coinFrom:from) {
             addressSet.add(AddressTool.getStringAddressByBytes(coinFrom.getAddress()));
         }
         return addressSet.size();
+    }
+
+    /**
+     * 计算指定资产手续费
+     * @param assetChainId     指定资产链ID
+     * @param assetId          指定资产ID
+     * @return                 手续费大小
+     * */
+    public BigInteger getFeeByAsset(int assetChainId, int assetId){
+        BigInteger fromAmount = BigInteger.ZERO;
+        BigInteger toAmount = BigInteger.ZERO;
+        for (CoinFrom coinFrom : from) {
+            if (coinFrom.getAssetsChainId() == assetChainId && coinFrom.getAssetsId() == assetId) {
+                fromAmount = fromAmount.add(coinFrom.getAmount());
+            }
+        }
+        for (CoinTo coinTo : to) {
+            if (coinTo.getAssetsChainId() == assetChainId && coinTo.getAssetsId() == assetId) {
+                toAmount = toAmount.add(coinTo.getAmount());
+            }
+        }
+        return fromAmount.subtract(toAmount);
     }
 }

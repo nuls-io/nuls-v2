@@ -25,14 +25,15 @@
 package io.nuls.contract.tx.nrc20;
 
 
-import io.nuls.contract.basetest.ContractTest;
+import io.nuls.contract.mock.basetest.ContractTest;
 import io.nuls.contract.tx.base.BaseQuery;
 import io.nuls.contract.util.Log;
+import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.crypto.HexUtil;
-import io.nuls.core.parse.JSONUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -51,38 +52,6 @@ import static io.nuls.contract.constant.ContractCmdConstant.*;
  * @date: 2019-03-15
  */
 public class ContractNRC20TokenQueryTest extends BaseQuery {
-
-
-    /**
-     * 预创建合约
-     */
-    @Test
-    public void preCreateContract() throws Exception {
-        InputStream in = new FileInputStream(ContractTest.class.getResource("/nrc20").getFile());
-        byte[] contractCode = IOUtils.toByteArray(in);
-        String remark = "create contract test - 空气币";
-        String name = "KQB";
-        String symbol = "KongQiBi";
-        String amount = BigDecimal.TEN.pow(10).toPlainString();
-        String decimals = "2";
-        Map params = this.makePreCreateParams(sender, contractCode, remark, name, symbol, amount, decimals);
-        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, PRE_CREATE, params);
-        Log.info("pre_create-Response:{}", JSONUtils.obj2PrettyJson(cmdResp2));
-        Assert.assertTrue(cmdResp2.isSuccess());
-    }
-
-    private Map makePreCreateParams(String sender, byte[] contractCode, String remark, Object... args) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
-        params.put("sender", sender);
-        params.put("password", password);
-        params.put("gasLimit", 200000L);
-        params.put("price", 25);
-        params.put("contractCode", HexUtil.encode(contractCode));
-        params.put("args", args);
-        params.put("remark", remark);
-        return params;
-    }
 
 
     /**
@@ -105,7 +74,7 @@ public class ContractNRC20TokenQueryTest extends BaseQuery {
 
     private Map makeImputedCreateGasParams(String sender, byte[] contractCode, Object... args) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("sender", sender);
         params.put("contractCode", HexUtil.encode(contractCode));
         params.put("args", args);
@@ -131,7 +100,7 @@ public class ContractNRC20TokenQueryTest extends BaseQuery {
 
     private Map makeValidateCreateParams(String sender, byte[] contractCode, Object... args) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("sender", sender);
         params.put("gasLimit", 200000L);
         params.put("price", 25);
@@ -158,7 +127,7 @@ public class ContractNRC20TokenQueryTest extends BaseQuery {
 
     private Map makeValidateCallParams(String sender, BigInteger value, String contractAddress0, String methodName, String methodDesc, Object... args) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("sender", sender);
         params.put("value", value);
         params.put("gasLimit", 200000L);
@@ -188,7 +157,7 @@ public class ContractNRC20TokenQueryTest extends BaseQuery {
 
     private Map makeImputedCallGasParams(String sender, BigInteger value, String contractAddress0, String methodName, String methodDesc, Object... args) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("sender", sender);
         params.put("value", value);
         params.put("contractAddress", contractAddress0);
@@ -215,7 +184,7 @@ public class ContractNRC20TokenQueryTest extends BaseQuery {
 
     private Map makeTransferFeeParams(String address, String toAddress, BigInteger amount, String remark) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", address);
         params.put("toAddress", toAddress);
         params.put("amount", amount);
@@ -238,7 +207,7 @@ public class ContractNRC20TokenQueryTest extends BaseQuery {
 
     private Map makeTokenBalanceParams(String contractAddress0, String address) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("contractAddress", contractAddress0);
         params.put("address", address);
         return params;
@@ -258,7 +227,7 @@ public class ContractNRC20TokenQueryTest extends BaseQuery {
 
     private Map makeTokenAssetsListParams(String address, int pageNumber, int pageSize) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", address);
         params.put("pageNumber", pageNumber);
         params.put("pageSize", pageSize);
@@ -279,7 +248,7 @@ public class ContractNRC20TokenQueryTest extends BaseQuery {
 
     private Map makeTokenTransferListParams(String address, int pageNumber, int pageSize) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", address);
         params.put("pageNumber", pageNumber);
         params.put("pageSize", pageSize);
@@ -303,7 +272,7 @@ public class ContractNRC20TokenQueryTest extends BaseQuery {
 
     private Map makeInvokeViewParams(String contractAddress0, String methodName, String methodDesc, Object... args) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("contractAddress", contractAddress0);
         params.put("methodName", methodName);
         params.put("methodDesc", methodDesc);
@@ -327,7 +296,7 @@ public class ContractNRC20TokenQueryTest extends BaseQuery {
 
     private Map makeConstructorParams(byte[] contractCode) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("contractCode", HexUtil.encode(contractCode));
         return params;
     }
@@ -345,7 +314,7 @@ public class ContractNRC20TokenQueryTest extends BaseQuery {
 
     private Map makeValidateDeleteParams(String sender, String contractAddress0) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("sender", sender);
         params.put("contractAddress", contractAddress0);
         return params;
@@ -361,7 +330,7 @@ public class ContractNRC20TokenQueryTest extends BaseQuery {
 
     private void getTxCfmClient(String hash) throws Exception {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("txHash", hash);
         Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getConfirmedTxClient", params);
         Map record = (Map) dpResp.getResponseData();

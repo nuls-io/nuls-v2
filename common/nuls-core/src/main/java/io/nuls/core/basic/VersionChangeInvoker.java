@@ -2,6 +2,6 @@ package io.nuls.core.basic;
 
 public interface VersionChangeInvoker {
 
-    void process();
+    void process(int chainId);
 
 }

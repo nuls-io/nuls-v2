@@ -67,7 +67,7 @@ public class TransactionTest {
     public void serialization() throws Exception{
         Transaction tx = new Transaction();
         tx.setType(10);
-        tx.setTime(System.currentTimeMillis());
+        tx.setTime(System.currentTimeMillis()/1000);
         tx.setBlockHeight(100);
         String remark = "试一试";
         tx.setRemark(StringUtils.bytes(remark));

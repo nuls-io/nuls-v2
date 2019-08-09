@@ -54,7 +54,7 @@ public class I18nUtils {
      * 系统当前已选择语言包
      * The system currently selects the language package.
      */
-    private static Properties nowMapping = new Properties();
+    private static Properties nowMapping = null;
 
     /**
      * 默认语言设置为英文
@@ -103,7 +103,11 @@ public class I18nUtils {
             if (StringUtils.isNotBlank(defaultLanguage)) {
                 key = defaultLanguage;
             }
-            URL furl = Resources.getResource(folder);
+            URL furl = I18nUtils.class.getClassLoader().getResource(folder);
+            if (furl == null){
+                Log.warn("language folder not exists");
+                return ;
+            }
             if (null != furl) {
                 File folderFile = new File(furl.getPath());
                 Log.info("furl.getPath()=" + furl.getPath());

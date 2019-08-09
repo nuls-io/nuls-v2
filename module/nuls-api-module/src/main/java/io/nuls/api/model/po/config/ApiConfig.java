@@ -32,7 +32,17 @@ public class ApiConfig implements ModuleConfig {
 
     private int assetId;
 
+    private int mainChainId;
+
+    private int mainAssetId;
+
+    private String mainSymbol;
+
+    private String chainName;
+
     private String symbol;
+
+    private int decimals;
 
     private String listenerIp;
 
@@ -45,6 +55,20 @@ public class ApiConfig implements ModuleConfig {
     private int maxWaitTime;
 
     private int connectTimeOut;
+
+    private String developerNodeAddress;
+
+    private String ambassadorNodeAddress;
+
+    private String mappingAddress;
+
+    private String businessAddress;
+
+    private String teamAddress;
+
+    private String communityAddress;
+
+    private String blackHolePublicKey;
 
     public String getEncoding() {
         return encoding;
@@ -148,5 +172,101 @@ public class ApiConfig implements ModuleConfig {
 
     public void setSymbol(String symbol) {
         this.symbol = symbol;
+    }
+
+    public String getChainName() {
+        return chainName;
+    }
+
+    public void setChainName(String chainName) {
+        this.chainName = chainName;
+    }
+
+    public int getDecimals() {
+        return decimals;
+    }
+
+    public void setDecimals(int decimals) {
+        this.decimals = decimals;
+    }
+
+    public int getMainChainId() {
+        return mainChainId;
+    }
+
+    public void setMainChainId(int mainChainId) {
+        this.mainChainId = mainChainId;
+    }
+
+    public int getMainAssetId() {
+        return mainAssetId;
+    }
+
+    public void setMainAssetId(int mainAssetId) {
+        this.mainAssetId = mainAssetId;
+    }
+
+    public String getMainSymbol() {
+        return mainSymbol;
+    }
+
+    public void setMainSymbol(String mainSymbol) {
+        this.mainSymbol = mainSymbol;
+    }
+
+    public String getDeveloperNodeAddress() {
+        return developerNodeAddress;
+    }
+
+    public void setDeveloperNodeAddress(String developerNodeAddress) {
+        this.developerNodeAddress = developerNodeAddress;
+    }
+
+    public String getAmbassadorNodeAddress() {
+        return ambassadorNodeAddress;
+    }
+
+    public void setAmbassadorNodeAddress(String ambassadorNodeAddress) {
+        this.ambassadorNodeAddress = ambassadorNodeAddress;
+    }
+
+    public String getMappingAddress() {
+        return mappingAddress;
+    }
+
+    public void setMappingAddress(String mappingAddress) {
+        this.mappingAddress = mappingAddress;
+    }
+
+    public String getBusinessAddress() {
+        return businessAddress;
+    }
+
+    public void setBusinessAddress(String businessAddress) {
+        this.businessAddress = businessAddress;
+    }
+
+    public String getTeamAddress() {
+        return teamAddress;
+    }
+
+    public void setTeamAddress(String teamAddress) {
+        this.teamAddress = teamAddress;
+    }
+
+    public String getCommunityAddress() {
+        return communityAddress;
+    }
+
+    public void setCommunityAddress(String communityAddress) {
+        this.communityAddress = communityAddress;
+    }
+
+    public String getBlackHolePublicKey() {
+        return blackHolePublicKey;
+    }
+
+    public void setBlackHolePublicKey(String blackHolePublicKey) {
+        this.blackHolePublicKey = blackHolePublicKey;
     }
 }

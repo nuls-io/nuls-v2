@@ -24,6 +24,12 @@
 
 package io.nuls.transaction;
 
+import io.nuls.base.basic.AddressTool;
+import io.nuls.base.protocol.ModuleHelper;
+import io.nuls.base.protocol.ProtocolGroupManager;
+import io.nuls.base.protocol.RegisterHelper;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.model.ModuleE;
@@ -31,16 +37,13 @@ import io.nuls.core.rpc.modulebootstrap.Module;
 import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
-import io.nuls.core.rpc.protocol.ProtocolGroupManager;
-import io.nuls.core.rpc.util.ModuleHelper;
-import io.nuls.core.rpc.util.RegisterHelper;
-import io.nuls.core.rpc.util.TimeUtils;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
+import io.nuls.core.rpc.util.AddressPrefixDatas;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.manager.ChainManager;
+import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.utils.DBUtil;
 
 import java.util.Set;
@@ -57,7 +60,8 @@ public class TransactionBootstrap extends RpcModule {
 
     @Autowired
     private TxConfig txConfig;
-
+    @Autowired
+    private AddressPrefixDatas addressPrefixDatas;
     @Autowired
     private ChainManager chainManager;
 
@@ -71,6 +75,8 @@ public class TransactionBootstrap extends RpcModule {
     @Override
     public void init() {
         try {
+            //初始化地址工具
+            AddressTool.init(addressPrefixDatas);
             //初始化系统参数
             initSys();
             //初始化数据库配置文件
@@ -114,18 +120,33 @@ public class TransactionBootstrap extends RpcModule {
     @Override
     public RpcModuleState onDependenciesReady() {
         LOG.info("Transaction onDependenciesReady");
-        TimeUtils.getInstance().start();
+        NulsDateUtils.getInstance().start();
         return RpcModuleState.Running;
     }
 
     @Override
-    public RpcModuleState onDependenciesLoss(Module dependenciesModule) {
+    public RpcModuleState onDependenciesLoss(Module module) {
+        if (ModuleE.BL.abbr.equals(module.getName())) {
+            for(Chain chain : chainManager.getChainMap().values()) {
+                chain.getProcessTxStatus().set(false);
+            }
+        }
+        if (ModuleE.CS.abbr.equals(module.getName())) {
+            for(Chain chain : chainManager.getChainMap().values()) {
+                chain.getPackaging().set(false);
+            }
+        }
         return RpcModuleState.Ready;
     }
 
     @Override
     public Module[] declareDependent() {
-        return new Module[0];
+        return new Module[]{
+                Module.build(ModuleE.NW),
+                Module.build(ModuleE.LG),
+                Module.build(ModuleE.BL),
+                Module.build(ModuleE.AC)
+        };
     }
 
     @Override

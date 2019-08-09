@@ -31,6 +31,8 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.core.log.Log;
+import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.manager.MessageManager;
 import io.nuls.network.manager.handler.base.BaseChannelHandler;
 import io.nuls.network.model.Node;
@@ -64,9 +66,7 @@ public class ClientChannelHandler extends BaseChannelHandler {
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
-
         Attribute<Node> nodeAttribute = ctx.channel().attr(key);
-
         Node node = nodeAttribute.get();
         if (node != null) {
             node.setChannel(ctx.channel());
@@ -74,7 +74,9 @@ public class ClientChannelHandler extends BaseChannelHandler {
         if (node != null && node.getConnectedListener() != null) {
             node.getConnectedListener().action();
         }
-        LoggerUtil.logger().info("Client Node is active:{}", node != null ? node.getId() : null);
+        ctx.channel().config().setWriteBufferHighWaterMark(NetworkConstant.HIGH_WATER_MARK);
+        ctx.channel().config().setWriteBufferLowWaterMark(NetworkConstant.LOW_WATER_MARK);
+        LoggerUtil.COMMON_LOG.info("Client Node is active:{}", node != null ? node.getId() : null);
     }
 
     @Override
@@ -98,11 +100,11 @@ public class ClientChannelHandler extends BaseChannelHandler {
                 buf.readBytes(bytes);
                 byteBuffer = new NulsByteBuffer(bytes);
             } else {
-                LoggerUtil.logger().error("-----------------client channelRead  node is null -----------------" + remoteIP + ":" + port);
+                Log.error("-----------------client channelRead  node is null -----------------" + remoteIP + ":" + port);
                 ctx.channel().close();
             }
         } catch (Exception e) {
-            LoggerUtil.logger().error("", e);
+            Log.error(e);
 //            throw e;
         } finally {
             buf.clear();
@@ -116,18 +118,16 @@ public class ClientChannelHandler extends BaseChannelHandler {
         Attribute<Node> nodeAttribute = ctx.channel().attr(key);
         Node node = nodeAttribute.get();
         if (node != null && node.getDisconnectListener() != null) {
-            LoggerUtil.logger().debug("-----------------client channelInactive  node is channelUnregistered node={}-----------------",node.getId());
+            LoggerUtil.COMMON_LOG.info("-----------------client channelInactive  node is channelUnregistered node={}-----------------", node.getId());
             node.getDisconnectListener().action();
         }
-        LoggerUtil.logger().info("-----------------client channelInactive  node is channelUnregistered -----------------");
-
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         cause.printStackTrace();
         if (!(cause instanceof IOException)) {
-            LoggerUtil.logger().error(cause.getMessage(), cause);
+            LoggerUtil.COMMON_LOG.error(cause.getMessage(), cause);
         }
         ctx.channel().close();
     }

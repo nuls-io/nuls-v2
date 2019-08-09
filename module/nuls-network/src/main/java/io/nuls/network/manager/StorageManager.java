@@ -24,16 +24,16 @@
  */
 package io.nuls.network.manager;
 
+import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.log.Log;
+import io.nuls.network.constant.ManagerStatusEnum;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.po.GroupNodesPo;
 import io.nuls.network.model.po.GroupPo;
 import io.nuls.network.model.po.NodePo;
-import io.nuls.network.model.po.RoleProtocolPo;
 import io.nuls.network.storage.DbService;
 import io.nuls.network.storage.impl.DbServiceImpl;
-import io.nuls.core.core.ioc.SpringLiteContext;
-import io.nuls.core.exception.NulsException;
-import io.nuls.network.utils.LoggerUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,7 +77,7 @@ public class StorageManager extends BaseManager {
                 nodeGroups.add((NodeGroup) groupPo.parseDto());
             }
         } catch (NulsException e) {
-            LoggerUtil.logger().error("", e);
+            Log.error("", e);
         }
         return nodeGroups;
     }
@@ -92,20 +92,9 @@ public class StorageManager extends BaseManager {
         try {
             return dbService.getNodesByChainId(chainId);
         } catch (NulsException e) {
-            LoggerUtil.logger().error("", e);
+            Log.error(e);
         }
         return null;
-    }
-
-
-    /**
-     * 加载所有模块的协议注册信息
-     * load ProtocolRegisterInfos form storage
-     *
-     * @return List<RoleProtocolPo>
-     */
-    public List<RoleProtocolPo> getProtocolRegisterInfos() {
-        return dbService.getProtocolRegisterInfos();
     }
 
     @Override
@@ -115,6 +104,11 @@ public class StorageManager extends BaseManager {
 
     @Override
     public void start() throws Exception {
+
+    }
+
+    @Override
+    public void change(ManagerStatusEnum toStatus) throws Exception {
 
     }
 }

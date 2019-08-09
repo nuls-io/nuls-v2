@@ -42,10 +42,9 @@ import io.nuls.core.basic.Result;
 import io.nuls.core.basic.VarInt;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
-import org.spongycastle.util.Arrays;
+import org.bouncycastle.util.Arrays;
 
 import static io.nuls.contract.util.ContractUtil.getFailed;
-import static io.nuls.contract.util.ContractUtil.getSuccess;
 
 /**
  * @desription:
@@ -93,13 +92,16 @@ public class CallContractTxProcessor {
             // 处理合约执行失败 - 没有transferEvent的情况, 直接从数据库中获取, 若是本地创建的交易，获取到修改为失败交易
             if (isTerminatedContract || !contractResult.isSuccess()) {
                 if (contractAddressInfoPo != null && contractAddressInfoPo.isNrc20() && ContractUtil.isTransferMethod(callContractData.getMethodName())) {
-                    byte[] txHashBytes = tx.getHash().serialize();
+                    byte[] txHashBytes = tx.getHash().getBytes();
                     byte[] infoKey = Arrays.concatenate(callContractData.getSender(), txHashBytes, new VarInt(0).encode());
                     Result<ContractTokenTransferInfoPo> infoResult = contractTokenTransferStorageService.getTokenTransferInfo(chainId, infoKey);
                     ContractTokenTransferInfoPo po = infoResult.getData();
                     if (po != null) {
                         po.setStatus((byte) 2);
-                        contractTokenTransferStorageService.saveTokenTransferInfo(chainId, infoKey, po);
+                        Result result = contractTokenTransferStorageService.saveTokenTransferInfo(chainId, infoKey, po);
+                        if(result.isFailed()) {
+                            return result;
+                        }
 
                         // 刷新token余额
                         if (isTerminatedContract) {
@@ -126,13 +128,11 @@ public class CallContractTxProcessor {
             }
 
             // 保存合约执行结果
-            contractService.saveContractExecuteResult(chainId, tx.getHash(), contractResult);
-
+            return contractService.saveContractExecuteResult(chainId, tx.getHash(), contractResult);
         } catch (Exception e) {
             Log.error("save call contract tx error.", e);
             return getFailed();
         }
-        return getSuccess();
     }
 
     public Result onRollback(int chainId, ContractWrapperTransaction tx) {
@@ -145,12 +145,11 @@ public class CallContractTxProcessor {
             }
             contractHelper.rollbackNrc20Events(chainId, tx, contractResult);
             // 删除合约执行结果
-            contractService.deleteContractExecuteResult(chainId, tx.getHash());
+            return contractService.deleteContractExecuteResult(chainId, tx.getHash());
         } catch (Exception e) {
             Log.error("rollback call contract tx error.", e);
             return getFailed();
         }
-        return getSuccess();
     }
 
 

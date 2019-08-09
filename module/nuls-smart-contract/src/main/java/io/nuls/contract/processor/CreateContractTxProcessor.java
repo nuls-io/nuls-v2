@@ -26,12 +26,13 @@ package io.nuls.contract.processor;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractWrapperTransaction;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
 import io.nuls.contract.model.txdata.ContractData;
+import io.nuls.contract.model.txdata.CreateContractData;
 import io.nuls.contract.service.ContractService;
 import io.nuls.contract.service.ContractTxService;
 import io.nuls.contract.storage.ContractAddressStorageService;
@@ -40,9 +41,6 @@ import io.nuls.contract.util.Log;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.core.exception.NulsRuntimeException;
-
-import java.io.IOException;
 
 import static io.nuls.contract.util.ContractUtil.getSuccess;
 
@@ -65,15 +63,17 @@ public class CreateContractTxProcessor {
     @Autowired
     private ContractHelper contractHelper;
 
-    public Result onCommit(int chainId, ContractWrapperTransaction tx) {
+    public Result onCommit(int chainId, ContractWrapperTransaction tx) throws Exception {
         BlockHeader blockHeader = contractHelper.getBatchInfoCurrentBlockHeader(chainId);
-        byte[] stateRoot = blockHeader.getStateRoot();
         long blockHeight = blockHeader.getHeight();
         ContractResult contractResult = tx.getContractResult();
         contractResult.setBlockHeight(blockHeight);
-        contractService.saveContractExecuteResult(chainId, tx.getHash(), contractResult);
+        Result saveContractExecuteResult = contractService.saveContractExecuteResult(chainId, tx.getHash(), contractResult);
+        if(saveContractExecuteResult.isFailed()) {
+            return saveContractExecuteResult;
+        }
 
-        ContractData txData = tx.getContractData();
+        CreateContractData txData = (CreateContractData) tx.getContractData();
         byte[] contractAddress = txData.getContractAddress();
         byte[] sender = txData.getSender();
         String senderStr = AddressTool.getStringAddressByBytes(sender);
@@ -87,16 +87,13 @@ public class CreateContractTxProcessor {
         }
 
 
-        NulsDigestData hash = tx.getHash();
+        NulsHash hash = tx.getHash();
         tx.setBlockHeight(blockHeight);
         ContractAddressInfoPo info = new ContractAddressInfoPo();
         info.setContractAddress(contractAddress);
         info.setSender(sender);
-        try {
-            info.setCreateTxHash(hash.serialize());
-        } catch (IOException e) {
-            throw new NulsRuntimeException(e);
-        }
+        info.setCreateTxHash(hash.getBytes());
+        info.setAlias(txData.getAlias());
         info.setCreateTime(tx.getTime());
         info.setBlockHeight(blockHeight);
 
@@ -115,11 +112,12 @@ public class CreateContractTxProcessor {
             //处理NRC20合约事件
             contractHelper.dealNrc20Events(chainId, newestStateRoot, tx, contractResult, info);
             // 保存NRC20-token地址
-            contractTokenAddressStorageService.saveTokenAddress(chainId, contractAddress);
+            Result result = contractTokenAddressStorageService.saveTokenAddress(chainId, contractAddress);
+            if(result.isFailed()) {
+                return result;
+            }
         }
-
-        Result result = contractAddressStorageService.saveContractAddress(chainId, contractAddress, info);
-        return result;
+        return contractAddressStorageService.saveContractAddress(chainId, contractAddress, info);
     }
 
     public Result onRollback(int chainId, ContractWrapperTransaction tx) throws Exception {
@@ -133,11 +131,15 @@ public class CreateContractTxProcessor {
             contractResult = contractService.getContractExecuteResult(chainId, tx.getHash());
         }
         contractHelper.rollbackNrc20Events(chainId, tx, contractResult);
-        contractAddressStorageService.deleteContractAddress(chainId, contractAddress);
-        contractTokenAddressStorageService.deleteTokenAddress(chainId, contractAddress);
-
-        contractService.deleteContractExecuteResult(chainId, tx.getHash());
-        return getSuccess();
+        Result result = contractAddressStorageService.deleteContractAddress(chainId, contractAddress);
+        if(result.isFailed()) {
+            return result;
+        }
+        result = contractTokenAddressStorageService.deleteTokenAddress(chainId, contractAddress);
+        if(result.isFailed()) {
+            return result;
+        }
+        return contractService.deleteContractExecuteResult(chainId, tx.getHash());
     }
 
 

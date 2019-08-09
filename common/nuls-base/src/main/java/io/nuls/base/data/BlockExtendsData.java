@@ -38,12 +38,24 @@ import java.io.IOException;
  */
 public class BlockExtendsData extends BaseNulsData {
 
+    /**
+     * 轮次
+     */
     private long roundIndex;
 
+    /**
+     * 共识节点数
+     */
     private int consensusMemberCount;
 
+    /**
+     * 轮次起始时间
+     */
     private long roundStartTime;
 
+    /**
+     * 轮次中的顺序
+     */
     private int packingIndexOfRound;
 
     /**
@@ -66,7 +78,14 @@ public class BlockExtendsData extends BaseNulsData {
      */
     private short continuousIntervalCount;
 
+    /**
+     * 智能合约初始状态根
+     */
     private byte[] stateRoot;
+
+    private byte[] seed;
+
+    private byte[] nextSeedHash;
 
     public BlockExtendsData() {
     }
@@ -113,10 +132,10 @@ public class BlockExtendsData extends BaseNulsData {
 
     /**
      * 根据轮次开始时间计算轮次结束时间
-     * @param packing_interval 打包间隔时间（单位：毫秒）
+     * @param packingInterval 打包间隔时间（单位：秒）
      * */
-    public long getRoundEndTime(long packing_interval) {
-        return roundStartTime + consensusMemberCount * packing_interval;
+    public long getRoundEndTime(long packingInterval) {
+        return roundStartTime + consensusMemberCount * packingInterval;
     }
 
     public int getConsensusMemberCount() {
@@ -157,10 +176,13 @@ public class BlockExtendsData extends BaseNulsData {
         int size = 0;
         size += SerializeUtils.sizeOfUint32();  // roundIndex
         size += SerializeUtils.sizeOfUint16();  // consensusMemberCount
-        size += SerializeUtils.sizeOfUint48();  // roundStartTime
+        size += SerializeUtils.sizeOfUint32();  // roundStartTime
         size += SerializeUtils.sizeOfUint16();  // packingIndexOfRound
         size += 7;
         size += SerializeUtils.sizeOfBytes(stateRoot);
+        if (nextSeedHash != null) {
+            size += 40;
+        }
         return size;
     }
 
@@ -168,26 +190,34 @@ public class BlockExtendsData extends BaseNulsData {
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint32(roundIndex);
         stream.writeUint16(consensusMemberCount);
-        stream.writeUint48(roundStartTime);
+        stream.writeUint32(roundStartTime);
         stream.writeUint16(packingIndexOfRound);
         stream.writeShort(mainVersion);
         stream.writeShort(blockVersion);
         stream.writeByte(effectiveRatio);
         stream.writeShort(continuousIntervalCount);
         stream.writeBytesWithLength(stateRoot);
+        if (nextSeedHash != null) {
+            stream.write(seed);
+            stream.write(nextSeedHash);
+        }
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.roundIndex = byteBuffer.readUint32();
         this.consensusMemberCount = byteBuffer.readUint16();
-        this.roundStartTime = byteBuffer.readUint48();
+        this.roundStartTime = byteBuffer.readUint32();
         this.packingIndexOfRound = byteBuffer.readUint16();
         this.mainVersion = byteBuffer.readShort();
         this.blockVersion = byteBuffer.readShort();
         this.effectiveRatio = byteBuffer.readByte();
         this.continuousIntervalCount = byteBuffer.readShort();
         this.stateRoot = byteBuffer.readByLengthByte();
+        if (!byteBuffer.isFinished() && byteBuffer.getPayload().length >= (byteBuffer.getCursor() + 40)) {
+            this.seed = byteBuffer.readBytes(32);
+            this.nextSeedHash = byteBuffer.readBytes(8);
+        }
     }
 
     public byte[] getStateRoot() {
@@ -198,10 +228,25 @@ public class BlockExtendsData extends BaseNulsData {
         this.stateRoot = stateRoot;
     }
 
+    public byte[] getSeed() {
+        return seed;
+    }
+
+    public void setSeed(byte[] seed) {
+        this.seed = seed;
+    }
+
+    public byte[] getNextSeedHash() {
+        return nextSeedHash;
+    }
+
+    public void setNextSeedHash(byte[] nextSeedHash) {
+        this.nextSeedHash = nextSeedHash;
+    }
+
     @Override
     public String toString() {
-        return "BlockExtendsData{" +
-                "mainVersion=" + mainVersion +
+        return "BlockExtendsData{mainVersion=" + mainVersion +
                 ", blockVersion=" + blockVersion +
                 ", effectiveRatio=" + effectiveRatio +
                 ", continuousIntervalCount=" + continuousIntervalCount +

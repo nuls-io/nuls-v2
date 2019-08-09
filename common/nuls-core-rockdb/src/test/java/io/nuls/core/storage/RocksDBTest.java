@@ -65,12 +65,12 @@ public class RocksDBTest {
         table = "test-table";
         key = "test-key";
         initTest();
-        //createTableTest();
+//        createTableTest();
         //existTableTest();
         //destroyTableTest();
         //listTableTest();
-        //putTest();
-        //getTest();
+        putTest();
+        getTest();
         //deleteTest();
         //multiGetTest();
         //multiGetValueListTest();
@@ -85,7 +85,7 @@ public class RocksDBTest {
     @Ignore
     @Test
     public void initTest() throws Exception {
-        String dataPath = "../../entity";
+        String dataPath = "E:\\RocksDBTest";
         long start = System.currentTimeMillis();
         RocksDBService.init(dataPath);
         long end = System.currentTimeMillis();
@@ -190,6 +190,7 @@ public class RocksDBTest {
         byte[] getByte = get(table, key.getBytes(UTF_8));
         if (getByte != null) {
             String getValue = new String(getByte, UTF_8);
+            System.out.println(getValue);
             Assert.assertEquals(value, getValue);
         }
     }

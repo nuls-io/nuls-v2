@@ -1,15 +1,17 @@
 package io.nuls.transaction.model.bo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.core.model.ByteArrayWrapper;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.po.TransactionNetPO;
-import io.nuls.transaction.threadpool.NetTxThreadPoolExecutor;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -38,14 +40,15 @@ public class Chain {
     private AtomicBoolean packaging;
 
     /**
-     * 是否需要重新打包,开始打包区块交易时设为false. 打包同时,收到新区块时设为true,则需要重新打包
+     * 是否处理交易
+     * block通知,由节点区块同步状态决定
      */
-    private AtomicBoolean rePackage;
+    private AtomicBoolean processTxStatus;
 
     /**
      * 日志
      */
-    private Map<String, NulsLogger> loggerMap;
+    private NulsLogger logger;
 
     /**
      * 交易注册信息
@@ -53,9 +56,15 @@ public class Chain {
     private Map<Integer, TxRegister> txRegisterMap;
 
     /**
-     * 交易已完成交易管理模块的校验(打包的时候从这里取)
+     * 可打包交易hash集合, 交易已完成交易管理模块的校验(打包的时候从这里取)
      */
-    private BlockingDeque<Transaction> txQueue;
+    private BlockingDeque<ByteArrayWrapper> packableHashQueue;
+
+    /**
+     * 可打包交易hash对应的交易map
+     */
+    private Map<ByteArrayWrapper, Transaction> packableTxMap;
+
 
     /**
      * 未进行验证的交易队列
@@ -63,7 +72,7 @@ public class Chain {
     private BlockingDeque<TransactionNetPO> unverifiedQueue;
 
 
-    private List<TransactionNetPO> orphanList;
+    private LinkedList<TransactionNetPO> orphanList;
 
     private Map<String, Orphans> orphanMap;
 
@@ -90,31 +99,33 @@ public class Chain {
     /**
      * 打包时处理孤儿交易的map
      */
-    private Map<NulsDigestData, Integer> txPackageOrphanMap;
+    private Map<NulsHash, Integer> txPackageOrphanMap;
 
     private final Lock packageLock = new ReentrantLock();
 
     /**
-     * 网络新交易处理
+     * 是否可执行打包
+     * 交易在打包时,如果正在执行账本正在执行已确认提交或回滚, 则停止当前打包,并重新打包
      */
-    private NetTxThreadPoolExecutor netTxThreadPoolExecutor;
+    private AtomicBoolean packableState;
 
     /**
-     * 处理一次网络新交易的集合
+     * 执行协议升级的处理
      */
-    private List<TransactionNetPO> txNetProcessList;
+    private AtomicBoolean protocolUpgrade;
 
     public Chain() {
         this.packaging = new AtomicBoolean(false);
-        this.rePackage = new AtomicBoolean(true);
+        this.packableState = new AtomicBoolean(true);
+        this.processTxStatus = new AtomicBoolean(false);
         this.txRegisterMap = new ConcurrentHashMap<>(TxConstant.INIT_CAPACITY_32);
-        this.txQueue = new LinkedBlockingDeque<>();
-        this.loggerMap = new HashMap<>();
+        this.packableHashQueue = new LinkedBlockingDeque<>();
+        this.packableTxMap = new ConcurrentHashMap<>();
         this.contractTxFail = false;
         this.txPackageOrphanMap = new HashMap<>();
         this.orphanList = new LinkedList<>();
-        this.txNetProcessList = new ArrayList<>(TxConstant.NET_TX_PROCESS_NUMBER_ONCE);
         this.orphanMap = new ConcurrentHashMap<>();
+        this.protocolUpgrade = new AtomicBoolean(false);
     }
 
     public int getChainId(){
@@ -137,12 +148,12 @@ public class Chain {
         this.scheduledThreadPoolExecutor = scheduledThreadPoolExecutor;
     }
 
-    public Map<String, NulsLogger> getLoggerMap() {
-        return loggerMap;
+    public NulsLogger getLogger() {
+        return logger;
     }
 
-    public void setLoggerMap(Map<String, NulsLogger> loggerMap) {
-        this.loggerMap = loggerMap;
+    public void setLogger(NulsLogger logger) {
+        this.logger = logger;
     }
 
     public Map<Integer, TxRegister> getTxRegisterMap() {
@@ -153,23 +164,21 @@ public class Chain {
         this.txRegisterMap = txRegisterMap;
     }
 
-    public BlockingDeque<Transaction> getTxQueue() {
-        return txQueue;
+    public BlockingDeque<ByteArrayWrapper> getPackableHashQueue() {
+        return packableHashQueue;
     }
 
-    public void setTxQueue(BlockingDeque<Transaction> txQueue) {
-        this.txQueue = txQueue;
+    public void setPackableHashQueue(BlockingDeque<ByteArrayWrapper> packableHashQueue) {
+        this.packableHashQueue = packableHashQueue;
     }
 
-/*
-    public PersistentQueue getUnverifiedQueue() {
-        return unverifiedQueue;
+    public Map<ByteArrayWrapper, Transaction> getPackableTxMap() {
+        return packableTxMap;
     }
 
-    public void setUnverifiedQueue(PersistentQueue unverifiedQueue) {
-        this.unverifiedQueue = unverifiedQueue;
+    public void setPackableTxMap(Map<ByteArrayWrapper, Transaction> packableTxMap) {
+        this.packableTxMap = packableTxMap;
     }
-*/
 
     public long getBestBlockHeight() {
         return bestBlockHeight;
@@ -183,16 +192,8 @@ public class Chain {
         return packaging;
     }
 
-    public void setPackaging(AtomicBoolean packaging) {
-        this.packaging = packaging;
-    }
-
-    public AtomicBoolean getRePackage() {
-        return rePackage;
-    }
-
-    public void setRePackage(AtomicBoolean rePackage) {
-        this.rePackage = rePackage;
+    public AtomicBoolean getProcessTxStatus() {
+        return processTxStatus;
     }
 
     public boolean getContractTxFail() {
@@ -203,7 +204,7 @@ public class Chain {
         this.contractTxFail = contractTxFail;
     }
 
-    public Map<NulsDigestData, Integer> getTxPackageOrphanMap() {
+    public Map<NulsHash, Integer> getTxPackageOrphanMap() {
         return txPackageOrphanMap;
     }
 
@@ -211,7 +212,7 @@ public class Chain {
         return packageLock;
     }
 
-    public void setTxPackageOrphanMap(Map<NulsDigestData, Integer> txPackageOrphanMap) {
+    public void setTxPackageOrphanMap(Map<NulsHash, Integer> txPackageOrphanMap) {
         this.txPackageOrphanMap = txPackageOrphanMap;
     }
 
@@ -223,28 +224,12 @@ public class Chain {
         this.unverifiedQueue = unverifiedQueue;
     }
 
-    public List<TransactionNetPO> getOrphanList() {
+    public LinkedList<TransactionNetPO> getOrphanList() {
         return orphanList;
     }
 
-    public void setOrphanList(List<TransactionNetPO> orphanList) {
+    public void setOrphanList(LinkedList<TransactionNetPO> orphanList) {
         this.orphanList = orphanList;
-    }
-
-    public NetTxThreadPoolExecutor getNetTxThreadPoolExecutor() {
-        return netTxThreadPoolExecutor;
-    }
-
-    public void setNetTxThreadPoolExecutor(NetTxThreadPoolExecutor netTxThreadPoolExecutor) {
-        this.netTxThreadPoolExecutor = netTxThreadPoolExecutor;
-    }
-
-    public List<TransactionNetPO> getTxNetProcessList() {
-        return txNetProcessList;
-    }
-
-    public void setTxNetProcessList(List<TransactionNetPO> txNetProcessList) {
-        this.txNetProcessList = txNetProcessList;
     }
 
     public Map<String, Orphans> getOrphanMap() {
@@ -253,5 +238,13 @@ public class Chain {
 
     public void setOrphanMap(Map<String, Orphans> orphanMap) {
         this.orphanMap = orphanMap;
+    }
+
+    public AtomicBoolean getProtocolUpgrade() {
+        return protocolUpgrade;
+    }
+
+    public AtomicBoolean getPackableState() {
+        return packableState;
     }
 }

@@ -17,18 +17,18 @@
  */
 package org.ethereum.util;
 
+import org.bouncycastle.util.encoders.Hex;
 import org.ethereum.db.ByteArrayWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spongycastle.util.encoders.Hex;
 
 import java.math.BigInteger;
 import java.util.*;
 
 import static java.util.Arrays.copyOfRange;
+import static org.bouncycastle.util.Arrays.concatenate;
+import static org.bouncycastle.util.BigIntegers.asUnsignedByteArray;
 import static org.ethereum.util.ByteUtil.*;
-import static org.spongycastle.util.Arrays.concatenate;
-import static org.spongycastle.util.BigIntegers.asUnsignedByteArray;
 
 /**
  * Recursive Length Prefix (RLP) encoding.
@@ -39,7 +39,7 @@ import static org.spongycastle.util.BigIntegers.asUnsignedByteArray;
  * types (eg. strings, integers, floats) is left up to higher-order protocols; in
  * Ethereum the standard is that integers are represented in big endian binary
  * form. If one wishes to use RLP to encode a dictionary, the two suggested
- * canonical forms are to either use [[k1,v1],[k2,v2]...] with keys in
+ * canonical forms are to either use [[k1,v1],[k2,provider]...] with keys in
  * lexicographic order or to use the higher-level Patricia Tree encoding as
  * Ethereum does.
  * <p>
@@ -825,7 +825,7 @@ public class RLP {
             }
             byte[] output = ByteUtil.EMPTY_BYTE_ARRAY;
             for (Object object : inputArray) {
-                output = concatenate(output, encode(object));
+                output = org.bouncycastle.util.Arrays.concatenate(output, encode(object));
             }
             byte[] prefix = encodeLength(output.length, OFFSET_SHORT_LIST);
             return concatenate(prefix, output);

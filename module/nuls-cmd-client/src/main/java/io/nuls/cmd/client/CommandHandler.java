@@ -32,16 +32,12 @@ import io.nuls.cmd.client.processor.block.GetBestBlockHeaderProcessor;
 import io.nuls.cmd.client.processor.block.GetBlockHeaderProcessor;
 import io.nuls.cmd.client.processor.consensus.*;
 import io.nuls.cmd.client.processor.contract.*;
-import io.nuls.cmd.client.processor.crosschain.CreateCrossTxProcessor;
-import io.nuls.cmd.client.processor.crosschain.GetCrossChainRegisterInfoProcessor;
-import io.nuls.cmd.client.processor.crosschain.GetCrossTxStateProcessor;
-import io.nuls.cmd.client.processor.crosschain.RegisterCrossChainProcessor;
+import io.nuls.cmd.client.processor.crosschain.*;
 import io.nuls.cmd.client.processor.ledger.GetBalanceProcessor;
 import io.nuls.cmd.client.processor.network.GetNetworkProcessor;
 import io.nuls.cmd.client.processor.system.ExitProcessor;
 import io.nuls.cmd.client.processor.system.HelpProcessor;
-import io.nuls.cmd.client.processor.transaction.GetTxProcessor;
-import io.nuls.cmd.client.processor.transaction.TransferProcessor;
+import io.nuls.cmd.client.processor.transaction.*;
 import io.nuls.core.basic.InitializingBean;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.ioc.SpringLiteContext;
@@ -109,6 +105,7 @@ public class CommandHandler implements InitializingBean {
         register(getBean(SetAliasProcessor.class));
         //transfer
         register(getBean(TransferProcessor.class));
+        register(getBean(TransferTestProcessor.class));
         //transfer by alias
 //        register(getBean(TransferByAliasProcessor.class));
 
@@ -128,7 +125,6 @@ public class CommandHandler implements InitializingBean {
          */
         //create consensus node
         register(getBean(CreateAgentProcessor.class));
-
         //stop consensus node
         register(getBean(StopAgentProcessor.class));
 
@@ -146,6 +142,20 @@ public class CommandHandler implements InitializingBean {
 
         register(getBean(GetNetworkProcessor.class));
 
+        /**
+         * multi sign transfer
+         */
+        register(getBean(CreateMultiAccountProcessor.class));
+        register(getBean(RemoveMultiSignAccountProcessor.class));
+        register(getBean(CreateMultiSignTransferProcessor.class));
+        register(getBean(CreateMultiSignTransferAndSignProcessor.class));
+        register(getBean(SignMultiSingTransferProcessor.class));
+        register(getBean(SetMultiSignAliasProcessor.class));
+        register(getBean(GetMultiSignAccountProcessor.class));
+        register(getBean(CreateMultiSignAgentProcessor.class));
+        register(getBean(StopMultiSignAgentProcessor.class));
+        register(getBean(DepositForMultiSignProcessor.class));
+        register(getBean(WithdrawForMultiSignProcessor.class));
 
         register(getBean(CreateContractProcessor.class));
         register(getBean(CallContractProcessor.class));
@@ -161,8 +171,13 @@ public class CommandHandler implements InitializingBean {
 
 
         register(getBean(RegisterCrossChainProcessor.class));
+        register(getBean(CrossAssetAddProcessor.class));
+        register(getBean(CrossAssetDisableProcessor.class));
+        register(getBean(UpdateCrossChainProcessor.class));
+
         register(getBean(CreateCrossTxProcessor.class));
         register(getBean(GetCrossChainRegisterInfoProcessor.class));
+        register(getBean(GetCrossAssetInfoProcessor.class));
         register(getBean(GetCrossTxStateProcessor.class));
     }
 
@@ -254,6 +269,9 @@ public class CommandHandler implements InitializingBean {
             }
             return processor.execute(args).toString();
         } catch (Exception e) {
+            if(System.Logger.Level.DEBUG.getName().equals(System.getProperty("log.level"))){
+                e.printStackTrace();
+            }
             return CommandConstant.EXCEPTION + ": " + e.getMessage();
         }
     }

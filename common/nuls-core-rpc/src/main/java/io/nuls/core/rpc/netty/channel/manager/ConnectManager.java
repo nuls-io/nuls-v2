@@ -1,6 +1,9 @@
 package io.nuls.core.rpc.netty.channel.manager;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.nuls.core.core.ioc.ScanUtil;
@@ -19,8 +22,10 @@ import io.nuls.core.rpc.netty.channel.ConnectData;
 import io.nuls.core.rpc.netty.processor.RequestMessageProcessor;
 import io.nuls.core.rpc.netty.thread.RequestByCountProcessor;
 import io.nuls.core.rpc.netty.thread.RequestByPeriodProcessor;
+import io.nuls.core.rpc.netty.thread.RequestOnlyProcessor;
 import io.nuls.core.rpc.netty.thread.ResponseAutoProcessor;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
+import io.nuls.core.rpc.util.SerializeUtil;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -51,6 +56,12 @@ public class ConnectManager {
      * local module(io.nuls.rpc.RegisterApi) information
      */
     public static final RegisterApi LOCAL = new RegisterApi();
+
+    /**
+     * 本模块各个CMD优先级
+     * Each CMD priority of this module
+     * */
+    public static final Map<String, Integer> CMD_PRIORITY_MAP = new ConcurrentHashMap<>();
 
     /**
      * 本模块配置信息
@@ -301,8 +312,10 @@ public class ConnectManager {
                 cmdDetail.setMethodMinPeriod(cmdAnnotation.minPeriod() + "");
                 cmdDetail.setMethodScope(cmdAnnotation.scope());
                 cmdDetail.setVersion(cmdAnnotation.version());
+                cmdDetail.setPriority(cmdAnnotation.priority());
                 cmdDetail.setInvokeClass(method.getDeclaringClass().getName());
                 cmdDetail.setInvokeMethod(method.getName());
+                CMD_PRIORITY_MAP.put(cmdAnnotation.cmd(),cmdAnnotation.priority().getPriority());
                 continue;
             }
 
@@ -641,9 +654,9 @@ public class ConnectManager {
          */
 
         Channel channel = NettyClient.createConnect(url);
-        long start =  TimeUtils.getCurrentTimeMillis();
+        long start =  NulsDateUtils.getCurrentTimeMillis();
         while (channel==null || !channel.isOpen()) {
-            if ( TimeUtils.getCurrentTimeMillis() - start > Constants.MILLIS_PER_SECOND * 5) {
+            if ( NulsDateUtils.getCurrentTimeMillis() - start > Constants.MILLIS_PER_SECOND * 5) {
                 throw new Exception("Failed to connect " + url);
             }
             Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
@@ -662,6 +675,8 @@ public class ConnectManager {
         connectData.getThreadPool().execute(new RequestByCountProcessor(connectData));
         connectData.getThreadPool().execute(new ResponseAutoProcessor(connectData));
         connectData.getThreadPool().execute(new ResponseAutoProcessor(connectData));
+        connectData.getThreadPool().execute(new RequestOnlyProcessor(connectData));
+        connectData.getThreadPool().execute(new RequestOnlyProcessor(connectData));
         CHANNEL_DATA_MAP.put(channel, connectData);
     }
 
@@ -711,19 +726,52 @@ public class ConnectManager {
         }
     }
 
-    public static void sendMessage(Channel channel, String message) {
+    public static void sendMessage(Channel channel, ByteBuf message) {
 //        Log.debug("发送消息:{}",message);
         try {
             channel.eventLoop().execute(() -> {
-                channel.writeAndFlush(new TextWebSocketFrame(message));
+                ChannelFuture cf = channel.writeAndFlush(new TextWebSocketFrame(message));
+                cf.addListener((ChannelFutureListener) future -> {
+                    if (!future.isSuccess()) {
+                        Log.error(future.cause());
+                    }
+                });
             });
         } catch (Exception e) {
             Log.error(e);
         }
     }
 
+//    public static void sendMessage(Channel channel, String message) {
+////        Log.debug("发送消息:{}",message);
+//        try {
+//            channel.eventLoop().execute(() -> {
+//                ChannelFuture cf = channel.writeAndFlush(new TextWebSocketFrame(message));
+//                cf.addListener(new ChannelFutureListener() {
+//                    @Override
+//                    public void operationComplete(ChannelFuture future) {
+//                        if (!future.isSuccess()){
+//                            Log.error(future.cause());
+//                        }
+//                    }
+//                });
+//            });
+//        } catch (Exception e) {
+//            Log.error(e);
+//        }
+//    }
+
     public static void sendMessage(String moduleAbbr, Message message) throws Exception {
-        sendMessage(getConnectByRole(moduleAbbr), JSONUtils.obj2json(message));
+        sendMessage(getConnectByRole(moduleAbbr), SerializeUtil.getBuffer(JSONUtils.obj2ByteArray(message)));
+    }
+
+    public static String getRoleByChannel(Channel channel){
+        for (String role:ROLE_CHANNEL_MAP.keySet()) {
+            if(ROLE_CHANNEL_MAP.get(role).equals(channel)){
+                return role;
+            }
+        }
+        return "";
     }
 
     /**

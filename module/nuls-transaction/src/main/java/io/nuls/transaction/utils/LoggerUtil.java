@@ -26,7 +26,7 @@ package io.nuls.transaction.utils;
 
 import io.nuls.core.log.logback.LoggerBuilder;
 import io.nuls.core.log.logback.NulsLogger;
-import io.nuls.transaction.constant.TxConstant;
+import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.transaction.model.bo.Chain;
 
 /**
@@ -35,16 +35,11 @@ import io.nuls.transaction.model.bo.Chain;
  */
 public class LoggerUtil {
 
-    public static final NulsLogger LOG = LoggerBuilder.getLogger( "tx");
-
-    private static final String FOLDER_PREFIX = "chain-";
+    public static final NulsLogger LOG = LoggerBuilder.getLogger(ModuleE.TX.name);
 
     public static void init(Chain chain){
-        NulsLogger txLogger = LoggerBuilder.getLogger(FOLDER_PREFIX + String.valueOf(chain.getConfig().getChainId()), TxConstant.LOG_TX);
-        chain.getLoggerMap().put(TxConstant.LOG_TX, txLogger);
-        NulsLogger txProcessLogger = LoggerBuilder.getLogger(FOLDER_PREFIX + String.valueOf(chain.getConfig().getChainId()), TxConstant.LOG_NEW_TX_PROCESS);
-        chain.getLoggerMap().put(TxConstant.LOG_NEW_TX_PROCESS, txProcessLogger);
-        NulsLogger txMessageLogger = LoggerBuilder.getLogger(FOLDER_PREFIX + String.valueOf(chain.getConfig().getChainId()), TxConstant.LOG_TX_MESSAGE);
-        chain.getLoggerMap().put(TxConstant.LOG_TX_MESSAGE, txMessageLogger);
+        int chainId = chain.getConfig().getChainId();
+        NulsLogger logger = LoggerBuilder.getLogger(ModuleE.TX.name, chainId);
+        chain.setLogger(logger);
     }
 }

@@ -21,16 +21,15 @@
 package io.nuls.block.thread.monitor;
 
 import io.nuls.base.data.Block;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.model.Node;
-import io.nuls.block.rpc.call.NetworkUtil;
+import io.nuls.block.rpc.call.NetworkCall;
 import io.nuls.block.storage.ChainStorageService;
 import io.nuls.block.utils.BlockUtil;
-import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.log.logback.NulsLogger;
 
@@ -55,8 +54,7 @@ import static io.nuls.block.constant.StatusEnum.UPDATE_ORPHAN_CHAINS;
  */
 public class OrphanChainsMaintainer extends BaseMonitor {
 
-    @Autowired
-    private static ChainStorageService chainStorageService;
+    private ChainStorageService chainStorageService;
 
     private static final OrphanChainsMaintainer INSTANCE = new OrphanChainsMaintainer();
 
@@ -86,7 +84,7 @@ public class OrphanChainsMaintainer extends BaseMonitor {
                 if (!lock.validate(stamp)) {
                     continue;
                 }
-                if (orphanChains.size() < 1) {
+                if (orphanChains.isEmpty()) {
                     break;
                 }
                 stamp = lock.tryConvertToWriteLock(stamp);
@@ -94,7 +92,7 @@ public class OrphanChainsMaintainer extends BaseMonitor {
                     continue;
                 }
                 // exclusive access
-                List<Node> availableNodes = NetworkUtil.getAvailableNodes(chainId);
+                List<Node> availableNodes = NetworkCall.getAvailableNodes(chainId);
                 //维护现有孤儿链,尝试在链首增加区块
                 context.setStatus(UPDATE_ORPHAN_CHAINS);
                 for (Chain orphanChain : orphanChains) {
@@ -128,7 +126,7 @@ public class OrphanChainsMaintainer extends BaseMonitor {
         if (age.get() > orphanChainMaxAge) {
             return;
         }
-        NulsDigestData previousHash = orphanChain.getPreviousHash();
+        NulsHash previousHash = orphanChain.getPreviousHash();
         Chain masterChain = BlockChainManager.getMasterChain(chainId);
         if (masterChain.getHashList().contains(previousHash)) {
             return;
@@ -136,7 +134,7 @@ public class OrphanChainsMaintainer extends BaseMonitor {
         Block block;
         //向其他节点请求孤儿链起始区块的上一个区块
         for (Node availableNode : availableNodes) {
-            block = BlockUtil.downloadBlockByHash(chainId, previousHash, availableNode.getId());
+            block = BlockUtil.downloadBlockByHash(chainId, previousHash, availableNode.getId(), orphanChain.getStartHeight() - 1);
             if (block != null) {
                 orphanChain.addFirst(block);
                 chainStorageService.save(chainId, block);

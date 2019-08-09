@@ -20,27 +20,30 @@
 
 package io.nuls.block.model;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.base.signture.BlockSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.block.constant.BlockErrorCode;
+import io.nuls.block.utils.LoggerUtil;
+import io.nuls.core.basic.VarInt;
+import io.nuls.core.constant.ToolsConstant;
+import io.nuls.core.constant.TxType;
 import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.HexUtil;
-import io.nuls.core.model.StringUtils;
-import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.io.IoUtils;
+import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static io.nuls.block.utils.LoggerUtil.commonLog;
-
 /**
- * todo 链工厂的链创世块
  * 创世块
  *
  * @author captain
@@ -50,14 +53,45 @@ import static io.nuls.block.utils.LoggerUtil.commonLog;
 public final class GenesisBlock extends Block {
 
     private static final String GENESIS_BLOCK_FILE = "genesis-block.json";
+    /**
+     * 创世块生成时间,相比1970-01-01 08:00:00过去了多少秒
+     */
     private static final String CONFIG_FILED_TIME = "time";
+    /**
+     * 创世块高度,默认为0
+     */
     private static final String CONFIG_FILED_HEIGHT = "height";
+    /**
+     * 扩展字段,详细注释见${@link BlockExtendsData},如果不清楚如何设置extend的值,可以参考${@link BlockExtendsDataTest}
+     */
     private static final String CONFIG_FILED_EXTEND = "extend";
+    /**
+     * 初始资产分配
+     */
     private static final String CONFIG_FILED_TXS = "txs";
+    /**
+     * 初始别名设定
+     */
+    private static final String CONFIG_FILED_ALIAS = "alias";
+    /**
+     * 分配地址
+     */
     private static final String CONFIG_FILED_ADDRESS = "address";
+    /**
+     * 分配金额
+     */
     private static final String CONFIG_FILED_AMOUNT = "amount";
+    /**
+     * 锁定时间
+     */
     private static final String CONFIG_FILED_LOCK_TIME = "lockTime";
+    /**
+     * 创世块中交易的备注
+     */
     private static final String CONFIG_FILED_REMARK = "remark";
+    /**
+     * 私钥,用来对创世块交易进行签名,没有其他用处
+     */
     private static final String CONFIG_FILED_PRIVATE_KEY = "privateKey";
 
     private transient long blockTime;
@@ -65,14 +99,9 @@ public final class GenesisBlock extends Block {
     private int assetsId;
     private BigInteger priKey;
 
-    private GenesisBlock(int chainId, int assetsId, String json) throws Exception {
-        Map<String, Object> jsonMap = null;
-        try {
-            jsonMap = JSONUtils.json2map(json);
-        } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
-        }
+    private GenesisBlock(int chainId, int assetsId, String json) throws IOException {
+        Map<String, Object> jsonMap;
+        jsonMap = JSONUtils.json2map(json);
         String time = (String) jsonMap.get(CONFIG_FILED_TIME);
         blockTime = Long.parseLong(time);
         this.chainId = chainId;
@@ -81,22 +110,16 @@ public final class GenesisBlock extends Block {
         this.fillHeader(jsonMap);
     }
 
-    public static GenesisBlock getInstance(int chainId, int assetsId, String json) throws Exception {
+    public static GenesisBlock getInstance(int chainId, int assetsId, String json) throws IOException {
         return new GenesisBlock(chainId, assetsId, json);
     }
 
     public static GenesisBlock getInstance(int chainId, int assetsId) throws Exception {
-        String json = null;
-        try {
-            json = IoUtils.read(GENESIS_BLOCK_FILE);
-        } catch (NulsException e) {
-            e.printStackTrace();
-            commonLog.error(e);
-        }
+        String json = IoUtils.read(GENESIS_BLOCK_FILE);
         return new GenesisBlock(chainId, assetsId, json);
     }
 
-    private void initGengsisTxs(Map<String, Object> jsonMap) throws Exception {
+    private void initGengsisTxs(Map<String, Object> jsonMap) throws IOException {
         List<Map<String, Object>> list = (List<Map<String, Object>>) jsonMap.get(CONFIG_FILED_TXS);
         if (null == list || list.isEmpty()) {
             throw new NulsRuntimeException(BlockErrorCode.DATA_ERROR);
@@ -124,10 +147,47 @@ public final class GenesisBlock extends Block {
         if (StringUtils.isNotBlank(remark)) {
             tx.setRemark(HexUtil.decode(remark));
         }
-        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
         List<Transaction> txlist = new ArrayList<>();
         txlist.add(tx);
+        fillAliasTxs(txlist, jsonMap);
         setTxs(txlist);
+    }
+
+    private void fillAliasTxs(List<Transaction> txlist, Map<String, Object> jsonMap) {
+        List<Map<String, Object>> list = (List<Map<String, Object>>) jsonMap.get(CONFIG_FILED_ALIAS);
+        if (null == list || list.isEmpty()) {
+            return;
+        }
+        for (Map<String, Object> map : list) {
+            Transaction tx = new Transaction();
+            tx.setType(TxType.ACCOUNT_ALIAS);
+            tx.setTime(this.blockTime);
+            String address = (String) map.get("address");
+            String alias = (String) map.get("alias");
+            byte[] txData;
+            try {
+                txData = getAliasTxData(address, alias);
+            } catch (UnsupportedEncodingException e) {
+                LoggerUtil.COMMON_LOG.error(e);
+                continue;
+            }
+            tx.setTxData(txData);
+            txlist.add(tx);
+        }
+    }
+
+    private byte[] getAliasTxData(String address, String alias) throws UnsupportedEncodingException {
+        byte[] addrByte = AddressTool.getAddress(address);
+        byte[] addrLength = new VarInt(addrByte.length).encode();
+        byte[] aliasBytes = alias.getBytes(ToolsConstant.DEFAULT_ENCODING);
+        byte[] aliasLength = new VarInt(aliasBytes.length).encode();
+        byte[] data = new byte[addrByte.length + addrLength.length + aliasBytes.length + aliasLength.length];
+        System.arraycopy(addrLength, 0, data, 0, addrLength.length);
+        System.arraycopy(addrByte, 0, data, addrLength.length, addrByte.length);
+        System.arraycopy(aliasLength, 0, data, addrByte.length + addrLength.length, aliasLength.length);
+        System.arraycopy(aliasBytes, 0, data, addrByte.length + addrLength.length + aliasLength.length, aliasBytes.length);
+        return data;
     }
 
 
@@ -138,19 +198,18 @@ public final class GenesisBlock extends Block {
         this.setHeader(header);
         header.setHeight(height);
         header.setTime(blockTime);
-        header.setPreHash(NulsDigestData.calcDigestData(new byte[35]));
+        header.setPreHash(NulsHash.calcHash(new byte[35]));
         header.setTxCount(this.getTxs().size());
-        List<NulsDigestData> txHashList = new ArrayList<>();
+        List<NulsHash> txHashList = new ArrayList<>();
         for (Transaction tx : this.getTxs()) {
             txHashList.add(tx.getHash());
         }
-        header.setMerkleHash(NulsDigestData.calcMerkleDigestData(txHashList));
+        header.setMerkleHash(NulsHash.calcMerkleHash(txHashList));
         header.setExtend(HexUtil.decode(extend));
-        header.setHash(NulsDigestData.calcDigestData(header));
 
         BlockSignature p2PKHScriptSig = new BlockSignature();
         priKey = new BigInteger(1, HexUtil.decode((String) jsonMap.get(CONFIG_FILED_PRIVATE_KEY)));
-        NulsSignData signData = this.signature(header.getHash().getDigestBytes());
+        NulsSignData signData = this.signature(header.getHash().getBytes());
         p2PKHScriptSig.setSignData(signData);
         p2PKHScriptSig.setPublicKey(getGenesisPubkey());
         header.setBlockSignature(p2PKHScriptSig);

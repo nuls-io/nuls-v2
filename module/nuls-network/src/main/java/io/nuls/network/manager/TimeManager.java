@@ -25,6 +25,7 @@
 
 package io.nuls.network.manager;
 
+import io.nuls.network.constant.ManagerStatusEnum;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.dto.NetTimeUrl;
@@ -118,7 +119,7 @@ public class TimeManager extends BaseManager {
 
     private void sendGetTimeMessage(Node node) {
         GetTimeMessage getTimeMessage = MessageFactory.getInstance().buildTimeRequestMessage(node.getMagicNumber(), currentRequestId);
-        MessageManager.getInstance().sendToNode(getTimeMessage, node, true);
+        MessageManager.getInstance().sendHandlerMsg(getTimeMessage, node, true);
     }
 
     private synchronized void syncPeerTime() {
@@ -129,10 +130,10 @@ public class TimeManager extends BaseManager {
         peerTimesMap.clear();
         //随机发出请求
         List<NodeGroup> list = NodeGroupManager.getInstance().getNodeGroups();
-        Collections.shuffle(list);
         if (list.size() == 0) {
             return;
         }
+        Collections.shuffle(list);
         int count = 0;
         boolean nodesEnough = false;
         for (NodeGroup nodeGroup : list) {
@@ -156,22 +157,18 @@ public class TimeManager extends BaseManager {
 
         //数量或时间满足要求
         long intervalTime = 0;
-        while (peerTimesMap.size() < MAX_REQ_PEER_NUMBER && intervalTime < TIME_WAIT_PEER_RESPONSE)
-
-        {
+        while (peerTimesMap.size() < MAX_REQ_PEER_NUMBER && intervalTime < TIME_WAIT_PEER_RESPONSE) {
             try {
                 Thread.sleep(500L);
             } catch (InterruptedException e) {
-                LoggerUtil.logger().error("", e);
+                LoggerUtil.COMMON_LOG.error(e);
                 Thread.currentThread().interrupt();
             }
             intervalTime = System.currentTimeMillis() - beginTime;
         }
 
         int size = peerTimesMap.size();
-        if (size > 0)
-
-        {
+        if (size > 0) {
             long sum = 0L;
             Set set = peerTimesMap.keySet();
             //计算
@@ -179,6 +176,7 @@ public class TimeManager extends BaseManager {
                 sum += peerTimesMap.get(aSet.toString());
             }
             netTimeOffset = sum / size;
+            LoggerUtil.COMMON_LOG.debug("syncPeerTime netTimeOffset={}", netTimeOffset);
         }
 
     }
@@ -209,7 +207,8 @@ public class TimeManager extends BaseManager {
 
         int count = 0;
         long sum = 0L;
-
+        long[] times = {0, 0, 0};
+        int c = 0;
         for (int i = 0; i < netTimeUrls.size(); i++) {
             long localBeforeTime = System.currentTimeMillis();
             long netTime = getWebTime(netTimeUrls.get(i).getUrl());
@@ -217,9 +216,10 @@ public class TimeManager extends BaseManager {
                 continue;
             }
             long localEndTime = System.currentTimeMillis();
-            long value = (netTime + (localEndTime - localBeforeTime) / 2) - localEndTime;
+            times[c] = (netTime + (localEndTime - localBeforeTime) / 2) - localEndTime;
+            LoggerUtil.COMMON_LOG.debug("address={},localEndTime={}==localBeforeTime={}==netTime={}==value={}", netTimeUrls.get(i).getUrl(), localEndTime, localBeforeTime, netTime, times[c]);
             count++;
-            sum += value;
+            c++;
             /*
              * 有3个网络时间返回就可以退出了
              */
@@ -228,13 +228,36 @@ public class TimeManager extends BaseManager {
             }
 
         }
-        if (count > 0) {
-            netTimeOffset = sum / count;
+        if (count == 3) {
+            calNetTimeOffset(times[0], times[1], times[2]);
+            LoggerUtil.COMMON_LOG.debug("netTimeOffset={}", netTimeOffset);
         } else {
             //从对等网络去获取时间
+            LoggerUtil.COMMON_LOG.debug("count={} syncPeerTime .....", count);
             syncPeerTime();
         }
         lastSyncTime = currentTimeMillis();
+    }
+
+    public static void calNetTimeOffset(long time1, long time2, long time3) {
+        //3个网络时间里去除 与其他2个偏差大于500ms的时间值。
+        long differMs = 500;
+        int count = 3;
+        if (Math.abs(time1 - time2) > differMs && Math.abs(time1 - time3) > differMs) {
+            time1 = 0;
+            count--;
+        }
+        if (Math.abs(time2 - time1) > differMs && Math.abs(time2 - time3) > differMs) {
+            time2 = 0;
+            count--;
+        }
+        if (Math.abs(time3 - time1) > differMs && Math.abs(time3 - time2) > differMs) {
+            time3 = 0;
+            count--;
+        }
+        if (count > 1) {
+            netTimeOffset = (time1 + time2 + time3) / count;
+        }
     }
 
     /**
@@ -254,7 +277,7 @@ public class TimeManager extends BaseManager {
             //Log.debug("done!");
             return timeInfo.getMessage().getTransmitTimeStamp().getTime();
         } catch (Exception e) {
-            LoggerUtil.logger().error("address={} getTime error", address);
+            LoggerUtil.COMMON_LOG.error("address={} getTime error", address);
             return 0L;
         }
     }
@@ -277,6 +300,11 @@ public class TimeManager extends BaseManager {
 
     @Override
     public void start() throws Exception {
+
+    }
+
+    @Override
+    public void change(ManagerStatusEnum toStatus) throws Exception {
 
     }
 }

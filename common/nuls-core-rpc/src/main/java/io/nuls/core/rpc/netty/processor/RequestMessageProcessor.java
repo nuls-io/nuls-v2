@@ -2,6 +2,10 @@ package io.nuls.core.rpc.netty.processor;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.netty.channel.Channel;
+import io.nuls.core.constant.CommonCodeConstanst;
+import io.nuls.core.log.Log;
+import io.nuls.core.model.StringUtils;
+import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.CmdDetail;
@@ -9,11 +13,8 @@ import io.nuls.core.rpc.model.CmdParameter;
 import io.nuls.core.rpc.model.message.*;
 import io.nuls.core.rpc.netty.channel.ConnectData;
 import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
-import io.nuls.core.rpc.util.TimeUtils;
-import io.nuls.core.constant.CommonCodeConstanst;
-import io.nuls.core.log.Log;
-import io.nuls.core.model.StringUtils;
-import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
+import io.nuls.core.rpc.util.SerializeUtil;
 
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -50,7 +51,7 @@ public class RequestMessageProcessor {
 
         Message rspMsg = MessageUtil.basicMessage(MessageType.NegotiateConnectionResponse);
         rspMsg.setMessageData(negotiateConnectionResponse);
-        ConnectManager.sendMessage(channel, JSONUtils.obj2json(rspMsg));
+        ConnectManager.sendMessage(channel, SerializeUtil.getBuffer(JSONUtils.obj2ByteArray(rspMsg)));
 
         //握手成功之后保存channel与角色的对应信息
         NegotiateConnection negotiateConnection = JSONUtils.map2pojo((Map) message.getMessageData(), NegotiateConnection.class);
@@ -71,7 +72,7 @@ public class RequestMessageProcessor {
         ack.setRequestId(messageId);
         Message rspMsg = MessageUtil.basicMessage(MessageType.Ack);
         rspMsg.setMessageData(ack);
-        ConnectManager.sendMessage(channel, JSONUtils.obj2json(rspMsg));
+        ConnectManager.sendMessage(channel, SerializeUtil.getBuffer(JSONUtils.obj2ByteArray(rspMsg)));
     }
 
     /**
@@ -85,7 +86,7 @@ public class RequestMessageProcessor {
         Response response = MessageUtil.newFailResponse(messageId, "Service not started!");
         Message rspMsg = MessageUtil.basicMessage(MessageType.Response);
         rspMsg.setMessageData(response);
-        ConnectManager.sendMessage(channel, JSONUtils.obj2json(rspMsg));
+        ConnectManager.sendMessage(channel, SerializeUtil.getBuffer(JSONUtils.obj2ByteArray(rspMsg)));
     }
 
     /**
@@ -126,11 +127,11 @@ public class RequestMessageProcessor {
             switch (nextProcess) {
                 case Constants.EXECUTE_AND_KEEP:
                     callCommandsWithPeriod(channelData.getChannel(), request.getRequestMethods(), message.getMessageID(), false);
-                    channelData.getCmdInvokeTime().put(message, TimeUtils.getCurrentTimeMillis());
+                    channelData.getCmdInvokeTime().put(message, NulsDateUtils.getCurrentTimeMillis());
                     return true;
                 case Constants.EXECUTE_AND_REMOVE:
                     callCommandsWithPeriod(channelData.getChannel(), request.getRequestMethods(), message.getMessageID(), false);
-                    channelData.getCmdInvokeTime().put(message, TimeUtils.getCurrentTimeMillis());
+                    channelData.getCmdInvokeTime().put(message, NulsDateUtils.getCurrentTimeMillis());
                     return false;
                 case Constants.SKIP_AND_KEEP:
                     return true;
@@ -168,8 +169,6 @@ public class RequestMessageProcessor {
             Construct the returned message object
              */
             Response response = MessageUtil.newResponse(messageId, Response.FAIL, "");
-//            response.setRequestID(messageId);
-//            response.setResponseStatus(Constants.BOOLEAN_FALSE);
             try {
                  /*
                 从本地注册的cmd中得到对应的方法
@@ -188,7 +187,7 @@ public class RequestMessageProcessor {
                     response.setResponseErrorCode(CommonCodeConstanst.CMD_NOTFOUND.getCode());
                     Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
                     rspMessage.setMessageData(response);
-                    ConnectManager.sendMessage(channel, JSONUtils.obj2json(rspMessage));
+                    ConnectManager.sendMessage(channel, SerializeUtil.getBuffer(JSONUtils.obj2ByteArray(rspMessage)));
                     return;
                 }
 
@@ -202,12 +201,12 @@ public class RequestMessageProcessor {
                     response.setResponseErrorCode(CommonCodeConstanst.PARAMETER_ERROR.getCode());
                     Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
                     rspMessage.setMessageData(response);
-                    ConnectManager.sendMessage(channel, JSONUtils.obj2json(rspMessage));
+                    ConnectManager.sendMessage(channel, SerializeUtil.getBuffer(JSONUtils.obj2ByteArray(rspMessage)));
                     return;
                 }
 
                 Message rspMessage = execute(cmdDetail, params, messageId);
-                ConnectManager.sendMessage(channel, JSONUtils.obj2json(rspMessage));
+                ConnectManager.sendMessage(channel, SerializeUtil.getBuffer(JSONUtils.obj2ByteArray(rspMessage)));
 
                 /*
                 执行成功之后判断该接口是否被订阅过，如果被订阅则改变该接口触发次数
@@ -222,7 +221,54 @@ public class RequestMessageProcessor {
                 response.setResponseErrorCode(CommonCodeConstanst.SYS_UNKOWN_EXCEPTION.getCode());
                 Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
                 rspMessage.setMessageData(response);
-                ConnectManager.sendMessage(channel, JSONUtils.obj2json(rspMessage));
+                ConnectManager.sendMessage(channel, SerializeUtil.getBuffer(JSONUtils.obj2ByteArray(rspMessage)));
+            }
+        }
+    }
+
+    /**
+     * 处理Request，不返回结果
+     * Processing Request, automatically calling the correct method, returning the result
+     *
+     * @param requestMethods 请求的方法集合 / The collections of request method
+     * @throws JsonProcessingException 服务器端处理异常
+     */
+    @SuppressWarnings("unchecked")
+    public static void callCommands(Map requestMethods) throws JsonProcessingException {
+        for (Object object : requestMethods.entrySet()) {
+            Map.Entry<String, Map> entry = (Map.Entry<String, Map>) object;
+            String method = entry.getKey();
+            Map params = entry.getValue();
+            try {
+                 /*
+                从本地注册的cmd中得到对应的方法
+                Get the corresponding method from the locally registered CMD
+                */
+                CmdDetail cmdDetail = params == null || params.get(Constants.VERSION_KEY_STR) == null
+                        ? ConnectManager.getLocalInvokeCmd(method)
+                        : ConnectManager.getLocalInvokeCmd(method, Double.parseDouble(params.get(Constants.VERSION_KEY_STR).toString()));
+
+                /*
+                找不到本地方法，则返回"CMD_NOT_FOUND"错误
+                If the local method cannot be found, the "CMD_NOT_FOUND" error is returned
+                */
+                if (cmdDetail == null) {
+                    Log.info("Call method does not exist!");
+                    return;
+                }
+
+                /*
+                根据注册信息进行参数的基础验证
+                Basic verification of parameters based on registration information
+                */
+                String validationString = paramsValidation(cmdDetail, params);
+                if (validationString != null) {
+                    Log.info("Parameter validation error!");
+                    return;
+                }
+                invoke(cmdDetail.getInvokeClass(), cmdDetail.getInvokeMethod(), params);
+            } catch (Exception e) {
+                Log.error(e);
             }
         }
     }
@@ -238,13 +284,13 @@ public class RequestMessageProcessor {
      * @throws Exception 调用的方法返回的任何异常 / Any exception returned by the invoked method
      */
     private static Message execute(CmdDetail cmdDetail, Map params, String messageId) throws Exception {
-        long startTimemillis = TimeUtils.getCurrentTimeMillis();
+        long startTimemillis = NulsDateUtils.getCurrentTimeMillis();
         Response response = invoke(cmdDetail.getInvokeClass(), cmdDetail.getInvokeMethod(), params);
         response.setRequestID(messageId);
         Map<String, Object> responseData = new HashMap<>(1);
         responseData.put(cmdDetail.getMethodName(), response.getResponseData());
         response.setResponseData(responseData);
-        response.setResponseProcessingTime((TimeUtils.getCurrentTimeMillis() - startTimemillis) + "");
+        response.setResponseProcessingTime((NulsDateUtils.getCurrentTimeMillis() - startTimemillis) + "");
         Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
         rspMessage.setMessageData(response);
         return rspMessage;
@@ -263,7 +309,7 @@ public class RequestMessageProcessor {
         rspMessage.setMessageData(realResponse);
         try {
             Log.debug("responseWithEventCount: " + JSONUtils.obj2json(rspMessage));
-            ConnectManager.sendMessage(channel, JSONUtils.obj2json(rspMessage));
+            ConnectManager.sendMessage(channel, SerializeUtil.getBuffer(JSONUtils.obj2ByteArray(rspMessage)));
         } catch (JsonProcessingException e) {
             Log.error(e);
         }
@@ -297,7 +343,7 @@ public class RequestMessageProcessor {
 //            return Constants.EXECUTE_AND_KEEP;
         }
 
-        if (TimeUtils.getCurrentTimeMillis() - channelData.getCmdInvokeTime().get(message) < subscriptionPeriod * Constants.MILLIS_PER_SECOND) {
+        if (NulsDateUtils.getCurrentTimeMillis() - channelData.getCmdInvokeTime().get(message) < subscriptionPeriod * Constants.MILLIS_PER_SECOND) {
             /*
             没有达到执行条件，返回SKIP_AND_KEEP（不执行，然后保留）
             If the execution condition is not met, return SKIP_AND_KEEP (not executed, then keep)

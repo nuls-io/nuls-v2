@@ -24,10 +24,18 @@
  */
 package io.nuls.network.rpc.cmd;
 
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.log.Log;
+import io.nuls.core.model.StringUtils;
+import io.nuls.core.rpc.cmd.BaseCmd;
+import io.nuls.core.rpc.model.*;
+import io.nuls.core.rpc.model.message.Response;
 import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.CmdConstant;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkErrorCode;
+import io.nuls.network.manager.MessageManager;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.StorageManager;
 import io.nuls.network.model.Node;
@@ -35,13 +43,6 @@ import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.po.GroupPo;
 import io.nuls.network.model.vo.NodeGroupVo;
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.core.rpc.cmd.BaseCmd;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.Parameter;
-import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.model.StringUtils;
 
 import java.util.*;
 
@@ -59,15 +60,18 @@ public class NodeGroupRpc extends BaseCmd {
      * nw_createNodeGroup
      * 主网创建跨链网络或者链工厂创建链
      */
+
     @CmdAnnotation(cmd = CmdConstant.CMD_NW_CREATE_NODEGROUP, version = 1.0,
-            description = "createNodeGroup")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "magicNumber", parameterType = "String")
-    @Parameter(parameterName = "maxOut", parameterType = "String")
-    @Parameter(parameterName = "maxIn", parameterType = "String")
-    @Parameter(parameterName = "minAvailableCount", parameterType = "String")
-    @Parameter(parameterName = "seedIps", parameterType = "String")
-    @Parameter(parameterName = "isMoonNode", parameterType = "int", parameterValidRange = "[0,1]")
+            description = "主网创建跨链网络或者链工厂创建链")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "连接的链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "magicNumber", requestType = @TypeDescriptor(value = long.class), parameterDes = "网络魔法参数"),
+            @Parameter(parameterName = "maxOut", requestType = @TypeDescriptor(value = int.class), parameterDes = "作为client主动对外最大连接数"),
+            @Parameter(parameterName = "maxIn", requestType = @TypeDescriptor(value = int.class), parameterDes = "作为sever允许外部最大连接数"),
+            @Parameter(parameterName = "minAvailableCount", requestType = @TypeDescriptor(value = int.class), parameterDes = "最小有效连接数"),
+            @Parameter(parameterName = "isCrossGroup", requestType = @TypeDescriptor(value = boolean.class), parameterDes = "是否创建跨链连接组:true 跨链连接，false 普通连接"),
+    })
+    @ResponseData(description = "无特定返回值，没有错误即成功")
     public Response createNodeGroup(Map params) {
         List<GroupPo> nodeGroupPos = new ArrayList<>();
         int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
@@ -96,16 +100,15 @@ public class NodeGroupRpc extends BaseCmd {
             }
         }
         int minAvailableCount = Integer.valueOf(String.valueOf(params.get("minAvailableCount")));
-        int isMoonNode = Integer.valueOf(String.valueOf(params.get("isMoonNode")));
-        boolean isMoonNet = (isMoonNode == 1);
-        if (!networkConfig.isMoonNode() && isMoonNet) {
-            LoggerUtil.logger().error("Local is not Moon net，but param isMoonNode is 1");
+        boolean isCrossGroup = Boolean.valueOf(params.get("isCrossGroup").toString());
+        if (!networkConfig.isMoonNode() && isCrossGroup) {
+            LoggerUtil.logger(chainId).error("Local is not Moon net，can not create CrossGroup");
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
         NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByMagic(magicNumber);
         if (null != nodeGroup) {
-            LoggerUtil.logger().error("getNodeGroupByMagic: nodeGroup  exist");
+            LoggerUtil.logger(chainId).error("getNodeGroupByMagic: nodeGroup  exist");
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         nodeGroup = new NodeGroup(magicNumber, chainId, maxIn, maxOut, minAvailableCount);
@@ -113,7 +116,12 @@ public class NodeGroupRpc extends BaseCmd {
         nodeGroupPos.add((GroupPo) nodeGroup.parseToPo());
         StorageManager.getInstance().getDbService().saveNodeGroups(nodeGroupPos);
         nodeGroupManager.addNodeGroup(nodeGroup.getChainId(), nodeGroup);
-        // 成功
+        // 发送地址请求列表
+        if (networkConfig.isMoonNode()) {
+            MessageManager.getInstance().sendGetCrossAddressMessage(nodeGroupManager.getMoonMainNet(), nodeGroup, false, true, true);
+        } else {
+            MessageManager.getInstance().sendGetCrossAddressMessage(nodeGroup, nodeGroup, false, true, true);
+        }
         return success();
     }
 
@@ -122,39 +130,41 @@ public class NodeGroupRpc extends BaseCmd {
      * 友链激活跨链
      */
     @CmdAnnotation(cmd = CmdConstant.CMD_NW_ACTIVE_CROSS, version = 1.0,
-            description = "activeCross")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "maxOut", parameterType = "int")
-    @Parameter(parameterName = "maxIn", parameterType = "int")
-    @Parameter(parameterName = "seedIps", parameterType = "String")
+            description = "跨链协议模块激活跨链")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "连接的链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "maxOut", requestType = @TypeDescriptor(value = String.class), parameterDes = "作为client主动对外最大连接数"),
+            @Parameter(parameterName = "maxIn", requestType = @TypeDescriptor(value = int.class), parameterDes = "作为sever允许外部最大连接数"),
+            @Parameter(parameterName = "seedIps", requestType = @TypeDescriptor(value = String.class), parameterDes = "种子连接节点ID,用逗号拼接")
+    })
+    @ResponseData(description = "无特定返回值，没有错误即成功")
     public Response activeCross(Map params) {
-        LoggerUtil.logger().info("params:chainId={},maxOut={},maxIn={},seedIps={}",params.get("chainId"),
-                params.get("maxOut"),params.get("maxIn"),params.get("seedIps"));
-        List<GroupPo> nodeGroupPos = new ArrayList<>();
         int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
+        LoggerUtil.logger(chainId).info("params:chainId={},maxOut={},maxIn={},seedIps={}", params.get("chainId"),
+                params.get("maxOut"), params.get("maxIn"), params.get("seedIps"));
+        List<GroupPo> nodeGroupPos = new ArrayList<>();
         int maxOut;
-        if (StringUtils.isNotBlank(String.valueOf(params.get("maxOut")))) {
-            maxOut = Integer.valueOf(String.valueOf(params.get("maxOut")));
-        } else {
+        if (null == params.get("maxOut") || 0 == Integer.valueOf(params.get("maxOut").toString())) {
             maxOut = networkConfig.getMaxOutCount();
-        }
-
-        int maxIn;
-        if (StringUtils.isNotBlank(String.valueOf(params.get("maxIn")))) {
-            maxIn = Integer.valueOf(String.valueOf(params.get("maxIn")));
         } else {
+            maxOut = Integer.valueOf(String.valueOf(params.get("maxOut")));
+        }
+        int maxIn;
+        if (null == params.get("maxIn") || 0 == Integer.valueOf(params.get("maxIn").toString())) {
             maxIn = networkConfig.getMaxInCount();
+        } else {
+            maxIn = Integer.valueOf(String.valueOf(params.get("maxIn")));
         }
         NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
         String seedIps = String.valueOf(params.get("seedIps"));
         //友链的跨链协议调用
         NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByChainId(chainId);
         if (null == nodeGroup) {
-            LoggerUtil.logger().error("getNodeGroupByMagic is null");
+            LoggerUtil.logger(chainId).error("getNodeGroupByMagic is null");
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         if (chainId != nodeGroup.getChainId()) {
-            LoggerUtil.logger().error("chainId != nodeGroup.getChainId()");
+            LoggerUtil.logger(chainId).error("chainId != nodeGroup.getChainId()");
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         nodeGroup.setMaxCrossIn(maxIn);
@@ -166,7 +176,7 @@ public class NodeGroupRpc extends BaseCmd {
         }
         for (String croosSeed : ipList) {
             String[] crossAddr = croosSeed.split(NetworkConstant.COLON);
-            nodeGroup.addNeedCheckNode(crossAddr[0], Integer.valueOf(crossAddr[1]), Integer.valueOf(crossAddr[1]),true);
+            nodeGroup.addNeedCheckNode(crossAddr[0], Integer.valueOf(crossAddr[1]), Integer.valueOf(crossAddr[1]), true);
         }
         networkConfig.setMoonSeedIpList(ipList);
         nodeGroup.setCrossActive(true);
@@ -178,8 +188,11 @@ public class NodeGroupRpc extends BaseCmd {
      * 查看指定网络组信息
      */
     @CmdAnnotation(cmd = CmdConstant.CMD_NW_GET_GROUP_BY_CHAINID, version = 1.0,
-            description = "getGroupByChainId")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
+            description = "获取节点组信息")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "连接的链Id,取值区间[1-65535]")
+    })
+    @ResponseData(description = "返回节点组信息", responseType = @TypeDescriptor(value = NodeGroupVo.class))
     public Response getGroupByChainId(Map params) {
         int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
         NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
@@ -191,10 +204,6 @@ public class NodeGroupRpc extends BaseCmd {
         NodeGroupVo nodeGroupVo = new NodeGroupVo();
         nodeGroupVo.setChainId(nodeGroup.getChainId());
         nodeGroupVo.setMagicNumber(nodeGroup.getMagicNumber());
-//        if(null != nodeGroupConnector){
-//            nodeGroupVo.setBlockHash(nodeGroupConnector.getBlockHash());
-//            nodeGroupVo.setBlockHeight(nodeGroupConnector.getBlockHeight());
-//        }
         nodeGroupVo.setConnectCount(nodeGroup.getLocalNetNodeContainer().getConnectedNodes().size());
         nodeGroupVo.setDisConnectCount(nodeGroup.getLocalNetNodeContainer().getCanConnectNodes().size()
                 + nodeGroup.getLocalNetNodeContainer().getDisconnectNodes().size() +
@@ -203,8 +212,7 @@ public class NodeGroupRpc extends BaseCmd {
         nodeGroupVo.setConnectCrossCount(nodeGroup.getCrossNodeContainer().getConnectedNodes().size());
         nodeGroupVo.setDisConnectCrossCount(nodeGroup.getCrossNodeContainer().getCanConnectNodes().size()
                 + nodeGroup.getCrossNodeContainer().getDisconnectNodes().size() +
-                nodeGroup.getCrossNodeContainer().getUncheckNodes().size() +
-                nodeGroup.getCrossNodeContainer().getFailNodes().size());
+                nodeGroup.getCrossNodeContainer().getUncheckNodes().size());
         nodeGroupVo.setInCount(nodeGroup.getLocalNetNodeContainer().getConnectedCount(Node.IN));
         nodeGroupVo.setOutCount(nodeGroup.getLocalNetNodeContainer().getConnectedCount(Node.OUT));
         nodeGroupVo.setInCrossCount(nodeGroup.getCrossNodeContainer().getConnectedCount(Node.IN));
@@ -227,19 +235,26 @@ public class NodeGroupRpc extends BaseCmd {
      * 查看指定网络组信息
      */
     @CmdAnnotation(cmd = CmdConstant.CMD_NW_GET_CHAIN_CONNECT_AMOUNT, version = 1.0,
-            description = "nw_getChainConnectAmount")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "isCross", parameterType = "boolean")
+            description = "获取指定网络组可连接数量")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "连接的链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "isCross", requestType = @TypeDescriptor(value = boolean.class), parameterDes = "true，获取跨链连接数，false本地网络连接数")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象",
+            responseType = @TypeDescriptor(value = List.class, collectionElement = Map.class, mapKeys = {
+                    @Key(name = "connectAmount", valueType = Integer.class, description = "可连接数")
+            })
+    )
     public Response getChainConnectAmount(Map params) {
+        int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
         try {
-            int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
             NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
             boolean isCross = Boolean.valueOf(String.valueOf(params.get("isCross")));
             Map<String, Object> rtMap = new HashMap<>();
             rtMap.put("connectAmount", nodeGroup.getAvailableNodes(isCross).size());
             return success(rtMap);
         } catch (Exception e) {
-            LoggerUtil.logger().error("", e);
+            LoggerUtil.logger(chainId).error(e);
             return failed(e.getMessage());
         }
     }
@@ -250,8 +265,11 @@ public class NodeGroupRpc extends BaseCmd {
      * 注销指定网络组信息
      */
     @CmdAnnotation(cmd = CmdConstant.CMD_NW_GET_DELETE_NODEGROUP, version = 1.0,
-            description = "delGroupByChainId")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
+            description = "删除指定网络组")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "连接的链Id,取值区间[1-65535]")
+    })
+    @ResponseData(description = "无特定返回值，没有错误即成功")
     public Response delGroupByChainId(Map params) {
         int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
         StorageManager.getInstance().getDbService().deleteGroup(chainId);
@@ -266,7 +284,12 @@ public class NodeGroupRpc extends BaseCmd {
      * 查询跨链种子节点
      */
     @CmdAnnotation(cmd = CmdConstant.CMD_NW_GET_SEEDS, version = 1.0,
-            description = "delGroupByChainId")
+            description = "查看跨链网络提供的种子节点")
+    @ResponseData(name = "返回值", description = "返回一个Map对象",
+            responseType = @TypeDescriptor(value = List.class, collectionElement = Map.class, mapKeys = {
+                    @Key(name = "seedsIps", valueType = String.class, description = "主网可连接的种子节点ID，逗号进行拼接")
+            })
+    )
     public Response getCrossSeeds(Map params) {
         List<String> seeds = networkConfig.getMoonSeedIpList();
         if (null == seeds) {
@@ -277,23 +300,49 @@ public class NodeGroupRpc extends BaseCmd {
             seedsStr.append(seed);
             seedsStr.append(",");
         }
-        Map<String,String> rtMap = new HashMap<>(1);
+        Map<String, String> rtMap = new HashMap<>(1);
         if (seedsStr.length() > 0) {
-            rtMap.put("seedsIps",seedsStr.substring(0, seedsStr.length()-1));
-        }else{
-            rtMap.put("seedsIps","");
+            rtMap.put("seedsIps", seedsStr.substring(0, seedsStr.length() - 1));
+        } else {
+            rtMap.put("seedsIps", "");
         }
         return success(rtMap);
     }
 
+    /**
+     * @param params
+     * @return
+     */
+
+    @CmdAnnotation(cmd = CmdConstant.CMD_NW_GET_MAIN_NET_MAGIC_NUMBER, version = 1.0,
+            description = "查看主网的魔法参数")
+    @ResponseData(name = "返回值", description = "返回一个Map对象",
+            responseType = @TypeDescriptor(value = List.class, collectionElement = Map.class, mapKeys = {
+                    @Key(name = "value", valueType = Long.class, description = "主网魔法参数")
+            })
+    )
+    public Response getMainMagicNumber(Map params) {
+        try {
+            Map<String, Object> rtMap = new HashMap<>();
+            rtMap.put("value", networkConfig.getPacketMagic());
+            return success(rtMap);
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(NetworkErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+
+    }
 
     /**
      * nw_reconnect
      * 重连网络
      */
     @CmdAnnotation(cmd = CmdConstant.CMD_NW_RECONNECT, version = 1.0,
-            description = "reconnect")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
+            description = "本地网络重启")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "组网的链Id,取值区间[1-65535]")
+    })
+    @ResponseData(description = "无特定返回值，没有错误即成功")
     public Response reconnect(Map params) {
         int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
         NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
@@ -307,9 +356,14 @@ public class NodeGroupRpc extends BaseCmd {
      * 获取链组信息
      */
     @CmdAnnotation(cmd = CmdConstant.CMD_NW_GET_GROUPS, version = 1.0,
-            description = "getGroups")
-    @Parameter(parameterName = "startPage", parameterType = "int", parameterValidRange = "[0,65535]")
-    @Parameter(parameterName = "pageSize", parameterType = "int", parameterValidRange = "[0,65535]")
+            description = "分页获取网络组信息,startPage与pageSize 都为0时，不分页，返回所有网络组信息")
+    @Parameters(value = {
+            @Parameter(parameterName = "startPage", requestType = @TypeDescriptor(value = int.class), parameterDes = "开始页数"),
+            @Parameter(parameterName = "pageSize", requestType = @TypeDescriptor(value = int.class), parameterDes = "每页展示数量")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Page对象，这里只描述Page对象中的集合",
+            responseType = @TypeDescriptor(value = List.class, collectionElement = NodeGroupVo.class)
+    )
     public Response getGroups(Map params) {
         int startPage = Integer.valueOf(String.valueOf(params.get("startPage")));
         int pageSize = Integer.valueOf(String.valueOf(params.get("pageSize")));

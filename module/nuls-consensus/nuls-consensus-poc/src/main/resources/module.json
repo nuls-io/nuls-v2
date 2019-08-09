@@ -1,9 +1,8 @@
 {
-  "dataFolder": "consensus",
-  "packingInterval": 10000,
-  "inflationAmount": 500000000000000,
-  "redPublishLockTime": 3600000,
-  "stopAgentLockTime": 3600000,
+  "packingInterval": 10,
+  "inflationAmount": 18000000000,
+  "redPublishLockTime": 3600,
+  "stopAgentLockTime": 3600,
   "commissionRateMin": 10,
   "commissionRateMax": 100,
   "depositMin": 2000000000000,
@@ -12,17 +11,8 @@
   "commissionMax": 50000000000000,
   "entrusterDepositMin": 200000000000,
   "blockReward": 0,
-  "blockMaxSize": 30000000,
-  "assetId": 1,
-  "chainId": 2,
+  "blockMaxSize": 4900000,
   "moduleCode": "cs",
-  "mainChainId": 2,
-  "mainAssetId": 1,
-  "language": "en",
   "maxAgentCountOfAddress": "1",
-  "encoding": "UTF-8",
-  "mainChainCommissionRatio": 60,
-  "seedNodes": "tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp",
-  "password": "nuls123456",
-  "dependent": "bl:1.0,ac:1.0,nw:1.0,lg:1.0,tx:1.0,sc:1.0,pu:1.0"
+  "mainChainCommissionRatio": 60
 }

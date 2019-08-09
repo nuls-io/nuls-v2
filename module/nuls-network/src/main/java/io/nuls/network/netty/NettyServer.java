@@ -64,7 +64,7 @@ public class NettyServer {
                 .childOption(ChannelOption.SO_KEEPALIVE, true)
                 .childOption(ChannelOption.SO_SNDBUF, 128 * 1024)
                 .childOption(ChannelOption.SO_RCVBUF, 128 * 1024)
-                .option(ChannelOption.RCVBUF_ALLOCATOR, AdaptiveRecvByteBufAllocator.DEFAULT)
+                .childOption(ChannelOption.RCVBUF_ALLOCATOR, AdaptiveRecvByteBufAllocator.DEFAULT)
                 .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                 .childHandler(new NulsChannelInitializer<>(new ServerChannelHandler()));
     }
@@ -73,7 +73,7 @@ public class NettyServer {
         try {
             // Start the server.
             ChannelFuture future = serverBootstrap.bind(port).sync();
-            LoggerUtil.logger().info("boot server:" + port);
+            LoggerUtil.COMMON_LOG.info("boot server:" + port);
             // Wait until the server socket is closed.
             future.channel().closeFuture().sync();
         } catch (InterruptedException e) {
@@ -85,7 +85,7 @@ public class NettyServer {
         }
     }
 
-    public void shutdown() {
+    public void shutdownGracefully() {
         boss.shutdownGracefully();
         worker.shutdownGracefully();
     }

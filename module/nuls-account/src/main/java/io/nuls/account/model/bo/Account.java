@@ -29,11 +29,11 @@ import io.nuls.core.crypto.AESEncrypt;
 import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.EncryptedData;
 import io.nuls.core.crypto.Sha256Hash;
-import io.nuls.core.model.FormatValidUtils;
-import io.nuls.core.model.ObjectUtils;
 import io.nuls.core.exception.CryptoException;
 import io.nuls.core.exception.NulsException;
-import org.spongycastle.crypto.params.KeyParameter;
+import io.nuls.core.model.FormatValidUtils;
+import io.nuls.core.model.ObjectUtils;
+import org.bouncycastle.crypto.params.KeyParameter;
 
 import java.io.Serializable;
 import java.math.BigInteger;
@@ -110,10 +110,7 @@ public class Account implements Serializable {
      * Whether the account is encrypted (Whether the password is set)
      */
     public boolean isEncrypted() {
-        if (getEncryptedPriKey() != null && getEncryptedPriKey().length > 0) {
-            return true;
-        }
-        return false;
+        return getEncryptedPriKey() != null && getEncryptedPriKey().length > 0;
     }
 
     /**
@@ -142,10 +139,7 @@ public class Account implements Serializable {
      */
     public boolean unlock(String password) throws NulsException {
         decrypt(password);
-        if (isLocked()) {
-            return false;
-        }
-        return true;
+        return !isLocked();
     }
 
     /**
@@ -176,10 +170,7 @@ public class Account implements Serializable {
         BigInteger newPriv = new BigInteger(1, unencryptedPrivateKey);
         ECKey key = ECKey.fromPrivate(newPriv);
 
-        if (!Arrays.equals(key.getPubKey(), getPubKey())) {
-            return false;
-        }
-        return true;
+        return Arrays.equals(key.getPubKey(), getPubKey());
     }
 
     /**

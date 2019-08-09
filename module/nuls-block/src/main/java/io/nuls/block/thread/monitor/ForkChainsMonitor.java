@@ -25,14 +25,15 @@ import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
-import io.nuls.block.rpc.call.ConsensusUtil;
+import io.nuls.block.rpc.call.ConsensusCall;
+import io.nuls.block.rpc.call.TransactionCall;
 import io.nuls.core.log.logback.NulsLogger;
 
 import java.util.SortedSet;
 import java.util.concurrent.locks.StampedLock;
 
-import static io.nuls.block.constant.Constant.CONSENSUS_WAITING;
-import static io.nuls.block.constant.Constant.CONSENSUS_WORKING;
+import static io.nuls.block.constant.Constant.MODULE_WAITING;
+import static io.nuls.block.constant.Constant.MODULE_WORKING;
 
 /**
  * 分叉链的形成原因分析:由于网络延迟,同时有两个矿工发布同一高度的区块,或者被恶意节点攻击
@@ -64,7 +65,7 @@ public class ForkChainsMonitor extends BaseMonitor {
                 if (!lock.validate(stamp)) {
                     continue;
                 }
-                if (forkChains.size() < 1) {
+                if (forkChains.isEmpty()) {
                     break;
                 }
                 commonLog.info("####################################fork chains######################################");
@@ -96,13 +97,15 @@ public class ForkChainsMonitor extends BaseMonitor {
                 // exclusive access
                 //进行切换,切换前变更模块运行状态
                 context.setStatus(StatusEnum.SWITCHING);
-                ConsensusUtil.notice(chainId, CONSENSUS_WAITING);
+                ConsensusCall.notice(chainId, MODULE_WAITING);
+                TransactionCall.notice(chainId, MODULE_WAITING);
                 if (BlockChainManager.switchChain(chainId, masterChain, switchChain)) {
                     commonLog.info("chainId-" + chainId + ", switchChain success");
                 } else {
                     commonLog.info("chainId-" + chainId + ", switchChain fail, auto rollback success");
                 }
-                ConsensusUtil.notice(chainId, CONSENSUS_WORKING);
+                ConsensusCall.notice(chainId, MODULE_WORKING);
+                TransactionCall.notice(chainId, MODULE_WORKING);
                 break;
             }
         } finally {

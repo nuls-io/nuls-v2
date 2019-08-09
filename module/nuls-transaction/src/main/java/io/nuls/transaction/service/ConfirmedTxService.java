@@ -1,6 +1,6 @@
 package io.nuls.transaction.service;
 
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.core.exception.NulsException;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
@@ -22,7 +22,7 @@ public interface ConfirmedTxService {
      * @param hash
      * @return TransactionConfirmedPO
      */
-    TransactionConfirmedPO getConfirmedTransaction(Chain chain, NulsDigestData hash);
+    TransactionConfirmedPO getConfirmedTransaction(Chain chain, NulsHash hash);
 
     /**
      * 保存创世块的交易
@@ -41,7 +41,7 @@ public interface ConfirmedTxService {
      * @param blockHeader
      * @return
      */
-    boolean saveTxList(Chain chain, List<String> txStrList, String blockHeader) throws NulsException;
+    boolean saveTxList(Chain chain, List<String> txStrList, List<String> contractList, String blockHeader) throws NulsException;
 
 
 
@@ -52,7 +52,7 @@ public interface ConfirmedTxService {
      * @param blockHeader
      * @return
      */
-    boolean rollbackTxList(Chain chain, List<NulsDigestData> txHashList, String blockHeader) throws NulsException;
+    boolean rollbackTxList(Chain chain, List<NulsHash> txHashList, String blockHeader) throws NulsException;
 
 
     /**
@@ -73,4 +73,13 @@ public interface ConfirmedTxService {
      * @return List<String> tx list
      */
     List<String> getTxListExtend(Chain chain, List<String> hashList, boolean allHits);
+
+
+    /**
+     * 查询出入的交易hash中,在未确认库中不存在的交易hash
+     * @param chain
+     * @param hashList
+     * @return
+     */
+    List<String> getNonexistentUnconfirmedHashList(Chain chain, List<String> hashList);
 }

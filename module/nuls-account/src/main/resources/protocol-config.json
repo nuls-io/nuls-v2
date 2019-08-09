@@ -2,33 +2,26 @@
   {
     "version": "1",
     "extend": "",
-    "moduleValidator": "ac_accountTxValidate",
-    "moduleCommit": "ac_commitTx",
-    "moduleRollback": "ac_rollbackTx",
-    "validTransactions": [
+    "validTxs": [
       {
         "type": "2",
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
-        "handler": "io.nuls.account.rpc.cmd.AccountTransactionHandler",
-        "validate": "transferTxValidate",
-        "commit": "",
-        "rollback": ""
+        "verifyFee": true,
+        "handler": "TransferProcessorV1"
       },
       {
         "type": "3",
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
-        "handler": "io.nuls.account.rpc.cmd.AccountTransactionHandler",
-        "validate": "aliasTxValidate",
-        "commit": "aliasTxCommit",
-        "rollback": "aliasTxRollback"
+        "verifyFee": true,
+        "handler": "AliasProcessorV1"
       }
     ],
-    "validMessages": [],
-    "invalidTransactions": "",
-    "invalidMessages": ""
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
   }
 ]

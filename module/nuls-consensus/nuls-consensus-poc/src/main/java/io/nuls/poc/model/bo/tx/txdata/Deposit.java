@@ -28,11 +28,13 @@ package io.nuls.poc.model.bo.tx.txdata;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.basic.TransactionLogicData;
 import io.nuls.base.data.Address;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.BaseNulsData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -46,14 +48,23 @@ import java.util.Set;
  * @author tag
  * 2018/11/28
  */
-public class Deposit extends TransactionLogicData {
+@ApiModel(name = "委托信息")
+public class Deposit extends BaseNulsData {
+    @ApiModelProperty(description = "委托金额")
     private BigInteger deposit;
-    private NulsDigestData agentHash;
+    @ApiModelProperty(description = "委托的节点HASH")
+    private NulsHash agentHash;
+    @ApiModelProperty(description = "委托账户")
     private byte[] address;
+    @ApiModelProperty(description = "委托时间")
     private transient long time;
+    @ApiModelProperty(description = "状态")
     private transient int status;
-    private transient NulsDigestData txHash;
+    @ApiModelProperty(description = "委托交易HASH")
+    private transient NulsHash txHash;
+    @ApiModelProperty(description = "委托交易被打包的高度")
     private transient long blockHeight = -1L;
+    @ApiModelProperty(description = "退出委托高度")
     private transient long delHeight = -1L;
 
     /**
@@ -63,7 +74,7 @@ public class Deposit extends TransactionLogicData {
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeBigInteger(deposit);
         stream.write(address);
-        stream.writeNulsData(agentHash);
+        stream.write(agentHash.getBytes());
 
     }
 
@@ -79,7 +90,7 @@ public class Deposit extends TransactionLogicData {
         int size = 0;
         size += SerializeUtils.sizeOfBigInteger();
         size += Address.ADDRESS_LENGTH;
-        size += this.agentHash.size();
+        size += NulsHash.HASH_LENGTH;
         return size;
     }
 
@@ -91,11 +102,11 @@ public class Deposit extends TransactionLogicData {
         this.deposit = deposit;
     }
 
-    public NulsDigestData getAgentHash() {
+    public NulsHash getAgentHash() {
         return agentHash;
     }
 
-    public void setAgentHash(NulsDigestData agentHash) {
+    public void setAgentHash(NulsHash agentHash) {
         this.agentHash = agentHash;
     }
 
@@ -115,11 +126,11 @@ public class Deposit extends TransactionLogicData {
         this.status = status;
     }
 
-    public NulsDigestData getTxHash() {
+    public NulsHash getTxHash() {
         return txHash;
     }
 
-    public void setTxHash(NulsDigestData txHash) {
+    public void setTxHash(NulsHash txHash) {
         this.txHash = txHash;
     }
 
@@ -147,7 +158,6 @@ public class Deposit extends TransactionLogicData {
         this.address = address;
     }
 
-    @Override
     public Set<byte[]> getAddresses() {
         Set<byte[]> addressSet = new HashSet<>();
         addressSet.add(this.address);

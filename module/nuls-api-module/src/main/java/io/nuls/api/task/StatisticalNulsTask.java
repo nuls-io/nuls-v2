@@ -6,7 +6,8 @@ import io.nuls.api.cache.ApiCache;
 import io.nuls.api.db.AccountService;
 import io.nuls.api.db.AgentService;
 import io.nuls.api.manager.CacheManager;
-import io.nuls.api.model.po.db.ContextInfo;
+import io.nuls.api.model.po.db.CoinContextInfo;
+import io.nuls.base.basic.AddressTool;
 import io.nuls.core.core.ioc.SpringLiteContext;
 
 import java.math.BigInteger;
@@ -32,11 +33,13 @@ public class StatisticalNulsTask implements Runnable {
         BigInteger consensusTotal = agentService.getConsensusCoinTotal(chainId);
 
         ApiCache apiCache = CacheManager.getCache(chainId);
-        ContextInfo contextInfo = apiCache.getContextInfo();
+        CoinContextInfo contextInfo = apiCache.getCoinContextInfo();
         //团队持有数量
         BigInteger teamNuls = accountService.getAccountTotalBalance(chainId, ApiContext.TEAM_ADDRESS);
         //销毁数量
-        BigInteger destroyNuls = accountService.getAccountTotalBalance(chainId, ApiContext.DESTROY_ADDRESS);
+        byte[] address = AddressTool.getAddress(ApiContext.blackHolePublicKey, chainId);
+        String destroyAddress = AddressTool.getStringAddressByBytes(address);
+        BigInteger destroyNuls = accountService.getAccountTotalBalance(chainId, destroyAddress);
         //商务持有数量
         BigInteger businessNuls = accountService.getAccountTotalBalance(chainId, ApiContext.BUSINESS_ADDRESS);
         //社区持有数量

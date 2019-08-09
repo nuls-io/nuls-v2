@@ -25,17 +25,10 @@
 
 package io.nuls.network.manager.handler.message;
 
-import io.nuls.network.manager.MessageFactory;
-import io.nuls.network.manager.MessageManager;
 import io.nuls.network.manager.handler.base.BaseMessageHandler;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
-import io.nuls.network.model.message.GetTimeMessage;
-import io.nuls.network.model.message.PingMessage;
-import io.nuls.network.model.message.PongMessage;
-import io.nuls.network.model.message.TimeMessage;
 import io.nuls.network.model.message.base.BaseMessage;
-import io.nuls.network.utils.LoggerUtil;
 
 /**
  * get time message handler
@@ -63,7 +56,7 @@ public class PongMessageHandler extends BaseMessageHandler {
      */
     @Override
     public NetworkEventResult recieve(BaseMessage message, Node node) {
-        PongMessage pongMessage = (PongMessage) message;
+//        PongMessage pongMessage = (PongMessage) message;
 //        LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("PongMessageHandler Recieve:magicNum={}, node={},randCode={}", pongMessage.getHeader().getMagicNumber(), node.getId(), pongMessage.getMsgBody().getRandomCode());
         return NetworkEventResult.getResultSuccess();
     }

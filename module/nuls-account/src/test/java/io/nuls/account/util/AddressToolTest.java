@@ -15,6 +15,15 @@ import static junit.framework.TestCase.assertTrue;
  * @author Niels
  */
 public class AddressToolTest {
+    @Test
+    public void createAccountByPrefix() {
+        AddressTool.addPrefix(4, "LJS");
+        for (int i = 0; i < 10; i++) {
+            ECKey key = new ECKey();
+            Address address = new Address(4, BaseConstant.DEFAULT_ADDRESS_TYPE, SerializeUtils.sha256hash160(key.getPubKey()));
+            System.out.println(address.toString() + "================" + address.getBase58() + "===========" + key.getPrivateKeyAsHex());
+        }
+    }
 
     @Test
     public void createAccount() throws NulsException {

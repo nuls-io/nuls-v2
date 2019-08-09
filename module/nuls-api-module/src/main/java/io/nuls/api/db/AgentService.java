@@ -28,6 +28,8 @@ public interface AgentService {
 
     PageInfo<AgentInfo> getAgentList(int chainId, int type, int pageNumber, int pageSize);
 
+    PageInfo<AgentInfo> getAgentList(int chainId, int pageNumber, int pageSize);
+
     long agentsCount(int chainId, long startHeight);
 
     BigInteger getConsensusCoinTotal(int chainId);

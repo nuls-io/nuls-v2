@@ -28,8 +28,8 @@ package io.nuls.api.model.entity;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.basic.TransactionLogicData;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.BaseNulsData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.core.exception.NulsException;
 
 import java.io.IOException;
@@ -43,17 +43,17 @@ import java.util.Set;
  * @author tag
  * 2018/11/20
  */
-public class StopAgent extends TransactionLogicData {
+public class StopAgent extends BaseNulsData {
 
     private byte[] address;
 
-    private NulsDigestData createTxHash;
+    private NulsHash createTxHash;
     /**
      * serialize important field
      */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(this.createTxHash);
+        stream.write(this.createTxHash.getBytes());
 
     }
 
@@ -64,10 +64,9 @@ public class StopAgent extends TransactionLogicData {
 
     @Override
     public int size() {
-        return this.createTxHash.size();
+        return this.createTxHash.getBytes().length;
     }
 
-    @Override
     public Set<byte[]> getAddresses() {
         Set<byte[]> addressSet = new HashSet<>();
         if(null!=address){
@@ -84,11 +83,11 @@ public class StopAgent extends TransactionLogicData {
         this.address = address;
     }
 
-    public NulsDigestData getCreateTxHash() {
+    public NulsHash getCreateTxHash() {
         return createTxHash;
     }
 
-    public void setCreateTxHash(NulsDigestData createTxHash) {
+    public void setCreateTxHash(NulsHash createTxHash) {
         this.createTxHash = createTxHash;
     }
 }

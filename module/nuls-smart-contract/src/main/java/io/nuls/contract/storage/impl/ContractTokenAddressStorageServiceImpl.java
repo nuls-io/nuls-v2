@@ -27,7 +27,6 @@ package io.nuls.contract.storage.impl;
 
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.storage.ContractTokenAddressStorageService;
-import io.nuls.contract.util.ContractDBUtil;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Component;
@@ -49,11 +48,11 @@ public class ContractTokenAddressStorageServiceImpl implements ContractTokenAddr
     private final String baseArea = DB_NAME_CONTRACT_NRC20_TOKEN_ADDRESS + "_";
 
     @Override
-    public Result saveTokenAddress(int chainId, byte[] contractAddressBytes) {
+    public Result saveTokenAddress(int chainId, byte[] contractAddressBytes) throws Exception {
         if (contractAddressBytes == null) {
             return Result.getFailed(ContractErrorCode.NULL_PARAMETER);
         }
-        boolean result = ContractDBUtil.putModel(baseArea + chainId, contractAddressBytes, EMPTY);
+        boolean result = RocksDBService.put(baseArea + chainId, contractAddressBytes, EMPTY);
         if (result) {
             return ContractUtil.getSuccess();
         } else {

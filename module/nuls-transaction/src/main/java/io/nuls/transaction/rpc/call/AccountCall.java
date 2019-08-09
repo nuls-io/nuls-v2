@@ -34,14 +34,14 @@ public class AccountCall {
             int chainId = AddressTool.getChainIdByAddress(address);
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("address", address);
-            HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.AC.abbr, "ac_getMultiSigAccount", params);
+            HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.AC.abbr, "ac_getMultiSignAccount", params);
             String mAccountStr = (String) result.get("value");
             return null == mAccountStr ? null : TxUtil.getInstanceRpcStr(mAccountStr, MultiSigAccount.class);
         } catch (RuntimeException e){
             Log.error(e);
-            throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+            throw new NulsException(TxErrorCode.RPC_REQUEST_FAILD);
         }
     }
 

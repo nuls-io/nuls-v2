@@ -25,21 +25,25 @@
  */
 package io.nuls.ledger;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.model.ByteUtils;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.modulebootstrap.Module;
 import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.core.rpc.util.AddressPrefixDatas;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.ledger.config.LedgerConfig;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.manager.LedgerChainManager;
+import io.nuls.ledger.service.impl.TaskManager;
 import io.nuls.ledger.utils.LoggerUtil;
-
-import java.util.Random;
 
 /**
  * @author: Niels Wang
@@ -49,7 +53,8 @@ import java.util.Random;
 public class LedgerBootstrap extends RpcModule {
     @Autowired
     LedgerConfig ledgerConfig;
-
+    @Autowired
+    AddressPrefixDatas addressPrefixDatas;
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
             args = new String[]{"ws://" + HostInfo.getLocalIP() + ":7771"};
@@ -57,12 +62,12 @@ public class LedgerBootstrap extends RpcModule {
         NulsRpcModuleBootstrap.run("io.nuls", args);
     }
 
-
     @Override
     public Module[] declareDependent() {
 
         return new Module[]{
-                new Module(ModuleE.NW.abbr, "1.0")};
+                new Module(ModuleE.NW.abbr, "1.0"),
+                new Module(ModuleE.BL.abbr, "1.0")};
 
     }
 
@@ -78,16 +83,17 @@ public class LedgerBootstrap extends RpcModule {
     public void init() {
         try {
             super.init();
-            LoggerUtil.logLevel = ledgerConfig.getLogLevel();
-            //转为ms
-            LedgerConstant.UNCONFIRM_NONCE_EXPIRED_TIME = ledgerConfig.getUnconfirmedTxExpired() * 1000;
+            //增加地址工具类初始化
+            AddressTool.init(addressPrefixDatas);
+            LedgerConstant.UNCONFIRM_NONCE_EXPIRED_TIME = ledgerConfig.getUnconfirmedTxExpired();
             LedgerConstant.DEFAULT_ENCODING = ledgerConfig.getEncoding();
+            LedgerConstant.blackHolePublicKey = HexUtil.decode(ledgerConfig.getBlackHolePublicKey());
             LedgerChainManager ledgerChainManager = SpringLiteContext.getBean(LedgerChainManager.class);
             ledgerChainManager.initChains();
-            LoggerUtil.logger().info("Ledger data init  complete!");
+            LoggerUtil.COMMON_LOG.info("Ledger data init  complete!");
         } catch (Exception e) {
-            LoggerUtil.logger().error(e);
-            LoggerUtil.logger().error("start fail...");
+            LoggerUtil.COMMON_LOG.error(e);
+            LoggerUtil.COMMON_LOG.error("start fail...");
             System.exit(-1);
         }
 
@@ -96,14 +102,31 @@ public class LedgerBootstrap extends RpcModule {
     @Override
     public boolean doStart() {
         //springLite容器初始化AppInitializing
-        LoggerUtil.logger().info("Ledger READY");
+        LoggerUtil.COMMON_LOG.info("Ledger READY");
         return true;
     }
 
     @Override
+    public void onDependenciesReady(Module module) {
+        try {
+            /*处理区块信息*/
+            if (ModuleE.BL.abbr.equals(module.getName())) {
+                LedgerChainManager ledgerChainManager = SpringLiteContext.getBean(LedgerChainManager.class);
+                ledgerChainManager.syncBlockHeight();
+            }
+
+        } catch (Exception e) {
+            LoggerUtil.COMMON_LOG.error(e);
+            System.exit(-1);
+
+        }
+    }
+
+    @Override
     public RpcModuleState onDependenciesReady() {
-        LoggerUtil.logger().info("Ledger onDependenciesReady");
-//        TaskManager.getInstance().start();
+        LoggerUtil.COMMON_LOG.info("Ledger onDependenciesReady");
+        NulsDateUtils.getInstance().start(5 * 60 * 1000);
+        TaskManager.getInstance().start();
         return RpcModuleState.Running;
     }
 

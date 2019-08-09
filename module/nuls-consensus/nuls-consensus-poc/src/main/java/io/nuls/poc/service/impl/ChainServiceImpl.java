@@ -1,5 +1,6 @@
 package io.nuls.poc.service.impl;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.core.basic.Result;
@@ -11,10 +12,10 @@ import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
+import io.nuls.poc.model.bo.config.ConfigBean;
 import io.nuls.poc.model.bo.round.MeetingMember;
 import io.nuls.poc.model.bo.round.MeetingRound;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
@@ -69,7 +70,7 @@ public class ChainServiceImpl implements ChainService {
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
         try {
-            List<String> txHexList = (List<String>)params.get(ConsensusConstant.PARAM_TX_HEX_LIST);
+            List<String> txHexList = (List<String>) params.get(ConsensusConstant.PARAM_TX_HEX_LIST);
             List<Transaction> txList = new ArrayList<>();
             for (String txHex : txHexList) {
                 Transaction tx = new Transaction();
@@ -79,13 +80,13 @@ public class ChainServiceImpl implements ChainService {
             batchValidator.batchValid(txList, chain);
             List<String> resultTxHashList = new ArrayList<>();
             for (Transaction tx : txList) {
-                resultTxHashList.add(tx.getHash().getDigestHex());
+                resultTxHashList.add(tx.getHash().toHex());
             }
             Map<String, Object> result = new HashMap<>(2);
-            result.put("list",resultTxHashList);
+            result.put("list", resultTxHashList);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
         } catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(e.getErrorCode());
         }
     }
@@ -106,38 +107,29 @@ public class ChainServiceImpl implements ChainService {
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
         Map<String, Object> result = new HashMap<>(2);
-        result.put(ConsensusConstant.PARAM_RESULT_VALUE ,false);
-        //List<Transaction> commitSuccessList = new ArrayList<>();
+        result.put(ConsensusConstant.PARAM_RESULT_VALUE, false);
+        List<Transaction> commitSuccessList = new ArrayList<>();
         BlockHeader blockHeader = new BlockHeader();
         try {
             String headerHex = (String) params.get(ConsensusConstant.PARAM_BLOCK_HEADER_HEX);
             blockHeader.parse(RPCUtil.decode(headerHex), 0);
-            List<String> txHexList = (List<String>)params.get(ConsensusConstant.PARAM_TX_HEX_LIST);
+            List<String> txHexList = (List<String>) params.get(ConsensusConstant.PARAM_TX_HEX_LIST);
             for (String txHex : txHexList) {
                 Transaction tx = new Transaction();
                 tx.parse(RPCUtil.decode(txHex), 0);
-                if(!transactionCommit(tx,chain,blockHeader)){
-                    result.put(ConsensusConstant.PARAM_RESULT_VALUE ,false);
+                if (transactionCommit(tx, chain, blockHeader)) {
+                    commitSuccessList.add(tx);
+                } else {
+                    transactionBatchRollBack(commitSuccessList, chain, blockHeader);
+                    result.put(ConsensusConstant.PARAM_RESULT_VALUE, false);
                     return Result.getFailed(ConsensusErrorCode.SAVE_FAILED).setData(result);
                 }
-                /*if(transactionCommit(tx,chain,blockHeader)){
-                    commitSuccessList.add(tx);
-                }else{
-                    transactionBatchRollBack(commitSuccessList,chain,blockHeader);
-                    result.put(ConsensusConstant.PARAM_RESULT_VALUE ,false);
-                    return Result.getFailed(ConsensusErrorCode.SAVE_FAILED).setData(result);
-                }*/
             }
-            result.put(ConsensusConstant.PARAM_RESULT_VALUE ,true);
+            result.put(ConsensusConstant.PARAM_RESULT_VALUE, true);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
-        }catch (NulsException e){
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
-            /*try{
-                transactionBatchRollBack(commitSuccessList,chain,blockHeader);
-            }catch (NulsException re){
-                chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(re);
-            }*/
-            result.put(ConsensusConstant.PARAM_RESULT_VALUE ,false);
+        } catch (NulsException e) {
+            chain.getLogger().error(e);
+            result.put(ConsensusConstant.PARAM_RESULT_VALUE, false);
             return Result.getFailed(e.getErrorCode()).setData(result);
         }
     }
@@ -157,21 +149,21 @@ public class ChainServiceImpl implements ChainService {
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
         Map<String, Object> result = new HashMap<>(2);
-        result.put(ConsensusConstant.PARAM_RESULT_VALUE ,false);
+        result.put(ConsensusConstant.PARAM_RESULT_VALUE, false);
         try {
             String headerHex = (String) params.get(ConsensusConstant.PARAM_BLOCK_HEADER_HEX);
             BlockHeader blockHeader = new BlockHeader();
             blockHeader.parse(RPCUtil.decode(headerHex), 0);
-            List<String> txHexList = (List<String>)params.get(ConsensusConstant.PARAM_TX_HEX_LIST);
+            List<String> txHexList = (List<String>) params.get(ConsensusConstant.PARAM_TX_HEX_LIST);
             for (String txHex : txHexList) {
                 Transaction tx = new Transaction();
                 tx.parse(RPCUtil.decode(txHex), 0);
-                transactionRollback(tx,chain,blockHeader);
+                transactionRollback(tx, chain, blockHeader);
             }
-            result.put(ConsensusConstant.PARAM_RESULT_VALUE ,true);
+            result.put(ConsensusConstant.PARAM_RESULT_VALUE, true);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
-        }catch (NulsException e){
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+        } catch (NulsException e) {
+            chain.getLogger().error(e);
             return Result.getFailed(e.getErrorCode()).setData(result);
         }
     }
@@ -198,13 +190,13 @@ public class ChainServiceImpl implements ChainService {
             header.parse(RPCUtil.decode((String) params.get(ConsensusConstant.PARAM_BLOCK_HEADER)), 0);
             BlockHeader evidenceHeader = new BlockHeader();
             evidenceHeader.parse(RPCUtil.decode((String) params.get(ConsensusConstant.PARAM_EVIDENCE_HEADER)), 0);
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).info("Received new bifurcation evidence:"+header.getHeight());
+            chain.getLogger().info("Received new bifurcation evidence:" + header.getHeight());
             punishManager.addEvidenceRecord(chain, header, evidenceHeader);
             Map<String, Object> validResult = new HashMap<>(2);
             validResult.put("value", true);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(validResult);
         } catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(e.getErrorCode());
         }
     }
@@ -244,10 +236,10 @@ public class ChainServiceImpl implements ChainService {
             validResult.put("value", true);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(validResult);
         } catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(e.getErrorCode());
         } catch (IOException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(ConsensusErrorCode.DATA_PARSE_ERROR);
         }
     }
@@ -330,12 +322,12 @@ public class ChainServiceImpl implements ChainService {
             if (Arrays.equals(agent.getAgentAddress(), addressBytes)) {
                 //一个账户最多只能创建一个共识节点
                 agentCount = 1;
-                agentHash = agent.getTxHash().getDigestHex();
+                agentHash = agent.getTxHash().toHex();
                 break;
             }
         }
         List<Deposit> depositList = chain.getDepositList();
-        Set<NulsDigestData> agentSet = new HashSet<>();
+        Set<NulsHash> agentSet = new HashSet<>();
         BigInteger totalDeposit = BigInteger.ZERO;
         for (Deposit deposit : depositList) {
             if (deposit.getDelHeight() != -1L && deposit.getDelHeight() <= startBlockHeight) {
@@ -359,7 +351,7 @@ public class ChainServiceImpl implements ChainService {
         try {
             //todo 从账本模块获取账户可用余额
         } catch (Exception e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             dto.setUsableBalance(BigIntegerUtils.ZERO);
         }
         return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(dto);
@@ -387,6 +379,7 @@ public class ChainServiceImpl implements ChainService {
         }
         List<PunishLogDTO> yellowPunishList = null;
         List<PunishLogDTO> redPunishList = null;
+        int typeOfYellow = 2;
         //查询红牌交易
         if (type != 1) {
             redPunishList = new ArrayList<>();
@@ -396,7 +389,8 @@ public class ChainServiceImpl implements ChainService {
                 }
                 redPunishList.add(new PunishLogDTO(po));
             }
-        } else if (type != 2) {
+        }
+        if (type != typeOfYellow) {
             yellowPunishList = new ArrayList<>();
             for (PunishLogPo po : chain.getYellowPunishList()) {
                 if (StringUtils.isNotBlank(address) && !ByteUtils.arrayEquals(po.getAddress(), AddressTool.getAddress(address))) {
@@ -432,9 +426,9 @@ public class ChainServiceImpl implements ChainService {
             MeetingRound round = roundManager.resetRound(chain, true);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(round);
         } catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(e.getErrorCode());
-        }catch (Exception e){
+        } catch (Exception e) {
             return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
         }
     }
@@ -458,23 +452,154 @@ public class ChainServiceImpl implements ChainService {
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
         try {
-            BlockExtendsData extendsData = new BlockExtendsData(RPCUtil.decode((String)params.get(ConsensusConstant.PARAM_EXTEND)));
+            BlockExtendsData extendsData = new BlockExtendsData(RPCUtil.decode((String) params.get(ConsensusConstant.PARAM_EXTEND)));
             MeetingRound round = roundManager.getRoundByIndex(chain, extendsData.getRoundIndex());
-            if(round == null){
+            if (round == null) {
                 round = roundManager.getRound(chain, extendsData, false);
             }
             List<String> packAddressList = new ArrayList<>();
-            for (MeetingMember meetingMember:round.getMemberList()) {
+            for (MeetingMember meetingMember : round.getMemberList()) {
                 packAddressList.add(AddressTool.getStringAddressByBytes(meetingMember.getAgent().getPackingAddress()));
             }
             Map<String, Object> resultMap = new HashMap<>(2);
             resultMap.put("packAddressList", packAddressList);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(resultMap);
         } catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(e.getErrorCode());
-        }catch (Exception e){
+        } catch (Exception e) {
             return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
+        }
+    }
+
+    /**
+     * 获取共模块识配置信息
+     *
+     * @param params
+     * @return Result
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public Result getConsensusConfig(Map<String, Object> params) {
+        if (params == null || params.get(ConsensusConstant.PARAM_CHAIN_ID) == null) {
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
+        int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
+        if (chainId <= ConsensusConstant.MIN_VALUE) {
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
+        Chain chain = chainManager.getChainMap().get(chainId);
+        if (chain == null) {
+            return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
+        }
+        ConfigBean configBean = chain.getConfig();
+        Map<String, Object> map = new HashMap<>(8);
+        map.put("seedNodes", configBean.getSeedNodes());
+        map.put("inflationAmount", configBean.getInflationAmount());
+        map.put("agentAssetId", configBean.getAgentAssetId());
+        map.put("agentChainId", configBean.getAgentChainId());
+        map.put("awardAssetId", configBean.getAwardAssetId());
+        return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(map);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Result getAgentChangeInfo(Map<String, Object> params) {
+        if (params == null || params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.CURRENT_ROUND) == null) {
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
+        int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
+        if (chainId <= ConsensusConstant.MIN_VALUE) {
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
+        Chain chain = chainManager.getChainMap().get(chainId);
+        if (chain == null) {
+            return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
+        }
+        BlockExtendsData lastExtendsData = null;
+        String lastRoundStr = (String)params.get(ConsensusConstant.LAST_ROUND);
+        if(lastRoundStr != null){
+            lastExtendsData = new BlockExtendsData(RPCUtil.decode(lastRoundStr));
+        }
+        String currentRoundStr = (String)params.get(ConsensusConstant.CURRENT_ROUND);
+        BlockExtendsData currentExtendsData = new BlockExtendsData(RPCUtil.decode(currentRoundStr));
+        return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(roundManager.getAgentChangeInfo(chain, lastExtendsData, currentExtendsData));
+    }
+
+    /**
+     * 停止一条链
+     */
+    @Override
+    public Result stopChain(Map<String, Object> params) {
+        return null;
+    }
+
+    /**
+     * 启动一条新链
+     */
+    @Override
+    public Result runChain(Map<String, Object> params) {
+        return null;
+    }
+
+    @Override
+    public Result runMainChain(Map<String, Object> params) {
+        return null;
+    }
+
+    private boolean transactionCommit(Transaction tx, Chain chain, BlockHeader header) throws NulsException {
+        switch (tx.getType()) {
+            case (TxType.REGISTER_AGENT):
+            case (TxType.CONTRACT_CREATE_AGENT):
+                return agentManager.createAgentCommit(tx, header, chain);
+            case (TxType.STOP_AGENT):
+            case (TxType.CONTRACT_STOP_AGENT):
+                return agentManager.stopAgentCommit(tx, header, chain);
+            case (TxType.DEPOSIT):
+            case (TxType.CONTRACT_DEPOSIT):
+                return depositManager.depositCommit(tx, header, chain);
+            case (TxType.CANCEL_DEPOSIT):
+            case (TxType.CONTRACT_CANCEL_DEPOSIT):
+                return depositManager.cancelDepositCommit(tx, header, chain);
+            case (TxType.YELLOW_PUNISH):
+                return punishManager.yellowPunishCommit(tx, chain, header);
+            case (TxType.RED_PUNISH):
+                return punishManager.redPunishCommit(tx, chain, header);
+            case (TxType.COIN_BASE):
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private void transactionBatchRollBack(List<Transaction> txList, Chain chain, BlockHeader header) throws NulsException {
+        for (Transaction tx : txList) {
+            transactionRollback(tx, chain, header);
+        }
+    }
+
+    private boolean transactionRollback(Transaction tx, Chain chain, BlockHeader header) throws NulsException {
+        switch (tx.getType()) {
+            case (TxType.REGISTER_AGENT):
+            case (TxType.CONTRACT_CREATE_AGENT):
+                return agentManager.createAgentRollBack(tx, chain);
+            case (TxType.STOP_AGENT):
+            case (TxType.CONTRACT_STOP_AGENT):
+                return agentManager.stopAgentRollBack(tx, chain, header);
+            case (TxType.DEPOSIT):
+            case (TxType.CONTRACT_DEPOSIT):
+                return depositManager.depositRollBack(tx, chain);
+            case (TxType.CANCEL_DEPOSIT):
+            case (TxType.CONTRACT_CANCEL_DEPOSIT):
+                return depositManager.cancelDepositRollBack(tx, chain, header);
+            case (TxType.YELLOW_PUNISH):
+                return punishManager.yellowPunishRollback(tx, chain, header);
+            case (TxType.RED_PUNISH):
+                return punishManager.redPunishRollback(tx, chain, header);
+            case (TxType.COIN_BASE):
+                return true;
+            default:
+                return false;
         }
     }
 
@@ -503,79 +628,4 @@ public class ChainServiceImpl implements ChainService {
         resultMap.put("inflationAmount",chain.getConfig().getInflationAmount().toString());
         return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(resultMap);
     }
-
-    /**
-     * 停止一条链
-     */
-    @Override
-    public Result stopChain(Map<String, Object> params) {
-        return null;
-    }
-
-    /**
-     * 启动一条新链
-     */
-    @Override
-    public Result runChain(Map<String, Object> params) {
-        return null;
-    }
-
-    @Override
-    public Result runMainChain(Map<String, Object> params) {
-        return null;
-    }
-    private boolean transactionCommit(Transaction tx, Chain chain, BlockHeader header)throws NulsException {
-        switch (tx.getType()){
-            case (TxType.REGISTER_AGENT):
-            case (TxType.CONTRACT_CREATE_AGENT):
-                return agentManager.createAgentCommit(tx, header, chain);
-            case (TxType.STOP_AGENT):
-            case (TxType.CONTRACT_STOP_AGENT):
-                return agentManager.stopAgentCommit(tx, header, chain);
-            case (TxType.DEPOSIT):
-            case (TxType.CONTRACT_DEPOSIT):
-                return depositManager.depositCommit(tx, header, chain);
-            case (TxType.CANCEL_DEPOSIT):
-            case (TxType.CONTRACT_CANCEL_DEPOSIT):
-                return depositManager.cancelDepositCommit(tx, header, chain);
-            case (TxType.YELLOW_PUNISH):
-                return punishManager.yellowPunishCommit(tx, chain, header);
-            case (TxType.RED_PUNISH):
-                return punishManager.redPunishCommit(tx, chain, header);
-            case (TxType.COIN_BASE):
-                return true;
-            default: return false;
-        }
-    }
-
-    private void transactionBatchRollBack(List<Transaction> txList, Chain chain, BlockHeader header)throws NulsException{
-        for (Transaction tx:txList) {
-            transactionRollback(tx,chain,header);
-        }
-    }
-
-    private boolean transactionRollback(Transaction tx,Chain chain,BlockHeader header)throws NulsException{
-        switch (tx.getType()){
-            case (TxType.REGISTER_AGENT):
-            case (TxType.CONTRACT_CREATE_AGENT):
-                return agentManager.createAgentRollBack(tx, chain);
-            case (TxType.STOP_AGENT):
-            case (TxType.CONTRACT_STOP_AGENT):
-                return agentManager.stopAgentRollBack(tx, chain, header);
-            case (TxType.DEPOSIT):
-            case (TxType.CONTRACT_DEPOSIT):
-                return depositManager.depositRollBack(tx, chain);
-            case (TxType.CANCEL_DEPOSIT):
-            case (TxType.CONTRACT_CANCEL_DEPOSIT):
-                return depositManager.cancelDepositRollBack(tx, chain, header);
-            case (TxType.YELLOW_PUNISH):
-                return punishManager.yellowPunishRollback(tx, chain, header);
-            case (TxType.RED_PUNISH):
-                return punishManager.redPunishRollback(tx, chain, header);
-            case (TxType.COIN_BASE):
-                return true;
-            default: return false;
-        }
-    }
-
 }

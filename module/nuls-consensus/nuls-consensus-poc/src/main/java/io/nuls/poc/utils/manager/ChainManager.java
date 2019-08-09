@@ -1,16 +1,16 @@
 package io.nuls.poc.utils.manager;
 
-import ch.qos.logback.classic.Level;
+import io.nuls.base.protocol.ProtocolGroupManager;
+import io.nuls.base.protocol.ProtocolLoader;
+import io.nuls.base.protocol.RegisterHelper;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.Log;
-import io.nuls.core.log.logback.LoggerBuilder;
-import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.rockdb.constant.DBErrorCode;
 import io.nuls.core.rockdb.service.RocksDBService;
-import io.nuls.core.rpc.protocol.ProtocolGroupManager;
-import io.nuls.core.rpc.protocol.ProtocolLoader;
-import io.nuls.core.rpc.util.RegisterHelper;
+import io.nuls.economic.base.service.EconomicService;
+import io.nuls.economic.nuls.constant.ParamConstant;
+import io.nuls.economic.nuls.model.bo.ConsensusConfigInfo;
 import io.nuls.poc.constant.ConsensusConfig;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.Chain;
@@ -18,9 +18,11 @@ import io.nuls.poc.model.bo.config.ConfigBean;
 import io.nuls.poc.model.dto.CmdRegisterDto;
 import io.nuls.poc.rpc.call.CallMethodUtils;
 import io.nuls.poc.storage.ConfigService;
+import io.nuls.poc.utils.LoggerUtil;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -48,6 +50,9 @@ public class ChainManager {
     private SchedulerManager schedulerManager;
     @Autowired
     private ConsensusConfig config;
+    @Autowired
+    private EconomicService economicService;
+
     private Map<Integer, Chain> chainMap = new ConcurrentHashMap<>();
 
     /**
@@ -63,7 +68,8 @@ public class ChainManager {
         for (Map.Entry<Integer, ConfigBean> entry : configMap.entrySet()){
             Chain chain = new Chain();
             int chainId = entry.getKey();
-            chain.setConfig(entry.getValue());
+            ConfigBean configBean = entry.getValue();
+            chain.setConfig(configBean);
             /*
              * 初始化链日志对象
              * Initialization Chain Log Objects
@@ -76,8 +82,11 @@ public class ChainManager {
             initTable(chain);
             chainMap.put(chainId, chain);
             ProtocolLoader.load(chainId);
+            Map<String,Object> param = new HashMap<>(4);
+            param.put(ParamConstant.CONSENUS_CONFIG, new ConsensusConfigInfo(chainId,configBean.getAssetId(),configBean.getPackingInterval(),
+                    configBean.getInflationAmount(),configBean.getInitTime(),configBean.getDeflationRatio(),configBean.getDeflationTimeInterval(),configBean.getAwardAssetId()));
+            economicService.registerConfig(param);
         }
-
     }
 
     /**
@@ -199,7 +208,6 @@ public class ChainManager {
      * @param chain chain info
      */
     private void initTable(Chain chain) {
-        NulsLogger logger = chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME);
         int chainId = chain.getConfig().getChainId();
         try {
             /*
@@ -219,11 +227,15 @@ public class ChainManager {
             Creating Red and Yellow Card Information Table
             */
             RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSENSUS_PUNISH + chainId);
+            /*
+            创建底层随机数表
+            */
+            RocksDBService.createTable(ConsensusConstant.DB_NAME_RANDOM_SEEDS + chainId);
         } catch (Exception e) {
             if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
-                logger.error(e.getMessage());
+                chain.getLogger().error(e.getMessage());
             } else {
-                logger.error(e.getMessage());
+                chain.getLogger().error(e.getMessage());
             }
         }
     }
@@ -233,11 +245,7 @@ public class ChainManager {
          * 共识模块日志文件对象创建,如果一条链有多类日志文件，可在此添加
          * Creation of Log File Object in Consensus Module，If there are multiple log files in a chain, you can add them here
          * */
-        String bootFolder = ConsensusConstant.CHAIN + "-" + String.valueOf(chain.getConfig().getChainId());
-        NulsLogger consensusLogger = LoggerBuilder.getLogger(bootFolder, ConsensusConstant.CONSENSUS_LOGGER_NAME, Level.DEBUG);
-        NulsLogger rpcLogger = LoggerBuilder.getLogger(bootFolder, ConsensusConstant.BASIC_LOGGER_NAME, Level.DEBUG);
-        chain.getLoggerMap().put(ConsensusConstant.CONSENSUS_LOGGER_NAME, consensusLogger);
-        chain.getLoggerMap().put(ConsensusConstant.BASIC_LOGGER_NAME, rpcLogger);
+        LoggerUtil.initLogger(chain);
     }
 
     /**
@@ -258,7 +266,7 @@ public class ChainManager {
                 roundManager.initRound(chain);
             }
         } catch (Exception e) {
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
         }
     }
 

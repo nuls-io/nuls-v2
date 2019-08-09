@@ -24,6 +24,8 @@ import io.nuls.api.exception.JsonRpcException;
 import io.nuls.api.model.rpc.RpcResult;
 import io.nuls.api.model.rpc.RpcResultError;
 import io.nuls.api.utils.LoggerUtil;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.StringUtils;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -47,18 +49,31 @@ public class RpcMethodInvoker {
         try {
             result = (RpcResult) method.invoke(bean, jsonParams);
         } catch (Exception e) {
+
             LoggerUtil.commonLog.error("\n" + method.toString());
             if (e.getCause() instanceof JsonRpcException) {
                 JsonRpcException jsonRpcException = (JsonRpcException) e.getCause();
                 result = new RpcResult();
                 result.setError(jsonRpcException.getError());
 
+            } else if (e.getCause() instanceof NulsException) {
+                NulsException nulsException = (NulsException) e.getCause();
+                result = new RpcResult();
+                String error = null;
+                String customMessage = nulsException.getCustomMessage();
+                if(StringUtils.isNotBlank(customMessage) && customMessage.contains(";")) {
+                    error = (customMessage.split(";", 2))[1];
+                }
+                RpcResultError rpcResultError = new RpcResultError(nulsException.getErrorCode());
+                rpcResultError.setData(error);
+                result.setError(rpcResultError);
             } else {
-                LoggerUtil.commonLog.error(e);
+                LoggerUtil.commonLog.error(e.getCause());
                 result = new RpcResult();
                 RpcResultError error = new RpcResultError();
-                error.setMessage(e.getMessage());
+                error.setMessage("system error");
                 error.setCode("-32603");
+                error.setData(e.getCause().getMessage());
                 result.setError(error);
             }
         }

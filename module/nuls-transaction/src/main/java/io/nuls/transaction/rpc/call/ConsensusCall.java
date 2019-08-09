@@ -43,17 +43,17 @@ public class ConsensusCall {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chain.getChainId());
+            params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("tx", tx);
             params.put("blockHeader", blockHeader);
             params.put("stateRoot", stateRoot);
             HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.CS.abbr, "cs_triggerCoinBaseContract", params);
             return (String) result.get("value");
         } catch (NulsException e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            chain.getLogger().error(e);
             return null;
         } catch (Exception e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            chain.getLogger().error(e);
             return null;
         }
     }

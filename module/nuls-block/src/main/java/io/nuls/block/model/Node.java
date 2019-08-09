@@ -20,8 +20,11 @@
 
 package io.nuls.block.model;
 
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
+import io.nuls.block.constant.NodeEnum;
 import io.nuls.block.utils.LoggerUtil;
+
+import java.util.StringJoiner;
 
 /**
  * 节点
@@ -43,7 +46,7 @@ public class Node {
     /**
      * 最新区块hash
      */
-    private NulsDigestData hash;
+    private NulsHash hash;
     /**
      * 下载信用值
      */
@@ -53,6 +56,19 @@ public class Node {
      * 下载耗时,初始为0
      */
     private long duration;
+
+    /**
+     * 节点状态
+     */
+    private NodeEnum nodeEnum;
+
+    public NodeEnum getNodeEnum() {
+        return nodeEnum;
+    }
+
+    public void setNodeEnum(NodeEnum nodeEnum) {
+        this.nodeEnum = nodeEnum;
+    }
 
     public String getId() {
         return id;
@@ -70,11 +86,11 @@ public class Node {
         this.height = height;
     }
 
-    public NulsDigestData getHash() {
+    public NulsHash getHash() {
         return hash;
     }
 
-    public void setHash(NulsDigestData hash) {
+    public void setHash(NulsHash hash) {
         this.hash = hash;
     }
 
@@ -83,7 +99,8 @@ public class Node {
     }
 
     public void setCredit(int credit) {
-        this.credit = credit;
+        //主动设置的下载信用值不低于10
+        this.credit = Math.max(credit, 10);
     }
 
     public long getDuration() {
@@ -102,24 +119,48 @@ public class Node {
         if (success) {
             this.duration = duration;
             //下载成功,信用值加20,上限为初始信用值的两倍
-            credit = Math.min(200, credit + 20);
+            credit = Math.min(100, credit + 10);
         } else {
-            //下载失败,信用值减半,下限为0
-            credit /= 2;
+            //下载失败,信用值降为原值的四分之一,下限为0
+            credit >>= 3;
+            if (credit == 0) {
+                setNodeEnum(NodeEnum.TIMEOUT);
+                LoggerUtil.COMMON_LOG.warn("node-" + id + ", response timeouts are excessive, this node was marked unavailable");
+            }
         }
         if (!success) {
-            LoggerUtil.commonLog.error("download fail! node-" + id + ",oldCredit-" + oldCredit + ",newCredit-" + credit);
+            LoggerUtil.COMMON_LOG.warn("download fail! node-" + id + ",oldCredit-" + oldCredit + ",newCredit-" + credit);
         }
     }
 
     @Override
     public String toString() {
-        return "Node{" +
-                "id='" + id + '\'' +
-                ", height=" + height +
-                ", hash=" + hash +
-                ", credit=" + credit +
-                ", duration=" + duration +
-                '}';
+        return new StringJoiner(", ", Node.class.getSimpleName() + "[", "]")
+                .add("id='" + id + "'")
+                .add("height=" + height)
+                .add("hash=" + hash)
+                .add("credit=" + credit)
+                .add("duration=" + duration)
+                .add("nodeEnum=" + nodeEnum)
+                .toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        Node node = (Node) o;
+
+        return id != null ? id.equals(node.id) : node.id == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return id != null ? id.hashCode() : 0;
     }
 }

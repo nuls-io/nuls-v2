@@ -5,6 +5,7 @@ import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.log.Log;
 import io.nuls.ledger.constant.LedgerConstant;
 
 import java.io.UnsupportedEncodingException;
@@ -16,6 +17,15 @@ import java.util.Arrays;
  * @author lanjinsheng
  */
 public class LedgerUtil {
+
+    public static String getRealAddressStr(String addrContainPre) {
+        return AddressTool.getRealAddress(addrContainPre);
+    }
+
+    public static String getRealAddressStr(byte[] coinAddr) {
+        return AddressTool.getStringAddressNoPrefix(coinAddr);
+    }
+
     /**
      * rockdb key
      *
@@ -40,7 +50,7 @@ public class LedgerUtil {
         try {
             return (key.getBytes(LedgerConstant.DEFAULT_ENCODING));
         } catch (UnsupportedEncodingException e) {
-            LoggerUtil.logger().error(e);
+            Log.error(e);
         }
         return null;
     }
@@ -55,28 +65,22 @@ public class LedgerUtil {
 
     public static String getNonceEncodeByTx(Transaction tx) {
         byte[] out = new byte[8];
-        byte[] in = tx.getHash().getDigestBytes();
+        byte[] in = tx.getHash().getBytes();
         int copyEnd = in.length;
         System.arraycopy(in, (copyEnd - 8), out, 0, 8);
-        String nonce8BytesStr = HexUtil.encode(out);
-        return nonce8BytesStr;
+        return HexUtil.encode(out);
     }
 
     public static byte[] getNonceByTx(Transaction tx) {
         byte[] out = new byte[8];
-        byte[] in = tx.getHash().getDigestBytes();
+        byte[] in = tx.getHash().getBytes();
         int copyEnd = in.length;
         System.arraycopy(in, (copyEnd - 8), out, 0, 8);
         return out;
     }
 
     public static String getNonceEncodeByTxHash(String txHash) {
-        byte[] out = new byte[8];
-        byte[] in = HexUtil.decode(txHash);
-        int copyEnd = in.length;
-        System.arraycopy(in, (copyEnd - 8), out, 0, 8);
-        String nonce8BytesStr = HexUtil.encode(out);
-        return nonce8BytesStr;
+        return txHash.substring(txHash.length() - 16);
     }
 
     public static byte[] getNonceDecodeByTxHash(String txHash) {
@@ -117,16 +121,8 @@ public class LedgerUtil {
 
     }
 
-    public static String getAccountNoncesStringKey(CoinFrom from, byte[] nonce) {
-        return AddressTool.getStringAddressByBytes(from.getAddress()) + "-" + from.getAssetsChainId() + "-" + from.getAssetsId() + "-" + getNonceEncode(nonce);
-    }
-
-    public static String getAccountNoncesStringKey(String assetKey, String nonce) {
-        return assetKey + "-" + nonce;
-    }
-
     public static String getAccountAssetStrKey(CoinFrom from) {
-        return AddressTool.getStringAddressByBytes(from.getAddress()) + "-" + from.getAssetsChainId() + "-" + from.getAssetsId();
+        return LedgerUtil.getRealAddressStr(from.getAddress()) + "-" + from.getAssetsChainId() + "-" + from.getAssetsId();
     }
 
     /**

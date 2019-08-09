@@ -287,4 +287,35 @@ public class AgentInfo extends TxDataInfo {
     public void setYellowCardCount(int yellowCardCount) {
         this.yellowCardCount = yellowCardCount;
     }
+
+    public AgentInfo copy() {
+        AgentInfo agentInfo = new AgentInfo();
+        agentInfo.txHash = this.txHash;
+        agentInfo.agentId = this.agentId;
+        agentInfo.agentAddress = this.agentAddress;
+        agentInfo.packingAddress = this.packingAddress;
+        agentInfo.rewardAddress = this.rewardAddress;
+        agentInfo.agentAlias = this.agentAlias;
+        agentInfo.deposit = new BigInteger(this.deposit.toString());
+        agentInfo.commissionRate = this.commissionRate;
+        agentInfo.createTime = this.createTime;
+        agentInfo.status = this.status;
+        agentInfo.totalDeposit = new BigInteger(this.totalDeposit.toString());
+        agentInfo.depositCount = this.depositCount;
+        agentInfo.creditValue = this.creditValue;
+        agentInfo.totalPackingCount = this.totalPackingCount;
+        agentInfo.lostRate = this.lostRate;
+        agentInfo.lastRewardHeight = this.lastRewardHeight;
+        agentInfo.deleteHash = this.deleteHash;
+        agentInfo.blockHeight = this.blockHeight;
+        agentInfo.deleteHeight = this.deleteHeight;
+        agentInfo.totalReward = new BigInteger(this.totalReward.toString());
+        agentInfo.commissionReward = new BigInteger(this.commissionReward.toString());
+        agentInfo.agentReward = new BigInteger(this.agentReward.toString());
+        agentInfo.roundPackingTime = this.roundPackingTime;
+        agentInfo.yellowCardCount = this.yellowCardCount;
+        agentInfo.version = this.version;
+        agentInfo.type = this.type;
+        return agentInfo;
+    }
 }

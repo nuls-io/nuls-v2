@@ -5,9 +5,11 @@ import io.nuls.base.api.provider.BaseRpcService;
 import io.nuls.base.api.provider.Provider;
 import io.nuls.base.api.provider.Result;
 import io.nuls.base.api.provider.network.facade.NetworkInfo;
+import io.nuls.base.api.provider.network.facade.RemoteNodeInfo;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.parse.MapUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -40,8 +42,34 @@ public class NetworkProviderForRpc extends BaseRpcService implements NetworkProv
         BaseReq req = new BaseReq();
         req.setChainId(getChainId());
         Function<List,Result> callback = res->{
-            return success(res);
+            List<String> list = new ArrayList<>();
+            res.stream().forEach(map->{
+                RemoteNodeInfo info = dataToRemoteNodeInfo((Map<String, Object>) map);
+                list.add(info.getPeer());
+            });
+            return success(list);
         };
         return call("nw_nodes",req,callback);
     }
+
+    @Override
+    public Result<RemoteNodeInfo> getNodesInfo() {
+        BaseReq req = new BaseReq();
+        req.setChainId(getChainId());
+        Function<List,Result> callback = res->{
+            List<RemoteNodeInfo> list = new ArrayList<>();
+            res.stream().forEach(map->{
+                RemoteNodeInfo info = dataToRemoteNodeInfo((Map<String, Object>) map);
+                list.add(info);
+            });
+            return success(list);
+        };
+        return call("nw_nodes",req,callback);
+    }
+
+    private RemoteNodeInfo dataToRemoteNodeInfo(Map<String,Object> data){
+        RemoteNodeInfo info = MapUtils.mapToBean(data,new RemoteNodeInfo());
+        return info;
+    }
+
 }

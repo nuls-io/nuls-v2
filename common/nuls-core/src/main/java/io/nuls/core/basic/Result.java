@@ -25,6 +25,7 @@
 package io.nuls.core.basic;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
@@ -46,6 +47,11 @@ public class Result<T> implements Serializable {
 
     public Result(boolean success) {
         this.success = success;
+    }
+
+    public Result(boolean success, T data) {
+        this.success = success;
+        this.data = data;
     }
 
     public Result(boolean success, ErrorCode errorCode, T data) {
@@ -122,6 +128,11 @@ public class Result<T> implements Serializable {
 
     public static Result getSuccess(ErrorCode successCode) {
         return new Result(true, successCode);
+    }
+
+    public static <T> Result getSuccess(T t) {
+
+        return new Result(true, CommonCodeConstanst.SUCCESS, t);
     }
 
     public static Result getFailed(ErrorCode errorCode) {

@@ -29,9 +29,13 @@ import io.netty.channel.Channel;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.model.dto.Dto;
+import io.nuls.network.model.dto.PeerCacheMessage;
 import io.nuls.network.model.po.BasePo;
 import io.nuls.network.model.po.NodePo;
 import io.nuls.network.netty.listener.EventListener;
+
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * 一个peer节点可以同时为多条链使用，
@@ -94,20 +98,25 @@ public class Node implements Dto {
     private int connectStatus;
     private boolean isSeedNode;
     /**
-     * 成功探测时间
+     * 是否分享过地址
+     */
+    private boolean hadShare = false;
+    /**
+     * 探测时间
      */
     private Long lastProbeTime = 0L;
     private EventListener registerListener;
     private EventListener connectedListener;
     private EventListener disconnectListener;
 
+    private BlockingDeque<PeerCacheMessage> cacheSendMsgQueue = new LinkedBlockingDeque<>(NetworkConstant.INIT_CACHE_MSG_QUEUE_NUMBER);
 
-    public Node(long magicNumber, String ip, int remotePort, int remoteCrossPort,int type, boolean isCrossConnect) {
-        this(ip + NetworkConstant.COLON + remotePort, magicNumber, ip, remotePort,remoteCrossPort, type, isCrossConnect);
+    public Node(long magicNumber, String ip, int remotePort, int remoteCrossPort, int type, boolean isCrossConnect) {
+        this(ip + NetworkConstant.COLON + remotePort, magicNumber, ip, remotePort, remoteCrossPort, type, isCrossConnect);
     }
 
 
-    public Node(String id, long magicNumber, String ip, int remotePort,int remoteCrossPort, int type, boolean isCrossConnect) {
+    public Node(String id, long magicNumber, String ip, int remotePort, int remoteCrossPort, int type, boolean isCrossConnect) {
         this.ip = ip;
         this.magicNumber = magicNumber;
         this.remotePort = remotePort;
@@ -339,8 +348,24 @@ public class Node implements Dto {
         this.blockHash = blockHash;
     }
 
+    public boolean isHadShare() {
+        return hadShare;
+    }
+
+    public void setHadShare(boolean hadShare) {
+        this.hadShare = hadShare;
+    }
+
+    public BlockingDeque<PeerCacheMessage> getCacheSendMsgQueue() {
+        return cacheSendMsgQueue;
+    }
+
+    public void setCacheSendMsgQueue(BlockingDeque<PeerCacheMessage> cacheSendMsgQueue) {
+        this.cacheSendMsgQueue = cacheSendMsgQueue;
+    }
+
     @Override
     public BasePo parseToPo() {
-        return new NodePo(magicNumber, id, ip, remotePort, remoteCrossPort, isCrossConnect,status,failCount);
+        return new NodePo(magicNumber, id, ip, remotePort, remoteCrossPort, isCrossConnect, status, failCount);
     }
 }

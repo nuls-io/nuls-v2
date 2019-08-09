@@ -24,20 +24,18 @@
  */
 package io.nuls.transaction.manager;
 
+import io.nuls.base.protocol.ProtocolLoader;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.rockdb.constant.DBErrorCode;
 import io.nuls.core.rockdb.service.RocksDBService;
-import io.nuls.core.rpc.protocol.ProtocolLoader;
 import io.nuls.transaction.constant.TxConfig;
-import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.po.TransactionNetPO;
 import io.nuls.transaction.storage.ConfigStorageService;
-import io.nuls.transaction.threadpool.NetTxThreadPoolExecutor;
 import io.nuls.transaction.utils.LoggerUtil;
 
 import java.util.Map;
@@ -68,8 +66,6 @@ public class ChainManager {
 
     private Map<Integer, Chain> chainMap = new ConcurrentHashMap<>();
 
-
-
     /**
      * 初始化并启动链
      * Initialize and start the chain
@@ -86,7 +82,7 @@ public class ChainManager {
             initLogger(chain);
             initTable(chain);
             chainMap.put(chainId, chain);
-            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("Chain:{} init success..", chainId);
+            chain.getLogger().debug("Chain:{} init success..", chainId);
             ProtocolLoader.load(chainId);
         }
     }
@@ -101,7 +97,7 @@ public class ChainManager {
             initCache(chain);
             schedulerManager.createTransactionScheduler(chain);
             chainMap.put(chain.getChainId(), chain);
-            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("Chain:{} runChain success..", chain.getChainId());
+            chain.getLogger().debug("Chain:{} runChain success..", chain.getChainId());
         }
     }
 
@@ -137,7 +133,7 @@ public class ChainManager {
             if (configMap.isEmpty()) {
                 ConfigBean configBean = txConfig;
 
-                boolean saveSuccess = configService.save(configBean,configBean.getChainId());
+                boolean saveSuccess = configService.save(configBean, configBean.getChainId());
                 if(saveSuccess){
                     configMap.put(configBean.getChainId(), configBean);
                 }
@@ -156,23 +152,29 @@ public class ChainManager {
      * @param chain
      */
     private void initTable(Chain chain) {
-        NulsLogger logger = chain.getLoggerMap().get(TxConstant.LOG_TX);
+        NulsLogger logger = chain.getLogger();
         int chainId = chain.getConfig().getChainId();
         try {
+            //未确认表
+            if(RocksDBService.existTable(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId)){
+                RocksDBService.destroyTable(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId);
+            }
+
             /*
             创建已确认交易表
             Create confirmed transaction table
             */
             RocksDBService.createTable(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + chainId);
 
+
             /*
-            已验证未打包交易
+            已验证未打包交易 未确认
             Verified transaction
             */
             RocksDBService.createTable(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId);
         } catch (Exception e) {
             if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
-                logger.error(e.getMessage());
+                logger.error(e);
             }
         }
     }
@@ -186,11 +188,7 @@ public class ChainManager {
     private void initCache(Chain chain) {
         BlockingDeque<TransactionNetPO> unverifiedQueue = new LinkedBlockingDeque<>((int)txConfig.getTxUnverifiedQueueSize());
         chain.setUnverifiedQueue(unverifiedQueue);
-
-        NetTxThreadPoolExecutor netTxThreadPoolExecutor = new NetTxThreadPoolExecutor(chain);
-        chain.setNetTxThreadPoolExecutor(netTxThreadPoolExecutor);
     }
-
 
     private void initLogger(Chain chain) {
         LoggerUtil.init(chain);

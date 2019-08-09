@@ -23,18 +23,18 @@
 package io.nuls.block.model;
 
 import io.nuls.base.data.Block;
-import io.nuls.base.data.NulsDigestData;
-import io.nuls.block.cache.BlockCacher;
-import io.nuls.block.cache.SmallBlockCacher;
+import io.nuls.base.data.NulsHash;
 import io.nuls.block.constant.StatusEnum;
 import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.thread.monitor.TxGroupRequestor;
 import io.nuls.block.utils.LoggerUtil;
+import io.nuls.block.utils.SingleBlockCacher;
+import io.nuls.block.utils.SmallBlockCacher;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.CollectionUtils;
 
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.StampedLock;
 
@@ -52,9 +52,9 @@ public class ChainContext {
     private StatusEnum status;
 
     /**
-     * 是否继续本次下载,中途发生异常置为false
+     * 是否进行区块同步,中途发生异常置为false,终止同步
      */
-    private boolean doSyn;
+    private boolean needSyn;
 
     /**
      * 链ID
@@ -65,6 +65,11 @@ public class ChainContext {
      * 该链的系统交易类型
      */
     private List<Integer> systemTransactionType;
+
+    /**
+     * 网络最新高度
+     */
+    private long networkHeight;
 
     /**
      * 最新区块
@@ -95,12 +100,7 @@ public class ChainContext {
     /**
      * 记录通用日志
      */
-    private NulsLogger commonLog;
-
-    /**
-     * 记录消息收发日志
-     */
-    private NulsLogger messageLog;
+    private NulsLogger logger;
 
     /**
      * 分叉链、孤儿链中重复hash计数器
@@ -110,18 +110,57 @@ public class ChainContext {
     /**
      * 记录某个打包地址是否已经进行过分叉通知,每个地址只通知一次
      */
-    private List<byte []> packingAddressList;
+    private List<String> packingAddressList;
 
     /**
      * 缓存的hash与高度映射,用于设置节点高度
      */
-    private Map<NulsDigestData, Long> cachedHashHeightMap;
+    private Map<NulsHash, Long> cachedHashHeightMap;
 
-    public Map<NulsDigestData, Long> getCachedHashHeightMap() {
+    /**
+     * 已缓存的区块字节数
+     */
+    private AtomicInteger cachedBlockSize;
+
+    /**
+     * 一次区块下载过程中用到的参数
+     */
+    private BlockDownloaderParams downloaderParams;
+
+    /**
+     * 同步区块缓存
+     */
+    private Map<Long, Block> blockMap = new ConcurrentHashMap<>(100);
+
+    public Map<Long, Block> getBlockMap() {
+        return blockMap;
+    }
+
+    public void setBlockMap(Map<Long, Block> blockMap) {
+        this.blockMap = blockMap;
+    }
+
+    public BlockDownloaderParams getDownloaderParams() {
+        return downloaderParams;
+    }
+
+    public void setDownloaderParams(BlockDownloaderParams downloaderParams) {
+        this.downloaderParams = downloaderParams;
+    }
+
+    public AtomicInteger getCachedBlockSize() {
+        return cachedBlockSize;
+    }
+
+    public void setCachedBlockSize(AtomicInteger cachedBlockSize) {
+        this.cachedBlockSize = cachedBlockSize;
+    }
+
+    public Map<NulsHash, Long> getCachedHashHeightMap() {
         return cachedHashHeightMap;
     }
 
-    public void setCachedHashHeightMap(Map<NulsDigestData, Long> cachedHashHeightMap) {
+    public void setCachedHashHeightMap(Map<NulsHash, Long> cachedHashHeightMap) {
         this.cachedHashHeightMap = cachedHashHeightMap;
     }
 
@@ -129,12 +168,12 @@ public class ChainContext {
         return status;
     }
 
-    public boolean isDoSyn() {
-        return doSyn;
+    public boolean isNeedSyn() {
+        return needSyn;
     }
 
-    public void setDoSyn(boolean doSyn) {
-        this.doSyn = doSyn;
+    public void setNeedSyn(boolean needSyn) {
+        this.needSyn = needSyn;
     }
 
     public int getChainId() {
@@ -193,20 +232,12 @@ public class ChainContext {
         this.lock = lock;
     }
 
-    public NulsLogger getCommonLog() {
-        return commonLog;
+    public NulsLogger getLogger() {
+        return logger;
     }
 
-    public void setCommonLog(NulsLogger commonLog) {
-        this.commonLog = commonLog;
-    }
-
-    public NulsLogger getMessageLog() {
-        return messageLog;
-    }
-
-    public void setMessageLog(NulsLogger messageLog) {
-        this.messageLog = messageLog;
+    public void setLogger(NulsLogger logger) {
+        this.logger = logger;
     }
 
     public Map<String, AtomicInteger> getDuplicateBlockMap() {
@@ -217,11 +248,19 @@ public class ChainContext {
         this.duplicateBlockMap = duplicateBlockMap;
     }
 
-    public List<byte[]> getPackingAddressList() {
+    public long getNetworkHeight() {
+        return networkHeight;
+    }
+
+    public void setNetworkHeight(long networkHeight) {
+        this.networkHeight = networkHeight;
+    }
+
+    public List<String> getPackingAddressList() {
         return packingAddressList;
     }
 
-    public void setPackingAddressList(List<byte[]> packingAddressList) {
+    public void setPackingAddressList(List<String> packingAddressList) {
         this.packingAddressList = packingAddressList;
     }
 
@@ -230,7 +269,7 @@ public class ChainContext {
             return;
         }
         synchronized (this) {
-            commonLog.debug("status changed:" + this.status + "->" + status);
+            logger.debug("status changed:" + this.status + "->" + status);
             this.status = status;
         }
     }
@@ -240,17 +279,18 @@ public class ChainContext {
     }
 
     public void init() {
-        LoggerUtil.init(chainId, parameters.getLogLevel());
+        LoggerUtil.init(chainId);
+        cachedBlockSize = new AtomicInteger(0);
         this.setStatus(StatusEnum.INITIALIZING);
-        cachedHashHeightMap = CollectionUtils.getSizedMap(parameters.getSmallBlockCache());
-        packingAddressList = new CopyOnWriteArrayList<>();
+        cachedHashHeightMap = CollectionUtils.getSynSizedMap(parameters.getSmallBlockCache());
+        packingAddressList = CollectionUtils.getSynList();
         duplicateBlockMap = new HashMap<>();
         systemTransactionType = new ArrayList<>();
-        doSyn = true;
+        needSyn = true;
         lock = new StampedLock();
         //各类缓存初始化
         SmallBlockCacher.init(chainId);
-        BlockCacher.init(chainId);
+        SingleBlockCacher.init(chainId);
         BlockChainManager.init(chainId);
         TxGroupRequestor.init(chainId);
     }
@@ -269,10 +309,10 @@ public class ChainContext {
 
     public void printChains() {
         Chain masterChain = BlockChainManager.getMasterChain(chainId);
-        commonLog.info("masterChain-" + masterChain);
+        logger.info("masterChain-" + masterChain);
         SortedSet<Chain> forkChains = BlockChainManager.getForkChains(chainId);
-        forkChains.forEach(e -> commonLog.info("forkChain-" + e));
+        forkChains.forEach(e -> logger.info("forkChain-" + e));
         SortedSet<Chain> orphanChains = BlockChainManager.getOrphanChains(chainId);
-        orphanChains.forEach(e -> commonLog.info("orphanChain-" + e));
+        orphanChains.forEach(e -> logger.info("orphanChain-" + e));
     }
 }

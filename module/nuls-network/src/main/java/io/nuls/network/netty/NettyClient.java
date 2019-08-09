@@ -35,9 +35,9 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.AttributeKey;
+import io.nuls.core.log.Log;
 import io.nuls.network.model.Node;
 import io.nuls.network.netty.handler.ClientChannelHandler;
-import io.nuls.network.utils.LoggerUtil;
 
 import static io.nuls.network.constant.NetworkConstant.CONNETCI_TIME_OUT;
 
@@ -81,7 +81,6 @@ public class NettyClient {
                 .option(ChannelOption.RCVBUF_ALLOCATOR, AdaptiveRecvByteBufAllocator.DEFAULT)
                 .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, CONNETCI_TIME_OUT)
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, CONNETCI_TIME_OUT)
                 .handler(new NulsChannelInitializer<>(new ClientChannelHandler()));
     }
 
@@ -91,7 +90,7 @@ public class NettyClient {
             future.await();
             return future.isSuccess();
         } catch (Exception e) {
-            LoggerUtil.logger().error("{}", e);
+            Log.error(e);
             if (node.getChannel() != null) {
                 node.getChannel().close();
             }

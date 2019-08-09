@@ -2,10 +2,12 @@ package io.nuls.cmd.client;
 
 import io.nuls.base.api.provider.Provider;
 import io.nuls.base.api.provider.ServiceManager;
+import io.nuls.base.basic.AddressTool;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.core.config.ConfigurationLoader;
 import io.nuls.core.log.Log;
+import io.nuls.core.rpc.util.AddressPrefixDatas;
 
 /**
  * @Author: zhoulijun
@@ -28,6 +30,8 @@ public class CmdClientBootstrap {
         ServiceManager.init(defaultChainId,providerType);
         try {
             NulsRpcModuleBootstrap.run("io.nuls.cmd.client",args);
+            //增加地址工具类初始化
+            AddressTool.init(new AddressPrefixDatas());
         }catch (Exception e){
             Log.error("module start fail {}",e.getMessage());
         }

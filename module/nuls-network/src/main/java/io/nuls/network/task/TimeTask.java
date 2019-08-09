@@ -48,7 +48,7 @@ public class TimeTask implements Runnable {
         while (true) {
             long newTime = System.currentTimeMillis();
             if (Math.abs(newTime - lastTime) > TimeManager.TIME_OFFSET_BOUNDARY) {
-                LoggerUtil.logger().debug("local time changed ：{}", newTime - lastTime);
+                LoggerUtil.COMMON_LOG.debug("local time changed ：{}", newTime - lastTime);
                 timeManager.syncWebTime();
             } else if (TimeManager.currentTimeMillis() - TimeManager.lastSyncTime > TimeManager.NET_REFRESH_TIME) {
                 //每隔一段时间更新网络时间
@@ -58,7 +58,7 @@ public class TimeTask implements Runnable {
             try {
                 Thread.sleep(500L);
             } catch (InterruptedException e) {
-                LoggerUtil.logger().error("", e);
+                LoggerUtil.COMMON_LOG.error(e);
                 Thread.currentThread().interrupt();
             }
         }

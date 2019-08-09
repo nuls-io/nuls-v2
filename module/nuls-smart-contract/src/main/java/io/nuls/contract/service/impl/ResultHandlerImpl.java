@@ -23,6 +23,7 @@
  */
 package io.nuls.contract.service.impl;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.data.*;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.helper.ContractTransferHandler;
@@ -39,7 +40,6 @@ import io.nuls.contract.service.ResultHanlder;
 import io.nuls.contract.util.CompareTxOrderAsc;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.ProgramExecutor;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
@@ -124,8 +124,8 @@ public class ResultHandlerImpl implements ResultHanlder {
                 tx.setTime(blockTime);
 
                 tx.serializeData();
-                NulsDigestData hash = NulsDigestData.calcDigestData(tx.serializeForHash());
-                byte[] hashBytes = hash.serialize();
+                NulsHash hash = NulsHash.calcHash(tx.serializeForHash());
+                byte[] hashBytes = hash.getBytes();
                 byte[] currentNonceBytes = Arrays.copyOfRange(hashBytes, hashBytes.length - 8, hashBytes.length);
                 balance.setNonce(RPCUtil.encode(currentNonceBytes));
                 tx.setHash(hash);

@@ -10,10 +10,10 @@
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,15 +25,16 @@
  */
 package io.nuls.ledger.test.cmd;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
-import io.nuls.ledger.test.constant.TestConfig;
-import io.nuls.ledger.utils.LoggerUtil;
+import io.nuls.core.log.Log;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.rpc.util.RPCUtil;
+import io.nuls.ledger.test.constant.TestConfig;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -52,8 +53,10 @@ public class CmdValidateTest {
         NoUse.mockModule();
 //        CmdDispatcher.syncKernel("ws://127.0.0.1:7771");
     }
+
     String address = "tNULSeBaMfi17CxRHVqFZbSFGYeyRLHWw2ctho";
     String addressTo = "tNULSeBaMmp4U2k653V5FmmPf4HDECWK2ExYVr";
+
     @Test
     public void validateCoinData() throws Exception {
         double version = 1.0;
@@ -74,17 +77,17 @@ public class CmdValidateTest {
         coinTo.setAssetsChainId(TestConfig.assetChainId);
         coinTo.setAssetsId(TestConfig.assetId);
         coinTo.setLockTime(0);
-        List<CoinFrom> coinFroms =new ArrayList<>();
+        List<CoinFrom> coinFroms = new ArrayList<>();
 //        coinFroms.add(coinFrom);
-        List<CoinTo> coinTos =new ArrayList<>();
+        List<CoinTo> coinTos = new ArrayList<>();
         coinTos.add(coinTo);
         coinData.setFrom(coinFroms);
         coinData.setTo(coinTos);
         tx.setCoinData(coinData.serialize());
-        params.put("chainId", TestConfig.chainId);
-        params.put("tx",RPCUtil.encode(tx.serialize()));
+        params.put(Constants.CHAIN_ID, TestConfig.chainId);
+        params.put("tx", RPCUtil.encode(tx.serialize()));
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
-        LoggerUtil.logger().info("response {}", response);
+        Log.info("response {}", response);
     }
 
 
@@ -97,9 +100,9 @@ public class CmdValidateTest {
 
 //        Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
 //        String nonce =  ((Map)((Map)response.getResponseData()).get("getNonce")).get("nonce").toString();
-        params.put("chainId", TestConfig.chainId);
+        params.put(Constants.CHAIN_ID, TestConfig.chainId);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "bathValidateBegin", params);
-        LoggerUtil.logger().info("response {}", response);
+        Log.info("response {}", response);
     }
 
     @Test
@@ -120,20 +123,20 @@ public class CmdValidateTest {
         coinTo.setAssetsChainId(TestConfig.assetChainId);
         coinTo.setAssetsId(TestConfig.assetId);
         coinTo.setLockTime(-1);
-        List<CoinFrom> coinFroms =new ArrayList<>();
+        List<CoinFrom> coinFroms = new ArrayList<>();
 //        coinFroms.add(coinFrom);
-        List<CoinTo> coinTos =new ArrayList<>();
+        List<CoinTo> coinTos = new ArrayList<>();
         coinTos.add(coinTo);
         coinData.setFrom(coinFroms);
         coinData.setTo(coinTos);
         tx.setBlockHeight(1L);
         tx.setCoinData(coinData.serialize());
-        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
-        params.put("chainId", TestConfig.chainId);
-        params.put("tx",RPCUtil.encode(tx.serialize()));
-        params.put("isBatchValidate",true);
-        Response  response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
-        LoggerUtil.logger().info("response {}", response);
+        tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
+        params.put(Constants.CHAIN_ID, TestConfig.chainId);
+        params.put("tx", RPCUtil.encode(tx.serialize()));
+        params.put("isBatchValidate", true);
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
+        Log.info("response {}", response);
     }
 
     @Test
@@ -146,9 +149,9 @@ public class CmdValidateTest {
         params.put("assetChainId", TestConfig.assetChainId);
         params.put("address", address);
         params.put("assetId", TestConfig.assetId);
-        params.put("chainId", TestConfig.chainId);
+        params.put(Constants.CHAIN_ID, TestConfig.chainId);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
-        String nonce =  ((Map)((Map)response.getResponseData()).get("getNonce")).get("nonce").toString();
+        String nonce = ((Map) ((Map) response.getResponseData()).get("getNonce")).get("nonce").toString();
         //封装交易执行
         Transaction tx = new Transaction();
         CoinData coinData = new CoinData();
@@ -158,26 +161,26 @@ public class CmdValidateTest {
         coinFrom.setAssetsId(TestConfig.assetId);
         coinFrom.setAssetsChainId(TestConfig.assetChainId);
         coinFrom.setAmount(BigInteger.valueOf(21));
-        coinFrom.setLocked((byte)0);
+        coinFrom.setLocked((byte) 0);
         CoinTo coinTo = new CoinTo();
         coinTo.setAddress(AddressTool.getAddress(addressTo));
         coinTo.setAmount(BigInteger.valueOf(20));
         coinTo.setAssetsChainId(TestConfig.assetChainId);
         coinTo.setAssetsId(TestConfig.assetId);
         coinTo.setLockTime(0);
-        List<CoinFrom> coinFroms =new ArrayList<>();
+        List<CoinFrom> coinFroms = new ArrayList<>();
         coinFroms.add(coinFrom);
-        List<CoinTo> coinTos =new ArrayList<>();
+        List<CoinTo> coinTos = new ArrayList<>();
         coinTos.add(coinTo);
         coinData.setFrom(coinFroms);
         coinData.setTo(coinTos);
         tx.setBlockHeight(2L);
         tx.setCoinData(coinData.serialize());
-        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
-        params.put("chainId", TestConfig.chainId);
-        params.put("tx",RPCUtil.encode(tx.serialize()));
-        params.put("isBatchValidate",true);
-          response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
-        LoggerUtil.logger().info("response {}", response);
+        tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
+        params.put(Constants.CHAIN_ID, TestConfig.chainId);
+        params.put("tx", RPCUtil.encode(tx.serialize()));
+        params.put("isBatchValidate", true);
+        response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
+        Log.info("response {}", response);
     }
 }

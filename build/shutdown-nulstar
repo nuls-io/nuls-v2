@@ -1,7 +1,11 @@
 #!/bin/bash
 cd `dirname $0`
 KILL_WAIT_COUNT=120
-modules=(%MODULES%)
+declare -a modules
+while read module
+do
+	modules[${#modules[@]}]="$module"
+done < "$(pwd)/.modules"
 stop(){
     pid=$1;
     kill $pid > /dev/null 2>&1
@@ -32,15 +36,16 @@ for pid in $APP_PID
 do
    stop $pid "Modules/Nulstar"
 done
-for module in ${modules[@]}
-do
-    APP_PID=`ps -ef|grep -w "Dapp.name=${module}"|grep -v grep|awk '{print $2}'`
-    if [ -z "${APP_PID}" ];
-    then
-        echo "${module} not running"
-    else
-        stop $APP_PID "Dapp.name=${module}"
-    fi
-done
+#for module in ${modules[@]}
+#do
+#    APP_PID=`ps -ef|grep -w "Dapp.name=${module}"|grep -v grep|awk '{print $2}'`
+#    if [ -n "${APP_PID}" ];
+#    then
+#        stop $APP_PID "Dapp.name=${module}"
+#    fi
+#done
 echo ""
 echo "shutdown success"
+if [ -f "./.DONE" ]; then
+    rm ./.DONE
+fi

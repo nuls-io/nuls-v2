@@ -166,7 +166,7 @@ public class RoundManager {
         round.setStartBlockHeader(header);
         round.setStartTime(header.getRoundStartTime());
         round.setMemberCount(sorterList.size());
-        round.setEndTime(round.getStartTime() + 10000 * sorterList.size());
+        round.setEndTime(round.getStartTime() + 10 * sorterList.size());
         round.setProducedBlockCount(1);
 
         List<PocRoundItem> itemList = new ArrayList<>();
@@ -194,7 +194,7 @@ public class RoundManager {
                 item.setPackingAddress(sorter.getSeedAddress());
 
             }
-            item.setTime(round.getStartTime() + item.getOrder() * 10000L);
+            item.setTime(round.getStartTime() + item.getOrder() * 10L);
             itemList.add(item);
         }
         round.setItemList(itemList);
@@ -243,6 +243,9 @@ public class RoundManager {
             PocRound round = null;
             long roundIndex = blockInfo.getHeader().getRoundIndex();
             while (round == null && blockInfo.getHeader().getHeight() > 0) {
+                if(roundIndex < 0) {
+                    return;
+                }
                 round = mongoRoundServiceImpl.getRound(chainId, roundIndex--);
             }
             if (round != null) {
@@ -273,7 +276,11 @@ public class RoundManager {
         if(currentRound.getStartHeight() == 1) {
             roundIndex = 1;
         }
+
         while (round == null) {
+            if(roundIndex < 0) {
+                return;
+            }
             round = mongoRoundServiceImpl.getRound(chainId, roundIndex--);
         }
         CurrentRound preRound = new CurrentRound();

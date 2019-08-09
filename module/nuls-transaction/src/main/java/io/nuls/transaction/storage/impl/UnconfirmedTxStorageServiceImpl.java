@@ -1,20 +1,21 @@
 package io.nuls.transaction.storage.impl;
 
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
-import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.rockdb.service.RocksDBService;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.constant.TxErrorCode;
+import io.nuls.transaction.model.po.TransactionNetPO;
 import io.nuls.transaction.model.po.TransactionUnconfirmedPO;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,14 +38,9 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
         if (tx == null) {
             return false;
         }
-        TransactionUnconfirmedPO txPO = new TransactionUnconfirmedPO(tx);
+        TransactionUnconfirmedPO txPO = new TransactionUnconfirmedPO(tx, NulsDateUtils.getCurrentTimeSeconds());
         byte[] txHashBytes;
-        try {
-            txHashBytes = tx.getHash().serialize();
-        } catch (IOException e) {
-            LOG.error(e);
-            return false;
-        }
+        txHashBytes = tx.getHash().getBytes();
         boolean result = false;
         try {
             result = RocksDBService.put(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, txHashBytes, txPO.serialize());
@@ -55,18 +51,19 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
     }
 
     @Override
-    public boolean putTxList(int chainId, List<Transaction> txList) {
-        if (null == txList || txList.size() == 0) {
+    public boolean putTxList(int chainId, List<TransactionNetPO> txNetPOList) {
+        if (null == txNetPOList || txNetPOList.size() == 0) {
             throw new NulsRuntimeException(TxErrorCode.PARAMETER_ERROR);
         }
-        Map<byte[], byte[]> txPoMap = new HashMap<>();
+        Map<byte[], byte[]> txPOMap = new HashMap<>();
         try {
-            for (Transaction tx : txList) {
-                TransactionUnconfirmedPO txPO = new TransactionUnconfirmedPO(tx);
+            for (TransactionNetPO txNetPO : txNetPOList) {
+                Transaction tx = txNetPO.getTx();
+                TransactionUnconfirmedPO txPO = new TransactionUnconfirmedPO(tx, NulsDateUtils.getCurrentTimeSeconds());
                 //序列化对象为byte数组存储
-                txPoMap.put(tx.getHash().serialize(), txPO.serialize());
+                txPOMap.put(tx.getHash().getBytes(), txPO.serialize());
             }
-            return RocksDBService.batchPut(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, txPoMap);
+            return RocksDBService.batchPut(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, txPOMap);
         } catch (Exception e) {
             LOG.error(e.getMessage());
             throw new NulsRuntimeException(TxErrorCode.DB_SAVE_BATCH_ERROR);
@@ -75,65 +72,60 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
 
 
     @Override
-    public Transaction getTx(int chainId, NulsDigestData hash) {
+    public TransactionUnconfirmedPO getTx(int chainId, NulsHash hash) {
         if (hash == null) {
             return null;
         }
-        try {
-            return getTx(chainId, hash.serialize());
-        } catch (IOException e) {
-            LOG.error(e);
-            throw new NulsRuntimeException(e);
-        }
+        return getTx(chainId, hash.getBytes());
     }
 
     @Override
-    public boolean isExists(int chainId, NulsDigestData hash) {
-        try {
-            byte[] txBytes = RocksDBService.get(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hash.serialize());
-            if (null != txBytes && txBytes.length > 0) {
-                return true;
-            }
-            return false;
-        } catch (IOException e) {
-            LOG.error(e);
-            throw new NulsRuntimeException(e);
+    public boolean isExists(int chainId, NulsHash hash) {
+//        return RocksDBService.keyMayExist(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hash.getBytes());
+        byte[] txBytes = RocksDBService.get(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hash.getBytes());
+        if (null != txBytes && txBytes.length > 0) {
+            return true;
         }
+        return false;
     }
 
     @Override
-    public Transaction getTx(int chainId, String hash) {
+    public TransactionUnconfirmedPO getTx(int chainId, String hash) {
         if (StringUtils.isBlank(hash)) {
             return null;
         }
         return getTx(chainId, HexUtil.decode(hash));
     }
 
-    private Transaction getTx(int chainId, byte[] hashSerialize) {
+    private TransactionUnconfirmedPO getTx(int chainId, byte[] hashSerialize) {
         byte[] txBytes = RocksDBService.get(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hashSerialize);
-        Transaction tx = null;
+        TransactionUnconfirmedPO txPO = null;
         if (null != txBytes) {
             try {
-                TransactionUnconfirmedPO txPO = new TransactionUnconfirmedPO();
+                txPO = new TransactionUnconfirmedPO();
                 txPO.parse(new NulsByteBuffer(txBytes, 0));
-                tx = txPO.getTx();
             } catch (Exception e) {
                 LOG.error(e);
                 return null;
             }
         }
-        return tx;
+        return txPO;
     }
 
 
     @Override
-    public boolean removeTx(int chainId, NulsDigestData hash) {
+    public boolean removeTx(int chainId, NulsHash hash) {
         if (hash == null) {
             return false;
         }
+        return removeTx(chainId, hash.getBytes());
+    }
+
+    @Override
+    public boolean removeTx(int chainId, byte[] hash) {
         boolean result = false;
         try {
-            result = RocksDBService.delete(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hash.serialize());
+            result = RocksDBService.delete(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hash);
         } catch (Exception e) {
             LOG.error(e);
         }
@@ -182,10 +174,19 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
     }
 
     @Override
-    public List<TransactionUnconfirmedPO> getAllTxPOList(int chainId) {
-        List<TransactionUnconfirmedPO> txList = new ArrayList<>();
+    public List<byte[]> getAllTxkeyList(int chainId) {
+        return RocksDBService.keyList(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId);
+    }
+
+    @Override
+    public List<TransactionUnconfirmedPO> getTransactionUnconfirmedPOList(int chainId, List<byte[]> hashList) {
+        //check params
+        if (hashList == null || hashList.size() == 0) {
+            return null;
+        }
+        List<TransactionUnconfirmedPO> txPOList = new ArrayList<>();
         //根据交易hash批量查询交易数据
-        List<byte[]> list = RocksDBService.valueList(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId);
+        List<byte[]> list = RocksDBService.multiGetValueList(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hashList);
         if (list != null) {
             for (byte[] txBytes : list) {
                 TransactionUnconfirmedPO txPO = new TransactionUnconfirmedPO();
@@ -194,9 +195,28 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
                 } catch (NulsException e) {
                     LOG.error(e);
                 }
-                txList.add(txPO);
+                txPOList.add(txPO);
             }
         }
-        return txList;
+        return txPOList;
+    }
+
+    @Override
+    public List<byte[]> getExistKeys(int chainId, List<byte[]> hashList) {
+        if (hashList == null || hashList.size() == 0) {
+            return null;
+        }
+        //根据交易hash批量查询交易数据
+        return RocksDBService.multiGetKeyList(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hashList);
+    }
+
+    @Override
+    public List<String> getExistKeysStr(int chainId, List<byte[]> hashList) {
+
+        List<String> list = new ArrayList<>();
+        for(byte[] hash : getExistKeys(chainId, hashList)){
+            list.add(HexUtil.encode(hash));
+        }
+        return list;
     }
 }

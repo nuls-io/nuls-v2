@@ -50,7 +50,7 @@ public class ConfigurationLoader {
         }
     }
 
-    private static final String JVM_OPTION_ACTIVE_MODULE = "active.module";
+    private static final String JVM_OPTION_ACTIVE_MODULE = "active.config";
 
     public static final String GLOBAL_DOMAIN = "global";
 
@@ -125,10 +125,9 @@ public class ConfigurationLoader {
 
     private void loadForFile(String fileName, ModuleConfigParser parser) {
         File file = new File(fileName);
-
         if (file.exists() && file.isFile()) {
             try {
-                Log.info("found config file : {}", fileName);
+                Log.info("found config file : {}", file.getAbsolutePath());
                 mergeConfigItem(parser.parse(file.getAbsolutePath(), new FileInputStream(file)));
             } catch (Exception e) {
                 throw new RuntimeException(e);

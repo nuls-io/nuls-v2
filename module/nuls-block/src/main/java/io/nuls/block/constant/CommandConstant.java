@@ -39,6 +39,10 @@ public interface CommandConstant {
      */
     String BLOCK_MESSAGE = "block";
     /**
+     * 根据区块高度获取区块
+     */
+    String GET_BLOCK_BY_HEIGHT_MESSAGE = "getBlockH";
+    /**
      * 根据区块HASH获取区块
      */
     String GET_BLOCK_MESSAGE = "getBlock";
@@ -68,6 +72,10 @@ public interface CommandConstant {
     String TXGROUP_MESSAGE = "txs";
 
     //普通服务对应的RPC命令
+    /**
+     * 获取一些信息
+     */
+    String INFO = "info";
     /**
      * 获取最新高度
      */
@@ -132,4 +140,8 @@ public interface CommandConstant {
      * 提供给协议升级模块的批量接口
      */
     String GET_BLOCK_HEADERS_FOR_PROTOCOL = "getBlockHeadersForProtocol";
+    /**
+     * 接收本地节点新打包的区块
+     */
+    String GET_STATUS = "getStatus";
 }

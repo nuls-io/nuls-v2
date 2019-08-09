@@ -1,15 +1,19 @@
 package io.nuls.api.db.mongo;
 
 import com.mongodb.client.model.*;
+import io.nuls.api.ApiContext;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.DBTableConstant;
 import io.nuls.api.db.AccountLedgerService;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.AccountLedgerInfo;
+import io.nuls.api.model.po.db.AssetInfo;
 import io.nuls.api.utils.DocumentTransferTool;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import org.bson.Document;
+import org.bson.conversions.Bson;
+import org.checkerframework.checker.units.qual.A;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +46,7 @@ public class MongoAccountLedgerServiceImpl implements AccountLedgerService {
             accountLedgerInfo = DocumentTransferTool.toInfo(document, "key", AccountLedgerInfo.class);
             apiCache.addAccountLedgerInfo(accountLedgerInfo);
         }
-        return accountLedgerInfo;
+        return accountLedgerInfo.copy();
     }
 
     public void saveLedgerList(int chainId, Map<String, AccountLedgerInfo> accountLedgerInfoMap) {
@@ -56,8 +60,6 @@ public class MongoAccountLedgerServiceImpl implements AccountLedgerService {
             if (ledgerInfo.isNew()) {
                 modelList.add(new InsertOneModel(document));
                 ledgerInfo.setNew(false);
-                ApiCache cache = CacheManager.getCache(chainId);
-                cache.addAccountLedgerInfo(ledgerInfo);
             } else {
                 modelList.add(new ReplaceOneModel<>(Filters.eq("_id", ledgerInfo.getKey()), document));
             }
@@ -65,5 +67,47 @@ public class MongoAccountLedgerServiceImpl implements AccountLedgerService {
         BulkWriteOptions options = new BulkWriteOptions();
         options.ordered(false);
         mongoDBService.bulkWrite(DBTableConstant.ACCOUNT_LEDGER_TABLE + chainId, modelList, options);
+
+        ApiCache cache = CacheManager.getCache(chainId);
+        for (AccountLedgerInfo ledgerInfo : accountLedgerInfoMap.values()) {
+            cache.addAccountLedgerInfo(ledgerInfo);
+        }
+    }
+
+    @Override
+    public List<AccountLedgerInfo> getAccountLedgerInfoList(int chainId, String address) {
+        Bson filter = Filters.eq("address", address);
+        List<Document> documentList = mongoDBService.query(DBTableConstant.ACCOUNT_LEDGER_TABLE + chainId, filter);
+        List<AccountLedgerInfo> accountLedgerInfoList = new ArrayList<>();
+
+        for (Document document : documentList) {
+            if (document.getInteger("chainId") != chainId) {
+                continue;
+            }
+            AccountLedgerInfo ledgerInfo = DocumentTransferTool.toInfo(document, "key", AccountLedgerInfo.class);
+            accountLedgerInfoList.add(ledgerInfo);
+        }
+        if (accountLedgerInfoList.isEmpty()) {
+            AssetInfo assetInfo = CacheManager.getCacheChain(chainId).getDefaultAsset();
+            AccountLedgerInfo accountLedgerInfo = new AccountLedgerInfo(address, assetInfo.getChainId(), assetInfo.getAssetId());
+            accountLedgerInfoList.add(accountLedgerInfo);
+        }
+        return accountLedgerInfoList;
+    }
+
+    @Override
+    public List<AccountLedgerInfo> getAccountCrossLedgerInfoList(int chainId, String address) {
+        Bson filter = Filters.eq("address", address);
+        List<Document> documentList = mongoDBService.query(DBTableConstant.ACCOUNT_LEDGER_TABLE + chainId, filter);
+        List<AccountLedgerInfo> accountLedgerInfoList = new ArrayList<>();
+
+        for (Document document : documentList) {
+            if (document.getInteger("chainId") == chainId) {
+                continue;
+            }
+            AccountLedgerInfo ledgerInfo = DocumentTransferTool.toInfo(document, "key", AccountLedgerInfo.class);
+            accountLedgerInfoList.add(ledgerInfo);
+        }
+        return accountLedgerInfoList;
     }
 }

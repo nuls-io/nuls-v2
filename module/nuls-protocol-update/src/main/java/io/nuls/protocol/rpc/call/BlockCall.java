@@ -24,12 +24,12 @@
 
 package io.nuls.protocol.rpc.call;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
-import io.nuls.core.rpc.util.RPCUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,23 +46,9 @@ public class BlockCall {
         try {
             Map<String, Object> params = new HashMap<>(4);
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             Map resultMap = (Map) CallHelper.request(ModuleE.BL.abbr, "latestHeight", params);
             return Long.valueOf(resultMap.get("value").toString());
-        } catch (Exception e) {
-            throw new NulsException(e);
-        }
-    }
-
-    public static BlockHeader getLatestBlockHeader(int chainId) throws NulsException {
-        try {
-            Map<String, Object> params = new HashMap<>(4);
-            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
-            String blockHeaderData = (String) CallHelper.request(ModuleE.BL.abbr, "latestBlockHeader", params);
-            BlockHeader header = new BlockHeader();
-            header.parse(RPCUtil.decode(blockHeaderData), 0);
-            return header;
         } catch (Exception e) {
             throw new NulsException(e);
         }
@@ -72,7 +58,7 @@ public class BlockCall {
         try {
             Map<String, Object> params = new HashMap<>(4);
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("interval", interval);
 
             List<String> blockHeaderList = (List) CallHelper.request(ModuleE.BL.abbr, "getBlockHeadersForProtocol", params);
@@ -91,33 +77,4 @@ public class BlockCall {
         }
     }
 
-    public static BlockHeader getBlockHeader(int chainId, long height) throws NulsException {
-        try {
-            Map<String, Object> params = new HashMap<>(4);
-            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
-            params.put("height", height);
-            String blockHeaderData = (String) CallHelper.request(ModuleE.BL.abbr, "getBlockHeaderByHeight", params);
-            BlockHeader header = new BlockHeader();
-            header.parse(RPCUtil.decode(blockHeaderData), 0);
-            return header;
-        } catch (Exception e) {
-            throw new NulsException(e);
-        }
-    }
-
-    public static BlockHeader getBlockHeader(int chainId, String hash) throws NulsException {
-        try {
-            Map<String, Object> params = new HashMap<>(4);
-            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
-            params.put("hash", hash);
-            String blockHeaderData = (String) CallHelper.request(ModuleE.BL.abbr, "getBlockHeaderByHash", params);
-            BlockHeader header = new BlockHeader();
-            header.parse(RPCUtil.decode(blockHeaderData), 0);
-            return header;
-        } catch (Exception e) {
-            throw new NulsException(e);
-        }
-    }
 }

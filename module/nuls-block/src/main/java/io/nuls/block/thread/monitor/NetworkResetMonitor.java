@@ -22,13 +22,14 @@ package io.nuls.block.thread.monitor;
 
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
-import io.nuls.block.rpc.call.ConsensusUtil;
-import io.nuls.block.rpc.call.NetworkUtil;
+import io.nuls.block.rpc.call.ConsensusCall;
+import io.nuls.block.rpc.call.NetworkCall;
+import io.nuls.block.rpc.call.TransactionCall;
 import io.nuls.block.thread.BlockSynchronizer;
 import io.nuls.core.log.logback.NulsLogger;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 
-import static io.nuls.block.constant.Constant.CONSENSUS_WAITING;
+import static io.nuls.block.constant.Constant.MODULE_WAITING;
 
 /**
  * 区块高度监控器
@@ -51,15 +52,16 @@ public class NetworkResetMonitor extends BaseMonitor {
     protected void process(int chainId, ChainContext context, NulsLogger commonLog) {
         ChainParameters parameters = context.getParameters();
         int reset = parameters.getResetTime();
-        long time = context.getLatestBlock().getHeader().getTime();
+        long time = context.getLatestBlock().getHeader().getTime() * 1000;
         //如果(当前时间戳-最新区块时间戳)>重置网络阈值,通知网络模块重置可用节点
-        long currentTime = TimeUtils.getCurrentTimeMillis();
+        long currentTime = NulsDateUtils.getCurrentTimeMillis();
         commonLog.debug("chainId-" + chainId + ",currentTime-" + currentTime + ",blockTime-" + time + ",diffrence-" + (currentTime - time));
         if (currentTime - time > reset) {
             commonLog.info("chainId-" + chainId + ",NetworkReset!");
-            NetworkUtil.resetNetwork(chainId);
+            NetworkCall.resetNetwork(chainId);
             //重新开启区块同步线程
-            ConsensusUtil.notice(chainId, CONSENSUS_WAITING);
+            ConsensusCall.notice(chainId, MODULE_WAITING);
+            TransactionCall.notice(chainId, MODULE_WAITING);
             BlockSynchronizer.syn(chainId);
         }
     }

@@ -18,6 +18,9 @@ public interface ConsensusConstant {
     String DB_NAME_CONSUME_TX = "consensus_tx";
     String DB_NAME_CONSUME_LANGUAGE = "language";
     String DB_NAME_CONSUME_CONGIF = "config";
+    String DB_NAME_RANDOM_SEEDS = "random_seed";
+
+    byte[] EMPTY_SEED = new byte[32];
 
     /**
      * config param
@@ -112,7 +115,7 @@ public interface ConsensusConstant {
      * 每出一个块获得的共识奖励，一年总的共识奖励金5000000，一年总出块数3154600,相除得到每一块的奖励金
      * value = 5000000/3154600
      */
-    BigInteger YEAR_MILLISECOND = new BigInteger("31536000000");
+    BigInteger YEAR_MILLISECOND = new BigInteger("31536000");
 
     /**
      * 信誉值的最小值，小于等于该值会给红牌处罚
@@ -141,7 +144,7 @@ public interface ConsensusConstant {
     int MIN_VALUE = 0;
     int PAGE_NUMBER_INIT_VALUE = 1;
     int PAGE_SIZE_INIT_VALUE = 10;
-    int PAGE_SIZE_MAX_VALUE = 100;
+    int PAGE_SIZE_MAX_VALUE = 300;
     String PARAM_CHAIN_ID = "chainId";
     String PARAM_ADDRESS = "address";
     String PARAM_TX = "tx";
@@ -157,6 +160,9 @@ public interface ConsensusConstant {
     String PARAM_STATUS = "status";
     String HEADER_LIST = "headerList";
     String STATE_ROOT = "stateRoot";
+    String LAST_ROUND = "lastRound";
+    String CURRENT_ROUND = "currentRound";
+    String PUB_KEY = "pubKey";
 
     /**
      * 共识模块日志管理
@@ -164,6 +170,7 @@ public interface ConsensusConstant {
      * */
     String CONSENSUS_LOGGER_NAME = "consensus/consensus";
     String BASIC_LOGGER_NAME = "consensus/rpc";
+    String COMMON_LOG_NAME = "common";
 
     String CHAIN ="chain";
 
@@ -176,4 +183,6 @@ public interface ConsensusConstant {
     int RPC_CALL_TRY_COUNT = 5;
 
     byte VALUE_OF_ONE_HUNDRED =100;
+
+    String SEPARATOR = "_";
  }

@@ -24,14 +24,14 @@
 
 package io.nuls.account.tx;
 
+import io.nuls.core.log.Log;
+import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.log.Log;
-import io.nuls.core.parse.JSONUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -69,19 +69,6 @@ public class TxTest {
     }
 
     @Test
-    public void mTransfer() throws Exception {
-        Transfer transfer1 = new Transfer(address21, address20);
-        Thread thread1 = new Thread(transfer1);
-        thread1.start();
-        Transfer transfer2 = new Transfer(address25, address20);
-        Thread thread2 = new Thread(transfer2);
-        thread2.start();
-        thread1.join();
-        thread2.join();
-    }
-
-
-    @Test
     public void importPriKeyTest() {
         importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//种子出块地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
 //        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//种子出块地址 tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
@@ -98,6 +85,18 @@ public class TxTest {
 //        importPriKey("00a6eef7b91c645525bb8410f2a79e1299a69d0d7ef980068434b6aca90ab6d9", password);
     }
 
+    @Test
+    public void mTransfer() throws Exception {
+        Transfer transfer1 = new Transfer(address21, address20);
+        Thread thread1 = new Thread(transfer1);
+        thread1.start();
+//        Transfer transfer2 = new Transfer(address25, address20);
+//        Thread thread2 = new Thread(transfer2);
+//        thread2.start();
+        thread1.join();
+//        thread2.join();
+    }
+
     /**
      * 删除账户
      */
@@ -112,7 +111,7 @@ public class TxTest {
             //账户已存在则覆盖 If the account exists, it covers.
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
 
             params.put("priKey", priKey);
             params.put("password", pwd);
@@ -129,10 +128,11 @@ public class TxTest {
     public void removeAccount(String address, String password) throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", address);
         params.put("password", password);
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_removeAccount", params);
         Log.debug("{}", JSONUtils.obj2json(cmdResp.getResponseData()));
     }
+
 }

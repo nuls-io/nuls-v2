@@ -46,7 +46,7 @@ public class HeartbeatServerHandler extends ChannelInboundHandlerAdapter {
         if (evt instanceof IdleStateEvent) {
             SocketChannel channel = (SocketChannel) ctx.channel();
             String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-            LoggerUtil.logger().debug("{}====userEventTriggered  IdleStateEvent==", nodeId);
+            LoggerUtil.COMMON_LOG.info("{}====userEventTriggered  IdleStateEvent==", nodeId);
             IdleStateEvent event = (IdleStateEvent) evt;
             String type = "";
             if (event.state() == IdleState.READER_IDLE) {
@@ -56,8 +56,8 @@ public class HeartbeatServerHandler extends ChannelInboundHandlerAdapter {
             } else if (event.state() == IdleState.ALL_IDLE) {
                 type = "all idle";
             }
-            LoggerUtil.logger().debug("localInfo: " + channel.localAddress().getHostString() + ":" + channel.localAddress().getPort());
-            LoggerUtil.logger().debug("remoteInfo: " + channel.remoteAddress().getHostString() + ":" + channel.remoteAddress().getPort());
+            LoggerUtil.COMMON_LOG.info("localInfo: " + channel.localAddress().getHostString() + ":" + channel.localAddress().getPort());
+            LoggerUtil.COMMON_LOG.info("remoteInfo: " + channel.remoteAddress().getHostString() + ":" + channel.remoteAddress().getPort());
             ctx.channel().close();
         } else {
             super.userEventTriggered(ctx, evt);

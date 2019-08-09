@@ -21,10 +21,12 @@
 package io.nuls.protocol.rpc;
 
 import com.google.common.collect.Maps;
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.ProtocolVersion;
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
+import io.nuls.base.protocol.Protocol;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
@@ -33,12 +35,8 @@ import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.info.Constants;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.Parameter;
+import io.nuls.core.rpc.model.*;
 import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.protocol.Protocol;
-import io.nuls.core.rpc.protocol.ProtocolGroupManager;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.protocol.manager.ContextManager;
 import io.nuls.protocol.model.ProtocolContext;
 import io.nuls.protocol.service.ProtocolService;
@@ -67,10 +65,17 @@ public class ProtocolResource extends BaseCmd {
      * @param map
      * @return
      */
-    @CmdAnnotation(cmd = GET_MAIN_VERSION, version = 1.0, scope = Constants.PUBLIC, description = "")
-    @Parameter(parameterName = "chainId", parameterType = "int")
+    @CmdAnnotation(cmd = GET_MAIN_VERSION, version = 1.0, description = "get mainnet version")
+    @Parameters({
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象，包含三个属性", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "version", valueType = Short.class, description = "协议版本号"),
+            @Key(name = "effectiveRatio", valueType = Byte.class, description = "每个统计区间内的最小生效比例"),
+            @Key(name = "continuousIntervalCount", valueType = Short.class, description = "协议生效要满足的连续区间数")})
+    )
     public Response getMainVersion(Map map) {
-        int chainId = Integer.parseInt(map.get("chainId").toString());
+        int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
         return success(ContextManager.getContext(chainId).getCurrentProtocolVersion());
     }
 
@@ -80,10 +85,17 @@ public class ProtocolResource extends BaseCmd {
      * @param map
      * @return
      */
-    @CmdAnnotation(cmd = GET_BLOCK_VERSION, version = 1.0, scope = Constants.PUBLIC, description = "")
-    @Parameter(parameterName = "chainId", parameterType = "int")
+    @CmdAnnotation(cmd = GET_BLOCK_VERSION, version = 1.0, description = "get wallet version")
+    @Parameters({
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象，包含三个属性", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "version", valueType = Short.class, description = "协议版本号"),
+            @Key(name = "effectiveRatio", valueType = Byte.class, description = "每个统计区间内的最小生效比例"),
+            @Key(name = "continuousIntervalCount", valueType = Short.class, description = "协议生效要满足的连续区间数")})
+    )
     public Response getBlockVersion(Map map) {
-        int chainId = Integer.parseInt(map.get("chainId").toString());
+        int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
         List<ProtocolVersion> list = ContextManager.getContext(chainId).getLocalVersionList();
         return success(list.get(list.size() - 1));
 
@@ -95,10 +107,14 @@ public class ProtocolResource extends BaseCmd {
      * @param map
      * @return
      */
-    @CmdAnnotation(cmd = CHECK_BLOCK_VERSION, version = 1.0, scope = Constants.PUBLIC, description = "")
-    @Parameter(parameterName = "chainId", parameterType = "int")
+    @CmdAnnotation(cmd = CHECK_BLOCK_VERSION, version = 1.0, description = "check block version")
+    @Parameters({
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
+            @Parameter(parameterName = "extendsData", requestType = @TypeDescriptor(value = String.class), parameterDes = "BlockExtendsData序列化后的hex字符串")
+    })
+    @ResponseData(name = "返回值", description = "无返回值")
     public Response checkBlockVersion(Map map) {
-        int chainId = Integer.parseInt(map.get("chainId").toString());
+        int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
         String extendStr = map.get("extendsData").toString();
         BlockExtendsData extendsData = new BlockExtendsData(RPCUtil.decode(extendStr));
 
@@ -106,7 +122,7 @@ public class ProtocolResource extends BaseCmd {
         ProtocolVersion currentProtocol = context.getCurrentProtocolVersion();
         //收到的新区块和本地主网版本不一致，验证不通过
         if (currentProtocol.getVersion() != extendsData.getMainVersion()) {
-            NulsLogger commonLog = context.getCommonLog();
+            NulsLogger commonLog = context.getLogger();
             commonLog.info("------block version error, mainVersion:" + currentProtocol.getVersion() + ",blockVersion:" + extendsData.getMainVersion());
             return failed("block version error");
         }
@@ -119,11 +135,14 @@ public class ProtocolResource extends BaseCmd {
      * @param map
      * @return
      */
-    @CmdAnnotation(cmd = SAVE_BLOCK, version = 1.0, scope = Constants.PUBLIC, description = "")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "blockHeader", parameterType = "string")
+    @CmdAnnotation(cmd = SAVE_BLOCK, version = 1.0, description = "save block header")
+    @Parameters({
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
+            @Parameter(parameterName = "blockHeader", requestType = @TypeDescriptor(value = String.class), parameterDes = "区块头hex")
+    })
+    @ResponseData(name = "返回值", description = "无返回值")
     public Response save(Map map) {
-        int chainId = Integer.parseInt(map.get("chainId").toString());
+        int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
         String hex = map.get("blockHeader").toString();
         BlockHeader blockHeader = new BlockHeader();
         try {
@@ -144,11 +163,14 @@ public class ProtocolResource extends BaseCmd {
      * @param map
      * @return
      */
-    @CmdAnnotation(cmd = ROLLBACK_BLOCK, version = 1.0, scope = Constants.PUBLIC, description = "")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "blockHeader", parameterType = "string")
+    @CmdAnnotation(cmd = ROLLBACK_BLOCK, version = 1.0, description = "rollback block header")
+    @Parameters({
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
+            @Parameter(parameterName = "blockHeader", requestType = @TypeDescriptor(value = String.class), parameterDes = "区块头hex")
+    })
+    @ResponseData(name = "返回值", description = "无返回值")
     public Response rollback(Map map) {
-        int chainId = Integer.parseInt(map.get("chainId").toString());
+        int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
         String hex = map.get("blockHeader").toString();
         BlockHeader blockHeader = new BlockHeader();
         try {
@@ -169,14 +191,18 @@ public class ProtocolResource extends BaseCmd {
      * @param map
      * @return
      */
-    @CmdAnnotation(cmd = REGISTER_PROTOCOL, version = 1.0, scope = Constants.PUBLIC, description = "")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "list", parameterType = "List")
+    @CmdAnnotation(cmd = REGISTER_PROTOCOL, version = 1.0, description = "register protocol")
+    @Parameters({
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
+            @Parameter(parameterName = "moduleCode", requestType = @TypeDescriptor(value = String.class), parameterDes = "模块标志"),
+            @Parameter(parameterName = "list", requestType = @TypeDescriptor(value = List.class), parameterDes = "Protocol序列化后的hex字符串"),
+    })
+    @ResponseData(name = "返回值", description = "无返回值")
     public Response registerProtocol(Map map) {
-        int chainId = Integer.parseInt(map.get("chainId").toString());
+        int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
         ProtocolContext context = ContextManager.getContext(chainId);
         Map<Short, List<Map.Entry<String, Protocol>>> protocolMap = context.getProtocolMap();
-        NulsLogger commonLog = context.getCommonLog();
+        NulsLogger commonLog = context.getLogger();
         String moduleCode = map.get("moduleCode").toString();
         List list = (List) map.get("list");
         commonLog.info("--------------------registerProtocol---------------------------");

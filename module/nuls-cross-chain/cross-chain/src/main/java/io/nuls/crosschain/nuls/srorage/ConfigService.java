@@ -18,7 +18,7 @@ public interface ConfigService {
      * @param bean     配置类/config bean
      * @param chainID  链ID/chain id
      * @return 保存是否成功/Is preservation successful?
-     * @Exception
+     * @exception Exception 数据保存失败
      * */
     boolean save(ConfigBean bean, int chainID)throws Exception;
 

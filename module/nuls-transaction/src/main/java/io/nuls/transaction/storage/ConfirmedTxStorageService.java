@@ -1,6 +1,6 @@
 package io.nuls.transaction.storage;
 
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
 
@@ -36,7 +36,7 @@ public interface ConfirmedTxStorageService {
      * @param hash 交易hash
      * @return
      */
-    TransactionConfirmedPO getTx(int chainId, NulsDigestData hash);
+    TransactionConfirmedPO getTx(int chainId, NulsHash hash);
 
     /**
      * 获取交易数据
@@ -52,7 +52,7 @@ public interface ConfirmedTxStorageService {
      * @param hash 交易hash
      * @return
      */
-    boolean removeTx(int chainId,NulsDigestData hash);
+    boolean removeTx(int chainId,NulsHash hash);
 
     /**
      * 删除交易数据
@@ -84,6 +84,33 @@ public interface ConfirmedTxStorageService {
      * @param hash
      * @return
      */
-    boolean isExists(int chainId, NulsDigestData hash);
+    boolean isExists(int chainId, NulsHash hash);
+
+    /**
+     * 根据交易hash批量查询已确认交易数据
+     *
+     * @param chainId
+     * @param hashList NulsHash serialize entity
+     * @return 交易数据列表
+     */
+    List<Transaction> getTxList(int chainId, List<byte[]> hashList);
+
+
+    /**
+     * 根据hash 获取存在的key
+     * @param chainId
+     * @param hashList
+     * @return List<byte[]>
+     */
+    List<byte[]> getExistKeys(int chainId, List<byte[]> hashList);
+
+
+    /**
+     * 根据hash 获取存在的key
+     * @param chainId
+     * @param hashList
+     * @return List<String>
+     */
+    List<String> getExistKeysStr(int chainId, List<byte[]> hashList);
 
 }

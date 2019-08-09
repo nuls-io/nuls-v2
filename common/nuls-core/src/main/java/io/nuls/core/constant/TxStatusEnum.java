@@ -41,7 +41,12 @@ public enum TxStatusEnum {
      * 已确认状态
      * packaged and saved
      */
-    CONFIRMED((byte)1);
+    CONFIRMED((byte)1),
+    /**
+     * 已打包状态
+     * packaged and saved
+     */
+    COMMITTED((byte)2);
 
     private byte status;
 
@@ -55,5 +60,15 @@ public enum TxStatusEnum {
 
     public void setStatus(byte status) {
         this.status = status;
+    }
+
+    public static TxStatusEnum getStatus(int status) {
+        if(status == 0) {
+            return UNCONFIRM;
+        }
+        if(status == 1) {
+            return CONFIRMED;
+        }
+        return null;
     }
 }

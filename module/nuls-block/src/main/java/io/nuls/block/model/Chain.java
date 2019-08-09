@@ -23,7 +23,7 @@ package io.nuls.block.model;
 import com.google.common.base.Objects;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.block.constant.ChainTypeEnum;
 
 import java.util.*;
@@ -84,7 +84,7 @@ public class Chain {
     /**
      * 链上起始区块的previousHash
      */
-    private NulsDigestData previousHash;
+    private NulsHash previousHash;
 
     /**
      * 链的起始高度(包含)
@@ -104,7 +104,7 @@ public class Chain {
     /**
      * 链上所有区块hash列表,分叉链、孤儿链维护所有区块的hash在内存中,主链只维护ConfigConstant.HEIGHT_RANGE个hash在内存中
      */
-    private LinkedList<NulsDigestData> hashList;
+    private Deque<NulsHash> hashList;
 
     /**
      * 标记该链的类型
@@ -121,7 +121,7 @@ public class Chain {
      *
      * @return
      */
-    public NulsDigestData getStartHash() {
+    public NulsHash getStartHash() {
         return hashList.getFirst();
     }
 
@@ -130,7 +130,7 @@ public class Chain {
      *
      * @return
      */
-    public NulsDigestData getEndHash() {
+    public NulsHash getEndHash() {
         return hashList.getLast();
     }
 
@@ -140,11 +140,10 @@ public class Chain {
      * @return
      */
     public boolean isMaster() {
+        if (type == null) {
+            return false;
+        }
         return type.equals(ChainTypeEnum.MASTER);
-    }
-
-    public static Comparator<Chain> getCOMPARATOR() {
-        return COMPARATOR;
     }
 
     public Chain getParent() {
@@ -171,11 +170,11 @@ public class Chain {
         this.chainId = chainId;
     }
 
-    public NulsDigestData getPreviousHash() {
+    public NulsHash getPreviousHash() {
         return previousHash;
     }
 
-    public void setPreviousHash(NulsDigestData previousHash) {
+    public void setPreviousHash(NulsHash previousHash) {
         this.previousHash = previousHash;
     }
 
@@ -203,11 +202,11 @@ public class Chain {
         this.endHeight = endHeight;
     }
 
-    public LinkedList<NulsDigestData> getHashList() {
+    public Deque<NulsHash> getHashList() {
         return hashList;
     }
 
-    public void setHashList(LinkedList<NulsDigestData> hashList) {
+    public void setHashList(Deque<NulsHash> hashList) {
         this.hashList = hashList;
     }
 
@@ -252,22 +251,26 @@ public class Chain {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", Chain.class.getSimpleName() + "[", "]")
-                .add("parentStartHashCode=" + (this.getParent() == null ? null : this.getParent().getStartHashCode()))
-                .add("startHashCode=" + startHashCode)
-                .add("startHeight=" + startHeight)
-                .add("endHeight=" + endHeight)
-                .add("type=" + type)
-                .add("age=" + age)
-                .add("hashList=" + hashList)
-                .toString();
-    }
-
-    @Override
-    protected Object clone() throws CloneNotSupportedException {
-        Chain clone = new Chain();
-
-        return super.clone();
+//        if (isMaster()) {
+            return new StringJoiner(", ", Chain.class.getSimpleName() + "[", "]")
+                    .add("parentStartHashCode=" + (this.getParent() == null ? null : this.getParent().getStartHashCode()))
+                    .add("startHashCode=" + startHashCode)
+                    .add("startHeight=" + startHeight)
+                    .add("endHeight=" + endHeight)
+                    .add("type=" + type)
+                    .add("age=" + age)
+                    .toString();
+//        } else {
+//            return new StringJoiner(", ", Chain.class.getSimpleName() + "[", "]")
+//                    .add("parentStartHashCode=" + (this.getParent() == null ? null : this.getParent().getStartHashCode()))
+//                    .add("startHashCode=" + startHashCode)
+//                    .add("startHeight=" + startHeight)
+//                    .add("endHeight=" + endHeight)
+//                    .add("type=" + type)
+//                    .add("age=" + age)
+//                    .add("hashList=" + hashList)
+//                    .toString();
+//        }
     }
 
     @Override

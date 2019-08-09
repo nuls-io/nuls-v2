@@ -1,10 +1,13 @@
 [JAVA]
-APP_NAME=nuls-cross-chain
+APP_NAME=cross-chain
 VERSION=1.0.0
-MAIN_CLASS=io.nuls.crosschain.nuls.NulsCrossChainBootStrap
+MAIN_CLASS=io.nuls.crosschain.nuls.CrossChainBootStrap
 JOPT_XMS=256
 JOPT_XMX=256
-PrivateDependent=base-lib
+PrivateDependent=base-lib,nuls-base-protocol-update
 
 [Core]
 Managed=1
+
+[cross-chain]
+

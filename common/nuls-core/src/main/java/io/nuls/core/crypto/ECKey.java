@@ -24,27 +24,27 @@ import com.google.common.primitives.UnsignedBytes;
 import io.nuls.core.basic.VarInt;
 import io.nuls.core.model.ObjectUtils;
 import io.nuls.core.parse.SerializeUtils;
+import org.bouncycastle.asn1.*;
+import org.bouncycastle.asn1.x9.X9ECParameters;
+import org.bouncycastle.asn1.x9.X9IntegerConverter;
+import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
+import org.bouncycastle.crypto.digests.SHA256Digest;
+import org.bouncycastle.crypto.ec.CustomNamedCurves;
+import org.bouncycastle.crypto.generators.ECKeyPairGenerator;
+import org.bouncycastle.crypto.params.ECDomainParameters;
+import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
+import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
+import org.bouncycastle.crypto.params.ECPublicKeyParameters;
+import org.bouncycastle.crypto.signers.ECDSASigner;
+import org.bouncycastle.crypto.signers.HMacDSAKCalculator;
+import org.bouncycastle.math.ec.ECAlgorithms;
+import org.bouncycastle.math.ec.ECPoint;
+import org.bouncycastle.math.ec.FixedPointCombMultiplier;
+import org.bouncycastle.math.ec.FixedPointUtil;
+import org.bouncycastle.math.ec.custom.sec.SecP256K1Curve;
+import org.bouncycastle.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spongycastle.asn1.*;
-import org.spongycastle.asn1.x9.X9ECParameters;
-import org.spongycastle.asn1.x9.X9IntegerConverter;
-import org.spongycastle.crypto.AsymmetricCipherKeyPair;
-import org.spongycastle.crypto.digests.SHA256Digest;
-import org.spongycastle.crypto.ec.CustomNamedCurves;
-import org.spongycastle.crypto.generators.ECKeyPairGenerator;
-import org.spongycastle.crypto.params.ECDomainParameters;
-import org.spongycastle.crypto.params.ECKeyGenerationParameters;
-import org.spongycastle.crypto.params.ECPrivateKeyParameters;
-import org.spongycastle.crypto.params.ECPublicKeyParameters;
-import org.spongycastle.crypto.signers.ECDSASigner;
-import org.spongycastle.crypto.signers.HMacDSAKCalculator;
-import org.spongycastle.math.ec.ECAlgorithms;
-import org.spongycastle.math.ec.ECPoint;
-import org.spongycastle.math.ec.FixedPointCombMultiplier;
-import org.spongycastle.math.ec.FixedPointUtil;
-import org.spongycastle.math.ec.custom.sec.SecP256K1Curve;
-import org.spongycastle.util.Properties;
 
 import javax.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
@@ -93,22 +93,18 @@ public class ECKey {
     /**
      * Sorts oldest keys first, newest last.
      */
-    public static final Comparator<ECKey> AGE_COMPARATOR = new Comparator<ECKey>() {
-
-        @Override
-        public int compare(ECKey k1, ECKey k2) {
-            if (k1.creationTimeSeconds == k2.creationTimeSeconds) {
-                return 0;
-            } else {
-                return k1.creationTimeSeconds > k2.creationTimeSeconds ? 1 : -1;
-            }
+    public static final Comparator<ECKey> AGE_COMPARATOR = (k1, k2) -> {
+        if (k1.creationTimeSeconds == k2.creationTimeSeconds) {
+            return 0;
+        } else {
+            return k1.creationTimeSeconds > k2.creationTimeSeconds ? 1 : -1;
         }
     };
 
     /**
      * Compares pub key bytes using {@link com.google.common.primitives.UnsignedBytes#lexicographicalComparator()}
      */
-    public static final Comparator<ECKey> PUBKEY_COMPARATOR = new Comparator<ECKey>() {
+    public static final Comparator<ECKey> PUBKEY_COMPARATOR = new Comparator<>() {
         private Comparator<byte[]> comparator = UnsignedBytes.lexicographicalComparator();
 
         @Override
@@ -140,7 +136,7 @@ public class ECKey {
         }
 
         // Tell Bouncy Castle to precompute data that's needed during secp256k1 calculations.
-        FixedPointUtil.precompute(CURVE_PARAMS.getG(), 12);
+        FixedPointUtil.precompute(CURVE_PARAMS.getG());
         CURVE = new ECDomainParameters(CURVE_PARAMS.getCurve(), CURVE_PARAMS.getG(), CURVE_PARAMS.getN(),
                 CURVE_PARAMS.getH());
         HALF_CURVE_ORDER = CURVE_PARAMS.getN().shiftRight(1);
@@ -614,34 +610,26 @@ public class ECKey {
     public static boolean FAKE_SIGNATURES = false;
 
     /**
+     * 验证16进制私钥字符串是否正确
+     *
+     * @return boolean 正确返回true,否则返回false
+     */
+    public static boolean isValidPrivteHex(String privateHex) {
+        int len = privateHex.length();
+        if (len % 2 == 1) {
+            return false;
+        }
+
+        return len >= 60 && len <= 66;
+    }
+
+    /**
      * 用私钥对数据进行签名
      *
      * @param hash 需签名数据
      * @return byte[] 签名
      */
     public byte[] sign(byte[] hash) {
-        return sign(hash, null);
-    }
-
-    /**
-     * 用私钥对数据进行签名
-     *
-     * @param hash   需签名数据
-     * @param aesKey 私钥
-     * @return byte[] 签名
-     */
-    public byte[] sign(Sha256Hash hash, BigInteger aesKey) {
-        return doSign(hash.getBytes(), priv);
-    }
-
-    /**
-     * 用私钥对数据进行签名
-     *
-     * @param hash   需签名数据
-     * @param aesKey 私钥
-     * @return byte[] 签名
-     */
-    public byte[] sign(byte[] hash, BigInteger aesKey) {
         return doSign(hash, priv);
     }
 
@@ -658,7 +646,7 @@ public class ECKey {
         ECPrivateKeyParameters privKey = new ECPrivateKeyParameters(privateKeyForSigning, CURVE);
         signer.init(true, privKey);
         BigInteger[] components = signer.generateSignature(input);
-        return new ECKey.ECDSASignature(components[0], components[1]).toCanonicalised().encodeToDER();
+        return new ECDSASignature(components[0], components[1]).toCanonicalised().encodeToDER();
     }
 
 
@@ -697,14 +685,13 @@ public class ECKey {
     }
 
     /**
-     * Verifies the given ASN.1 encoded ECDSA signature against a hash using the public key.
+     * 用私钥对数据进行签名
      *
-     * @param hash      Hash of the data to verify.
-     * @param signature ASN.1 encoded signature.
-     * @throws Exception if the signature is unparseable in some way.
+     * @param hash   需签名数据
+     * @return byte[] 签名
      */
-    public boolean verify(byte[] hash, byte[] signature) throws Exception {
-        return ECKey.verify(hash, signature, getPubKey());
+    public byte[] sign(Sha256Hash hash) {
+        return doSign(hash.getBytes(), priv);
     }
 
     /**
@@ -1019,20 +1006,13 @@ public class ECKey {
         }
     }
 
-
     /**
-     * 验证16进制私钥字符串是否正确
-     * @return  boolean 正确返回true,否则返回false
-     * */
-    public static boolean isValidPrivteHex(String privateHex) {
-        int len = privateHex.length();
-        if (len % 2 == 1) {
-            return false;
-        }
-
-        if (len < 60 || len > 66) {
-            return false;
-        }
-        return true;
+     * Verifies the given ASN.1 encoded ECDSA signature against a hash using the public key.
+     *
+     * @param hash      Hash of the data to verify.
+     * @param signature ASN.1 encoded signature.
+     */
+    public boolean verify(byte[] hash, byte[] signature) {
+        return ECKey.verify(hash, signature, getPubKey());
     }
 }

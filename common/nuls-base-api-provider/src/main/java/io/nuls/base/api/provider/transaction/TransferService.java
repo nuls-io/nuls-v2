@@ -1,10 +1,7 @@
 package io.nuls.base.api.provider.transaction;
 
 import io.nuls.base.api.provider.Result;
-import io.nuls.base.api.provider.transaction.facade.GetConfirmedTxByHashReq;
-import io.nuls.base.api.provider.transaction.facade.GetTxByHashReq;
-import io.nuls.base.api.provider.transaction.facade.TransactionData;
-import io.nuls.base.api.provider.transaction.facade.TransferReq;
+import io.nuls.base.api.provider.transaction.facade.*;
 import io.nuls.base.data.Transaction;
 
 /**
@@ -14,6 +11,12 @@ import io.nuls.base.data.Transaction;
  */
 public interface TransferService {
 
+    //todo
+    /**
+     * 测试批量发交易 要删
+     */
+    Result transferTest(int method, String addr1, String addr2);
+
     /**
      *  发起交易
      *  transfer
@@ -21,6 +24,20 @@ public interface TransferService {
      * @return
      */
     Result<String> transfer(TransferReq req);
+
+    /**
+     * 创建多签交易
+     * @param req
+     * @return
+     */
+    Result<MultiSignTransferRes> multiSignTransfer(CreateMultiSignTransferReq req);
+
+    /**
+     * 签名多签交易
+     * @param req
+     * @return
+     */
+    Result<MultiSignTransferRes> signMultiSignTransfer(SignMultiSignTransferReq req);
 
 
     /**

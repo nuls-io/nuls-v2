@@ -24,25 +24,23 @@
 
 package io.nuls.transaction.utils;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.model.DateUtils;
-import io.nuls.core.model.StringUtils;
-import io.nuls.core.rpc.util.RPCUtil;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.transaction.constant.TxConfig;
+import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.manager.TxManager;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
 
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
@@ -95,6 +93,7 @@ public class TxUtil {
 
     /**
      * RPCUtil 反序列化
+     *
      * @param data
      * @param clazz
      * @param <T>
@@ -102,15 +101,12 @@ public class TxUtil {
      * @throws NulsException
      */
     public static <T> T getInstanceRpcStr(String data, Class<? extends BaseNulsData> clazz) throws NulsException {
-        if (StringUtils.isBlank(data)) {
-            throw new NulsException(TxErrorCode.DATA_NOT_FOUND);
-        }
         return getInstance(RPCUtil.decode(data), clazz);
     }
 
-
     /**
      * HEX反序列化
+     *
      * @param hex
      * @param clazz
      * @param <T>
@@ -118,9 +114,6 @@ public class TxUtil {
      * @throws NulsException
      */
     public static <T> T getInstance(String hex, Class<? extends BaseNulsData> clazz) throws NulsException {
-        if (StringUtils.isBlank(hex)) {
-            throw new NulsException(TxErrorCode.DATA_NOT_FOUND);
-        }
         return getInstance(HexUtil.decode(hex), clazz);
     }
 
@@ -210,13 +203,13 @@ public class TxUtil {
         LOG.debug("**************************************************");
         LOG.debug("Transaction information");
         LOG.debug("type: {}", tx.getType());
-        LOG.debug("txHash: {}", tx.getHash().getDigestHex());
-        LOG.debug("time: {}", DateUtils.timeStamp2DateStr(tx.getTime()));
+        LOG.debug("txHash: {}", tx.getHash().toHex());
+        LOG.debug("time: {}", NulsDateUtils.timeStamp2DateStr(tx.getTime()));
         LOG.debug("size: {}B,  -{}KB, -{}MB",
                 String.valueOf(tx.getSize()), String.valueOf(tx.getSize() / 1024), String.valueOf(tx.getSize() / 1024 / 1024));
         byte[] remark = tx.getRemark();
         try {
-            String remarkStr =  remark == null ? "" : new String(tx.getRemark(),"UTF-8");
+            String remarkStr = remark == null ? "" : new String(tx.getRemark(), "UTF-8");
             LOG.debug("remark: {}", remarkStr);
         } catch (UnsupportedEncodingException e) {
             LOG.error(e);
@@ -287,7 +280,7 @@ public class TxUtil {
      * @param tx
      * @throws NulsException
      */
-    public static void moduleGroups(Chain chain, Map<TxRegister, List<String>> moduleVerifyMap, Transaction tx) throws NulsException {
+    public static void moduleGroups(Chain chain, Map<String, List<String>> moduleVerifyMap, Transaction tx) throws NulsException {
         //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
         String txStr;
         try {
@@ -307,20 +300,26 @@ public class TxUtil {
      * @param txStr
      * @throws NulsException
      */
-    public static void moduleGroups(Chain chain, Map<TxRegister, List<String>> moduleVerifyMap, int txType, String txStr) {
+    public static void moduleGroups(Chain chain, Map<String, List<String>> moduleVerifyMap, int txType, String txStr) {
         //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
         TxRegister txRegister = TxManager.getTxRegister(chain, txType);
-        if (moduleVerifyMap.containsKey(txRegister)) {
-            moduleVerifyMap.get(txRegister).add(txStr);
+        moduleGroups(moduleVerifyMap, txRegister, txStr);
+    }
+
+    public static void moduleGroups(Map<String, List<String>> moduleVerifyMap, TxRegister txRegister, String txStr) {
+        //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
+        String moduleCode = txRegister.getModuleCode();
+        if (moduleVerifyMap.containsKey(moduleCode)) {
+            moduleVerifyMap.get(moduleCode).add(txStr);
         } else {
             List<String> txStrList = new ArrayList<>();
             txStrList.add(txStr);
-            moduleVerifyMap.put(txRegister, txStrList);
+            moduleVerifyMap.put(moduleCode, txStrList);
         }
     }
 
 
-    public static byte[] getNonce(byte[] preHash){
+    public static byte[] getNonce(byte[] preHash) {
         byte[] nonce = new byte[8];
         byte[] in = preHash;
         int copyEnd = in.length;
@@ -340,5 +339,92 @@ public class TxUtil {
         String txTypeHexString = txString.substring(0, 4);
         NulsByteBuffer byteBuffer = new NulsByteBuffer(RPCUtil.decode(txTypeHexString));
         return byteBuffer.readUint16();
+    }
+
+
+    /**
+     * 根据待打包队列存交易的map实际交易数, 来计算是放弃当前交易
+     *
+     * @return
+     */
+    public static boolean discardTx(int packableTxMapSize) {
+        Random random = new Random();
+        int number = random.nextInt(10);
+        if (packableTxMapSize >= TxConstant.PACKABLE_TX_MAP_MAX_SIZE) {
+            //扔80%
+            if (number < 8) {
+                return true;
+            }
+        } else if (packableTxMapSize >= TxConstant.PACKABLE_TX_MAP_HEAVY_SIZE) {
+            //扔50%
+            if (number < 5) {
+                return true;
+            }
+        } else if (packableTxMapSize >= TxConstant.PACKABLE_TX_MAP_STRESS_SIZE) {
+            //扔30%
+            if (number < 3) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    /**
+     * 获取两个集合的不同元素
+     *
+     * @param collectionMax
+     * @param collectionMin
+     * @return
+     */
+    public static Collection getDiffent(Collection collectionMax, Collection collectionMin) {
+        //使用LinkeList防止差异过大时,元素拷贝
+        Collection collection = new LinkedList();
+        Collection max = collectionMax;
+        Collection min = collectionMin;
+        //先比较大小,这样会减少后续map的if判断次数
+        if (collectionMax.size() < collectionMin.size()) {
+            max = collectionMin;
+            min = collectionMax;
+        }
+        Map<Object, Integer> map = new HashMap<>(max.size() * 2);
+        for (Object object : max) {
+            map.put(object, 1);
+        }
+        for (Object object : min) {
+            if (map.get(object) == null) {
+                collection.add(object);
+            } else {
+                map.put(object, 2);
+            }
+        }
+        for (Map.Entry<Object, Integer> entry : map.entrySet()) {
+            if (entry.getValue() == 1) {
+                collection.add(entry.getKey());
+            }
+        }
+        return collection;
+    }
+
+    /**
+     * 获取两个集合的不同元素,去除重复
+     *
+     * @param collmax
+     * @param collmin
+     * @return
+     */
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public static Collection getDiffentNoDuplicate(Collection collmax, Collection collmin) {
+        return new HashSet(getDiffent(collmax, collmin));
+    }
+
+
+    /**
+     * 输出三个换行符, 日志用
+     * @return
+     */
+    public static String nextLine(){
+        String lineSeparator = System.getProperty("line.separator");
+        return lineSeparator + lineSeparator;
     }
 }

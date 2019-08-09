@@ -24,13 +24,14 @@
  */
 package io.nuls.network.manager.threads;
 
-import io.nuls.network.model.NodeGroup;
-import io.nuls.network.model.message.body.TimeMessageBody;
-import io.nuls.network.utils.LoggerUtil;
+import io.nuls.base.RPCUtil;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.rpc.util.RPCUtil;
+import io.nuls.network.model.NodeGroup;
+import io.nuls.network.model.message.body.TimeMessageBody;
+import io.nuls.network.utils.LoggerUtil;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -38,44 +39,46 @@ import java.util.Map;
 
 /**
  * 连接定时器，主要任务：
- *  1>询问种子节点要更多的地址
- *  2>补充未饱和的网络连接
- *  3>清除无效的网络连接
+ * 1>询问种子节点要更多的地址
+ * 2>补充未饱和的网络连接
+ * 3>清除无效的网络连接
  * Connection timer, main tasks:
  * 1> Ask the seed node for more addresses
  * 2>Supply an unsaturated network connection
  * 3> Clear invalid network connections
  * ues add peer connect
+ *
  * @author lan
  * @date 2018/11/01
- *
  */
-public class MessageSendTaskTest implements Runnable  {
+public class MessageSendTaskTest implements Runnable {
     private static long id = 0;
-    private void connectPeer(NodeGroup nodeGroup){
+
+    private void connectPeer(NodeGroup nodeGroup) {
 
     }
+
     @Override
     public void run() {
         Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", 1);
+        params.put(Constants.CHAIN_ID, 1);
         params.put("nodes", "192.168.0.116:8008");
-        TimeMessageBody messageBody =  new TimeMessageBody();
+        TimeMessageBody messageBody = new TimeMessageBody();
         messageBody.setMessageId(id++);
         try {
             params.put("messageBody", RPCUtil.encode(messageBody.serialize()));
         } catch (IOException e) {
-            LoggerUtil.logger().error("", e);
+            LoggerUtil.COMMON_LOG.error(e);
         }
-        params.put("command","test");
+        params.put("command", "test");
         Response response = null;
         try {
             response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_sendPeersMsg", params);
         } catch (Exception e) {
-            LoggerUtil.logger().error("", e);
+            LoggerUtil.COMMON_LOG.error(e);
         }
-        LoggerUtil.logger().info("response {}", response);
-      }
- }
+        LoggerUtil.COMMON_LOG.info("response {}", response);
+    }
+}
 

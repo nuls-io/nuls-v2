@@ -1,6 +1,7 @@
 package io.nuls.poc.service;
 
 import io.nuls.core.basic.Result;
+import io.nuls.poc.model.bo.config.ConfigBean;
 
 import java.util.Map;
 
@@ -102,9 +103,18 @@ public interface ChainService {
     Result doubleSpendRecord(Map<String,Object> params);
 
     /**
-     * 获取种子节点列表
+     * 获取共模块识配置信息
      * @param params
      * @return Result
      * */
+    Result getConsensusConfig(Map<String,Object> params);
+
     Result getSeedNodeList(Map<String,Object> params);
+
+    /**
+     * 获取共识两轮次间节点变化信息
+     * @param params
+     * @return Result
+     * */
+    Result getAgentChangeInfo(Map<String,Object> params);
 }

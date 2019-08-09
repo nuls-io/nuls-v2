@@ -2,6 +2,8 @@ package io.nuls.base.api.provider.account;
 
 import io.nuls.base.api.provider.Result;
 import io.nuls.base.api.provider.account.facade.*;
+import io.nuls.base.api.provider.transaction.facade.MultiSignTransferRes;
+import io.nuls.base.data.MultiSigAccount;
 import io.nuls.core.log.Log;
 
 import java.io.*;
@@ -31,6 +33,14 @@ public interface AccountService {
      * @return
      */
     Result<String> backupAccount(BackupAccountReq req);
+
+    /**
+     * 获取账户keyStore
+     * get account's keystore
+     * @param req
+     * @return
+     */
+    Result<String> getAccountKeyStore(KeyStoreReq req);
 
 
     /**
@@ -68,6 +78,13 @@ public interface AccountService {
     Result<AccountInfo> getAccountByAddress(GetAccountByAddressReq req);
 
     /**
+     * 获取多签账户信息
+     * @param req
+     * @return
+     */
+    Result<MultiSigAccount> getMultiSignAccount(GetMultiSignAccountByAddressReq req);
+
+    /**
      * 获取账户列表
      * get all account list
      * @return
@@ -100,6 +117,26 @@ public interface AccountService {
      */
     Result<String> setAccountAlias(SetAccountAliasReq req);
 
+    /**
+     * 创建多签账户
+     * @param req
+     * @return
+     */
+    Result<String> createMultiSignAccount(GenerateMultiSignAccountReq req);
+
+    /**
+     * 移除一个多签账户
+     * @param req
+     * @return
+     */
+    Result<Boolean> removeMultiSignAccount(RemoveMultiSignAccountReq req);
+
+    /**
+     * 多签账户设置别名
+     * @param req
+     * @return
+     */
+    Result<MultiSignTransferRes> setMultiSignAccountAlias(SetMultiSignAccountAliasReq req);
 
     /**
      * 根据文件地址获取AccountKeystoreDto对象

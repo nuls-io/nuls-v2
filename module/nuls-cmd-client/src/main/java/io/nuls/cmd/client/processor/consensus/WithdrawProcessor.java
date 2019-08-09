@@ -30,7 +30,7 @@ import io.nuls.base.api.provider.Result;
 import io.nuls.base.api.provider.ServiceManager;
 import io.nuls.base.api.provider.consensus.ConsensusProvider;
 import io.nuls.base.api.provider.consensus.facade.WithdrawReq;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.config.Config;
@@ -74,7 +74,7 @@ public class WithdrawProcessor extends ConsensusBaseProcessor implements Command
     public boolean argsValidate(String[] args) {
         checkArgsNumber(args,2);
         checkAddress(config.getChainId(),args[1]);
-        checkArgs(NulsDigestData.validHash(args[2]),"txHash format error");
+        checkArgs(NulsHash.validHash(args[2]),"txHash format error");
         return true;
     }
 

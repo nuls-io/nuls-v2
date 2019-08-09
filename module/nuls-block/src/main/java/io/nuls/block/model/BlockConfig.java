@@ -19,11 +19,6 @@ import java.io.File;
 public class BlockConfig extends ChainParameters implements ModuleConfig {
 
     /**
-     * db文件存放目录
-     */
-    private String dataFolder;
-
-    /**
      * 国际化
      */
     private String language;
@@ -81,10 +76,6 @@ public class BlockConfig extends ChainParameters implements ModuleConfig {
 
     public void setNodesMonitorInterval(int nodesMonitorInterval) {
         this.nodesMonitorInterval = nodesMonitorInterval;
-    }
-
-    public void setDataFolder(String dataFolder) {
-        this.dataFolder = dataFolder;
     }
 
     public String getLanguage() {
@@ -168,7 +159,7 @@ public class BlockConfig extends ChainParameters implements ModuleConfig {
     }
 
     public String getDataFolder() {
-        return dataPath + File.separator + dataFolder;
+        return dataPath + File.separator + ModuleE.BL.name;
     }
 
 }

@@ -1,9 +1,11 @@
 [JAVA]
 APP_NAME=smart-contract
-MAIN_CLASS=io.nuls.contract.ContractBootStrap
+MAIN_CLASS=io.nuls.contract.SmartContractBootStrap
 VERSION=1.0.0
 JOPT_XMS=256
 JOPT_XMX=512
 
 [Core]
 Managed=1
+
+[smart-contract]

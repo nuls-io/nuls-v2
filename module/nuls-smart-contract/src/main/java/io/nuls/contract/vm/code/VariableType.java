@@ -109,6 +109,9 @@ public class VariableType {
     public static final VariableType STRING_TWO_DIMENSIONAL_ARRAY_TYPE = valueOf("[[Ljava/lang/String;");
     public static final VariableType STACK_TRACE_ELEMENT_TYPE = valueOf("Ljava/lang/StackTraceElement;");
     public static final VariableType STACK_TRACE_ELEMENT_ARRAY_TYPE = valueOf("[Ljava/lang/StackTraceElement;");
+    public static final VariableType ABSTRACT_COLLECTION_TYPE = valueOf("Ljava/util/AbstractCollection;");
+    public static final VariableType HASH_MAP_TYPE = valueOf("Ljava/util/HashMap;");
+    public static final VariableType HASH_MAP_NODE_TYPE = valueOf("Ljava/util/HashMap$Node;");
 
     public static final VariableType[] WRAPPER_TYPE = new VariableType[]{
             INT_WRAPPER_TYPE,

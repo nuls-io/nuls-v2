@@ -25,15 +25,15 @@
 package io.nuls.contract.tx.contractcallcontract;
 
 
-import io.nuls.contract.basetest.ContractTest;
 import io.nuls.contract.tx.base.BaseQuery;
 import io.nuls.contract.util.Log;
-import io.nuls.core.rpc.model.ModuleE;
-import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rpc.info.Constants;
+import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -57,27 +57,14 @@ public class ContractCallContractSendTxTest extends BaseQuery {
      */
     @Test
     public void createContract() throws Exception {
-        InputStream in = new FileInputStream(ContractTest.class.getResource("/contract_call_contract").getFile());
+        InputStream in = new FileInputStream(ContractCallContractSendTxTest.class.getResource("/contract_call_contract").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
         String remark = "create contract test - 合约内部转账，合约调用合约";
-        Map params = this.makeCreateParams(sender, contractCode, remark);
+        Map params = this.makeCreateParams(sender, contractCode, "inner_call", remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CREATE));
-        Assert.assertTrue(null != result);
+        Assert.assertTrue(JSONUtils.obj2PrettyJson(cmdResp2), null != result);
         Log.info("Create-InnerCall-Contract-result:{}", JSONUtils.obj2PrettyJson(result));
-    }
-
-    private Map makeCreateParams(String sender, byte[] contractCode, String remark, Object... args) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
-        params.put("sender", sender);
-        params.put("password", password);
-        params.put("gasLimit", 200000L);
-        params.put("price", 25);
-        params.put("contractCode", HexUtil.encode(contractCode));
-        params.put("args", args);
-        params.put("remark", remark);
-        return params;
     }
 
     /**
@@ -87,22 +74,11 @@ public class ContractCallContractSendTxTest extends BaseQuery {
     public void transfer2Contract() throws Exception {
         BigInteger value = BigInteger.valueOf(888834777633L);
         String remark = "transfer 2 contract";
-        Map params = this.makeTransferParams(sender, contractAddress0, value, remark);
+        Map params = this.makeTransferParams(sender, contractAddress, value, remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TRANSFER, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(TRANSFER));
         Assert.assertTrue(null != result);
         Log.info("transfer2Contract-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
-    }
-
-    private Map makeTransferParams(String address, String toAddress, BigInteger amount, String remark) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
-        params.put("address", address);
-        params.put("toAddress", toAddress);
-        params.put("password", password);
-        params.put("amount", amount);
-        params.put("remark", remark);
-        return params;
     }
 
     /**
@@ -110,7 +86,6 @@ public class ContractCallContractSendTxTest extends BaseQuery {
      */
     @Test
     public void callContract_transferOut() throws Exception {
-        contractAddress = "tNULSeBaN155SwgcURmRwBMzmjKAH3PwK55tSe";
         BigInteger value = BigInteger.ZERO;
         if(StringUtils.isBlank(methodName)) {
             methodName = "multyForAddress";
@@ -127,22 +102,6 @@ public class ContractCallContractSendTxTest extends BaseQuery {
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
         Assert.assertTrue(null != result);
         Log.info("call-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
-    }
-
-    private Map makeCallParams(String sender, BigInteger value, String contractAddress0, String methodName, String methodDesc, String remark, Object... args) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
-        params.put("sender", sender);
-        params.put("value", value);
-        params.put("gasLimit", 200000L);
-        params.put("price", 25);
-        params.put("contractAddress", contractAddress0);
-        params.put("methodName", methodName);
-        params.put("methodDesc", methodDesc);
-        params.put("args", args);
-        params.put("password", password);
-        params.put("remark", remark);
-        return params;
     }
 
     /**
@@ -211,7 +170,7 @@ public class ContractCallContractSendTxTest extends BaseQuery {
 
     private Map makeDeleteParams(String sender, String contractAddress0, String remark) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("sender", sender);
         params.put("contractAddress", contractAddress0);
         params.put("password", password);

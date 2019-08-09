@@ -25,21 +25,25 @@
 package io.nuls.account.util;
 
 import io.nuls.account.config.NulsConfig;
+import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.NonceBalance;
 import io.nuls.account.model.bo.Chain;
-import io.nuls.account.rpc.call.LedgerCmdCall;
+import io.nuls.account.rpc.call.LedgerCall;
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.base.data.Coin;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.Transaction;
-import io.nuls.core.rpc.util.RPCUtil;
+import io.nuls.core.basic.Result;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.model.StringUtils;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.util.HashMap;
 
@@ -50,6 +54,23 @@ import java.util.HashMap;
  * @date: 2018-12-12
  */
 public class TxUtil {
+
+    /**
+     * 校验该资产是否是该链主资产
+     *
+     * @param chain
+     * @param assetId
+     * @return
+     */
+    public static boolean isMainAsset(Chain chain,int assetChainId, int assetId) {
+        if (chain == null) {
+            throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
+        }
+        if (chain.getConfig().getChainId() == assetChainId && chain.getConfig().getAssetId() == assetId) {
+            return true;
+        }
+        return false;
+    }
 
     /**
      * 是否主网资产
@@ -79,38 +100,25 @@ public class TxUtil {
      */
     public static boolean isChainAssetExist(Chain chain, Coin coin) {
         if (chain.getConfig().getChainId() == coin.getAssetsChainId() &&
-                chain.getConfig().getAssetsId() == coin.getAssetsId()) {
+                chain.getConfig().getAssetId() == coin.getAssetsId()) {
             return true;
         }
         return false;
     }
 
-    /**
-     * 查询账户账本nonce值
-     *
-     * @param chainId
-     * @param assetChainId
-     * @param assetId
-     * @param addressByte
-     * @return
-     */
-    public static byte[] getNonce(int chainId, int assetChainId, int assetId, byte[] addressByte) {
-        String address = AddressTool.getStringAddressByBytes(addressByte);
-        return LedgerCmdCall.getNonce(chainId, assetChainId, assetId, address);
-    }
 
     /**
      * 查询账户余额（未确认）
      *
-     * @param chainId
+     * @param chain
      * @param assetChainId
      * @param assetId
      * @param addressByte
      * @return
      */
-    public static BigInteger getBalance(int chainId, int assetChainId, int assetId, byte[] addressByte) {
+    public static BigInteger getBalance(Chain chain, int assetChainId, int assetId, byte[] addressByte) {
         String address = AddressTool.getStringAddressByBytes(addressByte);
-        HashMap balanceNonce = LedgerCmdCall.getBalanceNonce(chainId, assetChainId, assetId, address);
+        HashMap balanceNonce = LedgerCall.getBalanceNonce(chain, assetChainId, assetId, address);
         if (balanceNonce != null) {
             Object available = balanceNonce.get("available");
             return BigIntegerUtils.stringToBigInteger(String.valueOf(available));
@@ -121,15 +129,15 @@ public class TxUtil {
     /**
      * 查询账户余额（未确认）
      *
-     * @param chainId
+     * @param chain
      * @param assetChainId
      * @param assetId
      * @param addressByte
      * @return
      */
-    public static NonceBalance getBalanceNonce(int chainId, int assetChainId, int assetId, byte[] addressByte) {
+    public static NonceBalance getBalanceNonce(Chain chain, int assetChainId, int assetId, byte[] addressByte) {
         String address = AddressTool.getStringAddressByBytes(addressByte);
-        HashMap balanceNonce = LedgerCmdCall.getBalanceNonce(chainId, assetChainId, assetId, address);
+        HashMap balanceNonce = LedgerCall.getBalanceNonce(chain, assetChainId, assetId, address);
         if (balanceNonce != null) {
             Object available = balanceNonce.get("available");
             String strNonce = (String)balanceNonce.get("nonce");
@@ -141,15 +149,15 @@ public class TxUtil {
     /**
      * 查询账户余额（已确认）
      *
-     * @param chainId
+     * @param chain
      * @param assetChainId
      * @param assetId
      * @param addressByte
      * @return
      */
-    public static BigInteger getConfirmedBalance(int chainId, int assetChainId, int assetId, byte[] addressByte) {
+    public static BigInteger getConfirmedBalance(Chain chain, int assetChainId, int assetId, byte[] addressByte) {
         String address = AddressTool.getStringAddressByBytes(addressByte);
-        return LedgerCmdCall.getBalance(chainId, assetChainId, assetId, address);
+        return LedgerCall.getBalance(chain, assetChainId, assetId, address);
     }
 
     public static CoinData getCoinData(Transaction tx) throws NulsException {
@@ -159,7 +167,7 @@ public class TxUtil {
         try {
             return tx.getCoinDataInstance();
         } catch (NulsException e) {
-            LoggerUtil.logger.error(e);
+            LoggerUtil.LOG.error(e);
             throw new NulsException(AccountErrorCode.DESERIALIZE_ERROR);
         }
     }
@@ -171,7 +179,7 @@ public class TxUtil {
         try {
             return Transaction.getInstance(txBytes);
         } catch (NulsException e) {
-            LoggerUtil.logger.error(e);
+            LoggerUtil.LOG.error(e);
             throw new NulsException(AccountErrorCode.DESERIALIZE_ERROR);
         }
     }
@@ -207,10 +215,10 @@ public class TxUtil {
             baseNulsData.parse(new NulsByteBuffer(bytes));
             return (T) baseNulsData;
         } catch (NulsException e) {
-            LoggerUtil.logger.error(e);
+            LoggerUtil.LOG.error(e);
             throw new NulsException(AccountErrorCode.DESERIALIZE_ERROR);
         } catch (Exception e) {
-            LoggerUtil.logger.error(e);
+            LoggerUtil.LOG.error(e);
             throw new NulsException(AccountErrorCode.DESERIALIZE_ERROR);
         }
     }
@@ -220,6 +228,36 @@ public class TxUtil {
             throw new NulsException(AccountErrorCode.DATA_NOT_FOUND);
         }
         return getInstance(RPCUtil.decode(hex), clazz);
+    }
+
+    public static Result getSuccess() {
+        return Result.getSuccess(AccountErrorCode.SUCCESS);
+    }
+
+
+    /**
+     * 校验转账交易备注是否有效
+     *
+     * @param remark
+     * @return
+     */
+    public static boolean validTxRemark(String remark) {
+        if (StringUtils.isBlank(remark)) {
+            return true;
+        }
+        try {
+            byte[] bytes = remark.getBytes(NulsConfig.DEFAULT_ENCODING);
+            return bytes.length <= AccountConstant.TX_REMARK_MAX_LEN;
+        } catch (UnsupportedEncodingException e) {
+            return false;
+        }
+    }
+
+    public static boolean isLegalContractAddress(byte[] addressBytes, Chain chain) {
+        if (addressBytes == null) {
+            return false;
+        }
+        return AddressTool.validContractAddress(addressBytes, chain.getChainId());
     }
 
 }

@@ -2,6 +2,7 @@ package io.nuls.test.rpc;
 
 import io.nuls.base.data.Address;
 import io.nuls.base.data.BlockHeader;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
@@ -42,7 +43,7 @@ public class AgentTest {
         Address packingAddress = new Address(1,(byte)1,SerializeUtils.sha256hash160("a5WhgP1iu2Qwt5CiaPTV4Fegfgqmd".getBytes()));
         Map<String,Object> params = new HashMap<>();
         params.put("agentAddress",agentAddress.getBase58());
-        params.put("chainId",1);
+        params.put(Constants.CHAIN_ID,1);
         params.put("deposit",20000);
         params.put("commissionRate",10);
         params.put("packingAddress",packingAddress.getBase58());
@@ -58,7 +59,7 @@ public class AgentTest {
      * */
     public void createAgentCommit()throws Exception{
         Map<String,Object>params = new HashMap<>();
-        params.put("chainId",1);
+        params.put(Constants.CHAIN_ID,1);
         //组装交易
         BlockHeader blockHeader = new BlockHeader();
         blockHeader.setHeight(100);
@@ -76,7 +77,7 @@ public class AgentTest {
      * */
     public void createAgentRollback()throws Exception{
         Map<String,Object>params = new HashMap<>();
-        params.put("chainId",1);
+        params.put(Constants.CHAIN_ID,1);
         params.put("tx","0400a50140a16701005d204e0000000000000000000000000000010001f6db7f28888015528eae577ae82f985589dc63f20100012f627a02ca063f0c1c9466290c376c97a86edf95010001197a64059dd812fcf6e2d4c2bf22f0b320554c770000000000002440680117010001f6db7f28888015528eae577ae82f985589dc63f201000100c0d40100000000000000000000000000080000000000000000000117010001f6db7f28888015528eae577ae82f985589dc63f201000100204e0000000000000000000000000000ffffffff00");
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgentRollBack", params);
         System.out.println(cmdResp.getResponseData());
@@ -88,7 +89,7 @@ public class AgentTest {
      * */
     public void stopAgent()throws Exception{
         Map<String,Object>params = new HashMap<>();
-        params.put("chainId",1);
+        params.put(Constants.CHAIN_ID,1);
         Address agentAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("a5WhgP1iu2Qwt5CiaPTV4Fe2Xqmfd".getBytes()));
         params.put("address",agentAddress.getBase58());
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_stopAgent", params);
@@ -101,7 +102,7 @@ public class AgentTest {
      * */
     public void stopAgentCommit()throws Exception{
         Map<String,Object>params = new HashMap<>();
-        params.put("chainId",1);
+        params.put(Constants.CHAIN_ID,1);
         //组装交易
         BlockHeader blockHeader = new BlockHeader();
         blockHeader.setHeight(100);
@@ -118,7 +119,7 @@ public class AgentTest {
      * */
     public void stopAgentRollback()throws Exception{
         Map<String,Object>params = new HashMap<>();
-        params.put("chainId",1);
+        params.put(Constants.CHAIN_ID,1);
         params.put("tx","");
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_stopAgentRollBack", params);
         System.out.println(cmdResp.getResponseData());
@@ -130,7 +131,7 @@ public class AgentTest {
      * */
     public void getAgentList()throws Exception{
         Map<String,Object>params = new HashMap<>();
-        params.put("chainId",2);
+        params.put(Constants.CHAIN_ID,2);
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_getAgentList", params);
         System.out.println(cmdResp.getResponseData());
     }
@@ -138,7 +139,7 @@ public class AgentTest {
     @Test
     public void getAgentInfo()throws Exception{
         Map<String,Object>params = new HashMap<>();
-        params.put("chainId",2);
+        params.put(Constants.CHAIN_ID,2);
         params.put("agentHash","0020d8e9866e891362cec0948a5d759e85c424e56e4fa3b29e2f58021c26d989d5fa");
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_getAgentInfo", params);
         System.out.println(cmdResp.getResponseData());
@@ -147,7 +148,7 @@ public class AgentTest {
     @Test
     public void getAgentStatus()throws Exception{
         Map<String,Object>params = new HashMap<>();
-        params.put("chainId",1);
+        params.put(Constants.CHAIN_ID,1);
         params.put("agentHash","0020fef3f394953c601f6abe82f223d5c5673d3b4d7461e575f663954a7c4e055317");
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_getAgentStatus", params);
         System.out.println(cmdResp.getResponseData());
@@ -156,7 +157,7 @@ public class AgentTest {
     @Test
     public void testBigInteger()throws Exception{
         Map<String,Object>params = new HashMap<>();
-        params.put("chainId",new BigInteger("26778686868678686867"));
+        params.put(Constants.CHAIN_ID,new BigInteger("26778686868678686867"));
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_testBigInteger", params);
         System.out.println(cmdResp.getResponseData());
     }

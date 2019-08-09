@@ -20,7 +20,7 @@
 
 package io.nuls.api.model.po.db;
 
-import org.apache.tools.ant.util.DateUtils;
+import io.nuls.core.model.DateUtils;
 
 import java.util.Date;
 import java.util.List;
@@ -78,7 +78,7 @@ public class CurrentRound extends PocRound {
         stringBuilder.append("index:" + this.getIndex());
         stringBuilder.append(", startHeight:");
         stringBuilder.append(this.getStartHeight());
-        stringBuilder.append(", startTime:" + DateUtils.format(new Date(this.getStartTime()), "YYYY-mm-DD HH:MM:SS"));
+        stringBuilder.append(", startTime:" + DateUtils.convertDate(new Date(this.getStartTime()), "YYYY-mm-DD HH:MM:SS"));
         stringBuilder.append("\n");
         int index = 1;
         if (null != this.getItemList()) {

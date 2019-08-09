@@ -46,7 +46,7 @@ public class MongoAgentServiceImpl implements AgentService {
             agentInfo = DocumentTransferTool.toInfo(document, "txHash", AgentInfo.class);
             CacheManager.getCache(chainID).addAgentInfo(agentInfo);
         }
-        return agentInfo;
+        return agentInfo.copy();
     }
 
     @Override
@@ -72,48 +72,57 @@ public class MongoAgentServiceImpl implements AgentService {
 
     public AgentInfo getAgentByPackingAddress(int chainID, String packingAddress) {
         Collection<AgentInfo> agentInfos = CacheManager.getCache(chainID).getAgentMap().values();
-        AgentInfo info = null;
+        AgentInfo agentInfo = null;
         for (AgentInfo agent : agentInfos) {
             if (!agent.getPackingAddress().equals(packingAddress)) {
                 continue;
             }
-            if (null == info || agent.getCreateTime() > info.getCreateTime()) {
-                info = agent;
+            if (null == agentInfo || agent.getCreateTime() > agentInfo.getCreateTime()) {
+                agentInfo = agent;
             }
         }
-        return info;
+        if (agentInfo == null) {
+            return null;
+        }
+        return agentInfo.copy();
     }
 
     public AgentInfo getAgentByAgentAddress(int chainID, String agentAddress) {
         Collection<AgentInfo> agentInfos = CacheManager.getCache(chainID).getAgentMap().values();
-        AgentInfo info = null;
+        AgentInfo agentInfo = null;
         for (AgentInfo agent : agentInfos) {
             if (!agentAddress.equals(agent.getAgentAddress())) {
                 continue;
             }
-            if (null == info || agent.getCreateTime() > info.getCreateTime()) {
-                info = agent;
+            if (null == agentInfo || agent.getCreateTime() > agentInfo.getCreateTime()) {
+                agentInfo = agent;
             }
         }
-        return info;
+        if (agentInfo == null) {
+            return null;
+        }
+        return agentInfo.copy();
     }
 
     @Override
     public AgentInfo getAliveAgentByAgentAddress(int chainID, String agentAddress) {
         Collection<AgentInfo> agentInfos = CacheManager.getCache(chainID).getAgentMap().values();
-        AgentInfo info = null;
+        AgentInfo agentInfo = null;
         for (AgentInfo agent : agentInfos) {
             if (!agentAddress.equals(agent.getAgentAddress())) {
                 continue;
             }
-            if(agent.getStatus() == 2) {
+            if (agent.getStatus() == 2) {
                 continue;
             }
-            if (null == info || agent.getCreateTime() > info.getCreateTime()) {
-                info = agent;
+            if (null == agentInfo || agent.getCreateTime() > agentInfo.getCreateTime()) {
+                agentInfo = agent;
             }
         }
-        return info;
+        if (agentInfo == null) {
+            return null;
+        }
+        return agentInfo.copy();
     }
 
     public void saveAgentList(int chainID, List<AgentInfo> agentInfoList) {
@@ -127,8 +136,6 @@ public class MongoAgentServiceImpl implements AgentService {
             if (agentInfo.isNew()) {
                 modelList.add(new InsertOneModel(document));
                 agentInfo.setNew(false);
-                ApiCache cache = CacheManager.getCache(chainID);
-                cache.addAgentInfo(agentInfo);
             } else {
                 modelList.add(new ReplaceOneModel<>(Filters.eq("_id", agentInfo.getTxHash()), document));
             }
@@ -136,6 +143,10 @@ public class MongoAgentServiceImpl implements AgentService {
         BulkWriteOptions options = new BulkWriteOptions();
         options.ordered(false);
         mongoDBService.bulkWrite(AGENT_TABLE + chainID, modelList, options);
+        ApiCache cache = CacheManager.getCache(chainID);
+        for (AgentInfo agentInfo : agentInfoList) {
+            cache.addAgentInfo(agentInfo);
+        }
     }
 
     public void rollbackAgentList(int chainId, List<AgentInfo> agentInfoList) {
@@ -152,10 +163,12 @@ public class MongoAgentServiceImpl implements AgentService {
             } else {
                 Document document = DocumentTransferTool.toDocument(agentInfo, "txHash");
                 modelList.add(new ReplaceOneModel<>(Filters.eq("_id", agentInfo.getTxHash()), document));
-                apiCache.getAgentMap().put(agentInfo.getTxHash(), agentInfo);
+                apiCache.addAgentInfo(agentInfo);
             }
         }
-        mongoDBService.bulkWrite(AGENT_TABLE + chainId, modelList);
+        BulkWriteOptions options = new BulkWriteOptions();
+        options.ordered(false);
+        mongoDBService.bulkWrite(AGENT_TABLE + chainId, modelList, options);
     }
 
     public List<AgentInfo> getAgentList(int chainId, long startHeight) {
@@ -204,6 +217,32 @@ public class MongoAgentServiceImpl implements AgentService {
         }
         long totalCount = this.mongoDBService.getCount(AGENT_TABLE + chainId, filter);
         List<Document> docsList = this.mongoDBService.pageQuery(AGENT_TABLE + chainId, filter, Sorts.descending("createTime"), pageNumber, pageSize);
+        List<AgentInfo> agentInfoList = new ArrayList<>();
+        for (Document document : docsList) {
+            AgentInfo agentInfo = DocumentTransferTool.toInfo(document, "txHash", AgentInfo.class);
+            AliasInfo alias = mongoAliasServiceImpl.getAliasByAddress(chainId, agentInfo.getAgentAddress());
+            if (alias != null) {
+                agentInfo.setAgentAlias(alias.getAlias());
+            }
+            agentInfoList.add(agentInfo);
+            if (agentInfo.getType() == 0 && null != agentInfo.getAgentAddress()) {
+                if (ApiContext.DEVELOPER_NODE_ADDRESS.contains(agentInfo.getAgentAddress())) {
+                    agentInfo.setType(2);
+                } else if (ApiContext.AMBASSADOR_NODE_ADDRESS.contains(agentInfo.getAgentAddress())) {
+                    agentInfo.setType(3);
+                } else {
+                    agentInfo.setType(1);
+                }
+            }
+        }
+        PageInfo<AgentInfo> pageInfo = new PageInfo<>(pageNumber, pageSize, totalCount, agentInfoList);
+        return pageInfo;
+    }
+
+    @Override
+    public PageInfo<AgentInfo> getAgentList(int chainId, int pageNumber, int pageSize) {
+        long totalCount = this.mongoDBService.getCount(AGENT_TABLE + chainId);
+        List<Document> docsList = this.mongoDBService.pageQuery(AGENT_TABLE + chainId, Sorts.descending("createTime"), pageNumber, pageSize);
         List<AgentInfo> agentInfoList = new ArrayList<>();
         for (Document document : docsList) {
             AgentInfo agentInfo = DocumentTransferTool.toInfo(document, "txHash", AgentInfo.class);

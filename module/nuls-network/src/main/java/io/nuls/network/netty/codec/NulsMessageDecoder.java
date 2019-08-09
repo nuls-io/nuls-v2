@@ -26,8 +26,8 @@ package io.nuls.network.netty.codec;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
+import io.nuls.core.log.Log;
 import io.nuls.network.manager.NodeGroupManager;
-import io.nuls.network.utils.LoggerUtil;
 
 import java.nio.ByteOrder;
 import java.util.List;
@@ -41,6 +41,7 @@ import static io.nuls.network.constant.NetworkConstant.MAX_FRAME_LENGTH;
  */
 public class NulsMessageDecoder extends ByteToMessageDecoder {
     private NulsLengthFieldBasedFrameDecoder newDecoder = new NulsLengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, MAX_FRAME_LENGTH, 4, 4, 16, 0, true);
+
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
         long readMagicNumber = in.getUnsignedIntLE(0);
@@ -50,7 +51,7 @@ public class NulsMessageDecoder extends ByteToMessageDecoder {
                 out.add(decoded);
             }
         } else {
-            LoggerUtil.logger().error("readMagicNumber={} illegal message REC",readMagicNumber);
+            Log.error("readMagicNumber={} illegal message REC", readMagicNumber);
             in.clear();
             ctx.close();
 

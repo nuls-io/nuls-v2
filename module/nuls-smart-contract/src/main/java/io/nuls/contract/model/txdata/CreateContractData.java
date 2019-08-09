@@ -25,8 +25,8 @@ package io.nuls.contract.model.txdata;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.basic.TransactionLogicData;
 import io.nuls.base.data.Address;
+import io.nuls.base.data.BaseNulsData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 
@@ -38,11 +38,12 @@ import java.util.Set;
 /**
  * @Author: PierreLuo
  */
-public class CreateContractData extends TransactionLogicData implements ContractData {
+public class CreateContractData extends BaseNulsData implements ContractData {
 
     private byte[] sender;
     private byte[] contractAddress;
     private byte[] code;
+    private String alias;
     private long gasLimit;
     private long price;
     private byte argsCount;
@@ -54,6 +55,7 @@ public class CreateContractData extends TransactionLogicData implements Contract
         size += Address.ADDRESS_LENGTH;
         size += Address.ADDRESS_LENGTH;
         size += SerializeUtils.sizeOfBytes(code);
+        size += SerializeUtils.sizeOfString(alias);
         size += SerializeUtils.sizeOfInt64();
         size += SerializeUtils.sizeOfInt64();
         size += 1;
@@ -77,6 +79,7 @@ public class CreateContractData extends TransactionLogicData implements Contract
         stream.write(sender);
         stream.write(contractAddress);
         stream.writeBytesWithLength(code);
+        stream.writeString(alias);
         stream.writeInt64(gasLimit);
         stream.writeInt64(price);
         stream.write(argsCount);
@@ -99,6 +102,7 @@ public class CreateContractData extends TransactionLogicData implements Contract
         this.sender = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
         this.contractAddress = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
         this.code = byteBuffer.readByLengthByte();
+        this.alias = byteBuffer.readString();
         this.gasLimit = byteBuffer.readInt64();
         this.price = byteBuffer.readInt64();
         this.argsCount = byteBuffer.readByte();
@@ -160,6 +164,14 @@ public class CreateContractData extends TransactionLogicData implements Contract
         this.code = code;
     }
 
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
+
     @Override
     public long getGasLimit() {
         return gasLimit;
@@ -195,7 +207,7 @@ public class CreateContractData extends TransactionLogicData implements Contract
         this.args = args;
     }
 
-    @Override
+
     public Set<byte[]> getAddresses() {
         Set<byte[]> addressSet = new HashSet<>();
         addressSet.add(contractAddress);

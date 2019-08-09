@@ -1,5 +1,6 @@
 package io.nuls.api.db;
 
+import io.nuls.api.model.po.db.ChainConfigInfo;
 import io.nuls.api.model.po.db.ChainInfo;
 import io.nuls.api.model.po.db.SyncInfo;
 
@@ -15,7 +16,11 @@ public interface ChainService {
 
     void addChainInfo(ChainInfo chainInfo);
 
+    void addCacheChain(ChainInfo chainInfo, ChainConfigInfo configInfo);
+
     void saveChainList(List<ChainInfo> chainInfoList);
+
+    void rollbackChainList(List<ChainInfo> chainInfoList);
 
     ChainInfo getChainInfo(int chainId);
 

@@ -20,6 +20,7 @@
 
 package io.nuls.api.task;
 
+import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.db.AgentService;
 import io.nuls.api.db.BlockService;
@@ -35,12 +36,16 @@ import io.nuls.api.model.po.db.BlockHeaderInfo;
 import io.nuls.api.model.po.db.DepositInfo;
 import io.nuls.api.model.po.db.StatisticalInfo;
 import io.nuls.api.utils.LoggerUtil;
+import io.nuls.core.basic.Result;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.model.DoubleUtils;
 
 import java.math.BigInteger;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
+
+import io.nuls.core.rpc.util.NulsDateUtils;
 
 /**
  * @author Niels
@@ -77,22 +82,22 @@ public class StatisticalTask implements Runnable {
     private void doCalc() {
         long bestId = statisticalService.getBestId(chainId);
         BlockHeaderInfo header = blockService.getBestBlockHeader(chainId);
-        if (null == header) {
+        if (null == header || header.getHeight() == 0) {
             return;
         }
         long day = 24 * 3600000;
         long start = bestId + 1;
         long end = 0;
         if (bestId == -1) {
-            BlockHeaderInfo header0 = blockService.getBlockHeader(chainId, 0);
-            start = header0.getCreateTime();
+            BlockHeaderInfo header0 = blockService.getBlockHeader(chainId, 1);
+            start = header0.getCreateTime() * 1000 - NulsDateUtils.SECOND_TIME * 10;
             end = start + day;
             this.statisticalService.saveBestId(chainId, start);
         } else {
             end = start + day - 1;
         }
         while (true) {
-            if (end > header.getCreateTime()) {
+            if (end > header.getCreateTime() * 1000) {
                 break;
             }
             statistical(start, end);
@@ -121,7 +126,10 @@ public class StatisticalTask implements Runnable {
         double annualizedReward = 0L;
         ApiCache apiCache = CacheManager.getCache(chainId);
         if (consensusLocked.compareTo(BigInteger.ZERO) != 0) {
-            annualizedReward = DoubleUtils.mul(100, DoubleUtils.div(apiCache.getChainInfo().getInflationCoins(), consensusLocked, 4), 2);
+            Result<Map> result = WalletRpcHandler.getConsensusConfig(chainId);
+            Map map = result.getData();
+            String inflationAmount = map.get("inflationAmount").toString();
+            annualizedReward = DoubleUtils.mul(100, DoubleUtils.div(new BigInteger(inflationAmount), consensusLocked, 4), 2);
         }
 
         Calendar calendar = Calendar.getInstance();

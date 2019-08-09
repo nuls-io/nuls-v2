@@ -1,7 +1,7 @@
 package io.nuls.account.rpc.common;
 
-import io.nuls.account.model.dto.CoinDto;
-import io.nuls.account.model.dto.TransferDto;
+import io.nuls.account.model.dto.CoinDTO;
+import io.nuls.account.model.dto.TransferDTO;
 import io.nuls.base.data.Address;
 import io.nuls.base.data.MultiSigAccount;
 import io.nuls.core.rpc.info.Constants;
@@ -58,7 +58,7 @@ public class CommonRpcOperation {
         try {
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("count", count);
             params.put("password", password);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
@@ -77,7 +77,7 @@ public class CommonRpcOperation {
         try {
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("address", address);
 
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAccountByAddress", params);
@@ -94,7 +94,7 @@ public class CommonRpcOperation {
     public static String setAlias(String address, String alias) throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", address);
         params.put("password", password);
         params.put("alias", alias);
@@ -114,7 +114,7 @@ public class CommonRpcOperation {
     public static String getAliasByAddress(String address) throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", address);
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAliasByAddress", params);
         System.out.println("ac_getAliasByAddress result:" + JSONUtils.obj2json(cmdResp));
@@ -149,13 +149,13 @@ public class CommonRpcOperation {
         multiSigAccount.setM((byte) 2);
 
         params.put(Constants.VERSION_KEY_STR, "1.0");
-        params.put("chainId", multiSigAccount.getChainId());
+        params.put(Constants.CHAIN_ID, multiSigAccount.getChainId());
         params.put("pubKeys", pubKeys);
         params.put("minSigns", multiSigAccount.getM());
         //create the multi sign accout
-        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createMultiSigAccount", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createMultiSignAccount", params);
         assertNotNull(cmdResp);
-        HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createMultiSigAccount");
+        HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createMultiSignAccount");
         assertNotNull(result);
         String address = (String) result.get("address");
         assertNotNull(address);
@@ -187,7 +187,7 @@ public class CommonRpcOperation {
 
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("keyStore", HexUtil.encode(bytes));
             params.put("password", password);
             params.put("overwrite", true);
@@ -235,7 +235,7 @@ public class CommonRpcOperation {
 
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, version);
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("priKey", priKey);
         params.put("password", password);
         params.put("overwrite", true);
@@ -253,13 +253,13 @@ public class CommonRpcOperation {
      *
      * @return
      */
-    public static TransferDto createTransferTx(String fromAddress, String toAddress, BigInteger amount) {
-        TransferDto transferDto = new TransferDto();
+    public static TransferDTO createTransferTx(String fromAddress, String toAddress, BigInteger amount) {
+        TransferDTO transferDto = new TransferDTO();
         transferDto.setChainId(chainId);
         transferDto.setRemark("transfer test");
-        List<CoinDto> inputs = new ArrayList<>();
-        List<CoinDto> outputs = new ArrayList<>();
-        CoinDto inputCoin1 = new CoinDto();
+        List<CoinDTO> inputs = new ArrayList<>();
+        List<CoinDTO> outputs = new ArrayList<>();
+        CoinDTO inputCoin1 = new CoinDTO();
         inputCoin1.setAddress(fromAddress);
         inputCoin1.setPassword(password);
         inputCoin1.setAssetsChainId(chainId);
@@ -267,7 +267,7 @@ public class CommonRpcOperation {
         inputCoin1.setAmount(amount);
         inputs.add(inputCoin1);
 
-        CoinDto outputCoin1 = new CoinDto();
+        CoinDTO outputCoin1 = new CoinDTO();
         outputCoin1.setAddress(toAddress);
         outputCoin1.setPassword(password);
         outputCoin1.setAssetsChainId(chainId);

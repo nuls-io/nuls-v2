@@ -103,7 +103,7 @@ public class GetAgentsProcessor extends ConsensusBaseProcessor {
             return CommandResult.getFailed(result);
         }
 
-        List<Map<String, Object>> list = result.getList().stream().map(GetAgentInfoProcessor::agentToMap).collect(Collectors.toList());
+        List<Map<String, Object>> list = result.getList().stream().map(this::agentToMap).collect(Collectors.toList());
         return CommandResult.getResult(CommandResult.dataTransformList(new Result(list)));
     }
 

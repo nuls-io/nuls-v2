@@ -1,5 +1,6 @@
 package io.nuls.api.model.rpc;
 
+import io.nuls.api.model.po.db.FeeInfo;
 import io.nuls.api.model.po.db.TxRelationInfo;
 
 import java.math.BigInteger;
@@ -22,7 +23,7 @@ public class AccountTxInfo {
 
     private BigInteger values;
 
-    private BigInteger fee;
+    private FeeInfo fee;
 
     private BigInteger balance;
 
@@ -45,7 +46,7 @@ public class AccountTxInfo {
         this.height = relationInfo.getHeight();
         this.chainId = relationInfo.getChainId();
         this.assetId = relationInfo.getAssetId();
-        this.fee = relationInfo.getFee();
+       // this.fee = relationInfo.getFee();
         this.values = relationInfo.getValues();
         this.balance = relationInfo.getBalance();
         this.transferType = relationInfo.getTransferType();
@@ -117,11 +118,11 @@ public class AccountTxInfo {
         this.values = values;
     }
 
-    public BigInteger getFee() {
+    public FeeInfo getFee() {
         return fee;
     }
 
-    public void setFee(BigInteger fee) {
+    public void setFee(FeeInfo fee) {
         this.fee = fee;
     }
 

@@ -1,6 +1,6 @@
 package io.nuls.crosschain.nuls.srorage;
 
-import io.nuls.crosschain.nuls.model.po.SendCtxHashPo;
+import io.nuls.crosschain.nuls.model.po.SendCtxHashPO;
 
 import java.util.Map;
 
@@ -19,7 +19,7 @@ public interface SendedHeightService {
      * @param chainID           链ID
      * @return                  保存成功与否
      * */
-    boolean save(long height, SendCtxHashPo po, int chainID);
+    boolean save(long height, SendCtxHashPO po, int chainID);
 
     /**
      * 查询
@@ -27,7 +27,7 @@ public interface SendedHeightService {
      * @param chainID   链ID
      * @return          高度对应的交易Hash列表
      * */
-    SendCtxHashPo get(long height, int chainID);
+    SendCtxHashPO get(long height, int chainID);
 
     /**
      * 删除
@@ -42,5 +42,5 @@ public interface SendedHeightService {
      * @param chainID   链ID
      * @return          该表所有数据
      * */
-    Map<Long , SendCtxHashPo> getList(int chainID);
+    Map<Long , SendCtxHashPO> getList(int chainID);
 }

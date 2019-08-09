@@ -168,20 +168,18 @@ public class ClassCodeLoader {
     }
 
     private static Map<String, ClassCode> loadFromResource() {
-        InputStream baseInputStream = null;
-        InputStream sdkInputStream = null;
-        try {
-            baseInputStream = ClassCodeLoader.class.getResourceAsStream("/used_classes_base");
+        try (InputStream baseInputStream = ClassCodeLoader.class.getResourceAsStream("/used_classes_base");
+             InputStream sdkInputStream = ClassCodeLoader.class.getResourceAsStream("/used_classes_sdk");
+        ) {
             if (baseInputStream == null) {
                 return new HashMap<>(0);
             } else {
                 Map<String, ClassCode> usedClasses = loadJar(baseInputStream);
-                sdkInputStream = ClassCodeLoader.class.getResourceAsStream("/used_classes_sdk");
                 if (sdkInputStream == null) {
                     return usedClasses;
                 } else {
                     Map<String, ClassCode> sdkClasses = loadJar(sdkInputStream);
-                    if(sdkClasses != null && usedClasses != null) {
+                    if (sdkClasses != null && usedClasses != null) {
                         usedClasses.putAll(sdkClasses);
                     }
                     return usedClasses;
@@ -189,9 +187,6 @@ public class ClassCodeLoader {
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
-        } finally {
-            IOUtils.closeQuietly(baseInputStream);
-            IOUtils.closeQuietly(sdkInputStream);
         }
     }
 
@@ -229,7 +224,7 @@ public class ClassCodeLoader {
 
     private static Map<String, ClassCode> loadJar(JarInputStream jarInputStream) {
         Map<String, ClassCode> map = new HashMap<>(100);
-        try {
+        try (jarInputStream) {
             JarEntry jarEntry;
             while ((jarEntry = jarInputStream.getNextJarEntry()) != null) {
                 if (!jarEntry.isDirectory() && jarEntry.getName().endsWith(Constants.CLASS_SUFFIX)) {
@@ -240,8 +235,6 @@ public class ClassCodeLoader {
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
-        } finally {
-            IOUtils.closeQuietly(jarInputStream);
         }
         return map;
     }

@@ -25,54 +25,93 @@
 
 package io.nuls.base.basic;
 
+import com.google.common.primitives.UnsignedBytes;
 import io.nuls.base.data.Address;
 import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.crypto.Base58;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.SerializeUtils;
+import org.bouncycastle.util.encoders.Hex;
 
-import java.util.Arrays;
-import java.util.List;
+import java.io.ByteArrayOutputStream;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
  * @author: qinyifeng
  */
 public class AddressTool {
-
-    public static final String MAINNET_PREFIX = BaseConstant.MAINNET_DEFAULT_ADDRESS_PREFIX;
-    public static final String TESTNET_PREFIX = BaseConstant.TESTNET_DEFAULT_ADDRESS_PREFIX;
-
+    private static AddressPrefixInf addressPrefixToolsInf = null;
     private static final String ERROR_MESSAGE = "Address prefix can not be null!";
     private static final String[] LENGTHPREFIX = new String[]{"", "a", "b", "c", "d", "e"};
+    private static final Map<Integer, byte[]> BLACK_HOLE_ADDRESS_MAP = new ConcurrentHashMap<>();
+    /**
+     * chainId-地址映射表
+     */
+    private static Map<Integer, String> ADDRESS_PREFIX_MAP = new HashMap<Integer, String>();
 
-    public static String getPrefix(String addressString) {
-        if (addressString.startsWith(MAINNET_PREFIX)) {
-            return MAINNET_PREFIX;
+    public static Map<Integer, String> getAddressPreFixMap() {
+        return ADDRESS_PREFIX_MAP;
+    }
+
+    public static void addPrefix(int chainId, String prefix) {
+        if(chainId == BaseConstant.MAINNET_CHAIN_ID || chainId == BaseConstant.TESTNET_CHAIN_ID) {
+            ADDRESS_PREFIX_MAP.put(chainId, prefix);
+        }else{
+            ADDRESS_PREFIX_MAP.put(chainId, prefix.toUpperCase());
         }
-        if (addressString.startsWith(TESTNET_PREFIX)) {
-            return TESTNET_PREFIX;
+    }
+
+    public static void init(AddressPrefixInf addressPrefixInf) {
+        addressPrefixToolsInf = addressPrefixInf;
+    }
+
+    public static String getPrefix(int chainId) {
+        if (chainId == BaseConstant.MAINNET_CHAIN_ID) {
+            return BaseConstant.MAINNET_DEFAULT_ADDRESS_PREFIX;
+        } else if (chainId == BaseConstant.TESTNET_CHAIN_ID) {
+            return BaseConstant.TESTNET_DEFAULT_ADDRESS_PREFIX;
+        } else {
+            if (null == ADDRESS_PREFIX_MAP.get(chainId) && null != addressPrefixToolsInf) {
+                ADDRESS_PREFIX_MAP.putAll(addressPrefixToolsInf.syncAddressPrefix());
+            }
+            if (null == ADDRESS_PREFIX_MAP.get(chainId)) {
+                return Base58.encode(SerializeUtils.int16ToBytes(chainId)).toUpperCase();
+            } else {
+                return ADDRESS_PREFIX_MAP.get(chainId);
+            }
         }
-        char[] arr = addressString.toCharArray();
+    }
+
+    public static String getPrefix(String address) {
+        if (address.startsWith(BaseConstant.TESTNET_DEFAULT_ADDRESS_PREFIX)) {
+            return BaseConstant.TESTNET_DEFAULT_ADDRESS_PREFIX;
+        }
+        if (address.startsWith(BaseConstant.MAINNET_DEFAULT_ADDRESS_PREFIX)) {
+            return BaseConstant.MAINNET_DEFAULT_ADDRESS_PREFIX;
+        }
+        char[] arr = address.toCharArray();
         for (int i = 0; i < arr.length; i++) {
             char val = arr[i];
             if (val >= 97) {
-                return addressString.substring(0, i);
+                return address.substring(0, i);
             }
         }
         throw new RuntimeException(ERROR_MESSAGE);
     }
 
-    private static String getRealAddrss(String addressString) {
-        if (addressString.startsWith(MAINNET_PREFIX)) {
-            return addressString.substring(MAINNET_PREFIX.length() + 1);
+    public static String getRealAddress(String addressString) {
+        if (addressString.startsWith(BaseConstant.TESTNET_DEFAULT_ADDRESS_PREFIX)) {
+            return addressString.substring(BaseConstant.TESTNET_DEFAULT_ADDRESS_PREFIX.length() + 1);
         }
-        if (addressString.startsWith(TESTNET_PREFIX)) {
-            return addressString.substring(TESTNET_PREFIX.length() + 1);
+        if (addressString.startsWith(BaseConstant.MAINNET_DEFAULT_ADDRESS_PREFIX)) {
+            return addressString.substring(BaseConstant.MAINNET_DEFAULT_ADDRESS_PREFIX.length() + 1);
         }
         char[] arr = addressString.toCharArray();
         for (int i = 0; i < arr.length; i++) {
@@ -97,6 +136,41 @@ public class AddressTool {
             Log.error(e);
             throw new NulsRuntimeException(e);
         }
+    }
+
+    /**
+     * 根据地址字符串解码出地址原始字节数组
+     * base58(chainId)+_+base58(addressType+hash160(pubKey)+XOR(addressType+hash160(pubKey)))
+     * addressType在原始数据后补位0
+     *
+     * @param addressString
+     * @return
+     */
+    private static byte[] getAddressBytes(String addressString) {
+        byte[] result;
+        try {
+            String address = getRealAddress(addressString);
+            byte[] body = Base58.decode(address);
+            result = new byte[body.length - 1];
+            System.arraycopy(body, 0, result, 0, body.length - 1);
+        } catch (Exception e) {
+            Log.error(e);
+            throw new NulsRuntimeException(e);
+        }
+        return result;
+    }
+
+    public static byte[] getAddressByRealAddr(String addressString) {
+        byte[] result;
+        try {
+            byte[] body = Base58.decode(addressString);
+            result = new byte[body.length - 1];
+            System.arraycopy(body, 0, result, 0, body.length - 1);
+        } catch (Exception e) {
+            Log.error(e);
+            throw new NulsRuntimeException(e);
+        }
+        return result;
     }
 
     /**
@@ -126,12 +200,31 @@ public class AddressTool {
      * @return
      */
     public static byte[] getAddress(byte[] publicKey, int chainId) {
-        if (chainId == 1) {
-            return getAddress(publicKey, chainId, "NULS");
-        } else if (chainId == 2) {
-            return getAddress(publicKey, chainId, "tNULS");
-        }
-        return getAddress(publicKey, chainId, Base58.encode(SerializeUtils.int16ToBytes(chainId)).toUpperCase());
+        String prefix = getPrefix(chainId);
+        return getAddress(publicKey, chainId, prefix);
+    }
+
+    /**
+     * 根据公钥查询地址字节数组
+     *
+     * @param publicKeyStr
+     * @param chainId
+     * @return
+     */
+    public static byte[] getAddressByPubKeyStr(String publicKeyStr, int chainId, String charsetName) {
+        byte[] publicKey = ByteUtils.toBytes(publicKeyStr, charsetName);
+        return getAddress(publicKey, chainId);
+    }
+
+    /**
+     * @param blackHolePublicKey
+     * @param chainId
+     * @param address
+     * @return
+     */
+    public static boolean isBlackHoleAddress(byte[] blackHolePublicKey, int chainId, byte[] address) {
+        byte[] blackHoleAddress = BLACK_HOLE_ADDRESS_MAP.computeIfAbsent(chainId, k -> getAddress(blackHolePublicKey, chainId));
+        return Arrays.equals(blackHoleAddress, address);
     }
 
     public static byte[] getAddress(byte[] publicKey, int chainId, String prefix) {
@@ -190,7 +283,7 @@ public class AddressTool {
         byte[] bytes;
         byte[] body;
         try {
-            String subfix = getRealAddrss(address);
+            String subfix = getRealAddress(address);
             body = Base58.decode(subfix);
             bytes = new byte[body.length - 1];
             System.arraycopy(body, 0, bytes, 0, body.length - 1);
@@ -321,13 +414,13 @@ public class AddressTool {
      */
     public static String getStringAddressByBytes(byte[] addressBytes) {
         int chainId = getChainIdByAddress(addressBytes);
-        if (BaseConstant.MAINNET_CHAIN_ID == chainId) {
-            return getStringAddressByBytes(addressBytes, MAINNET_PREFIX);
-        } else if (chainId == BaseConstant.TESTNET_CHAIN_ID) {
-            return getStringAddressByBytes(addressBytes, TESTNET_PREFIX);
-        } else {
-            return getStringAddressByBytes(addressBytes, Base58.encode(SerializeUtils.int16ToBytes(chainId)).toUpperCase());
-        }
+        String prefix = getPrefix(chainId);
+        return getStringAddressByBytes(addressBytes, prefix);
+    }
+
+    public static String getStringAddressNoPrefix(byte[] addressBytes) {
+        byte[] bytes = ByteUtils.concatenate(addressBytes, new byte[]{getXor(addressBytes)});
+        return Base58.encode(bytes);
     }
 
     public static String getStringAddressByBytes(byte[] addressBytes, String prefix) {
@@ -337,32 +430,14 @@ public class AddressTool {
         if (addressBytes.length != Address.ADDRESS_LENGTH) {
             return null;
         }
-
         byte[] bytes = ByteUtils.concatenate(addressBytes, new byte[]{getXor(addressBytes)});
-        return prefix + LENGTHPREFIX[prefix.length()] + Base58.encode(bytes);
+        if (null != prefix) {
+            return prefix + LENGTHPREFIX[prefix.length()] + Base58.encode(bytes);
+        } else {
+            return Base58.encode(bytes);
+        }
     }
 
-    /**
-     * 根据地址字符串解码出地址原始字节数组
-     * base58(chainId)+_+base58(addressType+hash160(pubKey)+XOR(addressType+hash160(pubKey)))
-     * addressType在原始数据后补位0
-     *
-     * @param addressString
-     * @return
-     */
-    private static byte[] getAddressBytes(String addressString) {
-        byte[] result;
-        try {
-            String address = getRealAddrss(addressString);
-            byte[] body = Base58.decode(address);
-            result = new byte[body.length - 1];
-            System.arraycopy(body, 0, result, 0, body.length - 1);
-        } catch (Exception e) {
-            Log.error(e);
-            throw new NulsRuntimeException(e);
-        }
-        return result;
-    }
 
     public static boolean checkPublicKeyHash(byte[] address, byte[] pubKeyHash) {
         if (address == null || pubKeyHash == null) {
@@ -396,7 +471,7 @@ public class AddressTool {
         byte[] bytes;
         byte[] body;
         try {
-            String subfix = getRealAddrss(address);
+            String subfix = getRealAddress(address);
             body = Base58.decode(subfix);
             bytes = new byte[body.length - 1];
             System.arraycopy(body, 0, bytes, 0, body.length - 1);
@@ -448,4 +523,39 @@ public class AddressTool {
         return false;
     }
 
+    public static byte[] createMultiSigAccountOriginBytes(int chainId, int m, List<String> pubKeys) throws Exception {
+        byte[] result = null;
+        if (m < 1) {
+            throw new RuntimeException();
+        }
+        HashSet<String> hashSet = new HashSet(pubKeys);
+        List<String> pubKeyList = new ArrayList<>();
+        pubKeyList.addAll(hashSet);
+        if (pubKeyList.size() < m) {
+            throw new RuntimeException();
+        }
+        Collections.sort(pubKeyList, new Comparator<String>() {
+            private Comparator<byte[]> comparator = UnsignedBytes.lexicographicalComparator();
+            @Override
+            public int compare(String k1, String k2) {
+                return comparator.compare(Hex.decode(k1), Hex.decode(k2));
+            }
+        });
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        try {
+            byteArrayOutputStream.write(chainId);
+            byteArrayOutputStream.write(m);
+            for (String pubKey : pubKeyList) {
+                byteArrayOutputStream.write(HexUtil.decode(pubKey));
+            }
+            result = byteArrayOutputStream.toByteArray();
+        } finally {
+            try {
+                byteArrayOutputStream.close();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return  result;
+    }
 }

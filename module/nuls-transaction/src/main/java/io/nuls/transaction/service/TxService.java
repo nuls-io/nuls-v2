@@ -1,7 +1,7 @@
 package io.nuls.transaction.service;
 
 import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.exception.NulsException;
 import io.nuls.transaction.model.bo.Chain;
@@ -13,6 +13,7 @@ import io.nuls.transaction.model.po.TransactionConfirmedPO;
 import io.nuls.transaction.model.po.TransactionNetPO;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author: Charlie
@@ -29,14 +30,6 @@ public interface TxService {
      * @return boolean
      */
     boolean register(Chain chain, ModuleTxRegisterDTO moduleTxRegisterDto);
-
-    /**
-     * 取消模块注册的交易
-     *
-     * @param moduleCode 要取消注册的模块
-     * @return boolean
-     */
-    boolean unregister(Chain chain, String moduleCode);
 
     /**
      * 收到一个新的交易
@@ -103,7 +96,7 @@ public interface TxService {
      * @param hash  tx hash
      * @return Transaction 如果没有找到则返回null
      */
-    TransactionConfirmedPO getTransaction(Chain chain, NulsDigestData hash);
+    TransactionConfirmedPO getTransaction(Chain chain, NulsHash hash);
 
     /**
      * 查询交易是否存在，先从未确认库中查，再从已确认中查
@@ -111,7 +104,7 @@ public interface TxService {
      * @param hash
      * @return
      */
-    boolean isTxExists(Chain chain, NulsDigestData hash);
+    boolean isTxExists(Chain chain, NulsHash hash);
 
     /**
      *  共识打包获取打包所需交易
@@ -119,12 +112,11 @@ public interface TxService {
      * @param endtimestamp 获取交易截止时间
      * @param maxTxDataSize
      * @param blockTime 区块时间
-     * @param blockHeight 打包高度
      * @param packingAddress
      * @param preStateRoot
      * @return
      */
-    TxPackage getPackableTxs(Chain chain, long endtimestamp, long maxTxDataSize, long blockTime, long blockHeight,
+    TxPackage getPackableTxs(Chain chain, long endtimestamp, long maxTxDataSize, long blockTime,
                              String packingAddress, String preStateRoot);
 
     /**
@@ -135,20 +127,12 @@ public interface TxService {
      * @return
      * @throws NulsException
      */
-    boolean batchVerify(Chain chain, List<String> list, BlockHeader blockHeader, String blockHeaderStr, String preStateRoot) throws Exception;
+    Map<String, Object> batchVerify(Chain chain, List<String> list, BlockHeader blockHeader, String blockHeaderStr, String preStateRoot) throws Exception;
 
 
-    /**
-     * 从已验证未打包交易中删除无效的交易集合, 并回滚账本
-     *
-     * @param chain
-     * @param txList
-     * @return
-     */
-//    void clearInvalidTx(Chain chain, List<Transaction> txList);
 
     /**
-     * 从已验证未打包交易中删除单个无效的交易
+     * 从已验证未打包交易中删除单个无效的交易(异步)
      *
      * @param chain
      * @param tx
@@ -157,11 +141,18 @@ public interface TxService {
     void clearInvalidTx(Chain chain, Transaction tx);
 
     /**
-     * 从已验证未打包交易中删除单个无效的交易
+     * 从已验证未打包交易中删除单个无效的交易(异步)
      * @param chain
      * @param tx
-     * @param cleanLedgerUfmTx 调用账本的未确认回滚
+     * @param changeStatus
      */
-    void clearInvalidTx(Chain chain, Transaction tx, boolean cleanLedgerUfmTx);
+    void clearInvalidTx(Chain chain, Transaction tx, boolean changeStatus);
+
+//    /**
+//     * 从已验证未打包交易中删除单个无效的交易(单线程，清理机制使用)
+//     * @param chain
+//     * @param tx
+//     */
+//    void clearInvalidTxTask(Chain chain, Transaction tx);
 
 }

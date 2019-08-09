@@ -30,8 +30,16 @@ package io.nuls.ledger.constant;
  * @date 2019/03/10
  **/
 public interface CmdConstant {
-    /*CALL cmd 获取网络时间*/
-    String CMD_NW_GET_TIME_CALL = "nw_currentTimeMillis";
+    /*CALL cmd */
+    /**
+     * 根据区块高度获取区块
+     */
+    String CMD_GET_BLOCK_BY_HEIGHT = "getBlockByHeight";
+
+    /**
+     * 获取最新高度
+     */
+    String CMD_LATEST_HEIGHT = "latestHeight";
 
     /*RPC CMD*/
     /**
@@ -64,6 +72,11 @@ public interface CmdConstant {
      */
     String CMD_ROLLBACK_UNCONFIRMED_TX = "rollBackUnconfirmTx";
 
+    /**
+     * 回滚未确认交易
+     */
+    String CMD_CLEAR_UNCONFIRMED_TXS = "clearUnconfirmTxs";
+
 
     /**
      * 提交区块交易
@@ -79,6 +92,12 @@ public interface CmdConstant {
      * 区块打包整体校验
      */
     String CMD_VERIFY_COINDATA_PACKAGED = "verifyCoinDataPackaged";
+
+    /**
+     * 区块打包整体校验
+     */
+    String CMD_VERIFY_COINDATA_BATCH_PACKAGED = "verifyCoinDataBatchPackaged";
+
     /**
      * 单笔交易校验
      */
@@ -97,6 +116,10 @@ public interface CmdConstant {
      * 整区块校验
      */
     String CMD_BLOCK_VALIDATE = "blockValidate";
+    /**
+     * 获取资产信息
+     */
+    String CMD_GET_ASSETS_BY_ID = "getAssetsById";
 
 
 }

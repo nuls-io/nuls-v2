@@ -1,5 +1,6 @@
 package io.nuls.cmd.client;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Address;
 import io.nuls.cmd.client.config.Config;
 import io.nuls.core.constant.BaseConstant;
@@ -15,29 +16,45 @@ import io.nuls.core.parse.SerializeUtils;
 public class Tools {
 
     public static void main(String[] args) {
-        if(args.length < 1){
+        if (args.length < 1) {
             System.out.println("cmd must be null");
             System.exit(0);
         }
         SpringLiteContext.init("io.nuls.cmd.client.config");
+        Config config = SpringLiteContext.getBean(Config.class);
         String cmd = args[0];
-        switch (cmd){
-            case "address" : {
+        switch (cmd) {
+            case "address": {
                 int count = 1;
-                if(args.length == 2){
+                int chainId = config.getChainId();
+                if (args.length >= 3) {
+                    chainId = Integer.parseInt(args[2]);
+                }
+                if (args.length >= 2) {
                     count = Integer.parseInt(args[1]);
                 }
-                Config config = SpringLiteContext.getBean(Config.class);
+                System.out.println("chainId:" + chainId);
+                System.out.println("number:" + count);
+                String addressPrefix = "";
+                if (chainId == BaseConstant.MAINNET_CHAIN_ID || chainId == BaseConstant.TESTNET_CHAIN_ID) {
+                    addressPrefix = config.getAddressPrefix();
+                } else {
+                    addressPrefix = config.getAddressPrefix().toUpperCase();
+                }
                 for (int i = 0; i < count; i++) {
                     ECKey key = new ECKey();
-                    Address address = new Address(10, BaseConstant.DEFAULT_ADDRESS_TYPE, SerializeUtils.sha256hash160(key.getPubKey()));
+                    Address address = new Address(chainId, addressPrefix, BaseConstant.DEFAULT_ADDRESS_TYPE, SerializeUtils.sha256hash160(key.getPubKey()));
                     System.out.println("=".repeat(100));
-                    System.out.println("address   :" + address.getBase58());
+                    System.out.println("address   :" + AddressTool.getStringAddressByBytes(address.getAddressBytes(), address.getPrefix()));
                     System.out.println("privateKey:" + key.getPrivateKeyAsHex());
                     System.out.println("=".repeat(100));
+
                 }
                 System.exit(0);
             }
+            default:
+                System.out.println("error command :" + args[0]);
+                System.exit(0);
         }
     }
 

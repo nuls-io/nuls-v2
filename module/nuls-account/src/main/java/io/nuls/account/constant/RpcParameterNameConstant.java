@@ -136,6 +136,11 @@ public interface RpcParameterNameConstant {
     String SIGN_ADDREESS = "signAddress";
 
     /**
+     * signPassword
+     */
+    String SIGN_PASSWORD = "signPassword";
+
+    /**
      * the public key hex string
      */
     String PUB_KEY = "pubKey";
@@ -163,7 +168,9 @@ public interface RpcParameterNameConstant {
     /**
      * the ASSETS_Id
      */
-    String ASSETS_ID = "assetsId";
+    String ASSET_ID = "assetId";
+
+    String ASSET_CHAIN_ID = "assetChainId";
 
 
 }

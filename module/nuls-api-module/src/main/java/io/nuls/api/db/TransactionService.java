@@ -18,11 +18,11 @@ public interface TransactionService {
 
     List<TxHexInfo> getUnConfirmList(int chainId);
 
-    PageInfo<TransactionInfo> getBlockTxList(int chainId, int pageIndex, int pageSize, long blockHeight, int type);
+    PageInfo<MiniTransactionInfo> getBlockTxList(int chainId, int pageIndex, int pageSize, long blockHeight, int type);
 
     TransactionInfo getTx(int chainId, String txHash);
 
-    void rollbackTxRelationList(int chainId, List<String> txHashList);
+    void rollbackTxRelationList(int chainId, Set<TxRelationInfo> relationInfos);
 
     void rollbackTx(int chainId, List<String> txHashList);
 

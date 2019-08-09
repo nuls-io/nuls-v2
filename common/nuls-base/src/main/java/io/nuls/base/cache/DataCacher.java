@@ -20,7 +20,7 @@
 
 package io.nuls.base.cache;
 
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,15 +38,15 @@ public class DataCacher<T> {
     public DataCacher() {
     }
 
-    private Map<NulsDigestData, CompletableFuture<T>> cacher = new HashMap<>();
+    private Map<NulsHash, CompletableFuture<T>> cacher = new HashMap<>();
 
-    public CompletableFuture<T> addFuture(NulsDigestData hash) {
+    public CompletableFuture<T> addFuture(NulsHash hash) {
         var future = new CompletableFuture<T>();
         cacher.put(hash, future);
         return future;
     }
 
-    public boolean complete(NulsDigestData hash, T t) {
+    public boolean complete(NulsHash hash, T t) {
         CompletableFuture<T> future = cacher.get(hash);
         if (future == null) {
             return false;
@@ -56,7 +56,7 @@ public class DataCacher<T> {
         return true;
     }
 
-    public void removeFuture(NulsDigestData hash) {
+    public void removeFuture(NulsHash hash) {
         cacher.remove(hash);
     }
 }

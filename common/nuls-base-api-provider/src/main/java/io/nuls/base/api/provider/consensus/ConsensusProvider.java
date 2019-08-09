@@ -2,6 +2,7 @@ package io.nuls.base.api.provider.consensus;
 
 import io.nuls.base.api.provider.Result;
 import io.nuls.base.api.provider.consensus.facade.*;
+import io.nuls.base.api.provider.transaction.facade.MultiSignTransferRes;
 
 /**
  * @Author: zhoulijun
@@ -19,11 +20,25 @@ public interface ConsensusProvider {
     Result<String> createAgent(CreateAgentReq req);
 
     /**
+     * create consensus node
+     * @param req
+     * @return
+     */
+    Result<MultiSignTransferRes> createAgentForMultiSignAccount(CreateMultiSignAgentReq req);
+
+    /**
      * stop consensus node
      * @param req
      * @return
      */
     Result<String> stopAgent(StopAgentReq req);
+
+    /**
+     * stop consensus node
+     * @param req
+     * @return
+     */
+    Result<MultiSignTransferRes> stopAgentForMultiSignAccount(StopMultiSignAgentReq req);
 
 
     /**
@@ -35,11 +50,27 @@ public interface ConsensusProvider {
 
 
     /**
+     * 委托共识
+     * @param req
+     * @return
+     */
+    Result<MultiSignTransferRes> depositToAgentForMultiSignAccount(MultiSignAccountDepositToAgentReq req);
+
+
+    /**
      * 退出委托
      * @param req
      * @return
      */
     Result<String> withdraw(WithdrawReq req);
+
+
+    /**
+     * 退出委托
+     * @param req
+     * @return
+     */
+    Result<MultiSignTransferRes> withdrawForMultiSignAccount(MultiSignAccountWithdrawReq req);
 
 
     /**
@@ -57,5 +88,10 @@ public interface ConsensusProvider {
      */
     Result<AgentInfo> getAgentList(GetAgentListReq req);
 
-
+    /**
+     * 查询委托列表
+     * @param req
+     * @return
+     */
+    Result<DepositInfo> getDepositList(GetDepositListReq req);
 }

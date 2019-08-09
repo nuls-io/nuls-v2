@@ -32,29 +32,33 @@ package io.nuls.ledger.constant;
  */
 public class LedgerConstant {
 
-    public static final String MODULE_DB_PATH = "/lg";
-
     public static int UNCONFIRMED_NONCE = 0;
     public static int CONFIRMED_NONCE = 1;
 
 
     /**
-     * 高度解锁的阈值，大于这个值就是时间
+     * 高度解锁的阈值，大于这个值就是时间锁
      */
     public static final int MAX_HEIGHT_VALUE = 10000000;
     /**
-     * 重新统计锁定的时间
+     * 重新统计锁定的时间 1s
      */
-    public static final int TIME_RECALCULATE_FREEZE = 1000;
+    public static final int TIME_RECALCULATE_FREEZE = 1;
     /**
      * 永久锁定lockTime值
      */
     public static final int PERMANENT_LOCK = -1;
+
+    public static byte[] blackHolePublicKey = null;
+
     /**
      * 缓存的账户区块数量
      */
-    public static final int CACHE_ACCOUNT_BLOCK = 500;
-
+    public static final int CACHE_ACCOUNT_BLOCK = 1000;
+    /**
+     * 缓存同步统计数据的区块信息
+      */
+    public static final int CACHE_NONCE_INFO_BLOCK = 100;
     /**
      * 缓存的账户初始化nonce
      */
@@ -66,7 +70,11 @@ public class LedgerConstant {
     public static final int NONCE_LENGHT = 8;
     public static String DEFAULT_ENCODING = "UTF-8";
     /**
-     * 未确认交易的过期时间-ms，配置加载会重置该值
+     * 未确认交易的过期时间-s，配置加载会重置该值
      */
-    public static int UNCONFIRM_NONCE_EXPIRED_TIME = 100000;
+    public static int UNCONFIRM_NONCE_EXPIRED_TIME = 100;
+
+    public static final String COMMA = ",";
+    public static final String COLON = ":";
+    public static final String DOWN_LINE = "_";
 }

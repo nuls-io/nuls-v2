@@ -7,7 +7,6 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.math.BigInteger;
 
 /**
@@ -18,6 +17,18 @@ import java.math.BigInteger;
  * 2018/11/7
  */
 public class ConfigBean extends BaseNulsData {
+    /**
+     * 本链资产ID
+     * assets id
+     */
+    private int assetId;
+
+    /**
+     * 本链链ID
+     * chain id
+     */
+    private int chainId;
+
     /**
      * 打包间隔时间
      * Packing interval time
@@ -77,17 +88,6 @@ public class ConfigBean extends BaseNulsData {
     private String seedNodes;
 
     /**
-     * 资产ID
-     * assets id
-     */
-    private int assetId;
-
-    /**
-     * chain id
-     */
-    private int chainId;
-
-    /**
      * 节点委托金额最大值
      * Maximum Node Delegation Amount
      */
@@ -108,6 +108,47 @@ public class ConfigBean extends BaseNulsData {
      * 每年通胀/每年出块数
      * */
     private BigInteger blockReward;
+
+
+    /**
+     * 创建节点资产ID
+     * agent assets id
+     */
+    private int agentAssetId;
+
+    /**
+     * 创建节点资产链ID
+     * Create node asset chain ID
+     */
+    private int agentChainId;
+
+
+    /**
+     * 共识奖励资产ID
+     * Award asset chain ID
+     */
+    private int awardAssetId;
+
+    /**
+     * 交易手续费单价
+     * Transaction fee unit price
+     */
+    private long feeUnit;
+
+    /**
+     * 通胀开始时间
+     * */
+    private long initTime;
+
+    /**
+     * 通缩比例
+     * */
+    private byte deflationRatio;
+
+    /**
+     * 通缩间隔时间
+     * */
+    private long deflationTimeInterval;
 
     public long getPackingInterval() {
         return packingInterval;
@@ -246,11 +287,67 @@ public class ConfigBean extends BaseNulsData {
         this.blockReward = blockReward;
     }
 
+    public int getAgentAssetId() {
+        return agentAssetId;
+    }
+
+    public void setAgentAssetId(int agentAssetId) {
+        this.agentAssetId = agentAssetId;
+    }
+
+    public int getAgentChainId() {
+        return agentChainId;
+    }
+
+    public void setAgentChainId(int agentChainId) {
+        this.agentChainId = agentChainId;
+    }
+
+    public int getAwardAssetId() {
+        return awardAssetId;
+    }
+
+    public void setAwardAssetId(int awardAssetId) {
+        this.awardAssetId = awardAssetId;
+    }
+
+    public long getFeeUnit() {
+        return feeUnit;
+    }
+
+    public void setFeeUnit(long feeUnit) {
+        this.feeUnit = feeUnit;
+    }
+
+    public long getInitTime() {
+        return initTime;
+    }
+
+    public void setInitTime(long initTime) {
+        this.initTime = initTime;
+    }
+
+    public byte getDeflationRatio() {
+        return deflationRatio;
+    }
+
+    public void setDeflationRatio(byte deflationRatio) {
+        this.deflationRatio = deflationRatio;
+    }
+
+    public long getDeflationTimeInterval() {
+        return deflationTimeInterval;
+    }
+
+    public void setDeflationTimeInterval(long deflationTimeInterval) {
+        this.deflationTimeInterval = deflationTimeInterval;
+    }
+
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeUint48(packingInterval);
-        stream.writeUint48(redPublishLockTime);
-        stream.writeUint48(stopAgentLockTime);
+        stream.writeUint32(packingInterval);
+        stream.writeUint32(redPublishLockTime);
+        stream.writeUint32(stopAgentLockTime);
         stream.writeByte(commissionRateMin);
         stream.writeByte(commissionRateMax);
         stream.writeBigInteger(depositMin);
@@ -265,13 +362,20 @@ public class ConfigBean extends BaseNulsData {
         stream.writeString(password);
         stream.writeUint48(blockMaxSize);
         stream.writeBigInteger(blockReward);
+        stream.writeUint16(agentAssetId);
+        stream.writeUint16(agentChainId);
+        stream.writeUint16(awardAssetId);
+        stream.writeUint32(feeUnit);
+        stream.writeUint32(initTime);
+        stream.writeByte(deflationRatio);
+        stream.writeUint32(deflationTimeInterval);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.packingInterval = byteBuffer.readUint48();
-        this.redPublishLockTime = byteBuffer.readUint48();
-        this.stopAgentLockTime = byteBuffer.readUint48();
+        this.packingInterval = byteBuffer.readUint32();
+        this.redPublishLockTime = byteBuffer.readUint32();
+        this.stopAgentLockTime = byteBuffer.readUint32();
         this.commissionRateMin = byteBuffer.readByte();
         this.commissionRateMax = byteBuffer.readByte();
         this.depositMin = byteBuffer.readBigInteger();
@@ -286,17 +390,26 @@ public class ConfigBean extends BaseNulsData {
         this.password = byteBuffer.readString();
         this.blockMaxSize = byteBuffer.readUint48();
         this.blockReward = byteBuffer.readBigInteger();
+        this.agentAssetId = byteBuffer.readUint16();
+        this.agentChainId = byteBuffer.readUint16();
+        this.awardAssetId = byteBuffer.readUint16();
+        this.feeUnit = byteBuffer.readUint32();
+        this.initTime = byteBuffer.readUint32();
+        this.deflationRatio = byteBuffer.readByte();
+        this.deflationTimeInterval = byteBuffer.readUint32();
     }
 
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfUint48() * 4;
-        size += 2;
+        size += SerializeUtils.sizeOfUint48();
+        size += SerializeUtils.sizeOfUint32() * 5;
+        size += 3;
         size += SerializeUtils.sizeOfBigInteger() * 7;
         size += SerializeUtils.sizeOfString(seedNodes);
-        size += SerializeUtils.sizeOfUint16() * 2;
+        size += SerializeUtils.sizeOfUint16() * 5;
         size += SerializeUtils.sizeOfString(password);
+        size += SerializeUtils.sizeOfUint32();
         return size;
     }
 }

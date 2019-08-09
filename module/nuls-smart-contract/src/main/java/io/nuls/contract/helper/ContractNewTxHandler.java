@@ -52,6 +52,7 @@ public class ContractNewTxHandler {
 
     public void handleContractNewTx(int chainId, long blockTime, ContractWrapperTransaction tx, ContractResult contractResult, ContractTempBalanceManager tempBalanceManager) {
         Map<ByteArrayWrapper, ProgramAccount> accountMap = contractResult.getAccounts();
+        // 维护临时余额管理器
         if(accountMap != null) {
             ProgramAccount account;
             byte[] contractBytes;

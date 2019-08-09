@@ -36,23 +36,16 @@ import java.util.List;
  */
 public interface ContractTxService {
 
-    Result contractCreateTx(int chainId, String sender, Long gasLimit, Long price,
+    Result contractCreateTx(int chainId, String sender, String alias, Long gasLimit, Long price,
                             byte[] contractCode, String[][] args, String password, String remark);
 
     Result validateContractCreateTx(int chainId, byte[] sender, Long gasLimit, Long price, byte[] contractCode, String[][] args);
-
-
-    Result contractPreCreateTx(int chainId, String sender, Long gasLimit, Long price,
-                               byte[] contractCode, String[][] args, String password, String remark);
 
     Result contractCallTx(int chainId, String sender, BigInteger value, Long gasLimit, Long price, String contractAddress,
                           String methodName, String methodDesc, String[][] args, String password, String remark);
 
     Result validateContractCallTx(int chainId, byte[] senderBytes, BigInteger value, Long gasLimit, Long price, byte[] contractAddressBytes,
                                   String methodName, String methodDesc, String[][] args);
-
-    Result callTxFee(int chainId, String sender, BigInteger value, Long gasLimit, Long price, String contractAddress,
-                     String methodName, String methodDesc, String[][] args, String remark);
 
     Result contractDeleteTx(int chainId, String sender, String contractAddress, String password, String remark);
 

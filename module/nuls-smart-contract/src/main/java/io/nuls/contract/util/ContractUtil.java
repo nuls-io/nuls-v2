@@ -23,11 +23,15 @@
  */
 package io.nuls.contract.util;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Address;
+import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
+import io.nuls.base.signture.P2PHKSignature;
+import io.nuls.base.signture.TransactionSignature;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.model.bo.ContractResult;
@@ -41,7 +45,6 @@ import io.nuls.contract.model.txdata.CreateContractData;
 import io.nuls.contract.model.txdata.DeleteContractData;
 import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.core.basic.Result;
-import io.nuls.core.basic.VarInt;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -50,7 +53,6 @@ import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.rpc.model.message.MessageUtil;
 import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.util.RPCUtil;
 
 import java.lang.reflect.Array;
 import java.math.BigInteger;
@@ -67,11 +69,6 @@ import static io.nuls.core.model.StringUtils.isBlank;
  * @date: 2018/8/25
  */
 public class ContractUtil {
-
-    /**
-     * 此长度来源于BlockExtendsData中定长变量的字节总数
-     */
-    private static final int BLOCK_EXTENDS_DATA_FIX_LENGTH = 21;
 
     public static String[][] twoDimensionalArray(Object[] args, String[] types) {
         if (args == null) {
@@ -284,15 +281,11 @@ public class ContractUtil {
         }
         try {
             byte[] extend = blockHeader.getExtend();
-            if (extend.length > BLOCK_EXTENDS_DATA_FIX_LENGTH) {
-                VarInt varInt = new VarInt(extend, BLOCK_EXTENDS_DATA_FIX_LENGTH);
-                int lengthFieldSize = varInt.getOriginalSizeInBytes();
-                int stateRootlength = (int) varInt.value;
-                stateRoot = new byte[stateRootlength];
-                System.arraycopy(extend, BLOCK_EXTENDS_DATA_FIX_LENGTH + lengthFieldSize, stateRoot, 0, stateRootlength);
-                blockHeader.setStateRoot(stateRoot);
-                return stateRoot;
-            }
+            BlockExtendsData extendsData = new BlockExtendsData();
+            extendsData.parse(extend, 0);
+            stateRoot = extendsData.getStateRoot();
+            blockHeader.setStateRoot(stateRoot);
+            return stateRoot;
         } catch (Exception e) {
             Log.error("parse stateRoot error.", e);
         }
@@ -350,8 +343,8 @@ public class ContractUtil {
     }
 
     public static boolean isTransferMethod(String method) {
-        return (ContractConstant.NRC20_METHOD_TRANSFER.equals(method)
-                || ContractConstant.NRC20_METHOD_TRANSFER_FROM.equals(method));
+        return (NRC20_METHOD_TRANSFER.equals(method)
+                || NRC20_METHOD_TRANSFER_FROM.equals(method));
     }
 
     public static String argToString(String[][] args) {
@@ -366,7 +359,14 @@ public class ContractUtil {
     }
 
     public static boolean checkPrice(long price) {
-        if (price < ContractConstant.CONTRACT_MINIMUM_PRICE) {
+        if (price < CONTRACT_MINIMUM_PRICE) {
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean checkGasLimit(long gas) {
+        if (gas <= 0 || gas > MAX_GASLIMIT) {
             return false;
         }
         return true;
@@ -535,6 +535,20 @@ public class ContractUtil {
         String txTypeHexString = txString.substring(0, 4);
         NulsByteBuffer byteBuffer = new NulsByteBuffer(RPCUtil.decode(txTypeHexString));
         return byteBuffer.readUint16();
+    }
+
+    public static byte[] extractPublicKey(Transaction tx) {
+        TransactionSignature signature = new TransactionSignature();
+        try {
+            signature.parse(tx.getTransactionSignature(), 0);
+        } catch (NulsException e) {
+            Log.error(e);
+            return null;
+        }
+        List<P2PHKSignature> p2PHKSignatures = signature.getP2PHKSignatures();
+        P2PHKSignature p2PHKSignature = p2PHKSignatures.get(0);
+        byte[] publicKey = p2PHKSignature.getPublicKey();
+        return publicKey;
     }
 
     public static void mapAddBigInteger(LinkedHashMap<String, BigInteger> map, byte[] address, BigInteger amount) {

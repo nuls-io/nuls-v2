@@ -24,23 +24,31 @@
  */
 package io.nuls.contract.vm.program;
 
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
+import io.nuls.core.rpc.model.TypeDescriptor;
+
 import java.util.List;
 
+@ApiModel(name = "合约方法详情")
 public class ProgramMethod {
 
+    @ApiModelProperty(description = "方法名称")
     private String name;
-
+    @ApiModelProperty(description = "方法描述")
     private String desc;
-
+    @ApiModelProperty(description = "方法参数列表", type = @TypeDescriptor(value = List.class, collectionElement = ProgramMethodArg.class))
     private List<ProgramMethodArg> args;
-
+    @ApiModelProperty(description = "返回值类型")
     private String returnArg;
-
+    @ApiModelProperty(description = "是否视图方法（调用此方法数据不上链）")
     private boolean view;
-
+    @ApiModelProperty(description = "是否是事件")
     private boolean event;
-
+    @ApiModelProperty(description = "是否是可接受主链资产转账的方法")
     private boolean payable;
+    @ApiModelProperty(description = "方法返回值是否JSON序列化")
+    private boolean jsonSerializable;
 
     public ProgramMethod() {
     }
@@ -99,6 +107,14 @@ public class ProgramMethod {
 
     public void setPayable(boolean payable) {
         this.payable = payable;
+    }
+
+    public boolean isJsonSerializable() {
+        return jsonSerializable;
+    }
+
+    public void setJsonSerializable(boolean jsonSerializable) {
+        this.jsonSerializable = jsonSerializable;
     }
 
     @Override

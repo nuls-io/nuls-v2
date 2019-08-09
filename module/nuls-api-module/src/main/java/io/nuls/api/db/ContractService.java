@@ -4,6 +4,7 @@ import io.nuls.api.model.po.db.ContractInfo;
 import io.nuls.api.model.po.db.ContractResultInfo;
 import io.nuls.api.model.po.db.ContractTxInfo;
 import io.nuls.api.model.po.db.PageInfo;
+import io.nuls.api.model.po.db.mini.MiniContractInfo;
 
 import java.util.List;
 import java.util.Map;
@@ -28,7 +29,11 @@ public interface ContractService {
 
     PageInfo<ContractTxInfo> getContractTxList(int chainId, String contractAddress, int type, int pageNumber, int pageSize);
 
-    PageInfo<ContractInfo> getContractList(int chainId, int pageNumber, int pageSize, boolean onlyNrc20, boolean isHidden);
+    PageInfo<MiniContractInfo> getContractList(int chainId, int pageNumber, int pageSize, boolean onlyNrc20, boolean isHidden);
+
+    PageInfo<MiniContractInfo> getContractList(int chainId, int pageNumber, int pageSize, String address, boolean onlyNrc20, boolean isHidden);
+
+    List<MiniContractInfo> getContractList(int chainId, List<String> addressList);
 
     ContractResultInfo getContractResultInfo(int chainId, String txHash);
 }

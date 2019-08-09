@@ -44,32 +44,12 @@ public class LogUtil {
     private LogUtil() {
     }
 
-    public static void configDefaultLog(String folderName, String fileName, Level fileLevel, Level consoleLevel, String systemLogLevel, String packageLogPackages, String packageLogLevels) {
-        int rootLevelInt = Math.min(fileLevel.toInt(), consoleLevel.toInt());
-
-        LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-        Logger rootLogger = context.getLogger(Logger.ROOT_LOGGER_NAME);
-        rootLogger.setAdditive(false);
-        rootLogger.setLevel(Level.toLevel(rootLevelInt));
-        RollingFileAppender fileAppender = LogAppender.getAppender(folderName + File.separator + fileName, fileLevel);
-        PatternLayoutEncoder encoder = new PatternLayoutEncoder();
-        encoder.setContext(context);
-        encoder.setPattern("%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger - %msg%n");
-        encoder.start();
-        fileAppender.setEncoder(encoder);
-        fileAppender.start();
-        rootLogger.addAppender(fileAppender);
-
-        Log.DEFAULT_BASIC_LOGGER = LoggerBuilder.getLogger(folderName, fileName, fileLevel, consoleLevel);
+    public static void configDefaultLog(String fileName, String packageLogPackages, String packageLogLevels) {
+        Log.DEFAULT_BASIC_LOGGER = LoggerBuilder.getLogger(fileName);
         Log.DEFAULT_BASIC_LOGGER.addBasicPath(Log.class.getName());
 
-        if (StringUtils.isNotBlank(systemLogLevel)) {
-            String systemLogName = io.nuls.core.log.Log.BASIC_LOGGER.getLogger().getName();
-            Logger systemLogger = context.getLogger(systemLogName);
-            systemLogger.setAdditive(false);
-            systemLogger.setLevel(Level.toLevel(systemLogLevel));
-        }
         if (StringUtils.isNotBlank(packageLogPackages) && StringUtils.isNotBlank(packageLogLevels)) {
+            LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
             String[] packages = packageLogPackages.split(",");
             String[] levels = packageLogLevels.split(",");
             int levelsLength = levels.length;
@@ -89,15 +69,14 @@ public class LogUtil {
         }
     }
 
-    public static void configChainLog(Integer chainId, String folderName, String fileName, Level fileLevel, Level consoleLevel) {
-        folderName = "chain-" + chainId + File.separator + folderName;
-        NulsLogger nulsLogger = LoggerBuilder.getLogger(folderName, fileName, fileLevel, consoleLevel);
+    public static void configChainLog(Integer chainId, String fileName) {
+        NulsLogger nulsLogger = LoggerBuilder.getLogger(fileName, chainId);
         nulsLogger.addBasicPath(Log.class.getName());
         Log.BASIC_LOGGER_MAP.put(chainId, nulsLogger);
     }
 
-    public static void configDefaultLog(String folderName, String fileName, Level fileLevel, Level consoleLevel) {
-        configDefaultLog(folderName, fileName, fileLevel, consoleLevel, null, null, null);
+    public static void configDefaultLog(String fileName) {
+        configDefaultLog(fileName, null, null);
     }
 
 }

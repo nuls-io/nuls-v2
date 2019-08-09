@@ -30,20 +30,20 @@ import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.AccountKeyStore;
-import io.nuls.account.model.dto.AccountKeyStoreDto;
+import io.nuls.account.model.dto.AccountKeyStoreDTO;
 import io.nuls.account.service.AccountKeyStoreService;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.AliasService;
 import io.nuls.account.storage.AccountStorageService;
 import io.nuls.account.util.LoggerUtil;
 import io.nuls.base.basic.AddressTool;
-import io.nuls.core.rockdb.util.DBUtils;
 import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Service;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rockdb.util.DBUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -55,7 +55,7 @@ import java.net.URLDecoder;
 /**
  * @author: qinyifeng
  */
-@Service
+@Component
 public class AccountKeyStoreServiceImpl implements AccountKeyStoreService {
 
     @Autowired
@@ -72,8 +72,14 @@ public class AccountKeyStoreServiceImpl implements AccountKeyStoreService {
         //export account to keystore
         AccountKeyStore accountKeyStore = this.accountToKeyStore(chainId, address, password);
         //backup keystore files
-        String backupPath = this.backUpKeyStore(path, new AccountKeyStoreDto(accountKeyStore));
+        String backupPath = this.backUpKeyStore(path, new AccountKeyStoreDTO(accountKeyStore));
         return backupPath;
+    }
+
+    @Override
+    public AccountKeyStore getKeyStore(int chainId, String address, String password) {
+        AccountKeyStore accountKeyStore = this.accountToKeyStore(chainId, address, password);
+        return accountKeyStore;
     }
 
     /**
@@ -116,7 +122,7 @@ public class AccountKeyStoreServiceImpl implements AccountKeyStoreService {
      * 备份keystore文件
      * backup keystore file
      */
-    public String backUpKeyStore(String path, AccountKeyStoreDto accountKeyStoreDto) {
+    public String backUpKeyStore(String path, AccountKeyStoreDTO accountKeyStoreDto) {
         //如果备份地址为空，则使用系统默认备份地址
         //if the backup address is empty, the default backup address of the system is used
         if (StringUtils.isBlank(path)) {
@@ -129,7 +135,7 @@ public class AccountKeyStoreServiceImpl implements AccountKeyStoreService {
             try {
                 path = URLDecoder.decode(path, "UTF-8");
             } catch (UnsupportedEncodingException e) {
-                LoggerUtil.logger.error(e);
+                LoggerUtil.LOG.error(e);
             }
         }
         File backupFile = DBUtils.loadDataPath(path);
@@ -169,7 +175,7 @@ public class AccountKeyStoreServiceImpl implements AccountKeyStoreService {
                 try {
                     fileOutputStream.close();
                 } catch (IOException e) {
-                    LoggerUtil.logger.error(e);
+                    LoggerUtil.LOG.error(e);
                 }
             }
         }

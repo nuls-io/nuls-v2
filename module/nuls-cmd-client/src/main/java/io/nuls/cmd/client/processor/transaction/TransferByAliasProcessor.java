@@ -118,7 +118,7 @@ public class TransferByAliasProcessor  extends TransactionBaseProcessor implemen
         if(args.length == 5){
             builder.setRemark(args[4]);
         }
-        return builder.build();
+        return builder.build(new TransferReq());
     }
 
     @Override

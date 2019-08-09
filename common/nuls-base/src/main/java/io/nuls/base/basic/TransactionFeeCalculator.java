@@ -57,6 +57,20 @@ public class TransactionFeeCalculator {
     }
 
     /**
+     * 根据交易大小计算需要交纳的手续费
+     * According to the transaction size calculate the handling fee.
+     * @param size 交易大小/size of the transaction
+     */
+    public static final BigInteger getConsensusTxFee(int size,long unit) {
+        BigInteger unitBigInteger = BigInteger.valueOf(unit);
+        BigInteger fee = unitBigInteger.multiply(new BigInteger(String.valueOf(size/KB)));
+        if (size % KB > 0) {
+            fee = fee.add(unitBigInteger);
+        }
+        return fee;
+    }
+
+    /**
      * 根据未签名的交易大小计算需要交纳的手续费
      * @param size 未签名的交易大小/ size of the unsigned transaction
      * @return 交易手续费

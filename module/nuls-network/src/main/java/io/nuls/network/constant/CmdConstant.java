@@ -38,10 +38,13 @@ public interface CmdConstant {
      * 注册网络指令协议
      */
     String CMD_NW_PROTOCOL_REGISTER = "nw_protocolRegister";
+    String CMD_NW_PROTOCOL_PRIORITY_REGISTER = "protocolRegisterWithPriority";
     /**
      * 广播消息
      */
     String CMD_NW_BROADCAST = "nw_broadcast";
+
+    String CMD_NW_CROSS_RANDOM_BROADCAST = "nw_crossRandomBroadcast";
     /**
      * 发送消息
      */
@@ -80,6 +83,8 @@ public interface CmdConstant {
      * 获取种子节点
      */
     String CMD_NW_GET_SEEDS = "nw_getSeeds";
+
+    String CMD_NW_GET_MAIN_NET_MAGIC_NUMBER = "nw_getMainMagicNumber";
     /**
      * 重新连接
      */
@@ -105,4 +110,9 @@ public interface CmdConstant {
      */
     String CMD_NW_UPDATE_NODE_INFO = "nw_updateNodeInfo";
 
+
+    /**
+     * 模块统一消息处理器RPC接口
+     */
+     String CMD_MSG_PROCESS = "msgProcess";
 }

@@ -26,10 +26,9 @@ package io.nuls.transaction.task;
 
 import io.nuls.base.data.Transaction;
 import io.nuls.core.core.ioc.SpringLiteContext;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxConfig;
-import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.po.TransactionUnconfirmedPO;
 import io.nuls.transaction.service.TxService;
@@ -40,10 +39,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * 未确认交易脏数据处理
- *
- * @author: qinyifeng
- * @date: 2019/01/24
+ * 未确认交易清理机制
  */
 public class ClearUnconfirmedTxProcessTask implements Runnable {
 
@@ -62,36 +58,68 @@ public class ClearUnconfirmedTxProcessTask implements Runnable {
         try {
             doTask(chain);
         } catch (Exception e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            chain.getLogger().error(e);
         }
     }
 
     private void doTask(Chain chain) {
-        List<TransactionUnconfirmedPO> txPOList = unconfirmedTxStorageService.getAllTxPOList(chain.getChainId());
-        if (txPOList == null || txPOList.size() == 0) {
+        List<byte[]> txKeyList = unconfirmedTxStorageService.getAllTxkeyList(chain.getChainId());
+        if (txKeyList == null || txKeyList.size() == 0) {
             return;
         }
+        int count = processUnconfirmedTxs(txKeyList);
+        chain.getLogger().info("%%%%% Clean %%%%% [UnconfirmedTxProcessTask] expire count: {}", count);
+    }
 
-        List<Transaction> expireTxList = this.getExpireTxList(txPOList);
-        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("%%%%% Clean %%%%% [UnconfirmedTxProcessTask] expire list size: {}", expireTxList.size());
+    private boolean processTx(Chain chain, Transaction tx) {
+        try {
+            txService.clearInvalidTx(chain, tx, false);
+        } catch (Exception e) {
+            chain.getLogger().error(e);
+        }
+        return false;
+    }
+
+    /**
+     * 过滤指定时间内过期的交易
+     *
+     * @param txKeyList
+     * @return expireTxList
+     */
+    private int processUnconfirmedTxs(List<byte[]> txKeyList) {
+        int unconfirmedTxsCount = 0;
+        List<byte[]> queryList = new ArrayList<>();
+        //一次最多处理1W笔
+        for (int i = 0; i < txKeyList.size(); i++) {
+            queryList.add(txKeyList.get(i));
+            if (queryList.size() == 10000) {
+                unconfirmedTxsCount += processExpireTxs(queryList);
+                queryList.clear();
+            }
+        }
+        if(!queryList.isEmpty()){
+            unconfirmedTxsCount += processExpireTxs(queryList);
+        }
+        return unconfirmedTxsCount;
+    }
+
+    public int processExpireTxs(List<byte[]> queryList){
+        //获取未确认的交易
+        List<TransactionUnconfirmedPO> list = unconfirmedTxStorageService.getTransactionUnconfirmedPOList(chain.getChainId(), queryList);
+        //计算出超时的未确认交易
+        List<Transaction> expireTxList = getExpireTxList(list);
+        int count = 0;
         Transaction tx;
         for (int i = 0; i < expireTxList.size(); i++) {
             tx = expireTxList.get(i);
             //如果该未确认交易不在待打包池中，则认为是过期脏数据，需要清理
             if (!packablePool.exist(chain, tx)) {
                 processTx(chain, tx);
-                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("%%%%% Clean %%%%% [UnconfirmedTxProcessTask] destroy tx - type:{}, - hash:{}", tx.getType(), tx.getHash().getDigestHex());
+                StatisticsTask.clearUnconfirmedTx++;
+                count++;
             }
         }
-    }
-
-    private boolean processTx(Chain chain, Transaction tx) {
-        try {
-            txService.clearInvalidTx(chain, tx, true);
-        } catch (Exception e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
-        }
-        return false;
+        return count;
     }
 
     /**
@@ -102,9 +130,9 @@ public class ClearUnconfirmedTxProcessTask implements Runnable {
      */
     private List<Transaction> getExpireTxList(List<TransactionUnconfirmedPO> txPOList) {
         List<Transaction> expireTxList = new ArrayList<>();
-        long currentTime = TimeUtils.getCurrentTimeMillis();
+        long currentTimeSeconds = NulsDateUtils.getCurrentTimeSeconds();
         //过滤指定时间内过期的交易
-        List<TransactionUnconfirmedPO> expireTxPOList = txPOList.stream().filter(txPo -> currentTime - txConfig.getUnconfirmedTxExpire() * 1000 > txPo.getCreateTime()).collect(Collectors.toList());
+        List<TransactionUnconfirmedPO> expireTxPOList = txPOList.stream().filter(txPo -> currentTimeSeconds - txConfig.getUnconfirmedTxExpire() > txPo.getCreateTime()).collect(Collectors.toList());
         expireTxPOList.forEach(txPo -> expireTxList.add(txPo.getTx()));
         return expireTxList;
     }

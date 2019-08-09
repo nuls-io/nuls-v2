@@ -20,6 +20,8 @@
 
 package io.nuls.api.model.rpc;
 
+import io.nuls.core.constant.ErrorCode;
+
 /**
  * @author Niels
  */
@@ -41,6 +43,10 @@ public class RpcResultError {
         this.data = data;
     }
 
+    public RpcResultError(ErrorCode errorCode) {
+        this.code = errorCode.getCode();
+        this.message = errorCode.getMsg();
+    }
     public RpcResultError(RpcErrorCode rpcErrorCode) {
         this.code = rpcErrorCode.getCode();
         this.message = rpcErrorCode.getMessage();

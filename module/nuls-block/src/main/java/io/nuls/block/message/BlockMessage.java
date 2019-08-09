@@ -24,7 +24,7 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseBusinessMessage;
 import io.nuls.base.data.Block;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 
@@ -41,17 +41,22 @@ public class BlockMessage extends BaseBusinessMessage {
     /**
      * 用来区分批量获取区块请求和单个区块请求,也可以用来过滤非法消息
      */
-    private NulsDigestData requestHash;
+    private NulsHash requestHash;
     /**
      * 区块数据
      */
     private Block block;
 
-    public NulsDigestData getRequestHash() {
+    /**
+     * 是否同步中下载的区块
+     */
+    private boolean syn;
+
+    public NulsHash getRequestHash() {
         return requestHash;
     }
 
-    public void setRequestHash(NulsDigestData requestHash) {
+    public void setRequestHash(NulsHash requestHash) {
         this.requestHash = requestHash;
     }
 
@@ -63,29 +68,40 @@ public class BlockMessage extends BaseBusinessMessage {
         this.block = block;
     }
 
+    public BlockMessage(NulsHash requestHash, Block block, boolean syn) {
+        this.requestHash = requestHash;
+        this.block = block;
+        this.syn = syn;
+    }
+
+    public boolean isSyn() {
+        return syn;
+    }
+
     public BlockMessage() {
     }
 
-    public BlockMessage(NulsDigestData requestHash, Block block) {
-        this.requestHash = requestHash;
-        this.block = block;
+    public void setSyn(boolean syn) {
+        this.syn = syn;
     }
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer buffer) throws IOException {
-        buffer.writeNulsData(requestHash);
+        buffer.write(requestHash.getBytes());
         buffer.writeNulsData(block);
+        buffer.writeBoolean(syn);
     }
 
     @Override
     public void parse(NulsByteBuffer nulsByteBuffer) throws NulsException {
         this.requestHash = nulsByteBuffer.readHash();
         this.block = nulsByteBuffer.readNulsData(new Block());
+        this.syn = nulsByteBuffer.readBoolean();
     }
 
     @Override
     public int size() {
-        return SerializeUtils.sizeOfNulsData(requestHash) + SerializeUtils.sizeOfNulsData(block);
+        return NulsHash.HASH_LENGTH + SerializeUtils.sizeOfNulsData(block) + SerializeUtils.sizeOfBoolean();
     }
 
 }

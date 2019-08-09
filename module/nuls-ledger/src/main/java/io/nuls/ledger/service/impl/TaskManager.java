@@ -26,6 +26,7 @@ package io.nuls.ledger.service.impl;
 
 import io.nuls.core.thread.ThreadUtils;
 import io.nuls.core.thread.commom.NulsThreadFactory;
+import io.nuls.ledger.task.LedgerBlockSyncTask;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -45,7 +46,6 @@ public class TaskManager {
 
     }
 
-    private boolean clientThreadStart = false;
 
     public static TaskManager getInstance() {
         if (null == taskManager) {
@@ -55,12 +55,12 @@ public class TaskManager {
     }
 
     public void start() {
-        executorService = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("LedgerInfoThread"));
-        infoPrint();
+        executorService = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("LedgerThread"));
+        syncBlockInfos();
     }
 
-    private void infoPrint() {
-        executorService.scheduleWithFixedDelay(new LedgerInfoPrintTask(), 1, 10, TimeUnit.SECONDS);
+    private void syncBlockInfos() {
+//        executorService.scheduleWithFixedDelay(new LedgerBlockSyncTask(), 1, 5, TimeUnit.SECONDS);
     }
 
 }

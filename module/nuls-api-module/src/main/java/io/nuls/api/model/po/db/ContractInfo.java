@@ -16,6 +16,8 @@ public class ContractInfo extends TxDataInfo {
 
     private String createTxHash;
 
+    private String alias;
+
     private long blockHeight;
 
     private boolean success;
@@ -25,6 +27,8 @@ public class ContractInfo extends TxDataInfo {
     private String errorMsg;
 
     private boolean isNrc20;//是否支持NRC20协议(0-否、1-是)
+
+    private boolean isDirectPayable;
 
     private int status; // -1,执行失败，0未认证 1正在审核 2通过验证 3 已删除
 
@@ -61,12 +65,22 @@ public class ContractInfo extends TxDataInfo {
     public Document toDocument() {
         Document document = DocumentTransferTool.toDocument(this, "contractAddress");
         List<Document> methodsList = new ArrayList<>();
-        for (ContractMethod method : methods) {
-            Document doc = DocumentTransferTool.toDocument(method);
-            methodsList.add(doc);
+        List<Document> paramsList;
+        if (methods != null) {
+            for (ContractMethod method : methods) {
+                List<ContractMethodArg> params = method.getParams();
+                paramsList = new ArrayList<>();
+                for (ContractMethodArg param : params) {
+                    Document paramDoc = DocumentTransferTool.toDocument(param);
+                    paramsList.add(paramDoc);
+                }
+                Document doc = DocumentTransferTool.toDocument(method);
+                doc.put("params", paramsList);
+                methodsList.add(doc);
+            }
         }
-
         document.put("methods", methodsList);
+
         //document.put("resultInfo", resultInfo.toDocument());
         document.remove("resultInfo");
         return document;
@@ -77,6 +91,14 @@ public class ContractInfo extends TxDataInfo {
         List<Document> methodsList = (List<Document>) document.get("methods");
         for (Document doc : methodsList) {
             ContractMethod method = DocumentTransferTool.toInfo(doc, ContractMethod.class);
+            List<ContractMethodArg> params = new ArrayList<>();
+            List<Document> paramsList = (List<Document>) doc.get("params");
+            for (Document paramDoc : paramsList) {
+                ContractMethodArg param = DocumentTransferTool.toInfo(paramDoc, ContractMethodArg.class);
+                params.add(param);
+            }
+            doc.remove("params");
+            method.setParams(params);
             methods.add(method);
         }
         document.remove("methods");
@@ -269,5 +291,21 @@ public class ContractInfo extends TxDataInfo {
 
     public void setResultInfo(ContractResultInfo resultInfo) {
         this.resultInfo = resultInfo;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
+
+    public boolean isDirectPayable() {
+        return isDirectPayable;
+    }
+
+    public void setDirectPayable(boolean directPayable) {
+        isDirectPayable = directPayable;
     }
 }

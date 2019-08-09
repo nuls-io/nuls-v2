@@ -40,6 +40,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import static io.nuls.api.constant.DBTableConstant.DATABASE_NAME;
+import static io.nuls.api.constant.DBTableConstant.TEST_TABLE;
+
 /**
  * @author Niels
  */
@@ -71,9 +74,9 @@ public class MongoDBService implements InitializingBean {
                     .build();
             ServerAddress serverAddress = new ServerAddress(ApiContext.databaseUrl, ApiContext.databasePort);
             MongoClient mongoClient = new MongoClient(serverAddress, options);
-            MongoDatabase mongoDatabase = mongoClient.getDatabase("nuls-api");
+            MongoDatabase mongoDatabase = mongoClient.getDatabase(DATABASE_NAME);
 
-            mongoDatabase.getCollection("test").drop();
+            mongoDatabase.getCollection(TEST_TABLE).drop();
             time2 = System.currentTimeMillis();
             LoggerUtil.commonLog.info("------connect mongodb use time:" + (time2 - time1));
             this.client = mongoClient;

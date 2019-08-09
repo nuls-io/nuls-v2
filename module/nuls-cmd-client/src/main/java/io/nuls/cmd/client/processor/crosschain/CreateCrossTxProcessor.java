@@ -2,8 +2,10 @@ package io.nuls.cmd.client.processor.crosschain;
 
 import io.nuls.base.api.provider.Result;
 import io.nuls.base.api.provider.crosschain.facade.CreateCrossTxReq;
+import io.nuls.base.basic.AddressTool;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandResult;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.core.annotation.Component;
 
 import java.math.BigInteger;
@@ -25,7 +27,6 @@ public class CreateCrossTxProcessor extends CrossChainBaseProcessor {
     public String getHelp() {
         CommandBuilder builder = new CommandBuilder();
         builder.newLine(getCommandDescription())
-                .newLine("\t<chainId>  source chainId - require")
                 .newLine("\t<formAddress>  source address - require")
                 .newLine("\t<toAddress>  target address - require")
                 .newLine("\t<assetChainId> transaction asset chainId - require")
@@ -37,32 +38,32 @@ public class CreateCrossTxProcessor extends CrossChainBaseProcessor {
 
     @Override
     public String getCommandDescription() {
-        return "createcrosstx <chainId> <formAddress> <toAddress> <assetChainId> <assetId> <amount> [remark] --create cross chain tx";
+        return "createcrosstx <formAddress> <toAddress> <assetChainId> <assetId> <amount> [remark] --create cross chain tx";
     }
 
 
     @Override
     public boolean argsValidate(String[] args) {
-        checkArgsNumber(args, 6, 7);
-        checkIsNumeric(args[1], "chainId");
-        checkAddress(Integer.parseInt(args[1]), args[2]);
-        checkIsNumeric(args[4], "assetChainId");
-        checkIsNumeric(args[5], "assetId");
-        checkIsNumeric(args[6], "amount");
+        checkArgsNumber(args, 5,6);
+        checkAddress(config.getChainId(), args[1]);
+        checkArgs(AddressTool.getChainIdByAddress(args[2])!=config.getChainId(), ErrorCode.init("cc_0001").getMsg());
+        checkIsNumeric(args[3], "assetChainId");
+        checkIsNumeric(args[4], "assetId");
+        checkIsNumeric(args[5], "amount");
         return true;
     }
 
     @Override
     public CommandResult execute(String[] args) {
-        Integer chainId = Integer.parseInt(args[1]);
-        String formAddress = args[2];
-        String toAddress = args[3];
-        Integer assetChainId = Integer.parseInt(args[4]);
-        Integer assetId = Integer.parseInt(args[5]);
-        BigInteger amount = new BigInteger(args[6]);
+        Integer chainId = config.getChainId();
+        String formAddress = args[1];
+        String toAddress = args[2];
+        Integer assetChainId = Integer.parseInt(args[3]);
+        Integer assetId = Integer.parseInt(args[4]);
+        BigInteger amount = new BigInteger(args[5]);
         String remark = null;
-        if (args.length == 8) {
-            remark = args[7];
+        if (args.length == 7) {
+            remark = args[6];
         }
         Result<String> result = crossChainProvider.createCrossTx(
                 new CreateCrossTxReq.CreateCrossTxReqBuilder(chainId)

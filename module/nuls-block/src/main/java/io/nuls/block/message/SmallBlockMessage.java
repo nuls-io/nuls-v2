@@ -44,10 +44,6 @@ public class SmallBlockMessage extends BaseBusinessMessage {
     public SmallBlockMessage() {
     }
 
-    public SmallBlockMessage(SmallBlock smallBlock) {
-        this.smallBlock = smallBlock;
-    }
-
     public SmallBlock getSmallBlock() {
         return smallBlock;
     }

@@ -23,7 +23,7 @@
  */
 package io.nuls.contract.model.bo;
 
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -42,12 +42,12 @@ public class ContractMergedTransfer {
     /**
      * 智能合约交易hash
      */
-    private NulsDigestData orginHash;
+    private NulsHash orginHash;
 
     /**
      * 合约转账(从合约转出)交易hash
      */
-    private NulsDigestData hash;
+    private NulsHash hash;
 
     public ContractMergedTransfer() {
         outputs = new ArrayList<>();
@@ -77,19 +77,19 @@ public class ContractMergedTransfer {
         this.outputs = outputs;
     }
 
-    public NulsDigestData getOrginHash() {
+    public NulsHash getOrginHash() {
         return orginHash;
     }
 
-    public void setOrginHash(NulsDigestData orginHash) {
+    public void setOrginHash(NulsHash orginHash) {
         this.orginHash = orginHash;
     }
 
-    public NulsDigestData getHash() {
+    public NulsHash getHash() {
         return hash;
     }
 
-    public void setHash(NulsDigestData hash) {
+    public void setHash(NulsHash hash) {
         this.hash = hash;
     }
 }

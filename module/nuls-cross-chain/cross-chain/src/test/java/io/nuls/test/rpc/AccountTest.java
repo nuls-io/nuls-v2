@@ -1,12 +1,12 @@
 package io.nuls.test.rpc;
 
+import io.nuls.core.log.Log;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.log.Log;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -51,6 +51,9 @@ public class AccountTest {
 //        importPriKey("7433ce8a4e0f1f4b7cc12a426651f67ed032e84f459c336cf8cfd73ebe1ae700", password);
 //        importPriKey("bbabe268d6965462f7b33d05fafb7cd2ef2a8fb6b5e48663a0050cac85a7992e", password);
 //        importPriKey("ab46c5514398791ff0de0a4291db76ae708de5a3319d838329f88c97ee55c17b", password);
+
+        //200
+        //GDMcKEW9i43HACuvkRNFLJgV4yQjXZQhASbed
     }
 
     public void importPriKey(String priKey, String pwd) {
@@ -58,7 +61,7 @@ public class AccountTest {
             //账户已存在则覆盖 If the account exists, it covers.
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
 
             params.put("priKey", priKey);
             params.put("password", pwd);

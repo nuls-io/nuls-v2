@@ -2,7 +2,7 @@ package io.nuls.crosschain.base.message;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.crosschain.base.message.base.BaseMessage;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
@@ -15,44 +15,46 @@ import java.io.IOException;
  * @date 2019/4/4
  */
 public class CtxStateMessage extends BaseMessage {
-    private NulsDigestData requestHash;
-
-    private boolean handleResult;
+    private NulsHash requestHash;
+    /**
+     * 0未确认 1主网已确认 2接收链已确认
+     */
+    private byte handleResult;
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(requestHash);
-        stream.writeBoolean(handleResult);
+        stream.write(requestHash.getBytes());
+        stream.writeByte(handleResult);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.requestHash = byteBuffer.readHash();
-        this.handleResult = byteBuffer.readBoolean();
+        this.handleResult = byteBuffer.readByte();
     }
 
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfNulsData(requestHash);
-        size += SerializeUtils.sizeOfBoolean();
+        size += NulsHash.HASH_LENGTH;
+        size += 1;
         return size;
     }
 
 
-    public NulsDigestData getRequestHash() {
+    public NulsHash getRequestHash() {
         return requestHash;
     }
 
-    public void setRequestHash(NulsDigestData requestHash) {
+    public void setRequestHash(NulsHash requestHash) {
         this.requestHash = requestHash;
     }
 
-    public boolean isHandleResult() {
+    public byte getHandleResult() {
         return handleResult;
     }
 
-    public void setHandleResult(boolean handleResult) {
+    public void setHandleResult(byte handleResult) {
         this.handleResult = handleResult;
     }
 }

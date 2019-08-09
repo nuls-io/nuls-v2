@@ -26,6 +26,8 @@ package io.nuls.core.exception;
 
 import io.nuls.core.constant.ErrorCode;
 
+import java.text.MessageFormat;
+
 /**
  * Created by Niels on 2017/10/9.
  */
@@ -50,6 +52,12 @@ public class NulsException extends Exception {
         this.message = message.getMsg();
     }
 
+    public NulsException(ErrorCode errorCode, String message) {
+        super(errorCode.getMsg());
+        this.code = errorCode.getCode();
+        this.message = errorCode.getMsg() + ";" + message;
+        this.errorCode = errorCode;
+    }
 
     /**
      * Constructs a new exception with the specified detail validator and
@@ -115,5 +123,13 @@ public class NulsException extends Exception {
 
     public ErrorCode getErrorCode() {
         return errorCode;
+    }
+
+    public String getCustomMessage() {
+        return this.message;
+    }
+
+    public String format() {
+        return MessageFormat.format("NulsException -code: [{0}], -msg: {1}", this.code, this.message);
     }
 }

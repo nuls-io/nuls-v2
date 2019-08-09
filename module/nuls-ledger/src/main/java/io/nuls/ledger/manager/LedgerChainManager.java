@@ -24,18 +24,20 @@
  */
 package io.nuls.ledger.manager;
 
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.rockdb.service.RocksDBService;
+import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.ledger.config.LedgerConfig;
-import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.LedgerChain;
 import io.nuls.ledger.service.BlockDataService;
 import io.nuls.ledger.storage.Repository;
+import io.nuls.ledger.storage.impl.LgBlockSyncRepositoryImpl;
 import io.nuls.ledger.storage.impl.RepositoryImpl;
 import io.nuls.ledger.utils.LoggerUtil;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Service;
-import io.nuls.core.core.ioc.SpringLiteContext;
 
+import java.io.File;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -46,7 +48,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author lanjinsheng
  * @date 2019/02/11
  */
-@Service
+@Component
 public class LedgerChainManager {
     @Autowired
     BlockDataService blockDataService;
@@ -65,6 +67,11 @@ public class LedgerChainManager {
             return;
         }
         LedgerChain ledgerChain = new LedgerChain(chainId);
+        //建立日志
+        LoggerUtil.createLogger(chainId);
+        //建立数据库
+        SpringLiteContext.getBean(RepositoryImpl.class).initChainDb(chainId);
+        SpringLiteContext.getBean(LgBlockSyncRepositoryImpl.class).initChainDb(chainId);
         chainMap.put(chainId, ledgerChain);
     }
 
@@ -100,11 +107,11 @@ public class LedgerChainManager {
      */
     private void initRocksDb() {
         try {
-            RocksDBService.init(ledgerConfig.getDataPath() + LedgerConstant.MODULE_DB_PATH);
+            RocksDBService.init(ledgerConfig.getDataPath() + File.separator + ModuleE.LG.name);
             Repository initDB = SpringLiteContext.getBean(RepositoryImpl.class);
             initDB.initTableName();
         } catch (Exception e) {
-            LoggerUtil.logger().error(e);
+            LoggerUtil.COMMON_LOG.error(e);
         }
     }
 
@@ -112,7 +119,13 @@ public class LedgerChainManager {
         initRocksDb();
         initLedgerDatas();
     }
-
+     public void syncBlockHeight(){
+         try {
+             blockDataService.syncBlockHeight();
+         } catch (Exception e) {
+             LoggerUtil.COMMON_LOG.error(e);
+         }
+     }
 
     public LedgerChain getChain(int key) {
         return this.chainMap.get(key);

@@ -28,10 +28,10 @@ import io.nuls.core.basic.NulsData;
 import io.nuls.core.basic.VarInt;
 import io.nuls.core.constant.ToolsConstant;
 import io.nuls.core.crypto.Sha256Hash;
-import io.nuls.core.model.ByteUtils;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.log.Log;
-import org.spongycastle.crypto.digests.RIPEMD160Digest;
+import io.nuls.core.model.ByteUtils;
+import org.bouncycastle.crypto.digests.RIPEMD160Digest;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

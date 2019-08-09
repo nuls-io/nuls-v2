@@ -24,6 +24,12 @@
  */
 package io.nuls.network.rpc.cmd;
 
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.model.StringUtils;
+import io.nuls.core.rpc.cmd.BaseCmd;
+import io.nuls.core.rpc.model.*;
+import io.nuls.core.rpc.model.message.Response;
 import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.CmdConstant;
 import io.nuls.network.constant.NetworkErrorCode;
@@ -34,13 +40,6 @@ import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.po.NodePo;
 import io.nuls.network.model.vo.NodeVo;
 import io.nuls.network.netty.container.NodesContainer;
-import io.nuls.core.rpc.cmd.BaseCmd;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.Parameter;
-import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.model.StringUtils;
 import io.nuls.network.utils.LoggerUtil;
 
 import java.util.ArrayList;
@@ -66,15 +65,19 @@ public class NodeRpc extends BaseCmd {
      * nw_addNodes
      * 增加节点
      */
+
     @CmdAnnotation(cmd = CmdConstant.CMD_NW_ADD_NODES, version = 1.0,
-            description = "addNodes")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "isCross", parameterType = "int", parameterValidRange = "[0,1]")
-    @Parameter(parameterName = "nodes", parameterType = "String")
+            description = "增加待连接节点")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "连接的链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "isCross", requestType = @TypeDescriptor(value = int.class), parameterDes = "1跨链连接,0普通连接"),
+            @Parameter(parameterName = "nodes", requestType = @TypeDescriptor(value = String.class), parameterDes = "节点组ID，逗号拼接")
+    })
+    @ResponseData(description = "无特定返回值，没有错误即成功")
     public Response addNodes(Map params) {
+        int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
+        int isCross = Integer.valueOf(String.valueOf(params.get("isCross")));
         try {
-            int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
-            int isCross = Integer.valueOf(String.valueOf(params.get("isCross")));
             String nodes = String.valueOf(params.get("nodes"));
             if (chainId < 0 || StringUtils.isBlank(nodes)) {
                 return failed(NetworkErrorCode.PARAMETER_ERROR);
@@ -95,7 +98,7 @@ public class NodeRpc extends BaseCmd {
                 }
             }
         } catch (Exception e) {
-            LoggerUtil.logger().error("", e);LoggerUtil.logger().error("", e);
+            LoggerUtil.logger(chainId).error(e);
             return failed(e.getMessage());
         }
         return success();
@@ -106,9 +109,13 @@ public class NodeRpc extends BaseCmd {
      * nw_delNodes
      * 删除节点
      */
-    @CmdAnnotation(cmd = CmdConstant.CMD_NW_DEL_NODES, version = 1.0, description = "delNodes")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "nodes", parameterType = "String")
+    @CmdAnnotation(cmd = CmdConstant.CMD_NW_DEL_NODES, version = 1.0,
+            description = "删除节点组节点")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "连接的链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "nodes", requestType = @TypeDescriptor(value = String.class), parameterDes = "节点组ID，逗号拼接")
+    })
+    @ResponseData(description = "无特定返回值，没有错误即成功")
     public Response delNodes(Map params) {
         int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
         String nodes = String.valueOf(params.get("nodes"));
@@ -143,34 +150,37 @@ public class NodeRpc extends BaseCmd {
         return success();
     }
 
-    @CmdAnnotation(cmd = CmdConstant.CMD_NW_GET_NODES, version = 1.0, description = "getNodes")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "state", parameterType = "int", parameterValidRange = "[0,2]")
-    @Parameter(parameterName = "isCross", parameterType = "int", parameterValidRange = "[0,1]")
-    @Parameter(parameterName = "startPage", parameterType = "int", parameterValidRange = "[0,65535]")
-    @Parameter(parameterName = "pageSize", parameterType = "int", parameterValidRange = "[0,65535]")
+    @CmdAnnotation(cmd = CmdConstant.CMD_NW_GET_NODES, version = 1.0,
+            description = "分页查看连接节点信息,startPage与pageSize 都为0时，不分页，返回所有节点信息")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "连接的链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "state", requestType = @TypeDescriptor(value = int.class), parameterDes = "0:所有连接,1:已连接  2:未连接"),
+            @Parameter(parameterName = "isCross", requestType = @TypeDescriptor(value = boolean.class), parameterDes = "false:非跨链连接，true:跨链连接"),
+            @Parameter(parameterName = "startPage", requestType = @TypeDescriptor(value = int.class), parameterDes = "分页起始页数"),
+            @Parameter(parameterName = "pageSize", requestType = @TypeDescriptor(value = int.class), parameterDes = "每页显示数量")
+    })
+    @ResponseData(description = "返回节点列表信息", responseType = @TypeDescriptor(value = NodeVo.class))
     public Response getNodes(Map params) {
         int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
         int state = Integer.valueOf(String.valueOf(params.get("state")));
-        int isCross = Integer.valueOf(String.valueOf(params.get("isCross")));
+        boolean isCross = Boolean.valueOf(String.valueOf(params.get("isCross")));
         int startPage = Integer.valueOf(String.valueOf(params.get("startPage")));
         int pageSize = Integer.valueOf(String.valueOf(params.get("pageSize")));
         NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
         List<Node> nodes = new ArrayList<>();
 
-        if (0 == isCross) {
-            /*
-             * 普通连接
-             * comment connection
-             */
-            addNode(nodes, state, nodeGroup.getLocalNetNodeContainer());
-
-        } else {
+        if (isCross) {
             /*
              * 跨链连接
              * cross connection
              */
             addNode(nodes, state, nodeGroup.getCrossNodeContainer());
+        } else {
+            /*
+             * 普通连接
+             * comment connection
+             */
+            addNode(nodes, state, nodeGroup.getLocalNetNodeContainer());
         }
         int total = nodes.size();
         List<NodeVo> pageList = new ArrayList<>();
@@ -221,15 +231,16 @@ public class NodeRpc extends BaseCmd {
      * nw_updateNodeInfo
      * 更新区块高度与hash
      */
-    @CmdAnnotation(cmd = CmdConstant.CMD_NW_UPDATE_NODE_INFO, version = 1.0, description = "updateNodeInfo")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "nodeId", parameterType = "String")
-    @Parameter(parameterName = "blockHeight", parameterType = "long")
-    @Parameter(parameterName = "blockHash", parameterType = "String")
+    @CmdAnnotation(cmd = CmdConstant.CMD_NW_UPDATE_NODE_INFO, version = 1.0,
+            description = "更新连接节点信息")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "连接的链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "nodeId", requestType = @TypeDescriptor(value = String.class), parameterDes = "连接节点ID"),
+            @Parameter(parameterName = "blockHeight", requestType = @TypeDescriptor(value = long.class), parameterDes = "区块高度"),
+            @Parameter(parameterName = "blockHash", requestType = @TypeDescriptor(value = String.class), parameterDes = "区块hash值")
+    })
+    @ResponseData(description = "无特定返回值，没有错误即成功")
     public Response updateNodeInfo(Map params) {
-//        if (1 == networkConfig.getUpdatePeerInfoType()){
-//            return failed("use network module protocol update node Info");
-//        }
         int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
         String nodeId = String.valueOf(params.get("nodeId"));
         long blockHeight = Long.valueOf(String.valueOf(params.get("blockHeight")));

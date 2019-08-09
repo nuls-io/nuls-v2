@@ -2,11 +2,19 @@ package io.nuls.api.constant;
 
 public interface DBTableConstant {
 
-    String CHAIN_INFO_TABLE = "chain_info_table_";
+    String DATABASE_NAME = "nuls-api";
 
-    String SYNC_INFO_TABLE = "sync_info_table_";
+    String TEST_TABLE = "test-table";
+
+    String CHAIN_INFO_TABLE = "chain_info_table";
+
+    String CHAIN_CONFIG_TABLE = "chain_config_table";
+
+    String SYNC_INFO_TABLE = "sync_info_table";
     //区块信息表
     String BLOCK_HEADER_TABLE = "block_header_table_";
+
+    String BLOCK_HEX_TABLE = "block_hex_table_";
     //账户信息表
     String ACCOUNT_TABLE = "account_table_";
     //资产信息表

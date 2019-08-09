@@ -28,16 +28,13 @@ import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.TimeManager;
-import io.nuls.network.manager.handler.MessageHandlerFactory;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
-import io.nuls.network.model.dto.ProtocolRoleHandler;
 import io.nuls.network.netty.container.NodesContainer;
 import io.nuls.network.utils.LoggerUtil;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Group event monitor
@@ -50,23 +47,13 @@ public class NwInfosPrintTask implements Runnable {
     @Override
     public void run() {
         printlnPeer();
+//        printlnMem();
     }
-
-    private void printlnProtocolMap() {
-        Collection<Map<String, ProtocolRoleHandler>> values = MessageHandlerFactory.getInstance().getProtocolRoleHandlerMap().values();
-        LoggerUtil.logger().debug("protocolRoleHandler ==================");
-        StringBuilder stringBuilder = new StringBuilder();
-        for (Map<String, ProtocolRoleHandler> map : values) {
-            Collection<ProtocolRoleHandler> list = map.values();
-            for (ProtocolRoleHandler protocolRoleHandler : list) {
-                stringBuilder.append("{role:").append(protocolRoleHandler.getRole()).append(",cmd:").append(protocolRoleHandler.getHandler()).append("}");
-
-            }
-        }
-        LoggerUtil.logger().debug("protocolRoleHandler={}", stringBuilder.toString());
-
+    private void printlnMem() {
+        LoggerUtil.COMMON_LOG.debug("Java进程可以向操作系统申请到的最大内存:" + (Runtime.getRuntime().maxMemory()) / (1024 * 1024) + "M");
+        LoggerUtil.COMMON_LOG.debug("Java进程空闲内存:" + (Runtime.getRuntime().freeMemory()) / (1024 * 1024) + "M");
+        LoggerUtil.COMMON_LOG.debug("Java进程现在从操作系统那里已经申请了内存:" + (Runtime.getRuntime().totalMemory()) / (1024 * 1024) + "M");
     }
-
     private void printlnPeer() {
         NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
         List<NodeGroup> nodeGroupList = nodeGroupManager.getNodeGroups();
@@ -95,19 +82,20 @@ public class NwInfosPrintTask implements Runnable {
         Collection<Node> d3 = crossNodesContainer.getDisconnectNodes().values();
         Collection<Node> d4 = crossNodesContainer.getUncheckNodes().values();
         Collection<Node> d5 = crossNodesContainer.getFailNodes().values();
-        LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("");
-        LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("BEGIN @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-        LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("(跨链网络)begin printlnPeer :CrossConnectNodes-网络时间time = {},offset={}", TimeManager.currentTimeMillis(), TimeManager.netTimeOffset);
+        LoggerUtil.logger(nodeGroup.getChainId()).info("");
+        LoggerUtil.logger(nodeGroup.getChainId()).info("BEGIN @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+        LoggerUtil.logger(nodeGroup.getChainId()).info("(跨链网络)begin printlnPeer :CrossConnectNodes-网络时间time = {},offset={}", TimeManager.currentTimeMillis(), TimeManager.netTimeOffset);
         StringBuilder sb1 = new StringBuilder();
         sb1.append("\n@@@@@@@@@@@跨链组网 chainId=").append(nodeGroup.getChainId()).append(",magicNumber=").append(nodeGroup.getMagicNumber()).append(",crossNetStatus(跨链)=").append(nodeGroup.getCrossStatus());
         sb1.append("\n*****(connected)已连接信息******************************\n");
         for (Node n : d1) {
-            sb1.append("(connected):").append(n.getId()).append(",info:").append(",channelId=")
+            sb1.append("(connected):").append(n.getId()).append(",channelId=")
                     .append(n.getChannel().id().asShortText()).append(",connStatus=").append(n.getConnectStatus()).append("\n");
         }
         sb1.append("\n*****(canConnect)可连接信息*******************************\n");
         for (Node n : d2) {
-            sb1.append("(canConnect):").append(n.getId()).append(",info:").append(",connStatus=").append(n.getConnectStatus()).append("\n");
+            sb1.append("(canConnect):").append(n.getId()).append(",tryCount=")
+                    .append(n.getFailCount()).append(",connStatus=").append(n.getConnectStatus()).append("\n");
         }
         sb1.append("\n*****(disConnect)断开连接信息*****************************\n");
         for (Node n : d3) {
@@ -124,10 +112,9 @@ public class NwInfosPrintTask implements Runnable {
             sb1.append("(failed):").append(n.getId()).append(",failCount=")
                     .append(n.getFailCount()).append(",connStatus=").append(n.getConnectStatus()).append("\n");
         }
-        LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info(sb1.toString());
-        LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("END @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-        LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("");
-
+        LoggerUtil.logger(nodeGroup.getChainId()).info(sb1.toString());
+        LoggerUtil.logger(nodeGroup.getChainId()).info("END @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+        LoggerUtil.logger(nodeGroup.getChainId()).info("");
     }
 
     private void printLocalNet(NodeGroup nodeGroup) {
@@ -137,19 +124,20 @@ public class NwInfosPrintTask implements Runnable {
         Collection<Node> c3 = localNodesContainer.getDisconnectNodes().values();
         Collection<Node> c4 = localNodesContainer.getUncheckNodes().values();
         Collection<Node> c5 = localNodesContainer.getFailNodes().values();
-        LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("");
-        LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("BEGIN @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-        LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("(普通网络)begin printlnPeer :SelfConnectNodes-网络时间time = {},offset={}", TimeManager.currentTimeMillis(), TimeManager.netTimeOffset);
+        LoggerUtil.logger(nodeGroup.getChainId()).info("");
+        LoggerUtil.logger(nodeGroup.getChainId()).info("BEGIN @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+        LoggerUtil.logger(nodeGroup.getChainId()).info("(普通网络)begin printlnPeer :SelfConnectNodes-网络时间time = {},offset={}", TimeManager.currentTimeMillis(), TimeManager.netTimeOffset);
         StringBuilder sb1 = new StringBuilder();
         sb1.append("\n@@@@@@@@@@@ 普通组网 chainId=").append(nodeGroup.getChainId()).append(",magicNumber=").append(nodeGroup.getMagicNumber()).append(",localNetStatus(本地网络)=").append(nodeGroup.getLocalStatus());
         sb1.append("\n*****(connected)已连接信息******************************\n");
         for (Node n : c1) {
-            sb1.append("(connected):").append(n.getId()).append(",info:blockHash=").append(n.getBlockHash()).append(",blockHeight=").append(n.getBlockHeight()).append(",channelId=")
+            sb1.append("(connected):").append(n.getId()).append(",blockHash=").append(n.getBlockHash()).append(",blockHeight=").append(n.getBlockHeight()).append(",channelId=")
                     .append(n.getChannel().id().asShortText()).append(",connStatus=").append(n.getConnectStatus()).append("\n");
         }
         sb1.append("\n*****(canConnect)可连接信息******************************\n");
         for (Node n : c2) {
-            sb1.append("(canConnect):").append(n.getId()).append(",info:crossPort=").append(n.getRemoteCrossPort()).append(",connStatus=").append(n.getConnectStatus()).append("\n");
+            sb1.append("(canConnect):").append(n.getId()).append(",tryCount=")
+                    .append(n.getFailCount()).append(",crossPort=").append(n.getRemoteCrossPort()).append(",connStatus=").append(n.getConnectStatus()).append("\n");
         }
         sb1.append("\n*****(disConnect)断开连接信息******************************\n");
         for (Node n : c3) {
@@ -166,8 +154,8 @@ public class NwInfosPrintTask implements Runnable {
             sb1.append("(failed):").append(n.getId()).append(",failCount=")
                     .append(n.getFailCount()).append(",connStatus=").append(n.getConnectStatus()).append("\n");
         }
-        LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info(sb1.toString());
-        LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("END @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-        LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("");
+        LoggerUtil.logger(nodeGroup.getChainId()).info(sb1.toString());
+        LoggerUtil.logger(nodeGroup.getChainId()).info("END @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+        LoggerUtil.logger(nodeGroup.getChainId()).info("");
     }
 }

@@ -102,8 +102,6 @@ public interface ApiConstant {
     int CONTRACT_NOT_EXIST = 100002;
     //资产转出类型
     int TRANSFER_FROM_TYPE = -1;
-    //资产无变化类型
-    int TRANSFER_NO_TYPE = 0;
     //资产转入类型
     int TRANSFER_TO_TYPE = 1;
 
@@ -111,6 +109,10 @@ public interface ApiConstant {
     int TX_UNCONFIRM = 0;
     //已确认交易
     int TX_CONFIRM = 1;
+
+    int ENABLE = 1;
+
+    int DISABLE = 0;
 
     //设置别名金额
     BigInteger ALIAS_AMOUNT = BigInteger.valueOf(100000000L);

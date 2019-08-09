@@ -32,6 +32,7 @@ import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 import io.nuls.core.parse.SerializeUtils;
+
 import java.io.IOException;
 import java.math.BigInteger;
 
@@ -71,15 +72,11 @@ public class NulsSignData extends BaseNulsData {
         this.signBytes = signBytes;
     }
 
-    public NulsSignData sign(NulsDigestData nulsDigestData, BigInteger privkey) {
+    public NulsSignData sign(NulsHash nulsHash, BigInteger privkey) throws NulsException {
         ECKey ecKey = ECKey.fromPrivate(privkey);
-        byte[] signBytes = ecKey.sign(nulsDigestData.getDigestBytes(), privkey);
+        byte[] signBytes = ecKey.sign(nulsHash.getBytes());
         NulsSignData signData = new NulsSignData();
-        try {
-            signData.parse(signBytes, 0);
-        } catch (NulsException e) {
-            Log.error(e);
-        }
+        signData.parse(signBytes, 0);
         return signData;
     }
 

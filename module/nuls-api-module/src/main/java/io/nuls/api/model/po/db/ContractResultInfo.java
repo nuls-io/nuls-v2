@@ -40,17 +40,11 @@ public class ContractResultInfo {
 
     private List<TokenTransfer> tokenTransfers;
 
-    private String tokenName;
-
-    private String symbol;
-
-    private Long decimals;
-
     private String remark;
 
-    private Long confirmCount;
+    private List<String> contractTxList;
 
-    private Long createTime;
+    private List<String> events;
 
     public Document toDocument() {
         Document document = DocumentTransferTool.toDocument(this, "txHash");
@@ -215,30 +209,6 @@ public class ContractResultInfo {
         this.tokenTransfers = tokenTransfers;
     }
 
-    public String getTokenName() {
-        return tokenName;
-    }
-
-    public void setTokenName(String tokenName) {
-        this.tokenName = tokenName;
-    }
-
-    public String getSymbol() {
-        return symbol;
-    }
-
-    public void setSymbol(String symbol) {
-        this.symbol = symbol;
-    }
-
-    public Long getDecimals() {
-        return decimals;
-    }
-
-    public void setDecimals(Long decimals) {
-        this.decimals = decimals;
-    }
-
     public String getRemark() {
         return remark;
     }
@@ -247,19 +217,19 @@ public class ContractResultInfo {
         this.remark = remark;
     }
 
-    public Long getConfirmCount() {
-        return confirmCount;
+    public List<String> getContractTxList() {
+        return contractTxList;
     }
 
-    public void setConfirmCount(Long confirmCount) {
-        this.confirmCount = confirmCount;
+    public void setContractTxList(List<String> contractTxList) {
+        this.contractTxList = contractTxList;
     }
 
-    public Long getCreateTime() {
-        return createTime;
+    public List<String> getEvents() {
+        return events;
     }
 
-    public void setCreateTime(Long createTime) {
-        this.createTime = createTime;
+    public void setEvents(List<String> events) {
+        this.events = events;
     }
 }

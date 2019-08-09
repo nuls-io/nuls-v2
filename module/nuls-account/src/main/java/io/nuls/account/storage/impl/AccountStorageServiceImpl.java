@@ -27,14 +27,14 @@ package io.nuls.account.storage.impl;
 
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.AccountStorageConstant;
-import io.nuls.account.model.po.AccountPo;
+import io.nuls.account.model.po.AccountPO;
 import io.nuls.account.storage.AccountStorageService;
 import io.nuls.account.util.LoggerUtil;
 import io.nuls.base.data.Address;
-import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.basic.InitializingBean;
-import io.nuls.core.core.annotation.Service;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.rockdb.service.RocksDBService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,7 +44,7 @@ import java.util.Map;
 /**
  * @author: qinyifeng
  */
-@Service
+@Component
 public class AccountStorageServiceImpl implements AccountStorageService, InitializingBean {
 
     @Override
@@ -52,29 +52,29 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
     }
 
     @Override
-    public boolean saveAccountList(List<AccountPo> accountPoList) {
-        if (null == accountPoList || accountPoList.size() == 0) {
+    public boolean saveAccountList(List<AccountPO> accountPOList) {
+        if (null == accountPOList || accountPOList.size() == 0) {
             throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
         }
         Map<byte[], byte[]> accountPoMap = new HashMap<>();
         try {
-            for (AccountPo po : accountPoList) {
+            for (AccountPO po : accountPOList) {
                 //序列化对象为byte数组存储
                 accountPoMap.put(po.getAddressObj().getAddressBytes(), po.serialize());
             }
             return RocksDBService.batchPut(AccountStorageConstant.DB_NAME_ACCOUNT, accountPoMap);
         } catch (Exception e) {
-            LoggerUtil.logger.error(e.getMessage());
+            LoggerUtil.LOG.error(e.getMessage());
             throw new NulsRuntimeException(AccountErrorCode.DB_SAVE_BATCH_ERROR);
         }
     }
 
     @Override
-    public boolean saveAccount(AccountPo account) {
+    public boolean saveAccount(AccountPO account) {
         try {
             return RocksDBService.put(AccountStorageConstant.DB_NAME_ACCOUNT, account.getAddressObj().getAddressBytes(), account.serialize());
         } catch (Exception e) {
-            LoggerUtil.logger.error(e.getMessage());
+            LoggerUtil.LOG.error(e.getMessage());
             throw new NulsRuntimeException(AccountErrorCode.DB_SAVE_BATCH_ERROR);
         }
     }
@@ -87,50 +87,50 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
         try {
             return RocksDBService.delete(AccountStorageConstant.DB_NAME_ACCOUNT, address.getAddressBytes());
         } catch (Exception e) {
-            LoggerUtil.logger.error(e.getMessage());
+            LoggerUtil.LOG.error(e.getMessage());
             throw new NulsRuntimeException(AccountErrorCode.DB_SAVE_ERROR);
         }
     }
 
     @Override
-    public List<AccountPo> getAccountList() {
-        List<AccountPo> accountPoList = new ArrayList<>();
+    public List<AccountPO> getAccountList() {
+        List<AccountPO> accountPOList = new ArrayList<>();
         try {
             List<byte[]> list = RocksDBService.valueList(AccountStorageConstant.DB_NAME_ACCOUNT);
             if (list != null) {
                 for (byte[] value : list) {
-                    AccountPo accountPo = new AccountPo();
+                    AccountPO accountPo = new AccountPO();
                     //将byte数组反序列化为AccountPo返回
                     accountPo.parse(value, 0);
-                    accountPoList.add(accountPo);
+                    accountPOList.add(accountPo);
                 }
             }
         } catch (Exception e) {
-            LoggerUtil.logger.error(e.getMessage());
+            LoggerUtil.LOG.error(e.getMessage());
             throw new NulsRuntimeException(AccountErrorCode.DB_QUERY_ERROR);
         }
-        return accountPoList;
+        return accountPOList;
     }
 
     @Override
-    public AccountPo getAccount(byte[] address) {
+    public AccountPO getAccount(byte[] address) {
         byte[] accountBytes = RocksDBService.get(AccountStorageConstant.DB_NAME_ACCOUNT, address);
         if (null == accountBytes) {
             return null;
         }
-        AccountPo accountPo = new AccountPo();
+        AccountPO accountPo = new AccountPO();
         try {
             //将byte数组反序列化为AccountPo返回
             accountPo.parse(accountBytes, 0);
         } catch (Exception e) {
-            LoggerUtil.logger.error(e.getMessage());
+            LoggerUtil.LOG.error(e.getMessage());
             throw new NulsRuntimeException(AccountErrorCode.DB_QUERY_ERROR);
         }
         return accountPo;
     }
 
     @Override
-    public boolean updateAccount(AccountPo po) {
+    public boolean updateAccount(AccountPO po) {
         if (null == po) {
             throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
         }
@@ -138,7 +138,7 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
             po.setAddressObj(new Address(po.getAddress()));
         }
         //校验该账户是否存在
-        AccountPo account = getAccount(po.getAddressObj().getAddressBytes());
+        AccountPO account = getAccount(po.getAddressObj().getAddressBytes());
         if (null == account) {
             throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
@@ -146,7 +146,7 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
             //更新账户数据
             return RocksDBService.put(AccountStorageConstant.DB_NAME_ACCOUNT, po.getAddressObj().getAddressBytes(), po.serialize());
         } catch (Exception e) {
-            LoggerUtil.logger.error(e.getMessage());
+            LoggerUtil.LOG.error(e.getMessage());
             throw new NulsRuntimeException(AccountErrorCode.DB_UPDATE_ERROR);
         }
     }

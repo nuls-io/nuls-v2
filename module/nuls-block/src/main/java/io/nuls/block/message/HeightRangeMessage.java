@@ -27,10 +27,10 @@ import io.nuls.core.parse.SerializeUtils;
 
 import java.io.IOException;
 
-import static io.nuls.block.utils.LoggerUtil.commonLog;
+import static io.nuls.block.utils.LoggerUtil.COMMON_LOG;
 
 /**
- * 异步请求处理完成响应消息
+ * 批量下载某个高度区间内的区块
  *
  * @author captain
  * @version 1.0
@@ -85,8 +85,7 @@ public class HeightRangeMessage extends BaseBusinessMessage {
             this.startHeight = byteBuffer.readInt64();
             this.endHeight = byteBuffer.readInt64();
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            COMMON_LOG.error("", e);
         }
     }
 

@@ -22,18 +22,18 @@ package io.nuls.block.utils;
 
 import io.nuls.base.data.*;
 import io.nuls.base.data.po.BlockHeaderPo;
-import io.nuls.block.cache.BlockCacher;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.ChainTypeEnum;
 import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.HashMessage;
+import io.nuls.block.message.HeightMessage;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
-import io.nuls.block.rpc.call.ConsensusUtil;
-import io.nuls.block.rpc.call.NetworkUtil;
-import io.nuls.block.rpc.call.TransactionUtil;
+import io.nuls.block.rpc.call.ConsensusCall;
+import io.nuls.block.rpc.call.NetworkCall;
+import io.nuls.block.rpc.call.TransactionCall;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.storage.ChainStorageService;
 import io.nuls.core.basic.Result;
@@ -42,6 +42,7 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.core.model.ByteUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +51,7 @@ import java.util.SortedSet;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import static io.nuls.block.constant.CommandConstant.GET_BLOCK_BY_HEIGHT_MESSAGE;
 import static io.nuls.block.constant.CommandConstant.GET_BLOCK_MESSAGE;
 
 /**
@@ -68,36 +70,36 @@ public class BlockUtil {
     private static ChainStorageService chainStorageService;
 
     public static boolean basicVerify(int chainId, Block block) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         if (block == null) {
-            commonLog.debug("basicVerify fail, block is null! chainId-" + chainId);
+            logger.debug("basicVerify fail, block is null!");
             return false;
         }
 
         BlockHeader header = block.getHeader();
         if (header == null) {
-            commonLog.debug("basicVerify fail, blockHeader is null! chainId-" + chainId);
+            logger.debug("basicVerify fail, blockHeader is null!");
             return false;
         }
 
         if (!headerVerify(chainId, header)) {
-            commonLog.debug("basicVerify fail, blockHeader error! chainId-" + chainId + ", height-" + header.getHeight() + ", hash-" + header.getHash());
+            logger.debug("basicVerify fail, blockHeader error! height-" + header.getHeight() + ", hash-" + header.getHash());
             return false;
         }
 
         if (block.getTxs() == null || block.getTxs().isEmpty()) {
-            commonLog.debug("basicVerify fail, transaction is null! chainId-" + chainId + ", height-" + header.getHeight() + ", hash-" + header.getHash());
+            logger.debug("basicVerify fail, transaction is null! height-" + header.getHeight() + ", hash-" + header.getHash());
             return false;
         }
 
         if (block.getTxs().size() != header.getTxCount()) {
-            commonLog.debug("basicVerify fail, transaction count not equals! chainId-" + chainId + ", height-" + header.getHeight() + ", hash-" + header.getHash());
+            logger.debug("basicVerify fail, transaction count not equals! height-" + header.getHeight() + ", hash-" + header.getHash());
             return false;
         }
 
         ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
         if (block.size() > parameters.getBlockMaxSize()) {
-            commonLog.debug("basicVerify fail, beyond blockMaxSize! chainId-" + chainId + ", height-" + header.getHeight() + ", hash-" + header.getHash());
+            logger.debug("basicVerify fail, beyond blockMaxSize! height-" + header.getHeight() + ", hash-" + header.getHash());
             return false;
         }
 
@@ -105,24 +107,24 @@ public class BlockUtil {
     }
 
     public static boolean headerVerify(int chainId, BlockHeader header) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         if (header.getHash() == null) {
-            commonLog.debug("headerVerify fail, block hash can not be null! chainId-" + chainId + ", height-" + header.getHeight() + ", hash-" + header.getHash());
+            logger.debug("headerVerify fail, block hash can not be null! height-" + header.getHeight() + ", hash-" + header.getHash());
             return false;
         }
 
         if (header.getHeight() < 0) {
-            commonLog.debug("headerVerify fail, block height can not be less than 0! chainId-" + chainId + ", height-" + header.getHeight() + ", hash-" + header.getHash());
+            logger.debug("headerVerify fail, block height can not be less than 0! height-" + header.getHeight() + ", hash-" + header.getHash());
             return false;
         }
 
         if (null == header.getPackingAddress(chainId)) {
-            commonLog.debug("headerVerify fail, block packingAddress can not be null! chainId-" + chainId + ", height-" + header.getHeight() + ", hash-" + header.getHash());
+            logger.debug("headerVerify fail, block packingAddress can not be null! height-" + header.getHeight() + ", hash-" + header.getHash());
             return false;
         }
         ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
         if (header.getExtend() != null && header.getExtend().length > parameters.getExtendMaxSize()) {
-            commonLog.debug("headerVerify fail, block extend too long! chainId-" + chainId + ", height-" + header.getHeight() + ", hash-" + header.getHash());
+            logger.debug("headerVerify fail, block extend too long! height-" + header.getHeight() + ", hash-" + header.getHash());
             return false;
         }
 
@@ -169,25 +171,25 @@ public class BlockUtil {
     private static Result mainChainProcess(int chainId, Block block) {
         BlockHeader header = block.getHeader();
         long blockHeight = header.getHeight();
-        NulsDigestData blockHash = header.getHash();
-        NulsDigestData blockPreviousHash = header.getPreHash();
+        NulsHash blockHash = header.getHash();
+        NulsHash blockPreviousHash = header.getPreHash();
 
         Chain masterChain = BlockChainManager.getMasterChain(chainId);
         long masterChainEndHeight = masterChain.getEndHeight();
-        NulsDigestData masterChainEndHash = masterChain.getEndHash();
+        NulsHash masterChainEndHash = masterChain.getEndHash();
 
         //1.收到的区块与主链最新高度差大于1000(可配置),丢弃
         ChainContext context = ContextManager.getContext(chainId);
         ChainParameters parameters = context.getParameters();
-        NulsLogger commonLog = context.getCommonLog();
+        NulsLogger logger = context.getLogger();
         if (Math.abs(blockHeight - masterChainEndHeight) > parameters.getHeightRange()) {
-            commonLog.debug("chainId:" + chainId + ", received out of range block, height:" + blockHeight + ", hash:" + blockHash);
+            logger.debug("received out of range block, height:" + blockHeight + ", hash:" + blockHash);
             return Result.getFailed(BlockErrorCode.OUT_OF_RANGE);
         }
 
         //2.收到的区块可以连到主链,验证通过
         if (blockHeight == masterChainEndHeight + 1 && blockPreviousHash.equals(masterChainEndHash)) {
-            commonLog.debug("chainId:" + chainId + ", received continuous block of masterChain, height:" + blockHeight + ", hash:" + blockHash);
+            logger.debug("received continuous block of masterChain, height:" + blockHeight + ", hash:" + blockHash);
             return Result.getSuccess(BlockErrorCode.SUCCESS);
         }
 
@@ -195,7 +197,7 @@ public class BlockUtil {
             //3.收到的区块是主链上的重复区块,丢弃
             BlockHeaderPo blockHeader = blockService.getBlockHeaderPo(chainId, blockHeight);
             if (blockHash.equals(blockHeader.getHash())) {
-                commonLog.debug("chainId:" + chainId + ", received duplicate block of masterChain, height:" + blockHeight + ", hash:" + blockHash);
+                logger.debug("received duplicate block of masterChain, height:" + blockHeight + ", hash:" + blockHash);
                 return Result.getFailed(BlockErrorCode.DUPLICATE_MAIN_BLOCK);
             }
             //4.收到的区块是主链上的分叉区块,保存区块,并新增一条分叉链链接到主链
@@ -203,8 +205,8 @@ public class BlockUtil {
                 chainStorageService.save(chainId, block);
                 Chain forkChain = ChainGenerator.generate(chainId, block, masterChain, ChainTypeEnum.FORK);
                 BlockChainManager.addForkChain(chainId, forkChain);
-                commonLog.info("chainId:" + chainId + ", received fork block of masterChain, height:" + blockHeight + ", hash:" + blockHash);
-                ConsensusUtil.evidence(chainId, blockService, header);
+                logger.info("received fork block of masterChain, height:" + blockHeight + ", hash:" + blockHash);
+                ConsensusCall.evidence(chainId, blockService, header);
                 return Result.getFailed(BlockErrorCode.FORK_BLOCK);
             }
         }
@@ -222,28 +224,27 @@ public class BlockUtil {
     private static Result forkChainProcess(int chainId, Block block) {
         BlockHeader header = block.getHeader();
         long blockHeight = header.getHeight();
-        NulsDigestData blockHash = header.getHash();
-        NulsDigestData blockPreviousHash = header.getPreHash();
+        NulsHash blockHash = header.getHash();
+        NulsHash blockPreviousHash = header.getPreHash();
         SortedSet<Chain> forkChains = BlockChainManager.getForkChains(chainId);
         ChainContext context = ContextManager.getContext(chainId);
-        NulsLogger commonLog = context.getCommonLog();
+        NulsLogger logger = context.getLogger();
         try {
             for (Chain forkChain : forkChains) {
                 long forkChainStartHeight = forkChain.getStartHeight();
                 long forkChainEndHeight = forkChain.getEndHeight();
-                NulsDigestData forkChainEndHash = forkChain.getEndHash();
-                NulsDigestData forkChainPreviousHash = forkChain.getPreviousHash();
+                NulsHash forkChainEndHash = forkChain.getEndHash();
                 //1.直连,链尾
                 if (blockHeight == forkChainEndHeight + 1 && blockPreviousHash.equals(forkChainEndHash)) {
                     chainStorageService.save(chainId, block);
                     forkChain.addLast(block);
-                    commonLog.debug("chainId:" + chainId + ", received continuous block of forkChain, height:" + blockHeight + ", hash:" + blockHash);
-                    ConsensusUtil.evidence(chainId, blockService, header);
+                    logger.debug("received continuous block of forkChain, height:" + blockHeight + ", hash:" + blockHash);
+                    ConsensusCall.evidence(chainId, blockService, header);
                     return Result.getFailed(BlockErrorCode.FORK_BLOCK);
                 }
                 //2.重复,丢弃
                 if (forkChainStartHeight <= blockHeight && blockHeight <= forkChainEndHeight && forkChain.getHashList().contains(blockHash)) {
-                    commonLog.debug("chainId:" + chainId + ", received duplicate block of forkChain, height:" + blockHeight + ", hash:" + blockHash);
+                    logger.debug("received duplicate block of forkChain, height:" + blockHeight + ", hash:" + blockHash);
                     return Result.getFailed(BlockErrorCode.FORK_BLOCK);
                 }
                 //3.分叉
@@ -251,14 +252,13 @@ public class BlockUtil {
                     chainStorageService.save(chainId, block);
                     Chain newForkChain = ChainGenerator.generate(chainId, block, forkChain, ChainTypeEnum.FORK);
                     BlockChainManager.addForkChain(chainId, newForkChain);
-                    commonLog.debug("chainId:" + chainId + ", received fork block of forkChain, height:" + blockHeight + ", hash:" + blockHash);
-                    ConsensusUtil.evidence(chainId, blockService, header);
+                    logger.debug("received fork block of forkChain, height:" + blockHeight + ", hash:" + blockHash);
+                    ConsensusCall.evidence(chainId, blockService, header);
                     return Result.getFailed(BlockErrorCode.FORK_BLOCK);
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            logger.error("", e);
         }
         //4.与分叉链没有关联,进入孤儿链判断流程
         return Result.getFailed(BlockErrorCode.IRRELEVANT_BLOCK);
@@ -273,32 +273,32 @@ public class BlockUtil {
      */
     private static void orphanChainProcess(int chainId, Block block) {
         long blockHeight = block.getHeader().getHeight();
-        NulsDigestData blockHash = block.getHeader().getHash();
-        NulsDigestData blockPreviousHash = block.getHeader().getPreHash();
+        NulsHash blockHash = block.getHeader().getHash();
+        NulsHash blockPreviousHash = block.getHeader().getPreHash();
         SortedSet<Chain> orphanChains = BlockChainManager.getOrphanChains(chainId);
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         try {
             for (Chain orphanChain : orphanChains) {
                 long orphanChainStartHeight = orphanChain.getStartHeight();
                 long orphanChainEndHeight = orphanChain.getEndHeight();
-                NulsDigestData orphanChainEndHash = orphanChain.getEndHash();
-                NulsDigestData orphanChainPreviousHash = orphanChain.getPreviousHash();
+                NulsHash orphanChainEndHash = orphanChain.getEndHash();
+                NulsHash orphanChainPreviousHash = orphanChain.getPreviousHash();
                 //1.直连,分链头、链尾两种情况
                 if (blockHeight == orphanChainEndHeight + 1 && blockPreviousHash.equals(orphanChainEndHash)) {
                     chainStorageService.save(chainId, block);
                     orphanChain.addLast(block);
-                    commonLog.debug("chainId:" + chainId + ", received continuous tail block of orphanChain, height:" + blockHeight + ", hash:" + blockHash);
+                    logger.debug("received continuous tail block of orphanChain, height:" + blockHeight + ", hash:" + blockHash);
                     return;
                 }
                 if (blockHeight == orphanChainStartHeight - 1 && blockHash.equals(orphanChainPreviousHash)) {
                     chainStorageService.save(chainId, block);
                     orphanChain.addFirst(block);
-                    commonLog.info("chainId:" + chainId + ", received continuous head block of orphanChain, height:" + blockHeight + ", hash:" + blockHash);
+                    logger.info("received continuous head block of orphanChain, height:" + blockHeight + ", hash:" + blockHash);
                     return;
                 }
                 //2.重复,丢弃
                 if (orphanChainStartHeight <= blockHeight && blockHeight <= orphanChainEndHeight && orphanChain.getHashList().contains(blockHash)) {
-                    commonLog.debug("chainId:" + chainId + ", received duplicate block of orphanChain, height:" + blockHeight + ", hash:" + blockHash);
+                    logger.debug("received duplicate block of orphanChain, height:" + blockHeight + ", hash:" + blockHash);
                     return;
                 }
                 //3.分叉
@@ -306,7 +306,7 @@ public class BlockUtil {
                     chainStorageService.save(chainId, block);
                     Chain forkOrphanChain = ChainGenerator.generate(chainId, block, orphanChain, ChainTypeEnum.ORPHAN);
                     BlockChainManager.addOrphanChain(chainId, forkOrphanChain);
-                    commonLog.info("chainId:" + chainId + ", received fork block of orphanChain, height:" + blockHeight + ", hash:" + blockHash);
+                    logger.info("received fork block of orphanChain, height:" + blockHeight + ", hash:" + blockHash);
                     return;
                 }
             }
@@ -314,22 +314,21 @@ public class BlockUtil {
             chainStorageService.save(chainId, block);
             Chain newOrphanChain = ChainGenerator.generate(chainId, block, null, ChainTypeEnum.ORPHAN);
             BlockChainManager.addOrphanChain(chainId, newOrphanChain);
-            commonLog.info("chainId:" + chainId + ", received orphan block, height:" + blockHeight + ", hash:" + blockHash);
+            logger.info("received orphan block, height:" + blockHeight + ", hash:" + blockHash);
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            logger.error("", e);
         }
     }
 
     public static SmallBlock getSmallBlock(int chainId, Block block) {
         ChainContext context = ContextManager.getContext(chainId);
         List<Integer> transactionType = context.getSystemTransactionType();
-        if (transactionType.size() == 0) {
-            transactionType.addAll(TransactionUtil.getSystemTypes(chainId));
+        if (transactionType.isEmpty()) {
+            transactionType.addAll(TransactionCall.getSystemTypes(chainId));
         }
         SmallBlock smallBlock = new SmallBlock();
         smallBlock.setHeader(block.getHeader());
-        smallBlock.setTxHashList((ArrayList<NulsDigestData>) block.getTxHashList());
+        smallBlock.setTxHashList((ArrayList<NulsHash>) block.getTxHashList());
         block.getTxs().stream().filter(e -> transactionType.contains(e.getType())).forEach(smallBlock::addSystemTx);
         return smallBlock;
     }
@@ -342,11 +341,11 @@ public class BlockUtil {
      * @param txHashList
      * @return
      */
-    public static Block assemblyBlock(BlockHeader header, Map<NulsDigestData, Transaction> txMap, List<NulsDigestData> txHashList) {
+    public static Block assemblyBlock(BlockHeader header, Map<NulsHash, Transaction> txMap, List<NulsHash> txHashList) {
         Block block = new Block();
         block.setHeader(header);
         List<Transaction> txs = new ArrayList<>();
-        for (NulsDigestData txHash : txHashList) {
+        for (NulsHash txHash : txHashList) {
             Transaction tx = txMap.get(txHash);
             if (null == tx) {
                 throw new NulsRuntimeException(BlockErrorCode.DATA_ERROR);
@@ -390,39 +389,75 @@ public class BlockUtil {
     }
 
     /**
+     * 根据区块高度从节点下载区块
+     *
+     * @param chainId 链Id/chain id
+     * @param nodeId
+     * @param height
+     * @return
+     */
+    public static Block downloadBlockByHeight(int chainId, String nodeId, long height) {
+        if (height < 0 || nodeId == null) {
+            return null;
+        }
+        HeightMessage message = new HeightMessage(height);
+        ChainContext context = ContextManager.getContext(chainId);
+        int singleDownloadTimeout = context.getParameters().getSingleDownloadTimeout();
+        NulsLogger logger = context.getLogger();
+        NulsHash hash = NulsHash.calcHash(ByteUtils.longToBytes(height));
+        Future<Block> future = SingleBlockCacher.addRequest(chainId, hash);
+        logger.debug("get block from " + nodeId + " begin, height-" + height);
+        boolean result = NetworkCall.sendToNode(chainId, message, nodeId, GET_BLOCK_BY_HEIGHT_MESSAGE);
+        if (!result) {
+            SingleBlockCacher.removeRequest(chainId, hash);
+            return null;
+        }
+        try {
+            Block block = future.get(singleDownloadTimeout, TimeUnit.MILLISECONDS);
+            logger.debug("get block from " + nodeId + " success!, height-" + height);
+            return block;
+        } catch (Exception e) {
+            logger.error("get block from " + nodeId + " fail!, height-" + height, e);
+            return null;
+        } finally {
+            SingleBlockCacher.removeRequest(chainId, hash);
+        }
+    }
+
+    /**
      * 根据区块hash从节点下载区块
      *
      * @param chainId 链Id/chain id
      * @param hash
      * @param nodeId
+     * @param height
      * @return
      */
-    public static Block downloadBlockByHash(int chainId, NulsDigestData hash, String nodeId) {
+    public static Block downloadBlockByHash(int chainId, NulsHash hash, String nodeId, long height) {
         if (hash == null || nodeId == null) {
             return null;
         }
         HashMessage message = new HashMessage();
         message.setRequestHash(hash);
         ChainContext context = ContextManager.getContext(chainId);
-        int singleDownloadTimeout = context.getParameters().getsingleDownloadTimeout();
-        NulsLogger commonLog = context.getCommonLog();
-        Future<Block> future = BlockCacher.addSingleBlockRequest(chainId, hash);
-        commonLog.debug("get block-" + hash + " from " + nodeId + "begin");
-        boolean result = NetworkUtil.sendToNode(chainId, message, nodeId, GET_BLOCK_MESSAGE);
+        int singleDownloadTimeout = context.getParameters().getSingleDownloadTimeout();
+        NulsLogger logger = context.getLogger();
+        Future<Block> future = SingleBlockCacher.addRequest(chainId, hash);
+        logger.debug("get block-" + hash + " from " + nodeId + " begin, height-" + height);
+        boolean result = NetworkCall.sendToNode(chainId, message, nodeId, GET_BLOCK_MESSAGE);
         if (!result) {
-            BlockCacher.removeBlockByHashFuture(chainId, hash);
+            SingleBlockCacher.removeRequest(chainId, hash);
             return null;
         }
         try {
             Block block = future.get(singleDownloadTimeout, TimeUnit.MILLISECONDS);
-            commonLog.debug("get block-" + hash + " from " + nodeId + " success!");
+            logger.debug("get block-" + hash + " from " + nodeId + " success!, height-" + height);
             return block;
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error("get block-" + hash + " from " + nodeId + " fail!", e);
+            logger.error("get block-" + hash + " from " + nodeId + " fail!, height-" + height, e);
             return null;
         } finally {
-            BlockCacher.removeBlockByHashFuture(chainId, hash);
+            SingleBlockCacher.removeRequest(chainId, hash);
         }
     }
 

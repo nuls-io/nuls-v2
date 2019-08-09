@@ -4,8 +4,12 @@
   "chainId": 2,
   "assetsId": 1,
   "testNodeType": "slave",
-  "testNodeExclude": "192.168.1.145,192.168.1.32",
-  "testNodeCount": 2,
+  "testNodeExclude": "192.168.1.131,192.168.1.132,192.168.1.133,192.168.1.134,192.168.1.135",
+  "testNodeCount": 3,
   "testNodeList": "",
-  "testSeedAccountPriKey": "477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75"
+  "testSeedAccountPriKey": "8212e7ba23c8b52790c45b0514490356cd819db15d364cbe08659b5888339e78",
+  "testBatchTxTotal": 6000
 }
+
+
+

@@ -3,9 +3,7 @@ package io.nuls.base.api.provider.crosschain;
 import io.nuls.base.api.provider.BaseRpcService;
 import io.nuls.base.api.provider.Provider;
 import io.nuls.base.api.provider.Result;
-import io.nuls.base.api.provider.crosschain.facade.CrossChainRegisterInfo;
-import io.nuls.base.api.provider.crosschain.facade.GetCrossChainInfoReq;
-import io.nuls.base.api.provider.crosschain.facade.RegisterChainReq;
+import io.nuls.base.api.provider.crosschain.facade.*;
 import io.nuls.core.parse.MapUtils;
 import io.nuls.core.rpc.model.ModuleE;
 
@@ -35,10 +33,33 @@ public class ChainManageProviderForRpc extends BaseRpcService implements ChainMa
             return success(crossChainRegisterInfo);
         });
     }
+    @Override
+    public  Result<CrossAssetRegisterInfo> getCrossAssetInfo(GetCrossAssetInfoReq req){
+        return _call("cm_asset",req,res->{
+            if(res == null){
+                return fail(RPC_ERROR_CODE,"asset not found");
+            }
+            CrossAssetRegisterInfo crossAssetRegisterInfo = MapUtils.mapToBean(res,new CrossAssetRegisterInfo());
+            return success(crossAssetRegisterInfo);
+        });
+    }
 
     @Override
-    public Result<String> registerChain(RegisterChainReq req) {
-        return callReturnString("cm_chainReg",req,"txHash");
+    public Result<Map> registerChain(RegisterChainReq req) {
+        return callResutlMap("cm_chainReg",req);
+    }
+    @Override
+    public Result<Map> updateChain(RegisterChainReq req) {
+        return callResutlMap("cm_chainActive",req);
+    }
+    @Override
+    public Result<String> disableCrossAsset(DisableAssetReq req) {
+        return callReturnString("cm_assetDisable",req,"txHash");
+    }
+
+    @Override
+    public Result<String> addCrossAsset(AddCrossAssetReq req) {
+        return callReturnString("cm_assetReg",req,"txHash");
     }
 
     private <T> Result<T> _call(String method, Object req, Function<Map, Result> callback){

@@ -30,6 +30,7 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.basic.TransactionManager;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +42,7 @@ public class Block extends BaseNulsData implements Cloneable {
 
     private BlockHeader header;
     private List<Transaction> txs;
-    private transient List<NulsDigestData> txHashList;
+    private transient List<NulsHash> txHashList;
 
     @Override
     public int size() {
@@ -94,7 +95,7 @@ public class Block extends BaseNulsData implements Cloneable {
 //     * 从交易列表中循环取出所有的交易hash，顺序和交易列表保持一致
 //     * Loop through the list of trades to remove all of the trading hash, in the same order as the list of transactions.
 //     */
-    public List<NulsDigestData> getTxHashList() {
+    public List<NulsHash> getTxHashList() {
         if (txHashList == null) {
             txHashList = new ArrayList<>();
             for (Transaction tx : txs) {
@@ -107,4 +108,27 @@ public class Block extends BaseNulsData implements Cloneable {
         return txHashList;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        Block block = (Block) o;
+
+        if (!header.equals(block.header)) {
+            return false;
+        }
+        return txs.equals(block.txs);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = header.hashCode();
+        result = 31 * result + txs.hashCode();
+        return result;
+    }
 }

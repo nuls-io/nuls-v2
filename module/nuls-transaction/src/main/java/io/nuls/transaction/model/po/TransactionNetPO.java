@@ -44,7 +44,16 @@ public class TransactionNetPO extends BaseNulsData {
 
     private String excludeNode;
 
+    /**
+     * 主要用于孤儿交易排序
+     */
+    private transient long orphanSortSerial;
+
     public TransactionNetPO() {
+    }
+
+    public TransactionNetPO(Transaction tx) {
+        this.tx = tx;
     }
 
     public TransactionNetPO(Transaction tx, String excludeNode) {
@@ -86,5 +95,13 @@ public class TransactionNetPO extends BaseNulsData {
 
     public void setExcludeNode(String excludeNode) {
         this.excludeNode = excludeNode;
+    }
+
+    public long getOrphanSortSerial() {
+        return orphanSortSerial;
+    }
+
+    public void setOrphanSortSerial(long orphanSortSerial) {
+        this.orphanSortSerial = orphanSortSerial;
     }
 }

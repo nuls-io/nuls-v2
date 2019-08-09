@@ -6,6 +6,9 @@ import io.nuls.core.core.annotation.Configuration;
 import io.nuls.core.core.annotation.Value;
 import io.nuls.core.exception.NulsException;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-07 16:56
@@ -22,10 +25,21 @@ public class Config implements InitializingBean {
     @Value.NotNull
     private Integer assetsId;
 
+    //默认资产小数位数
+    private Integer decimals;
+
     @Value.NotNull
     private Provider.ProviderType providerType;
-
+    private String addressPrefix;
     private String language;
+
+    public String getAddressPrefix() {
+        return addressPrefix;
+    }
+
+    public void setAddressPrefix(String addressPrefix) {
+        this.addressPrefix = addressPrefix;
+    }
 
     public boolean isMainChain() {
         return chainId.equals(mainChainId);
@@ -74,4 +88,28 @@ public class Config implements InitializingBean {
     @Override
     public void afterPropertiesSet() throws NulsException {
     }
+
+    public Integer getDecimals() {
+        return decimals;
+    }
+
+    public void setDecimals(Integer decimals) {
+        this.decimals = decimals;
+    }
+
+    public BigDecimal toBigUnit(BigInteger val) {
+        BigDecimal decimal = BigDecimal.TEN.pow(this.getDecimals());
+        BigDecimal dval = BigDecimal.valueOf(val.longValue());
+        return dval.divide(decimal);
+    }
+
+    public BigInteger toSmallUnit(BigDecimal val) {
+        BigDecimal decimal = BigDecimal.TEN.pow(this.getDecimals());
+        return val.multiply(decimal).toBigInteger();
+    }
+
+    public BigInteger toSmallUnit(String val) {
+        return toSmallUnit(new BigDecimal(val));
+    }
+
 }

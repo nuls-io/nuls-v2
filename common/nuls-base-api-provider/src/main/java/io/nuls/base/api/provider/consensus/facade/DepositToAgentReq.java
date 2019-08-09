@@ -27,6 +27,12 @@ public class DepositToAgentReq extends BaseReq {
         this.password = password;
     }
 
+    public DepositToAgentReq(String address, String agentHash, BigInteger deposit) {
+        this.address = address;
+        this.agentHash = agentHash;
+        this.deposit = deposit;
+    }
+
     public String getAddress() {
         return address;
     }
@@ -58,4 +64,5 @@ public class DepositToAgentReq extends BaseReq {
     public void setPassword(String password) {
         this.password = password;
     }
+
 }

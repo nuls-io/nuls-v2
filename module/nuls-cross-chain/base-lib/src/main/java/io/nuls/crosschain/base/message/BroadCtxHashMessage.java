@@ -2,10 +2,9 @@ package io.nuls.crosschain.base.message;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.data.NulsDigestData;
-import io.nuls.crosschain.base.message.base.BaseMessage;
+import io.nuls.base.data.NulsHash;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.parse.SerializeUtils;
+import io.nuls.crosschain.base.message.base.BaseMessage;
 
 import java.io.IOException;
 
@@ -15,30 +14,31 @@ import java.io.IOException;
  * @date 2019/4/4
  */
 public class BroadCtxHashMessage extends BaseMessage{
-    private NulsDigestData requestHash;
+    private NulsHash convertHash;
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(requestHash);
+        stream.write(convertHash.getBytes());
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.requestHash = byteBuffer.readHash();
+        this.convertHash = byteBuffer.readHash();
+
     }
 
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfNulsData(requestHash);
+        size += NulsHash.HASH_LENGTH;
         return size;
     }
 
-    public NulsDigestData getRequestHash() {
-        return requestHash;
+    public NulsHash getConvertHash() {
+        return convertHash;
     }
 
-    public void setRequestHash(NulsDigestData requestHash) {
-        this.requestHash = requestHash;
+    public void setConvertHash(NulsHash convertHash) {
+        this.convertHash = convertHash;
     }
 }

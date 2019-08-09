@@ -25,15 +25,14 @@
 package io.nuls.account.service;
 
 import io.nuls.account.model.bo.Account;
-import io.nuls.account.model.dto.CoinDto;
-import io.nuls.account.model.dto.MultiSignTransactionResultDto;
-import io.nuls.base.data.MultiSigAccount;
+import io.nuls.account.model.bo.Chain;
+import io.nuls.account.model.dto.MultiSignTransactionResultDTO;
+import io.nuls.account.model.dto.MultiSignTransferDTO;
+import io.nuls.account.model.dto.TransferDTO;
+import io.nuls.base.data.Address;
 import io.nuls.base.data.Transaction;
+import io.nuls.core.basic.Result;
 import io.nuls.core.exception.NulsException;
-
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.List;
 
 /**
  * 账户相关交易接口定义
@@ -43,102 +42,92 @@ import java.util.List;
  */
 public interface TransactionService {
 
+
     /**
-     * accountTxValidate
-     * 1.检查是否多个交易设置了同样的别名
-     * 2.检测一个acount只能设置一个别名
-     * accountTxValidate
-     * 1.Check if multiple aliasTransaction have the same alias.
-     * 2.Detecting an acount can only set one alias.
+     * 转账交易验证器(协议升级扫描)
      *
-     * @param chainId
-     * @param txList  需要检查的交易列表/A list of transactions to be checked.
+     * @param chain
+     * @param tx
      * @return
+     * @throws NulsException
      */
-    List<Transaction> accountTxValidate(int chainId, List<Transaction> txList) throws Exception;
+    Result transferTxValidate(Chain chain, Transaction tx) throws NulsException;
 
     /**
      * 多地址转账
      *
-     * @param currentChainId 当前链ID
-     * @param fromList       从指定账户转出
-     * @param toList         转出到指定账户
-     * @param remark         备注
+     * @param chain    当前链ID
+     * @param transferDTO Data to be assembled
      * @return transfer transaction hash
      * @throws NulsException
      */
-    Transaction transfer(int currentChainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) throws NulsException;
-
-    /**
-     * 别名转账
-     * <p>
-     * the receipt address is alias
-     *
-     * @param chainId chainId
-     * @param from    the from coin dto
-     * @param to      the to coin dto
-     * @param remark  remark
-     * @return transfer transaction
-     */
-    Transaction transferByAlias(int chainId, CoinDto from, CoinDto to, String remark) throws NulsException;
+    Transaction transfer(Chain chain, TransferDTO transferDTO) throws NulsException;
 
 
     /**
-     * 创建多签交易
+     * 创建多签交易, 交易from中只能有同一个多签地址
      * <p>
      * create multi sign transfer transaction
      *
-     * @param chainId         chainId
-     * @param assetsId        assetId
-     * @param account         the account which will sign the transaction
-     * @param password        the account's password
-     * @param multiSigAccount the multi sign account
-     * @param toAddress       the to address
-     * @param amount          the amount
-     * @param remark          remark
-     * @return MultiSignTransactionResultDto it contains two element:is broadcast and the transaction
+     * @param chain                chain
+     * @param multiSignTransferDTO Data to be assembled
+     * @return
      */
-    MultiSignTransactionResultDto createMultiSignTransfer(int chainId, int assetsId, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, BigInteger amount, String remark)
-            throws NulsException, IOException;
+    MultiSignTransactionResultDTO multiSignTransfer(Chain chain, MultiSignTransferDTO multiSignTransferDTO) throws NulsException;
+
 
     /**
      * 多签交易签名
      * <p>
      * sign multi sign transaction
      *
-     * @param chainId  chainId
+     * @param chain    chainId
      * @param account  the account which will sign the transaction
      * @param password the account's password
-     * @param txStr   the hex data of transaction
+     * @param txStr    the hex data of transaction
      * @return MultiSignTransactionResultDto it contains two element:is broadcast and the transactio
      * @auther EdwardChan
      */
-    MultiSignTransactionResultDto signMultiSignTransaction(int chainId, Account account, String password, String txStr)
-            throws NulsException, IOException;
+    MultiSignTransactionResultDTO signMultiSignTransaction(Chain chain, Account account, String password, String txStr)
+            throws NulsException;
 
     /**
      * 创建多签账户设置别名交易
-     * <p>
-     * create multi sign account set alias transaction
-     *
-     * @param chainId         chainId
-     * @param account         the account which will sign the transaction
-     * @param password        the account's password
-     * @param multiSigAccount the multi sign account
-     * @param toAddress       the to address
-     * @param remark          remark
-     * @return MultiSignTransactionResultDto it contains two element:is broadcast and the transaction
+     * @param chain
+     * @param address
+     * @param aliasName
+     * @param signAddr
+     * @param password
+     * @return
+     * @throws NulsException
      */
-    MultiSignTransactionResultDto createSetAliasMultiSignTransaction(int chainId, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, String aliasName, String remark)
-            throws NulsException, IOException;
+    MultiSignTransactionResultDTO setMultiSignAccountAlias(Chain chain, String address, String aliasName, String signAddr, String password) throws NulsException;
 
     /**
-     * 校验该链是否有该资产
-     *
-     * @param chainId
-     * @param assetId
+     * 组装一个不包含签名的设置别名的交易(适用于普通地址)
+     * @param chain
+     * @param address
+     * @param aliasName
      * @return
+     * @throws NulsException
      */
-    boolean assetExist(int chainId, int assetId);
+    Transaction createSetAliasTxWithoutSign(Chain chain, Address address, String aliasName) throws NulsException;
+
+    /**
+     * 组装一个不包含签名的设置别名的交易(适用于多签地址)
+     * @param chain
+     * @param address
+     * @param aliasName
+     * @param msign 多签地址最小签名数
+     * @return
+     * @throws NulsException
+     */
+    Transaction createSetAliasTxWithoutSign(Chain chain, Address address, String aliasName, int msign) throws NulsException;
+
+//    /**
+//     * 多签交易处理
+//     * 如果达到最少签名数则广播交易，否则什么也不做
+//     **/
+//    boolean txMutilProcessing(Chain chain, MultiSigAccount multiSigAccount, Transaction tx, TransactionSignature txSignature) throws NulsException;
 
 }

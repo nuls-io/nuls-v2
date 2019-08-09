@@ -28,7 +28,23 @@ public class RegisterChainReq extends BaseReq {
 
     private String address;
     private String chainName;
+    private String addressPrefix;
+
     private Long magicNumber;
+
+    /**
+     * 初始化验证人信息
+     */
+    private String verifierList = "";
+    /**
+     * 按100来计算拜占庭比例
+     */
+    private int signatureByzantineRatio = 0;
+    /**
+     * 最大签名数量
+     */
+    private int maxSignatureCount = 0;
+
     private int assetId;
     private String symbol;
     private String assetName;
@@ -39,10 +55,14 @@ public class RegisterChainReq extends BaseReq {
     private int decimalPlaces;
     private String password;
 
-    public RegisterChainReq(String address,Integer chainId, String chainName, Long magicNumber, int assetId, String symbol, String assetName, Long initNumber, String addressType, String password) {
+    public RegisterChainReq(String address, Integer chainId, String chainName, String addressPrefix,Long magicNumber,
+                            int maxSignatureCount, int signatureByzantineRatio, String verifierList,
+                            int assetId, String symbol, String assetName, Long initNumber, String addressType,
+                            String password) {
         this.setChainId(chainId);
         this.address = address;
         this.chainName = chainName;
+        this.addressPrefix = addressPrefix;
         this.magicNumber = magicNumber;
         this.assetId = assetId;
         this.symbol = symbol;
@@ -50,6 +70,9 @@ public class RegisterChainReq extends BaseReq {
         this.initNumber = initNumber;
         this.addressType = addressType;
         this.password = password;
+        this.maxSignatureCount = maxSignatureCount;
+        this.signatureByzantineRatio = signatureByzantineRatio;
+        this.verifierList = verifierList;
     }
 
     public int getAssetId() {
@@ -66,6 +89,14 @@ public class RegisterChainReq extends BaseReq {
 
     public void setChainName(String chainName) {
         this.chainName = chainName;
+    }
+
+    public String getAddressPrefix() {
+        return addressPrefix;
+    }
+
+    public void setAddressPrefix(String addressPrefix) {
+        this.addressPrefix = addressPrefix;
     }
 
     public String getAddressType() {
@@ -146,6 +177,30 @@ public class RegisterChainReq extends BaseReq {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getVerifierList() {
+        return verifierList;
+    }
+
+    public void setVerifierList(String verifierList) {
+        this.verifierList = verifierList;
+    }
+
+    public int getSignatureByzantineRatio() {
+        return signatureByzantineRatio;
+    }
+
+    public void setSignatureByzantineRatio(int signatureByzantineRatio) {
+        this.signatureByzantineRatio = signatureByzantineRatio;
+    }
+
+    public int getMaxSignatureCount() {
+        return maxSignatureCount;
+    }
+
+    public void setMaxSignatureCount(int maxSignatureCount) {
+        this.maxSignatureCount = maxSignatureCount;
     }
 }
 

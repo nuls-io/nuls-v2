@@ -9,6 +9,7 @@ import io.nuls.api.cache.ApiCache;
 import io.nuls.api.db.BlockService;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.BlockHeaderInfo;
+import io.nuls.api.model.po.db.BlockHexInfo;
 import io.nuls.api.model.po.db.PageInfo;
 import io.nuls.api.model.po.db.SyncInfo;
 import io.nuls.api.model.po.db.mini.MiniBlockHeaderInfo;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static io.nuls.api.constant.DBTableConstant.BLOCK_HEADER_TABLE;
+import static io.nuls.api.constant.DBTableConstant.BLOCK_HEX_TABLE;
 
 @Component
 public class MongoBlockServiceImpl implements BlockService {
@@ -63,6 +65,19 @@ public class MongoBlockServiceImpl implements BlockService {
     public void saveBLockHeaderInfo(int chainId, BlockHeaderInfo blockHeaderInfo) {
         Document document = DocumentTransferTool.toDocument(blockHeaderInfo, "height");
         mongoDBService.insertOne(BLOCK_HEADER_TABLE + chainId, document);
+    }
+
+    public void saveBlockHexInfo(int chainId, BlockHexInfo hexInfo) {
+        Document document = DocumentTransferTool.toDocument(hexInfo, "height");
+        mongoDBService.insertOne(BLOCK_HEX_TABLE + chainId, document);
+    }
+
+    public BlockHexInfo getBlockHexInfo(int chainId, long height) {
+        Document document = mongoDBService.findOne(BLOCK_HEX_TABLE + chainId, Filters.eq("_id", height));
+        if (document == null) {
+            return null;
+        }
+        return DocumentTransferTool.toInfo(document, "height", BlockHexInfo.class);
     }
 
     public void saveList(int chainId, List<BlockHeaderInfo> blockHeaderInfos) {
@@ -107,7 +122,7 @@ public class MongoBlockServiceImpl implements BlockService {
         }
         long totalCount = mongoDBService.getCount(BLOCK_HEADER_TABLE + chainId, filter);
         BasicDBObject fields = new BasicDBObject();
-        fields.append("_id", 1).append("createTime", 1).append("txCount", 1).
+        fields.append("_id", 1).append("createTime", 1).append("txCount", 1).append("agentHash", 1).
                 append("agentId", 1).append("agentAlias", 1).append("size", 1).append("reward", 1);
 
         List<Document> docsList = this.mongoDBService.pageQuery(BLOCK_HEADER_TABLE + chainId, filter, fields, Sorts.descending("_id"), pageIndex, pageSize);
@@ -125,7 +140,9 @@ public class MongoBlockServiceImpl implements BlockService {
 
     public void deleteBlockHeader(int chainId, long height) {
         mongoDBService.delete(BLOCK_HEADER_TABLE + chainId, Filters.eq("_id", height));
+        mongoDBService.delete(BLOCK_HEX_TABLE + chainId, Filters.eq("_id", height));
         ApiCache apiCache = CacheManager.getCache(chainId);
         apiCache.setBestHeader(null);
     }
+
 }

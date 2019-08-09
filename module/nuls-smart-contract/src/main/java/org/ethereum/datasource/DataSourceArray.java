@@ -17,8 +17,8 @@
  */
 package org.ethereum.datasource;
 
+import org.bouncycastle.util.encoders.Hex;
 import org.ethereum.util.ByteUtil;
-import org.spongycastle.util.encoders.Hex;
 
 import java.util.AbstractList;
 

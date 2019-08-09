@@ -5,5 +5,7 @@ package io.nuls.crosschain.base.constant;
  * 2019/04/08
  */
 public interface ParamConstant {
-
+    String PARAM_CHAIN_ID = "chainId";
+    String PARAM_NODE_ID = "nodeId";
+    String PARAM_MESSAGE_BODY = "messageBody";
 }

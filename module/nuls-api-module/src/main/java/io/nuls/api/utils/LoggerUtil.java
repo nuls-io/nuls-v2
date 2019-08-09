@@ -40,9 +40,9 @@ public class LoggerUtil {
 
     //modify by zlj : common.log->protocol.log
     public static NulsLogger commonLog = LoggerBuilder.getLogger("api-module");
-
-    public static void init(int chainId, String levelString) {
-        Level level = Level.valueOf(levelString);
-        NulsLogger commonLog = LoggerBuilder.getLogger("api-module/chain-"+chainId+"/","common", level);
-    }
+//
+//    public static void init(int chainId, String levelString) {
+//        Level level = Level.valueOf(levelString);
+//        NulsLogger commonLog = LoggerBuilder.getLogger("api-module/chain-"+chainId+"/","common", level);
+//    }
 }

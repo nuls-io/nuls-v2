@@ -4,7 +4,7 @@ import io.nuls.core.log.Log;
 
 public class DefaultVersionChangeInvoker implements VersionChangeInvoker{
     @Override
-    public void process() {
-        Log.info("DefaultVersionChangeInvoker trigger");
+    public void process(int chainId) {
+        Log.info("DefaultVersionChangeInvoker trigger. chainId-" + chainId);
     }
 }
