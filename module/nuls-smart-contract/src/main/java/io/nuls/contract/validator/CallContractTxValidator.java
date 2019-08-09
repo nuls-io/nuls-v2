@@ -69,7 +69,7 @@ public class CallContractTxValidator {
         List<CoinFrom> fromList = coinData.getFrom();
         List<CoinTo> toList = coinData.getTo();
         Chain chain = contractHelper.getChain(chainId);
-        int assetsId = chain.getConfig().getAssetsId();
+        int assetsId = chain.getConfig().getAssetId();
         for(CoinFrom from : fromList) {
             if(from.getAssetsChainId() != chainId || from.getAssetsId() != assetsId) {
                 Log.error("contract call error: The chain id or assets id of coin from is error.");

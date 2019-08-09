@@ -225,7 +225,7 @@ public class ContractTxHelper {
         BigInteger totalValue = imputedValue.add(value);
 
         Chain chain = contractHelper.getChain(chainId);
-        int assetsId = chain.getConfig().getAssetsId();
+        int assetsId = chain.getConfig().getAssetId();
         ContractBalance senderBalance = contractHelper.getTempBalanceAndNonce(chainId, sender);
         CoinFrom coinFrom = new CoinFrom(senderBytes, chainId, assetsId, totalValue, RPCUtil.decode(senderBalance.getNonce()), UNLOCKED_TX);
         coinData.addFrom(coinFrom);

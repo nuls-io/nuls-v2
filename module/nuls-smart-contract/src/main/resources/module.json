@@ -1,6 +1,6 @@
 {
   "chainId": 2,
-  "assetsId": 1,
+  "assetId": 1,
   "maxViewGas": 100000000,
   "mainChainId": 2,
   "mainAssetId": 1,

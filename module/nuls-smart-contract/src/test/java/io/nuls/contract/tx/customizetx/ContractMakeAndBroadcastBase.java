@@ -325,7 +325,7 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
 
     protected void txFakeAddCoinTo(ContractBaseTransaction tx, String address, long amount) throws Exception {
         CoinData coinDataObj = tx.getCoinDataObj();
-        CoinTo coinTo = new CoinTo(AddressTool.getAddress(address), chainId, chain.getConfig().getAssetsId(),
+        CoinTo coinTo = new CoinTo(AddressTool.getAddress(address), chainId, chain.getConfig().getAssetId(),
                 BigInteger.valueOf(amount), 0L);
         coinDataObj.getTo().add(coinTo);
     }

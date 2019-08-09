@@ -52,7 +52,7 @@ public class ContractConfig implements ModuleConfig {
 
     private int chainId;
 
-    private int assetsId;
+    private int assetId;
 
     private long maxViewGas;
 
@@ -68,12 +68,12 @@ public class ContractConfig implements ModuleConfig {
         this.chainId = chainId;
     }
 
-    public int getAssetsId() {
-        return assetsId;
+    public int getAssetId() {
+        return assetId;
     }
 
-    public void setAssetsId(int assetsId) {
-        this.assetsId = assetsId;
+    public void setAssetId(int assetId) {
+        this.assetId = assetId;
     }
 
     public long getMaxViewGas() {
@@ -134,7 +134,7 @@ public class ContractConfig implements ModuleConfig {
 
     public ConfigBean getChainConfig() {
         ConfigBean configBean = new ConfigBean();
-        configBean.setAssetsId(assetsId);
+        configBean.setAssetId(assetId);
         configBean.setChainId(chainId);
         configBean.setMaxViewGas(maxViewGas);
         return configBean;
