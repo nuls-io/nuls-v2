@@ -617,6 +617,7 @@ public class TxServiceImpl implements TxService {
             LedgerCall.coinDataBatchNotify(chain);
             //取出的交易集合(需要发送给账本验证)
             List<String> batchProcessList = new ArrayList<>();
+            Set<String> duplicatesVerify = new HashSet<>();
             //取出的交易集合
             List<TxPackageWrapper> currentBatchPackableTxs = new ArrayList<>();
             //本次打包包含跨链交易个数
@@ -669,6 +670,10 @@ public class TxServiceImpl implements TxService {
                         //达到处理该批次的条件
                         process = true;
                     } else if (tx != null) {
+                        if (!duplicatesVerify.add(tx.getHash().toHex())) {
+                            //加入不进去表示已存在
+                            continue;
+                        }
                         long txSize = tx.size();
                         if ((totalSizeTemp + txSize) > maxTxDataSize) {
                             packablePool.offerFirst(chain, tx);
