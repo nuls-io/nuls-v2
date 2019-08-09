@@ -44,6 +44,13 @@ fi
 #cp -f ./genesis-block-11.json ./NULS-Wallet-linux64-alpha3/genesis-block.json
 #cp -f ./README-ALPAH3.md ./NULS-Wallet-linux64-alpha3/README.md
 #tar -zcPf NULS-Wallet-linux64-alpha3-NETH.tar.gz ./NULS-Wallet-linux64-alpha3
-echo "out of"
-echo "${OUT_DIR}-main-${TARGET_OS}.tar.gz"
-echo "${OUT_DIR}-NBTC-${TARGET_OS}.tar.gz"
+echo "======================== out of ======================== "
+if [ "$TARGET_OS" == "window" ];
+then
+    echo "${OUT_DIR}-main-${TARGET_OS}.zip"
+    echo "${OUT_DIR}-NBTC-${TARGET_OS}.zip"
+else
+    echo "${OUT_DIR}-main-${TARGET_OS}.tar.gz"
+    echo "${OUT_DIR}-NBTC-${TARGET_OS}.tar.gz"
+fi
+echo "======================================================== "
