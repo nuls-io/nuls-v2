@@ -179,7 +179,7 @@ public class NodeGroupRpc extends BaseCmd {
             String[] crossAddr = croosSeed.split(NetworkConstant.COLON);
             nodeGroup.addNeedCheckNode(crossAddr[0], Integer.valueOf(crossAddr[1]), Integer.valueOf(crossAddr[1]), true);
         }
-        networkConfig.setMoonSeedIpList(ipList);
+//        networkConfig.setMoonSeedIpList(ipList);
         nodeGroup.setCrossActive(true);
         return success();
     }
