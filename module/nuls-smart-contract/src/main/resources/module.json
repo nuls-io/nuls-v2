@@ -5,7 +5,6 @@
   "mainChainId": 2,
   "mainAssetId": 1,
   "encoding": "UTF-8",
-  "kernelUrl": "ws://127.0.0.1:7771",
   "packageLogPackages": "io.nuls.contract.vm.program.impl.ProgramExecutorImpl,db,rlp,general",
   "packageLogLevels": "INFO,INFO,INFO,INFO"
 }

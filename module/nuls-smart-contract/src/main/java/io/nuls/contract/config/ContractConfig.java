@@ -41,8 +41,6 @@ public class ContractConfig implements ModuleConfig {
      */
     private String encoding;
 
-    private String kernelUrl;
-
     private int mainChainId;
 
     private int mainAssetId;
@@ -92,14 +90,6 @@ public class ContractConfig implements ModuleConfig {
 
     public void setEncoding(String encoding) {
         this.encoding = encoding;
-    }
-
-    public String getKernelUrl() {
-        return kernelUrl;
-    }
-
-    public void setKernelUrl(String kernelUrl) {
-        this.kernelUrl = kernelUrl;
     }
 
     public int getMainChainId() {

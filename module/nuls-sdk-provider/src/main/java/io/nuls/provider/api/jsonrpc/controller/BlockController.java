@@ -260,7 +260,6 @@ public class BlockController {
             Block data = result.getData();
             try {
                 BlockDto dto = new BlockDto(data);
-                BeanCopierManager.beanCopier(data, dto);
                 return RpcResult.success(dto);
             } catch (NulsException e) {
                 Log.error(e);
@@ -302,13 +301,74 @@ public class BlockController {
             Block data = result.getData();
             try {
                 BlockDto dto = new BlockDto(data);
-                BeanCopierManager.beanCopier(data, dto);
                 return RpcResult.success(dto);
             } catch (NulsException e) {
                 Log.error(e);
                 return ResultUtil.getNulsExceptionJsonRpcResult(e);
             }
         }
+        return ResultUtil.getJsonRpcResult(result);
+    }
+
+    @RpcMethod("getBlockSerializationByHeight")
+    @ApiOperation(description = "根据区块高度查询区块序列化字符串", order = 207, detailDesc = "包含区块打包的所有交易信息，此接口返回数据量较多，谨慎调用")
+    @Parameters({
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
+            @Parameter(parameterName = "height", requestType = @TypeDescriptor(value = long.class), parameterDes = "区块高度")
+    })
+    @ResponseData(name = "返回值", description = "返回区块序列化后的HEX字符串", responseType = @TypeDescriptor(value = String.class))
+    public RpcResult getBlockSerializationByHeight(List<Object> params) {
+        VerifyUtils.verifyParams(params, 2);
+        int chainId;
+        long height;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is invalid");
+        }
+        try {
+            height = Long.parseLong("" + params.get(1));
+        } catch (Exception e) {
+            return RpcResult.paramError("[height] is invalid");
+        }
+        if (height < 0) {
+            return RpcResult.paramError("[height] is invalid");
+        }
+        if (!Context.isChainExist(chainId)) {
+            return RpcResult.paramError(String.format("chainId [%s] is invalid", chainId));
+        }
+        Result<String> result = blockTools.getBlockSerializationByHeight(chainId, height);
+        return ResultUtil.getJsonRpcResult(result);
+    }
+
+    @RpcMethod("getBlockSerializationByHash")
+    @ApiOperation(description = "根据区块hash查询区块序列化字符串", order = 208, detailDesc = "包含区块打包的所有交易信息，此接口返回数据量较多，谨慎调用")
+    @Parameters({
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
+            @Parameter(parameterName = "hash", parameterDes = "区块hash")
+    })
+    @ResponseData(name = "返回值", description = "返回区块序列化后的HEX字符串", responseType = @TypeDescriptor(value = String.class))
+    public RpcResult getBlockSerializationByHash(List<Object> params) {
+        VerifyUtils.verifyParams(params, 2);
+        int chainId;
+        String hash;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is invalid");
+        }
+        try {
+            hash = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[hash] is invalid");
+        }
+        if (!ValidateUtil.validHash(hash)) {
+            return RpcResult.paramError("[hash] is invalid");
+        }
+        if (!Context.isChainExist(chainId)) {
+            return RpcResult.paramError(String.format("chainId [%s] is invalid", chainId));
+        }
+        Result<String> result = blockTools.getBlockSerializationByHash(chainId, hash);
         return ResultUtil.getJsonRpcResult(result);
     }
 
