@@ -27,7 +27,6 @@ import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.storage.ConfirmedTxStorageService;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
-import io.nuls.transaction.task.StatisticsTask;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.io.IOException;
@@ -112,7 +111,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
     }
 
     private boolean saveBlockTxList(Chain chain, List<String> txStrList, String blockHeaderStr, boolean gengsis) {
-        long start = NulsDateUtils.getCurrentTimeMillis();//-----
+        long start = NulsDateUtils.getCurrentTimeMillis();
         List<Transaction> txList = new ArrayList<>();
         int chainId = chain.getChainId();
         List<byte[]> txHashs = new ArrayList<>();
@@ -166,7 +165,6 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         unconfirmedTxStorageService.removeTxList(chainId, txHashs);
         //从待打包map中删除
         packablePool.clearConfirmedTxs(chain, txHashs);
-        StatisticsTask.confirmedTx.addAndGet(txHashs.size());
         logger.debug("[保存区块] 合计执行时间:{} - 高度:{}, - 交易数量:{}" + TxUtil.nextLine(),
                 NulsDateUtils.getCurrentTimeMillis() - start, blockHeader.getHeight(), txList.size());
         return true;
@@ -465,64 +463,4 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         return txHashList;
     }
 
-
-
-   /* 单个实现
-   @Override
-    public List<String> getTxList(Chain chain, List<String> hashList) {
-        List<String> txList = new ArrayList<>();
-        if (hashList == null || hashList.size() == 0) {
-            return txList;
-        }
-        int chainId = chain.getChainId();
-        for(String hashHex : hashList){
-            TransactionConfirmedPO txCfmPO = confirmedTxStorageService.getTx(chainId, hashHex);
-            if(null == txCfmPO){
-                return new ArrayList<>();
-            }
-            try {
-                txList.add(RPCUtil.encode(txCfmPO.getTx().serialize()));
-            } catch (Exception e) {
-                chain.getLogger().error(e);
-                return new ArrayList<>();
-            }
-        }
-        return txList;
-    }
-
-    @Override
-    public List<String> getTxListExtend(Chain chain, List<String> hashList, boolean allHits) {
-        List<String> txList = new ArrayList<>();
-        if (hashList == null || hashList.size() == 0) {
-            return txList;
-        }
-        int chainId = chain.getChainId();
-        for(String hashHex : hashList){
-            TransactionUnconfirmedPO txPo = unconfirmedTxStorageService.getTx(chain.getChainId(), hashHex);
-            Transaction tx;
-            if(null == txPo) {
-                TransactionConfirmedPO txCfmPO = confirmedTxStorageService.getTx(chainId, hashHex);
-                if(null == txCfmPO){
-                    if(allHits) {
-                        //allHits为true时一旦有一个没有获取到, 直接返回空list
-                        return new ArrayList<>();
-                    }
-                    continue;
-                }
-                tx = txCfmPO.getTx();
-            }else{
-                tx = txPo.getTx();
-            }
-            try {
-                txList.add(RPCUtil.encode(tx.serialize()));
-            } catch (Exception e) {
-                chain.getLogger().error(e);
-                if(allHits) {
-                    //allHits为true时直接返回空list
-                    return new ArrayList<>();
-                }
-            }
-        }
-        return txList;
-    }*/
 }
