@@ -16,7 +16,7 @@ else
 ./package  -O $TARGET_OS -Nb $version -o ./$OUT_DIR
 fi
 #mv NULS-Wallet-linux64-beta1 NULS-Wallet-linux64-
-cp -f ./nuls-main-$version.ncf ./${OUT_DIR}/nuls.ncf
+cp -f ./nuls-chain-main-$version.ncf ./${OUT_DIR}/nuls.ncf
 cp -f ./genesis-block-main-$version.json ./${OUT_DIR}/genesis-block.json
 if [ "$TARGET_OS" == "window" ];
 then
