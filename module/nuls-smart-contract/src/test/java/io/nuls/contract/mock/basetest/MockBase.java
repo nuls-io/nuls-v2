@@ -67,7 +67,7 @@ public class MockBase extends Base {
         Chain chain = new Chain();
         ConfigBean configBean = new ConfigBean();
         configBean.setChainId(2);
-        configBean.setAssetsId(1);
+        configBean.setAssetId(1);
         configBean.setMaxViewGas(100000000L);
         chain.setConfig(configBean);
         vmContext = new VMContextMock();

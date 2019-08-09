@@ -44,11 +44,6 @@ import java.util.concurrent.TimeUnit;
 public class SchedulerManager {
 
     public boolean createTransactionScheduler(Chain chain) {
-        //统计
-        /*ScheduledThreadPoolExecutor netTxExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("StatisticsTask"));
-        netTxExecutor.scheduleAtFixedRate(new StatisticsTask(), TxConstant.TX_TASK_INITIALDELAY, TxConstant.TX_TASK_PERIOD, TimeUnit.SECONDS);
-        chain.setScheduledThreadPoolExecutor(netTxExecutor);*/
-
         //网络新交易
         ThreadUtils.createAndRunThread(TxConstant.TX_THREAD, new NetTxProcessTask(chain));
         //孤儿交易

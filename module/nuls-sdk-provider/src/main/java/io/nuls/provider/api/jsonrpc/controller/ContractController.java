@@ -511,9 +511,44 @@ public class ContractController {
         return RpcResult.success(map.get("data"));
     }
 
+    @RpcMethod("getContractTxResultList")
+    @ApiOperation(description = "获取智能合约执行结果列表", order = 409)
+    @Parameters({
+        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
+        @Parameter(parameterName = "hashList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "交易hash列表")
+    })
+    @ResponseData(name = "返回值", description = "返回交易的合约执行结果列表", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "hash1 or hash2 or hash3...", valueType = ContractResultDto.class, description = "以交易hash列表中的hash值作为key，这里的key name是动态的")
+    }))
+    public RpcResult getContractResultList(List<Object> params) {
+        VerifyUtils.verifyParams(params, 2);
+        int chainId;
+        List<String> hashList;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is invalid");
+        }
+        try {
+            hashList = (List<String>) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[hashList] is invalid");
+        }
+
+        if (!Context.isChainExist(chainId)) {
+            return RpcResult.paramError(String.format("chainId [%s] is invalid", chainId));
+        }
+        Result<Map> contractResult = contractTools.getContractResultList(chainId, hashList);
+        if (contractResult.isFailed()) {
+            return ResultUtil.getJsonRpcResult(contractResult);
+        }
+        Map map = contractResult.getData();
+        return RpcResult.success(map);
+    }
+
 
     @RpcMethod("getContractConstructor")
-    @ApiOperation(description = "获取合约代码构造函数", order = 409)
+    @ApiOperation(description = "获取合约代码构造函数", order = 410)
     @Parameters({
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
             @Parameter(parameterName = "contractCode", parameterDes = "智能合约代码(字节码的Hex编码字符串)")
@@ -551,7 +586,7 @@ public class ContractController {
     }
 
     @RpcMethod("getContractMethod")
-    @ApiOperation(description = "获取合约方法信息",order = 410)
+    @ApiOperation(description = "获取合约方法信息",order = 411)
     @Parameters({
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
             @Parameter(parameterName = "contractAddress", parameterDes = "合约地址"),
@@ -626,7 +661,7 @@ public class ContractController {
     }
 
     @RpcMethod("getContractMethodArgsTypes")
-    @ApiOperation(description = "获取合约方法参数类型", order = 411)
+    @ApiOperation(description = "获取合约方法参数类型", order = 412)
     @Parameters({
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
             @Parameter(parameterName = "contractAddress", parameterDes = "合约地址"),
@@ -661,7 +696,7 @@ public class ContractController {
 
 
     @RpcMethod("validateContractCreate")
-    @ApiOperation(description = "验证发布合约" ,order = 412)
+    @ApiOperation(description = "验证发布合约" ,order = 413)
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "sender", parameterDes = "交易创建者账户地址"),
@@ -698,7 +733,7 @@ public class ContractController {
 
 
     @RpcMethod("validateContractCall")
-    @ApiOperation(description = "验证调用合约", order = 413)
+    @ApiOperation(description = "验证调用合约", order = 414)
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "sender", parameterDes = "交易创建者账户地址"),
@@ -740,7 +775,7 @@ public class ContractController {
     }
 
     @RpcMethod("validateContractDelete")
-    @ApiOperation(description = "验证删除合约", order = 414)
+    @ApiOperation(description = "验证删除合约", order = 415)
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "sender", parameterDes = "交易创建者账户地址"),
@@ -770,7 +805,7 @@ public class ContractController {
     }
 
     @RpcMethod("imputedContractCreateGas")
-    @ApiOperation(description = "估算发布合约交易的GAS", order = 415)
+    @ApiOperation(description = "估算发布合约交易的GAS", order = 416)
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "sender", parameterDes = "交易创建者账户地址"),
@@ -800,7 +835,7 @@ public class ContractController {
     }
 
     @RpcMethod("imputedContractCallGas")
-    @ApiOperation(description = "估算调用合约交易的GAS", order = 416)
+    @ApiOperation(description = "估算调用合约交易的GAS", order = 417)
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "sender", parameterDes = "交易创建者账户地址"),
@@ -836,7 +871,7 @@ public class ContractController {
     }
 
     @RpcMethod("invokeView")
-    @ApiOperation(description = "调用合约不上链方法", order = 417)
+    @ApiOperation(description = "调用合约不上链方法", order = 418)
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "contractAddress", parameterDes = "合约地址"),

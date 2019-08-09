@@ -57,9 +57,6 @@ public class ConfigBean extends BaseNulsData {
      * */
     private int byzantineRatio;
 
-    /**默认链接到的跨链节点*/
-    private String crossSeedIps;
-
     /**
      * 最小签名数
      * */
@@ -142,14 +139,6 @@ public class ConfigBean extends BaseNulsData {
         this.maxInNode = maxInNode;
     }
 
-    public String getCrossSeedIps() {
-        return crossSeedIps;
-    }
-
-    public void setCrossSeedIps(String crossSeedIps) {
-        this.crossSeedIps = crossSeedIps;
-    }
-
     public int getMinSignature() {
         return minSignature;
     }
@@ -199,7 +188,6 @@ public class ConfigBean extends BaseNulsData {
         stream.writeUint16(maxInNode);
         stream.writeUint16(sendHeight);
         stream.writeUint16(byzantineRatio);
-        stream.writeString(crossSeedIps);
         stream.writeUint16(minSignature);
         stream.writeString(verifiers);
         stream.writeUint16(mainByzantineRatio);
@@ -222,7 +210,6 @@ public class ConfigBean extends BaseNulsData {
         this.maxInNode = byteBuffer.readUint16();
         this.sendHeight = byteBuffer.readUint16();
         this.byzantineRatio = byteBuffer.readUint16();
-        this.crossSeedIps = byteBuffer.readString();
         this.minNodeAmount = byteBuffer.readUint16();
         this.verifiers = byteBuffer.readString();
         this.mainByzantineRatio = byteBuffer.readUint16();
@@ -241,7 +228,6 @@ public class ConfigBean extends BaseNulsData {
     public int size() {
         int size = 0;
         size += SerializeUtils.sizeOfUint16() * 10;
-        size += SerializeUtils.sizeOfString(crossSeedIps);
         size += SerializeUtils.sizeOfString(verifiers);
         size += SerializeUtils.sizeOfVarInt(verifierSet == null ? 0 : verifierSet.size());
         if(verifierSet != null){

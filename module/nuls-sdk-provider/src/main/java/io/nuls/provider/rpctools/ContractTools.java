@@ -9,6 +9,7 @@ import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.provider.model.dto.ContractTokenInfoDto;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -60,6 +61,22 @@ public class ContractTools implements CallRpc {
         params.put("hash", hash);
         try {
             return  callRpc(ModuleE.SC.abbr, CONTRACT_RESULT, params,(Function<Map<String,Object>, Result<Map>>) res->{
+                if(res == null){
+                    return new Result();
+                }
+                return new Result(res);
+            });
+        } catch (NulsRuntimeException e) {
+            return Result.fail(e.getCode(), e.getMessage());
+        }
+    }
+
+    public Result<Map> getContractResultList(int chainId, List<String> hashList) {
+        Map<String, Object> params = new HashMap(4);
+        params.put(Constants.CHAIN_ID, chainId);
+        params.put("hashList", hashList);
+        try {
+            return  callRpc(ModuleE.SC.abbr, CONTRACT_RESULT_LIST, params,(Function<Map<String,Object>, Result<Map>>) res->{
                 if(res == null){
                     return new Result();
                 }

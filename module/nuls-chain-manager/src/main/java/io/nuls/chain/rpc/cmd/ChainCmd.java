@@ -336,7 +336,7 @@ public class ChainCmd extends BaseChainCmd {
 
     @ResponseData(name = "返回值", description = "返回一个Map对象",
             responseType = @TypeDescriptor(value = Map.class, collectionElement = List.class, mapKeys = {
-                    @Key(name = "chainInfos", valueType = List.class, valueElement = ChainDto.class, description = "资产信息列表")
+                    @Key(name = "chainInfos", valueType = List.class, valueElement = ChainDto.class, description = "已注册的链与资产信息列表")
             })
     )
     public Response getCrossChainInfos(Map params) {
@@ -355,6 +355,29 @@ public class ChainCmd extends BaseChainCmd {
             LoggerUtil.COMMON_LOG.debug(JSONUtils.obj2json(chainInfos));
         } catch (JsonProcessingException e) {
         }
+        return success(rtMap);
+    }
+
+    @CmdAnnotation(cmd = RpcConstants.CMD_GET_CROSS_CHAIN_SIMPLE_INFOS, version = 1.0,
+            description = "获取跨链已注册链列表")
+
+    @ResponseData(name = "返回值", description = "返回一个Map对象",
+            responseType = @TypeDescriptor(value = Map.class, collectionElement = List.class, mapKeys = {
+                    @Key(name = "chainInfos", valueType = List.class, valueElement = Map.class, description = "返回链及资产的简要信息列表")
+            })
+    )
+    public Response getChainAssetsSimpleInfo(Map params) {
+        List<Map<String, Object>> chainInfos = new ArrayList<>();
+        Map<String, Object> rtMap = new HashMap<>();
+        try {
+            List<BlockChain> blockChains = chainService.getBlockList();
+            for (BlockChain blockChain : blockChains) {
+                chainInfos.add(chainService.getChainAssetsSimpleInfo(blockChain));
+            }
+        } catch (Exception e) {
+            LoggerUtil.logger().error(e);
+        }
+        rtMap.put("chainInfos", chainInfos);
         return success(rtMap);
     }
 

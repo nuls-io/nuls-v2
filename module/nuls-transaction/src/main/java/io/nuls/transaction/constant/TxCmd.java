@@ -25,14 +25,13 @@
 package io.nuls.transaction.constant;
 
 /**
+ * Module API CMD
+ *
  * @author: Charlie
  * @date: 2018-12-25
  */
 public final class TxCmd {
 
-    /**
-     * 模块接口
-     */
     public static final String TX_GET_SYSTEM_TYPES = "tx_getSystemTypes";
     public static final String TX_REGISTER = "tx_register";
     public static final String TX_PACKABLETXS = "tx_packableTxs";
@@ -54,11 +53,13 @@ public final class TxCmd {
 
     /**
      * 修改节点共识状态
+     * Modify the node consensus state
      */
     public static final String TX_CS_STATE = "tx_cs_state";
 
     /**
      * 修改节点处理交易状态
+     * Modify the node to handle transaction status
      */
     public static final String TX_BL_STATE = "tx_bl_state";
 
@@ -68,15 +69,18 @@ public final class TxCmd {
     public static final String TX_BASE_VALIDATE = "tx_baseValidateTx";
 
     /**
-     * 接收广播的新交易hash
+     * 接收其他节点转发的新交易hash
+     * Receive the new transaction hash forwarded by other nodes
      */
     public static final String NW_NEW_HASH = "newHash";
     /**
      * 接收其他节点发送的完整交易
+     * Receive complete transactions sent by other nodes
      */
     public static final String NW_RECEIVE_TX = "receiveTx";
     /**
      * 索取完整交易
+     * Request full transaction
      */
     public static final String NW_ASK_TX = "askTx";
 

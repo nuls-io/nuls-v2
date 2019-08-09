@@ -157,7 +157,7 @@ public class ContractBatchEndCallable implements Callable<ContractPackageDto> {
     }
 
     private static ContractReturnGasTransaction makeReturnGasTx(int chainId, List<ContractResult> resultList, long time, ContractHelper contractHelper) throws IOException {
-        int assetsId = contractHelper.getChain(chainId).getConfig().getAssetsId();
+        int assetsId = contractHelper.getChain(chainId).getConfig().getAssetId();
         ContractWrapperTransaction wrapperTx;
         ContractData contractData;
         Map<ByteArrayWrapper, BigInteger> returnMap = new HashMap<>();

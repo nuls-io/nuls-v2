@@ -26,6 +26,7 @@
 package io.nuls.transaction.model.bo;
 
 /**
+ * 交易注册信息类
  * @author: Charlie
  * @date: 2018/11/12
  */

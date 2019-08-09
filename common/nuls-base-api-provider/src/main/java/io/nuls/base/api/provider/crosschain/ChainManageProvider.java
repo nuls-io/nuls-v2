@@ -22,11 +22,11 @@ public interface ChainManageProvider {
     Result<Map> registerChain(RegisterChainReq req);
 
     /**
-     *
      * @param req
      * @return
      */
     Result<Map> updateChain(RegisterChainReq req);
+
     /**
      * 注销资产
      *
@@ -51,6 +51,8 @@ public interface ChainManageProvider {
      * @return
      */
     Result<CrossChainRegisterInfo> getCrossChainInfo(GetCrossChainInfoReq req);
+
+    Result<Map> getCrossChainsSimpleInfo();
 
     Result<CrossAssetRegisterInfo> getCrossAssetInfo(GetCrossAssetInfoReq req);
 

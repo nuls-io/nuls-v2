@@ -118,7 +118,7 @@ public class BaseQuery extends Base {
 
     @Test
     public void transfer() {
-        TransferReq.TransferReqBuilder builder = new TransferReq.TransferReqBuilder(chain.getChainId(), chain.getConfig().getAssetsId())
+        TransferReq.TransferReqBuilder builder = new TransferReq.TransferReqBuilder(chain.getChainId(), chain.getConfig().getAssetId())
                 .addForm(sender, password, BigInteger.valueOf(33_1000_0000_0000L))
                 .addTo(toAddress5, BigInteger.valueOf(1000000000000L))
                 .addTo(toAddress6, BigInteger.valueOf(1000000000000L))

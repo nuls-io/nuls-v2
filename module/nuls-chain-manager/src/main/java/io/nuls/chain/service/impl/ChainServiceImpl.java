@@ -300,4 +300,15 @@ public class ChainServiceImpl implements ChainService {
         return chainInfoMap;
     }
 
+    @Override
+    public Map<String, Object> getChainAssetsSimpleInfo(BlockChain blockChain) throws Exception {
+        Map<String, Object> chainInfoMap = new HashMap<>();
+        chainInfoMap.put("chainId", blockChain.getChainId());
+        chainInfoMap.put("chainName", blockChain.getChainName());
+        chainInfoMap.put("addressPrefix", blockChain.getAddressPrefix());
+        chainInfoMap.put("registerTime", blockChain.getCreateTime());
+        chainInfoMap.put("enable", !blockChain.isDelete());
+        return chainInfoMap;
+    }
+
 }

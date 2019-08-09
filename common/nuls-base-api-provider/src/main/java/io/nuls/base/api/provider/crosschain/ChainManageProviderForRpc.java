@@ -34,6 +34,11 @@ public class ChainManageProviderForRpc extends BaseRpcService implements ChainMa
         });
     }
     @Override
+    public  Result<Map> getCrossChainsSimpleInfo(){
+        return callResutlMap("cm_getChainsSimpleInfo",null);
+    }
+
+    @Override
     public  Result<CrossAssetRegisterInfo> getCrossAssetInfo(GetCrossAssetInfoReq req){
         return _call("cm_asset",req,res->{
             if(res == null){
