@@ -1852,13 +1852,43 @@ _**详细描述: 根据hash获取交易**_
 ### Example request data: 
 
 _**request path:**_
-略
+http://localhost:18004/api/tx/247a026d48f6be0c358423898e38a50ac0c2c1a851419b1ec843a667bab90df9
 
 _**request form data:**_
 无
 
 ### Example response data: 
-略
+```json
+{
+  "success" : true,
+  "data" : {
+    "hash" : "247a026d48f6be0c358423898e38a50ac0c2c1a851419b1ec843a667bab90df9",
+    "type" : 2,
+    "time" : "2019-07-16 18:30:03.003",
+    "blockHeight" : 9,
+    "remark" : "remark",
+    "transactionSignature" : "2103958b790c331954ed367d37bac901de5c2f06ac8368b37d7bd6cd5ae143c1d7e34630440220084da59fca5edc6ed047c1360bb45d3e7ec297c367b8c2810421b2a43d1eabba02201f9e499fe63ad2dbbd83c1dafcb8437f5aba1c61fd0e5c9075a80b50820ca3ac",
+    "status" : 1,
+    "size" : 261,
+    "inBlockIndex" : 0,
+    "form" : [ {
+      "address" : "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG",
+      "assetsChainId" : 2,
+      "assetsId" : 1,
+      "amount" : "100000100000",
+      "nonce" : "0000000000000000",
+      "locked" : 0
+    } ],
+    "to" : [ {
+      "address" : "tNULSeBaMujLBcZWfE2wHKnZo7PGvqvNrt6yWG",
+      "assetsChainId" : 2,
+      "assetsId" : 1,
+      "amount" : "100000000000",
+      "lockTime" : 0
+    } ]
+  }
+}
+```
 
 3.2 验证交易
 ========
