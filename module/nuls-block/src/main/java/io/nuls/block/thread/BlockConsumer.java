@@ -24,6 +24,7 @@ import io.nuls.base.data.Block;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.NodeEnum;
 import io.nuls.block.manager.ContextManager;
+import io.nuls.block.model.BlockDownloaderParams;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.Node;
 import io.nuls.block.service.BlockService;
@@ -71,7 +72,7 @@ public class BlockConsumer implements Callable<Boolean> {
                     begin = System.nanoTime();
                     boolean saveBlock = blockService.saveBlock(chainId, block, true);
                     if (!saveBlock) {
-                        logger.error("error occur when saving downloaded blocks, height-" + startHeight + ", hash-" + block.getHeader().getHash());
+                        logger.error("An exception occurred while saving the downloaded block, height-" + startHeight + ", hash-" + block.getHeader().getHash());
                         context.setNeedSyn(false);
                         return false;
                     }

@@ -31,6 +31,9 @@ import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
+import io.nuls.network.model.dto.BestBlockInfo;
+import io.nuls.network.rpc.call.BlockRpcService;
+import io.nuls.network.rpc.call.impl.BlockRpcServiceImpl;
 import io.nuls.network.utils.IpUtil;
 import io.nuls.network.utils.LoggerUtil;
 
@@ -73,6 +76,24 @@ public class NodeMaintenanceTask implements Runnable {
     }
 
     private void process(NodeGroup nodeGroup, boolean isCross) {
+        if (isCross) {
+            if (nodeGroup.isMoonNode()) {
+                //主网节点，不用判断，主网卫星链不会存在高度0的情况
+            } else {
+                //看跨链节点的高度是否不为0
+                if (!nodeGroup.isHadBlockHeigh()) {
+                    BlockRpcService blockRpcService = SpringLiteContext.getBean(BlockRpcServiceImpl.class);
+                    BestBlockInfo bestBlockInfo = blockRpcService.getBestBlockHeader(nodeGroup.getChainId());
+                    if (bestBlockInfo.getBlockHeight() < 1) {
+                        LoggerUtil.logger(nodeGroup.getChainId()).info("chainId={} cross connect process stop.blockHeight={}", nodeGroup.getChainId(), bestBlockInfo.getBlockHeight());
+                        return;
+                    } else {
+                        LoggerUtil.logger(nodeGroup.getChainId()).info("chainId={} cross connect process active.blockHeight={}", nodeGroup.getChainId(), bestBlockInfo.getBlockHeight());
+                        nodeGroup.setHadBlockHeigh(true);
+                    }
+                }
+            }
+        }
         List<Node> needConnectNodes = getNeedConnectNodes(nodeGroup, isCross);
         if (needConnectNodes == null || needConnectNodes.size() == 0) {
             return;
@@ -82,7 +103,7 @@ public class NodeMaintenanceTask implements Runnable {
         for (Node node : needConnectNodes) {
             node.setType(Node.OUT);
             count++;
-            Future<Node> future =  connectionManager.maintenance.submit(new Callable<Node>() {
+            Future<Node> future = connectionManager.maintenance.submit(new Callable<Node>() {
                 @Override
                 public Node call() {
                     try {

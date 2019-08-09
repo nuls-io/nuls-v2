@@ -157,6 +157,7 @@ public class NodeGroupRpc extends BaseCmd {
         }
         NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
         String seedIps = String.valueOf(params.get("seedIps"));
+        LoggerUtil.logger(chainId).info("chainId={},seedIps={}",chainId,seedIps);
         //友链的跨链协议调用
         NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByChainId(chainId);
         if (null == nodeGroup) {
@@ -178,7 +179,7 @@ public class NodeGroupRpc extends BaseCmd {
             String[] crossAddr = croosSeed.split(NetworkConstant.COLON);
             nodeGroup.addNeedCheckNode(crossAddr[0], Integer.valueOf(crossAddr[1]), Integer.valueOf(crossAddr[1]), true);
         }
-        networkConfig.setMoonSeedIpList(ipList);
+//        networkConfig.setMoonSeedIpList(ipList);
         nodeGroup.setCrossActive(true);
         return success();
     }

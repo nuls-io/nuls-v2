@@ -34,6 +34,7 @@ import io.nuls.base.script.ScriptBuilder;
 import io.nuls.base.script.ScriptChunk;
 import io.nuls.base.script.ScriptOpCodes;
 import io.nuls.core.constant.BaseConstant;
+import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.HexUtil;
@@ -115,6 +116,9 @@ public class SignatureUtil {
      */
     public static boolean validateCtxSignture(Transaction tx)throws NulsException{
         if (tx.getTransactionSignature() == null || tx.getTransactionSignature().length == 0) {
+            if(tx.getType() == TxType.VERIFIER_INIT || tx.getType() == TxType.VERIFIER_CHANGE){
+                return true;
+            }
             return false;
         }
         TransactionSignature transactionSignature = new TransactionSignature();

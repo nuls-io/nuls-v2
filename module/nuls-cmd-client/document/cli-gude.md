@@ -1602,14 +1602,18 @@ nuls>>> network nodes
 
 ### 在主链注册侧链
 侧链需要进行跨链交易，需要先在主链完成注册，此命令需要在主网节点运行
-- **命令： registercrosschain &lt;address> &lt;chainId> &lt;chainName> &lt;magicNumber> &lt;assetId> &lt;symbol> &lt;assetName> &lt;initNumber> [decimalPlaces] [minAvailableNodeNum] [txConfirmedBlockNum]**
+- **命令： registercrosschain &lt;address> &lt;chainId> &lt;chainName> &lt;addressPrefix> &lt;magicNumber> &lt;maxSignatureCount> &lt;signatureBFTRatio>&lt;verifierList>&lt;assetId> &lt;symbol> &lt;assetName> &lt;initNumber> [decimalPlaces] [minAvailableNodeNum] [txConfirmedBlockNum]**
 
 | 参数           | 说明         |
 | -------------- | ------------ |
 |&lt;address>|注册跨链费用支付账户|
 |&lt;chainId>|注册的链id|
 |&lt;chainName>|注册的链名称|
+|&lt;addressPrefix>|地址前缀|
 |&lt;magicNumber>|注册链的运行的网络魔法参数|
+|&lt;maxSignatureCount>|注册链最大签名数量|
+|&lt;signatureBFTRatio>|拜占庭比例 [67-100]|
+|&lt;verifierList>|注册链的初始验证人列表|
 |&lt;assetId>|注册的资产id|
 |&lt;symbol>|资产简称 e.g. BTC|
 |&lt;assetName>|资产名称|
@@ -1620,76 +1624,321 @@ nuls>>> network nodes
 返回值
 
 ```
-6c29d99c2b02cfc766ef25bee2ea619610a5fce1d778c3038885111f590ae312  #注册交易hash
+{
+  "mainNetVerifierSeeds" : "tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp",#主网验证人列表
+  "txHash" : "25b3a57507086d5d895895b41ef744a160f3251f4e5db118b7ca833eb6c9fff3",#交易hash
+  "mainNetCrossConnectSeeds" : "192.168.1.192:8088"#主网跨链种子连接节点
+}
+
 ```
 示例
 
-```nuls>>> registercrosschain tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD 3 testchain 123456 10 TB tb 1000
+```
+nuls>>>registercrosschain tNULSeBaMqywZjfSrKNQKBfuQtVxAHBQ8rB2Zn 12 nbtc btc 20197777 12  67 LJScusmPf5EfdEwbA8nRZEYqMbRXKp6y3oCb 1 btc bt 100000000 8 1
+
 Please enter the password.
 Enter your password:**********
-6c29d99c2b02cfc766ef25bee2ea619610a5fce1d778c3038885111f590ae312
+{
+  "mainNetVerifierSeeds" : "tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp",
+  "txHash" : "25b3a57507086d5d895895b41ef744a160f3251f4e5db118b7ca833eb6c9fff3",
+  "mainNetCrossConnectSeeds" : "192.168.1.192:8088"
+}
+
 ```
+
+
+
+
+### 在主链添加需要跨链交易的侧链资产
+
+侧链是多资产的，需要在已存在的链上进行跨链资产的添加，此命令需要在主网节点运行
+
+- **命令： addcrossasset &lt;address> &lt;chainId> &lt;assetId> &lt;symbol> &lt;assetName> &lt;initNumber> [decimalPlaces] **
+
+| 参数            | 说明                     |
+| --------------- | ------------------------ |
+| &lt;address>    | 添加资产指令费用支付账户 |
+| &lt;chainId>    | 注册的链id               |
+| &lt;assetId>    | 注册的资产id             |
+| &lt;symbol>     | 资产简称 e.g. BTC        |
+| &lt;assetName>  | 资产名称                 |
+| &lt;initNumber> | 资产发现总量             |
+| [decimalPlaces] | 资产小数位数 默认8       |
+
+返回值
+
+```
+  "txHash" : "25b3a57507086d5d895895b41ef744a160f3251f4e5db118b7ca833eb6c9fff3",#交易hash
+```
+
+示例
+
+```
+nuls>>>addcrossasset tNULSeBaMqywZjfSrKNQKBfuQtVxAHBQ8rB2Zn  10 2 yuer CCY 300000000 8
+
+Please enter the password.
+Enter your password:**********
+ "25b3a57507086d5d895895b41ef744a160f3251f4e5db118b7ca833eb6c9fff3"
+  
+
+```
+
+
+
+### 在主链移除跨链交易的侧链资产
+
+侧链是多资产的，在主网上要停止该资产的跨链交易时，使用移除指令，如果剩下最后一个资产，则该指令执行后，对应的链也将停止工作。此命令需要在主网节点运行
+
+- **命令： disablecrossasset &lt;address> &lt;chainId> &lt;assetId>**
+
+| 参数         | 说明                   |
+| ------------ | ---------------------- |
+| &lt;address> | 添加资产时候使用的地址 |
+| &lt;chainId> | 移除注册的链id         |
+| &lt;assetId> | 移除注册的资产id       |
+
+返回值
+
+```
+  "txHash" : "25b3a57507086d5d895895b41ef744a160f3251f4e5db118b7ca833eb6c9fff3",#交易hash
+```
+
+示例
+
+```
+nuls>>>disablecrossasset tNULSeBaMqywZjfSrKNQKBfuQtVxAHBQ8rB2Zn  10 3
+Please enter the password.
+Enter your password:**********
+ "25b3a57507086d5d895895b41ef744a160f3251f4e5db118b7ca833eb6c9fff3"
+  
+
+```
+
+
+
+### 在主链恢复侧链
+
+侧链在主网注册并且删除后，需要恢复，则可以通过如下命令进行恢复并更新信息，此命令需要在主网节点运行
+
+- **命令： updatecrosschain &lt;address> &lt;chainId> &lt;chainName> &lt;addressPrefix> &lt;magicNumber> &lt;maxSignatureCount> &lt;signatureBFTRatio>&lt;verifierList>&lt;assetId> &lt;symbol> &lt;assetName> &lt;initNumber> [decimalPlaces] [minAvailableNodeNum] [txConfirmedBlockNum]**
+
+| 参数                   | 说明                                      |
+| ---------------------- | ----------------------------------------- |
+| &lt;address>           | 注册跨链费用支付账户                      |
+| &lt;chainId>           | 注册的链id                                |
+| &lt;chainName>         | 注册的链名称                              |
+| &lt;addressPrefix>     | 地址前缀                                  |
+| &lt;magicNumber>       | 注册链的运行的网络魔法参数                |
+| &lt;maxSignatureCount> | 注册链最大签名数量                        |
+| &lt;signatureBFTRatio> | 拜占庭比例 [67-100]                       |
+| &lt;verifierList>      | 注册链的初始验证人列表                    |
+| &lt;assetId>           | 注册的资产id                              |
+| &lt;symbol>            | 资产简称 e.g. BTC                         |
+| &lt;assetName>         | 资产名称                                  |
+| &lt;initNumber>        | 资产发现总量                              |
+| [decimalPlaces]        | 资产小数位数 默认8                        |
+| [minAvailableNodeNum]  | 跨链交易可用条件：最小可用节点数量，默认5 |
+| [txConfirmedBlockNum]  | 注册交易的确认块数，默认30                |
+
+返回值
+
+```
+{
+  "mainNetVerifierSeeds" : "tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp",#主网验证人列表
+  "txHash" : "25b3a57507086d5d895895b41ef744a160f3251f4e5db118b7ca833eb6c9fff3",#交易hash
+  "mainNetCrossConnectSeeds" : "192.168.1.192:8088"#主网跨链种子连接节点
+}
+
+```
+
+示例
+
+```
+nuls>>>registercrosschain tNULSeBaMqywZjfSrKNQKBfuQtVxAHBQ8rB2Zn 12 nbtc btc 20197777 12  67 LJScusmPf5EfdEwbA8nRZEYqMbRXKp6y3oCb 1 btc bt 100000000 8 1
+
+Please enter the password.
+Enter your password:**********
+{
+  "mainNetVerifierSeeds" : "tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp",
+  "txHash" : "25b3a57507086d5d895895b41ef744a160f3251f4e5db118b7ca833eb6c9fff3",
+  "mainNetCrossConnectSeeds" : "192.168.1.192:8088"
+}
+
+```
+
+
+
 ### 查询侧链注册信息
-在主网查询某条测试的注册信息
+
+在主网查询某条侧链的注册信息
+
 - **命令：crosschaininfo &lt;chainId>**
 
-| 参数           | 说明         |
-| -------------- | ------------ |
-|&lt;chainId>|注册链的id|
+| 参数         | 说明       |
+| ------------ | ---------- |
+| &lt;chainId> | 注册链的id |
+
 返回值
 
 ```{
+ {
   "chainId" : 3,
   "chainName" : "testchain",
   "addressType" : "1",
+  "addressPrefix" : "TBTC",
   "magicNumber" : 123456,
   "minAvailableNodeNum" : 5,
   "txConfirmedBlockNum" : 0,
   "regAddress" : "tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD",
   "regTxHash" : "6c29d99c2b02cfc766ef25bee2ea619610a5fce1d778c3038885111f590ae312",
   "createTime" : 1557739548367,
-  "seeds" : "192.168.1.192:8088",
+  "verifierList" : [ "TBTCdusmPf5EfdEwbA8nRZEYqMbRXKp6y3oCb" ],
+  "signatureByzantineRatio" : 67,
+  "maxSignatureCount" : 12,
   "selfAssetKeyList" : [ "3-10" ],
-  "totalAssetKeyList" : [ "3-10" ]
+  "totalAssetKeyList" : [ "3-10" ]，
+  "mainNetVerifierSeeds" : "tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp",
+  "mainNetCrossConnectSeeds" : "192.168.1.192:8088",
+  "enable" : true
 }
 ```
+
 返回参数说明
 
-|parameter|required|type|description|
-|------------------|-------|-----|-------------------------------------------|
-|chainId|true|int|链标识|
-|assetId|true|int|资产id|
-|chainName|true|string|链名称|
-|addressType|true|int|链上创建的账户的地址类型：1生态内2非生态内|
-|magicNumber|true|string|网络魔法参数|
-|minAvailableNodeNum|true|int|最小可用节点数量|
-|txConfirmBlockNum|true|int|交易确认块数|
-|symbol|true|string|资产符号|
-|assetName|true|string|资产名称|
-|initNumber|true|string|资产初始值|
-|decimalPlaces|true|int|最小资产可分割位数|
-|address|true|string|创建链的主网地址|
-|password|true|string|私钥对应的密码|
+| parameter                | required | type   | description                                |
+| ------------------------ | -------- | ------ | ------------------------------------------ |
+| chainId                  | true     | int    | 链标识                                     |
+| assetId                  | true     | int    | 资产id                                     |
+| chainName                | true     | string | 链名称                                     |
+| addressType              | true     | int    | 链上创建的账户的地址类型：1生态内2非生态内 |
+| addressPrefix            | true     | string | 地址前缀 1-5个 大写字母或数字              |
+| magicNumber              | true     | string | 网络魔法参数                               |
+| minAvailableNodeNum      | true     | int    | 最小可用节点数量                           |
+| txConfirmBlockNum        | true     | int    | 交易确认块数                               |
+| regAddress               | true     | string | 注册支付地址                               |
+| regTxHash                | true     | string | 交易hash                                   |
+| createTime               | true     | long   | 交易提交时间 ，1970相差的秒数              |
+| verifierList             | true     | string | 验证人列表                                 |
+| signatureByzantineRatio  | true     | int    | 拜占庭比例 [67-100]                        |
+| maxSignatureCount        | true     | int    | 最大签名数                                 |
+| symbol                   | true     | string | 资产符号                                   |
+| assetName                | true     | string | 资产名称                                   |
+| initNumber               | true     | string | 资产初始值                                 |
+| decimalPlaces            | true     | int    | 最小资产可分割位数                         |
+| mainNetVerifierSeeds     | true     | string | 主网种子验证人地址                         |
+| mainNetCrossConnectSeeds | true     | string | 主网种子连接节点地址                       |
+| enable                   | true     | string | 是否使用中                                 |
+
 示例
 
 ```
-nuls>>> crosschaininfo 11
+nuls>>> crosschaininfo 10
 {
-  "chainId" : 11,
-  "chainName" : "Neth",
+  "chainId" : 10,
+  "chainName" : "nuls10",
   "addressType" : "1",
-  "magicNumber" : 20190303,
-  "minAvailableNodeNum" : 5,
+  "addressPrefix" : "LJS2",
+  "magicNumber" : 2019888,
+  "minAvailableNodeNum" : 1,
   "txConfirmedBlockNum" : 0,
-  "regAddress" : "tNULSeBaMgDEcAUhPSdF3D3C6mT54HPUt81cQ4",
-  "regTxHash" : "7a672b093b274b93bc145dda0e598eddf1f1cf0ccb9aba3e67b3899a5b4ad7a1",
-  "createTime" : 1557921296460,
-  "seeds" : "192.168.1.192:8088",
-  "selfAssetKeyList" : [ "11-1" ],
-  "totalAssetKeyList" : [ "11-1", "2-1" ]
+  "regAddress" : "tNULSeBaMqywZjfSrKNQKBfuQtVxAHBQ8rB2Zn",
+  "regTxHash" : "14539bbcb00b26e545168aa241c4484cf8aff42f373a2019959681e73f0acea8",
+  "createTime" : 1565229647,
+  "verifierList" : [ "LJS2dusmPf5EfdEwbA8nRZEYqMbRXKp6y3oCb" ],
+  "signatureByzantineRatio" : 67,
+  "maxSignatureCount" : 12,
+  "selfAssetKeyList" : [ "10-1" ],
+  "totalAssetKeyList" : [ "10-1" ],
+  "mainNetVerifierSeeds" : "tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp",
+  "mainNetCrossConnectSeeds" : "192.168.1.192:8088",
+  "enable" : true
 }
 ```
+
+
+
+### 查询侧链注册资产信息
+
+在主网查询某条侧链资产的注册信息
+
+- **命令：crosschaininfo &lt;chainId>**
+
+| 参数         | 说明       |
+| ------------ | ---------- |
+| &lt;chainId> | 注册链的id |
+| &lt;assetId> | 资产id     |
+
+返回值
+
+```{
+ {
+  "chainId" : 10,
+  "assetId" : 2,
+  "symbol" : "CCY",
+  "assetName" : "yuer",
+  "depositNuls" : "100000000000",
+  "destroyNuls" : "20000000000",
+  "initNumber" : "30000000000",
+  "decimalPlaces" : 2,
+  "enable" : false,
+  "createTime" : 1565229429,
+  "address" : "tNULSeBaMqywZjfSrKNQKBfuQtVxAHBQ8rB2Zn",
+  "txHash" : "612eda872c6ca16c5a5f63cce70a64ac15852e2b3a403309b0d963d22d6391bc"
+}
+```
+
+返回参数说明
+
+| parameter     | required | type    | description                  |
+| ------------- | -------- | ------- | ---------------------------- |
+| chainId       | true     | int     | 链标识                       |
+| assetId       | true     | int     | 资产id                       |
+| &lt;symbol>   | true     | string  | 资产简称 e.g. BTC            |
+| assetName     | true     | string  | 资产名称                     |
+| depositNuls   | true     | long    | 抵押的主网资产数量           |
+| destroyNuls   | true     | long    | 销毁的主网资产数量           |
+| initNumber    | true     | string  | 资产初始值                   |
+| decimalPlaces | true     | int     | 资产可切割位数               |
+| enable        | true     | boolean | 是否可用 true可用,false 停用 |
+| createTime    | true     | long    | 交易产生时间                 |
+| address       | true     | String  | 交易支付地址                 |
+| txHash        | true     | String  | 交易hash                     |
+
+示例
+
+```
+
+nuls>>> crossassetinfo 10 2
+{
+  "chainId" : 10,
+  "assetId" : 2,
+  "symbol" : "CCY",
+  "assetName" : "yuer",
+  "depositNuls" : "100000000000",
+  "destroyNuls" : "20000000000",
+  "initNumber" : "30000000000",
+  "decimalPlaces" : 2,
+  "enable" : false,
+  "createTime" : 1565229429,
+  "address" : "tNULSeBaMqywZjfSrKNQKBfuQtVxAHBQ8rB2Zn",
+  "txHash" : "612eda872c6ca16c5a5f63cce70a64ac15852e2b3a403309b0d963d22d6391bc"
+}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
 ### 创建跨链交易
+
 - **命令：createcrosstx &lt;formAddress> &lt;toAddress> &lt;assetChainId> &lt;assetId> &lt;amount> [remark]**
 
 

@@ -267,12 +267,12 @@ public class CoinDataValidator {
                     //非本地网络账户地址,不进行处理
                     continue;
                 } else {
-                    return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{ LedgerUtil.getRealAddressStr(coinTo.getAddress()), "--", "address Not local chain Exception"});
+                    return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{LedgerUtil.getRealAddressStr(coinTo.getAddress()), "--", "address Not local chain Exception"});
                 }
             }
             //判断是否是解锁操作
             if (coinTo.getLockTime() == 0) {
-                String address =  LedgerUtil.getRealAddressStr(coinTo.getAddress());
+                String address = LedgerUtil.getRealAddressStr(coinTo.getAddress());
                 String assetKey = LedgerUtil.getKeyStr(address, coinTo.getAssetsChainId(), coinTo.getAssetsId());
                 AccountState accountState = accountStateMap.get(assetKey);
                 if (null == accountState) {
@@ -357,7 +357,7 @@ public class CoinDataValidator {
      * @param fromNonce
      * @return
      */
-    private ValidateResult validateCommonCoinData(int addressChainId, int assetChainId, int assetId, AccountState accountState, String address, BigInteger fromAmount, byte[] fromNonce, boolean containUncomfirmedAmount) {
+    private ValidateResult validateCommonCoinData(int addressChainId, int assetChainId, int assetId, AccountState accountState, String address, BigInteger fromAmount, byte[] fromNonce, byte[] txNonce, boolean containUncomfirmedAmount) {
         AccountStateUnconfirmed accountStateUnconfirmed = null;
         if (containUncomfirmedAmount) {
             accountStateUnconfirmed = unconfirmedStateService.getUnconfirmedInfo(address, addressChainId, assetChainId, assetId, accountState);
@@ -391,6 +391,11 @@ public class CoinDataValidator {
                 logger(addressChainId).info("DOUBLE_EXPENSES_CODE address={},fromNonceStr={},dbNonce={}", address, fromNonceStr, LedgerUtil.getNonceEncode(preNonce));
                 return ValidateResult.getResult(LedgerErrorCode.DOUBLE_EXPENSES, new String[]{address, fromNonceStr});
             }
+            //数据nonce值== 当前提交的hash值
+            if (LedgerUtil.equalsNonces(preNonce, txNonce)) {
+                logger(addressChainId).info("DOUBLE_EXPENSES_CODE address={},fromNonceStr={},dbNonce={}", address, fromNonceStr, LedgerUtil.getNonceEncode(preNonce));
+                return ValidateResult.getResult(LedgerErrorCode.DOUBLE_EXPENSES, new String[]{address, fromNonceStr});
+            }
             //上面没连接上，但是fromNonce又存储过，则双花了
             if (transactionService.fromNonceExist(addressChainId, LedgerUtil.getAccountNoncesStrKey(address, assetChainId, assetId, fromNonceStr))) {
 //                logger(addressChainId).info("DOUBLE_EXPENSES_CODE address={},fromNonceStr={},dbNonce={}", address, fromNonceStr, LedgerUtil.getNonceEncode(preNonce));
@@ -401,6 +406,7 @@ public class CoinDataValidator {
             return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{address, fromNonceStr, "exception:" + e.getMessage()});
         }
         //孤儿交易了，这笔交易不清楚状况，是孤儿
+        logger(addressChainId).debug("#############address={},fromNonceStr={},dbNonce={}", address, fromNonceStr, LedgerUtil.getNonceEncode(preNonce));
         return ValidateResult.getResult(LedgerErrorCode.ORPHAN, new String[]{address, fromNonceStr, LedgerUtil.getNonceEncode(preNonce)});
     }
 
@@ -415,7 +421,7 @@ public class CoinDataValidator {
      */
     private ValidateResult isValidateCommonTxBatch(int chainId, AccountState accountState, CoinFrom coinFrom, byte[] txNonce,
                                                    Map<String, List<TempAccountNonce>> accountValidateTxMap) {
-        String address =  LedgerUtil.getRealAddressStr(coinFrom.getAddress());
+        String address = LedgerUtil.getRealAddressStr(coinFrom.getAddress());
         String assetKey = LedgerUtil.getKeyStr(address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
         String fromCoinNonceStr = LedgerUtil.getNonceEncode(coinFrom.getNonce());
         if (LedgerUtil.equalsNonces(coinFrom.getNonce(), txNonce)) {
@@ -450,7 +456,7 @@ public class CoinDataValidator {
 
     private ValidateResult analysisFromCoinBlokTx(int chainId, int txType, byte[] txNonce, List<CoinFrom> coinFroms, Map<String, List<TempAccountNonce>> accountValidateTxMap, Map<String, AccountState> accountStateMap) {
         for (CoinFrom coinFrom : coinFroms) {
-            String address =  LedgerUtil.getRealAddressStr(coinFrom.getAddress());
+            String address = LedgerUtil.getRealAddressStr(coinFrom.getAddress());
             if (LedgerUtil.isNotLocalChainAccount(chainId, coinFrom.getAddress())) {
                 if (LedgerUtil.isCrossTx(txType)) {
                     //非本地网络账户地址,不进行处理
@@ -593,6 +599,7 @@ public class CoinDataValidator {
      */
     public ValidateResult validateCoinData(int addressChainId, Transaction tx) throws Exception {
         String txHash = tx.getHash().toHex();
+        byte[] txNonce = LedgerUtil.getNonceByTx(tx);
         if (transactionService.hadTxExist(addressChainId, txHash)) {
             return ValidateResult.getResult(LedgerErrorCode.TX_EXIST, new String[]{"--", txHash});
         }
@@ -614,11 +621,11 @@ public class CoinDataValidator {
                     return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{LedgerUtil.getRealAddressStr(coinFrom.getAddress()), "--", "address Not local chain Exception"});
                 }
             }
-            String address =  LedgerUtil.getRealAddressStr(coinFrom.getAddress());
+            String address = LedgerUtil.getRealAddressStr(coinFrom.getAddress());
             AccountState accountState = accountStateService.getAccountStateReCal(address, addressChainId, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
             //普通交易
             if (coinFrom.getLocked() == 0) {
-                return validateCommonCoinData(addressChainId, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), accountState, address, coinFrom.getAmount(), coinFrom.getNonce(), true);
+                return validateCommonCoinData(addressChainId, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), accountState, address, coinFrom.getAmount(), coinFrom.getNonce(), txNonce, true);
             } else {
                 if (!isValidateFreezeTx(coinFrom.getLocked(), accountState, coinFrom.getAmount(), coinFrom.getNonce())) {
                     //确认交易未找到冻结的交易
@@ -650,17 +657,17 @@ public class CoinDataValidator {
                     //非本地网络账户地址,不进行处理
                     continue;
                 } else {
-                    return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{ LedgerUtil.getRealAddressStr(coinFrom.getAddress()), "--", "address Not local chain Exception"});
+                    return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{LedgerUtil.getRealAddressStr(coinFrom.getAddress()), "--", "address Not local chain Exception"});
                 }
             }
-            String address =  LedgerUtil.getRealAddressStr(coinFrom.getAddress());
+            String address = LedgerUtil.getRealAddressStr(coinFrom.getAddress());
             int assetChainId = coinFrom.getAssetsChainId();
             int assetId = coinFrom.getAssetsId();
             String accountKey = LedgerUtil.getKeyStr(address, assetChainId, assetId);
             AccountState accountState = accountStateService.getAccountStateReCal(address, addressChainId, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
             //普通交易
             if (coinFrom.getLocked() == 0) {
-                ValidateResult validateResult = validateCommonCoinData(addressChainId, assetChainId, assetId, accountState, address, coinFrom.getAmount(), coinFrom.getNonce(), false);
+                ValidateResult validateResult = validateCommonCoinData(addressChainId, assetChainId, assetId, accountState, address, coinFrom.getAmount(), coinFrom.getNonce(), txNonce, false);
                 if (validateResult.isSuccess()) {
                     CoinDataUtil.calTxFromAmount(accountsMap, coinFrom, txNonce, accountKey, address);
                 } else {
@@ -706,7 +713,7 @@ public class CoinDataValidator {
             }
             //判断是否是解锁操作
             if (coinFrom.getLocked() == 0) {
-                String assetKey = LedgerUtil.getKeyStr( LedgerUtil.getRealAddressStr(coinFrom.getAddress()), coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
+                String assetKey = LedgerUtil.getKeyStr(LedgerUtil.getRealAddressStr(coinFrom.getAddress()), coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
                 //回滚accountBalanceValidateTxMap缓存数据
                 List<TempAccountNonce> list = accountBalanceValidateTxMap.get(assetKey);
                 if (null == list) {

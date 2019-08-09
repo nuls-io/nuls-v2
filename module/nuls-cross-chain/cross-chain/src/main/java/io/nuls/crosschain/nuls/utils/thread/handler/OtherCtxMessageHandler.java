@@ -30,12 +30,12 @@ public class OtherCtxMessageHandler implements Runnable {
                 otherHash = untreatedMessage.getCacheHash();
                 String otherHex = otherHash.toHex();
                 int fromChainId = untreatedMessage.getChainId();
-                chain.getLogger().info("开始处理其他链节点：{}发送的跨链交易,Hash:{}", untreatedMessage.getNodeId(), otherHex);
+                chain.getLogger().debug("开始处理其他链节点：{}发送的跨链交易,Hash:{}", untreatedMessage.getNodeId(), otherHex);
                 boolean handleResult = MessageUtil.handleOtherChainCtx(messageBody.getCtx(),chain, fromChainId);
                 if (!handleResult && chain.getOtherHashNodeIdMap().get(otherHash) != null && !chain.getOtherHashNodeIdMap().get(otherHash).isEmpty()) {
                     MessageUtil.regainCtx(chain, fromChainId, otherHash, otherHex,false);
                 }
-                chain.getLogger().info("新交易处理完成,Hash:{}\n\n", otherHex);
+                chain.getLogger().debug("新交易处理完成,Hash:{}\n\n", otherHex);
             } catch (Exception e) {
                 chain.getLogger().error(e);
             } finally {

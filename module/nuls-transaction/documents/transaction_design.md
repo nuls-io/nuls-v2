@@ -35,11 +35,11 @@
 - 区块模块
 - 链管理模块
 
-![](./image/tx-manager-module/tx-manager-context.png)
+![](./img/tx-manager-context.png)
 
 ### 架构图
 
-![](./img/architecture.png)
+![](https://raw.githubusercontent.com/nuls-io/nuls-v2/develop/module/nuls-transaction/documents/img/architecture.png)
 
 整个模块大致分为3个部分: 接口、实现层、本地存储
 
@@ -130,7 +130,7 @@
 
 ​	只有共识节点才会有打包新区快交易的流程，交易模块开始打包新区块交易的指令是由共识模块发出的，共识提供组装交易的执行截止时间，当前区块可打包交易总容量大小等数据，交由交易模块进行打包。
 
-​	交易模块打包区块交易时，首先从待打包队列（先进先出）中取出交易，然后到账本模块进行交易的账本验证，由于打包和验证保存区块的操作可能会并行处理，所有为了避免已确认交易的nonce值能够按照正确的逻辑验证，我们需要在验证账本前后都需要检查该交易是否已经被加入其他区块进行确认了。
+​	交易模块打包区块交易时，首先从PackablePool待打包队列（先进先出）中取出交易，然后到账本模块进行交易的账本验证，账本验证时批量进行的，为了在大批量交易时减少模块间的RPC调用。为了网络的稳定性，一个块打包的交易数是有限制，在不包含系统交易的情况下，默认一个块最大为1万笔交易。
 
 ​	账本验证不通过的交易与已确认的交易将不会放入可打包交易集合中（如果是孤儿交易，将会重新放入待打包队列里，为了防止出现永久性的孤儿交易重复的被取出和放回对系统成影响，放回的次数会被限制）
 
@@ -159,9 +159,90 @@
 
 
 
+## 通用交易协议
+
+NULS采用通用的交易协议格式，主要由以下字段组成：
+
+| Len  | Fields   | Data Type | Remark             |
+| ---- | -------- | --------- | ------------------ |
+| 2    | type     | uint16    | 交易类型           |
+| 4    | time     | uint32    | 时间，精确到秒     |
+| ？   | txData   | VarByte   | 业务数据           |
+| ？   | coinData | VarByte   | 资产数据           |
+| ？   | remark   | VarString | 备注               |
+| ？   | sigData  | VarByte   | 包含公钥和签名数据 |
+
+
+
+**type**
+
+用于区分不同的业务交易，每个模块可以注册多个交易类型，每个交易类型可以有不同的验证逻辑、处理逻辑。取值范围是1~65535。
+不同的交易类型不应该设置重复的type，系统不允许重复的type进行注册。
+系统对扩展的支持：大于100的type
+
+**time** 
+
+交易发生的时间，精确到秒，不做强制限制，取值范围可以是任何uint32内的数字。
+
+**txData**  
+
+用于扩展业务数据，账本不验证txData内容，这里可以存放任何数据。目前NULS内置的交易类型中的业务数据都是存储在txData字段中。业务模块在注册了交易类型后，会提供三个接口来验证和处理txData中的数据（verifyTx，commitTx，rollbackTx）。
+
+**CoinData**  
+
+交易的资产数据，NULS目前定义了一套通用的CoinData格式，具体如下
+
+```
+froms://List<CoinForm>格式，
+tos://List<CoinTo>格式
+```
+
+注：支持多个账户同一笔交易中转出不同资产到不同的账户中
+
+CoinForm结构[40]
+
+```
+address:  //byte[24] 账户地址  
+assetsChainId://uint16 资产发行链的
+idassetsId: //uint16 资产
+idamount：  //uint128，转出数量
+nonce  ： //byte[8] 交易顺序号，前一笔交易的hash的后8个字节
+locked ： //byte 是否是锁定状态(locktime:-1),1代表锁定，0代表非锁定
+```
+
+CoinTo结构[44]
+
+```
+address:  //byte[24],目标地址
+assetsChainId://uint16 资产发行链的
+idassetsId: //uint16 资产
+idamount :  //uint128，转账金额
+lockTime：//uint32,解锁高度或解锁时间，-1为永久锁定
+```
+
+手续费
+
+```
+forms-tos剩余的部分就是手续费（模型中支持多种资产缴纳手续费，约束条件由经济模型设计决定）
+```
+
+**remark**  
+
+备注，此内容的数据，会通过utf-8编码转换为字符串显示在浏览器和钱包中。也可以用remark字段进行交易的业务扩展。
+
+**sigData** 
+
+签名数据支持多个账户的签名，每个签名包括四个部分：公钥长度、公钥、签名数据长度、签名数据。
+
+**交易的Hash计算** 
+
+将交易除sigData外的数据进行序列化，获得完整的字节数组。使用Sha-256对数据进行两次计算，得到32位的Hash值。
+
+
+
 ## 模块服务
 
-参考[交易管理模块RPC-API接口文档](transaction.md)
+参考[交易管理模块RPC-API接口文档](./transaction.md)
 
 
 
@@ -192,7 +273,7 @@
 | 4      | time                 | uint32    | 交易时间       |
 | ？     | txData               | VarByte   | 交易数据       |
 | ？     | coinData             | VarByte   | 交易输入和输出 |
-| ？     | remark               | VarByte   | 备注           |
+| ？     | remark               | VarString | 备注           |
 | ？     | transactionSignature | VarByte   | 交易签名       |
 
 - 消息处理

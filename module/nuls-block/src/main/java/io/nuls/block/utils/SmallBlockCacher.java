@@ -18,7 +18,7 @@
  * SOFTWARE.
  */
 
-package io.nuls.block.cache;
+package io.nuls.block.utils;
 
 import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsHash;
@@ -28,7 +28,6 @@ import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.CachedSmallBlock;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.service.BlockService;
-import io.nuls.block.utils.BlockUtil;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.CollectionUtils;
@@ -64,7 +63,7 @@ public class SmallBlockCacher {
     /**
      * 将一个SmallBlock放入内存中,若不主动删除,则在缓存存满或者存在时间超过1000秒时,自动清理
      *
-     * @param chainId 链Id/chain id
+     * @param chainId          链Id/chain id
      * @param cachedSmallBlock
      */
     public static void cacheSmallBlock(int chainId, CachedSmallBlock cachedSmallBlock) {
@@ -76,7 +75,7 @@ public class SmallBlockCacher {
      * 根据hash获取缓存的{@link SmallBlock}
      * TODO  注释完整性
      *
-     * @param chainId 链Id/chain id
+     * @param chainId   链Id/chain id
      * @param blockHash
      * @return
      */
@@ -105,7 +104,7 @@ public class SmallBlockCacher {
     /**
      * 获取状态
      *
-     * @param chainId 链Id/chain id
+     * @param chainId   链Id/chain id
      * @param blockHash
      * @return
      */
@@ -117,7 +116,7 @@ public class SmallBlockCacher {
     /**
      * 设置状态
      *
-     * @param chainId 链Id/chain id
+     * @param chainId          链Id/chain id
      * @param blockHash
      * @param blockForwardEnum
      * @return

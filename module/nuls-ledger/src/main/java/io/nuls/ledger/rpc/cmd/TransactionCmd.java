@@ -147,7 +147,6 @@ public class TransactionCmd extends BaseLedgerCmd {
                     failList.add(txHash);
                 }
             }
-
             Map<String, Object> rtMap = new HashMap<>(2);
             rtMap.put("fail", failList);
             rtMap.put("orphan", orphanList);

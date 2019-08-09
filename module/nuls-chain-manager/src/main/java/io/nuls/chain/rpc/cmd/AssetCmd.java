@@ -147,10 +147,12 @@ public class AssetCmd extends BaseChainCmd {
             /* 身份的校验，账户地址的校验 (Verification of account address) */
             String dealAssetKey = CmRuntimeInfo.getAssetKey(chainId, assetId);
             Asset asset = assetService.getAsset(dealAssetKey);
-            if (asset == null || !asset.isAvailable()) {
+            if (asset == null) {
                 return failed(CmErrorCode.ERROR_ASSET_NOT_EXIST);
             }
-
+            if (!asset.isAvailable()) {
+                return failed(CmErrorCode.ERROR_ASSET_NOT_EXIST);
+            }
             if (!ByteUtils.arrayEquals(asset.getAddress(), address)) {
                 return failed(CmErrorCode.ERROR_ADDRESS_ERROR);
             }

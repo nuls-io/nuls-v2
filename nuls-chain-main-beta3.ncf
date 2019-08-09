@@ -112,7 +112,7 @@ connectTimeOut=30000
 
 [cross-chain]
 #跨链节点链接的最小值
-minNodeAmount=8
+minNodeAmount=4
 #跨链节点链接的最大值
 maxNodeAmount=10
 #跨链交易在本链内确认块数

@@ -92,6 +92,7 @@ public class NodeGroup implements Dto {
     private Map<String, Node> localShareToCrossUncheckNodes = new ConcurrentHashMap<>();
     private Map<String, Node> localShareToCrossCanConnectNodes = new ConcurrentHashMap<>();
 
+    private boolean hadBlockHeigh = false;
     private Lock locker = new ReentrantLock();
     /**
      * GROUP  STATUS
@@ -104,6 +105,8 @@ public class NodeGroup implements Dto {
     public final static int OK = 3;
     private final static int DESTROY = -1;
     private final static int RECONNECT = -2;
+
+
     public static Map<String, String> statusMap = new HashMap<>();
 
     static {
@@ -184,6 +187,13 @@ public class NodeGroup implements Dto {
         isCrossActive = crossActive;
     }
 
+    public boolean isHadBlockHeigh() {
+        return hadBlockHeigh;
+    }
+
+    public void setHadBlockHeigh(boolean hadBlockHeigh) {
+        this.hadBlockHeigh = hadBlockHeigh;
+    }
 
     public long getMagicNumber() {
         return magicNumber;
@@ -308,6 +318,10 @@ public class NodeGroup implements Dto {
             return true;
         }
         return false;
+    }
+
+    public boolean isMoonNode() {
+        return networkConfig.isMoonNode();
     }
 
     public int getSameIpMaxCount(boolean isCross) {
