@@ -107,16 +107,16 @@ int VERIFIER_CHANGE = 24;				// 验证人变更
 
      添加请求头 Content-Type: application/json;charset=UTF-8
      
-     其余请参考 [RESTFUL 接口文档](https://github.com/nuls-io/nuls-sdk-provider/blob/master/documents/nuls-sdk-provider_RESTFUL.md)
+     其余请参考 [RESTFUL 接口文档](https://github.com/nuls-io/nuls-v2/blob/master/module/nuls-sdk-provider/documents/nuls-sdk-provider_RESTFUL.md)
 
 
 ## 接口文档
 
 我们对外提供的API接口，分为`JSON-RPC`和`Restful`两种风格，用户可根据需要选择不通过的对接方式，接口文档详见以下: 
 
-[JSON-RPC 接口文档](https://github.com/nuls-io/nuls-sdk-provider/blob/master/documents/nuls-sdk-provider_JSONRPC.md)
+[JSON-RPC 接口文档](https://github.com/nuls-io/nuls-v2/blob/master/module/nuls-sdk-provider/documents/nuls-sdk-provider_JSONRPC.md)
 
-[RESTFUL 接口文档](https://github.com/nuls-io/nuls-sdk-provider/blob/master/documents/nuls-sdk-provider_RESTFUL.md)
+[RESTFUL 接口文档](https://github.com/nuls-io/nuls-v2/blob/master/module/nuls-sdk-provider/documents/nuls-sdk-provider_RESTFUL.md)
 
 _**附：**_ 官方已提供NULS-SDK-4J工具，有使用JAVA做对接的合作伙伴，可使用工具对接`NULS-SDK-Provider`模块，详见：[NULS-SDK-4J使用说明](https://github.com/nuls-io/nuls-v2-sdk4j/blob/master/README.md)
 
@@ -124,8 +124,8 @@ _**附：**_ 官方已提供NULS-SDK-4J工具，有使用JAVA做对接的合作�
 
 我们提供了`Postman`接口调式工具的导入文件(`JSON-RPC`和`RESTFUL`)，导入后，即可调试接口
 
-[JSON-PRC 接口调试-POSTMAN导入文件](https://github.com/nuls-io/nuls-sdk-provider/blob/master/documents/nuls-sdk-provider_Postman_JSONRPC.json)
+[JSON-PRC 接口调试-POSTMAN导入文件](https://github.com/nuls-io/nuls-v2/blob/master/module/nuls-sdk-provider/documents/nuls-sdk-provider_Postman_JSONRPC.json)
 
-[RESTFUL 接口调试-POSTMAN导入文件](https://github.com/nuls-io/nuls-sdk-provider/blob/master/documents/nuls-sdk-provider_Postman_RESTFUL.json)
+[RESTFUL 接口调试-POSTMAN导入文件](https://github.com/nuls-io/nuls-v2/blob/master/module/nuls-sdk-provider/documents/nuls-sdk-provider_Postman_RESTFUL.json)
 
 
