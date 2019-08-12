@@ -30,7 +30,7 @@ blackHolePublicKey=0298f88c3cae67385ce3cbee00f78816db3e56e566b62bd0f4c5b45f205d3
 port=18001
 crossPort=18002
 #魔法参数
-packetMagic=20190806
+packetMagic=20190807
 #种子节点
 selfSeedIps=39.98.226.51:18001,47.244.186.65:18001,47.254.234.223:18001,47.74.86.85:18001
 #主网的跨链种子连接节点
@@ -123,7 +123,7 @@ crossSeedIps=39.98.226.51:18002,47.244.186.65:18002,47.254.234.223:18002,47.74.8
 #主网验证人列表
 verifiers=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMmShSTVwbU4rHkZjpD98JgFgg6rmhF,tNULSeBaMpTj8qEQ8CFDxiP69hGFB27u9nmMUc
 #主网签名拜占庭比列
-mainByzantineRatio=66
+mainByzantineRatio=50
 #主网最大签名数
 maxSignatureCount=100
 
