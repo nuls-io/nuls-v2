@@ -93,6 +93,9 @@ public class RegChainTransferProcessor implements TransactionProcessor {
                 if (null != dbChain) {
                     blockChain.setSelfAssetKeyList(dbChain.getSelfAssetKeyList());
                     blockChain.setTotalAssetKeyList(dbChain.getTotalAssetKeyList());
+                }else{
+                        blockChain.addCreateAssetId(CmRuntimeInfo.getAssetKey(blockChain.getChainId(), asset.getAssetId()));
+                        blockChain.addCirculateAssetId(CmRuntimeInfo.getAssetKey(blockChain.getChainId(), asset.getAssetId()));
                 }
                 asset = TxUtil.buildAssetWithTxChain(tx);
                 chainService.registerBlockChain(blockChain, asset);
