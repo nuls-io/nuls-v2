@@ -188,6 +188,7 @@ public class ChainServiceImpl implements ChainService {
          */
         assetService.createAsset(asset);
 
+
         saveChain(blockChain);
         /*
             通知网络模块创建链

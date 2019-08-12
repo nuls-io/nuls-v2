@@ -13,7 +13,7 @@ assetId=1
 #默认资产小数位数
 decimals=8
 #默认链名称
-chainName=nbtc
+chainName=btc
 
 #本链默认资产符号
 symbol=BTC

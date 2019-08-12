@@ -35,6 +35,10 @@ import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.StringUtils;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 /**
  * @author lan
  * @description
@@ -113,4 +117,15 @@ public class TxUtil {
             return null;
         }
     }
+
+    public static List<String> moveRepeatInfo(List<String> list) {
+        Set<String> set = new HashSet<String>();
+        for (String s : list) {
+            set.add(s);
+        }
+        list.clear();
+        list.addAll(set);
+        return list;
+    }
+
 }

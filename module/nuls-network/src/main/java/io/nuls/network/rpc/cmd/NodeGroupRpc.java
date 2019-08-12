@@ -259,7 +259,7 @@ public class NodeGroupRpc extends BaseCmd {
                 rtMap.put("connectAmount", nodeGroup.getAvailableNodes(isCross).size());
             }
             return success(rtMap);
-        } catch (Exception e) {
+        }  catch (Exception e) {
             LoggerUtil.logger(chainId).error(e);
             return failed(e.getMessage());
         }
