@@ -31,7 +31,7 @@ blackHolePublicKey=0298f88c3cae67385ce3cbee00f78816db3e56e566b62bd0f4c5b45f205d3
 port=18001
 crossPort=18002
 #魔法参数
-packetMagic=20190805
+packetMagic=20190808
 #种子节点
 selfSeedIps=149.129.176.20:18001,47.252.86.42:18001,18.216.165.46:18001,116.62.135.185:18001
 #最大入网连接数
