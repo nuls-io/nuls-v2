@@ -250,11 +250,16 @@ public class NodeGroupRpc extends BaseCmd {
         int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
         try {
             NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
-            boolean isCross = Boolean.valueOf(String.valueOf(params.get("isCross")));
             Map<String, Object> rtMap = new HashMap<>();
-            rtMap.put("connectAmount", nodeGroup.getAvailableNodes(isCross).size());
+            if (null == nodeGroup) {
+                rtMap.put("connectAmount", 0);
+                LoggerUtil.logger(chainId).error("chainId={} nodeGroup is null", chainId);
+            } else {
+                boolean isCross = Boolean.valueOf(String.valueOf(params.get("isCross")));
+                rtMap.put("connectAmount", nodeGroup.getAvailableNodes(isCross).size());
+            }
             return success(rtMap);
-        } catch (Exception e) {
+        }  catch (Exception e) {
             LoggerUtil.logger(chainId).error(e);
             return failed(e.getMessage());
         }
