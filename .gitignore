@@ -120,6 +120,6 @@ logs/
 keystore/
 Modules/
 NULS-Wallet-linux64-beta*
-NULS_WALLET_*
+NULS_Wallet_*
 config_tmp/
 NULS-Wallet-linux64-alpha*
