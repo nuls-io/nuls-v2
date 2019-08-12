@@ -505,19 +505,21 @@ public class WalletRpcHandler {
                 chainInfoMap.put(chainInfo.getChainId(), chainInfo);
 
                 List<Map<String, Object>> assetList = (List<Map<String, Object>>) resultMap.get("assetInfoList");
-                for (Map<String, Object> assetMap : assetList) {
-                    AssetInfo assetInfo = new AssetInfo();
-                    assetInfo.setChainId((Integer) resultMap.get("chainId"));
-                    assetInfo.setAssetId((Integer) assetMap.get("assetId"));
-                    assetInfo.setSymbol((String) assetMap.get("symbol"));
-                    assetInfo.setDecimals((Integer) assetMap.get("decimalPlaces"));
-                    boolean usable = (boolean) assetMap.get("usable");
-                    if (usable) {
-                        assetInfo.setStatus(ENABLE);
-                    } else {
-                        assetInfo.setStatus(DISABLE);
+                if (assetList != null) {
+                    for (Map<String, Object> assetMap : assetList) {
+                        AssetInfo assetInfo = new AssetInfo();
+                        assetInfo.setChainId((Integer) resultMap.get("chainId"));
+                        assetInfo.setAssetId((Integer) assetMap.get("assetId"));
+                        assetInfo.setSymbol((String) assetMap.get("symbol"));
+                        assetInfo.setDecimals((Integer) assetMap.get("decimalPlaces"));
+                        boolean usable = (boolean) assetMap.get("usable");
+                        if (usable) {
+                            assetInfo.setStatus(ENABLE);
+                        } else {
+                            assetInfo.setStatus(DISABLE);
+                        }
+                        assetInfoMap.put(assetInfo.getKey(), assetInfo);
                     }
-                    assetInfoMap.put(assetInfo.getKey(), assetInfo);
                 }
             }
             map.clear();
