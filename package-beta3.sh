@@ -5,6 +5,7 @@ OUT_DIR=NULS_Wallet_$version
 ./package -a smart-contract
 ./package -a chain-manager
 ./package -a cross-chain
+./package -a protocol-update
 TARGET_OS="linux"
 if [ -n "$1" ]; then
     TARGET_OS=$1
