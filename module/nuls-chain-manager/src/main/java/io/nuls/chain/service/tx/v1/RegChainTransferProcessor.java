@@ -88,6 +88,7 @@ public class RegChainTransferProcessor implements TransactionProcessor {
         try {
             for (Transaction tx : txs) {
                 blockChain = TxUtil.buildChainWithTxData(tx, false);
+                asset = TxUtil.buildAssetWithTxChain(tx);
                 BlockChain dbChain = chainService.getChain(blockChain.getChainId());
                 //继承数据
                 if (null != dbChain) {
@@ -97,7 +98,7 @@ public class RegChainTransferProcessor implements TransactionProcessor {
                     blockChain.addCreateAssetId(CmRuntimeInfo.getAssetKey(blockChain.getChainId(), asset.getAssetId()));
                     blockChain.addCirculateAssetId(CmRuntimeInfo.getAssetKey(blockChain.getChainId(), asset.getAssetId()));
                 }
-                asset = TxUtil.buildAssetWithTxChain(tx);
+
                 chainService.registerBlockChain(blockChain, asset);
                 blockChains.add(blockChain);
                 Map<String, Object> prefix = new HashMap<>(2);
