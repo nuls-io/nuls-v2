@@ -188,11 +188,6 @@ public class ChainServiceImpl implements ChainService {
          */
         assetService.createAsset(asset);
 
-        /*
-          3. 插入链
-         */
-        blockChain.addCreateAssetId(CmRuntimeInfo.getAssetKey(blockChain.getChainId(), asset.getAssetId()));
-        blockChain.addCirculateAssetId(CmRuntimeInfo.getAssetKey(blockChain.getChainId(), asset.getAssetId()));
         saveChain(blockChain);
         /*
             通知网络模块创建链
