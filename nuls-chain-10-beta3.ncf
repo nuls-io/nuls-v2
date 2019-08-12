@@ -7,7 +7,7 @@ dataPath=data
 #默认本链ID
 chainId=10
 #地址前缀
-addressPrefix=TNBTC
+addressPrefix=TBTC
 #默认本链主资产ID
 assetId=1
 #默认资产小数位数
@@ -68,7 +68,7 @@ genesisBlockPath=genesis-block.json
 
 [consensus]
 #种子节点列表
-seedNodes=TNBTCeusmLN2YocxwaveLhodXkqhSvemY4iBHu,TNBTCeusmEjj4LKfJzeYRKCgJb4qSkkeL4fadR
+seedNodes=TBTCdusmKhGrXWyAgzwt4HypV92UsgTaJJcCc,TBTCdusmKY2Qdv36Z1EedTRywwa6y3r35LEBJ,TBTCdusmLrEr4FYU7FGzWTTARe9hsAs6x1m9T
 #出块地址密码
 password=nuls123456
 #出块间隔时间(单位：s)
