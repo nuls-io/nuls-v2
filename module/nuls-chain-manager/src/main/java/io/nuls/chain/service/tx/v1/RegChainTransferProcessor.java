@@ -91,8 +91,11 @@ public class RegChainTransferProcessor implements TransactionProcessor {
                 BlockChain dbChain = chainService.getChain(blockChain.getChainId());
                 //继承数据
                 if (null != dbChain) {
-                    blockChain.setSelfAssetKeyList(dbChain.getSelfAssetKeyList());
-                    blockChain.setTotalAssetKeyList(dbChain.getTotalAssetKeyList());
+                    blockChain.setSelfAssetKeyList(TxUtil.moveRepeatInfo(dbChain.getSelfAssetKeyList()));
+                    blockChain.setTotalAssetKeyList(TxUtil.moveRepeatInfo(dbChain.getTotalAssetKeyList()));
+                }else{
+                    blockChain.addCreateAssetId(CmRuntimeInfo.getAssetKey(blockChain.getChainId(), asset.getAssetId()));
+                    blockChain.addCirculateAssetId(CmRuntimeInfo.getAssetKey(blockChain.getChainId(), asset.getAssetId()));
                 }
                 asset = TxUtil.buildAssetWithTxChain(tx);
                 chainService.registerBlockChain(blockChain, asset);

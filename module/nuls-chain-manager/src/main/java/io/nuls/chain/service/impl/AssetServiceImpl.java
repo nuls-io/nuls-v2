@@ -1,7 +1,6 @@
 package io.nuls.chain.service.impl;
 
 import io.nuls.chain.config.NulsChainConfig;
-import io.nuls.chain.info.CmErrorCode;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
@@ -13,10 +12,10 @@ import io.nuls.chain.storage.AssetStorage;
 import io.nuls.chain.storage.ChainAssetStorage;
 import io.nuls.chain.storage.ChainCirculateStorage;
 import io.nuls.chain.util.LoggerUtil;
+import io.nuls.chain.util.TxUtil;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.BigIntegerUtils;
-import io.nuls.core.model.ByteUtils;
 import io.nuls.core.rpc.util.NulsDateUtils;
 
 import java.math.BigInteger;
@@ -59,7 +58,7 @@ public class AssetServiceImpl implements AssetService {
     public void deleteAsset(Asset asset) throws Exception {
         String assetKey = CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId());
         asset.setAvailable(false);
-        assetStorage.save(assetKey,asset);
+        assetStorage.save(assetKey, asset);
 //        assetStorage.delete(assetKey);
 //        chainAssetStorage.delete(key);
     }
@@ -138,9 +137,12 @@ public class AssetServiceImpl implements AssetService {
         if (notExist) {
             dbChain.addCreateAssetId(CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
             dbChain.addCirculateAssetId(CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
-            //更新chain
-            chainService.updateChain(dbChain);
+        } else {
+            dbChain.setSelfAssetKeyList(TxUtil.moveRepeatInfo(dbChain.getSelfAssetKeyList()));
+            dbChain.setTotalAssetKeyList(TxUtil.moveRepeatInfo(dbChain.getTotalAssetKeyList()));
         }
+        //更新chain
+        chainService.updateChain(dbChain);
     }
 
     /**
