@@ -126,6 +126,7 @@ public class ChainManager {
             chain.getThreadPool().execute(new SignMessageHandler(chain));
             chain.getThreadPool().execute(new OtherCtxMessageHandler(chain));
             chain.getThreadPool().execute(new GetCtxStateHandler(chain));
+            chain.getThreadPool().execute(new SignMessageByzantineHandler(chain));
             chainHeaderMap.put(chain.getChainId(), BlockCall.getLatestBlockHeader(chain));
 
         }
