@@ -33,13 +33,13 @@ log(){ #print date prefix and green
 }
 
 BUILD_NULSTAR="1"
-NULSTAR_FILE_NAME="nulstar_190712.tar.gz"
+NULSTAR_FILE_NAME="nulstar_190806.tar.gz"
 #TARGET_OS=linux
 #NULSTAR download url
 NULSTAR_URL="http://pub-readingpal.oss-cn-hangzhou.aliyuncs.com/nulstar/"
 #获取参数
 #输出目录
-NULS_WALLET_TAR_NAME="./NULS-Wallet-linux64-beta2"
+NULS_WALLET_TAR_NAME="./NULS_Wallet_linux64_beta3"
 MODULES_PATH="${NULS_WALLET_TAR_NAME}"
 #RELEASE_OUT_PATH="./NULS-Walltet-linux64-alpha1"
 #是否马上更新代码
@@ -274,8 +274,11 @@ if [ -n  "${BUILD_NULSTAR}" ]; then
             cp "${BUILD_PATH}/tmp/Nulstar/stop.bat"  "${RELEASE_PATH}/"
         else
             cp "${BUILD_PATH}/start-nulstar-linux" "$BUILD_PATH/tmp/start-nulstar"
-            echo "" >> "$BUILD_PATH/tmp/start-nulstar"
-            echo `cat ${BUILD_PATH}/tmp/Nulstar/Nulstar.sh` >> "$BUILD_PATH/tmp/start-nulstar"
+            while read -r line
+            do
+               echo $line >> "$BUILD_PATH/tmp/start-nulstar"
+            done < ${BUILD_PATH}/tmp/Nulstar/start
+#            echo `cat ${BUILD_PATH}/tmp/Nulstar/start` >> "$BUILD_PATH/tmp/start-nulstar"
             cp  "$BUILD_PATH/tmp/start-nulstar" "${RELEASE_PATH}/start"
             chmod +x "${RELEASE_PATH}/start"
         fi

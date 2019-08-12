@@ -505,7 +505,7 @@ public class WalletRpcHandler {
                 chainInfoMap.put(chainInfo.getChainId(), chainInfo);
 
                 List<Map<String, Object>> assetList = (List<Map<String, Object>>) resultMap.get("assetInfoList");
-                if(assetList != null) {
+                if (assetList != null) {
                     for (Map<String, Object> assetMap : assetList) {
                         AssetInfo assetInfo = new AssetInfo();
                         assetInfo.setChainId((Integer) resultMap.get("chainId"));

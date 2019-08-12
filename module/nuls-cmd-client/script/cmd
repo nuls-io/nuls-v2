@@ -15,6 +15,16 @@ JAVA=${JAVA_HOME}/bin/java
 #do
 # PUB_LIB="$PUB_LIB:""$jar"
 #done
+
+APP=`ps -ef|grep -w "name=cmd-client "|grep -v grep|wc -l`
+if [ $APP -eq 1 ]; then
+    APP_PID=`ps -ef|grep -w "name=cmd-client "|grep -v grep|awk '{print $2}'`
+    PID_EXIST=`ps -f -p $APP_PID | grep java`
+    if [ ! -z "$PID_EXIST" ]; then
+        echo "stopping cmd-client@${APP_PID}"
+        kill ${APP_PID} > /dev/null 2>&1
+    fi
+fi
 PUB_LIB=
 if [ ! -f "./dependent.conf" ]; then
     echoRed "not found dependent config "

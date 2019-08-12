@@ -83,7 +83,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(description = "批量创建账户", order = 101, detailDesc = "创建的账户存在于本地钱包内")
     @Parameters({
-            @Parameter(parameterName = "批量创建账户", parameterDes = "批量创建账户表单", requestType = @TypeDescriptor(value = AccountCreateForm.class))
+            @Parameter(parameterName = "form", parameterDes = "批量创建账户表单", requestType = @TypeDescriptor(value = AccountCreateForm.class))
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "list", valueType = List.class, valueElement = String.class, description = "账户地址")
@@ -115,7 +115,7 @@ public class AccountResource {
     @ApiOperation(description = "修改账户密码", order = 102)
     @Parameters({
             @Parameter(parameterName = "address", parameterDes = "账户地址"),
-            @Parameter(parameterName = "账户密码信息", parameterDes = "账户密码信息表单", requestType = @TypeDescriptor(value = AccountUpdatePasswordForm.class))
+            @Parameter(parameterName = "form", parameterDes = "账户密码信息表单", requestType = @TypeDescriptor(value = AccountUpdatePasswordForm.class))
     })
     @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "value", valueType = Boolean.class, description = "是否修改成功")
@@ -149,7 +149,7 @@ public class AccountResource {
     @ApiOperation(description = "导出账户私钥", order = 103, detailDesc = "只能导出本地钱包已存在账户的私钥")
     @Parameters({
             @Parameter(parameterName = "address", parameterDes = "账户地址"),
-            @Parameter(parameterName = "账户密码信息", parameterDes = "账户密码信息表单", requestType = @TypeDescriptor(value = AccountPasswordForm.class))
+            @Parameter(parameterName = "form", parameterDes = "账户密码信息表单", requestType = @TypeDescriptor(value = AccountPasswordForm.class))
     })
     @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "value", description = "私钥")
@@ -176,7 +176,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(description = "根据私钥导入账户", order = 104, detailDesc = "导入私钥时，需要输入密码给明文私钥加密")
     @Parameters({
-            @Parameter(parameterName = "根据私钥导入账户", parameterDes = "根据私钥导入账户表单", requestType = @TypeDescriptor(value = AccountPriKeyPasswordForm.class))
+            @Parameter(parameterName = "form", parameterDes = "根据私钥导入账户表单", requestType = @TypeDescriptor(value = AccountPriKeyPasswordForm.class))
     })
     @ResponseData(name = "返回值", description = "返回账户地址", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "value", description = "账户地址")
@@ -239,7 +239,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(description = "根据keystore文件路径导入账户", order = 106)
     @Parameters({
-            @Parameter(parameterName = "根据keystore文件路径导入账户", parameterDes = "根据keystore文件路径导入账户表单", requestType = @TypeDescriptor(value = AccountKeyStoreImportForm.class))
+            @Parameter(parameterName = "form", parameterDes = "根据keystore文件路径导入账户表单", requestType = @TypeDescriptor(value = AccountKeyStoreImportForm.class))
     })
     @ResponseData(name = "返回值", description = "返回账户地址", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "value", description = "账户地址")
@@ -264,7 +264,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(description = "根据keystore字符串导入账户", order = 107)
     @Parameters({
-            @Parameter(parameterName = "根据keystore字符串导入账户", parameterDes = "根据keystore字符串导入账户表单", requestType = @TypeDescriptor(value = AccountKeyStoreJsonImportForm.class))
+            @Parameter(parameterName = "form", parameterDes = "根据keystore字符串导入账户表单", requestType = @TypeDescriptor(value = AccountKeyStoreJsonImportForm.class))
     })
     @ResponseData(name = "返回值", description = "返回账户地址", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "value", description = "账户地址")
@@ -295,7 +295,7 @@ public class AccountResource {
     @ApiOperation(description = "账户备份，导出AccountKeyStore文件到指定目录", order = 108)
     @Parameters({
             @Parameter(parameterName = "address", parameterDes = "账户地址", requestType = @TypeDescriptor(value = String.class)),
-            @Parameter(parameterName = "keystone导出信息", parameterDes = "keystone导出信息表单", requestType = @TypeDescriptor(value = AccountKeyStoreBackup.class))
+            @Parameter(parameterName = "form", parameterDes = "keystone导出信息表单", requestType = @TypeDescriptor(value = AccountKeyStoreBackup.class))
     })
     @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "path", description = "导出的文件路径")
@@ -357,7 +357,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(description = "账户设置别名", order = 109, detailDesc = "别名格式为1-20位小写字母和数字的组合，设置别名会销毁1个NULS")
     @Parameters({
-            @Parameter(parameterName = "账户设置别名", parameterDes = "账户设置别名表单", requestType = @TypeDescriptor(value = SetAliasForm.class))
+            @Parameter(parameterName = "form", parameterDes = "账户设置别名表单", requestType = @TypeDescriptor(value = SetAliasForm.class))
     })
     @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "value", description = "设置别名交易的hash")
@@ -386,7 +386,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(description = "离线 - 批量创建账户", order = 151, detailDesc = "创建的账户不会保存到钱包中,接口直接返回账户的keystore信息")
     @Parameters({
-            @Parameter(parameterName = "离线批量创建账户", parameterDes = "离线批量创建账户表单", requestType = @TypeDescriptor(value = AccountCreateForm.class))
+            @Parameter(parameterName = "form", parameterDes = "离线批量创建账户表单", requestType = @TypeDescriptor(value = AccountCreateForm.class))
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "list", valueType = List.class, valueElement = AccountDto.class, description = "账户keystore列表")
@@ -409,7 +409,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(description = "离线获取账户明文私钥", order = 152)
     @Parameters({
-            @Parameter(parameterName = "离线获取账户明文私钥", parameterDes = "离线获取账户明文私钥表单", requestType = @TypeDescriptor(value = GetPriKeyForm.class))
+            @Parameter(parameterName = "form", parameterDes = "离线获取账户明文私钥表单", requestType = @TypeDescriptor(value = GetPriKeyForm.class))
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "value", description = "明文私钥")
@@ -424,7 +424,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(description = "离线修改账户密码", order = 153)
     @Parameters({
-            @Parameter(parameterName = "离线修改账户密码", parameterDes = "离线修改账户密码表单", requestType = @TypeDescriptor(value = ResetPasswordForm.class))
+            @Parameter(parameterName = "form", parameterDes = "离线修改账户密码表单", requestType = @TypeDescriptor(value = ResetPasswordForm.class))
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "value", description = "重置密码后的加密私钥")
@@ -439,7 +439,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(description = "多账户摘要签名", order = 154, detailDesc = "用于签名离线组装的多账户转账交易，调用接口时，参数可以传地址和私钥，或者传地址和加密私钥和加密密码")
     @Parameters({
-            @Parameter(parameterName = "多账户摘要签名", parameterDes = "多账户摘要签名表单", requestType = @TypeDescriptor(value = MultiSignForm.class))
+            @Parameter(parameterName = "form", parameterDes = "多账户摘要签名表单", requestType = @TypeDescriptor(value = MultiSignForm.class))
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "hash", description = "交易hash"),
@@ -455,7 +455,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(description = "明文私钥摘要签名", order = 155)
     @Parameters({
-            @Parameter(parameterName = "明文私钥摘要签名", parameterDes = "明文私钥摘要签名表单", requestType = @TypeDescriptor(value = PriKeySignForm.class))
+            @Parameter(parameterName = "form", parameterDes = "明文私钥摘要签名表单", requestType = @TypeDescriptor(value = PriKeySignForm.class))
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "hash", description = "交易hash"),
@@ -471,7 +471,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(description = "密文私钥摘要签名", order = 156)
     @Parameters({
-            @Parameter(parameterName = "密文私钥摘要签名", parameterDes = "密文私钥摘要签名表单", requestType = @TypeDescriptor(value = EncryptedPriKeySignForm.class))
+            @Parameter(parameterName = "form", parameterDes = "密文私钥摘要签名表单", requestType = @TypeDescriptor(value = EncryptedPriKeySignForm.class))
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "hash", description = "交易hash"),
@@ -487,7 +487,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(description = "创建多签账户", order = 157, detailDesc = "根据多个账户的公钥创建多签账户，minSigns为多签账户创建交易时需要的最小签名数")
     @Parameters({
-            @Parameter(parameterName = "创建多签账户", parameterDes = "创建多签账户表单", requestType = @TypeDescriptor(value = MultiSignAccountCreateForm.class))
+            @Parameter(parameterName = "form", parameterDes = "创建多签账户表单", requestType = @TypeDescriptor(value = MultiSignAccountCreateForm.class))
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "value", description = "账户的地址")
@@ -508,7 +508,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(description = "离线创建设置别名交易", order = 158, detailDesc = "根据多个账户的公钥创建多签账户，minSigns为多签账户创建交易时需要的最小签名数")
     @Parameters({
-            @Parameter(parameterName = "创建多签账户", parameterDes = "创建多签账户表单", requestType = @TypeDescriptor(value = AliasDto.class))
+            @Parameter(parameterName = "dto", parameterDes = "创建多签账户表单", requestType = @TypeDescriptor(value = AliasDto.class))
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "hash", description = "交易hash"),
@@ -524,7 +524,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(description = "多签账户离线创建设置别名交易", order = 159)
     @Parameters({
-            @Parameter(parameterName = "多签账户离线创建设置别名交易", parameterDes = "创建别名交易表单", requestType = @TypeDescriptor(value = MultiSignAliasDto.class))
+            @Parameter(parameterName = "dto", parameterDes = "创建别名交易表单", requestType = @TypeDescriptor(value = MultiSignAliasDto.class))
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "hash", description = "交易hash"),
@@ -532,6 +532,21 @@ public class AccountResource {
     }))
     public RpcClientResult createMultiSignAliasTxOffLine(MultiSignAliasDto dto) {
         io.nuls.core.basic.Result result = NulsSDKTool.createMultiSignAliasTxOffline(dto);
+        return ResultUtil.getRpcClientResult(result);
+    }
+
+    @POST
+    @Path("/address/priKey")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(description = "根据私钥获取账户地址格式", order = 160)
+    @Parameters({
+            @Parameter(parameterName = "form", parameterDes = "私钥表单", requestType = @TypeDescriptor(value = PriKeyForm.class))
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "账户地址")
+    }))
+    public RpcClientResult getAddressByPriKey(PriKeyForm form) {
+        io.nuls.core.basic.Result result = NulsSDKTool.getAddressByPriKey(form.getPriKey());
         return ResultUtil.getRpcClientResult(result);
     }
 }
