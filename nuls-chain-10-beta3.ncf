@@ -68,7 +68,7 @@ genesisBlockPath=genesis-block.json
 
 [consensus]
 #种子节点列表
-seedNodes=TBTCdusmKhGrXWyAgzwt4HypV92UsgTaJJcCc,TBTCdusmKY2Qdv36Z1EedTRywwa6y3r35LEBJ,TBTCdusmLrEr4FYU7FGzWTTARe9hsAs6x1m9T
+seedNodes=TBTCd26T7nhzCzf7p441zoGAniQScUyJ8Zctj7,TBTCd26T7he4JSQLTBjBPuzPo3jayzuhDhDiLr,TBTCd26T7hjrrQoV6goCRDCmeZBNw2TkgRp67V
 #出块地址密码
 password=nuls123456
 #出块间隔时间(单位：s)
