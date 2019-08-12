@@ -86,11 +86,11 @@ public class ShareAddressTask implements Runnable {
         networkConfig.getLocalIps().add(externalIp);
         /*自有网络的连接分享*/
         if (!nodeGroup.isMoonCrossGroup()) {
-            LoggerUtil.logger(nodeGroup.getChainId()).info("网络Ip分享：share self ip  is {}:{}", externalIp, networkConfig.getPort());
+            LoggerUtil.logger(nodeGroup.getChainId()).info("begin share self ip  is {}:{}", externalIp, networkConfig.getPort());
             Node myNode = new Node(nodeGroup.getMagicNumber(), externalIp, networkConfig.getPort(), networkConfig.getCrossPort(), Node.OUT, false);
             myNode.setConnectedListener(() -> {
                 myNode.getChannel().close();
-                LoggerUtil.logger(nodeGroup.getChainId()).info("端口自我检测ok,进行网络Ip分享：share self ip  is {}:{}", externalIp, networkConfig.getPort());
+                LoggerUtil.logger(nodeGroup.getChainId()).info("self ip verify success,doShare ：share self ip  is {}:{}", externalIp, networkConfig.getPort());
                 //如果是主网卫星链,自有网络发现需要广播给所有跨链分支,如果是友链，自有网络发现也需要广播给到主网
                 doShare(externalIp, nodeGroup.getLocalNetNodeContainer().getAvailableNodes(),
                         networkConfig.getPort(), networkConfig.getCrossPort(), false);
@@ -111,11 +111,11 @@ public class ShareAddressTask implements Runnable {
         networkConfig.getLocalIps().add(externalIp);
         if (nodeGroup.isCrossActive()) {
             //开启了跨链业务
-            LoggerUtil.logger(nodeGroup.getChainId()).info("跨链网络Ip分享share self ip  is {}:{}", externalIp, networkConfig.getCrossPort());
+            LoggerUtil.logger(nodeGroup.getChainId()).info("begin cross ip share. self ip  is {}:{}", externalIp, networkConfig.getCrossPort());
             Node crossNode = new Node(nodeGroup.getMagicNumber(), externalIp, networkConfig.getCrossPort(), networkConfig.getCrossPort(), Node.OUT, true);
             crossNode.setConnectedListener(() -> {
                 crossNode.getChannel().close();
-                LoggerUtil.logger(nodeGroup.getChainId()).info("跨链端口自我检测ok,进行跨链分享{}:{}", externalIp, networkConfig.getCrossPort());
+                LoggerUtil.logger(nodeGroup.getChainId()).info("cross ip verify success,doShare {}:{}", externalIp, networkConfig.getCrossPort());
                 doShare(externalIp, nodeGroup.getCrossNodeContainer().getAvailableNodes(), networkConfig.getCrossPort(), networkConfig.getCrossPort(), true);
             });
             connectionManager.connection(crossNode);
