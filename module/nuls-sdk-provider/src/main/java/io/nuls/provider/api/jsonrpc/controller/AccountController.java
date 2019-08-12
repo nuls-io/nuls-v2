@@ -37,6 +37,7 @@ import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.model.*;
 import io.nuls.provider.model.dto.AccountBalanceDto;
 import io.nuls.provider.model.dto.AccountKeyStoreDto;
+import io.nuls.provider.model.form.PriKeyForm;
 import io.nuls.provider.model.jsonrpc.RpcResult;
 import io.nuls.provider.model.jsonrpc.RpcResultError;
 import io.nuls.provider.rpctools.AccountTools;
@@ -786,7 +787,7 @@ public class AccountController {
     @RpcMethod("createAliasTx")
     @ApiOperation(description = "离线创建设置别名交易", order = 158)
     @Parameters({
-            @Parameter(parameterName = "AliasDto", parameterDes = "创建别名交易表单", requestType = @TypeDescriptor(value = AliasDto.class))
+            @Parameter(parameterName = "创建别名交易", parameterDes = "创建别名交易表单", requestType = @TypeDescriptor(value = AliasDto.class))
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "hash", description = "交易hash"),
@@ -864,6 +865,25 @@ public class AccountController {
         dto.setPubKeys(pubKeys);
         dto.setMinSigns(minSigns);
         io.nuls.core.basic.Result result = NulsSDKTool.createMultiSignAliasTxOffline(dto);
+        return ResultUtil.getJsonRpcResult(result);
+    }
+
+    @RpcMethod("createMultiSignAliasTx")
+    @ApiOperation(description = "根据私钥获取账户地址格式", order = 160)
+    @Parameters({
+            @Parameter(parameterName = "原始私钥", parameterDes = "私钥表单", requestType = @TypeDescriptor(value = PriKeyForm.class))
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "账户地址")
+    }))
+    public RpcResult getAddressByPriKey(List<Object> params){
+        String priKey;
+        try {
+            priKey = (String) params.get(0);
+        }catch (Exception e) {
+            return RpcResult.paramError("[priKey] is inValid");
+        }
+        io.nuls.core.basic.Result result = NulsSDKTool.getAddressByPriKey(priKey);
         return ResultUtil.getJsonRpcResult(result);
     }
 }
