@@ -92,15 +92,15 @@ public class JsonRpcHandler extends HttpHandler {
                     for (Map<String, Object> map : paramList) {
                         list.add(doHandler(map, response));
                     }
-                    if(list.isEmpty()) {
+                    if (list.isEmpty()) {
                         responseResult = JSONUtils.obj2json(responseError("-32603", "Internal error!", "0"));
                         break;
                     }
-                    if(list.size() == 1) {
+                    if (list.size() == 1) {
                         responseResult = JSONUtils.obj2json(list.get(0));
                         break;
                     }
-                    if(list.size() > 1) {
+                    if (list.size() > 1) {
                         responseResult = JSONUtils.obj2json(list);
                         break;
                     }
@@ -108,9 +108,11 @@ public class JsonRpcHandler extends HttpHandler {
                     // 处理单个请求
                     Map<String, Object> jsonRpcParam = null;
                     try {
+
                         jsonRpcParam = JSONUtils.json2map(content);
                     } catch (Exception e) {
-                        LoggerUtil.commonLog.error(e);
+                        LoggerUtil.commonLog.error("------remote host : " + request.getRemoteHost());
+                        LoggerUtil.commonLog.error(e.getMessage());
                         responseResult = JSONUtils.obj2json(responseError("-32700", "the request is not a json-rpc 2.0 request", "0"));
                         break;
                     }
@@ -137,7 +139,7 @@ public class JsonRpcHandler extends HttpHandler {
 
         if (null == invoker) {
             LoggerUtil.commonLog.warn("Can't find the method:{}", method);
-            return responseError( "-32601", "Can't find the method", id);
+            return responseError("-32601", "Can't find the method", id);
         }
 
         RpcResult result = invoker.invoke((List<Object>) jsonRpcParam.get("params"));
