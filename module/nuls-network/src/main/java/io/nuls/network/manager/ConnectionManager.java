@@ -78,7 +78,7 @@ public class ConnectionManager extends BaseManager {
     private Map<String, Node> cacheConnectNodeOutMap = new ConcurrentHashMap<>();
 
     public ExecutorService discover = ThreadUtils.createThreadPool(Runtime.getRuntime().availableProcessors(), 20, new NulsThreadFactory("NODE_DISCOVER_MULTI_THREAD"));
-    public ExecutorService maintenance = ThreadUtils.createThreadPool(Runtime.getRuntime().availableProcessors(), 20, new NulsThreadFactory("NODE_DISCOVER_MULTI_THREAD"));
+    public ExecutorService maintenance = ThreadUtils.createThreadPool(Runtime.getRuntime().availableProcessors(), 20, new NulsThreadFactory("NODE_MAINTENANCE_MULTI_THREAD"));
 
     public static ConnectionManager getInstance() {
         return instance;
