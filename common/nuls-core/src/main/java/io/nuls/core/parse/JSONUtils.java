@@ -28,6 +28,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -60,6 +61,9 @@ public final class JSONUtils {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
+    static {
+        OBJECT_MAPPER.registerModule(new AfterburnerModule());
+    }
 
     public static ObjectMapper getInstance() {
         return OBJECT_MAPPER;

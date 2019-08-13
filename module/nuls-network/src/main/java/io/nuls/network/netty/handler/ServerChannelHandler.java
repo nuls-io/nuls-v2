@@ -80,7 +80,7 @@ public class ServerChannelHandler extends BaseChannelHandler {
     }
 
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         SocketChannel channel = (SocketChannel) ctx.channel();
         String remoteIP = channel.remoteAddress().getHostString();
         LoggerUtil.COMMON_LOG.error("Server Node is exceptionCaught:{}:{}", remoteIP, channel.remoteAddress().getPort());
@@ -95,7 +95,7 @@ public class ServerChannelHandler extends BaseChannelHandler {
     }
 
     @Override
-    public void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
+    public void channelRead0(ChannelHandlerContext ctx, Object msg) {
         SocketChannel channel = (SocketChannel) ctx.channel();
         ByteBuf buf = (ByteBuf) msg;
         String remoteIP = channel.remoteAddress().getHostString();
