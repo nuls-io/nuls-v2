@@ -238,7 +238,7 @@ public class MessageManager extends BaseManager {
         for (Node node : nodes) {
             if (NodeConnectStatusEnum.AVAILABLE == node.getConnectStatus()) {
                 GetAddrMessage getAddrMessage = MessageFactory.getInstance()
-                        .buildGetAddrMessage(messageNodeGroup, isCrossAddress);
+                        .buildGetAddrMessage(messageNodeGroup.getChainId(),connectNodeGroup.getMagicNumber(), isCrossAddress);
                 sendHandlerMsg(getAddrMessage, node, asyn);
             }
         }
