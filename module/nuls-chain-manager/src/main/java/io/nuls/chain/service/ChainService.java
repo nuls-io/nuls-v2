@@ -125,5 +125,11 @@ public interface ChainService {
      * @return
      */
     Map<String,Object> getBlockAssetsInfo(BlockChain blockChain) throws Exception;
+    /**
+     *
+     * @param blockChain
+     * @return
+     */
+    Map<String,Object> getChainAssetsSimpleInfo(BlockChain blockChain) throws Exception;
 
 }

@@ -45,7 +45,7 @@ public class LedgerCall {
         params.put(Constants.CHAIN_ID, chain.getConfig().getChainId());
         params.put("assetChainId", chain.getConfig().getChainId());
         params.put("address", address);
-        params.put("assetId", chain.getConfig().getAssetsId());
+        params.put("assetId", chain.getConfig().getAssetId());
         try {
             Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalanceNonce", params);
             if (!callResp.isSuccess()) {
@@ -62,7 +62,7 @@ public class LedgerCall {
         params.put(Constants.CHAIN_ID, chain.getConfig().getChainId());
         params.put("assetChainId", chain.getConfig().getChainId());
         params.put("address", address);
-        params.put("assetId", chain.getConfig().getAssetsId());
+        params.put("assetId", chain.getConfig().getAssetId());
         try {
             Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalance", params);
             if (!callResp.isSuccess()) {
@@ -79,7 +79,7 @@ public class LedgerCall {
         params.put(Constants.CHAIN_ID, chain.getConfig().getChainId());
         params.put("assetChainId", chain.getConfig().getChainId());
         params.put("address", address);
-        params.put("assetId", chain.getConfig().getAssetsId());
+        params.put("assetId", chain.getConfig().getAssetId());
         try {
             Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
             if (!callResp.isSuccess()) {

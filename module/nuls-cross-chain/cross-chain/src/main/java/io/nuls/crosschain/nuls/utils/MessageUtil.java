@@ -248,7 +248,7 @@ public class MessageUtil {
                 }
             }
         }
-        int signCount = signature.getP2PHKSignatures().size();
+        int signCount = signature.getSignersCount();
         if (signCount >= byzantineCount) {
             List<P2PHKSignature> misMatchSignList = CommonUtil.getMisMatchSigns(chain, signature, packAddressList);
             signCount -= misMatchSignList.size();

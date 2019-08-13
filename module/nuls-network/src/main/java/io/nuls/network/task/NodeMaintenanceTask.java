@@ -85,9 +85,10 @@ public class NodeMaintenanceTask implements Runnable {
                     BlockRpcService blockRpcService = SpringLiteContext.getBean(BlockRpcServiceImpl.class);
                     BestBlockInfo bestBlockInfo = blockRpcService.getBestBlockHeader(nodeGroup.getChainId());
                     if (bestBlockInfo.getBlockHeight() < 1) {
-                        LoggerUtil.logger(nodeGroup.getChainId()).error("chainId={} cross connect process stop.blockHeight={}", nodeGroup.getChainId(), bestBlockInfo.getBlockHeight());
+                        LoggerUtil.logger(nodeGroup.getChainId()).info("chainId={} cross connect process stop.blockHeight={}", nodeGroup.getChainId(), bestBlockInfo.getBlockHeight());
                         return;
                     } else {
+                        LoggerUtil.logger(nodeGroup.getChainId()).info("chainId={} cross connect process active.blockHeight={}", nodeGroup.getChainId(), bestBlockInfo.getBlockHeight());
                         nodeGroup.setHadBlockHeigh(true);
                     }
                 }

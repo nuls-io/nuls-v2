@@ -1,11 +1,10 @@
 {
   "chainId": 2,
-  "assetsId": 1,
+  "assetId": 1,
   "maxViewGas": 100000000,
   "mainChainId": 2,
   "mainAssetId": 1,
   "encoding": "UTF-8",
-  "kernelUrl": "ws://127.0.0.1:7771",
   "packageLogPackages": "io.nuls.contract.vm.program.impl.ProgramExecutorImpl,db,rlp,general",
   "packageLogLevels": "INFO,INFO,INFO,INFO"
 }

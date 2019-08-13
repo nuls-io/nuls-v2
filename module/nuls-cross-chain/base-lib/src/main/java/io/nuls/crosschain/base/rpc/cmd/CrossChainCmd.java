@@ -93,4 +93,20 @@ public class CrossChainCmd  extends BaseCmd {
         }
         return success(result.getData());
     }
+
+    /**
+     * 查询当前签名拜占庭最小通过数量（当前验证人数量*本链拜占庭比例）
+     * */
+    @CmdAnnotation(cmd = "getByzantineCount", version = 1.0, description = "查询当前签名拜占庭最小通过数量/查询当前签名拜占庭最小通过数量")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
+    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", valueType = int.class, description = "当前拜占庭最小签名数")
+    }))
+    public Response getByzantineCount(Map<String,Object> params){
+        Result result = service.getByzantineCount(params);
+        if(result.isFailed()){
+            return failed(result.getErrorCode());
+        }
+        return success(result.getData());
+    }
 }

@@ -70,14 +70,6 @@ public interface TxService {
 
     /**
      * 交易基础验证
-     * 基础字段
-     * 交易size
-     * 交易类型
-     * 交易签名
-     * from的地址必须全部是发起链(本链or相同链）地址
-     * from里面的资产是否存在
-     * to里面的地址必须是相同链的地址
-     * 交易手续费
      *
      * @param chain
      * @param tx
@@ -147,12 +139,5 @@ public interface TxService {
      * @param changeStatus
      */
     void clearInvalidTx(Chain chain, Transaction tx, boolean changeStatus);
-
-//    /**
-//     * 从已验证未打包交易中删除单个无效的交易(单线程，清理机制使用)
-//     * @param chain
-//     * @param tx
-//     */
-//    void clearInvalidTxTask(Chain chain, Transaction tx);
 
 }

@@ -86,10 +86,8 @@ public class OrphanTxProcessTask implements Runnable {
         }
         List<TransactionNetPO> chainOrphan = chain.getOrphanList();
         if (chainOrphan.size() == 0) {
-//            LOG.debug("执行处理孤儿交易Task，孤儿数为：0");
             return;
         }
-//        LOG.debug("开始处理孤儿交易，-当前孤儿交易总数:{}", chainOrphan.size());
         //把孤儿交易list的交易全部取出来，然后清空；如果有验不过的 再加回去,避免阻塞新的孤儿交易的加入
         List<TransactionNetPO> orphanTxList = new LinkedList<>();
         synchronized (chainOrphan) {
@@ -129,7 +127,6 @@ public class OrphanTxProcessTask implements Runnable {
             TransactionNetPO txNet = it.next();
             boolean rs = processOrphanTx(chain, txNet);
             if (rs) {
-                StatisticsTask.orphanTxTotal.incrementAndGet();
                 it.remove();
                 //有孤儿交易被处理
                 flag = true;
@@ -167,19 +164,13 @@ public class OrphanTxProcessTask implements Runnable {
                 if (chain.getPackaging().get()) {
                     //当节点是出块节点时, 才将交易放入待打包队列
                     packablePool.add(chain, tx);
-                //chain.getLogger().debug("[OrphanTxProcessTask] 加入待打包队列....hash:{}", tx.getHash().toHex());
                 }
-                //保存到rocksdb
                 unconfirmedTxStorageService.putTx(chainId, tx);
                 //转发交易hash,网络交易不处理转发失败的情况
                 String hash = tx.getHash().toHex();
                 NetworkCall.forwardTxHash(chain, tx.getHash(), TxDuplicateRemoval.getExcludeNode(hash));
                 return true;
             }
-           /* if(!verifyLedgerResult.isOrphan()) {
-                chain.getLogger().error("[OrphanTxProcessTask] tx coinData verify fail - orphan: {}, - code:{}, type:{}, - txhash:{}", verifyLedgerResult.getOrphan(),
-                        verifyLedgerResult.getErrorCode() == null ? "" : verifyLedgerResult.getErrorCode().getCode(), tx.getType(), tx.getHash().toHex());
-            }*/
             if (!verifyLedgerResult.getSuccess()) {
                 //如果处理孤儿交易时，账本验证返回异常，则直接清理该交易
                 chain.getLogger().error("[OrphanTxProcessTask] tx coinData verify fail - code:{}, type:{}, - txhash:{}",

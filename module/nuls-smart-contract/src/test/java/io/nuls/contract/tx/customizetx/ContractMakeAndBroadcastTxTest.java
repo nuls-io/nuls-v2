@@ -184,7 +184,7 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
      */
     private void createTxFake1_1(CreateContractTransaction tx) throws NulsException {
         // 配合发送转账交易
-        TransferReq.TransferReqBuilder builder = new TransferReq.TransferReqBuilder(chain.getChainId(), chain.getConfig().getAssetsId())
+        TransferReq.TransferReqBuilder builder = new TransferReq.TransferReqBuilder(chain.getChainId(), chain.getConfig().getAssetId())
                 .addForm(toAddress0, password, BigInteger.valueOf(10001_0000_0000L))
                 .addTo(toAddress5,BigInteger.valueOf(10000_0000_0000L));
         String transferHash = transferService.transfer(builder.build(new TransferReq())).getData();

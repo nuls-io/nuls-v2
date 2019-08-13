@@ -52,7 +52,7 @@ public interface CmErrorCode extends CommonCodeConstanst {
     ErrorCode ERROR_CHAIN_ADDRESS_PREFIX = ErrorCode.init("cm_1012");
     ErrorCode ERROR_CHAIN_REG_CMD = ErrorCode.init("cm_1013");
     ErrorCode ERROR_CHAIN_ACTIVE = ErrorCode.init("cm_1014");
-
+    ErrorCode ERROR_CHAIN_SYSTEM_USED = ErrorCode.init("cm_1015");
     /**
      * 错误编码
      */

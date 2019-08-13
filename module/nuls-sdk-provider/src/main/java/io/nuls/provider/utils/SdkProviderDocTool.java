@@ -22,6 +22,7 @@ import org.apache.commons.beanutils.BeanUtils;
 import javax.ws.rs.*;
 import java.io.*;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -416,7 +417,7 @@ public class SdkProviderDocTool {
                         try {
                             res.formJsonOfRestful = JSONUtils.obj2PrettyJson(newInstance(requestType));
                         } catch (Exception e) {
-                            System.out.println(String.format("Form named [%s] has no non-args-constructor.", requestType.getSimpleName()));
+                            System.out.println(String.format("Form named [%s] has no non-args-constructor or other error [%s].", requestType.getSimpleName(), e.getMessage()));
                         }
                     }
                     res.list = buildResultDes(parameter.requestType(), res.des, res.name, res.canNull);
@@ -432,21 +433,26 @@ public class SdkProviderDocTool {
             Field[] fields = cls.getDeclaredFields();
             for(Field field : fields) {
                 if(!baseType.contains(field.getType())) {
-                    Object o1 = null;
+                    Object o1;
                     if(field.getType() == List.class) {
                         o1 = new ArrayList<>();
                         List o2 = (List) o1;
                         ApiModelProperty apiModelProperty = field.getAnnotation(ApiModelProperty.class);
                         if(apiModelProperty != null) {
                             Class<?> element = apiModelProperty.type().collectionElement();
-                            o2.add(newInstance(element));
+                            if(!baseType.contains(element)) {
+                                o2.add(newInstance(element));
+                            }
                         }
                     } else if(field.getType() == Map.class) {
                         o1 = new HashMap<>();
                     } else if(field.getType() == Set.class) {
                         o1 = new HashSet<>();
+                    } else if(field.getType().isArray()) {
+                        o1 = Array.newInstance(field.getType(), 0);
                     } else {
                         o1 = field.getType().newInstance();
+
                     }
                     BeanUtils.setProperty(o, field.getName(), o1);
                 }

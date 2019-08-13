@@ -42,6 +42,7 @@ import io.nuls.chain.rpc.call.RpcService;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.util.LoggerUtil;
+import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -105,7 +106,7 @@ public class ChainCmd extends BaseChainCmd {
     @CmdAnnotation(cmd = RpcConstants.CMD_CHAIN_REG, version = 1.0,
             description = "链注册-用于平行链的跨链注册")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[3-65535]", parameterDes = "资产链Id,取值区间[3-65535]"),
             @Parameter(parameterName = "chainName", requestType = @TypeDescriptor(value = String.class), parameterDes = "链名称"),
             @Parameter(parameterName = "addressType", requestType = @TypeDescriptor(value = int.class), parameterDes = "1 使用NULS框架构建的链 生态内，2生态外"),
             @Parameter(parameterName = "addressPrefix", requestType = @TypeDescriptor(value = String.class), parameterDes = "链地址前缀,1-5字符"),
@@ -134,6 +135,13 @@ public class ChainCmd extends BaseChainCmd {
         /* 发送到交易模块 (Send to transaction module) */
         Map<String, Object> rtMap = new HashMap<>(1);
         try {
+            /*判断链与资产是否已经存在*/
+            /* 组装BlockChain (BlockChain object) */
+            BlockChain blockChain = new BlockChain();
+            blockChain.map2pojo(params);
+            if (blockChain.getChainId() == BaseConstant.MAINNET_CHAIN_ID || blockChain.getChainId() == BaseConstant.TESTNET_CHAIN_ID) {
+                return failed(CmErrorCode.ERROR_CHAIN_SYSTEM_USED);
+            }
             String addressPrefix = (String) params.get("addressPrefix");
             if (StringUtils.isBlank(addressPrefix)) {
                 return failed(CmErrorCode.ERROR_CHAIN_ADDRESS_PREFIX);
@@ -147,11 +155,6 @@ public class ChainCmd extends BaseChainCmd {
                     return failed(CmErrorCode.ERROR_CHAIN_ADDRESS_PREFIX);
                 }
             }
-            /*判断链与资产是否已经存在*/
-            /* 组装BlockChain (BlockChain object) */
-            BlockChain blockChain = new BlockChain();
-            blockChain.map2pojo(params);
-
             /* 组装Asset (Asset object) */
             /* 取消int assetId = seqService.createAssetId(blockChain.getChainId());*/
             Asset asset = new Asset();
@@ -246,6 +249,13 @@ public class ChainCmd extends BaseChainCmd {
         /* 发送到交易模块 (Send to transaction module) */
         Map<String, Object> rtMap = new HashMap<>(1);
         try {
+            /*判断链与资产是否已经存在*/
+            /* 组装BlockChain (BlockChain object) */
+            BlockChain blockChain = new BlockChain();
+            blockChain.map2pojo(params);
+            if (blockChain.getChainId() == BaseConstant.MAINNET_CHAIN_ID || blockChain.getChainId() == BaseConstant.TESTNET_CHAIN_ID) {
+                return failed(CmErrorCode.ERROR_CHAIN_SYSTEM_USED);
+            }
             String addressPrefix = (String) params.get("addressPrefix");
             if (StringUtils.isBlank(addressPrefix)) {
                 return failed(CmErrorCode.ERROR_CHAIN_ADDRESS_PREFIX);
@@ -259,11 +269,6 @@ public class ChainCmd extends BaseChainCmd {
                     return failed(CmErrorCode.ERROR_CHAIN_ADDRESS_PREFIX);
                 }
             }
-            /*判断链与资产是否已经存在*/
-            /* 组装BlockChain (BlockChain object) */
-            BlockChain blockChain = new BlockChain();
-            blockChain.map2pojo(params);
-
             /* 组装Asset (Asset object) */
             /* 取消int assetId = seqService.createAssetId(blockChain.getChainId());*/
             Asset asset = new Asset();
@@ -331,7 +336,7 @@ public class ChainCmd extends BaseChainCmd {
 
     @ResponseData(name = "返回值", description = "返回一个Map对象",
             responseType = @TypeDescriptor(value = Map.class, collectionElement = List.class, mapKeys = {
-                    @Key(name = "chainInfos", valueType = List.class, valueElement = ChainDto.class, description = "资产信息列表")
+                    @Key(name = "chainInfos", valueType = List.class, valueElement = ChainDto.class, description = "已注册的链与资产信息列表")
             })
     )
     public Response getCrossChainInfos(Map params) {
@@ -350,6 +355,29 @@ public class ChainCmd extends BaseChainCmd {
             LoggerUtil.COMMON_LOG.debug(JSONUtils.obj2json(chainInfos));
         } catch (JsonProcessingException e) {
         }
+        return success(rtMap);
+    }
+
+    @CmdAnnotation(cmd = RpcConstants.CMD_GET_CROSS_CHAIN_SIMPLE_INFOS, version = 1.0,
+            description = "获取跨链已注册链列表")
+
+    @ResponseData(name = "返回值", description = "返回一个Map对象",
+            responseType = @TypeDescriptor(value = Map.class, collectionElement = List.class, mapKeys = {
+                    @Key(name = "chainInfos", valueType = List.class, valueElement = Map.class, description = "返回链及资产的简要信息列表")
+            })
+    )
+    public Response getChainAssetsSimpleInfo(Map params) {
+        List<Map<String, Object>> chainInfos = new ArrayList<>();
+        Map<String, Object> rtMap = new HashMap<>();
+        try {
+            List<BlockChain> blockChains = chainService.getBlockList();
+            for (BlockChain blockChain : blockChains) {
+                chainInfos.add(chainService.getChainAssetsSimpleInfo(blockChain));
+            }
+        } catch (Exception e) {
+            LoggerUtil.logger().error(e);
+        }
+        rtMap.put("chainInfos", chainInfos);
         return success(rtMap);
     }
 

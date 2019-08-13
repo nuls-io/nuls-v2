@@ -28,6 +28,7 @@ package io.nuls.provider.model.form;
 
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
+import io.nuls.core.rpc.model.TypeDescriptor;
 
 import java.util.List;
 
@@ -37,7 +38,7 @@ import java.util.List;
 @ApiModel(name = "创建多签账户表单数据")
 public class MultiSignAccountCreateForm extends Base{
 
-    @ApiModelProperty(description = "账户公钥集合")
+    @ApiModelProperty(description = "账户公钥集合", type = @TypeDescriptor(value = List.class, collectionElement = String.class))
     private List<String> pubKeys;
 
     @ApiModelProperty(description = "最小签名数")

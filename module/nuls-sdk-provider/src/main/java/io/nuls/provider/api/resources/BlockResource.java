@@ -169,7 +169,7 @@ public class BlockResource {
     @Parameters({
             @Parameter(parameterName = "height", requestType = @TypeDescriptor(value = Long.class), parameterDes = "区块高度")
     })
-    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = BlockHeaderDto.class))
+    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = BlockDto.class))
     public RpcClientResult getBlockByHeight(@PathParam("height") Long height) {
         if (height == null || height < 0) {
             return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "height is invalid"));
@@ -196,8 +196,8 @@ public class BlockResource {
     @Parameters({
             @Parameter(parameterName = "hash", parameterDes = "区块hash")
     })
-    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = BlockHeaderDto.class))
-    public RpcClientResult getBlockByHeight(@PathParam("hash") String hash) {
+    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = BlockDto.class))
+    public RpcClientResult getBlockByHash(@PathParam("hash") String hash) {
         if (hash == null || !ValidateUtil.validHash(hash)) {
             return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "hash is invalid"));
         }
@@ -216,4 +216,37 @@ public class BlockResource {
         return clientResult;
     }
 
+    @GET
+    @Path("/serialization/height/{height}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(description = "根据区块高度查询区块序列化字符串", order = 207, detailDesc = "包含区块打包的所有交易信息，此接口返回数据量较多，谨慎调用")
+    @Parameters({
+            @Parameter(parameterName = "height", requestType = @TypeDescriptor(value = Long.class), parameterDes = "区块高度")
+    })
+    @ResponseData(name = "返回值", description = "返回区块序列化后的HEX字符串", responseType = @TypeDescriptor(value = String.class))
+    public RpcClientResult getBlockSerializationByHeight(@PathParam("height") Long height) {
+        if (height == null || height < 0) {
+            return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "height is invalid"));
+        }
+        Result<String> result = blockTools.getBlockSerializationByHeight(config.getChainId(), height);
+        RpcClientResult clientResult = ResultUtil.getRpcClientResult(result);
+        return clientResult;
+    }
+
+    @GET
+    @Path("/serialization/hash/{hash}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(description = "根据区块hash查询区块序列化字符串", order = 208, detailDesc = "包含区块打包的所有交易信息，此接口返回数据量较多，谨慎调用")
+    @Parameters({
+            @Parameter(parameterName = "hash", parameterDes = "区块hash")
+    })
+    @ResponseData(name = "返回值", description = "返回区块序列化后的HEX字符串", responseType = @TypeDescriptor(value = String.class))
+    public RpcClientResult getBlockSerializationByHash(@PathParam("hash") String hash) {
+        if (hash == null || !ValidateUtil.validHash(hash)) {
+            return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "hash is invalid"));
+        }
+        Result<String> result = blockTools.getBlockSerializationByHash(config.getChainId(), hash);
+        RpcClientResult clientResult = ResultUtil.getRpcClientResult(result);
+        return clientResult;
+    }
 }

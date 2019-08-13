@@ -71,7 +71,7 @@ public class ContractTest {
         Chain chain = new Chain();
         ConfigBean configBean = new ConfigBean();
         configBean.setChainId(2);
-        configBean.setAssetsId(1);
+        configBean.setAssetId(1);
         configBean.setMaxViewGas(100000000L);
         chain.setConfig(configBean);
         //ContractTokenBalanceManager tokenBalanceManager = ContractTokenBalanceManager.newInstance(chain.getChainId());

@@ -126,6 +126,7 @@ public class ChainManager {
             chain.getThreadPool().execute(new SignMessageHandler(chain));
             chain.getThreadPool().execute(new OtherCtxMessageHandler(chain));
             chain.getThreadPool().execute(new GetCtxStateHandler(chain));
+            chain.getThreadPool().execute(new SignMessageByzantineHandler(chain));
             chainHeaderMap.put(chain.getChainId(), BlockCall.getLatestBlockHeader(chain));
 
         }
@@ -154,7 +155,11 @@ public class ChainManager {
             */
             if (configMap == null || configMap.size() == 0) {
                 ConfigBean configBean = config;
-                configBean.setVerifierSet(new HashSet<>(Arrays.asList(config.getVerifiers().split(NulsCrossChainConstant.VERIFIER_SPLIT))));
+                if(config.getVerifiers() != null){
+                    configBean.setVerifierSet(new HashSet<>(Arrays.asList(config.getVerifiers().split(NulsCrossChainConstant.VERIFIER_SPLIT))));
+                }else{
+                    configBean.setVerifierSet(new HashSet<>());
+                }
                 boolean saveSuccess = configService.save(configBean,configBean.getChainId());
                 if(saveSuccess){
                     configMap.put(configBean.getChainId(), configBean);

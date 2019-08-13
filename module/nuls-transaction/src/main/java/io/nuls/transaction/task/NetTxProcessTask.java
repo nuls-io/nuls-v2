@@ -46,6 +46,8 @@ import io.nuls.transaction.utils.TxUtil;
 import java.util.*;
 
 /**
+ * Process new transactions broadcast by other nodes in the network
+ *
  * @author: Charlie
  * @date: 2019/6/11
  */
@@ -83,7 +85,6 @@ public class NetTxProcessTask implements Runnable {
                 }
                 List<TransactionNetPO> txNetList = new ArrayList<>(TxConstant.NET_TX_PROCESS_NUMBER_ONCE);
                 chain.getUnverifiedQueue().drainTo(txNetList, TxConstant.NET_TX_PROCESS_NUMBER_ONCE);
-                StatisticsTask.txNetListTotal.addAndGet(txNetList.size());
                 //分组 调验证器
                 Map<String, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
                 Iterator<TransactionNetPO> it = txNetList.iterator();
@@ -91,10 +92,6 @@ public class NetTxProcessTask implements Runnable {
                 while (it.hasNext()) {
                     TransactionNetPO txNetPO = it.next();
                     Transaction tx = txNetPO.getTx();
-                    /*if (txService.isTxExists(chain, tx.getHash())) {
-                        it.remove();
-                        continue;
-                    }*/
                     //待打包队列map超过预定值,则不再接受处理交易,直接转发交易完整交易
                     if (TxUtil.discardTx(packableTxMapSize)) {
                         //待打包队列map超过预定值, 不处理转发失败的情况
@@ -121,7 +118,6 @@ public class NetTxProcessTask implements Runnable {
                     //网络交易不处理转发失败的情况
                     String hash = tx.getHash().toHex();
                     NetworkCall.forwardTxHash(chain, tx.getHash(), TxDuplicateRemoval.getExcludeNode(hash));
-                    //chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("NEW TX count:{} - hash:{}", ++count, hash.toHex());
                 }
             } catch (Exception e) {
                 chain.getLogger().error(e);
@@ -184,8 +180,6 @@ public class NetTxProcessTask implements Runnable {
             if (failHashs.isEmpty() && orphanHashs.isEmpty()) {
                 return;
             }
-            StatisticsTask.addOrphanCount.addAndGet(orphanHashs.size());
-//            chain.getLogger().warn("Net new tx verify coinData, -txNetList：{} - failHashSize:{}, - orphanHashSize:{}",txNetList.size(), failHashs.size(), orphanHashs.size());
             Iterator<TransactionNetPO> it = txNetList.iterator();
             removeAndGo:
             while (it.hasNext()) {
@@ -195,8 +189,6 @@ public class NetTxProcessTask implements Runnable {
                 for (String hash : failHashs) {
                     String hashStr = tx.getHash().toHex();
                     if (hash.equals(hashStr)) {
-//                        chain.getLogger().error("Net new tx coinData verify fail, - type:{}, - txhash:{}",
-//                                tx.getType(), hashStr);
                         it.remove();
                         continue removeAndGo;
                     }
@@ -210,8 +202,6 @@ public class NetTxProcessTask implements Runnable {
                         synchronized (chainOrphan) {
                             chainOrphan.add(transactionNetPO);
                         }
-//                        chain.getLogger().debug("Net new tx coinData orphan, - type:{}, - txhash:{}",
-//                                tx.getType(), hashStr);
                         it.remove();
                         continue removeAndGo;
                     }
