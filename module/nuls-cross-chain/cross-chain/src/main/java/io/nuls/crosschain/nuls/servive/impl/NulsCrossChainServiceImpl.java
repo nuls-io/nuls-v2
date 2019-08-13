@@ -546,6 +546,25 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
         return config.getCrossCtxType();
     }
 
+    @Override
+    @SuppressWarnings("unchecked")
+    public Result getByzantineCount(Map<String, Object> params) {
+        if (params.get(CHAIN_ID) == null || params.get(TX_HASH) == null) {
+            return Result.getFailed(PARAMETER_ERROR);
+        }
+        int chainId = (Integer) params.get(CHAIN_ID);
+        if (chainId <= 0) {
+            return Result.getFailed(PARAMETER_ERROR);
+        }
+        Chain chain = chainManager.getChainMap().get(chainId);
+        if (chain == null) {
+            return Result.getFailed(CHAIN_NOT_EXIST);
+        }
+        Map<String, Object> result = new HashMap<>(2);
+        result.put(VALUE, config.getByzantineRatio() * CommonUtil.getCurrentPackAddressList(chain).size());
+        return Result.getSuccess(SUCCESS).setData(result);
+    }
+
     private void rollbackCtx(List<NulsHash> convertHashList, List<NulsHash> ctxStatusList, List<NulsHash> otherCtxList, int chainId) {
         for (NulsHash convertHash : convertHashList) {
             convertHashService.delete(convertHash, chainId);
