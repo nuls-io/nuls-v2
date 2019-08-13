@@ -87,6 +87,14 @@ public interface CrossChainService {
     Result getRegisteredChainInfoList(Map<String,Object> params);
 
     /**
+     * 查询已注册跨链的链信息列表
+     *
+     * @param params    无
+     * @return processor result
+     * */
+    Result getByzantineCount(Map<String,Object> params);
+
+    /**
      * 设置跨链交易类型
      * Setting up cross-chain transaction types
      *

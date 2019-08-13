@@ -80,4 +80,6 @@ public interface CommandConstant {
     String GET_REGISTERED_CHAIN = "getRegisteredChainInfoList";
     //获取地址前缀映射表
     String GET_ALL_ADDRESS_PREFIX = "ac_getAllAddressPrefix";
+
+    String GET_BYZANTINE_COUNT = "getByzantineCount";
 }

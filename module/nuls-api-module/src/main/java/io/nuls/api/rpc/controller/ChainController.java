@@ -250,4 +250,27 @@ public class ChainController {
             return dto;
         }
     }
+
+    @RpcMethod("getByzantineCount")
+    public RpcResult getByzantineCount(List<Object> params) {
+        int chainId;
+        String txHash;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        try {
+            txHash = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[txHash] is inValid");
+        }
+
+        Result result = WalletRpcHandler.getByzantineCount(chainId, txHash);
+        if (result.isFailed()) {
+            throw new JsonRpcException(result.getErrorCode());
+        }
+        Map<String,Object> map = (Map<String, Object>) result.getData();
+        return RpcResult.success(map);
+    }
 }
