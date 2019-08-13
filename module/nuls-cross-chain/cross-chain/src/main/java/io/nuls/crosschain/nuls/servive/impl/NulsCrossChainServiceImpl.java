@@ -549,7 +549,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
     @Override
     @SuppressWarnings("unchecked")
     public Result getByzantineCount(Map<String, Object> params) {
-        if (params.get(CHAIN_ID) == null || params.get(TX_HASH) == null) {
+        if (params.get(CHAIN_ID) == null) {
             return Result.getFailed(PARAMETER_ERROR);
         }
         int chainId = (Integer) params.get(CHAIN_ID);
