@@ -29,7 +29,7 @@ import static io.nuls.api.constant.ApiConstant.*;
 import static io.nuls.api.constant.DBTableConstant.*;
 
 @Component
-public class MongoTransactionServiceImpl implements TransactionService, InitializingBean {
+public class MongoTransactionServiceImpl implements TransactionService,InitializingBean {
 
     @Autowired
     private MongoDBService mongoDBService;
@@ -39,8 +39,9 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
 
     Map<String, List<Document>> relationMap;
     Map<String, List<String>> deleteRelationMap;
+    Map<Integer, Long> txCountMap;
 //    Map<String, List<DeleteManyModel<Document>>> deleteRelationMap;
-
+//
     @Override
     public void afterPropertiesSet() {
         relationMap = new HashMap<>();
@@ -54,12 +55,28 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
             List<String> modelList = new ArrayList<>();
             deleteRelationMap.put("relation_" + i, modelList);
         }
-
-//        deleteRelationMap = new HashMap<>();
+        //        deleteRelationMap = new HashMap<>();
 //        for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
 //            List<DeleteManyModel<Document>> modelList = new ArrayList<>();
 //            deleteRelationMap.put("relation_" + i, modelList);
 //        }
+    }
+
+    @Override
+    public void initCache() {
+        txCountMap = new HashMap<>();
+        for (ApiCache apiCache : CacheManager.getApiCaches().values()) {
+            long totalCount = mongoDBService.getCount(TX_TABLE + apiCache.getChainInfo().getChainId());
+            txCountMap.put(apiCache.getChainInfo().getChainId(), totalCount);
+        }
+    }
+
+    @Override
+    public void addCache(int chainId) {
+        if(txCountMap == null) {
+            txCountMap = new HashMap<>();
+        }
+        txCountMap.put(chainId, 0L);
     }
 
     //tx_table只存储最近100万条数据
@@ -74,8 +91,11 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
             deleteUnConfirmTx(chainId, transactionInfo.getHash());
         }
 
-        long totalCount = mongoDBService.getCount(TX_TABLE + chainId);
+        //long totalCount = mongoDBService.getCount(TX_TABLE + chainId);
+        long totalCount = txCountMap.get(chainId);
+
         totalCount += documentList.size();
+        txCountMap.put(chainId, totalCount);
         if (totalCount > 1000000) {
             int deleteCount = (int) (totalCount - 1000000);
             BasicDBObject fields = new BasicDBObject();
@@ -87,6 +107,8 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
             }
             mongoDBService.delete(TX_TABLE + chainId, Filters.in("_id", hashList));
         }
+
+
         InsertManyOptions options = new InsertManyOptions();
         options.ordered(false);
         mongoDBService.insertMany(TX_TABLE + chainId, documentList, options);

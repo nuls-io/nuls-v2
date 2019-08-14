@@ -91,7 +91,6 @@ public class SyncService {
         clear();
         long time1, time2;
         time1 = System.currentTimeMillis();
-
         findAddProcessAgentOfBlock(chainId, blockInfo);
         //处理交易
         processTxs(chainId, blockInfo.getTxList());
@@ -99,10 +98,11 @@ public class SyncService {
         roundManager.process(chainId, blockInfo);
         //保存数据
         save(chainId, blockInfo);
-        time2 = System.currentTimeMillis();
 
         ApiCache apiCache = CacheManager.getCache(chainId);
         apiCache.setBestHeader(blockInfo.getHeader());
+
+        time2 = System.currentTimeMillis();
         LoggerUtil.commonLog.info("-----height finish:" + blockInfo.getHeader().getHeight() + "-----txCount:" + blockInfo.getHeader().getTxCount() + "-----use:" + (time2 - time1) + "-----");
         return true;
     }
@@ -791,6 +791,7 @@ public class SyncService {
         blockHexInfo.setBlockHex(blockInfo.getBlockHex());
         //存储区块头信息
         blockService.saveBLockHeaderInfo(chainId, blockInfo.getHeader());
+        //存区块序列化完整信息
         blockService.saveBlockHexInfo(chainId, blockHexInfo);
         //存储交易记录
         txService.saveTxList(chainId, blockInfo.getTxList());
