@@ -34,8 +34,6 @@ import io.nuls.network.netty.codec.NulsMessageDecoder;
 import io.nuls.network.netty.codec.NulsMessageEncoder;
 import io.nuls.network.netty.handler.HeartbeatServerHandler;
 
-import java.util.concurrent.TimeUnit;
-
 import static io.nuls.network.constant.NetworkConstant.*;
 
 /**
@@ -54,9 +52,9 @@ public class NulsChannelInitializer<T extends ChannelInboundHandlerAdapter> exte
     }
 
     @Override
-    protected void initChannel(SocketChannel socketChannel) throws Exception {
+    protected void initChannel(SocketChannel socketChannel) {
         ChannelPipeline p = socketChannel.pipeline();
-        p.addLast("idle", new IdleStateHandler(READ_IDEL_TIME_OUT, WRITE_IDEL_TIME_OUT, ALL_IDLE_TIME_OUT, TimeUnit.SECONDS));
+        p.addLast("idle", new IdleStateHandler(READ_IDEL_TIME_OUT, WRITE_IDEL_TIME_OUT, ALL_IDLE_TIME_OUT));
         p.addLast("decoder", new NulsMessageDecoder());
         p.addLast("encoder0", new NulsMessageEncoder());
         p.addLast("heartbeat", new HeartbeatServerHandler());

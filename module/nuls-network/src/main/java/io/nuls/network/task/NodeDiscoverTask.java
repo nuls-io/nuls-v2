@@ -131,8 +131,8 @@ public class NodeDiscoverTask implements Runnable {
                     node.setStatus(NodeStatusEnum.CONNECTABLE);
                     canConnectNodes.put(node.getId(), node);
                     verifyNodes.remove(node.getId());
-                    LoggerUtil.logger(node.getNodeGroup().getChainId()).info("增加可用跨链,移除探测信息:{}", node.getId());
-                    LoggerUtil.logger(node.getNodeGroup().getChainId()).info("跨链连接{}探测可用，进行跨链分享", node.getId());
+                    LoggerUtil.logger(node.getNodeGroup().getChainId()).info("add cross node,remove from verifyNodes:{}", node.getId());
+                    LoggerUtil.logger(node.getNodeGroup().getChainId()).info("share cross node={}", node.getId());
                     doShare(node, true);
                 } else {
                     node.setStatus(NodeStatusEnum.UNAVAILABLE);
@@ -281,13 +281,13 @@ public class NodeDiscoverTask implements Runnable {
         node.setConnectStatus(NodeConnectStatusEnum.CONNECTING);
         node.setConnectedListener(() -> {
             //探测可连接后，断开连接
-            LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("探测可连接:{},之后自动断开", node.getId());
+            LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("verify node:{},connect success", node.getId());
             node.setConnectStatus(NodeConnectStatusEnum.CONNECTED);
             node.getChannel().close();
         });
 
         node.setDisconnectListener(() -> {
-            LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("探测进入断开:{},failCount={}", node.getId(), node.getFailCount());
+            LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("verify node:{},disconnect,failCount={}", node.getId(), node.getFailCount());
             node.setChannel(null);
             int availableNodesCount = 0;
             if (node.isCrossConnect()) {

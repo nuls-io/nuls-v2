@@ -108,6 +108,7 @@ public class NetworkCall {
             params.put(Constants.CHAIN_ID, chainId);
 
             ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_reconnect", params);
+            logger.info("resetNetwork......");
         } catch (Exception e) {
             logger.error("", e);
         }

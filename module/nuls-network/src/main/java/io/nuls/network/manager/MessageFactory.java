@@ -159,15 +159,27 @@ public class MessageFactory {
         return new GetAddrMessage(nodeGroup.getMagicNumber(), NetworkConstant.CMD_MESSAGE_GET_ADDR, messageBody);
     }
 
+    /**
+     * @param chainId
+     * @param magicNumber
+     * @param isCrossAddress
+     * @return
+     */
+    GetAddrMessage buildGetAddrMessage(int chainId, long magicNumber, boolean isCrossAddress) {
+        GetAddrMessageBody messageBody = new GetAddrMessageBody();
+        messageBody.setChainId(chainId);
+        messageBody.setIsCrossAddress(isCrossAddress ? (byte) 1 : (byte) 0);
+        return new GetAddrMessage(magicNumber, NetworkConstant.CMD_MESSAGE_GET_ADDR, messageBody);
+    }
 
     /**
      * 主动构造地址消息：广播地址消息时使用
      * Actively constructing address messages: used when broadcasting address messages
      *
-     * @param ipAddressList ip set
-     * @param magicNumber   net id
-     * @param chainId       chainId
-     * @param isCrossAddress       isCrossAddress
+     * @param ipAddressList  ip set
+     * @param magicNumber    net id
+     * @param chainId        chainId
+     * @param isCrossAddress isCrossAddress
      * @return AddrMessage
      */
     public AddrMessage buildAddrMessage(List<IpAddressShare> ipAddressList, long magicNumber, int chainId, byte isCrossAddress) {

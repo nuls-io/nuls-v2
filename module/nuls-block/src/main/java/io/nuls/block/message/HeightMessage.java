@@ -78,8 +78,8 @@ public class HeightMessage extends BaseBusinessMessage {
 
     @Override
     public String toString() {
-        return "HeightRangeMessage{" +
-                ", height=" + height +
+        return "HeightMessage{" +
+                "height=" + height +
                 '}';
     }
 }

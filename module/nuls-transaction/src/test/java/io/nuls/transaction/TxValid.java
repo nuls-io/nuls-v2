@@ -142,7 +142,7 @@ public class TxValid {
      */
     @Test
     public void mAddressTransfer() throws Exception {
-        int count = 10000;
+        int count = 10;
         Log.info("创建转账账户...");
         List<String> list = createAddress(count);
         //给新生成账户转账
@@ -151,7 +151,7 @@ public class TxValid {
         Log.info("交易账户余额初始化...");
         for (int i = 0; i < count; i++) {
             String address = list.get(i);
-            Map transferMap = this.createTransferTx(address21, address, new BigInteger("8000000000"));
+            Map transferMap = this.createTransferTx(address21, address, new BigInteger("80000000"));
             Transaction tx = assemblyTransaction((int) transferMap.get(Constants.CHAIN_ID), (List<CoinDTO>) transferMap.get("inputs"),
                     (List<CoinDTO>) transferMap.get("outputs"), (String) transferMap.get("remark"), hash);
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
@@ -173,7 +173,7 @@ public class TxValid {
         Log.debug("{}", System.currentTimeMillis());
         int countTx = 0;
         Map<String, NulsHash> preHashMap = new HashMap<>();
-        for (int x = 0; x < 50; x++) {
+        for (int x = 0; x < 100000; x++) {
             Log.info("start Transfer {} 笔,  * 第 {} 次", count, x + 1);
             long startTime = System.currentTimeMillis();
             for (int i = 0; i < count; i++) {

@@ -37,6 +37,8 @@ import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
 import io.nuls.core.rpc.util.NulsDateUtils;
 
+import java.util.List;
+
 /**
  * @author: Niels Wang
  */
@@ -90,6 +92,9 @@ public class BlockHeaderDto {
 
     @ApiModelProperty(description = "智能合约世界状态根")
     private String stateRoot;
+
+    @ApiModelProperty(description = "区块打包的交易hash集合")
+    private List<String> txHashList;
 
     public BlockHeaderDto() {
 
@@ -242,5 +247,13 @@ public class BlockHeaderDto {
 
     public void setStateRoot(String stateRoot) {
         this.stateRoot = stateRoot;
+    }
+
+    public List<String> getTxHashList() {
+        return txHashList;
+    }
+
+    public void setTxHashList(List<String> txHashList) {
+        this.txHashList = txHashList;
     }
 }

@@ -8,6 +8,10 @@ import java.util.Set;
 
 public interface TransactionService {
 
+    void initCache();
+
+    void addCache(int chainId);
+
     void saveTxList(int chainId, List<TransactionInfo> txList);
 
     void saveCoinDataList(int chainId, List<CoinDataInfo> coinDataList);
