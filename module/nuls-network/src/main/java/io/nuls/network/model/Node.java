@@ -96,7 +96,7 @@ public class Node implements Dto {
 
 
     private int connectStatus;
-    private boolean isSeedNode;
+    private boolean isSeedNode = false;
     /**
      * 是否分享过地址
      */

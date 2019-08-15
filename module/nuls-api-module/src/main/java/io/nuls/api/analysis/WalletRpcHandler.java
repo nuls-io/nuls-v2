@@ -539,4 +539,17 @@ public class WalletRpcHandler {
             return Result.getFailed(e.getErrorCode());
         }
     }
+
+
+    public static Result getByzantineCount(int chainId, String txHash) {
+        try {
+            Map<String,Object> params = new HashMap<>();
+            params.put("chainId", chainId);
+            params.put("txHash", txHash);
+            Map<String,Object> map = (Map<String, Object>) RpcCall.request(ModuleE.CC.abbr, CommandConstant.GET_BYZANTINE_COUNT, params);
+            return Result.getSuccess(null).setData(map);
+        }catch (NulsException e) {
+            return Result.getFailed(e.getErrorCode());
+        }
+    }
 }

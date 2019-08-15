@@ -21,6 +21,7 @@ import io.nuls.crosschain.base.model.dto.input.CoinDTO;
 import io.nuls.crosschain.base.model.dto.input.CrossTxTransferDTO;
 import io.nuls.crosschain.base.service.CrossChainService;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
+import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainErrorCode;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.model.po.CtxStatusPO;
@@ -544,6 +545,25 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
     @Override
     public int getCrossChainTxType() {
         return config.getCrossCtxType();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Result getByzantineCount(Map<String, Object> params) {
+        if (params.get(CHAIN_ID) == null) {
+            return Result.getFailed(PARAMETER_ERROR);
+        }
+        int chainId = (Integer) params.get(CHAIN_ID);
+        if (chainId <= 0) {
+            return Result.getFailed(PARAMETER_ERROR);
+        }
+        Chain chain = chainManager.getChainMap().get(chainId);
+        if (chain == null) {
+            return Result.getFailed(CHAIN_NOT_EXIST);
+        }
+        Map<String, Object> result = new HashMap<>(2);
+        result.put(VALUE, config.getByzantineRatio() * CommonUtil.getCurrentPackAddressList(chain).size()/ NulsCrossChainConstant.MAGIC_NUM_100);
+        return Result.getSuccess(SUCCESS).setData(result);
     }
 
     private void rollbackCtx(List<NulsHash> convertHashList, List<NulsHash> ctxStatusList, List<NulsHash> otherCtxList, int chainId) {
