@@ -784,33 +784,75 @@ public class SyncService {
     public void save(int chainId, BlockInfo blockInfo) {
         long height = blockInfo.getHeader().getHeight();
 
+        long time1,time2;
+
         SyncInfo syncInfo = chainService.saveNewSyncInfo(chainId, height);
 
         BlockHexInfo blockHexInfo = new BlockHexInfo();
         blockHexInfo.setHeight(blockInfo.getHeader().getHeight());
         blockHexInfo.setBlockHex(blockInfo.getBlockHex());
         //存储区块头信息
+        time1 = System.currentTimeMillis();
         blockService.saveBLockHeaderInfo(chainId, blockInfo.getHeader());
         blockService.saveBlockHexInfo(chainId, blockHexInfo);
+//        time2 = System.currentTimeMillis();
+//        System.out.println("-----------saveBlockHexInfo, use: " + (time2 - time1) );
+//        time1 = System.currentTimeMillis();
         //存储交易记录
         txService.saveTxList(chainId, blockInfo.getTxList());
+//        time2 = System.currentTimeMillis();
+//        System.out.println("-----------saveTxList, use: " + (time2 - time1) );
+//        time1 = System.currentTimeMillis();
+
         // txService.saveCoinDataList(chainId, coinDataList);
         //存储交易和地址关系记录
         txService.saveTxRelationList(chainId, txRelationInfoSet);
+//        time2 = System.currentTimeMillis();
+//        System.out.println("-----------saveTxRelationList, use: " + (time2 - time1) );
+//        time1 = System.currentTimeMillis();
+
         //存储别名记录
         aliasService.saveAliasList(chainId, aliasInfoList);
+//        time2 = System.currentTimeMillis();
+//        System.out.println("-----------saveAliasList, use: " + (time2 - time1) );
+//        time1 = System.currentTimeMillis();
+
         //存储红黄牌惩罚记录
         punishService.savePunishList(chainId, punishLogList);
+//        time2 = System.currentTimeMillis();
+//        System.out.println("-----------savePunishList, use: " + (time2 - time1) );
+//        time1 = System.currentTimeMillis();
+
         //存储委托/取消委托记录
         depositService.saveDepositList(chainId, depositInfoList);
+//        time2 = System.currentTimeMillis();
+//        System.out.println("-----------saveDepositList, use: " + (time2 - time1) );
+//        time1 = System.currentTimeMillis();
+
         //存储智能合约交易关系记录
         contractService.saveContractTxInfos(chainId, contractTxInfoList);
+//        time2 = System.currentTimeMillis();
+//        System.out.println("-----------saveContractTxInfos, use: " + (time2 - time1) );
+//        time1 = System.currentTimeMillis();
+
         //存储智能合约结果记录
         contractService.saveContractResults(chainId, contractResultList);
+//        time2 = System.currentTimeMillis();
+//        System.out.println("-----------saveContractResults, use: " + (time2 - time1) );
+//        time1 = System.currentTimeMillis();
+
         //存储token转账信息
         tokenService.saveTokenTransfers(chainId, tokenTransferList);
+//        time2 = System.currentTimeMillis();
+//        System.out.println("-----------saveTokenTransfers, use: " + (time2 - time1) );
+//        time1 = System.currentTimeMillis();
+
         //存储链信息
         chainService.saveChainList(chainInfoList);
+//        time2 = System.currentTimeMillis();
+//        System.out.println("-----------saveChainList, use: " + (time2 - time1) );
+//        time1 = System.currentTimeMillis();
+
         /*
             涉及到统计类的表放在最后来存储，便于回滚
          */

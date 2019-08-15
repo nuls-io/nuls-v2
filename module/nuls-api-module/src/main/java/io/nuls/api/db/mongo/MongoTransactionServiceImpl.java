@@ -67,6 +67,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         if (txList.isEmpty()) {
             return;
         }
+        long time1, time2;
 
         List<Document> documentList = new ArrayList<>();
         for (TransactionInfo transactionInfo : txList) {
