@@ -45,6 +45,7 @@ import io.nuls.provider.model.form.*;
 import io.nuls.provider.rpctools.AccountTools;
 import io.nuls.provider.utils.Log;
 import io.nuls.provider.utils.ResultUtil;
+import io.nuls.v2.error.AccountErrorCode;
 import io.nuls.v2.model.annotation.Api;
 import io.nuls.v2.model.annotation.ApiOperation;
 import io.nuls.v2.model.dto.AccountDto;
@@ -379,6 +380,19 @@ public class AccountResource {
             return clientResult.resultMap().map("value", clientResult.getData()).mapToData();
         }
         return clientResult;
+    }
+
+    @POST
+    @Path("/address/validate")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(description = "验证地址格式是否正确", order = 110, detailDesc = "验证地址格式是否正确")
+    public RpcClientResult validateAddress(ValidateAddressForm form) {
+        boolean b = AddressTool.validAddress(form.getChainId(), form.getAddress());
+        if (b) {
+            return RpcClientResult.getSuccess(null).resultMap().map("value", true);
+        } else {
+            return RpcClientResult.getFailed(new ErrorData(AccountErrorCode.ADDRESS_ERROR.getCode(),"address is wrong"));
+        }
     }
 
     @POST
