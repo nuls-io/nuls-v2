@@ -277,7 +277,7 @@ public class NodeGroupRpc extends BaseCmd {
     })
     @ResponseData(description = "无特定返回值，没有错误即成功")
     public Response delGroupByChainId(Map params) {
-        int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
+        int chainId = Integer.parseInt(String.valueOf(params.get("chainId")));
         StorageManager.getInstance().getDbService().deleteGroup(chainId);
         //删除网络连接
         NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);

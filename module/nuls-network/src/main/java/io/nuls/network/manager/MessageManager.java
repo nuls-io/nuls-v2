@@ -30,7 +30,6 @@ import io.netty.channel.ChannelFuture;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.core.crypto.Sha256Hash;
-import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.network.constant.ManagerStatusEnum;
@@ -132,7 +131,7 @@ public class MessageManager extends BaseManager {
         return checksum == pChecksum;
     }
 
-    public void receiveMessage(NulsByteBuffer byteBuffer, Node node) throws NulsException {
+    public void receiveMessage(NulsByteBuffer byteBuffer, Node node) {
         //统一接收消息处理
         try {
             if (null == byteBuffer) {
