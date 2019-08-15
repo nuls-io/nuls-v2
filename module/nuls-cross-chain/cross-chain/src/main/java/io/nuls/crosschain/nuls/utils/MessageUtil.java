@@ -493,6 +493,7 @@ public class MessageUtil {
         int passCount = 0;
         List<P2PHKSignature> signatureList = signature.getP2PHKSignatures();
         if(signatureList == null || signatureList.size() < minPassCount){
+            chain.getLogger().error("跨链交易签名数量小于拜占庭验证最小数量，signCount{},minPassCount{}",signatureList == null ? 0 : signatureList.size(),minPassCount);
             return false;
         }
         byte[] hashByte = ctx.getHash().getBytes();
@@ -513,6 +514,7 @@ public class MessageUtil {
             }
         }
         if(passCount < minPassCount){
+            chain.getLogger().error("签名验证通过数量小于拜占庭验证最小数量,passCount{},minPassCount{}",passCount,minPassCount);
             return false;
         }
         return true;
@@ -587,27 +589,32 @@ public class MessageUtil {
      * 是否可以发送跨链相关消息
      * @param chain      本链信息
      * @param toChainId  接收链ID
-     * @return           是否可发送跨链消息
+     * @return           当前跨链网络状态 0链已注销1不可广播2可广播
      * */
-    public static boolean canSendMessage(Chain chain,int toChainId) {
+    public static byte canSendMessage(Chain chain,int toChainId) {
         try {
-            int linkedNode = NetWorkCall.getAvailableNodeAmount(toChainId, true);
             int minNodeAmount = chain.getConfig().getMinNodeAmount();
+            boolean chainExist = false;
             if(config.isMainNet()){
                 for (ChainInfo chainInfo:chainManager.getRegisteredCrossChainList()) {
                     if(chainInfo.getChainId() == toChainId){
                         minNodeAmount = chainInfo.getMinAvailableNodeNum();
+                        chainExist = true;
                     }
                 }
             }
+            if(!chainExist){
+                return 0;
+            }
+            int linkedNode = NetWorkCall.getAvailableNodeAmount(toChainId, true);
             if(linkedNode >= minNodeAmount){
-                return true;
+                return 2;
             } else {
                 chain.getLogger().debug("当前节点链接到的跨链节点数小于最小链接数,crossChainId:{},linkedNodeCount:{},minLinkedCount:{}", toChainId, linkedNode, minNodeAmount);
             }
         }catch (NulsException e){
             chain.getLogger().error(e);
         }
-        return false;
+        return 1;
     }
 }
