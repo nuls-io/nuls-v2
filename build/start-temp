@@ -100,7 +100,7 @@ while [ ! -z $1 ] ; do
         "--debug")
             DEBUG="$2";
             shift 2 ;;
-        * ) shift
+        * ) shift 1 ;;
     esac
 done  
 
