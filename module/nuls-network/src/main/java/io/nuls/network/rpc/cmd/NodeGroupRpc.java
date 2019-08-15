@@ -253,13 +253,12 @@ public class NodeGroupRpc extends BaseCmd {
             Map<String, Object> rtMap = new HashMap<>();
             if (null == nodeGroup) {
                 rtMap.put("connectAmount", 0);
-                LoggerUtil.logger(chainId).error("chainId={} nodeGroup is null", chainId);
             } else {
                 boolean isCross = Boolean.valueOf(String.valueOf(params.get("isCross")));
                 rtMap.put("connectAmount", nodeGroup.getAvailableNodes(isCross).size());
             }
             return success(rtMap);
-        }  catch (Exception e) {
+        } catch (Exception e) {
             LoggerUtil.logger(chainId).error(e);
             return failed(e.getMessage());
         }
