@@ -226,7 +226,7 @@ public class MessageUtil {
      */
     public static boolean signByzantineInChain(Chain chain,Transaction ctx,TransactionSignature signature,List<String>packAddressList)throws NulsException,IOException{
         //交易签名拜占庭
-        int byzantineCount = CommonUtil.getByzantineCount(packAddressList, chain);
+        int byzantineCount = CommonUtil.getByzantineCount(ctx, packAddressList, chain);
         //如果为友链中跨链转账交易，则需要减掉本链协议交易签名
         if(ctx.getType() == config.getCrossCtxType()){
             int fromChainId = AddressTool.getChainIdByAddress(ctx.getCoinDataInstance().getFrom().get(0).getAddress());

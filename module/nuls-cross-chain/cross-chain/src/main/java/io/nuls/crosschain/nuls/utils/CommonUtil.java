@@ -5,8 +5,10 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.base.data.Coin;
+import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.ioc.SpringLiteContext;
@@ -14,6 +16,8 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.StringUtils;
 import io.nuls.crosschain.base.model.bo.ChainInfo;
+import io.nuls.crosschain.base.model.bo.txdata.VerifierChangeData;
+import io.nuls.crosschain.base.model.bo.txdata.VerifierInitData;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainErrorCode;
@@ -110,6 +114,25 @@ public class CommonUtil {
             }
         }
         return misMatchSignList;
+    }
+
+    /**
+     * 获取当前签名拜占庭数量
+     * */
+    @SuppressWarnings("unchecked")
+    public static int getByzantineCount(Transaction ctx, List<String> packAddressList, Chain chain)throws NulsException{
+        int agentCount = packAddressList.size();
+        if(ctx.getType() == TxType.VERIFIER_CHANGE){
+            VerifierChangeData verifierChangeData = new VerifierChangeData();
+            verifierChangeData.parse(ctx.getTxData(),0);
+            agentCount = agentCount + verifierChangeData.getCancelAgentList().size() - verifierChangeData.getRegisterAgentList().size();
+        }
+        int minPassCount = agentCount*chain.getConfig().getByzantineRatio()/ NulsCrossChainConstant.MAGIC_NUM_100;
+        if(minPassCount == 0){
+            minPassCount = 1;
+        }
+        chain.getLogger().debug("当前共识节点数量为：{},最少签名数量为:{}",agentCount,minPassCount );
+        return minPassCount;
     }
 
     /**
