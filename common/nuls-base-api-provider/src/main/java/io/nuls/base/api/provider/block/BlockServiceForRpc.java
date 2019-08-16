@@ -11,6 +11,7 @@ import io.nuls.base.api.provider.block.facade.GetBlockHeaderByLastHeightReq;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BlockExtendsData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.po.BlockHeaderPo;
 import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.exception.NulsException;
@@ -19,6 +20,8 @@ import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.util.NulsDateUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 
 /**
@@ -55,7 +58,7 @@ public class BlockServiceForRpc extends BaseRpcService implements BlockService {
 
     private Result<BlockHeaderData> tranderBlockHeader(String hexString) {
         try {
-            if(StringUtils.isBlank(hexString)) {
+            if (StringUtils.isBlank(hexString)) {
                 return success(null);
             }
             BlockHeaderPo header = new BlockHeaderPo();
@@ -79,6 +82,12 @@ public class BlockServiceForRpc extends BaseRpcService implements BlockService {
             res.setRoundIndex(blockExtendsData.getRoundIndex());
             res.setRoundStartTime(NulsDateUtils.timeStamp2DateStr(blockExtendsData.getRoundStartTime()));
             res.setStateRoot(RPCUtil.encode(blockExtendsData.getStateRoot()));
+
+            List<String> hashList = new ArrayList<>();
+            for (NulsHash nulsHash : header.getTxHashList()) {
+                hashList.add(nulsHash.toHex());
+            }
+            res.setTxHashList(hashList);
             return success(res);
         } catch (NulsException e) {
             Log.error("反序列化block header发生异常", e);

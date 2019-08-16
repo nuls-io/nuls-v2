@@ -347,26 +347,29 @@ public class Account implements Serializable {
      */
     public ECKey getEcKey(String password) throws NulsException {
         ECKey eckey = null;
-        byte[] unencryptedPrivateKey;
         //判断当前账户是否存在私钥，如果不存在私钥这为加密账户
-        BigInteger newPriv = null;
+        BigInteger newPriv;
         if (this.isEncrypted()) {
             ObjectUtils.canNotEmpty(password, "the password can not be empty");
-            if (!validatePassword(password)) {
-                throw new NulsException(AccountErrorCode.PASSWORD_IS_WRONG);
+            boolean result = FormatValidUtils.validPassword(password);
+            if (result) {
+                byte[] unencryptedPrivateKey;
+                try {
+                    unencryptedPrivateKey = AESEncrypt.decrypt(this.getEncryptedPriKey(), password);
+                    newPriv = new BigInteger(1, unencryptedPrivateKey);
+                    eckey = ECKey.fromPrivate(newPriv);
+                    result = Arrays.equals(eckey.getPubKey(), getPubKey());
+                } catch (CryptoException e) {
+                    result = false;
+                }
+
             }
-            try {
-                unencryptedPrivateKey = AESEncrypt.decrypt(this.getEncryptedPriKey(), password);
-                newPriv = new BigInteger(1, unencryptedPrivateKey);
-            } catch (CryptoException e) {
+            if (!result) {
                 throw new NulsException(AccountErrorCode.PASSWORD_IS_WRONG);
             }
         } else {
             newPriv = new BigInteger(1, this.getPriKey());
-        }
-        eckey = ECKey.fromPrivate(newPriv);
-        if (!Arrays.equals(eckey.getPubKey(), getPubKey())) {
-            throw new NulsException(AccountErrorCode.PASSWORD_IS_WRONG);
+            eckey = ECKey.fromPrivate(newPriv);
         }
         return eckey;
     }

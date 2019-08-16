@@ -51,16 +51,22 @@ public class Node {
      * 下载信用值
      */
     private int credit = 100;
-
     /**
-     * 下载耗时,初始为0
+     * 批量下载任务开始时间
      */
-    private long duration;
-
+    private long startTime = 0;
     /**
      * 节点状态
      */
     private NodeEnum nodeEnum;
+
+    public long getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(long startTime) {
+        this.startTime = startTime;
+    }
 
     public NodeEnum getNodeEnum() {
         return nodeEnum;
@@ -103,21 +109,12 @@ public class Node {
         this.credit = Math.max(credit, 10);
     }
 
-    public long getDuration() {
-        return duration;
-    }
-
-    public void setDuration(long duration) {
-        this.duration = duration;
-    }
-
     /**
      * 根据下载是否成功、下载耗费时间调整信用值
      */
-    public void adjustCredit(boolean success, long duration) {
+    public void adjustCredit(boolean success) {
         int oldCredit = credit;
         if (success) {
-            this.duration = duration;
             //下载成功,信用值加20,上限为初始信用值的两倍
             credit = Math.min(100, credit + 10);
         } else {
@@ -140,7 +137,6 @@ public class Node {
                 .add("height=" + height)
                 .add("hash=" + hash)
                 .add("credit=" + credit)
-                .add("duration=" + duration)
                 .add("nodeEnum=" + nodeEnum)
                 .toString();
     }

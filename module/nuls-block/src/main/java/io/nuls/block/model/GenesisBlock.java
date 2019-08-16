@@ -207,12 +207,12 @@ public final class GenesisBlock extends Block {
         header.setMerkleHash(NulsHash.calcMerkleHash(txHashList));
         header.setExtend(HexUtil.decode(extend));
 
-        BlockSignature p2PKHScriptSig = new BlockSignature();
+        BlockSignature blockSignature = new BlockSignature();
         priKey = new BigInteger(1, HexUtil.decode((String) jsonMap.get(CONFIG_FILED_PRIVATE_KEY)));
         NulsSignData signData = this.signature(header.getHash().getBytes());
-        p2PKHScriptSig.setSignData(signData);
-        p2PKHScriptSig.setPublicKey(getGenesisPubkey());
-        header.setBlockSignature(p2PKHScriptSig);
+        blockSignature.setSignData(signData);
+        blockSignature.setPublicKey(getGenesisPubkey());
+        header.setBlockSignature(blockSignature);
     }
 
     private NulsSignData signature(byte[] bytes) {

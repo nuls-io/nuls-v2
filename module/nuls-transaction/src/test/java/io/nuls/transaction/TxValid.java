@@ -115,8 +115,8 @@ public class TxValid {
 
     @Test
     public void importPriKeyTest() {
-//        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//种子出块地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
-//        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//种子出块地址 tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
+        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//种子出块地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
+        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//种子出块地址 tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
         importPriKey("9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b", password);//20 tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
         importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//21 tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
         importPriKey("8212e7ba23c8b52790c45b0514490356cd819db15d364cbe08659b5888339e78", password);//22 tNULSeBaMrbMRiFAUeeAt6swb4xVBNyi81YL24
@@ -142,7 +142,7 @@ public class TxValid {
      */
     @Test
     public void mAddressTransfer() throws Exception {
-        int count = 10000;
+        int count = 9999;
         Log.info("创建转账账户...");
         List<String> list = createAddress(count);
         //给新生成账户转账
@@ -151,7 +151,7 @@ public class TxValid {
         Log.info("交易账户余额初始化...");
         for (int i = 0; i < count; i++) {
             String address = list.get(i);
-            Map transferMap = this.createTransferTx(address21, address, new BigInteger("8000000000"));
+            Map transferMap = this.createTransferTx(address23, address, new BigInteger("100000000000"));
             Transaction tx = assemblyTransaction((int) transferMap.get(Constants.CHAIN_ID), (List<CoinDTO>) transferMap.get("inputs"),
                     (List<CoinDTO>) transferMap.get("outputs"), (String) transferMap.get("remark"), hash);
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
@@ -173,13 +173,13 @@ public class TxValid {
         Log.debug("{}", System.currentTimeMillis());
         int countTx = 0;
         Map<String, NulsHash> preHashMap = new HashMap<>();
-        for (int x = 0; x < 50; x++) {
+        for (int x = 0; x < 1000; x++) {
             Log.info("start Transfer {} 笔,  * 第 {} 次", count, x + 1);
             long startTime = System.currentTimeMillis();
             for (int i = 0; i < count; i++) {
                 String address = list.get(i);
                 String addressTo = listTo.get(i);
-                Map transferMap = this.createTransferTx(address, addressTo, new BigInteger("1000000"));
+                Map transferMap = this.createTransferTx(address, addressTo, new BigInteger("100000"));
                 Transaction tx = assemblyTransaction((int) transferMap.get(Constants.CHAIN_ID), (List<CoinDTO>) transferMap.get("inputs"),
                         (List<CoinDTO>) transferMap.get("outputs"), (String) transferMap.get("remark"), preHashMap.get(address));
                 Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
