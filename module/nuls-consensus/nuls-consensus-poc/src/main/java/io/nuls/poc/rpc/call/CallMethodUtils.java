@@ -288,7 +288,7 @@ public class CallMethodUtils {
             params.put("maxTxDataSize", chain.getConfig().getBlockMaxSize());
             params.put("blockTime", blockTime);
             params.put("packingAddress", packingAddress);
-            BlockExtendsData preExtendsData = new BlockExtendsData(chain.getNewestHeader().getExtend());
+            BlockExtendsData preExtendsData = chain.getNewestHeader().getExtendsData();
             byte[] preStateRoot = preExtendsData.getStateRoot();
             params.put("preStateRoot", RPCUtil.encode(preStateRoot));
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_packableTxs", params,surplusTime-TIME_OUT);
