@@ -24,11 +24,11 @@ import io.nuls.base.RPCUtil;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.SmallBlock;
 import io.nuls.base.protocol.MessageProcessor;
-import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.HashMessage;
 import io.nuls.block.message.SmallBlockMessage;
 import io.nuls.block.rpc.call.NetworkCall;
+import io.nuls.block.utils.SmallBlockCacher;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.logback.NulsLogger;
 

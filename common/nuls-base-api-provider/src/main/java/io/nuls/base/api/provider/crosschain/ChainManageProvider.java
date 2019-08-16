@@ -22,11 +22,11 @@ public interface ChainManageProvider {
     Result<Map> registerChain(RegisterChainReq req);
 
     /**
-     *
      * @param req
      * @return
      */
     Result<Map> updateChain(RegisterChainReq req);
+
     /**
      * 注销资产
      *
@@ -45,20 +45,16 @@ public interface ChainManageProvider {
 
 
     /**
-     * 注销链
-     *
-     * @param req
-     * @return
-     */
-    Result<String> disCrossChain(DisableAssetReq req);
-
-    /**
      * 获取注册了跨链交易的链的注册信息
      *
      * @param req
      * @return
      */
     Result<CrossChainRegisterInfo> getCrossChainInfo(GetCrossChainInfoReq req);
+
+    Result<Map> getCrossChainsSimpleInfo();
+
+    Result<CrossAssetRegisterInfo> getCrossAssetInfo(GetCrossAssetInfoReq req);
 
 
 }

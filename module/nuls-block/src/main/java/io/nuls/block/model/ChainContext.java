@@ -24,13 +24,12 @@ package io.nuls.block.model;
 
 import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsHash;
-import io.nuls.block.cache.SingleBlockCacher;
-import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.StatusEnum;
 import io.nuls.block.manager.BlockChainManager;
-import io.nuls.block.thread.BlockDownloaderParams;
 import io.nuls.block.thread.monitor.TxGroupRequestor;
 import io.nuls.block.utils.LoggerUtil;
+import io.nuls.block.utils.SingleBlockCacher;
+import io.nuls.block.utils.SmallBlockCacher;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.CollectionUtils;
 

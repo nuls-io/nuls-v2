@@ -176,7 +176,9 @@ public class CommandHandler implements InitializingBean {
         register(getBean(UpdateCrossChainProcessor.class));
 
         register(getBean(CreateCrossTxProcessor.class));
+        register(getBean(GetCrossChainsSimpleInfoProcessor.class));
         register(getBean(GetCrossChainRegisterInfoProcessor.class));
+        register(getBean(GetCrossAssetInfoProcessor.class));
         register(getBean(GetCrossTxStateProcessor.class));
     }
 
@@ -224,7 +226,7 @@ public class CommandHandler implements InitializingBean {
     }
 
     private static String[] parseArgs(String line) throws UnsupportedEncodingException {
-        if(StringUtils.isBlank(line)) {
+        if (StringUtils.isBlank(line)) {
             return new String[0];
         }
         Matcher matcher = CMD_PATTERN.matcher(line);
@@ -237,7 +239,7 @@ public class CommandHandler implements InitializingBean {
         }
 
         String[] args = result.split("\\s+");
-        for(int i = 0, length = args.length; i < length; i++) {
+        for (int i = 0, length = args.length; i < length; i++) {
             args[i] = URLDecoder.decode(args[i], StandardCharsets.UTF_8.toString());
         }
         return args;
@@ -257,18 +259,17 @@ public class CommandHandler implements InitializingBean {
             return processor.getHelp();
         }
         try {
-            try
-            {
+            try {
                 boolean result = processor.argsValidate(args);
                 if (!result) {
                     return "args incorrect:\n" + processor.getHelp();
                 }
-            }catch (ParameterException e){
+            } catch (ParameterException e) {
                 return e.getMessage() + "\n" + "args incorrect:\n" + processor.getHelp();
             }
             return processor.execute(args).toString();
         } catch (Exception e) {
-            if(System.Logger.Level.DEBUG.getName().equals(System.getProperty("log.level"))){
+            if (System.Logger.Level.DEBUG.getName().equals(System.getProperty("log.level"))) {
                 e.printStackTrace();
             }
             return CommandConstant.EXCEPTION + ": " + e.getMessage();

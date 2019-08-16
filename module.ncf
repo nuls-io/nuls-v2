@@ -32,6 +32,8 @@ crossPort=18002
 packetMagic=2019073101
 #种子节点
 selfSeedIps=192.168.1.192:18001
+#主网的跨链种子节点
+moonSeedIps=192.168.1.192:18002
 #最大入网连接数
 maxInCount=100
 #最大出网连接数
@@ -49,7 +51,7 @@ minNodeAmount=0
 #区块同步过程中,每次从网络上节点下载的区块数量
 downloadNumber=10
 #从网络节点下载单个区块的超时时间
-singleDownloadTimeout=15000
+singleDownloadTimeout=10000
 #区块同步过程中缓存的区块字节数上限(20M)
 cachedBlockSizeLimit=20971520
 #创世块文件路径(支持绝对路径与相对路径,相对路径相对于此配置文件的目录)
@@ -58,7 +60,7 @@ dependent=cross-chain,smart-contract,protocol-update
 
 [consensus]
 #种子节点列表
-seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMmShSTVwbU4rHkZjpD98JgFgg6rmhF,tNULSeBaMpTj8qEQ8CFDxiP69hGFB27u9nmMUc
+seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
 #出块地址密码
 password=nuls123456
 #出块间隔时间(单位：s)

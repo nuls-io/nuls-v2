@@ -2,9 +2,9 @@
 
 **NULS为合作伙伴定制了对接需要的NULS2.0钱包版本，对接钱包内嵌`NULS-SDK-Provider`模块，模块内封装了NULS-SDK的功能，用HTTP协议访问接口，支持`JSON—RPC`和`Restful`两种格式。**
 
-[测试版钱包下载地址](http://nuls-usa-west.oss-us-west-1.aliyuncs.com/2.0/NULS-Wallet-linux64-beta1.1.tar.gz)
+[测试版钱包下载地址](http://nuls-usa-west.oss-us-west-1.aliyuncs.com/beta3/NULS_Wallet_linux64_beta3_sdk_provider.tar.gz)
 
-[NULS-SDK-Provider离线操作工具下载地址](http://nuls-usa-west.oss-us-west-1.aliyuncs.com/2.0/nuls-sdk-provider-offline-beta1.1.tar.gz)
+[NULS-SDK-Provider离线操作工具下载地址](http://nuls-usa-west.oss-us-west-1.aliyuncs.com/beta3/nuls-sdk-provider-offline.tar.gz)
 
 ## 设置
 
@@ -26,7 +26,7 @@ server_port=18004
 
 在线接口：钱包必须正常运行，且能够连接网络中的其他节点，能够正常同步区块和广播数据。在调用在线接口之前，最好是已经同步到最新区块。接口所产生的数据都会保存在钱包中。例如创建账户、修改密码、转账、获取区块头等。
 
-离线接口：NULS2.0提供了一个专门用于[离线操作的NULS-SDK-Provider工具](http://nuls-usa-west.oss-us-west-1.aliyuncs.com/2.0/nuls-sdk-provider-offline-beta1.1.tar.gz)。无需安装钱包，可独立运行在一台没有连接网络的服务器上。用户通过调用离线接口，传入相关的参数，获取返回值，相应数据不会存入钱包。例如离线创建账户、离线组装转账交易、离线签名等。
+离线接口：NULS2.0提供了一个专门用于[离线操作的NULS-SDK-Provider工具](http://nuls-usa-west.oss-us-west-1.aliyuncs.com/beta3/nuls-sdk-provider-offline.tar.gz)。无需安装钱包，可独立运行在一台没有连接网络的服务器上。用户通过调用离线接口，传入相关的参数，获取返回值，相应数据不会存入钱包。例如离线创建账户、离线组装转账交易、离线签名等。
 
 #### 字段描述
 
@@ -107,16 +107,16 @@ int VERIFIER_CHANGE = 24;				// 验证人变更
 
      添加请求头 Content-Type: application/json;charset=UTF-8
      
-     其余请参考 [RESTFUL 接口文档](https://github.com/nuls-io/nuls-sdk-provider/blob/master/documents/nuls-sdk-provider_RESTFUL.md)
+     其余请参考 [RESTFUL 接口文档](https://github.com/nuls-io/nuls-v2/blob/master/module/nuls-sdk-provider/documents/nuls-sdk-provider_RESTFUL.md)
 
 
 ## 接口文档
 
 我们对外提供的API接口，分为`JSON-RPC`和`Restful`两种风格，用户可根据需要选择不通过的对接方式，接口文档详见以下: 
 
-[JSON-RPC 接口文档](https://github.com/nuls-io/nuls-sdk-provider/blob/master/documents/nuls-sdk-provider_JSONRPC.md)
+[JSON-RPC 接口文档](https://github.com/nuls-io/nuls-v2/blob/master/module/nuls-sdk-provider/documents/nuls-sdk-provider_JSONRPC.md)
 
-[RESTFUL 接口文档](https://github.com/nuls-io/nuls-sdk-provider/blob/master/documents/nuls-sdk-provider_RESTFUL.md)
+[RESTFUL 接口文档](https://github.com/nuls-io/nuls-v2/blob/master/module/nuls-sdk-provider/documents/nuls-sdk-provider_RESTFUL.md)
 
 _**附：**_ 官方已提供NULS-SDK-4J工具，有使用JAVA做对接的合作伙伴，可使用工具对接`NULS-SDK-Provider`模块，详见：[NULS-SDK-4J使用说明](https://github.com/nuls-io/nuls-v2-sdk4j/blob/master/README.md)
 
@@ -124,9 +124,9 @@ _**附：**_ 官方已提供NULS-SDK-4J工具，有使用JAVA做对接的合作�
 
 我们提供了`Postman`接口调式工具的导入文件(`JSON-RPC`和`RESTFUL`)，导入后，即可调试接口
 
-[JSON-PRC 接口调试-POSTMAN导入文件](https://github.com/nuls-io/nuls-sdk-provider/blob/master/documents/nuls-sdk-provider_Postman_JSONRPC.json)
+[JSON-PRC 接口调试-POSTMAN导入文件](https://github.com/nuls-io/nuls-v2/blob/master/module/nuls-sdk-provider/documents/nuls-sdk-provider_Postman_JSONRPC.json)
 
-[RESTFUL 接口调试-POSTMAN导入文件](https://github.com/nuls-io/nuls-sdk-provider/blob/master/documents/nuls-sdk-provider_Postman_RESTFUL.json)
+[RESTFUL 接口调试-POSTMAN导入文件](https://github.com/nuls-io/nuls-v2/blob/master/module/nuls-sdk-provider/documents/nuls-sdk-provider_Postman_RESTFUL.json)
 
 
 
@@ -284,7 +284,7 @@ _**详细描述: 只能导出本地钱包已存在账户的私钥**_
 ### Example request data: 
 
 _**request path:**_
-http://localhost:9898/api/account/prikey/tNULSeBaMujLBcZWfE2wHKnZo7PGvqvNrt6yWG
+http://localhost:18004/api/account/prikey/tNULSeBaMujLBcZWfE2wHKnZo7PGvqvNrt6yWG
 
 _**request form data:**_
 ```json
@@ -541,7 +541,7 @@ _**详细描述: 账户备份，导出AccountKeyStore文件到指定目录**_
 ### Example request data: 
 
 _**request path:**_
-http://localhost:9898/api/account/export/tNULSeBaMujLBcZWfE2wHKnZo7PGvqvNrt6yWG
+http://localhost:18004/api/account/export/tNULSeBaMujLBcZWfE2wHKnZo7PGvqvNrt6yWG
 
 _**request form data:**_
 ```json
@@ -639,7 +639,7 @@ _**详细描述: 根据资产链ID和资产ID，查询本链账户对应资产�
 ### Example request data: 
 
 _**request path:**_
-http://localhost:9898/api/accountledger/balance/tNULSeBaMujLBcZWfE2wHKnZo7PGvqvNrt6yWG
+http://localhost:18004/api/accountledger/balance/tNULSeBaMujLBcZWfE2wHKnZo7PGvqvNrt6yWG
 
 _**request form data:**_
 ```json
@@ -1012,12 +1012,20 @@ Cmd: /api/account/multiSign/create
 _**详细描述: 根据多个账户的公钥创建多签账户，minSigns为多签账户创建交易时需要的最小签名数**_
 ### HttpMethod: POST
 
+### Form json data: 
+```json
+{
+  "pubKeys" : [ ],
+  "minSigns" : 0
+}
+```
+
 参数列表
 ----
 | 参数名                                                      |            参数类型            | 参数描述     | 是否必填 |
 | -------------------------------------------------------- |:--------------------------:| -------- |:----:|
 | 创建多签账户                                                   | multisignaccountcreateform | 创建多签账户表单 |  是   |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pubKeys  |            list            | 账户公钥集合   |  是   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pubKeys  |      list&lt;string>       | 账户公钥集合   |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;minSigns |            int             | 最小签名数    |  是   |
 
 返回值
@@ -1087,6 +1095,18 @@ Cmd: /api/account/multiSign/aliasTx/create
 _**详细描述: 多签账户离线创建设置别名交易**_
 ### HttpMethod: POST
 
+### Form json data: 
+```json
+{
+  "address" : null,
+  "alias" : null,
+  "nonce" : null,
+  "remark" : null,
+  "pubKeys" : [ ],
+  "minSigns" : 0
+}
+```
+
 参数列表
 ----
 | 参数名                                                      |       参数类型        | 参数描述     | 是否必填 |
@@ -1152,7 +1172,7 @@ _**详细描述: 根据区块高度查询区块头**_
 ### Example request data: 
 
 _**request path:**_
-http://localhost:9898/api/block/header/height/1
+http://localhost:18004/api/block/header/height/1
 
 _**request form data:**_
 无
@@ -1218,7 +1238,7 @@ _**详细描述: 根据区块hash查询区块头**_
 ### Example request data: 
 
 _**request path:**_
-http://localhost:9898/api/block/header/hash/0b21cc1e77865f3e414e69ccb63d65c2bdedd98f2aa3d6e414d4791ee897190f
+http://localhost:18004/api/block/header/hash/0b21cc1e77865f3e414e69ccb63d65c2bdedd98f2aa3d6e414d4791ee897190f
 
 _**request form data:**_
 无
@@ -1462,28 +1482,53 @@ _**详细描述: 包含区块打包的所有交易信息，此接口返回数据
 
 返回值
 ---
-| 字段名                  |  字段类型  | 参数描述                 |
-| -------------------- |:------:| -------------------- |
-| hash                 | string | 区块的hash值             |
-| preHash              | string | 上一个区块的hash值          |
-| merkleHash           | string | 梅克尔hash              |
-| time                 | string | 区块生成时间               |
-| height               |  long  | 区块高度                 |
-| txCount              |  int   | 区块打包交易数量             |
-| blockSignature       | string | 签名Hex.encode(byte[]) |
-| size                 |  int   | 大小                   |
-| packingAddress       | string | 打包地址                 |
-| roundIndex           |  long  | 共识轮次                 |
-| consensusMemberCount |  int   | 参与共识成员数量             |
-| roundStartTime       | string | 当前共识轮开始时间            |
-| packingIndexOfRound  |  int   | 当前轮次打包出块的名次          |
-| mainVersion          | short  | 主网当前生效的版本            |
-| blockVersion         | short  | 区块的版本，可以理解为本地钱包的版本   |
-| stateRoot            | string | 智能合约世界状态根            |
+| 字段名                                                                                                           |      字段类型       | 参数描述                                      |
+| ------------------------------------------------------------------------------------------------------------- |:---------------:| ----------------------------------------- |
+| header                                                                                                        |     object      | 区块头信息, 只返回对应的部分数据                         |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;hash                                                          |     string      | 区块的hash值                                  |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;preHash                                                       |     string      | 上一个区块的hash值                               |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;merkleHash                                                    |     string      | 梅克尔hash                                   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;time                                                          |     string      | 区块生成时间                                    |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;height                                                        |      long       | 区块高度                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;txCount                                                       |       int       | 区块打包交易数量                                  |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;blockSignature                                                |     string      | 签名Hex.encode(byte[])                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size                                                          |       int       | 大小                                        |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;packingAddress                                                |     string      | 打包地址                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;roundIndex                                                    |      long       | 共识轮次                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;consensusMemberCount                                          |       int       | 参与共识成员数量                                  |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;roundStartTime                                                |     string      | 当前共识轮开始时间                                 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;packingIndexOfRound                                           |       int       | 当前轮次打包出块的名次                               |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mainVersion                                                   |      short      | 主网当前生效的版本                                 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;blockVersion                                                  |      short      | 区块的版本，可以理解为本地钱包的版本                        |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;stateRoot                                                     |     string      | 智能合约世界状态根                                 |
+| txs                                                                                                           | list&lt;object> | 交易列表                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;hash                                                          |     string      | 交易的hash值                                  |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type                                                          |       int       | 交易类型                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;time                                                          |     string      | 交易时间                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;blockHeight                                                   |      long       | 区块高度                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remark                                                        |     string      | 交易备注                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;transactionSignature                                          |     string      | 交易签名                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;txDataHex                                                     |     string      | 交易业务数据序列化字符串                              |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;status                                                        |       int       | 交易状态 0:unConfirm(待确认), 1:confirm(已确认)     |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size                                                          |       int       | 交易大小                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inBlockIndex                                                  |       int       | 在区块中的顺序，存储在rocksDB中是无序的，保存区块时赋值，取出后根据此值排序 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;form                                                          | list&lt;object> | 输入                                        |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;address       |     string      | 账户地址                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assetsChainId |       int       | 资产发行链的id                                  |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assetsId      |       int       | 资产id                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;amount        |     string      | 数量                                        |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nonce         |     string      | 账户nonce值的Hex字符串，防止双花交易，取上一笔交易hash的最后8个字节  |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;locked        |      byte       | 0普通交易，-1解锁金额交易（退出共识，退出委托）                 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;to                                                            | list&lt;object> | 输出                                        |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;address       |     string      | 账户地址                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assetsChainId |       int       | 资产发行链的id                                  |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assetsId      |       int       | 资产id                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;amount        |     string      | 数量                                        |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lockTime      |      long       | 解锁时间，-1为永久锁定                              |
 ### Example request data: 
 
 _**request path:**_
-http://localhost:9898//api/block/height/9
+http://localhost:18004/api/block/height/9
 
 _**request form data:**_
 无
@@ -1574,28 +1619,53 @@ _**详细描述: 包含区块打包的所有交易信息，此接口返回数据
 
 返回值
 ---
-| 字段名                  |  字段类型  | 参数描述                 |
-| -------------------- |:------:| -------------------- |
-| hash                 | string | 区块的hash值             |
-| preHash              | string | 上一个区块的hash值          |
-| merkleHash           | string | 梅克尔hash              |
-| time                 | string | 区块生成时间               |
-| height               |  long  | 区块高度                 |
-| txCount              |  int   | 区块打包交易数量             |
-| blockSignature       | string | 签名Hex.encode(byte[]) |
-| size                 |  int   | 大小                   |
-| packingAddress       | string | 打包地址                 |
-| roundIndex           |  long  | 共识轮次                 |
-| consensusMemberCount |  int   | 参与共识成员数量             |
-| roundStartTime       | string | 当前共识轮开始时间            |
-| packingIndexOfRound  |  int   | 当前轮次打包出块的名次          |
-| mainVersion          | short  | 主网当前生效的版本            |
-| blockVersion         | short  | 区块的版本，可以理解为本地钱包的版本   |
-| stateRoot            | string | 智能合约世界状态根            |
+| 字段名                                                                                                           |      字段类型       | 参数描述                                      |
+| ------------------------------------------------------------------------------------------------------------- |:---------------:| ----------------------------------------- |
+| header                                                                                                        |     object      | 区块头信息, 只返回对应的部分数据                         |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;hash                                                          |     string      | 区块的hash值                                  |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;preHash                                                       |     string      | 上一个区块的hash值                               |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;merkleHash                                                    |     string      | 梅克尔hash                                   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;time                                                          |     string      | 区块生成时间                                    |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;height                                                        |      long       | 区块高度                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;txCount                                                       |       int       | 区块打包交易数量                                  |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;blockSignature                                                |     string      | 签名Hex.encode(byte[])                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size                                                          |       int       | 大小                                        |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;packingAddress                                                |     string      | 打包地址                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;roundIndex                                                    |      long       | 共识轮次                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;consensusMemberCount                                          |       int       | 参与共识成员数量                                  |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;roundStartTime                                                |     string      | 当前共识轮开始时间                                 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;packingIndexOfRound                                           |       int       | 当前轮次打包出块的名次                               |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mainVersion                                                   |      short      | 主网当前生效的版本                                 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;blockVersion                                                  |      short      | 区块的版本，可以理解为本地钱包的版本                        |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;stateRoot                                                     |     string      | 智能合约世界状态根                                 |
+| txs                                                                                                           | list&lt;object> | 交易列表                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;hash                                                          |     string      | 交易的hash值                                  |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type                                                          |       int       | 交易类型                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;time                                                          |     string      | 交易时间                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;blockHeight                                                   |      long       | 区块高度                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remark                                                        |     string      | 交易备注                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;transactionSignature                                          |     string      | 交易签名                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;txDataHex                                                     |     string      | 交易业务数据序列化字符串                              |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;status                                                        |       int       | 交易状态 0:unConfirm(待确认), 1:confirm(已确认)     |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size                                                          |       int       | 交易大小                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inBlockIndex                                                  |       int       | 在区块中的顺序，存储在rocksDB中是无序的，保存区块时赋值，取出后根据此值排序 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;form                                                          | list&lt;object> | 输入                                        |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;address       |     string      | 账户地址                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assetsChainId |       int       | 资产发行链的id                                  |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assetsId      |       int       | 资产id                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;amount        |     string      | 数量                                        |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nonce         |     string      | 账户nonce值的Hex字符串，防止双花交易，取上一笔交易hash的最后8个字节  |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;locked        |      byte       | 0普通交易，-1解锁金额交易（退出共识，退出委托）                 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;to                                                            | list&lt;object> | 输出                                        |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;address       |     string      | 账户地址                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assetsChainId |       int       | 资产发行链的id                                  |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assetsId      |       int       | 资产id                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;amount        |     string      | 数量                                        |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lockTime      |      long       | 解锁时间，-1为永久锁定                              |
 ### Example request data: 
 
 _**request path:**_
-http://localhost:9898//api/block/hash/92285f81a649a7c65b1fe9e52738bb95c4aac6a7f4ab4b0b971c09662a9433ad
+http://localhost:18004/api/block/hash/92285f81a649a7c65b1fe9e52738bb95c4aac6a7f4ab4b0b971c09662a9433ad
 
 _**request form data:**_
 无
@@ -1671,6 +1741,74 @@ _**request form data:**_
 }
 ```
 
+2.7 根据区块高度查询区块序列化字符串
+====================
+Cmd: /api/block/serialization/height/{height}
+---------------------------------------------
+_**详细描述: 包含区块打包的所有交易信息，此接口返回数据量较多，谨慎调用**_
+### HttpMethod: GET
+
+参数列表
+----
+| 参数名    | 参数类型 | 参数描述 | 是否必填 |
+| ------ |:----:| ---- |:----:|
+| height | long | 区块高度 |  是   |
+
+返回值
+---
+| 字段名 |  字段类型  | 参数描述            |
+| --- |:------:| --------------- |
+| 返回值 | string | 返回区块序列化后的HEX字符串 |
+### Example request data: 
+
+_**request path:**_
+http://localhost:18004/api/block/serialization/height/1
+
+_**request form data:**_
+无
+
+### Example response data: 
+```json
+{
+  "success" : true,
+  "data" : "772f158614cefd4f4e0a7ef1cd442f4de7439c10b5642afe582ed09b585d9b1e37d371e184142ebb1d46f4160a18a1e27d51c23dd66c0ccc607044821ae7fff24ddc4c5d01000000010000005c6e7c5409010043dc4c5d0100010001005064002056e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b42100000000000000000000000000000000000000000000000000000000000000000f2517abe887d67e21037fae74d15153c3b55857ca0abd5c34c865dfa1c0d0232997c545bae5541a0863473045022100c6515c296a80ae8ef48713cae87b693003fb57cc41ce2af4dcc93d32e3cb382502201b84db49946fee5fd57edb350fe0f4c78cac3a503cfb11cbb3a4f6082ffe26cb01004ddc4c5d000002000000"
+}
+```
+
+2.8 根据区块hash查询区块序列化字符串
+======================
+Cmd: /api/block/serialization/hash/{hash}
+-----------------------------------------
+_**详细描述: 包含区块打包的所有交易信息，此接口返回数据量较多，谨慎调用**_
+### HttpMethod: GET
+
+参数列表
+----
+| 参数名  |  参数类型  | 参数描述   | 是否必填 |
+| ---- |:------:| ------ |:----:|
+| hash | string | 区块hash |  是   |
+
+返回值
+---
+| 字段名 |  字段类型  | 参数描述            |
+| --- |:------:| --------------- |
+| 返回值 | string | 返回区块序列化后的HEX字符串 |
+### Example request data: 
+
+_**request path:**_
+http://localhost:18004/api/block/serialization/hash/5ce81f9a470459276b633465f2572862aa7156a42220d29d724ced9bf9d723f9
+
+_**request form data:**_
+无
+
+### Example response data: 
+```json
+{
+  "success" : true,
+  "data" : "772f158614cefd4f4e0a7ef1cd442f4de7439c10b5642afe582ed09b585d9b1e37d371e184142ebb1d46f4160a18a1e27d51c23dd66c0ccc607044821ae7fff24ddc4c5d01000000010000005c6e7c5409010043dc4c5d0100010001005064002056e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b42100000000000000000000000000000000000000000000000000000000000000000f2517abe887d67e21037fae74d15153c3b55857ca0abd5c34c865dfa1c0d0232997c545bae5541a0863473045022100c6515c296a80ae8ef48713cae87b693003fb57cc41ce2af4dcc93d32e3cb382502201b84db49946fee5fd57edb350fe0f4c78cac3a503cfb11cbb3a4f6082ffe26cb01004ddc4c5d000002000000"
+}
+```
+
 3.1 根据hash获取交易
 ==============
 Cmd: /api/tx/{hash}
@@ -1714,13 +1852,43 @@ _**详细描述: 根据hash获取交易**_
 ### Example request data: 
 
 _**request path:**_
-略
+http://localhost:18004/api/tx/247a026d48f6be0c358423898e38a50ac0c2c1a851419b1ec843a667bab90df9
 
 _**request form data:**_
 无
 
 ### Example response data: 
-略
+```json
+{
+  "success" : true,
+  "data" : {
+    "hash" : "247a026d48f6be0c358423898e38a50ac0c2c1a851419b1ec843a667bab90df9",
+    "type" : 2,
+    "time" : "2019-07-16 18:30:03.003",
+    "blockHeight" : 9,
+    "remark" : "remark",
+    "transactionSignature" : "2103958b790c331954ed367d37bac901de5c2f06ac8368b37d7bd6cd5ae143c1d7e34630440220084da59fca5edc6ed047c1360bb45d3e7ec297c367b8c2810421b2a43d1eabba02201f9e499fe63ad2dbbd83c1dafcb8437f5aba1c61fd0e5c9075a80b50820ca3ac",
+    "status" : 1,
+    "size" : 261,
+    "inBlockIndex" : 0,
+    "form" : [ {
+      "address" : "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG",
+      "assetsChainId" : 2,
+      "assetsId" : 1,
+      "amount" : "100000100000",
+      "nonce" : "0000000000000000",
+      "locked" : 0
+    } ],
+    "to" : [ {
+      "address" : "tNULSeBaMujLBcZWfE2wHKnZo7PGvqvNrt6yWG",
+      "assetsChainId" : 2,
+      "assetsId" : 1,
+      "amount" : "100000000000",
+      "lockTime" : 0
+    } ]
+  }
+}
+```
 
 3.2 验证交易
 ========
@@ -2036,6 +2204,29 @@ Cmd: /api/accountledger/createMultiSignTransferTxOffline
 --------------------------------------------------------
 _**详细描述: 根据inputs和outputs离线组装转账交易，用于单账户或多账户的转账交易。交易手续费为inputs里本链主资产金额总和，减去outputs里本链主资产总和**_
 ### HttpMethod: POST
+
+### Form json data: 
+```json
+{
+  "pubKeys" : [ ],
+  "minSigns" : 0,
+  "inputs" : [ {
+    "address" : null,
+    "assetChainId" : 0,
+    "assetId" : 0,
+    "amount" : null,
+    "nonce" : null
+  } ],
+  "outputs" : [ {
+    "address" : null,
+    "assetChainId" : 0,
+    "assetId" : 0,
+    "amount" : null,
+    "lockTime" : 0
+  } ],
+  "remark" : null
+}
+```
 
 参数列表
 ----
@@ -2474,7 +2665,7 @@ _**详细描述: 获取账户地址的指定合约的token余额**_
 ### Example request data: 
 
 _**request path:**_
-http://localhost:9898/api/contract/balance/token/tNULSeBaNAKfKnLMR5XG5qtwXt5JS1b3QosZxg/tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
+http://localhost:18004/api/contract/balance/token/tNULSeBaNAKfKnLMR5XG5qtwXt5JS1b3QosZxg/tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
 
 _**request form data:**_
 无
@@ -2536,10 +2727,11 @@ _**详细描述: 获取智能合约详细信息**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;view                                                     |     boolean     | 是否视图方法（调用此方法数据不上链）            |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;event                                                    |     boolean     | 是否是事件                         |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;payable                                                  |     boolean     | 是否是可接受主链资产转账的方法               |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;jsonSerializable                                         |     boolean     | 方法返回值是否JSON序列化                |
 ### Example request data: 
 
 _**request path:**_
-http://localhost:9898/api/contract/info/tNULSeBaMxyMyafiQjq1wCW7cQouyEhRL8njtu
+http://localhost:18004/api/contract/info/tNULSeBaMxyMyafiQjq1wCW7cQouyEhRL8njtu
 
 _**request form data:**_
 无
@@ -2728,7 +2920,7 @@ _**详细描述: 获取智能合约执行结果**_
 ### Example request data: 
 
 _**request path:**_
-http://localhost:9898/api/contract/result/f0a5fc5d20c39355e35f1fe8011b1a28e7c65d8566ae8d76b297a22d1110851d
+http://localhost:18004/api/contract/result/f0a5fc5d20c39355e35f1fe8011b1a28e7c65d8566ae8d76b297a22d1110851d
 
 _**request form data:**_
 无
@@ -2799,8 +2991,171 @@ _**request form data:**_
 }
 ```
 
-4.9 获取合约代码构造函数
-==============
+4.9 获取智能合约执行结果列表
+================
+Cmd: /api/contract/result/list
+------------------------------
+_**详细描述: 获取智能合约执行结果列表**_
+### HttpMethod: POST
+
+### Form json data: 
+```json
+{
+  "hashList" : [ ]
+}
+```
+
+参数列表
+----
+| 参数名                                                      |          参数类型          | 参数描述           | 是否必填 |
+| -------------------------------------------------------- |:----------------------:| -------------- |:----:|
+| 获取智能合约执行结果列表                                             | contractresultlistform | 获取智能合约执行结果列表表单 |  是   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;hashList |    list&lt;string>     | 交易hash列表       |  是   |
+
+返回值
+---
+| 字段名                                                                                                                                                   |      字段类型       | 参数描述                                        |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------- |:---------------:| ------------------------------------------- |
+| hash1 or hash2 or hash3...                                                                                                                            |     object      | 以交易hash列表中的hash值作为key，这里的key name是动态的       |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;success                                                                                               |     boolean     | 合约执行是否成功                                    |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;errorMessage                                                                                          |     string      | 执行失败信息                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;contractAddress                                                                                       |     string      | 合约地址                                        |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;result                                                                                                |     string      | 合约执行结果                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gasLimit                                                                                              |      long       | GAS限制                                       |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gasUsed                                                                                               |      long       | 已使用GAS                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;price                                                                                                 |      long       | GAS单价                                       |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;totalFee                                                                                              |     string      | 交易总手续费                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;txSizeFee                                                                                             |     string      | 交易大小手续费                                     |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;actualContractFee                                                                                     |     string      | 实际执行合约手续费                                   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;refundFee                                                                                             |     string      | 合约返回的手续费                                    |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value                                                                                                 |     string      | 调用者向合约地址转入的主网资产金额，没有此业务时则为0                 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;stackTrace                                                                                            |     string      | 异常堆栈踪迹                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;transfers                                                                                             | list&lt;object> | 合约转账列表（从合约转出）                               |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;txHash                                                |     string      | 合约生成交易：合约转账交易hash                           |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;from                                                  |     string      | 转出的合约地址                                     |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value                                                 |     string      | 转账金额                                        |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;outputs                                               | list&lt;object> | 转入的地址列表                                     |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;to    |     string      | 转入地址                                        |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value |     string      | 转入金额                                        |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;orginTxHash                                           |     string      | 调用合约交易hash（源交易hash，合约交易由调用合约交易派生而来）         |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;events                                                                                                | list&lt;string> | 合约事件列表                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tokenTransfers                                                                                        | list&lt;object> | 合约token转账列表                                 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;contractAddress                                       |     string      | 合约地址                                        |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;from                                                  |     string      | 付款方                                         |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;to                                                    |     string      | 收款方                                         |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value                                                 |     string      | 转账金额                                        |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;name                                                  |     string      | token名称                                     |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;symbol                                                |     string      | token符号                                     |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decimals                                              |      long       | token支持的小数位数                                |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;invokeRegisterCmds                                                                                    | list&lt;object> | 合约调用外部命令的调用记录列表                             |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cmdName                                               |     string      | 命令名称                                        |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;args                                                  |       map       | 命令参数，参数不固定，依据不同的命令而来，故此处不作描述，结构为 {参数名称=参数值} |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cmdRegisterMode                                       |     string      | 注册的命令模式（QUERY\_DATA or NEW\_TX）             |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;newTxHash                                             |     string      | 生成的交易hash（当调用的命令模式是 NEW\_TX 时，会生成交易）        |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;contractTxList                                                                                        | list&lt;string> | 合约生成交易的序列化字符串列表                             |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remark                                                                                                |     string      | 备注                                          |
+### Example request data: 
+
+_**request path:**_
+略
+
+_**request form data:**_
+```json
+{
+  "hashList" : [ "c2460b94430074dd98e497ed9d48afb8f44d1323b73ca2086f5abaa0684b760d", "48b2f348f201f9d10848f4031a746919470b679f621327b0e0edf50a339f2e87", "2e99610b7d295790b636fcdb8acf72d70fcae61c873df0984ef248bbbaa6daa2" ]
+}
+```
+
+### Example response data: 
+```json
+{
+  "success" : true,
+  "data" : {
+    "c2460b94430074dd98e497ed9d48afb8f44d1323b73ca2086f5abaa0684b760d" : {
+      "success" : true,
+      "errorMessage" : null,
+      "contractAddress" : "tNULSeBaN5Y2gRias1NMNVmsmXqJbu5Bcp3ZPL",
+      "result" : null,
+      "gasLimit" : 20000,
+      "gasUsed" : 13429,
+      "price" : 30,
+      "totalFee" : "1300000",
+      "txSizeFee" : "700000",
+      "actualContractFee" : "402870",
+      "refundFee" : "197130",
+      "value" : "0",
+      "stackTrace" : null,
+      "transfers" : [ ],
+      "events" : [ "{\"contractAddress\":\"tNULSeBaN5Y2gRias1NMNVmsmXqJbu5Bcp3ZPL\",\"blockNumber\":68,\"event\":\"TransferEvent\",\"payload\":{\"from\":null,\"to\":\"tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG\",\"value\":\"800000\"}}" ],
+      "tokenTransfers" : [ {
+        "contractAddress" : "tNULSeBaN5Y2gRias1NMNVmsmXqJbu5Bcp3ZPL",
+        "from" : null,
+        "to" : "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG",
+        "value" : "800000",
+        "name" : "io",
+        "symbol" : "IO",
+        "decimals" : 1
+      } ],
+      "invokeRegisterCmds" : [ ],
+      "contractTxList" : [ ],
+      "remark" : "create"
+    },
+    "48b2f348f201f9d10848f4031a746919470b679f621327b0e0edf50a339f2e87" : {
+      "success" : true,
+      "errorMessage" : null,
+      "contractAddress" : "tNULSeBaN5Y2gRias1NMNVmsmXqJbu5Bcp3ZPL",
+      "result" : "true",
+      "gasLimit" : 200000,
+      "gasUsed" : 9444,
+      "price" : 30,
+      "totalFee" : "6100000",
+      "txSizeFee" : "100000",
+      "actualContractFee" : "283320",
+      "refundFee" : "5716680",
+      "value" : "0",
+      "stackTrace" : null,
+      "transfers" : [ ],
+      "events" : [ "{\"contractAddress\":\"tNULSeBaN5Y2gRias1NMNVmsmXqJbu5Bcp3ZPL\",\"blockNumber\":71,\"event\":\"TransferEvent\",\"payload\":{\"from\":\"tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG\",\"to\":\"tNULSeBaMtkzQ1tH8JWBGZDCmRHCmySevE4frM\",\"value\":\"4000\"}}" ],
+      "tokenTransfers" : [ {
+        "contractAddress" : "tNULSeBaN5Y2gRias1NMNVmsmXqJbu5Bcp3ZPL",
+        "from" : "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG",
+        "to" : "tNULSeBaMtkzQ1tH8JWBGZDCmRHCmySevE4frM",
+        "value" : "4000",
+        "name" : "io",
+        "symbol" : "IO",
+        "decimals" : 1
+      } ],
+      "invokeRegisterCmds" : [ ],
+      "contractTxList" : [ ],
+      "remark" : "call"
+    },
+    "2e99610b7d295790b636fcdb8acf72d70fcae61c873df0984ef248bbbaa6daa2" : {
+      "success" : true,
+      "errorMessage" : null,
+      "contractAddress" : "tNULSeBaN5Y2gRias1NMNVmsmXqJbu5Bcp3ZPL",
+      "result" : "true",
+      "gasLimit" : 200000,
+      "gasUsed" : 5836,
+      "price" : 30,
+      "totalFee" : "6100000",
+      "txSizeFee" : "100000",
+      "actualContractFee" : "175080",
+      "refundFee" : "5824920",
+      "value" : "0",
+      "stackTrace" : null,
+      "transfers" : [ ],
+      "events" : [ "{\"contractAddress\":\"tNULSeBaN5Y2gRias1NMNVmsmXqJbu5Bcp3ZPL\",\"blockNumber\":72,\"event\":\"ApprovalEvent\",\"payload\":{\"owner\":\"tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG\",\"spender\":\"tNULSeBaMtkzQ1tH8JWBGZDCmRHCmySevE4frM\",\"value\":\"4000\"}}" ],
+      "tokenTransfers" : [ ],
+      "invokeRegisterCmds" : [ ],
+      "contractTxList" : [ ],
+      "remark" : "call"
+    }
+  }
+}
+```
+
+4.10 获取合约代码构造函数
+===============
 Cmd: /api/contract/constructor
 ------------------------------
 _**详细描述: 获取合约代码构造函数**_
@@ -2835,6 +3190,7 @@ _**详细描述: 获取合约代码构造函数**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;view                                                     |     boolean     | 是否视图方法（调用此方法数据不上链） |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;event                                                    |     boolean     | 是否是事件              |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;payable                                                  |     boolean     | 是否是可接受主链资产转账的方法    |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;jsonSerializable                                         |     boolean     | 方法返回值是否JSON序列化     |
 | isNrc20                                                                                                  |     boolean     | 是否是NRC20合约         |
 ### Example request data: 
 
@@ -2883,7 +3239,7 @@ _**request form data:**_
 }
 ```
 
-4.10 获取已发布合约指定函数的信息
+4.11 获取已发布合约指定函数的信息
 ===================
 Cmd: /api/contract/method
 -------------------------
@@ -2922,6 +3278,7 @@ _**详细描述: 获取已发布合约指定函数的信息**_
 | view                                                     |     boolean     | 是否视图方法（调用此方法数据不上链） |
 | event                                                    |     boolean     | 是否是事件              |
 | payable                                                  |     boolean     | 是否是可接受主链资产转账的方法    |
+| jsonSerializable                                         |     boolean     | 方法返回值是否JSON序列化     |
 ### Example request data: 
 
 _**request path:**_
@@ -2976,7 +3333,7 @@ _**request form data:**_
 }
 ```
 
-4.11 获取已发布合约指定函数的参数类型列表
+4.12 获取已发布合约指定函数的参数类型列表
 =======================
 Cmd: /api/contract/method/argstypes
 -----------------------------------
@@ -3028,7 +3385,7 @@ _**request form data:**_
 }
 ```
 
-4.12 验证发布合约
+4.13 验证发布合约
 ===========
 Cmd: /api/contract/validate/create
 ----------------------------------
@@ -3090,7 +3447,7 @@ _**request form data:**_
 }, "校验失败示例请参考[/api/contract/validate/call] - 验证调用合约" ]
 ```
 
-4.13 验证调用合约
+4.14 验证调用合约
 ===========
 Cmd: /api/contract/validate/call
 --------------------------------
@@ -3168,7 +3525,7 @@ _**request form data:**_
 } ]
 ```
 
-4.14 验证删除合约
+4.15 验证删除合约
 ===========
 Cmd: /api/contract/validate/delete
 ----------------------------------
@@ -3221,7 +3578,7 @@ _**request form data:**_
 }, "校验失败示例请参考[/api/contract/validate/call] - 验证调用合约" ]
 ```
 
-4.15 估算发布合约交易的GAS
+4.16 估算发布合约交易的GAS
 =================
 Cmd: /api/contract/imputedgas/create
 ------------------------------------
@@ -3275,7 +3632,7 @@ _**request form data:**_
 }
 ```
 
-4.16 估算调用合约交易的GAS
+4.17 估算调用合约交易的GAS
 =================
 Cmd: /api/contract/imputedgas/call
 ----------------------------------
@@ -3338,7 +3695,7 @@ _**request form data:**_
 }
 ```
 
-4.17 调用合约不上链方法
+4.18 调用合约不上链方法
 ==============
 Cmd: /api/contract/view
 -----------------------
@@ -3395,7 +3752,7 @@ _**request form data:**_
 }
 ```
 
-4.18 离线组装 - 发布合约的交易
+4.19 离线组装 - 发布合约的交易
 ===================
 Cmd: /api/contract/create/offline
 ---------------------------------
@@ -3471,7 +3828,7 @@ _**request form data:**_
 }
 ```
 
-4.19 离线组装 - 调用合约的交易
+4.20 离线组装 - 调用合约的交易
 ===================
 Cmd: /api/contract/call/offline
 -------------------------------
@@ -3551,7 +3908,7 @@ _**request form data:**_
 }
 ```
 
-4.20 离线组装 - 删除合约交易
+4.21 离线组装 - 删除合约交易
 ==================
 Cmd: /api/contract/delete/offline
 ---------------------------------
@@ -3613,7 +3970,7 @@ _**request form data:**_
 }
 ```
 
-4.21 离线组装 - 合约token转账交易
+4.22 离线组装 - 合约token转账交易
 =======================
 Cmd: /api/contract/tokentransfer/offline
 ----------------------------------------
@@ -3684,7 +4041,7 @@ _**request form data:**_
 }
 ```
 
-4.22 离线组装 - 从账户地址向合约地址转账(主链资产)的合约交易
+4.23 离线组装 - 从账户地址向合约地址转账(主链资产)的合约交易
 ===================================
 Cmd: /api/contract/transfer2contract/offline
 --------------------------------------------
@@ -4004,7 +4361,7 @@ _**详细描述: 查询节点的委托共识列表**_
 ### Example request data: 
 
 _**request path:**_
-http://localhost:9898/api/consensus/list/deposit/786402b17649b968e4643cb52fa30225645b0dc7b8761b047a1f080d3dd30dcd
+http://localhost:18004/api/consensus/list/deposit/786402b17649b968e4643cb52fa30225645b0dc7b8761b047a1f080d3dd30dcd
 
 _**request form data:**_
 无
@@ -4370,6 +4727,20 @@ Cmd: /api/consensus/multiSign/agent/offline
 _**详细描述: 参与共识所需资产可通过查询链信息接口获取(agentChainId和agentAssetId)**_
 ### HttpMethod: POST
 
+### Form json data: 
+```json
+{
+  "agentAddress" : null,
+  "packingAddress" : null,
+  "rewardAddress" : null,
+  "commissionRate" : 0,
+  "deposit" : null,
+  "input" : null,
+  "pubKeys" : [ ],
+  "minSigns" : 0
+}
+```
+
 参数列表
 ----
 | 参数名                                                                                                          |         参数类型          | 参数描述           | 是否必填 |
@@ -4413,6 +4784,18 @@ Cmd: /api/consensus/multiSign/deposit/offline
 _**详细描述: 参与共识所需资产可通过查询链信息接口获取(agentChainId和agentAssetId)**_
 ### HttpMethod: POST
 
+### Form json data: 
+```json
+{
+  "address" : null,
+  "deposit" : null,
+  "agentHash" : null,
+  "input" : null,
+  "pubKeys" : [ ],
+  "minSigns" : 0
+}
+```
+
 参数列表
 ----
 | 参数名                                                                                                          |        参数类型         | 参数描述           | 是否必填 |
@@ -4454,6 +4837,18 @@ Cmd: /api/consensus/multiSign/withdraw/offline
 _**详细描述: 接口的input数据，则是委托共识交易的output数据，nonce值可为空**_
 ### HttpMethod: POST
 
+### Form json data: 
+```json
+{
+  "address" : null,
+  "depositHash" : null,
+  "price" : null,
+  "input" : null,
+  "pubKeys" : [ ],
+  "minSigns" : 0
+}
+```
+
 参数列表
 ----
 | 参数名                                                                                                          |         参数类型         | 参数描述         | 是否必填 |
@@ -4494,6 +4889,19 @@ Cmd: /api/consensus/multiSign/agent/stop/offline
 ------------------------------------------------
 _**详细描述: 组装交易的StopDepositDto信息，可通过查询节点的委托共识列表获取，input的nonce值可为空**_
 ### HttpMethod: POST
+
+### Form json data: 
+```json
+{
+  "agentHash" : null,
+  "agentAddress" : null,
+  "deposit" : null,
+  "price" : null,
+  "depositList" : null,
+  "pubKeys" : [ ],
+  "minSigns" : 0
+}
+```
 
 参数列表
 ----

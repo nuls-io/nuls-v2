@@ -66,6 +66,7 @@ public class CrossAssetAddProcessor extends CrossChainBaseProcessor {
 
     @Override
     public boolean argsValidate(String[] args) {
+        checkArgsNumber(args,7);
         checkAddress(config.getMainChainId(), args[1]);
         checkIsNumeric(args[2], "assetChainId");
         checkIsNumeric(args[3], "assetId");

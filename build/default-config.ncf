@@ -12,6 +12,8 @@ addressPrefix=tNULS
 assetId=1
 #默认链名称
 chainName=nuls2
+#默认资产小数位数
+decimals=8
 #本链默认资产符号
 symbol=NULS
 #默认资产的小数精确位数
@@ -29,8 +31,10 @@ port=18001
 crossPort=18002
 #魔法参数
 packetMagic=2019070801
-#种子节点
+#种子连接节点
 selfSeedIps=192.168.1.32:18001,192.168.1.149:18001
+#主网的跨链种子连接节点
+moonSeedIps=192.168.1.32:18002,192.168.1.149:18002
 #最大入网连接数
 maxInCount=100
 #最大出网连接数
@@ -51,7 +55,7 @@ minNodeAmount=1
 #区块同步过程中,每次从网络上节点下载的区块数量
 downloadNumber=10
 #从网络节点下载单个区块的超时时间
-singleDownloadTimeout=15000
+singleDownloadTimeout=10000
 #区块同步过程中缓存的区块字节数上限(20M)
 cachedBlockSizeLimit=20971520
 #创世块文件路径(支持绝对路径与相对路径,相对路径相对于此配置文件的目录)

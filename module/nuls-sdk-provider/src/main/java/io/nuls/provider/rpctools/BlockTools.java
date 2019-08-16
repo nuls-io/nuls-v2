@@ -126,4 +126,46 @@ public class BlockTools implements CallRpc {
             return Result.fail(e.getErrorCode().getCode(), e.getMessage());
         }
     }
+
+    /**
+     * 根据高度获取区块序列化字符串
+     *
+     * @param chainId
+     * @param height
+     * @return
+     */
+    public Result<String> getBlockSerializationByHeight(int chainId, long height) {
+        Map<String, Object> param = new HashMap<>(2);
+        param.put("chainId", chainId);
+        param.put("height", height);
+        try {
+            String block = callRpc(ModuleE.BL.name, "getBlockByHeight", param, (Function<String, String>) res -> {
+                return res;
+            });
+            return new Result(block);
+        } catch (NulsRuntimeException e) {
+            return Result.fail(e.getCode(), e.getMessage());
+        }
+    }
+
+    /**
+     * 根据hash获取区块序列化字符串
+     *
+     * @param chainId
+     * @param hash
+     * @return
+     */
+    public Result<String> getBlockSerializationByHash(int chainId, String hash) {
+        Map<String, Object> param = new HashMap<>(2);
+        param.put("chainId", chainId);
+        param.put("hash", hash);
+        try {
+            String block = callRpc(ModuleE.BL.name, "downloadBlockByHash", param, (Function<String, String>) res -> {
+                return res;
+            });
+            return new Result(block);
+        } catch (NulsRuntimeException e) {
+            return Result.fail(e.getCode(), e.getMessage());
+        }
+    }
 }

@@ -39,6 +39,9 @@ public class NulsCrossChainConfig extends ConfigBean implements ModuleConfig {
 
     private boolean mainNet;
 
+    /**默认链接到的跨链节点*/
+    private String crossSeedIps;
+
     public String getDataPath() {
         return dataPath;
     }
@@ -105,5 +108,13 @@ public class NulsCrossChainConfig extends ConfigBean implements ModuleConfig {
 
     public void setMainNet(boolean mainNet) {
         this.mainNet = mainNet;
+    }
+
+    public String getCrossSeedIps() {
+        return crossSeedIps;
+    }
+
+    public void setCrossSeedIps(String crossSeedIps) {
+        this.crossSeedIps = crossSeedIps;
     }
 }

@@ -8,8 +8,6 @@ import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.MultiSignTxSignature;
 import io.nuls.base.signture.P2PHKSignature;
-import io.nuls.base.signture.SignatureUtil;
-import io.nuls.base.signture.TransactionSignature;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -429,23 +427,6 @@ public class TxValidator {
         }
         if (total.compareTo(chain.getConfig().getCommissionMax()) > 0) {
             throw new NulsException(ConsensusErrorCode.DEPOSIT_OVER_AMOUNT);
-        }
-        return true;
-    }
-
-    /**
-     * 交易签名验证
-     * Transaction signature verification
-     *
-     * @param tx      交易/transaction
-     * @param address 签名账户/signature
-     * @return boolean
-     */
-    private boolean validSignature(Transaction tx, byte[] address, int chainId) throws NulsException {
-        TransactionSignature sig = new TransactionSignature();
-        sig.parse(tx.getTransactionSignature(), 0);
-        if (!SignatureUtil.containsAddress(tx, address, chainId)) {
-            throw new NulsException(ConsensusErrorCode.SIGNATURE_ERROR);
         }
         return true;
     }

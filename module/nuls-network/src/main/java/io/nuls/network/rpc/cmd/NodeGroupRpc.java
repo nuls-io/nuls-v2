@@ -157,6 +157,7 @@ public class NodeGroupRpc extends BaseCmd {
         }
         NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
         String seedIps = String.valueOf(params.get("seedIps"));
+        LoggerUtil.logger(chainId).info("chainId={},seedIps={}", chainId, seedIps);
         //友链的跨链协议调用
         NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByChainId(chainId);
         if (null == nodeGroup) {
@@ -178,7 +179,7 @@ public class NodeGroupRpc extends BaseCmd {
             String[] crossAddr = croosSeed.split(NetworkConstant.COLON);
             nodeGroup.addNeedCheckNode(crossAddr[0], Integer.valueOf(crossAddr[1]), Integer.valueOf(crossAddr[1]), true);
         }
-        networkConfig.setMoonSeedIpList(ipList);
+//        networkConfig.setMoonSeedIpList(ipList);
         nodeGroup.setCrossActive(true);
         return success();
     }
@@ -249,11 +250,16 @@ public class NodeGroupRpc extends BaseCmd {
         int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
         try {
             NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
-            boolean isCross = Boolean.valueOf(String.valueOf(params.get("isCross")));
             Map<String, Object> rtMap = new HashMap<>();
-            rtMap.put("connectAmount", nodeGroup.getAvailableNodes(isCross).size());
+            if (null == nodeGroup) {
+                rtMap.put("connectAmount", 0);
+                LoggerUtil.logger(chainId).error("chainId={} nodeGroup is null", chainId);
+            } else {
+                boolean isCross = Boolean.valueOf(String.valueOf(params.get("isCross")));
+                rtMap.put("connectAmount", nodeGroup.getAvailableNodes(isCross).size());
+            }
             return success(rtMap);
-        } catch (Exception e) {
+        }  catch (Exception e) {
             LoggerUtil.logger(chainId).error(e);
             return failed(e.getMessage());
         }
@@ -271,7 +277,7 @@ public class NodeGroupRpc extends BaseCmd {
     })
     @ResponseData(description = "无特定返回值，没有错误即成功")
     public Response delGroupByChainId(Map params) {
-        int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
+        int chainId = Integer.parseInt(String.valueOf(params.get("chainId")));
         StorageManager.getInstance().getDbService().deleteGroup(chainId);
         //删除网络连接
         NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);

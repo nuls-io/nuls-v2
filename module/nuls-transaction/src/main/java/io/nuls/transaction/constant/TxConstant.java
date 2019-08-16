@@ -26,10 +26,6 @@ public interface TxConstant {
     String VERIFY_TX_SIGN_THREAD = "verifyTxSignThread";
     /** 清理无效交易(验证未通过)线程 */
     String CLEAN_INVALID_TX_THREAD = "cleanInvalidTxThread";
-//    /** 验证交易线程 */
-//    String VERIFY_TX_THREAD = "verifyTxThread";
-//    /** 网络新交易处理线程名称前缀 */
-//    String NET_TX_THREAD_PREFIX = "netTxWorker-chain-";
 
     /** 新交易task, 初始延迟值(秒) */
     int TX_TASK_INITIALDELAY = 1;

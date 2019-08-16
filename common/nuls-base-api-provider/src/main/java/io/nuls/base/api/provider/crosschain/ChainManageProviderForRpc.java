@@ -33,6 +33,21 @@ public class ChainManageProviderForRpc extends BaseRpcService implements ChainMa
             return success(crossChainRegisterInfo);
         });
     }
+    @Override
+    public  Result<Map> getCrossChainsSimpleInfo(){
+        return callResutlMap("cm_getChainsSimpleInfo",null);
+    }
+
+    @Override
+    public  Result<CrossAssetRegisterInfo> getCrossAssetInfo(GetCrossAssetInfoReq req){
+        return _call("cm_asset",req,res->{
+            if(res == null){
+                return fail(RPC_ERROR_CODE,"asset not found");
+            }
+            CrossAssetRegisterInfo crossAssetRegisterInfo = MapUtils.mapToBean(res,new CrossAssetRegisterInfo());
+            return success(crossAssetRegisterInfo);
+        });
+    }
 
     @Override
     public Result<Map> registerChain(RegisterChainReq req) {
@@ -40,7 +55,7 @@ public class ChainManageProviderForRpc extends BaseRpcService implements ChainMa
     }
     @Override
     public Result<Map> updateChain(RegisterChainReq req) {
-        return callResutlMap("cm_chainUpdate",req);
+        return callResutlMap("cm_chainActive",req);
     }
     @Override
     public Result<String> disableCrossAsset(DisableAssetReq req) {
@@ -50,11 +65,6 @@ public class ChainManageProviderForRpc extends BaseRpcService implements ChainMa
     @Override
     public Result<String> addCrossAsset(AddCrossAssetReq req) {
         return callReturnString("cm_assetReg",req,"txHash");
-    }
-
-    @Override
-    public Result<String> disCrossChain(DisableAssetReq req) {
-        return callReturnString("cm_assetDisable",req,"txHash");
     }
 
     private <T> Result<T> _call(String method, Object req, Function<Map, Result> callback){

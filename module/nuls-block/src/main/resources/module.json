@@ -19,9 +19,9 @@
   "downloadNumber": 10,
   "extendMaxSize": 1024,
   "validBlockInterval": 60000,
-  "smallBlockCache": 10,
+  "smallBlockCache": 6,
   "orphanChainMaxAge": 10,
-  "singleDownloadTimeout": 15000,
+  "singleDownloadTimeout": 10000,
   "waitNetworkInterval": 5000,
   "cachedBlockSizeLimit": 20971520,
   "genesisBlockPath": ""

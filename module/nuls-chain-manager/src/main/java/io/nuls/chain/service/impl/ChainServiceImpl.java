@@ -188,11 +188,7 @@ public class ChainServiceImpl implements ChainService {
          */
         assetService.createAsset(asset);
 
-        /*
-          3. 插入链
-         */
-        blockChain.addCreateAssetId(CmRuntimeInfo.getAssetKey(blockChain.getChainId(), asset.getAssetId()));
-        blockChain.addCirculateAssetId(CmRuntimeInfo.getAssetKey(blockChain.getChainId(), asset.getAssetId()));
+
         saveChain(blockChain);
         /*
             通知网络模块创建链
@@ -261,7 +257,6 @@ public class ChainServiceImpl implements ChainService {
         dbChain.setDelAddress(blockChain.getDelAddress());
         dbChain.setDelAssetId(blockChain.getDelAssetId());
         dbChain.setDelTxHash(blockChain.getDelTxHash());
-        dbChain.removeCreateAssetId(CmRuntimeInfo.getAssetKey(blockChain.getChainId(), blockChain.getDelAssetId()));
         dbChain.setDelete(true);
         updateChain(dbChain);
         //通知销毁链
@@ -298,6 +293,17 @@ public class ChainServiceImpl implements ChainService {
             rtAssetList.add(assetMap);
         }
         chainInfoMap.put("assetInfoList", rtAssetList);
+        return chainInfoMap;
+    }
+
+    @Override
+    public Map<String, Object> getChainAssetsSimpleInfo(BlockChain blockChain) throws Exception {
+        Map<String, Object> chainInfoMap = new HashMap<>();
+        chainInfoMap.put("chainId", blockChain.getChainId());
+        chainInfoMap.put("chainName", blockChain.getChainName());
+        chainInfoMap.put("addressPrefix", blockChain.getAddressPrefix());
+        chainInfoMap.put("registerTime", blockChain.getCreateTime());
+        chainInfoMap.put("enable", !blockChain.isDelete());
         return chainInfoMap;
     }
 

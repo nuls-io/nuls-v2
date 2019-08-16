@@ -147,7 +147,6 @@ public class TransactionCmd extends BaseLedgerCmd {
                     failList.add(txHash);
                 }
             }
-
             Map<String, Object> rtMap = new HashMap<>(2);
             rtMap.put("fail", failList);
             rtMap.put("orphan", orphanList);
@@ -185,28 +184,24 @@ public class TransactionCmd extends BaseLedgerCmd {
         }
         long blockHeight = Long.valueOf(params.get("blockHeight").toString());
         List<String> txStrList = (List) params.get("txList");
-        LoggerUtil.logger(chainId).debug("commitBlockTxs chainId={},blockHeight={}", chainId, blockHeight);
+        LoggerUtil.logger(chainId).info("commitBlockTxs chainId={},blockHeight={}", chainId, blockHeight);
         if (null == txStrList || 0 == txStrList.size()) {
             LoggerUtil.logger(chainId).error("txList is blank");
             return failed("txList is blank");
         }
         boolean value = false;
-        long time1 = System.currentTimeMillis();
         List<Transaction> txList = new ArrayList<>();
         Response parseResponse = parseTxs(txStrList, txList, chainId);
-        long time2 = System.currentTimeMillis();
-        LoggerUtil.logger(chainId).debug("commitBlockTxs txHexList={} parseTxsTime={}", txStrList.size(), time2 - time1);
         if (!parseResponse.isSuccess()) {
             LoggerUtil.logger(chainId).debug("commitBlockTxs response={}", parseResponse);
             return parseResponse;
         }
-
         if (transactionService.confirmBlockProcess(chainId, txList, blockHeight)) {
             value = true;
         }
         rtData.put("value", value);
         Response response = success(rtData);
-        LoggerUtil.logger(chainId).debug("response={}", response);
+        LoggerUtil.logger(chainId).info("response={}", value);
         return response;
     }
 

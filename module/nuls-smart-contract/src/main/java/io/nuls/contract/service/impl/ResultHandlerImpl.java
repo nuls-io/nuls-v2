@@ -92,7 +92,7 @@ public class ResultHandlerImpl implements ResultHanlder {
 
     private void handleFailedContract(int chainId, AnalyzerResult analyzerResult, long blockTime) throws IOException, NulsException {
         ContractTempBalanceManager tempBalanceManager = contractHelper.getBatchInfoTempBalanceManager(chainId);
-        int assetsId = contractHelper.getChain(chainId).getConfig().getAssetsId();
+        int assetsId = contractHelper.getChain(chainId).getConfig().getAssetId();
 
         Set<ContractResult> failedSet = analyzerResult.getFailedSet();
         for (ContractResult contractResult : failedSet) {

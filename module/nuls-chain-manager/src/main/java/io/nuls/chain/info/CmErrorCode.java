@@ -51,7 +51,8 @@ public interface CmErrorCode extends CommonCodeConstanst {
     ErrorCode ERROR_MAX_SIGNATURE_COUNT = ErrorCode.init("cm_1011");
     ErrorCode ERROR_CHAIN_ADDRESS_PREFIX = ErrorCode.init("cm_1012");
     ErrorCode ERROR_CHAIN_REG_CMD = ErrorCode.init("cm_1013");
-
+    ErrorCode ERROR_CHAIN_ACTIVE = ErrorCode.init("cm_1014");
+    ErrorCode ERROR_CHAIN_SYSTEM_USED = ErrorCode.init("cm_1015");
     /**
      * 错误编码
      */
@@ -73,7 +74,7 @@ public interface CmErrorCode extends CommonCodeConstanst {
     ErrorCode ERROR_TX_HASH = ErrorCode.init("cm_2017");
     ErrorCode ERROR_TX_REG_RPC = ErrorCode.init("cm_2018");
     ErrorCode ERROR_LEDGER_BALANCE_RPC = ErrorCode.init("cm_2019");
-
+    ErrorCode ERROR_ASSET_ALREADY_DISABLE = ErrorCode.init("cm_2020");
 
 
     ErrorCode ERROR_ACCOUNT_VALIDATE = ErrorCode.init("cm_3000");

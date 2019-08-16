@@ -12,6 +12,7 @@ import io.nuls.api.model.po.db.mini.MiniTransactionInfo;
 import io.nuls.api.model.rpc.BalanceInfo;
 import io.nuls.api.utils.DBUtil;
 import io.nuls.api.utils.DocumentTransferTool;
+import io.nuls.base.basic.AddressTool;
 import io.nuls.core.basic.InitializingBean;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
@@ -28,7 +29,7 @@ import static io.nuls.api.constant.ApiConstant.*;
 import static io.nuls.api.constant.DBTableConstant.*;
 
 @Component
-public class MongoTransactionServiceImpl implements TransactionService, InitializingBean {
+public class MongoTransactionServiceImpl implements TransactionService,InitializingBean {
 
     @Autowired
     private MongoDBService mongoDBService;
@@ -38,8 +39,9 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
 
     Map<String, List<Document>> relationMap;
     Map<String, List<String>> deleteRelationMap;
+    Map<Integer, Long> txCountMap;
 //    Map<String, List<DeleteManyModel<Document>>> deleteRelationMap;
-
+//
     @Override
     public void afterPropertiesSet() {
         relationMap = new HashMap<>();
@@ -53,12 +55,28 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
             List<String> modelList = new ArrayList<>();
             deleteRelationMap.put("relation_" + i, modelList);
         }
-
-//        deleteRelationMap = new HashMap<>();
+        //        deleteRelationMap = new HashMap<>();
 //        for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
 //            List<DeleteManyModel<Document>> modelList = new ArrayList<>();
 //            deleteRelationMap.put("relation_" + i, modelList);
 //        }
+    }
+
+    @Override
+    public void initCache() {
+        txCountMap = new HashMap<>();
+        for (ApiCache apiCache : CacheManager.getApiCaches().values()) {
+            long totalCount = mongoDBService.getCount(TX_TABLE + apiCache.getChainInfo().getChainId());
+            txCountMap.put(apiCache.getChainInfo().getChainId(), totalCount);
+        }
+    }
+
+    @Override
+    public void addCache(int chainId) {
+        if(txCountMap == null) {
+            txCountMap = new HashMap<>();
+        }
+        txCountMap.put(chainId, 0L);
     }
 
     //tx_table只存储最近100万条数据
@@ -66,15 +84,22 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         if (txList.isEmpty()) {
             return;
         }
+        long time1, time2;
 
+        time1 = System.currentTimeMillis();
         List<Document> documentList = new ArrayList<>();
         for (TransactionInfo transactionInfo : txList) {
             documentList.add(transactionInfo.toDocument());
             deleteUnConfirmTx(chainId, transactionInfo.getHash());
         }
+        time2 = System.currentTimeMillis();
+        System.out.println("-----------deleteUnConfirmTx, use: " + (time2 - time1) );
+        time1 = System.currentTimeMillis();
+        //long totalCount = mongoDBService.getCount(TX_TABLE + chainId);
+        long totalCount = txCountMap.get(chainId);
 
-        long totalCount = mongoDBService.getCount(TX_TABLE + chainId);
         totalCount += documentList.size();
+        txCountMap.put(chainId, totalCount);
         if (totalCount > 1000000) {
             int deleteCount = (int) (totalCount - 1000000);
             BasicDBObject fields = new BasicDBObject();
@@ -85,10 +110,18 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
                 hashList.add(document.getString("_id"));
             }
             mongoDBService.delete(TX_TABLE + chainId, Filters.in("_id", hashList));
+            time2 = System.currentTimeMillis();
+            System.out.println("-----------delete, use: " + (time2 - time1) );
+            time1 = System.currentTimeMillis();
         }
+
+
         InsertManyOptions options = new InsertManyOptions();
         options.ordered(false);
         mongoDBService.insertMany(TX_TABLE + chainId, documentList, options);
+        time2 = System.currentTimeMillis();
+        System.out.println("-----------insertMany, use: " + (time2 - time1) );
+        time1 = System.currentTimeMillis();
     }
 
     public void saveCoinDataList(int chainId, List<CoinDataInfo> coinDataList) {
@@ -289,7 +322,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         Set<TxRelationInfo> txRelationInfoSet = new HashSet<>();
         if (tx.getType() == TxType.COIN_BASE) {
             processCoinBaseTx(chainId, tx, txRelationInfoSet);
-        } else if (tx.getType() == TxType.TRANSFER) {
+        } else if (tx.getType() == TxType.TRANSFER || tx.getType() == TxType.CROSS_CHAIN) {
             processTransferTx(chainId, tx, txRelationInfoSet);
         } else if (tx.getType() == TxType.ACCOUNT_ALIAS) {
             processAliasTx(chainId, tx, txRelationInfoSet);
@@ -354,6 +387,27 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         }
         if (tx.getCoinTos() != null) {
             for (CoinToInfo output : tx.getCoinTos()) {
+                BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
+                txRelationInfoSet.add(new TxRelationInfo(output, tx, balanceInfo.getTotalBalance()));
+            }
+        }
+    }
+
+    private void processCrossTransferTx(int chainId, TransactionInfo tx, Set<TxRelationInfo> txRelationInfoSet) {
+        if (tx.getCoinFroms() != null) {
+            for (CoinFromInfo input : tx.getCoinFroms()) {
+                if (chainId != AddressTool.getChainIdByAddress(input.getAddress())) {
+                    continue;
+                }
+                BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, input.getAddress(), input.getChainId(), input.getAssetsId());
+                txRelationInfoSet.add(new TxRelationInfo(input, tx, balanceInfo.getTotalBalance()));
+            }
+        }
+        if (tx.getCoinTos() != null) {
+            for (CoinToInfo output : tx.getCoinTos()) {
+                if (chainId != AddressTool.getChainIdByAddress(output.getAddress())) {
+                    continue;
+                }
                 BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
                 txRelationInfoSet.add(new TxRelationInfo(output, tx, balanceInfo.getTotalBalance()));
             }

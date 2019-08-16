@@ -25,10 +25,7 @@
 package io.nuls.network.rpc.cmd;
 
 import io.nuls.base.RPCUtil;
-import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.NulsHash;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.log.Log;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.*;
@@ -222,7 +219,7 @@ public class MessageRpc extends BaseCmd {
                 if (null != availableNode) {
                     nodesList.add(availableNode);
                 } else {
-                    LoggerUtil.logger(chainId).error("cmd={},node = {} is not available!", cmd,nodeId);
+                    LoggerUtil.logger(chainId).error("cmd={},node = {} is not available!", cmd, nodeId);
                 }
             }
             messageManager.broadcastToNodes(message, cmd, nodesList, true, NetworkConstant.FULL_BROADCAST_PERCENT);

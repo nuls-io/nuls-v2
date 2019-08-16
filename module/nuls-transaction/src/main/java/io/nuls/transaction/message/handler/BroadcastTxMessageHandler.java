@@ -10,7 +10,6 @@ import io.nuls.transaction.message.BroadcastTxMessage;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.po.TransactionNetPO;
 import io.nuls.transaction.service.TxService;
-import io.nuls.transaction.task.StatisticsTask;
 import io.nuls.transaction.utils.TxDuplicateRemoval;
 
 import static io.nuls.transaction.constant.TxCmd.NW_RECEIVE_TX;
@@ -56,7 +55,6 @@ public class BroadcastTxMessageHandler implements MessageProcessor {
                 //该完整交易已经收到过
                 return;
             }
-            StatisticsTask.countRc.incrementAndGet();
             //将交易放入待验证本地交易队列中
             txService.newBroadcastTx(chainManager.getChain(chainId), new TransactionNetPO(transaction, nodeId));
         } catch (Exception e) {

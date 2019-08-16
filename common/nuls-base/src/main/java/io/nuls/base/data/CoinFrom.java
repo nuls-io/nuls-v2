@@ -136,7 +136,6 @@ public class CoinFrom extends Coin {
     }
 
     public void setNonce(byte[] nonce) {
-
         this.nonce = nonce;
     }
 

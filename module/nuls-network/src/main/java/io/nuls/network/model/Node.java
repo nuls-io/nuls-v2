@@ -96,7 +96,7 @@ public class Node implements Dto {
 
 
     private int connectStatus;
-    private boolean isSeedNode;
+    private boolean isSeedNode = false;
     /**
      * 是否分享过地址
      */
@@ -292,11 +292,7 @@ public class Node implements Dto {
     }
 
     public boolean isServer() {
-        if (IN == type) {
-            return true;
-        } else {
-            return false;
-        }
+        return IN == type;
     }
 
     public long getConnectTime() {

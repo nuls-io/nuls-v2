@@ -26,6 +26,7 @@ public class VerifierInitData extends BaseNulsData {
 
     public VerifierInitData(int registerChainId,List<String> verifierList){
         this.registerChainId = registerChainId;
+        this.verifierList = verifierList;
     }
 
     @Override

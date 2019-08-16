@@ -26,6 +26,7 @@ import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.NodeEnum;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.HeightRangeMessage;
+import io.nuls.block.model.BlockDownloaderParams;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.model.Node;
@@ -101,7 +102,8 @@ public class BlockDownloader implements Callable<Boolean> {
                 //发送消息给目标节点
                 boolean b = NetworkCall.sendToNode(chainId, message, node.getId(), GET_BLOCKS_BY_HEIGHT_MESSAGE);
                 if (b) {
-                    downloaderParams.getNodeMap().get(node.getId()).setNodeEnum(NodeEnum.WORKING);
+                    node.setNodeEnum(NodeEnum.WORKING);
+                    node.setStartTime(System.currentTimeMillis());
                 }
                 startHeight += size;
             }

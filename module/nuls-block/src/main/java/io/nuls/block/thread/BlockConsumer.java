@@ -24,6 +24,7 @@ import io.nuls.base.data.Block;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.NodeEnum;
 import io.nuls.block.manager.ContextManager;
+import io.nuls.block.model.BlockDownloaderParams;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.Node;
 import io.nuls.block.service.BlockService;
@@ -71,7 +72,7 @@ public class BlockConsumer implements Callable<Boolean> {
                     begin = System.nanoTime();
                     boolean saveBlock = blockService.saveBlock(chainId, block, true);
                     if (!saveBlock) {
-                        logger.error("error occur when saving downloaded blocks, height-" + startHeight + ", hash-" + block.getHeader().getHash());
+                        logger.error("An exception occurred while saving the downloaded block, height-" + startHeight + ", hash-" + block.getHeader().getHash());
                         context.setNeedSyn(false);
                         return false;
                     }
@@ -83,6 +84,7 @@ public class BlockConsumer implements Callable<Boolean> {
                 long end = System.nanoTime();
                 //超过10秒没有高度更新
                 if ((end - begin) / 1000000 > 5000) {
+                    updateNodeStatus(context);
                     retryDownload(startHeight, context);
                     begin = System.nanoTime();
                 }
@@ -93,6 +95,18 @@ public class BlockConsumer implements Callable<Boolean> {
             logger.error("BlockConsumer stop work abnormally", e);
             context.setNeedSyn(false);
             return false;
+        }
+    }
+
+    private void updateNodeStatus(ChainContext context) {
+        List<Node> nodes = context.getDownloaderParams().getNodes();
+        for (Node node : nodes) {
+            if (node.getNodeEnum().equals(NodeEnum.WORKING) && (System.currentTimeMillis() - node.getStartTime() > 60000)) {
+                node.adjustCredit(false);
+                if (!node.getNodeEnum().equals(NodeEnum.TIMEOUT)) {
+                    node.setNodeEnum(NodeEnum.IDLE);
+                }
+            }
         }
     }
 
@@ -119,7 +133,7 @@ public class BlockConsumer implements Callable<Boolean> {
                 context.getCachedBlockSize().addAndGet(block.size());
                 break;
             } else {
-                node.adjustCredit(false, 0);
+                node.adjustCredit(false);
             }
         }
         if (!download) {

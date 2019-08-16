@@ -79,7 +79,7 @@ public class RegChainTransferProcessor implements TransactionProcessor {
 
     @Override
     public boolean commit(int chainId, List<Transaction> txs, BlockHeader blockHeader) {
-        LoggerUtil.logger().debug("reg chain tx count = {}",txs.size());
+        LoggerUtil.logger().debug("reg chain tx count = {}", txs.size());
         long commitHeight = blockHeader.getHeight();
         BlockChain blockChain = null;
         Asset asset = null;
@@ -89,9 +89,19 @@ public class RegChainTransferProcessor implements TransactionProcessor {
             for (Transaction tx : txs) {
                 blockChain = TxUtil.buildChainWithTxData(tx, false);
                 asset = TxUtil.buildAssetWithTxChain(tx);
+                BlockChain dbChain = chainService.getChain(blockChain.getChainId());
+                //继承数据
+                if (null != dbChain) {
+                    blockChain.setSelfAssetKeyList(TxUtil.moveRepeatInfo(dbChain.getSelfAssetKeyList()));
+                    blockChain.setTotalAssetKeyList(TxUtil.moveRepeatInfo(dbChain.getTotalAssetKeyList()));
+                }else{
+                    blockChain.addCreateAssetId(CmRuntimeInfo.getAssetKey(blockChain.getChainId(), asset.getAssetId()));
+                    blockChain.addCirculateAssetId(CmRuntimeInfo.getAssetKey(blockChain.getChainId(), asset.getAssetId()));
+                }
+
                 chainService.registerBlockChain(blockChain, asset);
                 blockChains.add(blockChain);
-                Map<String, Object> prefix = new HashMap<>();
+                Map<String, Object> prefix = new HashMap<>(2);
                 prefix.put("chainId", blockChain.getChainId());
                 prefix.put("addressPrefix", blockChain.getAddressPrefix());
                 prefixList.add(prefix);
