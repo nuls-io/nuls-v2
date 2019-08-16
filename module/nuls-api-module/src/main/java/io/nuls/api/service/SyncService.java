@@ -227,13 +227,15 @@ public class SyncService {
         Set<String> addressSet = new HashSet<>();
         for (CoinToInfo output : tx.getCoinTos()) {
             addressSet.add(output.getAddress());
-            AccountLedgerInfo ledgerInfo = calcBalance(chainId, output);
-            txRelationInfoSet.add(new TxRelationInfo(output, tx, ledgerInfo.getTotalBalance()));
+            calcBalance(chainId, output);
+//            AccountLedgerInfo ledgerInfo = calcBalance(chainId, output);
+//            txRelationInfoSet.add(new TxRelationInfo(output, tx, ledgerInfo.getTotalBalance()));
 
             //奖励是本链主资产的时候，累计奖励金额
             if (output.getChainId() == assetInfo.getChainId() && output.getAssetsId() == assetInfo.getAssetId()) {
                 AccountInfo accountInfo = queryAccountInfo(chainId, output.getAddress());
                 accountInfo.setTotalReward(accountInfo.getTotalReward().add(output.getAmount()));
+                accountInfo.setLastReward(output.getAmount());
             }
         }
         for (String address : addressSet) {

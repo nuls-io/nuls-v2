@@ -200,7 +200,7 @@ public class RollbackService {
         for (CoinToInfo output : tx.getCoinTos()) {
             addressSet.add(output.getAddress());
             calcBalance(chainId, output);
-            txRelationInfoSet.add(new TxRelationInfo(output.getAddress(), tx.getHash()));
+//            txRelationInfoSet.add(new TxRelationInfo(output.getAddress(), tx.getHash()));
 
             //奖励是本链主资产的时候，回滚奖励金额
             if (output.getChainId() == assetInfo.getChainId() && output.getAssetsId() == assetInfo.getAssetId()) {

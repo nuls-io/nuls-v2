@@ -33,6 +33,8 @@ public class AccountInfo {
 
     private BigInteger totalReward;
 
+    private BigInteger lastReward;
+
     private String symbol;
 
     private List<String> tokens;
@@ -187,5 +189,13 @@ public class AccountInfo {
 
     public void setSymbol(String symbol) {
         this.symbol = symbol;
+    }
+
+    public BigInteger getLastReward() {
+        return lastReward;
+    }
+
+    public void setLastReward(BigInteger lastReward) {
+        this.lastReward = lastReward;
     }
 }
