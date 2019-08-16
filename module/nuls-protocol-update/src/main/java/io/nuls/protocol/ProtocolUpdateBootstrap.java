@@ -67,7 +67,7 @@ public class ProtocolUpdateBootstrap extends RpcModule {
     public void init() {
         try {
             super.init();
-            initDB();
+            initDb();
             chainManager.initChain();
             ModuleHelper.init(this);
         } catch (Exception e) {
@@ -80,7 +80,7 @@ public class ProtocolUpdateBootstrap extends RpcModule {
      * 初始化数据库
      * Initialization database
      */
-    private void initDB() throws Exception {
+    private void initDb() throws Exception {
         //读取配置文件,数据存储根目录,初始化打开该目录下所有表连接并放入缓存
         RocksDBService.init(protocolConfig.getDataFolder());
         RocksDBService.createTable(PROTOCOL_CONFIG);
