@@ -281,7 +281,7 @@ public class BlockSynchronizer implements Runnable {
                 TransactionCall.notice(chainId, MODULE_WORKING);
                 return true;
             } else {
-                logger.warn("Block syn complete but another syn is needed");
+                logger.info("Block syn complete but another syn is needed");
             }
         } else {
             logger.error("Block syn fail, downResult:" + downResult + ", storageResult:" + storageResult);
