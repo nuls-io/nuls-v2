@@ -58,6 +58,8 @@ public class ContractInfo extends TxDataInfo {
     private List<String> owners;
 
     private ContractResultInfo resultInfo;
+
+    private String args;
     @JsonIgnore
     private boolean isNew;
 
@@ -307,5 +309,13 @@ public class ContractInfo extends TxDataInfo {
 
     public void setDirectPayable(boolean directPayable) {
         isDirectPayable = directPayable;
+    }
+
+    public String getArgs() {
+        return args;
+    }
+
+    public void setArgs(String args) {
+        this.args = args;
     }
 }

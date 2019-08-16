@@ -21,6 +21,7 @@
 package io.nuls.provider.api.jsonrpc.controller;
 
 import io.nuls.base.api.provider.account.facade.*;
+import io.nuls.provider.api.config.Config;
 import io.nuls.provider.api.config.Context;
 import io.nuls.base.api.provider.Result;
 import io.nuls.base.api.provider.ServiceManager;
@@ -45,6 +46,7 @@ import io.nuls.provider.rpctools.LegderTools;
 import io.nuls.provider.rpctools.vo.AccountBalance;
 import io.nuls.provider.utils.ResultUtil;
 import io.nuls.provider.utils.VerifyUtils;
+import io.nuls.v2.error.AccountErrorCode;
 import io.nuls.v2.model.annotation.Api;
 import io.nuls.v2.model.annotation.ApiOperation;
 import io.nuls.v2.model.annotation.ApiType;
@@ -70,6 +72,8 @@ public class AccountController {
     private LegderTools legderTools;
     @Autowired
     private AccountTools accountTools;
+    @Autowired
+    private Config config;
 
     AccountService accountService = ServiceManager.get(AccountService.class);
 
@@ -470,6 +474,36 @@ public class AccountController {
             rpcResult.setError(new RpcResultError(result.getStatus(), result.getMessage(), null));
         }
         return rpcResult;
+    }
+
+    @RpcMethod("validateAddress")
+    @ApiOperation(description = "验证地址是否正确", order = 109, detailDesc = "验证地址是否正确")
+    @Parameters({
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
+            @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "账户地址")
+    })
+    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "boolean")
+    }))
+    public RpcResult validateAddress(List<Object> params) {
+        int chainId;
+        String address;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        try {
+            address = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[address] is inValid");
+        }
+        boolean b = AddressTool.validAddress(chainId, address);
+        if (b) {
+            return RpcResult.success(Map.of("value", true));
+        } else {
+            return RpcResult.failed(AccountErrorCode.ADDRESS_ERROR);
+        }
     }
 
     @RpcMethod("createAccountOffline")
@@ -876,14 +910,16 @@ public class AccountController {
     @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "value", description = "账户地址")
     }))
-    public RpcResult getAddressByPriKey(List<Object> params){
+    public RpcResult getAddressByPriKey(List<Object> params) {
         String priKey;
         try {
             priKey = (String) params.get(0);
-        }catch (Exception e) {
+        } catch (Exception e) {
             return RpcResult.paramError("[priKey] is inValid");
         }
         io.nuls.core.basic.Result result = NulsSDKTool.getAddressByPriKey(priKey);
         return ResultUtil.getJsonRpcResult(result);
     }
+
+
 }

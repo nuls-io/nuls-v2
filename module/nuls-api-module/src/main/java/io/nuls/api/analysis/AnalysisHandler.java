@@ -404,6 +404,18 @@ public class AnalysisHandler {
         contractInfo.setAlias(data.getAlias());
         contractInfo.setBlockHeight(tx.getBlockHeight());
         contractInfo.setCreateTime(tx.getTime());
+        String args = "";
+        String[][] arrays = data.getArgs();
+        if (arrays != null) {
+            for (String[] arg : arrays) {
+                if (arg != null) {
+                    for (String s : arg) {
+                        args = args + s + ",";
+                    }
+                }
+            }
+        }
+        contractInfo.setArgs(args);
         if (tx.getStatus() == TxStatusEnum.CONFIRMED) {
             Result<ContractInfo> result = WalletRpcHandler.getContractInfo(chainId, contractInfo);
             return result.getData();
@@ -420,7 +432,18 @@ public class AnalysisHandler {
         contractInfo.setContractAddress(AddressTool.getStringAddressByBytes(data.getContractAddress()));
         contractInfo.setBlockHeight(tx.getBlockHeight());
         contractInfo.setCreateTime(tx.getTime());
-
+        String args = "";
+        String[][] arrays = data.getArgs();
+        if (arrays != null) {
+            for (String[] arg : arrays) {
+                if (arg != null) {
+                    for (String s : arg) {
+                        args = args + s + ",";
+                    }
+                }
+            }
+        }
+        contractInfo.setArgs(args);
         contractInfo.setResultInfo(resultInfo);
         if (!resultInfo.isSuccess()) {
             contractInfo.setSuccess(false);
@@ -488,6 +511,7 @@ public class AnalysisHandler {
         callInfo.setMethodName(data.getMethodName());
         callInfo.setMethodDesc(data.getMethodDesc());
         callInfo.setCreateTxHash(tx.getHash().toHex());
+        callInfo.setValue(data.getValue());
         String args = "";
         String[][] arrays = data.getArgs();
         if (arrays != null) {
@@ -521,6 +545,7 @@ public class AnalysisHandler {
         callInfo.setMethodName(data.getMethodName());
         callInfo.setMethodDesc(data.getMethodDesc());
         callInfo.setCreateTxHash(tx.getHash().toHex());
+        callInfo.setValue(data.getValue());
         String args = "";
         String[][] arrays = data.getArgs();
         if (arrays != null) {

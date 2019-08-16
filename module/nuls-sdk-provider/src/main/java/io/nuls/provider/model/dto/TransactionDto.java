@@ -63,7 +63,7 @@ public class TransactionDto {
     @ApiModelProperty(description = "在区块中的顺序，存储在rocksDB中是无序的，保存区块时赋值，取出后根据此值排序")
     private int inBlockIndex;
     @ApiModelProperty(description = "输入", type = @TypeDescriptor(value = List.class, collectionElement = CoinFromDto.class))
-    private List<CoinFromDto> form;
+    private List<CoinFromDto> from;
     @ApiModelProperty(description = "输出", type = @TypeDescriptor(value = List.class, collectionElement = CoinToDto.class))
     private List<CoinToDto> to;
 
@@ -81,7 +81,7 @@ public class TransactionDto {
         this.txDataHex = RPCUtil.encode(transaction.getTxData());
         this.type = transaction.getType();
         CoinData coinData = transaction.getCoinDataInstance();
-        this.form = coinData.getFrom().stream().map(from -> new CoinFromDto(from)).collect(Collectors.toList());
+        this.from = coinData.getFrom().stream().map(from -> new CoinFromDto(from)).collect(Collectors.toList());
         this.to = coinData.getTo().stream().map(to -> new CoinToDto(to)).collect(Collectors.toList());
     }
 
@@ -165,12 +165,12 @@ public class TransactionDto {
         this.inBlockIndex = inBlockIndex;
     }
 
-    public List<CoinFromDto> getForm() {
-        return form;
+    public List<CoinFromDto> getFrom() {
+        return from;
     }
 
-    public void setForm(List<CoinFromDto> form) {
-        this.form = form;
+    public void setFrom(List<CoinFromDto> from) {
+        this.from = from;
     }
 
     public List<CoinToDto> getTo() {
