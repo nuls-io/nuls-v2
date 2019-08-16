@@ -1,6 +1,3 @@
-[global]
-encoding=UTF-8
-language=en
 logPath=Logs
 logLevel=INFO
 dataPath=data
@@ -10,10 +7,10 @@ chainId=2
 addressPrefix=tNULS
 #默认本链主资产ID
 assetId=1
-#默认链名称
-chainName=nuls2
 #默认资产小数位数
 decimals=8
+#默认链名称
+chainName=nuls2
 #本链默认资产符号
 symbol=NULS
 #默认资产的小数精确位数
@@ -30,11 +27,11 @@ blackHolePublicKey=0298f88c3cae67385ce3cbee00f78816db3e56e566b62bd0f4c5b45f205d3
 port=18001
 crossPort=18002
 #魔法参数
-packetMagic=2019070801
-#种子连接节点
-selfSeedIps=192.168.1.32:18001,192.168.1.149:18001
+packetMagic=20190807
+#种子节点
+selfSeedIps=39.98.226.51:18001,47.244.186.65:18001,47.254.234.223:18001,47.74.86.85:18001
 #主网的跨链种子连接节点
-moonSeedIps=192.168.1.32:18002,192.168.1.149:18002
+moonSeedIps=39.98.226.51:18002,47.244.186.65:18002,47.254.234.223:18002,47.74.86.85:18002
 #最大入网连接数
 maxInCount=100
 #最大出网连接数
@@ -53,17 +50,17 @@ chainSwtichThreshold=3
 #最小链接节点数,当链接到的网络节点低于此参数时,会持续等待
 minNodeAmount=1
 #区块同步过程中,每次从网络上节点下载的区块数量
-downloadNumber=10
+downloadNumber=5
 #从网络节点下载单个区块的超时时间
-singleDownloadTimeout=10000
+singleDownloadTimeout=15000
 #区块同步过程中缓存的区块字节数上限(20M)
 cachedBlockSizeLimit=20971520
 #创世块文件路径(支持绝对路径与相对路径,相对路径相对于此配置文件的目录)
-#genesisBlockPath=genesis-block.json
+genesisBlockPath=genesis-block.json
 
 [consensus]
 #种子节点列表
-seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
+seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMmShSTVwbU4rHkZjpD98JgFgg6rmhF,tNULSeBaMpTj8qEQ8CFDxiP69hGFB27u9nmMUc
 #出块地址密码
 password=nuls123456
 #出块间隔时间(单位：s)
@@ -85,7 +82,6 @@ deflationRatio=100
 #通缩间隔时间(单位：S)
 deflationTimeInterval=31536000
 
-
 [smart_contract]
 #合约视图方法调用最大消耗的Gas
 maxViewGas=100000000
@@ -106,7 +102,7 @@ connectTimeOut=30000
 
 [cross-chain]
 #跨链节点链接的最小值
-minNodeAmount=8
+minNodeAmount=4
 #跨链节点链接的最大值
 maxNodeAmount=10
 #跨链交易在本链内确认块数
@@ -114,11 +110,11 @@ sendHeight=5
 #跨链交易拜占庭比例
 byzantineRatio=50
 #主网跨链种子节点列表
-crossSeedIps=39.98.226.51:18002,47.244.186.65:18002,172.21.149.246:18002,47.74.86.85:18002
+crossSeedIps=39.98.226.51:18002,47.244.186.65:18002,47.254.234.223:18002,47.74.86.85:18002
 #主网验证人列表
-verifiers=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
+verifiers=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMmShSTVwbU4rHkZjpD98JgFgg6rmhF,tNULSeBaMpTj8qEQ8CFDxiP69hGFB27u9nmMUc
 #主网签名拜占庭比列
-mainByzantineRatio=66
+mainByzantineRatio=50
 #主网最大签名数
 maxSignatureCount=100
 
