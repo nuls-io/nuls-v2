@@ -86,12 +86,15 @@ public class MongoTransactionServiceImpl implements TransactionService,Initializ
         }
         long time1, time2;
 
+        time1 = System.currentTimeMillis();
         List<Document> documentList = new ArrayList<>();
         for (TransactionInfo transactionInfo : txList) {
             documentList.add(transactionInfo.toDocument());
             deleteUnConfirmTx(chainId, transactionInfo.getHash());
         }
-
+        time2 = System.currentTimeMillis();
+        System.out.println("-----------deleteUnConfirmTx, use: " + (time2 - time1) );
+        time1 = System.currentTimeMillis();
         //long totalCount = mongoDBService.getCount(TX_TABLE + chainId);
         long totalCount = txCountMap.get(chainId);
 
@@ -107,12 +110,18 @@ public class MongoTransactionServiceImpl implements TransactionService,Initializ
                 hashList.add(document.getString("_id"));
             }
             mongoDBService.delete(TX_TABLE + chainId, Filters.in("_id", hashList));
+            time2 = System.currentTimeMillis();
+            System.out.println("-----------delete, use: " + (time2 - time1) );
+            time1 = System.currentTimeMillis();
         }
 
 
         InsertManyOptions options = new InsertManyOptions();
         options.ordered(false);
         mongoDBService.insertMany(TX_TABLE + chainId, documentList, options);
+        time2 = System.currentTimeMillis();
+        System.out.println("-----------insertMany, use: " + (time2 - time1) );
+        time1 = System.currentTimeMillis();
     }
 
     public void saveCoinDataList(int chainId, List<CoinDataInfo> coinDataList) {

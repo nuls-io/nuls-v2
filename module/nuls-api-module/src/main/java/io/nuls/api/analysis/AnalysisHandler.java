@@ -511,6 +511,7 @@ public class AnalysisHandler {
         callInfo.setMethodName(data.getMethodName());
         callInfo.setMethodDesc(data.getMethodDesc());
         callInfo.setCreateTxHash(tx.getHash().toHex());
+        callInfo.setValue(data.getValue());
         String args = "";
         String[][] arrays = data.getArgs();
         if (arrays != null) {
@@ -544,6 +545,7 @@ public class AnalysisHandler {
         callInfo.setMethodName(data.getMethodName());
         callInfo.setMethodDesc(data.getMethodDesc());
         callInfo.setCreateTxHash(tx.getHash().toHex());
+        callInfo.setValue(data.getValue());
         String args = "";
         String[][] arrays = data.getArgs();
         if (arrays != null) {
