@@ -72,7 +72,7 @@ public class UpdatePasswordProcessor extends AccountBaseProcessor implements Com
     public CommandResult execute(String[] args) {
         String address = args[1];
         String password = CommandHelper.getPwd( "Enter your old password:");
-        String newPassword = CommandHelper.getPwd("Enter new password");
+        String newPassword = CommandHelper.getPwd("Enter new password:");
         CommandHelper.confirmPwd(newPassword);
         UpdatePasswordReq req = new UpdatePasswordReq(address,password,newPassword);
         Result<Boolean> res = accountService.updatePassword(req);
