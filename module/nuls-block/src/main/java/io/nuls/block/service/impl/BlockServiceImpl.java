@@ -131,9 +131,6 @@ public class BlockServiceImpl implements BlockService {
             for (long i = startHeight; i <= endHeight; i++) {
                 BlockHeaderPo blockHeaderPo = blockStorageService.query(chainId, i);
                 BlockHeader blockHeader = BlockUtil.fromBlockHeaderPo(blockHeaderPo);
-                if (blockHeader == null) {
-                    return Collections.emptyList();
-                }
                 list.add(blockHeader);
             }
             return list;
@@ -228,7 +225,7 @@ public class BlockServiceImpl implements BlockService {
                 return null;
             }
             block.setTxs(transactions);
-            logger.info("get block time-" + (System.nanoTime() - l) + ", height-" + height);
+            logger.debug("get block time-" + (System.nanoTime() - l) + ", height-" + height);
             return block;
         } catch (Exception e) {
             logger.error("error when getBlock by height", e);

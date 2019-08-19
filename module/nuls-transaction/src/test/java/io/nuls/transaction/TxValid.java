@@ -28,6 +28,7 @@ import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
+import io.nuls.base.data.po.BlockHeaderPo;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.TransactionSignature;
 import io.nuls.core.crypto.HexUtil;
@@ -94,6 +95,7 @@ public class TxValid {
      * tNULSeBaMigwBrvikwVwbhAgAxip8cTScwcaT8
      */
     private Chain chain;
+//    static int chainId = 12;
     static int chainId = 2;
     static int assetChainId = 2;
     static int assetId = 1;
@@ -786,6 +788,30 @@ public class TxValid {
         Log.debug(JSONUtils.obj2PrettyJson(record));
         return (Map)record.get("tx_getConfirmedTxClient");
     }
+
+    /**
+     * 查区块
+     * 高度或者hash
+     */
+    @Test
+    public void getBlocByHeight() throws Exception {
+        getBlockHeaderPoByHeight(9878L);
+    }
+    private void getBlockHeaderPoByHeight(long param) throws Exception {
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.CHAIN_ID, chainId);
+        params.put("height", param);
+        Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "getBlockHeaderPoByHeight", params);
+        Map record = (Map) dpResp.getResponseData();
+        String rs = (String)record.get("getBlockHeaderPoByHeight");
+        BlockHeaderPo blockHeaderPo = new BlockHeaderPo();
+        blockHeaderPo.parse(new NulsByteBuffer(RPCUtil.decode(rs)));
+        Log.debug(JSONUtils.obj2PrettyJson(blockHeaderPo));
+        for(NulsHash nulsHash : blockHeaderPo.getTxHashList()){
+            Log.debug("txHash:{}", nulsHash.toHex());
+        }
+    }
+
 
     @Test
     public void getPriKeyByAddress() throws Exception {
