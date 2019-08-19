@@ -73,7 +73,9 @@ public class UpdatePasswordProcessor extends AccountBaseProcessor implements Com
         String address = args[1];
         String password = CommandHelper.getPwd( "Enter your old password:");
         String newPassword = CommandHelper.getPwd("Enter new password:");
-        CommandHelper.confirmPwd(newPassword);
+        if(!CommandHelper.confirmPwd(newPassword)) {
+            return CommandResult.getFailed("Password confirmation doesn't match the password.Operation abort.");
+        }
         UpdatePasswordReq req = new UpdatePasswordReq(address,password,newPassword);
         Result<Boolean> res = accountService.updatePassword(req);
         if(res.isFailed()){
