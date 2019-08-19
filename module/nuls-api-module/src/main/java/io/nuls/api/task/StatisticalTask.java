@@ -85,19 +85,19 @@ public class StatisticalTask implements Runnable {
         if (null == header || header.getHeight() == 0) {
             return;
         }
-        long day = 24 * 3600000;
+        long day = 24 * 3600;
         long start = bestId + 1;
         long end = 0;
         if (bestId == -1) {
             BlockHeaderInfo header0 = blockService.getBlockHeader(chainId, 1);
-            start = header0.getCreateTime() * 1000 - NulsDateUtils.SECOND_TIME * 10;
+            start = header0.getCreateTime()  -  10;
             end = start + day;
             this.statisticalService.saveBestId(chainId, start);
         } else {
             end = start + day - 1;
         }
         while (true) {
-            if (end > header.getCreateTime() * 1000) {
+            if (end > header.getCreateTime()) {
                 break;
             }
             statistical(start, end);
