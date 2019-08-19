@@ -236,7 +236,7 @@ public class BlockSynchronizer implements Runnable {
             return true;
         }
         //检查本地区块状态
-        LocalBlockStateEnum stateEnum = checkLocalBlock(chainId, downloaderParams);
+        LocalBlockStateEnum stateEnum = checkLocalBlock(downloaderParams);
         if (stateEnum.equals(CONSISTENT)) {
             logger.info("The local node's block is the latest height and does not need to be synchronized");
             context.setStatus(StatusEnum.RUNNING);
@@ -298,7 +298,6 @@ public class BlockSynchronizer implements Runnable {
      *
      * @param context
      * @return
-     * @throws Exception
      */
     private boolean checkIsNewest(ChainContext context) {
         BlockDownloaderParams newestParams = statistics(NetworkCall.getAvailableNodes(chainId), context);
@@ -352,7 +351,8 @@ public class BlockSynchronizer implements Runnable {
         }
         ChainParameters parameters = context.getParameters();
         double div = DoubleUtils.div(count, availableNodes.size(), 2);
-        if (div * 100 < parameters.getConsistencyNodePercent()) {
+        byte percent = calculateConsistencyNodePercent(parameters.getConsistencyNodePercent(), availableNodes.size());
+        if (div * 100 < percent) {
             return params;
         }
         List<Node> nodeList = nodeMap.get(key);
@@ -389,13 +389,25 @@ public class BlockSynchronizer implements Runnable {
     }
 
     /**
+     * 计算连接到不同数量节点时,一致节点的最低比例
+     *
+     * @param consistencyNodePercent 原始比例
+     * @param size                   连接节点数
+     * @return 最终比例
+     */
+    private byte calculateConsistencyNodePercent(byte consistencyNodePercent, int size) {
+        byte percent = consistencyNodePercent;
+        percent -= ((size / 4) - 1) * 5;
+        return percent;
+    }
+
+    /**
      * 区块同步前,与网络区块作对比,检查本地区块是否需要回滚
      *
-     * @param chainId 链Id/chain id
      * @param params
      * @return
      */
-    private LocalBlockStateEnum checkLocalBlock(int chainId, BlockDownloaderParams params) {
+    private LocalBlockStateEnum checkLocalBlock(BlockDownloaderParams params) {
         long localHeight = params.getLocalLatestHeight();
         long netHeight = params.getNetLatestHeight();
         //得到共同高度
@@ -408,15 +420,8 @@ public class BlockSynchronizer implements Runnable {
                 return CONSISTENT;
             }
         } else {
-            //需要回滚的场景,要满足可用节点数(10个)>配置,一致可用节点数(6个)占比超80%两个条件
-            ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
-            if (params.getNodes().size() >= parameters.getMinNodeAmount()
-                    && params.getAvailableNodesCount() >= params.getNodes().size() * parameters.getConsistencyNodePercent() / 100
-            ) {
-                return checkRollback(0, params);
-            }
+            return checkRollback(0, params);
         }
-        return INCONSISTENT;
     }
 
     private LocalBlockStateEnum checkRollback(int rollbackCount, BlockDownloaderParams params) {

@@ -40,10 +40,6 @@ import java.io.IOException;
 public class ChainParameters extends BaseNulsData {
 
     /**
-     * 链名
-     */
-    private String chainName;
-    /**
      * 链ID
      */
     private int chainId;
@@ -54,15 +50,15 @@ public class ChainParameters extends BaseNulsData {
     /**
      * 区块大小阈值
      */
-    private int blockMaxSize;
+    private long blockMaxSize;
     /**
      * 网络重置阈值
      */
-    private int resetTime;
+    private long resetTime;
     /**
      * 分叉链比主链高几个区块就进行链切换
      */
-    private int chainSwtichThreshold;
+    private byte chainSwtichThreshold;
     /**
      * 分叉链、孤儿链区块最大缓存数量
      */
@@ -78,15 +74,15 @@ public class ChainParameters extends BaseNulsData {
     /**
      * 一致节点比例
      */
-    private int consistencyNodePercent;
+    private byte consistencyNodePercent;
     /**
      * 系统运行最小节点数
      */
-    private int minNodeAmount;
+    private byte minNodeAmount;
     /**
      * 每次从一个节点下载多少区块
      */
-    private int downloadNumber;
+    private byte downloadNumber;
     /**
      * 区块头中扩展字段的最大长度
      */
@@ -99,11 +95,11 @@ public class ChainParameters extends BaseNulsData {
     /**
      * 系统正常运行时最多缓存多少个从别的节点接收到的小区块
      */
-    private int smallBlockCache;
+    private byte smallBlockCache;
     /**
      * 孤儿链最大年龄
      */
-    private int orphanChainMaxAge;
+    private byte orphanChainMaxAge;
     /**
      * 日志级别
      */
@@ -112,11 +108,6 @@ public class ChainParameters extends BaseNulsData {
      * 下载单个区块的超时时间
      */
     private int singleDownloadTimeout;
-
-    /**
-     * 两次区块同步之间的时间间隔
-     */
-    private int synSleepInterval;
 
     /**
      * 等待网络稳定的时间间隔
@@ -133,11 +124,7 @@ public class ChainParameters extends BaseNulsData {
      */
     private long cachedBlockSizeLimit;
 
-    public ChainParameters() {
-    }
-
-    public ChainParameters(String chainName, int chainId, int assetId, int blockMaxSize, int resetTime, int chainSwtichThreshold, int cacheSize, int heightRange, int maxRollback, int consistencyNodePercent, int minNodeAmount, int downloadNumber, int extendMaxSize, int validBlockInterval, int smallBlockCache, int orphanChainMaxAge, String logLevel, int singleDownloadTimeout, int synSleepInterval, int waitNetworkInterval, String genesisBlockPath, long cachedBlockSizeLimit) {
-        this.chainName = chainName;
+    public ChainParameters(int chainId, int assetId, long blockMaxSize, long resetTime, byte chainSwtichThreshold, int cacheSize, int heightRange, int maxRollback, byte consistencyNodePercent, byte minNodeAmount, byte downloadNumber, int extendMaxSize, int validBlockInterval, byte smallBlockCache, byte orphanChainMaxAge, String logLevel, int singleDownloadTimeout, int waitNetworkInterval, String genesisBlockPath, long cachedBlockSizeLimit) {
         this.chainId = chainId;
         this.assetId = assetId;
         this.blockMaxSize = blockMaxSize;
@@ -155,26 +142,9 @@ public class ChainParameters extends BaseNulsData {
         this.orphanChainMaxAge = orphanChainMaxAge;
         this.logLevel = logLevel;
         this.singleDownloadTimeout = singleDownloadTimeout;
-        this.synSleepInterval = synSleepInterval;
         this.waitNetworkInterval = waitNetworkInterval;
         this.genesisBlockPath = genesisBlockPath;
         this.cachedBlockSizeLimit = cachedBlockSizeLimit;
-    }
-
-    public String getGenesisBlockPath() {
-        return genesisBlockPath;
-    }
-
-    public void setGenesisBlockPath(String genesisBlockPath) {
-        this.genesisBlockPath = genesisBlockPath;
-    }
-
-    public String getChainName() {
-        return chainName;
-    }
-
-    public void setChainName(String chainName) {
-        this.chainName = chainName;
     }
 
     public int getChainId() {
@@ -185,28 +155,35 @@ public class ChainParameters extends BaseNulsData {
         this.chainId = chainId;
     }
 
-    public int getBlockMaxSize() {
+    public ChainParameters() {
+    }
+
+    public int getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(int assetId) {
+        this.assetId = assetId;
+    }
+
+    public long getBlockMaxSize() {
         return blockMaxSize;
     }
 
-    public void setBlockMaxSize(int blockMaxSize) {
+    public void setBlockMaxSize(long blockMaxSize) {
         this.blockMaxSize = blockMaxSize;
     }
 
-    public int getResetTime() {
+    public long getResetTime() {
         return resetTime;
     }
 
-    public void setResetTime(int resetTime) {
+    public void setResetTime(long resetTime) {
         this.resetTime = resetTime;
     }
 
-    public int getChainSwtichThreshold() {
+    public byte getChainSwtichThreshold() {
         return chainSwtichThreshold;
-    }
-
-    public void setChainSwtichThreshold(int chainSwtichThreshold) {
-        this.chainSwtichThreshold = chainSwtichThreshold;
     }
 
     public int getCacheSize() {
@@ -233,44 +210,28 @@ public class ChainParameters extends BaseNulsData {
         this.maxRollback = maxRollback;
     }
 
-    public int getConsistencyNodePercent() {
+    public void setChainSwtichThreshold(byte chainSwtichThreshold) {
+        this.chainSwtichThreshold = chainSwtichThreshold;
+    }
+
+    public byte getConsistencyNodePercent() {
         return consistencyNodePercent;
     }
 
-    public void setConsistencyNodePercent(int consistencyNodePercent) {
+    public void setConsistencyNodePercent(byte consistencyNodePercent) {
         this.consistencyNodePercent = consistencyNodePercent;
     }
 
-    public int getSingleDownloadTimeout() {
-        return singleDownloadTimeout;
-    }
-
-    public void setSingleDownloadTimeout(int singleDownloadTimeout) {
-        this.singleDownloadTimeout = singleDownloadTimeout;
-    }
-
-    public long getCachedBlockSizeLimit() {
-        return cachedBlockSizeLimit;
-    }
-
-    public void setCachedBlockSizeLimit(long cachedBlockSizeLimit) {
-        this.cachedBlockSizeLimit = cachedBlockSizeLimit;
-    }
-
-    public int getMinNodeAmount() {
+    public byte getMinNodeAmount() {
         return minNodeAmount;
     }
 
-    public void setMinNodeAmount(int minNodeAmount) {
+    public void setMinNodeAmount(byte minNodeAmount) {
         this.minNodeAmount = minNodeAmount;
     }
 
-    public int getDownloadNumber() {
+    public byte getDownloadNumber() {
         return downloadNumber;
-    }
-
-    public void setDownloadNumber(int downloadNumber) {
-        this.downloadNumber = downloadNumber;
     }
 
     public int getExtendMaxSize() {
@@ -289,20 +250,20 @@ public class ChainParameters extends BaseNulsData {
         this.validBlockInterval = validBlockInterval;
     }
 
-    public int getSmallBlockCache() {
+    public void setDownloadNumber(byte downloadNumber) {
+        this.downloadNumber = downloadNumber;
+    }
+
+    public byte getSmallBlockCache() {
         return smallBlockCache;
     }
 
-    public void setSmallBlockCache(int smallBlockCache) {
+    public void setSmallBlockCache(byte smallBlockCache) {
         this.smallBlockCache = smallBlockCache;
     }
 
-    public int getOrphanChainMaxAge() {
+    public byte getOrphanChainMaxAge() {
         return orphanChainMaxAge;
-    }
-
-    public void setOrphanChainMaxAge(int orphanChainMaxAge) {
-        this.orphanChainMaxAge = orphanChainMaxAge;
     }
 
     public String getLogLevel() {
@@ -313,12 +274,12 @@ public class ChainParameters extends BaseNulsData {
         this.logLevel = logLevel;
     }
 
-    public int getSynSleepInterval() {
-        return synSleepInterval;
+    public void setOrphanChainMaxAge(byte orphanChainMaxAge) {
+        this.orphanChainMaxAge = orphanChainMaxAge;
     }
 
-    public void setSynSleepInterval(int synSleepInterval) {
-        this.synSleepInterval = synSleepInterval;
+    public int getSingleDownloadTimeout() {
+        return singleDownloadTimeout;
     }
 
     public int getWaitNetworkInterval() {
@@ -329,35 +290,45 @@ public class ChainParameters extends BaseNulsData {
         this.waitNetworkInterval = waitNetworkInterval;
     }
 
-    public int getAssetId() {
-        return assetId;
+    public void setSingleDownloadTimeout(int singleDownloadTimeout) {
+        this.singleDownloadTimeout = singleDownloadTimeout;
     }
 
-    public void setAssetId(int assetId) {
-        this.assetId = assetId;
+    public String getGenesisBlockPath() {
+        return genesisBlockPath;
+    }
+
+    public void setGenesisBlockPath(String genesisBlockPath) {
+        this.genesisBlockPath = genesisBlockPath;
+    }
+
+    public long getCachedBlockSizeLimit() {
+        return cachedBlockSizeLimit;
+    }
+
+    public void setCachedBlockSizeLimit(long cachedBlockSizeLimit) {
+        this.cachedBlockSizeLimit = cachedBlockSizeLimit;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeString(chainName);
         stream.writeUint16(chainId);
         stream.writeUint16(assetId);
         stream.writeUint32(blockMaxSize);
-        stream.writeUint16(resetTime);
-        stream.writeUint16(chainSwtichThreshold);
+        stream.writeUint32(resetTime);
+        stream.writeByte(chainSwtichThreshold);
         stream.writeUint16(cacheSize);
         stream.writeUint16(heightRange);
         stream.writeUint16(maxRollback);
-        stream.writeUint16(consistencyNodePercent);
-        stream.writeUint16(minNodeAmount);
-        stream.writeUint16(downloadNumber);
+        stream.writeByte(consistencyNodePercent);
+        stream.writeByte(minNodeAmount);
+        stream.writeByte(downloadNumber);
         stream.writeUint16(extendMaxSize);
         stream.writeUint16(validBlockInterval);
-        stream.writeUint16(smallBlockCache);
-        stream.writeUint16(orphanChainMaxAge);
+        stream.writeByte(smallBlockCache);
+        stream.writeByte(orphanChainMaxAge);
         stream.writeString(logLevel);
         stream.writeUint16(singleDownloadTimeout);
-        stream.writeUint16(synSleepInterval);
         stream.writeUint16(waitNetworkInterval);
         stream.writeString(genesisBlockPath);
         stream.writeUint32(cachedBlockSizeLimit);
@@ -365,25 +336,23 @@ public class ChainParameters extends BaseNulsData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.chainName = byteBuffer.readString();
         this.chainId = byteBuffer.readUint16();
         this.assetId = byteBuffer.readUint16();
-        this.blockMaxSize = (int) byteBuffer.readUint32();
-        this.resetTime = byteBuffer.readUint16();
-        this.chainSwtichThreshold = byteBuffer.readUint16();
+        this.blockMaxSize = byteBuffer.readUint32();
+        this.resetTime = byteBuffer.readUint32();
+        this.chainSwtichThreshold = byteBuffer.readByte();
         this.cacheSize = byteBuffer.readUint16();
         this.heightRange = byteBuffer.readUint16();
         this.maxRollback = byteBuffer.readUint16();
-        this.consistencyNodePercent = byteBuffer.readUint16();
-        this.minNodeAmount = byteBuffer.readUint16();
-        this.downloadNumber = byteBuffer.readUint16();
+        this.consistencyNodePercent = byteBuffer.readByte();
+        this.minNodeAmount = byteBuffer.readByte();
+        this.downloadNumber = byteBuffer.readByte();
         this.extendMaxSize = byteBuffer.readUint16();
         this.validBlockInterval = byteBuffer.readUint16();
-        this.smallBlockCache = byteBuffer.readUint16();
-        this.orphanChainMaxAge = byteBuffer.readUint16();
+        this.smallBlockCache = byteBuffer.readByte();
+        this.orphanChainMaxAge = byteBuffer.readByte();
         this.logLevel = byteBuffer.readString();
         this.singleDownloadTimeout = byteBuffer.readUint16();
-        this.synSleepInterval = byteBuffer.readUint16();
         this.waitNetworkInterval = byteBuffer.readUint16();
         this.genesisBlockPath = byteBuffer.readString();
         this.cachedBlockSizeLimit = byteBuffer.readUint32();
@@ -391,11 +360,105 @@ public class ChainParameters extends BaseNulsData {
 
     @Override
     public int size() {
-        int size = 0;
-        size += (21 * SerializeUtils.sizeOfUint16());
-        size += SerializeUtils.sizeOfString(chainName);
+        int size = 36;
         size += SerializeUtils.sizeOfString(logLevel);
         size += SerializeUtils.sizeOfString(genesisBlockPath);
         return size;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        ChainParameters that = (ChainParameters) o;
+
+        if (chainId != that.chainId) {
+            return false;
+        }
+        if (assetId != that.assetId) {
+            return false;
+        }
+        if (blockMaxSize != that.blockMaxSize) {
+            return false;
+        }
+        if (resetTime != that.resetTime) {
+            return false;
+        }
+        if (chainSwtichThreshold != that.chainSwtichThreshold) {
+            return false;
+        }
+        if (cacheSize != that.cacheSize) {
+            return false;
+        }
+        if (heightRange != that.heightRange) {
+            return false;
+        }
+        if (maxRollback != that.maxRollback) {
+            return false;
+        }
+        if (consistencyNodePercent != that.consistencyNodePercent) {
+            return false;
+        }
+        if (minNodeAmount != that.minNodeAmount) {
+            return false;
+        }
+        if (downloadNumber != that.downloadNumber) {
+            return false;
+        }
+        if (extendMaxSize != that.extendMaxSize) {
+            return false;
+        }
+        if (validBlockInterval != that.validBlockInterval) {
+            return false;
+        }
+        if (smallBlockCache != that.smallBlockCache) {
+            return false;
+        }
+        if (orphanChainMaxAge != that.orphanChainMaxAge) {
+            return false;
+        }
+        if (singleDownloadTimeout != that.singleDownloadTimeout) {
+            return false;
+        }
+        if (waitNetworkInterval != that.waitNetworkInterval) {
+            return false;
+        }
+        if (cachedBlockSizeLimit != that.cachedBlockSizeLimit) {
+            return false;
+        }
+        if (logLevel != null ? !logLevel.equals(that.logLevel) : that.logLevel != null) {
+            return false;
+        }
+        return genesisBlockPath != null ? genesisBlockPath.equals(that.genesisBlockPath) : that.genesisBlockPath == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = chainId;
+        result = 31 * result + assetId;
+        result = 31 * result + (int) (blockMaxSize ^ (blockMaxSize >>> 32));
+        result = 31 * result + (int) (resetTime ^ (resetTime >>> 32));
+        result = 31 * result + (int) chainSwtichThreshold;
+        result = 31 * result + cacheSize;
+        result = 31 * result + heightRange;
+        result = 31 * result + maxRollback;
+        result = 31 * result + (int) consistencyNodePercent;
+        result = 31 * result + (int) minNodeAmount;
+        result = 31 * result + (int) downloadNumber;
+        result = 31 * result + extendMaxSize;
+        result = 31 * result + validBlockInterval;
+        result = 31 * result + (int) smallBlockCache;
+        result = 31 * result + (int) orphanChainMaxAge;
+        result = 31 * result + (logLevel != null ? logLevel.hashCode() : 0);
+        result = 31 * result + singleDownloadTimeout;
+        result = 31 * result + waitNetworkInterval;
+        result = 31 * result + (genesisBlockPath != null ? genesisBlockPath.hashCode() : 0);
+        result = 31 * result + (int) (cachedBlockSizeLimit ^ (cachedBlockSizeLimit >>> 32));
+        return result;
     }
 }
