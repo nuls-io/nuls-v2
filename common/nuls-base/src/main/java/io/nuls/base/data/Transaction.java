@@ -64,6 +64,8 @@ public class Transaction extends BaseNulsData implements Cloneable {
 
     private transient int size;
 
+    private transient CoinData coinDataInstance;
+
     /**
      * 在区块中的顺序，存储在rocksDB中是无序的，保存区块时赋值，取出后根据此值排序
      */
@@ -218,9 +220,11 @@ public class Transaction extends BaseNulsData implements Cloneable {
     }
 
     public CoinData getCoinDataInstance() throws NulsException {
-        CoinData coinData = new CoinData();
-        coinData.parse(new NulsByteBuffer(this.coinData));
-        return coinData;
+        if (coinDataInstance == null) {
+            coinDataInstance = new CoinData();
+            coinDataInstance.parse(new NulsByteBuffer(this.coinData));
+        }
+        return coinDataInstance;
     }
 
     public void setCoinData(byte[] coinData) {
@@ -283,10 +287,7 @@ public class Transaction extends BaseNulsData implements Cloneable {
             return false;
         }
         CoinFrom coinFrom = from.get(0);
-        if (AddressTool.isMultiSignAddress(coinFrom.getAddress())) {
-            return true;
-        }
-        return false;
+        return AddressTool.isMultiSignAddress(coinFrom.getAddress());
     }
 
     @Override

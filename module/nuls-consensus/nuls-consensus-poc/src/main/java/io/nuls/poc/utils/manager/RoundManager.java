@@ -155,7 +155,7 @@ public class RoundManager {
             try {
                 MeetingRound lastRound = roundList.get(roundList.size() - 1);
                 BlockHeader blockHeader = chain.getNewestHeader();
-                BlockExtendsData blockRoundData = new BlockExtendsData(blockHeader.getExtend());
+                BlockExtendsData blockRoundData = blockHeader.getExtendsData();
                 if (blockRoundData.getRoundIndex() < lastRound.getIndex()) {
                     roundList.clear();
                     initRound(chain);
@@ -201,11 +201,11 @@ public class RoundManager {
         */
         if (currentRound.getPreRound() == null) {
             BlockHeader newestHeader = chain.getNewestHeader();
-            BlockExtendsData extendsData = new BlockExtendsData(newestHeader.getExtend());
+            BlockExtendsData extendsData = newestHeader.getExtendsData();
             List<BlockHeader> blockHeaderList = chain.getBlockHeaderList();
             for (int i = blockHeaderList.size() - 1; i >= 0; i--) {
                 BlockHeader blockHeader = blockHeaderList.get(i);
-                extendsData = new BlockExtendsData(blockHeader.getExtend());
+                extendsData = blockHeader.getExtendsData();
                 if (extendsData.getRoundIndex() < currentRound.getIndex()) {
                     break;
                 }
@@ -243,7 +243,7 @@ public class RoundManager {
             }
 
             BlockHeader blockHeader = chain.getNewestHeader();
-            BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getExtend());
+            BlockExtendsData extendsData = blockHeader.getExtendsData();
 
             /*
             如果本地最新轮次信息不为空&&本地最新轮次与最新区块轮次相等&&最新区块不是本轮次最后一个打包区块则直接返回本地最新轮次
@@ -339,7 +339,7 @@ public class RoundManager {
     private MeetingRound getRoundByRealTime(Chain chain) throws Exception {
         BlockHeader bestBlockHeader = chain.getNewestHeader();
         BlockHeader startBlockHeader = bestBlockHeader;
-        BlockExtendsData bestRoundData = new BlockExtendsData(bestBlockHeader.getExtend());
+        BlockExtendsData bestRoundData = bestBlockHeader.getExtendsData();
         long bestRoundEndTime = bestRoundData.getRoundEndTime(chain.getConfig().getPackingInterval());
         if (startBlockHeader.getHeight() != 0L) {
             long roundIndex = bestRoundData.getRoundIndex();
@@ -385,7 +385,7 @@ public class RoundManager {
      */
     private MeetingRound getRoundByNewestBlock(Chain chain) throws Exception {
         BlockHeader bestBlockHeader = chain.getNewestHeader();
-        BlockExtendsData extendsData = new BlockExtendsData(bestBlockHeader.getExtend());
+        BlockExtendsData extendsData = bestBlockHeader.getExtendsData();
         extendsData.setRoundStartTime(extendsData.getRoundEndTime(chain.getConfig().getPackingInterval()));
         extendsData.setRoundIndex(extendsData.getRoundIndex() + 1);
         return getRoundByExpectedRound(chain, extendsData);
@@ -576,7 +576,7 @@ public class RoundManager {
      * @return double
      */
     private double calcCreditVal(Chain chain, MeetingMember member, BlockHeader blockHeader) throws NulsException {
-        BlockExtendsData roundData = new BlockExtendsData(blockHeader.getExtend());
+        BlockExtendsData roundData = blockHeader.getExtendsData();
         long roundStart = roundData.getRoundIndex() - ConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT;
         if (roundStart < 0) {
             roundStart = 0;
@@ -654,14 +654,14 @@ public class RoundManager {
         List<BlockHeader> blockHeaderList = chain.getBlockHeaderList();
         for (int i = blockHeaderList.size() - 1; i >= 0; i--) {
             BlockHeader blockHeader = blockHeaderList.get(i);
-            long currentRoundIndex = new BlockExtendsData(blockHeader.getExtend()).getRoundIndex();
+            long currentRoundIndex = blockHeader.getExtendsData().getRoundIndex();
             if (roundIndex > currentRoundIndex) {
                 if (startRoundIndex == 0L) {
                     startRoundIndex = currentRoundIndex;
                 }
                 if (currentRoundIndex < startRoundIndex) {
                     firstBlockHeader = blockHeaderList.get(i + 1);
-                    BlockExtendsData roundData = new BlockExtendsData(firstBlockHeader.getExtend());
+                    BlockExtendsData roundData = firstBlockHeader.getExtendsData();
                     if (roundData.getPackingIndexOfRound() > 1) {
                         firstBlockHeader = blockHeader;
                     }
@@ -690,7 +690,7 @@ public class RoundManager {
         List<BlockHeader> blockHeaderList = chain.getBlockHeaderList();
         for (int i = blockHeaderList.size() - 1; i >= 0; i--) {
             BlockHeader blockHeader = blockHeaderList.get(i);
-            BlockExtendsData roundData = new BlockExtendsData(blockHeader.getExtend());
+            BlockExtendsData roundData = blockHeader.getExtendsData();
             if (roundData.getRoundIndex() > roundEnd) {
                 continue;
             }

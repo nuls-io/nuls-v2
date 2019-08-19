@@ -384,7 +384,7 @@ public class ContractServiceImpl implements ContractService {
             BlockHeader blockHeader = new BlockHeader();
             String originalStateRoot = (String) params.get(ConsensusConstant.STATE_ROOT);
             blockHeader.parse(RPCUtil.decode((String) params.get(ConsensusConstant.PARAM_BLOCK_HEADER_HEX)), 0);
-            BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getExtend());
+            BlockExtendsData extendsData = blockHeader.getExtendsData();
             MeetingRound round = roundManager.getRoundByIndex(chain, extendsData.getRoundIndex());
             if (round == null) {
                 round = roundManager.getRound(chain, extendsData, false);

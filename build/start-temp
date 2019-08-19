@@ -100,9 +100,13 @@ while [ ! -z $1 ] ; do
         "--debug")
             DEBUG="$2";
             shift 2 ;;
-        * ) shift
+        * )
+            if [ -z "$2" ]; then
+             shift 1
+            fi
+            shift 1 ;;
     esac
-done  
+done
 
 if [ ! -d $LOGS_DIR ]; then
     mkdir $LOGS_DIR
