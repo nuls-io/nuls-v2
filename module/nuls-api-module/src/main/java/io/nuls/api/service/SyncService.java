@@ -375,7 +375,6 @@ public class SyncService {
         cancelInfo.copyInfoWithDeposit(depositInfo);
         cancelInfo.setTxHash(tx.getHash());
         cancelInfo.setKey(DBUtil.getDepositKey(tx.getHash(), depositInfo.getKey()));
-        cancelInfo.setBlockHeight(tx.getHeight());
         cancelInfo.setDeleteKey(depositInfo.getKey());
         cancelInfo.setNew(true);
 
