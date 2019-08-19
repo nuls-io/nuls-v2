@@ -68,11 +68,6 @@ public class ForwardSmallBlockHandler implements MessageProcessor {
         Long height = context.getCachedHashHeightMap().get(blockHash);
         if (height != null) {
             NetworkCall.setHashAndHeight(chainId, blockHash, height, nodeId);
-        } else {
-            context.getLogger().debug("can't set node height, nodeId-" + nodeId + "hash-" + blockHash);
-        }
-        if (context.getStatus().equals(StatusEnum.SYNCHRONIZING)) {
-            return;
         }
         BlockForwardEnum status = SmallBlockCacher.getStatus(chainId, blockHash);
         logger.debug("recieve " + message + " from node-" + nodeId + ", hash:" + blockHash);
@@ -81,7 +76,7 @@ public class ForwardSmallBlockHandler implements MessageProcessor {
             return;
         }
         //2.已收到部分区块,还缺失交易信息,发送HashListMessage到源节点
-        if (BlockForwardEnum.INCOMPLETE.equals(status)) {
+        if (BlockForwardEnum.INCOMPLETE.equals(status) && !context.getStatus().equals(StatusEnum.SYNCHRONIZING)) {
             CachedSmallBlock block = SmallBlockCacher.getCachedSmallBlock(chainId, blockHash);
             HashListMessage request = new HashListMessage();
             request.setBlockHash(blockHash);

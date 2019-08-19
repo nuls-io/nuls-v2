@@ -93,7 +93,7 @@ public class TxGroupHandler implements MessageProcessor {
             }
 
             Block block = BlockUtil.assemblyBlock(header, txMap, smallBlock.getTxHashList());
-            logger.info("record recv block, block create time-" + DateUtils.timeStamp2DateStr(block.getHeader().getTime()) + ", hash-" + block.getHeader().getHash());
+            logger.debug("record recv block, block create time-" + DateUtils.timeStamp2DateStr(block.getHeader().getTime() * 1000) + ", hash-" + block.getHeader().getHash());
             boolean b = blockService.saveBlock(chainId, block, 1, true, false, true);
             if (!b) {
                 SmallBlockCacher.setStatus(chainId, blockHash, ERROR);
