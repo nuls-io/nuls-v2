@@ -130,7 +130,13 @@ public class OperandStack extends Stack {
     }
 
     public boolean popBoolean() {
-        return popInt() == 1 ? true : false;
+        Object pop = pop();
+        if(pop instanceof Integer) {
+            return (int) pop == 1 ? true : false;
+        } else {
+            return (boolean) pop;
+        }
+        //return (int) popInt() == 1 ? true : false;
     }
 
     public int pushByte(byte value) {

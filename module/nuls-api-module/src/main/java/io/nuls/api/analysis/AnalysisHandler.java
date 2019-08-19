@@ -96,7 +96,7 @@ public class AnalysisHandler {
     }
 
     public static BlockHeaderInfo toBlockHeaderInfo(BlockHeader blockHeader, int chainId) throws IOException {
-        BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getExtend());
+        BlockExtendsData extendsData = blockHeader.getExtendsData();
 
         BlockHeaderInfo info = new BlockHeaderInfo();
         info.setHash(blockHeader.getHash().toHex());

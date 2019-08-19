@@ -26,8 +26,8 @@ package io.nuls.base.signture;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.core.model.ByteUtils;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.ByteUtils;
 import io.nuls.core.parse.SerializeUtils;
 
 import java.io.IOException;
@@ -56,8 +56,8 @@ public class MultiSignTxSignature extends TransactionSignature {
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.write(m);
         stream.writeVarInt(pubKeyList.size());
-        for (int i = 0; i < pubKeyList.size(); i++) {
-            stream.writeBytesWithLength(pubKeyList.get(i));
+        for (byte[] bytes : pubKeyList) {
+            stream.writeBytesWithLength(bytes);
         }
         super.serializeToStream(stream);
     }
