@@ -9,7 +9,6 @@ import io.nuls.core.model.StringUtils;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,7 +20,7 @@ import java.util.Map;
  */
 public class LoggerBuilder {
 
-    private static final Map<String, NulsLogger> container = new HashMap<>();
+    private static final Map<String, NulsLogger> CONTAINER = new HashMap<>();
     private static final Level DEFAULT_LEVEL = Level.ALL;
 
     static {
@@ -39,35 +38,6 @@ public class LoggerBuilder {
         mongodbLogger2.setLevel(Level.ERROR);
     }
 
-    public static NulsLogger getLogger(String folderName, String fileName) {
-        String realKey = folderName + "/" + fileName;
-        return getLogger(realKey);
-    }
-
-
-    private static NulsLogger getLogger(String folderName, String fileName, Level level) {
-        String realKey = folderName + "/" + fileName;
-        return getLogger(realKey, level, level);
-    }
-
-    public static NulsLogger getLogger(String folderName, String fileName, Level fileLevel, Level consoleLevel) {
-        String realKey = folderName + "/" + fileName;
-        return getLogger(realKey, fileLevel, consoleLevel);
-    }
-
-    public static NulsLogger getLogger(String folderName, String fileName, List<String> packageNames, Level fileLevel, Level consoleLevel) {
-        String realKey = folderName + "/" + fileName;
-        NulsLogger logger = container.get(realKey);
-        if (logger != null) {
-            return logger;
-        }
-        synchronized (LoggerBuilder.class) {
-            logger = build(realKey, packageNames, fileLevel, consoleLevel);
-            container.put(realKey, logger);
-        }
-        return logger;
-    }
-
     public static NulsLogger getLogger(String fileName) {
         Level level = StringUtils.isNotBlank(System.getProperty("log.level")) ? Level.toLevel(System.getProperty("log.level")) : DEFAULT_LEVEL;
         return getLogger(fileName, level, level);
@@ -78,18 +48,14 @@ public class LoggerBuilder {
         return getLogger("chain_"+chainId+ "_" +fileName, level, level);
     }
 
-    public static NulsLogger getLogger(String fileName, Level level) {
-        return getLogger(fileName, level, level);
-    }
-
-    public static NulsLogger getLogger(String fileName, Level fileLevel, Level consoleLevel) {
-        NulsLogger logger = container.get(fileName);
+    private static NulsLogger getLogger(String fileName, Level fileLevel, Level consoleLevel) {
+        NulsLogger logger = CONTAINER.get(fileName);
         if (logger != null) {
             return logger;
         }
         synchronized (LoggerBuilder.class) {
             logger = build(fileName, fileLevel, consoleLevel);
-            container.put(fileName, logger);
+            CONTAINER.put(fileName, logger);
         }
         return logger;
     }
@@ -108,22 +74,4 @@ public class LoggerBuilder {
         return new NulsLogger(logger);
     }
 
-    private static NulsLogger build(String fileName, List<String> packageNames, Level fileLevel, Level consoleLevel) {
-        RollingFileAppender fileAppender = LogAppender.getAppender(fileName, fileLevel);
-        LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-        Logger logger = context.getLogger(fileAppender.getEncoder().toString());
-        //设置不向上级打印信息
-        logger.setAdditive(false);
-        logger.addAppender(fileAppender);
-
-        for (String name : packageNames) {
-            Logger log = context.getLogger(name);
-            logger.setAdditive(false);
-            log.addAppender(fileAppender);
-        }
-        //输出到控制台
-        Appender consoleAppender = LogAppender.createConsoleAppender(consoleLevel);
-        logger.addAppender(consoleAppender);
-        return new NulsLogger(logger);
-    }
 }

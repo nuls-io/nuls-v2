@@ -25,10 +25,7 @@
 package io.nuls.network.manager.handler.message;
 
 import io.nuls.base.RPCUtil;
-import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.NulsHash;
 import io.nuls.core.constant.BaseConstant;
-import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.CmdPriority;
 import io.nuls.core.rpc.model.message.MessageUtil;
@@ -46,9 +43,7 @@ import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.base.MessageHeader;
 import io.nuls.network.utils.LoggerUtil;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -97,7 +92,7 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
         paramMap.put("cmd", cmd);
         String messageBody = RPCUtil.encode(payLoadBody);
         paramMap.put("messageBody", messageBody);
-        Map<String,CmdPriority>  protocolRoles =(Map<String,CmdPriority>)(MessageHandlerFactory.getInstance().getProtocolRoleHandlerMap(cmd));
+        Map<String, CmdPriority> protocolRoles = MessageHandlerFactory.getInstance().getProtocolRoleHandlerMap(cmd);
         if (protocolRoles.isEmpty()) {
             LoggerUtil.logger(chainId).error("unknown mssages. cmd={},handler may be unRegistered to network.", cmd);
             return NetworkEventResult.getResultSuccess();

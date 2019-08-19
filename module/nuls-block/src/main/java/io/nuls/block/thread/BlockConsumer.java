@@ -84,6 +84,7 @@ public class BlockConsumer implements Callable<Boolean> {
                 long end = System.nanoTime();
                 //超过10秒没有高度更新
                 if ((end - begin) / 1000000 > 5000) {
+                    updateNodeStatus(context);
                     retryDownload(startHeight, context);
                     begin = System.nanoTime();
                 }
@@ -94,6 +95,18 @@ public class BlockConsumer implements Callable<Boolean> {
             logger.error("BlockConsumer stop work abnormally", e);
             context.setNeedSyn(false);
             return false;
+        }
+    }
+
+    private void updateNodeStatus(ChainContext context) {
+        List<Node> nodes = context.getDownloaderParams().getNodes();
+        for (Node node : nodes) {
+            if (node.getNodeEnum().equals(NodeEnum.WORKING) && (System.currentTimeMillis() - node.getStartTime() > 60000)) {
+                node.adjustCredit(false);
+                if (!node.getNodeEnum().equals(NodeEnum.TIMEOUT)) {
+                    node.setNodeEnum(NodeEnum.IDLE);
+                }
+            }
         }
     }
 
@@ -120,7 +133,7 @@ public class BlockConsumer implements Callable<Boolean> {
                 context.getCachedBlockSize().addAndGet(block.size());
                 break;
             } else {
-                node.adjustCredit(false, 0);
+                node.adjustCredit(false);
             }
         }
         if (!download) {
