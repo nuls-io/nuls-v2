@@ -87,7 +87,7 @@ public class GetContractTxProcessor extends ContractBaseProcessor {
         Map<String, Object> map = (Map) result.getData();
         map.put("fee", Na.naToNuls(map.get("fee"),config.getDecimals()));
         map.put("value", Na.naToNuls(map.get("value"),config.getDecimals()));
-        map.put("time", NulsDateUtils.convertDate(new Date((Long) map.get("time"))));
+        map.put("time", NulsDateUtils.convertDate(new Date( Long.valueOf(String.valueOf(map.get("time"))))));
         map.put("status", statusExplain((Integer) map.get("status")));
         map.put("type", CommandHelper.txTypeExplain((Integer) map.get("type")));
 
