@@ -313,16 +313,17 @@ public class BlockSynchronizer implements Runnable {
      * @date 18-11-8 下午4:55
      */
     BlockDownloaderParams statistics(List<Node> availableNodes, ChainContext context) {
+        List<Node> filterAvailableNodes = filterNodes(availableNodes, context);
         BlockDownloaderParams params = new BlockDownloaderParams();
-        params.setAvailableNodesCount(availableNodes.size());
+        params.setAvailableNodesCount(filterAvailableNodes.size());
         //每个节点的(最新HASH+最新高度)是key
         String key = "";
         int count = 0;
         //一个以key为主键记录持有该key的节点列表
-        Map<String, List<Node>> nodeMap = new HashMap<>(availableNodes.size());
+        Map<String, List<Node>> nodeMap = new HashMap<>(filterAvailableNodes.size());
         //一个以key为主键统计次数
-        Map<String, Integer> countMap = new HashMap<>(availableNodes.size());
-        for (Node node : availableNodes) {
+        Map<String, Integer> countMap = new HashMap<>(filterAvailableNodes.size());
+        for (Node node : filterAvailableNodes) {
             String tempKey = node.getHash().toHex() + node.getHeight();
             if (countMap.containsKey(tempKey)) {
                 //tempKey已存在,统计次数加1
@@ -350,8 +351,8 @@ public class BlockSynchronizer implements Runnable {
             }
         }
         ChainParameters parameters = context.getParameters();
-        double div = DoubleUtils.div(count, availableNodes.size(), 2);
-        byte percent = calculateConsistencyNodePercent(parameters.getConsistencyNodePercent(), availableNodes.size());
+        double div = DoubleUtils.div(count, filterAvailableNodes.size(), 2);
+        byte percent = calculateConsistencyNodePercent(parameters.getConsistencyNodePercent(), filterAvailableNodes.size());
         if (div * 100 < percent) {
             return params;
         }
@@ -389,6 +390,21 @@ public class BlockSynchronizer implements Runnable {
     }
 
     /**
+     * 过滤无效的连接节点
+     *
+     * @param availableNodes
+     * @param context
+     * @return
+     */
+    private List<Node> filterNodes(List<Node> availableNodes, ChainContext context) {
+        //连接节点高度小于本节点高度1000
+        availableNodes.removeIf(availableNode -> availableNode.getHeight() < context.getLatestHeight() - context.getParameters().getHeightRange());
+        //连接节点与本节点在同一条链上，并且高度比本节点低
+        availableNodes.removeIf(availableNode -> context.getMasterChain().getHashList().contains(availableNode.getHash()));
+        return availableNodes;
+    }
+
+    /**
      * 计算连接到不同数量节点时,一致节点的最低比例
      *
      * @param consistencyNodePercent 原始比例
@@ -398,7 +414,7 @@ public class BlockSynchronizer implements Runnable {
     private byte calculateConsistencyNodePercent(byte consistencyNodePercent, int size) {
         byte percent = consistencyNodePercent;
         percent -= ((size / 4) - 1) * 5;
-        return percent;
+        return percent < 50 ? 50 : percent;
     }
 
     /**
