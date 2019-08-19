@@ -1,5 +1,7 @@
 package io.nuls.base.api.provider.block.facade;
 
+import java.util.List;
+
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-19 18:07
@@ -45,6 +47,8 @@ public class BlockHeaderData {
 
 
     private String stateRoot;
+
+    private List<String> txHashList;
 
     @Override
     public boolean equals(Object o) {
@@ -290,5 +294,13 @@ public class BlockHeaderData {
                 .append(",\"stateRoot\":\"")
                 .append(stateRoot).append('\"')
                 .append('}').toString();
+    }
+
+    public List<String> getTxHashList() {
+        return txHashList;
+    }
+
+    public void setTxHashList(List<String> txHashList) {
+        this.txHashList = txHashList;
     }
 }

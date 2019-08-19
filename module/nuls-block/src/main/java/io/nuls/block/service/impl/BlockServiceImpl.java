@@ -131,9 +131,6 @@ public class BlockServiceImpl implements BlockService {
             for (long i = startHeight; i <= endHeight; i++) {
                 BlockHeaderPo blockHeaderPo = blockStorageService.query(chainId, i);
                 BlockHeader blockHeader = BlockUtil.fromBlockHeaderPo(blockHeaderPo);
-                if (blockHeader == null) {
-                    return Collections.emptyList();
-                }
                 list.add(blockHeader);
             }
             return list;
@@ -163,7 +160,7 @@ public class BlockServiceImpl implements BlockService {
                     break;
                 }
                 BlockHeader blockHeader = getBlockHeader(chainId, height);
-                BlockExtendsData newData = new BlockExtendsData(blockHeader.getExtend());
+                BlockExtendsData newData = blockHeader.getExtendsData();
                 long newRoundIndex = newData.getRoundIndex();
                 if (newRoundIndex != roundIndex) {
                     count++;
@@ -228,7 +225,7 @@ public class BlockServiceImpl implements BlockService {
                 return null;
             }
             block.setTxs(transactions);
-            logger.info("get block time-" + (System.nanoTime() - l) + ", height-" + height);
+            logger.debug("get block time-" + (System.nanoTime() - l) + ", height-" + height);
             return block;
         } catch (Exception e) {
             logger.error("error when getBlock by height", e);
@@ -491,6 +488,11 @@ public class BlockServiceImpl implements BlockService {
                 }
                 logger.error("rollback setLatestHeight fail! height-" + height);
                 return false;
+            }
+            try {
+                CrossChainCall.heightNotice(chainId, height, RPCUtil.encode(blockHeader.serialize()));
+            } catch (Exception e) {
+                LoggerUtil.COMMON_LOG.error(e);
             }
             context.setLatestBlock(getBlock(chainId, height - 1));
             Chain masterChain = BlockChainManager.getMasterChain(chainId);

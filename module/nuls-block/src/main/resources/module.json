@@ -1,8 +1,8 @@
 {
   "forkChainsMonitorInterval": 10000,
   "orphanChainsMonitorInterval": 10000,
-  "orphanChainsMaintainerInterval": 5000,
-  "storageSizeMonitorInterval": 300000,
+  "orphanChainsMaintainerInterval": 3000,
+  "storageSizeMonitorInterval": 180000,
   "networkResetMonitorInterval": 300000,
   "nodesMonitorInterval": 5000,
   "txGroupRequestorInterval": 1000,

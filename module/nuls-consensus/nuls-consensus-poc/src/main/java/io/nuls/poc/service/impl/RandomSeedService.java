@@ -27,7 +27,7 @@ public class RandomSeedService {
         if (ArraysTool.arrayEquals(headerPackingAddress, RandomSeedUtils.CACHE_SEED.getAddress())) {
             nextSeed = RandomSeedUtils.CACHE_SEED.getNextSeed();
         }
-        BlockExtendsData extendsData = new BlockExtendsData(header.getExtend());
+        BlockExtendsData extendsData = header.getExtendsData();
         byte[] seed = extendsData.getSeed();
         RandomSeedStatusPo po = this.randomSeedsStorageService.getAddressStatus(chainId, headerPackingAddress);
         long preHeight = 0;

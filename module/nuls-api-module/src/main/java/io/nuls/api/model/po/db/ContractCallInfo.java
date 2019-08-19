@@ -1,6 +1,8 @@
 package io.nuls.api.model.po.db;
 
 
+import java.math.BigInteger;
+
 public class ContractCallInfo extends TxDataInfo {
 
     private String contractAddress;
@@ -18,6 +20,8 @@ public class ContractCallInfo extends TxDataInfo {
     private String methodDesc;
 
     private String args;
+
+    private BigInteger value;
 
     private ContractResultInfo resultInfo;
 
@@ -91,5 +95,13 @@ public class ContractCallInfo extends TxDataInfo {
 
     public void setResultInfo(ContractResultInfo resultInfo) {
         this.resultInfo = resultInfo;
+    }
+
+    public BigInteger getValue() {
+        return value;
+    }
+
+    public void setValue(BigInteger value) {
+        this.value = value;
     }
 }

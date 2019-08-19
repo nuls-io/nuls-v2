@@ -15,6 +15,7 @@ import io.nuls.crosschain.base.message.BroadCtxHashMessage;
 import io.nuls.crosschain.base.model.bo.ChainInfo;
 import io.nuls.crosschain.base.model.bo.txdata.VerifierInitData;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
+import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.constant.ParamConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.model.po.SendCtxHashPO;
@@ -76,6 +77,7 @@ public class BlockServiceImpl implements BlockService {
         Map<Long , SendCtxHashPO> sendHeightMap = sendHeightService.getList(chainId);
         if(sendHeightMap != null && sendHeightMap.size() >0){
             Set<Long> sortSet = new TreeSet<>(sendHeightMap.keySet());
+            Map<Integer,Byte> crossStatusMap = new HashMap<>(NulsCrossChainConstant.INIT_CAPACITY_16);
             for (long cacheHeight:sortSet) {
                 if(height >= cacheHeight){
                     chain.getLogger().debug("广播区块高度为{}的跨链交易给其他链",cacheHeight );
@@ -83,7 +85,7 @@ public class BlockServiceImpl implements BlockService {
                     List<NulsHash> broadSuccessCtxHash = new ArrayList<>();
                     List<NulsHash> broadFailCtxHash = new ArrayList<>();
                     for (NulsHash ctxHash:po.getHashList()) {
-                        if(broadCtxHash(chain, ctxHash, cacheHeight)){
+                        if(broadCtxHash(chain, ctxHash, cacheHeight, crossStatusMap)){
                             broadSuccessCtxHash.add(ctxHash);
                         }else{
                             broadFailCtxHash.add(ctxHash);
@@ -147,8 +149,8 @@ public class BlockServiceImpl implements BlockService {
             Map<String,List<String>> agentChangeMap;
             BlockHeader localHeader = chainManager.getChainHeaderMap().get(chainId);
             if(localHeader != null){
-                BlockExtendsData blockExtendsData = new BlockExtendsData(blockHeader.getExtend());
-                BlockExtendsData localExtendsData = new BlockExtendsData(localHeader.getExtend());
+                BlockExtendsData blockExtendsData = blockHeader.getExtendsData();
+                BlockExtendsData localExtendsData = localHeader.getExtendsData();
                 if(blockExtendsData.getRoundIndex() == localExtendsData.getRoundIndex()){
                     chainManager.getChainHeaderMap().put(chainId, blockHeader);
                     return Result.getSuccess(SUCCESS);
@@ -175,7 +177,7 @@ public class BlockServiceImpl implements BlockService {
         return Result.getSuccess(SUCCESS);
     }
 
-    private boolean broadCtxHash(Chain chain,NulsHash ctxHash, long cacheHeight){
+    private boolean broadCtxHash(Chain chain,NulsHash ctxHash, long cacheHeight, Map<Integer,Byte> crossStatusMap){
         int chainId = chain.getChainId();
         BroadCtxHashMessage message = new BroadCtxHashMessage();
         message.setConvertHash(ctxHash);
@@ -186,9 +188,17 @@ public class BlockServiceImpl implements BlockService {
                 if(config.isMainNet()){
                     toId = AddressTool.getChainIdByAddress(ctx.getCoinDataInstance().getTo().get(0).getAddress());
                 }else{
-                    message.setConvertHash(TxUtil.friendConvertToMain(chain, ctx, null, TxType.CROSS_CHAIN).getHash());
+                    NulsHash convertHash = TxUtil.friendConvertToMain(chain, ctx, null, TxType.CROSS_CHAIN).getHash();
+                    message.setConvertHash(convertHash);
+                    chain.getLogger().info("广播跨链转账交易给主网，本链协议hash:{}对应的主网协议hash:{}",ctxHash.toHex(),convertHash.toHex());
                 }
-                byte broadStatus = MessageUtil.canSendMessage(chain,toId);
+                byte broadStatus;
+                if(crossStatusMap.containsKey(toId)){
+                    broadStatus = crossStatusMap.get(toId);
+                }else{
+                    broadStatus = MessageUtil.canSendMessage(chain,toId);
+                    crossStatusMap.put(toId, broadStatus);
+                }
                 if (broadStatus == 0) {
                     return true;
                 }else if(broadStatus == 1){
@@ -197,7 +207,13 @@ public class BlockServiceImpl implements BlockService {
                 return NetWorkCall.broadcast(toId, message, CommandConstant.BROAD_CTX_HASH_MESSAGE,true);
             }else if(ctx.getType() == TxType.VERIFIER_CHANGE){
                 if(!chain.isMainChain()){
-                    byte broadStatus = MessageUtil.canSendMessage(chain,chainId);
+                    byte broadStatus;
+                    if(crossStatusMap.containsKey(chainId)){
+                        broadStatus = crossStatusMap.get(chainId);
+                    }else{
+                        broadStatus = MessageUtil.canSendMessage(chain,chainId);
+                        crossStatusMap.put(chainId, broadStatus);
+                    }
                     if (broadStatus == 0) {
                         return true;
                     }else if(broadStatus == 1){
@@ -215,7 +231,13 @@ public class BlockServiceImpl implements BlockService {
                     Set<Integer> broadFailChains = new HashSet<>();
                     if(po != null){
                         for (Integer toChainId : po.getChains()) {
-                            byte broadStatus = MessageUtil.canSendMessage(chain,chainId);
+                            byte broadStatus;
+                            if(crossStatusMap.containsKey(chainId)){
+                                broadStatus = crossStatusMap.get(chainId);
+                            }else{
+                                broadStatus = MessageUtil.canSendMessage(chain,chainId);
+                                crossStatusMap.put(chainId, broadStatus);
+                            }
                             if (broadStatus == 1) {
                                 broadResult = false;
                                 broadFailChains.add(toChainId);
@@ -232,7 +254,13 @@ public class BlockServiceImpl implements BlockService {
                             if(toChainId == chainId){
                                 continue;
                             }
-                            byte broadStatus = MessageUtil.canSendMessage(chain,chainInfo.getChainId());
+                            byte broadStatus;
+                            if(crossStatusMap.containsKey(chainInfo.getChainId())){
+                                broadStatus = crossStatusMap.get(chainInfo.getChainId());
+                            }else{
+                                broadStatus = MessageUtil.canSendMessage(chain,chainInfo.getChainId());
+                                crossStatusMap.put(chainInfo.getChainId(), broadStatus);
+                            }
                             if (broadStatus == 1) {
                                 broadResult = false;
                                 broadFailChains.add(toChainId);

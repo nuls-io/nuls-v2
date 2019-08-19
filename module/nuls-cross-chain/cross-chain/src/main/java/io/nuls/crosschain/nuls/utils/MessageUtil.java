@@ -226,7 +226,7 @@ public class MessageUtil {
      */
     public static boolean signByzantineInChain(Chain chain,Transaction ctx,TransactionSignature signature,List<String>packAddressList)throws NulsException,IOException{
         //交易签名拜占庭
-        int byzantineCount = CommonUtil.getByzantineCount(packAddressList, chain);
+        int byzantineCount = CommonUtil.getByzantineCount(ctx, packAddressList, chain);
         //如果为友链中跨链转账交易，则需要减掉本链协议交易签名
         if(ctx.getType() == config.getCrossCtxType()){
             int fromChainId = AddressTool.getChainIdByAddress(ctx.getCoinDataInstance().getFrom().get(0).getAddress());
@@ -418,6 +418,7 @@ public class MessageUtil {
                         packCtx = TxUtil.mainConvertToFriend(ctx, config.getCrossCtxType());
                         packCtx.setTransactionSignature(signature.serialize());
                         convertCtxService.save(packCtx.getHash(), ctx, chain.getChainId());
+                        chain.getLogger().info("接收到的主网协议跨链交易hash：{}对应的本链协议跨链交易hash:{}",otherHashHex,packCtx.getHash());
                     }
                     TransactionCall.sendTx(chain, RPCUtil.encode(packCtx.serialize()));
                     chain.getLogger().info("接收链跨链交易验证完成，发送给交易模块处理，hash:{}",otherHashHex);

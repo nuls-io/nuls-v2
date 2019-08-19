@@ -56,6 +56,7 @@ public class BlockHeader extends BaseNulsData {
     private int txCount;
     private BlockSignature blockSignature;
     private byte[] extend;
+    private transient BlockExtendsData extendsData;
     /**
      * pierre add 智能合约世界状态根
      */
@@ -134,6 +135,13 @@ public class BlockHeader extends BaseNulsData {
             calcHash();
         }
         return hash;
+    }
+
+    public BlockExtendsData getExtendsData() {
+        if (extendsData == null) {
+            extendsData = new BlockExtendsData(this.extend);
+        }
+        return extendsData;
     }
 
     public void setHash(NulsHash hash) {
