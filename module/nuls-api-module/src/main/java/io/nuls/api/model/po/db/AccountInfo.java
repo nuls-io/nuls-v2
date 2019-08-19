@@ -59,6 +59,7 @@ public class AccountInfo {
         this.balance = BigInteger.ZERO;
         this.totalBalance = BigInteger.ZERO;
         this.totalReward = BigInteger.ZERO;
+        this.lastReward = BigInteger.ZERO;
     }
 
     public String getAddress() {
