@@ -103,9 +103,9 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
                 hashList.add(document.getString("_id"));
             }
             mongoDBService.delete(TX_TABLE + chainId, Filters.in("_id", hashList));
-            time2 = System.currentTimeMillis();
-            System.out.println("-----------delete, use: " + (time2 - time1));
-            time1 = System.currentTimeMillis();
+//            time2 = System.currentTimeMillis();
+//            System.out.println("-----------delete, use: " + (time2 - time1));
+//            time1 = System.currentTimeMillis();
             totalCount = 1000000;
         }
         txCountMap.put(chainId, totalCount);
@@ -119,16 +119,16 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
                 deleteUnConfirmTx(chainId, txInfo.getHash());
             }
             documentList.add(txInfo.toDocument());
-            if(documentList.size() == 1000) {
+            if (documentList.size() == 1000) {
                 mongoDBService.insertMany(TX_TABLE + chainId, documentList, options);
                 documentList.clear();
             }
         }
-        if(documentList.size() != 0) {
+        if (documentList.size() != 0) {
             mongoDBService.insertMany(TX_TABLE + chainId, documentList, options);
         }
-        time2 = System.currentTimeMillis();
-        System.out.println("-----------insertMany, use: " + (time2 - time1));
+//        time2 = System.currentTimeMillis();
+//        System.out.println("-----------insertMany, use: " + (time2 - time1));
     }
 
     public void saveCoinDataList(int chainId, List<CoinDataInfo> coinDataList) {
@@ -159,12 +159,24 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
 
         InsertManyOptions options = new InsertManyOptions();
         options.ordered(false);
+
+        List<Document> saveList = new ArrayList();
         for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
+            saveList.clear();
             List<Document> documentList = relationMap.get("relation_" + i);
             if (documentList.size() == 0) {
                 continue;
             }
-            mongoDBService.insertMany(TX_RELATION_TABLE + chainId + "_" + i, documentList, options);
+            for (Document document : documentList) {
+                saveList.add(document);
+                if(saveList.size() == 1000) {
+                    mongoDBService.insertMany(TX_RELATION_TABLE + chainId + "_" + i, saveList, options);
+                    saveList.clear();
+                }
+            }
+            if(saveList.size() != 0) {
+                mongoDBService.insertMany(TX_RELATION_TABLE + chainId + "_" + i, saveList, options);
+            }
         }
     }
 
