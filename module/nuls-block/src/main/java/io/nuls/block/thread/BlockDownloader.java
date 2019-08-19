@@ -102,7 +102,8 @@ public class BlockDownloader implements Callable<Boolean> {
                 //发送消息给目标节点
                 boolean b = NetworkCall.sendToNode(chainId, message, node.getId(), GET_BLOCKS_BY_HEIGHT_MESSAGE);
                 if (b) {
-                    downloaderParams.getNodeMap().get(node.getId()).setNodeEnum(NodeEnum.WORKING);
+                    node.setNodeEnum(NodeEnum.WORKING);
+                    node.setStartTime(System.currentTimeMillis());
                 }
                 startHeight += size;
             }

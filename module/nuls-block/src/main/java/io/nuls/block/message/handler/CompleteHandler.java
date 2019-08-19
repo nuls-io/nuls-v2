@@ -26,6 +26,7 @@ import io.nuls.block.constant.NodeEnum;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.CompleteMessage;
 import io.nuls.block.model.ChainContext;
+import io.nuls.block.model.Node;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.logback.NulsLogger;
 
@@ -55,6 +56,8 @@ public class CompleteHandler implements MessageProcessor {
         ChainContext context = ContextManager.getContext(chainId);
         NulsLogger logger = context.getLogger();
         logger.debug("recieve " + message + " from node-" + nodeId);
-        context.getDownloaderParams().getNodeMap().get(nodeId).setNodeEnum(NodeEnum.IDLE);
+        Node node = context.getDownloaderParams().getNodeMap().get(nodeId);
+        node.adjustCredit(message.isSuccess());
+        node.setNodeEnum(NodeEnum.IDLE);
     }
 }

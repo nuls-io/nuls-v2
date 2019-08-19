@@ -119,11 +119,7 @@ public class Transaction extends BaseNulsData implements Cloneable {
             return bos.toByteArray();
         } finally {
             if (bos != null) {
-                try {
-                    bos.close();
-                } catch (IOException e) {
-                    throw e;
-                }
+                bos.close();
             }
         }
     }

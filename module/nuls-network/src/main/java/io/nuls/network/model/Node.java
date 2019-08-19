@@ -292,11 +292,7 @@ public class Node implements Dto {
     }
 
     public boolean isServer() {
-        if (IN == type) {
-            return true;
-        } else {
-            return false;
-        }
+        return IN == type;
     }
 
     public long getConnectTime() {

@@ -228,12 +228,9 @@ public class TransactionServiceImpl implements TransactionService {
      */
     @Override
     public boolean confirmBlockProcess(int addressChainId, List<Transaction> txList, long blockHeight) {
-        long time1, time11,  time12, time2, time3, time4, time5, time6, time7 = 0;
-        time1 = System.currentTimeMillis();
         try {
             cleanBlockCommitTempDatas();
             LockerUtil.LEDGER_LOCKER.lock();
-            time11 = System.currentTimeMillis();
             long currentDbHeight = repository.getBlockHeight(addressChainId);
             if ((blockHeight - currentDbHeight) != 1) {
                 //高度不一致，数据出问题了
@@ -250,14 +247,10 @@ public class TransactionServiceImpl implements TransactionService {
             List<Uncfd2CfdKey> delUncfd2CfdKeys = new ArrayList<>();
             Map<String, Integer> clearUncfs = new HashMap<>(txList.size());
             Map<String, List<String>> assetAddressIndex = new HashMap<>(4);
-
-            time12 = System.currentTimeMillis();
             try {
                 if (!confirmBlockTxProcess(addressChainId, txList, updateAccounts, delUncfd2CfdKeys, clearUncfs, assetAddressIndex)) {
                     return false;
                 }
-                time2 = System.currentTimeMillis();
-
                 //整体交易的处理
                 //更新账本信息
                 for (Map.Entry<String, AccountBalance> entry : updateAccounts.entrySet()) {
@@ -266,7 +259,7 @@ public class TransactionServiceImpl implements TransactionService {
                     freezeStateService.recalculateFreeze(addressChainId, entry.getValue().getNowAccountState());
                     entry.getValue().getNowAccountState().setLatestUnFreezeTime(NulsDateUtils.getCurrentTimeSeconds());
                     accountStatesMap.put(entry.getKey().getBytes(LedgerConstant.DEFAULT_ENCODING), entry.getValue().getNowAccountState().serialize());
-                    updateMemAccounts.put(entry.getKey(),entry.getValue().getNowAccountState());
+                    updateMemAccounts.put(entry.getKey(), entry.getValue().getNowAccountState());
                 }
             } catch (Exception e) {
                 logger(addressChainId).error("confirmBlockProcess blockSnapshotAccounts addAccountState error!");
@@ -274,7 +267,6 @@ public class TransactionServiceImpl implements TransactionService {
                 cleanBlockCommitTempDatas();
                 return false;
             }
-            time3 = System.currentTimeMillis();
             //提交整体数据
             try {
                 //备份历史
@@ -283,9 +275,8 @@ public class TransactionServiceImpl implements TransactionService {
                 chainAssetsService.updateChainAssets(addressChainId, assetAddressIndex);
                 //更新账本
                 if (accountStatesMap.size() > 0) {
-                    repository.batchUpdateAccountState(addressChainId, accountStatesMap,updateMemAccounts);
+                    repository.batchUpdateAccountState(addressChainId, accountStatesMap, updateMemAccounts);
                 }
-                time4 = System.currentTimeMillis();
                 for (Map.Entry<String, Integer> entry : clearUncfs.entrySet()) {
                     //进行收到网络其他节点的交易，刷新本地未确认数据处理
                     unconfirmedStateService.clearAccountUnconfirmed(addressChainId, entry.getKey());
@@ -296,7 +287,6 @@ public class TransactionServiceImpl implements TransactionService {
                 if (blockHeight > LedgerConstant.CACHE_ACCOUNT_BLOCK) {
                     repository.delBlockSnapshot(addressChainId, (blockHeight - LedgerConstant.CACHE_ACCOUNT_BLOCK));
                 }
-                time6 = System.currentTimeMillis();
             } catch (Exception e) {
                 //需要回滚数据
                 cleanBlockCommitTempDatas();
@@ -307,9 +297,6 @@ public class TransactionServiceImpl implements TransactionService {
             }
             //完全提交,存储当前高度。
             repository.saveOrUpdateBlockHeight(addressChainId, blockHeight);
-            time7 = System.currentTimeMillis();
-            LoggerUtil.logger(addressChainId).info("####height={},txs={},accountSize={}====总时间:{},交易处理总时间={}[结构初始化={},结构解析={}],数据封装={},数据快照={},清除未确认={},跃迁未确认交易={}",
-                    blockHeight, txList.size(), updateAccounts.size(), time7 - time1, time2 - time11, time12 - time11, time2 - time12, time3 - time2, time4 - time3, time6 - time4, time7 - time6);
             return true;
         } catch (Exception e) {
             LoggerUtil.logger(addressChainId).error("confirmBlockProcess error", e);
@@ -376,7 +363,7 @@ public class TransactionServiceImpl implements TransactionService {
                 return false;
             }
             BlockSnapshotAccounts blockSnapshotAccounts = repository.getBlockSnapshot(addressChainId, blockHeight);
-            if(null == blockSnapshotAccounts){
+            if (null == blockSnapshotAccounts) {
                 logger(addressChainId).error("addressChainId ={},blockHeight={},blockSnapshotAccounts is null.", addressChainId, blockHeight);
                 return false;
             }
