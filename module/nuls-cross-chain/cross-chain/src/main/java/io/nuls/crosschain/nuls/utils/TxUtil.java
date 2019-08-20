@@ -193,10 +193,12 @@ public class TxUtil {
         /*
         保存并广播该交易
         */
-        if (!chain.getWaitBroadSignMap().keySet().contains(hash)) {
-            chain.getWaitBroadSignMap().put(hash, new HashSet<>());
+        if(sign){
+            if (!chain.getWaitBroadSignMap().keySet().contains(hash)) {
+                chain.getWaitBroadSignMap().put(hash, new HashSet<>());
+            }
+            chain.getWaitBroadSignMap().get(hash).add(new WaitBroadSignMessage(null, message));
         }
-        chain.getWaitBroadSignMap().get(hash).add(new WaitBroadSignMessage(null, message));
         ctxStatusService.save(hash, ctxStatusPO, chainId);
         if(!config.isMainNet()){
             if(ctx.getType() == config.getCrossCtxType()){
