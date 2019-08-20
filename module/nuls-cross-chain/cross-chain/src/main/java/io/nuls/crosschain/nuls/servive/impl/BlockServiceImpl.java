@@ -149,8 +149,8 @@ public class BlockServiceImpl implements BlockService {
             Map<String,List<String>> agentChangeMap;
             BlockHeader localHeader = chainManager.getChainHeaderMap().get(chainId);
             if(localHeader != null){
-                BlockExtendsData blockExtendsData = new BlockExtendsData(blockHeader.getExtend());
-                BlockExtendsData localExtendsData = new BlockExtendsData(localHeader.getExtend());
+                BlockExtendsData blockExtendsData = blockHeader.getExtendsData();
+                BlockExtendsData localExtendsData = localHeader.getExtendsData();
                 if(blockExtendsData.getRoundIndex() == localExtendsData.getRoundIndex()){
                     chainManager.getChainHeaderMap().put(chainId, blockHeader);
                     return Result.getSuccess(SUCCESS);

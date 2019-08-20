@@ -160,7 +160,7 @@ public class BlockServiceImpl implements BlockService {
                     break;
                 }
                 BlockHeader blockHeader = getBlockHeader(chainId, height);
-                BlockExtendsData newData = new BlockExtendsData(blockHeader.getExtend());
+                BlockExtendsData newData = blockHeader.getExtendsData();
                 long newRoundIndex = newData.getRoundIndex();
                 if (newRoundIndex != roundIndex) {
                     count++;
@@ -488,6 +488,11 @@ public class BlockServiceImpl implements BlockService {
                 }
                 logger.error("rollback setLatestHeight fail! height-" + height);
                 return false;
+            }
+            try {
+                CrossChainCall.heightNotice(chainId, height, RPCUtil.encode(blockHeader.serialize()));
+            } catch (Exception e) {
+                LoggerUtil.COMMON_LOG.error(e);
             }
             context.setLatestBlock(getBlock(chainId, height - 1));
             Chain masterChain = BlockChainManager.getMasterChain(chainId);

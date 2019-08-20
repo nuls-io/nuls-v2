@@ -96,7 +96,7 @@ public class AnalysisHandler {
     }
 
     public static BlockHeaderInfo toBlockHeaderInfo(BlockHeader blockHeader, int chainId) throws IOException {
-        BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getExtend());
+        BlockExtendsData extendsData = blockHeader.getExtendsData();
 
         BlockHeaderInfo info = new BlockHeaderInfo();
         info.setHash(blockHeader.getHash().toHex());
@@ -345,6 +345,7 @@ public class AnalysisHandler {
         deposit.setTxHash(cancelDeposit.getJoinTxHash().toHex());
         deposit.setFee(tx.getFee());
         deposit.setCreateTime(tx.getTime());
+        deposit.setBlockHeight(tx.getBlockHeight());
         deposit.setType(ApiConstant.CANCEL_CONSENSUS);
         return deposit;
     }

@@ -2,12 +2,12 @@ package io.nuls.poc.utils.manager;
 
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.rpc.call.CallMethodUtils;
 import io.nuls.poc.utils.compare.BlockHeaderComparator;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
 
 import java.util.Iterator;
 import java.util.List;
@@ -36,16 +36,16 @@ public class BlockManager {
         如果新增区块有轮次变化，则删除最小轮次区块
          */
         BlockHeader newestHeader = chain.getNewestHeader();
-        BlockExtendsData newestExtendsData = new BlockExtendsData(newestHeader.getExtend());
-        BlockExtendsData receiveExtendsData = new BlockExtendsData(blockHeader.getExtend());
+        BlockExtendsData newestExtendsData = newestHeader.getExtendsData();
+        BlockExtendsData receiveExtendsData = blockHeader.getExtendsData();
         long receiveRoundIndex = receiveExtendsData.getRoundIndex();
         if(chain.getBlockHeaderList().size() >0){
-            BlockExtendsData lastExtendsData = new BlockExtendsData(chain.getBlockHeaderList().get(0).getExtend());
+            BlockExtendsData lastExtendsData = chain.getBlockHeaderList().get(0).getExtendsData();
             long lastRoundIndex = lastExtendsData.getRoundIndex();
             if (receiveRoundIndex > newestExtendsData.getRoundIndex() && (receiveRoundIndex - ConsensusConstant.INIT_BLOCK_HEADER_COUNT > lastRoundIndex)) {
                 Iterator<BlockHeader> iterator = chain.getBlockHeaderList().iterator();
                 while (iterator.hasNext()) {
-                    lastExtendsData = new BlockExtendsData(iterator.next().getExtend());
+                    lastExtendsData = iterator.next().getExtendsData();
                     if (lastExtendsData.getRoundIndex() == lastRoundIndex) {
                         iterator.remove();
                     } else if (lastExtendsData.getRoundIndex() > lastRoundIndex) {
@@ -73,7 +73,7 @@ public class BlockManager {
         List<BlockHeader> headerList = chain.getBlockHeaderList();
         headerList.sort(new BlockHeaderComparator());
         BlockHeader originalBlocHeader = chain.getNewestHeader();
-        BlockExtendsData originalExtendsData = new BlockExtendsData(originalBlocHeader.getExtend());
+        BlockExtendsData originalExtendsData = originalBlocHeader.getExtendsData();
         long originalRound = originalExtendsData.getRoundIndex();
         for (int index = headerList.size() - 1; index >= 0; index--) {
             if (headerList.get(index).getHeight() >= height) {
@@ -85,12 +85,12 @@ public class BlockManager {
         chain.setBlockHeaderList(headerList);
         chain.setNewestHeader(headerList.get(headerList.size() - 1));
         BlockHeader newestBlocHeader = chain.getNewestHeader();
-        BlockExtendsData bestExtendsData = new BlockExtendsData(newestBlocHeader.getExtend());
+        BlockExtendsData bestExtendsData = newestBlocHeader.getExtendsData();
         long currentRound = bestExtendsData.getRoundIndex();
         //如果有轮次变化，回滚之后如果本地区块不足指定轮次的区块，则需向区块获取区块补足并回滚本地
         if(currentRound != originalRound){
             BlockHeader lastestBlocHeader = chain.getBlockHeaderList().get(0);
-            BlockExtendsData lastestExtendsData = new BlockExtendsData(lastestBlocHeader.getExtend());
+            BlockExtendsData lastestExtendsData = lastestBlocHeader.getExtendsData();
             long minRound = lastestExtendsData.getRoundIndex();
             int localRoundCount = (int)(currentRound - minRound + 1);
             int diffRoundCount = ConsensusConstant.INIT_BLOCK_HEADER_COUNT - localRoundCount;

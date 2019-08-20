@@ -36,7 +36,10 @@ import io.nuls.core.parse.SerializeUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author
@@ -160,23 +163,22 @@ public class CoinData extends BaseNulsData {
 
         Set<ByteArrayWrapper> addressSetWrapper = new HashSet<>();
         if (to != null && to.size() != 0) {
-            for (int i = 0; i < to.size(); i++) {
-                byte[] address = to.get(i).getAddress();
+            for (CoinTo coinTo : to) {
+                byte[] address = coinTo.getAddress();
                 ByteArrayWrapper baw = new ByteArrayWrapper(address);
                 addressSetWrapper.add(baw);
             }
         }
         if (from != null && from.size() != 0) {
-            for (int i = 0; i < from.size(); i++) {
-                byte[] address = from.get(i).getAddress();
+            for (CoinFrom coinFrom : from) {
+                byte[] address = coinFrom.getAddress();
                 ByteArrayWrapper baw = new ByteArrayWrapper(address);
                 addressSetWrapper.add(baw);
             }
         }
         Set<byte[]> addressSet = new HashSet<>();
-        Iterator<ByteArrayWrapper> it = addressSetWrapper.iterator();
-        while (it.hasNext()) {
-            addressSet.add(it.next().getBytes());
+        for (ByteArrayWrapper byteArrayWrapper : addressSetWrapper) {
+            addressSet.add(byteArrayWrapper.getBytes());
         }
         return addressSet;
     }

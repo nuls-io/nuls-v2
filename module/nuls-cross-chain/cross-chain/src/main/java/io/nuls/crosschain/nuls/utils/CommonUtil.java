@@ -125,7 +125,12 @@ public class CommonUtil {
         if(ctx.getType() == TxType.VERIFIER_CHANGE){
             VerifierChangeData verifierChangeData = new VerifierChangeData();
             verifierChangeData.parse(ctx.getTxData(),0);
-            agentCount = agentCount + verifierChangeData.getCancelAgentList().size() - verifierChangeData.getRegisterAgentList().size();
+            if(verifierChangeData.getCancelAgentList() != null){
+                agentCount += verifierChangeData.getCancelAgentList().size();
+            }
+            if(verifierChangeData.getRegisterAgentList() != null){
+                agentCount -= verifierChangeData.getRegisterAgentList().size();
+            }
         }
         int minPassCount = agentCount*chain.getConfig().getByzantineRatio()/ NulsCrossChainConstant.MAGIC_NUM_100;
         if(minPassCount == 0){
