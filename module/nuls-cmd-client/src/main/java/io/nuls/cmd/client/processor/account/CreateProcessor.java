@@ -74,7 +74,9 @@ public class CreateProcessor extends AccountBaseProcessor implements CommandProc
     public CommandResult execute(String[] args) {
         String password = getPwd("Please enter the new password(8-20 characters, the combination of letters and numbers).\nEnter your new password:");
         if(StringUtils.isNotBlank(password)){
-            CommandHelper.confirmPwd(password);
+            if(!CommandHelper.confirmPwd(password)) {
+                return CommandResult.getFailed("Password confirmation doesn't match the password.Operation abort.");
+            }
         }
         int count = 1;
         if(args.length == 2){

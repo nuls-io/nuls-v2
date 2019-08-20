@@ -39,8 +39,11 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
 
     Map<String, List<Document>> relationMap;
     Map<String, List<String>> deleteRelationMap;
-//    Map<String, List<DeleteManyModel<Document>>> deleteRelationMap;
+    Map<Integer, Long> txCountMap;
+    Set<String> txUnConfirmHashSet;
 
+    //    Map<String, List<DeleteManyModel<Document>>> deleteRelationMap;
+//
     @Override
     public void afterPropertiesSet() {
         relationMap = new HashMap<>();
@@ -54,7 +57,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
             List<String> modelList = new ArrayList<>();
             deleteRelationMap.put("relation_" + i, modelList);
         }
-
+        txUnConfirmHashSet = new HashSet<>();
 //        deleteRelationMap = new HashMap<>();
 //        for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
 //            List<DeleteManyModel<Document>> modelList = new ArrayList<>();
@@ -62,20 +65,34 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
 //        }
     }
 
+    @Override
+    public void initCache() {
+        txCountMap = new HashMap<>();
+        for (ApiCache apiCache : CacheManager.getApiCaches().values()) {
+            long totalCount = mongoDBService.getCount(TX_TABLE + apiCache.getChainInfo().getChainId());
+            txCountMap.put(apiCache.getChainInfo().getChainId(), totalCount);
+        }
+    }
+
+    @Override
+    public void addCache(int chainId) {
+        if (txCountMap == null) {
+            txCountMap = new HashMap<>();
+        }
+        txCountMap.put(chainId, 0L);
+    }
+
     //tx_table只存储最近100万条数据
     public void saveTxList(int chainId, List<TransactionInfo> txList) {
         if (txList.isEmpty()) {
             return;
         }
+        long time1, time2;
+        time1 = System.currentTimeMillis();
+        long totalCount = txCountMap.get(chainId);
 
-        List<Document> documentList = new ArrayList<>();
-        for (TransactionInfo transactionInfo : txList) {
-            documentList.add(transactionInfo.toDocument());
-            deleteUnConfirmTx(chainId, transactionInfo.getHash());
-        }
-
-        long totalCount = mongoDBService.getCount(TX_TABLE + chainId);
-        totalCount += documentList.size();
+        //当交易记录表超过100万条时，首先删除要最开始保存的记录
+        totalCount += txList.size();
         if (totalCount > 1000000) {
             int deleteCount = (int) (totalCount - 1000000);
             BasicDBObject fields = new BasicDBObject();
@@ -86,10 +103,32 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
                 hashList.add(document.getString("_id"));
             }
             mongoDBService.delete(TX_TABLE + chainId, Filters.in("_id", hashList));
+//            time2 = System.currentTimeMillis();
+//            System.out.println("-----------delete, use: " + (time2 - time1));
+//            time1 = System.currentTimeMillis();
+            totalCount = 1000000;
         }
+        txCountMap.put(chainId, totalCount);
+
         InsertManyOptions options = new InsertManyOptions();
         options.ordered(false);
-        mongoDBService.insertMany(TX_TABLE + chainId, documentList, options);
+
+        List<Document> documentList = new ArrayList<>();
+        for (TransactionInfo txInfo : txList) {
+            if (txUnConfirmHashSet.contains(txInfo.getHash())) {
+                deleteUnConfirmTx(chainId, txInfo.getHash());
+            }
+            documentList.add(txInfo.toDocument());
+            if (documentList.size() == 1000) {
+                mongoDBService.insertMany(TX_TABLE + chainId, documentList, options);
+                documentList.clear();
+            }
+        }
+        if (documentList.size() != 0) {
+            mongoDBService.insertMany(TX_TABLE + chainId, documentList, options);
+        }
+//        time2 = System.currentTimeMillis();
+//        System.out.println("-----------insertMany, use: " + (time2 - time1));
     }
 
     public void saveCoinDataList(int chainId, List<CoinDataInfo> coinDataList) {
@@ -120,12 +159,24 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
 
         InsertManyOptions options = new InsertManyOptions();
         options.ordered(false);
+
+        List<Document> saveList = new ArrayList();
         for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
+            saveList.clear();
             List<Document> documentList = relationMap.get("relation_" + i);
             if (documentList.size() == 0) {
                 continue;
             }
-            mongoDBService.insertMany(TX_RELATION_TABLE + chainId + "_" + i, documentList, options);
+            for (Document document : documentList) {
+                saveList.add(document);
+                if(saveList.size() == 1000) {
+                    mongoDBService.insertMany(TX_RELATION_TABLE + chainId + "_" + i, saveList, options);
+                    saveList.clear();
+                }
+            }
+            if(saveList.size() != 0) {
+                mongoDBService.insertMany(TX_RELATION_TABLE + chainId + "_" + i, saveList, options);
+            }
         }
     }
 
@@ -154,6 +205,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         for (Document document : docList) {
             TxHexInfo txHexInfo = DocumentTransferTool.toInfo(document, "txHash", TxHexInfo.class);
             txHexInfoList.add(txHexInfo);
+            txUnConfirmHashSet.add(txHexInfo.getTxHash());
         }
         return txHexInfoList;
     }
@@ -326,6 +378,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
 
         Document document = DocumentTransferTool.toDocument(hexInfo, "txHash");
         mongoDBService.insertOne(TX_UNCONFIRM_TABLE + chainId, document);
+        txUnConfirmHashSet.add(hexInfo.getTxHash());
     }
 
     @Override
@@ -334,6 +387,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         Bson filter2 = Filters.eq("txHash", txHash);
         mongoDBService.delete(TX_UNCONFIRM_TABLE + chainId, filter1);
         mongoDBService.delete(TX_UNCONFIRM_RELATION_TABLE + chainId, filter2);
+        txUnConfirmHashSet.remove(txHash);
     }
 
     private void processCoinBaseTx(int chainId, TransactionInfo tx, Set<TxRelationInfo> txRelationInfoSet) {

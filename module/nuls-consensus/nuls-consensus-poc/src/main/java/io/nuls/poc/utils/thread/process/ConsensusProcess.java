@@ -230,7 +230,7 @@ public class ConsensusProcess {
         it means that the previous node has already blocked, and the current node can blocked.
         */
         BlockHeader bestBlockHeader = chain.getNewestHeader();
-        BlockExtendsData blockRoundData = new BlockExtendsData(bestBlockHeader.getExtend());
+        BlockExtendsData blockRoundData = bestBlockHeader.getExtendsData();
         byte[] bestPackingAddress = bestBlockHeader.getPackingAddress(chain.getConfig().getChainId());
         long bestRoundIndex = blockRoundData.getRoundIndex();
         int bestPackingIndex = blockRoundData.getPackingIndexOfRound();
@@ -314,13 +314,13 @@ public class ConsensusProcess {
             bd.setPreHash(bestBlock.getHash());
         }
 
-        BlockExtendsData bestExtendsData = new BlockExtendsData(bestBlock.getExtend());
+        BlockExtendsData bestExtendsData = bestBlock.getExtendsData();
         boolean stateRootIsNull = false;
         if (resultMap == null) {
             extendsData.setStateRoot(bestExtendsData.getStateRoot());
             stateRootIsNull = true;
         } else {
-            long txPackageHeight = Long.valueOf(resultMap.get("packageHeight").toString());
+            long txPackageHeight = Long.parseLong(resultMap.get("packageHeight").toString());
             String stateRoot = (String) resultMap.get("stateRoot");
             if (StringUtils.isBlank(stateRoot)) {
                 extendsData.setStateRoot(bestExtendsData.getStateRoot());
@@ -355,7 +355,7 @@ public class ConsensusProcess {
             newBlock.getHeader().setPreHash(bestBlock.getHash());
             newBlock.getHeader().setHeight(bestBlock.getHeight());
             if (stateRootIsNull) {
-                bestExtendsData = new BlockExtendsData(bestBlock.getExtend());
+                bestExtendsData = bestBlock.getExtendsData();
                 extendsData.setStateRoot(bestExtendsData.getStateRoot());
                 newBlock.getHeader().setExtend(extendsData.serialize());
             }

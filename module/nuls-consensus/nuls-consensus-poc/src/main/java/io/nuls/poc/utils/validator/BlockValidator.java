@@ -3,6 +3,12 @@ package io.nuls.poc.utils.validator;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
+import io.nuls.core.constant.TxType;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.log.Log;
+import io.nuls.core.model.DoubleUtils;
 import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
@@ -18,12 +24,6 @@ import io.nuls.poc.utils.manager.CoinDataManager;
 import io.nuls.poc.utils.manager.ConsensusManager;
 import io.nuls.poc.utils.manager.PunishManager;
 import io.nuls.poc.utils.manager.RoundManager;
-import io.nuls.core.constant.TxType;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.log.Log;
-import io.nuls.core.model.DoubleUtils;
 
 import java.io.IOException;
 import java.util.*;
@@ -73,7 +73,7 @@ public class BlockValidator {
             throw new NulsException(e);
         }
         MeetingRound currentRound = roundValidResult.getRound();
-        BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getExtend());
+        BlockExtendsData extendsData = blockHeader.getExtendsData();
         MeetingMember member = currentRound.getMember(extendsData.getPackingIndexOfRound());
         boolean validResult = punishValidate(block, currentRound, member, chain, blockHeaderHash);
         if (!validResult) {
@@ -100,9 +100,9 @@ public class BlockValidator {
      * @param blockHeader block header info
      */
     private RoundValidResult roundValidate(boolean isDownload, Chain chain, BlockHeader blockHeader, String blockHeaderHash) throws Exception {
-        BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getExtend());
+        BlockExtendsData extendsData = blockHeader.getExtendsData();
         BlockHeader bestBlockHeader = chain.getNewestHeader();
-        BlockExtendsData bestExtendsData = new BlockExtendsData(bestBlockHeader.getExtend());
+        BlockExtendsData bestExtendsData = bestBlockHeader.getExtendsData();
 
         RoundValidResult roundValidResult = new RoundValidResult();
 
@@ -315,7 +315,7 @@ public class BlockValidator {
                 if (!Arrays.equals(header1.getBlockSignature().getPublicKey(), header2.getBlockSignature().getPublicKey())) {
                     throw new NulsException(ConsensusErrorCode.BLOCK_SIGNATURE_ERROR);
                 }
-                BlockExtendsData blockExtendsData = new BlockExtendsData(header1.getExtend());
+                BlockExtendsData blockExtendsData = header1.getExtendsData();
                 roundIndex[i] = blockExtendsData.getRoundIndex();
             }
             //验证轮次是否连续

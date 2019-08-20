@@ -76,7 +76,9 @@ public class ImportByPrivateKeyProcessor extends AccountBaseProcessor implements
         String prikey = args[1];
         String password = CommandHelper.getPwdOptional();
         if(StringUtils.isNotBlank(password)){
-            CommandHelper.confirmPwd(password);
+            if(!CommandHelper.confirmPwd(password)) {
+                return CommandResult.getFailed("Password confirmation doesn't match the password.Operation abort.");
+            }
         }
         ImportAccountByPrivateKeyReq req = new ImportAccountByPrivateKeyReq(password,prikey,true);
         Result<String> result = accountService.importAccountByPrivateKey(req);

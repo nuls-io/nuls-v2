@@ -91,7 +91,6 @@ public class SyncService {
         clear();
         long time1, time2;
         time1 = System.currentTimeMillis();
-
         findAddProcessAgentOfBlock(chainId, blockInfo);
         //处理交易
         processTxs(chainId, blockInfo.getTxList());
@@ -99,10 +98,11 @@ public class SyncService {
         roundManager.process(chainId, blockInfo);
         //保存数据
         save(chainId, blockInfo);
-        time2 = System.currentTimeMillis();
 
         ApiCache apiCache = CacheManager.getCache(chainId);
         apiCache.setBestHeader(blockInfo.getHeader());
+
+        time2 = System.currentTimeMillis();
         LoggerUtil.commonLog.info("-----height finish:" + blockInfo.getHeader().getHeight() + "-----txCount:" + blockInfo.getHeader().getTxCount() + "-----use:" + (time2 - time1) + "-----");
         return true;
     }
@@ -227,13 +227,15 @@ public class SyncService {
         Set<String> addressSet = new HashSet<>();
         for (CoinToInfo output : tx.getCoinTos()) {
             addressSet.add(output.getAddress());
-            AccountLedgerInfo ledgerInfo = calcBalance(chainId, output);
-            txRelationInfoSet.add(new TxRelationInfo(output, tx, ledgerInfo.getTotalBalance()));
+            calcBalance(chainId, output);
+//            AccountLedgerInfo ledgerInfo = calcBalance(chainId, output);
+//            txRelationInfoSet.add(new TxRelationInfo(output, tx, ledgerInfo.getTotalBalance()));
 
             //奖励是本链主资产的时候，累计奖励金额
             if (output.getChainId() == assetInfo.getChainId() && output.getAssetsId() == assetInfo.getAssetId()) {
                 AccountInfo accountInfo = queryAccountInfo(chainId, output.getAddress());
                 accountInfo.setTotalReward(accountInfo.getTotalReward().add(output.getAmount()));
+                accountInfo.setLastReward(output.getAmount());
             }
         }
         for (String address : addressSet) {
@@ -373,7 +375,6 @@ public class SyncService {
         cancelInfo.copyInfoWithDeposit(depositInfo);
         cancelInfo.setTxHash(tx.getHash());
         cancelInfo.setKey(DBUtil.getDepositKey(tx.getHash(), depositInfo.getKey()));
-        cancelInfo.setBlockHeight(tx.getHeight());
         cancelInfo.setDeleteKey(depositInfo.getKey());
         cancelInfo.setNew(true);
 
@@ -784,33 +785,76 @@ public class SyncService {
     public void save(int chainId, BlockInfo blockInfo) {
         long height = blockInfo.getHeader().getHeight();
 
+        long time1,time2;
+
         SyncInfo syncInfo = chainService.saveNewSyncInfo(chainId, height);
 
         BlockHexInfo blockHexInfo = new BlockHexInfo();
         blockHexInfo.setHeight(blockInfo.getHeader().getHeight());
         blockHexInfo.setBlockHex(blockInfo.getBlockHex());
         //存储区块头信息
+        time1 = System.currentTimeMillis();
         blockService.saveBLockHeaderInfo(chainId, blockInfo.getHeader());
+        //存区块序列化完整信息
         blockService.saveBlockHexInfo(chainId, blockHexInfo);
+//        time2 = System.currentTimeMillis();
+//        System.out.println("-----------saveBlockHexInfo, use: " + (time2 - time1) );
+//        time1 = System.currentTimeMillis();
         //存储交易记录
         txService.saveTxList(chainId, blockInfo.getTxList());
+//        time2 = System.currentTimeMillis();
+//        System.out.println("-----------saveTxList, use: " + (time2 - time1) );
+//        time1 = System.currentTimeMillis();
+
         // txService.saveCoinDataList(chainId, coinDataList);
         //存储交易和地址关系记录
         txService.saveTxRelationList(chainId, txRelationInfoSet);
+//        time2 = System.currentTimeMillis();
+//        System.out.println("-----------saveTxRelationList, use: " + (time2 - time1) );
+//        time1 = System.currentTimeMillis();
+
         //存储别名记录
         aliasService.saveAliasList(chainId, aliasInfoList);
+//        time2 = System.currentTimeMillis();
+//        System.out.println("-----------saveAliasList, use: " + (time2 - time1) );
+//        time1 = System.currentTimeMillis();
+
         //存储红黄牌惩罚记录
         punishService.savePunishList(chainId, punishLogList);
+//        time2 = System.currentTimeMillis();
+//        System.out.println("-----------savePunishList, use: " + (time2 - time1) );
+//        time1 = System.currentTimeMillis();
+
         //存储委托/取消委托记录
         depositService.saveDepositList(chainId, depositInfoList);
+//        time2 = System.currentTimeMillis();
+//        System.out.println("-----------saveDepositList, use: " + (time2 - time1) );
+//        time1 = System.currentTimeMillis();
+
         //存储智能合约交易关系记录
         contractService.saveContractTxInfos(chainId, contractTxInfoList);
+//        time2 = System.currentTimeMillis();
+//        System.out.println("-----------saveContractTxInfos, use: " + (time2 - time1) );
+//        time1 = System.currentTimeMillis();
+
         //存储智能合约结果记录
         contractService.saveContractResults(chainId, contractResultList);
+//        time2 = System.currentTimeMillis();
+//        System.out.println("-----------saveContractResults, use: " + (time2 - time1) );
+//        time1 = System.currentTimeMillis();
+
         //存储token转账信息
         tokenService.saveTokenTransfers(chainId, tokenTransferList);
+//        time2 = System.currentTimeMillis();
+//        System.out.println("-----------saveTokenTransfers, use: " + (time2 - time1) );
+//        time1 = System.currentTimeMillis();
+
         //存储链信息
         chainService.saveChainList(chainInfoList);
+//        time2 = System.currentTimeMillis();
+//        System.out.println("-----------saveChainList, use: " + (time2 - time1) );
+//        time1 = System.currentTimeMillis();
+
         /*
             涉及到统计类的表放在最后来存储，便于回滚
          */
@@ -818,22 +862,40 @@ public class SyncService {
         syncInfo.setStep(10);
         chainService.updateStep(syncInfo);
         agentService.saveAgentList(chainId, agentInfoList);
+//        time2 = System.currentTimeMillis();
+//        System.out.println("-----------saveAgentList, use: " + (time2 - time1) );
+//        time1 = System.currentTimeMillis();
         //存储账户资产信息
         syncInfo.setStep(20);
         chainService.updateStep(syncInfo);
         ledgerService.saveLedgerList(chainId, accountLedgerInfoMap);
+        time2 = System.currentTimeMillis();
+        System.out.println("-----------saveLedgerList, use: " + (time2 - time1) );
+        time1 = System.currentTimeMillis();
         //存储智能合约信息表
         syncInfo.setStep(30);
         chainService.updateStep(syncInfo);
         contractService.saveContractInfos(chainId, contractInfoMap);
+//        time2 = System.currentTimeMillis();
+//        System.out.println("-----------saveContractInfos, use: " + (time2 - time1) );
+//        time1 = System.currentTimeMillis();
+
         //存储账户token信息
         syncInfo.setStep(40);
         chainService.updateStep(syncInfo);
         tokenService.saveAccountTokens(chainId, accountTokenMap);
+//        time2 = System.currentTimeMillis();
+//        System.out.println("-----------saveAccountTokens, use: " + (time2 - time1) );
+//        time1 = System.currentTimeMillis();
+
         //存储账户信息表
         syncInfo.setStep(50);
         chainService.updateStep(syncInfo);
         accountService.saveAccounts(chainId, accountInfoMap);
+//        time2 = System.currentTimeMillis();
+//        System.out.println("-----------saveAccounts, use: " + (time2 - time1) );
+//        time1 = System.currentTimeMillis();
+
         //完成解析
         syncInfo.setStep(100);
         chainService.updateStep(syncInfo);

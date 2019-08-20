@@ -332,7 +332,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         Chain chain = chainManager.getChainMap().get(handleChainId);
         NulsHash ctxHash = messageBody.getCtx().getHash();
         String ctxHashHex = ctxHash.toHex();
-        chain.getLogger().info("收到其他链节点{}发送过来的完整跨链交易,Hash:{}", nodeId, ctxHashHex);
+        chain.getLogger().info("收到其他链节点{}发送过来的完整跨链交易,Hash:{},交易类型：{}", nodeId, ctxHashHex, messageBody.getCtx().getType());
         //判断本节点是否已经收到过该跨链交易，如果已收到过直接忽略
         if (convertHashService.get(ctxHash, handleChainId) != null) {
             chain.getLogger().debug("本节点已收到并处理过该跨链交易,Hash:{}\n\n", ctxHashHex);
