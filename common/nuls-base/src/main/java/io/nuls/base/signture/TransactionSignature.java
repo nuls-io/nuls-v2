@@ -29,8 +29,6 @@ package io.nuls.base.signture;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
-import io.nuls.base.data.CoinFrom;
-import io.nuls.base.data.Transaction;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 
@@ -39,13 +37,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TransactionSignature extends BaseNulsData {
-
     protected List<P2PHKSignature> p2PHKSignatures;
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        int signCount = p2PHKSignatures == null ? 0 : p2PHKSignatures.size();
-        stream.writeVarInt(signCount);
         // 旧签名数据写入流中
         if (p2PHKSignatures != null && p2PHKSignatures.size() > 0) {
             for (P2PHKSignature p2PHKSignature : p2PHKSignatures) {
@@ -58,20 +53,22 @@ public class TransactionSignature extends BaseNulsData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        int signCount = (int) byteBuffer.readVarInt();
-        if (0 < signCount) {
-            List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
-            for (int i = 0; i < signCount; i++) {
-                p2PHKSignatures.add(byteBuffer.readNulsData(new P2PHKSignature()));
-            }
-            this.p2PHKSignatures = p2PHKSignatures;
+        // 从流中读取签名,兼容新老版本
+        int course = 0;
+        List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
+        while (!byteBuffer.isFinished()) {
+            course = byteBuffer.getCursor();
+            //读取两个字节（脚本标识位），如果两个字节都为0x00则表示后面的数据流为脚本数据
+            byteBuffer.setCursor(course);
+            p2PHKSignatures.add(byteBuffer.readNulsData(new P2PHKSignature()));
         }
+        this.p2PHKSignatures = p2PHKSignatures;
     }
 
     @Override
     public int size() {
         // 当前签名数据长度
-        int size = SerializeUtils.sizeOfVarInt(p2PHKSignatures == null ? 0 : p2PHKSignatures.size());
+        int size = 0;
         if (p2PHKSignatures != null && p2PHKSignatures.size() > 0) {
             for (P2PHKSignature p2PHKSignature : p2PHKSignatures) {
                 if (p2PHKSignature != null) {
