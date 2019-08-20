@@ -1,3 +1,6 @@
+[global]
+encoding=UTF-8
+language=en
 logPath=Logs
 logLevel=INFO
 dataPath=data
