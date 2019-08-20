@@ -149,8 +149,8 @@ public class BlockServiceImpl implements BlockService {
             Map<String,List<String>> agentChangeMap;
             BlockHeader localHeader = chainManager.getChainHeaderMap().get(chainId);
             if(localHeader != null){
-                BlockExtendsData blockExtendsData = new BlockExtendsData(blockHeader.getExtend());
-                BlockExtendsData localExtendsData = new BlockExtendsData(localHeader.getExtend());
+                BlockExtendsData blockExtendsData = blockHeader.getExtendsData();
+                BlockExtendsData localExtendsData = localHeader.getExtendsData();
                 if(blockExtendsData.getRoundIndex() == localExtendsData.getRoundIndex()){
                     chainManager.getChainHeaderMap().put(chainId, blockHeader);
                     return Result.getSuccess(SUCCESS);
@@ -188,7 +188,9 @@ public class BlockServiceImpl implements BlockService {
                 if(config.isMainNet()){
                     toId = AddressTool.getChainIdByAddress(ctx.getCoinDataInstance().getTo().get(0).getAddress());
                 }else{
-                    message.setConvertHash(TxUtil.friendConvertToMain(chain, ctx, null, TxType.CROSS_CHAIN).getHash());
+                    NulsHash convertHash = TxUtil.friendConvertToMain(chain, ctx, null, TxType.CROSS_CHAIN).getHash();
+                    message.setConvertHash(convertHash);
+                    chain.getLogger().info("广播跨链转账交易给主网，本链协议hash:{}对应的主网协议hash:{}",ctxHash.toHex(),convertHash.toHex());
                 }
                 byte broadStatus;
                 if(crossStatusMap.containsKey(toId)){

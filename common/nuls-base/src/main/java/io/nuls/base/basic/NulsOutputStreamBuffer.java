@@ -27,10 +27,10 @@ package io.nuls.base.basic;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.core.basic.VarInt;
 import io.nuls.core.constant.ToolsConstant;
-import io.nuls.core.model.ByteUtils;
-import io.nuls.core.model.StringUtils;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.log.Log;
+import io.nuls.core.model.ByteUtils;
+import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.SerializeUtils;
 
 import java.io.IOException;
@@ -48,6 +48,12 @@ public class NulsOutputStreamBuffer {
         this.out = out;
     }
 
+    /**
+     * 0~255
+     *
+     * @param b
+     * @throws IOException
+     */
     public void writeByte(byte b) throws IOException {
         out.write(b);
     }
@@ -86,10 +92,20 @@ public class NulsOutputStreamBuffer {
         SerializeUtils.int16ToByteStreamLE(val, out);
     }
 
+    /**
+     * 0~65,535
+     * @param val
+     * @throws IOException
+     */
     public void writeUint16(int val) throws IOException {
         SerializeUtils.uint16ToByteStreamLE(val, out);
     }
 
+    /**
+     * 0~4,294,967,295‬
+     * @param val
+     * @throws IOException
+     */
     public void writeUint32(long val) throws IOException {
         SerializeUtils.uint32ToByteStreamLE(val, out);
     }

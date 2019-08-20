@@ -70,7 +70,7 @@ public class PunishManager {
         if (null == blockHeader) {
             return;
         }
-        BlockExtendsData roundData = new BlockExtendsData(blockHeader.getExtend());
+        BlockExtendsData roundData = blockHeader.getExtendsData();
         long breakRoundIndex = roundData.getRoundIndex() - ConsensusConstant.INIT_PUNISH_OF_ROUND_COUNT;
         List<PunishLogPo> punishLogList = punishStorageService.getPunishList(chain.getConfig().getChainId());
         List<PunishLogPo> redPunishList = new ArrayList<>();
@@ -99,14 +99,8 @@ public class PunishManager {
      */
     public void clear(Chain chain) {
         BlockHeader blockHeader = chain.getNewestHeader();
-        BlockExtendsData roundData = new BlockExtendsData(blockHeader.getExtend());
-        Iterator<PunishLogPo> yellowIterator = chain.getYellowPunishList().iterator();
-        while (yellowIterator.hasNext()) {
-            PunishLogPo po = yellowIterator.next();
-            if (po.getRoundIndex() < roundData.getRoundIndex() - ConsensusConstant.INIT_PUNISH_OF_ROUND_COUNT) {
-                yellowIterator.remove();
-            }
-        }
+        BlockExtendsData roundData = blockHeader.getExtendsData();
+        chain.getYellowPunishList().removeIf(po -> po.getRoundIndex() < roundData.getRoundIndex() - ConsensusConstant.INIT_PUNISH_OF_ROUND_COUNT);
     }
 
 
@@ -213,7 +207,7 @@ public class PunishManager {
     private boolean isRedPunish(Chain chain, BlockHeader firstHeader, BlockHeader secondHeader) {
         //验证出块地址PackingAddress，记录分叉的连续次数，如达到连续3轮则红牌惩罚/最近100轮中有3次分叉
         String packingAddress = AddressTool.getStringAddressByBytes(firstHeader.getPackingAddress(chain.getConfig().getChainId()));
-        BlockExtendsData extendsData = new BlockExtendsData(firstHeader.getExtend());
+        BlockExtendsData extendsData = firstHeader.getExtendsData();
         long currentRoundIndex = extendsData.getRoundIndex();
         Map<String, List<Evidence>> currentChainEvidences = chain.getEvidenceMap();
         /*
@@ -391,7 +385,7 @@ public class PunishManager {
      * @return Transaction
      */
     public Transaction createYellowPunishTx(Chain chain, BlockHeader preBlock, MeetingMember self, MeetingRound round) throws Exception {
-        BlockExtendsData preBlockRoundData = new BlockExtendsData(preBlock.getExtend());
+        BlockExtendsData preBlockRoundData = preBlock.getExtendsData();
         /*
         如果本节点当前打包轮次比本地最新区块的轮次大一轮以上则返回不生成黄牌交易
         If the current packing rounds of this node are more than one round larger than the rounds of the latest local block,
@@ -457,7 +451,7 @@ public class PunishManager {
                         preRound = chain.getRoundList().get(chain.getRoundList().size() - 1);
                     } else {
                         BlockHeader preRoundHeader = roundManager.getFirstBlockOfPreRound(chain, round.getIndex() - 1);
-                        BlockExtendsData preRoundExtendsData = new BlockExtendsData(preRoundHeader.getExtend());
+                        BlockExtendsData preRoundExtendsData = preRoundHeader.getExtendsData();
                         preRound = roundManager.getRoundByRoundIndex(chain, preRoundExtendsData.getRoundIndex(), preRoundExtendsData.getRoundStartTime());
                     }
                 }
@@ -562,7 +556,7 @@ public class PunishManager {
         int chainId = chain.getConfig().getChainId();
         RedPunishData punishData = new RedPunishData();
         punishData.parse(tx.getTxData(), 0);
-        BlockExtendsData roundData = new BlockExtendsData(blockHeader.getExtend());
+        BlockExtendsData roundData = blockHeader.getExtendsData();
         PunishLogPo punishLogPo = new PunishLogPo();
         punishLogPo.setAddress(punishData.getAddress());
         punishLogPo.setHeight(blockHeight);
@@ -738,7 +732,7 @@ public class PunishManager {
     public boolean yellowPunishCommit(Transaction tx, Chain chain, BlockHeader blockHeader) throws NulsException {
         YellowPunishData punishData = new YellowPunishData();
         punishData.parse(tx.getTxData(), 0);
-        BlockExtendsData roundData = new BlockExtendsData(blockHeader.getExtend());
+        BlockExtendsData roundData = blockHeader.getExtendsData();
         List<PunishLogPo> savedList = new ArrayList<>();
         int index = 1;
         int chainId = chain.getConfig().getChainId();
@@ -770,7 +764,7 @@ public class PunishManager {
         YellowPunishData punishData = new YellowPunishData();
         punishData.parse(tx.getTxData(), 0);
         List<PunishLogPo> deletedList = new ArrayList<>();
-        BlockExtendsData roundData = new BlockExtendsData(blockHeader.getExtend());
+        BlockExtendsData roundData = blockHeader.getExtendsData();
         int deleteIndex = 1;
         int chainId = chain.getConfig().getChainId();
         for (byte[] address : punishData.getAddressList()) {
