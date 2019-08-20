@@ -85,9 +85,6 @@ public class GetAddrMessageHandler extends BaseMessageHandler {
             LoggerUtil.logger(chainId).info("No Address");
         } else {
             LoggerUtil.logger(chainId).info("send addressMessage node = {}", node.getId());
-            ipAddresses.forEach(address -> {
-                LoggerUtil.logger(chainId).info("{}:{}:{}", address.getIpStr(), address.getPort(), address.getCrossPort());
-            });
             MessageManager.getInstance().sendHandlerMsg(addressMessage, node, true);
         }
         return NetworkEventResult.getResultSuccess();
