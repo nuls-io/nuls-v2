@@ -94,6 +94,7 @@ public class PunishLogPo extends BaseNulsData {
         stream.writeVarInt(roundIndex);
         stream.writeShort(reasonCode);
         stream.writeBytesWithLength(evidence);
+        stream.writeUint16(index);
     }
 
     @Override
@@ -105,6 +106,7 @@ public class PunishLogPo extends BaseNulsData {
         this.roundIndex = byteBuffer.readVarInt();
         this.reasonCode = byteBuffer.readShort();
         this.evidence = byteBuffer.readByLengthByte();
+        this.index = byteBuffer.readUint16();
     }
 
     @Override
@@ -117,6 +119,7 @@ public class PunishLogPo extends BaseNulsData {
         size += SerializeUtils.sizeOfVarInt(roundIndex);
         size += 2;
         size += SerializeUtils.sizeOfBytes(this.evidence);
+        size += SerializeUtils.sizeOfUint16();
         return size;
     }
 

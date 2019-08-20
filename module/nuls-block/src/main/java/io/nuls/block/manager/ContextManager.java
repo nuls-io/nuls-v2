@@ -52,6 +52,7 @@ public class ContextManager {
         CHAIN_ID_LIST.add(chainId);
         ContextManager.contextMap.put(chainId, chainContext);
         chainContext.setChainId(chainId);
+        chainParameters.setResetTime(1800000);
         chainContext.setParameters(chainParameters);
         chainContext.init();
         COMMON_LOG.info("new chainContext add! chainId-" + chainId);
