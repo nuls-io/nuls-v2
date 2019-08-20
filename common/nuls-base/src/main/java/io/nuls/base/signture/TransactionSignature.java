@@ -37,7 +37,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TransactionSignature extends BaseNulsData {
-
     protected List<P2PHKSignature> p2PHKSignatures;
 
     @Override
@@ -91,5 +90,4 @@ public class TransactionSignature extends BaseNulsData {
     public int getSignersCount() {
         return p2PHKSignatures == null ? 0 : p2PHKSignatures.size();
     }
-
 }
