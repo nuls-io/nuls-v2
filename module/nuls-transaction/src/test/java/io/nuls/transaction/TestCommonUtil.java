@@ -189,6 +189,25 @@ public class TestCommonUtil {
         return result;
     }
 
+    public static String createContract(String account, String pwd, String code) throws Exception {
+        //账户已存在则覆盖 If the account exists, it covers.
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.VERSION_KEY_STR, VERSION);
+        params.put(Constants.CHAIN_ID, CHAIN_ID);
+
+        params.put("sender", account);
+        params.put("password", pwd);
+        params.put("alias", "test");
+        params.put("gasLimit", 10000000);
+        params.put("price", 25);
+        params.put("contractCode", code);
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, "sc_create", params);
+        assertTrue(response.isSuccess());
+        Map map = (Map) response.getResponseData();
+        Map tx = (Map) map.get("sc_create");
+        return tx.get("contractAddress").toString();
+    }
+
 
     public static void importPriKey(String priKey, String pwd) {
         try {

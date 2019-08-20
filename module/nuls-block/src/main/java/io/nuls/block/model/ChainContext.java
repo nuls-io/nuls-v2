@@ -33,7 +33,10 @@ import io.nuls.block.utils.SmallBlockCacher;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.CollectionUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.StampedLock;
@@ -80,11 +83,6 @@ public class ChainContext {
      * 创世区块
      */
     private Block genesisBlock;
-
-    /**
-     * 主链
-     */
-    private Chain masterChain;
 
     /**
      * 链的运行时参数
@@ -208,14 +206,6 @@ public class ChainContext {
         this.genesisBlock = genesisBlock;
     }
 
-    public Chain getMasterChain() {
-        return masterChain;
-    }
-
-    public void setMasterChain(Chain masterChain) {
-        this.masterChain = masterChain;
-    }
-
     public ChainParameters getParameters() {
         return parameters;
     }
@@ -307,12 +297,4 @@ public class ChainContext {
 
     }
 
-    public void printChains() {
-        Chain masterChain = BlockChainManager.getMasterChain(chainId);
-        logger.info("masterChain-" + masterChain);
-        SortedSet<Chain> forkChains = BlockChainManager.getForkChains(chainId);
-        forkChains.forEach(e -> logger.info("forkChain-" + e));
-        SortedSet<Chain> orphanChains = BlockChainManager.getOrphanChains(chainId);
-        orphanChains.forEach(e -> logger.info("orphanChain-" + e));
-    }
 }
