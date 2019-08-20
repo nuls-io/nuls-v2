@@ -424,7 +424,7 @@ public class BlockSynchronizer implements Runnable {
         //连接节点高度小于本节点高度1000
         availableNodes.removeIf(availableNode -> availableNode.getHeight() < context.getLatestHeight() - context.getParameters().getHeightRange());
         //连接节点与本节点在同一条链上，并且高度比本节点低
-        availableNodes.removeIf(availableNode -> context.getMasterChain().getHashList().contains(availableNode.getHash()));
+        availableNodes.removeIf(availableNode -> context.getMasterChain().getHashList().contains(availableNode.getHash()) && availableNode.getHeight() < context.getLatestHeight());
         return availableNodes;
     }
 
