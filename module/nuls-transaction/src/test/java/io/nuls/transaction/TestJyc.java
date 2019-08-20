@@ -32,6 +32,9 @@ import io.nuls.transaction.model.bo.config.ConfigBean;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 import static io.nuls.transaction.TestCommonUtil.*;
 
 /**
@@ -48,6 +51,14 @@ public class TestJyc {
         ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":7771");
         chain = new Chain();
         chain.setConfig(new ConfigBean(CHAIN_ID, ASSET_ID, 1024 * 1024, 1000, 20, 20000, 60000));
+    }
+
+    @Test
+    public void name() throws Exception {
+//        System.out.println(getBalance(chain, "tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp"));
+
+        String code = Files.readString(Path.of("C:\\Users\\alvin\\Desktop\\contract", "code.txt"));
+        createContract(SOURCE_ADDRESS, PASSWORD, code);
     }
 
     /**

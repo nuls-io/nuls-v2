@@ -46,7 +46,6 @@ import io.nuls.core.model.DoubleUtils;
 import io.nuls.core.thread.ThreadUtils;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -148,9 +147,6 @@ public class BlockSynchronizer implements Runnable {
             if (firstStart) {
                 firstStart = false;
                 int testAutoRollbackAmount = blockConfig.getTestAutoRollbackAmount();
-//                if (context.getLatestHeight() > 33500 || context.getLatestHeight() < 33800) {
-//                    testAutoRollbackAmount = 50;
-//                }
                 if (testAutoRollbackAmount > 0) {
                     if (latestHeight < testAutoRollbackAmount) {
                         testAutoRollbackAmount = (int) (latestHeight);
@@ -210,26 +206,6 @@ public class BlockSynchronizer implements Runnable {
         NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         //1.调用网络模块接口获取当前chainId网络的可用节点
         List<Node> availableNodes = NetworkCall.getAvailableNodes(chainId);
-//        availableNodes.removeIf(availableNode -> availableNode.getHeight() < 33722);
-//        availableNodes.removeIf(availableNode -> availableNode.getId().contains("106.13.87.30"));
-//        availableNodes.removeIf(availableNode -> availableNode.getId().contains("159.69.247.168"));
-//        if (availableNodes.isEmpty()) {
-//            return false;
-//        }
-//        long h = 0;
-//        //找出最高高度
-//        for (Node availableNode : availableNodes) {
-//            if (availableNode.getHeight() > h) {
-//                h = availableNode.getHeight();
-//            }
-//        }
-//        //把不是最高高度的节点去掉
-//        for (Iterator<Node> iterator = availableNodes.iterator(); iterator.hasNext(); ) {
-//            Node availableNode = iterator.next();
-//            if (availableNode.getHeight() != h) {
-//                iterator.remove();
-//            }
-//        }
         //2.判断可用节点数是否满足最小配置
         ChainContext context = ContextManager.getContext(chainId);
         ChainParameters parameters = context.getParameters();
