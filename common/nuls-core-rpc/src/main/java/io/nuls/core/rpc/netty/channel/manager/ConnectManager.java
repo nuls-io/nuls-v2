@@ -35,6 +35,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 /**
  * 链接管理类
@@ -325,17 +326,13 @@ public class ConnectManager {
              */
             if (annotation instanceof Parameter) {
                 Parameter parameter = (Parameter) annotation;
-                CmdParameter cmdParameter = new CmdParameter(parameter.parameterName(), parameter.parameterType(), parameter.parameterValidRange(), parameter.parameterValidRegExp());
-                cmdParameters.add(cmdParameter);
+                cmdParameters.add(ConnectManager.transferCmdParameter(parameter));
                 continue;
             }
 
             if (annotation instanceof Parameters) {
                 Parameters parameters = (Parameters) annotation;
-                for (Parameter parameter : parameters.value()) {
-                    CmdParameter cmdParameter = new CmdParameter(parameter.parameterName(), parameter.parameterType(), parameter.parameterValidRange(), parameter.parameterValidRegExp());
-                    cmdParameters.add(cmdParameter);
-                }
+                cmdParameters.addAll(Arrays.stream(parameters.value()).map(ConnectManager::transferCmdParameter).collect(Collectors.toList()));
             }
         }
         if (cmdDetail == null) {
@@ -343,6 +340,15 @@ public class ConnectManager {
         }
         cmdDetail.setParameters(cmdParameters);
         return cmdDetail;
+    }
+
+    private static CmdParameter transferCmdParameter(Parameter parameter){
+        String parameterType = parameter.requestType().value().getSimpleName();
+        if(StringUtils.isNotBlank(parameter.parameterType()) ){
+            parameterType = parameter.parameterType();
+        }
+        CmdParameter cmdParameter = new CmdParameter(parameter.parameterName(), parameterType, parameter.parameterValidRange(), parameter.parameterValidRegExp());
+        return cmdParameter;
     }
 
 
