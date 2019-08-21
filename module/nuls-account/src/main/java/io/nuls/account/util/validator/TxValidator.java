@@ -120,7 +120,7 @@ public class TxValidator {
                 String key = coinFrom.getAssetsChainId() + "-" + coinFrom.getAssetsId();
                 BigInteger amount = mapFrom.get(key);
                 if (amount.compareTo(new BigInteger("10000000000")) < 0) {
-                    return Result.getFailed(AccountErrorCode.TRANSFER_AMOUNT_TOO_SMALL);
+                    return Result.getFailed(AccountErrorCode.INPUT_TOO_SMALL);
                 }
                 if (null != amount) {
                     amount = amount.add(coinFrom.getAmount());
