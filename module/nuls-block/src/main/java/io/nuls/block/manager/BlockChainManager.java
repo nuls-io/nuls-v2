@@ -142,8 +142,9 @@ public class BlockChainManager {
             masterForkChain.setSons(higherChains);
             higherChains.forEach(e -> e.setParent(masterForkChain));
         }
-        if (!addForkChain(chainId, masterForkChain) || !chainStorageService.save(chainId, blockList)) {
-            logger.info("*error occur when rollback master chain");
+        addForkChain(chainId, masterForkChain);
+        if (!chainStorageService.save(chainId, blockList)) {
+            logger.info("*error occur when save masterForkChain");
             append(masterChain, masterForkChain);
             return false;
         }
@@ -278,10 +279,9 @@ public class BlockChainManager {
      * 新增分叉链
      *
      * @param chainId 链Id/chain id
-     * @return
      */
-    public static boolean addForkChain(int chainId, Chain chain) {
-        return forkChains.get(chainId).add(chain);
+    public static void addForkChain(int chainId, Chain chain) {
+        forkChains.get(chainId).add(chain);
     }
 
     /**
@@ -313,7 +313,6 @@ public class BlockChainManager {
      * 更新分叉链集合
      *
      * @param chainId 链Id/chain id
-     * @return
      */
     public static void setForkChains(int chainId, SortedSet<Chain> chains) {
         forkChains.put(chainId, chains);
@@ -323,10 +322,9 @@ public class BlockChainManager {
      * 新增孤儿链
      *
      * @param chainId 链Id/chain id
-     * @return
      */
-    public static boolean addOrphanChain(int chainId, Chain chain) {
-        return orphanChains.get(chainId).add(chain);
+    public static void addOrphanChain(int chainId, Chain chain) {
+        orphanChains.get(chainId).add(chain);
     }
 
     /**
