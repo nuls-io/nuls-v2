@@ -24,8 +24,6 @@
 package io.nuls.contract.mock.nrc721;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import io.nuls.contract.SmartContractBootStrap;
-import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.mock.basetest.MockBase;
 import io.nuls.contract.mock.invokeexternalcmd.InvokeExternalCmdLocalTest;
 import io.nuls.contract.util.Log;
@@ -40,9 +38,7 @@ import org.junit.Test;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author: PierreLuo
@@ -95,19 +91,9 @@ public class NRC721Test extends MockBase {
 
     @Test
     public void testContractMethod() throws Exception {
-        SmartContractBootStrap bootStrap = new SmartContractBootStrap();
-        bootStrap.initNRC20Standard();
-        bootStrap.initNRC721Standard();
         InputStream in = new FileInputStream(InvokeExternalCmdLocalTest.class.getResource("/NRC721Metadata-test.jar").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
         List<ProgramMethod> programMethods = programExecutor.jarMethod(contractCode);
-        Map<String, ProgramMethod> contractMethodsMap = new HashMap<>();
-        ContractHelper contractHelper = new ContractHelper();
-        //boolean isNrc20 = (boolean) ContractHelper.class.getMethod("checkNrc20Contract", List.class, Map.class).invoke(contractHelper, programMethods, contractMethodsMap);
-        //boolean isNrc721 = (boolean) ContractHelper.class.getMethod("checkNrc721Contract", List.class, Map.class).invoke(contractHelper, programMethods, contractMethodsMap);
-        boolean isNrc20 = (boolean) contractHelper.checkNrc20Contract(programMethods, contractMethodsMap);
-        boolean isNrc721 = (boolean) contractHelper.checkNrc721Contract(programMethods, contractMethodsMap);
-        Log.info("isNrc20 - {}, isNrc721 - {}", isNrc20, isNrc721);
         Log.info("\n");
         Log.info(JSONUtils.obj2PrettyJson(programMethods));
         Log.info("\n");

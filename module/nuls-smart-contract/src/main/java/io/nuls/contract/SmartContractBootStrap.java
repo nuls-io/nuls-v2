@@ -120,7 +120,7 @@ public class SmartContractBootStrap extends RpcModule {
     /**
      * 初始化NRC20合约标准格式
      */
-    public void initNRC20Standard() {
+    private void initNRC20Standard() {
         String json = null;
         try {
             json = IoUtils.read(NRC20_STANDARD_FILE);
@@ -144,7 +144,7 @@ public class SmartContractBootStrap extends RpcModule {
     /**
      * 初始化NRC721合约标准格式
      */
-    public void initNRC721Standard() {
+    private void initNRC721Standard() {
         String json = null;
         try {
             json = IoUtils.read(NRC721_STANDARD_FILE);

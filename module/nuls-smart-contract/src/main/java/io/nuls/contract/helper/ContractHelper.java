@@ -160,7 +160,7 @@ public class ContractHelper {
     private boolean checkNrc20Contract(List<ProgramMethod> methods) {
         return checkNrc20Contract(methods, null);
     }
-    public boolean checkNrc20Contract(List<ProgramMethod> methods, Map<String, ProgramMethod> contractMethodsMap) {
+    private boolean checkNrc20Contract(List<ProgramMethod> methods, Map<String, ProgramMethod> contractMethodsMap) {
         if (methods == null || methods.size() == 0) {
             return false;
         }
@@ -191,7 +191,7 @@ public class ContractHelper {
         return true;
     }
 
-    public boolean checkNrc721Contract(List<ProgramMethod> methods, Map<String, ProgramMethod> contractMethodsMap) {
+    private boolean checkNrc721Contract(List<ProgramMethod> methods, Map<String, ProgramMethod> contractMethodsMap) {
         if (methods == null || methods.size() == 0) {
             return false;
         }
