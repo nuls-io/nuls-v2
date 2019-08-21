@@ -5,7 +5,7 @@ logPath=Logs
 logLevel=INFO
 dataPath=data
 #默认本链ID
-chainId=12
+chainId=10
 #地址前缀
 addressPrefix=TBTC
 #默认本链主资产ID
@@ -31,9 +31,9 @@ blackHolePublicKey=0298f88c3cae67385ce3cbee00f78816db3e56e566b62bd0f4c5b45f205d3
 port=18001
 crossPort=18002
 #魔法参数
-packetMagic=20190809
+packetMagic=20190819
 #种子节点
-selfSeedIps=149.129.176.20:18001,47.252.86.42:18001,18.216.165.46:18001,116.62.135.185:18001
+selfSeedIps=149.129.176.20:18001,47.252.86.42:18001,18.216.165.46:18001,116.62.135.185:18001,192.168.1.142:18001
 #最大入网连接数
 maxInCount=100
 #最大出网连接数
@@ -68,13 +68,13 @@ genesisBlockPath=genesis-block.json
 
 [consensus]
 #种子节点列表
-seedNodes=TBTCd26T7nhzCzf7p441zoGAniQScUyJ8Zctj7,TBTCd26T7he4JSQLTBjBPuzPo3jayzuhDhDiLr,TBTCd26T7hjrrQoV6goCRDCmeZBNw2TkgRp67V
+seedNodes=TBTCdusmKNvjrRiVPg8B922TKh6cJSWyVpfSk,TBTCdusmDXjZiQRL1jN9cbQhG4PvUjTbPegE1,TBTCdusmCmQmyy35yKgb7NUsQRcQLfGMs8Mgq
 #出块地址密码
 password=nuls123456
 #出块间隔时间(单位：s)
 packingInterval=10
 #共识委托抵押资产链ID
-agentChainId=12
+agentChainId=10
 #共识委托抵押资产ID
 agentAssetId=1
 #共识奖励资产ID(共识奖励必须为本链资产)
@@ -113,7 +113,7 @@ connectTimeOut=30000
 #跨链节点链接的最小值
 minNodeAmount=4
 #跨链节点链接的最大值
-maxNodeAmount=10
+maxNodeAmount=200
 #跨链交易在本链内确认块数
 sendHeight=5
 #跨链交易拜占庭比例
