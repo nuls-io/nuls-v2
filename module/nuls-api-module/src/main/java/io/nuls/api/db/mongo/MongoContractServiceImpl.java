@@ -143,18 +143,18 @@ public class MongoContractServiceImpl implements ContractService {
         return pageInfo;
     }
 
-    public PageInfo<MiniContractInfo> getContractList(int chainId, int pageNumber, int pageSize, boolean onlyNrc20, boolean isHidden) {
+    public PageInfo<MiniContractInfo> getContractList(int chainId, int pageNumber, int pageSize, int tokenType, boolean isHidden) {
         Bson filter = null;
-        if (onlyNrc20) {
-            filter = Filters.eq("isNrc20", true);
-        } else if (isHidden) {
-            filter = Filters.ne("isNrc20", true);
+        if (isHidden) {
+            filter = Filters.eq("tokenType", 0);
+        } else if (tokenType > -1) {
+            filter = Filters.eq("tokenType", tokenType);
         }
         Bson sort = Sorts.descending("createTime");
         BasicDBObject fields = new BasicDBObject();
         fields.append("_id", 1).append("remark", 1).append("txCount", 1).append("status", 1)
                 .append("createTime", 1).append("balance", 1).append("tokenName", 1).append("symbol", 1)
-                .append("decimals", 1).append("totalSupply", 1).append("creater", 1).append("alias", 1);
+                .append("decimals", 1).append("totalSupply", 1).append("creater", 1).append("alias", 1).append("tokenType", 1);
 
         List<Document> docsList = this.mongoDBService.pageQuery(CONTRACT_TABLE + chainId, filter, fields, sort, pageNumber, pageSize);
         List<MiniContractInfo> contractInfos = new ArrayList<>();
@@ -169,12 +169,12 @@ public class MongoContractServiceImpl implements ContractService {
     }
 
     @Override
-    public PageInfo<MiniContractInfo> getContractList(int chainId, int pageNumber, int pageSize, String address, boolean onlyNrc20, boolean isHidden) {
+    public PageInfo<MiniContractInfo> getContractList(int chainId, int pageNumber, int pageSize, String address, int tokenType, boolean isHidden) {
         Bson filter = null;
-        if (onlyNrc20) {
-            filter = Filters.and(Filters.eq("isNrc20", true), Filters.eq("creater", address));
-        } else if (isHidden) {
-            filter = Filters.and(Filters.ne("isNrc20", true), Filters.eq("creater", address));
+        if (isHidden) {
+            filter = Filters.and(Filters.eq("tokenType", 0), Filters.eq("creater", address));
+        } else if (tokenType > -1) {
+            filter = Filters.and(Filters.eq("tokenType", tokenType), Filters.eq("creater", address));
         } else {
             filter = Filters.eq("creater", address);
         }
@@ -182,7 +182,7 @@ public class MongoContractServiceImpl implements ContractService {
         BasicDBObject fields = new BasicDBObject();
         fields.append("_id", 1).append("remark", 1).append("txCount", 1).append("status", 1)
                 .append("createTime", 1).append("balance", 1).append("tokenName", 1).append("symbol", 1)
-                .append("decimals", 1).append("totalSupply", 1).append("creater", 1).append("alias", 1);
+                .append("decimals", 1).append("totalSupply", 1).append("creater", 1).append("alias", 1).append("tokenType", 1);
 
         List<Document> docsList = this.mongoDBService.pageQuery(CONTRACT_TABLE + chainId, filter, fields, sort, pageNumber, pageSize);
         List<MiniContractInfo> contractInfos = new ArrayList<>();

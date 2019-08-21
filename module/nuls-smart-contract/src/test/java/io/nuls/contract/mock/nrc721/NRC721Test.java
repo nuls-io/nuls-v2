@@ -90,12 +90,10 @@ public class NRC721Test extends MockBase {
     }
 
     @Test
-    public void testContractMethod() throws IOException {
-
+    public void testContractMethod() throws Exception {
         InputStream in = new FileInputStream(InvokeExternalCmdLocalTest.class.getResource("/NRC721Metadata-test.jar").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
         List<ProgramMethod> programMethods = programExecutor.jarMethod(contractCode);
-
         Log.info("\n");
         Log.info(JSONUtils.obj2PrettyJson(programMethods));
         Log.info("\n");
