@@ -345,6 +345,7 @@ public class AnalysisHandler {
         deposit.setTxHash(cancelDeposit.getJoinTxHash().toHex());
         deposit.setFee(tx.getFee());
         deposit.setCreateTime(tx.getTime());
+        deposit.setBlockHeight(tx.getBlockHeight());
         deposit.setType(ApiConstant.CANCEL_CONSENSUS);
         return deposit;
     }

@@ -73,17 +73,25 @@ public class CommandHelper {
 //     * 确认新密码
 //     * @param newPwd
 //     */
-    public static void confirmPwd(String newPwd) {
+    public static boolean confirmPwd(String newPwd) {
         System.out.print("Please confirm new password:");
         ConsoleReader reader = null;
+        int i = 3; //retry
+        boolean passed=true;
         try {
             reader = new ConsoleReader();
             String confirmed = null;
             do {
+                i--;
+                if(i<0) {
+                    passed=false;
+                    break;
+                }
                 confirmed = reader.readLine('*');
                 if (!newPwd.equals(confirmed)) {
-                    System.out.print("Password confirmation doesn't match the password.\nConfirm new password: ");
+                    System.out.print("Password confirmation doesn't match the password.\nConfirm new password:");
                 }
+
             } while (!newPwd.equals(confirmed));
         } catch (IOException e) {
 
@@ -96,6 +104,7 @@ public class CommandHelper {
                 e.printStackTrace();
             }
         }
+        return  passed;
     }
 
     //
