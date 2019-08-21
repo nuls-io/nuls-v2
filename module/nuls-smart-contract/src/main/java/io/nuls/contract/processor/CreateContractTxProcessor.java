@@ -101,6 +101,7 @@ public class CreateContractTxProcessor {
         boolean acceptDirectTransfer = contractResult.isAcceptDirectTransfer();
         info.setAcceptDirectTransfer(acceptDirectTransfer);
         info.setNrc20(isNrc20Contract);
+        info.setTokenType(contractResult.getTokenType());
         // 获取 token tracker
         if (isNrc20Contract) {
             // NRC20 token 标准方法获取名称数据

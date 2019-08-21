@@ -56,7 +56,10 @@ public class VMContext {
     @Autowired
     private ContractHelper contractHelper;
 
-    public static Map<String, ProgramMethod> NRC20_METHODS = null;
+    private static Map<String, ProgramMethod> NRC20_METHODS = null;
+    private static Map<String, ProgramMethod> NRC721_METHODS = null;
+    private static ProgramMethod NRC721_OVERLOAD_METHOD_SAFE_DATA = null;
+    private static ProgramMethod NRC721_OVERLOAD_METHOD_SAFE = null;
 
     /**
      * @param hash
@@ -173,6 +176,30 @@ public class VMContext {
 
     public static void setNrc20Methods(Map<String, ProgramMethod> nrc20Methods) {
         NRC20_METHODS = nrc20Methods;
+    }
+
+    public static Map<String, ProgramMethod> getNrc721Methods() {
+        return NRC721_METHODS;
+    }
+
+    public static void setNrc721Methods(Map<String, ProgramMethod> nrc721Methods) {
+        NRC721_METHODS = nrc721Methods;
+    }
+
+    public static ProgramMethod getNrc721OverloadMethodSafeData() {
+        return NRC721_OVERLOAD_METHOD_SAFE_DATA;
+    }
+
+    public static void setNrc721OverloadMethodSafeData(ProgramMethod nrc721OverloadMethodSafeData) {
+        NRC721_OVERLOAD_METHOD_SAFE_DATA = nrc721OverloadMethodSafeData;
+    }
+
+    public static ProgramMethod getNrc721OverloadMethodSafe() {
+        return NRC721_OVERLOAD_METHOD_SAFE;
+    }
+
+    public static void setNrc721OverloadMethodSafe(ProgramMethod nrc721OverloadMethodSafe) {
+        NRC721_OVERLOAD_METHOD_SAFE = nrc721OverloadMethodSafe;
     }
 
     public long getBestHeight(int chainId) {
