@@ -221,14 +221,15 @@ public class VersionMessageHandler extends BaseMessageHandler {
         if (node.isSeedNode()) {
             //向种子节点请求地址
             MessageManager.getInstance().sendGetAddressMessage(node, false, false, true);
-            List<NodeGroup> nodeGroupList = NodeGroupManager.getInstance().getNodeGroups();
-            nodeGroupList.forEach(nodeGroup -> {
-                //主网种子节点请求跨链地址
-                if (nodeGroup.isMoonCrossGroup()) {
-                    MessageManager.getInstance().sendGetCrossAddressMessage(nodeGroupManager.getMoonMainNet(), nodeGroup, false, true, true);
-                }
-            });
         }
+        List<NodeGroup> nodeGroupList = NodeGroupManager.getInstance().getNodeGroups();
+        nodeGroupList.forEach(nodeGroup -> {
+            //client像主网节点请求跨链地址列表
+            if (nodeGroup.isMoonCrossGroup()) {
+                MessageManager.getInstance().sendGetCrossAddressMessage(nodeGroupManager.getMoonMainNet(), nodeGroup, false, true, true);
+            }
+        });
+
     }
 
     /**
