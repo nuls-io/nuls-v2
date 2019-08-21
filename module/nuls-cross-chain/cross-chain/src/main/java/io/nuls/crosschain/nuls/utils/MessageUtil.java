@@ -596,12 +596,13 @@ public class MessageUtil {
         try {
             int minNodeAmount = chain.getConfig().getMinNodeAmount();
             boolean chainExist = false;
-            if(config.isMainNet()){
-                for (ChainInfo chainInfo:chainManager.getRegisteredCrossChainList()) {
-                    if(chainInfo.getChainId() == toChainId){
+            for (ChainInfo chainInfo:chainManager.getRegisteredCrossChainList()) {
+                if(chainInfo.getChainId() == toChainId){
+                    if(config.isMainNet()){
                         minNodeAmount = chainInfo.getMinAvailableNodeNum();
-                        chainExist = true;
                     }
+                    chainExist = true;
+                    break;
                 }
             }
             if(!chainExist){
