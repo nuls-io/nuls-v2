@@ -29,9 +29,9 @@ public interface ContractService {
 
     PageInfo<ContractTxInfo> getContractTxList(int chainId, String contractAddress, int type, int pageNumber, int pageSize);
 
-    PageInfo<MiniContractInfo> getContractList(int chainId, int pageNumber, int pageSize, boolean onlyNrc20, boolean isHidden);
+    PageInfo<MiniContractInfo> getContractList(int chainId, int pageNumber, int pageSize, boolean onlyNrc20, int tokenType, boolean isHidden);
 
-    PageInfo<MiniContractInfo> getContractList(int chainId, int pageNumber, int pageSize, String address, boolean onlyNrc20, boolean isHidden);
+    PageInfo<MiniContractInfo> getContractList(int chainId, int pageNumber, int pageSize, String address, boolean onlyNrc20, int tokenType, boolean isHidden);
 
     List<MiniContractInfo> getContractList(int chainId, List<String> addressList);
 

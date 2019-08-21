@@ -319,7 +319,7 @@ public class ContractController {
     @RpcMethod("getContractList")
     public RpcResult getContractList(List<Object> params) {
         VerifyUtils.verifyParams(params, 5);
-        int chainId, pageNumber, pageSize;
+        int chainId, pageNumber, pageSize, tokenType;
         boolean onlyNrc20, isHidden;
         try {
             chainId = (int) params.get(0);
@@ -342,7 +342,12 @@ public class ContractController {
             return RpcResult.paramError("[onlyNrc20] is invalid");
         }
         try {
-            isHidden = (boolean) params.get(4);
+            tokenType = (int) params.get(4);
+        } catch (Exception e) {
+            return RpcResult.paramError("[tokenType] is invalid");
+        }
+        try {
+            isHidden = (boolean) params.get(5);
         } catch (Exception e) {
             return RpcResult.paramError("[isHidden] is invalid");
         }
@@ -358,7 +363,7 @@ public class ContractController {
         if (!CacheManager.isChainExist(chainId)) {
             pageInfo = new PageInfo<>(pageNumber, pageSize);
         } else {
-            pageInfo = contractService.getContractList(chainId, pageNumber, pageSize, onlyNrc20, isHidden);
+            pageInfo = contractService.getContractList(chainId, pageNumber, pageSize, onlyNrc20, tokenType, isHidden);
         }
         RpcResult result = new RpcResult();
         result.setResult(pageInfo);
@@ -368,7 +373,7 @@ public class ContractController {
     @RpcMethod("getAccountContractList")
     public RpcResult getAccountContractList(List<Object> params) {
         VerifyUtils.verifyParams(params, 6);
-        int chainId, pageNumber, pageSize;
+        int chainId, pageNumber, pageSize, tokenType;
         boolean onlyNrc20, isHidden;
         String address;
         try {
@@ -397,7 +402,12 @@ public class ContractController {
             return RpcResult.paramError("[onlyNrc20] is invalid");
         }
         try {
-            isHidden = (boolean) params.get(5);
+            tokenType = (int) params.get(5);
+        } catch (Exception e) {
+            return RpcResult.paramError("[tokenType] is invalid");
+        }
+        try {
+            isHidden = (boolean) params.get(6);
         } catch (Exception e) {
             return RpcResult.paramError("[isHidden] is invalid");
         }
