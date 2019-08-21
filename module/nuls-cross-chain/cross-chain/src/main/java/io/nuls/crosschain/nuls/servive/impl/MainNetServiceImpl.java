@@ -107,11 +107,15 @@ public class MainNetServiceImpl implements MainNetService {
         int chainId = (int)params.get(ParamConstant.CHAIN_ID);
         int assetId = (int)params.get(ParamConstant.ASSET_ID);
         RegisteredChainMessage registeredChainMessage = registeredCrossChainService.get();
-        for (ChainInfo chainInfo:registeredChainMessage.getChainInfoList()) {
-            if(chainInfo.getChainId() == chainId){
-                for (AssetInfo assetInfo:chainInfo.getAssetInfoList()) {
-                    if (assetInfo.getAssetId() == assetId){
-                        assetInfo.setUsable(false);
+        if(assetId == 0){
+            registeredChainMessage.getChainInfoList().removeIf(chainInfo -> chainInfo.getChainId() == chainId);
+        }else{
+            for (ChainInfo chainInfo:registeredChainMessage.getChainInfoList()) {
+                if(chainInfo.getChainId() == chainId){
+                    for (AssetInfo assetInfo:chainInfo.getAssetInfoList()) {
+                        if (assetInfo.getAssetId() == assetId){
+                            assetInfo.setUsable(false);
+                        }
                     }
                 }
             }
