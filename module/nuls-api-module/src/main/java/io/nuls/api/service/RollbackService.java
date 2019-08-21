@@ -350,6 +350,8 @@ public class RollbackService {
 
         depositInfo.setDeleteKey(null);
         depositInfo.setDeleteHeight(0);
+        cancelInfo.setTxHash(tx.getHash());
+        cancelInfo.setKey(DBUtil.getDepositKey(tx.getHash(), depositInfo.getKey()));
         cancelInfo.setNew(true);
         depositInfoList.add(depositInfo);
         depositInfoList.add(cancelInfo);

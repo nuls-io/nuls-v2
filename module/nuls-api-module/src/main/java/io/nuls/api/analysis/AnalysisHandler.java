@@ -334,7 +334,7 @@ public class AnalysisHandler {
         info.setCreateTime(tx.getTime());
         info.setBlockHeight(tx.getBlockHeight());
         info.setFee(tx.getFee());
-        info.setKey(DBUtil.getDepositKey(info.getTxHash(), info.getAddress()));
+
         return info;
     }
 

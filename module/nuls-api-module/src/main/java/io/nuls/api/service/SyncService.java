@@ -350,6 +350,7 @@ public class SyncService {
         txRelationInfoSet.add(new TxRelationInfo(input, tx, tx.getFee().getValue(), ledgerInfo.getTotalBalance()));
 
         DepositInfo depositInfo = (DepositInfo) tx.getTxData();
+        depositInfo.setKey(DBUtil.getDepositKey(depositInfo.getTxHash(), depositInfo.getAddress()));
         depositInfo.setNew(true);
         depositInfoList.add(depositInfo);
         accountInfo.setConsensusLock(accountInfo.getConsensusLock().add(depositInfo.getAmount()));
