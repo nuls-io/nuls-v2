@@ -16,6 +16,8 @@ public class MiniContractInfo {
 
     private int status; // -1,执行失败，0未认证 1正在审核 2通过验证 3 已删除
 
+    //token类型, 0 - 非token, 1 - NRC20, 2 - NRC721"
+    private int tokenType;
     private long createTime;
 
     private BigInteger balance;
@@ -29,6 +31,13 @@ public class MiniContractInfo {
 
     private String totalSupply;
 
+    public int getTokenType() {
+        return tokenType;
+    }
+
+    public void setTokenType(int tokenType) {
+        this.tokenType = tokenType;
+    }
     public String getContractAddress() {
         return contractAddress;
     }

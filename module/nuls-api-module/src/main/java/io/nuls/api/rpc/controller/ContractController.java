@@ -426,7 +426,7 @@ public class ContractController {
         if (!CacheManager.isChainExist(chainId)) {
             pageInfo = new PageInfo<>(pageNumber, pageSize);
         } else {
-            pageInfo = contractService.getContractList(chainId, pageNumber, pageSize, address, onlyNrc20, isHidden);
+            pageInfo = contractService.getContractList(chainId, pageNumber, pageSize, address, onlyNrc20, tokenType, isHidden);
         }
         RpcResult result = new RpcResult();
         result.setResult(pageInfo);
