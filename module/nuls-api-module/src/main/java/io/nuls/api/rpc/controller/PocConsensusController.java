@@ -164,6 +164,11 @@ public class PocConsensusController {
 
         pageInfo = agentService.getAgentList(chainId, type, pageNumber, pageSize);
         for (AgentInfo agentInfo : pageInfo.getList()) {
+            long count = punishService.getYellowCount(chainId, agentInfo.getAgentAddress());
+            if (agentInfo.getTotalPackingCount() != 0) {
+                agentInfo.setLostRate(DoubleUtils.div(count, count + agentInfo.getTotalPackingCount()));
+            }
+            agentInfo.setYellowCardCount((int) count);
             Result<AgentInfo> clientResult = WalletRpcHandler.getAgentInfo(chainId, agentInfo.getTxHash());
             if (clientResult.isSuccess()) {
                 agentInfo.setCreditValue(clientResult.getData().getCreditValue());
@@ -214,6 +219,11 @@ public class PocConsensusController {
         }
         pageInfo = agentService.getAgentList(chainId, pageNumber, pageSize);
         for (AgentInfo agentInfo : pageInfo.getList()) {
+            long count = punishService.getYellowCount(chainId, agentInfo.getAgentAddress());
+            if (agentInfo.getTotalPackingCount() != 0) {
+                agentInfo.setLostRate(DoubleUtils.div(count, count + agentInfo.getTotalPackingCount()));
+            }
+            agentInfo.setYellowCardCount((int) count);
             Result<AgentInfo> clientResult = WalletRpcHandler.getAgentInfo(chainId, agentInfo.getTxHash());
             if (clientResult.isSuccess()) {
                 agentInfo.setCreditValue(clientResult.getData().getCreditValue());
