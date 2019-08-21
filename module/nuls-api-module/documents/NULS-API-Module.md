@@ -1553,8 +1553,8 @@ contractAddress:string							//智能合约地址
 chainId: int									//链的id
 pageNumber:int									//页码
 pageSize:int									//每页显示条数，取值[1-1000]
-onlyNrc20:boolean 								//只查询nrc20合约
-isHidden: boolean 								//是否隐藏nrc20合约，这个参数只有在			                                                   onlyNrc20=false时有效
+tokenType:int 								    //合约token类型  0: 非token, 1: NRC20, 2: NRC721
+isHidden: boolean 								//是否隐藏token类型合约
 ```
 
 返回：
@@ -1579,7 +1579,8 @@ isHidden: boolean 								//是否隐藏nrc20合约，这个参数只有在			  
            			"tokenName":					//string	token名称
            		    "symbol": "KQB",				//string	token符号
                     "decimals": 2,					//string	小数位
-        			"totalSupply": "1000000000000", //bigInt	总量
+        			"totalSupply": "1000000000000", //bigInt	总量,
+        			"tokenType":1                   //int       token类型, 0: 非token, 1: NRC20, 2: NRC721
            		}
           ]
      }

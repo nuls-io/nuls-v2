@@ -41,6 +41,8 @@ public class ContractAddressInfoPo {
     private long createTime;
     private long blockHeight;
     private boolean acceptDirectTransfer;
+    //token类型, 0 - 非token, 1 - NRC20, 2 - NRC721
+    private int tokenType;
     private boolean isNrc20;
     private String nrc20TokenName;
     private String nrc20TokenSymbol;
@@ -118,6 +120,14 @@ public class ContractAddressInfoPo {
 
     public void setAcceptDirectTransfer(boolean acceptDirectTransfer) {
         this.acceptDirectTransfer = acceptDirectTransfer;
+    }
+
+    public int getTokenType() {
+        return tokenType;
+    }
+
+    public void setTokenType(int tokenType) {
+        this.tokenType = tokenType;
     }
 
     public boolean isNrc20() {

@@ -26,6 +26,9 @@ public class ContractInfo extends TxDataInfo {
 
     private String errorMsg;
 
+    //token类型, 0 - 非token, 1 - NRC20, 2 - NRC721
+    private int tokenType;
+
     private boolean isNrc20;//是否支持NRC20协议(0-否、1-是)
 
     private boolean isDirectPayable;
@@ -109,6 +112,14 @@ public class ContractInfo extends TxDataInfo {
         info.setMethods(methods);
         return info;
 
+    }
+
+    public int getTokenType() {
+        return tokenType;
+    }
+
+    public void setTokenType(int tokenType) {
+        this.tokenType = tokenType;
     }
 
     public String getContractAddress() {
