@@ -79,7 +79,7 @@ public class ContractPOCMSendTxTest extends BaseQuery {
     }
 
     /**
-     * 创建TOKEN, POCM, 添加节点，抵押，退出
+     * 流程 - 创建TOKEN, POCM, 添加节点，抵押，退出
      */
     @Test
     public void testConsensusDepositOthersProcessor() throws Exception {
@@ -106,8 +106,19 @@ public class ContractPOCMSendTxTest extends BaseQuery {
         this.invokeCall(toAddress0, BigInteger.ZERO, contractAddress, "quit", null, "remark", "0");
         Log.info("begin quit {}", toAddress1);
         this.invokeCall(toAddress1, BigInteger.ZERO, contractAddress, "quit", null, "remark", "0");
+    }
 
-
+    /**
+     * 流程 - 退出
+     */
+    @Test
+    public void testQuitProcessor() throws Exception {
+        Log.info("begin quit {}", sender);
+        this.invokeCall(sender, BigInteger.ZERO, contractAddress, "quit", null, "remark", "0");
+        Log.info("begin quit {}", toAddress0);
+        this.invokeCall(toAddress0, BigInteger.ZERO, contractAddress, "quit", null, "remark", "0");
+        Log.info("begin quit {}", toAddress1);
+        this.invokeCall(toAddress1, BigInteger.ZERO, contractAddress, "quit", null, "remark", "0");
     }
 
     private String pocm(String nrc20) throws Exception {
