@@ -400,30 +400,28 @@ public class SyncService {
         agentInfo.setStatus(ApiConstant.STOP_AGENT);
         agentInfo.setNew(false);
 
-        CoinFromInfo agentInput = null;
-        for (CoinFromInfo input : tx.getCoinFroms()) {
-            if (input.getAddress().equals(agentInfo.getAgentAddress())) {
-                agentInput = input;
-                break;
-            }
-        }
-        //处理代理节点地址相关数据
-        AccountInfo accountInfo = queryAccountInfo(chainId, agentInput.getAddress());
-        accountInfo.setTxCount(accountInfo.getTxCount() + 1);
-        accountInfo.setConsensusLock(accountInfo.getConsensusLock().subtract(agentInfo.getDeposit()));
-        AccountLedgerInfo ledgerInfo = calcBalance(chainId, agentInput.getChainId(), agentInput.getAssetsId(), accountInfo, tx.getFee().getValue());
-        txRelationInfoSet.add(new TxRelationInfo(agentInput, tx, tx.getFee().getValue(), ledgerInfo.getTotalBalance()));
-        //处理其他委托的地址相关数据
+        //处理每个地址的余额和锁定的变化，注意区分共识地址和其他委托地址
+        AccountInfo accountInfo;
+        AccountLedgerInfo ledgerInfo;
         for (int i = 0; i < tx.getCoinTos().size(); i++) {
             CoinToInfo output = tx.getCoinTos().get(i);
+            //locktime > 0的记录为创建节点的记录,金额可通过节点保证金获取，在此过滤
+            if (output.getLockTime() > 0) {
+                continue;
+            }
+            accountInfo = queryAccountInfo(chainId, output.getAddress());
+            accountInfo.setTxCount(accountInfo.getTxCount() + 1);
+
             if (!output.getAddress().equals(agentInfo.getAgentAddress())) {
-                accountInfo = queryAccountInfo(chainId, output.getAddress());
-                accountInfo.setTxCount(accountInfo.getTxCount() + 1);
+                accountInfo.setConsensusLock(accountInfo.getConsensusLock().subtract(output.getAmount()));
                 ledgerInfo = queryLedgerInfo(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
                 txRelationInfoSet.add(new TxRelationInfo(output, tx, BigInteger.ZERO, ledgerInfo.getTotalBalance()));
+            } else {
+                accountInfo.setConsensusLock(accountInfo.getConsensusLock().subtract(output.getAmount()).subtract(agentInfo.getDeposit()));
+                ledgerInfo = calcBalance(chainId, output.getChainId(), output.getAssetsId(), accountInfo, tx.getFee().getValue());
+                txRelationInfoSet.add(new TxRelationInfo(output, tx, tx.getFee().getValue(), ledgerInfo.getTotalBalance()));
             }
         }
-
         //查询所有当前节点下的委托，生成取消委托记录
         List<DepositInfo> depositInfos = depositService.getDepositListByAgentHash(chainId, agentInfo.getTxHash());
         for (DepositInfo depositInfo : depositInfos) {
@@ -442,12 +440,8 @@ public class SyncService {
             depositInfo.setDeleteHeight(tx.getHeight());
             depositInfoList.add(depositInfo);
             depositInfoList.add(cancelDeposit);
-            accountInfo = queryAccountInfo(chainId, depositInfo.getAddress());
-            accountInfo.setConsensusLock(accountInfo.getConsensusLock().subtract(depositInfo.getAmount()));
+
             agentInfo.setTotalDeposit(agentInfo.getTotalDeposit().subtract(depositInfo.getAmount()));
-            if (agentInfo.getTotalDeposit().compareTo(BigInteger.ZERO) < 0) {
-                throw new NulsRuntimeException(ApiErrorCode.DATA_ERROR, "entity error: agent[" + agentInfo.getTxHash() + "] totalDeposit < 0");
-            }
         }
     }
 
@@ -477,25 +471,24 @@ public class SyncService {
         agentInfo.setDeleteHeight(tx.getHeight());
         agentInfo.setStatus(ApiConstant.STOP_AGENT);
         agentInfo.setNew(false);
-
-        boolean hadAgent = false;
+        //后续逻辑处理和停止节点交易一致
+        AccountInfo accountInfo;
+        AccountLedgerInfo ledgerInfo;
         for (int i = 0; i < tx.getCoinTos().size(); i++) {
             CoinToInfo output = tx.getCoinTos().get(i);
-            if (output.getAddress().equals(agentInfo.getAgentAddress())) {
-                if (!hadAgent) {
-                    AccountInfo accountInfo = queryAccountInfo(chainId, output.getAddress());
-                    accountInfo.setTxCount(accountInfo.getTxCount() + 1);
-                    accountInfo.setConsensusLock(accountInfo.getConsensusLock().subtract(agentInfo.getDeposit()));
-                    AccountLedgerInfo ledgerInfo = queryLedgerInfo(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
-                    txRelationInfoSet.add(new TxRelationInfo(output, tx, BigInteger.ZERO, ledgerInfo.getTotalBalance()));
-                    hadAgent = true;
-                }
-            } else {
-                AccountInfo accountInfo = queryAccountInfo(chainId, output.getAddress());
-                accountInfo.setTxCount(accountInfo.getTxCount() + 1);
-                AccountLedgerInfo ledgerInfo = queryLedgerInfo(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
-                txRelationInfoSet.add(new TxRelationInfo(output, tx, BigInteger.ZERO, ledgerInfo.getTotalBalance()));
+            if(output.getLockTime() > 0) {
+                continue;
             }
+            accountInfo = queryAccountInfo(chainId, output.getAddress());
+            accountInfo.setTxCount(accountInfo.getTxCount() + 1);
+
+            if (!output.getAddress().equals(agentInfo.getAgentAddress())) {
+                accountInfo.setConsensusLock(accountInfo.getConsensusLock().subtract(output.getAmount()));
+            } else {
+                accountInfo.setConsensusLock(accountInfo.getConsensusLock().subtract(output.getAmount()).subtract(agentInfo.getDeposit()));
+            }
+            ledgerInfo = queryLedgerInfo(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
+            txRelationInfoSet.add(new TxRelationInfo(output, tx, BigInteger.ZERO, ledgerInfo.getTotalBalance()));
         }
         //根据节点找到委托列表
         List<DepositInfo> depositInfos = depositService.getDepositListByAgentHash(chainId, agentInfo.getTxHash());
@@ -517,12 +510,7 @@ public class SyncService {
                 depositInfoList.add(depositInfo);
                 depositInfoList.add(cancelDeposit);
 
-                AccountInfo accountInfo = queryAccountInfo(chainId, depositInfo.getAddress());
-                accountInfo.setConsensusLock(accountInfo.getConsensusLock().subtract(depositInfo.getAmount()));
                 agentInfo.setTotalDeposit(agentInfo.getTotalDeposit().subtract(depositInfo.getAmount()));
-                if (agentInfo.getTotalDeposit().compareTo(BigInteger.ZERO) < 0) {
-                    throw new NulsRuntimeException(ApiErrorCode.DATA_ERROR, "entity error: agent[" + agentInfo.getTxHash() + "] totalDeposit < 0");
-                }
             }
         }
     }
@@ -786,7 +774,7 @@ public class SyncService {
     public void save(int chainId, BlockInfo blockInfo) {
         long height = blockInfo.getHeader().getHeight();
 
-        long time1,time2;
+        long time1, time2;
 
         SyncInfo syncInfo = chainService.saveNewSyncInfo(chainId, height);
 
@@ -871,7 +859,7 @@ public class SyncService {
         chainService.updateStep(syncInfo);
         ledgerService.saveLedgerList(chainId, accountLedgerInfoMap);
         time2 = System.currentTimeMillis();
-        System.out.println("-----------saveLedgerList, use: " + (time2 - time1) );
+        System.out.println("-----------saveLedgerList, use: " + (time2 - time1));
         time1 = System.currentTimeMillis();
         //存储智能合约信息表
         syncInfo.setStep(30);

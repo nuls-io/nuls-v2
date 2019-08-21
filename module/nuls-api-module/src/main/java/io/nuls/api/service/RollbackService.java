@@ -323,15 +323,13 @@ public class RollbackService {
         //查找到委托记录，设置isNew = true，最后做存储的时候删除
         DepositInfo depositInfo = (DepositInfo) tx.getTxData();
         depositInfo.setNew(true);
+        depositInfo.setKey(DBUtil.getDepositKey(depositInfo.getTxHash(), depositInfo.getAddress()));
         depositInfoList.add(depositInfo);
         accountInfo.setConsensusLock(accountInfo.getConsensusLock().subtract(depositInfo.getAmount()));
 
         AgentInfo agentInfo = queryAgentInfo(chainId, depositInfo.getAgentHash(), 1);
         agentInfo.setTotalDeposit(agentInfo.getTotalDeposit().subtract(depositInfo.getAmount()));
         agentInfo.setNew(false);
-//        if (agentInfo.getTotalDeposit().compareTo(BigInteger.ZERO) < 0) {
-//            throw new RuntimeException("data error: agent[" + agentInfo.getTxHash() + "] totalDeposit < 0");
-//        }
     }
 
     private void processCancelDepositTx(int chainId, TransactionInfo tx) {
@@ -345,7 +343,6 @@ public class RollbackService {
         //查询取消委托记录，再根据deleteHash反向查到委托记录
         DepositInfo cancelInfo = (DepositInfo) tx.getTxData();
         DepositInfo depositInfo = depositService.getDepositInfoByKey(chainId, DBUtil.getDepositKey(cancelInfo.getTxHash(), accountInfo.getAddress()));
-//        DepositInfo depositInfo = depositService.getDepositInfoByKey(chainId, cancelInfo.getDeleteKey());
         accountInfo.setConsensusLock(accountInfo.getConsensusLock().add(depositInfo.getAmount()));
 
         depositInfo.setDeleteKey(null);
@@ -362,7 +359,8 @@ public class RollbackService {
     }
 
     private void processStopAgentTx(int chainId, TransactionInfo tx) {
-        AgentInfo agentInfo = queryAgentInfo(chainId, tx.getHash(), 4);
+        AgentInfo agentInfo = (AgentInfo) tx.getTxData();
+        agentInfo = queryAgentInfo(chainId, agentInfo.getTxHash(), 1);
         agentInfo.setDeleteHash(null);
         agentInfo.setDeleteHeight(0);
         agentInfo.setStatus(1);
@@ -370,15 +368,18 @@ public class RollbackService {
 
         for (int i = 0; i < tx.getCoinTos().size(); i++) {
             CoinToInfo output = tx.getCoinTos().get(i);
+            //locktime > 0的记录为创建节点的记录,金额可通过节点保证金获取，在此过滤
+            if (output.getLockTime() > 0) {
+                continue;
+            }
             AccountInfo accountInfo = queryAccountInfo(chainId, output.getAddress());
-            if (accountInfo.getAddress().equals(agentInfo.getAgentAddress())) {
-                if (output.getLockTime() > 0) {
-                    accountInfo.setTxCount(accountInfo.getTxCount() - 1);
-                    accountInfo.setConsensusLock(accountInfo.getConsensusLock().add(agentInfo.getDeposit()));
-                    calcBalance(chainId, output.getChainId(), output.getAssetsId(), accountInfo, tx.getFee().getValue());
-                }
+            accountInfo.setTxCount(accountInfo.getTxCount() - 1);
+
+            if (!accountInfo.getAddress().equals(agentInfo.getAgentAddress())) {
+                accountInfo.setConsensusLock(accountInfo.getConsensusLock().add(output.getAmount()));
             } else {
-                accountInfo.setTxCount(accountInfo.getTxCount() - 1);
+                accountInfo.setConsensusLock(accountInfo.getConsensusLock().add(output.getAmount()).add(agentInfo.getDeposit()));
+                calcBalance(chainId, output.getChainId(), output.getAssetsId(), accountInfo, tx.getFee().getValue());
             }
             txRelationInfoSet.add(new TxRelationInfo(output.getAddress(), tx.getHash()));
         }
@@ -397,8 +398,6 @@ public class RollbackService {
                 depositInfoList.add(cancelDeposit);
                 depositInfoList.add(depositInfo);
 
-                AccountInfo accountInfo = queryAccountInfo(chainId, depositInfo.getAddress());
-                accountInfo.setConsensusLock(accountInfo.getConsensusLock().add(depositInfo.getAmount()));
                 agentInfo.setTotalDeposit(agentInfo.getTotalDeposit().add(depositInfo.getAmount()));
             }
         }
@@ -431,22 +430,24 @@ public class RollbackService {
 
         for (int i = 0; i < tx.getCoinTos().size(); i++) {
             CoinToInfo output = tx.getCoinTos().get(i);
+            if(output.getLockTime() > 0) {
+                continue;
+            }
             AccountInfo accountInfo = queryAccountInfo(chainId, output.getAddress());
-            if (accountInfo.getAddress().equals(agentInfo.getAgentAddress())) {
-                if (output.getLockTime() > 0) {
-                    accountInfo.setTxCount(accountInfo.getTxCount() - 1);
-                    accountInfo.setConsensusLock(accountInfo.getConsensusLock().add(agentInfo.getDeposit()));
-                }
+            accountInfo.setTxCount(accountInfo.getTxCount() - 1);
+
+            if (!output.getAddress().equals(agentInfo.getAgentAddress())) {
+                accountInfo.setConsensusLock(accountInfo.getConsensusLock().add(output.getAmount()));
             } else {
-                accountInfo.setTxCount(accountInfo.getTxCount() - 1);
+                accountInfo.setConsensusLock(accountInfo.getConsensusLock().add(output.getAmount()).add(agentInfo.getDeposit()));
             }
             txRelationInfoSet.add(new TxRelationInfo(output.getAddress(), tx.getHash()));
         }
-
         //根据交易hash查询所有取消委托的记录
         List<DepositInfo> depositInfos = depositService.getDepositListByHash(chainId, tx.getHash());
         if (!depositInfos.isEmpty()) {
             for (DepositInfo cancelDeposit : depositInfos) {
+                //需要删除的数据
                 cancelDeposit.setNew(true);
 
                 DepositInfo depositInfo = depositService.getDepositInfoByKey(chainId, cancelDeposit.getDeleteKey());
@@ -456,8 +457,6 @@ public class RollbackService {
                 depositInfoList.add(cancelDeposit);
                 depositInfoList.add(depositInfo);
 
-                AccountInfo accountInfo = queryAccountInfo(chainId, depositInfo.getAddress());
-                accountInfo.setConsensusLock(accountInfo.getConsensusLock().subtract(depositInfo.getAmount()));
                 agentInfo.setTotalDeposit(agentInfo.getTotalDeposit().add(depositInfo.getAmount()));
             }
         }
