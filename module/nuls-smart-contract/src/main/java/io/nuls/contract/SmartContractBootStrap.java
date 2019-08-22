@@ -36,9 +36,10 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.util.Map;
 
-import static io.nuls.contract.constant.ContractConstant.NRC20_STANDARD_FILE;
+import static io.nuls.contract.constant.ContractConstant.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
@@ -80,6 +81,7 @@ public class SmartContractBootStrap extends RpcModule {
             initNulsConfig();
             initDB();
             initNRC20Standard();
+            initNRC721Standard();
             chainManager.initChain();
             ModuleHelper.init(this);
         } catch (Exception e) {
@@ -137,6 +139,34 @@ public class SmartContractBootStrap extends RpcModule {
             Log.error("init NRC20Standard map error.", e);
         }
         VMContext.setNrc20Methods(jsonMap);
+    }
+
+    /**
+     * 初始化NRC721合约标准格式
+     */
+    private void initNRC721Standard() {
+        String json = null;
+        try {
+            json = IoUtils.read(NRC721_STANDARD_FILE);
+        } catch (Exception e) {
+            // skip it
+            Log.error("init NRC721Standard error.", e);
+        }
+        if (json == null) {
+            return;
+        }
+
+        Map<String, ProgramMethod> jsonMap = null;
+        try {
+            jsonMap = JSONUtils.json2map(json, ProgramMethod.class);
+        } catch (Exception e) {
+            Log.error("init NRC721Standard map error.", e);
+        }
+        ProgramMethod overloadMethodSafeData = jsonMap.remove(NRC721_SAFETRANSFERFROM_DATA);
+        ProgramMethod overloadMethodSafe = jsonMap.remove(NRC721_SAFETRANSFERFROM);
+        VMContext.setNrc721Methods(jsonMap);
+        VMContext.setNrc721OverloadMethodSafeData(overloadMethodSafeData);
+        VMContext.setNrc721OverloadMethodSafe(overloadMethodSafe);
     }
 
     /**

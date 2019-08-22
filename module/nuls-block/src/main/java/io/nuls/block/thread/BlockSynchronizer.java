@@ -29,10 +29,7 @@ import io.nuls.block.constant.LocalBlockStateEnum;
 import io.nuls.block.constant.StatusEnum;
 import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.manager.ContextManager;
-import io.nuls.block.model.BlockDownloaderParams;
-import io.nuls.block.model.ChainContext;
-import io.nuls.block.model.ChainParameters;
-import io.nuls.block.model.Node;
+import io.nuls.block.model.*;
 import io.nuls.block.rpc.call.ConsensusCall;
 import io.nuls.block.rpc.call.NetworkCall;
 import io.nuls.block.rpc.call.TransactionCall;
@@ -400,7 +397,8 @@ public class BlockSynchronizer implements Runnable {
         //连接节点高度小于本节点高度1000
         availableNodes.removeIf(availableNode -> availableNode.getHeight() < context.getLatestHeight() - context.getParameters().getHeightRange());
         //连接节点与本节点在同一条链上，并且高度比本节点低
-        availableNodes.removeIf(availableNode -> context.getMasterChain().getHashList().contains(availableNode.getHash()));
+        Chain masterChain = BlockChainManager.getMasterChain(chainId);
+        availableNodes.removeIf(availableNode -> masterChain.getHashList().contains(availableNode.getHash()) && availableNode.getHeight() < context.getLatestHeight());
         return availableNodes;
     }
 
