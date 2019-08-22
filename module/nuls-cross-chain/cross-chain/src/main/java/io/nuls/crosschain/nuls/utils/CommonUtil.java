@@ -164,17 +164,4 @@ public class CommonUtil {
         Map packerInfo = ConsensusCall.getPackerInfo(chain);
         return (List<String>) packerInfo.get("packAddressList");
     }
-
-    public static void main(String[] args){
-        List<String> stringList = new ArrayList<>();
-        stringList.add("1");
-        stringList.add("1");
-        stringList.add("2");
-        stringList.add("2");
-        stringList.add("1");
-        stringList.add("2");
-        System.out.println(stringList);
-        stringList = stringList.stream().distinct().collect(Collectors.toList());
-        System.out.println(stringList);
-    }
 }
