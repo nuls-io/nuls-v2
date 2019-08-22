@@ -27,6 +27,7 @@ import io.nuls.crosschain.nuls.srorage.ConfigService;
 import io.nuls.crosschain.nuls.utils.manager.ChainManager;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 跨链模块基础工具类
@@ -98,6 +99,7 @@ public class CommonUtil {
 
     public static List<P2PHKSignature> getMisMatchSigns(Chain chain, TransactionSignature transactionSignature, List<String> addressList){
         List<P2PHKSignature>misMatchSignList = new ArrayList<>();
+        transactionSignature.setP2PHKSignatures(transactionSignature.getP2PHKSignatures().stream().distinct().collect(Collectors.toList()));
         Iterator<P2PHKSignature> iterator = transactionSignature.getP2PHKSignatures().iterator();
         while (iterator.hasNext()){
             P2PHKSignature signature = iterator.next();
@@ -161,5 +163,18 @@ public class CommonUtil {
     public static List<String> getCurrentPackAddressList(Chain chain){
         Map packerInfo = ConsensusCall.getPackerInfo(chain);
         return (List<String>) packerInfo.get("packAddressList");
+    }
+
+    public static void main(String[] args){
+        List<String> stringList = new ArrayList<>();
+        stringList.add("1");
+        stringList.add("1");
+        stringList.add("2");
+        stringList.add("2");
+        stringList.add("1");
+        stringList.add("2");
+        System.out.println(stringList);
+        stringList = stringList.stream().distinct().collect(Collectors.toList());
+        System.out.println(stringList);
     }
 }
