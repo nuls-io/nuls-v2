@@ -462,13 +462,13 @@ public class RollbackService {
     }
 
     private void processCreateContract(int chainId, TransactionInfo tx) {
-        CoinFromInfo coinFromInfo = tx.getCoinFroms().get(0);
-
-        AccountInfo accountInfo = queryAccountInfo(chainId, coinFromInfo.getAddress());
-        accountInfo.setTxCount(accountInfo.getTxCount() - 1);
-        calcBalance(chainId, coinFromInfo);
-        txRelationInfoSet.add(new TxRelationInfo(accountInfo.getAddress(), tx.getHash()));
-
+        //CoinFromInfo coinFromInfo = tx.getCoinFroms().get(0);
+        //
+        //AccountInfo accountInfo = queryAccountInfo(chainId, coinFromInfo.getAddress());
+        //accountInfo.setTxCount(accountInfo.getTxCount() - 1);
+        //calcBalance(chainId, coinFromInfo);
+        //txRelationInfoSet.add(new TxRelationInfo(accountInfo.getAddress(), tx.getHash()));
+        processTransferTx(chainId, tx);
         ContractInfo contractInfo = (ContractInfo) tx.getTxData();
         contractInfo.setNew(true);
         contractTxHashList.add(tx.getHash());

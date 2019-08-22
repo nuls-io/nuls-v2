@@ -181,7 +181,7 @@ _**详细描述: 创建的账户存在于本地钱包内**_
 ----
 | 参数名                                                      |       参数类型        | 参数描述     | 是否必填 |
 | -------------------------------------------------------- |:-----------------:| -------- |:----:|
-| 批量创建账户                                                   | accountcreateform | 批量创建账户表单 |  是   |
+| form                                                     | accountcreateform | 批量创建账户表单 |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;count    |        int        | 新建账户数量   |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;prefix   |      string       | 地址前缀     |  否   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;password |      string       | 账户密码     |  是   |
@@ -234,7 +234,7 @@ _**详细描述: 修改账户密码**_
 | 参数名                                                         |           参数类型            | 参数描述     | 是否必填 |
 | ----------------------------------------------------------- |:-------------------------:| -------- |:----:|
 | address                                                     |          string           | 账户地址     |  是   |
-| 账户密码信息                                                      | accountupdatepasswordform | 账户密码信息表单 |  是   |
+| form                                                        | accountupdatepasswordform | 账户密码信息表单 |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;password    |          string           | 原始密码     |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;newPassword |          string           | 新密码      |  是   |
 
@@ -273,7 +273,7 @@ _**详细描述: 只能导出本地钱包已存在账户的私钥**_
 | 参数名                                                      |        参数类型         | 参数描述     | 是否必填 |
 | -------------------------------------------------------- |:-------------------:| -------- |:----:|
 | address                                                  |       string        | 账户地址     |  是   |
-| 账户密码信息                                                   | accountpasswordform | 账户密码信息表单 |  是   |
+| form                                                     | accountpasswordform | 账户密码信息表单 |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;password |       string        | 密码       |  是   |
 
 返回值
@@ -323,7 +323,7 @@ _**详细描述: 导入私钥时，需要输入密码给明文私钥加密**_
 ----
 | 参数名                                                       |           参数类型            | 参数描述                           | 是否必填 |
 | --------------------------------------------------------- |:-------------------------:| ------------------------------ |:----:|
-| 根据私钥导入账户                                                  | accountprikeypasswordform | 根据私钥导入账户表单                     |  是   |
+| form                                                      | accountprikeypasswordform | 根据私钥导入账户表单                     |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;priKey    |          string           | 私钥                             |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;password  |          string           | 密码                             |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;overwrite |          boolean          | 是否覆盖账户: false:不覆盖导入, true:覆盖导入 |  是   |
@@ -407,7 +407,7 @@ _**详细描述: 根据keystore文件路径导入账户**_
 ----
 | 参数名                                                       |           参数类型            | 参数描述                           | 是否必填 |
 | --------------------------------------------------------- |:-------------------------:| ------------------------------ |:----:|
-| 根据keystore文件路径导入账户                                        | accountkeystoreimportform | 根据keystore文件路径导入账户表单           |  是   |
+| form                                                      | accountkeystoreimportform | 根据keystore文件路径导入账户表单           |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;path      |          string           | 本地keystore文件路径                 |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;password  |          string           | 密码                             |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;overwrite |          boolean          | 是否覆盖账户: false:不覆盖导入, true:覆盖导入 |  是   |
@@ -466,7 +466,7 @@ _**详细描述: 根据keystore字符串导入账户**_
 ----
 | 参数名                                                                                                                 |             参数类型              | 参数描述                           | 是否必填 |
 | ------------------------------------------------------------------------------------------------------------------- |:-----------------------------:| ------------------------------ |:----:|
-| 根据keystore字符串导入账户                                                                                                   | accountkeystorejsonimportform | 根据keystore字符串导入账户表单            |  是   |
+| form                                                                                                                | accountkeystorejsonimportform | 根据keystore字符串导入账户表单            |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;keystore                                                            |            object             | keystore字符串                    |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;address             |            string             | 账户地址                           |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;encryptedPrivateKey |            string             | 加密后的私钥                         |  是   |
@@ -529,7 +529,7 @@ _**详细描述: 账户备份，导出AccountKeyStore文件到指定目录**_
 | 参数名                                                      |         参数类型          | 参数描述           | 是否必填 |
 | -------------------------------------------------------- |:---------------------:| -------------- |:----:|
 | address                                                  |        string         | 账户地址           |  是   |
-| keystone导出信息                                             | accountkeystorebackup | keystone导出信息表单 |  是   |
+| form                                                     | accountkeystorebackup | keystone导出信息表单 |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;password |        string         | 密码             |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;path     |        string         | 文件路径           |  是   |
 
@@ -581,7 +581,7 @@ _**详细描述: 别名格式为1-20位小写字母和数字的组合，设置�
 ----
 | 参数名                                                      |     参数类型     | 参数描述     | 是否必填 |
 | -------------------------------------------------------- |:------------:| -------- |:----:|
-| 账户设置别名                                                   | setaliasform | 账户设置别名表单 |  是   |
+| form                                                     | setaliasform | 账户设置别名表单 |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;address  |    string    | 账户地址     |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;alias    |    string    | 别名       |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;password |    string    | 账户密码     |  是   |
@@ -665,7 +665,32 @@ _**request form data:**_
 }
 ```
 
-1.11 离线 - 批量创建账户
+1.11 验证地址格式是否正确
+===============
+Cmd: /api/account/address/validate
+----------------------------------
+_**详细描述: 验证地址格式是否正确**_
+### HttpMethod: POST
+
+参数列表
+----
+无参数
+
+返回值
+---
+无返回值
+### Example request data: 
+
+_**request path:**_
+略
+
+_**request form data:**_
+无
+
+### Example response data: 
+略
+
+1.12 离线 - 批量创建账户
 ================
 Cmd: /api/account/offline
 -------------------------
@@ -685,7 +710,7 @@ _**详细描述: 创建的账户不会保存到钱包中,接口直接返回账�
 ----
 | 参数名                                                      |       参数类型        | 参数描述       | 是否必填 |
 | -------------------------------------------------------- |:-----------------:| ---------- |:----:|
-| 离线批量创建账户                                                 | accountcreateform | 离线批量创建账户表单 |  是   |
+| form                                                     | accountcreateform | 离线批量创建账户表单 |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;count    |        int        | 新建账户数量     |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;prefix   |      string       | 地址前缀       |  否   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;password |      string       | 账户密码       |  是   |
@@ -726,7 +751,7 @@ _**request form data:**_
 }
 ```
 
-1.12 离线获取账户明文私钥
+1.13 离线获取账户明文私钥
 ===============
 Cmd: /api/account/priKey/offline
 --------------------------------
@@ -746,7 +771,7 @@ _**详细描述: 离线获取账户明文私钥**_
 ----
 | 参数名                                                             |     参数类型      | 参数描述         | 是否必填 |
 | --------------------------------------------------------------- |:-------------:| ------------ |:----:|
-| 离线获取账户明文私钥                                                      | getprikeyform | 离线获取账户明文私钥表单 |  是   |
+| form                                                            | getprikeyform | 离线获取账户明文私钥表单 |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;address         |    string     | 账户地址         |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;encryptedPriKey |    string     | 账户密文私钥       |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;password        |    string     | 账户密码         |  是   |
@@ -780,7 +805,7 @@ _**request form data:**_
 }
 ```
 
-1.13 离线修改账户密码
+1.14 离线修改账户密码
 =============
 Cmd: /api/account/password/offline/
 -----------------------------------
@@ -801,7 +826,7 @@ _**详细描述: 离线修改账户密码**_
 ----
 | 参数名                                                             |       参数类型        | 参数描述       | 是否必填 |
 | --------------------------------------------------------------- |:-----------------:| ---------- |:----:|
-| 离线修改账户密码                                                        | resetpasswordform | 离线修改账户密码表单 |  是   |
+| form                                                            | resetpasswordform | 离线修改账户密码表单 |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;address         |      string       | 账户地址       |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;encryptedPriKey |      string       | 账户密文私钥     |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;oldPassword     |      string       | 账户原密码      |  是   |
@@ -823,7 +848,7 @@ _**request form data:**_
 ### Example response data: 
 略
 
-1.14 多账户摘要签名
+1.15 多账户摘要签名
 ============
 Cmd: /api/account/multi/sign
 ----------------------------
@@ -847,7 +872,7 @@ _**详细描述: 用于签名离线组装的多账户转账交易，调用接口
 ----
 | 参数名                                                                                                                 |      参数类型       | 参数描述        | 是否必填 |
 | ------------------------------------------------------------------------------------------------------------------- |:---------------:| ----------- |:----:|
-| 多账户摘要签名                                                                                                             |  multisignform  | 多账户摘要签名表单   |  是   |
+| form                                                                                                                |  multisignform  | 多账户摘要签名表单   |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dtoList                                                             | list&lt;object> | keystore集合  |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;address             |     string      | 地址          |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;priKey              |     string      | 明文私钥        |  否   |
@@ -890,7 +915,7 @@ _**request form data:**_
 }
 ```
 
-1.15 明文私钥摘要签名
+1.16 明文私钥摘要签名
 =============
 Cmd: /api/account/priKey/sign
 -----------------------------
@@ -910,7 +935,7 @@ _**详细描述: 明文私钥摘要签名**_
 ----
 | 参数名                                                     |      参数类型      | 参数描述        | 是否必填 |
 | ------------------------------------------------------- |:--------------:| ----------- |:----:|
-| 明文私钥摘要签名                                                | prikeysignform | 明文私钥摘要签名表单  |  是   |
+| form                                                    | prikeysignform | 明文私钥摘要签名表单  |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;txHex   |     string     | 交易序列化Hex字符串 |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;address |     string     | 账户地址        |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;priKey  |     string     | 账户明文私钥      |  是   |
@@ -946,7 +971,7 @@ _**request form data:**_
 }
 ```
 
-1.16 密文私钥摘要签名
+1.17 密文私钥摘要签名
 =============
 Cmd: /api/account/encryptedPriKey/sign
 --------------------------------------
@@ -967,7 +992,7 @@ _**详细描述: 密文私钥摘要签名**_
 ----
 | 参数名                                                             |          参数类型           | 参数描述        | 是否必填 |
 | --------------------------------------------------------------- |:-----------------------:| ----------- |:----:|
-| 密文私钥摘要签名                                                        | encryptedprikeysignform | 密文私钥摘要签名表单  |  是   |
+| form                                                            | encryptedprikeysignform | 密文私钥摘要签名表单  |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;txHex           |         string          | 交易序列化Hex字符串 |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;address         |         string          | 账户地址        |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;encryptedPriKey |         string          | 账户密文私钥      |  是   |
@@ -1005,7 +1030,7 @@ _**request form data:**_
 }
 ```
 
-1.17 创建多签账户
+1.18 创建多签账户
 ===========
 Cmd: /api/account/multiSign/create
 ----------------------------------
@@ -1024,7 +1049,7 @@ _**详细描述: 根据多个账户的公钥创建多签账户，minSigns为多�
 ----
 | 参数名                                                      |            参数类型            | 参数描述     | 是否必填 |
 | -------------------------------------------------------- |:--------------------------:| -------- |:----:|
-| 创建多签账户                                                   | multisignaccountcreateform | 创建多签账户表单 |  是   |
+| form                                                     | multisignaccountcreateform | 创建多签账户表单 |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pubKeys  |      list&lt;string>       | 账户公钥集合   |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;minSigns |            int             | 最小签名数    |  是   |
 
@@ -1044,7 +1069,7 @@ _**request form data:**_
 ### Example response data: 
 略
 
-1.18 离线创建设置别名交易
+1.19 离线创建设置别名交易
 ===============
 Cmd: /api/account/aliasTx/create
 --------------------------------
@@ -1065,7 +1090,7 @@ _**详细描述: 根据多个账户的公钥创建多签账户，minSigns为多�
 ----
 | 参数名                                                     |   参数类型   | 参数描述     | 是否必填 |
 | ------------------------------------------------------- |:--------:| -------- |:----:|
-| 创建多签账户                                                  | aliasdto | 创建多签账户表单 |  是   |
+| dto                                                     | aliasdto | 创建多签账户表单 |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;address |  string  | 账户地址     |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;alias   |  string  | 别名       |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nonce   |  string  | 资产nonce值 |  是   |
@@ -1088,7 +1113,7 @@ _**request form data:**_
 ### Example response data: 
 略
 
-1.19 多签账户离线创建设置别名交易
+1.20 多签账户离线创建设置别名交易
 ===================
 Cmd: /api/account/multiSign/aliasTx/create
 ------------------------------------------
@@ -1111,7 +1136,7 @@ _**详细描述: 多签账户离线创建设置别名交易**_
 ----
 | 参数名                                                      |       参数类型        | 参数描述     | 是否必填 |
 | -------------------------------------------------------- |:-----------------:| -------- |:----:|
-| 多签账户离线创建设置别名交易                                           | multisignaliasdto | 创建别名交易表单 |  是   |
+| dto                                                      | multisignaliasdto | 创建别名交易表单 |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;address  |      string       | 账户地址     |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;alias    |      string       | 别名       |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nonce    |      string       | 资产nonce值 |  是   |
@@ -1125,6 +1150,43 @@ _**详细描述: 多签账户离线创建设置别名交易**_
 | ----- |:------:| ------------ |
 | hash  | string | 交易hash       |
 | txHex | string | 交易序列化16进制字符串 |
+### Example request data: 
+
+_**request path:**_
+略
+
+_**request form data:**_
+无
+
+### Example response data: 
+略
+
+1.21 根据私钥获取账户地址格式
+=================
+Cmd: /api/account/address/priKey
+--------------------------------
+_**详细描述: 根据私钥获取账户地址格式**_
+### HttpMethod: POST
+
+### Form json data: 
+```json
+{
+  "priKey" : null
+}
+```
+
+参数列表
+----
+| 参数名                                                    |    参数类型    | 参数描述   | 是否必填 |
+| ------------------------------------------------------ |:----------:| ------ |:----:|
+| form                                                   | prikeyform | 私钥表单   |  是   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;priKey |   string   | 账户明文私钥 |  是   |
+
+返回值
+---
+| 字段名   |  字段类型  | 参数描述 |
+| ----- |:------:| ---- |
+| value | string | 账户地址 |
 ### Example request data: 
 
 _**request path:**_
@@ -1151,24 +1213,25 @@ _**详细描述: 根据区块高度查询区块头**_
 
 返回值
 ---
-| 字段名                  |  字段类型  | 参数描述                 |
-| -------------------- |:------:| -------------------- |
-| hash                 | string | 区块的hash值             |
-| preHash              | string | 上一个区块的hash值          |
-| merkleHash           | string | 梅克尔hash              |
-| time                 | string | 区块生成时间               |
-| height               |  long  | 区块高度                 |
-| txCount              |  int   | 区块打包交易数量             |
-| blockSignature       | string | 签名Hex.encode(byte[]) |
-| size                 |  int   | 大小                   |
-| packingAddress       | string | 打包地址                 |
-| roundIndex           |  long  | 共识轮次                 |
-| consensusMemberCount |  int   | 参与共识成员数量             |
-| roundStartTime       | string | 当前共识轮开始时间            |
-| packingIndexOfRound  |  int   | 当前轮次打包出块的名次          |
-| mainVersion          | short  | 主网当前生效的版本            |
-| blockVersion         | short  | 区块的版本，可以理解为本地钱包的版本   |
-| stateRoot            | string | 智能合约世界状态根            |
+| 字段名                  |      字段类型       | 参数描述                 |
+| -------------------- |:---------------:| -------------------- |
+| hash                 |     string      | 区块的hash值             |
+| preHash              |     string      | 上一个区块的hash值          |
+| merkleHash           |     string      | 梅克尔hash              |
+| time                 |     string      | 区块生成时间               |
+| height               |      long       | 区块高度                 |
+| txCount              |       int       | 区块打包交易数量             |
+| blockSignature       |     string      | 签名Hex.encode(byte[]) |
+| size                 |       int       | 大小                   |
+| packingAddress       |     string      | 打包地址                 |
+| roundIndex           |      long       | 共识轮次                 |
+| consensusMemberCount |       int       | 参与共识成员数量             |
+| roundStartTime       |     string      | 当前共识轮开始时间            |
+| packingIndexOfRound  |       int       | 当前轮次打包出块的名次          |
+| mainVersion          |      short      | 主网当前生效的版本            |
+| blockVersion         |      short      | 区块的版本，可以理解为本地钱包的版本   |
+| stateRoot            |     string      | 智能合约世界状态根            |
+| txHashList           | list&lt;string> | 区块打包的交易hash集合        |
 ### Example request data: 
 
 _**request path:**_
@@ -1217,24 +1280,25 @@ _**详细描述: 根据区块hash查询区块头**_
 
 返回值
 ---
-| 字段名                  |  字段类型  | 参数描述                 |
-| -------------------- |:------:| -------------------- |
-| hash                 | string | 区块的hash值             |
-| preHash              | string | 上一个区块的hash值          |
-| merkleHash           | string | 梅克尔hash              |
-| time                 | string | 区块生成时间               |
-| height               |  long  | 区块高度                 |
-| txCount              |  int   | 区块打包交易数量             |
-| blockSignature       | string | 签名Hex.encode(byte[]) |
-| size                 |  int   | 大小                   |
-| packingAddress       | string | 打包地址                 |
-| roundIndex           |  long  | 共识轮次                 |
-| consensusMemberCount |  int   | 参与共识成员数量             |
-| roundStartTime       | string | 当前共识轮开始时间            |
-| packingIndexOfRound  |  int   | 当前轮次打包出块的名次          |
-| mainVersion          | short  | 主网当前生效的版本            |
-| blockVersion         | short  | 区块的版本，可以理解为本地钱包的版本   |
-| stateRoot            | string | 智能合约世界状态根            |
+| 字段名                  |      字段类型       | 参数描述                 |
+| -------------------- |:---------------:| -------------------- |
+| hash                 |     string      | 区块的hash值             |
+| preHash              |     string      | 上一个区块的hash值          |
+| merkleHash           |     string      | 梅克尔hash              |
+| time                 |     string      | 区块生成时间               |
+| height               |      long       | 区块高度                 |
+| txCount              |       int       | 区块打包交易数量             |
+| blockSignature       |     string      | 签名Hex.encode(byte[]) |
+| size                 |       int       | 大小                   |
+| packingAddress       |     string      | 打包地址                 |
+| roundIndex           |      long       | 共识轮次                 |
+| consensusMemberCount |       int       | 参与共识成员数量             |
+| roundStartTime       |     string      | 当前共识轮开始时间            |
+| packingIndexOfRound  |       int       | 当前轮次打包出块的名次          |
+| mainVersion          |      short      | 主网当前生效的版本            |
+| blockVersion         |      short      | 区块的版本，可以理解为本地钱包的版本   |
+| stateRoot            |     string      | 智能合约世界状态根            |
+| txHashList           | list&lt;string> | 区块打包的交易hash集合        |
 ### Example request data: 
 
 _**request path:**_
@@ -1281,24 +1345,25 @@ _**详细描述: 查询最新区块头信息**_
 
 返回值
 ---
-| 字段名                  |  字段类型  | 参数描述                 |
-| -------------------- |:------:| -------------------- |
-| hash                 | string | 区块的hash值             |
-| preHash              | string | 上一个区块的hash值          |
-| merkleHash           | string | 梅克尔hash              |
-| time                 | string | 区块生成时间               |
-| height               |  long  | 区块高度                 |
-| txCount              |  int   | 区块打包交易数量             |
-| blockSignature       | string | 签名Hex.encode(byte[]) |
-| size                 |  int   | 大小                   |
-| packingAddress       | string | 打包地址                 |
-| roundIndex           |  long  | 共识轮次                 |
-| consensusMemberCount |  int   | 参与共识成员数量             |
-| roundStartTime       | string | 当前共识轮开始时间            |
-| packingIndexOfRound  |  int   | 当前轮次打包出块的名次          |
-| mainVersion          | short  | 主网当前生效的版本            |
-| blockVersion         | short  | 区块的版本，可以理解为本地钱包的版本   |
-| stateRoot            | string | 智能合约世界状态根            |
+| 字段名                  |      字段类型       | 参数描述                 |
+| -------------------- |:---------------:| -------------------- |
+| hash                 |     string      | 区块的hash值             |
+| preHash              |     string      | 上一个区块的hash值          |
+| merkleHash           |     string      | 梅克尔hash              |
+| time                 |     string      | 区块生成时间               |
+| height               |      long       | 区块高度                 |
+| txCount              |       int       | 区块打包交易数量             |
+| blockSignature       |     string      | 签名Hex.encode(byte[]) |
+| size                 |       int       | 大小                   |
+| packingAddress       |     string      | 打包地址                 |
+| roundIndex           |      long       | 共识轮次                 |
+| consensusMemberCount |       int       | 参与共识成员数量             |
+| roundStartTime       |     string      | 当前共识轮开始时间            |
+| packingIndexOfRound  |       int       | 当前轮次打包出块的名次          |
+| mainVersion          |      short      | 主网当前生效的版本            |
+| blockVersion         |      short      | 区块的版本，可以理解为本地钱包的版本   |
+| stateRoot            |     string      | 智能合约世界状态根            |
+| txHashList           | list&lt;string> | 区块打包的交易hash集合        |
 ### Example request data: 
 
 _**request path:**_
@@ -1364,6 +1429,7 @@ _**详细描述: 包含区块打包的所有交易信息，此接口返回数据
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mainVersion                                                   |      short      | 主网当前生效的版本                                 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;blockVersion                                                  |      short      | 区块的版本，可以理解为本地钱包的版本                        |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;stateRoot                                                     |     string      | 智能合约世界状态根                                 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;txHashList                                                    | list&lt;string> | 区块打包的交易hash集合                             |
 | txs                                                                                                           | list&lt;object> | 交易列表                                      |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;hash                                                          |     string      | 交易的hash值                                  |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type                                                          |       int       | 交易类型                                      |
@@ -1375,7 +1441,7 @@ _**详细描述: 包含区块打包的所有交易信息，此接口返回数据
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;status                                                        |       int       | 交易状态 0:unConfirm(待确认), 1:confirm(已确认)     |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size                                                          |       int       | 交易大小                                      |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inBlockIndex                                                  |       int       | 在区块中的顺序，存储在rocksDB中是无序的，保存区块时赋值，取出后根据此值排序 |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;form                                                          | list&lt;object> | 输入                                        |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;from                                                          | list&lt;object> | 输入                                        |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;address       |     string      | 账户地址                                      |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assetsChainId |       int       | 资产发行链的id                                  |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assetsId      |       int       | 资产id                                      |
@@ -1501,6 +1567,7 @@ _**详细描述: 包含区块打包的所有交易信息，此接口返回数据
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mainVersion                                                   |      short      | 主网当前生效的版本                                 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;blockVersion                                                  |      short      | 区块的版本，可以理解为本地钱包的版本                        |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;stateRoot                                                     |     string      | 智能合约世界状态根                                 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;txHashList                                                    | list&lt;string> | 区块打包的交易hash集合                             |
 | txs                                                                                                           | list&lt;object> | 交易列表                                      |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;hash                                                          |     string      | 交易的hash值                                  |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type                                                          |       int       | 交易类型                                      |
@@ -1512,7 +1579,7 @@ _**详细描述: 包含区块打包的所有交易信息，此接口返回数据
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;status                                                        |       int       | 交易状态 0:unConfirm(待确认), 1:confirm(已确认)     |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size                                                          |       int       | 交易大小                                      |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inBlockIndex                                                  |       int       | 在区块中的顺序，存储在rocksDB中是无序的，保存区块时赋值，取出后根据此值排序 |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;form                                                          | list&lt;object> | 输入                                        |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;from                                                          | list&lt;object> | 输入                                        |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;address       |     string      | 账户地址                                      |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assetsChainId |       int       | 资产发行链的id                                  |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assetsId      |       int       | 资产id                                      |
@@ -1638,6 +1705,7 @@ _**详细描述: 包含区块打包的所有交易信息，此接口返回数据
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mainVersion                                                   |      short      | 主网当前生效的版本                                 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;blockVersion                                                  |      short      | 区块的版本，可以理解为本地钱包的版本                        |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;stateRoot                                                     |     string      | 智能合约世界状态根                                 |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;txHashList                                                    | list&lt;string> | 区块打包的交易hash集合                             |
 | txs                                                                                                           | list&lt;object> | 交易列表                                      |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;hash                                                          |     string      | 交易的hash值                                  |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type                                                          |       int       | 交易类型                                      |
@@ -1649,7 +1717,7 @@ _**详细描述: 包含区块打包的所有交易信息，此接口返回数据
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;status                                                        |       int       | 交易状态 0:unConfirm(待确认), 1:confirm(已确认)     |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size                                                          |       int       | 交易大小                                      |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inBlockIndex                                                  |       int       | 在区块中的顺序，存储在rocksDB中是无序的，保存区块时赋值，取出后根据此值排序 |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;form                                                          | list&lt;object> | 输入                                        |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;from                                                          | list&lt;object> | 输入                                        |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;address       |     string      | 账户地址                                      |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assetsChainId |       int       | 资产发行链的id                                  |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assetsId      |       int       | 资产id                                      |
@@ -1836,7 +1904,7 @@ _**详细描述: 根据hash获取交易**_
 | status                                                        |       int       | 交易状态 0:unConfirm(待确认), 1:confirm(已确认)     |
 | size                                                          |       int       | 交易大小                                      |
 | inBlockIndex                                                  |       int       | 在区块中的顺序，存储在rocksDB中是无序的，保存区块时赋值，取出后根据此值排序 |
-| form                                                          | list&lt;object> | 输入                                        |
+| from                                                          | list&lt;object> | 输入                                        |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;address       |     string      | 账户地址                                      |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assetsChainId |       int       | 资产发行链的id                                  |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assetsId      |       int       | 资产id                                      |
@@ -2701,33 +2769,34 @@ _**详细描述: 获取智能合约详细信息**_
 
 返回值
 ---
-| 字段名                                                                                                      |      字段类型       | 参数描述                          |
-| -------------------------------------------------------------------------------------------------------- |:---------------:| ----------------------------- |
-| createTxHash                                                                                             |     string      | 发布合约的交易hash                   |
-| address                                                                                                  |     string      | 合约地址                          |
-| creater                                                                                                  |     string      | 合约创建者地址                       |
-| alias                                                                                                    |     string      | 合约别名                          |
-| createTime                                                                                               |      long       | 合约创建时间（单位：秒）                  |
-| blockHeight                                                                                              |      long       | 合约创建时的区块高度                    |
-| isDirectPayable                                                                                          |     boolean     | 是否接受直接转账                      |
-| isNrc20                                                                                                  |     boolean     | 是否是NRC20合约                    |
-| nrc20TokenName                                                                                           |     string      | NRC20-token名称                 |
-| nrc20TokenSymbol                                                                                         |     string      | NRC20-token符号                 |
-| decimals                                                                                                 |      long       | NRC20-token支持的小数位数            |
-| totalSupply                                                                                              |     string      | NRC20-token发行总量               |
-| status                                                                                                   |     string      | 合约状态（not_found, normal, stop） |
-| method                                                                                                   | list&lt;object> | 合约方法列表                        |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;name                                                     |     string      | 方法名称                          |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;desc                                                     |     string      | 方法描述                          |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;args                                                     | list&lt;object> | 方法参数列表                        |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type     |     string      | 参数类型                          |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;name     |     string      | 参数名称                          |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;required |     boolean     | 是否必填                          |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;returnArg                                                |     string      | 返回值类型                         |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;view                                                     |     boolean     | 是否视图方法（调用此方法数据不上链）            |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;event                                                    |     boolean     | 是否是事件                         |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;payable                                                  |     boolean     | 是否是可接受主链资产转账的方法               |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;jsonSerializable                                         |     boolean     | 方法返回值是否JSON序列化                |
+| 字段名                                                                                                      |      字段类型       | 参数描述                                       |
+| -------------------------------------------------------------------------------------------------------- |:---------------:| ------------------------------------------ |
+| createTxHash                                                                                             |     string      | 发布合约的交易hash                                |
+| address                                                                                                  |     string      | 合约地址                                       |
+| creater                                                                                                  |     string      | 合约创建者地址                                    |
+| alias                                                                                                    |     string      | 合约别名                                       |
+| createTime                                                                                               |      long       | 合约创建时间（单位：秒）                               |
+| blockHeight                                                                                              |      long       | 合约创建时的区块高度                                 |
+| isDirectPayable                                                                                          |     boolean     | 是否接受直接转账                                   |
+| tokenType                                                                                                |       int       | token类型, 0 - 非token, 1 - NRC20, 2 - NRC721 |
+| isNrc20                                                                                                  |     boolean     | 是否是NRC20合约                                 |
+| nrc20TokenName                                                                                           |     string      | NRC20-token名称                              |
+| nrc20TokenSymbol                                                                                         |     string      | NRC20-token符号                              |
+| decimals                                                                                                 |      long       | NRC20-token支持的小数位数                         |
+| totalSupply                                                                                              |     string      | NRC20-token发行总量                            |
+| status                                                                                                   |     string      | 合约状态（not_found, normal, stop）              |
+| method                                                                                                   | list&lt;object> | 合约方法列表                                     |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;name                                                     |     string      | 方法名称                                       |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;desc                                                     |     string      | 方法描述                                       |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;args                                                     | list&lt;object> | 方法参数列表                                     |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type     |     string      | 参数类型                                       |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;name     |     string      | 参数名称                                       |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;required |     boolean     | 是否必填                                       |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;returnArg                                                |     string      | 返回值类型                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;view                                                     |     boolean     | 是否视图方法（调用此方法数据不上链）                         |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;event                                                    |     boolean     | 是否是事件                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;payable                                                  |     boolean     | 是否是可接受主链资产转账的方法                            |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;jsonSerializable                                         |     boolean     | 方法返回值是否JSON序列化                             |
 ### Example request data: 
 
 _**request path:**_

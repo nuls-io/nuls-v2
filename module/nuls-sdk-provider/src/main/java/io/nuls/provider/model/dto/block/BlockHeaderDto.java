@@ -26,6 +26,7 @@
 package io.nuls.provider.model.dto.block;
 
 
+import io.nuls.core.rpc.model.TypeDescriptor;
 import io.nuls.provider.api.config.Context;
 import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
@@ -93,7 +94,7 @@ public class BlockHeaderDto {
     @ApiModelProperty(description = "智能合约世界状态根")
     private String stateRoot;
 
-    @ApiModelProperty(description = "区块打包的交易hash集合")
+    @ApiModelProperty(description = "区块打包的交易hash集合", type = @TypeDescriptor(value = List.class, collectionElement = String.class))
     private List<String> txHashList;
 
     public BlockHeaderDto() {
