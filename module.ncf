@@ -89,8 +89,8 @@ dependent=protocol-update,smart-contract,cross-chain
 maxViewGas=100000000
 systemLogLevel=WARN
 
-[api-module]
-#api-module模块对外的rpc端口号
+[query-service]
+#query-service模块对外的rpc端口号
 rpcPort=18003
 #数据库url地址
 databaseUrl=127.0.0.1
