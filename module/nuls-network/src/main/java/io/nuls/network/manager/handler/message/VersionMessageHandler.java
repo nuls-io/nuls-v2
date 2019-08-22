@@ -47,6 +47,7 @@ import io.nuls.network.rpc.call.BlockRpcService;
 import io.nuls.network.rpc.call.impl.BlockRpcServiceImpl;
 import io.nuls.network.utils.LoggerUtil;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -218,8 +219,16 @@ public class VersionMessageHandler extends BaseMessageHandler {
         LoggerUtil.logger(node.getNodeGroup().getChainId()).info("rec node={} ver msg success.go response verackMessage..cross={}", node.getId(), node.isCrossConnect());
         MessageManager.getInstance().sendHandlerMsg(verackMessage, node, true);
         if (node.isSeedNode()) {
+            //向种子节点请求地址
             MessageManager.getInstance().sendGetAddressMessage(node, false, false, true);
         }
+        List<NodeGroup> nodeGroupList = NodeGroupManager.getInstance().getNodeGroups();
+        nodeGroupList.forEach(nodeGroup -> {
+            //client像主网节点请求跨链地址列表
+            if (nodeGroup.isMoonCrossGroup()) {
+                MessageManager.getInstance().sendGetCrossAddressMessage(nodeGroupManager.getMoonMainNet(), nodeGroup, false, true, true);
+            }
+        });
 
     }
 

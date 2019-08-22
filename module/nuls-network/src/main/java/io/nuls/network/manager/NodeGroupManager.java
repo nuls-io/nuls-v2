@@ -27,7 +27,6 @@ package io.nuls.network.manager;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.ManagerStatusEnum;
-import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.utils.LoggerUtil;
 
@@ -152,12 +151,11 @@ public class NodeGroupManager extends BaseManager {
         List<NodeGroup> list = storageManager.getAllNodeGroupFromDb();
         for (NodeGroup dbNodeGroup : list) {
             if (dbNodeGroup.getChainId() == nodeGroup.getChainId()) {
+                //配置的group优先,数据库存储的忽略
                 continue;
             }
+            //主网的默认跨链网络组属性active
             dbNodeGroup.setCrossActive(true);
-            if (dbNodeGroup.getChainId() == nodeGroup.getChainId()) {
-                continue;
-            }
             nodeGroupManager.addNodeGroup(dbNodeGroup.getChainId(), dbNodeGroup);
         }
     }
