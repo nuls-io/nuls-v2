@@ -150,7 +150,7 @@ public class NodeMaintenanceTask implements Runnable {
 
     private List<Node> getNeedConnectNodes(NodeGroup nodeGroup, boolean isCross) {
         Collection<Node> connectedNodes = nodeGroup.getConnectedNodes(isCross);
-        int maxOutCount = isCross ? networkConfig.getCrossMaxOutCount() : networkConfig.getMaxOutCount();
+        int maxOutCount = isCross ? nodeGroup.getMaxCrossOut() : nodeGroup.getMaxOut();
         if (connectedNodes.size() >= maxOutCount) {
             //进行种子节点的断链
             nodeGroup.stopConnectedSeeds(isCross);
