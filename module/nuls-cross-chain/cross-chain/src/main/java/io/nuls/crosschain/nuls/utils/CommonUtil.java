@@ -99,7 +99,7 @@ public class CommonUtil {
 
     public static List<P2PHKSignature> getMisMatchSigns(Chain chain, TransactionSignature transactionSignature, List<String> addressList){
         List<P2PHKSignature>misMatchSignList = new ArrayList<>();
-        transactionSignature.setP2PHKSignatures(transactionSignature.getP2PHKSignatures().stream().distinct().collect(Collectors.toList()));
+        transactionSignature.setP2PHKSignatures(transactionSignature.getP2PHKSignatures().parallelStream().distinct().collect(Collectors.toList()));
         Iterator<P2PHKSignature> iterator = transactionSignature.getP2PHKSignatures().iterator();
         while (iterator.hasNext()){
             P2PHKSignature signature = iterator.next();
