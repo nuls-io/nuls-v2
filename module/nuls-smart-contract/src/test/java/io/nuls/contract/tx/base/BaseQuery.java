@@ -43,6 +43,7 @@ import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.parse.I18nUtils;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.HostInfo;
@@ -71,6 +72,7 @@ public class BaseQuery extends Base {
     public static void initClass() {
         Log.info("init log.");
         ServiceManager.init(chainId, Provider.ProviderType.RPC);
+        I18nUtils.loadLanguage(BaseQuery.class, "languages", "en");
     }
 
     @Test
@@ -255,7 +257,7 @@ public class BaseQuery extends Base {
      */
     @Test
     public void contractTx() throws Exception {
-        Object[] objects = getContractTx("48cbafcfe0142a47ef6f3139c0bf99d85b09fff478bc774d3380810535a0d6f7");
+        Object[] objects = getContractTx("d23b16077a0514779f59cbf8da263eb21c6edcda28b85c704c13420d20f8f3ec");
         Log.info("contractTx-result:{}", JSONUtils.obj2PrettyJson(objects[0]));
         Assert.assertTrue(null != objects[1]);
     }

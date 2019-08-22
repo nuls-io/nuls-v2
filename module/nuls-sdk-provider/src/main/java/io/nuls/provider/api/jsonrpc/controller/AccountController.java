@@ -378,7 +378,7 @@ public class AccountController {
             @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterDes = "资产ID"),
             @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "账户地址")
     })
-    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = AccountBalanceDto.class))
+    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = AccountBalance.class))
     public RpcResult getAccountBalance(List<Object> params) {
         VerifyUtils.verifyParams(params, 4);
         int chainId, assetChainId, assetId;

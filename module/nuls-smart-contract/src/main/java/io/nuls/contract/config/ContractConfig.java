@@ -60,6 +60,8 @@ public class ContractConfig implements ModuleConfig {
 
     private String packageLogLevels;
 
+    private String blackHolePublicKey;
+
     public int getChainId() {
         return chainId;
     }
@@ -130,6 +132,14 @@ public class ContractConfig implements ModuleConfig {
 
     public void setPackageLogLevels(String packageLogLevels) {
         this.packageLogLevels = packageLogLevels;
+    }
+
+    public String getBlackHolePublicKey() {
+        return blackHolePublicKey;
+    }
+
+    public void setBlackHolePublicKey(String blackHolePublicKey) {
+        this.blackHolePublicKey = blackHolePublicKey;
     }
 
     public ConfigBean getChainConfig() {
