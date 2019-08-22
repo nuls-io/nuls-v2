@@ -250,6 +250,7 @@ public class MessageUtil {
         }
         int signCount = signature.getSignersCount();
         if (signCount >= byzantineCount) {
+            //去掉不是当前验证人的签名和重复签名
             List<P2PHKSignature> misMatchSignList = CommonUtil.getMisMatchSigns(chain, signature, packAddressList);
             signCount -= misMatchSignList.size();
             if (signCount >= byzantineCount) {
