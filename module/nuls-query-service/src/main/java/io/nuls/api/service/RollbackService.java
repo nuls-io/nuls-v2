@@ -345,6 +345,7 @@ public class RollbackService {
         DepositInfo depositInfo = depositService.getDepositInfoByKey(chainId, DBUtil.getDepositKey(cancelInfo.getTxHash(), accountInfo.getAddress()));
         accountInfo.setConsensusLock(accountInfo.getConsensusLock().add(depositInfo.getAmount()));
 
+        cancelInfo.setTxHash(tx.getHash());
         cancelInfo.setKey(DBUtil.getDepositKey(tx.getHash(), depositInfo.getKey()));
         cancelInfo.setNew(true);
 

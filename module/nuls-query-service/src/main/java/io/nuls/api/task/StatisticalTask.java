@@ -133,9 +133,9 @@ public class StatisticalTask implements Runnable {
         }
 
         Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(end);
+        calendar.setTimeInMillis(end * 1000);
         StatisticalInfo info = new StatisticalInfo();
-        info.setTime(end);
+        info.setTime(end * 1000);
         info.setTxCount(txCount);
         info.setAnnualizedReward(annualizedReward);
         info.setNodeCount(nodeCount);

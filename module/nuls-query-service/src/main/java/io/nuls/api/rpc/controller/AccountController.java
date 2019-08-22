@@ -433,6 +433,8 @@ public class AccountController {
             assetId = defaultAsset.getAssetId();
         }
         BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, address, assetChainId, assetId);
+        AccountInfo accountInfo = accountService.getAccountInfo(chainId,address);
+        balanceInfo.setConsensusLock(accountInfo.getConsensusLock());
         return RpcResult.success(balanceInfo);
 
     }
