@@ -145,7 +145,7 @@ echo `${JAVA} -version`
 cd ./Modules/Nuls
 MODULE_PATH=`pwd`
 echo "===================="
-echo "NULS-WALLET STARING"
+echo "NULS-WALLET STARTING"
 echo "===================="
 if [ -n "${RUNFRONT}" ];
 then
