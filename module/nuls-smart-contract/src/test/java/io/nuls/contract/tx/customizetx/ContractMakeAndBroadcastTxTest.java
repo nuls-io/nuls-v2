@@ -87,9 +87,10 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
         new MakeAndBroadcastCreateTxTest()
                 .make()
                 .fake(new ExecuteFake() {
+                    // 测试网黑洞地址 - tNULSeBaMhZnRteniCy3UZqPjTbnWKBPHX1a5d
                     @Override
                     public void execute(ContractBaseTransaction tx) throws Exception {
-                        txFakeAddCoinTo(tx, toAddress9, 1_0000L);
+                        txFakeAddCoinTo(tx, "tNULSeBaMhZnRteniCy3UZqPjTbnWKBPHX1a5d", 1_0000L);
                     }
                 })
                 .signAndBroadcast();

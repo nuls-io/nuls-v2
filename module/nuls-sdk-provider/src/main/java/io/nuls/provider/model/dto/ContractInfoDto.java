@@ -50,6 +50,8 @@ public class ContractInfoDto {
     private long blockHeight;
     @ApiModelProperty(description = "是否接受直接转账")
     private boolean isDirectPayable;
+    @ApiModelProperty(description = "token类型, 0 - 非token, 1 - NRC20, 2 - NRC721")
+    private int tokenType;
     @ApiModelProperty(description = "是否是NRC20合约")
     private boolean isNrc20;
     @ApiModelProperty(description = "NRC20-token名称")
@@ -67,6 +69,14 @@ public class ContractInfoDto {
 
     public ContractInfoDto() {
 
+    }
+
+    public int getTokenType() {
+        return tokenType;
+    }
+
+    public void setTokenType(int tokenType) {
+        this.tokenType = tokenType;
     }
 
     public String getCreateTxHash() {

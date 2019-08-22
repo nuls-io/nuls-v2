@@ -319,8 +319,8 @@ public class ContractController {
     @RpcMethod("getContractList")
     public RpcResult getContractList(List<Object> params) {
         VerifyUtils.verifyParams(params, 5);
-        int chainId, pageNumber, pageSize;
-        boolean onlyNrc20, isHidden;
+        int chainId, pageNumber, pageSize, tokenType;
+        boolean isHidden;
         try {
             chainId = (int) params.get(0);
         } catch (Exception e) {
@@ -337,9 +337,9 @@ public class ContractController {
             return RpcResult.paramError("[pageSize] is invalid");
         }
         try {
-            onlyNrc20 = (boolean) params.get(3);
+            tokenType = (int) params.get(3);
         } catch (Exception e) {
-            return RpcResult.paramError("[onlyNrc20] is invalid");
+            return RpcResult.paramError("[tokenType] is invalid");
         }
         try {
             isHidden = (boolean) params.get(4);
@@ -358,7 +358,7 @@ public class ContractController {
         if (!CacheManager.isChainExist(chainId)) {
             pageInfo = new PageInfo<>(pageNumber, pageSize);
         } else {
-            pageInfo = contractService.getContractList(chainId, pageNumber, pageSize, onlyNrc20, isHidden);
+            pageInfo = contractService.getContractList(chainId, pageNumber, pageSize, tokenType, isHidden);
         }
         RpcResult result = new RpcResult();
         result.setResult(pageInfo);
@@ -368,8 +368,8 @@ public class ContractController {
     @RpcMethod("getAccountContractList")
     public RpcResult getAccountContractList(List<Object> params) {
         VerifyUtils.verifyParams(params, 6);
-        int chainId, pageNumber, pageSize;
-        boolean onlyNrc20, isHidden;
+        int chainId, pageNumber, pageSize, tokenType;
+        boolean isHidden;
         String address;
         try {
             chainId = (int) params.get(0);
@@ -391,10 +391,11 @@ public class ContractController {
         } catch (Exception e) {
             return RpcResult.paramError("[address] is invalid");
         }
+
         try {
-            onlyNrc20 = (boolean) params.get(4);
+            tokenType = (int) params.get(4);
         } catch (Exception e) {
-            return RpcResult.paramError("[onlyNrc20] is invalid");
+            return RpcResult.paramError("[tokenType] is invalid");
         }
         try {
             isHidden = (boolean) params.get(5);
@@ -416,7 +417,7 @@ public class ContractController {
         if (!CacheManager.isChainExist(chainId)) {
             pageInfo = new PageInfo<>(pageNumber, pageSize);
         } else {
-            pageInfo = contractService.getContractList(chainId, pageNumber, pageSize, address, onlyNrc20, isHidden);
+            pageInfo = contractService.getContractList(chainId, pageNumber, pageSize, address, tokenType, isHidden);
         }
         RpcResult result = new RpcResult();
         result.setResult(pageInfo);
@@ -600,7 +601,7 @@ public class ContractController {
     @RpcMethod("getContractMethodArgsTypes")
     public RpcResult getContractMethodArgsTypes(List<Object> params) {
         RpcResult result = this.getContractMethod(params);
-        if(result.getError() != null) {
+        if (result.getError() != null) {
             return result;
         }
         ContractMethod resultMethod = (ContractMethod) result.getResult();

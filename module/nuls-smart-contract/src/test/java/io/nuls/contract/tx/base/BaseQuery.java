@@ -43,6 +43,7 @@ import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.parse.I18nUtils;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.HostInfo;
@@ -71,12 +72,13 @@ public class BaseQuery extends Base {
     public static void initClass() {
         Log.info("init log.");
         ServiceManager.init(chainId, Provider.ProviderType.RPC);
+        I18nUtils.loadLanguage(BaseQuery.class, "languages", "en");
     }
 
     @Test
     public void importPriKeyTest() {
-//        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//打包地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
-//        importPriKey("9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b", password);//25 tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
+        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//打包地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
+        importPriKey("9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b", password);//25 tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
         importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//26 tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
         importPriKey("8212e7ba23c8b52790c45b0514490356cd819db15d364cbe08659b5888339e78", password);//27 tNULSeBaMrbMRiFAUeeAt6swb4xVBNyi81YL24
         importPriKey("4100e2f88c3dba08e5000ed3e8da1ae4f1e0041b856c09d35a26fb399550f530", password);//28 tNULSeBaMu38g1vnJsSZUCwTDU9GsE5TVNUtpD
@@ -255,7 +257,7 @@ public class BaseQuery extends Base {
      */
     @Test
     public void contractTx() throws Exception {
-        Object[] objects = getContractTx("ab1a5758357fe90fe2a4def06518addcf7c1c59f5af4a7c37c349f62bde2ef42");
+        Object[] objects = getContractTx("d23b16077a0514779f59cbf8da263eb21c6edcda28b85c704c13420d20f8f3ec");
         Log.info("contractTx-result:{}", JSONUtils.obj2PrettyJson(objects[0]));
         Assert.assertTrue(null != objects[1]);
     }
@@ -267,7 +269,7 @@ public class BaseQuery extends Base {
     public void getTxClient() throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.CHAIN_ID, chainId);
-        params.put("txHash", "3e7faf0939b131ccb018ce5b96761fb9178cbd247d781a8c1315a4e47c08630f");
+        params.put("txHash", "2f6b65ae8283ee376446b72aadc7312eae4af5e00624d29248343ac74b4f0dcb");
         Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getTxClient", params);
         Map record = (Map) dpResp.getResponseData();
         Map resultMap = (Map) record.get("tx_getTxClient");

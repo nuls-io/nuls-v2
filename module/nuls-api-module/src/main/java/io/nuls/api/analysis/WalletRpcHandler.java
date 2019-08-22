@@ -243,6 +243,7 @@ public class WalletRpcHandler {
 
         contractInfo.setCreater(map.get("creater").toString());
         contractInfo.setNrc20((Boolean) map.get("nrc20"));
+        contractInfo.setTokenType((Integer) map.get("tokenType"));
         contractInfo.setDirectPayable((Boolean) map.get("directPayable"));
         if (contractInfo.isNrc20()) {
             contractInfo.setTokenName(map.get("nrc20TokenName").toString());

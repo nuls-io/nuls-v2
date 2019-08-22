@@ -516,12 +516,14 @@ public class SyncService {
     }
 
     private void processCreateContract(int chainId, TransactionInfo tx) {
-        CoinFromInfo coinFromInfo = tx.getCoinFroms().get(0);
+        //CoinFromInfo coinFromInfo = tx.getCoinFroms().get(0);
+        //
+        //AccountInfo accountInfo = queryAccountInfo(chainId, coinFromInfo.getAddress());
+        //accountInfo.setTxCount(accountInfo.getTxCount() + 1);
+        //calcBalance(chainId, coinFromInfo);
+        //txRelationInfoSet.add(new TxRelationInfo(coinFromInfo, tx, tx.getFee().getValue(), accountInfo.getTotalBalance()));
 
-        AccountInfo accountInfo = queryAccountInfo(chainId, coinFromInfo.getAddress());
-        accountInfo.setTxCount(accountInfo.getTxCount() + 1);
-        calcBalance(chainId, coinFromInfo);
-        txRelationInfoSet.add(new TxRelationInfo(coinFromInfo, tx, tx.getFee().getValue(), accountInfo.getTotalBalance()));
+        processTransferTx(chainId, tx);
 
         ContractInfo contractInfo = (ContractInfo) tx.getTxData();
         contractInfo.setTxCount(1);

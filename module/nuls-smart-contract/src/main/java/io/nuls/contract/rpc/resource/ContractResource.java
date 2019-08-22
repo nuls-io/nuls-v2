@@ -874,8 +874,7 @@ public class ContractResource extends BaseCmd {
         @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
         @Parameter(parameterName = "contractAddress", parameterDes = "合约地址")
     })
-    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = ContractInfoDto.class)
-    )
+    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = ContractInfoDto.class))
     public Response contractInfo(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
@@ -933,6 +932,7 @@ public class ContractResource extends BaseCmd {
             dto.setAlias(po.getAlias());
             dto.setCreateTime(po.getCreateTime());
             dto.setBlockHeight(po.getBlockHeight());
+            dto.setTokenType(po.getTokenType());
             dto.setNrc20(po.isNrc20());
             if (po.isNrc20()) {
                 dto.setNrc20TokenName(po.getNrc20TokenName());
