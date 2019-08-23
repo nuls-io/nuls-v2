@@ -89,8 +89,8 @@ deflationTimeInterval=31536000
 #合约视图方法调用最大消耗的Gas
 maxViewGas=100000000
 
-[api-module]
-#api-module模块对外的rpc端口号
+[public-service]
+#public-service模块对外的rpc端口号
 rpcPort=18003
 #数据库url地址
 databaseUrl=127.0.0.1
@@ -120,6 +120,12 @@ verifiers=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1
 mainByzantineRatio=50
 #主网最大签名数
 maxSignatureCount=100
+
+[nuls-api]
+#httpServer的启动ip
+server_ip=0.0.0.0
+#httpServer的启动port
+server_port=18004
 
 [protocol-update]
 #每隔多少个区块统计一次协议占比
