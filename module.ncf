@@ -132,7 +132,7 @@ mainByzantineRatio=50
 maxSignatureCount=100
 dependent=protocol-update
 
-[nuls-sdk-provider]
+[nuls-api]
 #httpServer的启动ip
 server_ip=0.0.0.0
 #httpServer的启动port

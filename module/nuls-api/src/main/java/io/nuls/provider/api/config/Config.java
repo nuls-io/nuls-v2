@@ -5,7 +5,7 @@ import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.annotation.Configuration;
 import io.nuls.core.core.annotation.Value;
 
-import static io.nuls.provider.api.constant.SdkConstant.SDK_PROVIDER_DOMAIN;
+import static io.nuls.provider.api.constant.SdkConstant.SDK_API;
 
 /**
  * @Author: zhoulijun
@@ -13,7 +13,7 @@ import static io.nuls.provider.api.constant.SdkConstant.SDK_PROVIDER_DOMAIN;
  * @Description:
  */
 @Component
-@Configuration(domain = SDK_PROVIDER_DOMAIN)
+@Configuration(domain = SDK_API)
 public class Config implements ModuleConfig {
 
     private String providerType;

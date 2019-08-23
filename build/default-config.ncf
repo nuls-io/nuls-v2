@@ -121,6 +121,12 @@ mainByzantineRatio=50
 #主网最大签名数
 maxSignatureCount=100
 
+[nuls-api]
+#httpServer的启动ip
+server_ip=0.0.0.0
+#httpServer的启动port
+server_port=18004
+
 [protocol-update]
 #每隔多少个区块统计一次协议占比
 interval=1000

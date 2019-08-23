@@ -6,6 +6,7 @@ ledger=1
 network=1
 transaction=1
 cmd-client=1
+nuls-api=0
 public-service=0
 smart-contract=0
 chain-manager=0

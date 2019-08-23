@@ -19,7 +19,7 @@ import io.nuls.v2.NulsSDKBootStrap;
 
 import java.util.Map;
 
-import static io.nuls.provider.api.constant.SdkConstant.SDK_PROVIDER_DOMAIN;
+import static io.nuls.provider.api.constant.SdkConstant.SDK_API;
 
 /**
  * @Author: zhoulijun
@@ -27,9 +27,9 @@ import static io.nuls.provider.api.constant.SdkConstant.SDK_PROVIDER_DOMAIN;
  * @Description: 模块启动类
  */
 @Service
-public class ProviderModuleBootstrap extends RpcModule {
+public class ApiBootstrap extends RpcModule {
 
-    private String moduleName = "nuls-sdk-provider";
+    private String moduleName = "nuls-api";
 
     @Autowired
     MyModule myModule;
@@ -54,7 +54,7 @@ public class ProviderModuleBootstrap extends RpcModule {
         int defaultChainId = Integer.parseInt(configurationLoader.getValue("chainId"));
         Provider.ProviderType providerType = Provider.ProviderType.RPC;
         ServiceManager.init(defaultChainId, providerType);
-        Map<String, ConfigurationLoader.ConfigItem> configItemMap = configurationLoader.getConfigData().get(SDK_PROVIDER_DOMAIN);
+        Map<String, ConfigurationLoader.ConfigItem> configItemMap = configurationLoader.getConfigData().get(SDK_API);
         ConfigurationLoader.ConfigItem offline = configItemMap.get("offline");
         if (offline != null) {
             isOffline = Boolean.parseBoolean(offline.getValue());
