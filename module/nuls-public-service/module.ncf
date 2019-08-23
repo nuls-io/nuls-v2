@@ -1,0 +1,13 @@
+[JAVA]
+APP_NAME=public-service
+MAIN_CLASS=io.nuls.api.PublicServiceBootstrap
+VERSION=1.0.0
+JOPT_XMS=256
+JOPT_XMX=512
+
+[Core]
+Managed=1
+loadLanguage=1
+
+[public-service]
+moduleDynamicDependent=smart-contract,cross-chain

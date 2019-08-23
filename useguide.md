@@ -209,7 +209,7 @@ privateKey:e27e3961384bc4749cb5bd535b16c90c4430d4da2cd34e1edd10b50b0d01fa1d
 | --- | --- | --- |
 | maxViewGas | 正整数 | 合约视图方法调用最大消耗的Gas |
 
-#### api接口模块配置:api-module
+#### public-service模块配置:public-service
 
 | 配置项 | 取值范围 | 说明 |
 | --- | --- | --- |
