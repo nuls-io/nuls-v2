@@ -17,7 +17,7 @@
     </properties>
     <modules>
         <module>nuls-account</module>
-        <module>nuls-api-module</module>
+        <module>nuls-query-service</module>
         <module>nuls-block</module>
         <module>nuls-chain-manager</module>
         <module>nuls-consensus</module>
