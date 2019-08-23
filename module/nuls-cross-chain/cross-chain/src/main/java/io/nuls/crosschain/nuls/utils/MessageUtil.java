@@ -254,7 +254,7 @@ public class MessageUtil {
         if (signCount >= byzantineCount) {
             //去掉不是当前验证人的签名和重复签名
             List<P2PHKSignature> misMatchSignList = CommonUtil.getMisMatchSigns(chain, signature, handleAddressList);
-            signCount -= misMatchSignList.size();
+            signCount = signature.getSignersCount();
             if (signCount >= byzantineCount) {
                 ctx.setTransactionSignature(signature.serialize());
                 //如果本链为发起链则发送交易模块处理，否则直接放入待广播队列
