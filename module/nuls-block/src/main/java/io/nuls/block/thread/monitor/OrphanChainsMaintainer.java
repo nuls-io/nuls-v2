@@ -142,6 +142,9 @@ public class OrphanChainsMaintainer extends BaseMonitor {
             }
             //请求区块失败,孤儿链年龄加一
             age.incrementAndGet();
+            if (age.get() > orphanChainMaxAge) {
+                return;
+            }
         }
     }
 
