@@ -809,7 +809,10 @@ public class ContractResource extends BaseCmd {
             byte[] prevStateRoot = ContractUtil.getStateRoot(blockHeader);
 
             ProgramMethod method = contractHelper.getMethodInfoByContractAddress(chainId, prevStateRoot, methodName, methodDesc, contractAddressBytes);
-            if (method == null || !method.isView()) {
+            if (method == null) {
+                return failed(ContractErrorCode.CONTRACT_METHOD_NOT_EXIST);
+            }
+            if (!method.isView()) {
                 return failed(ContractErrorCode.CONTRACT_NON_VIEW_METHOD);
             }
 
