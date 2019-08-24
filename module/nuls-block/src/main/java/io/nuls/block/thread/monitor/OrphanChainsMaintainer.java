@@ -23,6 +23,7 @@ package io.nuls.block.thread.monitor;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsHash;
 import io.nuls.block.manager.BlockChainManager;
+import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
@@ -33,10 +34,10 @@ import io.nuls.block.utils.BlockUtil;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.log.logback.NulsLogger;
 
-import java.util.List;
-import java.util.SortedSet;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.StampedLock;
+import java.util.stream.Collectors;
 
 import static io.nuls.block.constant.StatusEnum.RUNNING;
 import static io.nuls.block.constant.StatusEnum.UPDATE_ORPHAN_CHAINS;
@@ -95,8 +96,13 @@ public class OrphanChainsMaintainer extends BaseMonitor {
                 List<Node> availableNodes = NetworkCall.getAvailableNodes(chainId);
                 //维护现有孤儿链,尝试在链首增加区块
                 context.setStatus(UPDATE_ORPHAN_CHAINS);
+                long l = System.nanoTime();
                 for (Chain orphanChain : orphanChains) {
                     maintainOrphanChain(chainId, orphanChain, availableNodes, orphanChainMaxAge);
+                    //孤儿链维护时间超过十秒，就退出
+                    if (System.nanoTime() - l > 10000000000L) {
+                        break;
+                    }
                 }
                 break;
             }
@@ -116,6 +122,8 @@ public class OrphanChainsMaintainer extends BaseMonitor {
      * @param orphanChainMaxAge
      */
     private void maintainOrphanChain(int chainId, Chain orphanChain, List<Node> availableNodes, int orphanChainMaxAge) {
+        ChainContext context = ContextManager.getContext(chainId);
+        Map<NulsHash, List<String>> orphanBlockRelatedNodes = context.getOrphanBlockRelatedNodes();
         //有父链的孤儿链,是从某孤儿链分叉得到的,不需要进行链首维护
         //链首高度为1时,不需要进行链首维护
         if (orphanChain.getParent() != null || orphanChain.getStartHeight() <= 1) {
@@ -131,10 +139,20 @@ public class OrphanChainsMaintainer extends BaseMonitor {
         if (masterChain.getHashList().contains(previousHash)) {
             return;
         }
+        Set<String> nodes = new HashSet<>();
+        for (NulsHash nulsHash : orphanChain.getHashList()) {
+            List<String> list = orphanBlockRelatedNodes.get(nulsHash);
+            if (list != null) {
+                nodes.addAll(list);
+            }
+        }
+        Set<String> set = availableNodes.stream().map(Node::getId).collect(Collectors.toSet());
+        nodes.retainAll(set);
         Block block;
         //向其他节点请求孤儿链起始区块的上一个区块
-        for (Node availableNode : availableNodes) {
-            block = BlockUtil.downloadBlockByHash(chainId, previousHash, availableNode.getId(), orphanChain.getStartHeight() - 1);
+        long l = System.nanoTime();
+        for (String availableNode : nodes) {
+            block = BlockUtil.downloadBlockByHash(chainId, previousHash, availableNode, orphanChain.getStartHeight() - 1);
             if (block != null) {
                 orphanChain.addFirst(block);
                 chainStorageService.save(chainId, block);
@@ -144,6 +162,9 @@ public class OrphanChainsMaintainer extends BaseMonitor {
             age.incrementAndGet();
             if (age.get() > orphanChainMaxAge) {
                 return;
+            }
+            if (System.nanoTime() - l > 10000000000L) {
+                break;
             }
         }
     }
