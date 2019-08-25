@@ -669,9 +669,9 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
     private static Source<byte[], byte[]> stateSource(Chain chain) {
         SystemProperties config = SystemProperties.getDefault();
-        CommonConfig commonConfig = CommonConfig.newInstance(chain);
+        CommonConfig commonConfig = CommonConfig.newInstance(chain.getChainId());
         chain.setCommonConfig(commonConfig);
-        DefaultConfig defaultConfig = DefaultConfig.newInstance(chain);
+        DefaultConfig defaultConfig = DefaultConfig.newInstance(commonConfig);
         chain.setDefaultConfig(defaultConfig);
         StateSource stateSource = commonConfig.stateSource();
         stateSource.setConfig(config);

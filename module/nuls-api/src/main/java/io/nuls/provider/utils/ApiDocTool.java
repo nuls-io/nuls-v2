@@ -39,9 +39,9 @@ import java.util.stream.Collectors;
  * @Time: 2019-06-19 14:26
  * @Description: 生成rpc接口文档
  */
-public class SdkProviderDocTool {
+public class ApiDocTool {
 
-    static String appName = "nuls-sdk-provider";
+    static String appName = "nuls-api";
 
     static Set<String> exclusion = Set.of("io.nuls.base.protocol.cmd", "io.nuls.core.rpc.cmd.kernel", "io.nuls.core.rpc.modulebootstrap");
 
@@ -611,7 +611,7 @@ public class SdkProviderDocTool {
         }
 
         public static String createJSONConfig(List<CmdDes> cmdDesList, ApiType apiType, String tempFile) throws IOException {
-            URL resource = SdkProviderDocTool.class.getClassLoader().getResource(".");
+            URL resource = ApiDocTool.class.getClassLoader().getResource(".");
             File temp = new File(resource.getFile());
             String parent = temp.getParentFile().getParent();
             File file = new File(parent + File.separator + tempFile);
@@ -643,7 +643,7 @@ public class SdkProviderDocTool {
         }
 
         public static String createPostmanJSONConfig(List<CmdDes> cmdDesList, ApiType apiType, String tempFile) throws IOException {
-            URL resource = SdkProviderDocTool.class.getClassLoader().getResource(".");
+            URL resource = ApiDocTool.class.getClassLoader().getResource(".");
             File temp = new File(resource.getFile());
             String parent = temp.getParentFile().getParent();
             File file = new File(parent + File.separator + tempFile);
@@ -677,7 +677,7 @@ public class SdkProviderDocTool {
         }
 
         public static String createMarketDownDoc(List<CmdDes> cmdDesList, ApiType apiType, String tempFile) throws IOException {
-            URL resource = SdkProviderDocTool.class.getClassLoader().getResource(".");
+            URL resource = ApiDocTool.class.getClassLoader().getResource(".");
             File temp = new File(resource.getFile());
             String parent = temp.getParentFile().getParent();
             File file = new File(parent + File.separator + tempFile);
@@ -918,7 +918,7 @@ public class SdkProviderDocTool {
             PostmanFormat format = new PostmanFormat();
             Info info = new Info();
             format.setInfo(info);
-            info.setName("SDK-Provider-" + apiType.name());
+            info.setName(appName + "-" + apiType.name());
             info.setSchema("https://schema.getpostman.com/json/collection/v2.1.0/collection.json");
             List<Item> item = new ArrayList<>();
             for(CmdDes des : cmdDesList) {

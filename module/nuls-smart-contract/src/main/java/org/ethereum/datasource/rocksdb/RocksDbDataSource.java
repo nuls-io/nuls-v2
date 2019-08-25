@@ -17,7 +17,6 @@
  */
 package org.ethereum.datasource.rocksdb;
 
-import io.nuls.contract.model.bo.Chain;
 import io.nuls.core.rockdb.service.BatchOperation;
 import io.nuls.core.rockdb.service.RocksDBService;
 import org.apache.commons.lang3.ArrayUtils;
@@ -48,7 +47,6 @@ public class RocksDbDataSource implements DbSource<byte[]> {
 
     String name;
     boolean alive;
-    Chain chain;
 
     DbSettings settings = DbSettings.DEFAULT;
 
@@ -63,9 +61,8 @@ public class RocksDbDataSource implements DbSource<byte[]> {
     public RocksDbDataSource() {
     }
 
-    public RocksDbDataSource(Chain chain) {
-        this.AREA = "contract_" + chain.getChainId();
-        this.chain = chain;
+    public RocksDbDataSource(int chainId) {
+        this.AREA = "contract_" + chainId;
     }
 
     public RocksDbDataSource(String name) {

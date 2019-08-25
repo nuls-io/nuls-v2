@@ -467,11 +467,19 @@ public class ContractHelper {
     }
 
     public ContractTempBalanceManager getBatchInfoTempBalanceManager(int chainId) {
-        return getChain(chainId).getBatchInfo().getTempBalanceManager();
+        BatchInfo batchInfo;
+        if((batchInfo = getChain(chainId).getBatchInfo()) == null) {
+            return null;
+        }
+        return batchInfo.getTempBalanceManager();
     }
 
     public BlockHeader getBatchInfoCurrentBlockHeader(int chainId) {
-        return getChain(chainId).getBatchInfo().getCurrentBlockHeader();
+        BatchInfo batchInfo;
+        if((batchInfo = getChain(chainId).getBatchInfo()) == null) {
+            return null;
+        }
+        return batchInfo.getCurrentBlockHeader();
     }
 
     public Result<ContractAddressInfoPo> getContractAddressInfo(int chainId, byte[] contractAddressBytes) {

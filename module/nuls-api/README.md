@@ -118,7 +118,7 @@ int VERIFIER_CHANGE = 24;				// 验证人变更
 
 [RESTFUL 接口文档](https://github.com/nuls-io/nuls-v2/blob/release/module/nuls-api/documents/nuls-api_RESTFUL.md)
 
-_**附：**_ 官方已提供NULS-SDK-4J工具，有使用JAVA做对接的合作伙伴，可使用工具对接`NULS-API`模块，详见：[NULS-SDK-4J使用说明](https://github.com/nuls-io/nuls-v2-sdk4j/blob/release/README.md)
+_**附：**_ 官方已提供NULS-SDK-4J工具，有使用JAVA做对接的合作伙伴，可使用工具对接`NULS-API`模块，详见：[NULS-SDK-4J使用说明](https://github.com/nuls-io/nuls-v2-sdk4j/blob/master/README.md)
 
 ## 接口调试
 

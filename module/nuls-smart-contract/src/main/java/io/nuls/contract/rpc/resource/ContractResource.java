@@ -822,7 +822,7 @@ public class ContractResource extends BaseCmd {
             Log.info("view method cost gas: " + programResult.getGasUsed());
 
             if (!programResult.isSuccess()) {
-                Log.error(programResult.getStackTrace());
+                Log.error("error msg: {}, statck trace: {}", programResult.getErrorMessage(), programResult.getStackTrace());
                 Result result = Result.getFailed(ContractErrorCode.DATA_ERROR);
                 result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
                 Result newResult = checkVmResultAndReturn(programResult.getErrorMessage(), result);

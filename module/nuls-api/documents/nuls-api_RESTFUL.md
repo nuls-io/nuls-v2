@@ -1,4 +1,4 @@
-# NULS2.0 SDK-Provider
+# NULS2.0 API
 
 **NULS为合作伙伴定制了对接需要的NULS2.0钱包版本，对接钱包内嵌`NULS-API`模块，模块内封装了NULS-SDK的功能，用HTTP协议访问接口，支持`JSON—RPC`和`Restful`两种格式。**
 
@@ -11,7 +11,7 @@
 ​	`NULS-API`模块默认访问的端口号是18004，可以在nuls.ncf配置文件中做修改，如下：
 
 ```
-[nuls-api]
+[nuls-API]
 #httpServer的启动port
 server_port=18004
 ```
@@ -118,7 +118,7 @@ int VERIFIER_CHANGE = 24;				// 验证人变更
 
 [RESTFUL 接口文档](https://github.com/nuls-io/nuls-v2/blob/release/module/nuls-api/documents/nuls-api_RESTFUL.md)
 
-_**附：**_ 官方已提供NULS-SDK-4J工具，有使用JAVA做对接的合作伙伴，可使用工具对接`NULS-API`模块，详见：[NULS-SDK-4J使用说明](https://github.com/nuls-io/nuls-v2-sdk4j/blob/release/README.md)
+_**附：**_ 官方已提供NULS-SDK-4J工具，有使用JAVA做对接的合作伙伴，可使用工具对接`NULS-API`模块，详见：[NULS-SDK-4J使用说明](https://github.com/nuls-io/nuls-v2-sdk4j/blob/master/README.md)
 
 ## 接口调试
 

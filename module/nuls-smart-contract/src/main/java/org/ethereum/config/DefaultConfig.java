@@ -17,7 +17,6 @@
  */
 package org.ethereum.config;
 
-import io.nuls.contract.model.bo.Chain;
 import org.ethereum.datasource.Source;
 import org.ethereum.db.BlockStore;
 import org.ethereum.db.IndexedBlockStore;
@@ -34,8 +33,6 @@ public class DefaultConfig {
 
     CommonConfig commonConfig;
 
-    Chain chain;
-
     SystemProperties config = SystemProperties.getDefault();
 
     //private static DefaultConfig defaultInstance;
@@ -47,10 +44,9 @@ public class DefaultConfig {
     //    return defaultInstance;
     //}
 
-    public static DefaultConfig newInstance(Chain chain) {
+    public static DefaultConfig newInstance(CommonConfig commonConfig) {
         DefaultConfig defaultConfig = new DefaultConfig();
-        defaultConfig.chain = chain;
-        defaultConfig.commonConfig = chain.getCommonConfig();
+        defaultConfig.commonConfig = commonConfig;
         return defaultConfig;
     }
 
