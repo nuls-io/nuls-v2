@@ -43,6 +43,18 @@ public class Block extends BaseNulsData implements Cloneable {
     private BlockHeader header;
     private List<Transaction> txs;
     private transient List<NulsHash> txHashList;
+    /**
+     * 该区块来自哪个节点，主要用于孤儿区块的维护
+     */
+    private transient String nodeId;
+
+    public String getNodeId() {
+        return nodeId;
+    }
+
+    public void setNodeId(String nodeId) {
+        this.nodeId = nodeId;
+    }
 
     @Override
     public int size() {

@@ -83,9 +83,10 @@ public class ContractPOCMSendTxTest extends BaseQuery {
      */
     @Test
     public void testConsensusDepositOthersProcessor() throws Exception {
+        String authCode = "1a4123aa-7cbb-42f5-80be-8d8dc8331522";
         String nrc20 = nrc20();
         this.contractAddress_nrc20 = nrc20;
-        String pocm = pocm(nrc20);
+        String pocm = pocm(nrc20, authCode);
         this.contractAddress = pocm;
         tokenTransfer();
 
@@ -99,7 +100,7 @@ public class ContractPOCMSendTxTest extends BaseQuery {
         this.invokeCall(toAddress0, BigInteger.valueOf(2100_00000000L), contractAddress, "depositForOwn", null, "remark");
         Log.info("begin depositForOwn {}", toAddress1);
         this.invokeCall(toAddress1, BigInteger.valueOf(1200_00000000L), contractAddress, "depositForOwn", null, "remark");
-        TimeUnit.SECONDS.sleep(120);
+        TimeUnit.SECONDS.sleep(50);
         Log.info("begin quit {}", sender);
         this.invokeCall(sender, BigInteger.ZERO, contractAddress, "quit", null, "remark", "0");
         Log.info("begin quit {}", toAddress0);
@@ -109,10 +110,59 @@ public class ContractPOCMSendTxTest extends BaseQuery {
     }
 
     /**
-     * 流程 - 退出
+     * 流程 - 创建TOKEN, POCM, 抵押，领取
+     */
+    @Test
+    public void testConsensusDepositReceiveAwardsProcessor() throws Exception {
+        String authCode = "9ba1e84f-df69-4e52-aa09-5343b112db6e";
+        String nrc20 = nrc20("token_check_again", "NanGao", "NG", "100000000", "8");
+        this.contractAddress_nrc20 = nrc20;
+        String pocm = pocm(nrc20, authCode);
+        this.contractAddress = pocm;
+        tokenTransfer();
+
+        Log.info("begin depositForOwn {}", sender);
+        this.invokeCall(sender, BigInteger.valueOf(3000_00000000L), contractAddress, "depositForOwn", null, "remark");
+        Log.info("begin depositForOwn {}", toAddress0);
+        this.invokeCall(toAddress0, BigInteger.valueOf(2100_00000000L), contractAddress, "depositForOwn", null, "remark");
+        Log.info("begin depositForOwn {}", toAddress1);
+        this.invokeCall(toAddress1, BigInteger.valueOf(1200_00000000L), contractAddress, "depositForOwn", null, "remark");
+        TimeUnit.SECONDS.sleep(90);
+        Log.info("begin receiveAwards {}", sender);
+        this.invokeCall(sender, BigInteger.ZERO, contractAddress, "receiveAwards", null, "remark");
+        Log.info("begin receiveAwards {}", toAddress0);
+        this.invokeCall(toAddress0, BigInteger.ZERO, contractAddress, "receiveAwards", null, "remark");
+        Log.info("begin receiveAwards {}", toAddress1);
+        this.invokeCall(toAddress1, BigInteger.ZERO, contractAddress, "receiveAwards", null, "remark");
+    }
+
+    /**
+     * 流程 - 指定合约地址 抵押、领取
+     */
+    @Test
+    public void testDepositReceiveAwardsProcessor() throws Exception {
+        contractAddress = "tNULSeBaNA8kLEjf36cVe86PdydQuQ6fregeT4";
+        Log.info("begin depositForOwn {}", sender);
+        this.invokeCall(sender, BigInteger.valueOf(3000_00000000L), contractAddress, "depositForOwn", null, "remark");
+        Log.info("begin depositForOwn {}", toAddress0);
+        this.invokeCall(toAddress0, BigInteger.valueOf(2100_00000000L), contractAddress, "depositForOwn", null, "remark");
+        Log.info("begin depositForOwn {}", toAddress1);
+        this.invokeCall(toAddress1, BigInteger.valueOf(1200_00000000L), contractAddress, "depositForOwn", null, "remark");
+        TimeUnit.SECONDS.sleep(90);
+        Log.info("begin receiveAwards {}", sender);
+        this.invokeCall(sender, BigInteger.ZERO, contractAddress, "receiveAwards", null, "remark");
+        Log.info("begin receiveAwards {}", toAddress0);
+        this.invokeCall(toAddress0, BigInteger.ZERO, contractAddress, "receiveAwards", null, "remark");
+        Log.info("begin receiveAwards {}", toAddress1);
+        this.invokeCall(toAddress1, BigInteger.ZERO, contractAddress, "receiveAwards", null, "remark");
+    }
+
+    /**
+     * 流程 - 指定合约地址 退出
      */
     @Test
     public void testQuitProcessor() throws Exception {
+        contractAddress = "tNULSeBaMzXKLBfD3Y4CEUAxY93vUsbgSGxRiC";
         Log.info("begin quit {}", sender);
         this.invokeCall(sender, BigInteger.ZERO, contractAddress, "quit", null, "remark", "0");
         Log.info("begin quit {}", toAddress0);
@@ -121,15 +171,31 @@ public class ContractPOCMSendTxTest extends BaseQuery {
         this.invokeCall(toAddress1, BigInteger.ZERO, contractAddress, "quit", null, "remark", "0");
     }
 
-    private String pocm(String nrc20) throws Exception {
+    private String pocm(String nrc20, String authCode) throws Exception {
         Log.info("begin create pocm");
-        String filePath = "/Users/pierreluo/IdeaProjects/pocmContract-ConsensusEnhancement/target/pocmContract-v3-test2.jar";
-        //String filePath = ContractPOCMSendTxTest.class.getResource("/pocmContract-v3-test2.jar").getFile();
+        //String filePath = "/Users/pierreluo/IdeaProjects/pocmContract-ConsensusEnhancement/target/pocmContract-v3-test2.jar";
+        String filePath = ContractPOCMSendTxTest.class.getResource("/pocmContract-v3-test2.jar").getFile();
         InputStream in = new FileInputStream(filePath);
         byte[] contractCode = IOUtils.toByteArray(in);
         String remark = "POCM - consensus enhancement contract test - POCM_共识加强合约";
-        Object[] args = new Object[]{nrc20, 5000, 2, 500, 2, true, "5c633fiS", null, null};
+        Object[] args = new Object[]{nrc20, 5000, 2, 500, 2, true, authCode, null, null};
         Map params = this.makeCreateParams(sender, contractCode, "pocm_enhancement", remark, args);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CREATE));
+        assertTrue(cmdResp2, result);
+        String hash = (String) result.get("txHash");
+        String contractAddress = (String) result.get("contractAddress");
+        Map map = waitGetContractTx(hash);
+        Assert.assertTrue(JSONUtils.obj2PrettyJson(map), (Boolean) ((Map)(map.get("contractResult"))).get("success"));
+        return contractAddress;
+    }
+
+    private String nrc20(String alias, String name, String symbol, String totalSupply, String decimals) throws Exception {
+        Log.info("begin create nrc20");
+        InputStream in = new FileInputStream(ContractTest.class.getResource("/nrc20").getFile());
+        byte[] contractCode = IOUtils.toByteArray(in);
+        String remark = "create contract test - " + alias;
+        Map params = this.makeCreateParams(sender, contractCode, alias, remark, name, symbol, totalSupply, decimals);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CREATE));
         assertTrue(cmdResp2, result);
