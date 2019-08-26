@@ -103,40 +103,16 @@ public class BatchInfo {
     private Future<ContractPackageDto> contractPackageDtoFuture;
 
 
-    public BatchInfo() {
-        this.status = BatchInfoStatus.NOT_STARTING;
+    public BatchInfo(long height) {
+        this.txCounter = 0;
+        this.height = height;
+        this.beginTime = System.currentTimeMillis();
+        this.status = BatchInfoStatus.STARTING;
         this.contractContainerMap = new LinkedHashMap<>();
     }
 
     public boolean hasBegan() {
         return status.status() > 0;
-    }
-
-    public boolean isTimeOut() {
-        long time = System.currentTimeMillis() - this.beginTime;
-        return time > TIME_OUT;
-    }
-
-    public void init(long height) {
-        this.clear();
-        this.txCounter = 0;
-        this.height = height;
-        this.beginTime = System.currentTimeMillis();
-        this.status = BatchInfoStatus.STARTING;
-    }
-
-    public void clear() {
-        this.tempBalanceManager = null;
-        this.currentBlockHeader = null;
-        this.contractPackageDto = null;
-        this.batchExecutor = null;
-        this.txCounter = -1;
-        this.height = -1L;
-        this.beginTime = -1L;
-        this.status = BatchInfoStatus.NOT_STARTING;
-        this.preStateRoot = null;
-        this.checker = null;
-        this.contractContainerMap = new LinkedHashMap<>();
     }
 
     public ContractContainer newAndGetContractContainer(String contractAddress) {

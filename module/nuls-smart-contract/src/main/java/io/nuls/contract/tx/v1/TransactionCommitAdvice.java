@@ -28,7 +28,6 @@ import io.nuls.base.data.Transaction;
 import io.nuls.base.protocol.CommonAdvice;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.manager.ChainManager;
-import io.nuls.contract.model.bo.BatchInfo;
 import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.model.dto.ContractPackageDto;
 import io.nuls.contract.model.po.ContractOfflineTxHashPo;
@@ -76,7 +75,6 @@ public class TransactionCommitAdvice implements CommonAdvice {
     public void end(int chainId, List<Transaction> txList, BlockHeader blockHeader) {
         // 移除临时余额, 临时区块头等当前批次执行数据
         Chain chain = contractHelper.getChain(chainId);
-        BatchInfo batchInfo = chain.getBatchInfo();
-        batchInfo.clear();
+        chain.setBatchInfo(null);
     }
 }

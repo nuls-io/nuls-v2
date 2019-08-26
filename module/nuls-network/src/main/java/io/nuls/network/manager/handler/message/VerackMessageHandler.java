@@ -26,16 +26,22 @@
 package io.nuls.network.manager.handler.message;
 
 import io.nuls.network.constant.NodeConnectStatusEnum;
+import io.nuls.network.manager.MessageFactory;
+import io.nuls.network.manager.MessageManager;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.TimeManager;
 import io.nuls.network.manager.handler.base.BaseMessageHandler;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
+import io.nuls.network.model.dto.IpAddressShare;
+import io.nuls.network.model.message.AddrMessage;
 import io.nuls.network.model.message.VerackMessage;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.body.VerackMessageBody;
 import io.nuls.network.utils.LoggerUtil;
+
+import java.util.List;
 
 /**
  * version ack message handler
@@ -73,7 +79,7 @@ public class VerackMessageHandler extends BaseMessageHandler {
          *The server can receive the verack message, receive the message and transition the connection state to the handshake.
          */
         if (VerackMessageBody.VER_CONNECT_MAX == verackMessage.getMsgBody().getAckCode()) {
-            LoggerUtil.logger(nodeGroup.getChainId()).info("recieve versionAck peer max!peer = {}s",node.getId());
+            LoggerUtil.logger(nodeGroup.getChainId()).info("recieve versionAck peer max!peer = {}s", node.getId());
             node.getChannel().close();
 
         } else {
@@ -85,6 +91,17 @@ public class VerackMessageHandler extends BaseMessageHandler {
             } else {
                 node.getNodeGroup().getLocalNetNodeContainer().setLatestHandshakeSuccTime(TimeManager.currentTimeMillis());
             }
+            //作为server端主动回复地址列表
+            List<NodeGroup> nodeGroupList = NodeGroupManager.getInstance().getNodeGroups();
+            nodeGroupList.forEach(nodeGroupShareAddrs -> {
+                //发送addr消息
+                List<IpAddressShare> ipAddresses = NodeGroupManager.getInstance().getAvailableShareNodes(node, nodeGroupShareAddrs.getChainId(), true);
+                AddrMessage addressMessage = MessageFactory.getInstance().buildAddrMessage(ipAddresses, message.getHeader().getMagicNumber(),nodeGroupShareAddrs.getChainId() , (byte) 1);
+                if (addressMessage.getMsgBody().getIpAddressList().size() > 0) {
+                    LoggerUtil.logger(nodeGroupShareAddrs.getChainId()).info("send addressMessage node = {}", node.getId());
+                    MessageManager.getInstance().sendHandlerMsg(addressMessage, node, true);
+                }
+            });
         }
         return NetworkEventResult.getResultSuccess();
     }

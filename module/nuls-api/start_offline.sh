@@ -6,7 +6,7 @@ echo "MODULE_PATH is ${MODULE_PATH}"
 
 LOGS_DIR="${MODULE_PATH}/log"
 
-APP_NAME="nuls-sdk-provider" # %APP_NAME 注入
+APP_NAME="nuls-api-offline" # %APP_NAME 注入
 
 if [ -d ./JAVA/JRE/11.0.2 ]; then
     JAVA_HOME=`dirname "./JAVA/JRE/11.0.2/bin"`;
@@ -23,7 +23,7 @@ if [ ! -n "$JAVA_EXIST" ]; then
     exit 0;
 fi
 
-MAIN_CLASS="io.nuls.NulsModuleBootstrap" # MAIN_CLASS 注入
+MAIN_CLASS="io.nuls.provider.ApiBootstrap" # MAIN_CLASS 注入
 JOPT_XMS="64"  # JOPT_XMS 注入
 JOPT_XMX="128"    # JOPT_XMX 注入
 JOPT_METASPACESIZE="32"  # %JOPT_METASPACESIZE 注入

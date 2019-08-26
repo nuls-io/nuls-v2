@@ -17,7 +17,6 @@
  */
 package org.ethereum.config;
 
-import io.nuls.contract.model.bo.Chain;
 import org.ethereum.core.Repository;
 import org.ethereum.crypto.HashUtil;
 import org.ethereum.datasource.*;
@@ -36,7 +35,7 @@ import java.util.Set;
 public class CommonConfig {
     private static final Logger logger = LoggerFactory.getLogger("general");
     private Set<DbSource> dbSources = new HashSet<>();
-    private Chain chain;
+    private int chainId;
 
     //private static CommonConfig defaultInstance;
     //
@@ -47,9 +46,9 @@ public class CommonConfig {
     //    return defaultInstance;
     //}
 
-    public static CommonConfig newInstance(Chain chain) {
+    public static CommonConfig newInstance(int chainId) {
         CommonConfig commonConfig = new CommonConfig();
-        commonConfig.chain = chain;
+        commonConfig.chainId = chainId;
         return commonConfig;
     }
 
@@ -158,7 +157,7 @@ public class CommonConfig {
     }
 
     protected RocksDbDataSource rocksDbDataSource() {
-        return new RocksDbDataSource(chain);
+        return new RocksDbDataSource(chainId);
     }
 
     private void resetDataSource(Source source) {

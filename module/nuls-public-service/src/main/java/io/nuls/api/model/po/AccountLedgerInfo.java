@@ -17,6 +17,8 @@ public class AccountLedgerInfo {
 
     private String symbol;
 
+    private int decimals;
+
     private BigInteger totalBalance;
 
     private BigInteger balance;
@@ -136,5 +138,13 @@ public class AccountLedgerInfo {
 
     public String getAssetKey() {
         return chainId + "-" + assetId;
+    }
+
+    public int getDecimals() {
+        return decimals;
+    }
+
+    public void setDecimals(int decimals) {
+        this.decimals = decimals;
     }
 }

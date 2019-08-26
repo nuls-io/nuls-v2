@@ -114,8 +114,8 @@ public class ContractPOCMSendTxTest extends BaseQuery {
      */
     @Test
     public void testConsensusDepositReceiveAwardsProcessor() throws Exception {
-        String authCode = "9ba1e84f-df69-4e52-aa09-5343b112db6e";
-        String nrc20 = nrc20("token_check_again", "NanGao", "NG", "100000000", "8");
+        String authCode = "e5fc4203-ac48-4a56-868f-1bebde571006";
+        String nrc20 = nrc20("nangao", "NanGao", "NG", "100000000", "8");
         this.contractAddress_nrc20 = nrc20;
         String pocm = pocm(nrc20, authCode);
         this.contractAddress = pocm;
@@ -202,7 +202,7 @@ public class ContractPOCMSendTxTest extends BaseQuery {
         String hash = (String) result.get("txHash");
         String contractAddress = (String) result.get("contractAddress");
         Map map = waitGetContractTx(hash);
-        Assert.assertTrue(JSONUtils.obj2PrettyJson(map), (Boolean) ((Map)(map.get("contractResult"))).get("success"));
+        Assert.assertTrue(JSONUtils.obj2PrettyJson(map), map != null && (Boolean) ((Map)(map.get("contractResult"))).get("success"));
         return contractAddress;
     }
 
