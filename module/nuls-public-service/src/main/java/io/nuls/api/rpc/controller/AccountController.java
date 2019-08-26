@@ -496,6 +496,7 @@ public class AccountController {
             AssetInfo assetInfo = CacheManager.getAssetInfoMap().get(ledgerInfo.getAssetKey());
             if (assetInfo != null) {
                 ledgerInfo.setSymbol(assetInfo.getSymbol());
+                ledgerInfo.setDecimals(assetInfo.getDecimals());
             }
         }
         return RpcResult.success(list);
@@ -534,6 +535,7 @@ public class AccountController {
             AssetInfo assetInfo = CacheManager.getAssetInfoMap().get(ledgerInfo.getAssetKey());
             if (assetInfo != null) {
                 ledgerInfo.setSymbol(assetInfo.getSymbol());
+                ledgerInfo.setDecimals(assetInfo.getDecimals());
             }
         }
         return RpcResult.success(list);
