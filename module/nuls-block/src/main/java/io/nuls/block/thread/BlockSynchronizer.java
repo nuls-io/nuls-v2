@@ -310,9 +310,12 @@ public class BlockSynchronizer implements Runnable {
      * @date 18-11-8 下午4:55
      */
     BlockDownloaderParams statistics(List<Node> availableNodes, ChainContext context) {
-        List<Node> filterAvailableNodes = filterNodes(availableNodes, context);
         BlockDownloaderParams params = new BlockDownloaderParams();
+        List<Node> filterAvailableNodes = filterNodes(availableNodes, context);
         params.setAvailableNodesCount(filterAvailableNodes.size());
+        if (filterAvailableNodes.isEmpty()) {
+            return params;
+        }
         //每个节点的(最新HASH+最新高度)是key
         String key = "";
         int count = 0;
