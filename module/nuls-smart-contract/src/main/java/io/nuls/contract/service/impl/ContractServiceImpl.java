@@ -101,10 +101,10 @@ public class ContractServiceImpl implements ContractService {
     public Result begin(int chainId, long blockHeight, long blockTime, String packingAddress, String preStateRoot) {
         Log.info("[Begin contract batch] packaging blockHeight is [{}], packaging address is [{}], preStateRoot is [{}]", blockHeight, packingAddress, preStateRoot);
         Chain chain = contractHelper.getChain(chainId);
-        BatchInfo batchInfo = chain.getBatchInfo();
-        // 清空上次批量的所有数据
-        batchInfo.clear();
-        batchInfo.init(blockHeight);
+        chain.setBatchInfo(null);
+        BatchInfo batchInfo = new BatchInfo(blockHeight);
+        // 初始化批量执行基本数据
+        chain.setBatchInfo(batchInfo);
         // 准备临时余额和当前区块头
         contractHelper.createTempBalanceManagerAndCurrentBlockHeader(chainId, blockHeight, blockTime, AddressTool.getAddress(packingAddress));
         // 准备批量执行器
@@ -155,9 +155,6 @@ public class ContractServiceImpl implements ContractService {
             }
             Chain chain = contractHelper.getChain(chainId);
             BatchInfo batchInfo = chain.getBatchInfo();
-            if (!batchInfo.hasBegan()) {
-                return getFailed();
-            }
             byte[] contractAddressBytes = ContractUtil.extractContractAddressFromTxData(tx);
             String contractAddress = AddressTool.getStringAddressByBytes(contractAddressBytes);
             ContractContainer container = batchInfo.newAndGetContractContainer(contractAddress);
@@ -194,10 +191,6 @@ public class ContractServiceImpl implements ContractService {
     @Override
     public Result beforeEnd(int chainId, long blockHeight) {
         try {
-            BatchInfo batchInfo = contractHelper.getChain(chainId).getBatchInfo();
-            if (!batchInfo.hasBegan()) {
-                return getFailed();
-            }
             Result result = contractCaller.callBatchEnd(chainId, blockHeight);
             return result;
         } catch (Exception e) {
@@ -211,9 +204,6 @@ public class ContractServiceImpl implements ContractService {
 
         try {
             BatchInfo batchInfo = contractHelper.getChain(chainId).getBatchInfo();
-            if (!batchInfo.hasBegan()) {
-                return getFailed();
-            }
             Future<ContractPackageDto> future = batchInfo.getContractPackageDtoFuture();
             // 等待before_end执行完成
             future.get();
@@ -284,8 +274,7 @@ public class ContractServiceImpl implements ContractService {
         } finally {
             // 移除临时余额, 临时区块头等当前批次执行数据
             Chain chain = contractHelper.getChain(chainId);
-            BatchInfo batchInfo = chain.getBatchInfo();
-            batchInfo.clear();
+            chain.setBatchInfo(null);
         }
     }
 

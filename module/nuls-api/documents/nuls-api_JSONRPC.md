@@ -1,17 +1,17 @@
-# NULS2.0 SDK-Provider
+# NULS2.0 API
 
-**NULS为合作伙伴定制了对接需要的NULS2.0钱包版本，对接钱包内嵌`NULS-SDK-Provider`模块，模块内封装了NULS-SDK的功能，用HTTP协议访问接口，支持`JSON—RPC`和`Restful`两种格式。**
+**NULS为合作伙伴定制了对接需要的NULS2.0钱包版本，对接钱包内嵌`NULS-API`模块，模块内封装了NULS-SDK的功能，用HTTP协议访问接口，支持`JSON—RPC`和`Restful`两种格式。**
 
 [测试版钱包下载地址](http://nuls-usa-west.oss-us-west-1.aliyuncs.com/beta3/NULS_Wallet_linux64_beta3_sdk_provider.tar.gz)
 
-[NULS-SDK-Provider离线操作工具下载地址](http://nuls-usa-west.oss-us-west-1.aliyuncs.com/beta3/nuls-sdk-provider-offline.tar.gz)
+[NULS-API离线操作工具下载地址](http://nuls-usa-west.oss-us-west-1.aliyuncs.com/beta3/nuls-sdk-provider-offline.tar.gz)
 
 ## 设置
 
-​	`NULS-SDK-Provider`模块默认访问的端口号是18004，可以在nuls.ncf配置文件中做修改，如下：
+​	`NULS-API`模块默认访问的端口号是18004，可以在nuls.ncf配置文件中做修改，如下：
 
 ```
-[nuls-sdk-provider]
+[nuls-API]
 #httpServer的启动port
 server_port=18004
 ```
@@ -22,11 +22,11 @@ server_port=18004
 
 #### 在线与离线
 
-`NULS-SDK-Provider`模块提供了若干在线接口和离线接口。
+`NULS-API`模块提供了若干在线接口和离线接口。
 
 在线接口：钱包必须正常运行，且能够连接网络中的其他节点，能够正常同步区块和广播数据。在调用在线接口之前，最好是已经同步到最新区块。接口所产生的数据都会保存在钱包中。例如创建账户、修改密码、转账、获取区块头等。
 
-离线接口：NULS2.0提供了一个专门用于[离线操作的NULS-SDK-Provider工具](http://nuls-usa-west.oss-us-west-1.aliyuncs.com/beta3/nuls-sdk-provider-offline.tar.gz)。无需安装钱包，可独立运行在一台没有连接网络的服务器上。用户通过调用离线接口，传入相关的参数，获取返回值，相应数据不会存入钱包。例如离线创建账户、离线组装转账交易、离线签名等。
+离线接口：NULS2.0提供了一个专门用于[离线操作的NULS-API工具](http://nuls-usa-west.oss-us-west-1.aliyuncs.com/beta3/nuls-sdk-provider-offline.tar.gz)。无需安装钱包，可独立运行在一台没有连接网络的服务器上。用户通过调用离线接口，传入相关的参数，获取返回值，相应数据不会存入钱包。例如离线创建账户、离线组装转账交易、离线签名等。
 
 #### 字段描述
 
@@ -107,26 +107,26 @@ int VERIFIER_CHANGE = 24;				// 验证人变更
 
      添加请求头 Content-Type: application/json;charset=UTF-8
      
-     其余请参考 [RESTFUL 接口文档](https://github.com/nuls-io/nuls-v2/blob/master/module/nuls-sdk-provider/documents/nuls-sdk-provider_RESTFUL.md)
+     其余请参考 [RESTFUL 接口文档](https://github.com/nuls-io/nuls-v2/blob/release/module/nuls-api/documents/nuls-api_RESTFUL.md)
 
 
 ## 接口文档
 
 我们对外提供的API接口，分为`JSON-RPC`和`Restful`两种风格，用户可根据需要选择不通过的对接方式，接口文档详见以下: 
 
-[JSON-RPC 接口文档](https://github.com/nuls-io/nuls-v2/blob/master/module/nuls-sdk-provider/documents/nuls-sdk-provider_JSONRPC.md)
+[JSON-RPC 接口文档](https://github.com/nuls-io/nuls-v2/blob/release/module/nuls-api/documents/nuls-api_JSONRPC.md)
 
-[RESTFUL 接口文档](https://github.com/nuls-io/nuls-v2/blob/master/module/nuls-sdk-provider/documents/nuls-sdk-provider_RESTFUL.md)
+[RESTFUL 接口文档](https://github.com/nuls-io/nuls-v2/blob/release/module/nuls-api/documents/nuls-api_RESTFUL.md)
 
-_**附：**_ 官方已提供NULS-SDK-4J工具，有使用JAVA做对接的合作伙伴，可使用工具对接`NULS-SDK-Provider`模块，详见：[NULS-SDK-4J使用说明](https://github.com/nuls-io/nuls-v2-sdk4j/blob/master/README.md)
+_**附：**_ 官方已提供NULS-SDK-4J工具，有使用JAVA做对接的合作伙伴，可使用工具对接`NULS-API`模块，详见：[NULS-SDK-4J使用说明](https://github.com/nuls-io/nuls-v2-sdk4j/blob/master/README.md)
 
 ## 接口调试
 
 我们提供了`Postman`接口调式工具的导入文件(`JSON-RPC`和`RESTFUL`)，导入后，即可调试接口
 
-[JSON-PRC 接口调试-POSTMAN导入文件](https://github.com/nuls-io/nuls-v2/blob/master/module/nuls-sdk-provider/documents/nuls-sdk-provider_Postman_JSONRPC.json)
+[JSON-PRC 接口调试-POSTMAN导入文件](https://github.com/nuls-io/nuls-v2/blob/release/module/nuls-api/documents/nuls-api_Postman_JSONRPC.json)
 
-[RESTFUL 接口调试-POSTMAN导入文件](https://github.com/nuls-io/nuls-v2/blob/master/module/nuls-sdk-provider/documents/nuls-sdk-provider_Postman_RESTFUL.json)
+[RESTFUL 接口调试-POSTMAN导入文件](https://github.com/nuls-io/nuls-v2/blob/release/module/nuls-api/documents/nuls-api_Postman_RESTFUL.json)
 
 
 

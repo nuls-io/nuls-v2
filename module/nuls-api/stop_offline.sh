@@ -1,6 +1,6 @@
 #!/bin/bash
 cd `dirname $0`
-APP_NAME="nuls-sdk-provider"
+APP_NAME="nuls-api-offline"
 KILL_WAIT_COUNT=120
 APP_PID=`ps -ef|grep -w "name=${APP_NAME} "|grep -v grep|awk '{print $2}'`
 APP=0
