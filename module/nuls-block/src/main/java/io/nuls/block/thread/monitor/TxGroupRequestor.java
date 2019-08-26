@@ -125,6 +125,7 @@ public class TxGroupRequestor extends BaseMonitor {
                     }
 
                     Block block = BlockUtil.assemblyBlock(header, txMap, smallBlock.getTxHashList());
+                    block.setNodeId(cachedSmallBlock.getNodeId());
                     logger.info("record recv block, block create time-" + DateUtils.timeStamp2DateStr(block.getHeader().getTime()) + ", hash-" + block.getHeader().getHash());
                     boolean b = blockService.saveBlock(chainId, block, 1, true, false, true);
                     if (!b) {

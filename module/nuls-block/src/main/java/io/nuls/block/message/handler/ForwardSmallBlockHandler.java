@@ -76,6 +76,7 @@ public class ForwardSmallBlockHandler implements MessageProcessor {
         List<String> nodes = context.getOrphanBlockRelatedNodes().get(blockHash);
         if (nodes != null && !nodes.contains(nodeId)) {
             nodes.add(nodeId);
+            logger.debug("add OrphanBlockRelatedNodes, blockHash-{}, nodeId-{}", blockHash, nodeId);
         }
         //1.已收到完整区块,丢弃
         if (BlockForwardEnum.COMPLETE.equals(status)) {
