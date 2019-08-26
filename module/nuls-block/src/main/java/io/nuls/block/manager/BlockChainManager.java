@@ -281,7 +281,10 @@ public class BlockChainManager {
      * @param chainId 链Id/chain id
      */
     public static void addForkChain(int chainId, Chain chain) {
-        forkChains.get(chainId).add(chain);
+        boolean add = forkChains.get(chainId).add(chain);
+        if (!add) {
+            ContextManager.getContext(chainId).getLogger().warn("add fail, forkChain-" + chain);
+        }
     }
 
     /**
@@ -324,7 +327,10 @@ public class BlockChainManager {
      * @param chainId 链Id/chain id
      */
     public static void addOrphanChain(int chainId, Chain chain) {
-        orphanChains.get(chainId).add(chain);
+        boolean add = orphanChains.get(chainId).add(chain);
+        if (!add) {
+            ContextManager.getContext(chainId).getLogger().warn("add fail, orphanChain-" + chain);
+        }
     }
 
     /**
