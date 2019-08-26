@@ -67,6 +67,7 @@ public interface ContractConstant {
     long CONTRACT_CONSTANT_PRICE = 1;
 
     long MAX_GASLIMIT = 10000000;
+    long MAX_GAS_COST_IN_BLOCK = 15000000L;
 
     long CONTRACT_MINIMUM_PRICE = 25;
 
