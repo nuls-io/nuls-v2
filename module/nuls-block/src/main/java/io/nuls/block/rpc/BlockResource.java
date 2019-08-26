@@ -321,7 +321,7 @@ public class BlockResource extends BaseCmd {
             }
             long height = Long.parseLong(map.get("height").toString());
             int round = Integer.parseInt(map.get("round").toString());
-            List<BlockHeader> blockHeaders = service.getBlockHeaderByRound(chainId, height, round);
+            List<BlockHeader> blockHeaders = service.getBlockHeaderByRound(chainId, height - 1, round);
             List<String> hexList = new ArrayList<>();
             for (BlockHeader e : blockHeaders) {
                 hexList.add(RPCUtil.encode(e.serialize()));
