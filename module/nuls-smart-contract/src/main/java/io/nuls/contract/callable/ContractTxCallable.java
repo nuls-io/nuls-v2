@@ -94,13 +94,13 @@ public class ContractTxCallable implements Callable<ContractResult> {
 
     @Override
     public ContractResult call() throws Exception {
+        ChainManager.chainHandle(chainId);
         BatchInfo batchInfo = contractHelper.getChain(chainId).getBatchInfo();
         String hash = tx.getHash().toHex();
-        if(batchInfo.checkGasCostTotal(tx.getHash().toHex())) {
+        if(!batchInfo.checkGasCostTotal(tx.getHash().toHex())) {
             Log.error("Exceed gas limit of block [15,000,000 gas], the contract transaction [{}] revert to package queue.", hash);
             return null;
         }
-        ChainManager.chainHandle(chainId);
         long start = 0L;
         if (Log.isDebugEnabled()) {
             start = System.currentTimeMillis();
