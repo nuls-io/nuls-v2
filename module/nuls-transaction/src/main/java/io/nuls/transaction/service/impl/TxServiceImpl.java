@@ -1175,7 +1175,9 @@ public class TxServiceImpl implements TxService {
         });
         for (TxPackageWrapper txPackageWrapper : txList) {
             packablePool.offerFirst(chain, txPackageWrapper.getTx());
+            chain.getLogger().info("putBackPackablePool tx hash:{}", txPackageWrapper.getTx().getHash().toHex());
         }
+        chain.getLogger().info("putBackPackablePool count:{}", txList.size());
     }
 
     private void putBackPackablePool(Chain chain, Set<TxPackageWrapper> orphanTxSet) {
