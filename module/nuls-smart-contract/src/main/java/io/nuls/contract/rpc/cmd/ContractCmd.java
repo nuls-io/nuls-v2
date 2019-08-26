@@ -120,6 +120,11 @@ public class ContractCmd extends BaseCmd {
             ContractTempTransaction tx = new ContractTempTransaction();
             tx.setTxHex(txData);
             tx.parse(RPCUtil.decode(txData), 0);
+            String hash = tx.getHash().toHex();
+            if(!contractHelper.getChain(chainId).getBatchInfo().checkGasCostTotal(hash)) {
+                Log.warn("Exceed gas limit of block [15,000,000 gas], the contract transaction [{}] revert to package queue.", hash);
+                return success();
+            }
             Result result = contractService.invokeContractOneByOne(chainId, tx);
             if (result.isFailed()) {
                 return wrapperFailed(result);
@@ -173,11 +178,14 @@ public class ContractCmd extends BaseCmd {
             if (result.isFailed()) {
                 return wrapperFailed(result);
             }
+            List<String> pendingTxHashList = contractHelper.getChain(chainId).getBatchInfo().getPendingTxHashList();
             ContractPackageDto dto = (ContractPackageDto) result.getData();
             List<String> resultTxDataList = dto.getResultTxList();
             Map<String, Object> resultMap = MapUtil.createHashMap(2);
             resultMap.put("stateRoot", RPCUtil.encode(dto.getStateRoot()));
             resultMap.put("txList", resultTxDataList);
+            // 存放未处理的交易
+            resultMap.put("pendingTxHashList", pendingTxHashList);
             Log.info("[End Contract Batch] packaging blockHeight is [{}], packaging StateRoot is [{}]", blockHeight, RPCUtil.encode(dto.getStateRoot()));
             return success(resultMap);
         } catch (Exception e) {

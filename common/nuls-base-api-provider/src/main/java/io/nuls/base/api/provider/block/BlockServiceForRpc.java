@@ -69,7 +69,7 @@ public class BlockServiceForRpc extends BaseRpcService implements BlockService {
             res.setHash(header.getHash().toString());
             res.setHeight(header.getHeight());
             res.setSize(header.getBlockSize());
-            res.setTime(NulsDateUtils.timeStamp2DateStr(header.getTime()));
+            res.setTime(NulsDateUtils.timeStamp2DateStr(header.getTime()*1000));
             res.setTxCount(header.getTxCount());
             res.setMerkleHash(header.getMerkleHash().toString());
             res.setBlockSignature(header.getBlockSignature().getSignData().toString());
@@ -80,7 +80,7 @@ public class BlockServiceForRpc extends BaseRpcService implements BlockService {
             res.setBlockVersion(blockExtendsData.getBlockVersion());
             res.setPackingIndexOfRound(blockExtendsData.getPackingIndexOfRound());
             res.setRoundIndex(blockExtendsData.getRoundIndex());
-            res.setRoundStartTime(NulsDateUtils.timeStamp2DateStr(blockExtendsData.getRoundStartTime()));
+            res.setRoundStartTime(NulsDateUtils.timeStamp2DateStr(blockExtendsData.getRoundStartTime()*1000));
             res.setStateRoot(RPCUtil.encode(blockExtendsData.getStateRoot()));
 
             List<String> hashList = new ArrayList<>();
