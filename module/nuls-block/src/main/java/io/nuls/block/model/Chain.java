@@ -64,7 +64,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class Chain {
 
-    public static final Comparator<Chain> COMPARATOR = Comparator.comparingLong(Chain::getStartHeight).thenComparingInt(Chain::getStartHashCode);
+    public static final Comparator<Chain> COMPARATOR = Comparator.comparingLong(Chain::getStartHeight).thenComparingInt(Chain::getStartHashCode).thenComparingLong(Chain::getEndHeight).thenComparingInt(Chain::getEndHashCode);
 
     /**
      * 标记这个链是从哪个链分叉来的,一个链的parent不一定是主链
@@ -132,6 +132,15 @@ public class Chain {
      */
     public NulsHash getEndHash() {
         return hashList.getLast();
+    }
+
+    /**
+     * 获取链的结束hashcode
+     *
+     * @return
+     */
+    public int getEndHashCode() {
+        return hashList.getLast().hashCode();
     }
 
     /**
@@ -251,26 +260,14 @@ public class Chain {
 
     @Override
     public String toString() {
-//        if (isMaster()) {
-            return new StringJoiner(", ", Chain.class.getSimpleName() + "[", "]")
-                    .add("parentStartHashCode=" + (this.getParent() == null ? null : this.getParent().getStartHashCode()))
-                    .add("startHashCode=" + startHashCode)
-                    .add("startHeight=" + startHeight)
-                    .add("endHeight=" + endHeight)
-                    .add("type=" + type)
-                    .add("age=" + age)
-                    .toString();
-//        } else {
-//            return new StringJoiner(", ", Chain.class.getSimpleName() + "[", "]")
-//                    .add("parentStartHashCode=" + (this.getParent() == null ? null : this.getParent().getStartHashCode()))
-//                    .add("startHashCode=" + startHashCode)
-//                    .add("startHeight=" + startHeight)
-//                    .add("endHeight=" + endHeight)
-//                    .add("type=" + type)
-//                    .add("age=" + age)
-//                    .add("hashList=" + hashList)
-//                    .toString();
-//        }
+        return new StringJoiner(", ", Chain.class.getSimpleName() + "[", "]")
+                .add("parentStartHashCode=" + (this.getParent() == null ? null : this.getParent().getStartHashCode()))
+                .add("startHashCode=" + startHashCode)
+                .add("startHeight=" + startHeight)
+                .add("endHeight=" + endHeight)
+                .add("type=" + type)
+                .add("age=" + age)
+                .toString();
     }
 
     @Override
