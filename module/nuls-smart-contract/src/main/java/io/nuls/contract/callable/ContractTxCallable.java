@@ -125,6 +125,7 @@ public class ContractTxCallable implements Callable<ContractResult> {
                 case CREATE_CONTRACT:
                     container.setHasCreate(true);
                     contractResult = contractExecutor.create(executor, contractData, number, preStateRoot, extractPublicKey(tx));
+                    makeContractResult(tx, contractResult);
                     if(!checkGas(contractResult)) {
                         break;
                     }
@@ -132,6 +133,7 @@ public class ContractTxCallable implements Callable<ContractResult> {
                     break;
                 case CALL_CONTRACT:
                     contractResult = contractExecutor.call(executor, contractData, number, preStateRoot, extractPublicKey(tx));
+                    makeContractResult(tx, contractResult);
                     if(!checkGas(contractResult)) {
                         break;
                     }
@@ -167,7 +169,6 @@ public class ContractTxCallable implements Callable<ContractResult> {
     }
 
     private void checkCreateResult(ContractWrapperTransaction tx, CallableResult callableResult, ContractResult contractResult) {
-        makeContractResult(tx, contractResult);
         if (contractResult.isSuccess()) {
             Result checkResult = contractHelper.validateNrc20Contract(chainId, (ProgramExecutor) contractResult.getTxTrack(), tx, contractResult);
             if (checkResult.isFailed()) {
@@ -186,7 +187,6 @@ public class ContractTxCallable implements Callable<ContractResult> {
 
 
     private void checkCallResult(ContractWrapperTransaction tx, CallableResult callableResult, ContractResult contractResult) throws IOException {
-        makeContractResult(tx, contractResult);
         List<ContractResult> reCallList = callableResult.getReCallList();
         boolean isConflict = checker.checkConflict(chainId, tx, contractResult, container.getCommitSet());
         if (isConflict) {
