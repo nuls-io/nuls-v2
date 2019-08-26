@@ -1016,14 +1016,14 @@ public class TxServiceImpl implements TxService {
                     //如果合约交易不需要全部放回待打包队列,就检查如果存在未执行的智能合约,则放回待打包队列,下次执行。
                     List<String> nonexecutionList = (List<String>) map.get("pendingTxHashList");
                     if (null != nonexecutionList && !nonexecutionList.isEmpty()) {
-                        chain.getLogger().debug("contract pending tx count:{} ", nonexecutionList.size());
+                        chain.getLogger().info("contract pending tx count:{} ", nonexecutionList.size());
                         Iterator<TxPackageWrapper> iterator = packingTxList.iterator();
                         while (iterator.hasNext()) {
                             TxPackageWrapper txPackageWrapper = iterator.next();
                             for (String hash : nonexecutionList) {
                                 if (hash.equals(txPackageWrapper.getTx().getHash().toHex())) {
                                     orphanTxSet.add(txPackageWrapper);
-                                    chain.getLogger().debug("contract pending tx back to PackablePool hash:{} ", hash);
+                                    chain.getLogger().info("contract pending tx back to PackablePool hash:{} ", hash);
                                     //从可打包集合中删除
                                     iterator.remove();
                                     break;
