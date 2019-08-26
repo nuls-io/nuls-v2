@@ -79,7 +79,7 @@ public class Utils {
             throw new RuntimeException("exceed depth");
             //return depth;
         }
-        if (SdkProviderDocTool.baseType.contains(cls)) {
+        if (ApiDocTool.baseType.contains(cls)) {
             return depth;
         }
         Field[] fields = cls.getDeclaredFields();
@@ -88,7 +88,7 @@ public class Utils {
             for (Field field : fields) {
                 // 每次循环初始化最初的层级
                 int initial = depth;
-                if (SdkProviderDocTool.baseType.contains(field.getType())) {
+                if (ApiDocTool.baseType.contains(field.getType())) {
                     continue;
                 }
                 Type genericType = field.getGenericType();
@@ -98,7 +98,7 @@ public class Utils {
                     Type[] typeArguments = pType.getActualTypeArguments();
                     for (int i = 0; i < typeArguments.length; i++) {
                         Class<?> aClass = Class.forName(typeArguments[i].getTypeName());
-                        if (SdkProviderDocTool.baseType.contains(aClass)) {
+                        if (ApiDocTool.baseType.contains(aClass)) {
                             continue;
                         }
                         int i1 = getDepth(aClass, initial);

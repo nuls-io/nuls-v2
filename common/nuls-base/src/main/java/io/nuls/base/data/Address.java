@@ -181,7 +181,9 @@ public class Address {
     }
 
     public String getBase58() {
-        if (StringUtils.isBlank(addressStr)) {
+        if(StringUtils.isNotBlank(prefix)){
+            addressStr = AddressTool.getStringAddressByBytes(this.addressBytes,prefix);
+        }else if (StringUtils.isBlank(addressStr)) {
             addressStr = AddressTool.getStringAddressByBytes(this.addressBytes);
         }
         return addressStr;

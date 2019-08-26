@@ -49,7 +49,7 @@ public class Chain {
     /**
      * 批量执行信息
      */
-    private BatchInfo batchInfo = new BatchInfo();
+    private BatchInfo batchInfo;
 
     /**
      * 向合约模块注册接口提供给合约来调用

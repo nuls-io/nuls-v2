@@ -474,6 +474,7 @@ public class RollbackService {
         processTransferTx(chainId, tx);
         ContractInfo contractInfo = (ContractInfo) tx.getTxData();
         contractInfo.setNew(true);
+        contractInfoMap.put(contractInfo.getContractAddress(), contractInfo);
         contractTxHashList.add(tx.getHash());
         ContractResultInfo resultInfo = contractInfo.getResultInfo();
         if (resultInfo.isSuccess()) {

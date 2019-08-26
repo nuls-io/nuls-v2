@@ -80,9 +80,11 @@ public class TransactionDto {
         this.transactionSignature = RPCUtil.encode(transaction.getTransactionSignature());
         this.txDataHex = RPCUtil.encode(transaction.getTxData());
         this.type = transaction.getType();
-        CoinData coinData = transaction.getCoinDataInstance();
-        this.from = coinData.getFrom().stream().map(from -> new CoinFromDto(from)).collect(Collectors.toList());
-        this.to = coinData.getTo().stream().map(to -> new CoinToDto(to)).collect(Collectors.toList());
+        if(transaction.getCoinData() != null) {
+            CoinData coinData = transaction.getCoinDataInstance();
+            this.from = coinData.getFrom().stream().map(from -> new CoinFromDto(from)).collect(Collectors.toList());
+            this.to = coinData.getTo().stream().map(to -> new CoinToDto(to)).collect(Collectors.toList());
+        }
     }
 
     public String getHash() {
