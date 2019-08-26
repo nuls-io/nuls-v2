@@ -84,7 +84,7 @@ public class SmallBlockCacher {
         if (cachedSmallBlock == null) {
             Block block = service.getBlock(chainId, blockHash);
             SmallBlock smallBlock = BlockUtil.getSmallBlock(chainId, block);
-            cachedSmallBlock = new CachedSmallBlock(null, smallBlock, null);
+            cachedSmallBlock = new CachedSmallBlock(null, smallBlock, null, null);
         }
         return cachedSmallBlock;
     }
