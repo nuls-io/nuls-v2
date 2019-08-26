@@ -118,7 +118,7 @@ public class TxValid {
     @Test
     public void importPriKeyTest() {
         importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//种子出块地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
-        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//种子出块地址 tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
+//        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//种子出块地址 tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
         importPriKey("9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b", password);//20 tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
         importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//21 tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
         importPriKey("8212e7ba23c8b52790c45b0514490356cd819db15d364cbe08659b5888339e78", password);//22 tNULSeBaMrbMRiFAUeeAt6swb4xVBNyi81YL24
@@ -131,14 +131,41 @@ public class TxValid {
         importPriKey("76b7beaa98db863fb680def099af872978209ed9422b7acab8ab57ad95ab218b", password);//29 tNULSeBaMqywZjfSrKNQKBfuQtVxAHBQ8rB2Zn
     }
 
-//    @Test
-//    public void importPriKeyTest() {
-//        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//种子出块地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
-//        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//种子出块地址 tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
-//        importPriKey("9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b", password);//20 tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
-//        importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//21 tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
-//    }
+    @Test
+    public void getTxs() throws Exception {
+//        getTxCfmClient("31f65fb2cc5e468b203f692291ea94f8559dca30878f9e1648c11601bf0cf7e1");
+        String txStr = (String)(getTxCfmClient("6905e41243be43ba7550a25626e2dbe3b6f0ac6a472b7599464ad056ddf66c82").get("tx"));
+        Transaction tx = TxUtil.getInstance(txStr, Transaction.class);//最后一条
+        TxUtil.txInformationDebugPrint(tx);
+    }
 
+    @Test
+    public void scTestTransfer() throws Exception { //测试合约发钱
+        importPriKey("38464747051e948965d667bd24696ffcce8fb680b2faa843273aa2d609a4d40b", password);
+        importPriKey("55eea92427e97fb26ab965087aba1326e44b3251923a8b1c4891eff58da43fc1", password);
+        importPriKey("1c47826a81bf7ee46092e4c76c5f6a6fdf5d6a193946270b157c8f9d625baaab", password);
+        importPriKey("41f2de5344e238a65b8e4f15afcab46465d641eea020d79761aa356144d1b7df", password);
+        importPriKey("5302cb0d14207abcbf2c2ffcacb2c8de2f6e522bfcfbbf0d9326828b4e1d7203", password);
+        importPriKey("107c590e2a33df44218dac70177b52c814992b035f2f8b8d529470612a16fc93", password);
+        importPriKey("5060502d157c03e46ac7dd3ced2e4c456e55cc7b924c94c6203e4c3d7f46a6c4", password);
+        importPriKey("3fd3381c647612a4cf19eac516d8c582e61eb99d8532ea11d0bae605b542f7ac", password);
+        importPriKey("1b6fffdb9eb61749b7b8466bc7996da9f889e2ca1fd332895ace170914dcf958", password);
+        importPriKey("368c32b90f810cc4d2f83b374785bda919a5dfda88a1a34c56757107d8b1a28b", password);
+        importPriKey("368c32b90f810cc4d2f83b374785bda919a5dfda88a1a34c56757107d8b1a28b", password);
+        importPriKey("1660e4773adf225f167c1834085afc31aaea52e5b28fb76d251eab6e92c73116", password);
+        createTransfer(address20, "tNULSeBaMmcSM2rzbZ4HQzv1ge4KT828W3PFKx", new BigInteger("20000000000000"));
+        createTransfer(address20, "tNULSeBaMvTdRV28tTLxn6T6nKShUfMvdEqtFP", new BigInteger("20000000000000"));
+        createTransfer(address20, "tNULSeBaMjtpBCk5953nc81jr28rvLgsKENcQy", new BigInteger("20000000000000"));
+        createTransfer(address20, "tNULSeBaMrp9a1QMF3S6gR2JZnmEZq68sqgTLA", new BigInteger("20000000000000"));
+        createTransfer(address20, "tNULSeBaMvAj8L9ET1haM7FgWHsBPcNend21fS", new BigInteger("20000000000000"));
+        createTransfer(address20, "tNULSeBaMjhfQ1G2shvFF4QbCZeTJ5b23iTR2h", new BigInteger("20000000000000"));
+        createTransfer(address20, "tNULSeBaMuAQZMiWXmvRhpJzC4aY4DEwqQrucQ", new BigInteger("20000000000000"));
+        createTransfer(address20, "tNULSeBaMph1RpK3FAJZcW9QoRa1G4jvC4VSA2", new BigInteger("20000000000000"));
+        createTransfer(address20, "tNULSeBaMf9iLnMzHWtvn3JGQ7r55ysbtWDUE1", new BigInteger("20000000000000"));
+        createTransfer(address20, "tNULSeBaMmc8tip5c4pob9cd41CpnZDYS6beCm", new BigInteger("20000000000000"));
+        createTransfer(address20, "tNULSeBaMszoF91eiFTb4UWU6q78jsG5jDbd91", new BigInteger("20000000000000"));
+        createTransfer(address20, "tNULSeBaMg9PdWwZfugBd1NJ7qxNGjWFc2XJtg", new BigInteger("20000000000000"));
+    }
     /**
      * 多个地址转账
      */
@@ -601,7 +628,7 @@ public class TxValid {
     @Test
     public void getTx() throws Exception {
 //        getTxCfmClient("31f65fb2cc5e468b203f692291ea94f8559dca30878f9e1648c11601bf0cf7e1");
-        String txStr = (String)(getTxCfmClient("eeb0e51e1c627aa0327c4df08005864223b7d7e456663fc943ad0fdb0497d06f").get("tx"));
+        String txStr = (String)(getTxCfmClient("6905e41243be43ba7550a25626e2dbe3b6f0ac6a472b7599464ad056ddf66c82").get("tx"));
         Transaction tx = TxUtil.getInstance(txStr, Transaction.class);//最后一条
         TxUtil.txInformationDebugPrint(tx);
     }
