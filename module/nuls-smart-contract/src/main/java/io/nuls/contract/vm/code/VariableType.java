@@ -45,8 +45,10 @@ public class VariableType {
 
     static {
         CACHE = CacheBuilder.newBuilder()
-                .initialCapacity(1024)
-                .maximumSize(102400)
+                //.initialCapacity(1024)
+                //.maximumSize(102400)
+                .initialCapacity(512)
+                .maximumSize(51200)
                 .expireAfterAccess(10, TimeUnit.MINUTES)
                 .build(new CacheLoader<String, VariableType>() {
                     @Override
@@ -55,8 +57,10 @@ public class VariableType {
                     }
                 });
         CACHE_LIST = CacheBuilder.newBuilder()
-                .initialCapacity(1024)
-                .maximumSize(10240)
+                //.initialCapacity(1024)
+                //.maximumSize(10240)
+                .initialCapacity(512)
+                .maximumSize(5120)
                 .expireAfterAccess(10, TimeUnit.MINUTES)
                 .build(new CacheLoader<String, List<VariableType>>() {
                     @Override
