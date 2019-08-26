@@ -64,8 +64,8 @@ public class ContractCallerImpl implements ContractCaller {
 
     private static final ExecutorService TX_EXECUTOR_SERVICE =
             new ThreadPoolExecutor(
-                    Runtime.getRuntime().availableProcessors(),
-                    Runtime.getRuntime().availableProcessors() * 2,
+                    4,
+                    4,
                     10L,
                     TimeUnit.SECONDS,
                     new LinkedBlockingQueue<Runnable>(),
