@@ -115,7 +115,7 @@ public class ConnectionManager extends BaseManager {
         List<String> list = networkConfig.getSeedIpList();
         NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByMagic(networkConfig.getPacketMagic());
         for (String seed : list) {
-            String[] peer = seed.split(NetworkConstant.COLON);
+            String[] peer = IpUtil.splitHostPort(seed);
             if (IpUtil.getIps().contains(peer[0])) {
                 continue;
             }
