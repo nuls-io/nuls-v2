@@ -114,7 +114,7 @@ public class MultiTestJyc extends Thread {
             for (int i = 0; i < count; i++) {
                 String from = accountList.get((i % count) + num * count);
                 try {
-                    createContract(from, PASSWORD, code);
+                    createContract(from, PASSWORD, code, null);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

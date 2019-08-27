@@ -32,8 +32,13 @@ import io.nuls.transaction.model.bo.config.ConfigBean;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.File;
+import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 import static io.nuls.transaction.TestCommonUtil.*;
 
@@ -54,11 +59,55 @@ public class TestJyc {
     }
 
     @Test
-    public void name() throws Exception {
-//        System.out.println(getBalance(chain, "tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp"));
+    public void delete() throws Exception {
+        deleteContract("tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD", PASSWORD, "TNULSeBaN1tX2yHviatGhCjtCjLHNgwrvwpg1Q");
+    }
 
-        String code = Files.readString(Path.of("C:\\Users\\alvin\\Desktop\\contract", "code.txt"));
-        createContract(SOURCE_ADDRESS, PASSWORD, code);
+    @Test
+    public void createContractPixelTest() throws Exception {
+        String code = Files.readString(Path.of("C:\\Users\\alvin\\Desktop\\contract", "pixel.txt"));
+        int size = 0;
+        for (int i = 0; i < 10000000; i++) {
+            size++;
+            System.out.println(createContract("tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD", PASSWORD, code, new Object[]{size % 50 + 1}));
+            Thread.sleep(1000);
+        }
+    }
+
+    @Test
+    public void createCommonContractTest() throws Exception {
+        File path = new File("C:\\Users\\alvin\\Documents\\WeChat Files\\jyc19900913\\FileStorage\\File\\2019-08\\合约代码HEX码");
+        List<String> codes = new ArrayList<>();
+        for (String file : path.list()) {
+            codes.add(Files.readString(Path.of(file)));
+        }
+
+        for (int i = 0; i < 10000000; i++) {
+            for (String code : codes) {
+                System.out.println(createContract("tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD", PASSWORD, code, null));
+                Thread.sleep(1000);
+            }
+        }
+    }
+
+    @Test
+    public void callContractTest() throws Exception {
+        String code = Files.readString(Path.of("C:\\Users\\alvin\\Desktop\\contract", "pixel.txt"));
+        int size = 10;
+        String account = "tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD";
+        String contract = createContract(account, PASSWORD, code, new Object[]{size});
+        Thread.sleep(15000);
+        BigInteger value = new BigInteger("100000000");
+        for (int z = 0; z < 50; z++) {
+            for (int i = 0; i < size; i++) {
+                for (int j = 0; j < size; j++) {
+                    Random random = new Random();
+                    callContract(account, PASSWORD, value, contract, "buy", new Object[]{i + 1, j + 1, random.nextInt(256), random.nextInt(256), random.nextInt(256)});
+                    Thread.sleep(500);
+                }
+            }
+            value = value.multiply(new BigInteger("115")).divide(new BigInteger("100"));
+        }
     }
 
     /**
@@ -66,7 +115,7 @@ public class TestJyc {
      */
     @Test
     public void importSeed() {
-        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", PASSWORD);//tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
+//        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", PASSWORD);//tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
 //        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", PASSWORD);//tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
 //        importPriKey("14a37507d42e474b45e7f2914c4fc317bbf3a428f6d9a398f5719a3be6bb74b1", PASSWORD);//tNULSeBaMjESuVomqR74SbUmTHwQGEKAeE9awT
 //        importPriKey("60bdc4d03a10de2f86f351f2e7cecc2d306b7150265e19727148f1c51bec2fd8", PASSWORD);//tNULSeBaMtsumpXhfEZBU2pMEz7SHLcx5b2TQr
@@ -84,6 +133,7 @@ public class TestJyc {
 //        importPriKey("27dbdcd1f2d6166001e5a722afbbb86a845ef590433ab4fcd13b9a433af6e66e", PASSWORD);//tNULSeBaMoNnKitV28JeuUdBaPSR6n1xHfKLj2
 //        importPriKey("76b7beaa98db863fb680def099af872978209ed9422b7acab8ab57ad95ab218b", PASSWORD);//tNULSeBaMqywZjfSrKNQKBfuQtVxAHBQ8rB2Zn
 //        importPriKey("00a6eef7b91c645525bb8410f2a79e1299a69d0d7ef980068434b6aca90ab6d9", PASSWORD);//tNULSeBaMiAQSiqXHBUypfMGZzcroe12W4SFbi
+//        importPriKey("fbcae491407b54aa3904ff295f2d644080901fda0d417b2b427f5c1487b2b499", PASSWORD);//tNULSeBaMmShSTVwbU4rHkZjpD98JgFgg6rmhF
     }
 
 }
