@@ -33,14 +33,12 @@ import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.helper.ContractNewTxHandler;
 import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.manager.ContractTempBalanceManager;
-import io.nuls.contract.model.bo.CallableResult;
-import io.nuls.contract.model.bo.ContractContainer;
-import io.nuls.contract.model.bo.ContractResult;
-import io.nuls.contract.model.bo.ContractWrapperTransaction;
+import io.nuls.contract.model.bo.*;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.service.ContractExecutor;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
+import io.nuls.contract.vm.GasCost;
 import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.ioc.SpringLiteContext;
@@ -97,6 +95,12 @@ public class ContractTxCallable implements Callable<ContractResult> {
     @Override
     public ContractResult call() throws Exception {
         ChainManager.chainHandle(chainId);
+        BatchInfo batchInfo = contractHelper.getChain(chainId).getBatchInfo();
+        String hash = tx.getHash().toHex();
+        if(!batchInfo.checkGasCostTotal(tx.getHash().toHex())) {
+            Log.error("Exceed gas limit of block [15,000,000 gas], the contract transaction [{}] revert to package queue.", hash);
+            return null;
+        }
         long start = 0L;
         if (Log.isDebugEnabled()) {
             start = System.currentTimeMillis();
@@ -127,10 +131,18 @@ public class ContractTxCallable implements Callable<ContractResult> {
                 case CREATE_CONTRACT:
                     container.setHasCreate(true);
                     contractResult = contractExecutor.create(executor, contractData, number, preStateRoot, extractPublicKey(tx));
+                    makeContractResult(tx, contractResult);
+                    if(!checkGas(contractResult)) {
+                        break;
+                    }
                     checkCreateResult(tx, callableResult, contractResult);
                     break;
                 case CALL_CONTRACT:
                     contractResult = contractExecutor.call(executor, contractData, number, preStateRoot, extractPublicKey(tx));
+                    makeContractResult(tx, contractResult);
+                    if(!checkGas(contractResult)) {
+                        break;
+                    }
                     checkCallResult(tx, callableResult, contractResult);
                     break;
                 case DELETE_CONTRACT:
@@ -151,8 +163,18 @@ public class ContractTxCallable implements Callable<ContractResult> {
         return contractResult;
     }
 
+    private boolean checkGas(ContractResult contractResult) {
+        long gasUsed = contractResult.getGasUsed();
+        BatchInfo batchInfo = contractHelper.getChain(chainId).getBatchInfo();
+        boolean isAdded = batchInfo.addGasCostTotal(gasUsed, contractResult.getHash());
+        if(!isAdded) {
+            contractResult.setError(true);
+            contractResult.setErrorMessage("Exceed gas limit of block [15,000,000 gas], the contract transaction ["+ contractResult.getHash() +"] revert to package queue.");
+        }
+        return isAdded;
+    }
+
     private void checkCreateResult(ContractWrapperTransaction tx, CallableResult callableResult, ContractResult contractResult) {
-        makeContractResult(tx, contractResult);
         if (contractResult.isSuccess()) {
             Result checkResult = contractHelper.validateNrc20Contract(chainId, (ProgramExecutor) contractResult.getTxTrack(), tx, contractResult);
             if (checkResult.isFailed()) {
@@ -171,7 +193,6 @@ public class ContractTxCallable implements Callable<ContractResult> {
 
 
     private void checkCallResult(ContractWrapperTransaction tx, CallableResult callableResult, ContractResult contractResult) throws IOException {
-        makeContractResult(tx, contractResult);
         List<ContractResult> reCallList = callableResult.getReCallList();
         boolean isConflict = checker.checkConflict(chainId, tx, contractResult, container.getCommitSet());
         if (isConflict) {

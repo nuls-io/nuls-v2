@@ -488,9 +488,9 @@ public class CoinDataValidator {
                 if (null == list) {
                     //从头开始处理
                     if (!LedgerUtil.equalsNonces(accountState.getNonce(), coinFrom.getNonce())) {
-                        logger(chainId).error("validate fail:(isBlockValidateCommonTx failed)：{}=={}=={}==nonce is error!dbNonce:{}!=fromNonce:{}", address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), accountState.getNonce(), fromCoinNonce);
+                        logger(chainId).error("validate fail:(isBlockValidateCommonTx failed)：{}=={}=={}==nonce is error!dbNonce:{}!=fromNonce:{}", address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), LedgerUtil.getNonceEncode(accountState.getNonce()), fromCoinNonce);
                         //判断是否fromNonce是否已经存储了,如果存储了，则这笔是异常交易双花
-                        return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{address, fromCoinNonce, "dbNonce=" + accountState.getNonce()});
+                        return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{address, fromCoinNonce, "dbNonce=" + LedgerUtil.getNonceEncode(accountState.getNonce())});
                     }
                     list = new ArrayList<>();
                     list.add(new TempAccountNonce(assetKey, coinFrom.getNonce(), txNonce));

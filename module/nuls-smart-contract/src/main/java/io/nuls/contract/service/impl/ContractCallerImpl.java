@@ -64,8 +64,8 @@ public class ContractCallerImpl implements ContractCaller {
 
     private static final ExecutorService TX_EXECUTOR_SERVICE =
             new ThreadPoolExecutor(
-                    Runtime.getRuntime().availableProcessors(),
-                    Runtime.getRuntime().availableProcessors() * 2,
+                    1,
+                    1,
                     10L,
                     TimeUnit.SECONDS,
                     new LinkedBlockingQueue<Runnable>(),
@@ -83,9 +83,7 @@ public class ContractCallerImpl implements ContractCaller {
 
     @Override
     public Result callTx(int chainId, ContractContainer container, ProgramExecutor batchExecutor, ContractWrapperTransaction tx, String preStateRoot) {
-
         try {
-
             ContractData contractData = tx.getContractData();
             byte[] contractAddressBytes = contractData.getContractAddress();
             String contract = AddressTool.getStringAddressByBytes(contractAddressBytes);

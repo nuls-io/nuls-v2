@@ -24,6 +24,7 @@
 package io.nuls.contract.model.bo;
 
 import io.nuls.base.data.BlockHeader;
+import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.enums.BatchInfoStatus;
 import io.nuls.contract.helper.ContractConflictChecker;
 import io.nuls.contract.manager.ContractTempBalanceManager;
@@ -31,11 +32,11 @@ import io.nuls.contract.model.dto.ContractPackageDto;
 import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.core.model.StringUtils;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Future;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * @author: PierreLuo
@@ -78,6 +79,14 @@ public class BatchInfo {
      */
     private long beginTime;
     /**
+     * 本次批量执行总共消耗的gas
+     */
+    private long gasCostTotal;
+    /**
+     * 本次批量执行总交易数
+     */
+    private int txTotal;
+    /**
      * 0 - 未开始， 1 - 已开始
      */
     private BatchInfoStatus status;
@@ -102,13 +111,29 @@ public class BatchInfo {
      */
     private Future<ContractPackageDto> contractPackageDtoFuture;
 
+    /**
+     * gas变化锁
+     */
+    private final ReadWriteLock gasLock = new ReentrantReadWriteLock();
+    /**
+     * 未处理交易hash列表锁
+     */
+    private final ReentrantLock pendingTxListlock = new ReentrantLock();
+
+    /**
+     * 因区块GAS用尽，未处理的合约交易
+     */
+    private List<String> pendingTxHashList;
 
     public BatchInfo(long height) {
         this.txCounter = 0;
         this.height = height;
+        this.gasCostTotal = 0L;
+        this.txTotal = 0;
         this.beginTime = System.currentTimeMillis();
         this.status = BatchInfoStatus.STARTING;
         this.contractContainerMap = new LinkedHashMap<>();
+        this.pendingTxHashList = new ArrayList<>();
     }
 
     public boolean hasBegan() {
@@ -227,5 +252,55 @@ public class BatchInfo {
 
     public void setContractPackageDtoFuture(Future<ContractPackageDto> contractPackageDtoFuture) {
         this.contractPackageDtoFuture = contractPackageDtoFuture;
+    }
+
+    public long getGasCostTotal() {
+        return gasCostTotal;
+    }
+
+    public List<String> getPendingTxHashList() {
+        return pendingTxHashList;
+    }
+
+    private void addPendingTxHashList(String txHash) {
+        pendingTxListlock.lock();
+        try {
+            pendingTxHashList.add(txHash);
+        } finally {
+            pendingTxListlock.unlock();
+        }
+    }
+
+    public boolean checkGasCostTotal(String txHash) {
+        gasLock.readLock().lock();
+        try {
+            boolean exceedTx = txTotal > ContractConstant.MAX_CONTRACT_TX_IN_BLOCK;
+            boolean exceedGas = gasCostTotal > ContractConstant.MAX_GAS_COST_IN_BLOCK;
+            if(exceedTx || exceedGas) {
+                addPendingTxHashList(txHash);
+                return false;
+            }
+            return true;
+        } finally {
+            gasLock.readLock().unlock();
+        }
+    }
+
+    public boolean addGasCostTotal(long gasCost, String txHash) {
+        gasLock.writeLock().lock();
+        try {
+            this.txTotal += 1;
+            this.gasCostTotal += gasCost;
+            boolean exceedTx = txTotal > ContractConstant.MAX_CONTRACT_TX_IN_BLOCK;
+            boolean exceedGas = gasCostTotal > ContractConstant.MAX_GAS_COST_IN_BLOCK;
+            if(exceedTx || exceedGas) {
+                addPendingTxHashList(txHash);
+                return false;
+            } else {
+                return true;
+            }
+        } finally {
+            gasLock.writeLock().unlock();
+        }
     }
 }

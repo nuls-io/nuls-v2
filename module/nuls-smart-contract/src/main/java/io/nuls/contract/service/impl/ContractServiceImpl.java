@@ -225,6 +225,30 @@ public class ContractServiceImpl implements ContractService {
     }
 
     @Override
+    public Result packageEnd(int chainId, long blockHeight) {
+
+        try {
+            BatchInfo batchInfo = contractHelper.getChain(chainId).getBatchInfo();
+            Future<ContractPackageDto> future = batchInfo.getContractPackageDtoFuture();
+            // 等待before_end执行完成
+            future.get();
+            ContractPackageDto dto = batchInfo.getContractPackageDto();
+            if (dto == null) {
+                return getFailed();
+            }
+            BlockHeader currentBlockHeader = batchInfo.getCurrentBlockHeader();
+            ProgramExecutor batchExecutor = batchInfo.getBatchExecutor();
+            byte[] stateRoot = batchExecutor.getRoot();
+            currentBlockHeader.setStateRoot(stateRoot);
+            dto.setStateRoot(stateRoot);
+            return getSuccess().setData(dto);
+        } catch (Exception e) {
+            Log.error(e);
+            return getFailed().setMsg(e.getMessage());
+        }
+    }
+
+    @Override
     public Result commitProcessor(int chainId, List<String> txDataList, String blockHeaderHex) {
         try {
             ContractPackageDto contractPackageDto = contractHelper.getChain(chainId).getBatchInfo().getContractPackageDto();
