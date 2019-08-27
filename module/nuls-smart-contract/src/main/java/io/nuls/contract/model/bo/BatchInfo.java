@@ -249,6 +249,10 @@ public class BatchInfo {
         this.contractPackageDtoFuture = contractPackageDtoFuture;
     }
 
+    public long getGasCostTotal() {
+        return gasCostTotal;
+    }
+
     public List<String> getPendingTxHashList() {
         return pendingTxHashList;
     }
