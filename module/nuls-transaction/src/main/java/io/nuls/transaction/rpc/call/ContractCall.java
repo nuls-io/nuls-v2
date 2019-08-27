@@ -118,7 +118,7 @@ public class ContractCall {
     }
 
     /**
-     * 调用智能合约
+     * 调用智能合约执行 验证区块交易的时候调用
      * @param chain
      * @param blockHeight
      * @return
@@ -131,6 +131,28 @@ public class ContractCall {
         params.put("blockHeight", blockHeight);
         try {
             Map result = (Map) TransactionCall.requestAndResponse(ModuleE.SC.abbr, "sc_batch_end", params);
+            chain.getLogger().debug("moduleCode:{}, -cmd:{}, -contractProcess -rs: {}",
+                    ModuleE.SC.abbr, "sc_batch_end", JSONUtils.obj2json(result));
+            return result;
+        }catch (Exception e) {
+            chain.getLogger().error(e);
+            throw new NulsException(TxErrorCode.RPC_REQUEST_FAILD);
+        }
+    }
+    /**
+     * 调用智能合约执行 打包的时候调用
+     * @param chain
+     * @param blockHeight
+     * @return
+     * @throws NulsException
+     */
+    public static Map<String, Object> contractPackageBatchEnd(Chain chain, long blockHeight) throws NulsException {
+
+        Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_4);
+        params.put(Constants.CHAIN_ID, chain.getChainId());
+        params.put("blockHeight", blockHeight);
+        try {
+            Map result = (Map) TransactionCall.requestAndResponse(ModuleE.SC.abbr, "sc_package_batch_end", params);
             chain.getLogger().debug("moduleCode:{}, -cmd:{}, -contractProcess -rs: {}",
                     ModuleE.SC.abbr, "sc_batch_end", JSONUtils.obj2json(result));
             return result;
