@@ -278,12 +278,14 @@ public class BatchInfo {
     public boolean addGasCostTotal(long gasCost, String txHash) {
         gasLock.writeLock().lock();
         try {
-            if(this.gasCostTotal <= ContractConstant.MAX_GAS_COST_IN_BLOCK) {
-                this.gasCostTotal += gasCost;
+            long tempTotalGas = this.gasCostTotal + gasCost;
+            if(tempTotalGas > ContractConstant.MAX_GAS_COST_IN_BLOCK) {
+                addPendingTxHashList(txHash);
+                return false;
+            } else {
+                this.gasCostTotal = tempTotalGas;
                 return true;
             }
-            addPendingTxHashList(txHash);
-            return false;
         } finally {
             gasLock.writeLock().unlock();
         }
