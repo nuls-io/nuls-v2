@@ -965,7 +965,7 @@ public class TxServiceImpl implements TxService {
             isRollbackPackablePool = true;
         } else {
             try {
-                Map<String, Object> map = ContractCall.contractBatchEnd(chain, blockHeight);
+                Map<String, Object> map = ContractCall.contractPackageBatchEnd(chain, blockHeight);
                 List<String> scNewList = (List<String>) map.get("txList");
                 if (null != scNewList) {
                     /**

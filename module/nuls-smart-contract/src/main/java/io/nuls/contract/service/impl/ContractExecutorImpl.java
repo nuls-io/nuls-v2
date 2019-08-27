@@ -30,10 +30,12 @@ import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.service.ContractExecutor;
 import io.nuls.contract.util.ContractUtil;
+import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.*;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.crypto.HexUtil;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -202,6 +204,9 @@ public class ContractExecutorImpl implements ContractExecutor {
         }
         executor.commit();
         byte[] stateRoot = executor.getRoot();
+        if(Log.isDebugEnabled()) {
+            Log.debug("after commit state is {}", HexUtil.encode(stateRoot));
+        }
         return ContractUtil.getSuccess().setData(stateRoot);
     }
 

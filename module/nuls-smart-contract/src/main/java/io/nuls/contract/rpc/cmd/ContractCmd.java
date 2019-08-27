@@ -32,6 +32,7 @@ import io.nuls.base.data.Transaction;
 import io.nuls.contract.enums.CmdRegisterMode;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.manager.*;
+import io.nuls.contract.model.bo.BatchInfo;
 import io.nuls.contract.model.bo.ContractTempTransaction;
 import io.nuls.contract.model.dto.ContractPackageDto;
 import io.nuls.contract.model.dto.ModuleCmdRegisterDto;
@@ -57,6 +58,7 @@ import java.math.BigInteger;
 import java.util.*;
 
 import static io.nuls.contract.constant.ContractCmdConstant.*;
+import static io.nuls.contract.constant.ContractCmdConstant.PACKAGE_BATCH_END;
 import static io.nuls.contract.constant.ContractConstant.*;
 import static io.nuls.contract.constant.ContractErrorCode.*;
 import static io.nuls.contract.util.ContractUtil.*;
@@ -178,7 +180,8 @@ public class ContractCmd extends BaseCmd {
             if (result.isFailed()) {
                 return wrapperFailed(result);
             }
-            List<String> pendingTxHashList = contractHelper.getChain(chainId).getBatchInfo().getPendingTxHashList();
+            BatchInfo batchInfo = contractHelper.getChain(chainId).getBatchInfo();
+            List<String> pendingTxHashList = batchInfo.getPendingTxHashList();
             ContractPackageDto dto = (ContractPackageDto) result.getData();
             List<String> resultTxDataList = dto.getResultTxList();
             Map<String, Object> resultMap = MapUtil.createHashMap(2);
@@ -186,7 +189,43 @@ public class ContractCmd extends BaseCmd {
             resultMap.put("txList", resultTxDataList);
             // 存放未处理的交易
             resultMap.put("pendingTxHashList", pendingTxHashList);
-            Log.info("[End Contract Batch] packaging blockHeight is [{}], packaging StateRoot is [{}]", blockHeight, RPCUtil.encode(dto.getStateRoot()));
+            Log.info("[End Contract Batch] Gas total cost is [{}], packaging blockHeight is [{}], packaging StateRoot is [{}]", batchInfo.getGasCostTotal(), blockHeight, RPCUtil.encode(dto.getStateRoot()));
+            return success(resultMap);
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
+    @CmdAnnotation(cmd = PACKAGE_BATCH_END, version = 1.0, description = "打包结束 - 通知当前批次结束并返回结果/batch end")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "blockHeight", parameterType = "long", parameterDes = "当前打包的区块高度")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象，包含两个key", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "stateRoot", description = "当前stateRoot"),
+            @Key(name = "txList", valueType = List.class, valueElement = String.class, description = "合约新生成的交易序列化字符串列表(可能有合约转账、合约共识、合约返回GAS)")
+    }))
+    public Response packageBatchEnd(Map<String, Object> params) {
+        try {
+            Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
+            Long blockHeight = Long.parseLong(params.get("blockHeight").toString());
+
+            Result result = contractService.packageEnd(chainId, blockHeight);
+            if (result.isFailed()) {
+                return wrapperFailed(result);
+            }
+            BatchInfo batchInfo = contractHelper.getChain(chainId).getBatchInfo();
+            List<String> pendingTxHashList = batchInfo.getPendingTxHashList();
+            ContractPackageDto dto = (ContractPackageDto) result.getData();
+            List<String> resultTxDataList = dto.getResultTxList();
+            Map<String, Object> resultMap = MapUtil.createHashMap(2);
+            resultMap.put("stateRoot", RPCUtil.encode(dto.getStateRoot()));
+            resultMap.put("txList", resultTxDataList);
+            // 存放未处理的交易
+            resultMap.put("pendingTxHashList", pendingTxHashList);
+            Log.info("[End Contract Batch] Gas total cost is [{}], packaging blockHeight is [{}], packaging StateRoot is [{}]", batchInfo.getGasCostTotal(), blockHeight, RPCUtil.encode(dto.getStateRoot()));
             return success(resultMap);
         } catch (Exception e) {
             Log.error(e);
