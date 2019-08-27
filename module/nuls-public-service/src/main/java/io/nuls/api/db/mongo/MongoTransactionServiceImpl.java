@@ -166,12 +166,12 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
             }
             for (Document document : documentList) {
                 saveList.add(document);
-                if(saveList.size() == 1000) {
+                if (saveList.size() == 1000) {
                     mongoDBService.insertMany(TX_RELATION_TABLE + chainId + "_" + i, saveList, options);
                     saveList.clear();
                 }
             }
-            if(saveList.size() != 0) {
+            if (saveList.size() != 0) {
                 mongoDBService.insertMany(TX_RELATION_TABLE + chainId + "_" + i, saveList, options);
             }
         }
@@ -185,7 +185,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
             filter = ne("type", 1);
         }
         long totalCount = mongoDBService.getCount(TX_TABLE + chainId, filter);
-        List<Document> docList = this.mongoDBService.pageQuery(TX_TABLE + chainId, filter, Sorts.descending("createTime"), pageIndex, pageSize);
+        List<Document> docList = this.mongoDBService.pageQuery(TX_TABLE + chainId, filter, Sorts.descending("height"), pageIndex, pageSize);
         List<MiniTransactionInfo> txList = new ArrayList<>();
         for (Document document : docList) {
             txList.add(MiniTransactionInfo.toInfo(document));
@@ -220,7 +220,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         }
         long count = mongoDBService.getCount(TX_TABLE + chainId, filter);
         List<MiniTransactionInfo> txList = new ArrayList<>();
-        List<Document> docList = this.mongoDBService.pageQuery(TX_TABLE + chainId, filter, Sorts.descending("createTime"), pageIndex, pageSize);
+        List<Document> docList = this.mongoDBService.pageQuery(TX_TABLE + chainId, filter, Sorts.descending("height"), pageIndex, pageSize);
         for (Document document : docList) {
             txList.add(MiniTransactionInfo.toInfo(document));
         }
@@ -339,7 +339,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         Set<TxRelationInfo> txRelationInfoSet = new HashSet<>();
         if (tx.getType() == TxType.COIN_BASE) {
             processCoinBaseTx(chainId, tx, txRelationInfoSet);
-        } else if (tx.getType() == TxType.TRANSFER || tx.getType() == TxType.CROSS_CHAIN) {
+        } else if (tx.getType() == TxType.TRANSFER) {
             processTransferTx(chainId, tx, txRelationInfoSet);
         } else if (tx.getType() == TxType.ACCOUNT_ALIAS) {
             processAliasTx(chainId, tx, txRelationInfoSet);
@@ -351,6 +351,8 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
             processCancelDepositTx(chainId, tx, txRelationInfoSet);
         } else if (tx.getType() == TxType.STOP_AGENT) {
             processStopAgentTx(chainId, tx, txRelationInfoSet);
+        } else if (tx.getType() == TxType.CROSS_CHAIN) {
+            processCrossTransferTx(chainId, tx, txRelationInfoSet);
         } else if (tx.getType() == TxType.CREATE_CONTRACT) {
             processCreateContract(chainId, tx, txRelationInfoSet);
         } else if (tx.getType() == TxType.CALL_CONTRACT) {
