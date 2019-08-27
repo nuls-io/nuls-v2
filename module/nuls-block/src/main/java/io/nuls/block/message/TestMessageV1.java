@@ -38,6 +38,9 @@ public class TestMessageV1 extends BaseBusinessMessage {
 
     private int count;
 
+    public TestMessageV1() {
+    }
+
     public TestMessageV1(int count) {
         this.count = count;
     }

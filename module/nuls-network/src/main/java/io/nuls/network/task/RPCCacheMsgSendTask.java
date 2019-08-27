@@ -70,12 +70,12 @@ public class RPCCacheMsgSendTask implements Runnable {
                             continue;
                         }
                         //发送消息
-                        Map<String, CmdPriority> protocolRoles = (Map<String, CmdPriority>) (MessageHandlerFactory.getInstance().getProtocolRoleHandlerMap(peerMessage.getCmd()));
+                        Map<String, CmdPriority> protocolRoles = MessageHandlerFactory.getInstance().getProtocolRoleHandlerMap(peerMessage.getCmd());
                         boolean fail = false;
                         for (Map.Entry<String, CmdPriority> entry : protocolRoles.entrySet()) {
                             try {
                                 Request request = MessageUtil.newRequest(BaseConstant.MSG_PROCESS, peerMessage.toMap(chainId), Constants.BOOLEAN_FALSE, Constants.ZERO, Constants.ZERO);
-                                if (ResponseMessageProcessor.requestOnly(entry.getKey(), request).equals("0")) {
+                                if ("0".equals(ResponseMessageProcessor.requestOnly(entry.getKey(), request))) {
                                     fail = true;
                                     LoggerUtil.logger(chainId).debug("##### chainId = {},cmd={},RPC resend fail,back to cache", chainId, peerMessage.getCmd());
                                 } else {
@@ -92,8 +92,6 @@ public class RPCCacheMsgSendTask implements Runnable {
                                 continue;
                             }
                             backList.add(peerMessage);
-                        } else {
-                            continue;
                         }
                     } catch (Exception e) {
                         LoggerUtil.logger(chainId).error(e);
