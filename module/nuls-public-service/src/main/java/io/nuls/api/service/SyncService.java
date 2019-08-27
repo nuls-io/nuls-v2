@@ -18,8 +18,7 @@ import io.nuls.core.exception.NulsRuntimeException;
 import java.math.BigInteger;
 import java.util.*;
 
-import static io.nuls.api.constant.ApiConstant.DISABLE;
-import static io.nuls.api.constant.ApiConstant.TRANSFER_TO_TYPE;
+import static io.nuls.api.constant.ApiConstant.*;
 
 @Component
 public class SyncService {
@@ -416,7 +415,9 @@ public class SyncService {
             } else {
                 accountInfo.setConsensusLock(accountInfo.getConsensusLock().subtract(output.getAmount()).subtract(agentInfo.getDeposit()));
                 ledgerInfo = calcBalance(chainId, output.getChainId(), output.getAssetsId(), accountInfo, tx.getFee().getValue());
-                txRelationInfoSet.add(new TxRelationInfo(output, tx, tx.getFee().getValue(), ledgerInfo.getTotalBalance()));
+                TxRelationInfo relationInfo = new TxRelationInfo(output, tx, tx.getFee().getValue(), ledgerInfo.getTotalBalance());
+                relationInfo.setTransferType(TRANSFER_FROM_TYPE);
+                txRelationInfoSet.add(relationInfo);
             }
         }
 
