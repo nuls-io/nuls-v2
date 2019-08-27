@@ -28,11 +28,11 @@ blackHolePublicKey=0000000000000000000000000000000000000000000000000000000000000
 port=18001
 crossPort=18002
 #魔法参数
-packetMagic=20190817
+packetMagic=19900913
 #种子节点
-selfSeedIps=39.98.226.51:18001,47.244.186.65:18001,47.254.234.223:18001,47.74.86.85:18001,192.168.1.145:18001
+selfSeedIps=192.168.1.117:18001,192.168.1.118:18001,192.168.1.119:18001
 #主网的跨链种子连接节点
-moonSeedIps=39.98.226.51:18002,47.244.186.65:18002,47.254.234.223:18002,47.74.86.85:18002,192.168.1.145:18002
+moonSeedIps=192.168.1.117:18002,192.168.1.118:18002,192.168.1.119:18002
 #最大入网连接数
 maxInCount=100
 #最大出网连接数
@@ -57,12 +57,12 @@ singleDownloadTimeout=15000
 #区块同步过程中缓存的区块字节数上限(20M)
 cachedBlockSizeLimit=20971520
 #创世块文件路径(支持绝对路径与相对路径,相对路径相对于此配置文件的目录)
-genesisBlockPath=genesis-block-main-beta3.json
+#genesisBlockPath=genesis-block-main-beta3.json
 dependent=cross-chain,smart-contract,protocol-update
 
 [consensus]
 #种子节点列表
-seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMmShSTVwbU4rHkZjpD98JgFgg6rmhF,tNULSeBaMpTj8qEQ8CFDxiP69hGFB27u9nmMUc
+seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMjESuVomqR74SbUmTHwQGEKAeE9awT
 #出块地址密码
 password=nuls123456
 #出块间隔时间(单位：s)
@@ -125,9 +125,9 @@ sendHeight=5
 #跨链交易拜占庭比例
 byzantineRatio=66
 #主网跨链种子节点列表
-crossSeedIps=192.168.1.121:18002,192.168.1.122:18002,192.168.1.123:18002,192.168.1.124:18002
+crossSeedIps=192.168.1.117:18002,192.168.1.118:18002,192.168.1.119:18002
 #主网验证人列表
-verifiers=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMmShSTVwbU4rHkZjpD98JgFgg6rmhF,tNULSeBaMpTj8qEQ8CFDxiP69hGFB27u9nmMUc,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
+verifiers=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMjESuVomqR74SbUmTHwQGEKAeE9awT
 #主网签名拜占庭比列
 mainByzantineRatio=66
 #主网最大签名数
