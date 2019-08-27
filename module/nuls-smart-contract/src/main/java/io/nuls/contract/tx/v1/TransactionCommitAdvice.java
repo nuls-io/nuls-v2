@@ -56,9 +56,7 @@ public class TransactionCommitAdvice implements CommonAdvice {
             ChainManager.chainHandle(chainId);
             ContractPackageDto contractPackageDto = contractHelper.getChain(chainId).getBatchInfo().getContractPackageDto();
             if (contractPackageDto != null) {
-                if (Log.isDebugEnabled()) {
-                    Log.debug("contract execute txDataSize is {}, commit txDataSize is {}", contractPackageDto.getContractResultMap().keySet().size(), txList.size());
-                }
+                Log.info("contract execute txDataSize is {}, commit txDataSize is {}", contractPackageDto.getContractResultMap().keySet().size(), txList.size());
 
                 List<byte[]> offlineTxHashList = contractPackageDto.getOfflineTxHashList();
                 if(offlineTxHashList != null && !offlineTxHashList.isEmpty()) {
