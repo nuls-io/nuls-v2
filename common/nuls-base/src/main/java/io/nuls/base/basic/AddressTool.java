@@ -61,9 +61,9 @@ public class AddressTool {
     }
 
     public static void addPrefix(int chainId, String prefix) {
-        if(chainId == BaseConstant.MAINNET_CHAIN_ID || chainId == BaseConstant.TESTNET_CHAIN_ID) {
+        if (chainId == BaseConstant.MAINNET_CHAIN_ID || chainId == BaseConstant.TESTNET_CHAIN_ID) {
             ADDRESS_PREFIX_MAP.put(chainId, prefix);
-        }else{
+        } else {
             ADDRESS_PREFIX_MAP.put(chainId, prefix.toUpperCase());
         }
     }
@@ -211,8 +211,8 @@ public class AddressTool {
      * @param chainId
      * @return
      */
-    public static byte[] getAddressByPubKeyStr(String publicKeyStr, int chainId, String charsetName) {
-        byte[] publicKey = ByteUtils.toBytes(publicKeyStr, charsetName);
+    public static byte[] getAddressByPubKeyStr(String publicKeyStr, int chainId) {
+        byte[] publicKey = HexUtil.decode(publicKeyStr);
         return getAddress(publicKey, chainId);
     }
 
@@ -536,6 +536,7 @@ public class AddressTool {
         }
         Collections.sort(pubKeyList, new Comparator<String>() {
             private Comparator<byte[]> comparator = UnsignedBytes.lexicographicalComparator();
+
             @Override
             public int compare(String k1, String k2) {
                 return comparator.compare(Hex.decode(k1), Hex.decode(k2));
@@ -556,6 +557,6 @@ public class AddressTool {
                 throw new RuntimeException(e);
             }
         }
-        return  result;
+        return result;
     }
 }
