@@ -98,7 +98,7 @@ public class ContractTxCallable implements Callable<ContractResult> {
         BatchInfo batchInfo = contractHelper.getChain(chainId).getBatchInfo();
         String hash = tx.getHash().toHex();
         if(!batchInfo.checkGasCostTotal(tx.getHash().toHex())) {
-            Log.error("Exceed gas limit of block [15,000,000 gas], the contract transaction [{}] revert to package queue.", hash);
+            Log.error("Exceed tx count [500] or gas limit of block [15,000,000 gas], the contract transaction [{}] revert to package queue.", hash);
             return null;
         }
         long start = 0L;
@@ -169,7 +169,7 @@ public class ContractTxCallable implements Callable<ContractResult> {
         boolean isAdded = batchInfo.addGasCostTotal(gasUsed, contractResult.getHash());
         if(!isAdded) {
             contractResult.setError(true);
-            contractResult.setErrorMessage("Exceed gas limit of block [15,000,000 gas], the contract transaction ["+ contractResult.getHash() +"] revert to package queue.");
+            contractResult.setErrorMessage("Exceed tx count [500] or gas limit of block [15,000,000 gas], the contract transaction ["+ contractResult.getHash() +"] revert to package queue.");
         }
         return isAdded;
     }
