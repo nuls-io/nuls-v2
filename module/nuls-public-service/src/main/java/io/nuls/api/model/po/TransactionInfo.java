@@ -147,8 +147,10 @@ public class TransactionInfo {
                 resultInfo = callInfo.getResultInfo();
             }
             feeInfo = new FeeInfo(assetInfo.getChainId(), assetInfo.getAssetId(), assetInfo.getSymbol());
-            BigInteger feeValue = new BigInteger(resultInfo.getActualContractFee()).add(new BigInteger(resultInfo.getTxSizeFee()));
-            feeInfo.setValue(feeValue);
+            if(resultInfo != null) {
+                BigInteger feeValue = new BigInteger(resultInfo.getActualContractFee()).add(new BigInteger(resultInfo.getTxSizeFee()));
+                feeInfo.setValue(feeValue);
+            }
         } else {
             //其他类型的交易,去本链默认资产手续费
             feeInfo = new FeeInfo(assetInfo.getChainId(), assetInfo.getAssetId(), assetInfo.getSymbol());
