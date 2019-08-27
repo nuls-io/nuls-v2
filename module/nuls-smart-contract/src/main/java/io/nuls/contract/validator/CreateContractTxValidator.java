@@ -33,7 +33,6 @@ import io.nuls.base.data.CoinTo;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.contract.config.ContractConfig;
 import io.nuls.contract.helper.ContractHelper;
-import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.model.tx.CreateContractTransaction;
 import io.nuls.contract.model.txdata.CreateContractData;
@@ -42,10 +41,12 @@ import io.nuls.contract.util.Log;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.FormatValidUtils;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -61,15 +62,30 @@ public class CreateContractTxValidator {
 
     @Autowired
     private ContractHelper contractHelper;
+    @Autowired
+    private ContractConfig contractConfig;
 
     public Result validate(int chainId, CreateContractTransaction tx) throws NulsException {
         CoinData coinData = tx.getCoinDataInstance();
         List<CoinFrom> fromList = coinData.getFrom();
         List<CoinTo> toList = coinData.getTo();
-        if(toList.size() != 0) {
+        // 检查 toList, 除了黑洞地址外，其他不被允许 000000000000000000000000000000000000000000000000000000000000000000
+        int toListSize = toList.size();
+        do {
+            if(toListSize == 0) {
+                break;
+            }
+            if(toListSize == 1) {
+                CoinTo coinTo = toList.get(0);
+                byte[] blockHoleAddress = AddressTool.getAddress(HexUtil.decode(contractConfig.getBlackHolePublicKey()), contractConfig.getChainId());
+                if(Arrays.equals(blockHoleAddress, coinTo.getAddress())) {
+                    break;
+                }
+            }
             Log.error("contract create error: The contract coin to is not empty.");
             return Result.getFailed(CONTRACT_COIN_TO_EMPTY_ERROR);
-        }
+        } while (false);
+
         Chain chain = contractHelper.getChain(chainId);
         int assetsId = chain.getConfig().getAssetId();
         for(CoinFrom from : fromList) {

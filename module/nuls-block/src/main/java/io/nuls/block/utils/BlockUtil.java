@@ -272,11 +272,18 @@ public class BlockUtil {
      * @return
      */
     private static void orphanChainProcess(int chainId, Block block) {
-        long blockHeight = block.getHeader().getHeight();
+        ChainContext context = ContextManager.getContext(chainId);
         NulsHash blockHash = block.getHeader().getHash();
+        NulsLogger logger = context.getLogger();
+        if (block.getNodeId() != null) {
+            Map<NulsHash, List<String>> map = context.getOrphanBlockRelatedNodes();
+            List<String> list = map.computeIfAbsent(blockHash, k -> new ArrayList<>());
+            list.add(block.getNodeId());
+            logger.debug("add OrphanBlockRelatedNodes, blockHash-{}, nodeId-{}", blockHash, block.getNodeId());
+        }
+        long blockHeight = block.getHeader().getHeight();
         NulsHash blockPreviousHash = block.getHeader().getPreHash();
         SortedSet<Chain> orphanChains = BlockChainManager.getOrphanChains(chainId);
-        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         try {
             for (Chain orphanChain : orphanChains) {
                 long orphanChainStartHeight = orphanChain.getStartHeight();

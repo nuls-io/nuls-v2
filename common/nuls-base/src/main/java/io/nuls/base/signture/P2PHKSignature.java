@@ -37,6 +37,7 @@ import io.nuls.core.log.Log;
 import io.nuls.core.parse.SerializeUtils;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Comparator;
 
 public class P2PHKSignature extends BaseNulsData {
@@ -141,6 +142,25 @@ public class P2PHKSignature extends BaseNulsData {
         } else {
             return new Result(false);
         }
+    }
+
+
+    @Override
+    public int hashCode() {
+        int result = 17;
+        result = 31 * result + Arrays.hashCode(signData.getSignBytes());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof P2PHKSignature)) {
+            return false;
+        }
+        return Arrays.equals(this.signData.getSignBytes(), ((P2PHKSignature) obj).signData.getSignBytes());
     }
 
     public static final Comparator<P2PHKSignature> PUBKEY_COMPARATOR = new Comparator<P2PHKSignature>() {

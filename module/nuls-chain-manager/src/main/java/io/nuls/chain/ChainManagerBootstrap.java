@@ -90,7 +90,7 @@ public class ChainManagerBootstrap extends RpcModule {
         nulsChainConfig.setAssetInitNumberMax(BigIntegerUtils.bigIntegerToString(assetInitNumberMax));
         nulsChainConfig.setNulsFeeMainNetPercent((int) (Double.valueOf(nulsChainConfig.getNulsFeeMainNetRate()) * 100));
         nulsChainConfig.setNulsFeeOtherNetPercent((int) (Double.valueOf(nulsChainConfig.getNulsFeeOtherNetRate()) * 100));
-        CmConstants.BLACK_HOLE_ADDRESS = AddressTool.getAddressByPubKeyStr(nulsChainConfig.getBlackHolePublicKey(), CmRuntimeInfo.getMainIntChainId(), nulsChainConfig.getEncoding());
+        CmConstants.BLACK_HOLE_ADDRESS = AddressTool.getAddressByPubKeyStr(nulsChainConfig.getBlackHolePublicKey(), CmRuntimeInfo.getMainIntChainId());
         LoggerUtil.defaultLogInit(CmRuntimeInfo.getMainIntChainId());
     }
 

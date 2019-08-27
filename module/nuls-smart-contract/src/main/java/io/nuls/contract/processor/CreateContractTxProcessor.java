@@ -69,7 +69,7 @@ public class CreateContractTxProcessor {
         ContractResult contractResult = tx.getContractResult();
         contractResult.setBlockHeight(blockHeight);
         Result saveContractExecuteResult = contractService.saveContractExecuteResult(chainId, tx.getHash(), contractResult);
-        if(saveContractExecuteResult.isFailed()) {
+        if (saveContractExecuteResult.isFailed()) {
             return saveContractExecuteResult;
         }
 
@@ -114,7 +114,7 @@ public class CreateContractTxProcessor {
             contractHelper.dealNrc20Events(chainId, newestStateRoot, tx, contractResult, info);
             // 保存NRC20-token地址
             Result result = contractTokenAddressStorageService.saveTokenAddress(chainId, contractAddress);
-            if(result.isFailed()) {
+            if (result.isFailed()) {
                 return result;
             }
         }
@@ -131,13 +131,16 @@ public class CreateContractTxProcessor {
         if (contractResult == null) {
             contractResult = contractService.getContractExecuteResult(chainId, tx.getHash());
         }
+        if (contractResult == null) {
+            return Result.getSuccess(null);
+        }
         contractHelper.rollbackNrc20Events(chainId, tx, contractResult);
         Result result = contractAddressStorageService.deleteContractAddress(chainId, contractAddress);
-        if(result.isFailed()) {
+        if (result.isFailed()) {
             return result;
         }
         result = contractTokenAddressStorageService.deleteTokenAddress(chainId, contractAddress);
-        if(result.isFailed()) {
+        if (result.isFailed()) {
             return result;
         }
         return contractService.deleteContractExecuteResult(chainId, tx.getHash());

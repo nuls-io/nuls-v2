@@ -17,7 +17,7 @@
     </properties>
     <modules>
         <module>nuls-account</module>
-        <module>nuls-api-module</module>
+        <module>nuls-public-service</module>
         <module>nuls-block</module>
         <module>nuls-chain-manager</module>
         <module>nuls-consensus</module>
@@ -28,7 +28,7 @@
         <module>nuls-smart-contract</module>
         <module>nuls-transaction</module>
         <module>nuls-cmd-client</module>
-        <module>nuls-sdk-provider</module>
+        <module>nuls-api</module>
     </modules>
 
     <dependencies>

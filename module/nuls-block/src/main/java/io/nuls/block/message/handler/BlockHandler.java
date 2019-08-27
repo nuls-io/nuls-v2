@@ -64,6 +64,9 @@ public class BlockHandler implements MessageProcessor {
                 context.getCachedBlockSize().addAndGet(block.size());
             }
         } else {
+            if (block != null) {
+                block.setNodeId(nodeId);
+            }
             SingleBlockCacher.receiveBlock(chainId, message);
         }
         if (block != null) {

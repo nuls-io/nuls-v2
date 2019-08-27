@@ -352,7 +352,7 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
             String decimals = "2";
             String[][] args = ContractUtil.twoDimensionalArray(new Object[]{name, symbol, amount, decimals});
 
-            Result result = ContractMakeAndBroadcastBase.this.makeCreateTx(chainId, sender, "KQB_contract", 200000L, 25L, contractCode, args, password, remark);
+            Result result = ContractMakeAndBroadcastBase.this.makeCreateTx(chainId, sender, "kqb_contract", 200000L, 25L, contractCode, args, password, remark);
             if (result.isFailed()) {
                 throw new RuntimeException(result.getMsg());
             }

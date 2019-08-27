@@ -22,7 +22,7 @@ public class FormatValidUtils {
         if (password.length() < 8 || password.length() > 20) {
             return false;
         }
-        if (password.matches("(.*)[a-zA-z](.*)")
+        if (password.matches("(.*)[a-zA-Z](.*)")
                 && password.matches("(.*)\\d+(.*)")
                 && !password.matches("(.*)\\s+(.*)")
                 && !password.matches("(.*)[\u4e00-\u9fa5\u3000]+(.*)")) {

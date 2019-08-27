@@ -314,6 +314,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             VM vm = VMFactory.createVM();
             logTime("load vm");
 
+            vm.setProgramExecutor(this);
             vm.heap.loadClassCodes(classCodes);
             vm.methodArea.loadClassCodes(classCodes);
 
@@ -364,7 +365,6 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             if (transferValue.compareTo(BigInteger.ZERO) > 0) {
                 getAccount(contractAddressBytes).addBalance(transferValue);
             }
-            vm.setProgramExecutor(this);
             vm.setRepository(repository);
             vm.setGas(programInvoke.getGasLimit());
             vm.addGasUsed(contractCodeData == null ? 0 : contractCodeData.length);
@@ -669,9 +669,9 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
     private static Source<byte[], byte[]> stateSource(Chain chain) {
         SystemProperties config = SystemProperties.getDefault();
-        CommonConfig commonConfig = CommonConfig.newInstance(chain);
+        CommonConfig commonConfig = CommonConfig.newInstance(chain.getChainId());
         chain.setCommonConfig(commonConfig);
-        DefaultConfig defaultConfig = DefaultConfig.newInstance(chain);
+        DefaultConfig defaultConfig = DefaultConfig.newInstance(commonConfig);
         chain.setDefaultConfig(defaultConfig);
         StateSource stateSource = commonConfig.stateSource();
         stateSource.setConfig(config);

@@ -130,6 +130,19 @@ public class ChainContext {
      */
     private Map<Long, Block> blockMap = new ConcurrentHashMap<>(100);
 
+    /**
+     * 孤儿区块关联的节点,维护孤儿区块时优先从这些节点下载
+     */
+    private Map<NulsHash, List<String>> orphanBlockRelatedNodes;
+
+    public Map<NulsHash, List<String>> getOrphanBlockRelatedNodes() {
+        return orphanBlockRelatedNodes;
+    }
+
+    public void setOrphanBlockRelatedNodes(Map<NulsHash, List<String>> orphanBlockRelatedNodes) {
+        this.orphanBlockRelatedNodes = orphanBlockRelatedNodes;
+    }
+
     public Map<Long, Block> getBlockMap() {
         return blockMap;
     }
@@ -273,6 +286,7 @@ public class ChainContext {
         cachedBlockSize = new AtomicInteger(0);
         this.setStatus(StatusEnum.INITIALIZING);
         cachedHashHeightMap = CollectionUtils.getSynSizedMap(parameters.getSmallBlockCache());
+        orphanBlockRelatedNodes = CollectionUtils.getSynSizedMap(parameters.getHeightRange());
         packingAddressList = CollectionUtils.getSynList();
         duplicateBlockMap = new HashMap<>();
         systemTransactionType = new ArrayList<>();

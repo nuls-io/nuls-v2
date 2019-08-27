@@ -40,6 +40,7 @@ import io.nuls.crosschain.nuls.utils.manager.ChainManager;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 消息工具类
@@ -225,20 +226,21 @@ public class MessageUtil {
      * @return                   拜占庭验证是否通过
      */
     public static boolean signByzantineInChain(Chain chain,Transaction ctx,TransactionSignature signature,List<String>packAddressList)throws NulsException,IOException{
+        List<String> handleAddressList = new ArrayList<>(packAddressList);
         //交易签名拜占庭
-        int byzantineCount = CommonUtil.getByzantineCount(ctx, packAddressList, chain);
+        int byzantineCount = CommonUtil.getByzantineCount(ctx, handleAddressList, chain);
         //如果为友链中跨链转账交易，则需要减掉本链协议交易签名
         if(ctx.getType() == config.getCrossCtxType()){
             int fromChainId = AddressTool.getChainIdByAddress(ctx.getCoinDataInstance().getFrom().get(0).getAddress());
             if(chain.getChainId() == fromChainId){
                 Set<String> fromAddressList = ctx.getCoinDataInstance().getFromAddressList();
                 for (String address:fromAddressList) {
-                    if(packAddressList.contains(address)){
+                    if(handleAddressList.contains(address)){
                         if(!config.isMainNet()){
                             byzantineCount += 1;
                         }
                     }else{
-                        packAddressList.add(address);
+                        handleAddressList.add(address);
                         if(config.isMainNet()){
                             byzantineCount += 1;
                         }else{
@@ -250,8 +252,9 @@ public class MessageUtil {
         }
         int signCount = signature.getSignersCount();
         if (signCount >= byzantineCount) {
-            List<P2PHKSignature> misMatchSignList = CommonUtil.getMisMatchSigns(chain, signature, packAddressList);
-            signCount -= misMatchSignList.size();
+            //去掉不是当前验证人的签名和重复签名
+            List<P2PHKSignature> misMatchSignList = CommonUtil.getMisMatchSigns(chain, signature, handleAddressList);
+            signCount = signature.getSignersCount();
             if (signCount >= byzantineCount) {
                 ctx.setTransactionSignature(signature.serialize());
                 //如果本链为发起链则发送交易模块处理，否则直接放入待广播队列

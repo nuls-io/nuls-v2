@@ -90,15 +90,19 @@ public class MockBase extends Base {
         programCreate.setContractAddress(contractAddress == null ? NativeAddress.toBytes(ADDRESS) : NativeAddress.toBytes(contractAddress));
         programCreate.setSender(NativeAddress.toBytes(sender));
         programCreate.setPrice(1);
-        programCreate.setGasLimit(1000000);
+        programCreate.setGasLimit(10000000);
         programCreate.setNumber(1);
         programCreate.setContractCode(contractCode);
         programCreate.setArgs(args);
 
         ProgramExecutor track = programExecutor.begin(prevStateRoot);
+        long s = System.currentTimeMillis();
         ProgramResult programResult = track.create(programCreate);
         track.commit();
 
+        long e = System.currentTimeMillis();
+
+        System.out.println("cost: " + (e - s));
         Log.info(programResult.toString());
         Log.info("\n");
         return track.getRoot();

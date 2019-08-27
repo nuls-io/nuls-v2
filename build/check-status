@@ -52,7 +52,7 @@ then
     sleep 1
     clear;
 else
-    echo "==================RPC REDAY MODULE=================="
+    echo "==================RPC READY MODULE=================="
     for module in ${modules[@]}
     do
         #echo ${module}
@@ -66,7 +66,7 @@ else
         fi
     done
 
-    echo "======================REDAY MODULE=================="
+    echo "======================READY MODULE=================="
     for module in ${modules[@]}
     do
         if [ "1" == `check $logPath/${module}/common.log $module 'RMB:module is READY'` ];

@@ -47,10 +47,17 @@ public class CachedSmallBlock {
 
     private Map<NulsHash, Transaction> txMap;
 
-    public CachedSmallBlock(List<NulsHash> missingTransactions, SmallBlock smallBlock, Map<NulsHash, Transaction> txMap) {
+    private String nodeId;
+
+    public CachedSmallBlock(List<NulsHash> missingTransactions, SmallBlock smallBlock, Map<NulsHash, Transaction> txMap, String nodeId) {
         this.missingTransactions = missingTransactions;
         this.smallBlock = smallBlock;
         this.txMap = txMap;
+        this.nodeId = nodeId;
+    }
+
+    public String getNodeId() {
+        return nodeId;
     }
 
     public List<NulsHash> getMissingTransactions() {
