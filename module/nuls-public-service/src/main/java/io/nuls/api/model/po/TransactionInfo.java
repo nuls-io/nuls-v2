@@ -135,7 +135,19 @@ public class TransactionInfo {
             //如果是共识相关的交易，收取共识配置的手续费
             assetInfo = CacheManager.getRegisteredAsset(DBUtil.getAssetKey(configInfo.getChainId(), configInfo.getAwardAssetId()));
             feeInfo = new FeeInfo(assetInfo.getChainId(), assetInfo.getAssetId(), assetInfo.getSymbol());
-            BigInteger feeValue = calcFeeValue(assetInfo.getChainId(),assetInfo.getAssetId());
+            BigInteger feeValue = calcFeeValue(assetInfo.getChainId(), assetInfo.getAssetId());
+            feeInfo.setValue(feeValue);
+        } else if (type == TxType.CREATE_CONTRACT || type == TxType.CALL_CONTRACT) {
+            ContractResultInfo resultInfo;
+            if (type == TxType.CREATE_CONTRACT) {
+                ContractInfo contractInfo = (ContractInfo) this.txData;
+                resultInfo = contractInfo.getResultInfo();
+            } else {
+                ContractCallInfo callInfo = (ContractCallInfo) this.txData;
+                resultInfo = callInfo.getResultInfo();
+            }
+            feeInfo = new FeeInfo(assetInfo.getChainId(), assetInfo.getAssetId(), assetInfo.getSymbol());
+            BigInteger feeValue = new BigInteger(resultInfo.getActualContractFee()).add(new BigInteger(resultInfo.getTxSizeFee()));
             feeInfo.setValue(feeValue);
         } else {
             //其他类型的交易,去本链默认资产手续费
