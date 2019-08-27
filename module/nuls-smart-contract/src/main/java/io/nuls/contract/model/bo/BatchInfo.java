@@ -83,6 +83,10 @@ public class BatchInfo {
      */
     private long gasCostTotal;
     /**
+     * 本次批量执行总交易数
+     */
+    private int txTotal;
+    /**
      * 0 - 未开始， 1 - 已开始
      */
     private BatchInfoStatus status;
@@ -125,6 +129,7 @@ public class BatchInfo {
         this.txCounter = 0;
         this.height = height;
         this.gasCostTotal = 0L;
+        this.txTotal = 0;
         this.beginTime = System.currentTimeMillis();
         this.status = BatchInfoStatus.STARTING;
         this.contractContainerMap = new LinkedHashMap<>();
@@ -269,7 +274,9 @@ public class BatchInfo {
     public boolean checkGasCostTotal(String txHash) {
         gasLock.readLock().lock();
         try {
-            if(gasCostTotal > ContractConstant.MAX_GAS_COST_IN_BLOCK) {
+            boolean exceedTx = txTotal > ContractConstant.MAX_CONTRACT_TX_IN_BLOCK;
+            boolean exceedGas = gasCostTotal > ContractConstant.MAX_GAS_COST_IN_BLOCK;
+            if(exceedTx || exceedGas) {
                 addPendingTxHashList(txHash);
                 return false;
             }
@@ -282,8 +289,11 @@ public class BatchInfo {
     public boolean addGasCostTotal(long gasCost, String txHash) {
         gasLock.writeLock().lock();
         try {
+            this.txTotal += 1;
             this.gasCostTotal += gasCost;
-            if(gasCostTotal > ContractConstant.MAX_GAS_COST_IN_BLOCK) {
+            boolean exceedTx = txTotal > ContractConstant.MAX_CONTRACT_TX_IN_BLOCK;
+            boolean exceedGas = gasCostTotal > ContractConstant.MAX_GAS_COST_IN_BLOCK;
+            if(exceedTx || exceedGas) {
                 addPendingTxHashList(txHash);
                 return false;
             } else {
