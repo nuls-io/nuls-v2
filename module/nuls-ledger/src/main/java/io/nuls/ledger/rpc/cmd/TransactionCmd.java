@@ -184,7 +184,7 @@ public class TransactionCmd extends BaseLedgerCmd {
         }
         long blockHeight = Long.valueOf(params.get("blockHeight").toString());
         List<String> txStrList = (List) params.get("txList");
-        LoggerUtil.logger(chainId).info("commitBlockTxs chainId={},blockHeight={}", chainId, blockHeight);
+        LoggerUtil.logger(chainId).info("commitBlockTxs chainId={},blockHeight={},txs={}", chainId, blockHeight,txStrList.size());
         if (null == txStrList || 0 == txStrList.size()) {
             LoggerUtil.logger(chainId).error("txList is blank");
             return failed("txList is blank");

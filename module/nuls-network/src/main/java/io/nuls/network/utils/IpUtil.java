@@ -58,6 +58,56 @@ public class IpUtil {
         return ips;
     }
 
+    public static String getHostIp(String nodeId) {
+        String[] hostAndPort = splitHostPort(nodeId);
+        String addr = hostAndPort[0];
+        try {
+            String hostIp = InetAddress.getByName(addr).getHostAddress();
+            return hostIp;
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        return nodeId;
+    }
+
+    public static String[] changeHostToIp(String hostPort) {
+        String[] hostAndPort = splitHostPort(hostPort);
+        String addr = hostAndPort[0];
+        try {
+            String hostIp = InetAddress.getByName(addr).getHostAddress();
+            hostAndPort[0] = hostIp;
+        } catch (UnknownHostException e) {
+            LoggerUtil.COMMON_LOG.error(e);
+            return null;
+        }
+        return hostAndPort;
+    }
+
+    public static String changeHostToIpStr(String hostPort) {
+        String[] hostAndPort = splitHostPort(hostPort);
+        String addr = hostAndPort[0];
+        try {
+            String hostIp = InetAddress.getByName(addr).getHostAddress();
+            return hostIp + NetworkConstant.COLON + hostAndPort[1];
+        } catch (UnknownHostException e) {
+            LoggerUtil.COMMON_LOG.error(e);
+            return null;
+        }
+    }
+
+    public static String[] splitHostPort(String ipPort) {
+        String[] hostPort = {"", ""};
+        int lastSplitIndex = ipPort.lastIndexOf(NetworkConstant.COLON);
+        if (-1 == lastSplitIndex) {
+            hostPort[0] = ipPort;
+            hostPort[1] = "80";
+        } else {
+            hostPort[0] = ipPort.substring(0, lastSplitIndex);
+            hostPort[1] = ipPort.substring(lastSplitIndex + 1, ipPort.length());
+        }
+        return hostPort;
+    }
+
     private static ArrayList<String> getLocalIP() {
         ArrayList<String> iplist = new ArrayList<>();
         boolean loop = false;
