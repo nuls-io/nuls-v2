@@ -105,9 +105,9 @@ public class ContractBatchEndCallable implements Callable<ContractPackageDto> {
             String newTx, newTxHash;
             ProgramNewTx programNewTx;
             for (ContractResult contractResult : contractResultList) {
-                if (Log.isDebugEnabled()) {
-                    Log.debug("ContractResult Address is {}, Order is {}", AddressTool.getStringAddressByBytes(contractResult.getContractAddress()), contractResult.getTxOrder());
-                }
+                //if (Log.isDebugEnabled()) {
+                //    Log.debug("ContractResult Address is {}, Order is {}", AddressTool.getStringAddressByBytes(contractResult.getContractAddress()), contractResult.getTxOrder());
+                //}
                 // [外部模块调用生成的交易]
                 invokeRegisterCmds = contractResult.getInvokeRegisterCmds();
                 for (ProgramInvokeRegisterCmd invokeRegisterCmd : invokeRegisterCmds) {
