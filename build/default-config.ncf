@@ -36,7 +36,7 @@ selfSeedIps=127.0.0.1:18001
 #主网的跨链种子连接节点
 moonSeedIps=127.0.0.1:18002
 #最大入网连接数
-maxInCount=100
+maxInCount=300
 #最大出网连接数
 maxOutCount=20
 
