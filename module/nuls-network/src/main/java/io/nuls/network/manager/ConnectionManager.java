@@ -35,7 +35,6 @@ import io.nuls.core.thread.ThreadUtils;
 import io.nuls.core.thread.commom.NulsThreadFactory;
 import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.ManagerStatusEnum;
-import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NodeConnectStatusEnum;
 import io.nuls.network.constant.NodeStatusEnum;
 import io.nuls.network.model.Node;
@@ -115,7 +114,7 @@ public class ConnectionManager extends BaseManager {
         List<String> list = networkConfig.getSeedIpList();
         NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByMagic(networkConfig.getPacketMagic());
         for (String seed : list) {
-            String[] peer = seed.split(NetworkConstant.COLON);
+            String[] peer = IpUtil.splitHostPort(seed);
             if (IpUtil.getIps().contains(peer[0])) {
                 continue;
             }
@@ -193,20 +192,21 @@ public class ConnectionManager extends BaseManager {
             nodesContainer = nodeGroup.getLocalNetNodeContainer();
         }
         //连接断开后,判断是否是为连接成功，还是连接成功后断开
-        if (node.getConnectStatus() == NodeConnectStatusEnum.CONNECTED ||
-                node.getConnectStatus() == NodeConnectStatusEnum.AVAILABLE) {
-            if (node.getConnectStatus() == NodeConnectStatusEnum.AVAILABLE) {
-                //重置一些信息
-                node.setFailCount(0);
-                node.setHadShare(false);
-            }
+
+        if (node.getConnectStatus() == NodeConnectStatusEnum.AVAILABLE) {
+            //重置一些信息
+            node.setFailCount(0);
+            node.setHadShare(false);
             node.setConnectStatus(NodeConnectStatusEnum.DISCONNECT);
             nodesContainer.getDisconnectNodes().put(node.getId(), node);
             nodesContainer.getConnectedNodes().remove(node.getId());
-
 //            Log.info("node {} disconnect !", node.getId());
         } else {
             // 如果是未连接成功，标记为连接失败，失败次数+1，记录当前失败时间，供下次尝试连接使用
+            if (node.getConnectStatus() == NodeConnectStatusEnum.CONNECTED) {
+                //socket连接上了，但是业务没握手成功，判定为失败连接
+                nodesContainer.getConnectedNodes().remove(node.getId());
+            }
             nodeConnectFail(node);
             nodesContainer.getCanConnectNodes().remove(node.getId());
             nodesContainer.getFailNodes().put(node.getId(), node);
