@@ -66,6 +66,29 @@ public class AccountTool {
         return new Address(chainId, BaseConstant.DEFAULT_ADDRESS_TYPE, SerializeUtils.sha256hash160(publicKey));
     }
 
+    public static Account createAccount(int chainId, String prikey, String prefix) throws NulsException {
+        ECKey key = null;
+        if (StringUtils.isBlank(prikey)) {
+            key = new ECKey();
+        } else {
+            try {
+                key = ECKey.fromPrivate(new BigInteger(1, HexUtil.decode(prikey)));
+            } catch (Exception e) {
+                throw new NulsException(AccountErrorCode.PRIVATE_KEY_WRONG, e);
+            }
+        }
+        Address address = new Address(chainId, prefix, BaseConstant.DEFAULT_ADDRESS_TYPE, SerializeUtils.sha256hash160(key.getPubKey()));
+        Account account = new Account();
+        account.setChainId(chainId);
+        account.setAddress(address);
+        account.setPubKey(key.getPubKey());
+        account.setPriKey(key.getPrivKeyBytes());
+        account.setEncryptedPriKey(new byte[0]);
+        account.setCreateTime(NulsDateUtils.getCurrentTimeMillis());
+        account.setEcKey(key);
+        return account;
+    }
+
     public static Account createAccount(int chainId, String prikey) throws NulsException {
         ECKey key = null;
         if (StringUtils.isBlank(prikey)) {

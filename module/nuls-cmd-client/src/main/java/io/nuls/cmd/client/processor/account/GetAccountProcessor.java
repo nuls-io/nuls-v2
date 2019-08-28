@@ -102,7 +102,7 @@ public class GetAccountProcessor extends AccountBaseProcessor implements Command
         balanceMap.put("freeze",config.toBigUnit(balance.getData().getFreeze()));
         balanceMap.put("total",config.toBigUnit(balance.getData().getTotal()));
         res.putAll(MapUtils.beanToMap(info.getData()));
-        res.put("baglance",balanceMap);
+        res.put("balance",balanceMap);
         try {
             return CommandResult.getSuccess(JSONUtils.obj2PrettyJson(res));
         } catch (JsonProcessingException e) {

@@ -218,9 +218,9 @@ public class VersionMessageHandler extends BaseMessageHandler {
         LoggerUtil.logger(node.getNodeGroup().getChainId()).info("rec node={} ver msg success.go response verackMessage..cross={}", node.getId(), node.isCrossConnect());
         MessageManager.getInstance().sendHandlerMsg(verackMessage, node, true);
         if (node.isSeedNode()) {
+            //向种子节点请求地址
             MessageManager.getInstance().sendGetAddressMessage(node, false, false, true);
         }
-
     }
 
     /**

@@ -75,6 +75,8 @@ public class ContractResult {
     private String errorMessage;
     private String stackTrace;
     private boolean acceptDirectTransfer;
+    // token类型, 0 - 非token, 1 - NRC20, 2 - NRC721
+    private int tokenType;
     private boolean isNrc20;
     private String tokenName;
     private String tokenSymbol;
@@ -308,6 +310,14 @@ public class ContractResult {
 
     public void setAcceptDirectTransfer(boolean acceptDirectTransfer) {
         this.acceptDirectTransfer = acceptDirectTransfer;
+    }
+
+    public int getTokenType() {
+        return tokenType;
+    }
+
+    public void setTokenType(int tokenType) {
+        this.tokenType = tokenType;
     }
 
     public boolean isNrc20() {

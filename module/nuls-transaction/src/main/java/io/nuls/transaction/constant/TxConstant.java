@@ -27,31 +27,26 @@ public interface TxConstant {
     /** 清理无效交易(验证未通过)线程 */
     String CLEAN_INVALID_TX_THREAD = "cleanInvalidTxThread";
 
-    /** 新交易task, 初始延迟值(秒) */
-    int TX_TASK_INITIALDELAY = 1;
-    /** 新交易task, 运行周期间隔(秒) */
-    int TX_TASK_PERIOD = 15;
-
     /** 孤儿交易处理task, 初始延迟值(秒) */
     int TX_ORPHAN_TASK_INITIALDELAY = 1;
     /** 孤儿交易处理task, 运行周期间隔(秒) */
     int TX_ORPHAN_TASK_PERIOD = 3;
 
     /** 未确认交易清理机制task,初始延迟值 */
-    int TX_CLEAN_TASK_INITIALDELAY = 10;
-    /** 未确认交易清理机制task, 运行周期间隔(分钟) */
-    int TX_CLEAN_TASK_PERIOD = 3;
+    int TX_CLEAN_TASK_INITIALDELAY = 10 * 60;
+    /** 未确认交易清理机制task, 运行周期间隔(秒) */
+    int TX_CLEAN_TASK_PERIOD = 3 * 60;
 
     /** 打包时孤儿交易返回待打包队列重新处理的最大次数，超过该次数则不再处理该孤儿交易(丢弃) */
     int PACKAGE_ORPHAN_MAXCOUNT = 5;
     /** 处理网络新交易时，一次从待处理集合中获取新交易的最大值 */
     int NET_TX_PROCESS_NUMBER_ONCE = 3000;
 
-    /** 处理网络新交易时，一次从待处理集合中获取新交易的最大值 */
+    /** 打包时，一批次给账本进行验证的交易数 */
     int PACKAGE_TX_VERIFY_COINDATA_NUMBER_OF_TIMES_TO_PROCESS = 2000;
 
     /** 计算打包预留时间的临界值*/
-    long PACKAGE_RESERVE_CRITICAL_TIME = 6000L;
+//    long PACKAGE_RESERVE_CRITICAL_TIME = 6000L;
 
     /** Map初始值 */
     int INIT_CAPACITY_32 = 32;
@@ -65,13 +60,21 @@ public interface TxConstant {
 
     int CACHED_SIZE = 50000;
 
-    /** 待打包队列存储交易的map 最大限制*/
-    int PACKABLE_TX_MAP_STRESS_SIZE = 150000;
-    int PACKABLE_TX_MAP_HEAVY_SIZE = 200000;
-    int PACKABLE_TX_MAP_MAX_SIZE = 250000;
+    /** 待打包队列存储交易的map 所有交易size 最大限制 (B)*/
+    int PACKABLE_TX_MAP_STRESS_DATA_SIZE = 150000 * 300;
+    int PACKABLE_TX_MAP_HEAVY_DATA_SIZE = 200000 * 300;
+    int PACKABLE_TX_MAP_MAX_DATA_SIZE = 250000 * 300;
 
-    int PACKAGE_TX_MAX_COUNT = 12000;
+    int PACKAGE_TX_MAX_COUNT = 10000;
+    /** 一个区块中最大允许跨链模块交易的数量*/
     int PACKAGE_CROSS_TX_MAX_COUNT = 500;
+    /** 一个区块中最大允许智能合约交易的数量*/
+    int PACKAGE_CONTRACT_TX_MAX_COUNT = 500;
 
+    /**(毫秒) 打包时的时间分配分为两大部分
+     1：从待打包队列获取交易以及账本验证。
+     2：调用各模块验证器验证交易，获取智能合约结果。
+     该配置为固定给第二部分预留的时间，其他时间留给第一部分。
+     */
     long PACKAGE_MODULE_VALIDATOR_RESERVE_TIME = 1500L;
 }

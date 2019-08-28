@@ -28,7 +28,6 @@ import io.nuls.base.data.Transaction;
 import io.nuls.base.protocol.CommonAdvice;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.manager.ChainManager;
-import io.nuls.contract.model.bo.BatchInfo;
 import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.model.dto.ContractPackageDto;
 import io.nuls.contract.model.po.ContractOfflineTxHashPo;
@@ -57,9 +56,7 @@ public class TransactionCommitAdvice implements CommonAdvice {
             ChainManager.chainHandle(chainId);
             ContractPackageDto contractPackageDto = contractHelper.getChain(chainId).getBatchInfo().getContractPackageDto();
             if (contractPackageDto != null) {
-                if (Log.isDebugEnabled()) {
-                    Log.debug("contract execute txDataSize is {}, commit txDataSize is {}", contractPackageDto.getContractResultMap().keySet().size(), txList.size());
-                }
+                Log.info("contract execute txDataSize is {}, commit txDataSize is {}", contractPackageDto.getContractResultMap().keySet().size(), txList.size());
 
                 List<byte[]> offlineTxHashList = contractPackageDto.getOfflineTxHashList();
                 if(offlineTxHashList != null && !offlineTxHashList.isEmpty()) {
@@ -76,7 +73,6 @@ public class TransactionCommitAdvice implements CommonAdvice {
     public void end(int chainId, List<Transaction> txList, BlockHeader blockHeader) {
         // 移除临时余额, 临时区块头等当前批次执行数据
         Chain chain = contractHelper.getChain(chainId);
-        BatchInfo batchInfo = chain.getBatchInfo();
-        batchInfo.clear();
+        chain.setBatchInfo(null);
     }
 }

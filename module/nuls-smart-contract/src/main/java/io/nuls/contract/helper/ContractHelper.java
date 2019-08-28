@@ -30,6 +30,7 @@ import io.nuls.base.data.Transaction;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.enums.ContractStatus;
+import io.nuls.contract.enums.TokenTypeStatus;
 import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.manager.ContractTempBalanceManager;
 import io.nuls.contract.manager.ContractTokenBalanceManager;
@@ -157,10 +158,15 @@ public class ContractHelper {
     }
 
     private boolean checkNrc20Contract(List<ProgramMethod> methods) {
+        return checkNrc20Contract(methods, null);
+    }
+    private boolean checkNrc20Contract(List<ProgramMethod> methods, Map<String, ProgramMethod> contractMethodsMap) {
         if (methods == null || methods.size() == 0) {
             return false;
         }
-        Map<String, ProgramMethod> contractMethodsMap = new HashMap<>(methods.size());
+        if(contractMethodsMap == null) {
+            contractMethodsMap = new HashMap<>(methods.size());
+        }
         for (ProgramMethod method : methods) {
             contractMethodsMap.put(method.getName(), method);
         }
@@ -183,6 +189,51 @@ public class ContractHelper {
         }
 
         return true;
+    }
+
+    private boolean checkNrc721Contract(List<ProgramMethod> methods, Map<String, ProgramMethod> contractMethodsMap) {
+        if (methods == null || methods.size() == 0) {
+            return false;
+        }
+
+        Set<Map.Entry<String, ProgramMethod>> entries = VMContext.getNrc721Methods().entrySet();
+        String methodName;
+        ProgramMethod standardMethod;
+        ProgramMethod mappingMethod;
+        for (Map.Entry<String, ProgramMethod> entry : entries) {
+            methodName = entry.getKey();
+            standardMethod = entry.getValue();
+            mappingMethod = contractMethodsMap.get(methodName);
+
+            if (mappingMethod == null) {
+                return false;
+            }
+            if (!standardMethod.equalsNrc721Method(mappingMethod)) {
+                return false;
+            }
+        }
+        boolean hasSafe = false;
+        boolean hasSafeData = false;
+        for(ProgramMethod method : methods) {
+            if(NRC721_SAFETRANSFERFROM.equals(method.getName())) {
+                int size = method.getArgs().size();
+                if(size == 3 && VMContext.getNrc721OverloadMethodSafe().equalsNrc721Method(method)) {
+                    hasSafe = true;
+                    continue;
+                }
+                if(size == 4 && VMContext.getNrc721OverloadMethodSafeData().equalsNrc721Method(method)) {
+                    hasSafeData = true;
+                    continue;
+                }
+            }
+            if(hasSafe && hasSafeData){
+                break;
+            }
+        }
+        if(hasSafe && hasSafeData) {
+            return true;
+        }
+        return false;
     }
 
     private boolean checkAcceptDirectTransfer(List<ProgramMethod> methods) {
@@ -277,7 +328,14 @@ public class ContractHelper {
         byte[] contractAddress = contractResult.getContractAddress();
         long bestBlockHeight = vmContext.getBestHeight(chainId);
         List<ProgramMethod> methods = this.getAllMethods(chainId, createContractData.getCode());
-        boolean isNrc20 = this.checkNrc20Contract(methods);
+        Map<String, ProgramMethod> contractMethodsMap = new HashMap<>();
+        boolean isNrc20 = this.checkNrc20Contract(methods, contractMethodsMap);
+        boolean isNrc721 = this.checkNrc721Contract(methods, contractMethodsMap);
+        if(isNrc20) {
+            contractResult.setTokenType(TokenTypeStatus.NRC20.status());
+        } else if(isNrc721) {
+            contractResult.setTokenType(TokenTypeStatus.NRC721.status());
+        }
         boolean isAcceptDirectTransfer = this.checkAcceptDirectTransfer(methods);
         contractResult.setNrc20(isNrc20);
         contractResult.setAcceptDirectTransfer(isAcceptDirectTransfer);
@@ -409,11 +467,19 @@ public class ContractHelper {
     }
 
     public ContractTempBalanceManager getBatchInfoTempBalanceManager(int chainId) {
-        return getChain(chainId).getBatchInfo().getTempBalanceManager();
+        BatchInfo batchInfo;
+        if((batchInfo = getChain(chainId).getBatchInfo()) == null) {
+            return null;
+        }
+        return batchInfo.getTempBalanceManager();
     }
 
     public BlockHeader getBatchInfoCurrentBlockHeader(int chainId) {
-        return getChain(chainId).getBatchInfo().getCurrentBlockHeader();
+        BatchInfo batchInfo;
+        if((batchInfo = getChain(chainId).getBatchInfo()) == null) {
+            return null;
+        }
+        return batchInfo.getCurrentBlockHeader();
     }
 
     public Result<ContractAddressInfoPo> getContractAddressInfo(int chainId, byte[] contractAddressBytes) {

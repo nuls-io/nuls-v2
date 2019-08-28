@@ -33,7 +33,10 @@ import io.nuls.block.utils.SmallBlockCacher;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.CollectionUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.StampedLock;
@@ -82,11 +85,6 @@ public class ChainContext {
     private Block genesisBlock;
 
     /**
-     * 主链
-     */
-    private Chain masterChain;
-
-    /**
      * 链的运行时参数
      */
     private ChainParameters parameters;
@@ -131,6 +129,19 @@ public class ChainContext {
      * 同步区块缓存
      */
     private Map<Long, Block> blockMap = new ConcurrentHashMap<>(100);
+
+    /**
+     * 孤儿区块关联的节点,维护孤儿区块时优先从这些节点下载
+     */
+    private Map<NulsHash, List<String>> orphanBlockRelatedNodes;
+
+    public Map<NulsHash, List<String>> getOrphanBlockRelatedNodes() {
+        return orphanBlockRelatedNodes;
+    }
+
+    public void setOrphanBlockRelatedNodes(Map<NulsHash, List<String>> orphanBlockRelatedNodes) {
+        this.orphanBlockRelatedNodes = orphanBlockRelatedNodes;
+    }
 
     public Map<Long, Block> getBlockMap() {
         return blockMap;
@@ -208,14 +219,6 @@ public class ChainContext {
         this.genesisBlock = genesisBlock;
     }
 
-    public Chain getMasterChain() {
-        return masterChain;
-    }
-
-    public void setMasterChain(Chain masterChain) {
-        this.masterChain = masterChain;
-    }
-
     public ChainParameters getParameters() {
         return parameters;
     }
@@ -283,6 +286,7 @@ public class ChainContext {
         cachedBlockSize = new AtomicInteger(0);
         this.setStatus(StatusEnum.INITIALIZING);
         cachedHashHeightMap = CollectionUtils.getSynSizedMap(parameters.getSmallBlockCache());
+        orphanBlockRelatedNodes = CollectionUtils.getSynSizedMap(parameters.getHeightRange());
         packingAddressList = CollectionUtils.getSynList();
         duplicateBlockMap = new HashMap<>();
         systemTransactionType = new ArrayList<>();
@@ -307,12 +311,4 @@ public class ChainContext {
 
     }
 
-    public void printChains() {
-        Chain masterChain = BlockChainManager.getMasterChain(chainId);
-        logger.info("masterChain-" + masterChain);
-        SortedSet<Chain> forkChains = BlockChainManager.getForkChains(chainId);
-        forkChains.forEach(e -> logger.info("forkChain-" + e));
-        SortedSet<Chain> orphanChains = BlockChainManager.getOrphanChains(chainId);
-        orphanChains.forEach(e -> logger.info("orphanChain-" + e));
-    }
 }

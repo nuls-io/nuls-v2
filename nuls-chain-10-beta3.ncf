@@ -95,8 +95,8 @@ deflationTimeInterval=31536000
 #合约视图方法调用最大消耗的Gas
 maxViewGas=100000000
 
-[api-module]
-#api-module模块对外的rpc端口号
+[public-service]
+#public-service模块对外的rpc端口号
 rpcPort=18003
 #数据库url地址
 databaseUrl=127.0.0.1

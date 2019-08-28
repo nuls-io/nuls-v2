@@ -122,6 +122,12 @@ public class UnconfirmedRepositoryImpl implements UnconfirmedRepository, Initial
         accountStateUnconfirmed.setToConfirmedAmount(accountStateUnconfirmed.getToConfirmedAmount().add(addAmount));
     }
 
+    /**
+     * 清除未确认交易,其后关联的交易一并移除
+     * @param chainId
+     * @param accountKey
+     * @param txUnconfirmed
+     */
     @Override
     public void clearMemUnconfirmedTxs(int chainId, String accountKey, TxUnconfirmed txUnconfirmed) {
         AccountStateUnconfirmed accountStateUnconfirmed = getMemAccountStateUnconfirmed(chainId, accountKey);
@@ -133,9 +139,9 @@ public class UnconfirmedRepositoryImpl implements UnconfirmedRepository, Initial
             String key = LedgerUtil.getNonceEncode(txUnconfirmed.getNonce());
             TxUnconfirmed memTxUnconfirmed = accountUnconfirmedTxs.get(key);
             while (null != memTxUnconfirmed) {
-                key = LedgerUtil.getNonceEncode(txUnconfirmed.getNonce());
+                key = LedgerUtil.getNonceEncode(memTxUnconfirmed.getNonce());
+                String keyNext = LedgerUtil.getNonceEncode(memTxUnconfirmed.getNextNonce());
                 accountUnconfirmedTxs.remove(key);
-                String keyNext = LedgerUtil.getNonceEncode(txUnconfirmed.getNextNonce());
                 memTxUnconfirmed = accountUnconfirmedTxs.get(keyNext);
             }
         }

@@ -1,0 +1,277 @@
+{
+  "balanceOf": {
+    "name": "balanceOf",
+    "desc": "(Address owner) return int",
+    "args": [
+      {
+        "type": "Address",
+        "name": "owner",
+        "required": true
+      }
+    ],
+    "returnArg": "int",
+    "view": true,
+    "event": false,
+    "payable": false
+  },
+  "ownerOf": {
+    "name": "ownerOf",
+    "desc": "(BigInteger tokenId) return Address",
+    "args": [
+      {
+        "type": "BigInteger",
+        "name": "tokenId",
+        "required": true
+      }
+    ],
+    "returnArg": "Address",
+    "view": true,
+    "event": false,
+    "payable": false
+  },
+  "safeTransferFrom-data": {
+    "name": "safeTransferFrom",
+    "desc": "(Address from, Address to, BigInteger tokenId, String data) return void",
+    "args": [
+      {
+        "type": "Address",
+        "name": "from",
+        "required": true
+      },
+      {
+        "type": "Address",
+        "name": "to",
+        "required": true
+      },
+      {
+        "type": "BigInteger",
+        "name": "tokenId",
+        "required": true
+      },
+      {
+        "type": "String",
+        "name": "data",
+        "required": true
+      }
+    ],
+    "returnArg": "void",
+    "view": false,
+    "event": false,
+    "payable": false
+  },
+  "safeTransferFrom": {
+    "name": "safeTransferFrom",
+    "desc": "(Address from, Address to, BigInteger tokenId) return void",
+    "args": [
+      {
+        "type": "Address",
+        "name": "from",
+        "required": true
+      },
+      {
+        "type": "Address",
+        "name": "to",
+        "required": true
+      },
+      {
+        "type": "BigInteger",
+        "name": "tokenId",
+        "required": true
+      }
+    ],
+    "returnArg": "void",
+    "view": false,
+    "event": false,
+    "payable": false
+  },
+  "transferFrom": {
+    "name": "transferFrom",
+    "desc": "(Address from, Address to, BigInteger tokenId) return void",
+    "args": [
+      {
+        "type": "Address",
+        "name": "from",
+        "required": true
+      },
+      {
+        "type": "Address",
+        "name": "to",
+        "required": true
+      },
+      {
+        "type": "BigInteger",
+        "name": "tokenId",
+        "required": true
+      }
+    ],
+    "returnArg": "void",
+    "view": false,
+    "event": false,
+    "payable": false
+  },
+  "approve": {
+    "name": "approve",
+    "desc": "(Address to, BigInteger tokenId) return void",
+    "args": [
+      {
+        "type": "Address",
+        "name": "to",
+        "required": true
+      },
+      {
+        "type": "BigInteger",
+        "name": "tokenId",
+        "required": true
+      }
+    ],
+    "returnArg": "void",
+    "view": false,
+    "event": false,
+    "payable": false
+  },
+  "setApprovalForAll": {
+    "name": "setApprovalForAll",
+    "desc": "(Address operator, boolean approved) return void",
+    "args": [
+      {
+        "type": "Address",
+        "name": "operator",
+        "required": true
+      },
+      {
+        "type": "boolean",
+        "name": "approved",
+        "required": true
+      }
+    ],
+    "returnArg": "void",
+    "view": false,
+    "event": false,
+    "payable": false
+  },
+  "getApproved": {
+    "name": "getApproved",
+    "desc": "(BigInteger tokenId) return Address",
+    "args": [
+      {
+        "type": "BigInteger",
+        "name": "tokenId",
+        "required": true
+      }
+    ],
+    "returnArg": "Address",
+    "view": true,
+    "event": false,
+    "payable": false
+  },
+  "isApprovedForAll": {
+    "name": "isApprovedForAll",
+    "desc": "(Address owner, Address operator) return boolean",
+    "args": [
+      {
+        "type": "Address",
+        "name": "owner",
+        "required": true
+      },
+      {
+        "type": "Address",
+        "name": "operator",
+        "required": true
+      }
+    ],
+    "returnArg": "boolean",
+    "view": true,
+    "event": false,
+    "payable": false
+  },
+  "supportsInterface": {
+    "name": "supportsInterface",
+    "desc": "(String interfaceName) return boolean",
+    "args": [
+      {
+        "type": "String",
+        "name": "interfaceName",
+        "required": true
+      }
+    ],
+    "returnArg": "boolean",
+    "view": true,
+    "event": false,
+    "payable": false
+  },
+  "Transfer": {
+    "name": "Transfer",
+    "desc": "(Address from, Address to, BigInteger tokenId) return void",
+    "args": [
+      {
+        "type": "Address",
+        "name": "from",
+        "required": false
+      },
+      {
+        "type": "Address",
+        "name": "to",
+        "required": false
+      },
+      {
+        "type": "BigInteger",
+        "name": "tokenId",
+        "required": true
+      }
+    ],
+    "returnArg": "void",
+    "view": false,
+    "event": true,
+    "payable": false
+  },
+  "Approval": {
+    "name": "Approval",
+    "desc": "(Address owner, Address approved, BigInteger tokenId) return void",
+    "args": [
+      {
+        "type": "Address",
+        "name": "owner",
+        "required": true
+      },
+      {
+        "type": "Address",
+        "name": "approved",
+        "required": true
+      },
+      {
+        "type": "BigInteger",
+        "name": "tokenId",
+        "required": true
+      }
+    ],
+    "returnArg": "void",
+    "view": false,
+    "event": true,
+    "payable": false
+  },
+  "ApprovalForAll": {
+    "name": "ApprovalForAll",
+    "desc": "(Address owner, Address operator, Boolean approved) return void",
+    "args": [
+      {
+        "type": "Address",
+        "name": "owner",
+        "required": true
+      },
+      {
+        "type": "Address",
+        "name": "operator",
+        "required": true
+      },
+      {
+        "type": "Boolean",
+        "name": "approved",
+        "required": true
+      }
+    ],
+    "returnArg": "void",
+    "view": false,
+    "event": true,
+    "payable": false
+  }
+}

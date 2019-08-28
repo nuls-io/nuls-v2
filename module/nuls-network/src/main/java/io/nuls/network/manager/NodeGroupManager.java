@@ -29,6 +29,7 @@ import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.ManagerStatusEnum;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
+import io.nuls.network.model.dto.IpAddressShare;
 import io.nuls.network.utils.LoggerUtil;
 
 import java.util.ArrayList;
@@ -67,6 +68,74 @@ public class NodeGroupManager extends BaseManager {
 
     private NodeGroupManager() {
 
+    }
+
+    /**
+     * 获取可分享的节点信息
+     *
+     * @param node
+     * @return
+     */
+    public List<IpAddressShare> getAvailableShareNodes(Node node, int getChainId, boolean isCrossAddress) {
+        NetworkConfig networkConfig = SpringLiteContext.getBean(NetworkConfig.class);
+
+        List<IpAddressShare> addressList = new ArrayList<>();
+        List nodesList = new ArrayList();
+        if (node.isCrossConnect()) {
+            //跨链节点的请求
+            //取本地网络地址去支持跨链连接,跨链的请求地址取的都是对方的本地网络IP
+            if (networkConfig.isMoonNode()) {
+                //是主网节点，回复
+                nodesList.addAll(NodeGroupManager.getInstance().getMoonMainNet().getLocalShareToCrossCanConnectNodes().values());
+            } else {
+                nodesList.addAll(node.getNodeGroup().getLocalShareToCrossCanConnectNodes().values());
+            }
+        } else {
+            //非跨链节点的请求,分2种，一种是获取外界网络的跨链地址，一种是自身网络地址
+            NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByChainId(getChainId);
+            if (isCrossAddress) {
+                //主网 跨链网络组
+                nodesList.addAll(nodeGroup.getCrossNodeContainer().getAllCanShareNodes().values());
+            } else {
+                nodesList.addAll(nodeGroup.getLocalNetNodeContainer().getAllCanShareNodes().values());
+            }
+        }
+
+        addAddress(nodesList, addressList, node.getIp(), node.isCrossConnect());
+        return addressList;
+
+    }
+
+    private void addAddress(Collection<Node> nodes, List<IpAddressShare> list, String fromIp, boolean isCross) {
+        for (Node peer : nodes) {
+            /*
+             * 排除自身连接信息，比如组网A=====B，A向B请求地址，B给的地址列表需排除A地址。
+             * Exclude self-connection information, such as networking A=====B,
+             * A requests an address from B, and the address list given by B excludes the A address.
+             */
+            if (peer.getIp().equals(fromIp)) {
+                continue;
+            }
+            /*
+             * 只有主动连接的节点地址才可使用。
+             * Only active node addresses are available for use.
+             */
+            if (Node.OUT == peer.getType()) {
+                try {
+                    int port = peer.getRemotePort();
+                    int crossPort = peer.getRemoteCrossPort();
+                    if (isCross) {
+                        if (0 == crossPort) {
+                            continue;
+                        }
+                    }
+                    IpAddressShare ipAddress = new IpAddressShare(peer.getIp(), port, crossPort);
+                    list.add(ipAddress);
+                } catch (Exception e) {
+                    LoggerUtil.COMMON_LOG.error(e);
+                }
+            }
+        }
     }
 
 
@@ -116,7 +185,7 @@ public class NodeGroupManager extends BaseManager {
     public void addNodeGroup(int chainId, NodeGroup nodeGroup) {
         nodeGroupMap.put(String.valueOf(chainId), nodeGroup);
         magicNumChainIdMap.put(String.valueOf(nodeGroup.getMagicNumber()), String.valueOf(chainId));
-       // String logLevel = SpringLiteContext.getBean(NetworkConfig.class).getLogLevel();
+        // String logLevel = SpringLiteContext.getBean(NetworkConfig.class).getLogLevel();
         LoggerUtil.createLogs(chainId);
     }
 
@@ -152,12 +221,11 @@ public class NodeGroupManager extends BaseManager {
         List<NodeGroup> list = storageManager.getAllNodeGroupFromDb();
         for (NodeGroup dbNodeGroup : list) {
             if (dbNodeGroup.getChainId() == nodeGroup.getChainId()) {
+                //配置的group优先,数据库存储的忽略
                 continue;
             }
+            //主网的默认跨链网络组属性active
             dbNodeGroup.setCrossActive(true);
-            if (dbNodeGroup.getChainId() == nodeGroup.getChainId()) {
-                continue;
-            }
             nodeGroupManager.addNodeGroup(dbNodeGroup.getChainId(), dbNodeGroup);
         }
     }

@@ -64,8 +64,8 @@ public class ContractCallerImpl implements ContractCaller {
 
     private static final ExecutorService TX_EXECUTOR_SERVICE =
             new ThreadPoolExecutor(
-                    Runtime.getRuntime().availableProcessors(),
-                    Runtime.getRuntime().availableProcessors() * 2,
+                    1,
+                    1,
                     10L,
                     TimeUnit.SECONDS,
                     new LinkedBlockingQueue<Runnable>(),
@@ -83,9 +83,7 @@ public class ContractCallerImpl implements ContractCaller {
 
     @Override
     public Result callTx(int chainId, ContractContainer container, ProgramExecutor batchExecutor, ContractWrapperTransaction tx, String preStateRoot) {
-
         try {
-
             ContractData contractData = tx.getContractData();
             byte[] contractAddressBytes = contractData.getContractAddress();
             String contract = AddressTool.getStringAddressByBytes(contractAddressBytes);
@@ -94,14 +92,15 @@ public class ContractCallerImpl implements ContractCaller {
             BlockHeader currentBlockHeader = batchInfo.getCurrentBlockHeader();
             long blockTime = currentBlockHeader.getTime();
             long lastestHeight = currentBlockHeader.getHeight() - 1;
-            BlockHeader latestBlockHeader = BlockCall.getLatestBlockHeader(chainId);
-            if (Log.isDebugEnabled()) {
-                Log.debug("Current block header height is {}", currentBlockHeader.getHeight());
-                Log.debug("Latest block header height is {}", latestBlockHeader.getHeight());
-            }
+            //BlockHeader latestBlockHeader = BlockCall.getLatestBlockHeader(chainId);
+            //if (Log.isDebugEnabled()) {
+            //    Log.debug("Current block header height is {}", currentBlockHeader.getHeight());
+            //    Log.debug("Latest block header height is {}", latestBlockHeader.getHeight());
+            //}
             ContractTxCallable txCallable = new ContractTxCallable(chainId, blockTime, batchExecutor, contract, tx, lastestHeight, preStateRoot, checker, container);
-
+            //String hash = tx.getHash().toHex();
             Future<ContractResult> contractResultFuture = TX_EXECUTOR_SERVICE.submit(txCallable);
+            //batchInfo.getContractMap().put(hash, contractResultFuture);
             container.getFutureList().add(contractResultFuture);
 
             return getSuccess();

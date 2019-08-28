@@ -37,6 +37,8 @@ import io.nuls.block.utils.SmallBlockCacher;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.logback.NulsLogger;
 
+import java.util.List;
+
 import static io.nuls.block.BlockBootstrap.blockConfig;
 import static io.nuls.block.constant.CommandConstant.FORWARD_SMALL_BLOCK_MESSAGE;
 import static io.nuls.block.constant.CommandConstant.GET_SMALL_BLOCK_MESSAGE;
@@ -71,6 +73,11 @@ public class ForwardSmallBlockHandler implements MessageProcessor {
         }
         BlockForwardEnum status = SmallBlockCacher.getStatus(chainId, blockHash);
         logger.debug("recieve " + message + " from node-" + nodeId + ", hash:" + blockHash);
+        List<String> nodes = context.getOrphanBlockRelatedNodes().get(blockHash);
+        if (nodes != null && !nodes.contains(nodeId)) {
+            nodes.add(nodeId);
+            logger.debug("add OrphanBlockRelatedNodes, blockHash-{}, nodeId-{}", blockHash, nodeId);
+        }
         //1.已收到完整区块,丢弃
         if (BlockForwardEnum.COMPLETE.equals(status)) {
             return;

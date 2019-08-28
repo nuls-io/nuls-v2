@@ -67,6 +67,8 @@ public interface ContractConstant {
     long CONTRACT_CONSTANT_PRICE = 1;
 
     long MAX_GASLIMIT = 10000000;
+    long MAX_GAS_COST_IN_BLOCK = 12000000L;
+    int MAX_CONTRACT_TX_IN_BLOCK = 500;
 
     long CONTRACT_MINIMUM_PRICE = 25;
 
@@ -91,10 +93,17 @@ public interface ContractConstant {
     String NRC20_METHOD_ALLOWANCE = "allowance";
     String NRC20_EVENT_TRANSFER = "TransferEvent";
     String NRC20_EVENT_APPROVAL = "ApprovalEvent";
+    String NRC20_STANDARD_FILE = "nrc20.json";
+
+    /**
+     * NRC721
+     */
+    String NRC721_SAFETRANSFERFROM = "safeTransferFrom";
+    String NRC721_SAFETRANSFERFROM_DATA = "safeTransferFrom-data";
+    String NRC721_STANDARD_FILE = "nrc721.json";
 
     int DEFAULT_MAX_VIEW_GAS = 100000000;
     String SYS_FILE_ENCODING = "file.encoding";
-    String NRC20_STANDARD_FILE = "nrc20.json";
     String MODULE_CONFIG_FILE = "module.json";
 
     /**

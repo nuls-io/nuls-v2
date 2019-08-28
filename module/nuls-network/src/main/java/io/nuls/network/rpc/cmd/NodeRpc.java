@@ -40,6 +40,7 @@ import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.po.NodePo;
 import io.nuls.network.model.vo.NodeVo;
 import io.nuls.network.netty.container.NodesContainer;
+import io.nuls.network.utils.IpUtil;
 import io.nuls.network.utils.LoggerUtil;
 
 import java.util.ArrayList;
@@ -90,7 +91,10 @@ public class NodeRpc extends BaseCmd {
             NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByChainId(chainId);
             List<NodePo> nodePos = new ArrayList<>();
             for (String peer : peers) {
-                String[] ipPort = peer.split(":");
+                String[] ipPort = IpUtil.changeHostToIp(peer);
+                if (null == ipPort) {
+                    continue;
+                }
                 if (blCross) {
                     nodeGroup.addNeedCheckNode(ipPort[0], Integer.valueOf(ipPort[1]), Integer.valueOf(ipPort[1]), blCross);
                 } else {
@@ -125,6 +129,10 @@ public class NodeRpc extends BaseCmd {
         String[] peers = nodes.split(",");
         NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByChainId(chainId);
         for (String nodeId : peers) {
+            nodeId = IpUtil.changeHostToIpStr(nodeId);
+            if (null == nodeId) {
+                continue;
+            }
             //移除 peer
             Node node = nodeGroup.getLocalNetNodeContainer().getConnectedNodes().get(nodeId);
             if (null != node) {

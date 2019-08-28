@@ -177,7 +177,7 @@ public class ContractPOCMLocalTest extends Base {
 
     @Test
     public void createContract() throws IOException {
-        InputStream in = new FileInputStream(InvokeExternalCmdLocalTest.class.getResource("/pocmContract-test.jar").getFile());
+        InputStream in = new FileInputStream(InvokeExternalCmdLocalTest.class.getResource("/pocmContract-v3-test2.jar").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
 
         ProgramCreate programCreate = new ProgramCreate();
@@ -187,8 +187,7 @@ public class ContractPOCMLocalTest extends Base {
         programCreate.setGasLimit(1000000);
         programCreate.setNumber(1);
         programCreate.setContractCode(contractCode);
-        Object[] args = new Object[]{"pocManager", "POCM", 100000000, 8, 5000, 5, 200, 20, true, "tNULSeBaMtEPLXxUgyfnBt9bpb5Xv84dyJV98p",
-                                    null, null, null, null};
+        Object[] args = new Object[]{"tNULSeBaN152GXtPK5MZX57zeFR7QKvjNKkVA5", 5000, 2, 200, 2, false, null, null, null};
         programCreate.setArgs(ContractUtil.twoDimensionalArray(args));
 
         byte[] prevStateRoot = HexUtil.decode("56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421");

@@ -111,7 +111,7 @@ public class SmallBlockHandler implements MessageProcessor {
         }
 
         //2.已收到部分区块,还缺失交易信息,发送HashListMessage到源节点
-        if (INCOMPLETE.equals(status)) {
+        if (INCOMPLETE.equals(status) && !context.getStatus().equals(StatusEnum.SYNCHRONIZING)) {
             CachedSmallBlock block = SmallBlockCacher.getCachedSmallBlock(chainId, blockHash);
             List<NulsHash> missingTransactions = block.getMissingTransactions();
             if (missingTransactions == null) {
@@ -130,7 +130,7 @@ public class SmallBlockHandler implements MessageProcessor {
         }
 
         //3.未收到区块
-        if (EMPTY.equals(status)) {
+        if (EMPTY.equals(status) && !context.getStatus().equals(StatusEnum.SYNCHRONIZING)) {
             if (!BlockUtil.headerVerify(chainId, header)) {
                 logger.info("recieve error SmallBlockMessage from " + nodeId);
                 SmallBlockCacher.setStatus(chainId, blockHash, ERROR);
@@ -167,7 +167,7 @@ public class SmallBlockHandler implements MessageProcessor {
             if (!missTxHashList.isEmpty()) {
                 logger.info("block height:" + header.getHeight() + ", total tx count:" + header.getTxCount() + " , get group tx of " + missTxHashList.size());
                 //这里的smallBlock的subTxList中包含一些非系统交易,用于跟TxGroup组合成完整区块
-                CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(missTxHashList, smallBlock, txMap);
+                CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(missTxHashList, smallBlock, txMap, nodeId);
                 SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);
                 SmallBlockCacher.setStatus(chainId, blockHash, INCOMPLETE);
                 HashListMessage request = new HashListMessage();
@@ -177,11 +177,12 @@ public class SmallBlockHandler implements MessageProcessor {
                 return;
             }
 
-            CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(null, smallBlock, txMap);
+            CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(null, smallBlock, txMap, nodeId);
             SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);
             SmallBlockCacher.setStatus(chainId, blockHash, COMPLETE);
             TxGroupRequestor.removeTask(chainId, blockHash.toString());
             Block block = BlockUtil.assemblyBlock(header, txMap, txHashList);
+            block.setNodeId(nodeId);
             logger.debug("record recv block, block create time-" + DateUtils.timeStamp2DateStr(block.getHeader().getTime() * 1000) + ", hash-" + block.getHeader().getHash());
             boolean b = blockService.saveBlock(chainId, block, 1, true, false, true);
             if (!b) {
