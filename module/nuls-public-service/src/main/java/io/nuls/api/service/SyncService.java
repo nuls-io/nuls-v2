@@ -219,9 +219,7 @@ public class SyncService {
     }
 
     private void processCoinBaseTx(int chainId, TransactionInfo tx) {
-        if (tx.getHeight() == 0) {
-            return;
-        }
+
         if (tx.getCoinTos() == null || tx.getCoinTos().isEmpty()) {
             return;
         }
@@ -234,6 +232,9 @@ public class SyncService {
 //            txRelationInfoSet.add(new TxRelationInfo(output, tx, ledgerInfo.getTotalBalance()));
 
             //奖励是本链主资产的时候，累计奖励金额
+            if (tx.getHeight() == 0) {
+                continue;
+            }
             if (output.getChainId() == assetInfo.getChainId() && output.getAssetsId() == assetInfo.getAssetId()) {
                 AccountInfo accountInfo = queryAccountInfo(chainId, output.getAddress());
                 accountInfo.setTotalReward(accountInfo.getTotalReward().add(output.getAmount()));
