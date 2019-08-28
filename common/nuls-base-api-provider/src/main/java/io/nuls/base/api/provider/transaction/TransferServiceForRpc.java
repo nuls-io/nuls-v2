@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
 public class TransferServiceForRpc extends BaseRpcService implements TransferService {
 
     @Override
-    public Result transferTest(int method, String addr1, String addr2) {
+    public Result transferTest(int method, String addr1, String addr2,String amount) {
         try {
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, "1.0");

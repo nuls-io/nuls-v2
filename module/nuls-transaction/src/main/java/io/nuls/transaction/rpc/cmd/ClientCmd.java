@@ -230,8 +230,9 @@ public class ClientCmd extends BaseCmd {
                 transferTest.mAddressTransfer(address1);
             }
             if(2 == method){
+                String amount =  (String)params.get("amount");
                 adddress2 = (String) params.get("address2");
-                transferTest.mAddressTransferLjs(address1, adddress2);
+                transferTest.mAddressTransferLjs(address1, adddress2,amount);
             }
             return success();
         } catch (Exception e) {
