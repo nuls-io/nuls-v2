@@ -124,6 +124,7 @@ public class UnconfirmedRepositoryImpl implements UnconfirmedRepository, Initial
 
     /**
      * 清除未确认交易,其后关联的交易一并移除
+     *
      * @param chainId
      * @param accountKey
      * @param txUnconfirmed
@@ -131,7 +132,7 @@ public class UnconfirmedRepositoryImpl implements UnconfirmedRepository, Initial
     @Override
     public void clearMemUnconfirmedTxs(int chainId, String accountKey, TxUnconfirmed txUnconfirmed) {
         AccountStateUnconfirmed accountStateUnconfirmed = getMemAccountStateUnconfirmed(chainId, accountKey);
-        if(null ==accountStateUnconfirmed){
+        if (null == accountStateUnconfirmed || null == txUnconfirmed) {
             return;
         }
         Map<String, TxUnconfirmed> accountUnconfirmedTxs = accountStateUnconfirmed.getTxUnconfirmedMap();
@@ -164,11 +165,12 @@ public class UnconfirmedRepositoryImpl implements UnconfirmedRepository, Initial
 
     /**
      * 清空链所有未确认交易
+     *
      * @param chainId
      */
     @Override
     public void clearAllMemUnconfirmedTxs(int chainId) {
-        Map<String,AccountStateUnconfirmed> allChainUnconfirmed =chainAccountUnconfirmed.get(String.valueOf(chainId));
+        Map<String, AccountStateUnconfirmed> allChainUnconfirmed = chainAccountUnconfirmed.get(String.valueOf(chainId));
         if (null == allChainUnconfirmed) {
             return;
         }
