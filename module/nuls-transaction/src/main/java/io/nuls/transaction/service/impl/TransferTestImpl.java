@@ -169,7 +169,7 @@ public class TransferTestImpl {
 
 
     public void mAddressTransferLjs(String addressMoney1, String addressMoney2, String amount) throws Exception {
-        int count = 1;
+        int count = 10000;
         if (null == amount) {
             amount = "500000000";
         }
