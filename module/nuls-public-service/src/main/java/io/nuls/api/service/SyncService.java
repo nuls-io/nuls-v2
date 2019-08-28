@@ -219,6 +219,9 @@ public class SyncService {
     }
 
     private void processCoinBaseTx(int chainId, TransactionInfo tx) {
+        if (tx.getHeight() == 0) {
+            return;
+        }
         if (tx.getCoinTos() == null || tx.getCoinTos().isEmpty()) {
             return;
         }
