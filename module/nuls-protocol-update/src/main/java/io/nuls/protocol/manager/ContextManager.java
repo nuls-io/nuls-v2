@@ -21,7 +21,6 @@
 package io.nuls.protocol.manager;
 
 import io.nuls.base.basic.ProtocolVersion;
-import io.nuls.core.exception.NulsException;
 import io.nuls.protocol.model.ChainParameters;
 import io.nuls.protocol.model.ProtocolContext;
 
@@ -48,7 +47,7 @@ public class ContextManager {
     private ContextManager() {
     }
 
-    public static void init(ChainParameters parameter, List<ProtocolVersion> versions) throws NulsException {
+    public static void init(ChainParameters parameter, List<ProtocolVersion> versions) {
         ProtocolContext protocolContext = new ProtocolContext();
         int chainId = parameter.getChainId();
         chainIds.add(chainId);
@@ -58,7 +57,6 @@ public class ContextManager {
         versions.sort(ProtocolVersion.COMPARATOR);
         protocolContext.setLocalVersionList(versions);
         protocolContext.setCurrentProtocolVersion(versions.get(0));
-        //todo 根据最新区块高度
         protocolContext.init();
         COMMON_LOG.info("new protocolContext add! chainId-" + chainId);
     }

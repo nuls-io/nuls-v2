@@ -7,6 +7,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.util.RpcCall;
+import io.nuls.protocol.manager.ContextManager;
 import io.nuls.protocol.model.ProtocolContext;
 
 import java.util.ArrayList;
@@ -37,7 +38,6 @@ public class VersionChangeNotifier {
             noticedModule.add(ModuleE.CM.abbr);
         }
         for (String module : noticedModule) {
-            long l1 = System.nanoTime();
             Map<String, Object> params = new HashMap<>(4);
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put(Constants.CHAIN_ID, chainId);
@@ -49,7 +49,7 @@ public class VersionChangeNotifier {
             }
         }
         long end = System.nanoTime();
-        System.out.println("****total notify time****" + (end - begin));
+        ContextManager.getContext(chainId).getLogger().info("****total notify time****" + (end - begin));
         return true;
     }
 
@@ -61,7 +61,7 @@ public class VersionChangeNotifier {
      * @param version
      * @return
      */
-    public static boolean reRegister(int chainId, ProtocolContext context, short version) {
+    public static void reRegister(int chainId, ProtocolContext context, short version) {
         long begin = System.nanoTime();
         List<Map.Entry<String, Protocol>> entries = context.getProtocolMap().get(version);
         if (entries != null) {
@@ -71,8 +71,7 @@ public class VersionChangeNotifier {
             });
         }
         long end = System.nanoTime();
-        System.out.println("****reRegister time****" + (end - begin));
-        return true;
+        context.getLogger().info("****reRegister time****" + (end - begin));
     }
 
 }
