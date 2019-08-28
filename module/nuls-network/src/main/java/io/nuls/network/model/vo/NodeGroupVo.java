@@ -60,7 +60,7 @@ public class NodeGroupVo implements Ivo {
     private int isActive;
     @ApiModelProperty(description = "跨链网络是否已工作")
     private int isCrossActive;
-    @ApiModelProperty(description = "网络组是否是卫星链节点")
+    @ApiModelProperty(description = "网络组是否是主网链节点")
     private int isMoonNet;
 
     public int getChainId() {

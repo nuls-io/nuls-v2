@@ -624,6 +624,10 @@ public class TxServiceImpl implements TxService {
             int corssTxCount = 0;
             //一批次处理，包含跨链交易个数
             int batchCorssTxCount = 0;
+            //本次打包包含合约交易个数
+            int contractTxCount = 0;
+            //一批次处理，包含合约交易个数
+            int batchContractTxCount = 0;
             for (int index = 0; ; index++) {
                 long currentTimeMillis = NulsDateUtils.getCurrentTimeMillis();
                 long currentReserve = endtimestamp - currentTimeMillis;
@@ -686,8 +690,22 @@ public class TxServiceImpl implements TxService {
                             }
                         } else {
                             TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
+                            //限制跨链交易数量
                             if (txRegister.getModuleCode().equals(ModuleE.CC.abbr)) {
                                 if (corssTxCount + (++batchCorssTxCount) >= TxConstant.PACKAGE_CROSS_TX_MAX_COUNT) {
+                                    //限制单个区块包含的跨链交易总数，超过跨链交易最大个数，放回去, 然后停止获取交易
+                                    packablePool.add(chain, tx);
+                                    if (batchProcessListSize > 0) {
+                                        //达到处理该批次的条件
+                                        process = true;
+                                    } else {
+                                        break;
+                                    }
+                                }
+                            }
+                            //限制智能合约交易数量
+                            if (txRegister.getModuleCode().equals(ModuleE.SC.abbr)) {
+                                if (contractTxCount + (++batchContractTxCount) >= TxConstant.PACKAGE_CONTRACT_TX_MAX_COUNT) {
                                     //限制单个区块包含的跨链交易总数，超过跨链交易最大个数，放回去, 然后停止获取交易
                                     packablePool.add(chain, tx);
                                     if (batchProcessListSize > 0) {
@@ -750,6 +768,10 @@ public class TxServiceImpl implements TxService {
                             if (txRegister.getModuleCode().equals(ModuleE.CC.abbr)) {
                                 corssTxCount++;
                             }
+                            //计算合约交易的数量
+                            if (txRegister.getModuleCode().equals(ModuleE.SC.abbr)) {
+                                contractTxCount++;
+                            }
                             //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
                             TxUtil.moduleGroups(moduleVerifyMap, txRegister, RPCUtil.encode(transaction.serialize()));
                         }
@@ -757,9 +779,11 @@ public class TxServiceImpl implements TxService {
                         totalSizeTemp = totalSize;
                         packingTxList.addAll(currentBatchPackableTxs);
 
+                        //批次结束重置数据
                         batchProcessList.clear();
                         currentBatchPackableTxs.clear();
                         batchCorssTxCount = 0;
+                        batchContractTxCount = 0;
                     }
                 } catch (Exception e) {
                     currentBatchPackableTxs.clear();
@@ -1016,14 +1040,14 @@ public class TxServiceImpl implements TxService {
                     //如果合约交易不需要全部放回待打包队列,就检查如果存在未执行的智能合约,则放回待打包队列,下次执行。
                     List<String> nonexecutionList = (List<String>) map.get("pendingTxHashList");
                     if (null != nonexecutionList && !nonexecutionList.isEmpty()) {
-                        chain.getLogger().info("contract pending tx count:{} ", nonexecutionList.size());
+                        chain.getLogger().debug("contract pending tx count:{} ", nonexecutionList.size());
                         Iterator<TxPackageWrapper> iterator = packingTxList.iterator();
                         while (iterator.hasNext()) {
                             TxPackageWrapper txPackageWrapper = iterator.next();
                             for (String hash : nonexecutionList) {
                                 if (hash.equals(txPackageWrapper.getTx().getHash().toHex())) {
                                     orphanTxSet.add(txPackageWrapper);
-                                    chain.getLogger().info("contract pending tx back to PackablePool hash:{} ", hash);
+                                    chain.getLogger().debug("contract pending tx back to PackablePool hash:{} ", hash);
                                     //从可打包集合中删除
                                     iterator.remove();
                                     break;

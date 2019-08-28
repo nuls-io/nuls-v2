@@ -124,7 +124,7 @@ public class ContractCmd extends BaseCmd {
             tx.parse(RPCUtil.decode(txData), 0);
             String hash = tx.getHash().toHex();
             if(!contractHelper.getChain(chainId).getBatchInfo().checkGasCostTotal(hash)) {
-                Log.warn("Exceed gas limit of block [15,000,000 gas], the contract transaction [{}] revert to package queue.", hash);
+                Log.warn("Exceed tx count [500] or gas limit of block [15,000,000 gas], the contract transaction [{}] revert to package queue.", hash);
                 return success();
             }
             Result result = contractService.invokeContractOneByOne(chainId, tx);
@@ -175,6 +175,7 @@ public class ContractCmd extends BaseCmd {
             Integer chainId = (Integer) params.get("chainId");
             ChainManager.chainHandle(chainId);
             Long blockHeight = Long.parseLong(params.get("blockHeight").toString());
+            Log.info("[End Contract Batch] contract batch request start, height is {}", blockHeight);
 
             Result result = contractService.end(chainId, blockHeight);
             if (result.isFailed()) {
@@ -211,6 +212,7 @@ public class ContractCmd extends BaseCmd {
             Integer chainId = (Integer) params.get("chainId");
             ChainManager.chainHandle(chainId);
             Long blockHeight = Long.parseLong(params.get("blockHeight").toString());
+            Log.info("[End Package Contract Batch] contract batch request start, height is {}", blockHeight);
 
             Result result = contractService.packageEnd(chainId, blockHeight);
             if (result.isFailed()) {
@@ -225,7 +227,7 @@ public class ContractCmd extends BaseCmd {
             resultMap.put("txList", resultTxDataList);
             // 存放未处理的交易
             resultMap.put("pendingTxHashList", pendingTxHashList);
-            Log.info("[End Contract Batch] Gas total cost is [{}], packaging blockHeight is [{}], packaging StateRoot is [{}]", batchInfo.getGasCostTotal(), blockHeight, RPCUtil.encode(dto.getStateRoot()));
+            Log.info("[End Package Contract Batch] Gas total cost is [{}], packaging blockHeight is [{}], packaging StateRoot is [{}]", batchInfo.getGasCostTotal(), blockHeight, RPCUtil.encode(dto.getStateRoot()));
             return success(resultMap);
         } catch (Exception e) {
             Log.error(e);
