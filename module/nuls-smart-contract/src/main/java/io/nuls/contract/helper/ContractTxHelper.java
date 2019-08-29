@@ -253,7 +253,7 @@ public class ContractTxHelper {
         createContractData.setPrice(price);
         createContractData.setCode(contractCode);
         if (args != null) {
-            createContractData.setArgsCount((byte) args.length);
+            createContractData.setArgsCount((short) args.length);
             createContractData.setArgs(args);
         }
         return createContractData;
@@ -334,7 +334,7 @@ public class ContractTxHelper {
         callContractData.setMethodName(methodName);
         callContractData.setMethodDesc(methodDesc);
         if (args != null) {
-            callContractData.setArgsCount((byte) args.length);
+            callContractData.setArgsCount((short) args.length);
             callContractData.setArgs(args);
         }
         return callContractData;
