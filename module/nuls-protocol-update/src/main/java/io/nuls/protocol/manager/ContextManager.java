@@ -23,6 +23,7 @@ package io.nuls.protocol.manager;
 import io.nuls.base.basic.ProtocolVersion;
 import io.nuls.protocol.model.ChainParameters;
 import io.nuls.protocol.model.ProtocolContext;
+import io.nuls.protocol.utils.LoggerUtil;
 
 import java.util.List;
 import java.util.Map;
@@ -58,6 +59,7 @@ public class ContextManager {
         protocolContext.setLocalVersionList(versions);
         protocolContext.setCurrentProtocolVersion(versions.get(0));
         protocolContext.init();
+        LoggerUtil.init(chainId);
         COMMON_LOG.info("new protocolContext add! chainId-" + chainId);
     }
 

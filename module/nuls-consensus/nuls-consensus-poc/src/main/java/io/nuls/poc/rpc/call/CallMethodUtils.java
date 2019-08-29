@@ -3,7 +3,6 @@ package io.nuls.poc.rpc.call;
 import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.basic.ProtocolVersion;
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.MultiSigAccount;
@@ -16,7 +15,6 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.StringUtils;
-import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
@@ -659,38 +657,15 @@ public class CallMethodUtils {
      * @param chainId
      */
     @SuppressWarnings("unchecked")
-    public static ProtocolVersion getMainVersion(int chainId) throws NulsException {
+    public static Map getVersion(int chainId) throws NulsException {
         Map<String, Object> params = new HashMap(4);
         params.put(Constants.CHAIN_ID, chainId);
         try {
-            Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.PU.abbr, "getMainVersion", params);
+            Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.PU.abbr, "getVersion", params);
             if (!callResp.isSuccess()) {
                 return null;
             }
-            Map map = (Map) ((Map) callResp.getResponseData()).get("getMainVersion");
-            return JSONUtils.map2pojo(map, ProtocolVersion.class);
-        } catch (Exception e) {
-            throw new NulsException(e);
-        }
-    }
-
-    /**
-     * 获取本地节点版本
-     * Acquire account lock-in amount and available balance
-     *
-     * @param chainId
-     */
-    @SuppressWarnings("unchecked")
-    public static ProtocolVersion getLocalVersion(int chainId) throws NulsException {
-        Map<String, Object> params = new HashMap(4);
-        params.put(Constants.CHAIN_ID, chainId);
-        try {
-            Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.PU.abbr, "getBlockVersion", params);
-            if (!callResp.isSuccess()) {
-                return null;
-            }
-            Map map = (Map) ((Map) callResp.getResponseData()).get("getBlockVersion");
-            return JSONUtils.map2pojo(map, ProtocolVersion.class);
+            return (Map) ((Map) callResp.getResponseData()).get("getVersion");
         } catch (Exception e) {
             throw new NulsException(e);
         }

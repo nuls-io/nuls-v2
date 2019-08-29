@@ -49,7 +49,7 @@ public class VersionChangeNotifier {
                 return false;
             }
             long end = System.nanoTime();
-            ContextManager.getContext(chainId).getLogger().info("****{} notify time-{}ms", module, (end - begin) / 1000000);
+            ContextManager.getContext(chainId).getLogger().info("****{} notify time-{}ms", module, (end - l) / 1000000);
         }
         long end = System.nanoTime();
         ContextManager.getContext(chainId).getLogger().info("****total notify time-{}ms", (end - begin) / 1000000);

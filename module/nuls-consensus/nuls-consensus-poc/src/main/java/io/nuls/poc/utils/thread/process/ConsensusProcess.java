@@ -12,6 +12,7 @@ import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
@@ -247,12 +248,13 @@ public class ConsensusProcess {
 
     public void fillProtocol(BlockExtendsData extendsData, int chainId) throws NulsException {
         if (ModuleHelper.isSupportProtocolUpdate()) {
-            ProtocolVersion mainVersion = CallMethodUtils.getMainVersion(chainId);
-            ProtocolVersion localVersion = CallMethodUtils.getLocalVersion(chainId);
-            extendsData.setMainVersion(mainVersion.getVersion());
-            extendsData.setBlockVersion(localVersion.getVersion());
-            extendsData.setEffectiveRatio(localVersion.getEffectiveRatio());
-            extendsData.setContinuousIntervalCount(localVersion.getContinuousIntervalCount());
+            Map map = CallMethodUtils.getVersion(chainId);
+            ProtocolVersion currentProtocolVersion = JSONUtils.map2pojo((Map) map.get("currentProtocolVersion"), ProtocolVersion.class);
+            ProtocolVersion localProtocolVersion = JSONUtils.map2pojo((Map) map.get("localProtocolVersion"), ProtocolVersion.class);
+            extendsData.setMainVersion(currentProtocolVersion.getVersion());
+            extendsData.setBlockVersion(localProtocolVersion.getVersion());
+            extendsData.setEffectiveRatio(localProtocolVersion.getEffectiveRatio());
+            extendsData.setContinuousIntervalCount(localProtocolVersion.getContinuousIntervalCount());
         } else {
             extendsData.setMainVersion((short) 1);
             extendsData.setBlockVersion((short) 1);

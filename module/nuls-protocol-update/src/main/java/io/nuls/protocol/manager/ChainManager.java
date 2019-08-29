@@ -66,13 +66,13 @@ public class ChainManager {
             protocolService.init(chainId);
             ProtocolContext context = ContextManager.getContext(chainId);
             List<ProtocolVersion> list = context.getLocalVersionList();
-            NulsLogger commonLog = context.getLogger();
+            NulsLogger logger = context.getLogger();
             short localVersion = list.get(list.size() - 1).getVersion();
             short version = context.getCurrentProtocolVersion().getVersion();
             if (version > localVersion) {
-                commonLog.error("localVersion-" + localVersion);
-                commonLog.error("newVersion-" + version);
-                commonLog.error("Older versions of the wallet automatically stop working, Please upgrade the latest version of the wallet!");
+                logger.error("localVersion-" + localVersion);
+                logger.error("newVersion-" + version);
+                logger.error("Older versions of the wallet automatically stop working, Please upgrade the latest version of the wallet!");
                 System.exit(1);
             }
         }
@@ -95,13 +95,13 @@ public class ChainManager {
      * @param chainId
      */
     private void initTable(int chainId) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
+        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         try {
             RocksDBService.createTable(Constant.STATISTICS + chainId);
             RocksDBService.createTable(Constant.CACHED_INFO + chainId);
             RocksDBService.createTable(Constant.PROTOCOL_VERSION_PO + chainId);
         } catch (Exception e) {
-            commonLog.error(e);
+            logger.error(e);
         }
     }
 

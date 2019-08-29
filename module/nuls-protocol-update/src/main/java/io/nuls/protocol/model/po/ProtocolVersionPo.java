@@ -106,7 +106,7 @@ public class ProtocolVersionPo extends BaseNulsData {
 
     @Override
     public int hashCode() {
-        int result = (int) version;
+        int result = version;
         result = 31 * result + (int) effectiveRatio;
         result = 31 * result + (int) continuousIntervalCount;
         result = 31 * result + (int) (beginHeight ^ (beginHeight >>> 32));
@@ -116,7 +116,7 @@ public class ProtocolVersionPo extends BaseNulsData {
 
     @Override
     public String toString() {
-        return "ProtocolVersionPo{" +
+        return "{" +
                 "version=" + version +
                 ", effectiveRatio=" + effectiveRatio +
                 ", continuousIntervalCount=" + continuousIntervalCount +

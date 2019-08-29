@@ -154,7 +154,7 @@ public class ChainParameters extends BaseNulsData {
 
     @Override
     public String toString() {
-        return "ChainParameters{" +
+        return "{" +
                 "chainId=" + chainId +
                 ", logLevel='" + logLevel + '\'' +
                 ", interval=" + interval +
