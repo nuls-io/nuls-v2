@@ -20,7 +20,6 @@ public class StatisticsInfoTest {
         StatisticsInfo statisticsInfo1 = new StatisticsInfo();
         statisticsInfo1.setCount((short) 88);
         statisticsInfo1.setHeight(888);
-        statisticsInfo1.setLastHeight(777);
 
         ProtocolVersion version1 = new ProtocolVersion();
         version1.setVersion((byte) 1);

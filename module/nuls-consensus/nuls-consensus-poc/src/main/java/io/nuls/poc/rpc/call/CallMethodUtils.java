@@ -2,7 +2,6 @@ package io.nuls.poc.rpc.call;
 
 import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.MultiSigAccount;
@@ -403,8 +402,7 @@ public class CallMethodUtils {
                 txList.add(RPCUtil.encode(transaction.serialize()));
             }
             params.put("txList", txList);
-            BlockExtendsData lastData = new BlockExtendsData();
-            lastData.parse(new NulsByteBuffer(lastHeader.getExtend()));
+            BlockExtendsData lastData = lastHeader.getExtendsData();
             params.put("preStateRoot", RPCUtil.encode(lastData.getStateRoot()));
             params.put("blockHeader", RPCUtil.encode(header.serialize()));
             return ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_batchVerify", params);

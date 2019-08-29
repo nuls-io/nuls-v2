@@ -246,7 +246,7 @@ public class ConsensusProcess {
         }
     }
 
-    public void fillProtocol(BlockExtendsData extendsData, int chainId) throws NulsException {
+    private void fillProtocol(BlockExtendsData extendsData, int chainId) throws NulsException {
         if (ModuleHelper.isSupportProtocolUpdate()) {
             Map map = CallMethodUtils.getVersion(chainId);
             ProtocolVersion currentProtocolVersion = JSONUtils.map2pojo((Map) map.get("currentProtocolVersion"), ProtocolVersion.class);

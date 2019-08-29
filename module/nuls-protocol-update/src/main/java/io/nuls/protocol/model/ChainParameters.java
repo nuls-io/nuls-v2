@@ -57,11 +57,7 @@ public class ChainParameters extends BaseNulsData {
      */
     private byte effectiveRatioMinimum;
     /**
-     * 协议生效要满足的连续区间数
-     */
-    private short continuousIntervalCountMaximum;
-    /**
-     * 协议生效要满足的连续区间数
+     * 协议生效要满足的连续区间数最小值
      */
     private short continuousIntervalCountMinimum;
 
@@ -97,14 +93,6 @@ public class ChainParameters extends BaseNulsData {
         this.effectiveRatioMinimum = effectiveRatioMinimum;
     }
 
-    public short getContinuousIntervalCountMaximum() {
-        return continuousIntervalCountMaximum;
-    }
-
-    public void setContinuousIntervalCountMaximum(short continuousIntervalCountMaximum) {
-        this.continuousIntervalCountMaximum = continuousIntervalCountMaximum;
-    }
-
     public short getContinuousIntervalCountMinimum() {
         return continuousIntervalCountMinimum;
     }
@@ -121,7 +109,6 @@ public class ChainParameters extends BaseNulsData {
         this.logLevel = logLevel;
         this.interval = interval;
         this.effectiveRatioMinimum = effectiveRatioMinimum;
-        this.continuousIntervalCountMaximum = continuousIntervalCountMaximum;
         this.continuousIntervalCountMinimum = continuousIntervalCountMinimum;
     }
 
@@ -131,7 +118,6 @@ public class ChainParameters extends BaseNulsData {
         stream.writeString(logLevel);
         stream.writeShort(interval);
         stream.writeByte(effectiveRatioMinimum);
-        stream.writeShort(continuousIntervalCountMaximum);
         stream.writeShort(continuousIntervalCountMinimum);
     }
 
@@ -141,13 +127,12 @@ public class ChainParameters extends BaseNulsData {
         this.logLevel = byteBuffer.readString();
         this.interval = byteBuffer.readShort();
         this.effectiveRatioMinimum = byteBuffer.readByte();
-        this.continuousIntervalCountMaximum = byteBuffer.readShort();
         this.continuousIntervalCountMinimum = byteBuffer.readShort();
     }
 
     @Override
     public int size() {
-        int size = 9;
+        int size = 7;
         size += SerializeUtils.sizeOfString(logLevel);
         return size;
     }
@@ -159,7 +144,6 @@ public class ChainParameters extends BaseNulsData {
                 ", logLevel='" + logLevel + '\'' +
                 ", interval=" + interval +
                 ", effectiveRatioMinimum=" + effectiveRatioMinimum +
-                ", continuousIntervalCountMaximum=" + continuousIntervalCountMaximum +
                 ", continuousIntervalCountMinimum=" + continuousIntervalCountMinimum +
                 '}';
     }
