@@ -180,6 +180,7 @@ public class AccountInfo {
         accountInfo.totalBalance = new BigInteger(this.totalBalance.toString());
         accountInfo.totalReward = new BigInteger(this.totalReward.toString());
         accountInfo.tokens = new ArrayList<>(this.tokens);
+        accountInfo.lastReward = new BigInteger(this.lastReward.toString());
         return accountInfo;
     }
 

@@ -1,19 +1,17 @@
 package io.nuls.crosschain.nuls.model.bo;
 
 import io.nuls.base.data.NulsHash;
-import io.nuls.core.exception.NulsException;
+import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.thread.ThreadUtils;
 import io.nuls.core.thread.commom.NulsThreadFactory;
-import io.nuls.crosschain.base.message.BroadCtxSignMessage;
 import io.nuls.crosschain.nuls.model.bo.config.ConfigBean;
 import io.nuls.crosschain.nuls.model.bo.message.UntreatedMessage;
 import io.nuls.crosschain.nuls.model.bo.message.WaitBroadSignMessage;
-import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -27,6 +25,12 @@ import java.util.concurrent.LinkedBlockingQueue;
  * 2019/4/10
  **/
 public class Chain {
+    /**
+     * 本节点已签名的跨链交易及签名
+     * Cross-Chain Transaction and Signature of Signed Node
+     */
+    private Map<NulsHash, P2PHKSignature> signedCtxMap;
+
     /**
      * 链基础配置信息
      * Chain Foundation Configuration Information
@@ -136,6 +140,7 @@ public class Chain {
     private boolean mainChain;
 
     public Chain(){
+        signedCtxMap = new HashMap<>();
         hashNodeIdMap = new ConcurrentHashMap<>();
         otherHashNodeIdMap = new ConcurrentHashMap<>();
         ctxStageMap = new ConcurrentHashMap<>();
@@ -150,6 +155,14 @@ public class Chain {
         otherCtxMessageQueue = new LinkedBlockingQueue<>();
         getCtxStateQueue = new LinkedBlockingQueue<>();
         mainChain = false;
+    }
+
+    public Map<NulsHash, P2PHKSignature> getSignedCtxMap() {
+        return signedCtxMap;
+    }
+
+    public void setSignedCtxMap(Map<NulsHash, P2PHKSignature> signedCtxMap) {
+        this.signedCtxMap = signedCtxMap;
     }
 
     public int getChainId(){

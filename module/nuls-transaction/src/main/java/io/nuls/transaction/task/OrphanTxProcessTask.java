@@ -152,8 +152,11 @@ public class OrphanTxProcessTask implements Runnable {
                 return true;
             }
             //待打包队列map超过预定值,则不再接受处理交易,直接转发交易完整交易
-            int packableTxMapSize = chain.getPackableTxMap().size();
-            if(TxUtil.discardTx(packableTxMapSize)){
+            int packableTxMapDataSize = 0;
+            for (Transaction transaction : chain.getPackableTxMap().values()) {
+                packableTxMapDataSize += transaction.size();
+            }
+            if (TxUtil.discardTx(packableTxMapDataSize)) {
                 //待打包队列map超过预定值, 不处理转发失败的情况
                 String hash = tx.getHash().toHex();
                 NetworkCall.broadcastTx(chain, tx, TxDuplicateRemoval.getExcludeNode(hash));

@@ -41,7 +41,8 @@ import io.nuls.crosschain.nuls.utils.validator.CrossTxValidator;
 import java.io.IOException;
 import java.util.*;
 
-import static io.nuls.crosschain.nuls.constant.NulsCrossChainConstant.*;
+import static io.nuls.crosschain.nuls.constant.NulsCrossChainConstant.CHAIN_ID_MIN;
+import static io.nuls.crosschain.nuls.constant.NulsCrossChainConstant.INIT_CAPACITY_8;
 import static io.nuls.crosschain.nuls.constant.NulsCrossChainErrorCode.*;
 import static io.nuls.crosschain.nuls.constant.ParamConstant.*;
 
@@ -248,6 +249,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                 if (isPacker) {
                     P2PHKSignature p2PHKSignature = AccountCall.signDigest(address, password, convertHash.getBytes());
                     signature.getP2PHKSignatures().add(p2PHKSignature);
+                    chain.getSignedCtxMap().put(txHash, p2PHKSignature);
                 }
                 if (!txValidator.coinDataValid(chain, mainCtx.getCoinDataInstance(), mainCtx.size(), false)) {
                     chain.getLogger().error("生成的主网协议跨链交易CoinData验证失败！\n\n");
@@ -262,6 +264,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                 if (isPacker) {
                     P2PHKSignature p2PHKSignature = AccountCall.signDigest(address, password, txHash.getBytes());
                     signature.getP2PHKSignatures().add(p2PHKSignature);
+                    chain.getSignedCtxMap().put(txHash, p2PHKSignature);
                 }
             }
             tx.setTransactionSignature(signature.serialize());
@@ -356,6 +359,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                     }
                     ctxStatusList.add(ctxHash);
                     waitSendList.add(ctxHash);
+                    chain.getSignedCtxMap().remove(ctxHash);
                 } else if (chainId == toChainId) {
                     NulsHash convertHash = ctxHash;
                     if (!config.isMainNet()) {

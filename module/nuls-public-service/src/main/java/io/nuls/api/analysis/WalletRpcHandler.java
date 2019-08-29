@@ -25,7 +25,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.nuls.api.constant.ApiConstant.*;
+import static io.nuls.api.constant.ApiConstant.DISABLE;
+import static io.nuls.api.constant.ApiConstant.ENABLE;
 
 public class WalletRpcHandler {
 
@@ -549,6 +550,17 @@ public class WalletRpcHandler {
             Map<String,Object> map = (Map<String, Object>) RpcCall.request(ModuleE.CC.abbr, CommandConstant.GET_BYZANTINE_COUNT, params);
             return Result.getSuccess(null).setData(map);
         }catch (NulsException e) {
+            return Result.getFailed(e.getErrorCode());
+        }
+    }
+
+    public static Result getNetworkInfo(int chainId) {
+        try {
+            Map<String, Object> params = new HashMap<>();
+            params.put("chainId", chainId);
+            Map<String, Object> map = (Map<String, Object>) RpcCall.request(ModuleE.NW.abbr, CommandConstant.GET_NETWORK_GROUP, params);
+            return Result.getSuccess(null).setData(map);
+        } catch (NulsException e) {
             return Result.getFailed(e.getErrorCode());
         }
     }

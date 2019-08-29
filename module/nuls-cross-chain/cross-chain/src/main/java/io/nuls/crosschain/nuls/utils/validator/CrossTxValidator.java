@@ -7,22 +7,26 @@ import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
 import io.nuls.core.constant.TxType;
-import io.nuls.crosschain.base.model.bo.ChainInfo;
-import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
-import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
-import io.nuls.crosschain.nuls.constant.NulsCrossChainErrorCode;
-import io.nuls.crosschain.nuls.constant.ParamConstant;
-import io.nuls.crosschain.nuls.model.bo.Chain;
-import io.nuls.crosschain.nuls.rpc.call.ChainManagerCall;
-import io.nuls.crosschain.nuls.rpc.call.ConsensusCall;
-import io.nuls.crosschain.nuls.srorage.ConvertHashService;
-import io.nuls.crosschain.nuls.srorage.ConvertCtxService;
-import io.nuls.crosschain.nuls.utils.CommonUtil;
-import io.nuls.crosschain.nuls.utils.TxUtil;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.BigIntegerUtils;
+import io.nuls.core.model.StringUtils;
+import io.nuls.crosschain.base.constant.CommandConstant;
+import io.nuls.crosschain.base.message.BroadCtxSignMessage;
+import io.nuls.crosschain.base.model.bo.ChainInfo;
+import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
+import io.nuls.crosschain.nuls.constant.NulsCrossChainErrorCode;
+import io.nuls.crosschain.nuls.constant.ParamConstant;
+import io.nuls.crosschain.nuls.model.bo.Chain;
+import io.nuls.crosschain.nuls.rpc.call.AccountCall;
+import io.nuls.crosschain.nuls.rpc.call.ChainManagerCall;
+import io.nuls.crosschain.nuls.rpc.call.ConsensusCall;
+import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
+import io.nuls.crosschain.nuls.srorage.ConvertCtxService;
+import io.nuls.crosschain.nuls.srorage.ConvertHashService;
+import io.nuls.crosschain.nuls.utils.CommonUtil;
+import io.nuls.crosschain.nuls.utils.TxUtil;
 import io.nuls.crosschain.nuls.utils.manager.ChainManager;
 
 import java.io.IOException;
@@ -114,9 +118,11 @@ public class CrossTxValidator {
         List<String> verifierList;
         int minPassCount = 1;
         int verifierChainId = fromChainId;
+        Map packerInfo = null;
         if(chain.getChainId() == fromChainId){
             if(blockHeader == null){
-                verifierList = (List<String>)ConsensusCall.getPackerInfo(chain).get(ParamConstant.PARAM_PACK_ADDRESS_LIST);
+                packerInfo = ConsensusCall.getPackerInfo(chain);
+                verifierList = (List<String>) packerInfo.get(ParamConstant.PARAM_PACK_ADDRESS_LIST);
             }else{
                 verifierList = ConsensusCall.getRoundMemberList(chain, blockHeader);
             }
@@ -147,6 +153,15 @@ public class CrossTxValidator {
             minPassCount = chainInfo.getMinPassCount();
         }
         if(!signByzantineVerify(chain, realCtx, coinData, verifierList, minPassCount, verifierChainId)){
+            if (chain.getChainId() == fromChainId) {
+                String password = null;
+                String address = null;
+                if (packerInfo != null) {
+                    password = (String) packerInfo.get(ParamConstant.PARAM_PASSWORD);
+                    address = (String) packerInfo.get(ParamConstant.PARAM_ADDRESS);
+                }
+                rebroadcastSign(chain, tx.getHash(), password, address, realCtx);
+            }
             chain.getLogger().info("签名拜占庭验证失败！");
             throw new NulsException(NulsCrossChainErrorCode.CTX_SIGN_BYZANTINE_FAIL);
         }
@@ -188,9 +203,11 @@ public class CrossTxValidator {
         List<String> verifierList;
         int minPassCount = 1;
         int verifierChainId = fromChainId;
+        Map packerInfo = null;
         if(chain.getChainId() == fromChainId){
             if(blockHeader == null){
-                verifierList = (List<String>)ConsensusCall.getPackerInfo(chain).get("packAddressList");
+                packerInfo = ConsensusCall.getPackerInfo(chain);
+                verifierList = (List<String>) packerInfo.get(ParamConstant.PARAM_PACK_ADDRESS_LIST);
             }else{
                 verifierList = ConsensusCall.getRoundMemberList(chain, blockHeader);
             }
@@ -229,6 +246,15 @@ public class CrossTxValidator {
             throw new NulsException(NulsCrossChainErrorCode.SIGNATURE_ERROR);
         }
         if(!signByzantineVerify(chain, realCtx, coinData, verifierList, minPassCount, verifierChainId)){
+            if (chain.getChainId() == fromChainId) {
+                String password = null;
+                String address = null;
+                if (packerInfo != null) {
+                    password = (String) packerInfo.get(ParamConstant.PARAM_PASSWORD);
+                    address = (String) packerInfo.get(ParamConstant.PARAM_ADDRESS);
+                }
+                rebroadcastSign(chain, tx.getHash(), password, address, realCtx);
+            }
             chain.getLogger().info("签名拜占庭验证失败！");
             throw new NulsException(NulsCrossChainErrorCode.CTX_SIGN_BYZANTINE_FAIL);
         }
@@ -377,5 +403,22 @@ public class CrossTxValidator {
             return false;
         }
         return true;
+    }
+
+    private void rebroadcastSign(Chain chain, NulsHash hash, String password, String address, Transaction realCtx) {
+        try {
+            P2PHKSignature p2PHKSignature = chain.getSignedCtxMap().get(hash);
+            if (p2PHKSignature == null && !StringUtils.isBlank(address)) {
+                p2PHKSignature = AccountCall.signDigest(address, password, realCtx.getHash().getBytes());
+            }
+            if (p2PHKSignature != null) {
+                BroadCtxSignMessage message = new BroadCtxSignMessage();
+                message.setSignature(p2PHKSignature.serialize());
+                message.setLocalHash(hash);
+                NetWorkCall.broadcast(chain.getChainId(), message, null, CommandConstant.BROAD_CTX_SIGN_MESSAGE, false);
+            }
+        } catch (Exception e) {
+            chain.getLogger().error(e);
+        }
     }
 }

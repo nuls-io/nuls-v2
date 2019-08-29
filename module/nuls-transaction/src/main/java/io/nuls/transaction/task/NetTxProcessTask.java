@@ -88,12 +88,15 @@ public class NetTxProcessTask implements Runnable {
                 //分组 调验证器
                 Map<String, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
                 Iterator<TransactionNetPO> it = txNetList.iterator();
-                int packableTxMapSize = chain.getPackableTxMap().size();
+                int packableTxMapDataSize = 0;
+                for (Transaction tx : chain.getPackableTxMap().values()) {
+                    packableTxMapDataSize += tx.size();
+                }
                 while (it.hasNext()) {
                     TransactionNetPO txNetPO = it.next();
                     Transaction tx = txNetPO.getTx();
                     //待打包队列map超过预定值,则不再接受处理交易,直接转发交易完整交易
-                    if (TxUtil.discardTx(packableTxMapSize)) {
+                    if (TxUtil.discardTx(packableTxMapDataSize)) {
                         //待打包队列map超过预定值, 不处理转发失败的情况
                         String hash = tx.getHash().toHex();
                         NetworkCall.broadcastTx(chain, tx, TxDuplicateRemoval.getExcludeNode(hash));

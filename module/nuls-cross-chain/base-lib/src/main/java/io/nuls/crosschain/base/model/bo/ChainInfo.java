@@ -7,7 +7,6 @@ import io.nuls.core.parse.SerializeUtils;
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
 import io.nuls.core.rpc.model.TypeDescriptor;
-import io.nuls.core.rpc.util.SerializeUtil;
 import io.nuls.crosschain.base.constant.CrossChainConstant;
 import io.nuls.crosschain.base.message.base.BaseMessage;
 
@@ -191,9 +190,9 @@ public class ChainInfo extends BaseMessage {
 
     public int getMinPassCount(){
         int minPassCount = getVerifierList().size() * getSignatureByzantineRatio()/ CrossChainConstant.MAGIC_NUM_100;
-        if(minPassCount > getMaxSignatureCount()){
+        /*if(minPassCount > getMaxSignatureCount()){
             minPassCount = getMaxSignatureCount();
-        }
+        }*/
         if(minPassCount == 0){
             minPassCount = 1;
         }

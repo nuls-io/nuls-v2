@@ -108,6 +108,8 @@ public class ChainController {
         } else {
             map.put("agentAsset", null);
         }
+        result = WalletRpcHandler.getNetworkInfo(chainId);
+        map.put("magicNumber", result.getData().get("magicNumber"));
         map.put("isRunCrossChain", ApiContext.isRunCrossChain);
         map.put("isRunSmartContract", ApiContext.isRunSmartContract);
         return RpcResult.success(map);
