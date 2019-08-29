@@ -60,7 +60,7 @@ public class StatisticsStorageServiceImpl implements StatisticsStorageService {
     public StatisticsInfo get(int chainId, long height) {
         try {
             StatisticsInfo po = new StatisticsInfo();
-            byte[] bytes = RocksDBService.get(Constant.STATISTICS+chainId, ByteUtils.longToBytes(height));
+            byte[] bytes = RocksDBService.get(Constant.STATISTICS + chainId, ByteUtils.longToBytes(height));
             po.parse(new NulsByteBuffer(bytes));
             return po;
         } catch (Exception e) {
@@ -72,7 +72,7 @@ public class StatisticsStorageServiceImpl implements StatisticsStorageService {
     @Override
     public boolean delete(int chainId, long height) {
         try {
-            return RocksDBService.delete(Constant.STATISTICS+chainId, ByteUtils.longToBytes(height));
+            return RocksDBService.delete(Constant.STATISTICS + chainId, ByteUtils.longToBytes(height));
         } catch (Exception e) {
             ContextManager.getContext(chainId).getLogger().error(e);
             return false;
@@ -83,7 +83,7 @@ public class StatisticsStorageServiceImpl implements StatisticsStorageService {
     public List<StatisticsInfo> getList(int chainId) {
         try {
             var pos = new ArrayList<StatisticsInfo>();
-            List<byte[]> valueList = RocksDBService.valueList(Constant.STATISTICS+chainId);
+            List<byte[]> valueList = RocksDBService.valueList(Constant.STATISTICS + chainId);
             for (byte[] bytes : valueList) {
                 var po = new StatisticsInfo();
                 po.parse(new NulsByteBuffer(bytes));

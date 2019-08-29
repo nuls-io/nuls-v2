@@ -325,10 +325,10 @@ public class ProtocolServiceImpl implements ProtocolService {
         short interval = parameters.getInterval();
         //区块高度到达阈值,从数据库删除一条统计记录
         if (count < 0) {
+            StatisticsInfo oldValidStatisticsInfo = service.get(chainId, height);
             boolean b = service.delete(chainId, height);
             logger.info("height-" + height + ", delete-" + b);
             count = interval - 1;
-            StatisticsInfo oldValidStatisticsInfo = service.get(chainId, height);
             StatisticsInfo newValidStatisticsInfo = service.get(chainId, height - interval);
             context.setLastValidStatisticsInfo(newValidStatisticsInfo);
             context.setProportionMap(oldValidStatisticsInfo.getProtocolVersionMap());
