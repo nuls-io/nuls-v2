@@ -345,6 +345,7 @@ public class ProtocolServiceImpl implements ProtocolService {
             StatisticsInfo newValidStatisticsInfo = service.get(chainId, lastValidStatisticsInfo.getLastHeight());
             context.setLastValidStatisticsInfo(newValidStatisticsInfo);
             context.setProportionMap(newValidStatisticsInfo.getProtocolVersionMap());
+            context.setCurrentProtocolVersionCount(context.getCurrentProtocolVersionCount() - 1);
             ProtocolVersion currentProtocolVersion = context.getCurrentProtocolVersion();
             if (newValidStatisticsInfo.getProtocolVersion().equals(currentProtocolVersion) && newValidStatisticsInfo.getCount() < currentProtocolVersion.getContinuousIntervalCount()) {
                 //设置新协议版本

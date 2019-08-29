@@ -124,7 +124,7 @@ public class StatisticsInfo extends BaseNulsData {
 
     @Override
     public String toString() {
-        return "StatisticsInfo{" +
+        return "{" +
                 "lastHeight=" + lastHeight +
                 ", height=" + height +
                 ", count=" + count +

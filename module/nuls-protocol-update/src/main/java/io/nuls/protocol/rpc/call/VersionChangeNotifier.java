@@ -38,6 +38,7 @@ public class VersionChangeNotifier {
             noticedModule.add(ModuleE.CM.abbr);
         }
         for (String module : noticedModule) {
+            long l = System.nanoTime();
             Map<String, Object> params = new HashMap<>(4);
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put(Constants.CHAIN_ID, chainId);
@@ -47,9 +48,11 @@ public class VersionChangeNotifier {
             } catch (NulsException e) {
                 return false;
             }
+            long end = System.nanoTime();
+            ContextManager.getContext(chainId).getLogger().info("****{} notify time-{}ms", module, (end - begin) / 1000000);
         }
         long end = System.nanoTime();
-        ContextManager.getContext(chainId).getLogger().info("****total notify time****" + (end - begin));
+        ContextManager.getContext(chainId).getLogger().info("****total notify time-{}ms", (end - begin) / 1000000);
         return true;
     }
 
