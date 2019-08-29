@@ -248,6 +248,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                 if (isPacker) {
                     P2PHKSignature p2PHKSignature = AccountCall.signDigest(address, password, convertHash.getBytes());
                     signature.getP2PHKSignatures().add(p2PHKSignature);
+                    chain.getSignedCtxMap().put(txHash, p2PHKSignature);
                 }
                 if (!txValidator.coinDataValid(chain, mainCtx.getCoinDataInstance(), mainCtx.size(), false)) {
                     chain.getLogger().error("生成的主网协议跨链交易CoinData验证失败！\n\n");
@@ -262,6 +263,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                 if (isPacker) {
                     P2PHKSignature p2PHKSignature = AccountCall.signDigest(address, password, txHash.getBytes());
                     signature.getP2PHKSignatures().add(p2PHKSignature);
+                    chain.getSignedCtxMap().put(txHash, p2PHKSignature);
                 }
             }
             tx.setTransactionSignature(signature.serialize());
@@ -356,6 +358,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                     }
                     ctxStatusList.add(ctxHash);
                     waitSendList.add(ctxHash);
+                    chain.getSignedCtxMap().remove(ctxHash);
                 } else if (chainId == toChainId) {
                     NulsHash convertHash = ctxHash;
                     if (!config.isMainNet()) {
