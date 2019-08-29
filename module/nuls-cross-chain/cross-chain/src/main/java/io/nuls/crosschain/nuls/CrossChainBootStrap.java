@@ -135,7 +135,7 @@ public class CrossChainBootStrap extends BaseCrossChainBootStrap {
                 RegisterHelper.registerMsg(ProtocolGroupManager.getOneProtocol());
                 for (Chain chain:chainManager.getChainMap().values()) {
                     if(!chain.isMainChain()){
-                        NetWorkCall.activeCrossNet(chain.getChainId(), chain.getConfig().getMaxNodeAmount(), chain.getConfig().getMaxInNode(), nulsCrossChainConfig.getCrossSeedIps());
+                        NetWorkCall.activeCrossNet(chain.getChainId(), chain.getConfig().getMaxOutAmount(), chain.getConfig().getMaxInNode(), nulsCrossChainConfig.getCrossSeedIps());
                     }
                 }
             }
