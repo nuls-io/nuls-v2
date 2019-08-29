@@ -343,31 +343,31 @@ public class TxUtil {
 
 
     /**
-     * 根据待打包队列存交易的map实际交易数, 来计算是放弃当前交易
+     * 根据待打包队列存交易的map交易的数据总和, 来计算是放弃当前交易
      *
      * @return
      */
-    public static boolean discardTx(int packableTxMapSize) {
+    public static boolean discardTx(int packableTxMapDataSize) {
         Random random = new Random();
+        //随机0~9
         int number = random.nextInt(10);
-        if (packableTxMapSize >= TxConstant.PACKABLE_TX_MAP_MAX_SIZE) {
+        if (packableTxMapDataSize >= TxConstant.PACKABLE_TX_MAP_MAX_DATA_SIZE) {
+            //扔100%
+            return true;
+        } else if (packableTxMapDataSize >= TxConstant.PACKABLE_TX_MAP_HEAVY_DATA_SIZE) {
             //扔80%
             if (number < 8) {
                 return true;
             }
-        } else if (packableTxMapSize >= TxConstant.PACKABLE_TX_MAP_HEAVY_SIZE) {
+        } else if (packableTxMapDataSize >= TxConstant.PACKABLE_TX_MAP_STRESS_DATA_SIZE) {
             //扔50%
             if (number < 5) {
-                return true;
-            }
-        } else if (packableTxMapSize >= TxConstant.PACKABLE_TX_MAP_STRESS_SIZE) {
-            //扔30%
-            if (number < 3) {
                 return true;
             }
         }
         return false;
     }
+
 
 
     /**

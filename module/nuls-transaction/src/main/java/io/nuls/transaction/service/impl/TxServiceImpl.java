@@ -795,7 +795,7 @@ public class TxServiceImpl implements TxService {
             }
             //循环获取交易使用时间
             whileTime = NulsDateUtils.getCurrentTimeMillis() - startTime;
-            nulsLogger.debug("-取出的交易 - totalSize:{}", totalSize);
+            nulsLogger.debug("-取出的交易 -count:{} - data size:{}", packingTxList.size(), totalSize);
 
             boolean contractBefore = false;
             if (contractNotify) {
@@ -1189,6 +1189,9 @@ public class TxServiceImpl implements TxService {
         }
         if (null != orphanTxSet && !orphanTxSet.isEmpty()) {
             txList.addAll(orphanTxSet);
+        }
+        if (txList.isEmpty()) {
+            return;
         }
         //孤儿交易排倒序,全加回待打包队列去
         txList.sort(new Comparator<TxPackageWrapper>() {
@@ -1596,6 +1599,8 @@ public class TxServiceImpl implements TxService {
         //从待打包队里存交易的map中移除
         ByteArrayWrapper wrapper = new ByteArrayWrapper(tx.getHash().getBytes());
         chain.getPackableTxMap().remove(wrapper);
+        //从待打包队列中存实际交易的的map中移除该笔交易
+        packablePool.removeInvalidTxFromMap(chain, tx);
         //判断如果交易已被确认就不用调用账本清理了!!
         TransactionConfirmedPO txConfirmed = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
         if (txConfirmed == null) {
