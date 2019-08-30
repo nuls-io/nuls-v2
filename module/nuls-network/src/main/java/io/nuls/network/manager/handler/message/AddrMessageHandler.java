@@ -93,7 +93,11 @@ public class AddrMessageHandler extends BaseMessageHandler {
             AddrMessageBody addrMessageBody = (AddrMessageBody) message.getMsgBody();
             if (addrMessageBody.getIsCross() == (byte) 1) {
                 int getMessageChainId = addrMessageBody.getChainId();
-                return crossNetRecieveMessage(ipAddressList, NodeGroupManager.getInstance().getNodeGroupByChainId(getMessageChainId));
+                NodeGroup messageNodeGroup = NodeGroupManager.getInstance().getNodeGroupByChainId(getMessageChainId);
+                //可能本地还未同步到对应的Group，则丢弃这部分地址消息
+                if (null != messageNodeGroup) {
+                    return crossNetRecieveMessage(ipAddressList, NodeGroupManager.getInstance().getNodeGroupByChainId(getMessageChainId));
+                }
             }
             return commonNetRecieveMessage(ipAddressList, nodeGroup, node);
         }

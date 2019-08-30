@@ -37,7 +37,7 @@ public class NetworkConfig implements ModuleConfig {
 
     private int crossMaxOutCount;
 
-    private int corssMaxInSameIp;
+    private int crossMaxInSameIp;
     private String moonSeedIps;
     private List<String> moonSeedIpList;
 
@@ -161,12 +161,12 @@ public class NetworkConfig implements ModuleConfig {
         this.crossMaxOutCount = crossMaxOutCount;
     }
 
-    public int getCorssMaxInSameIp() {
-        return corssMaxInSameIp;
+    public int getCrossMaxInSameIp() {
+        return crossMaxInSameIp;
     }
 
-    public void setCorssMaxInSameIp(int corssMaxInSameIp) {
-        this.corssMaxInSameIp = corssMaxInSameIp;
+    public void setCrossMaxInSameIp(int crossMaxInSameIp) {
+        this.crossMaxInSameIp = crossMaxInSameIp;
     }
 
     public String getMoonSeedIps() {
