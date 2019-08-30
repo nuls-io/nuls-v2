@@ -1,6 +1,6 @@
 {
   "maxOutAmount":20,
-  "maxInNode":200,
+  "maxInAmount":200,
   "moduleCode":"cc",
   "crossCtxType":10,
   "mainNet":false

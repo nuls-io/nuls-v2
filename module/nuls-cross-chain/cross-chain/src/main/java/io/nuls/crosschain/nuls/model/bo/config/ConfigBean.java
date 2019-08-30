@@ -45,7 +45,7 @@ public class ConfigBean extends BaseNulsData {
     /**
      * 最大被链接数
      * */
-    private int maxInNode;
+    private int maxInAmount;
 
     /**
      * 跨链交易被打包多少块之后广播给其他链
@@ -131,12 +131,12 @@ public class ConfigBean extends BaseNulsData {
         this.maxOutAmount = maxOutAmount;
     }
 
-    public int getMaxInNode() {
-        return maxInNode;
+    public int getMaxInAmount() {
+        return maxInAmount;
     }
 
-    public void setMaxInNode(int maxInNode) {
-        this.maxInNode = maxInNode;
+    public void setMaxInAmount(int maxInAmount) {
+        this.maxInAmount = maxInAmount;
     }
 
     public int getMinSignature() {
@@ -185,7 +185,7 @@ public class ConfigBean extends BaseNulsData {
         stream.writeUint16(chainId);
         stream.writeUint16(minNodeAmount);
         stream.writeUint16(maxOutAmount);
-        stream.writeUint16(maxInNode);
+        stream.writeUint16(maxInAmount);
         stream.writeUint16(sendHeight);
         stream.writeUint16(byzantineRatio);
         stream.writeUint16(minSignature);
@@ -207,7 +207,7 @@ public class ConfigBean extends BaseNulsData {
         this.chainId = byteBuffer.readUint16();
         this.minNodeAmount = byteBuffer.readUint16();
         this.maxOutAmount = byteBuffer.readUint16();
-        this.maxInNode = byteBuffer.readUint16();
+        this.maxInAmount = byteBuffer.readUint16();
         this.sendHeight = byteBuffer.readUint16();
         this.byzantineRatio = byteBuffer.readUint16();
         this.minNodeAmount = byteBuffer.readUint16();

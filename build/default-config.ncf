@@ -107,8 +107,6 @@ connectTimeOut=30000
 #跨链节点链接的最小值
 minNodeAmount=4
 #跨链节点链接的最大值
-maxNodeAmount=10
-#跨链交易在本链内确认块数
 sendHeight=5
 #跨链交易拜占庭比例
 byzantineRatio=50
