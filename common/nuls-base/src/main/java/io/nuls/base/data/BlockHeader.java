@@ -196,9 +196,9 @@ public class BlockHeader extends BaseNulsData {
         this.blockSignature = scriptSign;
     }
 
-    public byte[] getPackingAddress(int chainID) {
+    public byte[] getPackingAddress(int chainId) {
         if (this.blockSignature != null && this.packingAddress == null) {
-            this.packingAddress = AddressTool.getAddress(blockSignature.getPublicKey(), chainID);
+            this.packingAddress = AddressTool.getAddress(blockSignature.getPublicKey(), chainId);
         }
         return packingAddress;
     }
@@ -234,7 +234,6 @@ public class BlockHeader extends BaseNulsData {
                 ", height=" + height +
                 ", txCount=" + txCount +
                 ", blockSignature=" + blockSignature +
-                //", extend=" + Arrays.toString(extend) +
                 ", size=" + size() +
                 ", packingAddress=" + (packingAddress == null ? packingAddress : AddressTool.getStringAddressByBytes(packingAddress)) +
                 '}';

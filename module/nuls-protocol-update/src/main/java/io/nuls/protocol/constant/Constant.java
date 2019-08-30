@@ -38,10 +38,6 @@ public interface Constant {
     /**
      * 存储每条链的配置信息
      */
-    String VERSION = "version";
-    /**
-     * 存储每条链的配置信息
-     */
     String PROTOCOL_CONFIG = "protocol_config_json";
     /**
      * 存储每条链的版本统计信息

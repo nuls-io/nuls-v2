@@ -26,6 +26,7 @@ import io.nuls.base.basic.ProtocolVersion;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.io.IoUtils;
+import io.nuls.core.log.Log;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.protocol.manager.ContextManager;
 import io.nuls.protocol.model.ChainParameters;
@@ -48,39 +49,41 @@ public class ConfigLoader {
 
     @Autowired
     private static ParametersStorageService service;
+    private static List<ProtocolVersion> versions;
+
+    static {
+        try {
+            versions = JSONUtils.json2list(IoUtils.read(PROTOCOL_CONFIG_FILE), ProtocolVersion.class);
+        } catch (Exception e) {
+            Log.error(e);
+            System.exit(1);
+        }
+    }
+
 
     /**
      * 加载配置文件
      *
-     * @throws Exception
      */
-    public static void load() throws Exception {
+    public static void load() {
         List<ChainParameters> list = service.getList();
         if (list == null || list.size() == 0) {
             loadDefault();
         } else {
             for (ChainParameters chainParameters : list) {
-                int chainId = chainParameters.getChainId();
-                String versionJson = service.getVersionJson(chainId);
-                List<ProtocolVersion> versions = JSONUtils.json2list(versionJson, ProtocolVersion.class);
                 ContextManager.init(chainParameters, versions);
             }
-
         }
     }
 
     /**
      * 加载默认配置文件
      *
-     * @throws Exception
      */
-    private static void loadDefault() throws Exception {
-        String versionJson = IoUtils.read(PROTOCOL_CONFIG_FILE);
-        List<ProtocolVersion> versions = JSONUtils.json2list(versionJson, ProtocolVersion.class);
+    private static void loadDefault() {
         int chainId = protocolConfig.getChainId();
         ContextManager.init(protocolConfig, versions);
         service.save(protocolConfig, chainId);
-        service.saveVersionJson(versionJson, chainId);
     }
 
 }
