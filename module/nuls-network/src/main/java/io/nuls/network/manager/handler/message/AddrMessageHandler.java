@@ -96,7 +96,9 @@ public class AddrMessageHandler extends BaseMessageHandler {
                 NodeGroup messageNodeGroup = NodeGroupManager.getInstance().getNodeGroupByChainId(getMessageChainId);
                 //可能本地还未同步到对应的Group，则丢弃这部分地址消息
                 if (null != messageNodeGroup) {
-                    return crossNetRecieveMessage(ipAddressList, NodeGroupManager.getInstance().getNodeGroupByChainId(getMessageChainId));
+                    return crossNetRecieveMessage(ipAddressList, messageNodeGroup);
+                }else{
+                    return NetworkEventResult.getResultSuccess();
                 }
             }
             return commonNetRecieveMessage(ipAddressList, nodeGroup, node);
