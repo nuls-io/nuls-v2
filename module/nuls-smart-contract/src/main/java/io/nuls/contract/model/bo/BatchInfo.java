@@ -29,10 +29,12 @@ import io.nuls.contract.enums.BatchInfoStatus;
 import io.nuls.contract.helper.ContractConflictChecker;
 import io.nuls.contract.manager.ContractTempBalanceManager;
 import io.nuls.contract.model.dto.ContractPackageDto;
+import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.core.model.StringUtils;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -124,6 +126,7 @@ public class BatchInfo {
      * 因区块GAS用尽，未处理的合约交易
      */
     private List<String> pendingTxHashList;
+    private Map<String, Future<ContractResult>> contractMap;
 
     public BatchInfo(long height) {
         this.txCounter = 0;
@@ -134,6 +137,7 @@ public class BatchInfo {
         this.status = BatchInfoStatus.STARTING;
         this.contractContainerMap = new LinkedHashMap<>();
         this.pendingTxHashList = new ArrayList<>();
+        this.contractMap = new ConcurrentHashMap<>();
     }
 
     public boolean hasBegan() {
@@ -254,6 +258,14 @@ public class BatchInfo {
         this.contractPackageDtoFuture = contractPackageDtoFuture;
     }
 
+    public Map<String, Future<ContractResult>> getContractMap() {
+        return contractMap;
+    }
+
+    public void setContractMap(Map<String, Future<ContractResult>> contractMap) {
+        this.contractMap = contractMap;
+    }
+
     public long getGasCostTotal() {
         return gasCostTotal;
     }
@@ -294,7 +306,25 @@ public class BatchInfo {
             boolean exceedTx = txTotal > ContractConstant.MAX_CONTRACT_TX_IN_BLOCK;
             boolean exceedGas = gasCostTotal > ContractConstant.MAX_GAS_COST_IN_BLOCK;
             if(exceedTx || exceedGas) {
-                addPendingTxHashList(txHash);
+                this.addPendingTxHashList(txHash);
+                // 中断线程
+                if(!pendingTxHashList.isEmpty()) {
+                    for(String hash : pendingTxHashList) {
+                        contractMap.remove(hash);
+                    }
+                    if(!contractMap.isEmpty()) {
+                        Set<Map.Entry<String, Future<ContractResult>>> entries = contractMap.entrySet();
+                        String hash;
+                        for(Map.Entry<String, Future<ContractResult>> entry : entries) {
+                            hash = entry.getKey();
+                            entry.getValue().cancel(true);
+                            this.addPendingTxHashList(hash);
+                            if(Log.isDebugEnabled()) {
+                                Log.debug("contract-tx-executor-pool put hash [{}]", hash);
+                            }
+                        }
+                    }
+                }
                 return false;
             } else {
                 return true;

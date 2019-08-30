@@ -37,7 +37,6 @@ import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractWrapperTransaction;
 import io.nuls.contract.model.dto.ContractPackageDto;
 import io.nuls.contract.model.txdata.ContractData;
-import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.contract.service.ContractCaller;
 import io.nuls.contract.service.ContractExecutor;
 import io.nuls.contract.util.Log;
@@ -62,14 +61,23 @@ import static io.nuls.core.constant.TxType.CALL_CONTRACT;
 @Component
 public class ContractCallerImpl implements ContractCaller {
 
-    private static final ExecutorService TX_EXECUTOR_SERVICE =
-            new ThreadPoolExecutor(
-                    1,
-                    1,
-                    10L,
-                    TimeUnit.SECONDS,
-                    new LinkedBlockingQueue<Runnable>(),
-                    new NulsThreadFactory("contract-tx-executor-pool"));
+    private static ExecutorService TX_EXECUTOR_SERVICE;
+    static {
+        int availableProcessors = Runtime.getRuntime().availableProcessors();
+        int threadCount = 4;
+        // 线程数最大4个，线程核心小于4时，使用线程核心数
+        if(availableProcessors < threadCount) {
+            threadCount = availableProcessors;
+        }
+        TX_EXECUTOR_SERVICE =
+                new ThreadPoolExecutor(
+                        threadCount,
+                        threadCount,
+                        10L,
+                        TimeUnit.SECONDS,
+                        new LinkedBlockingQueue<Runnable>(),
+                        new NulsThreadFactory("contract-tx-executor-pool"));
+    }
     private static final ExecutorService BATCH_END_SERVICE = Executors.newSingleThreadExecutor(new NulsThreadFactory("contract-batch-end-pool"));
 
     @Autowired
@@ -92,15 +100,18 @@ public class ContractCallerImpl implements ContractCaller {
             BlockHeader currentBlockHeader = batchInfo.getCurrentBlockHeader();
             long blockTime = currentBlockHeader.getTime();
             long lastestHeight = currentBlockHeader.getHeight() - 1;
-            //BlockHeader latestBlockHeader = BlockCall.getLatestBlockHeader(chainId);
             //if (Log.isDebugEnabled()) {
+            //    BlockHeader latestBlockHeader = BlockCall.getLatestBlockHeader(chainId);
             //    Log.debug("Current block header height is {}", currentBlockHeader.getHeight());
             //    Log.debug("Latest block header height is {}", latestBlockHeader.getHeight());
             //}
             ContractTxCallable txCallable = new ContractTxCallable(chainId, blockTime, batchExecutor, contract, tx, lastestHeight, preStateRoot, checker, container);
-            //String hash = tx.getHash().toHex();
+            String hash = tx.getHash().toHex();
             Future<ContractResult> contractResultFuture = TX_EXECUTOR_SERVICE.submit(txCallable);
-            //batchInfo.getContractMap().put(hash, contractResultFuture);
+            batchInfo.getContractMap().put(hash, contractResultFuture);
+            if(Log.isDebugEnabled()) {
+                Log.debug("contract-tx-executor-pool put hash [{}]", hash);
+            }
             container.getFutureList().add(contractResultFuture);
 
             return getSuccess();

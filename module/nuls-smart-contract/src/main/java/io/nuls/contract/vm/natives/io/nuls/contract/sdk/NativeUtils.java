@@ -35,6 +35,7 @@ import io.nuls.contract.model.bo.CmdRegister;
 import io.nuls.contract.model.bo.ContractBalance;
 import io.nuls.contract.model.dto.BlockHeaderDto;
 import io.nuls.contract.sdk.Event;
+import io.nuls.contract.sdk.event.DebugEvent;
 import io.nuls.contract.vm.*;
 import io.nuls.contract.vm.code.ClassCode;
 import io.nuls.contract.vm.code.FieldCode;
@@ -67,6 +68,7 @@ import static io.nuls.contract.vm.util.Utils.hashMapInitialCapacity;
 public class NativeUtils {
 
     public static final String TYPE = "io/nuls/contract/sdk/Utils";
+    public static final String DEBUG_EVENT = "io/nuls/contract/sdk/event/DebugEvent";
 
     public static Result nativeRun(MethodCode methodCode, MethodArgs methodArgs, Frame frame, boolean check) {
         switch (methodCode.fullName) {
@@ -180,7 +182,14 @@ public class NativeUtils {
         eventJson.setEvent(classCode.simpleName);
         eventJson.setPayload(jsonMap);
         String json = JsonUtils.toJson(eventJson);
-        frame.vm.getEvents().add(json);
+        if(DEBUG_EVENT.equals(classCode.name)) {
+            List<String> debugEvents = frame.vm.getDebugEvents();
+            if(debugEvents.size() < 10) {
+                debugEvents.add(json);
+            }
+        } else {
+            frame.vm.getEvents().add(json);
+        }
         Result result = NativeMethod.result(methodCode, null, frame);
         return result;
     }

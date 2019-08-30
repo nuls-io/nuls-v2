@@ -187,6 +187,7 @@ public class ContractTxHelper {
                 Result result = Result.getFailed(DATA_ERROR);
                 result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
                 result = checkVmResultAndReturn(programResult.getErrorMessage(), result);
+                addDebugEvents(programResult.getDebugEvents(), result);
                 return result;
             } else {
                 // 其他合法性都通过后，再验证Gas
@@ -198,6 +199,7 @@ public class ContractTxHelper {
                         Log.error(programResult.getStackTrace());
                         Result result = Result.getFailed(DATA_ERROR);
                         result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
+                        addDebugEvents(programResult.getDebugEvents(), result);
                         return result;
                     }
                 }
@@ -389,6 +391,7 @@ public class ContractTxHelper {
                 Result result = Result.getFailed(DATA_ERROR);
                 result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
                 result = checkVmResultAndReturn(programResult.getErrorMessage(), result);
+                addDebugEvents(programResult.getDebugEvents(), result);
                 return result;
             } else {
                 // 其他合法性都通过后，再验证Gas
@@ -400,6 +403,7 @@ public class ContractTxHelper {
                         Log.error(programResult.getStackTrace());
                         Result result = Result.getFailed(DATA_ERROR);
                         result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
+                        addDebugEvents(programResult.getDebugEvents(), result);
                         return result;
                     }
                 }

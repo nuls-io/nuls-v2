@@ -443,10 +443,12 @@ public class TxServiceImpl implements TxService {
             if (!rs) {
                 throw new NulsException(TxErrorCode.COINFROM_HAS_DUPLICATE_COIN);
             }
-            //用户发出的交易不允许from中有合约地址,如果from包含合约地址,那么这个交易一定是系统发出的,系统发出的交易不会走基础验证
+            //用户发出的交易（普通注销节点交易除外）不允许from中有合约地址,如果from包含合约地址,那么（普通注销节点交易除外）这个交易一定是系统发出的,系统发出的交易不会走基础验证
             if (TxUtil.isLegalContractAddress(coinFrom.getAddress(), chain)) {
-                chain.getLogger().error("Tx from cannot have contract address ");
-                throw new NulsException(TxErrorCode.TX_FROM_CANNOT_HAS_CONTRACT_ADDRESS);
+                if (type != TxType.STOP_AGENT) {
+                    chain.getLogger().error("Tx from cannot have contract address ");
+                    throw new NulsException(TxErrorCode.TX_FROM_CANNOT_HAS_CONTRACT_ADDRESS);
+                }
             }
         }
         if (null != existMultiSignAddress) {
