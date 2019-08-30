@@ -41,9 +41,6 @@ public class NulsChainConfig implements ModuleConfig {
     private String nulsAssetInitNumberMax;
     private String nulsAssetSymbol;
     private String addressPrefix;
-    private String nulsFeeMainNetRate = "0.6";
-    private String nulsFeeOtherNetRate = "0.4";
-
     private int nulsFeeMainNetPercent = 60;
     private int nulsFeeOtherNetPercent = 40;
     private String blackHolePublicKey;
@@ -259,19 +256,4 @@ public class NulsChainConfig implements ModuleConfig {
         this.chainNameMax = chainNameMax;
     }
 
-    public String getNulsFeeMainNetRate() {
-        return nulsFeeMainNetRate;
-    }
-
-    public void setNulsFeeMainNetRate(String nulsFeeMainNetRate) {
-        this.nulsFeeMainNetRate = nulsFeeMainNetRate;
-    }
-
-    public String getNulsFeeOtherNetRate() {
-        return nulsFeeOtherNetRate;
-    }
-
-    public void setNulsFeeOtherNetRate(String nulsFeeOtherNetRate) {
-        this.nulsFeeOtherNetRate = nulsFeeOtherNetRate;
-    }
 }
