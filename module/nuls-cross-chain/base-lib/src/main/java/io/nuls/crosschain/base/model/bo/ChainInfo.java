@@ -7,6 +7,7 @@ import io.nuls.core.parse.SerializeUtils;
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
 import io.nuls.core.rpc.model.TypeDescriptor;
+import io.nuls.core.rpc.util.SerializeUtil;
 import io.nuls.crosschain.base.constant.CrossChainConstant;
 import io.nuls.crosschain.base.message.base.BaseMessage;
 

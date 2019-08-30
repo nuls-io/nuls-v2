@@ -130,7 +130,7 @@ public class TxValidator {
         }
         //比较from和to相同资产的值是否相等
         for(Map.Entry<String, BigInteger> entry : mapFrom.entrySet()){
-            if (entry.getValue().compareTo(mapTo.get(entry.getKey())) == -1) {
+            if(entry.getValue().compareTo(mapTo.get(entry.getKey())) == -1){
                 return Result.getFailed(AccountErrorCode.COINFROM_UNDERPAYMENT);
             }
         }

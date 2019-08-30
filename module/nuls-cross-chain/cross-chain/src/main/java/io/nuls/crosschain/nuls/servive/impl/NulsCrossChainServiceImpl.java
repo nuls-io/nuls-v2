@@ -41,8 +41,7 @@ import io.nuls.crosschain.nuls.utils.validator.CrossTxValidator;
 import java.io.IOException;
 import java.util.*;
 
-import static io.nuls.crosschain.nuls.constant.NulsCrossChainConstant.CHAIN_ID_MIN;
-import static io.nuls.crosschain.nuls.constant.NulsCrossChainConstant.INIT_CAPACITY_8;
+import static io.nuls.crosschain.nuls.constant.NulsCrossChainConstant.*;
 import static io.nuls.crosschain.nuls.constant.NulsCrossChainErrorCode.*;
 import static io.nuls.crosschain.nuls.constant.ParamConstant.*;
 

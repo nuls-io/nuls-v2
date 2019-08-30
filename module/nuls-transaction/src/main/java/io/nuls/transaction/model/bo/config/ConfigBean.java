@@ -53,9 +53,7 @@ public class ConfigBean extends BaseNulsData {
     private int moduleVerifyPercent;
     /** 打包获取交易给RPC传输到共识的预留时间,超时则需要处理交易还原待打包队列*/
     private int packageRpcReserveTime;
-    /**
-     * 接收网络新交易队列的最大容量 未处理的交易队列
-     **/
+    /** 接收网络新交易队列的最大容量 未处理的交易队列**/
     private long txUnverifiedQueueSize;
     /** 孤儿交易生命时间,超过会被清理**/
     private int orphanTtl;

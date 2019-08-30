@@ -89,7 +89,7 @@ public class NetTxProcessTask implements Runnable {
                 Map<String, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
                 Iterator<TransactionNetPO> it = txNetList.iterator();
                 int packableTxMapDataSize = 0;
-                for (Transaction tx : chain.getPackableTxMap().values()) {
+                for(Transaction tx : chain.getPackableTxMap().values()){
                     packableTxMapDataSize += tx.size();
                 }
                 while (it.hasNext()) {

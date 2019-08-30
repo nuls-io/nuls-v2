@@ -35,14 +35,12 @@ import io.nuls.crosschain.nuls.rpc.call.AccountCall;
 import io.nuls.crosschain.nuls.rpc.call.ConsensusCall;
 import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
 import io.nuls.crosschain.nuls.rpc.call.TransactionCall;
-import io.nuls.crosschain.nuls.srorage.ConvertCtxService;
-import io.nuls.crosschain.nuls.srorage.ConvertHashService;
-import io.nuls.crosschain.nuls.srorage.CtxStatusService;
-import io.nuls.crosschain.nuls.srorage.SendHeightService;
+import io.nuls.crosschain.nuls.srorage.*;
 import io.nuls.crosschain.nuls.utils.manager.ChainManager;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 消息工具类
@@ -376,7 +374,7 @@ public class MessageUtil {
                         if(signByzantineInChain(chain, ctx, transactionSignature, packAddressList)){
                             ctxStatusPO.setStatus(TxStatusEnum.CONFIRMED.getStatus());
                         }
-                        if (ctx.getType() == config.getCrossCtxType() && chain.getChainId() == AddressTool.getChainIdByAddress(ctx.getCoinDataInstance().getFrom().get(0).getAddress())) {
+                        if(ctx.getType() == config.getCrossCtxType() && chain.getChainId() == AddressTool.getChainIdByAddress(ctx.getCoinDataInstance().getFrom().get(0).getAddress())){
                             chain.getSignedCtxMap().put(nativeHash, p2PHKSignature);
                         }
                     }

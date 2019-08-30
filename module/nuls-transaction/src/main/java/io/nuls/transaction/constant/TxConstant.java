@@ -34,9 +34,7 @@ public interface TxConstant {
 
     /** 未确认交易清理机制task,初始延迟值 */
     int TX_CLEAN_TASK_INITIALDELAY = 10 * 60;
-    /**
-     * 未确认交易清理机制task, 运行周期间隔(秒)
-     */
+    /** 未确认交易清理机制task, 运行周期间隔(秒) */
     int TX_CLEAN_TASK_PERIOD = 3 * 60;
 
     /** 打包时孤儿交易返回待打包队列重新处理的最大次数，超过该次数则不再处理该孤儿交易(丢弃) */

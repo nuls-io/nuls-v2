@@ -25,8 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.nuls.api.constant.ApiConstant.DISABLE;
-import static io.nuls.api.constant.ApiConstant.ENABLE;
+import static io.nuls.api.constant.ApiConstant.*;
 
 public class WalletRpcHandler {
 
@@ -556,11 +555,11 @@ public class WalletRpcHandler {
 
     public static Result getNetworkInfo(int chainId) {
         try {
-            Map<String, Object> params = new HashMap<>();
+            Map<String,Object> params = new HashMap<>();
             params.put("chainId", chainId);
-            Map<String, Object> map = (Map<String, Object>) RpcCall.request(ModuleE.NW.abbr, CommandConstant.GET_NETWORK_GROUP, params);
+            Map<String,Object> map = (Map<String, Object>) RpcCall.request(ModuleE.NW.abbr, CommandConstant.GET_NETWORK_GROUP, params);
             return Result.getSuccess(null).setData(map);
-        } catch (NulsException e) {
+        }catch (NulsException e) {
             return Result.getFailed(e.getErrorCode());
         }
     }
