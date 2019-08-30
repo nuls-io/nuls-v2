@@ -28,14 +28,11 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.enums.CmdRegisterMode;
 import io.nuls.contract.enums.CmdRegisterReturnType;
-import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.helper.ContractNewTxFromOtherModuleHandler;
 import io.nuls.contract.manager.CmdRegisterManager;
 import io.nuls.contract.model.bo.CmdRegister;
-import io.nuls.contract.model.bo.ContractBalance;
 import io.nuls.contract.model.dto.BlockHeaderDto;
 import io.nuls.contract.sdk.Event;
-import io.nuls.contract.sdk.event.DebugEvent;
 import io.nuls.contract.vm.*;
 import io.nuls.contract.vm.code.ClassCode;
 import io.nuls.contract.vm.code.FieldCode;
@@ -175,6 +172,14 @@ public class NativeUtils {
         ObjectRef objectRef = (ObjectRef) methodArgs.invokeArgs[0];
         //String str = frame.heap.runToString(objectRef);
         ClassCode classCode = frame.methodArea.loadClass(objectRef.getVariableType().getType());
+        boolean isDebugEvent = DEBUG_EVENT.equals(classCode.name);
+        List<String> debugEvents = frame.vm.getDebugEvents();
+        if(isDebugEvent) {
+            if(debugEvents.size() > 10) {
+                Result result = NativeMethod.result(methodCode, null, frame);
+                return result;
+            }
+        }
         Map<String, Object> jsonMap = (Map<String, Object>) toJson(objectRef, frame.heap, frame.methodArea);
         EventJson eventJson = new EventJson();
         eventJson.setContractAddress(frame.vm.getProgramInvoke().getAddress());
@@ -182,11 +187,8 @@ public class NativeUtils {
         eventJson.setEvent(classCode.simpleName);
         eventJson.setPayload(jsonMap);
         String json = JsonUtils.toJson(eventJson);
-        if(DEBUG_EVENT.equals(classCode.name)) {
-            List<String> debugEvents = frame.vm.getDebugEvents();
-            if(debugEvents.size() < 10) {
-                debugEvents.add(json);
-            }
+        if(isDebugEvent) {
+            debugEvents.add(json);
         } else {
             frame.vm.getEvents().add(json);
         }
@@ -562,8 +564,6 @@ public class NativeUtils {
         CmdRegisterMode cmdRegisterMode = cmdRegister.getCmdRegisterMode();
         if (CmdRegisterMode.NEW_TX.equals(cmdRegisterMode)) {
             BlockHeaderDto blockHeaderDto = frame.vm.getBlockHeader(programInvoke.getNumber() + 1);
-            ContractHelper contractHelper = SpringLiteContext.getBean(ContractHelper.class);
-            ContractBalance balance = contractHelper.getBalance(currentChainId, programInvoke.getContractAddress());
             // 使用虚拟机内部维护的合约余额
             ProgramAccount account = frame.vm.getProgramExecutor().getAccount(contractAddressBytes);
             argsMap.put("contractBalance", account.getBalance().toString());
