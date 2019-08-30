@@ -41,7 +41,7 @@ import static io.nuls.protocol.utils.LoggerUtil.COMMON_LOG;
  */
 public class ContextManager {
 
-    public static List<Integer> chainIds = new CopyOnWriteArrayList<>();
+    static List<Integer> chainIds = new CopyOnWriteArrayList<>();
 
     private static Map<Integer, ProtocolContext> contextMap = new ConcurrentHashMap<>();
 
@@ -57,7 +57,6 @@ public class ContextManager {
         protocolContext.setParameters(parameter);
         versions.sort(ProtocolVersion.COMPARATOR);
         protocolContext.setLocalVersionList(versions);
-        protocolContext.setCurrentProtocolVersion(versions.get(0));
         protocolContext.init();
         LoggerUtil.init(chainId);
         COMMON_LOG.info("new protocolContext add! chainId-" + chainId);

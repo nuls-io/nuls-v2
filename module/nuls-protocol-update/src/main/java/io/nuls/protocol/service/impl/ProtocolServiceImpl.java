@@ -135,19 +135,13 @@ public class ProtocolServiceImpl implements ProtocolService {
 
         Map<ProtocolVersion, Integer> proportionMap = context.getProportionMap();
         ProtocolVersion genesisProtocolVersion = new ProtocolVersion();
-        if (!validate(data, context)) {
-            logger.error("invalid block header-0");
-            logger.error("currentProtocolVersion-" + context.getCurrentProtocolVersion());
-            logger.error("data-" + data);
-            return false;
-        } else {
-            genesisProtocolVersion.setVersion(data.getBlockVersion());
-            genesisProtocolVersion.setEffectiveRatio(data.getEffectiveRatio());
-            genesisProtocolVersion.setContinuousIntervalCount(data.getContinuousIntervalCount());
-            logger.debug("save block, height-0, data-" + data);
-            //计算统计信息
-            proportionMap.put(genesisProtocolVersion, 1);
-        }
+        genesisProtocolVersion.setVersion(data.getBlockVersion());
+        genesisProtocolVersion.setEffectiveRatio(data.getEffectiveRatio());
+        genesisProtocolVersion.setContinuousIntervalCount(data.getContinuousIntervalCount());
+        logger.debug("save block, height-0, data-" + data);
+        //计算统计信息
+        proportionMap.put(genesisProtocolVersion, 1);
+
         //初始化一条新协议统计信息,与区块高度绑定,并存到数据库
         StatisticsInfo statisticsInfo = new StatisticsInfo();
         statisticsInfo.setHeight(0);
@@ -161,7 +155,6 @@ public class ProtocolServiceImpl implements ProtocolService {
         context.setCurrentProtocolVersion(genesisProtocolVersion);
         context.setCurrentProtocolVersionCount(statisticsInfo.getCount());
         protocolService.saveCurrentProtocolVersionCount(chainId, context.getCurrentProtocolVersionCount());
-        context.getProtocolVersionHistory().push(genesisProtocolVersion);
         VersionChangeNotifier.notify(chainId, genesisProtocolVersion.getVersion());
         //保存新协议
         protocolService.save(chainId, PoUtil.getProtocolVersionPo(genesisProtocolVersion, 0, 0));

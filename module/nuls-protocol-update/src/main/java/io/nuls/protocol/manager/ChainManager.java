@@ -24,7 +24,6 @@
  */
 package io.nuls.protocol.manager;
 
-import io.nuls.base.basic.ProtocolVersion;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.logback.NulsLogger;
@@ -49,7 +48,7 @@ public class ChainManager {
     @Autowired
     private ProtocolService protocolService;
 
-    public void initChain() throws Exception {
+    public void initChain() {
         //加载配置
         ConfigLoader.load();
         ContextManager.chainIds.forEach(this::initTable);
@@ -65,9 +64,8 @@ public class ChainManager {
             //服务初始化
             protocolService.init(chainId);
             ProtocolContext context = ContextManager.getContext(chainId);
-            List<ProtocolVersion> list = context.getLocalVersionList();
             NulsLogger logger = context.getLogger();
-            short localVersion = list.get(list.size() - 1).getVersion();
+            short localVersion = context.getLocalProtocolVersion().getVersion();
             short version = context.getCurrentProtocolVersion().getVersion();
             if (version > localVersion) {
                 logger.error("localVersion-" + localVersion);

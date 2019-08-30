@@ -27,7 +27,10 @@ import io.nuls.base.protocol.Protocol;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.protocol.model.po.StatisticsInfo;
 
-import java.util.*;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 每个链ID对应一个{@link ProtocolContext},维护一些链运行期间的信息,并负责链的初始化、启动、停止、销毁操作
@@ -113,15 +116,6 @@ public class ProtocolContext {
 
     public void setProtocolMap(Map<Short, List<Map.Entry<String, Protocol>>> protocolMap) {
         this.protocolMap = protocolMap;
-    }
-
-    public ProtocolVersion getProtocolVersion(int version) {
-        for (ProtocolVersion protocolVersion : localVersionList) {
-            if (protocolVersion.getVersion() == version) {
-                return protocolVersion;
-            }
-        }
-        return null;
     }
 
     public int getChainId() {
@@ -215,12 +209,6 @@ public class ProtocolContext {
     public void init() {
         protocolMap = new HashMap<>();
         proportionMap = new HashMap<>();
-        lastValidStatisticsInfo = new StatisticsInfo();
-        lastValidStatisticsInfo.setCount((short) 0);
-        lastValidStatisticsInfo.setHeight(0);
-        lastValidStatisticsInfo.setProtocolVersion(currentProtocolVersion);
-        protocolVersionHistory = new ArrayDeque<>();
-        protocolVersionHistory.push(currentProtocolVersion);
         localProtocolVersion = localVersionList.get(localVersionList.size() - 1);
     }
 
