@@ -28,7 +28,7 @@ public class Chain {
     /**
      * 本节点已签名的跨链交易及签名
      * Cross-Chain Transaction and Signature of Signed Node
-     */
+     * */
     private Map<NulsHash, P2PHKSignature> signedCtxMap;
 
     /**

@@ -38,9 +38,6 @@ public interface CommandConstant {
      * 完整的区块消息
      */
     String BLOCK_MESSAGE = "block";
-    String TEST_1 = "test1";
-    String TEST_2 = "test2";
-    String TEST_3 = "test3";
     /**
      * 根据区块高度获取区块
      */

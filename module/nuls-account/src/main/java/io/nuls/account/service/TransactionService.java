@@ -53,8 +53,6 @@ public interface TransactionService {
      */
     Result transferTxValidate(Chain chain, Transaction tx) throws NulsException;
 
-    Result transferTxValidateV2(Chain chain, Transaction tx) throws NulsException;
-
     /**
      * 多地址转账
      *

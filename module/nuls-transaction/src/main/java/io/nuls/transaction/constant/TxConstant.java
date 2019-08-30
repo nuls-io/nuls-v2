@@ -62,9 +62,7 @@ public interface TxConstant {
 
     int CACHED_SIZE = 50000;
 
-    /**
-     * 待打包队列存储交易的map 所有交易size 最大限制 (B)
-     */
+    /** 待打包队列存储交易的map 所有交易size 最大限制 (B)*/
     int PACKABLE_TX_MAP_STRESS_DATA_SIZE = 150000 * 300;
     int PACKABLE_TX_MAP_HEAVY_DATA_SIZE = 200000 * 300;
     int PACKABLE_TX_MAP_MAX_DATA_SIZE = 250000 * 300;

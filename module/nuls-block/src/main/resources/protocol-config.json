@@ -43,38 +43,9 @@
         "name": "io.nuls.block.message.TxGroupMessage",
         "protocolCmd": "txs",
         "handlers": "TxGroupHandlerV1"
-      },
-      {
-        "name": "io.nuls.block.message.TestMessageV1",
-        "protocolCmd": "test1",
-        "handlers": "TestHandlerV1"
-      },
-      {
-        "name": "io.nuls.block.message.TestMessageV2",
-        "protocolCmd": "test2",
-        "handlers": "TestHandlerV2"
       }
     ],
     "invalidTxs": "",
     "invalidMsgs": ""
-  },
-  {
-    "version": "2",
-    "extend": "1",
-    "validTxs": [],
-    "validMsgs": [
-      {
-        "name": "io.nuls.block.message.TestMessageV2",
-        "protocolCmd": "test2",
-        "handlers": "TestHandlerV2_2"
-      },
-      {
-        "name": "io.nuls.block.message.TestMessageV3",
-        "protocolCmd": "test3",
-        "handlers": "TestHandlerV3"
-      }
-    ],
-    "invalidTxs": "",
-    "invalidMsgs": "io.nuls.block.message.TestMessageV1"
   }
 ]
