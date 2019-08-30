@@ -363,12 +363,12 @@ public class MessageManager extends BaseManager {
      * @return
      */
     public NetworkEventResult broadcastToNodes(byte[] message, String cmd, List<Node> nodes, boolean asyn, int percent) {
-        if (nodes.size() > NetworkConstant.MIN_PEER_NUMBER && percent < NetworkConstant.FULL_BROADCAST_PERCENT) {
+        if (nodes.size() > NetworkConstant.BROADCAST_MIN_PEER_NUMBER && percent < NetworkConstant.FULL_BROADCAST_PERCENT) {
             Collections.shuffle(nodes);
             double d = BigDecimal.valueOf(percent).divide(BigDecimal.valueOf(NetworkConstant.FULL_BROADCAST_PERCENT), 2, RoundingMode.HALF_DOWN).doubleValue();
             int toIndex = (int) (nodes.size() * d);
-            if (toIndex < NetworkConstant.MIN_PEER_NUMBER) {
-                toIndex = NetworkConstant.MIN_PEER_NUMBER;
+            if (toIndex < NetworkConstant.BROADCAST_MIN_PEER_NUMBER) {
+                toIndex = NetworkConstant.BROADCAST_MIN_PEER_NUMBER;
             }
             nodes = nodes.subList(0, toIndex);
         }

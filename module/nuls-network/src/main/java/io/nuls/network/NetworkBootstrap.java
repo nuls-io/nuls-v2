@@ -29,6 +29,7 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.log.Log;
+import io.nuls.core.model.StringUtils;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.model.ModuleE;
@@ -95,10 +96,18 @@ public class NetworkBootstrap extends RpcModule {
      */
     private void jsonCfgInit() throws Exception {
         try {
-            String seedIp = networkConfig.getSelfSeedIps();
+            String seedIps = networkConfig.getSelfSeedIps();
             List<String> ipList = new ArrayList<>();
-            Collections.addAll(ipList, seedIp.split(NetworkConstant.COMMA));
-            networkConfig.setSeedIpList(ipList);
+            if (StringUtils.isNotBlank(seedIps)) {
+                String[] seedIpsArray = seedIps.split(NetworkConstant.COMMA);
+                for (String seedIp : seedIpsArray) {
+                    seedIp = IpUtil.changeHostToIpStr(seedIp);
+                    if (null != seedIp) {
+                        ipList.add(seedIp);
+                    }
+                }
+                networkConfig.setSeedIpList(ipList);
+            }
             if (networkConfig.getMainChainId() == networkConfig.getChainId()) {
                 networkConfig.setMoonNode(true);
             } else {

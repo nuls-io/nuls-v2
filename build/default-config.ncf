@@ -36,7 +36,7 @@ selfSeedIps=127.0.0.1:18001
 #主网的跨链种子连接节点
 moonSeedIps=127.0.0.1:18002
 #最大入网连接数
-maxInCount=100
+maxInCount=300
 #最大出网连接数
 maxOutCount=20
 
@@ -107,17 +107,15 @@ connectTimeOut=30000
 #跨链节点链接的最小值
 minNodeAmount=4
 #跨链节点链接的最大值
-maxNodeAmount=10
-#跨链交易在本链内确认块数
-sendHeight=5
+sendHeight=6
 #跨链交易拜占庭比例
-byzantineRatio=50
+byzantineRatio=66
 #主网跨链种子节点列表
 crossSeedIps=39.98.226.51:18002,47.244.186.65:18002,47.254.234.223:18002,47.74.86.85:18002
 #主网验证人列表
 verifiers=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
 #主网签名拜占庭比列
-mainByzantineRatio=50
+mainByzantineRatio=66
 #主网最大签名数
 maxSignatureCount=100
 

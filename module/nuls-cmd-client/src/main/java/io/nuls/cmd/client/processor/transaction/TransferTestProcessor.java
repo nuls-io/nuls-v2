@@ -73,11 +73,13 @@ public class TransferTestProcessor extends TransactionBaseProcessor implements C
         Integer method = Integer.parseInt(args[1]);
         String address1 = args[2];
         String address2 = null;
+        String amount = null;
         if(method == 2) {
             address2 = args[3];
+            amount = args[4];
         }
 
-        Result<String> result = transferService.transferTest(method, address1, address2);
+        Result<String> result = transferService.transferTest(method, address1, address2,amount);
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }
