@@ -9,6 +9,13 @@ import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 
 import java.util.Map;
 
+/**
+ * RPC调用工具类
+ *
+ * @author captain
+ * @version 1.0
+ * @date 2019/8/29 10:43
+ */
 public class RpcCall {
     public static Object request(String moduleCode, String cmd, Map params) throws NulsException {
         return request(moduleCode, cmd, params, null);

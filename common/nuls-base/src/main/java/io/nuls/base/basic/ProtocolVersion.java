@@ -97,7 +97,7 @@ public class ProtocolVersion extends BaseNulsData {
 
     @Override
     public String toString() {
-        return "ProtocolVersion{" +
+        return "{" +
                 "version=" + version +
                 ", effectiveRatio=" + effectiveRatio +
                 ", continuousIntervalCount=" + continuousIntervalCount +

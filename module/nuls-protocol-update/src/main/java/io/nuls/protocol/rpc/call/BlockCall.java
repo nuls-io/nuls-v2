@@ -30,6 +30,7 @@ import io.nuls.base.data.BlockHeader;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.util.RpcCall;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,8 +48,8 @@ public class BlockCall {
             Map<String, Object> params = new HashMap<>(4);
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put(Constants.CHAIN_ID, chainId);
-            Map resultMap = (Map) CallHelper.request(ModuleE.BL.abbr, "latestHeight", params);
-            return Long.valueOf(resultMap.get("value").toString());
+            Map resultMap = (Map) RpcCall.request(ModuleE.BL.abbr, "latestHeight", params);
+            return Long.parseLong(resultMap.get("value").toString());
         } catch (Exception e) {
             throw new NulsException(e);
         }
@@ -61,7 +62,7 @@ public class BlockCall {
             params.put(Constants.CHAIN_ID, chainId);
             params.put("interval", interval);
 
-            List<String> blockHeaderList = (List) CallHelper.request(ModuleE.BL.abbr, "getBlockHeadersForProtocol", params);
+            List<String> blockHeaderList = (List) RpcCall.request(ModuleE.BL.abbr, "getBlockHeadersForProtocol", params);
             if (blockHeaderList == null) {
                 return List.of();
             }

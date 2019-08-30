@@ -20,32 +20,18 @@
 
 package io.nuls.protocol.constant;
 
-
+import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.rpc.model.ModuleE;
 
 /**
- * todo 错误码细化
  * 协议升级模块的错误信息表
  *
  * @author captain
  * @version 1.0
  * @date 18-11-20 上午11:01
  */
-public interface ProtocolErrorCode {
-    /**
-     * RPC请求成功
-     */
-    ErrorCode SUCCESS = ErrorCode.init("10000");
-    /**
-     * RPC请求参数错误
-     */
-    ErrorCode PARAMETER_ERROR = ErrorCode.init("10001");
-    /**
-     * 未知错误
-     */
-    ErrorCode UNKOWN_ERROR = ErrorCode.init("10002");
-    /**
-     * 数据序列化错误
-     */
-    ErrorCode DATA_ERROR = ErrorCode.init("10003");
+public interface ProtocolErrorCode extends CommonCodeConstanst {
+    ErrorCode SAVE_ERROR = ErrorCode.init(ModuleE.PU.getPrefix() + "_0001");
+    ErrorCode ROLLBACK_ERROR = ErrorCode.init(ModuleE.PU.getPrefix() + "_0002");
 }

@@ -120,6 +120,7 @@ public class AccountBootstrap extends RpcModule {
         }
         if (ModuleE.NW.abbr.equals(module.getName())) {
             RegisterHelper.registerMsg(ProtocolGroupManager.getOneProtocol());
+            LoggerUtil.LOG.info("register msg ...");
         }
         if (ModuleE.PU.abbr.equals(module.getName())) {
             //注册账户模块相关交易

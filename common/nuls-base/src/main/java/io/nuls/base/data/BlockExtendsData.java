@@ -246,7 +246,7 @@ public class BlockExtendsData extends BaseNulsData {
 
     @Override
     public String toString() {
-        return "BlockExtendsData{mainVersion=" + mainVersion +
+        return "{mainVersion=" + mainVersion +
                 ", blockVersion=" + blockVersion +
                 ", effectiveRatio=" + effectiveRatio +
                 ", continuousIntervalCount=" + continuousIntervalCount +
