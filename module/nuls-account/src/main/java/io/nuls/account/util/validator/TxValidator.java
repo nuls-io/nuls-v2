@@ -119,15 +119,11 @@ public class TxValidator {
             if (!TxUtil.isChainAssetExist(chain, coinFrom)) {
                 String key = coinFrom.getAssetsChainId() + "-" + coinFrom.getAssetsId();
                 BigInteger amount = mapFrom.get(key);
-                if (amount.compareTo(new BigInteger("10000000000")) < 0) {
-                    return Result.getFailed(AccountErrorCode.INPUT_TOO_SMALL);
-                }
-                if (null != amount) {
-                    amount = amount.add(coinFrom.getAmount());
-                } else {
-                    amount = coinFrom.getAmount();
-                }
+                amount = amount.add(coinFrom.getAmount());
                 mapFrom.put(key, amount);
+            }
+            if (coinFrom.getAmount().compareTo(new BigInteger("10000000000")) < 0) {
+                return Result.getFailed(AccountErrorCode.INPUT_TOO_SMALL);
             }
         }
         //to中资产id-资产链id作为key，存一个资产的金额总和
@@ -174,21 +170,21 @@ public class TxValidator {
         }
         //to中资产id-资产链id作为key，存一个资产的金额总和
         Map<String, BigInteger> mapTo = new HashMap<>(AccountConstant.INIT_CAPACITY_8);
-        for (CoinTo coinTO : coinData.getTo()) {
-            if (!TxUtil.isChainAssetExist(chain, coinTO)) {
-                String key = coinTO.getAssetsChainId() + "-" + coinTO.getAssetsId();
+        for (CoinTo coinTo : coinData.getTo()) {
+            if (!TxUtil.isChainAssetExist(chain, coinTo)) {
+                String key = coinTo.getAssetsChainId() + "-" + coinTo.getAssetsId();
                 BigInteger amount = mapTo.get(key);
                 if(null != amount) {
-                    amount = amount.add(coinTO.getAmount());
+                    amount = amount.add(coinTo.getAmount());
                 }else{
-                    amount = coinTO.getAmount();
+                    amount = coinTo.getAmount();
                 }
                 mapTo.put(key, amount);
             }
         }
         //比较from和to相同资产的值是否相等
         for(Map.Entry<String, BigInteger> entry : mapFrom.entrySet()){
-            if(entry.getValue().compareTo(mapTo.get(entry.getKey())) == -1){
+            if (entry.getValue().compareTo(mapTo.get(entry.getKey())) < 0) {
                 return Result.getFailed(AccountErrorCode.COINFROM_UNDERPAYMENT);
             }
         }
