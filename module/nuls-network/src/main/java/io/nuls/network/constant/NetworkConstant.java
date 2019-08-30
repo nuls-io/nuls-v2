@@ -73,9 +73,9 @@ public interface NetworkConstant {
      */
     int FULL_BROADCAST_PERCENT = 100;
     /**
-     * 最少的PEER数量，小于等于这个值，将取消比例广播
+     * 最少的PEER数量，小于等于这个值，将取消比例广播,按100%节点广播
      */
-    int MIN_PEER_NUMBER = 7;
+    int BROADCAST_MIN_PEER_NUMBER = 7;
     /**
      * ========================================
      * --------[RPC CMD] -------

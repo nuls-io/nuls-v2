@@ -31,13 +31,9 @@ public interface CommandConstant {
 
     //普通服务对应的RPC命令
     /**
-     * 获取主网协议版本号
+     * 获取协议版本
      */
-    String GET_MAIN_VERSION = "getMainVersion";
-    /**
-     * 获取本地协议版本号
-     */
-    String GET_BLOCK_VERSION = "getBlockVersion";
+    String GET_VERSION = "getVersion";
     /**
      * 验证新区块协议版本号
      */

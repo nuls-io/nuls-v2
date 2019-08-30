@@ -374,6 +374,9 @@ public class MessageUtil {
                         if(signByzantineInChain(chain, ctx, transactionSignature, packAddressList)){
                             ctxStatusPO.setStatus(TxStatusEnum.CONFIRMED.getStatus());
                         }
+                        if(ctx.getType() == config.getCrossCtxType() && chain.getChainId() == AddressTool.getChainIdByAddress(ctx.getCoinDataInstance().getFrom().get(0).getAddress())){
+                            chain.getSignedCtxMap().put(nativeHash, p2PHKSignature);
+                        }
                     }
                 }
             }

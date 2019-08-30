@@ -124,19 +124,13 @@ public class TxUtil {
 
     public static boolean isNulsAsset(int chainId, int assetId) {
         TxConfig txConfig = SpringLiteContext.getBean(TxConfig.class);
-        if (chainId == txConfig.getMainChainId()
-                && assetId == txConfig.getMainAssetId()) {
-            return true;
-        }
-        return false;
+        return chainId == txConfig.getMainChainId()
+                && assetId == txConfig.getMainAssetId();
     }
 
     public static boolean isChainAssetExist(Chain chain, Coin coin) {
-        if (chain.getConfig().getChainId() == coin.getAssetsChainId() &&
-                chain.getConfig().getAssetId() == coin.getAssetsId()) {
-            return true;
-        }
-        return false;
+        return chain.getConfig().getChainId() == coin.getAssetsChainId() &&
+                chain.getConfig().getAssetId() == coin.getAssetsId();
     }
 
     /**
@@ -321,9 +315,8 @@ public class TxUtil {
 
     public static byte[] getNonce(byte[] preHash) {
         byte[] nonce = new byte[8];
-        byte[] in = preHash;
-        int copyEnd = in.length;
-        System.arraycopy(in, (copyEnd - 8), nonce, 0, 8);
+        int copyEnd = preHash.length;
+        System.arraycopy(preHash, (copyEnd - 8), nonce, 0, 8);
         return nonce;
     }
 
@@ -343,26 +336,25 @@ public class TxUtil {
 
 
     /**
-     * 根据待打包队列存交易的map实际交易数, 来计算是放弃当前交易
+     * 根据待打包队列存交易的map交易的数据总和, 来计算是放弃当前交易
      *
      * @return
      */
-    public static boolean discardTx(int packableTxMapSize) {
+    public static boolean discardTx(int packableTxMapDataSize) {
         Random random = new Random();
+        //随机0~9
         int number = random.nextInt(10);
-        if (packableTxMapSize >= TxConstant.PACKABLE_TX_MAP_MAX_SIZE) {
+        if (packableTxMapDataSize >= TxConstant.PACKABLE_TX_MAP_MAX_DATA_SIZE) {
+            //扔100%
+            return true;
+        } else if (packableTxMapDataSize >= TxConstant.PACKABLE_TX_MAP_HEAVY_DATA_SIZE) {
             //扔80%
             if (number < 8) {
                 return true;
             }
-        } else if (packableTxMapSize >= TxConstant.PACKABLE_TX_MAP_HEAVY_SIZE) {
+        } else if (packableTxMapDataSize >= TxConstant.PACKABLE_TX_MAP_STRESS_DATA_SIZE) {
             //扔50%
             if (number < 5) {
-                return true;
-            }
-        } else if (packableTxMapSize >= TxConstant.PACKABLE_TX_MAP_STRESS_SIZE) {
-            //扔30%
-            if (number < 3) {
                 return true;
             }
         }

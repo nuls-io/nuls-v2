@@ -130,6 +130,12 @@ public class PackablePool {
         }
     }
 
+    public void removeInvalidTxFromMap(Chain chain, Transaction tx) {
+        Map<ByteArrayWrapper, Transaction> map = chain.getPackableTxMap();
+        ByteArrayWrapper wrapper = new ByteArrayWrapper(tx.getHash().getBytes());
+        map.remove(wrapper);
+    }
+
     /**
      * 判断交易是否在待打包队列的map中，交易如果存在于待打包hash队列中,不一定存在于map中.
      * Determine if the transaction is in the map to be packaged;

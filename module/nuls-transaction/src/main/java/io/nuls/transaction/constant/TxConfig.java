@@ -30,7 +30,7 @@ public class TxConfig extends ConfigBean implements ModuleConfig {
     private int mainAssetId;
     /** 编码*/
     private String encoding;
-    /** 未确认交易过期毫秒数-30分钟 秒 */
+    /** 未确认交易过期时间秒 */
     private long unconfirmedTxExpire;
 
 
