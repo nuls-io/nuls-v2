@@ -356,7 +356,6 @@ public class ProtocolServiceImpl implements ProtocolService {
         }
         context.setCount(count);
         context.setLatestHeight(height - 1);
-        System.out.println(context.getProportionMap());
         return true;
     }
 

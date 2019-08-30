@@ -30,7 +30,7 @@ blackHolePublicKey=0000000000000000000000000000000000000000000000000000000000000
 port=18001
 crossPort=18002
 #魔法参数
-packetMagic=19900913
+packetMagic=19856856
 #种子节点
 selfSeedIps=192.168.1.117:18001,192.168.1.118:18001,192.168.1.119:18001
 #主网的跨链种子连接节点
@@ -59,7 +59,7 @@ singleDownloadTimeout=15000
 #区块同步过程中缓存的区块字节数上限(20M)
 cachedBlockSizeLimit=20971520
 #创世块文件路径(支持绝对路径与相对路径,相对路径相对于此配置文件的目录)
-#genesisBlockPath=genesis-block.json
+genesisBlockPath=genesis-block-main-beta3.json
 
 [consensus]
 #种子节点列表
@@ -67,7 +67,7 @@ seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1
 #出块地址密码
 password=nuls123456
 #出块间隔时间(单位：s)
-packingInterval=10
+packingInterval=5
 #共识委托抵押资产链ID
 agentChainId=2
 #共识委托抵押资产ID
@@ -123,4 +123,4 @@ maxSignatureCount=100
 
 [protocol-update]
 #每隔多少个区块统计一次协议占比
-interval=1000
+interval=10
