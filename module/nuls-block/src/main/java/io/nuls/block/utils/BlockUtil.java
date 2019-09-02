@@ -195,13 +195,16 @@ public class BlockUtil {
 
         if (blockHeight <= masterChainEndHeight) {
             //3.收到的区块是主链上的重复区块,丢弃
-            BlockHeaderPo blockHeader = blockService.getBlockHeaderPo(chainId, blockHeight);
-            if (blockHash.equals(blockHeader.getHash())) {
+            BlockHeaderPo masterHeader = blockService.getBlockHeaderPo(chainId, blockHeight);
+            if (blockHash.equals(masterHeader.getHash())) {
                 logger.debug("received duplicate block of masterChain, height:" + blockHeight + ", hash:" + blockHash);
                 return Result.getFailed(BlockErrorCode.DUPLICATE_MAIN_BLOCK);
             }
             //4.收到的区块是主链上的分叉区块,保存区块,并新增一条分叉链链接到主链
-            if (blockPreviousHash.equals(blockHeader.getPreHash())) {
+            if (blockPreviousHash.equals(masterHeader.getPreHash())) {
+                if (handleSpecificForkBlock(chainId, blockService, header, masterChainEndHeight, masterChainEndHash, masterHeader)) {
+                    return Result.getSuccess(BlockErrorCode.SUCCESS);
+                }
                 chainStorageService.save(chainId, block);
                 Chain forkChain = ChainGenerator.generate(chainId, block, masterChain, ChainTypeEnum.FORK);
                 BlockChainManager.addForkChain(chainId, forkChain);
@@ -212,6 +215,19 @@ public class BlockUtil {
         }
         //与主链没有关联
         return Result.getFailed(BlockErrorCode.IRRELEVANT_BLOCK);
+    }
+
+    private static boolean handleSpecificForkBlock(int chainId, BlockService blockService, BlockHeader header, long masterChainEndHeight, NulsHash masterChainEndHash, BlockHeaderPo masterHeader) {
+        if (header.getHeight() == masterChainEndHeight) {
+            List<String> list = new ArrayList<>();
+            list.add(masterChainEndHash.toHex());
+            list.add(header.getHash().toHex());
+            list.sort(String.CASE_INSENSITIVE_ORDER);
+            if (list.get(0).equals(header.getHash().toHex())) {
+                return blockService.rollbackBlock(chainId, masterHeader, false);
+            }
+        }
+        return false;
     }
 
     /**
