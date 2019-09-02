@@ -129,6 +129,7 @@ public class ContractCallerImpl implements ContractCaller {
             ContractBatchEndCallable callable = new ContractBatchEndCallable(chainId, blockHeight);
             Future<ContractPackageDto> contractPackageDtoFuture = BATCH_END_SERVICE.submit(callable);
             batchInfo.setContractPackageDtoFuture(contractPackageDtoFuture);
+            batchInfo.setBeforeEndTime(System.currentTimeMillis());
             return getSuccess();
         } catch (Exception e) {
             Log.error(e);

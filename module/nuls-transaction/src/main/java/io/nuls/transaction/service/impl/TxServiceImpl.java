@@ -1061,7 +1061,7 @@ public class TxServiceImpl implements TxService {
                             for (String hash : nonexecutionList) {
                                 if (hash.equals(txPackageWrapper.getTx().getHash().toHex())) {
                                     orphanTxSet.add(txPackageWrapper);
-                                    chain.getLogger().debug("contract pending tx back to PackablePool hash:{} ", hash);
+                                    //chain.getLogger().debug("contract pending tx back to PackablePool hash:{} ", hash);
                                     //从可打包集合中删除
                                     iterator.remove();
                                     break;
@@ -1216,7 +1216,7 @@ public class TxServiceImpl implements TxService {
         });
         for (TxPackageWrapper txPackageWrapper : txList) {
             packablePool.offerFirst(chain, txPackageWrapper.getTx());
-            chain.getLogger().info("putBackPackablePool tx hash:{}", txPackageWrapper.getTx().getHash().toHex());
+            //chain.getLogger().info("putBackPackablePool tx hash:{}", txPackageWrapper.getTx().getHash().toHex());
         }
         chain.getLogger().info("putBackPackablePool count:{}", txList.size());
     }

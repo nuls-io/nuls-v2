@@ -81,6 +81,10 @@ public class BatchInfo {
      */
     private long beginTime;
     /**
+     * 停止接收交易开始时间
+     */
+    private long beforeEndTime;
+    /**
      * 本次批量执行总共消耗的gas
      */
     private long gasCostTotal;
@@ -210,6 +214,14 @@ public class BatchInfo {
         this.height = height;
     }
 
+    public long getBeforeEndTime() {
+        return beforeEndTime;
+    }
+
+    public void setBeforeEndTime(long beforeEndTime) {
+        this.beforeEndTime = beforeEndTime;
+    }
+
     public long getBeginTime() {
         return beginTime;
     }
@@ -274,7 +286,7 @@ public class BatchInfo {
         return pendingTxHashList;
     }
 
-    private void addPendingTxHashList(String txHash) {
+    public void addPendingTxHashList(String txHash) {
         pendingTxListlock.lock();
         try {
             pendingTxHashList.add(txHash);
@@ -286,9 +298,7 @@ public class BatchInfo {
     public boolean checkGasCostTotal(String txHash) {
         gasLock.readLock().lock();
         try {
-            boolean exceedTx = txTotal > ContractConstant.MAX_CONTRACT_TX_IN_BLOCK;
-            boolean exceedGas = gasCostTotal > ContractConstant.MAX_GAS_COST_IN_BLOCK;
-            if(exceedTx || exceedGas) {
+            if(isExceed()) {
                 addPendingTxHashList(txHash);
                 return false;
             }
@@ -298,33 +308,22 @@ public class BatchInfo {
         }
     }
 
+    public boolean isExceed() {
+        boolean exceedTx = txTotal > ContractConstant.MAX_CONTRACT_TX_IN_BLOCK;
+        boolean exceedGas = gasCostTotal > ContractConstant.MAX_GAS_COST_IN_BLOCK;
+        if(exceedTx || exceedGas) {
+            return true;
+        }
+        return false;
+    }
+
     public boolean addGasCostTotal(long gasCost, String txHash) {
         gasLock.writeLock().lock();
         try {
             this.txTotal += 1;
             this.gasCostTotal += gasCost;
-            boolean exceedTx = txTotal > ContractConstant.MAX_CONTRACT_TX_IN_BLOCK;
-            boolean exceedGas = gasCostTotal > ContractConstant.MAX_GAS_COST_IN_BLOCK;
-            if(exceedTx || exceedGas) {
+            if(isExceed()) {
                 this.addPendingTxHashList(txHash);
-                // 中断线程
-                if(!pendingTxHashList.isEmpty()) {
-                    for(String hash : pendingTxHashList) {
-                        contractMap.remove(hash);
-                    }
-                    if(!contractMap.isEmpty()) {
-                        Set<Map.Entry<String, Future<ContractResult>>> entries = contractMap.entrySet();
-                        String hash;
-                        for(Map.Entry<String, Future<ContractResult>> entry : entries) {
-                            hash = entry.getKey();
-                            entry.getValue().cancel(true);
-                            this.addPendingTxHashList(hash);
-                            if(Log.isDebugEnabled()) {
-                                Log.debug("contract-tx-executor-pool put hash [{}]", hash);
-                            }
-                        }
-                    }
-                }
                 return false;
             } else {
                 return true;

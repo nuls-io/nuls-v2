@@ -55,9 +55,11 @@ import io.nuls.core.exception.NulsException;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import static io.nuls.contract.constant.ContractErrorCode.FAILED;
 import static io.nuls.contract.util.ContractUtil.getFailed;
@@ -229,9 +231,59 @@ public class ContractServiceImpl implements ContractService {
 
         try {
             BatchInfo batchInfo = contractHelper.getChain(chainId).getBatchInfo();
-            Future<ContractPackageDto> future = batchInfo.getContractPackageDtoFuture();
-            // 等待before_end执行完成
-            future.get();
+            long beforeEndTime = batchInfo.getBeforeEndTime();
+            long now0 = System.currentTimeMillis();
+            do {
+                long timeOut = 800 - (now0 - beforeEndTime);
+                if(timeOut <= 0) {
+                    Log.warn("超过了预留的超时时间[0]: {}", timeOut);
+                    break;
+                }
+                Log.info("预留的超时时间[0]: {}", timeOut);
+                Future<ContractPackageDto> future = batchInfo.getContractPackageDtoFuture();
+                try {
+                    // 等待before_end执行完成
+                    future.get(timeOut, TimeUnit.MILLISECONDS);
+                } catch (Exception e) {
+                    Log.error("wait end time out", e.getMessage());
+                }
+                // 若超过了区块合约gas或者txCount限制，则中断未执行完的线程
+                if(batchInfo.isExceed()) {
+                    Map<String, Future<ContractResult>> contractMap = batchInfo.getContractMap();
+                    if(!contractMap.isEmpty()) {
+                        Set<Map.Entry<String, Future<ContractResult>>> entries = contractMap.entrySet();
+                        String hash;
+                        Future<ContractResult> _future;
+                        int count = 0;
+                        for(Map.Entry<String, Future<ContractResult>> entry : entries) {
+                            hash = entry.getKey();
+                            _future = entry.getValue();
+                            if(_future.isDone()) {
+                                continue;
+                            }
+                            _future.cancel(true);
+                            batchInfo.addPendingTxHashList(hash);
+                            count++;
+                        }
+                        Log.warn("超过了区块合约gas或者txCount限制，中断未执行完的交易数量: {}", count);
+                    }
+                }
+
+                long now1 = System.currentTimeMillis();
+                timeOut = 300 - (now1 - now0);
+                Log.info("预留的超时时间[1]: {}", timeOut);
+                if(timeOut <= 0) {
+                    Log.warn("超过了预留的超时时间[1]: {}", timeOut);
+                    break;
+                }
+                try {
+                    // 等待before_end执行完成
+                    future.get(timeOut, TimeUnit.MILLISECONDS);
+                } catch (Exception e) {
+                    Log.error("wait end time out", e.getMessage());
+                }
+            } while (false);
+
             ContractPackageDto dto = batchInfo.getContractPackageDto();
             if (dto == null) {
                 return getFailed();
