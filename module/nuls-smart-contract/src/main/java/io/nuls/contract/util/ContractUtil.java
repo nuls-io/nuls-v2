@@ -280,9 +280,7 @@ public class ContractUtil {
             return stateRoot;
         }
         try {
-            byte[] extend = blockHeader.getExtend();
-            BlockExtendsData extendsData = new BlockExtendsData();
-            extendsData.parse(extend, 0);
+            BlockExtendsData extendsData = blockHeader.getExtendsData();
             stateRoot = extendsData.getStateRoot();
             blockHeader.setStateRoot(stateRoot);
             return stateRoot;

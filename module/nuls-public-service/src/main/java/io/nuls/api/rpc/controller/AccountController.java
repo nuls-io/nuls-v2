@@ -95,10 +95,10 @@ public class AccountController {
 
     @RpcMethod("getAccountTxs")
     public RpcResult getAccountTxs(List<Object> params) {
-        VerifyUtils.verifyParams(params, 6);
+        VerifyUtils.verifyParams(params, 7);
         int chainId, pageNumber, pageSize, type;
         String address;
-        boolean isMark;
+        long startHeight, endHeight;
         try {
             chainId = (int) params.get(0);
         } catch (Exception e) {
@@ -125,11 +125,15 @@ public class AccountController {
             return RpcResult.paramError("[type] is inValid");
         }
         try {
-            isMark = (boolean) params.get(5);
+            startHeight = Long.parseLong("" + params.get(5));
         } catch (Exception e) {
-            return RpcResult.paramError("[isMark] is inValid");
+            return RpcResult.paramError("[startHeight] is invalid");
         }
-
+        try {
+            endHeight = Long.parseLong("" + params.get(6));
+        } catch (Exception e) {
+            return RpcResult.paramError("[endHeight] is invalid");
+        }
         if (!AddressTool.validAddress(chainId, address)) {
             return RpcResult.paramError("[address] is inValid");
         }
@@ -143,7 +147,7 @@ public class AccountController {
         RpcResult result = new RpcResult();
         PageInfo<TxRelationInfo> pageInfo;
         if (CacheManager.isChainExist(chainId)) {
-            pageInfo = accountService.getAccountTxs(chainId, address, pageNumber, pageSize, type, isMark);
+            pageInfo = accountService.getAccountTxs(chainId, address, pageNumber, pageSize, type, startHeight, endHeight);
         } else {
             pageInfo = new PageInfo<>(pageNumber, pageSize);
         }
@@ -154,10 +158,10 @@ public class AccountController {
 
     @RpcMethod("getAcctTxs")
     public RpcResult getAcctTxs(List<Object> params) {
-        VerifyUtils.verifyParams(params, 6);
+        VerifyUtils.verifyParams(params, 7);
         int chainId, pageNumber, pageSize, type;
         String address;
-        boolean isMark;
+        long startHeight, endHeight;
         try {
             chainId = (int) params.get(0);
         } catch (Exception e) {
@@ -184,10 +188,16 @@ public class AccountController {
             return RpcResult.paramError("[type] is inValid");
         }
         try {
-            isMark = (boolean) params.get(5);
+            startHeight = Long.parseLong("" + params.get(5));
         } catch (Exception e) {
-            return RpcResult.paramError("[isMark] is inValid");
+            return RpcResult.paramError("[startHeight] is invalid");
         }
+        try {
+            endHeight = Long.parseLong("" + params.get(6));
+        } catch (Exception e) {
+            return RpcResult.paramError("[endHeight] is invalid");
+        }
+
 
         if (!AddressTool.validAddress(chainId, address)) {
             return RpcResult.paramError("[address] is inValid");
@@ -202,7 +212,7 @@ public class AccountController {
         RpcResult result = new RpcResult();
         PageInfo<TxRelationInfo> pageInfo;
         if (CacheManager.isChainExist(chainId)) {
-            pageInfo = accountService.getAcctTxs(chainId, address, pageNumber, pageSize, type, isMark);
+            pageInfo = accountService.getAcctTxs(chainId, address, pageNumber, pageSize, type, startHeight, endHeight);
         } else {
             pageInfo = new PageInfo<>(pageNumber, pageSize);
         }
@@ -430,8 +440,8 @@ public class AccountController {
             assetId = defaultAsset.getAssetId();
         }
         BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, address, assetChainId, assetId);
-        AccountInfo accountInfo = accountService.getAccountInfo(chainId,address);
-        if(accountInfo != null) {
+        AccountInfo accountInfo = accountService.getAccountInfo(chainId, address);
+        if (accountInfo != null) {
             balanceInfo.setConsensusLock(accountInfo.getConsensusLock());
         }
         return RpcResult.success(balanceInfo);

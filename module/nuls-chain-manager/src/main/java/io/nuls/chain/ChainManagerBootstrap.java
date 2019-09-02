@@ -82,6 +82,7 @@ public class ChainManagerBootstrap extends RpcModule {
         BigInteger assetDepositNuls = BigIntegerUtils.stringToBigInteger(nulsChainConfig.getAssetDepositNuls()).multiply(
                 BigInteger.valueOf(decimal));
         nulsChainConfig.setAssetDepositNuls(BigIntegerUtils.bigIntegerToString(assetDepositNuls));
+        nulsChainConfig.setAssetDepositNulsLockRate(String.valueOf(1-Double.valueOf(nulsChainConfig.getAssetDepositNulsDestroyRate())));
         BigInteger assetInitNumberMin = BigIntegerUtils.stringToBigInteger(nulsChainConfig.getAssetInitNumberMin()).multiply(
                 BigInteger.valueOf(decimal));
         nulsChainConfig.setAssetInitNumberMin(BigIntegerUtils.bigIntegerToString(assetInitNumberMin));
@@ -89,7 +90,7 @@ public class ChainManagerBootstrap extends RpcModule {
                 BigInteger.valueOf(decimal));
         nulsChainConfig.setAssetInitNumberMax(BigIntegerUtils.bigIntegerToString(assetInitNumberMax));
         nulsChainConfig.setNulsFeeMainNetPercent((int) (Double.valueOf(nulsChainConfig.getNulsFeeMainNetRate()) * 100));
-        nulsChainConfig.setNulsFeeOtherNetPercent((int) (Double.valueOf(nulsChainConfig.getNulsFeeOtherNetRate()) * 100));
+        nulsChainConfig.setNulsFeeOtherNetPercent(100-nulsChainConfig.getNulsFeeMainNetPercent());
         CmConstants.BLACK_HOLE_ADDRESS = AddressTool.getAddressByPubKeyStr(nulsChainConfig.getBlackHolePublicKey(), CmRuntimeInfo.getMainIntChainId());
         LoggerUtil.defaultLogInit(CmRuntimeInfo.getMainIntChainId());
     }

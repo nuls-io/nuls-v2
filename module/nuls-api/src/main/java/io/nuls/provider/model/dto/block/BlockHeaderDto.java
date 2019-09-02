@@ -26,17 +26,15 @@
 package io.nuls.provider.model.dto.block;
 
 
-import io.nuls.core.rpc.model.TypeDescriptor;
-import io.nuls.provider.api.config.Context;
 import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
-import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
+import io.nuls.core.rpc.model.TypeDescriptor;
 import io.nuls.core.rpc.util.NulsDateUtils;
+import io.nuls.provider.api.config.Context;
 
 import java.util.List;
 
@@ -101,9 +99,8 @@ public class BlockHeaderDto {
 
     }
 
-    public BlockHeaderDto(BlockHeader header) throws NulsException {
-        BlockExtendsData blockExtendsData = new BlockExtendsData();
-        blockExtendsData.parse(new NulsByteBuffer(header.getExtend()));
+    public BlockHeaderDto(BlockHeader header) {
+        BlockExtendsData blockExtendsData = header.getExtendsData();
         this.setHash(header.getHash().toString());
         this.setHeight(header.getHeight());
         this.setSize(header.size());

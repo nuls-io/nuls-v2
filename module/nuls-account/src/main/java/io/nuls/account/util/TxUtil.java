@@ -80,11 +80,8 @@ public class TxUtil {
      * @return
      */
     public static boolean isNulsAsset(int chainId, int assetId) {
-        if (chainId == NulsConfig.MAIN_CHAIN_ID
-                && assetId == NulsConfig.MAIN_ASSETS_ID) {
-            return true;
-        }
-        return false;
+        return chainId == NulsConfig.MAIN_CHAIN_ID
+                && assetId == NulsConfig.MAIN_ASSETS_ID;
     }
 
     public static boolean isNulsAsset(Coin coin) {
@@ -99,11 +96,8 @@ public class TxUtil {
      * @return
      */
     public static boolean isChainAssetExist(Chain chain, Coin coin) {
-        if (chain.getConfig().getChainId() == coin.getAssetsChainId() &&
-                chain.getConfig().getAssetId() == coin.getAssetsId()) {
-            return true;
-        }
-        return false;
+        return chain.getConfig().getChainId() == coin.getAssetsChainId() &&
+                chain.getConfig().getAssetId() == coin.getAssetsId();
     }
 
 

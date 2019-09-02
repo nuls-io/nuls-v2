@@ -76,6 +76,8 @@ public class SyncService {
     private List<TokenTransfer> tokenTransferList = new ArrayList<>();
     //记录链信息
     private List<ChainInfo> chainInfoList = new ArrayList<>();
+    //处理每个交易时，过滤交易中的重复地址
+    Set<String> addressSet = new HashSet<>();
 
     public SyncInfo getSyncInfo(int chainId) {
         return chainService.getSyncInfo(chainId);
@@ -223,13 +225,17 @@ public class SyncService {
             return;
         }
         AssetInfo assetInfo = CacheManager.getCacheChain(chainId).getDefaultAsset();
-        Set<String> addressSet = new HashSet<>();
+        addressSet.clear();
         for (CoinToInfo output : tx.getCoinTos()) {
             addressSet.add(output.getAddress());
             calcBalance(chainId, output);
 //            AccountLedgerInfo ledgerInfo = calcBalance(chainId, output);
 //            txRelationInfoSet.add(new TxRelationInfo(output, tx, ledgerInfo.getTotalBalance()));
 
+            //创世块的数据不计算共识奖励
+            if (tx.getHeight() == 0) {
+                continue;
+            }
             //奖励是本链主资产的时候，累计奖励金额
             if (output.getChainId() == assetInfo.getChainId() && output.getAssetsId() == assetInfo.getAssetId()) {
                 AccountInfo accountInfo = queryAccountInfo(chainId, output.getAddress());
@@ -244,7 +250,7 @@ public class SyncService {
     }
 
     private void processTransferTx(int chainId, TransactionInfo tx) {
-        Set<String> addressSet = new HashSet<>();
+        addressSet.clear();
 
         if (tx.getCoinFroms() != null) {
             for (CoinFromInfo input : tx.getCoinFroms()) {
@@ -261,6 +267,7 @@ public class SyncService {
                 txRelationInfoSet.add(new TxRelationInfo(output, tx, ledgerInfo.getTotalBalance()));
             }
         }
+
         for (String address : addressSet) {
             AccountInfo accountInfo = queryAccountInfo(chainId, address);
             accountInfo.setTxCount(accountInfo.getTxCount() + 1);
@@ -268,7 +275,7 @@ public class SyncService {
     }
 
     private void processCrossTransferTx(int chainId, TransactionInfo tx) {
-        Set<String> addressSet = new HashSet<>();
+        addressSet.clear();
 
         if (tx.getCoinFroms() != null) {
             for (CoinFromInfo input : tx.getCoinFroms()) {
@@ -293,6 +300,7 @@ public class SyncService {
                 txRelationInfoSet.add(new TxRelationInfo(output, tx, ledgerInfo.getTotalBalance()));
             }
         }
+
         for (String address : addressSet) {
             AccountInfo accountInfo = queryAccountInfo(chainId, address);
             accountInfo.setTxCount(accountInfo.getTxCount() + 1);
@@ -318,7 +326,6 @@ public class SyncService {
         txRelationInfoSet.add(new TxRelationInfo(output, tx, ledgerInfo.getTotalBalance()));
         accountInfo = queryAccountInfo(chainId, input.getAddress());
         accountInfo.setTxCount(accountInfo.getTxCount() + 1);
-
     }
 
     private void processCreateAgentTx(int chainId, TransactionInfo tx) {
@@ -399,26 +406,27 @@ public class SyncService {
         AccountInfo accountInfo;
         AccountLedgerInfo ledgerInfo;
         CoinToInfo output;
+        addressSet.clear();
         //处理各个用户的锁定金额，尤其是创建节点的地址要特殊处理
         for (int i = 0; i < tx.getCoinTos().size(); i++) {
             output = tx.getCoinTos().get(i);
+            accountInfo = queryAccountInfo(chainId, output.getAddress());
+            if (!addressSet.contains(output.getAddress())) {
+                accountInfo.setTxCount(accountInfo.getTxCount() + 1);
+            }
             //lockTime > 0 这条output的金额就是节点的保证金
             if (output.getLockTime() > 0) {
-                continue;
-            }
-            accountInfo = queryAccountInfo(chainId, output.getAddress());
-            accountInfo.setTxCount(accountInfo.getTxCount() + 1);
-            if (!output.getAddress().equals(agentInfo.getAgentAddress())) {
-                accountInfo.setConsensusLock(accountInfo.getConsensusLock().subtract(output.getAmount()));
-                ledgerInfo = queryLedgerInfo(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
-                txRelationInfoSet.add(new TxRelationInfo(output, tx, BigInteger.ZERO, ledgerInfo.getTotalBalance()));
-            } else {
-                accountInfo.setConsensusLock(accountInfo.getConsensusLock().subtract(output.getAmount()).subtract(agentInfo.getDeposit()));
+                accountInfo.setConsensusLock(accountInfo.getConsensusLock().subtract(agentInfo.getDeposit()));
                 ledgerInfo = calcBalance(chainId, output.getChainId(), output.getAssetsId(), accountInfo, tx.getFee().getValue());
                 TxRelationInfo relationInfo = new TxRelationInfo(output, tx, tx.getFee().getValue(), ledgerInfo.getTotalBalance());
                 relationInfo.setTransferType(TRANSFER_FROM_TYPE);
                 txRelationInfoSet.add(relationInfo);
+            } else {
+                accountInfo.setConsensusLock(accountInfo.getConsensusLock().subtract(output.getAmount()));
+                ledgerInfo = queryLedgerInfo(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
+                txRelationInfoSet.add(new TxRelationInfo(output, tx, BigInteger.ZERO, ledgerInfo.getTotalBalance()));
             }
+            addressSet.add(output.getAddress());
         }
 
         //查询所有当前节点下的委托，生成取消委托记录
@@ -445,7 +453,8 @@ public class SyncService {
     }
 
     public void processYellowPunishTx(int chainId, TransactionInfo tx) {
-        Set<String> addressSet = new HashSet<>();
+        addressSet.clear();
+
         for (TxDataInfo txData : tx.getTxDataList()) {
             PunishLogInfo punishLog = (PunishLogInfo) txData;
             punishLogList.add(punishLog);
@@ -475,22 +484,20 @@ public class SyncService {
         AccountInfo accountInfo;
         AccountLedgerInfo ledgerInfo;
         CoinToInfo output;
+        addressSet.clear();
         for (int i = 0; i < tx.getCoinTos().size(); i++) {
             output = tx.getCoinTos().get(i);
-            //lockTime > 0 这条output的金额就是节点的保证金
-            if (output.getLockTime() > 0) {
-                continue;
-            }
             accountInfo = queryAccountInfo(chainId, output.getAddress());
-            accountInfo.setTxCount(accountInfo.getTxCount() + 1);
-            if (!output.getAddress().equals(agentInfo.getAgentAddress())) {
-                accountInfo.setConsensusLock(accountInfo.getConsensusLock().subtract(output.getAmount()));
-            } else {
-                accountInfo.setConsensusLock(accountInfo.getConsensusLock().subtract(output.getAmount()).subtract(agentInfo.getDeposit()));
+            if (!addressSet.contains(output.getAddress())) {
+                accountInfo.setTxCount(accountInfo.getTxCount() + 1);
             }
+            accountInfo.setConsensusLock(accountInfo.getConsensusLock().subtract(output.getAmount()));
             ledgerInfo = queryLedgerInfo(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
             txRelationInfoSet.add(new TxRelationInfo(output, tx, BigInteger.ZERO, ledgerInfo.getTotalBalance()));
+
+            addressSet.add(output.getAddress());
         }
+
         //根据节点找到委托列表
         List<DepositInfo> depositInfos = depositService.getDepositListByAgentHash(chainId, agentInfo.getTxHash());
         if (!depositInfos.isEmpty()) {

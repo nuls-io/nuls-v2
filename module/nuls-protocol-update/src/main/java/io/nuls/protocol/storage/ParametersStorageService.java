@@ -72,37 +72,4 @@ public interface ParametersStorageService {
      */
     List<ChainParameters> getList();
 
-    /**
-     * 保存版本配置信息
-     *
-     * @param versionJson
-     * @param chainId
-     * @return
-     */
-    boolean saveVersionJson(String versionJson, int chainId);
-
-    /**
-     * 获取版本配置信息
-     *
-     * @param chainId
-     * @return
-     */
-    String getVersionJson(int chainId);
-
-    /**
-     * 删除版本配置信息
-     *
-     * @param chainId
-     * @return
-     */
-    boolean deleteVersionJson(int chainId);
-
-    /**
-     * 获取版本配置信息列表
-     *
-     * @param chainId
-     * @return
-     */
-    List<String> getVersionJsonList(int chainId);
-
 }

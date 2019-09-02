@@ -22,11 +22,6 @@ import java.util.Set;
 public class StatisticsInfo extends BaseNulsData {
 
     /**
-     * 上一个统计信息生效高度
-     */
-    private long lastHeight;
-
-    /**
      * 本次统计信息生效高度
      */
     private long height;
@@ -43,14 +38,6 @@ public class StatisticsInfo extends BaseNulsData {
      * 统计区间内所有协议的占比
      */
     private Map<ProtocolVersion,Integer> protocolVersionMap;
-
-    public long getLastHeight() {
-        return lastHeight;
-    }
-
-    public void setLastHeight(long lastHeight) {
-        this.lastHeight = lastHeight;
-    }
 
     public long getHeight() {
         return height;
@@ -86,9 +73,8 @@ public class StatisticsInfo extends BaseNulsData {
 
     @Override
     public int size() {
-        int size = 18;
+        int size = 12;
         size += SerializeUtils.sizeOfNulsData(protocolVersion);
-        size += SerializeUtils.sizeOfInt16();
         for (int i = 0; i < protocolVersionMap.size(); i++) {
             size += 7;
         }
@@ -97,7 +83,6 @@ public class StatisticsInfo extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeInt64(lastHeight);
         stream.writeInt64(height);
         stream.writeShort(count);
         stream.writeNulsData(protocolVersion);
@@ -111,7 +96,6 @@ public class StatisticsInfo extends BaseNulsData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.lastHeight = byteBuffer.readInt64();
         this.height = byteBuffer.readInt64();
         this.count = byteBuffer.readShort();
         this.protocolVersion = byteBuffer.readNulsData(new ProtocolVersion());
@@ -124,9 +108,8 @@ public class StatisticsInfo extends BaseNulsData {
 
     @Override
     public String toString() {
-        return "StatisticsInfo{" +
-                "lastHeight=" + lastHeight +
-                ", height=" + height +
+        return "{" +
+                "height=" + height +
                 ", count=" + count +
                 ", protocolVersion=" + protocolVersion +
                 ", protocolVersionMap=" + protocolVersionMap +

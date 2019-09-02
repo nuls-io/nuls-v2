@@ -119,10 +119,7 @@ public class MessageHandlerFactory {
      * @return Collection
      */
     public Map<String, CmdPriority> getProtocolRoleHandlerMap(String protocolCmd) {
-        if (null != protocolRoleHandlerMap.get(protocolCmd)) {
-            return protocolRoleHandlerMap.get(protocolCmd);
-        }
-        return null;
+        return protocolRoleHandlerMap.get(protocolCmd);
     }
 
 }

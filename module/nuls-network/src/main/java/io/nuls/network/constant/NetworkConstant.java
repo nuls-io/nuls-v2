@@ -63,6 +63,9 @@ public interface NetworkConstant {
 
     int HIGH_WATER_MARK = 8 * 1024 * 1024;
     int LOW_WATER_MARK = 4 * 1024 * 1024;
+
+    int MAX_SAME_IP_PER_GROUP = 10;
+
     /**
      * 10秒链内网络数量与高度无变更,则认为网络状态已稳定
      * 10 seconds The number and speed of the network in the chain are unchanged, and the network status is considered stable.
@@ -73,9 +76,9 @@ public interface NetworkConstant {
      */
     int FULL_BROADCAST_PERCENT = 100;
     /**
-     * 最少的PEER数量，小于等于这个值，将取消比例广播
+     * 最少的PEER数量，小于等于这个值，将取消比例广播,按100%节点广播
      */
-    int MIN_PEER_NUMBER = 7;
+    int BROADCAST_MIN_PEER_NUMBER = 7;
     /**
      * ========================================
      * --------[RPC CMD] -------

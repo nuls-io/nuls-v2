@@ -82,4 +82,6 @@ public interface CommandConstant {
     String GET_ALL_ADDRESS_PREFIX = "ac_getAllAddressPrefix";
 
     String GET_BYZANTINE_COUNT = "getByzantineCount";
+
+    String GET_NETWORK_GROUP = "nw_getGroupByChainId";
 }

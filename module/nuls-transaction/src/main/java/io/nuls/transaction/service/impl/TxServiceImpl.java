@@ -443,8 +443,8 @@ public class TxServiceImpl implements TxService {
             if (!rs) {
                 throw new NulsException(TxErrorCode.COINFROM_HAS_DUPLICATE_COIN);
             }
-            //用户发出的交易不允许from中有合约地址,如果from包含合约地址,那么这个交易一定是系统发出的,系统发出的交易不会走基础验证
-            if (TxUtil.isLegalContractAddress(coinFrom.getAddress(), chain)) {
+            //用户发出的[非停止节点,红牌]交易不允许from中有合约地址,如果from包含合约地址,那么这个交易一定是系统发出的,系统发出的交易不会走基础验证
+            if (type != TxType.STOP_AGENT && type != TxType.RED_PUNISH && TxUtil.isLegalContractAddress(coinFrom.getAddress(), chain)) {
                 chain.getLogger().error("Tx from cannot have contract address ");
                 throw new NulsException(TxErrorCode.TX_FROM_CANNOT_HAS_CONTRACT_ADDRESS);
             }
@@ -567,6 +567,15 @@ public class TxServiceImpl implements TxService {
         }
     }
 
+    /**
+     * 打包时,从待打包队列获取交易阶段,会产生临时交易列表,在中断获取交易时需要把遗留的临时交易还回待打包队列
+     */
+    private void backTempPackablePool(Chain chain ,List<TxPackageWrapper> listTx){
+        for(int i = listTx.size() - 1; i >= 0 ;i--){
+            packablePool.offerFirst(chain, listTx.get(i).getTx());
+        }
+    }
+
     @Override
     public TxPackage getPackableTxs(Chain chain, long endtimestamp, long maxTxDataSize, long blockTime, String packingAddress, String preStateRoot) {
         chain.getPackageLock().lock();
@@ -634,16 +643,19 @@ public class TxServiceImpl implements TxService {
                 if (currentReserve <= batchValidReserve) {
                     nulsLogger.debug("获取交易时间到,进入模块验证阶段: currentTimeMillis:{}, -endtimestamp:{}, -offset:{}, -remaining:{}",
                             currentTimeMillis, endtimestamp, batchValidReserve, currentReserve);
+                    backTempPackablePool(chain, currentBatchPackableTxs);
                     break;
                 }
                 if (currentReserve < packageRpcReserveTime) {
                     //超时,留给最后数据组装和RPC传输时间不足
                     nulsLogger.error("getPackableTxs time out, endtimestamp:{}, current:{}, endtimestamp-current:{}, reserveTime:{}",
                             endtimestamp, currentTimeMillis, currentReserve, packageRpcReserveTime);
+                    backTempPackablePool(chain, currentBatchPackableTxs);
                     throw new NulsException(TxErrorCode.PACKAGE_TIME_OUT);
                 }
                 if (chain.getProtocolUpgrade().get()) {
                     nulsLogger.info("Protocol Upgrade Package stop -chain:{} -best block height", chain.getChainId(), chain.getBestBlockHeight());
+                    backTempPackablePool(chain, currentBatchPackableTxs);
                     //放回可打包交易和孤儿
                     putBackPackablePool(chain, packingTxList, orphanTxSet);
                     //直接打空块
@@ -652,6 +664,7 @@ public class TxServiceImpl implements TxService {
                 //如果本地最新区块+1 大于当前在打包区块的高度, 说明本地最新区块已更新,需要重新打包,把取出的交易放回到打包队列
                 if (blockHeight < chain.getBestBlockHeight() + 1) {
                     nulsLogger.info("获取交易过程中最新区块高度已增长,把取出的交易以及孤儿放回到打包队列, 重新打包...");
+                    backTempPackablePool(chain, currentBatchPackableTxs);
                     //放回可打包交易和孤儿
                     putBackPackablePool(chain, packingTxList, orphanTxSet);
                     return getPackableTxs(chain, endtimestamp, maxTxDataSize, blockTime, packingAddress, preStateRoot);
@@ -659,6 +672,7 @@ public class TxServiceImpl implements TxService {
                 if (packingTxList.size() > maxCount) {
                     nulsLogger.debug("获取交易已达max count,进入模块验证阶段: currentTimeMillis:{}, -endtimestamp:{}, -offset:{}, -remaining:{}",
                             currentTimeMillis, endtimestamp, batchValidReserve, endtimestamp - currentTimeMillis);
+                    backTempPackablePool(chain, currentBatchPackableTxs);
                     break;
                 }
                 int batchProcessListSize = batchProcessList.size();

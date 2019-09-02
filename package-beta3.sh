@@ -2,10 +2,13 @@
 cd `dirname $0`
 version=beta3
 OUT_DIR=NULS_Wallet_$version
+rm -f ./.package.ncf
+rm -rf ./NULS_Wallet_*
 ./package -a smart-contract
 ./package -a chain-manager
 ./package -a cross-chain
 ./package -a protocol-update
+./package -a nuls-api
 TARGET_OS="linux"
 if [ -n "$1" ]; then
     TARGET_OS=$1
@@ -41,10 +44,6 @@ then
 else
     tar -zcPf ${OUT_DIR}-NBTC-${TARGET_OS}.tar.gz ./${OUT_DIR}
 fi
-#cp -f ./nuls-chain-11.ncf ./NULS-Wallet-linux64-alpha3/nuls.ncf
-#cp -f ./genesis-block-11.json ./NULS-Wallet-linux64-alpha3/genesis-block.json
-#cp -f ./README-ALPAH3.md ./NULS-Wallet-linux64-alpha3/README.md
-#tar -zcPf NULS-Wallet-linux64-alpha3-NETH.tar.gz ./NULS-Wallet-linux64-alpha3
 echo "======================== out of ======================== "
 if [ "$TARGET_OS" == "window" ];
 then

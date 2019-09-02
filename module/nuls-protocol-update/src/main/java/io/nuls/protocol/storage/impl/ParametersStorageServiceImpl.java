@@ -27,6 +27,7 @@ import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.protocol.constant.Constant;
+import io.nuls.protocol.manager.ContextManager;
 import io.nuls.protocol.model.ChainParameters;
 import io.nuls.protocol.storage.ParametersStorageService;
 
@@ -51,7 +52,7 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
             bytes = parameters.serialize();
             return RocksDBService.put(Constant.PROTOCOL_CONFIG, ByteUtils.intToBytes(chainId), bytes);
         } catch (Exception e) {
-            COMMON_LOG.error(e);
+            ContextManager.getContext(chainId).getLogger().error(e);
             return false;
         }
     }
@@ -64,7 +65,7 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
             parameters.parse(new NulsByteBuffer(bytes));
             return parameters;
         } catch (Exception e) {
-            COMMON_LOG.error(e);
+            ContextManager.getContext(chainId).getLogger().error(e);
             return null;
         }
     }
@@ -74,7 +75,7 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
         try {
             return RocksDBService.delete(Constant.PROTOCOL_CONFIG, ByteUtils.intToBytes(chainId));
         } catch (Exception e) {
-            COMMON_LOG.error(e);
+            ContextManager.getContext(chainId).getLogger().error(e);
             return false;
         }
     }
@@ -96,51 +97,4 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
         }
     }
 
-    @Override
-    public boolean saveVersionJson(String versionJson, int chainId) {
-        byte[] bytes;
-        try {
-            bytes = versionJson.getBytes();
-            return RocksDBService.put(Constant.VERSION, ByteUtils.intToBytes(chainId), bytes);
-        } catch (Exception e) {
-            COMMON_LOG.error(e);
-            return false;
-        }
-    }
-
-    @Override
-    public String getVersionJson(int chainId) {
-        try {
-            byte[] bytes = RocksDBService.get(Constant.VERSION, ByteUtils.intToBytes(chainId));
-            return new String(bytes);
-        } catch (Exception e) {
-            COMMON_LOG.error(e);
-            return null;
-        }
-    }
-
-    @Override
-    public boolean deleteVersionJson(int chainId) {
-        try {
-            return RocksDBService.delete(Constant.VERSION, ByteUtils.intToBytes(chainId));
-        } catch (Exception e) {
-            COMMON_LOG.error(e);
-            return false;
-        }
-    }
-
-    @Override
-    public List<String> getVersionJsonList(int chainId) {
-        try {
-            var pos = new ArrayList<String>();
-            List<byte[]> valueList = RocksDBService.valueList(Constant.VERSION);
-            for (byte[] bytes : valueList) {
-                pos.add(new String(bytes));
-            }
-            return pos;
-        } catch (Exception e) {
-            COMMON_LOG.error(e);
-            return null;
-        }
-    }
 }
