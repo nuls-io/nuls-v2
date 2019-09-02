@@ -44,10 +44,7 @@ import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.ByteUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedSet;
+import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -217,14 +214,26 @@ public class BlockUtil {
         return Result.getFailed(BlockErrorCode.IRRELEVANT_BLOCK);
     }
 
+    /**
+     * 处理同一个打包地址出的同样高度的块，降低网络分区概率
+     * @param chainId           链ID
+     * @param blockService
+     * @param header            要保存的区块
+     * @param masterChainEndHeight          主链最新高度
+     * @param masterChainEndHash            主链最新区块hash
+     * @param masterHeader
+     * @return
+     */
     private static boolean handleSpecificForkBlock(int chainId, BlockService blockService, BlockHeader header, long masterChainEndHeight, NulsHash masterChainEndHash, BlockHeaderPo masterHeader) {
         if (header.getHeight() == masterChainEndHeight) {
-            List<String> list = new ArrayList<>();
-            list.add(masterChainEndHash.toHex());
-            list.add(header.getHash().toHex());
-            list.sort(String.CASE_INSENSITIVE_ORDER);
-            if (list.get(0).equals(header.getHash().toHex())) {
-                return blockService.rollbackBlock(chainId, masterHeader, false);
+            if (Arrays.equals(masterHeader.getPackingAddress(chainId), header.getPackingAddress(chainId))) {
+                List<String> list = new ArrayList<>();
+                list.add(masterChainEndHash.toHex());
+                list.add(header.getHash().toHex());
+                list.sort(String.CASE_INSENSITIVE_ORDER);
+                if (list.get(0).equals(header.getHash().toHex())) {
+                    return blockService.rollbackBlock(chainId, masterHeader, false);
+                }
             }
         }
         return false;
