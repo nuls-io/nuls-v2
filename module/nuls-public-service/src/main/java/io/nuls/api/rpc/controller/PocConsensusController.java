@@ -435,7 +435,7 @@ public class PocConsensusController {
         if (type < 0 || type > 2) {
             return RpcResult.paramError("[type] is invalid");
         }
-        if (!AddressTool.validAddress(chainId, agentAddress)) {
+        if (!StringUtils.isBlank(agentAddress) && !AddressTool.validAddress(chainId, agentAddress)) {
             return RpcResult.paramError("[agentAddress] is inValid");
         }
         if (pageNumber <= 0) {
