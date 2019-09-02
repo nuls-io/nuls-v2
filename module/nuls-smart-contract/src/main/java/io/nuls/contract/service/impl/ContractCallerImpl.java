@@ -109,9 +109,9 @@ public class ContractCallerImpl implements ContractCaller {
             String hash = tx.getHash().toHex();
             Future<ContractResult> contractResultFuture = TX_EXECUTOR_SERVICE.submit(txCallable);
             batchInfo.getContractMap().put(hash, contractResultFuture);
-            if(Log.isDebugEnabled()) {
-                Log.debug("contract-tx-executor-pool put hash [{}]", hash);
-            }
+            //if(Log.isDebugEnabled()) {
+            //    Log.debug("contract-tx-executor-pool put hash [{}]", hash);
+            //}
             container.getFutureList().add(contractResultFuture);
 
             return getSuccess();
