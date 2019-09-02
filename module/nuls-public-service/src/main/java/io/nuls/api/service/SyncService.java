@@ -232,8 +232,8 @@ public class SyncService {
 //            AccountLedgerInfo ledgerInfo = calcBalance(chainId, output);
 //            txRelationInfoSet.add(new TxRelationInfo(output, tx, ledgerInfo.getTotalBalance()));
 
-            //创世块的数据不计算共识奖励
-            if (tx.getHeight() == 0) {
+            //创世块的数据和合约返还不计算共识奖励
+            if (tx.getHeight() == 0 || tx.getType() == TxType.CONTRACT_RETURN_GAS) {
                 continue;
             }
             //奖励是本链主资产的时候，累计奖励金额
