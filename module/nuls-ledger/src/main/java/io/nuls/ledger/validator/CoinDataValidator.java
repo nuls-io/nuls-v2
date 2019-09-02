@@ -143,6 +143,7 @@ public class CoinDataValidator {
         Map<String, List<TempAccountNonce>> accountValidateTxMap = new HashMap<>(1024);
         Map<String, AccountState> accountStateMap = new HashMap<>(1024);
         for (Transaction tx : txs) {
+            LoggerUtil.DEBUGHASH.info("height={},hash={}",height,tx.getHash().toHex());
             ValidateResult validateResult = blockTxsValidate(chainId, tx, batchValidateTxSet, accountValidateTxMap, accountStateMap);
             if (!validateResult.isSuccess()) {
                 LoggerUtil.logger(chainId).error("code={},msg={}", validateResult.getValidateCode(), validateResult.getValidateCode());

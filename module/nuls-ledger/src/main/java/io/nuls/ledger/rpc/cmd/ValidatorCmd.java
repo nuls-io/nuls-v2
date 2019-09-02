@@ -96,6 +96,7 @@ public class ValidatorCmd extends BaseLedgerCmd {
             List<String> failList = new ArrayList<>();
             for (Transaction tx : txList) {
                 String txHash = tx.getHash().toHex();
+                LoggerUtil.DEBUGHASH.info("verifyCoinDataBatchPackaged,hash={}",txHash);
                 ValidateResult validateResult = coinDataValidator.bathValidatePerTx(chainId, tx);
                 if (validateResult.isSuccess()) {
                     //success
