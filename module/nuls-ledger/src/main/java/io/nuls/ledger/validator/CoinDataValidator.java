@@ -140,7 +140,7 @@ public class CoinDataValidator {
     public boolean blockValidate(int chainId, long height, List<Transaction> txs) {
         LoggerUtil.logger(chainId).debug("blocksValidate chainId={},height={},txsNumber={}", chainId, height, txs.size());
         long currentDbHeight = repository.getBlockHeight(chainId);
-        if ((height - currentDbHeight) > 1) {
+        if ((height - currentDbHeight) > 1 || (height - currentDbHeight) <= 0) {
             LoggerUtil.logger(chainId).error("addressChainId ={},blockHeight={},ledgerBlockHeight={}", chainId, height, currentDbHeight);
             return false;
         }
