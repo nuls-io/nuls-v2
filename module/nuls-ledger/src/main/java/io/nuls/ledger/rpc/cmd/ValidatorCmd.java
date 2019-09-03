@@ -94,9 +94,10 @@ public class ValidatorCmd extends BaseLedgerCmd {
             List<String> orphanList = new ArrayList<>();
             List<String> successList = new ArrayList<>();
             List<String> failList = new ArrayList<>();
+            StringBuilder sb = new StringBuilder("");
             for (Transaction tx : txList) {
                 String txHash = tx.getHash().toHex();
-                LoggerUtil.DEBUGHASH.info("verifyCoinDataBatchPackaged,hash={}",txHash);
+                sb.append(txHash+",");
                 ValidateResult validateResult = coinDataValidator.bathValidatePerTx(chainId, tx);
                 if (validateResult.isSuccess()) {
                     //success
@@ -110,9 +111,9 @@ public class ValidatorCmd extends BaseLedgerCmd {
 //                    LoggerUtil.logger(chainId).debug("verifyCoinDataBatchPackaged failed txHash={}", txHash);
                 }
             }
-
+            LoggerUtil.VALIDATE_LOG.debug("verifyCoinDataBatchPackaged:{}",sb.toString());
             Map<String, Object> rtMap = new HashMap<>(3);
-            if(failList.size()>0) {
+            if (failList.size() > 0) {
                 LoggerUtil.logger(chainId).debug("verifyCoinDataBatchPackaged failed txs size={}", failList.size());
             }
             rtMap.put("fail", failList);

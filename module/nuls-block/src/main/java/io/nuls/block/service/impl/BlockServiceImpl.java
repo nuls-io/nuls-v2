@@ -336,7 +336,7 @@ public class BlockServiceImpl implements BlockService {
 
             //5.通知协议升级模块,完全保存,更新标记
             blockHeaderPo.setComplete(true);
-            if (!ProtocolCall.saveNotice(chainId, header) || !blockStorageService.save(chainId, blockHeaderPo) || !TransactionCall.heightNotice(chainId, height)) {
+            if (!ProtocolCall.saveNotice(chainId, header) || !blockStorageService.save(chainId, blockHeaderPo)) {
                 if (!ConsensusCall.rollbackNotice(chainId, height)) {
                     throw new NulsRuntimeException(BlockErrorCode.CS_ROLLBACK_ERROR);
                 }
@@ -353,6 +353,7 @@ public class BlockServiceImpl implements BlockService {
                 return false;
             }
             try {
+                TransactionCall.heightNotice(chainId, height);
                 CrossChainCall.heightNotice(chainId, height, RPCUtil.encode(block.getHeader().serialize()));
             }catch (Exception e){
                 LoggerUtil.COMMON_LOG.error(e);
@@ -412,7 +413,7 @@ public class BlockServiceImpl implements BlockService {
         try {
             BlockHeader blockHeader = BlockUtil.fromBlockHeaderPo(blockHeaderPo);
             blockHeaderPo.setComplete(false);
-            if (!TransactionCall.heightNotice(chainId, height - 1) || !blockStorageService.save(chainId, blockHeaderPo) || !ProtocolCall.rollbackNotice(chainId, blockHeader)) {
+            if (!blockStorageService.save(chainId, blockHeaderPo) || !ProtocolCall.rollbackNotice(chainId, blockHeader)) {
                 logger.error("ProtocolCall rollbackNotice fail! height-" + height);
                 return false;
             }
@@ -490,7 +491,8 @@ public class BlockServiceImpl implements BlockService {
                 return false;
             }
             try {
-                CrossChainCall.heightNotice(chainId, height, RPCUtil.encode(blockHeader.serialize()));
+                TransactionCall.heightNotice(chainId, height - 1);
+                CrossChainCall.heightNotice(chainId, height - 1, RPCUtil.encode(blockHeader.serialize()));
             } catch (Exception e) {
                 LoggerUtil.COMMON_LOG.error(e);
             }

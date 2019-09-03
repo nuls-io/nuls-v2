@@ -105,17 +105,19 @@ public class MongoAccountServiceImpl implements AccountService {
         Bson addressFilter = Filters.eq("address", address);
 
         if (type > 0 && startHeight > -1 && endHeight > -1) {
-            filter = Filters.and(addressFilter, Filters.gte("height", startHeight), Filters.lte("height", endHeight));
+            filter = Filters.and(addressFilter, Filters.eq("type", type), Filters.gte("height", startHeight), Filters.lte("height", endHeight));
         } else if (type > 0 && startHeight > -1) {
-            filter = Filters.and(addressFilter, Filters.gte("height", startHeight));
+            filter = Filters.and(addressFilter, Filters.eq("type", type), Filters.gte("height", startHeight));
         } else if (type > 0 && endHeight > -1) {
-            filter = Filters.and(addressFilter, Filters.lte("height", endHeight));
+            filter = Filters.and(addressFilter, Filters.eq("type", type), Filters.lte("height", endHeight));
         } else if (startHeight > -1 && endHeight > -1) {
-            filter = Filters.and(Filters.gte("height", startHeight), Filters.lte("height", endHeight));
+            filter = Filters.and(addressFilter, Filters.gte("height", startHeight), Filters.lte("height", endHeight));
         } else if (startHeight > -1) {
-            filter = Filters.and(Filters.gte("height", startHeight));
+            filter = Filters.and(addressFilter, Filters.gte("height", startHeight));
         } else if (endHeight > -1) {
-            filter = Filters.and(Filters.lte("height", endHeight));
+            filter = Filters.and(addressFilter, Filters.lte("height", endHeight));
+        } else if (type > 0) {
+            filter = Filters.and(addressFilter, Filters.eq("type", type));
         } else {
             filter = addressFilter;
         }
@@ -145,17 +147,19 @@ public class MongoAccountServiceImpl implements AccountService {
         Bson addressFilter = Filters.eq("address", address);
 
         if (type > 0 && startHeight > -1 && endHeight > -1) {
-            filter = Filters.and(addressFilter, Filters.gte("height", startHeight), Filters.lte("height", endHeight));
+            filter = Filters.and(addressFilter, Filters.eq("type", type), Filters.gte("height", startHeight), Filters.lte("height", endHeight));
         } else if (type > 0 && startHeight > -1) {
-            filter = Filters.and(addressFilter, Filters.gte("height", startHeight));
+            filter = Filters.and(addressFilter, Filters.eq("type", type), Filters.gte("height", startHeight));
         } else if (type > 0 && endHeight > -1) {
-            filter = Filters.and(addressFilter, Filters.lte("height", endHeight));
+            filter = Filters.and(addressFilter, Filters.eq("type", type), Filters.lte("height", endHeight));
         } else if (startHeight > -1 && endHeight > -1) {
-            filter = Filters.and(Filters.gte("height", startHeight), Filters.lte("height", endHeight));
+            filter = Filters.and(addressFilter, Filters.gte("height", startHeight), Filters.lte("height", endHeight));
         } else if (startHeight > -1) {
-            filter = Filters.and(Filters.gte("height", startHeight));
+            filter = Filters.and(addressFilter, Filters.gte("height", startHeight));
         } else if (endHeight > -1) {
-            filter = Filters.and(Filters.lte("height", endHeight));
+            filter = Filters.and(addressFilter, Filters.lte("height", endHeight));
+        } else if (type > 0) {
+            filter = Filters.and(addressFilter, Filters.eq("type", type));
         } else {
             filter = addressFilter;
         }
