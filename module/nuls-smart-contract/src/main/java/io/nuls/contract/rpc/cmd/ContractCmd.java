@@ -58,7 +58,6 @@ import java.math.BigInteger;
 import java.util.*;
 
 import static io.nuls.contract.constant.ContractCmdConstant.*;
-import static io.nuls.contract.constant.ContractCmdConstant.PACKAGE_BATCH_END;
 import static io.nuls.contract.constant.ContractConstant.*;
 import static io.nuls.contract.constant.ContractErrorCode.*;
 import static io.nuls.contract.util.ContractUtil.*;
@@ -123,15 +122,18 @@ public class ContractCmd extends BaseCmd {
             tx.setTxHex(txData);
             tx.parse(RPCUtil.decode(txData), 0);
             String hash = tx.getHash().toHex();
+            Map<String, Boolean> dealResult = new HashMap<>(2);
             if(!contractHelper.getChain(chainId).getBatchInfo().checkGasCostTotal(hash)) {
                 Log.warn("Exceed tx count [500] or gas limit of block [15,000,000 gas], the contract transaction [{}] revert to package queue.", hash);
-                return success();
+                dealResult.put(RPC_RESULT_KEY, false);
+                return success(dealResult);
             }
             Result result = contractService.invokeContractOneByOne(chainId, tx);
             if (result.isFailed()) {
                 return wrapperFailed(result);
             }
-            return success();
+            dealResult.put(RPC_RESULT_KEY, true);
+            return success(dealResult);
         } catch (Exception e) {
             Log.error(e);
             return failed(e.getMessage());

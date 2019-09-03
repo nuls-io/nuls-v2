@@ -1,5 +1,6 @@
 package io.nuls.api.analysis;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.constant.CommandConstant;
@@ -12,10 +13,13 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
 import io.nuls.core.basic.Result;
+import io.nuls.core.constant.CommonCodeConstanst;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 
@@ -404,18 +408,12 @@ public class AnalysisHandler {
         contractInfo.setAlias(data.getAlias());
         contractInfo.setBlockHeight(tx.getBlockHeight());
         contractInfo.setCreateTime(tx.getTime());
-        String args = "";
-        String[][] arrays = data.getArgs();
-        if (arrays != null) {
-            for (String[] arg : arrays) {
-                if (arg != null) {
-                    for (String s : arg) {
-                        args = args + s + ",";
-                    }
-                }
-            }
+        try {
+            String args = JSONUtils.obj2json(data.getArgs());
+            contractInfo.setArgs(args);
+        } catch (JsonProcessingException e) {
+            throw new NulsException(CommonCodeConstanst.DATA_PARSE_ERROR);
         }
-        contractInfo.setArgs(args);
         if (tx.getStatus() == TxStatusEnum.CONFIRMED) {
             Result<ContractInfo> result = WalletRpcHandler.getContractInfo(chainId, contractInfo);
             return result.getData();
@@ -432,18 +430,12 @@ public class AnalysisHandler {
         contractInfo.setContractAddress(AddressTool.getStringAddressByBytes(data.getContractAddress()));
         contractInfo.setBlockHeight(tx.getBlockHeight());
         contractInfo.setCreateTime(tx.getTime());
-        String args = "";
-        String[][] arrays = data.getArgs();
-        if (arrays != null) {
-            for (String[] arg : arrays) {
-                if (arg != null) {
-                    for (String s : arg) {
-                        args = args + s + ",";
-                    }
-                }
-            }
+        try {
+            String args = JSONUtils.obj2json(data.getArgs());
+            contractInfo.setArgs(args);
+        } catch (JsonProcessingException e) {
+            throw new NulsException(CommonCodeConstanst.DATA_PARSE_ERROR);
         }
-        contractInfo.setArgs(args);
         contractInfo.setResultInfo(resultInfo);
         if (!resultInfo.isSuccess()) {
             contractInfo.setSuccess(false);
@@ -513,18 +505,12 @@ public class AnalysisHandler {
         callInfo.setMethodDesc(data.getMethodDesc());
         callInfo.setCreateTxHash(tx.getHash().toHex());
         callInfo.setValue(data.getValue());
-        String args = "";
-        String[][] arrays = data.getArgs();
-        if (arrays != null) {
-            for (String[] arg : arrays) {
-                if (arg != null) {
-                    for (String s : arg) {
-                        args = args + s + ",";
-                    }
-                }
-            }
+        try {
+            String args = JSONUtils.obj2json(data.getArgs());
+            callInfo.setArgs(args);
+        } catch (JsonProcessingException e) {
+            throw new NulsException(CommonCodeConstanst.DATA_PARSE_ERROR);
         }
-        callInfo.setArgs(args);
 
         //查询智能合约详情之前，先查询创建智能合约的执行结果是否成功
         if (tx.getStatus() == TxStatusEnum.CONFIRMED) {
@@ -547,18 +533,12 @@ public class AnalysisHandler {
         callInfo.setMethodDesc(data.getMethodDesc());
         callInfo.setCreateTxHash(tx.getHash().toHex());
         callInfo.setValue(data.getValue());
-        String args = "";
-        String[][] arrays = data.getArgs();
-        if (arrays != null) {
-            for (String[] arg : arrays) {
-                if (arg != null) {
-                    for (String s : arg) {
-                        args = args + s + ",";
-                    }
-                }
-            }
+        try {
+            String args = JSONUtils.obj2json(data.getArgs());
+            callInfo.setArgs(args);
+        } catch (JsonProcessingException e) {
+            throw new NulsException(CommonCodeConstanst.DATA_PARSE_ERROR);
         }
-        callInfo.setArgs(args);
         callInfo.setResultInfo(resultInfo);
         return callInfo;
     }

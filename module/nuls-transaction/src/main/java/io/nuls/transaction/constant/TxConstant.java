@@ -65,6 +65,8 @@ public interface TxConstant {
     int PACKABLE_TX_MAP_HEAVY_DATA_SIZE = 200000 * 300;
     int PACKABLE_TX_MAP_MAX_DATA_SIZE = 250000 * 300;
 
+    int ORPHAN_LIST_MAX_DATA_SIZE = 50000 * 300;
+
     int PACKAGE_TX_MAX_COUNT = 10000;
     /** 一个区块中最大允许跨链模块交易的数量*/
     int PACKAGE_CROSS_TX_MAX_COUNT = 500;
@@ -76,5 +78,5 @@ public interface TxConstant {
      2：调用各模块验证器验证交易，获取智能合约结果。
      该配置为固定给第二部分预留的时间，其他时间留给第一部分。
      */
-    long PACKAGE_MODULE_VALIDATOR_RESERVE_TIME = 1500L;
+    long PACKAGE_MODULE_VALIDATOR_RESERVE_TIME = 2000L;//1500L;
 }

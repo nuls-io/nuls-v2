@@ -61,7 +61,7 @@ public interface NulsCrossChainConstant {
      * */
     String COMMON_LOG_NAME = "common";
 
-    int CHAIN_ID_MIN = 1;
+    int CHAIN_ID_MIN = 0;
 
     /**
      * 跨链交易固定为非解锁交易
@@ -82,6 +82,8 @@ public interface NulsCrossChainConstant {
     long BYZANTINE_TIMEOUT = 10 * 1000L;
 
     int BYZANTINE_TRY_COUNT = 5;
+
+    int FAULT_TOLERANT_RATIO = 10;
 
     int MAGIC_NUM_100 =100;
 
