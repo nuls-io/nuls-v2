@@ -194,8 +194,8 @@ public class EconomicManager {
         long endTime = consensusConfig.getInitTime() + consensusConfig.getDeflationTimeInterval();
 
         if(time < startTime){
-            Log.error("The current time is less than the initial time of inflation");
-            throw new NulsException(CommonCodeConstanst.PARAMETER_ERROR);
+            time = startTime;
+            Log.info("当前时间小于通缩开始时间！" );
         }
 
         if(lastVisitInflationInfo != null && time >= lastVisitInflationInfo.getStartTime() && time <= lastVisitInflationInfo.getEndTime()){
@@ -205,8 +205,8 @@ public class EconomicManager {
         if(time <= endTime){
             inflationInfo.setStartTime(startTime);
             inflationInfo.setEndTime(endTime);
-            inflationInfo.setInflationAmount(consensusConfig.getInflationAmount());
-            inflationInfo.setAwardUnit(calcAwardUnit(consensusConfig, consensusConfig.getInflationAmount()));
+            inflationInfo.setInflationAmount(new BigDecimal(consensusConfig.getInflationAmount()));
+            inflationInfo.setAwardUnit(calcAwardUnit(consensusConfig, new BigDecimal(consensusConfig.getInflationAmount())));
         }else{
             long differentCount = (time - endTime)/consensusConfig.getDeflationTimeInterval();
             if((time - endTime)%consensusConfig.getDeflationTimeInterval() != 0){
@@ -215,8 +215,8 @@ public class EconomicManager {
             long differentTime = consensusConfig.getDeflationTimeInterval()* differentCount;
             inflationInfo.setStartTime(startTime + differentTime);
             inflationInfo.setEndTime(endTime + differentTime);
-            double ratio = DoubleUtils.div(consensusConfig.getDeflationRatio(), NulsEconomicConstant.VALUE_OF_100, 2);
-            BigInteger inflationAmount = DoubleUtils.mul(new BigDecimal(consensusConfig.getInflationAmount()),BigDecimal.valueOf(Math.pow(ratio, differentCount))).toBigInteger();
+            double ratio = DoubleUtils.div(consensusConfig.getDeflationRatio(), NulsEconomicConstant.VALUE_OF_100, 4);
+            BigDecimal inflationAmount = DoubleUtils.mul(new BigDecimal(consensusConfig.getInflationAmount()),BigDecimal.valueOf(Math.pow(ratio, differentCount)));
             inflationInfo.setInflationAmount(inflationAmount);
             inflationInfo.setAwardUnit(calcAwardUnit(consensusConfig,inflationAmount));
         }
@@ -225,8 +225,8 @@ public class EconomicManager {
         return inflationInfo;
     }
 
-    private static double calcAwardUnit(ConsensusConfigInfo consensusConfig, BigInteger inflationAmount){
+    private static double calcAwardUnit(ConsensusConfigInfo consensusConfig, BigDecimal inflationAmount){
         long blockCount = consensusConfig.getDeflationTimeInterval()/consensusConfig.getPackingInterval();
-        return DoubleUtils.div(inflationAmount, BigInteger.valueOf(blockCount), 2);
+        return DoubleUtils.div(inflationAmount, BigDecimal.valueOf(blockCount)).setScale(4, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
 }

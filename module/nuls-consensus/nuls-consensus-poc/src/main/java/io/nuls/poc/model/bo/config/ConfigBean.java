@@ -88,12 +88,6 @@ public class ConfigBean extends BaseNulsData {
     private String seedNodes;
 
     /**
-     * 节点委托金额最大值
-     * Maximum Node Delegation Amount
-     */
-    private BigInteger inflationAmount;
-
-    /**
      * 出块节点密码
      * */
     private String password;
@@ -136,6 +130,18 @@ public class ConfigBean extends BaseNulsData {
     private long feeUnit;
 
     /**
+     * 总流通量
+     * Total circulation
+     */
+    private BigInteger totalCirculation;
+
+    /**
+     * 初始通胀金额
+     * Initial Inflation Amount
+     */
+    private BigInteger inflationAmount;
+
+    /**
      * 通胀开始时间
      * */
     private long initTime;
@@ -143,7 +149,7 @@ public class ConfigBean extends BaseNulsData {
     /**
      * 通缩比例
      * */
-    private byte deflationRatio;
+    private double deflationRatio;
 
     /**
      * 通缩间隔时间
@@ -327,11 +333,11 @@ public class ConfigBean extends BaseNulsData {
         this.initTime = initTime;
     }
 
-    public byte getDeflationRatio() {
+    public double getDeflationRatio() {
         return deflationRatio;
     }
 
-    public void setDeflationRatio(byte deflationRatio) {
+    public void setDeflationRatio(double deflationRatio) {
         this.deflationRatio = deflationRatio;
     }
 
@@ -341,6 +347,14 @@ public class ConfigBean extends BaseNulsData {
 
     public void setDeflationTimeInterval(long deflationTimeInterval) {
         this.deflationTimeInterval = deflationTimeInterval;
+    }
+
+    public BigInteger getTotalCirculation() {
+        return totalCirculation;
+    }
+
+    public void setTotalCirculation(BigInteger totalCirculation) {
+        this.totalCirculation = totalCirculation;
     }
 
     @Override
@@ -358,7 +372,6 @@ public class ConfigBean extends BaseNulsData {
         stream.writeString(seedNodes);
         stream.writeUint16(assetId);
         stream.writeUint16(chainId);
-        stream.writeBigInteger(inflationAmount);
         stream.writeString(password);
         stream.writeUint48(blockMaxSize);
         stream.writeBigInteger(blockReward);
@@ -366,8 +379,10 @@ public class ConfigBean extends BaseNulsData {
         stream.writeUint16(agentChainId);
         stream.writeUint16(awardAssetId);
         stream.writeUint32(feeUnit);
+        stream.writeBigInteger(totalCirculation);
+        stream.writeBigInteger(inflationAmount);
         stream.writeUint32(initTime);
-        stream.writeByte(deflationRatio);
+        stream.writeDouble(deflationRatio);
         stream.writeUint32(deflationTimeInterval);
     }
 
@@ -386,7 +401,6 @@ public class ConfigBean extends BaseNulsData {
         this.seedNodes = byteBuffer.readString();
         this.assetId = byteBuffer.readUint16();
         this.chainId = byteBuffer.readUint16();
-        this.inflationAmount = byteBuffer.readBigInteger();
         this.password = byteBuffer.readString();
         this.blockMaxSize = byteBuffer.readUint48();
         this.blockReward = byteBuffer.readBigInteger();
@@ -394,8 +408,10 @@ public class ConfigBean extends BaseNulsData {
         this.agentChainId = byteBuffer.readUint16();
         this.awardAssetId = byteBuffer.readUint16();
         this.feeUnit = byteBuffer.readUint32();
+        this.totalCirculation = byteBuffer.readBigInteger();
+        this.inflationAmount = byteBuffer.readBigInteger();
         this.initTime = byteBuffer.readUint32();
-        this.deflationRatio = byteBuffer.readByte();
+        this.deflationRatio = byteBuffer.readDouble();
         this.deflationTimeInterval = byteBuffer.readUint32();
     }
 
@@ -404,8 +420,9 @@ public class ConfigBean extends BaseNulsData {
         int size = 0;
         size += SerializeUtils.sizeOfUint48();
         size += SerializeUtils.sizeOfUint32() * 5;
-        size += 3;
-        size += SerializeUtils.sizeOfBigInteger() * 7;
+        size += 2;
+        size += SerializeUtils.sizeOfDouble(deflationRatio);
+        size += SerializeUtils.sizeOfBigInteger() * 8;
         size += SerializeUtils.sizeOfString(seedNodes);
         size += SerializeUtils.sizeOfUint16() * 5;
         size += SerializeUtils.sizeOfString(password);

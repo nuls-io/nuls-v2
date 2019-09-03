@@ -1,7 +1,6 @@
 package io.nuls.economic.nuls.model.bo;
 
-import java.math.BigInteger;
-
+import java.math.BigDecimal;
 /**
  * 当前通胀阶段详情
  * Details of the current inflation stage
@@ -12,7 +11,7 @@ import java.math.BigInteger;
 public class InflationInfo {
     private long startTime;
     private long endTime;
-    private BigInteger inflationAmount ;
+    private BigDecimal inflationAmount ;
     private double awardUnit;
 
     public long getStartTime() {
@@ -31,11 +30,11 @@ public class InflationInfo {
         this.endTime = endTime;
     }
 
-    public BigInteger getInflationAmount() {
+    public BigDecimal getInflationAmount() {
         return inflationAmount;
     }
 
-    public void setInflationAmount(BigInteger inflationAmount) {
+    public void setInflationAmount(BigDecimal inflationAmount) {
         this.inflationAmount = inflationAmount;
     }
 
