@@ -619,7 +619,9 @@ public class RollbackService {
 
     private AccountTokenInfo processAccountNrc20(int chainId, ContractInfo contractInfo, String address, BigInteger value, int type) {
         AccountTokenInfo tokenInfo = queryAccountTokenInfo(chainId, address + contractInfo.getContractAddress());
-
+        if(tokenInfo == null) {
+            return null;
+        }
         if (type == 1) {
             tokenInfo.setBalance(tokenInfo.getBalance().add(value));
         } else {
