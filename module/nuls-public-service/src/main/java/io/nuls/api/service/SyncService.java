@@ -228,10 +228,11 @@ public class SyncService {
         addressSet.clear();
         for (CoinToInfo output : tx.getCoinTos()) {
             addressSet.add(output.getAddress());
-            calcBalance(chainId, output);
-//            AccountLedgerInfo ledgerInfo = calcBalance(chainId, output);
-//            txRelationInfoSet.add(new TxRelationInfo(output, tx, ledgerInfo.getTotalBalance()));
-
+            AccountLedgerInfo ledgerInfo = calcBalance(chainId, output);
+            //如果是共识奖励，则不存储交易关系表记录
+            if (tx.getType() == TxType.CONTRACT_RETURN_GAS) {
+                txRelationInfoSet.add(new TxRelationInfo(output, tx, ledgerInfo.getTotalBalance()));
+            }
             //创世块的数据和合约返还不计算共识奖励
             if (tx.getHeight() == 0 || tx.getType() == TxType.CONTRACT_RETURN_GAS) {
                 continue;
