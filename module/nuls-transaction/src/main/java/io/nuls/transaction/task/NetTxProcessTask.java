@@ -183,13 +183,7 @@ public class NetTxProcessTask implements Runnable {
             if (failHashs.isEmpty() && orphanHashs.isEmpty()) {
                 return;
             }
-            //孤儿交易集合数据总大小
-            int orphanListSize = 0;
-            if(orphanHashs.size() > 0){
-                for(TransactionNetPO txPO : chain.getOrphanList()){
-                    orphanListSize += txPO.size();
-                }
-            }
+
             Iterator<TransactionNetPO> it = txNetList.iterator();
             removeAndGo:
             while (it.hasNext()) {
@@ -204,22 +198,24 @@ public class NetTxProcessTask implements Runnable {
                     }
                 }
                 //去除孤儿交易, 同时把孤儿交易放入孤儿池
-
                 for (String hash : orphanHashs) {
                     String hashStr = tx.getHash().toHex();
                     if (hash.equals(hashStr)) {
-                        if(orphanListSize >= TxConstant.ORPHAN_LIST_MAX_DATA_SIZE){
+                        //孤儿交易
+                        List<TransactionNetPO> chainOrphan = chain.getOrphanList();
+                        //孤儿交易集合数据总大小
+                        if (chain.getOrphanListDataSize().get() >= TxConstant.ORPHAN_LIST_MAX_DATA_SIZE) {
                             chain.getLogger().warn("Orphan tx list data size reach discard orphan transaction threshold, hash:{}", tx.getHash().toHex());
                             it.remove();
                             break;
+                        } else {
+                            synchronized (chainOrphan) {
+                                chainOrphan.add(transactionNetPO);
+                                chain.getOrphanListDataSize().addAndGet(transactionNetPO.getTx().size());
+                            }
+                            it.remove();
+                            continue removeAndGo;
                         }
-                        //孤儿交易
-                        List<TransactionNetPO> chainOrphan = chain.getOrphanList();
-                        synchronized (chainOrphan) {
-                            chainOrphan.add(transactionNetPO);
-                        }
-                        it.remove();
-                        continue removeAndGo;
                     }
                 }
             }

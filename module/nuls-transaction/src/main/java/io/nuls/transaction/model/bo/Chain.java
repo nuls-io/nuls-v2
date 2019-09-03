@@ -17,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -76,6 +77,7 @@ public class Chain {
 
     private Map<String, Orphans> orphanMap;
 
+    private AtomicInteger orphanListDataSize;
     /**
      * 当前最新高度
      */
@@ -126,6 +128,7 @@ public class Chain {
         this.orphanList = new LinkedList<>();
         this.orphanMap = new ConcurrentHashMap<>();
         this.protocolUpgrade = new AtomicBoolean(false);
+        this.orphanListDataSize = new AtomicInteger(0);
     }
 
     public int getChainId(){
@@ -246,5 +249,9 @@ public class Chain {
 
     public AtomicBoolean getPackableState() {
         return packableState;
+    }
+
+    public AtomicInteger getOrphanListDataSize() {
+        return orphanListDataSize;
     }
 }
