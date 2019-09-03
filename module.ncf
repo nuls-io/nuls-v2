@@ -80,7 +80,7 @@ inflationAmount=41095890410959
 #通胀开始计算时间(单位:S)2020-07-12 00:00:00
 initTime=1594483200
 #通缩比例(如果没有通缩则设为100)
-deflationRatio=0.996
+deflationRatio=99.6
 #通缩间隔时间(单位：S),30天
 deflationTimeInterval=2592000
 dataPath=../../../../../data
