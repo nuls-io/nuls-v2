@@ -128,7 +128,7 @@ public class CrossTxValidator {
                 verifierList = ConsensusCall.getRoundMemberList(chain, blockHeader);
             }
             if(verifierList != null){
-                minPassCount = CommonUtil.getByzantineCount(verifierList, chain);
+                minPassCount = CommonUtil.getByzantineCount(verifierList, chain, true);
             }
             //如果本链不为主网且交易是跨链转账交易，则需要验证原交易签名，和主网协议交易签名
             if(!config.isMainNet()){
@@ -213,7 +213,7 @@ public class CrossTxValidator {
                 verifierList = ConsensusCall.getRoundMemberList(chain, blockHeader);
             }
             if(verifierList != null){
-                minPassCount = CommonUtil.getByzantineCount(verifierList, chain);
+                minPassCount = CommonUtil.getByzantineCount(verifierList, chain, true);
             }
             //如果本链不为主网且交易是跨链转账交易，则需要验证原交易签名，和主网协议交易签名
             if(!config.isMainNet()){
@@ -384,23 +384,24 @@ public class CrossTxValidator {
         }
         chain.getLogger().debug("当前验证人列表：{}",verifierList.toString());
         Iterator<P2PHKSignature> iterator = transactionSignature.getP2PHKSignatures().iterator();
+        int passCount = 0;
         while (iterator.hasNext()){
             P2PHKSignature signature = iterator.next();
-            boolean isMatchSign = false;
             for (String verifier:verifierList) {
                 if(Arrays.equals(AddressTool.getAddress(signature.getPublicKey(), verifierChainId), AddressTool.getAddress(verifier))){
-                    isMatchSign = true;
+                    passCount++;
                     fromAddressList.remove(verifier);
                     break;
                 }
             }
-            if(!isMatchSign){
-                chain.getLogger().error("跨链交易签名验证失败，Hash:{},sign{}",ctx.getHash().toHex(), signature.getSignerHash160());
-                return false;
-            }
+
+        }
+        if(passCount < byzantineCount){
+            chain.getLogger().error("跨链交易签名验证通过数小于拜占庭数量，Hash:{},passCount:{},byzantineCount:{}", ctx.getHash().toHex(),passCount,byzantineCount);
+            return false;
         }
         if(!fromAddressList.isEmpty()){
-            chain.getLogger().info("签名验证失败！");
+            chain.getLogger().info("跨链转账交易创建者签名验证失败！");
             return false;
         }
         return true;
