@@ -976,6 +976,7 @@ public class TxServiceImpl implements TxService {
                 for (String hash : failHashs) {
                     String hashStr = transaction.getHash().toHex();
                     if (hash.equals(hashStr)) {
+                        chain.getLogger().error("Package verify Ledger fail tx type:{}, - hash:{}", hash, transaction.getType());
                         if (!backContract && proccessContract && TxManager.isUnSystemSmartContract(chain, transaction.getType())) {
                             //设置标志,如果是智能合约的非系统交易,未验证通过,则需要将所有非系统智能合约交易还回待打包队列.
                             backContract = true;
@@ -990,6 +991,7 @@ public class TxServiceImpl implements TxService {
                 for (String hash : orphanHashs) {
                     String hashStr = transaction.getHash().toHex();
                     if (hash.equals(hashStr)) {
+                        chain.getLogger().error("Package verify Ledger orphan tx type:{}, - hash:{}", hash, transaction.getType());
                         if (!backContract && proccessContract && TxManager.isUnSystemSmartContract(chain, transaction.getType())) {
                             //设置标志, 如果是智能合约的非系统交易,未验证通过,则需要将所有非系统智能合约交易还回待打包队列.
                             backContract = true;
@@ -1253,7 +1255,7 @@ public class TxServiceImpl implements TxService {
         });
         for (TxPackageWrapper txPackageWrapper : txList) {
             packablePool.offerFirst(chain, txPackageWrapper.getTx());
-            chain.getLogger().info("putBackPackablePool tx hash:{}", txPackageWrapper.getTx().getHash().toHex());
+            chain.getLogger().debug("putBackPackablePool tx hash:{}", txPackageWrapper.getTx().getHash().toHex());
         }
         chain.getLogger().info("putBackPackablePool count:{}", txList.size());
     }
