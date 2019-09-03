@@ -165,7 +165,7 @@ public class BlockServiceImpl implements BlockService {
                 boolean verifierChange = (registerAgentList != null && !registerAgentList.isEmpty()) || (cancelAgentList != null && !cancelAgentList.isEmpty());
                 if(verifierChange){
                     chain.getLogger().info("有验证人变化，创建验证人变化交易!");
-                    Transaction verifierChangeTx = TxUtil.createVerifierChangeTx(registerAgentList, cancelAgentList, blockHeader.getTime(),chainId);
+                    Transaction verifierChangeTx = TxUtil.createVerifierChangeTx(registerAgentList, cancelAgentList, blockHeader.getExtendsData().getRoundStartTime(),chainId);
                     TxUtil.handleNewCtx(verifierChangeTx, chain, registerAgentList);
                 }
             }

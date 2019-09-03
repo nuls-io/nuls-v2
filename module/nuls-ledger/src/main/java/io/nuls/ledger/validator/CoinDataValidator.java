@@ -147,13 +147,16 @@ public class CoinDataValidator {
         Set<String> batchValidateTxSet = new HashSet<>(txs.size());
         Map<String, List<TempAccountNonce>> accountValidateTxMap = new HashMap<>(1024);
         Map<String, AccountState> accountStateMap = new HashMap<>(1024);
+        StringBuilder sb = new StringBuilder("");
         for (Transaction tx : txs) {
+            sb.append(tx.getHash().toHex()+",");
             ValidateResult validateResult = blockTxsValidate(chainId, tx, batchValidateTxSet, accountValidateTxMap, accountStateMap);
             if (!validateResult.isSuccess()) {
                 LoggerUtil.logger(chainId).error("code={},msg={}", validateResult.getValidateCode(), validateResult.getValidateCode());
                 return false;
             }
         }
+        LoggerUtil.VALIDATE_LOG.debug("blockValidate:height={},hashs={}",height,sb.toString());
         //遍历余额判断
         for (Map.Entry<String, AccountState> entry : accountStateMap.entrySet()) {
             //缓存数据
