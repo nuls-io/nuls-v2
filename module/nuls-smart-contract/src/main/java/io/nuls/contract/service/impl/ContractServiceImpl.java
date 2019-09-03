@@ -152,9 +152,9 @@ public class ContractServiceImpl implements ContractService {
     @Override
     public Result invokeContractOneByOne(int chainId, ContractTempTransaction tx) {
         try {
-            //if (Log.isDebugEnabled()) {
-            //    Log.debug("[Invoke Contract] TxType is [{}], hash is [{}]", tx.getType(), tx.getHash().toString());
-            //}
+            if (Log.isDebugEnabled()) {
+                Log.debug("[Invoke Contract] TxType is [{}], hash is [{}]", tx.getType(), tx.getHash().toString());
+            }
             Chain chain = contractHelper.getChain(chainId);
             BatchInfo batchInfo = chain.getBatchInfo();
             byte[] contractAddressBytes = ContractUtil.extractContractAddressFromTxData(tx);
@@ -168,10 +168,8 @@ public class ContractServiceImpl implements ContractService {
             if (validResult.isFailed()) {
                 return validResult;
             }
-
             String preStateRoot = batchInfo.getPreStateRoot();
             ProgramExecutor batchExecutor = batchInfo.getBatchExecutor();
-
             // 等上次的执行完
             container.loadFutureList();
             // 多线程执行合约
@@ -179,13 +177,13 @@ public class ContractServiceImpl implements ContractService {
             return result;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            Log.error("", e);
+            Log.error(e);
             return getFailed().setMsg(e.getMessage());
         } catch (ExecutionException e) {
-            Log.error("", e);
+            Log.error(e);
             return getFailed().setMsg(e.getMessage());
         } catch (NulsException e) {
-            Log.error("", e);
+            Log.error(e);
             return Result.getFailed(e.getErrorCode() == null ? FAILED : e.getErrorCode());
         }
     }
@@ -228,12 +226,23 @@ public class ContractServiceImpl implements ContractService {
 
     @Override
     public Result packageEnd(int chainId, long blockHeight) {
-
+        /*
+         before = 0
+         now0 = 100
+         timeOut0 = 700
+         firstCost = 200
+         */
         try {
             BatchInfo batchInfo = contractHelper.getChain(chainId).getBatchInfo();
-            long beforeEndTime = batchInfo.getBeforeEndTime();
-            long now0 = System.currentTimeMillis();
+            // 判断超时时间之前，获取此对象，不为空说明已经执行结束，可跳过直接执行后面处理结果的步骤
+            ContractPackageDto dto;
             do {
+                dto = batchInfo.getContractPackageDto();
+                if(dto != null) {
+                    break;
+                }
+                long beforeEndTime = batchInfo.getBeforeEndTime();
+                long now0 = System.currentTimeMillis();
                 long timeOut = 800 - (now0 - beforeEndTime);
                 if(timeOut <= 0) {
                     Log.warn("超过了预留的超时时间[0]: {}", timeOut);
@@ -245,8 +254,14 @@ public class ContractServiceImpl implements ContractService {
                     // 等待before_end执行完成
                     future.get(timeOut, TimeUnit.MILLISECONDS);
                 } catch (Exception e) {
-                    Log.error("wait end time out", e.getMessage());
+                    Log.error("wait end time out[0]", e.getMessage());
                 }
+                dto = batchInfo.getContractPackageDto();
+                if(dto != null) {
+                    break;
+                }
+                long now1 = System.currentTimeMillis();
+                Log.info("第一次花费的时间: {}", now1 - beforeEndTime);
                 // 若超过了区块合约gas或者txCount限制，则中断未执行完的线程
                 if(batchInfo.isExceed()) {
                     Map<String, Future<ContractResult>> contractMap = batchInfo.getContractMap();
@@ -269,8 +284,8 @@ public class ContractServiceImpl implements ContractService {
                     }
                 }
 
-                long now1 = System.currentTimeMillis();
-                timeOut = 300 - (now1 - now0);
+                long now2 = System.currentTimeMillis();
+                timeOut = 1100 - (now2 - beforeEndTime);
                 Log.info("预留的超时时间[1]: {}", timeOut);
                 if(timeOut <= 0) {
                     Log.warn("超过了预留的超时时间[1]: {}", timeOut);
@@ -280,11 +295,10 @@ public class ContractServiceImpl implements ContractService {
                     // 等待before_end执行完成
                     future.get(timeOut, TimeUnit.MILLISECONDS);
                 } catch (Exception e) {
-                    Log.error("wait end time out", e.getMessage());
+                    Log.error("wait end time out[1]", e.getMessage());
                 }
+                Log.info("第二次花费的时间: {}", System.currentTimeMillis() - beforeEndTime);
             } while (false);
-
-            ContractPackageDto dto = batchInfo.getContractPackageDto();
             if (dto == null) {
                 return getFailed();
             }
