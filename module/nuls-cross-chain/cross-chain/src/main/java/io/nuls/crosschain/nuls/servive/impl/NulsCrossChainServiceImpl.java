@@ -123,11 +123,10 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             String password = (String) packerInfo.get("password");
             String address = (String) packerInfo.get("address");
             List<String> packers = (List<String>) packerInfo.get("packAddressList");
-            int verifierSignCount = CommonUtil.getByzantineCount(packers, chain) - 1;
+            int verifierSignCount = CommonUtil.getByzantineCount(packers, chain, true);
             boolean isPacker = false;
             if (!StringUtils.isBlank(address) && !crossTxTransferDTO.getFromAddressList().contains(address)) {
                 isPacker = true;
-                verifierSignCount++;
             }
             txSize += verifierSignCount * P2PHKSignature.SERIALIZE_LENGTH;
 

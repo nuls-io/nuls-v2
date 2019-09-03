@@ -124,6 +124,8 @@ public class CommonUtil {
     @SuppressWarnings("unchecked")
     public static int getByzantineCount(Transaction ctx, List<String> packAddressList, Chain chain)throws NulsException{
         int agentCount = packAddressList.size();
+        int chainId = chain.getChainId();
+        int byzantineRatio = chain.getConfig().getByzantineRatio();
         if(ctx.getType() == TxType.VERIFIER_CHANGE){
             VerifierChangeData verifierChangeData = new VerifierChangeData();
             verifierChangeData.parse(ctx.getTxData(),0);
@@ -133,8 +135,17 @@ public class CommonUtil {
             if(verifierChangeData.getRegisterAgentList() != null){
                 agentCount -= verifierChangeData.getRegisterAgentList().size();
             }
+        }else if(ctx.getType() == config.getCrossCtxType()){
+            int fromChainId = AddressTool.getChainIdByAddress(ctx.getCoinDataInstance().getFrom().get(0).getAddress());
+            int toChainId = AddressTool.getChainIdByAddress(ctx.getCoinDataInstance().getTo().get(0).getAddress());
+            if(chainId == fromChainId || (chainId != toChainId && config.isMainNet())){
+                byzantineRatio += NulsCrossChainConstant.FAULT_TOLERANT_RATIO;
+                if(byzantineRatio > NulsCrossChainConstant.MAGIC_NUM_100){
+                    byzantineRatio = NulsCrossChainConstant.MAGIC_NUM_100;
+                }
+            }
         }
-        int minPassCount = agentCount*chain.getConfig().getByzantineRatio()/ NulsCrossChainConstant.MAGIC_NUM_100;
+        int minPassCount = agentCount*byzantineRatio/ NulsCrossChainConstant.MAGIC_NUM_100;
         if(minPassCount == 0){
             minPassCount = 1;
         }
@@ -146,9 +157,16 @@ public class CommonUtil {
      * 获取当前签名拜占庭数量
      * */
     @SuppressWarnings("unchecked")
-    public static int getByzantineCount(List<String> packAddressList, Chain chain){
+    public static int getByzantineCount(List<String> packAddressList, Chain chain, boolean isFromChain){
         int agentCount = packAddressList.size();
-        int minPassCount = agentCount*chain.getConfig().getByzantineRatio()/ NulsCrossChainConstant.MAGIC_NUM_100;
+        int byzantineRatio = agentCount*chain.getConfig().getByzantineRatio();
+        if(isFromChain){
+            byzantineRatio += NulsCrossChainConstant.FAULT_TOLERANT_RATIO;
+            if(byzantineRatio > NulsCrossChainConstant.MAGIC_NUM_100){
+                byzantineRatio = NulsCrossChainConstant.MAGIC_NUM_100;
+            }
+        }
+        int minPassCount = agentCount * byzantineRatio / NulsCrossChainConstant.MAGIC_NUM_100;
         if(minPassCount == 0){
             minPassCount = 1;
         }

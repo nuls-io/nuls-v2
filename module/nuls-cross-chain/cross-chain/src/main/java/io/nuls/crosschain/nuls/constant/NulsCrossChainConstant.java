@@ -83,6 +83,8 @@ public interface NulsCrossChainConstant {
 
     int BYZANTINE_TRY_COUNT = 5;
 
+    int FAULT_TOLERANT_RATIO = 10;
+
     int MAGIC_NUM_100 =100;
 
     long RPC_TIME_OUT = 5 * 1000L;
