@@ -64,6 +64,7 @@ public class OrphanTxProcessTask implements Runnable {
 
     private OrphanSort orphanSort = SpringLiteContext.getBean(OrphanSort.class);
 
+
     public OrphanTxProcessTask(Chain chain) {
         this.chain = chain;
     }
@@ -156,7 +157,7 @@ public class OrphanTxProcessTask implements Runnable {
             for(Transaction transaction : chain.getPackableTxMap().values()){
                 packableTxMapDataSize += transaction.size();
             }
-            if(TxUtil.discardTx(packableTxMapDataSize)){
+            if(TxUtil.discardTx(chain, packableTxMapDataSize, tx)){
                 //待打包队列map超过预定值, 不处理转发失败的情况
                 String hash = tx.getHash().toHex();
                 NetworkCall.broadcastTx(chain, tx, TxDuplicateRemoval.getExcludeNode(hash));
