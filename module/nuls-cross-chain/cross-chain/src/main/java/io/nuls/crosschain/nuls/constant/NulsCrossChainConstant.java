@@ -61,7 +61,7 @@ public interface NulsCrossChainConstant {
      * */
     String COMMON_LOG_NAME = "common";
 
-    int CHAIN_ID_MIN = 1;
+    int CHAIN_ID_MIN = 0;
 
     /**
      * 跨链交易固定为非解锁交易

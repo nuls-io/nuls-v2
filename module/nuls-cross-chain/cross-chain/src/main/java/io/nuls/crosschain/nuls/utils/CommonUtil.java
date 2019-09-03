@@ -159,7 +159,7 @@ public class CommonUtil {
     @SuppressWarnings("unchecked")
     public static int getByzantineCount(List<String> packAddressList, Chain chain, boolean isFromChain){
         int agentCount = packAddressList.size();
-        int byzantineRatio = agentCount*chain.getConfig().getByzantineRatio();
+        int byzantineRatio = chain.getConfig().getByzantineRatio();
         if(isFromChain){
             byzantineRatio += NulsCrossChainConstant.FAULT_TOLERANT_RATIO;
             if(byzantineRatio > NulsCrossChainConstant.MAGIC_NUM_100){
