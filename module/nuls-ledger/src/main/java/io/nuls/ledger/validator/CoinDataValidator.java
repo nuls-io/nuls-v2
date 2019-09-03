@@ -139,16 +139,24 @@ public class CoinDataValidator {
      */
     public boolean blockValidate(int chainId, long height, List<Transaction> txs) {
         LoggerUtil.logger(chainId).debug("blocksValidate chainId={},height={},txsNumber={}", chainId, height, txs.size());
+        long currentDbHeight = repository.getBlockHeight(chainId);
+        if ((height - currentDbHeight) > 1 || (height - currentDbHeight) <= 0) {
+            LoggerUtil.logger(chainId).error("addressChainId ={},blockHeight={},ledgerBlockHeight={}", chainId, height, currentDbHeight);
+            return false;
+        }
         Set<String> batchValidateTxSet = new HashSet<>(txs.size());
         Map<String, List<TempAccountNonce>> accountValidateTxMap = new HashMap<>(1024);
         Map<String, AccountState> accountStateMap = new HashMap<>(1024);
+        StringBuilder sb = new StringBuilder("");
         for (Transaction tx : txs) {
+            sb.append(tx.getHash().toHex()+",");
             ValidateResult validateResult = blockTxsValidate(chainId, tx, batchValidateTxSet, accountValidateTxMap, accountStateMap);
             if (!validateResult.isSuccess()) {
                 LoggerUtil.logger(chainId).error("code={},msg={}", validateResult.getValidateCode(), validateResult.getValidateCode());
                 return false;
             }
         }
+        LoggerUtil.VALIDATE_LOG.debug("blockValidate:height={},hashs={}",height,sb.toString());
         //遍历余额判断
         for (Map.Entry<String, AccountState> entry : accountStateMap.entrySet()) {
             //缓存数据
@@ -406,7 +414,7 @@ public class CoinDataValidator {
             return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{address, fromNonceStr, "exception:" + e.getMessage()});
         }
         //孤儿交易了，这笔交易不清楚状况，是孤儿
-        logger(addressChainId).debug("#############address={},fromNonceStr={},dbNonce={}", address, fromNonceStr, LedgerUtil.getNonceEncode(preNonce));
+        logger(addressChainId).debug("ORPHAN #############address={},fromNonceStr={},dbNonce={},tx={}", address, fromNonceStr, LedgerUtil.getNonceEncode(preNonce), LedgerUtil.getNonceEncode(txNonce));
         return ValidateResult.getResult(LedgerErrorCode.ORPHAN, new String[]{address, fromNonceStr, LedgerUtil.getNonceEncode(preNonce)});
     }
 
@@ -435,7 +443,7 @@ public class CoinDataValidator {
         if (null == list) {
             //从头开始处理
             if (!LedgerUtil.equalsNonces(accountState.getNonce(), coinFrom.getNonce())) {
-                logger(chainId).error("package validate fail(validateCommonTxBatch):{}=={}=={}==nonce is error!dbNonce:{}!=fromNonce:{}", address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), LedgerUtil.getNonceEncode(accountState.getNonce()), fromCoinNonceStr);
+                logger(chainId).error("package validate fail(validateCommonTxBatch):{}=={}=={}==nonce is error!dbNonce:{}!=fromNonce:{},tx={}", address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), LedgerUtil.getNonceEncode(accountState.getNonce()), fromCoinNonceStr,LedgerUtil.getNonceEncode(txNonce));
                 //nonce不连续按孤儿处理，双花场景由交易模块来进行删除
                 return ValidateResult.getResult(LedgerErrorCode.ORPHAN, new String[]{address, fromCoinNonceStr, LedgerUtil.getNonceEncode(accountState.getNonce())});
             }
@@ -446,7 +454,7 @@ public class CoinDataValidator {
             //从已有的缓存数据中获取对象进行操作,nonce必须连贯
             TempAccountNonce tempAccountState = list.get(list.size() - 1);
             if (!LedgerUtil.equalsNonces(tempAccountState.getNextNonce(), coinFrom.getNonce())) {
-                logger(chainId).error("isValidateCommonTxBatch {}=={}=={}==nonce is error!tempNonce:{}!=fromNonce:{}", address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), LedgerUtil.getNonceEncode(tempAccountState.getNextNonce()), fromCoinNonceStr);
+                logger(chainId).error("isValidateCommonTxBatch {}=={}=={}==nonce is error!tempNonce:{}!=fromNonce:{},tx={}", address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), LedgerUtil.getNonceEncode(tempAccountState.getNextNonce()), fromCoinNonceStr,LedgerUtil.getNonceEncode(txNonce));
                 return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{address, fromCoinNonceStr, "last pool nonce=" + LedgerUtil.getNonceEncode(tempAccountState.getNextNonce())});
             }
             list.add(new TempAccountNonce(assetKey, coinFrom.getNonce(), txNonce));

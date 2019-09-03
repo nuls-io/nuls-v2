@@ -201,8 +201,12 @@ public class RollbackService {
         for (CoinToInfo output : tx.getCoinTos()) {
             addressSet.add(output.getAddress());
             calcBalance(chainId, output);
-//            txRelationInfoSet.add(new TxRelationInfo(output.getAddress(), tx.getHash()));
-            if(tx.getHeight() == 0) {
+            //如果是共识奖励，则不存储交易关系表记录
+            if (tx.getType() == TxType.CONTRACT_RETURN_GAS) {
+                txRelationInfoSet.add(new TxRelationInfo(output.getAddress(), tx.getHash()));
+            }
+            //创世块的数据和合约返还不计算共识奖励
+            if (tx.getHeight() == 0 || tx.getType() == TxType.CONTRACT_RETURN_GAS) {
                 continue;
             }
             //奖励是本链主资产的时候，回滚奖励金额
@@ -384,7 +388,7 @@ public class RollbackService {
             if (output.getLockTime() > 0) {
                 accountInfo.setConsensusLock(accountInfo.getConsensusLock().add(agentInfo.getDeposit()));
                 calcBalance(chainId, output.getChainId(), output.getAssetsId(), accountInfo, tx.getFee().getValue());
-            }else {
+            } else {
                 accountInfo.setConsensusLock(accountInfo.getConsensusLock().add(output.getAmount()));
             }
             addressSet.add(output.getAddress());
@@ -618,7 +622,9 @@ public class RollbackService {
 
     private AccountTokenInfo processAccountNrc20(int chainId, ContractInfo contractInfo, String address, BigInteger value, int type) {
         AccountTokenInfo tokenInfo = queryAccountTokenInfo(chainId, address + contractInfo.getContractAddress());
-
+        if (tokenInfo == null) {
+            return null;
+        }
         if (type == 1) {
             tokenInfo.setBalance(tokenInfo.getBalance().add(value));
         } else {

@@ -3,13 +3,10 @@ package io.nuls.crosschain.nuls.servive.impl;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
-import io.nuls.base.signture.P2PHKSignature;
-import io.nuls.base.signture.SignatureUtil;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.crosschain.base.constant.CommandConstant;
@@ -26,7 +23,6 @@ import io.nuls.crosschain.nuls.model.po.CtxStatusPO;
 import io.nuls.crosschain.nuls.rpc.call.LedgerCall;
 import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
 import io.nuls.crosschain.nuls.srorage.*;
-import io.nuls.crosschain.nuls.utils.MessageUtil;
 import io.nuls.crosschain.nuls.utils.TxUtil;
 import io.nuls.crosschain.nuls.utils.manager.ChainManager;
 
@@ -166,18 +162,6 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         try {
             UntreatedMessage untreatedSignMessage = new UntreatedMessage(chainId,nodeId,messageBody,localHash);
             chain.getSignMessageByzantineQueue().offer(untreatedSignMessage);
-            /*P2PHKSignature p2PHKSignature = new P2PHKSignature();
-            p2PHKSignature.parse(messageBody.getSignature(), 0);
-            Transaction convertCtx = ctxStatusPO.getTx();
-            if(!config.isMainNet() && convertCtx.getType() == config.getCrossCtxType()){
-                convertCtx = convertCtxService.get(localHash, handleChainId);
-            }
-            //验证签名是否正确，如果是跨链转账交易，这签名为
-            if(!ECKey.verify(convertCtx.getHash().getBytes(), p2PHKSignature.getSignData().getSignBytes(), p2PHKSignature.getPublicKey())){
-                chain.getLogger().info("签名验证错误，hash:{},签名:{}\n\n",nativeHex,signHex);
-                return;
-            }
-            MessageUtil.signByzantine(chain, chainId, localHash, ctxStatusPO.getTx(), messageBody, nativeHex, signHex, nodeId);*/
         } catch (Exception e) {
             chain.getLogger().error(e);
         }
