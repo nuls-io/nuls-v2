@@ -20,7 +20,7 @@ server_port=18004
 
 ​	为了更好的理解NULS2.0的相关业务，和接口返回值的含义，提前在这里做一些说明。
 
-#### 在线与离线
+### 在线与离线
 
 `NULS-API`模块提供了若干在线接口和离线接口。
 
@@ -28,7 +28,7 @@ server_port=18004
 
 离线接口：NULS2.0提供了一个专门用于[离线操作的NULS-API工具](http://nuls-usa-west.oss-us-west-1.aliyuncs.com/beta3/nuls-sdk-provider-offline.tar.gz)。无需安装钱包，可独立运行在一台没有连接网络的服务器上。用户通过调用离线接口，传入相关的参数，获取返回值，相应数据不会存入钱包。例如离线创建账户、离线组装转账交易、离线签名等。
 
-#### 字段描述
+### 字段描述
 
 **链的chainId:**
 
@@ -130,19 +130,16 @@ _**附：**_ 官方已提供NULS-SDK-4J工具，有使用JAVA做对接的合作�
 
 
 
-0.1 获取本链相关信息
-============
-Cmd: /api/info
---------------
+## 接口列表
+### 0.1 获取本链相关信息
+#### Cmd: /api/info
 _**详细描述: 获取本链相关信息**_
-### HttpMethod: GET
+#### HttpMethod: GET
 
-参数列表
-----
+#### 参数列表
 无参数
 
-返回值
----
+#### 返回值
 | 字段名             |  字段类型  | 参数描述         |
 | --------------- |:------:| ------------ |
 | chainId         | string | 本链的ID        |
@@ -150,7 +147,7 @@ _**详细描述: 获取本链相关信息**_
 | inflationAmount | string | 本链默认主资产的初始数量 |
 | agentChainId    | string | 本链共识资产的链ID   |
 | agentAssetId    | string | 本链共识资产的ID    |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -158,17 +155,15 @@ _**request path:**_
 _**request form data:**_
 无
 
-### Example response data: 
+#### Example response data: 
 略
 
-1.1 批量创建账户
-==========
-Cmd: /api/account
------------------
+### 1.1 批量创建账户
+#### Cmd: /api/account
 _**详细描述: 创建的账户存在于本地钱包内**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "count" : 0,
@@ -177,8 +172,7 @@ _**详细描述: 创建的账户存在于本地钱包内**_
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                      |       参数类型        | 参数描述     | 是否必填 |
 | -------------------------------------------------------- |:-----------------:| -------- |:----:|
 | form                                                     | accountcreateform | 批量创建账户表单 |  是   |
@@ -186,12 +180,11 @@ _**详细描述: 创建的账户存在于本地钱包内**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;prefix   |      string       | 地址前缀     |  否   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;password |      string       | 账户密码     |  是   |
 
-返回值
----
+#### 返回值
 | 字段名  |      字段类型       | 参数描述 |
 | ---- |:---------------:| ---- |
 | list | list&lt;string> | 账户地址 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -204,7 +197,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -214,14 +207,12 @@ _**request form data:**_
 }
 ```
 
-1.2 修改账户密码
-==========
-Cmd: /api/account/password/{address}
-------------------------------------
+### 1.2 修改账户密码
+#### Cmd: /api/account/password/{address}
 _**详细描述: 修改账户密码**_
-### HttpMethod: PUT
+#### HttpMethod: PUT
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "password" : null,
@@ -229,8 +220,7 @@ _**详细描述: 修改账户密码**_
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                         |           参数类型            | 参数描述     | 是否必填 |
 | ----------------------------------------------------------- |:-------------------------:| -------- |:----:|
 | address                                                     |          string           | 账户地址     |  是   |
@@ -238,12 +228,11 @@ _**详细描述: 修改账户密码**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;password    |          string           | 原始密码     |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;newPassword |          string           | 新密码      |  是   |
 
-返回值
----
+#### 返回值
 | 字段名   |  字段类型   | 参数描述   |
 | ----- |:-------:| ------ |
 | value | boolean | 是否修改成功 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -251,37 +240,33 @@ _**request path:**_
 _**request form data:**_
 无
 
-### Example response data: 
+#### Example response data: 
 略
 
-1.3 导出账户私钥
-==========
-Cmd: /api/account/prikey/{address}
-----------------------------------
+### 1.3 导出账户私钥
+#### Cmd: /api/account/prikey/{address}
 _**详细描述: 只能导出本地钱包已存在账户的私钥**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "password" : null
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                      |        参数类型         | 参数描述     | 是否必填 |
 | -------------------------------------------------------- |:-------------------:| -------- |:----:|
 | address                                                  |       string        | 账户地址     |  是   |
 | form                                                     | accountpasswordform | 账户密码信息表单 |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;password |       string        | 密码       |  是   |
 
-返回值
----
+#### 返回值
 | 字段名   |  字段类型  | 参数描述 |
 | ----- |:------:| ---- |
 | value | string | 私钥   |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 http://localhost:18004/api/account/prikey/tNULSeBaMujLBcZWfE2wHKnZo7PGvqvNrt6yWG
@@ -293,7 +278,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -303,14 +288,12 @@ _**request form data:**_
 }
 ```
 
-1.4 根据私钥导入账户
-============
-Cmd: /api/account/import/pri
-----------------------------
+### 1.4 根据私钥导入账户
+#### Cmd: /api/account/import/pri
 _**详细描述: 导入私钥时，需要输入密码给明文私钥加密**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "priKey" : null,
@@ -319,8 +302,7 @@ _**详细描述: 导入私钥时，需要输入密码给明文私钥加密**_
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                       |           参数类型            | 参数描述                           | 是否必填 |
 | --------------------------------------------------------- |:-------------------------:| ------------------------------ |:----:|
 | form                                                      | accountprikeypasswordform | 根据私钥导入账户表单                     |  是   |
@@ -328,12 +310,11 @@ _**详细描述: 导入私钥时，需要输入密码给明文私钥加密**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;password  |          string           | 密码                             |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;overwrite |          boolean          | 是否覆盖账户: false:不覆盖导入, true:覆盖导入 |  是   |
 
-返回值
----
+#### 返回值
 | 字段名   |  字段类型  | 参数描述 |
 | ----- |:------:| ---- |
 | value | string | 账户地址 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -347,7 +328,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -357,26 +338,22 @@ _**request form data:**_
 }
 ```
 
-1.5 根据keyStore导入账户
-==================
-Cmd: /api/account/import/keystore
----------------------------------
+### 1.5 根据keyStore导入账户
+#### Cmd: /api/account/import/keystore
 _**详细描述: 根据keyStore导入账户**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                      |    参数类型     | 参数描述       | 是否必填 |
 | -------------------------------------------------------- |:-----------:| ---------- |:----:|
 | 根据私钥导入账户                                                 | inputstream | 根据私钥导入账户表单 |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;根据私钥导入账户 | inputstream | 根据私钥导入账户表单 |  是   |
 
-返回值
----
+#### 返回值
 | 字段名   |  字段类型  | 参数描述 |
 | ----- |:------:| ---- |
 | value | string | 账户地址 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -384,17 +361,15 @@ _**request path:**_
 _**request form data:**_
 无
 
-### Example response data: 
+#### Example response data: 
 略
 
-1.6 根据keystore文件路径导入账户
-======================
-Cmd: /api/account/import/keystore/path
---------------------------------------
+### 1.6 根据keystore文件路径导入账户
+#### Cmd: /api/account/import/keystore/path
 _**详细描述: 根据keystore文件路径导入账户**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "path" : null,
@@ -403,8 +378,7 @@ _**详细描述: 根据keystore文件路径导入账户**_
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                       |           参数类型            | 参数描述                           | 是否必填 |
 | --------------------------------------------------------- |:-------------------------:| ------------------------------ |:----:|
 | form                                                      | accountkeystoreimportform | 根据keystore文件路径导入账户表单           |  是   |
@@ -412,12 +386,11 @@ _**详细描述: 根据keystore文件路径导入账户**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;password  |          string           | 密码                             |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;overwrite |          boolean          | 是否覆盖账户: false:不覆盖导入, true:覆盖导入 |  是   |
 
-返回值
----
+#### 返回值
 | 字段名   |  字段类型  | 参数描述 |
 | ----- |:------:| ---- |
 | value | string | 账户地址 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -431,7 +404,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -441,14 +414,12 @@ _**request form data:**_
 }
 ```
 
-1.7 根据keystore字符串导入账户
-=====================
-Cmd: /api/account/import/keystore/json
---------------------------------------
+### 1.7 根据keystore字符串导入账户
+#### Cmd: /api/account/import/keystore/json
 _**详细描述: 根据keystore字符串导入账户**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "keystore" : {
@@ -462,8 +433,7 @@ _**详细描述: 根据keystore字符串导入账户**_
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                                                                                 |             参数类型              | 参数描述                           | 是否必填 |
 | ------------------------------------------------------------------------------------------------------------------- |:-----------------------------:| ------------------------------ |:----:|
 | form                                                                                                                | accountkeystorejsonimportform | 根据keystore字符串导入账户表单            |  是   |
@@ -475,12 +445,11 @@ _**详细描述: 根据keystore字符串导入账户**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;password                                                            |            string             | 密码                             |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;overwrite                                                           |            boolean            | 是否覆盖账户: false:不覆盖导入, true:覆盖导入 |  是   |
 
-返回值
----
+#### 返回值
 | 字段名   |  字段类型  | 参数描述 |
 | ----- |:------:| ---- |
 | value | string | 账户地址 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -499,7 +468,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -509,14 +478,12 @@ _**request form data:**_
 }
 ```
 
-1.8 账户备份，导出AccountKeyStore文件到指定目录
-=================================
-Cmd: /api/account/export/{address}
-----------------------------------
+### 1.8 账户备份，导出AccountKeyStore文件到指定目录
+#### Cmd: /api/account/export/{address}
 _**详细描述: 账户备份，导出AccountKeyStore文件到指定目录**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "password" : null,
@@ -524,8 +491,7 @@ _**详细描述: 账户备份，导出AccountKeyStore文件到指定目录**_
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                      |         参数类型          | 参数描述           | 是否必填 |
 | -------------------------------------------------------- |:---------------------:| -------------- |:----:|
 | address                                                  |        string         | 账户地址           |  是   |
@@ -533,12 +499,11 @@ _**详细描述: 账户备份，导出AccountKeyStore文件到指定目录**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;password |        string         | 密码             |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;path     |        string         | 文件路径           |  是   |
 
-返回值
----
+#### 返回值
 | 字段名  |  字段类型  | 参数描述    |
 | ---- |:------:| ------- |
 | path | string | 导出的文件路径 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 http://localhost:18004/api/account/export/tNULSeBaMujLBcZWfE2wHKnZo7PGvqvNrt6yWG
@@ -551,7 +516,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -561,14 +526,12 @@ _**request form data:**_
 }
 ```
 
-1.9 账户设置别名
-==========
-Cmd: /api/account/alias
------------------------
+### 1.9 账户设置别名
+#### Cmd: /api/account/alias
 _**详细描述: 别名格式为1-20位小写字母和数字的组合，设置别名会销毁1个NULS**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "address" : null,
@@ -577,8 +540,7 @@ _**详细描述: 别名格式为1-20位小写字母和数字的组合，设置�
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                      |     参数类型     | 参数描述     | 是否必填 |
 | -------------------------------------------------------- |:------------:| -------- |:----:|
 | form                                                     | setaliasform | 账户设置别名表单 |  是   |
@@ -586,12 +548,11 @@ _**详细描述: 别名格式为1-20位小写字母和数字的组合，设置�
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;alias    |    string    | 别名       |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;password |    string    | 账户密码     |  是   |
 
-返回值
----
+#### 返回值
 | 字段名   |  字段类型  | 参数描述        |
 | ----- |:------:| ----------- |
 | value | string | 设置别名交易的hash |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -599,17 +560,15 @@ _**request path:**_
 _**request form data:**_
 无
 
-### Example response data: 
+#### Example response data: 
 略
 
-1.10 查询账户余额
-===========
-Cmd: /api/accountledger/balance/{address}
------------------------------------------
+### 1.10 查询账户余额
+#### Cmd: /api/accountledger/balance/{address}
 _**详细描述: 根据资产链ID和资产ID，查询本链账户对应资产的余额与nonce值**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "assetChainId" : 0,
@@ -617,16 +576,14 @@ _**详细描述: 根据资产链ID和资产ID，查询本链账户对应资产�
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                          |    参数类型     | 参数描述   | 是否必填 |
 | ------------------------------------------------------------ |:-----------:| ------ |:----:|
 | balanceDto                                                   | balanceform | 账户余额表单 |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assetChainId |     int     | 资产的链ID |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assetId      |     int     | 资产ID   |  是   |
 
-返回值
----
+#### 返回值
 | 字段名           |  字段类型  | 参数描述                      |
 | ------------- |:------:| ------------------------- |
 | total         | string | 总余额                       |
@@ -636,7 +593,7 @@ _**详细描述: 根据资产链ID和资产ID，查询本链账户对应资产�
 | consensusLock | string |  共识锁定金额                   |
 | nonce         | string | 账户资产nonce值                |
 | nonceType     |  int   | 1：已确认的nonce值,0：未确认的nonce值 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 http://localhost:18004/api/accountledger/balance/tNULSeBaMujLBcZWfE2wHKnZo7PGvqvNrt6yWG
@@ -649,7 +606,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -665,21 +622,17 @@ _**request form data:**_
 }
 ```
 
-1.11 验证地址格式是否正确
-===============
-Cmd: /api/account/address/validate
-----------------------------------
+### 1.11 验证地址格式是否正确
+#### Cmd: /api/account/address/validate
 _**详细描述: 验证地址格式是否正确**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-参数列表
-----
+#### 参数列表
 无参数
 
-返回值
----
+#### 返回值
 无返回值
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -687,17 +640,15 @@ _**request path:**_
 _**request form data:**_
 无
 
-### Example response data: 
+#### Example response data: 
 略
 
-1.12 离线 - 批量创建账户
-================
-Cmd: /api/account/offline
--------------------------
+### 1.12 离线 - 批量创建账户
+#### Cmd: /api/account/offline
 _**详细描述: 创建的账户不会保存到钱包中,接口直接返回账户的keystore信息**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "count" : 0,
@@ -706,8 +657,7 @@ _**详细描述: 创建的账户不会保存到钱包中,接口直接返回账�
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                      |       参数类型        | 参数描述       | 是否必填 |
 | -------------------------------------------------------- |:-----------------:| ---------- |:----:|
 | form                                                     | accountcreateform | 离线批量创建账户表单 |  是   |
@@ -715,8 +665,7 @@ _**详细描述: 创建的账户不会保存到钱包中,接口直接返回账�
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;prefix   |      string       | 地址前缀       |  否   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;password |      string       | 账户密码       |  是   |
 
-返回值
----
+#### 返回值
 | 字段名                                                                 |      字段类型       | 参数描述         |
 | ------------------------------------------------------------------- |:---------------:| ------------ |
 | list                                                                | list&lt;object> | 账户keystore列表 |
@@ -724,7 +673,7 @@ _**详细描述: 创建的账户不会保存到钱包中,接口直接返回账�
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pubKey              |     string      | 公钥           |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;prikey              |     string      | 明文私钥         |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;encryptedPrivateKey |     string      | 加密后的私钥       |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -738,7 +687,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -751,14 +700,12 @@ _**request form data:**_
 }
 ```
 
-1.13 离线获取账户明文私钥
-===============
-Cmd: /api/account/priKey/offline
---------------------------------
+### 1.13 离线获取账户明文私钥
+#### Cmd: /api/account/priKey/offline
 _**详细描述: 离线获取账户明文私钥**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "address" : null,
@@ -767,8 +714,7 @@ _**详细描述: 离线获取账户明文私钥**_
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                             |     参数类型      | 参数描述         | 是否必填 |
 | --------------------------------------------------------------- |:-------------:| ------------ |:----:|
 | form                                                            | getprikeyform | 离线获取账户明文私钥表单 |  是   |
@@ -776,12 +722,11 @@ _**详细描述: 离线获取账户明文私钥**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;encryptedPriKey |    string     | 账户密文私钥       |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;password        |    string     | 账户密码         |  是   |
 
-返回值
----
+#### 返回值
 | 字段名   |  字段类型  | 参数描述 |
 | ----- |:------:| ---- |
 | value | string | 明文私钥 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -795,7 +740,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -805,14 +750,12 @@ _**request form data:**_
 }
 ```
 
-1.14 离线修改账户密码
-=============
-Cmd: /api/account/password/offline/
------------------------------------
+### 1.14 离线修改账户密码
+#### Cmd: /api/account/password/offline/
 _**详细描述: 离线修改账户密码**_
-### HttpMethod: PUT
+#### HttpMethod: PUT
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "address" : null,
@@ -822,8 +765,7 @@ _**详细描述: 离线修改账户密码**_
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                             |       参数类型        | 参数描述       | 是否必填 |
 | --------------------------------------------------------------- |:-----------------:| ---------- |:----:|
 | form                                                            | resetpasswordform | 离线修改账户密码表单 |  是   |
@@ -832,12 +774,11 @@ _**详细描述: 离线修改账户密码**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;oldPassword     |      string       | 账户原密码      |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;newPassword     |      string       | 账户新密码      |  是   |
 
-返回值
----
+#### 返回值
 | 字段名   |  字段类型  | 参数描述       |
 | ----- |:------:| ---------- |
 | value | string | 重置密码后的加密私钥 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -845,17 +786,15 @@ _**request path:**_
 _**request form data:**_
 无
 
-### Example response data: 
+#### Example response data: 
 略
 
-1.15 多账户摘要签名
-============
-Cmd: /api/account/multi/sign
-----------------------------
+### 1.15 多账户摘要签名
+#### Cmd: /api/account/multi/sign
 _**详细描述: 用于签名离线组装的多账户转账交易，调用接口时，参数可以传地址和私钥，或者传地址和加密私钥和加密密码**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "dtoList" : [ {
@@ -868,8 +807,7 @@ _**详细描述: 用于签名离线组装的多账户转账交易，调用接口
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                                                                                 |      参数类型       | 参数描述        | 是否必填 |
 | ------------------------------------------------------------------------------------------------------------------- |:---------------:| ----------- |:----:|
 | form                                                                                                                |  multisignform  | 多账户摘要签名表单   |  是   |
@@ -880,13 +818,12 @@ _**详细描述: 用于签名离线组装的多账户转账交易，调用接口
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;password            |     string      | 密码          |  否   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;txHex                                                               |     string      | 交易序列化Hex字符串 |  是   |
 
-返回值
----
+#### 返回值
 | 字段名   |  字段类型  | 参数描述          |
 | ----- |:------:| ------------- |
 | hash  | string | 交易hash        |
 | txHex | string | 签名后的交易16进制字符串 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -904,7 +841,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -915,14 +852,12 @@ _**request form data:**_
 }
 ```
 
-1.16 明文私钥摘要签名
-=============
-Cmd: /api/account/priKey/sign
------------------------------
+### 1.16 明文私钥摘要签名
+#### Cmd: /api/account/priKey/sign
 _**详细描述: 明文私钥摘要签名**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "txHex" : null,
@@ -931,8 +866,7 @@ _**详细描述: 明文私钥摘要签名**_
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                     |      参数类型      | 参数描述        | 是否必填 |
 | ------------------------------------------------------- |:--------------:| ----------- |:----:|
 | form                                                    | prikeysignform | 明文私钥摘要签名表单  |  是   |
@@ -940,13 +874,12 @@ _**详细描述: 明文私钥摘要签名**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;address |     string     | 账户地址        |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;priKey  |     string     | 账户明文私钥      |  是   |
 
-返回值
----
+#### 返回值
 | 字段名   |  字段类型  | 参数描述          |
 | ----- |:------:| ------------- |
 | hash  | string | 交易hash        |
 | txHex | string | 签名后的交易16进制字符串 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -960,7 +893,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -971,14 +904,12 @@ _**request form data:**_
 }
 ```
 
-1.17 密文私钥摘要签名
-=============
-Cmd: /api/account/encryptedPriKey/sign
---------------------------------------
+### 1.17 密文私钥摘要签名
+#### Cmd: /api/account/encryptedPriKey/sign
 _**详细描述: 密文私钥摘要签名**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "txHex" : null,
@@ -988,8 +919,7 @@ _**详细描述: 密文私钥摘要签名**_
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                             |          参数类型           | 参数描述        | 是否必填 |
 | --------------------------------------------------------------- |:-----------------------:| ----------- |:----:|
 | form                                                            | encryptedprikeysignform | 密文私钥摘要签名表单  |  是   |
@@ -998,13 +928,12 @@ _**详细描述: 密文私钥摘要签名**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;encryptedPriKey |         string          | 账户密文私钥      |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;password        |         string          | 账户密码        |  是   |
 
-返回值
----
+#### 返回值
 | 字段名   |  字段类型  | 参数描述          |
 | ----- |:------:| ------------- |
 | hash  | string | 交易hash        |
 | txHex | string | 签名后的交易16进制字符串 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -1019,7 +948,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -1030,14 +959,12 @@ _**request form data:**_
 }
 ```
 
-1.18 创建多签账户
-===========
-Cmd: /api/account/multiSign/create
-----------------------------------
+### 1.18 创建多签账户
+#### Cmd: /api/account/multiSign/create
 _**详细描述: 根据多个账户的公钥创建多签账户，minSigns为多签账户创建交易时需要的最小签名数**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "pubKeys" : [ ],
@@ -1045,20 +972,18 @@ _**详细描述: 根据多个账户的公钥创建多签账户，minSigns为多�
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                      |            参数类型            | 参数描述     | 是否必填 |
 | -------------------------------------------------------- |:--------------------------:| -------- |:----:|
 | form                                                     | multisignaccountcreateform | 创建多签账户表单 |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pubKeys  |      list&lt;string>       | 账户公钥集合   |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;minSigns |            int             | 最小签名数    |  是   |
 
-返回值
----
+#### 返回值
 | 字段名   |  字段类型  | 参数描述  |
 | ----- |:------:| ----- |
 | value | string | 账户的地址 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -1066,17 +991,15 @@ _**request path:**_
 _**request form data:**_
 无
 
-### Example response data: 
+#### Example response data: 
 略
 
-1.19 离线创建设置别名交易
-===============
-Cmd: /api/account/aliasTx/create
---------------------------------
+### 1.19 离线创建设置别名交易
+#### Cmd: /api/account/aliasTx/create
 _**详细描述: 根据多个账户的公钥创建多签账户，minSigns为多签账户创建交易时需要的最小签名数**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "address" : null,
@@ -1086,8 +1009,7 @@ _**详细描述: 根据多个账户的公钥创建多签账户，minSigns为多�
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                     |   参数类型   | 参数描述     | 是否必填 |
 | ------------------------------------------------------- |:--------:| -------- |:----:|
 | dto                                                     | aliasdto | 创建多签账户表单 |  是   |
@@ -1096,13 +1018,12 @@ _**详细描述: 根据多个账户的公钥创建多签账户，minSigns为多�
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nonce   |  string  | 资产nonce值 |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remark  |  string  | 交易备注     |  否   |
 
-返回值
----
+#### 返回值
 | 字段名   |  字段类型  | 参数描述         |
 | ----- |:------:| ------------ |
 | hash  | string | 交易hash       |
 | txHex | string | 交易序列化16进制字符串 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -1110,17 +1031,15 @@ _**request path:**_
 _**request form data:**_
 无
 
-### Example response data: 
+#### Example response data: 
 略
 
-1.20 多签账户离线创建设置别名交易
-===================
-Cmd: /api/account/multiSign/aliasTx/create
-------------------------------------------
+### 1.20 多签账户离线创建设置别名交易
+#### Cmd: /api/account/multiSign/aliasTx/create
 _**详细描述: 多签账户离线创建设置别名交易**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "address" : null,
@@ -1132,8 +1051,7 @@ _**详细描述: 多签账户离线创建设置别名交易**_
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                      |       参数类型        | 参数描述     | 是否必填 |
 | -------------------------------------------------------- |:-----------------:| -------- |:----:|
 | dto                                                      | multisignaliasdto | 创建别名交易表单 |  是   |
@@ -1144,13 +1062,12 @@ _**详细描述: 多签账户离线创建设置别名交易**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pubKeys  |  list&lt;string>  | 公钥集合     |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;minSigns |        int        | 最小签名数    |  是   |
 
-返回值
----
+#### 返回值
 | 字段名   |  字段类型  | 参数描述         |
 | ----- |:------:| ------------ |
 | hash  | string | 交易hash       |
 | txHex | string | 交易序列化16进制字符串 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -1158,36 +1075,32 @@ _**request path:**_
 _**request form data:**_
 无
 
-### Example response data: 
+#### Example response data: 
 略
 
-1.21 根据私钥获取账户地址格式
-=================
-Cmd: /api/account/address/priKey
---------------------------------
+### 1.21 根据私钥获取账户地址格式
+#### Cmd: /api/account/address/priKey
 _**详细描述: 根据私钥获取账户地址格式**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "priKey" : null
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                    |    参数类型    | 参数描述   | 是否必填 |
 | ------------------------------------------------------ |:----------:| ------ |:----:|
 | form                                                   | prikeyform | 私钥表单   |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;priKey |   string   | 账户明文私钥 |  是   |
 
-返回值
----
+#### 返回值
 | 字段名   |  字段类型  | 参数描述 |
 | ----- |:------:| ---- |
 | value | string | 账户地址 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -1195,24 +1108,20 @@ _**request path:**_
 _**request form data:**_
 无
 
-### Example response data: 
+#### Example response data: 
 略
 
-2.1 根据区块高度查询区块头
-===============
-Cmd: /api/block/header/height/{height}
---------------------------------------
+### 2.1 根据区块高度查询区块头
+#### Cmd: /api/block/header/height/{height}
 _**详细描述: 根据区块高度查询区块头**_
-### HttpMethod: GET
+#### HttpMethod: GET
 
-参数列表
-----
+#### 参数列表
 | 参数名    | 参数类型 | 参数描述 | 是否必填 |
 | ------ |:----:| ---- |:----:|
 | height | long | 区块高度 |  是   |
 
-返回值
----
+#### 返回值
 | 字段名                  |      字段类型       | 参数描述                 |
 | -------------------- |:---------------:| -------------------- |
 | hash                 |     string      | 区块的hash值             |
@@ -1232,7 +1141,7 @@ _**详细描述: 根据区块高度查询区块头**_
 | blockVersion         |      short      | 区块的版本，可以理解为本地钱包的版本   |
 | stateRoot            |     string      | 智能合约世界状态根            |
 | txHashList           | list&lt;string> | 区块打包的交易hash集合        |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 http://localhost:18004/api/block/header/height/1
@@ -1240,7 +1149,7 @@ http://localhost:18004/api/block/header/height/1
 _**request form data:**_
 无
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -1265,21 +1174,17 @@ _**request form data:**_
 }
 ```
 
-2.2 根据区块hash查询区块头
-=================
-Cmd: /api/block/header/hash/{hash}
-----------------------------------
+### 2.2 根据区块hash查询区块头
+#### Cmd: /api/block/header/hash/{hash}
 _**详细描述: 根据区块hash查询区块头**_
-### HttpMethod: GET
+#### HttpMethod: GET
 
-参数列表
-----
+#### 参数列表
 | 参数名  |  参数类型  | 参数描述   | 是否必填 |
 | ---- |:------:| ------ |:----:|
 | hash | string | 区块hash |  是   |
 
-返回值
----
+#### 返回值
 | 字段名                  |      字段类型       | 参数描述                 |
 | -------------------- |:---------------:| -------------------- |
 | hash                 |     string      | 区块的hash值             |
@@ -1299,7 +1204,7 @@ _**详细描述: 根据区块hash查询区块头**_
 | blockVersion         |      short      | 区块的版本，可以理解为本地钱包的版本   |
 | stateRoot            |     string      | 智能合约世界状态根            |
 | txHashList           | list&lt;string> | 区块打包的交易hash集合        |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 http://localhost:18004/api/block/header/hash/0b21cc1e77865f3e414e69ccb63d65c2bdedd98f2aa3d6e414d4791ee897190f
@@ -1307,7 +1212,7 @@ http://localhost:18004/api/block/header/hash/0b21cc1e77865f3e414e69ccb63d65c2bde
 _**request form data:**_
 无
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -1332,19 +1237,15 @@ _**request form data:**_
 }
 ```
 
-2.3 查询最新区块头信息
-=============
-Cmd: /api/block/header/newest
------------------------------
+### 2.3 查询最新区块头信息
+#### Cmd: /api/block/header/newest
 _**详细描述: 查询最新区块头信息**_
-### HttpMethod: GET
+#### HttpMethod: GET
 
-参数列表
-----
+#### 参数列表
 无参数
 
-返回值
----
+#### 返回值
 | 字段名                  |      字段类型       | 参数描述                 |
 | -------------------- |:---------------:| -------------------- |
 | hash                 |     string      | 区块的hash值             |
@@ -1364,7 +1265,7 @@ _**详细描述: 查询最新区块头信息**_
 | blockVersion         |      short      | 区块的版本，可以理解为本地钱包的版本   |
 | stateRoot            |     string      | 智能合约世界状态根            |
 | txHashList           | list&lt;string> | 区块打包的交易hash集合        |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -1372,7 +1273,7 @@ _**request path:**_
 _**request form data:**_
 无
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -1397,19 +1298,15 @@ _**request form data:**_
 }
 ```
 
-2.4 查询最新区块
-==========
-Cmd: /api/block/newest
-----------------------
+### 2.4 查询最新区块
+#### Cmd: /api/block/newest
 _**详细描述: 包含区块打包的所有交易信息，此接口返回数据量较多，谨慎调用**_
-### HttpMethod: GET
+#### HttpMethod: GET
 
-参数列表
-----
+#### 参数列表
 无参数
 
-返回值
----
+#### 返回值
 | 字段名                                                                                                           |      字段类型       | 参数描述                                      |
 | ------------------------------------------------------------------------------------------------------------- |:---------------:| ----------------------------------------- |
 | header                                                                                                        |     object      | 区块头信息, 只返回对应的部分数据                         |
@@ -1454,7 +1351,7 @@ _**详细描述: 包含区块打包的所有交易信息，此接口返回数据
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assetsId      |       int       | 资产id                                      |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;amount        |     string      | 数量                                        |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lockTime      |      long       | 解锁时间，-1为永久锁定                              |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -1462,7 +1359,7 @@ _**request path:**_
 _**request form data:**_
 无
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -1533,21 +1430,17 @@ _**request form data:**_
 }
 ```
 
-2.5 根据区块高度查询区块
-==============
-Cmd: /api/block/height/{height}
--------------------------------
+### 2.5 根据区块高度查询区块
+#### Cmd: /api/block/height/{height}
 _**详细描述: 包含区块打包的所有交易信息，此接口返回数据量较多，谨慎调用**_
-### HttpMethod: GET
+#### HttpMethod: GET
 
-参数列表
-----
+#### 参数列表
 | 参数名    | 参数类型 | 参数描述 | 是否必填 |
 | ------ |:----:| ---- |:----:|
 | height | long | 区块高度 |  是   |
 
-返回值
----
+#### 返回值
 | 字段名                                                                                                           |      字段类型       | 参数描述                                      |
 | ------------------------------------------------------------------------------------------------------------- |:---------------:| ----------------------------------------- |
 | header                                                                                                        |     object      | 区块头信息, 只返回对应的部分数据                         |
@@ -1592,7 +1485,7 @@ _**详细描述: 包含区块打包的所有交易信息，此接口返回数据
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assetsId      |       int       | 资产id                                      |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;amount        |     string      | 数量                                        |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lockTime      |      long       | 解锁时间，-1为永久锁定                              |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 http://localhost:18004/api/block/height/9
@@ -1600,7 +1493,7 @@ http://localhost:18004/api/block/height/9
 _**request form data:**_
 无
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -1671,21 +1564,17 @@ _**request form data:**_
 }
 ```
 
-2.6 根据区块hash查询区块
-================
-Cmd: /api/block/hash/{hash}
----------------------------
+### 2.6 根据区块hash查询区块
+#### Cmd: /api/block/hash/{hash}
 _**详细描述: 包含区块打包的所有交易信息，此接口返回数据量较多，谨慎调用**_
-### HttpMethod: GET
+#### HttpMethod: GET
 
-参数列表
-----
+#### 参数列表
 | 参数名  |  参数类型  | 参数描述   | 是否必填 |
 | ---- |:------:| ------ |:----:|
 | hash | string | 区块hash |  是   |
 
-返回值
----
+#### 返回值
 | 字段名                                                                                                           |      字段类型       | 参数描述                                      |
 | ------------------------------------------------------------------------------------------------------------- |:---------------:| ----------------------------------------- |
 | header                                                                                                        |     object      | 区块头信息, 只返回对应的部分数据                         |
@@ -1730,7 +1619,7 @@ _**详细描述: 包含区块打包的所有交易信息，此接口返回数据
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assetsId      |       int       | 资产id                                      |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;amount        |     string      | 数量                                        |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lockTime      |      long       | 解锁时间，-1为永久锁定                              |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 http://localhost:18004/api/block/hash/92285f81a649a7c65b1fe9e52738bb95c4aac6a7f4ab4b0b971c09662a9433ad
@@ -1738,7 +1627,7 @@ http://localhost:18004/api/block/hash/92285f81a649a7c65b1fe9e52738bb95c4aac6a7f4
 _**request form data:**_
 无
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -1809,25 +1698,21 @@ _**request form data:**_
 }
 ```
 
-2.7 根据区块高度查询区块序列化字符串
-====================
-Cmd: /api/block/serialization/height/{height}
----------------------------------------------
+### 2.7 根据区块高度查询区块序列化字符串
+#### Cmd: /api/block/serialization/height/{height}
 _**详细描述: 包含区块打包的所有交易信息，此接口返回数据量较多，谨慎调用**_
-### HttpMethod: GET
+#### HttpMethod: GET
 
-参数列表
-----
+#### 参数列表
 | 参数名    | 参数类型 | 参数描述 | 是否必填 |
 | ------ |:----:| ---- |:----:|
 | height | long | 区块高度 |  是   |
 
-返回值
----
+#### 返回值
 | 字段名 |  字段类型  | 参数描述            |
 | --- |:------:| --------------- |
 | 返回值 | string | 返回区块序列化后的HEX字符串 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 http://localhost:18004/api/block/serialization/height/1
@@ -1835,7 +1720,7 @@ http://localhost:18004/api/block/serialization/height/1
 _**request form data:**_
 无
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -1843,25 +1728,21 @@ _**request form data:**_
 }
 ```
 
-2.8 根据区块hash查询区块序列化字符串
-======================
-Cmd: /api/block/serialization/hash/{hash}
------------------------------------------
+### 2.8 根据区块hash查询区块序列化字符串
+#### Cmd: /api/block/serialization/hash/{hash}
 _**详细描述: 包含区块打包的所有交易信息，此接口返回数据量较多，谨慎调用**_
-### HttpMethod: GET
+#### HttpMethod: GET
 
-参数列表
-----
+#### 参数列表
 | 参数名  |  参数类型  | 参数描述   | 是否必填 |
 | ---- |:------:| ------ |:----:|
 | hash | string | 区块hash |  是   |
 
-返回值
----
+#### 返回值
 | 字段名 |  字段类型  | 参数描述            |
 | --- |:------:| --------------- |
 | 返回值 | string | 返回区块序列化后的HEX字符串 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 http://localhost:18004/api/block/serialization/hash/5ce81f9a470459276b633465f2572862aa7156a42220d29d724ced9bf9d723f9
@@ -1869,7 +1750,7 @@ http://localhost:18004/api/block/serialization/hash/5ce81f9a470459276b633465f257
 _**request form data:**_
 无
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -1877,21 +1758,17 @@ _**request form data:**_
 }
 ```
 
-3.1 根据hash获取交易
-==============
-Cmd: /api/tx/{hash}
--------------------
+### 3.1 根据hash获取交易
+#### Cmd: /api/tx/{hash}
 _**详细描述: 根据hash获取交易**_
-### HttpMethod: GET
+#### HttpMethod: GET
 
-参数列表
-----
+#### 参数列表
 | 参数名  |  参数类型  | 参数描述   | 是否必填 |
 | ---- |:------:| ------ |:----:|
 | hash | string | 交易hash |  是   |
 
-返回值
----
+#### 返回值
 | 字段名                                                           |      字段类型       | 参数描述                                      |
 | ------------------------------------------------------------- |:---------------:| ----------------------------------------- |
 | hash                                                          |     string      | 交易的hash值                                  |
@@ -1917,7 +1794,7 @@ _**详细描述: 根据hash获取交易**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assetsId      |       int       | 资产id                                      |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;amount        |     string      | 数量                                        |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lockTime      |      long       | 解锁时间，-1为永久锁定                              |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 http://localhost:18004/api/tx/247a026d48f6be0c358423898e38a50ac0c2c1a851419b1ec843a667bab90df9
@@ -1925,7 +1802,7 @@ http://localhost:18004/api/tx/247a026d48f6be0c358423898e38a50ac0c2c1a851419b1ec8
 _**request form data:**_
 无
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -1958,33 +1835,29 @@ _**request form data:**_
 }
 ```
 
-3.2 验证交易
-========
-Cmd: /api/accountledger/transaction/validate
---------------------------------------------
+### 3.2 验证交易
+#### Cmd: /api/accountledger/transaction/validate
 _**详细描述: 验证离线组装的交易,验证成功返回交易hash值,失败返回错误提示信息**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "txHex" : null
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                   |  参数类型  | 参数描述         | 是否必填 |
 | ----------------------------------------------------- |:------:| ------------ |:----:|
 | 验证交易是否正确                                              | txform | 验证交易是否正确表单   |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;txHex | string | 交易序列化16进制字符串 |  是   |
 
-返回值
----
+#### 返回值
 | 字段名   |  字段类型  | 参数描述   |
 | ----- |:------:| ------ |
 | value | string | 交易hash |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -1996,7 +1869,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -2006,34 +1879,30 @@ _**request form data:**_
 }
 ```
 
-3.3 广播交易
-========
-Cmd: /api/accountledger/transaction/broadcast
----------------------------------------------
+### 3.3 广播交易
+#### Cmd: /api/accountledger/transaction/broadcast
 _**详细描述: 广播离线组装的交易,成功返回true,失败返回错误提示信息**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "txHex" : null
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                   |  参数类型  | 参数描述         | 是否必填 |
 | ----------------------------------------------------- |:------:| ------------ |:----:|
 | 广播交易                                                  | txform | 广播交易表单       |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;txHex | string | 交易序列化16进制字符串 |  是   |
 
-返回值
----
+#### 返回值
 | 字段名   |  字段类型   | 参数描述   |
 | ----- |:-------:| ------ |
 | value | boolean | 是否成功   |
 | hash  | string  | 交易hash |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -2045,7 +1914,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -2056,14 +1925,12 @@ _**request form data:**_
 }
 ```
 
-3.4 单笔转账
-========
-Cmd: /api/accountledger/transfer
---------------------------------
+### 3.4 单笔转账
+#### Cmd: /api/accountledger/transfer
 _**详细描述: 发起单账户单资产的转账交易**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "address" : null,
@@ -2074,8 +1941,7 @@ _**详细描述: 发起单账户单资产的转账交易**_
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                       |     参数类型     | 参数描述   | 是否必填 |
 | --------------------------------------------------------- |:------------:| ------ |:----:|
 | 单笔转账                                                      | transferform | 单笔转账表单 |  是   |
@@ -2085,12 +1951,11 @@ _**详细描述: 发起单账户单资产的转账交易**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;amount    |  biginteger  | 金额     |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remark    |    string    | 备注     |  否   |
 
-返回值
----
+#### 返回值
 | 字段名   |  字段类型  | 参数描述   |
 | ----- |:------:| ------ |
 | value | string | 交易hash |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -2106,7 +1971,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -2116,14 +1981,12 @@ _**request form data:**_
 }
 ```
 
-3.5 离线组装转账交易
-============
-Cmd: /api/accountledger/createTransferTxOffline
------------------------------------------------
+### 3.5 离线组装转账交易
+#### Cmd: /api/accountledger/createTransferTxOffline
 _**详细描述: 根据inputs和outputs离线组装转账交易，用于单账户或多账户的转账交易。交易手续费为inputs里本链主资产金额总和，减去outputs里本链主资产总和**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "inputs" : [ {
@@ -2144,8 +2007,7 @@ _**详细描述: 根据inputs和outputs离线组装转账交易，用于单账�
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                                                                          |      参数类型       | 参数描述     | 是否必填 |
 | ------------------------------------------------------------------------------------------------------------ |:---------------:| -------- |:----:|
 | transferDto                                                                                                  |   transferdto   | 转账交易表单   |  是   |
@@ -2163,13 +2025,12 @@ _**详细描述: 根据inputs和outputs离线组装转账交易，用于单账�
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lockTime     |      long       | 锁定时间     |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remark                                                       |     string      | 交易备注     |  是   |
 
-返回值
----
+#### 返回值
 | 字段名   |  字段类型  | 参数描述         |
 | ----- |:------:| ------------ |
 | hash  | string | 交易hash       |
 | txHex | string | 交易序列化16进制字符串 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -2195,7 +2056,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -2206,14 +2067,12 @@ _**request form data:**_
 }
 ```
 
-3.6 计算离线创建转账交易所需手续费
-===================
-Cmd: /api/accountledger/calcTransferTxFee
------------------------------------------
+### 3.6 计算离线创建转账交易所需手续费
+#### Cmd: /api/accountledger/calcTransferTxFee
 _**详细描述: 计算离线创建转账交易所需手续费**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "addressCount" : 0,
@@ -2224,8 +2083,7 @@ _**详细描述: 计算离线创建转账交易所需手续费**_
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                          |       参数类型       | 参数描述    | 是否必填 |
 | ------------------------------------------------------------ |:----------------:| ------- |:----:|
 | TransferTxFeeDto                                             | transfertxfeedto | 转账交易手续费 |  是   |
@@ -2235,12 +2093,11 @@ _**详细描述: 计算离线创建转账交易所需手续费**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remark       |      string      | 交易备注    |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;price        |    biginteger    | 手续费单价   |  否   |
 
-返回值
----
+#### 返回值
 | 字段名   |  字段类型  | 参数描述  |
 | ----- |:------:| ----- |
 | value | string | 交易手续费 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -2256,7 +2113,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -2266,14 +2123,12 @@ _**request form data:**_
 }
 ```
 
-3.7 多签账户离线组装转账交易
-================
-Cmd: /api/accountledger/createMultiSignTransferTxOffline
---------------------------------------------------------
+### 3.7 多签账户离线组装转账交易
+#### Cmd: /api/accountledger/createMultiSignTransferTxOffline
 _**详细描述: 根据inputs和outputs离线组装转账交易，用于单账户或多账户的转账交易。交易手续费为inputs里本链主资产金额总和，减去outputs里本链主资产总和**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "pubKeys" : [ ],
@@ -2296,8 +2151,7 @@ _**详细描述: 根据inputs和outputs离线组装转账交易，用于单账�
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                                                                          |         参数类型         | 参数描述       | 是否必填 |
 | ------------------------------------------------------------------------------------------------------------ |:--------------------:| ---------- |:----:|
 | transferDto                                                                                                  | multisigntransferdto | 多签账户转账交易表单 |  是   |
@@ -2317,13 +2171,12 @@ _**详细描述: 根据inputs和outputs离线组装转账交易，用于单账�
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lockTime     |         long         | 锁定时间       |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remark                                                       |        string        | 交易备注       |  是   |
 
-返回值
----
+#### 返回值
 | 字段名   |  字段类型  | 参数描述         |
 | ----- |:------:| ------------ |
 | hash  | string | 交易hash       |
 | txHex | string | 交易序列化16进制字符串 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -2331,17 +2184,15 @@ _**request path:**_
 _**request form data:**_
 无
 
-### Example response data: 
+#### Example response data: 
 略
 
-3.8 计算离线创建多签账户转账交易所需手续费
-=======================
-Cmd: /api/accountledger/calcMultiSignTransferTxFee
---------------------------------------------------
+### 3.8 计算离线创建多签账户转账交易所需手续费
+#### Cmd: /api/accountledger/calcMultiSignTransferTxFee
 _**详细描述: 计算离线创建多签账户转账交易所需手续费**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "pubKeyCount" : 0,
@@ -2352,8 +2203,7 @@ _**详细描述: 计算离线创建多签账户转账交易所需手续费**_
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                         |           参数类型            | 参数描述          | 是否必填 |
 | ----------------------------------------------------------- |:-------------------------:| ------------- |:----:|
 | MultiSignTransferTxFeeDto                                   | multisigntransfertxfeedto | 多签账户转账交易手续费表单 |  是   |
@@ -2363,12 +2213,11 @@ _**详细描述: 计算离线创建多签账户转账交易所需手续费**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remark      |          string           | 交易备注          |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;price       |        biginteger         | 手续费单价         |  否   |
 
-返回值
----
+#### 返回值
 | 字段名   |  字段类型  | 参数描述  |
 | ----- |:------:| ----- |
 | value | string | 交易手续费 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -2376,17 +2225,15 @@ _**request path:**_
 _**request form data:**_
 无
 
-### Example response data: 
+#### Example response data: 
 略
 
-4.1 发布合约
-========
-Cmd: /api/contract/create
--------------------------
+### 4.1 发布合约
+#### Cmd: /api/contract/create
 _**详细描述: 发布合约**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "sender" : null,
@@ -2400,8 +2247,7 @@ _**详细描述: 发布合约**_
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                          |      参数类型      | 参数描述                 | 是否必填 |
 | ------------------------------------------------------------ |:--------------:| -------------------- |:----:|
 | 发布合约                                                         | contractcreate | 发布合约表单               |  是   |
@@ -2414,13 +2260,12 @@ _**详细描述: 发布合约**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;alias        |     string     | 合约别名                 |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;args         |    object[]    | 参数列表                 |  否   |
 
-返回值
----
+#### 返回值
 | 字段名             |  字段类型  | 参数描述        |
 | --------------- |:------:| ----------- |
 | txHash          | string | 发布合约的交易hash |
 | contractAddress | string | 生成的合约地址     |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -2439,7 +2284,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -2450,14 +2295,12 @@ _**request form data:**_
 }
 ```
 
-4.2 调用合约
-========
-Cmd: /api/contract/call
------------------------
+### 4.2 调用合约
+#### Cmd: /api/contract/call
 _**详细描述: 调用合约**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "sender" : null,
@@ -2473,8 +2316,7 @@ _**详细描述: 调用合约**_
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                             |     参数类型     | 参数描述                       | 是否必填 |
 | --------------------------------------------------------------- |:------------:| -------------------------- |:----:|
 | 调用合约                                                            | contractcall | 调用合约表单                     |  是   |
@@ -2489,12 +2331,11 @@ _**详细描述: 调用合约**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;methodDesc      |    string    | 方法描述，若合约内方法没有重载，则此参数可以为空   |  否   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;args            |   object[]   | 参数列表                       |  否   |
 
-返回值
----
+#### 返回值
 | 字段名    |  字段类型  | 参数描述        |
 | ------ |:------:| ----------- |
 | txHash | string | 调用合约的交易hash |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -2515,7 +2356,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -2525,14 +2366,12 @@ _**request form data:**_
 }
 ```
 
-4.3 删除合约
-========
-Cmd: /api/contract/delete
--------------------------
+### 4.3 删除合约
+#### Cmd: /api/contract/delete
 _**详细描述: 删除合约**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "sender" : null,
@@ -2542,8 +2381,7 @@ _**详细描述: 删除合约**_
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                             |      参数类型      | 参数描述      | 是否必填 |
 | --------------------------------------------------------------- |:--------------:| --------- |:----:|
 | 删除合约                                                            | contractdelete | 删除合约表单    |  是   |
@@ -2552,12 +2390,11 @@ _**详细描述: 删除合约**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;password        |     string     | 交易创建者账户密码 |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remark          |     string     | 备注        |  否   |
 
-返回值
----
+#### 返回值
 | 字段名    |  字段类型  | 参数描述        |
 | ------ |:------:| ----------- |
 | txHash | string | 删除合约的交易hash |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -2572,7 +2409,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -2582,14 +2419,12 @@ _**request form data:**_
 }
 ```
 
-4.4 合约token转账
-=============
-Cmd: /api/contract/tokentransfer
---------------------------------
+### 4.4 合约token转账
+#### Cmd: /api/contract/tokentransfer
 _**详细描述: 合约token转账**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "fromAddress" : null,
@@ -2601,8 +2436,7 @@ _**详细描述: 合约token转账**_
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                             |         参数类型          | 参数描述         | 是否必填 |
 | --------------------------------------------------------------- |:---------------------:| ------------ |:----:|
 | token转账                                                         | contracttokentransfer | token转账表单    |  是   |
@@ -2613,12 +2447,11 @@ _**详细描述: 合约token转账**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;amount          |      biginteger       | 转出的token资产金额 |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remark          |        string         | 备注           |  否   |
 
-返回值
----
+#### 返回值
 | 字段名    |  字段类型  | 参数描述   |
 | ------ |:------:| ------ |
 | txHash | string | 交易hash |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -2635,7 +2468,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -2645,14 +2478,12 @@ _**request form data:**_
 }
 ```
 
-4.5 从账户地址向合约地址转账(主链资产)的合约交易
-===========================
-Cmd: /api/contract/transfer2contract
-------------------------------------
+### 4.5 从账户地址向合约地址转账(主链资产)的合约交易
+#### Cmd: /api/contract/transfer2contract
 _**详细描述: 从账户地址向合约地址转账(主链资产)的合约交易**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "fromAddress" : null,
@@ -2663,8 +2494,7 @@ _**详细描述: 从账户地址向合约地址转账(主链资产)的合约交�
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                         |       参数类型       | 参数描述      | 是否必填 |
 | ----------------------------------------------------------- |:----------------:| --------- |:----:|
 | 向合约地址转账                                                     | contracttransfer | 向合约地址转账表单 |  是   |
@@ -2674,12 +2504,11 @@ _**详细描述: 从账户地址向合约地址转账(主链资产)的合约交�
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;amount      |    biginteger    | 转出的主链资产金额 |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remark      |      string      | 备注        |  否   |
 
-返回值
----
+#### 返回值
 | 字段名    |  字段类型  | 参数描述   |
 | ------ |:------:| ------ |
 | txHash | string | 交易hash |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -2695,7 +2524,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -2705,22 +2534,18 @@ _**request form data:**_
 }
 ```
 
-4.6 获取账户地址的指定合约的token余额
-=======================
-Cmd: /api/contract/balance/token/{contractAddress}/{address}
-------------------------------------------------------------
+### 4.6 获取账户地址的指定合约的token余额
+#### Cmd: /api/contract/balance/token/{contractAddress}/{address}
 _**详细描述: 获取账户地址的指定合约的token余额**_
-### HttpMethod: GET
+#### HttpMethod: GET
 
-参数列表
-----
+#### 参数列表
 | 参数名             |  参数类型  | 参数描述 | 是否必填 |
 | --------------- |:------:| ---- |:----:|
 | contractAddress | string | 合约地址 |  是   |
 | address         | string | 账户地址 |  是   |
 
-返回值
----
+#### 返回值
 | 字段名             |  字段类型  | 参数描述                    |
 | --------------- |:------:| ----------------------- |
 | contractAddress | string | 合约地址                    |
@@ -2730,7 +2555,7 @@ _**详细描述: 获取账户地址的指定合约的token余额**_
 | decimals        |  long  | token支持的小数位数            |
 | blockHeight     |  long  | 合约创建时的区块高度              |
 | status          |  int   | 合约状态(0-不存在, 1-正常, 2-终止) |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 http://localhost:18004/api/contract/balance/token/tNULSeBaNAKfKnLMR5XG5qtwXt5JS1b3QosZxg/tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
@@ -2738,7 +2563,7 @@ http://localhost:18004/api/contract/balance/token/tNULSeBaNAKfKnLMR5XG5qtwXt5JS1
 _**request form data:**_
 无
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -2754,21 +2579,17 @@ _**request form data:**_
 }
 ```
 
-4.7 获取智能合约详细信息
-==============
-Cmd: /api/contract/info/{address}
----------------------------------
+### 4.7 获取智能合约详细信息
+#### Cmd: /api/contract/info/{address}
 _**详细描述: 获取智能合约详细信息**_
-### HttpMethod: GET
+#### HttpMethod: GET
 
-参数列表
-----
+#### 参数列表
 | 参数名     |  参数类型  | 参数描述 | 是否必填 |
 | ------- |:------:| ---- |:----:|
 | address | string | 合约地址 |  是   |
 
-返回值
----
+#### 返回值
 | 字段名                                                                                                      |      字段类型       | 参数描述                                       |
 | -------------------------------------------------------------------------------------------------------- |:---------------:| ------------------------------------------ |
 | createTxHash                                                                                             |     string      | 发布合约的交易hash                                |
@@ -2797,7 +2618,7 @@ _**详细描述: 获取智能合约详细信息**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;event                                                    |     boolean     | 是否是事件                                      |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;payable                                                  |     boolean     | 是否是可接受主链资产转账的方法                            |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;jsonSerializable                                         |     boolean     | 方法返回值是否JSON序列化                             |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 http://localhost:18004/api/contract/info/tNULSeBaMxyMyafiQjq1wCW7cQouyEhRL8njtu
@@ -2805,7 +2626,7 @@ http://localhost:18004/api/contract/info/tNULSeBaMxyMyafiQjq1wCW7cQouyEhRL8njtu
 _**request form data:**_
 无
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -2932,21 +2753,17 @@ _**request form data:**_
 }
 ```
 
-4.8 获取智能合约执行结果
-==============
-Cmd: /api/contract/result/{hash}
---------------------------------
+### 4.8 获取智能合约执行结果
+#### Cmd: /api/contract/result/{hash}
 _**详细描述: 获取智能合约执行结果**_
-### HttpMethod: GET
+#### HttpMethod: GET
 
-参数列表
-----
+#### 参数列表
 | 参数名  |  参数类型  | 参数描述   | 是否必填 |
 | ---- |:------:| ------ |:----:|
 | hash | string | 交易hash |  是   |
 
-返回值
----
+#### 返回值
 | 字段名                                                                                                   |      字段类型       | 参数描述                                        |
 | ----------------------------------------------------------------------------------------------------- |:---------------:| ------------------------------------------- |
 | success                                                                                               |     boolean     | 合约执行是否成功                                    |
@@ -2986,7 +2803,7 @@ _**详细描述: 获取智能合约执行结果**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;newTxHash                                             |     string      | 生成的交易hash（当调用的命令模式是 NEW\_TX 时，会生成交易）        |
 | contractTxList                                                                                        | list&lt;string> | 合约生成交易的序列化字符串列表                             |
 | remark                                                                                                |     string      | 备注                                          |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 http://localhost:18004/api/contract/result/f0a5fc5d20c39355e35f1fe8011b1a28e7c65d8566ae8d76b297a22d1110851d
@@ -2994,7 +2811,7 @@ http://localhost:18004/api/contract/result/f0a5fc5d20c39355e35f1fe8011b1a28e7c65
 _**request form data:**_
 无
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -3060,29 +2877,25 @@ _**request form data:**_
 }
 ```
 
-4.9 获取智能合约执行结果列表
-================
-Cmd: /api/contract/result/list
-------------------------------
+### 4.9 获取智能合约执行结果列表
+#### Cmd: /api/contract/result/list
 _**详细描述: 获取智能合约执行结果列表**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "hashList" : [ ]
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                      |          参数类型          | 参数描述           | 是否必填 |
 | -------------------------------------------------------- |:----------------------:| -------------- |:----:|
 | 获取智能合约执行结果列表                                             | contractresultlistform | 获取智能合约执行结果列表表单 |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;hashList |    list&lt;string>     | 交易hash列表       |  是   |
 
-返回值
----
+#### 返回值
 | 字段名                                                                                                                                                   |      字段类型       | 参数描述                                        |
 | ----------------------------------------------------------------------------------------------------------------------------------------------------- |:---------------:| ------------------------------------------- |
 | hash1 or hash2 or hash3...                                                                                                                            |     object      | 以交易hash列表中的hash值作为key，这里的key name是动态的       |
@@ -3123,7 +2936,7 @@ _**详细描述: 获取智能合约执行结果列表**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;newTxHash                                             |     string      | 生成的交易hash（当调用的命令模式是 NEW\_TX 时，会生成交易）        |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;contractTxList                                                                                        | list&lt;string> | 合约生成交易的序列化字符串列表                             |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remark                                                                                                |     string      | 备注                                          |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -3135,7 +2948,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -3223,29 +3036,25 @@ _**request form data:**_
 }
 ```
 
-4.10 获取合约代码构造函数
-===============
-Cmd: /api/contract/constructor
-------------------------------
+### 4.10 获取合约代码构造函数
+#### Cmd: /api/contract/constructor
 _**详细描述: 获取合约代码构造函数**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "contractCode" : null
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                          |     参数类型     | 参数描述                 | 是否必填 |
 | ------------------------------------------------------------ |:------------:| -------------------- |:----:|
 | 获取合约代码构造函数                                                   | contractcode | 获取合约代码构造函数表单         |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;contractCode |    string    | 智能合约代码(字节码的Hex编码字符串) |  是   |
 
-返回值
----
+#### 返回值
 | 字段名                                                                                                      |      字段类型       | 参数描述               |
 | -------------------------------------------------------------------------------------------------------- |:---------------:| ------------------ |
 | constructor                                                                                              |     object      | 合约构造函数详情           |
@@ -3261,7 +3070,7 @@ _**详细描述: 获取合约代码构造函数**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;payable                                                  |     boolean     | 是否是可接受主链资产转账的方法    |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;jsonSerializable                                         |     boolean     | 方法返回值是否JSON序列化     |
 | isNrc20                                                                                                  |     boolean     | 是否是NRC20合约         |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -3273,7 +3082,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -3308,14 +3117,12 @@ _**request form data:**_
 }
 ```
 
-4.11 获取已发布合约指定函数的信息
-===================
-Cmd: /api/contract/method
--------------------------
+### 4.11 获取已发布合约指定函数的信息
+#### Cmd: /api/contract/method
 _**详细描述: 获取已发布合约指定函数的信息**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "contractAddress" : null,
@@ -3324,8 +3131,7 @@ _**详细描述: 获取已发布合约指定函数的信息**_
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                             |        参数类型        | 参数描述                     | 是否必填 |
 | --------------------------------------------------------------- |:------------------:| ------------------------ |:----:|
 | 获取已发布合约指定函数的信息                                                  | contractmethodform | 获取已发布合约指定函数的信息表单         |  是   |
@@ -3333,8 +3139,7 @@ _**详细描述: 获取已发布合约指定函数的信息**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;methodName      |       string       | 方法名                      |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;methodDesc      |       string       | 方法描述，若合约内方法没有重载，则此参数可以为空 |  否   |
 
-返回值
----
+#### 返回值
 | 字段名                                                      |      字段类型       | 参数描述               |
 | -------------------------------------------------------- |:---------------:| ------------------ |
 | name                                                     |     string      | 方法名称               |
@@ -3348,7 +3153,7 @@ _**详细描述: 获取已发布合约指定函数的信息**_
 | event                                                    |     boolean     | 是否是事件              |
 | payable                                                  |     boolean     | 是否是可接受主链资产转账的方法    |
 | jsonSerializable                                         |     boolean     | 方法返回值是否JSON序列化     |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -3362,7 +3167,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -3402,14 +3207,12 @@ _**request form data:**_
 }
 ```
 
-4.12 获取已发布合约指定函数的参数类型列表
-=======================
-Cmd: /api/contract/method/argstypes
------------------------------------
+### 4.12 获取已发布合约指定函数的参数类型列表
+#### Cmd: /api/contract/method/argstypes
 _**详细描述: 获取已发布合约指定函数的参数类型列表**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "contractAddress" : null,
@@ -3418,8 +3221,7 @@ _**详细描述: 获取已发布合约指定函数的参数类型列表**_
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                             |        参数类型        | 参数描述                     | 是否必填 |
 | --------------------------------------------------------------- |:------------------:| ------------------------ |:----:|
 | 获取已发布合约指定函数的参数类型列表                                              | contractmethodform | 获取已发布合约指定函数的参数类型表单       |  是   |
@@ -3427,12 +3229,11 @@ _**详细描述: 获取已发布合约指定函数的参数类型列表**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;methodName      |       string       | 方法名                      |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;methodDesc      |       string       | 方法描述，若合约内方法没有重载，则此参数可以为空 |  否   |
 
-返回值
----
+#### 返回值
 | 字段名 |      字段类型       | 参数描述 |
 | --- |:---------------:| ---- |
 | 返回值 | list&lt;string> |      |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -3446,7 +3247,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -3454,14 +3255,12 @@ _**request form data:**_
 }
 ```
 
-4.13 验证发布合约
-===========
-Cmd: /api/contract/validate/create
-----------------------------------
+### 4.13 验证发布合约
+#### Cmd: /api/contract/validate/create
 _**详细描述: 验证发布合约**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "sender" : null,
@@ -3472,8 +3271,7 @@ _**详细描述: 验证发布合约**_
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                          |          参数类型          | 参数描述                 | 是否必填 |
 | ------------------------------------------------------------ |:----------------------:| -------------------- |:----:|
 | 验证发布合约                                                       | contractvalidatecreate | 验证发布合约表单             |  是   |
@@ -3483,14 +3281,13 @@ _**详细描述: 验证发布合约**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;contractCode |         string         | 智能合约代码(字节码的Hex编码字符串) |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;args         |        object[]        | 参数列表                 |  否   |
 
-返回值
----
+#### 返回值
 | 字段名     |  字段类型   | 参数描述      |
 | ------- |:-------:| --------- |
 | success | boolean | 验证成功与否    |
 | code    | string  | 验证失败的错误码  |
 | msg     | string  | 验证失败的错误信息 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -3506,7 +3303,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 [ {
   "success" : true,
@@ -3516,14 +3313,12 @@ _**request form data:**_
 }, "校验失败示例请参考[/api/contract/validate/call] - 验证调用合约" ]
 ```
 
-4.14 验证调用合约
-===========
-Cmd: /api/contract/validate/call
---------------------------------
+### 4.14 验证调用合约
+#### Cmd: /api/contract/validate/call
 _**详细描述: 验证调用合约**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "sender" : null,
@@ -3537,8 +3332,7 @@ _**详细描述: 验证调用合约**_
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                             |         参数类型         | 参数描述                       | 是否必填 |
 | --------------------------------------------------------------- |:--------------------:| -------------------------- |:----:|
 | 验证调用合约                                                          | contractvalidatecall | 验证调用合约表单                   |  是   |
@@ -3551,14 +3345,13 @@ _**详细描述: 验证调用合约**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;methodDesc      |        string        | 方法描述，若合约内方法没有重载，则此参数可以为空   |  否   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;args            |       object[]       | 参数列表                       |  否   |
 
-返回值
----
+#### 返回值
 | 字段名     |  字段类型   | 参数描述      |
 | ------- |:-------:| --------- |
 | success | boolean | 验证成功与否    |
 | code    | string  | 验证失败的错误码  |
 | msg     | string  | 验证失败的错误信息 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -3577,7 +3370,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 [ {
   "success" : true,
@@ -3594,14 +3387,12 @@ _**request form data:**_
 } ]
 ```
 
-4.15 验证删除合约
-===========
-Cmd: /api/contract/validate/delete
-----------------------------------
+### 4.15 验证删除合约
+#### Cmd: /api/contract/validate/delete
 _**详细描述: 验证删除合约**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "sender" : null,
@@ -3609,22 +3400,20 @@ _**详细描述: 验证删除合约**_
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                             |          参数类型          | 参数描述     | 是否必填 |
 | --------------------------------------------------------------- |:----------------------:| -------- |:----:|
 | 验证删除合约                                                          | contractvalidatedelete | 验证删除合约表单 |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sender          |         string         | 交易创建者    |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;contractAddress |         string         | 智能合约地址   |  是   |
 
-返回值
----
+#### 返回值
 | 字段名     |  字段类型   | 参数描述      |
 | ------- |:-------:| --------- |
 | success | boolean | 验证成功与否    |
 | code    | string  | 验证失败的错误码  |
 | msg     | string  | 验证失败的错误信息 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -3637,7 +3426,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 [ {
   "success" : true,
@@ -3647,14 +3436,12 @@ _**request form data:**_
 }, "校验失败示例请参考[/api/contract/validate/call] - 验证调用合约" ]
 ```
 
-4.16 估算发布合约交易的GAS
-=================
-Cmd: /api/contract/imputedgas/create
-------------------------------------
+### 4.16 估算发布合约交易的GAS
+#### Cmd: /api/contract/imputedgas/create
 _**详细描述: 估算发布合约交易的GAS**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "sender" : null,
@@ -3663,8 +3450,7 @@ _**详细描述: 估算发布合约交易的GAS**_
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                          |           参数类型           | 参数描述                 | 是否必填 |
 | ------------------------------------------------------------ |:------------------------:| -------------------- |:----:|
 | 估算发布合约交易的GAS                                                 | imputedgascontractcreate | 估算发布合约交易的GAS表单       |  是   |
@@ -3672,12 +3458,11 @@ _**详细描述: 估算发布合约交易的GAS**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;contractCode |          string          | 智能合约代码(字节码的Hex编码字符串) |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;args         |         object[]         | 参数列表                 |  否   |
 
-返回值
----
+#### 返回值
 | 字段名      | 字段类型 | 参数描述              |
 | -------- |:----:| ----------------- |
 | gasLimit | long | 消耗的gas值，执行失败返回数值1 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -3691,7 +3476,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -3701,14 +3486,12 @@ _**request form data:**_
 }
 ```
 
-4.17 估算调用合约交易的GAS
-=================
-Cmd: /api/contract/imputedgas/call
-----------------------------------
+### 4.17 估算调用合约交易的GAS
+#### Cmd: /api/contract/imputedgas/call
 _**详细描述: 估算调用合约交易的GAS**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "sender" : null,
@@ -3720,8 +3503,7 @@ _**详细描述: 估算调用合约交易的GAS**_
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                             |          参数类型          | 参数描述                       | 是否必填 |
 | --------------------------------------------------------------- |:----------------------:| -------------------------- |:----:|
 | 估算调用合约交易的GAS                                                    | imputedgascontractcall | 估算调用合约交易的GAS表单             |  是   |
@@ -3732,12 +3514,11 @@ _**详细描述: 估算调用合约交易的GAS**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;methodDesc      |         string         | 方法描述，若合约内方法没有重载，则此参数可以为空   |  否   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;args            |        object[]        | 参数列表                       |  否   |
 
-返回值
----
+#### 返回值
 | 字段名      | 字段类型 | 参数描述              |
 | -------- |:----:| ----------------- |
 | gasLimit | long | 消耗的gas值，执行失败返回数值1 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -3754,7 +3535,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -3764,14 +3545,12 @@ _**request form data:**_
 }
 ```
 
-4.18 调用合约不上链方法
-==============
-Cmd: /api/contract/view
------------------------
+### 4.18 调用合约不上链方法
+#### Cmd: /api/contract/view
 _**详细描述: 调用合约不上链方法**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "contractAddress" : null,
@@ -3781,8 +3560,7 @@ _**详细描述: 调用合约不上链方法**_
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                             |       参数类型       | 参数描述                     | 是否必填 |
 | --------------------------------------------------------------- |:----------------:| ------------------------ |:----:|
 | 调用合约不上链方法                                                       | contractviewcall | 调用合约不上链方法表单              |  是   |
@@ -3791,12 +3569,11 @@ _**详细描述: 调用合约不上链方法**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;methodDesc      |      string      | 方法描述，若合约内方法没有重载，则此参数可以为空 |  否   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;args            |     object[]     | 参数列表                     |  否   |
 
-返回值
----
+#### 返回值
 | 字段名    |  字段类型  | 参数描述      |
 | ------ |:------:| --------- |
 | result | string | 视图方法的调用结果 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -3811,7 +3588,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -3821,14 +3598,12 @@ _**request form data:**_
 }
 ```
 
-4.19 离线组装 - 发布合约的交易
-===================
-Cmd: /api/contract/create/offline
----------------------------------
+### 4.19 离线组装 - 发布合约的交易
+#### Cmd: /api/contract/create/offline
 _**详细描述: 离线组装 - 发布合约的交易**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "sender" : null,
@@ -3843,8 +3618,7 @@ _**详细描述: 离线组装 - 发布合约的交易**_
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                           |         参数类型          | 参数描述                 | 是否必填 |
 | ------------------------------------------------------------- |:---------------------:| -------------------- |:----:|
 | 发布合约离线交易                                                      | contractcreateoffline | 发布合约离线交易表单           |  是   |
@@ -3858,14 +3632,13 @@ _**详细描述: 离线组装 - 发布合约的交易**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;argsType      |       string[]        | 参数类型列表               |  否   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remark        |        string         | 备注                   |  否   |
 
-返回值
----
+#### 返回值
 | 字段名             |  字段类型  | 参数描述     |
 | --------------- |:------:| -------- |
 | hash            | string | 交易hash   |
 | txHex           | string | 交易序列化字符串 |
 | contractAddress | string | 生成的合约地址  |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -3885,7 +3658,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -3897,14 +3670,12 @@ _**request form data:**_
 }
 ```
 
-4.20 离线组装 - 调用合约的交易
-===================
-Cmd: /api/contract/call/offline
--------------------------------
+### 4.20 离线组装 - 调用合约的交易
+#### Cmd: /api/contract/call/offline
 _**详细描述: 离线组装 - 调用合约的交易**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "sender" : null,
@@ -3921,8 +3692,7 @@ _**详细描述: 离线组装 - 调用合约的交易**_
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                             |        参数类型         | 参数描述                       | 是否必填 |
 | --------------------------------------------------------------- |:-------------------:| -------------------------- |:----:|
 | 调用合约离线交易                                                        | contractcalloffline | 调用合约离线交易表单                 |  是   |
@@ -3938,13 +3708,12 @@ _**详细描述: 离线组装 - 调用合约的交易**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;argsType        |      string[]       | 参数类型列表                     |  否   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remark          |       string        | 备注                         |  否   |
 
-返回值
----
+#### 返回值
 | 字段名   |  字段类型  | 参数描述     |
 | ----- |:------:| -------- |
 | hash  | string | 交易hash   |
 | txHex | string | 交易序列化字符串 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -3966,7 +3735,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -3977,14 +3746,12 @@ _**request form data:**_
 }
 ```
 
-4.21 离线组装 - 删除合约交易
-==================
-Cmd: /api/contract/delete/offline
----------------------------------
+### 4.21 离线组装 - 删除合约交易
+#### Cmd: /api/contract/delete/offline
 _**详细描述: 离线组装 - 删除合约交易**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "sender" : null,
@@ -3995,8 +3762,7 @@ _**详细描述: 离线组装 - 删除合约交易**_
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                             |         参数类型          | 参数描述       | 是否必填 |
 | --------------------------------------------------------------- |:---------------------:| ---------- |:----:|
 | 删除合约离线交易                                                        | contractdeleteoffline | 删除合约离线交易表单 |  是   |
@@ -4006,13 +3772,12 @@ _**详细描述: 离线组装 - 删除合约交易**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;contractAddress |        string         | 智能合约地址     |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remark          |        string         | 备注         |  否   |
 
-返回值
----
+#### 返回值
 | 字段名   |  字段类型  | 参数描述     |
 | ----- |:------:| -------- |
 | hash  | string | 交易hash   |
 | txHex | string | 交易序列化字符串 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -4028,7 +3793,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -4039,14 +3804,12 @@ _**request form data:**_
 }
 ```
 
-4.22 离线组装 - 合约token转账交易
-=======================
-Cmd: /api/contract/tokentransfer/offline
-----------------------------------------
+### 4.22 离线组装 - 合约token转账交易
+#### Cmd: /api/contract/tokentransfer/offline
 _**详细描述: 离线组装 - 合约token转账交易**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "fromAddress" : null,
@@ -4060,8 +3823,7 @@ _**详细描述: 离线组装 - 合约token转账交易**_
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                             |             参数类型             | 参数描述          | 是否必填 |
 | --------------------------------------------------------------- |:----------------------------:| ------------- |:----:|
 | token转账离线交易                                                     | contracttokentransferoffline | token转账离线交易表单 |  是   |
@@ -4074,13 +3836,12 @@ _**详细描述: 离线组装 - 合约token转账交易**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;amount          |          biginteger          | 转出的token资产金额  |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remark          |            string            | 备注            |  否   |
 
-返回值
----
+#### 返回值
 | 字段名   |  字段类型  | 参数描述     |
 | ----- |:------:| -------- |
 | hash  | string | 交易hash   |
 | txHex | string | 交易序列化字符串 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -4099,7 +3860,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -4110,14 +3871,12 @@ _**request form data:**_
 }
 ```
 
-4.23 离线组装 - 从账户地址向合约地址转账(主链资产)的合约交易
-===================================
-Cmd: /api/contract/transfer2contract/offline
---------------------------------------------
+### 4.23 离线组装 - 从账户地址向合约地址转账(主链资产)的合约交易
+#### Cmd: /api/contract/transfer2contract/offline
 _**详细描述: 离线组装 - 从账户地址向合约地址转账(主链资产)的合约交易**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "fromAddress" : null,
@@ -4130,8 +3889,7 @@ _**详细描述: 离线组装 - 从账户地址向合约地址转账(主链资�
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                           |          参数类型           | 参数描述          | 是否必填 |
 | ------------------------------------------------------------- |:-----------------------:| ------------- |:----:|
 | 向合约地址转账离线交易                                                   | contracttransferoffline | 向合约地址转账离线交易表单 |  是   |
@@ -4143,13 +3901,12 @@ _**详细描述: 离线组装 - 从账户地址向合约地址转账(主链资�
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;amount        |       biginteger        | 转出的主链资产金额     |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remark        |         string          | 备注            |  否   |
 
-返回值
----
+#### 返回值
 | 字段名   |  字段类型  | 参数描述     |
 | ----- |:------:| -------- |
 | hash  | string | 交易hash   |
 | txHex | string | 交易序列化字符串 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -4167,7 +3924,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -4178,14 +3935,12 @@ _**request form data:**_
 }
 ```
 
-5.1 创建共识节点
-==========
-Cmd: /api/consensus/agent
--------------------------
+### 5.1 创建共识节点
+#### Cmd: /api/consensus/agent
 _**详细描述: 创建共识节点**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "agentAddress" : null,
@@ -4197,8 +3952,7 @@ _**详细描述: 创建共识节点**_
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                            |      参数类型       | 参数描述        | 是否必填 |
 | -------------------------------------------------------------- |:---------------:| ----------- |:----:|
 | CreateAgentForm                                                | createagentform | 创建共识节点表单    |  是   |
@@ -4209,12 +3963,11 @@ _**详细描述: 创建共识节点**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;deposit        |     string      | 抵押金额        |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;password       |     string      | 密码          |  是   |
 
-返回值
----
+#### 返回值
 | 字段名   |  字段类型  | 参数描述   |
 | ----- |:------:| ------ |
 | value | string | 交易hash |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -4231,7 +3984,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -4241,14 +3994,12 @@ _**request form data:**_
 }
 ```
 
-5.2 注销共识节点
-==========
-Cmd: /api/consensus/agent/stop
-------------------------------
+### 5.2 注销共识节点
+#### Cmd: /api/consensus/agent/stop
 _**详细描述: 注销共识节点**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "address" : null,
@@ -4256,20 +4007,18 @@ _**详细描述: 注销共识节点**_
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                      |     参数类型      | 参数描述     | 是否必填 |
 | -------------------------------------------------------- |:-------------:| -------- |:----:|
 | StopAgentForm                                            | stopagentform | 注销共识节点表单 |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;address  |    string     | 共识节点地址   |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;password |    string     | 密码       |  是   |
 
-返回值
----
+#### 返回值
 | 字段名   |  字段类型  | 参数描述   |
 | ----- |:------:| ------ |
 | value | string | 交易hash |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -4282,7 +4031,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -4292,14 +4041,12 @@ _**request form data:**_
 }
 ```
 
-5.3 委托参与共识
-==========
-Cmd: /api/consensus/deposit
----------------------------
+### 5.3 委托参与共识
+#### Cmd: /api/consensus/deposit
 _**详细描述: 委托参与共识**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "address" : null,
@@ -4309,8 +4056,7 @@ _**详细描述: 委托参与共识**_
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                       |    参数类型     | 参数描述     | 是否必填 |
 | --------------------------------------------------------- |:-----------:| -------- |:----:|
 | DepositForm                                               | depositform | 委托参与共识表单 |  是   |
@@ -4319,12 +4065,11 @@ _**详细描述: 委托参与共识**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;deposit   |   string    | 参与共识的金额  |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;password  |   string    | 密码       |  是   |
 
-返回值
----
+#### 返回值
 | 字段名   |  字段类型  | 参数描述   |
 | ----- |:------:| ------ |
 | value | string | 交易hash |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -4339,7 +4084,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -4349,14 +4094,12 @@ _**request form data:**_
 }
 ```
 
-5.4 退出共识
-========
-Cmd: /api/consensus/withdraw
-----------------------------
+### 5.4 退出共识
+#### Cmd: /api/consensus/withdraw
 _**详细描述: 退出共识**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "address" : null,
@@ -4365,8 +4108,7 @@ _**详细描述: 退出共识**_
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                      |     参数类型     | 参数描述         | 是否必填 |
 | -------------------------------------------------------- |:------------:| ------------ |:----:|
 | 退出共识                                                     | withdrawform | 退出共识表单       |  是   |
@@ -4374,12 +4116,11 @@ _**详细描述: 退出共识**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;txHash   |    string    | 加入共识时的交易hash |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;password |    string    | 密码           |  是   |
 
-返回值
----
+#### 返回值
 | 字段名   |  字段类型  | 参数描述   |
 | ----- |:------:| ------ |
 | value | string | 交易hash |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -4393,7 +4134,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -4403,21 +4144,17 @@ _**request form data:**_
 }
 ```
 
-5.5 查询节点的委托共识列表
-===============
-Cmd: /api/consensus/list/deposit/{agentHash}
---------------------------------------------
+### 5.5 查询节点的委托共识列表
+#### Cmd: /api/consensus/list/deposit/{agentHash}
 _**详细描述: 查询节点的委托共识列表**_
-### HttpMethod: GET
+#### HttpMethod: GET
 
-参数列表
-----
+#### 参数列表
 | 参数名       |  参数类型  | 参数描述          | 是否必填 |
 | --------- |:------:| ------------- |:----:|
 | agentHash | string | 创建共识节点的交易hash |  是   |
 
-返回值
----
+#### 返回值
 | 字段名         |  字段类型  | 参数描述      |
 | ----------- |:------:| --------- |
 | deposit     | string | 委托金额      |
@@ -4427,7 +4164,7 @@ _**详细描述: 查询节点的委托共识列表**_
 | txHash      | string | 委托交易hash  |
 | blockHeight |  long  | 委托时的区块高度  |
 | delHeight   |  long  | 退出委托的区块高度 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 http://localhost:18004/api/consensus/list/deposit/786402b17649b968e4643cb52fa30225645b0dc7b8761b047a1f080d3dd30dcd
@@ -4435,7 +4172,7 @@ http://localhost:18004/api/consensus/list/deposit/786402b17649b968e4643cb52fa302
 _**request form data:**_
 无
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -4459,14 +4196,12 @@ _**request form data:**_
 }
 ```
 
-5.6 离线组装 - 创建共识节点交易
-===================
-Cmd: /api/consensus/agent/offline
----------------------------------
+### 5.6 离线组装 - 创建共识节点交易
+#### Cmd: /api/consensus/agent/offline
 _**详细描述: 参与共识所需资产可通过查询链信息接口获取(agentChainId和agentAssetId)**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "agentAddress" : null,
@@ -4484,8 +4219,7 @@ _**详细描述: 参与共识所需资产可通过查询链信息接口获取(ag
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                                                                          |     参数类型     | 参数描述       | 是否必填 |
 | ------------------------------------------------------------------------------------------------------------ |:------------:| ---------- |:----:|
 | ConsensusDto                                                                                                 | consensusdto | 离线创建共识节点表单 |  是   |
@@ -4501,13 +4235,12 @@ _**详细描述: 参与共识所需资产可通过查询链信息接口获取(ag
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;amount       |  biginteger  | 资产金额       |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nonce        |    string    | 资产nonce值   |  是   |
 
-返回值
----
+#### 返回值
 | 字段名   |  字段类型  | 参数描述     |
 | ----- |:------:| -------- |
 | hash  | string | 交易hash   |
 | txHex | string | 交易序列化字符串 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -4530,7 +4263,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -4541,14 +4274,12 @@ _**request form data:**_
 }
 ```
 
-5.7 离线组装 - 注销共识节点交易
-===================
-Cmd: /api/consensus/agent/stop/offline
---------------------------------------
+### 5.7 离线组装 - 注销共识节点交易
+#### Cmd: /api/consensus/agent/stop/offline
 _**详细描述: 组装交易的StopDepositDto信息，可通过查询节点的委托共识列表获取，input的nonce值可为空**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "agentHash" : null,
@@ -4568,8 +4299,7 @@ _**详细描述: 组装交易的StopDepositDto信息，可通过查询节点的�
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                                                                                                                          |       参数类型       | 参数描述        | 是否必填 |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |:----------------:| ----------- |:----:|
 | StopConsensusDto                                                                                                                                             | stopconsensusdto | 离线注销共识节点表单  |  是   |
@@ -4586,13 +4316,12 @@ _**详细描述: 组装交易的StopDepositDto信息，可通过查询节点的�
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;amount       |    biginteger    | 资产金额        |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nonce        |      string      | 资产nonce值    |  是   |
 
-返回值
----
+#### 返回值
 | 字段名   |  字段类型  | 参数描述     |
 | ----- |:------:| -------- |
 | hash  | string | 交易hash   |
 | txHex | string | 交易序列化字符串 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -4626,7 +4355,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -4637,14 +4366,12 @@ _**request form data:**_
 }
 ```
 
-5.8 离线组装 - 委托参与共识交易
-===================
-Cmd: /api/consensus/deposit/offline
------------------------------------
+### 5.8 离线组装 - 委托参与共识交易
+#### Cmd: /api/consensus/deposit/offline
 _**详细描述: 参与共识所需资产可通过查询链信息接口获取(agentChainId和agentAssetId)**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "address" : null,
@@ -4660,8 +4387,7 @@ _**详细描述: 参与共识所需资产可通过查询链信息接口获取(ag
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                                                                          |    参数类型    | 参数描述       | 是否必填 |
 | ------------------------------------------------------------------------------------------------------------ |:----------:| ---------- |:----:|
 | DepositDto                                                                                                   | depositdto | 离线委托参与共识表单 |  是   |
@@ -4675,13 +4401,12 @@ _**详细描述: 参与共识所需资产可通过查询链信息接口获取(ag
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;amount       | biginteger | 资产金额       |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nonce        |   string   | 资产nonce值   |  是   |
 
-返回值
----
+#### 返回值
 | 字段名   |  字段类型  | 参数描述     |
 | ----- |:------:| -------- |
 | hash  | string | 交易hash   |
 | txHex | string | 交易序列化字符串 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -4702,7 +4427,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -4713,14 +4438,12 @@ _**request form data:**_
 }
 ```
 
-5.9 离线组装 - 退出共识交易
-=================
-Cmd: /api/consensus/withdraw/offline
-------------------------------------
+### 5.9 离线组装 - 退出共识交易
+#### Cmd: /api/consensus/withdraw/offline
 _**详细描述: 接口的input数据，则是委托共识交易的output数据，nonce值可为空**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "address" : null,
@@ -4736,8 +4459,7 @@ _**详细描述: 接口的input数据，则是委托共识交易的output数据�
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                                                                          |    参数类型     | 参数描述        | 是否必填 |
 | ------------------------------------------------------------------------------------------------------------ |:-----------:| ----------- |:----:|
 | WithDrawDto                                                                                                  | withdrawdto | 离线退出共识表单    |  是   |
@@ -4751,13 +4473,12 @@ _**详细描述: 接口的input数据，则是委托共识交易的output数据�
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;amount       | biginteger  | 资产金额        |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nonce        |   string    | 资产nonce值    |  是   |
 
-返回值
----
+#### 返回值
 | 字段名   |  字段类型  | 参数描述     |
 | ----- |:------:| -------- |
 | hash  | string | 交易hash   |
 | txHex | string | 交易序列化字符串 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -4778,7 +4499,7 @@ _**request form data:**_
 }
 ```
 
-### Example response data: 
+#### Example response data: 
 ```json
 {
   "success" : true,
@@ -4789,14 +4510,12 @@ _**request form data:**_
 }
 ```
 
-5.10 多签账户离线组装 - 创建共识节点交易
-========================
-Cmd: /api/consensus/multiSign/agent/offline
--------------------------------------------
+### 5.10 多签账户离线组装 - 创建共识节点交易
+#### Cmd: /api/consensus/multiSign/agent/offline
 _**详细描述: 参与共识所需资产可通过查询链信息接口获取(agentChainId和agentAssetId)**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "agentAddress" : null,
@@ -4810,8 +4529,7 @@ _**详细描述: 参与共识所需资产可通过查询链信息接口获取(ag
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                                                                          |         参数类型          | 参数描述           | 是否必填 |
 | ------------------------------------------------------------------------------------------------------------ |:---------------------:| -------------- |:----:|
 | MultiSignConsensusDto                                                                                        | multisignconsensusdto | 多签账户离线创建共识节点表单 |  是   |
@@ -4829,13 +4547,12 @@ _**详细描述: 参与共识所需资产可通过查询链信息接口获取(ag
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pubKeys                                                      |    list&lt;string>    | 公钥集合           |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;minSigns                                                     |          int          | 最小签名数          |  是   |
 
-返回值
----
+#### 返回值
 | 字段名   |  字段类型  | 参数描述     |
 | ----- |:------:| -------- |
 | hash  | string | 交易hash   |
 | txHex | string | 交易序列化字符串 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -4843,17 +4560,15 @@ _**request path:**_
 _**request form data:**_
 无
 
-### Example response data: 
+#### Example response data: 
 略
 
-5.11 离线组装 - 多签账户委托参与共识交易
-========================
-Cmd: /api/consensus/multiSign/deposit/offline
----------------------------------------------
+### 5.11 离线组装 - 多签账户委托参与共识交易
+#### Cmd: /api/consensus/multiSign/deposit/offline
 _**详细描述: 参与共识所需资产可通过查询链信息接口获取(agentChainId和agentAssetId)**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "address" : null,
@@ -4865,8 +4580,7 @@ _**详细描述: 参与共识所需资产可通过查询链信息接口获取(ag
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                                                                          |        参数类型         | 参数描述           | 是否必填 |
 | ------------------------------------------------------------------------------------------------------------ |:-------------------:| -------------- |:----:|
 | MultiSignDepositDto                                                                                          | multisigndepositdto | 多签账户离线委托参与共识表单 |  是   |
@@ -4882,13 +4596,12 @@ _**详细描述: 参与共识所需资产可通过查询链信息接口获取(ag
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pubKeys                                                      |   list&lt;string>   | 公钥集合           |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;minSigns                                                     |         int         | 最小签名数          |  是   |
 
-返回值
----
+#### 返回值
 | 字段名   |  字段类型  | 参数描述     |
 | ----- |:------:| -------- |
 | hash  | string | 交易hash   |
 | txHex | string | 交易序列化字符串 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -4896,17 +4609,15 @@ _**request path:**_
 _**request form data:**_
 无
 
-### Example response data: 
+#### Example response data: 
 略
 
-5.12 离线组装 - 多签账户退出共识交易
-======================
-Cmd: /api/consensus/multiSign/withdraw/offline
-----------------------------------------------
+### 5.12 离线组装 - 多签账户退出共识交易
+#### Cmd: /api/consensus/multiSign/withdraw/offline
 _**详细描述: 接口的input数据，则是委托共识交易的output数据，nonce值可为空**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "address" : null,
@@ -4918,8 +4629,7 @@ _**详细描述: 接口的input数据，则是委托共识交易的output数据�
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                                                                          |         参数类型         | 参数描述         | 是否必填 |
 | ------------------------------------------------------------------------------------------------------------ |:--------------------:| ------------ |:----:|
 | WithDrawDto                                                                                                  | multisignwithdrawdto | 多签账户离线退出共识表单 |  是   |
@@ -4935,13 +4645,12 @@ _**详细描述: 接口的input数据，则是委托共识交易的output数据�
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pubKeys                                                      |   list&lt;string>    | 公钥集合         |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;minSigns                                                     |         int          | 最小签名数        |  是   |
 
-返回值
----
+#### 返回值
 | 字段名   |  字段类型  | 参数描述     |
 | ----- |:------:| -------- |
 | hash  | string | 交易hash   |
 | txHex | string | 交易序列化字符串 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -4949,17 +4658,15 @@ _**request path:**_
 _**request form data:**_
 无
 
-### Example response data: 
+#### Example response data: 
 略
 
-5.13 离线组装 - 多签账户注销共识节点交易
-========================
-Cmd: /api/consensus/multiSign/agent/stop/offline
-------------------------------------------------
+### 5.13 离线组装 - 多签账户注销共识节点交易
+#### Cmd: /api/consensus/multiSign/agent/stop/offline
 _**详细描述: 组装交易的StopDepositDto信息，可通过查询节点的委托共识列表获取，input的nonce值可为空**_
-### HttpMethod: POST
+#### HttpMethod: POST
 
-### Form json data: 
+#### Form json data: 
 ```json
 {
   "agentHash" : null,
@@ -4972,8 +4679,7 @@ _**详细描述: 组装交易的StopDepositDto信息，可通过查询节点的�
 }
 ```
 
-参数列表
-----
+#### 参数列表
 | 参数名                                                                                                                                                          |           参数类型            | 参数描述           | 是否必填 |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |:-------------------------:| -------------- |:----:|
 | StopConsensusDto                                                                                                                                             | multisignstopconsensusdto | 多签账户离线注销共识节点表单 |  是   |
@@ -4992,13 +4698,12 @@ _**详细描述: 组装交易的StopDepositDto信息，可通过查询节点的�
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pubKeys                                                                                                      |      list&lt;string>      | 公钥集合           |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;minSigns                                                                                                     |            int            | 最小签名数          |  是   |
 
-返回值
----
+#### 返回值
 | 字段名   |  字段类型  | 参数描述     |
 | ----- |:------:| -------- |
 | hash  | string | 交易hash   |
 | txHex | string | 交易序列化字符串 |
-### Example request data: 
+#### Example request data: 
 
 _**request path:**_
 略
@@ -5006,6 +4711,6 @@ _**request path:**_
 _**request form data:**_
 无
 
-### Example response data: 
+#### Example response data: 
 略
 
