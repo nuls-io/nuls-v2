@@ -30,6 +30,7 @@ import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.transaction.cache.PackablePool;
+import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.Orphans;
@@ -39,6 +40,7 @@ import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
+import io.nuls.transaction.utils.LoggerUtil;
 import io.nuls.transaction.utils.OrphanSort;
 import io.nuls.transaction.utils.TxDuplicateRemoval;
 import io.nuls.transaction.utils.TxUtil;
@@ -64,7 +66,6 @@ public class OrphanTxProcessTask implements Runnable {
 
     private OrphanSort orphanSort = SpringLiteContext.getBean(OrphanSort.class);
 
-
     public OrphanTxProcessTask(Chain chain) {
         this.chain = chain;
     }
@@ -89,6 +90,13 @@ public class OrphanTxProcessTask implements Runnable {
         if (chainOrphan.size() == 0) {
             return;
         }
+        /** test **/
+        int orphanListSize = 0;
+        for(TransactionNetPO txPO : chain.getOrphanList()){
+            orphanListSize += txPO.size();
+        }
+        LoggerUtil.LOG.info("OrphanTxProcessTask Orphan Pool maxSize:{} count:{}, size:{}", TxConstant.ORPHAN_LIST_MAX_DATA_SIZE, chainOrphan.size(), orphanListSize);
+        /** test **/
         //把孤儿交易list的交易全部取出来，然后清空；如果有验不过的 再加回去,避免阻塞新的孤儿交易的加入
         List<TransactionNetPO> orphanTxList = new LinkedList<>();
         synchronized (chainOrphan) {
@@ -128,6 +136,7 @@ public class OrphanTxProcessTask implements Runnable {
             TransactionNetPO txNet = it.next();
             boolean rs = processOrphanTx(chain, txNet);
             if (rs) {
+                chain.getOrphanListDataSize().addAndGet(Math.negateExact(txNet.getTx().size()));
                 it.remove();
                 //有孤儿交易被处理
                 flag = true;
@@ -135,7 +144,6 @@ public class OrphanTxProcessTask implements Runnable {
         }
         return flag;
     }
-
 
     /**
      * 处理孤儿交易
