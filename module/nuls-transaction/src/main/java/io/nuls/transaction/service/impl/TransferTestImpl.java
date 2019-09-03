@@ -43,6 +43,7 @@ import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.transaction.constant.TxConstant;
+import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.config.ConfigBean;
@@ -246,9 +247,9 @@ public class TransferTestImpl {
         long countTx = 0;
         chain = chainManager.getChain(2);
         for (int i = 0; i < count; i++) {
+            String address = list1.get(i);
+            String addressTo = list2.get(i);
             try {
-                String address = list1.get(i);
-                String addressTo = list2.get(i);
                 Map transferMap = this.createTransferTx(address, addressTo, new BigInteger("1000000"));
                 Transaction tx = assemblyTransaction((int) transferMap.get(Constants.CHAIN_ID), (List<CoinDTO>) transferMap.get("inputs"),
                         (List<CoinDTO>) transferMap.get("outputs"), (String) transferMap.get("remark"), preHashMap.get(address));
@@ -261,6 +262,16 @@ public class TransferTestImpl {
 //            HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
                 preHashMap.put(address, tx.getHash());
                 countTx++;
+            } catch (NulsException e) {
+                Log.error(e);
+                if (e.getErrorCode().getCode().equalsIgnoreCase(TxErrorCode.PAUSE_NEWTX.getCode())) {
+                    //交易状态不对，睡2s再执行
+                    Thread.sleep(2000L);
+                } else if (e.getErrorCode().getCode().equalsIgnoreCase(TxErrorCode.ORPHAN_TX.getCode())) {
+                    //孤儿交易，从数据库重新获取nonce
+                    preHashMap.remove(address);
+                }
+                continue;
             } catch (Exception e) {
                 Log.error(e);
                 continue;

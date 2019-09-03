@@ -10,6 +10,7 @@ import io.nuls.api.model.po.TxDataInfo;
 import io.nuls.api.utils.DocumentTransferTool;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.model.StringUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
@@ -67,10 +68,13 @@ public class MongoPunishServiceImpl implements PunishService {
     }
 
     public PageInfo<PunishLogInfo> getPunishLogList(int chainId, int type, String address, int pageIndex, int pageSize) {
-        Bson filter;
-        if (type == 0) {
+        Bson filter = null;
+
+        if (type == 0 && !StringUtils.isBlank(address)) {
             filter = Filters.eq("address", address);
-        } else {
+        } else if (type > 0 && StringUtils.isBlank(address)) {
+            filter = Filters.eq("type", type);
+        } else if (type > 0 && !StringUtils.isBlank(address)) {
             filter = Filters.and(eq("type", type), eq("address", address));
         }
 
@@ -85,7 +89,7 @@ public class MongoPunishServiceImpl implements PunishService {
     }
 
 
-    public void rollbackPunishLog(int chainID,List<String> txHashs, long height) {
+    public void rollbackPunishLog(int chainID, List<String> txHashs, long height) {
         if (txHashs.isEmpty()) {
             return;
         }

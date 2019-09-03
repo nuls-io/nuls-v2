@@ -77,7 +77,7 @@ public class DepositProcessor extends ConsensusBaseProcessor implements CommandP
     public boolean argsValidate(String[] args) {
         checkArgsNumber(args,3);
         checkAddress(config.getChainId(),args[1]);
-        checkIsNumeric(args[3],"deposit");
+        checkIsAmount(args[3],"deposit");
         checkArgs(NulsHash.validHash(args[2]),"agentHash format error");
         return true;
     }
