@@ -4,6 +4,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Address;
 import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.crypto.ECKey;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 import org.junit.Test;
@@ -23,6 +24,22 @@ public class AddressToolTest {
             Address address = new Address(4, BaseConstant.DEFAULT_ADDRESS_TYPE, SerializeUtils.sha256hash160(key.getPubKey()));
             System.out.println(address.toString() + "================" + address.getBase58() + "===========" + key.getPrivateKeyAsHex());
         }
+    }
+
+    @Test
+    public void creaateMainNetAccount() {
+        System.out.println("=======================main net=======================");
+        for (int i = 0; i < 100; i++) {
+            ECKey key = new ECKey();
+            Address address = new Address(1, (byte) 1, SerializeUtils.sha256hash160(key.getPubKey()));
+            System.out.println(address.getBase58() + "===========" + key.getPrivateKeyAsHex());
+        }
+    }
+
+    @Test
+    public void getBlackWhole() {
+        Address address = new Address(1, (byte) 1, SerializeUtils.sha256hash160(HexUtil.decode("000000000000000000000000000000000000000000000000000000000000000000")));
+        System.out.println(address);
     }
 
     @Test
