@@ -570,9 +570,17 @@ public class TxServiceImpl implements TxService {
     /**
      * 打包时,从待打包队列获取交易阶段,会产生临时交易列表,在中断获取交易时需要把遗留的临时交易还回待打包队列
      */
-    private void backTempPackablePool(Chain chain ,List<TxPackageWrapper> listTx){
+    private void backTempPackablePool(Chain chain, List<TxPackageWrapper> listTx){
         for(int i = listTx.size() - 1; i >= 0 ;i--){
             packablePool.offerFirst(chain, listTx.get(i).getTx());
+        }
+    }
+    /**
+     * 循环获取交易结束后,把从待打包队列拿出的 不需要处理的智能合约交易, 再还回待打包队列
+     */
+    private void backPackablePoolContractTx(Chain chain, List<Transaction> listTx){
+        for(int i = listTx.size() - 1; i >= 0 ;i--){
+            packablePool.offerFirst(chain, listTx.get(i));
         }
     }
 
@@ -637,6 +645,11 @@ public class TxServiceImpl implements TxService {
             int contractTxCount = 0;
             //一批次处理，包含合约交易个数
             int batchContractTxCount = 0;
+            //是否停止执行职能合约,如果位true,则取出的智能合约本次打包不再处理,需要还回待打包队列
+            boolean stopInvokeContract = false;
+            //需要还回待打包队列的智能合约交易
+            List<Transaction> backPackablePoolContractTxs = new ArrayList<>();
+
             for (int index = 0; ; index++) {
                 long currentTimeMillis = NulsDateUtils.getCurrentTimeMillis();
                 long currentReserve = endtimestamp - currentTimeMillis;
@@ -690,6 +703,11 @@ public class TxServiceImpl implements TxService {
                     } else if (tx != null) {
                         if (!duplicatesVerify.add(tx.getHash().toHex())) {
                             //加入不进去表示已存在
+                            continue;
+                        }
+                        if(stopInvokeContract){
+                            //该标志true,表示不再处理智能合约交易,需要暂存交易,统一还回待打包队列
+                            backPackablePoolContractTxs.add(tx);
                             continue;
                         }
                         long txSize = tx.size();
@@ -763,15 +781,32 @@ public class TxServiceImpl implements TxService {
                         }
                         verifyLedger(chain, batchProcessList, currentBatchPackableTxs, orphanTxSet, false);
                         totalLedgerTime += NulsDateUtils.getCurrentTimeMillis() - verifyLedgerStart;
+
+
                         for (TxPackageWrapper txPackageWrapper : currentBatchPackableTxs) {
                             Transaction transaction = txPackageWrapper.getTx();
                             if (TxManager.isSmartContract(chain, transaction.getType())) {
+                                if(stopInvokeContract){
+                                    //该标志true,表示不再处理智能合约交易,需要暂存交易,统一还回待打包队列
+                                    backPackablePoolContractTxs.add(txPackageWrapper.getTx());
+                                    continue;
+                                }
                                 // 出现智能合约,且通知标识为false,则先调用通知
                                 if (!contractNotify) {
                                     ContractCall.contractBatchBegin(chain, blockHeight, blockTime, packingAddress, preStateRoot);
                                     contractNotify = true;
                                 }
-                                if (!ContractCall.invokeContract(chain, txPackageWrapper.getTxHex())) {
+                                try {
+                                    //调用执行智能合约,返回false.则不再处理智能合约
+                                    boolean invokeContractRs = ContractCall.invokeContract(chain, txPackageWrapper.getTxHex());
+                                    if(!invokeContractRs){
+                                        //不再发invoke
+                                        stopInvokeContract = true;
+                                        backPackablePoolContractTxs.add(txPackageWrapper.getTx());
+                                        continue;
+                                    }
+                                } catch (NulsException e) {
+                                    chain.getLogger().error(e);
                                     clearInvalidTx(chain, transaction);
                                     continue;
                                 }
@@ -807,6 +842,8 @@ public class TxServiceImpl implements TxService {
                 }
 
             }
+            //循环获取交易结束后,把从待打包队列拿出的 不需要处理的智能合约交易, 再还回待打包队列
+            backPackablePoolContractTx(chain, backPackablePoolContractTxs);
             //循环获取交易使用时间
             whileTime = NulsDateUtils.getCurrentTimeMillis() - startTime;
             nulsLogger.debug("-取出的交易 -count:{} - data size:{}", packingTxList.size(), totalSize);

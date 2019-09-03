@@ -76,5 +76,5 @@ public interface TxConstant {
      2：调用各模块验证器验证交易，获取智能合约结果。
      该配置为固定给第二部分预留的时间，其他时间留给第一部分。
      */
-    long PACKAGE_MODULE_VALIDATOR_RESERVE_TIME = 1500L;
+    long PACKAGE_MODULE_VALIDATOR_RESERVE_TIME = 2000L;//1500L;
 }

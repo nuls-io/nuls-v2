@@ -76,20 +76,22 @@ public class ContractCall {
      * @return
      * @throws NulsException
      */
-    public static boolean invokeContract(Chain chain, String tx) {
-
-        Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
-        params.put(Constants.CHAIN_ID, chain.getChainId());
-        params.put("tx", tx);
+    public static boolean invokeContract(Chain chain, String tx) throws NulsException {
         try {
-            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, "sc_invoke_contract", params);
-            if(!response.isSuccess()){
-                return false;
+            Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
+            params.put(Constants.CHAIN_ID, chain.getChainId());
+            params.put("tx", tx);
+            HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.SC.abbr, "sc_invoke_contract", params);
+            Boolean value = (Boolean) result.get("value");
+            if(null == value){
+                chain.getLogger().error("call sc_invoke_contract response value is null, error:{}",
+                        TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
+                throw new NulsException(TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND);
             }
-            return true;
-        } catch (Exception e) {
+            return value;
+        } catch (RuntimeException e) {
             chain.getLogger().error(e);
-            return false;
+            throw new NulsException(TxErrorCode.RPC_REQUEST_FAILD);
         }
     }
 
