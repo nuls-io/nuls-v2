@@ -50,7 +50,7 @@ public interface CommandProcessor {
 
     Pattern IS_NUMBERIC = Pattern.compile("[0-9]+");
 
-    Pattern IS_AMOUNT = Pattern.compile("^[0-9]+([.]{1}[0-9]+){0,1}$");
+    Pattern IS_AMOUNT = Pattern.compile("(^[0-9]+$)|(^[0-9]+([.]{1}[0-9]{0,8}))$");
 
     default void checkArgsNumber(String[] args, int... numbers) throws ParameterException {
         if (!Arrays.stream(numbers).anyMatch(number -> args.length - 1 == number)) {
@@ -171,4 +171,6 @@ public interface CommandProcessor {
     boolean argsValidate(String[] args);
 
     CommandResult execute(String[] args);
+
+
 }
