@@ -8,7 +8,7 @@ import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.*;
 import net.steppschuh.markdowngenerator.table.Table;
 import net.steppschuh.markdowngenerator.text.Text;
-import net.steppschuh.markdowngenerator.text.heading.Heading;
+import net.steppschuh.markdowngenerator.util.StringUtil;
 
 import java.io.*;
 import java.lang.annotation.Annotation;
@@ -24,6 +24,66 @@ import java.util.*;
  * @Description: 生成rpc接口文档
  */
 public class DocTool {
+
+
+    public static class Heading extends Text {
+        public static final int MINIMUM_LEVEL = 1;
+        public static final int MAXIMUM_LEVEL = 6;
+        public static final char UNDERLINE_CHAR_1 = '=';
+        public static final char UNDERLINE_CHAR_2 = '-';
+        private int level;
+        boolean underlineStyle = false;
+
+        public Heading(Object value) {
+            super(value);
+            this.level = 1;
+        }
+
+        public Heading(Object value, int level) {
+            super(value);
+            this.level = level;
+            this.trimLevel();
+        }
+
+        @Override
+        public String getPredecessor() {
+            return this.underlineStyle && this.level < 0 ? "" : StringUtil.fillUpRightAligned("", "#", this.level) + " ";
+        }
+
+        @Override
+        public String getSuccessor() {
+            if (this.underlineStyle && this.level < 3) {
+                char underlineChar = (char) (this.level == 1 ? 61 : 45);
+                return System.lineSeparator() + StringUtil.fillUpLeftAligned("", "" + underlineChar, this.value.toString().length());
+            } else {
+                return "";
+            }
+        }
+
+        private void trimLevel() {
+            this.level = Math.min(6, Math.max(1, this.level));
+        }
+
+        public int getLevel() {
+            return this.level;
+        }
+
+        public void setLevel(int level) {
+            this.level = level;
+            this.trimLevel();
+            this.invalidateSerialized();
+        }
+
+        public boolean isUnderlineStyle() {
+            return this.underlineStyle;
+        }
+
+        public void setUnderlineStyle(boolean underlineStyle) {
+            this.underlineStyle = underlineStyle;
+            this.invalidateSerialized();
+        }
+    }
+
 
     static Set<String> exclusion = Set.of("io.nuls.base.protocol.cmd","io.nuls.core.rpc.cmd.kernel","io.nuls.core.rpc.modulebootstrap");
 
@@ -449,6 +509,8 @@ public class DocTool {
             }
             try(BufferedWriter writer = new BufferedWriter(new FileWriter(mdFile,true))){
                 writer.newLine();
+                writer.write(new Heading("接口列表",2).toString());
+                writer.newLine();
                 cmdDesList.forEach(cmd->{
                     writeMarkdown(cmd,writer);
                 });
@@ -458,13 +520,13 @@ public class DocTool {
 
         private static void writeMarkdown(CmdDes cmd,BufferedWriter writer){
             try {
-                writer.write(new Heading(cmd.cmdName.replaceAll("_", "\\\\_"), 1).toString());
-                writer.newLine();
-                writer.write(new Heading("scope:" + cmd.scope, 3).toString());
-                writer.newLine();
-                writer.write(new Heading("version:" + cmd.version, 3).toString());
+                writer.write(new Heading(cmd.cmdName.replaceAll("_", "\\\\_"), 3).toString());
                 writer.newLine();
                 writer.write(new Text(cmd.des).toString());
+                writer.newLine();
+                writer.write(new Heading("scope:" + cmd.scope, 4).toString());
+                writer.newLine();
+                writer.write(new Heading("version:" + cmd.version, 4).toString());
                 writer.newLine();
                 buildParam(writer,cmd.parameters);
                 buildResult(writer,cmd.result);
@@ -478,7 +540,7 @@ public class DocTool {
         private static void buildResult(BufferedWriter writer, List<ResultDes> result) throws IOException {
             writer.newLine();
             writer.newLine();
-            writer.write(new Heading("返回值",2).toString());
+            writer.write(new Heading("返回值",4).toString());
             if(result == null){
                 writer.newLine();
                 writer.write("无返回值");
@@ -503,7 +565,7 @@ public class DocTool {
 
         private static void buildParam(BufferedWriter writer, List<ResultDes> parameters) throws IOException {
             writer.newLine();
-            writer.write(new Heading("参数列表",2).toString());
+            writer.write(new Heading("参数列表",4).toString());
             if(parameters == null || parameters.isEmpty()){
                 writer.newLine();
                 writer.write("无参数");
