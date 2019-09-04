@@ -5,21 +5,21 @@ logPath=Logs
 logLevel=INFO
 dataPath=data
 #默认本链ID
-chainId=2
+chainId=1
 #地址前缀
-addressPrefix=tNULS
+addressPrefix=NULS
 #默认本链主资产ID
 assetId=1
 #默认资产小数位数
 decimals=8
 #默认链名称
-chainName=nuls2
+chainName=nuls
 #本链默认资产符号
 symbol=NULS
 #默认资产的小数精确位数
 decimals=8
 #主网链id
-mainChainId=2
+mainChainId=1
 #主网主资产id
 mainAssetId=1
 #主网主资产符号
@@ -27,14 +27,14 @@ mainSymbol=NULS
 blackHolePublicKey=000000000000000000000000000000000000000000000000000000000000000000
 
 [network]
-port=18001
-crossPort=18002
+port=8001
+crossPort=8002
 #魔法参数
-packetMagic=10000
+packetMagic=20190903
 #种子节点
-selfSeedIps=127.0.0.1:18001
+selfSeedIps=192.168.1.37:8001
 #主网的跨链种子连接节点
-moonSeedIps=127.0.0.1:18002
+moonSeedIps=192.168.1.37:8002
 #最大入网连接数
 maxInCount=300
 #最大出网连接数
@@ -51,7 +51,7 @@ extendMaxSize=1024
 #引发分叉链切换的高度差阈值
 chainSwtichThreshold=3
 #最小链接节点数,当链接到的网络节点低于此参数时,会持续等待
-minNodeAmount=0
+minNodeAmount=1
 #区块同步过程中,每次从网络上节点下载的区块数量
 downloadNumber=5
 #从网络节点下载单个区块的超时时间
@@ -63,27 +63,29 @@ cachedBlockSizeLimit=20971520
 
 [consensus]
 #种子节点列表
-seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
+seedNodes=NULSd6HgcbGS9WLjJqSqDhqrh7W7ZcRb2MtWi,NULSd6HgWfTd7SJbbjruaVfvhjmeYSLW2GPzi
 #出块地址密码
 password=nuls123456
 #出块间隔时间(单位：s)
 packingInterval=10
 #共识委托抵押资产链ID
-agentChainId=2
+agentChainId=1
 #共识委托抵押资产ID
 agentAssetId=1
 #共识奖励资产ID(共识奖励必须为本链资产)
 awardAssetId=1
 #共识交易手续费单价
 feeUnit=100000
-#初始通胀金额
-inflationAmount=500000000000000
-#通胀开始计算时间(单位:S)
-initTime=1563951658
+#总流通量
+totalCirculation=11000000000000000
+#初始通胀金额500w/265*30
+inflationAmount=41095890410959
+#通胀开始计算时间(单位:S)2020-07-12 00:00:00
+initTime=1594483200
 #通缩比例(如果没有通缩则设为100)
-deflationRatio=100
-#通缩间隔时间(单位：S)
-deflationTimeInterval=31536000
+deflationRatio=99
+#通缩间隔时间(单位：S),30天
+deflationTimeInterval=2592000
 
 [smart_contract]
 #合约视图方法调用最大消耗的Gas
@@ -91,7 +93,7 @@ maxViewGas=100000000
 
 [public-service]
 #public-service模块对外的rpc端口号
-rpcPort=18003
+rpcPort=8003
 #数据库url地址
 databaseUrl=127.0.0.1
 #数据库端口号
@@ -102,18 +104,21 @@ maxAliveConnect=20
 maxWaitTime=120000
 #连接超时时间
 connectTimeOut=30000
+businessAddress=NULSd6HgdemcQDAaiEJWq9ESMhtUHXRsNJ4KM
+teamAddress=NULSd6HgbfkSuRGKSLJJzAPAihgDQtaUhuE4L
+communityAddress=NULSd6HgjDZmLMbZSmH9tqb6smdzZHCxsCRD3
 
 [cross-chain]
 #跨链节点链接的最小值
-minNodeAmount=4
+minNodeAmount=3
 #跨链节点链接的最大值
 sendHeight=6
 #跨链交易拜占庭比例
 byzantineRatio=66
 #主网跨链种子节点列表
-crossSeedIps=39.98.226.51:18002,47.244.186.65:18002,47.254.234.223:18002,47.74.86.85:18002
+crossSeedIps=192.168.1.37:8002
 #主网验证人列表
-verifiers=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
+verifiers=NULSd6HgcbGS9WLjJqSqDhqrh7W7ZcRb2MtWi,NULSd6HgWfTd7SJbbjruaVfvhjmeYSLW2GPzi
 #主网签名拜占庭比列
 mainByzantineRatio=66
 #主网最大签名数
