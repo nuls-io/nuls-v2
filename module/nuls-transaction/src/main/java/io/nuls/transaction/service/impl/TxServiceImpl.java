@@ -572,7 +572,7 @@ public class TxServiceImpl implements TxService {
      */
     private void backTempPackablePool(Chain chain, List<TxPackageWrapper> listTx){
         for(int i = listTx.size() - 1; i >= 0 ;i--){
-            packablePool.offerFirst(chain, listTx.get(i).getTx());
+            packablePool.offerFirstOnlyHash(chain, listTx.get(i).getTx());
         }
     }
     /**
@@ -580,7 +580,7 @@ public class TxServiceImpl implements TxService {
      */
     private void backPackablePoolContractTx(Chain chain, List<Transaction> listTx){
         for(int i = listTx.size() - 1; i >= 0 ;i--){
-            packablePool.offerFirst(chain, listTx.get(i));
+            packablePool.offerFirstOnlyHash(chain, listTx.get(i));
         }
     }
 
@@ -712,7 +712,7 @@ public class TxServiceImpl implements TxService {
                         }
                         long txSize = tx.size();
                         if ((totalSizeTemp + txSize) > maxTxDataSize) {
-                            packablePool.offerFirst(chain, tx);
+                            packablePool.offerFirstOnlyHash(chain, tx);
                             nulsLogger.info("交易已达最大容量, 实际值: {} 当前交易size：{} - 预定最大值maxTxDataSize:{}", totalSize + txSize, txSize, maxTxDataSize);
                             if (batchProcessListSize > 0) {
                                 //达到处理该批次的条件
@@ -1012,7 +1012,7 @@ public class TxServiceImpl implements TxService {
                     Transaction transaction = txPackageWrapper.getTx();
                     if (TxManager.isUnSystemSmartContract(chain, transaction.getType())) {
                         //如果是智能合约的非系统交易,未验证通过,则需要将所有非系统智能合约交易还回待打包队列.
-                        packablePool.offerFirst(chain, transaction);
+                        packablePool.offerFirstOnlyHash(chain, transaction);
                         chain.setContractTxFail(true);
                         it.remove();
                     }
@@ -1254,7 +1254,7 @@ public class TxServiceImpl implements TxService {
             }
         });
         for (TxPackageWrapper txPackageWrapper : txList) {
-            packablePool.offerFirst(chain, txPackageWrapper.getTx());
+            packablePool.offerFirstOnlyHash(chain, txPackageWrapper.getTx());
             chain.getLogger().debug("putBackPackablePool tx hash:{}", txPackageWrapper.getTx().getHash().toHex());
         }
         chain.getLogger().info("putBackPackablePool count:{}", txList.size());
