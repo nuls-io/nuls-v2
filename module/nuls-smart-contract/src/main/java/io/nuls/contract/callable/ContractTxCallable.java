@@ -23,11 +23,6 @@
  */
 package io.nuls.contract.callable;
 
-import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.Transaction;
-import io.nuls.base.signture.P2PHKSignature;
-import io.nuls.base.signture.SignatureUtil;
-import io.nuls.base.signture.TransactionSignature;
 import io.nuls.contract.helper.ContractConflictChecker;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.helper.ContractNewTxHandler;
@@ -38,11 +33,9 @@ import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.service.ContractExecutor;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
-import io.nuls.contract.vm.GasCost;
 import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.ioc.SpringLiteContext;
-import io.nuls.core.exception.NulsException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -131,16 +124,14 @@ public class ContractTxCallable implements Callable<ContractResult> {
                 case CREATE_CONTRACT:
                     container.setHasCreate(true);
                     contractResult = contractExecutor.create(executor, contractData, number, preStateRoot, extractPublicKey(tx));
-                    makeContractResult(tx, contractResult);
-                    if(!checkGas(contractResult)) {
+                    if(!makeContractResultAndCheckGasSerial(tx, contractResult, batchInfo)) {
                         break;
                     }
                     checkCreateResult(tx, callableResult, contractResult);
                     break;
                 case CALL_CONTRACT:
                     contractResult = contractExecutor.call(executor, contractData, number, preStateRoot, extractPublicKey(tx));
-                    makeContractResult(tx, contractResult);
-                    if(!checkGas(contractResult)) {
+                    if(!makeContractResultAndCheckGasSerial(tx, contractResult, batchInfo)) {
                         break;
                     }
                     checkCallResult(tx, callableResult, contractResult);
@@ -161,17 +152,6 @@ public class ContractTxCallable implements Callable<ContractResult> {
             Log.debug("[Per Contract Execution Cost Time] TxType is {}, TxHash is {}, Cost Time is {}", tx.getType(), tx.getHash().toString(), System.currentTimeMillis() - start);
         }
         return contractResult;
-    }
-
-    private boolean checkGas(ContractResult contractResult) {
-        long gasUsed = contractResult.getGasUsed();
-        BatchInfo batchInfo = contractHelper.getChain(chainId).getBatchInfo();
-        boolean isAdded = batchInfo.addGasCostTotal(gasUsed, contractResult.getHash());
-        if(!isAdded) {
-            contractResult.setError(true);
-            contractResult.setErrorMessage("Exceed tx count [500] or gas limit of block [15,000,000 gas], the contract transaction ["+ contractResult.getHash() +"] revert to package queue.");
-        }
-        return isAdded;
     }
 
     private void checkCreateResult(ContractWrapperTransaction tx, CallableResult callableResult, ContractResult contractResult) {

@@ -132,6 +132,11 @@ public class BatchInfo {
     private List<String> pendingTxHashList;
     private Map<String, Future<ContractResult>> contractMap;
 
+    /**
+     * 串行标记数字
+     */
+    private int serialOrder;
+
     public BatchInfo(long height) {
         this.txCounter = 0;
         this.height = height;
@@ -142,13 +147,14 @@ public class BatchInfo {
         this.contractContainerMap = new LinkedHashMap<>();
         this.pendingTxHashList = new ArrayList<>();
         this.contractMap = new ConcurrentHashMap<>();
+        this.serialOrder = 0;
     }
 
     public boolean hasBegan() {
         return status.status() > 0;
     }
 
-    public ContractContainer newAndGetContractContainer(String contractAddress) {
+    public ContractContainer newOrGetContractContainer(String contractAddress) {
         if (StringUtils.isBlank(contractAddress)) {
             return null;
         }
@@ -164,6 +170,14 @@ public class BatchInfo {
 
     public int getAndIncreaseTxCounter() {
         return txCounter++;
+    }
+
+    public int getSerialOrder() {
+        return serialOrder;
+    }
+
+    public void setSerialOrder(int serialOrder) {
+        this.serialOrder = serialOrder;
     }
 
     public ContractTempBalanceManager getTempBalanceManager() {
@@ -320,6 +334,10 @@ public class BatchInfo {
     public boolean addGasCostTotal(long gasCost, String txHash) {
         gasLock.writeLock().lock();
         try {
+            if(isExceed()) {
+                this.addPendingTxHashList(txHash);
+                return false;
+            }
             this.txTotal += 1;
             this.gasCostTotal += gasCost;
             if(isExceed()) {

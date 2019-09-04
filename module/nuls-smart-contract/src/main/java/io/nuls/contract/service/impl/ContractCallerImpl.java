@@ -71,7 +71,7 @@ public class ContractCallerImpl implements ContractCaller {
         }
         TX_EXECUTOR_SERVICE =
                 new ThreadPoolExecutor(
-                        threadCount,
+                        1,
                         threadCount,
                         10L,
                         TimeUnit.SECONDS,

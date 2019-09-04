@@ -159,7 +159,7 @@ public class ContractServiceImpl implements ContractService {
             BatchInfo batchInfo = chain.getBatchInfo();
             byte[] contractAddressBytes = ContractUtil.extractContractAddressFromTxData(tx);
             String contractAddress = AddressTool.getStringAddressByBytes(contractAddressBytes);
-            ContractContainer container = batchInfo.newAndGetContractContainer(contractAddress);
+            ContractContainer container = batchInfo.newOrGetContractContainer(contractAddress);
             ContractWrapperTransaction wrapperTx = ContractUtil.parseContractTransaction(tx);
             wrapperTx.setOrder(batchInfo.getAndIncreaseTxCounter());
 
