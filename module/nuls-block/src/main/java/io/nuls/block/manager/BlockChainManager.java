@@ -296,6 +296,7 @@ public class BlockChainManager {
     public static void deleteForkChain(int chainId, Chain forkChain, boolean recursive) {
         forkChains.get(chainId).remove(forkChain);
         chainStorageService.remove(chainId, forkChain.getHashList());
+        ContextManager.getContext(chainId).getLogger().info("delete Fork Chain-" + forkChain);
         if (recursive && !forkChain.getSons().isEmpty()) {
             forkChain.getSons().forEach(e -> deleteForkChain(chainId, e, true));
         }
@@ -415,6 +416,7 @@ public class BlockChainManager {
     public static void deleteOrphanChain(int chainId, Chain orphanChain) {
         orphanChains.get(chainId).remove(orphanChain);
         chainStorageService.remove(chainId, orphanChain.getHashList());
+        ContextManager.getContext(chainId).getLogger().info("delete Orphan Chain-" + orphanChain);
         if (!orphanChain.getSons().isEmpty()) {
             orphanChain.getSons().forEach(e -> deleteOrphanChain(chainId, e));
         }
