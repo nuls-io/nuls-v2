@@ -491,7 +491,7 @@ public class ContractUtil {
         boolean isAdded = batchInfo.addGasCostTotal(gasUsed, contractResult.getHash());
         if(!isAdded) {
             contractResult.setError(true);
-            contractResult.setErrorMessage("Exceed tx count [500] or gas limit of block [15,000,000 gas], the contract transaction ["+ contractResult.getHash() +"] revert to package queue.");
+            contractResult.setErrorMessage("Exceed tx count [500] or gas limit of block [12,000,000 gas], the contract transaction ["+ contractResult.getHash() +"] revert to package queue.");
         }
         return isAdded;
     }

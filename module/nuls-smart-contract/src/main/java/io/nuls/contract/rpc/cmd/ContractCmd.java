@@ -124,7 +124,7 @@ public class ContractCmd extends BaseCmd {
             String hash = tx.getHash().toHex();
             Map<String, Boolean> dealResult = new HashMap<>(2);
             if(!contractHelper.getChain(chainId).getBatchInfo().checkGasCostTotal(hash)) {
-                Log.warn("Exceed tx count [500] or gas limit of block [15,000,000 gas], the contract transaction [{}] revert to package queue.", hash);
+                Log.warn("Exceed tx count [500] or gas limit of block [12,000,000 gas], the contract transaction [{}] revert to package queue.", hash);
                 dealResult.put(RPC_RESULT_KEY, false);
                 return success(dealResult);
             }
