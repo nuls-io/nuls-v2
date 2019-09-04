@@ -318,8 +318,11 @@ public class BlockValidator {
                 BlockExtendsData blockExtendsData = header1.getExtendsData();
                 roundIndex[i] = blockExtendsData.getRoundIndex();
             }
-            //验证轮次是否连续
-            boolean rs = true;
+            //验证三次分叉是否是100轮以内
+            if(roundIndex[ConsensusConstant.REDPUNISH_BIFURCATION - 1] - roundIndex[0] > ConsensusConstant.VALUE_OF_ONE_HUNDRED){
+                throw new NulsException(ConsensusErrorCode.BLOCK_RED_PUNISH_ERROR);
+            }
+            /*boolean rs = true;
             for (int i = 0; i < roundIndex.length; i++) {
                 if (i < roundIndex.length - 2 && roundIndex[i + 2] - roundIndex[i] > 100) {
                     rs = false;
@@ -328,7 +331,7 @@ public class BlockValidator {
             }
             if (!rs) {
                 throw new NulsException(ConsensusErrorCode.BLOCK_RED_PUNISH_ERROR);
-            }
+            }*/
         }
       /*
       红牌交易类型为黄牌过多
