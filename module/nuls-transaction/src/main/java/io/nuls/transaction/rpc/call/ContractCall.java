@@ -133,8 +133,6 @@ public class ContractCall {
         params.put("blockHeight", blockHeight);
         try {
             Map result = (Map) TransactionCall.requestAndResponse(ModuleE.SC.abbr, "sc_batch_end", params);
-            chain.getLogger().debug("moduleCode:{}, -cmd:{}, -contractProcess -rs: {}",
-                    ModuleE.SC.abbr, "sc_batch_end", JSONUtils.obj2json(result));
             return result;
         }catch (Exception e) {
             chain.getLogger().error(e);
