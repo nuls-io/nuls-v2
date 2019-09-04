@@ -11,6 +11,7 @@ import io.nuls.core.log.Log;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.model.*;
+import io.nuls.core.rpc.util.DocTool;
 import io.nuls.v2.model.annotation.Api;
 import io.nuls.v2.model.annotation.ApiOperation;
 import io.nuls.v2.model.annotation.ApiType;
@@ -706,6 +707,8 @@ public class ApiDocTool {
             }
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(mdFile, true))) {
                 writer.newLine();
+                writer.write(new DocTool.Heading("接口列表",2).toString());
+                writer.newLine();
                 AtomicInteger i = new AtomicInteger(0);
                 for(CmdDes cmd : cmdDesList) {
                     writeMarkdown(cmd, writer, i, egMap);
@@ -734,14 +737,14 @@ public class ApiDocTool {
                     order = order.substring(0, 1) + "." + Integer.parseInt(order.substring(1)) + " ";
                 }
                 boolean jsonrpc = ApiType.JSONRPC.name().equals(cmd.cmdType);
-                writer.write(new Heading(order + cmd.des, 1).toString());
+                writer.write(new Heading(order + cmd.des, 3).toString());
                 writer.newLine();
-                writer.write(new Heading("Cmd: " + cmd.cmdName.replaceAll("_", "\\\\_"), 2).toString());
+                writer.write(new Heading("Cmd: " + cmd.cmdName.replaceAll("_", "\\\\_"), 4).toString());
                 writer.newLine();
                 writer.write(new Text("_**详细描述: " + cmd.detailDesc + "**_").toString());
                 writer.newLine();
                 if(!jsonrpc) {
-                    writer.write(new Heading("HttpMethod: " + cmd.httpMethod, 3).toString());
+                    writer.write(new Heading("HttpMethod: " + cmd.httpMethod, 4).toString());
                     writer.newLine();
                 }
                 buildParam(writer, cmd.parameters, jsonrpc);
@@ -775,7 +778,7 @@ public class ApiDocTool {
                     }
                 }
                 writer.newLine();
-                writer.write(new Heading("Example request data: ", 3).toString());
+                writer.write(new Heading("Example request data: ", 4).toString());
                 writer.newLine();
                 if(jsonrpc) {
                     if("无".equals(egReqDesc)) {
@@ -811,7 +814,7 @@ public class ApiDocTool {
                 }
 
                 writer.newLine();
-                writer.write(new Heading("Example response data: ", 3).toString());
+                writer.write(new Heading("Example response data: ", 4).toString());
                 writer.newLine();
                 if("略".equals(egRespDesc)) {
                     writer.write(new Text(egRespDesc).toString());
@@ -843,7 +846,7 @@ public class ApiDocTool {
         private static void buildResult(BufferedWriter writer, List<ResultDes> result) throws IOException {
             writer.newLine();
             writer.newLine();
-            writer.write(new Heading("返回值", 2).toString());
+            writer.write(new Heading("返回值", 4).toString());
             if (result == null) {
                 writer.newLine();
                 writer.write("无返回值");
@@ -872,7 +875,7 @@ public class ApiDocTool {
                     if(des.formJsonOfRestful != null) {
                         try {
                             writer.newLine();
-                            writer.write(new Heading("Form json data: ", 3).toString());
+                            writer.write(new Heading("Form json data: ", 4).toString());
                             writer.newLine();
                             writer.write(new Text("```json").toString());
                             writer.newLine();
@@ -887,7 +890,7 @@ public class ApiDocTool {
                 });
             }
             writer.newLine();
-            writer.write(new Heading("参数列表", 2).toString());
+            writer.write(new Heading("参数列表", 4).toString());
             if (parameters == null || parameters.isEmpty()) {
                 writer.newLine();
                 writer.write("无参数");

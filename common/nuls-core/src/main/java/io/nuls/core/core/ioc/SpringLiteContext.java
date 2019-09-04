@@ -163,7 +163,8 @@ public class SpringLiteContext {
                 });
             }
         });
-        int maxKeyLength = values.keySet().stream().max((d1, d2) -> d1.length() > d2.length() ? 1 : -1).get().length();
+        Optional<String> maxItem = values.keySet().stream().max((d1, d2) -> d1.length() > d2.length() ? 1 : -1);
+        int maxKeyLength = maxItem.isPresent() ? maxItem.get().length() : 0;
         Log.info("Configuration information:");
         values.forEach((key, value) -> {
             Log.info("{} : {} ==> {}", key + " ".repeat(Math.max(0, maxKeyLength - key.length())), value.getValue(), value.getConfigFile());

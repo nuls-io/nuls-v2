@@ -11,3 +11,4 @@ Managed=1
 
 [chain-manager]
 moduleDynamicDependent=protocol-update
+blackHolePublicKey=000000000000000000000000000000000000000000000000000000000000000000
