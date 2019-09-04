@@ -55,7 +55,7 @@ public class UpdateCrossChainProcessor extends CrossChainBaseProcessor {
 
     @Override
     public boolean argsValidate(String[] args) {
-        checkArgsNumber(args, 12, 13, 14, 15);
+        checkArgsNumber(args, 11, 12, 13, 14);
         checkAddress(config.getMainChainId(), args[1]);
         checkIsNumeric(args[2], "chainId");
         checkIsNumeric(args[5], "magicNumber");
@@ -72,9 +72,6 @@ public class UpdateCrossChainProcessor extends CrossChainBaseProcessor {
         }
         if (args.length > 14) {
             checkIsNumeric(args[14], "minAvailableNodeNum");
-        }
-        if (args.length > 15) {
-            checkIsNumeric(args[15], "txConfirmedBlockNum");
         }
         return true;
     }
@@ -103,15 +100,11 @@ public class UpdateCrossChainProcessor extends CrossChainBaseProcessor {
         if (args.length > 14) {
             minAvailableNodeNum = Integer.parseInt(args[14]);
         }
-        if (args.length > 15) {
-            txConfirmedBlockNum = Integer.parseInt(args[15]);
-        }
         RegisterChainReq req = new RegisterChainReq(address, chainId, chainName, addressPrefix, magicNumber,
                 maxSignatureCount, signatureBFTRatio, verifierList,
                 assetId, symbol, assetName, initNumber, "1", getPwd());
         req.setDecimalPlaces(decimalPlaces);
         req.setMinAvailableNodeNum(minAvailableNodeNum);
-        req.setTxConfirmedBlockNum(txConfirmedBlockNum);
         Result<Map> result = chainManageProvider.updateChain(req);
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
