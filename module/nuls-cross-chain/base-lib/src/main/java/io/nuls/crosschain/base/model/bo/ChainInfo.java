@@ -191,9 +191,6 @@ public class ChainInfo extends BaseMessage {
 
     public int getMinPassCount(){
         int minPassCount = getVerifierList().size() * getSignatureByzantineRatio()/ CrossChainConstant.MAGIC_NUM_100;
-        /*if(minPassCount > getMaxSignatureCount()){
-            minPassCount = getMaxSignatureCount();
-        }*/
         if(minPassCount == 0){
             minPassCount = 1;
         }

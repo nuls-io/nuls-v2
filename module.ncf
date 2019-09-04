@@ -75,6 +75,8 @@ agentAssetId=1
 awardAssetId=1
 #共识交易手续费单价
 feeUnit=100000
+#总流通量
+totalCirculation=11000000000000000
 #初始通胀金额500w/265*30
 inflationAmount=41095890410959
 #通胀开始计算时间(单位:S)2020-07-12 00:00:00

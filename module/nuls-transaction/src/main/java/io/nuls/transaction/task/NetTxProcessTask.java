@@ -96,7 +96,7 @@ public class NetTxProcessTask implements Runnable {
                     TransactionNetPO txNetPO = it.next();
                     Transaction tx = txNetPO.getTx();
                     //待打包队列map超过预定值,则不再接受处理交易,直接转发交易完整交易
-                    if (TxUtil.discardTx(packableTxMapDataSize)) {
+                    if (TxUtil.discardTx(chain, packableTxMapDataSize, tx)) {
                         //待打包队列map超过预定值, 不处理转发失败的情况
                         String hash = tx.getHash().toHex();
                         NetworkCall.broadcastTx(chain, tx, TxDuplicateRemoval.getExcludeNode(hash));
@@ -183,6 +183,7 @@ public class NetTxProcessTask implements Runnable {
             if (failHashs.isEmpty() && orphanHashs.isEmpty()) {
                 return;
             }
+
             Iterator<TransactionNetPO> it = txNetList.iterator();
             removeAndGo:
             while (it.hasNext()) {
@@ -202,11 +203,19 @@ public class NetTxProcessTask implements Runnable {
                     if (hash.equals(hashStr)) {
                         //孤儿交易
                         List<TransactionNetPO> chainOrphan = chain.getOrphanList();
-                        synchronized (chainOrphan) {
-                            chainOrphan.add(transactionNetPO);
+                        //孤儿交易集合数据总大小
+                        if (chain.getOrphanListDataSize().get() >= TxConstant.ORPHAN_LIST_MAX_DATA_SIZE) {
+                            chain.getLogger().warn("Orphan tx list data size reach discard orphan transaction threshold, hash:{}", tx.getHash().toHex());
+                            it.remove();
+                            break;
+                        } else {
+                            synchronized (chainOrphan) {
+                                chainOrphan.add(transactionNetPO);
+                                chain.getOrphanListDataSize().addAndGet(transactionNetPO.getTx().size());
+                            }
+                            it.remove();
+                            continue removeAndGo;
                         }
-                        it.remove();
-                        continue removeAndGo;
                     }
                 }
             }

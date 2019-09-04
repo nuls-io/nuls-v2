@@ -3,9 +3,11 @@ package io.nuls.transaction.cache;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.model.ByteArrayWrapper;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
+import io.nuls.transaction.utils.LoggerUtil;
 
 import java.util.List;
 import java.util.Map;
@@ -36,6 +38,23 @@ public class PackablePool {
         synchronized (hash) {
             if (chain.getPackableHashQueue().offerFirst(hash)) {
                 chain.getPackableTxMap().put(hash, tx);
+                return true;
+            }
+        }
+        chain.getLogger().error("PackableHashQueue offerFirst false");
+        return false;
+    }
+
+    /**
+     * 只还hash 不需要还到map中
+     * @param chain
+     * @param tx
+     * @return
+     */
+    public boolean offerFirstOnlyHash(Chain chain, Transaction tx) {
+        ByteArrayWrapper hash = new ByteArrayWrapper(tx.getHash().getBytes());
+        synchronized (hash) {
+            if (chain.getPackableHashQueue().offerFirst(hash)) {
                 return true;
             }
         }
@@ -123,10 +142,12 @@ public class PackablePool {
     }
 
     public void clearConfirmedTxs(Chain chain, List<byte[]> txHashs) {
+        LoggerUtil.LOG.info("交易已确认从待打包队列中移除");
         Map<ByteArrayWrapper, Transaction> map = chain.getPackableTxMap();
         for (byte[] hash : txHashs) {
             ByteArrayWrapper wrapper = new ByteArrayWrapper(hash);
             map.remove(wrapper);
+            LoggerUtil.LOG.info("rm cfm hash:{}", HexUtil.encode(hash));
         }
     }
 
