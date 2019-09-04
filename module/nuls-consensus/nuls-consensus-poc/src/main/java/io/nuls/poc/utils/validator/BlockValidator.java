@@ -321,7 +321,7 @@ public class BlockValidator {
             //验证轮次是否连续
             boolean rs = true;
             for (int i = 0; i < roundIndex.length; i++) {
-                if (i < roundIndex.length - 2 && roundIndex[i + 1] - roundIndex[i] != 1) {
+                if (i < roundIndex.length - 2 && roundIndex[i + 2] - roundIndex[i] > 100) {
                     rs = false;
                     break;
                 }
