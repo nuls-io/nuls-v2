@@ -495,7 +495,7 @@ public class CoinDataValidator {
                 if (null == list) {
                     //从头开始处理
                     if (!LedgerUtil.equalsNonces(accountState.getNonce(), coinFrom.getNonce())) {
-                        logger(chainId).error("validate fail:(isBlockValidateCommonTx failed)：{}=={}=={}==nonce is error!dbNonce:{}!=fromNonce:{}", address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), LedgerUtil.getNonceEncode(accountState.getNonce()), fromCoinNonce);
+                        logger(chainId).error("validate fail:(isBlockValidateCommonTx failed)：{}=={}=={}==nonce is error!dbNonce:{}!=fromNonce:{},tx={}", address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), LedgerUtil.getNonceEncode(accountState.getNonce()), fromCoinNonce,LedgerUtil.getNonceEncode(txNonce));
                         //判断是否fromNonce是否已经存储了,如果存储了，则这笔是异常交易双花
                         return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{address, fromCoinNonce, "dbNonce=" + LedgerUtil.getNonceEncode(accountState.getNonce())});
                     }
@@ -506,7 +506,7 @@ public class CoinDataValidator {
                     //从已有的缓存数据中获取对象进行操作,nonce必须连贯
                     TempAccountNonce tempAccountState = list.get(list.size() - 1);
                     if (!LedgerUtil.equalsNonces(tempAccountState.getNextNonce(), coinFrom.getNonce())) {
-                        logger(chainId).info("isValidateCommonTxBatch {}=={}=={}==nonce is error!tempNonce:{}!=fromNonce:{}", address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), LedgerUtil.getNonceEncode(tempAccountState.getNextNonce()), fromCoinNonce);
+                        logger(chainId).info("isValidateCommonTxBatch {}=={}=={}==nonce is error!tempNonce:{}!=fromNonce:{},tx={}", address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), LedgerUtil.getNonceEncode(tempAccountState.getNextNonce()), fromCoinNonce,LedgerUtil.getNonceEncode(txNonce));
                         return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{address, fromCoinNonce, "last pool nonce=" + LedgerUtil.getNonceEncode(tempAccountState.getNextNonce())});
                     }
                     list.add(new TempAccountNonce(assetKey, coinFrom.getNonce(), txNonce));
