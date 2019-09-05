@@ -49,7 +49,7 @@ public class RegisterCrossChainProcessor extends CrossChainBaseProcessor {
 
     @Override
     public String getCommandDescription() {
-        return getCommand() + " <address> <chainId> <chainName> <addressPrefix> <magicNumber> <maxSignatureCount> <signatureBFTRatio> <verifierList> <assetId> <symbol> <assetName> <initNumber> [decimalPlaces] [minAvailableNodeNum] [txConfirmedBlockNum]";
+        return getCommand() + " <address> <chainId> <chainName> <addressPrefix> <magicNumber> <maxSignatureCount> <signatureBFTRatio> <verifierList> <assetId> <symbol> <assetName> <initNumber> [decimalPlaces] [minAvailableNodeNum]";
     }
 
     @Override
