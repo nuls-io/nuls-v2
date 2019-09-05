@@ -116,6 +116,7 @@ public class VM {
     private List<ProgramInternalCall> internalCalls = new ArrayList<>();
 
     private List<String> events = new ArrayList<>();
+    private List<String> debugEvents = new ArrayList<>();
 
     private List<ProgramInvokeRegisterCmd> invokeRegisterCmds = new ArrayList<>();
 
@@ -1260,6 +1261,10 @@ public class VM {
 
     public List<String> getEvents() {
         return events;
+    }
+
+    public List<String> getDebugEvents() {
+        return debugEvents;
     }
 
     public void setResult(Result result) {

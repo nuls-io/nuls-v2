@@ -32,8 +32,6 @@ import io.nuls.core.parse.SerializeUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * @Author: PierreLuo
@@ -47,7 +45,7 @@ public class CallContractData extends BaseNulsData implements ContractData {
     private long price;
     private String methodName;
     private String methodDesc;
-    private byte argsCount;
+    private short argsCount;
     private String[][] args;
 
 
@@ -88,13 +86,13 @@ public class CallContractData extends BaseNulsData implements ContractData {
 
         stream.writeString(methodName);
         stream.writeString(methodDesc);
-        stream.write(argsCount);
+        stream.writeUint8(argsCount);
         if (args != null) {
             for (String[] arg : args) {
                 if (arg == null) {
-                    stream.write((byte) 0);
+                    stream.writeUint8((short) 0);
                 } else {
-                    stream.write((byte) arg.length);
+                    stream.writeUint8((short) arg.length);
                     for (String str : arg) {
                         stream.writeString(str);
                     }
@@ -113,16 +111,16 @@ public class CallContractData extends BaseNulsData implements ContractData {
 
         this.methodName = byteBuffer.readString();
         this.methodDesc = byteBuffer.readString();
-        this.argsCount = byteBuffer.readByte();
-        byte length = this.argsCount;
+        this.argsCount = byteBuffer.readUint8();
+        short length = this.argsCount;
         this.args = new String[length][];
-        for (byte i = 0; i < length; i++) {
-            byte argCount = byteBuffer.readByte();
+        for (short i = 0; i < length; i++) {
+            short argCount = byteBuffer.readUint8();
             if (argCount == 0) {
                 args[i] = new String[0];
             } else {
                 String[] arg = new String[argCount];
-                for (byte k = 0; k < argCount; k++) {
+                for (short k = 0; k < argCount; k++) {
                     arg[k] = byteBuffer.readString();
                 }
                 args[i] = arg;
@@ -198,11 +196,11 @@ public class CallContractData extends BaseNulsData implements ContractData {
         this.methodDesc = methodDesc;
     }
 
-    public byte getArgsCount() {
+    public short getArgsCount() {
         return argsCount;
     }
 
-    public void setArgsCount(byte argsCount) {
+    public void setArgsCount(short argsCount) {
         this.argsCount = argsCount;
     }
 
@@ -215,10 +213,4 @@ public class CallContractData extends BaseNulsData implements ContractData {
         this.args = args;
     }
 
-
-    public Set<byte[]> getAddresses() {
-        Set<byte[]> addressSet = new HashSet<>();
-        addressSet.add(contractAddress);
-        return addressSet;
-    }
 }

@@ -54,6 +54,7 @@ public class ProgramResult {
     private List<ProgramInternalCall> internalCalls = new ArrayList<>();
 
     private List<String> events = new ArrayList<>();
+    private List<String> debugEvents = new ArrayList<>();
 
     private List<ProgramInvokeRegisterCmd> invokeRegisterCmds = new ArrayList<>();
 
@@ -173,6 +174,14 @@ public class ProgramResult {
 
     public void setEvents(List<String> events) {
         this.events = events;
+    }
+
+    public List<String> getDebugEvents() {
+        return debugEvents;
+    }
+
+    public void setDebugEvents(List<String> debugEvents) {
+        this.debugEvents = debugEvents;
     }
 
     public List<ProgramInvokeRegisterCmd> getInvokeRegisterCmds() {
