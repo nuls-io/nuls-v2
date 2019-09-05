@@ -17,6 +17,8 @@ public class ApiCache {
 
     private CurrentRound currentRound;
 
+    private StatisicalCache statisicalCache = new StatisicalCache();
+
     private Map<String, AccountInfo> accountMap = new ConcurrentHashMap<>();
 
     private Map<String, AccountLedgerInfo> ledgerMap = new ConcurrentHashMap<>();
@@ -134,5 +136,13 @@ public class ApiCache {
 
     public void setConfigInfo(ChainConfigInfo configInfo) {
         this.configInfo = configInfo;
+    }
+
+    public StatisicalCache getStatisicalCache() {
+        return statisicalCache;
+    }
+
+    public void setStatisicalCache(StatisicalCache statisicalCache) {
+        this.statisicalCache = statisicalCache;
     }
 }

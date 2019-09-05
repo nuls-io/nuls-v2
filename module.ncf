@@ -28,11 +28,11 @@ blackHolePublicKey=0000000000000000000000000000000000000000000000000000000000000
 port=18001
 crossPort=18002
 #魔法参数
-packetMagic=20190827
+packetMagic=201909021
 #种子节点
-selfSeedIps=39.98.226.51:18001,47.244.186.65:18001,47.254.234.223:18001,47.74.86.85:18001,192.168.1.145:18001
+selfSeedIps=192.168.1.121:18001,192.168.1.122:18001,192.168.1.123:18001,192.168.1.124:18001
 #主网的跨链种子连接节点
-moonSeedIps=39.98.226.51:18002,47.244.186.65:18002,47.254.234.223:18002,47.74.86.85:18002,192.168.1.145:18002
+moonSeedIps=39.98.226.51:18002,47.244.186.65:18002,47.254.234.223:18002,47.74.86.85:18002
 #最大入网连接数
 maxInCount=300
 #最大出网连接数
@@ -57,7 +57,7 @@ singleDownloadTimeout=15000
 #区块同步过程中缓存的区块字节数上限(20M)
 cachedBlockSizeLimit=20971520
 #创世块文件路径(支持绝对路径与相对路径,相对路径相对于此配置文件的目录)
-genesisBlockPath=genesis-block-main-beta3.json
+#genesisBlockPath=genesis-block-main-beta3.json
 dependent=cross-chain,smart-contract,protocol-update
 
 [consensus]
@@ -109,10 +109,7 @@ maxWaitTime=120000
 connectTimeOut=30000
 developerNodeAddress=tNULSeBaMuKuKY4UstKpXvGxd7LEvEBtd3NXAG,tNULSeBaMns1C6kTePxcQS7rGAu37foAwAMpri
 ambassadorNodeAddress=tNULSeBaMhWyQBHc54oXLXB13WhJsyrTobMYYU,tNULSeBaMtCmUuBHMDAjKVSoVBsAEvLoWCspyE
-mappingAddress=tNULSeBaMqTC6rnF56dnJqz1Fb8gMdVxGGvxSf,tNULSeBaMkroWKUKj6X4zURBE3V47VZwMJdHPm
-businessAddress=tNULSeBaMnf1qfX7emr14att2DsSb2TSPcPBSL
-teamAddress=tNULSeBaMqTvaS2NEEZfdrmPzoRvd8zN6T57LH
-communityAddress=tNULSeBaMm9RQLKKUBXKJ1rQ7g4iobmWAB73mS
+
 dependent=smart-contract,cross-chain
 
 [cross-chain]
@@ -136,9 +133,13 @@ dependent=protocol-update
 
 [nuls-api]
 #httpServer的启动ip
-server_ip=0.0.0.0
+serverIp=0.0.0.0
 #httpServer的启动port
-server_port=18004
+serverPort=18004
+mappingAddress=tNULSeBaMqTC6rnF56dnJqz1Fb8gMdVxGGvxSf,tNULSeBaMkroWKUKj6X4zURBE3V47VZwMJdHPm
+businessAddress=tNULSeBaMnf1qfX7emr14att2DsSb2TSPcPBSL
+teamAddress=tNULSeBaMqTvaS2NEEZfdrmPzoRvd8zN6T57LH
+communityAddress=tNULSeBaMm9RQLKKUBXKJ1rQ7g4iobmWAB73mS
 dependent=smart-contract,cross-chain
 
 [protocol-update]
