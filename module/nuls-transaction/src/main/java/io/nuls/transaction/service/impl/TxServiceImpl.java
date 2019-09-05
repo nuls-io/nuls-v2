@@ -982,7 +982,7 @@ public class TxServiceImpl implements TxService {
         List<String> orphanHashs = (List<String>) verifyCoinDataResult.get("orphan");
         if (!failHashs.isEmpty() || !orphanHashs.isEmpty()) {
             chain.getLogger().error("Package verify Ledger fail tx count:{}", failHashs.size());
-            chain.getLogger().error("Package verify Ledger fail tx count:{}, - hash:{}", orphanHashs.size());
+            chain.getLogger().error("Package verify Ledger orphan tx count:{}", orphanHashs.size());
 
             Iterator<TxPackageWrapper> it = currentBatchPackableTxs.iterator();
             boolean backContract = false;
@@ -1361,6 +1361,8 @@ public class TxServiceImpl implements TxService {
 
     private void verifyAgain(Chain chain, Map<String, List<String>> moduleVerifyMap, List<TxPackageWrapper> packingTxList, Set<TxPackageWrapper> orphanTxSet) throws NulsException {
         chain.getLogger().debug("------ verifyAgain 打包再次批量校验通知 ------");
+        //向账本模块发送要批量验证coinData的标识
+        LedgerCall.coinDataBatchNotify(chain);
         List<String> batchProcessList = new ArrayList<>();
         for (TxPackageWrapper txPackageWrapper : packingTxList) {
             if (TxManager.isSystemSmartContract(chain, txPackageWrapper.getTx().getType())) {

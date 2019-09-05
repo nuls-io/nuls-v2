@@ -208,7 +208,8 @@ public class TestCommonUtil {
         assertTrue(response.isSuccess());
         Map map = (Map) response.getResponseData();
         Map tx = (Map) map.get("sc_create");
-        return tx.get("contractAddress").toString();
+//        return tx.get("contractAddress").toString();
+        return tx.get("txHash").toString();
     }
 
     public static String callContract(String account, String pwd, BigInteger value, String address, String methodName, Object[] args) throws Exception {
