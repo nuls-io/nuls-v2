@@ -200,7 +200,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                     entry.getKey(), entry.getValue(), blockHeader);
             if (!rs) {
                 result = false;
-                chain.getLogger().debug("save tx failed! commitTxs");
+                chain.getLogger().error("save tx failed! commitTxs");
                 break;
             }
             successed.put(entry.getKey(), entry.getValue());
@@ -218,11 +218,11 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             chain.getPackableState().set(false);
             boolean rs = LedgerCall.commitTxsLedger(chain, txList, blockHeight);
             if(!rs){
-                chain.getLogger().debug("save block tx failed! commitLedger");
+                chain.getLogger().error("save block tx failed! commitLedger");
             }
             return rs;
         } catch (NulsException e) {
-            chain.getLogger().debug("failed! commitLedger");
+            chain.getLogger().error("failed! commitLedger");
             chain.getLogger().error(e);
             return false;
         }finally {
@@ -250,7 +250,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                     entry.getKey(), entry.getValue(), blockHeader);
             if (!rs) {
                 result = false;
-                chain.getLogger().debug("failed! rollbackcommitTxs ");
+                chain.getLogger().error("failed! rollbackcommitTxs ");
                 break;
             }
             successed.put(entry.getKey(), entry.getValue());
@@ -271,7 +271,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             chain.getPackableState().set(false);
             boolean rs =  LedgerCall.rollbackTxsLedger(chain, txList, blockHeight);
             if(!rs){
-                chain.getLogger().debug("rollback block tx failed! rollbackLedger");
+                chain.getLogger().error("rollback block tx failed! rollbackLedger");
             }
             return rs;
         } catch (NulsException e) {
@@ -291,6 +291,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         int chainId = chain.getChainId();
         BlockHeader blockHeader = TxUtil.getInstanceRpcStr(blockHeaderStr, BlockHeader.class);
         logger.info("start rollbackTxList block height:{}", blockHeader.getHeight());
+        long start = NulsDateUtils.getCurrentTimeMillis();
         List<Transaction> txList = new ArrayList<>();
         List<String> txStrList = new ArrayList<>();
         //组装统一验证参数数据,key为各模块统一验证器cmd
@@ -312,21 +313,28 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             logger.error(e);
             return false;
         }
+        logger.debug("[回滚区块] 组装数据 执行时间:{}", NulsDateUtils.getCurrentTimeMillis() - start);
 
+        long ledgerStart = NulsDateUtils.getCurrentTimeMillis();
         if (!rollbackLedger(chain, txStrList, blockHeader.getHeight())) {
             return false;
         }
+        logger.debug("[回滚区块] 回滚账本:{}", NulsDateUtils.getCurrentTimeMillis() - ledgerStart);
 
+        long moduleStart = NulsDateUtils.getCurrentTimeMillis();
         if (!rollbackTxs(chain, moduleVerifyMap, blockHeaderStr, true)) {
             commitLedger(chain, txStrList, blockHeader.getHeight());
             return false;
         }
+        logger.debug("[回滚区块] 回滚交易业务数据:{}", NulsDateUtils.getCurrentTimeMillis() - moduleStart);
+
+
+        long dbStart = NulsDateUtils.getCurrentTimeMillis();
         if (!removeTxs(chain, txList, blockHeader.getHeight(), true)) {
             commitTxs(chain, moduleVerifyMap, blockHeaderStr, false);
             saveTxs(chain, txList, blockHeader.getHeight(), false);
             return false;
         }
-
         //倒序放入未确认库, 和待打包队列
         for (int i = txList.size() - 1; i >= 0; i--) {
             Transaction tx = txList.get(i);
@@ -335,6 +343,8 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                 savePackable(chain, tx);
             }
         }
+        logger.debug("[回滚区块] 回滚移除DB已存储的交易, 放入未确认库:{}", NulsDateUtils.getCurrentTimeMillis() - dbStart);
+        logger.info("rollbackTxList success block height:{}", blockHeader.getHeight());
         return true;
     }
 
