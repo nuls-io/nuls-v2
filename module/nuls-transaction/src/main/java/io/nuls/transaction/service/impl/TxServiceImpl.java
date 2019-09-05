@@ -782,13 +782,15 @@ public class TxServiceImpl implements TxService {
                         verifyLedger(chain, batchProcessList, currentBatchPackableTxs, orphanTxSet, false);
                         totalLedgerTime += NulsDateUtils.getCurrentTimeMillis() - verifyLedgerStart;
 
-
-                        for (TxPackageWrapper txPackageWrapper : currentBatchPackableTxs) {
+                        Iterator<TxPackageWrapper> it = currentBatchPackableTxs.iterator();
+                        while (it.hasNext()) {
+                            TxPackageWrapper txPackageWrapper = it.next();
                             Transaction transaction = txPackageWrapper.getTx();
                             if (TxManager.isSmartContract(chain, transaction.getType())) {
                                 if(stopInvokeContract){
                                     //该标志true,表示不再处理智能合约交易,需要暂存交易,统一还回待打包队列
                                     backPackablePoolContractTxs.add(txPackageWrapper.getTx());
+                                    it.remove();
                                     continue;
                                 }
                                 // 出现智能合约,且通知标识为false,则先调用通知
@@ -803,6 +805,7 @@ public class TxServiceImpl implements TxService {
                                         //不再发invoke
                                         stopInvokeContract = true;
                                         backPackablePoolContractTxs.add(txPackageWrapper.getTx());
+                                        it.remove();
                                         continue;
                                     }
                                 } catch (NulsException e) {
@@ -852,21 +855,33 @@ public class TxServiceImpl implements TxService {
             if (contractNotify) {
                 contractBefore = ContractCall.contractBatchBeforeEnd(chain, blockHeight);
             }
-
-            long batchStart = NulsDateUtils.getCurrentTimeMillis();
-            txModuleValidatorPackable(chain, moduleVerifyMap, packingTxList, orphanTxSet);
-            //模块统一验证使用总时间
-            batchModuleTime = NulsDateUtils.getCurrentTimeMillis() - batchStart;
-
+            //处理智能合约
             String stateRoot = preStateRoot;
+            boolean hasTxbackPackablePool = false;
             long contractStart = NulsDateUtils.getCurrentTimeMillis();
             /** 智能合约 当通知标识为true, 则表明有智能合约被调用执行*/
             List<String> contractGenerateTxs = new ArrayList<>();
             if (contractNotify && !chain.getContractTxFail()) {
                 //处理智能合约执行结果
-                stateRoot = processContractResult(chain, packingTxList, orphanTxSet, contractGenerateTxs, blockHeight, contractBefore, stateRoot);
+                Map map = processContractResult(chain, packingTxList, orphanTxSet, contractGenerateTxs, blockHeight, contractBefore, stateRoot);
+                stateRoot = (String) map.get("stateRoot");
+                hasTxbackPackablePool = (boolean) map.get("hasTxbackPackablePool");
+
+            }
+            //如果合约invoke时有需要还回去的合约交易,或者合约执行结果有还回去的交易,都需要重新验证账本
+            if(stopInvokeContract || hasTxbackPackablePool){
+                //如果智能合约有退回或者验证不通过的交易 则需要再次账本验证
+                verifyAgain(chain, moduleVerifyMap, packingTxList, orphanTxSet);
             }
             long contractTime = NulsDateUtils.getCurrentTimeMillis() - contractStart;
+
+
+            //模块统一验证器
+            long batchStart = NulsDateUtils.getCurrentTimeMillis();
+            txModuleValidatorPackable(chain, moduleVerifyMap, packingTxList, orphanTxSet);
+            //模块统一验证使用总时间
+            batchModuleTime = NulsDateUtils.getCurrentTimeMillis() - batchStart;
+
 
             List<String> packableTxs = new ArrayList<>();
             Iterator<TxPackageWrapper> iterator = packingTxList.iterator();
@@ -1034,8 +1049,10 @@ public class TxServiceImpl implements TxService {
      * @return 返回新生成的stateRoot
      * @throws IOException
      */
-    private String processContractResult(Chain chain, List<TxPackageWrapper> packingTxList, Set<TxPackageWrapper> orphanTxSet, List<String> contractGenerateTxs,
+    private Map processContractResult(Chain chain, List<TxPackageWrapper> packingTxList, Set<TxPackageWrapper> orphanTxSet, List<String> contractGenerateTxs,
                                          long blockHeight, boolean contractBefore, String stateRoot) throws IOException {
+
+        boolean hasTxbackPackablePool = false;
         /**当contractBefore通知失败,或者contractBatchEnd失败则需要将智能合约交易还回待打包队列*/
         boolean isRollbackPackablePool = false;
         if (!contractBefore) {
@@ -1103,6 +1120,9 @@ public class TxServiceImpl implements TxService {
 //                                    chain.getLogger().debug("contract pending tx back to PackablePool hash:{} ", hash);
                                     //从可打包集合中删除
                                     iterator.remove();
+                                    if(!hasTxbackPackablePool){
+                                        hasTxbackPackablePool = true;
+                                    }
                                     break;
                                 }
                             }
@@ -1126,10 +1146,16 @@ public class TxServiceImpl implements TxService {
                     orphanTxSet.add(txPackageWrapper);
                     //从可打包集合中删除
                     iterator.remove();
+                    if(!hasTxbackPackablePool){
+                        hasTxbackPackablePool = true;
+                    }
                 }
             }
         }
-        return stateRoot;
+        Map rs = new HashMap();
+        rs.put("stateRoot", stateRoot);
+        rs.put("hasTxbackPackablePool", hasTxbackPackablePool);
+        return rs;
     }
 
     /**
