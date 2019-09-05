@@ -37,7 +37,6 @@ import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractWrapperTransaction;
 import io.nuls.contract.model.dto.ContractPackageDto;
 import io.nuls.contract.model.txdata.ContractData;
-import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.contract.service.ContractCaller;
 import io.nuls.contract.service.ContractExecutor;
 import io.nuls.contract.util.Log;
@@ -92,15 +91,18 @@ public class ContractCallerImpl implements ContractCaller {
             BlockHeader currentBlockHeader = batchInfo.getCurrentBlockHeader();
             long blockTime = currentBlockHeader.getTime();
             long lastestHeight = currentBlockHeader.getHeight() - 1;
-            //BlockHeader latestBlockHeader = BlockCall.getLatestBlockHeader(chainId);
             //if (Log.isDebugEnabled()) {
+            //    BlockHeader latestBlockHeader = BlockCall.getLatestBlockHeader(chainId);
             //    Log.debug("Current block header height is {}", currentBlockHeader.getHeight());
             //    Log.debug("Latest block header height is {}", latestBlockHeader.getHeight());
             //}
             ContractTxCallable txCallable = new ContractTxCallable(chainId, blockTime, batchExecutor, contract, tx, lastestHeight, preStateRoot, checker, container);
-            //String hash = tx.getHash().toHex();
             Future<ContractResult> contractResultFuture = TX_EXECUTOR_SERVICE.submit(txCallable);
+            //String hash = tx.getHash().toHex();
             //batchInfo.getContractMap().put(hash, contractResultFuture);
+            //if(Log.isDebugEnabled()) {
+            //    Log.debug("contract-tx-executor-pool put hash [{}]", hash);
+            //}
             container.getFutureList().add(contractResultFuture);
 
             return getSuccess();
@@ -118,6 +120,7 @@ public class ContractCallerImpl implements ContractCaller {
             ContractBatchEndCallable callable = new ContractBatchEndCallable(chainId, blockHeight);
             Future<ContractPackageDto> contractPackageDtoFuture = BATCH_END_SERVICE.submit(callable);
             batchInfo.setContractPackageDtoFuture(contractPackageDtoFuture);
+            batchInfo.setBeforeEndTime(System.currentTimeMillis());
             return getSuccess();
         } catch (Exception e) {
             Log.error(e);

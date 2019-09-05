@@ -29,10 +29,12 @@ import io.nuls.contract.enums.BatchInfoStatus;
 import io.nuls.contract.helper.ContractConflictChecker;
 import io.nuls.contract.manager.ContractTempBalanceManager;
 import io.nuls.contract.model.dto.ContractPackageDto;
+import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.core.model.StringUtils;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -79,6 +81,10 @@ public class BatchInfo {
      */
     private long beginTime;
     /**
+     * 停止接收交易开始时间
+     */
+    private long beforeEndTime;
+    /**
      * 本次批量执行总共消耗的gas
      */
     private long gasCostTotal;
@@ -124,6 +130,12 @@ public class BatchInfo {
      * 因区块GAS用尽，未处理的合约交易
      */
     private List<String> pendingTxHashList;
+    private Map<String, Future<ContractResult>> contractMap;
+
+    /**
+     * 串行标记数字
+     */
+    private int serialOrder;
 
     public BatchInfo(long height) {
         this.txCounter = 0;
@@ -134,13 +146,15 @@ public class BatchInfo {
         this.status = BatchInfoStatus.STARTING;
         this.contractContainerMap = new LinkedHashMap<>();
         this.pendingTxHashList = new ArrayList<>();
+        this.contractMap = new ConcurrentHashMap<>();
+        this.serialOrder = 0;
     }
 
     public boolean hasBegan() {
         return status.status() > 0;
     }
 
-    public ContractContainer newAndGetContractContainer(String contractAddress) {
+    public ContractContainer newOrGetContractContainer(String contractAddress) {
         if (StringUtils.isBlank(contractAddress)) {
             return null;
         }
@@ -156,6 +170,14 @@ public class BatchInfo {
 
     public int getAndIncreaseTxCounter() {
         return txCounter++;
+    }
+
+    public int getSerialOrder() {
+        return serialOrder;
+    }
+
+    public void setSerialOrder(int serialOrder) {
+        this.serialOrder = serialOrder;
     }
 
     public ContractTempBalanceManager getTempBalanceManager() {
@@ -206,6 +228,14 @@ public class BatchInfo {
         this.height = height;
     }
 
+    public long getBeforeEndTime() {
+        return beforeEndTime;
+    }
+
+    public void setBeforeEndTime(long beforeEndTime) {
+        this.beforeEndTime = beforeEndTime;
+    }
+
     public long getBeginTime() {
         return beginTime;
     }
@@ -254,6 +284,14 @@ public class BatchInfo {
         this.contractPackageDtoFuture = contractPackageDtoFuture;
     }
 
+    public Map<String, Future<ContractResult>> getContractMap() {
+        return contractMap;
+    }
+
+    public void setContractMap(Map<String, Future<ContractResult>> contractMap) {
+        this.contractMap = contractMap;
+    }
+
     public long getGasCostTotal() {
         return gasCostTotal;
     }
@@ -262,7 +300,7 @@ public class BatchInfo {
         return pendingTxHashList;
     }
 
-    private void addPendingTxHashList(String txHash) {
+    public void addPendingTxHashList(String txHash) {
         pendingTxListlock.lock();
         try {
             pendingTxHashList.add(txHash);
@@ -274,9 +312,7 @@ public class BatchInfo {
     public boolean checkGasCostTotal(String txHash) {
         gasLock.readLock().lock();
         try {
-            boolean exceedTx = txTotal > ContractConstant.MAX_CONTRACT_TX_IN_BLOCK;
-            boolean exceedGas = gasCostTotal > ContractConstant.MAX_GAS_COST_IN_BLOCK;
-            if(exceedTx || exceedGas) {
+            if(isExceed()) {
                 addPendingTxHashList(txHash);
                 return false;
             }
@@ -286,15 +322,26 @@ public class BatchInfo {
         }
     }
 
+    public boolean isExceed() {
+        boolean exceedTx = txTotal > ContractConstant.MAX_CONTRACT_TX_IN_BLOCK;
+        boolean exceedGas = gasCostTotal > ContractConstant.MAX_GAS_COST_IN_BLOCK;
+        if(exceedTx || exceedGas) {
+            return true;
+        }
+        return false;
+    }
+
     public boolean addGasCostTotal(long gasCost, String txHash) {
         gasLock.writeLock().lock();
         try {
+            if(isExceed()) {
+                this.addPendingTxHashList(txHash);
+                return false;
+            }
             this.txTotal += 1;
             this.gasCostTotal += gasCost;
-            boolean exceedTx = txTotal > ContractConstant.MAX_CONTRACT_TX_IN_BLOCK;
-            boolean exceedGas = gasCostTotal > ContractConstant.MAX_GAS_COST_IN_BLOCK;
-            if(exceedTx || exceedGas) {
-                addPendingTxHashList(txHash);
+            if(isExceed()) {
+                this.addPendingTxHashList(txHash);
                 return false;
             } else {
                 return true;

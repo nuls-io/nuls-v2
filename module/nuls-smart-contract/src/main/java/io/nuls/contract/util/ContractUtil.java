@@ -63,6 +63,7 @@ import static io.nuls.contract.constant.ContractConstant.*;
 import static io.nuls.contract.constant.ContractErrorCode.FAILED;
 import static io.nuls.core.constant.TxType.*;
 import static io.nuls.core.model.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 /**
  * @author: PierreLuo
@@ -314,7 +315,7 @@ public class ContractUtil {
             return defaultResult;
         }
         if (isNotEnoughGasError(errorMessage)) {
-            return Result.getFailed(ContractErrorCode.CONTRACT_GAS_LIMIT);
+            return Result.getFailed(ContractErrorCode.CONTRACT_GAS_LIMIT).setMsg(errorMessage);
         }
         return defaultResult;
     }
@@ -578,5 +579,17 @@ public class ContractUtil {
             b.append(", ");
         }
         return b.toString();
+    }
+
+    public static void addDebugEvents(List<String> debugEvents, Result result) {
+        if(debugEvents.isEmpty()) {
+            return;
+        }
+        String msg = result.getMsg();
+        if(msg == null) {
+            msg = EMPTY;
+        }
+        msg += ", debugEvents: " + debugEvents.toString();
+        result.setMsg(msg);
     }
 }

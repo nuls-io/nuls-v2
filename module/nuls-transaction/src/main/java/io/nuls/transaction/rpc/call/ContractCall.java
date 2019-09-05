@@ -153,8 +153,10 @@ public class ContractCall {
         params.put("blockHeight", blockHeight);
         try {
             Map result = (Map) TransactionCall.requestAndResponse(ModuleE.SC.abbr, "sc_package_batch_end", params);
+            //chain.getLogger().debug("moduleCode:{}, -cmd:{}, -contractProcess -rs: {}",
+            //        ModuleE.SC.abbr, "sc_batch_end", JSONUtils.obj2json(result));
             chain.getLogger().debug("moduleCode:{}, -cmd:{}, -contractProcess -rs: {}",
-                    ModuleE.SC.abbr, "sc_batch_end", JSONUtils.obj2json(result));
+                    ModuleE.SC.abbr, "sc_batch_end", "'stateRoot': '" + result.get("stateRoot") + "', 'txList': " + result.get("txList"));
             return result;
         }catch (Exception e) {
             chain.getLogger().error(e);

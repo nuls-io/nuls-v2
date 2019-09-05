@@ -13,7 +13,7 @@ public class ConsensusConfigInfo {
     private int assertId;
     private long packingInterval;
     private BigInteger inflationAmount;
-    private BigInteger totalCirculation;
+    private BigInteger totalInflationAmount;
     private long initTime;
     private double deflationRatio;
     private long deflationTimeInterval;
@@ -21,12 +21,12 @@ public class ConsensusConfigInfo {
 
     public ConsensusConfigInfo(){}
 
-    public ConsensusConfigInfo(int chainId, int assertId, long packingInterval, BigInteger inflationAmount, BigInteger totalCirculation, long initTime, double deflationRatio, long deflationTimeInterval, int awardAssetId){
+    public ConsensusConfigInfo(int chainId, int assertId, long packingInterval, BigInteger inflationAmount, BigInteger totalInflationAmount, long initTime, double deflationRatio, long deflationTimeInterval, int awardAssetId){
         this.chainId = chainId;
         this.assertId = assertId;
         this.packingInterval = packingInterval;
         this.inflationAmount = inflationAmount;
-        this.totalCirculation = totalCirculation;
+        this.totalInflationAmount = totalInflationAmount;
         this.initTime = initTime;
         this.deflationRatio = deflationRatio;
         this.deflationTimeInterval = deflationTimeInterval;
@@ -95,5 +95,13 @@ public class ConsensusConfigInfo {
 
     public void setAwardAssetId(int awardAssetId) {
         this.awardAssetId = awardAssetId;
+    }
+
+    public BigInteger getTotalInflationAmount() {
+        return totalInflationAmount;
+    }
+
+    public void setTotalInflationAmount(BigInteger totalInflationAmount) {
+        this.totalInflationAmount = totalInflationAmount;
     }
 }
