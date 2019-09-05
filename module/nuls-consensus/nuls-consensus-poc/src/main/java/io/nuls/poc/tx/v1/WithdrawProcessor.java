@@ -95,6 +95,7 @@ public class WithdrawProcessor implements TransactionProcessor {
                  * 重复退出节点
                  * */
                 if (!hashSet.add(cancelDeposit.getJoinTxHash())) {
+                    invalidTxList.add(withdrawTx);
                     chain.getLogger().info("Repeated transactions");
                     errorCode = ConsensusErrorCode.CONFLICT_ERROR.getCode();
                 }
