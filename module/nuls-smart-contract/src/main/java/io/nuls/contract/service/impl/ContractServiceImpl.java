@@ -55,11 +55,9 @@ import io.nuls.core.exception.NulsException;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import static io.nuls.contract.constant.ContractErrorCode.FAILED;
 import static io.nuls.contract.util.ContractUtil.getFailed;
@@ -226,79 +224,13 @@ public class ContractServiceImpl implements ContractService {
 
     @Override
     public Result packageEnd(int chainId, long blockHeight) {
-        /*
-         before = 0
-         now0 = 100
-         timeOut0 = 700
-         firstCost = 200
-         */
+
         try {
             BatchInfo batchInfo = contractHelper.getChain(chainId).getBatchInfo();
-            // 判断超时时间之前，获取此对象，不为空说明已经执行结束，可跳过直接执行后面处理结果的步骤
-            ContractPackageDto dto;
-            do {
-                dto = batchInfo.getContractPackageDto();
-                if(dto != null) {
-                    break;
-                }
-                long beforeEndTime = batchInfo.getBeforeEndTime();
-                long now0 = System.currentTimeMillis();
-                long timeOut = 800 - (now0 - beforeEndTime);
-                if(timeOut <= 0) {
-                    Log.warn("超过了预留的超时时间[0]: {}", timeOut);
-                    break;
-                }
-                Log.info("预留的超时时间[0]: {}", timeOut);
-                Future<ContractPackageDto> future = batchInfo.getContractPackageDtoFuture();
-                try {
-                    // 等待before_end执行完成
-                    future.get(timeOut, TimeUnit.MILLISECONDS);
-                } catch (Exception e) {
-                    Log.error("wait end time out[0]", e.getMessage());
-                }
-                dto = batchInfo.getContractPackageDto();
-                if(dto != null) {
-                    break;
-                }
-                long now1 = System.currentTimeMillis();
-                Log.info("第一次花费的时间: {}", now1 - beforeEndTime);
-                // 若超过了区块合约gas或者txCount限制，则中断未执行完的线程
-                if(batchInfo.isExceed()) {
-                    Map<String, Future<ContractResult>> contractMap = batchInfo.getContractMap();
-                    if(!contractMap.isEmpty()) {
-                        Set<Map.Entry<String, Future<ContractResult>>> entries = contractMap.entrySet();
-                        String hash;
-                        Future<ContractResult> _future;
-                        int count = 0;
-                        for(Map.Entry<String, Future<ContractResult>> entry : entries) {
-                            hash = entry.getKey();
-                            _future = entry.getValue();
-                            if(_future.isDone()) {
-                                continue;
-                            }
-                            _future.cancel(true);
-                            batchInfo.addPendingTxHashList(hash);
-                            count++;
-                        }
-                        Log.warn("超过了区块合约gas或者txCount限制，中断未执行完的交易数量: {}", count);
-                    }
-                }
-
-                long now2 = System.currentTimeMillis();
-                timeOut = 1100 - (now2 - beforeEndTime);
-                Log.info("预留的超时时间[1]: {}", timeOut);
-                if(timeOut <= 0) {
-                    Log.warn("超过了预留的超时时间[1]: {}", timeOut);
-                    break;
-                }
-                try {
-                    // 等待before_end执行完成
-                    future.get(timeOut, TimeUnit.MILLISECONDS);
-                } catch (Exception e) {
-                    Log.error("wait end time out[1]", e.getMessage());
-                }
-                Log.info("第二次花费的时间: {}", System.currentTimeMillis() - beforeEndTime);
-            } while (false);
+            Future<ContractPackageDto> future = batchInfo.getContractPackageDtoFuture();
+            // 等待before_end执行完成
+            future.get();
+            ContractPackageDto dto = batchInfo.getContractPackageDto();
             if (dto == null) {
                 return getFailed();
             }

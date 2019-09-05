@@ -50,11 +50,22 @@ public class ContractMultyTxTest extends BaseQuery {
 
     @Test
     public void loopCallContract() throws Exception {
-        contractNRC20TokenSendTxTest.setContractAddress_nrc20("tNULSeBaMxPE2ESCiEAZ9CxXMyzBkySBKKSUQ4");
+        contractNRC20TokenSendTxTest.setContractAddress_nrc20("tNULSeBaN1MUawR9CoUcNvsB9XtNrytj9cGaNC");
         long s = System.currentTimeMillis();
         int times = 2000;
         for(int i=0;i<times;i++) {
             contractNRC20TokenSendTxTest.callContract();
+        }
+        long e = System.currentTimeMillis();
+        Log.info("{} times cost time is {}", times, e - s);
+    }
+
+    @Test
+    public void loopCreateNRC20() throws Exception {
+        long s = System.currentTimeMillis();
+        int times = 1000;
+        for (int i = 0; i < times; i++) {
+            contractNRC20TokenSendTxTest.createContract();
         }
         long e = System.currentTimeMillis();
         Log.info("{} times cost time is {}", times, e - s);
