@@ -61,14 +61,23 @@ import static io.nuls.core.constant.TxType.CALL_CONTRACT;
 @Component
 public class ContractCallerImpl implements ContractCaller {
 
-    private static final ExecutorService TX_EXECUTOR_SERVICE =
-            new ThreadPoolExecutor(
-                    1,
-                    1,
-                    10L,
-                    TimeUnit.SECONDS,
-                    new LinkedBlockingQueue<Runnable>(),
-                    new NulsThreadFactory("contract-tx-executor-pool"));
+    private static ExecutorService TX_EXECUTOR_SERVICE;
+    static {
+        int availableProcessors = Runtime.getRuntime().availableProcessors();
+        int threadCount = 4;
+        // 线程数最大4个，线程核心小于4时，使用线程核心数
+        if(availableProcessors < threadCount) {
+            threadCount = availableProcessors;
+        }
+        TX_EXECUTOR_SERVICE =
+                new ThreadPoolExecutor(
+                        threadCount,
+                        threadCount,
+                        10L,
+                        TimeUnit.SECONDS,
+                        new LinkedBlockingQueue<Runnable>(),
+                        new NulsThreadFactory("contract-tx-executor-pool"));
+    }
     private static final ExecutorService BATCH_END_SERVICE = Executors.newSingleThreadExecutor(new NulsThreadFactory("contract-batch-end-pool"));
 
     @Autowired
@@ -98,8 +107,8 @@ public class ContractCallerImpl implements ContractCaller {
             //}
             ContractTxCallable txCallable = new ContractTxCallable(chainId, blockTime, batchExecutor, contract, tx, lastestHeight, preStateRoot, checker, container);
             Future<ContractResult> contractResultFuture = TX_EXECUTOR_SERVICE.submit(txCallable);
-            //String hash = tx.getHash().toHex();
-            //batchInfo.getContractMap().put(hash, contractResultFuture);
+            String hash = tx.getHash().toHex();
+            batchInfo.getContractMap().put(hash, contractResultFuture);
             //if(Log.isDebugEnabled()) {
             //    Log.debug("contract-tx-executor-pool put hash [{}]", hash);
             //}
