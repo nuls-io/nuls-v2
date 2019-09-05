@@ -406,7 +406,6 @@ public class CoinDataValidator {
             }
             //上面没连接上，但是fromNonce又存储过，则双花了
             if (transactionService.fromNonceExist(addressChainId, LedgerUtil.getAccountNoncesStrKey(address, assetChainId, assetId, fromNonceStr))) {
-//                logger(addressChainId).info("DOUBLE_EXPENSES_CODE address={},fromNonceStr={},dbNonce={}", address, fromNonceStr, LedgerUtil.getNonceEncode(preNonce));
                 return ValidateResult.getResult(LedgerErrorCode.DOUBLE_EXPENSES, new String[]{address, fromNonceStr});
             }
         } catch (Exception e) {
@@ -414,7 +413,7 @@ public class CoinDataValidator {
             return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{address, fromNonceStr, "exception:" + e.getMessage()});
         }
         //孤儿交易了，这笔交易不清楚状况，是孤儿
-        logger(addressChainId).debug("ORPHAN #############address={},fromNonceStr={},dbNonce={},tx={}", address, fromNonceStr, LedgerUtil.getNonceEncode(preNonce), LedgerUtil.getNonceEncode(txNonce));
+//        logger(addressChainId).debug("ORPHAN #############address={},fromNonceStr={},dbNonce={},tx={}", address, fromNonceStr, LedgerUtil.getNonceEncode(preNonce), LedgerUtil.getNonceEncode(txNonce));
         return ValidateResult.getResult(LedgerErrorCode.ORPHAN, new String[]{address, fromNonceStr, LedgerUtil.getNonceEncode(preNonce)});
     }
 
