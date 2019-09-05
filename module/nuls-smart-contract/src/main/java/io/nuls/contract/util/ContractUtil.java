@@ -465,11 +465,15 @@ public class ContractUtil {
 
     public static boolean makeContractResultAndCheckGasSerial(ContractWrapperTransaction tx, ContractResult contractResult, BatchInfo batchInfo) {
         int i = 0;
+        // 所以交易都按顺序串行执行checkGas
         while (true) {
             synchronized (batchInfo) {
                 int txOrder = tx.getOrder();
                 int serialOrder = batchInfo.getSerialOrder();
                 if(serialOrder == txOrder) {
+                    if(Log.isDebugEnabled()) {
+                        Log.debug("串行交易order - [{}]", txOrder);
+                    }
                     batchInfo.setSerialOrder(serialOrder + 1);
                     contractResult.setTx(tx);
                     contractResult.setTxTime(tx.getTime());

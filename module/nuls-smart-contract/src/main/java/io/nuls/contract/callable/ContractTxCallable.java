@@ -148,9 +148,9 @@ public class ContractTxCallable implements Callable<ContractResult> {
         if (contractResult != null && !contractResult.isSuccess()) {
             Log.error("Failed TxType [{}] Execute ContractResult is {}", tx.getType(), contractResult.toString());
         }
-        if (Log.isDebugEnabled()) {
-            Log.debug("[Per Contract Execution Cost Time] TxType is {}, TxHash is {}, Cost Time is {}", tx.getType(), tx.getHash().toString(), System.currentTimeMillis() - start);
-        }
+        //if (Log.isDebugEnabled()) {
+        //    Log.debug("[Per Contract Execution Cost Time] TxType is {}, TxHash is {}, Cost Time is {}", tx.getType(), tx.getHash().toString(), System.currentTimeMillis() - start);
+        //}
         return contractResult;
     }
 
