@@ -48,7 +48,7 @@ public class LoggerUtil {
 
     public static NulsLogger logger(int chainId) {
         if (null == logMap.get(String.valueOf(chainId))) {
-            return io.nuls.core.log.Log.BASIC_LOGGER;
+            return COMMON_LOG;
         }
         return logMap.get(String.valueOf(chainId));
     }
