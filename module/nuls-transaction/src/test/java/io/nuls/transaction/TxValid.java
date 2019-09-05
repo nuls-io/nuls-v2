@@ -396,7 +396,7 @@ public class TxValid {
     public void createContractPixelAndTransferTest() throws Exception {
         String code = Files.readString(Path.of("E:\\ContractTest", "pixel.txt"));
         int size = 0;
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 100; i++) {
             size++;
             String hash = createTransfer(address21, address29, new BigInteger("100000000"));
             //String hash = createCtxTransfer();

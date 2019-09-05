@@ -981,6 +981,9 @@ public class TxServiceImpl implements TxService {
         List<String> failHashs = (List<String>) verifyCoinDataResult.get("fail");
         List<String> orphanHashs = (List<String>) verifyCoinDataResult.get("orphan");
         if (!failHashs.isEmpty() || !orphanHashs.isEmpty()) {
+            chain.getLogger().error("Package verify Ledger fail tx count:{}", failHashs.size());
+            chain.getLogger().error("Package verify Ledger fail tx count:{}, - hash:{}", orphanHashs.size());
+
             Iterator<TxPackageWrapper> it = currentBatchPackableTxs.iterator();
             boolean backContract = false;
             removeAndGo:
@@ -991,7 +994,7 @@ public class TxServiceImpl implements TxService {
                 for (String hash : failHashs) {
                     String hashStr = transaction.getHash().toHex();
                     if (hash.equals(hashStr)) {
-                        chain.getLogger().error("Package verify Ledger fail tx type:{}, - hash:{}", hash, transaction.getType());
+//                        chain.getLogger().error("Package verify Ledger fail tx type:{}, - hash:{}", hash, transaction.getType());
                         if (!backContract && proccessContract && TxManager.isUnSystemSmartContract(chain, transaction.getType())) {
                             //设置标志,如果是智能合约的非系统交易,未验证通过,则需要将所有非系统智能合约交易还回待打包队列.
                             backContract = true;
@@ -1006,7 +1009,7 @@ public class TxServiceImpl implements TxService {
                 for (String hash : orphanHashs) {
                     String hashStr = transaction.getHash().toHex();
                     if (hash.equals(hashStr)) {
-                        chain.getLogger().error("Package verify Ledger orphan tx type:{}, - hash:{}", hash, transaction.getType());
+//                        chain.getLogger().error("Package verify Ledger orphan tx type:{}, - hash:{}", hash, transaction.getType());
                         if (!backContract && proccessContract && TxManager.isUnSystemSmartContract(chain, transaction.getType())) {
                             //设置标志, 如果是智能合约的非系统交易,未验证通过,则需要将所有非系统智能合约交易还回待打包队列.
                             backContract = true;
