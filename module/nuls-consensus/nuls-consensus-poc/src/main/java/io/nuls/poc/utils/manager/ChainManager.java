@@ -84,7 +84,7 @@ public class ChainManager {
             ProtocolLoader.load(chainId);
             Map<String,Object> param = new HashMap<>(4);
             param.put(ParamConstant.CONSENUS_CONFIG, new ConsensusConfigInfo(chainId,configBean.getAssetId(),configBean.getPackingInterval(),
-                    configBean.getInflationAmount(),configBean.getTotalCirculation(),configBean.getInitTime(),configBean.getDeflationRatio(),configBean.getDeflationTimeInterval(),configBean.getAwardAssetId()));
+                    configBean.getInflationAmount(),configBean.getTotalInflationAmount(),configBean.getInitTime(),configBean.getDeflationRatio(),configBean.getDeflationTimeInterval(),configBean.getAwardAssetId()));
             economicService.registerConfig(param);
         }
     }
