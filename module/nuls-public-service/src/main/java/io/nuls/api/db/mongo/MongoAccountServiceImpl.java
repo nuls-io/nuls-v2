@@ -20,6 +20,7 @@ import org.bson.conversions.Bson;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -31,13 +32,16 @@ public class MongoAccountServiceImpl implements AccountService {
     @Autowired
     private MongoDBService mongoDBService;
 
+    private List<String> addressList = new LinkedList<>();
+
     public void initCache() {
         for (ApiCache apiCache : CacheManager.getApiCaches().values()) {
-            List<Document> documentList = mongoDBService.query(ACCOUNT_TABLE + apiCache.getChainInfo().getChainId());
+            List<Document> documentList = mongoDBService.pageQuery(ACCOUNT_TABLE + apiCache.getChainInfo().getChainId(), 0, 30000);
             for (int i = 0; i < documentList.size(); i++) {
                 Document document = documentList.get(i);
                 AccountInfo accountInfo = DocumentTransferTool.toInfo(document, "address", AccountInfo.class);
                 apiCache.addAccountInfo(accountInfo);
+                addressList.add(accountInfo.getAddress());
             }
         }
     }
@@ -50,6 +54,17 @@ public class MongoAccountServiceImpl implements AccountService {
         AccountInfo accountInfo = apiCache.getAccountInfo(address);
         if (accountInfo == null) {
             return null;
+        }
+        Bson filter = Filters.eq("_id", accountInfo.getAddress());
+        Document document = mongoDBService.findOne(ACCOUNT_TABLE + chainId, filter);
+        if (document == null) {
+            return null;
+        }
+        accountInfo = DocumentTransferTool.toInfo(document, "address", AccountInfo.class);
+        while (addressList.size() >= 30000) {
+            address = addressList.remove(0);
+            apiCache.getAccountMap().remove(address);
+            apiCache.addAccountInfo(accountInfo);
         }
         return accountInfo.copy();
     }
@@ -67,8 +82,10 @@ public class MongoAccountServiceImpl implements AccountService {
             if (accountInfo.isNew()) {
                 modelList.add(new InsertOneModel(document));
                 accountInfo.setNew(false);
-                ApiCache apiCache = CacheManager.getCache(chainId);
-                apiCache.addAccountInfo(accountInfo);
+                if (addressList.size() < 30000) {
+                    ApiCache apiCache = CacheManager.getCache(chainId);
+                    apiCache.addAccountInfo(accountInfo);
+                }
             } else {
                 modelList.add(new ReplaceOneModel<>(Filters.eq("_id", accountInfo.getAddress()), document));
             }
