@@ -20,6 +20,7 @@ import org.bson.conversions.Bson;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -31,13 +32,18 @@ public class MongoAccountServiceImpl implements AccountService {
     @Autowired
     private MongoDBService mongoDBService;
 
+    private List<String> addressList = new LinkedList<>();
+
+    private static int cacheSize = 30000;
+
     public void initCache() {
         for (ApiCache apiCache : CacheManager.getApiCaches().values()) {
-            List<Document> documentList = mongoDBService.query(ACCOUNT_TABLE + apiCache.getChainInfo().getChainId());
+            List<Document> documentList = mongoDBService.pageQuery(ACCOUNT_TABLE + apiCache.getChainInfo().getChainId(), 0, cacheSize);
             for (int i = 0; i < documentList.size(); i++) {
                 Document document = documentList.get(i);
                 AccountInfo accountInfo = DocumentTransferTool.toInfo(document, "address", AccountInfo.class);
                 apiCache.addAccountInfo(accountInfo);
+                addressList.add(accountInfo.getAddress());
             }
         }
     }
@@ -49,7 +55,17 @@ public class MongoAccountServiceImpl implements AccountService {
         }
         AccountInfo accountInfo = apiCache.getAccountInfo(address);
         if (accountInfo == null) {
-            return null;
+            Document document = mongoDBService.findOne(ACCOUNT_TABLE + chainId, Filters.eq("_id", address));
+            if (document == null) {
+                return null;
+            }
+            accountInfo = DocumentTransferTool.toInfo(document, "address", AccountInfo.class);
+            while (addressList.size() >= cacheSize) {
+                address = addressList.remove(0);
+                apiCache.getAccountMap().remove(address);
+            }
+            apiCache.addAccountInfo(accountInfo);
+            addressList.add(accountInfo.getAddress());
         }
         return accountInfo.copy();
     }
@@ -67,8 +83,6 @@ public class MongoAccountServiceImpl implements AccountService {
             if (accountInfo.isNew()) {
                 modelList.add(new InsertOneModel(document));
                 accountInfo.setNew(false);
-                ApiCache apiCache = CacheManager.getCache(chainId);
-                apiCache.addAccountInfo(accountInfo);
             } else {
                 modelList.add(new ReplaceOneModel<>(Filters.eq("_id", accountInfo.getAddress()), document));
             }
@@ -79,13 +93,20 @@ public class MongoAccountServiceImpl implements AccountService {
         InsertManyOptions insertManyOptions = new InsertManyOptions();
         insertManyOptions.ordered(false);
 
-        if (modelList.size() > 0) {
-            mongoDBService.bulkWrite(ACCOUNT_TABLE + chainId, modelList, options);
-
-            ApiCache apiCache = CacheManager.getCache(chainId);
-            for (AccountInfo accountInfo : accountInfoMap.values()) {
+        mongoDBService.bulkWrite(ACCOUNT_TABLE + chainId, modelList, options);
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        for (AccountInfo accountInfo : accountInfoMap.values()) {
+            if (apiCache.getAccountMap().containsKey(accountInfo.getAddress())) {
                 apiCache.addAccountInfo(accountInfo);
             }
+//            else {
+//                while (addressList.size() >= cacheSize) {
+//                    String address = addressList.remove(0);
+//                    apiCache.getAccountMap().remove(address);
+//                }
+//                apiCache.addAccountInfo(accountInfo);
+//                addressList.add(accountInfo.getAddress());
+//            }
         }
     }
 
