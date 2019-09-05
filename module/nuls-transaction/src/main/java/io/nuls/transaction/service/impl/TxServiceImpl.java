@@ -767,7 +767,6 @@ public class TxServiceImpl implements TxService {
                         }
                         //总大小加上当前批次各笔交易大小
                         totalSizeTemp += txSize;
-                        tx = null;
                     }
                     if (process) {
                         long verifyLedgerStart = NulsDateUtils.getCurrentTimeMillis();
@@ -779,7 +778,7 @@ public class TxServiceImpl implements TxService {
                             Thread.sleep(30L);
                             return getPackableTxs(chain, endtimestamp, maxTxDataSize, blockTime, packingAddress, preStateRoot);
                         }
-                        verifyLedger(chain, batchProcessList, currentBatchPackableTxs, orphanTxSet, false);
+                        verifyLedger(chain, batchProcessList, currentBatchPackableTxs, orphanTxSet, false, false);
                         totalLedgerTime += NulsDateUtils.getCurrentTimeMillis() - verifyLedgerStart;
 
                         Iterator<TxPackageWrapper> it = currentBatchPackableTxs.iterator();
@@ -871,7 +870,7 @@ public class TxServiceImpl implements TxService {
             //如果合约invoke时有需要还回去的合约交易,或者合约执行结果有还回去的交易,都需要重新验证账本
             if(stopInvokeContract || hasTxbackPackablePool){
                 //如果智能合约有退回或者验证不通过的交易 则需要再次账本验证
-                verifyAgain(chain, moduleVerifyMap, packingTxList, orphanTxSet);
+                verifyAgain(chain, moduleVerifyMap, packingTxList, orphanTxSet, true);
             }
             long contractTime = NulsDateUtils.getCurrentTimeMillis() - contractStart;
 
@@ -972,10 +971,12 @@ public class TxServiceImpl implements TxService {
      * @param batchProcessList
      * @param currentBatchPackableTxs
      * @param orphanTxSet
-     * @param proccessContract
+     * @param proccessContract 是否处理智能合约
+     * @param orphanNoCount (是否因为合约还回去而再次验证账本)孤儿交易还回去的时候 不计算还回去的次数
      * @throws NulsException
      */
-    private void verifyLedger(Chain chain, List<String> batchProcessList, List<TxPackageWrapper> currentBatchPackableTxs, Set<TxPackageWrapper> orphanTxSet, boolean proccessContract) throws NulsException {
+    private void verifyLedger(Chain chain, List<String> batchProcessList, List<TxPackageWrapper> currentBatchPackableTxs,
+                              Set<TxPackageWrapper> orphanTxSet, boolean proccessContract, boolean orphanNoCount) throws NulsException {
         //开始处理
         Map verifyCoinDataResult = LedgerCall.verifyCoinDataBatchPackaged(chain, batchProcessList);
         List<String> failHashs = (List<String>) verifyCoinDataResult.get("fail");
@@ -1015,7 +1016,12 @@ public class TxServiceImpl implements TxService {
                             backContract = true;
                         } else {
                             //孤儿交易
-                            addOrphanTxSet(chain, orphanTxSet, txPackageWrapper);
+                            if(orphanNoCount){
+                                //如果是因为合约还回去之后,验证账本为孤儿交易则不需要计数 直接还回
+                                orphanTxSet.add(txPackageWrapper);
+                            }else {
+                                addOrphanTxSet(chain, orphanTxSet, txPackageWrapper);
+                            }
                         }
                         it.remove();
                         continue removeAndGo;
@@ -1249,6 +1255,9 @@ public class TxServiceImpl implements TxService {
             } else {
                 count++;
             }
+            if(chain.getTxPackageOrphanMap().size() > TxConstant.PACKAGE_ORPHAN_MAP_MAXCOUNT){
+                chain.getTxPackageOrphanMap().clear();
+            }
             chain.getTxPackageOrphanMap().put(hash, count);
         } else {
             //不加回(丢弃), 同时删除map中的key,并清理
@@ -1355,11 +1364,20 @@ public class TxServiceImpl implements TxService {
             return true;
         }
         moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_16);
-        verifyAgain(chain, moduleVerifyMap, packingTxList, orphanTxSet);
+        verifyAgain(chain, moduleVerifyMap, packingTxList, orphanTxSet, false);
         return txModuleValidatorPackable(chain, moduleVerifyMap, packingTxList, orphanTxSet);
     }
 
-    private void verifyAgain(Chain chain, Map<String, List<String>> moduleVerifyMap, List<TxPackageWrapper> packingTxList, Set<TxPackageWrapper> orphanTxSet) throws NulsException {
+    /**
+     *
+     * @param chain
+     * @param moduleVerifyMap
+     * @param packingTxList
+     * @param orphanTxSet
+     * @param orphanNoCount (是否因为合约还回去而再次验证账本)孤儿交易还回去的时候 不计算还回去的次数
+     * @throws NulsException
+     */
+    private void verifyAgain(Chain chain, Map<String, List<String>> moduleVerifyMap, List<TxPackageWrapper> packingTxList, Set<TxPackageWrapper> orphanTxSet, boolean orphanNoCount) throws NulsException {
         chain.getLogger().debug("------ verifyAgain 打包再次批量校验通知 ------");
         //向账本模块发送要批量验证coinData的标识
         LedgerCall.coinDataBatchNotify(chain);
@@ -1371,7 +1389,7 @@ public class TxServiceImpl implements TxService {
             }
             batchProcessList.add(txPackageWrapper.getTxHex());
         }
-        verifyLedger(chain, batchProcessList, packingTxList, orphanTxSet, true);
+        verifyLedger(chain, batchProcessList, packingTxList, orphanTxSet, true, orphanNoCount);
 
         for (TxPackageWrapper txPackageWrapper : packingTxList) {
             Transaction tx = txPackageWrapper.getTx();

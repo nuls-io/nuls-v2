@@ -396,13 +396,13 @@ public class TxValid {
     public void transferAndContractPixelTest() throws Exception {
         String code = Files.readString(Path.of("E:\\ContractTest", "pixel.txt"));
         int size = 0;
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 1000; i++) {
             size++;
             String hash = createTransfer(address21, address29, new BigInteger("100000000"));
             //String hash = createCtxTransfer();
             System.out.println("transfer: " + hash);
             System.out.println("contract: " + createContract(address21, PASSWORD, code, new Object[]{size % 50 + 1}));
-            Thread.sleep(80L);
+            Thread.sleep(100L);
         }
     }
 
