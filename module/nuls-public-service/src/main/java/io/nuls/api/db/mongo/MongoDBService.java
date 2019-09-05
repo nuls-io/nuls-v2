@@ -192,6 +192,19 @@ public class MongoDBService implements InitializingBean {
     }
 
 
+    public List<Document> query(String collName, Bson var1, BasicDBObject fields, Bson sort) {
+        MongoCollection<Document> collection = getCollection(collName);
+
+        FindIterable<Document> iterable = collection.find(var1).projection(fields).sort(sort);
+        List<Document> list = new ArrayList<>();
+        MongoCursor<Document> documentMongoCursor = iterable.iterator();
+        while (documentMongoCursor.hasNext()) {
+            list.add(documentMongoCursor.next());
+        }
+        return list;
+    }
+
+
     public long updateOne(String collName, Bson var1, Document docs) {
         return this.updateOne(collName, var1, "$set", docs);
     }

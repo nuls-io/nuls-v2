@@ -241,11 +241,21 @@ public class MongoAccountServiceImpl implements AccountService {
     }
 
     public BigInteger getAllAccountBalance(int chainId) {
-        List<Document> documentList = mongoDBService.query(ACCOUNT_TABLE + chainId);
-
+        boolean query = true;
         BigInteger totalBalance = BigInteger.ZERO;
-        for (Document document : documentList) {
-            totalBalance = totalBalance.add(new BigInteger(document.getString("totalBalance")));
+        List<Document> documentList;
+        int i = 0;
+        BasicDBObject fields = new BasicDBObject();
+        fields.append("totalBalance", 1);
+        while (query) {
+            documentList = mongoDBService.pageQuery(ACCOUNT_TABLE + chainId, null, fields, Sorts.descending("createTime"), i, 1000);
+            for (Document document : documentList) {
+                totalBalance = totalBalance.add(new BigInteger(document.getString("totalBalance")));
+            }
+            if (documentList.size() < 1000) {
+                query = false;
+            }
+            i++;
         }
         return totalBalance;
     }
