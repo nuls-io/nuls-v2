@@ -59,7 +59,7 @@ public class ContractCall {
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, cmd, params);
             if (!response.isSuccess()) {
                 String errorCode = response.getResponseErrorCode();
-                logger.error("Call interface [{}] error, ErrorCode is {}, ResponseComment:{}", cmd, errorCode, response.getResponseComment());
+                logger.warn("Call interface [{}] error, ErrorCode is {}, ResponseComment:{}", cmd, errorCode, response.getResponseComment());
                 return List.of();
             }
             Map data = (Map) response.getResponseData();
