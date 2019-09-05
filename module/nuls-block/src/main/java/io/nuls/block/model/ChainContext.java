@@ -33,10 +33,7 @@ import io.nuls.block.utils.SmallBlockCacher;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.StampedLock;
@@ -309,6 +306,29 @@ public class ChainContext {
 
     public void destroy() {
 
+    }
+
+    /**
+     * 打印当前链信息
+     */
+    public void printChains() {
+        Chain masterChain = BlockChainManager.getMasterChain(chainId);
+        logger.info("####################################master chain######################################");
+        logger.info("#" + masterChain);
+        SortedSet<Chain> forkChains = BlockChainManager.getForkChains(chainId);
+        if (!forkChains.isEmpty()) {
+            logger.info("####################################fork chains######################################");
+            for (Chain forkChain : forkChains) {
+                logger.info("#" + forkChain);
+            }
+        }
+        SortedSet<Chain> orphanChains = BlockChainManager.getOrphanChains(chainId);
+        if (!orphanChains.isEmpty()) {
+            logger.info("####################################orphan chains######################################");
+            for (Chain orphanChain : orphanChains) {
+                logger.info("#" + orphanChain);
+            }
+        }
     }
 
 }

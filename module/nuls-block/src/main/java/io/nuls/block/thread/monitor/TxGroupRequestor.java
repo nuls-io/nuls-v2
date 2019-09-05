@@ -106,11 +106,9 @@ public class TxGroupRequestor extends BaseMonitor {
                 logger.debug("TxGroupRequestor send getTxgroupMessage, original hashList size-" + original + ", blockHash-" + blockHash);
                 List<Transaction> existTransactions = TransactionCall.getTransactions(chainId, hashList, false);
                 List<NulsHash> existHashes = existTransactions.stream().map(Transaction::getHash).collect(Collectors.toList());
-//                hashList = TransactionCall.filterUnconfirmedHash(chainId, hashList);
                 hashList = CollectionUtils.removeAll(hashList, existHashes);
                 int filtered = hashList.size();
                 logger.debug("TxGroupRequestor send getTxgroupMessage, filtered hashList size-" + filtered + ", blockHash-" + blockHash);
-                //
                 if (filtered == 0) {
                     CachedSmallBlock cachedSmallBlock = SmallBlockCacher.getCachedSmallBlock(chainId, NulsHash.fromHex(blockHash));
                     SmallBlock smallBlock = cachedSmallBlock.getSmallBlock();
@@ -126,7 +124,7 @@ public class TxGroupRequestor extends BaseMonitor {
 
                     Block block = BlockUtil.assemblyBlock(header, txMap, smallBlock.getTxHashList());
                     block.setNodeId(cachedSmallBlock.getNodeId());
-                    logger.info("record recv block, block create time-" + DateUtils.timeStamp2DateStr(block.getHeader().getTime()) + ", hash-" + block.getHeader().getHash());
+                    logger.debug("record recv block, block create time-" + DateUtils.timeStamp2DateStr(block.getHeader().getTime() * 1000) + ", hash-" + block.getHeader().getHash());
                     boolean b = blockService.saveBlock(chainId, block, 1, true, false, true);
                     if (!b) {
                         SmallBlockCacher.setStatus(chainId, header.getHash(), ERROR);
