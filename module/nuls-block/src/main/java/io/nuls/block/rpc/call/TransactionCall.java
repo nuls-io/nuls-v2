@@ -130,7 +130,7 @@ public class TransactionCall {
             params.put("txList", txList);
             params.put("blockHeader", RPCUtil.encode(BlockUtil.fromBlockHeaderPo(blockHeaderPo).serialize()));
             params.put("contractList", contractList);
-            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_save", params);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_save", params, 10 * 60 * 1000);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
                 Map data = (Map) responseData.get("tx_save");
@@ -163,7 +163,7 @@ public class TransactionCall {
             txHashList.forEach(e -> list.add(e.toHex()));
             params.put("txHashList", list);
             params.put("blockHeader", RPCUtil.encode(BlockUtil.fromBlockHeaderPo(blockHeaderPo).serialize()));
-            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_rollback", params);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_rollback", params, 10 * 60 * 1000);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
                 Map data = (Map) responseData.get("tx_rollback");
@@ -218,48 +218,6 @@ public class TransactionCall {
     }
 
     /**
-     * 过滤未确认交易
-     *
-     * @param chainId  链Id/chain id
-     * @param hashList 交易hash列表
-     * @return
-     * @throws IOException
-     */
-    public static List<NulsHash> filterUnconfirmedHash(int chainId, List<NulsHash> hashList) {
-        if (hashList == null || hashList.isEmpty()) {
-            return Collections.emptyList();
-        }
-        ArrayList<NulsHash> hashes = new ArrayList<>();
-        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
-        try {
-            Map<String, Object> params = new HashMap<>(2);
-//            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put(Constants.CHAIN_ID, chainId);
-            List<String> t = new ArrayList<>();
-            hashList.forEach(e -> t.add(e.toHex()));
-            params.put("txHashList", t);
-            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getNonexistentUnconfirmedHashs", params);
-            if (response.isSuccess()) {
-                Map responseData = (Map) response.getResponseData();
-                Map map = (Map) responseData.get("tx_getNonexistentUnconfirmedHashs");
-                List<String> txHexList = (List<String>) map.get("txHashList");
-                if (txHexList == null || txHexList.isEmpty()) {
-                    return Collections.emptyList();
-                }
-                for (String txHex : txHexList) {
-                    hashes.add(NulsHash.fromHex(txHex));
-                }
-            } else {
-                return Collections.emptyList();
-            }
-        } catch (Exception e) {
-            logger.error("", e);
-            return Collections.emptyList();
-        }
-        return hashes;
-    }
-
-    /**
      * 批量获取交易
      *
      * @param chainId  链Id/chain id
@@ -302,40 +260,6 @@ public class TransactionCall {
             return Collections.emptyList();
         }
         return transactions;
-    }
-
-    /**
-     * 获取单个交易
-     *
-     * @param chainId 链Id/chain id
-     * @param hash
-     * @return
-     */
-    public static Transaction getTransaction(int chainId, NulsHash hash) {
-        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
-        try {
-            Map<String, Object> params = new HashMap<>(2);
-//            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put(Constants.CHAIN_ID, chainId);
-            params.put("txHash", hash.toHex());
-            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getTx", params);
-            if (response.isSuccess()) {
-                Map responseData = (Map) response.getResponseData();
-                Map map = (Map) responseData.get("tx_getTx");
-                String txHex = (String) map.get("tx");
-                if (txHex == null) {
-                    return null;
-                }
-                Transaction transaction = new Transaction();
-                transaction.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
-                return transaction;
-            } else {
-                return null;
-            }
-        } catch (Exception e) {
-            logger.error("", e);
-            return null;
-        }
     }
 
     /**
