@@ -268,6 +268,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
         logTime("start");
 
+        VM vm = null;
         try {
             byte[] contractAddressBytes = programInvoke.getContractAddress();
             byte[] sender = programInvoke.getSender();
@@ -311,7 +312,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             }
 
 
-            VM vm = VMFactory.createVM();
+            vm = VMFactory.createVM();
             logTime("load vm");
 
             vm.setProgramExecutor(this);
@@ -377,6 +378,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
             ProgramResult programResult = new ProgramResult();
             programResult.setGasUsed(vm.getGasUsed());
+            programResult.setDebugEvents(vm.getDebugEvents());
 
             Result vmResult = vm.getResult();
             Object resultValue = vmResult.getValue();
@@ -451,6 +453,9 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             ProgramResult programResult = new ProgramResult();
             programResult.setGasUsed(e.getGasUsed());
             logTime("error");
+            if(vm != null) {
+                programResult.setDebugEvents(vm.getDebugEvents());
+            }
             return programResult.error(e.getMessage());
         } catch (Exception e) {
             log.error("", e);

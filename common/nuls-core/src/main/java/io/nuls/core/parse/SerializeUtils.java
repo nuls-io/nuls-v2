@@ -150,6 +150,9 @@ public class SerializeUtils {
         }
     }
 
+    public static short readUint8LE(byte[] bytes, int offset) {
+        return (short) (bytes[offset] & 0xff);
+    }
     /**
      * Parse 2 bytes from the byte array (starting at the offset) as unsigned 16-bit integer in little endian format./从字节数组（以偏移量开始）解析2字节，以小端格式的无符号16位整数
      *
@@ -464,6 +467,9 @@ public class SerializeUtils {
         out[offset + 7] = (byte) (0xFF & (val >> 56));
     }
 
+    public static void uint8ToByteStreamLE(short val, OutputStream stream) throws IOException {
+        stream.write((short) (0xFF & val));
+    }
     /**
      * Write 2 bytes to the output stream as unsigned 16-bit short in little endian format./将2字节写入输出流作为无符号16位short型数据，以小端格式
      *

@@ -51,7 +51,6 @@ public class RegisterChainReq extends BaseReq {
     private Long initNumber;
     private String addressType;
     private int minAvailableNodeNum;
-    private int txConfirmedBlockNum;
     private int decimalPlaces;
     private String password;
 
@@ -121,14 +120,6 @@ public class RegisterChainReq extends BaseReq {
 
     public void setMinAvailableNodeNum(int minAvailableNodeNum) {
         this.minAvailableNodeNum = minAvailableNodeNum;
-    }
-
-    public int getTxConfirmedBlockNum() {
-        return txConfirmedBlockNum;
-    }
-
-    public void setTxConfirmedBlockNum(int txConfirmedBlockNum) {
-        this.txConfirmedBlockNum = txConfirmedBlockNum;
     }
 
     public String getAddress() {

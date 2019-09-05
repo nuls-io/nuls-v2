@@ -45,6 +45,7 @@ public class VMFactory {
             "io/nuls/contract/sdk/annotation/View",
             "io/nuls/contract/sdk/annotation/Required",
             "io/nuls/contract/sdk/annotation/Payable",
+            "io/nuls/contract/sdk/event/DebugEvent",
             "java/lang/Boolean",
             "java/lang/Byte",
             "java/lang/Short",

@@ -93,6 +93,7 @@ public class ContractResult {
      * 消息事件
      */
     private List<String> events = new ArrayList<>();
+    private List<String> debugEvents = new ArrayList<>();
     private List<ProgramInvokeRegisterCmd> invokeRegisterCmds = new ArrayList<>();
     private String remark;
     private boolean isTerminated;
@@ -390,6 +391,14 @@ public class ContractResult {
 
     public void setEvents(List<String> events) {
         this.events = events;
+    }
+
+    public List<String> getDebugEvents() {
+        return debugEvents;
+    }
+
+    public void setDebugEvents(List<String> debugEvents) {
+        this.debugEvents = debugEvents;
     }
 
     public String getRemark() {
