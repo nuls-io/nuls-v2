@@ -93,7 +93,6 @@ public class UpdateCrossChainProcessor extends CrossChainBaseProcessor {
         Long initNumber = Long.parseLong(args[12]);
         int decimalPlaces = 8;
         int minAvailableNodeNum = 5;
-        int txConfirmedBlockNum = 30;
         if (args.length > 13) {
             decimalPlaces = Integer.parseInt(args[13]);
         }
