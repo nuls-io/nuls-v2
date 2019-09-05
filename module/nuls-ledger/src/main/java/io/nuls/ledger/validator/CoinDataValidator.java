@@ -396,16 +396,17 @@ public class CoinDataValidator {
         try {
             //数据库已经不为初始值了，则这笔交易可以认为双花
             if (LedgerUtil.equalsNonces(fromNonce, LedgerConstant.getInitNonceByte())) {
-                logger(addressChainId).info("DOUBLE_EXPENSES_CODE address={},fromNonceStr={},dbNonce={}", address, fromNonceStr, LedgerUtil.getNonceEncode(preNonce));
+                logger(addressChainId).info("DOUBLE_EXPENSES_CODE address={},fromNonceStr={},dbNonce={},tx={}", address, fromNonceStr, LedgerUtil.getNonceEncode(preNonce), LedgerUtil.getNonceEncode(txNonce));
                 return ValidateResult.getResult(LedgerErrorCode.DOUBLE_EXPENSES, new String[]{address, fromNonceStr});
             }
             //数据nonce值== 当前提交的hash值
             if (LedgerUtil.equalsNonces(preNonce, txNonce)) {
-                logger(addressChainId).info("DOUBLE_EXPENSES_CODE address={},fromNonceStr={},dbNonce={}", address, fromNonceStr, LedgerUtil.getNonceEncode(preNonce));
+                logger(addressChainId).info("DOUBLE_EXPENSES_CODE address={},fromNonceStr={},dbNonce={},tx={}", address, fromNonceStr, LedgerUtil.getNonceEncode(preNonce), LedgerUtil.getNonceEncode(txNonce));
                 return ValidateResult.getResult(LedgerErrorCode.DOUBLE_EXPENSES, new String[]{address, fromNonceStr});
             }
             //上面没连接上，但是fromNonce又存储过，则双花了
             if (transactionService.fromNonceExist(addressChainId, LedgerUtil.getAccountNoncesStrKey(address, assetChainId, assetId, fromNonceStr))) {
+                logger(addressChainId).info("DOUBLE_EXPENSES_CODE address={},fromNonceStr={},tx={} fromNonce exist",address, fromNonceStr,LedgerUtil.getNonceEncode(txNonce));
                 return ValidateResult.getResult(LedgerErrorCode.DOUBLE_EXPENSES, new String[]{address, fromNonceStr});
             }
         } catch (Exception e) {
