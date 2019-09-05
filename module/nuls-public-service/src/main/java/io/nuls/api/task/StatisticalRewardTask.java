@@ -31,7 +31,7 @@ public class StatisticalRewardTask implements Runnable {
         BigInteger reward = blockService.getLast24HourRewards(chainId);
         ApiCache apiCache = CacheManager.getCache(chainId);
         if (apiCache != null) {
-            apiCache.getStatisicalCache().setDailyReward(reward);
+            apiCache.getCoinContextInfo().setDailyReward(reward);
         }
         //查询当前最新block高度
         BlockHeaderInfo headerInfo = blockService.getBestBlockHeader(chainId);
@@ -49,7 +49,10 @@ public class StatisticalRewardTask implements Runnable {
         for (MiniBlockHeaderInfo headerInfo1 : headerInfoList) {
             count += headerInfo1.getTxCount();
         }
+        statisticalInfo.setLastStatisticalHeight(headerInfo.getHeight());
         statisticalInfo.setTxCount(statisticalInfo.getTxCount() + count);
         statisticalService.saveChainStatisticalInfo(statisticalInfo);
+
+        apiCache.getCoinContextInfo().setTxCount(statisticalInfo.getTxCount());
     }
 }

@@ -610,8 +610,6 @@ public class RocksDBManager {
         Options options = new Options();
 
         options.setCreateIfMissing(createIfMissing);
-        options.setBaseBackgroundCompactions(2);
-
         /**
          * 优化读取性能方案
          */
@@ -619,9 +617,9 @@ public class RocksDBManager {
         options.setCompressionType(CompressionType.NO_COMPRESSION);
         options.setMaxOpenFiles(-1);
         BlockBasedTableConfig tableOption = new BlockBasedTableConfig();
-//        tableOption.setNoBlockCache(true);
+        tableOption.setNoBlockCache(true);
         tableOption.setBlockRestartInterval(4);
-        tableOption.setFilterPolicy(new BloomFilter(100, true));
+        tableOption.setFilterPolicy(new BloomFilter(10, true));
         options.setTableFormatConfig(tableOption);
 
         return options;
