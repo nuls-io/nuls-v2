@@ -113,7 +113,7 @@ public class ConsensusCall {
      * @param chainId 链Id/chain id
      * @return
      */
-    public static synchronized boolean evidence(int chainId, BlockService blockService, BlockHeader forkHeader) {
+    public static boolean evidence(int chainId, BlockService blockService, BlockHeader forkHeader) {
         ChainContext context = ContextManager.getContext(chainId);
         NulsLogger logger = context.getLogger();
         long forkHeaderHeight = forkHeader.getHeight();
