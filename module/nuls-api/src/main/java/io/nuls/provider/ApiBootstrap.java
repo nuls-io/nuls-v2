@@ -65,7 +65,7 @@ public class ApiBootstrap extends RpcModule {
             SpringLiteContext.init(basePackage);
         }
         initRpcServer(configItemMap);
-        NulsSDKBootStrap.init(defaultChainId, null);
+        NulsSDKBootStrap.init(defaultChainId, "");
     }
 
     private static void initRpcServer(Map<String, ConfigurationLoader.ConfigItem> configItemMap) {
