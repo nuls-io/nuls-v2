@@ -402,7 +402,7 @@ public class TxValid {
             //String hash = createCtxTransfer();
             System.out.println("transfer: " + hash);
             System.out.println("contract: " + createContract(address21, PASSWORD, code, new Object[]{size % 50 + 1}));
-            Thread.sleep(100L);
+//            Thread.sleep(100L);
         }
     }
 

@@ -713,7 +713,7 @@ public class TxServiceImpl implements TxService {
                         long txSize = tx.size();
                         if ((totalSizeTemp + txSize) > maxTxDataSize) {
                             packablePool.offerFirstOnlyHash(chain, tx);
-                            nulsLogger.info("交易已达最大容量, 实际值: {} 当前交易size：{} - 预定最大值maxTxDataSize:{}", totalSize + txSize, txSize, maxTxDataSize);
+                            nulsLogger.info("交易已达最大容量, 实际值: {}, totalSizeTemp:{}, 当前交易size：{} - 预定最大值maxTxDataSize:{}", totalSize, totalSizeTemp, txSize, maxTxDataSize);
                             if (batchProcessListSize > 0) {
                                 //达到处理该批次的条件
                                 process = true;
