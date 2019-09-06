@@ -70,13 +70,13 @@ public class ApiBootstrap extends RpcModule {
 
     private static void initRpcServer(Map<String, ConfigurationLoader.ConfigItem> configItemMap) {
         String server_ip = "0.0.0.0";
-        int server_port = 9898;
+        int server_port = 18004;
         if (configItemMap != null) {
-            ConfigurationLoader.ConfigItem serverIp = configItemMap.get("server_ip");
+            ConfigurationLoader.ConfigItem serverIp = configItemMap.get("serverIp");
             if (serverIp != null) {
                 server_ip = serverIp.getValue();
             }
-            ConfigurationLoader.ConfigItem serverPort = configItemMap.get("server_port");
+            ConfigurationLoader.ConfigItem serverPort = configItemMap.get("serverPort");
             if (serverPort != null) {
                 server_port = Integer.parseInt(serverPort.getValue());
             }

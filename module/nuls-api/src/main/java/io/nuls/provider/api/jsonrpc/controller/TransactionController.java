@@ -23,6 +23,9 @@
  */
 package io.nuls.provider.api.jsonrpc.controller;
 
+import io.nuls.base.api.provider.block.BlockService;
+import io.nuls.base.api.provider.block.facade.BlockHeaderData;
+import io.nuls.base.api.provider.block.facade.GetBlockHeaderByHeightReq;
 import io.nuls.provider.api.config.Context;
 import io.nuls.base.RPCUtil;
 import io.nuls.base.api.provider.Result;
@@ -84,6 +87,8 @@ public class TransactionController {
 
     TransferService transferService = ServiceManager.get(TransferService.class);
 
+    BlockService blockService = ServiceManager.get(BlockService.class);
+
     @RpcMethod("getTx")
     @ApiOperation(description = "根据hash获取交易", order = 301)
     @Parameters({
@@ -112,6 +117,15 @@ public class TransactionController {
             return RpcResult.paramError("[txHash] is inValid");
         }
         Result<TransactionDto> result = transactionTools.getTx(chainId, txHash);
+        if(result.isSuccess()) {
+            TransactionDto txDto = result.getData();
+            GetBlockHeaderByHeightReq req = new GetBlockHeaderByHeightReq(txDto.getBlockHeight());
+            req.setChainId(chainId);
+            Result<BlockHeaderData> blockResult = blockService.getBlockHeaderByHeight(req);
+            if(blockResult.isSuccess()) {
+                txDto.setBlockHash(blockResult.getData().getHash());
+            }
+        }
         return ResultUtil.getJsonRpcResult(result);
     }
 
