@@ -23,6 +23,9 @@
  */
 package io.nuls.provider.api.jsonrpc.controller;
 
+import io.nuls.base.api.provider.block.BlockService;
+import io.nuls.base.api.provider.block.facade.BlockHeaderData;
+import io.nuls.base.api.provider.block.facade.GetBlockHeaderByHeightReq;
 import io.nuls.provider.api.config.Context;
 import io.nuls.base.RPCUtil;
 import io.nuls.base.api.provider.Result;
@@ -44,9 +47,6 @@ import io.nuls.core.rpc.model.*;
 import io.nuls.provider.model.dto.TransactionDto;
 import io.nuls.provider.model.jsonrpc.RpcErrorCode;
 import io.nuls.provider.model.jsonrpc.RpcResult;
-import io.nuls.provider.model.txdata.CallContractData;
-import io.nuls.provider.model.txdata.CreateContractData;
-import io.nuls.provider.model.txdata.DeleteContractData;
 import io.nuls.provider.rpctools.ContractTools;
 import io.nuls.provider.rpctools.TransactionTools;
 import io.nuls.provider.utils.Log;
@@ -56,6 +56,9 @@ import io.nuls.v2.model.annotation.Api;
 import io.nuls.v2.model.annotation.ApiOperation;
 import io.nuls.v2.model.annotation.ApiType;
 import io.nuls.v2.model.dto.*;
+import io.nuls.v2.txdata.CallContractData;
+import io.nuls.v2.txdata.CreateContractData;
+import io.nuls.v2.txdata.DeleteContractData;
 import io.nuls.v2.util.CommonValidator;
 import io.nuls.v2.util.NulsSDKTool;
 import io.nuls.v2.util.ValidateUtil;
@@ -83,6 +86,8 @@ public class TransactionController {
     private ContractTools contractTools;
 
     TransferService transferService = ServiceManager.get(TransferService.class);
+
+    BlockService blockService = ServiceManager.get(BlockService.class);
 
     @RpcMethod("getTx")
     @ApiOperation(description = "根据hash获取交易", order = 301)
@@ -112,6 +117,15 @@ public class TransactionController {
             return RpcResult.paramError("[txHash] is inValid");
         }
         Result<TransactionDto> result = transactionTools.getTx(chainId, txHash);
+        if(result.isSuccess()) {
+            TransactionDto txDto = result.getData();
+            GetBlockHeaderByHeightReq req = new GetBlockHeaderByHeightReq(txDto.getBlockHeight());
+            req.setChainId(chainId);
+            Result<BlockHeaderData> blockResult = blockService.getBlockHeaderByHeight(req);
+            if(blockResult.isSuccess()) {
+                txDto.setBlockHash(blockResult.getData().getHash());
+            }
+        }
         return ResultUtil.getJsonRpcResult(result);
     }
 

@@ -123,11 +123,10 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             String password = (String) packerInfo.get("password");
             String address = (String) packerInfo.get("address");
             List<String> packers = (List<String>) packerInfo.get("packAddressList");
-            int verifierSignCount = CommonUtil.getByzantineCount(packers, chain) - 1;
+            int verifierSignCount = CommonUtil.getByzantineCount(packers, chain, true);
             boolean isPacker = false;
             if (!StringUtils.isBlank(address) && !crossTxTransferDTO.getFromAddressList().contains(address)) {
                 isPacker = true;
-                verifierSignCount++;
             }
             txSize += verifierSignCount * P2PHKSignature.SERIALIZE_LENGTH;
 
@@ -248,6 +247,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                 if (isPacker) {
                     P2PHKSignature p2PHKSignature = AccountCall.signDigest(address, password, convertHash.getBytes());
                     signature.getP2PHKSignatures().add(p2PHKSignature);
+                    chain.getSignedCtxMap().put(txHash, p2PHKSignature);
                 }
                 if (!txValidator.coinDataValid(chain, mainCtx.getCoinDataInstance(), mainCtx.size(), false)) {
                     chain.getLogger().error("生成的主网协议跨链交易CoinData验证失败！\n\n");
@@ -262,6 +262,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                 if (isPacker) {
                     P2PHKSignature p2PHKSignature = AccountCall.signDigest(address, password, txHash.getBytes());
                     signature.getP2PHKSignatures().add(p2PHKSignature);
+                    chain.getSignedCtxMap().put(txHash, p2PHKSignature);
                 }
             }
             tx.setTransactionSignature(signature.serialize());
@@ -356,6 +357,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                     }
                     ctxStatusList.add(ctxHash);
                     waitSendList.add(ctxHash);
+                    chain.getSignedCtxMap().remove(ctxHash);
                 } else if (chainId == toChainId) {
                     NulsHash convertHash = ctxHash;
                     if (!config.isMainNet()) {

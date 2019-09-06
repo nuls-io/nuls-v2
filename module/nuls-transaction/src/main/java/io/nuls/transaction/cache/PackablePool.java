@@ -44,6 +44,23 @@ public class PackablePool {
     }
 
     /**
+     * 只还hash 不需要还到map中
+     * @param chain
+     * @param tx
+     * @return
+     */
+    public boolean offerFirstOnlyHash(Chain chain, Transaction tx) {
+        ByteArrayWrapper hash = new ByteArrayWrapper(tx.getHash().getBytes());
+        synchronized (hash) {
+            if (chain.getPackableHashQueue().offerFirst(hash)) {
+                return true;
+            }
+        }
+        chain.getLogger().error("PackableHashQueue offerFirst false");
+        return false;
+    }
+
+    /**
      * 将交易加入到待打包队列队尾
      * Add the transaction to the end of the queue to be packed
      *
@@ -128,6 +145,12 @@ public class PackablePool {
             ByteArrayWrapper wrapper = new ByteArrayWrapper(hash);
             map.remove(wrapper);
         }
+    }
+
+    public void removeInvalidTxFromMap(Chain chain, Transaction tx) {
+        Map<ByteArrayWrapper, Transaction> map = chain.getPackableTxMap();
+        ByteArrayWrapper wrapper = new ByteArrayWrapper(tx.getHash().getBytes());
+        map.remove(wrapper);
     }
 
     /**

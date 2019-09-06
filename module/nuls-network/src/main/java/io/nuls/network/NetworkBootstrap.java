@@ -114,8 +114,8 @@ public class NetworkBootstrap extends RpcModule {
                 networkConfig.setMoonNode(false);
             }
 
-            networkConfig.setMaxInSameIp((networkConfig.getMaxInCount() / networkConfig.getMaxOutCount()));
-            networkConfig.setCorssMaxInSameIp((networkConfig.getCrossMaxInCount() / networkConfig.getCrossMaxOutCount()));
+            networkConfig.setMaxInSameIp(NetworkConstant.MAX_SAME_IP_PER_GROUP);
+            networkConfig.setCrossMaxInSameIp(NetworkConstant.MAX_SAME_IP_PER_GROUP);
             String seedMoonIp = networkConfig.getMoonSeedIps();
             List<String> ipMoonList = new ArrayList<>();
             Collections.addAll(ipMoonList, seedMoonIp.split(NetworkConstant.COMMA));

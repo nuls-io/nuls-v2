@@ -23,6 +23,7 @@ package io.nuls.api.db.mongo;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Sorts;
 import io.nuls.api.db.StatisticalService;
+import io.nuls.api.model.po.ChainStatisticalInfo;
 import io.nuls.api.model.po.KeyValue;
 import io.nuls.api.model.po.StatisticalInfo;
 import io.nuls.api.utils.DocumentTransferTool;
@@ -110,6 +111,21 @@ public class MongoStatisticalServiceImpl implements StatisticalService {
             }
         }
         return list;
+    }
+
+    @Override
+    public ChainStatisticalInfo getChainStatisticalInfo(int chainId) {
+        Document document = mongoDBService.findOne(CHAIN_STATISTICAL_TABLE, Filters.eq("chainId", chainId));
+        if (document == null) {
+            return null;
+        }
+        return DocumentTransferTool.toInfo(document, ChainStatisticalInfo.class);
+    }
+
+    @Override
+    public void saveChainStatisticalInfo(ChainStatisticalInfo statisticalInfo) {
+        Document document = DocumentTransferTool.toDocument(statisticalInfo);
+        mongoDBService.insertOne(CHAIN_STATISTICAL_TABLE, document);
     }
 
     private void summaryLong(List<KeyValue> list, List<Document> documentList, String field) {

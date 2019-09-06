@@ -68,10 +68,7 @@ public class ForkChainsMonitor extends BaseMonitor {
                 if (forkChains.isEmpty()) {
                     break;
                 }
-                commonLog.info("####################################fork chains######################################");
-                for (Chain forkChain : forkChains) {
-                    commonLog.info("#" + forkChain);
-                }
+                context.printChains();
                 //遍历当前分叉链,与主链进行比对,找出最大高度差,与默认参数chainSwtichThreshold对比,确定要切换的分叉链
                 Chain masterChain = BlockChainManager.getMasterChain(chainId);
                 ChainParameters parameters = context.getParameters();
@@ -104,6 +101,7 @@ public class ForkChainsMonitor extends BaseMonitor {
                 } else {
                     commonLog.info("chainId-" + chainId + ", switchChain fail, auto rollback success");
                 }
+                context.printChains();
                 ConsensusCall.notice(chainId, MODULE_WORKING);
                 TransactionCall.notice(chainId, MODULE_WORKING);
                 break;

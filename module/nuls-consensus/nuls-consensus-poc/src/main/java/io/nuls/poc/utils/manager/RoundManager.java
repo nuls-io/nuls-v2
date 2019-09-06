@@ -299,8 +299,7 @@ public class RoundManager {
         for (int index = blockHeaderSize - 1; index >= 0; index--) {
             BlockHeader blockHeader = chain.getBlockHeaderList().get(index);
             if (blockHeader.getTime() <= time) {
-                BlockExtendsData blockExtendsData = new BlockExtendsData();
-                blockExtendsData.parse(blockHeader.getExtend(), 0);
+                BlockExtendsData blockExtendsData = blockHeader.getExtendsData();
                 long roundStartTime = blockExtendsData.getRoundStartTime();
                 long roundEndTime = roundStartTime + chain.getConfig().getPackingInterval() * blockExtendsData.getConsensusMemberCount();
                 if (roundStartTime <= time) {

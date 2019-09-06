@@ -43,6 +43,9 @@ public class AccountLedgerInfo {
     }
 
     public String getKey() {
+        if (key == null) {
+            this.key = DBUtil.getAccountAssetKey(address, chainId, assetId);
+        }
         return key;
     }
 

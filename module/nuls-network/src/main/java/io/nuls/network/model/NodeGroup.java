@@ -327,9 +327,9 @@ public class NodeGroup implements Dto {
     public int getSameIpMaxCount(boolean isCross) {
         int sameIpMaxCount = 0;
         if (isCross) {
-            sameIpMaxCount = (BigDecimal.valueOf(maxCrossIn).divide(BigDecimal.valueOf(maxCrossOut), 0, RoundingMode.HALF_DOWN)).intValue();
+            sameIpMaxCount = networkConfig.getCrossMaxInSameIp();
         } else {
-            sameIpMaxCount = (BigDecimal.valueOf(maxIn).divide(BigDecimal.valueOf(maxOut), 0, RoundingMode.HALF_DOWN)).intValue();
+            sameIpMaxCount = networkConfig.getMaxInSameIp();
         }
         return sameIpMaxCount;
     }

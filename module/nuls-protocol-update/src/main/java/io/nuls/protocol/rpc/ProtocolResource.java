@@ -42,6 +42,7 @@ import io.nuls.protocol.model.ProtocolContext;
 import io.nuls.protocol.service.ProtocolService;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -65,7 +66,7 @@ public class ProtocolResource extends BaseCmd {
      * @param map
      * @return
      */
-    @CmdAnnotation(cmd = GET_MAIN_VERSION, version = 1.0, description = "get mainnet version")
+    @CmdAnnotation(cmd = GET_VERSION, version = 1.0, description = "get mainnet version")
     @Parameters({
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
     })
@@ -74,31 +75,15 @@ public class ProtocolResource extends BaseCmd {
             @Key(name = "effectiveRatio", valueType = Byte.class, description = "每个统计区间内的最小生效比例"),
             @Key(name = "continuousIntervalCount", valueType = Short.class, description = "协议生效要满足的连续区间数")})
     )
-    public Response getMainVersion(Map map) {
+    public Response getVersion(Map map) {
         int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
-        return success(ContextManager.getContext(chainId).getCurrentProtocolVersion());
-    }
-
-    /**
-     * 获取当前钱包版本信息
-     *
-     * @param map
-     * @return
-     */
-    @CmdAnnotation(cmd = GET_BLOCK_VERSION, version = 1.0, description = "get wallet version")
-    @Parameters({
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
-    })
-    @ResponseData(name = "返回值", description = "返回一个Map对象，包含三个属性", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "version", valueType = Short.class, description = "协议版本号"),
-            @Key(name = "effectiveRatio", valueType = Byte.class, description = "每个统计区间内的最小生效比例"),
-            @Key(name = "continuousIntervalCount", valueType = Short.class, description = "协议生效要满足的连续区间数")})
-    )
-    public Response getBlockVersion(Map map) {
-        int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
-        List<ProtocolVersion> list = ContextManager.getContext(chainId).getLocalVersionList();
-        return success(list.get(list.size() - 1));
-
+        ProtocolContext context = ContextManager.getContext(chainId);
+        ProtocolVersion currentProtocolVersion = context.getCurrentProtocolVersion();
+        ProtocolVersion localProtocolVersion = context.getLocalProtocolVersion();
+        Map<String, ProtocolVersion> result = new HashMap<>();
+        result.put("currentProtocolVersion", currentProtocolVersion);
+        result.put("localProtocolVersion", localProtocolVersion);
+        return success(result);
     }
 
     /**
@@ -122,8 +107,8 @@ public class ProtocolResource extends BaseCmd {
         ProtocolVersion currentProtocol = context.getCurrentProtocolVersion();
         //收到的新区块和本地主网版本不一致，验证不通过
         if (currentProtocol.getVersion() != extendsData.getMainVersion()) {
-            NulsLogger commonLog = context.getLogger();
-            commonLog.info("------block version error, mainVersion:" + currentProtocol.getVersion() + ",blockVersion:" + extendsData.getMainVersion());
+            NulsLogger logger = context.getLogger();
+            logger.info("------block version error, mainVersion:" + currentProtocol.getVersion() + ",blockVersion:" + extendsData.getMainVersion());
             return failed("block version error");
         }
         return success();
@@ -202,11 +187,11 @@ public class ProtocolResource extends BaseCmd {
         int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
         ProtocolContext context = ContextManager.getContext(chainId);
         Map<Short, List<Map.Entry<String, Protocol>>> protocolMap = context.getProtocolMap();
-        NulsLogger commonLog = context.getLogger();
+        NulsLogger logger = context.getLogger();
         String moduleCode = map.get("moduleCode").toString();
         List list = (List) map.get("list");
-        commonLog.info("--------------------registerProtocol---------------------------");
-        commonLog.info("moduleCode-" + moduleCode);
+        logger.info("--------------------registerProtocol---------------------------");
+        logger.info("moduleCode-" + moduleCode);
 //        JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         for (Object o : list) {
             Map m = (Map) o;
@@ -214,7 +199,7 @@ public class ProtocolResource extends BaseCmd {
             short version = protocol.getVersion();
             List<Map.Entry<String, Protocol>> protocolList = protocolMap.computeIfAbsent(version, k -> new ArrayList<>());
             protocolList.add(Maps.immutableEntry(moduleCode, protocol));
-            commonLog.info("protocol-" + protocol);
+            logger.info("protocol-" + protocol);
         }
         return success();
 

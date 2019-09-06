@@ -70,6 +70,8 @@ public class RollbackService {
     private List<ChainInfo> chainInfoList = new ArrayList<>();
     //记录每个区块交易和账户地址的关系
     private Set<TxRelationInfo> txRelationInfoSet = new HashSet<>();
+    //处理每个交易时，过滤交易中的重复地址
+    Set<String> addressSet = new HashSet<>();
 
     public boolean rollbackBlock(int chainId, long blockHeight) {
         clear();
@@ -195,12 +197,18 @@ public class RollbackService {
         }
 
         AssetInfo assetInfo = CacheManager.getCacheChain(chainId).getDefaultAsset();
-        Set<String> addressSet = new HashSet<>();
+        addressSet.clear();
         for (CoinToInfo output : tx.getCoinTos()) {
             addressSet.add(output.getAddress());
             calcBalance(chainId, output);
-//            txRelationInfoSet.add(new TxRelationInfo(output.getAddress(), tx.getHash()));
-
+            //如果是共识奖励，则不存储交易关系表记录
+            if (tx.getType() == TxType.CONTRACT_RETURN_GAS) {
+                txRelationInfoSet.add(new TxRelationInfo(output.getAddress(), tx.getHash()));
+            }
+            //创世块的数据和合约返还不计算共识奖励
+            if (tx.getHeight() == 0 || tx.getType() == TxType.CONTRACT_RETURN_GAS) {
+                continue;
+            }
             //奖励是本链主资产的时候，回滚奖励金额
             if (output.getChainId() == assetInfo.getChainId() && output.getAssetsId() == assetInfo.getAssetId()) {
                 AccountInfo accountInfo = queryAccountInfo(chainId, output.getAddress());
@@ -214,7 +222,7 @@ public class RollbackService {
     }
 
     private void processTransferTx(int chainId, TransactionInfo tx) {
-        Set<String> addressSet = new HashSet<>();
+        addressSet.clear();
 
         if (tx.getCoinFroms() != null) {
             for (CoinFromInfo input : tx.getCoinFroms()) {
@@ -237,7 +245,7 @@ public class RollbackService {
     }
 
     private void processCrossTransferTx(int chainId, TransactionInfo tx) {
-        Set<String> addressSet = new HashSet<>();
+        addressSet.clear();
 
         if (tx.getCoinFroms() != null) {
             for (CoinFromInfo input : tx.getCoinFroms()) {
@@ -268,7 +276,7 @@ public class RollbackService {
     }
 
     private void processAliasTx(int chainId, TransactionInfo tx) {
-        Set<String> addressSet = new HashSet<>();
+        addressSet.clear();
 
         if (tx.getCoinFroms() != null) {
             for (CoinFromInfo input : tx.getCoinFroms()) {
@@ -368,20 +376,22 @@ public class RollbackService {
 
         AccountInfo accountInfo;
         CoinToInfo output;
+        addressSet.clear();
         for (int i = 0; i < tx.getCoinTos().size(); i++) {
             output = tx.getCoinTos().get(i);
-            if (output.getLockTime() > 0) {
-                continue;
-            }
             accountInfo = queryAccountInfo(chainId, output.getAddress());
-            accountInfo.setTxCount(accountInfo.getTxCount() - 1);
-            if (!accountInfo.getAddress().equals(agentInfo.getAgentAddress())) {
-                accountInfo.setConsensusLock(accountInfo.getConsensusLock().add(output.getAmount()));
-            } else {
-                calcBalance(chainId, output.getChainId(), output.getAssetsId(), accountInfo, tx.getFee().getValue());
-                accountInfo.setConsensusLock(accountInfo.getConsensusLock().add(output.getAmount()).add(agentInfo.getDeposit()));
+            if (!addressSet.contains(output.getAddress())) {
+                accountInfo.setTxCount(accountInfo.getTxCount() - 1);
+                txRelationInfoSet.add(new TxRelationInfo(output.getAddress(), tx.getHash()));
             }
-            txRelationInfoSet.add(new TxRelationInfo(output.getAddress(), tx.getHash()));
+            //lockTime > 0 这条output的金额就是节点的保证金
+            if (output.getLockTime() > 0) {
+                accountInfo.setConsensusLock(accountInfo.getConsensusLock().add(agentInfo.getDeposit()));
+                calcBalance(chainId, output.getChainId(), output.getAssetsId(), accountInfo, tx.getFee().getValue());
+            } else {
+                accountInfo.setConsensusLock(accountInfo.getConsensusLock().add(output.getAmount()));
+            }
+            addressSet.add(output.getAddress());
         }
 
         //根据交易hash查询所有取消委托的记录
@@ -430,19 +440,16 @@ public class RollbackService {
 
         AccountInfo accountInfo;
         CoinToInfo output;
+        addressSet.clear();
         for (int i = 0; i < tx.getCoinTos().size(); i++) {
             output = tx.getCoinTos().get(i);
-            if (output.getLockTime() > 0) {
-                continue;
-            }
             accountInfo = queryAccountInfo(chainId, output.getAddress());
-            accountInfo.setTxCount(accountInfo.getTxCount() - 1);
-            if (!accountInfo.getAddress().equals(agentInfo.getAgentAddress())) {
-                accountInfo.setConsensusLock(accountInfo.getConsensusLock().add(output.getAmount()));
-            } else {
-                accountInfo.setConsensusLock(accountInfo.getConsensusLock().add(output.getAmount()).add(agentInfo.getDeposit()));
+            if (!addressSet.contains(output.getAddress())) {
+                accountInfo.setTxCount(accountInfo.getTxCount() - 1);
             }
+            accountInfo.setConsensusLock(accountInfo.getConsensusLock().add(output.getAmount()));
             txRelationInfoSet.add(new TxRelationInfo(output.getAddress(), tx.getHash()));
+            addressSet.add(output.getAddress());
         }
 
         //根据交易hash查询所有取消委托的记录
@@ -615,7 +622,9 @@ public class RollbackService {
 
     private AccountTokenInfo processAccountNrc20(int chainId, ContractInfo contractInfo, String address, BigInteger value, int type) {
         AccountTokenInfo tokenInfo = queryAccountTokenInfo(chainId, address + contractInfo.getContractAddress());
-
+        if (tokenInfo == null) {
+            return null;
+        }
         if (type == 1) {
             tokenInfo.setBalance(tokenInfo.getBalance().add(value));
         } else {

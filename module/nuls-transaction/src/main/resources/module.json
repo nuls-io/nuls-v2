@@ -9,6 +9,6 @@
   "txMaxSize":307200,
   "moduleVerifyPercent":30,
   "packageRpcReserveTime":100,
-  "txUnverifiedQueueSize":10000000,
+  "txUnverifiedQueueSize":100000,
   "orphanTtl":600
 }

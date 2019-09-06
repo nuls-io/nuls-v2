@@ -71,7 +71,6 @@ public class ChainCmdTest {
         parameters.put("magicNumber",3136151);
         parameters.put("minAvailableNodeNum",1);
         parameters.put("singleNodeMinConnectionNum",1);
-        parameters.put("txConfirmedBlockNum",10);
 
         parameters.put("maxSignatureCount",100);
         parameters.put("signatureByzantineRatio",67);

@@ -109,9 +109,8 @@ public class ValidatorCmd extends BaseLedgerCmd {
 //                    LoggerUtil.logger(chainId).debug("verifyCoinDataBatchPackaged failed txHash={}", txHash);
                 }
             }
-
             Map<String, Object> rtMap = new HashMap<>(3);
-            if(failList.size()>0) {
+            if (failList.size() > 0) {
                 LoggerUtil.logger(chainId).debug("verifyCoinDataBatchPackaged failed txs size={}", failList.size());
             }
             rtMap.put("fail", failList);

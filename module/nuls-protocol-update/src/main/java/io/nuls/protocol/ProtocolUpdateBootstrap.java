@@ -15,7 +15,6 @@ import io.nuls.protocol.manager.ChainManager;
 import io.nuls.protocol.model.ProtocolConfig;
 
 import static io.nuls.protocol.constant.Constant.PROTOCOL_CONFIG;
-import static io.nuls.protocol.constant.Constant.VERSION;
 
 /**
  * 协议升级模块启动类
@@ -84,7 +83,6 @@ public class ProtocolUpdateBootstrap extends RpcModule {
         //读取配置文件,数据存储根目录,初始化打开该目录下所有表连接并放入缓存
         RocksDBService.init(protocolConfig.getDataFolder());
         RocksDBService.createTable(PROTOCOL_CONFIG);
-        RocksDBService.createTable(VERSION);
     }
 
     /**

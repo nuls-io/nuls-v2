@@ -24,7 +24,6 @@
  */
 package io.nuls.protocol.manager;
 
-import io.nuls.base.basic.ProtocolVersion;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.logback.NulsLogger;
@@ -49,7 +48,7 @@ public class ChainManager {
     @Autowired
     private ProtocolService protocolService;
 
-    public void initChain() throws Exception {
+    public void initChain() {
         //加载配置
         ConfigLoader.load();
         ContextManager.chainIds.forEach(this::initTable);
@@ -65,14 +64,13 @@ public class ChainManager {
             //服务初始化
             protocolService.init(chainId);
             ProtocolContext context = ContextManager.getContext(chainId);
-            List<ProtocolVersion> list = context.getLocalVersionList();
-            NulsLogger commonLog = context.getLogger();
-            short localVersion = list.get(list.size() - 1).getVersion();
+            NulsLogger logger = context.getLogger();
+            short localVersion = context.getLocalProtocolVersion().getVersion();
             short version = context.getCurrentProtocolVersion().getVersion();
             if (version > localVersion) {
-                commonLog.error("localVersion-" + localVersion);
-                commonLog.error("newVersion-" + version);
-                commonLog.error("Older versions of the wallet automatically stop working, Please upgrade the latest version of the wallet!");
+                logger.error("localVersion-" + localVersion);
+                logger.error("newVersion-" + version);
+                logger.error("Older versions of the wallet automatically stop working, Please upgrade the latest version of the wallet!");
                 System.exit(1);
             }
         }
@@ -95,13 +93,13 @@ public class ChainManager {
      * @param chainId
      */
     private void initTable(int chainId) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
+        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         try {
             RocksDBService.createTable(Constant.STATISTICS + chainId);
             RocksDBService.createTable(Constant.CACHED_INFO + chainId);
             RocksDBService.createTable(Constant.PROTOCOL_VERSION_PO + chainId);
         } catch (Exception e) {
-            commonLog.error(e);
+            logger.error(e);
         }
     }
 

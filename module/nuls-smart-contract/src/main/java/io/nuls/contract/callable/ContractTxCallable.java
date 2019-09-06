@@ -23,11 +23,6 @@
  */
 package io.nuls.contract.callable;
 
-import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.Transaction;
-import io.nuls.base.signture.P2PHKSignature;
-import io.nuls.base.signture.SignatureUtil;
-import io.nuls.base.signture.TransactionSignature;
 import io.nuls.contract.helper.ContractConflictChecker;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.helper.ContractNewTxHandler;
@@ -38,11 +33,9 @@ import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.service.ContractExecutor;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
-import io.nuls.contract.vm.GasCost;
 import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.ioc.SpringLiteContext;
-import io.nuls.core.exception.NulsException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -98,7 +91,7 @@ public class ContractTxCallable implements Callable<ContractResult> {
         BatchInfo batchInfo = contractHelper.getChain(chainId).getBatchInfo();
         String hash = tx.getHash().toHex();
         if(!batchInfo.checkGasCostTotal(tx.getHash().toHex())) {
-            Log.error("Exceed tx count [500] or gas limit of block [15,000,000 gas], the contract transaction [{}] revert to package queue.", hash);
+            Log.error("Exceed tx count [500] or gas limit of block [12,000,000 gas], the contract transaction [{}] revert to package queue.", hash);
             return null;
         }
         long start = 0L;
@@ -157,9 +150,9 @@ public class ContractTxCallable implements Callable<ContractResult> {
         if (contractResult != null && !contractResult.isSuccess()) {
             Log.error("Failed TxType [{}] Execute ContractResult is {}", tx.getType(), contractResult.toString());
         }
-        if (Log.isDebugEnabled()) {
-            Log.debug("[Per Contract Execution Cost Time] TxType is {}, TxHash is {}, Cost Time is {}", tx.getType(), tx.getHash().toString(), System.currentTimeMillis() - start);
-        }
+        //if (Log.isDebugEnabled()) {
+        //    Log.debug("[Per Contract Execution Cost Time] TxType is {}, TxHash is {}, Cost Time is {}", tx.getType(), tx.getHash().toString(), System.currentTimeMillis() - start);
+        //}
         return contractResult;
     }
 
@@ -169,7 +162,7 @@ public class ContractTxCallable implements Callable<ContractResult> {
         boolean isAdded = batchInfo.addGasCostTotal(gasUsed, contractResult.getHash());
         if(!isAdded) {
             contractResult.setError(true);
-            contractResult.setErrorMessage("Exceed tx count [500] or gas limit of block [15,000,000 gas], the contract transaction ["+ contractResult.getHash() +"] revert to package queue.");
+            contractResult.setErrorMessage("Exceed tx count [500] or gas limit of block [12,000,000 gas], the contract transaction ["+ contractResult.getHash() +"] revert to package queue.");
         }
         return isAdded;
     }

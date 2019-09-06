@@ -1,7 +1,4 @@
 package io.nuls.economic.nuls.model.bo;
-
-import io.nuls.core.model.BigIntegerUtils;
-
 import java.math.BigInteger;
 
 /**
@@ -16,18 +13,20 @@ public class ConsensusConfigInfo {
     private int assertId;
     private long packingInterval;
     private BigInteger inflationAmount;
+    private BigInteger totalInflationAmount;
     private long initTime;
-    private byte deflationRatio;
+    private double deflationRatio;
     private long deflationTimeInterval;
     private int awardAssetId;
 
     public ConsensusConfigInfo(){}
 
-    public ConsensusConfigInfo(int chainId, int assertId, long packingInterval, BigInteger inflationAmount, long initTime, byte deflationRatio, long deflationTimeInterval, int awardAssetId){
+    public ConsensusConfigInfo(int chainId, int assertId, long packingInterval, BigInteger inflationAmount, BigInteger totalInflationAmount, long initTime, double deflationRatio, long deflationTimeInterval, int awardAssetId){
         this.chainId = chainId;
         this.assertId = assertId;
         this.packingInterval = packingInterval;
         this.inflationAmount = inflationAmount;
+        this.totalInflationAmount = totalInflationAmount;
         this.initTime = initTime;
         this.deflationRatio = deflationRatio;
         this.deflationTimeInterval = deflationTimeInterval;
@@ -74,11 +73,11 @@ public class ConsensusConfigInfo {
         this.initTime = initTime;
     }
 
-    public byte getDeflationRatio() {
+    public double getDeflationRatio() {
         return deflationRatio;
     }
 
-    public void setDeflationRatio(byte deflationRatio) {
+    public void setDeflationRatio(double deflationRatio) {
         this.deflationRatio = deflationRatio;
     }
 
@@ -96,5 +95,13 @@ public class ConsensusConfigInfo {
 
     public void setAwardAssetId(int awardAssetId) {
         this.awardAssetId = awardAssetId;
+    }
+
+    public BigInteger getTotalInflationAmount() {
+        return totalInflationAmount;
+    }
+
+    public void setTotalInflationAmount(BigInteger totalInflationAmount) {
+        this.totalInflationAmount = totalInflationAmount;
     }
 }

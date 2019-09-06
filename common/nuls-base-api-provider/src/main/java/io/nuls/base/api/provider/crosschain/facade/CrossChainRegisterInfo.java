@@ -30,7 +30,6 @@ public class CrossChainRegisterInfo {
     private String addressPrefix;
     private long magicNumber;
     private int minAvailableNodeNum;
-    private int txConfirmedBlockNum;
     private String regAddress;
     private String regTxHash;
     private long createTime;
@@ -91,14 +90,6 @@ public class CrossChainRegisterInfo {
 
     public void setMinAvailableNodeNum(int minAvailableNodeNum) {
         this.minAvailableNodeNum = minAvailableNodeNum;
-    }
-
-    public int getTxConfirmedBlockNum() {
-        return txConfirmedBlockNum;
-    }
-
-    public void setTxConfirmedBlockNum(int txConfirmedBlockNum) {
-        this.txConfirmedBlockNum = txConfirmedBlockNum;
     }
 
     public String getRegAddress() {

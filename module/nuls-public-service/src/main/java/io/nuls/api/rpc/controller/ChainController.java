@@ -4,10 +4,7 @@ import io.nuls.api.ApiContext;
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.AddressType;
-import io.nuls.api.db.AccountService;
-import io.nuls.api.db.BlockService;
-import io.nuls.api.db.ContractService;
-import io.nuls.api.db.TransactionService;
+import io.nuls.api.db.*;
 import io.nuls.api.exception.JsonRpcException;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.*;
@@ -39,6 +36,10 @@ public class ChainController {
     private AccountService accountService;
     @Autowired
     private ContractService contractService;
+    @Autowired
+    private StatisticalService statisticalService;
+    @Autowired
+    private AgentService agentService;
 
     @RpcMethod("getChainInfo")
     public RpcResult getChainInfo(List<Object> params) {
@@ -108,6 +109,8 @@ public class ChainController {
         } else {
             map.put("agentAsset", null);
         }
+        result = WalletRpcHandler.getNetworkInfo(chainId);
+        map.put("magicNumber", result.getData().get("magicNumber"));
         map.put("isRunCrossChain", ApiContext.isRunCrossChain);
         map.put("isRunSmartContract", ApiContext.isRunSmartContract);
         return RpcResult.success(map);
@@ -267,7 +270,42 @@ public class ChainController {
         if (result.isFailed()) {
             throw new JsonRpcException(result.getErrorCode());
         }
-        Map<String,Object> map = (Map<String, Object>) result.getData();
+        Map<String, Object> map = (Map<String, Object>) result.getData();
         return RpcResult.success(map);
+    }
+
+    @RpcMethod("assetGet")
+    public RpcResult assetGet(List<Object> params) {
+        int chainId;
+        try {
+            chainId = (int) params.get(0);
+
+            ApiCache apiCache = CacheManager.getCache(chainId);
+            CoinContextInfo coinContextInfo = apiCache.getCoinContextInfo();
+            Map<String, Object> map = new HashMap<>();
+            map.put("trades", coinContextInfo.getTxCount());
+            map.put("totalAssets", coinContextInfo.getTotal());
+            map.put("circulation", coinContextInfo.getCirculation());
+            map.put("deposit", coinContextInfo.getConsensusTotal());
+            map.put("circulation", coinContextInfo.getCirculation());
+            map.put("business", coinContextInfo.getBusiness());
+            map.put("team", coinContextInfo.getTeam());
+            map.put("community", coinContextInfo.getCommunity());
+            map.put("unmapped", coinContextInfo.getUnmapped());
+            int consensusCount = apiCache.getCurrentRound().getMemberCount() - apiCache.getChainInfo().getSeeds().size();
+            if (consensusCount < 0) {
+                consensusCount = 0;
+            }
+            map.put("consensusNodes", consensusCount);
+            long count = 0;
+            if (apiCache.getBestHeader() != null) {
+                count = agentService.agentsCount(chainId, apiCache.getBestHeader().getHeight());
+            }
+            map.put("totalNodes", count);
+
+            return RpcResult.success(map);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
     }
 }

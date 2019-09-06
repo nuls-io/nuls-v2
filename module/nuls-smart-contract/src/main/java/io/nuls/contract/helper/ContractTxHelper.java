@@ -187,6 +187,7 @@ public class ContractTxHelper {
                 Result result = Result.getFailed(DATA_ERROR);
                 result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
                 result = checkVmResultAndReturn(programResult.getErrorMessage(), result);
+                addDebugEvents(programResult.getDebugEvents(), result);
                 return result;
             } else {
                 // 其他合法性都通过后，再验证Gas
@@ -198,6 +199,7 @@ public class ContractTxHelper {
                         Log.error(programResult.getStackTrace());
                         Result result = Result.getFailed(DATA_ERROR);
                         result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
+                        addDebugEvents(programResult.getDebugEvents(), result);
                         return result;
                     }
                 }
@@ -253,7 +255,7 @@ public class ContractTxHelper {
         createContractData.setPrice(price);
         createContractData.setCode(contractCode);
         if (args != null) {
-            createContractData.setArgsCount((byte) args.length);
+            createContractData.setArgsCount((short) args.length);
             createContractData.setArgs(args);
         }
         return createContractData;
@@ -334,7 +336,7 @@ public class ContractTxHelper {
         callContractData.setMethodName(methodName);
         callContractData.setMethodDesc(methodDesc);
         if (args != null) {
-            callContractData.setArgsCount((byte) args.length);
+            callContractData.setArgsCount((short) args.length);
             callContractData.setArgs(args);
         }
         return callContractData;
@@ -389,6 +391,7 @@ public class ContractTxHelper {
                 Result result = Result.getFailed(DATA_ERROR);
                 result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
                 result = checkVmResultAndReturn(programResult.getErrorMessage(), result);
+                addDebugEvents(programResult.getDebugEvents(), result);
                 return result;
             } else {
                 // 其他合法性都通过后，再验证Gas
@@ -400,6 +403,7 @@ public class ContractTxHelper {
                         Log.error(programResult.getStackTrace());
                         Result result = Result.getFailed(DATA_ERROR);
                         result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
+                        addDebugEvents(programResult.getDebugEvents(), result);
                         return result;
                     }
                 }

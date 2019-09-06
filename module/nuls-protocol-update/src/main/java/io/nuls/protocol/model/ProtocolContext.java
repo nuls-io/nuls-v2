@@ -25,11 +25,12 @@ package io.nuls.protocol.model;
 import io.nuls.base.basic.ProtocolVersion;
 import io.nuls.base.protocol.Protocol;
 import io.nuls.core.log.logback.NulsLogger;
-import io.nuls.protocol.constant.RunningStatusEnum;
 import io.nuls.protocol.model.po.StatisticsInfo;
-import io.nuls.protocol.utils.LoggerUtil;
 
-import java.util.*;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 每个链ID对应一个{@link ProtocolContext},维护一些链运行期间的信息,并负责链的初始化、启动、停止、销毁操作
@@ -39,11 +40,6 @@ import java.util.*;
  * @date 18-11-20 上午10:46
  */
 public class ProtocolContext {
-    /**
-     * 代表模块的运行状态
-     */
-    private RunningStatusEnum status;
-
     /**
      * 链ID
      */
@@ -55,14 +51,14 @@ public class ProtocolContext {
     private long latestHeight;
 
     /**
-     * 当前钱包最新版本号
-     */
-    private short bestVersion;
-
-    /**
-     * 当前生效的协议版本
+     * 当前生效的协议版本(主网协议版本)
      */
     private ProtocolVersion currentProtocolVersion;
+
+    /**
+     * 当前本地的协议版本(本地节点协议版本)
+     */
+    private ProtocolVersion localProtocolVersion;
 
     /**
      * 当前生效的协议版本计数
@@ -106,25 +102,20 @@ public class ProtocolContext {
 
     private Map<Short, List<Map.Entry<String, Protocol>>> protocolMap;
 
+    public ProtocolVersion getLocalProtocolVersion() {
+        return localProtocolVersion;
+    }
+
+    public void setLocalProtocolVersion(ProtocolVersion localProtocolVersion) {
+        this.localProtocolVersion = localProtocolVersion;
+    }
+
     public Map<Short, List<Map.Entry<String, Protocol>>> getProtocolMap() {
         return protocolMap;
     }
 
     public void setProtocolMap(Map<Short, List<Map.Entry<String, Protocol>>> protocolMap) {
         this.protocolMap = protocolMap;
-    }
-
-    public ProtocolVersion getProtocolVersion(int version) {
-        for (ProtocolVersion protocolVersion : localVersionList) {
-            if (protocolVersion.getVersion() == version) {
-                return protocolVersion;
-            }
-        }
-        return null;
-    }
-
-    public RunningStatusEnum getStatus() {
-        return status;
     }
 
     public int getChainId() {
@@ -215,22 +206,10 @@ public class ProtocolContext {
         this.logger = logger;
     }
 
-    public synchronized void setStatus(RunningStatusEnum status) {
-        this.status = status;
-    }
-
     public void init() {
         protocolMap = new HashMap<>();
         proportionMap = new HashMap<>();
-        lastValidStatisticsInfo = new StatisticsInfo();
-        lastValidStatisticsInfo.setCount((short) 0);
-        lastValidStatisticsInfo.setHeight(0);
-        lastValidStatisticsInfo.setProtocolVersion(currentProtocolVersion);
-        protocolVersionHistory = new ArrayDeque<>();
-        protocolVersionHistory.push(currentProtocolVersion);
-        bestVersion = localVersionList.get(localVersionList.size() - 1).getVersion();
-        LoggerUtil.init(chainId);
-        this.setStatus(RunningStatusEnum.READY);
+        localProtocolVersion = localVersionList.get(localVersionList.size() - 1);
     }
 
     public void start() {
@@ -248,10 +227,8 @@ public class ProtocolContext {
     @Override
     public String toString() {
         return "ProtocolContext{" +
-                "status=" + status +
-                ", chainId=" + chainId +
+                "chainId=" + chainId +
                 ", latestHeight=" + latestHeight +
-                ", bestVersion=" + bestVersion +
                 ", currentProtocolVersion=" + currentProtocolVersion +
                 ", currentProtocolVersionCount=" + currentProtocolVersionCount +
                 ", protocolVersionHistory=" + protocolVersionHistory +
@@ -265,11 +242,4 @@ public class ProtocolContext {
                 '}';
     }
 
-    public short getBestVersion() {
-        return bestVersion;
-    }
-
-    public void setBestVersion(short bestVersion) {
-        this.bestVersion = bestVersion;
-    }
 }

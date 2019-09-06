@@ -93,7 +93,7 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
         String messageBody = RPCUtil.encode(payLoadBody);
         paramMap.put("messageBody", messageBody);
         Map<String, CmdPriority> protocolRoles = MessageHandlerFactory.getInstance().getProtocolRoleHandlerMap(cmd);
-        if (protocolRoles.isEmpty()) {
+        if (protocolRoles == null || protocolRoles.isEmpty()) {
             LoggerUtil.logger(chainId).error("unknown mssages. cmd={},handler may be unRegistered to network.", cmd);
             return NetworkEventResult.getResultSuccess();
         }

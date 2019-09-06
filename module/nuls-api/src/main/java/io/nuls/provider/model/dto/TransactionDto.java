@@ -50,6 +50,8 @@ public class TransactionDto {
     private String time;
     @ApiModelProperty(description = "区块高度")
     private long blockHeight = -1L;
+    @ApiModelProperty(description = "区块hash")
+    private String blockHash;
     @ApiModelProperty(description = "交易备注")
     private String remark;
     @ApiModelProperty(description = "交易签名")
@@ -67,7 +69,8 @@ public class TransactionDto {
     @ApiModelProperty(description = "输出", type = @TypeDescriptor(value = List.class, collectionElement = CoinToDto.class))
     private List<CoinToDto> to;
 
-    public TransactionDto() {}
+    public TransactionDto() {
+    }
 
     public TransactionDto(Transaction transaction) throws NulsException {
         this.blockHeight = transaction.getBlockHeight();
@@ -76,11 +79,11 @@ public class TransactionDto {
         this.remark = ByteUtils.asString(transaction.getRemark());
         this.inBlockIndex = transaction.getInBlockIndex();
         this.size = transaction.getSize();
-        this.time = DateUtils.timeStamp2DateStr(transaction.getTime()*1000);
+        this.time = DateUtils.timeStamp2DateStr(transaction.getTime() * 1000);
         this.transactionSignature = RPCUtil.encode(transaction.getTransactionSignature());
         this.txDataHex = RPCUtil.encode(transaction.getTxData());
         this.type = transaction.getType();
-        if(transaction.getCoinData() != null) {
+        if (transaction.getCoinData() != null) {
             CoinData coinData = transaction.getCoinDataInstance();
             this.from = coinData.getFrom().stream().map(from -> new CoinFromDto(from)).collect(Collectors.toList());
             this.to = coinData.getTo().stream().map(to -> new CoinToDto(to)).collect(Collectors.toList());
@@ -133,6 +136,14 @@ public class TransactionDto {
 
     public void setTransactionSignature(String transactionSignature) {
         this.transactionSignature = transactionSignature;
+    }
+
+    public String getBlockHash() {
+        return blockHash;
+    }
+
+    public void setBlockHash(String blockHash) {
+        this.blockHash = blockHash;
     }
 
     public String getTxDataHex() {

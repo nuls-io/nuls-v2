@@ -20,6 +20,7 @@ import org.bson.conversions.Bson;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -31,13 +32,18 @@ public class MongoAccountServiceImpl implements AccountService {
     @Autowired
     private MongoDBService mongoDBService;
 
+    private List<String> addressList = new LinkedList<>();
+
+    private static int cacheSize = 30000;
+
     public void initCache() {
         for (ApiCache apiCache : CacheManager.getApiCaches().values()) {
-            List<Document> documentList = mongoDBService.query(ACCOUNT_TABLE + apiCache.getChainInfo().getChainId());
+            List<Document> documentList = mongoDBService.pageQuery(ACCOUNT_TABLE + apiCache.getChainInfo().getChainId(), 0, cacheSize);
             for (int i = 0; i < documentList.size(); i++) {
                 Document document = documentList.get(i);
                 AccountInfo accountInfo = DocumentTransferTool.toInfo(document, "address", AccountInfo.class);
                 apiCache.addAccountInfo(accountInfo);
+                addressList.add(accountInfo.getAddress());
             }
         }
     }
@@ -49,7 +55,17 @@ public class MongoAccountServiceImpl implements AccountService {
         }
         AccountInfo accountInfo = apiCache.getAccountInfo(address);
         if (accountInfo == null) {
-            return null;
+            Document document = mongoDBService.findOne(ACCOUNT_TABLE + chainId, Filters.eq("_id", address));
+            if (document == null) {
+                return null;
+            }
+            accountInfo = DocumentTransferTool.toInfo(document, "address", AccountInfo.class);
+            while (addressList.size() >= cacheSize) {
+                address = addressList.remove(0);
+                apiCache.getAccountMap().remove(address);
+            }
+            apiCache.addAccountInfo(accountInfo);
+            addressList.add(accountInfo.getAddress());
         }
         return accountInfo.copy();
     }
@@ -67,8 +83,6 @@ public class MongoAccountServiceImpl implements AccountService {
             if (accountInfo.isNew()) {
                 modelList.add(new InsertOneModel(document));
                 accountInfo.setNew(false);
-                ApiCache apiCache = CacheManager.getCache(chainId);
-                apiCache.addAccountInfo(accountInfo);
             } else {
                 modelList.add(new ReplaceOneModel<>(Filters.eq("_id", accountInfo.getAddress()), document));
             }
@@ -79,13 +93,20 @@ public class MongoAccountServiceImpl implements AccountService {
         InsertManyOptions insertManyOptions = new InsertManyOptions();
         insertManyOptions.ordered(false);
 
-        if (modelList.size() > 0) {
-            mongoDBService.bulkWrite(ACCOUNT_TABLE + chainId, modelList, options);
-
-            ApiCache apiCache = CacheManager.getCache(chainId);
-            for (AccountInfo accountInfo : accountInfoMap.values()) {
+        mongoDBService.bulkWrite(ACCOUNT_TABLE + chainId, modelList, options);
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        for (AccountInfo accountInfo : accountInfoMap.values()) {
+            if (apiCache.getAccountMap().containsKey(accountInfo.getAddress())) {
                 apiCache.addAccountInfo(accountInfo);
             }
+//            else {
+//                while (addressList.size() >= cacheSize) {
+//                    String address = addressList.remove(0);
+//                    apiCache.getAccountMap().remove(address);
+//                }
+//                apiCache.addAccountInfo(accountInfo);
+//                addressList.add(accountInfo.getAddress());
+//            }
         }
     }
 
@@ -100,12 +121,22 @@ public class MongoAccountServiceImpl implements AccountService {
         return pageInfo;
     }
 
-    public PageInfo<TxRelationInfo> getAccountTxs(int chainId, String address, int pageIndex, int pageSize, int type, boolean isMark) {
+    public PageInfo<TxRelationInfo> getAccountTxs(int chainId, String address, int pageIndex, int pageSize, int type, long startHeight, long endHeight) {
         Bson filter;
         Bson addressFilter = Filters.eq("address", address);
 
-        if (type == 0 && isMark) {
-            filter = Filters.and(addressFilter, Filters.ne("type", 1));
+        if (type > 0 && startHeight > -1 && endHeight > -1) {
+            filter = Filters.and(addressFilter, Filters.eq("type", type), Filters.gte("height", startHeight), Filters.lte("height", endHeight));
+        } else if (type > 0 && startHeight > -1) {
+            filter = Filters.and(addressFilter, Filters.eq("type", type), Filters.gte("height", startHeight));
+        } else if (type > 0 && endHeight > -1) {
+            filter = Filters.and(addressFilter, Filters.eq("type", type), Filters.lte("height", endHeight));
+        } else if (startHeight > -1 && endHeight > -1) {
+            filter = Filters.and(addressFilter, Filters.gte("height", startHeight), Filters.lte("height", endHeight));
+        } else if (startHeight > -1) {
+            filter = Filters.and(addressFilter, Filters.gte("height", startHeight));
+        } else if (endHeight > -1) {
+            filter = Filters.and(addressFilter, Filters.lte("height", endHeight));
         } else if (type > 0) {
             filter = Filters.and(addressFilter, Filters.eq("type", type));
         } else {
@@ -132,12 +163,22 @@ public class MongoAccountServiceImpl implements AccountService {
         return pageInfo;
     }
 
-    public PageInfo<TxRelationInfo> getAcctTxs(int chainId, String address, int pageIndex, int pageSize, int type, boolean isMark) {
+    public PageInfo<TxRelationInfo> getAcctTxs(int chainId, String address, int pageIndex, int pageSize, int type, long startHeight, long endHeight) {
         Bson filter;
         Bson addressFilter = Filters.eq("address", address);
 
-        if (type == 0 && isMark) {
-            filter = Filters.and(addressFilter, Filters.ne("type", 1));
+        if (type > 0 && startHeight > -1 && endHeight > -1) {
+            filter = Filters.and(addressFilter, Filters.eq("type", type), Filters.gte("height", startHeight), Filters.lte("height", endHeight));
+        } else if (type > 0 && startHeight > -1) {
+            filter = Filters.and(addressFilter, Filters.eq("type", type), Filters.gte("height", startHeight));
+        } else if (type > 0 && endHeight > -1) {
+            filter = Filters.and(addressFilter, Filters.eq("type", type), Filters.lte("height", endHeight));
+        } else if (startHeight > -1 && endHeight > -1) {
+            filter = Filters.and(addressFilter, Filters.gte("height", startHeight), Filters.lte("height", endHeight));
+        } else if (startHeight > -1) {
+            filter = Filters.and(addressFilter, Filters.gte("height", startHeight));
+        } else if (endHeight > -1) {
+            filter = Filters.and(addressFilter, Filters.lte("height", endHeight));
         } else if (type > 0) {
             filter = Filters.and(addressFilter, Filters.eq("type", type));
         } else {
@@ -171,7 +212,7 @@ public class MongoAccountServiceImpl implements AccountService {
         List<Document> docsList = this.mongoDBService.limitQuery(TX_RELATION_TABLE + chainId + "_" + index, filter, Sorts.descending("createTime"), start, pageSize);
         List<TxRelationInfo> txRelationInfoList = new ArrayList<>();
         for (Document document : docsList) {
-            TxRelationInfo txRelationInfo =  TxRelationInfo.toInfo(document);
+            TxRelationInfo txRelationInfo = TxRelationInfo.toInfo(document);
             txRelationInfo.setStatus(1);
             txRelationInfoList.add(txRelationInfo);
         }
@@ -182,14 +223,14 @@ public class MongoAccountServiceImpl implements AccountService {
         List<Document> docsList = this.mongoDBService.limitQuery(TX_UNCONFIRM_RELATION_TABLE + chainId, filter1, Sorts.descending("createTime"), start, pageSize);
         List<TxRelationInfo> txRelationInfoList = new ArrayList<>();
         for (Document document : docsList) {
-            TxRelationInfo txRelationInfo =  TxRelationInfo.toInfo(document);
+            TxRelationInfo txRelationInfo = TxRelationInfo.toInfo(document);
             txRelationInfo.setStatus(ApiConstant.TX_UNCONFIRM);
             txRelationInfoList.add(txRelationInfo);
         }
         pageSize = pageSize - txRelationInfoList.size();
         docsList = this.mongoDBService.limitQuery(TX_RELATION_TABLE + chainId + "_" + index, filter2, Sorts.descending("createTime"), 0, pageSize);
         for (Document document : docsList) {
-            TxRelationInfo txRelationInfo =  TxRelationInfo.toInfo(document);
+            TxRelationInfo txRelationInfo = TxRelationInfo.toInfo(document);
             txRelationInfo.setStatus(ApiConstant.TX_CONFIRM);
             txRelationInfoList.add(txRelationInfo);
         }
@@ -221,11 +262,21 @@ public class MongoAccountServiceImpl implements AccountService {
     }
 
     public BigInteger getAllAccountBalance(int chainId) {
-        List<Document> documentList = mongoDBService.query(ACCOUNT_TABLE + chainId);
-
+        boolean query = true;
         BigInteger totalBalance = BigInteger.ZERO;
-        for (Document document : documentList) {
-            totalBalance = totalBalance.add(new BigInteger(document.getString("totalBalance")));
+        List<Document> documentList;
+        int i = 0;
+        BasicDBObject fields = new BasicDBObject();
+        fields.append("totalBalance", 1);
+        while (query) {
+            documentList = mongoDBService.pageQuery(ACCOUNT_TABLE + chainId, null, fields, Sorts.descending("createTime"), i, 1000);
+            for (Document document : documentList) {
+                totalBalance = totalBalance.add(new BigInteger(document.getString("totalBalance")));
+            }
+            if (documentList.size() < 1000) {
+                query = false;
+            }
+            i++;
         }
         return totalBalance;
     }

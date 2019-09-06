@@ -135,7 +135,7 @@ public class TransactionServiceImpl implements TransactionService {
         addressList.add(address);
     }
 
-    private boolean confirmBlockTxProcess(int addressChainId, List<Transaction> txList,
+    private boolean confirmBlockTxProcess(long blockHeight,int addressChainId, List<Transaction> txList,
                                           Map<String, AccountBalance> updateAccounts, List<Uncfd2CfdKey> delUncfd2CfdKeys,
                                           Map<String, Integer> clearUncfs, Map<String, List<String>> assetAddressIndex) throws Exception {
         for (Transaction transaction : txList) {
@@ -248,7 +248,7 @@ public class TransactionServiceImpl implements TransactionService {
             Map<String, Integer> clearUncfs = new HashMap<>(txList.size());
             Map<String, List<String>> assetAddressIndex = new HashMap<>(4);
             try {
-                if (!confirmBlockTxProcess(addressChainId, txList, updateAccounts, delUncfd2CfdKeys, clearUncfs, assetAddressIndex)) {
+                if (!confirmBlockTxProcess(blockHeight,addressChainId, txList, updateAccounts, delUncfd2CfdKeys, clearUncfs, assetAddressIndex)) {
                     return false;
                 }
                 //整体交易的处理

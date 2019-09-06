@@ -44,18 +44,17 @@ public class UpdateCrossChainProcessor extends CrossChainBaseProcessor {
                 .newLine("\t<initNumber>  register asset circulation - required")
                 .newLine("\t[decimalPlaces]  register asset decimal digits，default 8 ")
                 .newLine("\t[minAvailableNodeNum]  cross chain tx rely on min node number，default 5 ")
-                .newLine("\t[txConfirmedBlockNum]  cross chain tx success rely on confirm block number，default 30 ")
                 .toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return getCommand() + " <address> <chainId> <chainName> <addressPrefix> <magicNumber> <maxSignatureCount> <signatureBFTRatio> <verifierList> <assetId> <symbol> <assetName> <initNumber> [decimalPlaces] [minAvailableNodeNum] [txConfirmedBlockNum]";
+        return getCommand() + " <address> <chainId> <chainName> <addressPrefix> <magicNumber> <maxSignatureCount> <signatureBFTRatio> <verifierList> <assetId> <symbol> <assetName> <initNumber> [decimalPlaces] [minAvailableNodeNum]";
     }
 
     @Override
     public boolean argsValidate(String[] args) {
-        checkArgsNumber(args, 12, 13, 14, 15);
+        checkArgsNumber(args, 11, 12, 13, 14);
         checkAddress(config.getMainChainId(), args[1]);
         checkIsNumeric(args[2], "chainId");
         checkIsNumeric(args[5], "magicNumber");
@@ -72,9 +71,6 @@ public class UpdateCrossChainProcessor extends CrossChainBaseProcessor {
         }
         if (args.length > 14) {
             checkIsNumeric(args[14], "minAvailableNodeNum");
-        }
-        if (args.length > 15) {
-            checkIsNumeric(args[15], "txConfirmedBlockNum");
         }
         return true;
     }
@@ -96,22 +92,17 @@ public class UpdateCrossChainProcessor extends CrossChainBaseProcessor {
         Long initNumber = Long.parseLong(args[12]);
         int decimalPlaces = 8;
         int minAvailableNodeNum = 5;
-        int txConfirmedBlockNum = 30;
         if (args.length > 13) {
             decimalPlaces = Integer.parseInt(args[13]);
         }
         if (args.length > 14) {
             minAvailableNodeNum = Integer.parseInt(args[14]);
         }
-        if (args.length > 15) {
-            txConfirmedBlockNum = Integer.parseInt(args[15]);
-        }
         RegisterChainReq req = new RegisterChainReq(address, chainId, chainName, addressPrefix, magicNumber,
                 maxSignatureCount, signatureBFTRatio, verifierList,
                 assetId, symbol, assetName, initNumber, "1", getPwd());
         req.setDecimalPlaces(decimalPlaces);
         req.setMinAvailableNodeNum(minAvailableNodeNum);
-        req.setTxConfirmedBlockNum(txConfirmedBlockNum);
         Result<Map> result = chainManageProvider.updateChain(req);
         if (result.isFailed()) {
             return CommandResult.getFailed(result);

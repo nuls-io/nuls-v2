@@ -78,10 +78,7 @@ public class OrphanChainsMonitor extends BaseMonitor {
                     continue;
                 }
                 // exclusive access
-                commonLog.info("####################################orphan chains######################################");
-                for (Chain orphanChain : orphanChains) {
-                    commonLog.info("#" + orphanChain);
-                }
+                context.printChains();
                 context.setStatus(MAINTAIN_ORPHAN_CHAINS);
                 Chain masterChain = BlockChainManager.getMasterChain(chainId);
                 SortedSet<Chain> forkChains = BlockChainManager.getForkChains(chainId);
@@ -105,6 +102,7 @@ public class OrphanChainsMonitor extends BaseMonitor {
                 BlockChainManager.setOrphanChains(chainId, maintainedOrphanChains);
                 forkChains.forEach(e -> e.setType(ChainTypeEnum.FORK));
                 maintainedOrphanChains.forEach(e -> e.setType(ChainTypeEnum.ORPHAN));
+                context.printChains();
                 break;
             }
         } finally {
