@@ -64,6 +64,7 @@ import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.storage.ConfirmedTxStorageService;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
+import io.nuls.transaction.utils.LoggerUtil;
 import io.nuls.transaction.utils.TxDuplicateRemoval;
 import io.nuls.transaction.utils.TxUtil;
 
@@ -575,14 +576,6 @@ public class TxServiceImpl implements TxService {
             packablePool.offerFirstOnlyHash(chain, listTx.get(i).getTx());
         }
     }
-    /**
-     * 循环获取交易结束后,把从待打包队列拿出的 不需要处理的智能合约交易, 再还回待打包队列
-     */
-    private void backPackablePoolContractTx(Chain chain, List<Transaction> listTx){
-        for(int i = listTx.size() - 1; i >= 0 ;i--){
-            packablePool.offerFirstOnlyHash(chain, listTx.get(i));
-        }
-    }
 
     @Override
     public TxPackage getPackableTxs(Chain chain, long endtimestamp, long maxTxDataSize, long blockTime, String packingAddress, String preStateRoot) {
@@ -592,7 +585,6 @@ public class TxServiceImpl implements TxService {
         //记录账本的孤儿交易,返回给共识的时候给过滤出去,因为在因高度变化而导致重新打包的时候,需要还原到待打包队列
         Set<TxPackageWrapper> orphanTxSet = new HashSet<>();
         NulsLogger nulsLogger = chain.getLogger();
-        //nulsLogger.info("\n\n\n");
         try {
             //本次打包高度
             long blockHeight = chain.getBestBlockHeight() + 1;
@@ -647,9 +639,6 @@ public class TxServiceImpl implements TxService {
             int batchContractTxCount = 0;
             //是否停止执行职能合约,如果位true,则取出的智能合约本次打包不再处理,需要还回待打包队列
             boolean stopInvokeContract = false;
-            //需要还回待打包队列的智能合约交易
-            List<Transaction> backPackablePoolContractTxs = new ArrayList<>();
-
             for (int index = 0; ; index++) {
                 long currentTimeMillis = NulsDateUtils.getCurrentTimeMillis();
                 long currentReserve = endtimestamp - currentTimeMillis;
@@ -691,6 +680,7 @@ public class TxServiceImpl implements TxService {
                 int batchProcessListSize = batchProcessList.size();
                 boolean process = false;
                 Transaction tx = null;
+                boolean maxDataSize = false;
                 try {
                     tx = packablePool.poll(chain);
                     if (tx == null && batchProcessListSize == 0) {
@@ -705,15 +695,11 @@ public class TxServiceImpl implements TxService {
                             //加入不进去表示已存在
                             continue;
                         }
-                        if(stopInvokeContract){
-                            //该标志true,表示不再处理智能合约交易,需要暂存交易,统一还回待打包队列
-                            backPackablePoolContractTxs.add(tx);
-                            continue;
-                        }
                         long txSize = tx.size();
                         if ((totalSizeTemp + txSize) > maxTxDataSize) {
                             packablePool.offerFirstOnlyHash(chain, tx);
-                            nulsLogger.info("交易已达最大容量, 实际值: {}, totalSizeTemp:{}, 当前交易size：{} - 预定最大值maxTxDataSize:{}", totalSize, totalSizeTemp, txSize, maxTxDataSize);
+                            nulsLogger.info("交易已达最大容量, 实际值: {}, totalSizeTemp:{}, 当前交易size：{} - 预定最大值maxTxDataSize:{}, txhash:{}", totalSize, totalSizeTemp, txSize, maxTxDataSize ,tx.getHash().toHex());
+                            maxDataSize = true;
                             if (batchProcessListSize > 0) {
                                 //达到处理该批次的条件
                                 process = true;
@@ -736,7 +722,8 @@ public class TxServiceImpl implements TxService {
                                 }
                             }
                             //限制智能合约交易数量
-                            if (txRegister.getModuleCode().equals(ModuleE.SC.abbr)) {
+                            boolean isContract = txRegister.getModuleCode().equals(ModuleE.SC.abbr);
+                            if (isContract) {
                                 if (contractTxCount + (++batchContractTxCount) >= TxConstant.PACKAGE_CONTRACT_TX_MAX_COUNT) {
                                     //限制单个区块包含的跨链交易总数，超过跨链交易最大个数，放回去, 然后停止获取交易
                                     packablePool.add(chain, tx);
@@ -757,8 +744,8 @@ public class TxServiceImpl implements TxService {
                                 clearInvalidTx(chain, tx);
                                 continue;
                             }
-                            batchProcessList.add(txHex);
                             TxPackageWrapper txPackageWrapper = new TxPackageWrapper(tx, index, txHex);
+                            batchProcessList.add(txHex);
                             currentBatchPackableTxs.add(txPackageWrapper);
                             if (batchProcessList.size() == TxConstant.PACKAGE_TX_VERIFY_COINDATA_NUMBER_OF_TIMES_TO_PROCESS) {
                                 //达到处理该批次的条件
@@ -788,7 +775,8 @@ public class TxServiceImpl implements TxService {
                             if (TxManager.isSmartContract(chain, transaction.getType())) {
                                 if(stopInvokeContract){
                                     //该标志true,表示不再处理智能合约交易,需要暂存交易,统一还回待打包队列
-                                    backPackablePoolContractTxs.add(txPackageWrapper.getTx());
+//                                    backPackablePoolContractTxs.add(txPackageWrapper.getTx());
+                                    orphanTxSet.add(txPackageWrapper);
                                     it.remove();
                                     continue;
                                 }
@@ -803,7 +791,8 @@ public class TxServiceImpl implements TxService {
                                     if(!invokeContractRs){
                                         //不再发invoke
                                         stopInvokeContract = true;
-                                        backPackablePoolContractTxs.add(txPackageWrapper.getTx());
+//                                        backPackablePoolContractTxs.add(txPackageWrapper.getTx());
+                                        orphanTxSet.add(txPackageWrapper);
                                         it.remove();
                                         continue;
                                     }
@@ -835,6 +824,9 @@ public class TxServiceImpl implements TxService {
                         currentBatchPackableTxs.clear();
                         batchCorssTxCount = 0;
                         batchContractTxCount = 0;
+                        if(maxDataSize){
+                            break;
+                        }
                     }
                 } catch (Exception e) {
                     currentBatchPackableTxs.clear();
@@ -844,8 +836,6 @@ public class TxServiceImpl implements TxService {
                 }
 
             }
-            //循环获取交易结束后,把从待打包队列拿出的 不需要处理的智能合约交易, 再还回待打包队列
-            backPackablePoolContractTx(chain, backPackablePoolContractTxs);
             //循环获取交易使用时间
             whileTime = NulsDateUtils.getCurrentTimeMillis() - startTime;
             nulsLogger.debug("-取出的交易 -count:{} - data size:{}", packingTxList.size(), totalSize);
@@ -865,7 +855,6 @@ public class TxServiceImpl implements TxService {
                 Map map = processContractResult(chain, packingTxList, orphanTxSet, contractGenerateTxs, blockHeight, contractBefore, stateRoot);
                 stateRoot = (String) map.get("stateRoot");
                 hasTxbackPackablePool = (boolean) map.get("hasTxbackPackablePool");
-
             }
             //如果合约invoke时有需要还回去的合约交易,或者合约执行结果有还回去的交易,都需要重新验证账本
             if(stopInvokeContract || hasTxbackPackablePool){
@@ -874,13 +863,11 @@ public class TxServiceImpl implements TxService {
             }
             long contractTime = NulsDateUtils.getCurrentTimeMillis() - contractStart;
 
-
             //模块统一验证器
             long batchStart = NulsDateUtils.getCurrentTimeMillis();
             txModuleValidatorPackable(chain, moduleVerifyMap, packingTxList, orphanTxSet);
             //模块统一验证使用总时间
             batchModuleTime = NulsDateUtils.getCurrentTimeMillis() - batchStart;
-
 
             List<String> packableTxs = new ArrayList<>();
             Iterator<TxPackageWrapper> iterator = packingTxList.iterator();
@@ -950,8 +937,9 @@ public class TxServiceImpl implements TxService {
                     packingTime, allSleepTime, whileTime, totalLedgerTime, batchModuleTime,
                     contractTime);
 
-            nulsLogger.info("[Package end] - height:{} - 本次打包交易数:{} - 当前待打包队列交易hash数:{}, - 待打包队列实际交易数:{} " + TxUtil.nextLine(),
+            nulsLogger.info("[Package end] - height:{} - 本次打包交易数:{} - 当前待打包队列交易hash数:{}, - 待打包队列实际交易数:{}" + TxUtil.nextLine(),
                     blockHeight, packableTxs.size(), packablePool.packableHashQueueSize(chain), packablePool.packableTxMapSize(chain));
+
             return txPackage;
         } catch (Exception e) {
             nulsLogger.error(e);
@@ -962,7 +950,6 @@ public class TxServiceImpl implements TxService {
             chain.getPackageLock().unlock();
         }
     }
-
 
     /**
      * packing verify ledger
@@ -1261,6 +1248,7 @@ public class TxServiceImpl implements TxService {
             chain.getTxPackageOrphanMap().put(hash, count);
         } else {
             //不加回(丢弃), 同时删除map中的key,并清理
+            chain.getLogger().debug("超过5次孤儿交易 hash:{}", hash.toHex());
             clearInvalidTx(chain, txPackageWrapper.getTx());
             chain.getTxPackageOrphanMap().remove(hash);
         }
@@ -1293,7 +1281,6 @@ public class TxServiceImpl implements TxService {
         });
         for (TxPackageWrapper txPackageWrapper : txList) {
             packablePool.offerFirstOnlyHash(chain, txPackageWrapper.getTx());
-//            chain.getLogger().debug("putBackPackablePool tx hash:{}", txPackageWrapper.getTx().getHash().toHex());
         }
         chain.getLogger().info("putBackPackablePool count:{}", txList.size());
     }
