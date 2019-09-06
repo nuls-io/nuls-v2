@@ -610,7 +610,6 @@ public class RocksDBManager {
         Options options = new Options();
 
         options.setCreateIfMissing(createIfMissing);
-
         /**
          * 优化读取性能方案
          */

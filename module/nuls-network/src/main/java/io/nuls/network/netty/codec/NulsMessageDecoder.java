@@ -26,8 +26,8 @@ package io.nuls.network.netty.codec;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
-import io.nuls.core.log.Log;
 import io.nuls.network.manager.NodeGroupManager;
+import io.nuls.network.utils.LoggerUtil;
 
 import java.nio.ByteOrder;
 import java.util.List;
@@ -51,7 +51,7 @@ public class NulsMessageDecoder extends ByteToMessageDecoder {
                 out.add(decoded);
             }
         } else {
-            Log.error("readMagicNumber={} illegal message REC", readMagicNumber);
+            LoggerUtil.COMMON_LOG.error("readMagicNumber={} illegal message REC", readMagicNumber);
             in.clear();
             ctx.close();
 

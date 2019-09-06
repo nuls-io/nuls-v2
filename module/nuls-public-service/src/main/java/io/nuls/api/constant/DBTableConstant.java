@@ -54,6 +54,8 @@ public interface DBTableConstant {
     //统计表
     String STATISTICAL_TABLE = "statistical_table_";
 
+    String CHAIN_STATISTICAL_TABLE = "chain_statistical_table";
+
 
     //---------------------------------字段(field)------------------------------
     //new_info表，最新统计的时间点

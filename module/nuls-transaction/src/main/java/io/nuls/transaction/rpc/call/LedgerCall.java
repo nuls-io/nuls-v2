@@ -284,7 +284,7 @@ public class LedgerCall {
             params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("txList", txList);
             params.put("blockHeight", blockHeight);
-            HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.LG.abbr, "commitBlockTxs", params);
+            HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.LG.abbr, "commitBlockTxs", params, TxConstant.TIMEOUT);
             Boolean value = (Boolean) result.get("value");
             if (null == value) {
                 chain.getLogger().error("call commitBlockTxs response value is null, error:{}",
@@ -348,7 +348,7 @@ public class LedgerCall {
             params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("txList", txList);
             params.put("blockHeight", blockHeight);
-            HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.LG.abbr, "rollBackBlockTxs", params);
+            HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.LG.abbr, "rollBackBlockTxs", params, TxConstant.TIMEOUT);
             Boolean value = (Boolean) result.get("value");
             if (null == value) {
                 chain.getLogger().error("call rollBackBlockTxs response value is null, error:{}",

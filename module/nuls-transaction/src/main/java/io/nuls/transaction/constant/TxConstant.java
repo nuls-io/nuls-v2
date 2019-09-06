@@ -80,4 +80,7 @@ public interface TxConstant {
      该配置为固定给第二部分预留的时间，其他时间留给第一部分。
      */
     long PACKAGE_MODULE_VALIDATOR_RESERVE_TIME = 2000L;//1500L;
+
+
+    long TIMEOUT = 600 * 1000L;
 }

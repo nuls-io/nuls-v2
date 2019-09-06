@@ -44,13 +44,12 @@ public class UpdateCrossChainProcessor extends CrossChainBaseProcessor {
                 .newLine("\t<initNumber>  register asset circulation - required")
                 .newLine("\t[decimalPlaces]  register asset decimal digits，default 8 ")
                 .newLine("\t[minAvailableNodeNum]  cross chain tx rely on min node number，default 5 ")
-                .newLine("\t[txConfirmedBlockNum]  cross chain tx success rely on confirm block number，default 30 ")
                 .toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return getCommand() + " <address> <chainId> <chainName> <addressPrefix> <magicNumber> <maxSignatureCount> <signatureBFTRatio> <verifierList> <assetId> <symbol> <assetName> <initNumber> [decimalPlaces] [minAvailableNodeNum] [txConfirmedBlockNum]";
+        return getCommand() + " <address> <chainId> <chainName> <addressPrefix> <magicNumber> <maxSignatureCount> <signatureBFTRatio> <verifierList> <assetId> <symbol> <assetName> <initNumber> [decimalPlaces] [minAvailableNodeNum]";
     }
 
     @Override
