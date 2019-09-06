@@ -39,6 +39,7 @@ public interface TxConstant {
 
     /** 打包时孤儿交易返回待打包队列重新处理的最大次数，超过该次数则不再处理该孤儿交易(丢弃) */
     int PACKAGE_ORPHAN_MAXCOUNT = 5;
+    int PACKAGE_ORPHAN_MAP_MAXCOUNT = 10000;
     /** 处理网络新交易时，一次从待处理集合中获取新交易的最大值 */
     int NET_TX_PROCESS_NUMBER_ONCE = 3000;
 
@@ -79,4 +80,7 @@ public interface TxConstant {
      该配置为固定给第二部分预留的时间，其他时间留给第一部分。
      */
     long PACKAGE_MODULE_VALIDATOR_RESERVE_TIME = 2000L;//1500L;
+
+
+    long TIMEOUT = 600 * 1000L;
 }

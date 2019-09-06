@@ -35,20 +35,14 @@ public class AgentTest {
      * 创建节点
      * */
     public void createAgent()throws Exception{
-        /*Address agentAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("y5WhgP1iu2Qwt5CiaPTV4Fe2Xqmfd".getBytes()));
-        Address rewardAddress = new Address(1,(byte)1,SerializeUtils.sha256hash160("y5WhgP1iu2Qwt5CiaPTV4Fe2Xqmgd".getBytes()));
-        Address packingAddress = new Address(1,(byte)1,SerializeUtils.sha256hash160("y5WhgP1iu2Qwt5CiaPTV4Fegfgqmd".getBytes()));*/
-        Address agentAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("a5WhgP1iu2Qwt5CiaPTV4Fe2Xqmfd".getBytes()));
-        Address rewardAddress = new Address(1,(byte)1,SerializeUtils.sha256hash160("a5WhgP1iu2Qwt5CiaPTV4Fe2Xqmgd".getBytes()));
-        Address packingAddress = new Address(1,(byte)1,SerializeUtils.sha256hash160("a5WhgP1iu2Qwt5CiaPTV4Fegfgqmd".getBytes()));
         Map<String,Object> params = new HashMap<>();
-        params.put("agentAddress",agentAddress.getBase58());
-        params.put(Constants.CHAIN_ID,1);
-        params.put("deposit",20000);
+        params.put("agentAddress","tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG");
+        params.put(Constants.CHAIN_ID,2);
+        params.put("deposit","2000000000000");
         params.put("commissionRate",10);
-        params.put("packingAddress",packingAddress.getBase58());
-        params.put("password","");
-        params.put("rewardAddress",rewardAddress.getBase58());
+        params.put("packingAddress","tNULSeBaMqywZjfSrKNQKBfuQtVxAHBQ8rB2Zn");
+        params.put("password","nuls123456");
+        params.put("rewardAddress","tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG");
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", params);
         System.out.println(cmdResp.getResponseData());
     }
@@ -89,9 +83,9 @@ public class AgentTest {
      * */
     public void stopAgent()throws Exception{
         Map<String,Object>params = new HashMap<>();
-        params.put(Constants.CHAIN_ID,1);
-        Address agentAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("a5WhgP1iu2Qwt5CiaPTV4Fe2Xqmfd".getBytes()));
-        params.put("address",agentAddress.getBase58());
+        params.put(Constants.CHAIN_ID,2);
+        params.put("address","tNULSeBaMgU6sQHj9YXWBg21UpAhkTjePjb7ww");
+        params.put("password", "nuls123456");
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_stopAgent", params);
         System.out.println(cmdResp.getResponseData());
     }
@@ -140,7 +134,7 @@ public class AgentTest {
     public void getAgentInfo()throws Exception{
         Map<String,Object>params = new HashMap<>();
         params.put(Constants.CHAIN_ID,2);
-        params.put("agentHash","0020d8e9866e891362cec0948a5d759e85c424e56e4fa3b29e2f58021c26d989d5fa");
+        params.put("agentHash","232c772c667323d7cca96074cf7c06dba52777d88b0c6275177cc7bdc2196b70");
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_getAgentInfo", params);
         System.out.println(cmdResp.getResponseData());
     }

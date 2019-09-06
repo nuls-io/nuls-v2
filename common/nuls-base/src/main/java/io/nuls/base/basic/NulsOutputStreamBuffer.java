@@ -92,6 +92,9 @@ public class NulsOutputStreamBuffer {
         SerializeUtils.int16ToByteStreamLE(val, out);
     }
 
+    public void writeUint8(short val) throws IOException {
+        SerializeUtils.uint8ToByteStreamLE(val, out);
+    }
     /**
      * 0~65,535
      * @param val

@@ -32,12 +32,11 @@ public class DepositTest {
     @Test
     public void depositAgent()throws Exception{
         Map<String,Object> params = new HashMap<>();
-        Address depositAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("y5WhgP1iu2Qwt5CiaPTV4Fe2Xqmfd".getBytes()));
-        params.put(Constants.CHAIN_ID,1);
-        params.put("address",depositAddress.getBase58());
-        params.put("agentHash","00205d245e366862da82a1bd36745e1719e8b73e45dc320467d8639f9e0c82c39767");
-        //params.put("agentHash","00207d53655ffdb1bd3b5a05bc4d6e14d7c9980ff22e889fa7c2374e2c4b9cd8119f");
-        params.put("deposit","300000");
+        params.put(Constants.CHAIN_ID,2);
+        params.put("address","tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG");
+        params.put("agentHash","95153ab3ef9169e210d3a13c2b9d27ed7e8e19754c51c158a5f61df9657b4400");
+        params.put("deposit","30000000000000");
+        params.put("password", "nuls123456");
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_depositToAgent", params);
         System.out.println(cmdResp.getResponseData());
 
@@ -75,10 +74,10 @@ public class DepositTest {
     @Test
     public void withdraw()throws Exception{
         Map<String,Object>params = new HashMap<>();
-        params.put(Constants.CHAIN_ID,1);
-        Address depositAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("y5WhgP1iu2Qwt5CiaPTV4Fe2Xqmfd".getBytes()));
-        params.put("address",depositAddress.getBase58());
-        params.put("txHash","");
+        params.put(Constants.CHAIN_ID,2);
+        params.put("address","tNULSeBaMrbMRiFAUeeAt6swb4xVBNyi81YL24");
+        params.put("txHash","7bd91450dd129820edf78e34813c13e06bced654106146a30254df23b0321c47");
+        params.put("password", "nuls123456");
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_withdraw", params);
         System.out.println(cmdResp.getResponseData());
     }

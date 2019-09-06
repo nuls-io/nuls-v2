@@ -98,10 +98,14 @@ public class EconomicManager {
     private static Map<String,BigDecimal> getDepositWeight(AgentInfo agentInfo,BigInteger totalDeposit){
         Map<String,BigDecimal> depositWeightMap = new HashMap<>(NulsEconomicConstant.VALUE_OF_16);
         BigDecimal commissionRate = new BigDecimal(DoubleUtils.div(agentInfo.getCommissionRate(), 100, 2));
+        if(commissionRate.compareTo(BigDecimal.ONE) >= 0){
+            depositWeightMap.put(AddressTool.getStringAddressByBytes(agentInfo.getRewardAddress()), BigDecimal.ONE);
+            return depositWeightMap;
+        }
         BigDecimal depositRate = new BigDecimal(1).subtract(commissionRate);
         //节点创建者权重
-        BigDecimal creatorWeight = new BigDecimal(agentInfo.getDeposit()).divide(new BigDecimal(totalDeposit), 4, RoundingMode.HALF_DOWN);
-        BigDecimal creatorCommissionWeight = new BigDecimal(1).subtract(creatorWeight).multiply(commissionRate);
+        BigDecimal creatorWeight = new BigDecimal(agentInfo.getDeposit()).divide(new BigDecimal(totalDeposit), 8, RoundingMode.HALF_DOWN);
+        BigDecimal creatorCommissionWeight = BigDecimal.ONE.subtract(creatorWeight).multiply(commissionRate);
         creatorWeight = creatorWeight.add(creatorCommissionWeight);
         depositWeightMap.put(AddressTool.getStringAddressByBytes(agentInfo.getRewardAddress()), creatorWeight);
         /*

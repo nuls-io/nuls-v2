@@ -157,7 +157,7 @@ public class ContractServiceImpl implements ContractService {
             BatchInfo batchInfo = chain.getBatchInfo();
             byte[] contractAddressBytes = ContractUtil.extractContractAddressFromTxData(tx);
             String contractAddress = AddressTool.getStringAddressByBytes(contractAddressBytes);
-            ContractContainer container = batchInfo.newAndGetContractContainer(contractAddress);
+            ContractContainer container = batchInfo.newOrGetContractContainer(contractAddress);
             ContractWrapperTransaction wrapperTx = ContractUtil.parseContractTransaction(tx);
             wrapperTx.setOrder(batchInfo.getAndIncreaseTxCounter());
 
@@ -166,10 +166,8 @@ public class ContractServiceImpl implements ContractService {
             if (validResult.isFailed()) {
                 return validResult;
             }
-
             String preStateRoot = batchInfo.getPreStateRoot();
             ProgramExecutor batchExecutor = batchInfo.getBatchExecutor();
-
             // 等上次的执行完
             container.loadFutureList();
             // 多线程执行合约
@@ -177,13 +175,13 @@ public class ContractServiceImpl implements ContractService {
             return result;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            Log.error("", e);
+            Log.error(e);
             return getFailed().setMsg(e.getMessage());
         } catch (ExecutionException e) {
-            Log.error("", e);
+            Log.error(e);
             return getFailed().setMsg(e.getMessage());
         } catch (NulsException e) {
-            Log.error("", e);
+            Log.error(e);
             return Result.getFailed(e.getErrorCode() == null ? FAILED : e.getErrorCode());
         }
     }

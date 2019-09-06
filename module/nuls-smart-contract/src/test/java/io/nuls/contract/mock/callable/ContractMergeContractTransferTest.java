@@ -53,7 +53,7 @@ public class ContractMergeContractTransferTest {
         txData.setPrice(25L);
         txData.setMethodName(methodName);
         String[][] args2 = ContractUtil.twoDimensionalArray(args);
-        txData.setArgsCount((byte) args.length);
+        txData.setArgsCount((short) args.length);
         txData.setArgs(args2);
         return txData;
     }
