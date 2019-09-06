@@ -243,7 +243,7 @@ public class ContractServiceImpl implements ContractService {
                 }
                 long beforeEndTime = batchInfo.getBeforeEndTime();
                 long now0 = System.currentTimeMillis();
-                long timeOut = 1000 - (now0 - beforeEndTime);
+                long timeOut = 1200 - (now0 - beforeEndTime);
                 if(timeOut <= 0) {
                     Log.warn("超过了预留的超时时间[0]: {}", timeOut);
                     break;
@@ -285,7 +285,7 @@ public class ContractServiceImpl implements ContractService {
                 }
 
                 long now2 = System.currentTimeMillis();
-                timeOut = 1300 - (now2 - beforeEndTime);
+                timeOut = 1500 - (now2 - beforeEndTime);
                 Log.info("预留的超时时间[1]: {}", timeOut);
                 if(timeOut <= 0) {
                     Log.warn("超过了预留的超时时间[1]: {}", timeOut);
