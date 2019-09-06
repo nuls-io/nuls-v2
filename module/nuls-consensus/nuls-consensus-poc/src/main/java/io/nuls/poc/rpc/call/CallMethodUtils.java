@@ -405,7 +405,7 @@ public class CallMethodUtils {
             BlockExtendsData lastData = lastHeader.getExtendsData();
             params.put("preStateRoot", RPCUtil.encode(lastData.getStateRoot()));
             params.put("blockHeader", RPCUtil.encode(header.serialize()));
-            return ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_batchVerify", params);
+            return ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_batchVerify", params, 10 * 60 * 1000);
         } catch (Exception e) {
             logger.error("", e);
             return null;
