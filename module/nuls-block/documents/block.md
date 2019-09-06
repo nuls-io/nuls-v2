@@ -1,4 +1,4 @@
-# 模块概述
+# 区块模块
 
 ## 为什么要有《区块管理》模块
 
@@ -11,7 +11,7 @@
 ## 《区块管理》要做什么
 
 - 提供api，进行区块存储、查询、回滚的操作
-- 从网络上同步最新区块，验证通过后保存
+- 从网络上同步最新区块，进行初步验证、分叉验证，如果没有分叉，调用共识模块进行共识验证，调用交易模块进行交易验证，全部验证通过后保存到本地。
 - 区块同步、广播、转发消息的处理
 - 分叉区块的判断、存储
 - 孤儿区块的判断、存储
@@ -28,20 +28,16 @@
 
 |日志内容															|日志生成原因|
 |----|----|
-|Skip block syn|				把minNodeAmount设置为0,并且没有链接到任何可用节点时,直接跳过区块同步流程(一般用于运行单节点网络)|
-|There are no consistent nodes							|				连接到的节点高度或最新区块hash不一致|
-|This blockchain just started running			|				连接到的节点高度都是0,表示这条链刚开始运行|
-|The local node's block is the latest height	|				本地节点的区块已经是最新的,不需要进行区块同步|
-|The number of rolled back blocks exceeded the configured value|	本地区块与网络上的区块不一致,本地区块回滚,但是回滚数量已经超过阈值,停止回滚|
-|The local genesis block is different from networks		|				本地节点的创世区块hash与网络上的创世区块hash不匹配,需要检查本地创世块配置或创世块路径|
-|wait until network stable						|				连接到的可用节点数量不足,检查minNodeAmount这个配置项,以及网络模块配置、日志|
-|BlockDownloader start work						|				区块下载线程开始工作,记录了本次下载的起始高度与结束高度,以及同步节点|
-|BlockDownloader wait!						|				区块下载线程暂停工作,因为缓存的区块字节数已经超过配置的阈值|
-|Block syn complete successfully	|				区块同步成功,且已经同步到最新区块|
-|Block syn complete but another syn is needed			|				区块同步成功,但还不是最新区块,需要进行再次同步|
-|Block syn fail			|				区块同步失败,downResult标识下载是否成功,storageResult标识保存过程是否正常|
-|An exception occurred while saving the downloaded block	|				保存区块失败,重点检查共识模块,交易模块,账本模块的日志|
-|retryDownload	|				区块同步超时,启动重试下载机制|
+|skip block syn because minNodeAmount is set to 0|				把minNodeAmount设置为0会打印此日志,直接跳过区块同步流程,如果想一个节点出块才需要改这个参数|
+|no consistent nodes								|				连接到的节点高度不一致造成的|
+|first start										|				连接到的节点高度都是0,表示这条链刚开始运行|
+|local blocks is newest							|				本地节点的区块已经是最新的,不需要进行区块同步|
+|The number of rolled back blocks exceeded the configured value|	本地区块与网络上的区块不一致,本地区块回滚,但是回滚数量超过阈值,停止回滚|
+|The local GenesisBlock differ from network		|				本地节点的创世区块hash与网络上的创世区块hash不匹配,需要检查本地配置|
+|available nodes not enough						|				连接到的可用节点数量不足,检查minNodeAmount这个配置项,以及网络模块配置、日志|
+|block syn complete successfully current height	|				区块同步成功,且已经同步到最新区块|
+|block syn complete but is not newest			|				区块同步成功,但还不是最新区块,会自动进行再次同步|
+|error occur when saving downloaded blocks	|				区块同步失败,一般是保存同步到的区块时报错,重点检查区块模块、共识模块、交易模块的日志|
 
 # 常用配置说明
 
@@ -53,9 +49,11 @@
 
 配置文件路径：[module.json](./src/main/resources/module.json)
 
-### 配置项说明[^1]
+## 配置项说明[^1]
 |配置项															|说明|
 |----|----|
+|dataFolder|数据库文件夹名|
+|language|错误码语言|
 |forkChainsMonitorInterval|分叉链监视线程运行间隔|
 |orphanChainsMonitorInterval|孤儿链监视线程运行间隔|
 |orphanChainsMaintainerInterval|孤儿链维护线程运行间隔|
@@ -64,24 +62,32 @@
 |nodesMonitorInterval|节点数量监视线程运行间隔|
 |txGroupRequestorInterval|TxGroup获取线程运行间隔|
 |txGroupTaskDelay|分叉链监视线程运行间隔|
-|testAutoRollbackAmount|启动后自动回滚的区块数量,仅供测试区块回滚用,正式网络下设置为0|
+|testAutoRollbackAmount|启动后自动回滚的区块数量,仅供测试区块回滚用,生产环境下设置为0|
+|chainName|默认链名称|
+|chainId|默认链ID|
+|assetId|默认资产ID|
 |blockMaxSize|区块最大字节数|
 |extendMaxSize|区块扩展字段最大字节数|
 |resetTime|本地区块高度不更新时,引发重置网络动作的时间间隔|
 |chainSwtichThreshold|引发分叉链切换的高度差阈值|
 |cacheSize|分叉链、孤儿链区块最大缓存数量|
 |heightRange|接收新区块的范围|
+|waitInterval|批量下载区块时,如果收到CompleteMessage时,区块还没有保存完,每一个区块预留多长等待时间|
 |maxRollback|本地区块与网络区块不一致时,本地最大回滚数|
 |consistencyNodePercent|统计网络上的节点最新区块高度、hash一致的百分比阈值|
 |minNodeAmount|最小链接节点数,当链接到的网络节点低于此参数时,会持续等待|
 |downloadNumber|区块同步过程中,每次从网络上节点下载的区块数量|
 |validBlockInterval|为阻止恶意节点提前出块,设置此参数,区块时间戳大于当前时间多少就丢弃该区块|
-|cacheSize|同步区块时最多缓存多少个区块|
+|blockCache|同步区块时最多缓存多少个区块|
 |smallBlockCache|系统正常运行时最多缓存多少个从别的节点接收到的小区块|
 |orphanChainMaxAge|孤儿链维护失败时,年龄加一,此参数是孤儿链能达到的最大年龄,高于这个值会被清理线程清理|
+|logLevel|日志级别,按照不同的链进行区分|
 |singleDownloadTimeout|从网络节点下载单个区块的超时时间|
+|batchDownloadTimeout|从网络节点下载多个区块的超时时间|
+|maxLoop|批量下载区块时,如果收到CompleteMessage时,区块还没有保存完,最多循环等待几个回合|
+|synSleepInterval|两次区块同步之间的时间间隔|
 |waitNetworkInterval|等待网络稳定的时间间隔|
-|genesisBlockPath|创世区块文件路径|
+|cleanParam|分叉链监视线程运行间隔|
     
 ## 协议信息
 
@@ -89,324 +95,289 @@
 
 
 [^1]:配置文件中所有时间参数单位都是毫秒
-info
-====
-### scope:public
-### version:1.0
+## 接口列表
+### info
 returns network node height and local node height
+#### scope:public
+#### version:1.0
 
-参数列表
-----
+#### 参数列表
 | 参数名     | 参数类型 | 参数描述 | 是否非空 |
 | ------- |:----:| ---- |:----:|
 | chainId | int  | 链ID  |  是   |
 
-返回值
----
+#### 返回值
 | 字段名           | 字段类型 | 参数描述       |
 | ------------- |:----:| ---------- |
 | networkHeight | long | 网络节点最新区块高度 |
 | localHeight   | long | 本地节点最新区块高度 |
 
-latestBlock
-===========
-### scope:public
-### version:1.0
+### latestBlock
 the latest block of master chain
+#### scope:public
+#### version:1.0
 
-参数列表
-----
+#### 参数列表
 | 参数名     | 参数类型 | 参数描述 | 是否非空 |
 | ------- |:----:| ---- |:----:|
 | chainId | int  | 链ID  |  是   |
 
-返回值
----
+#### 返回值
 | 字段名 |  字段类型  | 参数描述              |
 | --- |:------:| ----------------- |
 | 返回值 | string | 返回一个区块序列化后的HEX字符串 |
 
-downloadBlockByHash
-===================
-### scope:public
-### version:1.0
+### downloadBlockByHash
 get a block by hash
+#### scope:public
+#### version:1.0
 
-参数列表
-----
+#### 参数列表
 | 参数名     |  参数类型  | 参数描述   | 是否非空 |
 | ------- |:------:| ------ |:----:|
 | chainId |  int   | 链ID    |  是   |
 | hash    | string | 区块hash |  是   |
 
-返回值
----
+#### 返回值
 | 字段名 |  字段类型  | 参数描述            |
 | --- |:------:| --------------- |
 | 返回值 | string | 返回区块序列化后的HEX字符串 |
 
-latestHeight
-============
-### scope:public
-### version:1.0
+### latestHeight
 the latest height of master chain
+#### scope:public
+#### version:1.0
 
-参数列表
-----
+#### 参数列表
 | 参数名     | 参数类型 | 参数描述 | 是否非空 |
 | ------- |:----:| ---- |:----:|
 | chainId | int  | 链ID  |  是   |
 
-返回值
----
+#### 返回值
 | 字段名   | 字段类型 | 参数描述   |
 | ----- |:----:| ------ |
 | value | long | 最新主链高度 |
 
-latestBlockHeader
-=================
-### scope:public
-### version:1.0
+### latestBlockHeader
 the latest block header of master chain
+#### scope:public
+#### version:1.0
 
-参数列表
-----
+#### 参数列表
 | 参数名     | 参数类型 | 参数描述 | 是否非空 |
 | ------- |:----:| ---- |:----:|
 | chainId | int  | 链ID  |  是   |
 
-返回值
----
+#### 返回值
 | 字段名 |  字段类型  | 参数描述               |
 | --- |:------:| ------------------ |
 | 返回值 | string | 返回一个区块头序列化后的HEX字符串 |
 
-latestBlockHeaderPo
-===================
-### scope:public
-### version:1.0
+### latestBlockHeaderPo
 the latest block header po of master chain
+#### scope:public
+#### version:1.0
 
-参数列表
-----
+#### 参数列表
 | 参数名     | 参数类型 | 参数描述 | 是否非空 |
 | ------- |:----:| ---- |:----:|
 | chainId | int  | 链ID  |  是   |
 
-返回值
----
+#### 返回值
 | 字段名 |  字段类型  | 参数描述                 |
 | --- |:------:| -------------------- |
 | 返回值 | string | 返回一个区块头PO序列化后的HEX字符串 |
 
-getBlockHeaderByHeight
-======================
-### scope:public
-### version:1.0
+### getBlockHeaderByHeight
 get a block header by height
+#### scope:public
+#### version:1.0
 
-参数列表
-----
+#### 参数列表
 | 参数名     | 参数类型 | 参数描述 | 是否非空 |
 | ------- |:----:| ---- |:----:|
 | chainId | int  | 链ID  |  是   |
 | height  | long | 区块高度 |  是   |
 
-返回值
----
+#### 返回值
 | 字段名 |  字段类型  | 参数描述               |
 | --- |:------:| ------------------ |
 | 返回值 | string | 返回一个区块头序列化后的HEX字符串 |
 
-getBlockHeaderPoByHeight
-========================
-### scope:public
-### version:1.0
+### getBlockHeaderPoByHeight
 get a block header po by height
+#### scope:public
+#### version:1.0
 
-参数列表
-----
+#### 参数列表
 | 参数名     | 参数类型 | 参数描述 | 是否非空 |
 | ------- |:----:| ---- |:----:|
 | chainId | int  | 链ID  |  是   |
 | height  | long | 区块高度 |  是   |
 
-返回值
----
+#### 返回值
 | 字段名 |  字段类型  | 参数描述                 |
 | --- |:------:| -------------------- |
 | 返回值 | string | 返回一个区块头PO序列化后的HEX字符串 |
 
-getBlockByHeight
-================
-### scope:public
-### version:1.0
+### getBlockByHeight
 get a block by height
+#### scope:public
+#### version:1.0
 
-参数列表
-----
+#### 参数列表
 | 参数名     | 参数类型 | 参数描述 | 是否非空 |
 | ------- |:----:| ---- |:----:|
 | chainId | int  | 链ID  |  是   |
 | height  | long | 区块高度 |  是   |
 
-返回值
----
+#### 返回值
 | 字段名 |  字段类型  | 参数描述                |
 | --- |:------:| ------------------- |
 | 返回值 | string | 返回区块序列化后的HEX字符串List |
 
-getBlockHeaderByHash
-====================
-### scope:public
-### version:1.0
+### getBlockHeaderByHash
 get a block header by hash
+#### scope:public
+#### version:1.0
 
-参数列表
-----
+#### 参数列表
 | 参数名     |  参数类型  | 参数描述   | 是否非空 |
 | ------- |:------:| ------ |:----:|
 | chainId |  int   | 链ID    |  是   |
 | hash    | string | 区块hash |  是   |
 
-返回值
----
+#### 返回值
 | 字段名 |  字段类型  | 参数描述             |
 | --- |:------:| ---------------- |
 | 返回值 | string | 返回区块头序列化后的HEX字符串 |
 
-getBlockHeaderPoByHash
-======================
-### scope:public
-### version:1.0
+### getBlockHeaderPoByHash
 get a block header po by hash
+#### scope:public
+#### version:1.0
 
-参数列表
-----
+#### 参数列表
 | 参数名     |  参数类型  | 参数描述   | 是否非空 |
 | ------- |:------:| ------ |:----:|
 | chainId |  int   | 链ID    |  是   |
 | hash    | string | 区块hash |  是   |
 
-返回值
----
+#### 返回值
 | 字段名 |  字段类型  | 参数描述               |
 | --- |:------:| ------------------ |
 | 返回值 | string | 返回区块头PO序列化后的HEX字符串 |
 
-getLatestBlockHeaders
-=====================
-### scope:public
-### version:1.0
+### getLatestBlockHeaders
 get the latest number of block headers
+#### scope:public
+#### version:1.0
 
-参数列表
-----
+#### 参数列表
 | 参数名     | 参数类型 | 参数描述 | 是否非空 |
 | ------- |:----:| ---- |:----:|
 | chainId | int  | 链ID  |  是   |
 | size    | int  | 数量   |  是   |
 
-返回值
----
+#### 返回值
 | 字段名 |      字段类型       | 参数描述                 |
 | --- |:---------------:| -------------------- |
 | 返回值 | list&lt;string> | 返回区块头序列化后的HEX字符串List |
 
-getLatestRoundBlockHeaders
-==========================
-### scope:public
-### version:1.0
+### getLatestRoundBlockHeaders
 get the latest several rounds of block headers
+#### scope:public
+#### version:1.0
 
-参数列表
-----
+#### 参数列表
 | 参数名     | 参数类型 | 参数描述 | 是否非空 |
 | ------- |:----:| ---- |:----:|
 | chainId | int  | 链ID  |  是   |
 | round   | int  | 共识轮次 |  是   |
 
-返回值
----
+#### 返回值
 | 字段名 |      字段类型       | 参数描述                 |
 | --- |:---------------:| -------------------- |
 | 返回值 | list&lt;string> | 返回区块头序列化后的HEX字符串List |
 
-getRoundBlockHeaders
-====================
-### scope:public
-### version:1.0
+### getRoundBlockHeaders
 get the latest several rounds of block headers
+#### scope:public
+#### version:1.0
 
-参数列表
-----
+#### 参数列表
 | 参数名     | 参数类型 | 参数描述 | 是否非空 |
 | ------- |:----:| ---- |:----:|
 | chainId | int  | 链ID  |  是   |
 | height  | long | 起始高度 |  是   |
 | round   | int  | 共识轮次 |  是   |
 
-返回值
----
+#### 返回值
 | 字段名 |      字段类型       | 参数描述                 |
 | --- |:---------------:| -------------------- |
 | 返回值 | list&lt;string> | 返回区块头序列化后的HEX字符串List |
 
-receivePackingBlock
-===================
-### scope:public
-### version:1.0
+### receivePackingBlock
 receive the new packaged block
+#### scope:public
+#### version:1.0
 
-参数列表
-----
+#### 参数列表
 | 参数名     |  参数类型  | 参数描述          | 是否非空 |
 | ------- |:------:| ------------- |:----:|
 | chainId |  int   | 链ID           |  是   |
 | block   | string | 区块序列化后的HEX字符串 |  是   |
 
-返回值
----
+#### 返回值
 | 字段名 | 字段类型 | 参数描述 |
 | --- |:----:| ---- |
 | N/A | void | 无返回值 |
 
-getBlockHeadersByHeightRange
-============================
-### scope:public
-### version:1.0
+### getBlockHeadersByHeightRange
 get the block headers according to the height range
+#### scope:public
+#### version:1.0
 
-参数列表
-----
+#### 参数列表
 | 参数名     | 参数类型 | 参数描述 | 是否非空 |
 | ------- |:----:| ---- |:----:|
 | chainId | int  | 链ID  |  是   |
 | begin   | long | 起始高度 |  是   |
 | end     | long | 结束高度 |  是   |
 
-返回值
----
+#### 返回值
 | 字段名 |      字段类型       | 参数描述                 |
 | --- |:---------------:| -------------------- |
 | 返回值 | list&lt;string> | 返回区块头序列化后的HEX字符串List |
 
-getBlockHeadersForProtocol
-==========================
-### scope:public
-### version:1.0
+### getBlockHeadersForProtocol
 get block headers for protocol upgrade module
+#### scope:public
+#### version:1.0
 
-参数列表
-----
+#### 参数列表
 | 参数名      | 参数类型 | 参数描述     | 是否非空 |
 | -------- |:----:| -------- |:----:|
 | chainId  | int  | 链ID      |  是   |
 | interval | int  | 协议升级统计区间 |  是   |
 
-返回值
----
+#### 返回值
 | 字段名 |      字段类型       | 参数描述                 |
 | --- |:---------------:| -------------------- |
 | 返回值 | list&lt;string> | 返回区块头序列化后的HEX字符串List |
+
+### getStatus
+receive the new packaged block
+#### scope:public
+#### version:1.0
+
+#### 参数列表
+| 参数名     | 参数类型 | 参数描述 | 是否非空 |
+| ------- |:----:| ---- |:----:|
+| chainId | int  | 链ID  |  是   |
+
+#### 返回值
+| 字段名    |  字段类型   | 参数描述 |
+| ------ |:-------:| ---- |
+| status | integer | 运行状态 |
 
