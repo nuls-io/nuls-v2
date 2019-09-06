@@ -42,7 +42,6 @@ public class LoggerUtil {
      */
     private static Map<String, NulsLogger> loggerMap = new HashMap<>();
     public static final NulsLogger COMMON_LOG = LoggerBuilder.getLogger(ModuleE.Constant.LEDGER);
-    public static final NulsLogger COMMIT_LOG = LoggerBuilder.getLogger("commitHash");
     public static NulsLogger logger(int chainId) {
         if (null == loggerMap.get(String.valueOf(chainId))) {
             createLogger(chainId);
