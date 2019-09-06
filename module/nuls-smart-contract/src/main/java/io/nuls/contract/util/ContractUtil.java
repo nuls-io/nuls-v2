@@ -34,6 +34,7 @@ import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.TransactionSignature;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
+import io.nuls.contract.model.bo.BatchInfo;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractTempTransaction;
 import io.nuls.contract.model.bo.ContractWrapperTransaction;
@@ -460,6 +461,50 @@ public class ContractUtil {
         contractResult.setTxTime(tx.getTime());
         contractResult.setHash(tx.getHash().toString());
         contractResult.setTxOrder(tx.getOrder());
+    }
+
+    public static boolean makeContractResultAndCheckGasSerial(ContractWrapperTransaction tx, ContractResult contractResult, BatchInfo batchInfo) {
+        int i = 0;
+        // 所以交易都按顺序串行执行checkGas
+        while (true) {
+            synchronized (batchInfo) {
+                int txOrder = tx.getOrder();
+                int serialOrder = batchInfo.getSerialOrder();
+                if(serialOrder == txOrder) {
+                    if(Log.isDebugEnabled()) {
+                        Log.debug("串行交易order - [{}]", txOrder);
+                    }
+                    batchInfo.setSerialOrder(serialOrder + 1);
+                    contractResult.setTx(tx);
+                    contractResult.setTxTime(tx.getTime());
+                    contractResult.setHash(tx.getHash().toString());
+                    contractResult.setTxOrder(tx.getOrder());
+                    boolean checkGas = checkGas(contractResult, batchInfo);
+                    batchInfo.notifyAll();
+                    return checkGas;
+                } else {
+                    i++;
+                    if(Log.isDebugEnabled()) {
+                        Log.debug("等待的交易order - [{}], [{}]线程等待次数 - [{}]", txOrder, Thread.currentThread().getName(), i);
+                    }
+                    try {
+                        batchInfo.wait();
+                    } catch (InterruptedException e) {
+                        Log.error(e);
+                    }
+                }
+            }
+        }
+    }
+
+    private static boolean checkGas(ContractResult contractResult, BatchInfo batchInfo) {
+        long gasUsed = contractResult.getGasUsed();
+        boolean isAdded = batchInfo.addGasCostTotal(gasUsed, contractResult.getHash());
+        if(!isAdded) {
+            contractResult.setError(true);
+            contractResult.setErrorMessage("Exceed tx count [500] or gas limit of block [12,000,000 gas], the contract transaction ["+ contractResult.getHash() +"] revert to package queue.");
+        }
+        return isAdded;
     }
 
     public static Result getSuccess() {
