@@ -39,6 +39,7 @@ public interface TxConstant {
 
     /** 打包时孤儿交易返回待打包队列重新处理的最大次数，超过该次数则不再处理该孤儿交易(丢弃) */
     int PACKAGE_ORPHAN_MAXCOUNT = 5;
+    int PACKAGE_ORPHAN_MAP_MAXCOUNT = 10000;
     /** 处理网络新交易时，一次从待处理集合中获取新交易的最大值 */
     int NET_TX_PROCESS_NUMBER_ONCE = 3000;
 
