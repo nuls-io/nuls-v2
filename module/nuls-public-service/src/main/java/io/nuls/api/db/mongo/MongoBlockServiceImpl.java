@@ -20,6 +20,7 @@ import io.nuls.core.model.StringUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -80,6 +81,19 @@ public class MongoBlockServiceImpl implements BlockService {
         return DocumentTransferTool.toInfo(document, "height", BlockHexInfo.class);
     }
 
+    @Override
+    public BigInteger getLast24HourRewards(int chainId) {
+        long time = System.currentTimeMillis() / 1000;
+        time = time - 24 * 60 * 60;
+        Bson filter = Filters.gte("createTime", time);
+        BigInteger reward = BigInteger.ZERO;
+        List<Document> docsList = this.mongoDBService.query(BLOCK_HEADER_TABLE + chainId, filter);
+        for (Document document : docsList) {
+            reward = reward.add(new BigInteger(document.getString("reward")));
+        }
+        return reward;
+    }
+
     public void saveList(int chainId, List<BlockHeaderInfo> blockHeaderInfos) {
         List<Document> documentList = new ArrayList<>();
         for (BlockHeaderInfo headerInfo : blockHeaderInfos) {
@@ -132,6 +146,23 @@ public class MongoBlockServiceImpl implements BlockService {
         }
         PageInfo<MiniBlockHeaderInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, totalCount, list);
         return pageInfo;
+    }
+
+    @Override
+    public List<MiniBlockHeaderInfo> getBlockList(int chainId, long startHeight, long endHeight) {
+        if (!CacheManager.isChainExist(chainId)) {
+            return new ArrayList<>();
+        }
+        BasicDBObject fields = new BasicDBObject();
+        fields.append("_id", 1).append("createTime", 1).append("txCount", 1).append("agentHash", 1).
+                append("agentId", 1).append("agentAlias", 1).append("size", 1).append("reward", 1);
+        Bson filter = Filters.and(Filters.gt("_id", startHeight), Filters.lte("_id", endHeight));
+        List<Document> docsList = this.mongoDBService.query(BLOCK_HEADER_TABLE + chainId, filter, fields, Sorts.descending("_id"));
+        List<MiniBlockHeaderInfo> list = new ArrayList<>();
+        for (Document document : docsList) {
+            list.add(DocumentTransferTool.toInfo(document, "height", MiniBlockHeaderInfo.class));
+        }
+        return list;
     }
 
     public long getMaxHeight(int chainId, long endTime) {

@@ -64,12 +64,16 @@ import org.junit.Test;
 
 import java.io.*;
 import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
+import static io.nuls.transaction.TestCommonUtil.PASSWORD;
+import static io.nuls.transaction.TestCommonUtil.createContract;
 import static org.junit.Assert.assertNotNull;
 
 /**
@@ -381,6 +385,24 @@ public class TxValid {
             System.out.println("count:" + (i + 1));
             System.out.println("");
 //            Thread.sleep(500L);
+        }
+    }
+
+    /**
+     * 合约与普通交易混发
+     * @throws Exception
+     */
+    @Test
+    public void transferAndContractPixelTest() throws Exception {
+        String code = Files.readString(Path.of("E:\\ContractTest", "pixel.txt"));
+        int size = 0;
+        for (int i = 0; i < 100; i++) {
+            size++;
+            String hash = createTransfer(address21, address29, new BigInteger("100000000"));
+            //String hash = createCtxTransfer();
+            System.out.println("transfer: " + hash);
+            System.out.println("contract: " + createContract(address21, PASSWORD, code, new Object[]{size % 50 + 1}));
+            Thread.sleep(80L);
         }
     }
 
@@ -878,7 +900,7 @@ public class TxValid {
         HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
         Assert.assertTrue(null != result);
         String hash = (String) result.get("value");
-        Log.debug("{}", hash);
+//        Log.debug("{}", hash);
         return hash;
     }
 
