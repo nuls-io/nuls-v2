@@ -124,16 +124,14 @@ public class ContractTxCallable implements Callable<ContractResult> {
                 case CREATE_CONTRACT:
                     container.setHasCreate(true);
                     contractResult = contractExecutor.create(executor, contractData, number, preStateRoot, extractPublicKey(tx));
-                    makeContractResult(tx, contractResult);
-                    if(!checkGas(contractResult)) {
+                    if(!makeContractResultAndCheckGasSerial(tx, contractResult, batchInfo)) {
                         break;
                     }
                     checkCreateResult(tx, callableResult, contractResult);
                     break;
                 case CALL_CONTRACT:
                     contractResult = contractExecutor.call(executor, contractData, number, preStateRoot, extractPublicKey(tx));
-                    makeContractResult(tx, contractResult);
-                    if(!checkGas(contractResult)) {
+                    if(!makeContractResultAndCheckGasSerial(tx, contractResult, batchInfo)) {
                         break;
                     }
                     checkCallResult(tx, callableResult, contractResult);
@@ -154,17 +152,6 @@ public class ContractTxCallable implements Callable<ContractResult> {
         //    Log.debug("[Per Contract Execution Cost Time] TxType is {}, TxHash is {}, Cost Time is {}", tx.getType(), tx.getHash().toString(), System.currentTimeMillis() - start);
         //}
         return contractResult;
-    }
-
-    private boolean checkGas(ContractResult contractResult) {
-        long gasUsed = contractResult.getGasUsed();
-        BatchInfo batchInfo = contractHelper.getChain(chainId).getBatchInfo();
-        boolean isAdded = batchInfo.addGasCostTotal(gasUsed, contractResult.getHash());
-        if(!isAdded) {
-            contractResult.setError(true);
-            contractResult.setErrorMessage("Exceed tx count [500] or gas limit of block [12,000,000 gas], the contract transaction ["+ contractResult.getHash() +"] revert to package queue.");
-        }
-        return isAdded;
     }
 
     private void checkCreateResult(ContractWrapperTransaction tx, CallableResult callableResult, ContractResult contractResult) {
