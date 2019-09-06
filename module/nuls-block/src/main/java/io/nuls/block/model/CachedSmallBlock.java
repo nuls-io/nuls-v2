@@ -45,8 +45,14 @@ public class CachedSmallBlock {
 
     private SmallBlock smallBlock;
 
+    /**
+     * 已有的交易集合
+     */
     private Map<NulsHash, Transaction> txMap;
 
+    /**
+     * 来自哪个节点
+     */
     private String nodeId;
 
     public CachedSmallBlock(List<NulsHash> missingTransactions, SmallBlock smallBlock, Map<NulsHash, Transaction> txMap, String nodeId) {

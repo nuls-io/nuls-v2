@@ -5,6 +5,9 @@ import io.nuls.api.model.po.BlockHexInfo;
 import io.nuls.api.model.po.PageInfo;
 import io.nuls.api.model.po.mini.MiniBlockHeaderInfo;
 
+import java.math.BigInteger;
+import java.util.List;
+
 public interface BlockService {
 
     BlockHeaderInfo getBestBlockHeader(int chainId);
@@ -17,6 +20,8 @@ public interface BlockService {
 
     PageInfo<MiniBlockHeaderInfo> pageQuery(int chainId, int pageIndex, int pageSize, String packingAddress, boolean filterEmptyBlocks);
 
+    List<MiniBlockHeaderInfo> getBlockList(int chainId, long startHeight, long endHeight);
+
     long getMaxHeight(int chainId, long endTime);
 
     void deleteBlockHeader(int chainId, long height);
@@ -24,5 +29,7 @@ public interface BlockService {
     void saveBlockHexInfo(int chainId, BlockHexInfo hexInfo);
 
     BlockHexInfo getBlockHexInfo(int chainId, long height);
+
+    BigInteger getLast24HourRewards(int chainId);
 
 }

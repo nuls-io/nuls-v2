@@ -15,6 +15,12 @@ import org.bson.Document;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListMap;
+
 public class ApiTest {
 
 //    protected Chain chain;
@@ -23,8 +29,8 @@ public class ApiTest {
 
     @Before
     public void before() throws Exception {
-        NoUse.mockModule();
-        ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":7771");
+//        NoUse.mockModule();
+//        ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":7771");
 //        chain = new Chain();
 //        chain.setConfig(new ConfigBean(chainId, assetId, 100000000L));
     }
@@ -104,4 +110,21 @@ public class ApiTest {
         }
     }
 
+
+    @Test
+    public void testMap() {
+        Map<String, String> map = new ConcurrentHashMap<>();
+
+        LinkedList linkedList = new LinkedList();
+
+        map.put("a", "a");
+        map.put("c", "c");
+        map.put("b", "b");
+        map.put("c1", "c1");
+        map.put("1", "1");
+        map.put("b1", "b1");
+        map.put("2", "2");
+        map.put("a1", "a1");
+        linkedList.addAll(map.keySet());
+    }
 }

@@ -81,6 +81,8 @@ public class ContractResultDto {
     private List<ContractMergedTransferDto> transfers;
     @ApiModelProperty(description = "合约事件列表", type = @TypeDescriptor(value = List.class, collectionElement = String.class))
     private List<String> events;
+    @ApiModelProperty(description = "调式合约事件列表", type = @TypeDescriptor(value = List.class, collectionElement = String.class))
+    private List<String> debugEvents;
     @ApiModelProperty(description = "合约token转账列表", type = @TypeDescriptor(value = List.class, collectionElement = ContractTokenTransferDto.class))
     private List<ContractTokenTransferDto> tokenTransfers;
     @ApiModelProperty(description = "合约调用外部命令的调用记录列表", type = @TypeDescriptor(value = List.class, collectionElement = ContractInvokeRegisterCmdDto.class))
@@ -113,6 +115,7 @@ public class ContractResultDto {
         this.stackTrace = result.getStackTrace();
         this.setMergedTransfers(result.getMergedTransferList());
         this.events = result.getEvents();
+        this.debugEvents = result.getDebugEvents();
         this.remark = result.getRemark();
         this.invokeRegisterCmds = new LinkedList<>();
         this.contractTxList = new ArrayList<>();
@@ -294,6 +297,14 @@ public class ContractResultDto {
 
     public void setEvents(List<String> events) {
         this.events = events;
+    }
+
+    public List<String> getDebugEvents() {
+        return debugEvents;
+    }
+
+    public void setDebugEvents(List<String> debugEvents) {
+        this.debugEvents = debugEvents;
     }
 
     public String getRemark() {

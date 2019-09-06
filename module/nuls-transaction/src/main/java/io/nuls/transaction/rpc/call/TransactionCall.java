@@ -75,13 +75,13 @@ public class TransactionCall {
             params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("txList", txList);
             params.put("blockHeader", blockHeader);
-            Map result = (Map) TransactionCall.requestAndResponse(moduleCode, cmd, params);
+            Map result = (Map) TransactionCall.requestAndResponse(moduleCode, cmd, params, TxConstant.TIMEOUT);
             Boolean value = (Boolean) result.get("value");
             if (null == value) {
-            chain.getLogger().error("call module-{} {} response value is null, error:{}",
-                    moduleCode, cmd, TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
-            return false;
-                }
+                chain.getLogger().error("call module-{} {} response value is null, error:{}",
+                        moduleCode, cmd, TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
+                return false;
+            }
             return value;
         } catch (Exception e) {
             chain.getLogger().error("call module-{} {} error, error:{}", moduleCode, "txProcess", e);

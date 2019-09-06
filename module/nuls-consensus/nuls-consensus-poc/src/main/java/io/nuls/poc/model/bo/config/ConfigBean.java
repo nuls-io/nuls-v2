@@ -130,10 +130,10 @@ public class ConfigBean extends BaseNulsData {
     private long feeUnit;
 
     /**
-     * 总流通量
-     * Total circulation
+     * 总通缩量
+     * Total inflation amount
      */
-    private BigInteger totalCirculation;
+    private BigInteger totalInflationAmount;
 
     /**
      * 初始通胀金额
@@ -349,12 +349,12 @@ public class ConfigBean extends BaseNulsData {
         this.deflationTimeInterval = deflationTimeInterval;
     }
 
-    public BigInteger getTotalCirculation() {
-        return totalCirculation;
+    public BigInteger getTotalInflationAmount() {
+        return totalInflationAmount;
     }
 
-    public void setTotalCirculation(BigInteger totalCirculation) {
-        this.totalCirculation = totalCirculation;
+    public void setTotalInflationAmount(BigInteger totalInflationAmount) {
+        this.totalInflationAmount = totalInflationAmount;
     }
 
     @Override
@@ -379,7 +379,7 @@ public class ConfigBean extends BaseNulsData {
         stream.writeUint16(agentChainId);
         stream.writeUint16(awardAssetId);
         stream.writeUint32(feeUnit);
-        stream.writeBigInteger(totalCirculation);
+        stream.writeBigInteger(totalInflationAmount);
         stream.writeBigInteger(inflationAmount);
         stream.writeUint32(initTime);
         stream.writeDouble(deflationRatio);
@@ -408,7 +408,7 @@ public class ConfigBean extends BaseNulsData {
         this.agentChainId = byteBuffer.readUint16();
         this.awardAssetId = byteBuffer.readUint16();
         this.feeUnit = byteBuffer.readUint32();
-        this.totalCirculation = byteBuffer.readBigInteger();
+        this.totalInflationAmount = byteBuffer.readBigInteger();
         this.inflationAmount = byteBuffer.readBigInteger();
         this.initTime = byteBuffer.readUint32();
         this.deflationRatio = byteBuffer.readDouble();

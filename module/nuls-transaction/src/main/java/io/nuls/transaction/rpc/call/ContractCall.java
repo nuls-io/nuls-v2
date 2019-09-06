@@ -25,7 +25,6 @@
 package io.nuls.transaction.rpc.call;
 
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
@@ -133,8 +132,6 @@ public class ContractCall {
         params.put("blockHeight", blockHeight);
         try {
             Map result = (Map) TransactionCall.requestAndResponse(ModuleE.SC.abbr, "sc_batch_end", params);
-            chain.getLogger().debug("moduleCode:{}, -cmd:{}, -contractProcess -rs: {}",
-                    ModuleE.SC.abbr, "sc_batch_end", JSONUtils.obj2json(result));
             return result;
         }catch (Exception e) {
             chain.getLogger().error(e);
@@ -155,8 +152,8 @@ public class ContractCall {
         params.put("blockHeight", blockHeight);
         try {
             Map result = (Map) TransactionCall.requestAndResponse(ModuleE.SC.abbr, "sc_package_batch_end", params);
-            chain.getLogger().debug("moduleCode:{}, -cmd:{}, -contractProcess -rs: {}",
-                    ModuleE.SC.abbr, "sc_batch_end", JSONUtils.obj2json(result));
+//            chain.getLogger().debug("moduleCode:{}, -cmd:{}, -contractProcess -rs: {}",
+//                    ModuleE.SC.abbr, "sc_batch_end", "'stateRoot': '" + result.get("stateRoot") + "', 'txList': " + result.get("txList"));
             return result;
         }catch (Exception e) {
             chain.getLogger().error(e);

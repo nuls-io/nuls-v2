@@ -14,6 +14,7 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -23,12 +24,17 @@ public class MongoAccountLedgerServiceImpl implements AccountLedgerService {
     @Autowired
     private MongoDBService mongoDBService;
 
+    private List<String> keyList = new LinkedList<>();
+
+    private static int cacheSize = 30000;
+
     public void initCache() {
         for (ApiCache apiCache : CacheManager.getApiCaches().values()) {
-            List<Document> documentList = mongoDBService.query(DBTableConstant.ACCOUNT_LEDGER_TABLE + apiCache.getChainInfo().getChainId());
+            List<Document> documentList = mongoDBService.pageQuery(DBTableConstant.ACCOUNT_LEDGER_TABLE + apiCache.getChainInfo().getChainId(), 0, cacheSize);
             for (Document document : documentList) {
                 AccountLedgerInfo ledgerInfo = DocumentTransferTool.toInfo(document, "key", AccountLedgerInfo.class);
                 apiCache.addAccountLedgerInfo(ledgerInfo);
+                keyList.add(ledgerInfo.getKey());
             }
         }
     }
@@ -42,7 +48,12 @@ public class MongoAccountLedgerServiceImpl implements AccountLedgerService {
                 return null;
             }
             accountLedgerInfo = DocumentTransferTool.toInfo(document, "key", AccountLedgerInfo.class);
+            while (keyList.size() >= cacheSize) {
+                key = keyList.remove(0);
+                apiCache.getLedgerMap().remove(key);
+            }
             apiCache.addAccountLedgerInfo(accountLedgerInfo);
+            keyList.add(accountLedgerInfo.getKey());
         }
         return accountLedgerInfo.copy();
     }
@@ -66,9 +77,11 @@ public class MongoAccountLedgerServiceImpl implements AccountLedgerService {
         options.ordered(false);
         mongoDBService.bulkWrite(DBTableConstant.ACCOUNT_LEDGER_TABLE + chainId, modelList, options);
 
-        ApiCache cache = CacheManager.getCache(chainId);
+        ApiCache apiCache = CacheManager.getCache(chainId);
         for (AccountLedgerInfo ledgerInfo : accountLedgerInfoMap.values()) {
-            cache.addAccountLedgerInfo(ledgerInfo);
+            if (apiCache.getLedgerMap().containsKey(ledgerInfo.getKey())) {
+                apiCache.addAccountLedgerInfo(ledgerInfo);
+            }
         }
     }
 

@@ -81,6 +81,7 @@ public class ContractExecutorImpl implements ContractExecutor {
         contractResult.setRemark(ContractConstant.CREATE_REMARK);
         // 批量提交方式，交易track放置到外部处理合约执行结果的方法里去提交
         contractResult.setTxTrack(track);
+        contractResult.setDebugEvents(programResult.getDebugEvents());
 
         if (!programResult.isSuccess()) {
             contractResult.setError(programResult.isError());
@@ -129,6 +130,7 @@ public class ContractExecutorImpl implements ContractExecutor {
         contractResult.setRemark(ContractConstant.CALL_REMARK);
         // 批量提交方式，交易track放置到外部处理合约执行结果的方法里去提交
         contractResult.setTxTrack(track);
+        contractResult.setDebugEvents(programResult.getDebugEvents());
 
         if (!programResult.isSuccess()) {
             contractResult.setError(programResult.isError());

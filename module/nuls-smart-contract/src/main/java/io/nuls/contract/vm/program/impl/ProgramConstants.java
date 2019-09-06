@@ -28,6 +28,7 @@ import io.nuls.contract.sdk.*;
 import io.nuls.contract.sdk.annotation.Payable;
 import io.nuls.contract.sdk.annotation.Required;
 import io.nuls.contract.sdk.annotation.View;
+import io.nuls.contract.sdk.event.DebugEvent;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -50,6 +51,7 @@ public class ProgramConstants {
             View.class,
             Required.class,
             Payable.class,
+            DebugEvent.class
     };
 
     public static final Class[] CONTRACT_USED_CLASSES = new Class[]{
