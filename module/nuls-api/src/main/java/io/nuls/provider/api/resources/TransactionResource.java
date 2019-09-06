@@ -23,6 +23,10 @@
  */
 package io.nuls.provider.api.resources;
 
+import io.nuls.base.api.provider.ServiceManager;
+import io.nuls.base.api.provider.block.BlockService;
+import io.nuls.base.api.provider.block.facade.BlockHeaderData;
+import io.nuls.base.api.provider.block.facade.GetBlockHeaderByHeightReq;
 import io.nuls.provider.api.config.Config;
 import io.nuls.base.api.provider.Result;
 import io.nuls.core.constant.CommonCodeConstanst;
@@ -35,6 +39,7 @@ import io.nuls.core.rpc.model.TypeDescriptor;
 import io.nuls.provider.model.ErrorData;
 import io.nuls.provider.model.RpcClientResult;
 import io.nuls.provider.model.dto.TransactionDto;
+import io.nuls.provider.rpctools.BlockTools;
 import io.nuls.provider.rpctools.TransactionTools;
 import io.nuls.provider.utils.ResultUtil;
 import io.nuls.v2.model.annotation.Api;
@@ -60,6 +65,8 @@ public class TransactionResource {
     @Autowired
     TransactionTools transactionTools;
 
+    BlockService blockService = ServiceManager.get(BlockService.class);
+
     @GET
     @Path("/{hash}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -74,6 +81,15 @@ public class TransactionResource {
         }
         Result<TransactionDto> result = transactionTools.getTx(config.getChainId(), hash);
         RpcClientResult clientResult = ResultUtil.getRpcClientResult(result);
+        if(clientResult.isSuccess()) {
+            TransactionDto txDto = (TransactionDto) clientResult.getData();
+            GetBlockHeaderByHeightReq req = new GetBlockHeaderByHeightReq(txDto.getBlockHeight());
+            req.setChainId(config.getChainId());
+            Result<BlockHeaderData> blockResult = blockService.getBlockHeaderByHeight(req);
+            if(blockResult.isSuccess()) {
+                txDto.setBlockHash(blockResult.getData().getHash());
+            }
+        }
         return clientResult;
     }
 }
