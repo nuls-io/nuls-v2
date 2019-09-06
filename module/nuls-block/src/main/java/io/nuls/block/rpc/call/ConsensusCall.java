@@ -69,7 +69,7 @@ public class ConsensusCall {
             params.put(Constants.CHAIN_ID, chainId);
             params.put("download", download);
             params.put("block", RPCUtil.encode(block.serialize()));
-            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_validBlock", params);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_validBlock", params, 10 * 60 * 1000);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
                 Map v = (Map) responseData.get("cs_validBlock");
