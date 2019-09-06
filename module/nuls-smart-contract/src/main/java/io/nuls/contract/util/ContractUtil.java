@@ -479,13 +479,20 @@ public class ContractUtil {
                     contractResult.setTxTime(tx.getTime());
                     contractResult.setHash(tx.getHash().toString());
                     contractResult.setTxOrder(tx.getOrder());
-                    return checkGas(contractResult, batchInfo);
+                    boolean checkGas = checkGas(contractResult, batchInfo);
+                    batchInfo.notifyAll();
+                    return checkGas;
                 } else {
                     i++;
+                    if(Log.isDebugEnabled()) {
+                        Log.debug("等待的交易order - [{}], [{}]线程等待次数 - [{}]", txOrder, Thread.currentThread().getName(), i);
+                    }
+                    try {
+                        batchInfo.wait();
+                    } catch (InterruptedException e) {
+                        Log.error(e);
+                    }
                 }
-            }
-            if(i > 4) {
-                throw new RuntimeException("等待次数超过了最大执行线程数[4]");
             }
         }
     }
