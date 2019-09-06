@@ -1074,7 +1074,7 @@ public class TxValid {
     /**
      * 组装交易
      */
-    private Transaction assemblyTransaction(int chainId, List<CoinDTO> fromList, List<CoinDTO> toList, String remark, NulsHash hash) throws NulsException {
+    public Transaction assemblyTransaction(int chainId, List<CoinDTO> fromList, List<CoinDTO> toList, String remark, NulsHash hash) throws NulsException {
         Transaction tx = new Transaction(2);
         tx.setTime(NulsDateUtils.getCurrentTimeMillis() / 1000);
         tx.setRemark(StringUtils.bytes(remark));
@@ -1249,7 +1249,7 @@ public class TxValid {
      *
      * @return
      */
-    private Map createTransferTx(String addressFrom, String addressTo, BigInteger amount) {
+    public Map createTransferTx(String addressFrom, String addressTo, BigInteger amount) {
         Map transferMap = new HashMap();
         transferMap.put("chainId", chainId);
         transferMap.put("remark", "abc");
