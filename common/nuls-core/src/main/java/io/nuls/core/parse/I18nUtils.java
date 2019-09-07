@@ -24,11 +24,10 @@
  */
 package io.nuls.core.parse;
 
-import com.google.common.io.Resources;
 import io.nuls.core.constant.ToolsConstant;
-import io.nuls.core.model.StringUtils;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
+import io.nuls.core.model.StringUtils;
 
 import java.io.*;
 import java.net.URL;
@@ -96,6 +95,7 @@ public class I18nUtils {
      * @param defaultLanguage
      */
     private static void load(Class c, String folder, String defaultLanguage) {
+        InputStream in = null;
         try {
             if (StringUtils.isBlank(folder)) {
                 folder = FOLDER;
@@ -117,6 +117,7 @@ public class I18nUtils {
                         Properties prop = new Properties();
                         prop.load(new InputStreamReader(is, ToolsConstant.DEFAULT_ENCODING));
                         String key = file.getName().replace(".properties", "");
+                        Log.info("key[0]={}", key);
                         if (ALL_MAPPING.containsKey(key)) {
                             ALL_MAPPING.get(key).putAll(prop);
                         } else {
@@ -133,12 +134,12 @@ public class I18nUtils {
                                 JarEntry jar = entrys.nextElement();
                                 if (jar.getName().indexOf(folder + "/") == 0 && jar.getName().length() > (folder + "/").length()) {
                                     Log.info(jar.getName());
-                                    InputStream in = I18nUtils.class.getClassLoader().getResourceAsStream(jar.getName());
+                                    in = I18nUtils.class.getClassLoader().getResourceAsStream(jar.getName());
                                     Properties prop = new Properties();
                                     prop.load(in);
                                     String key = jar.getName().replace(".properties", "");
                                     key = key.replace(folder + "/", "");
-                                    Log.info("key={}", key);
+                                    Log.info("key[1]={}", key);
                                     if (ALL_MAPPING.containsKey(key)) {
                                         ALL_MAPPING.get(key).putAll(prop);
                                     } else {
@@ -151,12 +152,43 @@ public class I18nUtils {
                             e.printStackTrace();
                         }
                     } else {
+                        boolean isSuccess = false;
+                        String jarPath = url.getPath();
+                        if (jarPath.indexOf("!") > 0) {
+                            try {
+                                String filePath = folder + File.separator + defaultLanguage + ".properties";
+                                Log.info("filePath[2]={}", filePath);
+                                in = I18nUtils.class.getClassLoader().getResourceAsStream(filePath);
+                                Properties prop = new Properties();
+                                prop.load(in);
+                                String key = defaultLanguage;
+                                Log.info("key[2]={}, load properties size={}", key, prop.size());
+                                if (ALL_MAPPING.containsKey(key)) {
+                                    ALL_MAPPING.get(key).putAll(prop);
+                                } else {
+                                    ALL_MAPPING.put(key, prop);
+                                }
+                                isSuccess = true;
+                            } catch (Exception e) {
+                                Log.error(e.getMessage());
+                            }
+                        }
+                        if(!isSuccess) {
                         Log.error("unSupport loadLanguage!");
+                        }
                     }
                 }
             }
         } catch (IOException e) {
             Log.error(e.getMessage());
+        } finally {
+            if(in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
     }
