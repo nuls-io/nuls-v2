@@ -8,10 +8,7 @@ import io.nuls.core.rockdb.util.DBUtils;
 import org.rocksdb.*;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -187,6 +184,28 @@ public class TransactionDBManager {
         Options options = new Options();
         TransactionDB.destroyDB(dbPath, options);
     }
+
+
+    /**
+     * 查询所有的数据库名称.
+     * query all table names
+     *
+     * @return 所有数据表名称
+     */
+    public static String[] listTable() {
+        int i = 0;
+        Enumeration<String> keys = TABLES.keys();
+        String[] tables = new String[TABLES.size()];
+        int length = tables.length;
+        while (keys.hasMoreElements()) {
+            tables[i++] = keys.nextElement();
+            if (i == length) {
+                break;
+            }
+        }
+        return tables;
+    }
+
 
     /**
      * 关闭所有数据库连接.
@@ -492,6 +511,28 @@ public class TransactionDBManager {
         }
     }
 
+    public static Transaction openSession(final String table) {
+        WriteOptions options = new WriteOptions();
+       // options.setSync(false);
+        TransactionDB db = TABLES.get(table);
+        return db.beginTransaction(options);
+    }
+
+    public static void commit(Transaction tx) throws RocksDBException {
+        try {
+            tx.commit();
+        }finally {
+            tx.close();
+        }
+    }
+
+    public static void rollBack(Transaction tx) throws RocksDBException {
+        try {
+            tx.rollback();
+        }finally {
+            tx.close();
+        }
+    }
 
     /**
      * 数据库基本校验.
