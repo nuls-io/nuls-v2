@@ -24,7 +24,6 @@
  */
 package io.nuls.contract.manager;
 
-import ch.qos.logback.classic.Level;
 import io.nuls.base.protocol.ProtocolLoader;
 import io.nuls.contract.config.ContractConfig;
 import io.nuls.contract.constant.ContractConstant;
@@ -205,11 +204,17 @@ public class ChainManager {
         }
     }
 
+    public static void chainHandle(int chainId, int blockType) {
+        // 设置日志分链打印
+        Log.currentThreadChainId(chainId);
+        // 设置交易模块请求区块处理模式, 打包区块 - 0, 验证区块 - 1
+        Chain.putCurrentThreadBlockType(blockType);
+    }
+
     public static void chainHandle(int chainId) {
         // 设置日志分链打印
         Log.currentThreadChainId(chainId);
     }
-
 
     public Map<Integer, Chain> getChainMap() {
         return chainMap;

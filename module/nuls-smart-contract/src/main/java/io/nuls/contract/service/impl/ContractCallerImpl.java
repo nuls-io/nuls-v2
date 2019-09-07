@@ -31,10 +31,7 @@ import io.nuls.contract.helper.ContractConflictChecker;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.helper.ContractNewTxHandler;
 import io.nuls.contract.manager.ContractTempBalanceManager;
-import io.nuls.contract.model.bo.BatchInfo;
-import io.nuls.contract.model.bo.ContractContainer;
-import io.nuls.contract.model.bo.ContractResult;
-import io.nuls.contract.model.bo.ContractWrapperTransaction;
+import io.nuls.contract.model.bo.*;
 import io.nuls.contract.model.dto.ContractPackageDto;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.service.ContractCaller;
@@ -93,6 +90,7 @@ public class ContractCallerImpl implements ContractCaller {
     public Result callTx(int chainId, ContractContainer container, ProgramExecutor batchExecutor, ContractWrapperTransaction tx, String preStateRoot) {
         try {
             ContractData contractData = tx.getContractData();
+            Integer blockType = Chain.currentThreadBlockType();
             byte[] contractAddressBytes = contractData.getContractAddress();
             String contract = AddressTool.getStringAddressByBytes(contractAddressBytes);
             BatchInfo batchInfo = contractHelper.getChain(chainId).getBatchInfo();
@@ -105,7 +103,7 @@ public class ContractCallerImpl implements ContractCaller {
             //    Log.debug("Current block header height is {}", currentBlockHeader.getHeight());
             //    Log.debug("Latest block header height is {}", latestBlockHeader.getHeight());
             //}
-            ContractTxCallable txCallable = new ContractTxCallable(chainId, blockTime, batchExecutor, contract, tx, lastestHeight, preStateRoot, checker, container);
+            ContractTxCallable txCallable = new ContractTxCallable(chainId, blockType, blockTime, batchExecutor, contract, tx, lastestHeight, preStateRoot, checker, container);
             Future<ContractResult> contractResultFuture = TX_EXECUTOR_SERVICE.submit(txCallable);
             String hash = tx.getHash().toHex();
             batchInfo.getContractMap().put(hash, contractResultFuture);
@@ -126,7 +124,8 @@ public class ContractCallerImpl implements ContractCaller {
         try {
             Log.info("[Call Before End] contract batch, blockHeight is {}", blockHeight);
             BatchInfo batchInfo = contractHelper.getChain(chainId).getBatchInfo();
-            ContractBatchEndCallable callable = new ContractBatchEndCallable(chainId, blockHeight);
+            Integer blockType = Chain.currentThreadBlockType();
+            ContractBatchEndCallable callable = new ContractBatchEndCallable(chainId, blockType, blockHeight);
             Future<ContractPackageDto> contractPackageDtoFuture = BATCH_END_SERVICE.submit(callable);
             batchInfo.setContractPackageDtoFuture(contractPackageDtoFuture);
             batchInfo.setBeforeEndTime(System.currentTimeMillis());

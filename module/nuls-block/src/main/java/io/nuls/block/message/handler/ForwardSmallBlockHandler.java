@@ -85,6 +85,9 @@ public class ForwardSmallBlockHandler implements MessageProcessor {
         //2.已收到部分区块,还缺失交易信息,发送HashListMessage到源节点
         if (BlockForwardEnum.INCOMPLETE.equals(status) && !context.getStatus().equals(StatusEnum.SYNCHRONIZING)) {
             CachedSmallBlock block = SmallBlockCacher.getCachedSmallBlock(chainId, blockHash);
+            if (block == null) {
+                return;
+            }
             HashListMessage request = new HashListMessage();
             request.setBlockHash(blockHash);
             request.setTxHashList(block.getMissingTransactions());
