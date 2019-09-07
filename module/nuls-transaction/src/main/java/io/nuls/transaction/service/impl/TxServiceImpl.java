@@ -781,12 +781,12 @@ public class TxServiceImpl implements TxService {
                                 }
                                 // 出现智能合约,且通知标识为false,则先调用通知
                                 if (!contractNotify) {
-                                    ContractCall.contractBatchBegin(chain, blockHeight, blockTime, packingAddress, preStateRoot);
+                                    ContractCall.contractBatchBegin(chain, blockHeight, blockTime, packingAddress, preStateRoot, 0);
                                     contractNotify = true;
                                 }
                                 try {
                                     //调用执行智能合约,返回false.则不再处理智能合约
-                                    boolean invokeContractRs = ContractCall.invokeContract(chain, txPackageWrapper.getTxHex());
+                                    boolean invokeContractRs = ContractCall.invokeContract(chain, txPackageWrapper.getTxHex(), 0);
                                     if(!invokeContractRs){
                                         //不再发invoke
                                         stopInvokeContract = true;
@@ -841,7 +841,7 @@ public class TxServiceImpl implements TxService {
 
             boolean contractBefore = false;
             if (contractNotify) {
-                contractBefore = ContractCall.contractBatchBeforeEnd(chain, blockHeight);
+                contractBefore = ContractCall.contractBatchBeforeEnd(chain, blockHeight, 0);
             }
             //处理智能合约
             String stateRoot = preStateRoot;
@@ -1419,11 +1419,11 @@ public class TxServiceImpl implements TxService {
                 /** 出现智能合约,且通知标识为false,则先调用通知 */
                 if (!contractNotify) {
                     String packingAddress = AddressTool.getStringAddressByBytes(blockHeader.getPackingAddress(chain.getChainId()));
-                    ContractCall.contractBatchBegin(chain, blockHeight, blockTime, packingAddress, preStateRoot);
+                    ContractCall.contractBatchBegin(chain, blockHeight, blockTime, packingAddress, preStateRoot, 1);
                     contractNotify = true;
                 }
                 try {
-                    if (!ContractCall.invokeContract(chain, RPCUtil.encode(tx.serialize()))) {
+                    if (!ContractCall.invokeContract(chain, RPCUtil.encode(tx.serialize()), 1)) {
                         logger.debug("batch verify failed. invokeContract fail");
                         throw new NulsException(TxErrorCode.CONTRACT_VERIFY_FAIL);
                     }
@@ -1502,7 +1502,7 @@ public class TxServiceImpl implements TxService {
                 timeF1, timeF2, timeF3, d, timeF4, NulsDateUtils.getCurrentTimeMillis() - s1);
 
         if (contractNotify) {
-            if (!ContractCall.contractBatchBeforeEnd(chain, blockHeight)) {
+            if (!ContractCall.contractBatchBeforeEnd(chain, blockHeight, 1)) {
                 logger.debug("batch verify failed. contractBatchBeforeEnd fail");
                 throw new NulsException(TxErrorCode.CONTRACT_VERIFY_FAIL);
             }

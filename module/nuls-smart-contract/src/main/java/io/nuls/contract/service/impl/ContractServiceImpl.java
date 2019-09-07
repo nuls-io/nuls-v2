@@ -103,8 +103,8 @@ public class ContractServiceImpl implements ContractService {
     public Result begin(int chainId, long blockHeight, long blockTime, String packingAddress, String preStateRoot) {
         Log.info("[Begin contract batch] packaging blockHeight is [{}], packaging address is [{}], preStateRoot is [{}]", blockHeight, packingAddress, preStateRoot);
         Chain chain = contractHelper.getChain(chainId);
-        chain.setBatchInfo(null);
         BatchInfo batchInfo = new BatchInfo(blockHeight);
+        chain.setBatchInfo(null);
         // 初始化批量执行基本数据
         chain.setBatchInfo(batchInfo);
         // 准备临时余额和当前区块头
@@ -291,13 +291,9 @@ public class ContractServiceImpl implements ContractService {
                     Log.warn("超过了预留的超时时间[1]: {}", timeOut);
                     break;
                 }
-                try {
-                    // 等待before_end执行完成
-                    future.get(timeOut, TimeUnit.MILLISECONDS);
-                } catch (Exception e) {
-                    Log.error("wait end time out[1]", e.getMessage());
-                }
-                Log.info("第二次花费的时间: {}", System.currentTimeMillis() - beforeEndTime);
+                // 最终等待before_end执行完成
+                future.get();
+                Log.info("触发END期间 - 合约执行花费的时间: {}", System.currentTimeMillis() - beforeEndTime);
             } while (false);
             if (dto == null) {
                 return getFailed();

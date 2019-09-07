@@ -66,11 +66,13 @@ public class ContractTxCallable implements Callable<ContractResult> {
     private ContractConflictChecker checker;
     private ContractContainer container;
     private int chainId;
+    private int blockType;
     private long blockTime;
 
 
-    public ContractTxCallable(int chainId, long blockTime, ProgramExecutor executor, String contract, ContractWrapperTransaction tx, long number, String preStateRoot, ContractConflictChecker checker, ContractContainer container) {
+    public ContractTxCallable(int chainId, int blockType, long blockTime, ProgramExecutor executor, String contract, ContractWrapperTransaction tx, long number, String preStateRoot, ContractConflictChecker checker, ContractContainer container) {
         this.chainId = chainId;
+        this.blockType = blockType;
         this.blockTime = blockTime;
         this.contractExecutor = SpringLiteContext.getBean(ContractExecutor.class);
         this.contractHelper = SpringLiteContext.getBean(ContractHelper.class);
@@ -87,7 +89,7 @@ public class ContractTxCallable implements Callable<ContractResult> {
 
     @Override
     public ContractResult call() throws Exception {
-        ChainManager.chainHandle(chainId);
+        ChainManager.chainHandle(chainId, blockType);
         BatchInfo batchInfo = contractHelper.getChain(chainId).getBatchInfo();
         String hash = tx.getHash().toHex();
         if(!batchInfo.checkGasCostTotal(tx.getHash().toHex())) {
