@@ -114,6 +114,7 @@ public class ResponseMessageProcessor {
         Create Request for Synchronization
          */
         Request request = MessageUtil.defaultRequest();
+        request.setTimeOut(String.valueOf(REGISTER_API_TIME_OUT));
         request.getRequestMethods().put("RegisterAPI", ConnectManager.LOCAL);
         Message message = MessageUtil.basicMessage(MessageType.Request);
         message.setMessageData(request);
@@ -190,6 +191,7 @@ public class ResponseMessageProcessor {
      */
     public static Response requestAndResponse(String role, String cmd, Map params, long timeOut) throws Exception {
         Request request = MessageUtil.newRequest(cmd, params, Constants.BOOLEAN_FALSE, Constants.ZERO, Constants.ZERO);
+        request.setTimeOut(String.valueOf(timeOut));
         ResponseContainer responseContainer = sendRequest(role, request);
         return receiveResponse(responseContainer, timeOut);
     }

@@ -38,6 +38,7 @@ import io.nuls.core.rpc.netty.processor.container.RequestContainer;
 import io.nuls.core.rpc.netty.processor.container.ResponseContainer;
 import io.nuls.core.log.Log;
 import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 
 import java.util.Comparator;
 import java.util.Map;
@@ -103,7 +104,15 @@ public class TextMessageHandler implements Runnable, Comparable<TextMessageHandl
                      */
                     if (!ConnectManager.isPureDigital(request.getSubscriptionEventCounter())
                             && !ConnectManager.isPureDigital(request.getSubscriptionPeriod())) {
-                        RequestMessageProcessor.callCommandsWithPeriod(channel, request.getRequestMethods(), messageId, false);
+                        if(request.getTimeOut().isEmpty()){
+                            RequestMessageProcessor.callCommandsWithPeriod(channel, request.getRequestMethods(), messageId, false);
+                        }else{
+                            long requestTime = Long.parseLong(message.getTimestamp());
+                            long timeOut = Long.parseLong(request.getTimeOut());
+                            if(timeOut == 0 || NulsDateUtils.getCurrentTimeMillis() < requestTime + timeOut){
+                                RequestMessageProcessor.callCommandsWithPeriod(channel, request.getRequestMethods(), messageId, false);
+                            }
+                        }
                     } else {
                         int tryCount = 0;
                         while (connectData == null && tryCount < Constants.TRY_COUNT) {
