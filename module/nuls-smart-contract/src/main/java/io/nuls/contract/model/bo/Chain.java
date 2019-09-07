@@ -1,8 +1,10 @@
 package io.nuls.contract.model.bo;
 
+import io.nuls.contract.enums.BlockType;
 import io.nuls.contract.manager.ContractTokenBalanceManager;
 import io.nuls.contract.manager.ContractTxCreateUnconfirmedManager;
 import io.nuls.contract.model.bo.config.ConfigBean;
+import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.ProgramExecutor;
 import org.ethereum.config.CommonConfig;
 import org.ethereum.config.DefaultConfig;
@@ -19,6 +21,10 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Chain {
 
+    /**
+     * 打包区块 - 0, 验证区块 - 1
+     */
+    private static ThreadLocal<Integer> currentThreadBlockType = new ThreadLocal<>();
     /**
      * 链基础配置信息
      * Chain Foundation Configuration Information
@@ -47,14 +53,27 @@ public class Chain {
     private ContractTxCreateUnconfirmedManager contractTxCreateUnconfirmedManager;
 
     /**
-     * 批量执行信息
+     * 打包区块时批量执行信息
      */
     private BatchInfo batchInfo;
+
+    /**
+     * 验证区块时批量执行信息
+     */
+    private BatchInfo verifyBatchInfo;
 
     /**
      * 向合约模块注册接口提供给合约来调用
      */
     private Map<String, CmdRegister> cmdRegisterMap = new ConcurrentHashMap<>();
+
+    public static void putCurrentThreadBlockType(Integer blockType) {
+        currentThreadBlockType.set(blockType);
+    }
+
+    public static Integer currentThreadBlockType() {
+        return currentThreadBlockType.get();
+    }
 
     public int getChainId() {
         return config.getChainId();
@@ -109,11 +128,37 @@ public class Chain {
     }
 
     public BatchInfo getBatchInfo() {
-        return batchInfo;
+        Integer blockType = currentThreadBlockType.get();
+        if(blockType == null) {
+            Log.error("Empty blockType!");
+            //throw new RuntimeException("Empty blockType!");
+        }
+        if(blockType == BlockType.PACKAGE_BLOCK.type()) {
+            return batchInfo;
+        }
+        if(blockType == BlockType.VERIFY_BLOCK.type()) {
+            return verifyBatchInfo;
+        }
+        Log.error("Unkown blockType! - [{}]", blockType);
+        //throw new RuntimeException(String.format("Empty blockType! - [%s]", blockType));
+        return null;
     }
 
     public void setBatchInfo(BatchInfo batchInfo) {
-        this.batchInfo = batchInfo;
+        Integer blockType = currentThreadBlockType.get();
+        if(blockType == null) {
+            Log.error("Setting value error. Empty blockType!");
+            return;
+        }
+        if(blockType == BlockType.PACKAGE_BLOCK.type()) {
+            this.batchInfo = batchInfo;
+            return;
+        }
+        if(blockType == BlockType.VERIFY_BLOCK.type()) {
+            this.verifyBatchInfo = batchInfo;
+            return;
+        }
+        Log.error("Setting value error. Unkown blockType! - [{}]", blockType);
     }
 
     public Map<String, CmdRegister> getCmdRegisterMap() {

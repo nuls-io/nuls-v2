@@ -24,7 +24,6 @@
 package io.nuls.contract.callable;
 
 import io.nuls.base.RPCUtil;
-import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.contract.enums.CmdRegisterMode;
 import io.nuls.contract.helper.ContractHelper;
@@ -61,13 +60,15 @@ import static io.nuls.core.constant.TxType.DELETE_CONTRACT;
 public class ContractBatchEndCallable implements Callable<ContractPackageDto> {
 
     private int chainId;
+    private int blockType;
     private long blockHeight;
     private ContractHelper contractHelper;
     private ResultAnalyzer resultAnalyzer;
     private ResultHanlder resultHanlder;
 
-    public ContractBatchEndCallable(int chainId, long blockHeight) {
+    public ContractBatchEndCallable(int chainId, int blockType, long blockHeight) {
         this.chainId = chainId;
+        this.blockType = blockType;
         this.blockHeight = blockHeight;
         this.contractHelper = SpringLiteContext.getBean(ContractHelper.class);
         this.resultAnalyzer = SpringLiteContext.getBean(ResultAnalyzer.class);
@@ -77,7 +78,7 @@ public class ContractBatchEndCallable implements Callable<ContractPackageDto> {
     @Override
     public ContractPackageDto call() {
         try {
-            ChainManager.chainHandle(chainId);
+            ChainManager.chainHandle(chainId, blockType);
             BatchInfo batchInfo = contractHelper.getChain(chainId).getBatchInfo();
             BlockHeader currentBlockHeader = batchInfo.getCurrentBlockHeader();
             long blockTime = currentBlockHeader.getTime();

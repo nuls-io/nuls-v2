@@ -27,6 +27,7 @@ import io.nuls.base.protocol.MessageProcessor;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.BlockMessage;
 import io.nuls.block.message.HeightRangeMessage;
+import io.nuls.block.model.ChainContext;
 import io.nuls.block.rpc.call.NetworkCall;
 import io.nuls.block.service.BlockService;
 import io.nuls.core.core.annotation.Autowired;
@@ -46,7 +47,6 @@ import static io.nuls.block.constant.CommandConstant.GET_BLOCKS_BY_HEIGHT_MESSAG
 @Component("GetBlocksHandlerV1")
 public class GetBlocksHandler implements MessageProcessor {
 
-    private static final int MAX_SIZE = 1000;
     @Autowired
     private BlockService service;
 
@@ -66,10 +66,11 @@ public class GetBlocksHandler implements MessageProcessor {
         if (message == null) {
             return;
         }
-        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
+        ChainContext context = ContextManager.getContext(chainId);
+        NulsLogger logger = context.getLogger();
         long startHeight = message.getStartHeight();
         long endHeight = message.getEndHeight();
-        if (startHeight < 0L || startHeight > endHeight || endHeight - startHeight > MAX_SIZE) {
+        if (startHeight < 0L || startHeight > endHeight || endHeight - startHeight > context.getParameters().getDownloadNumber()) {
             logger.error("PARAMETER_ERROR");
             return;
         }

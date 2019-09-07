@@ -135,6 +135,24 @@ public class TxValid {
         importPriKey("76b7beaa98db863fb680def099af872978209ed9422b7acab8ab57ad95ab218b", password);//29 tNULSeBaMqywZjfSrKNQKBfuQtVxAHBQ8rB2Zn
     }
 
+    /**
+     * 合约与普通交易混发
+     * @throws Exception
+     */
+    @Test
+    public void transferAndContractPixelTest() throws Exception {
+        String code = Files.readString(Path.of("E:\\ContractTest", "pixel.txt"));
+        int size = 0;
+        for (int i = 0; i < 1000; i++) {
+            size++;
+            String hash = createTransfer(address21, address29, new BigInteger("100000000"));
+            //String hash = createCtxTransfer();
+            System.out.println("transfer: " + hash);
+            System.out.println("contract: " + createContract(address21, PASSWORD, code, new Object[]{size % 50 + 1}));
+//            Thread.sleep(100L);
+        }
+    }
+
     @Test
     public void getTxs() throws Exception {
 //        getTxCfmClient("31f65fb2cc5e468b203f692291ea94f8559dca30878f9e1648c11601bf0cf7e1");
@@ -388,23 +406,6 @@ public class TxValid {
         }
     }
 
-    /**
-     * 合约与普通交易混发
-     * @throws Exception
-     */
-    @Test
-    public void transferAndContractPixelTest() throws Exception {
-        String code = Files.readString(Path.of("E:\\ContractTest", "pixel.txt"));
-        int size = 0;
-        for (int i = 0; i < 100; i++) {
-            size++;
-            String hash = createTransfer(address21, address29, new BigInteger("100000000"));
-            //String hash = createCtxTransfer();
-            System.out.println("transfer: " + hash);
-            System.out.println("contract: " + createContract(address21, PASSWORD, code, new Object[]{size % 50 + 1}));
-            Thread.sleep(80L);
-        }
-    }
 
     @Test
     public void transferLocal() throws Exception {
@@ -1074,7 +1075,7 @@ public class TxValid {
     /**
      * 组装交易
      */
-    private Transaction assemblyTransaction(int chainId, List<CoinDTO> fromList, List<CoinDTO> toList, String remark, NulsHash hash) throws NulsException {
+    public Transaction assemblyTransaction(int chainId, List<CoinDTO> fromList, List<CoinDTO> toList, String remark, NulsHash hash) throws NulsException {
         Transaction tx = new Transaction(2);
         tx.setTime(NulsDateUtils.getCurrentTimeMillis() / 1000);
         tx.setRemark(StringUtils.bytes(remark));
@@ -1249,7 +1250,7 @@ public class TxValid {
      *
      * @return
      */
-    private Map createTransferTx(String addressFrom, String addressTo, BigInteger amount) {
+    public Map createTransferTx(String addressFrom, String addressTo, BigInteger amount) {
         Map transferMap = new HashMap();
         transferMap.put("chainId", chainId);
         transferMap.put("remark", "abc");
