@@ -113,6 +113,9 @@ public class SmallBlockHandler implements MessageProcessor {
         //2.已收到部分区块,还缺失交易信息,发送HashListMessage到源节点
         if (INCOMPLETE.equals(status) && !context.getStatus().equals(StatusEnum.SYNCHRONIZING)) {
             CachedSmallBlock block = SmallBlockCacher.getCachedSmallBlock(chainId, blockHash);
+            if (block == null) {
+                return;
+            }
             List<NulsHash> missingTransactions = block.getMissingTransactions();
             if (missingTransactions == null) {
                 return;

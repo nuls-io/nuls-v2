@@ -81,11 +81,10 @@ public class TxGroupHandler implements MessageProcessor {
         //2.已收到部分区块,还缺失交易信息,收到的应该就是缺失的交易信息
         if (BlockForwardEnum.INCOMPLETE.equals(status)) {
             CachedSmallBlock cachedSmallBlock = SmallBlockCacher.getCachedSmallBlock(chainId, blockHash);
-            SmallBlock smallBlock = cachedSmallBlock.getSmallBlock();
-            if (null == smallBlock) {
+            if (cachedSmallBlock == null) {
                 return;
             }
-
+            SmallBlock smallBlock = cachedSmallBlock.getSmallBlock();
             BlockHeader header = smallBlock.getHeader();
             Map<NulsHash, Transaction> txMap = cachedSmallBlock.getTxMap();
             for (Transaction tx : transactions) {
