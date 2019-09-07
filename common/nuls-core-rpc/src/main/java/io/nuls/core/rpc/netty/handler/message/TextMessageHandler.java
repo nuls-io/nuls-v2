@@ -109,7 +109,7 @@ public class TextMessageHandler implements Runnable, Comparable<TextMessageHandl
                         }else{
                             long requestTime = Long.parseLong(message.getTimestamp());
                             long timeOut = Long.parseLong(request.getTimeOut());
-                            long currentTime = NulsDateUtils.getCurrentTimeMillis();
+                            long currentTime = System.currentTimeMillis() ;
                             if(timeOut == 0 ||  currentTime< requestTime + timeOut){
                                 RequestMessageProcessor.callCommandsWithPeriod(channel, request.getRequestMethods(), messageId, false);
                             }else{
