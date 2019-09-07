@@ -160,7 +160,7 @@ public class ConsensusProcess {
             return;
         }
         try {
-            CallMethodUtils.receivePackingBlock(chain.getConfig().getChainId(), RPCUtil.encode(block.serialize()), self.getPackEndTime() - NulsDateUtils.getCurrentTimeSeconds());
+            CallMethodUtils.receivePackingBlock(chain.getConfig().getChainId(), RPCUtil.encode(block.serialize()), 0);
         } catch (Exception e) {
             consensusLogger.error(e);
         }

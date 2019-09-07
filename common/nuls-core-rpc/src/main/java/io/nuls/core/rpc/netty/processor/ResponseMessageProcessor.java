@@ -356,8 +356,12 @@ public class ResponseMessageProcessor {
         try {
             return responseContainer.getFuture().get(timeOut, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
-            //Timeout Error
-            return MessageUtil.newFailResponse(responseContainer.getMessageId(), CommonCodeConstanst.REQUEST_TIME_OUT);
+            if(timeOut > 0){
+                //Timeout Error
+                return MessageUtil.newFailResponse(responseContainer.getMessageId(), CommonCodeConstanst.REQUEST_TIME_OUT);
+            }else{
+                return MessageUtil.newSuccessResponse(responseContainer.getMessageId());
+            }
         } finally {
             RequestContainer.removeResponseContainer(responseContainer.getMessageId());
         }
