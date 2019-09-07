@@ -26,6 +26,7 @@ package io.nuls.contract.tx.v1;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.protocol.CommonAdvice;
+import io.nuls.contract.enums.BlockType;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.model.bo.Chain;
@@ -53,7 +54,7 @@ public class TransactionCommitAdvice implements CommonAdvice {
     @Override
     public void begin(int chainId, List<Transaction> txList, BlockHeader header) {
         try {
-            ChainManager.chainHandle(chainId);
+            ChainManager.chainHandle(chainId, BlockType.VERIFY_BLOCK.type());
             ContractPackageDto contractPackageDto = contractHelper.getChain(chainId).getBatchInfo().getContractPackageDto();
             if (contractPackageDto != null) {
                 Log.info("contract execute txDataSize is {}, commit txDataSize is {}", contractPackageDto.getContractResultMap().keySet().size(), txList.size());
