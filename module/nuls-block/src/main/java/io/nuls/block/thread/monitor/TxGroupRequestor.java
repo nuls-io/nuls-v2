@@ -109,13 +109,12 @@ public class TxGroupRequestor extends BaseMonitor {
                 hashList = CollectionUtils.removeAll(hashList, existHashes);
                 int filtered = hashList.size();
                 logger.debug("TxGroupRequestor send getTxgroupMessage, filtered hashList size-" + filtered + ", blockHash-" + blockHash);
+                CachedSmallBlock cachedSmallBlock = SmallBlockCacher.getCachedSmallBlock(chainId, NulsHash.fromHex(blockHash));
+                if (cachedSmallBlock == null) {
+                    continue;
+                }
                 if (filtered == 0) {
-                    CachedSmallBlock cachedSmallBlock = SmallBlockCacher.getCachedSmallBlock(chainId, NulsHash.fromHex(blockHash));
                     SmallBlock smallBlock = cachedSmallBlock.getSmallBlock();
-                    if (null == smallBlock) {
-                        return;
-                    }
-
                     BlockHeader header = smallBlock.getHeader();
                     Map<NulsHash, Transaction> txMap = cachedSmallBlock.getTxMap();
                     for (Transaction tx : existTransactions) {
@@ -135,7 +134,7 @@ public class TxGroupRequestor extends BaseMonitor {
                 hashListMessage.setTxHashList(hashList);
                 if (original != filtered) {
                     entry.getValue().forEach(e -> e.setRequest(hashListMessage));
-                    Map<NulsHash, Transaction> map = SmallBlockCacher.getCachedSmallBlock(chainId, NulsHash.fromHex(blockHash)).getTxMap();
+                    Map<NulsHash, Transaction> map = cachedSmallBlock.getTxMap();
                     existTransactions.forEach(e -> map.put(e.getHash(), e));
                 }
                 boolean b = NetworkCall.sendToNode(chainId, hashListMessage, task.getNodeId(), GET_TXGROUP_MESSAGE);

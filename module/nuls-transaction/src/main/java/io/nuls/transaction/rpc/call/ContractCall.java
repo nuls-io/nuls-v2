@@ -49,16 +49,18 @@ public class ContractCall {
      * @param blockTime
      * @param packingAddress
      * @param preStateRoot
+     * @param blockType 该调用的处理模式, 打包:0, 验证区块:1
      * @return
      * @throws NulsException
      */
-    public static boolean contractBatchBegin(Chain chain, long blockHeight, long blockTime, String packingAddress, String preStateRoot) {
+    public static boolean contractBatchBegin(Chain chain, long blockHeight, long blockTime, String packingAddress, String preStateRoot, int blockType) {
         Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
         params.put(Constants.CHAIN_ID, chain.getChainId());
         params.put("blockHeight", blockHeight);
         params.put("blockTime", blockTime);
         params.put("packingAddress", packingAddress);
         params.put("preStateRoot", preStateRoot);
+        params.put("blockType", blockType);
         try {
             TransactionCall.requestAndResponse(ModuleE.SC.abbr, "sc_batch_begin", params);
             return true;
@@ -72,14 +74,16 @@ public class ContractCall {
      * 调用智能合约, 合约执行成功与否,不影响交易的打包
      * @param chain
      * @param tx
+     * @param blockType 该调用的处理模式, 打包:0, 验证区块:1
      * @return
      * @throws NulsException
      */
-    public static boolean invokeContract(Chain chain, String tx) throws NulsException {
+    public static boolean invokeContract(Chain chain, String tx, int blockType) throws NulsException {
         try {
             Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("tx", tx);
+            params.put("blockType", blockType);
             HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.SC.abbr, "sc_invoke_contract", params);
             Boolean value = (Boolean) result.get("value");
             if(null == value){
@@ -98,14 +102,15 @@ public class ContractCall {
      * 调用智能合约
      * @param chain
      * @param blockHeight
+     * @param blockType 该调用的处理模式, 打包:0, 验证区块:1
      * @return
      * @throws NulsException
      */
-    public static boolean contractBatchBeforeEnd(Chain chain, long blockHeight) {
-
+    public static boolean contractBatchBeforeEnd(Chain chain, long blockHeight, int blockType) {
         Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
         params.put(Constants.CHAIN_ID, chain.getChainId());
         params.put("blockHeight", blockHeight);
+        params.put("blockType", blockType);
         try {
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, "sc_batch_before_end", params);
             if(!response.isSuccess()){
@@ -152,8 +157,6 @@ public class ContractCall {
         params.put("blockHeight", blockHeight);
         try {
             Map result = (Map) TransactionCall.requestAndResponse(ModuleE.SC.abbr, "sc_package_batch_end", params);
-//            chain.getLogger().debug("moduleCode:{}, -cmd:{}, -contractProcess -rs: {}",
-//                    ModuleE.SC.abbr, "sc_batch_end", "'stateRoot': '" + result.get("stateRoot") + "', 'txList': " + result.get("txList"));
             return result;
         }catch (Exception e) {
             chain.getLogger().error(e);

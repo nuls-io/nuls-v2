@@ -86,6 +86,9 @@ public class SmallBlockCacher {
         CachedSmallBlock cachedSmallBlock = smallBlockCacheMap.get(chainId).get(blockHash);
         if (cachedSmallBlock == null) {
             Block block = service.getBlock(chainId, blockHash);
+            if (block == null) {
+                return null;
+            }
             SmallBlock smallBlock = BlockUtil.getSmallBlock(chainId, block);
             List<Transaction> txs = block.getTxs();
             Map<NulsHash, Transaction> txMap = new HashMap<>(txs.size());
@@ -104,7 +107,11 @@ public class SmallBlockCacher {
      * @return
      */
     public static SmallBlock getSmallBlock(int chainId, NulsHash blockHash) {
-        return getCachedSmallBlock(chainId, blockHash).getSmallBlock();
+        CachedSmallBlock cachedSmallBlock = getCachedSmallBlock(chainId, blockHash);
+        if (cachedSmallBlock == null) {
+            return null;
+        }
+        return cachedSmallBlock.getSmallBlock();
     }
 
     /**

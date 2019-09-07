@@ -66,11 +66,13 @@ public class ContractTxCallable implements Callable<ContractResult> {
     private ContractConflictChecker checker;
     private ContractContainer container;
     private int chainId;
+    private int blockType;
     private long blockTime;
 
 
-    public ContractTxCallable(int chainId, long blockTime, ProgramExecutor executor, String contract, ContractWrapperTransaction tx, long number, String preStateRoot, ContractConflictChecker checker, ContractContainer container) {
+    public ContractTxCallable(int chainId, int blockType, long blockTime, ProgramExecutor executor, String contract, ContractWrapperTransaction tx, long number, String preStateRoot, ContractConflictChecker checker, ContractContainer container) {
         this.chainId = chainId;
+        this.blockType = blockType;
         this.blockTime = blockTime;
         this.contractExecutor = SpringLiteContext.getBean(ContractExecutor.class);
         this.contractHelper = SpringLiteContext.getBean(ContractHelper.class);
@@ -87,7 +89,7 @@ public class ContractTxCallable implements Callable<ContractResult> {
 
     @Override
     public ContractResult call() throws Exception {
-        ChainManager.chainHandle(chainId);
+        ChainManager.chainHandle(chainId, blockType);
         BatchInfo batchInfo = contractHelper.getChain(chainId).getBatchInfo();
         String hash = tx.getHash().toHex();
         if(!batchInfo.checkGasCostTotal(tx.getHash().toHex())) {
@@ -124,16 +126,14 @@ public class ContractTxCallable implements Callable<ContractResult> {
                 case CREATE_CONTRACT:
                     container.setHasCreate(true);
                     contractResult = contractExecutor.create(executor, contractData, number, preStateRoot, extractPublicKey(tx));
-                    makeContractResult(tx, contractResult);
-                    if(!checkGas(contractResult)) {
+                    if(!makeContractResultAndCheckGasSerial(tx, contractResult, batchInfo)) {
                         break;
                     }
                     checkCreateResult(tx, callableResult, contractResult);
                     break;
                 case CALL_CONTRACT:
                     contractResult = contractExecutor.call(executor, contractData, number, preStateRoot, extractPublicKey(tx));
-                    makeContractResult(tx, contractResult);
-                    if(!checkGas(contractResult)) {
+                    if(!makeContractResultAndCheckGasSerial(tx, contractResult, batchInfo)) {
                         break;
                     }
                     checkCallResult(tx, callableResult, contractResult);
@@ -154,17 +154,6 @@ public class ContractTxCallable implements Callable<ContractResult> {
         //    Log.debug("[Per Contract Execution Cost Time] TxType is {}, TxHash is {}, Cost Time is {}", tx.getType(), tx.getHash().toString(), System.currentTimeMillis() - start);
         //}
         return contractResult;
-    }
-
-    private boolean checkGas(ContractResult contractResult) {
-        long gasUsed = contractResult.getGasUsed();
-        BatchInfo batchInfo = contractHelper.getChain(chainId).getBatchInfo();
-        boolean isAdded = batchInfo.addGasCostTotal(gasUsed, contractResult.getHash());
-        if(!isAdded) {
-            contractResult.setError(true);
-            contractResult.setErrorMessage("Exceed tx count [500] or gas limit of block [12,000,000 gas], the contract transaction ["+ contractResult.getHash() +"] revert to package queue.");
-        }
-        return isAdded;
     }
 
     private void checkCreateResult(ContractWrapperTransaction tx, CallableResult callableResult, ContractResult contractResult) {

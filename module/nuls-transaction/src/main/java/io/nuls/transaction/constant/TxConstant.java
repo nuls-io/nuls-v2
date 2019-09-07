@@ -72,7 +72,7 @@ public interface TxConstant {
     /** 一个区块中最大允许跨链模块交易的数量*/
     int PACKAGE_CROSS_TX_MAX_COUNT = 500;
     /** 一个区块中最大允许智能合约交易的数量*/
-    int PACKAGE_CONTRACT_TX_MAX_COUNT = 500;
+    int PACKAGE_CONTRACT_TX_MAX_COUNT = 700;
 
     /**(毫秒) 打包时的时间分配分为两大部分
      1：从待打包队列获取交易以及账本验证。
