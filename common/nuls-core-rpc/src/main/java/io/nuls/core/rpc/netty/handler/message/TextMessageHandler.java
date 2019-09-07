@@ -109,8 +109,11 @@ public class TextMessageHandler implements Runnable, Comparable<TextMessageHandl
                         }else{
                             long requestTime = Long.parseLong(message.getTimestamp());
                             long timeOut = Long.parseLong(request.getTimeOut());
-                            if(timeOut == 0 || NulsDateUtils.getCurrentTimeMillis() < requestTime + timeOut){
+                            long currentTime = NulsDateUtils.getCurrentTimeMillis();
+                            if(timeOut == 0 ||  currentTime< requestTime + timeOut){
                                 RequestMessageProcessor.callCommandsWithPeriod(channel, request.getRequestMethods(), messageId, false);
+                            }else{
+                                Log.info("请求超时丢弃请求，当前时间：{}，请求时间:{},超时时间:{},请求方法：{}", currentTime,requestTime,timeOut,request.getRequestMethods());
                             }
                         }
                     } else {
