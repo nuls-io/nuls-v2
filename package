@@ -103,9 +103,13 @@ setTargetOS(){
     case "$1" in
 		linux64)
 		     TARGET_OS=linux;;
+		linux)
+		     TARGET_OS=linux;;
 		macos)
 		     TARGET_OS=macos;;
 		win64)
+		     TARGET_OS=window;;
+		window)
 		     TARGET_OS=window;;
 		?)   exit 2;;
 	esac
