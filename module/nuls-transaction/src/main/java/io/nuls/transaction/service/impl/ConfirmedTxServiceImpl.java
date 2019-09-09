@@ -335,12 +335,28 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             saveTxs(chain, txList, blockHeader.getHeight(), false);
             return false;
         }
-        //倒序放入未确认库, 和待打包队列
+        //计算待打包队列大小倒序放入未确认库, 和待打包队列
+
+        int packableTxMapDataSize = 0;
+        if(chain.getPackaging().get()) {
+            //是打包节点才计算待打包队列的当前容量
+            for (Transaction tx : chain.getPackableTxMap().values()) {
+                packableTxMapDataSize += tx.size();
+            }
+        }
         for (int i = txList.size() - 1; i >= 0; i--) {
             Transaction tx = txList.get(i);
             if(!TxManager.isSystemTx(chain, tx)) {
                 unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
-                savePackable(chain, tx);
+                //不是系统交易,并且节点是打包节点,待打包队列没到最大值则重新放回待打包队列的最前端
+                if (chain.getPackaging().get() && packableTxMapDataSize < TxConstant.PACKABLE_TX_MAP_MAX_DATA_SIZE) {
+                    packablePool.offerFirst(chain, tx);
+                } else {
+                  //TODO test
+                    chain.getLogger().info("回滚扔交易 hash:{}", tx.getHash().toHex());
+                }
+
+
             }
         }
         logger.debug("[回滚区块] 回滚移除DB已存储的交易, 放入未确认库:{}", NulsDateUtils.getCurrentTimeMillis() - dbStart);
@@ -355,7 +371,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
      * @param tx    Transaction
      */
     private void savePackable(Chain chain, Transaction tx) {
-        //不是系统交易 并且节点是打包节点则重新放回待打包队列的最前端
+
         if (chain.getPackaging().get()) {
             packablePool.offerFirst(chain, tx);
         }
