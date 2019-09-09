@@ -33,7 +33,7 @@ log(){ #print date prefix and green
 }
 
 BUILD_NULSTAR="1"
-NULSTAR_FILE_NAME="nulstar_190819.tar.gz"
+NULSTAR_FILE_NAME="nulstar_190909.tar.gz"
 #TARGET_OS=linux
 #NULSTAR download url
 NULSTAR_URL="http://pub-readingpal.oss-cn-hangzhou.aliyuncs.com/nulstar/"
