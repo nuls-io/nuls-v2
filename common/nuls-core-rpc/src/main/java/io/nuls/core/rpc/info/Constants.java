@@ -221,7 +221,7 @@ public class Constants {
 
     public static final int QUEUE_SIZE = 100000;
 
-    public static final long QUEUE_MEM_LIMIT_SIZE = 180 * 1024 * 1024;
+    public static final long QUEUE_MEM_LIMIT_SIZE = 128 * 1024 * 1024;
 
     /**
      * 参数类型
