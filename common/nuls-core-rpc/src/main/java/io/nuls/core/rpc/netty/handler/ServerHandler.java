@@ -55,11 +55,6 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
             MessageType messageType = MessageType.valueOf(message.getMessageType());
             int priority = CmdPriority.DEFAULT.getPriority();
             TextMessageHandler messageHandler = new TextMessageHandler((SocketChannel) ctx.channel(), message,priority);
-            if(requestExecutorService.getQueue().size() >= 500 || responseExecutorService.getQueue().size() > 500){
-                String role = ConnectManager.getRoleByChannel(ctx.channel());
-                Log.info("链接{}当前请求线程池总线程数量{},运行中线程数量{},等待队列数量{}",role,requestExecutorService.getPoolSize(),requestExecutorService.getActiveCount(),requestExecutorService.getQueue().size());
-                Log.info("链接{}当前响应线程池总线程数量{},运行中线程数量{},等待队列数量{}",role,responseExecutorService.getPoolSize(),responseExecutorService.getActiveCount(),responseExecutorService.getQueue().size());
-            }
             if(messageType.equals(MessageType.Response)
                     || messageType.equals(MessageType.NegotiateConnectionResponse)
                     || messageType.equals(MessageType.Ack) ){
@@ -75,6 +70,10 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
                         }
                     }
                     messageHandler.setRequest(request);
+                }else if(messageType.equals(MessageType.RequestOnly)){
+                    Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
+                    messageHandler.setRequest(request);
+                    messageHandler.setMessageSize(bytes.length);
                 }
                 requestExecutorService.execute(messageHandler);
             }
