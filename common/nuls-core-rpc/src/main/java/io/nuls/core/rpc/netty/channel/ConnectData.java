@@ -2,6 +2,7 @@ package io.nuls.core.rpc.netty.channel;
 
 import io.netty.channel.socket.SocketChannel;
 import io.nuls.core.rpc.info.Constants;
+import io.nuls.core.rpc.model.RequestOnly;
 import io.nuls.core.rpc.model.message.Message;
 import io.nuls.core.rpc.model.message.Request;
 import io.nuls.core.rpc.model.message.Response;
@@ -36,6 +37,12 @@ public class ConnectData {
     private boolean connected = true;
 
     /**
+     * 当前RequestOnly队列占内存大小
+     * Current memory size of RequestOnly queue
+     * */
+    private long requestOnlyQueueMemSize = 0;
+
+    /**
      * 从服务端得到的自动处理的应答消息
      * Response that need to be handled Automatically from the server
      */
@@ -45,7 +52,7 @@ public class ConnectData {
      * 客户端不需要相应的请求
      * Client does not need corresponding requests
      */
-    private final LinkedBlockingQueue<Request> requestOnlyQueue = new LinkedBlockingQueue<>(Constants.QUEUE_SIZE);
+    private final LinkedBlockingQueue<RequestOnly> requestOnlyQueue = new LinkedBlockingQueue<>(Constants.QUEUE_SIZE);
 
     /**
      * 请求超时的请求
@@ -260,8 +267,28 @@ public class ConnectData {
         return threadPool;
     }
 
-    public LinkedBlockingQueue<Request> getRequestOnlyQueue() {
+    public LinkedBlockingQueue<RequestOnly> getRequestOnlyQueue() {
         return requestOnlyQueue;
+    }
+
+    public long getRequestOnlyQueueMemSize() {
+        return requestOnlyQueueMemSize;
+    }
+
+    public void setRequestOnlyQueueMemSize(long requestOnlyQueueMemSize) {
+        this.requestOnlyQueueMemSize = requestOnlyQueueMemSize;
+    }
+
+    public boolean requestOnlyQueueReachLimit(){
+        return Constants.QUEUE_MEM_LIMIT_SIZE <= this.requestOnlyQueueMemSize;
+    }
+
+    public void addRequestOnlyQueueMemSize(long requestOnlyMemSize) {
+        this.requestOnlyQueueMemSize += requestOnlyMemSize;
+    }
+
+    public void subRequestOnlyQueueMemSize(long requestOnlyMemSize) {
+        this.requestOnlyQueueMemSize -= requestOnlyMemSize;
     }
 
     /**
