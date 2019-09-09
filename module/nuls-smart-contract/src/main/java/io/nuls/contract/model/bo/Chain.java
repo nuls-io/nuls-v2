@@ -130,8 +130,9 @@ public class Chain {
     public BatchInfo getBatchInfo() {
         Integer blockType = currentThreadBlockType.get();
         if(blockType == null) {
-            Log.error("Empty blockType!");
+            Log.info("Empty blockType!");
             //throw new RuntimeException("Empty blockType!");
+            return null;
         }
         if(blockType == BlockType.PACKAGE_BLOCK.type()) {
             return batchInfo;
@@ -147,7 +148,7 @@ public class Chain {
     public void setBatchInfo(BatchInfo batchInfo) {
         Integer blockType = currentThreadBlockType.get();
         if(blockType == null) {
-            Log.error("Setting value error. Empty blockType!");
+            Log.info("Setting value error. Empty blockType!");
             return;
         }
         if(blockType == BlockType.PACKAGE_BLOCK.type()) {

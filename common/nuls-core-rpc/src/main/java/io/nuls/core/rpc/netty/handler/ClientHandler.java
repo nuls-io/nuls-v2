@@ -132,6 +132,10 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
                             }
                         }
                         messageHandler.setRequest(request);
+                    }else if(messageType.equals(MessageType.RequestOnly)){
+                        Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
+                        messageHandler.setRequest(request);
+                        messageHandler.setMessageSize(bytes.length);
                     }
                     requestExecutorService.execute(messageHandler);
                 }

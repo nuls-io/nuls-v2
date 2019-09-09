@@ -184,7 +184,7 @@ public class TransactionCall {
      * @return
      * @throws IOException
      */
-    public static List<Transaction> getConfirmedTransactions(int chainId, List<NulsHash> hashList) {
+    public static List<Transaction> getConfirmedTransactions(int chainId, List<NulsHash> hashList, long timeout) {
         List<Transaction> transactions = new ArrayList<>();
         NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         try {
@@ -194,7 +194,7 @@ public class TransactionCall {
             List<String> t = new ArrayList<>();
             hashList.forEach(e -> t.add(e.toHex()));
             params.put("txHashList", t);
-            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getBlockTxs", params);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getBlockTxs", params, timeout);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
                 Map map = (Map) responseData.get("tx_getBlockTxs");

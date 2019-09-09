@@ -46,14 +46,13 @@ public class DataCacher<T> {
         return future;
     }
 
-    public boolean complete(NulsHash hash, T t) {
+    public void complete(NulsHash hash, T t) {
         CompletableFuture<T> future = cacher.get(hash);
         if (future == null) {
-            return false;
+            return;
         }
         future.complete(t);
         cacher.remove(hash);
-        return true;
     }
 
     public void removeFuture(NulsHash hash) {
