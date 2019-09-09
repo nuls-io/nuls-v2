@@ -36,7 +36,7 @@ BUILD_NULSTAR="1"
 NULSTAR_FILE_NAME="nulstar_190909.tar.gz"
 #TARGET_OS=linux
 #NULSTAR download url
-NULSTAR_URL="http://pub-readingpal.oss-cn-hangzhou.aliyuncs.com/nulstar/"
+NULSTAR_URL="http://nuls-cn.oss-cn-hangzhou.aliyuncs.com/nulstar/"
 #获取参数
 #输出目录
 NULS_WALLET_TAR_NAME="./NULS_Wallet_linux64_beta3"
