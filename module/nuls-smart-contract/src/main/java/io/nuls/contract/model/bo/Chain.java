@@ -132,6 +132,7 @@ public class Chain {
         if(blockType == null) {
             Log.error("Empty blockType!");
             //throw new RuntimeException("Empty blockType!");
+            return null;
         }
         if(blockType == BlockType.PACKAGE_BLOCK.type()) {
             return batchInfo;

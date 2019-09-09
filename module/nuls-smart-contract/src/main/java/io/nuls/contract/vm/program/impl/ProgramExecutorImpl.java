@@ -27,6 +27,7 @@ package io.nuls.contract.vm.program.impl;
 import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.model.bo.ContractBalance;
 import io.nuls.contract.model.dto.BlockHeaderDto;
+import io.nuls.contract.util.Log;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.ObjectRef;
 import io.nuls.contract.vm.Result;
@@ -458,7 +459,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             }
             return programResult.error(e.getMessage());
         } catch (Exception e) {
-            log.error("", e);
+            Log.error(e);
             ProgramResult programResult = revert(e.getMessage());
             return programResult;
         }
