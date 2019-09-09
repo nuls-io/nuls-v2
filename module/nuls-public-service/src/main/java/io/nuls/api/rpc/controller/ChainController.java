@@ -81,13 +81,11 @@ public class ChainController {
         if (!CacheManager.isChainExist(chainId)) {
             return RpcResult.dataNotFound();
         }
-        Result<Map<String, Object>> result = WalletRpcHandler.getBlockGlobalInfo(chainId);
-        if (result.isFailed()) {
-            return RpcResult.failed(result);
-        }
 
-        Map<String, Object> map = result.getData();
+        Map<String, Object> map = new HashMap<>();
         map.put("chainId", chainId);
+        map.put("networkHeight", ApiContext.networkHeight);
+        map.put("localHeight", ApiContext.localHeight);
 
         ApiCache apiCache = CacheManager.getCache(chainId);
         AssetInfo assetInfo = apiCache.getChainInfo().getDefaultAsset();
@@ -109,8 +107,7 @@ public class ChainController {
         } else {
             map.put("agentAsset", null);
         }
-        result = WalletRpcHandler.getNetworkInfo(chainId);
-        map.put("magicNumber", result.getData().get("magicNumber"));
+        map.put("magicNumber", ApiContext.magicNumber);
         map.put("isRunCrossChain", ApiContext.isRunCrossChain);
         map.put("isRunSmartContract", ApiContext.isRunSmartContract);
         return RpcResult.success(map);
