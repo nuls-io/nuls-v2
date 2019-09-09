@@ -139,7 +139,7 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
         }
         List<Transaction> txList = new ArrayList<>();
         //根据交易hash批量查询交易数据
-        List<byte[]> list = RocksDBService.multiGetValueList(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hashList);
+        List<byte[]> list = RocksDBService.multiGetAsList(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hashList);
         if (list != null) {
             for (byte[] txBytes : list) {
                 Transaction tx = new Transaction();
@@ -185,7 +185,7 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
         }
         List<TransactionUnconfirmedPO> txPOList = new ArrayList<>();
         //根据交易hash批量查询交易数据
-        List<byte[]> list = RocksDBService.multiGetValueList(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hashList);
+        List<byte[]> list = RocksDBService.multiGetAsList(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hashList);
         if (list != null) {
             for (byte[] txBytes : list) {
                 TransactionUnconfirmedPO txPO = new TransactionUnconfirmedPO();

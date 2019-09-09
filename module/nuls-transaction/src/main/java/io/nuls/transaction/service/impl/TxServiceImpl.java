@@ -1412,7 +1412,7 @@ public class TxServiceImpl implements TxService {
         }
 
         long f2 = System.currentTimeMillis();
-        timeF1 += f2 - f1;
+        timeF1 = f2 - f1;
         //验证交易是否已确认过
         List<byte[]> confirmedList = confirmedTxStorageService.getExistKeys(chainId, keys);
         if (!confirmedList.isEmpty()) {
@@ -1422,15 +1422,14 @@ public class TxServiceImpl implements TxService {
             }
             throw new NulsException(TxErrorCode.TX_CONFIRMED);
         }
-
         long f3 = System.currentTimeMillis();
-        timeF2 += f3 - f2;
+        timeF2 = f3 - f2;
 
         //验证本地没有的交易
         List<String> unconfirmedList = unconfirmedTxStorageService.getExistKeysStr(chainId, keys);
 
         long f4 = System.currentTimeMillis();
-        timeF3 += f4 - f3;
+        timeF3 = f4 - f3;
 
         Set<String> set = new HashSet<>();
         set.addAll(unconfirmedList);
@@ -1466,7 +1465,7 @@ public class TxServiceImpl implements TxService {
                 d += (System.currentTimeMillis() - d1);
             }
         }
-        timeF4 += System.currentTimeMillis() - f4;
+        timeF4 = System.currentTimeMillis() - f4;
 
         logger.debug("[验区块交易] 反序列化,合约,分组:{} -是否确认过:{} -是否在未确认中:{}, -单个验证:{} -单内部处理:{} -合计时间:{}",
                 timeF1, timeF2, timeF3, d, timeF4, NulsDateUtils.getCurrentTimeMillis() - s1);
