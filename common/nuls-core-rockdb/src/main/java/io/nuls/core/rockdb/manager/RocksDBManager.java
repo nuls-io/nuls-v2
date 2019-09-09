@@ -266,7 +266,7 @@ public class RocksDBManager {
      */
     private static boolean baseCheckTable(final String tableName) {
         if (StringUtils.isBlank(tableName) || !TABLES.containsKey(tableName)) {
-            Log.error("");
+            Log.warn("tableName = {} is not in TABLES",tableName);
             return false;
         }
         return true;
