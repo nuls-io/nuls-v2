@@ -237,14 +237,8 @@ public class MongoAccountServiceImpl implements AccountService {
         return txRelationInfoList;
     }
 
-    public PageInfo<MiniAccountInfo> getCoinRanking(int pageIndex, int pageSize, int sortType, int chainId) {
-        Bson sort;
-//        if (sortType == 0) {
-//
-//        } else {
-//            sort = Sorts.ascending("totalBalance");
-//        }
-        sort = Sorts.descending("totalBalance");
+    public PageInfo<MiniAccountInfo> getCoinRanking(int pageIndex, int pageSize, int chainId) {
+        Bson sort = Sorts.descending("totalBalance");
         List<MiniAccountInfo> accountInfoList = new ArrayList<>();
         Bson filter = Filters.ne("totalBalance", 0);
         BasicDBObject fields = new BasicDBObject();
