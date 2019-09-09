@@ -300,8 +300,8 @@ public class AccountController {
 
     @RpcMethod("getCoinRanking")
     public RpcResult getCoinRanking(List<Object> params) {
-        VerifyUtils.verifyParams(params, 4);
-        int chainId, pageNumber, pageSize, sortType;
+        VerifyUtils.verifyParams(params, 3);
+        int chainId, pageNumber, pageSize;
         try {
             chainId = (int) params.get(0);
         } catch (Exception e) {
@@ -317,14 +317,7 @@ public class AccountController {
         } catch (Exception e) {
             return RpcResult.paramError("[pageSize] is inValid");
         }
-        try {
-            sortType = (int) params.get(3);
-        } catch (Exception e) {
-            return RpcResult.paramError("[sortType] is inValid");
-        }
-        if (sortType < 0 || sortType > 1) {
-            return RpcResult.paramError("[sortType] is invalid");
-        }
+
         if (pageNumber <= 0) {
             pageNumber = 1;
         }
@@ -334,7 +327,7 @@ public class AccountController {
 
         PageInfo<MiniAccountInfo> pageInfo;
         if (CacheManager.isChainExist(chainId)) {
-            pageInfo = accountService.getCoinRanking(pageNumber, pageSize, sortType, chainId);
+            pageInfo = accountService.getCoinRanking(pageNumber, pageSize, chainId);
         } else {
             pageInfo = new PageInfo<>(pageNumber, pageSize);
         }
