@@ -89,7 +89,6 @@ public class ClearUnconfirmedTxProcessTask implements Runnable {
     private int processUnconfirmedTxs(List<byte[]> txKeyList) {
         int unconfirmedTxsCount = 0;
         List<byte[]> queryList = new ArrayList<>();
-        //一次最多处理1W笔
         for (int i = 0; i < txKeyList.size(); i++) {
             queryList.add(txKeyList.get(i));
             if (queryList.size() == 10000) {
