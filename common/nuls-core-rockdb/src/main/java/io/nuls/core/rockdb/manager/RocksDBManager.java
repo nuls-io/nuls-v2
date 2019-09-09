@@ -267,6 +267,7 @@ public class RocksDBManager {
      */
     private static boolean baseCheckTable(final String tableName) {
         if (StringUtils.isBlank(tableName) || !TABLES.containsKey(tableName)) {
+            Log.warn("tableName = {} is not in TABLES",tableName);
             return false;
         }
         return true;
@@ -409,6 +410,7 @@ public class RocksDBManager {
      */
     public static byte[] get(final String table, final byte[] key) {
         if (!baseCheckTable(table)) {
+            Log.error("get table={}: error",table);
             return null;
         }
         if (key == null) {
@@ -418,6 +420,8 @@ public class RocksDBManager {
             RocksDB db = TABLES.get(table);
             return db.get(key);
         } catch (Exception e) {
+            Log.error("get table={}: error",table);
+            Log.error(e);
             return null;
         }
     }
@@ -431,6 +435,7 @@ public class RocksDBManager {
      */
     public static boolean keyMayExist(final String table, final byte[] key) {
         if (!baseCheckTable(table)) {
+            Log.error("keyMayExist table={}: error",table);
             return false;
         }
         if (key == null) {
@@ -441,6 +446,8 @@ public class RocksDBManager {
             boolean rs = db.keyMayExist(key, new StringBuilder());
             return rs && (db.get(key) != null);
         } catch (Exception e) {
+            Log.error("keyMayExist table={}: error",table);
+            Log.error(e);
             return false;
         }
     }
@@ -455,6 +462,7 @@ public class RocksDBManager {
      */
     public static Map<byte[], byte[]> multiGet(final String table, final List<byte[]> keys) {
         if (!baseCheckTable(table)) {
+            Log.error("multiGet table={}: error",table);
             return null;
         }
         if (keys == null || keys.size() == 0) {
@@ -464,6 +472,8 @@ public class RocksDBManager {
             RocksDB db = TABLES.get(table);
             return db.multiGet(keys);
         } catch (Exception ex) {
+            Log.error("multiGet table={}: error",table);
+            Log.error(ex);
             return null;
         }
     }
@@ -508,6 +518,7 @@ public class RocksDBManager {
     public static List<byte[]> multiGetValueList(final String table, final List<byte[]> keys) {
         List<byte[]> list = new ArrayList<>();
         if (!baseCheckTable(table)) {
+            Log.error("multiGetValueList table={}: error",table);
             return list;
         }
         if (keys == null || keys.size() == 0) {
@@ -521,6 +532,8 @@ public class RocksDBManager {
             }
             return list;
         } catch (Exception ex) {
+            Log.error("multiGetValueList table={}: error",table);
+            Log.error(ex);
             return list;
         }
     }
@@ -536,6 +549,7 @@ public class RocksDBManager {
     public static List<byte[]> multiGetKeyList(final String table, final List<byte[]> keys) {
         List<byte[]> list = new ArrayList<>();
         if (!baseCheckTable(table)) {
+            Log.error("multiGetKeyList table={}: error",table);
             return list;
         }
         if (keys == null || keys.size() == 0) {
@@ -549,6 +563,8 @@ public class RocksDBManager {
             }
             return list;
         } catch (Exception ex) {
+            Log.error("multiGetKeyList table={}: error",table);
+            Log.error(ex);
             return list;
         }
     }
@@ -562,6 +578,7 @@ public class RocksDBManager {
      */
     public static List<byte[]> keyList(final String table) {
         if (!baseCheckTable(table)) {
+            Log.error("keyList table={}: error",table);
             return null;
         }
         List<byte[]> list = new ArrayList<>();
@@ -574,6 +591,8 @@ public class RocksDBManager {
             }
             return list;
         } catch (Exception ex) {
+            Log.error("keyList table={}: error",table);
+            Log.error(ex);
             return null;
         }
     }
@@ -587,6 +606,7 @@ public class RocksDBManager {
      */
     public static List<byte[]> valueList(final String table) {
         if (!baseCheckTable(table)) {
+            Log.error("valueList table={}: error",table);
             return null;
         }
         List<byte[]> list = new ArrayList<>();
@@ -599,6 +619,8 @@ public class RocksDBManager {
             }
             return list;
         } catch (Exception ex) {
+            Log.error("valueList table={}: error",table);
+            Log.error(ex);
             return null;
         }
     }
@@ -612,6 +634,7 @@ public class RocksDBManager {
      */
     public static List<Entry<byte[], byte[]>> entryList(final String table) {
         if (!baseCheckTable(table)) {
+            Log.error("entryList table={}: error",table);
             return null;
         }
         List<Entry<byte[], byte[]>> entryList = new ArrayList<>();
@@ -624,6 +647,8 @@ public class RocksDBManager {
             }
             return entryList;
         } catch (Exception ex) {
+            Log.error("entryList table={}: error",table);
+            Log.error(ex);
             return null;
         }
     }

@@ -652,14 +652,13 @@ alias: string									//账户别名
 {
     "jsonrpc":"2.0",
     "method":"getCoinRanking",
-    "params":[chainId,pageNumber,pageSize,sortType],
+    "params":[chainId,pageNumber,pageSize],
     "id":1234
 }
 //参数说明
 chainId: int									//链的id
 pageNumber:int									//页码
 pageSize:int									//每页显示条数，取值[1-1000]
-sortType:int									//排序方式 0：总余额倒序	1：总余额正序
 ```
 
 返回：
@@ -879,8 +878,8 @@ txHash: string									//交易hash
 ```
 {
     "jsonrpc":"2.0",
-    "method":"getAccountTxs",
-    "params":[chainId,pageNumber,pageSize,address,txType,isHidden],                       
+    "method":"getLxList",
+    "params":[chainId,pageNumber,pageSize,address,txType,startHeight,endHeight],                       
     "id":1234
 }
 //参数说明
@@ -888,7 +887,7 @@ chainId: int									//链的id
 pageNumber:int									//页码
 pageSize:int									//每页显示条数，取值[1-1000]
 txType:int										//交易类型(txType),type=0时查询所有交易
-isHidden:boolean								//是否隐藏共识奖励交易(txType=1的交易)
+isHidden:boolean    //是否隐藏共识奖励交易，默认是不隐藏，这个参数只能是type=0时有效
 ```
 
 返回：
@@ -990,7 +989,7 @@ txType:int										//交易类型(txType),type=0时查询所有交易
 {
     "jsonrpc":"2.0",
     "method":"getAccountTxs",
-    "params":[chainId,pageNumber,pageSize,address,txType,isHidden],                       
+    "params":[chainId,pageNumber,pageSize,address,txType,startHeight, endHeight],                       
     "id":1234
 }
 //参数说明
@@ -999,7 +998,9 @@ pageNumber:int									//页码
 pageSize:int									//每页显示条数，取值[1-1000]
 address: string									//账户地址
 txType:int										//交易类型(txType),type=0时查询所有交易
-isHidden:boolean								//是否隐藏共识奖励交易(txType=1的交易)
+startHeight:long                                //打包交易的块起始高度，默认为-1,不限制
+
+endHeight:long                                  //交易的块截止高度，默认为-1，不限制
 ```
 
 返回：
