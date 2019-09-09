@@ -101,11 +101,11 @@ showPackageModule(){
 
 setTargetOS(){
     case "$1" in
-		linux)
+		linux64)
 		     TARGET_OS=linux;;
 		macos)
 		     TARGET_OS=macos;;
-		window)
+		win64)
 		     TARGET_OS=window;;
 		?)   exit 2;;
 	esac
