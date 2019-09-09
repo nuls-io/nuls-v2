@@ -20,16 +20,20 @@
 
 package io.nuls.api.rpc.controller;
 
+import io.nuls.api.analysis.AnalysisHandler;
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.db.BlockService;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.BlockHeaderInfo;
+import io.nuls.api.model.po.BlockHexInfo;
 import io.nuls.api.model.po.BlockInfo;
 import io.nuls.api.model.po.PageInfo;
 import io.nuls.api.model.po.mini.MiniBlockHeaderInfo;
 import io.nuls.api.model.rpc.RpcResult;
 import io.nuls.api.utils.VerifyUtils;
 import io.nuls.core.basic.Result;
+import io.nuls.core.constant.CommonCodeConstanst;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Controller;
 import io.nuls.core.core.annotation.RpcMethod;
@@ -144,20 +148,25 @@ public class BlockController {
         if (StringUtils.isBlank(hash)) {
             return RpcResult.paramError("[hash] is required");
         }
-
         if (!CacheManager.isChainExist(chainId)) {
             return RpcResult.dataNotFound();
         }
-        Result<BlockInfo> result = WalletRpcHandler.getBlockInfo(chainId, hash);
-        if (result.isFailed()) {
-            return RpcResult.failed(result);
-        }
-        if (result.getData() == null) {
+
+        BlockHeaderInfo blockHeaderInfo = blockService.getBlockHeaderByHash(chainId, hash);
+        if (blockHeaderInfo == null) {
             return RpcResult.dataNotFound();
         }
-        RpcResult rpcResult = new RpcResult();
-        rpcResult.setResult(result.getData());
-        return rpcResult;
+        BlockHexInfo hexInfo = blockService.getBlockHexInfo(chainId, blockHeaderInfo.getHeight());
+        if (hexInfo == null) {
+            return RpcResult.dataNotFound();
+        }
+        try {
+            BlockInfo blockInfo = AnalysisHandler.toBlockInfo(hexInfo.getBlockHex(), chainId);
+            blockInfo.setHeader(blockHeaderInfo);
+            return RpcResult.success(blockInfo);
+        } catch (Exception e) {
+            return RpcResult.failed(CommonCodeConstanst.DATA_PARSE_ERROR);
+        }
     }
 
     @RpcMethod("getBlockByHeight")
@@ -178,26 +187,25 @@ public class BlockController {
         if (height < 0) {
             return RpcResult.paramError("[height] is invalid");
         }
-
         if (!CacheManager.isChainExist(chainId)) {
             return RpcResult.dataNotFound();
         }
+
         BlockHeaderInfo blockHeaderInfo = blockService.getBlockHeader(chainId, height);
         if (blockHeaderInfo == null) {
             return RpcResult.dataNotFound();
         }
-        Result<BlockInfo> result = WalletRpcHandler.getBlockInfo(chainId, height);
-        if (result.isFailed()) {
-            return RpcResult.failed(result);
-        }
-        if (result.getData() == null) {
+        BlockHexInfo hexInfo = blockService.getBlockHexInfo(chainId, blockHeaderInfo.getHeight());
+        if (hexInfo == null) {
             return RpcResult.dataNotFound();
         }
-        BlockInfo blockInfo = result.getData();
-        blockInfo.setHeader(blockHeaderInfo);
-        RpcResult rpcResult = new RpcResult();
-        rpcResult.setResult(blockInfo);
-        return rpcResult;
+        try {
+            BlockInfo blockInfo = AnalysisHandler.toBlockInfo(hexInfo.getBlockHex(), chainId);
+            blockInfo.setHeader(blockHeaderInfo);
+            return RpcResult.success(blockInfo);
+        } catch (Exception e) {
+            return RpcResult.failed(CommonCodeConstanst.DATA_PARSE_ERROR);
+        }
     }
 
     @RpcMethod("getBlockHeaderList")

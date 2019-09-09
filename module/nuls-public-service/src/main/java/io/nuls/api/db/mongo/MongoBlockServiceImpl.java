@@ -82,6 +82,20 @@ public class MongoBlockServiceImpl implements BlockService {
     }
 
     @Override
+    public BlockHexInfo getBlockHexInfo(int chainId, String hash) {
+        Document document = mongoDBService.findOne(BLOCK_HEADER_TABLE + chainId, Filters.eq("hash", hash));
+        if (document == null) {
+            return null;
+        }
+        long height = document.getLong("_id");
+        document = mongoDBService.findOne(BLOCK_HEX_TABLE + chainId, Filters.eq("_id", height));
+        if (document == null) {
+            return null;
+        }
+        return DocumentTransferTool.toInfo(document, "height", BlockHexInfo.class);
+    }
+
+    @Override
     public BigInteger getLast24HourRewards(int chainId) {
         long time = System.currentTimeMillis() / 1000;
         time = time - 24 * 60 * 60;

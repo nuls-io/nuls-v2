@@ -30,6 +30,8 @@ public interface BlockService {
 
     BlockHexInfo getBlockHexInfo(int chainId, long height);
 
+    BlockHexInfo getBlockHexInfo(int chainId, String hash);
+
     BigInteger getLast24HourRewards(int chainId);
 
 }
