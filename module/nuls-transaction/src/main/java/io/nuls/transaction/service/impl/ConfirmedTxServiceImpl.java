@@ -78,12 +78,6 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         return true;
     }
 
-    /**
-     * 1.保存交易
-     * 2.调提交易接口
-     * 3.调账本
-     * 4.从未打包交易库中删除交易
-     */
     @Override
     public boolean saveTxList(Chain chain, List<String> txStrList, List<String> contractList, String blockHeader) throws NulsException {
         if (null == chain || txStrList == null || txStrList.size() == 0) {
@@ -170,8 +164,6 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         return true;
     }
 
-
-    /**保存交易*/
     private boolean saveTxs(Chain chain, List<Transaction> txList, long blockHeight, boolean atomicity) {
         boolean rs = true;
         List<TransactionConfirmedPO> toSaveList = new ArrayList<>();
@@ -190,7 +182,6 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         return rs;
     }
 
-    /**调提交易*/
     private boolean commitTxs(Chain chain, Map<String, List<String>> moduleVerifyMap, String blockHeader, boolean atomicity) {
         //调用交易模块统一commit接口 批量
         Map<String, List<String>> successed = new HashMap<>(TxConstant.INIT_CAPACITY_8);
@@ -212,7 +203,6 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         return true;
     }
 
-    /**提交账本*/
     private boolean commitLedger(Chain chain, List<String> txList, long blockHeight) {
         try {
             chain.getPackableState().set(false);
@@ -230,7 +220,6 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         }
     }
 
-    /**从已确认库中删除交易*/
     private boolean removeTxs(Chain chain, List<Transaction> txList, long blockheight, boolean atomicity) {
         boolean rs = true;
         if(!confirmedTxStorageService.removeTxList(chain.getChainId(), txList) && atomicity ){
@@ -241,7 +230,6 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         return rs;
     }
 
-    /**回滚交易业务数据*/
     private boolean rollbackTxs(Chain chain, Map<String, List<String>> moduleVerifyMap, String blockHeader, boolean atomicity) {
         Map<String, List<String>> successed = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         boolean result = true;
@@ -262,7 +250,6 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         return true;
     }
 
-    /**回滚已确认交易账本*/
     private boolean rollbackLedger(Chain chain, List<String> txList, Long blockHeight) {
         if (txList.isEmpty()) {
             return true;
@@ -319,14 +306,14 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         if (!rollbackLedger(chain, txStrList, blockHeader.getHeight())) {
             return false;
         }
-        logger.debug("[回滚区块] 回滚账本:{}", NulsDateUtils.getCurrentTimeMillis() - ledgerStart);
+        logger.debug("[回滚区块] 回滚账本 执行时间:{}", NulsDateUtils.getCurrentTimeMillis() - ledgerStart);
 
         long moduleStart = NulsDateUtils.getCurrentTimeMillis();
         if (!rollbackTxs(chain, moduleVerifyMap, blockHeaderStr, true)) {
             commitLedger(chain, txStrList, blockHeader.getHeight());
             return false;
         }
-        logger.debug("[回滚区块] 回滚交易业务数据:{}", NulsDateUtils.getCurrentTimeMillis() - moduleStart);
+        logger.debug("[回滚区块] 回滚交易业务数据 执行时间:{}", NulsDateUtils.getCurrentTimeMillis() - moduleStart);
 
 
         long dbStart = NulsDateUtils.getCurrentTimeMillis();
@@ -335,30 +322,28 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             saveTxs(chain, txList, blockHeader.getHeight(), false);
             return false;
         }
-        //倒序放入未确认库, 和待打包队列
+        //计算待打包队列大小倒序放入未确认库, 和待打包队列
+
+        int packableTxMapDataSize = 0;
+        if(chain.getPackaging().get()) {
+            //是打包节点才计算待打包队列的当前容量
+            for (Transaction tx : chain.getPackableTxMap().values()) {
+                packableTxMapDataSize += tx.size();
+            }
+        }
         for (int i = txList.size() - 1; i >= 0; i--) {
             Transaction tx = txList.get(i);
             if(!TxManager.isSystemTx(chain, tx)) {
                 unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
-                savePackable(chain, tx);
+                //不是系统交易,并且节点是打包节点,待打包队列没到最大值则重新放回待打包队列的最前端
+                if (chain.getPackaging().get() && packableTxMapDataSize < TxConstant.PACKABLE_TX_MAP_MAX_DATA_SIZE) {
+                    packablePool.offerFirst(chain, tx);
+                } 
             }
         }
-        logger.debug("[回滚区块] 回滚移除DB已存储的交易, 放入未确认库:{}", NulsDateUtils.getCurrentTimeMillis() - dbStart);
+        logger.debug("[回滚区块] 回滚移除DB已存储的交易, 放入未确认库 执行时间:{}", NulsDateUtils.getCurrentTimeMillis() - dbStart);
         logger.info("rollbackTxList success block height:{}", blockHeader.getHeight());
         return true;
-    }
-
-    /**
-     * 重新放回待打包队列的最前端
-     *
-     * @param chain chain
-     * @param tx    Transaction
-     */
-    private void savePackable(Chain chain, Transaction tx) {
-        //不是系统交易 并且节点是打包节点则重新放回待打包队列的最前端
-        if (chain.getPackaging().get()) {
-            packablePool.offerFirst(chain, tx);
-        }
     }
 
     /**
@@ -400,12 +385,6 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         return txStrList;
     }
 
-    /**
-     * 批量实现
-     * @param chain
-     * @param hashList
-     * @return
-     */
     @Override
     public List<String> getTxListExtend(Chain chain, List<String> hashList, boolean allHits) {
         List<String> txStrList = new ArrayList<>();

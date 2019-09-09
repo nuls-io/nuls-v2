@@ -186,7 +186,7 @@ public class MongoAccountServiceImpl implements AccountService {
         }
         int index = DBUtil.getShardNumber(address);
         long count = mongoDBService.getCount(TX_RELATION_TABLE + chainId + "_" + index, filter);
-        List<Document> docsList = this.mongoDBService.pageQuery(TX_RELATION_TABLE + chainId + "_" + index, filter, Sorts.descending("createTime"), pageIndex, pageSize);
+        List<Document> docsList = this.mongoDBService.pageQuery(TX_RELATION_TABLE + chainId + "_" + index, filter, Sorts.descending("height"), pageIndex, pageSize);
         List<TxRelationInfo> txRelationInfoList = new ArrayList<>();
         for (Document document : docsList) {
             TxRelationInfo txRelationInfo = TxRelationInfo.toInfo(document);
@@ -198,7 +198,7 @@ public class MongoAccountServiceImpl implements AccountService {
     }
 
     private List<TxRelationInfo> unConfirmLimitQuery(int chainId, int index, Bson filter, int start, int pageSize) {
-        List<Document> docsList = this.mongoDBService.limitQuery(TX_UNCONFIRM_RELATION_TABLE + chainId, filter, Sorts.descending("createTime"), start, pageSize);
+        List<Document> docsList = this.mongoDBService.limitQuery(TX_UNCONFIRM_RELATION_TABLE + chainId, filter, Sorts.descending("height"), start, pageSize);
         List<TxRelationInfo> txRelationInfoList = new ArrayList<>();
         for (Document document : docsList) {
             TxRelationInfo txRelationInfo = TxRelationInfo.toInfo(document);
@@ -209,7 +209,7 @@ public class MongoAccountServiceImpl implements AccountService {
     }
 
     private List<TxRelationInfo> confirmLimitQuery(int chainId, int index, Bson filter, int start, int pageSize) {
-        List<Document> docsList = this.mongoDBService.limitQuery(TX_RELATION_TABLE + chainId + "_" + index, filter, Sorts.descending("createTime"), start, pageSize);
+        List<Document> docsList = this.mongoDBService.limitQuery(TX_RELATION_TABLE + chainId + "_" + index, filter, Sorts.descending("height"), start, pageSize);
         List<TxRelationInfo> txRelationInfoList = new ArrayList<>();
         for (Document document : docsList) {
             TxRelationInfo txRelationInfo = TxRelationInfo.toInfo(document);
@@ -220,7 +220,7 @@ public class MongoAccountServiceImpl implements AccountService {
     }
 
     private List<TxRelationInfo> relationLimitQuery(int chainId, int index, Bson filter1, Bson filter2, int start, int pageSize) {
-        List<Document> docsList = this.mongoDBService.limitQuery(TX_UNCONFIRM_RELATION_TABLE + chainId, filter1, Sorts.descending("createTime"), start, pageSize);
+        List<Document> docsList = this.mongoDBService.limitQuery(TX_UNCONFIRM_RELATION_TABLE + chainId, filter1, Sorts.descending("height"), start, pageSize);
         List<TxRelationInfo> txRelationInfoList = new ArrayList<>();
         for (Document document : docsList) {
             TxRelationInfo txRelationInfo = TxRelationInfo.toInfo(document);
@@ -228,7 +228,7 @@ public class MongoAccountServiceImpl implements AccountService {
             txRelationInfoList.add(txRelationInfo);
         }
         pageSize = pageSize - txRelationInfoList.size();
-        docsList = this.mongoDBService.limitQuery(TX_RELATION_TABLE + chainId + "_" + index, filter2, Sorts.descending("createTime"), 0, pageSize);
+        docsList = this.mongoDBService.limitQuery(TX_RELATION_TABLE + chainId + "_" + index, filter2, Sorts.descending("height"), 0, pageSize);
         for (Document document : docsList) {
             TxRelationInfo txRelationInfo = TxRelationInfo.toInfo(document);
             txRelationInfo.setStatus(ApiConstant.TX_CONFIRM);
@@ -237,13 +237,8 @@ public class MongoAccountServiceImpl implements AccountService {
         return txRelationInfoList;
     }
 
-    public PageInfo<MiniAccountInfo> getCoinRanking(int pageIndex, int pageSize, int sortType, int chainId) {
-        Bson sort;
-        if (sortType == 0) {
-            sort = Sorts.descending("totalBalance");
-        } else {
-            sort = Sorts.ascending("totalBalance");
-        }
+    public PageInfo<MiniAccountInfo> getCoinRanking(int pageIndex, int pageSize, int chainId) {
+        Bson sort = Sorts.descending("totalBalance");
         List<MiniAccountInfo> accountInfoList = new ArrayList<>();
         Bson filter = Filters.ne("totalBalance", 0);
         BasicDBObject fields = new BasicDBObject();
@@ -269,7 +264,7 @@ public class MongoAccountServiceImpl implements AccountService {
         BasicDBObject fields = new BasicDBObject();
         fields.append("totalBalance", 1);
         while (query) {
-            documentList = mongoDBService.pageQuery(ACCOUNT_TABLE + chainId, null, fields, Sorts.descending("createTime"), i, 1000);
+            documentList = mongoDBService.pageQuery(ACCOUNT_TABLE + chainId, null, fields, Sorts.descending("totalBalance"), i, 1000);
             for (Document document : documentList) {
                 totalBalance = totalBalance.add(new BigInteger(document.getString("totalBalance")));
             }
