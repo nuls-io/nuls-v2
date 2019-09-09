@@ -26,6 +26,7 @@ package io.nuls.core.rpc.netty.handler.message;
 
 import io.netty.channel.socket.SocketChannel;
 import io.nuls.core.core.annotation.Value;
+import io.nuls.core.rpc.model.RequestOnly;
 import io.nuls.core.rpc.netty.processor.RequestMessageProcessor;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.message.Message;
@@ -57,6 +58,7 @@ public class TextMessageHandler implements Runnable, Comparable<TextMessageHandl
     private Message message;
     private int priority;
     private Request request;
+    private int messageSize;
 
     public TextMessageHandler(SocketChannel channel, Message message, int priority) {
         this.channel = channel;
@@ -147,7 +149,12 @@ public class TextMessageHandler implements Runnable, Comparable<TextMessageHandl
                     }
                     break;
                 case RequestOnly:
-                    connectData.getRequestOnlyQueue().offer(JSONUtils.map2pojo((Map) message.getMessageData(), Request.class));
+                    if(!connectData.requestOnlyQueueReachLimit()){
+                        connectData.getRequestOnlyQueue().offer(new RequestOnly(request, messageSize));
+                        connectData.addRequestOnlyQueueMemSize(messageSize);
+                    }else{
+                        Log.info("RequestOnly队列缓存已满，丢弃新接收到的消息，messageId:{},队列所占内存：{}", message.getMessageID(),connectData.getRequestOnlyQueueMemSize());
+                    }
                     break;
                 case NegotiateConnectionResponse:
                 case Ack:
@@ -193,5 +200,13 @@ public class TextMessageHandler implements Runnable, Comparable<TextMessageHandl
 
     public void setRequest(Request request) {
         this.request = request;
+    }
+
+    public int getMessageSize() {
+        return messageSize;
+    }
+
+    public void setMessageSize(int messageSize) {
+        this.messageSize = messageSize;
     }
 }
