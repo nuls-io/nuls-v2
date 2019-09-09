@@ -592,7 +592,7 @@ public class SyncService {
             }
         }
         AccountLedgerInfo ledgerInfo = calcBalance(chainId, input.getChainId(), input.getAssetsId(), accountInfo, output.getAmount().add(tx.getFee().getValue()));
-        txRelationInfoSet.add(new TxRelationInfo(input, tx, output.getAmount(), ledgerInfo.getTotalBalance()));
+        txRelationInfoSet.add(new TxRelationInfo(input, tx, output.getAmount().add(tx.getFee().getValue()), ledgerInfo.getTotalBalance()));
 
         AccountInfo destroyAccount = queryAccountInfo(chainId, output.getAddress());
         accountInfo.setTxCount(destroyAccount.getTxCount() + 1);
@@ -632,8 +632,9 @@ public class SyncService {
                 break;
             }
         }
+
         AccountLedgerInfo ledgerInfo = calcBalance(chainId, input.getChainId(), input.getAssetsId(), accountInfo, output.getAmount().add(tx.getFee().getValue()));
-        txRelationInfoSet.add(new TxRelationInfo(input, tx, ledgerInfo.getTotalBalance()));
+        txRelationInfoSet.add(new TxRelationInfo(input, tx, output.getAmount().add(tx.getFee().getValue()), ledgerInfo.getTotalBalance()));
 
         AccountInfo destroyAccount = queryAccountInfo(chainId, output.getAddress());
         accountInfo.setTxCount(destroyAccount.getTxCount() + 1);
