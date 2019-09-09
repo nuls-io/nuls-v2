@@ -354,8 +354,11 @@ public class ConsensusProcess {
          * */
         bestBlock = chain.getNewestHeader();
         if (!newBlock.getHeader().getPreHash().equals(bestBlock.getHash())) {
-            newBlock.getHeader().setPreHash(bestBlock.getHash());
-            newBlock.getHeader().setHeight(bestBlock.getHeight());
+            consensusManager.addConsensusTx(chain, bestBlock, new ArrayList<>(), self, round, extendsData);
+            bd.setTxList(packingTxList);
+            bd.setPreHash(bestBlock.getHash());
+            bd.setHeight(bestBlock.getHeight() + 1);
+            newBlock = consensusManager.createBlock(chain, bd, packingAddress, packingAddressString);
             if (stateRootIsNull) {
                 bestExtendsData = bestBlock.getExtendsData();
                 extendsData.setStateRoot(bestExtendsData.getStateRoot());

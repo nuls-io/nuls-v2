@@ -25,6 +25,7 @@ import io.nuls.core.rockdb.constant.DBErrorCode;
 import io.nuls.core.rockdb.model.Entry;
 import io.nuls.core.rockdb.util.DBUtils;
 import org.rocksdb.*;
+import org.rocksdb.util.SizeUnit;
 
 import java.io.File;
 import java.util.*;
@@ -41,10 +42,6 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class RocksDBManager {
 
-    static {
-        RocksDB.loadLibrary();
-    }
-
     /**
      * 数据库已打开的连接缓存.
      */
@@ -54,11 +51,6 @@ public class RocksDBManager {
      * 数据表基础文件夹名.
      */
     private static final String BASE_DB_NAME = "rocksdb";
-
-    /**
-     * 数据库是否已经初始化.
-     */
-    private static volatile boolean isInit = false;
 
     /**
      * 数据操作同步锁.
@@ -79,8 +71,6 @@ public class RocksDBManager {
      */
     public static void init(final String path) throws Exception {
         synchronized (RocksDBManager.class) {
-            //if (isInit) {
-            isInit = true;
             File dir = DBUtils.loadDataPath(path);
             dataPath = dir.getPath();
             Log.info("RocksDBManager dataPath is " + dataPath);
@@ -103,7 +93,6 @@ public class RocksDBManager {
                     throw e;
                 }
             }
-            //}
         }
 
     }
@@ -478,6 +467,35 @@ public class RocksDBManager {
     }
 
     /**
+     * 批量查询交易
+     * @param table
+     * @param keys
+     * @return
+     */
+    public static List<byte[]> multiGetAsList(final String table, final List<byte[]> keys) {
+        if (!baseCheckTable(table)) {
+            return null;
+        }
+        if (keys == null || keys.size() == 0) {
+            return null;
+        }
+        try {
+            RocksDB db = TABLES.get(table);
+            //该方法获取的结果包含查不到的key, 将以null 值放入返回的list中,因此需要把空值去除.
+            List<byte[]> list = db.multiGetAsList(keys);
+            List<byte[]> rs = new ArrayList<>();
+            for(byte[] hash : list){
+                if(null != hash){
+                    rs.add(hash);
+                }
+            }
+            return rs;
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
+    /**
      * 批量查询指定keys的List集合
      * batch query the List set of the specified keys.
      *
@@ -527,8 +545,6 @@ public class RocksDBManager {
         }
         try {
             RocksDB db = TABLES.get(table);
-//            ReadOptions readOptions = new ReadOptions();
-//            readOptions.setVerifyChecksums(false);
             Map<byte[], byte[]> map = db.multiGet(keys);
             if (map != null && map.size() > 0) {
                 list.addAll(map.keySet());
@@ -646,6 +662,12 @@ public class RocksDBManager {
         tableOption.setBlockRestartInterval(4);
         tableOption.setFilterPolicy(new BloomFilter(10, true));
         options.setTableFormatConfig(tableOption);
+
+        options.setMaxBackgroundCompactions(16);
+        options.setNewTableReaderForCompactionInputs(true);
+        //为压缩的输入，打开RocksDB层的预读取
+        options.setCompactionReadaheadSize(128 * SizeUnit.KB);
+        options.setNewTableReaderForCompactionInputs(true);
 
         return options;
     }
