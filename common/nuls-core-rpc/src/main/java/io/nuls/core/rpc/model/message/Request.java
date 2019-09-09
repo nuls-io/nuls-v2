@@ -90,6 +90,12 @@ public class Request {
     @JsonProperty
     private Map<String, Object> RequestMethods;
 
+    /**
+     * An unsigned integer with a default of 0 to indicate no timeout limit
+     */
+    @JsonProperty
+    private String TimeOut;
+
     @JsonIgnore
     public String getRequestAck() {
         return RequestAck;
@@ -148,5 +154,15 @@ public class Request {
     @JsonIgnore
     public void setRequestMethods(Map<String, Object> RequestMethods) {
         this.RequestMethods = RequestMethods;
+    }
+
+    @JsonIgnore
+    public String getTimeOut() {
+        return TimeOut;
+    }
+
+    @JsonIgnore
+    public void setTimeOut(String timeOut) {
+        TimeOut = timeOut;
     }
 }

@@ -41,6 +41,7 @@ public class StatisticalNulsTask implements Runnable {
             BigInteger teamNuls = BigInteger.ZERO;
             if (!StringUtils.isBlank(ApiContext.TEAM_ADDRESS)) {
                 teamNuls = accountService.getAccountTotalBalance(chainId, ApiContext.TEAM_ADDRESS);
+                contextInfo.setTeam(teamNuls);
             }
             //销毁数量
             byte[] address = AddressTool.getAddress(ApiContext.blackHolePublicKey, chainId);
@@ -50,12 +51,13 @@ public class StatisticalNulsTask implements Runnable {
             BigInteger businessNuls = BigInteger.ZERO;
             if (!StringUtils.isBlank(ApiContext.BUSINESS_ADDRESS)) {
                 businessNuls = accountService.getAccountTotalBalance(chainId, ApiContext.BUSINESS_ADDRESS);
+                contextInfo.setBusiness(businessNuls);
             }
-
             //社区持有数量
             BigInteger communityNuls = BigInteger.ZERO;
             if (!StringUtils.isBlank(ApiContext.COMMUNITY_ADDRESS)) {
                 communityNuls = accountService.getAccountTotalBalance(chainId, ApiContext.COMMUNITY_ADDRESS);
+                contextInfo.setCommunity(communityNuls);
             }
 
             contextInfo.setTotal(totalCoin);

@@ -346,18 +346,18 @@ public class TxUtil {
         int number = random.nextInt(10);
         if (packableTxMapDataSize >= TxConstant.PACKABLE_TX_MAP_MAX_DATA_SIZE) {
             //扔100%
-            chain.getLogger().warn("Packable pool tx data size reach the 100% discard transaction threshold, hash:{}", tx.getHash().toHex());
+            chain.getLogger().debug("Packable pool tx data size reach the 100% discard transaction threshold, hash:{}", tx.getHash().toHex());
             return true;
         } else if (packableTxMapDataSize >= TxConstant.PACKABLE_TX_MAP_HEAVY_DATA_SIZE) {
             //扔80%
             if (number < 8) {
-                chain.getLogger().warn("Packable pool tx data size reach the 80% discard transaction threshold, hash:{}", tx.getHash().toHex());
+                chain.getLogger().debug("Packable pool tx data size reach the 80% discard transaction threshold, hash:{}", tx.getHash().toHex());
                 return true;
             }
         } else if (packableTxMapDataSize >= TxConstant.PACKABLE_TX_MAP_STRESS_DATA_SIZE) {
             //扔50%
             if (number < 5) {
-                chain.getLogger().warn("Packable pool tx data size reach the 50% discard transaction threshold, hash:{}", tx.getHash().toHex());
+                chain.getLogger().debug("Packable pool tx data size reach the 50% discard transaction threshold, hash:{}", tx.getHash().toHex());
                 return true;
             }
         }

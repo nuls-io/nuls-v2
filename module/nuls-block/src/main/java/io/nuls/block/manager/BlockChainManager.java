@@ -105,19 +105,19 @@ public class BlockChainManager {
         //2.回滚主链
         //2.1 回滚主链到指定高度,回滚掉的区块收集起来放入分叉链数据库
         ArrayDeque<NulsHash> hashList = new ArrayDeque<>();
-        List<Block> blockList = new ArrayList<>();
+        Stack<Block> blockStack = new Stack<>();
         long rollbackHeight = masterChainEndHeight;
         logger.info("*rollback master chain begin, rollbackHeight=" + rollbackHeight);
         do {
             Block block = blockService.getBlock(chainId, rollbackHeight--);
             NulsHash hash = block.getHeader().getHash();
             if (blockService.rollbackBlock(chainId, BlockUtil.toBlockHeaderPo(block), false)) {
-                blockList.add(block);
+                blockStack.push(block);
                 hashList.offerFirst(hash);
                 logger.info("*rollback master chain doing, success hash=" + hash);
             } else {
                 logger.info("*rollback master chain doing, fail hash=" + hash);
-                saveBlockToMasterChain(chainId, blockList);
+                saveBlockToMasterChain(chainId, blockStack);
                 return false;
             }
         } while (rollbackHeight >= forkHeight);
@@ -143,7 +143,7 @@ public class BlockChainManager {
             higherChains.forEach(e -> e.setParent(masterForkChain));
         }
         addForkChain(chainId, masterForkChain);
-        if (!chainStorageService.save(chainId, blockList)) {
+        if (!chainStorageService.save(chainId, blockStack)) {
             logger.info("*error occur when save masterForkChain");
             append(masterChain, masterForkChain);
             return false;
@@ -177,10 +177,10 @@ public class BlockChainManager {
         return true;
     }
 
-    private static void saveBlockToMasterChain(int chainId, List<Block> blockList) {
+    private static void saveBlockToMasterChain(int chainId, Stack<Block> blockStack) {
         //主链回滚中途失败,把前面回滚的区块再加回主链
-        for (Block block : blockList) {
-            if (!blockService.saveBlock(chainId, block, false)) {
+        while (!blockStack.empty()) {
+            if (!blockService.saveBlock(chainId, blockStack.pop(), false)) {
                 throw new NulsRuntimeException(BlockErrorCode.CHAIN_SWITCH_ERROR);
             }
         }
@@ -296,6 +296,7 @@ public class BlockChainManager {
     public static void deleteForkChain(int chainId, Chain forkChain, boolean recursive) {
         forkChains.get(chainId).remove(forkChain);
         chainStorageService.remove(chainId, forkChain.getHashList());
+        ContextManager.getContext(chainId).getLogger().info("delete Fork Chain-" + forkChain);
         if (recursive && !forkChain.getSons().isEmpty()) {
             forkChain.getSons().forEach(e -> deleteForkChain(chainId, e, true));
         }
@@ -415,6 +416,7 @@ public class BlockChainManager {
     public static void deleteOrphanChain(int chainId, Chain orphanChain) {
         orphanChains.get(chainId).remove(orphanChain);
         chainStorageService.remove(chainId, orphanChain.getHashList());
+        ContextManager.getContext(chainId).getLogger().info("delete Orphan Chain-" + orphanChain);
         if (!orphanChain.getSons().isEmpty()) {
             orphanChain.getSons().forEach(e -> deleteOrphanChain(chainId, e));
         }

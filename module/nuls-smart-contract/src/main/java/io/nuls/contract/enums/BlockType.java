@@ -1,7 +1,7 @@
 /**
  * MIT License
  * <p>
- * Copyright (c) 2017-2019 nuls.io
+ * Copyright (c) 2017-2018 nuls.io
  * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,32 +21,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.provider.model.txdata;
+package io.nuls.contract.enums;
 
-import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * @desription:
  * @author: PierreLuo
- * @date: 2018/7/19
+ * @date: 2019-09-07
  */
-public interface ContractData {
+public enum BlockType {
+    // 打包区块 - 0, 验证区块 - 1
+    PACKAGE_BLOCK(0),
+    VERIFY_BLOCK(1);
 
-    byte[] getContractAddress();
+    private int type;
+    private static Map<Integer, BlockType> map;
 
-    byte[] getSender();
+    private BlockType(int type) {
+        this.type = type;
+        putType(type, this);
+    }
 
-    byte[] getCode();
+    public int type() {
+        return type;
+    }
 
-    long getGasLimit();
+    private static BlockType putType(int type, BlockType typeEnum) {
+        if(map == null) {
+            map = new HashMap<>(4);
+        }
+        return map.put(type, typeEnum);
+    }
 
-    long getPrice();
-
-    BigInteger getValue();
-
-    String getMethodName();
-
-    String getMethodDesc();
-
-    String[][] getArgs();
+    public static BlockType getType(int type) {
+        BlockType cmdRegisterReturnType = map.get(type);
+        if(cmdRegisterReturnType == null) {
+            throw new RuntimeException(String.format("not support cmd register return type - [%s] ", type));
+        }
+        return cmdRegisterReturnType;
+    }
 }

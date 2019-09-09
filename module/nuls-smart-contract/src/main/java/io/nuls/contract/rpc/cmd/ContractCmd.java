@@ -29,6 +29,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
+import io.nuls.contract.enums.BlockType;
 import io.nuls.contract.enums.CmdRegisterMode;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.manager.*;
@@ -85,6 +86,7 @@ public class ContractCmd extends BaseCmd {
     @CmdAnnotation(cmd = BATCH_BEGIN, version = 1.0, description = "执行合约一个批次的开始通知，生成当前批次的信息/batch begin")
     @Parameters(value = {
         @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+        @Parameter(parameterName = "blockType", parameterType = "int", parameterDes = "区块处理模式, 打包区块 - 0, 验证区块 - 1"),
         @Parameter(parameterName = "blockHeight", parameterType = "long", parameterDes = "当前打包的区块高度"),
         @Parameter(parameterName = "blockTime", parameterType = "long", parameterDes = "当前打包的区块时间"),
         @Parameter(parameterName = "packingAddress", parameterType = "String", parameterDes = "当前打包的区块打包地址"),
@@ -94,7 +96,8 @@ public class ContractCmd extends BaseCmd {
     public Response batchBegin(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
-            ChainManager.chainHandle(chainId);
+            Integer blockType = (Integer) params.get("blockType");
+            ChainManager.chainHandle(chainId, blockType);
             Long blockHeight = Long.parseLong(params.get("blockHeight").toString());
             Long blockTime = Long.parseLong(params.get("blockTime").toString());
             String packingAddress = (String) params.get("packingAddress");
@@ -110,13 +113,15 @@ public class ContractCmd extends BaseCmd {
     @CmdAnnotation(cmd = INVOKE_CONTRACT, version = 1.0, description = "批次通知开始后，一笔一笔执行合约/invoke contract one by one")
     @Parameters(value = {
         @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+        @Parameter(parameterName = "blockType", parameterType = "int", parameterDes = "区块处理模式, 打包区块 - 0, 验证区块 - 1"),
         @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "交易序列化的HEX编码字符串")
     })
     @ResponseData(description = "无特定返回值，没有错误即成功，如果返回错误，则丢弃这笔交易")
     public Response invokeContractOneByOne(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
-            ChainManager.chainHandle(chainId);
+            Integer blockType = (Integer) params.get("blockType");
+            ChainManager.chainHandle(chainId, blockType);
             String txData = (String) params.get("tx");
             ContractTempTransaction tx = new ContractTempTransaction();
             tx.setTxHex(txData);
@@ -124,7 +129,7 @@ public class ContractCmd extends BaseCmd {
             String hash = tx.getHash().toHex();
             Map<String, Boolean> dealResult = new HashMap<>(2);
             if(!contractHelper.getChain(chainId).getBatchInfo().checkGasCostTotal(hash)) {
-                Log.warn("Exceed tx count [500] or gas limit of block [15,000,000 gas], the contract transaction [{}] revert to package queue.", hash);
+                Log.warn("Exceed tx count [500] or gas limit of block [12,000,000 gas], the contract transaction [{}] revert to package queue.", hash);
                 dealResult.put(RPC_RESULT_KEY, false);
                 return success(dealResult);
             }
@@ -143,13 +148,15 @@ public class ContractCmd extends BaseCmd {
     @CmdAnnotation(cmd = BATCH_BEFORE_END, version = 1.0, description = "交易模块打包完交易，在做统一验证前，通知合约模块，合约模块停止接收交易，开始异步处理这个批次的结果/batch before end")
     @Parameters(value = {
         @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+        @Parameter(parameterName = "blockType", parameterType = "int", parameterDes = "区块处理模式, 打包区块 - 0, 验证区块 - 1"),
         @Parameter(parameterName = "blockHeight", parameterType = "long", parameterDes = "当前打包的区块高度")
     })
     @ResponseData(description = "无特定返回值，没有错误即成功，如果返回错误，则废弃这个批次，批次内已执行的合约交易退还到待打包交易队列中")
     public Response batchBeforeEnd(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
-            ChainManager.chainHandle(chainId);
+            Integer blockType = (Integer) params.get("blockType");
+            ChainManager.chainHandle(chainId, blockType);
             Long blockHeight = Long.parseLong(params.get("blockHeight").toString());
             Result result = contractService.beforeEnd(chainId, blockHeight);
             Log.info("[Before End Result] contract batch, result is {}", result.toString());
@@ -175,7 +182,7 @@ public class ContractCmd extends BaseCmd {
     public Response batchEnd(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
-            ChainManager.chainHandle(chainId);
+            ChainManager.chainHandle(chainId, BlockType.VERIFY_BLOCK.type());
             Long blockHeight = Long.parseLong(params.get("blockHeight").toString());
             Log.info("[End Contract Batch] contract batch request start, height is {}", blockHeight);
 
@@ -212,7 +219,7 @@ public class ContractCmd extends BaseCmd {
     public Response packageBatchEnd(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
-            ChainManager.chainHandle(chainId);
+            ChainManager.chainHandle(chainId, BlockType.PACKAGE_BLOCK.type());
             Long blockHeight = Long.parseLong(params.get("blockHeight").toString());
             Log.info("[End Package Contract Batch] contract batch request start, height is {}", blockHeight);
 
@@ -467,7 +474,7 @@ public class ContractCmd extends BaseCmd {
             ProgramExecutor batchExecutor = programExecutor.begin(stateRootBytes);
 
             BigInteger agentValue = BigInteger.ZERO;
-            BigInteger value = BigInteger.ZERO;
+            BigInteger value;
 
             byte[] contractAddressBytes = null;
             if(hasAgentContract) {

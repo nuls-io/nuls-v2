@@ -64,12 +64,16 @@ import org.junit.Test;
 
 import java.io.*;
 import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
+import static io.nuls.transaction.TestCommonUtil.PASSWORD;
+import static io.nuls.transaction.TestCommonUtil.createContract;
 import static org.junit.Assert.assertNotNull;
 
 /**
@@ -129,6 +133,24 @@ public class TxValid {
         importPriKey("3dadac00b523736f38f8c57deb81aa7ec612b68448995856038bd26addd80ec1", password);//27 tNULSeBaMmTNYqywL5ZSHbyAQ662uE3wibrgD1
         importPriKey("27dbdcd1f2d6166001e5a722afbbb86a845ef590433ab4fcd13b9a433af6e66e", password);//28 tNULSeBaMoNnKitV28JeuUdBaPSR6n1xHfKLj2
         importPriKey("76b7beaa98db863fb680def099af872978209ed9422b7acab8ab57ad95ab218b", password);//29 tNULSeBaMqywZjfSrKNQKBfuQtVxAHBQ8rB2Zn
+    }
+
+    /**
+     * 合约与普通交易混发
+     * @throws Exception
+     */
+    @Test
+    public void transferAndContractPixelTest() throws Exception {
+        String code = Files.readString(Path.of("E:\\ContractTest", "pixel.txt"));
+        int size = 0;
+        for (int i = 0; i < 1000; i++) {
+            size++;
+            String hash = createTransfer(address21, address29, new BigInteger("100000000"));
+            //String hash = createCtxTransfer();
+            System.out.println("transfer: " + hash);
+            System.out.println("contract: " + createContract(address21, PASSWORD, code, new Object[]{size % 50 + 1}));
+//            Thread.sleep(100L);
+        }
     }
 
     @Test
@@ -383,6 +405,7 @@ public class TxValid {
 //            Thread.sleep(500L);
         }
     }
+
 
     @Test
     public void transferLocal() throws Exception {
@@ -878,7 +901,7 @@ public class TxValid {
         HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
         Assert.assertTrue(null != result);
         String hash = (String) result.get("value");
-        Log.debug("{}", hash);
+//        Log.debug("{}", hash);
         return hash;
     }
 
@@ -1052,7 +1075,7 @@ public class TxValid {
     /**
      * 组装交易
      */
-    private Transaction assemblyTransaction(int chainId, List<CoinDTO> fromList, List<CoinDTO> toList, String remark, NulsHash hash) throws NulsException {
+    public Transaction assemblyTransaction(int chainId, List<CoinDTO> fromList, List<CoinDTO> toList, String remark, NulsHash hash) throws NulsException {
         Transaction tx = new Transaction(2);
         tx.setTime(NulsDateUtils.getCurrentTimeMillis() / 1000);
         tx.setRemark(StringUtils.bytes(remark));
@@ -1227,7 +1250,7 @@ public class TxValid {
      *
      * @return
      */
-    private Map createTransferTx(String addressFrom, String addressTo, BigInteger amount) {
+    public Map createTransferTx(String addressFrom, String addressTo, BigInteger amount) {
         Map transferMap = new HashMap();
         transferMap.put("chainId", chainId);
         transferMap.put("remark", "abc");

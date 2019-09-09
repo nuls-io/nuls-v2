@@ -205,7 +205,6 @@ public class NetTxProcessTask implements Runnable {
                         List<TransactionNetPO> chainOrphan = chain.getOrphanList();
                         //孤儿交易集合数据总大小
                         if (chain.getOrphanListDataSize().get() >= TxConstant.ORPHAN_LIST_MAX_DATA_SIZE) {
-                            chain.getLogger().warn("Orphan tx list data size reach discard orphan transaction threshold, hash:{}", tx.getHash().toHex());
                             it.remove();
                             break;
                         } else {

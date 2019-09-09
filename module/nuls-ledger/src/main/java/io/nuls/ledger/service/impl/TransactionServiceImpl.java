@@ -138,12 +138,10 @@ public class TransactionServiceImpl implements TransactionService {
     private boolean confirmBlockTxProcess(long blockHeight,int addressChainId, List<Transaction> txList,
                                           Map<String, AccountBalance> updateAccounts, List<Uncfd2CfdKey> delUncfd2CfdKeys,
                                           Map<String, Integer> clearUncfs, Map<String, List<String>> assetAddressIndex) throws Exception {
-        StringBuilder sb = new StringBuilder();
         for (Transaction transaction : txList) {
             byte[] nonce8Bytes = LedgerUtil.getNonceByTx(transaction);
             String nonce8Str = LedgerUtil.getNonceEncode(nonce8Bytes);
             String txHash = transaction.getHash().toHex();
-            sb.append(txHash+",");
             ledgerHash.put(txHash, 1);
             //从缓存校验交易
             CoinData coinData = CoinDataUtil.parseCoinData(transaction.getCoinData());
@@ -216,7 +214,6 @@ public class TransactionServiceImpl implements TransactionService {
                 }
             }
         }
-        LoggerUtil.COMMIT_LOG.debug("height={},hashs={}",blockHeight,sb.toString());
         return true;
     }
 

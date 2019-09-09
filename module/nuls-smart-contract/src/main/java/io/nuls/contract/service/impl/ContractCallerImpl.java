@@ -31,13 +31,9 @@ import io.nuls.contract.helper.ContractConflictChecker;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.helper.ContractNewTxHandler;
 import io.nuls.contract.manager.ContractTempBalanceManager;
-import io.nuls.contract.model.bo.BatchInfo;
-import io.nuls.contract.model.bo.ContractContainer;
-import io.nuls.contract.model.bo.ContractResult;
-import io.nuls.contract.model.bo.ContractWrapperTransaction;
+import io.nuls.contract.model.bo.*;
 import io.nuls.contract.model.dto.ContractPackageDto;
 import io.nuls.contract.model.txdata.ContractData;
-import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.contract.service.ContractCaller;
 import io.nuls.contract.service.ContractExecutor;
 import io.nuls.contract.util.Log;
@@ -62,14 +58,23 @@ import static io.nuls.core.constant.TxType.CALL_CONTRACT;
 @Component
 public class ContractCallerImpl implements ContractCaller {
 
-    private static final ExecutorService TX_EXECUTOR_SERVICE =
-            new ThreadPoolExecutor(
-                    1,
-                    1,
-                    10L,
-                    TimeUnit.SECONDS,
-                    new LinkedBlockingQueue<Runnable>(),
-                    new NulsThreadFactory("contract-tx-executor-pool"));
+    private static ExecutorService TX_EXECUTOR_SERVICE;
+    static {
+        int availableProcessors = Runtime.getRuntime().availableProcessors();
+        int threadCount = 4;
+        // 线程数最大4个，线程核心小于4时，使用线程核心数
+        if(availableProcessors < threadCount) {
+            threadCount = availableProcessors;
+        }
+        TX_EXECUTOR_SERVICE =
+                new ThreadPoolExecutor(
+                        threadCount,
+                        threadCount,
+                        10L,
+                        TimeUnit.SECONDS,
+                        new LinkedBlockingQueue<Runnable>(),
+                        new NulsThreadFactory("contract-tx-executor-pool"));
+    }
     private static final ExecutorService BATCH_END_SERVICE = Executors.newSingleThreadExecutor(new NulsThreadFactory("contract-batch-end-pool"));
 
     @Autowired
@@ -85,6 +90,7 @@ public class ContractCallerImpl implements ContractCaller {
     public Result callTx(int chainId, ContractContainer container, ProgramExecutor batchExecutor, ContractWrapperTransaction tx, String preStateRoot) {
         try {
             ContractData contractData = tx.getContractData();
+            Integer blockType = Chain.currentThreadBlockType();
             byte[] contractAddressBytes = contractData.getContractAddress();
             String contract = AddressTool.getStringAddressByBytes(contractAddressBytes);
             BatchInfo batchInfo = contractHelper.getChain(chainId).getBatchInfo();
@@ -92,15 +98,18 @@ public class ContractCallerImpl implements ContractCaller {
             BlockHeader currentBlockHeader = batchInfo.getCurrentBlockHeader();
             long blockTime = currentBlockHeader.getTime();
             long lastestHeight = currentBlockHeader.getHeight() - 1;
-            //BlockHeader latestBlockHeader = BlockCall.getLatestBlockHeader(chainId);
             //if (Log.isDebugEnabled()) {
+            //    BlockHeader latestBlockHeader = BlockCall.getLatestBlockHeader(chainId);
             //    Log.debug("Current block header height is {}", currentBlockHeader.getHeight());
             //    Log.debug("Latest block header height is {}", latestBlockHeader.getHeight());
             //}
-            ContractTxCallable txCallable = new ContractTxCallable(chainId, blockTime, batchExecutor, contract, tx, lastestHeight, preStateRoot, checker, container);
-            //String hash = tx.getHash().toHex();
+            ContractTxCallable txCallable = new ContractTxCallable(chainId, blockType, blockTime, batchExecutor, contract, tx, lastestHeight, preStateRoot, checker, container);
             Future<ContractResult> contractResultFuture = TX_EXECUTOR_SERVICE.submit(txCallable);
-            //batchInfo.getContractMap().put(hash, contractResultFuture);
+            String hash = tx.getHash().toHex();
+            batchInfo.getContractMap().put(hash, contractResultFuture);
+            //if(Log.isDebugEnabled()) {
+            //    Log.debug("contract-tx-executor-pool put hash [{}]", hash);
+            //}
             container.getFutureList().add(contractResultFuture);
 
             return getSuccess();
@@ -115,9 +124,11 @@ public class ContractCallerImpl implements ContractCaller {
         try {
             Log.info("[Call Before End] contract batch, blockHeight is {}", blockHeight);
             BatchInfo batchInfo = contractHelper.getChain(chainId).getBatchInfo();
-            ContractBatchEndCallable callable = new ContractBatchEndCallable(chainId, blockHeight);
+            Integer blockType = Chain.currentThreadBlockType();
+            ContractBatchEndCallable callable = new ContractBatchEndCallable(chainId, blockType, blockHeight);
             Future<ContractPackageDto> contractPackageDtoFuture = BATCH_END_SERVICE.submit(callable);
             batchInfo.setContractPackageDtoFuture(contractPackageDtoFuture);
+            batchInfo.setBeforeEndTime(System.currentTimeMillis());
             return getSuccess();
         } catch (Exception e) {
             Log.error(e);

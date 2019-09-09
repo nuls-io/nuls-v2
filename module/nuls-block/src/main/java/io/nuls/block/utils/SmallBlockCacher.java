@@ -23,6 +23,7 @@ package io.nuls.block.utils;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.SmallBlock;
+import io.nuls.base.data.Transaction;
 import io.nuls.block.constant.BlockForwardEnum;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.CachedSmallBlock;
@@ -32,6 +33,8 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.CollectionUtils;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -83,8 +86,14 @@ public class SmallBlockCacher {
         CachedSmallBlock cachedSmallBlock = smallBlockCacheMap.get(chainId).get(blockHash);
         if (cachedSmallBlock == null) {
             Block block = service.getBlock(chainId, blockHash);
+            if (block == null) {
+                return null;
+            }
             SmallBlock smallBlock = BlockUtil.getSmallBlock(chainId, block);
-            cachedSmallBlock = new CachedSmallBlock(null, smallBlock, null, null);
+            List<Transaction> txs = block.getTxs();
+            Map<NulsHash, Transaction> txMap = new HashMap<>(txs.size());
+            txs.forEach(e -> txMap.put(e.getHash(), e));
+            cachedSmallBlock = new CachedSmallBlock(null, smallBlock, txMap, null);
         }
         return cachedSmallBlock;
     }
@@ -98,7 +107,11 @@ public class SmallBlockCacher {
      * @return
      */
     public static SmallBlock getSmallBlock(int chainId, NulsHash blockHash) {
-        return getCachedSmallBlock(chainId, blockHash).getSmallBlock();
+        CachedSmallBlock cachedSmallBlock = getCachedSmallBlock(chainId, blockHash);
+        if (cachedSmallBlock == null) {
+            return null;
+        }
+        return cachedSmallBlock.getSmallBlock();
     }
 
     /**
