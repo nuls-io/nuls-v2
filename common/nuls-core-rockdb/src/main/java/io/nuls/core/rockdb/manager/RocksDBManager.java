@@ -41,10 +41,6 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class RocksDBManager {
 
-    static {
-        RocksDB.loadLibrary();
-    }
-
     /**
      * 数据库已打开的连接缓存.
      */
@@ -54,11 +50,6 @@ public class RocksDBManager {
      * 数据表基础文件夹名.
      */
     private static final String BASE_DB_NAME = "rocksdb";
-
-    /**
-     * 数据库是否已经初始化.
-     */
-    private static volatile boolean isInit = false;
 
     /**
      * 数据操作同步锁.
@@ -79,8 +70,6 @@ public class RocksDBManager {
      */
     public static void init(final String path) throws Exception {
         synchronized (RocksDBManager.class) {
-            //if (isInit) {
-            isInit = true;
             File dir = DBUtils.loadDataPath(path);
             dataPath = dir.getPath();
             Log.info("RocksDBManager dataPath is " + dataPath);
@@ -103,7 +92,6 @@ public class RocksDBManager {
                     throw e;
                 }
             }
-            //}
         }
 
     }
