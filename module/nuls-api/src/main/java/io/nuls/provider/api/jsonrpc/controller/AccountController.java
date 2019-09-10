@@ -864,7 +864,7 @@ public class AccountController {
             @Key(name = "txHex", description = "交易序列化16进制字符串")
     }))
     public RpcResult createMultiSignAliasTx(List<Object> params) {
-        String address, alias, nonce;
+        String address, alias, nonce, remark;
         List<String> pubKeys;
         int minSigns;
         try {
@@ -883,12 +883,17 @@ public class AccountController {
             return RpcResult.paramError("[nonce] is inValid");
         }
         try {
-            pubKeys = (List<String>) params.get(3);
+            remark = (String) params.get(3);
+        } catch (Exception e) {
+            return RpcResult.paramError("[remark] is inValid");
+        }
+        try {
+            pubKeys = (List<String>) params.get(4);
         } catch (Exception e) {
             return RpcResult.paramError("[pubKeys] is inValid");
         }
         try {
-            minSigns = (int) params.get(4);
+            minSigns = (int) params.get(5);
         } catch (Exception e) {
             return RpcResult.paramError("[minSigns] is inValid");
         }
@@ -898,11 +903,12 @@ public class AccountController {
         dto.setNonce(nonce);
         dto.setPubKeys(pubKeys);
         dto.setMinSigns(minSigns);
+        dto.setRemark(remark);
         io.nuls.core.basic.Result result = NulsSDKTool.createMultiSignAliasTxOffline(dto);
         return ResultUtil.getJsonRpcResult(result);
     }
 
-    @RpcMethod("createMultiSignAliasTx")
+    @RpcMethod("getAddressByPriKey")
     @ApiOperation(description = "根据私钥获取账户地址格式", order = 160)
     @Parameters({
             @Parameter(parameterName = "原始私钥", parameterDes = "私钥表单", requestType = @TypeDescriptor(value = PriKeyForm.class))

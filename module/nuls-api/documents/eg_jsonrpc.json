@@ -31,6 +31,29 @@
     "request": {"jsonrpc":"2.0","method":"getAccountBalance","params":[2,2,1,"tNULSeBaMhcccH1KeXhMpH5y3pvtRzatAiuMJk"],"id":1234},
     "response" : {"jsonrpc":"2.0","id":"1234","result":{"totalBalance":"0","balance":"0","timeLock":"0","consensusLock":"0","freeze":"0","nonce":"0000000000000000","nonceType":1}}
   },
+  "setAlias": {
+    "request": {"jsonrpc":"2.0","method":"setAlias","params":[2, "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", "test", "nuls123456"],"id":1234},
+    "response" : {"jsonrpc":"2.0","id":"1234","result":"b8e53f0b43bbb566bf48ba30a56dc935bba27873fb5e52d793b7dc564b71b81c"}
+  },
+  "validateAddress": {
+    "request": {"jsonrpc":"2.0","method":"validateAddress","params":[2, "tNULSeBaMhcccH1KeXhMpH5y3pvtRzatAiuMJk"],"id":1234},
+    "response" : {"jsonrpc":"2.0","id":"1234","result":{"value":true}}
+  },
+  "createMultiSignAccount": {
+    "request": {"jsonrpc":"2.0","method":"createMultiSignAccount","params":[["03d0593e55a11e841e28c4288aa1181fb151f9d260bab0e006ca158095eb78bb35","02ec141204330f1a028f4e4040582b9568db1f32bc8afc03c7ba6e84b78a72d979"], 2],"id":1234},
+    "response" :{"jsonrpc":"2.0","id":"1234","result":{"value":"tNULSeBaNNVVFWD1LjfT29s9BE4SqbzxonBejA"}}
+  },
+  "createAliasTx": {
+    "request": {"jsonrpc":"2.0","method":"createAliasTx","params":["tNULSeBaMhcccH1KeXhMpH5y3pvtRzatAiuMJk", "test2", "0000000000000000", "remark"],"id":1234},
+    "response" :{"jsonrpc":"2.0","id":"1234","result":{"txHex":"03006621775d001e170200012a9af4ee49f4cb1ee84eafd42aec41bc04b28f7b0574657374328c01170200012a9af4ee49f4cb1ee84eafd42aec41bc04b28f7b020001004023050600000000000000000000000000000000000000000000000000000000080000000000000000000117020001e2f297763765bc154afaac7aec5e7899a729fed20200010000e1f50500000000000000000000000000000000000000000000000000000000000000000000000000","hash":"170dc03089d5c721ce4f9794bb87ebf6c7553163622d57e7e8a22622ba02db5e"}}
+  },
+  "createMultiSignAliasTx": {
+    "request": {"jsonrpc":"2.0","method":"createMultiSignAliasTx","params":["tNULSeBaNNVVFWD1LjfT29s9BE4SqbzxonBejA", "test2", "0000000000000000", "remark", ["03d0593e55a11e841e28c4288aa1181fb151f9d260bab0e006ca158095eb78bb35","02ec141204330f1a028f4e4040582b9568db1f32bc8afc03c7ba6e84b78a72d979"], 2],"id":1234},
+    "response" :{"jsonrpc":"2.0","id":"1234","result":{"txHex":"0300462e775d0672656d61726b1e17020003a2d7273f40c7e2d19ac53fd743bdcea92494a7c00574657374328c0117020003a2d7273f40c7e2d19ac53fd743bdcea92494a7c0020001004023050600000000000000000000000000000000000000000000000000000000080000000000000000000117020001e2f297763765bc154afaac7aec5e7899a729fed20200010000e1f5050000000000000000000000000000000000000000000000000000000000000000000000004602022103d0593e55a11e841e28c4288aa1181fb151f9d260bab0e006ca158095eb78bb352102ec141204330f1a028f4e4040582b9568db1f32bc8afc03c7ba6e84b78a72d979","hash":"e05e43886c8f9a95ef4c6dfb10f1964d507ac6b2d98079e4aa8d9d8d0572bdb2"}}
+  },
+
+
+
   "createAccountOffline": {
     "request": {"jsonrpc":"2.0","method":"createAccountOffline","params":[2,1,"tNULS","abcd1234"],"id":1234},
     "response" : {"jsonrpc":"2.0","id":"1234","result":[{"address":"tNULSeBaMnS7et6FdFMMMLyK8Wvy1daVVeohfu","pubKey":"02756e0d0827df60f5806bc00c44f97a9f5c234f78502a314aa40bb0a0156cd9f0","prikey":"","encryptedPrivateKey":"720e9f7ac1ab2ee997bad249d1c42212a5c5c744358a7bc65f472a1fe61a87a8f0bc841fdc74c8313fe6c94f496f3676"}]}
