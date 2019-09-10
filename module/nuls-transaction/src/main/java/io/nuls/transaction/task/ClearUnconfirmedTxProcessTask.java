@@ -68,7 +68,7 @@ public class ClearUnconfirmedTxProcessTask implements Runnable {
             return;
         }
         int count = processUnconfirmedTxs(txKeyList);
-        chain.getLogger().info("%%%%% Clean %%%%% [UnconfirmedTxProcessTask] expire count: {}", count);
+        chain.getLogger().info("[UnconfirmedTxProcessTask] Clean expire count: {}", count);
     }
 
     private boolean processTx(Chain chain, Transaction tx) {
