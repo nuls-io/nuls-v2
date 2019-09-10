@@ -28,7 +28,7 @@ blackHolePublicKey=0000000000000000000000000000000000000000000000000000000000000
 port=18001
 crossPort=18002
 #魔法参数
-packetMagic=201909051
+packetMagic=201909091
 #种子节点
 selfSeedIps=192.168.1.121:18001,192.168.1.122:18001,192.168.1.123:18001,192.168.1.124:18001
 #主网的跨链种子连接节点
@@ -105,6 +105,8 @@ databasePort=27017
 maxAliveConnect=20
 #连接最大等待时间
 maxWaitTime=120000
+#连接最大持续时间
+socketTimeout=300000
 #连接超时时间
 connectTimeOut=30000
 developerNodeAddress=NULSd6Hgf15aUZj6918tEwy9aT4JG1ZQotXRF

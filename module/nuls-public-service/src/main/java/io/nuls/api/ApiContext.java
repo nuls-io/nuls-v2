@@ -66,6 +66,8 @@ public class ApiContext {
 
     public static int maxWaitTime;
 
+    public static int socketTimeout;
+
     public static int connectTimeOut;
 
     public static boolean isRunSmartContract;
