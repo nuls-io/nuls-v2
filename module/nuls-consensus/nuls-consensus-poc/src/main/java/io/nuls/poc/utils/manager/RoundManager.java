@@ -678,6 +678,30 @@ public class RoundManager {
     }
 
     /**
+     * 获取指定轮次的前一轮轮次信息
+     * Gets the first block packaged in the previous round of the specified round
+     *
+     * @param chain      chain info
+     * @param roundIndex 轮次下标
+     */
+    public MeetingRound getPreRound(Chain chain, long roundIndex)throws Exception{
+        List<BlockHeader> blockHeaderList = chain.getBlockHeaderList();
+        BlockHeader blockHeader;
+        BlockExtendsData extendsData = null;
+        for (int i = blockHeaderList.size() - 1; i >= 0; i--) {
+            blockHeader = blockHeaderList.get(i);
+            extendsData = blockHeader.getExtendsData();
+            if(extendsData.getRoundIndex() < roundIndex){
+                break;
+            }
+        }
+        if(extendsData == null){
+            return null;
+        }
+        return getRound(chain,extendsData,false);
+    }
+
+    /**
      * 获取地址出块数量
      * Get the number of address blocks
      *

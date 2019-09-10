@@ -448,18 +448,19 @@ public class PunishManager {
                      * 找到round前一轮的第一个区块
                      * */
                     if (chain.getRoundList().size() > 0) {
-                        preRound = chain.getRoundList().get(chain.getRoundList().size() - 1);
-                    } else {
-                        BlockHeader preRoundHeader = roundManager.getFirstBlockOfPreRound(chain, round.getIndex() - 1);
-                        BlockExtendsData preRoundExtendsData = preRoundHeader.getExtendsData();
-                        preRound = roundManager.getRoundByRoundIndex(chain, preRoundExtendsData.getRoundIndex(), preRoundExtendsData.getRoundStartTime());
+                        preRound = roundManager.getRoundByIndex(chain, round.getIndex()-1);
+                    }
+                    if(preRound == null){
+                        preRound = roundManager.getPreRound(chain, round.getIndex());
                     }
                 }
-                member = preRound.getMember(index + preRound.getMemberCount());
-                if (member.getAgent() == null || member.getAgent().getDelHeight() > 0 || member.getAgent().getDeposit().equals(BigInteger.ZERO)) {
-                    continue;
+                if(preRound != null){
+                    member = preRound.getMember(index + preRound.getMemberCount());
+                    if (member.getAgent() == null || member.getAgent().getDelHeight() > 0 || member.getAgent().getDeposit().equals(BigInteger.ZERO)) {
+                        continue;
+                    }
+                    addressList.add(member.getAgent().getAgentAddress());
                 }
-                addressList.add(member.getAgent().getAgentAddress());
             }
         }
         if (addressList.isEmpty()) {
