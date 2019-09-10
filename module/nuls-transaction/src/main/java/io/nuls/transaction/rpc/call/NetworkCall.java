@@ -99,12 +99,13 @@ public class NetworkCall {
             params.put("nodes", nodeId);
             params.put("messageBody", RPCUtil.encode(message.serialize()));
             params.put("command", cmd);
-            TransactionCall.requestAndResponse(ModuleE.NW.abbr, "nw_sendPeersMsg", params);
-            return true;
+            Request request = MessageUtil.newRequest("nw_sendPeersMsg", params, Constants.BOOLEAN_FALSE, Constants.ZERO, Constants.ZERO);
+            String messageId = ResponseMessageProcessor.requestOnly(ModuleE.NW.abbr, request);
+            return messageId.equals("0") ? false : true;
         } catch (IOException e) {
             LOG.error("message:" + cmd + " failed", e);
             throw new NulsException(TxErrorCode.SEND_MSG_FAIL);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             LOG.error("message:" + cmd + " failed", e);
             throw new NulsException(TxErrorCode.SEND_MSG_FAIL);
         }
