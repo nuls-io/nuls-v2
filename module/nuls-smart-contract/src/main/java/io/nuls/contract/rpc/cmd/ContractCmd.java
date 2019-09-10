@@ -508,7 +508,7 @@ public class ContractCmd extends BaseCmd {
                     depositArgs[0] = element;
                     result = this.callDepositContract(chainId, address, value, blockHeight, depositArgs, batchExecutor, stateRootBytes);
                     if(result.isFailed()) {
-                        Log.error("deposit contract address [{}] trigger payable error [{}]", AddressTool.getStringAddressByBytes(address), extractMsg(result));
+                        Log.error("deposit contract address [{}] trigger payable error [{}], blockHeight is {}", AddressTool.getStringAddressByBytes(address), extractMsg(result), blockHeight);
                     }
                 }
                 agentArgs[i++] = element;
@@ -519,14 +519,14 @@ public class ContractCmd extends BaseCmd {
                 agentArgs[0] = new String[]{contractAddress, agentValue.toString()};
                 result = this.callAgentContract(chainId, contractAddressBytes, agentValue, blockHeight, agentArgs, batchExecutor, stateRootBytes);
                 if(result.isFailed()) {
-                    Log.error("agent contract address [{}] trigger payable error [{}]", AddressTool.getStringAddressByBytes(contractAddressBytes), extractMsg(result));
+                    Log.error("agent contract address [{}] trigger payable error [{}], blockHeight is {}", AddressTool.getStringAddressByBytes(contractAddressBytes), extractMsg(result), blockHeight);
                 }
             }
 
             batchExecutor.commit();
             byte[] newStateRootBytes = batchExecutor.getRoot();
             if (Log.isDebugEnabled()) {
-                Log.debug("contract trigger payable for consensus rewarding, preStateRoot is {}, currentStateRoot is {}", stateRoot, HexUtil.encode(newStateRootBytes));
+                Log.debug("contract trigger payable for consensus rewarding, blockHeight is {}, preStateRoot is {}, currentStateRoot is {}", blockHeight, stateRoot, HexUtil.encode(newStateRootBytes));
             }
             Map rpcResult = new HashMap(2);
             rpcResult.put(RPC_RESULT_KEY, RPCUtil.encode(newStateRootBytes));
@@ -547,16 +547,16 @@ public class ContractCmd extends BaseCmd {
 
     private Result callAgentContract(int chainId, byte[] contractAddressBytes, BigInteger value, Long blockHeight, String[][] args, ProgramExecutor batchExecutor, byte[] stateRootBytes) {
         if (Log.isDebugEnabled()) {
-            Log.debug("agent contract trigger payable for consensus rewarding, contractAddress is {}, reward detail is {}",
-                    AddressTool.getStringAddressByBytes(contractAddressBytes), ContractUtil.toString(args));
+            Log.debug("agent contract trigger payable for consensus rewarding, blockHeight is {}, contractAddress is {}, reward detail is {}",
+                    blockHeight, AddressTool.getStringAddressByBytes(contractAddressBytes), ContractUtil.toString(args));
         }
         return this.callConsensusContract(chainId, contractAddressBytes, value, blockHeight, args, batchExecutor, stateRootBytes, true);
     }
 
     private Result callDepositContract(int chainId, byte[] contractAddressBytes, BigInteger value, Long blockHeight, String[][] args, ProgramExecutor batchExecutor, byte[] stateRootBytes) {
         if (Log.isDebugEnabled()) {
-            Log.debug("deposit contract trigger payable for consensus rewarding, contractAddress is {}, reward is {}",
-                    AddressTool.getStringAddressByBytes(contractAddressBytes), value.toString());
+            Log.debug("deposit contract trigger payable for consensus rewarding, blockHeight is {}, contractAddress is {}, reward is {}",
+                    blockHeight, AddressTool.getStringAddressByBytes(contractAddressBytes), value.toString());
         }
         return this.callConsensusContract(chainId, contractAddressBytes, value, blockHeight, args, batchExecutor, stateRootBytes, false);
     }
