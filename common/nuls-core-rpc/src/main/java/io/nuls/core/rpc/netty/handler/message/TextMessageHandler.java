@@ -153,7 +153,7 @@ public class TextMessageHandler implements Runnable, Comparable<TextMessageHandl
                         connectData.getRequestOnlyQueue().offer(new RequestOnly(request, messageSize));
                         connectData.addRequestOnlyQueueMemSize(messageSize);
                     }else{
-                        Log.info("RequestOnly队列缓存已满，丢弃新接收到的消息，messageId:{},队列所占内存：{}", message.getMessageID(),connectData.getRequestOnlyQueueMemSize());
+                        Log.debug("RequestOnly队列缓存已满，丢弃新接收到的消息，messageId:{},队列所占内存：{}", message.getMessageID(),connectData.getRequestOnlyQueueMemSize());
                     }
                     break;
                 case NegotiateConnectionResponse:
