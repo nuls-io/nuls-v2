@@ -67,6 +67,7 @@ int CONTRACT_DEPOSIT = 21;				// 合约委托参与共识
 int CONTRACT_CANCEL_DEPOSIT = 22;		// 合约取消委托共识
 int CONTRACT_STOP_AGENT = 23;			// 合约注销共识节点
 int VERIFIER_CHANGE = 24;				// 验证人变更
+int VERIFIER_INIT = 25;                 //验证人初始化
 ```
 
 **交易的from和to：**

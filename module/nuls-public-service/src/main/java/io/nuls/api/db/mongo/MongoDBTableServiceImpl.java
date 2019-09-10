@@ -119,6 +119,7 @@ public class MongoDBTableServiceImpl implements DBTableService {
         }
         //账户信息表
         mongoDBService.createIndex(DBTableConstant.ACCOUNT_TABLE + chainId, Indexes.descending("totalBalance"));
+        mongoDBService.createIndex(DBTableConstant.ACCOUNT_LEDGER_TABLE + chainId, Indexes.descending("address"));
         //交易表
         mongoDBService.createIndex(DBTableConstant.TX_TABLE + chainId, Indexes.descending("height"));
         //block 表

@@ -100,8 +100,10 @@ public class MongoBlockServiceImpl implements BlockService {
         long time = System.currentTimeMillis() / 1000;
         time = time - 24 * 60 * 60;
         Bson filter = Filters.gte("createTime", time);
+        BasicDBObject fields = new BasicDBObject();
+        fields.append("reward", 1);
         BigInteger reward = BigInteger.ZERO;
-        List<Document> docsList = this.mongoDBService.query(BLOCK_HEADER_TABLE + chainId, filter);
+        List<Document> docsList = this.mongoDBService.query(BLOCK_HEADER_TABLE + chainId, filter, fields);
         for (Document document : docsList) {
             reward = reward.add(new BigInteger(document.getString("reward")));
         }
