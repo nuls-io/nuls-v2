@@ -84,7 +84,26 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public Block getGenesisBlock(int chainId) {
-        return getBlock(chainId, 0);
+        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
+        try {
+            long l = System.nanoTime();
+            Block block = new Block();
+            BlockHeaderPo blockHeaderPo = blockStorageService.query(chainId, 0);
+            if (blockHeaderPo == null) {
+                return null;
+            }
+            block.setHeader(BlockUtil.fromBlockHeaderPo(blockHeaderPo));
+            List<Transaction> transactions = TransactionCall.getConfirmedTransactions(chainId, blockHeaderPo.getTxHashList(), 60 * 1000);
+            if (transactions.isEmpty()) {
+                return null;
+            }
+            block.setTxs(transactions);
+            logger.debug("get block time-" + (System.nanoTime() - l) + ", height-0");
+            return block;
+        } catch (Exception e) {
+            logger.error("error when getBlock by height", e);
+            return null;
+        }
     }
 
     @Override
@@ -200,7 +219,7 @@ public class BlockServiceImpl implements BlockService {
                 return null;
             }
             block.setHeader(BlockUtil.fromBlockHeaderPo(blockHeaderPo));
-            List<Transaction> transactions = TransactionCall.getConfirmedTransactions(chainId, blockHeaderPo.getTxHashList());
+            List<Transaction> transactions = TransactionCall.getConfirmedTransactions(chainId, blockHeaderPo.getTxHashList(), 10 * 1000);
             block.setTxs(transactions);
             return block;
         } catch (Exception e) {
@@ -220,7 +239,7 @@ public class BlockServiceImpl implements BlockService {
                 return null;
             }
             block.setHeader(BlockUtil.fromBlockHeaderPo(blockHeaderPo));
-            List<Transaction> transactions = TransactionCall.getConfirmedTransactions(chainId, blockHeaderPo.getTxHashList());
+            List<Transaction> transactions = TransactionCall.getConfirmedTransactions(chainId, blockHeaderPo.getTxHashList(), 10 * 1000);
             if (transactions.isEmpty()) {
                 return null;
             }

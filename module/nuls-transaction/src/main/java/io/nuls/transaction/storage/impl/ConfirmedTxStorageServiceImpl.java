@@ -200,7 +200,7 @@ public class ConfirmedTxStorageServiceImpl implements ConfirmedTxStorageService 
         }
         List<Transaction> txList = new ArrayList<>();
         //根据交易hash批量查询交易数据
-        List<byte[]> list = RocksDBService.multiGetValueList(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + chainId, hashList);
+        List<byte[]> list = RocksDBService.multiGetAsList(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + chainId, hashList);
         if (list != null) {
             for (byte[] txBytes : list) {
                 try {
@@ -220,7 +220,7 @@ public class ConfirmedTxStorageServiceImpl implements ConfirmedTxStorageService 
             return null;
         }
         //根据交易hash批量查询交易数据
-        return RocksDBService.multiGetKeyList(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + chainId, hashList);
+        return RocksDBService.multiGetAsList(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + chainId, hashList);
     }
 
     @Override

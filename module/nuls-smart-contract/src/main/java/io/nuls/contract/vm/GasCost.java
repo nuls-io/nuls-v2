@@ -46,7 +46,6 @@ public class GasCost {
     public static final int TRANSFER = 1000;//转账交易
     public static final int SHA3 = 500;//SHA3调用
     public static final int VERIFY_SIGNATURE = 500;//验证签名
-    public static final int ENCRYPT_OR_DECODE = 2000;//加密或解密
     public static final int RANDOM_COUNT_SEED = 5000;//根据高度和原始种子个数生成一个随机种子
     public static final int RANDOM_HEIGHT_SEED = 5000;//根据高度区间生成一个随机种子
     public static final int OBJ_TO_JSON = 2000;//对象转换成json

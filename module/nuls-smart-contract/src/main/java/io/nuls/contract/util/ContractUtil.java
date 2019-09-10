@@ -488,9 +488,13 @@ public class ContractUtil {
                         Log.debug("等待的交易order - [{}], [{}]线程等待次数 - [{}]", txOrder, Thread.currentThread().getName(), i);
                     }
                     try {
-                        batchInfo.wait();
+                        batchInfo.wait(5000);
                     } catch (InterruptedException e) {
                         Log.error(e);
+                    }
+                    // 防止唤醒线程意外终止，导致等待线程永远等待
+                    if(i > 4) {
+                        return false;
                     }
                 }
             }

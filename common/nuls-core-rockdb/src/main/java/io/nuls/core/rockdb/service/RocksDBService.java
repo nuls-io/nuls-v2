@@ -76,10 +76,7 @@ public class RocksDBService {
      */
     public static boolean existTable(String table) {
         String[] tables = RocksDBManager.listTable();
-        if (tables != null && Arrays.asList(tables).contains(table)) {
-            return true;
-        }
-        return false;
+        return Arrays.asList(tables).contains(table);
     }
 
 
@@ -109,6 +106,10 @@ public class RocksDBService {
 
     public static Map<byte[], byte[]> multiGet(String table, List<byte[]> keys) {
         return RocksDBManager.multiGet(table, keys);
+    }
+
+    public static List<byte[]> multiGetAsList(String table, List<byte[]> keys) {
+        return RocksDBManager.multiGetAsList(table, keys);
     }
 
     public static List<byte[]> multiGetValueList(String table, List<byte[]> keys) {
