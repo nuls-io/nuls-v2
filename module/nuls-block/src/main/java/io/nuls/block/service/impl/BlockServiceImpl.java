@@ -93,7 +93,7 @@ public class BlockServiceImpl implements BlockService {
                 return null;
             }
             block.setHeader(BlockUtil.fromBlockHeaderPo(blockHeaderPo));
-            List<Transaction> transactions = TransactionCall.getConfirmedTransactions(chainId, blockHeaderPo.getTxHashList(), 30 * 1000);
+            List<Transaction> transactions = TransactionCall.getConfirmedTransactions(chainId, blockHeaderPo.getTxHashList(), 60 * 1000);
             if (transactions.isEmpty()) {
                 return null;
             }

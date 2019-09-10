@@ -183,7 +183,7 @@ public class SmallBlockHandler implements MessageProcessor {
             CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(null, smallBlock, txMap, nodeId);
             SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);
             SmallBlockCacher.setStatus(chainId, blockHash, COMPLETE);
-            TxGroupRequestor.removeTask(chainId, blockHash.toString());
+            TxGroupRequestor.removeTask(chainId, blockHash);
             Block block = BlockUtil.assemblyBlock(header, txMap, txHashList);
             block.setNodeId(nodeId);
             logger.debug("record recv block, block create time-" + DateUtils.timeStamp2DateStr(block.getHeader().getTime() * 1000) + ", hash-" + block.getHeader().getHash());
