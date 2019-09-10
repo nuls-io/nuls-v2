@@ -56,6 +56,8 @@ public class ApiConfig implements ModuleConfig {
 
     private int connectTimeOut;
 
+    private int socketTimeout;
+
     private String developerNodeAddress;
 
     private String ambassadorNodeAddress;
@@ -268,5 +270,13 @@ public class ApiConfig implements ModuleConfig {
 
     public void setBlackHolePublicKey(String blackHolePublicKey) {
         this.blackHolePublicKey = blackHolePublicKey;
+    }
+
+    public int getSocketTimeout() {
+        return socketTimeout;
+    }
+
+    public void setSocketTimeout(int socketTimeout) {
+        this.socketTimeout = socketTimeout;
     }
 }
