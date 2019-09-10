@@ -71,7 +71,8 @@ public class TxGroupRequestor extends BaseMonitor {
     }
 
     public static void init(int chainId) {
-        Map<String, DelayQueue<TxGroupTask>> cMap = new ConcurrentHashMap<>(4);
+        byte smallBlockCache = ContextManager.getContext(chainId).getParameters().getSmallBlockCache();
+        Map<String, DelayQueue<TxGroupTask>> cMap = CollectionUtils.getSynSizedMap(smallBlockCache);
         map.put(chainId, cMap);
     }
 
@@ -86,9 +87,9 @@ public class TxGroupRequestor extends BaseMonitor {
         logger.debug("TxGroupRequestor add TxGroupTask, hash-" + hash + ", task-" + task + ", result-" + add);
     }
 
-    public static void removeTask(int chainId, String hash) {
+    public static void removeTask(int chainId, NulsHash hash) {
         NulsLogger logger = ContextManager.getContext(chainId).getLogger();
-        DelayQueue<TxGroupTask> remove = map.get(chainId).remove(hash);
+        DelayQueue<TxGroupTask> remove = map.get(chainId).remove(hash.toHex());
         logger.debug("TxGroupRequestor remove TxGroupTask, hash-" + hash + ", size-" + (remove == null ? 0 : remove.size()));
     }
 
@@ -123,6 +124,7 @@ public class TxGroupRequestor extends BaseMonitor {
 
                     Block block = BlockUtil.assemblyBlock(header, txMap, smallBlock.getTxHashList());
                     block.setNodeId(cachedSmallBlock.getNodeId());
+                    TxGroupRequestor.removeTask(chainId, header.getHash());
                     logger.debug("record recv block, block create time-" + DateUtils.timeStamp2DateStr(block.getHeader().getTime() * 1000) + ", hash-" + block.getHeader().getHash());
                     boolean b = blockService.saveBlock(chainId, block, 1, true, false, true);
                     if (!b) {
