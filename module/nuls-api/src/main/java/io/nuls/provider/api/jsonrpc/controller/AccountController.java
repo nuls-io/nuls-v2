@@ -920,11 +920,11 @@ public class AccountController {
         String priKey;
         try {
             priKey = (String) params.get(0);
+            io.nuls.core.basic.Result result = NulsSDKTool.getAddressByPriKey(priKey);
+            return ResultUtil.getJsonRpcResult(result);
         } catch (Exception e) {
             return RpcResult.paramError("[priKey] is inValid");
         }
-        io.nuls.core.basic.Result result = NulsSDKTool.getAddressByPriKey(priKey);
-        return ResultUtil.getJsonRpcResult(result);
     }
 
 

@@ -752,11 +752,10 @@ _**详细描述: 密文私钥摘要签名**_
 _**详细描述: 根据多个账户的公钥创建多签账户，minSigns为多签账户创建交易时需要的最小签名数**_
 
 #### 参数列表
-| 参数名                                                     |      参数类型       | 参数描述   | 是否必填 |
-| ------------------------------------------------------- |:---------------:| ------ |:----:|
-| pubKeys                                                 |      list       | 账户公钥集合 |  是   |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pubKeys | list&lt;string> | 账户公钥集合 |  是   |
-| minSigns                                                |       int       | 最小签名数  |  是   |
+| 参数名      |      参数类型       | 参数描述   | 是否必填 |
+| -------- |:---------------:| ------ |:----:|
+| pubKeys  | list&lt;string> | 账户公钥集合 |  是   |
+| minSigns |       int       | 最小签名数  |  是   |
 
 #### 返回值
 | 字段名   |  字段类型  | 参数描述  |
@@ -880,10 +879,25 @@ _**详细描述: 根据私钥获取账户地址格式**_
 | ----- |:------:| ---- |
 | value | string | 账户地址 |
 #### Example request data: 
-无
+```json
+{
+  "jsonrpc" : "2.0",
+  "method" : "getAddressByPriKey",
+  "params" : [ "9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b" ],
+  "id" : 1234
+}
+```
 
 #### Example response data: 
-略
+```json
+{
+  "jsonrpc" : "2.0",
+  "id" : "1234",
+  "result" : {
+    "value" : "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG"
+  }
+}
+```
 
 ### 2.1 根据区块高度查询区块头
 #### Cmd: getHeaderByHeight
@@ -1819,10 +1833,38 @@ _**详细描述: 根据inputs和outputs离线组装转账交易，用于单账�
 | hash  | string | 交易hash       |
 | txHex | string | 交易序列化16进制字符串 |
 #### Example request data: 
-无
+```json
+{
+  "jsonrpc" : "2.0",
+  "method" : "createMultiSignTransferTxOffline",
+  "params" : [ [ "0377a7e02381a11a1efe3995d1bced0b3e227cb058d7b09f615042123640f5b8db", "03f66892ff89daf758a5585aed62a3f43b0a12cbec8955c3b155474071e156a8a1" ], 2, [ {
+    "address" : "tNULSeBaNTcZo37gNC5mNjJuB39u8zT3TAy8jy",
+    "assetChainId" : 2,
+    "assetId" : 1,
+    "amount" : 11000000,
+    "nonce" : "0000000000000000"
+  } ], [ {
+    "address" : "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG",
+    "assetChainId" : 2,
+    "assetId" : 1,
+    "amount" : 10000000,
+    "lockTime" : 0
+  } ], "remark" ],
+  "id" : 1234
+}
+```
 
 #### Example response data: 
-略
+```json
+{
+  "jsonrpc" : "2.0",
+  "id" : "1234",
+  "result" : {
+    "txHex" : "02008854775d0672656d61726b008c0117020003f6231825aa05e4d25b4772909a15c9ba3c0b6fe202000100c0d8a70000000000000000000000000000000000000000000000000000000000080000000000000000000117020001f7ec6473df12e751d64cf20a8baa7edd50810f810200010080969800000000000000000000000000000000000000000000000000000000000000000000000000460202210377a7e02381a11a1efe3995d1bced0b3e227cb058d7b09f615042123640f5b8db2103f66892ff89daf758a5585aed62a3f43b0a12cbec8955c3b155474071e156a8a1",
+    "hash" : "f72a8240924380d3b2499ed8859f192b3097c0d19dbdbd879093fa2d974352c7"
+  }
+}
+```
 
 ### 3.8 计算离线创建转账交易所需手续费
 #### Cmd: calcMultiSignTransferTxFee
@@ -1843,10 +1885,25 @@ _**详细描述: 计算离线创建转账交易所需手续费**_
 | ----- |:------:| ----- |
 | value | string | 交易手续费 |
 #### Example request data: 
-无
+```json
+{
+  "jsonrpc" : "2.0",
+  "method" : "calcMultiSignTransferTxFee",
+  "params" : [ 2, 2, 1, "remark", "1000000" ],
+  "id" : 1234
+}
+```
 
 #### Example response data: 
-略
+```json
+{
+  "jsonrpc" : "2.0",
+  "id" : "1234",
+  "result" : {
+    "value" : 1000000
+  }
+}
+```
 
 ### 4.1 发布合约
 #### Cmd: contractCreate
@@ -2407,11 +2464,10 @@ _**详细描述: 获取智能合约执行结果**_
 _**详细描述: 获取智能合约执行结果列表**_
 
 #### 参数列表
-| 参数名                                                      |      参数类型       | 参数描述     | 是否必填 |
-| -------------------------------------------------------- |:---------------:| -------- |:----:|
-| chainId                                                  |       int       | 链ID      |  是   |
-| hashList                                                 |      list       | 交易hash列表 |  是   |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;hashList | list&lt;string> | 交易hash列表 |  是   |
+| 参数名      |      参数类型       | 参数描述     | 是否必填 |
+| -------- |:---------------:| -------- |:----:|
+| chainId  |       int       | 链ID      |  是   |
+| hashList | list&lt;string> | 交易hash列表 |  是   |
 
 #### 返回值
 | 字段名                                                                                                                                                   |      字段类型       | 参数描述                                        |
@@ -3645,10 +3701,32 @@ _**详细描述: 参与共识所需资产可通过查询链信息接口获取(ag
 | hash  | string | 交易hash   |
 | txHex | string | 交易序列化字符串 |
 #### Example request data: 
-无
+```json
+{
+  "jsonrpc" : "2.0",
+  "method" : "multiSignCreateAgentOffline",
+  "params" : [ 2, "tNULSeBaNTcZo37gNC5mNjJuB39u8zT3TAy8jy", "tNULSeBaMowgMLTbRUngAuj2BvGy2RmVLt3okv", "tNULSeBaNTcZo37gNC5mNjJuB39u8zT3TAy8jy", 10, 2000000000000, {
+    "address" : "tNULSeBaNTcZo37gNC5mNjJuB39u8zT3TAy8jy",
+    "assetChainId" : 2,
+    "assetId" : 1,
+    "amount" : 2000001000000,
+    "nonce" : "0000000000000000"
+  }, [ "0377a7e02381a11a1efe3995d1bced0b3e227cb058d7b09f615042123640f5b8db", "03f66892ff89daf758a5585aed62a3f43b0a12cbec8955c3b155474071e156a8a1" ], 2 ],
+  "id" : 1234
+}
+```
 
 #### Example response data: 
-略
+```json
+{
+  "jsonrpc" : "2.0",
+  "id" : "1234",
+  "result" : {
+    "txHex" : "04001d5a775d006600204aa9d1010000000000000000000000000000000000000000000000000000020003f6231825aa05e4d25b4772909a15c9ba3c0b6fe202000191866cefc8c9e1181b4e1e068b64fa288405b3e6020003f6231825aa05e4d25b4772909a15c9ba3c0b6fe20a8c0117020003f6231825aa05e4d25b4772909a15c9ba3c0b6fe202000100406259a9d1010000000000000000000000000000000000000000000000000000080000000000000000000117020003f6231825aa05e4d25b4772909a15c9ba3c0b6fe20200010000204aa9d1010000000000000000000000000000000000000000000000000000ffffffffffffffff460202210377a7e02381a11a1efe3995d1bced0b3e227cb058d7b09f615042123640f5b8db2103f66892ff89daf758a5585aed62a3f43b0a12cbec8955c3b155474071e156a8a1",
+    "hash" : "4b0aa8c126bf314dbc7d42dc94127064392643b33e194cfa050884a38557392c"
+  }
+}
+```
 
 ### 5.11 离线组装 - 多签账户注销共识节点
 #### Cmd: multiSignStopAgentOffline
@@ -3680,10 +3758,34 @@ _**详细描述: 组装交易的StopDepositDto信息，可通过查询节点的�
 | hash  | string | 交易hash   |
 | txHex | string | 交易序列化字符串 |
 #### Example request data: 
-无
+```json
+{
+  "jsonrpc" : "2.0",
+  "method" : "multiSignStopAgentOffline",
+  "params" : [ 2, "e67ed0f09cea8bd4e2ad3b4b6d83a39841f9f83dd2a9e5737b73b4d5ad203537", "tNULSeBaNTcZo37gNC5mNjJuB39u8zT3TAy8jy", 2000000000000, 1000000, [ {
+    "depositHash" : "d4a9404a823ea533d1c7fba34470970ac499a974f35172bb8a717b0d6c4d4cbe",
+    "input" : {
+      "address" : "tNULSeBaNTcZo37gNC5mNjJuB39u8zT3TAy8jy",
+      "assetChainId" : 2,
+      "assetId" : 1,
+      "amount" : 200000000000
+    }
+  } ], [ "0377a7e02381a11a1efe3995d1bced0b3e227cb058d7b09f615042123640f5b8db", "03f66892ff89daf758a5585aed62a3f43b0a12cbec8955c3b155474071e156a8a1" ], 2 ],
+  "id" : 1234
+}
+```
 
 #### Example response data: 
-略
+```json
+{
+  "jsonrpc" : "2.0",
+  "id" : "1234",
+  "result" : {
+    "txHex" : "0900a55b775d0020e67ed0f09cea8bd4e2ad3b4b6d83a39841f9f83dd2a9e5737b73b4d5ad203537fd16010217020003f6231825aa05e4d25b4772909a15c9ba3c0b6fe20200010000204aa9d1010000000000000000000000000000000000000000000000000000087b73b4d5ad203537ff17020003f6231825aa05e4d25b4772909a15c9ba3c0b6fe20200010000d0ed902e000000000000000000000000000000000000000000000000000000088a717b0d6c4d4cbeff0217020003f6231825aa05e4d25b4772909a15c9ba3c0b6fe202000100c0dd3aa9d1010000000000000000000000000000000000000000000000000000b569775d0000000017020003f6231825aa05e4d25b4772909a15c9ba3c0b6fe20200010000d0ed902e0000000000000000000000000000000000000000000000000000000000000000000000460202210377a7e02381a11a1efe3995d1bced0b3e227cb058d7b09f615042123640f5b8db2103f66892ff89daf758a5585aed62a3f43b0a12cbec8955c3b155474071e156a8a1",
+    "hash" : "fb7f4d0e078b0eba8e89e22faccab54af18eab73858fb0d1c8bddbf6c771f1e3"
+  }
+}
+```
 
 ### 5.12 离线组装 - 多签账户委托参与共识
 #### Cmd: multiSignDepositToAgentOffline
@@ -3712,10 +3814,32 @@ _**详细描述: 参与共识所需资产可通过查询链信息接口获取(ag
 | hash  | string | 交易hash   |
 | txHex | string | 交易序列化字符串 |
 #### Example request data: 
-无
+```json
+{
+  "jsonrpc" : "2.0",
+  "method" : "multiSignDepositToAgentOffline",
+  "params" : [ 2, "tNULSeBaNTcZo37gNC5mNjJuB39u8zT3TAy8jy", 200000000000, "e67ed0f09cea8bd4e2ad3b4b6d83a39841f9f83dd2a9e5737b73b4d5ad203537", {
+    "address" : "tNULSeBaNTcZo37gNC5mNjJuB39u8zT3TAy8jy",
+    "assetChainId" : 2,
+    "assetId" : 1,
+    "amount" : 2000001000000,
+    "nonce" : "0000000000000000"
+  }, [ "0377a7e02381a11a1efe3995d1bced0b3e227cb058d7b09f615042123640f5b8db", "03f66892ff89daf758a5585aed62a3f43b0a12cbec8955c3b155474071e156a8a1" ], 2 ],
+  "id" : 1234
+}
+```
 
 #### Example response data: 
-略
+```json
+{
+  "jsonrpc" : "2.0",
+  "id" : "1234",
+  "result" : {
+    "txHex" : "0500595c775d005700d0ed902e000000000000000000000000000000000000000000000000000000020003f6231825aa05e4d25b4772909a15c9ba3c0b6fe2e67ed0f09cea8bd4e2ad3b4b6d83a39841f9f83dd2a9e5737b73b4d5ad2035378c0117020003f6231825aa05e4d25b4772909a15c9ba3c0b6fe202000100406259a9d1010000000000000000000000000000000000000000000000000000080000000000000000000117020003f6231825aa05e4d25b4772909a15c9ba3c0b6fe20200010000d0ed902e000000000000000000000000000000000000000000000000000000ffffffffffffffff460202210377a7e02381a11a1efe3995d1bced0b3e227cb058d7b09f615042123640f5b8db2103f66892ff89daf758a5585aed62a3f43b0a12cbec8955c3b155474071e156a8a1",
+    "hash" : "afa774c23dc75dd61356135407959385728c34f358017842d9da090c1d9d08ec"
+  }
+}
+```
 
 ### 5.13 离线组装 - 多签账户退出共识
 #### Cmd: multiSignWithdrawOffline
@@ -3744,8 +3868,29 @@ _**详细描述: 离线组装 - 多签账户退出共识**_
 | hash  | string | 交易hash   |
 | txHex | string | 交易序列化字符串 |
 #### Example request data: 
-无
+```json
+{
+  "jsonrpc" : "2.0",
+  "method" : "multiSignWithdrawOffline",
+  "params" : [ 2, "tNULSeBaNTcZo37gNC5mNjJuB39u8zT3TAy8jy", "e67ed0f09cea8bd4e2ad3b4b6d83a39841f9f83dd2a9e5737b73b4d5ad203537", 1000000, {
+    "address" : "tNULSeBaNTcZo37gNC5mNjJuB39u8zT3TAy8jy",
+    "assetChainId" : 2,
+    "assetId" : 1,
+    "amount" : 200000000000
+  }, [ "0377a7e02381a11a1efe3995d1bced0b3e227cb058d7b09f615042123640f5b8db", "03f66892ff89daf758a5585aed62a3f43b0a12cbec8955c3b155474071e156a8a1" ], 2 ],
+  "id" : 1234
+}
+```
 
 #### Example response data: 
-略
+```json
+{
+  "jsonrpc" : "2.0",
+  "id" : "1234",
+  "result" : {
+    "txHex" : "0600255d775d0020e67ed0f09cea8bd4e2ad3b4b6d83a39841f9f83dd2a9e5737b73b4d5ad2035378c0117020003f6231825aa05e4d25b4772909a15c9ba3c0b6fe20200010000d0ed902e000000000000000000000000000000000000000000000000000000087b73b4d5ad203537ff0117020003f6231825aa05e4d25b4772909a15c9ba3c0b6fe202000100c08dde902e0000000000000000000000000000000000000000000000000000000000000000000000460202210377a7e02381a11a1efe3995d1bced0b3e227cb058d7b09f615042123640f5b8db2103f66892ff89daf758a5585aed62a3f43b0a12cbec8955c3b155474071e156a8a1",
+    "hash" : "ac7d378ffcc7d7688e16f5916d177ffae992f62cdd0718594308bde445f31b9c"
+  }
+}
+```
 
