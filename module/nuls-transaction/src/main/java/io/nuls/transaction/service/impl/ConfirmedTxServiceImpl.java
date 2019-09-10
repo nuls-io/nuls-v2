@@ -277,7 +277,8 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         }
         int chainId = chain.getChainId();
         BlockHeader blockHeader = TxUtil.getInstanceRpcStr(blockHeaderStr, BlockHeader.class);
-        logger.info("start rollbackTxList block height:{}", blockHeader.getHeight());
+        long blockHeight = blockHeader.getHeight();
+        logger.info("start rollbackTxList block height:{}", blockHeight);
         long start = NulsDateUtils.getCurrentTimeMillis();
         List<Transaction> txList = new ArrayList<>();
         List<String> txStrList = new ArrayList<>();
@@ -300,26 +301,30 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             logger.error(e);
             return false;
         }
+        if(txList.isEmpty()){
+            logger.error("[rollback error] block txs is empty . -hight:{}", blockHeight);
+            return false;
+        }
         logger.debug("[回滚区块] 组装数据 执行时间:{}", NulsDateUtils.getCurrentTimeMillis() - start);
 
         long ledgerStart = NulsDateUtils.getCurrentTimeMillis();
-        if (!rollbackLedger(chain, txStrList, blockHeader.getHeight())) {
+        if (!rollbackLedger(chain, txStrList, blockHeight)) {
             return false;
         }
         logger.debug("[回滚区块] 回滚账本 执行时间:{}", NulsDateUtils.getCurrentTimeMillis() - ledgerStart);
 
         long moduleStart = NulsDateUtils.getCurrentTimeMillis();
         if (!rollbackTxs(chain, moduleVerifyMap, blockHeaderStr, true)) {
-            commitLedger(chain, txStrList, blockHeader.getHeight());
+            commitLedger(chain, txStrList, blockHeight);
             return false;
         }
         logger.debug("[回滚区块] 回滚交易业务数据 执行时间:{}", NulsDateUtils.getCurrentTimeMillis() - moduleStart);
 
 
         long dbStart = NulsDateUtils.getCurrentTimeMillis();
-        if (!removeTxs(chain, txList, blockHeader.getHeight(), true)) {
+        if (!removeTxs(chain, txList, blockHeight, true)) {
             commitTxs(chain, moduleVerifyMap, blockHeaderStr, false);
-            saveTxs(chain, txList, blockHeader.getHeight(), false);
+            saveTxs(chain, txList, blockHeight, false);
             return false;
         }
         //计算待打包队列大小倒序放入未确认库, 和待打包队列
@@ -342,7 +347,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             }
         }
         logger.debug("[回滚区块] 回滚移除DB已存储的交易, 放入未确认库 执行时间:{}", NulsDateUtils.getCurrentTimeMillis() - dbStart);
-        logger.info("rollbackTxList success block height:{}", blockHeader.getHeight());
+        logger.info("rollbackTxList success block height:{}", blockHeight);
         return true;
     }
 
