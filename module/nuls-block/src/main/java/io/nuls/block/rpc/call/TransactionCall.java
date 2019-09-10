@@ -130,7 +130,7 @@ public class TransactionCall {
             params.put("txList", txList);
             params.put("blockHeader", RPCUtil.encode(BlockUtil.fromBlockHeaderPo(blockHeaderPo).serialize()));
             params.put("contractList", contractList);
-            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_save", params, 10 * 60 * 1000);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_save", params, 60 * 1000);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
                 Map data = (Map) responseData.get("tx_save");
@@ -163,7 +163,7 @@ public class TransactionCall {
             txHashList.forEach(e -> list.add(e.toHex()));
             params.put("txHashList", list);
             params.put("blockHeader", RPCUtil.encode(BlockUtil.fromBlockHeaderPo(blockHeaderPo).serialize()));
-            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_rollback", params, 10 * 60 * 1000);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_rollback", params, 60 * 1000);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
                 Map data = (Map) responseData.get("tx_rollback");
