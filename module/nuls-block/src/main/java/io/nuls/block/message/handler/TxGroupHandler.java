@@ -28,6 +28,7 @@ import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.TxGroupMessage;
 import io.nuls.block.model.CachedSmallBlock;
 import io.nuls.block.service.BlockService;
+import io.nuls.block.thread.monitor.TxGroupRequestor;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.block.utils.SmallBlockCacher;
 import io.nuls.core.core.annotation.Autowired;
@@ -93,6 +94,7 @@ public class TxGroupHandler implements MessageProcessor {
 
             Block block = BlockUtil.assemblyBlock(header, txMap, smallBlock.getTxHashList());
             block.setNodeId(nodeId);
+            TxGroupRequestor.removeTask(chainId, blockHash);
             logger.debug("record recv block, block create time-" + DateUtils.timeStamp2DateStr(block.getHeader().getTime() * 1000) + ", hash-" + block.getHeader().getHash());
             boolean b = blockService.saveBlock(chainId, block, 1, true, false, true);
             if (!b) {

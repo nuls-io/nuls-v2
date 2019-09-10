@@ -44,6 +44,8 @@ public class RoundManager {
         List<MeetingRound> roundList = chain.getRoundList();
         if (roundList == null) {
             roundList = new ArrayList<>();
+        }else{
+            rollBackRound(chain, meetingRound.getIndex()-1);
         }
         if (roundList.size() > 0 && meetingRound.getPreRound() == null) {
             meetingRound.setPreRound(roundList.get(roundList.size() - 1));

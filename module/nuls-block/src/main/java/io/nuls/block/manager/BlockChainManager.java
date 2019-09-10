@@ -84,96 +84,101 @@ public class BlockChainManager {
      */
     public static boolean switchChain(int chainId, Chain masterChain, Chain forkChain) {
         NulsLogger logger = ContextManager.getContext(chainId).getLogger();
-        logger.info("*switch chain start");
-        logger.info("*masterChain-" + masterChain);
-        logger.info("*forkChain-" + forkChain);
-        //1.获取主链与最长分叉链的分叉点,并记录从分叉点开始的最长分叉链路径
-        Deque<Chain> switchChainPath = new ArrayDeque<>();
-        while (forkChain.getParent() != null) {
-            switchChainPath.push(forkChain);
-            forkChain = forkChain.getParent();
-        }
-        Chain topForkChain = switchChainPath.peek();
-        long forkHeight = topForkChain.getStartHeight();
-        long masterChainEndHeight = masterChain.getEndHeight();
-        if (masterChainEndHeight < forkHeight) {
-            logger.error("*masterChainEndHeight < forkHeight, data error");
-            System.exit(1);
-        }
-        logger.info("*calculate fork point complete, forkHeight=" + forkHeight);
-
-        //2.回滚主链
-        //2.1 回滚主链到指定高度,回滚掉的区块收集起来放入分叉链数据库
-        ArrayDeque<NulsHash> hashList = new ArrayDeque<>();
-        Stack<Block> blockStack = new Stack<>();
-        long rollbackHeight = masterChainEndHeight;
-        logger.info("*rollback master chain begin, rollbackHeight=" + rollbackHeight);
-        do {
-            Block block = blockService.getBlock(chainId, rollbackHeight--);
-            NulsHash hash = block.getHeader().getHash();
-            if (blockService.rollbackBlock(chainId, BlockUtil.toBlockHeaderPo(block), false)) {
-                blockStack.push(block);
-                hashList.offerFirst(hash);
-                logger.info("*rollback master chain doing, success hash=" + hash);
-            } else {
-                logger.info("*rollback master chain doing, fail hash=" + hash);
-                saveBlockToMasterChain(chainId, blockStack);
-                return false;
+        try {
+            logger.info("*switch chain start");
+            logger.info("*masterChain-" + masterChain);
+            logger.info("*forkChain-" + forkChain);
+            //1.获取主链与最长分叉链的分叉点,并记录从分叉点开始的最长分叉链路径
+            Deque<Chain> switchChainPath = new ArrayDeque<>();
+            while (forkChain.getParent() != null) {
+                switchChainPath.push(forkChain);
+                forkChain = forkChain.getParent();
             }
-        } while (rollbackHeight >= forkHeight);
-        logger.info("*rollback master chain end");
-        //2.2 主链回滚所生成的新分叉链
-        Chain masterForkChain = new Chain();
-        masterForkChain.setParent(masterChain);
-        masterForkChain.setStartHeight(forkHeight);
-        masterForkChain.setEndHeight(masterChainEndHeight);
-        masterForkChain.setChainId(chainId);
-        masterForkChain.setPreviousHash(topForkChain.getPreviousHash());
-        masterForkChain.setHashList(hashList);
-        masterForkChain.setType(ChainTypeEnum.FORK);
-        masterForkChain.setStartHashCode(hashList.getFirst().hashCode());
-        logger.info("*generate new masterForkChain chain-" + masterForkChain);
-        //2.3 主链上低于topForkChain的链不用变动
-        //2.4 主链上高于topForkChain的链重新链接到新分叉链masterForkChain
-        SortedSet<Chain> higherChains = masterChain.getSons().tailSet(topForkChain);
-        if (higherChains.size() > 1) {
-            logger.info("*higher than topForkChain-" + higherChains);
-            higherChains.remove(topForkChain);
-            masterForkChain.setSons(higherChains);
-            higherChains.forEach(e -> e.setParent(masterForkChain));
-        }
-        addForkChain(chainId, masterForkChain);
-        if (!chainStorageService.save(chainId, blockStack)) {
-            logger.info("*error occur when save masterForkChain");
-            append(masterChain, masterForkChain);
-            return false;
-        }
-        //至此,主链回滚完成
-        logger.info("*masterChain rollback complete");
+            Chain topForkChain = switchChainPath.peek();
+            long forkHeight = topForkChain.getStartHeight();
+            long masterChainEndHeight = masterChain.getEndHeight();
+            if (masterChainEndHeight < forkHeight) {
+                logger.error("*masterChainEndHeight < forkHeight, data error");
+                System.exit(1);
+            }
+            logger.info("*calculate fork point complete, forkHeight=" + forkHeight);
 
-        //3.依次添加最长分叉链路径上所有分叉链区块
-        List<Chain> delete = new ArrayList<>();
-        while (!switchChainPath.isEmpty()) {
-            Chain chain = switchChainPath.pop();
-            delete.add(chain);
-            Chain subChain = switchChainPath.isEmpty() ? null : switchChainPath.peek();
-            boolean b = switchChain0(chainId, masterChain, chain, subChain);
-            if (!b) {
-                //切换链失败,恢复主链
-                //首先把切换失败过程中加到主链上的区块回滚掉
-                while (masterChain.getEndHeight() >= forkHeight) {
-                    blockService.rollbackBlock(chainId, masterChain.getEndHeight(), false);
+            //2.回滚主链
+            //2.1 回滚主链到指定高度,回滚掉的区块收集起来放入分叉链数据库
+            ArrayDeque<NulsHash> hashList = new ArrayDeque<>();
+            Stack<Block> blockStack = new Stack<>();
+            long rollbackHeight = masterChainEndHeight;
+            logger.info("*rollback master chain begin, rollbackHeight=" + rollbackHeight);
+            do {
+                Block block = blockService.getBlock(chainId, rollbackHeight--);
+                NulsHash hash = block.getHeader().getHash();
+                if (blockService.rollbackBlock(chainId, BlockUtil.toBlockHeaderPo(block), false)) {
+                    blockStack.push(block);
+                    hashList.offerFirst(hash);
+                    logger.info("*rollback master chain doing, success hash=" + hash);
+                } else {
+                    logger.info("*rollback master chain doing, fail hash=" + hash);
+                    saveBlockToMasterChain(chainId, blockStack);
+                    return false;
                 }
-                logger.info("*switchChain0 fail masterChain-" + masterChain + ",chain-" + chain + ",subChain-" +
-                        subChain + ",masterForkChain-" + masterForkChain);
-                deleteForkChain(chainId, topForkChain, true);
+            } while (rollbackHeight >= forkHeight);
+            logger.info("*rollback master chain end");
+            //2.2 主链回滚所生成的新分叉链
+            Chain masterForkChain = new Chain();
+            masterForkChain.setParent(masterChain);
+            masterForkChain.setStartHeight(forkHeight);
+            masterForkChain.setEndHeight(masterChainEndHeight);
+            masterForkChain.setChainId(chainId);
+            masterForkChain.setPreviousHash(topForkChain.getPreviousHash());
+            masterForkChain.setHashList(hashList);
+            masterForkChain.setType(ChainTypeEnum.FORK);
+            masterForkChain.setStartHashCode(hashList.getFirst().hashCode());
+            logger.info("*generate new masterForkChain chain-" + masterForkChain);
+            //2.3 主链上低于topForkChain的链不用变动
+            //2.4 主链上高于topForkChain的链重新链接到新分叉链masterForkChain
+            SortedSet<Chain> higherChains = masterChain.getSons().tailSet(topForkChain);
+            if (higherChains.size() > 1) {
+                logger.info("*higher than topForkChain-" + higherChains);
+                higherChains.remove(topForkChain);
+                masterForkChain.setSons(higherChains);
+                higherChains.forEach(e -> e.setParent(masterForkChain));
+            }
+            addForkChain(chainId, masterForkChain);
+            if (!chainStorageService.save(chainId, blockStack)) {
+                logger.info("*error occur when save masterForkChain");
                 append(masterChain, masterForkChain);
                 return false;
             }
+            //至此,主链回滚完成
+            logger.info("*masterChain rollback complete");
+
+            //3.依次添加最长分叉链路径上所有分叉链区块
+            List<Chain> delete = new ArrayList<>();
+            while (!switchChainPath.isEmpty()) {
+                Chain chain = switchChainPath.pop();
+                delete.add(chain);
+                Chain subChain = switchChainPath.isEmpty() ? null : switchChainPath.peek();
+                boolean b = switchChain0(chainId, masterChain, chain, subChain);
+                if (!b) {
+                    //切换链失败,恢复主链
+                    //首先把切换失败过程中加到主链上的区块回滚掉
+                    while (masterChain.getEndHeight() >= forkHeight) {
+                        blockService.rollbackBlock(chainId, masterChain.getEndHeight(), false);
+                    }
+                    logger.info("*switchChain0 fail masterChain-" + masterChain + ",chain-" + chain + ",subChain-" +
+                            subChain + ",masterForkChain-" + masterForkChain);
+                    deleteForkChain(chainId, topForkChain, true);
+                    append(masterChain, masterForkChain);
+                    return false;
+                }
+            }
+            //6.收尾工作
+            delete.forEach(e -> deleteForkChain(chainId, e, false));
+            logger.info("*switch chain complete");
+        } catch (Exception e) {
+            logger.error("block chain switch fail, auto rollback fail, process exit.");
+            System.exit(1);
         }
-        //6.收尾工作
-        delete.forEach(e -> deleteForkChain(chainId, e, false));
-        logger.info("*switch chain complete");
         return true;
     }
 
@@ -181,7 +186,8 @@ public class BlockChainManager {
         //主链回滚中途失败,把前面回滚的区块再加回主链
         while (!blockStack.empty()) {
             if (!blockService.saveBlock(chainId, blockStack.pop(), false)) {
-                throw new NulsRuntimeException(BlockErrorCode.CHAIN_SWITCH_ERROR);
+                ContextManager.getContext(chainId).getLogger().error("block chain switch fail, auto rollback fail, process exit.");
+                System.exit(1);
             }
         }
     }

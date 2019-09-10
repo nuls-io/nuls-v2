@@ -148,14 +148,6 @@ public class TextMessageHandler implements Runnable, Comparable<TextMessageHandl
                         RequestMessageProcessor.ack(channel, messageId);
                     }
                     break;
-                case RequestOnly:
-                    if(!connectData.requestOnlyQueueReachLimit()){
-                        connectData.getRequestOnlyQueue().offer(new RequestOnly(request, messageSize));
-                        connectData.addRequestOnlyQueueMemSize(messageSize);
-                    }else{
-                        Log.info("RequestOnly队列缓存已满，丢弃新接收到的消息，messageId:{},队列所占内存：{}", message.getMessageID(),connectData.getRequestOnlyQueueMemSize());
-                    }
-                    break;
                 case NegotiateConnectionResponse:
                 case Ack:
                     ResponseContainer resContainer = RequestContainer.getResponseContainer(((Map<String, String>) message.getMessageData()).get("RequestID"));

@@ -10,9 +10,11 @@ import io.nuls.core.log.Log;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.CmdPriority;
+import io.nuls.core.rpc.model.RequestOnly;
 import io.nuls.core.rpc.model.message.Message;
 import io.nuls.core.rpc.model.message.MessageType;
 import io.nuls.core.rpc.model.message.Request;
+import io.nuls.core.rpc.netty.channel.ConnectData;
 import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.core.rpc.netty.handler.message.TextMessageHandler;
 import io.nuls.core.thread.commom.NulsThreadFactory;
@@ -33,12 +35,6 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
 
     private WebSocketClientHandshaker handShaker;
     private ChannelPromise handshakeFuture;
-
-/*
-    private ThreadPoolExecutor requestExecutorService = ThreadUtils.createThreadPool(Constants.THREAD_POOL_SIZE, 0, new NulsThreadFactory("client-handler-request"));
-
-    private ThreadPoolExecutor responseExecutorService = ThreadUtils.createThreadPool(Constants.THREAD_POOL_SIZE, 0, new NulsThreadFactory("client-handler-response"));
-*/
 
     private ThreadPoolExecutor requestExecutorService = new ThreadPoolExecutor(Constants.THREAD_POOL_SIZE, Constants.THREAD_POOL_SIZE, 0L, TimeUnit.MILLISECONDS, new PriorityBlockingQueue<>(), new NulsThreadFactory("server-handler-request"));
 
@@ -105,10 +101,6 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
             if (frame instanceof CloseWebSocketFrame) {
                 ch.close();
             } else if (msg instanceof TextWebSocketFrame) {
-//                if(requestExecutorService.getQueue().size() >= 500 || responseExecutorService.getQueue().size() > 500){
-//                    Log.debug("当前请求线程池总线程数量{},运行中线程数量{},等待队列数量{}", requestExecutorService.getPoolSize(), requestExecutorService.getActiveCount(), requestExecutorService.getQueue().size());
-//                    Log.debug("当前响应线程池总线程数量{},运行中线程数量{},等待队列数量{}", responseExecutorService.getPoolSize(), responseExecutorService.getActiveCount(), responseExecutorService.getQueue().size());
-//                }
                 TextWebSocketFrame txMsg = (TextWebSocketFrame) msg;
                 ByteBuf content = txMsg.content();
                 byte[] bytes = new byte[content.readableBytes()];
@@ -132,12 +124,20 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
                             }
                         }
                         messageHandler.setRequest(request);
+                        requestExecutorService.execute(messageHandler);
                     }else if(messageType.equals(MessageType.RequestOnly)){
                         Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
-                        messageHandler.setRequest(request);
-                        messageHandler.setMessageSize(bytes.length);
+                        ConnectData connectData = ConnectManager.CHANNEL_DATA_MAP.get(ctx.channel());
+                        int messageSize = bytes.length;
+                        if(!connectData.requestOnlyQueueReachLimit()){
+                            connectData.getRequestOnlyQueue().offer(new RequestOnly(request, messageSize));
+                            connectData.addRequestOnlyQueueMemSize(messageSize);
+                        }else{
+                            Log.debug("RequestOnly队列缓存已满，丢弃新接收到的消息，messageId:{},队列所占内存：{}", message.getMessageID(),connectData.getRequestOnlyQueueMemSize());
+                        }
+                    }else{
+                        requestExecutorService.execute(messageHandler);
                     }
-                    requestExecutorService.execute(messageHandler);
                 }
             } else {
                 Log.warn("Unsupported message format");
