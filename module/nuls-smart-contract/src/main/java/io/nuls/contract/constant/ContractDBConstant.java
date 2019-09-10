@@ -39,11 +39,8 @@ public interface ContractDBConstant {
      */
     String DB_NAME_CONGIF = "contract_config";
 
-    String DB_NAME_CONTRACT_LEDGER_TX_INDEX = "contract_ledger_tx_index";
     String DB_NAME_CONTRACT_ADDRESS = "contract_address";
-    String DB_NAME_CONTRACT_TRANSFER_TX = "contract_transfer_tx";
     String DB_NAME_CONTRACT_EXECUTE_RESULT = "contract_execute_result";
-    String DB_NAME_CONTRACT_COLLECTION = "contract_collection";
 
     String DB_NAME_CONTRACT_NRC20_TOKEN_TRANSFER = "contract_nrc20_token_transfer";
     String DB_NAME_CONTRACT_NRC20_TOKEN_ADDRESS = "contract_nrc20_token_address";
