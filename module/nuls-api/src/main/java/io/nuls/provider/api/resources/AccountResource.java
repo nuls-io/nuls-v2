@@ -60,6 +60,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -84,7 +85,8 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(description = "批量创建账户", order = 101, detailDesc = "创建的账户存在于本地钱包内")
     @Parameters({
-            @Parameter(parameterName = "form", parameterDes = "批量创建账户表单", requestType = @TypeDescriptor(value = AccountCreateForm.class))
+            @Parameter(parameterName = "count", parameterDes = "新建账户数量,取值[1-10000]"),
+            @Parameter(parameterName = "password", parameterDes = "账户密码")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "list", valueType = List.class, valueElement = String.class, description = "账户地址")
@@ -93,7 +95,7 @@ public class AccountResource {
         if (form == null) {
             return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "form is empty"));
         }
-        if (form.getCount() <= 0) {
+        if (form.getCount() <= 0 || form.getCount() > 10000) {
             return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "[count] is invalid"));
         }
         if (!FormatValidUtils.validPassword(form.getPassword())) {
@@ -211,8 +213,7 @@ public class AccountResource {
             @Key(name = "value", description = "账户地址")
     }))
     public RpcClientResult importAccountByKeystoreFile(@FormDataParam("keystore") InputStream in,
-                                                       @FormDataParam("password") String password,
-                                                       @FormDataParam("overwrite") Boolean overwrite) {
+                                                       @FormDataParam("password") String password) {
         if (in == null) {
             return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "inputStream is empty"));
         }
@@ -222,7 +223,7 @@ public class AccountResource {
         }
         AccountKeyStoreDto dto = dtoResult.getData();
         try {
-            ImportAccountByKeyStoreReq req = new ImportAccountByKeyStoreReq(password, HexUtil.encode(JSONUtils.obj2json(dto).getBytes()), overwrite);
+            ImportAccountByKeyStoreReq req = new ImportAccountByKeyStoreReq(password, HexUtil.encode(JSONUtils.obj2json(dto).getBytes()), true);
             req.setChainId(config.getChainId());
             Result<String> result = accountService.importAccountByKeyStore(req);
             RpcClientResult clientResult = ResultUtil.getRpcClientResult(result);
@@ -250,7 +251,7 @@ public class AccountResource {
             return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "form is empty"));
         }
         String keystore = accountService.getAccountKeystoreDto(form.getPath());
-        ImportAccountByKeyStoreReq req = new ImportAccountByKeyStoreReq(form.getPassword(), HexUtil.encode(keystore.getBytes()), form.getOverwrite());
+        ImportAccountByKeyStoreReq req = new ImportAccountByKeyStoreReq(form.getPassword(), HexUtil.encode(keystore.getBytes()), true);
         req.setChainId(config.getChainId());
         Result<String> result = accountService.importAccountByKeyStore(req);
         RpcClientResult clientResult = ResultUtil.getRpcClientResult(result);
@@ -280,7 +281,7 @@ public class AccountResource {
         } catch (JsonProcessingException e) {
             return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "keystore is invalid"));
         }
-        ImportAccountByKeyStoreReq req = new ImportAccountByKeyStoreReq(form.getPassword(), HexUtil.encode(keystore.getBytes()), form.getOverwrite());
+        ImportAccountByKeyStoreReq req = new ImportAccountByKeyStoreReq(form.getPassword(), HexUtil.encode(keystore.getBytes()), true);
         req.setChainId(config.getChainId());
         Result<String> result = accountService.importAccountByKeyStore(req);
         RpcClientResult clientResult = ResultUtil.getRpcClientResult(result);
@@ -386,12 +387,20 @@ public class AccountResource {
     @Path("/address/validate")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(description = "验证地址格式是否正确", order = 110, detailDesc = "验证地址格式是否正确")
+    @Parameters({
+            @Parameter(parameterName = "form", parameterDes = "账户设置别名表单", requestType = @TypeDescriptor(value = ValidateAddressForm.class))
+    })
+    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "true")
+    }))
     public RpcClientResult validateAddress(ValidateAddressForm form) {
         boolean b = AddressTool.validAddress(form.getChainId(), form.getAddress());
         if (b) {
-            return RpcClientResult.getSuccess(null).resultMap().map("value", true);
+            Map map = new HashMap();
+            map.put("value", true);
+            return RpcClientResult.getSuccess(map).resultMap().map("value", true);
         } else {
-            return RpcClientResult.getFailed(new ErrorData(AccountErrorCode.ADDRESS_ERROR.getCode(),"address is wrong"));
+            return RpcClientResult.getFailed(new ErrorData(AccountErrorCode.ADDRESS_ERROR.getCode(), "address is wrong"));
         }
     }
 

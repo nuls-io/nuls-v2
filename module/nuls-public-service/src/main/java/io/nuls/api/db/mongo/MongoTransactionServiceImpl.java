@@ -111,14 +111,18 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         options.ordered(false);
 
         List<Document> documentList = new ArrayList<>();
+
+        int i = 0;
         for (TransactionInfo txInfo : txList) {
             if (txUnConfirmHashSet.contains(txInfo.getHash())) {
                 deleteUnConfirmTx(chainId, txInfo.getHash());
             }
             documentList.add(txInfo.toDocument());
-            if (documentList.size() == 1000) {
+            i++;
+            if (i == 1000) {
                 mongoDBService.insertMany(TX_TABLE + chainId, documentList, options);
                 documentList.clear();
+                i = 0;
             }
         }
         if (documentList.size() != 0) {
