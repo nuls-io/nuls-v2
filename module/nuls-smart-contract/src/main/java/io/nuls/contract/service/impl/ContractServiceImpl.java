@@ -300,7 +300,8 @@ public class ContractServiceImpl implements ContractService {
             }
             BlockHeader currentBlockHeader = batchInfo.getCurrentBlockHeader();
             ProgramExecutor batchExecutor = batchInfo.getBatchExecutor();
-            byte[] stateRoot = batchExecutor.getRoot();
+            Result<byte[]> batchExecuteResult = contractExecutor.commitBatchExecute(batchExecutor);
+            byte[] stateRoot = batchExecuteResult.getData();
             currentBlockHeader.setStateRoot(stateRoot);
             dto.setStateRoot(stateRoot);
             return getSuccess().setData(dto);

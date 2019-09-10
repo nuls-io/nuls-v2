@@ -564,9 +564,20 @@ public class ContractCmd extends BaseCmd {
     private Result callConsensusContract(int chainId, byte[] contractAddressBytes, BigInteger value, Long blockHeight, String[][] args,
                                          ProgramExecutor batchExecutor, byte[] stateRootBytes, boolean isAgentContract) {
         // 验证此合约是否接受直接转账
-        ProgramMethod methodInfo = contractHelper.getMethodInfoByContractAddress(chainId, stateRootBytes,
-                BALANCE_TRIGGER_METHOD_NAME, BALANCE_TRIGGER_FOR_CONSENSUS_CONTRACT_METHOD_DESC, contractAddressBytes);
+        ProgramMethod methodInfo = null;
+        List<ProgramMethod> methods = batchExecutor.method(contractAddressBytes);
+        if (methods != null && methods.size() > 0) {
+            for (ProgramMethod method : methods) {
+                if (BALANCE_TRIGGER_METHOD_NAME.equals(method.getName()) && BALANCE_TRIGGER_FOR_CONSENSUS_CONTRACT_METHOD_DESC.equals(method.getDesc())) {
+                    methodInfo = method;
+                    break;
+                }
+            }
+        }
         if(methodInfo == null) {
+            Log.error("chainId: {}, contractAddress: {}, stateRoot: {}", chainId,
+                    AddressTool.getStringAddressByBytes(contractAddressBytes),
+                    HexUtil.encode(stateRootBytes));
             return Result.getFailed(CONTRACT_METHOD_NOT_EXIST);
         }
         if(!methodInfo.isPayable()) {
