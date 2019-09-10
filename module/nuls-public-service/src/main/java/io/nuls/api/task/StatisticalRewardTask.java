@@ -8,6 +8,7 @@ import io.nuls.api.model.po.BlockHeaderInfo;
 import io.nuls.api.model.po.ChainStatisticalInfo;
 import io.nuls.api.model.po.mini.MiniBlockHeaderInfo;
 import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.log.Log;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -28,31 +29,35 @@ public class StatisticalRewardTask implements Runnable {
 
     @Override
     public void run() {
-        BigInteger reward = blockService.getLast24HourRewards(chainId);
-        ApiCache apiCache = CacheManager.getCache(chainId);
-        if (apiCache != null) {
-            apiCache.getCoinContextInfo().setDailyReward(reward);
-        }
-        //查询当前最新block高度
-        BlockHeaderInfo headerInfo = blockService.getBestBlockHeader(chainId);
-        if (headerInfo == null) {
-            return;
-        }
-        ChainStatisticalInfo statisticalInfo = statisticalService.getChainStatisticalInfo(chainId);
-        if (statisticalInfo == null) {
-            statisticalInfo = new ChainStatisticalInfo();
-            statisticalInfo.setChainId(chainId);
-            statisticalInfo.setLastStatisticalHeight(0);
-        }
-        List<MiniBlockHeaderInfo> headerInfoList = blockService.getBlockList(chainId, statisticalInfo.getLastStatisticalHeight(), headerInfo.getHeight());
-        long count = 0;
-        for (MiniBlockHeaderInfo headerInfo1 : headerInfoList) {
-            count += headerInfo1.getTxCount();
-        }
-        statisticalInfo.setLastStatisticalHeight(headerInfo.getHeight());
-        statisticalInfo.setTxCount(statisticalInfo.getTxCount() + count);
-        statisticalService.saveChainStatisticalInfo(statisticalInfo);
+        try {
+            BigInteger reward = blockService.getLast24HourRewards(chainId);
+            ApiCache apiCache = CacheManager.getCache(chainId);
+            if (apiCache != null) {
+                apiCache.getCoinContextInfo().setDailyReward(reward);
+            }
+            //查询当前最新block高度
+            BlockHeaderInfo headerInfo = blockService.getBestBlockHeader(chainId);
+            if (headerInfo == null) {
+                return;
+            }
+            ChainStatisticalInfo statisticalInfo = statisticalService.getChainStatisticalInfo(chainId);
+            if (statisticalInfo == null) {
+                statisticalInfo = new ChainStatisticalInfo();
+                statisticalInfo.setChainId(chainId);
+                statisticalInfo.setLastStatisticalHeight(0);
+            }
+            List<MiniBlockHeaderInfo> headerInfoList = blockService.getBlockList(chainId, statisticalInfo.getLastStatisticalHeight(), headerInfo.getHeight());
+            long count = 0;
+            for (MiniBlockHeaderInfo headerInfo1 : headerInfoList) {
+                count += headerInfo1.getTxCount();
+            }
+            statisticalInfo.setLastStatisticalHeight(headerInfo.getHeight());
+            statisticalInfo.setTxCount(statisticalInfo.getTxCount() + count);
+            statisticalService.saveChainStatisticalInfo(statisticalInfo);
 
-        apiCache.getCoinContextInfo().setTxCount(statisticalInfo.getTxCount());
+            apiCache.getCoinContextInfo().setTxCount(statisticalInfo.getTxCount());
+        } catch (Exception e) {
+            Log.error(e);
+        }
     }
 }

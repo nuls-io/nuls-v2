@@ -67,6 +67,7 @@ int CONTRACT_DEPOSIT = 21;				// 合约委托参与共识
 int CONTRACT_CANCEL_DEPOSIT = 22;		// 合约取消委托共识
 int CONTRACT_STOP_AGENT = 23;			// 合约注销共识节点
 int VERIFIER_CHANGE = 24;				// 验证人变更
+int VERIFIER_INIT = 25;                 //验证人初始化
 ```
 
 **交易的from和to：**
@@ -447,10 +448,23 @@ _**详细描述: 别名格式为1-20位小写字母和数字的组合，设置�
 | ----- |:------:| ----------- |
 | value | string | 设置别名交易的hash |
 #### Example request data: 
-无
+```json
+{
+  "jsonrpc" : "2.0",
+  "method" : "setAlias",
+  "params" : [ 2, "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", "test", "nuls123456" ],
+  "id" : 1234
+}
+```
 
 #### Example response data: 
-略
+```json
+{
+  "jsonrpc" : "2.0",
+  "id" : "1234",
+  "result" : "b8e53f0b43bbb566bf48ba30a56dc935bba27873fb5e52d793b7dc564b71b81c"
+}
+```
 
 ### 1.9 验证地址是否正确
 #### Cmd: validateAddress
@@ -467,10 +481,25 @@ _**详细描述: 验证地址是否正确**_
 | ----- |:------:| ------- |
 | value | string | boolean |
 #### Example request data: 
-无
+```json
+{
+  "jsonrpc" : "2.0",
+  "method" : "validateAddress",
+  "params" : [ 2, "tNULSeBaMhcccH1KeXhMpH5y3pvtRzatAiuMJk" ],
+  "id" : 1234
+}
+```
 
 #### Example response data: 
-略
+```json
+{
+  "jsonrpc" : "2.0",
+  "id" : "1234",
+  "result" : {
+    "value" : true
+  }
+}
+```
 
 ### 1.10 离线 - 批量创建账户
 #### Cmd: createAccountOffline
@@ -734,10 +763,25 @@ _**详细描述: 根据多个账户的公钥创建多签账户，minSigns为多�
 | ----- |:------:| ----- |
 | value | string | 账户的地址 |
 #### Example request data: 
-无
+```json
+{
+  "jsonrpc" : "2.0",
+  "method" : "createMultiSignAccount",
+  "params" : [ [ "03d0593e55a11e841e28c4288aa1181fb151f9d260bab0e006ca158095eb78bb35", "02ec141204330f1a028f4e4040582b9568db1f32bc8afc03c7ba6e84b78a72d979" ], 2 ],
+  "id" : 1234
+}
+```
 
 #### Example response data: 
-略
+```json
+{
+  "jsonrpc" : "2.0",
+  "id" : "1234",
+  "result" : {
+    "value" : "tNULSeBaNNVVFWD1LjfT29s9BE4SqbzxonBejA"
+  }
+}
+```
 
 ### 1.17 离线创建设置别名交易
 #### Cmd: createAliasTx
@@ -758,10 +802,26 @@ _**详细描述: 离线创建设置别名交易**_
 | hash  | string | 交易hash       |
 | txHex | string | 交易序列化16进制字符串 |
 #### Example request data: 
-无
+```json
+{
+  "jsonrpc" : "2.0",
+  "method" : "createAliasTx",
+  "params" : [ "tNULSeBaMhcccH1KeXhMpH5y3pvtRzatAiuMJk", "test2", "0000000000000000", "remark" ],
+  "id" : 1234
+}
+```
 
 #### Example response data: 
-略
+```json
+{
+  "jsonrpc" : "2.0",
+  "id" : "1234",
+  "result" : {
+    "txHex" : "03006621775d001e170200012a9af4ee49f4cb1ee84eafd42aec41bc04b28f7b0574657374328c01170200012a9af4ee49f4cb1ee84eafd42aec41bc04b28f7b020001004023050600000000000000000000000000000000000000000000000000000000080000000000000000000117020001e2f297763765bc154afaac7aec5e7899a729fed20200010000e1f50500000000000000000000000000000000000000000000000000000000000000000000000000",
+    "hash" : "170dc03089d5c721ce4f9794bb87ebf6c7553163622d57e7e8a22622ba02db5e"
+  }
+}
+```
 
 ### 1.18 多签账户离线创建设置别名交易
 #### Cmd: createMultiSignAliasTx
@@ -784,13 +844,29 @@ _**详细描述: 多签账户离线创建设置别名交易**_
 | hash  | string | 交易hash       |
 | txHex | string | 交易序列化16进制字符串 |
 #### Example request data: 
-无
+```json
+{
+  "jsonrpc" : "2.0",
+  "method" : "createMultiSignAliasTx",
+  "params" : [ "tNULSeBaNNVVFWD1LjfT29s9BE4SqbzxonBejA", "test2", "0000000000000000", "remark", [ "03d0593e55a11e841e28c4288aa1181fb151f9d260bab0e006ca158095eb78bb35", "02ec141204330f1a028f4e4040582b9568db1f32bc8afc03c7ba6e84b78a72d979" ], 2 ],
+  "id" : 1234
+}
+```
 
 #### Example response data: 
-略
+```json
+{
+  "jsonrpc" : "2.0",
+  "id" : "1234",
+  "result" : {
+    "txHex" : "0300462e775d0672656d61726b1e17020003a2d7273f40c7e2d19ac53fd743bdcea92494a7c00574657374328c0117020003a2d7273f40c7e2d19ac53fd743bdcea92494a7c0020001004023050600000000000000000000000000000000000000000000000000000000080000000000000000000117020001e2f297763765bc154afaac7aec5e7899a729fed20200010000e1f5050000000000000000000000000000000000000000000000000000000000000000000000004602022103d0593e55a11e841e28c4288aa1181fb151f9d260bab0e006ca158095eb78bb352102ec141204330f1a028f4e4040582b9568db1f32bc8afc03c7ba6e84b78a72d979",
+    "hash" : "e05e43886c8f9a95ef4c6dfb10f1964d507ac6b2d98079e4aa8d9d8d0572bdb2"
+  }
+}
+```
 
 ### 1.19 根据私钥获取账户地址格式
-#### Cmd: createMultiSignAliasTx
+#### Cmd: getAddressByPriKey
 _**详细描述: 根据私钥获取账户地址格式**_
 
 #### 参数列表
@@ -1041,6 +1117,7 @@ _**详细描述: 包含区块打包的所有交易信息，此接口返回数据
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type                                                          |       int       | 交易类型                                      |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;time                                                          |     string      | 交易时间                                      |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;blockHeight                                                   |      long       | 区块高度                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;blockHash                                                     |     string      | 区块hash                                    |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remark                                                        |     string      | 交易备注                                      |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;transactionSignature                                          |     string      | 交易签名                                      |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;txDataHex                                                     |     string      | 交易业务数据序列化字符串                              |
@@ -1156,6 +1233,7 @@ _**详细描述: 包含区块打包的所有交易信息，此接口返回数据
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type                                                          |       int       | 交易类型                                      |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;time                                                          |     string      | 交易时间                                      |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;blockHeight                                                   |      long       | 区块高度                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;blockHash                                                     |     string      | 区块hash                                    |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remark                                                        |     string      | 交易备注                                      |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;transactionSignature                                          |     string      | 交易签名                                      |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;txDataHex                                                     |     string      | 交易业务数据序列化字符串                              |
@@ -1271,6 +1349,7 @@ _**详细描述: 包含区块打包的所有交易信息，此接口返回数据
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type                                                          |       int       | 交易类型                                      |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;time                                                          |     string      | 交易时间                                      |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;blockHeight                                                   |      long       | 区块高度                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;blockHash                                                     |     string      | 区块hash                                    |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remark                                                        |     string      | 交易备注                                      |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;transactionSignature                                          |     string      | 交易签名                                      |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;txDataHex                                                     |     string      | 交易业务数据序列化字符串                              |
@@ -1433,6 +1512,7 @@ _**详细描述: 根据hash获取交易**_
 | type                                                          |       int       | 交易类型                                      |
 | time                                                          |     string      | 交易时间                                      |
 | blockHeight                                                   |      long       | 区块高度                                      |
+| blockHash                                                     |     string      | 区块hash                                    |
 | remark                                                        |     string      | 交易备注                                      |
 | transactionSignature                                          |     string      | 交易签名                                      |
 | txDataHex                                                     |     string      | 交易业务数据序列化字符串                              |
@@ -1628,7 +1708,8 @@ _**详细描述: 根据inputs和outputs离线组装转账交易，用于单账�
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assetId      |       int       | 资产id     |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;amount       |   biginteger    | 资产金额     |  是   |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lockTime     |      long       | 锁定时间     |  是   |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remark                                                       |     string      | 交易备注     |  是   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;time                                                         |      long       | 创建时间     |  否   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remark                                                       |     string      | 交易备注     |  否   |
 
 #### 返回值
 | 字段名   |  字段类型  | 参数描述         |

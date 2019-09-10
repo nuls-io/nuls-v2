@@ -136,16 +136,16 @@ public class PublicServiceBootstrap extends RpcModule {
         ApiContext.maxWaitTime = apiConfig.getMaxWaitTime();
         ApiContext.maxAliveConnect = apiConfig.getMaxAliveConnect();
         ApiContext.connectTimeOut = apiConfig.getConnectTimeOut();
-
+        ApiContext.socketTimeout = apiConfig.getSocketTimeout();
 
         ApiContext.blackHolePublicKey = Hex.decode(apiConfig.getBlackHolePublicKey());
         if (apiConfig.getDeveloperNodeAddress() != null) {
             ApiContext.DEVELOPER_NODE_ADDRESS = new HashSet(Arrays.asList(apiConfig.getDeveloperNodeAddress().split(",")));
         }
-        if(apiConfig.getAmbassadorNodeAddress() != null) {
+        if (apiConfig.getAmbassadorNodeAddress() != null) {
             ApiContext.AMBASSADOR_NODE_ADDRESS = new HashSet(Arrays.asList(apiConfig.getAmbassadorNodeAddress().split(",")));
         }
-        if(apiConfig.getMappingAddress() != null) {
+        if (apiConfig.getMappingAddress() != null) {
             ApiContext.MAPPING_ADDRESS = new HashSet(Arrays.asList(apiConfig.getMappingAddress().split(",")));
         }
         ApiContext.BUSINESS_ADDRESS = apiConfig.getBusinessAddress();

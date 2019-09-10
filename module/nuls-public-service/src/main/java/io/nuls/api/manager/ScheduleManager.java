@@ -33,7 +33,7 @@ public class ScheduleManager {
         executorService.scheduleAtFixedRate(new StatisticalNulsTask(ApiContext.defaultChainId), 1, 20, TimeUnit.MINUTES);
         executorService.scheduleAtFixedRate(new StatisticalTask(ApiContext.defaultChainId), 1, 60, TimeUnit.MINUTES);
         executorService.scheduleAtFixedRate(new UnConfirmTxTask(ApiContext.defaultChainId), 1, 2, TimeUnit.MINUTES);
-        executorService.scheduleAtFixedRate(new StatisticalRewardTask(ApiContext.defaultChainId), 0, 12, TimeUnit.HOURS);
+        executorService.scheduleAtFixedRate(new StatisticalRewardTask(ApiContext.defaultChainId), 2, 60, TimeUnit.MINUTES);
         executorService.scheduleAtFixedRate(new GetGlobalInfoTask(ApiContext.defaultChainId), 5, 10, TimeUnit.SECONDS);
     }
 }
