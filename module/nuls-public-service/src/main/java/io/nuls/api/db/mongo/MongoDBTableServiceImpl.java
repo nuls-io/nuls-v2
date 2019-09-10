@@ -115,14 +115,27 @@ public class MongoDBTableServiceImpl implements DBTableService {
             mongoDBService.createIndex(DBTableConstant.TX_RELATION_TABLE + chainId + "_" + i, Indexes.ascending("address"));
             mongoDBService.createIndex(DBTableConstant.TX_RELATION_TABLE + chainId + "_" + i, Indexes.ascending("address", "type"));
             mongoDBService.createIndex(DBTableConstant.TX_RELATION_TABLE + chainId + "_" + i, Indexes.ascending("txHash"));
-            mongoDBService.createIndex(DBTableConstant.TX_RELATION_TABLE + chainId + "_" + i, Indexes.descending("createTime"));
+            mongoDBService.createIndex(DBTableConstant.TX_RELATION_TABLE + chainId + "_" + i, Indexes.descending("height"));
         }
         //账户信息表
         mongoDBService.createIndex(DBTableConstant.ACCOUNT_TABLE + chainId, Indexes.descending("totalBalance"));
+        mongoDBService.createIndex(DBTableConstant.ACCOUNT_LEDGER_TABLE + chainId, Indexes.descending("address"));
         //交易表
-        mongoDBService.createIndex(DBTableConstant.TX_TABLE + chainId, Indexes.descending("createTime"));
+        mongoDBService.createIndex(DBTableConstant.TX_TABLE + chainId, Indexes.descending("height"));
         //block 表
         mongoDBService.createIndex(DBTableConstant.BLOCK_HEADER_TABLE + chainId, Indexes.ascending("hash"));
+        //委托记录表
+        mongoDBService.createIndex(DBTableConstant.DEPOSIT_TABLE + chainId, Indexes.descending("createTime"));
+        //智能合约表
+        mongoDBService.createIndex(DBTableConstant.CONTRACT_TABLE + chainId, Indexes.descending("createTime"));
+        //账户token表
+        mongoDBService.createIndex(DBTableConstant.ACCOUNT_TOKEN_TABLE + chainId, Indexes.descending("balance"));
+        mongoDBService.createIndex(DBTableConstant.ACCOUNT_TOKEN_TABLE + chainId, Indexes.ascending("address"));
+        mongoDBService.createIndex(DBTableConstant.ACCOUNT_TOKEN_TABLE + chainId, Indexes.ascending("contractAddress"));
+        //token交易记录表
+        mongoDBService.createIndex(DBTableConstant.TOKEN_TRANSFER_TABLE + chainId, Indexes.descending("time"));
+        mongoDBService.createIndex(DBTableConstant.TOKEN_TRANSFER_TABLE + chainId, Indexes.descending("contractAddress","fromAddress"));
+        mongoDBService.createIndex(DBTableConstant.TOKEN_TRANSFER_TABLE + chainId, Indexes.descending("contractAddress","toAddress"));
     }
 
 }

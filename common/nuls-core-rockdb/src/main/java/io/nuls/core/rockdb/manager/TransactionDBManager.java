@@ -1,22 +1,3 @@
-/**
- * MIT License
- * Copyright (c) 2017-2018 nuls.io
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
 package io.nuls.core.rockdb.manager;
 
 import io.nuls.core.log.Log;
@@ -25,32 +6,32 @@ import io.nuls.core.rockdb.constant.DBErrorCode;
 import io.nuls.core.rockdb.model.Entry;
 import io.nuls.core.rockdb.util.DBUtils;
 import org.rocksdb.*;
-import org.rocksdb.util.SizeUnit;
 
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
+public class TransactionDBManager {
 
-/**
- * rocksdb数据库连接管理、数据存储、查询、删除操作.
- * Rocksdb database connection management, entity storage, query, delete operation
- *
- * @author qinyf
- * @date 2018/10/10
- */
-public class RocksDBManager {
+    static {
+        TransactionDB.loadLibrary();
+    }
 
     /**
      * 数据库已打开的连接缓存.
      */
-    private static final ConcurrentHashMap<String, RocksDB> TABLES = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, TransactionDB> TABLES = new ConcurrentHashMap<>();
 
     /**
      * 数据表基础文件夹名.
      */
     private static final String BASE_DB_NAME = "rocksdb";
+
+    /**
+     * 数据库是否已经初始化.
+     */
+    private static volatile boolean isInit = false;
 
     /**
      * 数据操作同步锁.
@@ -70,12 +51,14 @@ public class RocksDBManager {
      * @throws Exception 数据库打开连接异常
      */
     public static void init(final String path) throws Exception {
-        synchronized (RocksDBManager.class) {
+        synchronized (TransactionDBManager.class) {
+            isInit = true;
             File dir = DBUtils.loadDataPath(path);
             dataPath = dir.getPath();
-            Log.info("RocksDBManager dataPath is " + dataPath);
+            Log.info("TransactionDBManager dataPath is " + dataPath);
+
             File[] tableFiles = dir.listFiles();
-            RocksDB db;
+            TransactionDB db;
             String dbPath = null;
             for (File tableFile : tableFiles) {
                 //缓存中已存在的数据库连接不再重复打开
@@ -94,36 +77,21 @@ public class RocksDBManager {
                 }
             }
         }
-
     }
 
     /**
      * @param dbPath 数据库地址
-     * @return RocksDB 数据库连接对象
+     * @return TransactionDB 数据库连接对象
      * @throws RocksDBException 数据库连接异常
      */
-    private static RocksDB initOpenDB(final String dbPath) throws RocksDBException {
+    private static TransactionDB initOpenDB(final String dbPath) throws RocksDBException {
         File checkFile = new File(dbPath + File.separator + "CURRENT");
         if (!checkFile.exists()) {
             return null;
         }
 
         Options options = getCommonOptions(false);
-        return RocksDB.open(options, dbPath);
-    }
-
-    /**
-     * 装载数据库.
-     * load database
-     *
-     * @param dbPath          数据库地址
-     * @param createIfMissing 数据库不存在时是否默认创建
-     * @return RocksDB
-     * @throws RocksDBException 数据库连接异常
-     */
-    private static RocksDB openDB(final String dbPath, final boolean createIfMissing) throws RocksDBException {
-        Options options = getCommonOptions(createIfMissing);
-        return RocksDB.open(options, dbPath);
+        return TransactionDB.open(options, new TransactionDBOptions(), dbPath);
     }
 
     /**
@@ -151,7 +119,8 @@ public class RocksDBManager {
                     dir.mkdir();
                 }
                 String filePath = dataPath + File.separator + tableName + File.separator + BASE_DB_NAME;
-                RocksDB db = openDB(filePath, true);
+                Options options = getCommonOptions(true);
+                TransactionDB db = TransactionDB.open(options, new TransactionDBOptions(), filePath);
                 TABLES.put(tableName, db);
             } catch (Exception e) {
                 Log.error("error create table: " + tableName, e);
@@ -163,6 +132,7 @@ public class RocksDBManager {
         }
     }
 
+
     /**
      * 根据名称获得对应的数据库对象.
      * Get database objects by name
@@ -170,7 +140,7 @@ public class RocksDBManager {
      * @param tableName 数据库表名称
      * @return RocksDB
      */
-    public static RocksDB getTable(final String tableName) {
+    public static TransactionDB getTable(final String tableName) {
         return TABLES.get(tableName);
     }
 
@@ -182,14 +152,14 @@ public class RocksDBManager {
      * @return Result
      */
     public static boolean destroyTable(final String tableName) throws Exception {
-        if (!baseCheckTable(tableName)) {
-            throw new Exception(DBErrorCode.DB_TABLE_NOT_EXIST);
-        }
         if (StringUtils.isBlank(dataPath) || !DBUtils.checkPathLegal(tableName)) {
             throw new Exception(DBErrorCode.DB_TABLE_CREATE_PATH_ERROR);
         }
+        if (!baseCheckTable(tableName)) {
+            throw new Exception(DBErrorCode.DB_TABLE_NOT_EXIST);
+        }
         try {
-            RocksDB db = TABLES.remove(tableName);
+            TransactionDB db = TABLES.remove(tableName);
             db.close();
             File dir = new File(dataPath + File.separator + tableName);
             if (!dir.exists()) {
@@ -212,54 +182,9 @@ public class RocksDBManager {
      */
     private static void destroyDB(final String dbPath) throws RocksDBException {
         Options options = new Options();
-        RocksDB.destroyDB(dbPath, options);
+        TransactionDB.destroyDB(dbPath, options);
     }
 
-    /**
-     * 关闭所有数据库连接.
-     * close all table
-     */
-    public static void close() {
-        Set<Map.Entry<String, RocksDB>> entries = TABLES.entrySet();
-        for (Map.Entry<String, RocksDB> entry : entries) {
-            try {
-                TABLES.remove(entry.getKey());
-                entry.getValue().close();
-            } catch (Exception e) {
-                Log.warn("close rocksdb error", e);
-            }
-        }
-    }
-
-    /**
-     * 关闭指定数据库连接.
-     * close a table
-     *
-     * @param tableName 数据库表名称
-     */
-    public static void closeTable(final String tableName) {
-        try {
-            RocksDB db = TABLES.remove(tableName);
-            db.close();
-        } catch (Exception e) {
-            Log.warn("close rocksdb tableName error:" + tableName, e);
-        }
-    }
-
-    /**
-     * 数据库基本校验.
-     * Basic database check
-     *
-     * @param tableName 数据库表名称
-     * @return boolean 校验是否成功
-     */
-    private static boolean baseCheckTable(final String tableName) {
-        if (StringUtils.isBlank(tableName) || !TABLES.containsKey(tableName)) {
-            Log.warn("tableName = {} is not in TABLES",tableName);
-            return false;
-        }
-        return true;
-    }
 
     /**
      * 查询所有的数据库名称.
@@ -281,6 +206,24 @@ public class RocksDBManager {
         return tables;
     }
 
+
+    /**
+     * 关闭所有数据库连接.
+     * close all table
+     */
+    public static void close() {
+        Set<Map.Entry<String, TransactionDB>> entries = TABLES.entrySet();
+        for (Map.Entry<String, TransactionDB> entry : entries) {
+            try {
+                TABLES.remove(entry.getKey());
+                entry.getValue().close();
+            } catch (Exception e) {
+                Log.warn("close rocksdb error", e);
+            }
+        }
+    }
+
+
     /**
      * 新增或者修改数据.
      * Add or modify entity to specified table
@@ -298,33 +241,8 @@ public class RocksDBManager {
             throw new Exception(DBErrorCode.NULL_PARAMETER);
         }
         try {
-            RocksDB db = TABLES.get(table);
+            TransactionDB db = TABLES.get(table);
             db.put(key, value);
-            return true;
-        } catch (Exception e) {
-            Log.error(e);
-            throw new Exception(DBErrorCode.DB_UNKOWN_EXCEPTION);
-        }
-    }
-
-    /**
-     * 删除数据.
-     * delete entity from specified table
-     *
-     * @param table 数据库表名称
-     * @param key   删除标识
-     * @return 删除是否成功
-     */
-    public static boolean delete(final String table, final byte[] key) throws Exception {
-        if (!baseCheckTable(table)) {
-            throw new Exception(DBErrorCode.DB_TABLE_NOT_EXIST);
-        }
-        if (key == null) {
-            throw new Exception(DBErrorCode.NULL_PARAMETER);
-        }
-        try {
-            RocksDB db = TABLES.get(table);
-            db.delete(key);
             return true;
         } catch (Exception e) {
             Log.error(e);
@@ -348,7 +266,7 @@ public class RocksDBManager {
             throw new Exception(DBErrorCode.NULL_PARAMETER);
         }
         try (WriteBatch writeBatch = new WriteBatch()) {
-            RocksDB db = TABLES.get(table);
+            TransactionDB db = TABLES.get(table);
             for (Map.Entry<byte[], byte[]> entry : kvs.entrySet()) {
                 writeBatch.put(entry.getKey(), entry.getValue());
             }
@@ -359,6 +277,32 @@ public class RocksDBManager {
             throw new Exception(DBErrorCode.DB_UNKOWN_EXCEPTION);
         }
     }
+
+    /**
+     * 删除数据.
+     * delete entity from specified table
+     *
+     * @param table 数据库表名称
+     * @param key   删除标识
+     * @return 删除是否成功
+     */
+    public static boolean delete(final String table, final byte[] key) throws Exception {
+        if (!baseCheckTable(table)) {
+            throw new Exception(DBErrorCode.DB_TABLE_NOT_EXIST);
+        }
+        if (key == null) {
+            throw new Exception(DBErrorCode.NULL_PARAMETER);
+        }
+        try {
+            TransactionDB db = TABLES.get(table);
+            db.delete(key);
+            return true;
+        } catch (Exception e) {
+            Log.error(e);
+            throw new Exception(DBErrorCode.DB_UNKOWN_EXCEPTION);
+        }
+    }
+
 
     /**
      * 批量删除数据.
@@ -376,7 +320,7 @@ public class RocksDBManager {
             throw new Exception(DBErrorCode.NULL_PARAMETER);
         }
         try (WriteBatch writeBatch = new WriteBatch()) {
-            RocksDB db = TABLES.get(table);
+            TransactionDB db = TABLES.get(table);
             for (byte[] key : keys) {
                 writeBatch.delete(key);
             }
@@ -398,47 +342,19 @@ public class RocksDBManager {
      */
     public static byte[] get(final String table, final byte[] key) {
         if (!baseCheckTable(table)) {
-            Log.error("get table={}: error",table);
             return null;
         }
         if (key == null) {
             return null;
         }
         try {
-            RocksDB db = TABLES.get(table);
+            TransactionDB db = TABLES.get(table);
             return db.get(key);
         } catch (Exception e) {
-            Log.error("get table={}: error",table);
-            Log.error(e);
             return null;
         }
     }
 
-    /**
-     * 查询key是否存在.
-     *
-     * @param table 数据库表名称
-     * @param key   查询关键字
-     * @return 查询结果
-     */
-    public static boolean keyMayExist(final String table, final byte[] key) {
-        if (!baseCheckTable(table)) {
-            Log.error("keyMayExist table={}: error",table);
-            return false;
-        }
-        if (key == null) {
-            return false;
-        }
-        try {
-            RocksDB db = TABLES.get(table);
-            boolean rs = db.keyMayExist(key, new StringBuilder());
-            return rs && (db.get(key) != null);
-        } catch (Exception e) {
-            Log.error("keyMayExist table={}: error",table);
-            Log.error(e);
-            return false;
-        }
-    }
 
     /**
      * 批量查询指定keys的Map集合.
@@ -450,46 +366,14 @@ public class RocksDBManager {
      */
     public static Map<byte[], byte[]> multiGet(final String table, final List<byte[]> keys) {
         if (!baseCheckTable(table)) {
-            Log.error("multiGet table={}: error",table);
             return null;
         }
         if (keys == null || keys.size() == 0) {
             return null;
         }
         try {
-            RocksDB db = TABLES.get(table);
+            TransactionDB db = TABLES.get(table);
             return db.multiGet(keys);
-        } catch (Exception ex) {
-            Log.error("multiGet table={}: error",table);
-            Log.error(ex);
-            return null;
-        }
-    }
-
-    /**
-     * 批量查询交易
-     * @param table
-     * @param keys
-     * @return
-     */
-    public static List<byte[]> multiGetAsList(final String table, final List<byte[]> keys) {
-        if (!baseCheckTable(table)) {
-            return null;
-        }
-        if (keys == null || keys.size() == 0) {
-            return null;
-        }
-        try {
-            RocksDB db = TABLES.get(table);
-            //该方法获取的结果包含查不到的key, 将以null 值放入返回的list中,因此需要把空值去除.
-            List<byte[]> list = db.multiGetAsList(keys);
-            List<byte[]> rs = new ArrayList<>();
-            for(byte[] hash : list){
-                if(null != hash){
-                    rs.add(hash);
-                }
-            }
-            return rs;
         } catch (Exception ex) {
             return null;
         }
@@ -506,22 +390,19 @@ public class RocksDBManager {
     public static List<byte[]> multiGetValueList(final String table, final List<byte[]> keys) {
         List<byte[]> list = new ArrayList<>();
         if (!baseCheckTable(table)) {
-            Log.error("multiGetValueList table={}: error",table);
             return list;
         }
         if (keys == null || keys.size() == 0) {
             return list;
         }
         try {
-            RocksDB db = TABLES.get(table);
+            TransactionDB db = TABLES.get(table);
             Map<byte[], byte[]> map = db.multiGet(keys);
             if (map != null && map.size() > 0) {
                 list.addAll(map.values());
             }
             return list;
         } catch (Exception ex) {
-            Log.error("multiGetValueList table={}: error",table);
-            Log.error(ex);
             return list;
         }
     }
@@ -537,25 +418,23 @@ public class RocksDBManager {
     public static List<byte[]> multiGetKeyList(final String table, final List<byte[]> keys) {
         List<byte[]> list = new ArrayList<>();
         if (!baseCheckTable(table)) {
-            Log.error("multiGetKeyList table={}: error",table);
             return list;
         }
         if (keys == null || keys.size() == 0) {
             return list;
         }
         try {
-            RocksDB db = TABLES.get(table);
+            TransactionDB db = TABLES.get(table);
             Map<byte[], byte[]> map = db.multiGet(keys);
             if (map != null && map.size() > 0) {
                 list.addAll(map.keySet());
             }
             return list;
         } catch (Exception ex) {
-            Log.error("multiGetKeyList table={}: error",table);
-            Log.error(ex);
             return list;
         }
     }
+
 
     /**
      * 查询指定表的key-List集合.
@@ -566,12 +445,11 @@ public class RocksDBManager {
      */
     public static List<byte[]> keyList(final String table) {
         if (!baseCheckTable(table)) {
-            Log.error("keyList table={}: error",table);
             return null;
         }
         List<byte[]> list = new ArrayList<>();
         try {
-            RocksDB db = TABLES.get(table);
+            TransactionDB db = TABLES.get(table);
             try (RocksIterator iterator = db.newIterator()) {
                 for (iterator.seekToFirst(); iterator.isValid(); iterator.next()) {
                     list.add(iterator.key());
@@ -579,8 +457,6 @@ public class RocksDBManager {
             }
             return list;
         } catch (Exception ex) {
-            Log.error("keyList table={}: error",table);
-            Log.error(ex);
             return null;
         }
     }
@@ -594,12 +470,11 @@ public class RocksDBManager {
      */
     public static List<byte[]> valueList(final String table) {
         if (!baseCheckTable(table)) {
-            Log.error("valueList table={}: error",table);
             return null;
         }
         List<byte[]> list = new ArrayList<>();
         try {
-            RocksDB db = TABLES.get(table);
+            TransactionDB db = TABLES.get(table);
             try (RocksIterator iterator = db.newIterator()) {
                 for (iterator.seekToFirst(); iterator.isValid(); iterator.next()) {
                     list.add(iterator.value());
@@ -607,8 +482,6 @@ public class RocksDBManager {
             }
             return list;
         } catch (Exception ex) {
-            Log.error("valueList table={}: error",table);
-            Log.error(ex);
             return null;
         }
     }
@@ -622,12 +495,11 @@ public class RocksDBManager {
      */
     public static List<Entry<byte[], byte[]>> entryList(final String table) {
         if (!baseCheckTable(table)) {
-            Log.error("entryList table={}: error",table);
             return null;
         }
         List<Entry<byte[], byte[]>> entryList = new ArrayList<>();
         try {
-            RocksDB db = TABLES.get(table);
+            TransactionDB db = TABLES.get(table);
             try (RocksIterator iterator = db.newIterator()) {
                 for (iterator.seekToFirst(); iterator.isValid(); iterator.next()) {
                     entryList.add(new Entry(iterator.key(), iterator.value()));
@@ -635,11 +507,47 @@ public class RocksDBManager {
             }
             return entryList;
         } catch (Exception ex) {
-            Log.error("entryList table={}: error",table);
-            Log.error(ex);
             return null;
         }
     }
+
+    public static Transaction openSession(final String table) {
+        WriteOptions options = new WriteOptions();
+       // options.setSync(false);
+        TransactionDB db = TABLES.get(table);
+        return db.beginTransaction(options);
+    }
+
+    public static void commit(Transaction tx) throws RocksDBException {
+        try {
+            tx.commit();
+        }finally {
+            tx.close();
+        }
+    }
+
+    public static void rollBack(Transaction tx) throws RocksDBException {
+        try {
+            tx.rollback();
+        }finally {
+            tx.close();
+        }
+    }
+
+    /**
+     * 数据库基本校验.
+     * Basic database check
+     *
+     * @param tableName 数据库表名称
+     * @return boolean 校验是否成功
+     */
+    private static boolean baseCheckTable(final String tableName) {
+        if (StringUtils.isBlank(tableName) || !TABLES.containsKey(tableName)) {
+            return false;
+        }
+        return true;
+    }
+
 
     /**
      * 获得公共的数据库连接属性.
@@ -649,7 +557,6 @@ public class RocksDBManager {
      */
     private static synchronized Options getCommonOptions(final boolean createIfMissing) {
         Options options = new Options();
-
         options.setCreateIfMissing(createIfMissing);
         /**
          * 优化读取性能方案
@@ -657,20 +564,13 @@ public class RocksDBManager {
         options.setAllowMmapReads(true);
         options.setCompressionType(CompressionType.NO_COMPRESSION);
         options.setMaxOpenFiles(-1);
+
         BlockBasedTableConfig tableOption = new BlockBasedTableConfig();
         tableOption.setNoBlockCache(true);
         tableOption.setBlockRestartInterval(4);
         tableOption.setFilterPolicy(new BloomFilter(10, true));
         options.setTableFormatConfig(tableOption);
 
-        options.setMaxBackgroundCompactions(16);
-        options.setNewTableReaderForCompactionInputs(true);
-        //为压缩的输入，打开RocksDB层的预读取
-        options.setCompactionReadaheadSize(128 * SizeUnit.KB);
-        options.setNewTableReaderForCompactionInputs(true);
-
         return options;
     }
-
-
 }

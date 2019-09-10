@@ -22,7 +22,7 @@ public interface AccountService {
 
     PageInfo<TxRelationInfo> getAcctTxs(int chainId, String address, int pageIndex, int pageSize, int type, long startHeight, long endHeight);
 
-    PageInfo<MiniAccountInfo> getCoinRanking(int pageIndex, int pageSize, int sortType, int chainId);
+    PageInfo<MiniAccountInfo> getCoinRanking(int pageIndex, int pageSize, int chainId);
 
     BigInteger getAllAccountBalance(int chainId);
 

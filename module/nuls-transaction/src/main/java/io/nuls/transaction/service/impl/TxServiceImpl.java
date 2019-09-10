@@ -100,7 +100,6 @@ public class TxServiceImpl implements TxService {
     private TxConfig txConfig;
 
     private ExecutorService verifySignExecutor = ThreadUtils.createThreadPool(Runtime.getRuntime().availableProcessors(), CACHED_SIZE, new NulsThreadFactory(TxConstant.VERIFY_TX_SIGN_THREAD));
-    private ExecutorService clearTxExecutor = ThreadUtils.createThreadPool(1, CACHED_SIZE, new NulsThreadFactory(TxConstant.CLEAN_INVALID_TX_THREAD));
 
     @Override
     public boolean register(Chain chain, ModuleTxRegisterDTO moduleTxRegisterDto) {
@@ -232,13 +231,6 @@ public class TxServiceImpl implements TxService {
         return rs;
     }
 
-    /**
-     * 验证交易
-     *
-     * @param chain
-     * @param tx
-     * @return
-     */
     @Override
     public VerifyResult verify(Chain chain, Transaction tx) {
         return verify(chain, tx, true);
@@ -296,7 +288,6 @@ public class TxServiceImpl implements TxService {
         if (tx.getType() == TxType.YELLOW_PUNISH || tx.getType() == TxType.VERIFIER_CHANGE || tx.getType() == TxType.VERIFIER_INIT) {
             return;
         }
-        //coinData基础验证以及手续费 (from中所有的nuls资产-to中所有nuls资产)
         CoinData coinData = TxUtil.getCoinData(tx);
         validateCoinFromBase(chain, txRegister, coinData.getFrom());
         validateCoinToBase(chain, txRegister, coinData.getTo());
@@ -383,15 +374,6 @@ public class TxServiceImpl implements TxService {
         }
     }
 
-    /**
-     * 验证交易的付款方数据
-     * 1.from中地址对应的链id是否是发起链id
-     * 2.
-     *
-     * @param chain
-     * @param listFrom
-     * @return Result
-     */
     private void validateCoinFromBase(Chain chain, TxRegister txRegister, List<CoinFrom> listFrom) throws NulsException {
         int type = txRegister.getTxType();
         //coinBase交易/智能合约退还gas交易没有from
@@ -459,13 +441,6 @@ public class TxServiceImpl implements TxService {
         }
     }
 
-    /**
-     * 验证交易的收款方数据(coinTo是不是属于同一条链)
-     * 1.收款方所有地址是不是属于同一条链
-     *
-     * @param listTo
-     * @return Result
-     */
     private void validateCoinToBase(Chain chain, TxRegister txRegister, List<CoinTo> listTo) throws NulsException {
         String moduleCode = txRegister.getModuleCode();
         int type = txRegister.getTxType();
@@ -774,7 +749,6 @@ public class TxServiceImpl implements TxService {
                             if (TxManager.isSmartContract(chain, transaction.getType())) {
                                 if(stopInvokeContract){
                                     //该标志true,表示不再处理智能合约交易,需要暂存交易,统一还回待打包队列
-//                                    backPackablePoolContractTxs.add(txPackageWrapper.getTx());
                                     orphanTxSet.add(txPackageWrapper);
                                     it.remove();
                                     continue;
@@ -790,7 +764,6 @@ public class TxServiceImpl implements TxService {
                                     if(!invokeContractRs){
                                         //不再发invoke
                                         stopInvokeContract = true;
-//                                        backPackablePoolContractTxs.add(txPackageWrapper.getTx());
                                         orphanTxSet.add(txPackageWrapper);
                                         it.remove();
                                         continue;
@@ -981,7 +954,6 @@ public class TxServiceImpl implements TxService {
                 for (String hash : failHashs) {
                     String hashStr = transaction.getHash().toHex();
                     if (hash.equals(hashStr)) {
-//                        chain.getLogger().error("Package verify Ledger fail tx type:{}, - hash:{}", hash, transaction.getType());
                         if (!backContract && proccessContract && TxManager.isUnSystemSmartContract(chain, transaction.getType())) {
                             //设置标志,如果是智能合约的非系统交易,未验证通过,则需要将所有非系统智能合约交易还回待打包队列.
                             backContract = true;
@@ -996,7 +968,6 @@ public class TxServiceImpl implements TxService {
                 for (String hash : orphanHashs) {
                     String hashStr = transaction.getHash().toHex();
                     if (hash.equals(hashStr)) {
-//                        chain.getLogger().error("Package verify Ledger orphan tx type:{}, - hash:{}", hash, transaction.getType());
                         if (!backContract && proccessContract && TxManager.isUnSystemSmartContract(chain, transaction.getType())) {
                             //设置标志, 如果是智能合约的非系统交易,未验证通过,则需要将所有非系统智能合约交易还回待打包队列.
                             backContract = true;
@@ -1112,7 +1083,6 @@ public class TxServiceImpl implements TxService {
                             for (String hash : nonexecutionList) {
                                 if (hash.equals(txPackageWrapper.getTx().getHash().toHex())) {
                                     orphanTxSet.add(txPackageWrapper);
-//                                    chain.getLogger().debug("contract pending tx back to PackablePool hash:{} ", hash);
                                     //从可打包集合中删除
                                     iterator.remove();
                                     if(!hasTxbackPackablePool){
@@ -1442,7 +1412,7 @@ public class TxServiceImpl implements TxService {
         }
 
         long f2 = System.currentTimeMillis();
-        timeF1 += f2 - f1;
+        timeF1 = f2 - f1;
         //验证交易是否已确认过
         List<byte[]> confirmedList = confirmedTxStorageService.getExistKeys(chainId, keys);
         if (!confirmedList.isEmpty()) {
@@ -1452,15 +1422,14 @@ public class TxServiceImpl implements TxService {
             }
             throw new NulsException(TxErrorCode.TX_CONFIRMED);
         }
-
         long f3 = System.currentTimeMillis();
-        timeF2 += f3 - f2;
+        timeF2 = f3 - f2;
 
         //验证本地没有的交易
         List<String> unconfirmedList = unconfirmedTxStorageService.getExistKeysStr(chainId, keys);
 
         long f4 = System.currentTimeMillis();
-        timeF3 += f4 - f3;
+        timeF3 = f4 - f3;
 
         Set<String> set = new HashSet<>();
         set.addAll(unconfirmedList);
@@ -1496,7 +1465,7 @@ public class TxServiceImpl implements TxService {
                 d += (System.currentTimeMillis() - d1);
             }
         }
-        timeF4 += System.currentTimeMillis() - f4;
+        timeF4 = System.currentTimeMillis() - f4;
 
         logger.debug("[验区块交易] 反序列化,合约,分组:{} -是否确认过:{} -是否在未确认中:{}, -单个验证:{} -单内部处理:{} -合计时间:{}",
                 timeF1, timeF2, timeF3, d, timeF4, NulsDateUtils.getCurrentTimeMillis() - s1);

@@ -110,7 +110,7 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
                     }
                 }
             } catch (Exception e) {
-                LoggerUtil.logger(chainId).error("{}", e);
+                LoggerUtil.logger(chainId).error("{}", e.getMessage());
             }
         }
 //        MessageTestUtil.recievedMessage(cmd);

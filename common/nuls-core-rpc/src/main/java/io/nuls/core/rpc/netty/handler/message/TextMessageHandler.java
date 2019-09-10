@@ -26,6 +26,7 @@ package io.nuls.core.rpc.netty.handler.message;
 
 import io.netty.channel.socket.SocketChannel;
 import io.nuls.core.core.annotation.Value;
+import io.nuls.core.rpc.model.RequestOnly;
 import io.nuls.core.rpc.netty.processor.RequestMessageProcessor;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.message.Message;
@@ -38,6 +39,7 @@ import io.nuls.core.rpc.netty.processor.container.RequestContainer;
 import io.nuls.core.rpc.netty.processor.container.ResponseContainer;
 import io.nuls.core.log.Log;
 import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 
 import java.util.Comparator;
 import java.util.Map;
@@ -56,6 +58,7 @@ public class TextMessageHandler implements Runnable, Comparable<TextMessageHandl
     private Message message;
     private int priority;
     private Request request;
+    private int messageSize;
 
     public TextMessageHandler(SocketChannel channel, Message message, int priority) {
         this.channel = channel;
@@ -103,7 +106,18 @@ public class TextMessageHandler implements Runnable, Comparable<TextMessageHandl
                      */
                     if (!ConnectManager.isPureDigital(request.getSubscriptionEventCounter())
                             && !ConnectManager.isPureDigital(request.getSubscriptionPeriod())) {
-                        RequestMessageProcessor.callCommandsWithPeriod(channel, request.getRequestMethods(), messageId, false);
+                        if(request.getTimeOut().isEmpty()){
+                            RequestMessageProcessor.callCommandsWithPeriod(channel, request.getRequestMethods(), messageId, false);
+                        }else{
+                            long requestTime = Long.parseLong(message.getTimestamp());
+                            long timeOut = Long.parseLong(request.getTimeOut());
+                            long currentTime = System.currentTimeMillis() ;
+                            if(timeOut == 0 ||  currentTime< requestTime + timeOut){
+                                RequestMessageProcessor.callCommandsWithPeriod(channel, request.getRequestMethods(), messageId, false);
+                            }else{
+                                Log.info("请求超时丢弃请求，当前时间：{}，请求时间:{},超时时间:{},请求方法：{}", currentTime,requestTime,timeOut,request.getRequestMethods());
+                            }
+                        }
                     } else {
                         int tryCount = 0;
                         while (connectData == null && tryCount < Constants.TRY_COUNT) {
@@ -133,9 +147,6 @@ public class TextMessageHandler implements Runnable, Comparable<TextMessageHandl
                     if (Constants.BOOLEAN_TRUE.equals(request.getRequestAck())) {
                         RequestMessageProcessor.ack(channel, messageId);
                     }
-                    break;
-                case RequestOnly:
-                    connectData.getRequestOnlyQueue().offer(JSONUtils.map2pojo((Map) message.getMessageData(), Request.class));
                     break;
                 case NegotiateConnectionResponse:
                 case Ack:
@@ -181,5 +192,13 @@ public class TextMessageHandler implements Runnable, Comparable<TextMessageHandl
 
     public void setRequest(Request request) {
         this.request = request;
+    }
+
+    public int getMessageSize() {
+        return messageSize;
+    }
+
+    public void setMessageSize(int messageSize) {
+        this.messageSize = messageSize;
     }
 }

@@ -68,7 +68,7 @@ public class ClearUnconfirmedTxProcessTask implements Runnable {
             return;
         }
         int count = processUnconfirmedTxs(txKeyList);
-        chain.getLogger().info("%%%%% Clean %%%%% [UnconfirmedTxProcessTask] expire count: {}", count);
+        chain.getLogger().info("[UnconfirmedTxProcessTask] Clean expire count: {}", count);
     }
 
     private boolean processTx(Chain chain, Transaction tx) {
@@ -89,7 +89,6 @@ public class ClearUnconfirmedTxProcessTask implements Runnable {
     private int processUnconfirmedTxs(List<byte[]> txKeyList) {
         int unconfirmedTxsCount = 0;
         List<byte[]> queryList = new ArrayList<>();
-        //一次最多处理1W笔
         for (int i = 0; i < txKeyList.size(); i++) {
             queryList.add(txKeyList.get(i));
             if (queryList.size() == 10000) {

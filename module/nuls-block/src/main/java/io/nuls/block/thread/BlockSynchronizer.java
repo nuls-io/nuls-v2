@@ -244,7 +244,6 @@ public class BlockSynchronizer implements Runnable {
         if (stateEnum.equals(UNCERTAINTY)) {
             logger.warn("The number of rolled back blocks exceeded the configured value");
             NetworkCall.resetNetwork(chainId);
-            waitUntilNetworkStable();
             return false;
         }
         if (stateEnum.equals(CONFLICT)) {
