@@ -380,7 +380,10 @@ public class BlockChainManager {
             for (Block block : blockList) {
                 if (!blockService.saveBlock(chainId, block, false)) {
                     for (int i = savedBlockList.size() - 1; i >= 0; i--) {
-                        blockService.rollbackBlock(chainId, savedBlockList.get(i).getHeader().getHeight(), false);
+                        if (!blockService.rollbackBlock(chainId, savedBlockList.get(i).getHeader().getHeight(), false)) {
+                            ContextManager.getContext(chainId).getLogger().error("block chain data error, can't restore, system exit");
+                            System.exit(1);
+                        }
                     }
                     throw new NulsRuntimeException(BlockErrorCode.CHAIN_SWITCH_ERROR);
                 } else {
