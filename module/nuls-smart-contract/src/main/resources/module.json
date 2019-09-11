@@ -1,8 +1,8 @@
 {
-  "chainId": 2,
+  "chainId": 1,
   "assetId": 1,
   "maxViewGas": 100000000,
-  "mainChainId": 2,
+  "mainChainId": 1,
   "mainAssetId": 1,
   "encoding": "UTF-8",
   "packageLogPackages": "io.nuls.contract.vm.program.impl.ProgramExecutorImpl,db,rlp,general",
