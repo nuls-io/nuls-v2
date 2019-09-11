@@ -78,7 +78,7 @@ awardAssetId=1
 feeUnit=100000
 #总通胀量
 totalInflationAmount=11000000000000000
-#初始通胀金额500w/265*30
+#初始通胀金额500w/365*30
 inflationAmount=41095890410959
 #通胀开始计算时间(单位:S)2020-07-12 00:00:00
 initTime=1594483200
