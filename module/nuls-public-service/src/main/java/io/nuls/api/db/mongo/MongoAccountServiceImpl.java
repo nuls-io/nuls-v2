@@ -174,7 +174,7 @@ public class MongoAccountServiceImpl implements AccountService {
         Bson addressFilter = Filters.eq("address", address);
 
         if (type > 0 && startHeight > -1 && endHeight > -1) {
-            filter = Filters.and(addressFilter, Filters.eq("type", type), Filters.gte("height", startHeight), Filters.lte("height", endHeight));
+            filter = Filters.and(addressFilter, Filters.eq("type", type), Filters.gte("height", startHeight), Filters.lte("createTime", endHeight));
         } else if (type > 0 && startHeight > -1) {
             filter = Filters.and(addressFilter, Filters.eq("type", type), Filters.gte("height", startHeight));
         } else if (type > 0 && endHeight > -1) {
@@ -192,7 +192,7 @@ public class MongoAccountServiceImpl implements AccountService {
         }
         int index = DBUtil.getShardNumber(address);
         long count = mongoDBService.getCount(TX_RELATION_TABLE + chainId + "_" + index, filter);
-        List<Document> docsList = this.mongoDBService.pageQuery(TX_RELATION_TABLE + chainId + "_" + index, filter, Sorts.descending("height"), pageIndex, pageSize);
+        List<Document> docsList = this.mongoDBService.pageQuery(TX_RELATION_TABLE + chainId + "_" + index, filter, Sorts.descending("createTime"), pageIndex, pageSize);
         List<TxRelationInfo> txRelationInfoList = new ArrayList<>();
         for (Document document : docsList) {
             TxRelationInfo txRelationInfo = TxRelationInfo.toInfo(document);
@@ -204,7 +204,7 @@ public class MongoAccountServiceImpl implements AccountService {
     }
 
     private List<TxRelationInfo> unConfirmLimitQuery(int chainId, int index, Bson filter, int start, int pageSize) {
-        List<Document> docsList = this.mongoDBService.limitQuery(TX_UNCONFIRM_RELATION_TABLE + chainId, filter, Sorts.descending("height"), start, pageSize);
+        List<Document> docsList = this.mongoDBService.limitQuery(TX_UNCONFIRM_RELATION_TABLE + chainId, filter, Sorts.descending("createTime"), start, pageSize);
         List<TxRelationInfo> txRelationInfoList = new ArrayList<>();
         for (Document document : docsList) {
             TxRelationInfo txRelationInfo = TxRelationInfo.toInfo(document);
@@ -215,7 +215,7 @@ public class MongoAccountServiceImpl implements AccountService {
     }
 
     private List<TxRelationInfo> confirmLimitQuery(int chainId, int index, Bson filter, int start, int pageSize) {
-        List<Document> docsList = this.mongoDBService.limitQuery(TX_RELATION_TABLE + chainId + "_" + index, filter, Sorts.descending("height"), start, pageSize);
+        List<Document> docsList = this.mongoDBService.limitQuery(TX_RELATION_TABLE + chainId + "_" + index, filter, Sorts.descending("createTime"), start, pageSize);
         List<TxRelationInfo> txRelationInfoList = new ArrayList<>();
         for (Document document : docsList) {
             TxRelationInfo txRelationInfo = TxRelationInfo.toInfo(document);
@@ -226,7 +226,7 @@ public class MongoAccountServiceImpl implements AccountService {
     }
 
     private List<TxRelationInfo> relationLimitQuery(int chainId, int index, Bson filter1, Bson filter2, int start, int pageSize) {
-        List<Document> docsList = this.mongoDBService.limitQuery(TX_UNCONFIRM_RELATION_TABLE + chainId, filter1, Sorts.descending("height"), start, pageSize);
+        List<Document> docsList = this.mongoDBService.limitQuery(TX_UNCONFIRM_RELATION_TABLE + chainId, filter1, Sorts.descending("createTime"), start, pageSize);
         List<TxRelationInfo> txRelationInfoList = new ArrayList<>();
         for (Document document : docsList) {
             TxRelationInfo txRelationInfo = TxRelationInfo.toInfo(document);
@@ -234,7 +234,7 @@ public class MongoAccountServiceImpl implements AccountService {
             txRelationInfoList.add(txRelationInfo);
         }
         pageSize = pageSize - txRelationInfoList.size();
-        docsList = this.mongoDBService.limitQuery(TX_RELATION_TABLE + chainId + "_" + index, filter2, Sorts.descending("height"), 0, pageSize);
+        docsList = this.mongoDBService.limitQuery(TX_RELATION_TABLE + chainId + "_" + index, filter2, Sorts.descending("createTime"), 0, pageSize);
         for (Document document : docsList) {
             TxRelationInfo txRelationInfo = TxRelationInfo.toInfo(document);
             txRelationInfo.setStatus(ApiConstant.TX_CONFIRM);
