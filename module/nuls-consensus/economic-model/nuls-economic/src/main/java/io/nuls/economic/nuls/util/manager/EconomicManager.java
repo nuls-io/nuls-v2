@@ -6,6 +6,7 @@ import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
+import io.nuls.core.model.ArraysTool;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.model.DoubleUtils;
 import io.nuls.economic.nuls.constant.NulsEconomicConstant;
@@ -103,28 +104,35 @@ public class EconomicManager {
             return depositWeightMap;
         }
         BigDecimal depositRate = new BigDecimal(1).subtract(commissionRate);
-        //节点创建者权重
-        BigDecimal creatorWeight = new BigDecimal(agentInfo.getDeposit()).divide(new BigDecimal(totalDeposit), 8, RoundingMode.HALF_DOWN);
-        BigDecimal creatorCommissionWeight = BigDecimal.ONE.subtract(creatorWeight).multiply(commissionRate);
-        creatorWeight = creatorWeight.add(creatorCommissionWeight);
-        depositWeightMap.put(AddressTool.getStringAddressByBytes(agentInfo.getRewardAddress()), creatorWeight);
+        BigInteger creatorDeposit = agentInfo.getDeposit();
         /*
         计算各委托账户获得的奖励金
         Calculate the rewards for each entrusted account
         */
         for (DepositInfo deposit : agentInfo.getDepositList()) {
+            if(ArraysTool.arrayEquals(agentInfo.getRewardAddress(), deposit.getAddress())){
+                creatorDeposit = creatorDeposit.add(deposit.getDeposit());
+                continue;
+            }
             /*
             计算各委托账户权重（委托金额/总的委托金)
             Calculate the weight of each entrusted account (amount of entrusted account/total entrusted fee)
             */
             String depositAddress = AddressTool.getStringAddressByBytes(deposit.getAddress());
-            BigDecimal depositWeight = new BigDecimal(deposit.getDeposit()).divide(new BigDecimal(totalDeposit), 4, RoundingMode.HALF_DOWN).multiply(depositRate);
+            BigDecimal depositWeight = new BigDecimal(deposit.getDeposit()).divide(new BigDecimal(totalDeposit), 8, RoundingMode.HALF_DOWN).multiply(depositRate);
             if(depositWeightMap.keySet().contains(depositAddress)){
                 depositWeightMap.put(depositAddress, depositWeightMap.get(depositAddress).add(depositWeight));
             }else{
                 depositWeightMap.put(depositAddress, depositWeight);
             }
         }
+
+        //节点创建者权重
+        BigDecimal creatorWeight = new BigDecimal(creatorDeposit).divide(new BigDecimal(totalDeposit), 8, RoundingMode.HALF_DOWN);
+        BigDecimal creatorCommissionWeight = BigDecimal.ONE.subtract(creatorWeight).multiply(commissionRate);
+        creatorWeight = creatorWeight.add(creatorCommissionWeight);
+        depositWeightMap.put(AddressTool.getStringAddressByBytes(agentInfo.getRewardAddress()), creatorWeight);
+        Log.debug("区块权重分配：{}",depositWeightMap.toString());
         return depositWeightMap;
     }
 
