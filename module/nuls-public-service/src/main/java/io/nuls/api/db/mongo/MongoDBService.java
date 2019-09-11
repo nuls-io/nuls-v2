@@ -69,6 +69,7 @@ public class MongoDBService implements InitializingBean {
             MongoClientOptions options = MongoClientOptions.builder()
                     .connectionsPerHost(ApiContext.maxAliveConnect)
                     .threadsAllowedToBlockForConnectionMultiplier(ApiContext.maxAliveConnect)
+                    .socketTimeout(ApiContext.socketTimeout)
                     .maxWaitTime(ApiContext.maxWaitTime)
                     .connectTimeout(ApiContext.connectTimeOut)
                     .build();

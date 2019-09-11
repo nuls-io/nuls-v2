@@ -78,6 +78,14 @@ public class RollbackService {
         BlockHexInfo blockHexInfo = blockService.getBlockHexInfo(chainId, blockHeight);
         if (blockHexInfo == null) {
             blockService.deleteBlockHeader(chainId, blockHeight);
+            SyncInfo syncInfo = chainService.getSyncInfo(chainId);
+            if (syncInfo != null) {
+                if (syncInfo.getBestHeight() > 0) {
+                    syncInfo.setBestHeight(syncInfo.getBestHeight() - 1);
+                    syncInfo.setStep(100);
+                    chainService.updateStep(syncInfo);
+                }
+            }
             return true;
         }
 

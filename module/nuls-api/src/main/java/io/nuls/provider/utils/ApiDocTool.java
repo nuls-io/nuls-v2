@@ -423,6 +423,11 @@ public class ApiDocTool {
                     }
                     res.list = buildResultDes(parameter.requestType(), res.des, res.name, res.canNull);
                     res.type = parameter.requestType().value().getSimpleName().toLowerCase();
+                    // pierre add at 20190910 for duplicate `List<String>`
+                    if(parameter.requestType().value() == List.class && baseType.contains(parameter.requestType().collectionElement())) {
+                        res.type = res.list.get(0).type;
+                        res.list = null;
+                    }
                     param.add(res);
                 }
             });
