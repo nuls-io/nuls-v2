@@ -641,10 +641,10 @@ public class TransactionCmd extends BaseCmd {
             }
             if(1 == status) {
                 chain.getProcessTxStatus().set(true);
-                chain.getLogger().debug("节点区块同步状态变更为: true");
+                chain.getLogger().info("节点区块同步状态变更为: true");
             }else{
                 chain.getProcessTxStatus().set(false);
-                chain.getLogger().debug("节点区块同步状态变更为: false");
+                chain.getLogger().info("节点区块同步状态变更为: false");
             }
             return success();
         } catch (NulsException e) {
