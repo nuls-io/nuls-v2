@@ -1,7 +1,7 @@
 /**
  * MIT License
  * <p>
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -56,7 +56,6 @@ public class SchedulerManager {
         //固定延迟时间
         unconfirmedTxExecutor.scheduleWithFixedDelay(new ClearUnconfirmedTxProcessTask(chain),
                 TxConstant.TX_CLEAN_TASK_INITIALDELAY, TxConstant.TX_CLEAN_TASK_PERIOD, TimeUnit.SECONDS);
-
         return true;
     }
 }

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -277,7 +277,7 @@ public class TimeManager extends BaseManager {
             //Log.debug("done!");
             return timeInfo.getMessage().getTransmitTimeStamp().getTime();
         } catch (Exception e) {
-            LoggerUtil.COMMON_LOG.error("address={} getTime error", address);
+            LoggerUtil.COMMON_LOG.warn("address={} sync time fail", address);
             return 0L;
         }
     }

@@ -16,8 +16,6 @@ decimals=8
 chainName=nuls
 #本链默认资产符号
 symbol=NULS
-#默认资产的小数精确位数
-decimals=8
 #主网链id
 mainChainId=1
 #主网主资产id
@@ -59,11 +57,11 @@ singleDownloadTimeout=15000
 #区块同步过程中缓存的区块字节数上限(20M)
 cachedBlockSizeLimit=20971520
 #创世块文件路径(支持绝对路径与相对路径,相对路径相对于此配置文件的目录)
-#genesisBlockPath=genesis-block.json
+genesisBlockPath=genesis-block.json
 
 [consensus]
 #种子节点列表
-seedNodes=NULSd6HgcbGS9WLjJqSqDhqrh7W7ZcRb2MtWi,NULSd6HgWfTd7SJbbjruaVfvhjmeYSLW2GPzi,NULSd6HgYStUxFezPAJxhexWyJK9n5wMKFWvk,NULSd6HgjDBsyfUNjmrYFVWLD3hPyWDzXKbi4,NULSd6HgVQAbN13sPYMvuJrVw2gFywA86CzZB
+seedNodes=NULSd6Hge7xHDnvsSpnzbR2gWHd31zJ1How11,NULSd6HgZkkF9wUMpCxhiuL4TGwQFHx4qNa22,NULSd6HgeQwXLdre69ArkqVZNDqMLU4CaAz33,NULSd6HgcjAKAgq8jjXgBCcNLEJUvJEYcoj44,NULSd6HgiDdTjcuvhqzm3bomyBFZmosV3ei55
 #出块地址密码
 password=nuls123456
 #出块间隔时间(单位：s)
@@ -87,13 +85,13 @@ deflationRatio=99.6
 #通缩间隔时间(单位：S),30天
 deflationTimeInterval=2592000
 
-[smart_contract]
+[smart-contract]
 #合约视图方法调用最大消耗的Gas
 maxViewGas=100000000
 
 [public-service]
 #public-service模块对外的rpc端口号
-rpcPort=18003
+rpcPort=8003
 #数据库url地址
 databaseUrl=127.0.0.1
 #数据库端口号
@@ -123,7 +121,7 @@ byzantineRatio=66
 #主网跨链种子节点列表
 crossSeedIps=seeda.nuls.io:8002,seedb.nuls.io:8002,seedc.nuls.io:8002,seedd.nuls.io:8002,seede.nuls.io:8002,seedf.nuls.io:8002
 #主网验证人列表
-verifiers=NULSd6HgcbGS9WLjJqSqDhqrh7W7ZcRb2MtWi,NULSd6HgWfTd7SJbbjruaVfvhjmeYSLW2GPzi,NULSd6HgYStUxFezPAJxhexWyJK9n5wMKFWvk,NULSd6HgjDBsyfUNjmrYFVWLD3hPyWDzXKbi4,NULSd6HgVQAbN13sPYMvuJrVw2gFywA86CzZB
+verifiers=NULSd6Hge7xHDnvsSpnzbR2gWHd31zJ1How11,NULSd6HgZkkF9wUMpCxhiuL4TGwQFHx4qNa22,NULSd6HgeQwXLdre69ArkqVZNDqMLU4CaAz33,NULSd6HgcjAKAgq8jjXgBCcNLEJUvJEYcoj44,NULSd6HgiDdTjcuvhqzm3bomyBFZmosV3ei55
 #主网签名拜占庭比列
 mainByzantineRatio=66
 #主网最大签名数

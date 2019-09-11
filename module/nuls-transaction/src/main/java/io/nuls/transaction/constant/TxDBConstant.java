@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -47,9 +47,4 @@ public interface TxDBConstant {
      * 验证通过但未打包的交易(未确认)
      */
      String DB_TRANSACTION_UNCONFIRMED_PREFIX = "tx_table_unconfirmed_";
-
-
-    /** 接收新交易的文件队列名**/
-    String TX_UNVERIFIED_QUEUE_PREFIX = "tx_queue_unverified_";
-
 }

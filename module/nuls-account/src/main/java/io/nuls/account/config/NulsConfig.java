@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,8 +26,6 @@
 package io.nuls.account.config;
 
 
-import io.nuls.base.basic.AddressTool;
-
 /**
  * 用来管理配置项
  * <p>
@@ -36,18 +34,6 @@ import io.nuls.base.basic.AddressTool;
  * @author: Niels Wang
  */
 public class NulsConfig {
-
-//    /**
-//     * 模块配置文件中加载的所有配置项
-//     * All the configuration items that are loaded in the module configuration file.
-//     */
-//    public static IniEntity MODULES_CONFIG;
-//
-//    /**
-//     * 模块配置文件名称
-//     * Module configuration file name.
-//     */
-//    public final static String MODULES_CONFIG_FILE = "modules.json";
 
     /**
      * 系统使用的编码方式
@@ -59,12 +45,6 @@ public class NulsConfig {
      * 导出keystore备份文件目录
      */
     public static String ACCOUNTKEYSTORE_FOLDER_NAME = "keystore/backup";
-
-//    /**
-//     * 内核模块地址端口
-//     * Kernel module address port
-//     */
-//    public static String KERNEL_MODULE_PORT = "8008";
 
     /**
      * 数据库存储地址
@@ -90,16 +70,5 @@ public class NulsConfig {
      * 主网链资产ID（卫星链资产ID，NULS资产）
      */
     public static int MAIN_ASSETS_ID;
-//
-//    /**
-//     * 当前链ID
-//     */
-//    public static int CURRENT_CHAIN_ID = 2;
-//
-//    /**
-//     * 当前链主资产ID
-//     */
-//    public static int CURRENT_MAIN_ASSETS_ID = 1;
-
 
 }
