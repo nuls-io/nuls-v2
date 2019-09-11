@@ -100,10 +100,18 @@ databaseUrl=127.0.0.1
 databasePort=27017
 #连接池最大数
 maxAliveConnect=20
-#从数据库获取连接最大等待时间
+#连接最大等待时间
 maxWaitTime=120000
+#连接最大持续时间
+socketTimeout=300000
 #连接超时时间
 connectTimeOut=30000
+developerNodeAddress=NULSd6Hgf15aUZj6918tEwy9aT4JG1ZQotXRF
+ambassadorNodeAddress=NULSd6HgcfGtsmm79QDoBK1MAjqNmm3rgKXSj
+mappingAddress=NULSd6HgcfwWCD5TLEfehrJ1fFYuZ6nqGbfiu,NULSd6HggAGpQbhhSHU9R1yRxKKuCCTFwayaB
+businessAddress=NULSd6HgdemcQDAaiEJWq9ESMhtUHXRsNJ4KM
+teamAddress=NULSd6HgbfkSuRGKSLJJzAPAihgDQtaUhuE4L
+communityAddress=NULSd6HgjDZmLMbZSmH9tqb6smdzZHCxsCRD3
 
 [cross-chain]
 #跨链节点链接的最小值

@@ -193,13 +193,13 @@ NULS采用通用的交易协议格式，主要由以下字段组成：
 交易的资产数据，NULS目前定义了一套通用的CoinData格式，具体如下
 
 ```
-froms://List<CoinForm>格式，
+froms://List<CoinFrom>格式，
 tos://List<CoinTo>格式
 ```
 
 注：支持多个账户同一笔交易中转出不同资产到不同的账户中
 
-CoinForm结构[40]
+CoinFrom结构[40]
 
 ```
 address:  //byte[24] 账户地址  
@@ -223,7 +223,7 @@ lockTime：//uint32,解锁高度或解锁时间，-1为永久锁定
 手续费
 
 ```
-forms-tos剩余的部分就是手续费（模型中支持多种资产缴纳手续费，约束条件由经济模型设计决定）
+froms-tos剩余的部分就是手续费（模型中支持多种资产缴纳手续费，约束条件由经济模型设计决定）
 ```
 
 **remark**  

@@ -75,7 +75,10 @@ public class MongoAccountServiceImpl implements AccountService {
             return;
         }
 
+        BulkWriteOptions options = new BulkWriteOptions();
+        options.ordered(false);
         List<WriteModel<Document>> modelList = new ArrayList<>();
+        int i = 0;
         for (AccountInfo accountInfo : accountInfoMap.values()) {
             Document document = DocumentTransferTool.toDocument(accountInfo, "address");
             document.put("totalBalance", BigIntegerUtils.bigIntegerToString(accountInfo.getTotalBalance(), 32));
@@ -86,14 +89,17 @@ public class MongoAccountServiceImpl implements AccountService {
             } else {
                 modelList.add(new ReplaceOneModel<>(Filters.eq("_id", accountInfo.getAddress()), document));
             }
+            i++;
+            if (i == 1000) {
+                mongoDBService.bulkWrite(ACCOUNT_TABLE + chainId, modelList, options);
+                modelList.clear();
+                i = 0;
+            }
+        }
+        if (modelList.size() > 0) {
+            mongoDBService.bulkWrite(ACCOUNT_TABLE + chainId, modelList, options);
         }
 
-        BulkWriteOptions options = new BulkWriteOptions();
-        options.ordered(false);
-        InsertManyOptions insertManyOptions = new InsertManyOptions();
-        insertManyOptions.ordered(false);
-
-        mongoDBService.bulkWrite(ACCOUNT_TABLE + chainId, modelList, options);
         ApiCache apiCache = CacheManager.getCache(chainId);
         for (AccountInfo accountInfo : accountInfoMap.values()) {
             if (apiCache.getAccountMap().containsKey(accountInfo.getAddress())) {

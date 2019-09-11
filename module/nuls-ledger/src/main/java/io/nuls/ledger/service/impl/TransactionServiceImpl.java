@@ -170,7 +170,7 @@ public class TransactionServiceImpl implements TransactionService {
                 dealAssetAddressIndex(assetAddressIndex, from.getAssetsChainId(), from.getAssetsId(), address);
                 if (from.getLocked() == 0) {
                     AmountNonce amountNonce = new AmountNonce(from.getNonce(), nonce8Bytes, from.getAmount());
-                    accountBalance.getNonces().add(amountNonce);
+                    accountBalance.getPreAccountState().getNonces().add(amountNonce);
                     //判断是否存在未确认过程交易，如果存在则进行确认记录，如果不存在，则进行未确认的清空记录
                     String accountKeyStr = LedgerUtil.getKeyStr(address, from.getAssetsChainId(), from.getAssetsId());
                     if (unconfirmedStateService.existTxUnconfirmedTx(addressChainId, accountKeyStr, nonce8Str)) {
