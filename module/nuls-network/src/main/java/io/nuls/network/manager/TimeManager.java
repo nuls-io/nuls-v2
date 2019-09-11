@@ -277,7 +277,7 @@ public class TimeManager extends BaseManager {
             //Log.debug("done!");
             return timeInfo.getMessage().getTransmitTimeStamp().getTime();
         } catch (Exception e) {
-            LoggerUtil.COMMON_LOG.error("address={} getTime error", address);
+            LoggerUtil.COMMON_LOG.warn("address={} sync time fail", address);
             return 0L;
         }
     }

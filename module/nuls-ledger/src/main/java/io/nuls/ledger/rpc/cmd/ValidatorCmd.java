@@ -295,7 +295,7 @@ public class ValidatorCmd extends BaseLedgerCmd {
         } else {
             rtData.put("value", false);
         }
-        LoggerUtil.logger(chainId).debug("chainId={} blockHeight={},return={}", chainId, blockHeight, success(rtData));
+        LoggerUtil.logger(chainId).debug("chainId={} blockHeight={},return={}", chainId, blockHeight, rtData.get("value"));
         return success(rtData);
     }
 }
