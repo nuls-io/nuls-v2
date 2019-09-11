@@ -313,20 +313,20 @@ public class ChainContext {
      */
     public void printChains() {
         Chain masterChain = BlockChainManager.getMasterChain(chainId);
-        logger.info("####################################master chain######################################");
-        logger.info("#" + masterChain);
+        logger.info("-------------------------------------master chain-------------------------------------");
+        logger.info("-" + masterChain);
         SortedSet<Chain> forkChains = BlockChainManager.getForkChains(chainId);
         if (!forkChains.isEmpty()) {
-            logger.info("####################################fork chains######################################");
+            logger.info("-------------------------------------fork chains-------------------------------------");
             for (Chain forkChain : forkChains) {
-                logger.info("#" + forkChain);
+                logger.info("-" + forkChain);
             }
         }
         SortedSet<Chain> orphanChains = BlockChainManager.getOrphanChains(chainId);
         if (!orphanChains.isEmpty()) {
-            logger.info("####################################orphan chains######################################");
+            logger.info("-------------------------------------orphan chains-------------------------------------");
             for (Chain orphanChain : orphanChains) {
-                logger.info("#" + orphanChain);
+                logger.info("-" + orphanChain);
             }
         }
     }
