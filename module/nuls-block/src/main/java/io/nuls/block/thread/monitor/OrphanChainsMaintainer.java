@@ -154,9 +154,17 @@ public class OrphanChainsMaintainer extends BaseMonitor {
         for (String availableNode : nodes) {
             block = BlockUtil.downloadBlockByHash(chainId, previousHash, availableNode, orphanChain.getStartHeight() - 1);
             if (block != null) {
+                //从节点下载区块成功
                 orphanChain.addFirst(block);
                 chainStorageService.save(chainId, block);
                 return;
+            } else {
+                //下载不到或者超时，把这个节点剔除
+                for (NulsHash nulsHash : orphanChain.getHashList()) {
+                    List<String> list = orphanBlockRelatedNodes.get(nulsHash);
+                    list.remove(availableNode);
+                    context.getLogger().warn("get block timeout, kick out this node-" + availableNode);
+                }
             }
             //请求区块失败,孤儿链年龄加一
             age.incrementAndGet();
