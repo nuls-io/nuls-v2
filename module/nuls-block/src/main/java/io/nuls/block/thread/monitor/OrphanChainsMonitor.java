@@ -25,6 +25,8 @@ import io.nuls.block.constant.ChainTypeEnum;
 import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
+import io.nuls.block.rpc.call.ConsensusCall;
+import io.nuls.block.rpc.call.TransactionCall;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.log.logback.NulsLogger;
 
@@ -33,6 +35,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.locks.StampedLock;
 
+import static io.nuls.block.constant.Constant.MODULE_WORKING;
 import static io.nuls.block.constant.StatusEnum.MAINTAIN_ORPHAN_CHAINS;
 import static io.nuls.block.constant.StatusEnum.RUNNING;
 
@@ -195,6 +198,8 @@ public class OrphanChainsMonitor extends BaseMonitor {
             }
         } catch (NulsRuntimeException e) {
             orphanChain.setType(ChainTypeEnum.DATA_ERROR);
+            ConsensusCall.notice(masterChain.getChainId(), MODULE_WORKING);
+            TransactionCall.notice(masterChain.getChainId(), MODULE_WORKING);
         }
     }
 
