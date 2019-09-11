@@ -48,7 +48,6 @@ import io.nuls.base.data.NulsSignData;
 import io.nuls.base.signture.BlockSignature;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
-import io.nuls.core.basic.InitializingBean;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.AESEncrypt;
@@ -71,7 +70,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author: qinyifeng
  */
 @Component
-public class AccountServiceImpl implements AccountService, InitializingBean {
+public class AccountServiceImpl implements AccountService {
 
     private Lock locker = new ReentrantLock();
 
@@ -86,11 +85,6 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
 
     private AccountCacheService accountCacheService = AccountCacheService.getInstance();
 
-    @Override
-    public void afterPropertiesSet() {
-        //Initialize local account data to cache
-        getAccountList();
-    }
 
     @Override
     public List<Account> createAccount(Chain chain, int count, String password) {

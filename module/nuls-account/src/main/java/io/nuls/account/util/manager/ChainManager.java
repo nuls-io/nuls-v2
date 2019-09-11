@@ -29,6 +29,7 @@ import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.AccountStorageConstant;
 import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.bo.config.ConfigBean;
+import io.nuls.account.service.AccountService;
 import io.nuls.account.storage.ConfigService;
 import io.nuls.account.util.LoggerUtil;
 import io.nuls.base.protocol.ProtocolGroupManager;
@@ -36,6 +37,7 @@ import io.nuls.base.protocol.ProtocolLoader;
 import io.nuls.base.protocol.RegisterHelper;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.rockdb.constant.DBErrorCode;
 import io.nuls.core.rockdb.service.RocksDBService;
@@ -87,6 +89,9 @@ public class ChainManager {
             chainMap.put(chainId, chain);
             ProtocolLoader.load(chainId);
         }
+
+        AccountService accountService = SpringLiteContext.getBean(AccountService.class);
+        accountService.getAccountList();
     }
 
 
