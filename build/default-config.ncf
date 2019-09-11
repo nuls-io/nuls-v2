@@ -63,7 +63,7 @@ cachedBlockSizeLimit=20971520
 
 [consensus]
 #种子节点列表
-seedNodes=NULSd6HgcbGS9WLjJqSqDhqrh7W7ZcRb2MtWi,NULSd6HgWfTd7SJbbjruaVfvhjmeYSLW2GPzi,NULSd6HgYStUxFezPAJxhexWyJK9n5wMKFWvk,NULSd6HgjDBsyfUNjmrYFVWLD3hPyWDzXKbi4,NULSd6HgVQAbN13sPYMvuJrVw2gFywA86CzZB
+seedNodes=NULSd6Hge7xHDnvsSpnzbR2gWHd31zJ1How11,NULSd6HgZkkF9wUMpCxhiuL4TGwQFHx4qNa22,NULSd6HgeQwXLdre69ArkqVZNDqMLU4CaAz33,NULSd6HgcjAKAgq8jjXgBCcNLEJUvJEYcoj44,NULSd6HgiDdTjcuvhqzm3bomyBFZmosV3ei55
 #出块地址密码
 password=nuls123456
 #出块间隔时间(单位：s)
@@ -123,7 +123,7 @@ byzantineRatio=66
 #主网跨链种子节点列表
 crossSeedIps=seeda.nuls.io:8002,seedb.nuls.io:8002,seedc.nuls.io:8002,seedd.nuls.io:8002,seede.nuls.io:8002,seedf.nuls.io:8002
 #主网验证人列表
-verifiers=NULSd6HgcbGS9WLjJqSqDhqrh7W7ZcRb2MtWi,NULSd6HgWfTd7SJbbjruaVfvhjmeYSLW2GPzi,NULSd6HgYStUxFezPAJxhexWyJK9n5wMKFWvk,NULSd6HgjDBsyfUNjmrYFVWLD3hPyWDzXKbi4,NULSd6HgVQAbN13sPYMvuJrVw2gFywA86CzZB
+verifiers=NULSd6Hge7xHDnvsSpnzbR2gWHd31zJ1How11,NULSd6HgZkkF9wUMpCxhiuL4TGwQFHx4qNa22,NULSd6HgeQwXLdre69ArkqVZNDqMLU4CaAz33,NULSd6HgcjAKAgq8jjXgBCcNLEJUvJEYcoj44,NULSd6HgiDdTjcuvhqzm3bomyBFZmosV3ei55
 #主网签名拜占庭比列
 mainByzantineRatio=66
 #主网最大签名数

@@ -530,9 +530,7 @@ public class ContractCmd extends BaseCmd {
 
             batchExecutor.commit();
             byte[] newStateRootBytes = batchExecutor.getRoot();
-            if (Log.isDebugEnabled()) {
-                Log.debug("contract trigger payable for consensus rewarding, blockHeight is {}, preStateRoot is {}, currentStateRoot is {}", packageHeight, stateRoot, HexUtil.encode(newStateRootBytes));
-            }
+            Log.info("contract trigger payable for consensus rewarding, blockHeight is {}, preStateRoot is {}, currentStateRoot is {}", packageHeight, stateRoot, HexUtil.encode(newStateRootBytes));
             Map rpcResult = new HashMap(2);
             rpcResult.put(RPC_RESULT_KEY, RPCUtil.encode(newStateRootBytes));
             return success(rpcResult);
