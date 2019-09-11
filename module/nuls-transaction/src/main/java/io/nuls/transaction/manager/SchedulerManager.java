@@ -56,7 +56,6 @@ public class SchedulerManager {
         //固定延迟时间
         unconfirmedTxExecutor.scheduleWithFixedDelay(new ClearUnconfirmedTxProcessTask(chain),
                 TxConstant.TX_CLEAN_TASK_INITIALDELAY, TxConstant.TX_CLEAN_TASK_PERIOD, TimeUnit.SECONDS);
-
         return true;
     }
 }
