@@ -27,4 +27,6 @@ public interface AccountService {
     BigInteger getAllAccountBalance(int chainId);
 
     BigInteger getAccountTotalBalance(int chainId, String address);
+
+    void testBalance(int chainId);
 }

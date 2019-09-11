@@ -30,10 +30,10 @@ public class ScheduleManager {
         ScheduledExecutorService executorService = Executors.newScheduledThreadPool(6);
         executorService.scheduleAtFixedRate(new QueryChainInfoTask(ApiContext.defaultChainId), 2, 60, TimeUnit.SECONDS);
         executorService.scheduleAtFixedRate(new SyncBlockTask(ApiContext.defaultChainId), 5, 10, TimeUnit.SECONDS);
-        executorService.scheduleAtFixedRate(new StatisticalNulsTask(ApiContext.defaultChainId), 1, 20, TimeUnit.MINUTES);
+        executorService.scheduleAtFixedRate(new StatisticalNulsTask(ApiContext.defaultChainId), 0, 20, TimeUnit.MINUTES);
         executorService.scheduleAtFixedRate(new StatisticalTask(ApiContext.defaultChainId), 1, 60, TimeUnit.MINUTES);
         executorService.scheduleAtFixedRate(new UnConfirmTxTask(ApiContext.defaultChainId), 1, 2, TimeUnit.MINUTES);
-        executorService.scheduleAtFixedRate(new StatisticalRewardTask(ApiContext.defaultChainId), 2, 60, TimeUnit.MINUTES);
+        executorService.scheduleAtFixedRate(new StatisticalRewardTask(ApiContext.defaultChainId), 1, 60, TimeUnit.MINUTES);
         executorService.scheduleAtFixedRate(new GetGlobalInfoTask(ApiContext.defaultChainId), 5, 10, TimeUnit.SECONDS);
     }
 }
