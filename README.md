@@ -63,14 +63,14 @@ Stay tuned
 
 #### Explorer and Web Wallet
 
-Explorer URL:  [http://alpha.nuls.io](http://alpha.nuls.io)
-Web Wallet: [http://alpha.wallet.nuls.io](http://alpha.wallet.nuls.io)
+Explorer URL:  [http://beta.nulscan.io/](http://beta.nulscan.io/)
+Web Wallet: [http://beta.wallet.nuls.io/](http://beta.wallet.nuls.io/)
 
-## Building the source
+## ChainBox Tutorial
 
 Please check the following documents：
 
-[http://docs.nuls.io/NULS2.0/packageGeneration.html](http://docs.nuls.io/NULS2.0/packageGeneration.html)
+[https://docs.nuls.io/NULS2.0/chainBoxGuide.html](https://docs.nuls.io/NULS2.0/chainBoxGuide.html)
 
 ## Debug
 
@@ -88,7 +88,7 @@ Stay tuned
 
 Please check the following documents；
 
-[http://docs.nuls.io/NULS2.0/developModule.html#only-add-modules](http://docs.nuls.io/NULS2.0/developModule.html#only-add-modules)
+[https://docs.nuls.io/NULS2.0/developeModule.html](https://docs.nuls.io/NULS2.0/developeModule.html)
 
 [^note]: Some documents are being updated, please understand if there are some inconsistencies
 

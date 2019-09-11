@@ -385,3 +385,58 @@ maxSignatureCount          主网设置的最大拜占庭签名数量
   |   2    |    usable     | boolean | 是否可用 |
   |   2    | decimalPlaces | uint16  | 资产精度 |
 
+## 如何开发一个跨链模块
+
+- 新建一个maven项目导入跨链基础包
+
+  ```
+  <dependency>
+        <groupId>io.nuls.v2.cross-chain</groupId>
+        <artifactId>base-lib</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+  </dependency>
+  ```
+
+- 创建模块启动类并让该类继承io.nuls.crosschain.base.BaseCrossChainBootStrap类
+
+  - 如果新创建的跨链模块有除了base-lib中提供的cmd以外的其他cmd,则需要在init()方法中将本模块中新增的cmd类路径添加到cmd目录列表里
+
+    ```
+    registerRpcPath(RPC_PATH);在init()方法中添加cmd目录
+    ```
+
+- 实现io.nuls.crosschain.base.service.CrossChainService类，该类负责处理跨链转账交易相关操作
+
+  - createCrossTx创建跨链转账交易
+  - newApiModuleCrossTx 处理apiModule发送的跨链转账交易
+  - commitCrossTx跨链转账交易提交
+  - rollbackCrossTx跨链转账交易回滚
+  - crossTxBatchValid跨链交易验证器
+  - getCrossTxState查询跨链转账交易处理状态
+  - getRegisteredChainInfoList 处理apiModule查询所有已注册跨链的连信息
+  - getByzantineCount处理apiModule查询当前最小拜占庭签名数量
+
+- 实现io.nuls.crosschain.base.service.VerifierChangeTxService类，该类负责处理跨链验证人变更交易相关操作
+
+  - validate验证人变更交易验证
+  - commit验证人变更交易提交
+  - rollback验证人变更交易回滚
+
+- 实现io.nuls.crosschain.base.service.VerifierInitService类，该类负责处理验证人初始化交易相关操作
+
+  - validate验证人初始化交易验证
+  - commit验证人初始化交易提交
+  - rollback验证人初始化交易回滚
+
+- 实现io.nuls.crosschain.base.service.ProtocolService类，该类负责处理跨链网络消息
+
+  - receiveCtxSign接收到链内节点广播的跨链交易签名
+  - getCtx链内节点向本节点获取完整跨链交易
+  - receiveCtx接收到本链节点广播的完整跨链交易
+  - receiveCtxHash接收到跨链节点广播的跨链交易Hash
+  - getOtherCtx跨链节点向本链获取完整跨链交易
+  - receiveOtherCtx接收到跨链节点广播的完整跨链交易
+  - getCtxState跨链节点向当前节点查询跨链交易处理状态
+  - receiveCtxState接收到跨链节点广播的跨链交易处理结果
+  - getCirculation主网向平行链节点查新本链资产流通量
+  - receiveRegisteredChainInfo平行链接收到主网广播的已注册跨链的链信息
