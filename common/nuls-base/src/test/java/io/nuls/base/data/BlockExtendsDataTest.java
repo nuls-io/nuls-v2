@@ -50,11 +50,11 @@ public class BlockExtendsDataTest {
         data.setConsensusMemberCount(1);
         data.setPackingIndexOfRound(1);
         data.setRoundIndex(1);
-        data.setRoundStartTime(1L);
-        data.setMainVersion((short)1);
+        data.setRoundStartTime(1568205590L);
+        data.setMainVersion((short) 1);
         data.setBlockVersion((short) 1);
-        data.setEffectiveRatio((byte) 60);
-        data.setContinuousIntervalCount((short) 100);
+        data.setEffectiveRatio((byte) 90);
+        data.setContinuousIntervalCount((short) 1000);
         data.setStateRoot(HexUtil.decode("56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421"));
         System.out.println(HexUtil.encode(data.serialize()));
     }
