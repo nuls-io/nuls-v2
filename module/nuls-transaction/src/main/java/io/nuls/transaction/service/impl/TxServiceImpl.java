@@ -1414,11 +1414,11 @@ public class TxServiceImpl implements TxService {
         long f2 = System.currentTimeMillis();
         timeF1 = f2 - f1;
         //验证交易是否已确认过
-        List<byte[]> confirmedList = confirmedTxStorageService.getExistKeys(chainId, keys);
+        List<byte[]> confirmedList = confirmedTxStorageService.getExistTxs(chainId, keys);
         if (!confirmedList.isEmpty()) {
             logger.error("There are confirmed transactions");
-            for (byte[] hash : confirmedList) {
-                logger.error("confirmed hash:{}", HexUtil.encode(hash));
+            for (byte[] cfmtx : confirmedList) {
+                logger.error("confirmed hash:{}", TxUtil.getTransaction(cfmtx).getHash().toHex());
             }
             throw new NulsException(TxErrorCode.TX_CONFIRMED);
         }
