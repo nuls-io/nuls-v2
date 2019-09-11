@@ -245,7 +245,7 @@ public class TransactionCmd extends BaseLedgerCmd {
         }
         rtData.put("value", value);
         Response response = success(rtData);
-        LoggerUtil.logger(chainId).debug("response={}", response);
+        LoggerUtil.logger(chainId).debug("response={}", rtData.get("value"));
         return response;
 
     }
