@@ -33,6 +33,7 @@ import org.glassfish.grizzly.http.server.Response;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -59,13 +60,16 @@ public class JsonRpcHandler extends HttpHandler {
 
         if (request.getMethod().equals(Method.GET)) {
             if (request.getRequestURI().endsWith("nuls/assets/get") || request.getRequestURI().endsWith("nuls/assets/get/")) {
-                RpcResult rpcResult = RpcResult.success(AssetTool.getNulsAssets());
-                response.getWriter().write(JSONUtils.obj2json(rpcResult));
+                Map<String, Object> result = new HashMap<>();
+                result.put("success", true);
+                result.put("code", 1000);
+                result.put("msg", "success");
+                result.put("data", AssetTool.getNulsAssets());
+                response.getWriter().write(JSONUtils.obj2json(result));
                 return;
             }
         }
 
-//        System.out.println("request::::::::::::::");
         if (!request.getMethod().equals(Method.POST)) {
             LoggerUtil.commonLog.warn("the request is not POST!");
             response.getWriter().write(JSONUtils.obj2json(responseError("-32600", "", "0")));
