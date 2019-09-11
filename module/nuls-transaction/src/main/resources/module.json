@@ -1,10 +1,10 @@
 {
   "moduleCode":"tx",
-  "mainChainId": 2,
+  "mainChainId": 1,
   "mainAssetId": 1,
   "encoding": "UTF-8",
   "unconfirmedTxExpire":600,
-  "chainId":2,
+  "chainId":1,
   "assetId":1,
   "txMaxSize":307200,
   "moduleVerifyPercent":30,

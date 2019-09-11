@@ -24,8 +24,6 @@ public interface TxConstant {
     String TX_CLEAN_THREAD = "cleanTxThread";
     /** 验证交易签名线程 */
     String VERIFY_TX_SIGN_THREAD = "verifyTxSignThread";
-    /** 清理无效交易(验证未通过)线程 */
-    String CLEAN_INVALID_TX_THREAD = "cleanInvalidTxThread";
 
     /** 孤儿交易处理task, 初始延迟值(秒) */
     int TX_ORPHAN_TASK_INITIALDELAY = 1;
@@ -45,9 +43,6 @@ public interface TxConstant {
 
     /** 打包时，一批次给账本进行验证的交易数 */
     int PACKAGE_TX_VERIFY_COINDATA_NUMBER_OF_TIMES_TO_PROCESS = 2000;
-
-    /** 计算打包预留时间的临界值*/
-//    long PACKAGE_RESERVE_CRITICAL_TIME = 6000L;
 
     /** Map初始值 */
     int INIT_CAPACITY_32 = 32;
