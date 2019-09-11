@@ -22,6 +22,7 @@ package io.nuls.api.rpc.jsonRpc;
 
 import io.nuls.api.model.rpc.RpcResult;
 import io.nuls.api.model.rpc.RpcResultError;
+import io.nuls.api.utils.AssetTool;
 import io.nuls.api.utils.LoggerUtil;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
@@ -55,13 +56,21 @@ public class JsonRpcHandler extends HttpHandler {
             response.getWriter().write("ok");
             return;
         }
+
+        if (request.getMethod().equals(Method.GET)) {
+            if (request.getRequestURI().endsWith("nuls/assets/get") || request.getRequestURI().endsWith("nuls/assets/get/")) {
+                RpcResult rpcResult = RpcResult.success(AssetTool.getNulsAssets());
+                response.getWriter().write(JSONUtils.obj2json(rpcResult));
+                return;
+            }
+        }
+
 //        System.out.println("request::::::::::::::");
         if (!request.getMethod().equals(Method.POST)) {
             LoggerUtil.commonLog.warn("the request is not POST!");
             response.getWriter().write(JSONUtils.obj2json(responseError("-32600", "", "0")));
             return;
         }
-
         String content = null;
         try {
             content = getParam(request);
