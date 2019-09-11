@@ -23,6 +23,7 @@ package io.nuls.block.thread.monitor;
 import io.nuls.base.data.NulsHash;
 import io.nuls.block.constant.ChainTypeEnum;
 import io.nuls.block.manager.BlockChainManager;
+import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.rpc.call.ConsensusCall;
@@ -197,6 +198,7 @@ public class OrphanChainsMonitor extends BaseMonitor {
                 }
             }
         } catch (NulsRuntimeException e) {
+            ContextManager.getContext(masterChain.getChainId()).getLogger().error("orphanChain data error-" + orphanChain);
             orphanChain.setType(ChainTypeEnum.DATA_ERROR);
             ConsensusCall.notice(masterChain.getChainId(), MODULE_WORKING);
             TransactionCall.notice(masterChain.getChainId(), MODULE_WORKING);
