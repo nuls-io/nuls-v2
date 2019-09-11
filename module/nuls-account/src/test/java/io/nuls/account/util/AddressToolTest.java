@@ -30,10 +30,12 @@ public class AddressToolTest {
     @Test
     public void creaateMainNetAccount() {
         System.out.println("=======================main net=======================");
-        for (int i = 0; i < 100; i++) {
+        while (true){
             ECKey key = new ECKey();
             Address address = new Address(1, (byte) 1, SerializeUtils.sha256hash160(key.getPubKey()));
-            System.out.println(address.getBase58() + "===========" + key.getPrivateKeyAsHex());
+            String value = address.getBase58();
+            if(value.toUpperCase().endsWith("55"))
+            System.out.println(value + "===========" + key.getPrivateKeyAsHex());
         }
     }
 
