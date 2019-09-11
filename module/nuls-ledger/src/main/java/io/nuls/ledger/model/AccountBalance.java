@@ -37,7 +37,6 @@ import java.util.List;
  * @date 2019/01/07
  **/
 public class AccountBalance {
-    private List<AmountNonce> nonces = new ArrayList<>();
     private AccountState nowAccountState;
     private AccountStateSnapshot preAccountState;
 
@@ -61,13 +60,5 @@ public class AccountBalance {
     public AccountBalance(AccountState nowAccountState, AccountStateSnapshot preAccountState) {
         this.nowAccountState = nowAccountState;
         this.preAccountState = preAccountState;
-    }
-
-    public List<AmountNonce> getNonces() {
-        return nonces;
-    }
-
-    public void setNonces(List<AmountNonce> nonces) {
-        this.nonces = nonces;
     }
 }

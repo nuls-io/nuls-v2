@@ -484,9 +484,9 @@ public class RocksDBManager {
             //该方法获取的结果包含查不到的key, 将以null 值放入返回的list中,因此需要把空值去除.
             List<byte[]> list = db.multiGetAsList(keys);
             List<byte[]> rs = new ArrayList<>();
-            for(byte[] hash : list){
-                if(null != hash){
-                    rs.add(hash);
+            for(byte[] tx : list){
+                if(null != tx){
+                    rs.add(tx);
                 }
             }
             return rs;

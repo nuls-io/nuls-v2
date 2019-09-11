@@ -191,7 +191,6 @@ public class ConfirmedTxStorageServiceImpl implements ConfirmedTxStorageService 
         return false;
     }
 
-
     @Override
     public List<Transaction> getTxList(int chainId, List<byte[]> hashList) {
         //check params
@@ -215,21 +214,11 @@ public class ConfirmedTxStorageServiceImpl implements ConfirmedTxStorageService 
     }
 
     @Override
-    public List<byte[]> getExistKeys(int chainId, List<byte[]> hashList) {
+    public List<byte[]> getExistTxs(int chainId, List<byte[]> hashList) {
         if (hashList == null || hashList.size() == 0) {
             return null;
         }
         //根据交易hash批量查询交易数据
         return RocksDBService.multiGetAsList(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + chainId, hashList);
-    }
-
-    @Override
-    public List<String> getExistKeysStr(int chainId, List<byte[]> hashList) {
-
-        List<String> list = new ArrayList<>();
-        for(byte[] hash : getExistKeys(chainId, hashList)){
-            list.add(HexUtil.encode(hash));
-        }
-        return list;
     }
 }

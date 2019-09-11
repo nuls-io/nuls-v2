@@ -456,7 +456,7 @@ public class AgentServiceImpl implements AgentService {
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
         chain.setConsensusStatus(ConsensusStatus.RUNNING);
-        chain.getLogger().debug("updateAgentConsensusStatus-修改节点共识状态成功......");
+        chain.getLogger().info("updateAgentConsensusStatus-修改节点共识状态成功......");
         return Result.getSuccess(ConsensusErrorCode.SUCCESS);
     }
 
@@ -479,10 +479,10 @@ public class AgentServiceImpl implements AgentService {
         }
         if (status == 1) {
             chain.setCanPacking(true);
-            chain.getLogger().debug("updateAgentStatus--节点打包状态修改成功，修改后状态为：可打包状态");
+            chain.getLogger().info("updateAgentStatus--节点打包状态修改成功，修改后状态为：可打包状态");
         } else {
             chain.setCanPacking(false);
-            chain.getLogger().debug("updateAgentStatus--节点打包状态修改成功，修改后状态为：不可打包状态");
+            chain.getLogger().info("updateAgentStatus--节点打包状态修改成功，修改后状态为：不可打包状态");
         }
         return Result.getSuccess(ConsensusErrorCode.SUCCESS);
 

@@ -42,9 +42,6 @@ public class AccountKeyStoreJsonImportForm {
     @ApiModelProperty(description = "密码")
     private String password;
 
-    @ApiModelProperty(description = "是否覆盖账户: false:不覆盖导入, true:覆盖导入")
-    private Boolean overwrite = false;
-
     public AccountKeyStoreDto getKeystore() {
         return keystore;
     }
@@ -61,11 +58,4 @@ public class AccountKeyStoreJsonImportForm {
         this.password = password;
     }
 
-    public Boolean getOverwrite() {
-        return overwrite;
-    }
-
-    public void setOverwrite(Boolean overwrite) {
-        this.overwrite = overwrite;
-    }
 }

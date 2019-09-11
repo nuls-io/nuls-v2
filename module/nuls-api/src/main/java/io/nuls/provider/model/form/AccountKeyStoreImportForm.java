@@ -41,9 +41,6 @@ public class AccountKeyStoreImportForm {
     @ApiModelProperty(description = "密码")
     private String password;
 
-    @ApiModelProperty(description = "是否覆盖账户: false:不覆盖导入, true:覆盖导入")
-    private Boolean overwrite = false;
-
     public String getPath() {
         return path;
     }
@@ -60,11 +57,4 @@ public class AccountKeyStoreImportForm {
         this.password = password;
     }
 
-    public Boolean getOverwrite() {
-        return overwrite;
-    }
-
-    public void setOverwrite(Boolean overwrite) {
-        this.overwrite = overwrite;
-    }
 }
