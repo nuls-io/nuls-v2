@@ -22,6 +22,7 @@ package io.nuls.api.rpc.jsonRpc;
 
 import io.nuls.api.model.rpc.RpcResult;
 import io.nuls.api.model.rpc.RpcResultError;
+import io.nuls.api.utils.AssetTool;
 import io.nuls.api.utils.LoggerUtil;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
@@ -32,6 +33,7 @@ import org.glassfish.grizzly.http.server.Response;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -55,13 +57,24 @@ public class JsonRpcHandler extends HttpHandler {
             response.getWriter().write("ok");
             return;
         }
-//        System.out.println("request::::::::::::::");
+
+        if (request.getMethod().equals(Method.GET)) {
+            if (request.getRequestURI().endsWith("nuls/assets/get") || request.getRequestURI().endsWith("nuls/assets/get/")) {
+                Map<String, Object> result = new HashMap<>();
+                result.put("success", true);
+                result.put("code", 1000);
+                result.put("msg", "success");
+                result.put("data", AssetTool.getNulsAssets());
+                response.getWriter().write(JSONUtils.obj2json(result));
+                return;
+            }
+        }
+
         if (!request.getMethod().equals(Method.POST)) {
             LoggerUtil.commonLog.warn("the request is not POST!");
             response.getWriter().write(JSONUtils.obj2json(responseError("-32600", "", "0")));
             return;
         }
-
         String content = null;
         try {
             content = getParam(request);

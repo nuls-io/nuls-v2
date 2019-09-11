@@ -37,6 +37,9 @@ public class MongoBlockServiceImpl implements BlockService {
 
     public BlockHeaderInfo getBestBlockHeader(int chainId) {
         ApiCache apiCache = CacheManager.getCache(chainId);
+        if(apiCache == null) {
+            return null;
+        }
         if (apiCache.getBestHeader() == null) {
             SyncInfo syncInfo = mongoChainServiceImpl.getSyncInfo(chainId);
             if (syncInfo == null) {
