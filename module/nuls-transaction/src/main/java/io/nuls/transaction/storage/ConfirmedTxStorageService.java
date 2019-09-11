@@ -104,5 +104,4 @@ public interface ConfirmedTxStorageService {
      */
     List<byte[]> getExistTxs(int chainId, List<byte[]> hashList);
 
-
 }

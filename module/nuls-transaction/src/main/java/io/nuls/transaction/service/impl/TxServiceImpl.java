@@ -1417,10 +1417,14 @@ public class TxServiceImpl implements TxService {
         List<byte[]> confirmedList = confirmedTxStorageService.getExistTxs(chainId, keys);
         if (!confirmedList.isEmpty()) {
             logger.error("There are confirmed transactions");
-            for (byte[] cfmtx : confirmedList) {
-                logger.error("confirmed hash:{}", TxUtil.getTransaction(cfmtx).getHash().toHex());
+            try {
+                for (byte[] cfmtx : confirmedList) {
+                    logger.error("confirmed hash:{}", TxUtil.getTransaction(cfmtx).getHash().toHex());
+                }
+            } finally {
+                logger.error("Show confirmed transaction deserialize fail");
+                throw new NulsException(TxErrorCode.TX_CONFIRMED);
             }
-            throw new NulsException(TxErrorCode.TX_CONFIRMED);
         }
         long f3 = System.currentTimeMillis();
         timeF2 = f3 - f2;
