@@ -601,7 +601,9 @@ public class PocConsensusController {
         if (agentInfo != null && !hashList.contains(agentInfo.getTxHash())) {
             hashList.add(agentInfo.getTxHash());
         }
-
+        if(agentInfo.getTotalDeposit().longValue() > 50000000000000L) {
+            agentInfo.setTotalDeposit(new BigInteger("50000000000000"));
+        }
         pageInfo = agentService.getAgentByHashList(chainId, pageNumber, pageSize, hashList);
         for (AgentInfo info : pageInfo.getList()) {
             Result<AgentInfo> clientResult = WalletRpcHandler.getAgentInfo(chainId, info.getTxHash());
