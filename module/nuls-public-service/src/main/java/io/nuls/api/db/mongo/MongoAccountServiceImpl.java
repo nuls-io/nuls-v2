@@ -266,7 +266,7 @@ public class MongoAccountServiceImpl implements AccountService {
         boolean query = true;
         BigInteger totalBalance = BigInteger.ZERO;
         List<Document> documentList;
-        int i = 0;
+        int i = 1;
         BasicDBObject fields = new BasicDBObject();
         fields.append("totalBalance", 1);
         while (query) {
@@ -288,5 +288,10 @@ public class MongoAccountServiceImpl implements AccountService {
             return BigInteger.ZERO;
         }
         return accountInfo.getTotalBalance();
+    }
+
+    @Override
+    public void testBalance(int chainId) {
+
     }
 }
