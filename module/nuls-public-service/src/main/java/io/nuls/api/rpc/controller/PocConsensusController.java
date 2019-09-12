@@ -266,6 +266,9 @@ public class PocConsensusController {
         if (agentInfo.getTotalPackingCount() != 0) {
             agentInfo.setLostRate(DoubleUtils.div(count, count + agentInfo.getTotalPackingCount()));
         }
+        if(agentInfo.getTotalDeposit().longValue() > 50000000000000L) {
+            agentInfo.setTotalDeposit(new BigInteger("50000000000000"));
+        }
         agentInfo.setYellowCardCount((int) count);
         ApiCache apiCache = CacheManager.getCache(chainId);
         List<PocRoundItem> itemList = apiCache.getCurrentRound().getItemList();
@@ -324,6 +327,9 @@ public class PocConsensusController {
             return RpcResult.dataNotFound();
         }
         AgentInfo agentInfo = agentService.getAgentByAgentAddress(chainId, address);
+        if(agentInfo.getTotalDeposit().longValue() > 50000000000000L) {
+            agentInfo.setTotalDeposit(new BigInteger("50000000000000"));
+        }
         return RpcResult.success(agentInfo);
     }
 

@@ -712,7 +712,7 @@ public class ApiDocTool {
             }
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(mdFile, true))) {
                 writer.newLine();
-                writer.write(new DocTool.Heading("接口列表",2).toString());
+                writer.write(new Heading("接口列表",2).toString());
                 writer.newLine();
                 AtomicInteger i = new AtomicInteger(0);
                 for(CmdDes cmd : cmdDesList) {

@@ -182,6 +182,9 @@ public class MongoAgentServiceImpl implements AgentService {
             if (agent.getBlockHeight() > startHeight) {
                 continue;
             }
+            if(agent.getTotalDeposit().longValue() > 50000000000000L) {
+                agent.setTotalDeposit(new BigInteger("50000000000000"));
+            }
             resultList.add(agent);
         }
 
@@ -224,6 +227,9 @@ public class MongoAgentServiceImpl implements AgentService {
             if (alias != null) {
                 agentInfo.setAgentAlias(alias.getAlias());
             }
+            if(agentInfo.getTotalDeposit().longValue() > 50000000000000L) {
+                agentInfo.setTotalDeposit(new BigInteger("50000000000000"));
+            }
             agentInfoList.add(agentInfo);
             if (agentInfo.getType() == 0 && null != agentInfo.getAgentAddress()) {
                 if (ApiContext.DEVELOPER_NODE_ADDRESS.contains(agentInfo.getAgentAddress())) {
@@ -249,6 +255,9 @@ public class MongoAgentServiceImpl implements AgentService {
             AliasInfo alias = mongoAliasServiceImpl.getAliasByAddress(chainId, agentInfo.getAgentAddress());
             if (alias != null) {
                 agentInfo.setAgentAlias(alias.getAlias());
+            }
+            if(agentInfo.getTotalDeposit().longValue() > 50000000000000L) {
+                agentInfo.setTotalDeposit(new BigInteger("50000000000000"));
             }
             agentInfoList.add(agentInfo);
             if (agentInfo.getType() == 0 && null != agentInfo.getAgentAddress()) {
