@@ -133,6 +133,6 @@ interval=1000
 
 [nuls-api]
 #httpServer的启动ip
-serverIp=127.0.0.1
+serverIp=0.0.0.0
 #httpServer的启动port
 serverPort=8004
