@@ -25,7 +25,6 @@
 package io.nuls.ledger.rpc.call;
 
 
-import io.nuls.base.data.Block;
 
 /**
  * @author lan
