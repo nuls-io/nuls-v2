@@ -29,6 +29,7 @@ public class VersionChangeNotifier {
         noticedModule.add(ModuleE.CS.abbr);
         noticedModule.add(ModuleE.BL.abbr);
         noticedModule.add(ModuleE.AC.abbr);
+        noticedModule.add(ModuleE.LG.abbr);
         noticedModule.add(ModuleE.TX.abbr);
         if (ModuleHelper.isSupportSmartContract()) {
             noticedModule.add(ModuleE.SC.abbr);
