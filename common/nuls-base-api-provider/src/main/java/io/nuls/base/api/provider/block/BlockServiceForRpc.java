@@ -22,6 +22,7 @@ import io.nuls.core.rpc.util.NulsDateUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -52,12 +53,13 @@ public class BlockServiceForRpc extends BaseRpcService implements BlockService {
         return callRpc(ModuleE.BL.abbr, method, req, res);
     }
 
-    private Result<BlockHeaderData> _call(String method, Object req, Function<String, Result> callback) {
+    private Result<BlockHeaderData> _call(String method, Object req, Function<Map, Result> callback) {
         return call(method, req, callback);
     }
 
-    private Result<BlockHeaderData> tranderBlockHeader(String hexString) {
+    private Result<BlockHeaderData> tranderBlockHeader(Map result) {
         try {
+            String hexString = (String) result.get("value");
             if (StringUtils.isBlank(hexString)) {
                 return success(null);
             }

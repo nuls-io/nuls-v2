@@ -115,7 +115,7 @@ public interface CommandConstant {
     /**
      * 根据区块HASH获取区块
      */
-    String GET_BLOCK_BY_HASH = "downloadBlockByHash";
+    String GET_BLOCK_BY_HASH = "getBlockByHash";
     /**
      * 获取最新若干区块头
      */

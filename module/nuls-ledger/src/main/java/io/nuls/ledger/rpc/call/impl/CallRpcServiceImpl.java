@@ -56,12 +56,12 @@ public class CallRpcServiceImpl implements CallRpcService {
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, CmdConstant.CMD_GET_BLOCK_BY_HEIGHT, map);
             if (null != response && response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
-                String hex = (String) responseData.get(CmdConstant.CMD_GET_BLOCK_BY_HEIGHT);
-                if (null == hex) {
+                Map result = (Map) responseData.get(CmdConstant.CMD_GET_BLOCK_BY_HEIGHT);
+                if (null == result) {
                     return null;
                 }
                 Block block = new Block();
-                block.parse(new NulsByteBuffer(RPCUtil.decode(hex)));
+                block.parse(new NulsByteBuffer(RPCUtil.decode((String) result.get("value"))));
                 return block;
             } else {
                 LoggerUtil.logger(chainId).error("getBlockByHeight fail.response={}", JSONUtils.obj2json(response));
@@ -81,10 +81,9 @@ public class CallRpcServiceImpl implements CallRpcService {
             if (null != response && response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
                 if(null != responseData) {
-                    Object datas =   responseData.get(CmdConstant.CMD_LATEST_HEIGHT);
+                    Map datas = (Map) responseData.get(CmdConstant.CMD_LATEST_HEIGHT);
                     if(null != datas){
-                        long height = Long.valueOf(((Map)datas).get("value").toString());
-                        return height;
+                        return Long.parseLong(datas.get("value").toString());
                     }
                 }
             } else {
