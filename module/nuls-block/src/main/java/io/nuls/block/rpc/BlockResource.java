@@ -129,13 +129,9 @@ public class BlockResource extends BaseCmd {
                 return success();
             }
             BlockHeader blockHeader = service.getLatestBlockHeader(chainId);
-            if (blockHeader != null) {
-                Map responseData = new HashMap<>(2);
-                responseData.put("value", RPCUtil.encode(blockHeader.serialize()));
-                return success(responseData);
-            } else {
-                return success();
-            }
+            Map responseData = new HashMap<>(2);
+            responseData.put("value", RPCUtil.encode(blockHeader.serialize()));
+            return success(responseData);
         } catch (Exception e) {
             COMMON_LOG.error("", e);
             return failed(e.getMessage());
@@ -161,13 +157,9 @@ public class BlockResource extends BaseCmd {
                 return success();
             }
             BlockHeaderPo blockHeader = service.getLatestBlockHeaderPo(chainId);
-            if (blockHeader != null) {
-                Map responseData = new HashMap<>(2);
-                responseData.put("value", RPCUtil.encode(blockHeader.serialize()));
-                return success(responseData);
-            } else {
-                return success();
-            }
+            Map responseData = new HashMap<>(2);
+            responseData.put("value", RPCUtil.encode(blockHeader.serialize()));
+            return success(responseData);
         } catch (Exception e) {
             COMMON_LOG.error("", e);
             return failed(e.getMessage());
@@ -193,13 +185,9 @@ public class BlockResource extends BaseCmd {
                 return success();
             }
             Block block = service.getLatestBlock(chainId);
-            if (block != null) {
-                Map responseData = new HashMap<>(2);
-                responseData.put("value", RPCUtil.encode(block.serialize()));
-                return success(responseData);
-            } else {
-                return success();
-            }
+            Map responseData = new HashMap<>(2);
+            responseData.put("value", RPCUtil.encode(block.serialize()));
+            return success(responseData);
         } catch (Exception e) {
             COMMON_LOG.error("", e);
             return failed(e.getMessage());
@@ -227,12 +215,12 @@ public class BlockResource extends BaseCmd {
             }
             long height = Long.parseLong(map.get("height").toString());
             BlockHeader blockHeader = service.getBlockHeader(chainId, height);
+            Map responseData = new HashMap<>(2);
             if (blockHeader != null) {
-                Map responseData = new HashMap<>(2);
                 responseData.put("value", RPCUtil.encode(blockHeader.serialize()));
                 return success(responseData);
             } else {
-                return success();
+                return success(responseData);
             }
         } catch (Exception e) {
             COMMON_LOG.error("", e);
@@ -261,12 +249,12 @@ public class BlockResource extends BaseCmd {
             }
             long height = Long.parseLong(map.get("height").toString());
             BlockHeaderPo po = service.getBlockHeaderPo(chainId, height);
+            Map responseData = new HashMap<>(2);
             if (po != null) {
-                Map responseData = new HashMap<>(2);
                 responseData.put("value", RPCUtil.encode(po.serialize()));
                 return success(responseData);
             } else {
-                return success();
+                return success(responseData);
             }
         } catch (Exception e) {
             COMMON_LOG.error("", e);
@@ -403,15 +391,15 @@ public class BlockResource extends BaseCmd {
             }
             long interval = Integer.parseInt(map.get("interval").toString());
             long latestHeight = context.getLatestHeight();
+            Map responseData = new HashMap<>(2);
             if (latestHeight % interval == 0) {
-                return success();
+                return success(responseData);
             }
             List<BlockHeader> blockHeaders = service.getBlockHeader(chainId, latestHeight - (latestHeight % interval) + 1, latestHeight);
             List<String> hexList = new ArrayList<>();
             for (BlockHeader blockHeader : blockHeaders) {
                 hexList.add(RPCUtil.encode(blockHeader.serialize()));
             }
-            Map responseData = new HashMap<>(2);
             responseData.put("value", hexList);
             return success(responseData);
         } catch (Exception e) {
@@ -477,10 +465,10 @@ public class BlockResource extends BaseCmd {
             }
             long height = Long.parseLong(map.get("height").toString());
             Block block = service.getBlock(chainId, height);
-            if (block == null) {
-                return success();
-            }
             Map<String, String> responseData = new HashMap<>(2);
+            if (block == null) {
+                return success(responseData);
+            }
             responseData.put("value", RPCUtil.encode(block.serialize()));
             return success(responseData);
         } catch (Exception e) {
@@ -510,10 +498,10 @@ public class BlockResource extends BaseCmd {
             }
             NulsHash hash = NulsHash.fromHex(map.get("hash").toString());
             BlockHeader blockHeader = service.getBlockHeader(chainId, hash);
-            if(blockHeader == null) {
-                return success();
-            }
             Map<String, String> responseData = new HashMap<>(2);
+            if(blockHeader == null) {
+                return success(responseData);
+            }
             responseData.put("value", RPCUtil.encode(blockHeader.serialize()));
             return success(responseData);
         } catch (Exception e) {
@@ -543,10 +531,10 @@ public class BlockResource extends BaseCmd {
             }
             NulsHash hash = NulsHash.fromHex(map.get("hash").toString());
             BlockHeaderPo blockHeader = service.getBlockHeaderPo(chainId, hash);
-            if(blockHeader == null) {
-                return success();
-            }
             Map<String, String> responseData = new HashMap<>(2);
+            if(blockHeader == null) {
+                return success(responseData);
+            }
             responseData.put("value", RPCUtil.encode(blockHeader.serialize()));
             return success(responseData);
         } catch (Exception e) {
@@ -576,10 +564,10 @@ public class BlockResource extends BaseCmd {
             }
             NulsHash hash = NulsHash.fromHex(map.get("hash").toString());
             Block block = service.getBlock(chainId, hash);
-            if(block == null) {
-                return success();
-            }
             Map<String, String> responseData = new HashMap<>(2);
+            if(block == null) {
+                return success(responseData);
+            }
             responseData.put("value", RPCUtil.encode(block.serialize()));
             return success(responseData);
         } catch (Exception e) {
