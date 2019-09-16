@@ -17,6 +17,21 @@
         "unlockTx": false,
         "verifySignature": false,
         "handler": "ContractDepositProcessorV2"
+      },
+      {
+        "type": "9",
+        "systemTx": false,
+        "unlockTx": true,
+        "verifySignature": true,
+        "verifyFee": false,
+        "handler": "StopAgentProcessorV2"
+      },
+      {
+        "type": "23",
+        "systemTx": true,
+        "unlockTx": true,
+        "verifySignature": false,
+        "handler": "ContractStopAgentProcessorV2"
       }
     ],
     "validMsgs": [],
