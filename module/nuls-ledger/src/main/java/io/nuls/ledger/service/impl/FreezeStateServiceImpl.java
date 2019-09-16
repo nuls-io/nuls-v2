@@ -56,7 +56,7 @@ public class FreezeStateServiceImpl implements FreezeStateService {
         List<FreezeLockTimeState> timeRemove = new ArrayList<>();
         timeList.sort((x, y) -> Long.compare(x.getLockTime(), y.getLockTime()));
         for (FreezeLockTimeState freezeLockTimeState : timeList) {
-            if ((freezeLockTimeState.getLockTime() <= nowTime) || (freezeLockTimeState.getLockTime() > LedgerConstant.GEN_BLOCK_TIME_VALUE && freezeLockTimeState.getLockTime() <= nowTimeMl)) {
+            if ((freezeLockTimeState.getLockTime() <= nowTime) || (freezeLockTimeState.getLockTime() > LedgerConstant.LOCKED_ML_TIME_VALUE && freezeLockTimeState.getLockTime() <= nowTimeMl)) {
                 //永久锁定的,继续处理
                 if (freezeLockTimeState.getLockTime() == LedgerConstant.PERMANENT_LOCK) {
                     continue;
