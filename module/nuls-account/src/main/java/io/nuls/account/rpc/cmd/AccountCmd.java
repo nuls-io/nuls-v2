@@ -265,15 +265,13 @@ public class AccountCmd extends BaseCmd {
             List<Account> accountList;
             chain = chainManager.getChain((Integer) chainIdObj);
             if (chain != null) {
-                //query all accounts in a chain
                 accountList = accountService.getAccountListByChain(chain.getChainId());
             } else {
-                //query all accounts
                 accountList = accountService.getAccountList();
             }
-
             if (null == accountList) {
-                return success();
+                map.put(RpcConstant.LIST, simpleAccountList);
+                return success(map);
             }
             accountList.forEach(account -> simpleAccountList.add(new SimpleAccountDTO((account))));
         } catch (NulsRuntimeException e) {
@@ -340,7 +338,6 @@ public class AccountCmd extends BaseCmd {
             responseType = @TypeDescriptor(value = List.class, collectionElement = String.class)
     )
     public Response getAddressList(Map params) {
-        Page<String> resultPage;
         Chain chain = null;
         try {
             // check parameters
@@ -364,17 +361,19 @@ public class AccountCmd extends BaseCmd {
             if (pageNumber < 1 || pageSize < 1) {
                 throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
             }
-
+            //根据分页参数返回账户地址列表 Returns the account address list according to paging parameters
+            Page<String> page = new Page<>(pageNumber, pageSize);
+            List<String> addressList = new ArrayList<>();
             //query all accounts in a chain
             List<Account> accountList = accountService.getAccountListByChain(chain.getChainId());
             if (null == accountList) {
-                return success(null);
+                page.setList(addressList);
+                return success(page);
             }
-            //根据分页参数返回账户地址列表 Returns the account address list according to paging parameters
-            Page<String> page = new Page<>(pageNumber, pageSize);
             page.setTotal(accountList.size());
             int start = (pageNumber - 1) * pageSize;
             if (start >= accountList.size()) {
+                page.setList(addressList);
                 return success(page);
             }
             int end = pageNumber * pageSize;
@@ -382,11 +381,10 @@ public class AccountCmd extends BaseCmd {
                 end = accountList.size();
             }
             accountList = accountList.subList(start, end);
-            resultPage = new Page<>(page);
-            List<String> addressList = new ArrayList<>();
             //只返回账户地址 Only return to account address
             accountList.forEach(account -> addressList.add(account.getAddress().getBase58()));
-            resultPage.setList(addressList);
+            page.setList(addressList);
+            return success(page);
         } catch (NulsRuntimeException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -394,7 +392,7 @@ public class AccountCmd extends BaseCmd {
             errorLogProcess(chain, e);
             return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
-        return success(resultPage);
+
     }
 
     @CmdAnnotation(cmd = "ac_removeAccount", version = 1.0, description = "移除指定账户/Remove specified account")
@@ -794,8 +792,6 @@ public class AccountCmd extends BaseCmd {
 
             AccountKeyStore accountKeyStore = keyStoreService.getKeyStore(chain.getChainId(), address, password);
             AccountKeyStoreDTO storeDTO = new AccountKeyStoreDTO(accountKeyStore);
-            map.clear();
-
             map.put("keystore", JSONUtils.obj2json(storeDTO));
             return success(map);
         } catch (NulsRuntimeException e) {
