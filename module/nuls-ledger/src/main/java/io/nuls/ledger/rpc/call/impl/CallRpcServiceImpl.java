@@ -24,9 +24,6 @@
  */
 package io.nuls.ledger.rpc.call.impl;
 
-import io.nuls.base.RPCUtil;
-import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.Block;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.model.ModuleE;
@@ -46,32 +43,6 @@ import java.util.Map;
  */
 @Component
 public class CallRpcServiceImpl implements CallRpcService {
-
-    @Override
-    public Block getBlockByHeight(int chainId, long height) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("chainId", chainId);
-        map.put("height", height);
-        try {
-            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, CmdConstant.CMD_GET_BLOCK_BY_HEIGHT, map);
-            if (null != response && response.isSuccess()) {
-                Map responseData = (Map) response.getResponseData();
-                Map result = (Map) responseData.get(CmdConstant.CMD_GET_BLOCK_BY_HEIGHT);
-                if (null == result) {
-                    return null;
-                }
-                Block block = new Block();
-                block.parse(new NulsByteBuffer(RPCUtil.decode((String) result.get("value"))));
-                return block;
-            } else {
-                LoggerUtil.logger(chainId).error("getBlockByHeight fail.response={}", JSONUtils.obj2json(response));
-            }
-        } catch (Exception e) {
-            LoggerUtil.logger(chainId).error("getBlockByHeight error,chainId={},height={}.exception={}", chainId, height, e.getMessage());
-            LoggerUtil.logger(chainId).error(e);
-        }
-        return null;
-    }
     @Override
     public long getBlockLatestHeight(int chainId) {
         Map<String, Object> map = new HashMap<>();
@@ -80,9 +51,9 @@ public class CallRpcServiceImpl implements CallRpcService {
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, CmdConstant.CMD_LATEST_HEIGHT, map);
             if (null != response && response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
-                if(null != responseData) {
+                if (null != responseData) {
                     Map datas = (Map) responseData.get(CmdConstant.CMD_LATEST_HEIGHT);
-                    if(null != datas){
+                    if (null != datas) {
                         return Long.parseLong(datas.get("value").toString());
                     }
                 }
