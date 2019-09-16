@@ -36,12 +36,12 @@ public class WalletRpcHandler {
         params.put(Constants.CHAIN_ID, chainID);
         params.put("height", height);
         try {
-            String blockHex = (String) RpcCall.request(ModuleE.BL.abbr, CommandConstant.GET_BLOCK_BY_HEIGHT, params);
-            if (null == blockHex) {
+            Map map = (Map) RpcCall.request(ModuleE.BL.abbr, CommandConstant.GET_BLOCK_BY_HEIGHT, params);
+            if (null == map) {
                 return Result.getSuccess(null);
             }
 
-            BlockInfo blockInfo = AnalysisHandler.toBlockInfo(blockHex, chainID);
+            BlockInfo blockInfo = AnalysisHandler.toBlockInfo((String) map.get("value"), chainID);
 
             return Result.getSuccess(null).setData(blockInfo);
         } catch (Exception e) {
@@ -56,11 +56,11 @@ public class WalletRpcHandler {
         params.put(Constants.CHAIN_ID, chainID);
         params.put("hash", hash);
         try {
-            String blockHex = (String) RpcCall.request(ModuleE.BL.abbr, CommandConstant.GET_BLOCK_BY_HASH, params);
-            if (null == blockHex) {
+            Map map = (Map) RpcCall.request(ModuleE.BL.abbr, CommandConstant.GET_BLOCK_BY_HASH, params);
+            if (null == map) {
                 return Result.getSuccess(null);
             }
-            BlockInfo blockInfo = AnalysisHandler.toBlockInfo(blockHex, chainID);
+            BlockInfo blockInfo = AnalysisHandler.toBlockInfo((String) map.get("value"), chainID);
             return Result.getSuccess(null).setData(blockInfo);
         } catch (Exception e) {
             Log.error(e);

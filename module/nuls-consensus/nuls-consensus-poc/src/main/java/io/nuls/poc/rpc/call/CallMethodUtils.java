@@ -487,18 +487,20 @@ public class CallMethodUtils {
         Map params = new HashMap(ConsensusConstant.INIT_CAPACITY);
         params.put(Constants.CHAIN_ID, chain.getConfig().getChainId());
         params.put("round", ConsensusConstant.INIT_BLOCK_HEADER_COUNT);
-        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "getLatestRoundBlockHeaders", params);
-        Map<String, Object> resultMap;
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "getLatestRoundBlockHeaders", params);
+        Map<String, Object> responseData;
         List<String> blockHeaderHexs = new ArrayList<>();
-        if (cmdResp.isSuccess()) {
-            resultMap = (Map<String, Object>) cmdResp.getResponseData();
-            blockHeaderHexs = (List<String>) resultMap.get("getLatestRoundBlockHeaders");
+        if (response.isSuccess()) {
+            responseData = (Map<String, Object>) response.getResponseData();
+            Map result = (Map) responseData.get("getLatestRoundBlockHeaders");
+            blockHeaderHexs = (List<String>) result.get("value");
         }
-        while (!cmdResp.isSuccess() && blockHeaderHexs.size() == 0) {
-            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "getLatestRoundBlockHeaders", params);
-            if (cmdResp.isSuccess()) {
-                resultMap = (Map<String, Object>) cmdResp.getResponseData();
-                blockHeaderHexs = (List<String>) resultMap.get("getLatestRoundBlockHeaders");
+        while (!response.isSuccess() && blockHeaderHexs.size() == 0) {
+            response = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "getLatestRoundBlockHeaders", params);
+            if (response.isSuccess()) {
+                responseData = (Map<String, Object>) response.getResponseData();
+                Map result = (Map) responseData.get("getLatestRoundBlockHeaders");
+                blockHeaderHexs = (List<String>) result.get("value");
                 break;
             }
             Log.debug("---------------------------区块加载失败！");
@@ -529,19 +531,21 @@ public class CallMethodUtils {
         params.put(Constants.CHAIN_ID, chain.getConfig().getChainId());
         params.put("round", roundCount);
         params.put("height", startHeight);
-        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "getRoundBlockHeaders", params);
-        Map<String, Object> resultMap;
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "getRoundBlockHeaders", params);
+        Map<String, Object> responseData;
         List<String> blockHeaderHexs = new ArrayList<>();
-        if (cmdResp.isSuccess()) {
-            resultMap = (Map<String, Object>) cmdResp.getResponseData();
-            blockHeaderHexs = (List<String>) resultMap.get("getRoundBlockHeaders");
+        if (response.isSuccess()) {
+            responseData = (Map<String, Object>) response.getResponseData();
+            Map result = (Map) responseData.get("getRoundBlockHeaders");
+            blockHeaderHexs = (List<String>) result.get("value");
         }
         int tryCount = 0;
-        while (!cmdResp.isSuccess() && blockHeaderHexs.size() == 0 && tryCount < ConsensusConstant.RPC_CALL_TRY_COUNT) {
-            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "getRoundBlockHeaders", params);
-            if (cmdResp.isSuccess()) {
-                resultMap = (Map<String, Object>) cmdResp.getResponseData();
-                blockHeaderHexs = (List<String>) resultMap.get("getRoundBlockHeaders");
+        while (!response.isSuccess() && blockHeaderHexs.size() == 0 && tryCount < ConsensusConstant.RPC_CALL_TRY_COUNT) {
+            response = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "getRoundBlockHeaders", params);
+            if (response.isSuccess()) {
+                responseData = (Map<String, Object>) response.getResponseData();
+                Map result = (Map) responseData.get("getRoundBlockHeaders");
+                blockHeaderHexs = (List<String>) result.get("value");
                 break;
             }
             tryCount++;
@@ -554,7 +558,7 @@ public class CallMethodUtils {
             blockHeader.parse(RPCUtil.decode(blockHeaderHex), 0);
             blockHeaders.add(blockHeader);
         }
-        Collections.sort(blockHeaders, new BlockHeaderComparator());
+        blockHeaders.sort(new BlockHeaderComparator());
         chain.getBlockHeaderList().addAll(0, blockHeaders);
         Log.debug("---------------------------回滚区块轮次变化从新加载区块成功！");
     }

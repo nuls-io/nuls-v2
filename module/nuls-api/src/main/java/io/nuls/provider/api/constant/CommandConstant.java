@@ -32,7 +32,7 @@ public interface CommandConstant {
     //根据区块高度获取区块
     String GET_BLOCK_BY_HEIGHT = "getBlockByHeight";
     //根据区块hash获取区块
-    String GET_BLOCK_BY_HASH = "downloadBlockByHash";
+    String GET_BLOCK_BY_HASH = "getBlockByHash";
 
     String INFO = "info";
     //获取账户余额

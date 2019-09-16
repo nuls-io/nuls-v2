@@ -70,9 +70,9 @@ public class BlockCall {
             if (!cmdResp.isSuccess()) {
                 chain.getLogger().error("get block status error!");
             }
-            String blockHeaderHex = (String) ((HashMap) cmdResp.getResponseData()).get("getStatus");
+            Map result = (Map) ((HashMap) cmdResp.getResponseData()).get("latestBlockHeader");
             BlockHeader blockHeader = new BlockHeader();
-            blockHeader.parse(RPCUtil.decode(blockHeaderHex),0);
+            blockHeader.parse(RPCUtil.decode((String) result.get("value")),0);
             return blockHeader;
         } catch (Exception e) {
             chain.getLogger().error(e);
