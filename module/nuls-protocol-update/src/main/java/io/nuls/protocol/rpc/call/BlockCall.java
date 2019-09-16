@@ -62,7 +62,8 @@ public class BlockCall {
             params.put(Constants.CHAIN_ID, chainId);
             params.put("interval", interval);
 
-            List<String> blockHeaderList = (List) RpcCall.request(ModuleE.BL.abbr, "getBlockHeadersForProtocol", params);
+            Map resultMap = (Map) RpcCall.request(ModuleE.BL.abbr, "getBlockHeadersForProtocol", params);
+            List<String> blockHeaderList = (List<String>) resultMap.get("value");
             if (blockHeaderList == null) {
                 return List.of();
             }

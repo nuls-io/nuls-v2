@@ -41,6 +41,7 @@ import java.util.List;
 
 /**
  * Created by wangkun23 on 2018/12/4.
+ *
  * @author lanjinsheng
  */
 @Component
@@ -50,19 +51,17 @@ public class FreezeStateServiceImpl implements FreezeStateService {
 
     private BigInteger unFreezeLockTimeState(List<FreezeLockTimeState> timeList, AccountState accountState) {
         long nowTime = NulsDateUtils.getCurrentTimeSeconds();
+        long nowTimeMl = NulsDateUtils.getCurrentTimeMillis();
         //可移除的时间锁列表
         List<FreezeLockTimeState> timeRemove = new ArrayList<>();
         timeList.sort((x, y) -> Long.compare(x.getLockTime(), y.getLockTime()));
         for (FreezeLockTimeState freezeLockTimeState : timeList) {
-            if (freezeLockTimeState.getLockTime() <= nowTime) {
+            if ((freezeLockTimeState.getLockTime() <= nowTime) || (freezeLockTimeState.getLockTime() > LedgerConstant.GEN_BLOCK_TIME_VALUE && freezeLockTimeState.getLockTime() <= nowTimeMl)) {
                 //永久锁定的,继续处理
                 if (freezeLockTimeState.getLockTime() == LedgerConstant.PERMANENT_LOCK) {
                     continue;
                 }
                 timeRemove.add(freezeLockTimeState);
-            } else {
-                //因为正序排列，所以可以跳出
-                break;
             }
         }
         BigInteger addToAmount = BigInteger.ZERO;
@@ -104,14 +103,14 @@ public class FreezeStateServiceImpl implements FreezeStateService {
      * @return
      */
     @Override
-    public boolean recalculateFreeze(int addressChainId,AccountState accountState) {
+    public boolean recalculateFreeze(int addressChainId, AccountState accountState) {
         List<FreezeLockTimeState> timeList = accountState.getFreezeLockTimeStates();
         List<FreezeHeightState> heightList = accountState.getFreezeHeightStates();
         if (timeList.size() == 0 && heightList.size() == 0) {
             return true;
         }
         BigInteger addTimeAmount = unFreezeLockTimeState(timeList, accountState);
-        BigInteger addHeightAmount = unFreezeLockHeightState(addressChainId,heightList, accountState);
+        BigInteger addHeightAmount = unFreezeLockHeightState(addressChainId, heightList, accountState);
         accountState.addTotalToAmount(addTimeAmount);
         accountState.addTotalToAmount(addHeightAmount);
         return true;

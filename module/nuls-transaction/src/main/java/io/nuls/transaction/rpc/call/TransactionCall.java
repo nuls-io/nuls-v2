@@ -132,9 +132,9 @@ public class TransactionCall {
 
         List<String> list = (List<String>) responseMap.get("list");
         if (null == list) {
-            chain.getLogger().error("call module-{} {} response value is null, error:{}",
+            chain.getLogger().error("call txModuleValidator-{} {} response value is null, error:{}",
                     moduleCode, BaseConstant.TX_VALIDATOR, TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
-            list = new ArrayList<>(txList.size());
+            throw new NulsException(TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND);
         }
 
         String errorCode = (String) responseMap.get("errorCode");
