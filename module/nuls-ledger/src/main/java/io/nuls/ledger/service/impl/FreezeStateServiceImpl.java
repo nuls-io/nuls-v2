@@ -25,6 +25,7 @@
  */
 package io.nuls.ledger.service.impl;
 
+import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.rpc.util.NulsDateUtils;
@@ -50,6 +51,29 @@ public class FreezeStateServiceImpl implements FreezeStateService {
     Repository repository;
 
     private BigInteger unFreezeLockTimeState(List<FreezeLockTimeState> timeList, AccountState accountState) {
+        long nowTime = NulsDateUtils.getCurrentTimeSeconds();
+        long nowTimeMl = NulsDateUtils.getCurrentTimeMillis();
+        //可移除的时间锁列表
+        List<FreezeLockTimeState> timeRemove = new ArrayList<>();
+        timeList.sort((x, y) -> Long.compare(x.getLockTime(), y.getLockTime()));
+        for (FreezeLockTimeState freezeLockTimeState : timeList) {
+            if (freezeLockTimeState.getLockTime() <= nowTime) {
+                //永久锁定的,继续处理
+                if (freezeLockTimeState.getLockTime() == LedgerConstant.PERMANENT_LOCK) {
+                    continue;
+                }
+                timeRemove.add(freezeLockTimeState);
+            }
+        }
+        BigInteger addToAmount = BigInteger.ZERO;
+        for (FreezeLockTimeState freezeLockTimeState : timeRemove) {
+            timeList.remove(freezeLockTimeState);
+            addToAmount = addToAmount.add(freezeLockTimeState.getAmount());
+        }
+        return addToAmount;
+    }
+
+    private BigInteger unFreezeLockTimeStateV2(List<FreezeLockTimeState> timeList, AccountState accountState) {
         long nowTime = NulsDateUtils.getCurrentTimeSeconds();
         long nowTimeMl = NulsDateUtils.getCurrentTimeMillis();
         //可移除的时间锁列表
@@ -109,7 +133,13 @@ public class FreezeStateServiceImpl implements FreezeStateService {
         if (timeList.size() == 0 && heightList.size() == 0) {
             return true;
         }
-        BigInteger addTimeAmount = unFreezeLockTimeState(timeList, accountState);
+        BigInteger addTimeAmount = BigInteger.ZERO;
+        if (ProtocolGroupManager.getCurrentProtocol(addressChainId).getVersion()>1) {
+            addTimeAmount = unFreezeLockTimeStateV2(timeList, accountState);
+        } else {
+            addTimeAmount = unFreezeLockTimeState(timeList, accountState);
+        }
+
         BigInteger addHeightAmount = unFreezeLockHeightState(addressChainId, heightList, accountState);
         accountState.addTotalToAmount(addTimeAmount);
         accountState.addTotalToAmount(addHeightAmount);
