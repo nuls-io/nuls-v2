@@ -255,13 +255,16 @@ public class TxCirculateCmd extends BaseChainCmd {
     }
 
     @CmdAnnotation(cmd = RpcConstants.CMD_UPDATE_CHAIN_ASSET, version = 1.0,
-            description = "查询资产信息")
+            description = "查询更新流通资产信息")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class),  parameterValidRange = "[1-65535]", parameterDes = "资产链ID,取值区间[1-65535]"),
-            @Parameter(parameterName = "assets", requestType = @TypeDescriptor(value = List.class,collectionElement = int.class), parameterDes = "资产id列表")
+            @Parameter(parameterName = "assets", requestType = @TypeDescriptor(value = List.class,collectionElement = Map.class, mapKeys = {
+                    @Key(name = "assetId", valueType = Integer.class, description = "资产id"),
+                    @Key(name = "availableAmount", valueType = BigInteger.class, description = "可用金额"),
+                    @Key(name = "freeze", valueType = BigInteger.class, description = "冻结金额"),
+            }), parameterDes = "资产id列表")
     })
     @ResponseData(description = "无特定返回值，没有错误即验证成功")
-
     public Response updateChainAsset(Map params) {
         List<Map<String, Object>> assets = new ArrayList<>();
         int chainId = 0;
