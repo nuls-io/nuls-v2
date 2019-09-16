@@ -174,4 +174,21 @@ public class BlockTools implements CallRpc {
             return Result.fail(e.getCode(), e.getMessage());
         }
     }
+
+    public Result<String> latestHeight(int chainId) {
+        Map<String, Object> param = new HashMap<>(2);
+        param.put("chainId", chainId);
+        try {
+            Long block = callRpc(ModuleE.BL.name, "latestHeight", param, (Function<Map, Long>) res -> {
+                Object value = res.get("value");
+                if(value == null) {
+                    return -1L;
+                }
+                return Long.parseLong(value.toString());
+            });
+            return new Result(block);
+        } catch (NulsRuntimeException e) {
+            return Result.fail(e.getCode(), e.getMessage());
+        }
+    }
 }

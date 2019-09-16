@@ -48,10 +48,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ContractTest {
-
-    private VMContext vmContext;
-    private ProgramExecutor programExecutor;
+public class ContractTest extends MockBase{
 
     private static final String ADDRESS = "tNULSeBaN7vAqBANTtVxsiFsam4NcRUbqrCpzK";
     private static final String SENDER = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
@@ -60,26 +57,6 @@ public class ContractTest {
     static String[] senderSeeds = {
             "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG"};
 
-    @BeforeClass
-    public static void initClass() {
-        Log.info("init log.");
-    }
-
-    @Before
-    public void setUp() {
-        RocksDBService.init("./data");
-        Chain chain = new Chain();
-        ConfigBean configBean = new ConfigBean();
-        configBean.setChainId(2);
-        configBean.setAssetId(1);
-        configBean.setMaxViewGas(100000000L);
-        chain.setConfig(configBean);
-        //ContractTokenBalanceManager tokenBalanceManager = ContractTokenBalanceManager.newInstance(chain.getChainId());
-        //chain.setContractTokenBalanceManager(tokenBalanceManager);
-        programExecutor = new ProgramExecutorImpl(vmContext, chain);
-        chain.setProgramExecutor(programExecutor);
-    }
-
     @Test
     public void testValidAddress() {
         Assert.assertTrue(AddressTool.validAddress(2, "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG"));
@@ -87,7 +64,8 @@ public class ContractTest {
 
     @Test
     public void testCreate() throws IOException {
-        InputStream in = new FileInputStream(ContractTest.class.getResource("/token_contract").getFile());
+        //InputStream in = new FileInputStream(ContractTest.class.getResource("/token_contract").getFile());
+        InputStream in = new FileInputStream(ContractTest.class.getResource("/nrc20-locked-token.jar").getFile());
         //InputStream in = new FileInputStream(ContractTest.class.getResource("/").getFile() + "../simple_chinese");
         byte[] contractCode = IOUtils.toByteArray(in);
 
@@ -98,7 +76,7 @@ public class ContractTest {
         programCreate.setGasLimit(1000000);
         programCreate.setNumber(1);
         programCreate.setContractCode(contractCode);
-        //programCreate.args();
+        programCreate.args("name", "symbol", "100000", "2");
         System.out.println(programCreate);
 
         byte[] prevStateRoot = HexUtil.decode("56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421");
@@ -121,12 +99,12 @@ public class ContractTest {
         programCall.setPrice(1);
         programCall.setGasLimit(1000000);
         programCall.setNumber(1);
-        programCall.setMethodName("mint");
+        programCall.setMethodName("transfer");
         programCall.setMethodDesc("");
         programCall.args(BUYER, "1000");
         System.out.println(programCall);
 
-        byte[] prevStateRoot = HexUtil.decode("740bfe8f98ca7bbf67b852304956b999364dc2882e92910144ce6e18d389db07");
+        byte[] prevStateRoot = HexUtil.decode("2426d251dc49d76ad9465f32c68dfb88edbf49279f717ea0991029dce93692be");
 
         ProgramExecutor track = programExecutor.begin(prevStateRoot);
         ProgramResult programResult = track.call(programCall);

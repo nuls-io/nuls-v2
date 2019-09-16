@@ -20,9 +20,6 @@
 
 package io.nuls.provider.api.jsonrpc.controller;
 
-import io.nuls.provider.api.config.Config;
-import io.nuls.provider.api.config.Context;
-import io.nuls.provider.api.manager.BeanCopierManager;
 import io.nuls.base.api.provider.Result;
 import io.nuls.base.api.provider.ServiceManager;
 import io.nuls.base.api.provider.block.BlockService;
@@ -36,6 +33,9 @@ import io.nuls.core.core.annotation.Controller;
 import io.nuls.core.core.annotation.RpcMethod;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.model.*;
+import io.nuls.provider.api.config.Config;
+import io.nuls.provider.api.config.Context;
+import io.nuls.provider.api.manager.BeanCopierManager;
 import io.nuls.provider.model.dto.block.BlockDto;
 import io.nuls.provider.model.dto.block.BlockHeaderDto;
 import io.nuls.provider.model.jsonrpc.RpcResult;
@@ -369,6 +369,27 @@ public class BlockController {
             return RpcResult.paramError(String.format("chainId [%s] is invalid", chainId));
         }
         Result<String> result = blockTools.getBlockSerializationByHash(chainId, hash);
+        return ResultUtil.getJsonRpcResult(result);
+    }
+
+    @RpcMethod("getLatestHeight")
+    @ApiOperation(description = "获取最新主链高度", order = 209)
+    @Parameters({
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
+    })
+    @ResponseData(name = "返回值", description = "获取最新主链高度", responseType = @TypeDescriptor(value = Long.class))
+    public RpcResult getLatestHeight(List<Object> params) {
+        VerifyUtils.verifyParams(params, 1);
+        int chainId;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is invalid");
+        }
+        if (!Context.isChainExist(chainId)) {
+            return RpcResult.paramError(String.format("chainId [%s] is invalid", chainId));
+        }
+        Result<String> result = blockTools.latestHeight(chainId);
         return ResultUtil.getJsonRpcResult(result);
     }
 
