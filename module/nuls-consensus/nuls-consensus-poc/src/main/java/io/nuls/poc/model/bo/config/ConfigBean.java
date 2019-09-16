@@ -156,6 +156,11 @@ public class ConfigBean extends BaseNulsData {
      * */
     private long deflationTimeInterval;
 
+    /**
+     * 协议升级时间
+     * */
+    private long protocolUpgrade = 0;
+
     public long getPackingInterval() {
         return packingInterval;
     }
@@ -357,6 +362,14 @@ public class ConfigBean extends BaseNulsData {
         this.totalInflationAmount = totalInflationAmount;
     }
 
+    public long getProtocolUpgrade() {
+        return protocolUpgrade;
+    }
+
+    public void setProtocolUpgrade(long protocolUpgrade) {
+        this.protocolUpgrade = protocolUpgrade;
+    }
+
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint32(packingInterval);
@@ -384,6 +397,7 @@ public class ConfigBean extends BaseNulsData {
         stream.writeUint32(initTime);
         stream.writeDouble(deflationRatio);
         stream.writeUint32(deflationTimeInterval);
+        stream.writeUint32(protocolUpgrade);
     }
 
     @Override
@@ -413,6 +427,7 @@ public class ConfigBean extends BaseNulsData {
         this.initTime = byteBuffer.readUint32();
         this.deflationRatio = byteBuffer.readDouble();
         this.deflationTimeInterval = byteBuffer.readUint32();
+        this.protocolUpgrade = byteBuffer.readUint32();
     }
 
     @Override
@@ -426,7 +441,7 @@ public class ConfigBean extends BaseNulsData {
         size += SerializeUtils.sizeOfString(seedNodes);
         size += SerializeUtils.sizeOfUint16() * 5;
         size += SerializeUtils.sizeOfString(password);
-        size += SerializeUtils.sizeOfUint32();
+        size += SerializeUtils.sizeOfUint32() * 2;
         return size;
     }
 }

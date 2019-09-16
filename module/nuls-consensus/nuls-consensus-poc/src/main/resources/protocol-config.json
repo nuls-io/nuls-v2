@@ -1,5 +1,29 @@
 [
   {
+    "version": "2",
+    "extend": "1",
+    "validTxs": [
+      {
+        "type": "5",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": false,
+        "handler": "DepositProcessorV2"
+      },
+      {
+        "type": "21",
+        "systemTx": true,
+        "unlockTx": false,
+        "verifySignature": false,
+        "handler": "ContractDepositProcessorV2"
+      }
+    ],
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  },
+  {
     "version": "1",
     "extend": "",
     "validTxs": [

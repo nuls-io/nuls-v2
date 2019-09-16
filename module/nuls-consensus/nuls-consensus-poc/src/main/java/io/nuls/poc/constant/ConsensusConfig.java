@@ -1,12 +1,14 @@
 package io.nuls.poc.constant;
 
 import io.nuls.core.basic.ModuleConfig;
+import io.nuls.core.basic.VersionChangeInvoker;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.annotation.Configuration;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.poc.model.bo.config.ConfigBean;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * 共识模块配置类
@@ -15,7 +17,7 @@ import java.io.File;
  * */
 @Component
 @Configuration(domain = ModuleE.Constant.CONSENSUS)
-public class ConsensusConfig  extends ConfigBean implements ModuleConfig {
+public class ConsensusConfig extends ConfigBean implements ModuleConfig {
 
     private String dataPath;
 
@@ -100,5 +102,9 @@ public class ConsensusConfig  extends ConfigBean implements ModuleConfig {
     public void setMainChainCommissionRatio(int mainChainCommissionRatio) {
         this.mainChainCommissionRatio = mainChainCommissionRatio;
     }
-
+    @Override
+    public VersionChangeInvoker getVersionChangeInvoker() throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        Class<?> aClass = Class.forName("io.nuls.poc.tx.ProtocolUpgradeInvoker");
+        return (VersionChangeInvoker) aClass.getDeclaredConstructor().newInstance();
+    }
 }
