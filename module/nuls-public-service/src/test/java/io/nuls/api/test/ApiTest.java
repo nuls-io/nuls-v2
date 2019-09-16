@@ -6,6 +6,7 @@ import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.ContractInfo;
 import io.nuls.api.model.po.ContractResultInfo;
 import io.nuls.api.model.po.CurrentRound;
+import io.nuls.core.model.DoubleUtils;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
@@ -15,6 +16,7 @@ import org.bson.Document;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.math.BigInteger;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
@@ -112,19 +114,10 @@ public class ApiTest {
 
 
     @Test
-    public void testMap() {
-        Map<String, String> map = new ConcurrentHashMap<>();
-
-        LinkedList linkedList = new LinkedList();
-
-        map.put("a", "a");
-        map.put("c", "c");
-        map.put("b", "b");
-        map.put("c1", "c1");
-        map.put("1", "1");
-        map.put("b1", "b1");
-        map.put("2", "2");
-        map.put("a1", "a1");
-        linkedList.addAll(map.keySet());
+    public void test() {
+        BigInteger bigInteger = new BigInteger("41095890410959");
+        double d = DoubleUtils.mul(365, bigInteger.doubleValue(), 0);
+        d = DoubleUtils.div(d, 30, 0);
+        System.out.println(d);
     }
 }
