@@ -57,6 +57,11 @@ public class ProtocolGroupManager {
             protocolGroupMap.put(chainId, protocolGroup);
         }
         chainIds.add(chainId);
+        if (ProtocolGroupManager.getCurrentVersion(chainId) != null) {
+            Short currentVersion = ProtocolGroupManager.getCurrentVersion(chainId);
+            version = version < currentVersion ? currentVersion : version;
+        }
+        updateProtocol(chainId, version);
     }
 
     /**
