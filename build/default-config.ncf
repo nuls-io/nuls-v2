@@ -129,7 +129,7 @@ maxSignatureCount=100
 
 [protocol-update]
 #每隔多少个区块统计一次协议占比
-interval=10
+interval=5
 
 [nuls-api]
 #httpServer的启动ip

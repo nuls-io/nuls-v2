@@ -80,6 +80,8 @@ public class ProtocolServiceImpl implements ProtocolService {
             ProtocolVersionPo protocolVersionPo = list.get(0);
             ProtocolVersion protocolVersion = PoUtil.getProtocolVersion(protocolVersionPo);
             context.setCurrentProtocolVersion(protocolVersion);
+            VersionChangeNotifier.notify(chainId, protocolVersion.getVersion());
+            VersionChangeNotifier.reRegister(chainId, context, protocolVersion.getVersion());
             var stack = list.stream().map(PoUtil::getProtocolVersion).collect(Collectors.toCollection(ArrayDeque::new));
             context.setProtocolVersionHistory(stack);
             List<BlockHeader> blockHeaders = BlockCall.getBlockHeaders(chainId, context.getParameters().getInterval());
