@@ -37,15 +37,32 @@ public class ProtocolGroupManager {
 
     private static Map<Integer, ProtocolGroup> protocolGroupMap = new ConcurrentHashMap<>();
 
+    private static Map<Integer, Short> versionMap = new ConcurrentHashMap<>();
+
     public static void init(int chainId, Map<Short, Protocol> protocolMap, short version) {
         ProtocolGroup protocolGroup = new ProtocolGroup();
         chainIds.add(chainId);
         protocolGroupMap.put(chainId, protocolGroup);
+        versionMap.put(chainId, version);
         protocolGroup.setProtocolsMap(protocolMap);
         protocolGroup.setVersion(version);
         updateProtocol(chainId, version);
     }
 
+    /**
+     * 获取当前生效的协议版本号
+     * @param chainId
+     * @return
+     */
+    public static Short getCurrentVersion(int chainId) {
+        return versionMap.get(chainId);
+    }
+
+    /**
+     * 获取当前生效的协议版本(包含消息、交易详细信息)
+     * @param chainId
+     * @return
+     */
     public static Protocol getCurrentProtocol(int chainId) {
         return protocolGroupMap.get(chainId).getProtocol();
     }
@@ -59,11 +76,8 @@ public class ProtocolGroupManager {
         return protocolGroupMap.get(chainId).getProtocolsMap().values();
     }
 
-    public static short getVersion(int chainId) {
-        return protocolGroupMap.get(chainId).getVersion();
-    }
-
     public static void updateProtocol(int chainId, short protocolVersion) {
+        versionMap.put(chainId, protocolVersion);
         if (transactionDispatcher == null) {
             transactionDispatcher = SpringLiteContext.getBean(TransactionDispatcher.class);
         }
