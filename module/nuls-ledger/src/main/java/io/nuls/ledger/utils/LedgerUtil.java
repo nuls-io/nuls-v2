@@ -3,6 +3,7 @@ package io.nuls.ledger.utils;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.Transaction;
+import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.log.Log;
@@ -134,5 +135,16 @@ public class LedgerUtil {
      */
     public static String getAccountNoncesStrKey(String address, int assetChainId, int assetId, String nonce) {
         return address + "-" + assetChainId + "-" + assetId + "-" + nonce;
+    }
+
+    public static int getVersion(int chainId) {
+        int version = 1;
+        try {
+            version = ProtocolGroupManager.getCurrentProtocol(chainId).getVersion();
+        } catch (Exception e) {
+            LoggerUtil.logger(chainId).error("chain={} getCurrentProtocol error", chainId);
+            LoggerUtil.logger(chainId).error(e);
+        }
+        return version;
     }
 }

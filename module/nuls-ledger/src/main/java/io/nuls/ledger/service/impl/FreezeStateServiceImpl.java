@@ -35,6 +35,7 @@ import io.nuls.ledger.model.po.sub.FreezeHeightState;
 import io.nuls.ledger.model.po.sub.FreezeLockTimeState;
 import io.nuls.ledger.service.FreezeStateService;
 import io.nuls.ledger.storage.Repository;
+import io.nuls.ledger.utils.LedgerUtil;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -134,7 +135,7 @@ public class FreezeStateServiceImpl implements FreezeStateService {
             return true;
         }
         BigInteger addTimeAmount = BigInteger.ZERO;
-        if (ProtocolGroupManager.getCurrentProtocol(addressChainId).getVersion()>1) {
+        if (LedgerUtil.getVersion(addressChainId) >1) {
             addTimeAmount = unFreezeLockTimeStateV2(timeList, accountState);
         } else {
             addTimeAmount = unFreezeLockTimeState(timeList, accountState);
