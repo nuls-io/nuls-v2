@@ -20,6 +20,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Component
 public class ProtocolGroupManager {
 
+    private static boolean loadProtocol;
+
     @Autowired
     public static ModuleConfig moduleConfig;
 
@@ -28,6 +30,14 @@ public class ProtocolGroupManager {
 
     @Autowired
     private static MessageDispatcher messageDispatcher;
+
+    public static boolean isLoadProtocol() {
+        return loadProtocol;
+    }
+
+    public static void setLoadProtocol(boolean loadProtocol) {
+        ProtocolGroupManager.loadProtocol = loadProtocol;
+    }
 
     public static VersionChangeInvoker getVersionChangeInvoker() throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         return moduleConfig.getVersionChangeInvoker();
@@ -40,12 +50,14 @@ public class ProtocolGroupManager {
     private static Map<Integer, Short> versionMap = new ConcurrentHashMap<>();
 
     public static void init(int chainId, Map<Short, Protocol> protocolMap, short version) {
-        ProtocolGroup protocolGroup = new ProtocolGroup();
+        if (ProtocolGroupManager.isLoadProtocol()) {
+            ProtocolGroup protocolGroup = new ProtocolGroup();
+            protocolGroup.setProtocolsMap(protocolMap);
+            protocolGroup.setVersion(version);
+            protocolGroupMap.put(chainId, protocolGroup);
+        }
         chainIds.add(chainId);
-        protocolGroupMap.put(chainId, protocolGroup);
         versionMap.put(chainId, version);
-        protocolGroup.setProtocolsMap(protocolMap);
-        protocolGroup.setVersion(version);
         updateProtocol(chainId, version);
     }
 
@@ -78,30 +90,32 @@ public class ProtocolGroupManager {
 
     public static void updateProtocol(int chainId, short protocolVersion) {
         versionMap.put(chainId, protocolVersion);
-        if (transactionDispatcher == null) {
-            transactionDispatcher = SpringLiteContext.getBean(TransactionDispatcher.class);
-        }
-        if (messageDispatcher == null) {
-            messageDispatcher = SpringLiteContext.getBean(MessageDispatcher.class);
-        }
-        ProtocolGroup protocolGroup = protocolGroupMap.get(chainId);
-        Protocol protocol = protocolGroup.getProtocolsMap().get(protocolVersion);
-        if (protocol != null) {
-            protocolGroup.setVersion(protocolVersion);
-            List<TransactionProcessor> transactionProcessors = new ArrayList<>();
-            protocol.getAllowTx().forEach(e -> {
-                if (StringUtils.isNotBlank(e.getHandler())) {
-                    transactionProcessors.add(SpringLiteContext.getBean(TransactionProcessor.class, e.getHandler()));
-                }
-            });
-            transactionDispatcher.setProcessors(transactionProcessors);
-            List<MessageProcessor> messageProcessors = new ArrayList<>();
-            protocol.getAllowMsg().forEach(e -> {
-                for (String s : e.getHandlers().split(",")) {
-                    messageProcessors.add(SpringLiteContext.getBean(MessageProcessor.class, s));
-                }
-            });
-            messageDispatcher.setProcessors(messageProcessors);
+        if (ProtocolGroupManager.isLoadProtocol()) {
+            if (transactionDispatcher == null) {
+                transactionDispatcher = SpringLiteContext.getBean(TransactionDispatcher.class);
+            }
+            if (messageDispatcher == null) {
+                messageDispatcher = SpringLiteContext.getBean(MessageDispatcher.class);
+            }
+            ProtocolGroup protocolGroup = protocolGroupMap.get(chainId);
+            Protocol protocol = protocolGroup.getProtocolsMap().get(protocolVersion);
+            if (protocol != null) {
+                protocolGroup.setVersion(protocolVersion);
+                List<TransactionProcessor> transactionProcessors = new ArrayList<>();
+                protocol.getAllowTx().forEach(e -> {
+                    if (StringUtils.isNotBlank(e.getHandler())) {
+                        transactionProcessors.add(SpringLiteContext.getBean(TransactionProcessor.class, e.getHandler()));
+                    }
+                });
+                transactionDispatcher.setProcessors(transactionProcessors);
+                List<MessageProcessor> messageProcessors = new ArrayList<>();
+                protocol.getAllowMsg().forEach(e -> {
+                    for (String s : e.getHandlers().split(",")) {
+                        messageProcessors.add(SpringLiteContext.getBean(MessageProcessor.class, s));
+                    }
+                });
+                messageDispatcher.setProcessors(messageProcessors);
+            }
         }
     }
 }
