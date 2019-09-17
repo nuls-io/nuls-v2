@@ -57,8 +57,6 @@ public class ProtocolGroupManager {
             protocolGroupMap.put(chainId, protocolGroup);
         }
         chainIds.add(chainId);
-        versionMap.put(chainId, version);
-        updateProtocol(chainId, version);
     }
 
     /**
