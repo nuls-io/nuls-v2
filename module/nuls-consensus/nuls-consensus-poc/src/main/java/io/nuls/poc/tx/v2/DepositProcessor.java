@@ -3,13 +3,11 @@ package io.nuls.poc.tx.v2;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
-import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.base.protocol.TransactionProcessor;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.tx.txdata.Deposit;
@@ -25,6 +23,7 @@ import java.util.*;
 
 /**
  * 委托交易处理器
+ *
  * @author tag
  * @date 2019/6/1
  */
@@ -46,7 +45,7 @@ public class DepositProcessor implements TransactionProcessor {
     public Map<String, Object> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {
         Chain chain = chainManager.getChainMap().get(chainId);
         Map<String, Object> result = new HashMap<>(2);
-        if(chain == null){
+        if (chain == null) {
             LoggerUtil.commonLog.error("Chains do not exist.");
             result.put("txList", txs);
             result.put("errorCode", ConsensusErrorCode.CHAIN_NOT_EXIST.getCode());
@@ -54,12 +53,12 @@ public class DepositProcessor implements TransactionProcessor {
         }
         List<Transaction> invalidTxList = new ArrayList<>();
         String errorCode = null;
-        Set<NulsHash> invalidHashSet = txValidator.getInvalidAgentHash(txMap.get(TxType.RED_PUNISH),txMap.get(TxType.CONTRACT_STOP_AGENT),txMap.get(TxType.STOP_AGENT),chain);
+        Set<NulsHash> invalidHashSet = txValidator.getInvalidAgentHash(txMap.get(TxType.RED_PUNISH), txMap.get(TxType.CONTRACT_STOP_AGENT), txMap.get(TxType.STOP_AGENT), chain);
         //个节点总委托金额
         Map<NulsHash, BigInteger> agentDepositTotalMap = new HashMap<>(16);
-        for (Transaction depositTx:txs) {
+        for (Transaction depositTx : txs) {
             try {
-                if(!txValidator.validateTx(chain, depositTx)){
+                if (!txValidator.validateTx(chain, depositTx)) {
                     invalidTxList.add(depositTx);
                     chain.getLogger().info("Delegated transaction verification failed");
                     continue;
@@ -71,36 +70,30 @@ public class DepositProcessor implements TransactionProcessor {
                     chain.getLogger().info("Conflict between Intelligent Delegation Transaction and Red Card Transaction or Stop Node Transaction");
                     errorCode = ConsensusErrorCode.CONFLICT_ERROR.getCode();
                 }
-                long time = NulsDateUtils.getCurrentTimeSeconds();
-                if(blockHeader != null){
-                    time = blockHeader.getTime();
-                }
-                if(txs.size() > 1 && time >= chain.getConfig().getProtocolUpgrade() && ProtocolGroupManager.getCurrentProtocol(chainId).getVersion() >= 2){
-                    NulsHash agentHash = deposit.getAgentHash();
-                    BigInteger totalDeposit = BigInteger.ZERO;
-                    if(agentDepositTotalMap.containsKey(agentHash)){
-                        totalDeposit = agentDepositTotalMap.get(agentHash).add(deposit.getDeposit());
-                        if (totalDeposit.compareTo(chain.getConfig().getCommissionMax()) > 0) {
-                            chain.getLogger().info("Node delegation amount exceeds maximum delegation amount");
-                            throw new NulsException(ConsensusErrorCode.DEPOSIT_OVER_AMOUNT);
-                        }else{
-                            agentDepositTotalMap.put(agentHash, totalDeposit);
-                        }
-                    }else{
-                        List<DepositPo> poList = txValidator.getDepositListByAgent(chain, deposit.getAgentHash());
-                        for (DepositPo cd : poList) {
-                            totalDeposit = totalDeposit.add(cd.getDeposit());
-                        }
-                        totalDeposit = totalDeposit.add(deposit.getDeposit());
+                NulsHash agentHash = deposit.getAgentHash();
+                BigInteger totalDeposit = BigInteger.ZERO;
+                if (agentDepositTotalMap.containsKey(agentHash)) {
+                    totalDeposit = agentDepositTotalMap.get(agentHash).add(deposit.getDeposit());
+                    if (totalDeposit.compareTo(chain.getConfig().getCommissionMax()) > 0) {
+                        chain.getLogger().info("Node delegation amount exceeds maximum delegation amount");
+                        throw new NulsException(ConsensusErrorCode.DEPOSIT_OVER_AMOUNT);
+                    } else {
                         agentDepositTotalMap.put(agentHash, totalDeposit);
                     }
+                } else {
+                    List<DepositPo> poList = txValidator.getDepositListByAgent(chain, deposit.getAgentHash());
+                    for (DepositPo cd : poList) {
+                        totalDeposit = totalDeposit.add(cd.getDeposit());
+                    }
+                    totalDeposit = totalDeposit.add(deposit.getDeposit());
+                    agentDepositTotalMap.put(agentHash, totalDeposit);
                 }
-            }catch (NulsException e){
+            } catch (NulsException e) {
                 invalidTxList.add(depositTx);
                 chain.getLogger().error("Intelligent Contract Creation Node Transaction Verification Failed");
                 chain.getLogger().error(e);
                 errorCode = e.getErrorCode().getCode();
-            }catch (IOException io){
+            } catch (IOException io) {
                 invalidTxList.add(depositTx);
                 chain.getLogger().error("Intelligent Contract Creation Node Transaction Verification Failed");
                 chain.getLogger().error(io);
@@ -115,29 +108,29 @@ public class DepositProcessor implements TransactionProcessor {
     @Override
     public boolean commit(int chainId, List<Transaction> txs, BlockHeader blockHeader) {
         Chain chain = chainManager.getChainMap().get(chainId);
-        if(chain == null){
+        if (chain == null) {
             LoggerUtil.commonLog.error("Chains do not exist.");
             return false;
         }
         List<Transaction> commitSuccessList = new ArrayList<>();
         boolean commitResult = true;
-        for (Transaction tx:txs) {
+        for (Transaction tx : txs) {
             try {
-                if(depositManager.depositCommit(tx,blockHeader,chain)){
+                if (depositManager.depositCommit(tx, blockHeader, chain)) {
                     commitSuccessList.add(tx);
                 }
-            }catch (NulsException e){
+            } catch (NulsException e) {
                 chain.getLogger().error("Failure to deposit transaction submission");
                 chain.getLogger().error(e);
                 commitResult = false;
             }
         }
         //回滚已提交成功的交易
-        if(!commitResult){
-            for (Transaction rollbackTx:commitSuccessList) {
+        if (!commitResult) {
+            for (Transaction rollbackTx : commitSuccessList) {
                 try {
                     depositManager.depositRollBack(rollbackTx, chain);
-                }catch (NulsException e){
+                } catch (NulsException e) {
                     chain.getLogger().error("Failure to deposit transaction rollback");
                     chain.getLogger().error(e);
                 }
@@ -149,29 +142,29 @@ public class DepositProcessor implements TransactionProcessor {
     @Override
     public boolean rollback(int chainId, List<Transaction> txs, BlockHeader blockHeader) {
         Chain chain = chainManager.getChainMap().get(chainId);
-        if(chain == null){
+        if (chain == null) {
             LoggerUtil.commonLog.error("Chains do not exist.");
             return false;
         }
         List<Transaction> rollbackSuccessList = new ArrayList<>();
         boolean rollbackResult = true;
-        for (Transaction tx:txs) {
+        for (Transaction tx : txs) {
             try {
-                if(depositManager.depositRollBack(tx,chain)){
+                if (depositManager.depositRollBack(tx, chain)) {
                     rollbackSuccessList.add(tx);
                 }
-            }catch (NulsException e){
+            } catch (NulsException e) {
                 chain.getLogger().error("Failure to deposit transaction rollback");
                 chain.getLogger().error(e);
                 rollbackResult = false;
             }
         }
         //保存已回滚成功的交易
-        if(!rollbackResult){
-            for (Transaction commitTx:rollbackSuccessList) {
+        if (!rollbackResult) {
+            for (Transaction commitTx : rollbackSuccessList) {
                 try {
                     depositManager.depositCommit(commitTx, blockHeader, chain);
-                }catch (NulsException e){
+                } catch (NulsException e) {
                     chain.getLogger().error("Failure to deposit transaction submission");
                     chain.getLogger().error(e);
                 }
