@@ -238,7 +238,7 @@ public class AgentManager {
             if (depositPo.getDelHeight() != blockHeader.getHeight()) {
                 continue;
             }
-            if (depositPo.getAgentHash().equals(agentPo.getHash())) {
+            if (!depositPo.getAgentHash().equals(agentPo.getHash())) {
                 continue;
             }
             depositPo.setDelHeight(-1);
