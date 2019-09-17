@@ -4,6 +4,7 @@ import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
+import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.base.protocol.TransactionProcessor;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
@@ -98,7 +99,7 @@ public class StopAgentProcessor implements TransactionProcessor {
                 if(blockHeader != null){
                     time = blockHeader.getTime();
                 }
-                if(time > chain.getConfig().getProtocolUpgrade()){
+                if(time >= chain.getConfig().getProtocolUpgrade() && ProtocolGroupManager.getCurrentProtocol(chainId).getVersion() >= 2){
                     CoinData coinData = new CoinData();
                     coinData.parse(stopAgentTx.getCoinData(), 0);
                     long unlockedTime = stopAgentTx.getTime() + chain.getConfig().getStopAgentLockTime();

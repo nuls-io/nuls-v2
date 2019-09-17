@@ -3,6 +3,7 @@ package io.nuls.poc.tx.v2;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
+import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.base.protocol.TransactionProcessor;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
@@ -74,7 +75,7 @@ public class DepositProcessor implements TransactionProcessor {
                 if(blockHeader != null){
                     time = blockHeader.getTime();
                 }
-                if(txs.size() >1 && time > chain.getConfig().getProtocolUpgrade()){
+                if(txs.size() > 1 && time >= chain.getConfig().getProtocolUpgrade() && ProtocolGroupManager.getCurrentProtocol(chainId).getVersion() >= 2){
                     NulsHash agentHash = deposit.getAgentHash();
                     BigInteger totalDeposit = BigInteger.ZERO;
                     if(agentDepositTotalMap.containsKey(agentHash)){
