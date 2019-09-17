@@ -111,6 +111,9 @@ businessAddress=NULSd6HgdemcQDAaiEJWq9ESMhtUHXRsNJ4KM
 teamAddress=NULSd6HgbfkSuRGKSLJJzAPAihgDQtaUhuE4L
 communityAddress=NULSd6HgjDZmLMbZSmH9tqb6smdzZHCxsCRD3
 
+[ledger]
+moduleDynamicDependent=protocol-update
+
 [cross-chain]
 #跨链节点链接的最小值
 minNodeAmount=3
