@@ -145,6 +145,7 @@ public class LedgerUtil {
             LoggerUtil.logger(chainId).error("chain={} getCurrentProtocol error", chainId);
             LoggerUtil.logger(chainId).error(e);
         }
+        LoggerUtil.logger(chainId).debug("verion={}",version);
         return version;
     }
 }
