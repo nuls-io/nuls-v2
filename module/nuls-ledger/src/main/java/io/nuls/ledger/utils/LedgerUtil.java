@@ -138,13 +138,7 @@ public class LedgerUtil {
     }
 
     public static int getVersion(int chainId) {
-        int version = 1;
-        try {
-            version = ProtocolGroupManager.getCurrentProtocol(chainId).getVersion();
-        } catch (Exception e) {
-            LoggerUtil.logger(chainId).error("chain={} getCurrentProtocol error", chainId);
-            LoggerUtil.logger(chainId).error(e);
-        }
+        int  version = ProtocolGroupManager.getCurrentVersion(chainId);
         LoggerUtil.logger(chainId).debug("verion={}",version);
         return version;
     }
