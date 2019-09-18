@@ -102,7 +102,7 @@ public class StopAgentProcessor implements TransactionProcessor {
                     time = blockHeader.getTime();
                 }
                 long txTime = stopAgentTx.getTime();
-                if(txTime > time || txTime < time + 3600){
+                if(txTime > time + 3600 || txTime < time - 3600){
                     invalidTxList.add(stopAgentTx);
                     chain.getLogger().error("Trading time error,txTime:{},time:{}",txTime,time);
                     errorCode = ConsensusErrorCode.ERROR_UNLOCK_TIME.getCode();
