@@ -11,7 +11,6 @@ import io.nuls.core.log.Log;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.model.*;
-import io.nuls.core.rpc.util.DocTool;
 import io.nuls.v2.model.annotation.Api;
 import io.nuls.v2.model.annotation.ApiOperation;
 import io.nuls.v2.model.annotation.ApiType;
@@ -712,7 +711,7 @@ public class ApiDocTool {
             }
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(mdFile, true))) {
                 writer.newLine();
-                writer.write(new DocTool.Heading("接口列表",2).toString());
+                writer.write(new Heading("接口列表",2).toString());
                 writer.newLine();
                 AtomicInteger i = new AtomicInteger(0);
                 for(CmdDes cmd : cmdDesList) {
