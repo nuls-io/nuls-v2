@@ -125,7 +125,9 @@ public class StatisticalTask implements Runnable {
             Result<Map> result = WalletRpcHandler.getConsensusConfig(chainId);
             Map map = result.getData();
             String inflationAmount = map.get("inflationAmount").toString();
-            annualizedReward = DoubleUtils.mul(100, DoubleUtils.div(new BigInteger(inflationAmount), consensusLocked, 4), 2);
+            double d = DoubleUtils.mul(365, new BigInteger(inflationAmount).doubleValue());
+            d = DoubleUtils.div(d, 30, 0);
+            annualizedReward = DoubleUtils.mul(100, DoubleUtils.div(d, consensusLocked.doubleValue(), 4), 2);
         }
 
         Calendar calendar = Calendar.getInstance();
