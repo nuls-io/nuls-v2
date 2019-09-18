@@ -9,9 +9,14 @@ JAVA_OPTS=
 [Core]
 Managed=1
 
+[global]
+mainChainId=1
+chainId=1
+assetsId=1
+
 [nuls-api]
 moduleDynamicDependent=smart-contract,cross-chain
 #httpServer的启动ip
-server_ip=0.0.0.0
+serverIp=0.0.0.0
 #httpServer的启动port
-server_port=18004
+serverPort=18004
