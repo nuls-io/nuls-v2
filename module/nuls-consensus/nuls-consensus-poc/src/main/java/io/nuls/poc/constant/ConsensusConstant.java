@@ -86,7 +86,7 @@ public interface ConsensusConstant {
      * Load the block header of the last specified number of rounds during initialization
      * 初始化时加载最近指定轮数的惩罚信息
      */
-    int INIT_PUNISH_OF_ROUND_COUNT = 200;
+    int INIT_PUNISH_OF_ROUND_COUNT = 400;
 
     /**
      * 系统启动时缓存指定轮次的区块

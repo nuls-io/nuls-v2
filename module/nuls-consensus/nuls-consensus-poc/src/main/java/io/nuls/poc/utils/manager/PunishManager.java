@@ -100,9 +100,16 @@ public class PunishManager {
     public void clear(Chain chain) {
         BlockHeader blockHeader = chain.getNewestHeader();
         BlockExtendsData roundData = blockHeader.getExtendsData();
-        chain.getYellowPunishList().removeIf(po -> po.getRoundIndex() < roundData.getRoundIndex() - ConsensusConstant.INIT_PUNISH_OF_ROUND_COUNT);
+        Iterator <PunishLogPo> iterator = chain.getYellowPunishList().iterator();
+        long minRound = roundData.getRoundIndex() - ConsensusConstant.INIT_PUNISH_OF_ROUND_COUNT;
+        while (iterator.hasNext()){
+            PunishLogPo punishLogPo = iterator.next();
+            if(punishLogPo.getRoundIndex() >= minRound){
+                break;
+            }
+            iterator.remove();
+        }
     }
-
 
     /**
      * 添加分叉证据
