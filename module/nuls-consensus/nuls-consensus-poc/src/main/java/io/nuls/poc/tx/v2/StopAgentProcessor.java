@@ -10,6 +10,7 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
@@ -93,6 +94,18 @@ public class StopAgentProcessor implements TransactionProcessor {
                 if (!txValidator.validateTx(chain, stopAgentTx)) {
                     invalidTxList.add(stopAgentTx);
                     chain.getLogger().info("Intelligent Contract Exit Node Trading Verification Failed");
+                    continue;
+                }
+                //验证停止节点交易时间正确性
+                long time = NulsDateUtils.getCurrentTimeSeconds();
+                if(blockHeader != null){
+                    time = blockHeader.getTime();
+                }
+                long txTime = stopAgentTx.getTime();
+                if(txTime > time || txTime < time + 3600){
+                    invalidTxList.add(stopAgentTx);
+                    chain.getLogger().error("Trading time error,txTime:{},time:{}",txTime,time);
+                    errorCode = ConsensusErrorCode.ERROR_UNLOCK_TIME.getCode();
                     continue;
                 }
                 CoinData coinData = new CoinData();

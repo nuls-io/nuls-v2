@@ -10,6 +10,7 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
@@ -92,6 +93,19 @@ public class ContractStopAgentProcessor implements TransactionProcessor {
                     errorCode = ConsensusErrorCode.CONFLICT_ERROR.getCode();
                     continue;
                 }
+                //验证停止节点交易时间正确性
+                long time = NulsDateUtils.getCurrentTimeSeconds();
+                if(blockHeader != null){
+                    time = blockHeader.getTime();
+                }
+                long txTime = contractStopAgentTx.getTime();
+                if(txTime > time || txTime < time + 3600){
+                    invalidTxList.add(contractStopAgentTx);
+                    chain.getLogger().error("Trading time error,txTime:{},time:{}",txTime,time);
+                    errorCode = ConsensusErrorCode.ERROR_UNLOCK_TIME.getCode();
+                    continue;
+                }
+                //验证解锁时间正确性
                 CoinData coinData = new CoinData();
                 coinData.parse(contractStopAgentTx.getCoinData(), 0);
                 long unlockedTime = contractStopAgentTx.getTime() + chain.getConfig().getStopAgentLockTime();
