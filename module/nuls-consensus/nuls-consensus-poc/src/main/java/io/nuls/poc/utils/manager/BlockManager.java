@@ -24,6 +24,9 @@ public class BlockManager {
     @Autowired
     private RoundManager roundManager;
 
+    @Autowired
+    private PunishManager punishManager;
+
     /**
      * 收到最新区块头，更新链区块缓存数据
      * Receive the latest block header, update the chain block cache entity
@@ -52,6 +55,8 @@ public class BlockManager {
                         break;
                     }
                 }
+                //清理轮次缓存
+                punishManager.clear(chain);
             }
         }
         chain.getBlockHeaderList().add(blockHeader);

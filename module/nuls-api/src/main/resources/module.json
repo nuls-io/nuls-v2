@@ -1,7 +1,7 @@
 {
   "providerType": "RPC",
-  "mainChainId": 2,
-  "chainId": 2,
+  "mainChainId": 1,
+  "chainId": 1,
   "assetsId": 1,
   "language": "zh-CHS"
 }
