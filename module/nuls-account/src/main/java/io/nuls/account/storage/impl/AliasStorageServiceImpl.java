@@ -163,14 +163,15 @@ public class AliasStorageServiceImpl implements AliasStorageService, Initializin
      * <p>
      * if the alias isn't exist in storage,it wil return true
      *
-     * @param alias
+     * @param aliasPO
      * @return
      */
 
     @Override
-    public boolean removeAlias(int chainId,String alias) {
+    public boolean removeAlias(int chainId, AliasPO aliasPO) {
         try {
-            return RocksDBService.delete(AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS_KEY_ALIAS + chainId, StringUtils.bytes(alias));
+            RocksDBService.delete(AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS_KEY_ADDRESS + chainId, aliasPO.getAddress());
+            return RocksDBService.delete(AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS_KEY_ALIAS + chainId, StringUtils.bytes(aliasPO.getAlias()));
         } catch (Exception e) {
             LoggerUtil.LOG.error("",e);
             throw new NulsRuntimeException(AccountErrorCode.DB_DELETE_ERROR,e);

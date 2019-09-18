@@ -74,6 +74,7 @@ import java.util.concurrent.Future;
 
 import static io.nuls.transaction.TestCommonUtil.PASSWORD;
 import static io.nuls.transaction.TestCommonUtil.createContract;
+import static io.nuls.transaction.utils.LoggerUtil.LOG;
 import static org.junit.Assert.assertNotNull;
 
 /**
@@ -651,10 +652,11 @@ public class TxValid {
     @Test
     public void getTx() throws Exception {
 //        getTxCfmClient("31f65fb2cc5e468b203f692291ea94f8559dca30878f9e1648c11601bf0cf7e1");
-        String txStr = (String)(getTxCfmClient("6905e41243be43ba7550a25626e2dbe3b6f0ac6a472b7599464ad056ddf66c82").get("tx"));
+        String txStr = (String)(getTxCfmClient("0af0e6bb75df48ca1fa397d16bccfc9091e2ac8fa83713e72e30e6c8a7867be0").get("tx"));
         Transaction tx = TxUtil.getInstance(txStr, Transaction.class);//最后一条
-        TxUtil.txInformationDebugPrint(tx);
+        txInformationDebugPrint(tx);
     }
+
 
     private void getTx(String hash) throws Exception {
         Map<String, Object> params = new HashMap<>();
@@ -845,7 +847,7 @@ public class TxValid {
      */
     @Test
     public void getBlocByHeight() throws Exception {
-        getBlockHeaderPoByHeight(9878L);
+        getBlockHeaderPoByHeight(2L);
     }
     private void getBlockHeaderPoByHeight(long param) throws Exception {
         Map<String, Object> params = new HashMap<>();
@@ -853,9 +855,9 @@ public class TxValid {
         params.put("height", param);
         Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "getBlockHeaderPoByHeight", params);
         Map record = (Map) dpResp.getResponseData();
-        String rs = (String)record.get("getBlockHeaderPoByHeight");
+        Map rs = (Map)record.get("getBlockHeaderPoByHeight");
         BlockHeaderPo blockHeaderPo = new BlockHeaderPo();
-        blockHeaderPo.parse(new NulsByteBuffer(RPCUtil.decode(rs)));
+        blockHeaderPo.parse(new NulsByteBuffer(RPCUtil.decode((String)rs.get("value"))));
         Log.debug(JSONUtils.obj2PrettyJson(blockHeaderPo));
         for(NulsHash nulsHash : blockHeaderPo.getTxHashList()){
             Log.debug("txHash:{}", nulsHash.toHex());
@@ -1393,5 +1395,83 @@ public class TxValid {
         balance = LedgerCall.getBalance(chain, AddressTool.getAddress("tNULSeBaMrLc5oxqm7kd5mNZCc7366ojE4QR59"), assetChainId, assetId);
         System.out.println(balance);
 
+    }
+
+
+
+    public void txInformationDebugPrint(Transaction tx) {
+        if (tx.getType() == 1) {
+            return;
+        }
+        LOG.debug("");
+        LOG.debug("**************************************************");
+        LOG.debug("Transaction information");
+        LOG.debug("type: {}", tx.getType());
+        LOG.debug("txHash: {}", tx.getHash().toHex());
+        LOG.debug("time: {}", NulsDateUtils.timeStamp2DateStr(tx.getTime()));
+        LOG.debug("size: {}B,  -{}KB, -{}MB",
+                String.valueOf(tx.getSize()), String.valueOf(tx.getSize() / 1024), String.valueOf(tx.getSize() / 1024 / 1024));
+        byte[] remark = tx.getRemark();
+        try {
+            String remarkStr = remark == null ? "" : new String(tx.getRemark(), "UTF-8");
+            LOG.debug("remark: {}", remarkStr);
+        } catch (UnsupportedEncodingException e) {
+            LOG.error(e);
+        }
+
+        CoinData coinData = null;
+        try {
+            if (tx.getCoinData() != null) {
+                coinData = tx.getCoinDataInstance();
+            }
+        } catch (NulsException e) {
+            LOG.error(e);
+        }
+        if (coinData != null) {
+            LOG.debug("coinData:");
+            List<CoinFrom> coinFromList = coinData.getFrom();
+            if (coinFromList == null) {
+                LOG.debug("\tcoinFrom: null");
+            } else if (coinFromList.size() == 0) {
+                LOG.debug("\tcoinFrom: size 0");
+            } else {
+                LOG.debug("\tcoinFrom: ");
+                for (int i = 0; i < coinFromList.size(); i++) {
+                    CoinFrom coinFrom = coinFromList.get(i);
+                    LOG.debug("\tFROM_{}:", i);
+                    LOG.debug("\taddress: {}", AddressTool.getStringAddressByBytes(coinFrom.getAddress()));
+                    LOG.debug("\tamount: {}", coinFrom.getAmount());
+                    LOG.debug("\tassetChainId: [{}]", coinFrom.getAssetsChainId());
+                    LOG.debug("\tassetId: [{}]", coinFrom.getAssetsId());
+                    LOG.debug("\tnonce: {}", HexUtil.encode(coinFrom.getNonce()));
+                    LOG.debug("\tlocked(0普通交易，-1解锁金额交易（退出共识，退出委托)): [{}]", coinFrom.getLocked());
+                    LOG.debug("");
+                }
+            }
+
+            List<CoinTo> coinToList = coinData.getTo();
+            if (coinToList == null) {
+                LOG.debug("\tcoinTo: null");
+            } else if (coinToList.size() == 0) {
+                LOG.debug("\tcoinTo: size 0");
+            } else {
+                LOG.debug("\tcoinTo: ");
+                for (int i = 0; i < coinToList.size(); i++) {
+                    CoinTo coinTo = coinToList.get(i);
+                    LOG.debug("\tTO_{}:", i);
+                    LOG.debug("\taddress: {}", AddressTool.getStringAddressByBytes(coinTo.getAddress()));
+                    LOG.debug("\tamount: {}", coinTo.getAmount());
+                    LOG.debug("\tassetChainId: [{}]", coinTo.getAssetsChainId());
+                    LOG.debug("\tassetId: [{}]", coinTo.getAssetsId());
+                    LOG.debug("\tlocked(解锁高度或解锁时间，-1为永久锁定): [{}]", coinTo.getLockTime());
+                    LOG.debug("");
+                }
+            }
+
+        } else {
+            LOG.debug("coinData: null");
+        }
+        LOG.debug("**************************************************");
+        LOG.debug("");
     }
 }

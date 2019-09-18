@@ -66,6 +66,6 @@ public interface AliasStorageService {
     /**
      * remove Alias by chainId and alias
      */
-    boolean removeAlias(int chainId, String alias);
+    boolean removeAlias(int chainId, AliasPO aliasPO);
 
 }
