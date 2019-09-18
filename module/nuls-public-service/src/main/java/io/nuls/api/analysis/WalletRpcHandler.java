@@ -37,12 +37,11 @@ public class WalletRpcHandler {
         params.put("height", height);
         try {
             Map map = (Map) RpcCall.request(ModuleE.BL.abbr, CommandConstant.GET_BLOCK_BY_HEIGHT, params);
-            if (null == map) {
+            if (null == map || map.isEmpty()) {
                 return Result.getSuccess(null);
             }
 
             BlockInfo blockInfo = AnalysisHandler.toBlockInfo((String) map.get("value"), chainID);
-
             return Result.getSuccess(null).setData(blockInfo);
         } catch (Exception e) {
             Log.error(e);
@@ -57,7 +56,7 @@ public class WalletRpcHandler {
         params.put("hash", hash);
         try {
             Map map = (Map) RpcCall.request(ModuleE.BL.abbr, CommandConstant.GET_BLOCK_BY_HASH, params);
-            if (null == map) {
+            if (null == map || map.isEmpty()) {
                 return Result.getSuccess(null);
             }
             BlockInfo blockInfo = AnalysisHandler.toBlockInfo((String) map.get("value"), chainID);
@@ -170,6 +169,9 @@ public class WalletRpcHandler {
         params.put("txHash", hash);
         try {
             Map map = (Map) RpcCall.request(ModuleE.TX.abbr, CommandConstant.GET_TX, params);
+            if (map == null || map.isEmpty()) {
+                return null;
+            }
             String txHex = (String) map.get("tx");
             if (null == txHex) {
                 return null;
@@ -412,7 +414,7 @@ public class WalletRpcHandler {
     private static Result<ContractResultInfo> getContractResultInfo(Map<String, Object> params) throws NulsException {
         Map map = (Map) RpcCall.request(ModuleE.SC.abbr, CommandConstant.CONTRACT_RESULT, params);
         map = (Map) map.get("data");
-        if (map == null) {
+        if (map == null || map.isEmpty()) {
             return Result.getFailed(ApiErrorCode.DATA_NOT_FOUND);
         }
 
@@ -543,23 +545,23 @@ public class WalletRpcHandler {
 
     public static Result getByzantineCount(int chainId, String txHash) {
         try {
-            Map<String,Object> params = new HashMap<>();
+            Map<String, Object> params = new HashMap<>();
             params.put("chainId", chainId);
             params.put("txHash", txHash);
-            Map<String,Object> map = (Map<String, Object>) RpcCall.request(ModuleE.CC.abbr, CommandConstant.GET_BYZANTINE_COUNT, params);
+            Map<String, Object> map = (Map<String, Object>) RpcCall.request(ModuleE.CC.abbr, CommandConstant.GET_BYZANTINE_COUNT, params);
             return Result.getSuccess(null).setData(map);
-        }catch (NulsException e) {
+        } catch (NulsException e) {
             return Result.getFailed(e.getErrorCode());
         }
     }
 
     public static Result getNetworkInfo(int chainId) {
         try {
-            Map<String,Object> params = new HashMap<>();
+            Map<String, Object> params = new HashMap<>();
             params.put("chainId", chainId);
-            Map<String,Object> map = (Map<String, Object>) RpcCall.request(ModuleE.NW.abbr, CommandConstant.GET_NETWORK_GROUP, params);
+            Map<String, Object> map = (Map<String, Object>) RpcCall.request(ModuleE.NW.abbr, CommandConstant.GET_NETWORK_GROUP, params);
             return Result.getSuccess(null).setData(map);
-        }catch (NulsException e) {
+        } catch (NulsException e) {
             return Result.getFailed(e.getErrorCode());
         }
     }
