@@ -199,24 +199,24 @@ tos://List<CoinTo>格式
 
 注：支持多个账户同一笔交易中转出不同资产到不同的账户中
 
-CoinFrom结构[40]
+CoinFrom结构[70]
 
 ```
 address:  //byte[24] 账户地址  
 assetsChainId://uint16 资产发行链的
-idassetsId: //uint16 资产
-idamount：  //uint128，转出数量
+assetsId: //uint16 资产
+amount：  //uint128，转出数量
 nonce  ： //byte[8] 交易顺序号，前一笔交易的hash的后8个字节
 locked ： //byte 是否是锁定状态(locktime:-1),1代表锁定，0代表非锁定
 ```
 
-CoinTo结构[44]
+CoinTo结构[68]
 
 ```
 address:  //byte[24],目标地址
 assetsChainId://uint16 资产发行链的
-idassetsId: //uint16 资产
-idamount :  //uint128，转账金额
+assetsId: //uint16 资产
+amount :  //uint128，转账金额
 lockTime：//uint32,解锁高度或解锁时间，-1为永久锁定
 ```
 
