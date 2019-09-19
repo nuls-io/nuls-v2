@@ -369,11 +369,30 @@ public class BlockValidator {
             chain.getLogger().debug("CoinBase transaction order wrong! height: " + block.getHeader().getHeight() + " , hash : " + blockHeaderHash);
             return false;
         }
-
         Transaction coinBaseTransaction = consensusManager.createCoinBaseTx(chain, member, block.getTxs(), currentRound, 0);
-        if (null == coinBaseTransaction || !tx.getHash().equals(coinBaseTransaction.getHash())) {
+        if (null == coinBaseTransaction) {
             chain.getLogger().error("the coin base tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + blockHeaderHash);
             return false;
+        }else if(!tx.getHash().equals(coinBaseTransaction.getHash())){
+            CoinFromComparator fromComparator = new CoinFromComparator();
+            CoinToComparator toComparator = new CoinToComparator();
+
+            CoinData coinBaseCoinData = coinBaseTransaction.getCoinDataInstance();
+            coinBaseCoinData.getFrom().sort(fromComparator);
+            coinBaseCoinData.getTo().sort(toComparator);
+            coinBaseTransaction.setCoinData(coinBaseCoinData.serialize());
+
+            Transaction originTransaction = new Transaction();
+            originTransaction.parse(tx.serialize() , 0);
+            CoinData originCoinData  = originTransaction.getCoinDataInstance();
+            originCoinData.getFrom().sort(fromComparator);
+            originCoinData.getTo().sort(toComparator);
+            originTransaction.setCoinData(originCoinData.serialize());
+
+            if(!originTransaction.getHash().equals(coinBaseTransaction.getHash())){
+                chain.getLogger().error("the coin base tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + blockHeaderHash);
+                return false;
+            }
         }
         return true;
     }
