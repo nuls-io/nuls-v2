@@ -329,6 +329,7 @@ public class ProtocolServiceImpl implements ProtocolService {
             context.setProportionMap(oldValidStatisticsInfo.getProtocolVersionMap());
             context.getProportionMap().merge(newProtocolVersion, 1, (x, y) -> x - y);
             context.setCurrentProtocolVersionCount(context.getCurrentProtocolVersionCount() - 1);
+            protocolService.saveCurrentProtocolVersionCount(chainId, context.getCurrentProtocolVersionCount());
             ProtocolVersion currentProtocolVersion = context.getCurrentProtocolVersion();
             if (newValidStatisticsInfo.getProtocolVersion().equals(currentProtocolVersion) && newValidStatisticsInfo.getCount() < currentProtocolVersion.getContinuousIntervalCount()) {
                 //设置新协议版本
