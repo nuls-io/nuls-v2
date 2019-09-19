@@ -21,7 +21,7 @@ public class GetTranscationFormAddressAdapter extends BaseAdapter<String, Transa
 
     @Override
     public String doTest(TransactionData param, int depth) throws TestFailException {
-            return param.getForm().get(0).getAddress();
+            return param.getFrom().get(0).getAddress();
     }
 
     @Override
