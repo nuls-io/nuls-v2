@@ -202,7 +202,9 @@ public class AccountStateCmd extends BaseLedgerCmd {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
             @Parameter(parameterName = "assetChainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
             @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "资产所在地址")
+            @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "资产所在地址"),
+            @Parameter(parameterName = "isConfirmed", requestType = @TypeDescriptor(value = boolean.class), parameterDes = "选填项,默认false. 填true,则必须从已确认交易里获取")
+
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
@@ -216,13 +218,17 @@ public class AccountStateCmd extends BaseLedgerCmd {
         Integer assetChainId = (Integer) params.get("assetChainId");
         String address = LedgerUtil.getRealAddressStr((String) params.get("address"));
         Integer assetId = (Integer) params.get("assetId");
+        boolean isConfirmed = false;
+        if (null != params.get("isConfirmed")) {
+            isConfirmed = Boolean.getBoolean(params.get("isConfirmed").toString());
+        }
         if (!chainHanlder(chainId)) {
             return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
         }
         Map<String, Object> rtMap = new HashMap<>(2);
         AccountState accountState = accountStateService.getAccountState(address, chainId, assetChainId, assetId);
         AccountStateUnconfirmed accountStateUnconfirmed = unconfirmedStateService.getUnconfirmedInfo(address, chainId, assetChainId, assetId, accountState);
-        if (null == accountStateUnconfirmed) {
+        if (isConfirmed || null == accountStateUnconfirmed) {
             rtMap.put("nonce", RPCUtil.encode(accountState.getNonce()));
             rtMap.put("nonceType", LedgerConstant.CONFIRMED_NONCE);
         } else {
