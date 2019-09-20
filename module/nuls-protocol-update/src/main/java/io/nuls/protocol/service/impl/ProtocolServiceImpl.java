@@ -232,7 +232,7 @@ public class ProtocolServiceImpl implements ProtocolService {
                     boolean b = service.save(chainId, statisticsInfo);
                     logger.info("height-" + height + ", save-" + b + ", new statisticsInfo-" + statisticsInfo);
                     //如果某协议版本连续统计确认数大于阈值,则进行版本升级
-                    if (statisticsInfo.getCount() >= statictisProtocolVersion.getContinuousIntervalCount()) {
+                    if (statisticsInfo.getCount() >= statictisProtocolVersion.getContinuousIntervalCount() && statictisProtocolVersion.getVersion() > currentProtocolVersion.getVersion()) {
                         short localVersion = context.getLocalProtocolVersion().getVersion();
                         if (statictisProtocolVersion.getVersion() > localVersion) {
                             logger.error("localVersion-" + localVersion);
