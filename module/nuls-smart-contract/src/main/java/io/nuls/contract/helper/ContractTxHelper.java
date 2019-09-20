@@ -228,7 +228,7 @@ public class ContractTxHelper {
 
         Chain chain = contractHelper.getChain(chainId);
         int assetsId = chain.getConfig().getAssetId();
-        ContractBalance senderBalance = contractHelper.getTempBalanceAndNonce(chainId, sender);
+        ContractBalance senderBalance = contractHelper.getUnConfirmedBalanceAndNonce(chainId, sender);
         CoinFrom coinFrom = new CoinFrom(senderBytes, chainId, assetsId, totalValue, RPCUtil.decode(senderBalance.getNonce()), UNLOCKED_TX);
         coinData.addFrom(coinFrom);
 

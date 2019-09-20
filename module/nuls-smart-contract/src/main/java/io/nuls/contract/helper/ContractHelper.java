@@ -428,12 +428,11 @@ public class ContractHelper {
 
     public ContractBalance getRealBalance(int chainId, String address) {
         try {
-            Map<String, Object> balance = LedgerCall.getBalance(getChain(chainId), address);
-            Map<String, Object> nonceMap = LedgerCall.getNonce(getChain(chainId), address);
+            Map<String, Object> balance = LedgerCall.getConfirmedBalanceAndNonce(getChain(chainId), address);
             ContractBalance contractBalance = ContractBalance.newInstance();
             contractBalance.setBalance(new BigInteger(balance.get("available").toString()));
             contractBalance.setFreeze(new BigInteger(balance.get("freeze").toString()));
-            contractBalance.setNonce((String) nonceMap.get("nonce"));
+            contractBalance.setNonce((String) balance.get("nonce"));
             return contractBalance;
         } catch (NulsException e) {
             Log.error(e);
@@ -441,7 +440,7 @@ public class ContractHelper {
         }
     }
 
-    public ContractBalance getTempBalanceAndNonce(int chainId, String address) {
+    public ContractBalance getUnConfirmedBalanceAndNonce(int chainId, String address) {
         try {
             Map<String, Object> balance = LedgerCall.getBalanceAndNonce(getChain(chainId), address);
             ContractBalance contractBalance = ContractBalance.newInstance();
