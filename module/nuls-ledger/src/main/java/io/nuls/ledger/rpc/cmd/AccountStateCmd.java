@@ -188,7 +188,9 @@ public class AccountStateCmd extends BaseLedgerCmd {
         rtMap.put("list", resultList);
         return success(rtMap);
     }
-
+    public static void main(String []args){
+        System.out.println(Boolean.valueOf("false"));
+    }
     /**
      * 获取账户nonce值
      * get user account nonce
@@ -220,7 +222,7 @@ public class AccountStateCmd extends BaseLedgerCmd {
         Integer assetId = (Integer) params.get("assetId");
         boolean isConfirmed = false;
         if (null != params.get("isConfirmed")) {
-            isConfirmed = Boolean.getBoolean(params.get("isConfirmed").toString());
+            isConfirmed = Boolean.valueOf(params.get("isConfirmed").toString());
         }
         if (!chainHanlder(chainId)) {
             return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
@@ -263,7 +265,7 @@ public class AccountStateCmd extends BaseLedgerCmd {
         Integer assetId = (Integer) params.get("assetId");
         boolean isConfirmed = false;
         if (null != params.get("isConfirmed")) {
-            isConfirmed = Boolean.getBoolean(params.get("isConfirmed").toString());
+            isConfirmed = Boolean.valueOf(params.get("isConfirmed").toString());
         }
         if (!chainHanlder(chainId)) {
             return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
