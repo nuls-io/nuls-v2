@@ -41,7 +41,6 @@ import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.ledger.config.LedgerConfig;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.manager.LedgerChainManager;
-import io.nuls.ledger.service.impl.TaskManager;
 import io.nuls.ledger.utils.LoggerUtil;
 
 /**
@@ -125,7 +124,6 @@ public class LedgerBootstrap extends RpcModule {
     public RpcModuleState onDependenciesReady() {
         LoggerUtil.COMMON_LOG.info("Ledger onDependenciesReady");
         NulsDateUtils.getInstance().start(5 * 60 * 1000);
-        TaskManager.getInstance().start();
         return RpcModuleState.Running;
     }
 
