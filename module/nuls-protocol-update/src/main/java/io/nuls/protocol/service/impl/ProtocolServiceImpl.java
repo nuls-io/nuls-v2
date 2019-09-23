@@ -105,7 +105,6 @@ public class ProtocolServiceImpl implements ProtocolService {
         blockHeaders.sort(BLOCK_HEADER_COMPARATOR);
         Map<ProtocolVersion, Integer> proportionMap = new HashMap<>();
         for (BlockHeader blockHeader : blockHeaders) {
-            long height = blockHeader.getHeight();
             BlockExtendsData data = blockHeader.getExtendsData();
             ProtocolVersion newProtocolVersion = new ProtocolVersion();
             newProtocolVersion.setVersion(data.getBlockVersion());
@@ -123,9 +122,8 @@ public class ProtocolServiceImpl implements ProtocolService {
      *
      * @param chainId
      * @param blockHeader
-     * @throws NulsException
      */
-    private boolean saveGenesisBlock(int chainId, BlockHeader blockHeader) throws NulsException {
+    private boolean saveGenesisBlock(int chainId, BlockHeader blockHeader) {
         ProtocolContext context = ContextManager.getContext(chainId);
         NulsLogger logger = context.getLogger();
         BlockExtendsData data = blockHeader.getExtendsData();
@@ -165,7 +163,7 @@ public class ProtocolServiceImpl implements ProtocolService {
     }
 
     @Override
-    public boolean save(int chainId, BlockHeader blockHeader) throws NulsException {
+    public boolean save(int chainId, BlockHeader blockHeader) {
         ProtocolContext context = ContextManager.getContext(chainId);
         NulsLogger logger = context.getLogger();
         StatisticsInfo lastValidStatisticsInfo = context.getLastValidStatisticsInfo();

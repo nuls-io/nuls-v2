@@ -145,4 +145,4 @@ dependent=smart-contract,cross-chain
 
 [protocol-update]
 #每隔多少个区块统计一次协议占比
-interval=5
+interval=1000
