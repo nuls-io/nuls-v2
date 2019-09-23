@@ -23,9 +23,6 @@ public class ProtocolUpgradeInvoker implements VersionChangeInvoker {
         }
         try {
             long time = NulsDateUtils.getCurrentTimeSeconds();
-            chain.getConfig().setProtocolUpgrade(time);
-            ConfigService configService = SpringLiteContext.getBean(ConfigService.class);
-            configService.save(chain.getConfig(), chainId);
             chain.getLogger().info("协议升级完成,升级时间：{}",time);
         }catch (Exception e){
             chain.getLogger().error("协议升级失败");
