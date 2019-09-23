@@ -84,40 +84,36 @@ public class ProtocolServiceImpl implements ProtocolService {
             VersionChangeNotifier.reRegister(chainId, context, protocolVersion.getVersion());
             var stack = list.stream().map(PoUtil::getProtocolVersion).collect(Collectors.toCollection(ArrayDeque::new));
             context.setProtocolVersionHistory(stack);
+            long latestHeight = BlockCall.getLatestHeight(chainId);
+            context.setLatestHeight(latestHeight);
+            long l = latestHeight % context.getParameters().getInterval();
+            context.setLastValidStatisticsInfo(service.get(chainId, latestHeight - l));
+            context.setCount((int) l);
+            context.setCurrentProtocolVersionCount(protocolService.getCurrentProtocolVersionCount(chainId));
             List<BlockHeader> blockHeaders = BlockCall.getBlockHeaders(chainId, context.getParameters().getInterval());
-            context.setProportionMap(initMap(blockHeaders, context, chainId));
+            context.setProportionMap(initMap(blockHeaders));
             logger.info("cached protocol version-" + protocolVersionPo);
         } catch (Exception e) {
             logger.error(e);
         }
     }
 
-    private Map<ProtocolVersion, Integer> initMap(List<BlockHeader> blockHeaders, ProtocolContext context, int chainId) {
+    private Map<ProtocolVersion, Integer> initMap(List<BlockHeader> blockHeaders) {
         if (blockHeaders.isEmpty()) {
             return new HashMap<>();
         }
         blockHeaders.sort(BLOCK_HEADER_COMPARATOR);
-        long latestHeight = blockHeaders.get(blockHeaders.size() - 1).getHeight();
-        context.setLatestHeight(latestHeight);
-        long l = latestHeight % context.getParameters().getInterval();
-        context.setLastValidStatisticsInfo(service.get(chainId, latestHeight - l));
-        context.setCount((int) l);
-        context.setCurrentProtocolVersionCount(protocolService.getCurrentProtocolVersionCount(chainId));
         Map<ProtocolVersion, Integer> proportionMap = new HashMap<>();
         for (BlockHeader blockHeader : blockHeaders) {
             long height = blockHeader.getHeight();
             BlockExtendsData data = blockHeader.getExtendsData();
-            if (!validate(data, context)) {
-                context.getLogger().error("invalid block header-" + height);
-                System.exit(1);
-            } else {
-                ProtocolVersion newProtocolVersion = new ProtocolVersion();
-                newProtocolVersion.setVersion(data.getBlockVersion());
-                newProtocolVersion.setEffectiveRatio(data.getEffectiveRatio());
-                newProtocolVersion.setContinuousIntervalCount(data.getContinuousIntervalCount());
-                //重新计算统计信息
-                proportionMap.merge(newProtocolVersion, 1, Integer::sum);
-            }
+            ProtocolVersion newProtocolVersion = new ProtocolVersion();
+            newProtocolVersion.setVersion(data.getBlockVersion());
+            newProtocolVersion.setEffectiveRatio(data.getEffectiveRatio());
+            newProtocolVersion.setContinuousIntervalCount(data.getContinuousIntervalCount());
+            //重新计算统计信息
+            proportionMap.merge(newProtocolVersion, 1, Integer::sum);
+
         }
         return proportionMap;
     }
@@ -232,7 +228,7 @@ public class ProtocolServiceImpl implements ProtocolService {
                     boolean b = service.save(chainId, statisticsInfo);
                     logger.info("height-" + height + ", save-" + b + ", new statisticsInfo-" + statisticsInfo);
                     //如果某协议版本连续统计确认数大于阈值,则进行版本升级
-                    if (statisticsInfo.getCount() >= statictisProtocolVersion.getContinuousIntervalCount()) {
+                    if (statisticsInfo.getCount() >= statictisProtocolVersion.getContinuousIntervalCount() && statictisProtocolVersion.getVersion() > currentProtocolVersion.getVersion()) {
                         short localVersion = context.getLocalProtocolVersion().getVersion();
                         if (statictisProtocolVersion.getVersion() > localVersion) {
                             logger.error("localVersion-" + localVersion);

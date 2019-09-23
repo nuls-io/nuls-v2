@@ -150,6 +150,9 @@ public class BlockServiceImpl implements BlockService {
             List<BlockHeader> list = new ArrayList<>(size);
             for (long i = startHeight; i <= endHeight; i++) {
                 BlockHeaderPo blockHeaderPo = blockStorageService.query(chainId, i);
+                if (blockHeaderPo.getHeight() == endHeight && !blockHeaderPo.isComplete()) {
+                    continue;
+                }
                 BlockHeader blockHeader = BlockUtil.fromBlockHeaderPo(blockHeaderPo);
                 list.add(blockHeader);
             }
