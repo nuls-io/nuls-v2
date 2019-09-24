@@ -422,10 +422,12 @@ public class SyncService {
                 TxRelationInfo relationInfo = new TxRelationInfo(output, tx, tx.getFee().getValue(), ledgerInfo.getTotalBalance());
                 relationInfo.setTransferType(TRANSFER_FROM_TYPE);
                 txRelationInfoSet.add(relationInfo);
-            } else if (!output.getAddress().equals(agentInfo.getAgentAddress())) {
+            } else {
                 accountInfo.setConsensusLock(accountInfo.getConsensusLock().subtract(output.getAmount()));
-                ledgerInfo = queryLedgerInfo(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
-                txRelationInfoSet.add(new TxRelationInfo(output, tx, BigInteger.ZERO, ledgerInfo.getTotalBalance()));
+                if (!output.getAddress().equals(agentInfo.getAgentAddress())) {
+                    ledgerInfo = queryLedgerInfo(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
+                    txRelationInfoSet.add(new TxRelationInfo(output, tx, BigInteger.ZERO, ledgerInfo.getTotalBalance()));
+                }
             }
             addressSet.add(output.getAddress());
         }
@@ -493,12 +495,19 @@ public class SyncService {
             if (!addressSet.contains(output.getAddress())) {
                 accountInfo.setTxCount(accountInfo.getTxCount() + 1);
             }
-            if (output.getAddress().equals(agentInfo.getAgentAddress())) {
-                amount = amount.add(output.getAmount());
+            //lockTime > 0 这条output的金额就是节点的保证金
+            if (output.getLockTime() > 0) {
+                accountInfo.setConsensusLock(accountInfo.getConsensusLock().subtract(agentInfo.getDeposit()));
+                ledgerInfo = calcBalance(chainId, output.getChainId(), output.getAssetsId(), accountInfo, tx.getFee().getValue());
+                TxRelationInfo relationInfo = new TxRelationInfo(output, tx, tx.getFee().getValue(), ledgerInfo.getTotalBalance());
+                relationInfo.setTransferType(TRANSFER_FROM_TYPE);
+                txRelationInfoSet.add(relationInfo);
             } else {
                 accountInfo.setConsensusLock(accountInfo.getConsensusLock().subtract(output.getAmount()));
-                ledgerInfo = queryLedgerInfo(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
-                txRelationInfoSet.add(new TxRelationInfo(output, tx, BigInteger.ZERO, ledgerInfo.getTotalBalance()));
+                if (!output.getAddress().equals(agentInfo.getAgentAddress())) {
+                    ledgerInfo = queryLedgerInfo(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
+                    txRelationInfoSet.add(new TxRelationInfo(output, tx, BigInteger.ZERO, ledgerInfo.getTotalBalance()));
+                }
             }
             addressSet.add(output.getAddress());
         }

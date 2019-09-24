@@ -38,7 +38,7 @@ public class BlockTools implements CallRpc {
         param.put("height", height);
         try {
             Block block = callRpc(ModuleE.BL.name, "getBlockByHeight", param, (Function<Map, Block>) res -> {
-                if (res == null) {
+                if (res == null || res.isEmpty()) {
                     return null;
                 }
                 Block _block = new Block();
@@ -69,7 +69,7 @@ public class BlockTools implements CallRpc {
         param.put("hash", hash);
         try {
             Block block = callRpc(ModuleE.BL.name, "getBlockByHash", param, (Function<Map, Block>) res -> {
-                if (res == null) {
+                if (res == null || res.isEmpty()) {
                     return null;
                 }
                 Block _block = new Block();
@@ -98,7 +98,7 @@ public class BlockTools implements CallRpc {
         param.put("chainId", chainId);
         try {
             Block block = callRpc(ModuleE.BL.name, "latestBlock", param, (Function<Map, Block>) res -> {
-                if (res == null) {
+                if (res == null || res.isEmpty()) {
                     return null;
                 }
                 Block _block = new Block();
@@ -140,7 +140,7 @@ public class BlockTools implements CallRpc {
         param.put("height", height);
         try {
             String block = callRpc(ModuleE.BL.name, "getBlockByHeight", param, (Function<Map, String>) res -> {
-                if (res == null) {
+                if (res == null || res.isEmpty()) {
                     return null;
                 }
                 return (String) res.get("value");
@@ -164,7 +164,7 @@ public class BlockTools implements CallRpc {
         param.put("hash", hash);
         try {
             String block = callRpc(ModuleE.BL.name, "getBlockByHash", param, (Function<Map, String>) res -> {
-                if (res == null) {
+                if (res == null || res.isEmpty()) {
                     return null;
                 }
                 return (String) res.get("value");
@@ -181,7 +181,7 @@ public class BlockTools implements CallRpc {
         try {
             Long block = callRpc(ModuleE.BL.name, "latestHeight", param, (Function<Map, Long>) res -> {
                 Object value = res.get("value");
-                if(value == null) {
+                if (value == null) {
                     return -1L;
                 }
                 return Long.parseLong(value.toString());

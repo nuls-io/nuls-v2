@@ -1,5 +1,7 @@
 package io.nuls.provider;
 
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.parse.I18nUtils;
 import io.nuls.provider.api.RpcServerManager;
 import io.nuls.base.api.provider.Provider;
 import io.nuls.base.api.provider.ServiceManager;
@@ -66,6 +68,11 @@ public class ApiBootstrap extends RpcModule {
         }
         initRpcServer(configItemMap);
         NulsSDKBootStrap.init(defaultChainId, "");
+        try {
+            I18nUtils.setLanguage("en");
+        } catch (NulsException e) {
+            e.printStackTrace();
+        }
     }
 
     private static void initRpcServer(Map<String, ConfigurationLoader.ConfigItem> configItemMap) {
