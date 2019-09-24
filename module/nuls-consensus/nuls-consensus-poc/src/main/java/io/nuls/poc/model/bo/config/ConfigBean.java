@@ -156,6 +156,7 @@ public class ConfigBean extends BaseNulsData {
      * */
     private long deflationTimeInterval;
 
+
     public long getPackingInterval() {
         return packingInterval;
     }

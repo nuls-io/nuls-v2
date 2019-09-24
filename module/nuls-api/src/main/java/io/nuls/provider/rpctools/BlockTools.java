@@ -1,6 +1,5 @@
 package io.nuls.provider.rpctools;
 
-import io.nuls.provider.api.constant.CommandConstant;
 import io.nuls.base.api.provider.Result;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
@@ -11,6 +10,7 @@ import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.util.RpcCall;
+import io.nuls.provider.api.constant.CommandConstant;
 import io.nuls.provider.utils.Log;
 
 import java.util.HashMap;
@@ -37,13 +37,13 @@ public class BlockTools implements CallRpc {
         param.put("chainId", chainId);
         param.put("height", height);
         try {
-            Block block = callRpc(ModuleE.BL.name, "getBlockByHeight", param, (Function<String, Block>) res -> {
+            Block block = callRpc(ModuleE.BL.name, "getBlockByHeight", param, (Function<Map, Block>) res -> {
                 if (res == null) {
                     return null;
                 }
                 Block _block = new Block();
                 try {
-                    _block.parse(new NulsByteBuffer(HexUtil.decode(res)));
+                    _block.parse(new NulsByteBuffer(HexUtil.decode((String) res.get("value"))));
                 } catch (NulsException e) {
                     Log.error(e);
                     return null;
@@ -68,13 +68,13 @@ public class BlockTools implements CallRpc {
         param.put("chainId", chainId);
         param.put("hash", hash);
         try {
-            Block block = callRpc(ModuleE.BL.name, "downloadBlockByHash", param, (Function<String, Block>) res -> {
+            Block block = callRpc(ModuleE.BL.name, "getBlockByHash", param, (Function<Map, Block>) res -> {
                 if (res == null) {
                     return null;
                 }
                 Block _block = new Block();
                 try {
-                    _block.parse(new NulsByteBuffer(HexUtil.decode(res)));
+                    _block.parse(new NulsByteBuffer(HexUtil.decode((String) res.get("value"))));
                 } catch (NulsException e) {
                     Log.error(e);
                     return null;
@@ -97,13 +97,13 @@ public class BlockTools implements CallRpc {
         Map<String, Object> param = new HashMap<>(2);
         param.put("chainId", chainId);
         try {
-            Block block = callRpc(ModuleE.BL.name, "latestBlock", param, (Function<String, Block>) res -> {
+            Block block = callRpc(ModuleE.BL.name, "latestBlock", param, (Function<Map, Block>) res -> {
                 if (res == null) {
                     return null;
                 }
                 Block _block = new Block();
                 try {
-                    _block.parse(new NulsByteBuffer(HexUtil.decode(res)));
+                    _block.parse(new NulsByteBuffer(HexUtil.decode((String) res.get("value"))));
                 } catch (NulsException e) {
                     Log.error(e);
                     return null;
@@ -139,8 +139,11 @@ public class BlockTools implements CallRpc {
         param.put("chainId", chainId);
         param.put("height", height);
         try {
-            String block = callRpc(ModuleE.BL.name, "getBlockByHeight", param, (Function<String, String>) res -> {
-                return res;
+            String block = callRpc(ModuleE.BL.name, "getBlockByHeight", param, (Function<Map, String>) res -> {
+                if (res == null) {
+                    return null;
+                }
+                return (String) res.get("value");
             });
             return new Result(block);
         } catch (NulsRuntimeException e) {
@@ -160,8 +163,28 @@ public class BlockTools implements CallRpc {
         param.put("chainId", chainId);
         param.put("hash", hash);
         try {
-            String block = callRpc(ModuleE.BL.name, "downloadBlockByHash", param, (Function<String, String>) res -> {
-                return res;
+            String block = callRpc(ModuleE.BL.name, "getBlockByHash", param, (Function<Map, String>) res -> {
+                if (res == null) {
+                    return null;
+                }
+                return (String) res.get("value");
+            });
+            return new Result(block);
+        } catch (NulsRuntimeException e) {
+            return Result.fail(e.getCode(), e.getMessage());
+        }
+    }
+
+    public Result<String> latestHeight(int chainId) {
+        Map<String, Object> param = new HashMap<>(2);
+        param.put("chainId", chainId);
+        try {
+            Long block = callRpc(ModuleE.BL.name, "latestHeight", param, (Function<Map, Long>) res -> {
+                Object value = res.get("value");
+                if(value == null) {
+                    return -1L;
+                }
+                return Long.parseLong(value.toString());
             });
             return new Result(block);
         } catch (NulsRuntimeException e) {

@@ -202,7 +202,6 @@ public class ProtocolResource extends BaseCmd {
             logger.info("protocol-" + protocol);
         }
         return success();
-
     }
 
 }

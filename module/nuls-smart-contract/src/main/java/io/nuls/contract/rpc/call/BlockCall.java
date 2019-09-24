@@ -46,7 +46,7 @@ public class BlockCall {
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put(Constants.CHAIN_ID, chainId);
             Map resultMap = (Map) CallHelper.request(ModuleE.BL.abbr, "latestHeight", params);
-            return Long.valueOf(resultMap.get("value").toString());
+            return Long.parseLong(resultMap.get("value").toString());
         } catch (Exception e) {
             throw new NulsException(e);
         }
@@ -57,9 +57,9 @@ public class BlockCall {
             Map<String, Object> params = new HashMap<>(4);
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put(Constants.CHAIN_ID, chainId);
-            String blockHeaderData = (String) CallHelper.request(ModuleE.BL.abbr, "latestBlockHeader", params);
+            Map resultMap = (Map) CallHelper.request(ModuleE.BL.abbr, "latestBlockHeader", params);
             BlockHeader header = new BlockHeader();
-            header.parse(RPCUtil.decode(blockHeaderData), 0);
+            header.parse(RPCUtil.decode((String) resultMap.get("value")), 0);
             return header;
         } catch (Exception e) {
             throw new NulsException(e);
@@ -72,9 +72,9 @@ public class BlockCall {
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put(Constants.CHAIN_ID, chainId);
             params.put("height", height);
-            String blockHeaderData = (String) CallHelper.request(ModuleE.BL.abbr, "getBlockHeaderByHeight", params);
+            Map resultMap = (Map) CallHelper.request(ModuleE.BL.abbr, "getBlockHeaderByHeight", params);
             BlockHeader header = new BlockHeader();
-            header.parse(RPCUtil.decode(blockHeaderData), 0);
+            header.parse(RPCUtil.decode((String) resultMap.get("value")), 0);
             return header;
         } catch (Exception e) {
             throw new NulsException(e);
@@ -87,9 +87,9 @@ public class BlockCall {
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put(Constants.CHAIN_ID, chainId);
             params.put("hash", hash);
-            String blockHeaderData = (String) CallHelper.request(ModuleE.BL.abbr, "getBlockHeaderByHash", params);
+            Map resultMap = (Map) CallHelper.request(ModuleE.BL.abbr, "getBlockHeaderByHash", params);
             BlockHeader header = new BlockHeader();
-            header.parse(RPCUtil.decode(blockHeaderData), 0);
+            header.parse(RPCUtil.decode((String) resultMap.get("value")), 0);
             return header;
         } catch (Exception e) {
             throw new NulsException(e);

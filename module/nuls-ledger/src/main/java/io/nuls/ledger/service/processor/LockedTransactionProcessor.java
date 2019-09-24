@@ -131,7 +131,4 @@ public class LockedTransactionProcessor implements TxLockedProcessor {
         }
         return true;
     }
-    public static void main(String []args){
-        System.out.println((int)(System.currentTimeMillis()/1000));
-    }
 }

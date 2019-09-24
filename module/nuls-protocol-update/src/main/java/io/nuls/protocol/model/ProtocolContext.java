@@ -230,16 +230,14 @@ public class ProtocolContext {
                 "chainId=" + chainId +
                 ", latestHeight=" + latestHeight +
                 ", currentProtocolVersion=" + currentProtocolVersion +
+                ", localProtocolVersion=" + localProtocolVersion +
                 ", currentProtocolVersionCount=" + currentProtocolVersionCount +
                 ", protocolVersionHistory=" + protocolVersionHistory +
                 ", localVersionList=" + localVersionList +
                 ", proportionMap=" + proportionMap +
                 ", count=" + count +
                 ", lastValidStatisticsInfo=" + lastValidStatisticsInfo +
-                ", parameters=" + parameters +
-                ", COMMON_LOG=" + logger +
                 ", protocolMap=" + protocolMap +
                 '}';
     }
-
 }

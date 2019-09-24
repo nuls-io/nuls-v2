@@ -46,6 +46,7 @@ public class LedgerCall {
         params.put("assetChainId", chain.getConfig().getChainId());
         params.put("address", address);
         params.put("assetId", chain.getConfig().getAssetId());
+        params.put("isConfirmed", false);
         try {
             Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalanceNonce", params);
             if (!callResp.isSuccess()) {
@@ -57,40 +58,23 @@ public class LedgerCall {
         }
     }
 
-    public static Map<String, Object> getBalance(Chain chain, String address) throws NulsException {
+    public static Map<String, Object> getConfirmedBalanceAndNonce(Chain chain, String address) throws NulsException {
         Map<String, Object> params = new HashMap(4);
         params.put(Constants.CHAIN_ID, chain.getConfig().getChainId());
         params.put("assetChainId", chain.getConfig().getChainId());
         params.put("address", address);
         params.put("assetId", chain.getConfig().getAssetId());
+        params.put("isConfirmed", true);
         try {
-            Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalance", params);
+            Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalanceNonce", params);
             if (!callResp.isSuccess()) {
                 return null;
             }
-            return (HashMap) ((HashMap) callResp.getResponseData()).get("getBalance");
+            return (HashMap) ((HashMap) callResp.getResponseData()).get("getBalanceNonce");
         } catch (Exception e) {
             throw new NulsException(e);
         }
     }
-
-    public static Map<String, Object> getNonce(Chain chain, String address) throws NulsException {
-        Map<String, Object> params = new HashMap(4);
-        params.put(Constants.CHAIN_ID, chain.getConfig().getChainId());
-        params.put("assetChainId", chain.getConfig().getChainId());
-        params.put("address", address);
-        params.put("assetId", chain.getConfig().getAssetId());
-        try {
-            Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
-            if (!callResp.isSuccess()) {
-                return null;
-            }
-            return (HashMap) ((HashMap) callResp.getResponseData()).get("getNonce");
-        } catch (Exception e) {
-            throw new NulsException(e);
-        }
-    }
-
 
     /**
      * 提交未确认交易给账本

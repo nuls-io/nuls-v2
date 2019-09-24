@@ -25,7 +25,6 @@
 package io.nuls.ledger.rpc.call;
 
 
-import io.nuls.base.data.Block;
 
 /**
  * @author lan
@@ -33,7 +32,5 @@ import io.nuls.base.data.Block;
  * @date 2018/12/07
  **/
 public interface CallRpcService {
-    Block getBlockByHeight(int chainId, long height);
-
     long getBlockLatestHeight(int chainId);
 }

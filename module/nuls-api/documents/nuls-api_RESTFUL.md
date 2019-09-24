@@ -135,7 +135,8 @@ _**附：**_ 官方已提供NULS-SDK-4J工具，有使用JAVA做对接的合作�
 
 
 
-## 接口列表
+接口列表
+----
 ### 0.1 获取本链相关信息
 #### Cmd: /api/info
 _**详细描述: 获取本链相关信息**_
@@ -175,7 +176,7 @@ _**request form data:**_
 ```
 
 ### 1.1 批量创建账户
-#### Cmd: /api/account/aliasTx/create
+#### Cmd: /api/account
 _**详细描述: 创建的账户存在于本地钱包内**_
 #### HttpMethod: POST
 
@@ -192,15 +193,13 @@ _**详细描述: 创建的账户存在于本地钱包内**_
 #### Example request data: 
 
 _**request path:**_
-/api/account/aliasTx/create
+/api/account
 
 _**request form data:**_
 ```json
 {
-  "address" : "tNULSeBaMpFkFySUJVXnYKKxye4RYkwRPqQF71",
-  "alias" : "tksk11",
-  "nonce" : "0000000000000000",
-  "remark" : ""
+  "count" : 1,
+  "password" : "abcd1234"
 }
 ```
 
@@ -209,8 +208,7 @@ _**request form data:**_
 {
   "success" : true,
   "data" : {
-    "txHex" : "03001177775d001f17020001969747d887b32d2048336799778b7fcd8c19d18706746b736b31318c0117020001969747d887b32d2048336799778b7fcd8c19d187020001004023050600000000000000000000000000000000000000000000000000000000080000000000000000000117020001e2f297763765bc154afaac7aec5e7899a729fed20200010000e1f50500000000000000000000000000000000000000000000000000000000000000000000000000",
-    "hash" : "fd728fe2d0d69e07358249b03f35663bc72b6d6ce9bbb5caff439a51fca7b565"
+    "list" : [ "tNULSeBaMujLBcZWfE2wHKnZo7PGvqvNrt6yWG" ]
   }
 }
 ```

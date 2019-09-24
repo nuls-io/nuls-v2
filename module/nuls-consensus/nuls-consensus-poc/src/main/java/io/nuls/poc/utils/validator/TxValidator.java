@@ -483,7 +483,7 @@ public class TxValidator {
      * @param agentHash 节点HASH/agent hash
      * @return List<DepositPo>
      */
-    private List<DepositPo> getDepositListByAgent(Chain chain, NulsHash agentHash) throws NulsException {
+    public List<DepositPo> getDepositListByAgent(Chain chain, NulsHash agentHash) throws NulsException {
         List<DepositPo> depositList;
         try {
             depositList = depositStorageService.getList(chain.getConfig().getChainId());

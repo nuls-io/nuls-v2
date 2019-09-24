@@ -257,7 +257,11 @@ public class NativeUtils {
                 case "java/util/Set":
                 case "java/util/HashSet":
                 case "java/util/HashMap$EntrySet":
+                case "java/util/HashMap$KeySet":
+                case "java/util/LinkedHashMap$EntrySet":
+                case "java/util/LinkedHashMap$KeySet":
                 case "java/util/LinkedHashMap$LinkedEntrySet":
+                case "java/util/LinkedHashMap$LinkedKeySet":
                     isCollection = true;
                     break;
                 default:

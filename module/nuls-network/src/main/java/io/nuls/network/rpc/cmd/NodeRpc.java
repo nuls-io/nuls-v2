@@ -175,6 +175,10 @@ public class NodeRpc extends BaseCmd {
         int startPage = Integer.valueOf(String.valueOf(params.get("startPage")));
         int pageSize = Integer.valueOf(String.valueOf(params.get("pageSize")));
         NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
+        if (null == nodeGroup) {
+            LoggerUtil.COMMON_LOG.error("chainId={} not get a net group.", chainId);
+            return failed(NetworkErrorCode.PARAMETER_ERROR);
+        }
         List<Node> nodes = new ArrayList<>();
 
         if (isCross) {

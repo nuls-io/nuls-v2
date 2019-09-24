@@ -19,6 +19,8 @@ import io.nuls.poc.model.bo.round.RoundValidResult;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
 import io.nuls.poc.model.bo.tx.txdata.RedPunishData;
 import io.nuls.poc.model.bo.tx.txdata.YellowPunishData;
+import io.nuls.poc.utils.compare.CoinFromComparator;
+import io.nuls.poc.utils.compare.CoinToComparator;
 import io.nuls.poc.utils.enumeration.PunishReasonEnum;
 import io.nuls.poc.utils.manager.CoinDataManager;
 import io.nuls.poc.utils.manager.ConsensusManager;
@@ -367,11 +369,30 @@ public class BlockValidator {
             chain.getLogger().debug("CoinBase transaction order wrong! height: " + block.getHeader().getHeight() + " , hash : " + blockHeaderHash);
             return false;
         }
-
         Transaction coinBaseTransaction = consensusManager.createCoinBaseTx(chain, member, block.getTxs(), currentRound, 0);
-        if (null == coinBaseTransaction || !tx.getHash().equals(coinBaseTransaction.getHash())) {
+        if (null == coinBaseTransaction) {
             chain.getLogger().error("the coin base tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + blockHeaderHash);
             return false;
+        }else if(!tx.getHash().equals(coinBaseTransaction.getHash())){
+            CoinFromComparator fromComparator = new CoinFromComparator();
+            CoinToComparator toComparator = new CoinToComparator();
+
+            CoinData coinBaseCoinData = coinBaseTransaction.getCoinDataInstance();
+            coinBaseCoinData.getFrom().sort(fromComparator);
+            coinBaseCoinData.getTo().sort(toComparator);
+            coinBaseTransaction.setCoinData(coinBaseCoinData.serialize());
+
+            Transaction originTransaction = new Transaction();
+            originTransaction.parse(tx.serialize() , 0);
+            CoinData originCoinData  = originTransaction.getCoinDataInstance();
+            originCoinData.getFrom().sort(fromComparator);
+            originCoinData.getTo().sort(toComparator);
+            originTransaction.setCoinData(originCoinData.serialize());
+
+            if(!originTransaction.getHash().equals(coinBaseTransaction.getHash())){
+                chain.getLogger().error("the coin base tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + blockHeaderHash);
+                return false;
+            }
         }
         return true;
     }
@@ -404,7 +425,15 @@ public class BlockValidator {
         }
         CoinData coinData = coinDataManager.getStopAgentCoinData(chain, punishAgent, tx.getTime() + chain.getConfig().getRedPublishLockTime());
         try {
-            if (!Arrays.equals(coinData.serialize(), tx.getCoinData())) {
+            CoinFromComparator fromComparator = new CoinFromComparator();
+            CoinToComparator toComparator = new CoinToComparator();
+            coinData.getFrom().sort(fromComparator);
+            coinData.getTo().sort(toComparator);
+            CoinData txCoinData = new CoinData();
+            txCoinData.parse(tx.getCoinData(),0);
+            txCoinData.getFrom().sort(fromComparator);
+            txCoinData.getTo().sort(toComparator);
+            if (!Arrays.equals(coinData.serialize(), txCoinData.serialize())) {
                 chain.getLogger().error("++++++++++ RedPunish verification does not pass, redPunish type:{}, - height:{}, - redPunish tx timestamp:{}", punishData.getReasonCode(), tx.getBlockHeight(), tx.getTime());
                 return false;
             }

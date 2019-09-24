@@ -106,7 +106,7 @@ public class TextMessageHandler implements Runnable, Comparable<TextMessageHandl
                      */
                     if (!ConnectManager.isPureDigital(request.getSubscriptionEventCounter())
                             && !ConnectManager.isPureDigital(request.getSubscriptionPeriod())) {
-                        if(request.getTimeOut().isEmpty()){
+                        if(null==request.getTimeOut() || request.getTimeOut().isEmpty()){
                             RequestMessageProcessor.callCommandsWithPeriod(channel, request.getRequestMethods(), messageId, false);
                         }else{
                             long requestTime = Long.parseLong(message.getTimestamp());

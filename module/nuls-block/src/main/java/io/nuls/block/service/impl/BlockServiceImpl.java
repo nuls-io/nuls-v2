@@ -47,6 +47,7 @@ import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.config.ConfigurationLoader;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.log.Log;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.SerializeUtils;
@@ -149,6 +150,9 @@ public class BlockServiceImpl implements BlockService {
             List<BlockHeader> list = new ArrayList<>(size);
             for (long i = startHeight; i <= endHeight; i++) {
                 BlockHeaderPo blockHeaderPo = blockStorageService.query(chainId, i);
+                if (blockHeaderPo.getHeight() == endHeight && !blockHeaderPo.isComplete()) {
+                    continue;
+                }
                 BlockHeader blockHeader = BlockUtil.fromBlockHeaderPo(blockHeaderPo);
                 list.add(blockHeader);
             }

@@ -24,6 +24,7 @@
  */
 package io.nuls.ledger.manager;
 
+import io.nuls.base.protocol.ProtocolLoader;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.ioc.SpringLiteContext;
@@ -69,6 +70,7 @@ public class LedgerChainManager {
         LedgerChain ledgerChain = new LedgerChain(chainId);
         //建立日志
         LoggerUtil.createLogger(chainId);
+        ProtocolLoader.load(chainId, false);
         //建立数据库
         SpringLiteContext.getBean(RepositoryImpl.class).initChainDb(chainId);
         SpringLiteContext.getBean(LgBlockSyncRepositoryImpl.class).initChainDb(chainId);

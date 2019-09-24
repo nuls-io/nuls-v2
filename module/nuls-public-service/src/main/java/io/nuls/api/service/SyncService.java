@@ -422,7 +422,7 @@ public class SyncService {
                 TxRelationInfo relationInfo = new TxRelationInfo(output, tx, tx.getFee().getValue(), ledgerInfo.getTotalBalance());
                 relationInfo.setTransferType(TRANSFER_FROM_TYPE);
                 txRelationInfoSet.add(relationInfo);
-            } else {
+            } else if (!output.getAddress().equals(agentInfo.getAgentAddress())) {
                 accountInfo.setConsensusLock(accountInfo.getConsensusLock().subtract(output.getAmount()));
                 ledgerInfo = queryLedgerInfo(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
                 txRelationInfoSet.add(new TxRelationInfo(output, tx, BigInteger.ZERO, ledgerInfo.getTotalBalance()));
@@ -484,7 +484,8 @@ public class SyncService {
         //红牌惩罚的账户余额和锁定金额的处理和停止共识节点类似
         AccountInfo accountInfo;
         AccountLedgerInfo ledgerInfo;
-        CoinToInfo output;
+        CoinToInfo output = null;
+        BigInteger amount = BigInteger.ZERO;
         addressSet.clear();
         for (int i = 0; i < tx.getCoinTos().size(); i++) {
             output = tx.getCoinTos().get(i);
@@ -492,12 +493,18 @@ public class SyncService {
             if (!addressSet.contains(output.getAddress())) {
                 accountInfo.setTxCount(accountInfo.getTxCount() + 1);
             }
-            accountInfo.setConsensusLock(accountInfo.getConsensusLock().subtract(output.getAmount()));
-            ledgerInfo = queryLedgerInfo(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
-            txRelationInfoSet.add(new TxRelationInfo(output, tx, BigInteger.ZERO, ledgerInfo.getTotalBalance()));
-
+            if (output.getAddress().equals(agentInfo.getAgentAddress())) {
+                amount = amount.add(output.getAmount());
+            } else {
+                accountInfo.setConsensusLock(accountInfo.getConsensusLock().subtract(output.getAmount()));
+                ledgerInfo = queryLedgerInfo(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
+                txRelationInfoSet.add(new TxRelationInfo(output, tx, BigInteger.ZERO, ledgerInfo.getTotalBalance()));
+            }
             addressSet.add(output.getAddress());
         }
+        //最后这条记录是创建节点的地址
+        ledgerInfo = queryLedgerInfo(chainId, agentInfo.getAgentAddress(), output.getChainId(), output.getAssetsId());
+        txRelationInfoSet.add(new TxRelationInfo(output, tx, BigInteger.ZERO, ledgerInfo.getTotalBalance()));
 
         //根据节点找到委托列表
         List<DepositInfo> depositInfos = depositService.getDepositListByAgentHash(chainId, agentInfo.getTxHash());

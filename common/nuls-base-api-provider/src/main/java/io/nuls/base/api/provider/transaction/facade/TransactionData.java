@@ -32,7 +32,7 @@ public class TransactionData {
      */
     private int inBlockIndex;
 
-    private List<TransactionCoinData> form;
+    private List<TransactionCoinData> from;
    private List<TransactionCoinData> to;
 
 
@@ -109,12 +109,12 @@ public class TransactionData {
         this.inBlockIndex = inBlockIndex;
     }
 
-    public List<TransactionCoinData> getForm() {
-        return form;
+    public List<TransactionCoinData> getFrom() {
+        return from;
     }
 
-    public void setForm(List<TransactionCoinData> form) {
-        this.form = form;
+    public void setFrom(List<TransactionCoinData> from) {
+        this.from = from;
     }
 
     public List<TransactionCoinData> getTo() {
@@ -142,7 +142,7 @@ public class TransactionData {
         if (remark != null ? !remark.equals(that.remark) : that.remark != null) return false;
         if (hash != null ? !hash.equals(that.hash) : that.hash != null) return false;
         if (status != that.status) return false;
-        if (form != null ? !form.equals(that.form) : that.form != null) return false;
+        if (from != null ? !from.equals(that.from) : that.from != null) return false;
         return to != null ? to.equals(that.to) : that.to == null;
     }
 
@@ -157,7 +157,7 @@ public class TransactionData {
         result = 31 * result + (status != null ? status.hashCode() : 0);
         result = 31 * result + size;
         result = 31 * result + inBlockIndex;
-        result = 31 * result + (form != null ? form.hashCode() : 0);
+        result = 31 * result + (from != null ? from.hashCode() : 0);
         result = 31 * result + (to != null ? to.hashCode() : 0);
         return result;
     }
@@ -184,8 +184,8 @@ public class TransactionData {
                 .append(size)
                 .append(",\"inBlockIndex\":")
                 .append(inBlockIndex)
-                .append(",\"form\":")
-                .append(form)
+                .append(",\"from\":")
+                .append(from)
                 .append(",\"to\":")
                 .append(to)
                 .append('}').toString();

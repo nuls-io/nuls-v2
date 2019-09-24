@@ -60,7 +60,8 @@ public class TestJyc {
 
     @Test
     public void remove() throws Exception {
-        removeAccount("tNULSeBaMiAQSiqXHBUypfMGZzcroe12W4SFbi", PASSWORD);
+        createAccounts(1);
+        System.out.println(getAccountList());
     }
 
     @Test
@@ -137,8 +138,10 @@ public class TestJyc {
 //        importPriKey("3dadac00b523736f38f8c57deb81aa7ec612b68448995856038bd26addd80ec1", PASSWORD);//tNULSeBaMmTNYqywL5ZSHbyAQ662uE3wibrgD1
 //        importPriKey("27dbdcd1f2d6166001e5a722afbbb86a845ef590433ab4fcd13b9a433af6e66e", PASSWORD);//tNULSeBaMoNnKitV28JeuUdBaPSR6n1xHfKLj2
 //        importPriKey("76b7beaa98db863fb680def099af872978209ed9422b7acab8ab57ad95ab218b", PASSWORD);//tNULSeBaMqywZjfSrKNQKBfuQtVxAHBQ8rB2Zn
-        importPriKey("00a6eef7b91c645525bb8410f2a79e1299a69d0d7ef980068434b6aca90ab6d9", PASSWORD);//tNULSeBaMiAQSiqXHBUypfMGZzcroe12W4SFbi
+//        importPriKey("00a6eef7b91c645525bb8410f2a79e1299a69d0d7ef980068434b6aca90ab6d9", PASSWORD);//tNULSeBaMiAQSiqXHBUypfMGZzcroe12W4SFbi
 //        importPriKey("fbcae491407b54aa3904ff295f2d644080901fda0d417b2b427f5c1487b2b499", PASSWORD);//tNULSeBaMmShSTVwbU4rHkZjpD98JgFgg6rmhF
+
+        importPriKey("8cf67af614c3a85354f3f725f88facf19a041acf642e7b7835e2f9e09265c8c2", PASSWORD);//NULSd6HgihciNo79bZCLrRwXX9WLvomRQQbb5
     }
 
 }

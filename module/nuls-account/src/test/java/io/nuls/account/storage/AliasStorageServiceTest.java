@@ -70,7 +70,7 @@ public class AliasStorageServiceTest {
         assertTrue(Arrays.equals(alias.getAddress(), savedAliasPO.getAddress()));
         assertEquals(alias.getAlias(), savedAliasPO.getAlias());
         //Forth:remove the alias
-        result = aliasStorageService.removeAlias(chainId,alias.getAlias());
+        result = aliasStorageService.removeAlias(chainId, savedAliasPO);
         assertTrue(result);
         //Fifth:get the alias from storage and check
         AliasPO aliasPOAfterRemove = aliasStorageService.getAlias(chainId,alias.getAlias());

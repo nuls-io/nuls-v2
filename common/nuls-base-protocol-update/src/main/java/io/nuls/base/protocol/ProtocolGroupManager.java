@@ -20,6 +20,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Component
 public class ProtocolGroupManager {
 
+    private static boolean loadProtocol;
+
     @Autowired
     public static ModuleConfig moduleConfig;
 
@@ -29,6 +31,14 @@ public class ProtocolGroupManager {
     @Autowired
     private static MessageDispatcher messageDispatcher;
 
+    public static boolean isLoadProtocol() {
+        return loadProtocol;
+    }
+
+    public static void setLoadProtocol(boolean loadProtocol) {
+        ProtocolGroupManager.loadProtocol = loadProtocol;
+    }
+
     public static VersionChangeInvoker getVersionChangeInvoker() throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         return moduleConfig.getVersionChangeInvoker();
     }
@@ -37,15 +47,37 @@ public class ProtocolGroupManager {
 
     private static Map<Integer, ProtocolGroup> protocolGroupMap = new ConcurrentHashMap<>();
 
+    private static Map<Integer, Short> versionMap = new ConcurrentHashMap<>();
+
     public static void init(int chainId, Map<Short, Protocol> protocolMap, short version) {
-        ProtocolGroup protocolGroup = new ProtocolGroup();
+        if (ProtocolGroupManager.isLoadProtocol()) {
+            ProtocolGroup protocolGroup = new ProtocolGroup();
+            protocolGroup.setProtocolsMap(protocolMap);
+            protocolGroup.setVersion(version);
+            protocolGroupMap.put(chainId, protocolGroup);
+        }
         chainIds.add(chainId);
-        protocolGroupMap.put(chainId, protocolGroup);
-        protocolGroup.setProtocolsMap(protocolMap);
-        protocolGroup.setVersion(version);
+        if (ProtocolGroupManager.getCurrentVersion(chainId) != null) {
+            Short currentVersion = ProtocolGroupManager.getCurrentVersion(chainId);
+            version = version < currentVersion ? currentVersion : version;
+        }
         updateProtocol(chainId, version);
     }
 
+    /**
+     * 获取当前生效的协议版本号
+     * @param chainId
+     * @return
+     */
+    public static Short getCurrentVersion(int chainId) {
+        return versionMap.get(chainId);
+    }
+
+    /**
+     * 获取当前生效的协议版本(包含消息、交易详细信息)
+     * @param chainId
+     * @return
+     */
     public static Protocol getCurrentProtocol(int chainId) {
         return protocolGroupMap.get(chainId).getProtocol();
     }
@@ -59,35 +91,34 @@ public class ProtocolGroupManager {
         return protocolGroupMap.get(chainId).getProtocolsMap().values();
     }
 
-    public static short getVersion(int chainId) {
-        return protocolGroupMap.get(chainId).getVersion();
-    }
-
     public static void updateProtocol(int chainId, short protocolVersion) {
-        if (transactionDispatcher == null) {
-            transactionDispatcher = SpringLiteContext.getBean(TransactionDispatcher.class);
-        }
-        if (messageDispatcher == null) {
-            messageDispatcher = SpringLiteContext.getBean(MessageDispatcher.class);
-        }
-        ProtocolGroup protocolGroup = protocolGroupMap.get(chainId);
-        Protocol protocol = protocolGroup.getProtocolsMap().get(protocolVersion);
-        if (protocol != null) {
-            protocolGroup.setVersion(protocolVersion);
-            List<TransactionProcessor> transactionProcessors = new ArrayList<>();
-            protocol.getAllowTx().forEach(e -> {
-                if (StringUtils.isNotBlank(e.getHandler())) {
-                    transactionProcessors.add(SpringLiteContext.getBean(TransactionProcessor.class, e.getHandler()));
-                }
-            });
-            transactionDispatcher.setProcessors(transactionProcessors);
-            List<MessageProcessor> messageProcessors = new ArrayList<>();
-            protocol.getAllowMsg().forEach(e -> {
-                for (String s : e.getHandlers().split(",")) {
-                    messageProcessors.add(SpringLiteContext.getBean(MessageProcessor.class, s));
-                }
-            });
-            messageDispatcher.setProcessors(messageProcessors);
+        versionMap.put(chainId, protocolVersion);
+        if (ProtocolGroupManager.isLoadProtocol()) {
+            if (transactionDispatcher == null) {
+                transactionDispatcher = SpringLiteContext.getBean(TransactionDispatcher.class);
+            }
+            if (messageDispatcher == null) {
+                messageDispatcher = SpringLiteContext.getBean(MessageDispatcher.class);
+            }
+            ProtocolGroup protocolGroup = protocolGroupMap.get(chainId);
+            Protocol protocol = protocolGroup.getProtocolsMap().get(protocolVersion);
+            if (protocol != null) {
+                protocolGroup.setVersion(protocolVersion);
+                List<TransactionProcessor> transactionProcessors = new ArrayList<>();
+                protocol.getAllowTx().forEach(e -> {
+                    if (StringUtils.isNotBlank(e.getHandler())) {
+                        transactionProcessors.add(SpringLiteContext.getBean(TransactionProcessor.class, e.getHandler()));
+                    }
+                });
+                transactionDispatcher.setProcessors(transactionProcessors);
+                List<MessageProcessor> messageProcessors = new ArrayList<>();
+                protocol.getAllowMsg().forEach(e -> {
+                    for (String s : e.getHandlers().split(",")) {
+                        messageProcessors.add(SpringLiteContext.getBean(MessageProcessor.class, s));
+                    }
+                });
+                messageDispatcher.setProcessors(messageProcessors);
+            }
         }
     }
 }

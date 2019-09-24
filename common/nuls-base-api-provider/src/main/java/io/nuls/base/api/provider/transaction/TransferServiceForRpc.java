@@ -144,7 +144,7 @@ public class TransferServiceForRpc extends BaseRpcService implements TransferSer
             res.setTime(DateUtils.timeStamp2DateStr(transaction.getTime()*1000));
             res.setTransactionSignature(RPCUtil.encode(transaction.getTransactionSignature()));
             res.setType(transaction.getType());
-            res.setForm(transaction.getCoinDataInstance().getFrom().stream().map(coinData->{
+            res.setFrom(transaction.getCoinDataInstance().getFrom().stream().map(coinData->{
                 TransactionCoinData tcd = buildTransactionCoinData(coinData);
                 tcd.setNonce(HexUtil.encode(coinData.getNonce()));
                 return tcd;

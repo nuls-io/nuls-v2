@@ -25,6 +25,7 @@
  */
 package io.nuls.ledger.service.impl;
 
+import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.rpc.util.NulsDateUtils;
@@ -34,6 +35,7 @@ import io.nuls.ledger.model.po.sub.FreezeHeightState;
 import io.nuls.ledger.model.po.sub.FreezeLockTimeState;
 import io.nuls.ledger.service.FreezeStateService;
 import io.nuls.ledger.storage.Repository;
+import io.nuls.ledger.utils.LedgerUtil;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -41,6 +43,7 @@ import java.util.List;
 
 /**
  * Created by wangkun23 on 2018/12/4.
+ *
  * @author lanjinsheng
  */
 @Component
@@ -50,6 +53,7 @@ public class FreezeStateServiceImpl implements FreezeStateService {
 
     private BigInteger unFreezeLockTimeState(List<FreezeLockTimeState> timeList, AccountState accountState) {
         long nowTime = NulsDateUtils.getCurrentTimeSeconds();
+        long nowTimeMl = NulsDateUtils.getCurrentTimeMillis();
         //可移除的时间锁列表
         List<FreezeLockTimeState> timeRemove = new ArrayList<>();
         timeList.sort((x, y) -> Long.compare(x.getLockTime(), y.getLockTime()));
@@ -60,9 +64,29 @@ public class FreezeStateServiceImpl implements FreezeStateService {
                     continue;
                 }
                 timeRemove.add(freezeLockTimeState);
-            } else {
-                //因为正序排列，所以可以跳出
-                break;
+            }
+        }
+        BigInteger addToAmount = BigInteger.ZERO;
+        for (FreezeLockTimeState freezeLockTimeState : timeRemove) {
+            timeList.remove(freezeLockTimeState);
+            addToAmount = addToAmount.add(freezeLockTimeState.getAmount());
+        }
+        return addToAmount;
+    }
+
+    private BigInteger unFreezeLockTimeStateV2(List<FreezeLockTimeState> timeList, AccountState accountState) {
+        long nowTime = NulsDateUtils.getCurrentTimeSeconds();
+        long nowTimeMl = NulsDateUtils.getCurrentTimeMillis();
+        //可移除的时间锁列表
+        List<FreezeLockTimeState> timeRemove = new ArrayList<>();
+        timeList.sort((x, y) -> Long.compare(x.getLockTime(), y.getLockTime()));
+        for (FreezeLockTimeState freezeLockTimeState : timeList) {
+            if ((freezeLockTimeState.getLockTime() <= nowTime) || (freezeLockTimeState.getLockTime() > LedgerConstant.LOCKED_ML_TIME_VALUE && freezeLockTimeState.getLockTime() <= nowTimeMl)) {
+                //永久锁定的,继续处理
+                if (freezeLockTimeState.getLockTime() == LedgerConstant.PERMANENT_LOCK) {
+                    continue;
+                }
+                timeRemove.add(freezeLockTimeState);
             }
         }
         BigInteger addToAmount = BigInteger.ZERO;
@@ -104,14 +128,20 @@ public class FreezeStateServiceImpl implements FreezeStateService {
      * @return
      */
     @Override
-    public boolean recalculateFreeze(int addressChainId,AccountState accountState) {
+    public boolean recalculateFreeze(int addressChainId, AccountState accountState) {
         List<FreezeLockTimeState> timeList = accountState.getFreezeLockTimeStates();
         List<FreezeHeightState> heightList = accountState.getFreezeHeightStates();
         if (timeList.size() == 0 && heightList.size() == 0) {
             return true;
         }
-        BigInteger addTimeAmount = unFreezeLockTimeState(timeList, accountState);
-        BigInteger addHeightAmount = unFreezeLockHeightState(addressChainId,heightList, accountState);
+        BigInteger addTimeAmount = BigInteger.ZERO;
+        if (LedgerUtil.getVersion(addressChainId) >1) {
+            addTimeAmount = unFreezeLockTimeStateV2(timeList, accountState);
+        } else {
+            addTimeAmount = unFreezeLockTimeState(timeList, accountState);
+        }
+
+        BigInteger addHeightAmount = unFreezeLockHeightState(addressChainId, heightList, accountState);
         accountState.addTotalToAmount(addTimeAmount);
         accountState.addTotalToAmount(addHeightAmount);
         return true;
