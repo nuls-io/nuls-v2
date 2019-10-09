@@ -141,6 +141,8 @@ public class ContractController {
             pageInfo = tokenService.getAccountTokens(chainId, address, pageNumber, pageSize);
         }
 
+
+
         RpcResult result = new RpcResult();
         result.setResult(pageInfo);
         return result;

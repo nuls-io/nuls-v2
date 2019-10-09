@@ -1,6 +1,7 @@
 package io.nuls.api.analysis;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.nuls.api.ApiContext;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.constant.CommandConstant;
@@ -216,6 +217,11 @@ public class AnalysisHandler {
         }
         info.calcValue();
         info.calcFee(chainId);
+        if (tx.getStatus() == TxStatusEnum.UNCONFIRM) {
+            info.setStatus(ApiConstant.TX_UNCONFIRM);
+        } else {
+            info.setStatus(ApiConstant.TX_CONFIRM);
+        }
         return info;
     }
 

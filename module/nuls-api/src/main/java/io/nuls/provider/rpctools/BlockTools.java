@@ -3,6 +3,8 @@ package io.nuls.provider.rpctools;
 import io.nuls.base.api.provider.Result;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
+import io.nuls.base.data.Transaction;
+import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
@@ -44,6 +46,9 @@ public class BlockTools implements CallRpc {
                 Block _block = new Block();
                 try {
                     _block.parse(new NulsByteBuffer(HexUtil.decode((String) res.get("value"))));
+                    for(Transaction tx : _block.getTxs()) {
+                        tx.setStatus(TxStatusEnum.CONFIRMED);
+                    }
                 } catch (NulsException e) {
                     Log.error(e);
                     return null;
@@ -75,6 +80,9 @@ public class BlockTools implements CallRpc {
                 Block _block = new Block();
                 try {
                     _block.parse(new NulsByteBuffer(HexUtil.decode((String) res.get("value"))));
+                    for(Transaction tx : _block.getTxs()) {
+                        tx.setStatus(TxStatusEnum.CONFIRMED);
+                    }
                 } catch (NulsException e) {
                     Log.error(e);
                     return null;
@@ -104,6 +112,9 @@ public class BlockTools implements CallRpc {
                 Block _block = new Block();
                 try {
                     _block.parse(new NulsByteBuffer(HexUtil.decode((String) res.get("value"))));
+                    for(Transaction tx : _block.getTxs()) {
+                        tx.setStatus(TxStatusEnum.CONFIRMED);
+                    }
                 } catch (NulsException e) {
                     Log.error(e);
                     return null;
