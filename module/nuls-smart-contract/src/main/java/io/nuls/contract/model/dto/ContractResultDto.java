@@ -126,6 +126,33 @@ public class ContractResultDto {
         this.contractTxList.addAll(result.getContractTransferTxStringList());
     }
 
+    public ContractResultDto(int chainId, ContractResult result, long gasLimit) throws NulsException {
+        this.gasLimit = gasLimit;
+        this.gasUsed = result.getGasUsed();
+        this.price = result.getPrice();
+        BigInteger actualContractFee = BigInteger.valueOf(LongUtils.mul(this.gasUsed, this.price));
+        this.actualContractFee = bigInteger2String(actualContractFee);
+        BigInteger contractFee = BigInteger.valueOf(LongUtils.mul(gasLimit, price));
+        this.refundFee = bigInteger2String(contractFee.subtract(actualContractFee));
+        this.value = String.valueOf(result.getValue());
+        this.contractAddress = AddressTool.getStringAddressByBytes(result.getContractAddress());
+        this.result = result.getResult();
+        this.success = result.isSuccess();
+        this.errorMessage = result.getErrorMessage();
+        this.stackTrace = result.getStackTrace();
+        this.setMergedTransfers(result.getMergedTransferList());
+        this.events = result.getEvents();
+        this.debugEvents = result.getDebugEvents();
+        this.remark = result.getRemark();
+        this.invokeRegisterCmds = new LinkedList<>();
+        this.contractTxList = new ArrayList<>();
+        if (result.isSuccess()) {
+            this.makeTokenTransfers(chainId, result.getEvents());
+            this.makeInvokeRegisterCmds(result.getInvokeRegisterCmds());
+        }
+        this.contractTxList.addAll(result.getContractTransferTxStringList());
+    }
+
     private void makeInvokeRegisterCmds(List<ProgramInvokeRegisterCmd> invokeRegisterCmds) {
         if(invokeRegisterCmds == null || invokeRegisterCmds.isEmpty()) {
             return;

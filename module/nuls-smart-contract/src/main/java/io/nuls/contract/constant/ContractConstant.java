@@ -56,6 +56,7 @@ public interface ContractConstant {
 
 
     String CALL_REMARK = "call";
+    String PREVIEW_CALL_REMARK = "previewCall";
     String CREATE_REMARK = "create";
     String DELETE_REMARK = "delete";
 

@@ -119,9 +119,24 @@ public class ContractNRC20TokenQueryTest extends BaseQuery {
         String methodName = "transfer";
         String methodDesc = "";
         String token = BigInteger.TEN.pow(8).toString();
-        Map params = this.makeValidateCallParams(sender, value, contractAddress0, methodName, methodDesc, toAddress0, token);
+        Map params = this.makeValidateCallParams(sender, value, contractAddress_nrc20, methodName, methodDesc, toAddress0, token);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, VALIDATE_CALL, params);
         Log.info("validateCall-Response:{}", JSONUtils.obj2PrettyJson(cmdResp2));
+        Assert.assertTrue(cmdResp2.isSuccess());
+    }
+
+    /**
+     * 预演调用合约
+     */
+    @Test
+    public void previewCall() throws Exception {
+        BigInteger value = BigInteger.ZERO;
+        String methodName = "transfer";
+        String methodDesc = "";
+        String token = BigInteger.TEN.pow(8).toString();
+        Map params = this.makeValidateCallParams(sender, value, contractAddress_nrc20, methodName, methodDesc, toAddress0, token);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, PREVIEW_CALL, params);
+        Log.info("previewCall-Response:{}", JSONUtils.obj2PrettyJson(cmdResp2));
         Assert.assertTrue(cmdResp2.isSuccess());
     }
 

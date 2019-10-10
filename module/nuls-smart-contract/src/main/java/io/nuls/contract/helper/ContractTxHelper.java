@@ -27,10 +27,12 @@ import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.*;
+import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.manager.ContractTxValidatorManager;
 import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.model.bo.ContractBalance;
+import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
 import io.nuls.contract.model.tx.CallContractTransaction;
 import io.nuls.contract.model.tx.CreateContractTransaction;
@@ -58,6 +60,9 @@ import io.nuls.core.rpc.util.NulsDateUtils;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static io.nuls.contract.constant.ContractConstant.MAX_GASLIMIT;
 import static io.nuls.contract.constant.ContractConstant.UNLOCKED_TX;
@@ -415,6 +420,88 @@ public class ContractTxHelper {
             Log.error(e);
             return Result.getFailed(e.getErrorCode() == null ? FAILED : e.getErrorCode());
         }
+    }
+
+    public Result<ContractResult> previewCall(int chainId, byte[] senderBytes, byte[] contractAddressBytes, BigInteger value, Long gasLimit, Long price, String methodName, String methodDesc, String[][] args) {
+        try {
+            if (!ContractUtil.checkPrice(price.longValue())) {
+                return Result.getFailed(CONTRACT_MINIMUM_PRICE_ERROR);
+            }
+
+            BlockHeader blockHeader = BlockCall.getLatestBlockHeader(chainId);
+            // 当前区块高度
+            long blockHeight = blockHeader.getHeight();
+            // 当前区块状态根
+            byte[] prevStateRoot = ContractUtil.getStateRoot(blockHeader);
+
+            // 组装VM执行数据
+            ProgramCall programCall = new ProgramCall();
+            programCall.setContractAddress(contractAddressBytes);
+            programCall.setSender(senderBytes);
+            programCall.setNumber(blockHeight);
+            programCall.setMethodName(methodName);
+            programCall.setMethodDesc(methodDesc);
+            programCall.setArgs(args);
+
+            ProgramMethod method = contractHelper.getMethodInfoByContractAddress(chainId, prevStateRoot, methodName, methodDesc, contractAddressBytes);
+            if (method == null) {
+                return Result.getFailed(CONTRACT_METHOD_NOT_EXIST);
+            }
+            // 如果方法是不上链的合约调用，同步执行合约代码，不改变状态根，并返回值
+            if (method.isView()) {
+                return Result.getFailed(CONTRACT_NOT_EXECUTE_VIEW);
+            }
+            // 创建链上交易，包含智能合约
+            programCall.setValue(value);
+            programCall.setPrice(price.longValue());
+
+            // 获取VM执行器
+            ProgramExecutor programExecutor = contractHelper.getProgramExecutor(chainId);
+            // 执行VM验证合法性
+            ProgramExecutor track = programExecutor.begin(prevStateRoot);
+            programCall.setGasLimit(gasLimit);
+            ProgramResult programResult = track.call(programCall);
+
+            // 执行结果失败时，交易直接返回错误，不上链，不消耗Gas
+            if (!programResult.isSuccess()) {
+                Log.error("sender[{}], contractAddress[{}]" + programResult.getErrorMessage() + ", " + programResult.getStackTrace(), AddressTool.getStringAddressByBytes(senderBytes), AddressTool.getStringAddressByBytes(contractAddressBytes));
+                Result result = Result.getFailed(DATA_ERROR);
+                result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
+                result = checkVmResultAndReturn(programResult.getErrorMessage(), result);
+                addDebugEvents(programResult.getDebugEvents(), result);
+                return result;
+            }
+            ContractResult contractResult = new ContractResult();
+
+            contractResult.setGasUsed(programResult.getGasUsed());
+            contractResult.setPrice(price);
+            contractResult.setContractAddress(contractAddressBytes);
+            contractResult.setSender(senderBytes);
+            contractResult.setValue(value.longValue());
+            contractResult.setRemark(ContractConstant.PREVIEW_CALL_REMARK);
+            // 批量提交方式，交易track放置到外部处理合约执行结果的方法里去提交
+            contractResult.setDebugEvents(programResult.getDebugEvents());
+
+            // 返回调用结果、已使用Gas、状态根、消息事件、合约转账(从合约转出)等
+            contractResult.setError(false);
+            contractResult.setRevert(false);
+            contractResult.setResult(programResult.getResult());
+            contractResult.setEvents(programResult.getEvents());
+            contractResult.setTransfers(programResult.getTransfers());
+            contractResult.setInvokeRegisterCmds(programResult.getInvokeRegisterCmds());
+            contractResult.setContractAddressInnerCallSet(generateInnerCallSet(programResult.getInternalCalls()));
+            contractResult.setAccounts(programResult.getAccounts());
+
+            return getSuccess().setData(contractResult);
+
+        } catch (NulsException e) {
+            Log.error(e);
+            return Result.getFailed(e.getErrorCode() == null ? FAILED : e.getErrorCode());
+        }
+    }
+
+    public Set<String> generateInnerCallSet(List<ProgramInternalCall> internalCalls) {
+        return internalCalls.stream().map(a -> AddressTool.getStringAddressByBytes(a.getContractAddress())).collect(Collectors.toSet());
     }
 
 
