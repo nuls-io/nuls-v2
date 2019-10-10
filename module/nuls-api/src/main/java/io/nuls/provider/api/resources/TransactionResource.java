@@ -81,13 +81,15 @@ public class TransactionResource {
         }
         Result<TransactionDto> result = transactionTools.getTx(config.getChainId(), hash);
         RpcClientResult clientResult = ResultUtil.getRpcClientResult(result);
-        if(clientResult.isSuccess()) {
+        if (clientResult.isSuccess()) {
             TransactionDto txDto = (TransactionDto) clientResult.getData();
-            GetBlockHeaderByHeightReq req = new GetBlockHeaderByHeightReq(txDto.getBlockHeight());
-            req.setChainId(config.getChainId());
-            Result<BlockHeaderData> blockResult = blockService.getBlockHeaderByHeight(req);
-            if(blockResult.isSuccess()) {
-                txDto.setBlockHash(blockResult.getData().getHash());
+            if (txDto.getBlockHeight() >= 0) {
+                GetBlockHeaderByHeightReq req = new GetBlockHeaderByHeightReq(txDto.getBlockHeight());
+                req.setChainId(config.getChainId());
+                Result<BlockHeaderData> blockResult = blockService.getBlockHeaderByHeight(req);
+                if (blockResult.isSuccess()) {
+                    txDto.setBlockHash(blockResult.getData().getHash());
+                }
             }
         }
         return clientResult;

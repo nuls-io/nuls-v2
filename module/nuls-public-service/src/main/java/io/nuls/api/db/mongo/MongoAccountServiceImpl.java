@@ -156,7 +156,7 @@ public class MongoAccountServiceImpl implements AccountService {
         long confirmCount = mongoDBService.getCount(TX_RELATION_TABLE + chainId + "_" + index, filter);
         List<TxRelationInfo> txRelationInfoList;
         if (end <= unConfirmCount) {
-            txRelationInfoList = unConfirmLimitQuery(chainId, index, addressFilter, start, pageSize);
+            txRelationInfoList = unConfirmLimitQuery(chainId, filter, start, pageSize);
         } else if (start - 1 > unConfirmCount) {
             start = start - 1;
             start = (int) (start - unConfirmCount);
@@ -203,7 +203,7 @@ public class MongoAccountServiceImpl implements AccountService {
         return pageInfo;
     }
 
-    private List<TxRelationInfo> unConfirmLimitQuery(int chainId, int index, Bson filter, int start, int pageSize) {
+    private List<TxRelationInfo> unConfirmLimitQuery(int chainId, Bson filter, int start, int pageSize) {
         List<Document> docsList = this.mongoDBService.limitQuery(TX_UNCONFIRM_RELATION_TABLE + chainId, filter, Sorts.descending("createTime"), start, pageSize);
         List<TxRelationInfo> txRelationInfoList = new ArrayList<>();
         for (Document document : docsList) {

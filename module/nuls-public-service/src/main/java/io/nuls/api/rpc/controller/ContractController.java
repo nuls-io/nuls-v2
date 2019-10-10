@@ -21,6 +21,7 @@ import io.nuls.core.core.annotation.RpcMethod;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.StringUtils;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -140,6 +141,7 @@ public class ContractController {
         } else {
             pageInfo = tokenService.getAccountTokens(chainId, address, pageNumber, pageSize);
         }
+
 
         RpcResult result = new RpcResult();
         result.setResult(pageInfo);
@@ -796,4 +798,73 @@ public class ContractController {
         return rpcResult;
     }
 
+
+    @RpcMethod("previewCall")
+    public RpcResult previewCall(List<Object> params) throws NulsException {
+        VerifyUtils.verifyParams(params, 9);
+        int chainId;
+        String sender, contractAddress, methodName, methodDesc, value;
+        BigInteger valueBigInteger = BigInteger.ZERO;
+        long gasLimit, price;
+        Object[] args;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is invalid");
+        }
+        if (!CacheManager.isChainExist(chainId)) {
+            return RpcResult.dataNotFound();
+        }
+        try {
+            sender = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[sender] is invalid");
+        }
+        try {
+            contractAddress = (String) params.get(2);
+        } catch (Exception e) {
+            return RpcResult.paramError("[contractAddress] is invalid");
+        }
+        try {
+            methodName = (String) params.get(3);
+        } catch (Exception e) {
+            return RpcResult.paramError("[methodName] is invalid");
+        }
+        try {
+            methodDesc = (String) params.get(4);
+        } catch (Exception e) {
+            return RpcResult.paramError("[methodDesc] is invalid");
+        }
+        try {
+            value = (String) params.get(5);
+            if (StringUtils.isNotBlank(value)) {
+                valueBigInteger = new BigInteger(value);
+            }
+        } catch (Exception e) {
+            return RpcResult.paramError("[value] is invalid");
+        }
+        try {
+            gasLimit = Long.parseLong(params.get(6).toString());
+        } catch (Exception e) {
+            return RpcResult.paramError("[gasLimit] is invalid");
+        }
+        try {
+            price = Long.parseLong(params.get(7).toString());
+        } catch (Exception e) {
+            return RpcResult.paramError("[price] is invalid");
+        }
+        try {
+            List list = (List) params.get(8);
+            args = new Object[list.size()];
+            for (int i = 0; i < list.size(); i++) {
+                args[i] = list.get(i);
+            }
+        } catch (Exception e) {
+            return RpcResult.paramError("[args] is invalid");
+        }
+        RpcResult rpcResult = new RpcResult();
+        Result<Map> mapResult = WalletRpcHandler.contractPreviewCall(chainId, sender, valueBigInteger, gasLimit, price, contractAddress, methodName, methodDesc, args);
+        rpcResult.setResult(mapResult.getData());
+        return rpcResult;
+    }
 }

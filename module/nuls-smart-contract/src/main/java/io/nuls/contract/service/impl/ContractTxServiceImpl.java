@@ -31,6 +31,7 @@ import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.helper.ContractTxHelper;
 import io.nuls.contract.manager.ContractTokenBalanceManager;
+import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.contract.model.tx.CallContractTransaction;
@@ -158,6 +159,12 @@ public class ContractTxServiceImpl implements ContractTxService {
     public Result validateContractCallTx(int chainId, byte[] senderBytes, BigInteger value, Long gasLimit, Long price, byte[] contractAddressBytes,
                                          String methodName, String methodDesc, String[][] args) {
         return contractTxHelper.validateCall(chainId, senderBytes, contractAddressBytes, value, gasLimit, price, methodName, methodDesc, args);
+    }
+
+    @Override
+    public Result<ContractResult> previewContractCallTx(int chainId, byte[] senderBytes, BigInteger value, Long gasLimit, Long price, byte[] contractAddressBytes,
+                                                        String methodName, String methodDesc, String[][] args) {
+        return contractTxHelper.previewCall(chainId, senderBytes, contractAddressBytes, value, gasLimit, price, methodName, methodDesc, args);
     }
 
     private Result<byte[]> saveUnConfirmedTokenTransfer(int chainId, CallContractTransaction tx, String sender, String contractAddress, String methodName, String[][] args) {

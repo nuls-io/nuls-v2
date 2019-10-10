@@ -3,6 +3,8 @@ package io.nuls.provider.rpctools;
 import io.nuls.base.api.provider.Result;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
+import io.nuls.base.data.Transaction;
+import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
@@ -38,12 +40,15 @@ public class BlockTools implements CallRpc {
         param.put("height", height);
         try {
             Block block = callRpc(ModuleE.BL.name, "getBlockByHeight", param, (Function<Map, Block>) res -> {
-                if (res == null) {
+                if (res == null || res.isEmpty()) {
                     return null;
                 }
                 Block _block = new Block();
                 try {
                     _block.parse(new NulsByteBuffer(HexUtil.decode((String) res.get("value"))));
+                    for(Transaction tx : _block.getTxs()) {
+                        tx.setStatus(TxStatusEnum.CONFIRMED);
+                    }
                 } catch (NulsException e) {
                     Log.error(e);
                     return null;
@@ -69,12 +74,15 @@ public class BlockTools implements CallRpc {
         param.put("hash", hash);
         try {
             Block block = callRpc(ModuleE.BL.name, "getBlockByHash", param, (Function<Map, Block>) res -> {
-                if (res == null) {
+                if (res == null || res.isEmpty()) {
                     return null;
                 }
                 Block _block = new Block();
                 try {
                     _block.parse(new NulsByteBuffer(HexUtil.decode((String) res.get("value"))));
+                    for(Transaction tx : _block.getTxs()) {
+                        tx.setStatus(TxStatusEnum.CONFIRMED);
+                    }
                 } catch (NulsException e) {
                     Log.error(e);
                     return null;
@@ -98,12 +106,15 @@ public class BlockTools implements CallRpc {
         param.put("chainId", chainId);
         try {
             Block block = callRpc(ModuleE.BL.name, "latestBlock", param, (Function<Map, Block>) res -> {
-                if (res == null) {
+                if (res == null || res.isEmpty()) {
                     return null;
                 }
                 Block _block = new Block();
                 try {
                     _block.parse(new NulsByteBuffer(HexUtil.decode((String) res.get("value"))));
+                    for(Transaction tx : _block.getTxs()) {
+                        tx.setStatus(TxStatusEnum.CONFIRMED);
+                    }
                 } catch (NulsException e) {
                     Log.error(e);
                     return null;
@@ -140,7 +151,7 @@ public class BlockTools implements CallRpc {
         param.put("height", height);
         try {
             String block = callRpc(ModuleE.BL.name, "getBlockByHeight", param, (Function<Map, String>) res -> {
-                if (res == null) {
+                if (res == null || res.isEmpty()) {
                     return null;
                 }
                 return (String) res.get("value");
@@ -164,7 +175,7 @@ public class BlockTools implements CallRpc {
         param.put("hash", hash);
         try {
             String block = callRpc(ModuleE.BL.name, "getBlockByHash", param, (Function<Map, String>) res -> {
-                if (res == null) {
+                if (res == null || res.isEmpty()) {
                     return null;
                 }
                 return (String) res.get("value");
@@ -181,7 +192,7 @@ public class BlockTools implements CallRpc {
         try {
             Long block = callRpc(ModuleE.BL.name, "latestHeight", param, (Function<Map, Long>) res -> {
                 Object value = res.get("value");
-                if(value == null) {
+                if (value == null) {
                     return -1L;
                 }
                 return Long.parseLong(value.toString());

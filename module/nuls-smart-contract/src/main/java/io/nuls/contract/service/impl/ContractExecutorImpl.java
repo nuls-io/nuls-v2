@@ -26,6 +26,7 @@ package io.nuls.contract.service.impl;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.helper.ContractHelper;
+import io.nuls.contract.helper.ContractTxHelper;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.service.ContractExecutor;
@@ -51,6 +52,8 @@ public class ContractExecutorImpl implements ContractExecutor {
 
     @Autowired
     private ContractHelper contractHelper;
+    @Autowired
+    private ContractTxHelper contractTxHelper;
 
     @Override
     public ContractResult create(ProgramExecutor executor, ContractData create, long number, String preStateRoot, byte[] publicKey) {
@@ -147,14 +150,10 @@ public class ContractExecutorImpl implements ContractExecutor {
         contractResult.setEvents(programResult.getEvents());
         contractResult.setTransfers(programResult.getTransfers());
         contractResult.setInvokeRegisterCmds(programResult.getInvokeRegisterCmds());
-        contractResult.setContractAddressInnerCallSet(generateInnerCallSet(programResult.getInternalCalls()));
+        contractResult.setContractAddressInnerCallSet(contractTxHelper.generateInnerCallSet(programResult.getInternalCalls()));
         contractResult.setAccounts(programResult.getAccounts());
 
         return contractResult;
-    }
-
-    private Set<String> generateInnerCallSet(List<ProgramInternalCall> internalCalls) {
-        return internalCalls.stream().map(a -> AddressTool.getStringAddressByBytes(a.getContractAddress())).collect(Collectors.toSet());
     }
 
     @Override
