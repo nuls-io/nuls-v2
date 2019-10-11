@@ -9,7 +9,6 @@ import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.info.RpcConstants;
 import io.nuls.chain.model.dto.AccountBalance;
 import io.nuls.chain.model.dto.RegAssetDto;
-import io.nuls.chain.model.dto.RegChainDto;
 import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.model.po.ChainAsset;
@@ -79,15 +78,21 @@ public class AssetCmd extends BaseChainCmd {
             /* 组装Asset (Asset object) */
             Asset asset = new Asset();
             asset.map2pojo(params);
+            if (asset.getDecimalPlaces() < Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMin()) || asset.getDecimalPlaces() > Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMax())) {
+                return failed(CmErrorCode.ERROR_ASSET_DECIMALPLACES);
+            }
+            if (null == asset.getSymbol() || asset.getSymbol().length() > Integer.valueOf(nulsChainConfig.getAssetSymbolMax()) || asset.getSymbol().length() < 1) {
+                return failed(CmErrorCode.ERROR_ASSET_SYMBOL_LENGTH);
+            }
             asset.setDepositNuls(new BigInteger(nulsChainConfig.getAssetDepositNuls()));
             int rateToPercent = new BigDecimal(nulsChainConfig.getAssetDepositNulsDestroyRate()).multiply(BigDecimal.valueOf(100)).intValue();
             asset.setDestroyNuls(new BigInteger(nulsChainConfig.getAssetDepositNuls()).multiply(BigInteger.valueOf(rateToPercent)).divide(BigInteger.valueOf(100)));
             asset.setAvailable(true);
             BlockChain dbChain = chainService.getChain(asset.getChainId());
-            if(null==dbChain){
+            if (null == dbChain) {
                 return failed(CmErrorCode.ERROR_CHAIN_NOT_FOUND);
             }
-            if(dbChain.isDelete()){
+            if (dbChain.isDelete()) {
                 return failed(CmErrorCode.ERROR_CHAIN_REG_CMD);
             }
             if (assetService.assetExist(asset) && asset.isAvailable()) {
@@ -162,25 +167,25 @@ public class AssetCmd extends BaseChainCmd {
               Judging whether there is only one asset under the chain, and if so, proceeding with the chain cancellation transaction
              */
             BlockChain dbChain = chainService.getChain(chainId);
-            if(null == dbChain){
+            if (null == dbChain) {
                 return failed(CmErrorCode.ERROR_ASSET_NOT_EXIST);
             }
 
             List<String> assetKeyList = dbChain.getSelfAssetKeyList();
             int activeAssetCount = 0;
             String activeKey = "";
-            for(String assetKey:assetKeyList){
+            for (String assetKey : assetKeyList) {
                 Asset chainAsset = assetService.getAsset(assetKey);
-                if(null!=chainAsset && chainAsset.isAvailable()){
+                if (null != chainAsset && chainAsset.isAvailable()) {
                     activeKey = assetKey;
                     activeAssetCount++;
                 }
-                if(activeAssetCount>1){
+                if (activeAssetCount > 1) {
                     break;
                 }
             }
             Transaction tx;
-            if(activeAssetCount == 1 && activeKey.equalsIgnoreCase(dealAssetKey)) {
+            if (activeAssetCount == 1 && activeKey.equalsIgnoreCase(dealAssetKey)) {
                 /* 注销资产和链 (Destroy assets and chains) */
                 tx = new DestroyAssetAndChainTransaction();
                 try {
