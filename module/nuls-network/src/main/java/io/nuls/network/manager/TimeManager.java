@@ -25,7 +25,11 @@
 
 package io.nuls.network.manager;
 
+import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.model.StringUtils;
+import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.ManagerStatusEnum;
+import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.dto.NetTimeUrl;
@@ -88,18 +92,15 @@ public class TimeManager extends BaseManager {
         return instance;
     }
 
-
     private TimeManager() {
-        urlList.add("sgp.ntp.org.cn");
-        urlList.add("cn.ntp.org.cn");
-        urlList.add("time1.apple.com");
-        urlList.add("ntp3.aliyun.com");
-        urlList.add("ntp5.aliyun.com");
-        urlList.add("us.ntp.org.cn");
-        urlList.add("kr.ntp.org.cn");
-        urlList.add("de.ntp.org.cn");
-        urlList.add("jp.ntp.org.cn");
-        urlList.add("ntp7.aliyun.com");
+        if (0 == urlList.size()) {
+            NetworkConfig networkConfig = SpringLiteContext.getBean(NetworkConfig.class);
+            String timeServers = networkConfig.getTimeServers();
+            if (StringUtils.isNotBlank(timeServers)) {
+                String[] urlArray = timeServers.split(NetworkConstant.COMMA);
+                urlList.addAll(Arrays.asList(urlArray));
+            }
+        }
     }
 
     public static void addPeerTime(String nodeId, long requestId, long time) {
