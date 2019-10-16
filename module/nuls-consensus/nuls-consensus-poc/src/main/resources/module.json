@@ -13,6 +13,6 @@
   "blockReward": 0,
   "blockMaxSize": 4900000,
   "moduleCode": "cs",
-  "maxAgentCountOfAddress": "1",
+  "maxAgentCountOfAddress": "2",
   "mainChainCommissionRatio": 60
 }
