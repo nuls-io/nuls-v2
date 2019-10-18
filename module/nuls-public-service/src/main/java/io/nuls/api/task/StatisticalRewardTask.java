@@ -46,11 +46,7 @@ public class StatisticalRewardTask implements Runnable {
                 statisticalInfo.setChainId(chainId);
                 statisticalInfo.setLastStatisticalHeight(0);
             }
-            List<MiniBlockHeaderInfo> headerInfoList = blockService.getBlockList(chainId, statisticalInfo.getLastStatisticalHeight(), headerInfo.getHeight());
-            long count = 0;
-            for (MiniBlockHeaderInfo headerInfo1 : headerInfoList) {
-                count += headerInfo1.getTxCount();
-            }
+            long count = blockService.getBlockPackageTxCount(chainId, statisticalInfo.getLastStatisticalHeight(), headerInfo.getHeight());
             statisticalInfo.setLastStatisticalHeight(headerInfo.getHeight());
             statisticalInfo.setTxCount(statisticalInfo.getTxCount() + count);
             statisticalService.saveChainStatisticalInfo(statisticalInfo);

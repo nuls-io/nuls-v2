@@ -22,6 +22,8 @@ public interface BlockService {
 
     List<MiniBlockHeaderInfo> getBlockList(int chainId, long startHeight, long endHeight);
 
+    int getBlockPackageTxCount(int chainId, long startHeight, long endHeight);
+
     long getMaxHeight(int chainId, long endTime);
 
     void deleteBlockHeader(int chainId, long height);
