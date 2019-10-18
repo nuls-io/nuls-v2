@@ -1595,7 +1595,7 @@ _**详细描述: 根据hash获取交易**_
     "status" : 1,
     "size" : 256,
     "inBlockIndex" : 0,
-    "form" : [ {
+    "from" : [ {
       "address" : "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG",
       "assetsChainId" : 2,
       "assetsId" : 1,
