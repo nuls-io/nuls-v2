@@ -70,13 +70,13 @@ public class JsonRpcHandler extends HttpHandler {
                 return;
             }
         }
-        String content = null;
+        String content = "";
         if (!request.getMethod().equals(Method.POST)) {
-            LoggerUtil.commonLog.warn("the request is not POST!, remoteHost:" + request.getRemoteHost());
+            LoggerUtil.commonLog.warn("the request is not POST!, remoteHost:" + request.getRemoteAddr());
             try {
                 content = getParam(request);
             } catch (IOException e) {
-                LoggerUtil.commonLog.error(e);
+             //   LoggerUtil.commonLog.error(e);
             }
             LoggerUtil.commonLog.warn(content);
             response.getWriter().write(JSONUtils.obj2json(responseError("-32600", "", "0")));
