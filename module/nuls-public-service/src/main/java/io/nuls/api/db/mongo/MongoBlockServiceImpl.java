@@ -37,7 +37,7 @@ public class MongoBlockServiceImpl implements BlockService {
 
     public BlockHeaderInfo getBestBlockHeader(int chainId) {
         ApiCache apiCache = CacheManager.getCache(chainId);
-        if(apiCache == null) {
+        if (apiCache == null) {
             return null;
         }
         if (apiCache.getBestHeader() == null) {
@@ -182,6 +182,22 @@ public class MongoBlockServiceImpl implements BlockService {
             list.add(DocumentTransferTool.toInfo(document, "height", MiniBlockHeaderInfo.class));
         }
         return list;
+    }
+
+    @Override
+    public int getBlockPackageTxCount(int chainId, long startHeight, long endHeight) {
+        if (!CacheManager.isChainExist(chainId)) {
+            return 0;
+        }
+        BasicDBObject fields = new BasicDBObject();
+        fields.append("txCount", 1);
+        Bson filter = Filters.and(Filters.gt("_id", startHeight), Filters.lte("_id", endHeight));
+        List<Document> docsList = this.mongoDBService.query(BLOCK_HEADER_TABLE + chainId, filter, fields, Sorts.descending("_id"));
+        int count = 0;
+        for (Document document : docsList) {
+            count += document.getInteger("txCount");
+        }
+        return count;
     }
 
     public long getMaxHeight(int chainId, long endTime) {
