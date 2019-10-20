@@ -42,6 +42,14 @@
         "verifyFee": true,
         "verifySignature": false,
         "handler": ""
+      },
+      {
+        "type": "26",
+        "systemTx": true,
+        "unlockTx": false,
+        "verifyFee": true,
+        "verifySignature": false,
+        "handler": ""
       }
     ],
     "validMsgs": [],

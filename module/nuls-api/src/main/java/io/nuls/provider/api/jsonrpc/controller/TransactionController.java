@@ -440,7 +440,7 @@ public class TransactionController {
         dto.setPrice(new BigInteger(price));
         BigInteger fee = NulsSDKTool.calcTransferTxFee(dto);
         Map map = new HashMap();
-        map.put("value", fee);
+        map.put("value", fee.toString());
 
         return RpcResult.success(map);
     }

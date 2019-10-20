@@ -73,6 +73,17 @@ public interface ContractConstant {
 
     long CONTRACT_MINIMUM_PRICE = 25;
 
+
+
+    /**
+     * 合约资产跨链
+     */
+    long CROSS_CHAIN_GASLIMIT = 300000;
+    //TODO pierre 系统合约地址
+    byte[] CROSS_CHAIN_SYSTEM_CONTRACT = null;
+    String CROSS_CHAIN_TRANSFER_IN_METHOD_NAME = "crossChainTokenTransfer";
+    String CMD_TOKEN_OUT_CROSS_CHAIN = "tokenOutCrossChain";
+
     /**
      *
      */

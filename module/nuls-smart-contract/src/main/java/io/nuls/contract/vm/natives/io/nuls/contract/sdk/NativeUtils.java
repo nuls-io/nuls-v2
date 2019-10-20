@@ -25,7 +25,10 @@
 package io.nuls.contract.vm.natives.io.nuls.contract.sdk;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.CoinData;
+import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
+import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.enums.CmdRegisterMode;
 import io.nuls.contract.enums.CmdRegisterReturnType;
 import io.nuls.contract.helper.ContractNewTxFromOtherModuleHandler;
@@ -43,15 +46,20 @@ import io.nuls.contract.vm.natives.NativeMethod;
 import io.nuls.contract.vm.program.ProgramAccount;
 import io.nuls.contract.vm.program.ProgramInvokeRegisterCmd;
 import io.nuls.contract.vm.program.ProgramNewTx;
+import io.nuls.contract.vm.program.ProgramResult;
 import io.nuls.contract.vm.program.impl.ProgramInvoke;
 import io.nuls.contract.vm.util.Constants;
 import io.nuls.contract.vm.util.JsonUtils;
 import io.nuls.contract.vm.util.Utils;
+import io.nuls.core.constant.TxType;
 import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.crypto.Sha3Hash;
 import io.nuls.core.rpc.model.message.Response;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.IOException;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -553,38 +561,101 @@ public class NativeUtils {
                     String.format("Invoke external cmd failed. Inconsistent number of arguments. register size: [%s] your size: [%s]",
                             argNamesSize, argsSize), frame.vm.getGasUsed(), null);
         }
+
         Map argsMap = new HashMap(8);
         for (int i = 0; i < argsSize; i++) {
             argsMap.put(argNames.get(i), args[i]);
         }
+
+        byte[] senderBytes = programInvoke.getSender();
+        String contractSender = AddressTool.getStringAddressByBytes(senderBytes);
         String contractAddress = programInvoke.getAddress();
         byte[] contractAddressBytes = programInvoke.getContractAddress();
-        String contractSender = AddressTool.getStringAddressByBytes(programInvoke.getSender());
         // 固定参数 - chainId、合约地址、合约调用者地址(Mode: All mode)
         argsMap.put("chainId", currentChainId);
         argsMap.put("contractAddress", contractAddress);
         argsMap.put("contractSender", contractSender);
         // 固定参数 - 合约地址的当前余额和nonce, 当前打包的区块时间(Mode: NEW_TX)
         CmdRegisterMode cmdRegisterMode = cmdRegister.getCmdRegisterMode();
+        long blockTime = 0L;
         if (CmdRegisterMode.NEW_TX.equals(cmdRegisterMode)) {
             BlockHeaderDto blockHeaderDto = frame.vm.getBlockHeader(programInvoke.getNumber() + 1);
+            blockTime = blockHeaderDto.getTime();
             // 使用虚拟机内部维护的合约余额
             ProgramAccount account = frame.vm.getProgramExecutor().getAccount(contractAddressBytes);
             argsMap.put("contractBalance", account.getBalance().toString());
             argsMap.put("contractNonce", account.getNonce());
-            argsMap.put("blockTime", blockHeaderDto.getTime());
+            argsMap.put("blockTime", blockTime);
         }
 
-        // 调用外部接口
-        Object cmdResult = requestAndResponse(cmdRegisterManager, moduleCode, cmdName, argsMap, frame);
-
-        // 处理返回值
         ProgramInvokeRegisterCmd invokeRegisterCmd = new ProgramInvokeRegisterCmd(cmdName, argsMap, cmdRegisterMode);
-        ObjectRef objectRef = handleResult(currentChainId, contractAddressBytes, cmdResult, invokeRegisterCmd, cmdRegister, frame);
-        frame.vm.getInvokeRegisterCmds().add(invokeRegisterCmd);
+        Result result;
+        ObjectRef objectRef;
+        // tokenCrossChain
+        if(ContractConstant.CMD_TOKEN_OUT_CROSS_CHAIN.equals(cmdName)) {
+            if(!NativeAddress.isContract(senderBytes, frame)) {
+                throw new ErrorException("non-contract address", frame.vm.getGasUsed(), null);
+            }
+            //TODO pierre 检查此nrc20合约是否已注册跨链资产
 
-        Result result = NativeMethod.result(methodCode, objectRef, frame);
+            try {
+                Transaction tokenOutCrossChainTx = NativeUtils.newTokenOutCrossChainTx(currentChainId, contractAddress, contractSender, args, blockTime, frame);
+                String txHash = tokenOutCrossChainTx.getHash().toHex();
+                invokeRegisterCmd.setProgramNewTx(new ProgramNewTx(txHash, HexUtil.encode(tokenOutCrossChainTx.serialize()), tokenOutCrossChainTx));
+                objectRef = frame.heap.newString(txHash);
+            } catch (IOException e) {
+                throw new ErrorException("new tx error", frame.vm.getGasUsed(), null);
+            }
+        } else {
+            // 调用外部接口
+            Object cmdResult = requestAndResponse(cmdRegisterManager, moduleCode, cmdName, argsMap, frame);
+            // 处理返回值
+            objectRef = handleResult(currentChainId, contractAddressBytes, cmdResult, invokeRegisterCmd, cmdRegister, frame);
+        }
+        frame.vm.getInvokeRegisterCmds().add(invokeRegisterCmd);
+        result = NativeMethod.result(methodCode, objectRef, frame);
         return result;
+    }
+
+    private static Transaction newTokenOutCrossChainTx(int currentChainId, String currentContractAddress, String tokenContractAddress, String[] args, long blockTime, Frame frame) throws IOException {
+        // 检查转出人对系统合约的token授权额度
+        String fromAddress = args[0];
+        String toAddress = args[1];
+        String value = args[2];
+        String chainId = args[3];
+        String assetsId = args[4];
+        BigInteger valueBig = new BigInteger(value);
+        String[][] args1 = new String[][]{
+                new String[]{fromAddress},
+                new String[]{currentContractAddress}};
+        ProgramResult programResult = NativeAddress.call(tokenContractAddress, "allowance", "", args1, BigInteger.ZERO, frame);
+        String authorizedAmounts = programResult.getResult();
+        BigInteger authorizedmountsBig = new BigInteger(authorizedAmounts);
+        if(authorizedmountsBig.compareTo(valueBig) < 0) {
+            throw new ErrorException("No enough amount for authorization", frame.vm.getGasUsed(), null);
+        }
+        // 转移转出人的token到系统合约当中
+        args1 = new String[][]{
+                new String[]{fromAddress},
+                new String[]{currentContractAddress},
+                new String[]{value}};
+        programResult = NativeAddress.call(tokenContractAddress, "transferFrom", null, args1, BigInteger.ZERO, frame);
+        if(!Boolean.parseBoolean(programResult.getResult())) {
+            throw new ErrorException("transfer token error", frame.vm.getGasUsed(), null);
+        }
+        // 生成合约资产跨链转出交易
+        Transaction tx = new Transaction();
+        CoinData coinData = new CoinData();
+        CoinTo to = new CoinTo();
+        to.setAmount(valueBig);
+        to.setAddress(NativeAddress.toBytes(toAddress));
+        to.setAssetsChainId(Integer.parseInt(chainId));
+        to.setAssetsId(Integer.parseInt(assetsId));
+        coinData.getTo().add(to);
+        tx.setType(TxType.CONTRACT_TOKEN_CROSS_TRANSFER);
+        tx.setTime(blockTime);
+        tx.setCoinData(coinData.serialize());
+        return tx;
     }
 
     private static Object requestAndResponse(CmdRegisterManager cmdRegisterManager, String moduleCode, String cmdName, Map argsMap, Frame frame) {

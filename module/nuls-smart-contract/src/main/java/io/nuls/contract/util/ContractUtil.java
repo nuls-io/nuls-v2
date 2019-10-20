@@ -26,10 +26,7 @@ package io.nuls.contract.util;
 import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.Address;
-import io.nuls.base.data.BlockExtendsData;
-import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.Transaction;
+import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.TransactionSignature;
 import io.nuls.contract.constant.ContractConstant;
@@ -47,6 +44,7 @@ import io.nuls.contract.model.txdata.DeleteContractData;
 import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.core.basic.Result;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.TxType;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.model.StringUtils;
@@ -147,15 +145,19 @@ public class ContractUtil {
         ContractData contractData = null;
         boolean isContractTx = true;
         switch (tx.getType()) {
+            case CALL_CONTRACT:
+                CallContractData call = new CallContractData();
+                call.parse(tx.getTxData(), 0);
+                contractData = call;
+                break;
             case CREATE_CONTRACT:
                 CreateContractData create = new CreateContractData();
                 create.parse(tx.getTxData(), 0);
                 contractData = create;
                 break;
-            case CALL_CONTRACT:
-                CallContractData call = new CallContractData();
-                call.parse(tx.getTxData(), 0);
-                contractData = call;
+            // add by pierre at 2019-10-20
+            case CROSS_CHAIN:
+                contractData = parseCrossChainTx(tx);
                 break;
             case DELETE_CONTRACT:
                 DeleteContractData delete = new DeleteContractData();
@@ -171,6 +173,42 @@ public class ContractUtil {
             contractTransaction = new ContractWrapperTransaction(tx, tx.getTxHex(), contractData);
         }
         return contractTransaction;
+    }
+
+    public static CallContractData parseCrossChainTx(Transaction tx) throws NulsException {
+        CoinData coinData = tx.getCoinDataInstance();
+        //TODO pierre 增加交易类型判断，跨链转账to资产识别为已注册的合约跨链资产，则设置合约调用
+        String nrcContractAddress = "//TODO pierr";
+
+        // pierre 解析跨链转账交易，设置调用合约的参数，特殊设置 sender == null
+        List<CoinFrom> fromList = coinData.getFrom();
+        List<CoinTo> toList = coinData.getTo();
+        CoinFrom from = fromList.get(0);
+        CoinTo coinTo = toList.get(0);
+        byte[] fromAddress = from.getAddress();
+        int assetsChainId = coinTo.getAssetsChainId();
+        int assetsId = coinTo.getAssetsId();
+        byte[] toAddress = coinTo.getAddress();
+        BigInteger amount = coinTo.getAmount();
+
+        CallContractData contractData = new CallContractData();
+        contractData.setSender(null);
+        contractData.setGasLimit(CROSS_CHAIN_GASLIMIT);
+        contractData.setPrice(CONTRACT_MINIMUM_PRICE);
+        contractData.setMethodName(CROSS_CHAIN_TRANSFER_IN_METHOD_NAME);
+        contractData.setValue(BigInteger.ZERO);
+        String[][] args = new String[][]{
+                new String[]{nrcContractAddress},
+                //TODO pierre 平行链地址，如何转换成字符串
+                new String[]{AddressTool.getStringAddressByBytes(fromAddress)},
+                new String[]{AddressTool.getStringAddressByBytes(toAddress)},
+                new String[]{amount.toString()},
+                new String[]{String.valueOf(assetsChainId)},
+                new String[]{String.valueOf(assetsId)}};
+        contractData.setArgsCount((short) args.length);
+        contractData.setArgs(args);
+        contractData.setContractAddress(CROSS_CHAIN_SYSTEM_CONTRACT);
+        return contractData;
     }
 
     public static String[][] twoDimensionalArray(Object[] args) {
@@ -506,7 +544,7 @@ public class ContractUtil {
         boolean isAdded = batchInfo.addGasCostTotal(gasUsed, contractResult.getHash());
         if(!isAdded) {
             contractResult.setError(true);
-            contractResult.setErrorMessage("Exceed tx count [500] or gas limit of block [12,000,000 gas], the contract transaction ["+ contractResult.getHash() +"] revert to package queue.");
+            contractResult.setErrorMessage("Exceed tx count [600] or gas limit of block [13,000,000 gas], the contract transaction ["+ contractResult.getHash() +"] revert to package queue.");
         }
         return isAdded;
     }
@@ -586,6 +624,9 @@ public class ContractUtil {
     }
 
     public static byte[] extractPublicKey(Transaction tx) {
+        if(tx.getTransactionSignature() == null) {
+            return null;
+        }
         TransactionSignature signature = new TransactionSignature();
         try {
             signature.parse(tx.getTransactionSignature(), 0);

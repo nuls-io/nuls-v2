@@ -32,6 +32,7 @@ import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -68,6 +69,19 @@ public class TransactionCall {
             throw new NulsException(e);
         }
     }
+
+    public static Map getTxList(int chainId, List<String> txHashList) throws NulsException {
+        Map<String, Object> params = new HashMap(4);
+        params.put(Constants.CHAIN_ID, chainId);
+        params.put("txHashList", txHashList);
+        try {
+            return (Map) CallHelper.request(ModuleE.TX.abbr, "tx_getBlockTxs", params);
+        } catch (Exception e) {
+            throw new NulsException(e);
+        }
+    }
+
+
 
     public static boolean baseValidateTx(int chainId, String txData) throws NulsException {
         Map<String, Object> params = new HashMap(4);

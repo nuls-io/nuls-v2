@@ -155,13 +155,17 @@ public class ContractServiceImpl implements ContractService {
             if (Log.isDebugEnabled()) {
                 Log.debug("[Invoke Contract] TxType is [{}], hash is [{}]", tx.getType(), tx.getHash().toString());
             }
+            ContractWrapperTransaction wrapperTx = ContractUtil.parseContractTransaction(tx);
+            // add by pierre at 2019-10-20
+            if(wrapperTx == null) {
+                return getSuccess();
+            }
             Chain chain = contractHelper.getChain(chainId);
             BatchInfo batchInfo = chain.getBatchInfo();
+            wrapperTx.setOrder(batchInfo.getAndIncreaseTxCounter());
             byte[] contractAddressBytes = ContractUtil.extractContractAddressFromTxData(tx);
             String contractAddress = AddressTool.getStringAddressByBytes(contractAddressBytes);
             ContractContainer container = batchInfo.newOrGetContractContainer(contractAddress);
-            ContractWrapperTransaction wrapperTx = ContractUtil.parseContractTransaction(tx);
-            wrapperTx.setOrder(batchInfo.getAndIncreaseTxCounter());
 
             // 验证合约交易
             Result validResult = this.validContractTx(chainId, tx);

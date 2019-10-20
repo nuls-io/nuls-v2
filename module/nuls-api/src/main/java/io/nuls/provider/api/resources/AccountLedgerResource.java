@@ -274,7 +274,7 @@ public class AccountLedgerResource {
     public RpcClientResult calcTransferTxFee(TransferTxFeeDto dto) {
         BigInteger fee = NulsSDKTool.calcTransferTxFee(dto);
         Map map = new HashMap();
-        map.put("value", fee);
+        map.put("value", fee.toString());
         RpcClientResult result = RpcClientResult.getSuccess(map);
         return result;
     }

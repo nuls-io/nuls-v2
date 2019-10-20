@@ -127,4 +127,9 @@ public class TxType {
      * */
     public static final int VERIFIER_INIT = 25;
 
+    /**
+     * 合约token跨链转账
+     * contract token cross transfer tx
+     */
+    public static final int CONTRACT_TOKEN_CROSS_TRANSFER = 26;
 }

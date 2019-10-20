@@ -38,6 +38,7 @@ import io.nuls.contract.model.bo.ContractTempTransaction;
 import io.nuls.contract.model.dto.ContractPackageDto;
 import io.nuls.contract.model.dto.ModuleCmdRegisterDto;
 import io.nuls.contract.model.po.ContractOfflineTxHashPo;
+import io.nuls.contract.rpc.call.TransactionCall;
 import io.nuls.contract.service.ContractService;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
@@ -129,7 +130,7 @@ public class ContractCmd extends BaseCmd {
             String hash = tx.getHash().toHex();
             Map<String, Boolean> dealResult = new HashMap<>(2);
             if(!contractHelper.getChain(chainId).getBatchInfo().checkGasCostTotal(hash)) {
-                Log.warn("Exceed tx count [500] or gas limit of block [12,000,000 gas], the contract transaction [{}] revert to package queue.", hash);
+                Log.warn("Exceed tx count [600] or gas limit of block [13,000,000 gas], the contract transaction [{}] revert to package queue.", hash);
                 dealResult.put(RPC_RESULT_KEY, false);
                 return success(dealResult);
             }
@@ -340,6 +341,37 @@ public class ContractCmd extends BaseCmd {
             }
             resultMap.put(RPC_COLLECTION_RESULT_KEY, resultList);
             return success(resultMap);
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
+    @CmdAnnotation(cmd = CONTRACT_OFFLINE_TX_LIST, version = 1.0, description = "返回指定区块中合约生成交易（合约返回GAS交易除外）的列表（合约新生成的交易除合约返回GAS交易外，不保存到区块中，合约模块保存了这些交易和指定区块的关系）/contract offline tx hash list")
+    @Parameters(value = {
+        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+        @Parameter(parameterName = "blockHash", parameterType = "String", parameterDes = "区块hash")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+        @Key(name = "txList", valueType = List.class, valueElement = String.class, description = "返回交易序列化数据字符串集合")
+    }))
+    public Response contractOfflineTxList(Map<String, Object> params) {
+        try {
+            Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
+            String blockHash = (String) params.get("blockHash");
+
+            Result<ContractOfflineTxHashPo> result = contractService.getContractOfflineTxHashList(chainId, blockHash);
+            if (result.isFailed()) {
+                return wrapperFailed(result);
+            }
+
+            List<byte[]> hashList = result.getData().getHashList();
+            List<String> resultList = new ArrayList<>(hashList.size());
+            for (byte[] hash : hashList) {
+                resultList.add(RPCUtil.encode(hash));
+            }
+            return success(TransactionCall.getTxList(chainId, resultList));
         } catch (Exception e) {
             Log.error(e);
             return failed(e.getMessage());

@@ -91,7 +91,6 @@ public class CmdRegisterManager implements InitializingBean {
         for(CmdRegisterDto dto : cmdRegisterList) {
             result = this.registerCmd(chain, moduleCode, dto.getCmdName(), dto.getCmdRegisterMode(), dto.getArgNames(), dto.getCmdRegisterReturnType());
             if(result.isFailed()) {
-                //TODO pierre 清除当前注册的cmd信息
                 return result;
             }
         }

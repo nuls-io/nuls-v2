@@ -250,7 +250,7 @@ public class NativeAddress {
         return array;
     }
 
-    private static ProgramResult call(String address, String methodName, String methodDesc, String[][] args, BigInteger value, Frame frame) {
+    public static ProgramResult call(String address, String methodName, String methodDesc, String[][] args, BigInteger value, Frame frame) {
         if (value.compareTo(BigInteger.ZERO) < 0) {
             throw new ErrorException(String.format("amount less than zero, value=%s", value), frame.vm.getGasUsed(), null);
         }
@@ -345,20 +345,7 @@ public class NativeAddress {
     private static Result isContract(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         ObjectRef addressRef = methodArgs.objectRef;
         String address = frame.heap.runToString(addressRef);
-        byte[] contractAddress = frame.vm.getProgramInvoke().getContractAddress();
-        byte[] itself = NativeAddress.toBytes(address);
-
-        boolean verify = false;
-        do {
-            if (Arrays.equals(contractAddress, itself)) {
-                verify = true;
-                break;
-            }
-            if (frame.heap.existContract(itself)) {
-                verify = true;
-                break;
-            }
-        } while (false);
+        boolean verify = isContract(NativeAddress.toBytes(address), frame);
         Result result = NativeMethod.result(methodCode, verify, frame);
         return result;
     }
@@ -383,6 +370,17 @@ public class NativeAddress {
         } catch (Exception e) {
             throw new RuntimeException("address error", e);
         }
+    }
+
+    public static boolean isContract(byte[] address, Frame frame) {
+        byte[] contractAddress = frame.vm.getProgramInvoke().getContractAddress();
+        if (Arrays.equals(contractAddress, address)) {
+            return true;
+        }
+        if (frame.heap.existContract(address)) {
+            return true;
+        }
+        return false;
     }
 
     public static boolean validAddress(int chainId, String str) {
