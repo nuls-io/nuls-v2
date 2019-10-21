@@ -28,9 +28,13 @@ import io.nuls.base.protocol.ProtocolLoader;
 import io.nuls.contract.config.ContractConfig;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractDBConstant;
+import io.nuls.contract.enums.CmdRegisterMode;
+import io.nuls.contract.enums.CmdRegisterReturnType;
 import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.model.bo.ContractTokenAssetsInfo;
 import io.nuls.contract.model.bo.config.ConfigBean;
+import io.nuls.contract.model.dto.CmdRegisterDto;
+import io.nuls.contract.model.dto.ModuleCmdRegisterDto;
 import io.nuls.contract.rpc.call.LedgerCall;
 import io.nuls.contract.storage.ConfigStorageService;
 import io.nuls.contract.util.Log;
@@ -42,7 +46,9 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.rockdb.constant.DBErrorCode;
 import io.nuls.core.rockdb.service.RocksDBService;
+import io.nuls.core.rpc.model.ModuleE;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -59,12 +65,12 @@ public class ChainManager {
 
     @Autowired
     private VMContext vmContext;
-
     @Autowired
     private ConfigStorageService configStorageService;
-
     @Autowired
     private ContractConfig contractConfig;
+    @Autowired
+    private CmdRegisterManager cmdRegisterManager;
 
     private Map<Integer, Chain> chainMap = new ConcurrentHashMap<>();
 
@@ -118,6 +124,14 @@ public class ChainManager {
                     tokenAssetsContractAddressInfoMap.put(chainId + "-" + assetId, tokenContractAddress);
                 });
             }
+            // 注册智能合约-token跨链转出命令
+            ModuleCmdRegisterDto dto = new ModuleCmdRegisterDto();
+            dto.setChainId(chainId);
+            dto.setModuleCode(ModuleE.SC.abbr);
+            List<CmdRegisterDto> list = new ArrayList<>();
+            list.add(new CmdRegisterDto(ContractConstant.CMD_TOKEN_OUT_CROSS_CHAIN, CmdRegisterMode.NEW_TX.mode(), List.of("from", "to", "value", "chainId", "assetsId"), CmdRegisterReturnType.STRING.type()));
+            dto.setCmdRegisterList(list);
+            cmdRegisterManager.registerCmd(dto);
 
         }
     }

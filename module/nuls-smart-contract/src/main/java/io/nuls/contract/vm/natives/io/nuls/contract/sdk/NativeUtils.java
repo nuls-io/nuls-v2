@@ -596,7 +596,7 @@ public class NativeUtils {
         ProgramInvokeRegisterCmd invokeRegisterCmd = new ProgramInvokeRegisterCmd(cmdName, argsMap, cmdRegisterMode);
         Result result;
         ObjectRef objectRef;
-        // tokenCrossChain
+        // token跨链转出命令
         if(ContractConstant.CMD_TOKEN_OUT_CROSS_CHAIN.equals(cmdName)) {
             byte[] nrc20Bytes = senderBytes;
             String nrc20 = contractSender;
@@ -620,7 +620,7 @@ public class NativeUtils {
                 e.printStackTrace();
                 throw new ErrorException("The asset is not a cross-chain asset[1]", frame.vm.getGasUsed(), null);
             }
-
+            // 生成token跨链转出交易
             try {
                 Transaction tokenOutCrossChainTx = NativeUtils.newTokenOutCrossChainTx(currentChainId, contractAddress, contractSender, args, blockTime, frame);
                 String txHash = tokenOutCrossChainTx.getHash().toHex();
