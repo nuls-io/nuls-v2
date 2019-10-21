@@ -83,6 +83,7 @@ public interface ContractConstant {
     byte[] CROSS_CHAIN_SYSTEM_CONTRACT = null;
     String CROSS_CHAIN_TRANSFER_IN_METHOD_NAME = "crossChainTokenTransfer";
     String CMD_TOKEN_OUT_CROSS_CHAIN = "tokenOutCrossChain";
+    int TOKEN_ASSET_TYPE = 2;
 
     /**
      *

@@ -32,9 +32,13 @@ import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.enums.CmdRegisterMode;
 import io.nuls.contract.enums.CmdRegisterReturnType;
 import io.nuls.contract.helper.ContractNewTxFromOtherModuleHandler;
+import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.manager.CmdRegisterManager;
+import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.model.bo.CmdRegister;
+import io.nuls.contract.model.bo.ContractTokenAssetsInfo;
 import io.nuls.contract.model.dto.BlockHeaderDto;
+import io.nuls.contract.rpc.call.ChainManagerCall;
 import io.nuls.contract.sdk.Event;
 import io.nuls.contract.vm.*;
 import io.nuls.contract.vm.code.ClassCode;
@@ -55,6 +59,7 @@ import io.nuls.core.constant.TxType;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.crypto.Sha3Hash;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.model.message.Response;
 import org.apache.commons.lang3.StringUtils;
 
@@ -593,10 +598,28 @@ public class NativeUtils {
         ObjectRef objectRef;
         // tokenCrossChain
         if(ContractConstant.CMD_TOKEN_OUT_CROSS_CHAIN.equals(cmdName)) {
-            if(!NativeAddress.isContract(senderBytes, frame)) {
+            byte[] nrc20Bytes = senderBytes;
+            String nrc20 = contractSender;
+            if(!NativeAddress.isContract(nrc20Bytes, frame)) {
                 throw new ErrorException("non-contract address", frame.vm.getGasUsed(), null);
             }
-            //TODO pierre 检查此nrc20合约是否已注册跨链资产
+            // 检查此nrc20合约是否已注册跨链资产
+            ChainManager chainManager = SpringLiteContext.getBean(ChainManager.class);
+            Chain chain = chainManager.getChainMap().get(currentChainId);
+            Map<String, ContractTokenAssetsInfo> tokenAssetsInfoMap = chain.getTokenAssetsInfoMap();
+            ContractTokenAssetsInfo tokenAssetsInfo = tokenAssetsInfoMap.get(nrc20);
+            if(tokenAssetsInfo == null) {
+                throw new ErrorException("The token is not registered", frame.vm.getGasUsed(), null);
+            }
+            try {
+                boolean isCrossAssets = ChainManagerCall.isCrossAssets(currentChainId, tokenAssetsInfo.getAssetsId());
+                if(!isCrossAssets) {
+                    throw new ErrorException("The asset is not a cross-chain asset[0]", frame.vm.getGasUsed(), null);
+                }
+            } catch (NulsException e) {
+                e.printStackTrace();
+                throw new ErrorException("The asset is not a cross-chain asset[1]", frame.vm.getGasUsed(), null);
+            }
 
             try {
                 Transaction tokenOutCrossChainTx = NativeUtils.newTokenOutCrossChainTx(currentChainId, contractAddress, contractSender, args, blockTime, frame);

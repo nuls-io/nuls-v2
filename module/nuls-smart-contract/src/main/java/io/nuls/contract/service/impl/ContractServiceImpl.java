@@ -31,6 +31,7 @@ import io.nuls.base.data.Transaction;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.helper.ContractConflictChecker;
 import io.nuls.contract.helper.ContractHelper;
+import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.manager.ContractTxProcessorManager;
 import io.nuls.contract.manager.ContractTxValidatorManager;
 import io.nuls.contract.model.bo.*;
@@ -87,6 +88,9 @@ public class ContractServiceImpl implements ContractService {
 
     @Autowired
     private ContractHelper contractHelper;
+
+    @Autowired
+    private ChainManager chainManager;
 
     @Autowired
     private ContractExecuteResultStorageService contractExecuteResultStorageService;
@@ -155,7 +159,7 @@ public class ContractServiceImpl implements ContractService {
             if (Log.isDebugEnabled()) {
                 Log.debug("[Invoke Contract] TxType is [{}], hash is [{}]", tx.getType(), tx.getHash().toString());
             }
-            ContractWrapperTransaction wrapperTx = ContractUtil.parseContractTransaction(tx);
+            ContractWrapperTransaction wrapperTx = ContractUtil.parseContractTransaction(tx, chainManager);
             // add by pierre at 2019-10-20
             if(wrapperTx == null) {
                 return getSuccess();
