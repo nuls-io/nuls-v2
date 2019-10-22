@@ -31,6 +31,16 @@ package io.nuls.ledger.constant;
  * @author lanjinsheng
  */
 public class LedgerConstant {
+    /**
+     * 基础类型与合约类型
+     */
+    public static final int COMMON_ASSET_TYPE = 1;
+    public static final int CONTRACT_ASSET_TYPE = 2;
+    /**
+     * 资产小数分割位
+     */
+    public static final int DECIMAL_PLACES_MIN = 0;
+    public static final int DECIMAL_PLACES_MAX = 18;
 
     public static int UNCONFIRMED_NONCE = 0;
     public static int CONFIRMED_NONCE = 1;

@@ -22,30 +22,17 @@
  * SOFTWARE.
  *
  */
-package io.nuls.ledger.rpc.call;
-
+package io.nuls.ledger.model.tx;
 
 import io.nuls.base.data.Transaction;
-import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.exception.NulsException;
+import io.nuls.core.constant.TxType;
 
 /**
  * @author lan
- * @description 调用外部区块模块接口
- * @date 2018/12/07
- **/
-public interface CallRpcService {
-    long getBlockLatestHeight(int chainId);
-    /**
-     * 交易签名
-     * transaction signature
-     *
-     * @param chainId
-     * @param address
-     * @param password
-     * @param tx
-     */
-    ErrorCode transactionSignature(int chainId, String address, String password, Transaction tx) throws NulsException;
-    ErrorCode newTx(Transaction tx);
-
+ * @date 2018/11/19
+ */
+public class AssetRegTransaction extends Transaction {
+    public AssetRegTransaction() {
+        super(TxType.LEDGER_ASSET_REG_TRANSFER);
+    }
 }

@@ -65,7 +65,9 @@ public class LedgerBootstrap extends RpcModule {
 
         return new Module[]{
                 new Module(ModuleE.NW.abbr, "1.0"),
-                new Module(ModuleE.BL.abbr, "1.0")};
+                new Module(ModuleE.BL.abbr, "1.0"),
+                new Module(ModuleE.AC.abbr, "1.0"),
+        };
 
     }
 

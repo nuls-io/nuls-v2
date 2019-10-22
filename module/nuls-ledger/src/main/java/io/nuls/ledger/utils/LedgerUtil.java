@@ -7,10 +7,14 @@ import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.log.Log;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.ledger.constant.LedgerConstant;
+import io.nuls.ledger.model.tx.txdata.TxLedgerAsset;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Map;
 
 /**
  * Created by lanjinsheng on 2019/01/02
@@ -141,5 +145,16 @@ public class LedgerUtil {
         int  version = ProtocolGroupManager.getCurrentVersion(chainId);
         LoggerUtil.logger(chainId).debug("verion={}",version);
         return version;
+    }
+    public static TxLedgerAsset map2TxLedgerAsset(Map<String, Object> map) {
+        TxLedgerAsset txLedgerAsset = new TxLedgerAsset();
+        txLedgerAsset.setName(String.valueOf(map.get("assetName")));
+        BigInteger initNumber = new BigInteger(String.valueOf(map.get("initNumber")));
+        txLedgerAsset.setInitNumber(initNumber);
+        txLedgerAsset.setDecimalPlaces(Short.valueOf(map.get("decimalPlaces").toString()));
+        txLedgerAsset.setSymbol(String.valueOf(map.get("assetSymbol")));
+        txLedgerAsset.setAddress(AddressTool.getAddress(map.get("assetOwnerAddress").toString()));
+        return txLedgerAsset;
+
     }
 }

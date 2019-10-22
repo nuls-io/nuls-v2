@@ -1,0 +1,237 @@
+/*-
+ * ⁣⁣
+ * MIT License
+ * ⁣⁣
+ * Copyright (C) 2017 - 2018 nuls.io
+ * ⁣⁣
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ * ⁣⁣
+ */
+package io.nuls.ledger.service.impl;
+
+import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.NulsHash;
+import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.model.BigIntegerUtils;
+import io.nuls.core.model.ByteUtils;
+import io.nuls.core.model.FormatValidUtils;
+import io.nuls.ledger.config.LedgerConfig;
+import io.nuls.ledger.constant.LedgerConstant;
+import io.nuls.ledger.constant.LedgerErrorCode;
+import io.nuls.ledger.model.po.LedgerAsset;
+import io.nuls.ledger.model.tx.txdata.TxLedgerAsset;
+import io.nuls.ledger.service.AssetRegMngService;
+import io.nuls.ledger.storage.AssetRegMngRepository;
+import io.nuls.ledger.utils.LoggerUtil;
+
+import java.math.BigInteger;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+
+/**
+ * 资产登记与管理接口
+ *
+ * @author lanjinsheng .
+ * @date 2019/10/22
+ */
+@Component
+public class AssetRegMngServiceImpl implements AssetRegMngService {
+    @Autowired
+    LedgerConfig ledgerConfig;
+    /**
+     * key chainID,value  assetId
+     */
+    Map<String, AtomicInteger> DB_ASSETS_ID_MAX_MAP = new ConcurrentHashMap<>();
+    @Autowired
+    AssetRegMngRepository assetRegMngRepository;
+
+    @Override
+    public void initDBAssetsIdMap() throws Exception {
+        int assetId = assetRegMngRepository.maxAssetId(ledgerConfig.getMainChainId());
+        DB_ASSETS_ID_MAX_MAP.put(String.valueOf(ledgerConfig.getMainChainId()), new AtomicInteger(assetId));
+    }
+
+    @Override
+    public synchronized int getAndSetAssetIdByTemp(int chainId, int assetSize) {
+        AtomicInteger assetIdAtomic = DB_ASSETS_ID_MAX_MAP.get(String.valueOf(chainId));
+        int assetId = assetIdAtomic.addAndGet(assetSize);
+        return assetId;
+    }
+
+    @Override
+    public synchronized int getRegAssetId(int chainId) {
+        AtomicInteger assetIdAtomic = DB_ASSETS_ID_MAX_MAP.get(String.valueOf(chainId));
+        return assetIdAtomic.get();
+    }
+
+    @Override
+    public String getRegAssetContractAddr(int chainId, int assetId) throws Exception {
+        LedgerAsset ledgerAsset = assetRegMngRepository.getLedgerAssetByAssetId(chainId, assetId);
+        if (null != ledgerAsset) {
+            return AddressTool.getStringAddressByBytes(ledgerAsset.getAssetOwnerAddress());
+        }
+        return null;
+    }
+
+    @Override
+    public int getRegAssetId(int chainId, String contractAddr) throws Exception {
+        int assetId = assetRegMngRepository.getLedgerAssetIdByContractAddr(chainId, AddressTool.getAddress(contractAddr));
+        return assetId;
+    }
+
+    @Override
+    public ErrorCode batchAssetRegValidator(TxLedgerAsset txLedgerAsset, byte[] address, BigInteger destroyAsset, int chainId) {
+        ErrorCode errorCode = commonRegValidator(txLedgerAsset);
+        if (null != errorCode) {
+            return errorCode;
+        }
+        //判断黑洞地址
+        if (!Arrays.equals(address, AddressTool.getAddressByPubKeyStr(ledgerConfig.getBlackHolePublicKey(), chainId))) {
+            LoggerUtil.COMMON_LOG.error("toAddress is not blackHole");
+            return LedgerErrorCode.TX_IS_WRONG;
+        }
+        if (!BigIntegerUtils.isEqual(destroyAsset, BigInteger.valueOf(ledgerConfig.getAssetRegDestroyAmount()))) {
+            LoggerUtil.COMMON_LOG.error("destroyNuls={} is error", destroyAsset);
+            return LedgerErrorCode.TX_IS_WRONG;
+        }
+        return null;
+    }
+
+    @Override
+    public ErrorCode commonRegValidator(TxLedgerAsset asset) {
+        if (asset.getDecimalPlaces() < LedgerConstant.DECIMAL_PLACES_MIN || asset.getDecimalPlaces() > LedgerConstant.DECIMAL_PLACES_MAX) {
+            return LedgerErrorCode.ERROR_ASSET_DECIMALPLACES;
+        }
+        if (FormatValidUtils.validTokenNameOrSymbol(asset.getSymbol())) {
+            return LedgerErrorCode.ERROR_ASSET_SYMBOL;
+        }
+        if (FormatValidUtils.validTokenNameOrSymbol(asset.getName())) {
+            return LedgerErrorCode.ERROR_ASSET_NAME;
+        }
+        return null;
+    }
+
+    @Override
+    public void registerTxAssets(int chainId, List<LedgerAsset> ledgerAssets) throws Exception {
+        Map<byte[], byte[]> assets = new HashMap<>(ledgerAssets.size());
+        Map<byte[], byte[]> hashMap = new HashMap<>(ledgerAssets.size());
+        int assetId = getRegAssetId(chainId);
+        for (LedgerAsset ledgerAsset : ledgerAssets) {
+            ledgerAsset.setAssetType(LedgerConstant.COMMON_ASSET_TYPE);
+            ledgerAsset.setAssetId(assetId++);
+            assets.put(ByteUtils.intToBytes(ledgerAsset.getAssetId()), ledgerAsset.serialize());
+            hashMap.put(ByteUtils.toBytes(ledgerConfig.getEncoding(), ledgerAsset.getTxHash()), ByteUtils.intToBytes(ledgerAsset.getAssetId()));
+        }
+        assetRegMngRepository.batchSaveLedgerAssetReg(chainId, assets, hashMap);
+        getAndSetAssetIdByTemp(chainId, ledgerAssets.size());
+    }
+
+    @Override
+    public void rollBackTxAssets(int chainId, List<NulsHash> hashList) throws Exception {
+        List<byte[]> list = new ArrayList<>();
+        for (NulsHash nulsHash : hashList) {
+            list.add(nulsHash.getBytes());
+        }
+        assetRegMngRepository.batchRollBackLedgerAssetReg(chainId, list);
+        initDBAssetsIdMap();
+    }
+
+    @Override
+    public int registerContractAsset(int chainId, LedgerAsset ledgerAssets) throws Exception {
+        ledgerAssets.setAssetId(getAndSetAssetIdByTemp(chainId, 1));
+        assetRegMngRepository.saveLedgerAssetReg(chainId, ledgerAssets);
+        return ledgerAssets.getAssetId();
+    }
+
+    @Override
+    public void rollBackContractAsset(int chainId, String contractAddress) throws Exception {
+        byte[] address = AddressTool.getAddress(contractAddress);
+        int assetId = assetRegMngRepository.getLedgerAssetIdByContractAddr(chainId, address);
+        if (assetId > 0) {
+            assetRegMngRepository.deleteLedgerAssetReg(chainId, assetId);
+            assetRegMngRepository.deleteLedgerAssetRegIndex(chainId, address);
+        }
+    }
+
+    Map<String, Object> getAssetMapByLedgerAsset(LedgerAsset ledgerAsset) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("assetId", ledgerAsset.getAssetId());
+        map.put("assetType", ledgerAsset.getAssetType());
+        map.put("assetOwnerAddress", AddressTool.getStringAddressByBytes(ledgerAsset.getAssetOwnerAddress()));
+        map.put("initNumber", ledgerAsset.getInitNumber());
+        map.put("decimalPlace", ledgerAsset.getDecimalPlaces());
+        map.put("assetName", ledgerAsset.getAssetName());
+        map.put("assetSymbol", ledgerAsset.getSymbol());
+        map.put("txHash", ledgerAsset.getTxHash());
+        return map;
+    }
+
+    @Override
+    public List<Map<String, Object>> getLedgerRegAssets(int chainId, int assetType) throws Exception {
+        List<LedgerAsset> assets = assetRegMngRepository.getAllRegLedgerAssets(chainId);
+        List<Map<String, Object>> rtList = new ArrayList<>();
+        if (LedgerConstant.COMMON_ASSET_TYPE == assetType) {
+            for (LedgerAsset ledgerAsset : assets) {
+                if (LedgerConstant.COMMON_ASSET_TYPE == ledgerAsset.getAssetType()) {
+                    rtList.add(getAssetMapByLedgerAsset(ledgerAsset));
+                }
+            }
+        } else if (LedgerConstant.CONTRACT_ASSET_TYPE == assetType) {
+            for (LedgerAsset ledgerAsset : assets) {
+                if (LedgerConstant.CONTRACT_ASSET_TYPE == ledgerAsset.getAssetType()) {
+                    rtList.add(getAssetMapByLedgerAsset(ledgerAsset));
+                }
+            }
+        } else {
+            for (LedgerAsset ledgerAsset : assets) {
+                rtList.add(getAssetMapByLedgerAsset(ledgerAsset));
+            }
+        }
+        return rtList;
+    }
+
+    @Override
+    public Map<String, Object> getLedgerRegAsset(int chainId, String txHash) throws Exception {
+        byte[] hashByte = HexUtil.decode(txHash);
+        int assetId = assetRegMngRepository.getLedgerAssetIdByHash(chainId, hashByte);
+        if (assetId > 0) {
+            LedgerAsset ledgerAsset = assetRegMngRepository.getLedgerAssetByAssetId(chainId, assetId);
+            if (null != ledgerAsset) {
+                return getAssetMapByLedgerAsset(ledgerAsset);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> getLedgerRegAsset(int chainId, int assetId) throws Exception {
+        LedgerAsset ledgerAsset = assetRegMngRepository.getLedgerAssetByAssetId(chainId, assetId);
+        if (null != ledgerAsset) {
+            return getAssetMapByLedgerAsset(ledgerAsset);
+        }
+        return null;
+    }
+
+}
+
+

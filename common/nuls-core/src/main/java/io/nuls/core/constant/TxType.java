@@ -132,4 +132,9 @@ public class TxType {
      * contract token cross transfer tx
      */
     public static final int CONTRACT_TOKEN_CROSS_TRANSFER = 26;
+    /**
+     * 账本链内资产注册登记
+     */
+    public static final int LEDGER_ASSET_REG_TRANSFER = 27;
+
 }
