@@ -50,5 +50,4 @@ public interface LedgerErrorCode extends CommonCodeConstanst {
     ErrorCode ERROR_ADDRESS_ERROR = ErrorCode.init(ModuleE.LG.getPrefix() + "_1014");
     ErrorCode ERROR_SIGNDIGEST = ErrorCode.init(ModuleE.LG.getPrefix() + "_1015");
     ErrorCode ERROR_TX_REG_RPC = ErrorCode.init(ModuleE.LG.getPrefix() + "_1016");
-    ErrorCode ERROR_TX_REG_ASSETID = ErrorCode.init(ModuleE.LG.getPrefix() + "_1017");
 }
