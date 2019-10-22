@@ -23,15 +23,18 @@
  */
 package io.nuls.contract.rpc.call;
 
-import io.nuls.contract.enums.LedgerUnConfirmedTxStatus;
+import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.model.bo.Chain;
+import io.nuls.contract.util.Log;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.exception.NulsException;
 
+import java.math.BigInteger;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -77,38 +80,70 @@ public class LedgerCall {
     }
 
     /**
-     * 提交未确认交易给账本
+     * 向账本注册NRC20资产
      */
-    public static int commitUnconfirmedTx(int chainId, String txData) throws NulsException {
+    public static Map commitNRC20Assets(int chainId, String name, String symbol, short decimal, BigInteger totalSupply, String nrc20ContractAddress) throws NulsException {
+        //TODO pierre 等待接口
+        String cmd = "commitNRC20Assets";
         try {
             Map<String, Object> params = new HashMap<>(4);
             params.put(Constants.CHAIN_ID, chainId);
-            params.put("tx", txData);
-            Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "commitUnconfirmedTx", params);
+            params.put("assetName", name);
+            params.put("assetSymbol", symbol);
+            params.put("decimalPlace", decimal);
+            params.put("initNumber", totalSupply);
+            params.put("assetOwnerAddress", nrc20ContractAddress);
+            Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, cmd, params);
             if (!callResp.isSuccess()) {
-                return LedgerUnConfirmedTxStatus.OTHER.status();
+                Log.error("Call interface [{}] error, ErrorCode is {}, ResponseComment:{}", cmd, callResp.getResponseErrorCode(), callResp.getResponseComment());
+                return null;
             }
-            HashMap result = (HashMap) ((HashMap) callResp.getResponseData()).get("commitUnconfirmedTx");
-            return (int) result.get("validateCode");
+            HashMap result = (HashMap) ((HashMap) callResp.getResponseData()).get(cmd);
+            return result;
         } catch (Exception e) {
             throw new NulsException(e);
         }
     }
 
     /**
-     * 调用账本回滚未确认的交易
+     * 调用账本回滚已注册的NRC20资产
      */
-    public static boolean rollBackUnconfirmTx(int chainId, String txData) throws NulsException {
+    public static boolean rollBackNRC20Assets(int chainId, String nrc20ContractAddress) throws NulsException {
+        //TODO pierre 等待接口
+        String cmd = "rollBackNRC20Assets";
         try {
             Map<String, Object> params = new HashMap<>(4);
             params.put(Constants.CHAIN_ID, chainId);
-            params.put("tx", txData);
-            Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "rollBackUnconfirmTx", params);
+            params.put("contractAddress", nrc20ContractAddress);
+            Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, cmd, params);
             if (!callResp.isSuccess()) {
+                Log.error("Call interface [{}] error, ErrorCode is {}, ResponseComment:{}", cmd, callResp.getResponseErrorCode(), callResp.getResponseComment());
                 return false;
             }
-            HashMap result = (HashMap) ((HashMap) callResp.getResponseData()).get("rollBackUnconfirmTx");
-            return (int) result.get("value") == 1;
+            HashMap result = (HashMap) ((HashMap) callResp.getResponseData()).get(cmd);
+            return Boolean.parseBoolean(result.get("value").toString());
+        } catch (Exception e) {
+            throw new NulsException(e);
+        }
+    }
+
+    /**
+     * 获取已注册的token资产列表
+     */
+    public static List<Map> getRegTokenList(int chainId) throws NulsException {
+        //TODO pierre 等待接口
+        String cmd = "lg_assets";
+        try {
+            Map<String, Object> params = new HashMap<>(4);
+            params.put(Constants.CHAIN_ID, chainId);
+            params.put("assetType", ContractConstant.TOKEN_ASSET_TYPE);
+            Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, cmd, params);
+            if (!callResp.isSuccess()) {
+                Log.error("Call interface [{}] error, ErrorCode is {}, ResponseComment:{}", cmd, callResp.getResponseErrorCode(), callResp.getResponseComment());
+                return null;
+            }
+            List<Map> resultList = (List<Map>) ((HashMap) callResp.getResponseData()).get(cmd);
+            return resultList;
         } catch (Exception e) {
             throw new NulsException(e);
         }

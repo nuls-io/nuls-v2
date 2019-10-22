@@ -1,7 +1,7 @@
 /**
  * MIT License
  * <p>
- * Copyright (c) 2017-2019 nuls.io
+ * Copyright (c) 2017-2018 nuls.io
  * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,44 +21,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.contract.rpc;
+package io.nuls.contract.rpc.call;
 
-import io.nuls.contract.util.Log;
+import io.nuls.contract.model.bo.Chain;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.info.Constants;
+import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.parse.JSONUtils;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
  * @author: PierreLuo
- * @date: 2019-02-26
+ * @date: 2019-10-21
  */
-public class CallHelper {
+public class ChainManagerCall {
+
     /**
-     * 调用其他模块接口
-     * Call other module interfaces
+     * 查询是否为跨链资产
      */
-    public static Object request(String moduleCode, String cmd, Map params) throws NulsException {
+    public static boolean isCrossAssets(int chainId, int assetId) throws NulsException {
+        Map<String, Object> params = new HashMap(4);
+        params.put(Constants.CHAIN_ID, chainId);
+        params.put("assetId", assetId);
         try {
-            params.put(Constants.VERSION_KEY_STR, "1.0");
-            Response response = ResponseMessageProcessor.requestAndResponse(moduleCode, cmd, params);
-            Map resData = (Map) response.getResponseData();
-            if (!response.isSuccess()) {
-                Log.error("response error info is {}, cmd is {}, params is {}", response, cmd, JSONUtils.obj2json(params));
-                String errorCode = response.getResponseErrorCode();
-                Log.error("Call interface [{}] error, ErrorCode is {}, ResponseComment:{}", cmd, errorCode, response.getResponseComment());
-                throw new NulsException(ErrorCode.init(errorCode));
-            }
-            return resData.get(cmd);
+            Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CM.abbr, "cm_asset", params);
+            return callResp.isSuccess();
         } catch (Exception e) {
-            Log.error(e);
-            if(e instanceof NulsException) {
-                throw (NulsException) e;
-            }
             throw new NulsException(e);
         }
     }

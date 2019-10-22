@@ -27,20 +27,29 @@ package io.nuls.contract.processor;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsHash;
+import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.helper.ContractHelper;
+import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.model.bo.ContractResult;
+import io.nuls.contract.model.bo.ContractTokenAssetsInfo;
 import io.nuls.contract.model.bo.ContractWrapperTransaction;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.model.txdata.CreateContractData;
+import io.nuls.contract.rpc.call.LedgerCall;
 import io.nuls.contract.service.ContractService;
 import io.nuls.contract.service.ContractTxService;
 import io.nuls.contract.storage.ContractAddressStorageService;
 import io.nuls.contract.storage.ContractTokenAddressStorageService;
 import io.nuls.contract.util.Log;
+import io.nuls.contract.vm.program.ProgramMethod;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+
+import java.math.BigInteger;
+import java.util.List;
+import java.util.Map;
 
 import static io.nuls.contract.util.ContractUtil.getSuccess;
 
@@ -105,10 +114,15 @@ public class CreateContractTxProcessor {
         // 获取 token tracker
         if (isNrc20Contract) {
             // NRC20 token 标准方法获取名称数据
-            info.setNrc20TokenName(contractResult.getTokenName());
-            info.setNrc20TokenSymbol(contractResult.getTokenSymbol());
-            info.setDecimals(contractResult.getTokenDecimals());
-            info.setTotalSupply(contractResult.getTokenTotalSupply());
+            String tokenName = contractResult.getTokenName();
+            String tokenSymbol = contractResult.getTokenSymbol();
+            int tokenDecimals = contractResult.getTokenDecimals();
+            BigInteger tokenTotalSupply = contractResult.getTokenTotalSupply();
+
+            info.setNrc20TokenName(tokenName);
+            info.setNrc20TokenSymbol(tokenSymbol);
+            info.setDecimals(tokenDecimals);
+            info.setTotalSupply(tokenTotalSupply);
             byte[] newestStateRoot = blockHeader.getStateRoot();
             //处理NRC20合约事件
             contractHelper.dealNrc20Events(chainId, newestStateRoot, tx, contractResult, info);
@@ -116,6 +130,29 @@ public class CreateContractTxProcessor {
             Result result = contractTokenAddressStorageService.saveTokenAddress(chainId, contractAddress);
             if (result.isFailed()) {
                 return result;
+            }
+            // add by pierre at 2019-10-21 调用账本模块，登记资产id
+            // 当NRC20合约存在[transferCrossChain]方法时，才登记资产id
+            List<ProgramMethod> methods = contractHelper.getAllMethods(chainId, txData.getCode());
+            boolean isNewNrc20 = false;
+            for(ProgramMethod method : methods) {
+                if(ContractConstant.CROSS_CHAIN_NRC20_CONTRACT_TRANSFER_OUT_METHOD_NAME.equals(method.getName()) &&
+                        ContractConstant.CROSS_CHAIN_NRC20_CONTRACT_TRANSFER_OUT_METHOD_DESC.equals(method.getDesc())) {
+                    isNewNrc20 = true;
+                    break;
+                }
+            }
+            if(isNewNrc20) {
+                Map resultMap = LedgerCall.commitNRC20Assets(chainId, tokenName, tokenSymbol, (short) tokenDecimals, tokenTotalSupply, contractAddressStr);
+                if(resultMap != null) {
+                    // 缓存合约地址和合约资产ID
+                    int assetId = Integer.parseInt(resultMap.get("assetId").toString());
+                    Chain chain = contractHelper.getChain(chainId);
+                    Map<String, ContractTokenAssetsInfo> tokenAssetsInfoMap = chain.getTokenAssetsInfoMap();
+                    Map<String, String> tokenAssetsContractAddressInfoMap = chain.getTokenAssetsContractAddressInfoMap();
+                    tokenAssetsInfoMap.put(contractAddressStr, new ContractTokenAssetsInfo(chainId, assetId));
+                    tokenAssetsContractAddressInfoMap.put(chainId + "-" + assetId, contractAddressStr);
+                }
             }
         }
         return contractAddressStorageService.saveContractAddress(chainId, contractAddress, info);
@@ -133,6 +170,18 @@ public class CreateContractTxProcessor {
         }
         if (contractResult == null) {
             return Result.getSuccess(null);
+        }
+        // add by pierre at 2019-10-21 调用账本模块，回滚已登记的资产id
+        if(contractResult.isNrc20()) {
+            LedgerCall.rollBackNRC20Assets(chainId, AddressTool.getStringAddressByBytes(contractAddress));
+            // 清理缓存
+            Chain chain = contractHelper.getChain(chainId);
+            Map<String, ContractTokenAssetsInfo> tokenAssetsInfoMap = chain.getTokenAssetsInfoMap();
+            ContractTokenAssetsInfo tokenAssetsInfo = tokenAssetsInfoMap.remove(contractAddress);
+            if(tokenAssetsInfo != null) {
+                Map<String, String> tokenAssetsContractAddressInfoMap = chain.getTokenAssetsContractAddressInfoMap();
+                tokenAssetsContractAddressInfoMap.remove(chainId + "-" + tokenAssetsInfo.getAssetsId());
+            }
         }
         contractHelper.rollbackNrc20Events(chainId, tx, contractResult);
         Result result = contractAddressStorageService.deleteContractAddress(chainId, contractAddress);

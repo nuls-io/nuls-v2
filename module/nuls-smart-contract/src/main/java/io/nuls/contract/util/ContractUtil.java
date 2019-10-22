@@ -29,12 +29,11 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
-import io.nuls.contract.model.bo.BatchInfo;
-import io.nuls.contract.model.bo.ContractResult;
-import io.nuls.contract.model.bo.ContractTempTransaction;
-import io.nuls.contract.model.bo.ContractWrapperTransaction;
+import io.nuls.contract.manager.ChainManager;
+import io.nuls.contract.model.bo.*;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.contract.model.tx.*;
 import io.nuls.contract.model.txdata.CallContractData;
@@ -42,9 +41,9 @@ import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.model.txdata.CreateContractData;
 import io.nuls.contract.model.txdata.DeleteContractData;
 import io.nuls.contract.rpc.call.BlockCall;
+import io.nuls.contract.rpc.call.ChainManagerCall;
 import io.nuls.core.basic.Result;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.TxType;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.model.StringUtils;
@@ -140,7 +139,7 @@ public class ContractUtil {
         return contractAddress;
     }
 
-    public static ContractWrapperTransaction parseContractTransaction(ContractTempTransaction tx) throws NulsException {
+    public static ContractWrapperTransaction parseContractTransaction(ContractTempTransaction tx, ChainManager chainManager) throws NulsException {
         ContractWrapperTransaction contractTransaction = null;
         ContractData contractData = null;
         boolean isContractTx = true;
@@ -157,7 +156,11 @@ public class ContractUtil {
                 break;
             // add by pierre at 2019-10-20
             case CROSS_CHAIN:
-                contractData = parseCrossChainTx(tx);
+                contractData = parseCrossChainTx(tx, chainManager);
+                if(contractData == null) {
+                    isContractTx = false;
+                    break;
+                }
                 break;
             case DELETE_CONTRACT:
                 DeleteContractData delete = new DeleteContractData();
@@ -175,31 +178,49 @@ public class ContractUtil {
         return contractTransaction;
     }
 
-    public static CallContractData parseCrossChainTx(Transaction tx) throws NulsException {
+    public static CallContractData parseCrossChainTx(Transaction tx, ChainManager chainManager) throws NulsException {
         CoinData coinData = tx.getCoinDataInstance();
-        //TODO pierre 增加交易类型判断，跨链转账to资产识别为已注册的合约跨链资产，则设置合约调用
-        String nrcContractAddress = "//TODO pierr";
-
-        // pierre 解析跨链转账交易，设置调用合约的参数，特殊设置 sender == null
-        List<CoinFrom> fromList = coinData.getFrom();
+        // 解析交易资产ID，跨链转账to资产识别为已注册的合约跨链资产，则设置合约调用
         List<CoinTo> toList = coinData.getTo();
-        CoinFrom from = fromList.get(0);
         CoinTo coinTo = toList.get(0);
-        byte[] fromAddress = from.getAddress();
-        int assetsChainId = coinTo.getAssetsChainId();
-        int assetsId = coinTo.getAssetsId();
         byte[] toAddress = coinTo.getAddress();
+        int chainIdByToAddress = AddressTool.getChainIdByAddress(toAddress);
+        if(chainIdByToAddress != ContractContext.MAIN_CHAIN_ID) {
+            // 接收者非主链地址，不是跨链转入交易
+            return null;
+        }
+        int assetsChainId = coinTo.getAssetsChainId();
+        Chain chain = chainManager.getChainMap().get(assetsChainId);
+        if(chain == null) {
+            // 未知链
+            return null;
+        }
+        int assetsId = coinTo.getAssetsId();
+        Map<String, String> tokenAssetsContractAddressInfoMap = chain.getTokenAssetsContractAddressInfoMap();
+        String nrcContractAddress = tokenAssetsContractAddressInfoMap.get(assetsChainId + "-" + assetsId);
+        if(StringUtils.isBlank(nrcContractAddress)) {
+            // 没有注册资产
+            return null;
+        }
+        boolean isCrossAssets = ChainManagerCall.isCrossAssets(assetsChainId, assetsId);
+        if(!isCrossAssets) {
+            // 没有注册跨链资产
+            return null;
+        }
+        // 解析跨链转账交易，设置调用合约的参数，特殊设置 sender == null
+        List<CoinFrom> fromList = coinData.getFrom();
+        CoinFrom from = fromList.get(0);
+        byte[] fromAddress = from.getAddress();
         BigInteger amount = coinTo.getAmount();
 
         CallContractData contractData = new CallContractData();
         contractData.setSender(null);
         contractData.setGasLimit(CROSS_CHAIN_GASLIMIT);
         contractData.setPrice(CONTRACT_MINIMUM_PRICE);
-        contractData.setMethodName(CROSS_CHAIN_TRANSFER_IN_METHOD_NAME);
+        contractData.setMethodName(CROSS_CHAIN_SYSTEM_CONTRACT_TRANSFER_IN_METHOD_NAME);
         contractData.setValue(BigInteger.ZERO);
         String[][] args = new String[][]{
                 new String[]{nrcContractAddress},
-                //TODO pierre 平行链地址，如何转换成字符串
                 new String[]{AddressTool.getStringAddressByBytes(fromAddress)},
                 new String[]{AddressTool.getStringAddressByBytes(toAddress)},
                 new String[]{amount.toString()},

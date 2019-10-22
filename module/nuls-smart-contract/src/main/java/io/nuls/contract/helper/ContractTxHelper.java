@@ -616,43 +616,10 @@ public class ContractTxHelper {
             AccountCall.transactionSignature(chainId, sender, password, tx);
             String txData = RPCUtil.encode(tx.serialize());
 
-            //// 验证交易
-            ////  交易基础验证
-            //boolean baseValidateSuccess = TransactionCall.baseValidateTx(chainId, txData);
-            //if(!baseValidateSuccess) {
-            //    return getFailed();
-            //}
-            ////  本模块交易业务验证
-            //Result validator;
-            //switch (tx.getType()) {
-            //    case TX_TYPE_CREATE_CONTRACT:
-            //        validator = contractTxValidatorManager.createValidator(chainId, (CreateContractTransaction) tx);
-            //        break;
-            //    case TX_TYPE_CALL_CONTRACT:
-            //        validator = contractTxValidatorManager.callValidator(chainId, (CallContractTransaction) tx);
-            //        break;
-            //    case TX_TYPE_DELETE_CONTRACT:
-            //        validator = contractTxValidatorManager.deleteValidator(chainId, (DeleteContractTransaction) tx);
-            //        break;
-            //    default:
-            //        validator = getFailed();
-            //        break;
-            //}
-            //if(validator.isFailed()) {
-            //    return validator;
-            //}
-            //
-            //// 通知账本
-            //int commitStatus = LedgerCall.commitUnconfirmedTx(chainId, txData);
-            //if(commitStatus != LedgerUnConfirmedTxStatus.SUCCESS.status()) {
-            //    return getFailed().setMsg(LedgerUnConfirmedTxStatus.getStatus(commitStatus).name());
-            //}
-
             // 发送交易到交易模块
             boolean broadcast = TransactionCall.newTx(chainId, txData);
             if (!broadcast) {
                 // 发送交易到交易模块失败，回滚账本的未确认交易
-                //LedgerCall.rollBackUnconfirmTx(chainId, txData);
                 return getFailed();
             }
             return getSuccess();

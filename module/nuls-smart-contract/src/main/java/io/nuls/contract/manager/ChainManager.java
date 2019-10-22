@@ -56,12 +56,12 @@ public class ChainManager {
 
     @Autowired
     private VMContext vmContext;
-
     @Autowired
     private ConfigStorageService configStorageService;
-
     @Autowired
     private ContractConfig contractConfig;
+    @Autowired
+    private CmdRegisterManager cmdRegisterManager;
 
     private Map<Integer, Chain> chainMap = new ConcurrentHashMap<>();
 

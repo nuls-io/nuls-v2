@@ -49,6 +49,9 @@ public class TransactionCall {
             Map<String, Boolean> registerResult = (Map<String, Boolean>) CallHelper.request(ModuleE.TX.abbr, "tx_newTx", params);
             return registerResult.get("value");
         } catch (Exception e) {
+            if(e instanceof NulsException) {
+                throw (NulsException) e;
+            }
             throw new NulsException(e);
         }
     }

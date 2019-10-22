@@ -30,7 +30,7 @@ import java.nio.charset.StandardCharsets;
  * @author: PierreLuo
  * @date: 2019-03-15
  */
-public class NulsConfig {
+public class ContractContext {
 
     public static Charset DEFAULT_ENCODING = StandardCharsets.UTF_8;
 
