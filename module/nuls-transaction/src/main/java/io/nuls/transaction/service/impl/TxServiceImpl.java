@@ -617,8 +617,10 @@ public class TxServiceImpl implements TxService {
                 long currentTimeMillis = NulsDateUtils.getCurrentTimeMillis();
                 long currentReserve = endtimestamp - currentTimeMillis;
                 if (currentReserve <= batchValidReserve) {
-                    nulsLogger.debug("获取交易时间到,进入模块验证阶段: currentTimeMillis:{}, -endtimestamp:{}, -offset:{}, -remaining:{}",
-                            currentTimeMillis, endtimestamp, batchValidReserve, currentReserve);
+                    if(nulsLogger.isDebugEnabled()) {
+                        nulsLogger.debug("获取交易时间到,进入模块验证阶段: currentTimeMillis:{}, -endtimestamp:{}, -offset:{}, -remaining:{}",
+                                currentTimeMillis, endtimestamp, batchValidReserve, currentReserve);
+                    }
                     backTempPackablePool(chain, currentBatchPackableTxs);
                     break;
                 }
@@ -646,8 +648,10 @@ public class TxServiceImpl implements TxService {
                     return getPackableTxs(chain, endtimestamp, maxTxDataSize, blockTime, packingAddress, preStateRoot);
                 }
                 if (packingTxList.size() > maxCount) {
-                    nulsLogger.debug("获取交易已达max count,进入模块验证阶段: currentTimeMillis:{}, -endtimestamp:{}, -offset:{}, -remaining:{}",
-                            currentTimeMillis, endtimestamp, batchValidReserve, endtimestamp - currentTimeMillis);
+                    if(nulsLogger.isDebugEnabled()) {
+                        nulsLogger.debug("获取交易已达max count,进入模块验证阶段: currentTimeMillis:{}, -endtimestamp:{}, -offset:{}, -remaining:{}",
+                                currentTimeMillis, endtimestamp, batchValidReserve, endtimestamp - currentTimeMillis);
+                    }
                     backTempPackablePool(chain, currentBatchPackableTxs);
                     break;
                 }
@@ -746,7 +750,13 @@ public class TxServiceImpl implements TxService {
                         while (it.hasNext()) {
                             TxPackageWrapper txPackageWrapper = it.next();
                             Transaction transaction = txPackageWrapper.getTx();
-                            if (TxManager.isSmartContract(chain, transaction.getType())) {
+                            TxRegister txRegister = TxManager.getTxRegister(chain, transaction.getType());
+                            String moduleCode = txRegister.getModuleCode();
+                            boolean isSmartContractTx = moduleCode.equals(ModuleE.SC.abbr);
+                            boolean isCrossTx = moduleCode.equals(ModuleE.CC.abbr);
+                            boolean isCrossTransferTx = TxType.CROSS_CHAIN == transaction.getType();
+                            // add by pierre at 2019-10-22 跨链转账交易发送到智能合约模块进行解析，是否为合约资产跨链转账
+                            if (isSmartContractTx || isCrossTransferTx) {
                                 if(stopInvokeContract){
                                     //该标志true,表示不再处理智能合约交易,需要暂存交易,统一还回待打包队列
                                     orphanTxSet.add(txPackageWrapper);
@@ -775,13 +785,13 @@ public class TxServiceImpl implements TxService {
                                 }
                             }
                             totalSize += transaction.getSize();
-                            TxRegister txRegister = TxManager.getTxRegister(chain, transaction.getType());
+
                             //计算跨链交易的数量
-                            if (txRegister.getModuleCode().equals(ModuleE.CC.abbr)) {
+                            if (isCrossTx) {
                                 corssTxCount++;
                             }
                             //计算合约交易的数量
-                            if (txRegister.getModuleCode().equals(ModuleE.SC.abbr)) {
+                            if (isSmartContractTx) {
                                 contractTxCount++;
                             }
                             //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
@@ -810,7 +820,9 @@ public class TxServiceImpl implements TxService {
             }
             //循环获取交易使用时间
             whileTime = NulsDateUtils.getCurrentTimeMillis() - startTime;
-            nulsLogger.debug("-取出的交易 -count:{} - data size:{}", packingTxList.size(), totalSize);
+            if(nulsLogger.isDebugEnabled()) {
+                nulsLogger.debug("-取出的交易 -count:{} - data size:{}", packingTxList.size(), totalSize);
+            }
 
             boolean contractBefore = false;
             if (contractNotify) {
@@ -1358,7 +1370,9 @@ public class TxServiceImpl implements TxService {
         NulsLogger logger = chain.getLogger();
         long s1 = NulsDateUtils.getCurrentTimeMillis();
         long blockHeight = blockHeader.getHeight();
-        logger.debug("[验区块交易] 开始 -----高度:{} -----区块交易数:{}", blockHeight, txStrList.size());
+        if(logger.isDebugEnabled()) {
+            logger.debug("[验区块交易] 开始 -----高度:{} -----区块交易数:{}", blockHeight, txStrList.size());
+        }
 
         List<TxVerifyWrapper> txList = new ArrayList<>();
         //智能合约通知标识,出现的第一个智能合约交易并且调用验证器通过时,有则只第一次时通知.
@@ -1384,8 +1398,10 @@ public class TxServiceImpl implements TxService {
             if (null == txRegister) {
                 throw new NulsException(TxErrorCode.TX_TYPE_INVALID);
             }
+            // add by pierre at 2019-10-22 跨链转账交易发送到智能合约模块进行解析，是否为合约资产跨链转账
+            boolean isCrossTransferTx = TxType.CROSS_CHAIN == type;
             /** 智能合约*/
-            if (TxManager.isUnSystemSmartContract(txRegister)) {
+            if (TxManager.isUnSystemSmartContract(txRegister) || isCrossTransferTx) {
                 /** 出现智能合约,且通知标识为false,则先调用通知 */
                 if (!contractNotify) {
                     String packingAddress = AddressTool.getStringAddressByBytes(blockHeader.getPackingAddress(chain.getChainId()));
@@ -1394,7 +1410,9 @@ public class TxServiceImpl implements TxService {
                 }
                 try {
                     if (!ContractCall.invokeContract(chain, RPCUtil.encode(tx.serialize()), 1)) {
-                        logger.debug("batch verify failed. invokeContract fail");
+                        if(logger.isDebugEnabled()) {
+                            logger.debug("batch verify failed. invokeContract fail");
+                        }
                         throw new NulsException(TxErrorCode.CONTRACT_VERIFY_FAIL);
                     }
                 } catch (IOException e) {
@@ -1469,14 +1487,18 @@ public class TxServiceImpl implements TxService {
                 d += (System.currentTimeMillis() - d1);
             }
         }
-        timeF4 = System.currentTimeMillis() - f4;
 
-        logger.debug("[验区块交易] 反序列化,合约,分组:{} -是否确认过:{} -是否在未确认中:{}, -单个验证:{} -单内部处理:{} -合计时间:{}",
-                timeF1, timeF2, timeF3, d, timeF4, NulsDateUtils.getCurrentTimeMillis() - s1);
+        if(logger.isDebugEnabled()) {
+            timeF4 = System.currentTimeMillis() - f4;
+            logger.debug("[验区块交易] 反序列化,合约,分组:{} -是否确认过:{} -是否在未确认中:{}, -单个验证:{} -单内部处理:{} -合计时间:{}",
+                    timeF1, timeF2, timeF3, d, timeF4, NulsDateUtils.getCurrentTimeMillis() - s1);
+        }
 
         if (contractNotify) {
             if (!ContractCall.contractBatchBeforeEnd(chain, blockHeight, 1)) {
-                logger.debug("batch verify failed. contractBatchBeforeEnd fail");
+                if(logger.isDebugEnabled()) {
+                    logger.debug("batch verify failed. contractBatchBeforeEnd fail");
+                }
                 throw new NulsException(TxErrorCode.CONTRACT_VERIFY_FAIL);
             }
         }
@@ -1484,11 +1506,15 @@ public class TxServiceImpl implements TxService {
         long coinDataV = NulsDateUtils.getCurrentTimeMillis();
         //账本验证
         if (!LedgerCall.verifyBlockTxsCoinData(chain, txStrList, blockHeight)) {
-            logger.debug("batch verifyCoinData failed.");
+            if(logger.isDebugEnabled()) {
+                logger.debug("batch verifyCoinData failed.");
+            }
             throw new NulsException(TxErrorCode.TX_LEDGER_VERIFY_FAIL);
         }
-        logger.debug("[验区块交易] coinData -距方法开始的时间:{}，-验证时间:{}",
-                NulsDateUtils.getCurrentTimeMillis() - s1, NulsDateUtils.getCurrentTimeMillis() - coinDataV);
+        if(logger.isDebugEnabled()) {
+            logger.debug("[验区块交易] coinData -距方法开始的时间:{}，-验证时间:{}",
+                    NulsDateUtils.getCurrentTimeMillis() - s1, NulsDateUtils.getCurrentTimeMillis() - coinDataV);
+        }
 
         //模块统一验证器
         long moduleV = NulsDateUtils.getCurrentTimeMillis();
@@ -1498,12 +1524,16 @@ public class TxServiceImpl implements TxService {
             List<String> txHashList = TransactionCall.txModuleValidator(chain,
                     entry.getKey(), entry.getValue(), blockHeaderStr);
             if (txHashList != null && txHashList.size() > 0) {
-                logger.debug("batch module verify fail, module-code:{},  return count:{}", entry.getKey(), txHashList.size());
+                if(logger.isDebugEnabled()) {
+                    logger.debug("batch module verify fail, module-code:{},  return count:{}", entry.getKey(), txHashList.size());
+                }
                 throw new NulsException(TxErrorCode.TX_VERIFY_FAIL);
             }
         }
-        logger.debug("[验区块交易] 模块统一验证时间:{}", NulsDateUtils.getCurrentTimeMillis() - moduleV);
-        logger.debug("[验区块交易] 模块统一验证 -距方法开始的时间:{}", NulsDateUtils.getCurrentTimeMillis() - s1);
+        if(logger.isDebugEnabled()) {
+            logger.debug("[验区块交易] 模块统一验证时间:{}", NulsDateUtils.getCurrentTimeMillis() - moduleV);
+            logger.debug("[验区块交易] 模块统一验证 -距方法开始的时间:{}", NulsDateUtils.getCurrentTimeMillis() - s1);
+        }
 
         /** 智能合约 当通知标识为true, 则表明有智能合约被调用执行*/
         List<String> scNewList = new ArrayList<>();
@@ -1640,8 +1670,10 @@ public class TxServiceImpl implements TxService {
             throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
 
-        logger.debug("[验区块交易] 合计执行时间:{}, - 高度:{} - 区块交易数:{}" + TxUtil.nextLine(),
-                NulsDateUtils.getCurrentTimeMillis() - s1, blockHeight, txStrList.size());
+        if(logger.isDebugEnabled()) {
+            logger.debug("[验区块交易] 合计执行时间:{}, - 高度:{} - 区块交易数:{}" + TxUtil.nextLine(),
+                    NulsDateUtils.getCurrentTimeMillis() - s1, blockHeight, txStrList.size());
+        }
         Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_4);
         resultMap.put("value", true);
         resultMap.put("contractList", scNewList);

@@ -81,9 +81,11 @@ public interface ContractConstant {
     long CROSS_CHAIN_GASLIMIT = 300000;
     //TODO pierre 系统合约地址
     byte[] CROSS_CHAIN_SYSTEM_CONTRACT = null;
-    String CROSS_CHAIN_TRANSFER_IN_METHOD_NAME = "crossChainTokenTransfer";
-    String CMD_TOKEN_OUT_CROSS_CHAIN = "tokenOutCrossChain";
+    String CROSS_CHAIN_SYSTEM_CONTRACT_TRANSFER_IN_METHOD_NAME = "crossChainTokenTransfer";
+    String CMD_TOKEN_OUT_CROSS_CHAIN = "cc_tokenOutCrossChain";
     int TOKEN_ASSET_TYPE = 2;
+    String CROSS_CHAIN_NRC20_CONTRACT_TRANSFER_OUT_METHOD_NAME = "transferCrossChain";
+    String CROSS_CHAIN_NRC20_CONTRACT_TRANSFER_OUT_METHOD_DESC = "(Address to, BigInteger value) return boolean";
 
     /**
      *
@@ -120,8 +122,8 @@ public interface ContractConstant {
     String MODULE_CONFIG_FILE = "module.json";
 
     /**
-     * 最小转账金额
-     * Minimum transfer amount
+     * 最小转账金额 - 0.01 NULS
+     * Minimum transfer amount - 0.01 NULS
      */
     BigInteger MININUM_TRANSFER_AMOUNT = BigInteger.TEN.pow(6);
 

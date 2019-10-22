@@ -11,6 +11,8 @@ import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractDBConstant;
 import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.model.bo.Chain;
+import io.nuls.contract.model.bo.ContractTokenAssetsInfo;
+import io.nuls.contract.rpc.call.LedgerCall;
 import io.nuls.contract.tx.v1.TransactionCommitAdvice;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.LogUtil;
@@ -19,6 +21,7 @@ import io.nuls.contract.vm.program.ProgramMethod;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.io.IoUtils;
 import io.nuls.core.log.Log;
 import io.nuls.core.parse.JSONUtils;
@@ -36,6 +39,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.Map;
 
 import static io.nuls.contract.constant.ContractConstant.*;
@@ -241,6 +245,37 @@ public class SmartContractBootStrap extends RpcModule {
                 int chainId = chain.getChainId();
                 boolean registerTx = RegisterHelper.registerTx(chainId, ProtocolGroupManager.getCurrentProtocol(chainId));
                 Log.info("register tx type to tx module, chain id is {}, result is {}", chainId, registerTx);
+            }
+        }
+        if (module.getName().equals(ModuleE.LG.abbr)) {
+            // add by pierre at 2019-10-21 缓存token注册资产的资产ID和token合约地址
+            Map<Integer, Chain> chainMap = chainManager.getChainMap();
+            for (Chain chain : chainMap.values()) {
+                int chainId = chain.getChainId();
+                List<Map> regTokenList;
+                try {
+                    regTokenList = LedgerCall.getRegTokenList(chainId);
+                    if(regTokenList != null && !regTokenList.isEmpty()) {
+                        Map<String, ContractTokenAssetsInfo> tokenAssetsInfoMap = chain.getTokenAssetsInfoMap();
+                        Map<String, String> tokenAssetsContractAddressInfoMap = chain.getTokenAssetsContractAddressInfoMap();
+                        regTokenList.stream().forEach(map -> {
+                            int assetId = Integer.parseInt(map.get("assetId").toString());
+                            String tokenContractAddress = map.get("assetOwnerAddress").toString();
+                            tokenAssetsInfoMap.put(tokenContractAddress, new ContractTokenAssetsInfo(chainId, assetId));
+                            tokenAssetsContractAddressInfoMap.put(chainId + "-" + assetId, tokenContractAddress);
+                        });
+                    }
+                    // 注册智能合约 - Token跨链转出命令, 注释原因: 由跨链模块注册该命令，该命令用于生成合约跨链转账交易
+                    /*ModuleCmdRegisterDto dto = new ModuleCmdRegisterDto();
+                    dto.setChainId(chainId);
+                    dto.setModuleCode(ModuleE.SC.abbr);
+                    List<CmdRegisterDto> list = new ArrayList<>();
+                    list.add(new CmdRegisterDto(ContractConstant.CMD_TOKEN_OUT_CROSS_CHAIN, CmdRegisterMode.NEW_TX.mode(), List.of("from", "to", "value", "chainId", "assetsId"), CmdRegisterReturnType.STRING.type()));
+                    dto.setCmdRegisterList(list);
+                    cmdRegisterManager.registerCmd(dto);*/
+                } catch (NulsException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
         if (module.getName().equals(ModuleE.PU.abbr)) {

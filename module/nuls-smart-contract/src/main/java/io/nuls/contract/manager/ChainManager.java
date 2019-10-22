@@ -28,14 +28,8 @@ import io.nuls.base.protocol.ProtocolLoader;
 import io.nuls.contract.config.ContractConfig;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractDBConstant;
-import io.nuls.contract.enums.CmdRegisterMode;
-import io.nuls.contract.enums.CmdRegisterReturnType;
 import io.nuls.contract.model.bo.Chain;
-import io.nuls.contract.model.bo.ContractTokenAssetsInfo;
 import io.nuls.contract.model.bo.config.ConfigBean;
-import io.nuls.contract.model.dto.CmdRegisterDto;
-import io.nuls.contract.model.dto.ModuleCmdRegisterDto;
-import io.nuls.contract.rpc.call.LedgerCall;
 import io.nuls.contract.storage.ConfigStorageService;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.util.LogUtil;
@@ -46,10 +40,7 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.rockdb.constant.DBErrorCode;
 import io.nuls.core.rockdb.service.RocksDBService;
-import io.nuls.core.rpc.model.ModuleE;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -112,27 +103,6 @@ public class ChainManager {
             initContractChainLog(chainId);
             chainMap.put(chainId, chain);
             ProtocolLoader.load(chainId);
-            // add by pierre at 2019-10-21 缓存token注册资产的资产ID和token合约地址
-            List<Map> regTokenList = LedgerCall.getRegTokenList(chainId);
-            if(regTokenList != null && !regTokenList.isEmpty()) {
-                Map<String, ContractTokenAssetsInfo> tokenAssetsInfoMap = chain.getTokenAssetsInfoMap();
-                Map<String, String> tokenAssetsContractAddressInfoMap = chain.getTokenAssetsContractAddressInfoMap();
-                regTokenList.stream().forEach(map -> {
-                    int assetId = Integer.parseInt(map.get("assetId").toString());
-                    String tokenContractAddress = map.get("assetOwnerAddress").toString();
-                    tokenAssetsInfoMap.put(tokenContractAddress, new ContractTokenAssetsInfo(chainId, assetId));
-                    tokenAssetsContractAddressInfoMap.put(chainId + "-" + assetId, tokenContractAddress);
-                });
-            }
-            // 注册智能合约-token跨链转出命令
-            ModuleCmdRegisterDto dto = new ModuleCmdRegisterDto();
-            dto.setChainId(chainId);
-            dto.setModuleCode(ModuleE.SC.abbr);
-            List<CmdRegisterDto> list = new ArrayList<>();
-            list.add(new CmdRegisterDto(ContractConstant.CMD_TOKEN_OUT_CROSS_CHAIN, CmdRegisterMode.NEW_TX.mode(), List.of("from", "to", "value", "chainId", "assetsId"), CmdRegisterReturnType.STRING.type()));
-            dto.setCmdRegisterList(list);
-            cmdRegisterManager.registerCmd(dto);
-
         }
     }
 

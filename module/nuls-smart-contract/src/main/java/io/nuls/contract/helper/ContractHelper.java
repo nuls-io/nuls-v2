@@ -127,7 +127,7 @@ public class ContractHelper {
         }
     }
 
-    private List<ProgramMethod> getAllMethods(int chainId, byte[] contractCode) {
+    public List<ProgramMethod> getAllMethods(int chainId, byte[] contractCode) {
         return getProgramExecutor(chainId).jarMethod(contractCode);
     }
 

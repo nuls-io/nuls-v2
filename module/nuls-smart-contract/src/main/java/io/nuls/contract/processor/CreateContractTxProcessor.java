@@ -27,6 +27,7 @@ package io.nuls.contract.processor;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsHash;
+import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.model.bo.ContractResult;
@@ -41,11 +42,13 @@ import io.nuls.contract.service.ContractTxService;
 import io.nuls.contract.storage.ContractAddressStorageService;
 import io.nuls.contract.storage.ContractTokenAddressStorageService;
 import io.nuls.contract.util.Log;
+import io.nuls.contract.vm.program.ProgramMethod;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Map;
 
 import static io.nuls.contract.util.ContractUtil.getSuccess;
@@ -129,15 +132,27 @@ public class CreateContractTxProcessor {
                 return result;
             }
             // add by pierre at 2019-10-21 调用账本模块，登记资产id
-            Map resultMap = LedgerCall.commitNRC20Assets(chainId, tokenName, tokenSymbol, (short) tokenDecimals, tokenTotalSupply, contractAddressStr);
-            if(resultMap != null) {
-                // 缓存合约地址和合约资产ID
-                int assetId = Integer.parseInt(resultMap.get("assetId").toString());
-                Chain chain = contractHelper.getChain(chainId);
-                Map<String, ContractTokenAssetsInfo> tokenAssetsInfoMap = chain.getTokenAssetsInfoMap();
-                Map<String, String> tokenAssetsContractAddressInfoMap = chain.getTokenAssetsContractAddressInfoMap();
-                tokenAssetsInfoMap.put(contractAddressStr, new ContractTokenAssetsInfo(chainId, assetId));
-                tokenAssetsContractAddressInfoMap.put(chainId + "-" + assetId, contractAddressStr);
+            // 当NRC20合约存在[transferCrossChain]方法时，才登记资产id
+            List<ProgramMethod> methods = contractHelper.getAllMethods(chainId, txData.getCode());
+            boolean isNewNrc20 = false;
+            for(ProgramMethod method : methods) {
+                if(ContractConstant.CROSS_CHAIN_NRC20_CONTRACT_TRANSFER_OUT_METHOD_NAME.equals(method.getName()) &&
+                        ContractConstant.CROSS_CHAIN_NRC20_CONTRACT_TRANSFER_OUT_METHOD_DESC.equals(method.getDesc())) {
+                    isNewNrc20 = true;
+                    break;
+                }
+            }
+            if(isNewNrc20) {
+                Map resultMap = LedgerCall.commitNRC20Assets(chainId, tokenName, tokenSymbol, (short) tokenDecimals, tokenTotalSupply, contractAddressStr);
+                if(resultMap != null) {
+                    // 缓存合约地址和合约资产ID
+                    int assetId = Integer.parseInt(resultMap.get("assetId").toString());
+                    Chain chain = contractHelper.getChain(chainId);
+                    Map<String, ContractTokenAssetsInfo> tokenAssetsInfoMap = chain.getTokenAssetsInfoMap();
+                    Map<String, String> tokenAssetsContractAddressInfoMap = chain.getTokenAssetsContractAddressInfoMap();
+                    tokenAssetsInfoMap.put(contractAddressStr, new ContractTokenAssetsInfo(chainId, assetId));
+                    tokenAssetsContractAddressInfoMap.put(chainId + "-" + assetId, contractAddressStr);
+                }
             }
         }
         return contractAddressStorageService.saveContractAddress(chainId, contractAddress, info);

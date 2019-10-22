@@ -56,6 +56,9 @@ public class CallHelper {
             return resData.get(cmd);
         } catch (Exception e) {
             Log.error(e);
+            if(e instanceof NulsException) {
+                throw (NulsException) e;
+            }
             throw new NulsException(e);
         }
     }
