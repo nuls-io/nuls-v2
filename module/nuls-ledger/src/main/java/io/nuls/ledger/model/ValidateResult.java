@@ -42,7 +42,7 @@ public class ValidateResult {
     public static final String VALIDATE_FAIL_DESC = "address {%s},nonce {%s} validate fail:{%s}";
     public static final String VALIDATE_TX_EXIST_DESC = "address={%s},hash={%s} in packing";
     public static final String BALANCE_NOT_ENOUGH_DESC = "assetKey={%s}, balance={%s},balance is not enough";
-
+    public static final String TX_AMOUNT_ERROR_DESC = "tx={%s} from amounts is less than to";
     public static Map<ErrorCode, ValidateResult> validateResultMap = new HashMap<>(6);
 
     static {
@@ -52,6 +52,7 @@ public class ValidateResult {
         validateResultMap.put(LedgerErrorCode.VALIDATE_FAIL, ValidateResult.getValidateResult(LedgerErrorCode.VALIDATE_FAIL, VALIDATE_FAIL_DESC));
         validateResultMap.put(LedgerErrorCode.TX_EXIST, ValidateResult.getValidateResult(LedgerErrorCode.TX_EXIST, VALIDATE_TX_EXIST_DESC));
         validateResultMap.put(LedgerErrorCode.BALANCE_NOT_ENOUGH, ValidateResult.getValidateResult(LedgerErrorCode.BALANCE_NOT_ENOUGH, BALANCE_NOT_ENOUGH_DESC));
+        validateResultMap.put(LedgerErrorCode.TX_AMOUNT_INVALIDATE, ValidateResult.getValidateResult(LedgerErrorCode.TX_AMOUNT_INVALIDATE, TX_AMOUNT_ERROR_DESC));
     }
 
     public ValidateResult(ErrorCode validateCode, String validateDesc) {

@@ -30,6 +30,7 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.ledger.constant.LedgerConstant;
+import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.model.AccountBalance;
 import io.nuls.ledger.model.Uncfd2CfdKey;
 import io.nuls.ledger.model.ValidateResult;
@@ -103,6 +104,9 @@ public class TransactionServiceImpl implements TransactionService {
         if (null == coinData) {
             //例如黄牌交易，直接返回
             return ValidateResult.getSuccess();
+        }
+        if(!coinDataValidator.validateTxAmount(coinData,transaction.getType())){
+            return ValidateResult.getResult(LedgerErrorCode.TX_AMOUNT_INVALIDATE, new String[]{transaction.getHash().toHex()});
         }
         /*未确认交易的校验*/
         Map<String, TxUnconfirmed> accountsMap = new ConcurrentHashMap<>(8);
