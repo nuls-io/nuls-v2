@@ -83,16 +83,15 @@ public class LedgerCall {
      * 向账本注册NRC20资产
      */
     public static Map commitNRC20Assets(int chainId, String name, String symbol, short decimal, BigInteger totalSupply, String nrc20ContractAddress) throws NulsException {
-        //TODO pierre 等待接口
-        String cmd = "commitNRC20Assets";
+        String cmd = "chainAssetContractReg";
         try {
             Map<String, Object> params = new HashMap<>(4);
             params.put(Constants.CHAIN_ID, chainId);
             params.put("assetName", name);
-            params.put("assetSymbol", symbol);
+            params.put("initNumber", totalSupply.toString());
             params.put("decimalPlace", decimal);
-            params.put("initNumber", totalSupply);
-            params.put("assetOwnerAddress", nrc20ContractAddress);
+            params.put("assetSymbol", symbol);
+            params.put("contractAddress", nrc20ContractAddress);
             Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, cmd, params);
             if (!callResp.isSuccess()) {
                 Log.error("Call interface [{}] error, ErrorCode is {}, ResponseComment:{}", cmd, callResp.getResponseErrorCode(), callResp.getResponseComment());
@@ -109,8 +108,7 @@ public class LedgerCall {
      * 调用账本回滚已注册的NRC20资产
      */
     public static boolean rollBackNRC20Assets(int chainId, String nrc20ContractAddress) throws NulsException {
-        //TODO pierre 等待接口
-        String cmd = "rollBackNRC20Assets";
+        String cmd = "chainAssetContractRollBack";
         try {
             Map<String, Object> params = new HashMap<>(4);
             params.put(Constants.CHAIN_ID, chainId);
@@ -131,8 +129,7 @@ public class LedgerCall {
      * 获取已注册的token资产列表
      */
     public static List<Map> getRegTokenList(int chainId) throws NulsException {
-        //TODO pierre 等待接口
-        String cmd = "lg_assets";
+        String cmd = "getAssetRegInfo";
         try {
             Map<String, Object> params = new HashMap<>(4);
             params.put(Constants.CHAIN_ID, chainId);
