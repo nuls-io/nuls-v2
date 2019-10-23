@@ -66,7 +66,7 @@ public class LockedTransactionProcessor implements TxLockedProcessor {
     @Override
     public boolean processFromCoinData(CoinFrom coin, byte[] nonce, String txHash, AccountState accountState, String address) {
 
-        if (coin.getLocked() == -1) {
+        if (coin.getLocked() == LedgerConstant.UNLOCKED_TIME) {
             //按时间移除锁定
             List<FreezeLockTimeState> list = accountState.getFreezeLockTimeStates();
             for (FreezeLockTimeState freezeLockTimeState : list) {
@@ -108,7 +108,7 @@ public class LockedTransactionProcessor implements TxLockedProcessor {
      */
     @Override
     public boolean processToCoinData(CoinTo coin, byte[] nonce, String hash, AccountState accountState, long txTime, String address) {
-        if (coin.getLockTime() < LedgerConstant.MAX_HEIGHT_VALUE && coin.getLockTime() != -1) {
+        if (coin.getLockTime() < LedgerConstant.MAX_HEIGHT_VALUE && !LedgerUtil.isPermanentLock(coin.getLockTime())) {
             //按高度锁定
             FreezeHeightState freezeHeightState = new FreezeHeightState();
             freezeHeightState.setAmount(coin.getAmount());

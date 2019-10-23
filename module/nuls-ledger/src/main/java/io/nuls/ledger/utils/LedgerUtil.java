@@ -7,7 +7,6 @@ import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.log.Log;
-import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.tx.txdata.TxLedgerAsset;
 
@@ -144,10 +143,11 @@ public class LedgerUtil {
     }
 
     public static int getVersion(int chainId) {
-        int  version = ProtocolGroupManager.getCurrentVersion(chainId);
-        LoggerUtil.logger(chainId).debug("verion={}",version);
+        int version = ProtocolGroupManager.getCurrentVersion(chainId);
+        LoggerUtil.logger(chainId).debug("verion={}", version);
         return version;
     }
+
     public static TxLedgerAsset map2TxLedgerAsset(Map<String, Object> map) {
         TxLedgerAsset txLedgerAsset = new TxLedgerAsset();
         txLedgerAsset.setName(String.valueOf(map.get("assetName")));
@@ -159,6 +159,7 @@ public class LedgerUtil {
         return txLedgerAsset;
 
     }
+
     public static void dealAssetAddressIndex(Map<String, List<String>> assetAddressIndex, int chainId, int assetId, String address) {
         String assetIndexKey = chainId + "-" + assetId;
         List<String> addressList = null;
@@ -169,5 +170,9 @@ public class LedgerUtil {
             addressList = assetAddressIndex.get(assetIndexKey);
         }
         addressList.add(address);
+    }
+
+    public static boolean isPermanentLock(long lockTime) {
+        return (lockTime == LedgerConstant.PERMANENT_LOCK_COMMON || lockTime == LedgerConstant.PERMANENT_LOCK_DEX);
     }
 }

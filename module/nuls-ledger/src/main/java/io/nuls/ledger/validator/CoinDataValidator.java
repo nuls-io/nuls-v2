@@ -584,7 +584,7 @@ public class CoinDataValidator {
     private boolean isValidateFreezeTx(byte locked, AccountState accountState, BigInteger fromAmount, byte[] fromNonce) {
         boolean isValidate = false;
         //解锁交易，校验是否存在该笔交易
-        if (locked == -1) {
+        if (locked == LedgerConstant.UNLOCKED_TIME) {
             //时间解锁
             List<FreezeLockTimeState> list = accountState.getFreezeLockTimeStates();
             for (FreezeLockTimeState freezeLockTimeState : list) {
@@ -594,7 +594,7 @@ public class CoinDataValidator {
                     break;
                 }
             }
-        } else if (locked == 1) {
+        } else if (locked == LedgerConstant.UNLOCKED_HEIGHT) {
             //高度解锁
             List<FreezeHeightState> list = accountState.getFreezeHeightStates();
             for (FreezeHeightState freezeHeightState : list) {

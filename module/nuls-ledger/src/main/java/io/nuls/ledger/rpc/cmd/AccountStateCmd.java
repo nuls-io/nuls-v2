@@ -103,7 +103,7 @@ public class AccountStateCmd extends BaseLedgerCmd {
         BigInteger permanentLocked = BigInteger.ZERO;
         BigInteger timeHeightLocked = BigInteger.ZERO;
         for (FreezeLockTimeState freezeLockTimeState : accountState.getFreezeLockTimeStates()) {
-            if (LedgerConstant.PERMANENT_LOCK == freezeLockTimeState.getLockTime()) {
+            if (LedgerUtil.isPermanentLock(freezeLockTimeState.getLockTime())) {
                 permanentLocked = permanentLocked.add(freezeLockTimeState.getAmount());
             } else {
                 timeHeightLocked = timeHeightLocked.add(freezeLockTimeState.getAmount());
@@ -286,7 +286,7 @@ public class AccountStateCmd extends BaseLedgerCmd {
         BigInteger permanentLocked = BigInteger.ZERO;
         BigInteger timeHeightLocked = BigInteger.ZERO;
         for (FreezeLockTimeState freezeLockTimeState : accountState.getFreezeLockTimeStates()) {
-            if (LedgerConstant.PERMANENT_LOCK == freezeLockTimeState.getLockTime()) {
+            if (LedgerUtil.isPermanentLock(freezeLockTimeState.getLockTime())) {
                 permanentLocked = permanentLocked.add(freezeLockTimeState.getAmount());
             } else {
                 timeHeightLocked = timeHeightLocked.add(freezeLockTimeState.getAmount());

@@ -8,12 +8,10 @@ import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
-import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.model.po.LedgerAsset;
 import io.nuls.ledger.model.tx.txdata.TxLedgerAsset;
 import io.nuls.ledger.service.AssetRegMngService;
-import io.nuls.ledger.utils.LedgerUtil;
 import io.nuls.ledger.utils.LoggerUtil;
 
 import java.math.BigInteger;

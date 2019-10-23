@@ -56,9 +56,15 @@ public class LedgerConstant {
      */
     public static final int TIME_RECALCULATE_FREEZE = 1;
     /**
+     * 解锁常量
+     */
+    public static final int UNLOCKED_TIME = -1;
+    public static final int UNLOCKED_HEIGHT = 1;
+    /**
      * 永久锁定lockTime值
      */
-    public static final int PERMANENT_LOCK = -1;
+    public static final int PERMANENT_LOCK_COMMON = -1;
+    public static final int PERMANENT_LOCK_DEX = -2;
 
     public static byte[] blackHolePublicKey = null;
 
