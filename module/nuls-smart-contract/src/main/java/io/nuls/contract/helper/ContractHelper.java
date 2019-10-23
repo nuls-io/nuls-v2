@@ -657,8 +657,12 @@ public class ContractHelper {
 
                     // 回滚token余额
                     this.rollbackContractToken(chainId, tokenTransferInfoPo);
-                    contractTokenTransferStorageService.deleteTokenTransferInfo(chainId, Arrays.concatenate(tokenTransferInfoPo.getFrom(), txHashBytes, new VarInt(i).encode()));
-                    contractTokenTransferStorageService.deleteTokenTransferInfo(chainId, Arrays.concatenate(tokenTransferInfoPo.getTo(), txHashBytes, new VarInt(i).encode()));
+                    if(tokenTransferInfoPo.getFrom() != null) {
+                        contractTokenTransferStorageService.deleteTokenTransferInfo(chainId, Arrays.concatenate(tokenTransferInfoPo.getFrom(), txHashBytes, new VarInt(i).encode()));
+                    }
+                    if(tokenTransferInfoPo.getTo() != null) {
+                        contractTokenTransferStorageService.deleteTokenTransferInfo(chainId, Arrays.concatenate(tokenTransferInfoPo.getTo(), txHashBytes, new VarInt(i).encode()));
+                    }
 
                 }
             }

@@ -183,6 +183,7 @@ public class CreateContractTxProcessor {
                 tokenAssetsContractAddressInfoMap.remove(chainId + "-" + tokenAssetsInfo.getAssetsId());
             }
         }
+        // end code by pierre
         contractHelper.rollbackNrc20Events(chainId, tx, contractResult);
         Result result = contractAddressStorageService.deleteContractAddress(chainId, contractAddress);
         if (result.isFailed()) {
