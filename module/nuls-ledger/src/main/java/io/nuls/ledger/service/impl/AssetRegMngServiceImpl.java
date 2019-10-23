@@ -68,6 +68,9 @@ public class AssetRegMngServiceImpl implements AssetRegMngService {
     @Override
     public void initDBAssetsIdMap() throws Exception {
         int assetId = assetRegMngRepository.maxAssetId(ledgerConfig.getMainChainId());
+        if (assetId == 0) {
+            assetId = ledgerConfig.getMainAssetId();
+        }
         DB_ASSETS_ID_MAX_MAP.put(String.valueOf(ledgerConfig.getMainChainId()), new AtomicInteger(assetId));
     }
 
@@ -79,7 +82,7 @@ public class AssetRegMngServiceImpl implements AssetRegMngService {
     }
 
     @Override
-    public synchronized int getRegAssetId(int chainId) {
+    public int getRegAssetId(int chainId) {
         AtomicInteger assetIdAtomic = DB_ASSETS_ID_MAX_MAP.get(String.valueOf(chainId));
         return assetIdAtomic.get();
     }
@@ -144,6 +147,8 @@ public class AssetRegMngServiceImpl implements AssetRegMngService {
         }
         assetRegMngRepository.batchSaveLedgerAssetReg(chainId, assets, hashMap);
         getAndSetAssetIdByTemp(chainId, ledgerAssets.size());
+        //资产信息入账本
+
     }
 
     @Override
