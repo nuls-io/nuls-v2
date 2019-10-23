@@ -323,7 +323,7 @@ public class CoinDataValidator {
             batchValidateTxMap.put(txHash, txHash);
             return ValidateResult.getSuccess();
         }
-        if(!validateTxAmount(coinData,tx.getType())){
+        if (!validateTxAmount(coinData, tx.getType())) {
             return ValidateResult.getResult(LedgerErrorCode.TX_AMOUNT_INVALIDATE, new String[]{txHash});
         }
         List<CoinFrom> coinFroms = coinData.getFrom();
@@ -554,7 +554,7 @@ public class CoinDataValidator {
             batchValidateTxSet.add(txHash);
             return ValidateResult.getSuccess();
         }
-        if(!validateTxAmount(coinData,tx.getType())){
+        if (!validateTxAmount(coinData, tx.getType())) {
             return ValidateResult.getResult(LedgerErrorCode.TX_AMOUNT_INVALIDATE, new String[]{txHash});
         }
         List<CoinFrom> coinFroms = coinData.getFrom();
@@ -628,7 +628,7 @@ public class CoinDataValidator {
             //例如黄牌交易，直接返回
             return ValidateResult.getSuccess();
         }
-        if(!validateTxAmount(coinData,tx.getType())){
+        if (!validateTxAmount(coinData, tx.getType())) {
             return ValidateResult.getResult(LedgerErrorCode.TX_AMOUNT_INVALIDATE, new String[]{txHash});
         }
         /*
@@ -756,7 +756,6 @@ public class CoinDataValidator {
     }
 
     /**
-     *
      * @param coinData
      * @param txType
      * @return
@@ -798,6 +797,9 @@ public class CoinDataValidator {
             }
         }
         for (String assetKey : assetKeys) {
+            if (null == assetMap.get(assetKey + "from") || null == assetMap.get(assetKey + "to")) {
+                continue;
+            }
             if (BigIntegerUtils.isLessThan(assetMap.get(assetKey + "from"), assetMap.get(assetKey + "to"))) {
                 LoggerUtil.COMMON_LOG.error("fromAmount is less than to amount");
                 return false;
