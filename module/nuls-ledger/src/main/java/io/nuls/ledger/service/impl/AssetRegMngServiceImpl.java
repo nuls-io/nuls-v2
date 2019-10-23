@@ -26,7 +26,6 @@
 package io.nuls.ledger.service.impl;
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.NulsHash;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -37,10 +36,14 @@ import io.nuls.core.model.FormatValidUtils;
 import io.nuls.ledger.config.LedgerConfig;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.constant.LedgerErrorCode;
+import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.model.po.LedgerAsset;
 import io.nuls.ledger.model.tx.txdata.TxLedgerAsset;
 import io.nuls.ledger.service.AssetRegMngService;
+import io.nuls.ledger.service.ChainAssetsService;
 import io.nuls.ledger.storage.AssetRegMngRepository;
+import io.nuls.ledger.storage.Repository;
+import io.nuls.ledger.utils.LedgerUtil;
 import io.nuls.ledger.utils.LoggerUtil;
 
 import java.math.BigInteger;
@@ -58,12 +61,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class AssetRegMngServiceImpl implements AssetRegMngService {
     @Autowired
     LedgerConfig ledgerConfig;
+    @Autowired
+    ChainAssetsService chainAssetsService;
     /**
      * key chainID,value  assetId
      */
     Map<String, AtomicInteger> DB_ASSETS_ID_MAX_MAP = new ConcurrentHashMap<>();
     @Autowired
     AssetRegMngRepository assetRegMngRepository;
+    @Autowired
+    Repository repository;
 
     @Override
     public void initDBAssetsIdMap() throws Exception {
@@ -139,25 +146,48 @@ public class AssetRegMngServiceImpl implements AssetRegMngService {
         Map<byte[], byte[]> assets = new HashMap<>(ledgerAssets.size());
         Map<byte[], byte[]> hashMap = new HashMap<>(ledgerAssets.size());
         int assetId = getRegAssetId(chainId);
+        Map<byte[], byte[]> accountStatesMap = new HashMap<>(ledgerAssets.size());
+        Map<String, List<String>> assetAddressIndex = new HashMap<>(4);
         for (LedgerAsset ledgerAsset : ledgerAssets) {
             ledgerAsset.setAssetType(LedgerConstant.COMMON_ASSET_TYPE);
             ledgerAsset.setAssetId(assetId++);
             assets.put(ByteUtils.intToBytes(ledgerAsset.getAssetId()), ledgerAsset.serialize());
             hashMap.put(ByteUtils.toBytes(ledgerConfig.getEncoding(), ledgerAsset.getTxHash()), ByteUtils.intToBytes(ledgerAsset.getAssetId()));
+            String address = LedgerUtil.getRealAddressStr(ledgerAsset.getAssetOwnerAddress());
+            String key = LedgerUtil.getKeyStr(address, chainId, assetId);
+            AccountState accountState = new AccountState();
+            long decimal = (long) Math.pow(10, Integer.valueOf(ledgerAsset.getDecimalPlaces()));
+            BigInteger amount = ledgerAsset.getInitNumber().multiply(BigInteger.valueOf(decimal));
+            accountState.setTotalToAmount(amount);
+            accountStatesMap.put(key.getBytes(LedgerConstant.DEFAULT_ENCODING), accountState.serialize());
+            LedgerUtil.dealAssetAddressIndex(assetAddressIndex, chainId, ledgerAsset.getAssetId(), address);
         }
         assetRegMngRepository.batchSaveLedgerAssetReg(chainId, assets, hashMap);
         getAndSetAssetIdByTemp(chainId, ledgerAssets.size());
         //资产信息入账本
-
+        //更新链下资产种类，及资产地址集合数据。
+        chainAssetsService.updateChainAssets(chainId, assetAddressIndex);
+        //更新账本
+        if (accountStatesMap.size() > 0) {
+            assetRegMngRepository.batchUpdateAccountState(chainId, accountStatesMap);
+        }
     }
 
     @Override
-    public void rollBackTxAssets(int chainId, List<NulsHash> hashList) throws Exception {
+    public void rollBackTxAssets(int chainId, List<LedgerAsset> ledgerAssets) throws Exception {
         List<byte[]> list = new ArrayList<>();
-        for (NulsHash nulsHash : hashList) {
-            list.add(nulsHash.getBytes());
+        List<byte []> delKeys = new ArrayList<>();
+        for (LedgerAsset ledgerAsset : ledgerAssets) {
+            byte[] hash = HexUtil.decode(ledgerAsset.getTxHash());
+            list.add(hash);
+            int assetId = assetRegMngRepository.getLedgerAssetIdByHash(chainId, hash);
+            String address = LedgerUtil.getRealAddressStr(ledgerAsset.getAssetOwnerAddress());
+            String key = LedgerUtil.getKeyStr(address, chainId, assetId);
+            delKeys.add(key.getBytes(LedgerConstant.DEFAULT_ENCODING));
         }
         assetRegMngRepository.batchRollBackLedgerAssetReg(chainId, list);
+        assetRegMngRepository.batchDelAccountState(chainId,delKeys);
+        //回滚资产
         initDBAssetsIdMap();
     }
 

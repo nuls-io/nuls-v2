@@ -13,6 +13,7 @@ import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.model.po.LedgerAsset;
 import io.nuls.ledger.model.tx.txdata.TxLedgerAsset;
 import io.nuls.ledger.service.AssetRegMngService;
+import io.nuls.ledger.utils.LedgerUtil;
 import io.nuls.ledger.utils.LoggerUtil;
 
 import java.math.BigInteger;
@@ -119,11 +120,12 @@ public class AssetRegTransferProcessor implements TransactionProcessor {
     @Override
     public boolean rollback(int chainId, List<Transaction> txs, BlockHeader blockHeader) {
         try {
-            List<NulsHash> hashList = new ArrayList<>();
+            List<LedgerAsset> list = new ArrayList<>();
             for (Transaction tx : txs) {
-                hashList.add(tx.getHash());
+                LedgerAsset ledgerAsset = buildLedgerAssetByTx(tx,chainId);
+                list.add(ledgerAsset);
             }
-            assetRegMngService.rollBackTxAssets(chainId, hashList);
+            assetRegMngService.rollBackTxAssets(chainId, list);
             return true;
         } catch (Exception e) {
             throw new RuntimeException(e);

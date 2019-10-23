@@ -25,7 +25,6 @@
  */
 package io.nuls.ledger.service;
 
-import io.nuls.base.data.NulsHash;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.ledger.model.po.LedgerAsset;
 import io.nuls.ledger.model.tx.txdata.TxLedgerAsset;
@@ -51,7 +50,7 @@ public interface AssetRegMngService {
 
     void registerTxAssets(int chainId, List<LedgerAsset> ledgerAssets) throws Exception;
 
-    void rollBackTxAssets(int chainId, List<NulsHash> hashList) throws Exception;
+    void rollBackTxAssets(int chainId, List<LedgerAsset> ledgerAssets) throws Exception;
 
     int registerContractAsset(int chainId, LedgerAsset ledgerAssets) throws Exception;
 
@@ -60,6 +59,7 @@ public interface AssetRegMngService {
     List<Map<String, Object>> getLedgerRegAssets(int chainId, int assetType) throws Exception;
 
     Map<String, Object> getLedgerRegAsset(int chainId, String txHash) throws Exception;
+
     Map<String, Object> getLedgerRegAsset(int chainId, int assetId) throws Exception;
 
     int getRegAssetId(int chainId);

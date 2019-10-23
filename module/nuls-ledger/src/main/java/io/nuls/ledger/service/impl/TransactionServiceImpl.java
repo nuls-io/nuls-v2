@@ -127,17 +127,7 @@ public class TransactionServiceImpl implements TransactionService {
         return ValidateResult.getSuccess();
     }
 
-    private void dealAssetAddressIndex(Map<String, List<String>> assetAddressIndex, int chainId, int assetId, String address) {
-        String assetIndexKey = chainId + "-" + assetId;
-        List<String> addressList = null;
-        if (null == assetAddressIndex.get(assetIndexKey)) {
-            addressList = new ArrayList<>();
-            assetAddressIndex.put(assetIndexKey, addressList);
-        } else {
-            addressList = assetAddressIndex.get(assetIndexKey);
-        }
-        addressList.add(address);
-    }
+
 
     private boolean confirmBlockTxProcess(long blockHeight,int addressChainId, List<Transaction> txList,
                                           Map<String, AccountBalance> updateAccounts, List<Uncfd2CfdKey> delUncfd2CfdKeys,
@@ -171,7 +161,7 @@ public class TransactionServiceImpl implements TransactionService {
                 boolean process;
                 AccountBalance accountBalance = getAccountBalance(addressChainId, from, updateAccounts, address);
                 //归集链下有多少种类资产，资产下有多少地址
-                dealAssetAddressIndex(assetAddressIndex, from.getAssetsChainId(), from.getAssetsId(), address);
+                LedgerUtil.dealAssetAddressIndex(assetAddressIndex, from.getAssetsChainId(), from.getAssetsId(), address);
                 if (from.getLocked() == 0) {
                     AmountNonce amountNonce = new AmountNonce(from.getNonce(), nonce8Bytes, from.getAmount());
                     accountBalance.getPreAccountState().getNonces().add(amountNonce);
@@ -208,7 +198,7 @@ public class TransactionServiceImpl implements TransactionService {
                 }
                 AccountBalance accountBalance = getAccountBalance(addressChainId, to, updateAccounts, address);
                 //归集链下有多少种类资产，资产下有多少地址
-                dealAssetAddressIndex(assetAddressIndex, to.getAssetsChainId(), to.getAssetsId(), address);
+                LedgerUtil.dealAssetAddressIndex(assetAddressIndex, to.getAssetsChainId(), to.getAssetsId(), address);
                 if (to.getLockTime() == 0) {
                     //非锁定交易处理
                     commontTransactionProcessor.processToCoinData(to, accountBalance.getNowAccountState());
