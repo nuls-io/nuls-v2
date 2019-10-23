@@ -135,6 +135,6 @@ public class TxType {
     /**
      * 账本链内资产注册登记
      */
-    public static final int LEDGER_ASSET_REG_TRANSFER = 30;
+    public static final int LEDGER_ASSET_REG_TRANSFER = 27;
 
 }
