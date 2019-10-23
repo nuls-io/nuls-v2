@@ -796,11 +796,14 @@ public class CoinDataValidator {
                 assetMap.put(toKey, fromAmount);
             }
         }
+        BigInteger assetKeyFrom, assetKeyTo;
         for (String assetKey : assetKeys) {
-            if (null == assetMap.get(assetKey + "from") || null == assetMap.get(assetKey + "to")) {
+            assetKeyFrom = assetMap.get(assetKey + "from");
+            assetKeyTo = assetMap.get(assetKey + "to");
+            if (null == assetKeyFrom || null == assetKeyTo) {
                 continue;
             }
-            if (BigIntegerUtils.isLessThan(assetMap.get(assetKey + "from"), assetMap.get(assetKey + "to"))) {
+            if (BigIntegerUtils.isLessThan(assetKeyFrom, assetKeyTo)) {
                 LoggerUtil.COMMON_LOG.error("fromAmount is less than to amount");
                 return false;
             }
