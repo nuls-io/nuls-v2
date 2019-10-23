@@ -25,7 +25,6 @@
  */
 package io.nuls.ledger.storage.impl;
 
-import io.nuls.base.basic.AddressTool;
 import io.nuls.core.basic.InitializingBean;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
@@ -125,8 +124,8 @@ public class AssetRegMngRepositoryImpl implements AssetRegMngRepository, Initial
     @Override
     public int getLedgerAssetIdByHash(int chainId, byte[] hash) throws Exception {
         String hashTableName = getLedgerAssetRegHashIndexTableName(chainId);
-        byte[] assetIdByte= RocksDBService.get(hashTableName,hash);
-        if(null!=assetIdByte){
+        byte[] assetIdByte = RocksDBService.get(hashTableName, hash);
+        if (null != assetIdByte) {
             return ByteUtils.bytesToInt(assetIdByte);
         }
         return 0;
@@ -195,5 +194,21 @@ public class AssetRegMngRepositoryImpl implements AssetRegMngRepository, Initial
             }
         }
         return 0;
+    }
+
+    @Override
+    public void batchUpdateAccountState(int addressChainId, Map<byte[], byte[]> accountStateMap) throws Exception {
+        //update account
+        RocksDBService.batchPut(getLedgerAccountTableName(addressChainId), accountStateMap);
+
+    }
+    @Override
+    public void batchDelAccountState(int addressChainId, List<byte[]> keys) throws Exception {
+        //update account
+        RocksDBService.deleteKeys(getLedgerAccountTableName(addressChainId), keys);
+
+    }
+    String getLedgerAccountTableName(int chainId) {
+        return DataBaseArea.TB_LEDGER_ACCOUNT + LedgerConstant.DOWN_LINE + chainId;
     }
 }

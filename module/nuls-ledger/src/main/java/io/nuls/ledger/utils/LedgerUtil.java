@@ -13,7 +13,9 @@ import io.nuls.ledger.model.tx.txdata.TxLedgerAsset;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -156,5 +158,16 @@ public class LedgerUtil {
         txLedgerAsset.setAddress(AddressTool.getAddress(map.get("assetOwnerAddress").toString()));
         return txLedgerAsset;
 
+    }
+    public static void dealAssetAddressIndex(Map<String, List<String>> assetAddressIndex, int chainId, int assetId, String address) {
+        String assetIndexKey = chainId + "-" + assetId;
+        List<String> addressList = null;
+        if (null == assetAddressIndex.get(assetIndexKey)) {
+            addressList = new ArrayList<>();
+            assetAddressIndex.put(assetIndexKey, addressList);
+        } else {
+            addressList = assetAddressIndex.get(assetIndexKey);
+        }
+        addressList.add(address);
     }
 }

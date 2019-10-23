@@ -38,14 +38,28 @@ import java.util.Map;
 public interface AssetRegMngRepository {
 
     void saveLedgerAssetReg(int chainId, LedgerAsset ledgerAsset) throws Exception;
-    void batchSaveLedgerAssetReg(int chainId,  Map<byte[], byte[]> ledgerAssets,Map<byte[], byte[]> ledgerAssetsHashs) throws Exception;
-    void batchRollBackLedgerAssetReg(int chainId,List<byte[]> txHashs) throws Exception;
-    int getLedgerAssetIdByContractAddr(int chainId,byte[] address) throws Exception;
-    int getLedgerAssetIdByHash(int chainId,byte[] hash) throws Exception;
-    LedgerAsset getLedgerAssetByAssetId(int chainId,int assetId) throws Exception;
+
+    void batchSaveLedgerAssetReg(int chainId, Map<byte[], byte[]> ledgerAssets, Map<byte[], byte[]> ledgerAssetsHashs) throws Exception;
+
+    void batchRollBackLedgerAssetReg(int chainId, List<byte[]> txHashs) throws Exception;
+
+    int getLedgerAssetIdByContractAddr(int chainId, byte[] address) throws Exception;
+
+    int getLedgerAssetIdByHash(int chainId, byte[] hash) throws Exception;
+
+    LedgerAsset getLedgerAssetByAssetId(int chainId, int assetId) throws Exception;
+
     void deleteLedgerAssetReg(int chainId, int assetId) throws Exception;
-    void deleteLedgerAssetRegIndex(int chainId,byte[] address) throws Exception;
+
+    void deleteLedgerAssetRegIndex(int chainId, byte[] address) throws Exception;
+
     List<LedgerAsset> getAllRegLedgerAssets(int chainId) throws Exception;
+
     int maxAssetId(int chainId) throws Exception;
+
+    void batchUpdateAccountState(int addressChainId, Map<byte[], byte[]> accountStateMap) throws Exception;
+
+    void batchDelAccountState(int addressChainId, List<byte[]> keys) throws Exception;
+
 
 }
