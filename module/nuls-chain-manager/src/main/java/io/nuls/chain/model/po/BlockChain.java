@@ -283,18 +283,7 @@ public class BlockChain extends BaseNulsData {
         super();
     }
 
-    public BlockChain(TxChain txChain) {
-        this.addressType = txChain.getAddressType();
-        this.addressPrefix = txChain.getAddressPrefix();
-        this.chainId = txChain.getDefaultAsset().getChainId();
-        this.magicNumber = txChain.getMagicNumber();
-        this.minAvailableNodeNum = txChain.getMinAvailableNodeNum();
-        this.chainName = txChain.getName();
-        this.supportInflowAsset = txChain.isSupportInflowAsset();
-        this.signatureByzantineRatio = txChain.getSignatureByzantineRatio();
-        this.verifierList = txChain.getVerifierList();
-        this.maxSignatureCount = txChain.getMaxSignatureCount();
-    }
+
 
     public byte[] parseToTransaction(Asset asset) throws IOException {
         TxChain txChain = new TxChain();

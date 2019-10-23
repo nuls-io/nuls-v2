@@ -52,30 +52,22 @@ public class Asset extends BaseNulsData {
         chainIds.add(chainId);
     }
 
-    public Asset(TxChain tx) {
-        TxAsset defaultAsset = tx.getDefaultAsset();
-        this.address = defaultAsset.getAddress();
+
+
+    public Asset(io.nuls.chain.model.tx.txdatav3.TxChain tx, BigInteger depositNuls, BigInteger destroyNuls, byte[] address) {
+        io.nuls.chain.model.tx.txdatav3.TxAsset defaultAsset = tx.getDefaultAsset();
+        this.address = address;
         this.assetId = defaultAsset.getAssetId();
         this.chainId = defaultAsset.getChainId();
         this.decimalPlaces = defaultAsset.getDecimalPlaces();
-        this.depositNuls = defaultAsset.getDepositNuls();
-        this.destroyNuls = defaultAsset.getDestroyNuls();
+        this.depositNuls = depositNuls;
+        this.destroyNuls = destroyNuls;
         this.initNumber = defaultAsset.getInitNumber();
         this.symbol = defaultAsset.getSymbol();
         this.assetName = defaultAsset.getName();
     }
 
-    public Asset(TxAsset tx) {
-        this.address = tx.getAddress();
-        this.assetId = tx.getAssetId();
-        this.chainId = tx.getChainId();
-        this.decimalPlaces = tx.getDecimalPlaces();
-        this.depositNuls = tx.getDepositNuls();
-        this.destroyNuls = tx.getDestroyNuls();
-        this.initNumber = tx.getInitNumber();
-        this.symbol = tx.getSymbol();
-        this.assetName = tx.getName();
-    }
+
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
@@ -160,20 +152,6 @@ public class Asset extends BaseNulsData {
             size += SerializeUtils.sizeOfUint16() * chainIds.size();
         }
         return size;
-    }
-
-    public byte[] parseToTransaction() throws IOException {
-        TxAsset txAsset = new TxAsset();
-        txAsset.setAddress(this.getAddress());
-        txAsset.setAssetId(this.getAssetId());
-        txAsset.setChainId(this.getChainId());
-        txAsset.setDecimalPlaces(this.getDecimalPlaces());
-        txAsset.setDepositNuls(this.getDepositNuls());
-        txAsset.setDestroyNuls(this.getDestroyNuls());
-        txAsset.setInitNumber(this.getInitNumber());
-        txAsset.setName(this.getAssetName());
-        txAsset.setSymbol(this.getSymbol());
-        return txAsset.serialize();
     }
 
     public Asset() {

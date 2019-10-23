@@ -18,11 +18,14 @@ import io.nuls.chain.model.tx.RemoveAssetFromChainTransaction;
 import io.nuls.chain.rpc.call.RpcService;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
+import io.nuls.chain.util.ChainManagerUtil;
 import io.nuls.chain.util.LoggerUtil;
+import io.nuls.chain.util.TxUtil;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.ByteUtils;
+import io.nuls.core.model.FormatValidUtils;
 import io.nuls.core.rpc.model.*;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.util.NulsDateUtils;
@@ -81,8 +84,11 @@ public class AssetCmd extends BaseChainCmd {
             if (asset.getDecimalPlaces() < Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMin()) || asset.getDecimalPlaces() > Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMax())) {
                 return failed(CmErrorCode.ERROR_ASSET_DECIMALPLACES);
             }
-            if (null == asset.getSymbol() || asset.getSymbol().length() > Integer.valueOf(nulsChainConfig.getAssetSymbolMax()) || asset.getSymbol().length() < 1) {
-                return failed(CmErrorCode.ERROR_ASSET_SYMBOL_LENGTH);
+            if (!FormatValidUtils.validTokenNameOrSymbol(asset.getSymbol())) {
+                return failed(CmErrorCode.ERROR_ASSET_SYMBOL);
+            }
+            if (!FormatValidUtils.validTokenNameOrSymbol(asset.getAssetName())) {
+                return failed(CmErrorCode.ERROR_ASSET_NAME);
             }
             asset.setDepositNuls(new BigInteger(nulsChainConfig.getAssetDepositNuls()));
             int rateToPercent = new BigDecimal(nulsChainConfig.getAssetDepositNulsDestroyRate()).multiply(BigDecimal.valueOf(100)).intValue();
@@ -100,7 +106,11 @@ public class AssetCmd extends BaseChainCmd {
             }
             /* 组装交易发送 (Send transaction) */
             Transaction tx = new AddAssetToChainTransaction();
-            tx.setTxData(asset.parseToTransaction());
+            if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) > 2) {
+                tx.setTxData(TxUtil.parseAssetToTxV3(asset).serialize());
+            } else {
+                tx.setTxData(TxUtil.parseAssetToTx(asset).serialize());
+            }
             tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
             AccountBalance accountBalance = new AccountBalance(null, null);
             ErrorCode ldErrorCode = rpcService.getCoinData(String.valueOf(params.get("address")), accountBalance);
@@ -198,7 +208,11 @@ public class AssetCmd extends BaseChainCmd {
                 /* 只注销资产 (Only destroy assets) */
                 tx = new RemoveAssetFromChainTransaction();
                 try {
-                    tx.setTxData(asset.parseToTransaction());
+                    if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) > 2) {
+                        tx.setTxData(TxUtil.parseAssetToTxV3(asset).serialize());
+                    } else {
+                        tx.setTxData(TxUtil.parseAssetToTx(asset).serialize());
+                    }
                 } catch (IOException e) {
                     LoggerUtil.logger().error(e);
                     return failed("parseToTransaction fail");

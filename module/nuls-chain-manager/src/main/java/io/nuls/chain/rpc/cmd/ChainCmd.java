@@ -47,6 +47,7 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.model.FormatValidUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.model.*;
@@ -162,8 +163,11 @@ public class ChainCmd extends BaseChainCmd {
             if (asset.getDecimalPlaces() < Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMin()) || asset.getDecimalPlaces() > Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMax())) {
                 return failed(CmErrorCode.ERROR_ASSET_DECIMALPLACES);
             }
-            if (null == asset.getSymbol() || asset.getSymbol().length() > Integer.valueOf(nulsChainConfig.getAssetSymbolMax()) || asset.getSymbol().length() < 1) {
-                return failed(CmErrorCode.ERROR_ASSET_SYMBOL_LENGTH);
+            if (!FormatValidUtils.validTokenNameOrSymbol(asset.getSymbol())) {
+                return failed(CmErrorCode.ERROR_ASSET_SYMBOL);
+            }
+            if (!FormatValidUtils.validTokenNameOrSymbol(asset.getAssetName())) {
+                return failed(CmErrorCode.ERROR_ASSET_NAME);
             }
             asset.setChainId(blockChain.getChainId());
             asset.setDepositNuls(new BigInteger(nulsChainConfig.getAssetDepositNuls()));
@@ -282,8 +286,11 @@ public class ChainCmd extends BaseChainCmd {
             if (asset.getDecimalPlaces() < Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMin()) || asset.getDecimalPlaces() > Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMax())) {
                 return failed(CmErrorCode.ERROR_ASSET_DECIMALPLACES);
             }
-            if (null == asset.getSymbol() || asset.getSymbol().length() > Integer.valueOf(nulsChainConfig.getAssetSymbolMax()) || asset.getSymbol().length() < 1) {
-                return failed(CmErrorCode.ERROR_ASSET_SYMBOL_LENGTH);
+            if (!FormatValidUtils.validTokenNameOrSymbol(asset.getSymbol())) {
+                return failed(CmErrorCode.ERROR_ASSET_SYMBOL);
+            }
+            if (!FormatValidUtils.validTokenNameOrSymbol(asset.getAssetName())) {
+                return failed(CmErrorCode.ERROR_ASSET_NAME);
             }
             asset.setChainId(blockChain.getChainId());
             asset.setDepositNuls(new BigInteger(nulsChainConfig.getAssetDepositNuls()));

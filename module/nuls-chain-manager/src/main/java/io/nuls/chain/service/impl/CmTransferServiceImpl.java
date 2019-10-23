@@ -68,4 +68,25 @@ public class CmTransferServiceImpl implements CmTransferService {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public boolean rollbackV3(int chainId, List<Transaction> txs, BlockHeader blockHeader) {
+        try {
+            long commitHeight = blockHeader.getHeight();
+            //获取回滚信息
+            CacheDatas moduleTxDatas = cacheDataService.getCacheDatas(commitHeight - 1);
+            //通知远程调用回滚
+            chainService.rpcBlockChainRollbackV3(txs);
+            if (null == moduleTxDatas) {
+                LoggerUtil.logger().info("chain module height ={} bak datas is null,maybe had rolled", commitHeight);
+                return true;
+            }
+            //进行数据回滚
+            cacheDataService.rollBlockTxs(chainId, commitHeight);
+            return true;
+        } catch (Exception e) {
+            LoggerUtil.logger().error(e);
+            throw new RuntimeException(e);
+        }
+    }
 }

@@ -1,5 +1,46 @@
 [
   {
+    "version": "3",
+    "extend": "",
+    "validTxs": [
+      {
+        "type": "11",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "RegChainTxProcessorV3"
+      },
+      {
+        "type": "12",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "DestroyChainTxProcessorV3"
+      },
+      {
+        "type": "13",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "AddAssetTxProcessorV3"
+      },
+      {
+        "type": "14",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "DisableAssetTxProcessorV3"
+      }
+    ],
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  },
+  {
     "version": "1",
     "extend": "",
     "validTxs": [
