@@ -81,6 +81,8 @@ public class TransactionServiceImpl implements TransactionService {
     FreezeStateService freezeStateService;
     @Autowired
     ChainAssetsService chainAssetsService;
+    @Autowired
+    AssetRegMngService assetRegMngService;
     /**
      * 缓存一个区块的nonce值
      */
@@ -105,7 +107,7 @@ public class TransactionServiceImpl implements TransactionService {
             //例如黄牌交易，直接返回
             return ValidateResult.getSuccess();
         }
-        if(!coinDataValidator.validateTxAmount(coinData,transaction.getType())){
+        if (!coinDataValidator.validateTxAmount(coinData, transaction.getType())) {
             return ValidateResult.getResult(LedgerErrorCode.TX_AMOUNT_INVALIDATE, new String[]{transaction.getHash().toHex()});
         }
         /*未确认交易的校验*/
@@ -128,8 +130,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
 
-
-    private boolean confirmBlockTxProcess(long blockHeight,int addressChainId, List<Transaction> txList,
+    private boolean confirmBlockTxProcess(long blockHeight, int addressChainId, List<Transaction> txList,
                                           Map<String, AccountBalance> updateAccounts, List<Uncfd2CfdKey> delUncfd2CfdKeys,
                                           Map<String, Integer> clearUncfs, Map<String, List<String>> assetAddressIndex) throws Exception {
         for (Transaction transaction : txList) {
@@ -157,6 +158,11 @@ public class TransactionServiceImpl implements TransactionService {
                         LoggerUtil.logger(addressChainId).error("address={} Not local chain Exception", address);
                         return false;
                     }
+                }
+                if(assetRegMngService.isContractAsset(from.getAssetsChainId(),from.getAssetsId())){
+                    //账本非跨链交易如果收到from是合约资产的，报错
+                    LoggerUtil.logger(addressChainId).error("hash={} asset={}-{}  from is contract asset  Exception", txHash,from.getAssetsChainId(),from.getAssetsId());
+                    return false;
                 }
                 boolean process;
                 AccountBalance accountBalance = getAccountBalance(addressChainId, from, updateAccounts, address);
@@ -195,6 +201,11 @@ public class TransactionServiceImpl implements TransactionService {
                         LoggerUtil.logger(addressChainId).error("address={} Not local chain Exception", address);
                         return false;
                     }
+                }
+                if(assetRegMngService.isContractAsset(to.getAssetsChainId(),to.getAssetsId())){
+                    //账本非跨链交易如果收到to是合约资产的,不进行入账
+                    LoggerUtil.logger(addressChainId).debug("hash={} asset={}-{} rec contract asset", txHash,to.getAssetsChainId(),to.getAssetsId());
+                    continue;
                 }
                 AccountBalance accountBalance = getAccountBalance(addressChainId, to, updateAccounts, address);
                 //归集链下有多少种类资产，资产下有多少地址
@@ -242,7 +253,7 @@ public class TransactionServiceImpl implements TransactionService {
             Map<String, Integer> clearUncfs = new HashMap<>(txList.size());
             Map<String, List<String>> assetAddressIndex = new HashMap<>(4);
             try {
-                if (!confirmBlockTxProcess(blockHeight,addressChainId, txList, updateAccounts, delUncfd2CfdKeys, clearUncfs, assetAddressIndex)) {
+                if (!confirmBlockTxProcess(blockHeight, addressChainId, txList, updateAccounts, delUncfd2CfdKeys, clearUncfs, assetAddressIndex)) {
                     return false;
                 }
                 //整体交易的处理

@@ -55,11 +55,11 @@ public interface AssetRegMngRepository {
 
     List<LedgerAsset> getAllRegLedgerAssets(int chainId) throws Exception;
 
-    int maxAssetId(int chainId) throws Exception;
+    int loadDatas(int chainId) throws Exception;
 
     void batchUpdateAccountState(int addressChainId, Map<byte[], byte[]> accountStateMap) throws Exception;
 
     void batchDelAccountState(int addressChainId, List<byte[]> keys) throws Exception;
 
-
+    boolean isContractAsset(int chainId, int assetId);
 }

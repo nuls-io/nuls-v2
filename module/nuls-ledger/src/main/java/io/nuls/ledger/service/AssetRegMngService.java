@@ -67,4 +67,6 @@ public interface AssetRegMngService {
     String getRegAssetContractAddr(int chainId, int assetId) throws Exception;
 
     int getRegAssetId(int chainId, String contractAddr) throws Exception;
+
+    boolean isContractAsset(int chainId, int assetId);
 }

@@ -69,12 +69,10 @@ public class AssetRegMngServiceImpl implements AssetRegMngService {
     Map<String, AtomicInteger> DB_ASSETS_ID_MAX_MAP = new ConcurrentHashMap<>();
     @Autowired
     AssetRegMngRepository assetRegMngRepository;
-    @Autowired
-    Repository repository;
 
     @Override
     public void initDBAssetsIdMap() throws Exception {
-        int assetId = assetRegMngRepository.maxAssetId(ledgerConfig.getMainChainId());
+        int assetId = assetRegMngRepository.loadDatas(ledgerConfig.getMainChainId());
         if (assetId == 0) {
             assetId = ledgerConfig.getMainAssetId();
         }
@@ -176,7 +174,7 @@ public class AssetRegMngServiceImpl implements AssetRegMngService {
     @Override
     public void rollBackTxAssets(int chainId, List<LedgerAsset> ledgerAssets) throws Exception {
         List<byte[]> list = new ArrayList<>();
-        List<byte []> delKeys = new ArrayList<>();
+        List<byte[]> delKeys = new ArrayList<>();
         for (LedgerAsset ledgerAsset : ledgerAssets) {
             byte[] hash = HexUtil.decode(ledgerAsset.getTxHash());
             list.add(hash);
@@ -186,16 +184,16 @@ public class AssetRegMngServiceImpl implements AssetRegMngService {
             delKeys.add(key.getBytes(LedgerConstant.DEFAULT_ENCODING));
         }
         assetRegMngRepository.batchRollBackLedgerAssetReg(chainId, list);
-        assetRegMngRepository.batchDelAccountState(chainId,delKeys);
-        //回滚资产
+        assetRegMngRepository.batchDelAccountState(chainId, delKeys);
+        //回滚资产后，进行缓存数据重置
         initDBAssetsIdMap();
     }
 
     @Override
-    public int registerContractAsset(int chainId, LedgerAsset ledgerAssets) throws Exception {
-        ledgerAssets.setAssetId(getAndSetAssetIdByTemp(chainId, 1));
-        assetRegMngRepository.saveLedgerAssetReg(chainId, ledgerAssets);
-        return ledgerAssets.getAssetId();
+    public int registerContractAsset(int chainId, LedgerAsset ledgerAsset) throws Exception {
+        ledgerAsset.setAssetId(getAndSetAssetIdByTemp(chainId, 1));
+        assetRegMngRepository.saveLedgerAssetReg(chainId, ledgerAsset);
+        return ledgerAsset.getAssetId();
     }
 
     @Override
@@ -265,6 +263,11 @@ public class AssetRegMngServiceImpl implements AssetRegMngService {
             return getAssetMapByLedgerAsset(ledgerAsset);
         }
         return null;
+    }
+
+    @Override
+    public boolean isContractAsset(int chainId, int assetId) {
+        return assetRegMngRepository.isContractAsset(chainId, assetId);
     }
 
 }

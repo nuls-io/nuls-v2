@@ -38,6 +38,7 @@ import io.nuls.ledger.storage.DataBaseArea;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author lanjinsheng
@@ -45,6 +46,10 @@ import java.util.Map;
  */
 @Component
 public class AssetRegMngRepositoryImpl implements AssetRegMngRepository, InitializingBean {
+    /**
+     * 缓存合约资产id
+     */
+    Map<String, Integer> DB_CONTRACT_ASSETS_IDS_MAP = new ConcurrentHashMap<>();
 
     String getLedgerAssetRegMngTableName(int chainId) throws Exception {
         String tableName = DataBaseArea.TB_LEDGER_ASSET_REG_MNG + LedgerConstant.DOWN_LINE + chainId;
@@ -80,6 +85,9 @@ public class AssetRegMngRepositoryImpl implements AssetRegMngRepository, Initial
     public void saveLedgerAssetReg(int chainId, LedgerAsset ledgerAsset) throws Exception {
         String assetRegTable = getLedgerAssetRegMngTableName(chainId);
         String assetContractAddrTable = getLedgerAssetRegContractAddrIndexTableName(chainId);
+        if (LedgerConstant.CONTRACT_ASSET_TYPE == ledgerAsset.getAssetType()) {
+            DB_CONTRACT_ASSETS_IDS_MAP.put(chainId + LedgerConstant.DOWN_LINE + ledgerAsset.getAssetId(), 1);
+        }
         RocksDBService.put(assetContractAddrTable, ledgerAsset.getAssetOwnerAddress(), ByteUtils.intToBytes(ledgerAsset.getAssetId()));
         RocksDBService.put(assetRegTable, ByteUtils.intToBytes(ledgerAsset.getAssetId()), ledgerAsset.serialize());
 
@@ -147,6 +155,7 @@ public class AssetRegMngRepositoryImpl implements AssetRegMngRepository, Initial
     public void deleteLedgerAssetReg(int chainId, int assetId) throws Exception {
         String assetRegTable = getLedgerAssetRegMngTableName(chainId);
         RocksDBService.delete(assetRegTable, ByteUtils.intToBytes(assetId));
+        DB_CONTRACT_ASSETS_IDS_MAP.remove(chainId + LedgerConstant.DOWN_LINE + assetId);
     }
 
     @Override
@@ -171,7 +180,7 @@ public class AssetRegMngRepositoryImpl implements AssetRegMngRepository, Initial
     }
 
     @Override
-    public int maxAssetId(int chainId) throws Exception {
+    public int loadDatas(int chainId) throws Exception {
         String assetHashTable = getLedgerAssetRegHashIndexTableName(chainId);
         int assetId = 0;
         List<byte[]> list1 = RocksDBService.valueList(assetHashTable);
@@ -188,6 +197,7 @@ public class AssetRegMngRepositoryImpl implements AssetRegMngRepository, Initial
         if (list2 != null) {
             for (byte[] value : list2) {
                 int addressAssetId = ByteUtils.bytesToInt(value);
+                DB_CONTRACT_ASSETS_IDS_MAP.put(chainId + LedgerConstant.DOWN_LINE + addressAssetId, 1);
                 if (addressAssetId > assetId) {
                     assetId = addressAssetId;
                 }
@@ -202,12 +212,19 @@ public class AssetRegMngRepositoryImpl implements AssetRegMngRepository, Initial
         RocksDBService.batchPut(getLedgerAccountTableName(addressChainId), accountStateMap);
 
     }
+
     @Override
     public void batchDelAccountState(int addressChainId, List<byte[]> keys) throws Exception {
         //update account
         RocksDBService.deleteKeys(getLedgerAccountTableName(addressChainId), keys);
 
     }
+
+    @Override
+    public boolean isContractAsset(int chainId, int assetId) {
+        return (null != DB_CONTRACT_ASSETS_IDS_MAP.get(chainId + LedgerConstant.DOWN_LINE + assetId));
+    }
+
     String getLedgerAccountTableName(int chainId) {
         return DataBaseArea.TB_LEDGER_ACCOUNT + LedgerConstant.DOWN_LINE + chainId;
     }
