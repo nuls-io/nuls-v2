@@ -172,9 +172,8 @@ public class ChainCmd extends BaseChainCmd {
                 return failed(CmErrorCode.ERROR_ASSET_NAME);
             }
             asset.setChainId(blockChain.getChainId());
-            asset.setDepositNuls(new BigInteger(nulsChainConfig.getAssetDepositNuls()));
-            int rateToPercent = new BigDecimal(nulsChainConfig.getAssetDepositNulsDestroyRate()).multiply(BigDecimal.valueOf(100)).intValue();
-            asset.setDestroyNuls(new BigInteger(nulsChainConfig.getAssetDepositNuls()).multiply(BigInteger.valueOf(rateToPercent)).divide(BigInteger.valueOf(100)));
+            asset.setDepositNuls(nulsChainConfig.getAssetDepositNuls());
+            asset.setDestroyNuls(nulsChainConfig.getAssetDestroyNuls());
             asset.setAvailable(true);
             BlockChain dbChain = chainService.getChain(blockChain.getChainId());
             if (null != dbChain && dbChain.isDelete()) {
@@ -300,9 +299,8 @@ public class ChainCmd extends BaseChainCmd {
                 return failed(CmErrorCode.ERROR_ASSET_NAME);
             }
             asset.setChainId(blockChain.getChainId());
-            asset.setDepositNuls(new BigInteger(nulsChainConfig.getAssetDepositNuls()));
-            int rateToPercent = new BigDecimal(nulsChainConfig.getAssetDepositNulsDestroyRate()).multiply(BigDecimal.valueOf(100)).intValue();
-            asset.setDestroyNuls(new BigInteger(nulsChainConfig.getAssetDepositNuls()).multiply(BigInteger.valueOf(rateToPercent)).divide(BigInteger.valueOf(100)));
+            asset.setDepositNuls(nulsChainConfig.getAssetDepositNuls());
+            asset.setDestroyNuls(nulsChainConfig.getAssetDestroyNuls());
             asset.setAvailable(true);
             BlockChain dbChain = chainService.getChain(blockChain.getChainId());
             if (null == dbChain) {
