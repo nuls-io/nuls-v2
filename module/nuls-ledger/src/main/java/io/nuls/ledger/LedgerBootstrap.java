@@ -90,7 +90,7 @@ public class LedgerBootstrap extends RpcModule {
             LedgerConstant.blackHolePublicKey = HexUtil.decode(ledgerConfig.getBlackHolePublicKey());
             LedgerChainManager ledgerChainManager = SpringLiteContext.getBean(LedgerChainManager.class);
             ledgerChainManager.initChains();
-            LoggerUtil.COMMON_LOG.info("Ledger data init  complete!");
+            LoggerUtil.COMMON_LOG.info("Ledger data init complete!");
         } catch (Exception e) {
             LoggerUtil.COMMON_LOG.error(e);
             LoggerUtil.COMMON_LOG.error("start fail...");

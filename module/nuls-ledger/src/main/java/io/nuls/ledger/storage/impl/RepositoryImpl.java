@@ -75,6 +75,16 @@ public class RepositoryImpl implements Repository, InitializingBean {
 
     }
 
+    @Override
+    public void clearAccountStateMem(int addressChainId, Map<String, AccountState> accountStateMemMap) throws Exception {
+        if (null == memChainsAccounts.get(String.valueOf(addressChainId))) {
+            memChainsAccounts.put(String.valueOf(addressChainId), new ConcurrentHashMap<>(1024));
+        }
+        if (null != accountStateMemMap) {
+            memChainsAccounts.get(String.valueOf(addressChainId)).putAll(accountStateMemMap);
+        }
+    }
+
 
     @Override
     public void delBlockSnapshot(int chainId, long height) throws Exception {

@@ -69,6 +69,8 @@ public class AssetRegMngServiceImpl implements AssetRegMngService {
     Map<String, AtomicInteger> DB_ASSETS_ID_MAX_MAP = new ConcurrentHashMap<>();
     @Autowired
     AssetRegMngRepository assetRegMngRepository;
+    @Autowired
+    Repository repository;
 
     @Override
     public void initDBAssetsIdMap() throws Exception {
@@ -175,14 +177,17 @@ public class AssetRegMngServiceImpl implements AssetRegMngService {
     public void rollBackTxAssets(int chainId, List<LedgerAsset> ledgerAssets) throws Exception {
         List<byte[]> list = new ArrayList<>();
         List<byte[]> delKeys = new ArrayList<>();
+        Map<String, AccountState> delMap = new ConcurrentHashMap<>();
         for (LedgerAsset ledgerAsset : ledgerAssets) {
             byte[] hash = HexUtil.decode(ledgerAsset.getTxHash());
             list.add(hash);
             int assetId = assetRegMngRepository.getLedgerAssetIdByHash(chainId, hash);
             String address = LedgerUtil.getRealAddressStr(ledgerAsset.getAssetOwnerAddress());
             String key = LedgerUtil.getKeyStr(address, chainId, assetId);
+            delMap.put(key, new AccountState());
             delKeys.add(key.getBytes(LedgerConstant.DEFAULT_ENCODING));
         }
+        repository.clearAccountStateMem(chainId, delMap);
         assetRegMngRepository.batchRollBackLedgerAssetReg(chainId, list);
         assetRegMngRepository.batchDelAccountState(chainId, delKeys);
         //回滚资产后，进行缓存数据重置
