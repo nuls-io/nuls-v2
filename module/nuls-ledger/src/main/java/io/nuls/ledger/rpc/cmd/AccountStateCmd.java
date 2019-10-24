@@ -188,9 +188,7 @@ public class AccountStateCmd extends BaseLedgerCmd {
         rtMap.put("list", resultList);
         return success(rtMap);
     }
-    public static void main(String []args){
-        System.out.println(Boolean.valueOf("false"));
-    }
+
     /**
      * 获取账户nonce值
      * get user account nonce

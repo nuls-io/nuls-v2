@@ -86,7 +86,7 @@ public class AssetsRegContractCmd extends BaseLedgerCmd {
         Map<String, Object> rtMap = new HashMap<>(3);
         try {
             /* 组装Asset (Asset object) */
-            params.put("chainId", ledgerConfig.getMainChainId());
+            params.put("chainId", ledgerConfig.getChainId());
             params.put("address", params.get("contractAddress"));
             LedgerAsset asset = new LedgerAsset();
             asset.map2pojo(params, LedgerConstant.CONTRACT_ASSET_TYPE);
@@ -121,7 +121,7 @@ public class AssetsRegContractCmd extends BaseLedgerCmd {
         Map<String, Object> rtMap = new HashMap<>(1);
         try {
             /* 组装Asset (Asset object) */
-            assetRegMngService.rollBackContractAsset(ledgerConfig.getMainChainId(), params.get("contractAddress").toString());
+            assetRegMngService.rollBackContractAsset(ledgerConfig.getChainId(), params.get("contractAddress").toString());
             rtMap.put("value", true);
         } catch (Exception e) {
             LoggerUtil.COMMON_LOG.error(e);

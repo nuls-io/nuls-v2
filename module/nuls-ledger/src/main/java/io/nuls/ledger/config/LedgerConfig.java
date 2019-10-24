@@ -18,8 +18,8 @@ public class LedgerConfig implements ModuleConfig {
     private String encoding;
     private int unconfirmedTxExpired;
     private String blackHolePublicKey;
-    private int mainChainId;
-    private int mainAssetId;
+    private int chainId;
+    private int assetId;
     private int assetRegDestroyAmount = 200;
     private int decimals = 8;
 
@@ -84,21 +84,6 @@ public class LedgerConfig implements ModuleConfig {
         this.assetRegDestroyAmount = assetRegDestroyAmount;
     }
 
-    public int getMainChainId() {
-        return mainChainId;
-    }
-
-    public void setMainChainId(int mainChainId) {
-        this.mainChainId = mainChainId;
-    }
-
-    public int getMainAssetId() {
-        return mainAssetId;
-    }
-
-    public void setMainAssetId(int mainAssetId) {
-        this.mainAssetId = mainAssetId;
-    }
 
     public int getDecimals() {
         return decimals;
@@ -106,5 +91,21 @@ public class LedgerConfig implements ModuleConfig {
 
     public void setDecimals(int decimals) {
         this.decimals = decimals;
+    }
+
+    public int getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(int chainId) {
+        this.chainId = chainId;
+    }
+
+    public int getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(int assetId) {
+        this.assetId = assetId;
     }
 }

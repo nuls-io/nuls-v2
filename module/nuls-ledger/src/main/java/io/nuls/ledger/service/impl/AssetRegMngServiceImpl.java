@@ -72,11 +72,11 @@ public class AssetRegMngServiceImpl implements AssetRegMngService {
 
     @Override
     public void initDBAssetsIdMap() throws Exception {
-        int assetId = assetRegMngRepository.loadDatas(ledgerConfig.getMainChainId());
+        int assetId = assetRegMngRepository.loadDatas(ledgerConfig.getChainId());
         if (assetId == 0) {
-            assetId = ledgerConfig.getMainAssetId();
+            assetId = ledgerConfig.getAssetId();
         }
-        DB_ASSETS_ID_MAX_MAP.put(String.valueOf(ledgerConfig.getMainChainId()), new AtomicInteger(assetId));
+        DB_ASSETS_ID_MAX_MAP.put(String.valueOf(ledgerConfig.getChainId()), new AtomicInteger(assetId));
     }
 
     @Override

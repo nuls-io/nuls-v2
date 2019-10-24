@@ -83,7 +83,7 @@ public class CallRpcServiceImpl implements CallRpcService {
     public ErrorCode newTx(Transaction tx) {
         try {
             Map<String, Object> params = new HashMap<>();
-            params.put("chainId", ledgerConfig.getMainChainId());
+            params.put("chainId", ledgerConfig.getChainId());
             params.put("tx", RPCUtil.encode(tx.serialize()));
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, CmdConstant.CMD_TX_NEW, params);
             if (!cmdResp.isSuccess()) {

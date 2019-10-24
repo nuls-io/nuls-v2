@@ -106,7 +106,6 @@ public class AssetsRegTxCmd extends BaseLedgerCmd {
     @CmdAnnotation(cmd = CmdConstant.CMD_CHAIN_ASSET_TX_REG, version = 1.0,
             description = "链内资产协议登记接口")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行链Id,取值区间[1-65535]"),
             @Parameter(parameterName = "assetName", requestType = @TypeDescriptor(value = String.class), parameterDes = "资产名称: 大、小写字母、数字、下划线（下划线不能在两端）1~20字节"),
             @Parameter(parameterName = "initNumber", requestType = @TypeDescriptor(value = BigInteger.class), parameterDes = "资产初始值"),
             @Parameter(parameterName = "decimalPlace", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-18]", parameterDes = "资产最小分割位数"),
@@ -134,17 +133,17 @@ public class AssetsRegTxCmd extends BaseLedgerCmd {
             Transaction tx = new AssetRegTransaction();
             tx.setTxData(asset.serialize());
             tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
-            AccountState accountState = accountStateService.getAccountStateReCal(params.get("txCreatorAddress").toString(), ledgerConfig.getMainChainId(), ledgerConfig.getMainChainId(), ledgerConfig.getMainAssetId());
-            CoinData coinData = this.getRegCoinData(BigInteger.valueOf(ledgerConfig.getAssetRegDestroyAmount()), AddressTool.getAddress(params.get("txCreatorAddress").toString()), ledgerConfig.getMainChainId(),
-                    ledgerConfig.getMainAssetId(), tx.size(), accountState);
+            AccountState accountState = accountStateService.getAccountStateReCal(params.get("txCreatorAddress").toString(), ledgerConfig.getChainId(), ledgerConfig.getChainId(), ledgerConfig.getAssetId());
+            CoinData coinData = this.getRegCoinData(BigInteger.valueOf(ledgerConfig.getAssetRegDestroyAmount()), AddressTool.getAddress(params.get("txCreatorAddress").toString()), ledgerConfig.getChainId(),
+                    ledgerConfig.getAssetId(), tx.size(), accountState);
             tx.setCoinData(coinData.serialize());
             /* 判断账号是否正确 (Determine if the signature is correct) */
-            ErrorCode acErrorCode = rpcService.transactionSignature(ledgerConfig.getMainChainId(), (String) params.get("address"), (String) params.get("password"), tx);
+            ErrorCode acErrorCode = rpcService.transactionSignature(ledgerConfig.getChainId(), (String) params.get("address"), (String) params.get("password"), tx);
             if (null != acErrorCode) {
                 return failed(acErrorCode);
             }
             rtMap.put("txHash", tx.getHash().toHex());
-            rtMap.put("chainId", ledgerConfig.getMainChainId());
+            rtMap.put("chainId", ledgerConfig.getChainId());
             ErrorCode txErrorCode = rpcService.newTx(tx);
             if (null != txErrorCode) {
                 return failed(txErrorCode);
