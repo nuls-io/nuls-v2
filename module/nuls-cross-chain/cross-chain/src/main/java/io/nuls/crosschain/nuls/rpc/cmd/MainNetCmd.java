@@ -155,4 +155,30 @@ public class MainNetCmd extends BaseCmd {
         return success(result.getData());
     }
 
+    /**
+     * 智能合约资产跨链
+     * Smart contract assets cross chain
+     * */
+    @CmdAnnotation(cmd = "cc_tokenOutCrossChain", version = 1.0, description = "智能合约资产跨链/Smart contract assets cross chain")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
+    @Parameter(parameterName = "assetsId", requestType = @TypeDescriptor(value = int.class), parameterDes = "资产ID")
+    @Parameter(parameterName = "from", parameterDes = "传出地址")
+    @Parameter(parameterName = "to", parameterDes = "地址转入")
+    @Parameter(parameterName = "value", parameterDes = "金额")
+    @Parameter(parameterName = "contractAddress", parameterDes = "合约地址")
+    @Parameter(parameterName = "contractSender", parameterDes = "合约调用者地址")
+    @Parameter(parameterName = "contractBalance", parameterDes = "合约地址的当前余额")
+    @Parameter(parameterName = "contractNonce", parameterDes = "合约地址的当前nonce值")
+    @Parameter(parameterName = "blockTime", requestType = @TypeDescriptor(value = long.class), parameterDes = "当前打包的区块时间")
+    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "txHash",valueType = Boolean.class, description = "交易hash"),
+            @Key(name = "tx",valueType = Boolean.class, description = "交易字符串")
+    }))
+    public Response tokenOutCrossChain(Map<String,Object> params){
+        Result result = service.tokenOutCrossChain(params);
+        if(result.isFailed()){
+            return failed(result.getErrorCode());
+        }
+        return success(result.getData());
+    }
 }

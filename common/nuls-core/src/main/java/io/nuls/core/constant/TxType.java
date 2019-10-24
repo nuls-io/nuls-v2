@@ -1,5 +1,7 @@
 package io.nuls.core.constant;
 
+import org.junit.rules.Verifier;
+
 /**
  * 交易类型
  *

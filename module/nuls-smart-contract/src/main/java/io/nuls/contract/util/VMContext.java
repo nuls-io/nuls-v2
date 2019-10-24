@@ -140,7 +140,13 @@ public class VMContext {
     public BlockHeaderDto getCurrentBlockHeader(int chainId) {
         BlockHeader blockHeader = contractHelper.getBatchInfoCurrentBlockHeader(chainId);
         if (blockHeader == null) {
-            return getNewestBlockHeader(chainId);
+            // edit by pierre at 2019-10-24 如果为空，说明是验证合约时，合约虚拟机调用此方法，此时需要手工设置当前打包区块数据，可手工设置的数据有区块高度和区块时间
+            BlockHeaderDto header = getNewestBlockHeader(chainId);
+            if(header != null) {
+                header.setHeight(header.getHeight() + 1);
+                header.setTime(header.getTime() + 10);
+            }
+            return header;
         }
         return new BlockHeaderDto(chainId, blockHeader);
     }

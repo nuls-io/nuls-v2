@@ -13,8 +13,10 @@ import io.nuls.crosschain.base.model.bo.ChainInfo;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
+import io.nuls.crosschain.nuls.model.bo.CmdRegisterDto;
 import io.nuls.crosschain.nuls.model.bo.config.ConfigBean;
 import io.nuls.crosschain.nuls.rpc.call.BlockCall;
+import io.nuls.crosschain.nuls.rpc.call.SmartContractCall;
 import io.nuls.crosschain.nuls.srorage.ConfigService;
 import io.nuls.crosschain.nuls.srorage.RegisteredCrossChainService;
 import io.nuls.crosschain.nuls.utils.LoggerUtil;
@@ -112,6 +114,23 @@ public class ChainManager {
                 mainChainInfo.setChainId(config.getMainChainId());
                 registeredCrossChainList.add(mainChainInfo);
             }
+        }
+    }
+
+    /**
+     * 注册智能合约交易
+     * */
+    public void registerContractTx(){
+        for (Chain chain:chainMap.values()) {
+            /*
+             * 注册智能合约交易
+             * Chain Trading Registration
+             * */
+            int chainId = chain.getConfig().getChainId();
+            List<CmdRegisterDto> cmdRegisterDtoList = new ArrayList<>();
+            CmdRegisterDto tokenOutCrossChain = new CmdRegisterDto("cc_tokenOutCrossChain", 1, List.of("from", "to", "value", "chainId", "assetsId"), 1);
+            cmdRegisterDtoList.add(tokenOutCrossChain);
+            SmartContractCall.registerContractTx(chainId, cmdRegisterDtoList);
         }
     }
 
