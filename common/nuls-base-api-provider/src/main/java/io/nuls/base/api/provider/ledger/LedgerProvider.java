@@ -3,6 +3,9 @@ package io.nuls.base.api.provider.ledger;
 import io.nuls.base.api.provider.Result;
 import io.nuls.base.api.provider.ledger.facade.AccountBalanceInfo;
 import io.nuls.base.api.provider.ledger.facade.GetBalanceReq;
+import io.nuls.base.api.provider.ledger.facade.RegLocalAssetReq;
+
+import java.util.Map;
 
 /**
  * @Author: zhoulijun
@@ -17,5 +20,12 @@ public interface LedgerProvider {
      * @return
      */
     Result<AccountBalanceInfo> getBalance(GetBalanceReq req);
+
+    /**
+     * 本地资产注册
+     * @param req
+     * @return
+     */
+    Result<Map> regLocalAsset(RegLocalAssetReq req);
 
 }

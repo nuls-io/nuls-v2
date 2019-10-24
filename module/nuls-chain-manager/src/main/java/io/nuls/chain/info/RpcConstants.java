@@ -36,7 +36,7 @@ public interface RpcConstants {
      */
     String CMD_ASSET_DISABLE = "cm_assetDisable";
     String CMD_ASSET_REG = "cm_assetReg";
-    String CMD_LOCAL_ASSET_REG = "cm_localAssetReg";
+    String CMD_MAIN_NET_ASSET_REG = "cm_mainNetAssetReg";
     String CMD_GET_CHAIN_ASSET = "cm_getChainAsset";
     String CMD_ASSET = "cm_asset";
     String CMD_CHAIN_REG = "cm_chainReg";

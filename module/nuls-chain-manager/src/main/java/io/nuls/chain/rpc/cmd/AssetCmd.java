@@ -142,7 +142,7 @@ public class AssetCmd extends BaseChainCmd {
     /**
      * 链内资产注册
      */
-    @CmdAnnotation(cmd = RpcConstants.CMD_LOCAL_ASSET_REG, version = 1.0,
+    @CmdAnnotation(cmd = RpcConstants.CMD_MAIN_NET_ASSET_REG, version = 1.0,
             description = "资产注册")
     @Parameters(value = {
             @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产Id,取值区间[1-65535]"),
@@ -154,7 +154,7 @@ public class AssetCmd extends BaseChainCmd {
                     @Key(name = "txHash", valueType = String.class, description = "交易hash值")
             })
     )
-    public Response localAssetReg(Map params) {
+    public Response cm_mainNetAssetReg(Map params) {
         /* 发送到交易模块 (Send to transaction module) */
         Map<String, String> rtMap = new HashMap<>(1);
         try {

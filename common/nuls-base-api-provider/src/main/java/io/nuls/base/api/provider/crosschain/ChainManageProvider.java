@@ -42,7 +42,7 @@ public interface ChainManageProvider {
      * @return
      */
     Result<String> addCrossAsset(AddCrossAssetReq req);
-
+    Result<String> addCrossLocalAsset(AddCrossLocalAssetReq req);
 
     /**
      * 获取注册了跨链交易的链的注册信息
