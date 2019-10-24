@@ -66,7 +66,28 @@ public class TxUtil {
         txAsset.setSymbol(asset.getSymbol());
         return txAsset;
     }
-
+    public static  TxChain parseChainToTx(BlockChain blockChain,Asset asset) throws IOException {
+        TxChain txChain = new TxChain();
+        txChain.setAddressType(blockChain.getAddressType());
+        txChain.setAddressPrefix(blockChain.getAddressPrefix());
+        txChain.getDefaultAsset().setChainId(blockChain.getChainId());
+        txChain.setMagicNumber(blockChain.getMagicNumber());
+        txChain.setMinAvailableNodeNum(blockChain.getMinAvailableNodeNum());
+        txChain.setName(blockChain.getChainName());
+        txChain.setSupportInflowAsset(blockChain.isSupportInflowAsset());
+        txChain.setVerifierList(blockChain.getVerifierList());
+        txChain.setMaxSignatureCount(blockChain.getMaxSignatureCount());
+        txChain.setSignatureByzantineRatio(blockChain.getSignatureByzantineRatio());
+        txChain.getDefaultAsset().setAddress(asset.getAddress());
+        txChain.getDefaultAsset().setAssetId(asset.getAssetId());
+        txChain.getDefaultAsset().setSymbol(asset.getSymbol());
+        txChain.getDefaultAsset().setName(asset.getAssetName());
+        txChain.getDefaultAsset().setDepositNuls(asset.getDepositNuls());
+        txChain.getDefaultAsset().setInitNumber(asset.getInitNumber());
+        txChain.getDefaultAsset().setDestroyNuls(asset.getDestroyNuls());
+        txChain.getDefaultAsset().setDecimalPlaces(asset.getDecimalPlaces());
+        return txChain;
+    }
     public static io.nuls.chain.model.tx.txdatav3.TxAsset parseAssetToTxV3(Asset asset) throws IOException {
         io.nuls.chain.model.tx.txdatav3.TxAsset txAsset = new io.nuls.chain.model.tx.txdatav3.TxAsset();
         txAsset.setAssetId(asset.getAssetId());
@@ -77,7 +98,25 @@ public class TxUtil {
         txAsset.setSymbol(asset.getSymbol());
         return txAsset;
     }
-
+    public static io.nuls.chain.model.tx.txdatav3.TxChain parseChainToTxV3(BlockChain blockChain,Asset asset) throws IOException {
+        io.nuls.chain.model.tx.txdatav3.TxChain txChain = new io.nuls.chain.model.tx.txdatav3.TxChain();
+        txChain.setAddressType(Short.valueOf(blockChain.getAddressType()));
+        txChain.setAddressPrefix(blockChain.getAddressPrefix());
+        txChain.getDefaultAsset().setChainId(blockChain.getChainId());
+        txChain.setMagicNumber(blockChain.getMagicNumber());
+        txChain.setMinAvailableNodeNum(blockChain.getMinAvailableNodeNum());
+        txChain.setName(blockChain.getChainName());
+        txChain.setSupportInflowAsset(blockChain.isSupportInflowAsset());
+        txChain.setVerifierList(blockChain.getVerifierList());
+        txChain.setMaxSignatureCount(blockChain.getMaxSignatureCount());
+        txChain.setSignatureByzantineRatio(blockChain.getSignatureByzantineRatio());
+        txChain.getDefaultAsset().setAssetId(asset.getAssetId());
+        txChain.getDefaultAsset().setSymbol(asset.getSymbol());
+        txChain.getDefaultAsset().setName(asset.getAssetName());
+        txChain.getDefaultAsset().setInitNumber(asset.getInitNumber());
+        txChain.getDefaultAsset().setDecimalPlaces(asset.getDecimalPlaces());
+        return txChain;
+    }
     public static void fillAssetByTxAsset(Asset asset, TxAsset txAsset) {
         asset.setAddress(txAsset.getAddress());
         asset.setAssetId(txAsset.getAssetId());

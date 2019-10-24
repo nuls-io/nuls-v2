@@ -139,6 +139,85 @@ public class AssetCmd extends BaseChainCmd {
         return success(rtMap);
     }
 
+    /**
+     * 链内资产注册
+     */
+    @CmdAnnotation(cmd = RpcConstants.CMD_LOCAL_ASSET_REG, version = 1.0,
+            description = "资产注册")
+    @Parameters(value = {
+            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "创建交易的账户地址"),
+            @Parameter(parameterName = "password", requestType = @TypeDescriptor(value = String.class), parameterDes = "账户密码")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象",
+            responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+                    @Key(name = "txHash", valueType = String.class, description = "交易hash值")
+            })
+    )
+    public Response localAssetReg(Map params) {
+        /* 发送到交易模块 (Send to transaction module) */
+        Map<String, String> rtMap = new HashMap<>(1);
+        try {
+            /* 组装Asset (Asset object) */
+            Asset asset = rpcService.getLocalAssetByLedger(CmRuntimeInfo.getMainIntChainId(),Integer.valueOf(params.get("assetId").toString()));
+            if (asset.getDecimalPlaces() < Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMin()) || asset.getDecimalPlaces() > Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMax())) {
+                return failed(CmErrorCode.ERROR_ASSET_DECIMALPLACES);
+            }
+            if (!FormatValidUtils.validTokenNameOrSymbol(asset.getSymbol())) {
+                return failed(CmErrorCode.ERROR_ASSET_SYMBOL);
+            }
+            if (!FormatValidUtils.validTokenNameOrSymbol(asset.getAssetName())) {
+                return failed(CmErrorCode.ERROR_ASSET_NAME);
+            }
+            asset.setDepositNuls(new BigInteger(nulsChainConfig.getAssetDepositNuls()));
+            int rateToPercent = new BigDecimal(nulsChainConfig.getAssetDepositNulsDestroyRate()).multiply(BigDecimal.valueOf(100)).intValue();
+            asset.setDestroyNuls(new BigInteger(nulsChainConfig.getAssetDepositNuls()).multiply(BigInteger.valueOf(rateToPercent)).divide(BigInteger.valueOf(100)));
+            asset.setAvailable(true);
+            BlockChain dbChain = chainService.getChain(asset.getChainId());
+            if (null == dbChain) {
+                return failed(CmErrorCode.ERROR_CHAIN_NOT_FOUND);
+            }
+            if (dbChain.isDelete()) {
+                return failed(CmErrorCode.ERROR_CHAIN_REG_CMD);
+            }
+            if (assetService.assetExist(asset) && asset.isAvailable()) {
+                return failed(CmErrorCode.ERROR_ASSET_ID_EXIST);
+            }
+            /* 组装交易发送 (Send transaction) */
+            Transaction tx = new AddAssetToChainTransaction();
+            if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) > 2) {
+                tx.setTxData(TxUtil.parseAssetToTxV3(asset).serialize());
+            } else {
+                tx.setTxData(TxUtil.parseAssetToTx(asset).serialize());
+            }
+            tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
+            AccountBalance accountBalance = new AccountBalance(null, null);
+            ErrorCode ldErrorCode = rpcService.getCoinData(String.valueOf(params.get("address")), accountBalance);
+            if (null != ldErrorCode) {
+                return failed(ldErrorCode);
+            }
+            CoinData coinData = this.getRegCoinData(asset, CmRuntimeInfo.getMainIntChainId(),
+                    CmRuntimeInfo.getMainIntAssetId(), tx.size(), accountBalance);
+            tx.setCoinData(coinData.serialize());
+
+            /* 判断签名是否正确 (Determine if the signature is correct) */
+            ErrorCode acErrorCode = rpcService.transactionSignature(CmRuntimeInfo.getMainIntChainId(), (String) params.get("address"), (String) params.get("password"), tx);
+            if (null != acErrorCode) {
+                return failed(acErrorCode);
+            }
+
+            rtMap.put("txHash", tx.getHash().toHex());
+            ErrorCode txErrorCode = rpcService.newTx(tx);
+            if (null != txErrorCode) {
+                return failed(txErrorCode);
+            }
+        } catch (Exception e) {
+            LoggerUtil.logger().error(e);
+            return failed(e.getMessage());
+        }
+        return success(rtMap);
+    }
+
     @CmdAnnotation(cmd = RpcConstants.CMD_ASSET_DISABLE, version = 1.0,
             description = "资产注销")
     @Parameters(value = {
@@ -199,7 +278,11 @@ public class AssetCmd extends BaseChainCmd {
                 /* 注销资产和链 (Destroy assets and chains) */
                 tx = new DestroyAssetAndChainTransaction();
                 try {
-                    tx.setTxData(dbChain.parseToTransaction(asset));
+                    if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) > 2) {
+                        tx.setTxData(TxUtil.parseChainToTxV3(dbChain, asset).serialize());
+                    } else {
+                        tx.setTxData(TxUtil.parseChainToTx(dbChain, asset).serialize());
+                    }
                 } catch (IOException e) {
                     LoggerUtil.logger().error(e);
                     return failed("parseToTransaction fail");

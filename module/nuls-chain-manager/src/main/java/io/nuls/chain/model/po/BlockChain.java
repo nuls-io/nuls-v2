@@ -284,31 +284,6 @@ public class BlockChain extends BaseNulsData {
     }
 
 
-
-    public byte[] parseToTransaction(Asset asset) throws IOException {
-        TxChain txChain = new TxChain();
-        txChain.setAddressType(this.addressType);
-        txChain.setAddressPrefix(this.addressPrefix);
-        txChain.getDefaultAsset().setChainId(this.chainId);
-        txChain.setMagicNumber(this.magicNumber);
-        txChain.setMinAvailableNodeNum(this.minAvailableNodeNum);
-        txChain.setName(this.chainName);
-        txChain.setSupportInflowAsset(this.supportInflowAsset);
-        txChain.setVerifierList(this.getVerifierList());
-        txChain.setMaxSignatureCount(this.getMaxSignatureCount());
-        txChain.setSignatureByzantineRatio(this.getSignatureByzantineRatio());
-
-        txChain.getDefaultAsset().setAddress(asset.getAddress());
-        txChain.getDefaultAsset().setAssetId(asset.getAssetId());
-        txChain.getDefaultAsset().setSymbol(asset.getSymbol());
-        txChain.getDefaultAsset().setName(asset.getAssetName());
-        txChain.getDefaultAsset().setDepositNuls(asset.getDepositNuls());
-        txChain.getDefaultAsset().setInitNumber(asset.getInitNumber());
-        txChain.getDefaultAsset().setDestroyNuls(asset.getDestroyNuls());
-        txChain.getDefaultAsset().setDecimalPlaces(asset.getDecimalPlaces());
-        return txChain.serialize();
-    }
-
     public int getChainId() {
         return chainId;
     }

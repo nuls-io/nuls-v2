@@ -41,7 +41,9 @@ import io.nuls.chain.model.tx.RegisterChainAndAssetTransaction;
 import io.nuls.chain.rpc.call.RpcService;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
+import io.nuls.chain.util.ChainManagerUtil;
 import io.nuls.chain.util.LoggerUtil;
+import io.nuls.chain.util.TxUtil;
 import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.core.annotation.Autowired;
@@ -189,7 +191,12 @@ public class ChainCmd extends BaseChainCmd {
             }
             /* 组装交易发送 (Send transaction) */
             Transaction tx = new RegisterChainAndAssetTransaction();
-            tx.setTxData(blockChain.parseToTransaction(asset));
+            if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) > 2) {
+                tx.setTxData(TxUtil.parseChainToTxV3(dbChain, asset).serialize());
+            } else {
+                tx.setTxData(TxUtil.parseChainToTx(dbChain, asset).serialize());
+            }
+
             tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
             AccountBalance accountBalance = new AccountBalance(null, null);
             ErrorCode ldErrorCode = rpcService.getCoinData(String.valueOf(params.get("address")), accountBalance);
@@ -313,7 +320,11 @@ public class ChainCmd extends BaseChainCmd {
             }
             /* 组装交易发送 (Send transaction) */
             Transaction tx = new RegisterChainAndAssetTransaction();
-            tx.setTxData(blockChain.parseToTransaction(asset));
+            if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) > 2) {
+                tx.setTxData(TxUtil.parseChainToTxV3(dbChain, asset).serialize());
+            } else {
+                tx.setTxData(TxUtil.parseChainToTx(dbChain, asset).serialize());
+            }
             tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
             AccountBalance accountBalance = new AccountBalance(null, null);
             ErrorCode ldErrorCode = rpcService.getCoinData(String.valueOf(params.get("address")), accountBalance);

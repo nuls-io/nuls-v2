@@ -75,12 +75,15 @@ public interface RpcService {
      * @return
      */
     boolean registerCrossChain(List<BlockChain> blockChains);
-    boolean registerCrossChain(BlockChain  blockChain);
 
-    boolean registerCrossAsset(  List<Asset> assets);
-    boolean registerCrossAsset( Asset asset);
+    boolean registerCrossChain(BlockChain blockChain);
+
+    boolean registerCrossAsset(List<Asset> assets);
+
+    boolean registerCrossAsset(Asset asset);
 
     boolean cancelCrossChain(List<Map<String, Object>> chainAssetIds);
+
     boolean cancelCrossChain(Map<String, Object> chainAssetIds);
 
     /**
@@ -114,6 +117,7 @@ public interface RpcService {
      */
     ErrorCode transactionSignature(int chainId, String address, String password, Transaction tx) throws NulsException;
 
+    Asset getLocalAssetByLedger(int chainId, int assetId) throws NulsException;
 
 }
 
