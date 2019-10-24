@@ -258,7 +258,7 @@ public class MessageUtil {
             if (signCount >= byzantineCount) {
                 ctx.setTransactionSignature(signature.serialize());
                 //如果本链为发起链则发送交易模块处理，否则直接放入待广播队列
-                if(ctx.getType() == config.getCrossCtxType()){
+                if(ctx.getType() == config.getCrossCtxType() || ctx.getType() == TxType.CONTRACT_TOKEN_CROSS_TRANSFER){
                     int fromChainId = AddressTool.getChainIdByAddress(ctx.getCoinDataInstance().getFrom().get(0).getAddress());
                     if(fromChainId == chain.getChainId()){
                         TransactionCall.sendTx(chain, RPCUtil.encode(ctx.serialize()));
@@ -374,7 +374,7 @@ public class MessageUtil {
                         if(signByzantineInChain(chain, ctx, transactionSignature, packAddressList)){
                             ctxStatusPO.setStatus(TxStatusEnum.CONFIRMED.getStatus());
                         }
-                        if(ctx.getType() == config.getCrossCtxType() && chain.getChainId() == AddressTool.getChainIdByAddress(ctx.getCoinDataInstance().getFrom().get(0).getAddress())){
+                        if((ctx.getType() == config.getCrossCtxType() ||  ctx.getType() == TxType.CONTRACT_TOKEN_CROSS_TRANSFER) && chain.getChainId() == AddressTool.getChainIdByAddress(ctx.getCoinDataInstance().getFrom().get(0).getAddress())){
                             chain.getSignedCtxMap().put(nativeHash, p2PHKSignature);
                         }
                     }
@@ -414,7 +414,7 @@ public class MessageUtil {
                 return false;
             }
             //跨链间传输的交易都是主网协议交易
-            if(ctx.getType() == TxType.CROSS_CHAIN){
+            if(ctx.getType() == TxType.CROSS_CHAIN || ctx.getType() == TxType.CONTRACT_TOKEN_CROSS_TRANSFER){
                 CoinData coinData = ctx.getCoinDataInstance();
                 int toChainId = AddressTool.getChainIdByAddress(coinData.getTo().get(0).getAddress());
                 Transaction packCtx = ctx;
