@@ -41,6 +41,7 @@ import io.nuls.chain.util.LoggerUtil;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Service;
 import io.nuls.core.log.Log;
+import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.core.model.FormatValidUtils;
 
@@ -181,6 +182,13 @@ public class ValidateServiceImpl implements ValidateService {
         if (!FormatValidUtils.validTokenNameOrSymbol(asset.getAssetName())) {
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_NAME);
         }
+        //判断黑洞资产与锁定资产
+        if(!BigIntegerUtils.isEqual(asset.getDepositNuls(),nulsChainConfig.getAssetDepositNuls())){
+            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_DEPOSITNULS);
+        }
+        if(!BigIntegerUtils.isEqual(asset.getDestroyNuls(),nulsChainConfig.getAssetDestroyNuls())){
+            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_DEPOSITNULS);
+        }
         return ChainEventResult.getResultSuccess();
     }
 
@@ -210,6 +218,13 @@ public class ValidateServiceImpl implements ValidateService {
         }
         if (!FormatValidUtils.validTokenNameOrSymbol(asset.getAssetName())) {
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_NAME);
+        }
+        //判断黑洞资产与锁定资产
+        if(!BigIntegerUtils.isEqual(asset.getDepositNuls(),nulsChainConfig.getAssetDepositNuls())){
+            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_DEPOSITNULS);
+        }
+        if(!BigIntegerUtils.isEqual(asset.getDestroyNuls(),nulsChainConfig.getAssetDestroyNuls())){
+            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_DEPOSITNULS);
         }
         return ChainEventResult.getResultSuccess();
     }

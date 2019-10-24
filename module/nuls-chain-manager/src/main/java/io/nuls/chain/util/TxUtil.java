@@ -66,7 +66,8 @@ public class TxUtil {
         txAsset.setSymbol(asset.getSymbol());
         return txAsset;
     }
-    public static  TxChain parseChainToTx(BlockChain blockChain,Asset asset) throws IOException {
+
+    public static TxChain parseChainToTx(BlockChain blockChain, Asset asset) throws IOException {
         TxChain txChain = new TxChain();
         txChain.setAddressType(blockChain.getAddressType());
         txChain.setAddressPrefix(blockChain.getAddressPrefix());
@@ -88,6 +89,7 @@ public class TxUtil {
         txChain.getDefaultAsset().setDecimalPlaces(asset.getDecimalPlaces());
         return txChain;
     }
+
     public static io.nuls.chain.model.tx.txdatav3.TxAsset parseAssetToTxV3(Asset asset) throws IOException {
         io.nuls.chain.model.tx.txdatav3.TxAsset txAsset = new io.nuls.chain.model.tx.txdatav3.TxAsset();
         txAsset.setAssetId(asset.getAssetId());
@@ -98,7 +100,8 @@ public class TxUtil {
         txAsset.setSymbol(asset.getSymbol());
         return txAsset;
     }
-    public static io.nuls.chain.model.tx.txdatav3.TxChain parseChainToTxV3(BlockChain blockChain,Asset asset) throws IOException {
+
+    public static io.nuls.chain.model.tx.txdatav3.TxChain parseChainToTxV3(BlockChain blockChain, Asset asset) throws IOException {
         io.nuls.chain.model.tx.txdatav3.TxChain txChain = new io.nuls.chain.model.tx.txdatav3.TxChain();
         txChain.setAddressType(Short.valueOf(blockChain.getAddressType()));
         txChain.setAddressPrefix(blockChain.getAddressPrefix());
@@ -117,6 +120,7 @@ public class TxUtil {
         txChain.getDefaultAsset().setDecimalPlaces(asset.getDecimalPlaces());
         return txChain;
     }
+
     public static void fillAssetByTxAsset(Asset asset, TxAsset txAsset) {
         asset.setAddress(txAsset.getAddress());
         asset.setAssetId(txAsset.getAssetId());
@@ -142,15 +146,16 @@ public class TxUtil {
         List<CoinTo> coinTos = coinData.getTo();
         List<CoinFrom> coinFroms = coinData.getFrom();
         byte[] fromAddress = null;
-        BigInteger depositNuls = BigInteger.ZERO;
+        BigInteger lockedNuls = BigInteger.ZERO;
         BigInteger destroyNuls = BigInteger.ZERO;
-        if (coinTos.size() == 2) {
+        if (2 == coinTos.size()) {
             for (CoinTo coinTo : coinTos) {
                 byte[] toAddress = coinTos.get(0).getAddress();
                 if (ArraysTool.arrayEquals(toAddress, CmConstants.BLACK_HOLE_ADDRESS)) {
                     destroyNuls = coinTo.getAmount();
-                } else {
-                    depositNuls = coinTo.getAmount();
+                } else if (-1 == coinTo.getLockTime()) {
+                    //永久锁定值
+                    lockedNuls = coinTo.getAmount();
                 }
             }
         } else {
@@ -162,7 +167,7 @@ public class TxUtil {
             throw new RuntimeException();
         }
         asset.setAddress(fromAddress);
-        asset.setDepositNuls(depositNuls);
+        asset.setDepositNuls(lockedNuls.add(destroyNuls));
         asset.setDestroyNuls(destroyNuls);
         asset.setTxHash(tx.getHash().toHex());
         asset.setCreateTime(tx.getTime());

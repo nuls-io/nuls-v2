@@ -5,6 +5,8 @@ import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.annotation.Configuration;
 import io.nuls.core.rpc.model.ModuleE;
 
+import java.math.BigInteger;
+
 /**
  * @author lanjinsheng
  */
@@ -25,7 +27,8 @@ public class NulsChainConfig implements ModuleConfig {
     private String chainNameMax;
     private String assetSymbolMax;
     private String assetNameMax;
-    private String assetDepositNuls;
+    private BigInteger assetDepositNuls;
+    private BigInteger assetDestroyNuls;
     private String assetDepositNulsDestroyRate;
     private String assetDepositNulsLockRate;
 
@@ -89,6 +92,7 @@ public class NulsChainConfig implements ModuleConfig {
         this.nulsFeeOtherNetPercent = nulsFeeOtherNetPercent;
     }
 
+
     public String getNulsFeeMainNetRate() {
         return nulsFeeMainNetRate;
     }
@@ -145,12 +149,20 @@ public class NulsChainConfig implements ModuleConfig {
         this.assetNameMax = assetNameMax;
     }
 
-    public String getAssetDepositNuls() {
+    public BigInteger getAssetDepositNuls() {
         return assetDepositNuls;
     }
 
-    public void setAssetDepositNuls(String assetDepositNuls) {
+    public void setAssetDepositNuls(BigInteger assetDepositNuls) {
         this.assetDepositNuls = assetDepositNuls;
+    }
+
+    public BigInteger getAssetDestroyNuls() {
+        return assetDestroyNuls;
+    }
+
+    public void setAssetDestroyNuls(BigInteger assetDestroyNuls) {
+        this.assetDestroyNuls = assetDestroyNuls;
     }
 
     public String getAssetDepositNulsDestroyRate() {
