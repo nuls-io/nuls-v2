@@ -1,37 +1,49 @@
 package io.nuls.crosschain.nuls.servive.impl;
 
-import io.nuls.base.data.Transaction;
+import io.nuls.base.RPCUtil;
+import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.*;
+import io.nuls.base.signture.P2PHKSignature;
+import io.nuls.base.signture.TransactionSignature;
 import io.nuls.core.basic.Result;
+import io.nuls.core.constant.TxStatusEnum;
+import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.io.IoUtils;
+import io.nuls.core.log.Log;
+import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.crosschain.base.constant.CommandConstant;
-import io.nuls.crosschain.base.message.CirculationMessage;
-import io.nuls.crosschain.base.message.GetCirculationMessage;
-import io.nuls.crosschain.base.message.GetRegisteredChainMessage;
-import io.nuls.crosschain.base.message.RegisteredChainMessage;
+import io.nuls.crosschain.base.message.*;
 import io.nuls.crosschain.base.model.bo.AssetInfo;
 import io.nuls.crosschain.base.model.bo.ChainInfo;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
+import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.constant.ParamConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
+import io.nuls.crosschain.nuls.model.po.CtxStatusPO;
+import io.nuls.crosschain.nuls.rpc.call.AccountCall;
 import io.nuls.crosschain.nuls.rpc.call.ChainManagerCall;
 import io.nuls.crosschain.nuls.rpc.call.ConsensusCall;
 import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
 import io.nuls.crosschain.nuls.servive.MainNetService;
+import io.nuls.crosschain.nuls.srorage.CtxStatusService;
 import io.nuls.crosschain.nuls.srorage.RegisteredCrossChainService;
 import io.nuls.crosschain.nuls.utils.LoggerUtil;
 import io.nuls.crosschain.nuls.utils.TxUtil;
 import io.nuls.crosschain.nuls.utils.manager.ChainManager;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.*;
 
 import static io.nuls.core.constant.CommonCodeConstanst.*;
 import static io.nuls.crosschain.nuls.constant.NulsCrossChainErrorCode.CHAIN_NOT_EXIST;
+import static io.nuls.crosschain.nuls.constant.NulsCrossChainErrorCode.CROSS_CHAIN_NETWORK_UNAVAILABLE;
 import static io.nuls.crosschain.nuls.constant.ParamConstant.CHAIN_ID;
+import static io.nuls.crosschain.nuls.constant.ParamConstant.TX_HASH;
 
 
 /**
@@ -48,6 +60,9 @@ public class MainNetServiceImpl implements MainNetService {
 
     @Autowired
     private RegisteredCrossChainService registeredCrossChainService;
+
+    @Autowired
+    private CtxStatusService ctxStatusService;
 
     @Override
     @SuppressWarnings("unchecked")
@@ -194,6 +209,72 @@ public class MainNetServiceImpl implements MainNetService {
         getCirculationMessage.setAssetIds((String)params.get(ParamConstant.ASSET_IDS));
         NetWorkCall.broadcast(chainId, getCirculationMessage, CommandConstant.GET_CIRCULLAT_MESSAGE,true);
         return Result.getSuccess(SUCCESS);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Result tokenOutCrossChain(Map<String, Object> params) {
+        int chainId = Integer.valueOf((String)params.get(ParamConstant.CHAIN_ID));
+        Chain chain = chainManager.getChainMap().get(chainId);
+        if (chain == null) {
+            return Result.getFailed(CHAIN_NOT_EXIST);
+        }
+        if (!chainManager.isCrossNetUseAble()) {
+            chain.getLogger().info("跨链网络组网异常！");
+            return Result.getFailed(CROSS_CHAIN_NETWORK_UNAVAILABLE);
+        }
+        int assetId = Integer.valueOf((String)params.get(ParamConstant.ASSET_ID));
+        String fromAddress = (String)params.get(ParamConstant.FROM);
+        String toAddress = (String)params.get(ParamConstant.TO);
+        BigInteger amount = new BigInteger((String)params.get(ParamConstant.VALUE));
+
+        Transaction tx = new Transaction(TxType.CONTRACT_CROSS_CHAIN);
+        tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
+
+        CoinData coinData = new CoinData();
+        List<CoinFrom> coinFromList = new ArrayList<>();
+        CoinFrom coinFrom = new CoinFrom(AddressTool.getAddress(fromAddress),chainId,assetId,amount, NulsCrossChainConstant.CORSS_TX_LOCKED);
+        coinFromList.add(coinFrom);
+        List<CoinTo> coinToList = new ArrayList<>();
+        CoinTo coinTo = new CoinTo(AddressTool.getAddress(toAddress), chainId, assetId, amount);
+        coinToList.add(coinTo);
+        coinData.setFrom(coinFromList);
+        coinData.setTo(coinToList);
+
+        Map<String, Object> result = new HashMap<>(2);
+        try {
+            tx.setCoinData(coinData.serialize());
+            tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
+            CtxStatusPO ctxStatusPO = new CtxStatusPO(tx, TxStatusEnum.UNCONFIRM.getStatus());
+            ctxStatusService.save(tx.getHash(), ctxStatusPO, chainId);
+            BroadCtxSignMessage message = new BroadCtxSignMessage();
+            message.setLocalHash(tx.getHash());
+            message.setSignature(null);
+            Map packerInfo = ConsensusCall.getPackerInfo(chain);
+            if (packerInfo != null ) {
+                String password = (String) packerInfo.get(ParamConstant.PARAM_PASSWORD);
+                String address = (String) packerInfo.get(ParamConstant.PARAM_ADDRESS);
+                if(StringUtils.isNotBlank(address)){
+                    List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
+                    TransactionSignature transactionSignature = new TransactionSignature();
+                    P2PHKSignature p2PHKSignature = AccountCall.signDigest(address, password, tx.getHash().getBytes());
+                    p2PHKSignatures.add(p2PHKSignature);
+                    transactionSignature.setP2PHKSignatures(p2PHKSignatures);
+                    tx.setTransactionSignature(transactionSignature.serialize());
+                    message.setSignature(p2PHKSignature.serialize());
+                }
+            }
+            NetWorkCall.broadcast(chainId, message, CommandConstant.BROAD_CTX_SIGN_MESSAGE, false);
+            result.put(TX_HASH, tx.getHash().toHex());
+            result.put(ParamConstant.TX, RPCUtil.encode(tx.serialize()));
+            return Result.getSuccess(SUCCESS).setData(result);
+        }catch (IOException e){
+            Log.error(e);
+            return Result.getFailed(SERIALIZE_ERROR);
+        }catch (NulsException e){
+            Log.error(e);
+            return Result.getFailed(e.getErrorCode());
+        }
     }
 }
 

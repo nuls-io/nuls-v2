@@ -127,4 +127,10 @@ public class TxType {
      * */
     public static final int VERIFIER_INIT = 25;
 
+    /**
+     * 智能合约跨链交易
+     * Verifier init
+     * */
+    public static final int CONTRACT_CROSS_CHAIN = 26;
+
 }

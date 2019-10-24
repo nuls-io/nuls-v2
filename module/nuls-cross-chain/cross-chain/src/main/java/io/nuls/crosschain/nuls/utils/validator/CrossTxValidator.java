@@ -362,7 +362,7 @@ public class CrossTxValidator {
         }
 
         Set<String> fromAddressList = new HashSet<>();
-        if(ctx.getType() != TxType.VERIFIER_CHANGE){
+        if(ctx.getType() == TxType.CROSS_CHAIN){
             int fromChainId = AddressTool.getChainIdByAddress(ctx.getCoinDataInstance().getFrom().get(0).getAddress());
             int toChainId = AddressTool.getChainIdByAddress(ctx.getCoinDataInstance().getTo().get(0).getAddress());
             boolean notValidFrom = chain.getChainId() == toChainId && fromChainId != config.getMainChainId() && chain.getChainId() != config.getMainChainId();

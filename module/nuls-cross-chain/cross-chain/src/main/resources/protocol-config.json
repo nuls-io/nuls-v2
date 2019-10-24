@@ -26,6 +26,14 @@
         "verifySignature": false,
         "verifyFee": true,
         "handler": "VerifierInitProcessorV1"
+      },
+      {
+        "type": "26",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": false,
+        "verifyFee": true,
+        "handler": "ContractCrossChainProcessorV1"
       }
     ],
     "validMsgs": [

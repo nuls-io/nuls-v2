@@ -160,6 +160,11 @@ public class CrossChainBootStrap extends BaseCrossChainBootStrap {
             if (ModuleE.AC.abbr.equals(module.getName())) {
                 AccountCall.addAddressPrefix(chainManager.getPrefixList());
             }
+
+            //智能合约交易注册
+            if (module.getName().equals(ModuleE.SC.abbr)) {
+                chainManager.registerContractTx();
+            }
         }catch (Exception e){
             Log.error(e);
         }

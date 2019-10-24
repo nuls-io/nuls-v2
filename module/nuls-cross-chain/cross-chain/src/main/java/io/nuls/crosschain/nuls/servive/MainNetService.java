@@ -77,5 +77,12 @@ public interface MainNetService {
      * */
     Result getFriendChainCirculation(Map<String,Object> params);
 
-
+    /**
+     * 智能合约资产跨链
+     * Smart contract assets cross chain
+     *
+     * @param params
+     * @return        Processing result
+     * */
+    Result tokenOutCrossChain(Map<String,Object> params);
 }
