@@ -191,9 +191,9 @@ public class ChainCmd extends BaseChainCmd {
             /* 组装交易发送 (Send transaction) */
             Transaction tx = new RegisterChainAndAssetTransaction();
             if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) > 2) {
-                tx.setTxData(TxUtil.parseChainToTxV3(dbChain, asset).serialize());
+                tx.setTxData(TxUtil.parseChainToTxV3(blockChain, asset).serialize());
             } else {
-                tx.setTxData(TxUtil.parseChainToTx(dbChain, asset).serialize());
+                tx.setTxData(TxUtil.parseChainToTx(blockChain, asset).serialize());
             }
 
             tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
@@ -319,9 +319,9 @@ public class ChainCmd extends BaseChainCmd {
             /* 组装交易发送 (Send transaction) */
             Transaction tx = new RegisterChainAndAssetTransaction();
             if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) > 2) {
-                tx.setTxData(TxUtil.parseChainToTxV3(dbChain, asset).serialize());
+                tx.setTxData(TxUtil.parseChainToTxV3(blockChain, asset).serialize());
             } else {
-                tx.setTxData(TxUtil.parseChainToTx(dbChain, asset).serialize());
+                tx.setTxData(TxUtil.parseChainToTx(blockChain, asset).serialize());
             }
             tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
             AccountBalance accountBalance = new AccountBalance(null, null);
