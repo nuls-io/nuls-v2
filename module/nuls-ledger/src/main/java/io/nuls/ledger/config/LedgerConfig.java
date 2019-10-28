@@ -22,6 +22,7 @@ public class LedgerConfig implements ModuleConfig {
     private int assetId;
     private int assetRegDestroyAmount = 200;
     private int decimals = 8;
+    private String  symbol;
 
     public String getBlackHolePublicKey() {
         return blackHolePublicKey;
@@ -107,5 +108,13 @@ public class LedgerConfig implements ModuleConfig {
 
     public void setAssetId(int assetId) {
         this.assetId = assetId;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
     }
 }

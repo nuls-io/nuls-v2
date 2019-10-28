@@ -71,6 +71,22 @@ public class AssetRegMngServiceImpl implements AssetRegMngService {
     AssetRegMngRepository assetRegMngRepository;
     @Autowired
     Repository repository;
+    Map<String, Object> localChainDefaultAsset = new HashMap<>();
+
+    public Map<String, Object> getLocalChainDefaultAsset() {
+        if (localChainDefaultAsset.size() > 0) {
+            return localChainDefaultAsset;
+        }
+        localChainDefaultAsset.put("assetId", ledgerConfig.getAssetId());
+        localChainDefaultAsset.put("assetType", LedgerConstant.COMMON_ASSET_TYPE);
+        localChainDefaultAsset.put("assetOwnerAddress", "");
+        localChainDefaultAsset.put("initNumber", "");
+        localChainDefaultAsset.put("decimalPlace", ledgerConfig.getDecimals());
+        localChainDefaultAsset.put("assetName", ledgerConfig.getSymbol());
+        localChainDefaultAsset.put("assetSymbol", ledgerConfig.getSymbol());
+        localChainDefaultAsset.put("txHash", "");
+        return localChainDefaultAsset;
+    }
 
     @Override
     public void initDBAssetsIdMap() throws Exception {
@@ -232,6 +248,7 @@ public class AssetRegMngServiceImpl implements AssetRegMngService {
             for (LedgerAsset ledgerAsset : assets) {
                 if (LedgerConstant.COMMON_ASSET_TYPE == ledgerAsset.getAssetType()) {
                     rtList.add(getAssetMapByLedgerAsset(ledgerAsset));
+                    rtList.add(localChainDefaultAsset);
                 }
             }
         } else if (LedgerConstant.CONTRACT_ASSET_TYPE == assetType) {
@@ -263,6 +280,9 @@ public class AssetRegMngServiceImpl implements AssetRegMngService {
 
     @Override
     public Map<String, Object> getLedgerRegAsset(int chainId, int assetId) throws Exception {
+        if(assetId == ledgerConfig.getAssetId()){
+            return localChainDefaultAsset;
+        }
         LedgerAsset ledgerAsset = assetRegMngRepository.getLedgerAssetByAssetId(chainId, assetId);
         if (null != ledgerAsset) {
             return getAssetMapByLedgerAsset(ledgerAsset);
