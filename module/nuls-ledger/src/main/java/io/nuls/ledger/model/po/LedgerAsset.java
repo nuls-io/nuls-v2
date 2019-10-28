@@ -101,8 +101,8 @@ public class LedgerAsset extends BaseNulsData {
         this.decimalPlaces = byteBuffer.readUint8();
         this.assetOwnerAddress = byteBuffer.readByLengthByte();
         this.creatorAddress = byteBuffer.readByLengthByte();
-        this.createTime = byteBuffer.readUint32();
         this.txHash = byteBuffer.readString();
+        this.createTime = byteBuffer.readUint32();
     }
 
     @Override

@@ -28,6 +28,7 @@ package io.nuls.ledger.rpc.cmd;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.model.*;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.ledger.config.LedgerConfig;
@@ -85,6 +86,7 @@ public class AssetsRegContractCmd extends BaseLedgerCmd {
     public Response chainAssetContractReg(Map params) {
         Map<String, Object> rtMap = new HashMap<>(3);
         try {
+            LoggerUtil.COMMON_LOG.debug("params={}",JSONUtils.obj2json(params));
             /* 组装Asset (Asset object) */
             params.put("chainId", ledgerConfig.getChainId());
             params.put("address", params.get("contractAddress"));
@@ -93,6 +95,7 @@ public class AssetsRegContractCmd extends BaseLedgerCmd {
             int assetId = assetRegMngService.registerContractAsset(asset.getChainId(), asset);
             rtMap.put("assetId", assetId);
             rtMap.put("chainId", asset.getChainId());
+            LoggerUtil.COMMON_LOG.debug("return={}",JSONUtils.obj2json(rtMap));
         } catch (Exception e) {
             LoggerUtil.COMMON_LOG.error(e);
             return failed(e.getMessage());
