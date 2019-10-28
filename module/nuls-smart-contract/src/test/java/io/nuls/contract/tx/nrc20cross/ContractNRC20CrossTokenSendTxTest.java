@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package io.nuls.contract.tx.temp;
+package io.nuls.contract.tx.nrc20cross;
 
 
 import io.nuls.contract.mock.basetest.ContractTest;
@@ -51,24 +51,27 @@ import static io.nuls.contract.constant.ContractCmdConstant.*;
  * @author: PierreLuo
  * @date: 2019-03-15
  */
-public class ContractTempSendTxTest extends BaseQuery {
+public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
 
     /**
      * 创建合约
      */
     @Test
     public void createContract() throws Exception {
-        //String file = ContractTest.class.getResource("/nrc20").getFile();
-        String file = "/Users/pierreluo/IdeaProjects/mavenplugin/target/maven-plugin-test.jar";
-        InputStream in = new FileInputStream(file);
+        //sender = toAddress32;
+        InputStream in = new FileInputStream(ContractTest.class.getResource("/nuls-cross-chain-nrc20-test.jar").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
-        String remark = "temp contract";
-        Object[] args = new Object[]{};
-        Map params = this.makeCreateParams(toAddress0, contractCode, "kqb", remark, args);
+        String remark = "create cross token";
+        String name = "CCT";
+        String symbol = "CrossChainToken";
+        String amount = BigDecimal.TEN.pow(10).toPlainString();
+        String decimals = "8";
+        Map params = this.makeCreateParams(sender, contractCode, "cct", remark, name, symbol, amount, decimals);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CREATE));
         assertTrue(cmdResp2, result);
         String hash = (String) result.get("txHash");
+        String contractAddress = (String) result.get("contractAddress");
         Map map = waitGetContractTx(hash);
         Assert.assertTrue(JSONUtils.obj2PrettyJson(map), (Boolean) ((Map)(map.get("contractResult"))).get("success"));
         Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(map));
@@ -79,15 +82,34 @@ public class ContractTempSendTxTest extends BaseQuery {
      */
     @Test
     public void callContract() throws Exception {
-        contractAddress = "tNULSeBaN36LmvDrwc4fZ7QJX2krMsmEvVjCEv";
-        BigInteger value = BigInteger.valueOf(11L);
-        methodName = "m3";
+        BigInteger value = BigInteger.ZERO;
+        if(StringUtils.isBlank(methodName)) {
+            methodName = "transfer";
+        }
+        if(StringUtils.isBlank(tokenReceiver)) {
+            tokenReceiver = toAddress1;
+        }
         String methodDesc = "";
-        String remark = "temp call contract";
-        Object[] args = new Object[]{};
-        Map params = this.makeCallParams(sender, value, contractAddress, methodName, methodDesc, remark, args);
+        String remark = "call contract test - token转账";
+        String token = BigInteger.valueOf(800L).toString();
+        Map params = this.makeCallParams(sender, value, contractAddress_nrc20, methodName, methodDesc, remark, tokenReceiver, token);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
+        assertTrue(cmdResp2, result);
+        String hash = (String) result.get("txHash");
+        Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(waitGetContractTx(hash)));
+    }
+
+    /**
+     * token转账
+     */
+    @Test
+    public void tokenTransfer() throws Exception {
+        BigInteger value = BigInteger.TEN.pow(10);
+        String remark = "token transfer to " + contractAddress;
+        Map params = this.makeTokenTransferParams(sender, contractAddress, contractAddress_nrc20, value, remark);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TOKEN_TRANSFER, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(TOKEN_TRANSFER));
         assertTrue(cmdResp2, result);
         String hash = (String) result.get("txHash");
         Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(waitGetContractTx(hash)));
