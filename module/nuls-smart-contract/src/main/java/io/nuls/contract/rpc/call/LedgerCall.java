@@ -139,7 +139,8 @@ public class LedgerCall {
                 Log.error("Call interface [{}] error, ErrorCode is {}, ResponseComment:{}", cmd, callResp.getResponseErrorCode(), callResp.getResponseComment());
                 return null;
             }
-            List<Map> resultList = (List<Map>) ((HashMap) callResp.getResponseData()).get(cmd);
+            Map resultMap = (Map) ((HashMap) callResp.getResponseData()).get(cmd);
+            List<Map> resultList = (List<Map>) resultMap.get("assets");
             return resultList;
         } catch (Exception e) {
             throw new NulsException(e);
