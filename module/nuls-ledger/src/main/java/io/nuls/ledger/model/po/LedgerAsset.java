@@ -148,7 +148,7 @@ public class LedgerAsset extends BaseNulsData {
         this.setAssetName(String.valueOf(map.get("assetName")));
         BigInteger initNumber = new BigInteger(String.valueOf(map.get("initNumber")));
         this.setInitNumber(initNumber);
-        this.setDecimalPlaces(Short.valueOf(map.get("decimalPlaces").toString()));
+        this.setDecimalPlaces(Short.valueOf(map.get("decimalPlace").toString()));
         this.setSymbol(String.valueOf(map.get("assetSymbol")));
         this.setAssetOwnerAddress(AddressTool.getAddress(map.get("address").toString()));
         this.setCreateTime(NulsDateUtils.getCurrentTimeSeconds());
