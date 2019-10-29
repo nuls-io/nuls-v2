@@ -137,7 +137,7 @@ public abstract class RpcModule implements InitializingBean {
             });
             this.onDependenciesReady(module);
         } catch (Exception e) {
-            Log.error("");
+            Log.error("",e.getMessage(),e);
             e.printStackTrace();
         }
     }
