@@ -248,7 +248,7 @@ public class AssetRegMngServiceImpl implements AssetRegMngService {
             for (LedgerAsset ledgerAsset : assets) {
                 if (LedgerConstant.COMMON_ASSET_TYPE == ledgerAsset.getAssetType()) {
                     rtList.add(getAssetMapByLedgerAsset(ledgerAsset));
-                    rtList.add(localChainDefaultAsset);
+                    rtList.add(getLocalChainDefaultAsset());
                 }
             }
         } else if (LedgerConstant.CONTRACT_ASSET_TYPE == assetType) {
@@ -260,6 +260,7 @@ public class AssetRegMngServiceImpl implements AssetRegMngService {
         } else {
             for (LedgerAsset ledgerAsset : assets) {
                 rtList.add(getAssetMapByLedgerAsset(ledgerAsset));
+                rtList.add(getLocalChainDefaultAsset());
             }
         }
         return rtList;
@@ -280,8 +281,8 @@ public class AssetRegMngServiceImpl implements AssetRegMngService {
 
     @Override
     public Map<String, Object> getLedgerRegAsset(int chainId, int assetId) throws Exception {
-        if(assetId == ledgerConfig.getAssetId()){
-            return localChainDefaultAsset;
+        if (assetId == ledgerConfig.getAssetId()) {
+            return getLocalChainDefaultAsset();
         }
         LedgerAsset ledgerAsset = assetRegMngRepository.getLedgerAssetByAssetId(chainId, assetId);
         if (null != ledgerAsset) {
