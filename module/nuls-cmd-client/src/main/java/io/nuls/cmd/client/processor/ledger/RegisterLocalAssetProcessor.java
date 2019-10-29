@@ -69,14 +69,14 @@ public class RegisterLocalAssetProcessor implements CommandProcessor {
                 .newLine("\t<assetName> asset name - require")
                 .newLine("\t<symbol> asset symbol - require")
                 .newLine("\t<initNumber> asset init Number - require")
-                .newLine("\t<decimalPlaces> asset decimal - require")
+                .newLine("\t<decimalPlace> asset decimal - require")
                 .newLine("\t<assetOwnerAddress> asset owner - require");
         return builder.toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return "registerlocalasset <regAddress> <assetName> <symbol> <initNumber> <decimalPlaces> <assetOwnerAddress>--add local chain asset";
+        return "registerlocalasset <regAddress> <assetName> <symbol> <initNumber> <decimalPlace> <assetOwnerAddress>--add local chain asset";
     }
 
 
@@ -85,7 +85,7 @@ public class RegisterLocalAssetProcessor implements CommandProcessor {
         checkArgsNumber(args, 6);
         checkAddress(config.getMainChainId(), args[1]);
         checkIsAmount(args[4], "initNumber");
-        checkIsAmount(args[5], "decimalPlaces");
+        checkIsAmount(args[5], "decimalPlace");
         return true;
     }
 

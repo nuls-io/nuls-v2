@@ -35,19 +35,19 @@ public class RegLocalAssetReq extends BaseReq {
     private String symbol;
     private String assetName;
     private long initNumber;
-    private int decimalPlaces;
+    private int decimalPlace;
     private String txCreatorAddress;
     private String assetOwnerAddress;
     private String password = "";
 
     public RegLocalAssetReq(String address,
-                            String symbol, String assetName, long initNumber, int decimalPlaces,
+                            String symbol, String assetName, long initNumber, int decimalPlace,
                             String password, String assetOwnerAddress) {
         this.txCreatorAddress = address;
         this.symbol = symbol;
         this.assetName = assetName;
         this.initNumber = initNumber;
-        this.decimalPlaces = decimalPlaces;
+        this.decimalPlace = decimalPlace;
         this.password = password;
         this.assetOwnerAddress = assetOwnerAddress;
     }
@@ -100,12 +100,12 @@ public class RegLocalAssetReq extends BaseReq {
         this.initNumber = initNumber;
     }
 
-    public int getDecimalPlaces() {
-        return decimalPlaces;
+    public int getDecimalPlace() {
+        return decimalPlace;
     }
 
-    public void setDecimalPlaces(int decimalPlaces) {
-        this.decimalPlaces = decimalPlaces;
+    public void setDecimalPlace(int decimalPlace) {
+        this.decimalPlace = decimalPlace;
     }
 }
 
