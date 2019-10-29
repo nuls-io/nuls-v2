@@ -139,7 +139,7 @@ public class AssetsRegTxCmd extends BaseLedgerCmd {
                     ledgerConfig.getAssetId(), tx.size(), accountState);
             tx.setCoinData(coinData.serialize());
             /* 判断账号是否正确 (Determine if the signature is correct) */
-            ErrorCode acErrorCode = rpcService.transactionSignature(ledgerConfig.getChainId(), (String) params.get("address"), (String) params.get("password"), tx);
+            ErrorCode acErrorCode = rpcService.transactionSignature(ledgerConfig.getChainId(), (String) params.get("txCreatorAddress"), (String) params.get("password"), tx);
             if (null != acErrorCode) {
                 return failed(acErrorCode);
             }
