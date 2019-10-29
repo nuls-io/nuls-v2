@@ -66,7 +66,6 @@ public class RegisterLocalAssetProcessor implements CommandProcessor {
         CommandBuilder builder = new CommandBuilder();
         builder.newLine(getCommandDescription())
                 .newLine("\t<regAddress>  register asset address - require")
-                .newLine("\t<assetId> add assetId - require")
                 .newLine("\t<assetName> asset name - require")
                 .newLine("\t<symbol> asset symbol - require")
                 .newLine("\t<initNumber> asset init Number - require")
@@ -77,31 +76,28 @@ public class RegisterLocalAssetProcessor implements CommandProcessor {
 
     @Override
     public String getCommandDescription() {
-        return "addcrossasset <regAddress> <assetId> <assetName> <symbol> <initNumber> <decimalPlaces> <assetOwnerAddress>--add local chain asset";
+        return "addcrossasset <regAddress> <assetName> <symbol> <initNumber> <decimalPlaces> <assetOwnerAddress>--add local chain asset";
     }
 
 
     @Override
     public boolean argsValidate(String[] args) {
-        checkArgsNumber(args, 7);
+        checkArgsNumber(args, 6);
         checkAddress(config.getMainChainId(), args[1]);
-        checkIsNumeric(args[2], "assetId");
-        checkIsAmount(args[5], "initNumber");
-        checkIsAmount(args[6], "decimalPlaces");
+        checkIsAmount(args[4], "initNumber");
+        checkIsAmount(args[5], "decimalPlaces");
         return true;
     }
 
     @Override
     public CommandResult execute(String[] args) {
         String address = args[1];
-        Integer assetChainId = Integer.parseInt(args[2]);
-        Integer assetId = Integer.parseInt(args[2]);
-        String assetName = args[3];
-        String symbol = args[4];
-        long initNumber = Long.valueOf(args[5]);
-        int decimalPlaces = Integer.parseInt(args[6]);
-        String assetOwnerAddress = args[7];
-        RegLocalAssetReq req = new RegLocalAssetReq(address, assetId,
+        String assetName = args[2];
+        String symbol = args[3];
+        long initNumber = Long.valueOf(args[4]);
+        int decimalPlaces = Integer.parseInt(args[5]);
+        String assetOwnerAddress = args[6];
+        RegLocalAssetReq req = new RegLocalAssetReq(address,
                 symbol, assetName, initNumber, decimalPlaces, getPwd(), assetOwnerAddress);
         Result<Map> result = ledgerProvider.regLocalAsset(req);
         if (result.isFailed()) {

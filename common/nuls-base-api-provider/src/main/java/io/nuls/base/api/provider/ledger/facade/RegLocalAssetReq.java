@@ -32,7 +32,6 @@ import io.nuls.base.api.provider.BaseReq;
  * @Description: 功能描述
  */
 public class RegLocalAssetReq extends BaseReq {
-    private int assetId;
     private String symbol;
     private String assetName;
     private long initNumber;
@@ -41,11 +40,10 @@ public class RegLocalAssetReq extends BaseReq {
     private String assetOwnerAddress;
     private String password = "";
 
-    public RegLocalAssetReq(String address, Integer assetId,
+    public RegLocalAssetReq(String address,
                             String symbol, String assetName, long initNumber, int decimalPlaces,
                             String password, String assetOwnerAddress) {
         this.txCreatorAddress = address;
-        this.assetId = assetId;
         this.symbol = symbol;
         this.assetName = assetName;
         this.initNumber = initNumber;
@@ -68,14 +66,6 @@ public class RegLocalAssetReq extends BaseReq {
 
     public void setAssetOwnerAddress(String assetOwnerAddress) {
         this.assetOwnerAddress = assetOwnerAddress;
-    }
-
-    public int getAssetId() {
-        return assetId;
-    }
-
-    public void setAssetId(int assetId) {
-        this.assetId = assetId;
     }
 
     public String getPassword() {
