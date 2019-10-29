@@ -153,7 +153,7 @@ public class LedgerUtil {
         txLedgerAsset.setName(String.valueOf(map.get("assetName")));
         BigInteger initNumber = new BigInteger(String.valueOf(map.get("initNumber")));
         txLedgerAsset.setInitNumber(initNumber);
-        txLedgerAsset.setDecimalPlaces(Short.valueOf(map.get("decimalPlaces").toString()));
+        txLedgerAsset.setDecimalPlaces(Short.valueOf(map.get("decimalPlace").toString()));
         txLedgerAsset.setSymbol(String.valueOf(map.get("assetSymbol")));
         txLedgerAsset.setAddress(AddressTool.getAddress(map.get("assetOwnerAddress").toString()));
         return txLedgerAsset;
