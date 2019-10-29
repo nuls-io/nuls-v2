@@ -76,7 +76,7 @@ public class RegisterLocalAssetProcessor implements CommandProcessor {
 
     @Override
     public String getCommandDescription() {
-        return "addcrossasset <regAddress> <assetName> <symbol> <initNumber> <decimalPlaces> <assetOwnerAddress>--add local chain asset";
+        return "registerlocalasset <regAddress> <assetName> <symbol> <initNumber> <decimalPlaces> <assetOwnerAddress>--add local chain asset";
     }
 
 
