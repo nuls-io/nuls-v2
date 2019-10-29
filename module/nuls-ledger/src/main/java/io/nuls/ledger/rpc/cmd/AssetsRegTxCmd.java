@@ -129,11 +129,12 @@ public class AssetsRegTxCmd extends BaseLedgerCmd {
             if (null != errorCode) {
                 return failed(errorCode);
             }
+            String ledgerAddr = LedgerUtil.getRealAddressStr(params.get("txCreatorAddress").toString());
             /* 组装交易发送 (Send transaction) */
             Transaction tx = new AssetRegTransaction();
             tx.setTxData(asset.serialize());
             tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
-            AccountState accountState = accountStateService.getAccountStateReCal(params.get("txCreatorAddress").toString(), ledgerConfig.getChainId(), ledgerConfig.getChainId(), ledgerConfig.getAssetId());
+            AccountState accountState = accountStateService.getAccountStateReCal(ledgerAddr, ledgerConfig.getChainId(), ledgerConfig.getChainId(), ledgerConfig.getAssetId());
             CoinData coinData = this.getRegCoinData(BigInteger.valueOf(ledgerConfig.getAssetRegDestroyAmount()), AddressTool.getAddress(params.get("txCreatorAddress").toString()), ledgerConfig.getChainId(),
                     ledgerConfig.getAssetId(), tx.size(), accountState);
             tx.setCoinData(coinData.serialize());
