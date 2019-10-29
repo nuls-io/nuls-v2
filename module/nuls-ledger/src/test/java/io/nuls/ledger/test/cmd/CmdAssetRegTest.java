@@ -29,7 +29,7 @@ public class CmdAssetRegTest {
         Log.debug("response {}", JSONUtils.obj2json(response));
     }
     @Test
-    public void getRegAssetInfoTest() throws Exception {
+    public void chainAssetTxRegTest() throws Exception {
         // Build params map
         Map<String,Object> params = new HashMap<>();
         params.put("assetSymbol","ljs");

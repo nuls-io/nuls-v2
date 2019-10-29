@@ -34,8 +34,8 @@ public class LedgerConstant {
     /**
      * 基础类型与合约类型
      */
-    public static final int COMMON_ASSET_TYPE = 1;
-    public static final int CONTRACT_ASSET_TYPE = 2;
+    public static final short COMMON_ASSET_TYPE = 1;
+    public static final short CONTRACT_ASSET_TYPE = 2;
     /**
      * 资产小数分割位
      */

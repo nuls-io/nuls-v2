@@ -129,6 +129,11 @@ public class AssetsRegTxCmd extends BaseLedgerCmd {
             if (null != errorCode) {
                 return failed(errorCode);
             }
+            //判断地址是否为本地chainId地址
+            boolean isAddressValidate = (AddressTool.getChainIdByAddress(asset.getAddress()) == ledgerConfig.getChainId());
+            if (!isAddressValidate) {
+                return failed(LedgerErrorCode.ERROR_ADDRESS_ERROR);
+            }
             String ledgerAddr = LedgerUtil.getRealAddressStr(params.get("txCreatorAddress").toString());
             /* 组装交易发送 (Send transaction) */
             Transaction tx = new AssetRegTransaction();

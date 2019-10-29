@@ -8,6 +8,7 @@ import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
+import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.model.po.LedgerAsset;
 import io.nuls.ledger.model.tx.txdata.TxLedgerAsset;
@@ -43,7 +44,7 @@ public class AssetRegTransferProcessor implements TransactionProcessor {
         byte[] fromAddress = null;
         BigInteger destroyAsset = coinTos.get(0).getAmount();
         fromAddress = coinFroms.get(0).getAddress();
-        LedgerAsset asset = new LedgerAsset(txLedgerAsset, chainId, destroyAsset, txHash, tx.getTime(), fromAddress);
+        LedgerAsset asset = new LedgerAsset(txLedgerAsset, chainId, destroyAsset, txHash, tx.getTime(), fromAddress,LedgerConstant.COMMON_ASSET_TYPE);
         return asset;
     }
 

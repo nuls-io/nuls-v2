@@ -131,6 +131,11 @@ public class AssetRegMngServiceImpl implements AssetRegMngService {
         if (null != errorCode) {
             return errorCode;
         }
+        //判断地址是否为本地chainId地址
+        boolean isAddressValidate=(AddressTool.getChainIdByAddress(txLedgerAsset.getAddress()) == chainId);
+        if(!isAddressValidate){
+            return LedgerErrorCode.ERROR_ADDRESS_ERROR;
+        }
         //判断黑洞地址
         if (!Arrays.equals(address, AddressTool.getAddressByPubKeyStr(ledgerConfig.getBlackHolePublicKey(), chainId))) {
             LoggerUtil.COMMON_LOG.error("toAddress is not blackHole");

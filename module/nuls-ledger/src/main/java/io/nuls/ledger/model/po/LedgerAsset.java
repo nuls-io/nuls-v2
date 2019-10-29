@@ -51,7 +51,7 @@ public class LedgerAsset extends BaseNulsData {
     private int assetId = 0;
     private String symbol;
     private String assetName;
-    private int assetType = 1;
+    private short assetType = 1;
     private BigInteger destroyNuls = BigInteger.ZERO;
     private BigInteger initNumber = BigInteger.ZERO;
     private short decimalPlace = 8;
@@ -61,8 +61,9 @@ public class LedgerAsset extends BaseNulsData {
     private long createTime = 0;
 
     public LedgerAsset(TxLedgerAsset tx,
-                       int chainId, BigInteger destroyNuls, String txHash, long createTime, byte[] creatorAddress) {
+                       int chainId, BigInteger destroyNuls, String txHash, long createTime, byte[] creatorAddress, short assetType) {
         this.chainId = chainId;
+        this.assetType = assetType;
         this.symbol = tx.getSymbol();
         this.assetName = tx.getName();
         this.destroyNuls = destroyNuls;
@@ -77,6 +78,7 @@ public class LedgerAsset extends BaseNulsData {
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint16(chainId);
+        stream.writeUint8(assetType);
         stream.writeUint16(assetId);
         stream.writeString(symbol);
         stream.writeString(assetName);
@@ -92,6 +94,7 @@ public class LedgerAsset extends BaseNulsData {
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.chainId = byteBuffer.readUint16();
+        this.assetType = byteBuffer.readUint8();
         this.assetId = byteBuffer.readUint16();
         this.symbol = byteBuffer.readString();
         this.assetName = byteBuffer.readString();
@@ -109,6 +112,7 @@ public class LedgerAsset extends BaseNulsData {
         int size = 0;
         // chainId
         size += SerializeUtils.sizeOfUint16();
+        size += SerializeUtils.sizeOfUint8();
         // assetId
         size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfString(symbol);
@@ -124,6 +128,7 @@ public class LedgerAsset extends BaseNulsData {
         size += SerializeUtils.sizeOfString(txHash);
         // createTime
         size += SerializeUtils.sizeOfUint32();
+
         return size;
     }
 
@@ -142,7 +147,7 @@ public class LedgerAsset extends BaseNulsData {
     }
 
 
-    public void map2pojo(Map<String, Object> map, int assetType) {
+    public void map2pojo(Map<String, Object> map, short assetType) {
         this.setChainId(Integer.valueOf(map.get("chainId").toString()));
         this.setAssetName(String.valueOf(map.get("assetName")));
         BigInteger initNumber = new BigInteger(String.valueOf(map.get("initNumber")));
@@ -188,11 +193,11 @@ public class LedgerAsset extends BaseNulsData {
         this.assetName = assetName;
     }
 
-    public int getAssetType() {
+    public short getAssetType() {
         return assetType;
     }
 
-    public void setAssetType(int assetType) {
+    public void setAssetType(short assetType) {
         this.assetType = assetType;
     }
 
