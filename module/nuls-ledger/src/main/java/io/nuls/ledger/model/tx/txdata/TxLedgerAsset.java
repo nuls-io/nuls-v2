@@ -42,7 +42,7 @@ import java.math.BigInteger;
 public class TxLedgerAsset extends BaseNulsData {
     private String name;
     private BigInteger initNumber;
-    private short decimalPlaces;
+    private short decimalPlace;
     private String symbol;
     private byte[] address;
 
@@ -50,7 +50,7 @@ public class TxLedgerAsset extends BaseNulsData {
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeString(name);
         stream.writeBigInteger(initNumber);
-        stream.writeUint8(decimalPlaces);
+        stream.writeUint8(decimalPlace);
         stream.writeString(symbol);
         stream.writeBytesWithLength(address);
     }
@@ -59,7 +59,7 @@ public class TxLedgerAsset extends BaseNulsData {
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.name = byteBuffer.readString();
         this.initNumber = byteBuffer.readBigInteger();
-        this.decimalPlaces = byteBuffer.readUint8();
+        this.decimalPlace = byteBuffer.readUint8();
         this.symbol = byteBuffer.readString();
         this.address = byteBuffer.readByLengthByte();
     }
@@ -93,20 +93,20 @@ public class TxLedgerAsset extends BaseNulsData {
         this.initNumber = initNumber;
     }
 
-    public short getDecimalPlaces() {
-        return decimalPlaces;
-    }
-
-    public void setDecimalPlaces(short decimalPlaces) {
-        this.decimalPlaces = decimalPlaces;
-    }
-
     public String getSymbol() {
         return symbol;
     }
 
     public void setSymbol(String symbol) {
         this.symbol = symbol;
+    }
+
+    public short getDecimalPlace() {
+        return decimalPlace;
+    }
+
+    public void setDecimalPlace(short decimalPlace) {
+        this.decimalPlace = decimalPlace;
     }
 
     public byte[] getAddress() {

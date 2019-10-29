@@ -30,7 +30,6 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
-import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.ledger.model.tx.txdata.TxLedgerAsset;
 
@@ -55,7 +54,7 @@ public class LedgerAsset extends BaseNulsData {
     private int assetType = 1;
     private BigInteger destroyNuls = BigInteger.ZERO;
     private BigInteger initNumber = BigInteger.ZERO;
-    private short decimalPlaces = 8;
+    private short decimalPlace = 8;
     private byte[] assetOwnerAddress;
     private byte[] creatorAddress;
     private String txHash;
@@ -68,7 +67,7 @@ public class LedgerAsset extends BaseNulsData {
         this.assetName = tx.getName();
         this.destroyNuls = destroyNuls;
         this.initNumber = tx.getInitNumber();
-        this.decimalPlaces = tx.getDecimalPlaces();
+        this.decimalPlace = tx.getDecimalPlace();
         this.assetOwnerAddress = tx.getAddress();
         this.creatorAddress = creatorAddress;
         this.txHash = txHash;
@@ -83,7 +82,7 @@ public class LedgerAsset extends BaseNulsData {
         stream.writeString(assetName);
         stream.writeBigInteger(destroyNuls);
         stream.writeBigInteger(initNumber);
-        stream.writeUint8(decimalPlaces);
+        stream.writeUint8(decimalPlace);
         stream.writeBytesWithLength(assetOwnerAddress);
         stream.writeBytesWithLength(creatorAddress);
         stream.writeString(txHash);
@@ -98,7 +97,7 @@ public class LedgerAsset extends BaseNulsData {
         this.assetName = byteBuffer.readString();
         this.destroyNuls = byteBuffer.readBigInteger();
         this.initNumber = byteBuffer.readBigInteger();
-        this.decimalPlaces = byteBuffer.readUint8();
+        this.decimalPlace = byteBuffer.readUint8();
         this.assetOwnerAddress = byteBuffer.readByLengthByte();
         this.creatorAddress = byteBuffer.readByLengthByte();
         this.txHash = byteBuffer.readString();
@@ -132,7 +131,7 @@ public class LedgerAsset extends BaseNulsData {
         TxLedgerAsset txAsset = new TxLedgerAsset();
         txAsset.setName(this.getAssetName());
         txAsset.setInitNumber(this.getInitNumber());
-        txAsset.setDecimalPlaces(this.getDecimalPlaces());
+        txAsset.setDecimalPlace(this.getDecimalPlace());
         txAsset.setSymbol(this.getSymbol());
         txAsset.setAddress(this.getAssetOwnerAddress());
         return txAsset.serialize();
@@ -148,7 +147,7 @@ public class LedgerAsset extends BaseNulsData {
         this.setAssetName(String.valueOf(map.get("assetName")));
         BigInteger initNumber = new BigInteger(String.valueOf(map.get("initNumber")));
         this.setInitNumber(initNumber);
-        this.setDecimalPlaces(Short.valueOf(map.get("decimalPlace").toString()));
+        this.setDecimalPlace(Short.valueOf(map.get("decimalPlace").toString()));
         this.setSymbol(String.valueOf(map.get("assetSymbol")));
         this.setAssetOwnerAddress(AddressTool.getAddress(map.get("address").toString()));
         this.setCreateTime(NulsDateUtils.getCurrentTimeSeconds());
@@ -213,12 +212,12 @@ public class LedgerAsset extends BaseNulsData {
         this.initNumber = initNumber;
     }
 
-    public short getDecimalPlaces() {
-        return decimalPlaces;
+    public short getDecimalPlace() {
+        return decimalPlace;
     }
 
-    public void setDecimalPlaces(short decimalPlaces) {
-        this.decimalPlaces = decimalPlaces;
+    public void setDecimalPlace(short decimalPlace) {
+        this.decimalPlace = decimalPlace;
     }
 
     public byte[] getAssetOwnerAddress() {

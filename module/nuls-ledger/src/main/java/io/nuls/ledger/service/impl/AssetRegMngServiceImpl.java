@@ -145,7 +145,7 @@ public class AssetRegMngServiceImpl implements AssetRegMngService {
 
     @Override
     public ErrorCode commonRegValidator(TxLedgerAsset asset) {
-        if (asset.getDecimalPlaces() < LedgerConstant.DECIMAL_PLACES_MIN || asset.getDecimalPlaces() > LedgerConstant.DECIMAL_PLACES_MAX) {
+        if (asset.getDecimalPlace() < LedgerConstant.DECIMAL_PLACES_MIN || asset.getDecimalPlace() > LedgerConstant.DECIMAL_PLACES_MAX) {
             return LedgerErrorCode.ERROR_ASSET_DECIMALPLACES;
         }
         if (FormatValidUtils.validTokenNameOrSymbol(asset.getSymbol())) {
@@ -172,7 +172,7 @@ public class AssetRegMngServiceImpl implements AssetRegMngService {
             String address = LedgerUtil.getRealAddressStr(ledgerAsset.getAssetOwnerAddress());
             String key = LedgerUtil.getKeyStr(address, chainId, assetId);
             AccountState accountState = new AccountState();
-            long decimal = (long) Math.pow(10, Integer.valueOf(ledgerAsset.getDecimalPlaces()));
+            long decimal = (long) Math.pow(10, Integer.valueOf(ledgerAsset.getDecimalPlace()));
             BigInteger amount = ledgerAsset.getInitNumber().multiply(BigInteger.valueOf(decimal));
             accountState.setTotalToAmount(amount);
             accountStatesMap.put(key.getBytes(LedgerConstant.DEFAULT_ENCODING), accountState.serialize());
@@ -233,7 +233,7 @@ public class AssetRegMngServiceImpl implements AssetRegMngService {
         map.put("assetType", ledgerAsset.getAssetType());
         map.put("assetOwnerAddress", AddressTool.getStringAddressByBytes(ledgerAsset.getAssetOwnerAddress()));
         map.put("initNumber", ledgerAsset.getInitNumber());
-        map.put("decimalPlace", ledgerAsset.getDecimalPlaces());
+        map.put("decimalPlace", ledgerAsset.getDecimalPlace());
         map.put("assetName", ledgerAsset.getAssetName());
         map.put("assetSymbol", ledgerAsset.getSymbol());
         map.put("txHash", ledgerAsset.getTxHash());
