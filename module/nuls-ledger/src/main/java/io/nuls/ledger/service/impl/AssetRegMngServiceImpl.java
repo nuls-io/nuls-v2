@@ -148,10 +148,10 @@ public class AssetRegMngServiceImpl implements AssetRegMngService {
         if (asset.getDecimalPlace() < LedgerConstant.DECIMAL_PLACES_MIN || asset.getDecimalPlace() > LedgerConstant.DECIMAL_PLACES_MAX) {
             return LedgerErrorCode.ERROR_ASSET_DECIMALPLACES;
         }
-        if (FormatValidUtils.validTokenNameOrSymbol(asset.getSymbol())) {
+        if (!FormatValidUtils.validTokenNameOrSymbol(asset.getSymbol())) {
             return LedgerErrorCode.ERROR_ASSET_SYMBOL;
         }
-        if (FormatValidUtils.validTokenNameOrSymbol(asset.getName())) {
+        if (!FormatValidUtils.validTokenNameOrSymbol(asset.getName())) {
             return LedgerErrorCode.ERROR_ASSET_NAME;
         }
         return null;
