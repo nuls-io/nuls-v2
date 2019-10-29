@@ -136,7 +136,9 @@ public class AssetRegMngServiceImpl implements AssetRegMngService {
             LoggerUtil.COMMON_LOG.error("toAddress is not blackHole");
             return LedgerErrorCode.TX_IS_WRONG;
         }
-        if (!BigIntegerUtils.isEqual(destroyAsset, BigInteger.valueOf(ledgerConfig.getAssetRegDestroyAmount()))) {
+        long decimal = (long) Math.pow(10, Integer.valueOf(ledgerConfig.getDecimals()));
+        BigInteger destroyAssetTx = BigInteger.valueOf(ledgerConfig.getAssetRegDestroyAmount()).multiply(BigInteger.valueOf(decimal));
+        if (!BigIntegerUtils.isEqual(destroyAsset, destroyAssetTx)) {
             LoggerUtil.COMMON_LOG.error("destroyNuls={} is error", destroyAsset);
             return LedgerErrorCode.TX_IS_WRONG;
         }
@@ -162,13 +164,16 @@ public class AssetRegMngServiceImpl implements AssetRegMngService {
         Map<byte[], byte[]> assets = new HashMap<>(ledgerAssets.size());
         Map<byte[], byte[]> hashMap = new HashMap<>(ledgerAssets.size());
         int assetId = getRegAssetId(chainId);
+        LoggerUtil.COMMON_LOG.info("1=assetId={}" + assetId);
         Map<byte[], byte[]> accountStatesMap = new HashMap<>(ledgerAssets.size());
         Map<String, List<String>> assetAddressIndex = new HashMap<>(4);
         for (LedgerAsset ledgerAsset : ledgerAssets) {
             ledgerAsset.setAssetType(LedgerConstant.COMMON_ASSET_TYPE);
-            ledgerAsset.setAssetId(assetId++);
+            assetId++;
+            LoggerUtil.COMMON_LOG.info("assetId={}" + assetId);
+            ledgerAsset.setAssetId(assetId);
             assets.put(ByteUtils.intToBytes(ledgerAsset.getAssetId()), ledgerAsset.serialize());
-            hashMap.put(ByteUtils.toBytes(ledgerConfig.getEncoding(), ledgerAsset.getTxHash()), ByteUtils.intToBytes(ledgerAsset.getAssetId()));
+            hashMap.put(HexUtil.decode(ledgerAsset.getTxHash()), ByteUtils.intToBytes(ledgerAsset.getAssetId()));
             String address = LedgerUtil.getRealAddressStr(ledgerAsset.getAssetOwnerAddress());
             String key = LedgerUtil.getKeyStr(address, chainId, assetId);
             AccountState accountState = new AccountState();
@@ -248,9 +253,9 @@ public class AssetRegMngServiceImpl implements AssetRegMngService {
             for (LedgerAsset ledgerAsset : assets) {
                 if (LedgerConstant.COMMON_ASSET_TYPE == ledgerAsset.getAssetType()) {
                     rtList.add(getAssetMapByLedgerAsset(ledgerAsset));
-                    rtList.add(getLocalChainDefaultAsset());
                 }
             }
+            rtList.add(getLocalChainDefaultAsset());
         } else if (LedgerConstant.CONTRACT_ASSET_TYPE == assetType) {
             for (LedgerAsset ledgerAsset : assets) {
                 if (LedgerConstant.CONTRACT_ASSET_TYPE == ledgerAsset.getAssetType()) {
@@ -260,8 +265,8 @@ public class AssetRegMngServiceImpl implements AssetRegMngService {
         } else {
             for (LedgerAsset ledgerAsset : assets) {
                 rtList.add(getAssetMapByLedgerAsset(ledgerAsset));
-                rtList.add(getLocalChainDefaultAsset());
             }
+            rtList.add(getLocalChainDefaultAsset());
         }
         return rtList;
     }

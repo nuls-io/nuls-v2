@@ -32,7 +32,7 @@ import io.nuls.base.api.provider.BaseReq;
  * @Description: 功能描述
  */
 public class RegLocalAssetReq extends BaseReq {
-    private String symbol;
+    private String assetSymbol;
     private String assetName;
     private long initNumber;
     private int decimalPlace;
@@ -44,7 +44,7 @@ public class RegLocalAssetReq extends BaseReq {
                             String symbol, String assetName, long initNumber, int decimalPlace,
                             String password, String assetOwnerAddress) {
         this.txCreatorAddress = address;
-        this.symbol = symbol;
+        this.assetSymbol = symbol;
         this.assetName = assetName;
         this.initNumber = initNumber;
         this.decimalPlace = decimalPlace;
@@ -76,12 +76,12 @@ public class RegLocalAssetReq extends BaseReq {
         this.password = password;
     }
 
-    public String getSymbol() {
-        return symbol;
+    public String getAssetSymbol() {
+        return assetSymbol;
     }
 
-    public void setSymbol(String symbol) {
-        this.symbol = symbol;
+    public void setAssetSymbol(String assetSymbol) {
+        this.assetSymbol = assetSymbol;
     }
 
     public String getAssetName() {

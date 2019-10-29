@@ -7,7 +7,6 @@ import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.ledger.test.constant.TestConfig;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -25,8 +24,22 @@ public class CmdAssetRegTest {
     public void getAssetRegInfoTest() throws Exception {
         // Build params map
         Map<String,Object> params = new HashMap<>();
-        params.put(Constants.CHAIN_ID, TestConfig.chainId);
+        params.put(Constants.CHAIN_ID, 1);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getAssetRegInfo", params);
+        Log.debug("response {}", JSONUtils.obj2json(response));
+    }
+    @Test
+    public void getRegAssetInfoTest() throws Exception {
+        // Build params map
+        Map<String,Object> params = new HashMap<>();
+        params.put("assetSymbol","ljs");
+        params.put("assetName","ljs");
+        params.put("initNumber",500000000);
+        params.put("decimalPlace",8);
+        params.put("txCreatorAddress","NULSd6HgXQht4JybnU8pScuqbsiRxTH6rr3do");
+        params.put("assetOwnerAddress","NULSd6HggU7nLpj6GUP7F4c8Dr9GfRiDYcb1j");
+        params.put("password","nuls123456");
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "chainAssetTxReg", params);
         Log.debug("response {}", JSONUtils.obj2json(response));
     }
 }

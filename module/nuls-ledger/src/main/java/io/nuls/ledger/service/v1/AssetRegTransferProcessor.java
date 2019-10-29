@@ -28,7 +28,7 @@ public class AssetRegTransferProcessor implements TransactionProcessor {
 
     @Override
     public int getType() {
-        return TxType.ADD_ASSET_TO_CHAIN;
+        return TxType.LEDGER_ASSET_REG_TRANSFER;
     }
 
     private LedgerAsset buildLedgerAssetByTx(Transaction tx, int chainId) throws NulsException {
