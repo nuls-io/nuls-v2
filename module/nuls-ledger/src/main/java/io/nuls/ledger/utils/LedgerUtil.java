@@ -173,6 +173,6 @@ public class LedgerUtil {
     }
 
     public static boolean isPermanentLock(long lockTime) {
-        return (lockTime == LedgerConstant.PERMANENT_LOCK_COMMON || lockTime == LedgerConstant.PERMANENT_LOCK_DEX);
+        return (lockTime < 0);
     }
 }
