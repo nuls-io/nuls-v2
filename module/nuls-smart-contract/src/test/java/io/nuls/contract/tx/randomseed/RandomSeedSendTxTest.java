@@ -164,13 +164,8 @@ public class RandomSeedSendTxTest extends BaseQuery {
         Log.info("viewRandomSeedListByHeight is {}", invokeView(contractAddress, "viewRandomSeedListByHeight", 5, 10));
     }
 
-    private void invokeCall(String sender, BigInteger value, String contractAddress, String methodName, String methodDesc, String remark, Object... args) throws Exception {
-        Map params = this.makeCallParams(sender, value, contractAddress, methodName, methodDesc, remark, args);
-        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
-        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
-        assertTrue(cmdResp2, result);
-        String hash = (String) result.get("txHash");
-        Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(waitGetContractTx(hash)));
+    protected void invokeCall(String sender, BigInteger value, String contractAddress, String methodName, String methodDesc, String remark, Object... args) throws Exception {
+        super.invokeCall(sender, value, contractAddress, methodName, methodDesc, remark, args);
         TimeUnit.SECONDS.sleep(1);
         getContractWholeInfo();
     }

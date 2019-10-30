@@ -578,10 +578,9 @@ public class NativeUtils {
         argsMap.put("contractSender", contractSender);
         // 固定参数 - 合约地址的当前余额和nonce, 当前打包的区块时间(Mode: NEW_TX)
         CmdRegisterMode cmdRegisterMode = cmdRegister.getCmdRegisterMode();
-        long blockTime = 0L;
         if (CmdRegisterMode.NEW_TX.equals(cmdRegisterMode)) {
             BlockHeaderDto blockHeaderDto = frame.vm.getBlockHeader(programInvoke.getNumber() + 1);
-            blockTime = blockHeaderDto.getTime();
+            long blockTime = blockHeaderDto.getTime();
             // 使用虚拟机内部维护的合约余额
             ProgramAccount account = frame.vm.getProgramExecutor().getAccount(contractAddressBytes);
             argsMap.put("contractBalance", account.getBalance().toString());
@@ -599,6 +598,11 @@ public class NativeUtils {
             if(!NativeAddress.isContract(nrc20Bytes, frame)) {
                 throw new ErrorException("non-contract address", frame.vm.getGasUsed(), null);
             }
+            String toAddress = args[1];
+            int chainIdByAddress = AddressTool.getChainIdByAddress(toAddress);
+            if(currentChainId == chainIdByAddress) {
+                throw new ErrorException("The chainId of the recipient is not a cross-chain", frame.vm.getGasUsed(), null);
+            }
             // 检查此nrc20合约是否已注册跨链资产
             ChainManager chainManager = SpringLiteContext.getBean(ChainManager.class);
             Chain chain = chainManager.getChainMap().get(currentChainId);
@@ -607,8 +611,11 @@ public class NativeUtils {
             if(tokenAssetsInfo == null) {
                 throw new ErrorException("The token is not registered", frame.vm.getGasUsed(), null);
             }
+            int assetsId = tokenAssetsInfo.getAssetsId();
+            // 增加资产id参数
+            argsMap.put("assetsId", assetsId);
             try {
-                boolean isCrossAssets = ChainManagerCall.isCrossAssets(currentChainId, tokenAssetsInfo.getAssetsId());
+                boolean isCrossAssets = ChainManagerCall.isCrossAssets(currentChainId, assetsId);
                 if(!isCrossAssets) {
                     throw new ErrorException("The asset is not a cross-chain asset[0]", frame.vm.getGasUsed(), null);
                 }
@@ -624,7 +631,11 @@ public class NativeUtils {
                 // 调用命令向跨链模块请求生成这笔交易
                 NativeUtils.newTokenOutCrossChainTx(cmdRegisterManager, moduleCode, cmdName, argsMap, invokeRegisterCmd, frame);
                 String txHash = invokeRegisterCmd.getProgramNewTx().getTxHash();
-                objectRef = frame.heap.newString(txHash);
+                String[] invokeResult = new String[3];
+                invokeResult[0] = String.valueOf(currentChainId);
+                invokeResult[1] = String.valueOf(assetsId);
+                invokeResult[2] = txHash;
+                objectRef = frame.heap.stringArrayToObjectRef(invokeResult);
             } catch (IOException e) {
                 throw new ErrorException("new tx error", frame.vm.getGasUsed(), null);
             }

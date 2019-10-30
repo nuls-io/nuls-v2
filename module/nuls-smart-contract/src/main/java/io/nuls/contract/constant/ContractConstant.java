@@ -85,7 +85,7 @@ public interface ContractConstant {
     String CMD_TOKEN_OUT_CROSS_CHAIN = "cc_tokenOutCrossChain";
     int TOKEN_ASSET_TYPE = 2;
     String CROSS_CHAIN_NRC20_CONTRACT_TRANSFER_OUT_METHOD_NAME = "transferCrossChain";
-    String CROSS_CHAIN_NRC20_CONTRACT_TRANSFER_OUT_METHOD_DESC = "(Address to, BigInteger value) return boolean";
+    String CROSS_CHAIN_NRC20_CONTRACT_TRANSFER_OUT_METHOD_DESC = "(String to, BigInteger value) return boolean";
 
     /**
      *
