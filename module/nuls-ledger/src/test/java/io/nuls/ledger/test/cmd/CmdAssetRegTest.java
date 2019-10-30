@@ -19,7 +19,6 @@ public class CmdAssetRegTest {
         NoUse.mockModule();
     }
 
-
     @Test
     public void getAssetRegInfoTest() throws Exception {
         // Build params map
@@ -42,4 +41,41 @@ public class CmdAssetRegTest {
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "chainAssetTxReg", params);
         Log.debug("response {}", JSONUtils.obj2json(response));
     }
+
+    @Test
+    public void getAssetRegInfoByHashTest() throws Exception {
+        // Build params map
+        Map<String,Object> params = new HashMap<>();
+        params.put("chainId",1);
+        params.put("txHash","6d7fce97c656834dad86f2c47d16f2373db006b49d836a98701d8273c45264fc");
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getAssetRegInfoByHash", params);
+        Log.debug("response {}", JSONUtils.obj2json(response));
+    }
+    @Test
+    public void getAssetContractAddressTest() throws Exception {
+        // Build params map
+        Map<String,Object> params = new HashMap<>();
+        params.put("chainId",1);
+        params.put("assetId",2);
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getAssetContractAddress", params);
+        Log.debug("response {}", JSONUtils.obj2json(response));
+    }
+    @Test
+    public void getAssetRegInfoByAssetIdTest() throws Exception {
+        // Build params map
+        Map<String,Object> params = new HashMap<>();
+        params.put("chainId",1);
+        params.put("assetId",2);
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getAssetRegInfoByAssetId", params);
+        Log.debug("response {}", JSONUtils.obj2json(response));
+    }
+    @Test
+    public void getAssetContractAssetIdTest() throws Exception {
+        // Build params map
+        Map<String,Object> params = new HashMap<>();
+        params.put("contractAddress","NULSd6HgYEvN6e8kVdrJ3pBzPFq1T6p6j6pjv");
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getAssetContractAssetId", params);
+        Log.debug("response {}", JSONUtils.obj2json(response));
+    }
+
 }
