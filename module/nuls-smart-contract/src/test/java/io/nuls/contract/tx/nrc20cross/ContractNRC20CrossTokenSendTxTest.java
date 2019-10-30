@@ -25,6 +25,7 @@
 package io.nuls.contract.tx.nrc20cross;
 
 
+import io.nuls.contract.mock.basetest.ContractTest;
 import io.nuls.contract.tx.base.BaseQuery;
 import io.nuls.contract.util.Log;
 import io.nuls.core.parse.JSONUtils;
@@ -57,12 +58,12 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
     @Test
     public void createContract() throws Exception {
         //sender = toAddress32;
-        //InputStream in = new FileInputStream(ContractTest.class.getResource("/nuls-cross-chain-nrc20-test.jar").getFile());
-        InputStream in = new FileInputStream("/Users/pierreluo/IdeaProjects/nuls-cross-chain-nrc20/target/nuls-cross-chain-nrc20-test.jar");
+        InputStream in = new FileInputStream(ContractTest.class.getResource("/nuls-cross-chain-nrc20-test.jar").getFile());
+        //InputStream in = new FileInputStream("/Users/pierreluo/IdeaProjects/nuls-cross-chain-nrc20/target/nuls-cross-chain-nrc20-test.jar");
         byte[] contractCode = IOUtils.toByteArray(in);
         String remark = "create cross token";
-        String name = "CCT";
-        String symbol = "CrossChainToken";
+        String name = "cct";
+        String symbol = "CCT";
         String amount = BigDecimal.TEN.pow(10).toPlainString();
         String decimals = "8";
         Map params = this.makeCreateParams(sender, contractCode, "cct", remark, name, symbol, amount, decimals);
@@ -129,8 +130,8 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
         InputStream in = new FileInputStream("/Users/pierreluo/IdeaProjects/nuls-cross-chain-nrc20/target/nuls-cross-chain-nrc20-test.jar");
         byte[] contractCode = IOUtils.toByteArray(in);
         String remark = "create cross token";
-        String name = "CCT";
-        String symbol = "CrossChainToken";
+        String name = "cct";
+        String symbol = "CCT";
         String amount = BigDecimal.TEN.pow(10).toPlainString();
         String decimals = "8";
         Map params = this.makeCreateParams(sender, contractCode, "cct", remark, name, symbol, amount, decimals);
