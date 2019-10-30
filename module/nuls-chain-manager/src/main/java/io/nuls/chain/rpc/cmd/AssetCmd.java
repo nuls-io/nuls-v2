@@ -185,7 +185,11 @@ public class AssetCmd extends BaseChainCmd {
             /* 组装交易发送 (Send transaction) */
             Transaction tx = new AddAssetToChainTransaction();
             LoggerUtil.COMMON_LOG.debug("version= {}", ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()));
-            tx.setTxData(TxUtil.parseAssetToTxV3(asset).serialize());
+            if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) > 2) {
+                tx.setTxData(TxUtil.parseAssetToTxV3(asset).serialize());
+            } else {
+                tx.setTxData(TxUtil.parseAssetToTx(asset).serialize());
+            }
             tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
             AccountBalance accountBalance = new AccountBalance(null, null);
             ErrorCode ldErrorCode = rpcService.getCoinData(String.valueOf(params.get("address")), accountBalance);
