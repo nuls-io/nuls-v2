@@ -132,8 +132,8 @@ public class AssetRegMngServiceImpl implements AssetRegMngService {
             return errorCode;
         }
         //判断地址是否为本地chainId地址
-        boolean isAddressValidate=(AddressTool.getChainIdByAddress(txLedgerAsset.getAddress()) == chainId);
-        if(!isAddressValidate){
+        boolean isAddressValidate = (AddressTool.getChainIdByAddress(txLedgerAsset.getAddress()) == chainId);
+        if (!isAddressValidate) {
             return LedgerErrorCode.ERROR_ADDRESS_ERROR;
         }
         //判断黑洞地址
@@ -254,13 +254,17 @@ public class AssetRegMngServiceImpl implements AssetRegMngService {
     public List<Map<String, Object>> getLedgerRegAssets(int chainId, int assetType) throws Exception {
         List<LedgerAsset> assets = assetRegMngRepository.getAllRegLedgerAssets(chainId);
         List<Map<String, Object>> rtList = new ArrayList<>();
+        Map<String, Object> defaultAsset = new HashMap<>();
+        if (ledgerConfig.getChainId() == chainId) {
+            defaultAsset = getLocalChainDefaultAsset();
+        }
         if (LedgerConstant.COMMON_ASSET_TYPE == assetType) {
+            rtList.add(defaultAsset);
             for (LedgerAsset ledgerAsset : assets) {
                 if (LedgerConstant.COMMON_ASSET_TYPE == ledgerAsset.getAssetType()) {
                     rtList.add(getAssetMapByLedgerAsset(ledgerAsset));
                 }
             }
-            rtList.add(getLocalChainDefaultAsset());
         } else if (LedgerConstant.CONTRACT_ASSET_TYPE == assetType) {
             for (LedgerAsset ledgerAsset : assets) {
                 if (LedgerConstant.CONTRACT_ASSET_TYPE == ledgerAsset.getAssetType()) {
@@ -268,10 +272,10 @@ public class AssetRegMngServiceImpl implements AssetRegMngService {
                 }
             }
         } else {
+            rtList.add(defaultAsset);
             for (LedgerAsset ledgerAsset : assets) {
                 rtList.add(getAssetMapByLedgerAsset(ledgerAsset));
             }
-            rtList.add(getLocalChainDefaultAsset());
         }
         return rtList;
     }
