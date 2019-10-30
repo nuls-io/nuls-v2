@@ -555,9 +555,10 @@ public class SyncService {
         contractInfo.setNew(true);
         contractInfo.setRemark(tx.getRemark());
         createContractTxInfo(tx, contractInfo, null);
-        contractInfoMap.put(contractInfo.getContractAddress(), contractInfo);
+
 
         if (contractInfo.isSuccess()) {
+            contractInfoMap.put(contractInfo.getContractAddress(), contractInfo);
             processTokenTransfers(chainId, contractInfo.getResultInfo().getTokenTransfers(), tx);
         }
     }
