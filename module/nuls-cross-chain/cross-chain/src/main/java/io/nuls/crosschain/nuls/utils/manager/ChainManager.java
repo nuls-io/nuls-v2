@@ -128,7 +128,7 @@ public class ChainManager {
              * */
             int chainId = chain.getConfig().getChainId();
             List<CmdRegisterDto> cmdRegisterDtoList = new ArrayList<>();
-            CmdRegisterDto tokenOutCrossChain = new CmdRegisterDto("cc_tokenOutCrossChain", 1, List.of("from", "to", "value", "chainId", "assetsId"), 1);
+            CmdRegisterDto tokenOutCrossChain = new CmdRegisterDto("cc_tokenOutCrossChain", 0, List.of("from", "to", "value"), 1);
             cmdRegisterDtoList.add(tokenOutCrossChain);
             SmartContractCall.registerContractTx(chainId, cmdRegisterDtoList);
         }
