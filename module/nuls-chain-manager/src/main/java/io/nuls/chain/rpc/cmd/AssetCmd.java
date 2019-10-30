@@ -158,7 +158,8 @@ public class AssetCmd extends BaseChainCmd {
         Map<String, String> rtMap = new HashMap<>(1);
         try {
             /* 组装Asset (Asset object) */
-            Asset asset = rpcService.getLocalAssetByLedger(CmRuntimeInfo.getMainIntChainId(),Integer.valueOf(params.get("assetId").toString()));
+            Asset asset = rpcService.getLocalAssetByLedger(CmRuntimeInfo.getMainIntChainId(), Integer.valueOf(params.get("assetId").toString()));
+            asset.setAddress(AddressTool.getAddress((String) params.get("address")));
             if (asset.getDecimalPlaces() < Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMin()) || asset.getDecimalPlaces() > Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMax())) {
                 return failed(CmErrorCode.ERROR_ASSET_DECIMALPLACES);
             }
@@ -183,11 +184,8 @@ public class AssetCmd extends BaseChainCmd {
             }
             /* 组装交易发送 (Send transaction) */
             Transaction tx = new AddAssetToChainTransaction();
-            if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) > 2) {
-                tx.setTxData(TxUtil.parseAssetToTxV3(asset).serialize());
-            } else {
-                tx.setTxData(TxUtil.parseAssetToTx(asset).serialize());
-            }
+            LoggerUtil.COMMON_LOG.debug("version= {}", ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()));
+            tx.setTxData(TxUtil.parseAssetToTxV3(asset).serialize());
             tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
             AccountBalance accountBalance = new AccountBalance(null, null);
             ErrorCode ldErrorCode = rpcService.getCoinData(String.valueOf(params.get("address")), accountBalance);
