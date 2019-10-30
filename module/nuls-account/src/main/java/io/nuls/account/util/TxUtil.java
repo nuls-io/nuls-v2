@@ -232,20 +232,20 @@ public class TxUtil {
     /**
      * 校验转账交易备注是否有效
      *
-     * @param remark
+     * @param
      * @return
      */
-    public static boolean validTxRemark(String remark) {
-        if (StringUtils.isBlank(remark)) {
-            return true;
-        }
-        try {
-            byte[] bytes = remark.getBytes(NulsConfig.DEFAULT_ENCODING);
-            return bytes.length <= AccountConstant.TX_REMARK_MAX_LEN;
-        } catch (UnsupportedEncodingException e) {
-            return false;
-        }
-    }
+//    public static boolean validTxRemark(String remark) {
+//        if (StringUtils.isBlank(remark)) {
+//            return true;
+//        }
+//        try {
+//            byte[] bytes = remark.getBytes(NulsConfig.DEFAULT_ENCODING);
+//            return bytes.length <= AccountConstant.TX_REMARK_MAX_LEN;
+//        } catch (UnsupportedEncodingException e) {
+//            return false;
+//        }
+//    }
 
     public static boolean isLegalContractAddress(byte[] addressBytes, Chain chain) {
         if (addressBytes == null) {
