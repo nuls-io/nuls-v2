@@ -73,7 +73,7 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
         String hash = (String) result.get("txHash");
         String contractAddress = (String) result.get("contractAddress");
         Map map = waitGetContractTx(hash);
-        Assert.assertTrue(JSONUtils.obj2PrettyJson(map), (Boolean) ((Map)(map.get("contractResult"))).get("success"));
+        Assert.assertTrue(JSONUtils.obj2PrettyJson(map), (Boolean) ((Map) (map.get("contractResult"))).get("success"));
         Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(map));
     }
 
@@ -92,8 +92,30 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
         Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(waitGetContractTx(hash)));
     }
 
+    private Integer getAssetId(String contractAddress) throws Exception {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("contractAddress", contractAddress);
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getAssetContractAssetId", parameters);
+        Map result = (HashMap) (((HashMap) response.getResponseData()).get("getAssetContractAssetId"));
+        assertTrue(response, result);
+        Integer assetId = Integer.parseInt(result.get("assetId").toString());
+        return assetId;
+    }
+
+    private void mainNetAssetReg(Integer assetId) throws Exception {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("address", sender);
+        parameters.put("assetId", assetId);
+        parameters.put("password", "nuls123456");
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CM.abbr, "cm_mainNetAssetReg", parameters);
+        System.out.println(JSONUtils.obj2PrettyJson(response));
+    }
+
     /**
-     * 1. 流程 - 创建NRC20合约、创建系统合约、向NRC20合约设置系统合约参数
+     * 1. 流程 - 创建NRC20合约
+     *          创建系统合约
+     *          向NRC20合约设置系统合约参数
+     *          向链管理模块注册跨链
      */
     @Test
     public void testCreateProcessor() throws Exception {
@@ -101,7 +123,10 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
         String sys = createCrossSystemContract();
         this.invokeCall(sender, BigInteger.ZERO, nrc20, "setSystemContract", null, "remark", sys);
         TimeUnit.SECONDS.sleep(1);
-        Log.info("nrc20 is [{}], sys is [{}]", nrc20, sys);
+        Integer assetId = this.getAssetId(nrc20);
+        this.mainNetAssetReg(assetId);
+        Log.info("nrc20 is [{}], assetId is [{}], sys is [{}]", nrc20, assetId, sys);
+
     }
 
     /**
@@ -109,7 +134,7 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
      */
     @Test
     public void callTransferCrossChain() throws Exception {
-        contractAddress_nrc20 = "tNULSeBaN91vUxDW5bu3FU1dLC2BXkvpEnuCFB";
+        contractAddress_nrc20 = "tNULSeBaN9o5tHvqwjfU9qXKosatrDxjAgUNFc";
         methodName = "transferCrossChain";
         BigInteger value = BigInteger.ZERO;
         String methodDesc = "";
@@ -127,7 +152,8 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
 
     private String createCrossNrc20Contract() throws Exception {
         Log.info("开始创建跨链特性的NRC20合约");
-        InputStream in = new FileInputStream("/Users/pierreluo/IdeaProjects/nuls-cross-chain-nrc20/target/nuls-cross-chain-nrc20-test.jar");
+        InputStream in = new FileInputStream(ContractTest.class.getResource("/nuls-cross-chain-nrc20-test.jar").getFile());
+        //InputStream in = new FileInputStream("/Users/pierreluo/IdeaProjects/nuls-cross-chain-nrc20/target/nuls-cross-chain-nrc20-test.jar");
         byte[] contractCode = IOUtils.toByteArray(in);
         String remark = "create cross token";
         String name = "cct";
@@ -141,13 +167,14 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
         String hash = (String) result.get("txHash");
         String contractAddress = (String) result.get("contractAddress");
         Map map = waitGetContractTx(hash);
-        Assert.assertTrue(JSONUtils.obj2PrettyJson(map), (Boolean) ((Map)(map.get("contractResult"))).get("success"));
+        Assert.assertTrue(JSONUtils.obj2PrettyJson(map), (Boolean) ((Map) (map.get("contractResult"))).get("success"));
         return contractAddress;
     }
 
     private String createCrossSystemContract() throws Exception {
         Log.info("开始创建跨链特性的System合约");
-        InputStream in = new FileInputStream("/Users/pierreluo/IdeaProjects/cross-token-system-contract/target/cross-token-system-contract-test1.jar");
+        InputStream in = new FileInputStream(ContractTest.class.getResource("/cross-token-system-contract-test1.jar").getFile());
+        //InputStream in = new FileInputStream("/Users/pierreluo/IdeaProjects/cross-token-system-contract/target/cross-token-system-contract-test1.jar");
         byte[] contractCode = IOUtils.toByteArray(in);
         String remark = "create cross system contract";
         Map params = this.makeCreateParams(sender, contractCode, "sys", remark);
@@ -157,7 +184,74 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
         String hash = (String) result.get("txHash");
         String contractAddress = (String) result.get("contractAddress");
         Map map = waitGetContractTx(hash);
-        Assert.assertTrue(JSONUtils.obj2PrettyJson(map), (Boolean) ((Map)(map.get("contractResult"))).get("success"));
+        Assert.assertTrue(JSONUtils.obj2PrettyJson(map), (Boolean) ((Map) (map.get("contractResult"))).get("success"));
+        return contractAddress;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * 流程: 测试合约内部临时存储
+     */
+    @Test
+    public void testContractRepositoryProcessor() throws Exception {
+        String nrc20 = createTempNrc20Contract();
+        String temp = createTempContract();
+        this.invokeCall(sender, BigInteger.ZERO, nrc20, "setSystemContract", null, "remark", temp);
+        TimeUnit.SECONDS.sleep(1);
+        Log.info("nrc20 is [{}], temp is [{}]", nrc20, temp);
+        String to = "tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD";
+        String token = BigInteger.valueOf(8_0000_0000L).toString();
+        String[] args = {to, token};
+        this.invokeCall(sender, BigInteger.ZERO, nrc20, "transferCrossChain123", null, "remark", args);
+    }
+
+    @Test
+    public void test() throws Exception {
+        // tNULSeBaNC716ifZZz7ZxnXfAbQE7k6VBpm8PD
+        // tNULSeBaMz8qLFzkUMXTzWDG4KzdaEg3kPtpSd
+        String nrc20 = "tNULSeBaNC716ifZZz7ZxnXfAbQE7k6VBpm8PD";
+        //String temp = "tNULSeBaMz8qLFzkUMXTzWDG4KzdaEg3kPtpSd";
+        //this.invokeCall(sender, BigInteger.ZERO, nrc20, "setSystemContract", null, "remark", temp);
+        String to = "XXOOdjJQw4LJdjtCd5Gda17FCNgSgTcPUUdSA";
+        String token = BigInteger.valueOf(8_0000_0000L).toString();
+        String[] args = {to, token};
+        this.invokeCall(sender, BigInteger.ZERO, nrc20, "transferCrossChain123", null, "remark", args);
+    }
+
+    private String createTempNrc20Contract() throws Exception {
+        Log.info("开始创建测试合约存储的NRC20合约");
+        InputStream in = new FileInputStream("/Users/pierreluo/IdeaProjects/contract-vm-storage-test/target/contract-vm-storage-test-test1.jar");
+        byte[] contractCode = IOUtils.toByteArray(in);
+        String remark = "create cross token";
+        String name = "cct";
+        String symbol = "CCT";
+        String amount = BigDecimal.TEN.pow(10).toPlainString();
+        String decimals = "8";
+        Map params = this.makeCreateParams(sender, contractCode, "cct", remark, name, symbol, amount, decimals);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CREATE));
+        assertTrue(cmdResp2, result);
+        String hash = (String) result.get("txHash");
+        String contractAddress = (String) result.get("contractAddress");
+        Map map = waitGetContractTx(hash);
+        Assert.assertTrue(JSONUtils.obj2PrettyJson(map), (Boolean) ((Map) (map.get("contractResult"))).get("success"));
+        return contractAddress;
+    }
+
+    private String createTempContract() throws Exception {
+        Log.info("开始创建Temp合约");
+        InputStream in = new FileInputStream("/Users/pierreluo/IdeaProjects/mavenplugin/target/maven-plugin-test.jar");
+        byte[] contractCode = IOUtils.toByteArray(in);
+        String remark = "create temp contract";
+        Map params = this.makeCreateParams(sender, contractCode, "temp", remark);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CREATE));
+        assertTrue(cmdResp2, result);
+        String hash = (String) result.get("txHash");
+        String contractAddress = (String) result.get("contractAddress");
+        Map map = waitGetContractTx(hash);
+        Assert.assertTrue(JSONUtils.obj2PrettyJson(map), (Boolean) ((Map) (map.get("contractResult"))).get("success"));
         return contractAddress;
     }
 }

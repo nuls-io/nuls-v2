@@ -29,11 +29,11 @@ package io.nuls.contract.model.bo;
  */
 public class ContractTokenAssetsInfo {
     private int chainId;
-    private int assetsId;
+    private int assetId;
 
-    public ContractTokenAssetsInfo(int chainId, int assetsId) {
+    public ContractTokenAssetsInfo(int chainId, int assetId) {
         this.chainId = chainId;
-        this.assetsId = assetsId;
+        this.assetId = assetId;
     }
 
     public int getChainId() {
@@ -44,11 +44,11 @@ public class ContractTokenAssetsInfo {
         this.chainId = chainId;
     }
 
-    public int getAssetsId() {
-        return assetsId;
+    public int getAssetId() {
+        return assetId;
     }
 
-    public void setAssetsId(int assetsId) {
-        this.assetsId = assetsId;
+    public void setAssetId(int assetId) {
+        this.assetId = assetId;
     }
 }

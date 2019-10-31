@@ -223,7 +223,7 @@ public class VM {
         // 特殊处理方法参数，传入的二维数组就是此合约方法的第一个参数 - method: _payable(String[][] args)
         if(BALANCE_TRIGGER_METHOD_NAME.equals(methodCode.name) &&
                 BALANCE_TRIGGER_FOR_CONSENSUS_CONTRACT_METHOD_DESC_IN_VM.equals(methodCode.desc)) {
-            final VariableType variableType = argsVariableType.get(0);
+            //final VariableType variableType = argsVariableType.get(0);
             final ProgramMethodArg programMethodArg = methodCode.args.get(0);
             if(args == null || args.length == 0) {
                 throw new RuntimeException(String.format("parameter %s required", programMethodArg.getName()));

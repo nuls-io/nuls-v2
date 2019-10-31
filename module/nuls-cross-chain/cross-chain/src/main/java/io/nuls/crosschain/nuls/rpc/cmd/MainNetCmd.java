@@ -13,8 +13,11 @@ import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.constant.CrossChainErrorCode;
 import io.nuls.crosschain.base.message.CirculationMessage;
 import io.nuls.crosschain.base.message.GetRegisteredChainMessage;
+import io.nuls.crosschain.nuls.constant.ParamConstant;
 import io.nuls.crosschain.nuls.servive.MainNetService;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -161,7 +164,7 @@ public class MainNetCmd extends BaseCmd {
      * */
     @CmdAnnotation(cmd = "cc_tokenOutCrossChain", version = 1.0, description = "智能合约资产跨链/Smart contract assets cross chain")
     @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
-    @Parameter(parameterName = "assetsId", requestType = @TypeDescriptor(value = int.class), parameterDes = "资产ID")
+    @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterDes = "资产ID")
     @Parameter(parameterName = "from", parameterDes = "传出地址")
     @Parameter(parameterName = "to", parameterDes = "地址转入")
     @Parameter(parameterName = "value", parameterDes = "金额")
@@ -179,6 +182,11 @@ public class MainNetCmd extends BaseCmd {
         if(result.isFailed()){
             return failed(result.getErrorCode());
         }
-        return success(result.getData());
+        Map data = (Map) result.getData();
+        String txHash = (String) data.get(ParamConstant.TX_HASH);
+        String txHex = (String) data.get(ParamConstant.TX);
+        Map resultMap = new HashMap();
+        resultMap.put(ParamConstant.VALUE, List.of(txHash, txHex));
+        return success(resultMap);
     }
 }

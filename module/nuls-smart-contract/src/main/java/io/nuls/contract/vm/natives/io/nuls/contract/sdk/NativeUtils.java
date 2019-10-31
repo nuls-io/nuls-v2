@@ -591,6 +591,7 @@ public class NativeUtils {
         ProgramInvokeRegisterCmd invokeRegisterCmd = new ProgramInvokeRegisterCmd(cmdName, argsMap, cmdRegisterMode);
         Result result;
         ObjectRef objectRef;
+        // add by pierre at 2019-11-01 - 需要协议升级
         // token跨链转出命令
         if(ContractConstant.CMD_TOKEN_OUT_CROSS_CHAIN.equals(cmdName)) {
             byte[] nrc20Bytes = senderBytes;
@@ -611,11 +612,11 @@ public class NativeUtils {
             if(tokenAssetsInfo == null) {
                 throw new ErrorException("The token is not registered", frame.vm.getGasUsed(), null);
             }
-            int assetsId = tokenAssetsInfo.getAssetsId();
+            int assetId = tokenAssetsInfo.getAssetId();
             // 增加资产id参数
-            argsMap.put("assetsId", assetsId);
+            argsMap.put("assetId", assetId);
             try {
-                boolean isCrossAssets = ChainManagerCall.isCrossAssets(currentChainId, assetsId);
+                boolean isCrossAssets = ChainManagerCall.isCrossAssets(currentChainId, assetId);
                 if(!isCrossAssets) {
                     throw new ErrorException("The asset is not a cross-chain asset[0]", frame.vm.getGasUsed(), null);
                 }
@@ -633,12 +634,13 @@ public class NativeUtils {
                 String txHash = invokeRegisterCmd.getProgramNewTx().getTxHash();
                 String[] invokeResult = new String[3];
                 invokeResult[0] = String.valueOf(currentChainId);
-                invokeResult[1] = String.valueOf(assetsId);
+                invokeResult[1] = String.valueOf(assetId);
                 invokeResult[2] = txHash;
                 objectRef = frame.heap.stringArrayToObjectRef(invokeResult);
             } catch (IOException e) {
                 throw new ErrorException("new tx error", frame.vm.getGasUsed(), null);
             }
+        // end code by pierre 
         } else {
             // 调用外部接口
             Object cmdResult = requestAndResponse(cmdRegisterManager, moduleCode, cmdName, argsMap, frame);

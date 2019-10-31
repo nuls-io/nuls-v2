@@ -30,14 +30,13 @@ import io.nuls.contract.vm.*;
 import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.exception.ErrorException;
 import io.nuls.contract.vm.natives.NativeMethod;
-import io.nuls.contract.vm.program.ProgramCall;
-import io.nuls.contract.vm.program.ProgramInternalCall;
-import io.nuls.contract.vm.program.ProgramResult;
-import io.nuls.contract.vm.program.ProgramTransfer;
+import io.nuls.contract.vm.program.*;
 import io.nuls.contract.vm.program.impl.ProgramInvoke;
+import org.ethereum.vm.DataWord;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Map;
 
 import static io.nuls.contract.vm.natives.NativeMethod.NOT_SUPPORT_NATIVE;
 import static io.nuls.contract.vm.natives.NativeMethod.SUPPORT_NATIVE;
@@ -287,6 +286,14 @@ public class NativeAddress {
 
         frame.vm.getInternalCalls().add(programInternalCall);
 
+        // add by pierre at 2019-10-31 - 需要增加协议升级
+        Map<DataWord, DataWord> contractState = frame.vm.heap.contractState();
+        for (Map.Entry<DataWord, DataWord> entry : contractState.entrySet()) {
+            DataWord key1 = entry.getKey();
+            DataWord value1 = entry.getValue();
+            frame.vm.getRepository().addStorageRow(programInvoke.getContractAddress(), key1, value1);
+        }
+        // end code by pierre
         ProgramResult programResult = frame.vm.getProgramExecutor().callProgramExecutor().call(programCall);
 
         frame.vm.addGasUsed(programResult.getGasUsed());

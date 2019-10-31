@@ -213,7 +213,7 @@ public class ContractNRC20TokenQueryTest extends BaseQuery {
      */
     @Test
     public void tokenBalance() throws Exception {
-        Map params = this.makeTokenBalanceParams(contractAddress_nrc200, toAddress1);
+        Map params = this.makeTokenBalanceParams(contractAddress_nrc20, "tNULSeBaMw6krHqxioKc8pJa6NT8dueBZpg7Ci");
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TOKEN_BALANCE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(TOKEN_BALANCE));
         Assert.assertTrue(null != result);

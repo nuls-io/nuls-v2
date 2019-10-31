@@ -180,7 +180,7 @@ public class CreateContractTxProcessor {
             ContractTokenAssetsInfo tokenAssetsInfo = tokenAssetsInfoMap.remove(contractAddress);
             if(tokenAssetsInfo != null) {
                 Map<String, String> tokenAssetsContractAddressInfoMap = chain.getTokenAssetsContractAddressInfoMap();
-                tokenAssetsContractAddressInfoMap.remove(chainId + "-" + tokenAssetsInfo.getAssetsId());
+                tokenAssetsContractAddressInfoMap.remove(chainId + "-" + tokenAssetsInfo.getAssetId());
             }
         }
         // end code by pierre

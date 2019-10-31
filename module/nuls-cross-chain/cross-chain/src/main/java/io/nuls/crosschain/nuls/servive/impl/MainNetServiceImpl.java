@@ -217,7 +217,7 @@ public class MainNetServiceImpl implements MainNetService {
     @Override
     @SuppressWarnings("unchecked")
     public Result tokenOutCrossChain(Map<String, Object> params) {
-        int chainId = Integer.valueOf((String)params.get(ParamConstant.CHAIN_ID));
+        int chainId = Integer.valueOf(params.get(ParamConstant.CHAIN_ID).toString());
         Chain chain = chainManager.getChainMap().get(chainId);
         if (chain == null) {
             return Result.getFailed(CHAIN_NOT_EXIST);
@@ -226,7 +226,7 @@ public class MainNetServiceImpl implements MainNetService {
             chain.getLogger().info("跨链网络组网异常！");
             return Result.getFailed(CROSS_CHAIN_NETWORK_UNAVAILABLE);
         }
-        int assetId = Integer.valueOf((String)params.get(ParamConstant.ASSET_ID));
+        int assetId = Integer.valueOf(params.get(ParamConstant.ASSET_ID).toString());
         String fromAddress = (String)params.get(ParamConstant.FROM);
         String toAddress = (String)params.get(ParamConstant.TO);
         BigInteger amount = new BigInteger((String)params.get(ParamConstant.VALUE));
