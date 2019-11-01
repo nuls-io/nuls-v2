@@ -236,7 +236,7 @@ public class MainNetServiceImpl implements MainNetService {
 
         CoinData coinData = new CoinData();
         List<CoinFrom> coinFromList = new ArrayList<>();
-        CoinFrom coinFrom = new CoinFrom(AddressTool.getAddress(fromAddress),chainId,assetId,amount, NulsCrossChainConstant.CORSS_TX_LOCKED);
+        CoinFrom coinFrom = new CoinFrom(AddressTool.getAddress(fromAddress),chainId,assetId,amount,NulsCrossChainConstant.CROSS_TOKEN_NONCE, NulsCrossChainConstant.CORSS_TX_LOCKED);
         coinFromList.add(coinFrom);
         List<CoinTo> coinToList = new ArrayList<>();
         CoinTo coinTo = new CoinTo(AddressTool.getAddress(toAddress), chainId, assetId, amount);
