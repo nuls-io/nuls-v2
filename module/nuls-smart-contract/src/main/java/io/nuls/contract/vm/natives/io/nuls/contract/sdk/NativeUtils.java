@@ -640,7 +640,7 @@ public class NativeUtils {
             } catch (IOException e) {
                 throw new ErrorException("new tx error", frame.vm.getGasUsed(), null);
             }
-        // end code by pierre 
+        // end code by pierre
         } else {
             // 调用外部接口
             Object cmdResult = requestAndResponse(cmdRegisterManager, moduleCode, cmdName, argsMap, frame);

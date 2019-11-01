@@ -58,6 +58,7 @@ public class Base {
     protected static String password = "nuls123456";//"nuls123456";
 
     protected String sender = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
+    protected String toAddress = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
     protected String toAddress0 = "tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD";
     protected String toAddress1 = "tNULSeBaMrbMRiFAUeeAt6swb4xVBNyi81YL24";
     protected String toAddress2 = "tNULSeBaMu38g1vnJsSZUCwTDU9GsE5TVNUtpD";
@@ -131,7 +132,7 @@ public class Base {
     protected String contractAddress32 = "tNULSeBaMx5VtE2EJTHtHueWQ1yA37EP1AGuia";
     protected String contractAddress33 = "tNULSeBaN7gkAGGdnj9hDkKgFDXDf6LnnbWpSG";
     protected String contractAddress34 = "tNULSeBaN4kWaxmgYq2oFMvQ9hq8UEdivvA7i7";
-    protected String contractAddress_nrc20 = "tNULSeBaNARcN51M8hoBnxrpAp5zazncj89f6i";
+    protected String contractAddress_nrc20 = "tNULSeBaMxtnTzym2up4YbeUiEA1njRZRPBPiH";
     protected String contractAddress_nrc200 = "tNULSeBaMzThBLi2gwarkgcEdKAT8twK4KF1Uf";
     protected String contractAddress_nrc201 = "tNULSeBaN8LYBqbDhfF7cW11iu9bk1QyjNNVK6";
     protected String contractAddress_nrc202 = "tNULSeBaN9TgWh4hteRMiWKNeEumnKPJCUTh53";

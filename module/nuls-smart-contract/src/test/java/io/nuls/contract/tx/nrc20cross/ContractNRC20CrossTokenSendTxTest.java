@@ -25,10 +25,12 @@
 package io.nuls.contract.tx.nrc20cross;
 
 
+import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.mock.basetest.ContractTest;
 import io.nuls.contract.tx.base.BaseQuery;
 import io.nuls.contract.util.Log;
 import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
@@ -111,6 +113,35 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
         System.out.println(JSONUtils.obj2PrettyJson(response));
     }
 
+    @Test
+    public void getAssetRegInfo() throws Exception {
+        String cmd = "getAssetRegInfo";
+        Map<String, Object> params = new HashMap<>(4);
+        params.put(Constants.CHAIN_ID, chainId);
+        params.put("assetType", ContractConstant.TOKEN_ASSET_TYPE);
+        Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, cmd, params);
+        if (!callResp.isSuccess()) {
+            Log.error("Call interface [{}] error, ErrorCode is {}, ResponseComment:{}", cmd, callResp.getResponseErrorCode(), callResp.getResponseComment());
+            return;
+        }
+        System.out.println(JSONUtils.obj2PrettyJson(callResp));
+    }
+
+    @Test
+    public void getAssetContractAddressTest() throws Exception {
+        // Build params map
+        Map<String,Object> params = new HashMap<>();
+        params.put("chainId",2);
+        params.put("assetId",2);
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getAssetContractAddress", params);
+        System.out.println(JSONUtils.obj2PrettyJson(response));
+    }
+
+    @Test
+    public void temp() throws Exception {
+        System.out.println(getAssetId("tNULSeBaN6e4ANHRsextm4bY5e8HpDCWWe7eby"));
+    }
+
     /**
      * 1. 流程 - 创建NRC20合约
      *          创建系统合约
@@ -134,7 +165,7 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
      */
     @Test
     public void callTransferCrossChain() throws Exception {
-        contractAddress_nrc20 = "tNULSeBaN9o5tHvqwjfU9qXKosatrDxjAgUNFc";
+        contractAddress_nrc20 = "tNULSeBaMxMQEBEzEVwX3ZE7shuzuD9uEn45dW";
         methodName = "transferCrossChain";
         BigInteger value = BigInteger.ZERO;
         String methodDesc = "";
