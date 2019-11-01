@@ -98,7 +98,7 @@ public class ChainServiceImpl implements ChainService {
         asset.setChainId(chainId);
         asset.setAssetId(assetId);
         asset.setInitNumber(new BigInteger(nulsChainConfig.getNulsAssetInitNumberMax()));
-        asset.setSymbol(nulsChainConfig.getNulsAssetSymbol());
+        asset.setSymbol(nulsChainConfig.getMainSymbol());
         assetService.createAsset(asset);
     }
 

@@ -42,7 +42,7 @@ public class NulsChainConfig implements ModuleConfig {
     private String chainName;
     private String mainAssetId;
     private String nulsAssetInitNumberMax;
-    private String nulsAssetSymbol;
+    private String mainSymbol;
     private String addressPrefix;
     private String nulsFeeMainNetRate = "0.6";
     private int nulsFeeMainNetPercent = 60;
@@ -261,12 +261,12 @@ public class NulsChainConfig implements ModuleConfig {
         this.nulsAssetInitNumberMax = nulsAssetInitNumberMax;
     }
 
-    public String getNulsAssetSymbol() {
-        return nulsAssetSymbol;
+    public String getMainSymbol() {
+        return mainSymbol;
     }
 
-    public void setNulsAssetSymbol(String nulsAssetSymbol) {
-        this.nulsAssetSymbol = nulsAssetSymbol;
+    public void setMainSymbol(String mainSymbol) {
+        this.mainSymbol = mainSymbol;
     }
 
     public String getChainNameMax() {

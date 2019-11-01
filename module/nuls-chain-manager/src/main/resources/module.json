@@ -16,7 +16,7 @@
   "chainName": "NULS",
   "mainAssetId": "1",
   "nulsAssetInitNumberMax": "100000000",
-  "nulsAssetSymbol": "NULS",
+  "mainSymbol": "NULS",
   "nulsFeeMainNetRate": "0.6",
   "chainAssetsTaskIntervalMinute": 600
 }
