@@ -123,8 +123,7 @@ public class LedgerUtil {
      * @return
      */
     public static boolean isCrossTx(int txType) {
-        return txType == TxType.CROSS_CHAIN;
-
+        return (txType == TxType.CROSS_CHAIN || txType == TxType.CONTRACT_TOKEN_CROSS_TRANSFER);
     }
 
     public static String getAccountAssetStrKey(CoinFrom from) {
