@@ -161,8 +161,8 @@ public class TransactionServiceImpl implements TransactionService {
                 }
                 if(assetRegMngService.isContractAsset(from.getAssetsChainId(),from.getAssetsId())){
                     //账本非跨链交易如果收到from是合约资产的，报错
-                    LoggerUtil.logger(addressChainId).error("hash={} asset={}-{}  from is contract asset  Exception", txHash,from.getAssetsChainId(),from.getAssetsId());
-                    return false;
+                    LoggerUtil.logger(addressChainId).info("hash={} asset={}-{}  from is contract asset", txHash,from.getAssetsChainId(),from.getAssetsId());
+                    continue;
                 }
                 boolean process;
                 AccountBalance accountBalance = getAccountBalance(addressChainId, from, updateAccounts, address);
@@ -204,7 +204,7 @@ public class TransactionServiceImpl implements TransactionService {
                 }
                 if(assetRegMngService.isContractAsset(to.getAssetsChainId(),to.getAssetsId())){
                     //账本非跨链交易如果收到to是合约资产的,不进行入账
-                    LoggerUtil.logger(addressChainId).debug("hash={} asset={}-{} rec contract asset", txHash,to.getAssetsChainId(),to.getAssetsId());
+                    LoggerUtil.logger(addressChainId).info("hash={} asset={}-{} rec contract asset", txHash,to.getAssetsChainId(),to.getAssetsId());
                     continue;
                 }
                 AccountBalance accountBalance = getAccountBalance(addressChainId, to, updateAccounts, address);
