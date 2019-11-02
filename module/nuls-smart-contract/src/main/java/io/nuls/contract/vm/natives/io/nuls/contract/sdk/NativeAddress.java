@@ -286,7 +286,7 @@ public class NativeAddress {
 
         frame.vm.getInternalCalls().add(programInternalCall);
 
-        // add by pierre at 2019-10-31 - 需要增加协议升级
+        // add by pierre at 2019-10-31 - 需要协议升级
         Map<DataWord, DataWord> contractState = frame.vm.heap.contractState();
         for (Map.Entry<DataWord, DataWord> entry : contractState.entrySet()) {
             DataWord key1 = entry.getKey();

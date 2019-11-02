@@ -148,9 +148,11 @@ public class ContractNewTxFromOtherModuleHandler {
             }
             // add by pierre at 2019-10-22 合约代币资产跨链转账不记录主资产余额
             programNewTx = invokeRegisterCmd.getProgramNewTx();
+            // add by pierre at 2019-11-02 需要协议升级
             if (programNewTx.getTx() == null) {
                 continue;
             }
+            // end code by pierre
             programNewTxList.add(programNewTx);
         }
         if (programNewTxList.isEmpty()) {
@@ -282,9 +284,11 @@ public class ContractNewTxFromOtherModuleHandler {
                 }
                 // add by pierre at 2019-10-22 合约代币资产跨链转账不记录主资产余额
                 programNewTx = invokeRegisterCmd.getProgramNewTx();
+                // add by pierre at 2019-11-02 需要协议升级
                 if (programNewTx.getTx() == null) {
                     continue;
                 }
+                // end code by pierre
                 programNewTxList.add(programNewTx);
             }
             if (programNewTxList.isEmpty()) {

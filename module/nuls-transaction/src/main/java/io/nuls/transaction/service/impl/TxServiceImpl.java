@@ -754,7 +754,9 @@ public class TxServiceImpl implements TxService {
                             String moduleCode = txRegister.getModuleCode();
                             boolean isSmartContractTx = moduleCode.equals(ModuleE.SC.abbr);
                             boolean isCrossTx = moduleCode.equals(ModuleE.CC.abbr);
+                            // add by pierre at 2019-11-02 需要协议升级
                             boolean isCrossTransferTx = TxType.CROSS_CHAIN == transaction.getType();
+                            // end code by pierre
                             // add by pierre at 2019-10-22 跨链转账交易发送到智能合约模块进行解析，是否为合约资产跨链转账
                             if (isSmartContractTx || isCrossTransferTx) {
                                 if(stopInvokeContract){
@@ -1398,8 +1400,10 @@ public class TxServiceImpl implements TxService {
             if (null == txRegister) {
                 throw new NulsException(TxErrorCode.TX_TYPE_INVALID);
             }
+            // add by pierre at 2019-11-02 需要协议升级
             // add by pierre at 2019-10-22 跨链转账交易发送到智能合约模块进行解析，是否为合约资产跨链转账
             boolean isCrossTransferTx = TxType.CROSS_CHAIN == type;
+            // end code by pierre
             /** 智能合约*/
             if (TxManager.isUnSystemSmartContract(txRegister) || isCrossTransferTx) {
                 /** 出现智能合约,且通知标识为false,则先调用通知 */
