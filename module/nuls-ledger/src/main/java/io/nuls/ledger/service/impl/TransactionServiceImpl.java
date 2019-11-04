@@ -159,9 +159,9 @@ public class TransactionServiceImpl implements TransactionService {
                         return false;
                     }
                 }
-                if(assetRegMngService.isContractAsset(from.getAssetsChainId(),from.getAssetsId())){
+                if (assetRegMngService.isContractAsset(from.getAssetsChainId(), from.getAssetsId())) {
                     //账本非跨链交易如果收到from是合约资产的，报错
-                    LoggerUtil.logger(addressChainId).info("hash={} asset={}-{}  from is contract asset", txHash,from.getAssetsChainId(),from.getAssetsId());
+                    LoggerUtil.logger(addressChainId).info("hash={} asset={}-{}  from is contract asset", txHash, from.getAssetsChainId(), from.getAssetsId());
                     continue;
                 }
                 boolean process;
@@ -182,7 +182,7 @@ public class TransactionServiceImpl implements TransactionService {
                     process = commontTransactionProcessor.processFromCoinData(from, nonce8Bytes, accountBalance.getNowAccountState());
                     ledgerNonce.put(LedgerUtil.getAccountNoncesStrKey(address, from.getAssetsChainId(), from.getAssetsId(), nonce8Str), 1);
                 } else {
-                    process = lockedTransactionProcessor.processFromCoinData(from, nonce8Bytes, txHash, accountBalance.getNowAccountState(), address);
+                    process = lockedTransactionProcessor.processCoinData(from, nonce8Bytes, txHash, accountBalance.getNowAccountState(), transaction.getTime(), address, true);
                 }
                 if (!process) {
                     logger(addressChainId).error("address={},txHash = {} processFromCoinData is fail.", addressChainId, transaction.getHash().toHex());
@@ -202,9 +202,9 @@ public class TransactionServiceImpl implements TransactionService {
                         return false;
                     }
                 }
-                if(assetRegMngService.isContractAsset(to.getAssetsChainId(),to.getAssetsId())){
+                if (assetRegMngService.isContractAsset(to.getAssetsChainId(), to.getAssetsId())) {
                     //账本非跨链交易如果收到to是合约资产的,不进行入账
-                    LoggerUtil.logger(addressChainId).info("hash={} asset={}-{} rec contract asset", txHash,to.getAssetsChainId(),to.getAssetsId());
+                    LoggerUtil.logger(addressChainId).info("hash={} asset={}-{} rec contract asset", txHash, to.getAssetsChainId(), to.getAssetsId());
                     continue;
                 }
                 AccountBalance accountBalance = getAccountBalance(addressChainId, to, updateAccounts, address);
@@ -215,7 +215,7 @@ public class TransactionServiceImpl implements TransactionService {
                     commontTransactionProcessor.processToCoinData(to, accountBalance.getNowAccountState());
                 } else {
                     //锁定交易处理
-                    lockedTransactionProcessor.processToCoinData(to, nonce8Bytes, txHash, accountBalance.getNowAccountState(), transaction.getTime(), address);
+                    lockedTransactionProcessor.processCoinData(to, nonce8Bytes, txHash, accountBalance.getNowAccountState(), transaction.getTime(), address, false);
                 }
             }
         }

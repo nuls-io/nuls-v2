@@ -25,6 +25,7 @@
  */
 package io.nuls.ledger.service.processor;
 
+import io.nuls.base.data.Coin;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
 import io.nuls.core.core.annotation.Autowired;
@@ -58,13 +59,11 @@ public class LockedTransactionProcessor implements TxLockedProcessor {
      * 交易中按 时间或高度的解锁操作
      *
      * @param coin
-     * @param nonce
      * @param txHash
      * @param accountState
      * @return
      */
-    @Override
-    public boolean processFromCoinData(CoinFrom coin, byte[] nonce, String txHash, AccountState accountState, String address) {
+    private boolean processFromCoinData(CoinFrom coin, String txHash, AccountState accountState, String address) {
 
         if (coin.getLocked() == LedgerConstant.UNLOCKED_TIME) {
             //按时间移除锁定
@@ -99,6 +98,7 @@ public class LockedTransactionProcessor implements TxLockedProcessor {
         return false;
     }
 
+
     /**
      * 交易中按 时间或者高度的锁定操作
      *
@@ -106,8 +106,7 @@ public class LockedTransactionProcessor implements TxLockedProcessor {
      * @param nonce
      * @param hash
      */
-    @Override
-    public boolean processToCoinData(CoinTo coin, byte[] nonce, String hash, AccountState accountState, long txTime, String address) {
+    private boolean processToCoinData(CoinTo coin, byte[] nonce, String hash, AccountState accountState, long txTime, String address) {
         if (coin.getLockTime() < LedgerConstant.MAX_HEIGHT_VALUE && !LedgerUtil.isPermanentLock(coin.getLockTime())) {
             //按高度锁定
             FreezeHeightState freezeHeightState = new FreezeHeightState();
@@ -130,5 +129,85 @@ public class LockedTransactionProcessor implements TxLockedProcessor {
             accountState.getFreezeLockTimeStates().add(freezeLockTimeState);
         }
         return true;
+    }
+
+    /**
+     * 进行区块的缓存锁定解锁处理
+     *
+     * @param coin
+     * @param nonce
+     * @param txHash
+     * @param timeStateList
+     * @param heightStateList
+     * @param address
+     * @param isFromCoin
+     * @return
+     */
+    @Override
+    public boolean processCoinData(Coin coin, byte[] nonce, String txHash, List<FreezeLockTimeState> timeStateList,
+                                   List<FreezeHeightState> heightStateList, String address, boolean isFromCoin) {
+        if (isFromCoin) {
+            CoinFrom coinFrom = (CoinFrom) coin;
+            if (coinFrom.getLocked() == LedgerConstant.UNLOCKED_TIME) {
+                //按时间移除锁定
+                for (FreezeLockTimeState freezeLockTimeState : timeStateList) {
+                    LoggerUtil.COMMON_LOG.debug("processFromCoinData remove TimeUnlocked address={},amount={}={},nonce={}={},hash={} ", address, coin.getAmount(), freezeLockTimeState.getAmount(), LedgerUtil.getNonceEncode(coinFrom.getNonce()), freezeLockTimeState.getNonce(), txHash);
+                    if (LedgerUtil.equalsNonces(freezeLockTimeState.getNonce(), coinFrom.getNonce())) {
+                        if (0 == freezeLockTimeState.getAmount().compareTo(coin.getAmount())) {
+                            //金额一致，移除
+                            timeStateList.remove(freezeLockTimeState);
+                            LoggerUtil.COMMON_LOG.debug("TimeUnlocked remove ok,hash={} ", txHash);
+                            return true;
+                        }
+                    }
+                }
+
+            } else {
+                //按高度移除锁定
+                for (FreezeHeightState freezeHeightState : heightStateList) {
+                    Log.debug("processFromCoinData remove HeightUnlocked address={},amount={}={},nonce={}={},hash={} ", address, coin.getAmount(), freezeHeightState.getAmount(), LedgerUtil.getNonceEncode(coinFrom.getNonce()), freezeHeightState.getNonce(), txHash);
+                    if (LedgerUtil.equalsNonces(freezeHeightState.getNonce(), coinFrom.getNonce())) {
+                        if (0 == freezeHeightState.getAmount().compareTo(coin.getAmount())) {
+                            //金额一致，移除
+                            heightStateList.remove(freezeHeightState);
+                            LoggerUtil.COMMON_LOG.debug("HeightUnlocked remove ok,hash={} ", txHash);
+                            return true;
+                        }
+                    }
+                }
+            }
+        } else {
+            CoinTo coinTo = (CoinTo) coin;
+            if (coinTo.getLockTime() < LedgerConstant.MAX_HEIGHT_VALUE && !LedgerUtil.isPermanentLock(coinTo.getLockTime())) {
+                //按高度锁定
+                FreezeHeightState freezeHeightState = new FreezeHeightState();
+                freezeHeightState.setAmount(coin.getAmount());
+                freezeHeightState.setHeight(coinTo.getLockTime());
+                freezeHeightState.setNonce(nonce);
+                freezeHeightState.setTxHash(txHash);
+                LoggerUtil.COMMON_LOG.debug("processToCoinData add HeightLocked address={},amount={},height={},hash={} ", address, freezeHeightState.getAmount(), freezeHeightState.getHeight(), txHash);
+                heightStateList.add(freezeHeightState);
+            } else {
+                //按时间锁定
+                FreezeLockTimeState freezeLockTimeState = new FreezeLockTimeState();
+                freezeLockTimeState.setAmount(coin.getAmount());
+                freezeLockTimeState.setLockTime(coinTo.getLockTime());
+                freezeLockTimeState.setNonce(nonce);
+                freezeLockTimeState.setTxHash(txHash);
+                LoggerUtil.COMMON_LOG.debug("processToCoinData add TimeLocked address={},amount={},time={},hash={} ", address, coin.getAmount(), freezeLockTimeState.getLockTime(), txHash);
+                timeStateList.add(freezeLockTimeState);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean processCoinData(Coin coin, byte[] nonce, String txHash, AccountState accountState, long txTime, String address, boolean isFromCoin) {
+        if (isFromCoin) {
+            return processFromCoinData((CoinFrom) coin, txHash, accountState, address);
+        } else {
+            return processToCoinData((CoinTo) coin, nonce, txHash, accountState, txTime, address);
+        }
     }
 }
