@@ -154,6 +154,7 @@ public class ContractUtil {
                 create.parse(tx.getTxData(), 0);
                 contractData = create;
                 break;
+            // add by pierre at 2019-11-02 需要协议升级
             // add by pierre at 2019-10-20
             case CROSS_CHAIN:
                 contractData = parseCrossChainTx(tx, chainManager);
@@ -162,6 +163,7 @@ public class ContractUtil {
                     break;
                 }
                 break;
+            // end code by pierre
             case DELETE_CONTRACT:
                 DeleteContractData delete = new DeleteContractData();
                 delete.parse(tx.getTxData(), 0);

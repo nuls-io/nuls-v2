@@ -131,6 +131,7 @@ public class CreateContractTxProcessor {
             if (result.isFailed()) {
                 return result;
             }
+            // add by pierre at 2019-11-02 需要协议升级
             // add by pierre at 2019-10-21 调用账本模块，登记资产id
             // 当NRC20合约存在[transferCrossChain]方法时，才登记资产id
             List<ProgramMethod> methods = contractHelper.getAllMethods(chainId, txData.getCode());
@@ -154,6 +155,7 @@ public class CreateContractTxProcessor {
                     tokenAssetsContractAddressInfoMap.put(chainId + "-" + assetId, contractAddressStr);
                 }
             }
+            // end code by pierre
         }
         return contractAddressStorageService.saveContractAddress(chainId, contractAddress, info);
     }
@@ -171,6 +173,7 @@ public class CreateContractTxProcessor {
         if (contractResult == null) {
             return Result.getSuccess(null);
         }
+        // add by pierre at 2019-11-02 需要协议升级
         // add by pierre at 2019-10-21 调用账本模块，回滚已登记的资产id
         if(contractResult.isNrc20()) {
             LedgerCall.rollBackNRC20Assets(chainId, AddressTool.getStringAddressByBytes(contractAddress));

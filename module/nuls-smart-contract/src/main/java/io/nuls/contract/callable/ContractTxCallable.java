@@ -131,7 +131,7 @@ public class ContractTxCallable implements Callable<ContractResult> {
                     }
                     checkCreateResult(tx, callableResult, contractResult);
                     break;
-                // add by pierre at 2019-10-20
+                // add by pierre at 2019-10-20 需要协议升级
                 case CROSS_CHAIN:
                 case CALL_CONTRACT:
                     contractResult = contractExecutor.call(executor, contractData, number, preStateRoot, extractPublicKey(tx));

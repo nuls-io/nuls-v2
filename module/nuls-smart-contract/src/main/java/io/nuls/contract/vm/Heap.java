@@ -607,6 +607,7 @@ public class Heap {
         ObjectRef staticObjectRef = getStaticObjectRef(className);
         stateObjectRefs(stateObjectRefs, staticObjectRef);
         stateObjectRefs(stateObjectRefs, this.contract);
+        List<ObjectRef> clearList = new ArrayList<>();
         for (ObjectRef objectRef : stateObjectRefs) {
             if (!this.changes.contains(objectRef)) {
                 continue;
@@ -636,7 +637,15 @@ public class Heap {
                     }
                 }
             }
+            clearList.add(objectRef);
         }
+        // add by pierre at 2019-11-04 需要协议升级
+        if(!clearList.isEmpty()) {
+            for(ObjectRef objectRef : clearList) {
+                this.changes.remove(objectRef);
+            }
+        }
+        // end code by pierre
         return contractState;
     }
 

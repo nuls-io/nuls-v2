@@ -247,6 +247,7 @@ public class SmartContractBootStrap extends RpcModule {
                 Log.info("register tx type to tx module, chain id is {}, result is {}", chainId, registerTx);
             }
         }
+        // add by pierre at 2019-11-02 需要协议升级
         if (module.getName().equals(ModuleE.LG.abbr)) {
             // add by pierre at 2019-10-21 缓存token注册资产的资产ID和token合约地址
             Map<Integer, Chain> chainMap = chainManager.getChainMap();
@@ -265,14 +266,6 @@ public class SmartContractBootStrap extends RpcModule {
                             tokenAssetsContractAddressInfoMap.put(chainId + "-" + assetId, tokenContractAddress);
                         });
                     }
-                    // 注册智能合约 - Token跨链转出命令, 注释原因: 由跨链模块注册该命令，该命令用于生成合约跨链转账交易
-                    /*ModuleCmdRegisterDto dto = new ModuleCmdRegisterDto();
-                    dto.setChainId(chainId);
-                    dto.setModuleCode(ModuleE.SC.abbr);
-                    List<CmdRegisterDto> list = new ArrayList<>();
-                    list.add(new CmdRegisterDto(ContractConstant.CMD_TOKEN_OUT_CROSS_CHAIN, CmdRegisterMode.NEW_TX.mode(), List.of("from", "to", "value", "chainId", "assetsId"), CmdRegisterReturnType.STRING.type()));
-                    dto.setCmdRegisterList(list);
-                    cmdRegisterManager.registerCmd(dto);*/
                 } catch (NulsException e) {
                     throw new RuntimeException(e);
                 }
