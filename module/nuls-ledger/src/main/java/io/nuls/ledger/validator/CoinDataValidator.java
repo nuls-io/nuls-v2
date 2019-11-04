@@ -292,11 +292,10 @@ public class CoinDataValidator {
                 List<FreezeHeightState> heightStates = getFreezeLockHeightValidateMap(chainId).get(assetKey);
                 if (!isValidateFreezeTxWithTemp(timeStates, heightStates, coinFrom.getLocked(), accountState, coinFrom.getAmount(), coinFrom.getNonce())) {
                     return ValidateResult.getResult(LedgerErrorCode.DOUBLE_EXPENSES, new String[]{address, LedgerUtil.getNonceEncode(coinFrom.getNonce())});
-                } else {
-                    //校验通过,将缓存处理
-                    txLockedProcessor.processCoinData(coinFrom, coinFrom.getNonce(), txHash, timeStates,
-                            heightStates, address, true);
                 }
+                //校验通过,将缓存处理
+                txLockedProcessor.processCoinData(coinFrom, coinFrom.getNonce(), txHash, timeStates,
+                        heightStates, address, true);
             }
         }
         return ValidateResult.getSuccess();
