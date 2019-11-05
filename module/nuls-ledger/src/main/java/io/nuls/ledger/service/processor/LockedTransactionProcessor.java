@@ -40,6 +40,7 @@ import io.nuls.ledger.storage.Repository;
 import io.nuls.ledger.utils.LedgerUtil;
 import io.nuls.ledger.utils.LoggerUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -146,6 +147,12 @@ public class LockedTransactionProcessor implements TxLockedProcessor {
     @Override
     public boolean processCoinData(Coin coin, byte[] nonce, String txHash, List<FreezeLockTimeState> timeStateList,
                                    List<FreezeHeightState> heightStateList, String address, boolean isFromCoin) {
+        if (null == timeStateList) {
+            timeStateList = new ArrayList<>();
+        }
+        if (null == heightStateList) {
+            heightStateList = new ArrayList<>();
+        }
         if (isFromCoin) {
             CoinFrom coinFrom = (CoinFrom) coin;
             if (coinFrom.getLocked() == LedgerConstant.UNLOCKED_TIME) {
@@ -210,4 +217,5 @@ public class LockedTransactionProcessor implements TxLockedProcessor {
             return processToCoinData((CoinTo) coin, nonce, txHash, accountState, txTime, address);
         }
     }
+
 }
