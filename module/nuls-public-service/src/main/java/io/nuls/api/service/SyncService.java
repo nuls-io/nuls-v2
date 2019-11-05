@@ -556,7 +556,7 @@ public class SyncService {
         contractInfo.setRemark(tx.getRemark());
         createContractTxInfo(tx, contractInfo, null);
 
-
+        contractResultList.add(contractInfo.getResultInfo());
         if (contractInfo.isSuccess()) {
             contractInfoMap.put(contractInfo.getContractAddress(), contractInfo);
             processTokenTransfers(chainId, contractInfo.getResultInfo().getTokenTransfers(), tx);
@@ -807,14 +807,11 @@ public class SyncService {
 
         SyncInfo syncInfo = chainService.saveNewSyncInfo(chainId, height);
 
-        BlockHexInfo blockHexInfo = new BlockHexInfo();
-        blockHexInfo.setHeight(blockInfo.getHeader().getHeight());
-        blockHexInfo.setBlockHex(blockInfo.getBlockHex());
         //存储区块头信息
         time1 = System.currentTimeMillis();
         blockService.saveBLockHeaderInfo(chainId, blockInfo.getHeader());
         //存区块序列化完整信息
-        blockService.saveBlockHexInfo(chainId, blockHexInfo);
+        blockService.saveBlockHexInfo(chainId, blockInfo.getBlockHexInfo());
 //        time2 = System.currentTimeMillis();
 //        System.out.println("-----------saveBlockHexInfo, use: " + (time2 - time1) );
 //        time1 = System.currentTimeMillis();
