@@ -121,12 +121,37 @@ public class CoinDataValidator {
     }
 
     public Map<String, List<FreezeLockTimeState>> getFreezeLockTimeValidateMap(int addressChainId) {
+        if (null == chainsLockedTimeMap.get(String.valueOf(addressChainId))) {
+            chainsLockedTimeMap.put(String.valueOf(addressChainId), new ConcurrentHashMap<String, List<FreezeLockTimeState>>());
+        }
         return chainsLockedTimeMap.get(String.valueOf(addressChainId));
     }
 
+    public List<FreezeLockTimeState> getFreezeLockTimeValidateList(Map<String, List<FreezeLockTimeState>> timeLockedMap, String assetKey) {
+        List<FreezeLockTimeState> timeStateList = timeLockedMap.get(assetKey);
+        if (null == timeStateList) {
+            timeStateList = new ArrayList<>();
+            timeLockedMap.put(assetKey, timeStateList);
+        }
+        return timeStateList;
+    }
+
     public Map<String, List<FreezeHeightState>> getFreezeLockHeightValidateMap(int addressChainId) {
+        if (null == chainsLockedHeightMap.get(String.valueOf(addressChainId))) {
+            chainsLockedHeightMap.put(String.valueOf(addressChainId), new ConcurrentHashMap<String, List<FreezeHeightState>>());
+        }
         return chainsLockedHeightMap.get(String.valueOf(addressChainId));
     }
+
+    public List<FreezeHeightState> getFreezeLockHeightValidateList(Map<String, List<FreezeHeightState>> heightMap, String assetKey) {
+        List<FreezeHeightState> heightStateList = heightMap.get(assetKey);
+        if (null == heightStateList) {
+            heightStateList = new ArrayList<>();
+            heightMap.put(assetKey, heightStateList);
+        }
+        return heightStateList;
+    }
+
 
     /**
      * 开始批量校验
@@ -288,8 +313,8 @@ public class CoinDataValidator {
             } else {
                 //解锁交易，需要从from 里去获取需要的高度数据或时间数据，进行校验
                 //解锁交易只需要从已确认的数据中去获取数据进行校验
-                List<FreezeLockTimeState> timeStates = getFreezeLockTimeValidateMap(chainId).get(assetKey);
-                List<FreezeHeightState> heightStates = getFreezeLockHeightValidateMap(chainId).get(assetKey);
+                List<FreezeLockTimeState> timeStates = getFreezeLockTimeValidateList(getFreezeLockTimeValidateMap(chainId), assetKey);
+                List<FreezeHeightState> heightStates = getFreezeLockHeightValidateList(getFreezeLockHeightValidateMap(chainId), assetKey);
                 if (!isValidateFreezeTxWithTemp(timeStates, heightStates, coinFrom.getLocked(), accountState, coinFrom.getAmount(), coinFrom.getNonce())) {
                     return ValidateResult.getResult(LedgerErrorCode.DOUBLE_EXPENSES, new String[]{address, LedgerUtil.getNonceEncode(coinFrom.getNonce())});
                 }
@@ -335,8 +360,8 @@ public class CoinDataValidator {
                 accountState.addTotalToAmount(coinTo.getAmount());
             } else {
 //           //校验通过,将缓存处理
-                txLockedProcessor.processCoinData(coinTo, LedgerUtil.getNonceDecodeByTxHash(txHash), txHash, timeStatesMap.get(assetKey),
-                        heightStatesMap.get(assetKey), address, false);
+                txLockedProcessor.processCoinData(coinTo, LedgerUtil.getNonceDecodeByTxHash(txHash), txHash, getFreezeLockTimeValidateList(timeStatesMap, assetKey),
+                        getFreezeLockHeightValidateList(heightStatesMap, assetKey), address, false);
             }
         }
         return ValidateResult.getSuccess();
@@ -574,8 +599,8 @@ public class CoinDataValidator {
                 //解锁交易，需要从from 里去获取需要的高度数据或时间数据，进行校验
                 //解锁交易只需要从已确认的数据中去获取数据进行校验
                 String lockedNonce = LedgerUtil.getNonceEncode(coinFrom.getNonce());
-                List<FreezeLockTimeState> timeList = timeLockMap.get(assetKey);
-                List<FreezeHeightState> heightList = heightLockMap.get(assetKey);
+                List<FreezeLockTimeState> timeList = getFreezeLockTimeValidateList(timeLockMap,assetKey);
+                List<FreezeHeightState> heightList = getFreezeLockHeightValidateList(heightLockMap,assetKey);
                 if (!isValidateFreezeTxWithTemp(timeList, heightList, coinFrom.getLocked(), accountState, coinFrom.getAmount(), coinFrom.getNonce())) {
                     return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{address, lockedNonce, "validate fail"});
                 }
