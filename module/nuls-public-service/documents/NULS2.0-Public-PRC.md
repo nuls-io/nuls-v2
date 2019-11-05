@@ -1095,6 +1095,34 @@ txHex: string									//组装的交易序列化后的16进制字符串
 }
 ```
 
+#### 广播离线组装交易(不验证合约)
+
+请求：
+
+```
+{
+    "jsonrpc":"2.0",
+    "method":"broadcastTxWithNoContractValidation",
+    "params":[chainId, txHex], 
+    "id":1234
+}
+//参数说明
+chainId: int									//链的id
+txHex: string									//组装的交易序列化后的16进制字符串
+```
+
+返回：
+
+```
+{
+     "jsonrpc": "2.0",
+     "id": 1234,
+     "result": {
+          "value": true							//true广播成功，false广播失败
+     }
+}
+```
+
 ### 共识相关接口[consensus]
 
 #### 查询可委托共识节点列表

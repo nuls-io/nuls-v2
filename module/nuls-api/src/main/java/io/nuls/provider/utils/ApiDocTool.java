@@ -788,6 +788,7 @@ public class ApiDocTool {
                     if("无".equals(egReqDesc)) {
                         writer.write(new Text(egReqDesc).toString());
                     } else {
+                        writer.newLine();
                         writer.write(new Text("```json").toString());
                         writer.newLine();
                         writer.write(new Text(egReqDesc).toString());
@@ -808,6 +809,7 @@ public class ApiDocTool {
                     if("无".equals(egReqDesc)) {
                         writer.write(new Text(egReqDesc).toString());
                     } else {
+                        writer.newLine();
                         writer.write(new Text("```json").toString());
                         writer.newLine();
                         writer.write(new Text(egReqDesc).toString());
@@ -823,6 +825,7 @@ public class ApiDocTool {
                 if("略".equals(egRespDesc)) {
                     writer.write(new Text(egRespDesc).toString());
                 } else {
+                    writer.newLine();
                     writer.write(new Text("```json").toString());
                     writer.newLine();
                     writer.write(new Text(egRespDesc).toString());
@@ -880,6 +883,7 @@ public class ApiDocTool {
                         try {
                             writer.newLine();
                             writer.write(new Heading("Form json data: ", 4).toString());
+                            writer.newLine();
                             writer.newLine();
                             writer.write(new Text("```json").toString());
                             writer.newLine();
