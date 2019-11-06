@@ -89,9 +89,17 @@ public class RollbackService {
             return true;
         }
 
+        Map<String, ContractResultInfo> resultInfoMap = null;
+        if (blockHexInfo.getContractHashList() != null && !blockHexInfo.getContractHashList().isEmpty()) {
+            resultInfoMap = new HashMap<>();
+            for (String hash : blockHexInfo.getContractHashList()) {
+                ContractResultInfo resultInfo = contractService.getContractResultInfo(chainId, hash);
+                resultInfoMap.put(resultInfo.getTxHash(), resultInfo);
+            }
+        }
         BlockInfo blockInfo;
         try {
-            blockInfo = AnalysisHandler.toBlockInfo(blockHexInfo.getBlockHex(), chainId);
+            blockInfo = AnalysisHandler.toBlockInfo(blockHexInfo.getBlockHex(), resultInfoMap, chainId);
         } catch (Exception e) {
             Log.error(e);
             return false;
