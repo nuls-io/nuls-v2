@@ -298,9 +298,13 @@ public class CoinDataValidator {
             }
             String assetKey = LedgerUtil.getKeyStr(address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
             AccountState accountState = accountStateMap.get(assetKey);
+            List<FreezeLockTimeState> timeStates = getFreezeLockTimeValidateList(getFreezeLockTimeValidateMap(chainId), assetKey);
+            List<FreezeHeightState> heightStates = getFreezeLockHeightValidateList(getFreezeLockHeightValidateMap(chainId), assetKey);
             if (null == accountState) {
                 accountState = accountStateService.getAccountStateReCal(address, chainId, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
                 accountStateMap.put(assetKey, accountState);
+                timeStates.addAll(accountState.getFreezeLockTimeStates());
+                heightStates.addAll(accountState.getFreezeHeightStates());
             }
             balanceValidateMap.put(assetKey, accountState);
             //判断是否是解锁操作
@@ -313,8 +317,6 @@ public class CoinDataValidator {
             } else {
                 //解锁交易，需要从from 里去获取需要的高度数据或时间数据，进行校验
                 //解锁交易只需要从已确认的数据中去获取数据进行校验
-                List<FreezeLockTimeState> timeStates = getFreezeLockTimeValidateList(getFreezeLockTimeValidateMap(chainId), assetKey);
-                List<FreezeHeightState> heightStates = getFreezeLockHeightValidateList(getFreezeLockHeightValidateMap(chainId), assetKey);
                 if (!isValidateFreezeTxWithTemp(timeStates, heightStates, coinFrom.getLocked(), accountState, coinFrom.getAmount(), coinFrom.getNonce())) {
                     return ValidateResult.getResult(LedgerErrorCode.DOUBLE_EXPENSES, new String[]{address, LedgerUtil.getNonceEncode(coinFrom.getNonce())});
                 }
@@ -558,9 +560,13 @@ public class CoinDataValidator {
             }
             String assetKey = LedgerUtil.getKeyStr(address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
             AccountState accountState = accountStateMap.get(assetKey);
+            List<FreezeLockTimeState> timeList = getFreezeLockTimeValidateList(timeLockMap, assetKey);
+            List<FreezeHeightState> heightList = getFreezeLockHeightValidateList(heightLockMap, assetKey);
             if (null == accountState) {
                 accountState = accountStateService.getAccountStateReCal(address, chainId, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
                 accountStateMap.put(assetKey, accountState);
+                timeList.addAll(accountState.getFreezeLockTimeStates());
+                heightList.addAll(accountState.getFreezeHeightStates());
             }
 
             //判断是否是解锁操作
@@ -599,8 +605,6 @@ public class CoinDataValidator {
                 //解锁交易，需要从from 里去获取需要的高度数据或时间数据，进行校验
                 //解锁交易只需要从已确认的数据中去获取数据进行校验
                 String lockedNonce = LedgerUtil.getNonceEncode(coinFrom.getNonce());
-                List<FreezeLockTimeState> timeList = getFreezeLockTimeValidateList(timeLockMap,assetKey);
-                List<FreezeHeightState> heightList = getFreezeLockHeightValidateList(heightLockMap,assetKey);
                 if (!isValidateFreezeTxWithTemp(timeList, heightList, coinFrom.getLocked(), accountState, coinFrom.getAmount(), coinFrom.getNonce())) {
                     return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{address, lockedNonce, "validate fail"});
                 }
@@ -709,13 +713,10 @@ public class CoinDataValidator {
                         break;
                     }
                 }
-            } else {
-                isValidate = isValidateFreezeTx(locked, accountState, fromAmount, fromNonce);
             }
 
         } else if (locked == LedgerConstant.UNLOCKED_HEIGHT) {
             //高度解锁
-            //时间解锁
             if (null != heightList) {
                 for (FreezeHeightState freezeHeightState : heightList) {
                     if (LedgerUtil.equalsNonces(freezeHeightState.getNonce(), fromNonce) && freezeHeightState.getAmount().compareTo(fromAmount) == 0) {
@@ -724,8 +725,6 @@ public class CoinDataValidator {
                         break;
                     }
                 }
-            } else {
-                isValidate = isValidateFreezeTx(locked, accountState, fromAmount, fromNonce);
             }
         }
         return isValidate;
