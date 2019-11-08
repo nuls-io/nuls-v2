@@ -600,22 +600,25 @@ public class SyncService {
         CoinFromInfo input = tx.getCoinFroms().get(0);
         AccountInfo accountInfo = queryAccountInfo(chainId, input.getAddress());
         accountInfo.setTxCount(accountInfo.getTxCount() + 1);
-        //找到销毁地址
+        //找到锁定to
         CoinToInfo output = null;
         for (CoinToInfo to : tx.getCoinTos()) {
-            if (!to.getAddress().equals(accountInfo.getAddress())) {
+            if (to.getAddress().equals(accountInfo.getAddress())) {
                 output = to;
                 break;
             }
         }
-        AccountLedgerInfo ledgerInfo = calcBalance(chainId, input.getChainId(), input.getAssetsId(), accountInfo, output.getAmount().add(tx.getFee().getValue()));
-        txRelationInfoSet.add(new TxRelationInfo(input, tx, output.getAmount().add(tx.getFee().getValue()), ledgerInfo.getTotalBalance()));
+        AccountLedgerInfo ledgerInfo = calcBalance(chainId, input.getChainId(), input.getAssetsId(), accountInfo, input.getAmount().subtract(output.getAmount()));
+        txRelationInfoSet.add(new TxRelationInfo(input, tx, input.getAmount().subtract(output.getAmount()), ledgerInfo.getTotalBalance()));
 
-        AccountInfo destroyAccount = queryAccountInfo(chainId, output.getAddress());
-        accountInfo.setTxCount(destroyAccount.getTxCount() + 1);
-        ledgerInfo = calcBalance(chainId, output);
-        txRelationInfoSet.add(new TxRelationInfo(output, tx, ledgerInfo.getTotalBalance()));
-
+        for (CoinToInfo to : tx.getCoinTos()) {
+            if (!to.getAddress().equals(accountInfo.getAddress())) {
+                AccountInfo destroyAccount = queryAccountInfo(chainId, output.getAddress());
+                accountInfo.setTxCount(destroyAccount.getTxCount() + 1);
+                ledgerInfo = calcBalance(chainId, output);
+                txRelationInfoSet.add(new TxRelationInfo(output, tx, ledgerInfo.getTotalBalance()));
+            }
+        }
         chainInfoList.add((ChainInfo) tx.getTxData());
     }
 
@@ -704,7 +707,7 @@ public class SyncService {
                 tokenInfo = processAccountNrc20(chainId, contractInfo, tokenTransfer.getFromAddress(), new BigInteger(tokenTransfer.getValue()), -1);
                 tokenTransfer.setFromBalance(tokenInfo.getBalance().toString());
             }
-            if (tokenTransfer.getToAddress()!= null) {
+            if (tokenTransfer.getToAddress() != null) {
                 tokenInfo = processAccountNrc20(chainId, contractInfo, tokenTransfer.getToAddress(), new BigInteger(tokenTransfer.getValue()), 1);
                 tokenTransfer.setToBalance(tokenInfo.getBalance().toString());
             }
