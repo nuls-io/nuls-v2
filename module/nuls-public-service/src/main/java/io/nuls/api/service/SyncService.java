@@ -704,9 +704,10 @@ public class SyncService {
                 tokenInfo = processAccountNrc20(chainId, contractInfo, tokenTransfer.getFromAddress(), new BigInteger(tokenTransfer.getValue()), -1);
                 tokenTransfer.setFromBalance(tokenInfo.getBalance().toString());
             }
-            tokenInfo = processAccountNrc20(chainId, contractInfo, tokenTransfer.getToAddress(), new BigInteger(tokenTransfer.getValue()), 1);
-            tokenTransfer.setToBalance(tokenInfo.getBalance().toString());
-
+            if (tokenTransfer.getToAddress()!= null) {
+                tokenInfo = processAccountNrc20(chainId, contractInfo, tokenTransfer.getToAddress(), new BigInteger(tokenTransfer.getValue()), 1);
+                tokenTransfer.setToBalance(tokenInfo.getBalance().toString());
+            }
             tokenTransferList.add(tokenTransfer);
         }
     }
@@ -726,9 +727,9 @@ public class SyncService {
             tokenInfo.setBalance(tokenInfo.getBalance().subtract(value));
         }
 
-        if (tokenInfo.getBalance().compareTo(BigInteger.ZERO) < 0) {
-            throw new RuntimeException("data error: " + address + " token[" + contractInfo.getSymbol() + "] balance < 0");
-        }
+//        if (tokenInfo.getBalance().compareTo(BigInteger.ZERO) < 0) {
+//            throw new RuntimeException("data error: " + address + " token[" + contractInfo.getSymbol() + "] balance < 0");
+//        }
         if (!accountTokenMap.containsKey(tokenInfo.getKey())) {
             accountTokenMap.put(tokenInfo.getKey(), tokenInfo);
         }
