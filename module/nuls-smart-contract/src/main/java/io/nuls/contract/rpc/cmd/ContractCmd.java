@@ -329,6 +329,11 @@ public class ContractCmd extends BaseCmd {
 
             Result<ContractOfflineTxHashPo> result = contractService.getContractOfflineTxHashList(chainId, blockHash);
             if (result.isFailed()) {
+                if(result.getErrorCode().equals(DATA_NOT_FOUND)) {
+                    Map<String, Object> resultMap = new HashMap<>(2);
+                    resultMap.put(RPC_COLLECTION_RESULT_KEY, Collections.emptyList());
+                    return success(resultMap);
+                }
                 return wrapperFailed(result);
             }
 
