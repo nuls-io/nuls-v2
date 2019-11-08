@@ -698,7 +698,7 @@ public class SyncService {
             tokenTransfer.setTime(tx.getCreateTime());
 
             contractInfo = queryContractInfo(chainId, tokenTransfer.getContractAddress());
-            if (!contractInfo.getOwners().contains(tokenTransfer.getToAddress())) {
+            if (tokenTransfer.getToAddress() != null && !contractInfo.getOwners().contains(tokenTransfer.getToAddress())) {
                 contractInfo.getOwners().add(tokenTransfer.getToAddress());
             }
             contractInfo.setTransferCount(contractInfo.getTransferCount() + 1);
