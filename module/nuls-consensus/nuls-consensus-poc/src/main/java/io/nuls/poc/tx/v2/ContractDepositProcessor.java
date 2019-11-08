@@ -8,6 +8,7 @@ import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.parse.JSONUtils;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.tx.txdata.Deposit;
@@ -156,6 +157,11 @@ public class ContractDepositProcessor implements TransactionProcessor {
         boolean rollbackResult = true;
         for (Transaction tx : txs) {
             try {
+                try {
+                    chain.getLogger().info("contract deposit transaction rollback, hash is {}, tx is {}", tx.getHash().toHex(), JSONUtils.obj2json(tx));
+                } catch (Exception e) {
+                    chain.getLogger().warn(e.getMessage());
+                }
                 if (depositManager.depositRollBack(tx, chain)) {
                     rollbackSuccessList.add(tx);
                 }

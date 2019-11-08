@@ -38,10 +38,12 @@ import io.nuls.contract.storage.ContractTokenTransferStorageService;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.ProgramStatus;
+import io.nuls.contract.vm.util.JsonUtils;
 import io.nuls.core.basic.Result;
 import io.nuls.core.basic.VarInt;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.parse.JSONUtils;
 import org.bouncycastle.util.Arrays;
 
 import static io.nuls.contract.util.ContractUtil.getFailed;
@@ -142,6 +144,11 @@ public class CallContractTxProcessor {
             ContractResult contractResult = tx.getContractResult();
             if (contractResult == null) {
                 contractResult = contractService.getContractExecuteResult(chainId, tx.getHash());
+            }
+            try {
+                Log.info("rollback call tx, contract result is {}", JSONUtils.obj2json(contractResult));
+            } catch (Exception e) {
+                Log.warn("failed to trace call rollback log, error is {}", e.getMessage());
             }
             contractHelper.rollbackNrc20Events(chainId, tx, contractResult);
             // 删除合约执行结果
