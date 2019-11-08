@@ -545,18 +545,21 @@ public class RollbackService {
 
         CoinToInfo output = null;
         for (CoinToInfo to : tx.getCoinTos()) {
-            if (!to.getAddress().equals(accountInfo.getAddress())) {
+            if (to.getAddress().equals(accountInfo.getAddress())) {
                 output = to;
                 break;
             }
         }
-        calcBalance(chainId, input.getChainId(), input.getAssetsId(), accountInfo, output.getAmount().add(tx.getFee().getValue()));
+        calcBalance(chainId, input.getChainId(), input.getAssetsId(), accountInfo, input.getAmount().subtract(output.getAmount()));
 
-        AccountInfo destroyAccount = queryAccountInfo(chainId, output.getAddress());
-        accountInfo.setTxCount(destroyAccount.getTxCount() - 1);
-        calcBalance(chainId, output);
-        txRelationInfoSet.add(new TxRelationInfo(output.getAddress(), tx.getHash()));
-
+        for (CoinToInfo to : tx.getCoinTos()) {
+            if (!to.getAddress().equals(accountInfo.getAddress())) {
+                AccountInfo destroyAccount = queryAccountInfo(chainId, output.getAddress());
+                accountInfo.setTxCount(destroyAccount.getTxCount() - 1);
+                calcBalance(chainId, output);
+                txRelationInfoSet.add(new TxRelationInfo(output.getAddress(), tx.getHash()));
+            }
+        }
         chainInfoList.add((ChainInfo) tx.getTxData());
     }
 
@@ -632,7 +635,9 @@ public class RollbackService {
             if (tokenTransfer.getFromAddress() != null) {
                 processAccountNrc20(chainId, contractInfo, tokenTransfer.getFromAddress(), new BigInteger(tokenTransfer.getValue()), 1);
             }
-            processAccountNrc20(chainId, contractInfo, tokenTransfer.getToAddress(), new BigInteger(tokenTransfer.getValue()), -1);
+            if (tokenTransfer.getToAddress() != null) {
+                processAccountNrc20(chainId, contractInfo, tokenTransfer.getToAddress(), new BigInteger(tokenTransfer.getValue()), -1);
+            }
         }
     }
 
