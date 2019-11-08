@@ -30,7 +30,11 @@ import io.nuls.base.data.NulsHash;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractWrapperTransaction;
+import io.nuls.contract.model.dto.CallContractDataDto;
+import io.nuls.contract.model.dto.ContractResultDto;
+import io.nuls.contract.model.dto.CreateContractDataDto;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
+import io.nuls.contract.model.txdata.CallContractData;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.model.txdata.CreateContractData;
 import io.nuls.contract.service.ContractService;
@@ -123,7 +127,6 @@ public class CreateContractTxProcessor {
     }
 
     public Result onRollback(int chainId, ContractWrapperTransaction tx) throws Exception {
-        Log.info("rollback create tx, hash is {}", tx.getHash().toString());
         ContractData txData = tx.getContractData();
         byte[] contractAddress = txData.getContractAddress();
 
@@ -136,7 +139,8 @@ public class CreateContractTxProcessor {
             return Result.getSuccess(null);
         }
         try {
-            Log.info("rollback create tx, contract result is {}", JSONUtils.obj2json(contractResult));
+            CreateContractData contractData = (CreateContractData) tx.getContractData();
+            Log.info("rollback create tx, contract data is {}, result is {}", JSONUtils.obj2json(new CreateContractDataDto(contractData)), JSONUtils.obj2json(new ContractResultDto(chainId, contractResult, contractData.getGasLimit())));
         } catch (Exception e) {
             Log.warn("failed to trace create rollback log, error is {}", e.getMessage());
         }

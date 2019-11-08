@@ -30,8 +30,11 @@ import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractWrapperTransaction;
+import io.nuls.contract.model.dto.CallContractDataDto;
+import io.nuls.contract.model.dto.ContractResultDto;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
+import io.nuls.contract.model.txdata.CallContractData;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.service.ContractService;
 import io.nuls.contract.storage.ContractTokenTransferStorageService;
@@ -138,7 +141,6 @@ public class CallContractTxProcessor {
     }
 
     public Result onRollback(int chainId, ContractWrapperTransaction tx) {
-        Log.info("rollback call tx, hash is {}", tx.getHash().toString());
         try {
             // 回滚代币转账交易
             ContractResult contractResult = tx.getContractResult();
@@ -146,7 +148,8 @@ public class CallContractTxProcessor {
                 contractResult = contractService.getContractExecuteResult(chainId, tx.getHash());
             }
             try {
-                Log.info("rollback call tx, contract result is {}", JSONUtils.obj2json(contractResult));
+                CallContractData contractData = (CallContractData) tx.getContractData();
+                Log.info("rollback call tx, contract data is {}, result is {}", JSONUtils.obj2json(new CallContractDataDto(contractData)), JSONUtils.obj2json(new ContractResultDto(chainId, contractResult, contractData.getGasLimit())));
             } catch (Exception e) {
                 Log.warn("failed to trace call rollback log, error is {}", e.getMessage());
             }

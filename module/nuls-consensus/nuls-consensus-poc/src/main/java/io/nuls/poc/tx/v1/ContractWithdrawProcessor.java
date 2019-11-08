@@ -12,6 +12,7 @@ import io.nuls.core.parse.JSONUtils;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.tx.txdata.CancelDeposit;
+import io.nuls.poc.model.dto.transaction.TransactionDto;
 import io.nuls.poc.model.po.AgentPo;
 import io.nuls.poc.model.po.DepositPo;
 import io.nuls.poc.storage.AgentStorageService;
@@ -152,7 +153,7 @@ public class ContractWithdrawProcessor implements TransactionProcessor {
         for (Transaction tx:txs) {
             try {
                 try {
-                    chain.getLogger().info("contract withdraw transaction rollback, hash is {}, tx is {}", tx.getHash().toHex(), JSONUtils.obj2json(tx));
+                    chain.getLogger().info("contract withdraw transaction rollback, hash is {}, tx is {}", tx.getHash().toHex(), JSONUtils.obj2json(new TransactionDto(tx)));
                 } catch (Exception e) {
                     chain.getLogger().warn(e.getMessage());
                 }

@@ -75,7 +75,7 @@ public class ContractCall {
             }
             try {
                 if(!hashList.isEmpty()) {
-                    logger.info("moduleCode:{}, -cmd:{}, -contractProcess -rs: {}", ModuleE.SC.abbr, "sc_contract_offline_tx_hash_list", JSONUtils.obj2json(hashList));
+                    logger.info("moduleCode:{}, -cmd:{}, -contractProcess -rs: {}", ModuleE.SC.abbr, "sc_contract_offline_tx_hash_list", JSONUtils.obj2json(result));
                 }
             } catch (Exception e) {
                 logger.warn("failed to trace sc_contract_offline_tx_hash_list log, error is {}", e.getMessage());

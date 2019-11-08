@@ -13,6 +13,7 @@ import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
 import io.nuls.poc.model.bo.tx.txdata.RedPunishData;
+import io.nuls.poc.model.dto.transaction.TransactionDto;
 import io.nuls.poc.utils.LoggerUtil;
 import io.nuls.poc.utils.manager.AgentManager;
 import io.nuls.poc.utils.manager.ChainManager;
@@ -165,7 +166,7 @@ public class ContractCreateAgentProcessor implements TransactionProcessor {
         for (Transaction tx:txs) {
             try {
                 try {
-                    chain.getLogger().info("contract create node transaction rollback, hash is {}, tx is {}", tx.getHash().toHex(), JSONUtils.obj2json(tx));
+                    chain.getLogger().info("contract create node transaction rollback, hash is {}, tx is {}", tx.getHash().toHex(), JSONUtils.obj2json(new TransactionDto(tx)));
                 } catch (Exception e) {
                     chain.getLogger().warn(e.getMessage());
                 }
