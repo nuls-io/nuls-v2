@@ -56,8 +56,6 @@ import io.nuls.core.rpc.model.*;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.util.NulsDateUtils;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -122,7 +120,7 @@ public class ChainCmd extends BaseChainCmd {
             @Parameter(parameterName = "decimalPlaces", requestType = @TypeDescriptor(value = short.class), parameterDes = "资产小数点位数"),
             @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "创建交易的账户地址"),
             @Parameter(parameterName = "password", requestType = @TypeDescriptor(value = String.class), parameterDes = "账户密码"),
-            @Parameter(parameterName = "verifierList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "验证者名单列表"),
+            @Parameter(parameterName = "verifierList", requestType = @TypeDescriptor(value = String.class), parameterDes = "验证者地址名单列表,逗号分割"),
             @Parameter(parameterName = "signatureBFTRatio", requestType = @TypeDescriptor(value = Integer.class), parameterDes = "拜占庭比例,大于等于该值为有效确认"),
             @Parameter(parameterName = "maxSignatureCount", requestType = @TypeDescriptor(value = Integer.class), parameterDes = "最大签名数量,限制验证者签名列表的最大数")
     })
@@ -249,7 +247,7 @@ public class ChainCmd extends BaseChainCmd {
             @Parameter(parameterName = "decimalPlaces", requestType = @TypeDescriptor(value = short.class), parameterDes = "资产小数点位数"),
             @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "创建交易的账户地址"),
             @Parameter(parameterName = "password", requestType = @TypeDescriptor(value = String.class), parameterDes = "账户密码"),
-            @Parameter(parameterName = "verifierList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "验证者名单列表"),
+            @Parameter(parameterName = "verifierList", requestType = @TypeDescriptor(value = String.class), parameterDes = "验证者地址名单列表,逗号分割"),
             @Parameter(parameterName = "signatureBFTRatio", requestType = @TypeDescriptor(value = Integer.class), parameterDes = "拜占庭比例,大于等于该值为有效确认"),
             @Parameter(parameterName = "maxSignatureCount", requestType = @TypeDescriptor(value = Integer.class), parameterDes = "最大签名数量,限制验证者签名列表的最大数")
     })

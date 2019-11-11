@@ -153,7 +153,7 @@ public class AssetCmd extends BaseChainCmd {
                     @Key(name = "txHash", valueType = String.class, description = "交易hash值")
             })
     )
-    public Response cm_mainNetAssetReg(Map params) {
+    public Response mainNetAssetReg(Map params) {
         /* 发送到交易模块 (Send to transaction module) */
         Map<String, String> rtMap = new HashMap<>(1);
         try {
