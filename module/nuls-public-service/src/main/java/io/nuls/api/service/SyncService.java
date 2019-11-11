@@ -598,27 +598,23 @@ public class SyncService {
 
     private void processRegChainTx(int chainId, TransactionInfo tx) {
         CoinFromInfo input = tx.getCoinFroms().get(0);
-        AccountInfo accountInfo = queryAccountInfo(chainId, input.getAddress());
-        accountInfo.setTxCount(accountInfo.getTxCount() + 1);
-        //找到锁定to
-        CoinToInfo output = null;
+        AccountInfo accountInfo;
+        AccountLedgerInfo ledgerInfo;
         for (CoinToInfo to : tx.getCoinTos()) {
-            if (to.getAddress().equals(accountInfo.getAddress())) {
-                output = to;
+            if (to.getAddress().equals(input.getAddress())) {
+                accountInfo = queryAccountInfo(chainId, input.getAddress());
+                accountInfo.setTxCount(accountInfo.getTxCount() + 1);
+                ledgerInfo = calcBalance(chainId, input.getChainId(), input.getAssetsId(), accountInfo, input.getAmount().subtract(to.getAmount()));
+                txRelationInfoSet.add(new TxRelationInfo(input, tx, input.getAmount().subtract(to.getAmount()), ledgerInfo.getTotalBalance()));
                 break;
+            } else {
+                accountInfo = queryAccountInfo(chainId, to.getAddress());
+                accountInfo.setTxCount(accountInfo.getTxCount() + 1);
+                ledgerInfo = calcBalance(chainId, to);
+                txRelationInfoSet.add(new TxRelationInfo(to, tx, ledgerInfo.getTotalBalance()));
             }
         }
-        AccountLedgerInfo ledgerInfo = calcBalance(chainId, input.getChainId(), input.getAssetsId(), accountInfo, input.getAmount().subtract(output.getAmount()));
-        txRelationInfoSet.add(new TxRelationInfo(input, tx, input.getAmount().subtract(output.getAmount()), ledgerInfo.getTotalBalance()));
 
-        for (CoinToInfo to : tx.getCoinTos()) {
-            if (!to.getAddress().equals(accountInfo.getAddress())) {
-                AccountInfo destroyAccount = queryAccountInfo(chainId, output.getAddress());
-                accountInfo.setTxCount(destroyAccount.getTxCount() + 1);
-                ledgerInfo = calcBalance(chainId, output);
-                txRelationInfoSet.add(new TxRelationInfo(output, tx, ledgerInfo.getTotalBalance()));
-            }
-        }
         chainInfoList.add((ChainInfo) tx.getTxData());
     }
 
