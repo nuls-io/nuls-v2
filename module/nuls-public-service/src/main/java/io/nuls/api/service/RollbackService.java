@@ -539,25 +539,20 @@ public class RollbackService {
 
     private void processRegChainTx(int chainId, TransactionInfo tx) {
         CoinFromInfo input = tx.getCoinFroms().get(0);
-        AccountInfo accountInfo = queryAccountInfo(chainId, input.getAddress());
-        accountInfo.setTxCount(accountInfo.getTxCount() - 1);
-        txRelationInfoSet.add(new TxRelationInfo(input.getAddress(), tx.getHash()));
+        AccountInfo accountInfo;
 
-        CoinToInfo output = null;
-        for (CoinToInfo to : tx.getCoinTos()) {
-            if (to.getAddress().equals(accountInfo.getAddress())) {
-                output = to;
-                break;
-            }
-        }
-        calcBalance(chainId, input.getChainId(), input.getAssetsId(), accountInfo, input.getAmount().subtract(output.getAmount()));
 
         for (CoinToInfo to : tx.getCoinTos()) {
-            if (!to.getAddress().equals(accountInfo.getAddress())) {
-                AccountInfo destroyAccount = queryAccountInfo(chainId, output.getAddress());
-                accountInfo.setTxCount(destroyAccount.getTxCount() - 1);
-                calcBalance(chainId, output);
-                txRelationInfoSet.add(new TxRelationInfo(output.getAddress(), tx.getHash()));
+            if (to.getAddress().equals(input.getAddress())) {
+                accountInfo = queryAccountInfo(chainId, input.getAddress());
+                accountInfo.setTxCount(accountInfo.getTxCount() - 1);
+                calcBalance(chainId, input.getChainId(), input.getAssetsId(), accountInfo, input.getAmount().subtract(to.getAmount()));
+                txRelationInfoSet.add(new TxRelationInfo(input.getAddress(), tx.getHash()));
+            } else {
+                accountInfo = queryAccountInfo(chainId, to.getAddress());
+                accountInfo.setTxCount(accountInfo.getTxCount() - 1);
+                calcBalance(chainId, to);
+                txRelationInfoSet.add(new TxRelationInfo(to.getAddress(), tx.getHash()));
             }
         }
         chainInfoList.add((ChainInfo) tx.getTxData());
