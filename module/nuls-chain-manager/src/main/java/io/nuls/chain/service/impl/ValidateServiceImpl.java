@@ -262,10 +262,12 @@ public class ValidateServiceImpl implements ValidateService {
                 return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_NOT_EXIST);
             }
             ChainAsset chainAsset = assetService.getChainAsset(fromChainId, CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
-            BigDecimal currentAsset = new BigDecimal(chainAsset.getInitNumber()).add(new BigDecimal(chainAsset.getInNumber())).subtract(new BigDecimal(chainAsset.getOutNumber()));
-            if (currentAsset.subtract(new BigDecimal(fromAssetMap.get(assetKey))).doubleValue() < 0) {
-                LoggerUtil.logger().error("fromChainId={},assetKey={}currentAsset={} fromAsset={} BALANCE_NOT_ENOUGH", fromChainId, assetKey, currentAsset, fromAssetMap.get(assetKey));
-                return ChainEventResult.getResultFail(CmErrorCode.BALANCE_NOT_ENOUGH);
+            if(!chainAsset.isFromChainAsset()) {
+                BigInteger currentAsset = chainAsset.getInitNumber().add(chainAsset.getInNumber()).subtract(chainAsset.getOutNumber());
+                if (BigIntegerUtils.isLessThan(currentAsset,fromAssetMap.get(assetKey))) {
+                    LoggerUtil.logger().error("fromChainId={},assetKey={}currentAsset={} fromAsset={} BALANCE_NOT_ENOUGH", fromChainId, assetKey, currentAsset, fromAssetMap.get(assetKey));
+                    return ChainEventResult.getResultFail(CmErrorCode.BALANCE_NOT_ENOUGH);
+                }
             }
         }
         return ChainEventResult.getResultSuccess();
