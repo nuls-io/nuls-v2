@@ -8,7 +8,7 @@ public class BlockInfo {
 
     private List<TransactionInfo> txList;
 
-    private String blockHex;
+    private BlockHexInfo blockHexInfo;
 
     public BlockHeaderInfo getHeader() {
         return header;
@@ -26,11 +26,11 @@ public class BlockInfo {
         this.txList = txList;
     }
 
-    public String getBlockHex() {
-        return blockHex;
+    public BlockHexInfo getBlockHexInfo() {
+        return blockHexInfo;
     }
 
-    public void setBlockHex(String blockHex) {
-        this.blockHex = blockHex;
+    public void setBlockHexInfo(BlockHexInfo blockHexInfo) {
+        this.blockHexInfo = blockHexInfo;
     }
 }

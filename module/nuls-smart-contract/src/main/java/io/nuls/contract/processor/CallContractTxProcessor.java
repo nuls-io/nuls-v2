@@ -30,18 +30,23 @@ import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractWrapperTransaction;
+import io.nuls.contract.model.dto.CallContractDataDto;
+import io.nuls.contract.model.dto.ContractResultDto;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
+import io.nuls.contract.model.txdata.CallContractData;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.service.ContractService;
 import io.nuls.contract.storage.ContractTokenTransferStorageService;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.ProgramStatus;
+import io.nuls.contract.vm.util.JsonUtils;
 import io.nuls.core.basic.Result;
 import io.nuls.core.basic.VarInt;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.parse.JSONUtils;
 import org.bouncycastle.util.Arrays;
 
 import static io.nuls.contract.util.ContractUtil.getFailed;
@@ -136,12 +141,17 @@ public class CallContractTxProcessor {
     }
 
     public Result onRollback(int chainId, ContractWrapperTransaction tx) {
-        Log.info("rollback call tx, hash is {}", tx.getHash().toString());
         try {
             // 回滚代币转账交易
             ContractResult contractResult = tx.getContractResult();
             if (contractResult == null) {
                 contractResult = contractService.getContractExecuteResult(chainId, tx.getHash());
+            }
+            try {
+                CallContractData contractData = (CallContractData) tx.getContractData();
+                Log.info("rollback call tx, contract data is {}, result is {}", JSONUtils.obj2json(new CallContractDataDto(contractData)), JSONUtils.obj2json(new ContractResultDto(chainId, contractResult, contractData.getGasLimit())));
+            } catch (Exception e) {
+                Log.warn("failed to trace call rollback log, error is {}", e.getMessage());
             }
             contractHelper.rollbackNrc20Events(chainId, tx, contractResult);
             // 删除合约执行结果

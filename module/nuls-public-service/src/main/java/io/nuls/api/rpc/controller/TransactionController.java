@@ -456,5 +456,4 @@ public class TransactionController {
             return RpcResult.failed(RpcErrorCode.TX_PARSE_ERROR);
         }
     }
-
 }
