@@ -117,13 +117,15 @@ public class TransactionController {
             return RpcResult.paramError("[txHash] is inValid");
         }
         Result<TransactionDto> result = transactionTools.getTx(chainId, txHash);
-        if(result.isSuccess()) {
+        if (result.isSuccess()) {
             TransactionDto txDto = result.getData();
-            GetBlockHeaderByHeightReq req = new GetBlockHeaderByHeightReq(txDto.getBlockHeight());
-            req.setChainId(chainId);
-            Result<BlockHeaderData> blockResult = blockService.getBlockHeaderByHeight(req);
-            if(blockResult.isSuccess()) {
-                txDto.setBlockHash(blockResult.getData().getHash());
+            if (txDto.getBlockHeight() >= 0) {
+                GetBlockHeaderByHeightReq req = new GetBlockHeaderByHeightReq(txDto.getBlockHeight());
+                req.setChainId(chainId);
+                Result<BlockHeaderData> blockResult = blockService.getBlockHeaderByHeight(req);
+                if (blockResult.isSuccess()) {
+                    txDto.setBlockHash(blockResult.getData().getHash());
+                }
             }
         }
         return ResultUtil.getJsonRpcResult(result);
