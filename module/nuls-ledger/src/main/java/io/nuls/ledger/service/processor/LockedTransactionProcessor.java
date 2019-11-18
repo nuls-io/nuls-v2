@@ -70,7 +70,7 @@ public class LockedTransactionProcessor implements TxLockedProcessor {
             //按时间移除锁定
             List<FreezeLockTimeState> list = accountState.getFreezeLockTimeStates();
             for (FreezeLockTimeState freezeLockTimeState : list) {
-                LoggerUtil.COMMON_LOG.debug("processFromCoinData remove TimeUnlocked address={},amount={}={},nonce={}={},hash={} ", address, coin.getAmount(), freezeLockTimeState.getAmount(), LedgerUtil.getNonceEncode(coin.getNonce()), freezeLockTimeState.getNonce(), txHash);
+                LoggerUtil.COMMON_LOG.debug("processFromCoinData remove TimeUnlocked address={},amount={}={},nonce={}={},hash={} ", address, coin.getAmount(), freezeLockTimeState.getAmount(), LedgerUtil.getNonceEncode(coin.getNonce()), LedgerUtil.getNonceEncode(freezeLockTimeState.getNonce()), txHash);
                 if (LedgerUtil.equalsNonces(freezeLockTimeState.getNonce(), coin.getNonce())) {
                     if (0 == freezeLockTimeState.getAmount().compareTo(coin.getAmount())) {
                         //金额一致，移除
@@ -85,7 +85,7 @@ public class LockedTransactionProcessor implements TxLockedProcessor {
             //按高度移除锁定
             List<FreezeHeightState> list = accountState.getFreezeHeightStates();
             for (FreezeHeightState freezeHeightState : list) {
-                Log.debug("processFromCoinData remove HeightUnlocked address={},amount={}={},nonce={}={},hash={} ", address, coin.getAmount(), freezeHeightState.getAmount(), LedgerUtil.getNonceEncode(coin.getNonce()), freezeHeightState.getNonce(), txHash);
+                Log.debug("processFromCoinData remove HeightUnlocked address={},amount={}={},nonce={}={},hash={} ", address, coin.getAmount(), freezeHeightState.getAmount(), LedgerUtil.getNonceEncode(coin.getNonce()), LedgerUtil.getNonceEncode(freezeHeightState.getNonce()), txHash);
                 if (LedgerUtil.equalsNonces(freezeHeightState.getNonce(), coin.getNonce())) {
                     if (0 == freezeHeightState.getAmount().compareTo(coin.getAmount())) {
                         //金额一致，移除
@@ -153,7 +153,7 @@ public class LockedTransactionProcessor implements TxLockedProcessor {
             if (coinFrom.getLocked() == LedgerConstant.UNLOCKED_TIME) {
                 //按时间移除锁定
                 for (FreezeLockTimeState freezeLockTimeState : timeStateList) {
-                    LoggerUtil.COMMON_LOG.debug("processFromCoinData remove TimeUnlocked address={},amount={}={},nonce={}={},hash={} ", address, coin.getAmount(), freezeLockTimeState.getAmount(), LedgerUtil.getNonceEncode(coinFrom.getNonce()), freezeLockTimeState.getNonce(), txHash);
+                    LoggerUtil.COMMON_LOG.debug("processFromCoinData remove TimeUnlocked address={},amount={}={},nonce={}={},hash={} ", address, coin.getAmount(), freezeLockTimeState.getAmount(), LedgerUtil.getNonceEncode(coinFrom.getNonce()), LedgerUtil.getNonceEncode(freezeLockTimeState.getNonce()), txHash);
                     if (LedgerUtil.equalsNonces(freezeLockTimeState.getNonce(), coinFrom.getNonce())) {
                         if (0 == freezeLockTimeState.getAmount().compareTo(coin.getAmount())) {
                             //金额一致，移除
@@ -167,7 +167,7 @@ public class LockedTransactionProcessor implements TxLockedProcessor {
             } else {
                 //按高度移除锁定
                 for (FreezeHeightState freezeHeightState : heightStateList) {
-                    Log.debug("processFromCoinData remove HeightUnlocked address={},amount={}={},nonce={}={},hash={} ", address, coin.getAmount(), freezeHeightState.getAmount(), LedgerUtil.getNonceEncode(coinFrom.getNonce()), freezeHeightState.getNonce(), txHash);
+                    Log.debug("processFromCoinData remove HeightUnlocked address={},amount={}={},nonce={}={},hash={} ", address, coin.getAmount(), freezeHeightState.getAmount(), LedgerUtil.getNonceEncode(coinFrom.getNonce()), LedgerUtil.getNonceEncode(freezeHeightState.getNonce()), txHash);
                     if (LedgerUtil.equalsNonces(freezeHeightState.getNonce(), coinFrom.getNonce())) {
                         if (0 == freezeHeightState.getAmount().compareTo(coin.getAmount())) {
                             //金额一致，移除
