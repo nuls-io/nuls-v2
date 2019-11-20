@@ -116,6 +116,8 @@ teamAddress=NULSd6HgbfkSuRGKSLJJzAPAihgDQtaUhuE4L
 communityAddress=NULSd6HgjDZmLMbZSmH9tqb6smdzZHCxsCRD3
 dependent=smart-contract,cross-chain
 
+
+
 [cross-chain]
 dataPath=../../../../../data
 logPath=../../../../../Logs
