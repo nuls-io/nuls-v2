@@ -545,7 +545,7 @@ public class TransactionServiceImpl implements TransactionService {
             }
             //转账交易不能含有智能合约地址
             if (TxUtil.isLegalContractAddress(addressByte, chain)) {
-                chain.getLogger().error("Tx from cannot have contract address ");
+                chain.getLogger().error("Tx to cannot have contract address ");
                 throw new NulsException(AccountErrorCode.COINDATA_CANNOT_HAS_CONTRACT_ADDRESS);
             }
             int assetsChainId = coinDto.getAssetsChainId();

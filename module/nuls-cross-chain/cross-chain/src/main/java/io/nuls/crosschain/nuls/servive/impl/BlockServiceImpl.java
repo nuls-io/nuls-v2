@@ -183,7 +183,7 @@ public class BlockServiceImpl implements BlockService {
         message.setConvertHash(ctxHash);
         Transaction ctx = ctxStatusService.get(ctxHash, chainId).getTx();
         try {
-            if(ctx.getType() == config.getCrossCtxType()){
+            if(ctx.getType() == config.getCrossCtxType() || ctx.getType() == TxType.CONTRACT_TOKEN_CROSS_TRANSFER){
                 int toId = chainId;
                 if(config.isMainNet()){
                     toId = AddressTool.getChainIdByAddress(ctx.getCoinDataInstance().getTo().get(0).getAddress());

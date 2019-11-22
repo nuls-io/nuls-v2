@@ -75,7 +75,7 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
         String hash = (String) result.get("txHash");
         String contractAddress = (String) result.get("contractAddress");
         Map map = waitGetContractTx(hash);
-        Assert.assertTrue(JSONUtils.obj2PrettyJson(map), (Boolean) ((Map) (map.get("contractResult"))).get("success"));
+        assertTrue(map);
         Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(map));
     }
 
@@ -143,10 +143,39 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
     }
 
     /**
+     * 0. 平行链注册
+     */
+    @Test
+    public void chainRegCommit() throws Exception {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("chainId", 8);
+        parameters.put("chainName", "xxoo");
+        parameters.put("addressType", "1");
+        parameters.put("addressPrefix", "XXOO");
+        parameters.put("magicNumber", 2019880904);
+        parameters.put("minAvailableNodeNum", 1);
+        parameters.put("singleNodeMinConnectionNum", 1);
+
+        parameters.put("maxSignatureCount", 100);
+        parameters.put("signatureByzantineRatio", 66);
+        parameters.put("verifierList", "XXOOdjJQvECefSZ971fYt4XMkv6BNcMxFWRgy");
+
+        parameters.put("address", sender);
+        parameters.put("assetId", 1);
+        parameters.put("symbol", "XXOO");
+        parameters.put("assetName", "xxoo");
+        parameters.put("initNumber", "100000000");
+        parameters.put("decimalPlaces", 8);
+        parameters.put("password", "nuls123456");
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CM.abbr, "cm_chainReg", parameters);
+        System.out.println(JSONUtils.obj2PrettyJson(response));
+    }
+
+    /**
      * 1. 流程 - 创建NRC20合约
      *          创建系统合约
      *          向NRC20合约设置系统合约参数
-     *          向链管理模块注册跨链
+     *          合约资产向链管理模块注册跨链
      */
     @Test
     public void testCreateProcessor() throws Exception {
@@ -155,6 +184,7 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
         this.invokeCall(sender, BigInteger.ZERO, nrc20, "setSystemContract", null, "remark", sys);
         TimeUnit.SECONDS.sleep(1);
         Integer assetId = this.getAssetId(nrc20);
+        Log.info("开始向链管理模块注册跨链");
         this.mainNetAssetReg(assetId);
         Log.info("nrc20 is [{}], assetId is [{}], sys is [{}]", nrc20, assetId, sys);
 
@@ -165,9 +195,9 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
      */
     @Test
     public void callTransferCrossChain() throws Exception {
-        contractAddress_nrc20 = "tNULSeBaMxMQEBEzEVwX3ZE7shuzuD9uEn45dW";
+        contractAddress_nrc20 = "tNULSeBaNASRv6NgWbGSXZf8y5PfN5hbFk41Rp";
         methodName = "transferCrossChain";
-        BigInteger value = BigInteger.ZERO;
+        BigInteger value = BigInteger.valueOf(1_0000_0000L);
         String methodDesc = "";
         String remark = "call contract test - token跨链转账";
         String to = "XXOOdjJQw4LJdjtCd5Gda17FCNgSgTcPUUdSA";
@@ -198,7 +228,7 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
         String hash = (String) result.get("txHash");
         String contractAddress = (String) result.get("contractAddress");
         Map map = waitGetContractTx(hash);
-        Assert.assertTrue(JSONUtils.obj2PrettyJson(map), (Boolean) ((Map) (map.get("contractResult"))).get("success"));
+        assertTrue(map);
         return contractAddress;
     }
 
@@ -215,7 +245,7 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
         String hash = (String) result.get("txHash");
         String contractAddress = (String) result.get("contractAddress");
         Map map = waitGetContractTx(hash);
-        Assert.assertTrue(JSONUtils.obj2PrettyJson(map), (Boolean) ((Map) (map.get("contractResult"))).get("success"));
+        assertTrue(map);
         return contractAddress;
     }
 
@@ -234,7 +264,73 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
         String to = "tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD";
         String token = BigInteger.valueOf(8_0000_0000L).toString();
         String[] args = {to, token};
-        this.invokeCall(sender, BigInteger.ZERO, nrc20, "transferCrossChain123", null, "remark", args);
+        this.invokeCall(sender, BigInteger.ZERO, nrc20, "transferCrossChain124", null, "remark", args);
+        TimeUnit.SECONDS.sleep(1);
+
+        Log.info("sender balance is {}", this.invokeView(nrc20, "balanceOf", sender));
+        Log.info("temp balance is {}", this.invokeView(nrc20, "balanceOf", temp));
+        Log.info("sender temp allowance is {}", this.invokeView(nrc20, "allowance", sender, temp));
+    }
+
+    @Test
+    public void ttt() throws Exception {
+        String nrc20 = createTempNrc20Contract();
+        String temp = createTempContract();
+        Log.info("nrc20 is [{}], temp is [{}]", nrc20, temp);
+        this.invokeCall(sender, BigInteger.ZERO, nrc20, "transfer", null, "remark", temp, "100000000000");
+        TimeUnit.SECONDS.sleep(1);
+        String to = "tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD";
+        String token = BigInteger.valueOf(8_0000_0000L).toString();
+        String[] args = {to, token, nrc20};
+        this.invokeCall(sender, BigInteger.ZERO, temp, "transferToken", null, "remark", args);
+        TimeUnit.SECONDS.sleep(1);
+
+        Log.info("sender balance is {}", this.invokeView(nrc20, "balanceOf", sender));
+        Log.info("temp balance is {}", this.invokeView(nrc20, "balanceOf", temp));
+        Log.info("to balance is {}", this.invokeView(nrc20, "balanceOf", to));
+    }
+
+    @Test
+    public void yyy() throws Exception {
+        String nrc20 = createTempNrc20Contract();
+        String temp = createTempContract();
+        this.invokeCall(sender, BigInteger.ZERO, nrc20, "test", null, "remark", temp);
+        TimeUnit.SECONDS.sleep(1);
+
+        Log.info("nrc20 is [{}], temp is [{}]", nrc20, temp);
+        Log.info("temp value is {}", this.invokeView(nrc20, "viewTemp"));
+    }
+    @Test
+    public void testView() throws Exception {
+        String nrc20 = "tNULSeBaN2mig4KPNtMPkhdJuL76kYm5rEV89k";
+        String temp = "tNULSeBaNBgnRrRcbf8yovEVxNDFysLrguCeqc";
+
+        String[] args = {sender, toAddress0, "800000000", nrc20};
+
+        //this.invokeCall(sender, BigInteger.ZERO, temp, "onNRC20Received125", null, "remark", args);
+
+        Log.info("sender balance is {}", this.invokeView(nrc20, "balanceOf", sender));
+        //Log.info("toAddress0 balance is {}", this.invokeView(nrc20, "balanceOf", toAddress0));
+        Log.info("temp balance is {}", this.invokeView(nrc20, "balanceOf", temp));
+        //Log.info("pocm balance is {}", this.invokeView("tNULSeBaN6jVp7nZthg3CTDpAQEKpw99aV3Zoc", "balanceOf", "tNULSeBaNAAY67nVBpcpwBpup2nzZJggWDZUtK"));
+        //Log.info("sender balance is {}", this.invokeView("tNULSeBaN6jVp7nZthg3CTDpAQEKpw99aV3Zoc", "balanceOf", sender));
+        Log.info("sender temp allowance is {}", this.invokeView(nrc20, "allowance", sender, temp));
+    }
+
+    @Test
+    public void testView1() throws Exception {
+        String nrc20 = "tNULSeBaN2z5nG6zjFaXTVB8pdJu9z8tvSg7aw";
+        String temp = "tNULSeBaMyd54zCspCt24h9SAJXU2QpiunsfLX";
+
+        String to = "tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD";
+        String token = BigInteger.valueOf(8_0000_0000L).toString();
+        String[] args = {to, token};
+        this.invokeCall(sender, BigInteger.ZERO, nrc20, "transferCrossChain124", null, "remark", args);
+        TimeUnit.SECONDS.sleep(1);
+
+        Log.info("sender balance is {}", this.invokeView(nrc20, "balanceOf", sender));
+        Log.info("temp balance is {}", this.invokeView(nrc20, "balanceOf", temp));
+        Log.info("sender temp allowance is {}", this.invokeView(nrc20, "allowance", sender, temp));
     }
 
     @Test

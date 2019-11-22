@@ -29,10 +29,7 @@ import io.nuls.contract.model.bo.ContractBalance;
 import io.nuls.contract.model.dto.BlockHeaderDto;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.util.VMContext;
-import io.nuls.contract.vm.ObjectRef;
-import io.nuls.contract.vm.Result;
-import io.nuls.contract.vm.VM;
-import io.nuls.contract.vm.VMFactory;
+import io.nuls.contract.vm.*;
 import io.nuls.contract.vm.code.*;
 import io.nuls.contract.vm.exception.ErrorException;
 import io.nuls.contract.vm.natives.io.nuls.contract.sdk.NativeAddress;
@@ -109,7 +106,14 @@ public class ProgramExecutorImpl implements ProgramExecutor {
     }
 
     public ProgramExecutor callProgramExecutor() {
-        return new ProgramExecutorImpl(this, vmContext, source, repository, prevStateRoot, accounts, thread);
+        ProgramExecutorImpl programExecutor = new ProgramExecutorImpl(this, vmContext, source, repository, prevStateRoot, accounts, thread);
+        //TODO pierre 标记
+        programExecutor.contractObjects = this.contractObjects;
+        programExecutor.contractChanges = this.contractChanges;
+        programExecutor.contractArrays = this.contractArrays;
+        programExecutor.contractObjectRefCount = this.contractObjectRefCount;
+        // end code by pierre
+        return programExecutor;
     }
 
     @Override
@@ -245,6 +249,11 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         return execute(programInvoke);
     }
 
+    private Map<String, Map<ObjectRef, Map<String, Object>>> contractObjects;
+    private Map<String, Set<ObjectRef>> contractChanges;
+    private Map<String, Map<String, Object>> contractArrays;
+    private Map<String, BigIntegerWrapper> contractObjectRefCount;
+
     private ProgramResult execute(ProgramInvoke programInvoke) {
         if (programInvoke.getPrice() < 1) {
             return revert("gas price must be greater than zero");
@@ -318,6 +327,54 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
             vm.setProgramExecutor(this);
             vm.heap.loadClassCodes(classCodes);
+            //TODO pierre 标记
+            //Log.debug("++++++++++++++++++++");
+            //Log.warn(programInvoke.toString());
+            //Log.info("this.contractObjectRefCount: {}", this.contractObjectRefCount);
+            //Log.info("vm.heap.objectRefCount: {}", vm.heap.objectRefCount);
+            if(contractObjects == null) {
+                contractObjects = new HashMap<>();
+                contractObjects.put(contractAddress, vm.heap.objects);
+            } else {
+                Map<ObjectRef, Map<String, Object>> objectRefMapMap = contractObjects.get(contractAddress);
+                if(objectRefMapMap != null) {
+                    if(programInvoke.isInternalCall()) {
+                        //Log.info("共享heap.objects");
+                        vm.heap.objects = objectRefMapMap;
+                    }
+                } else {
+                    contractObjects.put(contractAddress, vm.heap.objects);
+                }
+            }
+            if(contractArrays == null) {
+                contractArrays = new HashMap<>();
+                contractArrays.put(contractAddress, vm.heap.arrays);
+            } else {
+                Map<String, Object> arraysMap = contractArrays.get(contractAddress);
+                if(arraysMap != null) {
+                    if(programInvoke.isInternalCall()) {
+                        //Log.info("共享heap.arrays");
+                        vm.heap.arrays = arraysMap;
+                    }
+                } else {
+                    contractArrays.put(contractAddress, vm.heap.arrays);
+                }
+            }
+            if(contractChanges == null) {
+                contractChanges = new HashMap<>();
+                contractChanges.put(contractAddress, vm.heap.changes);
+            } else {
+                Set<ObjectRef> changesObjectRefs = contractChanges.get(contractAddress);
+                if(changesObjectRefs != null) {
+                    if(programInvoke.isInternalCall()) {
+                        //Log.info("共享heap.changes");
+                        vm.heap.changes.addAll(changesObjectRefs);
+                    }
+                } else {
+                    contractChanges.put(contractAddress, vm.heap.changes);
+                }
+            }
+            // end code by pierre
             vm.methodArea.loadClassCodes(classCodes);
 
             logTime("load classes");
@@ -361,6 +418,27 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             } else {
                 objectRef = vm.heap.loadContract(contractAddressBytes, contractClassCode, repository);
             }
+
+            //TODO pierre 标记
+            if(contractObjectRefCount == null) {
+                //Log.info("新建map和heap.objectRefCount");
+                contractObjectRefCount = new HashMap<>();
+                contractObjectRefCount.put(contractAddress, vm.heap.objectRefCount);
+            } else {
+                BigIntegerWrapper objectRefCount = contractObjectRefCount.get(contractAddress);
+                if(objectRefCount != null) {
+                    if(programInvoke.isInternalCall()) {
+                        //Log.info("共享heap.objectRefCount: {}", objectRefCount.hashCode());
+                        vm.heap.objectRefCount = objectRefCount;
+                    } else {
+                        //Log.info("问题heap.objectRefCount");
+                    }
+                } else {
+                    //Log.info("新增heap.objectRefCount");
+                    contractObjectRefCount.put(contractAddress, vm.heap.objectRefCount);
+                }
+            }
+            // end code by pierre
 
             logTime("load contract ref");
 
@@ -434,11 +512,14 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             Map<DataWord, DataWord> contractState = vm.heap.contractState();
             logTime("contract state");
 
+            //Log.error(programInvoke.toString());
             for (Map.Entry<DataWord, DataWord> entry : contractState.entrySet()) {
                 DataWord key = entry.getKey();
                 DataWord value = entry.getValue();
+                //Log.info("add storage row, key: {}, value: {}", key.asString(), value.asString());
                 repository.addStorageRow(contractAddressBytes, key, value);
             }
+            //Log.debug("---------------------\n");
             logTime("add contract state");
 
             if (programInvoke.isCreate()) {

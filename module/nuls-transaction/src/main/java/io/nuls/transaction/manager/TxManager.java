@@ -25,6 +25,7 @@
 package io.nuls.transaction.manager;
 
 import io.nuls.base.data.Transaction;
+import io.nuls.core.constant.TxType;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
@@ -146,5 +147,9 @@ public class TxManager {
             return false;
         }
         return ModuleE.SC.abbr.equals(txRegister.getModuleCode()) && txRegister.getSystemTx();
+    }
+
+    public static boolean isCrossTx(int txType) {
+        return txType == TxType.CROSS_CHAIN || txType == TxType.CONTRACT_TOKEN_CROSS_TRANSFER;
     }
 }

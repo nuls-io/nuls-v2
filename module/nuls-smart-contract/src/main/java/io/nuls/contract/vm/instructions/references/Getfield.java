@@ -24,9 +24,11 @@
  */
 package io.nuls.contract.vm.instructions.references;
 
+import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.Frame;
 import io.nuls.contract.vm.ObjectRef;
 import io.nuls.contract.vm.code.Descriptors;
+import io.nuls.contract.vm.code.VariableType;
 import org.objectweb.asm.tree.FieldInsnNode;
 
 public class Getfield {
@@ -41,6 +43,22 @@ public class Getfield {
             return;
         }
         Object value = frame.heap.getField(objectRef, fieldName);
+        /*if(value instanceof ObjectRef) {
+            try {
+                ObjectRef objectRef1 = (ObjectRef) value;
+                if(objectRef1.getVariableType().equals(VariableType.STRING_TYPE)) {
+                    Log.info("filedName: {}, fieldDesc: {}, valueRef: {}, value: {}", fieldName, fieldDesc, value, frame.heap.runToString(objectRef1));
+                } else if(objectRef1.getVariableType().equals(VariableType.HASH_MAP_TYPE)){
+                    Log.info("filedName: {}, fieldDesc: {}, hash map valueRef: {}", fieldName, fieldDesc, value);
+                } else if(objectRef1.getVariableType().equals(VariableType.INT_TYPE)){
+                    Log.info("filedName: {}, fieldDesc: {}, int valueRef: {}", fieldName, fieldDesc, value);
+                } else if(objectRef1.getVariableType().equals(VariableType.INT_WRAPPER_TYPE)){
+                    Log.info("filedName: {}, fieldDesc: {}, integer valueRef: {}", fieldName, fieldDesc, value);
+                } else if(objectRef1.getVariableType().getType().toLowerCase().contains("map")) {
+                    Log.info("filedName: {}, fieldDesc: {}, map valueRef: {}", fieldName, fieldDesc, value);
+                }
+            } catch (Exception e) {}
+        }*/
         if (Descriptors.LONG_DESC.equals(fieldDesc)) {
             frame.operandStack.pushLong((long) value);
         } else if (Descriptors.DOUBLE_DESC.equals(fieldDesc)) {

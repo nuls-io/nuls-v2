@@ -413,7 +413,7 @@ public class TxServiceImpl implements TxService {
                 throw new NulsException(TxErrorCode.COINFROM_NOT_SAME_CHAINID);
             }
             //如果不是跨链交易，from中地址对应的链id必须发起链id，跨链交易在验证器中验证
-            if (type != TxType.CROSS_CHAIN) {
+            if (!TxManager.isCrossTx(type)) {
                 if (chainId != addrChainId) {
                     throw new NulsException(TxErrorCode.FROM_ADDRESS_NOT_MATCH_CHAIN);
                 }
@@ -475,7 +475,7 @@ public class TxServiceImpl implements TxService {
                 throw new NulsException(TxErrorCode.DATA_ERROR);
             }
             //如果不是跨链交易，to中地址对应的链id必须发起交易的链id
-            if (type != TxType.CROSS_CHAIN) {
+            if (!TxManager.isCrossTx(type)) {
                 if (chainId != txChainId) {
                     throw new NulsException(TxErrorCode.TO_ADDRESS_NOT_MATCH_CHAIN);
                 }
@@ -517,7 +517,7 @@ public class TxServiceImpl implements TxService {
         }
         int feeAssetChainId;
         int feeAssetId;
-        if (type == TxType.CROSS_CHAIN && AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress()) != chain.getChainId()) {
+        if (TxManager.isCrossTx(type) && AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress()) != chain.getChainId()) {
             //为跨链交易并且不是交易发起链时,计算主网主资产为手续费NULS
             feeAssetChainId = txConfig.getMainChainId();
             feeAssetId = txConfig.getMainAssetId();
@@ -532,7 +532,7 @@ public class TxServiceImpl implements TxService {
         }
         //根据交易大小重新计算手续费，用来验证实际手续费
         BigInteger targetFee;
-        if (type == TxType.CROSS_CHAIN) {
+        if (TxManager.isCrossTx(type)) {
             targetFee = TransactionFeeCalculator.getCrossTxFee(txSize);
         } else {
             targetFee = TransactionFeeCalculator.getNormalTxFee(txSize);

@@ -287,12 +287,12 @@ public class NativeAddress {
         frame.vm.getInternalCalls().add(programInternalCall);
 
         // add by pierre at 2019-10-31 - 需要协议升级
-        Map<DataWord, DataWord> contractState = frame.vm.heap.contractState();
-        for (Map.Entry<DataWord, DataWord> entry : contractState.entrySet()) {
-            DataWord key1 = entry.getKey();
-            DataWord value1 = entry.getValue();
-            frame.vm.getRepository().addStorageRow(programInvoke.getContractAddress(), key1, value1);
-        }
+        //Map<DataWord, DataWord> contractState = frame.vm.heap.contractState();
+        //for (Map.Entry<DataWord, DataWord> entry : contractState.entrySet()) {
+        //    DataWord key1 = entry.getKey();
+        //    DataWord value1 = entry.getValue();
+        //    frame.vm.getRepository().addStorageRow(programInvoke.getContractAddress(), key1, value1);
+        //}
         // end code by pierre
         ProgramResult programResult = frame.vm.getProgramExecutor().callProgramExecutor().call(programCall);
 
@@ -301,6 +301,7 @@ public class NativeAddress {
             frame.vm.getTransfers().addAll(programResult.getTransfers());
             frame.vm.getInternalCalls().addAll(programResult.getInternalCalls());
             frame.vm.getEvents().addAll(programResult.getEvents());
+            frame.vm.getDebugEvents().addAll(programResult.getDebugEvents());
             frame.vm.getInvokeRegisterCmds().addAll(programResult.getInvokeRegisterCmds());
             return programResult;
         } else {
