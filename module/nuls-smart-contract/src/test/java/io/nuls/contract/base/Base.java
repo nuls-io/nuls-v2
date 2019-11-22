@@ -259,6 +259,15 @@ public class Base {
         return map;
     }
 
+    protected void assertTrue(Map map) throws Exception {
+        try {
+            Assert.assertTrue(JSONUtils.obj2PrettyJson(map), (Boolean) ((Map) (map.get("contractResult"))).get("success"));
+        } catch (Throwable e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
     protected void assertTrue(Response cmdResp2, Map result) throws JsonProcessingException {
         if(null == result) {
             Log.error("Contract-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
@@ -281,9 +290,12 @@ public class Base {
         while(map == null) {
             TimeUnit.MILLISECONDS.sleep(800);
             map = (Map) getContractTx(hash)[1];
-            if(++i > 32) {
+            if(++i > 64) {
                 break;
             }
+        }
+        if(map.get("contractResult") == null) {
+            map.put("contractResult", waitGetContractResult(hash));
         }
         return map;
     }
