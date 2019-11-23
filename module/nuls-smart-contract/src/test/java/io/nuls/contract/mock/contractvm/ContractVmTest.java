@@ -24,10 +24,12 @@
 package io.nuls.contract.mock.contractvm;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.mock.basetest.MockBase;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.ProgramMethod;
 import io.nuls.contract.vm.program.ProgramResult;
+import io.nuls.contract.vm.program.ProgramTransfer;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.parse.JSONUtils;
 import org.apache.commons.io.IOUtils;
@@ -38,6 +40,7 @@ import org.junit.Test;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.util.List;
 /**
  * 测试场景:
@@ -88,6 +91,9 @@ import java.util.List;
  *
  *  14. 双合约测试，A合约有map1，map1[a]值为1, A调用B，执行：B合约调用A合约查询map1[a]，使B局部变量t=a, B合约调用A合约修改map1[a]=t+5
  *  期望返回值map1[a]=105，调用view方法期望map1[a]=105
+ *
+ *  15. 双合约测试，调用者向A合约转入100，A调用B转入100，B使用30，转移70给调用者
+ *  期望执行结果中，有退回到调用者的70
  *
  *  //TODO pierre 增加数组类型的成员变量值的单元测试
  * @author: PierreLuo
@@ -141,14 +147,12 @@ public class ContractVmTest extends MockBase {
     public void test4() throws Exception{ this.callVmTest(prevStateRoot, "test4", "6"); }
     @Test
     public void test4_integer() throws Exception{
-        // 测试方法[test4_integer]View期望a=6, 实际a=1
         byte[] currentStateRoot = this.callVmTest(prevStateRoot, "test4_integer", "6", false);
         String integerValue = super.view(contractA, currentStateRoot, "getIntegerValue", new String[]{});
         Assert.assertTrue(String.format("测试方法[test4_integer]view期望integerValue=6, 实际integerValue=%s", integerValue), "6".equals(integerValue));
     }
     @Test
     public void test4_int() throws Exception{
-        // 测试方法[test4_int]View期望a=6, 实际a=1
         byte[] currentStateRoot = this.callVmTest(prevStateRoot, "test4_int", "6", false);
         String intValue = super.view(contractA, currentStateRoot, "getIntValue", new String[]{});
         Assert.assertTrue(String.format("测试方法[test4_int]view期望intValue=6, 实际intValue=%s", intValue), "6".equals(intValue));
@@ -235,6 +239,31 @@ public class ContractVmTest extends MockBase {
 
         a = super.view(contractA, currentStateRoot, "viewMap1ByKey", new String[]{"a"});
         Assert.assertTrue(String.format("测试方法[test14]View期望map1a=105, 实际map1a=%s", a), "105".equals(a));
+    }
+
+    @Test
+    public void test15() throws Exception{
+        byte[] currentStateRoot;
+        String a;
+        Object[] objects;
+        ProgramResult programResult;
+        objects = super.call(contractA, prevStateRoot, SENDER, "test15", new String[]{}, BigInteger.valueOf(100L));
+        currentStateRoot = (byte[]) objects[0];
+        programResult = (ProgramResult) objects[1];
+        Assert.assertTrue("测试方法[test15]expect success, " + programResult.getErrorMessage() + ", " + programResult.getStackTrace(), programResult.isSuccess());
+
+        List<ProgramTransfer> transfers = programResult.getTransfers();
+        boolean success = false;
+        for(ProgramTransfer transfer : transfers) {
+            String from = AddressTool.getStringAddressByBytes(transfer.getFrom());
+            String to = AddressTool.getStringAddressByBytes(transfer.getTo());
+            Log.info("transfer from: {}, to: {}, value: {}", from, to, transfer.getValue().toString());
+            if(from.equals(contractB) && to.equals(SENDER) && transfer.getValue().longValue() == 70L) {
+                success = true;
+                break;
+            }
+        }
+        Assert.assertTrue("测试方法[test15]期望 退回70", success);
     }
 
     private byte[] callVmTest(byte[] prevStateRoot, String method, String expect, boolean containViewExpect) throws Exception {

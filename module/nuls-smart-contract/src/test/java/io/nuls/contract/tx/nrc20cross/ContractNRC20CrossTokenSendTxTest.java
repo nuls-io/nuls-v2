@@ -195,7 +195,7 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
      */
     @Test
     public void callTransferCrossChain() throws Exception {
-        contractAddress_nrc20 = "tNULSeBaNASRv6NgWbGSXZf8y5PfN5hbFk41Rp";
+        contractAddress_nrc20 = "tNULSeBaN53H4YCeLuJf2MNoEsR2qESCuyEDhW";
         methodName = "transferCrossChain";
         BigInteger value = BigInteger.valueOf(1_0000_0000L);
         String methodDesc = "";
@@ -203,7 +203,7 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
         String to = "XXOOdjJQw4LJdjtCd5Gda17FCNgSgTcPUUdSA";
         String token = BigInteger.valueOf(8_0000_0000L).toString();
         String[] args = {to, token};
-        Map params = this.makeCallParams(sender, value, contractAddress_nrc20, methodName, methodDesc, remark, args);
+        Map params = this.makeCallParams(toAddress0, value, contractAddress_nrc20, methodName, methodDesc, remark, args);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
         assertTrue(cmdResp2, result);
@@ -213,8 +213,8 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
 
     private String createCrossNrc20Contract() throws Exception {
         Log.info("开始创建跨链特性的NRC20合约");
-        InputStream in = new FileInputStream(ContractTest.class.getResource("/nuls-cross-chain-nrc20-test.jar").getFile());
-        //InputStream in = new FileInputStream("/Users/pierreluo/IdeaProjects/nuls-cross-chain-nrc20/target/nuls-cross-chain-nrc20-test.jar");
+        //InputStream in = new FileInputStream(ContractTest.class.getResource("/nuls-cross-chain-nrc20-test.jar").getFile());
+        InputStream in = new FileInputStream("/Users/pierreluo/IdeaProjects/nuls-cross-chain-nrc20/target/nuls-cross-chain-nrc20-test.jar");
         byte[] contractCode = IOUtils.toByteArray(in);
         String remark = "create cross token";
         String name = "cct";
@@ -234,8 +234,8 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
 
     private String createCrossSystemContract() throws Exception {
         Log.info("开始创建跨链特性的System合约");
-        InputStream in = new FileInputStream(ContractTest.class.getResource("/cross-token-system-contract-test1.jar").getFile());
-        //InputStream in = new FileInputStream("/Users/pierreluo/IdeaProjects/cross-token-system-contract/target/cross-token-system-contract-test1.jar");
+        //InputStream in = new FileInputStream(ContractTest.class.getResource("/cross-token-system-contract-test1.jar").getFile());
+        InputStream in = new FileInputStream("/Users/pierreluo/IdeaProjects/cross-token-system-contract/target/cross-token-system-contract-test1.jar");
         byte[] contractCode = IOUtils.toByteArray(in);
         String remark = "create cross system contract";
         Map params = this.makeCreateParams(sender, contractCode, "sys", remark);

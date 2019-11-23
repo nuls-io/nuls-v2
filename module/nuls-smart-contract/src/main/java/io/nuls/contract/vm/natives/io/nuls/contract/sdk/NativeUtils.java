@@ -41,6 +41,7 @@ import io.nuls.contract.model.bo.ContractTokenAssetsInfo;
 import io.nuls.contract.model.dto.BlockHeaderDto;
 import io.nuls.contract.rpc.call.ChainManagerCall;
 import io.nuls.contract.sdk.Event;
+import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.*;
 import io.nuls.contract.vm.code.ClassCode;
 import io.nuls.contract.vm.code.FieldCode;
@@ -641,7 +642,7 @@ public class NativeUtils {
                 throw new ErrorException("The asset is not a cross-chain asset[0]", frame.vm.getGasUsed(), null);
             }
         } catch (NulsException e) {
-            e.printStackTrace();
+            Log.error(e);
             throw new ErrorException("The asset is not a cross-chain asset[1]", frame.vm.getGasUsed(), null);
         }
         try {
@@ -671,7 +672,8 @@ public class NativeUtils {
             ObjectRef objectRef = frame.heap.stringArrayToObjectRef(invokeResult);
             return objectRef;
         } catch (Exception e) {
-            throw new ErrorException("new tx error", frame.vm.getGasUsed(), null);
+            Log.error(e);
+            throw new ErrorException(String.format("new tx error: %s", e.getMessage()), frame.vm.getGasUsed(), null);
         }
     }
 
@@ -728,7 +730,9 @@ public class NativeUtils {
         ContractNewTxFromOtherModuleHandler handler = SpringLiteContext.getBean(ContractNewTxFromOtherModuleHandler.class);
         // 处理nonce和维护虚拟机内部的合约余额，不处理临时余额，外部再处理
         Transaction tx = handler.updateNonceAndVmBalance(chainId, contractAddressBytes, txHash, txString, frame);
-        invokeRegisterCmd.setProgramNewTx(new ProgramNewTx(txHash, txString, tx));
+        ProgramNewTx programNewTx = new ProgramNewTx(txHash, txString, tx);
+        invokeRegisterCmd.setProgramNewTx(programNewTx);
+        frame.vm.getOrderedInnerTxs().add(programNewTx);
     }
 
     private static Object requestAndResponse(CmdRegisterManager cmdRegisterManager, String moduleCode, String cmdName, Map argsMap, Frame frame) {
@@ -773,7 +777,9 @@ public class NativeUtils {
             ContractNewTxFromOtherModuleHandler handler = SpringLiteContext.getBean(ContractNewTxFromOtherModuleHandler.class);
             // 处理nonce和维护虚拟机内部的合约余额，不处理临时余额，外部再处理
             Transaction tx = handler.updateNonceAndVmBalance(chainId, contractAddressBytes, txHash, txString, frame);
-            invokeRegisterCmd.setProgramNewTx(new ProgramNewTx(txHash, txString, tx));
+            ProgramNewTx programNewTx = new ProgramNewTx(txHash, txString, tx);
+            invokeRegisterCmd.setProgramNewTx(programNewTx);
+            frame.vm.getOrderedInnerTxs().add(programNewTx);
             objectRef = frame.heap.newString(txHash);
         } else {
             // 根据返回值类型解析数据

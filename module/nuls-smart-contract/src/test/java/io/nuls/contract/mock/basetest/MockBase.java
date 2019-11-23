@@ -44,6 +44,8 @@ import io.nuls.core.rockdb.service.RocksDBService;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
+import java.math.BigInteger;
+
 /**
  * @author: PierreLuo
  * @date: 2019-06-11
@@ -109,20 +111,28 @@ public class MockBase extends Base {
         return begin.getRoot();
     }
 
+    protected Object[] call(byte[] preStateRoot, String sender, String methodName, String[] args, BigInteger value) throws JsonProcessingException {
+        return call(null, preStateRoot, sender, methodName, null, args, value);
+    }
+
     protected Object[] call(byte[] preStateRoot, String sender, String methodName, String[] args) throws JsonProcessingException {
-        return call(null, preStateRoot, sender, methodName, null, args);
+        return call(null, preStateRoot, sender, methodName, null, args, null);
     }
 
     protected Object[] call(byte[] preStateRoot, String sender, String methodName, String methodDesc, String[] args) throws JsonProcessingException {
-        return call(null, preStateRoot, sender, methodName, methodDesc, args);
+        return call(null, preStateRoot, sender, methodName, methodDesc, args, null);
     }
 
     protected Object[] call(String contractAddress, byte[] preStateRoot, String sender, String methodName, String[] args) throws JsonProcessingException {
-        return call(contractAddress, preStateRoot, sender, methodName, null, args);
+        return call(contractAddress, preStateRoot, sender, methodName, null, args, null);
     }
 
-    protected Object[] call(String contractAddress, byte[] preStateRoot,  String sender, String methodName, String methodDesc, String[] args) throws JsonProcessingException {
-        Object[] objects = execute(contractAddress, preStateRoot, sender, methodName, methodDesc, args);
+    protected Object[] call(String contractAddress, byte[] preStateRoot, String sender, String methodName, String[] args, BigInteger value) throws JsonProcessingException {
+        return call(contractAddress, preStateRoot, sender, methodName, null, args, value);
+    }
+
+    protected Object[] call(String contractAddress, byte[] preStateRoot,  String sender, String methodName, String methodDesc, String[] args, BigInteger value) throws JsonProcessingException {
+        Object[] objects = execute(contractAddress, preStateRoot, sender, methodName, methodDesc, args, value);
         ProgramExecutor track = (ProgramExecutor) objects[0];
         track.commit();
         ProgramResult programResult = (ProgramResult) objects[1];
@@ -144,13 +154,14 @@ public class MockBase extends Base {
         return view(contractAddress, preStateRoot, methodName, null, args);
     }
 
-    private Object[] execute(String contractAddress, byte[] preStateRoot, String sender, String methodName, String methodDesc, String[] args) throws JsonProcessingException {
+    private Object[] execute(String contractAddress, byte[] preStateRoot, String sender, String methodName, String methodDesc, String[] args, BigInteger value) throws JsonProcessingException {
         ProgramCall programCall = new ProgramCall();
         programCall.setContractAddress(contractAddress == null ? NativeAddress.toBytes(ADDRESS) : NativeAddress.toBytes(contractAddress));
         programCall.setSender(NativeAddress.toBytes(sender));
         programCall.setPrice(1);
         programCall.setGasLimit(1000000);
         programCall.setNumber(1);
+        programCall.setValue(value == null ? BigInteger.ZERO : value);
         programCall.setMethodName(methodName);
         programCall.setMethodDesc(methodDesc);
         programCall.setArgs(args);

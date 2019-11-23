@@ -179,6 +179,9 @@ public class NativeAddress {
             frame.vm.getProgramExecutor().getAccount(from).addBalance(value.negate());
             ProgramTransfer programTransfer = new ProgramTransfer(from, to, value);
             frame.vm.getTransfers().add(programTransfer);
+            // add by pierre at 2019-11-23 标记
+            frame.vm.getOrderedInnerTxs().add(programTransfer);
+            // end code by pierre
         }
 
         Result result = NativeMethod.result(methodCode, null, frame);
@@ -274,6 +277,9 @@ public class NativeAddress {
             frame.vm.getProgramExecutor().getAccount(programCall.getSender()).addBalance(programCall.getValue().negate());
             ProgramTransfer programTransfer = new ProgramTransfer(programCall.getSender(), programCall.getContractAddress(), programCall.getValue());
             frame.vm.getTransfers().add(programTransfer);
+            // add by pierre at 2019-11-23 标记
+            frame.vm.getOrderedInnerTxs().add(programTransfer);
+            // end code by pierre
         }
 
         ProgramInternalCall programInternalCall = new ProgramInternalCall();
@@ -303,6 +309,7 @@ public class NativeAddress {
             frame.vm.getEvents().addAll(programResult.getEvents());
             frame.vm.getDebugEvents().addAll(programResult.getDebugEvents());
             frame.vm.getInvokeRegisterCmds().addAll(programResult.getInvokeRegisterCmds());
+            frame.vm.getOrderedInnerTxs().addAll(programResult.getOrderedInnerTxs());
             return programResult;
         } else {
             frame.throwRuntimeException(programResult.getErrorMessage());

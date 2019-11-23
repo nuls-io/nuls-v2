@@ -390,7 +390,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                 return revert("can only invoke public method");
             }
             if (!methodCode.hasPayableAnnotation() && transferValue.compareTo(BigInteger.ZERO) > 0) {
-                return revert("not a payable method");
+                return revert(String.format("contract[%s]'s method[%s] is not a payable method", contractAddress, methodCode.name));
             }
             // 不允许非系统调用此方法
             boolean isBalanceTriggerForConsensusContractMethod = BALANCE_TRIGGER_METHOD_NAME.equals(methodName) &&
@@ -485,6 +485,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             programResult.setInternalCalls(vm.getInternalCalls());
             programResult.setEvents(vm.getEvents());
             programResult.setInvokeRegisterCmds(vm.getInvokeRegisterCmds());
+            programResult.setOrderedInnerTxs(vm.getOrderedInnerTxs());
 
             if (resultValue != null) {
                 if (resultValue instanceof ObjectRef) {

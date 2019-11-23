@@ -120,6 +120,8 @@ public class VM {
 
     private List<ProgramInvokeRegisterCmd> invokeRegisterCmds = new ArrayList<>();
 
+    private List<Object> orderedInnerTxs = new ArrayList<>();
+
     public VM() {
         this.vmStack = new VMStack(VM_STACK_MAX_SIZE);
         this.heap = new Heap(BigInteger.ZERO);
@@ -1277,6 +1279,14 @@ public class VM {
 
     public void setInvokeRegisterCmds(List<ProgramInvokeRegisterCmd> invokeRegisterCmds) {
         this.invokeRegisterCmds = invokeRegisterCmds;
+    }
+
+    public List<Object> getOrderedInnerTxs() {
+        return orderedInnerTxs;
+    }
+
+    public void setOrderedInnerTxs(List<Object> orderedInnerTxs) {
+        this.orderedInnerTxs = orderedInnerTxs;
     }
 
     public void setProgramExecutor(ProgramExecutorImpl programExecutor) {
