@@ -11,6 +11,7 @@ import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.BigIntegerUtils;
@@ -233,7 +234,9 @@ public class MainNetServiceImpl implements MainNetService {
         String fromAddress = (String) params.get(ParamConstant.FROM);
         String toAddress = (String) params.get(ParamConstant.TO);
         BigInteger amount = new BigInteger((String) params.get(ParamConstant.VALUE));
-
+        String contractAddress = (String) params.get("contractAddress");
+        String contractToken = (String) params.get("contractNonce");
+        String contractBalance = (String) params.get("contractBalance");
         Transaction tx = new Transaction(TxType.CONTRACT_TOKEN_CROSS_TRANSFER);
         tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
 
@@ -263,14 +266,12 @@ public class MainNetServiceImpl implements MainNetService {
             txSize += coinData.size();
 
             //计算手续费
-            Map<String, Object> balanceResult = LedgerCall.getBalanceAndNonce(chain, fromAddress, nulsCrossChainConfig.getMainChainId(), nulsCrossChainConfig.getMainAssetId());
-            byte[] nonce = RPCUtil.decode((String) balanceResult.get("nonce"));
-            BigInteger available = new BigInteger(balanceResult.get("available").toString());
             BigInteger targetFee = TransactionFeeCalculator.getCrossTxFee(txSize);
-            CoinFrom feeFrom = new CoinFrom(AddressTool.getAddress(fromAddress), nulsCrossChainConfig.getMainChainId(), nulsCrossChainConfig.getMainAssetId(), targetFee, nonce, (byte) 0);
+            CoinFrom feeFrom = new CoinFrom(AddressTool.getAddress(contractAddress), nulsCrossChainConfig.getMainChainId(), nulsCrossChainConfig.getMainAssetId(), targetFee, HexUtil.decode(contractToken), (byte) 0);
             txSize += feeFrom.size();
             targetFee = TransactionFeeCalculator.getCrossTxFee(txSize);
             feeFrom.setAmount(targetFee);
+            BigInteger available = new BigInteger(contractBalance);
             if (BigIntegerUtils.isLessThan(available, targetFee)) {
                 chain.getLogger().warn("手续费不足");
                 return Result.getFailed(INSUFFICIENT_FEE);
