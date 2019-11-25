@@ -88,7 +88,7 @@ public class ContractNewTxFromOtherModuleHandler {
                 }
             }
             if(!existContract) {
-                throw new RuntimeException("not contract address");
+                throw new RuntimeException("Illegal transaction: contract address must be exist in data of coin-from.");
             }
             //CoinFrom from0 = fromList.get(0);
             //addressBytes = from0.getAddress();

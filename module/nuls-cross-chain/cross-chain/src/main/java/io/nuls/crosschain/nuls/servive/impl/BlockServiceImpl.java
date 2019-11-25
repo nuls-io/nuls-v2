@@ -108,7 +108,7 @@ public class BlockServiceImpl implements BlockService {
                         chain.getLogger().error("区块高度为{}的跨链交易广播失败",cacheHeight);
                     }else{
                         sendHeightService.delete(cacheHeight, chainId);
-                        chain.getLogger().error("区块高度为{}的跨链交易广播成功",cacheHeight);
+                        chain.getLogger().info("区块高度为{}的跨链交易广播成功",cacheHeight);
                     }
                 }else{
                     break;

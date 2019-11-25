@@ -642,7 +642,7 @@ public class NativeUtils {
                 throw new ErrorException("The asset is not a cross-chain asset[0]", frame.vm.getGasUsed(), null);
             }
         } catch (NulsException e) {
-            Log.error(e);
+            Log.error(e.getMessage());
             throw new ErrorException("The asset is not a cross-chain asset[1]", frame.vm.getGasUsed(), null);
         }
         try {
@@ -672,7 +672,7 @@ public class NativeUtils {
             ObjectRef objectRef = frame.heap.stringArrayToObjectRef(invokeResult);
             return objectRef;
         } catch (Exception e) {
-            Log.error(e);
+            Log.error(e.getMessage());
             throw new ErrorException(String.format("new tx error: %s", e.getMessage()), frame.vm.getGasUsed(), null);
         }
     }
