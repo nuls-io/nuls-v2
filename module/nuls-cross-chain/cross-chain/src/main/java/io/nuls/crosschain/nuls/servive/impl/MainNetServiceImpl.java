@@ -2,6 +2,7 @@ package io.nuls.crosschain.nuls.servive.impl;
 
 import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.TransactionSignature;
@@ -12,6 +13,7 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
+import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.util.NulsDateUtils;
@@ -24,13 +26,11 @@ import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.constant.ParamConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.model.po.CtxStatusPO;
-import io.nuls.crosschain.nuls.rpc.call.AccountCall;
-import io.nuls.crosschain.nuls.rpc.call.ChainManagerCall;
-import io.nuls.crosschain.nuls.rpc.call.ConsensusCall;
-import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
+import io.nuls.crosschain.nuls.rpc.call.*;
 import io.nuls.crosschain.nuls.servive.MainNetService;
 import io.nuls.crosschain.nuls.srorage.CtxStatusService;
 import io.nuls.crosschain.nuls.srorage.RegisteredCrossChainService;
+import io.nuls.crosschain.nuls.utils.CommonUtil;
 import io.nuls.crosschain.nuls.utils.LoggerUtil;
 import io.nuls.crosschain.nuls.utils.TxUtil;
 import io.nuls.crosschain.nuls.utils.manager.ChainManager;
@@ -42,15 +42,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.nuls.core.constant.CommonCodeConstanst.*;
-import static io.nuls.crosschain.nuls.constant.NulsCrossChainErrorCode.CHAIN_NOT_EXIST;
-import static io.nuls.crosschain.nuls.constant.NulsCrossChainErrorCode.CROSS_CHAIN_NETWORK_UNAVAILABLE;
+import static io.nuls.core.constant.CommonCodeConstanst.DATA_PARSE_ERROR;
+import static io.nuls.core.constant.CommonCodeConstanst.PARAMETER_ERROR;
+import static io.nuls.core.constant.CommonCodeConstanst.SERIALIZE_ERROR;
+import static io.nuls.core.constant.CommonCodeConstanst.SUCCESS;
+import static io.nuls.crosschain.nuls.constant.NulsCrossChainErrorCode.*;
 import static io.nuls.crosschain.nuls.constant.ParamConstant.CHAIN_ID;
 import static io.nuls.crosschain.nuls.constant.ParamConstant.TX_HASH;
 
 
 /**
  * 主网跨链模块特有方法
+ *
  * @author tag
  * @date 2019/4/23
  */
@@ -77,22 +80,22 @@ public class MainNetServiceImpl implements MainNetService {
         ChainInfo chainInfo = JSONUtils.map2pojo(params, ChainInfo.class);
         Chain chain = chainManager.getChainMap().get(nulsCrossChainConfig.getMainChainId());
         RegisteredChainMessage registeredChainMessage = registeredCrossChainService.get();
-        if(registeredChainMessage == null){
+        if (registeredChainMessage == null) {
             registeredChainMessage = new RegisteredChainMessage();
         }
-        if(registeredChainMessage.getChainInfoList() == null){
+        if (registeredChainMessage.getChainInfoList() == null) {
             List<ChainInfo> chainInfoList = new ArrayList<>();
             registeredChainMessage.setChainInfoList(chainInfoList);
         }
         registeredChainMessage.getChainInfoList().add(chainInfo);
         registeredCrossChainService.save(registeredChainMessage);
         chainManager.setRegisteredCrossChainList(registeredChainMessage.getChainInfoList());
-        LoggerUtil.commonLog.info("有新链注册跨链，chainID:{},初始验证人列表：{}",chainInfo.getChainId(),chainInfo.getVerifierList().toString());
+        LoggerUtil.commonLog.info("有新链注册跨链，chainID:{},初始验证人列表：{}", chainInfo.getChainId(), chainInfo.getVerifierList().toString());
         //创建验证人初始化交易
         try {
             Transaction verifierInitTx = TxUtil.createVerifierInitTx((List<String>) ConsensusCall.getPackerInfo(chain).get(ParamConstant.PARAM_PACK_ADDRESS_LIST), chainInfo.getRegisterTime(), chainInfo.getChainId());
             TxUtil.handleNewCtx(verifierInitTx, chain, null);
-        }catch (IOException e){
+        } catch (IOException e) {
             chain.getLogger().error(e);
             return Result.getFailed(DATA_PARSE_ERROR);
         }
@@ -105,13 +108,13 @@ public class MainNetServiceImpl implements MainNetService {
             LoggerUtil.commonLog.error("参数错误");
             return Result.getFailed(PARAMETER_ERROR);
         }
-        int chainId = (int)params.get(ParamConstant.CHAIN_ID);
-        int assetId = (int)params.get(ParamConstant.ASSET_ID);
-        String symbol = (String)params.get(ParamConstant.SYMBOL);
-        String assetName = (String)params.get(ParamConstant.ASSET_NAME);
-        boolean usable = (boolean)params.get(ParamConstant.USABLE);
-        int decimalPlaces = (int)params.get(ParamConstant.DECIMAL_PLACES);
-        AssetInfo assetInfo = new AssetInfo(assetId,symbol,assetName,usable,decimalPlaces);
+        int chainId = (int) params.get(ParamConstant.CHAIN_ID);
+        int assetId = (int) params.get(ParamConstant.ASSET_ID);
+        String symbol = (String) params.get(ParamConstant.SYMBOL);
+        String assetName = (String) params.get(ParamConstant.ASSET_NAME);
+        boolean usable = (boolean) params.get(ParamConstant.USABLE);
+        int decimalPlaces = (int) params.get(ParamConstant.DECIMAL_PLACES);
+        AssetInfo assetInfo = new AssetInfo(assetId, symbol, assetName, usable, decimalPlaces);
         chainManager.getChainInfo(chainId).getAssetInfoList().add(assetInfo);
         return Result.getSuccess(SUCCESS);
     }
@@ -122,16 +125,16 @@ public class MainNetServiceImpl implements MainNetService {
             LoggerUtil.commonLog.error("参数错误");
             return Result.getFailed(PARAMETER_ERROR);
         }
-        int chainId = (int)params.get(ParamConstant.CHAIN_ID);
-        int assetId = (int)params.get(ParamConstant.ASSET_ID);
+        int chainId = (int) params.get(ParamConstant.CHAIN_ID);
+        int assetId = (int) params.get(ParamConstant.ASSET_ID);
         RegisteredChainMessage registeredChainMessage = registeredCrossChainService.get();
-        if(assetId == 0){
+        if (assetId == 0) {
             registeredChainMessage.getChainInfoList().removeIf(chainInfo -> chainInfo.getChainId() == chainId);
-        }else{
-            for (ChainInfo chainInfo:registeredChainMessage.getChainInfoList()) {
-                if(chainInfo.getChainId() == chainId){
-                    for (AssetInfo assetInfo:chainInfo.getAssetInfoList()) {
-                        if (assetInfo.getAssetId() == assetId){
+        } else {
+            for (ChainInfo chainInfo : registeredChainMessage.getChainInfoList()) {
+                if (chainInfo.getChainId() == chainId) {
+                    for (AssetInfo assetInfo : chainInfo.getAssetInfoList()) {
+                        if (assetInfo.getAssetId() == assetId) {
                             assetInfo.setUsable(false);
                         }
                     }
@@ -181,11 +184,11 @@ public class MainNetServiceImpl implements MainNetService {
                 handleChainId = nulsCrossChainConfig.getMainChainId();
             }
             Chain chain = chainManager.getChainMap().get(handleChainId);
-            chain.getLogger().info("收到友链节点{}查询已注册链列表消息！",nodeId);
+            chain.getLogger().info("收到友链节点{}查询已注册链列表消息！", nodeId);
             RegisteredChainMessage registeredChainMessage = ChainManagerCall.getRegisteredChainInfo();
-            chain.getLogger().info("当前已注册跨链的链数量为:{}\n\n",registeredChainMessage.getChainInfoList().size());
+            chain.getLogger().info("当前已注册跨链的链数量为:{}\n\n", registeredChainMessage.getChainInfoList().size());
             NetWorkCall.sendToNode(chainId, registeredChainMessage, nodeId, CommandConstant.REGISTERED_CHAIN_MESSAGE);
-        }catch (Exception e){
+        } catch (Exception e) {
             LoggerUtil.commonLog.error(e);
         }
     }
@@ -204,13 +207,13 @@ public class MainNetServiceImpl implements MainNetService {
 
     @Override
     public Result getFriendChainCirculation(Map<String, Object> params) {
-        if(params == null || params.get(ParamConstant.CHAIN_ID) == null || params.get(ParamConstant.ASSET_IDS) == null){
+        if (params == null || params.get(ParamConstant.CHAIN_ID) == null || params.get(ParamConstant.ASSET_IDS) == null) {
             return Result.getFailed(PARAMETER_ERROR);
         }
-        int chainId = (Integer)params.get(ParamConstant.CHAIN_ID);
+        int chainId = (Integer) params.get(ParamConstant.CHAIN_ID);
         GetCirculationMessage getCirculationMessage = new GetCirculationMessage();
-        getCirculationMessage.setAssetIds((String)params.get(ParamConstant.ASSET_IDS));
-        NetWorkCall.broadcast(chainId, getCirculationMessage, CommandConstant.GET_CIRCULLAT_MESSAGE,true);
+        getCirculationMessage.setAssetIds((String) params.get(ParamConstant.ASSET_IDS));
+        NetWorkCall.broadcast(chainId, getCirculationMessage, CommandConstant.GET_CIRCULLAT_MESSAGE, true);
         return Result.getSuccess(SUCCESS);
     }
 
@@ -227,16 +230,16 @@ public class MainNetServiceImpl implements MainNetService {
             return Result.getFailed(CROSS_CHAIN_NETWORK_UNAVAILABLE);
         }
         int assetId = Integer.valueOf(params.get(ParamConstant.ASSET_ID).toString());
-        String fromAddress = (String)params.get(ParamConstant.FROM);
-        String toAddress = (String)params.get(ParamConstant.TO);
-        BigInteger amount = new BigInteger((String)params.get(ParamConstant.VALUE));
+        String fromAddress = (String) params.get(ParamConstant.FROM);
+        String toAddress = (String) params.get(ParamConstant.TO);
+        BigInteger amount = new BigInteger((String) params.get(ParamConstant.VALUE));
 
         Transaction tx = new Transaction(TxType.CONTRACT_TOKEN_CROSS_TRANSFER);
         tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
 
         CoinData coinData = new CoinData();
         List<CoinFrom> coinFromList = new ArrayList<>();
-        CoinFrom coinFrom = new CoinFrom(AddressTool.getAddress(fromAddress),chainId,assetId,amount,NulsCrossChainConstant.CROSS_TOKEN_NONCE, NulsCrossChainConstant.CORSS_TX_LOCKED);
+        CoinFrom coinFrom = new CoinFrom(AddressTool.getAddress(fromAddress), chainId, assetId, amount, NulsCrossChainConstant.CROSS_TOKEN_NONCE, NulsCrossChainConstant.CORSS_TX_LOCKED);
         coinFromList.add(coinFrom);
         List<CoinTo> coinToList = new ArrayList<>();
         CoinTo coinTo = new CoinTo(AddressTool.getAddress(toAddress), chainId, assetId, amount);
@@ -246,7 +249,6 @@ public class MainNetServiceImpl implements MainNetService {
 
         Map<String, Object> result = new HashMap<>(2);
         try {
-            tx.setCoinData(coinData.serialize());
             tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
             CtxStatusPO ctxStatusPO = new CtxStatusPO(tx, TxStatusEnum.UNCONFIRM.getStatus());
             ctxStatusService.save(tx.getHash(), ctxStatusPO, chainId);
@@ -254,27 +256,47 @@ public class MainNetServiceImpl implements MainNetService {
             message.setLocalHash(tx.getHash());
             message.setSignature(null);
             Map packerInfo = ConsensusCall.getPackerInfo(chain);
-            if (packerInfo != null ) {
-                String password = (String) packerInfo.get(ParamConstant.PARAM_PASSWORD);
-                String address = (String) packerInfo.get(ParamConstant.PARAM_ADDRESS);
-                if(StringUtils.isNotBlank(address)){
-                    List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
-                    TransactionSignature transactionSignature = new TransactionSignature();
-                    P2PHKSignature p2PHKSignature = AccountCall.signDigest(address, password, tx.getHash().getBytes());
-                    p2PHKSignatures.add(p2PHKSignature);
-                    transactionSignature.setP2PHKSignatures(p2PHKSignatures);
-                    tx.setTransactionSignature(transactionSignature.serialize());
-                    message.setSignature(p2PHKSignature.serialize());
-                }
+            List<String> packers = (List<String>) packerInfo.get("packAddressList");
+            int verifierSignCount = CommonUtil.getByzantineCount(packers, chain, true);
+            int txSize = tx.size();
+            txSize += verifierSignCount * P2PHKSignature.SERIALIZE_LENGTH;
+            txSize += coinData.size();
+
+            //计算手续费
+            Map<String, Object> balanceResult = LedgerCall.getBalanceAndNonce(chain, fromAddress, nulsCrossChainConfig.getMainChainId(), nulsCrossChainConfig.getMainAssetId());
+            byte[] nonce = RPCUtil.decode((String) balanceResult.get("nonce"));
+            BigInteger available = new BigInteger(balanceResult.get("available").toString());
+            BigInteger targetFee = TransactionFeeCalculator.getCrossTxFee(txSize);
+            CoinFrom feeFrom = new CoinFrom(AddressTool.getAddress(fromAddress), nulsCrossChainConfig.getMainChainId(), nulsCrossChainConfig.getMainAssetId(), targetFee, nonce, (byte) 0);
+            txSize += feeFrom.size();
+            targetFee = TransactionFeeCalculator.getCrossTxFee(txSize);
+            feeFrom.setAmount(targetFee);
+            if (BigIntegerUtils.isLessThan(available, targetFee)) {
+                chain.getLogger().warn("手续费不足");
+                return Result.getFailed(INSUFFICIENT_FEE);
             }
+            coinData.addFrom(feeFrom);
+            tx.setCoinData(coinData.serialize());
+            String password = (String) packerInfo.get(ParamConstant.PARAM_PASSWORD);
+            String address = (String) packerInfo.get(ParamConstant.PARAM_ADDRESS);
+            if (StringUtils.isNotBlank(address)) {
+                List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
+                TransactionSignature transactionSignature = new TransactionSignature();
+                P2PHKSignature p2PHKSignature = AccountCall.signDigest(address, password, tx.getHash().getBytes());
+                p2PHKSignatures.add(p2PHKSignature);
+                transactionSignature.setP2PHKSignatures(p2PHKSignatures);
+                tx.setTransactionSignature(transactionSignature.serialize());
+                message.setSignature(p2PHKSignature.serialize());
+            }
+
             NetWorkCall.broadcast(chainId, message, CommandConstant.BROAD_CTX_SIGN_MESSAGE, false);
             result.put(TX_HASH, tx.getHash().toHex());
             result.put(ParamConstant.TX, RPCUtil.encode(tx.serialize()));
             return Result.getSuccess(SUCCESS).setData(result);
-        }catch (IOException e){
+        } catch (IOException e) {
             Log.error(e);
             return Result.getFailed(SERIALIZE_ERROR);
-        }catch (NulsException e){
+        } catch (NulsException e) {
             Log.error(e);
             return Result.getFailed(e.getErrorCode());
         }
