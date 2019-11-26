@@ -268,19 +268,12 @@ public class MainNetServiceImpl implements MainNetService {
             }
             coinData.addFrom(feeFrom);
             tx.setCoinData(coinData.serialize());
-            if (!TransactionCall.sendTx(chain, RPCUtil.encode(tx.serialize()))) {
-                chain.getLogger().error("跨链交易发送交易模块失败\n\n");
-                throw new NulsException(INTERFACE_CALL_FAILED);
-            }
             result.put(TX_HASH, tx.getHash().toHex());
             result.put(ParamConstant.TX, RPCUtil.encode(tx.serialize()));
             return Result.getSuccess(SUCCESS).setData(result);
         } catch (IOException e) {
             Log.error(e);
             return Result.getFailed(SERIALIZE_ERROR);
-        } catch (NulsException e) {
-            Log.error(e);
-            return Result.getFailed(e.getErrorCode());
         }
     }
 }
