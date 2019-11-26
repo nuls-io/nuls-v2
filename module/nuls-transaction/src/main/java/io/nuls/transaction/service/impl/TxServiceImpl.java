@@ -1075,7 +1075,6 @@ public class TxServiceImpl implements TxService {
                                 crossTransferList.add(RPCUtil.encode(txPackageWrapper.getTx().serialize()));
                             }
                         }
-                        ksdjfhkljsdhaflk
                         consensusList.addAll(scNewConsensusList);
                         crossTransferList.addAll(scNewTokenCrossTransferList);
                         if (!consensusList.isEmpty()) {
