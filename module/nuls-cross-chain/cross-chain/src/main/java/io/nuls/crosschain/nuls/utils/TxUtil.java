@@ -138,6 +138,71 @@ public class TxUtil {
     }
 
     /**
+     * 本链发起的跨链交易被打包之后，发起拜占庭验证
+     * After the cross chain transaction initiated by this chain is packaged, Byzantine verification is initiated
+     * */
+    @SuppressWarnings("unchecked")
+    public static void localCtxByzantine(Transaction ctx, Chain chain){
+        int chainId = chain.getChainId();
+        NulsHash hash = ctx.getHash();
+        String hashHex = hash.toHex();
+        if(NulsCrossChainConstant.CTX_STATE_PROCESSING.equals(chain.getCtxStageMap().get(hash))){
+            chain.getLogger().info("已经收到过该交易,hash:{}",hashHex);
+            return;
+        }
+        chain.getCtxStageMap().putIfAbsent(hash, NulsCrossChainConstant.CTX_STATE_PROCESSING);
+        BroadCtxSignMessage message = new BroadCtxSignMessage();
+        message.setLocalHash(hash);
+        try {
+            Map packerInfo = ConsensusCall.getPackerInfo(chain);
+            String password = (String) packerInfo.get("password");
+            String address = (String) packerInfo.get("address");
+            List<String> packers = (List<String>) packerInfo.get("packAddressList");
+            boolean isPacker = !StringUtils.isBlank(address);
+            boolean ctxChange = false;
+            TransactionSignature transactionSignature = new TransactionSignature();
+            transactionSignature.parse(ctx.serialize(),0);
+            //如果不是主网则转为主网协议跨链交易
+            if (!config.isMainNet()) {
+                Transaction mainCtx= TxUtil.friendConvertToMain(chain, ctx, null, TxType.CROSS_CHAIN);
+                NulsHash convertHash = mainCtx.getHash();
+                convertCtxService.save(hash, mainCtx, chainId);
+                if (isPacker){
+                    P2PHKSignature p2PHKSignature = AccountCall.signDigest(address, password, convertHash.getBytes());
+                    transactionSignature.getP2PHKSignatures().add(p2PHKSignature);
+                    message.setSignature(p2PHKSignature.serialize());
+                    ctxChange = true;
+                }
+            }else{
+                //出块节点，且不为转账账户
+                if(!StringUtils.isBlank(address)){
+                    if(ctx.getCoinDataInstance().getFromAddressList().contains(address)){
+                        message.setSignature(transactionSignature.getP2PHKSignatures().get(0).serialize());
+                    }else{
+                        P2PHKSignature p2PHKSignature = AccountCall.signDigest(address, password, hash.getBytes());
+                        transactionSignature.getP2PHKSignatures().add(p2PHKSignature);
+                        message.setSignature(p2PHKSignature.serialize());
+                        ctxChange = true;
+                    }
+                }
+            }
+            if(MessageUtil.signByzantineInChain(chain, ctx, transactionSignature, packers)){
+                ctxChange = true;
+            }
+            if(ctxChange){
+                CtxStatusPO ctxStatusPO = ctxStatusService.get(hash, chainId);
+                ctxStatusPO.setTx(ctx);
+                ctxStatusPO.setStatus(TxStatusEnum.CONFIRMED.getStatus());
+                ctxStatusService.save(hash, ctxStatusPO, chainId);
+            }
+            NetWorkCall.broadcast(chainId, message, CommandConstant.BROAD_CTX_SIGN_MESSAGE, false);
+            chain.getCtxStageMap().remove(hash);
+        }catch (NulsException | IOException e ){
+            chain.getLogger().error(e);
+        }
+    }
+
+    /**
      * 跨链交易处理
      * Cross-Chain Transaction Processing
      * */

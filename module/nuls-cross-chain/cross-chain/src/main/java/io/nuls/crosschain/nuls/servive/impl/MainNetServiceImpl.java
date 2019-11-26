@@ -252,19 +252,9 @@ public class MainNetServiceImpl implements MainNetService {
 
         Map<String, Object> result = new HashMap<>(2);
         try {
-            tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
-            CtxStatusPO ctxStatusPO = new CtxStatusPO(tx, TxStatusEnum.UNCONFIRM.getStatus());
-            ctxStatusService.save(tx.getHash(), ctxStatusPO, chainId);
-            BroadCtxSignMessage message = new BroadCtxSignMessage();
-            message.setLocalHash(tx.getHash());
-            message.setSignature(null);
-            Map packerInfo = ConsensusCall.getPackerInfo(chain);
-            List<String> packers = (List<String>) packerInfo.get("packAddressList");
-            int verifierSignCount = CommonUtil.getByzantineCount(packers, chain, true);
             int txSize = tx.size();
-            txSize += verifierSignCount * P2PHKSignature.SERIALIZE_LENGTH;
+            txSize += P2PHKSignature.SERIALIZE_LENGTH;
             txSize += coinData.size();
-
             //计算手续费
             BigInteger targetFee = TransactionFeeCalculator.getCrossTxFee(txSize);
             CoinFrom feeFrom = new CoinFrom(AddressTool.getAddress(contractAddress), nulsCrossChainConfig.getMainChainId(), nulsCrossChainConfig.getMainAssetId(), targetFee, HexUtil.decode(contractToken), (byte) 0);
@@ -278,19 +268,10 @@ public class MainNetServiceImpl implements MainNetService {
             }
             coinData.addFrom(feeFrom);
             tx.setCoinData(coinData.serialize());
-            String password = (String) packerInfo.get(ParamConstant.PARAM_PASSWORD);
-            String address = (String) packerInfo.get(ParamConstant.PARAM_ADDRESS);
-            if (StringUtils.isNotBlank(address)) {
-                List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
-                TransactionSignature transactionSignature = new TransactionSignature();
-                P2PHKSignature p2PHKSignature = AccountCall.signDigest(address, password, tx.getHash().getBytes());
-                p2PHKSignatures.add(p2PHKSignature);
-                transactionSignature.setP2PHKSignatures(p2PHKSignatures);
-                tx.setTransactionSignature(transactionSignature.serialize());
-                message.setSignature(p2PHKSignature.serialize());
+            if (!TransactionCall.sendTx(chain, RPCUtil.encode(tx.serialize()))) {
+                chain.getLogger().error("跨链交易发送交易模块失败\n\n");
+                throw new NulsException(INTERFACE_CALL_FAILED);
             }
-
-            NetWorkCall.broadcast(chainId, message, CommandConstant.BROAD_CTX_SIGN_MESSAGE, false);
             result.put(TX_HASH, tx.getHash().toHex());
             result.put(ParamConstant.TX, RPCUtil.encode(tx.serialize()));
             return Result.getSuccess(SUCCESS).setData(result);

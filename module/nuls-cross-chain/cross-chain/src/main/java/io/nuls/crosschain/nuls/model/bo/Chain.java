@@ -27,12 +27,6 @@ import java.util.concurrent.LinkedBlockingQueue;
  **/
 public class Chain {
     /**
-     * 本节点已签名的跨链交易及签名
-     * Cross-Chain Transaction and Signature of Signed Node
-     * */
-    private Map<NulsHash, P2PHKSignature> signedCtxMap;
-
-    /**
      * 链基础配置信息
      * Chain Foundation Configuration Information
      */
@@ -141,7 +135,6 @@ public class Chain {
     private boolean mainChain;
 
     public Chain(){
-        signedCtxMap = new HashMap<>();
         hashNodeIdMap = new ConcurrentHashMap<>();
         otherHashNodeIdMap = new ConcurrentHashMap<>();
         ctxStageMap = new ConcurrentHashMap<>();
@@ -156,14 +149,6 @@ public class Chain {
         otherCtxMessageQueue = new LinkedBlockingQueue<>();
         getCtxStateQueue = new LinkedBlockingQueue<>();
         mainChain = false;
-    }
-
-    public Map<NulsHash, P2PHKSignature> getSignedCtxMap() {
-        return signedCtxMap;
-    }
-
-    public void setSignedCtxMap(Map<NulsHash, P2PHKSignature> signedCtxMap) {
-        this.signedCtxMap = signedCtxMap;
     }
 
     public int getChainId(){
