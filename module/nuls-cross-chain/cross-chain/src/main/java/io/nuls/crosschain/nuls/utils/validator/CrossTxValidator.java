@@ -137,10 +137,12 @@ public class CrossTxValidator {
             throw new NulsException(NulsCrossChainErrorCode.TO_ADDRESS_ERROR);
         }
         //本链协议跨链交易不需要签名拜占庭验证，只需验证交易签名
-        if(chain.getChainId() == fromChainId && tx.getType() == TxType.CROSS_CHAIN){
-            if(!SignatureUtil.validateCtxSignture(tx)){
-                chain.getLogger().error("Signature verification failed");
-                throw new NulsException(NulsCrossChainErrorCode.SIGNATURE_ERROR);
+        if(chain.getChainId() == fromChainId){
+            if(tx.getType() == TxType.CROSS_CHAIN){
+                if(!SignatureUtil.validateCtxSignture(tx)){
+                    chain.getLogger().error("Signature verification failed");
+                    throw new NulsException(NulsCrossChainErrorCode.SIGNATURE_ERROR);
+                }
             }
         }else{
             Transaction realCtx = tx;
