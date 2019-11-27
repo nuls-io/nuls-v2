@@ -289,7 +289,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         /*
         如果为主网向友链获取完整跨链交易，则需要将本链协议跨链交易转换为对应主网协议跨链交易返回给主网节点
         */
-        if(!config.isMainNet() && localCtx.getType() == config.getCrossCtxType()){
+        if(!config.isMainNet() && (localCtx.getType() == config.getCrossCtxType() || localCtx.getType() == TxType.CONTRACT_TOKEN_CROSS_TRANSFER)){
             try {
                 localCtx = TxUtil.friendConvertToMain(chain, localCtx, null, TxType.CROSS_CHAIN);
             }catch (Exception e){
