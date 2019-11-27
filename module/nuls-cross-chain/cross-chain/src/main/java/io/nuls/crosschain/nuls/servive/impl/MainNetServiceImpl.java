@@ -35,6 +35,7 @@ import io.nuls.crosschain.nuls.utils.CommonUtil;
 import io.nuls.crosschain.nuls.utils.LoggerUtil;
 import io.nuls.crosschain.nuls.utils.TxUtil;
 import io.nuls.crosschain.nuls.utils.manager.ChainManager;
+import io.nuls.crosschain.nuls.utils.validator.CrossTxValidator;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -70,6 +71,9 @@ public class MainNetServiceImpl implements MainNetService {
 
     @Autowired
     private CtxStatusService ctxStatusService;
+
+    @Autowired
+    private CrossTxValidator txValidator;
 
     @Override
     @SuppressWarnings("unchecked")
@@ -268,12 +272,19 @@ public class MainNetServiceImpl implements MainNetService {
             }
             coinData.addFrom(feeFrom);
             tx.setCoinData(coinData.serialize());
+            if(!txValidator.validateTx(chain, tx, null)){
+                chain.getLogger().error("Transaction validation failed");
+                return Result.getFailed(COINDATA_VERIFY_FAIL);
+            }
             result.put(TX_HASH, tx.getHash().toHex());
             result.put(ParamConstant.TX, RPCUtil.encode(tx.serialize()));
             return Result.getSuccess(SUCCESS).setData(result);
         } catch (IOException e) {
             Log.error(e);
             return Result.getFailed(SERIALIZE_ERROR);
+        }catch (NulsException e){
+            Log.error(e);
+            return Result.getFailed(e.getErrorCode());
         }
     }
 }
