@@ -230,7 +230,7 @@ public class MessageUtil {
         //交易签名拜占庭
         int byzantineCount = CommonUtil.getByzantineCount(ctx, handleAddressList, chain);
         //如果为友链中跨链转账交易，则需要减掉本链协议交易签名
-        if(ctx.getType() == config.getCrossCtxType() || ctx.getType() == TxType.CONTRACT_TOKEN_CROSS_TRANSFER){
+        if(ctx.getType() == config.getCrossCtxType()){
             int fromChainId = AddressTool.getChainIdByAddress(ctx.getCoinDataInstance().getFrom().get(0).getAddress());
             if(chain.getChainId() == fromChainId){
                 Set<String> fromAddressList = ctx.getCoinDataInstance().getFromAddressList();

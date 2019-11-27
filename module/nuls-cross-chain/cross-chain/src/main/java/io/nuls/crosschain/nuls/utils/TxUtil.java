@@ -176,7 +176,7 @@ public class TxUtil {
             }else{
                 //出块节点，且不为转账账户
                 if(!StringUtils.isBlank(address)){
-                    if(ctx.getCoinDataInstance().getFromAddressList().contains(address)){
+                    if(ctx.getType() == TxType.CROSS_CHAIN && ctx.getCoinDataInstance().getFromAddressList().contains(address)){
                         message.setSignature(transactionSignature.getP2PHKSignatures().get(0).serialize());
                     }else{
                         P2PHKSignature p2PHKSignature = AccountCall.signDigest(address, password, hash.getBytes());
