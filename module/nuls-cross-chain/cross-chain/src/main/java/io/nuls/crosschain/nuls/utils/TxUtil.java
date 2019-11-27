@@ -161,7 +161,12 @@ public class TxUtil {
             boolean isPacker = !StringUtils.isBlank(address);
             boolean ctxChange = false;
             TransactionSignature transactionSignature = new TransactionSignature();
-            transactionSignature.parse(ctx.serialize(),0);
+            if(ctx.getTransactionSignature() != null){
+                transactionSignature.parse(ctx.getTransactionSignature(),0);
+            }else{
+                List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
+                transactionSignature.setP2PHKSignatures(p2PHKSignatures);
+            }
             //如果不是主网则转为主网协议跨链交易
             if (!config.isMainNet()) {
                 Transaction mainCtx= TxUtil.friendConvertToMain(chain, ctx, null, TxType.CROSS_CHAIN);
