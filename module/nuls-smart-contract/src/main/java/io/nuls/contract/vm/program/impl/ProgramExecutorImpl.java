@@ -361,16 +361,20 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                 }
             }
             if(contractChanges == null) {
+                //Log.info("新建map和heap.changes");
                 contractChanges = new HashMap<>();
                 contractChanges.put(contractAddress, vm.heap.changes);
             } else {
                 Set<ObjectRef> changesObjectRefs = contractChanges.get(contractAddress);
                 if(changesObjectRefs != null) {
                     if(programInvoke.isInternalCall()) {
-                        //Log.info("共享heap.changes");
-                        vm.heap.changes.addAll(changesObjectRefs);
+                        //Log.info("共享heap.changes: {}", changesObjectRefs.hashCode());
+                        vm.heap.changes = changesObjectRefs;
+                    } else {
+                        //Log.info("问题heap.changes");
                     }
                 } else {
+                    //Log.info("新增heap.changes");
                     contractChanges.put(contractAddress, vm.heap.changes);
                 }
             }

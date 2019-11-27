@@ -62,7 +62,7 @@ public class Heap {
     //public final Map<String, Object> arrays = new HashMap<>(1024);
 
     //TODO pierre 标记
-    public final Set<ObjectRef> changes = new LinkedHashSet<>(1024);
+    public Set<ObjectRef> changes = new LinkedHashSet<>(1024);
     // end code by pierre
     //private final Set<ObjectRef> changes = new HashSet<>(1024);
 
@@ -619,14 +619,16 @@ public class Heap {
         stateObjectRefs(stateObjectRefs, staticObjectRef);
         stateObjectRefs(stateObjectRefs, this.contract);
         List<ObjectRef> clearList = new ArrayList<>();
-        int j = 0;
+        //int j = 0;
         for (ObjectRef objectRef : stateObjectRefs) {
-            j++;
+            //j++;
             if (!this.changes.contains(objectRef)) {
+                //Log.warn("[{}]null changes objectRef: {}", j, objectRef);
                 continue;
             }
             Map<String, Object> fields = getFieldsInit(objectRef);
             if (fields == null) {
+                //Log.info("[{}]null fields objectRef: {}", j, objectRef);
                 continue;
             }
             String key = JsonUtils.encode(objectRef, classNames);

@@ -31,6 +31,7 @@ import io.nuls.contract.vm.program.ProgramMethod;
 import io.nuls.contract.vm.program.ProgramResult;
 import io.nuls.contract.vm.program.ProgramTransfer;
 import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
@@ -38,7 +39,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.List;
@@ -95,7 +95,158 @@ import java.util.List;
  *  15. 双合约测试，调用者向A合约转入100，A调用B转入100，B使用30，转移70给调用者
  *  期望执行结果中，有退回到调用者的70
  *
- *  //TODO pierre 增加数组类型的成员变量值的单元测试
+ *  16. 单合约测试，A有一个int数组变量，长度为3，值为[0, 1, 2]，修改数组第二个元素为8
+ *                  有一个String数组变量，长度为3，值为["a", "b", "c"]，修改数组第二个元素为f
+ *                  有一个Integer数组变量，长度为4，值为[5, 6, 7, 8]，修改数组第一个元素为2
+ *                  有一个double数组变量，长度为5, 值为[2.3, 4.5, 6.7, 8.9, 10.11]，修改第五个元素为12.13
+ *  期望返回值a=082 afc 2678 2.34.56.78.912.13，调用view方法期望a=a82 afc 2678 2.34.56.78.912.13
+ *
+ *  17. 单合约测试，A有一个int数组变量，长度为3，值为[0, 1, 2]，修改数组第二个元素为8，再修改为7
+ *                  有一个String数组变量，长度为3，值为["a", "b", "c"]，修改数组第二个元素为f，再修改为g
+ *                  有一个Integer数组变量，长度为4，值为[5, 6, 7, 8]，修改数组第一个元素为2，再修改为1
+ *                  有一个double数组变量，长度为5, 值为[2.3, 4.5, 6.7, 8.9, 10.11]，修改第五个元素为12.13，再修改为11.13
+ *  期望返回值a=072 agc 1678 2.34.56.78.911.13，调用view方法期望a=a72 agc 1678 2.34.56.78.911.13
+ *
+ *  18. 单合约测试，A有一个int数组变量，长度为3，值为[0, 1, 2]，修改数组第二个元素为8，私有方法再修改为7
+ *                  有一个String数组变量，长度为3，值为["a", "b", "c"]，修改数组第二个元素为f，再修改为g
+ *                  有一个Integer数组变量，长度为4，值为[5, 6, 7, 8]，修改数组第一个元素为2，在修改为1
+ *                  有一个double数组变量，长度为5, 值为[2.3, 4.5, 6.7, 8.9, 10.11]，修改第五个元素为12.13，再修改为11.13
+ *  期望返回值a=072 agc 1678 2.34.56.78.911.13，调用view方法期望a=a72 agc 1678 2.34.56.78.911.13
+ *
+ *  19. 双合约测试，A有一个int数组变量，长度为3，值为[0, 1, 2]，
+ *                  有一个String数组变量，长度为3，值为["a", "b", "c"]，
+ *                  有一个Integer数组变量，长度为4，值为[5, 6, 7, 8]，
+ *                  有一个double数组变量，长度为5, 值为[2.3, 4.5, 6.7, 8.9, 10.11]，
+ *         A调用B执行：B调用A，修改int数组第二个元素为8，私有方法再修改为7
+ *                          修改String数组第二个元素为f，再修改为g
+ *                          修改Integer数组第一个元素为2，在修改为1
+ *                          修改double数组第五个元素为12.13，再修改为11.13
+ *  期望返回值a=072 agc 1678 2.34.56.78.911.13，调用view方法期望a=a72 agc 1678 2.34.56.78.911.13
+ *
+ *  20. 双合约测试，A有一个int数组变量，长度为3，值为[0, 1, 2]，修改数组第二个元素为8
+ *                  有一个String数组变量，长度为3，值为["a", "b", "c"]，修改数组第二个元素为f
+ *                  有一个Integer数组变量，长度为4，值为[5, 6, 7, 8]，修改数组第一个元素为2
+ *                  有一个double数组变量，长度为5， 值为[2.3, 4.5, 6.7, 8.9, 10.11]，修改第五个元素为12.13
+ *         A调用B执行：B调用A，查询t1=int[1], t2=String[1], t3=Integer[0], t4=double[4]
+ *                   B调用A，修改以下数据
+ *                          修改int数组第二个元素为 int[1] + t1  ->(8 + 8)
+ *                          修改String数组第三个元素为 String[2] + t2  ->("c" + "f")
+ *                          修改Integer数组第二个元素为 Integer[0] + t3  ->(2 + 2)
+ *                          修改double数组第三个元素为 double[1] + t4  ->(4.5 + 12.13)
+ *  期望返回值a=0162 afcf 2478 2.34.516.638.912.13，调用view方法期望a=0162 afcf 2478 2.34.516.638.912.13
+ *
+ *  21. 双合约测试，A有一个int数组变量，长度为3，值为[0, 1, 2]，修改数组第二个元素为8
+ *                  有一个String数组变量，长度为3，值为["a", "b", "c"]，修改数组第二个元素为f
+ *                  有一个Integer数组变量，长度为4，值为[5, 6, 7, 8]，修改数组第一个元素为2
+ *                  有一个double数组变量，长度为5， 值为[2.3, 4.5, 6.7, 8.9, 10.11]，修改第五个元素为12.13
+ *         A调用B执行：B调用A，查询t1=int[1], t2=String[1], t3=Integer[0], t4=double[4]
+ *                   B调用A，修改以下数据
+ *                          修改int数组第二个元素为 int[1] + t1  ->(8 + 8)
+ *                          修改String数组第三个元素为 String[2] + t2  ->("c" + "f")
+ *                          修改Integer数组第二个元素为 Integer[0] + t3  ->(2 + 2)
+ *                          修改double数组第三个元素为 double[1] + t4  ->(4.5 + 12.13)
+ *         此时a=0162 afcf 2478 2.34.516.638.912.13
+ *         A修改以下数据
+ *                  修改int数组第二个元素为7
+ *                  修改String数组第二个元素为g
+ *                  修改Integer数组第一个元素为1
+ *                  修改double数组第五个元素为11.13
+ *  期望返回值a=072 agcf 1478 2.34.516.638.911.13，调用view方法期望a=072 agcf 1478 2.34.516.638.911.13
+ *
+ *  22. 双合约测试，A有一个int数组变量，长度为3，值为[0, 1, 2]，修改数组第二个元素为8
+ *                  有一个String数组变量，长度为3，值为["a", "b", "c"]，修改数组第二个元素为f
+ *                  有一个Integer数组变量，长度为4，值为[5, 6, 7, 8]，修改数组第一个元素为2
+ *                  有一个double数组变量，长度为5， 值为[2.3, 4.5, 6.7, 8.9, 10.11]，修改第五个元素为12.13
+ *                  0,8,2| a,f,c| 2,6,7,8| 2.3,4.5,6.7,8.9,12.13
+ *         A调用B执行：B调用A，查询t1=int[1], t2=String[1], t3=Integer[0], t4=double[4]
+ *                   B调用A，修改以下数据
+ *                          修改int数组第二个元素为 int[1] + t1  ->(8 + 8)
+ *                          修改String数组第三个元素为 String[2] + t2  ->("c" + "f")
+ *                          修改Integer数组第二个元素为 Integer[0] + t3  ->(2 + 2)
+ *                          修改double数组第三个元素为 double[1] + t4  ->(4.5 + 12.13)
+ *                   此时数组值依次为
+ *                   0,16,2| a,f,cf| 2,4,7,8| 2.3,4.5,16.63,8.9,12.13
+ *                   B调用A，查询y1=int[2], y2=String[2], y3=Integer[2], y4=double[2]
+ *                   B调用A，修改以下数据
+ *                          修改int数组第三个元素为 int[1] + y1  ->(16 + 2)
+ *                          修改String数组第一个元素为 String[0] + y2  ->("a" + "cf")
+ *                          修改Integer数组第三个元素为 Integer[1] + y3  ->(4 + 7)
+ *                          修改double数组第四个元素为 double[1] + y4  ->(4.5 + 16.63)
+ *                   B 成员变量 B-int数组[t1, y1]  ->8, 2
+ *                             B-String数组[t2, y2]  -> "f", "cf"
+ *                             B-Integer数组[t3, y3]  -> 2, 7
+ *                             B-double数组[t4, y4]  -> 12.13, 16.63
+ *  期望返回值a=01618 acffcf 24118 2.34.516.6321.1312.13|82 fcf 27 12.1316.63
+ *  调用view方法期望a=01618 acffcf 24118 2.34.516.6321.1312.13
+ *  调用view方法期望b=82 fcf 27 12.1316.63
+ *
+ *  23. 双合约测试，A有一个int数组变量，长度为3，值为[0, 1, 2]，
+ *                  有一个String数组变量，长度为3，值为["a", "b", "c"]，
+ *                  有一个Integer数组变量，长度为4，值为[5, 6, 7, 8]，
+ *                  有一个double数组变量，长度为5， 值为[2.3, 4.5, 6.7, 8.9, 10.11]，
+ *                B有一个int数组变量，长度为2，值为[10, 11]，
+ *                  有一个String数组变量，长度为2，值为["qa", "qb"]，
+ *                  有一个Integer数组变量，长度为2，值为[25, 26]，
+ *                  有一个double数组变量，长度为2， 值为[32.3, 34.5]，
+ *         A调用B，查询t1=B-int[1], t2=B-String[1], t3=B-Integer[1], t4=B-double[1]
+ *         A修改以下数据
+ *                  修改int数组第二个元素为 int[1] + t1  ->(1 + 11)
+ *                  修改String数组第三个元素为 String[2] + t2  ->("c" + "qb")
+ *                  修改Integer数组第二个元素为 Integer[0] + t3  ->(5 + 26)
+ *                  修改double数组第三个元素为 double[1] + t4  ->(4.5 + 34.5)
+ *         此时A数据为
+ *         0,12,2 a,b,cqb 5,31,7,8 2.3,4.5,39,8.9,10.11
+ *         A调用B执行：修改以下数据
+ *                          修改B-int[0]为 2
+ *                          修改B-String[0]为 2
+ *                          修改B-Integer[0]为 2
+ *                          修改B-double[0]为 2
+ *                   此时B数组值依次为
+ *                   211 2qb 226 234.5
+ *         A调用B，查询y1=B-int[0], y2=B-String[0], y3=B-Integer[0], y4=B-double[0]
+ *         A修改以下数据
+ *                  修改int数组第二个元素为 int[1] + y1  ->(12 + 2)
+ *                  修改String数组第三个元素为 String[2] + y2  ->("cqb" + "2")
+ *                  修改Integer数组第二个元素为 Integer[0] + y3  ->(5 + 2)
+ *                  修改double数组第三个元素为 double[1] + y4  ->(4.5 + 2)
+ *  期望返回值a=0142 abcqb2 5778 2.34.56.58.910.11|211 2qb 226 234.5
+ *  调用view方法期望a=0142 abcqb2 5778 2.34.56.58.910.11
+ *  调用view方法期望b=211 2qb 226 234.5
+ *
+ *  24. 双合约测试，A有一个int数组变量，长度为3，值为[0, 1, 2]，
+ *                  有一个String数组变量，长度为3，值为["a", "b", "c"]，
+ *                  有一个Integer数组变量，长度为4，值为[5, 6, 7, 8]，
+ *                  有一个double数组变量，长度为5， 值为[2.3, 4.5, 6.7, 8.9, 10.11]，
+ *                B有一个int数组变量，长度为2，值为[10, 11]，
+ *                  有一个String数组变量，长度为2，值为["qa", "qb"]，
+ *                  有一个Integer数组变量，长度为2，值为[25, 26]，
+ *                  有一个double数组变量，长度为2， 值为[32.3, 34.5]，
+ *         A调用B执行：修改以下数据
+ *                          修改B-int[0]为 2
+ *                          修改B-String[0]为 2
+ *                          修改B-Integer[0]为 2
+ *                          修改B-double[0]为 2
+ *                   此时B数组值依次为
+ *                   211 2qb 226 234.5
+ *         A调用B执行：修改以下数据
+ *                          修改B-int[0]为 3
+ *                          修改B-String[0]为 3
+ *                          修改B-Integer[0]为 3
+ *                          修改B-double[0]为 3
+ *                   此时B数组值依次为
+ *                   311 3qb 326 334.5
+ *         A分割返回值`311 3qb 326 334.5`，得到
+ *                      y1=311, y2="3qb", y3=326, y4=334.5
+ *         A修改以下数据
+ *                  修改int数组第二个元素为 int[1] + y1  ->(1 + 311)
+ *                  修改String数组第三个元素为 String[2] + y2  ->("c" + "3qb")
+ *                  修改Integer数组第二个元素为 Integer[0] + y3  ->(5 + 326)
+ *                  修改double数组第三个元素为 double[1] + y4  ->(4.5 + 334.5)
+ *  期望返回值a=03122 abc3qb 533178 2.34.5339.08.910.11|311 3qb 326 334.5
+ *  调用view方法期望a=03122 abc3qb 533178 2.34.5339.08.910.11
+ *  调用view方法期望b=311 3qb 326 334.5
+ *
+ *
  * @author: PierreLuo
  * @date: 2019-06-11
  */
@@ -266,7 +417,64 @@ public class ContractVmTest extends MockBase {
         Assert.assertTrue("测试方法[test15]期望 退回70", success);
     }
 
-    private byte[] callVmTest(byte[] prevStateRoot, String method, String expect, boolean containViewExpect) throws Exception {
+    @Test
+    public void test16() throws Exception{
+        this.callVmTest(prevStateRoot, "test16", "082 afc 2678 2.34.56.78.912.13", "arrayContact");
+    }
+
+    @Test
+    public void test17() throws Exception{
+        this.callVmTest(prevStateRoot, "test17", "072 agc 1678 2.34.56.78.911.13", "arrayContact");
+    }
+
+    @Test
+    public void test18() throws Exception{
+        this.callVmTest(prevStateRoot, "test18", "072 agc 1678 2.34.56.78.911.13", "arrayContact");
+    }
+
+    @Test
+    public void test19() throws Exception{
+        this.callVmTest(prevStateRoot, "test19", "072 agc 1678 2.34.56.78.911.13", "arrayContact");
+    }
+
+    @Test
+    public void test20() throws Exception{
+        this.callVmTest(prevStateRoot, "test20", "0162 afcf 2478 2.34.516.638.912.13", "arrayContact");
+    }
+
+    @Test
+    public void test21() throws Exception{
+        this.callVmTest(prevStateRoot, "test21", "072 agcf 1478 2.34.516.638.911.13", "arrayContact");
+    }
+
+    @Test
+    public void test22() throws Exception{
+        byte[] currentStateRoot = this.callVmTest(prevStateRoot, "test22", "01618 acffcf 24118 2.34.516.6321.1312.13|82 fcf 27 12.1316.63", false);
+        String a = super.view(contractA, currentStateRoot, "arrayContact", new String[]{});
+        Assert.assertTrue(String.format("测试方法[test22]view期望a=\"01618 acffcf 24118 2.34.516.6321.1312.13\", 实际a=%s", a), "01618 acffcf 24118 2.34.516.6321.1312.13".equals(a));
+        String b = super.view(contractB, currentStateRoot, "arrayContact", new String[]{});
+        Assert.assertTrue(String.format("测试方法[test22]view期望b=\"82 fcf 27 12.1316.63\", 实际b=%s", b), "82 fcf 27 12.1316.63".equals(b));
+    }
+
+    @Test
+    public void test23() throws Exception{
+        byte[] currentStateRoot = this.callVmTest(prevStateRoot, "test23", "0142 abcqb2 5778 2.34.56.58.910.11|211 2qb 226 234.5", false);
+        String a = super.view(contractA, currentStateRoot, "arrayContact", new String[]{});
+        Assert.assertTrue(String.format("测试方法[test23]view期望a=\"0142 abcqb2 5778 2.34.56.58.910.11\", 实际a=%s", a), "0142 abcqb2 5778 2.34.56.58.910.11".equals(a));
+        String b = super.view(contractB, currentStateRoot, "arrayContact", new String[]{});
+        Assert.assertTrue(String.format("测试方法[test23]view期望b=\"211 2qb 226 234.5\", 实际b=%s", b), "211 2qb 226 234.5".equals(b));
+    }
+
+    @Test
+    public void test24() throws Exception{
+        byte[] currentStateRoot = this.callVmTest(prevStateRoot, "test24", "03122 abc3qb 533178 2.34.5339.08.910.11|311 3qb 326 334.5", false);
+        String a = super.view(contractA, currentStateRoot, "arrayContact", new String[]{});
+        Assert.assertTrue(String.format("测试方法[test24]view期望a=\"03122 abc3qb 533178 2.34.5339.08.910.11\", 实际a=%s", a), "03122 abc3qb 533178 2.34.5339.08.910.11".equals(a));
+        String b = super.view(contractB, currentStateRoot, "arrayContact", new String[]{});
+        Assert.assertTrue(String.format("测试方法[test24]view期望b=\"311 3qb 326 334.5\", 实际b=%s", b), "311 3qb 326 334.5".equals(b));
+    }
+
+    private byte[] callVmTest(byte[] prevStateRoot, String method, String expect, String viewMethod) throws Exception {
         Object[] objects;
         ProgramResult programResult;
         //objects = super.call(contractA, prevStateRoot, SENDER, "resetA", new String[]{});
@@ -287,15 +495,23 @@ public class ContractVmTest extends MockBase {
         Assert.assertTrue("测试方法["+method+"]expect success, " + programResult.getErrorMessage() + ", " + programResult.getStackTrace(), programResult.isSuccess());
         Assert.assertTrue(String.format("测试方法[%s]返回值期望a=%s, 实际a=%s", method, expect, programResult.getResult()), expect.equals(programResult.getResult()));
 
-        if(containViewExpect) {
-            String a = super.view(contractA, prevStateRoot, "viewA", new String[]{});
+        if(StringUtils.isNotBlank(viewMethod)) {
+            String a = super.view(contractA, prevStateRoot, viewMethod, new String[]{});
             Assert.assertTrue(String.format("测试方法[%s]View期望a=%s, 实际a=%s", method, expect, a), expect.equals(a));
         }
         return prevStateRoot;
     }
 
     private byte[] callVmTest(byte[] stateRoot, String method, String expect) throws Exception {
-        return callVmTest(stateRoot, method, expect, true);
+        return callVmTest(stateRoot, method, expect, "viewA");
+    }
+
+    private byte[] callVmTest(byte[] stateRoot, String method, String expect, boolean containViewExpect) throws Exception {
+        String viewMethod = null;
+        if(containViewExpect) {
+            viewMethod = "viewA";
+        }
+        return callVmTest(stateRoot, method, expect, viewMethod);
     }
 
     public void testCall() throws JsonProcessingException {
