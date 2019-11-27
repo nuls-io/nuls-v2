@@ -114,7 +114,6 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             }
             tx.setCoinData(coinData.serialize());
             tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
-            tx.setTxData(ByteUtils.intToBytes(config.getCrossCtxType()));
             //签名
             TransactionSignature transactionSignature = new TransactionSignature();
             List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
