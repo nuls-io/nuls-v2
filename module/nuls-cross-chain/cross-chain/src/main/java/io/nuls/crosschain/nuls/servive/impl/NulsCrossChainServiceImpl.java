@@ -12,6 +12,7 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
+import io.nuls.core.model.ByteUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.util.NulsDateUtils;
@@ -23,7 +24,6 @@ import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainErrorCode;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.model.po.CtxStatusPO;
-import io.nuls.crosschain.nuls.model.po.SendCtxHashPO;
 import io.nuls.crosschain.nuls.rpc.call.*;
 import io.nuls.crosschain.nuls.srorage.*;
 import io.nuls.crosschain.nuls.utils.CommonUtil;
@@ -114,6 +114,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             }
             tx.setCoinData(coinData.serialize());
             tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
+            tx.setTxData(ByteUtils.intToBytes(config.getCrossCtxType()));
             //签名
             TransactionSignature transactionSignature = new TransactionSignature();
             List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();

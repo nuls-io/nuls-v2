@@ -159,7 +159,7 @@ public class TxUtil {
             String address = (String) packerInfo.get("address");
             List<String> packers = (List<String>) packerInfo.get("packAddressList");
             boolean isPacker = !StringUtils.isBlank(address);
-            boolean ctxChange = false;
+            boolean byzantinePass = false;
             TransactionSignature transactionSignature = new TransactionSignature();
             if(ctx.getTransactionSignature() != null){
                 transactionSignature.parse(ctx.getTransactionSignature(),0);
@@ -176,28 +176,30 @@ public class TxUtil {
                     P2PHKSignature p2PHKSignature = AccountCall.signDigest(address, password, convertHash.getBytes());
                     transactionSignature.getP2PHKSignatures().add(p2PHKSignature);
                     message.setSignature(p2PHKSignature.serialize());
-                    ctxChange = true;
                 }
             }else{
                 //出块节点，且不为转账账户
-                if(!StringUtils.isBlank(address)){
+                if(isPacker){
                     if(ctx.getType() == TxType.CROSS_CHAIN && ctx.getCoinDataInstance().getFromAddressList().contains(address)){
                         message.setSignature(transactionSignature.getP2PHKSignatures().get(0).serialize());
                     }else{
                         P2PHKSignature p2PHKSignature = AccountCall.signDigest(address, password, hash.getBytes());
                         transactionSignature.getP2PHKSignatures().add(p2PHKSignature);
                         message.setSignature(p2PHKSignature.serialize());
-                        ctxChange = true;
                     }
                 }
             }
-            if(MessageUtil.signByzantineInChain(chain, ctx, transactionSignature, packers)){
-                ctxChange = true;
+            if(isPacker && MessageUtil.signByzantineInChain(chain, ctx, transactionSignature, packers)){
+                byzantinePass = true;
             }
-            if(ctxChange){
+            if(isPacker){
                 CtxStatusPO ctxStatusPO = ctxStatusService.get(hash, chainId);
-                ctxStatusPO.setTx(ctx);
-                ctxStatusPO.setStatus(TxStatusEnum.CONFIRMED.getStatus());
+                if(byzantinePass){
+                    ctxStatusPO.setTx(ctx);
+                    ctxStatusPO.setStatus(TxStatusEnum.CONFIRMED.getStatus());
+                }else{
+                    ctx.setTransactionSignature(transactionSignature.serialize());
+                }
                 ctxStatusService.save(hash, ctxStatusPO, chainId);
             }
             NetWorkCall.broadcast(chainId, message, CommandConstant.BROAD_CTX_SIGN_MESSAGE, false);

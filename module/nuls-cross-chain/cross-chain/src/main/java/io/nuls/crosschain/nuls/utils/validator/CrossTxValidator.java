@@ -7,6 +7,7 @@ import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
 import io.nuls.core.constant.TxType;
+import io.nuls.core.model.ByteUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.BroadCtxSignMessage;
@@ -153,8 +154,11 @@ public class CrossTxValidator {
 
             if(chain.getChainId() == toChainId && !config.isMainNet()){
                 verifierChainId = config.getMainChainId();
-                realCtx = TxUtil.friendConvertToMain(chain, tx, null, TxType.CROSS_CHAIN);
-                realCtx.setTransactionSignature(tx.getTransactionSignature());
+                int txType = TxType.CROSS_CHAIN;
+                if(tx.getTxData() != null){
+                    txType = ByteUtils.bytesToInt(tx.getTxData());
+                }
+                realCtx = TxUtil.friendConvertToMain(chain, tx, null, txType);
             }
             chainInfo = chainManager.getChainInfo(verifierChainId);
             if(chainInfo == null){

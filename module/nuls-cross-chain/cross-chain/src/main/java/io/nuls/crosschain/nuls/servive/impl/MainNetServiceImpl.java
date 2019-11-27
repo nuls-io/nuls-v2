@@ -15,6 +15,7 @@ import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.BigIntegerUtils;
+import io.nuls.core.model.ByteUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.util.NulsDateUtils;
@@ -243,7 +244,7 @@ public class MainNetServiceImpl implements MainNetService {
         String contractBalance = (String) params.get("contractBalance");
         Transaction tx = new Transaction(TxType.CONTRACT_TOKEN_CROSS_TRANSFER);
         tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
-
+        tx.setTxData(ByteUtils.intToBytes(TxType.CONTRACT_TOKEN_CROSS_TRANSFER));
         CoinData coinData = new CoinData();
         List<CoinFrom> coinFromList = new ArrayList<>();
         CoinFrom coinFrom = new CoinFrom(AddressTool.getAddress(fromAddress), chainId, assetId, amount, NulsCrossChainConstant.CROSS_TOKEN_NONCE, NulsCrossChainConstant.CORSS_TX_LOCKED);

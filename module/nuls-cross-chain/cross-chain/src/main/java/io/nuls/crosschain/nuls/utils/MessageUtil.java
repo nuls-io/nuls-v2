@@ -412,7 +412,7 @@ public class MessageUtil {
                         packCtx = TxUtil.mainConvertToFriend(ctx, config.getCrossCtxType());
                         packCtx.setTransactionSignature(signature.serialize());
                         convertCtxService.save(packCtx.getHash(), ctx, chain.getChainId());
-                        chain.getLogger().info("接收到的主网协议跨链交易hash：{}对应的本链协议跨链交易hash:{}",otherHashHex,packCtx.getHash());
+                        chain.getLogger().info("接收到的主网协议跨链交易hash：{}对应的本链协议跨链交易hash:{}",otherHashHex,packCtx.getHash().toHex());
                     }
                     TransactionCall.sendTx(chain, RPCUtil.encode(packCtx.serialize()));
                     chain.getLogger().info("接收链跨链交易验证完成，发送给交易模块处理，hash:{}",otherHashHex);
