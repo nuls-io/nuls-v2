@@ -91,8 +91,10 @@ public class TxUtil {
                 for (int index = signCount;index < size;index++ ){
                     p2PHKSignatures.add(originalSignature.getP2PHKSignatures().get(index));
                 }
-                transactionSignature.setP2PHKSignatures(p2PHKSignatures);
-                mainCtx.setTransactionSignature(transactionSignature.serialize());
+                if(!p2PHKSignatures.isEmpty()){
+                    transactionSignature.setP2PHKSignatures(p2PHKSignatures);
+                    mainCtx.setTransactionSignature(transactionSignature.serialize());
+                }
             }else{
                 mainCtx.setTransactionSignature(friendCtx.getTransactionSignature());
             }
