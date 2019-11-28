@@ -41,6 +41,7 @@ import io.nuls.contract.model.tx.CallContractTransaction;
 import io.nuls.contract.model.tx.CreateContractTransaction;
 import io.nuls.contract.model.tx.DeleteContractTransaction;
 import io.nuls.contract.model.txdata.CallContractData;
+import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.model.txdata.CreateContractData;
 import io.nuls.contract.model.txdata.DeleteContractData;
 import io.nuls.contract.service.*;
@@ -167,7 +168,8 @@ public class ContractServiceImpl implements ContractService {
             Chain chain = contractHelper.getChain(chainId);
             BatchInfo batchInfo = chain.getBatchInfo();
             wrapperTx.setOrder(batchInfo.getAndIncreaseTxCounter());
-            byte[] contractAddressBytes = ContractUtil.extractContractAddressFromTxData(tx);
+            ContractData contractData = wrapperTx.getContractData();
+            byte[] contractAddressBytes = contractData.getContractAddress();
             String contractAddress = AddressTool.getStringAddressByBytes(contractAddressBytes);
             ContractContainer container = batchInfo.newOrGetContractContainer(contractAddress);
 

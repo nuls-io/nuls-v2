@@ -98,6 +98,7 @@ public class SmartContractBootStrap extends RpcModule {
         ContractContext.DATA_PATH = contractConfig.getDataPath() + File.separator + ModuleE.SC.name;
         ContractContext.MAIN_ASSETS_ID = contractConfig.getMainAssetId();
         ContractContext.MAIN_CHAIN_ID = contractConfig.getMainChainId();
+        ContractContext.CROSS_CHAIN_SYSTEM_CONTRACT = AddressTool.getAddress(contractConfig.getCrossChainSystemContract());
     }
 
     /**

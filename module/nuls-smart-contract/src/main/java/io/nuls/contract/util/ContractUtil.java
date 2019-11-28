@@ -230,7 +230,7 @@ public class ContractUtil {
                 new String[]{String.valueOf(assetsId)}};
         contractData.setArgsCount((short) args.length);
         contractData.setArgs(args);
-        contractData.setContractAddress(CROSS_CHAIN_SYSTEM_CONTRACT);
+        contractData.setContractAddress(ContractContext.CROSS_CHAIN_SYSTEM_CONTRACT);
         return contractData;
     }
 

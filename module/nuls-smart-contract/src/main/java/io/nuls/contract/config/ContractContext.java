@@ -49,4 +49,9 @@ public class ContractContext {
      * 主网链资产ID（卫星链资产ID，NULS资产）
      */
     public static int MAIN_ASSETS_ID;
+
+    /**
+     *  代币跨链系统合约地址
+     */
+    public static byte[] CROSS_CHAIN_SYSTEM_CONTRACT;
 }

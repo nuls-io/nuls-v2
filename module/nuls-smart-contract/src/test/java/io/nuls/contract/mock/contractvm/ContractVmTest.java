@@ -259,10 +259,10 @@ public class ContractVmTest extends MockBase {
     @Before
     public void createAndInit() throws Exception {
         // -------------------------------------------------------------------------------------//
-        //InputStream inA = new FileInputStream(getClass().getResource("/contract-vm-testA-testA.jar").getFile());
-        //InputStream inB = new FileInputStream(getClass().getResource("/contract-vm-testA-testB.jar").getFile());
-        InputStream inA = new FileInputStream("/Users/pierreluo/IdeaProjects/contract-vm-testA/target/contract-vm-testA-testA.jar");
-        InputStream inB = new FileInputStream("/Users/pierreluo/IdeaProjects/contract-vm-testB/target/contract-vm-testB-testB.jar");
+        InputStream inA = new FileInputStream(getClass().getResource("/contract-vm-testA-testA.jar").getFile());
+        InputStream inB = new FileInputStream(getClass().getResource("/contract-vm-testA-testB.jar").getFile());
+        //InputStream inA = new FileInputStream("/Users/pierreluo/IdeaProjects/contract-vm-testA/target/contract-vm-testA-testA.jar");
+        //InputStream inB = new FileInputStream("/Users/pierreluo/IdeaProjects/contract-vm-testB/target/contract-vm-testB-testB.jar");
         byte[] contractCodeA = IOUtils.toByteArray(inA);
         byte[] contractCodeB = IOUtils.toByteArray(inB);
 
