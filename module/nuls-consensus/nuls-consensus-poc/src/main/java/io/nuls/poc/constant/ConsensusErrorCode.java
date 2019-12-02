@@ -47,4 +47,7 @@ public interface ConsensusErrorCode extends CommonCodeConstanst {
     ErrorCode CONFLICT_ERROR = ErrorCode.init("cs_0039");
     ErrorCode FEE_NOT_ENOUGH = ErrorCode.init("cs_0040");
     ErrorCode ERROR_UNLOCK_TIME = ErrorCode.init("cs_0041");
+    ErrorCode TX_CREATOR_NOT_SIGNED = ErrorCode.init("cs_0042");
+    ErrorCode AGENT_CREATOR_NOT_SIGNED = ErrorCode.init("cs_0043");
+    ErrorCode WITHDRAW_CREATOR_ERROR = ErrorCode.init("cs_0044");
 }

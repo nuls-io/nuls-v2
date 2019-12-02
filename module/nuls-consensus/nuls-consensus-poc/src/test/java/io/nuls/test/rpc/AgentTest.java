@@ -1,7 +1,12 @@
 package io.nuls.test.rpc;
 
-import io.nuls.base.data.Address;
-import io.nuls.base.data.BlockHeader;
+import io.nuls.base.RPCUtil;
+import io.nuls.base.basic.AddressTool;
+import io.nuls.base.basic.TransactionFeeCalculator;
+import io.nuls.base.data.*;
+import io.nuls.base.signture.P2PHKSignature;
+import io.nuls.core.constant.TxType;
+import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.model.ModuleE;
@@ -9,6 +14,12 @@ import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.parse.SerializeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
+import io.nuls.poc.model.bo.Chain;
+import io.nuls.poc.model.bo.config.ConfigBean;
+import io.nuls.poc.model.bo.tx.txdata.StopAgent;
+import io.nuls.poc.rpc.call.CallMethodUtils;
+import io.nuls.poc.utils.manager.CoinDataManager;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -45,6 +56,7 @@ public class AgentTest {
         params.put("rewardAddress","tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG");
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", params);
         System.out.println(cmdResp.getResponseData());
+        //22b7d4dfbffab1bf5be5f1b63fd8ab8e1fdf84c306c5be297bd9996cc58320c7
     }
 
     @Test
@@ -84,11 +96,33 @@ public class AgentTest {
     public void stopAgent()throws Exception{
         Map<String,Object>params = new HashMap<>();
         params.put(Constants.CHAIN_ID,2);
-        params.put("address","tNULSeBaMgU6sQHj9YXWBg21UpAhkTjePjb7ww");
+        params.put("address","tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG");
         params.put("password", "nuls123456");
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_stopAgent", params);
         System.out.println(cmdResp.getResponseData());
     }
+
+    /**
+     * 停止节点
+     * */
+    @Test
+    public void stopOtherAgent() throws Exception{
+        Transaction tx = new Transaction();
+        tx.parse(HexUtil.decode("0900e5d6e45d002022b7d4dfbffab1bf5be5f1b63fd8ab8e1fdf84c306c5be297bd9996cc58320c7fd16010217020001f7ec6473df12e751d64cf20a8baa7edd50810f810200010000204aa9d1010000000000000000000000000000000000000000000000000000087bd9996cc58320c7ff170200018f44b8662e78871f44ef1e1608282fd59560dcd0020001000030ef7dba0200000000000000000000000000000000000000000000000000000802dbee733174b634ff0217020001f7ec6473df12e751d64cf20a8baa7edd50810f8102000100609948a9d101000000000000000000000000000000000000000000000000000065cbe85d00000000170200018f44b8662e78871f44ef1e1608282fd59560dcd0020001000030ef7dba0200000000000000000000000000000000000000000000000000000000000000000000692103958b790c331954ed367d37bac901de5c2f06ac8368b37d7bd6cd5ae143c1d7e34630440220319657c4de48083d18ff6ad004b4293cec7d27ede32bfe6134b2fca8c5e08f5002207192a3ce6b75b0bddda35e8700399ff3b2ca68593c577af11626b9ce4b991a25"), 0);
+
+//        tx.setTransactionSignature(null);
+//        HashMap callResult = CallMethodUtils.accountValid(2, "tNULSeBaMoodYW7AqyJrgYdWiJ6nfwfVHHHyXm", "nuls123456");
+//        String priKey = (String) callResult.get("priKey");
+//        CallMethodUtils.transactionSignature(2, "tNULSeBaMoodYW7AqyJrgYdWiJ6nfwfVHHHyXm", "nuls123456", priKey, tx);
+
+        String txStr = RPCUtil.encode(tx.serialize());
+        Chain chain = new Chain();
+        ConfigBean configBean = new ConfigBean();
+        configBean.setChainId(2);
+        chain.setConfig(configBean);
+        CallMethodUtils.sendTx(chain, txStr);
+    }
+
 
     @Test
     /**
