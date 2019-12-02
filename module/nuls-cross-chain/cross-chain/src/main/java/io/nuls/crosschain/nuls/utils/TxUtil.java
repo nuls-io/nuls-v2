@@ -148,20 +148,15 @@ public class TxUtil {
     public static void localCtxByzantine(Transaction ctx, Chain chain){
         int chainId = chain.getChainId();
         NulsHash hash = ctx.getHash();
-        String hashHex = hash.toHex();
-        if(NulsCrossChainConstant.CTX_STATE_PROCESSING.equals(chain.getCtxStageMap().get(hash))){
-            chain.getLogger().info("已经收到过该交易,hash:{}",hashHex);
-            return;
-        }
-        chain.getCtxStageMap().putIfAbsent(hash, NulsCrossChainConstant.CTX_STATE_PROCESSING);
         BroadCtxSignMessage message = new BroadCtxSignMessage();
         message.setLocalHash(hash);
         try {
             Map packerInfo = ConsensusCall.getPackerInfo(chain);
-            String password = (String) packerInfo.get("password");
-            String address = (String) packerInfo.get("address");
-            List<String> packers = (List<String>) packerInfo.get("packAddressList");
-            boolean isPacker = !StringUtils.isBlank(address);
+            String password = (String) packerInfo.get(ParamConstant.PARAM_PASSWORD);
+            String address = (String) packerInfo.get(ParamConstant.PARAM_ADDRESS);
+            List<String> packers = (List<String>) packerInfo.get(ParamConstant.PARAM_PACK_ADDRESS_LIST);
+
+            boolean isPacker = !StringUtils.isBlank(address) && chain.getVerifierList().contains(address);
             boolean byzantinePass = false;
             TransactionSignature transactionSignature = new TransactionSignature();
             if(ctx.getTransactionSignature() != null){
@@ -202,10 +197,14 @@ public class TxUtil {
                     ctxStatusPO.setStatus(TxStatusEnum.CONFIRMED.getStatus());
                 }else{
                     ctx.setTransactionSignature(transactionSignature.serialize());
+                    //将收到的签名消息加入消息队列
+                    chain.getSignMessageByzantineQueue().addAll(chain.getFutureMessageMap().remove(hash));
                 }
+                //删除缓存中当前交易的签名列表
+                chain.getFutureMessageMap().remove(hash);
                 ctxStatusService.save(hash, ctxStatusPO, chainId);
+                NetWorkCall.broadcast(chainId, message, CommandConstant.BROAD_CTX_SIGN_MESSAGE, false);
             }
-            NetWorkCall.broadcast(chainId, message, CommandConstant.BROAD_CTX_SIGN_MESSAGE, false);
             chain.getCtxStageMap().remove(hash);
         }catch (NulsException | IOException e ){
             chain.getLogger().error(e);
@@ -222,14 +221,6 @@ public class TxUtil {
         NulsHash hash = ctx.getHash();
         String hashHex = hash.toHex();
         /*
-        判断本节点是否收到过该交易
-        */
-        if(ctxStatusService.get(ctx.getHash(), chainId) != null || NulsCrossChainConstant.CTX_STATE_PROCESSING.equals(chain.getCtxStageMap().get(hash))){
-            chain.getLogger().info("已经收到过该交易,hash:{}",hashHex);
-            return;
-        }
-        chain.getCtxStageMap().putIfAbsent(hash, NulsCrossChainConstant.CTX_STATE_PROCESSING);
-        /*
         判断本节点是否为共识节点，如果为共识节点则签名，如果不为共识节点则广播该交易
         */
         Map packerInfo ;
@@ -243,7 +234,8 @@ public class TxUtil {
         BroadCtxSignMessage message = new BroadCtxSignMessage();
         message.setLocalHash(hash);
         CtxStatusPO ctxStatusPO  = new CtxStatusPO(ctx, TxStatusEnum.UNCONFIRM.getStatus());
-        boolean sign = !StringUtils.isBlank(address) && (newVerifierList == null || !newVerifierList.contains(address));
+        boolean byzantinePass = false;
+        boolean sign = !StringUtils.isBlank(address) && (newVerifierList == null || !newVerifierList.contains(address)) && chain.getVerifierList().contains(address);
         if (sign) {
             chain.getLogger().info("本节点为共识节点，对跨链交易签名,Hash:{}", hashHex);
             P2PHKSignature p2PHKSignature;
@@ -257,6 +249,7 @@ public class TxUtil {
                 ctx.setTransactionSignature(signature.serialize());
                 if(MessageUtil.signByzantineInChain(chain, ctx, signature, (List<String>) packerInfo.get(ParamConstant.PARAM_PACK_ADDRESS_LIST))){
                     ctxStatusPO.setStatus(TxStatusEnum.CONFIRMED.getStatus());
+                    byzantinePass = true;
                 }
             }catch (Exception e){
                 chain.getLogger().error(e);
@@ -276,11 +269,15 @@ public class TxUtil {
         }
         ctxStatusService.save(hash, ctxStatusPO, chainId);
         if(!config.isMainNet()){
-            if(ctx.getType() == config.getCrossCtxType()){
-                convertCtxService.save(hash, ctx, chainId);
-            }
             convertHashService.save(hash, hash, chainId);
         }
+
+        if(byzantinePass){
+            chain.getFutureMessageMap().remove(hash);
+        }else{
+            chain.getSignMessageByzantineQueue().addAll(chain.getFutureMessageMap().remove(hash));
+        }
+
         MessageUtil.broadcastCtx(chain,hash,chainId,hashHex);
         chain.getCtxStageMap().remove(hash);
     }

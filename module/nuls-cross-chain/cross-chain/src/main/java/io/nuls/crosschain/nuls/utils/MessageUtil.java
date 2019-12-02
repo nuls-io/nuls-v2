@@ -117,10 +117,7 @@ public class MessageUtil {
                 chain.getLogger().info("跨链交易在本节点已经处理完成,Hash:{}\n\n", hashHex);
                 return;
             }
-            String signHex = "";
-            if (messageBody.getSignature() != null) {
-                signHex = HexUtil.encode(messageBody.getSignature());
-            }
+            String signHex = HexUtil.encode(messageBody.getSignature());
             P2PHKSignature p2PHKSignature = new P2PHKSignature();
             p2PHKSignature.parse(messageBody.getSignature(), 0);
             Transaction convertCtx = ctxStatusPO.getTx();
@@ -226,9 +223,16 @@ public class MessageUtil {
      * @return                   拜占庭验证是否通过
      */
     public static boolean signByzantineInChain(Chain chain,Transaction ctx,TransactionSignature signature,List<String>packAddressList)throws NulsException,IOException{
-        List<String> handleAddressList = new ArrayList<>(packAddressList);
+        List<String> handleAddressList;
+        int agentCount ;
+        if(ctx.getType() == TxType.VERIFIER_INIT){
+            handleAddressList = new ArrayList<>(packAddressList);
+        }else{
+            handleAddressList = new ArrayList<>(chain.getVerifierList());
+        }
+        agentCount = handleAddressList.size();
         //交易签名拜占庭
-        int byzantineCount = CommonUtil.getByzantineCount(ctx, handleAddressList, chain);
+        int byzantineCount = CommonUtil.getByzantineCount(chain, agentCount);
         //如果为友链中跨链转账交易，则需要减掉本链协议交易签名
         if(ctx.getType() == config.getCrossCtxType()){
             int fromChainId = AddressTool.getChainIdByAddress(ctx.getCoinDataInstance().getFrom().get(0).getAddress());
@@ -423,8 +427,6 @@ public class MessageUtil {
                     }
                     TransactionCall.sendTx(chain, RPCUtil.encode(ctx.serialize()));
                     chain.getLogger().info("主网跨链交易验证完成，发送给交易模块处理，hash:{}",otherHashHex);
-                    ctx.setTransactionSignature(null);
-                    TxUtil.handleNewCtx(ctx, chain, null);
                 }
             }else if(ctx.getType() == TxType.VERIFIER_CHANGE){
                 VerifierChangeData verifierChangeData = new VerifierChangeData();

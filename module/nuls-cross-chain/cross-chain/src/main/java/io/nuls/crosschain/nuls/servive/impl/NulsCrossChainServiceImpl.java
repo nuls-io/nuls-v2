@@ -244,24 +244,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                 CoinData coinData = ctx.getCoinDataInstance();
                 int fromChainId = AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress());
                 int toChainId = AddressTool.getChainIdByAddress(coinData.getTo().get(0).getAddress());
-                if (chainId == fromChainId) {
-                    CtxStatusPO ctxStatusPO = new CtxStatusPO(ctx, TxStatusEnum.UNCONFIRM.getStatus());
-                    if (!config.isMainNet()) {
-                        NulsHash convertHash = TxUtil.friendConvertToMain(chain, ctx, null, TxType.CROSS_CHAIN).getHash();
-                        if (!convertHashService.save(convertHash, ctxHash, chainId)) {
-                            rollbackCtx(convertHashList, ctxStatusList, otherCtxList, chainId);
-                            return false;
-                        }
-                        convertHashList.add(convertHash);
-                    }
-                    if (!ctxStatusService.save(ctxHash, ctxStatusPO, chainId)) {
-                        rollbackCtx(convertHashList, ctxStatusList, otherCtxList, chainId);
-                        return false;
-                    }
-                    ctxStatusList.add(ctxHash);
-                    //发起拜占庭验证
-                    TxUtil.localCtxByzantine(ctx, chain);
-                } else if (chainId == toChainId) {
+                if(chainId == toChainId){
                     NulsHash convertHash = ctxHash;
                     if (!config.isMainNet()) {
                         convertHash = TxUtil.friendConvertToMain(chain, ctx, null, TxType.CROSS_CHAIN).getHash();
@@ -276,17 +259,32 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                         return false;
                     }
                     otherCtxList.add(convertHash);
-                } else {
-                    if (!otherCtxService.save(ctxHash, ctx, chainId)) {
+                }else{
+                    if (!config.isMainNet()) {
+                        NulsHash convertHash = TxUtil.friendConvertToMain(chain, ctx, null, TxType.CROSS_CHAIN).getHash();
+                        if (!convertHashService.save(convertHash, ctxHash, chainId)) {
+                            rollbackCtx(convertHashList, ctxStatusList, otherCtxList, chainId);
+                            return false;
+                        }
+                        convertHashList.add(convertHash);
+                    }
+                    //如果当前链不为发起链，则需清空签名在对交易对签名拜占庭
+                    if(chainId != fromChainId){
+                        ctx.setTransactionSignature(null);
+                        if (!otherCtxService.save(ctxHash, ctx, chainId)) {
+                            rollbackCtx(convertHashList, ctxStatusList, otherCtxList, chainId);
+                            return false;
+                        }
+                        otherCtxList.add(ctxHash);
+                    }
+                    CtxStatusPO ctxStatusPO = new CtxStatusPO(ctx, TxStatusEnum.UNCONFIRM.getStatus());
+                    if (!ctxStatusService.save(ctxHash, ctxStatusPO, chainId)) {
                         rollbackCtx(convertHashList, ctxStatusList, otherCtxList, chainId);
                         return false;
                     }
-                    otherCtxList.add(ctxHash);
-                    if (!convertHashService.save(ctxHash, ctxHash, chainId)) {
-                        rollbackCtx(convertHashList, ctxStatusList, otherCtxList, chainId);
-                        return false;
-                    }
-                    convertHashList.add(ctxHash);
+                    ctxStatusList.add(ctxHash);
+                    //发起拜占庭验证
+                    TxUtil.localCtxByzantine(ctx, chain);
                 }
             }
             //如果本链为主网通知跨链管理模块发起链与接收链资产变更

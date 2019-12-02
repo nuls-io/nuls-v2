@@ -13,6 +13,7 @@ import io.nuls.core.core.annotation.Component;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.BroadCtxHashMessage;
 import io.nuls.crosschain.base.model.bo.ChainInfo;
+import io.nuls.crosschain.base.model.bo.txdata.VerifierChangeData;
 import io.nuls.crosschain.base.model.bo.txdata.VerifierInitData;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
@@ -164,6 +165,8 @@ public class BlockServiceImpl implements BlockService {
                 List<String> cancelAgentList = agentChangeMap.get(ParamConstant.PARAM_CANCEL_AGENT_LIST);
                 boolean verifierChange = (registerAgentList != null && !registerAgentList.isEmpty()) || (cancelAgentList != null && !cancelAgentList.isEmpty());
                 if(verifierChange){
+                    //验证人列表信息
+                    chain.getVerifierList().removeAll(cancelAgentList);
                     chain.getLogger().info("有验证人变化，创建验证人变化交易!");
                     Transaction verifierChangeTx = TxUtil.createVerifierChangeTx(registerAgentList, cancelAgentList, blockHeader.getExtendsData().getRoundStartTime(),chainId);
                     TxUtil.handleNewCtx(verifierChangeTx, chain, registerAgentList);
@@ -219,7 +222,16 @@ public class BlockServiceImpl implements BlockService {
                     }else if(broadStatus == 1){
                         return false;
                     }
-                    return NetWorkCall.broadcast(chainId, message, CommandConstant.BROAD_CTX_HASH_MESSAGE,true);
+                    boolean broadResult = NetWorkCall.broadcast(chainId, message, CommandConstant.BROAD_CTX_HASH_MESSAGE,true);
+                    if(broadResult){
+                        //更新本地验证人列表
+                        VerifierChangeData verifierChangeData = new VerifierChangeData();
+                        verifierChangeData.parse(ctx.getTxData(),0);
+                        chain.getBroadcastVerifierList().removeAll(verifierChangeData.getCancelAgentList());
+                        chain.getBroadcastVerifierList().addAll(verifierChangeData.getRegisterAgentList());
+                        chain.setVerifierList(new ArrayList<>(chain.getBroadcastVerifierList()));
+                    }
+                    return broadResult;
                 }else{
                     boolean broadResult = true;
                     if(chainManager.getRegisteredCrossChainList() == null || chainManager.getRegisteredCrossChainList().isEmpty() || chainManager.getRegisteredCrossChainList().size() == 1){

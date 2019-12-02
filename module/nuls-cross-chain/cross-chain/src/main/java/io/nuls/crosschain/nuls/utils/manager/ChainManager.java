@@ -12,10 +12,12 @@ import io.nuls.crosschain.base.message.RegisteredChainMessage;
 import io.nuls.crosschain.base.model.bo.ChainInfo;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
+import io.nuls.crosschain.nuls.constant.ParamConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.model.bo.CmdRegisterDto;
 import io.nuls.crosschain.nuls.model.bo.config.ConfigBean;
 import io.nuls.crosschain.nuls.rpc.call.BlockCall;
+import io.nuls.crosschain.nuls.rpc.call.ConsensusCall;
 import io.nuls.crosschain.nuls.rpc.call.SmartContractCall;
 import io.nuls.crosschain.nuls.srorage.ConfigService;
 import io.nuls.crosschain.nuls.srorage.RegisteredCrossChainService;
@@ -138,6 +140,7 @@ public class ChainManager {
      * 加载链缓存数据并启动链
      * Load the chain to cache data and start the chain
      */
+    @SuppressWarnings("unchecked")
     public void runChain() {
         for (Chain chain : chainMap.values()) {
             chain.getThreadPool().execute(new HashMessageHandler(chain));
@@ -147,7 +150,11 @@ public class ChainManager {
             chain.getThreadPool().execute(new GetCtxStateHandler(chain));
             chain.getThreadPool().execute(new SignMessageByzantineHandler(chain));
             chainHeaderMap.put(chain.getChainId(), BlockCall.getLatestBlockHeader(chain));
-
+            //初始化验证人列表
+            Map packerInfo = ConsensusCall.getPackerInfo(chain);
+            List<String> verifierList = (List<String>)packerInfo.get(ParamConstant.PARAM_PACK_ADDRESS_LIST);
+            chain.getBroadcastVerifierList().addAll(verifierList);
+            chain.getVerifierList().addAll(verifierList);
         }
         if(!config.isMainNet()){
             scheduledThreadPoolExecutor.scheduleAtFixedRate(new GetRegisteredChainTask(this),  20L, 10 * 60L, TimeUnit.SECONDS );

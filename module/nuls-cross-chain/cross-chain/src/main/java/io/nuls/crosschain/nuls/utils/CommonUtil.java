@@ -122,6 +122,20 @@ public class CommonUtil {
      * 获取当前签名拜占庭数量
      * */
     @SuppressWarnings("unchecked")
+    public static int getByzantineCount(Chain chain, int agentCount){
+        int byzantineRatio = chain.getConfig().getByzantineRatio();
+        int minPassCount = agentCount*byzantineRatio/ NulsCrossChainConstant.MAGIC_NUM_100;
+        if(minPassCount == 0){
+            minPassCount = 1;
+        }
+        chain.getLogger().debug("当前共识节点数量为：{},最少签名数量为:{}",agentCount,minPassCount );
+        return minPassCount;
+    }
+
+    /**
+     * 获取当前签名拜占庭数量
+     * */
+    @SuppressWarnings("unchecked")
     public static int getByzantineCount(Transaction ctx, List<String> packAddressList, Chain chain)throws NulsException{
         int agentCount = packAddressList.size();
         int chainId = chain.getChainId();
