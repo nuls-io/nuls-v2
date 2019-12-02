@@ -39,6 +39,7 @@ public interface LedgerErrorCode extends CommonCodeConstanst {
     ErrorCode DOUBLE_EXPENSES = ErrorCode.init(ModuleE.LG.getPrefix() + "_1002");
     ErrorCode TX_EXIST = ErrorCode.init(ModuleE.LG.getPrefix() + "_1003");
     ErrorCode BALANCE_NOT_ENOUGH = ErrorCode.init(ModuleE.LG.getPrefix() + "_1004");
+    ErrorCode TX_AMOUNT_INVALIDATE = ErrorCode.init(ModuleE.LG.getPrefix() + "_1005");
     ErrorCode VALIDATE_FAIL = ErrorCode.init(ModuleE.LG.getPrefix() + "_1010");
 
 }
