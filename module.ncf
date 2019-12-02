@@ -5,19 +5,19 @@ logPath=../../../../Logs
 logLevel=INFO
 dataPath=../../../../data
 #默认本链ID
-chainId=1
+chainId=2
 #地址前缀
-addressPrefix=NULS
+addressPrefix=tNULS
 #默认本链主资产ID
 assetId=1
-#默认资产小数位数
-decimals=8
 #默认链名称
-chainName=nuls
+chainName=nuls2
 #本链默认资产符号
 symbol=NULS
+#默认资产的小数精确位数
+decimals=8
 #主网链id
-mainChainId=1
+mainChainId=2
 #主网主资产id
 mainAssetId=1
 #主网主资产符号
@@ -25,16 +25,16 @@ mainSymbol=NULS
 blackHolePublicKey=000000000000000000000000000000000000000000000000000000000000000000
 
 [network]
-port=8001
-crossPort=8002
+port=18001
+crossPort=18002
 #魔法参数
-packetMagic=20170904
+packetMagic=20190917
 #种子节点
-selfSeedIps=seeda.nuls.io:8001,seedb.nuls.io:8001,seedc.nuls.io:8001,seedd.nuls.io:8001,seede.nuls.io:8001,seedf.nuls.io:8001
+selfSeedIps=39.98.226.51:18001,47.244.186.65:18001,47.254.234.223:18001,47.74.86.85:18001,192.168.1.145:18001
 #主网的跨链种子连接节点
-moonSeedIps=seeda.nuls.io:8002,seedb.nuls.io:8002,seedc.nuls.io:8002,seedd.nuls.io:8002,seede.nuls.io:8002,seedf.nuls.io:8002
+moonSeedIps=39.98.226.51:18002,47.244.186.65:18002,47.254.234.223:18002,47.74.86.85:18002
 #最大入网连接数
-maxInCount=300
+maxInCount=100
 #最大出网连接数
 maxOutCount=20
 
@@ -57,19 +57,18 @@ singleDownloadTimeout=15000
 #区块同步过程中缓存的区块字节数上限(20M)
 cachedBlockSizeLimit=20971520
 #创世块文件路径(支持绝对路径与相对路径,相对路径相对于此配置文件的目录)
-genesisBlockPath=genesis-block.json
+#genesisBlockPath=genesis-block.json
 dependent=cross-chain,smart-contract,protocol-update
-
 
 [consensus]
 #种子节点列表
-seedNodes=NULSd6Hge7xHDnvsSpnzbR2gWHd31zJ1How11,NULSd6Hgc5VNP4rF4wxdiXEQKpBKUE4w5RS22,NULSd6HgeQwXLdre69ArkqVZNDqMLU4CaAz33,NULSd6HgcjAKAgq8jjXgBCcNLEJUvJEYcoj44,NULSd6HgiDdTjcuvhqzm3bomyBFZmosV3ei55
+seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMmShSTVwbU4rHkZjpD98JgFgg6rmhF
 #出块地址密码
 password=nuls123456
 #出块间隔时间(单位：s)
 packingInterval=10
 #共识委托抵押资产链ID
-agentChainId=1
+agentChainId=2
 #共识委托抵押资产ID
 agentAssetId=1
 #共识奖励资产ID(共识奖励必须为本链资产)
@@ -78,7 +77,7 @@ awardAssetId=1
 feeUnit=100000
 #总通胀量
 totalInflationAmount=11000000000000000
-#初始通胀金额500w/365*30
+#初始通胀金额500w/265*30
 inflationAmount=41095890410959
 #通胀开始计算时间(单位:S)2020-07-12 00:00:00
 initTime=1594483200
@@ -96,7 +95,7 @@ maxViewGas=100000000
 
 [public-service]
 #public-service模块对外的rpc端口号
-rpcPort=8003
+rpcPort=18003
 #数据库url地址
 databaseUrl=127.0.0.1
 #数据库端口号
@@ -109,27 +108,29 @@ maxWaitTime=120000
 socketTimeout=300000
 #连接超时时间
 connectTimeOut=30000
-developerNodeAddress=NULSd6Hgf15aUZj6918tEwy9aT4JG1ZQotXRF
-ambassadorNodeAddress=NULSd6HgcfGtsmm79QDoBK1MAjqNmm3rgKXSj
-mappingAddress=NULSd6HgcfwWCD5TLEfehrJ1fFYuZ6nqGbfiu,NULSd6HggAGpQbhhSHU9R1yRxKKuCCTFwayaB
-businessAddress=NULSd6HgdemcQDAaiEJWq9ESMhtUHXRsNJ4KM
-teamAddress=NULSd6HgbfkSuRGKSLJJzAPAihgDQtaUhuE4L
-communityAddress=NULSd6HgjDZmLMbZSmH9tqb6smdzZHCxsCRD3
+developerNodeAddress=tNULSeBaMuKuKY4UstKpXvGxd7LEvEBtd3NXAG,tNULSeBaMns1C6kTePxcQS7rGAu37foAwAMpri
+ambassadorNodeAddress=tNULSeBaMhWyQBHc54oXLXB13WhJsyrTobMYYU,tNULSeBaMtCmUuBHMDAjKVSoVBsAEvLoWCspyE
+mappingAddress=tNULSeBaMqTC6rnF56dnJqz1Fb8gMdVxGGvxSf,tNULSeBaMkroWKUKj6X4zURBE3V47VZwMJdHPm
+businessAddress=tNULSeBaMnf1qfX7emr14att2DsSb2TSPcPBSL
+teamAddress=tNULSeBaMqTvaS2NEEZfdrmPzoRvd8zN6T57LH
+communityAddress=tNULSeBaMm9RQLKKUBXKJ1rQ7g4iobmWAB73mS
 dependent=smart-contract,cross-chain
+
+
 
 [cross-chain]
 dataPath=../../../../../data
 logPath=../../../../../Logs
 #跨链节点链接的最小值
-minNodeAmount=3
+minNodeAmount=2
 #跨链节点链接的最大值
 sendHeight=6
 #跨链交易拜占庭比例
 byzantineRatio=66
 #主网跨链种子节点列表
-crossSeedIps=seeda.nuls.io:8002,seedb.nuls.io:8002,seedc.nuls.io:8002,seedd.nuls.io:8002,seede.nuls.io:8002,seedf.nuls.io:8002
+crossSeedIps=39.98.226.51:18002,47.244.186.65:18002,47.254.234.223:18002,47.74.86.85:18002,192.168.1.145:18002
 #主网验证人列表
-verifiers=NULSd6Hge7xHDnvsSpnzbR2gWHd31zJ1How11,NULSd6Hgc5VNP4rF4wxdiXEQKpBKUE4w5RS22,NULSd6HgeQwXLdre69ArkqVZNDqMLU4CaAz33,NULSd6HgcjAKAgq8jjXgBCcNLEJUvJEYcoj44,NULSd6HgiDdTjcuvhqzm3bomyBFZmosV3ei55
+verifiers=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMmShSTVwbU4rHkZjpD98JgFgg6rmhF,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
 #主网签名拜占庭比列
 mainByzantineRatio=66
 #主网最大签名数
@@ -140,9 +141,9 @@ dependent=protocol-update
 #httpServer的启动ip
 serverIp=127.0.0.1
 #httpServer的启动port
-serverPort=8004
+serverPort=18004
 dependent=smart-contract,cross-chain
 
 [protocol-update]
 #每隔多少个区块统计一次协议占比
-interval=1000
+interval=10
