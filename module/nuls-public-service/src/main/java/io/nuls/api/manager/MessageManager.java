@@ -61,7 +61,11 @@ public class MessageManager {
         if (StringUtils.isBlank(key) || null == message) {
             return;
         }
+        if (messageMap.size() > 5000) {
+            messageMap.clear();
+        }
         messageMap.put(key, message);
+
     }
 
     public static Message getMessage(String key) {

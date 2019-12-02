@@ -48,7 +48,7 @@ public class MessageController {
     @RpcMethod("commitData")
     public RpcResult commit(Map<String, Object> paramsMap) {
         String key = (String) paramsMap.get("key");
-        Map<String, Object> value = (Map<String, Object>) paramsMap.get("value");
+        Object value = paramsMap.get("value");
         if (StringUtils.isBlank(key) || null == value) {
             return RpcResult.paramError("Params is inValid");
         }
