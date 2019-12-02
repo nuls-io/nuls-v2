@@ -38,16 +38,15 @@ import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
  * @author: PierreLuo
- * @date: 2019-05-27
+ * @date: 2019-12-01
  */
 @Component
-public class TransactionCommitAdvice implements CommonAdvice {
+public class TransactionRollbackAdvice implements CommonAdvice {
 
     @Autowired
     private ContractHelper contractHelper;
@@ -60,19 +59,11 @@ public class TransactionCommitAdvice implements CommonAdvice {
     public void begin(int chainId, List<Transaction> txList, BlockHeader header) {
         try {
             ChainManager.chainHandle(chainId, BlockType.VERIFY_BLOCK.type());
-            ContractPackageDto contractPackageDto = contractHelper.getChain(chainId).getBatchInfo().getContractPackageDto();
-            if (contractPackageDto != null) {
-                Log.info("contract execute txDataSize is {}, commit txDataSize is {}", contractPackageDto.getContractResultMap().keySet().size(), txList.size());
-
-                List<byte[]> offlineTxHashList = contractPackageDto.getOfflineTxHashList();
-                if(offlineTxHashList != null && !offlineTxHashList.isEmpty()) {
-                    // 保存智能合约链下交易hash
-                    contractOfflineTxHashListStorageService.saveOfflineTxHashList(chainId, header.getHash().getBytes(), new ContractOfflineTxHashPo(contractPackageDto.getOfflineTxHashList()));
-                }
-            }
-            // add by pierre at 2019-12-01 处理type10交易的业务提交, 需要协议升级
+            // 删除智能合约链下交易hash
+            contractOfflineTxHashListStorageService.deleteOfflineTxHashList(chainId, header.getHash().getBytes());
+            // add by pierre at 2019-12-01 处理type10交易的业务回滚, 需要协议升级
             List<Transaction> crossTxList = txList.stream().filter(tx -> tx.getType() == TxType.CROSS_CHAIN).collect(Collectors.toList());
-            callContractProcessor.commit(chainId, crossTxList, header);
+            callContractProcessor.rollback(chainId, crossTxList, header);
             // end code by pierre
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -81,8 +72,5 @@ public class TransactionCommitAdvice implements CommonAdvice {
 
     @Override
     public void end(int chainId, List<Transaction> txList, BlockHeader blockHeader) {
-        // 移除临时余额, 临时区块头等当前批次执行数据
-        Chain chain = contractHelper.getChain(chainId);
-        chain.setBatchInfo(null);
     }
 }

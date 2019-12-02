@@ -295,6 +295,7 @@ public class ContractUtil {
                 || txType == CALL_CONTRACT
                 || txType == DELETE_CONTRACT
                 || txType == CONTRACT_TRANSFER
+                || txType == CROSS_CHAIN
                 || txType == CONTRACT_RETURN_GAS) {
             return true;
         }
@@ -614,6 +615,11 @@ public class ContractUtil {
             case CONTRACT_RETURN_GAS:
                 resultTx = new ContractReturnGasTransaction();
                 break;
+                //TODO pierre 标记
+            case CROSS_CHAIN:
+                resultTx = new CrossTokenContractTransaction();
+                break;
+                // end code by pierre
             default:
                 break;
         }

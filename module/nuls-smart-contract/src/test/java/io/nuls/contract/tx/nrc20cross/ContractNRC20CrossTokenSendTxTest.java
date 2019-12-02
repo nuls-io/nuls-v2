@@ -25,10 +25,15 @@
 package io.nuls.contract.tx.nrc20cross;
 
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.mock.basetest.ContractTest;
+import io.nuls.contract.model.bo.Chain;
+import io.nuls.contract.rpc.call.TransactionCall;
 import io.nuls.contract.tx.base.BaseQuery;
 import io.nuls.contract.util.Log;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
@@ -195,7 +200,7 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
      */
     @Test
     public void callTransferCrossChain() throws Exception {
-        contractAddress_nrc20 = "tNULSeBaN53H4YCeLuJf2MNoEsR2qESCuyEDhW";
+        contractAddress_nrc20 = "tNULSeBaMyW66axieu87pvECUspsKvrcygRxnx";
         methodName = "transferCrossChain";
         BigInteger value = BigInteger.valueOf(1_0000_0000L);
         String methodDesc = "";
@@ -203,12 +208,29 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
         String to = "XXOOdjJQw4LJdjtCd5Gda17FCNgSgTcPUUdSA";
         String token = BigInteger.valueOf(8_0000_0000L).toString();
         String[] args = {to, token};
-        Map params = this.makeCallParams(toAddress0, value, contractAddress_nrc20, methodName, methodDesc, remark, args);
+        Map params = this.makeCallParams(sender, value, contractAddress_nrc20, methodName, methodDesc, remark, args);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
         assertTrue(cmdResp2, result);
         String hash = (String) result.get("txHash");
         Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(waitGetContractTx(hash)));
+    }
+
+    /**
+     * 3. 查询账本资产
+     */
+    @Test
+    public void getBalance(int chainId, byte[] address, int assetChainId, int assetId) throws Exception {
+        String addressString = AddressTool.getStringAddressByBytes(address);
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.VERSION_KEY_STR, "1.0");
+        params.put(Constants.CHAIN_ID, chainId);
+        params.put("assetChainId", assetChainId);
+        params.put("assetId", assetId);
+        params.put("address", addressString);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalance", params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
+        Log.info("balance:{}", JSONUtils.obj2PrettyJson(result));
     }
 
     private String createCrossNrc20Contract() throws Exception {
