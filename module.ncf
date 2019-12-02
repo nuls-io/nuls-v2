@@ -21,7 +21,7 @@ mainChainId=2
 #主网主资产id
 mainAssetId=1
 #主网主资产符号
-mainSymbol=NULS
+mainSymbol=TNULS
 blackHolePublicKey=000000000000000000000000000000000000000000000000000000000000000000
 
 [network]
@@ -30,9 +30,9 @@ crossPort=18002
 #魔法参数
 packetMagic=20190917
 #种子节点
-selfSeedIps=39.98.226.51:18001,47.244.186.65:18001,47.254.234.223:18001,47.74.86.85:18001,192.168.1.145:18001
+selfSeedIps=127.0.0.1:18001
 #主网的跨链种子连接节点
-moonSeedIps=39.98.226.51:18002,47.244.186.65:18002,47.254.234.223:18002,47.74.86.85:18002
+moonSeedIps=127.0.0.1:18002
 #最大入网连接数
 maxInCount=100
 #最大出网连接数
@@ -49,7 +49,7 @@ extendMaxSize=1024
 #引发分叉链切换的高度差阈值
 chainSwtichThreshold=3
 #最小链接节点数,当链接到的网络节点低于此参数时,会持续等待
-minNodeAmount=2
+minNodeAmount=0
 #区块同步过程中,每次从网络上节点下载的区块数量
 downloadNumber=10
 #从网络节点下载单个区块的超时时间
@@ -62,7 +62,7 @@ dependent=cross-chain,smart-contract,protocol-update
 
 [consensus]
 #种子节点列表
-seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMmShSTVwbU4rHkZjpD98JgFgg6rmhF
+seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
 #出块地址密码
 password=nuls123456
 #出块间隔时间(单位：s)
