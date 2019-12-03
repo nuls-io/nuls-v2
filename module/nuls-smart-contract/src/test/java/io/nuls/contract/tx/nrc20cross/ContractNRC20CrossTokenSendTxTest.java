@@ -203,7 +203,7 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
      */
     @Test
     public void callTransferCrossChain() throws Exception {
-        contractAddress_nrc20 = "tNULSeBaMxJw4T7o5N2JwZe1jg8NSQaUNtGJX3";
+        contractAddress_nrc20 = "tNULSeBaN1JANNgiCJ62D3j3kerjeLZ9fopcPD";
         methodName = "transferCrossChain";
         BigInteger value = BigInteger.valueOf(1_0000_0000L);
         String methodDesc = "";
@@ -249,6 +249,15 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
         }
     }
 
+    @Test
+    public void viewNrc20Map() throws Exception {
+        String sys = "tNULSeBaN615E5S2vA4ewT3XdhLm2xMCeH1DaJ";
+        Log.info("system contract viewNrc20Map is {}", this.invokeView(sys, "viewNrc20Map"));
+
+        String nrc20 = "tNULSeBaN1JANNgiCJ62D3j3kerjeLZ9fopcPD";
+        Log.info("token balance is {}", this.invokeView(nrc20, "balanceOf", "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG"));
+    }
+
     /**
      * 4. (平行链调用) 查询账本资产
      */
@@ -268,7 +277,7 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
             List<CoinDTO> fromList = new ArrayList<>();
             List<CoinDTO> toList = new ArrayList<>();
             int assetChainId = 2;
-            int assetId = 1;
+            int assetId = 4;
             fromList.add(new CoinDTO("XXOOdjJQw4LJdjtCd5Gda17FCNgSgTcPUUdSA",assetChainId,assetId, BigInteger.valueOf(0_1000_0000L),password));
             toList.add(new CoinDTO("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG",assetChainId,assetId, BigInteger.valueOf(0_1000_0000L),password));
             Map paramMap = new HashMap();

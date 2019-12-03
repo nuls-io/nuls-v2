@@ -169,10 +169,11 @@ public class ContractBatchEndCallable implements Callable<ContractPackageDto> {
             if (wrapperTx.getType() == DELETE_CONTRACT) {
                 continue;
             }
-            // 代币跨链交易的合约调用是系统调用，不计算Gas消耗，跳过
+            // add by pierre at 2019-12-03 代币跨链交易的合约调用是系统调用，不计算Gas消耗，跳过
             if (wrapperTx.getType() == CROSS_CHAIN) {
                 continue;
             }
+            // end code by pierre
             contractData = wrapperTx.getContractData();
             long realGasUsed = contractResult.getGasUsed();
             long txGasUsed = contractData.getGasLimit();

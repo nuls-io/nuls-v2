@@ -150,6 +150,9 @@ public class ContractTxCallable implements Callable<ContractResult> {
             }
         } while (false);
         if (contractResult != null && !contractResult.isSuccess()) {
+            //TODO pierre 标记
+            contractResult.setGasUsed(contractData.getGasLimit());
+            // end code by pierre
             Log.error("Failed TxType [{}] Execute ContractResult is {}", tx.getType(), contractResult.toString());
         }
         //if (Log.isDebugEnabled()) {
