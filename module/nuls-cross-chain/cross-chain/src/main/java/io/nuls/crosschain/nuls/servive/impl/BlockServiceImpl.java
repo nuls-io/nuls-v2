@@ -230,6 +230,7 @@ public class BlockServiceImpl implements BlockService {
                         chain.getBroadcastVerifierList().removeAll(verifierChangeData.getCancelAgentList());
                         chain.getBroadcastVerifierList().addAll(verifierChangeData.getRegisterAgentList());
                         chain.setVerifierList(new ArrayList<>(chain.getBroadcastVerifierList()));
+                        chain.getLogger().info("验证人变更，当前最新验证人列表为：{}",chain.getVerifierList().toString());
                     }
                     return broadResult;
                 }else{
