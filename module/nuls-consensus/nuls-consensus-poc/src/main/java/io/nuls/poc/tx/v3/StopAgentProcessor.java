@@ -107,7 +107,7 @@ public class StopAgentProcessor implements TransactionProcessor {
                 StopAgent stopAgent = new StopAgent();
                 stopAgent.parse(stopAgentTx.getTxData(), 0);
                 AgentPo agentPo = agentStorageService.get(stopAgent.getCreateTxHash(), chain.getConfig().getChainId());
-                if (!Arrays.equals(agentPo.getAgentAddress(), agentPo.getAgentAddress()) || !verifyV3(chain, stopAgentTx, agentPo.getAgentAddress())) {
+                if (!verifyV3(chain, stopAgentTx, agentPo.getAgentAddress())) {
                     chain.getLogger().error("Stop node signature verification failed");
                     continue;
                 }
@@ -253,7 +253,7 @@ public class StopAgentProcessor implements TransactionProcessor {
             throw new NulsException(ConsensusErrorCode.AGENT_CREATOR_NOT_SIGNED);
         }
         transactionSignature.parse(tx.getTransactionSignature(), 0);
-        if (transactionSignature.getP2PHKSignatures() == null || transactionSignature.getP2PHKSignatures().size() != 1) {
+        if (transactionSignature.getP2PHKSignatures() == null || !transactionSignature.getP2PHKSignatures().isEmpty()) {
             throw new NulsException(ConsensusErrorCode.AGENT_CREATOR_NOT_SIGNED);
         }
         if (!Arrays.equals(creator, AddressTool.getAddress(transactionSignature.getP2PHKSignatures().get(0).getPublicKey(), chain.getConfig().getChainId()))) {

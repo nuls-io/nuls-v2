@@ -800,7 +800,10 @@ public class CoinDataValidator {
         for (String assetKey : assetKeys) {
             assetKeyFrom = assetMap.get(assetKey + "from");
             assetKeyTo = assetMap.get(assetKey + "to");
-            if (null == assetKeyFrom || null == assetKeyTo) {
+            if(null == assetKeyFrom){
+                return false;
+            }
+            if (null == assetKeyTo) {
                 continue;
             }
             if (BigIntegerUtils.isLessThan(assetKeyFrom, assetKeyTo)) {
