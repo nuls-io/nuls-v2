@@ -167,7 +167,7 @@ public class BlockServiceImpl implements BlockService {
                 if(verifierChange){
                     //验证人列表信息
                     chain.getVerifierList().removeAll(cancelAgentList);
-                    chain.getLogger().info("有验证人变化，创建验证人变化交易!");
+                    chain.getLogger().info("有验证人变化，创建验证人变化交易，最新轮次与上一轮共有的出块地址为：", chain.getVerifierList().toString());
                     Transaction verifierChangeTx = TxUtil.createVerifierChangeTx(registerAgentList, cancelAgentList, blockHeader.getExtendsData().getRoundStartTime(),chainId);
                     TxUtil.handleNewCtx(verifierChangeTx, chain, registerAgentList);
                 }

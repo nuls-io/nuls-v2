@@ -227,10 +227,11 @@ public class MessageUtil {
         int agentCount ;
         if(ctx.getType() == TxType.VERIFIER_INIT){
             handleAddressList = new ArrayList<>(packAddressList);
+            agentCount = handleAddressList.size();
         }else{
             handleAddressList = new ArrayList<>(chain.getVerifierList());
+            agentCount = chain.getBroadcastVerifierList().size();
         }
-        agentCount = handleAddressList.size();
         //交易签名拜占庭
         int byzantineCount = CommonUtil.getByzantineCount(chain, agentCount);
         //如果为友链中跨链转账交易，则需要减掉本链协议交易签名

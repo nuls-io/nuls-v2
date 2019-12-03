@@ -283,6 +283,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                         return false;
                     }
                     ctxStatusList.add(ctxHash);
+                    chain.getLogger().debug("跨链交易提交完成，对跨链交易做拜占庭验证：{}",ctxHash.toHex());
                     //发起拜占庭验证
                     TxUtil.localCtxByzantine(ctx, chain);
                 }

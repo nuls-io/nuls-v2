@@ -190,6 +190,7 @@ public class TxUtil {
             if(isPacker && MessageUtil.signByzantineInChain(chain, ctx, transactionSignature, packers)){
                 byzantinePass = true;
             }
+
             if(isPacker){
                 CtxStatusPO ctxStatusPO = ctxStatusService.get(hash, chainId);
                 if(byzantinePass){
@@ -197,15 +198,18 @@ public class TxUtil {
                     ctxStatusPO.setStatus(TxStatusEnum.CONFIRMED.getStatus());
                 }else{
                     ctx.setTransactionSignature(transactionSignature.serialize());
-                    //将收到的签名消息加入消息队列
-                    if(chain.getFutureMessageMap().containsKey(hash)){
-                        chain.getSignMessageByzantineQueue().addAll(chain.getFutureMessageMap().remove(hash));
-                    }
                 }
                 //删除缓存中当前交易的签名列表
                 chain.getFutureMessageMap().remove(hash);
                 ctxStatusService.save(hash, ctxStatusPO, chainId);
                 NetWorkCall.broadcast(chainId, message, CommandConstant.BROAD_CTX_SIGN_MESSAGE, false);
+            }
+            if(!byzantinePass){
+                //将收到的签名消息加入消息队列
+                if(chain.getFutureMessageMap().containsKey(hash)){
+                    chain.getLogger().debug("将本跨链交易:{}已收到的签名放入消息队列中",hash.toHex());
+                    chain.getSignMessageByzantineQueue().addAll(chain.getFutureMessageMap().remove(hash));
+                }
             }
             chain.getCtxStageMap().remove(hash);
         }catch (NulsException | IOException e ){

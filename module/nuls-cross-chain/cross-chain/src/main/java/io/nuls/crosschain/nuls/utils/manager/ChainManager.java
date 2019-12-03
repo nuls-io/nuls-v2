@@ -143,18 +143,30 @@ public class ChainManager {
     @SuppressWarnings("unchecked")
     public void runChain() {
         for (Chain chain : chainMap.values()) {
+            chainHeaderMap.put(chain.getChainId(), BlockCall.getLatestBlockHeader(chain));
+            //初始化验证人列表
+            Map packerInfo = ConsensusCall.getPackerInfo(chain);
+            List<String> verifierList = (List<String>)packerInfo.get(ParamConstant.PARAM_PACK_ADDRESS_LIST);
+            try {
+                while (verifierList == null || verifierList.isEmpty()){
+                    TimeUnit.MILLISECONDS.sleep(500);
+                    packerInfo = ConsensusCall.getPackerInfo(chain);
+                    verifierList = (List<String>)packerInfo.get(ParamConstant.PARAM_PACK_ADDRESS_LIST);
+                }
+            }catch (InterruptedException e){
+                chain.getLogger().error(e);
+                System.exit(1);
+            }
+            chain.getBroadcastVerifierList().addAll(verifierList);
+            chain.getVerifierList().addAll(verifierList);
+            chain.getLogger().info("链：{}，当前验证人列表为：{}",chain.getConfig().getChainId(), verifierList.toString());
+
             chain.getThreadPool().execute(new HashMessageHandler(chain));
             chain.getThreadPool().execute(new CtxMessageHandler(chain));
             chain.getThreadPool().execute(new SignMessageHandler(chain));
             chain.getThreadPool().execute(new OtherCtxMessageHandler(chain));
             chain.getThreadPool().execute(new GetCtxStateHandler(chain));
             chain.getThreadPool().execute(new SignMessageByzantineHandler(chain));
-            chainHeaderMap.put(chain.getChainId(), BlockCall.getLatestBlockHeader(chain));
-            //初始化验证人列表
-            Map packerInfo = ConsensusCall.getPackerInfo(chain);
-            List<String> verifierList = (List<String>)packerInfo.get(ParamConstant.PARAM_PACK_ADDRESS_LIST);
-            chain.getBroadcastVerifierList().addAll(verifierList);
-            chain.getVerifierList().addAll(verifierList);
         }
         if(!config.isMainNet()){
             scheduledThreadPoolExecutor.scheduleAtFixedRate(new GetRegisteredChainTask(this),  20L, 10 * 60L, TimeUnit.SECONDS );

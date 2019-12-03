@@ -138,6 +138,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             UntreatedMessage untreatedSignMessage = new UntreatedMessage(chainId,nodeId,messageBody,localHash);
             chain.getFutureMessageMap().putIfAbsent(localHash, new ArrayList<>());
             chain.getFutureMessageMap().get(localHash).add(untreatedSignMessage);
+            chain.getLogger().info("当前节点还未确认该跨链交易，缓存签名消息");
             return;
         }
         //如果最新区块表中不存在该交易，则表示该交易已经被打包了，所以不需要再广播该交易的签名

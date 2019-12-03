@@ -108,7 +108,6 @@ public class CrossChainBootStrap extends BaseCrossChainBootStrap {
                 Log.debug("wait depend modules ready");
                 Thread.sleep(2000L);
             }
-            chainManager.runChain();
             return true;
         }catch (Exception e){
             Log.error(e);
@@ -173,6 +172,7 @@ public class CrossChainBootStrap extends BaseCrossChainBootStrap {
     @Override
     public RpcModuleState onDependenciesReady() {
         Log.debug("cc onDependenciesReady");
+        chainManager.runChain();
         return RpcModuleState.Running;
     }
 
