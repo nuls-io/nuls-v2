@@ -302,8 +302,8 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             return false;
         }
         if(txList.isEmpty()){
-            logger.warn("[rollbacked] block txs is empty . -hight:{}", blockHeight);
-            return true;
+            logger.error("[rollback error] block txs is empty . -hight:{}", blockHeight);
+            return false;
         }
         logger.debug("[回滚区块] 组装数据 执行时间:{}", NulsDateUtils.getCurrentTimeMillis() - start);
 
