@@ -268,7 +268,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                         }
                         convertHashList.add(convertHash);
                     }
-                    //如果当前链不为发起链，则需清空签名在对交易对签名拜占庭
+                    //如果当前链不为发起链，则本链为主网中转链需清空签名在对交易对签名拜占庭
                     if(chainId != fromChainId){
                         ctx.setTransactionSignature(null);
                         if (!otherCtxService.save(ctxHash, ctx, chainId)) {
