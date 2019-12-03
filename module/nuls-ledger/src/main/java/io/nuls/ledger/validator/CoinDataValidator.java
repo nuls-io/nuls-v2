@@ -323,9 +323,9 @@ public class CoinDataValidator {
             batchValidateTxMap.put(txHash, txHash);
             return ValidateResult.getSuccess();
         }
-        if (!validateTxAmount(coinData, tx.getType())) {
+        /*if (!validateTxAmount(coinData, tx.getType())) {
             return ValidateResult.getResult(LedgerErrorCode.TX_AMOUNT_INVALIDATE, new String[]{txHash});
-        }
+        }*/
         List<CoinFrom> coinFroms = coinData.getFrom();
         List<CoinTo> coinTos = coinData.getTo();
 
@@ -554,9 +554,9 @@ public class CoinDataValidator {
             batchValidateTxSet.add(txHash);
             return ValidateResult.getSuccess();
         }
-        if (!validateTxAmount(coinData, tx.getType())) {
+        /*if (!validateTxAmount(coinData, tx.getType())) {
             return ValidateResult.getResult(LedgerErrorCode.TX_AMOUNT_INVALIDATE, new String[]{txHash});
-        }
+        }*/
         List<CoinFrom> coinFroms = coinData.getFrom();
         List<CoinTo> coinTos = coinData.getTo();
         byte[] txNonce = LedgerUtil.getNonceByTx(tx);
@@ -628,9 +628,9 @@ public class CoinDataValidator {
             //例如黄牌交易，直接返回
             return ValidateResult.getSuccess();
         }
-        if (!validateTxAmount(coinData, tx.getType())) {
+        /*if (!validateTxAmount(coinData, tx.getType())) {
             return ValidateResult.getResult(LedgerErrorCode.TX_AMOUNT_INVALIDATE, new String[]{txHash});
-        }
+        }*/
         /*
          * 先校验nonce值是否正常
          */

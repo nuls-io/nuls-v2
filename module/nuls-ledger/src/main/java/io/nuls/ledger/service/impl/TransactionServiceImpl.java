@@ -105,9 +105,9 @@ public class TransactionServiceImpl implements TransactionService {
             //例如黄牌交易，直接返回
             return ValidateResult.getSuccess();
         }
-        if (!coinDataValidator.validateTxAmount(coinData, transaction.getType())) {
+        /*if (!coinDataValidator.validateTxAmount(coinData, transaction.getType())) {
             return ValidateResult.getResult(LedgerErrorCode.TX_AMOUNT_INVALIDATE, new String[]{transaction.getHash().toHex()});
-        }
+        }*/
         /*未确认交易的校验*/
         Map<String, TxUnconfirmed> accountsMap = new ConcurrentHashMap<>(8);
         byte[] txNonce = LedgerUtil.getNonceByTx(transaction);
