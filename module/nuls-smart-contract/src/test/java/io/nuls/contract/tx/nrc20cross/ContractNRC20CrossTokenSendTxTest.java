@@ -36,6 +36,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.Constants;
+import io.nuls.core.rpc.model.ApiModelProperty;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
@@ -47,7 +48,9 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -200,7 +203,7 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
      */
     @Test
     public void callTransferCrossChain() throws Exception {
-        contractAddress_nrc20 = "tNULSeBaMyW66axieu87pvECUspsKvrcygRxnx";
+        contractAddress_nrc20 = "tNULSeBaMxJw4T7o5N2JwZe1jg8NSQaUNtGJX3";
         methodName = "transferCrossChain";
         BigInteger value = BigInteger.valueOf(1_0000_0000L);
         String methodDesc = "";
@@ -217,19 +220,84 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
     }
 
     /**
-     * 3. 查询账本资产
+     * 3. 转移主链资产到平行链地址
      */
     @Test
-    public void getBalance(int chainId, byte[] address, int assetChainId, int assetId) throws Exception {
-        String addressString = AddressTool.getStringAddressByBytes(address);
+    public void mainAssetTransferTest(){
+        try{
+            List<CoinDTO> fromList = new ArrayList<>();
+            List<CoinDTO> toList = new ArrayList<>();
+            int assetChainId = 2;
+            int assetId = 1;
+            fromList.add(new CoinDTO("tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD",assetChainId,assetId, BigInteger.valueOf(100_0000_0000L),password));
+            toList.add(new CoinDTO("XXOOdjJQw4LJdjtCd5Gda17FCNgSgTcPUUdSA",assetChainId,assetId, BigInteger.valueOf(100_0000_0000L),password));
+            Map paramMap = new HashMap();
+            paramMap.put("listFrom", fromList);
+            paramMap.put("listTo", toList);
+            paramMap.put("chainId", chainId);
+            paramMap.put("remark", "transfer test");
+            //调用接口
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, "createCrossTx", paramMap);
+            if (!cmdResp.isSuccess()) {
+                Log.info("接口调用失败！" );
+            }
+            HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("createCrossTx"));
+            String hash = (String) result.get("txHash");
+            Log.info("{}", hash);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 4. (平行链调用) 查询账本资产
+     */
+    @Test
+    public void balanceTest() throws Exception {
+        int assetChainId = 2;
+        int assetId = 3;
+        this.getBalance(chainId, "XXOOdjJQw4LJdjtCd5Gda17FCNgSgTcPUUdSA", assetChainId, assetId);
+    }
+
+    /**
+     * 5. (平行链调用) 转移主链代币资产回到主链
+     */
+    @Test
+    public void tokenAssetTransferBackTest() throws Exception {
+        try{
+            List<CoinDTO> fromList = new ArrayList<>();
+            List<CoinDTO> toList = new ArrayList<>();
+            int assetChainId = 2;
+            int assetId = 1;
+            fromList.add(new CoinDTO("XXOOdjJQw4LJdjtCd5Gda17FCNgSgTcPUUdSA",assetChainId,assetId, BigInteger.valueOf(0_1000_0000L),password));
+            toList.add(new CoinDTO("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG",assetChainId,assetId, BigInteger.valueOf(0_1000_0000L),password));
+            Map paramMap = new HashMap();
+            paramMap.put("listFrom", fromList);
+            paramMap.put("listTo", toList);
+            paramMap.put("chainId", chainId);
+            paramMap.put("remark", "transfer test");
+            //调用接口
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, "createCrossTx", paramMap);
+            if (!cmdResp.isSuccess()) {
+                Log.info("接口调用失败！{}", JSONUtils.obj2PrettyJson(cmdResp));
+            }
+            HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("createCrossTx"));
+            String hash = (String) result.get("txHash");
+            Log.info("{}", hash);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private void getBalance(int chainId, String address, int assetChainId, int assetId) throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
         params.put(Constants.CHAIN_ID, chainId);
         params.put("assetChainId", assetChainId);
         params.put("assetId", assetId);
-        params.put("address", addressString);
+        params.put("address", address);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalance", params);
-        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("getBalance"));
         Log.info("balance:{}", JSONUtils.obj2PrettyJson(result));
     }
 
@@ -402,5 +470,87 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
         Map map = waitGetContractTx(hash);
         Assert.assertTrue(JSONUtils.obj2PrettyJson(map), (Boolean) ((Map) (map.get("contractResult"))).get("success"));
         return contractAddress;
+    }
+
+    static class CoinDTO implements Cloneable {
+        private String address;
+        private Integer assetsChainId;
+        private Integer assetsId;
+        private BigInteger amount;
+        private String password;
+
+        public CoinDTO() {
+        }
+
+        public CoinDTO(String address, Integer assetsChainId, Integer assetsId, BigInteger amount, String password) {
+            this.address = address;
+            this.assetsChainId = assetsChainId;
+            this.assetsId = assetsId;
+            this.amount = amount;
+            this.password = password;
+        }
+
+        public String getAddress() {
+            return address;
+        }
+
+        public void setAddress(String address) {
+            this.address = address;
+        }
+
+        public int getAssetsChainId() {
+            return assetsChainId;
+        }
+
+        public void setAssetsChainId(int assetsChainId) {
+            this.assetsChainId = assetsChainId;
+        }
+
+        public int getAssetsId() {
+            return assetsId;
+        }
+
+        public void setAssetsId(int assetsId) {
+            this.assetsId = assetsId;
+        }
+
+        public BigInteger getAmount() {
+            return amount;
+        }
+
+        public void setAmount(BigInteger amount) {
+            this.amount = amount;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
+        }
+
+        @Override
+        public String toString() {
+            return "CoinDTO{" +
+                    "address='" + address + '\'' +
+                    ", assetsChainId=" + assetsChainId +
+                    ", assetsId=" + assetsId +
+                    ", amount=" + amount +
+                    ", password='" + password + '\'' +
+                    '}';
+        }
+
+        @Override
+        public Object clone(){
+            CoinDTO coinDTO = null;
+            try {
+                coinDTO = (CoinDTO)super.clone();
+            } catch (CloneNotSupportedException e) {
+                e.printStackTrace();
+            }
+
+            return coinDTO;
+        }
     }
 }

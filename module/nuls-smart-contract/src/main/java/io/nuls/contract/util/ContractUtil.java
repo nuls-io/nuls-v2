@@ -189,24 +189,36 @@ public class ContractUtil {
         int chainIdByToAddress = AddressTool.getChainIdByAddress(toAddress);
         if(chainIdByToAddress != ContractContext.MAIN_CHAIN_ID) {
             // 接收者非主链地址，不是跨链转入交易
+            if(Log.isDebugEnabled()) {
+                Log.warn("接收者[{}]非主链地址，不是跨链转入交易", AddressTool.getStringAddressByBytes(toAddress));
+            }
             return null;
         }
         int assetsChainId = coinTo.getAssetsChainId();
         Chain chain = chainManager.getChainMap().get(assetsChainId);
         if(chain == null) {
             // 未知链
+            if(Log.isDebugEnabled()) {
+                Log.warn("未知链[{}]", assetsChainId);
+            }
             return null;
         }
         int assetsId = coinTo.getAssetsId();
         Map<String, String> tokenAssetsContractAddressInfoMap = chain.getTokenAssetsContractAddressInfoMap();
         String nrcContractAddress = tokenAssetsContractAddressInfoMap.get(assetsChainId + "-" + assetsId);
         if(StringUtils.isBlank(nrcContractAddress)) {
-            // 没有注册资产
+            // 没有注册合约资产
+            if(Log.isDebugEnabled()) {
+                Log.warn("没有注册合约资产[{}]", assetsChainId + "-" + assetsId);
+            }
             return null;
         }
         boolean isCrossAssets = ChainManagerCall.isCrossAssets(assetsChainId, assetsId);
         if(!isCrossAssets) {
             // 没有注册跨链资产
+            if(Log.isDebugEnabled()) {
+                Log.warn("没有注册跨链资产[{}]", assetsChainId + "-" + assetsId);
+            }
             return null;
         }
         // 解析跨链转账交易，设置调用合约的参数，特殊设置 sender == null
