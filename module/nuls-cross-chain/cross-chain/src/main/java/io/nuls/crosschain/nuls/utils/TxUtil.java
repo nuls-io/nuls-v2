@@ -198,7 +198,9 @@ public class TxUtil {
                 }else{
                     ctx.setTransactionSignature(transactionSignature.serialize());
                     //将收到的签名消息加入消息队列
-                    chain.getSignMessageByzantineQueue().addAll(chain.getFutureMessageMap().remove(hash));
+                    if(chain.getFutureMessageMap().containsKey(hash)){
+                        chain.getSignMessageByzantineQueue().addAll(chain.getFutureMessageMap().remove(hash));
+                    }
                 }
                 //删除缓存中当前交易的签名列表
                 chain.getFutureMessageMap().remove(hash);
@@ -275,7 +277,9 @@ public class TxUtil {
         if(byzantinePass){
             chain.getFutureMessageMap().remove(hash);
         }else{
-            chain.getSignMessageByzantineQueue().addAll(chain.getFutureMessageMap().remove(hash));
+            if(chain.getFutureMessageMap().containsKey(hash)){
+                chain.getSignMessageByzantineQueue().addAll(chain.getFutureMessageMap().remove(hash));
+            }
         }
 
         MessageUtil.broadcastCtx(chain,hash,chainId,hashHex);
