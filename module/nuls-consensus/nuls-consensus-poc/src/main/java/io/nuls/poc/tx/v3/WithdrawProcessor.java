@@ -209,7 +209,7 @@ public class WithdrawProcessor implements TransactionProcessor {
             throw new NulsException(ConsensusErrorCode.TX_CREATOR_NOT_SIGNED);
         }
         transactionSignature.parse(tx.getTransactionSignature(), 0);
-        if (transactionSignature.getP2PHKSignatures() == null || transactionSignature.getP2PHKSignatures().size() != 1) {
+        if (transactionSignature.getP2PHKSignatures() == null || transactionSignature.getP2PHKSignatures().isEmpty()) {
             chain.getLogger().error("Unsigned Commission transaction");
             throw new NulsException(ConsensusErrorCode.TX_CREATOR_NOT_SIGNED);
         }
