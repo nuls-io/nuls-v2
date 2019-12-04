@@ -110,7 +110,7 @@ public class TransactionBootstrap extends RpcModule {
 
     @Override
     public void onDependenciesReady(Module module) {
-        // add by pierre at 2019-12-04 需要协议升级
+        // add by pierre at 2019-12-04 增加与智能合约模块的连接标志
         LOG.info("module [{}] is connected, version [{}]", module.getName(), module.getVersion());
         if (ModuleE.SC.abbr.equals(module.getName())) {
             txConfig.setCollectedSmartContractModule(true);
@@ -133,7 +133,7 @@ public class TransactionBootstrap extends RpcModule {
 
     @Override
     public RpcModuleState onDependenciesLoss(Module module) {
-        // add by pierre at 2019-12-04 需要协议升级
+        // add by pierre at 2019-12-04 增加与智能合约模块的连接标志
         LOG.info("module [{}] has lost connection, version [{}]", module.getName(), module.getVersion());
         if (ModuleE.SC.abbr.equals(module.getName())) {
             txConfig.setCollectedSmartContractModule(false);

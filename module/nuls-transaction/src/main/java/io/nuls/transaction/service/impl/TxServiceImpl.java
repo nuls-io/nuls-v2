@@ -29,6 +29,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.*;
+import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.base.protocol.TxRegisterDetail;
 import io.nuls.base.signture.MultiSignTxSignature;
 import io.nuls.base.signture.SignatureUtil;
@@ -52,6 +53,7 @@ import io.nuls.core.thread.commom.NulsThreadFactory;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
+import io.nuls.transaction.constant.TxContext;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.manager.TxManager;
 import io.nuls.transaction.model.bo.*;
@@ -754,10 +756,12 @@ public class TxServiceImpl implements TxService {
                             String moduleCode = txRegister.getModuleCode();
                             boolean isSmartContractTx = moduleCode.equals(ModuleE.SC.abbr);
                             boolean isCrossTx = moduleCode.equals(ModuleE.CC.abbr);
-                            // add by pierre at 2019-11-02 跨链转账交易发送到智能合约模块进行解析，是否为合约资产跨链转账 需要协议升级
-                            boolean isCrossTransferTx = TxType.CROSS_CHAIN == transaction.getType();
-                            if(!isSmartContractTx && txConfig.isCollectedSmartContractModule()) {
-                                isSmartContractTx = isCrossTransferTx;
+                            // add by pierre at 2019-11-02 跨链转账交易发送到智能合约模块进行解析，是否为合约资产跨链转账 需要协议升级 done
+                            if(ProtocolGroupManager.getCurrentVersion(chain.getChainId()) >= TxContext.UPDATE_VERSION_V230) {
+                                boolean isCrossTransferTx = TxType.CROSS_CHAIN == transaction.getType();
+                                if(!isSmartContractTx && txConfig.isCollectedSmartContractModule()) {
+                                    isSmartContractTx = isCrossTransferTx;
+                                }
                             }
                             // end code by pierre
                             if (isSmartContractTx) {
@@ -1408,10 +1412,12 @@ public class TxServiceImpl implements TxService {
                 throw new NulsException(TxErrorCode.TX_TYPE_INVALID);
             }
             boolean isSmartContractTx = TxManager.isUnSystemSmartContract(txRegister);
-            // add by pierre at 2019-11-02 跨链转账交易发送到智能合约模块进行解析，是否为合约资产跨链转账 需要协议升级
-            boolean isCrossTransferTx = TxType.CROSS_CHAIN == type;
-            if(!isSmartContractTx && txConfig.isCollectedSmartContractModule()) {
-                isSmartContractTx = isCrossTransferTx;
+            // add by pierre at 2019-11-02 跨链转账交易发送到智能合约模块进行解析，是否为合约资产跨链转账 需要协议升级 done
+            if(ProtocolGroupManager.getCurrentVersion(chain.getChainId()) >= TxContext.UPDATE_VERSION_V230) {
+                boolean isCrossTransferTx = TxType.CROSS_CHAIN == type;
+                if(!isSmartContractTx && txConfig.isCollectedSmartContractModule()) {
+                    isSmartContractTx = isCrossTransferTx;
+                }
             }
             // end code by pierre
             /** 智能合约*/

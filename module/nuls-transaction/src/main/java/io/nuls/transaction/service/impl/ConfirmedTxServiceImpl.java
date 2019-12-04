@@ -4,6 +4,7 @@ import io.nuls.base.RPCUtil;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
+import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.constant.TxType;
@@ -17,6 +18,7 @@ import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
+import io.nuls.transaction.constant.TxContext;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.manager.TxManager;
@@ -145,8 +147,9 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         }
         logger.debug("[保存区块] 存已确认交易DB 执行时间:{}", NulsDateUtils.getCurrentTimeMillis()- dbStart);
 
-        // add by pierre at 2019-12-01 把type10交易发送到合约模块筛选处理，需要协议升级
-        if (!crossChainTxList.isEmpty() && txConfig.isCollectedSmartContractModule()) {
+        // add by pierre at 2019-12-01 把type10交易发送到合约模块筛选处理，需要协议升级 done
+        if (ProtocolGroupManager.getCurrentVersion(chain.getChainId()) >= TxContext.UPDATE_VERSION_V230
+                && !crossChainTxList.isEmpty() && txConfig.isCollectedSmartContractModule()) {
             List<String> contractList = moduleVerifyMap.computeIfAbsent(ModuleE.SC.abbr, code -> new ArrayList<>());
             contractList.addAll(crossChainTxList);
         }
@@ -332,8 +335,9 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         }
         logger.debug("[回滚区块] 回滚账本 执行时间:{}", NulsDateUtils.getCurrentTimeMillis() - ledgerStart);
 
-        // add by pierre at 2019-12-01 把type10交易发送到合约模块筛选处理，需要协议升级
-        if (!crossChainTxList.isEmpty() && txConfig.isCollectedSmartContractModule()) {
+        // add by pierre at 2019-12-01 把type10交易发送到合约模块筛选处理，需要协议升级 done
+        if (ProtocolGroupManager.getCurrentVersion(chain.getChainId()) >= TxContext.UPDATE_VERSION_V230
+                && !crossChainTxList.isEmpty() && txConfig.isCollectedSmartContractModule()) {
             List<String> contractList = moduleVerifyMap.computeIfAbsent(ModuleE.SC.abbr, code -> new ArrayList<>());
             contractList.addAll(crossChainTxList);
         }

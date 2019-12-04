@@ -1,7 +1,7 @@
 /**
  * MIT License
  * <p>
- * Copyright (c) 2017-2019 nuls.io
+ * Copyright (c) 2017-2018 nuls.io
  * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,31 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.contract.model.bo;
-
-import io.nuls.base.data.Transaction;
+package io.nuls.transaction.constant;
 
 /**
  * @author: PierreLuo
- * @date: 2019-02-27
+ * @date: 2019-12-04
  */
-public class ContractTempTransaction extends Transaction {
-    private int chainId;
-    private String txHex;
-
-    public int getChainId() {
-        return chainId;
-    }
-
-    public void setChainId(int chainId) {
-        this.chainId = chainId;
-    }
-
-    public String getTxHex() {
-        return txHex;
-    }
-
-    public void setTxHex(String txHex) {
-        this.txHex = txHex;
-    }
+public class TxContext {
+    public static short UPDATE_VERSION_V230 = 3;
 }

@@ -248,12 +248,15 @@ public class SmartContractBootStrap extends RpcModule {
                 Log.info("register tx type to tx module, chain id is {}, result is {}", chainId, registerTx);
             }
         }
-        // add by pierre at 2019-11-02 需要协议升级
+        // add by pierre at 2019-11-02 需要协议升级 done
         if (module.getName().equals(ModuleE.LG.abbr)) {
             // 缓存token注册资产的资产ID和token合约地址
             Map<Integer, Chain> chainMap = chainManager.getChainMap();
             for (Chain chain : chainMap.values()) {
                 int chainId = chain.getChainId();
+                if(ProtocolGroupManager.getCurrentVersion(chainId) < ContractContext.UPDATE_VERSION_V230) {
+                    continue;
+                }
                 List<Map> regTokenList;
                 try {
                     regTokenList = LedgerCall.getRegTokenList(chainId);

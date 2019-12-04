@@ -27,6 +27,8 @@ package io.nuls.contract.processor;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsHash;
+import io.nuls.base.protocol.ProtocolGroupManager;
+import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.model.bo.Chain;
@@ -131,26 +133,28 @@ public class CreateContractTxProcessor {
             if (result.isFailed()) {
                 return result;
             }
-            // add by pierre at 2019-11-02 调用账本模块，登记资产id，当NRC20合约存在[transferCrossChain]方法时，才登记资产id 需要协议升级
-            List<ProgramMethod> methods = contractHelper.getAllMethods(chainId, txData.getCode());
-            boolean isNewNrc20 = false;
-            for(ProgramMethod method : methods) {
-                if(ContractConstant.CROSS_CHAIN_NRC20_CONTRACT_TRANSFER_OUT_METHOD_NAME.equals(method.getName()) &&
-                        ContractConstant.CROSS_CHAIN_NRC20_CONTRACT_TRANSFER_OUT_METHOD_DESC.equals(method.getDesc())) {
-                    isNewNrc20 = true;
-                    break;
+            // add by pierre at 2019-11-02 调用账本模块，登记资产id，当NRC20合约存在[transferCrossChain]方法时，才登记资产id 需要协议升级 done
+            if(ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_V230 ) {
+                List<ProgramMethod> methods = contractHelper.getAllMethods(chainId, txData.getCode());
+                boolean isNewNrc20 = false;
+                for(ProgramMethod method : methods) {
+                    if(ContractConstant.CROSS_CHAIN_NRC20_CONTRACT_TRANSFER_OUT_METHOD_NAME.equals(method.getName()) &&
+                            ContractConstant.CROSS_CHAIN_NRC20_CONTRACT_TRANSFER_OUT_METHOD_DESC.equals(method.getDesc())) {
+                        isNewNrc20 = true;
+                        break;
+                    }
                 }
-            }
-            if(isNewNrc20) {
-                Map resultMap = LedgerCall.commitNRC20Assets(chainId, tokenName, tokenSymbol, (short) tokenDecimals, tokenTotalSupply, contractAddressStr);
-                if(resultMap != null) {
-                    // 缓存合约地址和合约资产ID
-                    int assetId = Integer.parseInt(resultMap.get("assetId").toString());
-                    Chain chain = contractHelper.getChain(chainId);
-                    Map<String, ContractTokenAssetsInfo> tokenAssetsInfoMap = chain.getTokenAssetsInfoMap();
-                    Map<String, String> tokenAssetsContractAddressInfoMap = chain.getTokenAssetsContractAddressInfoMap();
-                    tokenAssetsInfoMap.put(contractAddressStr, new ContractTokenAssetsInfo(chainId, assetId));
-                    tokenAssetsContractAddressInfoMap.put(chainId + "-" + assetId, contractAddressStr);
+                if(isNewNrc20) {
+                    Map resultMap = LedgerCall.commitNRC20Assets(chainId, tokenName, tokenSymbol, (short) tokenDecimals, tokenTotalSupply, contractAddressStr);
+                    if(resultMap != null) {
+                        // 缓存合约地址和合约资产ID
+                        int assetId = Integer.parseInt(resultMap.get("assetId").toString());
+                        Chain chain = contractHelper.getChain(chainId);
+                        Map<String, ContractTokenAssetsInfo> tokenAssetsInfoMap = chain.getTokenAssetsInfoMap();
+                        Map<String, String> tokenAssetsContractAddressInfoMap = chain.getTokenAssetsContractAddressInfoMap();
+                        tokenAssetsInfoMap.put(contractAddressStr, new ContractTokenAssetsInfo(chainId, assetId));
+                        tokenAssetsContractAddressInfoMap.put(chainId + "-" + assetId, contractAddressStr);
+                    }
                 }
             }
             // end code by pierre
@@ -171,8 +175,8 @@ public class CreateContractTxProcessor {
         if (contractResult == null) {
             return Result.getSuccess(null);
         }
-        // add by pierre at 2019-11-02 调用账本模块，回滚已登记的资产id 需要协议升级
-        if(contractResult.isNrc20()) {
+        // add by pierre at 2019-11-02 调用账本模块，回滚已登记的资产id 需要协议升级 done
+        if(ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_V230 && contractResult.isNrc20()) {
             LedgerCall.rollBackNRC20Assets(chainId, AddressTool.getStringAddressByBytes(contractAddress));
             // 清理缓存
             Chain chain = contractHelper.getChain(chainId);

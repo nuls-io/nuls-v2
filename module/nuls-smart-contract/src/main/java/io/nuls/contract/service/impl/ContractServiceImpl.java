@@ -160,6 +160,7 @@ public class ContractServiceImpl implements ContractService {
             if (Log.isDebugEnabled()) {
                 Log.debug("[Invoke Contract] TxType is [{}], hash is [{}]", tx.getType(), tx.getHash().toString());
             }
+            tx.setChainId(chainId);
             ContractWrapperTransaction wrapperTx = ContractUtil.parseContractTransaction(tx, chainManager);
             // add by pierre at 2019-10-20
             if(wrapperTx == null) {

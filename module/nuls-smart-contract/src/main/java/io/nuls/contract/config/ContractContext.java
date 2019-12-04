@@ -54,4 +54,6 @@ public class ContractContext {
      *  代币跨链系统合约地址
      */
     public static byte[] CROSS_CHAIN_SYSTEM_CONTRACT;
+
+    public static short UPDATE_VERSION_V230 = 3;
 }

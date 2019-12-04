@@ -2,20 +2,20 @@
 encoding=UTF-8
 language=en
 logPath=../../../../Logs
-logLevel=INFO
+logLevel=DEBUG
 dataPath=../../../../data
 #默认本链ID
-chainId=8
+chainId=2
 #地址前缀
-addressPrefix=XXOO
+addressPrefix=tNULS
 #默认本链主资产ID
 assetId=1
-#默认资产小数位数
-decimals=8
 #默认链名称
-chainName=xxoo
+chainName=nuls2
 #本链默认资产符号
-symbol=XXOO
+symbol=NULS
+#默认资产的小数精确位数
+decimals=8
 #主网链id
 mainChainId=2
 #主网主资产id
@@ -28,13 +28,13 @@ blackHolePublicKey=0000000000000000000000000000000000000000000000000000000000000
 port=18001
 crossPort=18002
 #魔法参数
-packetMagic=2019880904
+packetMagic=2019880917
 #种子节点
-selfSeedIps=192.168.1.40:18001
+selfSeedIps=192.168.1.39:18001
 #主网的跨链种子连接节点
 moonSeedIps=192.168.1.39:18002
 #最大入网连接数
-maxInCount=300
+maxInCount=100
 #最大出网连接数
 maxOutCount=20
 
@@ -57,19 +57,18 @@ singleDownloadTimeout=15000
 #区块同步过程中缓存的区块字节数上限(20M)
 cachedBlockSizeLimit=20971520
 #创世块文件路径(支持绝对路径与相对路径,相对路径相对于此配置文件的目录)
-genesisBlockPath=genesis-block_dev_cross_chain.json
+genesisBlockPath=genesis-block_dev.json
 dependent=cross-chain,smart-contract,protocol-update
-
 
 [consensus]
 #种子节点列表
-seedNodes=XXOOdjJQvECefSZ971fYt4XMkv6BNcMxFWRgy
+seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
 #出块地址密码
 password=nuls123456
 #出块间隔时间(单位：s)
 packingInterval=10
 #共识委托抵押资产链ID
-agentChainId=8
+agentChainId=2
 #共识委托抵押资产ID
 agentAssetId=1
 #共识奖励资产ID(共识奖励必须为本链资产)
@@ -90,10 +89,14 @@ dataPath=../../../../../data
 logPath=../../../../../Logs
 dependent=protocol-update,smart-contract,cross-chain
 
+[transaction]
+dependent=protocol-update,smart-contract
+
 [smart-contract]
 #合约视图方法调用最大消耗的Gas
 maxViewGas=100000000
-
+systemLogLevel=WARN
+crossChainSystemContract=tNULSeBaN615E5S2vA4ewT3XdhLm2xMCeH1DaJ
 
 [public-service]
 #public-service模块对外的rpc端口号
@@ -110,17 +113,15 @@ maxWaitTime=120000
 socketTimeout=300000
 #连接超时时间
 connectTimeOut=30000
-developerNodeAddress=NULSd6Hgf15aUZj6918tEwy9aT4JG1ZQotXRF
-ambassadorNodeAddress=NULSd6HgcfGtsmm79QDoBK1MAjqNmm3rgKXSj
-mappingAddress=NULSd6HgcfwWCD5TLEfehrJ1fFYuZ6nqGbfiu,NULSd6HggAGpQbhhSHU9R1yRxKKuCCTFwayaB
-businessAddress=NULSd6HgdemcQDAaiEJWq9ESMhtUHXRsNJ4KM
-teamAddress=NULSd6HgbfkSuRGKSLJJzAPAihgDQtaUhuE4L
-communityAddress=NULSd6HgjDZmLMbZSmH9tqb6smdzZHCxsCRD3
+developerNodeAddress=tNULSeBaMuKuKY4UstKpXvGxd7LEvEBtd3NXAG,tNULSeBaMns1C6kTePxcQS7rGAu37foAwAMpri
+ambassadorNodeAddress=tNULSeBaMhWyQBHc54oXLXB13WhJsyrTobMYYU,tNULSeBaMtCmUuBHMDAjKVSoVBsAEvLoWCspyE
+mappingAddress=tNULSeBaMqTC6rnF56dnJqz1Fb8gMdVxGGvxSf,tNULSeBaMkroWKUKj6X4zURBE3V47VZwMJdHPm
+businessAddress=tNULSeBaMnf1qfX7emr14att2DsSb2TSPcPBSL
+teamAddress=tNULSeBaMqTvaS2NEEZfdrmPzoRvd8zN6T57LH
+communityAddress=tNULSeBaMm9RQLKKUBXKJ1rQ7g4iobmWAB73mS
 dependent=smart-contract,cross-chain
 
 [cross-chain]
-dataPath=../../../../../data
-logPath=../../../../../Logs
 #跨链节点链接的最小值
 minNodeAmount=1
 #跨链节点链接的最大值
@@ -135,11 +136,13 @@ verifiers=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
 mainByzantineRatio=66
 #主网最大签名数
 maxSignatureCount=100
+dataPath=../../../../../data
+logPath=../../../../../Logs
 dependent=protocol-update,smart-contract
 
 [nuls-api]
 #httpServer的启动ip
-serverIp=127.0.0.1
+serverIp=0.0.0.0
 #httpServer的启动port
 serverPort=18004
 dependent=smart-contract,cross-chain

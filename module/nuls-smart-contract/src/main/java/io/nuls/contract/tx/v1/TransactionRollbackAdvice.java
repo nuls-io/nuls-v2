@@ -26,14 +26,12 @@ package io.nuls.contract.tx.v1;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.protocol.CommonAdvice;
+import io.nuls.base.protocol.ProtocolGroupManager;
+import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.enums.BlockType;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.manager.ChainManager;
-import io.nuls.contract.model.bo.Chain;
-import io.nuls.contract.model.dto.ContractPackageDto;
-import io.nuls.contract.model.po.ContractOfflineTxHashPo;
 import io.nuls.contract.storage.ContractOfflineTxHashListStorageService;
-import io.nuls.contract.util.Log;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -61,9 +59,11 @@ public class TransactionRollbackAdvice implements CommonAdvice {
             ChainManager.chainHandle(chainId, BlockType.VERIFY_BLOCK.type());
             // 删除智能合约链下交易hash
             contractOfflineTxHashListStorageService.deleteOfflineTxHashList(chainId, header.getHash().getBytes());
-            // add by pierre at 2019-12-01 处理type10交易的业务回滚, 需要协议升级
-            List<Transaction> crossTxList = txList.stream().filter(tx -> tx.getType() == TxType.CROSS_CHAIN).collect(Collectors.toList());
-            callContractProcessor.rollback(chainId, crossTxList, header);
+            // add by pierre at 2019-12-01 处理type10交易的业务回滚, 需要协议升级 done
+            if(ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_V230) {
+                List<Transaction> crossTxList = txList.stream().filter(tx -> tx.getType() == TxType.CROSS_CHAIN).collect(Collectors.toList());
+                callContractProcessor.rollback(chainId, crossTxList, header);
+            }
             // end code by pierre
         } catch (Exception e) {
             throw new RuntimeException(e);

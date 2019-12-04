@@ -27,6 +27,7 @@ import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
+import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.TransactionSignature;
 import io.nuls.contract.config.ContractContext;
@@ -154,8 +155,11 @@ public class ContractUtil {
                 create.parse(tx.getTxData(), 0);
                 contractData = create;
                 break;
-            // add by pierre at 2019-11-02 需要协议升级
+            // add by pierre at 2019-11-02 需要协议升级 done
             case CROSS_CHAIN:
+                if(ProtocolGroupManager.getCurrentVersion(tx.getChainId()) < ContractContext.UPDATE_VERSION_V230) {
+                    break;
+                }
                 contractData = parseCrossChainTx(tx, chainManager);
                 if(contractData == null) {
                     isContractTx = false;
@@ -608,7 +612,7 @@ public class ContractUtil {
         return result;
     }
 
-    public static ContractBaseTransaction convertContractTx(Transaction tx) {
+    public static ContractBaseTransaction convertContractTx(int chainId, Transaction tx) {
         ContractBaseTransaction resultTx = null;
         switch (tx.getType()) {
             case CREATE_CONTRACT:
@@ -626,11 +630,14 @@ public class ContractUtil {
             case CONTRACT_RETURN_GAS:
                 resultTx = new ContractReturnGasTransaction();
                 break;
-                //TODO pierre 标记 需要协议升级
+            // pierre 标记 需要协议升级 done
             case CROSS_CHAIN:
+                if(ProtocolGroupManager.getCurrentVersion(chainId) < ContractContext.UPDATE_VERSION_V230) {
+                    break;
+                }
                 resultTx = new CrossTokenContractTransaction();
                 break;
-                // end code by pierre
+            // end code by pierre
             default:
                 break;
         }

@@ -25,10 +25,11 @@
 package io.nuls.contract.vm.natives.io.nuls.contract.sdk;
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.Transaction;
+import io.nuls.base.protocol.ProtocolGroupManager;
+import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.enums.CmdRegisterMode;
 import io.nuls.contract.enums.CmdRegisterReturnType;
@@ -58,7 +59,6 @@ import io.nuls.contract.vm.util.Constants;
 import io.nuls.contract.vm.util.JsonUtils;
 import io.nuls.contract.vm.util.Utils;
 import io.nuls.core.core.ioc.SpringLiteContext;
-import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.crypto.Sha3Hash;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.model.message.Response;
@@ -596,8 +596,13 @@ public class NativeUtils {
         ProgramInvokeRegisterCmd invokeRegisterCmd = new ProgramInvokeRegisterCmd(cmdName, argsMap, cmdRegisterMode);
         Result result;
         ObjectRef objectRef;
-        // add by pierre at 2019-11-01 token跨链转出命令 需要协议升级
+        // add by pierre at 2019-11-01 token跨链转出命令 需要协议升级 done
         if(ContractConstant.CMD_TOKEN_OUT_CROSS_CHAIN.equals(cmdName)) {
+            if(ProtocolGroupManager.getCurrentVersion(currentChainId) < ContractContext.UPDATE_VERSION_V230 ) {
+                throw new ErrorException(
+                        String.format("Invoke external cmd failed. There is no registration information. chainId: [%s] cmdName: [%s]",
+                                currentChainId, cmdName), frame.vm.getGasUsed(), null);
+            }
             objectRef = NativeUtils.tokenOutCrossChainCmdProcessor(currentChainId, senderBytes, contractSender, args, contractAddress, contractAddressBytes, cmdRegisterManager, moduleCode, cmdName, argsMap, invokeRegisterCmd, frame);
         // end code by pierre
         } else {

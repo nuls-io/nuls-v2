@@ -1061,7 +1061,7 @@ public class ContractResource extends BaseCmd {
                 } else if (!ContractUtil.isContractTransaction(tx)) {
                     continue;
                 }
-                ContractBaseTransaction tx1 = ContractUtil.convertContractTx(tx);
+                ContractBaseTransaction tx1 = ContractUtil.convertContractTx(chainId, tx);
                 contractResultDto = this.makeContractResultDto(chainId, tx1, txHash);
                 if (contractResultDto == null) {
                     continue;
@@ -1114,7 +1114,7 @@ public class ContractResource extends BaseCmd {
                         break;
                     }
                 }
-                ContractBaseTransaction tx1 = ContractUtil.convertContractTx(tx);
+                ContractBaseTransaction tx1 = ContractUtil.convertContractTx(chainId, tx);
                 contractResultDto = this.makeContractResultDto(chainId, tx1, txHash);
                 if (contractResultDto == null) {
                     flag = false;
@@ -1213,7 +1213,7 @@ public class ContractResource extends BaseCmd {
                     return failed(NON_CONTRACTUAL_TRANSACTION);
                 }
             }
-            ContractBaseTransaction tx1 = ContractUtil.convertContractTx(tx);
+            ContractBaseTransaction tx1 = ContractUtil.convertContractTx(chainId, tx);
             tx1.setStatus(TxStatusEnum.CONFIRMED);
             // 获取合约执行结果
             ContractResultDto contractResultDto = this.makeContractResultDto(chainId, tx1, txHash);

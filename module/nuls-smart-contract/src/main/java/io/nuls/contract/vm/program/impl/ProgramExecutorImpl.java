@@ -24,13 +24,18 @@
  */
 package io.nuls.contract.vm.program.impl;
 
+import io.nuls.base.protocol.ProtocolGroupManager;
+import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.model.bo.ContractBalance;
 import io.nuls.contract.model.dto.BlockHeaderDto;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.*;
-import io.nuls.contract.vm.code.*;
+import io.nuls.contract.vm.code.ClassCode;
+import io.nuls.contract.vm.code.ClassCodeLoader;
+import io.nuls.contract.vm.code.ClassCodes;
+import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.exception.ErrorException;
 import io.nuls.contract.vm.natives.io.nuls.contract.sdk.NativeAddress;
 import io.nuls.contract.vm.natives.io.nuls.contract.sdk.NativeUtils;
@@ -327,55 +332,58 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
             vm.setProgramExecutor(this);
             vm.heap.loadClassCodes(classCodes);
-            //TODO pierre 标记 当存在合约内部调用合约，共享同一个合约的内存数据 需要协议升级
+            // pierre 标记 当存在合约内部调用合约，共享同一个合约的内存数据 需要协议升级 done
             //Log.debug("++++++++++++++++++++");
             //Log.warn(programInvoke.toString());
             //Log.info("this.contractObjectRefCount: {}", this.contractObjectRefCount);
             //Log.info("vm.heap.objectRefCount: {}", vm.heap.objectRefCount);
-            if(contractObjects == null) {
-                contractObjects = new HashMap<>();
-                contractObjects.put(contractAddress, vm.heap.objects);
-            } else {
-                Map<ObjectRef, Map<String, Object>> objectRefMapMap = contractObjects.get(contractAddress);
-                if(objectRefMapMap != null) {
-                    if(programInvoke.isInternalCall()) {
-                        //Log.info("共享heap.objects");
-                        vm.heap.objects = objectRefMapMap;
-                    }
-                } else {
+            boolean isUpgradedV230 = ProtocolGroupManager.getCurrentVersion(getCurrentChainId()) >= ContractContext.UPDATE_VERSION_V230;
+            if(isUpgradedV230) {
+                if(contractObjects == null) {
+                    contractObjects = new HashMap<>();
                     contractObjects.put(contractAddress, vm.heap.objects);
-                }
-            }
-            if(contractArrays == null) {
-                contractArrays = new HashMap<>();
-                contractArrays.put(contractAddress, vm.heap.arrays);
-            } else {
-                Map<String, Object> arraysMap = contractArrays.get(contractAddress);
-                if(arraysMap != null) {
-                    if(programInvoke.isInternalCall()) {
-                        //Log.info("共享heap.arrays");
-                        vm.heap.arrays = arraysMap;
-                    }
                 } else {
-                    contractArrays.put(contractAddress, vm.heap.arrays);
-                }
-            }
-            if(contractChanges == null) {
-                //Log.info("新建map和heap.changes");
-                contractChanges = new HashMap<>();
-                contractChanges.put(contractAddress, vm.heap.changes);
-            } else {
-                Set<ObjectRef> changesObjectRefs = contractChanges.get(contractAddress);
-                if(changesObjectRefs != null) {
-                    if(programInvoke.isInternalCall()) {
-                        //Log.info("共享heap.changes: {}", changesObjectRefs.hashCode());
-                        vm.heap.changes = changesObjectRefs;
+                    Map<ObjectRef, Map<String, Object>> objectRefMapMap = contractObjects.get(contractAddress);
+                    if(objectRefMapMap != null) {
+                        if(programInvoke.isInternalCall()) {
+                            //Log.info("共享heap.objects");
+                            vm.heap.objects = objectRefMapMap;
+                        }
                     } else {
-                        //Log.info("问题heap.changes");
+                        contractObjects.put(contractAddress, vm.heap.objects);
                     }
+                }
+                if(contractArrays == null) {
+                    contractArrays = new HashMap<>();
+                    contractArrays.put(contractAddress, vm.heap.arrays);
                 } else {
-                    //Log.info("新增heap.changes");
+                    Map<String, Object> arraysMap = contractArrays.get(contractAddress);
+                    if(arraysMap != null) {
+                        if(programInvoke.isInternalCall()) {
+                            //Log.info("共享heap.arrays");
+                            vm.heap.arrays = arraysMap;
+                        }
+                    } else {
+                        contractArrays.put(contractAddress, vm.heap.arrays);
+                    }
+                }
+                if(contractChanges == null) {
+                    //Log.info("新建map和heap.changes");
+                    contractChanges = new HashMap<>();
                     contractChanges.put(contractAddress, vm.heap.changes);
+                } else {
+                    Set<ObjectRef> changesObjectRefs = contractChanges.get(contractAddress);
+                    if(changesObjectRefs != null) {
+                        if(programInvoke.isInternalCall()) {
+                            //Log.info("共享heap.changes: {}", changesObjectRefs.hashCode());
+                            vm.heap.changes = changesObjectRefs;
+                        } else {
+                            //Log.info("问题heap.changes");
+                        }
+                    } else {
+                        //Log.info("新增heap.changes");
+                        contractChanges.put(contractAddress, vm.heap.changes);
+                    }
                 }
             }
             // end code by pierre
@@ -423,23 +431,25 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                 objectRef = vm.heap.loadContract(contractAddressBytes, contractClassCode, repository);
             }
 
-            //TODO pierre 标记 当存在合约内部调用合约，共享同一个合约的内存数据 需要协议升级
-            if(contractObjectRefCount == null) {
-                //Log.info("新建map和heap.objectRefCount");
-                contractObjectRefCount = new HashMap<>();
-                contractObjectRefCount.put(contractAddress, vm.heap.objectRefCount);
-            } else {
-                BigIntegerWrapper objectRefCount = contractObjectRefCount.get(contractAddress);
-                if(objectRefCount != null) {
-                    if(programInvoke.isInternalCall()) {
-                        //Log.info("共享heap.objectRefCount: {}", objectRefCount.hashCode());
-                        vm.heap.objectRefCount = objectRefCount;
-                    } else {
-                        //Log.info("问题heap.objectRefCount");
-                    }
-                } else {
-                    //Log.info("新增heap.objectRefCount");
+            // pierre 标记 当存在合约内部调用合约，共享同一个合约的内存数据 需要协议升级 done
+            if(isUpgradedV230) {
+                if(contractObjectRefCount == null) {
+                    //Log.info("新建map和heap.objectRefCount");
+                    contractObjectRefCount = new HashMap<>();
                     contractObjectRefCount.put(contractAddress, vm.heap.objectRefCount);
+                } else {
+                    BigIntegerWrapper objectRefCount = contractObjectRefCount.get(contractAddress);
+                    if(objectRefCount != null) {
+                        if(programInvoke.isInternalCall()) {
+                            //Log.info("共享heap.objectRefCount: {}", objectRefCount.hashCode());
+                            vm.heap.objectRefCount = objectRefCount;
+                        } else {
+                            //Log.info("问题heap.objectRefCount");
+                        }
+                    } else {
+                        //Log.info("新增heap.objectRefCount");
+                        contractObjectRefCount.put(contractAddress, vm.heap.objectRefCount);
+                    }
                 }
             }
             // end code by pierre

@@ -23,6 +23,8 @@
  */
 package io.nuls.contract.callable;
 
+import io.nuls.base.protocol.ProtocolGroupManager;
+import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.helper.ContractConflictChecker;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.helper.ContractNewTxHandler;
@@ -131,8 +133,12 @@ public class ContractTxCallable implements Callable<ContractResult> {
                     }
                     checkCreateResult(tx, callableResult, contractResult);
                     break;
-                // add by pierre at 2019-10-20 需要协议升级
+                // add by pierre at 2019-10-20 需要协议升级 done
                 case CROSS_CHAIN:
+                    if(ProtocolGroupManager.getCurrentVersion(chainId) < ContractContext.UPDATE_VERSION_V230) {
+                        break;
+                    }
+                // end code by pierre
                 case CALL_CONTRACT:
                     contractResult = contractExecutor.call(executor, contractData, number, preStateRoot, extractPublicKey(tx));
                     if(!makeContractResultAndCheckGasSerial(tx, contractResult, batchInfo)) {
@@ -150,8 +156,8 @@ public class ContractTxCallable implements Callable<ContractResult> {
             }
         } while (false);
         if (contractResult != null) {
-            //TODO pierre 标记 需要协议升级
-            if(!contractResult.isSuccess()) {
+            // pierre 标记 需要协议升级 done
+            if(!contractResult.isSuccess() && ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_V230) {
                 contractResult.setGasUsed(contractData.getGasLimit());
             }
             // end code by pierre
