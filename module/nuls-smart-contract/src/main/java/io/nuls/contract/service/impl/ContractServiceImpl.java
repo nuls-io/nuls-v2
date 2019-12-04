@@ -165,6 +165,7 @@ public class ContractServiceImpl implements ContractService {
             if(wrapperTx == null) {
                 return getSuccess();
             }
+            // end code by pierre
             Chain chain = contractHelper.getChain(chainId);
             BatchInfo batchInfo = chain.getBatchInfo();
             wrapperTx.setOrder(batchInfo.getAndIncreaseTxCounter());

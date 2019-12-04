@@ -126,7 +126,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                 if(TxManager.isSystemSmartContract(chain, tx.getType())) {
                     continue;
                 }
-                // add by pierre at 2019-12-01 把type10交易发送到合约模块筛选处理，需要协议升级
+                // add by pierre at 2019-12-01 把type10交易发送到合约模块筛选处理
                 if(TxType.CROSS_CHAIN == tx.getType()) {
                     crossChainTxList.add(txStr);
                 }
@@ -146,7 +146,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         logger.debug("[保存区块] 存已确认交易DB 执行时间:{}", NulsDateUtils.getCurrentTimeMillis()- dbStart);
 
         // add by pierre at 2019-12-01 把type10交易发送到合约模块筛选处理，需要协议升级
-        if (!crossChainTxList.isEmpty()) {
+        if (!crossChainTxList.isEmpty() && txConfig.isCollectedSmartContractModule()) {
             List<String> contractList = moduleVerifyMap.computeIfAbsent(ModuleE.SC.abbr, code -> new ArrayList<>());
             contractList.addAll(crossChainTxList);
         }
@@ -309,7 +309,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                 txList.add(tx);
                 String txStr = RPCUtil.encode(tx.serialize());
                 txStrList.add(txStr);
-                // add by pierre at 2019-12-01 把type10交易发送到合约模块筛选处理，需要协议升级
+                // add by pierre at 2019-12-01 把type10交易发送到合约模块筛选处理
                 if(TxType.CROSS_CHAIN == tx.getType()) {
                     crossChainTxList.add(txStr);
                 }
@@ -333,7 +333,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         logger.debug("[回滚区块] 回滚账本 执行时间:{}", NulsDateUtils.getCurrentTimeMillis() - ledgerStart);
 
         // add by pierre at 2019-12-01 把type10交易发送到合约模块筛选处理，需要协议升级
-        if (!crossChainTxList.isEmpty()) {
+        if (!crossChainTxList.isEmpty() && txConfig.isCollectedSmartContractModule()) {
             List<String> contractList = moduleVerifyMap.computeIfAbsent(ModuleE.SC.abbr, code -> new ArrayList<>());
             contractList.addAll(crossChainTxList);
         }

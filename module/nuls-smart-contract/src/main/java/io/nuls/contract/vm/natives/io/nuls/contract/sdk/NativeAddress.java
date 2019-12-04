@@ -179,7 +179,7 @@ public class NativeAddress {
             frame.vm.getProgramExecutor().getAccount(from).addBalance(value.negate());
             ProgramTransfer programTransfer = new ProgramTransfer(from, to, value);
             frame.vm.getTransfers().add(programTransfer);
-            // add by pierre at 2019-11-23 标记
+            // add by pierre at 2019-11-23 标记 按合约执行顺序添加合约生成交易，按此顺序处理合约生成交易的业务 不确定 需要协议升级
             frame.vm.getOrderedInnerTxs().add(programTransfer);
             // end code by pierre
         }
@@ -277,7 +277,7 @@ public class NativeAddress {
             frame.vm.getProgramExecutor().getAccount(programCall.getSender()).addBalance(programCall.getValue().negate());
             ProgramTransfer programTransfer = new ProgramTransfer(programCall.getSender(), programCall.getContractAddress(), programCall.getValue());
             frame.vm.getTransfers().add(programTransfer);
-            // add by pierre at 2019-11-23 标记
+            // add by pierre at 2019-11-23 标记 按合约执行顺序添加合约生成交易，按此顺序处理合约生成交易的业务 不确定 需要协议升级
             frame.vm.getOrderedInnerTxs().add(programTransfer);
             // end code by pierre
         }
@@ -292,14 +292,6 @@ public class NativeAddress {
 
         frame.vm.getInternalCalls().add(programInternalCall);
 
-        // add by pierre at 2019-10-31 - 需要协议升级
-        //Map<DataWord, DataWord> contractState = frame.vm.heap.contractState();
-        //for (Map.Entry<DataWord, DataWord> entry : contractState.entrySet()) {
-        //    DataWord key1 = entry.getKey();
-        //    DataWord value1 = entry.getValue();
-        //    frame.vm.getRepository().addStorageRow(programInvoke.getContractAddress(), key1, value1);
-        //}
-        // end code by pierre
         ProgramResult programResult = frame.vm.getProgramExecutor().callProgramExecutor().call(programCall);
 
         frame.vm.addGasUsed(programResult.getGasUsed());

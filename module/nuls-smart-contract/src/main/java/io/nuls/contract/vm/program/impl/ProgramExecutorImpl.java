@@ -327,7 +327,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
             vm.setProgramExecutor(this);
             vm.heap.loadClassCodes(classCodes);
-            //TODO pierre 标记
+            //TODO pierre 标记 当存在合约内部调用合约，共享同一个合约的内存数据 需要协议升级
             //Log.debug("++++++++++++++++++++");
             //Log.warn(programInvoke.toString());
             //Log.info("this.contractObjectRefCount: {}", this.contractObjectRefCount);
@@ -423,7 +423,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                 objectRef = vm.heap.loadContract(contractAddressBytes, contractClassCode, repository);
             }
 
-            //TODO pierre 标记
+            //TODO pierre 标记 当存在合约内部调用合约，共享同一个合约的内存数据 需要协议升级
             if(contractObjectRefCount == null) {
                 //Log.info("新建map和heap.objectRefCount");
                 contractObjectRefCount = new HashMap<>();

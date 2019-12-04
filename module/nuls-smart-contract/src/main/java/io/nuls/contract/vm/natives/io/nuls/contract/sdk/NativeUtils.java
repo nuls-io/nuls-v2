@@ -596,8 +596,7 @@ public class NativeUtils {
         ProgramInvokeRegisterCmd invokeRegisterCmd = new ProgramInvokeRegisterCmd(cmdName, argsMap, cmdRegisterMode);
         Result result;
         ObjectRef objectRef;
-        // add by pierre at 2019-11-01 - 需要协议升级
-        // token跨链转出命令
+        // add by pierre at 2019-11-01 token跨链转出命令 需要协议升级
         if(ContractConstant.CMD_TOKEN_OUT_CROSS_CHAIN.equals(cmdName)) {
             objectRef = NativeUtils.tokenOutCrossChainCmdProcessor(currentChainId, senderBytes, contractSender, args, contractAddress, contractAddressBytes, cmdRegisterManager, moduleCode, cmdName, argsMap, invokeRegisterCmd, frame);
         // end code by pierre

@@ -155,7 +155,6 @@ public class ContractUtil {
                 contractData = create;
                 break;
             // add by pierre at 2019-11-02 需要协议升级
-            // add by pierre at 2019-10-20
             case CROSS_CHAIN:
                 contractData = parseCrossChainTx(tx, chainManager);
                 if(contractData == null) {
@@ -627,7 +626,7 @@ public class ContractUtil {
             case CONTRACT_RETURN_GAS:
                 resultTx = new ContractReturnGasTransaction();
                 break;
-                //TODO pierre 标记
+                //TODO pierre 标记 需要协议升级
             case CROSS_CHAIN:
                 resultTx = new CrossTokenContractTransaction();
                 break;

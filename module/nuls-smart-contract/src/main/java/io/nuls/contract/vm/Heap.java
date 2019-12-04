@@ -657,14 +657,6 @@ public class Heap {
             }
             clearList.add(objectRef);
         }
-        // add by pierre at 2019-11-04 需要协议升级
-        //if(!clearList.isEmpty()) {
-        //    for(ObjectRef objectRef : clearList) {
-        //        Log.info("removed objectRef: {}", objectRef);
-        //        this.changes.remove(objectRef);
-        //    }
-        //}
-        // end code by pierre
         return contractState;
     }
 

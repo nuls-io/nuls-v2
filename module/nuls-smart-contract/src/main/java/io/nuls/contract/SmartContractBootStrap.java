@@ -250,7 +250,7 @@ public class SmartContractBootStrap extends RpcModule {
         }
         // add by pierre at 2019-11-02 需要协议升级
         if (module.getName().equals(ModuleE.LG.abbr)) {
-            // add by pierre at 2019-10-21 缓存token注册资产的资产ID和token合约地址
+            // 缓存token注册资产的资产ID和token合约地址
             Map<Integer, Chain> chainMap = chainManager.getChainMap();
             for (Chain chain : chainMap.values()) {
                 int chainId = chain.getChainId();
@@ -272,6 +272,7 @@ public class SmartContractBootStrap extends RpcModule {
                 }
             }
         }
+        // end code by pierre
         if (module.getName().equals(ModuleE.PU.abbr)) {
             /*
              * 注册协议到协议升级模块

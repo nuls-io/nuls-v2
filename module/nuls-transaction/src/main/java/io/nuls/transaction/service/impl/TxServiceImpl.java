@@ -754,11 +754,13 @@ public class TxServiceImpl implements TxService {
                             String moduleCode = txRegister.getModuleCode();
                             boolean isSmartContractTx = moduleCode.equals(ModuleE.SC.abbr);
                             boolean isCrossTx = moduleCode.equals(ModuleE.CC.abbr);
-                            // add by pierre at 2019-11-02 需要协议升级
+                            // add by pierre at 2019-11-02 跨链转账交易发送到智能合约模块进行解析，是否为合约资产跨链转账 需要协议升级
                             boolean isCrossTransferTx = TxType.CROSS_CHAIN == transaction.getType();
+                            if(!isSmartContractTx && txConfig.isCollectedSmartContractModule()) {
+                                isSmartContractTx = isCrossTransferTx;
+                            }
                             // end code by pierre
-                            // add by pierre at 2019-10-22 跨链转账交易发送到智能合约模块进行解析，是否为合约资产跨链转账
-                            if (isSmartContractTx || isCrossTransferTx) {
+                            if (isSmartContractTx) {
                                 if (stopInvokeContract) {
                                     //该标志true,表示不再处理智能合约交易,需要暂存交易,统一还回待打包队列
                                     orphanTxSet.add(txPackageWrapper);
@@ -1405,12 +1407,15 @@ public class TxServiceImpl implements TxService {
             if (null == txRegister) {
                 throw new NulsException(TxErrorCode.TX_TYPE_INVALID);
             }
-            // add by pierre at 2019-11-02 需要协议升级
-            // add by pierre at 2019-10-22 跨链转账交易发送到智能合约模块进行解析，是否为合约资产跨链转账
+            boolean isSmartContractTx = TxManager.isUnSystemSmartContract(txRegister);
+            // add by pierre at 2019-11-02 跨链转账交易发送到智能合约模块进行解析，是否为合约资产跨链转账 需要协议升级
             boolean isCrossTransferTx = TxType.CROSS_CHAIN == type;
+            if(!isSmartContractTx && txConfig.isCollectedSmartContractModule()) {
+                isSmartContractTx = isCrossTransferTx;
+            }
             // end code by pierre
             /** 智能合约*/
-            if (TxManager.isUnSystemSmartContract(txRegister) || isCrossTransferTx) {
+            if (isSmartContractTx) {
                 /** 出现智能合约,且通知标识为false,则先调用通知 */
                 if (!contractNotify) {
                     String packingAddress = AddressTool.getStringAddressByBytes(blockHeader.getPackingAddress(chain.getChainId()));
