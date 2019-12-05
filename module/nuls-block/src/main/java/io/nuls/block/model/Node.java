@@ -154,8 +154,8 @@ public class Node {
         }
         int oldCredit = credit;
         if (success) {
-            //下载成功,信用值加10,上限为初始信用值的1.5倍
-            credit = Math.min(150, credit + 10);
+            //下载成功,信用值加10,初始值50,上限为100
+            credit = Math.min(100, credit + 10);
         } else {
             //下载失败,信用值降为原值的八分之一,下限为0,从最大信用值100下降到0，需要连续三次
             credit >>= 3;
