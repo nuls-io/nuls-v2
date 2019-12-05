@@ -157,11 +157,13 @@ public class ContractTxCallable implements Callable<ContractResult> {
         } while (false);
         if (contractResult != null) {
             // pierre 标记 需要协议升级 done
-            if(!contractResult.isSuccess() && ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_V230) {
-                contractResult.setGasUsed(contractData.getGasLimit());
+            if(!contractResult.isSuccess()) {
+                Log.error("Failed TxType [{}] Execute ContractResult is {}", tx.getType(), contractResult.toString());
+                if(ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_V230) {
+                    contractResult.setGasUsed(contractData.getGasLimit());
+                }
             }
             // end code by pierre
-            Log.error("Failed TxType [{}] Execute ContractResult is {}", tx.getType(), contractResult.toString());
         }
         //if (Log.isDebugEnabled()) {
         //    Log.debug("[Per Contract Execution Cost Time] TxType is {}, TxHash is {}, Cost Time is {}", tx.getType(), tx.getHash().toString(), System.currentTimeMillis() - start);
