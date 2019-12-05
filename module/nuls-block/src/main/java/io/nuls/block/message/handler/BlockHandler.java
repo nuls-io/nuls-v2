@@ -60,8 +60,12 @@ public class BlockHandler implements MessageProcessor {
         //接收到的区块用于区块同步
         if (message.isSyn()) {
             long height = block.getHeader().getHeight();
-            if (height > context.getLatestHeight() && context.getBlockMap().put(height, block) == null) {
+            //接受到的区块高度比当前最新高度高，并且区块同步过程正在进行
+            boolean b = height > context.getLatestHeight() && context.isNeedSyn();
+            if (b && context.getBlockMap().put(height, block) == null) {
                 context.getCachedBlockSize().addAndGet(block.size());
+            } else {
+                logger.warn("ignore BlockMessage from node-{}, blockHeight-{}, isNeedSyn-{}, LatestHeight-{}", nodeId, height, context.isNeedSyn(), context.getLatestHeight());
             }
         } else {
             if (block != null) {
