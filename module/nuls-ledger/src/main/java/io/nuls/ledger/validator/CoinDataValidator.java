@@ -708,9 +708,6 @@ public class CoinDataValidator {
     private boolean isValidateFreezeTxWithTemp(List<FreezeLockTimeState> timeList, List<FreezeHeightState> heightList, byte locked, AccountState accountState, BigInteger fromAmount,
                                                byte[] fromNonce) {
         boolean isValidate = false;
-        if(LedgerUtil.getNonceEncode(fromNonce).equals("81e2dbfbdee49ac7")){
-            LoggerUtil.COMMON_LOG.info("===============");
-        }
         //解锁交易，校验是否存在该笔交易
         if (locked == LedgerConstant.UNLOCKED_TIME) {
             //时间解锁
@@ -891,7 +888,7 @@ public class CoinDataValidator {
      * @return
      */
     public boolean validateTxAmount(CoinData coinData, int txType) {
-        if (txType == TxType.CONTRACT_RETURN_GAS || txType == TxType.CONTRACT_TOKEN_CROSS_TRANSFER || txType == TxType.COIN_BASE) {
+        if (txType == TxType.CONTRACT_RETURN_GAS || txType == TxType.COIN_BASE) {
             return true;
         }
         Map<String, BigInteger> assetMap = new HashMap<>();
