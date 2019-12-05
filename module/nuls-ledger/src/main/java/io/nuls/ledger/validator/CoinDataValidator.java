@@ -350,15 +350,20 @@ public class CoinDataValidator {
                     return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{LedgerUtil.getRealAddressStr(coinTo.getAddress()), "--", "address Not local chain Exception"});
                 }
             }
+
             //判断是否是解锁操作
             String address = LedgerUtil.getRealAddressStr(coinTo.getAddress());
             String assetKey = LedgerUtil.getKeyStr(address, coinTo.getAssetsChainId(), coinTo.getAssetsId());
+            AccountState accountState = accountStateMap.get(assetKey);
+            List<FreezeLockTimeState> timeList = getFreezeLockTimeValidateList(timeStatesMap, assetKey);
+            List<FreezeHeightState> heightList = getFreezeLockHeightValidateList(heightStatesMap, assetKey);
+            if (null == accountState) {
+                accountState = accountStateService.getAccountStateReCal(address, chainId, coinTo.getAssetsChainId(), coinTo.getAssetsId());
+                accountStateMap.put(assetKey, accountState);
+                timeList.addAll(accountState.getFreezeLockTimeStates());
+                heightList.addAll(accountState.getFreezeHeightStates());
+            }
             if (coinTo.getLockTime() == 0) {
-                AccountState accountState = accountStateMap.get(assetKey);
-                if (null == accountState) {
-                    accountState = accountStateService.getAccountStateReCal(address, chainId, coinTo.getAssetsChainId(), coinTo.getAssetsId());
-                    accountStateMap.put(assetKey, accountState);
-                }
                 accountState.addTotalToAmount(coinTo.getAmount());
             } else {
 //           //校验通过,将缓存处理
@@ -703,6 +708,9 @@ public class CoinDataValidator {
     private boolean isValidateFreezeTxWithTemp(List<FreezeLockTimeState> timeList, List<FreezeHeightState> heightList, byte locked, AccountState accountState, BigInteger fromAmount,
                                                byte[] fromNonce) {
         boolean isValidate = false;
+        if(LedgerUtil.getNonceEncode(fromNonce).equals("81e2dbfbdee49ac7")){
+            LoggerUtil.COMMON_LOG.info("===============");
+        }
         //解锁交易，校验是否存在该笔交易
         if (locked == LedgerConstant.UNLOCKED_TIME) {
             //时间解锁
@@ -883,7 +891,7 @@ public class CoinDataValidator {
      * @return
      */
     public boolean validateTxAmount(CoinData coinData, int txType) {
-        if (txType == TxType.CONTRACT_TOKEN_CROSS_TRANSFER || txType == TxType.COIN_BASE) {
+        if (txType == TxType.CONTRACT_RETURN_GAS || txType == TxType.CONTRACT_TOKEN_CROSS_TRANSFER || txType == TxType.COIN_BASE) {
             return true;
         }
         Map<String, BigInteger> assetMap = new HashMap<>();
@@ -922,7 +930,11 @@ public class CoinDataValidator {
         for (String assetKey : assetKeys) {
             assetKeyFrom = assetMap.get(assetKey + "from");
             assetKeyTo = assetMap.get(assetKey + "to");
-            if (null == assetKeyFrom || null == assetKeyTo) {
+            if(null == assetKeyFrom){
+                LoggerUtil.COMMON_LOG.error("=================asset From is null,txType={}",txType);
+                return false;
+            }
+            if (null == assetKeyTo) {
                 continue;
             }
             if (BigIntegerUtils.isLessThan(assetKeyFrom, assetKeyTo)) {
