@@ -25,6 +25,8 @@ package io.nuls.contract.mock.contractvm;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.protocol.ProtocolGroupManager;
+import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.mock.basetest.MockBase;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.ProgramMethod;
@@ -258,9 +260,13 @@ public class ContractVmTest extends MockBase {
 
     @Before
     public void createAndInit() throws Exception {
+        // 加载协议升级的数据
+        ProtocolGroupManager.setLoadProtocol(false);
+        ProtocolGroupManager.updateProtocol(chainId, (short) 3);
+
         // -------------------------------------------------------------------------------------//
         InputStream inA = new FileInputStream(getClass().getResource("/contract-vm-testA-testA.jar").getFile());
-        InputStream inB = new FileInputStream(getClass().getResource("/contract-vm-testA-testB.jar").getFile());
+        InputStream inB = new FileInputStream(getClass().getResource("/contract-vm-testB-testB.jar").getFile());
         //InputStream inA = new FileInputStream("/Users/pierreluo/IdeaProjects/contract-vm-testA/target/contract-vm-testA-testA.jar");
         //InputStream inB = new FileInputStream("/Users/pierreluo/IdeaProjects/contract-vm-testB/target/contract-vm-testB-testB.jar");
         byte[] contractCodeA = IOUtils.toByteArray(inA);
@@ -285,7 +291,11 @@ public class ContractVmTest extends MockBase {
         Log.info("stateRoot: {}", HexUtil.encode(prevStateRoot));
         programResult = (ProgramResult) objects[1];
         Assert.assertTrue("expect success, " + programResult.getErrorMessage() + ", " + programResult.getStackTrace(), programResult.isSuccess());
+    }
 
+    @Test
+    public void test() {
+        System.out.println(ProtocolGroupManager.getCurrentVersion(chainId));
     }
 
     @Test
