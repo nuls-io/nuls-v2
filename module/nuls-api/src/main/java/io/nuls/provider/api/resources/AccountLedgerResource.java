@@ -214,9 +214,34 @@ public class AccountLedgerResource {
     }
 
     @POST
+    @Path("/transaction/broadcastWithNoContractValidation")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(description = "广播交易(不验证合约)", order = 304, detailDesc = "广播离线组装的交易(不验证合约),成功返回true,失败返回错误提示信息")
+    @Parameters({
+            @Parameter(parameterName = "广播交易(不验证合约)", parameterDes = "广播交易(不验证合约)表单", requestType = @TypeDescriptor(value = TxForm.class))
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", valueType = boolean.class, description = "是否成功"),
+            @Key(name = "hash", description = "交易hash")
+    }))
+    public RpcClientResult broadcastWithNoContractValidation(TxForm form) {
+        if (form == null || StringUtils.isBlank(form.getTxHex())) {
+            return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "form is empty"));
+        }
+        try {
+            String txHex = form.getTxHex();
+            Result result = transactionTools.newTx(config.getChainId(), txHex);
+            return ResultUtil.getRpcClientResult(result);
+        } catch (Exception e) {
+            Log.error(e);
+            return RpcClientResult.getFailed(e.getMessage());
+        }
+    }
+
+    @POST
     @Path("/transfer")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "单笔转账", order = 304, detailDesc = "发起单账户单资产的转账交易")
+    @ApiOperation(description = "单笔转账", order = 305, detailDesc = "发起单账户单资产的转账交易")
     @Parameters({
             @Parameter(parameterName = "单笔转账", parameterDes = "单笔转账表单", requestType = @TypeDescriptor(value = TransferForm.class))
     })

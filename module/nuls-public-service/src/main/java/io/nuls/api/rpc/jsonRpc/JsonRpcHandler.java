@@ -70,17 +70,24 @@ public class JsonRpcHandler extends HttpHandler {
                 return;
             }
         }
-
+        String content = "";
         if (!request.getMethod().equals(Method.POST)) {
-            LoggerUtil.commonLog.warn("the request is not POST!");
+            LoggerUtil.commonLog.warn("the request is not POST!, remoteHost:" + request.getRemoteAddr());
+            try {
+                content = getParam(request);
+            } catch (IOException e) {
+                //   LoggerUtil.commonLog.error(e);
+            }
+            LoggerUtil.commonLog.warn(content);
             response.getWriter().write(JSONUtils.obj2json(responseError("-32600", "", "0")));
             return;
         }
-        String content = null;
+
         try {
             content = getParam(request);
         } catch (IOException e) {
             LoggerUtil.commonLog.error(e);
+            return;
         }
         if (StringUtils.isBlank(content)) {
             response.getWriter().write(JSONUtils.obj2json(responseError("-32700", "", "0")));
@@ -156,8 +163,7 @@ public class JsonRpcHandler extends HttpHandler {
             return responseError("-32601", "Can't find the method", id);
         }
 
-        RpcResult result = invoker.invoke((List<Object>) jsonRpcParam.get("params"));
-
+        RpcResult result = invoker.invoke(jsonRpcParam.get("params"));
         result.setId(id);
         return result;
     }

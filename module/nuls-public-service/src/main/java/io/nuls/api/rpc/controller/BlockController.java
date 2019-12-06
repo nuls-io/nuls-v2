@@ -245,7 +245,7 @@ public class BlockController {
         if (pageNumber <= 0) {
             pageNumber = 1;
         }
-        if (pageSize <= 0 || pageSize > 1000) {
+        if (pageSize <= 0 || pageSize > 100) {
             pageSize = 10;
         }
 

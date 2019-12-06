@@ -9,11 +9,13 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.parse.JSONUtils;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
 import io.nuls.poc.model.bo.tx.txdata.RedPunishData;
 import io.nuls.poc.model.bo.tx.txdata.StopAgent;
+import io.nuls.poc.model.dto.transaction.TransactionDto;
 import io.nuls.poc.rpc.call.CallMethodUtils;
 import io.nuls.poc.utils.LoggerUtil;
 import io.nuls.poc.utils.manager.AgentManager;
@@ -170,6 +172,11 @@ public class ContractStopAgentProcessor implements TransactionProcessor {
         boolean rollbackResult = true;
         for (Transaction tx:txs) {
             try {
+                try {
+                    chain.getLogger().info("contract stop agent transaction rollback, hash is {}, tx is {}", tx.getHash().toHex(), JSONUtils.obj2json(new TransactionDto(tx)));
+                } catch (Exception e) {
+                    chain.getLogger().warn(e.getMessage());
+                }
                 if(agentManager.stopAgentRollBack(tx,chain,blockHeader)){
                     rollbackSuccessList.add(tx);
                 }

@@ -117,13 +117,15 @@ public class TransactionController {
             return RpcResult.paramError("[txHash] is inValid");
         }
         Result<TransactionDto> result = transactionTools.getTx(chainId, txHash);
-        if(result.isSuccess()) {
+        if (result.isSuccess()) {
             TransactionDto txDto = result.getData();
-            GetBlockHeaderByHeightReq req = new GetBlockHeaderByHeightReq(txDto.getBlockHeight());
-            req.setChainId(chainId);
-            Result<BlockHeaderData> blockResult = blockService.getBlockHeaderByHeight(req);
-            if(blockResult.isSuccess()) {
-                txDto.setBlockHash(blockResult.getData().getHash());
+            if (txDto.getBlockHeight() >= 0) {
+                GetBlockHeaderByHeightReq req = new GetBlockHeaderByHeightReq(txDto.getBlockHeight());
+                req.setChainId(chainId);
+                Result<BlockHeaderData> blockResult = blockService.getBlockHeaderByHeight(req);
+                if (blockResult.isSuccess()) {
+                    txDto.setBlockHash(blockResult.getData().getHash());
+                }
             }
         }
         return ResultUtil.getJsonRpcResult(result);
@@ -255,8 +257,49 @@ public class TransactionController {
         }
     }
 
+    @RpcMethod("broadcastTxWithNoContractValidation")
+    @ApiOperation(description = "广播交易(不验证合约)", order = 304, detailDesc = "广播离线组装的交易(不验证合约),成功返回true,失败返回错误提示信息")
+    @Parameters({
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
+            @Parameter(parameterName = "tx", parameterDes = "交易序列化16进制字符串"),
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", valueType = boolean.class, description = "是否成功"),
+            @Key(name = "hash", description = "交易hash")
+    }))
+    public RpcResult broadcastTxWithNoContractValidation(List<Object> params) {
+        VerifyUtils.verifyParams(params, 2);
+        int chainId;
+        String txHex;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        try {
+            txHex = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[txHex] is inValid");
+        }
+
+        try {
+            if (!Context.isChainExist(chainId)) {
+                return RpcResult.dataNotFound();
+            }
+            Result result = transactionTools.newTx(chainId, txHex);
+            if (result.isSuccess()) {
+                return RpcResult.success(result.getData());
+            } else {
+                return RpcResult.failed(ErrorCode.init(result.getStatus()), result.getMessage());
+            }
+        } catch (Exception e) {
+            Log.error(e);
+            return RpcResult.failed(RpcErrorCode.TX_PARSE_ERROR);
+        }
+    }
+
     @RpcMethod("transfer")
-    @ApiOperation(description = "单笔转账", order = 304, detailDesc = "发起单账户单资产的转账交易")
+    @ApiOperation(description = "单笔转账", order = 305, detailDesc = "发起单账户单资产的转账交易")
     @Parameters({
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterDes = "资产id"),

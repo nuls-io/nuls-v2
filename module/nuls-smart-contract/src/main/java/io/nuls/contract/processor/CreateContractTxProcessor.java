@@ -30,7 +30,11 @@ import io.nuls.base.data.NulsHash;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractWrapperTransaction;
+import io.nuls.contract.model.dto.CallContractDataDto;
+import io.nuls.contract.model.dto.ContractResultDto;
+import io.nuls.contract.model.dto.CreateContractDataDto;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
+import io.nuls.contract.model.txdata.CallContractData;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.model.txdata.CreateContractData;
 import io.nuls.contract.service.ContractService;
@@ -41,6 +45,7 @@ import io.nuls.contract.util.Log;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.parse.JSONUtils;
 
 import static io.nuls.contract.util.ContractUtil.getSuccess;
 
@@ -122,7 +127,6 @@ public class CreateContractTxProcessor {
     }
 
     public Result onRollback(int chainId, ContractWrapperTransaction tx) throws Exception {
-        Log.info("rollback create tx, hash is {}", tx.getHash().toString());
         ContractData txData = tx.getContractData();
         byte[] contractAddress = txData.getContractAddress();
 
@@ -133,6 +137,12 @@ public class CreateContractTxProcessor {
         }
         if (contractResult == null) {
             return Result.getSuccess(null);
+        }
+        try {
+            CreateContractData contractData = (CreateContractData) tx.getContractData();
+            Log.info("rollback create tx, contract data is {}, result is {}", JSONUtils.obj2json(new CreateContractDataDto(contractData)), JSONUtils.obj2json(new ContractResultDto(chainId, contractResult, contractData.getGasLimit())));
+        } catch (Exception e) {
+            Log.warn("failed to trace create rollback log, error is {}", e.getMessage());
         }
         contractHelper.rollbackNrc20Events(chainId, tx, contractResult);
         Result result = contractAddressStorageService.deleteContractAddress(chainId, contractAddress);

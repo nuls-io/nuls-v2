@@ -60,7 +60,6 @@ cachedBlockSizeLimit=20971520
 genesisBlockPath=genesis-block.json
 dependent=cross-chain,smart-contract,protocol-update
 
-
 [consensus]
 #种子节点列表
 seedNodes=NULSd6Hge7xHDnvsSpnzbR2gWHd31zJ1How11,NULSd6Hgc5VNP4rF4wxdiXEQKpBKUE4w5RS22,NULSd6HgeQwXLdre69ArkqVZNDqMLU4CaAz33,NULSd6HgcjAKAgq8jjXgBCcNLEJUvJEYcoj44,NULSd6HgiDdTjcuvhqzm3bomyBFZmosV3ei55

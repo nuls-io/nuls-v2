@@ -17,6 +17,12 @@ import static junit.framework.TestCase.assertTrue;
  * @author Niels
  */
 public class AddressToolTest {
+
+    @Test
+    public void test7y(){
+        String address = "NULSd6Hgam8YajetEDnCoJBdEFkMNP41PfH7y";
+        System.out.println(AddressTool.validAddress(1,address));
+    }
     @Test
     public void createAccountByPrefix() {
         AddressTool.addPrefix(4, "LJS");
