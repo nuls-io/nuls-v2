@@ -1,5 +1,60 @@
 [
   {
+    "version": "3",
+    "extend": "2",
+    "validTxs": [
+      {
+        "type": "4",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": false,
+        "handler": "CreateAgentProcessorV3"
+      },
+      {
+        "type": "5",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": false,
+        "handler": "DepositProcessorV3"
+      },
+      {
+        "type": "6",
+        "systemTx": false,
+        "unlockTx": true,
+        "verifySignature": true,
+        "verifyFee": false,
+        "handler": "WithdrawProcessorV3"
+      },
+      {
+        "type": "9",
+        "systemTx": false,
+        "unlockTx": true,
+        "verifySignature": true,
+        "verifyFee": false,
+        "handler": "StopAgentProcessorV3"
+      },
+      {
+        "type": "21",
+        "systemTx": true,
+        "unlockTx": false,
+        "verifySignature": false,
+        "handler": "ContractDepositProcessorV3"
+      },
+      {
+        "type": "23",
+        "systemTx": true,
+        "unlockTx": true,
+        "verifySignature": false,
+        "handler": "ContractStopAgentProcessorV2"
+      }
+    ],
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  },
+  {
     "version": "2",
     "extend": "1",
     "validTxs": [
