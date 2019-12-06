@@ -31,6 +31,7 @@ import io.nuls.contract.tx.base.BaseQuery;
 import io.nuls.contract.util.Log;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
@@ -79,6 +80,23 @@ public class ContractPOCMSendTxTest extends BaseQuery {
     }
 
     /**
+     * 创建节点
+     * */
+    @Test
+    public void createAgent()throws Exception{
+        Map<String,Object> params = new HashMap<>();
+        params.put("agentAddress",sender);
+        params.put(Constants.CHAIN_ID,2);
+        params.put("deposit","2000000000000");
+        params.put("commissionRate",10);
+        params.put("packingAddress",toAddress34);
+        params.put("password","nuls123456");
+        params.put("rewardAddress",sender);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", params);
+        System.out.println(cmdResp.getResponseData());
+    }
+
+    /**
      * 流程 - 创建TOKEN, POCM, 添加节点，抵押，退出
      */
     @Test
@@ -92,8 +110,8 @@ public class ContractPOCMSendTxTest extends BaseQuery {
 
         //Log.info("begin openConsensus");
         //this.invokeCall(sender, BigInteger.ZERO, contractAddress, "openConsensus", null, "remark");
-        Log.info("begin addOtherAgent");
-        this.invokeCall(sender, BigInteger.ZERO, contractAddress, "addOtherAgent", null, "remark", List.of("ceb529616399fa3356d5f7f26705bfc4b61792da1c6de996d8030f3af71edd78").toArray());
+        //Log.info("begin addOtherAgent");
+        //this.invokeCall(sender, BigInteger.ZERO, contractAddress, "addOtherAgent", null, "remark", List.of("ceb529616399fa3356d5f7f26705bfc4b61792da1c6de996d8030f3af71edd78").toArray());
         Log.info("begin depositForOwn {}", sender);
         this.invokeCall(sender, BigInteger.valueOf(3000_00000000L), contractAddress, "depositForOwn", null, "remark");
         Log.info("begin depositForOwn {}", toAddress0);
@@ -107,6 +125,22 @@ public class ContractPOCMSendTxTest extends BaseQuery {
         this.invokeCall(toAddress0, BigInteger.ZERO, contractAddress, "quit", null, "remark", "0");
         Log.info("begin quit {}", toAddress1);
         this.invokeCall(toAddress1, BigInteger.ZERO, contractAddress, "quit", null, "remark", "0");
+
+        TimeUnit.SECONDS.sleep(2);
+        Log.info("sender balance is {}", this.invokeView(nrc20Locked, "balanceOf", sender));
+        Log.info("toAddress0 balance is {}", this.invokeView(nrc20Locked, "balanceOf", toAddress0));
+        Log.info("toAddress1 balance is {}", this.invokeView(nrc20Locked, "balanceOf", toAddress1));
+        Log.info("pocm balance is {}", this.invokeView(nrc20Locked, "balanceOf", pocm));
+    }
+
+    @Test
+    public void t() throws Exception {
+        String nrc20Locked = "tNULSeBaN7e8CjuKBJsivsbqviaMpFenfKVWQM";
+        String pocm = "tNULSeBaN81BfcZ2DLB5oAzZzVSo8CD3vYr49s";
+        Log.info("sender balance is {}", this.invokeView(nrc20Locked, "balanceOf", sender));
+        Log.info("toAddress0 balance is {}", this.invokeView(nrc20Locked, "lockedBalanceOf", toAddress0));
+        Log.info("toAddress1 balance is {}", this.invokeView(nrc20Locked, "lockedBalanceOf", toAddress1));
+        Log.info("pocm balance is {}", this.invokeView(nrc20Locked, "lockedBalanceOf", pocm));
     }
 
     /**
@@ -242,7 +276,7 @@ public class ContractPOCMSendTxTest extends BaseQuery {
      * 调用合约 - 项目发布者创建节点
      */
     @Test
-    public void createAgent() throws Exception {
+    public void createAgentByOwner() throws Exception {
         BigInteger value = BigInteger.valueOf(20000_00000000L);
         String methodName = "createAgentByOwner";
         String methodDesc = "";
@@ -397,10 +431,11 @@ public class ContractPOCMSendTxTest extends BaseQuery {
 
 
 
-    protected void invokeCall(String sender, BigInteger value, String contractAddress, String methodName, String methodDesc, String remark, Object... args) throws Exception {
-        super.invokeCall(sender, value, contractAddress, methodName, methodDesc, remark, args);
+    protected Map invokeCall(String sender, BigInteger value, String contractAddress, String methodName, String methodDesc, String remark, Object... args) throws Exception {
+        Map map = super.invokeCall(sender, value, contractAddress, methodName, methodDesc, remark, args);
         TimeUnit.SECONDS.sleep(1);
         getContractWholeInfo();
+        return map;
     }
 
 }

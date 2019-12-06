@@ -164,10 +164,11 @@ public class RandomSeedSendTxTest extends BaseQuery {
         Log.info("viewRandomSeedListByHeight is {}", invokeView(contractAddress, "viewRandomSeedListByHeight", 5, 10));
     }
 
-    protected void invokeCall(String sender, BigInteger value, String contractAddress, String methodName, String methodDesc, String remark, Object... args) throws Exception {
-        super.invokeCall(sender, value, contractAddress, methodName, methodDesc, remark, args);
+    protected Map invokeCall(String sender, BigInteger value, String contractAddress, String methodName, String methodDesc, String remark, Object... args) throws Exception {
+        Map map = super.invokeCall(sender, value, contractAddress, methodName, methodDesc, remark, args);
         TimeUnit.SECONDS.sleep(1);
         getContractWholeInfo();
+        return map;
     }
 
 }

@@ -57,7 +57,7 @@ public class Base {
 
     protected static String password = "nuls123456";//"nuls123456";
 
-    protected String sender = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
+    protected String sender = "tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD";
     protected String toAddress = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
     protected String toAddress0 = "tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD";
     protected String toAddress1 = "tNULSeBaMrbMRiFAUeeAt6swb4xVBNyi81YL24";
@@ -132,7 +132,7 @@ public class Base {
     protected String contractAddress32 = "tNULSeBaMx5VtE2EJTHtHueWQ1yA37EP1AGuia";
     protected String contractAddress33 = "tNULSeBaN7gkAGGdnj9hDkKgFDXDf6LnnbWpSG";
     protected String contractAddress34 = "tNULSeBaN4kWaxmgYq2oFMvQ9hq8UEdivvA7i7";
-    protected String contractAddress_nrc20 = "tNULSeBaMxtnTzym2up4YbeUiEA1njRZRPBPiH";
+    protected String contractAddress_nrc20 = "tNULSeBaMyW66axieu87pvECUspsKvrcygRxnx";
     protected String contractAddress_nrc200 = "tNULSeBaMzThBLi2gwarkgcEdKAT8twK4KF1Uf";
     protected String contractAddress_nrc201 = "tNULSeBaN8LYBqbDhfF7cW11iu9bk1QyjNNVK6";
     protected String contractAddress_nrc202 = "tNULSeBaN9TgWh4hteRMiWKNeEumnKPJCUTh53";
@@ -198,13 +198,27 @@ public class Base {
         return String.format("invoke_view-result: %s", JSONUtils.obj2PrettyJson(cmdResp2));
     }
 
-    protected void invokeCall(String sender, BigInteger value, String contractAddress, String methodName, String methodDesc, String remark, Object... args) throws Exception {
+    protected Map invokeCall(String sender, BigInteger value, String contractAddress, String methodName, String methodDesc, String remark, Object... args) throws Exception {
         Map params = this.makeCallParams(sender, value, contractAddress, methodName, methodDesc, remark, args);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
         assertTrue(cmdResp2, result);
         String hash = (String) result.get("txHash");
-        Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(waitGetContractTx(hash)));
+        Map resultMap = waitGetContractTx(hash);
+        Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(resultMap));
+        return resultMap;
+    }
+
+    protected String invokeCreate(String sender, byte[] contractCode, String alias, String remark, Object... args) throws Exception {
+        Map params = this.makeCreateParams(sender, contractCode, alias, remark, args);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CREATE));
+        assertTrue(cmdResp2, result);
+        String hash = (String) result.get("txHash");
+        String contractAddress = (String) result.get("contractAddress");
+        Map map = waitGetContractTx(hash);
+        assertTrue(map);
+        return contractAddress;
     }
 
     private Map makeInvokeViewParams(String contractAddress0, String methodName, String methodDesc, Object... args) {
@@ -262,7 +276,7 @@ public class Base {
     protected void assertTrue(Map map) throws Exception {
         try {
             Assert.assertTrue(JSONUtils.obj2PrettyJson(map), (Boolean) ((Map) (map.get("contractResult"))).get("success"));
-        } catch (Throwable e) {
+        } catch (Exception e) {
             e.printStackTrace();
             throw e;
         }
