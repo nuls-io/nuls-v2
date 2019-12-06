@@ -152,6 +152,12 @@ public class ValidateServiceImpl implements ValidateService {
             LoggerUtil.logger().error("chainId={} assetId={} getSignatureByzantineRatio={} less than {}", asset.getChainId(), asset.getAssetId(), blockChain.getSignatureByzantineRatio(), CmConstants.MIN_SIGNATURE_BFT_RATIO);
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_SIGNATURE_BYZANTINE_RATIO);
         }
+        if (asset.getDecimalPlaces() < Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMin()) || asset.getDecimalPlaces() > Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMax())) {
+            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_DECIMALPLACES);
+        }
+        if (null == asset.getSymbol() || asset.getSymbol().length() > Integer.valueOf(nulsChainConfig.getAssetSymbolMax()) || asset.getSymbol().length() < 1) {
+            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_SYMBOL_LENGTH);
+        }
         return ChainEventResult.getResultSuccess();
     }
 
@@ -159,6 +165,12 @@ public class ValidateServiceImpl implements ValidateService {
     public ChainEventResult batchAssetRegValidator(Asset asset, Map<String, Integer> tempAssets) throws Exception {
         if (assetService.assetExist(asset, tempAssets)) {
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_ID_EXIST);
+        }
+        if (asset.getDecimalPlaces() < Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMin()) || asset.getDecimalPlaces() > Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMax())) {
+            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_DECIMALPLACES);
+        }
+        if (null == asset.getSymbol() || asset.getSymbol().length() > Integer.valueOf(nulsChainConfig.getAssetSymbolMax()) || asset.getSymbol().length() < 1) {
+            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_SYMBOL_LENGTH);
         }
         return ChainEventResult.getResultSuccess();
     }

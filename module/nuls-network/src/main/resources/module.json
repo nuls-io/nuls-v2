@@ -10,5 +10,6 @@
   "crossPort": 18002,
   "crossMaxInCount": 300,
   "crossMaxOutCount": 10,
-  "moonSeedIps": "192.168.1.192:8088"
+  "moonSeedIps": "192.168.1.192:8088",
+  "timeServers":"sgp.ntp.org.cn,cn.ntp.org.cn,time1.apple.com,ntp3.aliyun.com,ntp5.aliyun.com,us.ntp.org.cn,kr.ntp.org.cn,de.ntp.org.cn,jp.ntp.org.cn,ntp7.aliyun.com"
 }

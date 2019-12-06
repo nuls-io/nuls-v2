@@ -8,6 +8,11 @@
     "version": "2",
     "effectiveRatio": "80",
     "continuousIntervalCount": "10"
+  },
+  {
+    "version": "3",
+    "effectiveRatio": "80",
+    "continuousIntervalCount": "10"
   }
 
 ]

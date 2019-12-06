@@ -52,6 +52,7 @@ public class RoundManager {
         }
         roundList.add(meetingRound);
         if (roundList.size() > ConsensusConstant.ROUND_CACHE_COUNT) {
+            roundList.get(0).setPreRound(null);
             roundList.remove(0);
         }
     }

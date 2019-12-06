@@ -159,6 +159,12 @@ public class ChainCmd extends BaseChainCmd {
             /* 取消int assetId = seqService.createAssetId(blockChain.getChainId());*/
             Asset asset = new Asset();
             asset.map2pojo(params);
+            if (asset.getDecimalPlaces() < Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMin()) || asset.getDecimalPlaces() > Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMax())) {
+                return failed(CmErrorCode.ERROR_ASSET_DECIMALPLACES);
+            }
+            if (null == asset.getSymbol() || asset.getSymbol().length() > Integer.valueOf(nulsChainConfig.getAssetSymbolMax()) || asset.getSymbol().length() < 1) {
+                return failed(CmErrorCode.ERROR_ASSET_SYMBOL_LENGTH);
+            }
             asset.setChainId(blockChain.getChainId());
             asset.setDepositNuls(new BigInteger(nulsChainConfig.getAssetDepositNuls()));
             int rateToPercent = new BigDecimal(nulsChainConfig.getAssetDepositNulsDestroyRate()).multiply(BigDecimal.valueOf(100)).intValue();
@@ -273,6 +279,12 @@ public class ChainCmd extends BaseChainCmd {
             /* 取消int assetId = seqService.createAssetId(blockChain.getChainId());*/
             Asset asset = new Asset();
             asset.map2pojo(params);
+            if (asset.getDecimalPlaces() < Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMin()) || asset.getDecimalPlaces() > Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMax())) {
+                return failed(CmErrorCode.ERROR_ASSET_DECIMALPLACES);
+            }
+            if (null == asset.getSymbol() || asset.getSymbol().length() > Integer.valueOf(nulsChainConfig.getAssetSymbolMax()) || asset.getSymbol().length() < 1) {
+                return failed(CmErrorCode.ERROR_ASSET_SYMBOL_LENGTH);
+            }
             asset.setChainId(blockChain.getChainId());
             asset.setDepositNuls(new BigInteger(nulsChainConfig.getAssetDepositNuls()));
             int rateToPercent = new BigDecimal(nulsChainConfig.getAssetDepositNulsDestroyRate()).multiply(BigDecimal.valueOf(100)).intValue();

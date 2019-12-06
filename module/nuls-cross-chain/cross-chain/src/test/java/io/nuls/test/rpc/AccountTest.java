@@ -1,6 +1,9 @@
 package io.nuls.test.rpc;
 
+import io.nuls.base.data.BlockExtendsData;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.log.Log;
+import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.info.NoUse;
@@ -14,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class AccountTest {
-    static int chainId = 100;
+    static int chainId = 2;
     static String password = "nuls123456";
 
     @Before
@@ -33,7 +36,7 @@ public class AccountTest {
 //        importPriKey("4100e2f88c3dba08e5000ed3e8da1ae4f1e0041b856c09d35a26fb399550f530", password);//23 tNULSeBaMu38g1vnJsSZUCwTDU9GsE5TVNUtpD
 //        importPriKey("bec819ef7d5beeb1593790254583e077e00f481982bce1a43ea2830a2dc4fdf7", password);//24 tNULSeBaMp9wC9PcWEcfesY7YmWrPfeQzkN1xL
 //        importPriKey("ddddb7cb859a467fbe05d5034735de9e62ad06db6557b64d7c139b6db856b200", password);//25 tNULSeBaMshNPEnuqiDhMdSA4iNs6LMgjY6tcL
-//        importPriKey("4efb6c23991f56626bc77cdb341d64e891e0412b03cbcb948aba6d4defb4e60a", password);//26 tNULSeBaMoodYW7AqyJrgYdWiJ6nfwfVHHHyXm
+        importPriKey("4efb6c23991f56626bc77cdb341d64e891e0412b03cbcb948aba6d4defb4e60a", password);//26 tNULSeBaMoodYW7AqyJrgYdWiJ6nfwfVHHHyXm
 //        importPriKey("3dadac00b523736f38f8c57deb81aa7ec612b68448995856038bd26addd80ec1", password);//27 tNULSeBaMmTNYqywL5ZSHbyAQ662uE3wibrgD1
 //        importPriKey("27dbdcd1f2d6166001e5a722afbbb86a845ef590433ab4fcd13b9a433af6e66e", password);//28 tNULSeBaMoNnKitV28JeuUdBaPSR6n1xHfKLj2
 //        importPriKey("76b7beaa98db863fb680def099af872978209ed9422b7acab8ab57ad95ab218b", password);//29 tNULSeBaMqywZjfSrKNQKBfuQtVxAHBQ8rB2Zn
@@ -41,7 +44,7 @@ public class AccountTest {
         /*
         * 链为100的地址
         * */
-        importPriKey("2b268718adc69586a38aa146987a7e365fac171b995d517cb8f166d8327bb5b1", password);
+//        importPriKey("2b268718adc69586a38aa146987a7e365fac171b995d517cb8f166d8327bb5b1", password);
 //        importPriKey("4eb6def1dc21f3afbc4d3d0892713e6467a91426940d6f00140629d9d64ba908", password);
 //        importPriKey("1a943e557a4c1a73083d9a82981621b5fefa4d9b99362db90e812777eaabb5b4", password);
 //        importPriKey("1568d9547ac0c748775d21ba5e806cba5b1fab185ffc4efe0623d3a3eba5283c", password);
@@ -73,5 +76,22 @@ public class AccountTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    public void removeAccount() throws Exception {
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.VERSION_KEY_STR, "1.0");
+        params.put(Constants.CHAIN_ID, chainId);
+        params.put("address", "tNULSeBaMqywZjfSrKNQKBfuQtVxAHBQ8rB2Zn");
+        params.put("password", password);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_removeAccount", params);
+        Log.debug("{}", JSONUtils.obj2json(cmdResp.getResponseData()));
+    }
+
+    public static void main(String[] args) throws Exception{
+        BlockExtendsData blockExtendsData = new BlockExtendsData();
+        blockExtendsData.parse(HexUtil.decode("010000000100010000000100010001003c64002056e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421"),0);
+        System.out.println(blockExtendsData.toString());
     }
 }

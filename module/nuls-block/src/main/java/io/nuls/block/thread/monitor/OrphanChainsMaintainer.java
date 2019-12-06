@@ -146,6 +146,7 @@ public class OrphanChainsMaintainer extends BaseMonitor {
                 nodes.addAll(list);
             }
         }
+        //过滤可用的孤儿块维护节点
         Set<String> set = availableNodes.stream().map(Node::getId).collect(Collectors.toSet());
         nodes.retainAll(set);
         Block block;
