@@ -301,6 +301,7 @@ public class BlockUtil {
         NulsHash blockHash = block.getHeader().getHash();
         NulsLogger logger = context.getLogger();
         if (block.getNodeId() != null) {
+            //添加孤儿区块与节点的关联关系，维护孤儿区块时从这些节点进行下载
             Map<NulsHash, List<String>> map = context.getOrphanBlockRelatedNodes();
             List<String> list = map.computeIfAbsent(blockHash, k -> new ArrayList<>());
             list.add(block.getNodeId());

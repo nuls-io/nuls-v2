@@ -107,8 +107,12 @@ public class BlockDownloader implements Callable<Boolean> {
                 if (b) {
                     node.setNodeEnum(NodeEnum.WORKING);
                     node.setStartTime(System.currentTimeMillis());
+                    node.setStartHeight(startHeight);
+                    node.setEndHeight(endHeight);
+                    startHeight += size;
+                } else {
+                    logger.error("BlockDownloader sendToNode failed!");
                 }
-                startHeight += size;
             }
             logger.info("BlockDownloader stop work, flag-" + context.isNeedSyn());
         } catch (Exception e) {

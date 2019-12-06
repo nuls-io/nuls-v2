@@ -44,13 +44,25 @@ public class Node {
      */
     private long height;
     /**
+     * 该节点关联的下载任务区间的起始高度
+     */
+    private long startHeight;
+    /**
+     * 该节点关联的下载任务区间的结束高度
+     */
+    private long endHeight;
+    /**
      * 最新区块hash
      */
     private NulsHash hash;
     /**
-     * 下载信用值
+     * 下载信用值,初始值50
      */
-    private int credit = 100;
+    private int credit = 50;
+    /**
+     * 累计失败次数
+     */
+    private int failedCount = 0;
     /**
      * 批量下载任务开始时间
      */
@@ -59,6 +71,30 @@ public class Node {
      * 节点状态
      */
     private NodeEnum nodeEnum;
+
+    public long getStartHeight() {
+        return startHeight;
+    }
+
+    public void setStartHeight(long startHeight) {
+        this.startHeight = startHeight;
+    }
+
+    public long getEndHeight() {
+        return endHeight;
+    }
+
+    public void setEndHeight(long endHeight) {
+        this.endHeight = endHeight;
+    }
+
+    public int getFailedCount() {
+        return failedCount;
+    }
+
+    public void setFailedCount(int failedCount) {
+        this.failedCount = failedCount;
+    }
 
     public long getStartTime() {
         return startTime;
@@ -112,17 +148,21 @@ public class Node {
     /**
      * 根据下载是否成功、下载耗费时间调整信用值
      */
-    public void adjustCredit(boolean success) {
+    public synchronized void adjustCredit(boolean success) {
+        if (nodeEnum.equals(NodeEnum.TIMEOUT)) {
+            return;
+        }
         int oldCredit = credit;
         if (success) {
-            //下载成功,信用值加20,上限为初始信用值的两倍
+            //下载成功,信用值加10,初始值50,上限为100
             credit = Math.min(100, credit + 10);
         } else {
-            //下载失败,信用值降为原值的四分之一,下限为0
+            //下载失败,信用值降为原值的八分之一,下限为0,从最大信用值100下降到0，需要连续三次
             credit >>= 3;
-            if (credit == 0) {
+            failedCount++;
+            if (credit == 0 || failedCount > 10) {
                 setNodeEnum(NodeEnum.TIMEOUT);
-                LoggerUtil.COMMON_LOG.warn("node-" + id + ", response timeouts are excessive, this node was marked unavailable");
+                LoggerUtil.COMMON_LOG.warn("node-{}, credit-{}, failedCount-{}, this node was marked unavailable", id, credit, failedCount);
             }
         }
         if (!success) {
