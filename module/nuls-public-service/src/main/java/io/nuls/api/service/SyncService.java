@@ -570,8 +570,22 @@ public class SyncService {
 
         contractResultList.add(contractInfo.getResultInfo());
         if (contractInfo.isSuccess()) {
+            addNrc20Info(chainId, contractInfo);
             contractInfoMap.put(contractInfo.getContractAddress(), contractInfo);
             processTokenTransfers(chainId, contractInfo.getResultInfo().getTokenTransfers(), tx);
+        }
+    }
+
+    private void addNrc20Info(int chainId, ContractInfo contractInfo) {
+        if (contractInfo.isNrc20()) {
+            Nrc20Info nrc20Info = new Nrc20Info();
+            nrc20Info.setContractAddress(contractInfo.getContractAddress());
+            nrc20Info.setSymbol(contractInfo.getSymbol());
+            nrc20Info.setDecimal(nrc20Info.getDecimal());
+            nrc20Info.setTotalSupply(nrc20Info.getTotalSupply());
+
+            ApiCache apiCache = CacheManager.getCache(chainId);
+            apiCache.addNrc20Info(nrc20Info);
         }
     }
 

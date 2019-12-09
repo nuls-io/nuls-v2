@@ -11,6 +11,8 @@ import java.util.Map;
 
 public interface ContractService {
 
+    void initCache();
+
     ContractInfo getContractInfo(int chainId, String contractAddress);
 
     ContractInfo getContractInfoByHash(int chainId, String txHash);
@@ -36,4 +38,5 @@ public interface ContractService {
     List<MiniContractInfo> getContractList(int chainId, List<String> addressList);
 
     ContractResultInfo getContractResultInfo(int chainId, String txHash);
+
 }
