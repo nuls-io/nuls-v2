@@ -2,11 +2,11 @@ package io.nuls.api.db.mongo;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.model.*;
+import io.nuls.api.cache.ApiCache;
+import io.nuls.api.constant.DBTableConstant;
 import io.nuls.api.db.ContractService;
-import io.nuls.api.model.po.ContractInfo;
-import io.nuls.api.model.po.ContractResultInfo;
-import io.nuls.api.model.po.ContractTxInfo;
-import io.nuls.api.model.po.PageInfo;
+import io.nuls.api.manager.CacheManager;
+import io.nuls.api.model.po.*;
 import io.nuls.api.model.po.mini.MiniContractInfo;
 import io.nuls.api.utils.DocumentTransferTool;
 import io.nuls.core.core.annotation.Autowired;
@@ -27,6 +27,25 @@ public class MongoContractServiceImpl implements ContractService {
     private MongoDBService mongoDBService;
     @Autowired
     private MongoAccountServiceImpl mongoAccountServiceImpl;
+
+
+    @Override
+    public void initCache() {
+        //缓存NRC20 token信息
+        for (ApiCache apiCache : CacheManager.getApiCaches().values()) {
+            List<Document> documentList = mongoDBService.query(DBTableConstant.CONTRACT_TABLE + apiCache.getChainInfo().getChainId());
+            for (Document document : documentList) {
+                if (document.getBoolean("isNrc20")) {
+                    Nrc20Info nrc20Info = new Nrc20Info();
+                    nrc20Info.setContractAddress(document.getString("_id"));
+                    nrc20Info.setTotalSupply(document.getString("totalSupply"));
+                    nrc20Info.setSymbol(document.getString("symbol"));
+                    nrc20Info.setDecimal(document.getInteger("decimals"));
+                    apiCache.addNrc20Info(nrc20Info);
+                }
+            }
+        }
+    }
 
     public ContractInfo getContractInfo(int chainId, String contractAddress) {
         Document document = mongoDBService.findOne(CONTRACT_TABLE + chainId, Filters.eq("_id", contractAddress));
