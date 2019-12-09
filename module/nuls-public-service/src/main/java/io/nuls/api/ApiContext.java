@@ -20,6 +20,7 @@
 
 package io.nuls.api;
 
+import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -49,6 +50,8 @@ public class ApiContext {
     public static int agentAssetId;
 
     public static int awardAssetId;
+
+    public static BigInteger minDeposit;
 
     public static String databaseUrl;
 

@@ -1,5 +1,6 @@
 package io.nuls.api.db;
 
+import io.nuls.api.ApiContext;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.db.mongo.MongoAgentServiceImpl;
@@ -138,7 +139,7 @@ public class RoundManager {
             if (null == totalDeposit) {
                 totalDeposit = BigInteger.ZERO;
             }
-            if (totalDeposit.compareTo(ApiConstant.MIN_DEPOSIT) >= 0) {
+            if (totalDeposit.compareTo(ApiContext.minDeposit) >= 0) {
                 AgentSorter sorter = new AgentSorter();
                 sorter.setAgentId(agent.getTxHash());
                 byte[] hash = ArraysTool.concatenate(AddressTool.getAddress(agent.getPackingAddress()), SerializeUtils.uint64ToByteArray(blockInfo.getHeader().getRoundStartTime()));
