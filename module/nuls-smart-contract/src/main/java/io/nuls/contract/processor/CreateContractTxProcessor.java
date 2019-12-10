@@ -145,6 +145,7 @@ public class CreateContractTxProcessor {
                     }
                 }
                 if(isNewNrc20) {
+                    Log.info("CROSS-NRC20-TOKEN contract [{}] 向账本注册合约资产", contractAddressStr);
                     Map resultMap = LedgerCall.commitNRC20Assets(chainId, tokenName, tokenSymbol, (short) tokenDecimals, tokenTotalSupply, contractAddressStr);
                     if(resultMap != null) {
                         // 缓存合约地址和合约资产ID

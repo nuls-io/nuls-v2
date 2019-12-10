@@ -600,7 +600,7 @@ public class NativeUtils {
         if(ContractConstant.CMD_TOKEN_OUT_CROSS_CHAIN.equals(cmdName)) {
             if(ProtocolGroupManager.getCurrentVersion(currentChainId) < ContractContext.UPDATE_VERSION_V230 ) {
                 throw new ErrorException(
-                        String.format("Invoke external cmd failed. There is no registration information. chainId: [%s] cmdName: [%s]",
+                        String.format("Invoke external cmd failed. There is no registration information. chainId: [%s] cmdName: [%s](1)",
                                 currentChainId, cmdName), frame.vm.getGasUsed(), null);
             }
             objectRef = NativeUtils.tokenOutCrossChainCmdProcessor(currentChainId, senderBytes, contractSender, args, contractAddress, contractAddressBytes, cmdRegisterManager, moduleCode, cmdName, argsMap, invokeRegisterCmd, frame);

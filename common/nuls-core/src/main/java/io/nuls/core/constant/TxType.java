@@ -39,7 +39,7 @@ public class TxType {
      */
     public static final int CANCEL_DEPOSIT = 6;
     /**
-     * 取消委托共识
+     * 黄牌
      */
     public static final int YELLOW_PUNISH = 7;
     /**

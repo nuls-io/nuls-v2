@@ -203,7 +203,7 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
      */
     @Test
     public void callTransferCrossChain() throws Exception {
-        contractAddress_nrc20 = "tNULSeBaN1JANNgiCJ62D3j3kerjeLZ9fopcPD";
+        contractAddress_nrc20 = "tNULSeBaNB47zCce3ZftkAd1HGehSY116Wbps4";
         methodName = "transferCrossChain";
         BigInteger value = BigInteger.valueOf(1_0000_0000L);
         String methodDesc = "";
@@ -350,6 +350,12 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
 
     ////////////////////////////////////////////////////////////////////////////////////
 
+    @Test
+    public void testNrc20() throws Exception {
+        String nrc20 = createCrossNrc20Contract();
+        Integer assetId = this.getAssetId(nrc20);
+        Log.info("nrc20 is [{}], assetId is [{}]", nrc20, assetId);
+    }
     /**
      * 流程: 测试合约内部临时存储
      */

@@ -85,15 +85,15 @@ public class ContractPOCMSendTxTest extends BaseQuery {
     @Test
     public void createAgent()throws Exception{
         Map<String,Object> params = new HashMap<>();
-        params.put("agentAddress",sender);
+        params.put("agentAddress",toAddress0);
         params.put(Constants.CHAIN_ID,2);
         params.put("deposit","2000000000000");
         params.put("commissionRate",10);
         params.put("packingAddress",toAddress34);
         params.put("password","nuls123456");
-        params.put("rewardAddress",sender);
+        params.put("rewardAddress",toAddress0);
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", params);
-        System.out.println(cmdResp.getResponseData());
+        System.out.println(JSONUtils.obj2PrettyJson(cmdResp));
     }
 
     /**
@@ -110,37 +110,50 @@ public class ContractPOCMSendTxTest extends BaseQuery {
 
         //Log.info("begin openConsensus");
         //this.invokeCall(sender, BigInteger.ZERO, contractAddress, "openConsensus", null, "remark");
-        //Log.info("begin addOtherAgent");
-        //this.invokeCall(sender, BigInteger.ZERO, contractAddress, "addOtherAgent", null, "remark", List.of("ceb529616399fa3356d5f7f26705bfc4b61792da1c6de996d8030f3af71edd78").toArray());
+        Log.info("begin addOtherAgent");
+        this.invokeCall(sender, BigInteger.ZERO, contractAddress, "addOtherAgent", null, "remark", List.of("db20782624661ff1014605755a0e386830b7f20e95c669dc1b46b5a4f6e886e3").toArray());
         Log.info("begin depositForOwn {}", sender);
+
+        //String nrc20Locked = "tNULSeBaN9Mu2No49JFyLc2Q8KvBWu5XoToaQJ";
+        //contractAddress = "tNULSeBaN46smZqFkndwG4WaczH2RRd76axdDq";
+        //String pocm = contractAddress;
         this.invokeCall(sender, BigInteger.valueOf(3000_00000000L), contractAddress, "depositForOwn", null, "remark");
-        Log.info("begin depositForOwn {}", toAddress0);
-        this.invokeCall(toAddress0, BigInteger.valueOf(2100_00000000L), contractAddress, "depositForOwn", null, "remark");
-        Log.info("begin depositForOwn {}", toAddress1);
-        this.invokeCall(toAddress1, BigInteger.valueOf(1200_00000000L), contractAddress, "depositForOwn", null, "remark");
-        TimeUnit.SECONDS.sleep(50);
+        Log.info("begin depositForOwn {}", toAddress5);
+        this.invokeCall(toAddress5, BigInteger.valueOf(2100_00000000L), contractAddress, "depositForOwn", null, "remark");
+        Log.info("begin depositForOwn {}", toAddress6);
+        this.invokeCall(toAddress6, BigInteger.valueOf(1200_00000000L), contractAddress, "depositForOwn", null, "remark");
+        TimeUnit.SECONDS.sleep(30);
+
         Log.info("begin quit {}", sender);
         this.invokeCall(sender, BigInteger.ZERO, contractAddress, "quit", null, "remark", "0");
-        Log.info("begin quit {}", toAddress0);
-        this.invokeCall(toAddress0, BigInteger.ZERO, contractAddress, "quit", null, "remark", "0");
-        Log.info("begin quit {}", toAddress1);
-        this.invokeCall(toAddress1, BigInteger.ZERO, contractAddress, "quit", null, "remark", "0");
+        Log.info("begin quit {}", toAddress5);
+        this.invokeCall(toAddress5, BigInteger.ZERO, contractAddress, "quit", null, "remark", "0");
+        Log.info("begin quit {}", toAddress6);
+        this.invokeCall(toAddress6, BigInteger.ZERO, contractAddress, "quit", null, "remark", "0");
 
         TimeUnit.SECONDS.sleep(2);
         Log.info("sender balance is {}", this.invokeView(nrc20Locked, "balanceOf", sender));
-        Log.info("toAddress0 balance is {}", this.invokeView(nrc20Locked, "balanceOf", toAddress0));
-        Log.info("toAddress1 balance is {}", this.invokeView(nrc20Locked, "balanceOf", toAddress1));
+        Log.info("toAddress5 balance is {}", this.invokeView(nrc20Locked, "balanceOf", toAddress5));
+        Log.info("toAddress6 balance is {}", this.invokeView(nrc20Locked, "balanceOf", toAddress6));
         Log.info("pocm balance is {}", this.invokeView(nrc20Locked, "balanceOf", pocm));
+        Log.info("sender locked balance is {}", this.invokeView(nrc20Locked, "lockedBalanceOf", sender));
+        Log.info("toAddress5 locked balance is {}", this.invokeView(nrc20Locked, "lockedBalanceOf", toAddress5));
+        Log.info("toAddress6 locked balance is {}", this.invokeView(nrc20Locked, "lockedBalanceOf", toAddress6));
+        Log.info("pocm locked balance is {}", this.invokeView(nrc20Locked, "lockedBalanceOf", pocm));
     }
 
     @Test
     public void t() throws Exception {
-        String nrc20Locked = "tNULSeBaN7e8CjuKBJsivsbqviaMpFenfKVWQM";
-        String pocm = "tNULSeBaN81BfcZ2DLB5oAzZzVSo8CD3vYr49s";
+        String nrc20Locked = "tNULSeBaN8Kpc1m5jhDWY5Ntnb1yU6ywUrYFS8";
+        String pocm = "tNULSeBaN9rBMnfwQLuFzvJ8c3fv4dsCkdJJfE";
         Log.info("sender balance is {}", this.invokeView(nrc20Locked, "balanceOf", sender));
-        Log.info("toAddress0 balance is {}", this.invokeView(nrc20Locked, "lockedBalanceOf", toAddress0));
-        Log.info("toAddress1 balance is {}", this.invokeView(nrc20Locked, "lockedBalanceOf", toAddress1));
-        Log.info("pocm balance is {}", this.invokeView(nrc20Locked, "lockedBalanceOf", pocm));
+        Log.info("toAddress0 balance is {}", this.invokeView(nrc20Locked, "balanceOf", toAddress0));
+        Log.info("toAddress1 balance is {}", this.invokeView(nrc20Locked, "balanceOf", toAddress1));
+        Log.info("pocm balance is {}", this.invokeView(nrc20Locked, "balanceOf", pocm));
+        Log.info("sender locked balance is {}", this.invokeView(nrc20Locked, "lockedBalanceOf", sender));
+        Log.info("toAddress0 locked balance is {}", this.invokeView(nrc20Locked, "lockedBalanceOf", toAddress0));
+        Log.info("toAddress1 locked balance is {}", this.invokeView(nrc20Locked, "lockedBalanceOf", toAddress1));
+        Log.info("pocm locked balance is {}", this.invokeView(nrc20Locked, "lockedBalanceOf", pocm));
     }
 
     /**
