@@ -58,7 +58,7 @@ singleDownloadTimeout=15000
 cachedBlockSizeLimit=20971520
 #创世块文件路径(支持绝对路径与相对路径,相对路径相对于此配置文件的目录)
 genesisBlockPath=genesis-block_dev.json
-dependent=cross-chain,smart-contract,protocol-update
+dependent=cross-chain,protocol-update
 
 [consensus]
 #种子节点列表
