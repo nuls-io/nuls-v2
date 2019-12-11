@@ -26,6 +26,8 @@ package io.nuls.contract.util;
 
 
 import io.nuls.base.data.BlockHeader;
+import io.nuls.contract.config.ContractConfig;
+import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.model.bo.ContractBalance;
 import io.nuls.contract.model.dto.BlockHeaderDto;
@@ -55,6 +57,8 @@ public class VMContext {
 
     @Autowired
     private ContractHelper contractHelper;
+    @Autowired
+    private ContractConfig contractConfig;
 
     private static Map<String, ProgramMethod> NRC20_METHODS = null;
     private static Map<String, ProgramMethod> NRC721_METHODS = null;
@@ -256,5 +260,9 @@ public class VMContext {
 
     public long getCustomMaxViewGasLimit(int chainId) {
         return contractHelper.getChain(chainId).getConfig().getMaxViewGas();
+    }
+
+    public String getCrossTokenSystemContract() {
+        return contractConfig.getCrossTokenSystemContract();
     }
 }

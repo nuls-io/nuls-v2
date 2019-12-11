@@ -538,14 +538,26 @@ public class NativeUtils {
             throw new ErrorException("Invoke external cmd failed. This method cannot be called when creating a contract.", frame.vm.getGasUsed(), null);
         }
         frame.vm.addGasUsed(GasCost.INVOKE_EXTERNAL_METHOD);
+        int currentChainId = frame.vm.getProgramExecutor().getCurrentChainId();
         ObjectRef cmdNameRef = (ObjectRef) methodArgs.invokeArgs[0];
         ObjectRef argsRef = (ObjectRef) methodArgs.invokeArgs[1];
         String cmdName = frame.heap.runToString(cmdNameRef);
+        if(ContractConstant.CMD_GET_CROSS_TOKEN_SYSTEM_CONTRACT.equals(cmdName)) {
+            if(ProtocolGroupManager.getCurrentVersion(currentChainId) < ContractContext.UPDATE_VERSION_V230 ) {
+                throw new ErrorException(
+                        String.format("Invoke external cmd failed. There is no registration information. chainId: [%s] cmdName: [%s](0)",
+                                currentChainId, cmdName), frame.vm.getGasUsed(), null);
+            }
+            String crossTokenSystemContract = frame.vm.getProgramExecutor().getCrossTokenSystemContract();
+            ObjectRef objectRef = frame.heap.newString(crossTokenSystemContract);
+            Result result = NativeMethod.result(methodCode, objectRef, frame);
+            return result;
+        }
         String[] args = (String[]) frame.heap.getObject(argsRef);
 
         // 检查是否注册
         CmdRegisterManager cmdRegisterManager = SpringLiteContext.getBean(CmdRegisterManager.class);
-        int currentChainId = frame.vm.getProgramExecutor().getCurrentChainId();
+
         CmdRegister cmdRegister = cmdRegisterManager.getCmdRegisterByCmdName(currentChainId, cmdName);
         if (cmdRegister == null) {
             throw new ErrorException(

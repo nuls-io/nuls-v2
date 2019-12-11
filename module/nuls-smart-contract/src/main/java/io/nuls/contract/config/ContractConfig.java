@@ -65,14 +65,14 @@ public class ContractConfig implements ModuleConfig {
 
     private String blackHolePublicKey;
 
-    private String crossChainSystemContract;
+    private String crossTokenSystemContract;
 
-    public String getCrossChainSystemContract() {
-        return crossChainSystemContract;
+    public String getCrossTokenSystemContract() {
+        return crossTokenSystemContract;
     }
 
-    public void setCrossChainSystemContract(String crossChainSystemContract) {
-        this.crossChainSystemContract = crossChainSystemContract;
+    public void setCrossTokenSystemContract(String crossTokenSystemContract) {
+        this.crossTokenSystemContract = crossTokenSystemContract;
     }
 
     public int getChainId() {

@@ -96,7 +96,11 @@ dependent=protocol-update,smart-contract
 #合约视图方法调用最大消耗的Gas
 maxViewGas=100000000
 systemLogLevel=WARN
-crossChainSystemContract=tNULSeBaN615E5S2vA4ewT3XdhLm2xMCeH1DaJ
+crossTokenSystemContract=tNULSeBaN5FeEZAiUY47g1rweQF2cYCELRNSxM
+dependent=protocol-update
+
+[chain-manager]
+dependent=smart-contract
 
 [public-service]
 #public-service模块对外的rpc端口号
@@ -149,4 +153,5 @@ dependent=smart-contract,cross-chain
 
 [protocol-update]
 #每隔多少个区块统计一次协议占比
-interval=1000
+interval=10
+dependent=smart-contract,cross-chain

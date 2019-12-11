@@ -24,9 +24,13 @@
 package io.nuls.contract.deserialization;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.*;
+import io.nuls.base.signture.P2PHKSignature;
+import io.nuls.base.signture.SignatureUtil;
+import io.nuls.base.signture.TransactionSignature;
 import io.nuls.contract.model.txdata.CallContractData;
 import io.nuls.contract.model.txdata.CreateContractData;
 import io.nuls.core.crypto.HexUtil;
@@ -42,6 +46,7 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -71,9 +76,27 @@ public class TxDeserialization {
     }
 
     @Test
+    public void type2test() throws NulsException, JsonProcessingException {
+        String txStr2 = "02001819ea5d00008c01170197dca8cf9c55829194654add150940ed3ef78a3fa09802000100aa860100000000000000000000000000000000000000000000000000000000000800000000000000000001170197dca8cf4d11842d6939709656b45e590df76d29dcff020001000a000000000000000000000000000000000000000000000000000000000000000000000000000000692102f746e7d62a6c0cc12936673bbb1f23e1938b85f60e30fd2b1e8525bb2844ded046304402203f133dacbd3983e9b32ee47a004cd05660cdd9677868c0272890c708ab084f65022061aa83ba8f60d72939afa3713d6bc8cdeeaec7323d3e5fe72ee860d1dedfe715";
+        Transaction tx2 = new Transaction();
+        tx2.parse(new NulsByteBuffer(HexUtil.decode(txStr2)));
+        CoinData coinData = tx2.getCoinDataInstance();
+
+        System.out.println(JSONUtils.obj2PrettyJson(tx2));
+        System.out.println(HexUtil.encode(tx2.getTransactionSignature()));
+        Set<String> addressFromTX = SignatureUtil.getAddressFromTX(tx2, 2);
+        System.out.println(AddressTool.getStringAddressByBytes(coinData.getFrom().get(0).getAddress()));
+        System.out.println(addressFromTX);
+        //
+        //TransactionSignature transactionSignature = new TransactionSignature();
+        //transactionSignature.parse(tx2.getTransactionSignature(), 0);
+        //List<P2PHKSignature> p2PHKSignatures = transactionSignature.getP2PHKSignatures();
+    }
+
+    @Test
     public void contractReturnTxTest() throws NulsException, JsonProcessingException {
-        String receiveTxStr = "13005229a95d000046000117010001a8e78f6b9e8eec915a9775cb999f3df21644671a0100010096f10e0000000000000000000000000000000000000000000000000000000000000000000000000000";
-        String makeTxStr = "13005229a95d000046000117010001a8e78f6b9e8eec915a9775cb999f3df21644671a010001004b990c0000000000000000000000000000000000000000000000000000000000000000000000000000";
+        String receiveTxStr = "130084fdc05d000046000117010001c0ad4e32cd607169570bc7b246df19c1a148a9a9010001006233240000000000000000000000000000000000000000000000000000000000000000000000000000";
+        String makeTxStr = "130084fdc05d000046000117010001c0ad4e32cd607169570bc7b246df19c1a148a9a901000100e59b1f0000000000000000000000000000000000000000000000000000000000000000000000000000";
 
         Transaction tx1 = new Transaction();
         tx1.parse(new NulsByteBuffer(HexUtil.decode(receiveTxStr)));
@@ -97,6 +120,21 @@ public class TxDeserialization {
         System.out.println(JSONUtils.obj2PrettyJson(deposit));
         System.out.println(JSONUtils.obj2PrettyJson(tx));
     }
+
+    @Test
+    public void depositTest() throws Exception {
+        //String asd = "808840e1e1020000000000000000000000000000000000000000000000000000010002edb1ef1966a161f15b50974ed793c049fa5c14eb2e5cb2b2fc3acce78f1d6d71ae1b18f4b58bf153bc3cc537b7fdd3667fd369be";
+        //String asd = "80326b99dc020000000000000000000000000000000000000000000000000000010002a838b812b0cde89ed43402bdcd4830da8fa6d9932e5cb2b2fc3acce78f1d6d71ae1b18f4b58bf153bc3cc537b7fdd3667fd369be";
+        String asd = "00e4b9fa91020000000000000000000000000000000000000000000000000000010002a838b812b0cde89ed43402bdcd4830da8fa6d9935820c4e21dcf018751e2b28b223a980a08906c1ead6edb9c02f003fbe3af4ae8";
+        Deposit deposit = new Deposit();
+        deposit.parse(new NulsByteBuffer(HexUtil.decode(asd)));
+        System.out.println(AddressTool.getStringAddressByBytes(deposit.getAddress()));
+        System.out.println(deposit.getAgentHash().toHex());
+        //System.out.println(JSONUtils.obj2PrettyJson(deposit));
+        // 2e5cb2b2fc3acce78f1d6d71ae1b18f4b58bf153bc3cc537b7fdd3667fd369be
+        // 2e5cb2b2fc3acce78f1d6d71ae1b18f4b58bf153bc3cc537b7fdd3667fd369be
+    }
+
 
     @Test
     public void testCreateContractData() throws NulsException, IOException {

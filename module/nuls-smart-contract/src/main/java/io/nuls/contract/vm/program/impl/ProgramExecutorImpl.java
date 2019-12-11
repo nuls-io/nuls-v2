@@ -112,7 +112,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
     public ProgramExecutor callProgramExecutor() {
         ProgramExecutorImpl programExecutor = new ProgramExecutorImpl(this, vmContext, source, repository, prevStateRoot, accounts, thread);
-        //TODO pierre 标记
+        // add by pierre at 2019-12-03 用于当存在合约内部调用合约，共享同一个合约的内存数据
         programExecutor.contractObjects = this.contractObjects;
         programExecutor.contractChanges = this.contractChanges;
         programExecutor.contractArrays = this.contractArrays;
@@ -193,6 +193,10 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             }
             logTime("commit");
         }
+    }
+
+    public String getCrossTokenSystemContract() {
+        return vmContext.getCrossTokenSystemContract();
     }
 
     @Override
@@ -332,7 +336,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
             vm.setProgramExecutor(this);
             vm.heap.loadClassCodes(classCodes);
-            // pierre 标记 当存在合约内部调用合约，共享同一个合约的内存数据 需要协议升级 done
+            // add by pierre at 2019-11-21 标记 当存在合约内部调用合约，共享同一个合约的内存数据 需要协议升级 done
             //Log.debug("++++++++++++++++++++");
             //Log.warn(programInvoke.toString());
             //Log.info("this.contractObjectRefCount: {}", this.contractObjectRefCount);
@@ -431,7 +435,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                 objectRef = vm.heap.loadContract(contractAddressBytes, contractClassCode, repository);
             }
 
-            // pierre 标记 当存在合约内部调用合约，共享同一个合约的内存数据 需要协议升级 done
+            // add by pierre at 2019-11-21 标记 当存在合约内部调用合约，共享同一个合约的内存数据 需要协议升级 done
             if(isUpgradedV230) {
                 if(contractObjectRefCount == null) {
                     //Log.info("新建map和heap.objectRefCount");
