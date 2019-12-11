@@ -103,7 +103,7 @@ public class AccountStateCmd extends BaseLedgerCmd {
         BigInteger permanentLocked = BigInteger.ZERO;
         BigInteger timeHeightLocked = BigInteger.ZERO;
         for (FreezeLockTimeState freezeLockTimeState : accountState.getFreezeLockTimeStates()) {
-            if (LedgerConstant.PERMANENT_LOCK == freezeLockTimeState.getLockTime()) {
+            if (LedgerUtil.isPermanentLock(freezeLockTimeState.getLockTime())) {
                 permanentLocked = permanentLocked.add(freezeLockTimeState.getAmount());
             } else {
                 timeHeightLocked = timeHeightLocked.add(freezeLockTimeState.getAmount());
@@ -188,9 +188,7 @@ public class AccountStateCmd extends BaseLedgerCmd {
         rtMap.put("list", resultList);
         return success(rtMap);
     }
-    public static void main(String []args){
-        System.out.println(Boolean.valueOf("false"));
-    }
+
     /**
      * 获取账户nonce值
      * get user account nonce
@@ -286,7 +284,7 @@ public class AccountStateCmd extends BaseLedgerCmd {
         BigInteger permanentLocked = BigInteger.ZERO;
         BigInteger timeHeightLocked = BigInteger.ZERO;
         for (FreezeLockTimeState freezeLockTimeState : accountState.getFreezeLockTimeStates()) {
-            if (LedgerConstant.PERMANENT_LOCK == freezeLockTimeState.getLockTime()) {
+            if (LedgerUtil.isPermanentLock(freezeLockTimeState.getLockTime())) {
                 permanentLocked = permanentLocked.add(freezeLockTimeState.getAmount());
             } else {
                 timeHeightLocked = timeHeightLocked.add(freezeLockTimeState.getAmount());

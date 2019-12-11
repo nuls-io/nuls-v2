@@ -613,7 +613,14 @@ public class SerializeUtils {
     public static int sizeOfUint16() {
         return 2;
     }
-
+    /**
+     * 获取Uint8数据占的字节数
+     *
+     * @return int
+     */
+    public static int sizeOfUint8() {
+        return 1;
+    }
     /**
      * 获取Int32数据占的字节数
      *

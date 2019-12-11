@@ -40,12 +40,32 @@ public interface CmdConstant {
      * 获取最新高度
      */
     String CMD_LATEST_HEIGHT = "latestHeight";
+    /**
+     * 账户签名校验
+     */
+    String CMD_AC_SIGN_DIGEST = "ac_signDigest";
+    /**
+     * 发起新交易接口
+     */
+    String CMD_TX_NEW = "tx_newTx";
 
     /*RPC CMD*/
+
+
+    String CMD_CHAIN_ASSET_REG_INFO = "getAssetRegInfo";
+    String CMD_CHAIN_ASSET_REG_INFO_BY_HASH = "getAssetRegInfoByHash";
+    String CMD_CHAIN_ASSET_REG_INFO_BY_ASSETID = "getAssetRegInfoByAssetId";
+    String CMD_CHAIN_ASSET_TX_REG = "chainAssetTxReg";
+
+    String CMD_CHAIN_ASSET_CONTRACT_REG = "chainAssetContractReg";
+    String CMD_CHAIN_ASSET_CONTRACT_ROLL_BACK = "chainAssetContractRollBack";
+    String CMD_CHAIN_ASSET_CONTRACT_ADDRESS = "getAssetContractAddress";
+    String CMD_CHAIN_ASSET_CONTRACT_ASSETID = "getAssetContractAssetId";
     /**
      * 获取确认交易余额
      */
     String CMD_GET_BALANCE = "getBalance";
+
 
     /**
      * 获取含未确认交易的信息

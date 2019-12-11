@@ -26,6 +26,9 @@
 package io.nuls.ledger;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.protocol.ProtocolGroupManager;
+import io.nuls.base.protocol.ProtocolLoader;
+import io.nuls.base.protocol.RegisterHelper;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.ioc.SpringLiteContext;
@@ -53,6 +56,7 @@ public class LedgerBootstrap extends RpcModule {
     LedgerConfig ledgerConfig;
     @Autowired
     AddressPrefixDatas addressPrefixDatas;
+
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
             args = new String[]{"ws://" + HostInfo.getLocalIP() + ":7771"};
@@ -64,8 +68,11 @@ public class LedgerBootstrap extends RpcModule {
     public Module[] declareDependent() {
 
         return new Module[]{
-                new Module(ModuleE.NW.abbr, "1.0"),
-                new Module(ModuleE.BL.abbr, "1.0")};
+                Module.build(ModuleE.TX),
+                Module.build(ModuleE.NW),
+                Module.build(ModuleE.BL),
+                Module.build(ModuleE.AC)
+        };
 
     }
 
@@ -88,7 +95,7 @@ public class LedgerBootstrap extends RpcModule {
             LedgerConstant.blackHolePublicKey = HexUtil.decode(ledgerConfig.getBlackHolePublicKey());
             LedgerChainManager ledgerChainManager = SpringLiteContext.getBean(LedgerChainManager.class);
             ledgerChainManager.initChains();
-            LoggerUtil.COMMON_LOG.info("Ledger data init  complete!");
+            LoggerUtil.COMMON_LOG.info("Ledger data init complete!");
         } catch (Exception e) {
             LoggerUtil.COMMON_LOG.error(e);
             LoggerUtil.COMMON_LOG.error("start fail...");
@@ -107,6 +114,26 @@ public class LedgerBootstrap extends RpcModule {
     @Override
     public void onDependenciesReady(Module module) {
         try {
+            ProtocolLoader.load(ledgerConfig.getChainId());
+            /*注册交易处理器*/
+            if (ModuleE.TX.abbr.equals(module.getName())) {
+                int chainId = ledgerConfig.getChainId();
+                boolean regSuccess = RegisterHelper.registerTx(chainId, ProtocolGroupManager.getCurrentProtocol(chainId));
+                if (!regSuccess) {
+                    LoggerUtil.COMMON_LOG.error("RegisterHelper.registerTx fail..");
+                    System.exit(-1);
+                }
+                LoggerUtil.COMMON_LOG.info("regTxRpc complete.....");
+            }
+            if (ModuleE.PU.abbr.equals(module.getName())) {
+                //注册相关交易
+                boolean regSuccess = RegisterHelper.registerProtocol(ledgerConfig.getChainId());
+                if (!regSuccess) {
+                    LoggerUtil.COMMON_LOG.error("RegisterHelper.registerProtocol fail..");
+                    System.exit(-1);
+                }
+                LoggerUtil.COMMON_LOG.info("register protocol ...");
+            }
             /*处理区块信息*/
             if (ModuleE.BL.abbr.equals(module.getName())) {
                 LedgerChainManager ledgerChainManager = SpringLiteContext.getBean(LedgerChainManager.class);

@@ -9,3 +9,4 @@ JOPT_XMX=1024
 Managed=1
 
 [smart-contract]
+moduleDynamicDependent=chain-manager

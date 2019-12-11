@@ -5,6 +5,7 @@ import io.nuls.base.api.provider.Provider;
 import io.nuls.base.api.provider.Result;
 import io.nuls.base.api.provider.ledger.facade.AccountBalanceInfo;
 import io.nuls.base.api.provider.ledger.facade.GetBalanceReq;
+import io.nuls.base.api.provider.ledger.facade.RegLocalAssetReq;
 import io.nuls.core.rpc.model.ModuleE;
 
 import java.math.BigInteger;
@@ -37,5 +38,10 @@ public class LedgerProviderForRpc extends BaseRpcService implements LedgerProvid
             return success(info);
         };
         return call("getBalance",req,callback);
+    }
+
+    @Override
+    public Result<Map> regLocalAsset(RegLocalAssetReq req) {
+        return callResutlMap("chainAssetTxReg", req);
     }
 }

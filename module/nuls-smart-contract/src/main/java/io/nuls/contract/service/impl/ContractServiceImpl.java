@@ -31,6 +31,7 @@ import io.nuls.base.data.Transaction;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.helper.ContractConflictChecker;
 import io.nuls.contract.helper.ContractHelper;
+import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.manager.ContractTxProcessorManager;
 import io.nuls.contract.manager.ContractTxValidatorManager;
 import io.nuls.contract.model.bo.*;
@@ -40,6 +41,7 @@ import io.nuls.contract.model.tx.CallContractTransaction;
 import io.nuls.contract.model.tx.CreateContractTransaction;
 import io.nuls.contract.model.tx.DeleteContractTransaction;
 import io.nuls.contract.model.txdata.CallContractData;
+import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.model.txdata.CreateContractData;
 import io.nuls.contract.model.txdata.DeleteContractData;
 import io.nuls.contract.service.*;
@@ -87,6 +89,9 @@ public class ContractServiceImpl implements ContractService {
 
     @Autowired
     private ContractHelper contractHelper;
+
+    @Autowired
+    private ChainManager chainManager;
 
     @Autowired
     private ContractExecuteResultStorageService contractExecuteResultStorageService;
@@ -155,13 +160,20 @@ public class ContractServiceImpl implements ContractService {
             if (Log.isDebugEnabled()) {
                 Log.debug("[Invoke Contract] TxType is [{}], hash is [{}]", tx.getType(), tx.getHash().toString());
             }
+            tx.setChainId(chainId);
+            ContractWrapperTransaction wrapperTx = ContractUtil.parseContractTransaction(tx, chainManager);
+            // add by pierre at 2019-10-20
+            if(wrapperTx == null) {
+                return getSuccess();
+            }
+            // end code by pierre
             Chain chain = contractHelper.getChain(chainId);
             BatchInfo batchInfo = chain.getBatchInfo();
-            byte[] contractAddressBytes = ContractUtil.extractContractAddressFromTxData(tx);
+            wrapperTx.setOrder(batchInfo.getAndIncreaseTxCounter());
+            ContractData contractData = wrapperTx.getContractData();
+            byte[] contractAddressBytes = contractData.getContractAddress();
             String contractAddress = AddressTool.getStringAddressByBytes(contractAddressBytes);
             ContractContainer container = batchInfo.newOrGetContractContainer(contractAddress);
-            ContractWrapperTransaction wrapperTx = ContractUtil.parseContractTransaction(tx);
-            wrapperTx.setOrder(batchInfo.getAndIncreaseTxCounter());
 
             // 验证合约交易
             Result validResult = this.validContractTx(chainId, tx);

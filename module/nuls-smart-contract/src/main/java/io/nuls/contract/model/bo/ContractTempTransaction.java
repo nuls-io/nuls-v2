@@ -30,7 +30,16 @@ import io.nuls.base.data.Transaction;
  * @date: 2019-02-27
  */
 public class ContractTempTransaction extends Transaction {
+    private int chainId;
     private String txHex;
+
+    public int getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(int chainId) {
+        this.chainId = chainId;
+    }
 
     public String getTxHex() {
         return txHex;

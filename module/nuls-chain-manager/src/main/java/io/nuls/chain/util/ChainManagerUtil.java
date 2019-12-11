@@ -24,6 +24,7 @@
  */
 package io.nuls.chain.util;
 
+import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.chain.model.po.BlockChain;
 
 import java.util.Map;
@@ -50,5 +51,11 @@ public class ChainManagerUtil {
 
     public static boolean duplicateChainName(BlockChain blockChain, Map<String, Integer> chainMap) {
         return null != chainMap.get("cName-" + String.valueOf(blockChain.getChainName()));
+    }
+
+    public static int getVersion(int chainId) {
+        int version = ProtocolGroupManager.getCurrentVersion(chainId);
+        LoggerUtil.COMMON_LOG.debug("verion={}", version);
+        return version;
     }
 }

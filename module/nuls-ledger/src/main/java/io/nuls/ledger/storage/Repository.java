@@ -69,6 +69,7 @@ public interface Repository {
      * @throws Exception
      */
     void batchUpdateAccountState(int addressChainId, Map<byte[], byte[]> accountStateMap,Map<String, AccountState> accountStateMemMap) throws Exception;
+    void clearAccountStateMem(int addressChainId, Map<String, AccountState> accountStateMemMap) throws Exception;
 
     /**
      * 删除区块快照

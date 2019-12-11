@@ -99,6 +99,7 @@ public class ContractExecutorImpl implements ContractExecutor {
         contractResult.setRevert(false);
         contractResult.setEvents(programResult.getEvents());
         contractResult.setTransfers(programResult.getTransfers());
+        contractResult.setOrderedInnerTxs(programResult.getOrderedInnerTxs());
         return contractResult;
     }
 
@@ -150,6 +151,7 @@ public class ContractExecutorImpl implements ContractExecutor {
         contractResult.setEvents(programResult.getEvents());
         contractResult.setTransfers(programResult.getTransfers());
         contractResult.setInvokeRegisterCmds(programResult.getInvokeRegisterCmds());
+        contractResult.setOrderedInnerTxs(programResult.getOrderedInnerTxs());
         contractResult.setContractAddressInnerCallSet(contractTxHelper.generateInnerCallSet(programResult.getInternalCalls()));
         contractResult.setAccounts(programResult.getAccounts());
 

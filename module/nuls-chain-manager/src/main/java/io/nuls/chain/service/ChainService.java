@@ -106,7 +106,7 @@ public interface ChainService {
      * @throws Exception
      */
     void rpcBlockChainRollback(List<Transaction> txs) throws Exception;
-
+    void rpcBlockChainRollbackV3(List<Transaction> txs) throws Exception;
     /**
      * 销毁链
      * Destroy a exist BlockChain

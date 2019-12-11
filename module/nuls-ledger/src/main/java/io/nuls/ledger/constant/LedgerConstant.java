@@ -31,6 +31,16 @@ package io.nuls.ledger.constant;
  * @author lanjinsheng
  */
 public class LedgerConstant {
+    /**
+     * 基础类型与合约类型
+     */
+    public static final short COMMON_ASSET_TYPE = 1;
+    public static final short CONTRACT_ASSET_TYPE = 2;
+    /**
+     * 资产小数分割位
+     */
+    public static final int DECIMAL_PLACES_MIN = 0;
+    public static final int DECIMAL_PLACES_MAX = 18;
 
     public static int UNCONFIRMED_NONCE = 0;
     public static int CONFIRMED_NONCE = 1;
@@ -39,16 +49,23 @@ public class LedgerConstant {
     /**
      * 高度解锁的阈值，大于这个值就是时间锁
      */
-    public static final int MAX_HEIGHT_VALUE = 10000000;
+    public static final int MAX_HEIGHT_VALUE = 1000000000;
     public static final long LOCKED_ML_TIME_VALUE = 1000000000000L;
     /**
      * 重新统计锁定的时间 1s
      */
     public static final int TIME_RECALCULATE_FREEZE = 1;
     /**
-     * 永久锁定lockTime值
+     * FROM locked 解锁常量 0 普通交易，-1 时间解锁,1 高度解锁
      */
-    public static final int PERMANENT_LOCK = -1;
+    public static final int UNLOCKED_TIME = -1;
+    public static final int UNLOCKED_HEIGHT = 1;
+    /**
+     * To 永久锁定lockTime值 0 不锁定 -1 普通永久锁定，-2 dex永久锁定，x 锁定时间(s或ms)
+     */
+    public static final int PERMANENT_LOCK_COMMON = -1;
+    public static final int PERMANENT_LOCK_DEX = -2;
+
 
     public static byte[] blackHolePublicKey = null;
 

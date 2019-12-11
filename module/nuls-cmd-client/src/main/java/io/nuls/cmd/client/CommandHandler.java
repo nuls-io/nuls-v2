@@ -34,6 +34,7 @@ import io.nuls.cmd.client.processor.consensus.*;
 import io.nuls.cmd.client.processor.contract.*;
 import io.nuls.cmd.client.processor.crosschain.*;
 import io.nuls.cmd.client.processor.ledger.GetBalanceProcessor;
+import io.nuls.cmd.client.processor.ledger.RegisterLocalAssetProcessor;
 import io.nuls.cmd.client.processor.network.GetNetworkProcessor;
 import io.nuls.cmd.client.processor.system.ExitProcessor;
 import io.nuls.cmd.client.processor.system.HelpProcessor;
@@ -118,6 +119,8 @@ public class CommandHandler implements InitializingBean {
 
         //get account balance
         register(getBean(GetBalanceProcessor.class));
+        //local asset register
+        register(getBean(RegisterLocalAssetProcessor.class));
 
         /**
          * consensus
@@ -173,6 +176,7 @@ public class CommandHandler implements InitializingBean {
         register(getBean(CrossAssetAddProcessor.class));
         register(getBean(CrossAssetDisableProcessor.class));
         register(getBean(UpdateCrossChainProcessor.class));
+        register(getBean(CrossLocalAssetAddProcessor.class));
 
         register(getBean(CreateCrossTxProcessor.class));
         register(getBean(GetCrossChainsSimpleInfoProcessor.class));

@@ -67,10 +67,22 @@ public class RepositoryImpl implements Repository, InitializingBean {
         if (null == memChainsAccounts.get(String.valueOf(addressChainId))) {
             memChainsAccounts.put(String.valueOf(addressChainId), new ConcurrentHashMap<>(1024));
         }
-        memChainsAccounts.get(String.valueOf(addressChainId)).putAll(accountStateMemMap);
+        if (null != accountStateMemMap) {
+            memChainsAccounts.get(String.valueOf(addressChainId)).putAll(accountStateMemMap);
+        }
         //update account
         RocksDBService.batchPut(getLedgerAccountTableName(addressChainId), accountStateMap);
 
+    }
+
+    @Override
+    public void clearAccountStateMem(int addressChainId, Map<String, AccountState> accountStateMemMap) throws Exception {
+        if (null == memChainsAccounts.get(String.valueOf(addressChainId))) {
+            memChainsAccounts.put(String.valueOf(addressChainId), new ConcurrentHashMap<>(1024));
+        }
+        if (null != accountStateMemMap) {
+            memChainsAccounts.get(String.valueOf(addressChainId)).putAll(accountStateMemMap);
+        }
     }
 
 

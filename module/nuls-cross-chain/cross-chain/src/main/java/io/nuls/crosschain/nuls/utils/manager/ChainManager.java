@@ -12,9 +12,13 @@ import io.nuls.crosschain.base.message.RegisteredChainMessage;
 import io.nuls.crosschain.base.model.bo.ChainInfo;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
+import io.nuls.crosschain.nuls.constant.ParamConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
+import io.nuls.crosschain.nuls.model.bo.CmdRegisterDto;
 import io.nuls.crosschain.nuls.model.bo.config.ConfigBean;
 import io.nuls.crosschain.nuls.rpc.call.BlockCall;
+import io.nuls.crosschain.nuls.rpc.call.ConsensusCall;
+import io.nuls.crosschain.nuls.rpc.call.SmartContractCall;
 import io.nuls.crosschain.nuls.srorage.ConfigService;
 import io.nuls.crosschain.nuls.srorage.RegisteredCrossChainService;
 import io.nuls.crosschain.nuls.utils.LoggerUtil;
@@ -116,19 +120,53 @@ public class ChainManager {
     }
 
     /**
+     * 注册智能合约交易
+     * */
+    public void registerContractTx(){
+        for (Chain chain:chainMap.values()) {
+            /*
+             * 注册智能合约交易
+             * Chain Trading Registration
+             * */
+            int chainId = chain.getConfig().getChainId();
+            List<CmdRegisterDto> cmdRegisterDtoList = new ArrayList<>();
+            CmdRegisterDto tokenOutCrossChain = new CmdRegisterDto("cc_tokenOutCrossChain", 0, List.of("from", "to", "value"), 1);
+            cmdRegisterDtoList.add(tokenOutCrossChain);
+            SmartContractCall.registerContractTx(chainId, cmdRegisterDtoList);
+        }
+    }
+
+    /**
      * 加载链缓存数据并启动链
      * Load the chain to cache data and start the chain
      */
+    @SuppressWarnings("unchecked")
     public void runChain() {
         for (Chain chain : chainMap.values()) {
+            chainHeaderMap.put(chain.getChainId(), BlockCall.getLatestBlockHeader(chain));
+            //初始化验证人列表
+            Map packerInfo = ConsensusCall.getPackerInfo(chain);
+            List<String> verifierList = (List<String>)packerInfo.get(ParamConstant.PARAM_PACK_ADDRESS_LIST);
+            try {
+                while (verifierList == null || verifierList.isEmpty()){
+                    TimeUnit.MILLISECONDS.sleep(500);
+                    packerInfo = ConsensusCall.getPackerInfo(chain);
+                    verifierList = (List<String>)packerInfo.get(ParamConstant.PARAM_PACK_ADDRESS_LIST);
+                }
+            }catch (InterruptedException e){
+                chain.getLogger().error(e);
+                System.exit(1);
+            }
+            chain.getBroadcastVerifierList().addAll(verifierList);
+            chain.getVerifierList().addAll(verifierList);
+            chain.getLogger().info("链：{}，当前验证人列表为：{}",chain.getConfig().getChainId(), verifierList.toString());
+
             chain.getThreadPool().execute(new HashMessageHandler(chain));
             chain.getThreadPool().execute(new CtxMessageHandler(chain));
             chain.getThreadPool().execute(new SignMessageHandler(chain));
             chain.getThreadPool().execute(new OtherCtxMessageHandler(chain));
             chain.getThreadPool().execute(new GetCtxStateHandler(chain));
             chain.getThreadPool().execute(new SignMessageByzantineHandler(chain));
-            chainHeaderMap.put(chain.getChainId(), BlockCall.getLatestBlockHeader(chain));
-
         }
         if(!config.isMainNet()){
             scheduledThreadPoolExecutor.scheduleAtFixedRate(new GetRegisteredChainTask(this),  20L, 10 * 60L, TimeUnit.SECONDS );

@@ -36,6 +36,9 @@ public interface ParamConstant {
 
     String USABLE = "usable";
 
+    String FROM = "from";
+    String TO = "to";
+
     String DECIMAL_PLACES = "decimalPlaces";
 
     String NEW_BLOCK_HEIGHT = "height";

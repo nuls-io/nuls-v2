@@ -1,0 +1,19 @@
+[
+  {
+    "version": "1",
+    "extend": "",
+    "validTxs": [
+      {
+        "type": "27",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "AssetRegTransferProcessorV1"
+      }
+    ],
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  }
+]

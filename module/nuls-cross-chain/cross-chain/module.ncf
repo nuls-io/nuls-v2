@@ -10,3 +10,5 @@ PrivateDependent=base-lib,nuls-base-protocol-update
 Managed=1
 
 [cross-chain]
+moduleDynamicDependent=smart-contract
+

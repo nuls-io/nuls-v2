@@ -240,12 +240,16 @@ public class ConsensusManager {
         跨链交易计算手续费
         Cross-Chain Transactions Calculate Processing Fees
         */
-        if (tx.getType() == TxType.CROSS_CHAIN) {
+        boolean isCrossTx = tx.getType() == TxType.CROSS_CHAIN;
+        if(config.getMainChainId() == chain.getConfig().getChainId()){
+            isCrossTx = isCrossTx || tx.getType() == TxType.CONTRACT_TOKEN_CROSS_TRANSFER;
+        }
+        if (isCrossTx) {
             /*
             计算链内手续费，from中链内主资产 - to中链内主资产的和
             Calculate in-chain handling fees, from in-chain main assets - to in-chain main assets and
             */
-            if (AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress()) == feeChainId) {
+            if (AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress()) == feeChainId && feeChainId != config.getMainChainId()) {
                 return new ChargeResultData(getFee(coinData, feeChainId, feeAssetId), feeChainId, feeAssetId);
             }
             /*
@@ -267,7 +271,6 @@ public class ConsensusManager {
                 }
                 return new ChargeResultData(fee.multiply(new BigInteger(String.valueOf(mainCommissionRatio))).divide(new BigInteger(String.valueOf(ConsensusConstant.VALUE_OF_ONE_HUNDRED))), config.getMainChainId(), config.getMainAssetId());
             }
-
             return new ChargeResultData(fee.multiply(new BigInteger(String.valueOf(ConsensusConstant.VALUE_OF_ONE_HUNDRED - mainCommissionRatio))).divide(new BigInteger(String.valueOf(ConsensusConstant.VALUE_OF_ONE_HUNDRED))), config.getMainChainId(), config.getMainAssetId());
         } else if (tx.getType() == TxType.REGISTER_AGENT || tx.getType() == TxType.STOP_AGENT || tx.getType() == TxType.DEPOSIT || tx.getType() == TxType.CANCEL_DEPOSIT) {
             feeChainId = chain.getConfig().getAgentChainId();

@@ -121,4 +121,8 @@ public class ChainAsset extends BaseNulsData {
     public void setOutNumber(BigInteger outNumber) {
         this.outNumber = outNumber;
     }
+
+    public boolean isFromChainAsset(){
+        return (addressChainId == assetChainId);
+    }
 }

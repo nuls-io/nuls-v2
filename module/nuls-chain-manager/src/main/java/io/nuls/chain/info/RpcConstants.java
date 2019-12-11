@@ -36,6 +36,7 @@ public interface RpcConstants {
      */
     String CMD_ASSET_DISABLE = "cm_assetDisable";
     String CMD_ASSET_REG = "cm_assetReg";
+    String CMD_MAIN_NET_ASSET_REG = "cm_mainNetAssetReg";
     String CMD_GET_CHAIN_ASSET = "cm_getChainAsset";
     String CMD_ASSET = "cm_asset";
     String CMD_CHAIN_REG = "cm_chainReg";
@@ -86,7 +87,7 @@ public interface RpcConstants {
      */
     String CMD_LG_GET_COINDATA = "getBalanceNonce";
     String CMD_LG_GET_ASSETS_BY_ID = "getAssetsById";
-
+    String CMD_LG_GET_ASSETS_REG_INFO_BY_ID ="getAssetRegInfoByAssetId";
     /**
      * 账户信息校验部分
      */
@@ -95,6 +96,8 @@ public interface RpcConstants {
 
     String CMD_AC_SIGN_DIGEST = "ac_signDigest";
     String CMD_AC_ADDRESS_PREFIX = "ac_addAddressPrefix";
+
+
 
 
     /**
