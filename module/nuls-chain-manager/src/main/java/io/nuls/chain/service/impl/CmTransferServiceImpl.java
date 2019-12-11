@@ -76,7 +76,7 @@ public class CmTransferServiceImpl implements CmTransferService {
             //获取回滚信息
             CacheDatas moduleTxDatas = cacheDataService.getCacheDatas(commitHeight - 1);
             //通知远程调用回滚
-            chainService.rpcBlockChainRollbackV3(txs);
+            chainService.rpcBlockChainRollbackV4(txs);
             if (null == moduleTxDatas) {
                 LoggerUtil.logger().info("chain module height ={} bak datas is null,maybe had rolled", commitHeight);
                 return true;

@@ -1,4 +1,4 @@
-package io.nuls.chain.service.tx.v3;
+package io.nuls.chain.service.tx.v4;
 
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Component("AddAssetTxProcessorV3")
+@Component("AddAssetTxProcessorV4")
 public class AddAssetTransferProcessor implements TransactionProcessor {
     @Autowired
     private ValidateService validateService;
@@ -51,7 +51,7 @@ public class AddAssetTransferProcessor implements TransactionProcessor {
             ChainEventResult chainEventResult = ChainEventResult.getResultSuccess();
             for (Transaction tx : txs) {
                 String txHash = tx.getHash().toHex();
-                asset = TxUtil.buildAssetWithTxAssetV3(tx);
+                asset = TxUtil.buildAssetWithTxAssetV4(tx);
                 String assetKey = CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId());
                 chainEventResult = validateService.batchAssetRegValidatorV3(asset, assetMap);
                 if (chainEventResult.isSuccess()) {
@@ -77,7 +77,7 @@ public class AddAssetTransferProcessor implements TransactionProcessor {
         Asset asset = null;
         try {
             for (Transaction tx : txs) {
-                asset = TxUtil.buildAssetWithTxAssetV3(tx);
+                asset = TxUtil.buildAssetWithTxAssetV4(tx);
                 assetService.registerAsset(asset);
                 assets.add(asset);
             }

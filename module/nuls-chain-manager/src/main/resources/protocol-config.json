@@ -1,6 +1,6 @@
 [
   {
-    "version": "3",
+    "version": "4",
     "extend": "",
     "validTxs": [
       {
@@ -9,7 +9,7 @@
         "unlockTx": false,
         "verifySignature": true,
         "verifyFee": true,
-        "handler": "RegChainTxProcessorV3"
+        "handler": "RegChainTxProcessorV4"
       },
       {
         "type": "12",
@@ -17,7 +17,7 @@
         "unlockTx": false,
         "verifySignature": true,
         "verifyFee": true,
-        "handler": "DestroyChainTxProcessorV3"
+        "handler": "DestroyChainTxProcessorV4"
       },
       {
         "type": "13",
@@ -25,7 +25,7 @@
         "unlockTx": false,
         "verifySignature": true,
         "verifyFee": true,
-        "handler": "AddAssetTxProcessorV3"
+        "handler": "AddAssetTxProcessorV4"
       },
       {
         "type": "14",
@@ -33,7 +33,7 @@
         "unlockTx": false,
         "verifySignature": true,
         "verifyFee": true,
-        "handler": "DisableAssetTxProcessorV3"
+        "handler": "DisableAssetTxProcessorV4"
       }
     ],
     "validMsgs": [],

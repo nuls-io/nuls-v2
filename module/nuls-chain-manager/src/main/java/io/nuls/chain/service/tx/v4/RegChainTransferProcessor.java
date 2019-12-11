@@ -1,13 +1,18 @@
-package io.nuls.chain.service.tx.v3;
+package io.nuls.chain.service.tx.v4;
 
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.protocol.TransactionProcessor;
+import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.dto.ChainEventResult;
 import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.rpc.call.RpcService;
-import io.nuls.chain.service.*;
+import io.nuls.chain.service.CacheDataService;
+import io.nuls.chain.service.ChainService;
+import io.nuls.chain.service.CmTransferService;
+import io.nuls.chain.service.ValidateService;
+import io.nuls.chain.util.ChainManagerUtil;
 import io.nuls.chain.util.LoggerUtil;
 import io.nuls.chain.util.TxUtil;
 import io.nuls.core.constant.TxType;
@@ -19,14 +24,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Component("DestroyChainTxProcessorV3")
-public class DestroyChainTransferProcessor implements TransactionProcessor {
+@Component("RegChainTxProcessorV4")
+public class RegChainTransferProcessor implements TransactionProcessor {
     @Autowired
     private ValidateService validateService;
     @Autowired
     private CacheDataService cacheDataService;
-    @Autowired
-    private AssetService assetService;
     @Autowired
     private ChainService chainService;
     @Autowired
@@ -36,7 +39,7 @@ public class DestroyChainTransferProcessor implements TransactionProcessor {
 
     @Override
     public int getType() {
-        return TxType.DESTROY_CHAIN_AND_ASSET;
+        return TxType.REGISTER_CHAIN_AND_ASSET;
     }
 
     @Override
@@ -46,9 +49,6 @@ public class DestroyChainTransferProcessor implements TransactionProcessor {
         rtData.put("errorCode", "");
         rtData.put("txList", errorList);
         try {
-            //1获取交易类型
-            //2进入不同验证器里处理
-            //3封装失败交易返回
             Map<String, Integer> chainMap = new HashMap<>();
             Map<String, Integer> assetMap = new HashMap<>();
             BlockChain blockChain = null;
@@ -56,16 +56,19 @@ public class DestroyChainTransferProcessor implements TransactionProcessor {
             ChainEventResult chainEventResult = ChainEventResult.getResultSuccess();
             for (Transaction tx : txs) {
                 String txHash = tx.getHash().toHex();
-                blockChain = TxUtil.buildChainWithTxDataV3(tx, true);
-                chainEventResult = validateService.chainDisableValidator(blockChain);
+                blockChain = TxUtil.buildChainWithTxDataV4(tx, false);
+                asset = TxUtil.buildAssetWithTxChainV4(tx);
+                String assetKey = CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId());
+                chainEventResult = validateService.batchChainRegValidatorV3(blockChain, asset, chainMap, assetMap);
                 if (chainEventResult.isSuccess()) {
-                    LoggerUtil.logger().debug("txHash = {},chainId={} destroy batchValidate success!", txHash, blockChain.getChainId());
+                    ChainManagerUtil.putChainMap(blockChain, chainMap);
+                    assetMap.put(assetKey, 1);
+                    LoggerUtil.logger().debug("txHash = {},chainId={} reg batchValidate success!", txHash, blockChain.getChainId());
                 } else {
                     rtData.put("errorCode", chainEventResult.getErrorCode().getCode());
-                    LoggerUtil.logger().error("txHash = {},chainId={} destroy batchValidate fail!", txHash, blockChain.getChainId());
+                    LoggerUtil.logger().error("txHash = {},chainId={},magicNumber={} reg batchValidate fail!", txHash, blockChain.getChainId(), blockChain.getMagicNumber());
                     errorList.add(tx);
                 }
-
             }
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
@@ -76,17 +79,32 @@ public class DestroyChainTransferProcessor implements TransactionProcessor {
 
     @Override
     public boolean commit(int chainId, List<Transaction> txs, BlockHeader blockHeader) {
+        LoggerUtil.logger().debug("reg chain tx count = {}", txs.size());
         long commitHeight = blockHeader.getHeight();
         BlockChain blockChain = null;
-        List<Map<String, Object>> chainAssetIds = new ArrayList<>();
+        Asset asset = null;
+        List<BlockChain> blockChains = new ArrayList<>();
+        List<Map<String, Object>> prefixList = new ArrayList<>();
         try {
             for (Transaction tx : txs) {
-                blockChain = TxUtil.buildChainWithTxDataV3(tx, true);
-                chainService.destroyBlockChain(blockChain);
-                Map<String, Object> chainAssetId = new HashMap<>(2);
-                chainAssetId.put("chainId", blockChain.getChainId());
-                chainAssetId.put("assetId", 0);
-                chainAssetIds.add(chainAssetId);
+                blockChain = TxUtil.buildChainWithTxDataV4(tx, false);
+                asset = TxUtil.buildAssetWithTxChainV4(tx);
+                BlockChain dbChain = chainService.getChain(blockChain.getChainId());
+                //继承数据
+                if (null != dbChain) {
+                    blockChain.setSelfAssetKeyList(TxUtil.moveRepeatInfo(dbChain.getSelfAssetKeyList()));
+                    blockChain.setTotalAssetKeyList(TxUtil.moveRepeatInfo(dbChain.getTotalAssetKeyList()));
+                } else {
+                    blockChain.addCreateAssetId(CmRuntimeInfo.getAssetKey(blockChain.getChainId(), asset.getAssetId()));
+                    blockChain.addCirculateAssetId(CmRuntimeInfo.getAssetKey(blockChain.getChainId(), asset.getAssetId()));
+                }
+
+                chainService.registerBlockChain(blockChain, asset);
+                blockChains.add(blockChain);
+                Map<String, Object> prefix = new HashMap<>(2);
+                prefix.put("chainId", blockChain.getChainId());
+                prefix.put("addressPrefix", blockChain.getAddressPrefix());
+                prefixList.add(prefix);
             }
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
@@ -101,7 +119,8 @@ public class DestroyChainTransferProcessor implements TransactionProcessor {
             }
             return false;
         }
-        rpcService.cancelCrossChain(chainAssetIds);
+        rpcService.registerCrossChain(blockChains);
+        rpcService.addAcAddressPrefix(prefixList);
         return true;
     }
 
@@ -113,5 +132,4 @@ public class DestroyChainTransferProcessor implements TransactionProcessor {
             throw new RuntimeException(e);
         }
     }
-
 }

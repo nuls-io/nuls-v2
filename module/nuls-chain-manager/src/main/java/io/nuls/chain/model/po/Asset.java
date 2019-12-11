@@ -4,8 +4,6 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
-import io.nuls.chain.model.tx.txdata.TxAsset;
-import io.nuls.chain.model.tx.txdata.TxChain;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 import io.nuls.core.rpc.info.Constants;
@@ -54,8 +52,8 @@ public class Asset extends BaseNulsData {
 
 
 
-    public Asset(io.nuls.chain.model.tx.txdatav3.TxChain tx, BigInteger depositNuls, BigInteger destroyNuls, byte[] address) {
-        io.nuls.chain.model.tx.txdatav3.TxAsset defaultAsset = tx.getDefaultAsset();
+    public Asset(io.nuls.chain.model.tx.txdatav4.TxChain tx, BigInteger depositNuls, BigInteger destroyNuls, byte[] address) {
+        io.nuls.chain.model.tx.txdatav4.TxAsset defaultAsset = tx.getDefaultAsset();
         this.address = address;
         this.assetId = defaultAsset.getAssetId();
         this.chainId = defaultAsset.getChainId();

@@ -1,4 +1,4 @@
-package io.nuls.chain.model.tx.txdatav3;
+package io.nuls.chain.model.tx.txdatav4;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
@@ -38,7 +38,7 @@ public class TxChain extends BaseNulsData {
     /**
      * 下面这些是创建链的时候，必须携带的资产信息
      */
-    private io.nuls.chain.model.tx.txdatav3.TxAsset defaultAsset = new io.nuls.chain.model.tx.txdatav3.TxAsset();
+    private TxAsset defaultAsset = new TxAsset();
 
 
     @Override

@@ -244,14 +244,14 @@ public class ChainServiceImpl implements ChainService {
      * @throws Exception
      */
     @Override
-    public void rpcBlockChainRollbackV3(List<Transaction> txs) throws Exception {
+    public void rpcBlockChainRollbackV4(List<Transaction> txs) throws Exception {
         /*
             通知网络模块创建链
         */
         for (Transaction tx : txs) {
             switch (tx.getType()) {
                 case TxType.REGISTER_CHAIN_AND_ASSET:
-                    BlockChain blockChain = TxUtil.buildChainWithTxDataV3(tx, false);
+                    BlockChain blockChain = TxUtil.buildChainWithTxDataV4(tx, false);
                     rpcService.destroyCrossGroup(blockChain);
                     Map<String, Object> chainAssetId = new HashMap<>();
                     chainAssetId.put("chainId", blockChain.getChainId());
@@ -260,21 +260,21 @@ public class ChainServiceImpl implements ChainService {
                     removeChainMapInfo(blockChain.getMagicNumber(), blockChain.getChainName());
                     break;
                 case TxType.DESTROY_CHAIN_AND_ASSET:
-                    BlockChain delBlockChain = TxUtil.buildChainWithTxDataV3(tx, true);
+                    BlockChain delBlockChain = TxUtil.buildChainWithTxDataV4(tx, true);
                     BlockChain dbRegChain = this.getChain(delBlockChain.getChainId());
                     rpcService.createCrossGroup(dbRegChain);
                     rpcService.registerCrossChain(delBlockChain);
                     addChainMapInfo(delBlockChain);
                     break;
                 case TxType.ADD_ASSET_TO_CHAIN:
-                    Asset asset = TxUtil.buildAssetWithTxChainV3(tx);
+                    Asset asset = TxUtil.buildAssetWithTxChainV4(tx);
                     Map<String, Object> chainAssetIdAdd = new HashMap<>();
                     chainAssetIdAdd.put("chainId", asset.getChainId());
                     chainAssetIdAdd.put("assetId", asset.getAssetId());
                     rpcService.cancelCrossChain(chainAssetIdAdd);
                     break;
                 case TxType.REMOVE_ASSET_FROM_CHAIN:
-                    Asset assetDel = TxUtil.buildAssetWithTxChainV3(tx);
+                    Asset assetDel = TxUtil.buildAssetWithTxChainV4(tx);
                     rpcService.registerCrossAsset(assetDel);
                     break;
                 default:

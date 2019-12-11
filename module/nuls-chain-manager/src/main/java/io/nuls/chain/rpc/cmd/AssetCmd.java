@@ -4,6 +4,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.Transaction;
 import io.nuls.chain.config.NulsChainConfig;
+import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.info.CmErrorCode;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.info.RpcConstants;
@@ -31,7 +32,6 @@ import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.util.NulsDateUtils;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
@@ -105,8 +105,8 @@ public class AssetCmd extends BaseChainCmd {
             }
             /* 组装交易发送 (Send transaction) */
             Transaction tx = new AddAssetToChainTransaction();
-            if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) > 2) {
-                tx.setTxData(TxUtil.parseAssetToTxV3(asset).serialize());
+            if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) >= CmConstants.LATEST_SUPPORT_VERSION) {
+                tx.setTxData(TxUtil.parseAssetToTxV4(asset).serialize());
             } else {
                 tx.setTxData(TxUtil.parseAssetToTx(asset).serialize());
             }
@@ -185,8 +185,8 @@ public class AssetCmd extends BaseChainCmd {
             /* 组装交易发送 (Send transaction) */
             Transaction tx = new AddAssetToChainTransaction();
             LoggerUtil.COMMON_LOG.debug("version= {}", ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()));
-            if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) > 2) {
-                tx.setTxData(TxUtil.parseAssetToTxV3(asset).serialize());
+            if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) >= CmConstants.LATEST_SUPPORT_VERSION) {
+                tx.setTxData(TxUtil.parseAssetToTxV4(asset).serialize());
             } else {
                 tx.setTxData(TxUtil.parseAssetToTx(asset).serialize());
             }
@@ -278,8 +278,8 @@ public class AssetCmd extends BaseChainCmd {
                 /* 注销资产和链 (Destroy assets and chains) */
                 tx = new DestroyAssetAndChainTransaction();
                 try {
-                    if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) > 2) {
-                        tx.setTxData(TxUtil.parseChainToTxV3(dbChain, asset).serialize());
+                    if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) >= CmConstants.LATEST_SUPPORT_VERSION) {
+                        tx.setTxData(TxUtil.parseChainToTxV4(dbChain, asset).serialize());
                     } else {
                         tx.setTxData(TxUtil.parseChainToTx(dbChain, asset).serialize());
                     }
@@ -291,8 +291,8 @@ public class AssetCmd extends BaseChainCmd {
                 /* 只注销资产 (Only destroy assets) */
                 tx = new RemoveAssetFromChainTransaction();
                 try {
-                    if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) > 2) {
-                        tx.setTxData(TxUtil.parseAssetToTxV3(asset).serialize());
+                    if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) >= CmConstants.LATEST_SUPPORT_VERSION) {
+                        tx.setTxData(TxUtil.parseAssetToTxV4(asset).serialize());
                     } else {
                         tx.setTxData(TxUtil.parseAssetToTx(asset).serialize());
                     }

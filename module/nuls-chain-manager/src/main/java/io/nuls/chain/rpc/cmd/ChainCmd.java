@@ -29,6 +29,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.Transaction;
 import io.nuls.chain.config.NulsChainConfig;
+import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.info.CmErrorCode;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.info.RpcConstants;
@@ -188,8 +189,8 @@ public class ChainCmd extends BaseChainCmd {
             }
             /* 组装交易发送 (Send transaction) */
             Transaction tx = new RegisterChainAndAssetTransaction();
-            if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) > 2) {
-                tx.setTxData(TxUtil.parseChainToTxV3(blockChain, asset).serialize());
+            if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) >= CmConstants.LATEST_SUPPORT_VERSION) {
+                tx.setTxData(TxUtil.parseChainToTxV4(blockChain, asset).serialize());
             } else {
                 tx.setTxData(TxUtil.parseChainToTx(blockChain, asset).serialize());
             }
@@ -316,8 +317,8 @@ public class ChainCmd extends BaseChainCmd {
             }
             /* 组装交易发送 (Send transaction) */
             Transaction tx = new RegisterChainAndAssetTransaction();
-            if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) > 2) {
-                tx.setTxData(TxUtil.parseChainToTxV3(blockChain, asset).serialize());
+            if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) >= CmConstants.LATEST_SUPPORT_VERSION) {
+                tx.setTxData(TxUtil.parseChainToTxV4(blockChain, asset).serialize());
             } else {
                 tx.setTxData(TxUtil.parseChainToTx(blockChain, asset).serialize());
             }

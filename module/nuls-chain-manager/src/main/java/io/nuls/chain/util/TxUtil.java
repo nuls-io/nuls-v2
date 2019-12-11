@@ -90,8 +90,8 @@ public class TxUtil {
         return txChain;
     }
 
-    public static io.nuls.chain.model.tx.txdatav3.TxAsset parseAssetToTxV3(Asset asset) throws IOException {
-        io.nuls.chain.model.tx.txdatav3.TxAsset txAsset = new io.nuls.chain.model.tx.txdatav3.TxAsset();
+    public static io.nuls.chain.model.tx.txdatav4.TxAsset parseAssetToTxV4(Asset asset) throws IOException {
+        io.nuls.chain.model.tx.txdatav4.TxAsset txAsset = new io.nuls.chain.model.tx.txdatav4.TxAsset();
         txAsset.setAssetId(asset.getAssetId());
         txAsset.setChainId(asset.getChainId());
         txAsset.setDecimalPlaces(asset.getDecimalPlaces());
@@ -101,8 +101,8 @@ public class TxUtil {
         return txAsset;
     }
 
-    public static io.nuls.chain.model.tx.txdatav3.TxChain parseChainToTxV3(BlockChain blockChain, Asset asset) throws IOException {
-        io.nuls.chain.model.tx.txdatav3.TxChain txChain = new io.nuls.chain.model.tx.txdatav3.TxChain();
+    public static io.nuls.chain.model.tx.txdatav4.TxChain parseChainToTxV4(BlockChain blockChain, Asset asset) throws IOException {
+        io.nuls.chain.model.tx.txdatav4.TxChain txChain = new io.nuls.chain.model.tx.txdatav4.TxChain();
         txChain.setAddressType(Short.valueOf(blockChain.getAddressType()));
         txChain.setAddressPrefix(blockChain.getAddressPrefix());
         txChain.getDefaultAsset().setChainId(blockChain.getChainId());
@@ -133,7 +133,7 @@ public class TxUtil {
         asset.setAssetName(txAsset.getName());
     }
 
-    public static void fillAssetByTxAssetV3(Asset asset, io.nuls.chain.model.tx.txdatav3.TxAsset txAsset, Transaction tx) throws NulsException {
+    public static void fillAssetByTxAssetV4(Asset asset, io.nuls.chain.model.tx.txdatav4.TxAsset txAsset, Transaction tx) throws NulsException {
         asset.setAssetId(txAsset.getAssetId());
         asset.setChainId(txAsset.getChainId());
         asset.setDecimalPlaces(txAsset.getDecimalPlaces());
@@ -150,7 +150,7 @@ public class TxUtil {
         BigInteger destroyNuls = BigInteger.ZERO;
         if (coinTos.size() > 1) {
             for (CoinTo coinTo : coinTos) {
-                byte[] toAddress = coinTos.get(0).getAddress();
+                byte[] toAddress = coinTo.getAddress();
                 if (ArraysTool.arrayEquals(toAddress, CmConstants.BLACK_HOLE_ADDRESS)) {
                     destroyNuls = coinTo.getAmount();
                 } else if (-1 == coinTo.getLockTime()) {
@@ -186,7 +186,7 @@ public class TxUtil {
         blockChain.setMaxSignatureCount(txChain.getMaxSignatureCount());
     }
 
-    public static void fillBlockChainByTxChainV3(BlockChain blockChain, io.nuls.chain.model.tx.txdatav3.TxChain txChain) {
+    public static void fillBlockChainByTxChainV4(BlockChain blockChain, io.nuls.chain.model.tx.txdatav4.TxChain txChain) {
         blockChain.setAddressType(String.valueOf(txChain.getAddressType()));
         blockChain.setAddressPrefix(txChain.getAddressPrefix());
         blockChain.setChainId(txChain.getDefaultAsset().getChainId());
@@ -254,13 +254,13 @@ public class TxUtil {
         }
     }
 
-    public static Asset buildAssetWithTxChainV3(Transaction tx) {
+    public static Asset buildAssetWithTxChainV4(Transaction tx) {
         try {
             Asset asset = new Asset();
-            io.nuls.chain.model.tx.txdatav3.TxChain txChain = new io.nuls.chain.model.tx.txdatav3.TxChain();
+            io.nuls.chain.model.tx.txdatav4.TxChain txChain = new io.nuls.chain.model.tx.txdatav4.TxChain();
             txChain.parse(tx.getTxData(), 0);
-            io.nuls.chain.model.tx.txdatav3.TxAsset txAsset = txChain.getDefaultAsset();
-            fillAssetByTxAssetV3(asset, txAsset, tx);
+            io.nuls.chain.model.tx.txdatav4.TxAsset txAsset = txChain.getDefaultAsset();
+            fillAssetByTxAssetV4(asset, txAsset, tx);
             return asset;
         } catch (Exception e) {
             Log.error(e);
@@ -268,12 +268,12 @@ public class TxUtil {
         }
     }
 
-    public static Asset buildAssetWithTxAssetV3(Transaction tx) {
+    public static Asset buildAssetWithTxAssetV4(Transaction tx) {
         try {
-            io.nuls.chain.model.tx.txdatav3.TxAsset txAsset = new io.nuls.chain.model.tx.txdatav3.TxAsset();
+            io.nuls.chain.model.tx.txdatav4.TxAsset txAsset = new io.nuls.chain.model.tx.txdatav4.TxAsset();
             txAsset.parse(tx.getTxData(), 0);
             Asset asset = new Asset();
-            fillAssetByTxAssetV3(asset, txAsset, tx);
+            fillAssetByTxAssetV4(asset, txAsset, tx);
             return asset;
         } catch (Exception e) {
             Log.error(e);
@@ -281,12 +281,12 @@ public class TxUtil {
         }
     }
 
-    public static BlockChain buildChainWithTxDataV3(Transaction tx, boolean isDelete) {
+    public static BlockChain buildChainWithTxDataV4(Transaction tx, boolean isDelete) {
         try {
-            io.nuls.chain.model.tx.txdatav3.TxChain txChain = new io.nuls.chain.model.tx.txdatav3.TxChain();
+            io.nuls.chain.model.tx.txdatav4.TxChain txChain = new io.nuls.chain.model.tx.txdatav4.TxChain();
             txChain.parse(tx.getTxData(), 0);
             BlockChain blockChain = new BlockChain();
-            fillBlockChainByTxChainV3(blockChain, txChain);
+            fillBlockChainByTxChainV4(blockChain, txChain);
             byte[] stream = tx.getCoinData();
             CoinData coinData = new CoinData();
             coinData.parse(new NulsByteBuffer(stream));

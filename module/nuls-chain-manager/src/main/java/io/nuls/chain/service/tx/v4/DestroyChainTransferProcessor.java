@@ -1,11 +1,11 @@
-package io.nuls.chain.service.tx.v3;
+package io.nuls.chain.service.tx.v4;
 
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.protocol.TransactionProcessor;
-import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.dto.ChainEventResult;
 import io.nuls.chain.model.po.Asset;
+import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.rpc.call.RpcService;
 import io.nuls.chain.service.*;
 import io.nuls.chain.util.LoggerUtil;
@@ -19,8 +19,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Component("DisableAssetTxProcessorV3")
-public class DisableAssetTransferProcessor implements TransactionProcessor {
+@Component("DestroyChainTxProcessorV4")
+public class DestroyChainTransferProcessor implements TransactionProcessor {
     @Autowired
     private ValidateService validateService;
     @Autowired
@@ -30,13 +30,13 @@ public class DisableAssetTransferProcessor implements TransactionProcessor {
     @Autowired
     private ChainService chainService;
     @Autowired
-    CmTransferService cmTransferService;
+    private RpcService rpcService;
     @Autowired
-    RpcService rpcService;
+    CmTransferService cmTransferService;
 
     @Override
     public int getType() {
-        return TxType.REMOVE_ASSET_FROM_CHAIN;
+        return TxType.DESTROY_CHAIN_AND_ASSET;
     }
 
     @Override
@@ -46,21 +46,27 @@ public class DisableAssetTransferProcessor implements TransactionProcessor {
         rtData.put("errorCode", "");
         rtData.put("txList", errorList);
         try {
+            //1获取交易类型
+            //2进入不同验证器里处理
+            //3封装失败交易返回
+            Map<String, Integer> chainMap = new HashMap<>();
+            Map<String, Integer> assetMap = new HashMap<>();
+            BlockChain blockChain = null;
             Asset asset = null;
             ChainEventResult chainEventResult = ChainEventResult.getResultSuccess();
             for (Transaction tx : txs) {
                 String txHash = tx.getHash().toHex();
-                asset = TxUtil.buildAssetWithTxAssetV3(tx);
-                chainEventResult = validateService.assetDisableValidator(asset);
+                blockChain = TxUtil.buildChainWithTxDataV4(tx, true);
+                chainEventResult = validateService.chainDisableValidator(blockChain);
                 if (chainEventResult.isSuccess()) {
-                    LoggerUtil.logger().debug("txHash = {},assetKey={} disable batchValidate success!", txHash, CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
+                    LoggerUtil.logger().debug("txHash = {},chainId={} destroy batchValidate success!", txHash, blockChain.getChainId());
                 } else {
                     rtData.put("errorCode", chainEventResult.getErrorCode().getCode());
-                    LoggerUtil.logger().error("txHash = {},assetKey={} disable batchValidate fail!", txHash, CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
+                    LoggerUtil.logger().error("txHash = {},chainId={} destroy batchValidate fail!", txHash, blockChain.getChainId());
                     errorList.add(tx);
                 }
-            }
 
+            }
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
             throw new RuntimeException(e);
@@ -70,26 +76,23 @@ public class DisableAssetTransferProcessor implements TransactionProcessor {
 
     @Override
     public boolean commit(int chainId, List<Transaction> txs, BlockHeader blockHeader) {
-        LoggerUtil.logger().debug("disable asset tx count={}", txs.size());
-        if (txs.size() == 0) {
-            return true;
-        }
         long commitHeight = blockHeader.getHeight();
-        Asset asset = null;
+        BlockChain blockChain = null;
         List<Map<String, Object>> chainAssetIds = new ArrayList<>();
         try {
             for (Transaction tx : txs) {
-                asset = TxUtil.buildAssetWithTxAssetV3(tx);
-                assetService.deleteAsset(asset);
+                blockChain = TxUtil.buildChainWithTxDataV4(tx, true);
+                chainService.destroyBlockChain(blockChain);
                 Map<String, Object> chainAssetId = new HashMap<>(2);
-                chainAssetId.put("chainId", asset.getChainId());
-                chainAssetId.put("assetId", asset.getAssetId());
+                chainAssetId.put("chainId", blockChain.getChainId());
+                chainAssetId.put("assetId", 0);
                 chainAssetIds.add(chainAssetId);
             }
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
             //通知远程调用回滚
             try {
+                chainService.rpcBlockChainRollback(txs);
                 //进行回滚
                 cacheDataService.rollBlockTxs(chainId, commitHeight);
             } catch (Exception e1) {

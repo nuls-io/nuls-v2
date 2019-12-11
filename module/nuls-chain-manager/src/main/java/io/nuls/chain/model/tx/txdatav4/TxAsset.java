@@ -1,4 +1,4 @@
-package io.nuls.chain.model.tx.txdatav3;
+package io.nuls.chain.model.tx.txdatav4;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
