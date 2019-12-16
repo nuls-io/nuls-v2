@@ -34,6 +34,8 @@ import io.nuls.cmd.client.processor.consensus.*;
 import io.nuls.cmd.client.processor.contract.*;
 import io.nuls.cmd.client.processor.crosschain.*;
 import io.nuls.cmd.client.processor.ledger.GetBalanceProcessor;
+import io.nuls.cmd.client.processor.ledger.GetContractCrossAssetProcessor;
+import io.nuls.cmd.client.processor.ledger.GetLocalCrossAssetProcessor;
 import io.nuls.cmd.client.processor.ledger.RegisterLocalAssetProcessor;
 import io.nuls.cmd.client.processor.network.GetNetworkProcessor;
 import io.nuls.cmd.client.processor.system.ExitProcessor;
@@ -121,7 +123,8 @@ public class CommandHandler implements InitializingBean {
         register(getBean(GetBalanceProcessor.class));
         //local asset register
         register(getBean(RegisterLocalAssetProcessor.class));
-
+        register(getBean(GetContractCrossAssetProcessor.class));
+        register(getBean(GetLocalCrossAssetProcessor.class));
         /**
          * consensus
          */
