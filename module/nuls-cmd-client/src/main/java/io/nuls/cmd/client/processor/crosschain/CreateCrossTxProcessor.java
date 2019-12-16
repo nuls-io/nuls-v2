@@ -63,7 +63,7 @@ public class CreateCrossTxProcessor extends CrossChainBaseProcessor {
         Integer assetChainId = Integer.parseInt(args[3]);
         Integer assetId = Integer.parseInt(args[4]);
 //        update cmd cross tx amount decimal
-        Integer decimalInt = AssetsUtil.getCrossAssetDecimal(chainId, assetId);
+        Integer decimalInt = AssetsUtil.getCrossAssetDecimal(assetChainId, assetId);
         if (null == decimalInt) {
             return CommandResult.getFailed("cross asset info not exist.");
         }

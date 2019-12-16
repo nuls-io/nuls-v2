@@ -24,6 +24,7 @@ import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.io.IoUtils;
 import io.nuls.core.log.Log;
+import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.rpc.info.HostInfo;
@@ -98,7 +99,9 @@ public class SmartContractBootStrap extends RpcModule {
         ContractContext.DATA_PATH = contractConfig.getDataPath() + File.separator + ModuleE.SC.name;
         ContractContext.MAIN_ASSETS_ID = contractConfig.getMainAssetId();
         ContractContext.MAIN_CHAIN_ID = contractConfig.getMainChainId();
-        ContractContext.CROSS_CHAIN_SYSTEM_CONTRACT = AddressTool.getAddress(contractConfig.getCrossTokenSystemContract());
+        if (StringUtils.isNotBlank(contractConfig.getCrossTokenSystemContract())) {
+            ContractContext.CROSS_CHAIN_SYSTEM_CONTRACT = AddressTool.getAddress(contractConfig.getCrossTokenSystemContract());
+        }
     }
 
     /**
