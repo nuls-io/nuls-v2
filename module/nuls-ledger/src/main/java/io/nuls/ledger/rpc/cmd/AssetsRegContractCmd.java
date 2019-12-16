@@ -86,7 +86,7 @@ public class AssetsRegContractCmd extends BaseLedgerCmd {
     public Response chainAssetContractReg(Map params) {
         Map<String, Object> rtMap = new HashMap<>(3);
         try {
-            LoggerUtil.COMMON_LOG.debug("params={}",JSONUtils.obj2json(params));
+            LoggerUtil.COMMON_LOG.debug("params={}", JSONUtils.obj2json(params));
             /* 组装Asset (Asset object) */
             params.put("chainId", ledgerConfig.getChainId());
             params.put("address", params.get("contractAddress"));
@@ -95,7 +95,7 @@ public class AssetsRegContractCmd extends BaseLedgerCmd {
             int assetId = assetRegMngService.registerContractAsset(asset.getChainId(), asset);
             rtMap.put("assetId", assetId);
             rtMap.put("chainId", asset.getChainId());
-            LoggerUtil.COMMON_LOG.debug("return={}",JSONUtils.obj2json(rtMap));
+            LoggerUtil.COMMON_LOG.debug("return={}", JSONUtils.obj2json(rtMap));
         } catch (Exception e) {
             LoggerUtil.COMMON_LOG.error(e);
             return failed(e.getMessage());
@@ -187,6 +187,39 @@ public class AssetsRegContractCmd extends BaseLedgerCmd {
             int assetId = assetRegMngService.getRegAssetId(chainId, address);
             rtMap.put("chainId", chainId);
             rtMap.put("assetId", assetId);
+        } catch (Exception e) {
+            LoggerUtil.COMMON_LOG.error(e);
+            return failed(e.getMessage());
+        }
+        return success(rtMap);
+    }
+
+    @CmdAnnotation(cmd = CmdConstant.CMD_CHAIN_ASSET_CONTRACT, version = 1.0,
+            description = "合约资产查询")
+    @Parameters(value = {
+            @Parameter(parameterName = "contractAddress", requestType = @TypeDescriptor(value = String.class), parameterDes = "合约地址")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象",
+            responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+                    @Key(name = "assetId", valueType = int.class, description = "资产id"),
+                    @Key(name = "assetType", valueType = int.class, description = "资产类型"),
+                    @Key(name = "assetOwnerAddress", valueType = String.class, description = "资产所有者地址"),
+                    @Key(name = "initNumber", valueType = BigInteger.class, description = "资产初始化值"),
+                    @Key(name = "decimalPlace", valueType = int.class, description = "小数点分割位数"),
+                    @Key(name = "assetName", valueType = String.class, description = "资产名"),
+                    @Key(name = "assetSymbol", valueType = String.class, description = "资产符号")
+            })
+    )
+    public Response getAssetRegInfoByAddress(Map params) {
+        Map<String, Object> rtMap = new HashMap<>(1);
+        try {
+            String address = params.get("contractAddress").toString();
+            int chainId = AddressTool.getChainIdByAddress(address);
+            int assetId = assetRegMngService.getRegAssetId(chainId, address);
+            rtMap = assetRegMngService.getLedgerRegAsset(chainId, assetId);
+            if (null != rtMap) {
+                rtMap.remove("txHash");
+            }
         } catch (Exception e) {
             LoggerUtil.COMMON_LOG.error(e);
             return failed(e.getMessage());

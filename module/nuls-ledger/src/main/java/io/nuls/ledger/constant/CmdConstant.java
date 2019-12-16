@@ -61,6 +61,7 @@ public interface CmdConstant {
     String CMD_CHAIN_ASSET_CONTRACT_ROLL_BACK = "chainAssetContractRollBack";
     String CMD_CHAIN_ASSET_CONTRACT_ADDRESS = "getAssetContractAddress";
     String CMD_CHAIN_ASSET_CONTRACT_ASSETID = "getAssetContractAssetId";
+    String CMD_CHAIN_ASSET_CONTRACT = "getAssetContract";
     /**
      * 获取确认交易余额
      */
