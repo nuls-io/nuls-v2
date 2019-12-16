@@ -26,6 +26,7 @@
 package io.nuls.cmd.client;
 
 
+import com.fasterxml.jackson.core.JsonParser;
 import io.nuls.cmd.client.processor.CommandProcessor;
 import io.nuls.cmd.client.processor.account.*;
 import io.nuls.cmd.client.processor.block.GetBestBlockHeaderProcessor;
@@ -44,6 +45,7 @@ import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.parse.JSONUtils;
 import jline.console.ConsoleReader;
 import jline.console.completer.ArgumentCompleter;
 import jline.console.completer.Completer;
@@ -183,6 +185,7 @@ public class CommandHandler implements InitializingBean {
         register(getBean(GetCrossChainRegisterInfoProcessor.class));
         register(getBean(GetCrossAssetInfoProcessor.class));
         register(getBean(GetCrossTxStateProcessor.class));
+        JSONUtils.getInstance().configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
     }
 
     public void start() {

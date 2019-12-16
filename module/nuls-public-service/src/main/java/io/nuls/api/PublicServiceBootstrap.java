@@ -20,11 +20,11 @@
 
 package io.nuls.api;
 
+import com.fasterxml.jackson.core.JsonParser;
 import io.nuls.api.analysis.WalletRpcHandler;
-import io.nuls.api.constant.ApiConstant;
+import io.nuls.api.constant.config.ApiConfig;
 import io.nuls.api.db.mongo.MongoDBTableServiceImpl;
 import io.nuls.api.manager.ScheduleManager;
-import io.nuls.api.constant.config.ApiConfig;
 import io.nuls.api.model.po.ChainInfo;
 import io.nuls.api.rpc.jsonRpc.JsonRpcServer;
 import io.nuls.api.utils.LoggerUtil;
@@ -36,6 +36,7 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.config.ConfigurationLoader;
 import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.modulebootstrap.Module;
@@ -153,6 +154,7 @@ public class PublicServiceBootstrap extends RpcModule {
         ApiContext.BUSINESS_ADDRESS = apiConfig.getBusinessAddress();
         ApiContext.TEAM_ADDRESS = apiConfig.getTeamAddress();
         ApiContext.COMMUNITY_ADDRESS = apiConfig.getCommunityAddress();
+        JSONUtils.getInstance().configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
 
     }
 
