@@ -54,7 +54,7 @@ public class CrossLocalAssetAddProcessor extends CrossChainBaseProcessor {
 
     @Override
     public String getCommandDescription() {
-        return "addcrosslocalasset <regAddress> <assetChainId> <assetId>--add cross local chain asset";
+        return "addcrosslocalasset <regAddress> <assetId>--add cross local chain asset";
     }
 
 
