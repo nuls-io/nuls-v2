@@ -275,9 +275,9 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
             List<CoinDTO> fromList = new ArrayList<>();
             List<CoinDTO> toList = new ArrayList<>();
             int assetChainId = 2;
-            int assetId = 4;
-            fromList.add(new CoinDTO("XXOOdjJQw4LJdjtCd5Gda17FCNgSgTcPUUdSA",assetChainId,assetId, BigInteger.valueOf(0_1000_0000L),password));
-            toList.add(new CoinDTO("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG",assetChainId,assetId, BigInteger.valueOf(0_1000_0000L),password));
+            int assetId = 2;
+            fromList.add(new CoinDTO("XXOOdjJQw4LJdjtCd5Gda17FCNgSgTcPUUdSA",assetChainId,assetId, BigInteger.valueOf(1000_0000L),password));
+            toList.add(new CoinDTO("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG",assetChainId,assetId, BigInteger.valueOf(1000_0000L),password));
             Map paramMap = new HashMap();
             paramMap.put("listFrom", fromList);
             paramMap.put("listTo", toList);
