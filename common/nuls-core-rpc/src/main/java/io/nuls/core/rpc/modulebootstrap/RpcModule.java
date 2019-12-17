@@ -300,7 +300,8 @@ public abstract class RpcModule implements InitializingBean {
     }
 
     protected long getTryRuningTimeout() {
-        return 30;
+        //TODO pierre 临时测试调整, 需要改回30
+        return 120;
     }
 
     protected String getRole() {
