@@ -23,9 +23,11 @@ package io.nuls.api;
 import com.fasterxml.jackson.core.JsonParser;
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.constant.config.ApiConfig;
+import io.nuls.api.db.mongo.MongoChainServiceImpl;
 import io.nuls.api.db.mongo.MongoDBTableServiceImpl;
 import io.nuls.api.manager.ScheduleManager;
 import io.nuls.api.model.po.ChainInfo;
+import io.nuls.api.model.po.SyncInfo;
 import io.nuls.api.rpc.jsonRpc.JsonRpcServer;
 import io.nuls.api.utils.LoggerUtil;
 import io.nuls.base.api.provider.Provider;
@@ -207,6 +209,12 @@ public class PublicServiceBootstrap extends RpcModule {
             tableService.addDefaultChainCache();
         } else {
             tableService.initCache();
+        }
+
+        MongoChainServiceImpl chainService = SpringLiteContext.getBean(MongoChainServiceImpl.class);
+        SyncInfo syncInfo = chainService.getSyncInfo(ApiContext.defaultChainId);
+        if (syncInfo != null) {
+            ApiContext.protocolVersion = syncInfo.getVersion();
         }
     }
 

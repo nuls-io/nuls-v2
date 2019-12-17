@@ -1,6 +1,7 @@
 package io.nuls.api.service;
 
 
+import io.nuls.api.ApiContext;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.constant.ApiErrorCode;
@@ -831,8 +832,8 @@ public class SyncService {
 
         long time1, time2;
 
-        SyncInfo syncInfo = chainService.saveNewSyncInfo(chainId, height);
-
+        SyncInfo syncInfo = chainService.saveNewSyncInfo(chainId, height, blockInfo.getHeader().getAgentVersion());
+        ApiContext.protocolVersion = syncInfo.getVersion();
         //存储区块头信息
         time1 = System.currentTimeMillis();
         blockService.saveBLockHeaderInfo(chainId, blockInfo.getHeader());

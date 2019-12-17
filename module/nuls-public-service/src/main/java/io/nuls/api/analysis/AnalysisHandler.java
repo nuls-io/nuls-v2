@@ -683,33 +683,59 @@ public class AnalysisHandler {
     }
 
     private static ChainInfo toChainInfo(Transaction tx) throws NulsException {
-        TxChain txChain = new TxChain();
-        txChain.parse(new NulsByteBuffer(tx.getTxData()));
-
         ChainInfo chainInfo = new ChainInfo();
-        chainInfo.setChainId(txChain.getDefaultAsset().getChainId());
+        if (ApiContext.protocolVersion < 4) {
+            TxChain txChain = new TxChain();
+            txChain.parse(new NulsByteBuffer(tx.getTxData()));
+            chainInfo.setChainId(txChain.getDefaultAsset().getChainId());
 
-        AssetInfo assetInfo = new AssetInfo();
-        assetInfo.setAssetId(txChain.getDefaultAsset().getAssetId());
-        assetInfo.setChainId(txChain.getDefaultAsset().getChainId());
-        assetInfo.setSymbol(txChain.getDefaultAsset().getSymbol());
-        assetInfo.setInitCoins(txChain.getDefaultAsset().getInitNumber());
-        chainInfo.setDefaultAsset(assetInfo);
-        chainInfo.getAssets().add(assetInfo);
+            AssetInfo assetInfo = new AssetInfo();
+            assetInfo.setAssetId(txChain.getDefaultAsset().getAssetId());
+            assetInfo.setChainId(txChain.getDefaultAsset().getChainId());
+            assetInfo.setSymbol(txChain.getDefaultAsset().getSymbol());
+            assetInfo.setInitCoins(txChain.getDefaultAsset().getInitNumber());
+            chainInfo.setDefaultAsset(assetInfo);
+            chainInfo.getAssets().add(assetInfo);
+        } else {
+            io.nuls.api.model.entity.v4.TxChain txChain = new io.nuls.api.model.entity.v4.TxChain();
+            txChain.parse(new NulsByteBuffer(tx.getTxData()));
+            chainInfo.setChainId(txChain.getDefaultAsset().getChainId());
+
+            AssetInfo assetInfo = new AssetInfo();
+            assetInfo.setAssetId(txChain.getDefaultAsset().getAssetId());
+            assetInfo.setChainId(txChain.getDefaultAsset().getChainId());
+            assetInfo.setSymbol(txChain.getDefaultAsset().getSymbol());
+            assetInfo.setInitCoins(txChain.getDefaultAsset().getInitNumber());
+            chainInfo.setDefaultAsset(assetInfo);
+            chainInfo.getAssets().add(assetInfo);
+        }
+
 
         return chainInfo;
     }
 
     private static AssetInfo toAssetInfo(Transaction tx) throws NulsException {
-        TxAsset txAsset = new TxAsset();
-        txAsset.parse(new NulsByteBuffer(tx.getTxData()));
-
         AssetInfo assetInfo = new AssetInfo();
-        assetInfo.setAssetId(txAsset.getAssetId());
-        assetInfo.setChainId(txAsset.getChainId());
-        assetInfo.setSymbol(txAsset.getSymbol());
-        assetInfo.setInitCoins(txAsset.getInitNumber());
-        assetInfo.setAddress(AddressTool.getStringAddressByBytes(txAsset.getAddress()));
+        if (ApiContext.protocolVersion >= 4) {
+            io.nuls.api.model.entity.v4.TxAsset txAsset = new io.nuls.api.model.entity.v4.TxAsset();
+            txAsset.parse(new NulsByteBuffer(tx.getTxData()));
+
+            assetInfo.setAssetId(txAsset.getAssetId());
+            assetInfo.setChainId(txAsset.getChainId());
+            assetInfo.setSymbol(txAsset.getSymbol());
+            assetInfo.setInitCoins(txAsset.getInitNumber());
+            assetInfo.setAddress("");
+        } else {
+            TxAsset txAsset = new TxAsset();
+            txAsset.parse(new NulsByteBuffer(tx.getTxData()));
+
+            assetInfo.setAssetId(txAsset.getAssetId());
+            assetInfo.setChainId(txAsset.getChainId());
+            assetInfo.setSymbol(txAsset.getSymbol());
+            assetInfo.setInitCoins(txAsset.getInitNumber());
+            assetInfo.setAddress(AddressTool.getStringAddressByBytes(txAsset.getAddress()));
+        }
+
         return assetInfo;
     }
 
