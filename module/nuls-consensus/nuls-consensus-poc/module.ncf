@@ -9,5 +9,5 @@ JOPT_XMX=512
 Managed=1
 
 [consensus]
-moduleDynamicDependent=protocol-update,smart-contract
+moduleDynamicDependent=protocol-update,smart-contract,cross-chain
 
