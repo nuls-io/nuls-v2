@@ -182,14 +182,12 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
     /**
      * 1. 流程 - 创建NRC20合约
      *          创建系统合约
-     *          向NRC20合约设置系统合约参数
      *          合约资产向链管理模块注册跨链
      */
     @Test
     public void testCreateProcessor() throws Exception {
         String nrc20 = createCrossNrc20Contract();
         String sys = createCrossSystemContract();
-        this.invokeCall(sender, BigInteger.ZERO, nrc20, "setSystemContract", null, "remark", sys);
         TimeUnit.SECONDS.sleep(1);
         Integer assetId = this.getAssetId(nrc20);
         Log.info("开始向链管理模块注册跨链");
@@ -203,7 +201,7 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
      */
     @Test
     public void callTransferCrossChain() throws Exception {
-        contractAddress_nrc20 = "tNULSeBaNB47zCce3ZftkAd1HGehSY116Wbps4";
+        contractAddress_nrc20 = "tNULSeBaN8Kz39Q7uvxwrWBfk8JPjJQTU9BDY4";
         methodName = "transferCrossChain";
         BigInteger value = BigInteger.valueOf(1_0000_0000L);
         String methodDesc = "";
@@ -251,10 +249,10 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
 
     @Test
     public void viewNrc20Map() throws Exception {
-        String sys = "tNULSeBaN615E5S2vA4ewT3XdhLm2xMCeH1DaJ";
+        String sys = "tNULSeBaN9mfqVuyYzKPpT1tNHXeWNgSpseVsL";
         Log.info("system contract viewNrc20Map is {}", this.invokeView(sys, "viewNrc20Map"));
 
-        String nrc20 = "tNULSeBaN1JANNgiCJ62D3j3kerjeLZ9fopcPD";
+        String nrc20 = "tNULSeBaN8Kz39Q7uvxwrWBfk8JPjJQTU9BDY4";
         Log.info("token balance is {}", this.invokeView(nrc20, "balanceOf", "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG"));
     }
 
@@ -407,8 +405,8 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
     }
     @Test
     public void testView() throws Exception {
-        String nrc20 = "tNULSeBaN2mig4KPNtMPkhdJuL76kYm5rEV89k";
-        String temp = "tNULSeBaNBgnRrRcbf8yovEVxNDFysLrguCeqc";
+        String nrc20 = "tNULSeBaN8Kz39Q7uvxwrWBfk8JPjJQTU9BDY4";
+        String temp = "tNULSeBaN9mfqVuyYzKPpT1tNHXeWNgSpseVsL";
 
         String[] args = {sender, toAddress0, "800000000", nrc20};
 

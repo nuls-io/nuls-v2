@@ -38,8 +38,10 @@ import io.nuls.base.data.Transaction;
 import io.nuls.contract.base.Base;
 import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.model.bo.config.ConfigBean;
+import io.nuls.contract.model.dto.ContractTransactionDto;
 import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.contract.rpc.call.LedgerCall;
+import io.nuls.contract.testmodel.TransactionDto;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.core.crypto.HexUtil;
@@ -214,7 +216,7 @@ public class BaseQuery extends Base {
      */
     @Test
     public void contractInfo() throws Exception {
-        Map params = this.makeContractInfoParams(contractAddress);
+        Map params = this.makeContractInfoParams("tNULSeBaN6GoEavdatSmFy6mzb88oNupqosF91");
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_INFO, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_INFO));
         Log.info("contract_info-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
@@ -258,7 +260,7 @@ public class BaseQuery extends Base {
      */
     @Test
     public void contractTx() throws Exception {
-        Object[] objects = getContractTx("d23b16077a0514779f59cbf8da263eb21c6edcda28b85c704c13420d20f8f3ec");
+        Object[] objects = getContractTx("3de9c8c84eb5e2ee9ebb53009cf77bbcd047f7ddcbf9e0e3fd7ab0bd36b1e141");
         Log.info("contractTx-result:{}", JSONUtils.obj2PrettyJson(objects[0]));
         Assert.assertTrue(null != objects[1]);
     }
@@ -270,7 +272,7 @@ public class BaseQuery extends Base {
     public void getTxClient() throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.CHAIN_ID, chainId);
-        params.put("txHash", "c5fda9cbd056f08439a23b5eb37a1d2013911c14767be18b9812a5d085699242");
+        params.put("txHash", "3de9c8c84eb5e2ee9ebb53009cf77bbcd047f7ddcbf9e0e3fd7ab0bd36b1e141");
         Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getTxClient", params);
         Map record = (Map) dpResp.getResponseData();
         Map resultMap = (Map) record.get("tx_getTxClient");
@@ -278,8 +280,8 @@ public class BaseQuery extends Base {
         Assert.assertTrue(null != txHex);
         Transaction tx = new Transaction();
         tx.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
-        tx.getCoinDataInstance();
-        Log.info("tx is {}", JSONUtils.obj2PrettyJson(tx));
+        TransactionDto dto = new TransactionDto(tx);
+        Log.info("tx is {}", JSONUtils.obj2PrettyJson(dto));
 
     }
 
