@@ -103,7 +103,7 @@ public class ContractResultDto {
         this.price = result.getPrice();
         BigInteger totalFee = tx.getFee();
         this.totalFee = bigInteger2String(totalFee);
-        //TODO pierre 标记
+        // pierre 标记
         if(tx.getType() == TxType.CROSS_CHAIN) {
             this.txSizeFee = this.totalFee;
             // end code by pierre 

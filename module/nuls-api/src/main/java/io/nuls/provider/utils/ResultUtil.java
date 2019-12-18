@@ -27,6 +27,7 @@ import io.nuls.base.api.provider.Result;
 import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.provider.model.ErrorData;
 import io.nuls.provider.model.RpcClientResult;
 import io.nuls.provider.model.jsonrpc.RpcResult;
@@ -82,6 +83,14 @@ public class ResultUtil {
         return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.DATA_ERROR.getCode(), e.getMessage()));
     }
 
+    public static RpcClientResult getNulsRuntimeExceptionRpcClientResult(NulsRuntimeException e) {
+        ErrorCode errorCode = e.getErrorCode();
+        if (errorCode != null) {
+            return RpcClientResult.getFailed(new ErrorData(errorCode.getCode(), e.format()));
+        }
+        return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.DATA_ERROR.getCode(), e.getMessage()));
+    }
+
     public static Result getNulsExceptionResult(NulsException e) {
         ErrorCode errorCode = e.getErrorCode();
         if (errorCode != null) {
@@ -126,6 +135,14 @@ public class ResultUtil {
     }
 
     public static RpcResult getNulsExceptionJsonRpcResult(NulsException e) {
+        ErrorCode errorCode = e.getErrorCode();
+        if (errorCode != null) {
+            return RpcResult.failed(errorCode, e.format());
+        }
+        return RpcResult.failed(CommonCodeConstanst.DATA_ERROR, e.getMessage());
+    }
+
+    public static RpcResult getNulsRuntimeExceptionJsonRpcResult(NulsRuntimeException e) {
         ErrorCode errorCode = e.getErrorCode();
         if (errorCode != null) {
             return RpcResult.failed(errorCode, e.format());

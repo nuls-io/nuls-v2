@@ -33,12 +33,12 @@ public class RandomSeedService {
         long preHeight = 0;
 
         // pierre test comment out
-        if (null == po || ArraysTool.arrayEquals(prePackingAddress, headerPackingAddress) || !ArraysTool.arrayEquals(RandomSeedUtils.getLastDigestEightBytes(extendsData.getSeed()), po.getSeedHash())) {
-            seed = ConsensusConstant.EMPTY_SEED;
-        }
-        //if (null == po || !ArraysTool.arrayEquals(RandomSeedUtils.getLastDigestEightBytes(extendsData.getSeed()), po.getSeedHash())) {
+        //if (null == po || ArraysTool.arrayEquals(prePackingAddress, headerPackingAddress) || !ArraysTool.arrayEquals(RandomSeedUtils.getLastDigestEightBytes(extendsData.getSeed()), po.getSeedHash())) {
         //    seed = ConsensusConstant.EMPTY_SEED;
         //}
+        if (null == po || !ArraysTool.arrayEquals(RandomSeedUtils.getLastDigestEightBytes(extendsData.getSeed()), po.getSeedHash())) {
+            seed = ConsensusConstant.EMPTY_SEED;
+        }
         if (null != po) {
             preHeight = po.getHeight();
         }
