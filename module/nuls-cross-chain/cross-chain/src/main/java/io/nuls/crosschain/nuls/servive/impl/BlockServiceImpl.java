@@ -227,8 +227,12 @@ public class BlockServiceImpl implements BlockService {
                         //更新本地验证人列表
                         VerifierChangeData verifierChangeData = new VerifierChangeData();
                         verifierChangeData.parse(ctx.getTxData(),0);
-                        chain.getBroadcastVerifierList().removeAll(verifierChangeData.getCancelAgentList());
-                        chain.getBroadcastVerifierList().addAll(verifierChangeData.getRegisterAgentList());
+                        if(verifierChangeData.getCancelAgentList() != null && !verifierChangeData.getCancelAgentList().isEmpty()){
+                            chain.getBroadcastVerifierList().removeAll(verifierChangeData.getCancelAgentList());
+                        }
+                        if(verifierChangeData.getRegisterAgentList() != null && !verifierChangeData.getRegisterAgentList().isEmpty()){
+                            chain.getBroadcastVerifierList().addAll(verifierChangeData.getRegisterAgentList());
+                        }
                         chain.setVerifierList(new ArrayList<>(chain.getBroadcastVerifierList()));
                         chain.getLogger().info("验证人变更，当前最新验证人列表为：{}",chain.getVerifierList().toString());
                     }
