@@ -15,7 +15,6 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
 import io.nuls.core.basic.Result;
 import io.nuls.core.constant.CommonCodeConstanst;
-import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.crypto.HexUtil;
@@ -31,6 +30,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static io.nuls.api.constant.ApiConstant.*;
 
 public class AnalysisHandler {
 
@@ -340,6 +341,8 @@ public class AnalysisHandler {
             return toContractInfo(chainId, tx, resultInfo);
         } else if (tx.getType() == TxType.CALL_CONTRACT) {
             return toContractCallInfo(chainId, tx, resultInfo);
+        } else if (tx.getType() == TxType.CROSS_CHAIN) {
+            return toContractCallInfoForCrossChain(chainId, tx, resultInfo);
         } else if (tx.getType() == TxType.DELETE_CONTRACT) {
             return toContractDeleteInfo(chainId, tx, resultInfo);
         }
@@ -586,6 +589,50 @@ public class AnalysisHandler {
         try {
             String args = JSONUtils.obj2json(data.getArgs());
             callInfo.setArgs(args);
+        } catch (JsonProcessingException e) {
+            throw new NulsException(CommonCodeConstanst.DATA_PARSE_ERROR);
+        }
+        callInfo.setResultInfo(resultInfo);
+        return callInfo;
+    }
+
+    public static ContractCallInfo toContractCallInfoForCrossChain(int chainId, Transaction tx, ContractResultInfo resultInfo) throws NulsException {
+        if(resultInfo == null) {
+            return null;
+        }
+        ContractCallInfo callInfo = new ContractCallInfo();
+        callInfo.setContractAddress(resultInfo.getContractAddress());
+        callInfo.setGasLimit(CROSS_CHAIN_GASLIMIT);
+        callInfo.setPrice(CONTRACT_MINIMUM_PRICE);
+        callInfo.setMethodName(CROSS_CHAIN_SYSTEM_CONTRACT_TRANSFER_IN_METHOD_NAME);
+        callInfo.setValue(BigInteger.ZERO);
+        callInfo.setCreateTxHash(tx.getHash().toHex());
+        String nrcContractAddress = null;
+        List<TokenTransfer> tokenTransfers = resultInfo.getTokenTransfers();
+        if(tokenTransfers != null && !tokenTransfers.isEmpty()) {
+            nrcContractAddress = tokenTransfers.get(0).getContractAddress();
+        }
+        CoinData coinData = tx.getCoinDataInstance();
+        List<CoinTo> toList = coinData.getTo();
+        CoinTo coinTo = toList.get(0);
+        byte[] toAddress = coinTo.getAddress();
+        List<CoinFrom> fromList = coinData.getFrom();
+        CoinFrom from = fromList.get(0);
+        byte[] fromAddress = from.getAddress();
+        BigInteger amount = coinTo.getAmount();
+        int assetsChainId = coinTo.getAssetsChainId();
+        int assetsId = coinTo.getAssetsId();
+
+        String[][] args = new String[][]{
+                new String[]{nrcContractAddress},
+                new String[]{AddressTool.getStringAddressByBytes(fromAddress)},
+                new String[]{AddressTool.getStringAddressByBytes(toAddress)},
+                new String[]{amount.toString()},
+                new String[]{String.valueOf(assetsChainId)},
+                new String[]{String.valueOf(assetsId)}};
+        try {
+            String argsStr = JSONUtils.obj2json(args);
+            callInfo.setArgs(argsStr);
         } catch (JsonProcessingException e) {
             throw new NulsException(CommonCodeConstanst.DATA_PARSE_ERROR);
         }

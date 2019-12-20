@@ -29,6 +29,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
+import io.nuls.contract.config.ContractConfig;
 import io.nuls.contract.enums.BlockType;
 import io.nuls.contract.enums.CmdRegisterMode;
 import io.nuls.contract.helper.ContractHelper;
@@ -83,6 +84,8 @@ public class ContractCmd extends BaseCmd {
     private ContractTxValidatorManager contractTxValidatorManager;
     @Autowired
     private CmdRegisterManager cmdRegisterManager;
+    @Autowired
+    private ContractConfig contractConfig;
 
     @CmdAnnotation(cmd = BATCH_BEGIN, version = 1.0, description = "执行合约一个批次的开始通知，生成当前批次的信息/batch begin")
     @Parameters(value = {
@@ -571,6 +574,26 @@ public class ContractCmd extends BaseCmd {
             Map rpcResult = new HashMap(2);
             rpcResult.put(RPC_RESULT_KEY, RPCUtil.encode(newStateRootBytes));
             return success(rpcResult);
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
+    @CmdAnnotation(cmd = GET_CROSS_TOKEN_SYSTEM_CONTRACT, version = 1.0, description = "get cross token system contract")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "代币跨链系统合约地址")
+    }))
+    public Response getCrossTokenSystemContract(Map<String, Object> params) {
+        try {
+            Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
+            Map result = new HashMap();
+            result.put(RPC_RESULT_KEY, contractConfig.getCrossTokenSystemContract());
+            return success();
         } catch (Exception e) {
             Log.error(e);
             return failed(e.getMessage());
