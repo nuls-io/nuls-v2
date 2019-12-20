@@ -58,7 +58,8 @@ public class AnalysisHandler {
         for (Transaction tx : block.getTxs()) {
             if (tx.getType() == TxType.CREATE_CONTRACT ||
                     tx.getType() == TxType.CALL_CONTRACT ||
-                    tx.getType() == TxType.DELETE_CONTRACT) {
+                    tx.getType() == TxType.DELETE_CONTRACT ||
+                    tx.getType() == TxType.CROSS_CHAIN) {
                 contactHashList.add(tx.getHash().toHex());
             }
         }
