@@ -37,6 +37,9 @@ public interface Constant {
      * 存储每条链的配置信息
      */
     String CHAIN_PARAMETERS = "chain_parameters";
+
+    String ROLLBACK_HEIGHT = "rollback_height";
+
     /**
      * 存储每条链的协议配置信息
      */
