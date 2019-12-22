@@ -142,4 +142,15 @@ public class LedgerUtil {
         LoggerUtil.logger(chainId).debug("verion={}",version);
         return version;
     }
+
+    public static boolean isBlackHoleAddress(byte[] address) {
+        if(address == null) {
+            return false;
+        }
+        int chainIdByAddress = AddressTool.getChainIdByAddress(address);
+        if(chainIdByAddress != 1) {
+            return false;
+        }
+        return AddressTool.BLOCK_HOLE_ADDRESS_SET.contains(AddressTool.getStringAddressByBytes(address));
+    }
 }
