@@ -390,7 +390,10 @@ public class TxServiceImpl implements TxService {
         byte[] existMultiSignAddress = null;
         for (CoinFrom coinFrom : listFrom) {
             byte[] addrBytes = coinFrom.getAddress();
-            if(TxUtil.isBlackHoleAddress(addrBytes)) {
+            if (AddressTool.isBlackHoleAddress(TxUtil.blackHolePublicKey, chainId, addrBytes)) {
+                throw new NulsException(TxErrorCode.INVALID_ADDRESS, "address is blackHoleAddress Exception");
+            }
+            if (TxUtil.isBlackHoleAddress(addrBytes)) {
                 throw new NulsException(TxErrorCode.INVALID_ADDRESS, "Address is blackHoleAddress Exception[x]");
             }
             String addr = AddressTool.getStringAddressByBytes(addrBytes);

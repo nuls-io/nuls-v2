@@ -30,6 +30,7 @@ import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.base.protocol.RegisterHelper;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.model.ModuleE;
@@ -45,6 +46,7 @@ import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.utils.DBUtil;
+import io.nuls.transaction.utils.TxUtil;
 
 import java.util.Set;
 
@@ -82,6 +84,7 @@ public class TransactionBootstrap extends RpcModule {
             //初始化数据库配置文件
             initDB();
             chainManager.initChain();
+            TxUtil.blackHolePublicKey = HexUtil.decode(txConfig.getBlackHolePublicKey());
             ModuleHelper.init(this);
         } catch (Exception e) {
             LOG.error("Transaction init error!");
