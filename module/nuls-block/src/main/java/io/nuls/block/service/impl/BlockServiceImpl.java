@@ -378,7 +378,7 @@ public class BlockServiceImpl implements BlockService {
             try {
                 TransactionCall.heightNotice(chainId, height);
                 CrossChainCall.heightNotice(chainId, height, RPCUtil.encode(block.getHeader().serialize()));
-            }catch (Exception e){
+            } catch (Exception e) {
                 LoggerUtil.COMMON_LOG.error(e);
             }
 

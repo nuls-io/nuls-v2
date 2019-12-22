@@ -60,6 +60,10 @@ public class SignatureUtil {
      * @param tx 交易
      */
     public static boolean validateTransactionSignture(Transaction tx) throws NulsException {
+        //todo 判断硬分叉,需要一个高度
+        boolean fencha = tx.getBlockHeight() <= 0 || tx.getBlockHeight() > 780000;
+
+
         try {
             if (tx.getTransactionSignature() == null || tx.getTransactionSignature().length == 0) {
                 throw new NulsException(new Exception());
@@ -70,15 +74,19 @@ public class SignatureUtil {
                 if ((transactionSignature.getP2PHKSignatures() == null || transactionSignature.getP2PHKSignatures().size() == 0)) {
                     throw new NulsException(new Exception("Transaction unsigned ！"));
                 }
-                int signCount = tx.getCoinDataInstance().getFromAddressCount();
-                int passCount = 0;
-                for (P2PHKSignature signature : transactionSignature.getP2PHKSignatures()) {
-                    if (!ECKey.verify(tx.getHash().getBytes(), signature.getSignData().getSignBytes(), signature.getPublicKey())) {
-                        throw new NulsException(new Exception("Transaction signature error !"));
-                    }
-                    passCount++;
-                    if(passCount >= signCount){
-                        break;
+                if (fencha) {
+                    //这里用硬分叉后的新逻辑
+                } else {
+                    int signCount = tx.getCoinDataInstance().getFromAddressCount();
+                    int passCount = 0;
+                    for (P2PHKSignature signature : transactionSignature.getP2PHKSignatures()) {
+                        if (!ECKey.verify(tx.getHash().getBytes(), signature.getSignData().getSignBytes(), signature.getPublicKey())) {
+                            throw new NulsException(new Exception("Transaction signature error !"));
+                        }
+                        passCount++;
+                        if (passCount >= signCount) {
+                            break;
+                        }
                     }
                 }
             } else {
@@ -93,8 +101,11 @@ public class SignatureUtil {
                     if (ECKey.verify(tx.getHash().getBytes(), signature.getSignData().getSignBytes(), signature.getPublicKey())) {
                         validCount++;
                     }
-                    if (validCount >= transactionSignature.getM()) {
+                    if (!fencha && validCount >= transactionSignature.getM()) {
                         break;
+                    }
+                    if (fencha && validCount > transactionSignature.getM()) {
+                        throw new NulsException(new Exception("Transaction unsigned ！"));
                     }
                 }
                 if (validCount < transactionSignature.getM()) {
@@ -114,9 +125,9 @@ public class SignatureUtil {
      *
      * @param tx 交易
      */
-    public static boolean validateCtxSignture(Transaction tx)throws NulsException{
+    public static boolean validateCtxSignture(Transaction tx) throws NulsException {
         if (tx.getTransactionSignature() == null || tx.getTransactionSignature().length == 0) {
-            if(tx.getType() == TxType.VERIFIER_INIT || tx.getType() == TxType.VERIFIER_CHANGE){
+            if (tx.getType() == TxType.VERIFIER_INIT || tx.getType() == TxType.VERIFIER_CHANGE) {
                 return true;
             }
             return false;
