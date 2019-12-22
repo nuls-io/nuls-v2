@@ -6,6 +6,8 @@ import io.nuls.base.data.BaseNulsData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 
+import java.io.IOException;
+
 public class RollbackInfoPo extends BaseNulsData {
     private long height;
 
