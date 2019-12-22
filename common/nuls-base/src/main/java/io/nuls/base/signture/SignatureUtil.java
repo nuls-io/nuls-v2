@@ -61,7 +61,7 @@ public class SignatureUtil {
      */
     public static boolean validateTransactionSignture(Transaction tx) throws NulsException {
         //todo 判断硬分叉,需要一个高度
-        long hardForkingHeight = 877000;
+        long hardForkingHeight = 1;
         boolean fork = tx.getBlockHeight() <= 0 || tx.getBlockHeight() > hardForkingHeight;
         try {
             if (tx.getTransactionSignature() == null || tx.getTransactionSignature().length == 0) {
@@ -75,6 +75,11 @@ public class SignatureUtil {
                 }
                 if (fork) {
                     //这里用硬分叉后的新逻辑
+                    for (P2PHKSignature signature : transactionSignature.getP2PHKSignatures()) {
+                        if (!ECKey.verify(tx.getHash().getBytes(), signature.getSignData().getSignBytes(), signature.getPublicKey())) {
+                            throw new NulsException(new Exception("Transaction signature error !"));
+                        }
+                    }
                 } else {
                     int signCount = tx.getCoinDataInstance().getFromAddressCount();
                     int passCount = 0;
