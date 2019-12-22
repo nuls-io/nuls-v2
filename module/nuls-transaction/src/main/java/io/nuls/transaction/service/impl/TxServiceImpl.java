@@ -388,12 +388,15 @@ public class TxServiceImpl implements TxService {
         Integer fromChainId = null;
         Set<String> uniqueCoin = new HashSet<>();
         byte[] existMultiSignAddress = null;
+
+        boolean forked = chain.getBestBlockHeight() >= 878000;
+
         for (CoinFrom coinFrom : listFrom) {
             byte[] addrBytes = coinFrom.getAddress();
             if (AddressTool.isBlackHoleAddress(TxUtil.blackHolePublicKey, chainId, addrBytes)) {
                 throw new NulsException(TxErrorCode.INVALID_ADDRESS, "address is blackHoleAddress Exception");
             }
-            if (TxUtil.isBlackHoleAddress(addrBytes)) {
+            if (forked && TxUtil.isBlackHoleAddress(addrBytes)) {
                 throw new NulsException(TxErrorCode.INVALID_ADDRESS, "Address is blackHoleAddress Exception[x]");
             }
             String addr = AddressTool.getStringAddressByBytes(addrBytes);
@@ -551,8 +554,8 @@ public class TxServiceImpl implements TxService {
     /**
      * 打包时,从待打包队列获取交易阶段,会产生临时交易列表,在中断获取交易时需要把遗留的临时交易还回待打包队列
      */
-    private void backTempPackablePool(Chain chain, List<TxPackageWrapper> listTx){
-        for(int i = listTx.size() - 1; i >= 0 ;i--){
+    private void backTempPackablePool(Chain chain, List<TxPackageWrapper> listTx) {
+        for (int i = listTx.size() - 1; i >= 0; i--) {
             packablePool.offerFirstOnlyHash(chain, listTx.get(i).getTx());
         }
     }
@@ -678,7 +681,7 @@ public class TxServiceImpl implements TxService {
                         long txSize = tx.size();
                         if ((totalSizeTemp + txSize) > maxTxDataSize) {
                             packablePool.offerFirstOnlyHash(chain, tx);
-                            nulsLogger.info("交易已达最大容量, 实际值: {}, totalSizeTemp:{}, 当前交易size：{} - 预定最大值maxTxDataSize:{}, txhash:{}", totalSize, totalSizeTemp, txSize, maxTxDataSize ,tx.getHash().toHex());
+                            nulsLogger.info("交易已达最大容量, 实际值: {}, totalSizeTemp:{}, 当前交易size：{} - 预定最大值maxTxDataSize:{}, txhash:{}", totalSize, totalSizeTemp, txSize, maxTxDataSize, tx.getHash().toHex());
                             maxDataSize = true;
                             if (batchProcessListSize > 0) {
                                 //达到处理该批次的条件
@@ -753,7 +756,7 @@ public class TxServiceImpl implements TxService {
                             TxPackageWrapper txPackageWrapper = it.next();
                             Transaction transaction = txPackageWrapper.getTx();
                             if (TxManager.isSmartContract(chain, transaction.getType())) {
-                                if(stopInvokeContract){
+                                if (stopInvokeContract) {
                                     //该标志true,表示不再处理智能合约交易,需要暂存交易,统一还回待打包队列
                                     orphanTxSet.add(txPackageWrapper);
                                     it.remove();
@@ -767,7 +770,7 @@ public class TxServiceImpl implements TxService {
                                 try {
                                     //调用执行智能合约,返回false.则不再处理智能合约
                                     boolean invokeContractRs = ContractCall.invokeContract(chain, txPackageWrapper.getTxHex(), 0);
-                                    if(!invokeContractRs){
+                                    if (!invokeContractRs) {
                                         //不再发invoke
                                         stopInvokeContract = true;
                                         orphanTxSet.add(txPackageWrapper);
@@ -802,7 +805,7 @@ public class TxServiceImpl implements TxService {
                         currentBatchPackableTxs.clear();
                         batchCorssTxCount = 0;
                         batchContractTxCount = 0;
-                        if(maxDataSize){
+                        if (maxDataSize) {
                             break;
                         }
                     }
@@ -835,7 +838,7 @@ public class TxServiceImpl implements TxService {
                 hasTxbackPackablePool = (boolean) map.get("hasTxbackPackablePool");
             }
             //如果合约invoke时有需要还回去的合约交易,或者合约执行结果有还回去的交易,都需要重新验证账本
-            if(stopInvokeContract || hasTxbackPackablePool){
+            if (stopInvokeContract || hasTxbackPackablePool) {
                 //如果智能合约有退回或者验证不通过的交易 则需要再次账本验证
                 verifyAgain(chain, moduleVerifyMap, packingTxList, orphanTxSet, true);
             }
@@ -936,8 +939,8 @@ public class TxServiceImpl implements TxService {
      * @param batchProcessList
      * @param currentBatchPackableTxs
      * @param orphanTxSet
-     * @param proccessContract 是否处理智能合约
-     * @param orphanNoCount (是否因为合约还回去而再次验证账本)孤儿交易还回去的时候 不计算还回去的次数
+     * @param proccessContract        是否处理智能合约
+     * @param orphanNoCount           (是否因为合约还回去而再次验证账本)孤儿交易还回去的时候 不计算还回去的次数
      * @throws NulsException
      */
     private void verifyLedger(Chain chain, List<String> batchProcessList, List<TxPackageWrapper> currentBatchPackableTxs,
@@ -979,10 +982,10 @@ public class TxServiceImpl implements TxService {
                             backContract = true;
                         } else {
                             //孤儿交易
-                            if(orphanNoCount){
+                            if (orphanNoCount) {
                                 //如果是因为合约还回去之后,验证账本为孤儿交易则不需要计数 直接还回
                                 orphanTxSet.add(txPackageWrapper);
-                            }else {
+                            } else {
                                 addOrphanTxSet(chain, orphanTxSet, txPackageWrapper);
                             }
                         }
@@ -1091,7 +1094,7 @@ public class TxServiceImpl implements TxService {
                                     orphanTxSet.add(txPackageWrapper);
                                     //从可打包集合中删除
                                     iterator.remove();
-                                    if(!hasTxbackPackablePool){
+                                    if (!hasTxbackPackablePool) {
                                         hasTxbackPackablePool = true;
                                     }
                                     break;
@@ -1117,7 +1120,7 @@ public class TxServiceImpl implements TxService {
                     orphanTxSet.add(txPackageWrapper);
                     //从可打包集合中删除
                     iterator.remove();
-                    if(!hasTxbackPackablePool){
+                    if (!hasTxbackPackablePool) {
                         hasTxbackPackablePool = true;
                     }
                 }
@@ -1217,7 +1220,7 @@ public class TxServiceImpl implements TxService {
             } else {
                 count++;
             }
-            if(chain.getTxPackageOrphanMap().size() > TxConstant.PACKAGE_ORPHAN_MAP_MAXCOUNT){
+            if (chain.getTxPackageOrphanMap().size() > TxConstant.PACKAGE_ORPHAN_MAP_MAXCOUNT) {
                 chain.getTxPackageOrphanMap().clear();
             }
             chain.getTxPackageOrphanMap().put(hash, count);
@@ -1331,12 +1334,11 @@ public class TxServiceImpl implements TxService {
     }
 
     /**
-     *
      * @param chain
      * @param moduleVerifyMap
      * @param packingTxList
      * @param orphanTxSet
-     * @param orphanNoCount (是否因为合约还回去而再次验证账本)孤儿交易还回去的时候 不计算还回去的次数
+     * @param orphanNoCount   (是否因为合约还回去而再次验证账本)孤儿交易还回去的时候 不计算还回去的次数
      * @throws NulsException
      */
     private void verifyAgain(Chain chain, Map<String, List<String>> moduleVerifyMap, List<TxPackageWrapper> packingTxList, Set<TxPackageWrapper> orphanTxSet, boolean orphanNoCount) throws NulsException {
