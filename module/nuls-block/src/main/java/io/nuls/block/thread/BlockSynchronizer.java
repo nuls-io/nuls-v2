@@ -185,8 +185,9 @@ public class BlockSynchronizer implements Runnable {
             RollbackStorageService rollbackService = SpringLiteContext.getBean(RollbackStorageService.class);
             RollbackInfoPo po = rollbackService.get(chainId);
             if(po == null || po.getHeight() != height){
-                if(){
-
+                if(latestHeight > height + 1000){
+                    logger.warn("If the rollback height is greater than 1000,p;ease replace the data package");
+                    System.exit(1);
                 }
                 while (latestHeight >= height){
                     if(!blockService.rollbackBlock(chainId, latestHeight--, true)){
