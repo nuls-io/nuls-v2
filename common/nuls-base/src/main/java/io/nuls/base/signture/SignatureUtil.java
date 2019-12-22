@@ -108,9 +108,6 @@ public class SignatureUtil {
                     if (!fork && validCount >= transactionSignature.getM()) {
                         break;
                     }
-                    if (fork && validCount > transactionSignature.getM()) {
-                        throw new NulsException(new Exception("Transaction unsigned ！"));
-                    }
                 }
                 if (validCount < transactionSignature.getM()) {
                     throw new NulsException(new Exception("Transaction signature error !"));
