@@ -217,9 +217,13 @@ public class CoinDataValidator {
      * @param balanceValidateMap
      * @return
      */
-    private ValidateResult analysisFromCoinPerTx(int chainId, int txType, byte[] nonce8Bytes,
+    private ValidateResult analysisFromCoinPerTx(int chainId, int txType, long blockHeight, byte[] nonce8Bytes,
                                                  List<CoinFrom> coinFroms, Map<String, List<TempAccountNonce>> accountValidateTxMap,
                                                  Map<String, AccountState> accountStateMap, Map<String, AccountState> balanceValidateMap) {
+        // 判断硬分叉,需要一个高度
+        long hardForkingHeight = 878000;
+        boolean forked = blockHeight <= 0 || blockHeight > hardForkingHeight;
+
         for (CoinFrom coinFrom : coinFroms) {
             String address = LedgerUtil.getRealAddressStr(coinFrom.getAddress());
             if (LedgerUtil.isNotLocalChainAccount(chainId, coinFrom.getAddress())) {
@@ -233,7 +237,7 @@ public class CoinDataValidator {
             if (AddressTool.isBlackHoleAddress(LedgerConstant.blackHolePublicKey, chainId, coinFrom.getAddress())) {
                 return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{address, LedgerUtil.getNonceEncode(coinFrom.getNonce()), "address is blackHoleAddress Exception"});
             }
-            if (LedgerUtil.isBlackHoleAddress(coinFrom.getAddress())) {
+            if (forked && LedgerUtil.isBlackHoleAddress(coinFrom.getAddress())) {
                 return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{address, LedgerUtil.getNonceEncode(coinFrom.getNonce()), "address is blackHoleAddress Exception[x]"});
             }
             String assetKey = LedgerUtil.getKeyStr(address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
@@ -333,7 +337,7 @@ public class CoinDataValidator {
         List<CoinTo> coinTos = coinData.getTo();
 
         byte[] nonce8Bytes = LedgerUtil.getNonceByTx(tx);
-        ValidateResult validateResult = analysisFromCoinPerTx(chainId, tx.getType(), nonce8Bytes, coinFroms, accountValidateTxMap,
+        ValidateResult validateResult = analysisFromCoinPerTx(chainId, tx.getType(), tx.getBlockHeight(), nonce8Bytes, coinFroms, accountValidateTxMap,
                 accountStateMap, balanceValidateMap);
         if (!validateResult.isSuccess()) {
             return validateResult;
