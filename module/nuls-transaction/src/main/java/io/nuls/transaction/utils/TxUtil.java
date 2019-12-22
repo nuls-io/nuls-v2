@@ -50,6 +50,8 @@ import static io.nuls.transaction.utils.LoggerUtil.LOG;
  */
 public class TxUtil {
 
+    public static byte[] blackHolePublicKey = null;
+
     public static CoinData getCoinData(Transaction tx) throws NulsException {
         if (null == tx) {
             throw new NulsException(TxErrorCode.TX_NOT_EXIST);
@@ -422,5 +424,16 @@ public class TxUtil {
     public static String nextLine(){
         String lineSeparator = System.getProperty("line.separator");
         return lineSeparator + lineSeparator;
+    }
+
+    public static boolean isBlackHoleAddress(byte[] address) {
+        if(address == null) {
+            return false;
+        }
+        int chainIdByAddress = AddressTool.getChainIdByAddress(address);
+        if(chainIdByAddress != 1) {
+            return false;
+        }
+        return AddressTool.BLOCK_HOLE_ADDRESS_SET.contains(AddressTool.getStringAddressByBytes(address));
     }
 }

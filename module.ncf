@@ -28,7 +28,7 @@ blackHolePublicKey=0000000000000000000000000000000000000000000000000000000000000
 port=8001
 crossPort=8002
 #魔法参数
-packetMagic=20170904
+packetMagic=20191222
 #种子节点
 selfSeedIps=seeda.nuls.io:8001,seedb.nuls.io:8001,seedc.nuls.io:8001,seedd.nuls.io:8001,seede.nuls.io:8001,seedf.nuls.io:8001
 #主网的跨链种子连接节点

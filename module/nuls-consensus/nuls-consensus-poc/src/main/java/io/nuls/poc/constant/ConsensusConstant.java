@@ -122,6 +122,10 @@ public interface ConsensusConstant {
      * */
     double RED_PUNISH_CREDIT_VAL = -1D;
 
+    long CHANGE_NET_HEIGHT_MIN = 878000;
+
+    long CHANGE_NET_HEIGHT_MAX = 900000;
+
     /**
      * 共识锁定时间
      * */

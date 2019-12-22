@@ -36,6 +36,7 @@ import io.nuls.block.rpc.call.ProtocolCall;
 import io.nuls.block.rpc.call.TransactionCall;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.storage.BlockStorageService;
+import io.nuls.block.storage.RollbackStorageService;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.block.utils.ChainGenerator;
 import io.nuls.core.core.ioc.SpringLiteContext;
@@ -160,6 +161,7 @@ public class BlockSynchronizer implements Runnable {
                         }
                     }
                 }
+                rollbackToHeight(latestHeight, chainId);
             }
             while (true) {
                 if (synchronize()) {
@@ -170,6 +172,34 @@ public class BlockSynchronizer implements Runnable {
             logger.error("", e);
         } finally {
             setRunning(false);
+        }
+    }
+
+    /**
+     * 回滚区块到指定高度
+     * */
+    private void rollbackToHeight(long latestHeight, int chainId){
+        BlockConfig blockConfig = SpringLiteContext.getBean(BlockConfig.class);
+        long height = blockConfig.getRollbackHeight();
+        if(height > 0){
+            RollbackStorageService rollbackService = SpringLiteContext.getBean(RollbackStorageService.class);
+            RollbackInfoPo po = rollbackService.get(chainId);
+            if(po == null || po.getHeight() != height){
+                if(latestHeight > height + 1000){
+                    ContextManager.getContext(chainId).getLogger().warn("If the rollback height is greater than 1000,p;ease replace the data package");
+                    System.exit(1);
+                }
+                while (latestHeight >= height){
+                    if(!blockService.rollbackBlock(chainId, latestHeight--, true)){
+                        latestHeight++;
+                    }
+                    if ( latestHeight == 0) {
+                        break;
+                    }
+                }
+                po = new RollbackInfoPo(height);
+                rollbackService.save(po, chainId);
+            }
         }
     }
 

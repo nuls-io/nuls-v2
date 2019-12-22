@@ -36,6 +36,7 @@ import io.nuls.ledger.constant.CmdConstant;
 import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.model.ValidateResult;
 import io.nuls.ledger.service.TransactionService;
+import io.nuls.ledger.storage.Repository;
 import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.ledger.validator.CoinDataValidator;
 
@@ -56,6 +57,8 @@ public class ValidatorCmd extends BaseLedgerCmd {
     CoinDataValidator coinDataValidator;
     @Autowired
     TransactionService transactionService;
+    @Autowired
+    Repository repository;
 
     /**
      * validate coin entity
@@ -91,10 +94,12 @@ public class ValidatorCmd extends BaseLedgerCmd {
                 LoggerUtil.logger(chainId).debug("verifyCoinDataBatchPackaged response={}", parseResponse);
                 return parseResponse;
             }
+            long packagingHeight = repository.getBlockHeight(chainId) + 1;
             List<String> orphanList = new ArrayList<>();
             List<String> successList = new ArrayList<>();
             List<String> failList = new ArrayList<>();
             for (Transaction tx : txList) {
+                tx.setBlockHeight(packagingHeight);
                 String txHash = tx.getHash().toHex();
                 ValidateResult validateResult = coinDataValidator.bathValidatePerTx(chainId, tx);
                 if (validateResult.isSuccess()) {
