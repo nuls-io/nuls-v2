@@ -150,6 +150,7 @@ public class CoinDataValidator {
         Map<String, AccountState> accountStateMap = new HashMap<>(1024);
         Map<String, Object> lockedCancelNonceMap = new HashMap<>(32);
         for (Transaction tx : txs) {
+            tx.setBlockHeight(height);
             ValidateResult validateResult = blockTxsValidate(chainId, tx, batchValidateTxSet, accountValidateTxMap, accountStateMap, lockedCancelNonceMap);
             if (!validateResult.isSuccess()) {
                 LoggerUtil.logger(chainId).error("code={},msg={}", validateResult.getValidateCode(), validateResult.getValidateCode());
@@ -471,8 +472,12 @@ public class CoinDataValidator {
         return ValidateResult.getSuccess();
     }
 
-    private ValidateResult analysisFromCoinBlokTx(int chainId, int txType, byte[] txNonce, List<CoinFrom> coinFroms,
+    private ValidateResult analysisFromCoinBlokTx(int chainId, int txType, long blockHeight, byte[] txNonce, List<CoinFrom> coinFroms,
                                                   Map<String, List<TempAccountNonce>> accountValidateTxMap, Map<String, AccountState> accountStateMap, Map<String, Object> lockedCancelNonceMap) {
+        // 判断硬分叉,需要一个高度
+        long hardForkingHeight = 878000;
+        boolean forked = blockHeight <= 0 || blockHeight > hardForkingHeight;
+
         for (CoinFrom coinFrom : coinFroms) {
             String address = LedgerUtil.getRealAddressStr(coinFrom.getAddress());
             if (LedgerUtil.isNotLocalChainAccount(chainId, coinFrom.getAddress())) {
@@ -483,6 +488,13 @@ public class CoinDataValidator {
                     return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{address, "--", "address Not local chain Exception"});
                 }
             }
+            if (AddressTool.isBlackHoleAddress(LedgerConstant.blackHolePublicKey, chainId, coinFrom.getAddress())) {
+                return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{address, LedgerUtil.getNonceEncode(coinFrom.getNonce()), "address is blackHoleAddress Exception"});
+            }
+            if (forked && LedgerUtil.isBlackHoleAddress(coinFrom.getAddress())) {
+                return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{address, LedgerUtil.getNonceEncode(coinFrom.getNonce()), "address is blackHoleAddress Exception[x]"});
+            }
+
             String assetKey = LedgerUtil.getKeyStr(address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
             AccountState accountState = accountStateMap.get(assetKey);
             if (null == accountState) {
@@ -567,7 +579,7 @@ public class CoinDataValidator {
         List<CoinFrom> coinFroms = coinData.getFrom();
         List<CoinTo> coinTos = coinData.getTo();
         byte[] txNonce = LedgerUtil.getNonceByTx(tx);
-        ValidateResult fromCoinsValidateResult = analysisFromCoinBlokTx(chainId, tx.getType(), txNonce, coinFroms, accountValidateTxMap, accountStateMap, lockedCancelNonceMap);
+        ValidateResult fromCoinsValidateResult = analysisFromCoinBlokTx(chainId, tx.getType(), tx.getBlockHeight(), txNonce, coinFroms, accountValidateTxMap, accountStateMap, lockedCancelNonceMap);
         if (!fromCoinsValidateResult.isSuccess()) {
             return fromCoinsValidateResult;
         }

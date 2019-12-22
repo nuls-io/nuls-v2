@@ -139,7 +139,7 @@ public class LedgerUtil {
 
     public static int getVersion(int chainId) {
         int  version = ProtocolGroupManager.getCurrentVersion(chainId);
-        LoggerUtil.logger(chainId).debug("verion={}",version);
+        //LoggerUtil.logger(chainId).debug("verion={}",version);
         return version;
     }
 
