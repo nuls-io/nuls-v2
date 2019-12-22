@@ -62,7 +62,7 @@ public class SignatureUtil {
     public static boolean validateTransactionSignture(Transaction tx) throws NulsException {
         // 判断硬分叉,需要一个高度
         long hardForkingHeight = 878000;
-        boolean fork = tx.getBlockHeight() <= 0 || tx.getBlockHeight() > hardForkingHeight;
+        boolean forked = tx.getBlockHeight() <= 0 || tx.getBlockHeight() > hardForkingHeight;
         try {
             if (tx.getTransactionSignature() == null || tx.getTransactionSignature().length == 0) {
                 throw new NulsException(new Exception());
@@ -73,7 +73,7 @@ public class SignatureUtil {
                 if ((transactionSignature.getP2PHKSignatures() == null || transactionSignature.getP2PHKSignatures().size() == 0)) {
                     throw new NulsException(new Exception("Transaction unsigned ！"));
                 }
-                if (fork) {
+                if (forked) {
                     //这里用硬分叉后的新逻辑
                     for (P2PHKSignature signature : transactionSignature.getP2PHKSignatures()) {
                         if (!ECKey.verify(tx.getHash().getBytes(), signature.getSignData().getSignBytes(), signature.getPublicKey())) {
@@ -105,7 +105,7 @@ public class SignatureUtil {
                     if (ECKey.verify(tx.getHash().getBytes(), signature.getSignData().getSignBytes(), signature.getPublicKey())) {
                         validCount++;
                     }
-                    if (!fork && validCount >= transactionSignature.getM()) {
+                    if (!forked && validCount >= transactionSignature.getM()) {
                         break;
                     }
                 }

@@ -1447,6 +1447,7 @@ public class TxServiceImpl implements TxService {
         long d = 0L;
         for (TxVerifyWrapper txVerifyWrapper : txList) {
             Transaction tx = txVerifyWrapper.getTx();
+            tx.setBlockHeight(blockHeight);
             //能加入表明未确认中没有,则需要处理
             if (set.add(tx.getHash().toHex())) {
                 long d1 = System.currentTimeMillis();
