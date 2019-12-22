@@ -3,14 +3,14 @@ package io.nuls.block.storage.impl;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.block.constant.Constant;
 import io.nuls.block.model.RollbackInfoPo;
-import io.nuls.block.storage.RollbackStorageSerice;
+import io.nuls.block.storage.RollbackStorageService;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.core.rockdb.service.RocksDBService;
 import static io.nuls.block.utils.LoggerUtil.COMMON_LOG;
 
 @Component
-public class RollbackServiceImpl implements RollbackStorageSerice{
+public class RollbackServiceImpl implements RollbackStorageService {
     public boolean save(RollbackInfoPo po, int chainId) {
         byte[] bytes;
         try {

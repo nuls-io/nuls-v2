@@ -36,8 +36,7 @@ import io.nuls.block.rpc.call.ProtocolCall;
 import io.nuls.block.rpc.call.TransactionCall;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.storage.BlockStorageService;
-import io.nuls.block.storage.RollbackStorageSerice;
-import io.nuls.block.storage.impl.RollbackServiceImpl;
+import io.nuls.block.storage.RollbackStorageService;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.block.utils.ChainGenerator;
 import io.nuls.core.core.ioc.SpringLiteContext;
@@ -183,9 +182,12 @@ public class BlockSynchronizer implements Runnable {
         BlockConfig blockConfig = SpringLiteContext.getBean(BlockConfig.class);
         long height = blockConfig.getRollbackHeight();
         if(height > 0){
-            RollbackStorageSerice rollbackService = SpringLiteContext.getBean(RollbackStorageSerice.class);
+            RollbackStorageService rollbackService = SpringLiteContext.getBean(RollbackStorageService.class);
             RollbackInfoPo po = rollbackService.get(chainId);
             if(po == null || po.getHeight() != height){
+                if(){
+
+                }
                 while (latestHeight >= height){
                     if(!blockService.rollbackBlock(chainId, latestHeight--, true)){
                         latestHeight++;
