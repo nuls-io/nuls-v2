@@ -60,8 +60,8 @@ public class SignatureUtil {
      * @param tx 交易
      */
     public static boolean validateTransactionSignture(Transaction tx) throws NulsException {
-        //todo 判断硬分叉,需要一个高度
-        long hardForkingHeight = 1;
+        // 判断硬分叉,需要一个高度
+        long hardForkingHeight = 878000;
         boolean fork = tx.getBlockHeight() <= 0 || tx.getBlockHeight() > hardForkingHeight;
         try {
             if (tx.getTransactionSignature() == null || tx.getTransactionSignature().length == 0) {
