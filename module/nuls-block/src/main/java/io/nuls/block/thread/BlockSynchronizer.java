@@ -186,7 +186,7 @@ public class BlockSynchronizer implements Runnable {
             RollbackInfoPo po = rollbackService.get(chainId);
             if(po == null || po.getHeight() != height){
                 if(latestHeight > height + 1000){
-                    logger.warn("If the rollback height is greater than 1000,p;ease replace the data package");
+                    ContextManager.getContext(chainId).getLogger().warn("If the rollback height is greater than 1000,p;ease replace the data package");
                     System.exit(1);
                 }
                 while (latestHeight >= height){
