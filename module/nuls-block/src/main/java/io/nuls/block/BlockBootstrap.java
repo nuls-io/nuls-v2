@@ -109,6 +109,7 @@ public class BlockBootstrap extends RpcModule {
         RocksDBService.createTable(CHAIN_LATEST_HEIGHT);
         RocksDBService.createTable(CHAIN_PARAMETERS);
         RocksDBService.createTable(PROTOCOL_CONFIG);
+        RocksDBService.createTable(ROLLBACK_HEIGHT);
     }
 
     /**

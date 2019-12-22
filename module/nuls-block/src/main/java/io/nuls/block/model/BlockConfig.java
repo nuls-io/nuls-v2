@@ -70,6 +70,11 @@ public class BlockConfig extends ChainParameters implements ModuleConfig {
      */
     private int testAutoRollbackAmount;
 
+    /**
+     * 回滚到指定高度
+     */
+    private int rollbackHeight;
+
     public int getNodesMonitorInterval() {
         return nodesMonitorInterval;
     }
@@ -162,4 +167,11 @@ public class BlockConfig extends ChainParameters implements ModuleConfig {
         return dataPath + File.separator + ModuleE.BL.name;
     }
 
+    public int getRollbackHeight() {
+        return rollbackHeight;
+    }
+
+    public void setRollbackHeight(int rollbackHeight) {
+        this.rollbackHeight = rollbackHeight;
+    }
 }
