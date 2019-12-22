@@ -50,6 +50,8 @@ import static io.nuls.transaction.utils.LoggerUtil.LOG;
  */
 public class TxUtil {
 
+    public static byte[] blackHolePublicKey = null;
+
     public static CoinData getCoinData(Transaction tx) throws NulsException {
         if (null == tx) {
             throw new NulsException(TxErrorCode.TX_NOT_EXIST);

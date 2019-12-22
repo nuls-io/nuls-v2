@@ -32,6 +32,15 @@ public class TxConfig extends ConfigBean implements ModuleConfig {
     private String encoding;
     /** 未确认交易过期时间秒 */
     private long unconfirmedTxExpire;
+    private String blackHolePublicKey;
+
+    public String getBlackHolePublicKey() {
+        return blackHolePublicKey;
+    }
+
+    public void setBlackHolePublicKey(String blackHolePublicKey) {
+        this.blackHolePublicKey = blackHolePublicKey;
+    }
 
 
     public String getDataPath() {
