@@ -324,6 +324,10 @@ public class AnalysisHandler {
             return toContractInfo(chainId, tx);
         } else if (tx.getType() == TxType.CALL_CONTRACT) {
             return toContractCallInfo(chainId, tx);
+        } else if (tx.getType() == TxType.CROSS_CHAIN) {
+            // add by pierre at 2019-12-23 特殊跨链转账交易，从平行链跨链转回主网的NRC20资产
+            return toContractCallInfoForCrossChain(chainId, tx);
+            // end code by pierre
         } else if (tx.getType() == TxType.DELETE_CONTRACT) {
             return toContractDeleteInfo(chainId, tx);
         } else if (tx.getType() == TxType.CONTRACT_TRANSFER) {
@@ -570,6 +574,59 @@ public class AnalysisHandler {
             Result<ContractResultInfo> result = WalletRpcHandler.getContractResultInfo(chainId, callInfo.getCreateTxHash());
             callInfo.setResultInfo(result.getData());
         }
+        return callInfo;
+    }
+
+    public static ContractCallInfo toContractCallInfoForCrossChain(int chainId, Transaction tx) throws NulsException {
+        ContractResultInfo contractResultInfo = null;
+        //查询智能合约详情之前，先查询创建智能合约的执行结果是否成功
+        if (tx.getStatus() == TxStatusEnum.CONFIRMED) {
+            Result<ContractResultInfo> result = WalletRpcHandler.getContractResultInfo(chainId, tx.getHash().toHex());
+            if(result.getData() == null) {
+                return null;
+            }
+            contractResultInfo = result.getData();
+        }
+        if(contractResultInfo == null) {
+            return null;
+        }
+        ContractCallInfo callInfo = new ContractCallInfo();
+        callInfo.setContractAddress(contractResultInfo.getContractAddress());
+        callInfo.setGasLimit(CROSS_CHAIN_GASLIMIT);
+        callInfo.setPrice(CONTRACT_MINIMUM_PRICE);
+        callInfo.setMethodName(CROSS_CHAIN_SYSTEM_CONTRACT_TRANSFER_IN_METHOD_NAME);
+        callInfo.setValue(BigInteger.ZERO);
+        callInfo.setCreateTxHash(tx.getHash().toHex());
+        String nrcContractAddress = null;
+        List<TokenTransfer> tokenTransfers = contractResultInfo.getTokenTransfers();
+        if(tokenTransfers != null && !tokenTransfers.isEmpty()) {
+            nrcContractAddress = tokenTransfers.get(0).getContractAddress();
+        }
+        CoinData coinData = tx.getCoinDataInstance();
+        List<CoinTo> toList = coinData.getTo();
+        CoinTo coinTo = toList.get(0);
+        byte[] toAddress = coinTo.getAddress();
+        List<CoinFrom> fromList = coinData.getFrom();
+        CoinFrom from = fromList.get(0);
+        byte[] fromAddress = from.getAddress();
+        BigInteger amount = coinTo.getAmount();
+        int assetsChainId = coinTo.getAssetsChainId();
+        int assetsId = coinTo.getAssetsId();
+
+        String[][] args = new String[][]{
+                new String[]{nrcContractAddress},
+                new String[]{AddressTool.getStringAddressByBytes(fromAddress)},
+                new String[]{AddressTool.getStringAddressByBytes(toAddress)},
+                new String[]{amount.toString()},
+                new String[]{String.valueOf(assetsChainId)},
+                new String[]{String.valueOf(assetsId)}};
+        try {
+            String argsStr = JSONUtils.obj2json(args);
+            callInfo.setArgs(argsStr);
+        } catch (JsonProcessingException e) {
+            throw new NulsException(CommonCodeConstanst.DATA_PARSE_ERROR);
+        }
+        callInfo.setResultInfo(contractResultInfo);
         return callInfo;
     }
 

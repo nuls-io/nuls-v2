@@ -209,6 +209,9 @@ public class SyncService {
                 processDeleteContract(chainId, tx);
             } else if (tx.getType() == TxType.CROSS_CHAIN) {
                 processCrossTransferTx(chainId, tx);
+                // add by pierre at 2019-12-23 特殊跨链转账交易，从平行链跨链转回主网的NRC20资产
+                processCrossTransferTxForNRC20(chainId, tx);
+                // end code by pierre
             } else if (tx.getType() == TxType.REGISTER_CHAIN_AND_ASSET) {
                 processRegChainTx(chainId, tx);
             } else if (tx.getType() == TxType.DESTROY_CHAIN_AND_ASSET) {
@@ -318,6 +321,21 @@ public class SyncService {
         for (String address : addressSet) {
             AccountInfo accountInfo = queryAccountInfo(chainId, address);
             accountInfo.setTxCount(accountInfo.getTxCount() + 1);
+        }
+    }
+
+    private void processCrossTransferTxForNRC20(int chainId, TransactionInfo tx) {
+        if(tx.getTxData() != null && tx.getTxData() instanceof ContractCallInfo) {
+            ContractCallInfo callInfo = (ContractCallInfo) tx.getTxData();
+            ContractInfo contractInfo = queryContractInfo(chainId, callInfo.getContractAddress());
+            contractInfo.setTxCount(contractInfo.getTxCount() + 1);
+
+            contractResultList.add(callInfo.getResultInfo());
+            createContractTxInfo(tx, contractInfo, callInfo.getMethodName());
+
+            if (callInfo.getResultInfo().isSuccess()) {
+                processTokenTransfers(chainId, callInfo.getResultInfo().getTokenTransfers(), tx);
+            }
         }
     }
 
