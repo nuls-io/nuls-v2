@@ -53,6 +53,11 @@ public class StatisticalNulsTask implements Runnable {
             byte[] address = AddressTool.getAddress(ApiContext.blackHolePublicKey, chainId);
             String destroyAddress = AddressTool.getStringAddressByBytes(address);
             BigInteger destroyNuls = accountService.getAccountTotalBalance(chainId, destroyAddress);
+
+            for (String blackAddress : AddressTool.BLOCK_HOLE_ADDRESS_SET) {
+                BigInteger blackNuls = accountService.getAccountTotalBalance(chainId, blackAddress);
+                destroyNuls = destroyNuls.add(blackNuls);
+            }
             //商务持有数量
             BigInteger businessNuls = BigInteger.ZERO;
             if (!StringUtils.isBlank(ApiContext.BUSINESS_ADDRESS)) {
