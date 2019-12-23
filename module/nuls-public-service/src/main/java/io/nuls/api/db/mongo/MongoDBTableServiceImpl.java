@@ -46,7 +46,6 @@ public class MongoDBTableServiceImpl implements DBTableService {
         ledgerService.initCache();
         aliasService.initCache();
         agentService.initCache();
-        transactionService.initCache();
     }
 
     public void addDefaultChainCache() {
@@ -78,7 +77,6 @@ public class MongoDBTableServiceImpl implements DBTableService {
 
         chainInfo.setSeeds(seedNodes);
         chainService.addCacheChain(chainInfo, configInfo);
-        transactionService.addCache(chainInfo.getChainId());
     }
 
     public void initTables(int chainId) {
