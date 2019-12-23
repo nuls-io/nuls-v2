@@ -581,11 +581,15 @@ public class AnalysisHandler {
         ContractResultInfo contractResultInfo = null;
         //查询智能合约详情之前，先查询创建智能合约的执行结果是否成功
         if (tx.getStatus() == TxStatusEnum.CONFIRMED) {
-            Result<ContractResultInfo> result = WalletRpcHandler.getContractResultInfo(chainId, tx.getHash().toHex());
-            if(result.getData() == null) {
+            try {
+                Result<ContractResultInfo> result = WalletRpcHandler.getContractResultInfo(chainId, tx.getHash().toHex());
+                if(result.getData() == null) {
+                    return null;
+                }
+                contractResultInfo = result.getData();
+            } catch (Exception e) {
                 return null;
             }
-            contractResultInfo = result.getData();
         }
         if(contractResultInfo == null) {
             return null;
