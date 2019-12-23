@@ -59,24 +59,23 @@ public class BlockConsumer implements Callable<Boolean> {
         ChainContext context = ContextManager.getContext(chainId);
         BlockDownloaderParams params = context.getDownloaderParams();
         long netLatestHeight = params.getNetLatestHeight();
-        long startHeight = params.getLocalLatestHeight() + 1;
+        long pendingHeight = params.getLocalLatestHeight() + 1;
         NulsLogger logger = context.getLogger();
         Block block;
         logger.info("BlockConsumer start work");
         try {
-            Map<Long, Block> blockMap = context.getBlockMap();
             long begin = System.nanoTime();
-            while (startHeight <= netLatestHeight && context.isNeedSyn()) {
-                block = blockMap.remove(startHeight);
+            while (pendingHeight <= netLatestHeight && context.isNeedSyn()) {
+                block = context.getBlockMap().remove(pendingHeight);
                 if (block != null) {
                     begin = System.nanoTime();
                     boolean saveBlock = blockService.saveBlock(chainId, block, true);
                     if (!saveBlock) {
-                        logger.error("An exception occurred while saving the downloaded block, height-" + startHeight + ", hash-" + block.getHeader().getHash());
+                        logger.error("An exception occurred while saving the downloaded block, height-" + pendingHeight + ", hash-" + block.getHeader().getHash());
                         context.setNeedSyn(false);
                         return false;
                     }
-                    startHeight++;
+                    pendingHeight++;
                     context.getCachedBlockSize().addAndGet(-block.size());
                     continue;
                 }
@@ -85,7 +84,8 @@ public class BlockConsumer implements Callable<Boolean> {
                 //超过10秒没有高度更新
                 if ((end - begin) / 1000000 > 5000) {
                     updateNodeStatus(context);
-                    retryDownload(startHeight, context);
+                    punishNode(pendingHeight, params.getNodes(), context);
+                    retryDownload(pendingHeight, context);
                     begin = System.nanoTime();
                 }
             }
@@ -95,6 +95,16 @@ public class BlockConsumer implements Callable<Boolean> {
             logger.error("BlockConsumer stop work abnormally", e);
             context.setNeedSyn(false);
             return false;
+        }
+    }
+
+    private void punishNode(long pendingHeight, List<Node> nodes, ChainContext context) {
+        for (Node node : nodes) {
+            if (node.getStartHeight() <= pendingHeight && pendingHeight <= node.getEndHeight()) {
+                context.getLogger().error("download block from {} failed! failed height {}", node.getId(), pendingHeight);
+                node.adjustCredit(false);
+                return;
+            }
         }
     }
 

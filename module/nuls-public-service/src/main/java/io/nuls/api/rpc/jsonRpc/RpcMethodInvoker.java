@@ -29,6 +29,7 @@ import io.nuls.core.model.StringUtils;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Niels
@@ -44,10 +45,10 @@ public class RpcMethodInvoker {
         this.method = method;
     }
 
-    public RpcResult invoke(List<Object> jsonParams) {
+    public RpcResult invoke(Object object) {
         RpcResult result = null;
         try {
-            result = (RpcResult) method.invoke(bean, jsonParams);
+            result = (RpcResult) method.invoke(bean, object);
         } catch (Exception e) {
 
             LoggerUtil.commonLog.error("\n" + method.toString());
@@ -61,7 +62,7 @@ public class RpcMethodInvoker {
                 result = new RpcResult();
                 String error = null;
                 String customMessage = nulsException.getCustomMessage();
-                if(StringUtils.isNotBlank(customMessage) && customMessage.contains(";")) {
+                if (StringUtils.isNotBlank(customMessage) && customMessage.contains(";")) {
                     error = (customMessage.split(";", 2))[1];
                 }
                 RpcResultError rpcResultError = new RpcResultError(nulsException.getErrorCode());

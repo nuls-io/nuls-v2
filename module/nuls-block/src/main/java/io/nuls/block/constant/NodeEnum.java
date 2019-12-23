@@ -43,7 +43,7 @@ public enum NodeEnum {
     IDLE,
 
     /**
-     * 超时
+     * 超时(节点连续三次下载区块超时、一次同步过程中累计十次下载超时，都会被标记为超时节点)
      * time out
      */
     TIMEOUT;

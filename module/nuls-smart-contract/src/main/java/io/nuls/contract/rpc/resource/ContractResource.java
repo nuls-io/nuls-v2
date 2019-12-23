@@ -432,6 +432,85 @@ public class ContractResource extends BaseCmd {
         }
     }
 
+    @CmdAnnotation(cmd = PREVIEW_CALL, version = 1.0, description = "preview call contract")
+    @Parameters(value = {
+        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
+        @Parameter(parameterName = "sender", parameterDes = "交易创建者账户地址"),
+        @Parameter(parameterName = "value", requestType = @TypeDescriptor(value = BigInteger.class), parameterDes = "调用者向合约地址转入的主网资产金额，没有此业务时填BigInteger.ZERO"),
+        @Parameter(parameterName = "gasLimit", requestType = @TypeDescriptor(value = long.class), parameterDes = "GAS限制"),
+        @Parameter(parameterName = "price", requestType = @TypeDescriptor(value = long.class), parameterDes = "GAS单价"),
+        @Parameter(parameterName = "contractAddress", parameterDes = "合约地址"),
+        @Parameter(parameterName = "methodName", parameterDes = "合约方法"),
+        @Parameter(parameterName = "methodDesc", parameterDes = "合约方法描述，若合约内方法没有重载，则此参数可以为空", canNull = true),
+        @Parameter(parameterName = "args", requestType = @TypeDescriptor(value = Object[].class), parameterDes = "参数列表", canNull = true)
+    })
+    @ResponseData(description = "返回合约执行结果", responseType = @TypeDescriptor(value = ContractResultDto.class))
+    public Response previewCall(Map<String, Object> params) {
+        try {
+            Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
+            String sender = (String) params.get("sender");
+            Object valueObj = params.get("value");
+            if(valueObj == null) {
+                valueObj = "0";
+            }
+            BigInteger value = new BigInteger(valueObj.toString());
+            Long gasLimit = Long.parseLong(params.get("gasLimit").toString());
+            Long price = Long.parseLong(params.get("price").toString());
+            String contractAddress = (String) params.get("contractAddress");
+            String methodName = (String) params.get("methodName");
+            String methodDesc = (String) params.get("methodDesc");
+            List argsList = (List) params.get("args");
+            Object[] args = argsList != null ? argsList.toArray() : null;
+
+            if (value.compareTo(BigInteger.ZERO) < 0 || gasLimit < 0 || price < 0) {
+                return failed(ContractErrorCode.PARAMETER_ERROR);
+            }
+
+            if (!AddressTool.validAddress(chainId, sender)) {
+                return failed(ADDRESS_ERROR);
+            }
+
+            if (!AddressTool.validAddress(chainId, contractAddress)) {
+                return failed(ADDRESS_ERROR);
+            }
+
+            if (StringUtils.isBlank(methodName)) {
+                return failed(NULL_PARAMETER);
+            }
+
+            byte[] senderBytes = AddressTool.getAddress(sender);
+            byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
+            if (!ContractLedgerUtil.isExistContractAddress(chainId, contractAddressBytes)) {
+                return failed(CONTRACT_ADDRESS_NOT_EXIST);
+            }
+            BlockHeader blockHeader = BlockCall.getLatestBlockHeader(chainId);
+            // 当前区块状态根
+            byte[] prevStateRoot = ContractUtil.getStateRoot(blockHeader);
+
+            ProgramMethod method = contractHelper.getMethodInfoByContractAddress(chainId, prevStateRoot, methodName, methodDesc, contractAddressBytes);
+            String[][] convertArgs = null;
+            if (method != null) {
+                convertArgs = ContractUtil.twoDimensionalArray(args, method.argsType2Array());
+            }
+
+            Result<ContractResult> result = contractTxService.previewContractCallTx(chainId, senderBytes, value, gasLimit, price, contractAddressBytes, methodName, methodDesc, convertArgs);
+
+            if (result.isFailed()) {
+                return wrapperFailed(result);
+            }
+            ContractResult contractResult = result.getData();
+            ContractResultDto contractResultDto = new ContractResultDto(chainId, contractResult, gasLimit);
+            List<ContractTokenTransferDto> tokenTransfers = contractResultDto.getTokenTransfers();
+            List<ContractTokenTransferDto> realTokenTransfers = this.filterRealTokenTransfers(chainId, tokenTransfers);
+            contractResultDto.setTokenTransfers(realTokenTransfers);
+            return success(contractResultDto);
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
     @CmdAnnotation(cmd = IMPUTED_CALL_GAS, version = 1.0, description = "imputed call gas")
     @Parameters(value = {
         @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),

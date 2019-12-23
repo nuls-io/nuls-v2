@@ -104,7 +104,7 @@ public class BlockHeaderDto {
         this.setHash(header.getHash().toString());
         this.setHeight(header.getHeight());
         this.setSize(header.size());
-        this.setTime(NulsDateUtils.timeStamp2DateStr(header.getTime()));
+        this.setTime(NulsDateUtils.timeStamp2DateStr(header.getTime() * 1000));
         this.setTxCount(header.getTxCount());
         this.setMerkleHash(header.getMerkleHash().toString());
         this.setBlockSignature(header.getBlockSignature().getSignData().toString());
@@ -115,7 +115,7 @@ public class BlockHeaderDto {
         this.setBlockVersion(blockExtendsData.getBlockVersion());
         this.setPackingIndexOfRound(blockExtendsData.getPackingIndexOfRound());
         this.setRoundIndex(blockExtendsData.getRoundIndex());
-        this.setRoundStartTime(NulsDateUtils.timeStamp2DateStr(blockExtendsData.getRoundStartTime()));
+        this.setRoundStartTime(NulsDateUtils.timeStamp2DateStr(blockExtendsData.getRoundStartTime() * 1000));
         this.setStateRoot(RPCUtil.encode(blockExtendsData.getStateRoot()));
     }
 

@@ -499,8 +499,9 @@ public class ChainServiceImpl implements ChainService {
         map.put("agentAssetId", configBean.getAgentAssetId());
         map.put("agentChainId", configBean.getAgentChainId());
         map.put("awardAssetId", configBean.getAwardAssetId());
+        map.put("commissionMin", configBean.getCommissionMin());
         return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(map);
-    }
+}
 
     @Override
     @SuppressWarnings("unchecked")

@@ -89,9 +89,17 @@ public class RollbackService {
             return true;
         }
 
+        Map<String, ContractResultInfo> resultInfoMap = null;
+        if (blockHexInfo.getContractHashList() != null && !blockHexInfo.getContractHashList().isEmpty()) {
+            resultInfoMap = new HashMap<>();
+            for (String hash : blockHexInfo.getContractHashList()) {
+                ContractResultInfo resultInfo = contractService.getContractResultInfo(chainId, hash);
+                resultInfoMap.put(resultInfo.getTxHash(), resultInfo);
+            }
+        }
         BlockInfo blockInfo;
         try {
-            blockInfo = AnalysisHandler.toBlockInfo(blockHexInfo.getBlockHex(), chainId);
+            blockInfo = AnalysisHandler.toBlockInfo(blockHexInfo.getBlockHex(), resultInfoMap, chainId);
         } catch (Exception e) {
             Log.error(e);
             return false;
@@ -161,7 +169,7 @@ public class RollbackService {
     private void processTxs(int chainId, List<TransactionInfo> txs) {
         for (int i = 0; i < txs.size(); i++) {
             TransactionInfo tx = txs.get(i);
-            if (tx.getType() == TxType.COIN_BASE || tx.getType() == TxType.CONTRACT_RETURN_GAS) {
+            if (tx.getType() == TxType.COIN_BASE) {
                 processCoinBaseTx(chainId, tx);
             } else if (tx.getType() == TxType.TRANSFER || tx.getType() == TxType.CONTRACT_TRANSFER) {
                 processTransferTx(chainId, tx);
@@ -195,6 +203,8 @@ public class RollbackService {
                 processAddAssetTx(chainId, tx);
             } else if (tx.getType() == TxType.REMOVE_ASSET_FROM_CHAIN) {
                 processCancelAssetTx(chainId, tx);
+            } else if (tx.getType() == TxType.CONTRACT_RETURN_GAS) {
+                processReturnGasTx(chainId, tx);
             }
         }
     }
@@ -203,18 +213,13 @@ public class RollbackService {
         if (tx.getCoinTos() == null || tx.getCoinTos().isEmpty()) {
             return;
         }
-
         AssetInfo assetInfo = CacheManager.getCacheChain(chainId).getDefaultAsset();
         addressSet.clear();
         for (CoinToInfo output : tx.getCoinTos()) {
             addressSet.add(output.getAddress());
             calcBalance(chainId, output);
-            //如果是共识奖励，则不存储交易关系表记录
-            if (tx.getType() == TxType.CONTRACT_RETURN_GAS) {
-                txRelationInfoSet.add(new TxRelationInfo(output.getAddress(), tx.getHash()));
-            }
             //创世块的数据和合约返还不计算共识奖励
-            if (tx.getHeight() == 0 || tx.getType() == TxType.CONTRACT_RETURN_GAS) {
+            if (tx.getHeight() == 0) {
                 continue;
             }
             //奖励是本链主资产的时候，回滚奖励金额
@@ -226,6 +231,20 @@ public class RollbackService {
         for (String address : addressSet) {
             AccountInfo accountInfo = queryAccountInfo(chainId, address);
             accountInfo.setTxCount(accountInfo.getTxCount() - 1);
+        }
+    }
+
+    private void processReturnGasTx(int chainId, TransactionInfo tx) {
+        if (tx.getCoinTos() == null || tx.getCoinTos().isEmpty()) {
+            return;
+        }
+        for (CoinToInfo output : tx.getCoinTos()) {
+            AccountInfo accountInfo = queryAccountInfo(chainId, output.getAddress());
+            accountInfo.setTxCount(accountInfo.getTxCount() - 1);
+            accountInfo.setTotalBalance(accountInfo.getTotalBalance().subtract(output.getAmount()));
+            AccountLedgerInfo ledgerInfo = queryLedgerInfo(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
+            ledgerInfo.setTotalBalance(ledgerInfo.getTotalBalance().subtract(output.getAmount()));
+            txRelationInfoSet.add(new TxRelationInfo(output.getAddress(), tx.getHash()));
         }
     }
 
@@ -531,24 +550,22 @@ public class RollbackService {
 
     private void processRegChainTx(int chainId, TransactionInfo tx) {
         CoinFromInfo input = tx.getCoinFroms().get(0);
-        AccountInfo accountInfo = queryAccountInfo(chainId, input.getAddress());
-        accountInfo.setTxCount(accountInfo.getTxCount() - 1);
-        txRelationInfoSet.add(new TxRelationInfo(input.getAddress(), tx.getHash()));
+        AccountInfo accountInfo;
 
-        CoinToInfo output = null;
+
         for (CoinToInfo to : tx.getCoinTos()) {
-            if (!to.getAddress().equals(accountInfo.getAddress())) {
-                output = to;
-                break;
+            if (to.getAddress().equals(input.getAddress())) {
+                accountInfo = queryAccountInfo(chainId, input.getAddress());
+                accountInfo.setTxCount(accountInfo.getTxCount() - 1);
+                calcBalance(chainId, input.getChainId(), input.getAssetsId(), accountInfo, input.getAmount().subtract(to.getAmount()));
+                txRelationInfoSet.add(new TxRelationInfo(input.getAddress(), tx.getHash()));
+            } else {
+                accountInfo = queryAccountInfo(chainId, to.getAddress());
+                accountInfo.setTxCount(accountInfo.getTxCount() - 1);
+                calcBalance(chainId, to);
+                txRelationInfoSet.add(new TxRelationInfo(to.getAddress(), tx.getHash()));
             }
         }
-        calcBalance(chainId, input.getChainId(), input.getAssetsId(), accountInfo, output.getAmount().add(tx.getFee().getValue()));
-
-        AccountInfo destroyAccount = queryAccountInfo(chainId, output.getAddress());
-        accountInfo.setTxCount(destroyAccount.getTxCount() - 1);
-        calcBalance(chainId, output);
-        txRelationInfoSet.add(new TxRelationInfo(output.getAddress(), tx.getHash()));
-
         chainInfoList.add((ChainInfo) tx.getTxData());
     }
 
@@ -624,7 +641,9 @@ public class RollbackService {
             if (tokenTransfer.getFromAddress() != null) {
                 processAccountNrc20(chainId, contractInfo, tokenTransfer.getFromAddress(), new BigInteger(tokenTransfer.getValue()), 1);
             }
-            processAccountNrc20(chainId, contractInfo, tokenTransfer.getToAddress(), new BigInteger(tokenTransfer.getValue()), -1);
+            if (tokenTransfer.getToAddress() != null) {
+                processAccountNrc20(chainId, contractInfo, tokenTransfer.getToAddress(), new BigInteger(tokenTransfer.getValue()), -1);
+            }
         }
     }
 

@@ -24,6 +24,7 @@
 package io.nuls.contract.service;
 
 
+import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.core.basic.Result;
 
@@ -46,6 +47,9 @@ public interface ContractTxService {
 
     Result validateContractCallTx(int chainId, byte[] senderBytes, BigInteger value, Long gasLimit, Long price, byte[] contractAddressBytes,
                                   String methodName, String methodDesc, String[][] args);
+
+    Result<ContractResult> previewContractCallTx(int chainId, byte[] senderBytes, BigInteger value, Long gasLimit, Long price, byte[] contractAddressBytes,
+                                                 String methodName, String methodDesc, String[][] args);
 
     Result contractDeleteTx(int chainId, String sender, String contractAddress, String password, String remark);
 

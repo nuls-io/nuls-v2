@@ -112,9 +112,9 @@ public class TransactionServiceImpl implements TransactionService {
             }
         }
         String remark = transferDTO.getRemark();
-        if (!TxUtil.validTxRemark(remark)) {
-            throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
-        }
+//        if (!TxUtil.validTxRemark(remark)) {
+//            throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
+//        }
         //创建组装一个交易
         Transaction tx = this.createNormalTransferTx(chain, fromList, toList, remark);
         //发送给交易模块
@@ -142,9 +142,9 @@ public class TransactionServiceImpl implements TransactionService {
             }
         }
         String remark = multiSignTransferDTO.getRemark();
-        if (!TxUtil.validTxRemark(remark)) {
-            throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
-        }
+//        if (!TxUtil.validTxRemark(remark)) {
+//            throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
+//        }
         //创建多签交易时需要本地有多签账户信息，计算签名大小和手续费的是必须的
         MultiSigAccount multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(address);
         Preconditions.checkNotNull(multiSigAccount, AccountErrorCode.MULTISIGN_ACCOUNT_NOT_EXIST);
@@ -673,8 +673,8 @@ public class TransactionServiceImpl implements TransactionService {
             CoinFrom coinFrom = iterator.next();
             //如果不为当前链主资产
             if (!TxUtil.isChainAssetExist(chain, coinFrom)) {
-                int assetsChainId = coinFrom.getAssetsChainId();
-                int assetsId = coinFrom.getAssetsId();
+                int assetsChainId = chain.getConfig().getChainId();
+                int assetsId = chain.getConfig().getAssetId();
                 //查询该地址在当前链的主资产余额
                 NonceBalance nonceBalance = TxUtil.getBalanceNonce(chain, assetsChainId, assetsId, coinFrom.getAddress());
                 BigInteger mainAsset = nonceBalance.getAvailable();

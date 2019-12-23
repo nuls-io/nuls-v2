@@ -1,6 +1,7 @@
 package io.nuls.api.analysis;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.nuls.api.ApiContext;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.constant.CommandConstant;
@@ -48,23 +49,29 @@ public class AnalysisHandler {
         block.parse(new NulsByteBuffer(bytes));
 
         BlockInfo blockInfo = new BlockInfo();
-        blockInfo.setBlockHex(blockHex);
         BlockHeaderInfo blockHeader = toBlockHeaderInfo(block.getHeader(), chainId);
         blockHeader.setSize(bytes.length);
         blockHeader.setTxHashList(new ArrayList<>());
         //提取智能合约相关交易的hash，查询合约执行结果
         //Extract the hash of smart contract related transactions and query the contract execution results
-        List<String> hashList = new ArrayList<>();
+        List<String> contactHashList = new ArrayList<>();
         for (Transaction tx : block.getTxs()) {
             if (tx.getType() == TxType.CREATE_CONTRACT ||
                     tx.getType() == TxType.CALL_CONTRACT ||
                     tx.getType() == TxType.DELETE_CONTRACT) {
-                hashList.add(tx.getHash().toHex());
+                contactHashList.add(tx.getHash().toHex());
             }
         }
+
+        BlockHexInfo hexInfo = new BlockHexInfo();
+        hexInfo.setHeight(blockHeader.getHeight());
+        hexInfo.setBlockHex(blockHex);
+        hexInfo.setContractHashList(contactHashList);
+        blockInfo.setBlockHexInfo(hexInfo);
+
         Map<String, ContractResultInfo> resultInfoMap = null;
-        if (!hashList.isEmpty()) {
-            Result<Map<String, ContractResultInfo>> result = WalletRpcHandler.getContractResults(chainId, hashList);
+        if (!contactHashList.isEmpty()) {
+            Result<Map<String, ContractResultInfo>> result = WalletRpcHandler.getContractResults(chainId, contactHashList);
             if (result.isFailed()) {
                 return null;
             } else {
@@ -97,6 +104,43 @@ public class AnalysisHandler {
         blockInfo.setHeader(blockHeader);
         return blockInfo;
     }
+
+    public static BlockInfo toBlockInfo(String blockHex, Map<String, ContractResultInfo> resultInfoMap, int chainId) throws Exception {
+        byte[] bytes = RPCUtil.decode(blockHex);
+        Block block = new Block();
+        block.parse(new NulsByteBuffer(bytes));
+
+        BlockInfo blockInfo = new BlockInfo();
+        BlockHeaderInfo blockHeader = toBlockHeaderInfo(block.getHeader(), chainId);
+        blockHeader.setSize(bytes.length);
+        blockHeader.setTxHashList(new ArrayList<>());
+
+        //执行成功的智能合约可能会产生系统内部交易，内部交易的序列化信息存放在执行结果中,将内部交易反序列后，一起解析
+        //A successful intelligent contract execution may result in system internal trading.
+        // The serialized information of internal trading is stored in the execution result, and the internal trading is reversed and parsed together
+        if (resultInfoMap != null) {
+            for (ContractResultInfo resultInfo : resultInfoMap.values()) {
+                if (resultInfo.getContractTxList() != null) {
+                    for (String txHex : resultInfo.getContractTxList()) {
+                        Transaction tx = new Transaction();
+                        tx.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
+                        tx.setBlockHeight(blockHeader.getHeight());
+                        block.getTxs().add(tx);
+                    }
+                }
+            }
+        }
+        blockInfo.setTxList(toTxs(chainId, block.getTxs(), blockHeader, resultInfoMap));
+        //计算coinBase奖励
+        blockHeader.setReward(calcCoinBaseReward(chainId, blockInfo.getTxList().get(0)));
+        //计算总手续费
+        blockHeader.setTotalFee(calcFee(blockInfo.getTxList(), chainId));
+        //重新计算区块打包的交易个数
+        blockHeader.setTxCount(blockInfo.getTxList().size());
+        blockInfo.setHeader(blockHeader);
+        return blockInfo;
+    }
+
 
     public static BlockHeaderInfo toBlockHeaderInfo(BlockHeader blockHeader, int chainId) throws IOException {
         BlockExtendsData extendsData = blockHeader.getExtendsData();
@@ -216,6 +260,11 @@ public class AnalysisHandler {
         }
         info.calcValue();
         info.calcFee(chainId);
+        if (tx.getStatus() == TxStatusEnum.UNCONFIRM) {
+            info.setStatus(ApiConstant.TX_UNCONFIRM);
+        } else {
+            info.setStatus(ApiConstant.TX_CONFIRM);
+        }
         return info;
     }
 

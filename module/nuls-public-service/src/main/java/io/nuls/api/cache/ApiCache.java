@@ -2,6 +2,8 @@ package io.nuls.api.cache;
 
 import io.nuls.api.model.po.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -25,6 +27,8 @@ public class ApiCache {
 
     private Map<String, AliasInfo> aliasMap = new ConcurrentHashMap<>();
 
+    private List<Nrc20Info> nrc20InfoList = new ArrayList<>();
+
     public ApiCache() {
         currentRound = new CurrentRound();
     }
@@ -43,6 +47,14 @@ public class ApiCache {
 
     public void addAccountLedgerInfo(AccountLedgerInfo ledgerInfo) {
         ledgerMap.put(ledgerInfo.getKey(), ledgerInfo);
+    }
+
+    public void addNrc20Info(Nrc20Info nrc20Info) {
+        nrc20InfoList.add(nrc20Info);
+    }
+
+    public List<Nrc20Info> getNrc20InfoList() {
+        return nrc20InfoList;
     }
 
     public void addAgentInfo(AgentInfo agentInfo) {

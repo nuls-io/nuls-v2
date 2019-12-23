@@ -16,8 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static io.nuls.api.constant.DBTableConstant.ACCOUNT_TOKEN_TABLE;
-import static io.nuls.api.constant.DBTableConstant.TOKEN_TRANSFER_TABLE;
+import static io.nuls.api.constant.DBTableConstant.*;
 
 @Component
 public class MongoTokenServiceImpl implements TokenService {
@@ -60,9 +59,14 @@ public class MongoTokenServiceImpl implements TokenService {
         List<Document> docsList = this.mongoDBService.pageQuery(ACCOUNT_TOKEN_TABLE + chainId, query, sort, pageNumber, pageSize);
         List<AccountTokenInfo> accountTokenList = new ArrayList<>();
         long totalCount = mongoDBService.getCount(ACCOUNT_TOKEN_TABLE + chainId, query);
+
         for (Document document : docsList) {
-            accountTokenList.add(DocumentTransferTool.toInfo(document, "key", AccountTokenInfo.class));
+            AccountTokenInfo tokenInfo = DocumentTransferTool.toInfo(document, "key", AccountTokenInfo.class);
+            accountTokenList.add(tokenInfo);
+            document = mongoDBService.findOne(CONTRACT_TABLE + chainId, Filters.eq("_id", tokenInfo.getContractAddress()));
+            tokenInfo.setStatus(document.getInteger("status"));
         }
+
         PageInfo<AccountTokenInfo> pageInfo = new PageInfo<>(pageNumber, pageSize, totalCount, accountTokenList);
         return pageInfo;
     }

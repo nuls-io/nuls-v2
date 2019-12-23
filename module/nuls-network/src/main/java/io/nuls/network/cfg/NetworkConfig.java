@@ -52,6 +52,10 @@ public class NetworkConfig implements ModuleConfig {
      * ROCK DB 数据库文件存储路径
      */
     private String dataPath;
+    /**
+     * 中心化网络服务接口
+     */
+    private String timeServers;
 
     public List<String> getLocalIps() {
 
@@ -227,6 +231,14 @@ public class NetworkConfig implements ModuleConfig {
 
     public void setDataPath(String dataPath) {
         this.dataPath = dataPath;
+    }
+
+    public String getTimeServers() {
+        return timeServers;
+    }
+
+    public void setTimeServers(String timeServers) {
+        this.timeServers = timeServers;
     }
 
     public int getMainChainId() {

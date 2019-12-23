@@ -324,6 +324,25 @@ public class PocConsensusController {
             return RpcResult.dataNotFound();
         }
         AgentInfo agentInfo = agentService.getAgentByAgentAddress(chainId, address);
+        if (agentInfo != null) {
+            long count = punishService.getYellowCount(chainId, agentInfo.getAgentAddress());
+            if (agentInfo.getTotalPackingCount() != 0 || count != 0) {
+                agentInfo.setLostRate(DoubleUtils.div(count, count + agentInfo.getTotalPackingCount()));
+            }
+            agentInfo.setYellowCardCount((int) count);
+            Result<AgentInfo> clientResult = WalletRpcHandler.getAgentInfo(chainId, agentInfo.getTxHash());
+            if (clientResult.isSuccess()) {
+                agentInfo.setCreditValue(clientResult.getData().getCreditValue());
+                agentInfo.setDepositCount(clientResult.getData().getDepositCount());
+                agentInfo.setStatus(clientResult.getData().getStatus());
+                if (agentInfo.getAgentAlias() == null) {
+                    AliasInfo info = aliasService.getAliasByAddress(chainId, agentInfo.getAgentAddress());
+                    if (null != info) {
+                        agentInfo.setAgentAlias(info.getAlias());
+                    }
+                }
+            }
+        }
         return RpcResult.success(agentInfo);
     }
 

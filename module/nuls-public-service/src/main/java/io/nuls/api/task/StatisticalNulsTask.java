@@ -78,7 +78,7 @@ public class StatisticalNulsTask implements Runnable {
 
             BigInteger circulation = totalCoin.subtract(destroyNuls);
             if (balanceInfo != null) {
-                circulation = circulation.subtract(balanceInfo.getBalance());
+                circulation = circulation.subtract(balanceInfo.getTimeLock());
             }
             circulation = circulation.subtract(businessNuls);
             circulation = circulation.subtract(communityNuls);
@@ -87,6 +87,5 @@ public class StatisticalNulsTask implements Runnable {
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);
         }
-
     }
 }

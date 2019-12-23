@@ -21,6 +21,7 @@
 package io.nuls.api;
 
 import io.nuls.api.analysis.WalletRpcHandler;
+import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.db.mongo.MongoDBTableServiceImpl;
 import io.nuls.api.manager.ScheduleManager;
 import io.nuls.api.constant.config.ApiConfig;
@@ -44,6 +45,7 @@ import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.core.rpc.util.AddressPrefixDatas;
 import org.bouncycastle.util.encoders.Hex;
 
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -168,6 +170,7 @@ public class PublicServiceBootstrap extends RpcModule {
                 ApiContext.agentChainId = (int) configMap.get("agentChainId");
                 ApiContext.agentAssetId = (int) configMap.get("agentAssetId");
                 ApiContext.awardAssetId = (int) configMap.get("awardAssetId");
+                ApiContext.minDeposit = new BigInteger(configMap.get("commissionMin").toString());
             }
             initDB();
 

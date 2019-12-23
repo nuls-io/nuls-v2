@@ -32,12 +32,7 @@ public class QueryChainInfoTask implements Runnable {
                 Map<String, Object> map = result.getData();
                 CacheManager.setChainInfoMap((Map<Integer, ChainInfo>) map.get("chainInfoMap"));
                 CacheManager.setAssetInfoMap((Map<String, AssetInfo>) map.get("assetInfoMap"));
-                if (CacheManager.getChainInfoMap().isEmpty() || CacheManager.getAssetInfoMap().isEmpty()) {
-                    ApiContext.isReady = false;
-                } else {
-                    ApiContext.isReady = true;
-                }
-
+                ApiContext.isReady = true;
             } else {
                 chainInfoMap = new HashMap<>();
                 assetInfoMap = new HashMap<>();

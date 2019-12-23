@@ -18,6 +18,8 @@ public class AccountTokenInfo {
 
     private BigInteger balance;
 
+    private int status;
+
     private int decimals;
     @JsonIgnore
     private boolean isNew;
@@ -99,5 +101,13 @@ public class AccountTokenInfo {
 
     public void setNew(boolean aNew) {
         isNew = aNew;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 }

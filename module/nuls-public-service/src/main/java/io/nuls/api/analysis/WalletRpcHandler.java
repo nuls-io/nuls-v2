@@ -565,4 +565,26 @@ public class WalletRpcHandler {
             return Result.getFailed(e.getErrorCode());
         }
     }
+
+
+    public static Result contractPreviewCall(int chainId, String sender, BigInteger value, long gasLimit, long price, String contractAddress, String methodName, String methodDesc, Object[] args) {
+
+        try {
+            Map<String, Object> params = new HashMap<>();
+            params.put(Constants.CHAIN_ID, chainId);
+            params.put("sender", sender);
+            params.put("value", value);
+            params.put("gasLimit", gasLimit);
+            params.put("price", price);
+            params.put("contractAddress", contractAddress);
+            params.put("methodName", methodName);
+            params.put("methodDesc", methodDesc);
+            params.put("args", args);
+            Map map = (Map) RpcCall.request(ModuleE.SC.abbr, CommandConstant.PREVIEW_CALL, params);
+            return Result.getSuccess(null).setData(map);
+        } catch (NulsException e) {
+            return Result.getFailed(e.getErrorCode());
+        }
+
+    }
 }

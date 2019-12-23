@@ -28,7 +28,7 @@ public class SyncBlockTask implements Runnable {
 
     @Override
     public void run() {
-        if(!ApiContext.isReady) {
+        if (!ApiContext.isReady) {
             LoggerUtil.commonLog.info("------- ApiModule wait for successful cross-chain networking  --------");
             return;
         }

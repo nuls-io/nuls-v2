@@ -84,4 +84,6 @@ public interface CommandConstant {
     String GET_BYZANTINE_COUNT = "getByzantineCount";
 
     String GET_NETWORK_GROUP = "nw_getGroupByChainId";
+
+    String PREVIEW_CALL = "sc_preview_call";
 }

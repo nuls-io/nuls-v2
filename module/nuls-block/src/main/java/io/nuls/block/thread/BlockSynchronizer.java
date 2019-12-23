@@ -208,7 +208,7 @@ public class BlockSynchronizer implements Runnable {
      * 每隔5秒请求一次getAvailableNodes,连续5次节点数大于minNodeAmount就认为网络稳定
      *
      */
-    private void waitUntilNetworkStable() throws InterruptedException {
+    private List<Node> waitUntilNetworkStable() throws InterruptedException {
         ChainContext context = ContextManager.getContext(chainId);
         ChainParameters parameters = context.getParameters();
         int waitNetworkInterval = parameters.getWaitNetworkInterval();
@@ -227,17 +227,16 @@ public class BlockSynchronizer implements Runnable {
             }
             logger.info("minNodeAmount = " + minNodeAmount + ", current nodes amount=" + nodeAmount + ", wait until network stable......");
             if (count >= 5) {
-                return;
+                return availableNodes;
             }
             Thread.sleep(waitNetworkInterval);
         }
     }
 
     private boolean synchronize() throws Exception {
-        waitUntilNetworkStable();
         NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         //1.调用网络模块接口获取当前chainId网络的可用节点
-        List<Node> availableNodes = NetworkCall.getAvailableNodes(chainId);
+        List<Node> availableNodes = waitUntilNetworkStable();
         //2.判断可用节点数是否满足最小配置
         ChainContext context = ContextManager.getContext(chainId);
         ChainParameters parameters = context.getParameters();
