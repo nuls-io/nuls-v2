@@ -1,11 +1,11 @@
 package io.nuls.api.db.mongo;
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.client.model.*;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.InsertManyOptions;
+import com.mongodb.client.model.Sorts;
 import io.nuls.api.analysis.WalletRpcHandler;
-import io.nuls.api.cache.ApiCache;
 import io.nuls.api.db.TransactionService;
-import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.*;
 import io.nuls.api.model.po.mini.MiniTransactionInfo;
 import io.nuls.api.model.rpc.BalanceInfo;
@@ -36,7 +36,6 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
 
     Map<String, List<Document>> relationMap;
     Map<String, List<String>> deleteRelationMap;
-    Map<Integer, Long> txCountMap;
     Set<String> txUnConfirmHashSet;
 
     //    Map<String, List<DeleteManyModel<Document>>> deleteRelationMap;
@@ -62,34 +61,17 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
 //        }
     }
 
-    @Override
     public void initCache() {
-        txCountMap = new HashMap<>();
-        for (ApiCache apiCache : CacheManager.getApiCaches().values()) {
-            long totalCount = mongoDBService.getCount(TX_TABLE + apiCache.getChainInfo().getChainId());
-            txCountMap.put(apiCache.getChainInfo().getChainId(), totalCount);
-        }
+//        txCountMap = new HashMap<>();
+//        for (ApiCache apiCache : CacheManager.getApiCaches().values()) {
+//            long totalCount = mongoDBService.getCount(TX_TABLE + apiCache.getChainInfo().getChainId());
+//            txCountMap.put(apiCache.getChainInfo().getChainId(), totalCount);
+//        }
     }
 
-    @Override
-    public void addCache(int chainId) {
-        if (txCountMap == null) {
-            txCountMap = new HashMap<>();
-        }
-        txCountMap.put(chainId, 0L);
-    }
 
-    //tx_table只存储最近100万条数据
-    public void saveTxList(int chainId, List<TransactionInfo> txList) {
-        if (txList.isEmpty()) {
-            return;
-        }
-        long time1, time2;
-        time1 = System.currentTimeMillis();
-        long totalCount = txCountMap.get(chainId);
-
-        //当交易记录表超过100万条时，首先删除要最开始保存的记录
-        totalCount += txList.size();
+    public void deleteTxs(int chainId) {
+        long totalCount = mongoDBService.getCount(TX_TABLE + chainId);
         if (totalCount > 1000000) {
             int deleteCount = (int) (totalCount - 1000000);
             BasicDBObject fields = new BasicDBObject();
@@ -100,12 +82,33 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
                 hashList.add(document.getString("_id"));
             }
             mongoDBService.delete(TX_TABLE + chainId, Filters.in("_id", hashList));
-//            time2 = System.currentTimeMillis();
-//            System.out.println("-----------delete, use: " + (time2 - time1));
-//            time1 = System.currentTimeMillis();
-            totalCount = 1000000;
         }
-        txCountMap.put(chainId, totalCount);
+    }
+
+    //tx_table只存储最近100万条数据
+    public void saveTxList(int chainId, List<TransactionInfo> txList) {
+        if (txList.isEmpty()) {
+            return;
+        }
+        long time1, time2;
+        time1 = System.currentTimeMillis();
+//        //当交易记录表超过100万条时，首先删除要最开始保存的记录
+//        totalCount += txList.size();
+//        if (totalCount > 1000000) {
+//            int deleteCount = (int) (totalCount - 1000000);
+//            BasicDBObject fields = new BasicDBObject();
+//            fields.append("_id", 1);
+//            List<Document> docList = this.mongoDBService.pageQuery(TX_TABLE + chainId, null, fields, Sorts.ascending("createTime"), 1, deleteCount);
+//            List<String> hashList = new ArrayList<>();
+//            for (Document document : docList) {
+//                hashList.add(document.getString("_id"));
+//            }
+//            mongoDBService.delete(TX_TABLE + chainId, Filters.in("_id", hashList));
+////            time2 = System.currentTimeMillis();
+////            System.out.println("-----------delete, use: " + (time2 - time1));
+////            time1 = System.currentTimeMillis();
+//            totalCount = 1000000;
+//        }
 
         InsertManyOptions options = new InsertManyOptions();
         options.ordered(false);

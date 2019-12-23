@@ -729,7 +729,7 @@ public class SyncService {
                 tokenInfo = processAccountNrc20(chainId, contractInfo, tokenTransfer.getFromAddress(), new BigInteger(tokenTransfer.getValue()), -1);
                 tokenTransfer.setFromBalance(tokenInfo.getBalance().toString());
             }
-            if (tokenTransfer.getToAddress() != null) {
+            if(tokenTransfer.getToAddress() != null) {
                 tokenInfo = processAccountNrc20(chainId, contractInfo, tokenTransfer.getToAddress(), new BigInteger(tokenTransfer.getValue()), 1);
                 tokenTransfer.setToBalance(tokenInfo.getBalance().toString());
             }
