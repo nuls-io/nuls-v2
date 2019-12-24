@@ -139,7 +139,7 @@ public class CreateContractTxProcessor {
                 return result;
             }
             // add by pierre at 2019-11-02 调用账本模块，登记资产id，当NRC20合约存在[transferCrossChain]方法时，才登记资产id 需要协议升级 done
-            if(ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_V230 ) {
+            if(ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_V240 ) {
                 List<ProgramMethod> methods = contractHelper.getAllMethods(chainId, txData.getCode());
                 boolean isNewNrc20 = false;
                 for(ProgramMethod method : methods) {
@@ -187,7 +187,7 @@ public class CreateContractTxProcessor {
             Log.warn("failed to trace create rollback log, error is {}", e.getMessage());
         }
         // add by pierre at 2019-11-02 调用账本模块，回滚已登记的资产id 需要协议升级 done
-        if(ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_V230 && contractResult.isNrc20()) {
+        if(ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_V240 && contractResult.isNrc20()) {
             LedgerCall.rollBackNRC20Assets(chainId, AddressTool.getStringAddressByBytes(contractAddress));
             // 清理缓存
             Chain chain = contractHelper.getChain(chainId);

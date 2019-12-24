@@ -157,7 +157,7 @@ public class ContractUtil {
                 break;
             // add by pierre at 2019-11-02 需要协议升级 done
             case CROSS_CHAIN:
-                if(ProtocolGroupManager.getCurrentVersion(tx.getChainId()) < ContractContext.UPDATE_VERSION_V230) {
+                if(ProtocolGroupManager.getCurrentVersion(tx.getChainId()) < ContractContext.UPDATE_VERSION_V240) {
                     break;
                 }
                 contractData = parseCrossChainTx(tx, chainManager);
@@ -632,7 +632,7 @@ public class ContractUtil {
                 break;
             // pierre 标记 需要协议升级 done
             case CROSS_CHAIN:
-                if(ProtocolGroupManager.getCurrentVersion(chainId) < ContractContext.UPDATE_VERSION_V230) {
+                if(ProtocolGroupManager.getCurrentVersion(chainId) < ContractContext.UPDATE_VERSION_V240) {
                     break;
                 }
                 resultTx = new CrossTokenContractTransaction();

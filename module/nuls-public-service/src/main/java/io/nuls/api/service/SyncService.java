@@ -210,7 +210,7 @@ public class SyncService {
             } else if (tx.getType() == TxType.CROSS_CHAIN) {
                 processCrossTransferTx(chainId, tx);
                 // add by pierre at 2019-12-23 特殊跨链转账交易，从平行链跨链转回主网的NRC20资产
-                processCrossTransferTxForNRC20(chainId, tx);
+                processCrossTransferTxForNRC20TransferBack(chainId, tx);
                 // end code by pierre
             } else if (tx.getType() == TxType.REGISTER_CHAIN_AND_ASSET) {
                 processRegChainTx(chainId, tx);
@@ -222,6 +222,10 @@ public class SyncService {
                 processCancelAssetTx(chainId, tx);
             } else if (tx.getType() == TxType.CONTRACT_RETURN_GAS) {
                 processReturnGasTx(chainId, tx);
+            } else if (tx.getType() == TxType.CONTRACT_TOKEN_CROSS_TRANSFER) {
+                processCrossTransferTxForNRC20TransferOut(chainId, tx);
+            } else if (tx.getType() == TxType.LEDGER_ASSET_REG_TRANSFER) {
+                processLedgerAssetRegTransferTx(chainId, tx);
             }
         }
     }
@@ -324,7 +328,44 @@ public class SyncService {
         }
     }
 
-    private void processCrossTransferTxForNRC20(int chainId, TransactionInfo tx) {
+    private void processCrossTransferTxForNRC20TransferOut(int chainId, TransactionInfo tx) {
+        addressSet.clear();
+
+        if (tx.getCoinFroms() != null) {
+            for (CoinFromInfo input : tx.getCoinFroms()) {
+                //如果地址不是本链的地址，不参与计算与存储
+                if (chainId != AddressTool.getChainIdByAddress(input.getAddress())) {
+                    continue;
+                }
+                addressSet.add(input.getAddress());
+                AccountLedgerInfo ledgerInfo = calcBalance(chainId, input);
+                txRelationInfoSet.add(new TxRelationInfo(input, tx, ledgerInfo.getTotalBalance()));
+            }
+        }
+
+        if (tx.getCoinTos() != null) {
+            for (CoinToInfo output : tx.getCoinTos()) {
+                //如果地址不是本链的地址，不参与计算与存储
+                if (chainId != AddressTool.getChainIdByAddress(output.getAddress())) {
+                    continue;
+                }
+                addressSet.add(output.getAddress());
+                AccountLedgerInfo ledgerInfo = calcBalance(chainId, output);
+                txRelationInfoSet.add(new TxRelationInfo(output, tx, ledgerInfo.getTotalBalance()));
+            }
+        }
+
+        for (String address : addressSet) {
+            AccountInfo accountInfo = queryAccountInfo(chainId, address);
+            accountInfo.setTxCount(accountInfo.getTxCount() + 1);
+        }
+    }
+
+    private void processLedgerAssetRegTransferTx(int chainId, TransactionInfo tx) {
+        processTransferTx(chainId, tx);
+    }
+
+    private void processCrossTransferTxForNRC20TransferBack(int chainId, TransactionInfo tx) {
         if(tx.getTxData() != null && tx.getTxData() instanceof ContractCallInfo) {
             ContractCallInfo callInfo = (ContractCallInfo) tx.getTxData();
             ContractInfo contractInfo = queryContractInfo(chainId, callInfo.getContractAddress());

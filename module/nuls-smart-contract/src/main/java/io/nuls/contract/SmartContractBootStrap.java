@@ -257,7 +257,7 @@ public class SmartContractBootStrap extends RpcModule {
             Map<Integer, Chain> chainMap = chainManager.getChainMap();
             for (Chain chain : chainMap.values()) {
                 int chainId = chain.getChainId();
-                if(ProtocolGroupManager.getCurrentVersion(chainId) < ContractContext.UPDATE_VERSION_V230) {
+                if(ProtocolGroupManager.getCurrentVersion(chainId) < ContractContext.UPDATE_VERSION_V240) {
                     continue;
                 }
                 List<Map> regTokenList;

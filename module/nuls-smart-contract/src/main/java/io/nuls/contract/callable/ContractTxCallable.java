@@ -135,7 +135,7 @@ public class ContractTxCallable implements Callable<ContractResult> {
                     break;
                 // add by pierre at 2019-10-20 需要协议升级 done
                 case CROSS_CHAIN:
-                    if(ProtocolGroupManager.getCurrentVersion(chainId) < ContractContext.UPDATE_VERSION_V230) {
+                    if(ProtocolGroupManager.getCurrentVersion(chainId) < ContractContext.UPDATE_VERSION_V240) {
                         break;
                     }
                 // end code by pierre
@@ -159,7 +159,7 @@ public class ContractTxCallable implements Callable<ContractResult> {
             // pierre 标记 需要协议升级 done
             if(!contractResult.isSuccess()) {
                 Log.error("Failed TxType [{}] Execute ContractResult is {}", tx.getType(), contractResult.toString());
-                if(ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_V230) {
+                if(ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_V240) {
                     contractResult.setGasUsed(contractData.getGasLimit());
                 }
             }

@@ -341,7 +341,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             //Log.warn(programInvoke.toString());
             //Log.info("this.contractObjectRefCount: {}", this.contractObjectRefCount);
             //Log.info("vm.heap.objectRefCount: {}", vm.heap.objectRefCount);
-            boolean isUpgradedV230 = ProtocolGroupManager.getCurrentVersion(getCurrentChainId()) >= ContractContext.UPDATE_VERSION_V230;
+            boolean isUpgradedV230 = ProtocolGroupManager.getCurrentVersion(getCurrentChainId()) >= ContractContext.UPDATE_VERSION_V240;
             if(isUpgradedV230) {
                 if(contractObjects == null) {
                     contractObjects = new HashMap<>();

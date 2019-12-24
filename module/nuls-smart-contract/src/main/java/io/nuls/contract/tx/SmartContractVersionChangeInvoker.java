@@ -37,7 +37,7 @@ public class SmartContractVersionChangeInvoker implements VersionChangeInvoker {
         for (Chain chain : chainMap.values()) {
             int chainId = chain.getChainId();
             Short version = ProtocolGroupManager.getCurrentVersion(chainId);
-            if(version != ContractContext.UPDATE_VERSION_V230) {
+            if(version != ContractContext.UPDATE_VERSION_V240) {
                 continue;
             }
             Log.info("协议升级成功，向账本模块获取token资产列表，chainId: [{}], 版本为: [{}]", chainId, version);

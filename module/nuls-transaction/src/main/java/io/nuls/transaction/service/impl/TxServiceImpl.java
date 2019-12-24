@@ -757,7 +757,7 @@ public class TxServiceImpl implements TxService {
                             boolean isSmartContractTx = moduleCode.equals(ModuleE.SC.abbr);
                             boolean isCrossTx = moduleCode.equals(ModuleE.CC.abbr);
                             // add by pierre at 2019-11-02 跨链转账交易发送到智能合约模块进行解析，是否为合约资产跨链转账 需要协议升级 done
-                            if(ProtocolGroupManager.getCurrentVersion(chain.getChainId()) >= TxContext.UPDATE_VERSION_V230) {
+                            if(ProtocolGroupManager.getCurrentVersion(chain.getChainId()) >= TxContext.UPDATE_VERSION_V240) {
                                 boolean isCrossTransferTx = TxType.CROSS_CHAIN == transaction.getType();
                                 if(!isSmartContractTx && txConfig.isCollectedSmartContractModule()) {
                                     isSmartContractTx = isCrossTransferTx;
@@ -1413,7 +1413,7 @@ public class TxServiceImpl implements TxService {
             }
             boolean isSmartContractTx = TxManager.isUnSystemSmartContract(txRegister);
             // add by pierre at 2019-11-02 跨链转账交易发送到智能合约模块进行解析，是否为合约资产跨链转账 需要协议升级 done
-            if(ProtocolGroupManager.getCurrentVersion(chain.getChainId()) >= TxContext.UPDATE_VERSION_V230) {
+            if(ProtocolGroupManager.getCurrentVersion(chain.getChainId()) >= TxContext.UPDATE_VERSION_V240) {
                 boolean isCrossTransferTx = TxType.CROSS_CHAIN == type;
                 if(!isSmartContractTx && txConfig.isCollectedSmartContractModule()) {
                     isSmartContractTx = isCrossTransferTx;

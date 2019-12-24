@@ -72,7 +72,7 @@ public class TransactionCommitAdvice implements CommonAdvice {
                 }
             }
             // add by pierre at 2019-12-01 处理type10交易的业务提交, 需要协议升级 done
-            if(ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_V230) {
+            if(ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_V240) {
                 List<Transaction> crossTxList = txList.stream().filter(tx -> tx.getType() == TxType.CROSS_CHAIN).collect(Collectors.toList());
                 callContractProcessor.commit(chainId, crossTxList, header);
             }

@@ -543,7 +543,7 @@ public class NativeUtils {
         ObjectRef argsRef = (ObjectRef) methodArgs.invokeArgs[1];
         String cmdName = frame.heap.runToString(cmdNameRef);
         if(ContractConstant.CMD_GET_CROSS_TOKEN_SYSTEM_CONTRACT.equals(cmdName)) {
-            if(ProtocolGroupManager.getCurrentVersion(currentChainId) < ContractContext.UPDATE_VERSION_V230 ) {
+            if(ProtocolGroupManager.getCurrentVersion(currentChainId) < ContractContext.UPDATE_VERSION_V240 ) {
                 throw new ErrorException(
                         String.format("Invoke external cmd failed. There is no registration information. chainId: [%s] cmdName: [%s](0)",
                                 currentChainId, cmdName), frame.vm.getGasUsed(), null);
@@ -610,7 +610,7 @@ public class NativeUtils {
         ObjectRef objectRef;
         // add by pierre at 2019-11-01 token跨链转出命令 需要协议升级 done
         if(ContractConstant.CMD_TOKEN_OUT_CROSS_CHAIN.equals(cmdName)) {
-            if(ProtocolGroupManager.getCurrentVersion(currentChainId) < ContractContext.UPDATE_VERSION_V230 ) {
+            if(ProtocolGroupManager.getCurrentVersion(currentChainId) < ContractContext.UPDATE_VERSION_V240 ) {
                 throw new ErrorException(
                         String.format("Invoke external cmd failed. There is no registration information. chainId: [%s] cmdName: [%s](1)",
                                 currentChainId, cmdName), frame.vm.getGasUsed(), null);
