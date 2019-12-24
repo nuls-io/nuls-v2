@@ -28,6 +28,26 @@ public class Config implements ModuleConfig {
 
     private String language;
 
+    private String addressPrefix;
+
+    private String symbol;
+
+    public String getAddressPrefix() {
+        return addressPrefix;
+    }
+
+    public void setAddressPrefix(String addressPrefix) {
+        this.addressPrefix = addressPrefix;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
+    }
+
     public boolean isMainChain() {
         return chainId.equals(mainChainId);
     }

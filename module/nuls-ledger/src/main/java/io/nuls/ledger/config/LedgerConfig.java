@@ -18,6 +18,11 @@ public class LedgerConfig implements ModuleConfig {
     private String encoding;
     private int unconfirmedTxExpired;
     private String blackHolePublicKey;
+    private int chainId;
+    private int assetId;
+    private int assetRegDestroyAmount = 200;
+    private int decimals = 8;
+    private String  symbol;
 
     public String getBlackHolePublicKey() {
         return blackHolePublicKey;
@@ -70,5 +75,46 @@ public class LedgerConfig implements ModuleConfig {
 
     public void setLogLevel(String logLevel) {
         this.logLevel = logLevel;
+    }
+
+    public int getAssetRegDestroyAmount() {
+        return assetRegDestroyAmount;
+    }
+
+    public void setAssetRegDestroyAmount(int assetRegDestroyAmount) {
+        this.assetRegDestroyAmount = assetRegDestroyAmount;
+    }
+
+
+    public int getDecimals() {
+        return decimals;
+    }
+
+    public void setDecimals(int decimals) {
+        this.decimals = decimals;
+    }
+
+    public int getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(int chainId) {
+        this.chainId = chainId;
+    }
+
+    public int getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(int assetId) {
+        this.assetId = assetId;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
     }
 }

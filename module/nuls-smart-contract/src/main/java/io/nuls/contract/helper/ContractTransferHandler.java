@@ -48,6 +48,7 @@ import java.util.*;
 import static io.nuls.contract.constant.ContractConstant.MININUM_TRANSFER_AMOUNT;
 import static io.nuls.contract.constant.ContractErrorCode.TOO_SMALL_AMOUNT;
 import static io.nuls.contract.util.ContractUtil.*;
+import static io.nuls.core.constant.CommonCodeConstanst.FAILED;
 
 /**
  * @author: PierreLuo
@@ -59,60 +60,70 @@ public class ContractTransferHandler {
     @Autowired
     private ContractHelper contractHelper;
 
-    public boolean handleContractTransfer(int chainId, long blockTime, ContractResult contractResult, ContractTempBalanceManager tempBalanceManager) {
-        this.refreshTempBalance(chainId, contractResult, tempBalanceManager);
-        return this.handleContractTransferTxs(contractResult, tempBalanceManager, chainId, blockTime);
-    }
+    //public boolean handleContractTransfer(int chainId, long blockTime, ContractResult contractResult, ContractTempBalanceManager tempBalanceManager) {
+    //    this.refreshTempBalance(chainId, contractResult, tempBalanceManager);
+    //    return this.handleContractTransferTxs(contractResult, tempBalanceManager, chainId, blockTime);
+    //}
 
-    private void refreshTempBalance(int chainId, ContractResult contractResult, ContractTempBalanceManager tempBalanceManager) {
-        // 增加转入, 扣除转出
-        List<ProgramTransfer> transfers = contractResult.getTransfers();
-        if (transfers != null && transfers.size() > 0) {
-            LinkedHashMap<String, BigInteger>[] contracts = this.filterContractValue(chainId, transfers);
-            LinkedHashMap<String, BigInteger> contractFromValue = contracts[0];
-            LinkedHashMap<String, BigInteger> contractToValue = contracts[1];
-            byte[] contractBytes;
-            Set<Map.Entry<String, BigInteger>> tos = contractToValue.entrySet();
-            for (Map.Entry<String, BigInteger> to : tos) {
-                contractBytes = asBytes(to.getKey());
-                // 初始化临时余额
-                tempBalanceManager.getBalance(contractBytes);
-                tempBalanceManager.addTempBalance(contractBytes, to.getValue());
-            }
-            Set<Map.Entry<String, BigInteger>> froms = contractFromValue.entrySet();
-            for (Map.Entry<String, BigInteger> from : froms) {
-                contractBytes = asBytes(from.getKey());
-                ContractBalance balance = tempBalanceManager.getBalance(contractBytes).getData();
-                if (StringUtils.isBlank(balance.getPreNonce())) {
-                    balance.setPreNonce(balance.getNonce());
+    public boolean refreshTempBalance(int chainId, List<ProgramTransfer> transfers, ContractTempBalanceManager tempBalanceManager) {
+        try {
+            // 增加转入, 扣除转出
+            if (transfers != null && transfers.size() > 0) {
+                LinkedHashMap<String, BigInteger>[] contracts = this.filterContractValue(chainId, transfers);
+                LinkedHashMap<String, BigInteger> contractFromValue = contracts[0];
+                LinkedHashMap<String, BigInteger> contractToValue = contracts[1];
+                byte[] contractBytes;
+                Set<Map.Entry<String, BigInteger>> tos = contractToValue.entrySet();
+                for (Map.Entry<String, BigInteger> to : tos) {
+                    contractBytes = asBytes(to.getKey());
+                    // 初始化临时余额
+                    tempBalanceManager.getBalance(contractBytes);
+                    tempBalanceManager.addTempBalance(contractBytes, to.getValue());
                 }
-                tempBalanceManager.minusTempBalance(contractBytes, from.getValue());
+                Set<Map.Entry<String, BigInteger>> froms = contractFromValue.entrySet();
+                for (Map.Entry<String, BigInteger> from : froms) {
+                    contractBytes = asBytes(from.getKey());
+                    ContractBalance balance = tempBalanceManager.getBalance(contractBytes).getData();
+                    if (StringUtils.isBlank(balance.getPreNonce())) {
+                        balance.setPreNonce(balance.getNonce());
+                    }
+                    tempBalanceManager.minusTempBalance(contractBytes, from.getValue());
+                }
             }
+            return true;
+        } catch (Exception e) {
+            Log.error(e);
+            return false;
         }
     }
 
-    private void rollbackContractTempBalance(int chainId, ContractResult contractResult, ContractTempBalanceManager tempBalanceManager) {
-        // 增加转出, 扣除转入
-        List<ProgramTransfer> transfers = contractResult.getTransfers();
-        if (transfers != null && transfers.size() > 0) {
-            LinkedHashMap<String, BigInteger>[] contracts = this.filterContractValue(chainId, transfers);
-            LinkedHashMap<String, BigInteger> contractFromValue = contracts[0];
-            LinkedHashMap<String, BigInteger> contractToValue = contracts[1];
-            byte[] contractBytes;
-            Set<Map.Entry<String, BigInteger>> froms = contractFromValue.entrySet();
-            for (Map.Entry<String, BigInteger> from : froms) {
-                contractBytes = asBytes(from.getKey());
-                ContractBalance balance = tempBalanceManager.getBalance(contractBytes).getData();
-                if (StringUtils.isNotBlank(balance.getPreNonce())) {
-                    balance.setNonce(balance.getPreNonce());
+    public boolean rollbackContractTempBalance(int chainId, List<ProgramTransfer> transfers, ContractTempBalanceManager tempBalanceManager) {
+        try {
+            // 增加转出, 扣除转入
+            if (transfers != null && transfers.size() > 0) {
+                LinkedHashMap<String, BigInteger>[] contracts = this.filterContractValue(chainId, transfers);
+                LinkedHashMap<String, BigInteger> contractFromValue = contracts[0];
+                LinkedHashMap<String, BigInteger> contractToValue = contracts[1];
+                byte[] contractBytes;
+                Set<Map.Entry<String, BigInteger>> froms = contractFromValue.entrySet();
+                for (Map.Entry<String, BigInteger> from : froms) {
+                    contractBytes = asBytes(from.getKey());
+                    ContractBalance balance = tempBalanceManager.getBalance(contractBytes).getData();
+                    if (StringUtils.isNotBlank(balance.getPreNonce())) {
+                        balance.setNonce(balance.getPreNonce());
+                    }
+                    tempBalanceManager.addTempBalance(contractBytes, from.getValue());
                 }
-                tempBalanceManager.addTempBalance(contractBytes, from.getValue());
+                Set<Map.Entry<String, BigInteger>> tos = contractToValue.entrySet();
+                for (Map.Entry<String, BigInteger> to : tos) {
+                    contractBytes = asBytes(to.getKey());
+                    tempBalanceManager.minusTempBalance(contractBytes, to.getValue());
+                }
             }
-            Set<Map.Entry<String, BigInteger>> tos = contractToValue.entrySet();
-            for (Map.Entry<String, BigInteger> to : tos) {
-                contractBytes = asBytes(to.getKey());
-                tempBalanceManager.minusTempBalance(contractBytes, to.getValue());
-            }
+            return true;
+        } catch (Exception e) {
+            Log.error(e);
+            return false;
         }
     }
 
@@ -139,7 +150,7 @@ public class ContractTransferHandler {
         return contracts;
     }
 
-    private boolean handleContractTransferTxs(ContractResult contractResult, ContractTempBalanceManager tempBalanceManager, int chainId, long blockTime) {
+    public boolean handleContractTransferTxs(int chainId, long blockTime, ContractResult contractResult, ContractTempBalanceManager tempBalanceManager) {
         boolean isCorrectContractTransfer = true;
         List<ProgramTransfer> transfers = contractResult.getTransfers();
         // 创建合约转账(从合约转出)交易
@@ -168,7 +179,7 @@ public class ContractTransferHandler {
                 contractResult.setError(true);
                 contractResult.setErrorMessage(result.getErrorCode().getMsg());
                 // 回滚临时余额
-                this.rollbackContractTempBalance(chainId, contractResult, tempBalanceManager);
+                this.rollbackContractTempBalance(chainId, contractResult.getTransfers(), tempBalanceManager);
                 // 清空内部转账列表
                 transfers.clear();
             }

@@ -41,6 +41,34 @@ public class Getfield {
             return;
         }
         Object value = frame.heap.getField(objectRef, fieldName);
+        //if(value instanceof ObjectRef) {
+        //    try {
+        //        ObjectRef objectRef1 = (ObjectRef) value;
+        //        if(objectRef1.getVariableType().equals(VariableType.STRING_TYPE)) {
+        //            Log.info("fieldName: {}, fieldDesc: {}, valueRef: {}, value: {}", fieldName, fieldDesc, value, frame.heap.runToString(objectRef1));
+        //        } else if(objectRef1.getVariableType().equals(VariableType.HASH_MAP_TYPE)){
+        //            Log.info("fieldName: {}, fieldDesc: {}, hash map valueRef: {}", fieldName, fieldDesc, value);
+        //        } else if(objectRef1.getVariableType().equals(VariableType.INT_TYPE)){
+        //            Log.info("fieldName: {}, fieldDesc: {}, int valueRef: {}", fieldName, fieldDesc, value);
+        //        } else if(objectRef1.getVariableType().equals(VariableType.INT_WRAPPER_TYPE)){
+        //            Log.info("fieldName: {}, fieldDesc: {}, integer valueRef: {}", fieldName, fieldDesc, value);
+        //        } else if(objectRef1.getVariableType().getType().toLowerCase().contains("map")) {
+        //            Log.info("fieldName: {}, fieldDesc: {}, map valueRef: {}", fieldName, fieldDesc, value);
+        //        } else if(objectRef1.getVariableType().equals(VariableType.INT_ARRAY_TYPE)) {
+        //            Log.info("fieldName: {}, fieldDesc: {}, int array valueRef: {}", fieldName, fieldDesc, value);
+        //        } else if(objectRef1.getVariableType().equals(VariableType.CHAR_ARRAY_TYPE)) {
+        //            //Log.info("fieldName: {}, fieldDesc: {}, char array valueRef: {}", fieldName, fieldDesc, value);
+        //        } else if(objectRef1.getVariableType().equals(VariableType.STRING_ARRAY_TYPE)) {
+        //            Log.info("fieldName: {}, fieldDesc: {}, string array valueRef: {}", fieldName, fieldDesc, value);
+        //        } else if("integerArray".equals(fieldName) && objectRef1.getVariableType().getType().toLowerCase().contains("integer")) {
+        //            Log.info("fieldName: {}, fieldDesc: {}, integer array valueRef: {}", fieldName, fieldDesc, value);
+        //        } else if(objectRef1.getVariableType().getType().toLowerCase().contains("decimal")) {
+        //            Log.info("fieldName: {}, fieldDesc: {}, decimal[0] valueRef: {}", fieldName, fieldDesc, value);
+        //        } else if(objectRef1.getVariableType().getDesc().toLowerCase().contains("decimal")) {
+        //            Log.info("fieldName: {}, fieldDesc: {}, decimal[1] valueRef: {}", fieldName, fieldDesc, value);
+        //        }
+        //    } catch (Exception e) {}
+        //}
         if (Descriptors.LONG_DESC.equals(fieldDesc)) {
             frame.operandStack.pushLong((long) value);
         } else if (Descriptors.DOUBLE_DESC.equals(fieldDesc)) {

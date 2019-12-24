@@ -41,7 +41,9 @@ import io.nuls.chain.util.LoggerUtil;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Service;
 import io.nuls.core.log.Log;
+import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.model.ByteUtils;
+import io.nuls.core.model.FormatValidUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -119,10 +121,9 @@ public class ValidateServiceImpl implements ValidateService {
         return ChainEventResult.getResultSuccess();
     }
 
-    @Override
-    public ChainEventResult batchChainRegValidator(BlockChain blockChain, Asset asset, Map<String, Integer> tempChains,
-                                                   Map<String, Integer> tempAssets) throws Exception {
-        /*
+    public ChainEventResult batchChainRegBaseValidator(BlockChain blockChain, Asset asset, Map<String, Integer> tempChains,
+                                                       Map<String, Integer> tempAssets) throws Exception {
+           /*
             判断链ID是否已经存在
             Determine if the chain ID already exists
              */
@@ -152,11 +153,41 @@ public class ValidateServiceImpl implements ValidateService {
             LoggerUtil.logger().error("chainId={} assetId={} getSignatureByzantineRatio={} less than {}", asset.getChainId(), asset.getAssetId(), blockChain.getSignatureByzantineRatio(), CmConstants.MIN_SIGNATURE_BFT_RATIO);
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_SIGNATURE_BYZANTINE_RATIO);
         }
+        return ChainEventResult.getResultSuccess();
+    }
+
+    @Override
+    public ChainEventResult batchChainRegValidator(BlockChain blockChain, Asset asset, Map<String, Integer> tempChains,
+                                                   Map<String, Integer> tempAssets) throws Exception {
+        ChainEventResult chainEventResult = batchChainRegBaseValidator(blockChain, asset, tempChains,
+                tempAssets);
+
+        return chainEventResult;
+    }
+
+    @Override
+    public ChainEventResult batchChainRegValidatorV3(BlockChain blockChain, Asset asset, Map<String, Integer> tempChains,
+                                                     Map<String, Integer> tempAssets) throws Exception {
+        ChainEventResult chainEventResult = batchChainRegBaseValidator(blockChain, asset, tempChains,
+                tempAssets);
+        if (!chainEventResult.isSuccess()) {
+            return chainEventResult;
+        }
         if (asset.getDecimalPlaces() < Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMin()) || asset.getDecimalPlaces() > Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMax())) {
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_DECIMALPLACES);
         }
-        if (null == asset.getSymbol() || asset.getSymbol().length() > Integer.valueOf(nulsChainConfig.getAssetSymbolMax()) || asset.getSymbol().length() < 1) {
-            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_SYMBOL_LENGTH);
+        if (!FormatValidUtils.validTokenNameOrSymbol(asset.getSymbol())) {
+            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_SYMBOL);
+        }
+        if (!FormatValidUtils.validTokenNameOrSymbol(asset.getAssetName())) {
+            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_NAME);
+        }
+        //判断黑洞资产与锁定资产
+        if(!BigIntegerUtils.isEqual(asset.getDepositNuls(),nulsChainConfig.getAssetDepositNuls())){
+            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_DEPOSITNULS);
+        }
+        if(!BigIntegerUtils.isEqual(asset.getDestroyNuls(),nulsChainConfig.getAssetDestroyNuls())){
+            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_DEPOSITNULS);
         }
         return ChainEventResult.getResultSuccess();
     }
@@ -174,7 +205,29 @@ public class ValidateServiceImpl implements ValidateService {
         }
         return ChainEventResult.getResultSuccess();
     }
-
+    @Override
+    public ChainEventResult batchAssetRegValidatorV3(Asset asset, Map<String, Integer> tempAssets) throws Exception {
+        if (assetService.assetExist(asset, tempAssets)) {
+            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_ID_EXIST);
+        }
+        if (asset.getDecimalPlaces() < Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMin()) || asset.getDecimalPlaces() > Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMax())) {
+            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_DECIMALPLACES);
+        }
+        if (!FormatValidUtils.validTokenNameOrSymbol(asset.getSymbol())) {
+            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_SYMBOL);
+        }
+        if (!FormatValidUtils.validTokenNameOrSymbol(asset.getAssetName())) {
+            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_NAME);
+        }
+        //判断黑洞资产与锁定资产
+        if(!BigIntegerUtils.isEqual(asset.getDepositNuls(),nulsChainConfig.getAssetDepositNuls())){
+            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_DEPOSITNULS);
+        }
+        if(!BigIntegerUtils.isEqual(asset.getDestroyNuls(),nulsChainConfig.getAssetDestroyNuls())){
+            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_DEPOSITNULS);
+        }
+        return ChainEventResult.getResultSuccess();
+    }
     @Override
     public ChainEventResult assetCirculateValidator(int fromChainId, int toChainId, Map<String, BigInteger> fromAssetMap, Map<String, BigInteger> toAssetMap) throws Exception {
         BlockChain fromChain = chainService.getChain(fromChainId);
@@ -209,10 +262,12 @@ public class ValidateServiceImpl implements ValidateService {
                 return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_NOT_EXIST);
             }
             ChainAsset chainAsset = assetService.getChainAsset(fromChainId, CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
-            BigDecimal currentAsset = new BigDecimal(chainAsset.getInitNumber()).add(new BigDecimal(chainAsset.getInNumber())).subtract(new BigDecimal(chainAsset.getOutNumber()));
-            if (currentAsset.subtract(new BigDecimal(fromAssetMap.get(assetKey))).doubleValue() < 0) {
-                LoggerUtil.logger().error("fromChainId={},assetKey={}currentAsset={} fromAsset={} BALANCE_NOT_ENOUGH", fromChainId, assetKey, currentAsset, fromAssetMap.get(assetKey));
-                return ChainEventResult.getResultFail(CmErrorCode.BALANCE_NOT_ENOUGH);
+            if(!chainAsset.isFromChainAsset()) {
+                BigInteger currentAsset = chainAsset.getInitNumber().add(chainAsset.getInNumber()).subtract(chainAsset.getOutNumber());
+                if (BigIntegerUtils.isLessThan(currentAsset,fromAssetMap.get(assetKey))) {
+                    LoggerUtil.logger().error("fromChainId={},assetKey={}currentAsset={} fromAsset={} BALANCE_NOT_ENOUGH", fromChainId, assetKey, currentAsset, fromAssetMap.get(assetKey));
+                    return ChainEventResult.getResultFail(CmErrorCode.BALANCE_NOT_ENOUGH);
+                }
             }
         }
         return ChainEventResult.getResultSuccess();

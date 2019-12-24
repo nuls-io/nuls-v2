@@ -108,7 +108,6 @@ public class CrossChainBootStrap extends BaseCrossChainBootStrap {
                 Log.debug("wait depend modules ready");
                 Thread.sleep(2000L);
             }
-            chainManager.runChain();
             return true;
         }catch (Exception e){
             Log.error(e);
@@ -160,6 +159,11 @@ public class CrossChainBootStrap extends BaseCrossChainBootStrap {
             if (ModuleE.AC.abbr.equals(module.getName())) {
                 AccountCall.addAddressPrefix(chainManager.getPrefixList());
             }
+
+            //智能合约交易注册
+            if (module.getName().equals(ModuleE.SC.abbr)) {
+                chainManager.registerContractTx();
+            }
         }catch (Exception e){
             Log.error(e);
         }
@@ -168,6 +172,7 @@ public class CrossChainBootStrap extends BaseCrossChainBootStrap {
     @Override
     public RpcModuleState onDependenciesReady() {
         Log.debug("cc onDependenciesReady");
+        chainManager.runChain();
         return RpcModuleState.Running;
     }
 

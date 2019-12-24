@@ -25,9 +25,12 @@ package io.nuls.contract.config;
 
 import io.nuls.contract.model.bo.config.ConfigBean;
 import io.nuls.core.basic.ModuleConfig;
+import io.nuls.core.basic.VersionChangeInvoker;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.annotation.Configuration;
 import io.nuls.core.rpc.model.ModuleE;
+
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * @author: PierreLuo
@@ -61,6 +64,16 @@ public class ContractConfig implements ModuleConfig {
     private String packageLogLevels;
 
     private String blackHolePublicKey;
+
+    private String crossTokenSystemContract;
+
+    public String getCrossTokenSystemContract() {
+        return crossTokenSystemContract;
+    }
+
+    public void setCrossTokenSystemContract(String crossTokenSystemContract) {
+        this.crossTokenSystemContract = crossTokenSystemContract;
+    }
 
     public int getChainId() {
         return chainId;
@@ -148,6 +161,12 @@ public class ContractConfig implements ModuleConfig {
         configBean.setChainId(chainId);
         configBean.setMaxViewGas(maxViewGas);
         return configBean;
+    }
+
+    @Override
+    public VersionChangeInvoker getVersionChangeInvoker() throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        Class<?> aClass = Class.forName("io.nuls.contract.tx.SmartContractVersionChangeInvoker");
+        return (VersionChangeInvoker) aClass.getDeclaredConstructor().newInstance();
     }
 
 }

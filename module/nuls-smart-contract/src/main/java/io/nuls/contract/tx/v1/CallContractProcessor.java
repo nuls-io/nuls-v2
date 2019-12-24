@@ -79,7 +79,7 @@ public class CallContractProcessor implements TransactionProcessor {
                     txHash = tx.getHash().toString();
                     contractResult = contractResultMap.get(txHash);
                     if (contractResult == null) {
-                        Log.warn("empty contract result with txHash: {}", txHash);
+                        Log.warn("empty contract result with txHash: {}, txType: {}", txHash, tx.getType());
                         continue;
                     }
                     wrapperTx = contractResult.getTx();

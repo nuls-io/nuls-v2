@@ -134,15 +134,15 @@ public class MongoChainServiceImpl implements ChainService {
         return DocumentTransferTool.toInfo(document, "chainId", SyncInfo.class);
     }
 
-    public SyncInfo saveNewSyncInfo(int chainId, long newHeight) {
-        SyncInfo syncInfo = new SyncInfo(chainId, newHeight, 0);
+    public SyncInfo saveNewSyncInfo(int chainId, long newHeight, int version) {
+        SyncInfo syncInfo = new SyncInfo(chainId, newHeight, version, 0);
         Document document = DocumentTransferTool.toDocument(syncInfo, "chainId");
         if (newHeight == 0) {
             Bson query = Filters.eq("_id", chainId);
             Document document1 = mongoDBService.findOne(SYNC_INFO_TABLE, query);
-            if(document1 != null) {
+            if (document1 != null) {
                 mongoDBService.updateOne(SYNC_INFO_TABLE, query, document);
-            }else {
+            } else {
                 mongoDBService.insertOne(SYNC_INFO_TABLE, document);
             }
         } else {

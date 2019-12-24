@@ -32,8 +32,8 @@ import java.io.InputStream;
 
 public class ContractCodeHexString {
     public static void main(String[] args) throws IOException {
-        InputStream in = new FileInputStream(ContractCodeHexString.class.getResource("/contract.jar").getFile());
-        //InputStream in = new FileInputStream("/Users/pierreluo/IdeaProjects/NRC721Metadata/target/NRC721Metadata-test.jar");
+        //InputStream in = new FileInputStream(ContractCodeHexString.class.getResource("/contract.jar").getFile());
+        InputStream in = new FileInputStream("/Users/pierreluo/IdeaProjects/pocmContract-ConsensusEnhancement/target/pocmContract-v3-test2.jar");
         byte[] contractCode = IOUtils.toByteArray(in);
         System.out.println(Hex.encodeHexString(contractCode));
     }

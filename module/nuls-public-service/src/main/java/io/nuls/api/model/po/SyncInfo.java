@@ -6,14 +6,17 @@ public class SyncInfo {
 
     private long bestHeight;
 
+    private int version;
+
     private int step;
 
     public SyncInfo() {
     }
 
-    public SyncInfo(int chainId, long bestHeight, int step) {
+    public SyncInfo(int chainId, long bestHeight, int version, int step) {
         this.chainId = chainId;
         this.bestHeight = bestHeight;
+        this.version = version;
         this.step = step;
     }
 
@@ -43,5 +46,13 @@ public class SyncInfo {
 
     public void setStep(int step) {
         this.step = step;
+    }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
     }
 }

@@ -33,6 +33,7 @@ import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.vm.program.ProgramInvokeRegisterCmd;
 import io.nuls.contract.vm.program.ProgramMethodArg;
+import io.nuls.core.constant.TxType;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.LongUtils;
 import io.nuls.core.rpc.model.ApiModel;
@@ -102,11 +103,17 @@ public class ContractResultDto {
         this.price = result.getPrice();
         BigInteger totalFee = tx.getFee();
         this.totalFee = bigInteger2String(totalFee);
-        BigInteger actualContractFee = BigInteger.valueOf(LongUtils.mul(this.gasUsed, this.price));
-        this.actualContractFee = bigInteger2String(actualContractFee);
-        BigInteger contractFee = BigInteger.valueOf(LongUtils.mul(gasLimit, price));
-        this.refundFee = bigInteger2String(contractFee.subtract(actualContractFee));
-        this.txSizeFee = bigInteger2String(totalFee.subtract(contractFee));
+        // pierre 标记
+        if(tx.getType() == TxType.CROSS_CHAIN) {
+            this.txSizeFee = this.totalFee;
+            // end code by pierre 
+        } else {
+            BigInteger actualContractFee = BigInteger.valueOf(LongUtils.mul(this.gasUsed, this.price));
+            this.actualContractFee = bigInteger2String(actualContractFee);
+            BigInteger contractFee = BigInteger.valueOf(LongUtils.mul(gasLimit, price));
+            this.refundFee = bigInteger2String(contractFee.subtract(actualContractFee));
+            this.txSizeFee = bigInteger2String(totalFee.subtract(contractFee));
+        }
         this.value = String.valueOf(result.getValue());
         this.contractAddress = AddressTool.getStringAddressByBytes(result.getContractAddress());
         this.result = result.getResult();

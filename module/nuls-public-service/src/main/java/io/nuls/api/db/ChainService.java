@@ -24,7 +24,7 @@ public interface ChainService {
 
     ChainInfo getChainInfo(int chainId);
 
-    SyncInfo saveNewSyncInfo(int chainId, long newHeight);
+    SyncInfo saveNewSyncInfo(int chainId, long newHeight, int version);
 
     void updateStep(SyncInfo syncInfo);
 }

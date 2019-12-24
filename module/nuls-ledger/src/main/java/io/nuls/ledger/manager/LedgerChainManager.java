@@ -32,6 +32,7 @@ import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.ledger.config.LedgerConfig;
 import io.nuls.ledger.model.LedgerChain;
+import io.nuls.ledger.service.AssetRegMngService;
 import io.nuls.ledger.service.BlockDataService;
 import io.nuls.ledger.storage.Repository;
 import io.nuls.ledger.storage.impl.LgBlockSyncRepositoryImpl;
@@ -53,6 +54,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class LedgerChainManager {
     @Autowired
     BlockDataService blockDataService;
+    @Autowired
+    AssetRegMngService assetRegMngService;
     @Autowired
     LedgerConfig ledgerConfig;
     private Map<Integer, LedgerChain> chainMap = new ConcurrentHashMap<>();
@@ -102,6 +105,7 @@ public class LedgerChainManager {
      */
     private void initLedgerDatas() throws Exception {
         blockDataService.initBlockDatas();
+        assetRegMngService.initDBAssetsIdMap();
     }
 
     /**
@@ -121,13 +125,14 @@ public class LedgerChainManager {
         initRocksDb();
         initLedgerDatas();
     }
-     public void syncBlockHeight(){
-         try {
-             blockDataService.syncBlockHeight();
-         } catch (Exception e) {
-             LoggerUtil.COMMON_LOG.error(e);
-         }
-     }
+
+    public void syncBlockHeight() {
+        try {
+            blockDataService.syncBlockHeight();
+        } catch (Exception e) {
+            LoggerUtil.COMMON_LOG.error(e);
+        }
+    }
 
     public LedgerChain getChain(int key) {
         return this.chainMap.get(key);

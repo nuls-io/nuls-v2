@@ -26,6 +26,8 @@ package io.nuls.contract.tx.v1;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.protocol.CommonAdvice;
+import io.nuls.base.protocol.ProtocolGroupManager;
+import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.enums.BlockType;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.manager.ChainManager;
@@ -34,10 +36,12 @@ import io.nuls.contract.model.dto.ContractPackageDto;
 import io.nuls.contract.model.po.ContractOfflineTxHashPo;
 import io.nuls.contract.storage.ContractOfflineTxHashListStorageService;
 import io.nuls.contract.util.Log;
+import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author: PierreLuo
@@ -50,6 +54,8 @@ public class TransactionCommitAdvice implements CommonAdvice {
     private ContractHelper contractHelper;
     @Autowired
     private ContractOfflineTxHashListStorageService contractOfflineTxHashListStorageService;
+    @Autowired
+    private CallContractProcessor callContractProcessor;
 
     @Override
     public void begin(int chainId, List<Transaction> txList, BlockHeader header) {
@@ -65,6 +71,12 @@ public class TransactionCommitAdvice implements CommonAdvice {
                     contractOfflineTxHashListStorageService.saveOfflineTxHashList(chainId, header.getHash().getBytes(), new ContractOfflineTxHashPo(contractPackageDto.getOfflineTxHashList()));
                 }
             }
+            // add by pierre at 2019-12-01 处理type10交易的业务提交, 需要协议升级 done
+            if(ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_V240) {
+                List<Transaction> crossTxList = txList.stream().filter(tx -> tx.getType() == TxType.CROSS_CHAIN).collect(Collectors.toList());
+                callContractProcessor.commit(chainId, crossTxList, header);
+            }
+            // end code by pierre
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

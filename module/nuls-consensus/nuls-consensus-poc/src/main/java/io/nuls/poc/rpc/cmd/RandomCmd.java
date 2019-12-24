@@ -26,6 +26,7 @@ package io.nuls.poc.rpc.cmd;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.Log;
+import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.*;
 import io.nuls.core.rpc.model.message.Response;
@@ -47,12 +48,12 @@ public class RandomCmd extends BaseCmd {
     @Autowired
     private RandomSeedsStorageService randomSeedService;
 
-    @CmdAnnotation(cmd = "cs_random_seed_count", version = 1.0, description = "根据高度和原始种子个数生成一个随机种子并返回")
+    @CmdAnnotation(cmd = "cs_random_seed_count", version = 1.0, description = "根据最大高度和原始种子个数生成一个随机种子并返回")
     @Parameters(value = {
         @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
         @Parameter(parameterName = "height", requestType = @TypeDescriptor(value = long.class), parameterDes = "最大高度"),
         @Parameter(parameterName = "count", requestType = @TypeDescriptor(value = int.class), parameterDes = "原始种子个数"),
-        @Parameter(parameterName = "algorithm", parameterDes = "算法标识：SHA3...")
+        @Parameter(parameterName = "algorithm", parameterDes = "算法标识：SHA3, KECCAK, MERKLE")
     })
     @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = RandomSeedDTO.class))
     public Response getRandomSeedByCount(Map<String,Object> params){
@@ -71,7 +72,11 @@ public class RandomCmd extends BaseCmd {
             }
             RandomSeedDTO dto = new RandomSeedDTO();
             dto.setCount(count);
-            dto.setAlgorithm(algorithm);
+            if(StringUtils.isNotBlank(algorithm)) {
+                dto.setAlgorithm(algorithm.toUpperCase());
+            } else {
+                dto.setAlgorithm(RandomSeedCaculator.SHA3);
+            }
             BigInteger value = new BigInteger(seed);
             dto.setSeed(value.toString());
             return success(dto);
@@ -86,7 +91,7 @@ public class RandomCmd extends BaseCmd {
         @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
         @Parameter(parameterName = "startHeight", requestType = @TypeDescriptor(value = long.class), parameterDes = "起始高度"),
         @Parameter(parameterName = "endHeight", requestType = @TypeDescriptor(value = long.class), parameterDes = "截止高度"),
-        @Parameter(parameterName = "algorithm", parameterDes = "算法标识：SHA3...")
+        @Parameter(parameterName = "algorithm", parameterDes = "算法标识：SHA3, KECCAK, MERKLE")
     })
     @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = RandomSeedDTO.class))
     public Response getRandomSeedByHeight(Map<String,Object> params){
@@ -106,7 +111,11 @@ public class RandomCmd extends BaseCmd {
             }
             RandomSeedDTO dto = new RandomSeedDTO();
             dto.setCount(count);
-            dto.setAlgorithm(algorithm);
+            if(StringUtils.isNotBlank(algorithm)) {
+                dto.setAlgorithm(algorithm.toUpperCase());
+            } else {
+                dto.setAlgorithm(RandomSeedCaculator.SHA3);
+            }
             BigInteger value = new BigInteger(seed);
             dto.setSeed(value.toString());
             return success(dto);
@@ -118,8 +127,8 @@ public class RandomCmd extends BaseCmd {
     @CmdAnnotation(cmd = "cs_random_raw_seeds_count", version = 1.0, description = "根据高度查找原始种子列表并返回")
     @Parameters(value = {
         @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
-        @Parameter(parameterName = "height", requestType = @TypeDescriptor(value = long.class), parameterDes = "起始高度"),
-        @Parameter(parameterName = "count", requestType = @TypeDescriptor(value = int.class), parameterDes = "截止高度")
+        @Parameter(parameterName = "height", requestType = @TypeDescriptor(value = long.class), parameterDes = "最大高度"),
+        @Parameter(parameterName = "count", requestType = @TypeDescriptor(value = int.class), parameterDes = "原始种子个数")
     })
     @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = List.class, collectionElement = String.class))
     public Response getRandomRawSeedsByCount(Map<String,Object> params){

@@ -82,10 +82,16 @@ public class CallContractTxProcessor {
 
             Result<ContractAddressInfoPo> contractAddressInfoPoResult = contractHelper.getContractAddressInfo(chainId, contractAddress);
             if (contractAddressInfoPoResult.isFailed()) {
+                if(!contractResult.isSuccess()) {
+                    contractService.saveContractExecuteResult(chainId, tx.getHash(), contractResult);
+                }
                 return contractAddressInfoPoResult;
             }
             ContractAddressInfoPo contractAddressInfoPo = contractAddressInfoPoResult.getData();
             if (contractAddressInfoPo == null) {
+                if(!contractResult.isSuccess()) {
+                    contractService.saveContractExecuteResult(chainId, tx.getHash(), contractResult);
+                }
                 return Result.getFailed(ContractErrorCode.CONTRACT_ADDRESS_NOT_EXIST);
             }
             contractResult.setNrc20(contractAddressInfoPo.isNrc20());

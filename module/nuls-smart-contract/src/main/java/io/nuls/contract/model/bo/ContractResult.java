@@ -101,6 +101,7 @@ public class ContractResult {
 
     private transient Object txTrack;
     private transient Map<ByteArrayWrapper, ProgramAccount> accounts;
+    private transient List<Object> orderedInnerTxs = new ArrayList<>();
 
     public Map<ByteArrayWrapper, ProgramAccount> getAccounts() {
         return accounts;
@@ -435,6 +436,14 @@ public class ContractResult {
 
     public void setInvokeRegisterCmds(List<ProgramInvokeRegisterCmd> invokeRegisterCmds) {
         this.invokeRegisterCmds = invokeRegisterCmds;
+    }
+
+    public List<Object> getOrderedInnerTxs() {
+        return orderedInnerTxs;
+    }
+
+    public void setOrderedInnerTxs(List<Object> orderedInnerTxs) {
+        this.orderedInnerTxs = orderedInnerTxs;
     }
 
     public List<String> getContractTransferTxStringList() {

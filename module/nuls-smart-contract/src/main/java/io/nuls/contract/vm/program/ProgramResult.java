@@ -57,6 +57,7 @@ public class ProgramResult {
     private List<String> debugEvents = new ArrayList<>();
 
     private List<ProgramInvokeRegisterCmd> invokeRegisterCmds = new ArrayList<>();
+    private List<Object> orderedInnerTxs = new ArrayList<>();
 
     public ProgramResult revert(String errorMessage) {
         this.revert = true;
@@ -190,6 +191,14 @@ public class ProgramResult {
 
     public void setInvokeRegisterCmds(List<ProgramInvokeRegisterCmd> invokeRegisterCmds) {
         this.invokeRegisterCmds = invokeRegisterCmds;
+    }
+
+    public List<Object> getOrderedInnerTxs() {
+        return orderedInnerTxs;
+    }
+
+    public void setOrderedInnerTxs(List<Object> orderedInnerTxs) {
+        this.orderedInnerTxs = orderedInnerTxs;
     }
 
     @Override
