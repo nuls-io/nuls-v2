@@ -310,6 +310,7 @@ public class SyncService {
             }
         }
 
+        boolean nrc20CrossTransferBack = tx.getTxData() != null && tx.getTxData() instanceof ContractCallInfo;
         if (tx.getCoinTos() != null) {
             for (CoinToInfo output : tx.getCoinTos()) {
                 //如果地址不是本链的地址，不参与计算与存储
@@ -317,8 +318,12 @@ public class SyncService {
                     continue;
                 }
                 addressSet.add(output.getAddress());
-                AccountLedgerInfo ledgerInfo = calcBalance(chainId, output);
-                txRelationInfoSet.add(new TxRelationInfo(output, tx, ledgerInfo.getTotalBalance()));
+                if(nrc20CrossTransferBack && output.getAssetsId() != ApiContext.defaultAssetId) {
+                    txRelationInfoSet.add(new TxRelationInfo(output, tx, BigInteger.ZERO));
+                } else {
+                    AccountLedgerInfo ledgerInfo = calcBalance(chainId, output);
+                    txRelationInfoSet.add(new TxRelationInfo(output, tx, ledgerInfo.getTotalBalance()));
+                }
             }
         }
 
@@ -338,8 +343,12 @@ public class SyncService {
                     continue;
                 }
                 addressSet.add(input.getAddress());
-                AccountLedgerInfo ledgerInfo = calcBalance(chainId, input);
-                txRelationInfoSet.add(new TxRelationInfo(input, tx, ledgerInfo.getTotalBalance()));
+                if(input.getAssetsId() == ApiContext.defaultAssetId) {
+                    AccountLedgerInfo ledgerInfo = calcBalance(chainId, input);
+                    txRelationInfoSet.add(new TxRelationInfo(input, tx, ledgerInfo.getTotalBalance()));
+                } else {
+                    txRelationInfoSet.add(new TxRelationInfo(input, tx, BigInteger.ZERO));
+                }
             }
         }
 
