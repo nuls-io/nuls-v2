@@ -199,14 +199,14 @@ public class BlockValidator {
         for (int index = 1; index < txs.size(); index++) {
             tx = txs.get(index);
             if (tx.getType() == TxType.COIN_BASE) {
-                chain.getLogger().debug("Coinbase transaction more than one! height: " + block.getHeader().getHeight() + " , hash : " + blockHeaderHash);
+                chain.getLogger().error("Coinbase transaction more than one! height: " + block.getHeader().getHeight() + " , hash : " + blockHeaderHash);
                 return false;
             }
             if (tx.getType() == TxType.YELLOW_PUNISH) {
                 if (yellowPunishTx == null) {
                     yellowPunishTx = tx;
                 } else {
-                    chain.getLogger().debug("Yellow punish transaction more than one! height: " + block.getHeader().getHeight() + " , hash : " + blockHeaderHash);
+                    chain.getLogger().error("Yellow punish transaction more than one! height: " + block.getHeader().getHeight() + " , hash : " + blockHeaderHash);
                     return false;
                 }
             } else if (tx.getType() == TxType.RED_PUNISH) {
@@ -221,14 +221,14 @@ public class BlockValidator {
             Transaction newYellowPunishTX = punishManager.createYellowPunishTx(chain, chain.getNewestHeader(), member, currentRound);
             boolean isMatch = (yellowPunishTx == null && newYellowPunishTX == null) || (yellowPunishTx != null && newYellowPunishTX != null);
             if(!isMatch){
-                chain.getLogger().debug("The yellow punish tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + blockHeaderHash);
+                chain.getLogger().error("The yellow punish tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + blockHeaderHash);
                 return false;
             }else if(yellowPunishTx != null && !yellowPunishTx.getHash().equals(newYellowPunishTX.getHash())){
-                chain.getLogger().debug("The yellow punish tx's hash is wrong! height: " + block.getHeader().getHeight() + " , hash : " + blockHeaderHash);
+                chain.getLogger().error("The yellow punish tx's hash is wrong! height: " + block.getHeader().getHeight() + " , hash : " + blockHeaderHash);
                 return false;
             }
         } catch (Exception e) {
-            chain.getLogger().debug("The tx's wrong! height: " + block.getHeader().getHeight() + " , hash : " + blockHeaderHash, e);
+            chain.getLogger().error("The tx's wrong! height: " + block.getHeader().getHeight() + " , hash : " + blockHeaderHash, e);
             return false;
         }
       /*
@@ -258,11 +258,11 @@ public class BlockValidator {
                 if (data.getReasonCode() == PunishReasonEnum.TOO_MUCH_YELLOW_PUNISH.getCode()) {
                     countOfTooMuchYP++;
                     if (!punishAddress.contains(AddressTool.getStringAddressByBytes(data.getAddress()))) {
-                        chain.getLogger().debug("There is a wrong red punish tx!" + blockHeaderHash);
+                        chain.getLogger().error("There is a wrong red punish tx!" + blockHeaderHash);
                         return false;
                     }
                     if (redTx.getTime() != block.getHeader().getTime()) {
-                        chain.getLogger().debug("red punish CoinData & TX time is wrong! " + blockHeaderHash);
+                        chain.getLogger().error("red punish CoinData & TX time is wrong! " + blockHeaderHash);
                         return false;
                     }
                 }
@@ -272,7 +272,7 @@ public class BlockValidator {
                 }
             }
             if (countOfTooMuchYP != punishAddress.size()) {
-                chain.getLogger().debug("There is a wrong red punish tx!" + blockHeaderHash);
+                chain.getLogger().error("There is a wrong red punish tx!" + blockHeaderHash);
                 return false;
             }
         }
@@ -366,7 +366,7 @@ public class BlockValidator {
     private boolean coinBaseValidate(Block block, MeetingRound currentRound, MeetingMember member, Chain chain, String blockHeaderHash) throws NulsException, IOException {
         Transaction tx = block.getTxs().get(0);
         if (tx.getType() != TxType.COIN_BASE) {
-            chain.getLogger().debug("CoinBase transaction order wrong! height: " + block.getHeader().getHeight() + " , hash : " + blockHeaderHash);
+            chain.getLogger().error("CoinBase transaction order wrong! height: " + block.getHeader().getHeight() + " , hash : " + blockHeaderHash);
             return false;
         }
         Transaction coinBaseTransaction = consensusManager.createCoinBaseTx(chain, member, block.getTxs(), currentRound, 0);
