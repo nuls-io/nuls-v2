@@ -126,11 +126,11 @@ public class ContractResultDto {
         this.remark = result.getRemark();
         this.invokeRegisterCmds = new LinkedList<>();
         this.contractTxList = new ArrayList<>();
+        this.contractTxList.addAll(result.getContractTransferTxStringList());
         if (result.isSuccess()) {
             this.makeTokenTransfers(chainId, result.getEvents());
             this.makeInvokeRegisterCmds(result.getInvokeRegisterCmds());
         }
-        this.contractTxList.addAll(result.getContractTransferTxStringList());
     }
 
     public ContractResultDto(int chainId, ContractResult result, long gasLimit) throws NulsException {
@@ -153,11 +153,11 @@ public class ContractResultDto {
         this.remark = result.getRemark();
         this.invokeRegisterCmds = new LinkedList<>();
         this.contractTxList = new ArrayList<>();
+        this.contractTxList.addAll(result.getContractTransferTxStringList());
         if (result.isSuccess()) {
             this.makeTokenTransfers(chainId, result.getEvents());
             this.makeInvokeRegisterCmds(result.getInvokeRegisterCmds());
         }
-        this.contractTxList.addAll(result.getContractTransferTxStringList());
     }
 
     private void makeInvokeRegisterCmds(List<ProgramInvokeRegisterCmd> invokeRegisterCmds) {
