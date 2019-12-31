@@ -56,6 +56,8 @@ public class BlockHeaderDto {
     @ApiModelProperty(description = "区块生成时间")
     private String time;
 
+    private long timestamp;
+
     @ApiModelProperty(description = "区块高度")
     private long height;
 
@@ -79,6 +81,8 @@ public class BlockHeaderDto {
 
     @ApiModelProperty(description = "当前共识轮开始时间")
     private String roundStartTime;
+
+    private long roundStartTimestamp;
 
     @ApiModelProperty(description = "当前轮次打包出块的名次")
     private int packingIndexOfRound;
@@ -105,6 +109,7 @@ public class BlockHeaderDto {
         this.setHeight(header.getHeight());
         this.setSize(header.size());
         this.setTime(NulsDateUtils.timeStamp2DateStr(header.getTime() * 1000));
+        this.setTimestamp(header.getTime());
         this.setTxCount(header.getTxCount());
         this.setMerkleHash(header.getMerkleHash().toString());
         this.setBlockSignature(header.getBlockSignature().getSignData().toString());
@@ -115,6 +120,7 @@ public class BlockHeaderDto {
         this.setBlockVersion(blockExtendsData.getBlockVersion());
         this.setPackingIndexOfRound(blockExtendsData.getPackingIndexOfRound());
         this.setRoundIndex(blockExtendsData.getRoundIndex());
+        this.setRoundStartTimestamp(blockExtendsData.getRoundStartTime());
         this.setRoundStartTime(NulsDateUtils.timeStamp2DateStr(blockExtendsData.getRoundStartTime() * 1000));
         this.setStateRoot(RPCUtil.encode(blockExtendsData.getStateRoot()));
     }
@@ -253,5 +259,21 @@ public class BlockHeaderDto {
 
     public void setTxHashList(List<String> txHashList) {
         this.txHashList = txHashList;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public long getRoundStartTimestamp() {
+        return roundStartTimestamp;
+    }
+
+    public void setRoundStartTimestamp(long roundStartTimestamp) {
+        this.roundStartTimestamp = roundStartTimestamp;
     }
 }

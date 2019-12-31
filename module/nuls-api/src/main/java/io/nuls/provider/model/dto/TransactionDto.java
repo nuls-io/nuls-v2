@@ -48,6 +48,8 @@ public class TransactionDto {
     private int type;
     @ApiModelProperty(description = "交易时间")
     private String time;
+    @ApiModelProperty(description = "交易时间戳")
+    private long timestamp;
     @ApiModelProperty(description = "区块高度")
     private long blockHeight = -1L;
     @ApiModelProperty(description = "区块hash")
@@ -80,6 +82,7 @@ public class TransactionDto {
         this.inBlockIndex = transaction.getInBlockIndex();
         this.size = transaction.getSize();
         this.time = DateUtils.timeStamp2DateStr(transaction.getTime() * 1000);
+        this.timestamp = transaction.getTime();
         this.transactionSignature = RPCUtil.encode(transaction.getTransactionSignature());
         this.txDataHex = RPCUtil.encode(transaction.getTxData());
         this.type = transaction.getType();
@@ -192,5 +195,13 @@ public class TransactionDto {
 
     public void setTo(List<CoinToDto> to) {
         this.to = to;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 }
