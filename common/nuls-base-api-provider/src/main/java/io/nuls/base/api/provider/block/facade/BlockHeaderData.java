@@ -17,6 +17,8 @@ public class BlockHeaderData {
 
     private String time;
 
+    private long timestamp;
+
     private long height;
 
     private int txCount;
@@ -32,6 +34,8 @@ public class BlockHeaderData {
     protected int consensusMemberCount;
 
     protected String roundStartTime;
+
+    private long roundStartTimestamp;
 
     protected int packingIndexOfRound;
 
@@ -302,5 +306,21 @@ public class BlockHeaderData {
 
     public void setTxHashList(List<String> txHashList) {
         this.txHashList = txHashList;
+    }
+
+    public long getRoundStartTimestamp() {
+        return roundStartTimestamp;
+    }
+
+    public void setRoundStartTimestamp(long roundStartTimestamp) {
+        this.roundStartTimestamp = roundStartTimestamp;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 }
