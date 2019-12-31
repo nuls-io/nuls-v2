@@ -31,6 +31,7 @@ import io.nuls.base.protocol.RegisterHelper;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.model.ModuleE;
@@ -45,6 +46,7 @@ import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.model.bo.Chain;
+import io.nuls.transaction.rpc.call.ContractCall;
 import io.nuls.transaction.utils.DBUtil;
 import io.nuls.transaction.utils.TxUtil;
 
@@ -116,6 +118,14 @@ public class TransactionBootstrap extends RpcModule {
         LOG.info("module [{}] is connected, version [{}]", module.getName(), module.getVersion());
         if (ModuleE.SC.abbr.equals(module.getName())) {
             txConfig.setCollectedSmartContractModule(true);
+        //add at 2019-12-31 增加获取智能合约生成的交易类型
+            try {
+                for(Chain chain : chainManager.getChainMap().values()) {
+                    chain.setContractGenerateTxTypes(ContractCall.getContractGenerateTxTypes(chain));
+                }
+            } catch (NulsException e) {
+                throw new RuntimeException(e);
+            }
         }
         // end code by pierre
         if (ModuleE.NW.abbr.equals(module.getName())) {

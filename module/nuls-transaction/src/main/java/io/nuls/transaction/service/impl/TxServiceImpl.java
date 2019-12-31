@@ -133,12 +133,7 @@ public class TxServiceImpl implements TxService {
         Transaction tx = txNet.getTx();
         if (!isTxExists(chain, tx.getHash())) {
             try {
-                //执行交易基础验证
-                TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
-                if (null == txRegister) {
-                    throw new NulsException(TxErrorCode.TX_TYPE_INVALID);
-                }
-                baseValidateTx(chain, tx, txRegister);
+                verifyTransactionInCirculation(chain, tx);
                 chain.getUnverifiedQueue().addLast(txNet);
             } catch (NulsException e) {
                 chain.getLogger().error(e);
@@ -233,21 +228,36 @@ public class TxServiceImpl implements TxService {
         return rs;
     }
 
-    @Override
-    public VerifyResult verify(Chain chain, Transaction tx) {
-        return verify(chain, tx, true);
+    /**
+     * 交易合法流通与基础验证
+     *
+     * @param chain
+     * @param tx
+     * @throws NulsException
+     */
+    public void verifyTransactionInCirculation(Chain chain, Transaction tx) throws NulsException {
+        TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
+        if (null == txRegister) {
+            throw new NulsException(TxErrorCode.TX_TYPE_INVALID);
+        }
+        if (txRegister.getSystemTx()) {
+            throw new NulsException(TxErrorCode.SYS_TX_TYPE_NON_CIRCULATING);
+        }
+        baseValidateTx(chain, tx, txRegister);
     }
 
+    /**
+     * 单个交易的完整验证（基础+业务）
+     *
+     * @param chain
+     * @param tx
+     * @return
+     */
     @Override
-    public VerifyResult verify(Chain chain, Transaction tx, boolean incloudBasic) {
+    public VerifyResult verify(Chain chain, Transaction tx) {
         try {
+            verifyTransactionInCirculation(chain, tx);
             TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
-            if (null == txRegister) {
-                throw new NulsException(TxErrorCode.TX_TYPE_INVALID);
-            }
-            if (incloudBasic) {
-                baseValidateTx(chain, tx, txRegister);
-            }
             Map<String, Object> result = TransactionCall.txModuleValidator(chain, txRegister.getModuleCode(), RPCUtil.encode(tx.serialize()));
             List<String> txHashList = (List<String>) result.get("list");
             if (txHashList.isEmpty()) {
@@ -267,6 +277,14 @@ public class TxServiceImpl implements TxService {
         }
     }
 
+    /**
+     * 单笔交易基础验证
+     *
+     * @param chain
+     * @param tx
+     * @param txRegister
+     * @throws NulsException
+     */
     @Override
     public void baseValidateTx(Chain chain, Transaction tx, TxRegister txRegister) throws NulsException {
         if (null == tx) {
@@ -306,73 +324,74 @@ public class TxServiceImpl implements TxService {
      * @throws NulsException
      */
     private void validateTxSignature(Transaction tx, TxRegister txRegister, Chain chain) throws NulsException {
-        //只需要验证,需要验证签名的交易(一些系统交易不用签名)
-        if (txRegister.getVerifySignature()) {
-            CoinData coinData = TxUtil.getCoinData(tx);
-            if (null == coinData || null == coinData.getFrom() || coinData.getFrom().size() <= 0) {
-                throw new NulsException(TxErrorCode.COINDATA_NOT_FOUND);
+        if (!txRegister.getVerifySignature() || txRegister.getModuleCode().equals(ModuleE.CC.abbr)) {
+            //注册时不需要验证签名的交易(一些系统交易),以及跨链模块的交易(单独处理).
+            return;
+        }
+        CoinData coinData = TxUtil.getCoinData(tx);
+        if (null == coinData || null == coinData.getFrom() || coinData.getFrom().size() <= 0) {
+            throw new NulsException(TxErrorCode.COINDATA_NOT_FOUND);
+        }
+        //获取交易签名者地址列表
+        Set<String> addressSet = SignatureUtil.getAddressFromTX(tx, chain.getChainId());
+        if (addressSet == null) {
+            throw new NulsException(TxErrorCode.SIGNATURE_ERROR);
+        }
+        int chainId = chain.getChainId();
+        byte[] multiSignAddress = null;
+        if (tx.isMultiSignTx()) {
+            /**
+             * 如果是多签交易, 则先从签名对象中取出多签地址原始创建者的公钥列表和最小签名数,
+             * 生成一个新的多签地址,来与交易from中的多签地址匹配，匹配不上这验证不通过.
+             */
+            MultiSignTxSignature multiSignTxSignature = new MultiSignTxSignature();
+            multiSignTxSignature.parse(new NulsByteBuffer(tx.getTransactionSignature()));
+            //验证签名者够不够最小签名数
+            if (addressSet.size() < multiSignTxSignature.getM()) {
+                throw new NulsException(TxErrorCode.INSUFFICIENT_SIGNATURES);
             }
-            //获取交易签名者地址列表
-            Set<String> addressSet = SignatureUtil.getAddressFromTX(tx, chain.getChainId());
-            if (addressSet == null) {
+            //签名者是否是多签账户创建者之一
+            for (String address : addressSet) {
+                boolean rs = false;
+                for (byte[] bytes : multiSignTxSignature.getPubKeyList()) {
+                    String addr = AddressTool.getStringAddressByBytes(AddressTool.getAddress(bytes, chainId));
+                    if (address.equals(addr)) {
+                        rs = true;
+                    }
+                }
+                if (!rs) {
+                    throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH_COINFROM);
+                }
+            }
+            //生成一个多签地址
+            List<String> pubKeys = new ArrayList<>();
+            for (byte[] pubkey : multiSignTxSignature.getPubKeyList()) {
+                pubKeys.add(HexUtil.encode(pubkey));
+            }
+            try {
+                byte[] hash160 = SerializeUtils.sha256hash160(AddressTool.createMultiSigAccountOriginBytes(chainId, multiSignTxSignature.getM(), pubKeys));
+                Address address = new Address(chainId, BaseConstant.P2SH_ADDRESS_TYPE, hash160);
+                multiSignAddress = address.getAddressBytes();
+            } catch (Exception e) {
+                chain.getLogger().error(e);
                 throw new NulsException(TxErrorCode.SIGNATURE_ERROR);
             }
-            int chainId = chain.getChainId();
-            byte[] multiSignAddress = null;
+        }
+        for (CoinFrom coinFrom : coinData.getFrom()) {
             if (tx.isMultiSignTx()) {
-                /**
-                 * 如果是多签交易, 则先从签名对象中取出多签地址原始创建者的公钥列表和最小签名数,
-                 * 生成一个新的多签地址,来与交易from中的多签地址匹配，匹配不上这验证不通过.
-                 */
-                MultiSignTxSignature multiSignTxSignature = new MultiSignTxSignature();
-                multiSignTxSignature.parse(new NulsByteBuffer(tx.getTransactionSignature()));
-                //验证签名者够不够最小签名数
-                if (addressSet.size() < multiSignTxSignature.getM()) {
-                    throw new NulsException(TxErrorCode.INSUFFICIENT_SIGNATURES);
-                }
-                //签名者是否是多签账户创建者之一
-                for (String address : addressSet) {
-                    boolean rs = false;
-                    for (byte[] bytes : multiSignTxSignature.getPubKeyList()) {
-                        String addr = AddressTool.getStringAddressByBytes(AddressTool.getAddress(bytes, chainId));
-                        if (address.equals(addr)) {
-                            rs = true;
-                        }
-                    }
-                    if (!rs) {
-                        throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH_COINFROM);
-                    }
-                }
-                //生成一个多签地址
-                List<String> pubKeys = new ArrayList<>();
-                for (byte[] pubkey : multiSignTxSignature.getPubKeyList()) {
-                    pubKeys.add(HexUtil.encode(pubkey));
-                }
-                try {
-                    byte[] hash160 = SerializeUtils.sha256hash160(AddressTool.createMultiSigAccountOriginBytes(chainId, multiSignTxSignature.getM(), pubKeys));
-                    Address address = new Address(chainId, BaseConstant.P2SH_ADDRESS_TYPE, hash160);
-                    multiSignAddress = address.getAddressBytes();
-                } catch (Exception e) {
-                    chain.getLogger().error(e);
+                if (!Arrays.equals(coinFrom.getAddress(), multiSignAddress)) {
                     throw new NulsException(TxErrorCode.SIGNATURE_ERROR);
                 }
+            } else if (!addressSet.contains(AddressTool.getStringAddressByBytes(coinFrom.getAddress()))) {
+                throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH_COINFROM);
             }
-            if (!txRegister.getModuleCode().equals(ModuleE.CC.abbr)) {
-                //判断from中地址和签名的地址是否匹配
-                for (CoinFrom coinFrom : coinData.getFrom()) {
-                    if (tx.isMultiSignTx()) {
-                        if (!Arrays.equals(coinFrom.getAddress(), multiSignAddress)) {
-                            throw new NulsException(TxErrorCode.SIGNATURE_ERROR);
-                        }
-                    } else if (!addressSet.contains(AddressTool.getStringAddressByBytes(coinFrom.getAddress()))
-                            && tx.getType() != TxType.STOP_AGENT) {
-                        throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH_COINFROM);
-                    }
-                }
-                if (!SignatureUtil.validateTransactionSignture(tx)) {
-                    throw new NulsException(TxErrorCode.SIGNATURE_ERROR);
-                }
+            if (tx.getType() == TxType.STOP_AGENT) {
+                //停止节点from中第一笔为签名地址, 只验证from中第一个
+                break;
             }
+        }
+        if (!SignatureUtil.validateTransactionSignture(tx)) {
+            throw new NulsException(TxErrorCode.SIGNATURE_ERROR);
         }
     }
 
@@ -442,7 +461,7 @@ public class TxServiceImpl implements TxService {
                 throw new NulsException(TxErrorCode.TX_FROM_CANNOT_HAS_CONTRACT_ADDRESS);
             }
         }
-        if (null != existMultiSignAddress) {
+        if (null != existMultiSignAddress && type != TxType.STOP_AGENT) {
             //如果from中含有多签地址,则表示该交易是多签交易,则必须满足,froms中只存在这一个多签地址
             for (CoinFrom coinFrom : listFrom) {
                 if (!Arrays.equals(existMultiSignAddress, coinFrom.getAddress())) {
@@ -485,7 +504,7 @@ public class TxServiceImpl implements TxService {
             if (coinTo.getAmount().compareTo(BigInteger.ZERO) < 0) {
                 throw new NulsException(TxErrorCode.DATA_ERROR);
             }
-            //如果不是跨链交易，to中地址对应的链id必须发起交易的链id
+            //如果不是跨链交易，to中地址对应的链id必须是发起交易的链id
             if (!TxManager.isCrossTx(type)) {
                 if (chainId != txChainId) {
                     throw new NulsException(TxErrorCode.TO_ADDRESS_NOT_MATCH_CHAIN);
@@ -766,9 +785,9 @@ public class TxServiceImpl implements TxService {
                             boolean isSmartContractTx = moduleCode.equals(ModuleE.SC.abbr);
                             boolean isCrossTx = moduleCode.equals(ModuleE.CC.abbr);
                             // add by pierre at 2019-11-02 跨链转账交易发送到智能合约模块进行解析，是否为合约资产跨链转账 需要协议升级 done
-                            if(ProtocolGroupManager.getCurrentVersion(chain.getChainId()) >= TxContext.UPDATE_VERSION_V240) {
+                            if (ProtocolGroupManager.getCurrentVersion(chain.getChainId()) >= TxContext.UPDATE_VERSION_V240) {
                                 boolean isCrossTransferTx = TxType.CROSS_CHAIN == transaction.getType();
-                                if(!isSmartContractTx && txConfig.isCollectedSmartContractModule()) {
+                                if (!isSmartContractTx && txConfig.isCollectedSmartContractModule()) {
                                     isSmartContractTx = isCrossTransferTx;
                                 }
                             }
@@ -1373,10 +1392,10 @@ public class TxServiceImpl implements TxService {
         LedgerCall.coinDataBatchNotify(chain);
         List<String> batchProcessList = new ArrayList<>();
         for (TxPackageWrapper txPackageWrapper : packingTxList) {
-            if (TxManager.isSystemSmartContract(chain, txPackageWrapper.getTx().getType())) {
+            /*if (TxManager.isSystemSmartContract(chain, txPackageWrapper.getTx().getType())) {
                 //智能合约系统交易不需要验证账本
                 continue;
-            }
+            }*/
             batchProcessList.add(txPackageWrapper.getTxHex());
         }
         verifyLedger(chain, batchProcessList, packingTxList, orphanTxSet, true, orphanNoCount);
@@ -1384,6 +1403,22 @@ public class TxServiceImpl implements TxService {
         for (TxPackageWrapper txPackageWrapper : packingTxList) {
             Transaction tx = txPackageWrapper.getTx();
             TxUtil.moduleGroups(chain, moduleVerifyMap, tx);
+        }
+    }
+
+    /**
+     * 验证区块中只允许有一个的交易不能有多个
+     *
+     */
+    public void verifySysTxCount(Set<Integer> onlyOneTxTypes, int type) throws NulsException {
+        switch (type) {
+            case TxType.COIN_BASE:
+            case TxType.YELLOW_PUNISH:
+            case TxType.RED_PUNISH:
+            case TxType.CONTRACT_RETURN_GAS:
+                if (!onlyOneTxTypes.add(type)) {
+                    throw new NulsException(TxErrorCode.CONTAINS_MULTIPLE_UNIQUE_TXS);
+                }
         }
     }
 
@@ -1395,8 +1430,9 @@ public class TxServiceImpl implements TxService {
         if (logger.isDebugEnabled()) {
             logger.debug("[验区块交易] 开始 -----高度:{} -----区块交易数:{}", blockHeight, txStrList.size());
         }
-
         List<TxVerifyWrapper> txList = new ArrayList<>();
+        //验证区块中只允许有一个的交易不能有多个
+        Set<Integer> onlyOneTxTypes = new HashSet<>();
         //智能合约通知标识,出现的第一个智能合约交易并且调用验证器通过时,有则只第一次时通知.
         boolean contractNotify = false;
         long blockTime = blockHeader.getTime();
@@ -1415,16 +1451,16 @@ public class TxServiceImpl implements TxService {
             Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
             txList.add(new TxVerifyWrapper(tx, txStr));
             int type = tx.getType();
-
+            verifySysTxCount(onlyOneTxTypes, type);
             TxRegister txRegister = TxManager.getTxRegister(chain, type);
             if (null == txRegister) {
                 throw new NulsException(TxErrorCode.TX_TYPE_INVALID);
             }
             boolean isSmartContractTx = TxManager.isUnSystemSmartContract(txRegister);
             // add by pierre at 2019-11-02 跨链转账交易发送到智能合约模块进行解析，是否为合约资产跨链转账 需要协议升级 done
-            if(ProtocolGroupManager.getCurrentVersion(chain.getChainId()) >= TxContext.UPDATE_VERSION_V240) {
+            if (ProtocolGroupManager.getCurrentVersion(chain.getChainId()) >= TxContext.UPDATE_VERSION_V240) {
                 boolean isCrossTransferTx = TxType.CROSS_CHAIN == type;
-                if(!isSmartContractTx && txConfig.isCollectedSmartContractModule()) {
+                if (!isSmartContractTx && txConfig.isCollectedSmartContractModule()) {
                     isSmartContractTx = isCrossTransferTx;
                 }
             }
@@ -1448,16 +1484,17 @@ public class TxServiceImpl implements TxService {
                     throw new NulsException(TxErrorCode.SERIALIZE_ERROR);
                 }
             }
-            //如果不是系统智能合约就继续单个验证
-            if (TxManager.isSystemSmartContract(txRegister)) {
-                continue;
+
+            if (chain.getContractGenerateTxTypes().contains(tx.getType())) {
+                //包含了合约模块生成的并且不应该放在区块交易列表中的交易
+                throw new NulsException(TxErrorCode.SYS_CONTRACT_TX_NON_CIRCULATING);
             }
 
             keys.add(tx.getHash().getBytes());
             //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
             TxUtil.moduleGroups(moduleVerifyMap, txRegister, txStr);
         }
-
+        onlyOneTxTypes = null;
         long f2 = System.currentTimeMillis();
         timeF1 = f2 - f1;
         //验证交易是否已确认过
@@ -1503,7 +1540,6 @@ public class TxServiceImpl implements TxService {
                             if (null == txRegister) {
                                 throw new NulsException(TxErrorCode.TX_TYPE_INVALID);
                             }
-                            //logger.debug("验证区块时本地没有的交易, 需要进行基础验证 hash:{}", tx.getHash().toHex());
                             baseValidateTx(chain, tx, txRegister);
                         } catch (Exception e) {
                             logger.error("batchVerify failed, single tx verify failed. hash:{}, -type:{}", tx.getHash().toHex(), tx.getType());
