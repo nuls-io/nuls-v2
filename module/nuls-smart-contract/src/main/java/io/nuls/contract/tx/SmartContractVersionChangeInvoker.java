@@ -21,8 +21,10 @@ import java.util.Map;
 public class SmartContractVersionChangeInvoker implements VersionChangeInvoker {
 
     /**
-     * //TODO pierre 刚协议升级成功时，没有这样的数据，这个缓存数据不用拿
-     * 协议升级后，向账本模块请求nrc20-token资产列表，缓存到模块内存中
+     *
+     * 协议升级后，向账本模块请求nrc20-token资产列表，缓存到模块内存中。
+     * Tip: 刚协议升级成功时，没有这样的数据，这个缓存数据不用拿
+     *
      * @param currentChainId
      */
     @Override

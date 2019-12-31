@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.contract.tx.v1;
+package io.nuls.contract.tx.common;
 
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
@@ -35,6 +35,7 @@ import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.model.dto.ContractPackageDto;
 import io.nuls.contract.model.po.ContractOfflineTxHashPo;
 import io.nuls.contract.storage.ContractOfflineTxHashListStorageService;
+import io.nuls.contract.tx.v1.CallContractProcessor;
 import io.nuls.contract.util.Log;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;

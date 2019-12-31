@@ -47,5 +47,22 @@
     "validMsgs": [],
     "invalidTxs": "",
     "invalidMsgs": ""
+  },
+  {
+    "version": "4",
+    "extend": "",
+    "validTxs": [
+      {
+        "type": "19",
+        "systemTx": true,
+        "unlockTx": false,
+        "verifyFee": true,
+        "verifySignature": false,
+        "handler": "ContractReturnGasProcessor"
+      }
+    ],
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
   }
 ]

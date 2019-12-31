@@ -13,7 +13,8 @@ import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.model.bo.ContractTokenAssetsInfo;
 import io.nuls.contract.rpc.call.LedgerCall;
-import io.nuls.contract.tx.v1.TransactionCommitAdvice;
+import io.nuls.contract.tx.common.TransactionCommitAdvice;
+import io.nuls.contract.tx.common.TransactionRollbackAdvice;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.LogUtil;
 import io.nuls.contract.util.VMContext;
@@ -220,7 +221,8 @@ public class SmartContractBootStrap extends RpcModule {
     public boolean doStart() {
         TransactionDispatcher dispatcher = SpringLiteContext.getBean(TransactionDispatcher.class);
         TransactionCommitAdvice commitAdvice = SpringLiteContext.getBean(TransactionCommitAdvice.class);
-        dispatcher.register(commitAdvice, null);
+        TransactionRollbackAdvice rollbackAdvice = SpringLiteContext.getBean(TransactionRollbackAdvice.class);
+        dispatcher.register(commitAdvice, rollbackAdvice);
         Log.info("module chain do start");
         return true;
     }
