@@ -1392,7 +1392,8 @@ public class TxServiceImpl implements TxService {
         LedgerCall.coinDataBatchNotify(chain);
         List<String> batchProcessList = new ArrayList<>();
         for (TxPackageWrapper txPackageWrapper : packingTxList) {
-            /*if (TxManager.isSystemSmartContract(chain, txPackageWrapper.getTx().getType())) {
+            /* 2019-12-31
+            if (TxManager.isSystemSmartContract(chain, txPackageWrapper.getTx().getType())) {
                 //智能合约系统交易不需要验证账本
                 continue;
             }*/
@@ -1419,6 +1420,9 @@ public class TxServiceImpl implements TxService {
                 if (!onlyOneTxTypes.add(type)) {
                     throw new NulsException(TxErrorCode.CONTAINS_MULTIPLE_UNIQUE_TXS);
                 }
+                break;
+            default:
+                break;
         }
     }
 
