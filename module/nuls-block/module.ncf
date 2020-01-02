@@ -10,4 +10,4 @@ PrivateDependent=nuls-base-protocol-update
 Managed=1
 
 [block]
-moduleDynamicDependent=protocol-update,cross-chain
+moduleDynamicDependent=protocol-update,cross-chain,smart-contract
