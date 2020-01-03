@@ -879,6 +879,7 @@ public class TxServiceImpl implements TxService {
             //如果合约invoke时有需要还回去的合约交易,或者合约执行结果有还回去的交易,都需要重新验证账本
             if (stopInvokeContract || hasTxbackPackablePool) {
                 //如果智能合约有退回或者验证不通过的交易 则需要再次账本验证
+                moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_16);
                 verifyAgain(chain, moduleVerifyMap, packingTxList, orphanTxSet, true);
             }
             long contractTime = NulsDateUtils.getCurrentTimeMillis() - contractStart;
@@ -1415,7 +1416,6 @@ public class TxServiceImpl implements TxService {
         switch (type) {
             case TxType.COIN_BASE:
             case TxType.YELLOW_PUNISH:
-            case TxType.RED_PUNISH:
             case TxType.CONTRACT_RETURN_GAS:
                 if (!onlyOneTxTypes.add(type)) {
                     throw new NulsException(TxErrorCode.CONTAINS_MULTIPLE_UNIQUE_TXS);
