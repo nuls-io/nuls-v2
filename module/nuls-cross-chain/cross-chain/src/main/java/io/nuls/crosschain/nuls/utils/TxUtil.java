@@ -425,7 +425,7 @@ public class TxUtil {
      * 跨链交易签名拜占庭验证
      * Byzantine Verification of Cross-Chain Transaction Signature
      */
-    public static boolean signByzantineVerify(Chain chain, Transaction ctx, List<String> verifierList, int byzantineCount, int verfierChainId) throws NulsException {
+    public static boolean signByzantineVerify(Chain chain, Transaction ctx, List<String> verifierList, int byzantineCount, int verifierChainId) throws NulsException {
         TransactionSignature transactionSignature = new TransactionSignature();
         try {
             transactionSignature.parse(ctx.getTransactionSignature(), 0);
@@ -438,19 +438,24 @@ public class TxUtil {
             return false;
         }
         Iterator<P2PHKSignature> iterator = transactionSignature.getP2PHKSignatures().iterator();
-        while (iterator.hasNext()) {
+        int passCount = 0;
+        Set<String> passedAddress  = new HashSet<>();
+        while (iterator.hasNext()){
             P2PHKSignature signature = iterator.next();
-            boolean isMatchSign = false;
-            for (String verifier : verifierList) {
-                if (Arrays.equals(AddressTool.getAddress(signature.getPublicKey(), verfierChainId), AddressTool.getAddress(verifier))) {
-                    isMatchSign = true;
+            for (String verifier:verifierList) {
+                if(passedAddress.contains(verifier)){
+                    continue;
+                }
+                if(Arrays.equals(AddressTool.getAddress(signature.getPublicKey(), verifierChainId), AddressTool.getAddress(verifier))){
+                    passedAddress.add(verifier);
+                    passCount++;
                     break;
                 }
             }
-            if (!isMatchSign) {
-                chain.getLogger().error("跨链交易签名验证失败，Hash:{},sign{}", ctx.getHash().toHex(), signature.getSignerHash160());
-                return false;
-            }
+        }
+        if(passCount < byzantineCount){
+            chain.getLogger().error("跨链交易签名验证通过数小于拜占庭数量，Hash:{},passCount:{},byzantineCount:{}", ctx.getHash().toHex(),passCount,byzantineCount);
+            return false;
         }
         return true;
     }
