@@ -311,9 +311,6 @@ public class BlockValidator {
                 if (header1.getHeight() != header2.getHeight()) {
                     throw new NulsException(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
                 }
-                if (i == ConsensusConstant.REDPUNISH_BIFURCATION - 1 && (header1.getTime() + header2.getTime()) / 2 != tx.getTime()) {
-                    return false;
-                }
                 if (!Arrays.equals(header1.getBlockSignature().getPublicKey(), header2.getBlockSignature().getPublicKey())) {
                     throw new NulsException(ConsensusErrorCode.BLOCK_SIGNATURE_ERROR);
                 }
@@ -324,16 +321,6 @@ public class BlockValidator {
             if(roundIndex[ConsensusConstant.REDPUNISH_BIFURCATION - 1] - roundIndex[0] > ConsensusConstant.VALUE_OF_ONE_HUNDRED){
                 throw new NulsException(ConsensusErrorCode.BLOCK_RED_PUNISH_ERROR);
             }
-            /*boolean rs = true;
-            for (int i = 0; i < roundIndex.length; i++) {
-                if (i < roundIndex.length - 2 && roundIndex[i + 2] - roundIndex[i] > 100) {
-                    rs = false;
-                    break;
-                }
-            }
-            if (!rs) {
-                throw new NulsException(ConsensusErrorCode.BLOCK_RED_PUNISH_ERROR);
-            }*/
         }
       /*
       红牌交易类型为黄牌过多
