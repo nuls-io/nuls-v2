@@ -289,6 +289,7 @@ public class ChainController {
             map.put("team", AssetTool.toDouble(coinContextInfo.getTeam()));
             map.put("community", AssetTool.toDouble(coinContextInfo.getCommunity()));
             map.put("unmapped", AssetTool.toDouble(coinContextInfo.getUnmapped()));
+            map.put("destroy", AssetTool.toDouble(coinContextInfo.getDestroy()));
             int consensusCount = apiCache.getCurrentRound().getMemberCount() - apiCache.getChainInfo().getSeeds().size();
             if (consensusCount < 0) {
                 consensusCount = 0;
