@@ -349,15 +349,15 @@ public class CoinDataManager {
      * @param listFrom  All coins transferred out 转出的所有coin
      * @param targetFee The amount of the fee that needs to be charged 需要收取的手续费数额
      * @param actualFee Actual amount charged 实际收取的数额
-     * @param isLocalCtx Launching cross-chain transactions 是否为发起链
+     * @param isLocalFee Launching cross-chain transactions 是否为收取本链手续费
      * @return BigInteger The amount of the fee actually charged 实际收取的手续费数额
      * @throws NulsException
      */
-    private BigInteger getFeeDirect(Chain chain, List<CoinFrom> listFrom, BigInteger targetFee, BigInteger actualFee, boolean isLocalCtx) throws NulsException {
+    private BigInteger getFeeDirect(Chain chain, List<CoinFrom> listFrom, BigInteger targetFee, BigInteger actualFee, boolean isLocalFee) throws NulsException {
         BigInteger balance;
         int chainId;
         int assertId;
-        if(!isLocalCtx){
+        if(!isLocalFee){
             chainId = config.getMainChainId();
             assertId = config.getMainAssetId();
         }else{
@@ -365,7 +365,7 @@ public class CoinDataManager {
             assertId = chain.getConfig().getAssetId();
         }
         for (CoinFrom coinFrom : listFrom) {
-            boolean isDirectCoin = (isLocalCtx && CommonUtil.isLocalAsset(coinFrom)) || (!isLocalCtx && CommonUtil.isNulsAsset(coinFrom));
+            boolean isDirectCoin = (isLocalFee && CommonUtil.isLocalAsset(coinFrom)) || (!isLocalFee && CommonUtil.isNulsAsset(coinFrom));
             if(!isDirectCoin){
                 continue;
             }
@@ -398,15 +398,16 @@ public class CoinDataManager {
      * @param txSize    Current transaction size
      * @param targetFee Estimated fee
      * @param actualFee actual Fee
+     * @param isLocalFee Launching cross-chain transactions 是否为收取本链手续费
      * @return boolean
      * @throws NulsException
      */
-    private boolean getFeeIndirect(Chain chain, List<CoinFrom> listFrom, int txSize, BigInteger targetFee, BigInteger actualFee, boolean isLocalCtx) throws NulsException {
+    private boolean getFeeIndirect(Chain chain, List<CoinFrom> listFrom, int txSize, BigInteger targetFee, BigInteger actualFee, boolean isLocalFee) throws NulsException {
         BigInteger balance;
         int chainId;
         int assertId;
         //如果为发起链则收取本链主资产做手续费，否则收取主网主资产做手续费
-        if(!isLocalCtx){
+        if(!isLocalFee){
             chainId = config.getMainChainId();
             assertId = config.getMainAssetId();
         }else{
@@ -415,7 +416,7 @@ public class CoinDataManager {
         }
         List<CoinFrom> newCoinFromList = new ArrayList<>();
         for (CoinFrom coinFrom : listFrom) {
-            boolean isDirectCoin = (isLocalCtx && CommonUtil.isLocalAsset(coinFrom)) || (!isLocalCtx && CommonUtil.isNulsAsset(coinFrom));
+            boolean isDirectCoin = (isLocalFee && CommonUtil.isLocalAsset(coinFrom)) || (!isLocalFee && CommonUtil.isNulsAsset(coinFrom));
             if (isDirectCoin) {
                 continue;
             }
