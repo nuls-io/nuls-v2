@@ -52,7 +52,7 @@ public class MainNetCmd extends BaseCmd {
     /**
      * 注册链新资产
      * */
-    @CmdAnnotation(cmd = "registerAsset", version = 1.0, description = "链注册跨链/register Cross Chain")
+    @CmdAnnotation(cmd = "registerAsset", version = 1.0, description = "链注册新资产/register Cross Chain")
     @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
     @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterDes = "资产ID")
     @Parameter(parameterName = "symbol", parameterType = "String", parameterDes = "资产符号")
@@ -71,7 +71,7 @@ public class MainNetCmd extends BaseCmd {
     }
 
     /**
-     * 友链向主网连管理模块注销跨链信息，连管理模块通知跨链模块
+     * 友链注销跨链资产
      * */
     @CmdAnnotation(cmd = "cancelCrossChain", version = 1.0, description = "指定链资产退出跨链/Specified Chain Assets Exit Cross Chain")
     @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
@@ -88,9 +88,9 @@ public class MainNetCmd extends BaseCmd {
     }
 
     /**
-     * 友链向主网连管理模块注销跨链信息，连管理模块通知跨链模块
+     * 友链跨链资产变更
      */
-    @CmdAnnotation(cmd = "crossChainRegisterChange", version = 1.0, description = "跨链注册信息变更/Registered Cross Chain change")
+    @CmdAnnotation(cmd = "crossChainRegisterChange", version = 1.0, description = "友链跨链资产变更/Registered Cross Chain change")
     @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
     @ResponseData(description = "无特定返回值，没有错误即成功")
     public Response crossChainRegisterChange(Map<String, Object> params) {
@@ -105,7 +105,7 @@ public class MainNetCmd extends BaseCmd {
      * 友链向主网查询所有跨链注册信息
      * Friend Chain inquires all cross-chain registration information from the main network
      * */
-    @CmdAnnotation(cmd = "getChains", version = 1.0, description = "cancel Cross Chain")
+    @CmdAnnotation(cmd = "getChains", version = 1.0, description = "Friend Chain inquires all cross-chain registration information from the main network")
     @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
     @Parameter(parameterName = "nodeId", parameterType = "String", parameterDes = "节点IP")
     @Parameter(parameterName = "messageBody", parameterType = "String", parameterDes = "消息体")
