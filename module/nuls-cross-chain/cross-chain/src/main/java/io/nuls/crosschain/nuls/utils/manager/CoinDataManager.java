@@ -197,15 +197,15 @@ public class CoinDataManager {
      * @param listFrom
      * @param listTo
      * @param txSize
-     * @param isLocalCtx Launching cross-chain transactions 是否为发起链
+     * @param isMainNet Launching cross-chain transactions 是否为主网
      * @return
      * @throws NulsException
      */
-    public CoinData getCoinData(Chain chain, List<CoinFrom> listFrom, List<CoinTo> listTo, int txSize , boolean isLocalCtx) throws NulsException {
+    public CoinData getCoinData(Chain chain, List<CoinFrom> listFrom, List<CoinTo> listTo, int txSize , boolean isMainNet) throws NulsException {
         BigInteger feeTotalFrom = BigInteger.ZERO;
         for (CoinFrom coinFrom : listFrom) {
             txSize += coinFrom.size();
-            if (isLocalCtx) {
+            if (isMainNet) {
                 if (CommonUtil.isLocalAsset(coinFrom)) {
                     feeTotalFrom = feeTotalFrom.add(coinFrom.getAmount());
                 }
@@ -218,7 +218,7 @@ public class CoinDataManager {
         BigInteger feeTotalTo = BigInteger.ZERO;
         for (CoinTo coinTo : listTo) {
             txSize += coinTo.size();
-            if (isLocalCtx) {
+            if (isMainNet) {
                 if (CommonUtil.isLocalAsset(coinTo)) {
                     feeTotalTo = feeTotalTo.add(coinTo.getAmount());
                 }
@@ -238,10 +238,10 @@ public class CoinDataManager {
             throw new NulsException(INSUFFICIENT_FEE);
         } else if (BigIntegerUtils.isLessThan(actualFee, targetFee)) {
             //先从有手续费资产的账户收取
-            actualFee = getFeeDirect(chain, listFrom, targetFee, actualFee, isLocalCtx);
+            actualFee = getFeeDirect(chain, listFrom, targetFee, actualFee, isMainNet);
             if (BigIntegerUtils.isLessThan(actualFee, targetFee)) {
                 //如果没收到足够的手续费，则从CoinFrom中资产不是手续费资产的coin账户中查找资产余额，并组装新的coinfrom来收取手续费
-                if (!getFeeIndirect(chain, listFrom, txSize, targetFee, actualFee, isLocalCtx)) {
+                if (!getFeeIndirect(chain, listFrom, txSize, targetFee, actualFee, isMainNet)) {
                     chain.getLogger().error("余额不足");
                     //所有from中账户的余额总和都不够支付手续费
                     throw new NulsException(INSUFFICIENT_FEE);
