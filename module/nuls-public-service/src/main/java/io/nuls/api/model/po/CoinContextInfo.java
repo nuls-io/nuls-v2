@@ -20,6 +20,8 @@ public class CoinContextInfo {
 
     private BigInteger unmapped;
 
+    private BigInteger destroy;
+
     private long txCount;
 
     public CoinContextInfo() {
@@ -103,5 +105,14 @@ public class CoinContextInfo {
 
     public void setUnmapped(BigInteger unmapped) {
         this.unmapped = unmapped;
+    }
+
+
+    public BigInteger getDestroy() {
+        return destroy;
+    }
+
+    public void setDestroy(BigInteger destroy) {
+        this.destroy = destroy;
     }
 }
