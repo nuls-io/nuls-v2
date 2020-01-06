@@ -201,6 +201,96 @@ public class CoinDataManager {
      * @return
      * @throws NulsException
      */
+    public CoinData getCrossCoinData(Chain chain, List<CoinFrom> listFrom, List<CoinTo> listTo, int txSize , boolean isMainNet) throws NulsException {
+        CoinData coinData = new CoinData();
+        coinData.setFrom(listFrom);
+        coinData.setTo(listTo);
+        txSize += coinData.size();
+
+        //本链资产手续费
+        BigInteger localFeeTotalFrom = BigInteger.ZERO;
+        //跨链手续费（主网主资产，平行链发起才会有）
+        BigInteger crossFeeTotalFrom = BigInteger.ZERO;
+        for (CoinFrom coinFrom : listFrom) {
+            txSize += coinFrom.size();
+            if (CommonUtil.isLocalAsset(coinFrom)) {
+                localFeeTotalFrom = localFeeTotalFrom.add(coinFrom.getAmount());
+                continue;
+            }
+            if (!isMainNet && CommonUtil.isNulsAsset(coinFrom)) {
+                crossFeeTotalFrom = crossFeeTotalFrom.add(coinFrom.getAmount());
+            }
+        }
+
+        BigInteger localFeeTotalTo = BigInteger.ZERO;
+        BigInteger crossFeeTotalTo = BigInteger.ZERO;
+        for (CoinTo coinTo : listTo) {
+            txSize += coinTo.size();
+            if (CommonUtil.isLocalAsset(coinTo)) {
+                localFeeTotalTo = localFeeTotalTo.add(coinTo.getAmount());
+                continue;
+            }
+            if (!isMainNet && CommonUtil.isNulsAsset(coinTo)) {
+                crossFeeTotalTo = crossFeeTotalTo.add(coinTo.getAmount());
+            }
+        }
+
+        //本交易预计收取的手续费
+        BigInteger targetFee = TransactionFeeCalculator.getCrossTxFee(txSize);
+        //交易中已收取的本链手续费
+        BigInteger localActualFee = localFeeTotalFrom.subtract(localFeeTotalTo);
+        if (BigIntegerUtils.isLessThan(localActualFee, BigInteger.ZERO)) {
+            chain.getLogger().error("转出金额小于转入金额");
+            //所有from中账户的余额总和小于to的总和，不够支付手续费
+            throw new NulsException(INSUFFICIENT_FEE);
+        } else if (BigIntegerUtils.isLessThan(localActualFee, targetFee)) {
+            //先从有手续费资产的账户收取
+            localActualFee = getFeeDirect(chain, listFrom, targetFee, localActualFee, true);
+            if (BigIntegerUtils.isLessThan(localActualFee, targetFee)) {
+                //如果没收到足够的手续费，则从CoinFrom中资产不是手续费资产的coin账户中查找资产余额，并组装新的coinfrom来收取手续费
+                if (!getFeeIndirect(chain, listFrom, txSize, targetFee, localActualFee, true)) {
+                    chain.getLogger().error("余额不足");
+                    //所有from中账户的余额总和都不够支付手续费
+                    throw new NulsException(INSUFFICIENT_FEE);
+                }
+            }
+        }
+
+        //如果不是主网，则验证组装跨链手续费
+        if (!isMainNet){
+            //交易中已收取的手续费
+            BigInteger crossActualFee = crossFeeTotalFrom.subtract(crossFeeTotalTo);
+            if (BigIntegerUtils.isLessThan(crossActualFee, BigInteger.ZERO)) {
+                chain.getLogger().error("转出金额小于转入金额");
+                //所有from中账户的余额总和小于to的总和，不够支付手续费
+                throw new NulsException(INSUFFICIENT_FEE);
+            } else if (BigIntegerUtils.isLessThan(crossActualFee, targetFee)) {
+                //先从有手续费资产的账户收取
+                crossActualFee = getFeeDirect(chain, listFrom, targetFee, crossActualFee, false);
+                if (BigIntegerUtils.isLessThan(crossActualFee, targetFee)) {
+                    //如果没收到足够的手续费，则从CoinFrom中资产不是手续费资产的coin账户中查找资产余额，并组装新的coinfrom来收取手续费
+                    if (!getFeeIndirect(chain, listFrom, txSize, targetFee, crossActualFee, false)) {
+                        chain.getLogger().error("余额不足");
+                        //所有from中账户的余额总和都不够支付手续费
+                        throw new NulsException(INSUFFICIENT_FEE);
+                    }
+                }
+            }
+        }
+        return coinData;
+    }
+
+    /**
+     * assembly coinData
+     * 组装跨链交易在本链的CoinData
+     *
+     * @param listFrom
+     * @param listTo
+     * @param txSize
+     * @param isMainNet Launching cross-chain transactions 是否为主网
+     * @return
+     * @throws NulsException
+     */
     public CoinData getCoinData(Chain chain, List<CoinFrom> listFrom, List<CoinTo> listTo, int txSize , boolean isMainNet) throws NulsException {
         BigInteger feeTotalFrom = BigInteger.ZERO;
         for (CoinFrom coinFrom : listFrom) {
