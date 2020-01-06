@@ -212,7 +212,6 @@ public class CoinDataManager {
         //跨链手续费（主网主资产，平行链发起才会有）
         BigInteger crossFeeTotalFrom = BigInteger.ZERO;
         for (CoinFrom coinFrom : listFrom) {
-            txSize += coinFrom.size();
             if (CommonUtil.isLocalAsset(coinFrom)) {
                 localFeeTotalFrom = localFeeTotalFrom.add(coinFrom.getAmount());
                 continue;
@@ -225,7 +224,6 @@ public class CoinDataManager {
         BigInteger localFeeTotalTo = BigInteger.ZERO;
         BigInteger crossFeeTotalTo = BigInteger.ZERO;
         for (CoinTo coinTo : listTo) {
-            txSize += coinTo.size();
             if (CommonUtil.isLocalAsset(coinTo)) {
                 localFeeTotalTo = localFeeTotalTo.add(coinTo.getAmount());
                 continue;
