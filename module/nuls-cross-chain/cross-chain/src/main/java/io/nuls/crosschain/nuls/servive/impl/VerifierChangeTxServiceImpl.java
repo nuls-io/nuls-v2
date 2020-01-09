@@ -156,9 +156,6 @@ public class VerifierChangeTxServiceImpl implements VerifierChangeTxService {
                 List<String> registerList = verifierChangeData.getRegisterAgentList();
                 List<String> cancelList = verifierChangeData.getCancelAgentList();
                 int verifierChainId = verifierChangeData.getChainId();
-                if (!convertHashService.delete(ctxHash, chainId)) {
-                    return false;
-                }
                 ChainInfo chainInfo = chainManager.getChainInfo(verifierChainId);
                 if(registerList != null && !registerList.isEmpty()){
                     chainInfo.getVerifierList().removeAll(registerList);

@@ -438,10 +438,10 @@ public class MessageUtil {
                     chain.getLogger().error("验证人变更信息无效,hash:{}",otherHashHex);
                 }
                 TransactionCall.sendTx(chain, RPCUtil.encode(ctx.serialize()));
-                chain.getLogger().error("接收链验证人变更交易验证完成，发送给交易模块处理，hash:{}",otherHashHex);
+                chain.getLogger().debug("接收链验证人变更交易验证完成，发送给交易模块处理，hash:{}",otherHashHex);
             }else{
                 TransactionCall.sendTx(chain, RPCUtil.encode(ctx.serialize()));
-                chain.getLogger().debug("接收链验证人变更交易验证完成，发送给交易模块处理，hash:{}",otherHashHex);
+                chain.getLogger().debug("接收链初始化验证人交易验证完成，发送给交易模块处理，hash:{}",otherHashHex);
             }
         }catch (Exception e){
             chain.getLogger().error("跨链交易处理失败，hash:{}",otherHashHex);
