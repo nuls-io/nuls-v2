@@ -102,9 +102,7 @@ public class AccountServiceImpl implements AccountService {
             for (int i = 0; i < count; i++) {
                 //create account
                 Account account = AccountTool.createAccount(chainId);
-                if (StringUtils.isNotBlank(password)) {
-                    account.encrypt(password);
-                }
+                account.encrypt(password);
                 accounts.add(account);
                 AccountPO po = new AccountPO(account);
                 accountPOs.add(po);
