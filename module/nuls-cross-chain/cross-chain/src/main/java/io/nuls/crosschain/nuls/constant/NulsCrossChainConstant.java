@@ -106,4 +106,6 @@ public interface NulsCrossChainConstant {
     String GET_REGISTERED_CHAIN_MESSAGE = "getChains";
 
     String VERIFIER_SPLIT = ",";
+
+    String STRING_SPLIT = "_";
 }

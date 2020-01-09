@@ -171,7 +171,7 @@ public class CoinDataManager {
             }
             Set<String> verifiedAssets = new HashSet<>();
             for (Coin coin : coinFromList) {
-                String key = String.valueOf(coin.getAssetsChainId()) + coin.getAssetsId();
+                String key = String.valueOf(coin.getAssetsChainId()) + NulsCrossChainConstant.STRING_SPLIT + coin.getAssetsId();
                 if (!verifiedAssets.contains(key)) {
                     boolean assetAvailable = false;
                     for (ChainInfo chainInfo : chainManager.getRegisteredCrossChainList()) {
