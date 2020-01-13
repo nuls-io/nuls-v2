@@ -74,6 +74,9 @@ public class ContractUtil {
         if (args == null) {
             return null;
         } else {
+            if(types != null && types.length != args.length) {
+                throw new NulsRuntimeException(ContractErrorCode.PARAMETER_ERROR);
+            }
             int length = args.length;
             String[][] two = new String[length][];
             Object arg;

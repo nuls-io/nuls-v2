@@ -594,10 +594,6 @@ public class ContractTxHelper {
             }
 
             ContractBalance balance = contractHelper.getRealBalance(chainId, contractAddress);
-            if (balance == null) {
-                return Result.getFailed(CONTRACT_OTHER_ERROR);
-            }
-
             BigInteger totalBalance = balance.getTotal();
             if (totalBalance.compareTo(BigInteger.ZERO) != 0) {
                 return Result.getFailed(ContractErrorCode.CONTRACT_DELETE_BALANCE);
