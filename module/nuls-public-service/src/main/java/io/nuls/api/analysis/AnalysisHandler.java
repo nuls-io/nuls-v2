@@ -9,6 +9,7 @@ import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.entity.*;
 import io.nuls.api.model.po.*;
 import io.nuls.api.rpc.RpcCall;
+import io.nuls.api.utils.LoggerUtil;
 import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
@@ -20,6 +21,7 @@ import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.log.Log;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
@@ -498,6 +500,7 @@ public class AnalysisHandler {
         params.put(Constants.CHAIN_ID, chainId);
         params.put("contractAddress", contractInfo.getContractAddress());
         params.put("hash", contractInfo.getCreateTxHash());
+        LoggerUtil.commonLog.info("------ContractAddress:" + contractInfo.getContractAddress());
         Map map = (Map) RpcCall.request(ModuleE.SC.abbr, CommandConstant.CONTRACT_INFO, params);
 
         contractInfo.setCreater(map.get("creater").toString());
