@@ -5,6 +5,8 @@ import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.constant.ApiErrorCode;
 import io.nuls.api.db.*;
+import io.nuls.api.db.mongo.MongoAccountServiceImpl;
+import io.nuls.api.db.mongo.MongoChainServiceImpl;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.*;
 import io.nuls.api.utils.DBUtil;
@@ -89,7 +91,7 @@ public class SyncService {
 
 
     public boolean syncNewBlock(int chainId, BlockInfo blockInfo) {
-        clear();
+        clear(chainId);
         long time1, time2;
         time1 = System.currentTimeMillis();
         findAddProcessAgentOfBlock(chainId, blockInfo);
@@ -729,7 +731,7 @@ public class SyncService {
                 tokenInfo = processAccountNrc20(chainId, contractInfo, tokenTransfer.getFromAddress(), new BigInteger(tokenTransfer.getValue()), -1);
                 tokenTransfer.setFromBalance(tokenInfo.getBalance().toString());
             }
-            if(tokenTransfer.getToAddress() != null) {
+            if (tokenTransfer.getToAddress() != null) {
                 tokenInfo = processAccountNrc20(chainId, contractInfo, tokenTransfer.getToAddress(), new BigInteger(tokenTransfer.getValue()), 1);
                 tokenTransfer.setToBalance(tokenInfo.getBalance().toString());
             }
@@ -1010,7 +1012,7 @@ public class SyncService {
         return accountTokenInfo;
     }
 
-    private void clear() {
+    private void clear(int chainId) {
         accountInfoMap.clear();
         accountLedgerInfoMap.clear();
         agentInfoList.clear();
@@ -1025,5 +1027,18 @@ public class SyncService {
         accountTokenMap.clear();
         tokenTransferList.clear();
         chainInfoList.clear();
+
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        if (apiCache.getAccountMap().size() > MongoAccountServiceImpl.cacheSize * 2) {
+            Set<String> keySet = apiCache.getAccountMap().keySet();
+            int i = 0;
+            for (String key : keySet) {
+                apiCache.getAccountMap().remove(key);
+                i++;
+                if (i >= MongoAccountServiceImpl.cacheSize) {
+                    break;
+                }
+            }
+        }
     }
 }

@@ -34,7 +34,7 @@ public class MongoAccountServiceImpl implements AccountService {
 
     private List<String> addressList = new LinkedList<>();
 
-    private static int cacheSize = 30000;
+    public static int cacheSize = 5000;
 
     public void initCache() {
         for (ApiCache apiCache : CacheManager.getApiCaches().values()) {

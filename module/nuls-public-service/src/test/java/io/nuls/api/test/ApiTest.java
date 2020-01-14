@@ -17,6 +17,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.math.BigInteger;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
@@ -115,9 +116,27 @@ public class ApiTest {
 
     @Test
     public void test() {
-        BigInteger bigInteger = new BigInteger("41095890410959");
-        double d = DoubleUtils.mul(365, bigInteger.doubleValue(), 0);
-        d = DoubleUtils.div(d, 30, 0);
-        System.out.println(d);
+        Set<String> set = new HashSet<>();
+        set.add("aaaa1");
+        set.add("aaaa11");
+        set.add("aaaa112");
+        set.add("aaaa13");
+        set.add("aaaa14");
+        set.add("aaaa15");
+        set.add("aaaa16");
+        set.add("aaaa17");
+        set.add("aaaa18");
+        set.add("aaaa19");
+        set.add("aaaa10");
+
+        int i = 0;
+        for (String key : set) {
+            System.out.println(key);
+            i++;
+            if (i == 6) {
+                break;
+            }
+        }
+
     }
 }
