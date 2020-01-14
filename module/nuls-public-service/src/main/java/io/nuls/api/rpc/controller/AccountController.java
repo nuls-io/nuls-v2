@@ -28,6 +28,7 @@ import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.*;
 import io.nuls.api.model.po.mini.MiniAccountInfo;
 import io.nuls.api.model.rpc.*;
+import io.nuls.api.utils.LoggerUtil;
 import io.nuls.api.utils.VerifyUtils;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.core.basic.Result;
@@ -78,7 +79,7 @@ public class AccountController {
         if (pageNumber <= 0) {
             pageNumber = 1;
         }
-        if (pageSize <= 0 || pageSize > 1000) {
+        if (pageSize <= 0 || pageSize > 100) {
             pageSize = 10;
         }
         RpcResult result = new RpcResult();
@@ -140,18 +141,21 @@ public class AccountController {
         if (pageNumber <= 0) {
             pageNumber = 1;
         }
-        if (pageSize <= 0 || pageSize > 1000) {
+        if (pageSize <= 0 || pageSize > 100) {
             pageSize = 10;
         }
-
         RpcResult result = new RpcResult();
-        PageInfo<TxRelationInfo> pageInfo;
-        if (CacheManager.isChainExist(chainId)) {
-            pageInfo = accountService.getAccountTxs(chainId, address, pageNumber, pageSize, type, startHeight, endHeight);
-        } else {
-            pageInfo = new PageInfo<>(pageNumber, pageSize);
+        try {
+            PageInfo<TxRelationInfo> pageInfo;
+            if (CacheManager.isChainExist(chainId)) {
+                pageInfo = accountService.getAccountTxs(chainId, address, pageNumber, pageSize, type, startHeight, endHeight);
+            } else {
+                pageInfo = new PageInfo<>(pageNumber, pageSize);
+            }
+            result.setResult(pageInfo);
+        } catch (Exception e) {
+            LoggerUtil.commonLog.error(e);
         }
-        result.setResult(pageInfo);
         return result;
 
     }
@@ -205,7 +209,7 @@ public class AccountController {
         if (pageNumber <= 0) {
             pageNumber = 1;
         }
-        if (pageSize <= 0 || pageSize > 1000) {
+        if (pageSize <= 0 || pageSize > 100) {
             pageSize = 10;
         }
 
@@ -321,7 +325,7 @@ public class AccountController {
         if (pageNumber <= 0) {
             pageNumber = 1;
         }
-        if (pageSize <= 0 || pageSize > 1000) {
+        if (pageSize <= 0 || pageSize > 100) {
             pageSize = 10;
         }
 
