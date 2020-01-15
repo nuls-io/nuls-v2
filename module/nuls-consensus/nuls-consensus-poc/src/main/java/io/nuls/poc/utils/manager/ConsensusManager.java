@@ -245,7 +245,7 @@ public class ConsensusManager {
             计算链内手续费，from中链内主资产 - to中链内主资产的和
             Calculate in-chain handling fees, from in-chain main assets - to in-chain main assets and
             */
-            if (AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress()) == feeChainId) {
+            if (AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress()) == feeChainId && feeChainId != config.getMainChainId()) {
                 return new ChargeResultData(getFee(coinData, feeChainId, feeAssetId), feeChainId, feeAssetId);
             }
             /*

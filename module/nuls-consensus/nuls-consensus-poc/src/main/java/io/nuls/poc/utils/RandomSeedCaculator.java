@@ -17,6 +17,7 @@ public class RandomSeedCaculator {
     public static final String SHA3 = "SHA3";
     public static final String KECCAK = "KECCAK";
     public static final String MERKLE = "MERKLE";
+
     public static byte[] clac(List<byte[]> seeds, String algorithm) {
         if (StringUtils.isBlank(algorithm)) {
             algorithm = SHA3;

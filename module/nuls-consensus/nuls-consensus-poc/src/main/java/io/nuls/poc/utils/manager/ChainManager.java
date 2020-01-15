@@ -265,6 +265,7 @@ public class ChainManager {
             if(chain.getBlockHeaderList().size()>1){
                 roundManager.initRound(chain);
             }
+            chain.setCacheLoaded(true);
         } catch (Exception e) {
             chain.getLogger().error(e);
         }

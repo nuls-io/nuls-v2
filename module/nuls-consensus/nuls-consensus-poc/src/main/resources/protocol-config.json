@@ -1,5 +1,29 @@
 [
   {
+    "version": "4",
+    "extend": "3",
+    "validTxs": [
+      {
+        "type": "5",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": false,
+        "handler": "DepositProcessorV4"
+      },
+      {
+        "type": "8",
+        "systemTx": true,
+        "unlockTx": false,
+        "verifySignature": false,
+        "verifyFee": false,
+        "handler": "RedPunishProcessorV4"
+      }
+    ],
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  },{
     "version": "3",
     "extend": "2",
     "validTxs": [

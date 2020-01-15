@@ -591,6 +591,10 @@ public class AgentServiceImpl implements AgentService {
                 for (MeetingMember meetingMember : round.getMemberList()) {
                     packAddressList.add(AddressTool.getStringAddressByBytes(meetingMember.getAgent().getPackingAddress()));
                 }
+            }else {
+                if(chain.isCacheLoaded()) {
+                    packAddressList = new ArrayList<>(Arrays.asList(chain.getConfig().getSeedNodes().split(",")));
+                }
             }
             resultMap.put("packAddressList", packAddressList);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(resultMap);
