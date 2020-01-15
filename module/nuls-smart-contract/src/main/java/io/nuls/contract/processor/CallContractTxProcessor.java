@@ -81,13 +81,7 @@ public class CallContractTxProcessor {
             byte[] contractAddress = callContractData.getContractAddress();
 
             Result<ContractAddressInfoPo> contractAddressInfoPoResult = contractHelper.getContractAddressInfo(chainId, contractAddress);
-            if (contractAddressInfoPoResult.isFailed()) {
-                return contractAddressInfoPoResult;
-            }
             ContractAddressInfoPo contractAddressInfoPo = contractAddressInfoPoResult.getData();
-            if (contractAddressInfoPo == null) {
-                return Result.getFailed(ContractErrorCode.CONTRACT_ADDRESS_NOT_EXIST);
-            }
             contractResult.setNrc20(contractAddressInfoPo.isNrc20());
             tx.setBlockHeight(blockHeight);
             // 获取合约当前状态
@@ -103,10 +97,7 @@ public class CallContractTxProcessor {
                     ContractTokenTransferInfoPo po = infoResult.getData();
                     if (po != null) {
                         po.setStatus((byte) 2);
-                        Result result = contractTokenTransferStorageService.saveTokenTransferInfo(chainId, infoKey, po);
-                        if(result.isFailed()) {
-                            return result;
-                        }
+                        contractTokenTransferStorageService.saveTokenTransferInfo(chainId, infoKey, po);
 
                         // 刷新token余额
                         if (isTerminatedContract) {

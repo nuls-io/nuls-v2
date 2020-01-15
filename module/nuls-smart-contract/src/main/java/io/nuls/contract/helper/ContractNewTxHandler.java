@@ -23,20 +23,22 @@
  */
 package io.nuls.contract.helper;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.manager.ContractTempBalanceManager;
 import io.nuls.contract.model.bo.ContractBalance;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractWrapperTransaction;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.vm.program.ProgramAccount;
+import io.nuls.contract.vm.program.ProgramNewTx;
+import io.nuls.contract.vm.program.ProgramTransfer;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.StringUtils;
 import org.ethereum.db.ByteArrayWrapper;
 
 import java.math.BigInteger;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author: PierreLuo
@@ -82,23 +84,61 @@ public class ContractNewTxHandler {
             tempBalanceManager.addTempBalance(contractAddress, value);
         }
 
-        boolean isSuccess;
+        boolean isSuccess = true;
         do {
             // 处理合约调用其他模块生成的交易的临时余额
-            isSuccess = contractNewTxFromOtherModuleHandler.refreshTempBalance(chainId, contractResult, tempBalanceManager);
+            List<Object> orderedInnerTxs = contractResult.getOrderedInnerTxs();
+            LinkedList<Object> successedOrderedInnerTxs = new LinkedList<>();
+            for(Object innerTx : orderedInnerTxs) {
+                if(innerTx instanceof ProgramNewTx) {
+                    isSuccess = contractNewTxFromOtherModuleHandler.refreshTempBalance(chainId, contractResult.getContractAddress(), List.of((ProgramNewTx) innerTx), tempBalanceManager);
             if (!isSuccess) {
                 contractResult.setError(true);
                 contractResult.setErrorMessage("Refresh temp balance failed about new transaction from external cmd.");
-                // 回滚 - 清空内部转账列表
-                contractResult.getTransfers().clear();
-                break;
+                        break;
+                    }
+                    successedOrderedInnerTxs.add(innerTx);
+                } else if(innerTx instanceof ProgramTransfer) {
+                    isSuccess = contractTransferHandler.refreshTempBalance(chainId, List.of((ProgramTransfer) innerTx), tempBalanceManager);
+                    if(!isSuccess) {
+                        contractResult.setError(true);
+                        contractResult.setErrorMessage(String.format("Refresh temp balance failed about inner transfer out from contract[%s].", AddressTool.getStringAddressByBytes(contractResult.getContractAddress())));
+                        break;
+                    }
+                    successedOrderedInnerTxs.add(innerTx);
+                }
             }
+            if(!isSuccess) {
+                // 回滚 - 清空内部转账列表
+                Iterator<Object> reverseIterator = successedOrderedInnerTxs.descendingIterator();
+                Object rollbackTx;
+                while (reverseIterator.hasNext()) {
+                    rollbackTx = reverseIterator.next();
+                    if(rollbackTx instanceof ProgramNewTx) {
+                        contractNewTxFromOtherModuleHandler.rollbackTempBalance(chainId, contractResult.getContractAddress(), List.of((ProgramNewTx) rollbackTx), tempBalanceManager);
+                    } else if(rollbackTx instanceof ProgramTransfer) {
+                        contractTransferHandler.rollbackContractTempBalance(chainId, List.of((ProgramTransfer) rollbackTx), tempBalanceManager);
+                    }
+                }
+                contractResult.getTransfers().clear();
+                contractResult.getInvokeRegisterCmds().clear();
+                break;
+            } else {
             // 处理合约内部转账交易
-            isSuccess = contractTransferHandler.handleContractTransfer(chainId, blockTime, contractResult, tempBalanceManager);
+                isSuccess = contractTransferHandler.handleContractTransferTxs(chainId, blockTime, contractResult, tempBalanceManager);
             // 如果内部转账失败，回滚合约新生成的其他交易 - 合约余额和nonce
             if (!isSuccess) {
-                contractNewTxFromOtherModuleHandler.rollbackTempBalance(chainId, contractResult, tempBalanceManager);
+                    Iterator<Object> reverseIterator = successedOrderedInnerTxs.descendingIterator();
+                    Object rollbackTx;
+                    while (reverseIterator.hasNext()) {
+                        rollbackTx = reverseIterator.next();
+                        if(rollbackTx instanceof ProgramNewTx) {
+                            contractNewTxFromOtherModuleHandler.rollbackTempBalance(chainId, contractResult.getContractAddress(), List.of((ProgramNewTx) rollbackTx), tempBalanceManager);
+                        }
+                    }
+                    contractResult.getInvokeRegisterCmds().clear();
                 break;
+                }
             }
         } while (false);
 

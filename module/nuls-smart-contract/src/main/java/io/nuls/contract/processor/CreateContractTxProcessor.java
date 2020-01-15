@@ -46,6 +46,9 @@ import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.parse.JSONUtils;
+import java.math.BigInteger;
+import java.util.List;
+import java.util.Map;
 
 import static io.nuls.contract.util.ContractUtil.getSuccess;
 
@@ -110,10 +113,14 @@ public class CreateContractTxProcessor {
         // 获取 token tracker
         if (isNrc20Contract) {
             // NRC20 token 标准方法获取名称数据
-            info.setNrc20TokenName(contractResult.getTokenName());
-            info.setNrc20TokenSymbol(contractResult.getTokenSymbol());
-            info.setDecimals(contractResult.getTokenDecimals());
-            info.setTotalSupply(contractResult.getTokenTotalSupply());
+            String tokenName = contractResult.getTokenName();
+            String tokenSymbol = contractResult.getTokenSymbol();
+            int tokenDecimals = contractResult.getTokenDecimals();
+            BigInteger tokenTotalSupply = contractResult.getTokenTotalSupply();
+            info.setNrc20TokenName(tokenName);
+            info.setNrc20TokenSymbol(tokenSymbol);
+            info.setDecimals(tokenDecimals);
+            info.setTotalSupply(tokenTotalSupply);
             byte[] newestStateRoot = blockHeader.getStateRoot();
             //处理NRC20合约事件
             contractHelper.dealNrc20Events(chainId, newestStateRoot, tx, contractResult, info);

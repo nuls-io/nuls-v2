@@ -87,7 +87,7 @@ public class CmdRegisterManager implements InitializingBean {
         }
         String moduleCode = moduleCmdRegisterDto.getModuleCode();
         List<CmdRegisterDto> cmdRegisterList = moduleCmdRegisterDto.getCmdRegisterList();
-        Result result = null;
+        Result result;
         for(CmdRegisterDto dto : cmdRegisterList) {
             result = this.registerCmd(chain, moduleCode, dto.getCmdName(), dto.getCmdRegisterMode(), dto.getArgNames(), dto.getCmdRegisterReturnType());
             if(result.isFailed()) {

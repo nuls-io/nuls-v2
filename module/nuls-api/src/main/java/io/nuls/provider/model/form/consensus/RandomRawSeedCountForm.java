@@ -1,7 +1,7 @@
 /**
  * MIT License
  * <p>
- * Copyright (c) 2017-2019 nuls.io
+ * Copyright (c) 2017-2018 nuls.io
  * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,31 +21,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.contract.model.bo;
+package io.nuls.provider.model.form.consensus;
 
-import io.nuls.base.data.Transaction;
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
+import io.nuls.provider.model.form.Base;
 
 /**
  * @author: PierreLuo
- * @date: 2019-02-27
+ * @date: 2019-12-18
  */
-public class ContractTempTransaction extends Transaction {
-    private int chainId;
-    private String txHex;
+@ApiModel(name = "原始随机种子")
+public class RandomRawSeedCountForm extends Base {
 
-    public int getChainId() {
-        return chainId;
+    @ApiModelProperty(description = "最大高度")
+    private long height;
+    @ApiModelProperty(description = "原始种子个数")
+    private int count;
+
+    public long getHeight() {
+        return height;
     }
 
-    public void setChainId(int chainId) {
-        this.chainId = chainId;
+    public void setHeight(long height) {
+        this.height = height;
     }
 
-    public String getTxHex() {
-        return txHex;
+    public int getCount() {
+        return count;
     }
 
-    public void setTxHex(String txHex) {
-        this.txHex = txHex;
+    public void setCount(int count) {
+        this.count = count;
     }
+
 }

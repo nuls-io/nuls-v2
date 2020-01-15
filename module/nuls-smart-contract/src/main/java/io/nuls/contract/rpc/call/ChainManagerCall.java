@@ -1,7 +1,7 @@
 /**
  * MIT License
  * <p>
- * Copyright (c) 2017-2019 nuls.io
+ * Copyright (c) 2017-2018 nuls.io
  * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,31 +21,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.contract.model.bo;
+package io.nuls.contract.rpc.call;
 
-import io.nuls.base.data.Transaction;
+import io.nuls.contract.model.bo.Chain;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.rpc.info.Constants;
+import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author: PierreLuo
- * @date: 2019-02-27
+ * @date: 2019-10-21
  */
-public class ContractTempTransaction extends Transaction {
-    private int chainId;
-    private String txHex;
+public class ChainManagerCall {
 
-    public int getChainId() {
-        return chainId;
-    }
-
-    public void setChainId(int chainId) {
-        this.chainId = chainId;
-    }
-
-    public String getTxHex() {
-        return txHex;
-    }
-
-    public void setTxHex(String txHex) {
-        this.txHex = txHex;
+    /**
+     * 查询是否为跨链资产
+     */
+    public static boolean isCrossAssets(int chainId, int assetId) throws NulsException {
+        Map<String, Object> params = new HashMap(4);
+        params.put(Constants.CHAIN_ID, chainId);
+        params.put("assetId", assetId);
+        try {
+            Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CM.abbr, "cm_asset", params);
+            return callResp.isSuccess();
+        } catch (Exception e) {
+            throw new NulsException(e);
+        }
     }
 }

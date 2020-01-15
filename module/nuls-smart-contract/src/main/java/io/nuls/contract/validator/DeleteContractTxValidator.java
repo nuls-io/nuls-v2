@@ -70,6 +70,9 @@ public class DeleteContractTxValidator {
             Log.error("contract delete error: The contract coin to is not empty.");
             return Result.getFailed(CONTRACT_COIN_TO_EMPTY_ERROR);
         }
+        DeleteContractData txData = tx.getTxDataObj();
+        byte[] sender = txData.getSender();
+        boolean existSender = false;
         Chain chain = contractHelper.getChain(chainId);
         int assetsId = chain.getConfig().getAssetId();
         for(CoinFrom from : fromList) {
@@ -77,18 +80,17 @@ public class DeleteContractTxValidator {
                 Log.error("contract delete error: The chain id or assets id of coin from is error.");
                 return Result.getFailed(CONTRACT_COIN_ASSETS_ERROR);
             }
+            if(!existSender && Arrays.equals(from.getAddress(), sender)) {
+                existSender = true;
+            }
         }
-
-        DeleteContractData txData = tx.getTxDataObj();
-        byte[] sender = txData.getSender();
-        byte[] contractAddressBytes = txData.getContractAddress();
         Set<String> addressSet = SignatureUtil.getAddressFromTX(tx, chainId);
-
-        if (!addressSet.contains(AddressTool.getStringAddressByBytes(sender))) {
+        if (!existSender || !addressSet.contains(AddressTool.getStringAddressByBytes(sender))) {
             Log.error("contract delete error: The contract deleter is not the transaction creator.");
             return Result.getFailed(CONTRACT_DELETER_ERROR);
         }
 
+        byte[] contractAddressBytes = txData.getContractAddress();
         Result<ContractAddressInfoPo> contractAddressInfoPoResult = contractHelper.getContractAddressInfo(chainId, contractAddressBytes);
         if (contractAddressInfoPoResult.isFailed()) {
             return Result.getFailed(contractAddressInfoPoResult.getErrorCode());

@@ -20,25 +20,29 @@
 
 package io.nuls.provider.api.jsonrpc.controller;
 
-import io.nuls.base.api.provider.consensus.facade.*;
-import io.nuls.provider.api.config.Context;
-import io.nuls.provider.api.manager.BeanCopierManager;
 import io.nuls.base.api.provider.Result;
 import io.nuls.base.api.provider.ServiceManager;
 import io.nuls.base.api.provider.consensus.ConsensusProvider;
+import io.nuls.base.api.provider.consensus.facade.*;
 import io.nuls.base.basic.AddressTool;
+import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Controller;
 import io.nuls.core.core.annotation.RpcMethod;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.model.FormatValidUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.model.*;
+import io.nuls.provider.api.config.Context;
+import io.nuls.provider.api.manager.BeanCopierManager;
 import io.nuls.provider.model.dto.DepositInfoDto;
+import io.nuls.provider.model.dto.RandomSeedDTO;
 import io.nuls.provider.model.form.consensus.CreateAgentForm;
 import io.nuls.provider.model.form.consensus.DepositForm;
 import io.nuls.provider.model.form.consensus.StopAgentForm;
 import io.nuls.provider.model.form.consensus.WithdrawForm;
 import io.nuls.provider.model.jsonrpc.RpcResult;
+import io.nuls.provider.rpctools.ConsensusTools;
 import io.nuls.provider.utils.ResultUtil;
 import io.nuls.provider.utils.VerifyUtils;
 import io.nuls.v2.model.annotation.Api;
@@ -62,6 +66,8 @@ import java.util.stream.Collectors;
 public class ConsensusController {
 
     ConsensusProvider consensusProvider = ServiceManager.get(ConsensusProvider.class);
+    @Autowired
+    private ConsensusTools consensusTools;
 
     @RpcMethod("createAgent")
     @ApiOperation(description = "创建共识节点", order = 501)
@@ -322,6 +328,164 @@ public class ConsensusController {
             }
         }
         return rpcResult;
+    }
+
+    @RpcMethod("getRandomSeedByCount")
+    @ApiOperation(description = "根据最大高度和原始种子个数生成一个随机种子并返回", order = 506, detailDesc = "包括最大高度往后退1000个区块，在这个区块区间内找到指定个数的原始种子，汇总生成一个随机种子并返回")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
+            @Parameter(parameterName = "height", requestType = @TypeDescriptor(value = long.class), parameterDes = "最大高度"),
+            @Parameter(parameterName = "count", requestType = @TypeDescriptor(value = int.class), parameterDes = "原始种子个数"),
+            @Parameter(parameterName = "algorithm", parameterDes = "算法标识：SHA3, KECCAK, MERKLE", canNull = true)
+    })
+    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = RandomSeedDTO.class))
+    public RpcResult getRandomSeedByCount(List<Object> params) {
+        int chainId;
+        long height;
+        int count;
+        String algorithm = null;
+        try {
+            chainId = Integer.parseInt(params.get(0).toString());
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        try {
+            height = Long.parseLong(params.get(1).toString());
+        } catch (Exception e) {
+            return RpcResult.paramError("[height] is inValid");
+        }
+        try {
+            count = Integer.parseInt(params.get(2).toString());
+        } catch (Exception e) {
+            return RpcResult.paramError("[count] is inValid");
+        }
+        if(params.size() > 3) {
+            try {
+                algorithm = params.get(3).toString();
+            } catch (Exception e) {
+                return RpcResult.paramError("[algorithm] is inValid");
+            }
+        }
+        try {
+            Map resultMap = consensusTools.getRandomSeedByCount(chainId, height, count, algorithm);
+            return RpcResult.success(resultMap);
+        } catch (NulsRuntimeException e) {
+            return ResultUtil.getNulsRuntimeExceptionJsonRpcResult(e);
+        }
+    }
+
+    @RpcMethod("getRandomSeedByHeight")
+    @ApiOperation(description = "根据高度区间生成一个随机种子并返回", order = 507, detailDesc = "在这个区块区间内找到所有有效的原始种子，汇总生成一个随机种子并返回")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
+            @Parameter(parameterName = "startHeight", requestType = @TypeDescriptor(value = long.class), parameterDes = "起始高度"),
+            @Parameter(parameterName = "endHeight", requestType = @TypeDescriptor(value = long.class), parameterDes = "截止高度"),
+            @Parameter(parameterName = "algorithm", parameterDes = "算法标识：SHA3, KECCAK, MERKLE", canNull = true)
+    })
+    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = RandomSeedDTO.class))
+    public RpcResult getRandomSeedByHeight(List<Object> params) {
+        int chainId;
+        long startHeight;
+        long endHeight;
+        String algorithm = null;
+        try {
+            chainId = Integer.parseInt(params.get(0).toString());
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        try {
+            startHeight = Long.parseLong(params.get(1).toString());
+        } catch (Exception e) {
+            return RpcResult.paramError("[startHeight] is inValid");
+        }
+        try {
+            endHeight = Long.parseLong(params.get(2).toString());
+        } catch (Exception e) {
+            return RpcResult.paramError("[endHeight] is inValid");
+        }
+        if(params.size() > 3) {
+            try {
+                algorithm = params.get(3).toString();
+            } catch (Exception e) {
+                return RpcResult.paramError("[algorithm] is inValid");
+            }
+        }
+        try {
+            Map resultMap = consensusTools.getRandomSeedByHeight(chainId, startHeight, endHeight, algorithm);
+            return RpcResult.success(resultMap);
+        } catch (NulsRuntimeException e) {
+            return ResultUtil.getNulsRuntimeExceptionJsonRpcResult(e);
+        }
+    }
+
+    @RpcMethod("getRandomRawSeedsByCount")
+    @ApiOperation(description = "根据最大高度和原始种子个数查找原始种子列表并返回", order = 508, detailDesc = "包括最大高度往后退1000个区块，在这个区块区间内找到指定个数的原始种子并返回")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
+            @Parameter(parameterName = "height", requestType = @TypeDescriptor(value = long.class), parameterDes = "最大高度"),
+            @Parameter(parameterName = "count", requestType = @TypeDescriptor(value = int.class), parameterDes = "原始种子个数")
+    })
+    @ResponseData(name = "原始种子列表", responseType = @TypeDescriptor(value = List.class, collectionElement = String.class))
+    public RpcResult getRandomRawSeedsByCount(List<Object> params) {
+        int chainId;
+        long height;
+        int count;
+        try {
+            chainId = Integer.parseInt(params.get(0).toString());
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        try {
+            height = Long.parseLong(params.get(1).toString());
+        } catch (Exception e) {
+            return RpcResult.paramError("[height] is inValid");
+        }
+        try {
+            count = Integer.parseInt(params.get(2).toString());
+        } catch (Exception e) {
+            return RpcResult.paramError("[count] is inValid");
+        }
+        try {
+            List<String> resultList = consensusTools.getRandomRawSeedsByCount(chainId, height, count);
+            return RpcResult.success(resultList);
+        } catch (NulsRuntimeException e) {
+            return ResultUtil.getNulsRuntimeExceptionJsonRpcResult(e);
+        }
+    }
+
+    @RpcMethod("getRandomRawSeedsByHeight")
+    @ApiOperation(description = "根据高度区间查找原始种子列表并返回", order = 509, detailDesc = "在这个区块区间内找到所有有效的原始种子并返回")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
+            @Parameter(parameterName = "startHeight", requestType = @TypeDescriptor(value = long.class), parameterDes = "起始高度"),
+            @Parameter(parameterName = "endHeight", requestType = @TypeDescriptor(value = long.class), parameterDes = "截止高度")
+    })
+    @ResponseData(name = "原始种子列表", responseType = @TypeDescriptor(value = List.class, collectionElement = String.class))
+    public RpcResult getRandomRawSeedsByHeight(List<Object> params) {
+        int chainId;
+        long startHeight;
+        long endHeight;
+        try {
+            chainId = Integer.parseInt(params.get(0).toString());
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        try {
+            startHeight = Long.parseLong(params.get(1).toString());
+        } catch (Exception e) {
+            return RpcResult.paramError("[startHeight] is inValid");
+        }
+        try {
+            endHeight = Long.parseLong(params.get(2).toString());
+        } catch (Exception e) {
+            return RpcResult.paramError("[endHeight] is inValid");
+        }
+        try {
+            List<String> resultList = consensusTools.getRandomRawSeedsByHeight(chainId, startHeight, endHeight);
+            return RpcResult.success(resultList);
+        } catch (NulsRuntimeException e) {
+            return ResultUtil.getNulsRuntimeExceptionJsonRpcResult(e);
+        }
     }
 
     @RpcMethod("createAgentOffline")

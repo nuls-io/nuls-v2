@@ -26,18 +26,15 @@ package io.nuls.contract.util;
 import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.Address;
-import io.nuls.base.data.BlockExtendsData;
-import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.Transaction;
+import io.nuls.base.data.*;
+import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
-import io.nuls.contract.model.bo.BatchInfo;
-import io.nuls.contract.model.bo.ContractResult;
-import io.nuls.contract.model.bo.ContractTempTransaction;
-import io.nuls.contract.model.bo.ContractWrapperTransaction;
+import io.nuls.contract.manager.ChainManager;
+import io.nuls.contract.model.bo.*;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.contract.model.tx.*;
 import io.nuls.contract.model.txdata.CallContractData;
@@ -76,6 +73,9 @@ public class ContractUtil {
         if (args == null) {
             return null;
         } else {
+            if(types != null && types.length != args.length) {
+                throw new NulsRuntimeException(ContractErrorCode.PARAMETER_ERROR);
+            }
             int length = args.length;
             String[][] two = new String[length][];
             Object arg;
@@ -142,20 +142,20 @@ public class ContractUtil {
         return contractAddress;
     }
 
-    public static ContractWrapperTransaction parseContractTransaction(ContractTempTransaction tx) throws NulsException {
+    public static ContractWrapperTransaction parseContractTransaction(ContractTempTransaction tx, ChainManager chainManager) throws NulsException {
         ContractWrapperTransaction contractTransaction = null;
         ContractData contractData = null;
         boolean isContractTx = true;
         switch (tx.getType()) {
-            case CREATE_CONTRACT:
-                CreateContractData create = new CreateContractData();
-                create.parse(tx.getTxData(), 0);
-                contractData = create;
-                break;
             case CALL_CONTRACT:
                 CallContractData call = new CallContractData();
                 call.parse(tx.getTxData(), 0);
                 contractData = call;
+                break;
+            case CREATE_CONTRACT:
+                CreateContractData create = new CreateContractData();
+                create.parse(tx.getTxData(), 0);
+                contractData = create;
                 break;
             case DELETE_CONTRACT:
                 DeleteContractData delete = new DeleteContractData();
@@ -506,7 +506,7 @@ public class ContractUtil {
         boolean isAdded = batchInfo.addGasCostTotal(gasUsed, contractResult.getHash());
         if(!isAdded) {
             contractResult.setError(true);
-            contractResult.setErrorMessage("Exceed tx count [500] or gas limit of block [12,000,000 gas], the contract transaction ["+ contractResult.getHash() +"] revert to package queue.");
+            contractResult.setErrorMessage("Exceed tx count [600] or gas limit of block [13,000,000 gas], the contract transaction ["+ contractResult.getHash() +"] revert to package queue.");
         }
         return isAdded;
     }
@@ -586,6 +586,9 @@ public class ContractUtil {
     }
 
     public static byte[] extractPublicKey(Transaction tx) {
+        if(tx.getTransactionSignature() == null) {
+            return null;
+        }
         TransactionSignature signature = new TransactionSignature();
         try {
             signature.parse(tx.getTransactionSignature(), 0);

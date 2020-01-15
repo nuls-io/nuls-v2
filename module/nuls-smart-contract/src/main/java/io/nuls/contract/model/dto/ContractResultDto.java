@@ -33,6 +33,7 @@ import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.vm.program.ProgramInvokeRegisterCmd;
 import io.nuls.contract.vm.program.ProgramMethodArg;
+import io.nuls.core.constant.TxType;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.LongUtils;
 import io.nuls.core.rpc.model.ApiModel;
@@ -119,11 +120,11 @@ public class ContractResultDto {
         this.remark = result.getRemark();
         this.invokeRegisterCmds = new LinkedList<>();
         this.contractTxList = new ArrayList<>();
+        this.contractTxList.addAll(result.getContractTransferTxStringList());
         if (result.isSuccess()) {
             this.makeTokenTransfers(chainId, result.getEvents());
             this.makeInvokeRegisterCmds(result.getInvokeRegisterCmds());
         }
-        this.contractTxList.addAll(result.getContractTransferTxStringList());
     }
 
     public ContractResultDto(int chainId, ContractResult result, long gasLimit) throws NulsException {
@@ -146,11 +147,11 @@ public class ContractResultDto {
         this.remark = result.getRemark();
         this.invokeRegisterCmds = new LinkedList<>();
         this.contractTxList = new ArrayList<>();
+        this.contractTxList.addAll(result.getContractTransferTxStringList());
         if (result.isSuccess()) {
             this.makeTokenTransfers(chainId, result.getEvents());
             this.makeInvokeRegisterCmds(result.getInvokeRegisterCmds());
         }
-        this.contractTxList.addAll(result.getContractTransferTxStringList());
     }
 
     private void makeInvokeRegisterCmds(List<ProgramInvokeRegisterCmd> invokeRegisterCmds) {

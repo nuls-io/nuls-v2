@@ -30,14 +30,13 @@ import io.nuls.contract.vm.*;
 import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.exception.ErrorException;
 import io.nuls.contract.vm.natives.NativeMethod;
-import io.nuls.contract.vm.program.ProgramCall;
-import io.nuls.contract.vm.program.ProgramInternalCall;
-import io.nuls.contract.vm.program.ProgramResult;
-import io.nuls.contract.vm.program.ProgramTransfer;
+import io.nuls.contract.vm.program.*;
 import io.nuls.contract.vm.program.impl.ProgramInvoke;
+import org.ethereum.vm.DataWord;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Map;
 
 import static io.nuls.contract.vm.natives.NativeMethod.NOT_SUPPORT_NATIVE;
 import static io.nuls.contract.vm.natives.NativeMethod.SUPPORT_NATIVE;
@@ -180,6 +179,9 @@ public class NativeAddress {
             frame.vm.getProgramExecutor().getAccount(from).addBalance(value.negate());
             ProgramTransfer programTransfer = new ProgramTransfer(from, to, value);
             frame.vm.getTransfers().add(programTransfer);
+            // add by pierre at 2019-11-23 标记 按合约执行顺序添加合约生成交易，按此顺序处理合约生成交易的业务 不确定 需要协议升级
+            frame.vm.getOrderedInnerTxs().add(programTransfer);
+            // end code by pierre
         }
 
         Result result = NativeMethod.result(methodCode, null, frame);
@@ -250,7 +252,7 @@ public class NativeAddress {
         return array;
     }
 
-    private static ProgramResult call(String address, String methodName, String methodDesc, String[][] args, BigInteger value, Frame frame) {
+    public static ProgramResult call(String address, String methodName, String methodDesc, String[][] args, BigInteger value, Frame frame) {
         if (value.compareTo(BigInteger.ZERO) < 0) {
             throw new ErrorException(String.format("amount less than zero, value=%s", value), frame.vm.getGasUsed(), null);
         }
@@ -275,6 +277,9 @@ public class NativeAddress {
             frame.vm.getProgramExecutor().getAccount(programCall.getSender()).addBalance(programCall.getValue().negate());
             ProgramTransfer programTransfer = new ProgramTransfer(programCall.getSender(), programCall.getContractAddress(), programCall.getValue());
             frame.vm.getTransfers().add(programTransfer);
+            // add by pierre at 2019-11-23 标记 按合约执行顺序添加合约生成交易，按此顺序处理合约生成交易的业务 不确定 需要协议升级
+            frame.vm.getOrderedInnerTxs().add(programTransfer);
+            // end code by pierre
         }
 
         ProgramInternalCall programInternalCall = new ProgramInternalCall();
@@ -294,7 +299,9 @@ public class NativeAddress {
             frame.vm.getTransfers().addAll(programResult.getTransfers());
             frame.vm.getInternalCalls().addAll(programResult.getInternalCalls());
             frame.vm.getEvents().addAll(programResult.getEvents());
+            frame.vm.getDebugEvents().addAll(programResult.getDebugEvents());
             frame.vm.getInvokeRegisterCmds().addAll(programResult.getInvokeRegisterCmds());
+            frame.vm.getOrderedInnerTxs().addAll(programResult.getOrderedInnerTxs());
             return programResult;
         } else {
             frame.throwRuntimeException(programResult.getErrorMessage());
@@ -345,20 +352,7 @@ public class NativeAddress {
     private static Result isContract(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         ObjectRef addressRef = methodArgs.objectRef;
         String address = frame.heap.runToString(addressRef);
-        byte[] contractAddress = frame.vm.getProgramInvoke().getContractAddress();
-        byte[] itself = NativeAddress.toBytes(address);
-
-        boolean verify = false;
-        do {
-            if (Arrays.equals(contractAddress, itself)) {
-                verify = true;
-                break;
-            }
-            if (frame.heap.existContract(itself)) {
-                verify = true;
-                break;
-            }
-        } while (false);
+        boolean verify = isContract(NativeAddress.toBytes(address), frame);
         Result result = NativeMethod.result(methodCode, verify, frame);
         return result;
     }
@@ -383,6 +377,17 @@ public class NativeAddress {
         } catch (Exception e) {
             throw new RuntimeException("address error", e);
         }
+    }
+
+    public static boolean isContract(byte[] address, Frame frame) {
+        byte[] contractAddress = frame.vm.getProgramInvoke().getContractAddress();
+        if (Arrays.equals(contractAddress, address)) {
+            return true;
+        }
+        if (frame.heap.existContract(address)) {
+            return true;
+        }
+        return false;
     }
 
     public static boolean validAddress(int chainId, String str) {

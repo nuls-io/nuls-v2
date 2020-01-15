@@ -28,6 +28,7 @@ import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
+import io.nuls.contract.config.ContractConfig;
 import io.nuls.contract.enums.CmdRegisterMode;
 import io.nuls.contract.manager.ContractTempBalanceManager;
 import io.nuls.contract.model.bo.ContractBalance;
@@ -40,6 +41,7 @@ import io.nuls.contract.vm.program.ProgramAccount;
 import io.nuls.contract.vm.program.ProgramInvokeRegisterCmd;
 import io.nuls.contract.vm.program.ProgramNewTx;
 import io.nuls.contract.vm.program.impl.ProgramExecutorImpl;
+import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
@@ -58,26 +60,42 @@ import static io.nuls.contract.util.ContractUtil.mapAddBigInteger;
 @Component
 public class ContractNewTxFromOtherModuleHandler {
 
+    @Autowired
+    private ContractConfig contractConfig;
     /**
      * 更新临时nonce和vm内维护的合约余额
      */
     public Transaction updateNonceAndVmBalance(int chainId, byte[] contractAddressBytes, String txHash, String txStr, Frame frame) {
         try {
+            int assetId = contractConfig.getAssetId();
             byte[] txBytes = RPCUtil.decode(txStr);
             Transaction tx = new Transaction();
             tx.parse(txBytes, 0);
             byte[] addressBytes;
+            CoinFrom contractFrom = null;
 
             CoinData coinData = tx.getCoinDataInstance();
 
-            // 扣除转出
+            // 检查合约地址
             List<CoinFrom> fromList = coinData.getFrom();
-            CoinFrom from0 = fromList.get(0);
-            addressBytes = from0.getAddress();
-            if (!Arrays.equals(contractAddressBytes, addressBytes)) {
-                throw new RuntimeException("not contract address");
+
+            boolean existContract = false;
+            for (CoinFrom from : fromList) {
+                if(Arrays.equals(contractAddressBytes, from.getAddress())) {
+                    contractFrom = from;
+                    existContract = true;
+                    break;
+                }
             }
-            boolean isUnlockTx = from0.getLocked() == (byte) -1;
+            if(!existContract) {
+                throw new RuntimeException("Illegal transaction: contract address must be exist in data of coin-from.");
+            }
+            //CoinFrom from0 = fromList.get(0);
+            //addressBytes = from0.getAddress();
+            //if (!Arrays.equals(contractAddressBytes, addressBytes)) {
+            //    throw new RuntimeException("not contract address");
+            //}
+            boolean isUnlockTx = contractFrom.getLocked() == (byte) -1;
             ProgramAccount account = frame.vm.getProgramExecutor().getAccount(contractAddressBytes);
 
             // 普通交易，更新nonce
@@ -96,6 +114,10 @@ public class ContractNewTxFromOtherModuleHandler {
             List<CoinFrom> froms = coinData.getFrom();
             List<CoinTo> tos = coinData.getTo();
             for (CoinFrom from : froms) {
+                // 只记录主资产的余额变化
+                if(from.getAssetsChainId() != chainId || from.getAssetsId() != assetId) {
+                    continue;
+                }
                 fromAddress = from.getAddress();
                 if (!ContractUtil.isLegalContractAddress(chainId, fromAddress)) {
                     continue;
@@ -105,6 +127,10 @@ public class ContractNewTxFromOtherModuleHandler {
                 }
             }
             for (CoinTo to : tos) {
+                // 只记录主资产的余额变化
+                if(to.getAssetsChainId() != chainId || to.getAssetsId() != assetId) {
+                    continue;
+                }
                 toAddress = to.getAddress();
                 if (!ContractUtil.isLegalContractAddress(chainId, toAddress)) {
                     continue;
@@ -135,26 +161,26 @@ public class ContractNewTxFromOtherModuleHandler {
         }
     }
 
-    public boolean refreshTempBalance(int chainId, ContractResult contractResult, ContractTempBalanceManager tempBalanceManager) {
-        List<ProgramInvokeRegisterCmd> invokeRegisterCmds = contractResult.getInvokeRegisterCmds();
-        if (invokeRegisterCmds.isEmpty()) {
-            return true;
-        }
-        List<ProgramNewTx> programNewTxList = new ArrayList<>();
-        for (ProgramInvokeRegisterCmd invokeRegisterCmd : invokeRegisterCmds) {
-            if (!CmdRegisterMode.NEW_TX.equals(invokeRegisterCmd.getCmdRegisterMode())) {
-                continue;
-            }
-            programNewTxList.add(invokeRegisterCmd.getProgramNewTx());
-        }
-        if (programNewTxList.isEmpty()) {
-            return true;
-        }
-        byte[] contractAddressBytes = contractResult.getContractAddress();
-        return this.refreshTempBalance(chainId, contractAddressBytes, programNewTxList, tempBalanceManager);
-    }
+    //public boolean refreshTempBalance(int chainId, ContractResult contractResult, ContractTempBalanceManager tempBalanceManager) {
+    //    List<ProgramInvokeRegisterCmd> invokeRegisterCmds = contractResult.getInvokeRegisterCmds();
+    //    if (invokeRegisterCmds.isEmpty()) {
+    //        return true;
+    //    }
+    //    List<ProgramNewTx> programNewTxList = new ArrayList<>();
+    //    for (ProgramInvokeRegisterCmd invokeRegisterCmd : invokeRegisterCmds) {
+    //        if (!CmdRegisterMode.NEW_TX.equals(invokeRegisterCmd.getCmdRegisterMode())) {
+    //            continue;
+    //        }
+    //        programNewTxList.add(invokeRegisterCmd.getProgramNewTx());
+    //    }
+    //    if (programNewTxList.isEmpty()) {
+    //        return true;
+    //    }
+    //    byte[] contractAddressBytes = contractResult.getContractAddress();
+    //    return this.refreshTempBalance(chainId, contractAddressBytes, programNewTxList, tempBalanceManager);
+    //}
 
-    private boolean refreshTempBalance(int chainId, byte[] contractAddressBytes, List<ProgramNewTx> programNewTxList, ContractTempBalanceManager tempBalanceManager) {
+    public boolean refreshTempBalance(int chainId, byte[] contractAddressBytes, List<ProgramNewTx> programNewTxList, ContractTempBalanceManager tempBalanceManager) {
         try {
             LinkedHashMap<String, BigInteger>[] contracts = this.filterContractValue(chainId, programNewTxList);
             LinkedHashMap<String, BigInteger> contractFromValue = contracts[0];
@@ -202,6 +228,7 @@ public class ContractNewTxFromOtherModuleHandler {
     }
 
     private LinkedHashMap<String, BigInteger>[] filterContractValue(int chainId, List<ProgramNewTx> programNewTxList) throws NulsException {
+        int assetId = contractConfig.getAssetId();
         LinkedHashMap<String, BigInteger> contractFromValue = MapUtil.createLinkedHashMap(4);
         LinkedHashMap<String, BigInteger> contractFromLockValue = MapUtil.createLinkedHashMap(4);
         LinkedHashMap<String, BigInteger> contractToValue = MapUtil.createLinkedHashMap(4);
@@ -224,6 +251,10 @@ public class ContractNewTxFromOtherModuleHandler {
             List<CoinTo> tos = coinData.getTo();
 
             for (CoinFrom from : froms) {
+                // 只记录主资产的余额变化
+                if(from.getAssetsChainId() != chainId || from.getAssetsId() != assetId) {
+                    continue;
+                }
                 fromAddress = from.getAddress();
                 if (!ContractUtil.isLegalContractAddress(chainId, fromAddress)) {
                     continue;
@@ -236,6 +267,10 @@ public class ContractNewTxFromOtherModuleHandler {
             }
 
             for (CoinTo to : tos) {
+                // 只记录主资产的余额变化
+                if(to.getAssetsChainId() != chainId || to.getAssetsId() != assetId) {
+                    continue;
+                }
                 toAddress = to.getAddress();
                 if (!ContractUtil.isLegalContractAddress(chainId, toAddress)) {
                     continue;
@@ -262,32 +297,32 @@ public class ContractNewTxFromOtherModuleHandler {
         return false;
     }
 
-    public void rollbackTempBalance(int chainId, ContractResult contractResult, ContractTempBalanceManager tempBalanceManager) {
-        try {
-            List<ProgramInvokeRegisterCmd> invokeRegisterCmds = contractResult.getInvokeRegisterCmds();
-            if (invokeRegisterCmds.isEmpty()) {
-                return;
-            }
-            List<ProgramNewTx> programNewTxList = new ArrayList<>();
-            for (ProgramInvokeRegisterCmd invokeRegisterCmd : invokeRegisterCmds) {
-                if (!CmdRegisterMode.NEW_TX.equals(invokeRegisterCmd.getCmdRegisterMode())) {
-                    continue;
-                }
-                programNewTxList.add(invokeRegisterCmd.getProgramNewTx());
-            }
-            if (programNewTxList.isEmpty()) {
-                return;
-            }
-            byte[] contractAddressBytes = contractResult.getContractAddress();
-            this.rollbackTempBalance(chainId, contractAddressBytes, programNewTxList, tempBalanceManager);
+    //public void rollbackTempBalance(int chainId, ContractResult contractResult, ContractTempBalanceManager tempBalanceManager) {
+    //    try {
+    //        List<ProgramInvokeRegisterCmd> invokeRegisterCmds = contractResult.getInvokeRegisterCmds();
+    //        if (invokeRegisterCmds.isEmpty()) {
+    //            return;
+    //        }
+    //        List<ProgramNewTx> programNewTxList = new ArrayList<>();
+    //        for (ProgramInvokeRegisterCmd invokeRegisterCmd : invokeRegisterCmds) {
+    //            if (!CmdRegisterMode.NEW_TX.equals(invokeRegisterCmd.getCmdRegisterMode())) {
+    //                continue;
+    //            }
+    //            programNewTxList.add(invokeRegisterCmd.getProgramNewTx());
+    //        }
+    //        if (programNewTxList.isEmpty()) {
+    //            return;
+    //        }
+    //        byte[] contractAddressBytes = contractResult.getContractAddress();
+    //        this.rollbackTempBalance(chainId, contractAddressBytes, programNewTxList, tempBalanceManager);
+    //
+    //        contractResult.getInvokeRegisterCmds().clear();
+    //    } catch (Exception e) {
+    //        Log.error(e);
+    //    }
+    //}
 
-            contractResult.getInvokeRegisterCmds().clear();
-        } catch (Exception e) {
-            Log.error(e);
-        }
-    }
-
-    private boolean rollbackTempBalance(int chainId, byte[] contractAddressBytes, List<ProgramNewTx> programNewTxList, ContractTempBalanceManager tempBalanceManager) {
+    public boolean rollbackTempBalance(int chainId, byte[] contractAddressBytes, List<ProgramNewTx> programNewTxList, ContractTempBalanceManager tempBalanceManager) {
         try {
             LinkedHashMap<String, BigInteger>[] contracts = this.filterContractValue(chainId, programNewTxList);
             LinkedHashMap<String, BigInteger> contractFromValue = contracts[0];

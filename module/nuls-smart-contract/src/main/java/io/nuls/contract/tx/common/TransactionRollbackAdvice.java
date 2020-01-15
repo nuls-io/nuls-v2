@@ -21,50 +21,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.contract.tx.v1;
+package io.nuls.contract.tx.common;
 
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.protocol.CommonAdvice;
+import io.nuls.base.protocol.ProtocolGroupManager;
+import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.enums.BlockType;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.manager.ChainManager;
-import io.nuls.contract.model.bo.Chain;
-import io.nuls.contract.model.dto.ContractPackageDto;
-import io.nuls.contract.model.po.ContractOfflineTxHashPo;
 import io.nuls.contract.storage.ContractOfflineTxHashListStorageService;
-import io.nuls.contract.util.Log;
+import io.nuls.contract.tx.v1.CallContractProcessor;
+import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author: PierreLuo
- * @date: 2019-05-27
+ * @date: 2019-12-01
  */
 @Component
-public class TransactionCommitAdvice implements CommonAdvice {
+public class TransactionRollbackAdvice implements CommonAdvice {
 
     @Autowired
     private ContractHelper contractHelper;
     @Autowired
     private ContractOfflineTxHashListStorageService contractOfflineTxHashListStorageService;
+    @Autowired
+    private CallContractProcessor callContractProcessor;
 
     @Override
     public void begin(int chainId, List<Transaction> txList, BlockHeader header) {
         try {
             ChainManager.chainHandle(chainId, BlockType.VERIFY_BLOCK.type());
-            ContractPackageDto contractPackageDto = contractHelper.getChain(chainId).getBatchInfo().getContractPackageDto();
-            if (contractPackageDto != null) {
-                Log.info("contract execute txDataSize is {}, commit txDataSize is {}", contractPackageDto.getContractResultMap().keySet().size(), txList.size());
-
-                List<byte[]> offlineTxHashList = contractPackageDto.getOfflineTxHashList();
-                if(offlineTxHashList != null && !offlineTxHashList.isEmpty()) {
-                    // 保存智能合约链下交易hash
-                    contractOfflineTxHashListStorageService.saveOfflineTxHashList(chainId, header.getHash().getBytes(), new ContractOfflineTxHashPo(contractPackageDto.getOfflineTxHashList()));
-                }
-            }
+            // 删除智能合约链下交易hash
+            contractOfflineTxHashListStorageService.deleteOfflineTxHashList(chainId, header.getHash().getBytes());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -72,8 +67,5 @@ public class TransactionCommitAdvice implements CommonAdvice {
 
     @Override
     public void end(int chainId, List<Transaction> txList, BlockHeader blockHeader) {
-        // 移除临时余额, 临时区块头等当前批次执行数据
-        Chain chain = contractHelper.getChain(chainId);
-        chain.setBatchInfo(null);
     }
 }

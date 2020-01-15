@@ -26,6 +26,7 @@ package io.nuls.contract.vm;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.code.ClassCode;
 import io.nuls.contract.vm.code.FieldCode;
 import io.nuls.contract.vm.code.MethodCode;
@@ -50,11 +51,20 @@ public class Heap {
 
     private VM vm;
 
-    public final Map<ObjectRef, Map<String, Object>> objects = new HashMap<>(1024);
+    //TODO pierre 标记
+    public Map<ObjectRef, Map<String, Object>> objects = new LinkedHashMap<>(1024);
+    // end code by pierre
+    //public final Map<ObjectRef, Map<String, Object>> objects = new HashMap<>(1024);
 
-    public final Map<String, Object> arrays = new HashMap<>(1024);
+    //TODO pierre 标记
+    public Map<String, Object> arrays = new LinkedHashMap<>(1024);
+    // end code by pierre
+    //public final Map<String, Object> arrays = new HashMap<>(1024);
 
-    private final Set<ObjectRef> changes = new HashSet<>(1024);
+    //TODO pierre 标记
+    public Set<ObjectRef> changes = new LinkedHashSet<>(1024);
+    // end code by pierre
+    //private final Set<ObjectRef> changes = new HashSet<>(1024);
 
     private final BiMap<String, String> classNames = HashBiMap.create(1024);
 
@@ -64,12 +74,12 @@ public class Heap {
 
     private Repository repository;
 
-    private BigInteger objectRefCount;
+    public BigIntegerWrapper objectRefCount;
 
     private static final DataWord OBJECT_REF_COUNT = new DataWord("objectRefCount");
 
     public Heap(BigInteger objectRefCount) {
-        this.objectRefCount = new BigInteger(objectRefCount.toString());
+        this.objectRefCount = new BigIntegerWrapper(objectRefCount);
     }
 
     public void setVm(VM vm) {
@@ -88,7 +98,7 @@ public class Heap {
 
     public ObjectRef newObjectRef(String ref, String desc, int... dimensions) {
         if (StringUtils.isEmpty(ref)) {
-            objectRefCount = objectRefCount.add(BigInteger.ONE);
+            objectRefCount.addOne();
             ref = objectRefCount.toString();
         }
         ObjectRef objectRef = new ObjectRef(ref, desc, dimensions);
@@ -589,7 +599,7 @@ public class Heap {
         this.contract = objectRef;
         this.address = address;
         this.repository = repository;
-        this.objectRefCount = this.repository.getStorageValue(this.address, OBJECT_REF_COUNT).toBigInteger();
+        this.objectRefCount = new BigIntegerWrapper(this.repository.getStorageValue(this.address, OBJECT_REF_COUNT).toBigInteger());
         String className = this.contract.getVariableType().getType();
         ObjectRef staticObjectRef = getStaticObjectRef(className);
         Map<String, Object> fields = getFieldsFromState(staticObjectRef);
@@ -600,23 +610,31 @@ public class Heap {
     }
 
     public Map<DataWord, DataWord> contractState() {
-        Map<DataWord, DataWord> contractState = new HashMap<>(1024);
-        contractState.put(OBJECT_REF_COUNT, new DataWord(this.objectRefCount));
-        Set<ObjectRef> stateObjectRefs = new HashSet<>(1024);
+        Map<DataWord, DataWord> contractState = new LinkedHashMap<>(1024);
+        //Log.info("=-=-=-=-=-= contractState - objectRefCount: {}, hashCode: {}", this.objectRefCount, this.objectRefCount.hashCode());
+        contractState.put(OBJECT_REF_COUNT, new DataWord(this.objectRefCount.getValue()));
+        Set<ObjectRef> stateObjectRefs = new LinkedHashSet<>(1024);
         String className = this.contract.getVariableType().getType();
         ObjectRef staticObjectRef = getStaticObjectRef(className);
         stateObjectRefs(stateObjectRefs, staticObjectRef);
         stateObjectRefs(stateObjectRefs, this.contract);
+        List<ObjectRef> clearList = new ArrayList<>();
+        //int j = 0;
         for (ObjectRef objectRef : stateObjectRefs) {
+            //j++;
             if (!this.changes.contains(objectRef)) {
+                //Log.warn("[{}]null changes objectRef: {}", j, objectRef);
                 continue;
             }
             Map<String, Object> fields = getFieldsInit(objectRef);
             if (fields == null) {
+                //Log.info("[{}]null fields objectRef: {}", j, objectRef);
                 continue;
             }
             String key = JsonUtils.encode(objectRef, classNames);
             String value = JsonUtils.encode(fields, classNames);
+            //Log.info("[{}]modified objectRef: {}, fields: {}", j, objectRef, fields);
+            //Log.info("[{}]modified key: {}, value: {}", j, key, value);
             contractState.put(new DataWord(key), new DataWord(value));
             if (objectRef.isArray()) {
                 for (String k : fields.keySet()) {
@@ -632,10 +650,12 @@ public class Heap {
                             clazz = ObjectRef.class;
                         }
                         String arrayValue = JsonUtils.encodeArray(object, clazz, classNames);
+                        //Log.info("[{}]modified arrayKey: {}, arrayValue: {}", j, arrayKey, arrayValue);
                         contractState.put(new DataWord(arrayKey), new DataWord(arrayValue));
                     }
                 }
             }
+            clearList.add(objectRef);
         }
         return contractState;
     }
@@ -726,7 +746,7 @@ public class Heap {
     }
 
     public BigInteger getObjectRefCount() {
-        return objectRefCount;
+        return objectRefCount.getValue();
     }
 
 }

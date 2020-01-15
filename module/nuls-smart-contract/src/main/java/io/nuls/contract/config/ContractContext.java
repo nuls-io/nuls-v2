@@ -21,31 +21,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.contract.model.bo;
+package io.nuls.contract.config;
 
-import io.nuls.base.data.Transaction;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @author: PierreLuo
- * @date: 2019-02-27
+ * @date: 2019-03-15
  */
-public class ContractTempTransaction extends Transaction {
-    private int chainId;
-    private String txHex;
+public class ContractContext {
 
-    public int getChainId() {
-        return chainId;
-    }
+    public static Charset DEFAULT_ENCODING = StandardCharsets.UTF_8;
 
-    public void setChainId(int chainId) {
-        this.chainId = chainId;
-    }
+    /**
+     * 数据库存储地址
+     * database path
+     */
+    public static String DATA_PATH;
 
-    public String getTxHex() {
-        return txHex;
-    }
+    /**
+     * 主网链ID（卫星链ID）
+     */
+    public static int MAIN_CHAIN_ID;
 
-    public void setTxHex(String txHex) {
-        this.txHex = txHex;
-    }
+    /**
+     * 主网链资产ID（卫星链资产ID，NULS资产）
+     */
+    public static int MAIN_ASSETS_ID;
+
+    /**
+     *  代币跨链系统合约地址
+     */
+    public static byte[] CROSS_CHAIN_SYSTEM_CONTRACT;
+
+    public static short UPDATE_VERSION_V240 = 4;
 }

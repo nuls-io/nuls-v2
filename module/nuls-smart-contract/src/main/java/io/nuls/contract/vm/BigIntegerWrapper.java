@@ -1,7 +1,7 @@
 /**
  * MIT License
  * <p>
- * Copyright (c) 2017-2019 nuls.io
+ * Copyright (c) 2017-2018 nuls.io
  * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,31 +21,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.contract.model.bo;
+package io.nuls.contract.vm;
 
-import io.nuls.base.data.Transaction;
+import java.math.BigInteger;
 
 /**
  * @author: PierreLuo
- * @date: 2019-02-27
+ * @date: 2019-11-22
  */
-public class ContractTempTransaction extends Transaction {
-    private int chainId;
-    private String txHex;
+public class BigIntegerWrapper {
+    private BigInteger value;
 
-    public int getChainId() {
-        return chainId;
+    public BigIntegerWrapper() {
+        this.value = BigInteger.ZERO;
     }
 
-    public void setChainId(int chainId) {
-        this.chainId = chainId;
+    public BigIntegerWrapper(BigInteger value) {
+        this.value = value;
     }
 
-    public String getTxHex() {
-        return txHex;
+    public void add(BigInteger value) {
+        this.value = this.value.add(value);
     }
 
-    public void setTxHex(String txHex) {
-        this.txHex = txHex;
+    public void addOne() {
+        this.value = this.value.add(BigInteger.ONE);
+    }
+
+    public BigInteger getValue() {
+        return value;
+    }
+
+    @Override
+    public String toString() {
+        return this.value.toString();
     }
 }

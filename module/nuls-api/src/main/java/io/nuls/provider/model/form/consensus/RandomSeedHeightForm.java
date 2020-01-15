@@ -1,7 +1,7 @@
 /**
  * MIT License
  * <p>
- * Copyright (c) 2017-2019 nuls.io
+ * Copyright (c) 2017-2018 nuls.io
  * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,31 +21,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.contract.model.bo;
+package io.nuls.provider.model.form.consensus;
 
-import io.nuls.base.data.Transaction;
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
+import io.nuls.provider.model.form.Base;
 
 /**
  * @author: PierreLuo
- * @date: 2019-02-27
+ * @date: 2019-12-18
  */
-public class ContractTempTransaction extends Transaction {
-    private int chainId;
-    private String txHex;
+@ApiModel(name = "随机种子")
+public class RandomSeedHeightForm extends Base {
 
-    public int getChainId() {
-        return chainId;
+    @ApiModelProperty(description = "起始高度")
+    private long startHeight;
+    @ApiModelProperty(description = "截止高度")
+    private long endHeight;
+    @ApiModelProperty(description = "算法标识：SHA3, KECCAK, MERKLE", required = false)
+    private String algorithm;
+
+    public long getStartHeight() {
+        return startHeight;
     }
 
-    public void setChainId(int chainId) {
-        this.chainId = chainId;
+    public void setStartHeight(long startHeight) {
+        this.startHeight = startHeight;
     }
 
-    public String getTxHex() {
-        return txHex;
+    public long getEndHeight() {
+        return endHeight;
     }
 
-    public void setTxHex(String txHex) {
-        this.txHex = txHex;
+    public void setEndHeight(long endHeight) {
+        this.endHeight = endHeight;
+    }
+
+    public String getAlgorithm() {
+        return algorithm;
+    }
+
+    public void setAlgorithm(String algorithm) {
+        this.algorithm = algorithm;
     }
 }

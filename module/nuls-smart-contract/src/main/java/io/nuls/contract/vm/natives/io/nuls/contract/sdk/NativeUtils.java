@@ -629,7 +629,9 @@ public class NativeUtils {
             ContractNewTxFromOtherModuleHandler handler = SpringLiteContext.getBean(ContractNewTxFromOtherModuleHandler.class);
             // 处理nonce和维护虚拟机内部的合约余额，不处理临时余额，外部再处理
             Transaction tx = handler.updateNonceAndVmBalance(chainId, contractAddressBytes, txHash, txString, frame);
-            invokeRegisterCmd.setProgramNewTx(new ProgramNewTx(txHash, txString, tx));
+            ProgramNewTx programNewTx = new ProgramNewTx(txHash, txString, tx);
+            invokeRegisterCmd.setProgramNewTx(programNewTx);
+            frame.vm.getOrderedInnerTxs().add(programNewTx);
             objectRef = frame.heap.newString(txHash);
         } else {
             // 根据返回值类型解析数据

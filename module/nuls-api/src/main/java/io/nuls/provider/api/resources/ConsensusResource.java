@@ -23,23 +23,27 @@
  */
 package io.nuls.provider.api.resources;
 
-import io.nuls.base.api.provider.consensus.facade.*;
-import io.nuls.provider.api.config.Config;
-import io.nuls.provider.api.manager.BeanCopierManager;
 import io.nuls.base.api.provider.Result;
 import io.nuls.base.api.provider.ServiceManager;
 import io.nuls.base.api.provider.consensus.ConsensusProvider;
+import io.nuls.base.api.provider.consensus.facade.*;
 import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.rpc.model.*;
+import io.nuls.provider.api.config.Config;
+import io.nuls.provider.api.manager.BeanCopierManager;
 import io.nuls.provider.model.ErrorData;
 import io.nuls.provider.model.RpcClientResult;
 import io.nuls.provider.model.dto.DepositInfoDto;
+import io.nuls.provider.model.dto.RandomSeedDTO;
 import io.nuls.provider.model.form.consensus.CreateAgentForm;
 import io.nuls.provider.model.form.consensus.DepositForm;
 import io.nuls.provider.model.form.consensus.StopAgentForm;
 import io.nuls.provider.model.form.consensus.WithdrawForm;
+import io.nuls.provider.model.form.consensus.*;
+import io.nuls.provider.rpctools.ConsensusTools;
 import io.nuls.provider.utils.ResultUtil;
 import io.nuls.v2.model.annotation.Api;
 import io.nuls.v2.model.annotation.ApiOperation;
@@ -67,6 +71,9 @@ public class ConsensusResource {
     private Config config;
 
     ConsensusProvider consensusProvider = ServiceManager.get(ConsensusProvider.class);
+
+    @Autowired
+    private ConsensusTools consensusTools;
 
     @POST
     @Path("/agent")
@@ -211,6 +218,86 @@ public class ConsensusResource {
             }
         }
         return clientResult;
+    }
+
+    @POST
+    @Path("/random/seed/count")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(description = "根据最大高度和原始种子个数生成一个随机种子并返回", order = 506, detailDesc = "包括最大高度往后退1000个区块，在这个区块区间内找到指定个数的原始种子，汇总生成一个随机种子并返回")
+    @Parameters(value = {
+            @Parameter(parameterName = "RandomSeedCountForm", parameterDes = "随机种子表单", requestType = @TypeDescriptor(value = RandomSeedCountForm.class))
+    })
+    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = RandomSeedDTO.class))
+    public RpcClientResult getRandomSeedByCount(RandomSeedCountForm form) {
+        if (form == null) {
+            return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "form is empty"));
+        }
+        try {
+            Map resultMap = consensusTools.getRandomSeedByCount(config.getChainId(), form.getHeight(), form.getCount(), form.getAlgorithm());
+            return RpcClientResult.getSuccess(resultMap);
+        } catch (NulsRuntimeException e) {
+            return ResultUtil.getNulsRuntimeExceptionRpcClientResult(e);
+        }
+    }
+
+    @POST
+    @Path("/random/seed/height")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(description = "根据高度区间生成一个随机种子并返回", order = 507, detailDesc = "在这个区块区间内找到所有有效的原始种子，汇总生成一个随机种子并返回")
+    @Parameters(value = {
+            @Parameter(parameterName = "RandomSeedHeightForm", parameterDes = "随机种子表单", requestType = @TypeDescriptor(value = RandomSeedHeightForm.class))
+    })
+    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = RandomSeedDTO.class))
+    public RpcClientResult getRandomSeedByHeight(RandomSeedHeightForm form) {
+        if (form == null) {
+            return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "form is empty"));
+        }
+        try {
+            Map resultMap = consensusTools.getRandomSeedByHeight(config.getChainId(), form.getStartHeight(), form.getEndHeight(), form.getAlgorithm());
+            return RpcClientResult.getSuccess(resultMap);
+        } catch (NulsRuntimeException e) {
+            return ResultUtil.getNulsRuntimeExceptionRpcClientResult(e);
+        }
+    }
+
+    @POST
+    @Path("/random/rawseed/count")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(description = "根据最大高度和原始种子个数查找原始种子列表并返回", order = 508, detailDesc = "包括最大高度往后退1000个区块，在这个区块区间内找到指定个数的原始种子并返回")
+    @Parameters(value = {
+            @Parameter(parameterName = "RandomRawSeedCountForm", parameterDes = "原始随机种子表单", requestType = @TypeDescriptor(value = RandomRawSeedCountForm.class))
+    })
+    @ResponseData(name = "原始种子列表", responseType = @TypeDescriptor(value = List.class, collectionElement = String.class))
+    public RpcClientResult getRandomRawSeedsByCount(RandomRawSeedCountForm form) {
+        if (form == null) {
+            return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "form is empty"));
+        }
+        try {
+            List<String> resultList = consensusTools.getRandomRawSeedsByCount(config.getChainId(), form.getHeight(), form.getCount());
+            return RpcClientResult.getSuccess(resultList);
+        } catch (NulsRuntimeException e) {
+            return ResultUtil.getNulsRuntimeExceptionRpcClientResult(e);
+        }
+    }
+
+    @POST
+    @Path("/random/rawseed/height")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(description = "根据高度区间查找原始种子列表并返回", order = 509, detailDesc = "在这个区块区间内找到所有有效的原始种子并返回")
+    @Parameters(value = {
+            @Parameter(parameterName = "RandomRawSeedHeightForm", parameterDes = "原始随机种子表单", requestType = @TypeDescriptor(value = RandomRawSeedHeightForm.class))
+    })
+    @ResponseData(name = "原始种子列表", responseType = @TypeDescriptor(value = List.class, collectionElement = String.class))
+    public RpcClientResult getRandomRawSeedsByHeight(RandomRawSeedHeightForm form) {
+        if (form == null) {
+            return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "form is empty"));
+        }
+        try {
+            List<String> resultList = consensusTools.getRandomRawSeedsByHeight(config.getChainId(), form.getStartHeight(), form.getEndHeight());
+            return RpcClientResult.getSuccess(resultList);
+        } catch (NulsRuntimeException e) {
+            return ResultUtil.getNulsRuntimeExceptionRpcClientResult(e);
+        }
     }
 
     @POST
@@ -364,4 +451,6 @@ public class ConsensusResource {
         io.nuls.core.basic.Result result = NulsSDKTool.createMultiSignStopConsensusTx(form);
         return ResultUtil.getRpcClientResult(result);
     }
+
+
 }
