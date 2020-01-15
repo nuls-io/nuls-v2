@@ -23,6 +23,7 @@ public class ContractInfo extends TxDataInfo {
     private boolean success;
 
     private BigInteger balance;
+    private BigInteger totalBalance;
 
     private String errorMsg;
 
@@ -112,6 +113,14 @@ public class ContractInfo extends TxDataInfo {
         info.setMethods(methods);
         return info;
 
+    }
+
+    public BigInteger getTotalBalance() {
+        return totalBalance;
+    }
+
+    public void setTotalBalance(BigInteger totalBalance) {
+        this.totalBalance = totalBalance;
     }
 
     public int getTokenType() {
