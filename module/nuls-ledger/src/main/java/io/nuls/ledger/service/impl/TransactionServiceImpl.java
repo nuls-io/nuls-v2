@@ -105,9 +105,9 @@ public class TransactionServiceImpl implements TransactionService {
             //例如黄牌交易，直接返回
             return ValidateResult.getSuccess();
         }
-        /*if (!coinDataValidator.validateTxAmount(coinData, transaction.getType())) {
+        if (!coinDataValidator.validateTxAmount(coinData, transaction.getType())) {
             return ValidateResult.getResult(LedgerErrorCode.TX_AMOUNT_INVALIDATE, new String[]{transaction.getHash().toHex()});
-        }*/
+        }
         /*未确认交易的校验*/
         Map<String, TxUnconfirmed> accountsMap = new ConcurrentHashMap<>(8);
         byte[] txNonce = LedgerUtil.getNonceByTx(transaction);
@@ -127,17 +127,6 @@ public class TransactionServiceImpl implements TransactionService {
         return ValidateResult.getSuccess();
     }
 
-    private void dealAssetAddressIndex(Map<String, List<String>> assetAddressIndex, int chainId, int assetId, String address) {
-        String assetIndexKey = chainId + "-" + assetId;
-        List<String> addressList = null;
-        if (null == assetAddressIndex.get(assetIndexKey)) {
-            addressList = new ArrayList<>();
-            assetAddressIndex.put(assetIndexKey, addressList);
-        } else {
-            addressList = assetAddressIndex.get(assetIndexKey);
-        }
-        addressList.add(address);
-    }
 
     private boolean confirmBlockTxProcess(long blockHeight,int addressChainId, List<Transaction> txList,
                                           Map<String, AccountBalance> updateAccounts, List<Uncfd2CfdKey> delUncfd2CfdKeys,
@@ -171,7 +160,7 @@ public class TransactionServiceImpl implements TransactionService {
                 boolean process;
                 AccountBalance accountBalance = getAccountBalance(addressChainId, from, updateAccounts, address);
                 //归集链下有多少种类资产，资产下有多少地址
-                dealAssetAddressIndex(assetAddressIndex, from.getAssetsChainId(), from.getAssetsId(), address);
+                LedgerUtil.dealAssetAddressIndex(assetAddressIndex, from.getAssetsChainId(), from.getAssetsId(), address);
                 if (from.getLocked() == 0) {
                     AmountNonce amountNonce = new AmountNonce(from.getNonce(), nonce8Bytes, from.getAmount());
                     accountBalance.getPreAccountState().getNonces().add(amountNonce);
@@ -186,7 +175,7 @@ public class TransactionServiceImpl implements TransactionService {
                     process = commontTransactionProcessor.processFromCoinData(from, nonce8Bytes, accountBalance.getNowAccountState());
                     ledgerNonce.put(LedgerUtil.getAccountNoncesStrKey(address, from.getAssetsChainId(), from.getAssetsId(), nonce8Str), 1);
                 } else {
-                    process = lockedTransactionProcessor.processFromCoinData(from, nonce8Bytes, txHash, accountBalance.getNowAccountState(), address);
+                    process = lockedTransactionProcessor.processCoinData(from, nonce8Bytes, txHash, accountBalance.getNowAccountState(), transaction.getTime(), address, true);
                 }
                 if (!process) {
                     logger(addressChainId).error("address={},txHash = {} processFromCoinData is fail.", addressChainId, transaction.getHash().toHex());
@@ -208,13 +197,13 @@ public class TransactionServiceImpl implements TransactionService {
                 }
                 AccountBalance accountBalance = getAccountBalance(addressChainId, to, updateAccounts, address);
                 //归集链下有多少种类资产，资产下有多少地址
-                dealAssetAddressIndex(assetAddressIndex, to.getAssetsChainId(), to.getAssetsId(), address);
+                LedgerUtil.dealAssetAddressIndex(assetAddressIndex, to.getAssetsChainId(), to.getAssetsId(), address);
                 if (to.getLockTime() == 0) {
                     //非锁定交易处理
                     commontTransactionProcessor.processToCoinData(to, accountBalance.getNowAccountState());
                 } else {
                     //锁定交易处理
-                    lockedTransactionProcessor.processToCoinData(to, nonce8Bytes, txHash, accountBalance.getNowAccountState(), transaction.getTime(), address);
+                    lockedTransactionProcessor.processCoinData(to, nonce8Bytes, txHash, accountBalance.getNowAccountState(), transaction.getTime(), address, false);
                 }
             }
         }

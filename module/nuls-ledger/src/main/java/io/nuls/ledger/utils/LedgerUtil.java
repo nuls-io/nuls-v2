@@ -10,7 +10,10 @@ import io.nuls.core.log.Log;
 import io.nuls.ledger.constant.LedgerConstant;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by lanjinsheng on 2019/01/02
@@ -152,5 +155,21 @@ public class LedgerUtil {
             return false;
         }
         return AddressTool.BLOCK_HOLE_ADDRESS_SET.contains(AddressTool.getStringAddressByBytes(address));
+    }
+
+    public static void dealAssetAddressIndex(Map<String, List<String>> assetAddressIndex, int chainId, int assetId, String address) {
+        String assetIndexKey = chainId + "-" + assetId;
+        List<String> addressList = null;
+        if (null == assetAddressIndex.get(assetIndexKey)) {
+            addressList = new ArrayList<>();
+            assetAddressIndex.put(assetIndexKey, addressList);
+        } else {
+            addressList = assetAddressIndex.get(assetIndexKey);
+        }
+        addressList.add(address);
+    }
+
+    public static boolean isPermanentLock(long lockTime) {
+        return (lockTime < 0);
     }
 }

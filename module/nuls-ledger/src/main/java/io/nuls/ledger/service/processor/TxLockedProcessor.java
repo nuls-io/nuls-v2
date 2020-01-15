@@ -25,9 +25,14 @@
  */
 package io.nuls.ledger.service.processor;
 
+import io.nuls.base.data.Coin;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
 import io.nuls.ledger.model.po.AccountState;
+import io.nuls.ledger.model.po.sub.FreezeHeightState;
+import io.nuls.ledger.model.po.sub.FreezeLockTimeState;
+
+import java.util.List;
 
 /**
  * 交易处理器
@@ -35,23 +40,11 @@ import io.nuls.ledger.model.po.AccountState;
  * @author lanjinsheng
  */
 public interface TxLockedProcessor {
-    /**
-     * 交易对象中fromCoinData 处理
-       * @param coin
-     * @param nonce
-     * @param txHash
-     * @param accountState
-     * @return
-     */
-    boolean processFromCoinData(CoinFrom coin, byte[] nonce, String txHash, AccountState accountState, String address);
 
-    /**
-     * 交易中toCoinData处理
-       * @param coin
-     * @param nonce
-     * @param txHash
-     * @param accountState
-     * @return
-     */
-    boolean processToCoinData(CoinTo coin, byte[] nonce, String txHash, AccountState accountState, long txTime, String address);
+    boolean processCoinData(Coin coin, byte[] nonce, String txHash, List<FreezeLockTimeState> timeStateList,
+                            List<FreezeHeightState> heightStateList,String address,boolean isFromCoin);
+
+
+    boolean processCoinData(Coin coin, byte[] nonce, String txHash, AccountState accountState, long txTime, String address,boolean isFromCoin);
+
 }
