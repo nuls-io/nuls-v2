@@ -41,7 +41,20 @@ public class TxConfig extends ConfigBean implements ModuleConfig {
     public void setBlackHolePublicKey(String blackHolePublicKey) {
         this.blackHolePublicKey = blackHolePublicKey;
     }
+    // add by pierre at 2019-12-04
+    /**
+     *  是否已连接智能合约模块
+     */
+    private volatile boolean collectedSmartContractModule;
 
+    public boolean isCollectedSmartContractModule() {
+        return collectedSmartContractModule;
+    }
+
+    public void setCollectedSmartContractModule(boolean collectedSmartContractModule) {
+        this.collectedSmartContractModule = collectedSmartContractModule;
+    }
+    // end code by pierre
 
     public String getDataPath() {
         return dataPath;

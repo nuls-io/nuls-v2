@@ -354,7 +354,8 @@ public class ConsensusProcess {
          * */
         bestBlock = chain.getNewestHeader();
         if (!newBlock.getHeader().getPreHash().equals(bestBlock.getHash())) {
-            consensusManager.addConsensusTx(chain, bestBlock, new ArrayList<>(), self, round, extendsData);
+            packingTxList.clear();
+            consensusManager.addConsensusTx(chain, bestBlock, packingTxList, self, round, extendsData);
             bd.setTxList(packingTxList);
             bd.setPreHash(bestBlock.getHash());
             bd.setHeight(bestBlock.getHeight() + 1);
