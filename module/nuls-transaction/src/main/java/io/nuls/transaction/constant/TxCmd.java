@@ -40,6 +40,7 @@ public final class TxCmd {
     public static final String TX_GENGSIS_SAVE = "tx_gengsisSave";
     public static final String TX_ROLLBACK = "tx_rollback";
     public static final String TX_GET_CONFIRMED_TX = "tx_getConfirmedTx";
+    public static final String TX_ISCONFIRMED = "tx_isConfirmed";
     public static final String TX_GETTX = "tx_getTx";
     public static final String TX_GET_BLOCK_TXS = "tx_getBlockTxs";
     public static final String TX_GET_BLOCK_TXS_EXTEND = "tx_getBlockTxsExtend";
