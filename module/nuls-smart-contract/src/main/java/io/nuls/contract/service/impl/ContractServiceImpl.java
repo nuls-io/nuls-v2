@@ -89,6 +89,7 @@ public class ContractServiceImpl implements ContractService {
 
     @Autowired
     private ContractHelper contractHelper;
+
     @Autowired
     private ChainManager chainManager;
 
@@ -161,9 +162,11 @@ public class ContractServiceImpl implements ContractService {
             }
             tx.setChainId(chainId);
             ContractWrapperTransaction wrapperTx = ContractUtil.parseContractTransaction(tx, chainManager);
+            // add by pierre at 2019-10-20
             if(wrapperTx == null) {
                 return getSuccess();
             }
+            // end code by pierre
             Chain chain = contractHelper.getChain(chainId);
             BatchInfo batchInfo = chain.getBatchInfo();
             wrapperTx.setOrder(batchInfo.getAndIncreaseTxCounter());

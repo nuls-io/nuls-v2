@@ -112,10 +112,12 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
     public ProgramExecutor callProgramExecutor() {
         ProgramExecutorImpl programExecutor = new ProgramExecutorImpl(this, vmContext, source, repository, prevStateRoot, accounts, thread);
+        // add by pierre at 2019-12-03 用于当存在合约内部调用合约，共享同一个合约的内存数据
         programExecutor.contractObjects = this.contractObjects;
         programExecutor.contractChanges = this.contractChanges;
         programExecutor.contractArrays = this.contractArrays;
         programExecutor.contractObjectRefCount = this.contractObjectRefCount;
+        // end code by pierre
         return programExecutor;
     }
 
@@ -251,6 +253,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         programInvoke.setSenderPublicKey(programCall.getSenderPublicKey());
         return execute(programInvoke);
     }
+
     private Map<String, Map<ObjectRef, Map<String, Object>>> contractObjects;
     private Map<String, Set<ObjectRef>> contractChanges;
     private Map<String, Map<String, Object>> contractArrays;

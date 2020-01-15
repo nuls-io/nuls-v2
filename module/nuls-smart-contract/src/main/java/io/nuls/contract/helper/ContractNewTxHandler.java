@@ -86,15 +86,15 @@ public class ContractNewTxHandler {
 
         boolean isSuccess = true;
         do {
-            // 处理合约调用其他模块生成的交易的临时余额
+            // 按交易生成顺序，依次处理合约转账交易和合约调用其他模块生成的交易的临时余额
             List<Object> orderedInnerTxs = contractResult.getOrderedInnerTxs();
             LinkedList<Object> successedOrderedInnerTxs = new LinkedList<>();
             for(Object innerTx : orderedInnerTxs) {
                 if(innerTx instanceof ProgramNewTx) {
                     isSuccess = contractNewTxFromOtherModuleHandler.refreshTempBalance(chainId, contractResult.getContractAddress(), List.of((ProgramNewTx) innerTx), tempBalanceManager);
-            if (!isSuccess) {
-                contractResult.setError(true);
-                contractResult.setErrorMessage("Refresh temp balance failed about new transaction from external cmd.");
+                    if(!isSuccess) {
+                        contractResult.setError(true);
+                        contractResult.setErrorMessage("Refresh temp balance failed about new transaction from external cmd.");
                         break;
                     }
                     successedOrderedInnerTxs.add(innerTx);
@@ -109,7 +109,7 @@ public class ContractNewTxHandler {
                 }
             }
             if(!isSuccess) {
-                // 回滚 - 清空内部转账列表
+                // 处理失败则回滚
                 Iterator<Object> reverseIterator = successedOrderedInnerTxs.descendingIterator();
                 Object rollbackTx;
                 while (reverseIterator.hasNext()) {
@@ -124,10 +124,10 @@ public class ContractNewTxHandler {
                 contractResult.getInvokeRegisterCmds().clear();
                 break;
             } else {
-            // 处理合约内部转账交易
+                // 处理合约内部转账交易 -> 合并、生成链上交易
                 isSuccess = contractTransferHandler.handleContractTransferTxs(chainId, blockTime, contractResult, tempBalanceManager);
-            // 如果内部转账失败，回滚合约新生成的其他交易 - 合约余额和nonce
-            if (!isSuccess) {
+                if(!isSuccess) {
+                    // 如果内部转账失败，回滚合约新生成的其他交易 - 合约余额和nonce
                     Iterator<Object> reverseIterator = successedOrderedInnerTxs.descendingIterator();
                     Object rollbackTx;
                     while (reverseIterator.hasNext()) {
@@ -137,9 +137,25 @@ public class ContractNewTxHandler {
                         }
                     }
                     contractResult.getInvokeRegisterCmds().clear();
-                break;
+                    break;
                 }
             }
+            //// 处理合约调用其他模块生成的交易的临时余额
+            //isSuccess = contractNewTxFromOtherModuleHandler.refreshTempBalance(chainId, contractResult, tempBalanceManager);
+            //if (!isSuccess) {
+            //    contractResult.setError(true);
+            //    contractResult.setErrorMessage("Refresh temp balance failed about new transaction from external cmd.");
+            //    // 回滚 - 清空内部转账列表
+            //    contractResult.getTransfers().clear();
+            //    break;
+            //}
+            //// 处理合约内部转账交易
+            //isSuccess = contractTransferHandler.handleContractTransfer(chainId, blockTime, contractResult, tempBalanceManager);
+            //// 如果内部转账失败，回滚合约新生成的其他交易 - 合约余额和nonce
+            //if (!isSuccess) {
+            //    contractNewTxFromOtherModuleHandler.rollbackTempBalance(chainId, contractResult, tempBalanceManager);
+            //    break;
+            //}
         } while (false);
 
         if (!isSuccess) {
