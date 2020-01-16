@@ -341,8 +341,8 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             //Log.warn(programInvoke.toString());
             //Log.info("this.contractObjectRefCount: {}", this.contractObjectRefCount);
             //Log.info("vm.heap.objectRefCount: {}", vm.heap.objectRefCount);
-            boolean isUpgradedV230 = ProtocolGroupManager.getCurrentVersion(getCurrentChainId()) >= ContractContext.UPDATE_VERSION_V240;
-            if(isUpgradedV230) {
+            boolean isUpgradedV240 = ProtocolGroupManager.getCurrentVersion(getCurrentChainId()) >= ContractContext.UPDATE_VERSION_V240;
+            if(isUpgradedV240) {
                 if(contractObjects == null) {
                     contractObjects = new HashMap<>();
                     contractObjects.put(contractAddress, vm.heap.objects);
@@ -436,7 +436,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             }
 
             // add by pierre at 2019-11-21 标记 当存在合约内部调用合约，共享同一个合约的内存数据 需要协议升级 done
-            if(isUpgradedV230) {
+            if(isUpgradedV240) {
                 if(contractObjectRefCount == null) {
                     //Log.info("新建map和heap.objectRefCount");
                     contractObjectRefCount = new HashMap<>();
