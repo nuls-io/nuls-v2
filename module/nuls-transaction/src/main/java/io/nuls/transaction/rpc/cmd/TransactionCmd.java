@@ -2,12 +2,17 @@ package io.nuls.transaction.rpc.cmd;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import io.nuls.base.RPCUtil;
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.protocol.TxRegisterDetail;
+import io.nuls.base.signture.MultiSignTxSignature;
+import io.nuls.base.signture.P2PHKSignature;
+import io.nuls.base.signture.TransactionSignature;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.crypto.ECKey;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.ObjectUtils;
 import io.nuls.core.parse.JSONUtils;
@@ -29,10 +34,7 @@ import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.utils.TxUtil;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
@@ -732,6 +734,58 @@ public class TransactionCmd extends BaseCmd {
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
+
+
+    @CmdAnnotation(cmd = "tx_getTxSigners", version = 1.0, description = "获取交易合法签名的签名者列表/Gets the list of signers of the transaction's legal signature")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
+            @Parameter(parameterName = "txHex", parameterType = "String", parameterDes = "交易字符串")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", valueType = List.class, valueElement = String.class, description = "交易的合法签名账户"),
+
+    }))
+    public Object getTxSigners(Map params){
+        Chain chain = null;
+        try {
+            // check parameters
+            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("txHex"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            chain = chainManager.getChain((Integer) params.get("chainId"));
+            if (null == chain) {
+                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
+            }
+            String txHex = (String)params.get("txHex");
+            Transaction tx = TxUtil.getInstance(txHex, Transaction.class);
+            TransactionSignature transactionSignature = null;
+            if (tx.isMultiSignTx()) {
+                transactionSignature = TxUtil.getInstance(tx.getTransactionSignature(), MultiSignTxSignature.class);
+            } else {
+                transactionSignature = TxUtil.getInstance(tx.getTransactionSignature(), TransactionSignature.class);
+            }
+            List<P2PHKSignature> p2PHKSignatureList = transactionSignature.getP2PHKSignatures();
+            Set<String> signers = new HashSet<>();
+            if(null != p2PHKSignatureList && !p2PHKSignatureList.isEmpty()){
+                for (P2PHKSignature signature : p2PHKSignatureList) {
+                    if (!ECKey.verify(tx.getHash().getBytes(), signature.getSignData().getSignBytes(), signature.getPublicKey())) {
+                        throw new NulsException(new Exception("Transaction signature error !"));
+                    }else{
+                        signers.add(AddressTool.getStringAddressByBytes(AddressTool.getAddress(signature.getPublicKey(), chain.getChainId())));
+                    }
+                }
+            }
+            Map<String, Object> map = new HashMap<>(TxConstant.INIT_CAPACITY_2);
+            map.put("list", signers);
+            return success(map);
+        } catch (NulsException e) {
+            errorLogProcess(chain, e);
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+    }
+
 
     private void errorLogProcess(Chain chain, Exception e) {
         if (chain == null) {

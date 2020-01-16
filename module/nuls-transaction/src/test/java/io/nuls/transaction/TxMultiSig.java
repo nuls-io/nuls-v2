@@ -122,7 +122,7 @@ public class TxMultiSig {
         importPriKey("930f0be5000d7c8d5ca69e9ff8b6ab9ca7f8e27ebb3843b4fc991727ed8f3200", password);// tNULSeBaMsbHJStYcYdosBGphvdr5yFCeCPZ3L -pubkey: 03d9eb346464550ce5349825d43bd15b16df3d97a0a0771f1c03f1a0e283d29e5b
     }
 
-//    static String addressMultiSign = "tNULSeBaNMnYA7FArmcMoYSdb1qsvoXL9qSKJB";//123
+    //    static String addressMultiSign = "tNULSeBaNMnYA7FArmcMoYSdb1qsvoXL9qSKJB";//123
     static String addressMultiSign = "tNULSeBaNQYZTy5euPXxs2VzJ1ffJQBNYjhwgj";//12
     static String multiAddress = "tNULSeBaNDW6r3RCaxLtBzo4QLPKPdWmDWgxAs";
 
@@ -134,7 +134,7 @@ public class TxMultiSig {
     static String address31 = "tNULSeBaMsbHJStYcYdosBGphvdr5yFCeCPZ3L";
 
 
-//    tNULSeBaNTKP46YNdzZbi1HbEMqPi8Dktj7vrm //1
+    //    tNULSeBaNTKP46YNdzZbi1HbEMqPi8Dktj7vrm //1
 //    tNULSeBaNQYZTy5euPXxs2VzJ1ffJQBNYjhwgj //2
 //    tNULSeBaNJNX3qPLctkWC1cAtVxqQSzRQ6XDdU //3
 //    tNULSeBaNDW6r3RCaxLtBzo4QLPKPdWmDWgxAs //5
@@ -155,16 +155,16 @@ public class TxMultiSig {
 
     @Test //转账
     public void transfer() throws Exception{
-//        String hash = createTransfer(address27, addressMultiSign, new BigInteger("100000000000000"));
-        String hash = createMultiSignTransfer(addressMultiSign, address30,new BigInteger("1000000000"), null, null);
+        String hash = createTransfer(address27, addressMultiSign, new BigInteger("100000000000000"));
+//        String hash = createMultiSignTransfer(addressMultiSign, address30,new BigInteger("1000000000"), null, null);
 //        String hash = createMultiSignTransfer(addressMultiSign, address31,new BigInteger("1400000000"), signAddress1, password);
     }
 
 
     @Test //签名
     public void signMultiSignTransactionTest() throws Exception {
-        String rs = signMultiSignTransaction(signAddress2, password,
-                "02003216405d03616263008c0117020003c43a0d6d2dad2c5bfb3ab67a6e2ff905e709634d02000100a0509c3b000000000000000000000000000000000000000000000000000000000800000000000000000001170200016d4edcc73408d15f4b69779e7997f1ec9013bc4f0200010000ca9a3b000000000000000000000000000000000000000000000000000000000000000000000000d1020321026a4821178975d196d90a68d80e5838876a2b30f1018d304c4b814823f7275a602102887a1e8bbb32a1885040849caf8ee194147c77ea4f227c18aad0b84ab79a3bf621035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b521035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b546304402202c4f4e578b00913a10730c2e3bbfc9fa7c694795afeff55d5ab785c3a117438802205507eabdfe7684bf3e5e7f803992975f73df1d6092d15acdfa4f1f034db720f1");
+        String rs = signMultiSignTransaction(signAddress1, password,
+                "0200861e205e03616263008c0117020003c43a0d6d2dad2c5bfb3ab67a6e2ff905e709634d02000100a0509c3b000000000000000000000000000000000000000000000000000000000800000000000000000001170200016d4edcc73408d15f4b69779e7997f1ec9013bc4f0200010000ca9a3b000000000000000000000000000000000000000000000000000000000000000000000000d1020321035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b521026a4821178975d196d90a68d80e5838876a2b30f1018d304c4b814823f7275a602102887a1e8bbb32a1885040849caf8ee194147c77ea4f227c18aad0b84ab79a3bf621026a4821178975d196d90a68d80e5838876a2b30f1018d304c4b814823f7275a60463044022069bac56d70eeccbecb28b92ccb56d123f05b4243ad0eb34c22bddb9c7922386d02207c0924cddd77092f090e576f065464c849e52f8d900979013b2728643d3aa3f4");
     }
 
     @Test //设置别名
@@ -201,6 +201,26 @@ public class TxMultiSig {
 //        removeAccount("tNULSeBaMkUZYqaeFqe6cdx2gdBZxZh1fVcnM5", password);
 //        removeAccount("tNULSeBaMo8z73fktnukU3JsFFfogWgLd91uPM", password);
         removeMultiSigAccount(addressMultiSign);
+    }
+
+    @Test
+    public void getSigner() throws Exception {
+        List<String> list = getSigner("0200861e205e03616263008c0117020003c43a0d6d2dad2c5bfb3ab67a6e2ff905e709634d02000100a0509c3b000000000000000000000000000000000000000000000000000000000800000000000000000001170200016d4edcc73408d15f4b69779e7997f1ec9013bc4f0200010000ca9a3b000000000000000000000000000000000000000000000000000000000000000000000000fd3a01020321035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b521026a4821178975d196d90a68d80e5838876a2b30f1018d304c4b814823f7275a602102887a1e8bbb32a1885040849caf8ee194147c77ea4f227c18aad0b84ab79a3bf621026a4821178975d196d90a68d80e5838876a2b30f1018d304c4b814823f7275a60463044022069bac56d70eeccbecb28b92ccb56d123f05b4243ad0eb34c22bddb9c7922386d02207c0924cddd77092f090e576f065464c849e52f8d900979013b2728643d3aa3f421035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b546304402204c0c5eb38b3c62580426493ad2dff9e19bb0f582988376985f6f851e5d6c0e5302202110b9a50a06119b4c0d298f97bbcd06dfecb87a147461526d7aacb788bd5575");
+        for(String s : list){
+            System.out.println(s);
+        }
+
+    }
+
+    private List<String> getSigner(String txHex) throws Exception {
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.VERSION_KEY_STR, version);
+        params.put(Constants.CHAIN_ID, chainId);
+        params.put("txHex", txHex);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getTxSigners", params);
+        HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("tx_getTxSigners");
+        List<String> list = (List) result.get("list");
+        return list;
     }
 
     public String createMultiSignAccount(List<String> pubKeys, int minSign) throws Exception {
