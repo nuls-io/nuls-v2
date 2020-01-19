@@ -664,6 +664,7 @@ log "================ COPY SCRIPT ==============="
 	chmod u+x "${MODULES_BIN_PATH}/stop"
 	cp "${BUILD_PATH}/tmp/check-status-temp" "${MODULES_BIN_PATH}/check-status"
 	chmod u+x "${MODULES_BIN_PATH}/check-status"
+	cp ${PROJECT_PATH}/version ${MODULES_BIN_PATH}/version
 log "===============  COPY SCRIPT DONE ==========="
 DOMOCK=`hasPackageModule "mykernel"`
 if [ -n "${DOMOCK}" ]; then

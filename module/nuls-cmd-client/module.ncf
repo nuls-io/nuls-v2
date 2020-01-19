@@ -11,4 +11,5 @@ Managed=0
 loadLanguage=1
 
 [cmd-client]
-moduleDynamicDependent=cross-chain,chain-manager,smart-contract
+moduleDynamicDependent=cross-chain,chain-manager,smart-contract,protocol-update
+clientVersion=2.4.0

@@ -5,7 +5,7 @@ logPath=../../../../Logs
 logLevel=INFO
 dataPath=../../../../data
 #默认本链ID
-chainId=1
+chainId=2
 #地址前缀
 addressPrefix=NULS
 #默认本链主资产ID
@@ -17,7 +17,7 @@ chainName=nuls
 #本链默认资产符号
 symbol=NULS
 #主网链id
-mainChainId=1
+mainChainId=2
 #主网主资产id
 mainAssetId=1
 #主网主资产符号
@@ -145,3 +145,7 @@ dependent=smart-contract,cross-chain
 [protocol-update]
 #每隔多少个区块统计一次协议占比
 interval=1000
+
+[cmd-client]
+clientVersion=2.4.0
+
