@@ -1470,7 +1470,7 @@ public class TxServiceImpl implements TxService {
             //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
             TxUtil.moduleGroups(moduleVerifyMap, txRegister, txStr);
         }
-        if (contractNotify && null != scReturnGas) {
+        if (!contractNotify && null != scReturnGas) {
             throw new NulsException(TxErrorCode.EXIST_GAS_RETURN_WITHOUT_SC_RETURN);
         }
 
