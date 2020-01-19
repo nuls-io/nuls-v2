@@ -376,16 +376,16 @@ public class TxServiceImpl implements TxService {
             }
         }
         for (CoinFrom coinFrom : coinData.getFrom()) {
+            if (tx.getType() == TxType.STOP_AGENT) {
+                //停止节点from中第一笔为签名地址, 只验证from中第一个
+                break;
+            }
             if (tx.isMultiSignTx()) {
                 if (!Arrays.equals(coinFrom.getAddress(), multiSignAddress)) {
                     throw new NulsException(TxErrorCode.SIGNATURE_ERROR);
                 }
             } else if (!addressSet.contains(AddressTool.getStringAddressByBytes(coinFrom.getAddress()))) {
                 throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH_COINFROM);
-            }
-            if (tx.getType() == TxType.STOP_AGENT) {
-                //停止节点from中第一笔为签名地址, 只验证from中第一个
-                break;
             }
         }
         if (!SignatureUtil.validateTransactionSignture(tx)) {

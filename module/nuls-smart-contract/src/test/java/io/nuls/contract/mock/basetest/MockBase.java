@@ -44,6 +44,8 @@ import io.nuls.core.rockdb.service.RocksDBService;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
+import java.math.BigInteger;
+
 /**
  * @author: PierreLuo
  * @date: 2019-06-11
@@ -95,33 +97,42 @@ public class MockBase extends Base {
         programCreate.setContractCode(contractCode);
         programCreate.setArgs(args);
 
-        ProgramExecutor track = programExecutor.begin(prevStateRoot);
+        ProgramExecutor begin = programExecutor.begin(prevStateRoot);
+        ProgramExecutor track = begin.startTracking();
         long s = System.currentTimeMillis();
         ProgramResult programResult = track.create(programCreate);
         track.commit();
+        begin.commit();
 
         long e = System.currentTimeMillis();
 
-        System.out.println("cost: " + (e - s));
+        Log.info("create cost: " + (e - s));
         Log.info(programResult.toString());
-        Log.info("\n");
-        return track.getRoot();
+        return begin.getRoot();
+    }
+
+    protected Object[] call(byte[] preStateRoot, String sender, String methodName, String[] args, BigInteger value) throws JsonProcessingException {
+        return call(null, preStateRoot, sender, methodName, null, args, value);
     }
 
     protected Object[] call(byte[] preStateRoot, String sender, String methodName, String[] args) throws JsonProcessingException {
-        return call(null, preStateRoot, sender, methodName, null, args);
+        return call(null, preStateRoot, sender, methodName, null, args, null);
     }
 
     protected Object[] call(byte[] preStateRoot, String sender, String methodName, String methodDesc, String[] args) throws JsonProcessingException {
-        return call(null, preStateRoot, sender, methodName, methodDesc, args);
+        return call(null, preStateRoot, sender, methodName, methodDesc, args, null);
     }
 
     protected Object[] call(String contractAddress, byte[] preStateRoot, String sender, String methodName, String[] args) throws JsonProcessingException {
-        return call(contractAddress, preStateRoot, sender, methodName, null, args);
+        return call(contractAddress, preStateRoot, sender, methodName, null, args, null);
     }
 
-    protected Object[] call(String contractAddress, byte[] preStateRoot,  String sender, String methodName, String methodDesc, String[] args) throws JsonProcessingException {
-        Object[] objects = execute(contractAddress, preStateRoot, sender, methodName, methodDesc, args);
+    protected Object[] call(String contractAddress, byte[] preStateRoot, String sender, String methodName, String[] args, BigInteger value) throws JsonProcessingException {
+        return call(contractAddress, preStateRoot, sender, methodName, null, args, value);
+    }
+
+    protected Object[] call(String contractAddress, byte[] preStateRoot,  String sender, String methodName, String methodDesc, String[] args, BigInteger value) throws JsonProcessingException {
+        Object[] objects = execute(contractAddress, preStateRoot, sender, methodName, methodDesc, args, value);
         ProgramExecutor track = (ProgramExecutor) objects[0];
         track.commit();
         ProgramResult programResult = (ProgramResult) objects[1];
@@ -129,30 +140,54 @@ public class MockBase extends Base {
         return new Object[]{newRootBytes, programResult};
     }
 
-    protected String view(byte[] preStateRoot, String methodName, String methodDesc, String[] args) throws JsonProcessingException {
-        ProgramResult programResult = (ProgramResult) execute(null, preStateRoot, null, methodName, methodDesc, args)[1];
+    protected String view(String contractAddress, byte[] preStateRoot, String methodName, String methodDesc, String[] args) throws JsonProcessingException {
+        ProgramResult programResult = (ProgramResult) executeView(contractAddress, preStateRoot, null, methodName, methodDesc, args)[1];
         Log.info(String.format("view cost: %s", programResult.getGasUsed()));
         return programResult.getResult();
     }
 
     protected String view(byte[] preStateRoot, String methodName, String[] args) throws JsonProcessingException {
-        return view(preStateRoot, methodName, null, args);
+        return view(null, preStateRoot, methodName, null, args);
     }
 
-    private Object[] execute(String contractAddress, byte[] preStateRoot, String sender, String methodName, String methodDesc, String[] args) throws JsonProcessingException {
+    protected String view(String contractAddress, byte[] preStateRoot, String methodName, String[] args) throws JsonProcessingException {
+        return view(contractAddress, preStateRoot, methodName, null, args);
+    }
+
+    private Object[] execute(String contractAddress, byte[] preStateRoot, String sender, String methodName, String methodDesc, String[] args, BigInteger value) throws JsonProcessingException {
         ProgramCall programCall = new ProgramCall();
         programCall.setContractAddress(contractAddress == null ? NativeAddress.toBytes(ADDRESS) : NativeAddress.toBytes(contractAddress));
         programCall.setSender(NativeAddress.toBytes(sender));
         programCall.setPrice(1);
         programCall.setGasLimit(1000000);
         programCall.setNumber(1);
+        programCall.setValue(value == null ? BigInteger.ZERO : value);
         programCall.setMethodName(methodName);
         programCall.setMethodDesc(methodDesc);
         programCall.setArgs(args);
 
-        ProgramExecutor track = programExecutor.begin(preStateRoot);
-        ProgramResult programResult = track.call(programCall);
-        return new Object[]{track, programResult};
+        ProgramExecutor begin = programExecutor.begin(preStateRoot);
+        ProgramExecutor tracking = begin.startTracking();
+        ProgramResult programResult = tracking.call(programCall);
+        tracking.commit();
+        return new Object[]{begin, programResult};
+    }
+
+    private Object[] executeView(String contractAddress, byte[] preStateRoot, String sender, String methodName, String methodDesc, String[] args) throws JsonProcessingException {
+        ProgramCall programCall = new ProgramCall();
+        programCall.setContractAddress(contractAddress == null ? NativeAddress.toBytes(ADDRESS) : NativeAddress.toBytes(contractAddress));
+        programCall.setSender(NativeAddress.toBytes(sender));
+        programCall.setPrice(1);
+        programCall.setGasLimit(1000000);
+        programCall.setNumber(2);
+        programCall.setMethodName(methodName);
+        programCall.setMethodDesc(methodDesc);
+        programCall.setArgs(args);
+
+        ProgramExecutor begin = programExecutor.begin(preStateRoot);
+        ProgramExecutor tracking = begin.startTracking();
+        ProgramResult programResult = tracking.call(programCall);
+        return new Object[]{begin, programResult};
     }
 
 }
