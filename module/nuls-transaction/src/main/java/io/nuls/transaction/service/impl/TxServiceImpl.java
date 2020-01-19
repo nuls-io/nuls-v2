@@ -1686,6 +1686,10 @@ public class TxServiceImpl implements TxService {
                         throw new NulsException(TxErrorCode.EXIST_GAS_RETURN_WITHOUT_SC_RETURN);
                     }
                 }
+            } else {
+                if (null != scReturnGas) {
+                    throw new NulsException(TxErrorCode.EXIST_GAS_RETURN_WITHOUT_SC_RETURN);
+                }
             }
         }
         //stateRoot发到共识,处理完再比较
