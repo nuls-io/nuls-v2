@@ -4,6 +4,14 @@
     "extend": "3",
     "validTxs": [
       {
+        "type": "4",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": false,
+        "handler": "CreateAgentProcessorV4"
+      },
+      {
         "type": "5",
         "systemTx": false,
         "unlockTx": false,
@@ -12,12 +20,28 @@
         "handler": "DepositProcessorV4"
       },
       {
+        "type": "6",
+        "systemTx": false,
+        "unlockTx": true,
+        "verifySignature": true,
+        "verifyFee": false,
+        "handler": "WithdrawProcessorV4"
+      },
+      {
         "type": "8",
         "systemTx": true,
         "unlockTx": false,
         "verifySignature": false,
         "verifyFee": false,
         "handler": "RedPunishProcessorV4"
+      },
+      {
+        "type": "9",
+        "systemTx": false,
+        "unlockTx": true,
+        "verifySignature": true,
+        "verifyFee": false,
+        "handler": "StopAgentProcessorV4"
       }
     ],
     "validMsgs": [],

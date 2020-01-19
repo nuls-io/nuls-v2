@@ -6,10 +6,8 @@ import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.MultiSigAccount;
 import io.nuls.base.data.Transaction;
-import io.nuls.base.signture.BlockSignature;
-import io.nuls.base.signture.P2PHKSignature;
-import io.nuls.base.signture.SignatureUtil;
-import io.nuls.base.signture.TransactionSignature;
+import io.nuls.base.signture.*;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 import io.nuls.core.log.logback.NulsLogger;
@@ -66,6 +64,40 @@ public class CallMethodUtils {
             throw e;
         }catch (Exception e) {
             throw new NulsException(e);
+        }
+    }
+
+    /**
+     * 创建多签账户
+     * Create multi sign account
+     *
+     * @param chainId
+     * @param
+     * @return validate result
+     */
+    public static String createMultiSignAccount(int chainId, MultiSignTxSignature signTxSignature) throws NulsException {
+        try {
+            Map<String, Object> callParams = new HashMap<>(4);
+            callParams.put(Constants.CHAIN_ID, chainId);
+            callParams.put("minSigns", signTxSignature.getM());
+            List<String> pubKeys = new ArrayList<>();
+            for (byte[] pubKey : signTxSignature.getPubKeyList()){
+                pubKeys.add(HexUtil.encode(pubKey));
+            }
+            callParams.put("pubKeys", pubKeys);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createMultiSignAccount", callParams);
+            if (!cmdResp.isSuccess()) {
+                throw new NulsException(ConsensusErrorCode.ACCOUNT_VALID_ERROR);
+            }
+            HashMap callResult = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createMultiSignAccount");
+            if (callResult == null || callResult.size() == 0) {
+                throw new NulsException(ConsensusErrorCode.ACCOUNT_VALID_ERROR);
+            }
+            return (String) callResult.get("address");
+        } catch (NulsException e) {
+            throw e;
+        }catch (Exception e) {
+            throw new NulsException(ConsensusErrorCode.INTERFACE_CALL_FAILED);
         }
     }
 
