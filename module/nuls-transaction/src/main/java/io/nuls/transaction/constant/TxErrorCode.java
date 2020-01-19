@@ -57,6 +57,7 @@ public interface TxErrorCode extends CommonCodeConstanst {
     ErrorCode SYS_TX_TYPE_NON_CIRCULATING = ErrorCode.init(ModuleE.TX.getPrefix() + "_0040");
     ErrorCode SYS_CONTRACT_TX_NON_CIRCULATING = ErrorCode.init(ModuleE.TX.getPrefix() + "_0041");
     ErrorCode CONTAINS_MULTIPLE_UNIQUE_TXS = ErrorCode.init(ModuleE.TX.getPrefix() + "_0042");
+    ErrorCode EXIST_GAS_RETURN_WITHOUT_SC_RETURN = ErrorCode.init(ModuleE.TX.getPrefix() + "_0043");
 
 
 }

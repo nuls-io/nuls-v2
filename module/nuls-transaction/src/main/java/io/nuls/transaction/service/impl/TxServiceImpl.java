@@ -646,8 +646,8 @@ public class TxServiceImpl implements TxService {
                 long currentReserve = endtimestamp - currentTimeMillis;
                 if (currentReserve <= batchValidReserve) {
                     if (nulsLogger.isDebugEnabled()) {
-                    nulsLogger.debug("获取交易时间到,进入模块验证阶段: currentTimeMillis:{}, -endtimestamp:{}, -offset:{}, -remaining:{}",
-                            currentTimeMillis, endtimestamp, batchValidReserve, currentReserve);
+                        nulsLogger.debug("获取交易时间到,进入模块验证阶段: currentTimeMillis:{}, -endtimestamp:{}, -offset:{}, -remaining:{}",
+                                currentTimeMillis, endtimestamp, batchValidReserve, currentReserve);
                     }
                     backTempPackablePool(chain, currentBatchPackableTxs);
                     break;
@@ -677,8 +677,8 @@ public class TxServiceImpl implements TxService {
                 }
                 if (packingTxList.size() > maxCount) {
                     if (nulsLogger.isDebugEnabled()) {
-                    nulsLogger.debug("获取交易已达max count,进入模块验证阶段: currentTimeMillis:{}, -endtimestamp:{}, -offset:{}, -remaining:{}",
-                            currentTimeMillis, endtimestamp, batchValidReserve, endtimestamp - currentTimeMillis);
+                        nulsLogger.debug("获取交易已达max count,进入模块验证阶段: currentTimeMillis:{}, -endtimestamp:{}, -offset:{}, -remaining:{}",
+                                currentTimeMillis, endtimestamp, batchValidReserve, endtimestamp - currentTimeMillis);
                     }
                     backTempPackablePool(chain, currentBatchPackableTxs);
                     break;
@@ -843,7 +843,7 @@ public class TxServiceImpl implements TxService {
             //循环获取交易使用时间
             whileTime = NulsDateUtils.getCurrentTimeMillis() - startTime;
             if (nulsLogger.isDebugEnabled()) {
-            nulsLogger.debug("-取出的交易 -count:{} - data size:{}", packingTxList.size(), totalSize);
+                nulsLogger.debug("-取出的交易 -count:{} - data size:{}", packingTxList.size(), totalSize);
             }
 
             boolean contractBefore = false;
@@ -1390,7 +1390,6 @@ public class TxServiceImpl implements TxService {
 
     /**
      * 验证区块中只允许有一个的交易不能有多个
-     *
      */
     public void verifySysTxCount(Set<Integer> onlyOneTxTypes, int type) throws NulsException {
         switch (type) {
@@ -1419,6 +1418,7 @@ public class TxServiceImpl implements TxService {
         Set<Integer> onlyOneTxTypes = new HashSet<>();
         //智能合约通知标识,出现的第一个智能合约交易并且调用验证器通过时,有则只第一次时通知.
         boolean contractNotify = false;
+        Transaction scReturnGas = null;
         long blockTime = blockHeader.getTime();
         List<Future<Boolean>> futures = new ArrayList<>();
         //组装统一验证参数数据,key为各模块统一验证器cmd
@@ -1429,7 +1429,6 @@ public class TxServiceImpl implements TxService {
         long timeF3 = 0L;
         long timeF4 = 0L;
         List<byte[]> keys = new ArrayList<>();
-
         long f1 = System.currentTimeMillis();
         for (String txStr : txStrList) {
             Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
@@ -1439,6 +1438,10 @@ public class TxServiceImpl implements TxService {
             TxRegister txRegister = TxManager.getTxRegister(chain, type);
             if (null == txRegister) {
                 throw new NulsException(TxErrorCode.TX_TYPE_INVALID);
+            }
+            if (type == TxType.CONTRACT_RETURN_GAS) {
+                //记录gas返还交易
+                scReturnGas = tx;
             }
             /** 智能合约*/
             if (TxManager.isUnSystemSmartContract(txRegister)) {
@@ -1459,16 +1462,18 @@ public class TxServiceImpl implements TxService {
                     throw new NulsException(TxErrorCode.SERIALIZE_ERROR);
                 }
             }
-
             if (chain.getContractGenerateTxTypes().contains(tx.getType())) {
                 //包含了合约模块生成的并且不应该放在区块交易列表中的交易
                 throw new NulsException(TxErrorCode.SYS_CONTRACT_TX_NON_CIRCULATING);
             }
-
             keys.add(tx.getHash().getBytes());
             //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
             TxUtil.moduleGroups(moduleVerifyMap, txRegister, txStr);
         }
+        if (contractNotify && null != scReturnGas) {
+            throw new NulsException(TxErrorCode.EXIST_GAS_RETURN_WITHOUT_SC_RETURN);
+        }
+
         onlyOneTxTypes = null;
         long f2 = System.currentTimeMillis();
         timeF1 = f2 - f1;
@@ -1676,6 +1681,10 @@ public class TxServiceImpl implements TxService {
                     }
                     //返回智能合约交易给区块
                     scNewList.remove(scNewTxHex);
+                } else {
+                    if (null != scReturnGas) {
+                        throw new NulsException(TxErrorCode.EXIST_GAS_RETURN_WITHOUT_SC_RETURN);
+                    }
                 }
             }
         }
