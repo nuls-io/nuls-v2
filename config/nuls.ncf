@@ -1,11 +1,11 @@
 [global]
 encoding=UTF-8
 language=en
-logPath=../../../../Logs
+logPath=Logs
 logLevel=INFO
-dataPath=../../../../data
+dataPath=data
 #默认本链ID
-chainId=2
+chainId=1
 #地址前缀
 addressPrefix=NULS
 #默认本链主资产ID
@@ -17,7 +17,7 @@ chainName=nuls
 #本链默认资产符号
 symbol=NULS
 #主网链id
-mainChainId=2
+mainChainId=1
 #主网主资产id
 mainAssetId=1
 #主网主资产符号
@@ -58,7 +58,6 @@ singleDownloadTimeout=15000
 cachedBlockSizeLimit=20971520
 #创世块文件路径(支持绝对路径与相对路径,相对路径相对于此配置文件的目录)
 genesisBlockPath=genesis-block.json
-dependent=cross-chain,smart-contract,protocol-update
 
 [consensus]
 #种子节点列表
@@ -85,9 +84,6 @@ initTime=1594483200
 deflationRatio=99.6
 #通缩间隔时间(单位：S),30天
 deflationTimeInterval=2592000
-dataPath=../../../../../data
-logPath=../../../../../Logs
-dependent=protocol-update,smart-contract,cross-chain
 
 [smart-contract]
 #合约视图方法调用最大消耗的Gas
@@ -114,11 +110,8 @@ mappingAddress=NULSd6HgcfwWCD5TLEfehrJ1fFYuZ6nqGbfiu,NULSd6HggAGpQbhhSHU9R1yRxKK
 businessAddress=NULSd6HgdemcQDAaiEJWq9ESMhtUHXRsNJ4KM
 teamAddress=NULSd6HgbfkSuRGKSLJJzAPAihgDQtaUhuE4L
 communityAddress=NULSd6HgjDZmLMbZSmH9tqb6smdzZHCxsCRD3
-dependent=smart-contract,cross-chain
 
 [cross-chain]
-dataPath=../../../../../data
-logPath=../../../../../Logs
 #跨链节点链接的最小值
 minNodeAmount=3
 #跨链节点链接的最大值
@@ -133,19 +126,24 @@ verifiers=NULSd6Hge7xHDnvsSpnzbR2gWHd31zJ1How11,NULSd6Hgc5VNP4rF4wxdiXEQKpBKUE4w
 mainByzantineRatio=66
 #主网最大签名数
 maxSignatureCount=100
-dependent=protocol-update
-
-[nuls-api]
-#httpServer的启动ip
-serverIp=127.0.0.1
-#httpServer的启动port
-serverPort=8004
-dependent=smart-contract,cross-chain
 
 [protocol-update]
 #每隔多少个区块统计一次协议占比
 interval=1000
 
-[cmd-client]
-clientVersion=2.4.0
+[nuls-api]
+#httpServer的启动ip
+serverIp=0.0.0.0
+#httpServer的启动port
+serverPort=8004
 
+
+[nuls-module-web-wallet]
+apiModuleApi=http://127.0.0.1:8003/
+webWalletPort=8006
+webWalletHost=0.0.0.0
+
+[nuls-module-explorer]
+apiModuleApi=http://127.0.0.1:8003/
+explorerPort=1999
+explorerHost=0.0.0.0

@@ -14,7 +14,7 @@ import java.math.BigInteger;
  * @Time: 2019-03-07 16:56
  * @Description:
  */
-@Configuration(domain = "cmd_client")
+@Configuration(domain = "cmd-client")
 public class Config implements InitializingBean {
 
     private Integer mainChainId;
@@ -32,6 +32,8 @@ public class Config implements InitializingBean {
     private Provider.ProviderType providerType;
     private String addressPrefix;
     private String language;
+
+    private String clientVersion;
 
     public String getAddressPrefix() {
         return addressPrefix;
@@ -95,6 +97,14 @@ public class Config implements InitializingBean {
 
     public void setDecimals(Integer decimals) {
         this.decimals = decimals;
+    }
+
+    public String getClientVersion() {
+        return clientVersion;
+    }
+
+    public void setClientVersion(String clientVersion) {
+        this.clientVersion = clientVersion;
     }
 
     public BigDecimal toBigUnit(BigInteger val) {

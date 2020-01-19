@@ -37,6 +37,7 @@ import io.nuls.cmd.client.processor.ledger.GetBalanceProcessor;
 import io.nuls.cmd.client.processor.network.GetNetworkProcessor;
 import io.nuls.cmd.client.processor.system.ExitProcessor;
 import io.nuls.cmd.client.processor.system.HelpProcessor;
+import io.nuls.cmd.client.processor.system.VersionProcessor;
 import io.nuls.cmd.client.processor.transaction.*;
 import io.nuls.core.basic.InitializingBean;
 import io.nuls.core.core.annotation.Component;
@@ -138,6 +139,7 @@ public class CommandHandler implements InitializingBean {
          */
         register(SpringLiteContext.getBean(ExitProcessor.class));
         register(SpringLiteContext.getBean(HelpProcessor.class));
+        register(SpringLiteContext.getBean(VersionProcessor.class));
 
         register(getBean(GetNetworkProcessor.class));
 
