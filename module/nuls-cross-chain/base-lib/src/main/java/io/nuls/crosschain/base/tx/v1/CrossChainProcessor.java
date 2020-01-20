@@ -41,6 +41,6 @@ public class CrossChainProcessor implements TransactionProcessor {
 
     @Override
     public boolean rollback(int chainId, List<Transaction> txs, BlockHeader blockHeader) {
-        return crossChainService.commitCrossTx(chainId, txs, blockHeader);
+        return crossChainService.rollbackCrossTx(chainId, txs, blockHeader);
     }
 }
