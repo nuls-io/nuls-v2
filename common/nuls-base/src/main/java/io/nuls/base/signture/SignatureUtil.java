@@ -126,6 +126,44 @@ public class SignatureUtil {
      *
      * @param tx 交易
      */
+    public static boolean ctxSignatureValid(int chainId,Transaction tx)throws NulsException{
+        if (tx.getTransactionSignature() == null || tx.getTransactionSignature().length == 0) {
+            throw new NulsException(new Exception());
+        }
+        TransactionSignature transactionSignature = new TransactionSignature();
+        transactionSignature.parse(tx.getTransactionSignature(), 0);
+        if ((transactionSignature.getP2PHKSignatures() == null || transactionSignature.getP2PHKSignatures().size() == 0)) {
+            throw new NulsException(new Exception("Transaction unsigned ！"));
+        }
+        Set<String> fromAddressSet = tx.getCoinDataInstance().getFromAddressList();
+        int signCount = tx.getCoinDataInstance().getFromAddressCount();
+        int passCount = 0;
+        String signAddress;
+        for (P2PHKSignature signature : transactionSignature.getP2PHKSignatures()) {
+            if (!ECKey.verify(tx.getHash().getBytes(), signature.getSignData().getSignBytes(), signature.getPublicKey())) {
+                throw new NulsException(new Exception("Transaction signature error !"));
+            }
+            signAddress = AddressTool.getStringAddressByBytes(AddressTool.getAddress(signature.getPublicKey(), chainId));
+            if(!fromAddressSet.contains(signAddress)){
+                continue;
+            }
+            fromAddressSet.remove(signAddress);
+            passCount++;
+            if (passCount >= signCount && fromAddressSet.isEmpty()) {
+                break;
+            }
+        }
+        if(passCount < signCount || !fromAddressSet.isEmpty()){
+            throw new NulsException(new Exception("Transaction signature error !"));
+        }
+        return true;
+    }
+
+    /**
+     * 跨链交易验证签名
+     *
+     * @param tx 交易
+     */
     public static boolean validateCtxSignture(Transaction tx) throws NulsException {
         if (tx.getTransactionSignature() == null || tx.getTransactionSignature().length == 0) {
             if (tx.getType() == TxType.VERIFIER_INIT || tx.getType() == TxType.VERIFIER_CHANGE) {

@@ -82,7 +82,7 @@ public class CrossTxValidator {
         if(chain.getChainId() == fromChainId){
             //如果本链不为主网且交易是跨链转账交易，则需要验证原交易签名，和主网协议交易签名
             if(!config.isMainNet()){
-                if(!SignatureUtil.validateTransactionSignture(tx)){
+                if(!SignatureUtil.ctxSignatureValid(fromChainId,tx)){
                     chain.getLogger().info("本链协议跨链交易签名验证失败！");
                     throw new NulsException(NulsCrossChainErrorCode.SIGNATURE_ERROR);
                 }
@@ -217,7 +217,7 @@ public class CrossTxValidator {
             }
             //如果本链不为主网且交易是跨链转账交易，则需要验证原交易签名，和主网协议交易签名
             if(!config.isMainNet()){
-                if(!SignatureUtil.validateTransactionSignture(tx)){
+                if(!SignatureUtil.ctxSignatureValid(fromChainId,tx)){
                     chain.getLogger().info("本链协议跨链交易签名验证失败！");
                     throw new NulsException(NulsCrossChainErrorCode.SIGNATURE_ERROR);
                 }
