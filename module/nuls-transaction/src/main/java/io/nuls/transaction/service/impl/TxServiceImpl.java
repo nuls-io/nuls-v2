@@ -390,7 +390,7 @@ public class TxServiceImpl implements TxService {
                 throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH_COINFROM);
             }
         }
-        if (!SignatureUtil.validateTransactionSignture(tx)) {
+        if (!SignatureUtil.validateTransactionSignture(chainId, tx)) {
             throw new NulsException(TxErrorCode.SIGNATURE_ERROR);
         }
     }

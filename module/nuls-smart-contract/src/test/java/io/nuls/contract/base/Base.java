@@ -336,11 +336,15 @@ public class Base {
     }
 
     protected Map makeCallParams(String sender, BigInteger value, String contractAddress, String methodName, String methodDesc, String remark, Object... args) {
+        return this.makeCallParams(sender, value, 2000000L, contractAddress, methodName, methodDesc, remark, args);
+    }
+
+    protected Map makeCallParams(String sender, BigInteger value, Long gasLimit, String contractAddress, String methodName, String methodDesc, String remark, Object... args) {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.CHAIN_ID, chainId);
         params.put("sender", sender);
         params.put("value", value);
-        params.put("gasLimit", 2000000L);
+        params.put("gasLimit", gasLimit);
         params.put("price", 25);
         params.put("contractAddress", contractAddress);
         params.put("methodName", methodName);
