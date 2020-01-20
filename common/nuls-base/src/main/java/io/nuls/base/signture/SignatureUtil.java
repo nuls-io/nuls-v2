@@ -54,15 +54,21 @@ import java.util.*;
  */
 @Component
 public class SignatureUtil {
+
+    private static final int MAIN_CHAIN_ID = 1;
     /**
      * 验证交易中所有签名正确性
      *
+     * @param chainId 当前链ID
      * @param tx 交易
      */
-    public static boolean validateTransactionSignture(Transaction tx) throws NulsException {
+    public static boolean validateTransactionSignture(int chainId, Transaction tx) throws NulsException {
         // 判断硬分叉,需要一个高度
         long hardForkingHeight = 878000;
         boolean forked = tx.getBlockHeight() <= 0 || tx.getBlockHeight() > hardForkingHeight;
+        if(chainId != MAIN_CHAIN_ID) {
+            forked = true;
+        }
         try {
             if (tx.getTransactionSignature() == null || tx.getTransactionSignature().length == 0) {
                 throw new NulsException(new Exception());
