@@ -28,5 +28,5 @@ package io.nuls.transaction.constant;
  * @date: 2019-12-04
  */
 public class TxContext {
-    public static short UPDATE_VERSION_V240 = 5;
+    public static short UPDATE_VERSION_V250 = 5;
 }

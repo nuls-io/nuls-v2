@@ -635,7 +635,7 @@ public class ContractUtil {
                 break;
             // pierre 标记 需要协议升级 done
             case CROSS_CHAIN:
-                if(ProtocolGroupManager.getCurrentVersion(chainId) < ContractContext.UPDATE_VERSION_V240) {
+                if(ProtocolGroupManager.getCurrentVersion(chainId) < ContractContext.UPDATE_VERSION_V250) {
                     break;
                 }
                 resultTx = new CrossTokenContractTransaction();
