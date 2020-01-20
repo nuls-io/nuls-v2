@@ -1,12 +1,15 @@
 package io.nuls.chain.test;
 
 import io.nuls.chain.model.po.Asset;
+import io.nuls.core.log.Log;
+import io.nuls.core.parse.I18nUtils;
+import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.parse.JSONUtils;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -20,6 +23,13 @@ import java.util.Map;
  * @description
  */
 public class AssetCmdTest {
+
+    @BeforeClass
+    public static void initClass() {
+        Log.info("init log.");
+        I18nUtils.loadLanguage(AssetCmdTest.class, "languages", "en");
+    }
+
     @Before
     public void init() throws Exception {
         NoUse.mockModule();
@@ -54,6 +64,16 @@ public class AssetCmdTest {
         parameters.put("password","nuls123456");
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CM.abbr, "cm_assetReg", parameters);
         System.out.println(JSONUtils.obj2json(response));
+    }
+
+    @Test
+    public void mainNetAssetReg() throws Exception {
+        Map<String,Object> parameters = new HashMap<>();
+        parameters.put("address","tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG");
+        parameters.put("assetId",2);
+        parameters.put("password","nuls123456");
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CM.abbr, "cm_mainNetAssetReg", parameters);
+        System.out.println(JSONUtils.obj2PrettyJson(response));
     }
 
     @Test

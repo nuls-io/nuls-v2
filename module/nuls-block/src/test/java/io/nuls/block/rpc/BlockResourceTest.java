@@ -163,12 +163,13 @@ public class BlockResourceTest {
     @Test
     public void getBlockByHeight() throws Exception {
         Map<String,Object> params = new HashMap<>();
-        long blockHeight = 4L;
+        long blockHeight = 53L;
         params.put(Constants.CHAIN_ID, chainId);
         params.put("height", blockHeight);
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, GET_BLOCK_BY_HEIGHT, params);
         Map data = (Map) cmdResp.getResponseData();
-        String hex = (String) data.get(GET_BLOCK_BY_HEIGHT);
+        Map result = (Map) data.get(GET_BLOCK_BY_HEIGHT);
+        String hex = (String) result.get("value");
         Block block100 = new Block();
         block100.parse(new NulsByteBuffer(HexUtil.decode(hex)));
         Log.info("block: {}", JSONUtils.obj2PrettyJson(block100));

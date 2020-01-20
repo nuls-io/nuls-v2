@@ -12,11 +12,10 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
+import io.nuls.core.model.ByteUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.util.NulsDateUtils;
-import io.nuls.crosschain.base.constant.CommandConstant;
-import io.nuls.crosschain.base.message.BroadCtxSignMessage;
 import io.nuls.crosschain.base.model.dto.input.CoinDTO;
 import io.nuls.crosschain.base.model.dto.input.CrossTxTransferDTO;
 import io.nuls.crosschain.base.service.CrossChainService;
@@ -25,14 +24,9 @@ import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainErrorCode;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.model.po.CtxStatusPO;
-import io.nuls.crosschain.nuls.model.po.SendCtxHashPO;
-import io.nuls.crosschain.nuls.rpc.call.AccountCall;
-import io.nuls.crosschain.nuls.rpc.call.ChainManagerCall;
-import io.nuls.crosschain.nuls.rpc.call.ConsensusCall;
-import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
+import io.nuls.crosschain.nuls.rpc.call.*;
 import io.nuls.crosschain.nuls.srorage.*;
 import io.nuls.crosschain.nuls.utils.CommonUtil;
-import io.nuls.crosschain.nuls.utils.MessageUtil;
 import io.nuls.crosschain.nuls.utils.TxUtil;
 import io.nuls.crosschain.nuls.utils.manager.ChainManager;
 import io.nuls.crosschain.nuls.utils.manager.CoinDataManager;
@@ -112,86 +106,32 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             List<CoinTo> coinToList = coinDataManager.assemblyCoinTo(crossTxTransferDTO.getListTo(), chain);
             coinDataManager.verifyCoin(coinFromList, coinToList, chain);
             int txSize = tx.size();
-            //如果为主链跨链交易中只存在原始跨链交易签名，如果不为主链，跨链交易签名列表中会包含主网协议跨链交易的签名列表
-            if (config.isMainNet()) {
-                txSize += coinDataManager.getSignatureSize(coinFromList);
-            } else {
-                txSize += coinDataManager.getSignatureSize(coinFromList) * 2;
-            }
-            //如果当前节点为共识节点且转出账户不为该共识账户则共识账户需对跨链交易签名
-            Map packerInfo = ConsensusCall.getPackerInfo(chain);
-            String password = (String) packerInfo.get("password");
-            String address = (String) packerInfo.get("address");
-            List<String> packers = (List<String>) packerInfo.get("packAddressList");
-            int verifierSignCount = CommonUtil.getByzantineCount(packers, chain, true);
-            boolean isPacker = false;
-            if (!StringUtils.isBlank(address) && !crossTxTransferDTO.getFromAddressList().contains(address)) {
-                isPacker = true;
-            }
-            txSize += verifierSignCount * P2PHKSignature.SERIALIZE_LENGTH;
-
-            CoinData coinData = coinDataManager.getCoinData(chain, coinFromList, coinToList, txSize, true);
-            //如果不是主网需计算主网协议跨链交易手续费
-            if (!config.isMainNet()) {
-                coinData = coinDataManager.getCoinData(chain, coinData.getFrom(), coinData.getTo(), txSize, false);
-            }
+            txSize += P2PHKSignature.SERIALIZE_LENGTH;
+            CoinData coinData = coinDataManager.getCrossCoinData(chain, coinFromList, coinToList, txSize, config.isMainNet());
             tx.setCoinData(coinData.serialize());
             tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
             //签名
             TransactionSignature transactionSignature = new TransactionSignature();
             List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
             List<String> signedAddressList = new ArrayList<>();
-            Map<String, String> signedAddressMap = new HashMap<>(INIT_CAPACITY_8);
             for (CoinDTO coinDTO : crossTxTransferDTO.getListFrom()) {
                 if (!signedAddressList.contains(coinDTO.getAddress())) {
                     P2PHKSignature p2PHKSignature = AccountCall.signDigest(coinDTO.getAddress(), coinDTO.getPassword(), tx.getHash().getBytes());
                     p2PHKSignatures.add(p2PHKSignature);
                     signedAddressList.add(coinDTO.getAddress());
-                    signedAddressMap.put(coinDTO.getAddress(), coinDTO.getPassword());
                 }
             }
             if (!txValidator.coinDataValid(chain, coinData, tx.size())) {
                 chain.getLogger().error("跨链交易CoinData验证失败！\n\n");
                 return Result.getFailed(COINDATA_VERIFY_FAIL);
             }
-            NulsHash txHash = tx.getHash();
-            BroadCtxSignMessage message = new BroadCtxSignMessage();
-
-            //判断本链是友链还是主网，如果是友链则需要生成对应的主网协议跨链交易，如果为主网则直接将跨链交易发送给交易模块处理
-            if (!config.isMainNet()) {
-                Transaction mainCtx = TxUtil.friendConvertToMain(chain, tx, signedAddressMap, TxType.CROSS_CHAIN);
-                NulsHash convertHash = mainCtx.getHash();
-                TransactionSignature mTransactionSignature = new TransactionSignature();
-                mTransactionSignature.parse(mainCtx.getTransactionSignature(), 0);
-                if (isPacker) {
-                    P2PHKSignature p2PHKSignature = AccountCall.signDigest(address, password, convertHash.getBytes());
-                    p2PHKSignatures.add(p2PHKSignature);
-                }
-                p2PHKSignatures.addAll(mTransactionSignature.getP2PHKSignatures());
-                if (!txValidator.coinDataValid(chain, mainCtx.getCoinDataInstance(), mainCtx.size(), false)) {
-                    chain.getLogger().error("生成的主网协议跨链交易CoinData验证失败！\n\n");
-                    return Result.getFailed(COINDATA_VERIFY_FAIL);
-                }
-                message.setSignature(mTransactionSignature.getP2PHKSignatures().get(0).serialize());
-                convertCtxService.save(txHash, mainCtx, chainId);
-                convertHashService.save(convertHash, txHash, chainId);
-            } else {
-                if (isPacker) {
-                    P2PHKSignature p2PHKSignature = AccountCall.signDigest(address, password, txHash.getBytes());
-                    p2PHKSignatures.add(p2PHKSignature);
-                }
-            }
             transactionSignature.setP2PHKSignatures(p2PHKSignatures);
             tx.setTransactionSignature(transactionSignature.serialize());
-            //如果本链为主网，则创建的交易就是主网协议交易
-            if (config.isMainNet()) {
-                message.setSignature(p2PHKSignatures.get(0).serialize());
+
+            if (!TransactionCall.sendTx(chain, RPCUtil.encode(tx.serialize()))) {
+                chain.getLogger().error("跨链交易发送交易模块失败\n\n");
+                throw new NulsException(INTERFACE_CALL_FAILED);
             }
-            message.setLocalHash(txHash);
-            CtxStatusPO ctxStatusPO = new CtxStatusPO(tx, TxStatusEnum.UNCONFIRM.getStatus());
-            ctxStatusService.save(txHash, ctxStatusPO, chainId);
-            MessageUtil.signByzantineInChain(chain, tx, transactionSignature, packers);
-            NetWorkCall.broadcast(chainId, message, CommandConstant.BROAD_CTX_SIGN_MESSAGE, false);
             Map<String, Object> result = new HashMap<>(2);
             result.put(TX_HASH, tx.getHash().toHex());
             return Result.getSuccess(SUCCESS).setData(result);
@@ -227,54 +167,12 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                 chain.getLogger().error("跨链交易CoinData验证失败！\n\n");
                 return Result.getFailed(COINDATA_VERIFY_FAIL);
             }
-            TransactionSignature signature = new TransactionSignature();
-            signature.parse(tx.getTransactionSignature(), 0);
-            NulsHash txHash = tx.getHash();
-            BroadCtxSignMessage message = new BroadCtxSignMessage();
-            //如果当前节点为共识节点且转出账户不为该共识账户则共识账户需对跨链交易签名
-            Map packerInfo = ConsensusCall.getPackerInfo(chain);
-            String password = (String) packerInfo.get("password");
-            String address = (String) packerInfo.get("address");
-            List<String> packers = (List<String>) packerInfo.get("packAddressList");
-            boolean isPacker = false;
-            if (!StringUtils.isBlank(address) && !coinData.getFromAddressList().contains(address)) {
-                isPacker = true;
+
+            if (!TransactionCall.sendTx(chain, RPCUtil.encode(tx.serialize()))) {
+                chain.getLogger().error("跨链交易发送交易模块失败\n\n");
+                throw new NulsException(INTERFACE_CALL_FAILED);
             }
-            //判断本链是友链还是主网，如果是友链则需要生成对应的主网协议跨链交易，如果为主网则直接将跨链交易发送给交易模块处理
-            if (!config.isMainNet()) {
-                Transaction mainCtx = TxUtil.friendConvertToMain(chain, tx, null, TxType.CROSS_CHAIN);
-                NulsHash convertHash = mainCtx.getHash();
-                if (isPacker) {
-                    P2PHKSignature p2PHKSignature = AccountCall.signDigest(address, password, convertHash.getBytes());
-                    signature.getP2PHKSignatures().add(p2PHKSignature);
-                    chain.getSignedCtxMap().put(txHash, p2PHKSignature);
-                }
-                if (!txValidator.coinDataValid(chain, mainCtx.getCoinDataInstance(), mainCtx.size(), false)) {
-                    chain.getLogger().error("生成的主网协议跨链交易CoinData验证失败！\n\n");
-                    return Result.getFailed(COINDATA_VERIFY_FAIL);
-                }
-                TransactionSignature mTransactionSignature = new TransactionSignature();
-                mTransactionSignature.parse(mainCtx.getTransactionSignature(), 0);
-                message.setSignature(mTransactionSignature.getP2PHKSignatures().get(0).serialize());
-                convertCtxService.save(txHash, mainCtx, chainId);
-                convertHashService.save(convertHash, txHash, chainId);
-            } else {
-                if (isPacker) {
-                    P2PHKSignature p2PHKSignature = AccountCall.signDigest(address, password, txHash.getBytes());
-                    signature.getP2PHKSignatures().add(p2PHKSignature);
-                    chain.getSignedCtxMap().put(txHash, p2PHKSignature);
-                }
-            }
-            tx.setTransactionSignature(signature.serialize());
-            //如果本链为主网，则创建的交易就是主网协议交易
-            if (config.isMainNet()) {
-                message.setSignature(signature.getP2PHKSignatures().get(0).serialize());
-            }
-            message.setLocalHash(txHash);
-            CtxStatusPO ctxStatusPO = new CtxStatusPO(tx, TxStatusEnum.UNCONFIRM.getStatus());
-            ctxStatusService.save(txHash, ctxStatusPO, chainId);
-            MessageUtil.signByzantineInChain(chain, tx, signature, packers);
-            NetWorkCall.broadcast(chainId, message, CommandConstant.BROAD_CTX_SIGN_MESSAGE, false);
+
             Map<String, Object> result = new HashMap<>(2);
             result.put(TX_HASH, tx.getHash().toHex());
             result.put("success", true);
@@ -334,31 +232,15 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             List<NulsHash> convertHashList = new ArrayList<>();
             List<NulsHash> ctxStatusList = new ArrayList<>();
             List<NulsHash> otherCtxList = new ArrayList<>();
-            List<NulsHash> waitSendList = new ArrayList<>();
             for (Transaction ctx : txs) {
                 NulsHash ctxHash = ctx.getHash();
-                verifiedCtxMap.get(chainId).remove(ctxHash);
+                if(verifiedCtxMap.get(chainId) != null){
+                    verifiedCtxMap.get(chainId).remove(ctxHash);
+                }
                 CoinData coinData = ctx.getCoinDataInstance();
                 int fromChainId = AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress());
                 int toChainId = AddressTool.getChainIdByAddress(coinData.getTo().get(0).getAddress());
-                if (chainId == fromChainId) {
-                    CtxStatusPO ctxStatusPO = new CtxStatusPO(ctx, TxStatusEnum.COMMITTED.getStatus());
-                    if (!config.isMainNet()) {
-                        NulsHash convertHash = TxUtil.friendConvertToMain(chain, ctx, null, TxType.CROSS_CHAIN).getHash();
-                        if (!convertHashService.save(convertHash, ctxHash, chainId)) {
-                            rollbackCtx(convertHashList, ctxStatusList, otherCtxList, chainId);
-                            return false;
-                        }
-                        convertHashList.add(convertHash);
-                    }
-                    if (!ctxStatusService.save(ctxHash, ctxStatusPO, chainId)) {
-                        rollbackCtx(convertHashList, ctxStatusList, otherCtxList, chainId);
-                        return false;
-                    }
-                    ctxStatusList.add(ctxHash);
-                    waitSendList.add(ctxHash);
-                    chain.getSignedCtxMap().remove(ctxHash);
-                } else if (chainId == toChainId) {
+                if(chainId == toChainId){
                     NulsHash convertHash = ctxHash;
                     if (!config.isMainNet()) {
                         convertHash = TxUtil.friendConvertToMain(chain, ctx, null, TxType.CROSS_CHAIN).getHash();
@@ -373,26 +255,33 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                         return false;
                     }
                     otherCtxList.add(convertHash);
-                } else {
-                    if (!otherCtxService.save(ctxHash, ctx, chainId)) {
+                }else{
+                    if (!config.isMainNet()) {
+                        NulsHash convertHash = TxUtil.friendConvertToMain(chain, ctx, null, TxType.CROSS_CHAIN).getHash();
+                        if (!convertHashService.save(convertHash, ctxHash, chainId)) {
+                            rollbackCtx(convertHashList, ctxStatusList, otherCtxList, chainId);
+                            return false;
+                        }
+                        convertHashList.add(convertHash);
+                    }
+                    //如果当前链不为发起链，则本链为主网中转链需清空签名在对交易对签名拜占庭
+                    if(chainId != fromChainId){
+                        ctx.setTransactionSignature(null);
+                        if (!otherCtxService.save(ctxHash, ctx, chainId)) {
+                            rollbackCtx(convertHashList, ctxStatusList, otherCtxList, chainId);
+                            return false;
+                        }
+                        otherCtxList.add(ctxHash);
+                    }
+                    CtxStatusPO ctxStatusPO = new CtxStatusPO(ctx, TxStatusEnum.UNCONFIRM.getStatus());
+                    if (!ctxStatusService.save(ctxHash, ctxStatusPO, chainId)) {
                         rollbackCtx(convertHashList, ctxStatusList, otherCtxList, chainId);
                         return false;
                     }
-                    otherCtxList.add(ctxHash);
-                    if (!convertHashService.save(ctxHash, ctxHash, chainId)) {
-                        rollbackCtx(convertHashList, ctxStatusList, otherCtxList, chainId);
-                        return false;
-                    }
-                    convertHashList.add(ctxHash);
-                }
-            }
-            if (!waitSendList.isEmpty()) {
-                //跨链交易被打包的高度
-                long sendHeight = blockHeader.getHeight() + chain.getConfig().getSendHeight();
-                SendCtxHashPO sendCtxHashPo = new SendCtxHashPO(waitSendList);
-                if (!sendHeightService.save(sendHeight, sendCtxHashPo, chainId)) {
-                    rollbackCtx(convertHashList, ctxStatusList, otherCtxList, chainId);
-                    return false;
+                    ctxStatusList.add(ctxHash);
+                    chain.getLogger().debug("跨链交易提交完成，对跨链交易做拜占庭验证：{}",ctxHash.toHex());
+                    //发起拜占庭验证
+                    TxUtil.localCtxByzantine(ctx, chain);
                 }
             }
             //如果本链为主网通知跨链管理模块发起链与接收链资产变更
@@ -426,8 +315,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                 int toChainId = AddressTool.getChainIdByAddress(coinData.getTo().get(0).getAddress());
                 NulsHash ctxHash = ctx.getHash();
                 if (chainId == fromChainId) {
-                    CtxStatusPO ctxStatusPO = new CtxStatusPO(ctx, TxStatusEnum.UNCONFIRM.getStatus());
-                    if (!ctxStatusService.save(ctxHash, ctxStatusPO, chainId)) {
+                    if (!ctxStatusService.delete(ctxHash,  chainId) || !convertHashService.delete(ctxHash, chainId)) {
                         return false;
                     }
                 } else if (chainId == toChainId) {
@@ -485,12 +373,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
         for (Transaction ctx : txs) {
             NulsHash ctxHash = ctx.getHash();
             try {
-                if (verifiedCtxSet.contains(ctxHash)) {
-                    if (!txValidator.packageValid(chain, ctx, blockHeader)) {
-                        verifiedCtxSet.remove(ctxHash);
-                        invalidCtxList.add(ctx);
-                    }
-                } else {
+                if (!verifiedCtxSet.contains(ctxHash)) {
                     if (!txValidator.validateTx(chain, ctx, blockHeader)) {
                         invalidCtxList.add(ctx);
                     } else {

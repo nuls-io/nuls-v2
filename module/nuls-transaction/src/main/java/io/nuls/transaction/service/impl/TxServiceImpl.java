@@ -29,6 +29,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.*;
+import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.base.protocol.TxRegisterDetail;
 import io.nuls.base.signture.MultiSignTxSignature;
 import io.nuls.base.signture.SignatureUtil;
@@ -52,6 +53,7 @@ import io.nuls.core.thread.commom.NulsThreadFactory;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
+import io.nuls.transaction.constant.TxContext;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.manager.TxManager;
 import io.nuls.transaction.model.bo.*;
@@ -441,7 +443,7 @@ public class TxServiceImpl implements TxService {
                 throw new NulsException(TxErrorCode.COINFROM_NOT_SAME_CHAINID);
             }
             //如果不是跨链交易，from中地址对应的链id必须发起链id，跨链交易在验证器中验证
-            if (type != TxType.CROSS_CHAIN) {
+            if (!TxManager.isCrossTx(type)) {
                 if (chainId != addrChainId) {
                     throw new NulsException(TxErrorCode.FROM_ADDRESS_NOT_MATCH_CHAIN);
                 }
@@ -502,8 +504,8 @@ public class TxServiceImpl implements TxService {
             if (coinTo.getAmount().compareTo(BigInteger.ZERO) < 0) {
                 throw new NulsException(TxErrorCode.DATA_ERROR);
             }
-            //如果不是跨链交易，to中地址对应的链id必须发起交易的链id
-            if (type != TxType.CROSS_CHAIN) {
+            //如果不是跨链交易，to中地址对应的链id必须是发起交易的链id
+            if (!TxManager.isCrossTx(type)) {
                 if (chainId != txChainId) {
                     throw new NulsException(TxErrorCode.TO_ADDRESS_NOT_MATCH_CHAIN);
                 }
@@ -545,7 +547,7 @@ public class TxServiceImpl implements TxService {
         }
         int feeAssetChainId;
         int feeAssetId;
-        if (type == TxType.CROSS_CHAIN && AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress()) != chain.getChainId()) {
+        if (TxManager.isCrossTx(type) && AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress()) != chain.getChainId()) {
             //为跨链交易并且不是交易发起链时,计算主网主资产为手续费NULS
             feeAssetChainId = txConfig.getMainChainId();
             feeAssetId = txConfig.getMainAssetId();
@@ -560,7 +562,7 @@ public class TxServiceImpl implements TxService {
         }
         //根据交易大小重新计算手续费，用来验证实际手续费
         BigInteger targetFee;
-        if (type == TxType.CROSS_CHAIN) {
+        if (TxManager.isCrossTx(type)) {
             targetFee = TransactionFeeCalculator.getCrossTxFee(txSize);
         } else {
             targetFee = TransactionFeeCalculator.getNormalTxFee(txSize);
@@ -778,7 +780,19 @@ public class TxServiceImpl implements TxService {
                         while (it.hasNext()) {
                             TxPackageWrapper txPackageWrapper = it.next();
                             Transaction transaction = txPackageWrapper.getTx();
-                            if (TxManager.isSmartContract(chain, transaction.getType())) {
+                            TxRegister txRegister = TxManager.getTxRegister(chain, transaction.getType());
+                            String moduleCode = txRegister.getModuleCode();
+                            boolean isSmartContractTx = moduleCode.equals(ModuleE.SC.abbr);
+                            boolean isCrossTx = moduleCode.equals(ModuleE.CC.abbr);
+                            // add by pierre at 2019-11-02 跨链转账交易发送到智能合约模块进行解析，是否为合约资产跨链转账 需要协议升级 done
+                            if (ProtocolGroupManager.getCurrentVersion(chain.getChainId()) >= TxContext.UPDATE_VERSION_V240) {
+                                boolean isCrossTransferTx = TxType.CROSS_CHAIN == transaction.getType();
+                                if (!isSmartContractTx && txConfig.isCollectedSmartContractModule()) {
+                                    isSmartContractTx = isCrossTransferTx;
+                                }
+                            }
+                            // end code by pierre
+                            if (isSmartContractTx) {
                                 if (stopInvokeContract) {
                                     //该标志true,表示不再处理智能合约交易,需要暂存交易,统一还回待打包队列
                                     orphanTxSet.add(txPackageWrapper);
@@ -807,13 +821,13 @@ public class TxServiceImpl implements TxService {
                                 }
                             }
                             totalSize += transaction.getSize();
-                            TxRegister txRegister = TxManager.getTxRegister(chain, transaction.getType());
+
                             //计算跨链交易的数量
-                            if (txRegister.getModuleCode().equals(ModuleE.CC.abbr)) {
+                            if (isCrossTx) {
                                 corssTxCount++;
                             }
                             //计算合约交易的数量
-                            if (txRegister.getModuleCode().equals(ModuleE.SC.abbr)) {
+                            if (isSmartContractTx) {
                                 contractTxCount++;
                             }
                             //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
@@ -1070,6 +1084,7 @@ public class TxServiceImpl implements TxService {
                      * 4.混合 执行2.
                      */
                     List<String> scNewConsensusList = new ArrayList<>();
+                    List<String> scNewTokenCrossTransferList = new ArrayList<>();
                     for (String scNewTx : scNewList) {
                         int scNewTxType = TxUtil.extractTxTypeFromTx(scNewTx);
                         if (scNewTxType == TxType.CONTRACT_CREATE_AGENT
@@ -1077,27 +1092,32 @@ public class TxServiceImpl implements TxService {
                                 || scNewTxType == TxType.CONTRACT_CANCEL_DEPOSIT
                                 || scNewTxType == TxType.CONTRACT_STOP_AGENT) {
                             scNewConsensusList.add(scNewTx);
+                        } else if (scNewTxType == TxType.CONTRACT_TOKEN_CROSS_TRANSFER) {
+                            scNewTokenCrossTransferList.add(scNewTx);
                         }
                     }
-                    if (!scNewConsensusList.isEmpty()) {
-                        //收集共识模块所有交易, 加上新产生的智能合约共识交易，一起再次进行模块统一验证
-                        TxRegister consensusTxRegister = null;
+                    if (!scNewConsensusList.isEmpty() || !scNewTokenCrossTransferList.isEmpty()) {
+                        //收集共识模块/跨链模块所有交易, 加上新产生的智能合约共识交易，一起再次进行模块统一验证
                         List<String> consensusList = new ArrayList<>();
+                        List<String> crossTransferList = new ArrayList<>();
                         for (TxPackageWrapper txPackageWrapper : packingTxList) {
                             Transaction tx = txPackageWrapper.getTx();
                             TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
                             if (txRegister.getModuleCode().equals(ModuleE.CS.abbr)) {
                                 consensusList.add(RPCUtil.encode(txPackageWrapper.getTx().serialize()));
-                                if (null == consensusTxRegister) {
-                                    consensusTxRegister = txRegister;
-                                }
+                            }
+                            if (txRegister.getModuleCode().equals(ModuleE.CC.abbr)) {
+                                crossTransferList.add(RPCUtil.encode(txPackageWrapper.getTx().serialize()));
                             }
                         }
-                        if (consensusTxRegister == null) {
-                            consensusTxRegister = TxManager.getTxRegister(chain, TxType.REGISTER_AGENT);
-                        }
                         consensusList.addAll(scNewConsensusList);
-                        isRollbackPackablePool = processContractConsensusTx(chain, consensusTxRegister, consensusList, packingTxList, false);
+                        crossTransferList.addAll(scNewTokenCrossTransferList);
+                        if (!consensusList.isEmpty()) {
+                            isRollbackPackablePool = processContractTxs(chain, ModuleE.CS.abbr, consensusList, packingTxList, false);
+                        }
+                        if (!isRollbackPackablePool && !crossTransferList.isEmpty()) {
+                            isRollbackPackablePool = processContractTxs(chain, ModuleE.CC.abbr, crossTransferList, packingTxList, false);
+                        }
                     }
                     if (!isRollbackPackablePool) {
                         contractGenerateTxs.addAll(scNewList);
@@ -1162,23 +1182,22 @@ public class TxServiceImpl implements TxService {
      * 处理智能合约的共识交易
      *
      * @param chain
-     * @param consensusTxRegister
-     * @param consensusList
+     * @param verifyList
      * @param packingTxList
      * @param batchVerify
      * @return
      * @throws NulsException
      */
-    private boolean processContractConsensusTx(Chain chain, TxRegister consensusTxRegister, List<String> consensusList, List<TxPackageWrapper> packingTxList, boolean batchVerify) throws NulsException {
+    private boolean processContractTxs(Chain chain, String moduleCode, List<String> verifyList, List<TxPackageWrapper> packingTxList, boolean batchVerify) throws NulsException {
         while (true) {
             List<String> txHashList = null;
             try {
-                txHashList = TransactionCall.txModuleValidator(chain, consensusTxRegister.getModuleCode(), consensusList);
+                txHashList = TransactionCall.txModuleValidator(chain, moduleCode, verifyList);
             } catch (NulsException e) {
                 chain.getLogger().error("Package module verify failed -txModuleValidator Exception:{}, module-code:{}, count:{} , return count:{}",
-                        BaseConstant.TX_VALIDATOR, consensusTxRegister.getModuleCode(), consensusList.size(), txHashList.size());
-                txHashList = new ArrayList<>(consensusList.size());
-                for (String txStr : consensusList) {
+                        BaseConstant.TX_VALIDATOR, moduleCode, verifyList.size(), txHashList.size());
+                txHashList = new ArrayList<>(verifyList.size());
+                for (String txStr : verifyList) {
                     Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
                     txHashList.add(tx.getHash().toHex());
                 }
@@ -1191,7 +1210,7 @@ public class TxServiceImpl implements TxService {
                 //如果是验证区块交易，有不通过的 直接返回
                 return true;
             }
-            Iterator<String> it = consensusList.iterator();
+            Iterator<String> it = verifyList.iterator();
             while (it.hasNext()) {
                 Transaction tx = TxUtil.getInstanceRpcStr(it.next(), Transaction.class);
                 int type = tx.getType();
@@ -1199,7 +1218,8 @@ public class TxServiceImpl implements TxService {
                     if (hash.equals(tx.getHash().toHex()) && (type == TxType.CONTRACT_CREATE_AGENT
                             || type == TxType.CONTRACT_DEPOSIT
                             || type == TxType.CONTRACT_CANCEL_DEPOSIT
-                            || type == TxType.CONTRACT_STOP_AGENT)) {
+                            || type == TxType.CONTRACT_STOP_AGENT
+                            || type == TxType.CONTRACT_TOKEN_CROSS_TRANSFER)) {
                         //有智能合约交易不通过 则把所有智能合约交易返回待打包队列
                         return true;
                     }
@@ -1221,7 +1241,7 @@ public class TxServiceImpl implements TxService {
                         its.remove();
                     }
                 }
-                Iterator<String> itcs = consensusList.iterator();
+                Iterator<String> itcs = verifyList.iterator();
                 while (its.hasNext()) {
                     Transaction tx = TxUtil.getInstanceRpcStr(itcs.next(), Transaction.class);
                     if (hash.equals(tx.getHash().toHex())) {
@@ -1390,6 +1410,7 @@ public class TxServiceImpl implements TxService {
 
     /**
      * 验证区块中只允许有一个的交易不能有多个
+     *
      */
     public void verifySysTxCount(Set<Integer> onlyOneTxTypes, int type) throws NulsException {
         switch (type) {
@@ -1443,8 +1464,17 @@ public class TxServiceImpl implements TxService {
                 //记录gas返还交易
                 scReturnGas = tx;
             }
+            boolean isSmartContractTx = TxManager.isUnSystemSmartContract(txRegister);
+            // add by pierre at 2019-11-02 跨链转账交易发送到智能合约模块进行解析，是否为合约资产跨链转账 需要协议升级 done
+            if (ProtocolGroupManager.getCurrentVersion(chain.getChainId()) >= TxContext.UPDATE_VERSION_V240) {
+                boolean isCrossTransferTx = TxType.CROSS_CHAIN == type;
+                if (!isSmartContractTx && txConfig.isCollectedSmartContractModule()) {
+                    isSmartContractTx = isCrossTransferTx;
+                }
+            }
+            // end code by pierre
             /** 智能合约*/
-            if (TxManager.isUnSystemSmartContract(txRegister)) {
+            if (isSmartContractTx) {
                 /** 出现智能合约,且通知标识为false,则先调用通知 */
                 if (!contractNotify) {
                     String packingAddress = AddressTool.getStringAddressByBytes(blockHeader.getPackingAddress(chain.getChainId()));
@@ -1606,6 +1636,7 @@ public class TxServiceImpl implements TxService {
              * 4.混合 执行2.
              */
             List<String> scNewConsensusList = new ArrayList<>();
+            List<String> scNewTokenCrossTransferList = new ArrayList<>();
             for (String scNewTx : scNewList) {
                 int scNewTxType = TxUtil.extractTxTypeFromTx(scNewTx);
                 if (scNewTxType == TxType.CONTRACT_CREATE_AGENT
@@ -1613,12 +1644,14 @@ public class TxServiceImpl implements TxService {
                         || scNewTxType == TxType.CONTRACT_CANCEL_DEPOSIT
                         || scNewTxType == TxType.CONTRACT_STOP_AGENT) {
                     scNewConsensusList.add(scNewTx);
+                } else if (scNewTxType == TxType.CONTRACT_TOKEN_CROSS_TRANSFER) {
+                    scNewTokenCrossTransferList.add(scNewTx);
                 }
             }
-            if (!scNewConsensusList.isEmpty()) {
-                //收集共识模块所有交易, 加上新产生的智能合约共识交易，一起再次进行模块统一验证
-                TxRegister consensusTxRegister = null;
+            if (!scNewConsensusList.isEmpty() || !scNewTokenCrossTransferList.isEmpty()) {
+                //收集共识模块/跨链模块所有交易, 加上新产生的智能合约共识交易，一起再次进行模块统一验证
                 List<String> consensusList = new ArrayList<>();
+                List<String> crossTransferList = new ArrayList<>();
                 int txType;
                 for (TxVerifyWrapper txVerifyWrapper : txList) {
                     Transaction tx = txVerifyWrapper.getTx();
@@ -1633,19 +1666,26 @@ public class TxServiceImpl implements TxService {
                     TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
                     if (txRegister.getModuleCode().equals(ModuleE.CS.abbr)) {
                         consensusList.add(txVerifyWrapper.getTxStr());
-                        if (null == consensusTxRegister) {
-                            consensusTxRegister = txRegister;
-                        }
+                    }
+                    if (txRegister.getModuleCode().equals(ModuleE.CC.abbr)) {
+                        crossTransferList.add(txVerifyWrapper.getTxStr());
                     }
                 }
-                if (consensusTxRegister == null) {
-                    consensusTxRegister = TxManager.getTxRegister(chain, TxType.REGISTER_AGENT);
-                }
                 consensusList.addAll(scNewConsensusList);
-                boolean rsProcess = processContractConsensusTx(chain, consensusTxRegister, consensusList, null, true);
-                if (rsProcess) {
-                    logger.error("contract tx consensus module verify fail.");
-                    throw new NulsException(TxErrorCode.CONTRACT_VERIFY_FAIL);
+                crossTransferList.addAll(scNewTokenCrossTransferList);
+                if (!consensusList.isEmpty()) {
+                    boolean rsProcess = processContractTxs(chain, ModuleE.CS.abbr, consensusList, null, true);
+                    if (rsProcess) {
+                        logger.error("contract tx consensus module verify fail.");
+                        throw new NulsException(TxErrorCode.CONTRACT_VERIFY_FAIL);
+                    }
+                }
+                if (!crossTransferList.isEmpty()) {
+                    boolean rsProcess = processContractTxs(chain, ModuleE.CC.abbr, crossTransferList, null, true);
+                    if (rsProcess) {
+                        logger.error("contract tx cross-chain module verify fail.");
+                        throw new NulsException(TxErrorCode.CONTRACT_VERIFY_FAIL);
+                    }
                 }
             }
             //验证智能合约gas返回的交易hex 是否正确.打包时返回的交易是加入到区块交易的队尾

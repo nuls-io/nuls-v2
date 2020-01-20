@@ -5,6 +5,8 @@ import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.annotation.Configuration;
 import io.nuls.core.rpc.model.ModuleE;
 
+import java.math.BigInteger;
+
 /**
  * @author lanjinsheng
  */
@@ -25,7 +27,8 @@ public class NulsChainConfig implements ModuleConfig {
     private String chainNameMax;
     private String assetSymbolMax;
     private String assetNameMax;
-    private String assetDepositNuls;
+    private BigInteger assetDepositNuls;
+    private BigInteger assetDestroyNuls;
     private String assetDepositNulsDestroyRate;
     private String assetDepositNulsLockRate;
 
@@ -39,7 +42,7 @@ public class NulsChainConfig implements ModuleConfig {
     private String chainName;
     private String mainAssetId;
     private String nulsAssetInitNumberMax;
-    private String nulsAssetSymbol;
+    private String mainSymbol;
     private String addressPrefix;
     private String nulsFeeMainNetRate = "0.6";
     private int nulsFeeMainNetPercent = 60;
@@ -88,6 +91,7 @@ public class NulsChainConfig implements ModuleConfig {
     public void setNulsFeeOtherNetPercent(int nulsFeeOtherNetPercent) {
         this.nulsFeeOtherNetPercent = nulsFeeOtherNetPercent;
     }
+
 
     public String getNulsFeeMainNetRate() {
         return nulsFeeMainNetRate;
@@ -145,12 +149,20 @@ public class NulsChainConfig implements ModuleConfig {
         this.assetNameMax = assetNameMax;
     }
 
-    public String getAssetDepositNuls() {
+    public BigInteger getAssetDepositNuls() {
         return assetDepositNuls;
     }
 
-    public void setAssetDepositNuls(String assetDepositNuls) {
+    public void setAssetDepositNuls(BigInteger assetDepositNuls) {
         this.assetDepositNuls = assetDepositNuls;
+    }
+
+    public BigInteger getAssetDestroyNuls() {
+        return assetDestroyNuls;
+    }
+
+    public void setAssetDestroyNuls(BigInteger assetDestroyNuls) {
+        this.assetDestroyNuls = assetDestroyNuls;
     }
 
     public String getAssetDepositNulsDestroyRate() {
@@ -249,12 +261,12 @@ public class NulsChainConfig implements ModuleConfig {
         this.nulsAssetInitNumberMax = nulsAssetInitNumberMax;
     }
 
-    public String getNulsAssetSymbol() {
-        return nulsAssetSymbol;
+    public String getMainSymbol() {
+        return mainSymbol;
     }
 
-    public void setNulsAssetSymbol(String nulsAssetSymbol) {
-        this.nulsAssetSymbol = nulsAssetSymbol;
+    public void setMainSymbol(String mainSymbol) {
+        this.mainSymbol = mainSymbol;
     }
 
     public String getChainNameMax() {

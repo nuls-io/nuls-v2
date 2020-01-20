@@ -29,6 +29,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.Transaction;
 import io.nuls.chain.config.NulsChainConfig;
+import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.info.CmErrorCode;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.info.RpcConstants;
@@ -41,20 +42,21 @@ import io.nuls.chain.model.tx.RegisterChainAndAssetTransaction;
 import io.nuls.chain.rpc.call.RpcService;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
+import io.nuls.chain.util.ChainManagerUtil;
 import io.nuls.chain.util.LoggerUtil;
+import io.nuls.chain.util.TxUtil;
 import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.model.FormatValidUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.model.*;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.util.NulsDateUtils;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -119,7 +121,7 @@ public class ChainCmd extends BaseChainCmd {
             @Parameter(parameterName = "decimalPlaces", requestType = @TypeDescriptor(value = short.class), parameterDes = "资产小数点位数"),
             @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "创建交易的账户地址"),
             @Parameter(parameterName = "password", requestType = @TypeDescriptor(value = String.class), parameterDes = "账户密码"),
-            @Parameter(parameterName = "verifierList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "验证者名单列表"),
+            @Parameter(parameterName = "verifierList", requestType = @TypeDescriptor(value = String.class), parameterDes = "验证者地址名单列表,逗号分割"),
             @Parameter(parameterName = "signatureBFTRatio", requestType = @TypeDescriptor(value = Integer.class), parameterDes = "拜占庭比例,大于等于该值为有效确认"),
             @Parameter(parameterName = "maxSignatureCount", requestType = @TypeDescriptor(value = Integer.class), parameterDes = "最大签名数量,限制验证者签名列表的最大数")
     })
@@ -162,13 +164,15 @@ public class ChainCmd extends BaseChainCmd {
             if (asset.getDecimalPlaces() < Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMin()) || asset.getDecimalPlaces() > Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMax())) {
                 return failed(CmErrorCode.ERROR_ASSET_DECIMALPLACES);
             }
-            if (null == asset.getSymbol() || asset.getSymbol().length() > Integer.valueOf(nulsChainConfig.getAssetSymbolMax()) || asset.getSymbol().length() < 1) {
-                return failed(CmErrorCode.ERROR_ASSET_SYMBOL_LENGTH);
+            if (!FormatValidUtils.validTokenNameOrSymbol(asset.getSymbol())) {
+                return failed(CmErrorCode.ERROR_ASSET_SYMBOL);
+            }
+            if (!FormatValidUtils.validTokenNameOrSymbol(asset.getAssetName())) {
+                return failed(CmErrorCode.ERROR_ASSET_NAME);
             }
             asset.setChainId(blockChain.getChainId());
-            asset.setDepositNuls(new BigInteger(nulsChainConfig.getAssetDepositNuls()));
-            int rateToPercent = new BigDecimal(nulsChainConfig.getAssetDepositNulsDestroyRate()).multiply(BigDecimal.valueOf(100)).intValue();
-            asset.setDestroyNuls(new BigInteger(nulsChainConfig.getAssetDepositNuls()).multiply(BigInteger.valueOf(rateToPercent)).divide(BigInteger.valueOf(100)));
+            asset.setDepositNuls(nulsChainConfig.getAssetDepositNuls());
+            asset.setDestroyNuls(nulsChainConfig.getAssetDestroyNuls());
             asset.setAvailable(true);
             BlockChain dbChain = chainService.getChain(blockChain.getChainId());
             if (null != dbChain && dbChain.isDelete()) {
@@ -185,7 +189,12 @@ public class ChainCmd extends BaseChainCmd {
             }
             /* 组装交易发送 (Send transaction) */
             Transaction tx = new RegisterChainAndAssetTransaction();
-            tx.setTxData(blockChain.parseToTransaction(asset));
+            if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) >= CmConstants.LATEST_SUPPORT_VERSION) {
+                tx.setTxData(TxUtil.parseChainToTxV4(blockChain, asset).serialize());
+            } else {
+                tx.setTxData(TxUtil.parseChainToTx(blockChain, asset).serialize());
+            }
+
             tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
             AccountBalance accountBalance = new AccountBalance(null, null);
             ErrorCode ldErrorCode = rpcService.getCoinData(String.valueOf(params.get("address")), accountBalance);
@@ -239,7 +248,7 @@ public class ChainCmd extends BaseChainCmd {
             @Parameter(parameterName = "decimalPlaces", requestType = @TypeDescriptor(value = short.class), parameterDes = "资产小数点位数"),
             @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "创建交易的账户地址"),
             @Parameter(parameterName = "password", requestType = @TypeDescriptor(value = String.class), parameterDes = "账户密码"),
-            @Parameter(parameterName = "verifierList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "验证者名单列表"),
+            @Parameter(parameterName = "verifierList", requestType = @TypeDescriptor(value = String.class), parameterDes = "验证者地址名单列表,逗号分割"),
             @Parameter(parameterName = "signatureBFTRatio", requestType = @TypeDescriptor(value = Integer.class), parameterDes = "拜占庭比例,大于等于该值为有效确认"),
             @Parameter(parameterName = "maxSignatureCount", requestType = @TypeDescriptor(value = Integer.class), parameterDes = "最大签名数量,限制验证者签名列表的最大数")
     })
@@ -282,13 +291,15 @@ public class ChainCmd extends BaseChainCmd {
             if (asset.getDecimalPlaces() < Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMin()) || asset.getDecimalPlaces() > Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMax())) {
                 return failed(CmErrorCode.ERROR_ASSET_DECIMALPLACES);
             }
-            if (null == asset.getSymbol() || asset.getSymbol().length() > Integer.valueOf(nulsChainConfig.getAssetSymbolMax()) || asset.getSymbol().length() < 1) {
-                return failed(CmErrorCode.ERROR_ASSET_SYMBOL_LENGTH);
+            if (!FormatValidUtils.validTokenNameOrSymbol(asset.getSymbol())) {
+                return failed(CmErrorCode.ERROR_ASSET_SYMBOL);
+            }
+            if (!FormatValidUtils.validTokenNameOrSymbol(asset.getAssetName())) {
+                return failed(CmErrorCode.ERROR_ASSET_NAME);
             }
             asset.setChainId(blockChain.getChainId());
-            asset.setDepositNuls(new BigInteger(nulsChainConfig.getAssetDepositNuls()));
-            int rateToPercent = new BigDecimal(nulsChainConfig.getAssetDepositNulsDestroyRate()).multiply(BigDecimal.valueOf(100)).intValue();
-            asset.setDestroyNuls(new BigInteger(nulsChainConfig.getAssetDepositNuls()).multiply(BigInteger.valueOf(rateToPercent)).divide(BigInteger.valueOf(100)));
+            asset.setDepositNuls(nulsChainConfig.getAssetDepositNuls());
+            asset.setDestroyNuls(nulsChainConfig.getAssetDestroyNuls());
             asset.setAvailable(true);
             BlockChain dbChain = chainService.getChain(blockChain.getChainId());
             if (null == dbChain) {
@@ -306,7 +317,11 @@ public class ChainCmd extends BaseChainCmd {
             }
             /* 组装交易发送 (Send transaction) */
             Transaction tx = new RegisterChainAndAssetTransaction();
-            tx.setTxData(blockChain.parseToTransaction(asset));
+            if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) >= CmConstants.LATEST_SUPPORT_VERSION) {
+                tx.setTxData(TxUtil.parseChainToTxV4(blockChain, asset).serialize());
+            } else {
+                tx.setTxData(TxUtil.parseChainToTx(blockChain, asset).serialize());
+            }
             tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
             AccountBalance accountBalance = new AccountBalance(null, null);
             ErrorCode ldErrorCode = rpcService.getCoinData(String.valueOf(params.get("address")), accountBalance);

@@ -60,6 +60,8 @@ public interface CommandConstant {
     String CONTRACT_RESULT = "sc_contract_result";
     //查询智能合约构造函数
     String CONSTRUCTOR = "sc_constructor";
+    //代币跨链系统合约地址
+    String GET_CROSS_TOKEN_SYSTEM_CONTRACT = "sc_get_cross_token_system_contract";
     //验证创建合约
     String VALIDATE_CREATE = "sc_validate_create";
     //验证调用合约

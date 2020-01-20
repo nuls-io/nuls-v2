@@ -29,7 +29,9 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
+import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.contract.config.ContractConfig;
+import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.enums.BlockType;
 import io.nuls.contract.enums.CmdRegisterMode;
 import io.nuls.contract.helper.ContractHelper;
@@ -383,6 +385,7 @@ public class ContractCmd extends BaseCmd {
             return failed(e.getMessage());
         }
     }
+
     @CmdAnnotation(cmd = INITIAL_ACCOUNT_TOKEN, version = 1.0, description = "初始化账户token信息，节点导入账户时调用/initial account token")
     @Parameters(value = {
         @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
@@ -577,7 +580,27 @@ public class ContractCmd extends BaseCmd {
         }
     }
 
-    @CmdAnnotation(cmd = GET_TX_TYPE_LIST_FROM_CONTRACT_GENERATED, version = 1.0, description = "智能合约模块会新生成的交易类型列表(合约返回GAS交易除外)")
+    @CmdAnnotation(cmd = GET_CROSS_TOKEN_SYSTEM_CONTRACT, version = 1.0, description = "get cross token system contract")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "代币跨链系统合约地址")
+    }))
+    public Response getCrossTokenSystemContract(Map<String, Object> params) {
+        try {
+            Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
+            Map result = new HashMap();
+            result.put(RPC_RESULT_KEY, contractConfig.getCrossTokenSystemContract());
+            return success();
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
+    @CmdAnnotation(cmd = GET_TX_TYPE_LIST_FROM_CONTRACT_GENERATED, version = 1.0, description = "通知当前批次结束并返回结果/batch end")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id")
     })
@@ -590,18 +613,23 @@ public class ContractCmd extends BaseCmd {
             ChainManager.chainHandle(chainId);
             Log.info("The generated list of transaction types is sent to the transaction module");
             Map<String, Object> resultMap = MapUtil.createHashMap(2);
-            resultMap.put("list", List.of(
+            List<Integer> list = List.of(
                     TxType.CONTRACT_TRANSFER,
                     TxType.CONTRACT_CREATE_AGENT,
                     TxType.CONTRACT_DEPOSIT,
                     TxType.CONTRACT_CANCEL_DEPOSIT,
-                    TxType.CONTRACT_STOP_AGENT));
+                    TxType.CONTRACT_STOP_AGENT);
+            if(ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_V250) {
+                list.add(TxType.CONTRACT_TOKEN_CROSS_TRANSFER);
+            }
+            resultMap.put("list", list);
             return success(resultMap);
         } catch (Exception e) {
             Log.error(e);
             return failed(e.getMessage());
         }
     }
+
     private String extractMsg(Result result) {
         if(result == null) {
             return EMPTY;

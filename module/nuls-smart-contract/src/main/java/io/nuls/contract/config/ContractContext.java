@@ -56,4 +56,5 @@ public class ContractContext {
     public static byte[] CROSS_CHAIN_SYSTEM_CONTRACT;
 
     public static short UPDATE_VERSION_V240 = 4;
+    public static short UPDATE_VERSION_V250 = 5;
 }

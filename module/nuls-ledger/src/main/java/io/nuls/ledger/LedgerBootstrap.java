@@ -26,6 +26,9 @@
 package io.nuls.ledger;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.protocol.ProtocolGroupManager;
+import io.nuls.base.protocol.ProtocolLoader;
+import io.nuls.base.protocol.RegisterHelper;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.ioc.SpringLiteContext;
@@ -111,6 +114,26 @@ public class LedgerBootstrap extends RpcModule {
     @Override
     public void onDependenciesReady(Module module) {
         try {
+            ProtocolLoader.load(ledgerConfig.getChainId());
+            /*注册交易处理器*/
+            if (ModuleE.TX.abbr.equals(module.getName())) {
+                int chainId = ledgerConfig.getChainId();
+                boolean regSuccess = RegisterHelper.registerTx(chainId, ProtocolGroupManager.getCurrentProtocol(chainId));
+                if (!regSuccess) {
+                    LoggerUtil.COMMON_LOG.error("RegisterHelper.registerTx fail..");
+                    System.exit(-1);
+                }
+                LoggerUtil.COMMON_LOG.info("regTxRpc complete.....");
+            }
+            if (ModuleE.PU.abbr.equals(module.getName())) {
+                //注册相关交易
+                boolean regSuccess = RegisterHelper.registerProtocol(ledgerConfig.getChainId());
+                if (!regSuccess) {
+                    LoggerUtil.COMMON_LOG.error("RegisterHelper.registerProtocol fail..");
+                    System.exit(-1);
+                }
+                LoggerUtil.COMMON_LOG.info("register protocol ...");
+            }
             /*处理区块信息*/
             if (ModuleE.BL.abbr.equals(module.getName())) {
                 LedgerChainManager ledgerChainManager = SpringLiteContext.getBean(LedgerChainManager.class);

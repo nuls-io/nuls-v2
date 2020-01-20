@@ -56,13 +56,13 @@ public interface CmErrorCode extends CommonCodeConstanst {
     /**
      * 错误编码
      */
-    ErrorCode ERROR_ASSET_SYMBOL_NULL = ErrorCode.init("cm_2000");
+    ErrorCode ERROR_ASSET_SYMBOL = ErrorCode.init("cm_2000");
     ErrorCode ERROR_ASSET_SYMBOL_LENGTH = ErrorCode.init("cm_2001");
     ErrorCode ERROR_ASSET_SYMBOL_EXIST = ErrorCode.init("cm_2002");
     ErrorCode ERROR_JSON_TO_ASSET = ErrorCode.init("cm_2003");
     ErrorCode ERROR_ASSET_RECOVERY_RATE = ErrorCode.init("cm_2004");
     ErrorCode ERROR_ASSET_ID_EXIST = ErrorCode.init("cm_2005");
-    ErrorCode ERROR_ASSET_NAME_NULL = ErrorCode.init("cm_2006");
+    ErrorCode ERROR_ASSET_NAME = ErrorCode.init("cm_2006");
     ErrorCode ERROR_ASSET_NAME_MAX = ErrorCode.init("cm_2007");
     ErrorCode ERROR_ASSET_DEPOSITNULS = ErrorCode.init("cm_2008");
     ErrorCode ERROR_ASSET_INITNUMBER = ErrorCode.init("cm_2009");

@@ -65,6 +65,8 @@ public class ApiContext {
 
     public static String VERSION = "1.0";
 
+    public static int protocolVersion = 1;
+
     public static int maxAliveConnect;
 
     public static int maxWaitTime;

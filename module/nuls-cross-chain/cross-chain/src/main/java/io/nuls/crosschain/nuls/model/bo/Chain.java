@@ -27,12 +27,6 @@ import java.util.concurrent.LinkedBlockingQueue;
  **/
 public class Chain {
     /**
-     * 本节点已签名的跨链交易及签名
-     * Cross-Chain Transaction and Signature of Signed Node
-     * */
-    private Map<NulsHash, P2PHKSignature> signedCtxMap;
-
-    /**
      * 链基础配置信息
      * Chain Foundation Configuration Information
      */
@@ -134,6 +128,22 @@ public class Chain {
      * */
     private NulsLogger logger;
 
+    /**
+     * 在本节点还未提交的跨链
+     * key:ctxHash
+     * value:投票消息列表
+     * */
+    private Map<NulsHash,List<UntreatedMessage>> futureMessageMap;
+
+    /**
+     * 其他链缓存的本链最新共识节点列表
+     * */
+    private List<String> broadcastVerifierList;
+
+    /**
+     * 本链最新投票节点列表（当前最新轮次与当前轮次交集）
+     * */
+    private List<String> verifierList;
 
     /**
      * 本链是否为主网
@@ -141,7 +151,6 @@ public class Chain {
     private boolean mainChain;
 
     public Chain(){
-        signedCtxMap = new HashMap<>();
         hashNodeIdMap = new ConcurrentHashMap<>();
         otherHashNodeIdMap = new ConcurrentHashMap<>();
         ctxStageMap = new ConcurrentHashMap<>();
@@ -155,15 +164,10 @@ public class Chain {
         signMessageByzantineQueue = new LinkedBlockingQueue<>();
         otherCtxMessageQueue = new LinkedBlockingQueue<>();
         getCtxStateQueue = new LinkedBlockingQueue<>();
+        futureMessageMap = new ConcurrentHashMap<>();
+        broadcastVerifierList = new ArrayList<>();
+        verifierList = new ArrayList<>();
         mainChain = false;
-    }
-
-    public Map<NulsHash, P2PHKSignature> getSignedCtxMap() {
-        return signedCtxMap;
-    }
-
-    public void setSignedCtxMap(Map<NulsHash, P2PHKSignature> signedCtxMap) {
-        this.signedCtxMap = signedCtxMap;
     }
 
     public int getChainId(){
@@ -298,6 +302,30 @@ public class Chain {
         this.getCtxStateQueue = getCtxStateQueue;
     }
 
+    public Map<NulsHash, List<UntreatedMessage>> getFutureMessageMap() {
+        return futureMessageMap;
+    }
+
+    public void setFutureMessageMap(Map<NulsHash, List<UntreatedMessage>> futureMessageMap) {
+        this.futureMessageMap = futureMessageMap;
+    }
+
+    public List<String> getBroadcastVerifierList() {
+        return broadcastVerifierList;
+    }
+
+    public void setBroadcastVerifierList(List<String> broadcastVerifierList) {
+        this.broadcastVerifierList = broadcastVerifierList;
+    }
+
+    public List<String> getVerifierList() {
+        return verifierList;
+    }
+
+    public void setVerifierList(List<String> verifierList) {
+        this.verifierList = verifierList;
+    }
+
     public ExecutorService getThreadPool() {
         return threadPool;
     }
@@ -318,21 +346,4 @@ public class Chain {
         }
         return false;
     }
-
-    /*public boolean statisticsCtxState(NulsHash hash,int threshold){
-        int count = 0;
-        if(ctxStateMap.get(hash).size() < threshold){
-            return false;
-        }
-        for (boolean ctxState:ctxStateMap.get(hash)) {
-            if(ctxState){
-                count++;
-                if(count >= threshold){
-                    return true;
-                }
-            }
-
-        }
-        return false;
-    }*/
 }

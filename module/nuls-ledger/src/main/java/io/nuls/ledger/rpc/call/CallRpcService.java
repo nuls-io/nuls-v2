@@ -25,6 +25,9 @@
 package io.nuls.ledger.rpc.call;
 
 
+import io.nuls.base.data.Transaction;
+import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.exception.NulsException;
 
 /**
  * @author lan
@@ -33,4 +36,16 @@ package io.nuls.ledger.rpc.call;
  **/
 public interface CallRpcService {
     long getBlockLatestHeight(int chainId);
+    /**
+     * 交易签名
+     * transaction signature
+     *
+     * @param chainId
+     * @param address
+     * @param password
+     * @param tx
+     */
+    ErrorCode transactionSignature(int chainId, String address, String password, Transaction tx) throws NulsException;
+    ErrorCode newTx(Transaction tx);
+
 }

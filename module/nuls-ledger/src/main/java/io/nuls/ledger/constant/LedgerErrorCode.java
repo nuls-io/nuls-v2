@@ -41,5 +41,13 @@ public interface LedgerErrorCode extends CommonCodeConstanst {
     ErrorCode BALANCE_NOT_ENOUGH = ErrorCode.init(ModuleE.LG.getPrefix() + "_1004");
     ErrorCode TX_AMOUNT_INVALIDATE = ErrorCode.init(ModuleE.LG.getPrefix() + "_1005");
     ErrorCode VALIDATE_FAIL = ErrorCode.init(ModuleE.LG.getPrefix() + "_1010");
-
+    /**
+     * 新增资产注册交易错误码
+     */
+    ErrorCode ERROR_ASSET_DECIMALPLACES = ErrorCode.init(ModuleE.LG.getPrefix() + "_1011");
+    ErrorCode ERROR_ASSET_SYMBOL = ErrorCode.init(ModuleE.LG.getPrefix() + "_1012");
+    ErrorCode ERROR_ASSET_NAME = ErrorCode.init(ModuleE.LG.getPrefix() + "_1013");
+    ErrorCode ERROR_ADDRESS_ERROR = ErrorCode.init(ModuleE.LG.getPrefix() + "_1014");
+    ErrorCode ERROR_SIGNDIGEST = ErrorCode.init(ModuleE.LG.getPrefix() + "_1015");
+    ErrorCode ERROR_TX_REG_RPC = ErrorCode.init(ModuleE.LG.getPrefix() + "_1016");
 }

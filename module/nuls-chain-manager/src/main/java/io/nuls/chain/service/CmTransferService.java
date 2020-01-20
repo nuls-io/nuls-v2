@@ -36,4 +36,6 @@ import java.util.List;
  **/
 public interface CmTransferService {
     boolean rollback(int chainId, List<Transaction> txs, BlockHeader blockHeader) throws Exception;
+
+    boolean rollbackV3(int chainId, List<Transaction> txs, BlockHeader blockHeader) throws Exception;
 }
