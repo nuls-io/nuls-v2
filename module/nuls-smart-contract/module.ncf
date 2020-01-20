@@ -10,3 +10,5 @@ Managed=1
 
 [smart-contract]
 moduleDynamicDependent=protocol-update
+
+
