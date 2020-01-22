@@ -6,12 +6,10 @@ import io.nuls.api.db.StatisticalService;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.BlockHeaderInfo;
 import io.nuls.api.model.po.ChainStatisticalInfo;
-import io.nuls.api.model.po.mini.MiniBlockHeaderInfo;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.log.Log;
 
 import java.math.BigInteger;
-import java.util.List;
 
 public class StatisticalRewardTask implements Runnable {
 

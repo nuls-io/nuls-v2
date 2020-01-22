@@ -5,7 +5,7 @@ logPath=../../../../Logs
 logLevel=INFO
 dataPath=../../../../data
 #默认本链ID
-chainId=2
+chainId=1
 #地址前缀
 addressPrefix=NULS
 #默认本链主资产ID
@@ -17,7 +17,7 @@ chainName=nuls
 #本链默认资产符号
 symbol=NULS
 #主网链id
-mainChainId=2
+mainChainId=1
 #主网主资产id
 mainAssetId=1
 #主网主资产符号

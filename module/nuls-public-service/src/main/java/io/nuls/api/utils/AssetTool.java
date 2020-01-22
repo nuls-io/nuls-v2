@@ -10,6 +10,7 @@ import io.nuls.core.core.ioc.SpringLiteContext;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,7 +29,7 @@ public class AssetTool {
         map.put("community", AssetTool.toDouble(coinContextInfo.getCommunity()));
         map.put("unmapped", AssetTool.toDouble(coinContextInfo.getUnmapped()));
         map.put("dailyReward", AssetTool.toDouble(coinContextInfo.getDailyReward()));
-        map.put("destroy",AssetTool.toDouble(coinContextInfo.getDestroy()));
+        map.put("destroy", AssetTool.toDouble(coinContextInfo.getDestroy()));
         int consensusCount = apiCache.getCurrentRound().getMemberCount() - apiCache.getChainInfo().getSeeds().size();
         if (consensusCount < 0) {
             consensusCount = 0;
@@ -47,5 +48,11 @@ public class AssetTool {
 
     public static double toDouble(BigInteger value) {
         return new BigDecimal(value).movePointLeft(8).setScale(8, RoundingMode.HALF_DOWN).doubleValue();
+    }
+
+    public static String toCoinString(BigInteger value) {
+        BigDecimal decimal = new BigDecimal(value).movePointLeft(8).setScale(8, RoundingMode.HALF_DOWN);
+        DecimalFormat format = new DecimalFormat("0.########");
+        return format.format(decimal);
     }
 }
