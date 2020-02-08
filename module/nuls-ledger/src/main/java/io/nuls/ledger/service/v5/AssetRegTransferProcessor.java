@@ -1,4 +1,4 @@
-package io.nuls.ledger.service.v1;
+package io.nuls.ledger.service.v5;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
@@ -21,12 +21,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Component("AssetRegTransferProcessorV1")
+@Component("AssetRegTransferProcessorV5")
 public class AssetRegTransferProcessor implements TransactionProcessor {
     @Autowired
     private AssetRegMngService assetRegMngService;
-
-
     @Override
     public int getType() {
         return TxType.LEDGER_ASSET_REG_TRANSFER;

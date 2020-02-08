@@ -1,6 +1,6 @@
 [
   {
-    "version": "1",
+    "version": "5",
     "extend": "",
     "validTxs": [
       {
@@ -9,7 +9,7 @@
         "unlockTx": false,
         "verifySignature": true,
         "verifyFee": true,
-        "handler": "AssetRegTransferProcessorV1"
+        "handler": "AssetRegTransferProcessorV5"
       }
     ],
     "validMsgs": [],
