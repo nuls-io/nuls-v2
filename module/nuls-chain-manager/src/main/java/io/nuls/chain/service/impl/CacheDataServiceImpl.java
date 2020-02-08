@@ -201,7 +201,7 @@ public class CacheDataServiceImpl implements CacheDataService {
                 case TxType.ADD_ASSET_TO_CHAIN:
                     Asset addAsset = null;
                     if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) >= CmConstants.LATEST_SUPPORT_VERSION) {
-                        addAsset = TxUtil.buildAssetWithTxAssetV4(tx);
+                        addAsset = TxUtil.buildAssetWithTxAssetV5(tx);
                     } else {
                         addAsset = TxUtil.buildAssetWithTxAsset(tx);
                     }
@@ -211,7 +211,7 @@ public class CacheDataServiceImpl implements CacheDataService {
                 case TxType.REMOVE_ASSET_FROM_CHAIN:
                     Asset delAsset = null;
                     if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) >= CmConstants.LATEST_SUPPORT_VERSION) {
-                        delAsset = TxUtil.buildAssetWithTxAssetV4(tx);
+                        delAsset = TxUtil.buildAssetWithTxAssetV5(tx);
                     } else {
                         delAsset = TxUtil.buildAssetWithTxAsset(tx);
                     }

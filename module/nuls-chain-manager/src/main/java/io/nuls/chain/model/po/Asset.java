@@ -52,8 +52,8 @@ public class Asset extends BaseNulsData {
 
 
 
-    public Asset(io.nuls.chain.model.tx.txdatav4.TxChain tx, BigInteger depositNuls, BigInteger destroyNuls, byte[] address) {
-        io.nuls.chain.model.tx.txdatav4.TxAsset defaultAsset = tx.getDefaultAsset();
+    public Asset(io.nuls.chain.model.tx.txdatav5.TxChain tx, BigInteger depositNuls, BigInteger destroyNuls, byte[] address) {
+        io.nuls.chain.model.tx.txdatav5.TxAsset defaultAsset = tx.getDefaultAsset();
         this.address = address;
         this.assetId = defaultAsset.getAssetId();
         this.chainId = defaultAsset.getChainId();

@@ -1,11 +1,11 @@
-package io.nuls.chain.service.tx.v4;
+package io.nuls.chain.service.tx.v5;
 
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.protocol.TransactionProcessor;
-import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.dto.ChainEventResult;
 import io.nuls.chain.model.po.Asset;
+import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.rpc.call.RpcService;
 import io.nuls.chain.service.*;
 import io.nuls.chain.util.LoggerUtil;
@@ -19,8 +19,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Component("AddAssetTxProcessorV4")
-public class AddAssetTransferProcessor implements TransactionProcessor {
+@Component("DestroyChainTxProcessorV5")
+public class DestroyChainTransferProcessor implements TransactionProcessor {
     @Autowired
     private ValidateService validateService;
     @Autowired
@@ -36,7 +36,7 @@ public class AddAssetTransferProcessor implements TransactionProcessor {
 
     @Override
     public int getType() {
-        return TxType.ADD_ASSET_TO_CHAIN;
+        return TxType.DESTROY_CHAIN_AND_ASSET;
     }
 
     @Override
@@ -46,22 +46,26 @@ public class AddAssetTransferProcessor implements TransactionProcessor {
         rtData.put("errorCode", "");
         rtData.put("txList", errorList);
         try {
+            //1获取交易类型
+            //2进入不同验证器里处理
+            //3封装失败交易返回
+            Map<String, Integer> chainMap = new HashMap<>();
             Map<String, Integer> assetMap = new HashMap<>();
+            BlockChain blockChain = null;
             Asset asset = null;
             ChainEventResult chainEventResult = ChainEventResult.getResultSuccess();
             for (Transaction tx : txs) {
                 String txHash = tx.getHash().toHex();
-                asset = TxUtil.buildAssetWithTxAssetV4(tx);
-                String assetKey = CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId());
-                chainEventResult = validateService.batchAssetRegValidatorV3(asset, assetMap);
+                blockChain = TxUtil.buildChainWithTxDataV4(tx, true);
+                chainEventResult = validateService.chainDisableValidator(blockChain);
                 if (chainEventResult.isSuccess()) {
-                    assetMap.put(assetKey, 1);
-                    LoggerUtil.logger().debug("txHash = {},assetKey={} reg batchValidate success!", txHash, assetKey);
+                    LoggerUtil.logger().debug("txHash = {},chainId={} destroy batchValidate success!", txHash, blockChain.getChainId());
                 } else {
                     rtData.put("errorCode", chainEventResult.getErrorCode().getCode());
-                    LoggerUtil.logger().error("txHash = {},assetKey={} reg batchValidate fail!", txHash, assetKey);
+                    LoggerUtil.logger().error("txHash = {},chainId={} destroy batchValidate fail!", txHash, blockChain.getChainId());
                     errorList.add(tx);
                 }
+
             }
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
@@ -73,18 +77,22 @@ public class AddAssetTransferProcessor implements TransactionProcessor {
     @Override
     public boolean commit(int chainId, List<Transaction> txs, BlockHeader blockHeader) {
         long commitHeight = blockHeader.getHeight();
-        List<Asset> assets = new ArrayList<>();
-        Asset asset = null;
+        BlockChain blockChain = null;
+        List<Map<String, Object>> chainAssetIds = new ArrayList<>();
         try {
             for (Transaction tx : txs) {
-                asset = TxUtil.buildAssetWithTxAssetV4(tx);
-                assetService.registerAsset(asset);
-                assets.add(asset);
+                blockChain = TxUtil.buildChainWithTxDataV4(tx, true);
+                chainService.destroyBlockChain(blockChain);
+                Map<String, Object> chainAssetId = new HashMap<>(2);
+                chainAssetId.put("chainId", blockChain.getChainId());
+                chainAssetId.put("assetId", 0);
+                chainAssetIds.add(chainAssetId);
             }
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
             //通知远程调用回滚
             try {
+                chainService.rpcBlockChainRollback(txs);
                 //进行回滚
                 cacheDataService.rollBlockTxs(chainId, commitHeight);
             } catch (Exception e1) {
@@ -93,7 +101,7 @@ public class AddAssetTransferProcessor implements TransactionProcessor {
             }
             return false;
         }
-        rpcService.registerCrossAsset(assets);
+        rpcService.cancelCrossChain(chainAssetIds);
         return true;
     }
 
