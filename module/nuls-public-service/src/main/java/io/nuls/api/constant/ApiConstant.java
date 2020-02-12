@@ -117,4 +117,8 @@ public interface ApiConstant {
     //设置别名金额
     BigInteger ALIAS_AMOUNT = BigInteger.valueOf(100000000L);
 
+    long CROSS_CHAIN_GASLIMIT = 300000;
+    long CONTRACT_MINIMUM_PRICE = 25;
+    String CROSS_CHAIN_SYSTEM_CONTRACT_TRANSFER_IN_METHOD_NAME = "crossChainTokenTransfer";
+
 }

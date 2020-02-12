@@ -3,10 +3,11 @@ package io.nuls.cmd.client;
 import io.nuls.base.api.provider.Provider;
 import io.nuls.base.api.provider.ServiceManager;
 import io.nuls.base.basic.AddressTool;
-import io.nuls.core.rpc.info.HostInfo;
-import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
+import io.nuls.cmd.client.utils.AssetsUtil;
 import io.nuls.core.core.config.ConfigurationLoader;
 import io.nuls.core.log.Log;
+import io.nuls.core.rpc.info.HostInfo;
+import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.util.AddressPrefixDatas;
 
 /**
@@ -15,7 +16,6 @@ import io.nuls.core.rpc.util.AddressPrefixDatas;
  * @Description: 功能描述
  */
 public class CmdClientBootstrap {
-
     public static void main(String[] args) {
         NulsRpcModuleBootstrap.printLogo("/cli-logo");
         if (args == null || args.length == 0) {
@@ -32,9 +32,10 @@ public class CmdClientBootstrap {
             NulsRpcModuleBootstrap.run("io.nuls.cmd.client",args);
             //增加地址工具类初始化
             AddressTool.init(new AddressPrefixDatas());
+            //增加跨链资产信息获取
+            AssetsUtil.initRegisteredChainInfo();
         }catch (Exception e){
             Log.error("module start fail {}",e.getMessage());
         }
     }
-
 }

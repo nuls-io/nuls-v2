@@ -1,5 +1,7 @@
 package io.nuls.core.constant;
 
+import org.junit.rules.Verifier;
+
 /**
  * 交易类型
  *
@@ -126,5 +128,15 @@ public class TxType {
      * Verifier init
      * */
     public static final int VERIFIER_INIT = 25;
+
+    /**
+     * 合约token跨链转账
+     * contract token cross transfer tx
+     */
+    public static final int CONTRACT_TOKEN_CROSS_TRANSFER = 26;
+    /**
+     * 账本链内资产注册登记
+     */
+    public static final int LEDGER_ASSET_REG_TRANSFER = 27;
 
 }

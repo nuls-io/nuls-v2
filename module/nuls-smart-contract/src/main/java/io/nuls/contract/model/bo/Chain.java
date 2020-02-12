@@ -9,6 +9,7 @@ import io.nuls.contract.vm.program.ProgramExecutor;
 import org.ethereum.config.CommonConfig;
 import org.ethereum.config.DefaultConfig;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -66,6 +67,17 @@ public class Chain {
      * 向合约模块注册接口提供给合约来调用
      */
     private Map<String, CmdRegister> cmdRegisterMap = new ConcurrentHashMap<>();
+
+    /**
+     * 合约资产ID缓存图
+     */
+    private Map<String, ContractTokenAssetsInfo> tokenAssetsInfoMap = new HashMap<>();
+    /**
+     * 合约资产ID - 合约地址缓存图
+     * key - chainId + "-" + assetId
+     * value - contractAddress
+     */
+    private Map<String, String> tokenAssetsContractAddressInfoMap = new HashMap<>();
 
     public static void putCurrentThreadBlockType(Integer blockType) {
         currentThreadBlockType.set(blockType);
@@ -168,5 +180,21 @@ public class Chain {
 
     public void setCmdRegisterMap(Map<String, CmdRegister> cmdRegisterMap) {
         this.cmdRegisterMap = cmdRegisterMap;
+    }
+
+    public Map<String, ContractTokenAssetsInfo> getTokenAssetsInfoMap() {
+        return tokenAssetsInfoMap;
+    }
+
+    public void setTokenAssetsInfoMap(Map<String, ContractTokenAssetsInfo> tokenAssetsInfoMap) {
+        this.tokenAssetsInfoMap = tokenAssetsInfoMap;
+    }
+
+    public Map<String, String> getTokenAssetsContractAddressInfoMap() {
+        return tokenAssetsContractAddressInfoMap;
+    }
+
+    public void setTokenAssetsContractAddressInfoMap(Map<String, String> tokenAssetsContractAddressInfoMap) {
+        this.tokenAssetsContractAddressInfoMap = tokenAssetsContractAddressInfoMap;
     }
 }

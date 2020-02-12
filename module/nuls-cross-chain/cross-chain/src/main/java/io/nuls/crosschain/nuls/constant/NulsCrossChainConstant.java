@@ -76,6 +76,8 @@ public interface NulsCrossChainConstant {
 
     String VERSION = "1.0";
 
+    byte[] CROSS_TOKEN_NONCE = new byte[]{0,0,0,0,0,0,0,0};
+
     /**
      * 拜占庭超时时间
      */
@@ -104,4 +106,6 @@ public interface NulsCrossChainConstant {
     String GET_REGISTERED_CHAIN_MESSAGE = "getChains";
 
     String VERIFIER_SPLIT = ",";
+
+    String STRING_SPLIT = "_";
 }

@@ -29,11 +29,13 @@ import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
+import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.po.*;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.CacheDataService;
 import io.nuls.chain.storage.*;
+import io.nuls.chain.util.ChainManagerUtil;
 import io.nuls.chain.util.TxUtil;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
@@ -172,8 +174,15 @@ public class CacheDataServiceImpl implements CacheDataService {
         for (Transaction tx : txList) {
             switch (tx.getType()) {
                 case TxType.REGISTER_CHAIN_AND_ASSET:
-                    BlockChain blockChain = TxUtil.buildChainWithTxData(tx, false);
-                    Asset asset = TxUtil.buildAssetWithTxChain(tx);
+                    BlockChain blockChain = null;
+                    Asset asset = null;
+                    if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) >= CmConstants.LATEST_SUPPORT_VERSION) {
+                        blockChain = TxUtil.buildChainWithTxDataV4(tx, false);
+                        asset = TxUtil.buildAssetWithTxChainV4(tx);
+                    } else {
+                        blockChain = TxUtil.buildChainWithTxData(tx, false);
+                        asset = TxUtil.buildAssetWithTxChain(tx);
+                    }
                     blockChains.put(String.valueOf(blockChain.getChainId()), 1);
                     String assetKey = CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId());
                     String key = CmRuntimeInfo.getChainAssetKey(asset.getChainId(), assetKey);
@@ -181,18 +190,33 @@ public class CacheDataServiceImpl implements CacheDataService {
                     chainAssets.put(key, 1);
                     break;
                 case TxType.DESTROY_CHAIN_AND_ASSET:
-                    BlockChain blockChain2 = TxUtil.buildChainWithTxData(tx, true);
-                    blockChains.put(String.valueOf(blockChain2.getChainId()), 1);
+                    BlockChain delBlockChain = null;
+                    if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) >= CmConstants.LATEST_SUPPORT_VERSION) {
+                        delBlockChain = TxUtil.buildChainWithTxDataV4(tx, true);
+                    } else {
+                        delBlockChain = TxUtil.buildChainWithTxData(tx, true);
+                    }
+                    blockChains.put(String.valueOf(delBlockChain.getChainId()), 1);
                     break;
                 case TxType.ADD_ASSET_TO_CHAIN:
-                    Asset asset2 = TxUtil.buildAssetWithTxAsset(tx);
-                    assets.put(CmRuntimeInfo.getAssetKey(asset2.getChainId(), asset2.getAssetId()), 1);
-                    chainAssets.put(CmRuntimeInfo.getChainAssetKey(asset2.getChainId(), CmRuntimeInfo.getAssetKey(asset2.getChainId(), asset2.getAssetId())), 1);
+                    Asset addAsset = null;
+                    if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) >= CmConstants.LATEST_SUPPORT_VERSION) {
+                        addAsset = TxUtil.buildAssetWithTxAssetV5(tx);
+                    } else {
+                        addAsset = TxUtil.buildAssetWithTxAsset(tx);
+                    }
+                    assets.put(CmRuntimeInfo.getAssetKey(addAsset.getChainId(), addAsset.getAssetId()), 1);
+                    chainAssets.put(CmRuntimeInfo.getChainAssetKey(addAsset.getChainId(), CmRuntimeInfo.getAssetKey(addAsset.getChainId(), addAsset.getAssetId())), 1);
                     break;
                 case TxType.REMOVE_ASSET_FROM_CHAIN:
-                    Asset asset3 = TxUtil.buildAssetWithTxAsset(tx);
-                    assets.put(CmRuntimeInfo.getAssetKey(asset3.getChainId(), asset3.getAssetId()), 1);
-                    chainAssets.put(CmRuntimeInfo.getChainAssetKey(asset3.getChainId(), CmRuntimeInfo.getAssetKey(asset3.getChainId(), asset3.getAssetId())), 1);
+                    Asset delAsset = null;
+                    if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) >= CmConstants.LATEST_SUPPORT_VERSION) {
+                        delAsset = TxUtil.buildAssetWithTxAssetV5(tx);
+                    } else {
+                        delAsset = TxUtil.buildAssetWithTxAsset(tx);
+                    }
+                    assets.put(CmRuntimeInfo.getAssetKey(delAsset.getChainId(), delAsset.getAssetId()), 1);
+                    chainAssets.put(CmRuntimeInfo.getChainAssetKey(delAsset.getChainId(), CmRuntimeInfo.getAssetKey(delAsset.getChainId(), delAsset.getAssetId())), 1);
                     break;
                 default:
                     break;

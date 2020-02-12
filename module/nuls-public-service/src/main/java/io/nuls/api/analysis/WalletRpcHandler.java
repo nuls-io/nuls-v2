@@ -15,6 +15,7 @@ import io.nuls.core.basic.Result;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
+import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
@@ -289,6 +290,17 @@ public class WalletRpcHandler {
         params.put("contractCode", contractCode);
         Map map = (Map) RpcCall.request(ModuleE.SC.abbr, CommandConstant.CONSTRUCTOR, params);
         return Result.getSuccess(null).setData(map);
+    }
+
+    private static String crossTokenSystemContract = null;
+    public static String getCrossTokenSystemContract(int chainId) throws NulsException {
+        if(StringUtils.isBlank(crossTokenSystemContract)) {
+            Map<String, Object> params = new HashMap<>();
+            params.put(Constants.CHAIN_ID, chainId);
+            Map map = (Map) RpcCall.request(ModuleE.SC.abbr, CommandConstant.GET_CROSS_TOKEN_SYSTEM_CONTRACT, params);
+            crossTokenSystemContract = (String) map.get("value");
+        }
+        return crossTokenSystemContract;
     }
 
     public static Result<Map> validateContractCreate(int chainId, Object sender, Object gasLimit, Object price, Object contractCode, Object args) throws NulsException {

@@ -37,8 +37,6 @@ import io.nuls.core.core.ioc.SpringLiteContext;
 import java.util.List;
 
 /**
- * Group event monitor
- * 测试 定时打印连接信息
  *
  * @author lan
  * @create 2018/11/14

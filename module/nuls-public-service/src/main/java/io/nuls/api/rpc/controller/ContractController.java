@@ -15,14 +15,18 @@ import io.nuls.api.utils.LoggerUtil;
 import io.nuls.api.utils.VerifyUtils;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.core.basic.Result;
+import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Controller;
 import io.nuls.core.core.annotation.RpcMethod;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.log.Log;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.parse.JSONUtils;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -645,21 +649,45 @@ public class ContractController {
     public RpcResult validateContractCreate(List<Object> params) throws NulsException {
         VerifyUtils.verifyParams(params, 6);
         int chainId;
+        String contractCode;
+        Object[] args;
         try {
             chainId = (int) params.get(0);
         } catch (Exception e) {
             return RpcResult.paramError("[chainId] is invalid");
         }
+        try {
+            contractCode = params.get(4).toString();
+        } catch (Exception e) {
+            return RpcResult.paramError("[contractCode] is invalid");
+        }
+        try {
+            List argsList = (List) params.get(5);
+            args = argsList != null ? argsList.toArray() : null;
+        } catch (Exception e) {
+            return RpcResult.paramError("[args] is invalid");
+        }
         if (!CacheManager.isChainExist(chainId)) {
             return RpcResult.dataNotFound();
         }
         RpcResult rpcResult = new RpcResult();
+        Result<Map> constructorResult = WalletRpcHandler.getContractConstructor(chainId, contractCode);
+        Map constructorData = constructorResult.getData();
+        if (constructorData == null) {
+            rpcResult.setError(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
+            return rpcResult;
+        }
+        Map constructor = (Map) constructorData.get("constructor");
+        ContractProgramMethod constructorMethod = new ContractProgramMethod(constructor);
+        String[] types = constructorMethod.argsType2Array();
+        convertArgsToObjectArray(args, types);
+
         Result<Map> mapResult = WalletRpcHandler.validateContractCreate(chainId,
                 params.get(1),
                 params.get(2),
                 params.get(3),
-                params.get(4),
-                params.get(5)
+                contractCode,
+                args
         );
         rpcResult.setResult(mapResult.getData());
         return rpcResult;
@@ -675,24 +703,56 @@ public class ContractController {
     public RpcResult validateContractCall(List<Object> params) throws NulsException {
         VerifyUtils.verifyParams(params, 9);
         int chainId;
+        String contractAddress, methodName, methodDesc;
+        Object[] args;
         try {
             chainId = (int) params.get(0);
         } catch (Exception e) {
             return RpcResult.paramError("[chainId] is invalid");
         }
+        try {
+            contractAddress = params.get(5).toString();
+        } catch (Exception e) {
+            return RpcResult.paramError("[contractAddress] is invalid");
+        }
+        try {
+            methodName = params.get(6).toString();
+        } catch (Exception e) {
+            return RpcResult.paramError("[methodName] is invalid");
+        }
+        try {
+            methodDesc = params.get(7).toString();
+        } catch (Exception e) {
+            return RpcResult.paramError("[methodDesc] is invalid");
+        }
+        try {
+            List argsList = (List) params.get(8);
+            args = argsList != null ? argsList.toArray() : null;
+        } catch (Exception e) {
+            return RpcResult.paramError("[args] is invalid");
+        }
         if (!CacheManager.isChainExist(chainId)) {
             return RpcResult.dataNotFound();
         }
+        RpcResult contractMethodArgsTypesResult = this.getContractMethodArgsTypes(List.of(chainId, contractAddress, methodName, methodDesc));
+        if(contractMethodArgsTypesResult.getError() != null) {
+            return contractMethodArgsTypesResult;
+        }
+        List<String> typeList = (List<String>) contractMethodArgsTypesResult.getResult();
+        String[] types = new String[typeList.size()];
+        types = typeList.toArray(types);
+        convertArgsToObjectArray(args, types);
+
         RpcResult rpcResult = new RpcResult();
         Result<Map> mapResult = WalletRpcHandler.validateContractCall(chainId,
                 params.get(1),
                 params.get(2),
                 params.get(3),
                 params.get(4),
-                params.get(5),
-                params.get(6),
-                params.get(7),
-                params.get(8)
+                contractAddress,
+                methodName,
+                methodDesc,
+                args
         );
         rpcResult.setResult(mapResult.getData());
         return rpcResult;
@@ -735,19 +795,43 @@ public class ContractController {
     public RpcResult imputedContractCreateGas(List<Object> params) throws NulsException {
         VerifyUtils.verifyParams(params, 4);
         int chainId;
+        String contractCode;
+        Object[] args;
         try {
             chainId = (int) params.get(0);
         } catch (Exception e) {
             return RpcResult.paramError("[chainId] is invalid");
         }
+        try {
+            contractCode = params.get(2).toString();
+        } catch (Exception e) {
+            return RpcResult.paramError("[contractCode] is invalid");
+        }
+        try {
+            List argsList = (List) params.get(3);
+            args = argsList != null ? argsList.toArray() : null;
+        } catch (Exception e) {
+            return RpcResult.paramError("[args] is invalid");
+        }
         if (!CacheManager.isChainExist(chainId)) {
             return RpcResult.dataNotFound();
         }
         RpcResult rpcResult = new RpcResult();
+        Result<Map> constructorResult = WalletRpcHandler.getContractConstructor(chainId, contractCode);
+        Map constructorData = constructorResult.getData();
+        if (constructorData == null) {
+            rpcResult.setError(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
+            return rpcResult;
+        }
+        Map constructor = (Map) constructorData.get("constructor");
+        ContractProgramMethod constructorMethod = new ContractProgramMethod(constructor);
+        String[] types = constructorMethod.argsType2Array();
+        convertArgsToObjectArray(args, types);
+
         Result<Map> mapResult = WalletRpcHandler.imputedContractCreateGas(chainId,
                 params.get(1),
-                params.get(2),
-                params.get(3)
+                contractCode,
+                args
         );
         rpcResult.setResult(mapResult.getData());
         return rpcResult;
@@ -763,11 +847,46 @@ public class ContractController {
     public RpcResult imputedContractCallGas(List<Object> params) throws NulsException {
         VerifyUtils.verifyParams(params, 7);
         int chainId;
+        String contractAddress, methodName, methodDesc;
+        Object[] args;
         try {
             chainId = (int) params.get(0);
         } catch (Exception e) {
             return RpcResult.paramError("[chainId] is invalid");
         }
+        try {
+            contractAddress = params.get(3).toString();
+        } catch (Exception e) {
+            return RpcResult.paramError("[contractAddress] is invalid");
+        }
+        try {
+            methodName = params.get(4).toString();
+        } catch (Exception e) {
+            return RpcResult.paramError("[methodName] is invalid");
+        }
+        try {
+            methodDesc = params.get(5).toString();
+        } catch (Exception e) {
+            return RpcResult.paramError("[methodDesc] is invalid");
+        }
+        try {
+            List argsList = (List) params.get(6);
+            args = argsList != null ? argsList.toArray() : null;
+        } catch (Exception e) {
+            return RpcResult.paramError("[args] is invalid");
+        }
+        if (!CacheManager.isChainExist(chainId)) {
+            return RpcResult.dataNotFound();
+        }
+        RpcResult contractMethodArgsTypesResult = this.getContractMethodArgsTypes(List.of(chainId, contractAddress, methodName, methodDesc));
+        if(contractMethodArgsTypesResult.getError() != null) {
+            return contractMethodArgsTypesResult;
+        }
+        List<String> typeList = (List<String>) contractMethodArgsTypesResult.getResult();
+        String[] types = new String[typeList.size()];
+        types = typeList.toArray(types);
+        convertArgsToObjectArray(args, types);
+
         if (!CacheManager.isChainExist(chainId)) {
             return RpcResult.dataNotFound();
         }
@@ -775,10 +894,10 @@ public class ContractController {
         Result<Map> mapResult = WalletRpcHandler.imputedContractCallGas(chainId,
                 params.get(1),
                 params.get(2),
-                params.get(3),
-                params.get(4),
-                params.get(5),
-                params.get(6)
+                contractAddress,
+                methodName,
+                methodDesc,
+                args
         );
         rpcResult.setResult(mapResult.getData());
         return rpcResult;
@@ -794,20 +913,55 @@ public class ContractController {
     public RpcResult invokeView(List<Object> params) throws NulsException {
         VerifyUtils.verifyParams(params, 5);
         int chainId;
+        String contractAddress, methodName, methodDesc;
+        Object[] args;
         try {
             chainId = (int) params.get(0);
         } catch (Exception e) {
             return RpcResult.paramError("[chainId] is invalid");
         }
+        try {
+            contractAddress = params.get(1).toString();
+        } catch (Exception e) {
+            return RpcResult.paramError("[contractAddress] is invalid");
+        }
+        try {
+            methodName = params.get(2).toString();
+        } catch (Exception e) {
+            return RpcResult.paramError("[methodName] is invalid");
+        }
+        try {
+            methodDesc = params.get(3).toString();
+        } catch (Exception e) {
+            return RpcResult.paramError("[methodDesc] is invalid");
+        }
+        try {
+            List argsList = (List) params.get(4);
+            args = argsList != null ? argsList.toArray() : null;
+        } catch (Exception e) {
+            return RpcResult.paramError("[args] is invalid");
+        }
+        if (!CacheManager.isChainExist(chainId)) {
+            return RpcResult.dataNotFound();
+        }
+        RpcResult contractMethodArgsTypesResult = this.getContractMethodArgsTypes(List.of(chainId, contractAddress, methodName, methodDesc));
+        if(contractMethodArgsTypesResult.getError() != null) {
+            return contractMethodArgsTypesResult;
+        }
+        List<String> typeList = (List<String>) contractMethodArgsTypesResult.getResult();
+        String[] types = new String[typeList.size()];
+        types = typeList.toArray(types);
+        convertArgsToObjectArray(args, types);
+
         if (!CacheManager.isChainExist(chainId)) {
             return RpcResult.dataNotFound();
         }
         RpcResult rpcResult = new RpcResult();
         Result<Map> mapResult = WalletRpcHandler.invokeView(chainId,
-                params.get(1),
-                params.get(2),
-                params.get(3),
-                params.get(4)
+                contractAddress,
+                methodName,
+                methodDesc,
+                args
         );
         rpcResult.setResult(mapResult.getData());
         return rpcResult;
@@ -877,9 +1031,78 @@ public class ContractController {
         } catch (Exception e) {
             return RpcResult.paramError("[args] is invalid");
         }
+        RpcResult contractMethodArgsTypesResult = this.getContractMethodArgsTypes(List.of(chainId, contractAddress, methodName, methodDesc));
+        if(contractMethodArgsTypesResult.getError() != null) {
+            return contractMethodArgsTypesResult;
+        }
+        List<String> typeList = (List<String>) contractMethodArgsTypesResult.getResult();
+        String[] types = new String[typeList.size()];
+        types = typeList.toArray(types);
+        convertArgsToObjectArray(args, types);
+
         RpcResult rpcResult = new RpcResult();
         Result<Map> mapResult = WalletRpcHandler.contractPreviewCall(chainId, sender, valueBigInteger, gasLimit, price, contractAddress, methodName, methodDesc, args);
         rpcResult.setResult(mapResult.getData());
         return rpcResult;
+    }
+
+    static void convertArgsToObjectArray(Object[] args, String[] types) throws NulsException {
+        if (args == null || args.length == 0) {
+            return;
+        }
+        try {
+            Object temp;
+            for (int i = 0, length = types.length; i < length; i++) {
+                temp = args[i];
+                if(temp == null) {
+                    continue;
+                }
+                if (types[i].contains("[]") && temp instanceof String && StringUtils.isNotBlank((String) temp)) {
+                    args[i] = JSONUtils.json2pojo((String) temp, ArrayList.class);
+                }
+            }
+        } catch (Exception e) {
+            Log.error("parse args error.", e);
+            throw new NulsException(CommonCodeConstanst.PARSE_JSON_FAILD, "parse contract args error.");
+        }
+    }
+
+    static class ContractProgramMethod {
+        private List<ContractProgramMethodArg> args;
+
+        public ContractProgramMethod(Map result) {
+            List<Map> args = (List<Map>) result.get("args");
+            this.args = new LinkedList<>();
+            if(args == null || args.isEmpty()) {
+                return;
+            }
+            for(Map arg : args) {
+                this.args.add(new ContractProgramMethodArg(arg));
+            }
+        }
+
+        public String[] argsType2Array() {
+            if (args != null && args.size() > 0) {
+                int size = args.size();
+                String[] result = new String[size];
+                for (int i = 0; i < size; i++) {
+                    result[i] = args.get(i).getType();
+                }
+                return result;
+            } else {
+                return null;
+            }
+        }
+    }
+    static class ContractProgramMethodArg {
+        private String type;
+
+        public ContractProgramMethodArg(Map result) {
+            this.type = (String) result.get("type");
+        }
+
+        public String getType() {
+            return type;
+        }
     }
 }

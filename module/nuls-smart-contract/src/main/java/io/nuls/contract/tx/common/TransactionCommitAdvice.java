@@ -72,6 +72,12 @@ public class TransactionCommitAdvice implements CommonAdvice {
                     contractOfflineTxHashListStorageService.saveOfflineTxHashList(chainId, header.getHash().getBytes(), new ContractOfflineTxHashPo(contractPackageDto.getOfflineTxHashList()));
                 }
             }
+            // add by pierre at 2019-12-01 处理type10交易的业务提交, 需要协议升级 done
+            if(ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_V250) {
+                List<Transaction> crossTxList = txList.stream().filter(tx -> tx.getType() == TxType.CROSS_CHAIN).collect(Collectors.toList());
+                callContractProcessor.commit(chainId, crossTxList, header);
+            }
+            // end code by pierre
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

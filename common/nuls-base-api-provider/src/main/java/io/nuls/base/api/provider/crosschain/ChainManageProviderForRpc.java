@@ -20,55 +20,63 @@ public class ChainManageProviderForRpc extends BaseRpcService implements ChainMa
 
     @Override
     protected <T, R> Result<T> call(String method, Object req, Function<R, Result> callback) {
-        return callRpc(ModuleE.CM.abbr,method,req,callback);
+        return callRpc(ModuleE.CM.abbr, method, req, callback);
     }
 
     @Override
     public Result<CrossChainRegisterInfo> getCrossChainInfo(GetCrossChainInfoReq req) {
-        return _call("cm_chain",req,res->{
-            if(res == null){
-                return fail(RPC_ERROR_CODE,"chain not found");
+        return _call("cm_chain", req, res -> {
+            if (res == null) {
+                return fail(RPC_ERROR_CODE, "chain not found");
             }
-            CrossChainRegisterInfo crossChainRegisterInfo = MapUtils.mapToBean(res,new CrossChainRegisterInfo());
+            CrossChainRegisterInfo crossChainRegisterInfo = MapUtils.mapToBean(res, new CrossChainRegisterInfo());
             return success(crossChainRegisterInfo);
         });
     }
+
     @Override
-    public  Result<Map> getCrossChainsSimpleInfo(){
-        return callResutlMap("cm_getChainsSimpleInfo",null);
+    public Result<Map> getCrossChainsSimpleInfo() {
+        return callResutlMap("cm_getChainsSimpleInfo", null);
     }
 
     @Override
-    public  Result<CrossAssetRegisterInfo> getCrossAssetInfo(GetCrossAssetInfoReq req){
-        return _call("cm_asset",req,res->{
-            if(res == null){
-                return fail(RPC_ERROR_CODE,"asset not found");
+    public Result<CrossAssetRegisterInfo> getCrossAssetInfo(GetCrossAssetInfoReq req) {
+        return _call("cm_asset", req, res -> {
+            if (res == null) {
+                return fail(RPC_ERROR_CODE, "asset not found");
             }
-            CrossAssetRegisterInfo crossAssetRegisterInfo = MapUtils.mapToBean(res,new CrossAssetRegisterInfo());
+            CrossAssetRegisterInfo crossAssetRegisterInfo = MapUtils.mapToBean(res, new CrossAssetRegisterInfo());
             return success(crossAssetRegisterInfo);
         });
     }
 
     @Override
     public Result<Map> registerChain(RegisterChainReq req) {
-        return callResutlMap("cm_chainReg",req);
+        return callResutlMap("cm_chainReg", req);
     }
+
     @Override
     public Result<Map> updateChain(RegisterChainReq req) {
-        return callResutlMap("cm_chainActive",req);
+        return callResutlMap("cm_chainActive", req);
     }
+
     @Override
     public Result<String> disableCrossAsset(DisableAssetReq req) {
-        return callReturnString("cm_assetDisable",req,"txHash");
+        return callReturnString("cm_assetDisable", req, "txHash");
     }
 
     @Override
     public Result<String> addCrossAsset(AddCrossAssetReq req) {
-        return callReturnString("cm_assetReg",req,"txHash");
+        return callReturnString("cm_assetReg", req, "txHash");
     }
 
-    private <T> Result<T> _call(String method, Object req, Function<Map, Result> callback){
-        return call(method,req,callback);
+    @Override
+    public Result<String> addCrossLocalAsset(AddCrossLocalAssetReq req) {
+        return callReturnString("cm_mainNetAssetReg", req, "txHash");
+    }
+
+    private <T> Result<T> _call(String method, Object req, Function<Map, Result> callback) {
+        return call(method, req, callback);
     }
 
 }

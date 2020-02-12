@@ -13,8 +13,11 @@ import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.constant.CrossChainErrorCode;
 import io.nuls.crosschain.base.message.CirculationMessage;
 import io.nuls.crosschain.base.message.GetRegisteredChainMessage;
+import io.nuls.crosschain.nuls.constant.ParamConstant;
 import io.nuls.crosschain.nuls.servive.MainNetService;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -49,7 +52,7 @@ public class MainNetCmd extends BaseCmd {
     /**
      * 注册链新资产
      * */
-    @CmdAnnotation(cmd = "registerAsset", version = 1.0, description = "链注册跨链/register Cross Chain")
+    @CmdAnnotation(cmd = "registerAsset", version = 1.0, description = "链注册新资产/register Cross Chain")
     @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
     @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterDes = "资产ID")
     @Parameter(parameterName = "symbol", parameterType = "String", parameterDes = "资产符号")
@@ -68,7 +71,7 @@ public class MainNetCmd extends BaseCmd {
     }
 
     /**
-     * 友链向主网连管理模块注销跨链信息，连管理模块通知跨链模块
+     * 友链注销跨链资产
      * */
     @CmdAnnotation(cmd = "cancelCrossChain", version = 1.0, description = "指定链资产退出跨链/Specified Chain Assets Exit Cross Chain")
     @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
@@ -85,9 +88,9 @@ public class MainNetCmd extends BaseCmd {
     }
 
     /**
-     * 友链向主网连管理模块注销跨链信息，连管理模块通知跨链模块
+     * 友链跨链资产变更
      */
-    @CmdAnnotation(cmd = "crossChainRegisterChange", version = 1.0, description = "跨链注册信息变更/Registered Cross Chain change")
+    @CmdAnnotation(cmd = "crossChainRegisterChange", version = 1.0, description = "友链跨链资产变更/Registered Cross Chain change")
     @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
     @ResponseData(description = "无特定返回值，没有错误即成功")
     public Response crossChainRegisterChange(Map<String, Object> params) {
@@ -102,7 +105,7 @@ public class MainNetCmd extends BaseCmd {
      * 友链向主网查询所有跨链注册信息
      * Friend Chain inquires all cross-chain registration information from the main network
      * */
-    @CmdAnnotation(cmd = "getChains", version = 1.0, description = "cancel Cross Chain")
+    @CmdAnnotation(cmd = "getChains", version = 1.0, description = "Friend Chain inquires all cross-chain registration information from the main network")
     @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
     @Parameter(parameterName = "nodeId", parameterType = "String", parameterDes = "节点IP")
     @Parameter(parameterName = "messageBody", parameterType = "String", parameterDes = "消息体")
@@ -155,4 +158,35 @@ public class MainNetCmd extends BaseCmd {
         return success(result.getData());
     }
 
+    /**
+     * 智能合约资产跨链
+     * Smart contract assets cross chain
+     * */
+    @CmdAnnotation(cmd = "cc_tokenOutCrossChain", version = 1.0, description = "智能合约资产跨链/Smart contract assets cross chain")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
+    @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterDes = "资产ID")
+    @Parameter(parameterName = "from", parameterDes = "传出地址")
+    @Parameter(parameterName = "to", parameterDes = "地址转入")
+    @Parameter(parameterName = "value", parameterDes = "金额")
+    @Parameter(parameterName = "contractAddress", parameterDes = "合约地址")
+    @Parameter(parameterName = "contractSender", parameterDes = "合约调用者地址")
+    @Parameter(parameterName = "contractBalance", parameterDes = "合约地址的当前余额")
+    @Parameter(parameterName = "contractNonce", parameterDes = "合约地址的当前nonce值")
+    @Parameter(parameterName = "blockTime", requestType = @TypeDescriptor(value = long.class), parameterDes = "当前打包的区块时间")
+    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "txHash",valueType = Boolean.class, description = "交易hash"),
+            @Key(name = "tx",valueType = Boolean.class, description = "交易字符串")
+    }))
+    public Response tokenOutCrossChain(Map<String,Object> params){
+        Result result = service.tokenOutCrossChain(params);
+        if(result.isFailed()){
+            return failed(result.getErrorCode());
+        }
+        Map data = (Map) result.getData();
+        String txHash = (String) data.get(ParamConstant.TX_HASH);
+        String txHex = (String) data.get(ParamConstant.TX);
+        Map resultMap = new HashMap();
+        resultMap.put(ParamConstant.VALUE, List.of(txHash, txHex));
+        return success(resultMap);
+    }
 }
