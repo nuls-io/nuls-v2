@@ -74,26 +74,16 @@ public class JsonRpcHandler extends HttpHandler {
                 result.put("success", true);
                 result.put("code", 1000);
                 result.put("msg", "success");
-                result.put("data", AssetTool.getNulsAssets());
+                result.put("data", AssetTool.getNulsAssetInfo());
                 response.getWriter().write(JSONUtils.obj2json(result));
                 return;
             }
             if (request.getRequestURI().endsWith("nuls/assets/total/get") || request.getRequestURI().endsWith("nuls/assets/total/get/")) {
-                Map<String, Object> result = new HashMap<>();
-                result.put("success", true);
-                result.put("code", 1000);
-                result.put("msg", "success");
-                result.put("data", AssetTool.getTotal());
-                response.getWriter().write(JSONUtils.obj2json(result));
+                response.getWriter().write(AssetTool.getTotal());
                 return;
             }
             if (request.getRequestURI().endsWith("nuls/assets/circulation/get") || request.getRequestURI().endsWith("nuls/assets/circulation/get/")) {
-                Map<String, Object> result = new HashMap<>();
-                result.put("success", true);
-                result.put("code", 1000);
-                result.put("msg", "success");
-                result.put("data", AssetTool.getTotal());
-                response.getWriter().write(JSONUtils.obj2json(result));
+                response.getWriter().write(AssetTool.getCirculation());
                 return;
             }
         }
