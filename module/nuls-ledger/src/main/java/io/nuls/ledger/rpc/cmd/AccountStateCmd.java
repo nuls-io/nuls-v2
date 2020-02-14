@@ -80,7 +80,7 @@ public class AccountStateCmd extends BaseLedgerCmd {
             @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "资产所在地址")
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象",
-            responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            responseType = @TypeDescriptor(value = MapStatisticalRewardTaskclass, mapKeys = {
                     @Key(name = "total", valueType = BigInteger.class, description = "总金额"),
                     @Key(name = "freeze", valueType = BigInteger.class, description = "冻结金额"),
                     @Key(name = "available", valueType = String.class, description = "可用金额")

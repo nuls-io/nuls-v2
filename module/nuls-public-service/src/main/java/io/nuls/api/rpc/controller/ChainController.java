@@ -289,14 +289,14 @@ public class ChainController {
         CoinContextInfo coinContextInfo = apiCache.getCoinContextInfo();
         Map<String, Object> map = new HashMap<>();
         map.put("trades", coinContextInfo.getTxCount());
-        map.put("totalAssets", AssetTool.toDouble(coinContextInfo.getTotal()));
-        map.put("circulation", AssetTool.toDouble(coinContextInfo.getCirculation()));
-        map.put("deposit", AssetTool.toDouble(coinContextInfo.getConsensusTotal()));
-        map.put("business", AssetTool.toDouble(coinContextInfo.getBusiness()));
-        map.put("team", AssetTool.toDouble(coinContextInfo.getTeam()));
-        map.put("community", AssetTool.toDouble(coinContextInfo.getCommunity()));
-        map.put("unmapped", AssetTool.toDouble(coinContextInfo.getUnmapped()));
-        map.put("destroy", AssetTool.toDouble(coinContextInfo.getDestroy()));
+        map.put("totalAssets", AssetTool.toCoinString(coinContextInfo.getTotal()));
+        map.put("circulation", AssetTool.toCoinString(coinContextInfo.getCirculation()));
+        map.put("deposit", AssetTool.toCoinString(coinContextInfo.getConsensusTotal()));
+        map.put("business", AssetTool.toCoinString(coinContextInfo.getBusiness()));
+        map.put("team", AssetTool.toCoinString(coinContextInfo.getTeam()));
+        map.put("community", AssetTool.toCoinString(coinContextInfo.getCommunity()));
+        map.put("unmapped", AssetTool.toCoinString(coinContextInfo.getUnmapped()));
+        map.put("destroy", AssetTool.toCoinString(coinContextInfo.getDestroy()));
         int consensusCount = apiCache.getCurrentRound().getMemberCount() - apiCache.getChainInfo().getSeeds().size();
         if (consensusCount < 0) {
             consensusCount = 0;

@@ -69,6 +69,33 @@ public class JsonRpcHandler extends HttpHandler {
                 response.getWriter().write(JSONUtils.obj2json(result));
                 return;
             }
+            if (request.getRequestURI().endsWith("nuls/assets/all/get") || request.getRequestURI().endsWith("nuls/assets/get/")) {
+                Map<String, Object> result = new HashMap<>();
+                result.put("success", true);
+                result.put("code", 1000);
+                result.put("msg", "success");
+                result.put("data", AssetTool.getNulsAssets());
+                response.getWriter().write(JSONUtils.obj2json(result));
+                return;
+            }
+            if (request.getRequestURI().endsWith("nuls/assets/total/get") || request.getRequestURI().endsWith("nuls/assets/total/get/")) {
+                Map<String, Object> result = new HashMap<>();
+                result.put("success", true);
+                result.put("code", 1000);
+                result.put("msg", "success");
+                result.put("data", AssetTool.getTotal());
+                response.getWriter().write(JSONUtils.obj2json(result));
+                return;
+            }
+            if (request.getRequestURI().endsWith("nuls/assets/circulation/get") || request.getRequestURI().endsWith("nuls/assets/circulation/get/")) {
+                Map<String, Object> result = new HashMap<>();
+                result.put("success", true);
+                result.put("code", 1000);
+                result.put("msg", "success");
+                result.put("data", AssetTool.getTotal());
+                response.getWriter().write(JSONUtils.obj2json(result));
+                return;
+            }
         }
         String content = "";
         if (!request.getMethod().equals(Method.POST)) {
