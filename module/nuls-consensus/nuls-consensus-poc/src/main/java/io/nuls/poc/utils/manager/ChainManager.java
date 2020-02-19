@@ -6,6 +6,7 @@ import io.nuls.base.protocol.RegisterHelper;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.Log;
+import io.nuls.core.model.DoubleUtils;
 import io.nuls.core.rockdb.constant.DBErrorCode;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.economic.base.service.EconomicService;
@@ -83,8 +84,9 @@ public class ChainManager {
             chainMap.put(chainId, chain);
             ProtocolLoader.load(chainId);
             Map<String,Object> param = new HashMap<>(4);
+            double deflationRatio = DoubleUtils.sub(ConsensusConstant.VALUE_OF_ONE_HUNDRED, config.getDeflationRatio());
             param.put(ParamConstant.CONSENUS_CONFIG, new ConsensusConfigInfo(chainId,configBean.getAssetId(),configBean.getPackingInterval(),
-                    configBean.getInflationAmount(),configBean.getTotalInflationAmount(),configBean.getInitTime(),configBean.getDeflationRatio(),configBean.getDeflationTimeInterval(),configBean.getAwardAssetId()));
+                    configBean.getInflationAmount(),configBean.getTotalInflationAmount(),configBean.getInitTime(),deflationRatio,configBean.getDeflationTimeInterval(),configBean.getAwardAssetId()));
             economicService.registerConfig(param);
         }
     }
