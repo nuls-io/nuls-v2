@@ -185,7 +185,7 @@ public class ClientCmd extends BaseCmd {
             //将txStr转换为Transaction对象
             Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
 
-            VerifyResult verifyResult = txService.verify(chain, tx, true);
+            VerifyResult verifyResult = txService.verify(chain, tx);
             if (!verifyResult.getResult()) {
                 return failed(verifyResult.getErrorCode());
             }

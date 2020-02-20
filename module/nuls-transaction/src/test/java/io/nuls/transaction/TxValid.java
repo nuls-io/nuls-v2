@@ -411,8 +411,8 @@ public class TxValid {
     @Test
     public void transferLocal() throws Exception {
         NulsHash hash = null;
-        for (int i = 0; i < 10000; i++) {
-            Map transferMap = this.createTransferTx(address23, address21, new BigInteger("1000000000"));
+        for (int i = 0; i < 3; i++) {
+            Map transferMap = this.createTransferTx(address20, address21, new BigInteger("10000000"));
 
             Transaction tx = assemblyTransaction((int) transferMap.get(Constants.CHAIN_ID), (List<CoinDTO>) transferMap.get("inputs"),
                     (List<CoinDTO>) transferMap.get("outputs"), (String) transferMap.get("remark"), hash);
@@ -429,6 +429,33 @@ public class TxValid {
 //            Thread.sleep(500L);
         }
     }
+
+    @Test
+    public void transferLocal2() throws Exception {
+        NulsHash hash = null;
+        int[] sysTypeTx = {1, 7, 8, 18, 19, 20, 21, 22, 23};
+        for (int i = 0; i < sysTypeTx.length; i++) {
+            try {
+                Map transferMap = this.createTransferTx(address20, address21, new BigInteger("10000000"));
+                Transaction tx = assemblyTransaction((int) transferMap.get(Constants.CHAIN_ID), sysTypeTx[i], (List<CoinDTO>) transferMap.get("inputs"),
+                        (List<CoinDTO>) transferMap.get("outputs"), (String) transferMap.get("remark"), hash);
+                Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+                params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
+                params.put(Constants.CHAIN_ID, chainId);
+                params.put("tx", RPCUtil.encode(tx.serialize()));
+                HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
+                hash = tx.getHash();
+                System.out.println("hash:" + hash.toHex());
+                System.out.println("hash:" + hash);
+                System.out.println("count:" + (i + 1));
+                System.out.println("");
+            } catch (NulsException e) {
+                System.out.println("type:" +sysTypeTx[i] + "; error: " + e.getErrorCode().getCode());
+            }
+//            Thread.sleep(500L);
+        }
+    }
+
 
 
     @Test
@@ -1072,13 +1099,18 @@ public class TxValid {
         listTO.add(coinDTO2);
         return listTO;
     }
-
+    public Transaction assemblyTransaction(int chainId, List<CoinDTO> fromList, List<CoinDTO> toList, String remark, NulsHash hash) throws NulsException {
+        return assemblyTransaction(chainId, null, fromList, toList, remark, hash);
+    }
 
     /**
      * 组装交易
      */
-    public Transaction assemblyTransaction(int chainId, List<CoinDTO> fromList, List<CoinDTO> toList, String remark, NulsHash hash) throws NulsException {
-        Transaction tx = new Transaction(2);
+    public Transaction assemblyTransaction(int chainId, Integer type, List<CoinDTO> fromList, List<CoinDTO> toList, String remark, NulsHash hash) throws NulsException {
+        if(null == type){
+            type = 2;
+        }
+        Transaction tx = new Transaction(type);
         tx.setTime(NulsDateUtils.getCurrentTimeMillis() / 1000);
         tx.setRemark(StringUtils.bytes(remark));
         try {

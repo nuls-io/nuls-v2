@@ -1,5 +1,22 @@
 [
   {
+    "version": "4",
+    "extend": "1",
+    "validTxs": [
+      {
+        "type": "19",
+        "systemTx": true,
+        "unlockTx": false,
+        "verifyFee": true,
+        "verifySignature": false,
+        "handler": "ContractReturnGasProcessor"
+      }
+    ],
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  },
+  {
     "version": "1",
     "extend": "",
     "validTxs": [

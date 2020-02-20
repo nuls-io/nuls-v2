@@ -128,7 +128,7 @@ public class ContractResource extends BaseCmd {
             Object[] args = argsList != null ? argsList.toArray() : null;
             String remark = (String) params.get("remark");
 
-            if (gasLimit < 0 || price < 0) {
+            if (gasLimit < 0 || price < CONTRACT_MINIMUM_PRICE) {
                 return failed(ContractErrorCode.PARAMETER_ERROR);
             }
 

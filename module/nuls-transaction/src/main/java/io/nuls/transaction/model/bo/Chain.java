@@ -9,9 +9,7 @@ import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.po.TransactionNetPO;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -116,6 +114,9 @@ public class Chain {
      */
     private AtomicBoolean protocolUpgrade;
 
+
+    private Set<Integer> contractGenerateTxTypes;
+
     public Chain() {
         this.packaging = new AtomicBoolean(false);
         this.packableState = new AtomicBoolean(true);
@@ -129,6 +130,7 @@ public class Chain {
         this.orphanMap = new ConcurrentHashMap<>();
         this.protocolUpgrade = new AtomicBoolean(false);
         this.orphanListDataSize = new AtomicInteger(0);
+        this.contractGenerateTxTypes = new HashSet<>();
     }
 
     public int getChainId(){
@@ -253,5 +255,13 @@ public class Chain {
 
     public AtomicInteger getOrphanListDataSize() {
         return orphanListDataSize;
+    }
+
+    public Set<Integer> getContractGenerateTxTypes() {
+        return contractGenerateTxTypes;
+    }
+
+    public void setContractGenerateTxTypes(Set<Integer> contractGenerateTxTypes) {
+        this.contractGenerateTxTypes = contractGenerateTxTypes;
     }
 }

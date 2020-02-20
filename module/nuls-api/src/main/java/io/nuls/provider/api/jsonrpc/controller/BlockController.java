@@ -71,7 +71,9 @@ public class BlockController {
             @Key(name = "assetId", description = "本链默认主资产的ID"),
             @Key(name = "inflationAmount", description = "本链默认主资产的初始数量"),
             @Key(name = "agentChainId", description = "本链共识资产的链ID"),
-            @Key(name = "agentAssetId", description = "本链共识资产的ID")
+            @Key(name = "agentAssetId", description = "本链共识资产的ID"),
+            @Key(name = "addressPrefix", description = "本链地址前缀"),
+            @Key(name = "symbol", description = "本链主资产符号")
     }))
     public RpcResult getInfo(List<Object> params) {
         Result<Map> result = blockTools.getInfo(config.getChainId());
@@ -79,6 +81,8 @@ public class BlockController {
             Map map = result.getData();
             map.put("chainId", config.getChainId());
             map.put("assetId", config.getAssetsId());
+            map.put("addressPrefix", config.getAddressPrefix());
+            map.put("symbol", config.getSymbol());
             map.remove("awardAssetId");
             map.remove("seedNodes");
         }

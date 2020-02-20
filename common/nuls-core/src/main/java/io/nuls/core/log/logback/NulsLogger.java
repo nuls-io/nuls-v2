@@ -40,6 +40,10 @@ public class NulsLogger {
         }
     }
 
+    public boolean isDebugEnabled() {
+        return logger.isDebugEnabled();
+    }
+
     public void debug(String msg, Object... objs) {
         if(logger.isDebugEnabled()){
             String logContent = getLogTrace() + ":" + msg;

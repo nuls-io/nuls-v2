@@ -323,7 +323,7 @@ public class MessageUtil {
             message.setLocalHash(nativeHash);
             Transaction realTransaction = ctx;
             if(!config.isMainNet() && ctx.getType() == config.getCrossCtxType()){
-                if(!SignatureUtil.validateTransactionSignture(ctx)){
+                if(!SignatureUtil.ctxSignatureValid(chain.getChainId(),ctx)){
                     chain.getLogger().error("交易签名验证失败,hash:{}",nativeHex);
                     return false;
                 }

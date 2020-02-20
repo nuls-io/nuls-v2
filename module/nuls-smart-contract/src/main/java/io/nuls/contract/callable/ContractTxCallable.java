@@ -23,6 +23,8 @@
  */
 package io.nuls.contract.callable;
 
+import io.nuls.base.protocol.ProtocolGroupManager;
+import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.helper.ContractConflictChecker;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.helper.ContractNewTxHandler;
@@ -93,7 +95,7 @@ public class ContractTxCallable implements Callable<ContractResult> {
         BatchInfo batchInfo = contractHelper.getChain(chainId).getBatchInfo();
         String hash = tx.getHash().toHex();
         if(!batchInfo.checkGasCostTotal(tx.getHash().toHex())) {
-            Log.error("Exceed tx count [500] or gas limit of block [12,000,000 gas], the contract transaction [{}] revert to package queue.", hash);
+            Log.error("Exceed tx count [600] or gas limit of block [13,000,000 gas], the contract transaction [{}] revert to package queue.", hash);
             return null;
         }
         long start = 0L;
@@ -147,8 +149,13 @@ public class ContractTxCallable implements Callable<ContractResult> {
                     break;
             }
         } while (false);
-        if (contractResult != null && !contractResult.isSuccess()) {
+        if (contractResult != null) {
+            if(!contractResult.isSuccess()) {
             Log.error("Failed TxType [{}] Execute ContractResult is {}", tx.getType(), contractResult.toString());
+                if(ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_V240) {
+                    contractResult.setGasUsed(contractData.getGasLimit());
+                }
+            }
         }
         //if (Log.isDebugEnabled()) {
         //    Log.debug("[Per Contract Execution Cost Time] TxType is {}, TxHash is {}, Cost Time is {}", tx.getType(), tx.getHash().toString(), System.currentTimeMillis() - start);

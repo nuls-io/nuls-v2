@@ -24,16 +24,18 @@
  */
 package io.nuls.contract.vm.program.impl;
 
+import io.nuls.base.protocol.ProtocolGroupManager;
+import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.model.bo.ContractBalance;
 import io.nuls.contract.model.dto.BlockHeaderDto;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.util.VMContext;
-import io.nuls.contract.vm.ObjectRef;
-import io.nuls.contract.vm.Result;
-import io.nuls.contract.vm.VM;
-import io.nuls.contract.vm.VMFactory;
-import io.nuls.contract.vm.code.*;
+import io.nuls.contract.vm.*;
+import io.nuls.contract.vm.code.ClassCode;
+import io.nuls.contract.vm.code.ClassCodeLoader;
+import io.nuls.contract.vm.code.ClassCodes;
+import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.exception.ErrorException;
 import io.nuls.contract.vm.natives.io.nuls.contract.sdk.NativeAddress;
 import io.nuls.contract.vm.natives.io.nuls.contract.sdk.NativeUtils;
@@ -109,7 +111,14 @@ public class ProgramExecutorImpl implements ProgramExecutor {
     }
 
     public ProgramExecutor callProgramExecutor() {
-        return new ProgramExecutorImpl(this, vmContext, source, repository, prevStateRoot, accounts, thread);
+        ProgramExecutorImpl programExecutor = new ProgramExecutorImpl(this, vmContext, source, repository, prevStateRoot, accounts, thread);
+        // add by pierre at 2019-12-03 用于当存在合约内部调用合约，共享同一个合约的内存数据
+        programExecutor.contractObjects = this.contractObjects;
+        programExecutor.contractChanges = this.contractChanges;
+        programExecutor.contractArrays = this.contractArrays;
+        programExecutor.contractObjectRefCount = this.contractObjectRefCount;
+        // end code by pierre
+        return programExecutor;
     }
 
     @Override
@@ -245,6 +254,11 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         return execute(programInvoke);
     }
 
+    private Map<String, Map<ObjectRef, Map<String, Object>>> contractObjects;
+    private Map<String, Set<ObjectRef>> contractChanges;
+    private Map<String, Map<String, Object>> contractArrays;
+    private Map<String, BigIntegerWrapper> contractObjectRefCount;
+
     private ProgramResult execute(ProgramInvoke programInvoke) {
         if (programInvoke.getPrice() < 1) {
             return revert("gas price must be greater than zero");
@@ -318,6 +332,59 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
             vm.setProgramExecutor(this);
             vm.heap.loadClassCodes(classCodes);
+            // add by pierre at 2019-11-21 标记 当存在合约内部调用合约，共享同一个合约的内存数据 需要协议升级 done
+            //Log.debug("++++++++++++++++++++");
+            //Log.warn(programInvoke.toString());
+            //Log.info("this.contractObjectRefCount: {}", this.contractObjectRefCount);
+            //Log.info("vm.heap.objectRefCount: {}", vm.heap.objectRefCount);
+            boolean isUpgradedV240 = ProtocolGroupManager.getCurrentVersion(getCurrentChainId()) >= ContractContext.UPDATE_VERSION_V240;
+            if(isUpgradedV240) {
+                if(contractObjects == null) {
+                    contractObjects = new HashMap<>();
+                    contractObjects.put(contractAddress, vm.heap.objects);
+                } else {
+                    Map<ObjectRef, Map<String, Object>> objectRefMapMap = contractObjects.get(contractAddress);
+                    if(objectRefMapMap != null) {
+                        if(programInvoke.isInternalCall()) {
+                            //Log.info("共享heap.objects");
+                            vm.heap.objects = objectRefMapMap;
+                        }
+                    } else {
+                        contractObjects.put(contractAddress, vm.heap.objects);
+                    }
+                }
+                if(contractArrays == null) {
+                    contractArrays = new HashMap<>();
+                    contractArrays.put(contractAddress, vm.heap.arrays);
+                } else {
+                    Map<String, Object> arraysMap = contractArrays.get(contractAddress);
+                    if(arraysMap != null) {
+                        if(programInvoke.isInternalCall()) {
+                            //Log.info("共享heap.arrays");
+                            vm.heap.arrays = arraysMap;
+                        }
+                    } else {
+                        contractArrays.put(contractAddress, vm.heap.arrays);
+                    }
+                }
+                if(contractChanges == null) {
+                    //Log.info("新建map和heap.changes");
+                    contractChanges = new HashMap<>();
+                    contractChanges.put(contractAddress, vm.heap.changes);
+                } else {
+                    Set<ObjectRef> changesObjectRefs = contractChanges.get(contractAddress);
+                    if(changesObjectRefs != null) {
+                        if(programInvoke.isInternalCall()) {
+                            //Log.info("共享heap.changes: {}", changesObjectRefs.hashCode());
+                            vm.heap.changes = changesObjectRefs;
+                        }
+                    } else {
+                        //Log.info("新增heap.changes");
+                        contractChanges.put(contractAddress, vm.heap.changes);
+                    }
+                }
+            }
+            // end code by pierre
             vm.methodArea.loadClassCodes(classCodes);
 
             logTime("load classes");
@@ -333,7 +400,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                 return revert("can only invoke public method");
             }
             if (!methodCode.hasPayableAnnotation() && transferValue.compareTo(BigInteger.ZERO) > 0) {
-                return revert("not a payable method");
+                return revert(String.format("contract[%s]'s method[%s] is not a payable method", contractAddress, methodCode.name));
             }
             // 不允许非系统调用此方法
             boolean isBalanceTriggerForConsensusContractMethod = BALANCE_TRIGGER_METHOD_NAME.equals(methodName) &&
@@ -361,6 +428,27 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             } else {
                 objectRef = vm.heap.loadContract(contractAddressBytes, contractClassCode, repository);
             }
+
+            // add by pierre at 2019-11-21 标记 当存在合约内部调用合约，共享同一个合约的内存数据 需要协议升级 done
+            if(isUpgradedV240) {
+                if(contractObjectRefCount == null) {
+                    //Log.info("新建map和heap.objectRefCount");
+                    contractObjectRefCount = new HashMap<>();
+                    contractObjectRefCount.put(contractAddress, vm.heap.objectRefCount);
+                } else {
+                    BigIntegerWrapper objectRefCount = contractObjectRefCount.get(contractAddress);
+                    if(objectRefCount != null) {
+                        if(programInvoke.isInternalCall()) {
+                            //Log.info("共享heap.objectRefCount: {}", objectRefCount.hashCode());
+                            vm.heap.objectRefCount = objectRefCount;
+                        }
+                    } else {
+                        //Log.info("新增heap.objectRefCount");
+                        contractObjectRefCount.put(contractAddress, vm.heap.objectRefCount);
+                    }
+                }
+            }
+            // end code by pierre
 
             logTime("load contract ref");
 
@@ -407,6 +495,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             programResult.setInternalCalls(vm.getInternalCalls());
             programResult.setEvents(vm.getEvents());
             programResult.setInvokeRegisterCmds(vm.getInvokeRegisterCmds());
+            programResult.setOrderedInnerTxs(vm.getOrderedInnerTxs());
 
             if (resultValue != null) {
                 if (resultValue instanceof ObjectRef) {

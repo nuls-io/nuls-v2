@@ -21,6 +21,7 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Controller;
 import io.nuls.core.core.annotation.RpcMethod;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -277,33 +278,96 @@ public class ChainController {
         int chainId;
         try {
             chainId = (int) params.get(0);
-
-            ApiCache apiCache = CacheManager.getCache(chainId);
-            CoinContextInfo coinContextInfo = apiCache.getCoinContextInfo();
-            Map<String, Object> map = new HashMap<>();
-            map.put("trades", coinContextInfo.getTxCount());
-            map.put("totalAssets", AssetTool.toDouble(coinContextInfo.getTotal()));
-            map.put("circulation",  AssetTool.toDouble(coinContextInfo.getCirculation()));
-            map.put("deposit", AssetTool.toDouble(coinContextInfo.getConsensusTotal()));
-            map.put("business", AssetTool.toDouble(coinContextInfo.getBusiness()));
-            map.put("team", AssetTool.toDouble(coinContextInfo.getTeam()));
-            map.put("community", AssetTool.toDouble(coinContextInfo.getCommunity()));
-            map.put("unmapped", AssetTool.toDouble(coinContextInfo.getUnmapped()));
-            map.put("destroy", AssetTool.toDouble(coinContextInfo.getDestroy()));
-            int consensusCount = apiCache.getCurrentRound().getMemberCount() - apiCache.getChainInfo().getSeeds().size();
-            if (consensusCount < 0) {
-                consensusCount = 0;
-            }
-            map.put("consensusNodes", consensusCount);
-            long count = 0;
-            if (apiCache.getBestHeader() != null) {
-                count = agentService.agentsCount(chainId, apiCache.getBestHeader().getHeight());
-            }
-            map.put("totalNodes", count);
-
-            return RpcResult.success(map);
         } catch (Exception e) {
             return RpcResult.paramError("[chainId] is inValid");
         }
+
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        if (apiCache == null) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        CoinContextInfo coinContextInfo = apiCache.getCoinContextInfo();
+        Map<String, Object> map = new HashMap<>();
+        map.put("trades", coinContextInfo.getTxCount());
+        map.put("totalAssets", AssetTool.toCoinString(coinContextInfo.getTotal()));
+        map.put("circulation", AssetTool.toCoinString(coinContextInfo.getCirculation()));
+        map.put("deposit", AssetTool.toCoinString(coinContextInfo.getConsensusTotal()));
+        map.put("business", AssetTool.toCoinString(coinContextInfo.getBusiness()));
+        map.put("team", AssetTool.toCoinString(coinContextInfo.getTeam()));
+        map.put("community", AssetTool.toCoinString(coinContextInfo.getCommunity()));
+        map.put("unmapped", AssetTool.toCoinString(coinContextInfo.getUnmapped()));
+        map.put("destroy", AssetTool.toCoinString(coinContextInfo.getDestroy()));
+        int consensusCount = apiCache.getCurrentRound().getMemberCount() - apiCache.getChainInfo().getSeeds().size();
+        if (consensusCount < 0) {
+            consensusCount = 0;
+        }
+        map.put("consensusNodes", consensusCount);
+        long count = 0;
+        if (apiCache.getBestHeader() != null) {
+            count = agentService.agentsCount(chainId, apiCache.getBestHeader().getHeight());
+        }
+        map.put("totalNodes", count);
+
+        return RpcResult.success(map);
+    }
+
+    @RpcMethod("getTotalSupply")
+    public RpcResult getTotalSupply(List<Object> params) {
+        int chainId;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        if (apiCache == null) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        CoinContextInfo coinContextInfo = apiCache.getCoinContextInfo();
+        Map<String, Object> map = new HashMap<>();
+        BigInteger supply = coinContextInfo.getTotal().subtract(coinContextInfo.getDestroy());
+        map.put("supplyCoin", AssetTool.toCoinString(supply) + "");
+        return RpcResult.success(map);
+    }
+
+
+    @RpcMethod("getCirculation")
+    public RpcResult getCirculation(List<Object> params) {
+        int chainId;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        if (apiCache == null) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        CoinContextInfo coinContextInfo = apiCache.getCoinContextInfo();
+        Map<String, Object> map = new HashMap<>();
+        map.put("circulation", AssetTool.toCoinString(coinContextInfo.getCirculation()) + "");
+        return RpcResult.success(map);
+    }
+
+    @RpcMethod("getDestroy")
+    public RpcResult getDestroy(List<Object> params) {
+        int chainId;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        if (apiCache == null) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        CoinContextInfo coinContextInfo = apiCache.getCoinContextInfo();
+        Map<String, Object> map = new HashMap<>();
+        map.put("destroy", AssetTool.toCoinString(coinContextInfo.getDestroy()) + "");
+        map.put("list", coinContextInfo.getDestroyInfoList());
+        return RpcResult.success(map);
     }
 }

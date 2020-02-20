@@ -115,6 +115,8 @@ public class Chain {
 
     private NulsLogger logger;
 
+    private boolean cacheLoaded;
+
     /**
      * 任务线程池
      * Schedule thread pool
@@ -132,6 +134,7 @@ public class Chain {
         this.redPunishTransactionList = new ArrayList<>();
         this.roundList = new ArrayList<>();
         this.packer = false;
+        this.cacheLoaded = false;
     }
 
     /**
@@ -367,5 +370,13 @@ public class Chain {
 
     public void setLogger(NulsLogger logger) {
         this.logger = logger;
+    }
+
+    public boolean isCacheLoaded() {
+        return cacheLoaded;
+    }
+
+    public void setCacheLoaded(boolean cacheLoaded) {
+        this.cacheLoaded = cacheLoaded;
     }
 }

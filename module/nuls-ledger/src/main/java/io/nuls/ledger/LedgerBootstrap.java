@@ -53,6 +53,7 @@ public class LedgerBootstrap extends RpcModule {
     LedgerConfig ledgerConfig;
     @Autowired
     AddressPrefixDatas addressPrefixDatas;
+
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
             args = new String[]{"ws://" + HostInfo.getLocalIP() + ":7771"};
@@ -64,8 +65,11 @@ public class LedgerBootstrap extends RpcModule {
     public Module[] declareDependent() {
 
         return new Module[]{
-                new Module(ModuleE.NW.abbr, "1.0"),
-                new Module(ModuleE.BL.abbr, "1.0")};
+                Module.build(ModuleE.TX),
+                Module.build(ModuleE.NW),
+                Module.build(ModuleE.BL),
+                Module.build(ModuleE.AC)
+        };
 
     }
 
@@ -88,7 +92,7 @@ public class LedgerBootstrap extends RpcModule {
             LedgerConstant.blackHolePublicKey = HexUtil.decode(ledgerConfig.getBlackHolePublicKey());
             LedgerChainManager ledgerChainManager = SpringLiteContext.getBean(LedgerChainManager.class);
             ledgerChainManager.initChains();
-            LoggerUtil.COMMON_LOG.info("Ledger data init  complete!");
+            LoggerUtil.COMMON_LOG.info("Ledger data init complete!");
         } catch (Exception e) {
             LoggerUtil.COMMON_LOG.error(e);
             LoggerUtil.COMMON_LOG.error("start fail...");

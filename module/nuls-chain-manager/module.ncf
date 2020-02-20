@@ -10,5 +10,5 @@ PrivateDependent=nuls-base-protocol-update
 Managed=1
 
 [chain-manager]
-moduleDynamicDependent=protocol-update
+moduleDynamicDependent=protocol-update,smart-contract
 blackHolePublicKey=000000000000000000000000000000000000000000000000000000000000000000

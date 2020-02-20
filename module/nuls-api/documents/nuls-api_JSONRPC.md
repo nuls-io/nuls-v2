@@ -152,6 +152,8 @@ _**详细描述: 获取本链相关信息,其中共识资产为本链创建共�
 | inflationAmount | string | 本链默认主资产的初始数量 |
 | agentChainId    | string | 本链共识资产的链ID   |
 | agentAssetId    | string | 本链共识资产的ID    |
+| addressPrefix   | string | 本链地址前缀       |
+| symbol          | string | 本链主资产符号      |
 #### Example request data: 
 
 ```json
@@ -171,10 +173,13 @@ _**详细描述: 获取本链相关信息,其中共识资产为本链创建共�
   "id" : "1234",
   "result" : {
     "agentChainId" : 2,
-    "inflationAmount" : 500000000000000,
+    "inflationAmount" : 41095890410959,
     "agentAssetId" : 1,
+    "commissionMin" : 20000000000000,
     "chainId" : 2,
-    "assetId" : 1
+    "assetId" : 1,
+    "addressPrefix" : "tNULS",
+    "symbol" : "NULS"
   }
 }
 ```
@@ -1632,7 +1637,7 @@ _**详细描述: 根据hash获取交易**_
 {
   "jsonrpc" : "2.0",
   "method" : "getTx",
-  "params" : [ 2, "40acabd7e7b7643aa545f2b74d09f8d65eecf885919d968d263a7a24255f8698" ],
+  "params" : [ 2, "3d05d84f7d537b70fe4bce6ec81904018e482461a831b6a7a69756225876293f" ],
   "id" : 1234
 }
 ```
@@ -1644,30 +1649,26 @@ _**详细描述: 根据hash获取交易**_
   "jsonrpc" : "2.0",
   "id" : "1234",
   "result" : {
-    "hash" : "40acabd7e7b7643aa545f2b74d09f8d65eecf885919d968d263a7a24255f8698",
-    "type" : 2,
-    "time" : "2019-07-16 15:24:55.055",
-    "blockHeight" : 1373,
-    "remark" : null,
-    "transactionSignature" : "2103958b790c331954ed367d37bac901de5c2f06ac8368b37d7bd6cd5ae143c1d7e3473045022100c2cdaec043c8e5f26cf2efcd63ce9a27461d0569fc4f5c13ee685c506329da4702204f3e0fc3aed450dbb8ac14b5745c1e694100092bad63a40247a534a82fcdab9d",
+    "hash" : "3d05d84f7d537b70fe4bce6ec81904018e482461a831b6a7a69756225876293f",
+    "type" : 16,
+    "time" : "2019-12-18 14:35:04.004",
+    "blockHeight" : 172,
+    "blockHash" : "d7412d925da4eef1f1d7fdf2e19c24d1d2616e9ae3d75b405ee9e69b51bf0491",
+    "remark" : "call contract test - 空气币转账",
+    "transactionSignature" : "2103958b790c331954ed367d37bac901de5c2f06ac8368b37d7bd6cd5ae143c1d7e3473045022100fa7c1987316b16fbc156173d2419591e4bc0df15835c096eae5d38f24c34ae7802201ca68cf83b13811f5e4cbd09bd03a53394ef0e90d20cd4a1bb43eb13a6fa441e",
+    "txDataHex" : "020001f7ec6473df12e751d64cf20a8baa7edd50810f810200029fef190beb3651234855ec4348471180ae1881b1000000000000000000000000000000000000000000000000000000000000000080841e00000000001900000000000000087472616e7366657200020126744e554c536542614d72624d52694641556565417436737762347856424e79693831594c32340103383030",
     "status" : 1,
-    "size" : 256,
+    "size" : 374,
     "inBlockIndex" : 0,
     "from" : [ {
       "address" : "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG",
       "assetsChainId" : 2,
       "assetsId" : 1,
-      "amount" : "10000000100000",
-      "nonce" : "0000000000000000",
+      "amount" : "50100000",
+      "nonce" : "ef3247392e9a8d99",
       "locked" : 0
     } ],
-    "to" : [ {
-      "address" : "tNULSeBaMhcccH1KeXhMpH5y3pvtRzatAiuMJk",
-      "assetsChainId" : 2,
-      "assetsId" : 1,
-      "amount" : "10000000000000",
-      "lockTime" : 0
-    } ]
+    "to" : [ ]
   }
 }
 ```
@@ -2519,6 +2520,7 @@ _**详细描述: 获取智能合约执行结果**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value |     string      | 转入金额                                        |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;orginTxHash                                           |     string      | 调用合约交易hash（源交易hash，合约交易由调用合约交易派生而来）         |
 | events                                                                                                | list&lt;string> | 合约事件列表                                      |
+| debugEvents                                                                                           | list&lt;string> | 调式合约事件列表                                    |
 | tokenTransfers                                                                                        | list&lt;object> | 合约token转账列表                                 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;contractAddress                                       |     string      | 合约地址                                        |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;from                                                  |     string      | 付款方                                         |
@@ -2579,6 +2581,7 @@ _**详细描述: 获取智能合约执行结果**_
       "orginTxHash" : "b5473eefecd1c70ac4276f70062a92bdbfe8f779cbe48de2d0315686cc7e6789"
     } ],
     "events" : [ "{\"contractAddress\":\"TTb1LZLo6izPGmXa9dGPmb5D2vpLpNqA\",\"blockNumber\":1343847,\"event\":\"TransferEvent\",\"payload\":{\"from\":\"TTasNs8MGGGaFT9hd9DLmkammYYv69vs\",\"to\":\"TTau7kAxyhc4yMomVJ2QkMVECKKZK1uG\",\"value\":\"1000\"}}" ],
+    "debugEvents" : [ ],
     "tokenTransfers" : [ {
       "contractAddress" : "TTb1LZLo6izPGmXa9dGPmb5D2vpLpNqA",
       "from" : "TTasNs8MGGGaFT9hd9DLmkammYYv69vs",
@@ -2646,6 +2649,7 @@ _**详细描述: 获取智能合约执行结果列表**_
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value |     string      | 转入金额                                        |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;orginTxHash                                           |     string      | 调用合约交易hash（源交易hash，合约交易由调用合约交易派生而来）         |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;events                                                                                                | list&lt;string> | 合约事件列表                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;debugEvents                                                                                           | list&lt;string> | 调式合约事件列表                                    |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tokenTransfers                                                                                        | list&lt;object> | 合约token转账列表                                 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;contractAddress                                       |     string      | 合约地址                                        |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;from                                                  |     string      | 付款方                                         |
@@ -2695,6 +2699,7 @@ _**详细描述: 获取智能合约执行结果列表**_
       "stackTrace" : null,
       "transfers" : [ ],
       "events" : [ "{\"contractAddress\":\"tNULSeBaN5Y2gRias1NMNVmsmXqJbu5Bcp3ZPL\",\"blockNumber\":68,\"event\":\"TransferEvent\",\"payload\":{\"from\":null,\"to\":\"tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG\",\"value\":\"800000\"}}" ],
+      "debugEvents" : [ ],
       "tokenTransfers" : [ {
         "contractAddress" : "tNULSeBaN5Y2gRias1NMNVmsmXqJbu5Bcp3ZPL",
         "from" : null,
@@ -2724,6 +2729,7 @@ _**详细描述: 获取智能合约执行结果列表**_
       "stackTrace" : null,
       "transfers" : [ ],
       "events" : [ "{\"contractAddress\":\"tNULSeBaN5Y2gRias1NMNVmsmXqJbu5Bcp3ZPL\",\"blockNumber\":71,\"event\":\"TransferEvent\",\"payload\":{\"from\":\"tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG\",\"to\":\"tNULSeBaMtkzQ1tH8JWBGZDCmRHCmySevE4frM\",\"value\":\"4000\"}}" ],
+      "debugEvents" : [ ],
       "tokenTransfers" : [ {
         "contractAddress" : "tNULSeBaN5Y2gRias1NMNVmsmXqJbu5Bcp3ZPL",
         "from" : "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG",
@@ -2753,7 +2759,8 @@ _**详细描述: 获取智能合约执行结果列表**_
       "stackTrace" : null,
       "transfers" : [ ],
       "events" : [ "{\"contractAddress\":\"tNULSeBaN5Y2gRias1NMNVmsmXqJbu5Bcp3ZPL\",\"blockNumber\":72,\"event\":\"ApprovalEvent\",\"payload\":{\"owner\":\"tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG\",\"spender\":\"tNULSeBaMtkzQ1tH8JWBGZDCmRHCmySevE4frM\",\"value\":\"4000\"}}" ],
-      "tokenTransfers" : [ ],
+      "debugEvents" : [ ],
+      "tokensfers" : [ ],
       "invokeRegisterCmds" : [ ],
       "contractTxList" : [ ],
       "remark" : "call"
@@ -3638,7 +3645,165 @@ _**详细描述: 查询节点的委托共识列表**_
 }
 ```
 
-### 5.6 离线组装 - 创建共识节点
+### 5.6 根据最大高度和原始种子个数生成一个随机种子并返回
+#### Cmd: getRandomSeedByCount
+_**详细描述: 包括最大高度往后退1000个区块，在这个区块区间内找到指定个数的原始种子，汇总生成一个随机种子并返回**_
+
+#### 参数列表
+| 参数名       |  参数类型  | 参数描述                      | 是否必填 |
+| --------- |:------:| ------------------------- |:----:|
+| chainId   |  int   | 链ID                       |  是   |
+| height    |  long  | 最大高度                      |  是   |
+| count     |  int   | 原始种子个数                    |  是   |
+| algorithm | string | 算法标识：SHA3, KECCAK, MERKLE |  否   |
+
+#### 返回值
+| 字段名       |  字段类型  | 参数描述    |
+| --------- |:------:| ------- |
+| seed      | string | 生成的随机种子 |
+| algorithm | string | 算法标识    |
+| count     |  int   | 原始种子个数  |
+#### Example request data: 
+
+```json
+{
+  "jsonrpc" : "2.0",
+  "method" : "getRandomSeedByCount",
+  "params" : [ 2, 15, 9, "sha3" ],
+  "id" : 1234
+}
+```
+
+#### Example response data: 
+
+```json
+{
+  "jsonrpc" : "2.0",
+  "id" : "1234",
+  "result" : {
+    "seed" : "39348806759173754289552718450552160894738020452243263500745175936916037359443",
+    "algorithm" : "SHA3",
+    "count" : 9
+  }
+}
+```
+
+### 5.7 根据高度区间生成一个随机种子并返回
+#### Cmd: getRandomSeedByHeight
+_**详细描述: 在这个区块区间内找到所有有效的原始种子，汇总生成一个随机种子并返回**_
+
+#### 参数列表
+| 参数名         |  参数类型  | 参数描述                      | 是否必填 |
+| ----------- |:------:| ------------------------- |:----:|
+| chainId     |  int   | 链ID                       |  是   |
+| startHeight |  long  | 起始高度                      |  是   |
+| endHeight   |  long  | 截止高度                      |  是   |
+| algorithm   | string | 算法标识：SHA3, KECCAK, MERKLE |  否   |
+
+#### 返回值
+| 字段名       |  字段类型  | 参数描述    |
+| --------- |:------:| ------- |
+| seed      | string | 生成的随机种子 |
+| algorithm | string | 算法标识    |
+| count     |  int   | 原始种子个数  |
+#### Example request data: 
+
+```json
+{
+  "jsonrpc" : "2.0",
+  "method" : "getRandomSeedByHeight",
+  "params" : [ 2, 7, 15, "sha3" ],
+  "id" : 1234
+}
+```
+
+#### Example response data: 
+
+```json
+{
+  "jsonrpc" : "2.0",
+  "id" : "1234",
+  "result" : {
+    "seed" : "32532675763615856265810357233291461242017048552507569663816339711779497299975",
+    "algorithm" : "sha3",
+    "count" : 9
+  }
+}
+```
+
+### 5.8 根据最大高度和原始种子个数查找原始种子列表并返回
+#### Cmd: getRandomRawSeedsByCount
+_**详细描述: 包括最大高度往后退1000个区块，在这个区块区间内找到指定个数的原始种子并返回**_
+
+#### 参数列表
+| 参数名     | 参数类型 | 参数描述   | 是否必填 |
+| ------- |:----:| ------ |:----:|
+| chainId | int  | 链ID    |  是   |
+| height  | long | 最大高度   |  是   |
+| count   | int  | 原始种子个数 |  是   |
+
+#### 返回值
+| 字段名    |      字段类型       | 参数描述 |
+| ------ |:---------------:| ---- |
+| 原始种子列表 | list&lt;string> |      |
+#### Example request data: 
+
+```json
+{
+  "jsonrpc" : "2.0",
+  "method" : "getRandomRawSeedsByCount",
+  "params" : [ 2, 15, 9 ],
+  "id" : 1234
+}
+```
+
+#### Example response data: 
+
+```json
+{
+  "jsonrpc" : "2.0",
+  "id" : "1234",
+  "result" : [ "-29372401885335809343334881114861862848664228571153431589582614750707853803688", "-12374588462997313588598897726376463898687300536133622323300129617802447843663", "35414850206903943716465298994826456060042987072617525631637631635987014797108", "-57234933950614201812269794723322473738769164815685574368298879134983145932442", "-36943716549467048219120901994813656501647327407366907446161430460954253977405", "30934978871350238591664023000030597630129456116167320700551408944317816121383", "-40719234813631611496719465228844846754749045533296280679027880790124492776813", "-9760170464524872943819135990753457668421091036911187432097064247132004006726", "8470565416062428412592833383521885451190767259837871270725993030997862574316" ]
+}
+```
+
+### 5.9 根据高度区间查找原始种子列表并返回
+#### Cmd: getRandomRawSeedsByHeight
+_**详细描述: 在这个区块区间内找到所有有效的原始种子并返回**_
+
+#### 参数列表
+| 参数名         | 参数类型 | 参数描述 | 是否必填 |
+| ----------- |:----:| ---- |:----:|
+| chainId     | int  | 链ID  |  是   |
+| startHeight | long | 起始高度 |  是   |
+| endHeight   | long | 截止高度 |  是   |
+
+#### 返回值
+| 字段名    |      字段类型       | 参数描述 |
+| ------ |:---------------:| ---- |
+| 原始种子列表 | list&lt;string> |      |
+#### Example request data: 
+
+```json
+{
+  "jsonrpc" : "2.0",
+  "method" : "getRandomRawSeedsByHeight",
+  "params" : [ 2, 7, 15 ],
+  "id" : 1234
+}
+```
+
+#### Example response data: 
+
+```json
+{
+  "jsonrpc" : "2.0",
+  "id" : "1234",
+  "result" : [ "8470565416062428412592833383521885451190767259837871270725993030997862574316", "-9760170464524872943819135990753457668421091036911187432097064247132004006726", "-40719234813631611496719465228844846754749045533296280679027880790124492776813", "30934978871350238591664023000030597630129456116167320700551408944317816121383", "-36943716549467048219120901994813656501647327407366907446161430460954253977405", "-57234933950614201812269794723322473738769164815685574368298879134983145932442", "35414850206903943716465298994826456060042987072617525631637631635987014797108", "-12374588462997313588598897726376463898687300536133622323300129617802447843663", "-29372401885335809343334881114861862848664228571153431589582614750707853803688" ]
+}
+```
+
+### 5.10 离线组装 - 创建共识节点
 #### Cmd: createAgentOffline
 _**详细描述: 参与共识所需资产可通过查询链信息接口获取(agentChainId和agentAssetId)**_
 
@@ -3694,7 +3859,7 @@ _**详细描述: 参与共识所需资产可通过查询链信息接口获取(ag
 }
 ```
 
-### 5.7 离线组装 - 注销共识节点
+### 5.11 离线组装 - 注销共识节点
 #### Cmd: stopAgentOffline
 _**详细描述: 组装交易的StopDepositDto信息，可通过查询节点的委托共识列表获取，input的nonce值可为空**_
 
@@ -3763,7 +3928,7 @@ _**详细描述: 组装交易的StopDepositDto信息，可通过查询节点的�
 }
 ```
 
-### 5.8 离线组装 - 委托参与共识
+### 5.12 离线组装 - 委托参与共识
 #### Cmd: depositToAgentOffline
 _**详细描述: 参与共识所需资产可通过查询链信息接口获取(agentChainId和agentAssetId)**_
 
@@ -3817,7 +3982,7 @@ _**详细描述: 参与共识所需资产可通过查询链信息接口获取(ag
 }
 ```
 
-### 5.9 离线组装 - 退出共识
+### 5.13 离线组装 - 退出共识
 #### Cmd: withdrawOffline
 _**详细描述: 离线组装 - 退出共识**_
 
@@ -3871,7 +4036,7 @@ _**详细描述: 离线组装 - 退出共识**_
 }
 ```
 
-### 5.10 离线组装 - 多签账户创建共识节点
+### 5.14 离线组装 - 多签账户创建共识节点
 #### Cmd: multiSignCreateAgentOffline
 _**详细描述: 参与共识所需资产可通过查询链信息接口获取(agentChainId和agentAssetId)**_
 
@@ -3929,7 +4094,7 @@ _**详细描述: 参与共识所需资产可通过查询链信息接口获取(ag
 }
 ```
 
-### 5.11 离线组装 - 多签账户注销共识节点
+### 5.15 离线组装 - 多签账户注销共识节点
 #### Cmd: multiSignStopAgentOffline
 _**详细描述: 组装交易的StopDepositDto信息，可通过查询节点的委托共识列表获取，input的nonce值可为空**_
 
@@ -3990,7 +4155,7 @@ _**详细描述: 组装交易的StopDepositDto信息，可通过查询节点的�
 }
 ```
 
-### 5.12 离线组装 - 多签账户委托参与共识
+### 5.16 离线组装 - 多签账户委托参与共识
 #### Cmd: multiSignDepositToAgentOffline
 _**详细描述: 参与共识所需资产可通过查询链信息接口获取(agentChainId和agentAssetId)**_
 
@@ -4046,7 +4211,7 @@ _**详细描述: 参与共识所需资产可通过查询链信息接口获取(ag
 }
 ```
 
-### 5.13 离线组装 - 多签账户退出共识
+### 5.17 离线组装 - 多签账户退出共识
 #### Cmd: multiSignWithdrawOffline
 _**详细描述: 离线组装 - 多签账户退出共识**_
 

@@ -68,6 +68,9 @@ public class CallContractTxValidator {
         CoinData coinData = tx.getCoinDataInstance();
         List<CoinFrom> fromList = coinData.getFrom();
         List<CoinTo> toList = coinData.getTo();
+        CallContractData txData = tx.getTxDataObj();
+        byte[] sender = txData.getSender();
+        boolean existSender = false;
         Chain chain = contractHelper.getChain(chainId);
         int assetsId = chain.getConfig().getAssetId();
         for(CoinFrom from : fromList) {
@@ -75,9 +78,15 @@ public class CallContractTxValidator {
                 Log.error("contract call error: The chain id or assets id of coin from is error.");
                 return Result.getFailed(CONTRACT_COIN_ASSETS_ERROR);
             }
+            if(!existSender && Arrays.equals(from.getAddress(), sender)) {
+                existSender = true;
+            }
         }
-
-        CallContractData txData = tx.getTxDataObj();
+        Set<String> addressSet = SignatureUtil.getAddressFromTX(tx, chainId);
+        if (!existSender || !addressSet.contains(AddressTool.getStringAddressByBytes(sender))) {
+            Log.error("contract call error: The contract caller is not the transaction creator.");
+            return Result.getFailed(CONTRACT_CALLER_ERROR);
+        }
         if (!ContractUtil.checkPrice(txData.getPrice())) {
             Log.error("contract call error: The minimum value of price is 25.");
             return Result.getFailed(CONTRACT_MINIMUM_PRICE_ERROR);
@@ -88,17 +97,11 @@ public class CallContractTxValidator {
         }
         BigInteger transferValue = txData.getValue();
         byte[] contractAddress = txData.getContractAddress();
-        byte[] sender = txData.getSender();
-        Set<String> addressSet = SignatureUtil.getAddressFromTX(tx, chainId);
+
 
         if (!ContractLedgerUtil.isExistContractAddress(chainId, contractAddress)) {
             Log.error("contract call error: The contract does not exist.");
             return Result.getFailed(CONTRACT_ADDRESS_NOT_EXIST);
-        }
-
-        if (!addressSet.contains(AddressTool.getStringAddressByBytes(sender))) {
-            Log.error("contract call error: The contract caller is not the transaction creator.");
-            return Result.getFailed(CONTRACT_CALLER_ERROR);
         }
 
         BigInteger contractReceivedValue = BigInteger.ZERO;
@@ -107,16 +110,14 @@ public class CallContractTxValidator {
                 Log.error("contract call error: The chain id or assets id of coin to is error.");
                 return Result.getFailed(CONTRACT_COIN_ASSETS_ERROR);
             }
-            byte[] owner = coin.getAddress();
-            if (addressSet.contains(AddressTool.getStringAddressByBytes(owner))) {
-                continue;
-            }
-
             if (coin.getLockTime() != 0) {
                 Log.error("contract call error: Transfer amount cannot be locked.");
                 return Result.getFailed(AMOUNT_LOCK_ERROR);
             }
-
+            byte[] owner = coin.getAddress();
+            if (addressSet.contains(AddressTool.getStringAddressByBytes(owner))) {
+                continue;
+            }
             if (!Arrays.equals(owner, contractAddress)) {
                 Log.error("contract call error: The receiver is not the contract address.");
                 return Result.getFailed(CONTRACT_RECEIVER_ERROR);

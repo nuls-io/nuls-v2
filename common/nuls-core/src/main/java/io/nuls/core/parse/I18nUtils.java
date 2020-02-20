@@ -220,6 +220,7 @@ public class I18nUtils {
     public static String get(String id) {
         if (nowMapping == null) {
             nowMapping = ALL_MAPPING.get(key);
+            return id;
         }
         return nowMapping.getProperty(id + "");
     }

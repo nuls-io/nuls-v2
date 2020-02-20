@@ -29,6 +29,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
+import io.nuls.contract.config.ContractConfig;
 import io.nuls.contract.enums.BlockType;
 import io.nuls.contract.enums.CmdRegisterMode;
 import io.nuls.contract.helper.ContractHelper;
@@ -38,6 +39,7 @@ import io.nuls.contract.model.bo.ContractTempTransaction;
 import io.nuls.contract.model.dto.ContractPackageDto;
 import io.nuls.contract.model.dto.ModuleCmdRegisterDto;
 import io.nuls.contract.model.po.ContractOfflineTxHashPo;
+import io.nuls.contract.rpc.call.TransactionCall;
 import io.nuls.contract.service.ContractService;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
@@ -82,6 +84,8 @@ public class ContractCmd extends BaseCmd {
     private ContractTxValidatorManager contractTxValidatorManager;
     @Autowired
     private CmdRegisterManager cmdRegisterManager;
+    @Autowired
+    private ContractConfig contractConfig;
 
     @CmdAnnotation(cmd = BATCH_BEGIN, version = 1.0, description = "执行合约一个批次的开始通知，生成当前批次的信息/batch begin")
     @Parameters(value = {
@@ -129,7 +133,7 @@ public class ContractCmd extends BaseCmd {
             String hash = tx.getHash().toHex();
             Map<String, Boolean> dealResult = new HashMap<>(2);
             if(!contractHelper.getChain(chainId).getBatchInfo().checkGasCostTotal(hash)) {
-                Log.warn("Exceed tx count [500] or gas limit of block [12,000,000 gas], the contract transaction [{}] revert to package queue.", hash);
+                Log.warn("Exceed tx count [600] or gas limit of block [13,000,000 gas], the contract transaction [{}] revert to package queue.", hash);
                 dealResult.put(RPC_RESULT_KEY, false);
                 return success(dealResult);
             }
@@ -351,6 +355,34 @@ public class ContractCmd extends BaseCmd {
         }
     }
 
+    @CmdAnnotation(cmd = CONTRACT_OFFLINE_TX_LIST, version = 1.0, description = "返回指定区块中合约生成交易（合约返回GAS交易除外）的列表（合约新生成的交易除合约返回GAS交易外，不保存到区块中，合约模块保存了这些交易和指定区块的关系）/contract offline tx hash list")
+    @Parameters(value = {
+        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+        @Parameter(parameterName = "blockHash", parameterType = "String", parameterDes = "区块hash")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+        @Key(name = "txList", valueType = List.class, valueElement = String.class, description = "返回交易序列化数据字符串集合")
+    }))
+    public Response contractOfflineTxList(Map<String, Object> params) {
+        try {
+            Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
+            String blockHash = (String) params.get("blockHash");
+            Result<ContractOfflineTxHashPo> result = contractService.getContractOfflineTxHashList(chainId, blockHash);
+            if (result.isFailed()) {
+                return wrapperFailed(result);
+            }
+            List<byte[]> hashList = result.getData().getHashList();
+            List<String> resultList = new ArrayList<>(hashList.size());
+            for (byte[] hash : hashList) {
+                resultList.add(RPCUtil.encode(hash));
+            }
+            return success(TransactionCall.getTxList(chainId, resultList));
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
     @CmdAnnotation(cmd = INITIAL_ACCOUNT_TOKEN, version = 1.0, description = "初始化账户token信息，节点导入账户时调用/initial account token")
     @Parameters(value = {
         @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
@@ -545,6 +577,31 @@ public class ContractCmd extends BaseCmd {
         }
     }
 
+    @CmdAnnotation(cmd = GET_TX_TYPE_LIST_FROM_CONTRACT_GENERATED, version = 1.0, description = "智能合约模块会新生成的交易类型列表(合约返回GAS交易除外)")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "list", valueType = List.class, valueElement = String.class, description = "智能合约模块会新生成的交易类型列表(合约返回GAS交易除外)")
+    }))
+    public Response getTxTypeListFromContractGenerated(Map<String, Object> params) {
+        try {
+            Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
+            Log.info("The generated list of transaction types is sent to the transaction module");
+            Map<String, Object> resultMap = MapUtil.createHashMap(2);
+            resultMap.put("list", List.of(
+                    TxType.CONTRACT_TRANSFER,
+                    TxType.CONTRACT_CREATE_AGENT,
+                    TxType.CONTRACT_DEPOSIT,
+                    TxType.CONTRACT_CANCEL_DEPOSIT,
+                    TxType.CONTRACT_STOP_AGENT));
+            return success(resultMap);
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
     private String extractMsg(Result result) {
         if(result == null) {
             return EMPTY;

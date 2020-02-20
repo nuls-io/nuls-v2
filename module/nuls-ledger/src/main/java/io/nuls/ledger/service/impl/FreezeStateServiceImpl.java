@@ -60,7 +60,7 @@ public class FreezeStateServiceImpl implements FreezeStateService {
         for (FreezeLockTimeState freezeLockTimeState : timeList) {
             if (freezeLockTimeState.getLockTime() <= nowTime) {
                 //永久锁定的,继续处理
-                if (freezeLockTimeState.getLockTime() == LedgerConstant.PERMANENT_LOCK) {
+                if (LedgerUtil.isPermanentLock(freezeLockTimeState.getLockTime())) {
                     continue;
                 }
                 timeRemove.add(freezeLockTimeState);
@@ -83,7 +83,7 @@ public class FreezeStateServiceImpl implements FreezeStateService {
         for (FreezeLockTimeState freezeLockTimeState : timeList) {
             if ((freezeLockTimeState.getLockTime() <= nowTime) || (freezeLockTimeState.getLockTime() > LedgerConstant.LOCKED_ML_TIME_VALUE && freezeLockTimeState.getLockTime() <= nowTimeMl)) {
                 //永久锁定的,继续处理
-                if (freezeLockTimeState.getLockTime() == LedgerConstant.PERMANENT_LOCK) {
+                if (LedgerUtil.isPermanentLock(freezeLockTimeState.getLockTime())) {
                     continue;
                 }
                 timeRemove.add(freezeLockTimeState);

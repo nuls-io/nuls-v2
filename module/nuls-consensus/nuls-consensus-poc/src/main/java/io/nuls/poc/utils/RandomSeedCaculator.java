@@ -14,17 +14,21 @@ import java.util.List;
  */
 public class RandomSeedCaculator {
 
+    public static final String SHA3 = "SHA3";
+    public static final String KECCAK = "KECCAK";
+    public static final String MERKLE = "MERKLE";
+
     public static byte[] clac(List<byte[]> seeds, String algorithm) {
         if (StringUtils.isBlank(algorithm)) {
-            algorithm = "sha3";
+            algorithm = SHA3;
         }
-        if ("SHA3".equals(algorithm.toUpperCase())) {
+        if (SHA3.equals(algorithm.toUpperCase())) {
             byte[] bytes = ArraysTool.concatenate(seeds.toArray(new byte[seeds.size()][]));
             return Sha3Hash.sha3bytes(bytes, 256);
-        } else if ("KECCAK".equals(algorithm.toUpperCase())) {
+        } else if (KECCAK.equals(algorithm.toUpperCase())) {
             byte[] bytes = ArraysTool.concatenate(seeds.toArray(new byte[seeds.size()][]));
             return KeccakHash.keccakBytes(bytes, 256);
-        } else if ("MERKLE".equals(algorithm.toUpperCase())) {
+        } else if (MERKLE.equals(algorithm.toUpperCase())) {
             return calcMerkleDigestData(seeds);
         }
         return null;

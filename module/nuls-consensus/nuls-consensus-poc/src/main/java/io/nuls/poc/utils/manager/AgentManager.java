@@ -114,6 +114,18 @@ public class AgentManager {
     }
 
     /**
+     * 根据节点地址找节点
+     * */
+    public Agent getAgentByAgentAddress(Chain chain, byte[] agentAddress){
+        for (Agent agent : chain.getAgentList()){
+            if(Arrays.equals(agentAddress, agent.getAgentAddress())){
+                return agent;
+            }
+        }
+        return null;
+    }
+
+    /**
      * AgentPo to Agent
      *
      * @param agentPo agentPo对象/agentPo object

@@ -6,12 +6,10 @@ import io.nuls.api.db.StatisticalService;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.BlockHeaderInfo;
 import io.nuls.api.model.po.ChainStatisticalInfo;
-import io.nuls.api.model.po.mini.MiniBlockHeaderInfo;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.log.Log;
 
 import java.math.BigInteger;
-import java.util.List;
 
 public class StatisticalRewardTask implements Runnable {
 
@@ -46,8 +44,22 @@ public class StatisticalRewardTask implements Runnable {
                 statisticalInfo.setChainId(chainId);
                 statisticalInfo.setLastStatisticalHeight(0);
             }
-            long count = blockService.getBlockPackageTxCount(chainId, statisticalInfo.getLastStatisticalHeight(), headerInfo.getHeight());
-            statisticalInfo.setLastStatisticalHeight(headerInfo.getHeight());
+            //统计已打包区块的交易数量
+            //获取上一次统计截止的区块高度，获取当前最新区块高度，累计之间所有区块的交易数量
+            //超过1000条数据后，每次循环统计1000条
+            long startHeight = statisticalInfo.getLastStatisticalHeight();
+            long endHeight = headerInfo.getHeight();
+            while (endHeight - startHeight > 1000) {
+                long count = blockService.getBlockPackageTxCount(chainId, startHeight, startHeight + 1000);
+                statisticalInfo.setLastStatisticalHeight(startHeight + 1000);
+                statisticalInfo.setTxCount(statisticalInfo.getTxCount() + count);
+                statisticalService.saveChainStatisticalInfo(statisticalInfo);
+                apiCache.getCoinContextInfo().setTxCount(statisticalInfo.getTxCount());
+                startHeight += 1000;
+                Thread.sleep(100);
+            }
+            long count = blockService.getBlockPackageTxCount(chainId, startHeight, endHeight);
+            statisticalInfo.setLastStatisticalHeight(endHeight);
             statisticalInfo.setTxCount(statisticalInfo.getTxCount() + count);
             statisticalService.saveChainStatisticalInfo(statisticalInfo);
 

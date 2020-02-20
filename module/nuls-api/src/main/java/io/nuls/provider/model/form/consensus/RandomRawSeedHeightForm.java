@@ -1,7 +1,7 @@
 /**
  * MIT License
  * <p>
- * Copyright (c) 2017-2019 nuls.io
+ * Copyright (c) 2017-2018 nuls.io
  * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,32 +21,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.contract.config;
+package io.nuls.provider.model.form.consensus;
 
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
+import io.nuls.provider.model.form.Base;
 
 /**
  * @author: PierreLuo
- * @date: 2019-03-15
+ * @date: 2019-12-18
  */
-public class NulsConfig {
+@ApiModel(name = "原始随机种子")
+public class RandomRawSeedHeightForm extends Base {
 
-    public static Charset DEFAULT_ENCODING = StandardCharsets.UTF_8;
+    @ApiModelProperty(description = "起始高度")
+    private long startHeight;
+    @ApiModelProperty(description = "截止高度")
+    private long endHeight;
 
-    /**
-     * 数据库存储地址
-     * database path
-     */
-    public static String DATA_PATH;
+    public long getStartHeight() {
+        return startHeight;
+    }
 
-    /**
-     * 主网链ID（卫星链ID）
-     */
-    public static int MAIN_CHAIN_ID;
+    public void setStartHeight(long startHeight) {
+        this.startHeight = startHeight;
+    }
 
-    /**
-     * 主网链资产ID（卫星链资产ID，NULS资产）
-     */
-    public static int MAIN_ASSETS_ID;
+    public long getEndHeight() {
+        return endHeight;
+    }
+
+    public void setEndHeight(long endHeight) {
+        this.endHeight = endHeight;
+    }
+
 }

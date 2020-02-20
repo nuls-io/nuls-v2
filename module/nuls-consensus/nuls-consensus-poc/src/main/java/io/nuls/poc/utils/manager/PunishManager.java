@@ -488,12 +488,17 @@ public class PunishManager {
      * Conflict Detection of UnPackaged Trading and Red Card Trading
      */
     private void conflictValid(Chain chain, List<Transaction> txList) throws NulsException {
-        Iterator<Transaction> iterator = txList.iterator();
-        Transaction tx;
         /*
          * 红牌惩罚的地址
          * */
         Set<String> redPunishAddressSet = redPunishAddressSet(chain);
+
+        if(redPunishAddressSet.isEmpty()){
+            return;
+        }
+
+        Iterator<Transaction> iterator = txList.iterator();
+        Transaction tx;
 
         /*
          * 无效的节点Hash
@@ -551,11 +556,18 @@ public class PunishManager {
      */
     private Set<String> redPunishAddressSet(Chain chain) throws NulsException {
         Set<String> redPunishAddressSet = new HashSet<>();
+        Transaction redPunishTx;
         RedPunishData redPunishData = new RedPunishData();
-        for (Transaction tx : chain.getRedPunishTransactionList()) {
-            redPunishData.parse(tx.getTxData(), 0);
-            String addressHex = HexUtil.encode(redPunishData.getAddress());
-            redPunishAddressSet.add(addressHex);
+        Iterator<Transaction> iterator = chain.getRedPunishTransactionList().iterator();
+        while (iterator.hasNext()){
+            redPunishTx = iterator.next();
+            redPunishData.parse(redPunishTx.getTxData(), 0);
+            Agent agent = agentManager.getAgentByAgentAddress(chain, redPunishData.getAddress());
+            if(agent == null || agent.getDelHeight() > 0){
+                iterator.remove();
+            }else {
+                redPunishAddressSet.add(HexUtil.encode(redPunishData.getAddress()));
+            }
         }
         return redPunishAddressSet;
     }

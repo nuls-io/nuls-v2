@@ -9,13 +9,18 @@ import io.nuls.api.db.AgentService;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.AssetInfo;
 import io.nuls.api.model.po.CoinContextInfo;
+import io.nuls.api.model.po.DestroyInfo;
 import io.nuls.api.model.rpc.BalanceInfo;
+import io.nuls.api.utils.AssetTool;
 import io.nuls.api.utils.LoggerUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.model.StringUtils;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 public class StatisticalNulsTask implements Runnable {
 
@@ -90,8 +95,31 @@ public class StatisticalNulsTask implements Runnable {
             circulation = circulation.subtract(communityNuls);
             circulation = circulation.subtract(unmapped);
             contextInfo.setCirculation(circulation);
+
+            setDestroyInfo(contextInfo);
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);
         }
+    }
+
+
+    private void setDestroyInfo(CoinContextInfo contextInfo) {
+        List<DestroyInfo> list = new LinkedList<>();
+        //销毁数量
+        byte[] address = AddressTool.getAddress(ApiContext.blackHolePublicKey, chainId);
+        String destroyAddress = AddressTool.getStringAddressByBytes(address);
+        BigInteger destroyNuls = accountService.getAccountTotalBalance(chainId, destroyAddress);
+        String reason = "account set alias destroy nuls";
+        DestroyInfo destroyInfo = new DestroyInfo(destroyAddress, reason, AssetTool.toCoinString(destroyNuls));
+        list.add(destroyInfo);
+
+        reason = "stolen blacklist";
+        for (String blackAddress : AddressTool.BLOCK_HOLE_ADDRESS_SET) {
+            BigInteger blackNuls = accountService.getAccountTotalBalance(chainId, blackAddress);
+            destroyNuls = destroyNuls.add(blackNuls);
+            destroyInfo = new DestroyInfo(blackAddress, reason, AssetTool.toCoinString(blackNuls));
+            list.add(destroyInfo);
+        }
+        contextInfo.setDestroyInfoList(list);
     }
 }

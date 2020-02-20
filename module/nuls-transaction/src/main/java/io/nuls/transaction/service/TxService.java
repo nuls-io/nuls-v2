@@ -60,15 +60,6 @@ public interface TxService {
     VerifyResult verify(Chain chain, Transaction tx);
 
     /**
-     * 验证交易,不执行基础的校验
-     * @param chain
-     * @param tx
-     * @param incloudBasic
-     * @return
-     */
-    VerifyResult verify(Chain chain, Transaction tx, boolean incloudBasic);
-
-    /**
      * 交易基础验证
      *
      * @param chain

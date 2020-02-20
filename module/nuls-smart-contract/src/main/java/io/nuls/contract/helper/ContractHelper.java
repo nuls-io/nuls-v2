@@ -127,7 +127,7 @@ public class ContractHelper {
         }
     }
 
-    private List<ProgramMethod> getAllMethods(int chainId, byte[] contractCode) {
+    public List<ProgramMethod> getAllMethods(int chainId, byte[] contractCode) {
         return getProgramExecutor(chainId).jarMethod(contractCode);
     }
 
@@ -627,6 +627,7 @@ public class ContractHelper {
             String event;
             ContractAddressInfoPo contractAddressInfo;
             if (events != null && size > 0) {
+                Map<String, Boolean> isNRC20Map = new HashMap<>();
                 for (int i = size - 1; i >= 0; i--) {
                     event = events.get(i);
                     // 按照NRC20标准，TransferEvent事件中第一个参数是转出地址-from，第二个参数是转入地址-to, 第三个参数是金额
@@ -638,25 +639,30 @@ public class ContractHelper {
                     if (StringUtils.isBlank(contractAddress)) {
                         continue;
                     }
-                    if (!AddressTool.validAddress(chainId, contractAddress)) {
-                        continue;
-                    }
-                    byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
-                    Result<ContractAddressInfoPo> contractAddressInfoResult = this.getContractAddressInfo(chainId, contractAddressBytes);
-                    contractAddressInfo = contractAddressInfoResult.getData();
-
-                    if (contractAddressInfo == null) {
-                        continue;
+                    Boolean isNRC20 = isNRC20Map.get(contractAddress);
+                    if(isNRC20 == null) {
+                        byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
+                        Result<ContractAddressInfoPo> contractAddressInfoResult = this.getContractAddressInfo(chainId, contractAddressBytes);
+                        contractAddressInfo = contractAddressInfoResult.getData();
+                        if (contractAddressInfo == null) {
+                            continue;
+                        }
+                        isNRC20 = contractAddressInfo.isNrc20();
+                        isNRC20Map.put(contractAddress, isNRC20);
                     }
                     // 事件不是NRC20合约的事件
-                    if (!contractAddressInfo.isNrc20()) {
+                    if (!isNRC20) {
                         continue;
                     }
 
                     // 回滚token余额
                     this.rollbackContractToken(chainId, tokenTransferInfoPo);
-                    contractTokenTransferStorageService.deleteTokenTransferInfo(chainId, Arrays.concatenate(tokenTransferInfoPo.getFrom(), txHashBytes, new VarInt(i).encode()));
-                    contractTokenTransferStorageService.deleteTokenTransferInfo(chainId, Arrays.concatenate(tokenTransferInfoPo.getTo(), txHashBytes, new VarInt(i).encode()));
+                    if(tokenTransferInfoPo.getFrom() != null) {
+                        contractTokenTransferStorageService.deleteTokenTransferInfo(chainId, Arrays.concatenate(tokenTransferInfoPo.getFrom(), txHashBytes, new VarInt(i).encode()));
+                    }
+                    if(tokenTransferInfoPo.getTo() != null) {
+                        contractTokenTransferStorageService.deleteTokenTransferInfo(chainId, Arrays.concatenate(tokenTransferInfoPo.getTo(), txHashBytes, new VarInt(i).encode()));
+                    }
 
                 }
             }

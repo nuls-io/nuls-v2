@@ -86,6 +86,9 @@ public class CreateContractTxValidator {
             return Result.getFailed(CONTRACT_COIN_TO_EMPTY_ERROR);
         } while (false);
 
+        CreateContractData txData = tx.getTxDataObj();
+        byte[] sender = txData.getSender();
+        boolean existSender = false;
         Chain chain = contractHelper.getChain(chainId);
         int assetsId = chain.getConfig().getAssetId();
         for(CoinFrom from : fromList) {
@@ -93,9 +96,15 @@ public class CreateContractTxValidator {
                 Log.error("contract create error: The chain id or assets id of coin from is error.");
                 return Result.getFailed(CONTRACT_COIN_ASSETS_ERROR);
             }
+            if(!existSender && Arrays.equals(from.getAddress(), sender)) {
+                existSender = true;
+            }
         }
-
-        CreateContractData txData = tx.getTxDataObj();
+        Set<String> addressSet = SignatureUtil.getAddressFromTX(tx, chainId);
+        if (!existSender || !addressSet.contains(AddressTool.getStringAddressByBytes(sender))) {
+            Log.error("contract create error: The contract creator is not the transaction creator.");
+            return Result.getFailed(CONTRACT_CREATOR_ERROR);
+        }
         String alias = txData.getAlias();
         if(!FormatValidUtils.validAlias(alias)) {
             Log.error("contract create error: The contract alias format error.");
@@ -109,17 +118,11 @@ public class CreateContractTxValidator {
             Log.error("contract create error: The value of gas limit ranges from 1 to 10,000,000.");
             return Result.getFailed(CONTRACT_GAS_LIMIT_ERROR);
         }
-        byte[] sender = txData.getSender();
+
         byte[] contractAddress = txData.getContractAddress();
         if (!ContractUtil.isLegalContractAddress(chainId, contractAddress)) {
             Log.error("contract create error: Illegal contract address.");
             return Result.getFailed(ILLEGAL_CONTRACT_ADDRESS);
-        }
-        Set<String> addressSet = SignatureUtil.getAddressFromTX(tx, chainId);
-
-        if (!addressSet.contains(AddressTool.getStringAddressByBytes(sender))) {
-            Log.error("contract create error: The contract creator is not the transaction creator.");
-            return Result.getFailed(CONTRACT_CREATOR_ERROR);
         }
 
         BigInteger realFee = tx.getFee();

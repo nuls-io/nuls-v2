@@ -24,7 +24,6 @@
  */
 package io.nuls.ledger.service.impl;
 
-import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -46,7 +45,6 @@ import io.nuls.ledger.utils.CoinDataUtil;
 import io.nuls.ledger.utils.LedgerUtil;
 import io.nuls.ledger.utils.LoggerUtil;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -124,17 +122,6 @@ public class BlockDataServiceImpl implements BlockDataService {
         return repository.getChainsBlockHeight();
     }
 
-    private void dealAssetAddressIndex(Map<String, List<String>> assetAddressIndex, int chainId, int assetId, String address) {
-        String assetIndexKey = chainId + "-" + assetId;
-        List<String> addressList;
-        if (null == assetAddressIndex.get(assetIndexKey)) {
-            addressList = new ArrayList<>();
-            assetAddressIndex.put(assetIndexKey, addressList);
-        } else {
-            addressList = assetAddressIndex.get(assetIndexKey);
-        }
-        addressList.add(address);
-    }
 
     @Override
     public void syncBlockDatas(int addressChainId, long height, Block block) throws Exception {
@@ -162,7 +149,7 @@ public class BlockDataServiceImpl implements BlockDataService {
                     //非本地网络账户地址,不进行处理
                     continue;
                 }
-                dealAssetAddressIndex(assetAddressIndex, from.getAssetsChainId(), from.getAssetsId(), address);
+                LedgerUtil.dealAssetAddressIndex(assetAddressIndex, from.getAssetsChainId(), from.getAssetsId(), address);
                 if (from.getLocked() == 0) {
                     String nonce8Str = LedgerUtil.getNonceEncode(nonce8Bytes);
                     String addressNonce = LedgerUtil.getAccountNoncesStrKey(address, from.getAssetsChainId(), from.getAssetsId(), nonce8Str);
@@ -177,7 +164,7 @@ public class BlockDataServiceImpl implements BlockDataService {
                     continue;
                 }
                 String address = LedgerUtil.getRealAddressStr(to.getAddress());
-                dealAssetAddressIndex(assetAddressIndex, to.getAssetsChainId(), to.getAssetsId(), address);
+                LedgerUtil.dealAssetAddressIndex(assetAddressIndex, to.getAssetsChainId(), to.getAssetsId(), address);
             }
         }
         //存储备份信息

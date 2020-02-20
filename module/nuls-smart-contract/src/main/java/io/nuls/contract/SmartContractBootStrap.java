@@ -6,12 +6,13 @@ import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.base.protocol.RegisterHelper;
 import io.nuls.base.protocol.cmd.TransactionDispatcher;
 import io.nuls.contract.config.ContractConfig;
-import io.nuls.contract.config.NulsConfig;
+import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractDBConstant;
 import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.model.bo.Chain;
-import io.nuls.contract.tx.v1.TransactionCommitAdvice;
+import io.nuls.contract.tx.common.TransactionCommitAdvice;
+import io.nuls.contract.tx.common.TransactionRollbackAdvice;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.LogUtil;
 import io.nuls.contract.util.VMContext;
@@ -36,7 +37,6 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
-import java.util.HashMap;
 import java.util.Map;
 
 import static io.nuls.contract.constant.ContractConstant.*;
@@ -91,10 +91,10 @@ public class SmartContractBootStrap extends RpcModule {
     }
 
     private void initNulsConfig() {
-        NulsConfig.DEFAULT_ENCODING = Charset.forName(contractConfig.getEncoding());
-        NulsConfig.DATA_PATH = contractConfig.getDataPath() + File.separator + ModuleE.SC.name;
-        NulsConfig.MAIN_ASSETS_ID = contractConfig.getMainAssetId();
-        NulsConfig.MAIN_CHAIN_ID = contractConfig.getMainChainId();
+        ContractContext.DEFAULT_ENCODING = Charset.forName(contractConfig.getEncoding());
+        ContractContext.DATA_PATH = contractConfig.getDataPath() + File.separator + ModuleE.SC.name;
+        ContractContext.MAIN_ASSETS_ID = contractConfig.getMainAssetId();
+        ContractContext.MAIN_CHAIN_ID = contractConfig.getMainChainId();
     }
 
     /**
@@ -174,7 +174,7 @@ public class SmartContractBootStrap extends RpcModule {
      * Initialization database
      */
     private void initDB() throws IOException {
-        RocksDBService.init(NulsConfig.DATA_PATH);
+        RocksDBService.init(ContractContext.DATA_PATH);
         ContractUtil.createTable(ContractDBConstant.DB_NAME_CONGIF);
     }
 
@@ -213,7 +213,8 @@ public class SmartContractBootStrap extends RpcModule {
     public boolean doStart() {
         TransactionDispatcher dispatcher = SpringLiteContext.getBean(TransactionDispatcher.class);
         TransactionCommitAdvice commitAdvice = SpringLiteContext.getBean(TransactionCommitAdvice.class);
-        dispatcher.register(commitAdvice, null);
+        TransactionRollbackAdvice rollbackAdvice = SpringLiteContext.getBean(TransactionRollbackAdvice.class);
+        dispatcher.register(commitAdvice, rollbackAdvice);
         Log.info("module chain do start");
         return true;
     }
