@@ -524,9 +524,21 @@ public class WalletRpcHandler {
                     }
                 }
             }
+
+            if (assetInfoMap.isEmpty()) {
+                AssetInfo assetInfo = new AssetInfo();
+                assetInfo.setChainId(ApiContext.defaultChainId);
+                assetInfo.setAssetId(ApiContext.defaultAssetId);
+                assetInfo.setSymbol(ApiContext.defaultSymbol);
+                assetInfo.setDecimals(ApiContext.defaultDecimals);
+                assetInfo.setStatus(ENABLE);
+                assetInfoMap.put(assetInfo.getKey(), assetInfo);
+            }
+
             map.clear();
             map.put("chainInfoMap", chainInfoMap);
             map.put("assetInfoMap", assetInfoMap);
+
             return Result.getSuccess(null).setData(map);
         } catch (NulsException e) {
             return Result.getFailed(e.getErrorCode());

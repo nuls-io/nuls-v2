@@ -22,6 +22,7 @@ import io.nuls.poc.model.bo.tx.txdata.CancelDeposit;
 import io.nuls.poc.model.bo.tx.txdata.Deposit;
 import io.nuls.poc.model.bo.tx.txdata.StopAgent;
 import io.nuls.poc.model.dto.input.*;
+import io.nuls.poc.model.dto.transaction.TransactionDto;
 import io.nuls.poc.model.po.AgentPo;
 import io.nuls.poc.model.po.DepositPo;
 import io.nuls.poc.rpc.call.CallMethodUtils;
@@ -311,6 +312,13 @@ public class ContractServiceImpl implements ContractService {
                     value.add(String.valueOf(agent.getStatus()));
                 }
                 result.put(ConsensusConstant.PARAM_RESULT_VALUE, value);
+                // add by pierre at 2020-03-19 trace the data log
+                try {
+                    chain.getLogger().info("contract cs_getContractDepositInfo, param is {}, data is {}", JSONUtils.obj2json(dto), JSONUtils.obj2json(result));
+                } catch (Exception e) {
+                    chain.getLogger().warn(e.getMessage());
+                }
+                // end code by pierre
                 return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
             }
         }

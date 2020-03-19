@@ -296,7 +296,7 @@ public class AgentManager {
                 memberSet.add(AddressTool.getStringAddressByBytes(deposit.getAddress()));
             }
             agent.setMemberCount(memberSet.size());
-            agent.setTotalDeposit(total);
+            agent.setReTotalDeposit(total);
         }
         if (round == null) {
             return;
