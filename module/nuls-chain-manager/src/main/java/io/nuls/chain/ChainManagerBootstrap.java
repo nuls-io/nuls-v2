@@ -36,6 +36,7 @@ import io.nuls.core.rpc.util.AddressPrefixDatas;
 import io.nuls.core.rpc.util.NulsDateUtils;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -79,10 +80,13 @@ public class ChainManagerBootstrap extends RpcModule {
         BigInteger initNumber = BigIntegerUtils.stringToBigInteger(nulsChainConfig.getNulsAssetInitNumberMax()).multiply(
                 BigInteger.valueOf(decimal));
         nulsChainConfig.setNulsAssetInitNumberMax(BigIntegerUtils.bigIntegerToString(initNumber));
-        BigInteger assetDepositNuls = BigIntegerUtils.stringToBigInteger(nulsChainConfig.getAssetDepositNuls()).multiply(
+        BigInteger assetDepositNuls = nulsChainConfig.getAssetDepositNuls().multiply(
                 BigInteger.valueOf(decimal));
-        nulsChainConfig.setAssetDepositNuls(BigIntegerUtils.bigIntegerToString(assetDepositNuls));
+        nulsChainConfig.setAssetDepositNuls(assetDepositNuls);
         nulsChainConfig.setAssetDepositNulsLockRate(String.valueOf(1-Double.valueOf(nulsChainConfig.getAssetDepositNulsDestroyRate())));
+        int rateToPercent = new BigDecimal(nulsChainConfig.getAssetDepositNulsDestroyRate()).multiply(BigDecimal.valueOf(100)).intValue();
+        nulsChainConfig.setAssetDestroyNuls(nulsChainConfig.getAssetDepositNuls().multiply(BigInteger.valueOf(rateToPercent)).divide(BigInteger.valueOf(100)));
+
         BigInteger assetInitNumberMin = BigIntegerUtils.stringToBigInteger(nulsChainConfig.getAssetInitNumberMin()).multiply(
                 BigInteger.valueOf(decimal));
         nulsChainConfig.setAssetInitNumberMin(BigIntegerUtils.bigIntegerToString(assetInitNumberMin));

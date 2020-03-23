@@ -11,6 +11,8 @@ import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractDBConstant;
 import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.model.bo.Chain;
+import io.nuls.contract.model.bo.ContractTokenAssetsInfo;
+import io.nuls.contract.rpc.call.LedgerCall;
 import io.nuls.contract.tx.common.TransactionCommitAdvice;
 import io.nuls.contract.tx.common.TransactionRollbackAdvice;
 import io.nuls.contract.util.ContractUtil;
@@ -20,8 +22,10 @@ import io.nuls.contract.vm.program.ProgramMethod;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.io.IoUtils;
 import io.nuls.core.log.Log;
+import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.rpc.info.HostInfo;
@@ -37,6 +41,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.Map;
 
 import static io.nuls.contract.constant.ContractConstant.*;
@@ -95,6 +100,9 @@ public class SmartContractBootStrap extends RpcModule {
         ContractContext.DATA_PATH = contractConfig.getDataPath() + File.separator + ModuleE.SC.name;
         ContractContext.MAIN_ASSETS_ID = contractConfig.getMainAssetId();
         ContractContext.MAIN_CHAIN_ID = contractConfig.getMainChainId();
+        if (StringUtils.isNotBlank(contractConfig.getCrossTokenSystemContract())) {
+            ContractContext.CROSS_CHAIN_SYSTEM_CONTRACT = AddressTool.getAddress(contractConfig.getCrossTokenSystemContract());
+        }
     }
 
     /**
@@ -245,6 +253,34 @@ public class SmartContractBootStrap extends RpcModule {
                 Log.info("register tx type to tx module, chain id is {}, result is {}", chainId, registerTx);
             }
         }
+        // add by pierre at 2019-11-02 需要协议升级 done
+        if (module.getName().equals(ModuleE.LG.abbr)) {
+            // 缓存token注册资产的资产ID和token合约地址
+            Map<Integer, Chain> chainMap = chainManager.getChainMap();
+            for (Chain chain : chainMap.values()) {
+                int chainId = chain.getChainId();
+                if(ProtocolGroupManager.getCurrentVersion(chainId) < ContractContext.UPDATE_VERSION_V250) {
+                    continue;
+                }
+                List<Map> regTokenList;
+                try {
+                    regTokenList = LedgerCall.getRegTokenList(chainId);
+                    if(regTokenList != null && !regTokenList.isEmpty()) {
+                        Map<String, ContractTokenAssetsInfo> tokenAssetsInfoMap = chain.getTokenAssetsInfoMap();
+                        Map<String, String> tokenAssetsContractAddressInfoMap = chain.getTokenAssetsContractAddressInfoMap();
+                        regTokenList.stream().forEach(map -> {
+                            int assetId = Integer.parseInt(map.get("assetId").toString());
+                            String tokenContractAddress = map.get("assetOwnerAddress").toString();
+                            tokenAssetsInfoMap.put(tokenContractAddress, new ContractTokenAssetsInfo(chainId, assetId));
+                            tokenAssetsContractAddressInfoMap.put(chainId + "-" + assetId, tokenContractAddress);
+                        });
+                    }
+                } catch (NulsException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        // end code by pierre
         if (module.getName().equals(ModuleE.PU.abbr)) {
             /*
              * 注册协议到协议升级模块

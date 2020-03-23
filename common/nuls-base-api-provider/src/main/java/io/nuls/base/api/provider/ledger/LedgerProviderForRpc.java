@@ -3,8 +3,7 @@ package io.nuls.base.api.provider.ledger;
 import io.nuls.base.api.provider.BaseRpcService;
 import io.nuls.base.api.provider.Provider;
 import io.nuls.base.api.provider.Result;
-import io.nuls.base.api.provider.ledger.facade.AccountBalanceInfo;
-import io.nuls.base.api.provider.ledger.facade.GetBalanceReq;
+import io.nuls.base.api.provider.ledger.facade.*;
 import io.nuls.core.rpc.model.ModuleE;
 
 import java.math.BigInteger;
@@ -21,12 +20,12 @@ public class LedgerProviderForRpc extends BaseRpcService implements LedgerProvid
 
     @Override
     protected <T, R> Result<T> call(String method, Object req, Function<R, Result> callback) {
-        return callRpc(ModuleE.LG.abbr,method,req,callback);
+        return callRpc(ModuleE.LG.abbr, method, req, callback);
     }
 
     @Override
     public Result<AccountBalanceInfo> getBalance(GetBalanceReq req) {
-        Function<Map,Result> callback = res->{
+        Function<Map, Result> callback = res -> {
             BigInteger total = new BigInteger(String.valueOf(res.get("total")));
             BigInteger freeze = new BigInteger(String.valueOf(res.get("freeze")));
             BigInteger available = new BigInteger(String.valueOf(res.get("available")));
@@ -36,6 +35,21 @@ public class LedgerProviderForRpc extends BaseRpcService implements LedgerProvid
             info.setTotal(total);
             return success(info);
         };
-        return call("getBalance",req,callback);
+        return call("getBalance", req, callback);
+    }
+
+    @Override
+    public Result<Map> getLocalAsset(GetAssetReq req) {
+        return callResutlMap("getAssetRegInfoByHash", req);
+    }
+
+    @Override
+    public Result<Map> getContractAsset(ContractAsset req) {
+        return callResutlMap("getAssetContract", req);
+    }
+
+    @Override
+    public Result<Map> regLocalAsset(RegLocalAssetReq req) {
+        return callResutlMap("chainAssetTxReg", req);
     }
 }

@@ -64,7 +64,7 @@ public class ContractTempSendTxTest extends BaseQuery {
         byte[] contractCode = IOUtils.toByteArray(in);
         String remark = "temp contract";
         Object[] args = new Object[]{};
-        Map params = this.makeCreateParams(sender, contractCode, "kqb", remark, args);
+        Map params = this.makeCreateParams(toAddress0, contractCode, "kqb", remark, args);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CREATE));
         assertTrue(cmdResp2, result);
@@ -79,9 +79,9 @@ public class ContractTempSendTxTest extends BaseQuery {
      */
     @Test
     public void callContract() throws Exception {
-        contractAddress = "tNULSeBaN3oxzbKnTtRtuujKB8tnnuZssmzRkU";
-        BigInteger value = BigInteger.ZERO;
-        methodName = "clinitTestRevert";
+        contractAddress = "tNULSeBaN36LmvDrwc4fZ7QJX2krMsmEvVjCEv";
+        BigInteger value = BigInteger.valueOf(11L);
+        methodName = "m3";
         String methodDesc = "";
         String remark = "temp call contract";
         Object[] args = new Object[]{};

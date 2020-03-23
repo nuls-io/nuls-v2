@@ -135,23 +135,10 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         //如果为第一次收到该交易，则向广播过来的节点获取完整跨链交易
         CtxStatusPO ctxStatusPO = ctxStatusService.get(localHash, handleChainId);
         if (ctxStatusPO == null) {
-            //将收到的消息放入缓存中，等到收到交易后再广播该签名给其他节点
-            if (messageBody.getSignature() != null) {
-                if (!chain.getWaitBroadSignMap().keySet().contains(localHash)) {
-                    chain.getWaitBroadSignMap().put(localHash, new HashSet<>());
-                }
-                chain.getWaitBroadSignMap().get(localHash).add(new WaitBroadSignMessage(nodeId, messageBody));
-            }
-            GetCtxMessage responseMessage = new GetCtxMessage();
-            responseMessage.setRequestHash(localHash);
-            if (chain.getCtxStageMap().get(localHash) == null && chain.getCtxStageMap().putIfAbsent(localHash, NulsCrossChainConstant.CTX_STAGE_WAIT_RECEIVE) == null) {
-                NetWorkCall.sendToNode(chainId, responseMessage, nodeId, CommandConstant.GET_CTX_MESSAGE);
-                chain.getLogger().info("第一次收到跨链交易Hash信息,向链内节点{}获取完整跨链交易,Hash:{}\n\n", nodeId, nativeHex);
-            } else {
-                UntreatedMessage untreatedSignMessage = new UntreatedMessage(chainId,nodeId,messageBody,localHash);
-                chain.getSignMessageQueue().offer(untreatedSignMessage);
-            }
-            chain.getLogger().info("链内节点{}广播过来的跨链交易签名消息接收完成，Hash:{},签名:{}\n\n", nodeId, nativeHex, signHex);
+            UntreatedMessage untreatedSignMessage = new UntreatedMessage(chainId,nodeId,messageBody,localHash);
+            chain.getFutureMessageMap().putIfAbsent(localHash, new ArrayList<>());
+            chain.getFutureMessageMap().get(localHash).add(untreatedSignMessage);
+            chain.getLogger().info("当前节点还未确认该跨链交易，缓存签名消息");
             return;
         }
         //如果最新区块表中不存在该交易，则表示该交易已经被打包了，所以不需要再广播该交易的签名

@@ -26,6 +26,7 @@
 package io.nuls.cmd.client;
 
 
+import com.fasterxml.jackson.core.JsonParser;
 import io.nuls.cmd.client.processor.CommandProcessor;
 import io.nuls.cmd.client.processor.account.*;
 import io.nuls.cmd.client.processor.block.GetBestBlockHeaderProcessor;
@@ -34,6 +35,9 @@ import io.nuls.cmd.client.processor.consensus.*;
 import io.nuls.cmd.client.processor.contract.*;
 import io.nuls.cmd.client.processor.crosschain.*;
 import io.nuls.cmd.client.processor.ledger.GetBalanceProcessor;
+import io.nuls.cmd.client.processor.ledger.GetContractCrossAssetProcessor;
+import io.nuls.cmd.client.processor.ledger.GetLocalCrossAssetProcessor;
+import io.nuls.cmd.client.processor.ledger.RegisterLocalAssetProcessor;
 import io.nuls.cmd.client.processor.network.GetNetworkProcessor;
 import io.nuls.cmd.client.processor.system.ExitProcessor;
 import io.nuls.cmd.client.processor.system.HelpProcessor;
@@ -44,6 +48,7 @@ import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.parse.JSONUtils;
 import jline.console.ConsoleReader;
 import jline.console.completer.ArgumentCompleter;
 import jline.console.completer.Completer;
@@ -119,7 +124,10 @@ public class CommandHandler implements InitializingBean {
 
         //get account balance
         register(getBean(GetBalanceProcessor.class));
-
+        //local asset register
+        register(getBean(RegisterLocalAssetProcessor.class));
+        register(getBean(GetContractCrossAssetProcessor.class));
+        register(getBean(GetLocalCrossAssetProcessor.class));
         /**
          * consensus
          */
@@ -175,12 +183,14 @@ public class CommandHandler implements InitializingBean {
         register(getBean(CrossAssetAddProcessor.class));
         register(getBean(CrossAssetDisableProcessor.class));
         register(getBean(UpdateCrossChainProcessor.class));
+        register(getBean(CrossLocalAssetAddProcessor.class));
 
         register(getBean(CreateCrossTxProcessor.class));
         register(getBean(GetCrossChainsSimpleInfoProcessor.class));
         register(getBean(GetCrossChainRegisterInfoProcessor.class));
         register(getBean(GetCrossAssetInfoProcessor.class));
         register(getBean(GetCrossTxStateProcessor.class));
+        JSONUtils.getInstance().configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
     }
 
     public void start() {

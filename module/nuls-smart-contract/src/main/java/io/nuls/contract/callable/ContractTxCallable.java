@@ -133,6 +133,12 @@ public class ContractTxCallable implements Callable<ContractResult> {
                     }
                     checkCreateResult(tx, callableResult, contractResult);
                     break;
+                // add by pierre at 2019-10-20 需要协议升级 done
+                case CROSS_CHAIN:
+                    if(ProtocolGroupManager.getCurrentVersion(chainId) < ContractContext.UPDATE_VERSION_V250) {
+                        break;
+                    }
+                // end code by pierre
                 case CALL_CONTRACT:
                     contractResult = contractExecutor.call(executor, contractData, number, preStateRoot, extractPublicKey(tx));
                     if(!makeContractResultAndCheckGasSerial(tx, contractResult, batchInfo)) {
@@ -150,12 +156,14 @@ public class ContractTxCallable implements Callable<ContractResult> {
             }
         } while (false);
         if (contractResult != null) {
+            // pierre 标记 需要协议升级 done
             if(!contractResult.isSuccess()) {
-            Log.error("Failed TxType [{}] Execute ContractResult is {}", tx.getType(), contractResult.toString());
+                Log.error("Failed TxType [{}] Execute ContractResult is {}", tx.getType(), contractResult.toString());
                 if(ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_V240) {
                     contractResult.setGasUsed(contractData.getGasLimit());
                 }
             }
+            // end code by pierre
         }
         //if (Log.isDebugEnabled()) {
         //    Log.debug("[Per Contract Execution Cost Time] TxType is {}, TxHash is {}, Cost Time is {}", tx.getType(), tx.getHash().toString(), System.currentTimeMillis() - start);

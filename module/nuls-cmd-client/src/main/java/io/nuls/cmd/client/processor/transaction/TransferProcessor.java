@@ -32,7 +32,6 @@ import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.config.Config;
 import io.nuls.cmd.client.processor.CommandProcessor;
-import io.nuls.cmd.client.utils.Na;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 
@@ -59,7 +58,7 @@ public class TransferProcessor extends TransactionBaseProcessor implements Comma
         builder.newLine(getCommandDescription())
                 .newLine("\t<address> \t\tsource address or alias - Required")
                 .newLine("\t<toaddress> \treceiving address or alias - Required")
-                .newLine("\t<amount> \t\tamount, you can have up to 8 valid digits after the decimal point - Required")
+                .newLine("\t<amount> \t\tamount - Required")
                 .newLine("\t[remark] \t\tremark - ");
         return builder.toString();
     }

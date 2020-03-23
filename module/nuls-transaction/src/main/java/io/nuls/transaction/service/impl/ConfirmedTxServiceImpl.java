@@ -4,6 +4,7 @@ import io.nuls.base.RPCUtil;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
+import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.constant.TxType;
@@ -12,10 +13,12 @@ import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
+import io.nuls.transaction.constant.TxContext;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.manager.TxManager;
@@ -113,6 +116,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         Map<String, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         BlockHeader blockHeader;
         NulsLogger logger = chain.getLogger();
+        List<String> crossChainTxList = new ArrayList<>();
         try {
             blockHeader = TxUtil.getInstanceRpcStr(blockHeaderStr, BlockHeader.class);
             logger.debug("[保存区块] 开始 -----高度:{} -----数量:{}", blockHeader.getHeight(), txStrList.size());
@@ -124,6 +128,11 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                 if(TxManager.isSystemSmartContract(chain, tx.getType())) {
                     continue;
                 }
+                // add by pierre at 2019-12-01 把type10交易发送到合约模块筛选处理
+                if(TxType.CROSS_CHAIN == tx.getType()) {
+                    crossChainTxList.add(txStr);
+                }
+                // end code by pierre
                 TxUtil.moduleGroups(chain, moduleVerifyMap, tx.getType(), txStr);
             }
         } catch (Exception e) {
@@ -138,6 +147,13 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         }
         logger.debug("[保存区块] 存已确认交易DB 执行时间:{}", NulsDateUtils.getCurrentTimeMillis()- dbStart);
 
+        // add by pierre at 2019-12-01 把type10交易发送到合约模块筛选处理，需要协议升级 done
+        if (ProtocolGroupManager.getCurrentVersion(chain.getChainId()) >= TxContext.UPDATE_VERSION_V250
+                && !crossChainTxList.isEmpty() && txConfig.isCollectedSmartContractModule()) {
+            List<String> contractList = moduleVerifyMap.computeIfAbsent(ModuleE.SC.abbr, code -> new ArrayList<>());
+            contractList.addAll(crossChainTxList);
+        }
+        // end code by pierre
         long commitStart = NulsDateUtils.getCurrentTimeMillis();
         if (!commitTxs(chain, moduleVerifyMap, blockHeaderStr, true)) {
             removeTxs(chain, txList, blockHeader.getHeight(), false);
@@ -282,6 +298,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         long start = NulsDateUtils.getCurrentTimeMillis();
         List<Transaction> txList = new ArrayList<>();
         List<String> txStrList = new ArrayList<>();
+        List<String> crossChainTxList = new ArrayList<>();
         //组装统一验证参数数据,key为各模块统一验证器cmd
         Map<String, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         try {
@@ -295,6 +312,11 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                 txList.add(tx);
                 String txStr = RPCUtil.encode(tx.serialize());
                 txStrList.add(txStr);
+                // add by pierre at 2019-12-01 把type10交易发送到合约模块筛选处理
+                if(TxType.CROSS_CHAIN == tx.getType()) {
+                    crossChainTxList.add(txStr);
+                }
+                // end code by pierre
                 TxUtil.moduleGroups(chain, moduleVerifyMap, tx);
             }
         } catch (Exception e) {
@@ -313,6 +335,13 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         }
         logger.debug("[回滚区块] 回滚账本 执行时间:{}", NulsDateUtils.getCurrentTimeMillis() - ledgerStart);
 
+        // add by pierre at 2019-12-01 把type10交易发送到合约模块筛选处理，需要协议升级 done
+        if (ProtocolGroupManager.getCurrentVersion(chain.getChainId()) >= TxContext.UPDATE_VERSION_V250
+                && !crossChainTxList.isEmpty() && txConfig.isCollectedSmartContractModule()) {
+            List<String> contractList = moduleVerifyMap.computeIfAbsent(ModuleE.SC.abbr, code -> new ArrayList<>());
+            contractList.addAll(crossChainTxList);
+        }
+        // end code by pierre
         long moduleStart = NulsDateUtils.getCurrentTimeMillis();
         if (!rollbackTxs(chain, moduleVerifyMap, blockHeaderStr, true)) {
             commitLedger(chain, txStrList, blockHeight);

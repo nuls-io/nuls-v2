@@ -12,4 +12,5 @@ public class CmConstants {
     public static  byte[] BLACK_HOLE_ADDRESS = null;
 
     public static final int MIN_SIGNATURE_BFT_RATIO= 66;
+    public static final int LATEST_SUPPORT_VERSION = 5;
 }

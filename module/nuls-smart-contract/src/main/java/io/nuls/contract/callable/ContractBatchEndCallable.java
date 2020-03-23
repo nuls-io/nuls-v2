@@ -50,6 +50,7 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
+import static io.nuls.core.constant.TxType.CROSS_CHAIN;
 import static io.nuls.core.constant.TxType.DELETE_CONTRACT;
 
 
@@ -168,6 +169,11 @@ public class ContractBatchEndCallable implements Callable<ContractPackageDto> {
             if (wrapperTx.getType() == DELETE_CONTRACT) {
                 continue;
             }
+            // add by pierre at 2019-12-03 代币跨链交易的合约调用是系统调用，不计算Gas消耗，跳过
+            if (wrapperTx.getType() == CROSS_CHAIN) {
+                continue;
+            }
+            // end code by pierre
             contractData = wrapperTx.getContractData();
             long realGasUsed = contractResult.getGasUsed();
             long txGasUsed = contractData.getGasLimit();

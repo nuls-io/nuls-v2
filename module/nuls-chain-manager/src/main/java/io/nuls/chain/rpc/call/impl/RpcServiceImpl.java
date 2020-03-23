@@ -446,4 +446,37 @@ public class RpcServiceImpl implements RpcService {
         }
         return null;
     }
+
+    @Override
+    public Asset getLocalAssetByLedger(int chainId, int assetId) throws NulsException {
+        try {
+            Map<String, Object> assetMap = new HashMap<>();
+            assetMap.put("chainId", chainId);
+            assetMap.put("assetId", assetId);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, RpcConstants.CMD_LG_GET_ASSETS_REG_INFO_BY_ID, assetMap);
+            if (!response.isSuccess()) {
+                LoggerUtil.logger().error("获取账本资产信息失败:chainId={},assetId={},error={}", chainId, assetId, response.getResponseComment());
+                return null;
+            }
+            Map<String, Object> result = ResponseUtil.getResultMap(response, RpcConstants.CMD_LG_GET_ASSETS_REG_INFO_BY_ID);
+            if (null == result) {
+                return null;
+            }
+            Asset asset = new Asset();
+            asset.setAssetName(result.get("assetName").toString());
+            asset.setChainId(chainId);
+            asset.setAssetId(assetId);
+            asset.setSymbol(result.get("assetSymbol").toString());
+            asset.setDecimalPlaces(Short.valueOf(result.get("decimalPlace").toString()));
+            BigInteger initNumber = new BigInteger(result.get("initNumber").toString());
+            long decimal = (long) Math.pow(10, Integer.valueOf(asset.getDecimalPlaces()));
+            initNumber = initNumber.multiply(
+                    BigInteger.valueOf(decimal));
+            asset.setInitNumber(initNumber);
+            return asset;
+        } catch (Exception e) {
+            LoggerUtil.logger().error(e);
+        }
+        return null;
+    }
 }

@@ -101,6 +101,21 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
         Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(waitGetContractTx(hash)));
     }
 
+    public void callContractWithParam(Long gasLimit) throws Exception {
+        BigInteger value = BigInteger.ZERO;
+        methodName = "transfer";
+        tokenReceiver = toAddress1;
+        String methodDesc = "";
+        String remark = "call contract test - 空气币转账";
+        String token = BigInteger.valueOf(800L).toString();
+        Map params = this.makeCallParams(sender, value, gasLimit, contractAddress_nrc20, methodName, methodDesc, remark, tokenReceiver, token);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
+        assertTrue(cmdResp2, result);
+        //String hash = (String) result.get("txHash");
+        //Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(waitGetContractTx(hash)));
+    }
+
     /**
      * token转账
      */

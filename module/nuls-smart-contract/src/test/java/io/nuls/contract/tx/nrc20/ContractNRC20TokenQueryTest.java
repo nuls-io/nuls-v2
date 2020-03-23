@@ -213,10 +213,11 @@ public class ContractNRC20TokenQueryTest extends BaseQuery {
      */
     @Test
     public void tokenBalance() throws Exception {
-        Map params = this.makeTokenBalanceParams(contractAddress_nrc200, toAddress1);
+        // tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
+        Map params = this.makeTokenBalanceParams(contractAddress_nrc20, "tNULSeBaMp9wC9PcWEcfesY7YmWrPfeQzkN1xL");
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TOKEN_BALANCE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(TOKEN_BALANCE));
-        Assert.assertTrue(null != result);
+        Assert.assertTrue(JSONUtils.obj2PrettyJson(cmdResp2), null != result);
         Log.info("tokenBalance-result:{}", JSONUtils.obj2PrettyJson(result));
     }
 

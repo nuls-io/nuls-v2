@@ -195,6 +195,10 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         }
     }
 
+    public String getCrossTokenSystemContract() {
+        return vmContext.getCrossTokenSystemContract();
+    }
+
     @Override
     public byte[] getRoot() {
         checkThread();
@@ -523,11 +527,14 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             Map<DataWord, DataWord> contractState = vm.heap.contractState();
             logTime("contract state");
 
+            //Log.error(programInvoke.toString());
             for (Map.Entry<DataWord, DataWord> entry : contractState.entrySet()) {
                 DataWord key = entry.getKey();
                 DataWord value = entry.getValue();
+                //Log.info("add storage row, key: {}, value: {}", key.asString(), value.asString());
                 repository.addStorageRow(contractAddressBytes, key, value);
             }
+            //Log.debug("---------------------\n");
             logTime("add contract state");
 
             if (programInvoke.isCreate()) {

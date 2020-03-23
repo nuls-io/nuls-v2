@@ -261,4 +261,8 @@ public class VMContext {
     public long getCustomMaxViewGasLimit(int chainId) {
         return contractHelper.getChain(chainId).getConfig().getMaxViewGas();
     }
+
+    public String getCrossTokenSystemContract() {
+        return contractConfig.getCrossTokenSystemContract();
+    }
 }

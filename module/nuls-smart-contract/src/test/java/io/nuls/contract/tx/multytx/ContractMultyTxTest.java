@@ -27,10 +27,21 @@ import io.nuls.contract.tx.base.BaseQuery;
 import io.nuls.contract.tx.contractcallcontract.ContractCallContractSendTxTest;
 import io.nuls.contract.tx.nrc20.ContractNRC20TokenSendTxTest;
 import io.nuls.contract.util.Log;
+import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rpc.info.Constants;
+import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import static io.nuls.contract.constant.ContractCmdConstant.IMPUTED_CALL_GAS;
 
 /**
  * @author: PierreLuo
@@ -50,14 +61,40 @@ public class ContractMultyTxTest extends BaseQuery {
 
     @Test
     public void loopCallContract() throws Exception {
-        contractNRC20TokenSendTxTest.setContractAddress_nrc20("tNULSeBaN1MUawR9CoUcNvsB9XtNrytj9cGaNC");
+        contractNRC20TokenSendTxTest.setSender("tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD");
+        contractNRC20TokenSendTxTest.setContractAddress_nrc20("tNULSeBaMypX5atNQku7sLXe5LGqwzuXubUmgx");
         long s = System.currentTimeMillis();
-        int times = 2000;
+        int times = 20000;
         for(int i=0;i<times;i++) {
-            contractNRC20TokenSendTxTest.callContract();
+            contractNRC20TokenSendTxTest.callContractWithParam(20000L);
+            TimeUnit.MILLISECONDS.sleep(800);
         }
         long e = System.currentTimeMillis();
         Log.info("{} times cost time is {}", times, e - s);
+    }
+
+    public long imputedCallGas() throws Exception {
+        BigInteger value = BigInteger.ZERO;
+        String methodName = "transfer";
+        String methodDesc = "";
+        String token = BigInteger.valueOf(800L).toString();
+        Map params = this.makeImputedCallGasParams("tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD", value, "tNULSeBaMypX5atNQku7sLXe5LGqwzuXubUmgx", methodName, methodDesc, toAddress1, token);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, IMPUTED_CALL_GAS, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(IMPUTED_CALL_GAS));
+        Assert.assertTrue(null != result);
+        return Long.parseLong(result.get("gasLimit").toString());
+    }
+
+    private Map makeImputedCallGasParams(String sender, BigInteger value, String contractAddress0, String methodName, String methodDesc, Object... args) {
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.CHAIN_ID, chainId);
+        params.put("sender", sender);
+        params.put("value", value);
+        params.put("contractAddress", contractAddress0);
+        params.put("methodName", methodName);
+        params.put("methodDesc", methodDesc);
+        params.put("args", args);
+        return params;
     }
 
     @Test

@@ -8,8 +8,10 @@ import io.nuls.core.constant.TxType;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.log.Log;
 import io.nuls.ledger.constant.LedgerConstant;
+import io.nuls.ledger.model.tx.txdata.TxLedgerAsset;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -121,8 +123,7 @@ public class LedgerUtil {
      * @return
      */
     public static boolean isCrossTx(int txType) {
-        return txType == TxType.CROSS_CHAIN;
-
+        return (txType == TxType.CROSS_CHAIN || txType == TxType.CONTRACT_TOKEN_CROSS_TRANSFER);
     }
 
     public static String getAccountAssetStrKey(CoinFrom from) {
@@ -155,6 +156,18 @@ public class LedgerUtil {
             return false;
         }
         return AddressTool.BLOCK_HOLE_ADDRESS_SET.contains(AddressTool.getStringAddressByBytes(address));
+    }
+
+    public static TxLedgerAsset map2TxLedgerAsset(Map<String, Object> map) {
+        TxLedgerAsset txLedgerAsset = new TxLedgerAsset();
+        txLedgerAsset.setName(String.valueOf(map.get("assetName")));
+        BigInteger initNumber = new BigInteger(String.valueOf(map.get("initNumber")));
+        txLedgerAsset.setInitNumber(initNumber);
+        txLedgerAsset.setDecimalPlace(Short.valueOf(map.get("decimalPlace").toString()));
+        txLedgerAsset.setSymbol(String.valueOf(map.get("assetSymbol")));
+        txLedgerAsset.setAddress(AddressTool.getAddress(map.get("assetOwnerAddress").toString()));
+        return txLedgerAsset;
+
     }
 
     public static void dealAssetAddressIndex(Map<String, List<String>> assetAddressIndex, int chainId, int assetId, String address) {

@@ -5,9 +5,11 @@ import io.nuls.base.api.provider.crosschain.facade.CreateCrossTxReq;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandResult;
+import io.nuls.cmd.client.utils.AssetsUtil;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.core.annotation.Component;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 /**
@@ -31,7 +33,7 @@ public class CreateCrossTxProcessor extends CrossChainBaseProcessor {
                 .newLine("\t<toAddress>  target address - require")
                 .newLine("\t<assetChainId> transaction asset chainId - require")
                 .newLine("\t<assetId> transaction assetId - require")
-                .newLine("\t<amount> \t\tamount, you can have up to 8 valid digits after the decimal point - required")
+                .newLine("\t<amount> \t\tamount - required")
                 .newLine("\t[remark] \t\tremark ");
         return builder.toString();
     }
@@ -44,12 +46,12 @@ public class CreateCrossTxProcessor extends CrossChainBaseProcessor {
 
     @Override
     public boolean argsValidate(String[] args) {
-        checkArgsNumber(args, 5,6);
+        checkArgsNumber(args, 5, 6);
         checkAddress(config.getChainId(), args[1]);
-        checkArgs(AddressTool.getChainIdByAddress(args[2])!=config.getChainId(), ErrorCode.init("cc_0001").getMsg());
+        checkArgs(AddressTool.getChainIdByAddress(args[2]) != config.getChainId(), ErrorCode.init("cc_0001").getMsg());
         checkIsNumeric(args[3], "assetChainId");
         checkIsNumeric(args[4], "assetId");
-        checkIsNumeric(args[5], "amount");
+        checkIsAmount(args[5], "amount");
         return true;
     }
 
@@ -60,16 +62,22 @@ public class CreateCrossTxProcessor extends CrossChainBaseProcessor {
         String toAddress = args[2];
         Integer assetChainId = Integer.parseInt(args[3]);
         Integer assetId = Integer.parseInt(args[4]);
-        BigInteger amount = new BigInteger(args[5]);
+//        update cmd cross tx amount decimal
+        Integer decimalInt = AssetsUtil.getCrossAssetDecimal(assetChainId, assetId);
+        if (null == decimalInt) {
+            return CommandResult.getFailed("cross asset info not exist.");
+        }
+        BigDecimal decimal = BigDecimal.TEN.pow(decimalInt);
+        BigInteger amount = new BigDecimal(args[5]).multiply(decimal).toBigInteger();
         String remark = null;
         if (args.length == 7) {
             remark = args[6];
         }
         Result<String> result = crossChainProvider.createCrossTx(
                 new CreateCrossTxReq.CreateCrossTxReqBuilder(chainId)
-                    .addForm(assetChainId, assetId, formAddress, getPwd(), amount)
-                    .addTo(assetChainId, assetId, toAddress, amount)
-                    .setRemark(remark).build());
+                        .addForm(assetChainId, assetId, formAddress, getPwd(), amount)
+                        .addTo(assetChainId, assetId, toAddress, amount)
+                        .setRemark(remark).build());
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }
