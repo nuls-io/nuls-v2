@@ -157,8 +157,7 @@ public class MongoAccountServiceImpl implements AccountService {
         List<TxRelationInfo> txRelationInfoList;
         if (end <= unConfirmCount) {
             txRelationInfoList = unConfirmLimitQuery(chainId, filter, start, pageSize);
-        } else if (start - 1 > unConfirmCount) {
-            start = start - 1;
+        } else if (start > unConfirmCount) {
             start = (int) (start - unConfirmCount);
             txRelationInfoList = confirmLimitQuery(chainId, index, filter, start, pageSize);
         } else {
