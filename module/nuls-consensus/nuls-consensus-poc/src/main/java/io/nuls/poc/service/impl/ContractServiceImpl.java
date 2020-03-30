@@ -3,6 +3,8 @@ package io.nuls.poc.service.impl;
 import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
+import io.nuls.base.protocol.Protocol;
+import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.core.basic.Result;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
@@ -299,7 +301,12 @@ public class ContractServiceImpl implements ContractService {
                 value.add(AddressTool.getStringAddressByBytes(agent.getPackingAddress()));
                 value.add(AddressTool.getStringAddressByBytes(agent.getRewardAddress()));
                 value.add(agent.getDeposit().toString());
-                value.add(agent.getTotalDeposit().toString());
+                //协议升级
+                if(ProtocolGroupManager.getCurrentProtocol(chain.getConfig().getChainId()).getVersion() >= 5){
+                    value.add(agentManager.getAgentDeposit(chain, agent).toString());
+                }else{
+                    value.add(agent.getTotalDeposit().toString());
+                }
                 value.add(String.valueOf(agent.getCommissionRate()));
                 value.add(String.valueOf(agent.getTime()));
                 value.add(String.valueOf(agent.getBlockHeight()));
