@@ -302,7 +302,7 @@ public class ContractServiceImpl implements ContractService {
                 value.add(AddressTool.getStringAddressByBytes(agent.getRewardAddress()));
                 value.add(agent.getDeposit().toString());
                 //协议升级
-                if(ProtocolGroupManager.getCurrentProtocol(chain.getConfig().getChainId()).getVersion() >= 5){
+                if(ProtocolGroupManager.getCurrentVersion(chain.getConfig().getChainId()) >= 5){
                     value.add(agentManager.getAgentDeposit(chain, agent).toString());
                 }else{
                     value.add(agent.getTotalDeposit().toString());
