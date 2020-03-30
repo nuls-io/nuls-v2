@@ -203,6 +203,7 @@ public class ContractCmd extends BaseCmd {
             Map<String, Object> resultMap = MapUtil.createHashMap(2);
             resultMap.put("stateRoot", RPCUtil.encode(dto.getStateRoot()));
             resultMap.put("txList", resultTxDataList);
+            resultMap.put("originTxList", dto.getResultOrginTxList());
             // 存放未处理的交易
             resultMap.put("pendingTxHashList", pendingTxHashList);
             Log.info("[End Contract Batch] Gas total cost is [{}], packaging blockHeight is [{}], packaging StateRoot is [{}]", batchInfo.getGasCostTotal(), blockHeight, RPCUtil.encode(dto.getStateRoot()));
@@ -240,6 +241,7 @@ public class ContractCmd extends BaseCmd {
             Map<String, Object> resultMap = MapUtil.createHashMap(2);
             resultMap.put("stateRoot", RPCUtil.encode(dto.getStateRoot()));
             resultMap.put("txList", resultTxDataList);
+            resultMap.put("originTxList", dto.getResultOrginTxList());
             // 存放未处理的交易
             resultMap.put("pendingTxHashList", pendingTxHashList);
             Log.info("[End Package Contract Batch] Gas total cost is [{}], packaging blockHeight is [{}], packaging StateRoot is [{}]", batchInfo.getGasCostTotal(), blockHeight, RPCUtil.encode(dto.getStateRoot()));
