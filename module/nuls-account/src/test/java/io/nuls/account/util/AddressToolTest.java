@@ -19,6 +19,14 @@ import static junit.framework.TestCase.assertTrue;
 public class AddressToolTest {
 
     @Test
+    public void testEckey(){
+        for(int i=0;i<10;i++){
+            ECKey eckey = new ECKey();
+            System.out.println("eckeyCase{\""+eckey.getPrivateKeyAsHex()+"\",\""+eckey.getPublicKeyAsHex()+"\"},");
+        }
+    }
+
+    @Test
     public void test7y(){
         String address = "NULSd6Hgam8YajetEDnCoJBdEFkMNP41PfH7y";
         System.out.println(AddressTool.validAddress(1,address));
