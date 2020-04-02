@@ -362,8 +362,7 @@ public class AgentServiceImpl implements AgentService {
         agentManager.fillAgentList(chain, handleList, null);
         List<AgentDTO> resultList = new ArrayList<>();
         for (int i = start; i < handleList.size() && i < (start + pageSize); i++) {
-            AgentDTO agentDTO = new AgentDTO(handleList.get(i));
-            resultList.add(agentDTO);
+            resultList.add(new AgentDTO(handleList.get(i)));
         }
         page.setList(resultList);
         return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(page);

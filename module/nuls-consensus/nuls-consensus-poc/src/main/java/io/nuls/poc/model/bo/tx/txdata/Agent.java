@@ -129,6 +129,12 @@ public class Agent extends BaseNulsData {
     private transient BigInteger totalDeposit = BigInteger.ZERO;
 
     /**
+     * 总委托金额，用于页面展示（由于2.4.1智能合约BUG引起，临时添加字段，后续版本需要删除）
+     * todo
+     * */
+    private transient BigInteger reTotalDeposit = BigInteger.ZERO;
+
+    /**
      * 交易HASH
      * transaction hash
      * */
@@ -268,6 +274,14 @@ public class Agent extends BaseNulsData {
 
     public void setMemberCount(int memberCount) {
         this.memberCount = memberCount;
+    }
+
+    public BigInteger getReTotalDeposit() {
+        return reTotalDeposit;
+    }
+
+    public void setReTotalDeposit(BigInteger reTotalDeposit) {
+        this.reTotalDeposit = reTotalDeposit;
     }
 
     /**
