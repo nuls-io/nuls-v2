@@ -417,7 +417,7 @@ public class TxServiceImpl implements TxService {
             if (AddressTool.isBlackHoleAddress(TxUtil.blackHolePublicKey, chainId, addrBytes)) {
                 throw new NulsException(TxErrorCode.INVALID_ADDRESS, "address is blackHoleAddress Exception");
             }
-            if (forked && TxUtil.isBlackHoleAddress(addrBytes)) {
+            if (forked && TxUtil.isBlackHoleAddress(chainId, addrBytes)) {
                 throw new NulsException(TxErrorCode.INVALID_ADDRESS, "Address is blackHoleAddress Exception[x]");
             }
             String addr = AddressTool.getStringAddressByBytes(addrBytes);
