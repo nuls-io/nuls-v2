@@ -118,6 +118,7 @@ public class AddressTool {
         BLOCK_HOLE_ADDRESS_SET.add("NULSd6HgbjaWQZrq3CoDZEed9RwAU3zyTeUAP");
         BLOCK_HOLE_ADDRESS_SET.add("NULSd6HgawRRELcuKfvf4TeyidGLqFsHo9hgM");
         BLOCK_HOLE_ADDRESS_SET_5.add("NULSd6HgfYpp9kfgJU5z5q5D4BRHw4rrbGVH3");
+        BLOCK_HOLE_ADDRESS_SET_5.add("NULSd6HgjYXoMgRa89jDeHcEV7B5JCEhhWqm2");
     }
     /**
      * chainId-地址映射表
