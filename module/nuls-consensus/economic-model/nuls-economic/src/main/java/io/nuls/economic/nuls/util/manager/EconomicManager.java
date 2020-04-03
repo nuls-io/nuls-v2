@@ -171,6 +171,7 @@ public class EconomicManager {
         //区块时间是出块结束时间，所以轮次出的第一个块时间是轮次开始时间+出块间隔时间
         long roundStartTime = roundInfo.getRoundStartTime() + consensusConfig.getPackingInterval();
         long roundEndTime = roundInfo.getRoundEndTime();
+        boolean changeInflationInfo = roundStartTime >= lastVisitInflationInfo.getEndTime();
 
         InflationInfo inflationInfo = getInflationInfo(consensusConfig, roundStartTime);
         if(roundEndTime <= inflationInfo.getEndTime()){
@@ -188,7 +189,9 @@ public class EconomicManager {
         currentCount = (roundEndTime - roundStartTime)/consensusConfig.getPackingInterval() + 1;
         Log.info("本轮共识奖励为{}的数量为{}", inflationInfo.getAwardUnit(),currentCount);
         totalAll = totalAll.add(DoubleUtils.mul(new BigDecimal(currentCount), new BigDecimal(inflationInfo.getAwardUnit())));
-
+        if(changeInflationInfo){
+            lastVisitInflationInfo = inflationInfo;
+        }
         return totalAll;
     }
 
@@ -232,7 +235,6 @@ public class EconomicManager {
             inflationInfo.setInflationAmount(inflationAmount);
             inflationInfo.setAwardUnit(calcAwardUnit(consensusConfig,inflationAmount));
         }
-        lastVisitInflationInfo = inflationInfo;
         Log.info("通胀发生改变，当前通胀通胀开始时间{}：，当前阶段通胀结束时间：{},当前阶段通胀总数：{}，当前阶段出块单位奖励：{}", inflationInfo.getStartTime(),inflationInfo.getEndTime(),inflationInfo.getInflationAmount(),inflationInfo.getAwardUnit());
         return inflationInfo;
     }
