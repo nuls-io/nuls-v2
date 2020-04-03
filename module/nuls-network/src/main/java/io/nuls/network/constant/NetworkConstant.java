@@ -59,7 +59,7 @@ public interface NetworkConstant {
      * netty 发起连接的超时时间,单位秒
      * netty connect time out,unit s
      */
-    int CONNETCI_TIME_OUT = 30000;
+    int CONNETCI_TIME_OUT = 6000;
 
     int HIGH_WATER_MARK = 8 * 1024 * 1024;
     int LOW_WATER_MARK = 4 * 1024 * 1024;
