@@ -171,8 +171,9 @@ public class EconomicManager {
         //区块时间是出块结束时间，所以轮次出的第一个块时间是轮次开始时间+出块间隔时间
         long roundStartTime = roundInfo.getRoundStartTime() + consensusConfig.getPackingInterval();
         long roundEndTime = roundInfo.getRoundEndTime();
+
         //区块回滚时导致通缩也回滚
-        boolean changeInflationInfo = roundStartTime >= lastVisitInflationInfo.getEndTime() || roundEndTime <= lastVisitInflationInfo.getStartTime();
+        boolean changeInflationInfo = lastVisitInflationInfo == null || roundStartTime >= lastVisitInflationInfo.getEndTime() || roundEndTime <= lastVisitInflationInfo.getStartTime();
 
         InflationInfo inflationInfo = getInflationInfo(consensusConfig, roundStartTime);
         if( roundStartTime >= inflationInfo.getStartTime() && roundEndTime <= inflationInfo.getEndTime()){
