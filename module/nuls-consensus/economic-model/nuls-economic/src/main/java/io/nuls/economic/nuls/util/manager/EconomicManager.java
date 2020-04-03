@@ -171,10 +171,11 @@ public class EconomicManager {
         //区块时间是出块结束时间，所以轮次出的第一个块时间是轮次开始时间+出块间隔时间
         long roundStartTime = roundInfo.getRoundStartTime() + consensusConfig.getPackingInterval();
         long roundEndTime = roundInfo.getRoundEndTime();
-        boolean changeInflationInfo = roundStartTime >= lastVisitInflationInfo.getEndTime();
+        //区块回滚时导致通缩也回滚
+        boolean changeInflationInfo = roundStartTime >= lastVisitInflationInfo.getEndTime() || roundEndTime <= lastVisitInflationInfo.getStartTime();
 
         InflationInfo inflationInfo = getInflationInfo(consensusConfig, roundStartTime);
-        if(roundEndTime <= inflationInfo.getEndTime()){
+        if( roundStartTime >= inflationInfo.getStartTime() && roundEndTime <= inflationInfo.getEndTime()){
             return DoubleUtils.mul(new BigDecimal(roundInfo.getMemberCount()), new BigDecimal(inflationInfo.getAwardUnit()));
         }
 
@@ -204,6 +205,10 @@ public class EconomicManager {
      * @return                  该时间点通胀信息
      * */
     private static InflationInfo getInflationInfo(ConsensusConfigInfo consensusConfig , long time) throws NulsException {
+        if(lastVisitInflationInfo != null && time >= lastVisitInflationInfo.getStartTime() && time <= lastVisitInflationInfo.getEndTime()){
+            return lastVisitInflationInfo;
+        }
+
         InflationInfo inflationInfo = new InflationInfo();
         long startTime = consensusConfig.getInitTime();
         long endTime = consensusConfig.getInitTime() + consensusConfig.getDeflationTimeInterval();
@@ -211,10 +216,6 @@ public class EconomicManager {
         if(time < startTime){
             time = startTime;
             Log.info("当前时间小于通缩开始时间！" );
-        }
-
-        if(lastVisitInflationInfo != null && time >= lastVisitInflationInfo.getStartTime() && time <= lastVisitInflationInfo.getEndTime()){
-            return lastVisitInflationInfo;
         }
 
         if(time <= endTime){
