@@ -26,6 +26,7 @@
 package io.nuls.ledger;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.protocol.ModuleHelper;
 import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.base.protocol.ProtocolLoader;
 import io.nuls.base.protocol.RegisterHelper;
@@ -95,6 +96,7 @@ public class LedgerBootstrap extends RpcModule {
             LedgerConstant.blackHolePublicKey = HexUtil.decode(ledgerConfig.getBlackHolePublicKey());
             LedgerChainManager ledgerChainManager = SpringLiteContext.getBean(LedgerChainManager.class);
             ledgerChainManager.initChains();
+            ModuleHelper.init(this);
             LoggerUtil.COMMON_LOG.info("Ledger data init complete!");
         } catch (Exception e) {
             LoggerUtil.COMMON_LOG.error(e);
