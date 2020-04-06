@@ -14,7 +14,6 @@ import io.nuls.api.model.po.mini.MiniCoinBaseInfo;
 import io.nuls.api.model.po.mini.MiniTransactionInfo;
 import io.nuls.api.model.rpc.RpcErrorCode;
 import io.nuls.api.model.rpc.RpcResult;
-import io.nuls.api.rpc.controller.runner.QueueContractRun;
 import io.nuls.api.utils.LoggerUtil;
 import io.nuls.api.utils.VerifyUtils;
 import io.nuls.base.RPCUtil;
@@ -29,14 +28,10 @@ import io.nuls.core.core.annotation.Controller;
 import io.nuls.core.core.annotation.RpcMethod;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.StringUtils;
-import io.nuls.core.thread.commom.NulsThreadFactory;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import static io.nuls.api.constant.DBTableConstant.TX_COUNT;
 import static io.nuls.core.constant.TxType.*;
@@ -288,9 +283,9 @@ public class TransactionController {
         }
     }
 
-    private static final String QUEUE_CONTRACT = "NULSd6HgugbpQf76wayhtXyH3obWaLezkTBn5";
-    private static final String QUEUE_CONTRACT_METHOD = "depositForOwn";
-    private static final ExecutorService QUEUE_CONTRACT_SINGLE_THREAD_EXECUTOR = Executors.newSingleThreadExecutor(new NulsThreadFactory("queue_contract"));
+    //private static final String QUEUE_CONTRACT = "NULSd6HgugbpQf76wayhtXyH3obWaLezkTBn5";
+    //private static final String QUEUE_CONTRACT_METHOD = "depositForOwn";
+    //private static final ExecutorService QUEUE_CONTRACT_SINGLE_THREAD_EXECUTOR = Executors.newSingleThreadExecutor(new NulsThreadFactory("queue_contract"));
 
     @RpcMethod("broadcastTx")
     public RpcResult broadcastTx(List<Object> params) {
@@ -367,15 +362,15 @@ public class TransactionController {
                 return RpcResult.failed(result);
             }
 
-            if(call != null) {
-                if(QUEUE_CONTRACT.equals(contract) && QUEUE_CONTRACT_METHOD.equals(call.getMethodName())) {
-                    QUEUE_CONTRACT_SINGLE_THREAD_EXECUTOR.submit(new QueueContractRun(chainId, txHex, txService));
-                    Map<String, Object> map = new HashMap<>(4);
-                    map.put("value", true);
-                    map.put("hash", txHash);
-                    return RpcResult.success(map);
-                }
-            }
+            //if(call != null) {
+            //    if(QUEUE_CONTRACT.equals(contract) && QUEUE_CONTRACT_METHOD.equals(call.getMethodName())) {
+            //        QUEUE_CONTRACT_SINGLE_THREAD_EXECUTOR.submit(new QueueContractRun(chainId, txHex, txService));
+            //        Map<String, Object> map = new HashMap<>(4);
+            //        map.put("value", true);
+            //        map.put("hash", txHash);
+            //        return RpcResult.success(map);
+            //    }
+            //}
 
             result = WalletRpcHandler.broadcastTx(chainId, txHex);
 

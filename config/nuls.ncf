@@ -81,13 +81,14 @@ inflationAmount=41095890410959
 #通胀开始计算时间(单位:S)2020-07-12 00:00:00
 initTime=1594483200
 #通缩比例(如果没有通缩则设为100)
-deflationRatio=99.6
+deflationRatio=0.4
 #通缩间隔时间(单位：S),30天
 deflationTimeInterval=2592000
 
 [smart-contract]
 #合约视图方法调用最大消耗的Gas
 maxViewGas=100000000
+crossTokenSystemContract=NULSd6HgsyGNK1xTcx2GnC9y3Jr1DKd3qL2HS
 
 [public-service]
 #public-service模块对外的rpc端口号
@@ -137,13 +138,5 @@ serverIp=0.0.0.0
 #httpServer的启动port
 serverPort=8004
 
-
-[nuls-module-web-wallet]
-apiModuleApi=http://127.0.0.1:8003/
-webWalletPort=8006
-webWalletHost=0.0.0.0
-
-[nuls-module-explorer]
-apiModuleApi=http://127.0.0.1:8003/
-explorerPort=1999
-explorerHost=0.0.0.0
+[cmd-client]
+clientVersion=2.5.0

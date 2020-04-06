@@ -310,4 +310,18 @@ public class AgentManager {
         }
         agent.setCreditVal(member.getAgent().getRealCreditVal());
     }
+
+    public BigInteger getAgentDeposit(Chain chain, Agent agent){
+        BigInteger totalDeposit = BigInteger.ZERO;
+        for (Deposit deposit : chain.getDepositList()){
+            if (!agent.getTxHash().equals(deposit.getAgentHash())) {
+                continue;
+            }
+            if (deposit.getDelHeight() >= 0) {
+                continue;
+            }
+            totalDeposit = totalDeposit.add(deposit.getDeposit());
+        }
+        return totalDeposit;
+    }
 }

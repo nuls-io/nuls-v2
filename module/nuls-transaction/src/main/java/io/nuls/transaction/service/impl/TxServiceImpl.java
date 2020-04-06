@@ -417,7 +417,7 @@ public class TxServiceImpl implements TxService {
             if (AddressTool.isBlackHoleAddress(TxUtil.blackHolePublicKey, chainId, addrBytes)) {
                 throw new NulsException(TxErrorCode.INVALID_ADDRESS, "address is blackHoleAddress Exception");
             }
-            if (forked && TxUtil.isBlackHoleAddress(addrBytes)) {
+            if (forked && TxUtil.isBlackHoleAddress(chainId, addrBytes)) {
                 throw new NulsException(TxErrorCode.INVALID_ADDRESS, "Address is blackHoleAddress Exception[x]");
             }
             String addr = AddressTool.getStringAddressByBytes(addrBytes);
@@ -1070,12 +1070,18 @@ public class TxServiceImpl implements TxService {
         boolean hasTxbackPackablePool = false;
         /**当contractBefore通知失败,或者contractBatchEnd失败则需要将智能合约交易还回待打包队列*/
         boolean isRollbackPackablePool = false;
+        /**
+         * 当出现智能合约生成的共识交易验证不通过时, 对应的原始交易有限制次数的还回待打包队列
+         * (记录有还回限制次数的合约原始交易hash)
+         */
+        Set<String> setLimitedRollbackOriginTx = new HashSet<>();
         if (!contractBefore) {
             isRollbackPackablePool = true;
         } else {
             try {
                 Map<String, Object> map = ContractCall.contractPackageBatchEnd(chain, blockHeight);
                 List<String> scNewList = (List<String>) map.get("txList");
+                List<String> originTxList = (List<String>) map.get("originTxList");
                 if (null != scNewList) {
                     /**
                      * 1.共识验证 如果有
@@ -1085,13 +1091,16 @@ public class TxServiceImpl implements TxService {
                      */
                     List<String> scNewConsensusList = new ArrayList<>();
                     List<String> scNewTokenCrossTransferList = new ArrayList<>();
-                    for (String scNewTx : scNewList) {
+//                    for (String scNewTx : scNewList) {
+                    for (int i = 0; i < scNewList.size(); i++) {
+                        String scNewTx = scNewList.get(i);
                         int scNewTxType = TxUtil.extractTxTypeFromTx(scNewTx);
                         if (scNewTxType == TxType.CONTRACT_CREATE_AGENT
                                 || scNewTxType == TxType.CONTRACT_DEPOSIT
                                 || scNewTxType == TxType.CONTRACT_CANCEL_DEPOSIT
                                 || scNewTxType == TxType.CONTRACT_STOP_AGENT) {
                             scNewConsensusList.add(scNewTx);
+                            setLimitedRollbackOriginTx.add(originTxList.get(i));
                         } else if (scNewTxType == TxType.CONTRACT_TOKEN_CROSS_TRANSFER) {
                             scNewTokenCrossTransferList.add(scNewTx);
                         }
@@ -1120,12 +1129,14 @@ public class TxServiceImpl implements TxService {
                         }
                     }
                     if (!isRollbackPackablePool) {
+                        // 合约共识 合约跨链都没有失败的交易 则获取使用新的stateRoot
+                        String sr = (String) map.get("stateRoot");
+                        if (null != sr) {
+                            stateRoot = sr;
+                        }
+                        // 加入合约生成交易验证通过集合(将加入打包集合)
                         contractGenerateTxs.addAll(scNewList);
                     }
-                }
-                String sr = (String) map.get("stateRoot");
-                if (null != sr) {
-                    stateRoot = sr;
                 }
                 if (!isRollbackPackablePool) {
                     //如果合约交易不需要全部放回待打包队列,就检查如果存在未执行的智能合约,则放回待打包队列,下次执行。
@@ -1154,16 +1165,19 @@ public class TxServiceImpl implements TxService {
                 isRollbackPackablePool = true;
             }
         }
+        // 判断智能合约出现需要加回待打包队列的情况
         if (isRollbackPackablePool) {
             Iterator<TxPackageWrapper> iterator = packingTxList.iterator();
             while (iterator.hasNext()) {
                 TxPackageWrapper txPackageWrapper = iterator.next();
                 if (TxManager.isUnSystemSmartContract(chain, txPackageWrapper.getTx().getType())) {
-                    /**
-                     * 智能合约出现需要加回待打包队列的情况,没有加回次数限制,
-                     * 不需要比对TX_PACKAGE_ORPHAN_MAP的阈值,直接加入集合,可以与孤儿交易合用一个集合
-                     */
-                    orphanTxSet.add(txPackageWrapper);
+                     if (setLimitedRollbackOriginTx.contains(txPackageWrapper.getTx().getHash().toHex())) {
+                        // 有加回次数限制的交易
+                        addOrphanTxSet(chain, orphanTxSet, txPackageWrapper);
+                    } else {
+                        // 没有加回次数限制的情况, 直接加入集合,可以与孤儿交易合用一个集合
+                        orphanTxSet.add(txPackageWrapper);
+                    }
                     //从可打包集合中删除
                     iterator.remove();
                     if (!hasTxbackPackablePool) {
@@ -1355,7 +1369,7 @@ public class TxServiceImpl implements TxService {
                 it.remove();
                 continue;
             }
-            chain.getLogger().debug("[Package module verify failed] module:{}, module-code:{}, count:{} , return count:{}",
+            chain.getLogger().error("[Package module verify failed] module:{}, module-code:{}, count:{} , return count:{}",
                     BaseConstant.TX_VALIDATOR, moduleCode, moduleList.size(), txHashList.size());
             /**冲突检测有不通过的, 执行清除和未确认回滚 从packingTxList删除*/
             for (int i = 0; i < txHashList.size(); i++) {
@@ -1410,7 +1424,6 @@ public class TxServiceImpl implements TxService {
 
     /**
      * 验证区块中只允许有一个的交易不能有多个
-     *
      */
     public void verifySysTxCount(Set<Integer> onlyOneTxTypes, int type) throws NulsException {
         switch (type) {

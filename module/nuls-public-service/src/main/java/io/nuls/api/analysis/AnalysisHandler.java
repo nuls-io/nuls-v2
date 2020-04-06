@@ -162,7 +162,6 @@ public class AnalysisHandler {
         info.setScriptSign(HexUtil.encode(blockHeader.getBlockSignature().serialize()));
         info.setAgentVersion(extendsData.getBlockVersion());
         info.setRoundStartTime(extendsData.getRoundStartTime());
-        info.setAgentVersion(extendsData.getBlockVersion());
         //是否是种子节点打包的区块
         ApiCache apiCache = CacheManager.getCache(chainId);
         if (apiCache.getChainInfo().getSeeds().contains(info.getPackingAddress()) || info.getHeight() == 0) {
