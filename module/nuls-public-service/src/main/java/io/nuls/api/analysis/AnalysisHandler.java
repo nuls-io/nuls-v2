@@ -160,7 +160,7 @@ public class AnalysisHandler {
         info.setRoundIndex(extendsData.getRoundIndex());
         info.setPackingIndexOfRound(extendsData.getPackingIndexOfRound());
         info.setScriptSign(HexUtil.encode(blockHeader.getBlockSignature().serialize()));
-        info.setAgentVersion(extendsData.getMainVersion());
+        info.setAgentVersion(extendsData.getBlockVersion());
         info.setRoundStartTime(extendsData.getRoundStartTime());
         //是否是种子节点打包的区块
         ApiCache apiCache = CacheManager.getCache(chainId);
