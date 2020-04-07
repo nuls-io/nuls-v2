@@ -389,6 +389,47 @@ public class TransactionController {
         }
     }
 
+    @RpcMethod("broadcastTxWithoutAnyValidation")
+    public RpcResult broadcastTxWithoutAnyValidation(List<Object> params) {
+        if (!ApiContext.isReady) {
+            return RpcResult.chainNotReady();
+        }
+        VerifyUtils.verifyParams(params, 2);
+        int chainId;
+        String txHex;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        try {
+            txHex = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[txHex] is inValid");
+        }
+
+        try {
+            if (!CacheManager.isChainExist(chainId)) {
+                return RpcResult.dataNotFound();
+            }
+
+            Result result = WalletRpcHandler.broadcastTxWithoutAnyValidation(chainId, txHex);
+
+            if (result.isSuccess()) {
+                Transaction tx = new Transaction();
+                tx.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
+                TransactionInfo txInfo = AnalysisHandler.toTransaction(chainId, tx);
+                txService.saveUnConfirmTx(chainId, txInfo, txHex);
+                return RpcResult.success(result.getData());
+            } else {
+                return RpcResult.failed(result);
+            }
+        } catch (Exception e) {
+            LoggerUtil.commonLog.error(e);
+            return RpcResult.failed(RpcErrorCode.TX_PARSE_ERROR);
+        }
+    }
+
     private int extractTxTypeFromTx(String txString) throws NulsException {
         String txTypeHexString = txString.substring(0, 4);
         NulsByteBuffer byteBuffer = new NulsByteBuffer(RPCUtil.decode(txTypeHexString));

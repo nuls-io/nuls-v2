@@ -39,6 +39,10 @@
     "request": {"jsonrpc":"2.0","method":"validateAddress","params":[2, "tNULSeBaMhcccH1KeXhMpH5y3pvtRzatAiuMJk"],"id":1234},
     "response" : {"jsonrpc":"2.0","id":"1234","result":{"value":true}}
   },
+  "getAddressByPublicKey": {
+    "request": {"jsonrpc":"2.0","method":"getAddressByPublicKey","params":[2, "03958b790c331954ed367d37bac901de5c2f06ac8368b37d7bd6cd5ae143c1d7e3"],"id":1234},
+    "response" : {"jsonrpc":"2.0","id":"1234","result":{"address":"tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG"}}
+  },
   "createMultiSignAccount": {
     "request": {"jsonrpc":"2.0","method":"createMultiSignAccount","params":[["03d0593e55a11e841e28c4288aa1181fb151f9d260bab0e006ca158095eb78bb35","02ec141204330f1a028f4e4040582b9568db1f32bc8afc03c7ba6e84b78a72d979"], 2],"id":1234},
     "response" :{"jsonrpc":"2.0","id":"1234","result":{"value":"tNULSeBaNNVVFWD1LjfT29s9BE4SqbzxonBejA"}}
@@ -138,6 +142,10 @@
   },
   "broadcastTxWithNoContractValidation": {
     "request": {"jsonrpc":"2.0","method":"broadcastTxWithNoContractValidation","params":[2,"02003fac2d5d00008c0117020001efa328e600912da9872390a675486ab9e8ec211402000100e0c8100000000000000000000000000000000000000000000000000000000000080000000000000000000117020001f7ec6473df12e751d64cf20a8baa7edd50810f810200010040420f000000000000000000000000000000000000000000000000000000000000000000000000006921023cee1aa6158ee640c8f48f9a9fa9735c8ed5426f2c353b0ed65e123033d820e646304402203c376fd0121fce6228516c011126a8526c5bc543afb7e4272c0de708a55d834f02204ebcd942e019b77bbec37f7e2b77b591ba4ce0fbc5fe9335ab91ae925ded6bed"],"id":1234},
+    "response" : {"jsonrpc":"2.0","id":"1234","result":{"value":true,"hash":"5a91b75e6a6d1f415638375627933b42ce7179b4c6390ca0dcc5a0c2c74bd34a"}}
+  },
+  "broadcastTxWithoutAnyValidation": {
+    "request": {"jsonrpc":"2.0","method":"broadcastTxWithoutAnyValidation","params":[2,"02003fac2d5d00008c0117020001efa328e600912da9872390a675486ab9e8ec211402000100e0c8100000000000000000000000000000000000000000000000000000000000080000000000000000000117020001f7ec6473df12e751d64cf20a8baa7edd50810f810200010040420f000000000000000000000000000000000000000000000000000000000000000000000000006921023cee1aa6158ee640c8f48f9a9fa9735c8ed5426f2c353b0ed65e123033d820e646304402203c376fd0121fce6228516c011126a8526c5bc543afb7e4272c0de708a55d834f02204ebcd942e019b77bbec37f7e2b77b591ba4ce0fbc5fe9335ab91ae925ded6bed"],"id":1234},
     "response" : {"jsonrpc":"2.0","id":"1234","result":{"value":true,"hash":"5a91b75e6a6d1f415638375627933b42ce7179b4c6390ca0dcc5a0c2c74bd34a"}}
   },
   "createAgent": {
