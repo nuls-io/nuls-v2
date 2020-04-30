@@ -63,6 +63,14 @@ public class StatisticalNulsTask implements Runnable {
                 BigInteger blackNuls = accountService.getAccountTotalBalance(chainId, blackAddress);
                 destroyNuls = destroyNuls.add(blackNuls);
             }
+            // add by pierre at 2020-04-02 协议升级黑洞地址
+            if (ApiContext.protocolVersion >= 5) {
+                for (String blackAddress : AddressTool.BLOCK_HOLE_ADDRESS_SET_5) {
+                    BigInteger blackNuls = accountService.getAccountTotalBalance(chainId, blackAddress);
+                    destroyNuls = destroyNuls.add(blackNuls);
+                }
+            }
+            // end code by pierre
             //商务持有数量
             BigInteger businessNuls = BigInteger.ZERO;
             if (!StringUtils.isBlank(ApiContext.BUSINESS_ADDRESS)) {
@@ -120,6 +128,16 @@ public class StatisticalNulsTask implements Runnable {
             destroyInfo = new DestroyInfo(blackAddress, reason, AssetTool.toCoinString(blackNuls));
             list.add(destroyInfo);
         }
+        // add by pierre at 2020-04-02 协议升级黑洞地址
+        if (ApiContext.protocolVersion >= 5) {
+            for (String blackAddress : AddressTool.BLOCK_HOLE_ADDRESS_SET_5) {
+                BigInteger blackNuls = accountService.getAccountTotalBalance(chainId, blackAddress);
+                destroyNuls = destroyNuls.add(blackNuls);
+                destroyInfo = new DestroyInfo(blackAddress, reason, AssetTool.toCoinString(blackNuls));
+                list.add(destroyInfo);
+            }
+        }
+        // end code by pierre
         contextInfo.setDestroyInfoList(list);
     }
 }

@@ -203,7 +203,7 @@ public class AssetRegMngRepositoryImpl implements AssetRegMngRepository, Initial
                 }
             }
         }
-        return 0;
+        return assetId;
     }
 
     @Override

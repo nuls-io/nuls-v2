@@ -147,7 +147,7 @@ public class LedgerUtil {
         return version;
     }
 
-    public static boolean isBlackHoleAddress(byte[] address) {
+    public static boolean isBlackHoleAddress(int chainId, byte[] address) {
         if(address == null) {
             return false;
         }
@@ -155,7 +155,14 @@ public class LedgerUtil {
         if(chainIdByAddress != 1) {
             return false;
         }
-        return AddressTool.BLOCK_HOLE_ADDRESS_SET.contains(AddressTool.getStringAddressByBytes(address));
+        String contractAddress = AddressTool.getStringAddressByBytes(address);
+        // add by pierre at 2020-04-02 协议升级黑洞地址
+        if (LedgerUtil.getVersion(chainId) >= 5) {
+            return AddressTool.BLOCK_HOLE_ADDRESS_SET.contains(contractAddress) ||
+                    AddressTool.BLOCK_HOLE_ADDRESS_SET_5.contains(contractAddress);
+        }
+        // end code by pierre
+        return AddressTool.BLOCK_HOLE_ADDRESS_SET.contains(contractAddress);
     }
 
     public static TxLedgerAsset map2TxLedgerAsset(Map<String, Object> map) {

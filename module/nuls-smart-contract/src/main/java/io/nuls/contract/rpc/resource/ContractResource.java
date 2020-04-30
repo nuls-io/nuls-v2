@@ -898,7 +898,9 @@ public class ContractResource extends BaseCmd {
             ProgramResult programResult = contractHelper.invokeCustomGasViewMethod(chainId, blockHeader, contractAddressBytes, methodName, methodDesc,
                     ContractUtil.twoDimensionalArray(args, method.argsType2Array()));
 
-            Log.info("view method cost gas: " + programResult.getGasUsed());
+            if (Log.isDebugEnabled()) {
+                Log.debug("view method cost gas: " + programResult.getGasUsed());
+            }
 
             if (!programResult.isSuccess()) {
                 Log.error("error msg: {}, statck trace: {}", programResult.getErrorMessage(), programResult.getStackTrace());

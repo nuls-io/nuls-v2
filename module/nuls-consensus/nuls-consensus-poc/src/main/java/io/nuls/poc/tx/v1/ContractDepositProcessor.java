@@ -56,6 +56,7 @@ public class ContractDepositProcessor implements TransactionProcessor {
             result.put("errorCode", ConsensusErrorCode.CHAIN_NOT_EXIST.getCode());
             return result;
         }
+        //chain.getLogger().info("进入版本一验证器" );
         List<Transaction> invalidTxList = new ArrayList<>();
         String errorCode = null;
         Set<NulsHash> invalidHashSet = txValidator.getInvalidAgentHash(txMap.get(TxType.RED_PUNISH),txMap.get(TxType.CONTRACT_STOP_AGENT),txMap.get(TxType.STOP_AGENT),chain);

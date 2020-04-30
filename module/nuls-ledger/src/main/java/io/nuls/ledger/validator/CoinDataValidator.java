@@ -301,7 +301,7 @@ public class CoinDataValidator {
             if (AddressTool.isBlackHoleAddress(LedgerConstant.blackHolePublicKey, chainId, coinFrom.getAddress())) {
                 return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{address, LedgerUtil.getNonceEncode(coinFrom.getNonce()), "address is blackHoleAddress Exception"});
             }
-            if (forked && LedgerUtil.isBlackHoleAddress(coinFrom.getAddress())) {
+            if (forked && LedgerUtil.isBlackHoleAddress(chainId, coinFrom.getAddress())) {
                 return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{address, LedgerUtil.getNonceEncode(coinFrom.getNonce()), "address is blackHoleAddress Exception[x]"});
             }
             String assetKey = LedgerUtil.getKeyStr(address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
@@ -578,7 +578,7 @@ public class CoinDataValidator {
             if (AddressTool.isBlackHoleAddress(LedgerConstant.blackHolePublicKey, chainId, coinFrom.getAddress())) {
                 return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{address, LedgerUtil.getNonceEncode(coinFrom.getNonce()), "address is blackHoleAddress Exception"});
             }
-            if (forked && LedgerUtil.isBlackHoleAddress(coinFrom.getAddress())) {
+            if (forked && LedgerUtil.isBlackHoleAddress(chainId, coinFrom.getAddress())) {
                 return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{address, LedgerUtil.getNonceEncode(coinFrom.getNonce()), "address is blackHoleAddress Exception[x]"});
             }
 

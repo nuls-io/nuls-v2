@@ -203,6 +203,7 @@ public class ContractCmd extends BaseCmd {
             Map<String, Object> resultMap = MapUtil.createHashMap(2);
             resultMap.put("stateRoot", RPCUtil.encode(dto.getStateRoot()));
             resultMap.put("txList", resultTxDataList);
+            resultMap.put("originTxList", dto.getResultOrginTxList());
             // 存放未处理的交易
             resultMap.put("pendingTxHashList", pendingTxHashList);
             Log.info("[End Contract Batch] Gas total cost is [{}], packaging blockHeight is [{}], packaging StateRoot is [{}]", batchInfo.getGasCostTotal(), blockHeight, RPCUtil.encode(dto.getStateRoot()));
@@ -240,6 +241,7 @@ public class ContractCmd extends BaseCmd {
             Map<String, Object> resultMap = MapUtil.createHashMap(2);
             resultMap.put("stateRoot", RPCUtil.encode(dto.getStateRoot()));
             resultMap.put("txList", resultTxDataList);
+            resultMap.put("originTxList", dto.getResultOrginTxList());
             // 存放未处理的交易
             resultMap.put("pendingTxHashList", pendingTxHashList);
             Log.info("[End Package Contract Batch] Gas total cost is [{}], packaging blockHeight is [{}], packaging StateRoot is [{}]", batchInfo.getGasCostTotal(), blockHeight, RPCUtil.encode(dto.getStateRoot()));
@@ -570,7 +572,9 @@ public class ContractCmd extends BaseCmd {
 
             batchExecutor.commit();
             byte[] newStateRootBytes = batchExecutor.getRoot();
-            Log.info("contract trigger payable for consensus rewarding, blockHeight is {}, preStateRoot is {}, currentStateRoot is {}", packageHeight, stateRoot, HexUtil.encode(newStateRootBytes));
+            if(Log.isDebugEnabled()) {
+                Log.debug("contract trigger payable for consensus rewarding, blockHeight is {}, preStateRoot is {}, currentStateRoot is {}", packageHeight, stateRoot, HexUtil.encode(newStateRootBytes));
+            }
             Map rpcResult = new HashMap(2);
             rpcResult.put(RPC_RESULT_KEY, RPCUtil.encode(newStateRootBytes));
             return success(rpcResult);

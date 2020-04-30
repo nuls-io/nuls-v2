@@ -39,11 +39,13 @@ public class ContractPackageDto {
     private byte[] stateRoot;
     private List<byte[]> offlineTxHashList;
     private List<String> resultTxList;
+    private List<String> resultOrginTxList;
     private Map<String, ContractResult> contractResultMap;
 
-    public ContractPackageDto(List<byte[]> offlineTxHashList, List<String> resultTxList) {
+    public ContractPackageDto(List<byte[]> offlineTxHashList, List<String> resultTxList, List<String> resultOrginTxList) {
         this.offlineTxHashList = offlineTxHashList;
         this.resultTxList = resultTxList;
+        this.resultOrginTxList = resultOrginTxList;
     }
 
     public void makeContractResultMap(List<ContractResult> contractResultList) {
@@ -64,6 +66,14 @@ public class ContractPackageDto {
 
     public void setResultTxList(List<String> resultTxList) {
         this.resultTxList = resultTxList;
+    }
+
+    public List<String> getResultOrginTxList() {
+        return resultOrginTxList;
+    }
+
+    public void setResultOrginTxList(List<String> resultOrginTxList) {
+        this.resultOrginTxList = resultOrginTxList;
     }
 
     public List<byte[]> getOfflineTxHashList() {

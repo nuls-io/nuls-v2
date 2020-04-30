@@ -283,6 +283,10 @@ public class TransactionController {
         }
     }
 
+    //private static final String QUEUE_CONTRACT = "NULSd6HgugbpQf76wayhtXyH3obWaLezkTBn5";
+    //private static final String QUEUE_CONTRACT_METHOD = "depositForOwn";
+    //private static final ExecutorService QUEUE_CONTRACT_SINGLE_THREAD_EXECUTOR = Executors.newSingleThreadExecutor(new NulsThreadFactory("queue_contract"));
+
     @RpcMethod("broadcastTx")
     public RpcResult broadcastTx(List<Object> params) {
         if (!ApiContext.isReady) {
@@ -308,6 +312,8 @@ public class TransactionController {
             }
             int type = this.extractTxTypeFromTx(txHex);
             Result result = Result.getSuccess(null);
+            CallContractData call = null;
+            String contract = null, txHash = null;
             switch (type) {
                 case CREATE_CONTRACT:
                     Transaction tx = new Transaction();
@@ -324,14 +330,15 @@ public class TransactionController {
                 case CALL_CONTRACT:
                     Transaction callTx = new Transaction();
                     callTx.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
-                    CallContractData call = new CallContractData();
+                    txHash = callTx.getHash().toHex();
+                    call = new CallContractData();
                     call.parse(new NulsByteBuffer(callTx.getTxData()));
                     result = WalletRpcHandler.validateContractCall(chainId,
                             AddressTool.getStringAddressByBytes(call.getSender()),
                             call.getValue(),
                             call.getGasLimit(),
                             call.getPrice(),
-                            AddressTool.getStringAddressByBytes(call.getContractAddress()),
+                            (contract = AddressTool.getStringAddressByBytes(call.getContractAddress())),
                             call.getMethodName(),
                             call.getMethodDesc(),
                             call.getArgs());
@@ -354,6 +361,16 @@ public class TransactionController {
                 result.setMsg((String) contractMap.get("msg"));
                 return RpcResult.failed(result);
             }
+
+            //if(call != null) {
+            //    if(QUEUE_CONTRACT.equals(contract) && QUEUE_CONTRACT_METHOD.equals(call.getMethodName())) {
+            //        QUEUE_CONTRACT_SINGLE_THREAD_EXECUTOR.submit(new QueueContractRun(chainId, txHex, txService));
+            //        Map<String, Object> map = new HashMap<>(4);
+            //        map.put("value", true);
+            //        map.put("hash", txHash);
+            //        return RpcResult.success(map);
+            //    }
+            //}
 
             result = WalletRpcHandler.broadcastTx(chainId, txHex);
 

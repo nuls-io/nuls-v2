@@ -352,11 +352,16 @@ public class CallMethodUtils {
                 return null;
             }
             Map responseData = (Map) cmdResp.getResponseData();
-            Transaction tx = new Transaction();
             Map realData = (Map) responseData.get("tx_getConfirmedTx");
+            if(realData.get("tx") == null){
+                return null;
+            }
             String txHex = (String) realData.get("tx");
+            Transaction tx = new Transaction();
             if (!StringUtils.isBlank(txHex)) {
                 tx.parse(RPCUtil.decode(txHex), 0);
+            }else{
+                return null;
             }
             return tx;
         } catch (Exception e) {

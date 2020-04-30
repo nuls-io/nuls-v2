@@ -52,6 +52,7 @@ public class AddressTool {
     private static final String[] LENGTHPREFIX = new String[]{"", "a", "b", "c", "d", "e"};
     private static final Map<Integer, byte[]> BLACK_HOLE_ADDRESS_MAP = new ConcurrentHashMap<>();
     public static Set<String> BLOCK_HOLE_ADDRESS_SET = new HashSet<>();
+    public static Set<String> BLOCK_HOLE_ADDRESS_SET_5 = new HashSet<>();
 
     static {
         BLOCK_HOLE_ADDRESS_SET.add("NULSd6HgWAwX7MbvcFSLYqMoyn88d5x3AcUww");
@@ -116,6 +117,8 @@ public class AddressTool {
         BLOCK_HOLE_ADDRESS_SET.add("NULSd6HgWZmG6MSNighAjziatrvuhM1LpCF9o");
         BLOCK_HOLE_ADDRESS_SET.add("NULSd6HgbjaWQZrq3CoDZEed9RwAU3zyTeUAP");
         BLOCK_HOLE_ADDRESS_SET.add("NULSd6HgawRRELcuKfvf4TeyidGLqFsHo9hgM");
+        BLOCK_HOLE_ADDRESS_SET_5.add("NULSd6HgfYpp9kfgJU5z5q5D4BRHw4rrbGVH3");
+        BLOCK_HOLE_ADDRESS_SET_5.add("NULSd6HgjYXoMgRa89jDeHcEV7B5JCEhhWqm2");
     }
     /**
      * chainId-地址映射表

@@ -1,7 +1,7 @@
 [
   {
-    "version": "5",
-    "extend": "",
+    "version": "6",
+    "extend": "1",
     "validTxs": [
       {
         "type": "27",
@@ -12,6 +12,14 @@
         "handler": "AssetRegTransferProcessorV5"
       }
     ],
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  },
+  {
+    "version": "1",
+    "extend": "",
+    "validTxs": [],
     "validMsgs": [],
     "invalidTxs": "",
     "invalidMsgs": ""

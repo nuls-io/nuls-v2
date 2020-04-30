@@ -278,6 +278,7 @@ public class SmartContractBootStrap extends RpcModule {
                 } catch (NulsException e) {
                     throw new RuntimeException(e);
                 }
+                Log.info("initial cross token asset completed");
             }
         }
         // end code by pierre

@@ -10,10 +10,7 @@ import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.model.StringUtils;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -102,6 +99,20 @@ public class ProtocolGroupManager {
             }
             ProtocolGroup protocolGroup = protocolGroupMap.get(chainId);
             Protocol protocol = protocolGroup.getProtocolsMap().get(protocolVersion);
+            //如果不存在给定版本号的协议信息，则取比当前版本号小的最大的一个协议
+            if(protocol == null){
+                Set<Short> sortKey = new TreeSet<>(protocolGroup.getProtocolsMap().keySet());
+                short effectiveVersion = 1;
+                for (Short version : sortKey){
+                    if(version <= protocolVersion){
+                        effectiveVersion = version;
+                    }else{
+                        break;
+                    }
+                }
+                protocol = protocolGroup.getProtocolsMap().get(effectiveVersion);
+            }
+
             if (protocol != null) {
                 protocolGroup.setVersion(protocolVersion);
                 List<TransactionProcessor> transactionProcessors = new ArrayList<>();
