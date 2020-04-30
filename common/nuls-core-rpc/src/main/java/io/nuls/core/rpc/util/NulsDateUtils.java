@@ -25,6 +25,7 @@
 
 package io.nuls.core.rpc.util;
 
+import io.nuls.core.log.logback.LoggerBuilder;
 import io.nuls.core.model.DateUtils;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
@@ -102,8 +103,7 @@ public class NulsDateUtils extends DateUtils implements Runnable {
         params.put(Constants.VERSION_KEY_STR, "1.0");
         try {
             HashMap hashMap = (HashMap) request(ModuleE.NW.abbr, "nw_currentTimeMillis", params, 200L);
-            long time = Long.valueOf(hashMap.get("currentTimeMillis").toString());
-            offset = time - System.currentTimeMillis();
+            offset = Long.valueOf(hashMap.get("offset").toString());
         } catch (NulsException e) {
             e.printStackTrace();
         } catch (NumberFormatException e) {
