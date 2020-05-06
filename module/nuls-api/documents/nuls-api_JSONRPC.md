@@ -2,13 +2,9 @@
 
 **NULS为合作伙伴定制了对接需要的NULS2.0钱包版本，对接钱包内嵌`NULS-API`模块，模块内封装了NULS-SDK的功能，用HTTP协议访问接口，支持`JSON—RPC`和`Restful`两种格式。**
 
-[正试版钱包下载地址](http://nuls-usa-west.oss-us-west-1.aliyuncs.com/2.0/NULS_Wallet_linux64_v2.0.0.tar.gz)
+[主网或测试版钱包下载地址](https://github.com/nuls-io/nuls-v2/releases)
 
-[NULS-API离线操作工具下载地址](http://nuls-cn.oss-cn-hangzhou.aliyuncs.com/2.0/NULS_API-offline_v2.0.0.tar.gz)
-
-[测试版钱包下载地址](http://nuls-usa-west.oss-us-west-1.aliyuncs.com/beta3/NULS_Wallet_linux64_beta3_sdk_provider.tar.gz)
-
-[NULS-API离线操作工具下载地址](http://nuls-usa-west.oss-us-west-1.aliyuncs.com/beta3/nuls-sdk-provider-offline.tar.gz)
+[NULS-API离线操作工具下载地址](http://nuls-cn.oss-cn-hangzhou.aliyuncs.com/2.1/NULS_API-offline_v2.0.0.tar.gz)
 
 ## 设置
 
@@ -17,7 +13,7 @@
 ```
 [nuls-API]
 #httpServer的启动port
-server_port=18004
+serverPort=18004
 ```
 
 ## 说明
@@ -30,7 +26,7 @@ server_port=18004
 
 在线接口：钱包必须正常运行，且能够连接网络中的其他节点，能够正常同步区块和广播数据。在调用在线接口之前，最好是已经同步到最新区块。接口所产生的数据都会保存在钱包中。例如创建账户、修改密码、转账、获取区块头等。
 
-离线接口：NULS2.0提供了一个专门用于[离线操作的NULS-API工具](http://nuls-cn.oss-cn-hangzhou.aliyuncs.com/2.0/NULS_API-offline_v2.0.0.tar.gz)。无需安装钱包，可独立运行在一台没有连接网络的服务器上。用户通过调用离线接口，传入相关的参数，获取返回值，相应数据不会存入钱包。例如离线创建账户、离线组装转账交易、离线签名等。
+离线接口：NULS2.0提供了一个专门用于[离线操作的NULS-API工具](http://nuls-cn.oss-cn-hangzhou.aliyuncs.com/2.1/NULS_API-offline_v2.0.0.tar.gz)。无需安装钱包，可独立运行在一台没有连接网络的服务器上。用户通过调用离线接口，传入相关的参数，获取返回值，相应数据不会存入钱包。例如离线创建账户、离线组装转账交易、离线签名等。
 
 ### 字段描述
 
@@ -531,7 +527,44 @@ _**详细描述: 验证地址是否正确**_
 }
 ```
 
-### 1.10 离线 - 批量创建账户
+### 1.10 根据账户公钥生成账户地址
+#### Cmd: getAddressByPublicKey
+_**详细描述: 根据账户公钥生成账户地址**_
+
+#### 参数列表
+| 参数名       |  参数类型  | 参数描述 | 是否必填 |
+| --------- |:------:| ---- |:----:|
+| chainId   |  int   | 链ID  |  是   |
+| publicKey | string | 账户公钥 |  是   |
+
+#### 返回值
+| 字段名     |  字段类型  | 参数描述 |
+| ------- |:------:| ---- |
+| address | string | 账户地址 |
+#### Example request data: 
+
+```json
+{
+  "jsonrpc" : "2.0",
+  "method" : "getAddressByPublicKey",
+  "params" : [ 2, "03958b790c331954ed367d37bac901de5c2f06ac8368b37d7bd6cd5ae143c1d7e3" ],
+  "id" : 1234
+}
+```
+
+#### Example response data: 
+
+```json
+{
+  "jsonrpc" : "2.0",
+  "id" : "1234",
+  "result" : {
+    "address" : "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG"
+  }
+}
+```
+
+### 1.11 离线 - 批量创建账户
 #### Cmd: createAccountOffline
 _**详细描述: 创建的账户不会保存到钱包中,接口直接返回账户的keystore信息**_
 
@@ -576,7 +609,7 @@ _**详细描述: 创建的账户不会保存到钱包中,接口直接返回账�
 }
 ```
 
-### 1.11 离线获取账户明文私钥
+### 1.12 离线获取账户明文私钥
 #### Cmd: getPriKeyOffline
 _**详细描述: 离线获取账户明文私钥**_
 
@@ -615,7 +648,7 @@ _**详细描述: 离线获取账户明文私钥**_
 }
 ```
 
-### 1.12 离线修改账户密码
+### 1.13 离线修改账户密码
 #### Cmd: resetPasswordOffline
 _**详细描述: 离线修改账户密码**_
 
@@ -655,7 +688,7 @@ _**详细描述: 离线修改账户密码**_
 }
 ```
 
-### 1.13 多账户摘要签名
+### 1.14 多账户摘要签名
 #### Cmd: multiSign
 _**详细描述: 用于签名离线组装的多账户转账交易,调用接口时，参数可以传地址和私钥，或者传地址和加密私钥和加密密码**_
 
@@ -706,7 +739,7 @@ _**详细描述: 用于签名离线组装的多账户转账交易,调用接口�
 }
 ```
 
-### 1.14 明文私钥摘要签名
+### 1.15 明文私钥摘要签名
 #### Cmd: priKeySign
 _**详细描述: 明文私钥摘要签名**_
 
@@ -747,7 +780,7 @@ _**详细描述: 明文私钥摘要签名**_
 }
 ```
 
-### 1.15 密文私钥摘要签名
+### 1.16 密文私钥摘要签名
 #### Cmd: encryptedPriKeySign
 _**详细描述: 密文私钥摘要签名**_
 
@@ -789,7 +822,7 @@ _**详细描述: 密文私钥摘要签名**_
 }
 ```
 
-### 1.16 创建多签账户
+### 1.17 创建多签账户
 #### Cmd: createMultiSignAccount
 _**详细描述: 根据多个账户的公钥创建多签账户，minSigns为多签账户创建交易时需要的最小签名数**_
 
@@ -826,7 +859,7 @@ _**详细描述: 根据多个账户的公钥创建多签账户，minSigns为多�
 }
 ```
 
-### 1.17 离线创建设置别名交易
+### 1.18 离线创建设置别名交易
 #### Cmd: createAliasTx
 _**详细描述: 离线创建设置别名交易**_
 
@@ -868,7 +901,7 @@ _**详细描述: 离线创建设置别名交易**_
 }
 ```
 
-### 1.18 多签账户离线创建设置别名交易
+### 1.19 多签账户离线创建设置别名交易
 #### Cmd: createMultiSignAliasTx
 _**详细描述: 多签账户离线创建设置别名交易**_
 
@@ -912,7 +945,7 @@ _**详细描述: 多签账户离线创建设置别名交易**_
 }
 ```
 
-### 1.19 根据私钥获取账户地址格式
+### 1.20 根据私钥获取账户地址格式
 #### Cmd: getAddressByPriKey
 _**详细描述: 根据私钥获取账户地址格式**_
 
@@ -949,7 +982,24 @@ _**详细描述: 根据私钥获取账户地址格式**_
 }
 ```
 
-### 2.1 根据区块高度查询区块头
+### 2.1 获取本节点的网络状态信息
+#### Cmd: getNetworkInfo
+_**详细描述: 获取本节点的网络状态信息**_
+
+#### 参数列表
+无参数
+
+#### 返回值
+| 字段名 |    字段类型     | 参数描述   |
+| --- |:-----------:| ------ |
+| 返回值 | networkinfo | 返回网络状态 |
+#### Example request data: 
+无
+
+#### Example response data: 
+略
+
+### 2.2 根据区块高度查询区块头
 #### Cmd: getHeaderByHeight
 _**详细描述: 根据区块高度查询区块头**_
 
@@ -1017,7 +1067,7 @@ _**详细描述: 根据区块高度查询区块头**_
 }
 ```
 
-### 2.2 根据区块hash查询区块头
+### 2.3 根据区块hash查询区块头
 #### Cmd: getHeaderByHash
 _**详细描述: 根据区块hash查询区块头**_
 
@@ -1085,7 +1135,7 @@ _**详细描述: 根据区块hash查询区块头**_
 }
 ```
 
-### 2.3 查询最新区块头信息
+### 2.4 查询最新区块头信息
 #### Cmd: getBestBlockHeader
 _**详细描述: 查询最新区块头信息**_
 
@@ -1152,7 +1202,7 @@ _**详细描述: 查询最新区块头信息**_
 }
 ```
 
-### 2.4 查询最新区块
+### 2.5 查询最新区块
 #### Cmd: getBestBlock
 _**详细描述: 包含区块打包的所有交易信息，此接口返回数据量较多，谨慎调用**_
 
@@ -1186,6 +1236,7 @@ _**详细描述: 包含区块打包的所有交易信息，此接口返回数据
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;hash                                                          |     string      | 交易的hash值                                  |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type                                                          |       int       | 交易类型                                      |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;time                                                          |     string      | 交易时间                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;timestamp                                                     |      long       | 交易时间戳                                     |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;blockHeight                                                   |      long       | 区块高度                                      |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;blockHash                                                     |     string      | 区块hash                                    |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remark                                                        |     string      | 交易备注                                      |
@@ -1269,7 +1320,7 @@ _**详细描述: 包含区块打包的所有交易信息，此接口返回数据
 }
 ```
 
-### 2.5 根据区块高度查询区块
+### 2.6 根据区块高度查询区块
 #### Cmd: getBlockByHeight
 _**详细描述: 包含区块打包的所有交易信息，此接口返回数据量较多，谨慎调用**_
 
@@ -1304,6 +1355,7 @@ _**详细描述: 包含区块打包的所有交易信息，此接口返回数据
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;hash                                                          |     string      | 交易的hash值                                  |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type                                                          |       int       | 交易类型                                      |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;time                                                          |     string      | 交易时间                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;timestamp                                                     |      long       | 交易时间戳                                     |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;blockHeight                                                   |      long       | 区块高度                                      |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;blockHash                                                     |     string      | 区块hash                                    |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remark                                                        |     string      | 交易备注                                      |
@@ -1387,7 +1439,7 @@ _**详细描述: 包含区块打包的所有交易信息，此接口返回数据
 }
 ```
 
-### 2.6 根据区块hash查询区块
+### 2.7 根据区块hash查询区块
 #### Cmd: getBlockByHash
 _**详细描述: 包含区块打包的所有交易信息，此接口返回数据量较多，谨慎调用**_
 
@@ -1422,6 +1474,7 @@ _**详细描述: 包含区块打包的所有交易信息，此接口返回数据
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;hash                                                          |     string      | 交易的hash值                                  |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type                                                          |       int       | 交易类型                                      |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;time                                                          |     string      | 交易时间                                      |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;timestamp                                                     |      long       | 交易时间戳                                     |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;blockHeight                                                   |      long       | 区块高度                                      |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;blockHash                                                     |     string      | 区块hash                                    |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remark                                                        |     string      | 交易备注                                      |
@@ -1505,7 +1558,7 @@ _**详细描述: 包含区块打包的所有交易信息，此接口返回数据
 }
 ```
 
-### 2.7 根据区块高度查询区块序列化字符串
+### 2.8 根据区块高度查询区块序列化字符串
 #### Cmd: getBlockSerializationByHeight
 _**详细描述: 包含区块打包的所有交易信息，此接口返回数据量较多，谨慎调用**_
 
@@ -1540,7 +1593,7 @@ _**详细描述: 包含区块打包的所有交易信息，此接口返回数据
 }
 ```
 
-### 2.8 根据区块hash查询区块序列化字符串
+### 2.9 根据区块hash查询区块序列化字符串
 #### Cmd: getBlockSerializationByHash
 _**详细描述: 包含区块打包的所有交易信息，此接口返回数据量较多，谨慎调用**_
 
@@ -1575,7 +1628,7 @@ _**详细描述: 包含区块打包的所有交易信息，此接口返回数据
 }
 ```
 
-### 2.9 获取最新主链高度
+### 2.10 获取最新主链高度
 #### Cmd: getLatestHeight
 _**详细描述: 获取最新主链高度**_
 
@@ -1610,6 +1663,7 @@ _**详细描述: 根据hash获取交易**_
 | hash                                                          |     string      | 交易的hash值                                  |
 | type                                                          |       int       | 交易类型                                      |
 | time                                                          |     string      | 交易时间                                      |
+| timestamp                                                     |      long       | 交易时间戳                                     |
 | blockHeight                                                   |      long       | 区块高度                                      |
 | blockHash                                                     |     string      | 区块hash                                    |
 | remark                                                        |     string      | 交易备注                                      |
@@ -1788,7 +1842,46 @@ _**详细描述: 广播离线组装的交易(不验证合约),成功返回true,�
 }
 ```
 
-### 3.5 单笔转账
+### 3.5 广播交易(不验证)
+#### Cmd: broadcastTxWithoutAnyValidation
+_**详细描述: 广播离线组装的交易(不验证),成功返回true,失败返回错误提示信息**_
+
+#### 参数列表
+| 参数名     |  参数类型  | 参数描述         | 是否必填 |
+| ------- |:------:| ------------ |:----:|
+| chainId |  int   | 链id          |  是   |
+| tx      | string | 交易序列化16进制字符串 |  是   |
+
+#### 返回值
+| 字段名   |  字段类型   | 参数描述   |
+| ----- |:-------:| ------ |
+| value | boolean | 是否成功   |
+| hash  | string  | 交易hash |
+#### Example request data: 
+
+```json
+{
+  "jsonrpc" : "2.0",
+  "method" : "broadcastTxWithoutAnyValidation",
+  "params" : [ 2, "02003fac2d5d00008c0117020001efa328e600912da9872390a675486ab9e8ec211402000100e0c8100000000000000000000000000000000000000000000000000000000000080000000000000000000117020001f7ec6473df12e751d64cf20a8baa7edd50810f810200010040420f000000000000000000000000000000000000000000000000000000000000000000000000006921023cee1aa6158ee640c8f48f9a9fa9735c8ed5426f2c353b0ed65e123033d820e646304402203c376fd0121fce6228516c011126a8526c5bc543afb7e4272c0de708a55d834f02204ebcd942e019b77bbec37f7e2b77b591ba4ce0fbc5fe9335ab91ae925ded6bed" ],
+  "id" : 1234
+}
+```
+
+#### Example response data: 
+
+```json
+{
+  "jsonrpc" : "2.0",
+  "id" : "1234",
+  "result" : {
+    "value" : true,
+    "hash" : "5a91b75e6a6d1f415638375627933b42ce7179b4c6390ca0dcc5a0c2c74bd34a"
+  }
+}
+```
+
+### 3.6 单笔转账
 #### Cmd: transfer
 _**详细描述: 发起单账户单资产的转账交易**_
 
@@ -1830,7 +1923,7 @@ _**详细描述: 发起单账户单资产的转账交易**_
 }
 ```
 
-### 3.6 离线组装转账交易
+### 3.7 离线组装转账交易
 #### Cmd: createTransferTxOffline
 _**详细描述: 根据inputs和outputs离线组装转账交易，用于单账户或多账户的转账交易。交易手续费为inputs里本链主资产金额总和，减去outputs里本链主资产总和**_
 
@@ -1894,7 +1987,7 @@ _**详细描述: 根据inputs和outputs离线组装转账交易，用于单账�
 }
 ```
 
-### 3.7 计算离线创建转账交易所需手续费
+### 3.8 计算离线创建转账交易所需手续费
 #### Cmd: calcTransferTxFee
 _**详细描述: 计算离线创建转账交易所需手续费**_
 
@@ -1935,7 +2028,7 @@ _**详细描述: 计算离线创建转账交易所需手续费**_
 }
 ```
 
-### 3.8 离线组装转账交易
+### 3.9 离线组装转账交易
 #### Cmd: createMultiSignTransferTxOffline
 _**详细描述: 根据inputs和outputs离线组装转账交易，用于单账户或多账户的转账交易。交易手续费为inputs里本链主资产金额总和，减去outputs里本链主资产总和**_
 
@@ -2000,7 +2093,7 @@ _**详细描述: 根据inputs和outputs离线组装转账交易，用于单账�
 }
 ```
 
-### 3.9 计算离线创建转账交易所需手续费
+### 3.10 计算离线创建转账交易所需手续费
 #### Cmd: calcMultiSignTransferTxFee
 _**详细描述: 计算离线创建转账交易所需手续费**_
 

@@ -242,8 +242,9 @@ public class MainNetServiceImpl implements MainNetService {
         String contractAddress = (String) params.get("contractAddress");
         String contractToken = (String) params.get("contractNonce");
         String contractBalance = (String) params.get("contractBalance");
+        long blockTime = Long.valueOf(params.get("blockTime").toString());
         Transaction tx = new Transaction(TxType.CONTRACT_TOKEN_CROSS_TRANSFER);
-        tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
+        tx.setTime(blockTime);
         tx.setTxData(ByteUtils.intToBytes(TxType.CONTRACT_TOKEN_CROSS_TRANSFER));
         CoinData coinData = new CoinData();
         List<CoinFrom> coinFromList = new ArrayList<>();

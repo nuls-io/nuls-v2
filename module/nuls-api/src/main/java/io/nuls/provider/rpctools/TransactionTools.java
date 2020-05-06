@@ -56,6 +56,20 @@ public class TransactionTools implements CallRpc {
     }
 
     /**
+     * 广播新交易
+     */
+    public Result broadcastTxWithoutAnyValidation(int chainId, String txStr) {
+        Map<String, Object> params = new HashMap<>(2);
+        params.put("chainId", chainId);
+        params.put("tx", txStr);
+        try {
+            return callRpc(ModuleE.TX.abbr, "tx_broadcast", params, (Function<Map<String, Object>, Result>) res -> new Result(res));
+        } catch (NulsRuntimeException e) {
+            return Result.fail(e.getCode(), e.getMessage());
+        }
+    }
+
+    /**
      * 向交易模块注册交易
      * Register transactions with the transaction module
      */

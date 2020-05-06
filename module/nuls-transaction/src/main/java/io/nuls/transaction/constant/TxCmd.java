@@ -67,6 +67,8 @@ public final class TxCmd {
 
     public static final String TX_NEWTX = "tx_newTx";
 
+    public static final String TX_BROADCAST = "tx_broadcast";
+
     public static final String TX_BASE_VALIDATE = "tx_baseValidateTx";
 
     /**
