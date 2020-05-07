@@ -21,12 +21,12 @@ public class SignMessageByzantineHandler implements Runnable{
 
     @Override
     public void run() {
-        while (chain.getSignMessageQueue() != null) {
+        while (chain.getSignMessageByzantineQueue() != null) {
             try {
                 UntreatedMessage untreatedMessage = chain.getSignMessageByzantineQueue().take();
                 String nativeHex = untreatedMessage.getCacheHash().toHex();
                 chain.getLogger().debug("开始对链内节点{}广播过来的跨链交易签名消息做签名拜占庭验证,Hash：{}", untreatedMessage.getNodeId(), nativeHex);
-                MessageUtil.handleSignMessageByzantine(chain, untreatedMessage.getCacheHash(), untreatedMessage.getChainId(), untreatedMessage.getNodeId(),(BroadCtxSignMessage)untreatedMessage.getMessage(), nativeHex);
+                MessageUtil.handleSignMessage(chain, untreatedMessage.getCacheHash(), untreatedMessage.getChainId(), untreatedMessage.getNodeId(),(BroadCtxSignMessage)untreatedMessage.getMessage(), nativeHex);
             } catch (Exception e) {
                 chain.getLogger().error(e);
             }

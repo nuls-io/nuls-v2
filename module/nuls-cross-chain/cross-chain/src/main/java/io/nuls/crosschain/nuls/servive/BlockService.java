@@ -16,4 +16,12 @@ public interface BlockService {
      * @return        消息处理结果
      * */
     Result newBlockHeight(Map<String,Object> params);
+
+    /**
+     * 节点同步状态变更
+     * Node synchronization state change
+     * @param params  参数
+     * @return        消息处理结果
+     * */
+    Result syncStatusUpdate(Map<String,Object> params);
 }

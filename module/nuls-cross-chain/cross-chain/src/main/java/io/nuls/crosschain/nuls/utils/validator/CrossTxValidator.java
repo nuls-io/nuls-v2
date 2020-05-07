@@ -69,62 +69,6 @@ public class CrossTxValidator {
      * @return boolean
      */
     @SuppressWarnings("unchecked")
-    public boolean packageValid(Chain chain, Transaction tx, BlockHeader blockHeader) throws NulsException, IOException{
-        CoinData coinData = tx.getCoinDataInstance();
-        int fromChainId = AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress());
-        int toChainId = AddressTool.getChainIdByAddress(coinData.getTo().get(0).getAddress());
-        if(chain.getChainId() == fromChainId){
-            if(!SignatureUtil.validateCtxSignture(tx)){
-                chain.getLogger().error("Signature verification failed");
-                throw new NulsException(NulsCrossChainErrorCode.SIGNATURE_ERROR);
-            }
-        }else{
-            Transaction realCtx = tx;
-            List<String> verifierList;
-            int minPassCount;
-            int verifierChainId = fromChainId;
-            ChainInfo chainInfo;
-            if(chain.getChainId() == toChainId && !config.isMainNet()){
-                verifierChainId = config.getMainChainId();
-                realCtx = TxUtil.friendConvertToMain(chain, tx, null, TxType.CROSS_CHAIN);
-                realCtx.setTransactionSignature(tx.getTransactionSignature());
-            }
-            chainInfo = chainManager.getChainInfo(verifierChainId);
-            if(chainInfo == null){
-                chain.getLogger().error("链未注册,chainId:{}",verifierChainId);
-                throw new NulsException(NulsCrossChainErrorCode.CHAIN_UNREGISTERED);
-            }
-            verifierList = new ArrayList<>(chainInfo.getVerifierList());
-            if(verifierList.isEmpty()){
-                chain.getLogger().error("链还未注册验证人,chainId:{}",verifierChainId);
-                throw new NulsException(NulsCrossChainErrorCode.CHAIN_UNREGISTERED_VERIFIER);
-            }
-            minPassCount = chainInfo.getMinPassCount();
-            if(!signByzantineVerify(chain, realCtx, verifierList, minPassCount, verifierChainId)){
-                chain.getLogger().info("签名拜占庭验证失败！");
-                throw new NulsException(NulsCrossChainErrorCode.CTX_SIGN_BYZANTINE_FAIL);
-            }
-            if(config.isMainNet()){
-                if(!ChainManagerCall.verifyCtxAsset(fromChainId, tx)){
-                    chain.getLogger().info("跨链资产验证失败！");
-                    throw new NulsException(NulsCrossChainErrorCode.CROSS_ASSERT_VALID_ERROR);
-                }
-            }
-        }
-        return true;
-    }
-
-
-    /**
-     * 验证交易
-     * Verifying transactions
-     *
-     * @param chain           链ID/chain id
-     * @param tx              交易/transaction info
-     * @param blockHeader     区块头信息/block header info
-     * @return boolean
-     */
-    @SuppressWarnings("unchecked")
     public boolean validateTx(Chain chain, Transaction tx, BlockHeader blockHeader) throws NulsException, IOException{
         //判断这笔跨链交易是否属于本链
         CoinData coinData = tx.getCoinDataInstance();
@@ -147,7 +91,12 @@ public class CrossTxValidator {
                 transactionSignature.parse(tx.getTransactionSignature(), 0);
                 String signAddress;
                 boolean verifyResult = false;
+                byte[] txHashByte = tx.getHash().getBytes();
                 for (P2PHKSignature signature : transactionSignature.getP2PHKSignatures()){
+                    if (!ECKey.verify(txHashByte, signature.getSignData().getSignBytes(), signature.getPublicKey())) {
+                        chain.getLogger().error("Signature verification failed");
+                        throw new NulsException(new Exception("Transaction signature error !"));
+                    }
                     signAddress = AddressTool.getStringAddressByBytes(AddressTool.getAddress(signature.getPublicKey(), chain.getChainId()));
                     fromAddressSet.remove(signAddress);
                     if(fromAddressSet.isEmpty()){
@@ -156,10 +105,6 @@ public class CrossTxValidator {
                     }
                 }
                 if(!verifyResult){
-                    throw new NulsException(NulsCrossChainErrorCode.SIGNATURE_ERROR);
-                }
-                if(!validateCtxSignature(tx.getHash().getBytes(), transactionSignature)){
-                    chain.getLogger().error("Signature verification failed");
                     throw new NulsException(NulsCrossChainErrorCode.SIGNATURE_ERROR);
                 }
             }
@@ -176,7 +121,7 @@ public class CrossTxValidator {
                 if(tx.getTxData() != null){
                     txType = ByteUtils.bytesToInt(tx.getTxData());
                 }
-                realCtx = TxUtil.friendConvertToMain(chain, tx, null, txType);
+                realCtx = TxUtil.friendConvertToMain(chain, tx, txType, true);
             }
             chainInfo = chainManager.getChainInfo(verifierChainId);
             if(chainInfo == null){
@@ -195,7 +140,7 @@ public class CrossTxValidator {
                 throw new NulsException(NulsCrossChainErrorCode.SIGNATURE_ERROR);
             }
 
-            if(!signByzantineVerify(chain, realCtx, verifierList, minPassCount, verifierChainId)){
+            if(!TxUtil.signByzantineVerify(chain, realCtx, verifierList, minPassCount, verifierChainId)){
                 chain.getLogger().info("签名拜占庭验证失败！");
                 throw new NulsException(NulsCrossChainErrorCode.CTX_SIGN_BYZANTINE_FAIL);
             }
@@ -284,56 +229,6 @@ public class CrossTxValidator {
             if(BigIntegerUtils.isLessThan(actualFee, targetFee)){
                 chain.getLogger().error("手续费不足");
                 throw new NulsException(NulsCrossChainErrorCode.INSUFFICIENT_FEE);
-            }
-        }
-        return true;
-    }
-
-    /**
-     * 跨链交易签名拜占庭验证
-     * Byzantine Verification of Cross-Chain Transaction Signature
-     *
-     * */
-    private boolean signByzantineVerify(Chain chain,Transaction ctx,  List<String> verifierList,int byzantineCount,int verifierChainId)throws NulsException{
-        TransactionSignature transactionSignature = new TransactionSignature();
-        try {
-            transactionSignature.parse(ctx.getTransactionSignature(),0);
-        }catch (NulsException e){
-            chain.getLogger().error(e);
-            throw e;
-        }
-        if(transactionSignature.getP2PHKSignatures().size() < byzantineCount){
-            chain.getLogger().error("跨链交易签名数量小于拜占庭数量，Hash:{},signCount:{},byzantineCount:{}", ctx.getHash().toHex(),transactionSignature.getP2PHKSignatures().size(),byzantineCount);
-            return false;
-        }
-        chain.getLogger().debug("当前验证人列表：{}",verifierList.toString());
-        Iterator<P2PHKSignature> iterator = transactionSignature.getP2PHKSignatures().iterator();
-        int passCount = 0;
-        Set<String> passedAddress  = new HashSet<>();
-        while (iterator.hasNext()){
-            P2PHKSignature signature = iterator.next();
-            for (String verifier:verifierList) {
-                if(passedAddress.contains(verifier)){
-                    continue;
-                }
-                if(Arrays.equals(AddressTool.getAddress(signature.getPublicKey(), verifierChainId), AddressTool.getAddress(verifier))){
-                    passedAddress.add(verifier);
-                    passCount++;
-                    break;
-                }
-            }
-        }
-        if(passCount < byzantineCount){
-            chain.getLogger().error("跨链交易签名验证通过数小于拜占庭数量，Hash:{},passCount:{},byzantineCount:{}", ctx.getHash().toHex(),passCount,byzantineCount);
-            return false;
-        }
-        return true;
-    }
-
-    private boolean validateCtxSignature(byte[] txHash,TransactionSignature transactionSignature)throws NulsException{
-        for (P2PHKSignature signature : transactionSignature.getP2PHKSignatures()) {
-            if (!ECKey.verify(txHash, signature.getSignData().getSignBytes(), signature.getPublicKey())) {
-                throw new NulsException(new Exception("Transaction signature error !"));
             }
         }
         return true;

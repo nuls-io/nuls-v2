@@ -46,7 +46,7 @@ public enum TxStatusEnum {
      * 已打包状态
      * packaged and saved
      */
-    COMMITTED((byte)2);
+    BYZANTINE_COMPLETE((byte)2);
 
     private byte status;
 

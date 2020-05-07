@@ -9,14 +9,6 @@ import io.nuls.crosschain.base.message.*;
  */
 public interface ProtocolService {
     /**
-     * 链内节点获取完整跨链交易
-     * @param chainId     消息所属链Id
-     * @param nodeId      发送此消息的节点Id
-     * @param messageBody 消息体
-     * */
-    void getCtx(int chainId, String nodeId, GetCtxMessage messageBody);
-
-    /**
      * 其他链向本链获取完整跨链交易
      * @param chainId     消息所属链Id
      * @param nodeId      发送此消息的节点Id
@@ -49,13 +41,6 @@ public interface ProtocolService {
      * */
     void getCirculation(int chainId, String nodeId, GetCirculationMessage messageBody);
 
-    /**
-     * 接收链内节点发送的完整跨链交易
-     * @param chainId     消息所属链Id
-     * @param nodeId      发送此消息的节点Id
-     * @param messageBody 消息体
-     * */
-    void receiveCtx(int chainId, String nodeId, NewCtxMessage messageBody);
 
     /**
      * 接收其他链发送的完整跨链交易

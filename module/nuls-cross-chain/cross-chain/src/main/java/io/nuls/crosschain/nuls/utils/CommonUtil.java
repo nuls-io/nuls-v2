@@ -101,11 +101,19 @@ public class CommonUtil {
         List<P2PHKSignature>misMatchSignList = new ArrayList<>();
         transactionSignature.setP2PHKSignatures(transactionSignature.getP2PHKSignatures().parallelStream().distinct().collect(Collectors.toList()));
         Iterator<P2PHKSignature> iterator = transactionSignature.getP2PHKSignatures().iterator();
+        Set<String> signedList = new HashSet<>();
+        String validAddress;
+        P2PHKSignature signature;
         while (iterator.hasNext()){
-            P2PHKSignature signature = iterator.next();
+            signature = iterator.next();
             boolean isMatchSign = false;
+            validAddress = AddressTool.getAddressString(signature.getPublicKey(), chain.getChainId());
+            if(signedList.contains(validAddress)){
+                break;
+            }
             for (String address:addressList) {
-                if(Arrays.equals(AddressTool.getAddress(signature.getPublicKey(), chain.getChainId()), AddressTool.getAddress(address))){
+                if(address.equals(validAddress)){
+                    signedList.add(address);
                     isMatchSign = true;
                     break;
                 }
@@ -115,6 +123,7 @@ public class CommonUtil {
                 iterator.remove();
             }
         }
+        chain.getLogger().info("Verification successful account list,signedList:{}",signedList);
         return misMatchSignList;
     }
 

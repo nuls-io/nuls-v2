@@ -1,7 +1,9 @@
 package io.nuls.crosschain.nuls.model.bo;
 
 import io.nuls.base.data.NulsHash;
+import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.P2PHKSignature;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.thread.ThreadUtils;
@@ -17,6 +19,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * 链信息类
@@ -33,13 +37,6 @@ public class Chain {
     private ConfigBean config;
 
     /**
-     * 接收到的交易Hash与当前链节点键值对
-     * key:交易Hash
-     * value:nodeId
-     * */
-    private Map<NulsHash, List<NodeType>> hashNodeIdMap;
-
-    /**
      * 接收到的其他链发送的交易Hash与当前链节点键值对
      * key:交易Hash
      * value:nodeId
@@ -48,28 +45,12 @@ public class Chain {
 
 
     /**
-     * 跨链交易在本链中状态状态
-     * Transactions under processing
-     * key:交易Hash
-     * value:跨链交易状态1.待接收 2.已收到
-     * */
-    private Map<NulsHash, Integer> ctxStageMap;
-
-    /**
      * 其他链广播的跨链交易在本链中状态
      * Transactions under processing
      * key:交易Hash
      * value:跨链交易状态1.待接收 2.已收到
      * */
     private Map<NulsHash, Integer> otherCtxStageMap;
-
-    /**
-     * 跨链交易验证结果
-     * Verification results of cross-chain transactions
-     * key:交易Hash
-     * value：验证结果列表
-     * */
-    private Map<NulsHash, List<Boolean>> verifyCtxResultMap;
 
     /**
      * 跨链交易处理结果
@@ -91,16 +72,6 @@ public class Chain {
      * 未处理的其他链广播来的跨链交易Hash消息
      * */
     private LinkedBlockingQueue<UntreatedMessage> hashMessageQueue;
-
-    /**
-     * 未处理的其他链广播来的完整跨链交易消息
-     * */
-    private LinkedBlockingQueue<UntreatedMessage> ctxMessageQueue;
-
-    /**
-     * 未处理的本链节点广播来的跨链交易签名消息
-     * */
-    private LinkedBlockingQueue<UntreatedMessage> signMessageQueue;
 
     /**
      * 未处理的本链节点广播来的跨链交易签名消息
@@ -136,11 +107,6 @@ public class Chain {
     private Map<NulsHash,List<UntreatedMessage>> futureMessageMap;
 
     /**
-     * 其他链缓存的本链最新共识节点列表
-     * */
-    private List<String> broadcastVerifierList;
-
-    /**
      * 本链最新投票节点列表（当前最新轮次与当前轮次交集）
      * */
     private List<String> verifierList;
@@ -150,24 +116,61 @@ public class Chain {
      * */
     private boolean mainChain;
 
+    /**
+     * 最后一次验证人变更高度,广播跨链转账交易时需要验证当前高度与该高度的大小
+     * */
+    private long lastChangeHeight;
+
+    /**
+     * 当前正在处理的验证人变更交易
+     * 同一时间最多只有一笔验证人变更交易被处理
+     * */
+    private Transaction verifierChangeTx;
+
+    /**
+     * 已拜占庭完成，高度最小的待广播跨链转账交易
+     * key:链ID
+     * value:最小高度的跨链转账交易
+     * */
+    private Map<Integer,Long> crossChainTxMap;
+
+    /**
+     * 已拜占庭完成，高度最小的待广验证人变更交易
+     * key:链ID
+     * value:最小高度的验证人变更交易
+     * */
+    private Map<Integer,Long> verifierChangeTxMap;
+
+    /**
+     * 更新验证人时需要的锁（如：拜占庭验证与更新验证人需要互斥执行，防止拜占庭验证时验证人错误的情况）
+     * */
+    private final ReentrantReadWriteLock switchVerifierLock = new ReentrantReadWriteLock();
+
+    /**
+     * 节点同步状态
+     * */
+    private int syncStatus = 0;
+
+    /**
+     * 处理跨链交易的线程池
+     * */
+    private final ExecutorService crossTxThreadPool = ThreadUtils.createThreadPool(4, 10000, new NulsThreadFactory("CROSS_TX_THREAD_POOL"));
     public Chain(){
-        hashNodeIdMap = new ConcurrentHashMap<>();
         otherHashNodeIdMap = new ConcurrentHashMap<>();
-        ctxStageMap = new ConcurrentHashMap<>();
-        verifyCtxResultMap = new ConcurrentHashMap<>();
         ctxStateMap = new ConcurrentHashMap<>();
         otherCtxStageMap = new ConcurrentHashMap<>();
         waitBroadSignMap = new ConcurrentHashMap<>();
         hashMessageQueue = new LinkedBlockingQueue<>();
-        ctxMessageQueue = new LinkedBlockingQueue<>();
-        signMessageQueue = new LinkedBlockingQueue<>();
         signMessageByzantineQueue = new LinkedBlockingQueue<>();
         otherCtxMessageQueue = new LinkedBlockingQueue<>();
         getCtxStateQueue = new LinkedBlockingQueue<>();
         futureMessageMap = new ConcurrentHashMap<>();
-        broadcastVerifierList = new ArrayList<>();
         verifierList = new ArrayList<>();
         mainChain = false;
+        verifierChangeTx = null;
+        crossChainTxMap = new ConcurrentHashMap<>();
+        verifierChangeTxMap = new ConcurrentHashMap<>();
+        lastChangeHeight = 0;
     }
 
     public int getChainId(){
@@ -180,22 +183,6 @@ public class Chain {
 
     public void setConfig(ConfigBean config) {
         this.config = config;
-    }
-
-    public Map<NulsHash, Integer> getCtxStageMap() {
-        return ctxStageMap;
-    }
-
-    public void setCtxStageMap(Map<NulsHash, Integer> ctxStageMap) {
-        this.ctxStageMap = ctxStageMap;
-    }
-
-    public Map<NulsHash, List<Boolean>> getVerifyCtxResultMap() {
-        return verifyCtxResultMap;
-    }
-
-    public void setVerifyCtxResultMap(Map<NulsHash, List<Boolean>> verifyCtxResultMap) {
-        this.verifyCtxResultMap = verifyCtxResultMap;
     }
 
     public Map<NulsHash, List<Byte>> getCtxStateMap() {
@@ -230,13 +217,6 @@ public class Chain {
         this.waitBroadSignMap = waitBroadSignMap;
     }
 
-    public Map<NulsHash, List<NodeType>> getHashNodeIdMap() {
-        return hashNodeIdMap;
-    }
-
-    public void setHashNodeIdMap(Map<NulsHash, List<NodeType>> hashNodeIdMap) {
-        this.hashNodeIdMap = hashNodeIdMap;
-    }
 
     public LinkedBlockingQueue<UntreatedMessage> getHashMessageQueue() {
         return hashMessageQueue;
@@ -244,22 +224,6 @@ public class Chain {
 
     public void setHashMessageQueue(LinkedBlockingQueue<UntreatedMessage> hashMessageQueue) {
         this.hashMessageQueue = hashMessageQueue;
-    }
-
-    public LinkedBlockingQueue<UntreatedMessage> getCtxMessageQueue() {
-        return ctxMessageQueue;
-    }
-
-    public void setCtxMessageQueue(LinkedBlockingQueue<UntreatedMessage> ctxMessageQueue) {
-        this.ctxMessageQueue = ctxMessageQueue;
-    }
-
-    public LinkedBlockingQueue<UntreatedMessage> getSignMessageQueue() {
-        return signMessageQueue;
-    }
-
-    public void setSignMessageQueue(LinkedBlockingQueue<UntreatedMessage> signMessageQueue) {
-        this.signMessageQueue = signMessageQueue;
     }
 
     public LinkedBlockingQueue<UntreatedMessage> getSignMessageByzantineQueue() {
@@ -306,18 +270,6 @@ public class Chain {
         return futureMessageMap;
     }
 
-    public void setFutureMessageMap(Map<NulsHash, List<UntreatedMessage>> futureMessageMap) {
-        this.futureMessageMap = futureMessageMap;
-    }
-
-    public List<String> getBroadcastVerifierList() {
-        return broadcastVerifierList;
-    }
-
-    public void setBroadcastVerifierList(List<String> broadcastVerifierList) {
-        this.broadcastVerifierList = broadcastVerifierList;
-    }
-
     public List<String> getVerifierList() {
         return verifierList;
     }
@@ -330,20 +282,59 @@ public class Chain {
         return threadPool;
     }
 
-    public boolean verifyResult(NulsHash hash,int threshold){
-        int count = 0;
-        if(verifyCtxResultMap.get(hash).size() < threshold){
-            return false;
-        }
-        for (boolean verifyResult:verifyCtxResultMap.get(hash)) {
-            if(verifyResult){
-                count++;
-                if(count >= threshold){
-                    return true;
-                }
-            }
+    public Transaction getVerifierChangeTx() {
+        return verifierChangeTx;
+    }
 
+    public void setVerifierChangeTx(Transaction verifierChangeTx) {
+        this.verifierChangeTx = verifierChangeTx;
+    }
+
+    public Map<Integer, Long> getCrossChainTxMap() {
+        return crossChainTxMap;
+    }
+
+    public void setCrossChainTxMap(Map<Integer, Long> crossChainTxMap) {
+        this.crossChainTxMap = crossChainTxMap;
+    }
+
+    public Map<Integer, Long> getVerifierChangeTxMap() {
+        return verifierChangeTxMap;
+    }
+
+    public void setVerifierChangeTxMap(Map<Integer, Long> verifierChangeTxMap) {
+        this.verifierChangeTxMap = verifierChangeTxMap;
+    }
+
+    public ExecutorService getCrossTxThreadPool() {
+        return crossTxThreadPool;
+    }
+
+    public ReentrantReadWriteLock getSwitchVerifierLock() {
+        return switchVerifierLock;
+    }
+
+    public long getLastChangeHeight() {
+        return lastChangeHeight;
+    }
+
+    public void setLastChangeHeight(long lastChangeHeight) {
+        this.lastChangeHeight = lastChangeHeight;
+    }
+
+    public int getSyncStatus() {
+        return syncStatus;
+    }
+
+    public void setSyncStatus(int syncStatus) {
+        this.syncStatus = syncStatus;
+    }
+
+    public synchronized Transaction isExistVerifierChangeTx(Transaction verifierChangeTx){
+        if(this.verifierChangeTx == null){
+            this.verifierChangeTx = verifierChangeTx;
+            return null;
         }
-        return false;
+        return this.verifierChangeTx;
     }
 }
