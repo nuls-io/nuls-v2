@@ -173,35 +173,37 @@ public class BlockServiceImpl implements BlockService {
                 return Result.getSuccess(SUCCESS);
             }
             /*
-            检测是否有轮次变化，如果有轮次变化，查询共识模块共识节点是否有变化，如果有变化则创建验证人变更交易
+            检测是否有轮次变化，如果有轮次变化，查询共识模块共识节点是否有变化，如果有变化则创建验证人变更交易(该操作需要在验证人初始化交易之后)
             */
-            Map<String,List<String>> agentChangeMap;
-            BlockHeader localHeader = chainManager.getChainHeaderMap().get(chainId);
-            if(localHeader != null){
-                BlockExtendsData blockExtendsData = blockHeader.getExtendsData();
-                BlockExtendsData localExtendsData = localHeader.getExtendsData();
-                if(blockExtendsData.getRoundIndex() == localExtendsData.getRoundIndex()){
-                    chainManager.getChainHeaderMap().put(chainId, blockHeader);
-                    return Result.getSuccess(SUCCESS);
-                }
-                agentChangeMap = ConsensusCall.getAgentChangeInfo(chain, localHeader.getExtend(), blockHeader.getExtend());
-            }else{
-                agentChangeMap = ConsensusCall.getAgentChangeInfo(chain, null, blockHeader.getExtend());
-            }
-            if(agentChangeMap != null){
-                List<String> registerAgentList = agentChangeMap.get(ParamConstant.PARAM_REGISTER_AGENT_LIST);
-                List<String> cancelAgentList = agentChangeMap.get(ParamConstant.PARAM_CANCEL_AGENT_LIST);
-                //第一个区块特殊处理,判断获取的到的变更的验证人列表是否正确
-                if(localHeader == null){
-                    if(registerAgentList != null){
-                        registerAgentList.removeAll(chain.getVerifierList());
+            if(chain.getVerifierList() != null && !chain.getVerifierList().isEmpty()){
+                Map<String,List<String>> agentChangeMap;
+                BlockHeader localHeader = chainManager.getChainHeaderMap().get(chainId);
+                if(localHeader != null){
+                    BlockExtendsData blockExtendsData = blockHeader.getExtendsData();
+                    BlockExtendsData localExtendsData = localHeader.getExtendsData();
+                    if(blockExtendsData.getRoundIndex() == localExtendsData.getRoundIndex()){
+                        chainManager.getChainHeaderMap().put(chainId, blockHeader);
+                        return Result.getSuccess(SUCCESS);
                     }
+                    agentChangeMap = ConsensusCall.getAgentChangeInfo(chain, localHeader.getExtend(), blockHeader.getExtend());
+                }else{
+                    agentChangeMap = ConsensusCall.getAgentChangeInfo(chain, null, blockHeader.getExtend());
                 }
-                boolean verifierChange = (registerAgentList != null && !registerAgentList.isEmpty()) || (cancelAgentList != null && !cancelAgentList.isEmpty());
-                if(verifierChange){
-                    chain.getLogger().info("有验证人变化，创建验证人变化交易，最新轮次与上一轮共有的出块地址为：{},新增的验证人列表：{},减少的验证人列表：{}", chain.getVerifierList().toString(),registerAgentList,cancelAgentList);
-                    Transaction verifierChangeTx = TxUtil.createVerifierChangeTx(registerAgentList, cancelAgentList, blockHeader.getExtendsData().getRoundStartTime(),chainId);
-                    chain.getCrossTxThreadPool().execute(new VerifierChangeTxHandler(chain, verifierChangeTx, blockHeader.getHeight()));
+                if(agentChangeMap != null){
+                    List<String> registerAgentList = agentChangeMap.get(ParamConstant.PARAM_REGISTER_AGENT_LIST);
+                    List<String> cancelAgentList = agentChangeMap.get(ParamConstant.PARAM_CANCEL_AGENT_LIST);
+                    //第一个区块特殊处理,判断获取的到的变更的验证人列表是否正确
+                    if(localHeader == null){
+                        if(registerAgentList != null){
+                            registerAgentList.removeAll(chain.getVerifierList());
+                        }
+                    }
+                    boolean verifierChange = (registerAgentList != null && !registerAgentList.isEmpty()) || (cancelAgentList != null && !cancelAgentList.isEmpty());
+                    if(verifierChange){
+                        chain.getLogger().info("有验证人变化，创建验证人变化交易，最新轮次与上一轮共有的出块地址为：{},新增的验证人列表：{},减少的验证人列表：{}", chain.getVerifierList().toString(),registerAgentList,cancelAgentList);
+                        Transaction verifierChangeTx = TxUtil.createVerifierChangeTx(registerAgentList, cancelAgentList, blockHeader.getExtendsData().getRoundStartTime(),chainId);
+                        chain.getCrossTxThreadPool().execute(new VerifierChangeTxHandler(chain, verifierChangeTx, blockHeader.getHeight()));
+                    }
                 }
             }
             chainManager.getChainHeaderMap().put(chainId, blockHeader);
