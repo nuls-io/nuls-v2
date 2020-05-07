@@ -41,11 +41,8 @@ public class SendCtxHashPO extends BaseNulsData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        int course;
         List<NulsHash> hashList = new ArrayList<>();
         while (!byteBuffer.isFinished()) {
-            course = byteBuffer.getCursor();
-            byteBuffer.setCursor(course);
             hashList.add(byteBuffer.readHash());
         }
         this.hashList = hashList;

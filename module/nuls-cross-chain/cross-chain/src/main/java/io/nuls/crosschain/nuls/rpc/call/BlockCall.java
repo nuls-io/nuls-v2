@@ -2,17 +2,16 @@ package io.nuls.crosschain.nuls.rpc.call;
 
 import io.nuls.base.RPCUtil;
 import io.nuls.base.data.BlockHeader;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.rpc.info.Constants;
+import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.rpc.callback.NewBlockHeightInvoke;
-import io.nuls.core.rpc.info.Constants;
-import io.nuls.core.rpc.model.ModuleE;
-import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.exception.NulsException;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -30,7 +29,7 @@ public class BlockCall {
             Map<String, Object> params = new HashMap<>(NulsCrossChainConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put(Constants.CHAIN_ID, chain.getChainId());
-            String messageId = ResponseMessageProcessor.requestAndInvoke(ModuleE.BL.abbr, "latestHeight",
+            String messageId = ResponseMessageProcessor.requestAndInvoke(ModuleE.BL.abbr, "subscriptionNewBlockHeight",
                     params, "0", "1", new NewBlockHeightInvoke());
             if(null != messageId){
                 return true;
@@ -55,7 +54,7 @@ public class BlockCall {
             return  (int)((HashMap) ((HashMap) cmdResp.getResponseData()).get("getStatus")).get("status");
         } catch (Exception e) {
             chain.getLogger().error(e);
-            return 1;
+            return 0;
         }
     }
 

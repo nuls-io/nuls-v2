@@ -92,4 +92,9 @@ public class RegisteredChainMessage extends BaseMessage {
     public void setChainInfoList(List<ChainInfo> chainInfoList) {
         this.chainInfoList = chainInfoList;
     }
+
+    public void addChainInfo(ChainInfo chainInfo){
+        chainInfoList.remove(chainInfo);
+        chainInfoList.add(chainInfo);
+    }
 }

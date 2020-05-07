@@ -42,6 +42,7 @@ public interface ParamConstant {
     String DECIMAL_PLACES = "decimalPlaces";
 
     String NEW_BLOCK_HEIGHT = "height";
+    String SYNC_STATUS = "status";
 
     String PARAM_TYPE_INT = "int";
     String PARAM_TYPE_STRING = "String";
