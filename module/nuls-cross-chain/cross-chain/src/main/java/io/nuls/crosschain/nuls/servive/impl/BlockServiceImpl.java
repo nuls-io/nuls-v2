@@ -191,6 +191,12 @@ public class BlockServiceImpl implements BlockService {
             if(agentChangeMap != null){
                 List<String> registerAgentList = agentChangeMap.get(ParamConstant.PARAM_REGISTER_AGENT_LIST);
                 List<String> cancelAgentList = agentChangeMap.get(ParamConstant.PARAM_CANCEL_AGENT_LIST);
+                //第一个区块特殊处理,判断获取的到的变更的验证人列表是否正确
+                if(localHeader == null){
+                    if(registerAgentList != null){
+                        registerAgentList.removeAll(chain.getVerifierList());
+                    }
+                }
                 boolean verifierChange = (registerAgentList != null && !registerAgentList.isEmpty()) || (cancelAgentList != null && !cancelAgentList.isEmpty());
                 if(verifierChange){
                     chain.getLogger().info("有验证人变化，创建验证人变化交易，最新轮次与上一轮共有的出块地址为：{},新增的验证人列表：{},减少的验证人列表：{}", chain.getVerifierList().toString(),registerAgentList,cancelAgentList);
