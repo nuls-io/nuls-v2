@@ -128,6 +128,12 @@ public class TxUtil {
     public static Transaction createVerifierChangeTx(List<String> registerAgentList, List<String> cancelAgentList, long time, int chainId) throws IOException {
         Transaction verifierChangeTx = new Transaction(TxType.VERIFIER_CHANGE);
         verifierChangeTx.setTime(time);
+        if(registerAgentList != null){
+            registerAgentList.sort(Comparator.naturalOrder());
+        }
+        if(cancelAgentList != null){
+            cancelAgentList.sort(Comparator.naturalOrder());
+        }
         VerifierChangeData verifierChangeData = new VerifierChangeData(registerAgentList, cancelAgentList, chainId);
         verifierChangeTx.setTxData(verifierChangeData.serialize());
         return verifierChangeTx;
