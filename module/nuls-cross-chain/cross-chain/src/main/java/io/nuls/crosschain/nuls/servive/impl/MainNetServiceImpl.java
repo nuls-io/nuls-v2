@@ -36,6 +36,7 @@ import io.nuls.crosschain.nuls.utils.CommonUtil;
 import io.nuls.crosschain.nuls.utils.LoggerUtil;
 import io.nuls.crosschain.nuls.utils.TxUtil;
 import io.nuls.crosschain.nuls.utils.manager.ChainManager;
+import io.nuls.crosschain.nuls.utils.manager.LocalVerifierManager;
 import io.nuls.crosschain.nuls.utils.validator.CrossTxValidator;
 
 import java.io.IOException;
@@ -93,13 +94,20 @@ public class MainNetServiceImpl implements MainNetService {
             List<ChainInfo> chainInfoList = new ArrayList<>();
             registeredChainMessage.setChainInfoList(chainInfoList);
         }
-        registeredChainMessage.getChainInfoList().add(chainInfo);
+        registeredChainMessage.addChainInfo(chainInfo);
         registeredCrossChainService.save(registeredChainMessage);
         chainManager.setRegisteredCrossChainList(registeredChainMessage.getChainInfoList());
+        if(chain.getVerifierList() == null || chain.getVerifierList().isEmpty()){
+            chain.getLogger().info("The first time the primary network has chain registration, cross chain initialization and local verification list");
+            boolean result = LocalVerifierManager.initLocalVerifier(chain, (List<String>) ConsensusCall.getPackerInfo(chain).get(ParamConstant.PARAM_PACK_ADDRESS_LIST));
+            if(!result){
+                return Result.getFailed(DB_SAVE_ERROR);
+            }
+        }
         LoggerUtil.commonLog.info("有新链注册跨链，chainID:{},初始验证人列表：{}", chainInfo.getChainId(), chainInfo.getVerifierList().toString());
         //创建验证人初始化交易
         try {
-            Transaction verifierInitTx = TxUtil.createVerifierInitTx((List<String>) ConsensusCall.getPackerInfo(chain).get(ParamConstant.PARAM_PACK_ADDRESS_LIST), chainInfo.getRegisterTime(), chainInfo.getChainId());
+            Transaction verifierInitTx = TxUtil.createVerifierInitTx(chain.getVerifierList(), chainInfo.getRegisterTime(), chainInfo.getChainId());
             TxUtil.handleNewCtx(verifierInitTx, chain, null);
         } catch (IOException e) {
             chain.getLogger().error(e);

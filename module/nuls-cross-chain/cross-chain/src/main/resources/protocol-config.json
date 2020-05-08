@@ -63,11 +63,6 @@
         "handlers": "GetCirculationHandlerV1"
       },
       {
-        "name": "io.nuls.crosschain.base.message.GetCtxMessage",
-        "protocolCmd": "getCtx",
-        "handlers": "GetCtxHandlerV1"
-      },
-      {
         "name": "io.nuls.crosschain.base.message.GetCtxStateMessage",
         "protocolCmd": "getCtxState",
         "handlers": "GetCtxStateHandlerV1"
@@ -81,11 +76,6 @@
         "name": "io.nuls.crosschain.base.message.GetRegisteredChainMessage",
         "protocolCmd": "getChains",
         "handlers": "GetRegisteredChainHandlerV1"
-      },
-      {
-        "name": "io.nuls.crosschain.base.message.NewCtxMessage",
-        "protocolCmd": "recvCtx",
-        "handlers": "NewCtxHandlerV1"
       },
       {
         "name": "io.nuls.crosschain.base.message.NewOtherCtxMessage",

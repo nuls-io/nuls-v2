@@ -1,5 +1,6 @@
 package io.nuls.crosschain.nuls.utils.manager;
 
+import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.protocol.ProtocolLoader;
 import io.nuls.core.core.annotation.Autowired;
@@ -143,33 +144,20 @@ public class ChainManager {
     @SuppressWarnings("unchecked")
     public void runChain() {
         for (Chain chain : chainMap.values()) {
-            chainHeaderMap.put(chain.getChainId(), BlockCall.getLatestBlockHeader(chain));
-            //初始化验证人列表
-            Map packerInfo = ConsensusCall.getPackerInfo(chain);
-            List<String> verifierList = (List<String>)packerInfo.get(ParamConstant.PARAM_PACK_ADDRESS_LIST);
-            try {
-                while (verifierList == null || verifierList.isEmpty()){
-                    TimeUnit.MILLISECONDS.sleep(500);
-                    packerInfo = ConsensusCall.getPackerInfo(chain);
-                    verifierList = (List<String>)packerInfo.get(ParamConstant.PARAM_PACK_ADDRESS_LIST);
-                }
-            }catch (InterruptedException e){
-                chain.getLogger().error(e);
-                System.exit(1);
-            }
-            chain.getBroadcastVerifierList().addAll(verifierList);
-            chain.getVerifierList().addAll(verifierList);
-            chain.getLogger().info("链：{}，当前验证人列表为：{}",chain.getConfig().getChainId(), verifierList.toString());
-
+            //加载本地验证人列表
+            LocalVerifierManager.loadLocalVerifier(chain);
+            //初始化区块模块同步状态
+            chain.setSyncStatus(BlockCall.getBlockStatus(chain));
             chain.getThreadPool().execute(new HashMessageHandler(chain));
-            chain.getThreadPool().execute(new CtxMessageHandler(chain));
-            chain.getThreadPool().execute(new SignMessageHandler(chain));
             chain.getThreadPool().execute(new OtherCtxMessageHandler(chain));
             chain.getThreadPool().execute(new GetCtxStateHandler(chain));
             chain.getThreadPool().execute(new SignMessageByzantineHandler(chain));
+            int syncStatus = BlockCall.getBlockStatus(chain);
+            chain.getLogger().info("The current status of the node is:{}",syncStatus);
+            chain.setSyncStatus(syncStatus);
         }
         if(!config.isMainNet()){
-            scheduledThreadPoolExecutor.scheduleAtFixedRate(new GetRegisteredChainTask(this),  20L, 10 * 60L, TimeUnit.SECONDS );
+            scheduledThreadPoolExecutor.scheduleAtFixedRate(new GetRegisteredChainTask(this),  20L, 60L, TimeUnit.SECONDS );
         }else{
             crossNetUseAble = true;
         }
