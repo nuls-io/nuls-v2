@@ -83,7 +83,7 @@ public class DepositServiceImpl implements DepositService {
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
         try {
-            if (!AddressTool.validAddress((short) dto.getChainId(), dto.getAddress())) {
+            if (!AddressTool.validAddress(dto.getChainId(), dto.getAddress())) {
                 throw new NulsException(ConsensusErrorCode.ADDRESS_ERROR);
             }
             //账户验证
@@ -171,7 +171,7 @@ public class DepositServiceImpl implements DepositService {
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
         try {
-            if (!AddressTool.validAddress((short) dto.getChainId(), dto.getAddress())) {
+            if (!AddressTool.validAddress( dto.getChainId(), dto.getAddress())) {
                 return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
             }
             //账户验证
