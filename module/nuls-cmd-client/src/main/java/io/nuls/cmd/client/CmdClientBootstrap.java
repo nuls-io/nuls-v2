@@ -32,8 +32,7 @@ public class CmdClientBootstrap {
             NulsRpcModuleBootstrap.run("io.nuls.cmd.client",args);
             //增加地址工具类初始化
             AddressTool.init(new AddressPrefixDatas());
-            //增加跨链资产信息获取
-            AssetsUtil.initRegisteredChainInfo();
+
         }catch (Exception e){
             Log.error("module start fail {}",e.getMessage());
         }

@@ -1,6 +1,7 @@
 package io.nuls.cmd.client;
 
 import io.nuls.cmd.client.config.Config;
+import io.nuls.cmd.client.utils.AssetsUtil;
 import io.nuls.cmd.client.utils.LoggerUtil;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -41,8 +42,7 @@ public class CmdClientModule extends RpcModule {
                 new Module(ModuleE.TX.abbr, ROLE),
                 new Module(ModuleE.BL.abbr, ROLE),
                 new Module(ModuleE.CS.abbr, ROLE),
-                new Module(ModuleE.LG.abbr, ROLE),
-                Module.build(ModuleE.PU)
+                new Module(ModuleE.LG.abbr, ROLE)
         };
     }
 
@@ -80,6 +80,10 @@ public class CmdClientModule extends RpcModule {
     public RpcModuleState onDependenciesReady() {
         System.out.println("nuls-wallet base module ready");
         ThreadUtils.createAndRunThread("cmd", () -> commandHandler.start());
+        if(this.hasDependent(ModuleE.CC)){
+            //增加跨链资产信息获取
+            AssetsUtil.initRegisteredChainInfo();
+        }
         return RpcModuleState.Running;
     }
 
