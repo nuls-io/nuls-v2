@@ -55,7 +55,7 @@ public class EconomicManager {
             return rewardList;
         }
 
-        if(consensusConfig.getInflationAmount().equals(BigInteger.ZERO)){
+        if(consensusConfig.getTotalInflationAmount().equals(BigInteger.ZERO) || consensusConfig.getInflationAmount().equals(BigInteger.ZERO)){
             return rewardList;
         }
 
