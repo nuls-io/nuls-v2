@@ -28,6 +28,7 @@ import io.nuls.core.core.annotation.Controller;
 import io.nuls.core.core.annotation.RpcMethod;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.StringUtils;
+import org.checkerframework.checker.index.qual.GTENegativeOne;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -138,6 +139,7 @@ public class TransactionController {
     public RpcResult getTxList(List<Object> params) {
         VerifyUtils.verifyParams(params, 5);
         int chainId, pageNumber, pageSize, type;
+        long startTime = 0, endTime = 0;
         boolean isHidden;
         try {
             chainId = (int) params.get(0);
@@ -164,6 +166,17 @@ public class TransactionController {
         } catch (Exception e) {
             return RpcResult.paramError("[isHidden] is inValid");
         }
+        try {
+            startTime = Long.parseLong(params.get(5).toString());
+        } catch (Exception e) {
+
+        }
+        try {
+            endTime =  Long.parseLong(params.get(6).toString());
+        } catch (Exception e) {
+
+        }
+
         if (pageNumber <= 0) {
             pageNumber = 1;
         }
@@ -174,7 +187,7 @@ public class TransactionController {
         if (!CacheManager.isChainExist(chainId)) {
             pageInfo = new PageInfo<>(pageNumber, pageSize);
         } else {
-            pageInfo = txService.getTxList(chainId, pageNumber, pageSize, type, isHidden);
+            pageInfo = txService.getTxList(chainId, pageNumber, pageSize, type, isHidden, startTime, endTime);
         }
         RpcResult rpcResult = new RpcResult();
         rpcResult.setResult(pageInfo);

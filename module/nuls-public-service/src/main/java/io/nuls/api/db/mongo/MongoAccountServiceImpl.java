@@ -169,37 +169,45 @@ public class MongoAccountServiceImpl implements AccountService {
         return pageInfo;
     }
 
-    public PageInfo<TxRelationInfo> getAcctTxs(int chainId, String address, int pageIndex, int pageSize, int type, long startHeight, long endHeight) {
+    public PageInfo<TxRelationInfo> getAcctTxs(int chainId, String address, int pageIndex, int pageSize, int type, long startTime, long endTime) {
         Bson filter;
         Bson addressFilter = Filters.eq("address", address);
 
-        if (type > 0 && startHeight > -1 && endHeight > -1) {
-            filter = Filters.and(addressFilter, Filters.eq("type", type), Filters.gte("height", startHeight), Filters.lte("createTime", endHeight));
-        } else if (type > 0 && startHeight > -1) {
-            filter = Filters.and(addressFilter, Filters.eq("type", type), Filters.gte("height", startHeight));
-        } else if (type > 0 && endHeight > -1) {
-            filter = Filters.and(addressFilter, Filters.eq("type", type), Filters.lte("height", endHeight));
-        } else if (startHeight > -1 && endHeight > -1) {
-            filter = Filters.and(addressFilter, Filters.gte("height", startHeight), Filters.lte("height", endHeight));
-        } else if (startHeight > -1) {
-            filter = Filters.and(addressFilter, Filters.gte("height", startHeight));
-        } else if (endHeight > -1) {
-            filter = Filters.and(addressFilter, Filters.lte("height", endHeight));
+        if (type > 0 && startTime > 0 && endTime > 0) {
+            filter = Filters.and(addressFilter, Filters.eq("type", type), Filters.gte("createTime", startTime), Filters.lte("createTime", endTime));
+        } else if (type > 0 && startTime > 0) {
+            filter = Filters.and(addressFilter, Filters.eq("type", type), Filters.gte("createTime", startTime));
+        } else if (type > 0 && endTime > 0) {
+            filter = Filters.and(addressFilter, Filters.eq("type", type), Filters.lte("createTime", endTime));
+        } else if (startTime > 0 && endTime > 0) {
+            filter = Filters.and(addressFilter, Filters.gte("createTime", startTime), Filters.lte("createTime", endTime));
+        } else if (startTime > 0) {
+            filter = Filters.and(addressFilter, Filters.gte("createTime", startTime));
+        } else if (endTime > 0) {
+            filter = Filters.and(addressFilter, Filters.lte("createTime", endTime));
         } else if (type > 0) {
             filter = Filters.and(addressFilter, Filters.eq("type", type));
         } else {
             filter = addressFilter;
         }
+        int start = (pageIndex - 1) * pageSize;
+        int end = pageIndex * pageSize;
         int index = DBUtil.getShardNumber(address);
-        long count = mongoDBService.getCount(TX_RELATION_TABLE + chainId + "_" + index, filter);
-        List<Document> docsList = this.mongoDBService.pageQuery(TX_RELATION_TABLE + chainId + "_" + index, filter, Sorts.descending("createTime"), pageIndex, pageSize);
-        List<TxRelationInfo> txRelationInfoList = new ArrayList<>();
-        for (Document document : docsList) {
-            TxRelationInfo txRelationInfo = TxRelationInfo.toInfo(document);
-            txRelationInfo.setStatus(1);
-            txRelationInfoList.add(txRelationInfo);
+
+        long unConfirmCount = mongoDBService.getCount(TX_UNCONFIRM_RELATION_TABLE + chainId, addressFilter);
+        long confirmCount = mongoDBService.getCount(TX_RELATION_TABLE + chainId + "_" + index, filter);
+        List<TxRelationInfo> txRelationInfoList;
+        if (end <= unConfirmCount) {
+            txRelationInfoList = unConfirmLimitQuery(chainId, filter, start, pageSize);
+        } else if (start - 1 > unConfirmCount) {
+            start = start - 1;
+            start = (int) (start - unConfirmCount);
+            txRelationInfoList = confirmLimitQuery(chainId, index, filter, start, pageSize);
+        } else {
+            txRelationInfoList = relationLimitQuery(chainId, index, addressFilter, filter, start, pageSize);
         }
-        PageInfo<TxRelationInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, count, txRelationInfoList);
+
+        PageInfo<TxRelationInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, unConfirmCount + confirmCount, txRelationInfoList);
         return pageInfo;
     }
 

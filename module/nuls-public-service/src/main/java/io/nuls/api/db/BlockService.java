@@ -20,7 +20,7 @@ public interface BlockService {
 
     PageInfo<MiniBlockHeaderInfo> pageQuery(int chainId, int pageIndex, int pageSize, String packingAddress, boolean filterEmptyBlocks);
 
-    List<MiniBlockHeaderInfo> getBlockList(int chainId, long startHeight, long endHeight);
+    List<MiniBlockHeaderInfo> getBlockList(int chainId, long startTime, long endTime);
 
     int getBlockPackageTxCount(int chainId, long startHeight, long endHeight);
 
