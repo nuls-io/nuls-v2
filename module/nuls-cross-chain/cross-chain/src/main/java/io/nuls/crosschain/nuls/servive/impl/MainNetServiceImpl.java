@@ -145,14 +145,23 @@ public class MainNetServiceImpl implements MainNetService {
         if (assetId == 0) {
             registeredChainMessage.getChainInfoList().removeIf(chainInfo -> chainInfo.getChainId() == chainId);
         } else {
+            boolean chainInvalid = true;
             for (ChainInfo chainInfo : registeredChainMessage.getChainInfoList()) {
                 if (chainInfo.getChainId() == chainId) {
                     for (AssetInfo assetInfo : chainInfo.getAssetInfoList()) {
                         if (assetInfo.getAssetId() == assetId) {
                             assetInfo.setUsable(false);
                         }
+                        if(assetInfo.isUsable()){
+                            chainInvalid = false;
+                        }
                     }
+                    break;
                 }
+            }
+            if(chainInvalid){
+                LoggerUtil.commonLog.info("链被注销，chainId:{},assetId",chainId,assetId);
+                registeredChainMessage.getChainInfoList().removeIf(chainInfo -> chainInfo.getChainId() == chainId);
             }
         }
         registeredCrossChainService.save(registeredChainMessage);
