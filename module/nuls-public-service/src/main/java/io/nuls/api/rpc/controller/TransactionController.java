@@ -28,7 +28,6 @@ import io.nuls.core.core.annotation.Controller;
 import io.nuls.core.core.annotation.RpcMethod;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.StringUtils;
-import org.checkerframework.checker.index.qual.GTENegativeOne;
 
 import java.util.ArrayList;
 import java.util.List;

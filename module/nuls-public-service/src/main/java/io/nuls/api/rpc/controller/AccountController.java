@@ -168,7 +168,7 @@ public class AccountController {
         VerifyUtils.verifyParams(params, 7);
         int chainId, pageNumber, pageSize, type;
         String address;
-        long startHeight, endHeight;
+        long startTime, endTime;
         try {
             chainId = (int) params.get(0);
         } catch (Exception e) {
@@ -195,14 +195,14 @@ public class AccountController {
             return RpcResult.paramError("[type] is inValid");
         }
         try {
-            startHeight = Long.parseLong("" + params.get(5));
+            startTime = Long.parseLong("" + params.get(5));
         } catch (Exception e) {
-            return RpcResult.paramError("[startHeight] is invalid");
+            return RpcResult.paramError("[startTime] is invalid");
         }
         try {
-            endHeight = Long.parseLong("" + params.get(6));
+            endTime = Long.parseLong("" + params.get(6));
         } catch (Exception e) {
-            return RpcResult.paramError("[endHeight] is invalid");
+            return RpcResult.paramError("[endTime] is invalid");
         }
 
 
@@ -219,7 +219,7 @@ public class AccountController {
         RpcResult result = new RpcResult();
         PageInfo<TxRelationInfo> pageInfo;
         if (CacheManager.isChainExist(chainId)) {
-            pageInfo = accountService.getAcctTxs(chainId, address, pageNumber, pageSize, type, startHeight, endHeight);
+            pageInfo = accountService.getAcctTxs(chainId, address, pageNumber, pageSize, type, startTime, endTime);
         } else {
             pageInfo = new PageInfo<>(pageNumber, pageSize);
         }
