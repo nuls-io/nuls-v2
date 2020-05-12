@@ -54,6 +54,11 @@ public class EconomicManager {
             }
             return rewardList;
         }
+
+        if(consensusConfig.getInflationAmount().equals(BigInteger.ZERO)){
+            return rewardList;
+        }
+
         /*
         本轮次总的出块奖励金(本轮次出块节点数*共识基础奖励 )
         Total reward in this round
@@ -209,7 +214,6 @@ public class EconomicManager {
         if(lastVisitInflationInfo != null && time >= lastVisitInflationInfo.getStartTime() && time <= lastVisitInflationInfo.getEndTime()){
             return lastVisitInflationInfo;
         }
-
         InflationInfo inflationInfo = new InflationInfo();
         long startTime = consensusConfig.getInitTime();
         long endTime = consensusConfig.getInitTime() + consensusConfig.getDeflationTimeInterval();
