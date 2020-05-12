@@ -70,8 +70,8 @@ public class TimeMessageBody extends BaseNulsData {
     @Override
     public int size() {
         int s = 0;
-        s += SerializeUtils.sizeOfUint48();
-        s += SerializeUtils.sizeOfUint48();
+        s += SerializeUtils.sizeOfInt64();
+        s += SerializeUtils.sizeOfInt64();
         return s;
     }
 
@@ -80,13 +80,13 @@ public class TimeMessageBody extends BaseNulsData {
      */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeUint48(messageId);
-        stream.writeUint48(time);
+        stream.writeInt64(messageId);
+        stream.writeInt64(time);
     }
 
     @Override
     public void parse(NulsByteBuffer buffer) throws NulsException {
-        messageId = buffer.readUint48();
-        time = buffer.readUint48();
+        messageId = buffer.readInt64();
+        time = buffer.readInt64();
     }
 }

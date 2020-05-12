@@ -14,7 +14,7 @@ public interface TransactionService {
 
     void saveTxRelationList(int chainId, Set<TxRelationInfo> relationInfos);
 
-    PageInfo<MiniTransactionInfo> getTxList(int chainId, int pageIndex, int pageSize, int type, boolean isHidden);
+    PageInfo<MiniTransactionInfo> getTxList(int chainId, int pageIndex, int pageSize, int type, boolean isHidden, long startTime, long endTime);
 
     List<TxHexInfo> getUnConfirmList(int chainId);
 
