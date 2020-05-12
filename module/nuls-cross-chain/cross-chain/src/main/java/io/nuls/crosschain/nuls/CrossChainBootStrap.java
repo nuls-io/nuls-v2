@@ -200,6 +200,7 @@ public class CrossChainBootStrap extends BaseCrossChainBootStrap {
         RocksDBService.init(nulsCrossChainConfig.getDataFolder());
         RocksDBService.createTable(DB_NAME_CONSUME_LANGUAGE);
         RocksDBService.createTable(DB_NAME_CONSUME_CONGIF);
+        RocksDBService.createTable(DB_NAME_LOCAL_VERIFIER);
         /*
             已注册跨链的链信息操作表
             Registered Cross-Chain Chain Information Operating Table

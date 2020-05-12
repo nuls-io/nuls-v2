@@ -36,7 +36,7 @@ public class NetWorkCall {
             Map<String, Object> map = new HashMap<>(2);
             List<Map<String, String>> cmds = new ArrayList<>();
             map.put("role", ModuleE.CC.abbr);
-            List<String> list = List.of(GET_CTX_MESSAGE,GET_OTHER_CTX_MESSAGE,NEW_CTX_MESSAGE,NEW_OTHER_CTX_MESSAGE,VERIFY_CTX_MESSAGE,CTX_VERIFY_RESULT_MESSAGE,GET_CTX_STATE_MESSAGE,CTX_STATE_MESSAGE,BROAD_CTX_HASH_MESSAGE,BROAD_CTX_SIGN_MESSAGE,GET_CIRCULLAT_MESSAGE,REGISTERED_CHAIN_MESSAGE,NulsCrossChainConstant.GET_REGISTERED_CHAIN_MESSAGE);
+            List<String> list = List.of(GET_OTHER_CTX_MESSAGE,NEW_OTHER_CTX_MESSAGE,VERIFY_CTX_MESSAGE,CTX_VERIFY_RESULT_MESSAGE,GET_CTX_STATE_MESSAGE,CTX_STATE_MESSAGE,BROAD_CTX_HASH_MESSAGE,BROAD_CTX_SIGN_MESSAGE,GET_CIRCULLAT_MESSAGE,REGISTERED_CHAIN_MESSAGE,NulsCrossChainConstant.GET_REGISTERED_CHAIN_MESSAGE);
             map.put("protocolCmds", list);
             boolean success = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map).isSuccess();
             while (!success) {

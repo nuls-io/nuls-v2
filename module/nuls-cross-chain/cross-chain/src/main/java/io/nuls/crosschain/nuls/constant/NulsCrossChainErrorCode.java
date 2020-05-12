@@ -40,4 +40,5 @@ public interface NulsCrossChainErrorCode extends CommonCodeConstanst {
     ErrorCode CTX_SIGN_BYZANTINE_FAIL = ErrorCode.init("cc_0027");
     ErrorCode CROSS_ASSERT_VALID_ERROR = ErrorCode.init("cc_0028");
     ErrorCode TO_ADDRESS_ERROR = ErrorCode.init("cc_0029");
+    ErrorCode TO_MANY_VERIFIER_EXIT = ErrorCode.init("cc_0030");
 }
