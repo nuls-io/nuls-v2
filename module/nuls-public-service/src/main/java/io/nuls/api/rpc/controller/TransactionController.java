@@ -28,6 +28,7 @@ import io.nuls.core.core.annotation.Controller;
 import io.nuls.core.core.annotation.RpcMethod;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.StringUtils;
+import org.checkerframework.checker.index.qual.GTENegativeOne;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -138,6 +139,7 @@ public class TransactionController {
     public RpcResult getTxList(List<Object> params) {
         VerifyUtils.verifyParams(params, 5);
         int chainId, pageNumber, pageSize, type;
+        long startTime = 0, endTime = 0;
         boolean isHidden;
         try {
             chainId = (int) params.get(0);
@@ -164,6 +166,17 @@ public class TransactionController {
         } catch (Exception e) {
             return RpcResult.paramError("[isHidden] is inValid");
         }
+        try {
+            startTime = Long.parseLong(params.get(5).toString());
+        } catch (Exception e) {
+
+        }
+        try {
+            endTime =  Long.parseLong(params.get(6).toString());
+        } catch (Exception e) {
+
+        }
+
         if (pageNumber <= 0) {
             pageNumber = 1;
         }
@@ -174,7 +187,7 @@ public class TransactionController {
         if (!CacheManager.isChainExist(chainId)) {
             pageInfo = new PageInfo<>(pageNumber, pageSize);
         } else {
-            pageInfo = txService.getTxList(chainId, pageNumber, pageSize, type, isHidden);
+            pageInfo = txService.getTxList(chainId, pageNumber, pageSize, type, isHidden, startTime, endTime);
         }
         RpcResult rpcResult = new RpcResult();
         rpcResult.setResult(pageInfo);
@@ -373,6 +386,47 @@ public class TransactionController {
             //}
 
             result = WalletRpcHandler.broadcastTx(chainId, txHex);
+
+            if (result.isSuccess()) {
+                Transaction tx = new Transaction();
+                tx.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
+                TransactionInfo txInfo = AnalysisHandler.toTransaction(chainId, tx);
+                txService.saveUnConfirmTx(chainId, txInfo, txHex);
+                return RpcResult.success(result.getData());
+            } else {
+                return RpcResult.failed(result);
+            }
+        } catch (Exception e) {
+            LoggerUtil.commonLog.error(e);
+            return RpcResult.failed(RpcErrorCode.TX_PARSE_ERROR);
+        }
+    }
+
+    @RpcMethod("broadcastTxWithoutAnyValidation")
+    public RpcResult broadcastTxWithoutAnyValidation(List<Object> params) {
+        if (!ApiContext.isReady) {
+            return RpcResult.chainNotReady();
+        }
+        VerifyUtils.verifyParams(params, 2);
+        int chainId;
+        String txHex;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        try {
+            txHex = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[txHex] is inValid");
+        }
+
+        try {
+            if (!CacheManager.isChainExist(chainId)) {
+                return RpcResult.dataNotFound();
+            }
+
+            Result result = WalletRpcHandler.broadcastTxWithoutAnyValidation(chainId, txHex);
 
             if (result.isSuccess()) {
                 Transaction tx = new Transaction();

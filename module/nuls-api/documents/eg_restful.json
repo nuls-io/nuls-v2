@@ -149,6 +149,11 @@
     "requestPath": "/api/accountledger/transaction/broadcastWithNoContractValidation",
     "response" : {"success":true,"data":{"value":true,"hash":"5a91b75e6a6d1f415638375627933b42ce7179b4c6390ca0dcc5a0c2c74bd34a"}}
   },
+  "/api/accountledger/transaction/broadcastTxWithoutAnyValidation": {
+    "request": {"txHex" : "02003fac2d5d00008c0117020001efa328e600912da9872390a675486ab9e8ec211402000100e0c8100000000000000000000000000000000000000000000000000000000000080000000000000000000117020001f7ec6473df12e751d64cf20a8baa7edd50810f810200010040420f000000000000000000000000000000000000000000000000000000000000000000000000006921023cee1aa6158ee640c8f48f9a9fa9735c8ed5426f2c353b0ed65e123033d820e646304402203c376fd0121fce6228516c011126a8526c5bc543afb7e4272c0de708a55d834f02204ebcd942e019b77bbec37f7e2b77b591ba4ce0fbc5fe9335ab91ae925ded6bed"},
+    "requestPath": "/api/accountledger/transaction/broadcastTxWithoutAnyValidation",
+    "response" : {"success":true,"data":{"value":true,"hash":"5a91b75e6a6d1f415638375627933b42ce7179b4c6390ca0dcc5a0c2c74bd34a"}}
+  },
   "/api/consensus/agent": {
     "request": {"agentAddress":"tNULSeBaMujLBcZWfE2wHKnZo7PGvqvNrt6yWG","packingAddress":"tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG","rewardAddress":"tNULSeBaMujLBcZWfE2wHKnZo7PGvqvNrt6yWG","commissionRate":10,"deposit":"2000000000000","password":"abcd1234"},
     "requestPath": "/api/consensus/agent",
@@ -318,6 +323,11 @@
     "request": {"chainId":2,"address":"tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG"},
     "requestPath": "/api/account/address/validate",
     "response" : {"success":true,"data":{"value":true}}
+  },
+  "/api/account/address/publickey": {
+    "request": {"chainId":2,"publicKey":"03958b790c331954ed367d37bac901de5c2f06ac8368b37d7bd6cd5ae143c1d7e3"},
+    "requestPath": "/api/account/address/publickey",
+    "response" : {"success":true,"data":{"address":"tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG"}}
   },
   "/api/account/password/offline/": {
     "request": {"address":"tNULSeBaMkMNC9mW5oCDXNMRoEVbE1iCsWVtPo","encryptedPriKey":"bbf0892918bf969b12c1c5c24848d7e12aa75d0dac06720977275af164edc30fd6832cafea5810c181072282302eaa23","oldPassword":"Nuls123546","newPassword":"Nuls123456"},

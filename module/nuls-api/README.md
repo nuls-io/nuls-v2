@@ -2,13 +2,9 @@
 
 **NULS为合作伙伴定制了对接需要的NULS2.0钱包版本，对接钱包内嵌`NULS-API`模块，模块内封装了NULS-SDK的功能，用HTTP协议访问接口，支持`JSON—RPC`和`Restful`两种格式。**
 
-[正试版钱包下载地址](http://nuls-usa-west.oss-us-west-1.aliyuncs.com/2.0/NULS_Wallet_linux64_v2.0.0.tar.gz)
+[主网或测试版钱包下载地址](https://github.com/nuls-io/nuls-v2/releases)
 
-[NULS-API离线操作工具下载地址](http://nuls-cn.oss-cn-hangzhou.aliyuncs.com/2.0/NULS_API-offline_v2.0.0.tar.gz)
-
-[测试版钱包下载地址](http://nuls-usa-west.oss-us-west-1.aliyuncs.com/beta3/NULS_Wallet_linux64_beta3_sdk_provider.tar.gz)
-
-[NULS-API离线操作工具下载地址](http://nuls-usa-west.oss-us-west-1.aliyuncs.com/beta3/nuls-sdk-provider-offline.tar.gz)
+[NULS-API离线操作工具下载地址](http://nuls-cn.oss-cn-hangzhou.aliyuncs.com/2.1/NULS_API-offline_v2.0.0.tar.gz)
 
 ## 设置
 
@@ -17,7 +13,7 @@
 ```
 [nuls-API]
 #httpServer的启动port
-server_port=18004
+serverPort=18004
 ```
 
 ## 说明
@@ -30,7 +26,7 @@ server_port=18004
 
 在线接口：钱包必须正常运行，且能够连接网络中的其他节点，能够正常同步区块和广播数据。在调用在线接口之前，最好是已经同步到最新区块。接口所产生的数据都会保存在钱包中。例如创建账户、修改密码、转账、获取区块头等。
 
-离线接口：NULS2.0提供了一个专门用于[离线操作的NULS-API工具](http://nuls-cn.oss-cn-hangzhou.aliyuncs.com/2.0/NULS_API-offline_v2.0.0.tar.gz)。无需安装钱包，可独立运行在一台没有连接网络的服务器上。用户通过调用离线接口，传入相关的参数，获取返回值，相应数据不会存入钱包。例如离线创建账户、离线组装转账交易、离线签名等。
+离线接口：NULS2.0提供了一个专门用于[离线操作的NULS-API工具](http://nuls-cn.oss-cn-hangzhou.aliyuncs.com/2.1/NULS_API-offline_v2.0.0.tar.gz)。无需安装钱包，可独立运行在一台没有连接网络的服务器上。用户通过调用离线接口，传入相关的参数，获取返回值，相应数据不会存入钱包。例如离线创建账户、离线组装转账交易、离线签名等。
 
 ### 字段描述
 

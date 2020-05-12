@@ -168,14 +168,14 @@ public class MongoBlockServiceImpl implements BlockService {
     }
 
     @Override
-    public List<MiniBlockHeaderInfo> getBlockList(int chainId, long startHeight, long endHeight) {
+    public List<MiniBlockHeaderInfo> getBlockList(int chainId, long startTime, long endTime) {
         if (!CacheManager.isChainExist(chainId)) {
             return new ArrayList<>();
         }
         BasicDBObject fields = new BasicDBObject();
         fields.append("_id", 1).append("createTime", 1).append("txCount", 1).append("agentHash", 1).
                 append("agentId", 1).append("agentAlias", 1).append("size", 1).append("reward", 1);
-        Bson filter = Filters.and(Filters.gt("_id", startHeight), Filters.lte("_id", endHeight));
+        Bson filter = Filters.and(Filters.gt("createTime", startTime), Filters.lte("createTime", endTime));
         List<Document> docsList = this.mongoDBService.query(BLOCK_HEADER_TABLE + chainId, filter, fields, Sorts.descending("_id"));
         List<MiniBlockHeaderInfo> list = new ArrayList<>();
         for (Document document : docsList) {

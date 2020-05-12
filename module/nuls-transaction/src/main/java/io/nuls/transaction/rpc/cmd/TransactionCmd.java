@@ -30,6 +30,7 @@ import io.nuls.transaction.model.bo.TxPackage;
 import io.nuls.transaction.model.bo.VerifyLedgerResult;
 import io.nuls.transaction.model.dto.ModuleTxRegisterDTO;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
+import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.utils.TxUtil;
@@ -94,6 +95,42 @@ public class TransactionCmd extends BaseCmd {
 
         map.put("value", result);
         return success(map);
+    }
+
+    @CmdAnnotation(cmd = TxCmd.TX_BROADCAST, version = 1.0, description = "直接广播新交易/broadcast a new transaction")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
+            @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "交易序列化数据字符串")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", valueType = boolean.class, description = "是否成功"),
+            @Key(name = "hash", description = "交易hash")
+    }))
+    public Response broadcastTx(Map params) {
+        Chain chain = null;
+        try {
+            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("tx"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            chain = chainManager.getChain((Integer) params.get("chainId"));
+            if (null == chain) {
+                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
+            }
+            String txStr = (String) params.get("tx");
+            //将txStr转换为Transaction对象
+            Transaction transaction = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
+            //将交易放入待验证本地交易队列中
+            boolean rs = NetworkCall.broadcastTx(chain, transaction);
+            Map<String, Object> map = new HashMap<>(TxConstant.INIT_CAPACITY_4);
+            map.put("value", rs);
+            map.put("hash", transaction.getHash().toHex());
+            return success(map);
+        } catch (NulsException e) {
+            errorLogProcess(chain, e);
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
     }
 
     @CmdAnnotation(cmd = TxCmd.TX_NEWTX, version = 1.0, description = "接收本地新交易/receive a new transaction")

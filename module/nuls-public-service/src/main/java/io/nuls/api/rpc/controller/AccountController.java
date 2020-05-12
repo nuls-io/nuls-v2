@@ -37,7 +37,10 @@ import io.nuls.core.core.annotation.Controller;
 import io.nuls.core.core.annotation.RpcMethod;
 import io.nuls.core.model.StringUtils;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Niels
@@ -401,7 +404,7 @@ public class AccountController {
 
     @RpcMethod("getAccountBalance")
     public RpcResult getAccountBalance(List<Object> params) {
-        VerifyUtils.verifyParams(params, 3);
+        VerifyUtils.verifyParams(params, 4);
         int chainId, assetChainId, assetId;
         String address;
         try {
@@ -444,6 +447,56 @@ public class AccountController {
         return RpcResult.success(balanceInfo);
 
     }
+
+    @RpcMethod("getAccountsBalance")
+    public RpcResult getAccountsBalance(List<Object> params) {
+        VerifyUtils.verifyParams(params, 4);
+        int chainId, assetChainId, assetId;
+        String address;
+
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        try {
+            assetChainId = (int) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[assetChainId] is inValid");
+        }
+        try {
+            assetId = (int) params.get(2);
+        } catch (Exception e) {
+            return RpcResult.paramError("[assetId] is inValid");
+        }
+        try {
+            address = (String) params.get(3);
+        } catch (Exception e) {
+            return RpcResult.paramError("[address] is inValid");
+        }
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        if (apiCache == null) {
+            return RpcResult.dataNotFound();
+        }
+        if (assetId <= 0) {
+            AssetInfo defaultAsset = apiCache.getChainInfo().getDefaultAsset();
+            assetId = defaultAsset.getAssetId();
+        }
+
+        String[] addressList = address.split(",");
+        Map<String,BalanceInfo> balanceInfoList = new HashMap<>();
+        for (int i = 0; i < addressList.length; i++) {
+            address = addressList[i];
+            BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, address, assetChainId, assetId);
+            AccountInfo accountInfo = accountService.getAccountInfo(chainId, address);
+            if (accountInfo != null) {
+                balanceInfo.setConsensusLock(accountInfo.getConsensusLock());
+            }
+            balanceInfoList.put(address, balanceInfo);
+        }
+        return RpcResult.success(balanceInfoList);
+    }
+
 
     @RpcMethod("isAliasUsable")
     public RpcResult isAliasUsable(List<Object> params) {

@@ -22,38 +22,39 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.model;
 
-import io.nuls.network.manager.TimeManager;
-import io.nuls.network.model.dto.NetTimeUrl;
-import org.junit.Test;
+package io.nuls.provider.model.form;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
 
 /**
- * @author lan
- * @description
- * @date 2018/12/06
- **/
-public class NetTimeTest {
-    @Test
-    public void listTest(){
-        List<NetTimeUrl> list = new ArrayList<>();
-        NetTimeUrl netTimeUrl1 = new NetTimeUrl("a",111);
-        NetTimeUrl netTimeUrl2 = new NetTimeUrl("b",2222);
-        NetTimeUrl netTimeUrl3 = new NetTimeUrl("c",333);
-        NetTimeUrl netTimeUrl4 = new NetTimeUrl("d",155);
-        list.add(netTimeUrl1);
-        list.add(netTimeUrl2);
-        list.add(netTimeUrl3);
-        list.add(netTimeUrl4);
-        Collections.sort(list);
-        for(int i=0;i<list.size();i++){
-            System.out.println(list.get(i).getUrl()+"==="+list.get(i).getTime());
-        }
+ * @author: PierreLuo
+ * @date: 2020-04-07
+ */
+@ApiModel(name = "根据账户公钥生成账户地址")
+public class AccountPublicKeyForm {
 
+    @ApiModelProperty(description = "链ID")
+    private int chainId;
+
+    @ApiModelProperty(description = "账户公钥")
+    private String publicKey;
+
+    public String getPublicKey() {
+        return publicKey;
     }
 
+    public void setPublicKey(String publicKey) {
+        this.publicKey = publicKey;
+    }
+
+    public int getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(int chainId) {
+        this.chainId = chainId;
+    }
 }

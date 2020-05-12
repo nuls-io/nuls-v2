@@ -42,6 +42,7 @@ import io.nuls.provider.model.ErrorData;
 import io.nuls.provider.model.RpcClientResult;
 import io.nuls.provider.model.dto.AccountKeyStoreDto;
 import io.nuls.provider.model.form.*;
+import io.nuls.provider.model.jsonrpc.RpcResult;
 import io.nuls.provider.rpctools.AccountTools;
 import io.nuls.provider.utils.Log;
 import io.nuls.provider.utils.ResultUtil;
@@ -398,8 +399,28 @@ public class AccountResource {
         if (b) {
             Map map = new HashMap();
             map.put("value", true);
-            return RpcClientResult.getSuccess(map).resultMap().map("value", true);
+            return RpcClientResult.getSuccess(map);
         } else {
+            return RpcClientResult.getFailed(new ErrorData(AccountErrorCode.ADDRESS_ERROR.getCode(), "address is wrong"));
+        }
+    }
+
+    @POST
+    @Path("/address/publickey")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(description = "根据账户公钥生成账户地址", order = 111, detailDesc = "根据账户公钥生成账户地址")
+    @Parameters({
+            @Parameter(parameterName = "form", parameterDes = "根据账户公钥生成账户地址", requestType = @TypeDescriptor(value = AccountPublicKeyForm.class))
+    })
+    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "address", description = "账户地址")
+    }))
+    public RpcClientResult getAddressByPublicKey(AccountPublicKeyForm form) {
+        try {
+            byte[] address = AddressTool.getAddress(HexUtil.decode(form.getPublicKey()), form.getChainId());
+            return RpcClientResult.getSuccess(Map.of("address", AddressTool.getStringAddressByBytes(address)));
+        } catch (Exception e) {
+            Log.error(e);
             return RpcClientResult.getFailed(new ErrorData(AccountErrorCode.ADDRESS_ERROR.getCode(), "address is wrong"));
         }
     }

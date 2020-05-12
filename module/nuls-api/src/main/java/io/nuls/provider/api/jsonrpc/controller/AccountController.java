@@ -44,6 +44,7 @@ import io.nuls.provider.model.jsonrpc.RpcResultError;
 import io.nuls.provider.rpctools.AccountTools;
 import io.nuls.provider.rpctools.LegderTools;
 import io.nuls.provider.rpctools.vo.AccountBalance;
+import io.nuls.provider.utils.Log;
 import io.nuls.provider.utils.ResultUtil;
 import io.nuls.provider.utils.VerifyUtils;
 import io.nuls.v2.error.AccountErrorCode;
@@ -502,6 +503,37 @@ public class AccountController {
         if (b) {
             return RpcResult.success(Map.of("value", true));
         } else {
+            return RpcResult.failed(AccountErrorCode.ADDRESS_ERROR);
+        }
+    }
+
+    @RpcMethod("getAddressByPublicKey")
+    @ApiOperation(description = "根据账户公钥生成账户地址", order = 110, detailDesc = "根据账户公钥生成账户地址")
+    @Parameters({
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
+            @Parameter(parameterName = "publicKey", requestType = @TypeDescriptor(value = String.class), parameterDes = "账户公钥")
+    })
+    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "address", description = "账户地址")
+    }))
+    public RpcResult getAddressByPublicKey(List<Object> params) {
+        int chainId;
+        String publicKey;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        try {
+            publicKey = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[publicKey] is inValid");
+        }
+        try {
+            byte[] address = AddressTool.getAddress(HexUtil.decode(publicKey), chainId);
+            return RpcResult.success(Map.of("address", AddressTool.getStringAddressByBytes(address)));
+        } catch (Exception e) {
+            Log.error(e);
             return RpcResult.failed(AccountErrorCode.ADDRESS_ERROR);
         }
     }
