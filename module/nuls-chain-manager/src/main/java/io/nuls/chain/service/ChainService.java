@@ -105,8 +105,8 @@ public interface ChainService {
      * @param txs
      * @throws Exception
      */
-    void rpcBlockChainRollback(List<Transaction> txs) throws Exception;
-    void rpcBlockChainRollbackV4(List<Transaction> txs) throws Exception;
+    void rpcBlockChainRollback(List<Transaction> txs, long time) throws Exception;
+    void rpcBlockChainRollbackV4(List<Transaction> txs, long time) throws Exception;
     /**
      * 销毁链
      * Destroy a exist BlockChain

@@ -173,7 +173,7 @@ public class MessageUtil {
         if (ctx.getType() == TxType.VERIFIER_INIT) {
             packAddressList = (List<String>) ConsensusCall.getSeedNodeList(chain).get(ParamConstant.PARAM_PACK_ADDRESS_LIST);
         } else {
-            packAddressList = CommonUtil.getCurrentPackAddressList(chain);
+            packAddressList = chain.getVerifierList();
         }
         signByzantineInChain(chain, ctx, signature, packAddressList, realHash);
         NetWorkCall.broadcast(chainId, messageBody, excludeNodes, CommandConstant.BROAD_CTX_SIGN_MESSAGE, false);
@@ -287,7 +287,6 @@ public class MessageUtil {
         int agentCount = handleAddressList.size();
         //交易签名拜占庭
         int byzantineCount = CommonUtil.getByzantineCount(chain, agentCount);
-        int fromChainId = AddressTool.getChainIdByAddress(ctx.getCoinDataInstance().getFrom().get(0).getAddress());
         int signCount = signature.getSignersCount();
         CtxStatusPO ctxStatusPO = new CtxStatusPO(ctx, TxStatusEnum.UNCONFIRM.getStatus());
         if (signCount >= byzantineCount) {
@@ -296,14 +295,10 @@ public class MessageUtil {
             signCount = signature.getSignersCount();
             if (signCount >= byzantineCount) {
                 ctx.setTransactionSignature(signature.serialize());
-                if (fromChainId == chain.getChainId()) {
-                    chain.getLogger().info("本链发起的跨链交易签名拜占庭验证通过,放入待广播队列，Hash{}", ctx.getHash().toHex());
-                } else {
-                    chain.getLogger().info("其他链发起的跨链交易签名拜占庭验证通过,放入待广播队列，Hash{}", ctx.getHash().toHex());
-                }
                 ctxStatusPO.setStatus(TxStatusEnum.CONFIRMED.getStatus());
                 ctxStatusService.save(realHash, ctxStatusPO, chain.getChainId());
                 saveCtxSendHeight(chain, broadHeight, ctx);
+                chain.getLogger().info("跨链交易拜占庭完成，放入待打包队列，等待广播，Hash:{},sendHeight:{},txType:{}",ctx.getHash().toHex(), broadHeight, ctx.getType());
                 return true;
             } else {
                 signature.getP2PHKSignatures().addAll(misMatchSignList);
@@ -326,6 +321,9 @@ public class MessageUtil {
     public static boolean handleOtherChainCtx(Transaction ctx, Chain chain, int fromChainId) {
         NulsHash ctxHash = ctx.getHash();
         try {
+            if(ctx.getType() == TxType.REGISTERED_CHAIN_CHANGE && config.isMainNet()){
+                return false;
+            }
             TransactionSignature signature = new TransactionSignature();
             signature.parse(ctx.getTransactionSignature(), 0);
             int verifierChainId = fromChainId;
@@ -346,7 +344,9 @@ public class MessageUtil {
                     return false;
                 }
             }else{
-                return true;
+                if(!handleOtherChainCrossTx(chain, ctx, signature, verifierChainId)){
+                    return false;
+                }
             }
         } catch (Exception e) {
             chain.getLogger().error(e);
@@ -465,6 +465,29 @@ public class MessageUtil {
             }
             TransactionCall.sendTx(chain, RPCUtil.encode(packCtx.serialize()));
             chain.getLogger().debug("跨链转账交易验证完成，发送给交易模块处理，hash:{}", crossTxHashHex);
+        } catch (NulsException | IOException e) {
+            chain.getLogger().error(e);
+            return false;
+        }
+        return true;
+    }
+
+    private static boolean handleOtherChainCrossTx(Chain chain, Transaction ctx, TransactionSignature signature, int verifierChainId) {
+        ChainInfo chainInfo = chainManager.getChainInfo(verifierChainId);
+        if (chainInfo == null) {
+            chain.getLogger().error("链未注册,chainId:{}", verifierChainId);
+            return false;
+        }
+        Set<String> verifierList = chainInfo.getVerifierList();
+        int minPassCount = chainInfo.getMinPassCount();
+        try {
+            String crossTxHashHex = ctx.getHash().toHex();
+            if (!otherCtxSignValidate(chain, ctx, signature, verifierChainId, verifierList, minPassCount)) {
+                chain.getLogger().error("其他广播的跨链交易验证失败，hash:{},txType:{}", crossTxHashHex, ctx.getType());
+                return false;
+            }
+            TransactionCall.sendTx(chain, RPCUtil.encode(ctx.serialize()));
+            chain.getLogger().debug("其他广播的跨链交易验证完成，发送给交易模块处理，hash:{},txType:{}", crossTxHashHex, ctx.getType());
         } catch (NulsException | IOException e) {
             chain.getLogger().error(e);
             return false;

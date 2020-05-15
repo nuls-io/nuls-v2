@@ -78,13 +78,13 @@ public interface RpcService {
 
     boolean registerCrossChain(BlockChain blockChain);
 
-    boolean registerCrossAsset(List<Asset> assets);
+    boolean registerCrossAsset(List<Asset> assets, long registerTime);
 
-    boolean registerCrossAsset(Asset asset);
+    boolean registerCrossAsset(Asset asset, long registerTime);
 
-    boolean cancelCrossChain(List<Map<String, Object>> chainAssetIds);
+    boolean cancelCrossChain(List<Map<String, Object>> chainAssetIds, long cancelTime);
 
-    boolean cancelCrossChain(Map<String, Object> chainAssetIds);
+    boolean cancelCrossChain(Map<String, Object> chainAssetIds, long cancelTime);
 
     /**
      * 发送链地址前缀

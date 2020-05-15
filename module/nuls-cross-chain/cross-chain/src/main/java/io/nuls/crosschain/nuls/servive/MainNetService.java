@@ -2,7 +2,6 @@ package io.nuls.crosschain.nuls.servive;
 
 import io.nuls.core.basic.Result;
 import io.nuls.crosschain.base.message.CirculationMessage;
-import io.nuls.crosschain.base.message.GetRegisteredChainMessage;
 
 import java.util.Map;
 
@@ -47,16 +46,6 @@ public interface MainNetService {
      * @return        Processing result
      */
     Result crossChainRegisterChange(Map<String, Object> params);
-
-    /**
-     * 友链向主网查询所有跨链注册信息
-     * Friend Chain inquires all cross-chain registration information from the main network
-     *
-     * @param chainId     消息所属链Id
-     * @param nodeId      发送此消息的节点Id
-     * @param message 消息体
-     * */
-    void getCrossChainList(int chainId, String nodeId, GetRegisteredChainMessage message);
 
     /**
      * 接收链资产统计消息
