@@ -9,6 +9,7 @@ import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.crosschain.base.message.CirculationMessage;
 import io.nuls.crosschain.base.message.RegisteredChainMessage;
+import io.nuls.crosschain.base.model.bo.AssetInfo;
 import io.nuls.crosschain.base.model.bo.ChainInfo;
 import io.nuls.crosschain.base.model.bo.Circulation;
 
@@ -134,7 +135,12 @@ public class ChainManagerCall {
             if(chainInfos != null && chainInfos.size() > 0){
                 for (Map<String,Object> chainInfoMap:chainInfos) {
                     ChainInfo chainInfo = JSONUtils.map2pojo(chainInfoMap, ChainInfo.class);
-                    chainInfoList.add(chainInfo);
+                    for (AssetInfo assetInfo : chainInfo.getAssetInfoList()){
+                        if(assetInfo.isUsable()){
+                            chainInfoList.add(chainInfo);
+                            break;
+                        }
+                    }
                 }
             }
             RegisteredChainMessage registeredChainMessage = new RegisteredChainMessage();

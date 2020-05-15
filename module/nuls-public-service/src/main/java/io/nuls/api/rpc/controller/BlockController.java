@@ -259,7 +259,6 @@ public class BlockController {
         result.setResult(pageInfo);
         return result;
     }
-
 //
 //    @RpcMethod("rollbackBestBlocks")
 //    public RpcResult rollbackBestBlocks(List<Object> params) {

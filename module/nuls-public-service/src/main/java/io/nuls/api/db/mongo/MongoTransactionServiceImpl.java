@@ -184,15 +184,34 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         }
     }
 
-    public PageInfo<MiniTransactionInfo> getTxList(int chainId, int pageIndex, int pageSize, int type, boolean isHidden) {
+    public PageInfo<MiniTransactionInfo> getTxList(int chainId, int pageIndex, int pageSize, int type,
+                                                   boolean isHidden, long startTime, long endTime) {
         Bson filter = null;
-        if (type > 0) {
-            filter = eq("type", type);
+        if (type > 0 && startTime > 0 && endTime > 0) {
+            filter = Filters.and(Filters.eq("type", type), Filters.gte("createTime", startTime), Filters.lte("createTime", endTime));
+        } else if (type > 0 && startTime > 0) {
+            filter = Filters.and(Filters.eq("type", type), Filters.gte("createTime", startTime));
+        } else if (type > 0 && endTime > 0) {
+            filter = Filters.and(Filters.eq("type", type), Filters.lte("createTime", endTime));
+        } else if (type > 0) {
+            filter = Filters.eq("type", type);
+        } else if (isHidden && startTime > 0 && endTime > 0) {
+            filter = Filters.and(ne("type", 1), Filters.gte("createTime", startTime), Filters.lte("createTime", endTime));
+        } else if (isHidden && startTime > 0) {
+            filter = Filters.and(ne("type", 1), Filters.gte("createTime", startTime));
+        } else if (isHidden && endTime > 0) {
+            filter = Filters.and(ne("type", 1), Filters.lte("createTime", endTime));
         } else if (isHidden) {
             filter = ne("type", 1);
+        } else if (startTime > 0 && endTime > 0) {
+            filter = Filters.and(Filters.gte("createTime", startTime), Filters.lte("createTime", endTime));
+        } else if (startTime > 0) {
+            filter = Filters.gte("createTime", startTime);
+        } else if (endTime > 0) {
+            filter = Filters.lte("createTime", endTime);
         }
         long totalCount = mongoDBService.getCount(TX_TABLE + chainId, filter);
-        List<Document> docList = this.mongoDBService.pageQuery(TX_TABLE + chainId, filter, Sorts.descending("height"), pageIndex, pageSize);
+        List<Document> docList = this.mongoDBService.pageQuery(TX_TABLE + chainId, filter, Sorts.descending("createTime"), pageIndex, pageSize);
         List<MiniTransactionInfo> txList = new ArrayList<>();
         for (Document document : docList) {
             txList.add(MiniTransactionInfo.toInfo(document));

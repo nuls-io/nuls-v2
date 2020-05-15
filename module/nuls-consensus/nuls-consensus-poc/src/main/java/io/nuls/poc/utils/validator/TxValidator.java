@@ -13,6 +13,7 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.ArraysTool;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.poc.constant.ConsensusConstant;
@@ -22,6 +23,7 @@ import io.nuls.poc.model.bo.tx.txdata.*;
 import io.nuls.poc.model.po.AgentPo;
 import io.nuls.poc.model.po.DepositPo;
 import io.nuls.poc.model.po.PunishLogPo;
+import io.nuls.poc.rpc.call.CallMethodUtils;
 import io.nuls.poc.storage.AgentStorageService;
 import io.nuls.poc.storage.DepositStorageService;
 import io.nuls.poc.utils.compare.CoinFromComparator;
@@ -222,6 +224,10 @@ public class TxValidator {
         if (!Arrays.equals(coinData.getFrom().get(0).getAddress(), coinData.getTo().get(0).getAddress())
                 || coinData.getFrom().get(0).getAssetsId() != coinData.getTo().get(0).getAssetsId()) {
             throw new NulsException(ConsensusErrorCode.DATA_ERROR);
+        }
+        //验证nonce值是否正确
+        if(!ArraysTool.arrayEquals(CallMethodUtils.getNonce(cancelDeposit.getJoinTxHash().getBytes()), coinData.getFrom().get(0).getNonce())){
+            throw new NulsException(ConsensusErrorCode.COIN_DATA_VALID_ERROR);
         }
         //退出委托金额是否正确
         if(depositPo.getDeposit().compareTo(coinData.getFrom().get(0).getAmount()) != 0 || coinData.getTo().get(0).getAmount().compareTo(BigInteger.ZERO) <= 0){

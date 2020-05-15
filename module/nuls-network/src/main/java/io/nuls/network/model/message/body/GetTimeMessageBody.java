@@ -62,7 +62,7 @@ public class GetTimeMessageBody extends BaseNulsData {
     @Override
     public int size() {
         int s = 0;
-        s += SerializeUtils.sizeOfUint32();
+        s += SerializeUtils.sizeOfInt64();
         return s;
     }
 
@@ -71,12 +71,12 @@ public class GetTimeMessageBody extends BaseNulsData {
      */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeUint32(messageId);
+        stream.writeInt64(messageId);
     }
 
     @Override
     public void parse(NulsByteBuffer buffer) throws NulsException {
-        messageId = buffer.readUint32();
+        messageId = buffer.readInt64();
     }
 
 }

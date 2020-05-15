@@ -71,7 +71,7 @@
       {
         "type": "14",
         "systemTx": false,
-        "unlockTx": false,
+        "unlockTx": true,
         "verifySignature": true,
         "verifyFee": true,
         "handler": "DisableAssetTxProcessorV1"
