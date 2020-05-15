@@ -462,7 +462,7 @@ public class TxServiceImpl implements TxService {
             }
 
             if(!txRegister.getUnlockTx() && coinFrom.getLocked() == -1){
-                chain.getLogger().error("This transaction type does not unlock the token");
+                chain.getLogger().error("This transaction type can not unlock the token");
                 throw new NulsException(TxErrorCode.TX_VERIFY_FAIL);
             }
         }
