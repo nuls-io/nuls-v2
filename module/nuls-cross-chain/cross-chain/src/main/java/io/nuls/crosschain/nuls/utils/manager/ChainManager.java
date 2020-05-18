@@ -252,6 +252,14 @@ public class ChainManager {
             value:List<chainId>
             */
             RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_BROAD_FAILED+ chainId);
+
+            /*
+            广播失败的验证人变更消息
+            Keep records of successful cross-chain transactions processed
+            key:高度
+            value:List<chainId>
+            */
+            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_CROSS_CHANGE_FAILED+ chainId);
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e.getMessage());
         }

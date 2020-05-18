@@ -40,6 +40,7 @@ public class RegisteredChainChangeServiceImpl implements RegisteredChainChangeSe
         Chain chain = chainManager.getChainMap().get(chainId);
         if(config.isMainNet()){
             invalidTxList.addAll(txs);
+            chain.getLogger().error("主网不打包注册链变更交易");
             result.put("errorCode", NulsCrossChainErrorCode.DATA_ERROR.getCode());
             return result;
         }
@@ -117,9 +118,11 @@ public class RegisteredChainChangeServiceImpl implements RegisteredChainChangeSe
                         registeredChainMessage.getChainInfoList().removeIf(chainInfo -> chainInfo.getChainId() == txData.getRegisterChainId());
                         registeredCrossChainService.save(registeredChainMessage);
                         chainManager.setRegisteredCrossChainList(registeredChainMessage.getChainInfoList());
+                        chain.getLogger().info("有链注销了跨链,chainId:{}",txData.getRegisterChainId());
                     }else{
                         for(ChainInfo chainInfo : txData.getChainInfoList()){
                             registeredChainMessage.addChainInfo(chainInfo);
+                            chain.getLogger().info("Registered cross chain chain information has changed,chainId:{}" ,chainInfo.getChainId());
                         }
                         registeredCrossChainService.save(registeredChainMessage);
                         chainManager.setRegisteredCrossChainList(registeredChainMessage.getChainInfoList());

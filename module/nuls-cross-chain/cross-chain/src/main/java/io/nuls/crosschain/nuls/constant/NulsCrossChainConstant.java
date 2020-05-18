@@ -44,6 +44,8 @@ public interface NulsCrossChainConstant {
     String DB_NAME_REGISTERED_CHAIN ="registered_chain";
     /**验证人变更交易广播失败的链信息*/
     String DB_NAME_BROAD_FAILED ="verifier_broad_fail";
+    /**验证人变更交易广播失败的链信息*/
+    String DB_NAME_CROSS_CHANGE_FAILED ="cross_change_broad_fail";
     /**本地验证人信息表*/
     String DB_NAME_LOCAL_VERIFIER ="local_verifier";
 

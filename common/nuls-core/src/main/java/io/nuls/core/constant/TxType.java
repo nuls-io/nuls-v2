@@ -142,6 +142,6 @@ public class TxType {
     /**
      * 注册跨链变更（新注册/注销链，新注册/注销资产）
      */
-    public static final int REGISTERED_CHAIN_CHANGE = 28;
+    public static final int REGISTERED_CHAIN_CHANGE = 60;
 
 }
