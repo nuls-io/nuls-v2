@@ -84,12 +84,15 @@ public class MainNetServiceImpl implements MainNetService {
         ChainInfo chainInfo = JSONUtils.map2pojo(params, ChainInfo.class);
         Chain chain = chainManager.getChainMap().get(nulsCrossChainConfig.getMainChainId());
         RegisteredChainMessage registeredChainMessage = registeredCrossChainService.get();
+        boolean initCrossChain = false;
         if (registeredChainMessage == null) {
             registeredChainMessage = new RegisteredChainMessage();
+            initCrossChain = true;
         }
         if (registeredChainMessage.getChainInfoList() == null) {
             List<ChainInfo> chainInfoList = new ArrayList<>();
             registeredChainMessage.setChainInfoList(chainInfoList);
+            initCrossChain = true;
         }
         registeredChainMessage.addChainInfo(chainInfo);
         registeredCrossChainService.save(registeredChainMessage);
@@ -106,7 +109,9 @@ public class MainNetServiceImpl implements MainNetService {
         try {
             int syncStatus = BlockCall.getBlockStatus(chain);
             chain.getCrossTxThreadPool().execute(new CrossTxHandler(chain, TxUtil.createVerifierInitTx(chain.getVerifierList(), chainInfo.getRegisterTime(), chainInfo.getChainId()),syncStatus));
-            chain.getCrossTxThreadPool().execute(new CrossTxHandler(chain, TxUtil.createCrossChainChangeTx(chainInfo,chainInfo.getRegisterTime(),chainInfo.getChainId(), ChainInfoChangeType.NEW_REGISTER_CHAIN.getType()),syncStatus));
+            if(initCrossChain){
+                chain.getCrossTxThreadPool().execute(new CrossTxHandler(chain, TxUtil.createCrossChainChangeTx(chainInfo,chainInfo.getRegisterTime(),chainInfo.getChainId(), ChainInfoChangeType.NEW_REGISTER_CHAIN.getType()),syncStatus));
+            }
         } catch (IOException e) {
             chain.getLogger().error(e);
             return Result.getFailed(DATA_PARSE_ERROR);
