@@ -104,12 +104,13 @@ public class MainNetServiceImpl implements MainNetService {
                 return Result.getFailed(DB_SAVE_ERROR);
             }
         }
-        LoggerUtil.commonLog.info("有新链注册跨链，chainID:{},初始验证人列表：{}", chainInfo.getChainId(), chainInfo.getVerifierList().toString());
+        chain.getLogger().info("有新链注册跨链，chainID:{},初始验证人列表：{}", chainInfo.getChainId(), chainInfo.getVerifierList().toString());
         //创建验证人初始化交易
         try {
             int syncStatus = BlockCall.getBlockStatus(chain);
             chain.getCrossTxThreadPool().execute(new CrossTxHandler(chain, TxUtil.createVerifierInitTx(chain.getVerifierList(), chainInfo.getRegisterTime(), chainInfo.getChainId()),syncStatus));
-            if(initCrossChain){
+            if(!initCrossChain){
+                chain.getLogger().info("将新注册的链信息广播给已注册的链");
                 chain.getCrossTxThreadPool().execute(new CrossTxHandler(chain, TxUtil.createCrossChainChangeTx(chainInfo,chainInfo.getRegisterTime(),chainInfo.getChainId(), ChainInfoChangeType.NEW_REGISTER_CHAIN.getType()),syncStatus));
             }
         } catch (IOException e) {
