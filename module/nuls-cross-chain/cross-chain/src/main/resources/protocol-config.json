@@ -36,7 +36,7 @@
         "handler": "ContractCrossChainProcessorV1"
       },
       {
-        "type": "28",
+        "type": "60",
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": false,

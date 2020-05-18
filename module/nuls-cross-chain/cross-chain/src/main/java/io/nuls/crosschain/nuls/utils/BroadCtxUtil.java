@@ -65,15 +65,16 @@ public class BroadCtxUtil {
             } else if (ctx.getType() == TxType.VERIFIER_INIT) {
                 VerifierInitData verifierInitData = new VerifierInitData();
                 verifierInitData.parse(ctx.getTxData(), 0);
-                BroadFailFlag broadFailFlag = broadFailMap.get(verifierInitData.getRegisterChainId());
                 if (!NetWorkCall.broadcast(verifierInitData.getRegisterChainId(), message, CommandConstant.BROAD_CTX_HASH_MESSAGE, true)) {
+                    BroadFailFlag broadFailFlag = broadFailMap.get(verifierInitData.getRegisterChainId());
                     if (broadFailFlag == null) {
                         broadFailFlag = new BroadFailFlag();
                     }
-                    broadFailFlag.setCrossChainTransferFlag(true);
+                    broadFailFlag.setVerifierInitFlag(true);
                     broadFailMap.put(verifierInitData.getRegisterChainId(), broadFailFlag);
                     return false;
                 }
+                chain.getLogger().info("验证人初始化交易广播成功，chainId:{}",verifierInitData.getRegisterChainId());
             }else if(ctx.getType() == TxType.REGISTERED_CHAIN_CHANGE){
                 return broadCrossChainChangeTx(chain, message, cacheHeight, crossStatusMap, broadFailMap, ctx);
             }
@@ -172,7 +173,7 @@ public class BroadCtxUtil {
             if (po != null) {
                 for (Integer toChainId : po.getChains()) {
                     broadFailFlag = broadFailMap.get(toChainId);
-                    boolean haveConflict = broadFailFlag != null && (broadFailFlag.isVerifierInitFlag() || broadFailFlag.isVerifierChangeFlag() || broadFailFlag.isCrossChainTransferFlag());
+                    boolean haveConflict = broadFailFlag != null && (broadFailFlag.isVerifierInitFlag() || broadFailFlag.isVerifierChangeFlag() || broadFailFlag.isCrossChainTransferFlag()|| broadFailFlag.isCrossChainChangeFlag());
                     if (haveConflict) {
                         broadFailChains.add(toChainId);
                         continue;
@@ -259,8 +260,9 @@ public class BroadCtxUtil {
             if (haveConflict) {
                 return false;
             }
-            byte broadStatus = getBroadStatus(chain, chainId, crossStatusMap);
+            byte broadStatus = getBroadStatus(chain, toChainId, crossStatusMap);
             if (broadStatus == 0) {
+                chain.getLogger().warn("消息接收链不存在，toChainId:{}",toChainId);
                 return true;
             }
             if (broadStatus == 1 || !NetWorkCall.broadcast(toChainId, message, CommandConstant.BROAD_CTX_HASH_MESSAGE, true)) {
@@ -268,9 +270,10 @@ public class BroadCtxUtil {
                     broadFailFlag = new BroadFailFlag();
                 }
                 broadFailFlag.setCrossChainChangeFlag(true);
-                broadFailMap.put(chainId, broadFailFlag);
+                broadFailMap.put(toChainId, broadFailFlag);
                 return false;
             }
+            chain.getLogger().info("跨链变更消息广播成功：toChainId:{}",toChainId);
             return true;
         }else{
             VerifierChangeSendFailPO po = crossChangeBroadFailService.get(cacheHeight, chainId);
@@ -286,16 +289,18 @@ public class BroadCtxUtil {
                     broadChains.remove(toChainId);
                 }
             }
+            chain.getLogger().info("跨链交易需要广播到broadChains:{}",broadChains);
             boolean broadResult = true;
             for (Integer broadChainId : broadChains){
                 broadFailFlag = broadFailMap.get(broadChainId);
-                boolean haveConflict = broadFailFlag != null && (broadFailFlag.isVerifierInitFlag() || broadFailFlag.isVerifierChangeFlag() || broadFailFlag.isCrossChainTransferFlag());
+                boolean haveConflict = broadFailFlag != null && (broadFailFlag.isVerifierInitFlag() || broadFailFlag.isVerifierChangeFlag());
                 if (haveConflict) {
                     broadFailChains.add(broadChainId);
                     continue;
                 }
                 byte broadStatus = getBroadStatus(chain, broadChainId, crossStatusMap);
                 if (broadStatus == 0) {
+                    chain.getLogger().warn("消息接收链不存在，toChainId:{}",broadChainId);
                     continue;
                 }
                 if (broadStatus == 1 || !NetWorkCall.broadcast(broadChainId, message, CommandConstant.BROAD_CTX_HASH_MESSAGE, true)) {
@@ -309,10 +314,11 @@ public class BroadCtxUtil {
                 }
             }
             if (broadFailChains.isEmpty()) {
-                verifierChangeBroadFailedService.delete(cacheHeight, chainId);
+                crossChangeBroadFailService.delete(cacheHeight, chainId);
             } else {
                 VerifierChangeSendFailPO failPO = new VerifierChangeSendFailPO(broadFailChains);
-                verifierChangeBroadFailedService.save(cacheHeight, failPO, chainId);
+                crossChangeBroadFailService.save(cacheHeight, failPO, chainId);
+                chain.getLogger().warn("跨链变更消息广播失败的链broadFailChains：{}",broadFailChains);
             }
             return broadResult;
         }

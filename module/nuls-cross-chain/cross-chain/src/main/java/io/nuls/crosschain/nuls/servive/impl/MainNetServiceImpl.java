@@ -84,15 +84,10 @@ public class MainNetServiceImpl implements MainNetService {
         ChainInfo chainInfo = JSONUtils.map2pojo(params, ChainInfo.class);
         Chain chain = chainManager.getChainMap().get(nulsCrossChainConfig.getMainChainId());
         RegisteredChainMessage registeredChainMessage = registeredCrossChainService.get();
-        boolean initCrossChain = false;
-        if (registeredChainMessage == null) {
+        if (registeredChainMessage == null || registeredChainMessage.getChainInfoList().isEmpty()) {
             registeredChainMessage = new RegisteredChainMessage();
-            initCrossChain = true;
-        }
-        if (registeredChainMessage.getChainInfoList() == null) {
             List<ChainInfo> chainInfoList = new ArrayList<>();
             registeredChainMessage.setChainInfoList(chainInfoList);
-            initCrossChain = true;
         }
         registeredChainMessage.addChainInfo(chainInfo);
         registeredCrossChainService.save(registeredChainMessage);
@@ -109,9 +104,11 @@ public class MainNetServiceImpl implements MainNetService {
         try {
             int syncStatus = BlockCall.getBlockStatus(chain);
             chain.getCrossTxThreadPool().execute(new CrossTxHandler(chain, TxUtil.createVerifierInitTx(chain.getVerifierList(), chainInfo.getRegisterTime(), chainInfo.getChainId()),syncStatus));
-            if(!initCrossChain){
+
+            if(registeredChainMessage.haveOtherChain(chainInfo.getChainId(), chain.getChainId())){
                 chain.getLogger().info("将新注册的链信息广播给已注册的链");
                 chain.getCrossTxThreadPool().execute(new CrossTxHandler(chain, TxUtil.createCrossChainChangeTx(chainInfo,chainInfo.getRegisterTime(),chainInfo.getChainId(), ChainInfoChangeType.NEW_REGISTER_CHAIN.getType()),syncStatus));
+
             }
         } catch (IOException e) {
             chain.getLogger().error(e);

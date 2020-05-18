@@ -103,4 +103,13 @@ public class RegisteredChainMessage extends BaseMessage {
         chainInfoList.remove(chainInfo);
         chainInfoList.add(chainInfo);
     }
+
+    public boolean haveOtherChain(int registerChainId, int mainChainId){
+        for (ChainInfo chainInfo : chainInfoList){
+            if(chainInfo.getChainId() != registerChainId && chainInfo.getChainId() != mainChainId){
+                return true;
+            }
+        }
+        return false;
+    }
 }
