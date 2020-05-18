@@ -149,7 +149,7 @@ public class VerifierInitServiceImpl implements VerifierInitService {
                     }
                     chain.getCrossTxThreadPool().execute(new CrossTxHandler(chain, TxUtil.createVerifierInitTx(localVerifierList, blockHeader.getTime(), chainId),syncStatus));
                 }else{
-                    chain.getLogger().info("链：{}初始化完成，将已注册跨链的链信息发送给该链");
+                    chain.getLogger().info("链：{}初始化完成，将已注册跨链的链信息发送给该链",verifierChainId);
                     chain.getCrossTxThreadPool().execute(new CrossTxHandler(chain, TxUtil.createCrossChainChangeTx(chainManager.getRegisteredCrossChainList(),blockHeader.getTime(),chainInfo.getChainId(), ChainInfoChangeType.INIT_REGISTER_CHAIN.getType()),syncStatus));
                 }
             } catch (NulsException e) {

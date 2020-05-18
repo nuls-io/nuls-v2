@@ -613,7 +613,7 @@ public class MessageUtil {
         return 1;
     }
 
-    public static void saveCtxSendHeight(Chain chain, long sendHeight, Transaction ctx) {
+    public static synchronized void saveCtxSendHeight(Chain chain, long sendHeight, Transaction ctx) {
         SendCtxHashPO sendCtxHashPo = sendHeightService.get(sendHeight, chain.getChainId());
         if (sendCtxHashPo == null) {
             List<NulsHash> hashList = new ArrayList<>();
