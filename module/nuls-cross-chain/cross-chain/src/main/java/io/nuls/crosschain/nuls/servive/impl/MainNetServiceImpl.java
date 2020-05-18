@@ -183,6 +183,7 @@ public class MainNetServiceImpl implements MainNetService {
         }
         try {
             if(chainInvalid){
+                chain.getLogger().info("注销链，chainId:{}",chainId);
                 chain.getCrossTxThreadPool().execute(new CrossTxHandler(chain, TxUtil.createCrossChainChangeTx(time,chainId, ChainInfoChangeType.REGISTERED_CHAIN_CHANGE.getType()),syncStatus));
             }else{
                 chain.getCrossTxThreadPool().execute(new CrossTxHandler(chain, TxUtil.createCrossChainChangeTx(realChainInfo,time,chainId, ChainInfoChangeType.REGISTERED_CHAIN_CHANGE.getType()),syncStatus));

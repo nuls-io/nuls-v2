@@ -289,6 +289,7 @@ public class BroadCtxUtil {
                     broadChains.remove(toChainId);
                 }
             }
+            broadChains.remove(config.getMainChainId());
             chain.getLogger().info("跨链交易需要广播到broadChains:{}",broadChains);
             boolean broadResult = true;
             for (Integer broadChainId : broadChains){
