@@ -13,6 +13,8 @@ import io.nuls.core.model.StringUtils;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.BroadCtxSignMessage;
 import io.nuls.crosschain.base.message.GetCtxStateMessage;
+import io.nuls.crosschain.base.model.bo.ChainInfo;
+import io.nuls.crosschain.base.model.bo.txdata.RegisteredChainChangeData;
 import io.nuls.crosschain.base.model.bo.txdata.VerifierChangeData;
 import io.nuls.crosschain.base.model.bo.txdata.VerifierInitData;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
@@ -152,6 +154,46 @@ public class TxUtil {
     }
 
     /**
+     * 组装注册跨链变更交易交易
+     * Assemble Verifier Change Transaction
+     */
+    public static Transaction createCrossChainChangeTx(long time, int registerChainId, int type) throws IOException {
+        Transaction crossChainChangeTx = new Transaction(TxType.REGISTERED_CHAIN_CHANGE);
+        crossChainChangeTx.setTime(time);
+        List<ChainInfo> chainInfoList = new ArrayList<>();
+        RegisteredChainChangeData txData = new RegisteredChainChangeData(registerChainId, type, chainInfoList);
+        crossChainChangeTx.setTxData(txData.serialize());
+        return crossChainChangeTx;
+    }
+
+    /**
+     * 组装注册跨链变更交易交易
+     * Assemble Verifier Change Transaction
+     */
+    public static Transaction createCrossChainChangeTx(ChainInfo chainInfo, long time, int registerChainId, int type) throws IOException {
+        Transaction crossChainChangeTx = new Transaction(TxType.REGISTERED_CHAIN_CHANGE);
+        crossChainChangeTx.setTime(time);
+        List<ChainInfo> chainInfoList = new ArrayList<>();
+        chainInfoList.add(chainInfo);
+        RegisteredChainChangeData txData = new RegisteredChainChangeData(registerChainId, type, chainInfoList);
+
+        crossChainChangeTx.setTxData(txData.serialize());
+        return crossChainChangeTx;
+    }
+
+    /**
+     * 组装注册跨链变更交易交易
+     * Assemble Verifier Change Transaction
+     */
+    public static Transaction createCrossChainChangeTx(List<ChainInfo> chainInfoList, long time, int registerChainId, int type) throws IOException {
+        Transaction crossChainChangeTx = new Transaction(TxType.REGISTERED_CHAIN_CHANGE);
+        crossChainChangeTx.setTime(time);
+        RegisteredChainChangeData txData = new RegisteredChainChangeData(registerChainId, type, chainInfoList);
+        crossChainChangeTx.setTxData(txData.serialize());
+        return crossChainChangeTx;
+    }
+
+    /**
      * 验证人变更交易处理时需要等待高度变更
      * When the verifier changes the transaction processing, it needs to wait for the height change
      */
@@ -234,8 +276,10 @@ public class TxUtil {
         判断本节点是否为共识节点，如果为共识节点则签名，如果不为共识节点则广播该交易
         */
         Map packerInfo;
+        List<String> verifierList = chain.getVerifierList();
         if (ctx.getType() == TxType.VERIFIER_INIT) {
             packerInfo = ConsensusCall.getSeedNodeList(chain);
+            verifierList = (List<String>) packerInfo.get(ParamConstant.PARAM_PACK_ADDRESS_LIST);
         } else {
             packerInfo = ConsensusCall.getPackerInfo(chain);
         }
@@ -246,7 +290,7 @@ public class TxUtil {
         CtxStatusPO ctxStatusPO = new CtxStatusPO(ctx, TxStatusEnum.UNCONFIRM.getStatus());
         boolean byzantinePass = false;
         //验证人变更，减少的验证人不签名
-        boolean sign = !StringUtils.isBlank(address) && chain.getVerifierList().contains(address);
+        boolean sign = !StringUtils.isBlank(address) && verifierList.contains(address);
         if (sign && cancelList != null) {
             sign = !cancelList.contains(address);
         }
@@ -261,23 +305,22 @@ public class TxUtil {
                 p2PHKSignatureList.add(p2PHKSignature);
                 signature.setP2PHKSignatures(p2PHKSignatureList);
                 ctx.setTransactionSignature(signature.serialize());
-                byzantinePass = MessageUtil.signByzantineInChain(chain, ctx, signature, (List<String>) packerInfo.get(ParamConstant.PARAM_PACK_ADDRESS_LIST),hash);
+                byzantinePass = MessageUtil.signByzantineInChain(chain, ctx, signature, verifierList,hash);
             } catch (Exception e) {
                 chain.getLogger().error(e);
                 chain.getLogger().error("签名错误!,hash:{}", hashHex);
                 return;
             }
-        }
-        /*
-        保存并广播该交易
-        */
-        if (sign) {
             if (!chain.getWaitBroadSignMap().keySet().contains(hash)) {
                 chain.getWaitBroadSignMap().put(hash, new HashSet<>());
             }
+            /*
+            保存并广播该交易
+            */
             chain.getWaitBroadSignMap().get(hash).add(new WaitBroadSignMessage(null, message));
+        }else{
+            ctxStatusService.save(hash, ctxStatusPO, chainId);
         }
-        ctxStatusService.save(hash, ctxStatusPO, chainId);
         if (!config.isMainNet()) {
             convertHashService.save(hash, hash, chainId);
         }
@@ -289,7 +332,6 @@ public class TxUtil {
                 chain.getSignMessageByzantineQueue().addAll(chain.getFutureMessageMap().remove(hash));
             }
         }
-
         MessageUtil.broadcastCtx(chain, hash, chainId, hashHex);
     }
 
@@ -300,11 +342,19 @@ public class TxUtil {
      * @param chain 链信息
      * @param ctx   跨链交易
      */
+    @SuppressWarnings("unchecked")
     public static void signAndBroad(Chain chain, Transaction ctx) {
-        Map packerInfo = ConsensusCall.getPackerInfo(chain);
+        Map packerInfo;
+        List<String> verifierList = chain.getVerifierList();
+        if (ctx.getType() == TxType.VERIFIER_INIT) {
+            packerInfo = ConsensusCall.getSeedNodeList(chain);
+            verifierList = (List<String>) packerInfo.get(ParamConstant.PARAM_PACK_ADDRESS_LIST);
+        } else {
+            packerInfo = ConsensusCall.getPackerInfo(chain);
+        }
         String password = (String) packerInfo.get(ParamConstant.PARAM_PASSWORD);
         String address = (String) packerInfo.get(ParamConstant.PARAM_ADDRESS);
-        boolean sign = !StringUtils.isBlank(address) && chain.getVerifierList().contains(address);
+        boolean sign = !StringUtils.isBlank(address) && verifierList.contains(address);
         if (!sign) {
             return;
         }

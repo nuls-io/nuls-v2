@@ -52,4 +52,5 @@ public interface ParamConstant {
     String PARAM_PACK_ADDRESS_LIST = "packAddressList";
     String PARAM_REGISTER_AGENT_LIST = "registerAgentList";
     String PARAM_CANCEL_AGENT_LIST = "cancelAgentList";
+    String PARAM_TIME = "time";
 }
