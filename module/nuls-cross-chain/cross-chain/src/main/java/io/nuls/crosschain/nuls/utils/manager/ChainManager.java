@@ -94,6 +94,7 @@ public class ChainManager {
             RegisteredChainMessage registeredChainMessage = registeredCrossChainService.get();
             if(registeredChainMessage != null){
                 registeredCrossChainList = registeredChainMessage.getChainInfoList();
+                crossNetUseAble = true;
             }else{
                 ChainInfo mainChainInfo = new ChainInfo();
                 mainChainInfo.setVerifierList(new HashSet<>(Arrays.asList(config.getVerifiers().split(NulsCrossChainConstant.VERIFIER_SPLIT))));
