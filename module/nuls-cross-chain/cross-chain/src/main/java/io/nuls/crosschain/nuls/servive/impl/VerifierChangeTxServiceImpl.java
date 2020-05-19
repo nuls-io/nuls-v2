@@ -7,7 +7,7 @@ import io.nuls.base.signture.SignatureUtil;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
-import io.nuls.crosschain.base.message.RegisteredChainMessage;
+import io.nuls.crosschain.base.model.bo.txdata.RegisteredChainMessage;
 import io.nuls.crosschain.base.model.bo.ChainInfo;
 import io.nuls.crosschain.base.model.bo.txdata.VerifierChangeData;
 import io.nuls.crosschain.base.service.VerifierChangeTxService;

@@ -202,6 +202,16 @@ privateKey:e27e3961384bc4749cb5bd535b16c90c4430d4da2cd34e1edd10b50b0d01fa1d
 | agentChainId | 正整数 | 允许参与共识的资产的链id |
 | awardAssetId | 正整数 | 共识奖励的资产id（必须在共识的资产所在的链，既资产链id相同） |
 | feeUnit | 正整数 | 手续费单价 |
+| packingInterval | 长整型 | 出块间隔时间 |
+| redPublishLockTime | 长整型 | 节点红牌保证金锁定时间 |
+| stopAgentLockTime | 长整型 | 停止节点保证金锁定时间 |
+| commissionRateMin | byte | 共识奖励提成最小比例                                         |
+| commissionRateMax | byte | 共识节点共识奖励提成最大比例 |
+| depositMin | BIgInteger | 创建节点保证金最小值 |
+| depositMax | BIgInteger | 创建节点保证金最大值 |
+| commissionMin | BIgInteger | 节点出块最少委托金额 |
+| commissionMax | BIgInteger | 节点最大委托金额 |
+| entrusterDepositMin | BIgInteger | 单笔委托最新金额 |
 
 #### 智能合约配置:smart_contract
 

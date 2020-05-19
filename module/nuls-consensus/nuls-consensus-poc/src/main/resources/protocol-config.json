@@ -30,7 +30,7 @@
       {
         "type": "8",
         "systemTx": true,
-        "unlockTx": false,
+        "unlockTx": true,
         "verifySignature": false,
         "verifyFee": false,
         "handler": "RedPunishProcessorV4"
@@ -188,7 +188,7 @@
       {
         "type": "8",
         "systemTx": true,
-        "unlockTx": false,
+        "unlockTx": true,
         "verifySignature": false,
         "verifyFee": false,
         "handler": "RedPunishProcessorV1"

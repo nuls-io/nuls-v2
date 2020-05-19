@@ -1,11 +1,9 @@
 package io.nuls.crosschain.nuls.srorage.imp;
 
-import io.nuls.base.RPCUtil;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.Log;
-import io.nuls.core.model.ByteUtils;
 import io.nuls.core.rockdb.service.RocksDBService;
-import io.nuls.crosschain.base.message.RegisteredChainMessage;
+import io.nuls.crosschain.base.model.bo.txdata.RegisteredChainMessage;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.srorage.RegisteredCrossChainService;
 

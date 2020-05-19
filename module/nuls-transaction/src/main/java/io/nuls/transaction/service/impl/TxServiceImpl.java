@@ -460,6 +460,11 @@ public class TxServiceImpl implements TxService {
                 chain.getLogger().error("Tx from cannot have contract address ");
                 throw new NulsException(TxErrorCode.TX_FROM_CANNOT_HAS_CONTRACT_ADDRESS);
             }
+
+            if(!txRegister.getUnlockTx() && coinFrom.getLocked() == -1){
+                chain.getLogger().error("This transaction type can not unlock the token");
+                throw new NulsException(TxErrorCode.TX_VERIFY_FAIL);
+            }
         }
         if (null != existMultiSignAddress && type != TxType.STOP_AGENT && type != TxType.RED_PUNISH) {
             //如果from中含有多签地址,则表示该交易是多签交易,则必须满足,froms中只存在这一个多签地址
