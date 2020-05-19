@@ -1,35 +1,27 @@
 package io.nuls.crosschain.nuls.utils.manager;
 
-import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.protocol.ProtocolLoader;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.Log;
 import io.nuls.core.rockdb.service.RocksDBService;
-import io.nuls.core.thread.ThreadUtils;
-import io.nuls.core.thread.commom.NulsThreadFactory;
-import io.nuls.crosschain.base.message.RegisteredChainMessage;
+import io.nuls.crosschain.base.model.bo.txdata.RegisteredChainMessage;
 import io.nuls.crosschain.base.model.bo.ChainInfo;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
-import io.nuls.crosschain.nuls.constant.ParamConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.model.bo.CmdRegisterDto;
 import io.nuls.crosschain.nuls.model.bo.config.ConfigBean;
 import io.nuls.crosschain.nuls.rpc.call.BlockCall;
-import io.nuls.crosschain.nuls.rpc.call.ConsensusCall;
 import io.nuls.crosschain.nuls.rpc.call.SmartContractCall;
 import io.nuls.crosschain.nuls.srorage.ConfigService;
 import io.nuls.crosschain.nuls.srorage.RegisteredCrossChainService;
 import io.nuls.crosschain.nuls.utils.LoggerUtil;
 import io.nuls.crosschain.nuls.utils.thread.handler.*;
-import io.nuls.crosschain.nuls.utils.thread.task.GetRegisteredChainTask;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 链管理类,负责各条链的初始化,运行,启动,参数维护等
@@ -61,13 +53,6 @@ public class ChainManager {
      * 缓存每条链最新区块头
      * */
     private Map<Integer, BlockHeader> chainHeaderMap = new ConcurrentHashMap<>();
-
-    /**
-     * 主网节点返回的已注册跨链交易列表信息
-     */
-    private List<RegisteredChainMessage> registeredChainMessageList = new ArrayList<>();
-
-    private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = ThreadUtils.createScheduledThreadPool(2, new NulsThreadFactory("getRegisteredChainTask"));
 
     private boolean crossNetUseAble = false;
 
@@ -156,9 +141,7 @@ public class ChainManager {
             chain.getLogger().info("The current status of the node is:{}",syncStatus);
             chain.setSyncStatus(syncStatus);
         }
-        if(!config.isMainNet()){
-            scheduledThreadPoolExecutor.scheduleAtFixedRate(new GetRegisteredChainTask(this),  20L, 60L, TimeUnit.SECONDS );
-        }else{
+        if(config.isMainNet()){
             crossNetUseAble = true;
         }
     }
@@ -269,6 +252,14 @@ public class ChainManager {
             value:List<chainId>
             */
             RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_BROAD_FAILED+ chainId);
+
+            /*
+            广播失败的验证人变更消息
+            Keep records of successful cross-chain transactions processed
+            key:高度
+            value:List<chainId>
+            */
+            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_CROSS_CHANGE_FAILED+ chainId);
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e.getMessage());
         }
@@ -288,14 +279,6 @@ public class ChainManager {
 
     public void setRegisteredCrossChainList(List<ChainInfo> registeredCrossChainList) {
         this.registeredCrossChainList = registeredCrossChainList;
-    }
-
-    public List<RegisteredChainMessage> getRegisteredChainMessageList() {
-        return registeredChainMessageList;
-    }
-
-    public void setRegisteredChainMessageList(List<RegisteredChainMessage> registeredChainMessageList) {
-        this.registeredChainMessageList = registeredChainMessageList;
     }
 
     public boolean isCrossNetUseAble() {

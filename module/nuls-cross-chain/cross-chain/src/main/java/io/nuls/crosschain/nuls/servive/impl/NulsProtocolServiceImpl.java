@@ -284,15 +284,4 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             chain.getLogger().error(e);
         }
     }
-
-    @Override
-    public void receiveRegisteredChainInfo(int chainId, String nodeId, RegisteredChainMessage messageBody) {
-        int handleChainId = chainId;
-        if (config.isMainNet()) {
-            handleChainId = config.getMainChainId();
-        }
-        Chain chain = chainManager.getChainMap().get(handleChainId);
-        chain.getLogger().info("收到主网节点{}发送的已注册链信息,注册跨链的链数量：{}",nodeId,messageBody.getChainInfoList().size());
-        chainManager.getRegisteredChainMessageList().add(messageBody);
-    }
 }

@@ -118,7 +118,7 @@ public class DisableAssetTransferProcessor implements TransactionProcessor {
             }
             return false;
         }
-        rpcService.cancelCrossChain(chainAssetIds);
+        rpcService.cancelCrossChain(chainAssetIds,blockHeader.getTime());
         return true;
     }
 
