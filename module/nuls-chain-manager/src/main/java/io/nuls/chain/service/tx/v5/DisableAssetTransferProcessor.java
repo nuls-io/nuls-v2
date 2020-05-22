@@ -52,25 +52,25 @@ public class DisableAssetTransferProcessor implements TransactionProcessor {
                 String txHash = tx.getHash().toHex();
                 asset = TxUtil.buildAssetWithTxAssetV5(tx);
 
-                CoinData coinData = tx.getCoinDataInstance();
-                if(coinData.getFrom().size() != 1) {
-                    rtData.put("errorCode", "coin from error");
-                    errorList.add(tx);
-                    continue;
-                }
-                BigInteger lockAmount = asset.getDepositNuls().subtract(asset.getDestroyNuls());
-                CoinFrom coinFrom = tx.getCoinDataInstance().getFrom().get(0);
-                if(coinFrom.getAmount().compareTo(lockAmount) != 0) {
-                    rtData.put("errorCode", "coin from error");
-                    errorList.add(tx);
-                    continue;
-                }
-                byte[] nonce =TxUtil.getNonceByTxHash(asset.getTxHash());
-                if(!Arrays.equals(nonce, coinFrom.getNonce())) {
-                    rtData.put("errorCode", "coin from error");
-                    errorList.add(tx);
-                    continue;
-                }
+//                CoinData coinData = tx.getCoinDataInstance();
+//                if(coinData.getFrom().size() != 1) {
+//                    rtData.put("errorCode", "coin from error");
+//                    errorList.add(tx);
+//                    continue;
+//                }
+//                BigInteger lockAmount = asset.getDepositNuls().subtract(asset.getDestroyNuls());
+//                CoinFrom coinFrom = tx.getCoinDataInstance().getFrom().get(0);
+//                if(coinFrom.getAmount().compareTo(lockAmount) != 0) {
+//                    rtData.put("errorCode", "coin from error");
+//                    errorList.add(tx);
+//                    continue;
+//                }
+//                byte[] nonce =TxUtil.getNonceByTxHash(asset.getTxHash());
+//                if(!Arrays.equals(nonce, coinFrom.getNonce())) {
+//                    rtData.put("errorCode", "coin from error");
+//                    errorList.add(tx);
+//                    continue;
+//                }
                 chainEventResult = validateService.assetDisableValidator(asset);
                 if (chainEventResult.isSuccess()) {
                     LoggerUtil.logger().debug("txHash = {},assetKey={} disable batchValidate success!", txHash, CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
