@@ -148,7 +148,7 @@ public class TxUtil {
         byte[] fromAddress = null;
         BigInteger lockedNuls = BigInteger.ZERO;
         BigInteger destroyNuls = BigInteger.ZERO;
-        if (coinTos.size() > 1) {
+        if (coinTos.size() > 0) {
             for (CoinTo coinTo : coinTos) {
                 byte[] toAddress = coinTo.getAddress();
                 if (ArraysTool.arrayEquals(toAddress, CmConstants.BLACK_HOLE_ADDRESS)) {
