@@ -93,7 +93,7 @@ public class AddAssetTransferProcessor implements TransactionProcessor {
             }
             return false;
         }
-        rpcService.registerCrossAsset(assets);
+        rpcService.registerCrossAsset(assets, blockHeader.getTime());
         return true;
     }
 

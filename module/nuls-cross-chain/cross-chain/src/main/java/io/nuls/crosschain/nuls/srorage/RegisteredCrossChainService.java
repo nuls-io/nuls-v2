@@ -1,6 +1,6 @@
 package io.nuls.crosschain.nuls.srorage;
 
-import io.nuls.crosschain.base.message.RegisteredChainMessage;
+import io.nuls.crosschain.base.model.bo.txdata.RegisteredChainMessage;
 
 /**
  * 已注册跨链的交易数据库操作类

@@ -12,7 +12,6 @@ import io.nuls.core.rpc.model.message.Response;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.constant.CrossChainErrorCode;
 import io.nuls.crosschain.base.message.CirculationMessage;
-import io.nuls.crosschain.base.message.GetRegisteredChainMessage;
 import io.nuls.crosschain.nuls.constant.ParamConstant;
 import io.nuls.crosschain.nuls.servive.MainNetService;
 
@@ -59,6 +58,7 @@ public class MainNetCmd extends BaseCmd {
     @Parameter(parameterName = "assetName", parameterType = "String", parameterDes = "资产名称")
     @Parameter(parameterName = "usable", requestType = @TypeDescriptor(value = boolean.class), parameterDes = "是否可用")
     @Parameter(parameterName = "decimalPlaces", requestType = @TypeDescriptor(value = int.class), parameterDes = "精度")
+    @Parameter(parameterName = "time", requestType = @TypeDescriptor(value = long.class), parameterDes = "链注册时间")
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "value", valueType = Boolean.class ,description = "处理结果")
     }))
@@ -76,6 +76,7 @@ public class MainNetCmd extends BaseCmd {
     @CmdAnnotation(cmd = "cancelCrossChain", version = 1.0, description = "指定链资产退出跨链/Specified Chain Assets Exit Cross Chain")
     @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
     @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterDes = "资产ID")
+    @Parameter(parameterName = "time", requestType = @TypeDescriptor(value = long.class), parameterDes = "链注册时间")
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "value", valueType = Boolean.class ,description = "处理结果")
     }))
@@ -99,25 +100,6 @@ public class MainNetCmd extends BaseCmd {
             return failed(result.getErrorCode());
         }
         return success(result.getData());
-    }
-
-    /**
-     * 友链向主网查询所有跨链注册信息
-     * Friend Chain inquires all cross-chain registration information from the main network
-     * */
-    @CmdAnnotation(cmd = "getChains", version = 1.0, description = "Friend Chain inquires all cross-chain registration information from the main network")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
-    @Parameter(parameterName = "nodeId", parameterType = "String", parameterDes = "节点IP")
-    @Parameter(parameterName = "messageBody", parameterType = "String", parameterDes = "消息体")
-    @ResponseData(description = "无特定返回值，没有错误即成功")
-    public Response getChains(Map<String,Object> params){
-        int chainId = Integer.parseInt(params.get("chainId").toString());
-        String nodeId = params.get("nodeId").toString();
-        byte[] decode = RPCUtil.decode(params.get("messageBody").toString());
-        GetRegisteredChainMessage message = new GetRegisteredChainMessage();
-        message.parse(new NulsByteBuffer(decode));
-        service.getCrossChainList(chainId,nodeId,message);
-        return success();
     }
 
     /**

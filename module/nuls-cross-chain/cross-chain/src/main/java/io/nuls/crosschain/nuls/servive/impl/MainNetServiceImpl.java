@@ -5,9 +5,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
-import io.nuls.base.signture.TransactionSignature;
 import io.nuls.core.basic.Result;
-import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -16,27 +14,26 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.model.ByteUtils;
-import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
-import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.*;
 import io.nuls.crosschain.base.model.bo.AssetInfo;
 import io.nuls.crosschain.base.model.bo.ChainInfo;
+import io.nuls.crosschain.base.model.bo.txdata.RegisteredChainMessage;
+import io.nuls.crosschain.base.utils.enumeration.ChainInfoChangeType;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.constant.ParamConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
-import io.nuls.crosschain.nuls.model.po.CtxStatusPO;
 import io.nuls.crosschain.nuls.rpc.call.*;
 import io.nuls.crosschain.nuls.servive.MainNetService;
 import io.nuls.crosschain.nuls.srorage.CtxStatusService;
 import io.nuls.crosschain.nuls.srorage.RegisteredCrossChainService;
-import io.nuls.crosschain.nuls.utils.CommonUtil;
 import io.nuls.crosschain.nuls.utils.LoggerUtil;
 import io.nuls.crosschain.nuls.utils.TxUtil;
 import io.nuls.crosschain.nuls.utils.manager.ChainManager;
 import io.nuls.crosschain.nuls.utils.manager.LocalVerifierManager;
+import io.nuls.crosschain.nuls.utils.thread.CrossTxHandler;
 import io.nuls.crosschain.nuls.utils.validator.CrossTxValidator;
 
 import java.io.IOException;
@@ -87,10 +84,8 @@ public class MainNetServiceImpl implements MainNetService {
         ChainInfo chainInfo = JSONUtils.map2pojo(params, ChainInfo.class);
         Chain chain = chainManager.getChainMap().get(nulsCrossChainConfig.getMainChainId());
         RegisteredChainMessage registeredChainMessage = registeredCrossChainService.get();
-        if (registeredChainMessage == null) {
+        if (registeredChainMessage == null || registeredChainMessage.getChainInfoList().isEmpty()) {
             registeredChainMessage = new RegisteredChainMessage();
-        }
-        if (registeredChainMessage.getChainInfoList() == null) {
             List<ChainInfo> chainInfoList = new ArrayList<>();
             registeredChainMessage.setChainInfoList(chainInfoList);
         }
@@ -104,11 +99,17 @@ public class MainNetServiceImpl implements MainNetService {
                 return Result.getFailed(DB_SAVE_ERROR);
             }
         }
-        LoggerUtil.commonLog.info("有新链注册跨链，chainID:{},初始验证人列表：{}", chainInfo.getChainId(), chainInfo.getVerifierList().toString());
+        chain.getLogger().info("有新链注册跨链，chainID:{},初始验证人列表：{}", chainInfo.getChainId(), chainInfo.getVerifierList().toString());
         //创建验证人初始化交易
         try {
-            Transaction verifierInitTx = TxUtil.createVerifierInitTx(chain.getVerifierList(), chainInfo.getRegisterTime(), chainInfo.getChainId());
-            TxUtil.handleNewCtx(verifierInitTx, chain, null);
+            int syncStatus = BlockCall.getBlockStatus(chain);
+            chain.getCrossTxThreadPool().execute(new CrossTxHandler(chain, TxUtil.createVerifierInitTx(chain.getVerifierList(), chainInfo.getRegisterTime(), chainInfo.getChainId()),syncStatus));
+
+            if(registeredChainMessage.haveOtherChain(chainInfo.getChainId(), chain.getChainId())){
+                chain.getLogger().info("将新注册的链信息广播给已注册的链");
+                chain.getCrossTxThreadPool().execute(new CrossTxHandler(chain, TxUtil.createCrossChainChangeTx(chainInfo,chainInfo.getRegisterTime(),chainInfo.getChainId(), ChainInfoChangeType.NEW_REGISTER_CHAIN.getType()),syncStatus));
+
+            }
         } catch (IOException e) {
             chain.getLogger().error(e);
             return Result.getFailed(DATA_PARSE_ERROR);
@@ -122,14 +123,25 @@ public class MainNetServiceImpl implements MainNetService {
             LoggerUtil.commonLog.error("参数错误");
             return Result.getFailed(PARAMETER_ERROR);
         }
+        Chain chain = chainManager.getChainMap().get(nulsCrossChainConfig.getMainChainId());
         int chainId = (int) params.get(ParamConstant.CHAIN_ID);
         int assetId = (int) params.get(ParamConstant.ASSET_ID);
         String symbol = (String) params.get(ParamConstant.SYMBOL);
         String assetName = (String) params.get(ParamConstant.ASSET_NAME);
         boolean usable = (boolean) params.get(ParamConstant.USABLE);
         int decimalPlaces = (int) params.get(ParamConstant.DECIMAL_PLACES);
+        long time = (int) params.get(ParamConstant.PARAM_TIME);
         AssetInfo assetInfo = new AssetInfo(assetId, symbol, assetName, usable, decimalPlaces);
         chainManager.getChainInfo(chainId).getAssetInfoList().add(assetInfo);
+        ChainInfo chainInfo = chainManager.getChainInfo(chainId);
+        try {
+            int syncStatus = BlockCall.getBlockStatus(chain);
+            chain.getLogger().info("新跨链资产注册，chainId:{},assetId:{}",chainId,assetId);
+            chain.getCrossTxThreadPool().execute(new CrossTxHandler(chain, TxUtil.createCrossChainChangeTx(chainInfo,time,chainInfo.getChainId(), ChainInfoChangeType.REGISTERED_CHAIN_CHANGE.getType()),syncStatus));
+        }catch (IOException e){
+            chain.getLogger().error(e);
+            return Result.getFailed(DATA_PARSE_ERROR);
+        }
         return Result.getSuccess(SUCCESS);
     }
 
@@ -141,13 +153,19 @@ public class MainNetServiceImpl implements MainNetService {
         }
         int chainId = (int) params.get(ParamConstant.CHAIN_ID);
         int assetId = (int) params.get(ParamConstant.ASSET_ID);
+        long time = (int) params.get(ParamConstant.PARAM_TIME);
         RegisteredChainMessage registeredChainMessage = registeredCrossChainService.get();
+        Chain chain = chainManager.getChainMap().get(nulsCrossChainConfig.getMainChainId());
+        int syncStatus = BlockCall.getBlockStatus(chain);
+        boolean chainInvalid = true;
+        ChainInfo realChainInfo = null;
+        chain.getLogger().info("跨链资产注销，chainId:{},assetId:{}",chainId,assetId);
         if (assetId == 0) {
             registeredChainMessage.getChainInfoList().removeIf(chainInfo -> chainInfo.getChainId() == chainId);
         } else {
-            boolean chainInvalid = true;
             for (ChainInfo chainInfo : registeredChainMessage.getChainInfoList()) {
                 if (chainInfo.getChainId() == chainId) {
+                    realChainInfo = chainInfo;
                     for (AssetInfo assetInfo : chainInfo.getAssetInfoList()) {
                         if (assetInfo.getAssetId() == assetId) {
                             assetInfo.setUsable(false);
@@ -160,9 +178,19 @@ public class MainNetServiceImpl implements MainNetService {
                 }
             }
             if(chainInvalid){
-                LoggerUtil.commonLog.info("链被注销，chainId:{},assetId",chainId,assetId);
                 registeredChainMessage.getChainInfoList().removeIf(chainInfo -> chainInfo.getChainId() == chainId);
             }
+        }
+        try {
+            if(chainInvalid){
+                chain.getLogger().info("注销链，chainId:{}",chainId);
+                chain.getCrossTxThreadPool().execute(new CrossTxHandler(chain, TxUtil.createCrossChainChangeTx(time,chainId, ChainInfoChangeType.REGISTERED_CHAIN_CHANGE.getType()),syncStatus));
+            }else{
+                chain.getCrossTxThreadPool().execute(new CrossTxHandler(chain, TxUtil.createCrossChainChangeTx(realChainInfo,time,chainId, ChainInfoChangeType.REGISTERED_CHAIN_CHANGE.getType()),syncStatus));
+            }
+        }catch (IOException e){
+            chain.getLogger().error(e);
+            return Result.getFailed(DATA_PARSE_ERROR);
         }
         registeredCrossChainService.save(registeredChainMessage);
         chainManager.setRegisteredCrossChainList(registeredChainMessage.getChainInfoList());
@@ -197,23 +225,6 @@ public class MainNetServiceImpl implements MainNetService {
             chain.getLogger().error(e);
         }
         return Result.getSuccess(SUCCESS);
-    }
-
-    @Override
-    public void getCrossChainList(int chainId, String nodeId, GetRegisteredChainMessage message) {
-        try {
-            int handleChainId = chainId;
-            if (nulsCrossChainConfig.isMainNet()) {
-                handleChainId = nulsCrossChainConfig.getMainChainId();
-            }
-            Chain chain = chainManager.getChainMap().get(handleChainId);
-            chain.getLogger().info("收到友链节点{}查询已注册链列表消息！", nodeId);
-            RegisteredChainMessage registeredChainMessage = ChainManagerCall.getRegisteredChainInfo();
-            chain.getLogger().info("当前已注册跨链的链数量为:{}\n\n", registeredChainMessage.getChainInfoList().size());
-            NetWorkCall.sendToNode(chainId, registeredChainMessage, nodeId, CommandConstant.REGISTERED_CHAIN_MESSAGE);
-        } catch (Exception e) {
-            LoggerUtil.commonLog.error(e);
-        }
     }
 
     @Override
