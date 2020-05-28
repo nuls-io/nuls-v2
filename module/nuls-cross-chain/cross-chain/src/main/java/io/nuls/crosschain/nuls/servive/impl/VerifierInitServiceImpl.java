@@ -138,6 +138,7 @@ public class VerifierInitServiceImpl implements VerifierInitService {
                     return false;
                 }
                 commitSuccessList.add(verifierInitTx);
+                chainManager.setCrossNetUseAble(true);
                 if(!config.isMainNet()){
                     List<String> localVerifierList = (List<String>) ConsensusCall.getPackerInfo(chain).get(ParamConstant.PARAM_PACK_ADDRESS_LIST);
                     if(chain.getVerifierList() == null || chain.getVerifierList().isEmpty()){
