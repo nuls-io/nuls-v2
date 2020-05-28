@@ -288,6 +288,7 @@ public class BroadCtxUtil {
                 if(txData.getType() == ChainInfoChangeType.NEW_REGISTER_CHAIN.getType()){
                     broadChains.remove(toChainId);
                 }
+                broadChains.remove(config.getMainChainId());
             }
             broadChains.remove(config.getMainChainId());
             chain.getLogger().info("跨链交易需要广播到broadChains:{}",broadChains);
