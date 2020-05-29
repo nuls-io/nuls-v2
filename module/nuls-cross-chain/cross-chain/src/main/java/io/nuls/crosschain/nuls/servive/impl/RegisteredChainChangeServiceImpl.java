@@ -83,10 +83,10 @@ public class RegisteredChainChangeServiceImpl implements RegisteredChainChangeSe
             try {
                 RegisteredChainChangeData txData = new RegisteredChainChangeData();
                 txData.parse(crossChainChangeTx.getTxData(), 0);
+                Set<String> verifierSet;
+                int mainByzantineRatio;
+                int maxSignatureCount;
                 if(txData.getType() == ChainInfoChangeType.INIT_REGISTER_CHAIN.getType()){
-                    Set<String> verifierSet;
-                    int mainByzantineRatio;
-                    int maxSignatureCount;
                     if(chainManager.getRegisteredCrossChainList() != null && !chainManager.getRegisteredCrossChainList().isEmpty()){
                         ChainInfo chainInfo = chainManager.getChainInfo(config.getMainChainId());
                         verifierSet = chainInfo.getVerifierList();
@@ -121,6 +121,12 @@ public class RegisteredChainChangeServiceImpl implements RegisteredChainChangeSe
                         chain.getLogger().info("有链注销了跨链,chainId:{}",txData.getRegisterChainId());
                     }else{
                         for(ChainInfo chainInfo : txData.getChainInfoList()){
+                            if(chainInfo.getChainId() == config.getMainChainId()){
+                                ChainInfo oldChainInfo = chainManager.getChainInfo(config.getMainChainId());
+                                chainInfo.setVerifierList(oldChainInfo.getVerifierList());
+                                chainInfo.setSignatureByzantineRatio(oldChainInfo.getSignatureByzantineRatio());
+                                chainInfo.setMaxSignatureCount(oldChainInfo.getMaxSignatureCount());
+                            }
                             registeredChainMessage.addChainInfo(chainInfo);
                             chain.getLogger().info("Registered cross chain chain information has changed,chainId:{}" ,chainInfo.getChainId());
                         }
