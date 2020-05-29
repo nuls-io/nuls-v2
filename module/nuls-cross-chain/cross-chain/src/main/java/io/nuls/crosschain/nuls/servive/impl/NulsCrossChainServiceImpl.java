@@ -288,18 +288,18 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                     }
                     ctxStatusList.add(ctxHash);
                     chain.getLogger().debug("跨链交易提交完成，对跨链转账交易做拜占庭验证：{}", ctxHash.toHex());
-                    //如果本链为主网通知跨链管理模块发起链与接收链资产变更
-                    if(config.isMainNet()){
-                        List<String> txStrList = new ArrayList<>();
-                        for (Transaction tx : txs) {
-                            txStrList.add(RPCUtil.encode(tx.serialize()));
-                        }
-                        String headerStr = RPCUtil.encode(blockHeader.serialize());
-                        ChainManagerCall.ctxAssetCirculateCommit(chainId, txStrList, headerStr);
-                    }
                     //发起拜占庭验证
                     chain.getCrossTxThreadPool().execute(new CrossTxHandler(chain, ctx, syncStatus));
                 }
+            }
+            //如果本链为主网通知跨链管理模块发起链与接收链资产变更
+            if(config.isMainNet()){
+                List<String> txStrList = new ArrayList<>();
+                for (Transaction tx : txs) {
+                    txStrList.add(RPCUtil.encode(tx.serialize()));
+                }
+                String headerStr = RPCUtil.encode(blockHeader.serialize());
+                ChainManagerCall.ctxAssetCirculateCommit(chainId, txStrList, headerStr);
             }
             chain.getLogger().info("高度：{} 的跨链交易提交完成\n", blockHeader.getHeight());
             return true;
