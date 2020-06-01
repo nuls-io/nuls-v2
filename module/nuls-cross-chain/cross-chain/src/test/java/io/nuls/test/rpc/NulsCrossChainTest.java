@@ -1,6 +1,9 @@
 package io.nuls.test.rpc;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.Constants;
+import io.nuls.core.rpc.util.RpcCall;
+import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.model.dto.input.CoinDTO;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.info.NoUse;
@@ -105,4 +108,18 @@ public class NulsCrossChainTest {
             return null;
         }
     }
+
+    @Test
+    public void testSendCrossTx(){
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.CHAIN_ID, 2);
+        params.put("tx", "0a00c07ed05e0000d20217020001b003d44b0cba41eb30bb5b775dc63f79247fb1a1040001000058850c0200000000000000000000000000000000000000000000000000000008c6bcaba6b2db02d50017020001b003d44b0cba41eb30bb5b775dc63f79247fb1a10200010040420f00000000000000000000000000000000000000000000000000000000000831816bd95cc2224600011704000111246da8310ed89f6ac6b16cfe17b72d7410c4de040001000058850c0200000000000000000000000000000000000000000000000000000000000000000000006a21026728caa0b388c4ae0f39394a039e5f773e3c9476192e707a3f54e6c4f1874583473045022100c050663c9c647b8985cf22c7d667953f0b4a5b1abe284d4853d47fc3ec6f15470220070df0df8adab51e47c061d70cc3f5c638846c1c885ba11cdfca3ae899ffe7e5");
+        try {
+            Map map = (Map) RpcCall.request(ModuleE.CC.abbr, "newApiModuleCrossTx", params);
+            Log.info("{}",map);
+        } catch (NulsException e) {
+        }
+    }
+
+
 }
