@@ -219,8 +219,7 @@ public class CommandHandler implements InitializingBean {
                 if (StringUtils.isBlank(line)) {
                     continue;
                 }
-                String[] cmdArgs = parseArgs(line);
-                System.out.print(this.processCommand(cmdArgs) + "\n");
+                processCommand(line);
             } while (line != null);
         } catch (IOException e) {
             e.printStackTrace();
@@ -248,7 +247,6 @@ public class CommandHandler implements InitializingBean {
             String encoder = URLEncoder.encode(subGroup, StandardCharsets.UTF_8.toString());
             result = result.replace(group, encoder);
         }
-
         String[] args = result.split("\\s+");
         for (int i = 0, length = args.length; i < length; i++) {
             args[i] = URLDecoder.decode(args[i], StandardCharsets.UTF_8.toString());
@@ -256,39 +254,50 @@ public class CommandHandler implements InitializingBean {
         return args;
     }
 
-    private String processCommand(String[] args) {
-        int length = args.length;
-        if (length == 0) {
-            return CommandConstant.COMMAND_ERROR;
-        }
-        String command = args[0].trim();
-        CommandProcessor processor = PROCESSOR_MAP.get(command);
-        if (processor == null) {
-            return command + " not a nuls command!";
-        }
-        if (length == 2 && CommandConstant.NEED_HELP.equals(args[1])) {
-            return processor.getHelp();
-        }
+    public void processCommand(String args) throws UnsupportedEncodingException {
+        String[] cmdArgs = parseArgs(args);
         try {
-            try {
-                boolean result = processor.argsValidate(args);
-                if (!result) {
-                    return "args incorrect:\n" + processor.getHelp();
-                }
-            } catch (ParameterException e) {
-                return e.getMessage() + "\n" + "args incorrect:\n" + processor.getHelp();
-            }
-            return processor.execute(args).toString();
+            CommandResult commandResult = this.processCommand(cmdArgs);
+            System.out.print( commandResult.toString() + "\n");
         } catch (Exception e) {
             if (System.Logger.Level.DEBUG.getName().equals(System.getProperty("log.level"))) {
                 e.printStackTrace();
             }
-            return CommandConstant.EXCEPTION + ": " + e.getMessage();
+            System.out.println(CommandConstant.EXCEPTION + ": " + e.getMessage());
         }
+    }
+
+    public CommandResult processCommand(String[] args) {
+        int length = args.length;
+        if (length == 0) {
+            return CommandResult.getFailed(CommandConstant.COMMAND_ERROR);
+        }
+        String command = args[0].trim();
+        CommandProcessor processor = PROCESSOR_MAP.get(command);
+        if (processor == null) {
+            return CommandResult.getFailed(command + " not a nuls command!");
+        }
+        if (length == 2 && CommandConstant.NEED_HELP.equals(args[1])) {
+            return CommandResult.getFailed(processor.getHelp());
+        }
+        try {
+            boolean result = processor.argsValidate(args);
+            if (!result) {
+                return CommandResult.getFailed("args incorrect:\n" + processor.getHelp());
+            }
+        } catch (ParameterException e) {
+            return CommandResult.getFailed(e.getMessage() + "\n" + "args incorrect:\n" + processor.getHelp());
+        }
+        return processor.execute(args);
     }
 
     private void register(CommandProcessor processor) {
         PROCESSOR_MAP.put(processor.getCommand(), processor);
     }
+
+    public boolean hasCommand(String command){
+        return PROCESSOR_MAP.containsKey(command);
+    }
+
 
 }

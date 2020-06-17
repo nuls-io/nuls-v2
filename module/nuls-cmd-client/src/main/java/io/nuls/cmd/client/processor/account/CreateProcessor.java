@@ -50,18 +50,19 @@ public class CreateProcessor extends AccountBaseProcessor implements CommandProc
     public String getHelp() {
         CommandBuilder builder = new CommandBuilder();
         builder.newLine(getCommandDescription())
-                .newLine("\t[number] The count of accounts you want to create, - default 1");
+                .newLine("\t[number] The count of accounts you want to create, - default 1")
+                .newLine("\t[password] setting account password");
         return builder.toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return "create [number] --create account, [number] the number of accounts you want to create, - default 1";
+        return "create [number] [password] --create account, [number] the number of accounts you want to create, - default 1. [password] setting account password";
     }
 
     @Override
     public boolean argsValidate(String[] args) {
-        checkArgsNumber(args,0,1);
+        checkArgsNumber(args,0,1,2);
         if(args.length==1){
             return true;
         }
@@ -72,10 +73,15 @@ public class CreateProcessor extends AccountBaseProcessor implements CommandProc
 
     @Override
     public CommandResult execute(String[] args) {
-        String password = getPwd("Please enter the new password(8-20 characters, the combination of letters and numbers).\nEnter your new password:");
-        if(StringUtils.isNotBlank(password)){
-            if(!CommandHelper.confirmPwd(password)) {
-                return CommandResult.getFailed("Password confirmation doesn't match the password.Operation abort.");
+        String password = null;
+        if(args.length == 3){
+            password = args[2];
+        }else {
+            password = getPwd("Please enter the new password(8-20 characters, the combination of letters and numbers).\nEnter your new password:");
+            if(StringUtils.isNotBlank(password)){
+                if(!CommandHelper.confirmPwd(password)) {
+                    return CommandResult.getFailed("Password confirmation doesn't match the password.Operation abort.");
+                }
             }
         }
         int count = 1;

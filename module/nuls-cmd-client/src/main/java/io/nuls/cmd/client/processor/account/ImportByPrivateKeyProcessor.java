@@ -62,7 +62,7 @@ public class ImportByPrivateKeyProcessor extends AccountBaseProcessor implements
     @Override
     public boolean argsValidate(String[] args) {
         int length = args.length;
-        if (length != 2) {
+        if (length < 2) {
             return false;
         }
         if (!CommandHelper.checkArgsIsNull(args)) {
@@ -74,10 +74,16 @@ public class ImportByPrivateKeyProcessor extends AccountBaseProcessor implements
     @Override
     public CommandResult execute(String[] args) {
         String prikey = args[1];
-        String password = CommandHelper.getPwdOptional();
-        if(StringUtils.isNotBlank(password)){
-            if(!CommandHelper.confirmPwd(password)) {
-                return CommandResult.getFailed("Password confirmation doesn't match the password.Operation abort.");
+
+        String password;
+        if(args.length > 2){
+            password = args[2];
+        }else{
+            password = CommandHelper.getPwdOptional();
+            if(StringUtils.isNotBlank(password)){
+                if(!CommandHelper.confirmPwd(password)) {
+                    return CommandResult.getFailed("Password confirmation doesn't match the password.Operation abort.");
+                }
             }
         }
         ImportAccountByPrivateKeyReq req = new ImportAccountByPrivateKeyReq(password,prikey,true);

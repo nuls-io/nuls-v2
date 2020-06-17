@@ -1,6 +1,7 @@
 package io.nuls.cmd.client;
 
 import io.nuls.cmd.client.config.Config;
+import io.nuls.cmd.client.processor.system.EvalProcessor;
 import io.nuls.cmd.client.utils.AssetsUtil;
 import io.nuls.cmd.client.utils.LoggerUtil;
 import io.nuls.core.core.annotation.Autowired;
@@ -14,6 +15,8 @@ import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.core.thread.ThreadUtils;
 
+import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -46,6 +49,8 @@ public class CmdClientModule extends RpcModule {
         };
     }
 
+    @Autowired
+    EvalProcessor evalProcessor;
 
     @Override
     public Module moduleInfo() {
@@ -79,11 +84,33 @@ public class CmdClientModule extends RpcModule {
     @Override
     public RpcModuleState onDependenciesReady() {
         System.out.println("nuls-wallet base module ready");
+
+        Arrays.stream(this.startArgs).forEach(d->{
+            Log.info("arg:{}",d);
+        });
+        if(startArgs.length > 1){
+            String evel = startArgs[1];
+            if(evel.equals(evalProcessor.getCommand())){
+                if(startArgs.length < 2){
+                    System.out.println("param is error");
+                }
+                String[] cmdAry = startArgs[2].split(",");
+                Arrays.stream(cmdAry).forEach(cmd->{
+                    try {
+                        commandHandler.processCommand(cmd);
+                    } catch (UnsupportedEncodingException e) {
+                        System.out.println(CommandConstant.EXCEPTION + ": " + e.getMessage());
+                    }
+                });
+                System.exit(0);
+            }
+        }
         ThreadUtils.createAndRunThread("cmd", () -> commandHandler.start());
         if(this.hasDependent(ModuleE.CC)){
             //增加跨链资产信息获取
             AssetsUtil.initRegisteredChainInfo();
         }
+
         return RpcModuleState.Running;
     }
 
