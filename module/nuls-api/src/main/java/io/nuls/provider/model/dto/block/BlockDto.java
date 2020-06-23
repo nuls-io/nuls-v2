@@ -54,11 +54,12 @@ public class BlockDto {
         this.header = new BlockHeaderDto(block.getHeader());
         this.txs = new LinkedList<>();
         List<Transaction> txList = block.getTxs();
-        if(txList == null || txList.isEmpty()) {
+        if (txList == null || txList.isEmpty()) {
             return;
         }
-        for(Transaction tx : txList) {
-            this.txs.add(new TransactionDto(tx));
+
+        for (int i = 0; i < txList.size(); i++) {
+            this.txs.add(new TransactionDto(txList.get(i), i));
         }
     }
 
