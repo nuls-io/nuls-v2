@@ -203,6 +203,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         String nativeHex = messageBody.getRequestHash().toHex();
         chain.getLogger().info("接收到请求链节点{}发送的获取完整跨链交易信息,Hash:{}", nodeId, nativeHex);
         //查到对应的跨链交易
+        //如果是主链，本链hash就等于mainHash，这里默认先设置为mainHash
         NulsHash localHash = mainHash;
         if(!config.isMainNet()){
             localHash = convertHashService.get(mainHash,handleChainId);

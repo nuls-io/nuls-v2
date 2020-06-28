@@ -97,8 +97,19 @@ public class CommonUtil {
         return false;
     }
 
+    /**
+     * 从签名对象中过滤出有效的签名列表
+     * 1.去除重复的签名字符串
+     * 2.去除同一个地址的签名
+     * @param chain
+     * @param transactionSignature
+     * @param addressList
+     * @return
+     */
     public static List<P2PHKSignature> getMisMatchSigns(Chain chain, TransactionSignature transactionSignature, List<String> addressList){
-        List<P2PHKSignature>misMatchSignList = new ArrayList<>();
+        List<P2PHKSignature> misMatchSignList = new ArrayList<>();
+
+        //1.去重，将签名列表中的重复签名去掉
         transactionSignature.setP2PHKSignatures(transactionSignature.getP2PHKSignatures().parallelStream().distinct().collect(Collectors.toList()));
         Iterator<P2PHKSignature> iterator = transactionSignature.getP2PHKSignatures().iterator();
         Set<String> signedList = new HashSet<>();
@@ -108,9 +119,11 @@ public class CommonUtil {
             signature = iterator.next();
             boolean isMatchSign = false;
             validAddress = AddressTool.getAddressString(signature.getPublicKey(), chain.getChainId());
+            //3.一个地址只能参与一次签名
             if(signedList.contains(validAddress)){
                 break;
             }
+            //2.排除不在验证人列表中的签名地址
             for (String address:addressList) {
                 if(address.equals(validAddress)){
                     signedList.add(address);
@@ -128,7 +141,7 @@ public class CommonUtil {
     }
 
     /**
-     * 获取当前签名拜占庭数量
+     * 获取当前完成拜占庭签名的最低签名数量
      * */
     @SuppressWarnings("unchecked")
     public static int getByzantineCount(Chain chain, int agentCount){

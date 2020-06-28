@@ -2,6 +2,7 @@ package io.nuls.test.rpc;
 
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.Constants;
@@ -10,6 +11,7 @@ import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.crosschain.nuls.rpc.call.CommonCall;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -87,6 +89,12 @@ public class AccountTest {
         params.put("password", password);
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_removeAccount", params);
         Log.debug("{}", JSONUtils.obj2json(cmdResp.getResponseData()));
+    }
+
+    @Test
+    public void testChainManger() throws NulsException {
+        HashMap result = (HashMap) CommonCall.request(ModuleE.CM.abbr,"getCrossChainInfos", new HashMap(2));
+        Log.info("{}",result);
     }
 
     public static void main(String[] args) throws Exception{

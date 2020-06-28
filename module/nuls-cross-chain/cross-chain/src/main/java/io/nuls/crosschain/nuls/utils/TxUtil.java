@@ -68,6 +68,7 @@ public class TxUtil {
 
     /**
      * 友链协议跨链交易转主网协议跨链交易
+     * 去掉平行链的手续费支付
      * Friendly Chain Protocol Cross-Chain Transaction to Main Network Protocol Cross-Chain Transaction
      */
     public static Transaction friendConvertToMain(Chain chain, Transaction friendCtx, int ctxType, boolean needSign) throws NulsException, IOException {
@@ -180,6 +181,7 @@ public class TxUtil {
             List<String> packers = (List<String>) packerInfo.get(ParamConstant.PARAM_PACK_ADDRESS_LIST);
             NulsHash convertHash = hash;
             if (!config.isMainNet()) {
+                //如果不是NULS主网，需要把跨链交易进行一次协议转账，转换成主网交易的协议，拜占庭签名的hash值也必须是主网协议的交易hash
                 Transaction mainCtx = TxUtil.friendConvertToMain(chain, ctx, TxType.CROSS_CHAIN);
                 convertHash = mainCtx.getHash();
                 convertCtxService.save(hash, mainCtx, chainId);
@@ -196,6 +198,7 @@ public class TxUtil {
                     transactionSignature.setP2PHKSignatures(p2PHKSignatures);
                 }
                 if (config.isMainNet()) {
+                    //如果是跨链转账交易，并且交易发起者就是当前签名者，就不重新签名，直接取交易的签名作为拜占庭签名
                     if (ctx.getType() == TxType.CROSS_CHAIN && ctx.getCoinDataInstance().getFromAddressList().contains(address)) {
                         message.setSignature(transactionSignature.getP2PHKSignatures().get(0).serialize());
                     } else {
@@ -244,13 +247,16 @@ public class TxUtil {
         BroadCtxSignMessage message = new BroadCtxSignMessage();
         message.setLocalHash(hash);
         CtxStatusPO ctxStatusPO = new CtxStatusPO(ctx, TxStatusEnum.UNCONFIRM.getStatus());
+        //拜占庭签名是否完成标志位，未true时，表示
         boolean byzantinePass = false;
         //验证人变更，减少的验证人不签名
-        boolean sign = !StringUtils.isBlank(address) && chain.getVerifierList().contains(address);
-        if (sign && cancelList != null) {
-            sign = !cancelList.contains(address);
+        //是否需要参与签名
+        boolean isSign = !StringUtils.isBlank(address) && chain.getVerifierList().contains(address);
+        if (isSign && cancelList != null) {
+            //如果当前地址在本轮退出的名单里，就不参与签名
+            isSign = !cancelList.contains(address);
         }
-        if (sign) {
+        if (isSign) {
             chain.getLogger().info("本节点为共识节点，对跨链交易签名,Hash:{}", hashHex);
             P2PHKSignature p2PHKSignature;
             try {
@@ -271,7 +277,7 @@ public class TxUtil {
         /*
         保存并广播该交易
         */
-        if (sign) {
+        if (isSign) {
             if (!chain.getWaitBroadSignMap().keySet().contains(hash)) {
                 chain.getWaitBroadSignMap().put(hash, new HashSet<>());
             }

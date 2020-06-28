@@ -605,7 +605,7 @@ public class AgentServiceImpl implements AgentService {
 
     @Override
     @SuppressWarnings("unchecked")
-    public Result getSeedNodeInfo(Map<String, Object> params) {
+    public Result getPackerInfoForSeedList(Map<String, Object> params) {
         if (params == null || params.get(ConsensusConstant.PARAM_CHAIN_ID) == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }

@@ -203,10 +203,12 @@ public class AgentCmd extends BaseCmd {
             @Key(name = "packAddressList", valueType = List.class, valueElement = String.class, description = "当前打包地址列表"),
     }))
     public Response getSeedNodeInfo(Map<String,Object> params){
-        Result result = service.getSeedNodeInfo(params);
+        Result result = service.getPackerInfoForSeedList(params);
         if(result.isFailed()){
             return failed(result.getErrorCode());
         }
         return success(result.getData());
     }
+
+
 }

@@ -97,5 +97,5 @@ public interface AgentService {
      * @param params
      * @return Result
      * */
-    Result getSeedNodeInfo(Map<String,Object> params);
+    Result getPackerInfoForSeedList(Map<String,Object> params);
 }

@@ -202,13 +202,14 @@ public class MessageUtil {
     private static boolean verifierInitLocalByzantine(Chain chain, Transaction ctx, TransactionSignature signature, List<String> packAddressList, NulsHash realHash) throws  IOException {
         List<String> handleAddressList = new ArrayList<>(packAddressList);
         int agentCount = handleAddressList.size();
-        //交易签名拜占庭
+        //需要完成拜占庭签名的最低签名数量
         int byzantineCount = CommonUtil.getByzantineCount(chain, agentCount);
         int signCount = signature.getSignersCount();
         CtxStatusPO ctxStatusPO = new CtxStatusPO(ctx, TxStatusEnum.UNCONFIRM.getStatus());
         if (signCount >= byzantineCount) {
             //去掉不是当前验证人的签名和重复签名
             List<P2PHKSignature> misMatchSignList = CommonUtil.getMisMatchSigns(chain, signature, handleAddressList);
+            //过滤掉无效签名后，再验证一次是否达到最低签名数量，调用CommonUtil.getMisMatchSigns方式时会改变signature中的签名数，会将无效签名移除掉
             signCount = signature.getSignersCount();
             if (signCount >= byzantineCount) {
                 ctx.setTransactionSignature(signature.serialize());
@@ -276,6 +277,7 @@ public class MessageUtil {
         List<String> handleAddressList;
         long broadHeight = chainManager.getChainHeaderMap().get(chain.getChainId()).getHeight();
         try {
+            //todo lastChangeHeight字段的含义
             chain.getSwitchVerifierLock().readLock().lock();
             handleAddressList = new ArrayList<>(chain.getVerifierList());
             if (broadHeight < chain.getLastChangeHeight()) {
@@ -286,6 +288,7 @@ public class MessageUtil {
         }
         int agentCount = handleAddressList.size();
         //交易签名拜占庭
+        //最低签名数
         int byzantineCount = CommonUtil.getByzantineCount(chain, agentCount);
         int fromChainId = AddressTool.getChainIdByAddress(ctx.getCoinDataInstance().getFrom().get(0).getAddress());
         int signCount = signature.getSignersCount();

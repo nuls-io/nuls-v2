@@ -107,7 +107,7 @@ public class BlockServiceImpl implements BlockService {
             Map<Integer, BroadFailFlag> broadFailMap = new HashMap<>(NulsCrossChainConstant.INIT_CAPACITY_16);
             for (long cacheHeight:sortSet) {
                 if(height >= cacheHeight){
-                    chain.getLogger().debug("广播区块高度为{}的跨链交易给其他链",cacheHeight );
+                    chain.getLogger().info("广播区块高度为{}的跨链交易给其他链",cacheHeight );
                     SendCtxHashPO po = sendHeightMap.get(cacheHeight);
                     List<NulsHash> broadSuccessCtxHash = new ArrayList<>();
                     List<NulsHash> broadFailCtxHash = new ArrayList<>();
