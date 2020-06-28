@@ -84,8 +84,8 @@ public class MainNetServiceImpl implements MainNetService {
             LoggerUtil.commonLog.error("参数错误");
             return Result.getFailed(PARAMETER_ERROR);
         }
-        ChainInfo chainInfo = JSONUtils.map2pojo(params, ChainInfo.class);
-        Chain chain = chainManager.getChainMap().get(nulsCrossChainConfig.getMainChainId());
+        ChainInfo newChainInfo = JSONUtils.map2pojo(params, ChainInfo.class);
+        Chain mainChain = chainManager.getChainMap().get(nulsCrossChainConfig.getMainChainId());
         RegisteredChainMessage registeredChainMessage = registeredCrossChainService.get();
         if (registeredChainMessage == null) {
             registeredChainMessage = new RegisteredChainMessage();
@@ -94,23 +94,23 @@ public class MainNetServiceImpl implements MainNetService {
             List<ChainInfo> chainInfoList = new ArrayList<>();
             registeredChainMessage.setChainInfoList(chainInfoList);
         }
-        registeredChainMessage.addChainInfo(chainInfo);
+        registeredChainMessage.addChainInfo(newChainInfo);
         registeredCrossChainService.save(registeredChainMessage);
         chainManager.setRegisteredCrossChainList(registeredChainMessage.getChainInfoList());
-        if(chain.getVerifierList() == null || chain.getVerifierList().isEmpty()){
-            chain.getLogger().info("The first time the primary network has chain registration, cross chain initialization and local verification list");
-            boolean result = LocalVerifierManager.initLocalVerifier(chain, (List<String>) ConsensusCall.getPackerInfo(chain).get(ParamConstant.PARAM_PACK_ADDRESS_LIST));
+        if(mainChain.getVerifierList() == null || mainChain.getVerifierList().isEmpty()){
+            mainChain.getLogger().warn("The first time the primary network has chain registration, cross chain initialization and local verification list");
+            boolean result = LocalVerifierManager.initLocalVerifier(mainChain, (List<String>) ConsensusCall.getPackerInfo(mainChain).get(ParamConstant.PARAM_PACK_ADDRESS_LIST));
             if(!result){
                 return Result.getFailed(DB_SAVE_ERROR);
             }
         }
-        LoggerUtil.commonLog.info("有新链注册跨链，chainID:{},初始验证人列表：{}", chainInfo.getChainId(), chainInfo.getVerifierList().toString());
+        LoggerUtil.commonLog.info("有新链注册跨链，chainID:{},初始验证人列表：{}", newChainInfo.getChainId(), newChainInfo.getVerifierList().toString());
         //创建验证人初始化交易
         try {
-            Transaction verifierInitTx = TxUtil.createVerifierInitTx(chain.getVerifierList(), chainInfo.getRegisterTime(), chainInfo.getChainId());
-            TxUtil.handleNewCtx(verifierInitTx, chain, null);
+            Transaction verifierInitTx = TxUtil.createVerifierInitTx(mainChain.getVerifierList(), newChainInfo.getRegisterTime(), newChainInfo.getChainId());
+            TxUtil.handleNewCtx(verifierInitTx, mainChain, null);
         } catch (IOException e) {
-            chain.getLogger().error(e);
+            mainChain.getLogger().error(e);
             return Result.getFailed(DATA_PARSE_ERROR);
         }
         return Result.getSuccess(SUCCESS);
@@ -130,6 +130,9 @@ public class MainNetServiceImpl implements MainNetService {
         int decimalPlaces = (int) params.get(ParamConstant.DECIMAL_PLACES);
         AssetInfo assetInfo = new AssetInfo(assetId, symbol, assetName, usable, decimalPlaces);
         chainManager.getChainInfo(chainId).getAssetInfoList().add(assetInfo);
+        RegisteredChainMessage registeredChainMessage = registeredCrossChainService.get();
+        registeredChainMessage.setChainInfoList(chainManager.getRegisteredCrossChainList());
+        registeredCrossChainService.save(registeredChainMessage);
         return Result.getSuccess(SUCCESS);
     }
 
