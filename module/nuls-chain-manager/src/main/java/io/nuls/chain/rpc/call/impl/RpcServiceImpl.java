@@ -210,9 +210,9 @@ public class RpcServiceImpl implements RpcService {
     }
 
     @Override
-    public boolean registerCrossAsset(List<Asset> assets) {
+    public boolean registerCrossAsset(List<Asset> assets, long registerTime) {
         for (Asset asset : assets) {
-            if (!registerCrossAsset(asset)) {
+            if (!registerCrossAsset(asset, registerTime)) {
                 return false;
             }
         }
@@ -221,7 +221,7 @@ public class RpcServiceImpl implements RpcService {
     }
 
     @Override
-    public boolean registerCrossAsset(Asset asset) {
+    public boolean registerCrossAsset(Asset asset, long registerTime) {
         try {
             Map<String, Object> assetMap = new HashMap<>();
             assetMap.put("chainId", asset.getChainId());
@@ -230,6 +230,7 @@ public class RpcServiceImpl implements RpcService {
             assetMap.put("assetName", asset.getAssetName());
             assetMap.put("usable", asset.isAvailable());
             assetMap.put("decimalPlaces", asset.getDecimalPlaces());
+            assetMap.put("time", registerTime);
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, RpcConstants.CMD_REG_CROSS_ASSET, assetMap);
             if (!response.isSuccess()) {
                 LoggerUtil.logger().info("通知跨链协议模块:cmd=registerCrossAsset fail chainId={},assetId={},error={}", asset.getChainId(), asset.getAssetId(), response.getResponseComment());
@@ -244,9 +245,9 @@ public class RpcServiceImpl implements RpcService {
     }
 
     @Override
-    public boolean cancelCrossChain(List<Map<String, Object>> chainAssetIds) {
+    public boolean cancelCrossChain(List<Map<String, Object>> chainAssetIds, long cancelTime) {
         for (Map map : chainAssetIds) {
-            if (!cancelCrossChain(map)) {
+            if (!cancelCrossChain(map, cancelTime)) {
                 return false;
             }
         }
@@ -254,8 +255,9 @@ public class RpcServiceImpl implements RpcService {
     }
 
     @Override
-    public boolean cancelCrossChain(Map<String, Object> chainAssetId) {
+    public boolean cancelCrossChain(Map<String, Object> chainAssetId, long cancelTime) {
         try {
+            chainAssetId.put("time", cancelTime);
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, RpcConstants.CMD_CANCEL_CROSS_CHAIN, chainAssetId);
             if (!response.isSuccess()) {
                 LoggerUtil.logger().info("通知跨链协议模块:cmd=cancelCrossChain fail chainId={},assetId={},error={}", chainAssetId.get("chainId"), chainAssetId.get("assetId"), response.getResponseComment());

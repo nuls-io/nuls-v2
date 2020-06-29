@@ -14,7 +14,7 @@ import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.core.rpc.util.AddressPrefixDatas;
 import io.nuls.crosschain.base.BaseCrossChainBootStrap;
-import io.nuls.crosschain.base.message.RegisteredChainMessage;
+import io.nuls.crosschain.base.model.bo.txdata.RegisteredChainMessage;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
@@ -200,6 +200,7 @@ public class CrossChainBootStrap extends BaseCrossChainBootStrap {
         RocksDBService.init(nulsCrossChainConfig.getDataFolder());
         RocksDBService.createTable(DB_NAME_CONSUME_LANGUAGE);
         RocksDBService.createTable(DB_NAME_CONSUME_CONGIF);
+        RocksDBService.createTable(DB_NAME_LOCAL_VERIFIER);
         /*
             已注册跨链的链信息操作表
             Registered Cross-Chain Chain Information Operating Table

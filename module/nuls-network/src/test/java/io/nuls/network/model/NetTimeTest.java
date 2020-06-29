@@ -55,12 +55,5 @@ public class NetTimeTest {
         }
 
     }
-    @Test
-   public void timeServiceListTest(){
-        TimeManager.getInstance().initWebTimeServer();
-        List<NetTimeUrl> list =  TimeManager.getInstance().getNetTimeUrls();
-        for(NetTimeUrl netTimeUrl:list){
-            System.out.println(netTimeUrl.getTime() + "================"+netTimeUrl.getUrl());
-        }
-   }
+
 }

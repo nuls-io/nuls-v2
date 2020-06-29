@@ -305,7 +305,7 @@ public class TxServiceImpl implements TxService {
         //验证签名
         validateTxSignature(tx, txRegister, chain);
         //如果有coinData, 则进行验证,有一些交易(黄牌)没有coinData数据
-        if (tx.getType() == TxType.YELLOW_PUNISH || tx.getType() == TxType.VERIFIER_CHANGE || tx.getType() == TxType.VERIFIER_INIT) {
+        if (tx.getType() == TxType.YELLOW_PUNISH || tx.getType() == TxType.VERIFIER_CHANGE || tx.getType() == TxType.VERIFIER_INIT  || tx.getType() == TxType.REGISTERED_CHAIN_CHANGE) {
             return;
         }
         CoinData coinData = TxUtil.getCoinData(tx);
@@ -459,6 +459,11 @@ public class TxServiceImpl implements TxService {
             if (type != TxType.STOP_AGENT && type != TxType.RED_PUNISH && TxUtil.isLegalContractAddress(coinFrom.getAddress(), chain)) {
                 chain.getLogger().error("Tx from cannot have contract address ");
                 throw new NulsException(TxErrorCode.TX_FROM_CANNOT_HAS_CONTRACT_ADDRESS);
+            }
+
+            if(!txRegister.getUnlockTx() && coinFrom.getLocked() == -1){
+                chain.getLogger().error("This transaction type can not unlock the token");
+                throw new NulsException(TxErrorCode.TX_VERIFY_FAIL);
             }
         }
         if (null != existMultiSignAddress && type != TxType.STOP_AGENT && type != TxType.RED_PUNISH) {

@@ -34,6 +34,14 @@
         "verifySignature": false,
         "verifyFee": true,
         "handler": "ContractCrossChainProcessorV1"
+      },
+      {
+        "type": "60",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": false,
+        "verifyFee": true,
+        "handler": "RegisteredChainChangeProcessorV1"
       }
     ],
     "validMsgs": [
@@ -63,11 +71,6 @@
         "handlers": "GetCirculationHandlerV1"
       },
       {
-        "name": "io.nuls.crosschain.base.message.GetCtxMessage",
-        "protocolCmd": "getCtx",
-        "handlers": "GetCtxHandlerV1"
-      },
-      {
         "name": "io.nuls.crosschain.base.message.GetCtxStateMessage",
         "protocolCmd": "getCtxState",
         "handlers": "GetCtxStateHandlerV1"
@@ -78,24 +81,9 @@
         "handlers": "GetOtherCtxHandlerV1"
       },
       {
-        "name": "io.nuls.crosschain.base.message.GetRegisteredChainMessage",
-        "protocolCmd": "getChains",
-        "handlers": "GetRegisteredChainHandlerV1"
-      },
-      {
-        "name": "io.nuls.crosschain.base.message.NewCtxMessage",
-        "protocolCmd": "recvCtx",
-        "handlers": "NewCtxHandlerV1"
-      },
-      {
         "name": "io.nuls.crosschain.base.message.NewOtherCtxMessage",
         "protocolCmd": "recvOtherCtx",
         "handlers": "NewOtherCtxHandlerV1"
-      },
-      {
-        "name": "io.nuls.crosschain.base.message.RegisteredChainMessage",
-        "protocolCmd": "recvRegChain",
-        "handlers": "RegisteredHandlerV1"
       }
     ],
     "invalidTxs": "",

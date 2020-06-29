@@ -18,6 +18,7 @@ import io.nuls.crosschain.base.model.bo.txdata.VerifierInitData;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.constant.ParamConstant;
+import io.nuls.crosschain.nuls.model.bo.BroadFailFlag;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.model.po.SendCtxHashPO;
 import io.nuls.crosschain.nuls.model.po.VerifierChangeSendFailPO;
@@ -25,9 +26,11 @@ import io.nuls.crosschain.nuls.rpc.call.ConsensusCall;
 import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
 import io.nuls.crosschain.nuls.servive.BlockService;
 import io.nuls.crosschain.nuls.srorage.*;
+import io.nuls.crosschain.nuls.utils.BroadCtxUtil;
 import io.nuls.crosschain.nuls.utils.MessageUtil;
 import io.nuls.crosschain.nuls.utils.TxUtil;
 import io.nuls.crosschain.nuls.utils.manager.ChainManager;
+import io.nuls.crosschain.nuls.utils.thread.VerifierChangeTxHandler;
 
 import java.util.*;
 
@@ -65,6 +68,26 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     @SuppressWarnings("unchecked")
+    public Result syncStatusUpdate(Map<String, Object> params) {
+        if (params.get(CHAIN_ID) == null || params.get(ParamConstant.SYNC_STATUS) == null) {
+            return Result.getFailed(PARAMETER_ERROR);
+        }
+        int chainId = (int) params.get(CHAIN_ID);
+        if (chainId <= 0) {
+            return Result.getFailed(PARAMETER_ERROR);
+        }
+        Chain chain = chainManager.getChainMap().get(chainId);
+        if (chain == null) {
+            return Result.getFailed(CHAIN_NOT_EXIST);
+        }
+        int syncStatus = (int)params.get(ParamConstant.SYNC_STATUS);
+        chain.setSyncStatus(syncStatus);
+        chain.getLogger().info("节点同步状态变更，syncStatus:{}",syncStatus );
+        return Result.getSuccess(SUCCESS);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
     public Result newBlockHeight(Map<String, Object> params) {
         Result result = paramValid(params);
         if(result.isFailed()){
@@ -78,7 +101,10 @@ public class BlockServiceImpl implements BlockService {
         Map<Long , SendCtxHashPO> sendHeightMap = sendHeightService.getList(chainId);
         if(sendHeightMap != null && sendHeightMap.size() >0){
             Set<Long> sortSet = new TreeSet<>(sendHeightMap.keySet());
+            //各条链状态缓存
             Map<Integer,Byte> crossStatusMap = new HashMap<>(NulsCrossChainConstant.INIT_CAPACITY_16);
+            //广播到各链失败的各种交易类型缓存，避免广播乱序
+            Map<Integer, BroadFailFlag> broadFailMap = new HashMap<>(NulsCrossChainConstant.INIT_CAPACITY_16);
             for (long cacheHeight:sortSet) {
                 if(height >= cacheHeight){
                     chain.getLogger().debug("广播区块高度为{}的跨链交易给其他链",cacheHeight );
@@ -86,7 +112,7 @@ public class BlockServiceImpl implements BlockService {
                     List<NulsHash> broadSuccessCtxHash = new ArrayList<>();
                     List<NulsHash> broadFailCtxHash = new ArrayList<>();
                     for (NulsHash ctxHash:po.getHashList()) {
-                        if(broadCtxHash(chain, ctxHash, cacheHeight, crossStatusMap)){
+                        if(BroadCtxUtil.broadCtxHash(chain, ctxHash, cacheHeight, crossStatusMap,broadFailMap)){
                             broadSuccessCtxHash.add(ctxHash);
                         }else{
                             broadFailCtxHash.add(ctxHash);
@@ -138,38 +164,46 @@ public class BlockServiceImpl implements BlockService {
             blockHeader.parse(RPCUtil.decode(headerHex), 0);
             if(!chainManager.isCrossNetUseAble()){
                 chainManager.getChainHeaderMap().put(chainId, blockHeader);
+                chain.getLogger().info("等待共识网络组网完成");
                 return Result.getSuccess(SUCCESS);
             }
             if(config.isMainNet() && chainManager.getRegisteredCrossChainList().size() <= 1){
+                chain.getLogger().info("当前没有注册链" );
                 chainManager.getChainHeaderMap().put(chainId, blockHeader);
                 return Result.getSuccess(SUCCESS);
             }
             /*
-            检测是否有轮次变化，如果有轮次变化，查询共识模块共识节点是否有变化，如果有变化则创建验证人变更交易
+            检测是否有轮次变化，如果有轮次变化，查询共识模块共识节点是否有变化，如果有变化则创建验证人变更交易(该操作需要在验证人初始化交易之后)
             */
-            Map<String,List<String>> agentChangeMap;
-            BlockHeader localHeader = chainManager.getChainHeaderMap().get(chainId);
-            if(localHeader != null){
-                BlockExtendsData blockExtendsData = blockHeader.getExtendsData();
-                BlockExtendsData localExtendsData = localHeader.getExtendsData();
-                if(blockExtendsData.getRoundIndex() == localExtendsData.getRoundIndex()){
-                    chainManager.getChainHeaderMap().put(chainId, blockHeader);
-                    return Result.getSuccess(SUCCESS);
+            if(chain.getVerifierList() != null && !chain.getVerifierList().isEmpty()){
+                Map<String,List<String>> agentChangeMap;
+                BlockHeader localHeader = chainManager.getChainHeaderMap().get(chainId);
+                if(localHeader != null){
+                    BlockExtendsData blockExtendsData = blockHeader.getExtendsData();
+                    BlockExtendsData localExtendsData = localHeader.getExtendsData();
+                    if(blockExtendsData.getRoundIndex() == localExtendsData.getRoundIndex()){
+                        chainManager.getChainHeaderMap().put(chainId, blockHeader);
+                        return Result.getSuccess(SUCCESS);
+                    }
+                    agentChangeMap = ConsensusCall.getAgentChangeInfo(chain, localHeader.getExtend(), blockHeader.getExtend());
+                }else{
+                    agentChangeMap = ConsensusCall.getAgentChangeInfo(chain, null, blockHeader.getExtend());
                 }
-                agentChangeMap = ConsensusCall.getAgentChangeInfo(chain, localHeader.getExtend(), blockHeader.getExtend());
-            }else{
-                agentChangeMap = ConsensusCall.getAgentChangeInfo(chain, null, blockHeader.getExtend());
-            }
-            if(agentChangeMap != null){
-                List<String> registerAgentList = agentChangeMap.get(ParamConstant.PARAM_REGISTER_AGENT_LIST);
-                List<String> cancelAgentList = agentChangeMap.get(ParamConstant.PARAM_CANCEL_AGENT_LIST);
-                boolean verifierChange = (registerAgentList != null && !registerAgentList.isEmpty()) || (cancelAgentList != null && !cancelAgentList.isEmpty());
-                if(verifierChange){
-                    //验证人列表信息
-                    chain.getVerifierList().removeAll(cancelAgentList);
-                    chain.getLogger().info("有验证人变化，创建验证人变化交易，最新轮次与上一轮共有的出块地址为：", chain.getVerifierList().toString());
-                    Transaction verifierChangeTx = TxUtil.createVerifierChangeTx(registerAgentList, cancelAgentList, blockHeader.getExtendsData().getRoundStartTime(),chainId);
-                    TxUtil.handleNewCtx(verifierChangeTx, chain, registerAgentList);
+                if(agentChangeMap != null){
+                    List<String> registerAgentList = agentChangeMap.get(ParamConstant.PARAM_REGISTER_AGENT_LIST);
+                    List<String> cancelAgentList = agentChangeMap.get(ParamConstant.PARAM_CANCEL_AGENT_LIST);
+                    //第一个区块特殊处理,判断获取的到的变更的验证人列表是否正确
+                    if(localHeader == null){
+                        if(registerAgentList != null){
+                            registerAgentList.removeAll(chain.getVerifierList());
+                        }
+                    }
+                    boolean verifierChange = (registerAgentList != null && !registerAgentList.isEmpty()) || (cancelAgentList != null && !cancelAgentList.isEmpty());
+                    if(verifierChange){
+                        chain.getLogger().info("有验证人变化，创建验证人变化交易，最新轮次与上一轮共有的出块地址为：{},新增的验证人列表：{},减少的验证人列表：{}", chain.getVerifierList().toString(),registerAgentList,cancelAgentList);
+                        Transaction verifierChangeTx = TxUtil.createVerifierChangeTx(registerAgentList, cancelAgentList, blockHeader.getExtendsData().getRoundStartTime(),chainId);
+                        chain.getCrossTxThreadPool().execute(new VerifierChangeTxHandler(chain, verifierChangeTx, blockHeader.getHeight()));
+                    }
                 }
             }
             chainManager.getChainHeaderMap().put(chainId, blockHeader);
@@ -178,134 +212,5 @@ public class BlockServiceImpl implements BlockService {
             return Result.getFailed(DATA_PARSE_ERROR);
         }
         return Result.getSuccess(SUCCESS);
-    }
-
-    private boolean broadCtxHash(Chain chain,NulsHash ctxHash, long cacheHeight, Map<Integer,Byte> crossStatusMap){
-        int chainId = chain.getChainId();
-        BroadCtxHashMessage message = new BroadCtxHashMessage();
-        message.setConvertHash(ctxHash);
-        Transaction ctx = ctxStatusService.get(ctxHash, chainId).getTx();
-        try {
-            if(ctx.getType() == config.getCrossCtxType() || ctx.getType() == TxType.CONTRACT_TOKEN_CROSS_TRANSFER){
-                int toId = chainId;
-                if(config.isMainNet()){
-                    toId = AddressTool.getChainIdByAddress(ctx.getCoinDataInstance().getTo().get(0).getAddress());
-                }else{
-                    NulsHash convertHash = TxUtil.friendConvertToMain(chain, ctx, null, TxType.CROSS_CHAIN).getHash();
-                    message.setConvertHash(convertHash);
-                    chain.getLogger().info("广播跨链转账交易给主网，本链协议hash:{}对应的主网协议hash:{}",ctxHash.toHex(),convertHash.toHex());
-                }
-                byte broadStatus;
-                if(crossStatusMap.containsKey(toId)){
-                    broadStatus = crossStatusMap.get(toId);
-                }else{
-                    broadStatus = MessageUtil.canSendMessage(chain,toId);
-                    crossStatusMap.put(toId, broadStatus);
-                }
-                if (broadStatus == 0) {
-                    return true;
-                }else if(broadStatus == 1){
-                    return false;
-                }
-                return NetWorkCall.broadcast(toId, message, CommandConstant.BROAD_CTX_HASH_MESSAGE,true);
-            }else if(ctx.getType() == TxType.VERIFIER_CHANGE){
-                if(!chain.isMainChain()){
-                    byte broadStatus;
-                    if(crossStatusMap.containsKey(chainId)){
-                        broadStatus = crossStatusMap.get(chainId);
-                    }else{
-                        broadStatus = MessageUtil.canSendMessage(chain,chainId);
-                        crossStatusMap.put(chainId, broadStatus);
-                    }
-                    if (broadStatus == 0) {
-                        return true;
-                    }else if(broadStatus == 1){
-                        return false;
-                    }
-                    boolean broadResult = NetWorkCall.broadcast(chainId, message, CommandConstant.BROAD_CTX_HASH_MESSAGE,true);
-                    if(broadResult){
-                        //更新本地验证人列表
-                        VerifierChangeData verifierChangeData = new VerifierChangeData();
-                        verifierChangeData.parse(ctx.getTxData(),0);
-                        if(verifierChangeData.getCancelAgentList() != null && !verifierChangeData.getCancelAgentList().isEmpty()){
-                            chain.getBroadcastVerifierList().removeAll(verifierChangeData.getCancelAgentList());
-                        }
-                        if(verifierChangeData.getRegisterAgentList() != null && !verifierChangeData.getRegisterAgentList().isEmpty()){
-                            chain.getBroadcastVerifierList().addAll(verifierChangeData.getRegisterAgentList());
-                        }
-                        chain.setVerifierList(new ArrayList<>(chain.getBroadcastVerifierList()));
-                        chain.getLogger().info("验证人变更，当前最新验证人列表为：{}",chain.getVerifierList().toString());
-                    }
-                    return broadResult;
-                }else{
-                    boolean broadResult = true;
-                    if(chainManager.getRegisteredCrossChainList() == null || chainManager.getRegisteredCrossChainList().isEmpty() || chainManager.getRegisteredCrossChainList().size() == 1){
-                        chain.getLogger().info("没有注册链信息");
-                        return true;
-                    }
-
-                    VerifierChangeSendFailPO po = verifierChangeBroadFailedService.get(cacheHeight, chainId);
-                    Set<Integer> broadFailChains = new HashSet<>();
-                    if(po != null){
-                        for (Integer toChainId : po.getChains()) {
-                            byte broadStatus;
-                            if(crossStatusMap.containsKey(chainId)){
-                                broadStatus = crossStatusMap.get(chainId);
-                            }else{
-                                broadStatus = MessageUtil.canSendMessage(chain,chainId);
-                                crossStatusMap.put(chainId, broadStatus);
-                            }
-                            if (broadStatus == 1) {
-                                broadResult = false;
-                                broadFailChains.add(toChainId);
-                            }else if(broadStatus == 2){
-                                if(!NetWorkCall.broadcast(toChainId, message, CommandConstant.BROAD_CTX_HASH_MESSAGE,true)){
-                                    broadResult = false;
-                                    broadFailChains.add(toChainId);
-                                }
-                            }
-                        }
-                    }else{
-                        for (ChainInfo chainInfo:chainManager.getRegisteredCrossChainList()) {
-                            int  toChainId = chainInfo.getChainId();
-                            if(toChainId == chainId){
-                                continue;
-                            }
-                            byte broadStatus;
-                            if(crossStatusMap.containsKey(chainInfo.getChainId())){
-                                broadStatus = crossStatusMap.get(chainInfo.getChainId());
-                            }else{
-                                broadStatus = MessageUtil.canSendMessage(chain,chainInfo.getChainId());
-                                crossStatusMap.put(chainInfo.getChainId(), broadStatus);
-                            }
-                            if (broadStatus == 1) {
-                                broadResult = false;
-                                broadFailChains.add(toChainId);
-                            }else if(broadStatus == 2){
-                                if(!NetWorkCall.broadcast(toChainId, message, CommandConstant.BROAD_CTX_HASH_MESSAGE,true)){
-                                    broadResult = false;
-                                    broadFailChains.add(toChainId);
-                                }
-                            }
-                        }
-                    }
-                    if(broadFailChains.isEmpty()){
-                        verifierChangeBroadFailedService.delete(cacheHeight, chainId);
-                    }else{
-                        VerifierChangeSendFailPO failPO = new VerifierChangeSendFailPO(broadFailChains);
-                        verifierChangeBroadFailedService.save(cacheHeight, failPO, chainId);
-                    }
-                    return broadResult;
-                }
-            }else if(ctx.getType() == TxType.VERIFIER_INIT){
-                VerifierInitData verifierInitData = new VerifierInitData();
-                verifierInitData.parse(ctx.getTxData(),0);
-                return NetWorkCall.broadcast(verifierInitData.getRegisterChainId(), message, CommandConstant.BROAD_CTX_HASH_MESSAGE,true);
-            }
-            return true;
-        }catch (Exception e){
-            chain.getLogger().error(e);
-            return false;
-        }
     }
 }

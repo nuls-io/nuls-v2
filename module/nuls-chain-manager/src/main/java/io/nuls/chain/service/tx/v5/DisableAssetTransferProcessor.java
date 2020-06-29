@@ -1,6 +1,8 @@
 package io.nuls.chain.service.tx.v5;
 
 import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.CoinData;
+import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.protocol.TransactionProcessor;
 import io.nuls.chain.info.CmRuntimeInfo;
@@ -14,10 +16,8 @@ import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.math.BigInteger;
+import java.util.*;
 
 @Component("DisableAssetTxProcessorV5")
 public class DisableAssetTransferProcessor implements TransactionProcessor {
@@ -51,6 +51,26 @@ public class DisableAssetTransferProcessor implements TransactionProcessor {
             for (Transaction tx : txs) {
                 String txHash = tx.getHash().toHex();
                 asset = TxUtil.buildAssetWithTxAssetV5(tx);
+
+//                CoinData coinData = tx.getCoinDataInstance();
+//                if(coinData.getFrom().size() != 1) {
+//                    rtData.put("errorCode", "coin from error");
+//                    errorList.add(tx);
+//                    continue;
+//                }
+//                BigInteger lockAmount = asset.getDepositNuls().subtract(asset.getDestroyNuls());
+//                CoinFrom coinFrom = tx.getCoinDataInstance().getFrom().get(0);
+//                if(coinFrom.getAmount().compareTo(lockAmount) != 0) {
+//                    rtData.put("errorCode", "coin from error");
+//                    errorList.add(tx);
+//                    continue;
+//                }
+//                byte[] nonce =TxUtil.getNonceByTxHash(asset.getTxHash());
+//                if(!Arrays.equals(nonce, coinFrom.getNonce())) {
+//                    rtData.put("errorCode", "coin from error");
+//                    errorList.add(tx);
+//                    continue;
+//                }
                 chainEventResult = validateService.assetDisableValidator(asset);
                 if (chainEventResult.isSuccess()) {
                     LoggerUtil.logger().debug("txHash = {},assetKey={} disable batchValidate success!", txHash, CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
@@ -98,7 +118,7 @@ public class DisableAssetTransferProcessor implements TransactionProcessor {
             }
             return false;
         }
-        rpcService.cancelCrossChain(chainAssetIds);
+        rpcService.cancelCrossChain(chainAssetIds,blockHeader.getTime());
         return true;
     }
 

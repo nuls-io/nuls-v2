@@ -26,13 +26,11 @@
 package io.nuls.network.manager.handler.message;
 
 import io.nuls.network.manager.NodeGroupManager;
-import io.nuls.network.manager.TimeManager;
 import io.nuls.network.manager.handler.base.BaseMessageHandler;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.message.PeerInfoMessage;
-import io.nuls.network.model.message.TimeMessage;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.utils.LoggerUtil;
 

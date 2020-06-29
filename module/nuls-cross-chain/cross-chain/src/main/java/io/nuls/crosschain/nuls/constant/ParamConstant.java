@@ -42,6 +42,7 @@ public interface ParamConstant {
     String DECIMAL_PLACES = "decimalPlaces";
 
     String NEW_BLOCK_HEIGHT = "height";
+    String SYNC_STATUS = "status";
 
     String PARAM_TYPE_INT = "int";
     String PARAM_TYPE_STRING = "String";
@@ -51,4 +52,5 @@ public interface ParamConstant {
     String PARAM_PACK_ADDRESS_LIST = "packAddressList";
     String PARAM_REGISTER_AGENT_LIST = "registerAgentList";
     String PARAM_CANCEL_AGENT_LIST = "cancelAgentList";
+    String PARAM_TIME = "time";
 }

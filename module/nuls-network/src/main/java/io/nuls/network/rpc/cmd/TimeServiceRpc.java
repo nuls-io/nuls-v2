@@ -52,7 +52,7 @@ public class TimeServiceRpc extends BaseCmd {
     public Response currentTimeMillis(Map params) {
         Map<String, Long> responseData = new HashMap<>();
         responseData.put("currentTimeMillis", TimeManager.currentTimeMillis());
+        responseData.put("offset", TimeManager.netTimeOffset);
         return success(responseData);
     }
 }
-

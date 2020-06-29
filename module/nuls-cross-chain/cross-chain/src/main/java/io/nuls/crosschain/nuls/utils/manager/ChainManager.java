@@ -6,29 +6,22 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.Log;
 import io.nuls.core.rockdb.service.RocksDBService;
-import io.nuls.core.thread.ThreadUtils;
-import io.nuls.core.thread.commom.NulsThreadFactory;
-import io.nuls.crosschain.base.message.RegisteredChainMessage;
+import io.nuls.crosschain.base.model.bo.txdata.RegisteredChainMessage;
 import io.nuls.crosschain.base.model.bo.ChainInfo;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
-import io.nuls.crosschain.nuls.constant.ParamConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.model.bo.CmdRegisterDto;
 import io.nuls.crosschain.nuls.model.bo.config.ConfigBean;
 import io.nuls.crosschain.nuls.rpc.call.BlockCall;
-import io.nuls.crosschain.nuls.rpc.call.ConsensusCall;
 import io.nuls.crosschain.nuls.rpc.call.SmartContractCall;
 import io.nuls.crosschain.nuls.srorage.ConfigService;
 import io.nuls.crosschain.nuls.srorage.RegisteredCrossChainService;
 import io.nuls.crosschain.nuls.utils.LoggerUtil;
 import io.nuls.crosschain.nuls.utils.thread.handler.*;
-import io.nuls.crosschain.nuls.utils.thread.task.GetRegisteredChainTask;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 链管理类,负责各条链的初始化,运行,启动,参数维护等
@@ -60,13 +53,6 @@ public class ChainManager {
      * 缓存每条链最新区块头
      * */
     private Map<Integer, BlockHeader> chainHeaderMap = new ConcurrentHashMap<>();
-
-    /**
-     * 主网节点返回的已注册跨链交易列表信息
-     */
-    private List<RegisteredChainMessage> registeredChainMessageList = new ArrayList<>();
-
-    private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = ThreadUtils.createScheduledThreadPool(2, new NulsThreadFactory("getRegisteredChainTask"));
 
     private boolean crossNetUseAble = false;
 
@@ -108,6 +94,7 @@ public class ChainManager {
             RegisteredChainMessage registeredChainMessage = registeredCrossChainService.get();
             if(registeredChainMessage != null){
                 registeredCrossChainList = registeredChainMessage.getChainInfoList();
+                crossNetUseAble = true;
             }else{
                 ChainInfo mainChainInfo = new ChainInfo();
                 mainChainInfo.setVerifierList(new HashSet<>(Arrays.asList(config.getVerifiers().split(NulsCrossChainConstant.VERIFIER_SPLIT))));
@@ -143,34 +130,19 @@ public class ChainManager {
     @SuppressWarnings("unchecked")
     public void runChain() {
         for (Chain chain : chainMap.values()) {
-            chainHeaderMap.put(chain.getChainId(), BlockCall.getLatestBlockHeader(chain));
-            //初始化验证人列表
-            Map packerInfo = ConsensusCall.getPackerInfo(chain);
-            List<String> verifierList = (List<String>)packerInfo.get(ParamConstant.PARAM_PACK_ADDRESS_LIST);
-            try {
-                while (verifierList == null || verifierList.isEmpty()){
-                    TimeUnit.MILLISECONDS.sleep(500);
-                    packerInfo = ConsensusCall.getPackerInfo(chain);
-                    verifierList = (List<String>)packerInfo.get(ParamConstant.PARAM_PACK_ADDRESS_LIST);
-                }
-            }catch (InterruptedException e){
-                chain.getLogger().error(e);
-                System.exit(1);
-            }
-            chain.getBroadcastVerifierList().addAll(verifierList);
-            chain.getVerifierList().addAll(verifierList);
-            chain.getLogger().info("链：{}，当前验证人列表为：{}",chain.getConfig().getChainId(), verifierList.toString());
-
+            //加载本地验证人列表
+            LocalVerifierManager.loadLocalVerifier(chain);
+            //初始化区块模块同步状态
+            chain.setSyncStatus(BlockCall.getBlockStatus(chain));
             chain.getThreadPool().execute(new HashMessageHandler(chain));
-            chain.getThreadPool().execute(new CtxMessageHandler(chain));
-            chain.getThreadPool().execute(new SignMessageHandler(chain));
             chain.getThreadPool().execute(new OtherCtxMessageHandler(chain));
             chain.getThreadPool().execute(new GetCtxStateHandler(chain));
             chain.getThreadPool().execute(new SignMessageByzantineHandler(chain));
+            int syncStatus = BlockCall.getBlockStatus(chain);
+            chain.getLogger().info("The current status of the node is:{}",syncStatus);
+            chain.setSyncStatus(syncStatus);
         }
-        if(!config.isMainNet()){
-            scheduledThreadPoolExecutor.scheduleAtFixedRate(new GetRegisteredChainTask(this),  20L, 10 * 60L, TimeUnit.SECONDS );
-        }else{
+        if(config.isMainNet()){
             crossNetUseAble = true;
         }
     }
@@ -281,6 +253,14 @@ public class ChainManager {
             value:List<chainId>
             */
             RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_BROAD_FAILED+ chainId);
+
+            /*
+            广播失败的验证人变更消息
+            Keep records of successful cross-chain transactions processed
+            key:高度
+            value:List<chainId>
+            */
+            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_CROSS_CHANGE_FAILED+ chainId);
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e.getMessage());
         }
@@ -300,14 +280,6 @@ public class ChainManager {
 
     public void setRegisteredCrossChainList(List<ChainInfo> registeredCrossChainList) {
         this.registeredCrossChainList = registeredCrossChainList;
-    }
-
-    public List<RegisteredChainMessage> getRegisteredChainMessageList() {
-        return registeredChainMessageList;
-    }
-
-    public void setRegisteredChainMessageList(List<RegisteredChainMessage> registeredChainMessageList) {
-        this.registeredChainMessageList = registeredChainMessageList;
     }
 
     public boolean isCrossNetUseAble() {

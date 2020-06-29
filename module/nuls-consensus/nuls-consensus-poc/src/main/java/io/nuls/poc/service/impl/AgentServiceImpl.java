@@ -108,7 +108,7 @@ public class AgentServiceImpl implements AgentService {
         }
         try {
             //1.参数验证
-            if (!AddressTool.isNormalAddress(dto.getPackingAddress(), (short) dto.getChainId())) {
+            if (!AddressTool.isNormalAddress(dto.getPackingAddress(), dto.getChainId())) {
                 throw new NulsRuntimeException(ConsensusErrorCode.ADDRESS_ERROR);
             }
             //2.账户验证
@@ -200,7 +200,7 @@ public class AgentServiceImpl implements AgentService {
         } catch (RuntimeException e) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
-        if (!AddressTool.validAddress((short) dto.getChainId(), dto.getAddress())) {
+        if (!AddressTool.validAddress(dto.getChainId(), dto.getAddress())) {
             throw new NulsRuntimeException(ConsensusErrorCode.ADDRESS_ERROR);
         }
         Chain chain = chainManager.getChainMap().get(dto.getChainId());

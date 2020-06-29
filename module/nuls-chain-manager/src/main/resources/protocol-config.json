@@ -14,7 +14,7 @@
       {
         "type": "12",
         "systemTx": false,
-        "unlockTx": false,
+        "unlockTx": true,
         "verifySignature": true,
         "verifyFee": true,
         "handler": "DestroyChainTxProcessorV5"
@@ -30,7 +30,7 @@
       {
         "type": "14",
         "systemTx": false,
-        "unlockTx": false,
+        "unlockTx": true,
         "verifySignature": true,
         "verifyFee": true,
         "handler": "DisableAssetTxProcessorV5"
@@ -55,7 +55,7 @@
       {
         "type": "12",
         "systemTx": false,
-        "unlockTx": false,
+        "unlockTx": true,
         "verifySignature": true,
         "verifyFee": true,
         "handler": "DestroyChainTxProcessorV1"
@@ -71,7 +71,7 @@
       {
         "type": "14",
         "systemTx": false,
-        "unlockTx": false,
+        "unlockTx": true,
         "verifySignature": true,
         "verifyFee": true,
         "handler": "DisableAssetTxProcessorV1"

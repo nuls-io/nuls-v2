@@ -1,5 +1,6 @@
 package io.nuls.crosschain.base.model.bo;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.core.exception.NulsException;
@@ -12,10 +13,7 @@ import io.nuls.crosschain.base.constant.CrossChainConstant;
 import io.nuls.crosschain.base.message.base.BaseMessage;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 链注册信息
@@ -197,6 +195,14 @@ public class ChainInfo extends BaseMessage {
         return minPassCount;
     }
 
+    public int getMinPassCount(int count){
+        int minPassCount = count * getSignatureByzantineRatio()/ CrossChainConstant.MAGIC_NUM_100;
+        if(minPassCount == 0){
+            minPassCount = 1;
+        }
+        return minPassCount;
+    }
+
     public boolean verifyAssetAvailability(int chainId, int assetId) {
         if (chainId != this.chainId) {
             return false;
@@ -207,5 +213,28 @@ public class ChainInfo extends BaseMessage {
             }
         }
         return false;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(this == obj){
+            return true;
+        }
+
+        if(obj == null){
+            return false;
+        }
+
+        if(obj instanceof ChainInfo){
+            return this.chainId == ((ChainInfo) obj).getChainId();
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 17;
+        result = 31 * result + this.chainId;
+        return result;
     }
 }

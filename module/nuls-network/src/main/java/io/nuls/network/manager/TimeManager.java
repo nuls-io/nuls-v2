@@ -28,7 +28,6 @@ package io.nuls.network.manager;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.model.StringUtils;
 import io.nuls.network.cfg.NetworkConfig;
-import io.nuls.network.constant.ManagerStatusEnum;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
@@ -48,18 +47,14 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author vivi & lan
  */
-public class TimeManager extends BaseManager {
-    private static final int MAX_REQ_PEER_NUMBER = 8;
-    private static Map<String, Long> peerTimesMap = new ConcurrentHashMap<>();
-    private static long currentRequestId = System.currentTimeMillis();
+public class TimeManager {
     private static TimeManager instance = new TimeManager();
-
     /**
-     * 网站url集合，用于同步网络时间
+     * NTP服务器网站url集合，用于同步网络时间
      */
-    private List<String> urlList = new ArrayList<>();
+    private List<String> ntpSeverUrlList = new ArrayList<>();
 
-    private List<NetTimeUrl> netTimeUrls = new ArrayList<>();
+    private List<NetTimeUrl> netTimeSevers = new ArrayList<>();
     /**
      * 时间偏移差距触发点，超过该值会导致本地时间重设，单位毫秒
      * Time migration gap trigger point, which can cause local time reset, unit milliseconds.
@@ -75,54 +70,114 @@ public class TimeManager extends BaseManager {
      * 2 minutes;
      */
     public static final long NET_REFRESH_TIME = 2 * 60 * 1000L;
-
     /**
      * 网络时间偏移值
      */
     public static long netTimeOffset;
-
-
     /**
      * 上次同步时间点
      * The last synchronization point.
      */
     public static long lastSyncTime;
 
+    //询问对等节点网络时间最大数量
+    private static final int MAX_REQ_PEER_NUMBER = 8;
+    private static Map<String, Long> peerTimesMap = new ConcurrentHashMap<>();
+    private static long currentRequestId;
+    private long syncStartTime;
+    private long syncEndTime;
+    private long netTime;
+
     public static TimeManager getInstance() {
         return instance;
     }
 
     private TimeManager() {
-        if (0 == urlList.size()) {
+        if (0 == ntpSeverUrlList.size()) {
             NetworkConfig networkConfig = SpringLiteContext.getBean(NetworkConfig.class);
             String timeServers = networkConfig.getTimeServers();
             if (StringUtils.isNotBlank(timeServers)) {
                 String[] urlArray = timeServers.split(NetworkConstant.COMMA);
-                urlList.addAll(Arrays.asList(urlArray));
+                ntpSeverUrlList.addAll(Arrays.asList(urlArray));
             }
         }
     }
 
-    public static void addPeerTime(String nodeId, long requestId, long time) {
-        if (currentRequestId == requestId) {
-            if (MAX_REQ_PEER_NUMBER > peerTimesMap.size()) {
-                long localBeforeTime = currentRequestId;
-                long localEndTime = System.currentTimeMillis();
-                long value = (time + (localEndTime - localBeforeTime) / 2) - localEndTime;
-                peerTimesMap.put(nodeId, value);
+    /**
+     * 初始化时，同步网络时间，将同步成功的放入集合备用
+     * 并按相应时间排序
+     */
+    public void initWebTimeServer() {
+        for (String url : ntpSeverUrlList) {
+            syncStartTime = System.currentTimeMillis();
+            netTime = getWebTime(url);
+            if (netTime == 0) {
+                continue;
             }
+            syncEndTime = System.currentTimeMillis();
+            NetTimeUrl netTimeUrl = new NetTimeUrl(url, (syncEndTime - syncStartTime));
+            netTimeSevers.add(netTimeUrl);
+        }
+        Collections.sort(netTimeSevers);
+    }
+
+    /**
+     * 同步网络时间
+     * 如果成功同步到三个即可
+     */
+    public void syncWebTime() {
+        int count = 0;
+        long[] times = {0, 0, 0};
+        for (int i = 0; i < netTimeSevers.size(); i++) {
+            syncStartTime = System.currentTimeMillis();
+            netTime = getWebTime(netTimeSevers.get(i).getUrl());
+            if (netTime == 0) {
+                continue;
+            }
+            syncEndTime = System.currentTimeMillis();
+            times[count] = (netTime + (syncEndTime - syncStartTime) / 2) - syncEndTime;
+            count++;
+            /*
+             * 有3个网络时间正常返回就可以
+             */
+            if (count >= 3) {
+                break;
+            }
+        }
+        if (count == 3) {
+            calNetTimeOffset(times[0], times[1], times[2]);
+        } else {
+            //从对等网络去获取时间
+            LoggerUtil.COMMON_LOG.debug("count={} syncPeerTime .....", count);
+            syncPeerTime();
+        }
+        lastSyncTime = currentTimeMillis();
+    }
+
+    public static void calNetTimeOffset(long time1, long time2, long time3) {
+        //3个网络时间里去除 与其他2个偏差大于500ms的时间值。
+        long differMs = 500;
+        int count = 3;
+        if (Math.abs(time1 - time2) > differMs && Math.abs(time1 - time3) > differMs) {
+            time1 = 0;
+            count--;
+        }
+        if (Math.abs(time2 - time1) > differMs && Math.abs(time2 - time3) > differMs) {
+            time2 = 0;
+            count--;
+        }
+        if (Math.abs(time3 - time1) > differMs && Math.abs(time3 - time2) > differMs) {
+            time3 = 0;
+            count--;
+        }
+        if (count > 1) {
+            netTimeOffset = (time1 + time2 + time3) / count;
         }
     }
 
-    public List<NetTimeUrl> getNetTimeUrls() {
-        return netTimeUrls;
-    }
-
-    private void sendGetTimeMessage(Node node) {
-        GetTimeMessage getTimeMessage = MessageFactory.getInstance().buildTimeRequestMessage(node.getMagicNumber(), currentRequestId);
-        MessageManager.getInstance().sendHandlerMsg(getTimeMessage, node, true);
-    }
-
+    /**
+     * 向对等节点同步时间
+     */
     private synchronized void syncPeerTime() {
         //设置请求id
         currentRequestId = System.currentTimeMillis();
@@ -151,7 +206,6 @@ public class TimeManager extends BaseManager {
                 break;
             }
         }
-
         if (count == 0) {
             return;
         }
@@ -179,86 +233,23 @@ public class TimeManager extends BaseManager {
             netTimeOffset = sum / size;
             LoggerUtil.COMMON_LOG.debug("syncPeerTime netTimeOffset={}", netTimeOffset);
         }
-
-    }
-
-    /**
-     * 按相应时间排序
-     */
-    public void initWebTimeServer() {
-        for (String anUrlList : urlList) {
-            long begin = System.currentTimeMillis();
-            long netTime = getWebTime(anUrlList);
-            if (netTime == 0) {
-                continue;
-            }
-            long end = System.currentTimeMillis();
-            NetTimeUrl netTimeUrl = new NetTimeUrl(anUrlList, (end - begin));
-            netTimeUrls.add(netTimeUrl);
-        }
-        Collections.sort(netTimeUrls);
-
     }
 
 
-    /**
-     * 同步网络时间
-     */
-    public void syncWebTime() {
-
-        int count = 0;
-        long sum = 0L;
-        long[] times = {0, 0, 0};
-        int c = 0;
-        for (int i = 0; i < netTimeUrls.size(); i++) {
-            long localBeforeTime = System.currentTimeMillis();
-            long netTime = getWebTime(netTimeUrls.get(i).getUrl());
-            if (netTime == 0) {
-                continue;
+    public static void addPeerTime(String nodeId, long requestId, long time) {
+        if (currentRequestId == requestId) {
+            if (MAX_REQ_PEER_NUMBER > peerTimesMap.size()) {
+                long localBeforeTime = currentRequestId;
+                long localEndTime = System.currentTimeMillis();
+                long value = (time + (localEndTime - localBeforeTime) / 2) - localEndTime;
+                peerTimesMap.put(nodeId, value);
             }
-            long localEndTime = System.currentTimeMillis();
-            times[c] = (netTime + (localEndTime - localBeforeTime) / 2) - localEndTime;
-            LoggerUtil.COMMON_LOG.debug("address={},localEndTime={}==localBeforeTime={}==netTime={}==value={}", netTimeUrls.get(i).getUrl(), localEndTime, localBeforeTime, netTime, times[c]);
-            count++;
-            c++;
-            /*
-             * 有3个网络时间返回就可以退出了
-             */
-            if (count >= 3) {
-                break;
-            }
-
         }
-        if (count == 3) {
-            calNetTimeOffset(times[0], times[1], times[2]);
-            LoggerUtil.COMMON_LOG.debug("netTimeOffset={}", netTimeOffset);
-        } else {
-            //从对等网络去获取时间
-            LoggerUtil.COMMON_LOG.debug("count={} syncPeerTime .....", count);
-            syncPeerTime();
-        }
-        lastSyncTime = currentTimeMillis();
     }
 
-    public static void calNetTimeOffset(long time1, long time2, long time3) {
-        //3个网络时间里去除 与其他2个偏差大于500ms的时间值。
-        long differMs = 500;
-        int count = 3;
-        if (Math.abs(time1 - time2) > differMs && Math.abs(time1 - time3) > differMs) {
-            time1 = 0;
-            count--;
-        }
-        if (Math.abs(time2 - time1) > differMs && Math.abs(time2 - time3) > differMs) {
-            time2 = 0;
-            count--;
-        }
-        if (Math.abs(time3 - time1) > differMs && Math.abs(time3 - time2) > differMs) {
-            time3 = 0;
-            count--;
-        }
-        if (count > 1) {
-            netTimeOffset = (time1 + time2 + time3) / count;
-        }
+    private void sendGetTimeMessage(Node node) {
+        GetTimeMessage getTimeMessage = MessageFactory.getInstance().buildTimeRequestMessage(node.getMagicNumber(), currentRequestId);
+        MessageManager.getInstance().sendHandlerMsg(getTimeMessage, node, true);
     }
 
     /**
@@ -293,19 +284,4 @@ public class TimeManager extends BaseManager {
         return System.currentTimeMillis() + netTimeOffset;
     }
 
-
-    @Override
-    public void init() throws Exception {
-
-    }
-
-    @Override
-    public void start() throws Exception {
-
-    }
-
-    @Override
-    public void change(ManagerStatusEnum toStatus) throws Exception {
-
-    }
 }
