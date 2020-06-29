@@ -9,11 +9,6 @@ package io.nuls.crosschain.base.constant;
 public interface CommandConstant {
 
     /**
-     * 向链内节点获取跨链交易
-     */
-    String GET_CTX_MESSAGE = "getCtx";
-
-    /**
      * 向其他链节点获取跨链交易
      */
     String GET_OTHER_CTX_MESSAGE = "getOtherCtx";
@@ -32,10 +27,6 @@ public interface CommandConstant {
      */
     String GET_CIRCULLAT_MESSAGE = "getCirculat";
 
-    /**
-     * 接收本链节点发来的跨链交易
-     */
-    String NEW_CTX_MESSAGE = "recvCtx";
 
     /**
      * 接收其他链节点发来的跨链交易
@@ -67,8 +58,4 @@ public interface CommandConstant {
      * */
     String  CIRCULATION_MESSAGE = "recvCirculat";
 
-    /**
-     * 已注册跨链交易信息
-     * */
-    String  REGISTERED_CHAIN_MESSAGE = "recvRegChain";
 }

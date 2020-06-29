@@ -585,7 +585,7 @@ public class AnalysisHandler {
         if (tx.getStatus() == TxStatusEnum.CONFIRMED) {
             try {
                 Result<ContractResultInfo> result = WalletRpcHandler.getContractResultInfo(chainId, tx.getHash().toHex());
-                if(result.getData() == null) {
+                if (result.getData() == null) {
                     return null;
                 }
                 contractResultInfo = result.getData();
@@ -593,7 +593,7 @@ public class AnalysisHandler {
                 return null;
             }
         }
-        if(contractResultInfo == null) {
+        if (contractResultInfo == null) {
             return null;
         }
         ContractCallInfo callInfo = new ContractCallInfo();
@@ -605,7 +605,7 @@ public class AnalysisHandler {
         callInfo.setCreateTxHash(tx.getHash().toHex());
         String nrcContractAddress = null;
         List<TokenTransfer> tokenTransfers = contractResultInfo.getTokenTransfers();
-        if(tokenTransfers != null && !tokenTransfers.isEmpty()) {
+        if (tokenTransfers != null && !tokenTransfers.isEmpty()) {
             nrcContractAddress = tokenTransfers.get(0).getContractAddress();
         }
         CoinData coinData = tx.getCoinDataInstance();
@@ -660,7 +660,7 @@ public class AnalysisHandler {
     }
 
     public static ContractCallInfo toContractCallInfoForCrossChain(int chainId, Transaction tx, ContractResultInfo resultInfo) throws NulsException {
-        if(resultInfo == null) {
+        if (resultInfo == null) {
             return null;
         }
         ContractCallInfo callInfo = new ContractCallInfo();
@@ -672,7 +672,7 @@ public class AnalysisHandler {
         callInfo.setCreateTxHash(tx.getHash().toHex());
         String nrcContractAddress = null;
         List<TokenTransfer> tokenTransfers = resultInfo.getTokenTransfers();
-        if(tokenTransfers != null && !tokenTransfers.isEmpty()) {
+        if (tokenTransfers != null && !tokenTransfers.isEmpty()) {
             nrcContractAddress = tokenTransfers.get(0).getContractAddress();
         }
         CoinData coinData = tx.getCoinDataInstance();
@@ -807,9 +807,21 @@ public class AnalysisHandler {
             assetInfo.setInitCoins(txChain.getDefaultAsset().getInitNumber());
             chainInfo.setDefaultAsset(assetInfo);
             chainInfo.getAssets().add(assetInfo);
-        } else {
+        } else if (ApiContext.protocolVersion == 4) {
             io.nuls.api.model.entity.v4.TxChain txChain = new io.nuls.api.model.entity.v4.TxChain();
             txChain.parse(new NulsByteBuffer(tx.getTxData()));
+            chainInfo.setChainId(txChain.getDefaultAsset().getChainId());
+
+            AssetInfo assetInfo = new AssetInfo();
+            assetInfo.setAssetId(txChain.getDefaultAsset().getAssetId());
+            assetInfo.setChainId(txChain.getDefaultAsset().getChainId());
+            assetInfo.setSymbol(txChain.getDefaultAsset().getSymbol());
+            assetInfo.setInitCoins(txChain.getDefaultAsset().getInitNumber());
+            chainInfo.setDefaultAsset(assetInfo);
+            chainInfo.getAssets().add(assetInfo);
+        } else  {
+            io.nuls.api.model.entity.v5.TxChain txChain = new io.nuls.api.model.entity.v5.TxChain();
+            txChain.parse(tx.getTxData(), 0);
             chainInfo.setChainId(txChain.getDefaultAsset().getChainId());
 
             AssetInfo assetInfo = new AssetInfo();

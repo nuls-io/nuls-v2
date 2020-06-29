@@ -92,7 +92,7 @@ public class DestroyChainTransferProcessor implements TransactionProcessor {
             LoggerUtil.logger().error(e);
             //通知远程调用回滚
             try {
-                chainService.rpcBlockChainRollback(txs);
+                chainService.rpcBlockChainRollback(txs,blockHeader.getTime());
                 //进行回滚
                 cacheDataService.rollBlockTxs(chainId, commitHeight);
             } catch (Exception e1) {
@@ -101,7 +101,7 @@ public class DestroyChainTransferProcessor implements TransactionProcessor {
             }
             return false;
         }
-        rpcService.cancelCrossChain(chainAssetIds);
+        rpcService.cancelCrossChain(chainAssetIds,blockHeader.getTime());
         return true;
     }
 

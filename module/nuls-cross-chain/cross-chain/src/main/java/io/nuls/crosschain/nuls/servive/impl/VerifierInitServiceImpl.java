@@ -1,24 +1,22 @@
 package io.nuls.crosschain.nuls.servive.impl;
 
 import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.SignatureUtil;
-import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.crosschain.base.constant.CrossChainConstant;
-import io.nuls.crosschain.base.message.RegisteredChainMessage;
+import io.nuls.crosschain.base.model.bo.txdata.RegisteredChainMessage;
 import io.nuls.crosschain.base.model.bo.ChainInfo;
 import io.nuls.crosschain.base.model.bo.txdata.VerifierInitData;
 import io.nuls.crosschain.base.service.VerifierInitService;
+import io.nuls.crosschain.base.utils.enumeration.ChainInfoChangeType;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainErrorCode;
 import io.nuls.crosschain.nuls.constant.ParamConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
-import io.nuls.crosschain.nuls.model.po.LocalVerifierPO;
 import io.nuls.crosschain.nuls.rpc.call.BlockCall;
 import io.nuls.crosschain.nuls.rpc.call.ConsensusCall;
 import io.nuls.crosschain.nuls.srorage.ConfigService;
@@ -27,12 +25,10 @@ import io.nuls.crosschain.nuls.srorage.RegisteredCrossChainService;
 import io.nuls.crosschain.nuls.utils.TxUtil;
 import io.nuls.crosschain.nuls.utils.manager.ChainManager;
 import io.nuls.crosschain.nuls.utils.manager.LocalVerifierManager;
-import io.nuls.crosschain.nuls.utils.thread.VerifierInitTxHandler;
+import io.nuls.crosschain.nuls.utils.thread.CrossTxHandler;
 
 import java.io.IOException;
 import java.util.*;
-
-import static io.nuls.core.constant.CommonCodeConstanst.DB_SAVE_ERROR;
 
 /**
  * 验证人初始化交易实现类
@@ -142,6 +138,7 @@ public class VerifierInitServiceImpl implements VerifierInitService {
                     return false;
                 }
                 commitSuccessList.add(verifierInitTx);
+                chainManager.setCrossNetUseAble(true);
                 if(!config.isMainNet()){
                     List<String> localVerifierList = (List<String>) ConsensusCall.getPackerInfo(chain).get(ParamConstant.PARAM_PACK_ADDRESS_LIST);
                     if(chain.getVerifierList() == null || chain.getVerifierList().isEmpty()){
@@ -151,9 +148,10 @@ public class VerifierInitServiceImpl implements VerifierInitService {
                             return false;
                         }
                     }
-                    if(syncStatus == 1){
-                        chain.getCrossTxThreadPool().execute(new VerifierInitTxHandler(chain, TxUtil.createVerifierInitTx(localVerifierList, blockHeader.getTime(), chainId)));
-                    }
+                    chain.getCrossTxThreadPool().execute(new CrossTxHandler(chain, TxUtil.createVerifierInitTx(localVerifierList, blockHeader.getTime(), chainId),syncStatus));
+                }else{
+                    chain.getLogger().info("链：{}初始化完成，将已注册跨链的链信息发送给该链",verifierChainId);
+                    chain.getCrossTxThreadPool().execute(new CrossTxHandler(chain, TxUtil.createCrossChainChangeTx(chainManager.getRegisteredCrossChainList(),blockHeader.getTime(),chainInfo.getChainId(), ChainInfoChangeType.INIT_REGISTER_CHAIN.getType()),syncStatus));
                 }
             } catch (NulsException e) {
                 chain.getLogger().error(e);

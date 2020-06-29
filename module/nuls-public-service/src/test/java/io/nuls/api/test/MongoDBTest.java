@@ -1,19 +1,28 @@
 package io.nuls.api.test;
 
 import io.nuls.api.ApiContext;
+import io.nuls.api.constant.CommandConstant;
 import io.nuls.api.db.mongo.MongoBlockServiceImpl;
 import io.nuls.api.db.mongo.MongoContractServiceImpl;
 import io.nuls.api.model.po.BlockHeaderInfo;
 import io.nuls.api.model.po.ContractInfo;
+import io.nuls.api.rpc.RpcCall;
 import io.nuls.api.utils.DocumentTransferTool;
+import io.nuls.core.basic.Result;
 import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.log.Log;
+import io.nuls.core.rpc.info.Constants;
+import io.nuls.core.rpc.model.ModuleE;
 import org.bson.Document;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MongoDBTest {
 
@@ -28,8 +37,9 @@ public class MongoDBTest {
 
         ApiContext.databaseUrl = "127.0.0.1";
         ApiContext.databasePort = 27017;
-        SpringLiteContext.init("io.nuls.api");
+        SpringLiteContext.init("io.nuls");
     }
+
 
 
     @Test
