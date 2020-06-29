@@ -93,6 +93,26 @@ public class TransactionDto {
         }
     }
 
+    public TransactionDto(Transaction transaction, int i) throws NulsException {
+        this.blockHeight = transaction.getBlockHeight();
+        this.status = transaction.getStatus().getStatus();
+        this.hash = transaction.getHash().toString();
+        this.remark = ByteUtils.asString(transaction.getRemark());
+        this.inBlockIndex = i;
+        this.status = 1;
+        this.size = transaction.getSize();
+        this.time = DateUtils.timeStamp2DateStr(transaction.getTime() * 1000);
+        this.timestamp = transaction.getTime();
+        this.transactionSignature = RPCUtil.encode(transaction.getTransactionSignature());
+        this.txDataHex = RPCUtil.encode(transaction.getTxData());
+        this.type = transaction.getType();
+        if (transaction.getCoinData() != null) {
+            CoinData coinData = transaction.getCoinDataInstance();
+            this.from = coinData.getFrom().stream().map(from -> new CoinFromDto(from)).collect(Collectors.toList());
+            this.to = coinData.getTo().stream().map(to -> new CoinToDto(to)).collect(Collectors.toList());
+        }
+    }
+
     public String getHash() {
         return hash;
     }

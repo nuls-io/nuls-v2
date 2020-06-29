@@ -78,7 +78,7 @@ public class NulsRpcModuleBootstrap {
                 }
             });
         }
-        module.run(scanPackage, args[0]);
+        module.run(scanPackage, args[0],args);
     }
 
     public static void printLogo(String logoFile) {

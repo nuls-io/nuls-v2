@@ -108,7 +108,11 @@ public class Config implements InitializingBean {
     }
 
     public BigDecimal toBigUnit(BigInteger val) {
-        BigDecimal decimal = BigDecimal.TEN.pow(this.getDecimals());
+        return toBigUnit(val,this.getDecimals());
+    }
+
+    public BigDecimal toBigUnit(BigInteger val,int decimals) {
+        BigDecimal decimal = BigDecimal.TEN.pow(decimals);
         BigDecimal dval = BigDecimal.valueOf(val.longValue());
         return dval.divide(decimal);
     }

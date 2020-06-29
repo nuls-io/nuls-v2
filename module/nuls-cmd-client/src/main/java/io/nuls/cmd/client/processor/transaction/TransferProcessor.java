@@ -59,13 +59,15 @@ public class TransferProcessor extends TransactionBaseProcessor implements Comma
                 .newLine("\t<address> \t\tsource address or alias - Required")
                 .newLine("\t<toaddress> \treceiving address or alias - Required")
                 .newLine("\t<amount> \t\tamount - Required")
-                .newLine("\t[remark] \t\tremark - ");
+                .newLine("\t[remark] \t\tremark - ")
+                .newLine("\t[password] \t\tpassword - ");
+
         return builder.toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return "transfer <address>|<alias> <toAddress>|<alias> <amount> [remark] --transfer";
+        return "transfer <address>|<alias> <toAddress>|<alias> <amount> [remark] [password] --transfer";
     }
 
     @Override
@@ -79,9 +81,15 @@ public class TransferProcessor extends TransactionBaseProcessor implements Comma
         String formAddress = args[1];
         String toAddress = args[2];
         BigInteger amount = config.toSmallUnit(new BigDecimal(args[3]));
+        String password;
+        if(args.length == 6){
+            password = args[5];
+        }else{
+            password = getPwd("\nEnter your account password:");
+        }
         TransferReq.TransferReqBuilder builder =
                 new TransferReq.TransferReqBuilder(config.getChainId(),config.getAssetsId())
-                        .addForm(formAddress,getPwd("Enter your account password"), amount)
+                        .addForm(formAddress,password, amount)
                         .addTo(toAddress,amount);
         if(args.length == 5){
             builder.setRemark(args[4]);

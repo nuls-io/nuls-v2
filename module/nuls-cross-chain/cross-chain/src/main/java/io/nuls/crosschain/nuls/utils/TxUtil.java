@@ -226,6 +226,7 @@ public class TxUtil {
                 convertHash = mainCtx.getHash();
                 convertCtxService.save(hash, mainCtx, chainId);
             }
+            CtxStatusPO ctxStatusPO = new CtxStatusPO(ctx, TxStatusEnum.UNCONFIRM.getStatus());
             //如果本节点是共识节点，则需要签名并做拜占庭，否则只需广播本地收集到的签名信息
             if (!StringUtils.isBlank(address) && chain.getVerifierList().contains(address)) {
                 BroadCtxSignMessage message = new BroadCtxSignMessage();
@@ -252,6 +253,8 @@ public class TxUtil {
                 }
                 MessageUtil.signByzantineInChain(chain, ctx, transactionSignature, packers,hash);
                 NetWorkCall.broadcast(chainId, message, CommandConstant.BROAD_CTX_SIGN_MESSAGE, false);
+            }else{
+                ctxStatusService.save(hash, ctxStatusPO, chainId);
             }
             //将收到的签名消息加入消息队列
             if (chain.getFutureMessageMap().containsKey(hash)) {

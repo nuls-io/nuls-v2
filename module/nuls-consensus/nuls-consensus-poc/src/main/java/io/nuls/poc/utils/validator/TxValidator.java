@@ -251,7 +251,7 @@ public class TxValidator {
      * @return boolean
      */
     private boolean createAgentBasicValid(Chain chain, Transaction tx, Agent agent) throws NulsException {
-        if (!AddressTool.validNormalAddress(agent.getPackingAddress(), (short) chain.getConfig().getChainId())) {
+        if (!AddressTool.validNormalAddress(agent.getPackingAddress(), chain.getConfig().getChainId())) {
             throw new NulsException(ConsensusErrorCode.ADDRESS_ERROR);
         }
         if (Arrays.equals(agent.getAgentAddress(), agent.getPackingAddress())) {

@@ -36,11 +36,13 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Controller;
 import io.nuls.core.core.annotation.RpcMethod;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.parse.MapUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author Niels
@@ -152,15 +154,21 @@ public class AccountController {
             PageInfo<TxRelationInfo> pageInfo;
             if (CacheManager.isChainExist(chainId)) {
                 pageInfo = accountService.getAccountTxs(chainId, address, pageNumber, pageSize, type, startHeight, endHeight);
+                result.setResult(new PageInfo<>(pageNumber, pageSize,pageInfo.getTotalCount(),pageInfo.getList().stream().map(d->{
+                    Map res = MapUtils.beanToMap(d);AssetInfo assetInfo = CacheManager.getAssetInfoMap().get(d.getChainId() + "-" + d.getAssetId());
+                    if (assetInfo != null) {
+                        res.put("symbol",assetInfo.getSymbol());
+                        res.put("decimals",assetInfo.getDecimals());
+                    }
+                    return res;
+                }).collect(Collectors.toList())));
             } else {
-                pageInfo = new PageInfo<>(pageNumber, pageSize);
+                result.setResult(new PageInfo<>(pageNumber, pageSize));
             }
-            result.setResult(pageInfo);
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);
         }
         return result;
-
     }
 
     @RpcMethod("getAcctTxs")

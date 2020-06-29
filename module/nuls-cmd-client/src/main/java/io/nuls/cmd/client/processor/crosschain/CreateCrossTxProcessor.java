@@ -34,19 +34,20 @@ public class CreateCrossTxProcessor extends CrossChainBaseProcessor {
                 .newLine("\t<assetChainId> transaction asset chainId - require")
                 .newLine("\t<assetId> transaction assetId - require")
                 .newLine("\t<amount> \t\tamount - required")
-                .newLine("\t[remark] \t\tremark ");
+                .newLine("\t[remark] \t\tremark ")
+                .newLine("\t[password] \t\tpassword");
         return builder.toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return "createcrosstx <formAddress> <toAddress> <assetChainId> <assetId> <amount> [remark] --create cross chain tx";
+        return "createcrosstx <formAddress> <toAddress> <assetChainId> <assetId> <amount> [remark] [password]--create cross chain tx";
     }
 
 
     @Override
     public boolean argsValidate(String[] args) {
-        checkArgsNumber(args, 5, 6);
+        checkArgsNumber(args, 5, 6,7);
         checkAddress(config.getChainId(), args[1]);
         checkArgs(AddressTool.getChainIdByAddress(args[2]) != config.getChainId(), ErrorCode.init("cc_0001").getMsg());
         checkIsNumeric(args[3], "assetChainId");
@@ -70,12 +71,18 @@ public class CreateCrossTxProcessor extends CrossChainBaseProcessor {
         BigDecimal decimal = BigDecimal.TEN.pow(decimalInt);
         BigInteger amount = new BigDecimal(args[5]).multiply(decimal).toBigInteger();
         String remark = null;
+        String password = null;
         if (args.length == 7) {
             remark = args[6];
         }
+        if (args.length == 8) {
+            password = args[7];
+        }else {
+            password = getPwd();
+        }
         Result<String> result = crossChainProvider.createCrossTx(
                 new CreateCrossTxReq.CreateCrossTxReqBuilder(chainId)
-                        .addForm(assetChainId, assetId, formAddress, getPwd(), amount)
+                        .addForm(assetChainId, assetId, formAddress, password, amount)
                         .addTo(assetChainId, assetId, toAddress, amount)
                         .setRemark(remark).build());
         if (result.isFailed()) {
