@@ -87,7 +87,7 @@ public class ValidateServiceImpl implements ValidateService {
         BigDecimal inAsset = new BigDecimal(chainAsset.getInNumber());
         BigDecimal outAsset = new BigDecimal(chainAsset.getOutNumber());
         BigDecimal currentNumber = initAsset.add(inAsset).subtract(outAsset);
-        double actual = currentNumber.divide(initAsset, 8, RoundingMode.HALF_DOWN).doubleValue();
+        double actual = currentNumber.divide(initAsset, dbAsset.getDecimalPlaces(), RoundingMode.HALF_DOWN).doubleValue();
         double config = Double.parseDouble(nulsChainConfig.getAssetRecoveryRate());
         if (actual < config) {
             LoggerUtil.logger().error("chainId={},assetId={} actual={},config={},==={}-{}-{}", asset.getChainId(), asset.getAssetId(),
