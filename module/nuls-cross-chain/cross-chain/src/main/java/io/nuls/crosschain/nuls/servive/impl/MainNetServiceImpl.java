@@ -134,6 +134,10 @@ public class MainNetServiceImpl implements MainNetService {
         AssetInfo assetInfo = new AssetInfo(assetId, symbol, assetName, usable, decimalPlaces);
         chainManager.getChainInfo(chainId).getAssetInfoList().add(assetInfo);
         ChainInfo chainInfo = chainManager.getChainInfo(chainId);
+        //本地数据库保存最新的资产信息
+        RegisteredChainMessage registeredChainMessage = registeredCrossChainService.get();
+        registeredChainMessage.setChainInfoList(chainManager.getRegisteredCrossChainList());
+        registeredCrossChainService.save(registeredChainMessage);
         try {
             int syncStatus = BlockCall.getBlockStatus(chain);
             chain.getLogger().info("新跨链资产注册，chainId:{},assetId:{}",chainId,assetId);
