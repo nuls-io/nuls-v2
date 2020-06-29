@@ -83,7 +83,7 @@ public class CrossAssetAddProcessor extends CrossChainBaseProcessor {
         String assetName = args[4];
         String symbol = args[5];
         long  initNumber = Long.valueOf(args[6]);
-        int decimalPlaces = Integer.parseInt(args[3]);
+        int decimalPlaces = Integer.parseInt(args[7]);
         AddCrossAssetReq req = new AddCrossAssetReq(address, assetChainId, assetId,
                 symbol,assetName,initNumber,decimalPlaces,getPwd());
         Result<String> result = chainManageProvider.addCrossAsset(req);
