@@ -26,7 +26,9 @@
 package io.nuls.network.manager;
 
 import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.log.Log;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.thread.ThreadUtils;
 import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.model.Node;
@@ -40,6 +42,9 @@ import org.apache.commons.net.ntp.TimeInfo;
 import java.net.InetAddress;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 时间服务类：用于同步网络标准时间
@@ -54,7 +59,7 @@ public class TimeManager {
      */
     private List<String> ntpSeverUrlList = new ArrayList<>();
 
-    private List<NetTimeUrl> netTimeSevers = new ArrayList<>();
+    private List<NetTimeUrl> netTimeSevers = new CopyOnWriteArrayList<>();
     /**
      * 时间偏移差距触发点，超过该值会导致本地时间重设，单位毫秒
      * Time migration gap trigger point, which can cause local time reset, unit milliseconds.
@@ -108,17 +113,35 @@ public class TimeManager {
      * 并按相应时间排序
      */
     public void initWebTimeServer() {
+        CountDownLatch latch = new CountDownLatch(ntpSeverUrlList.size());
         for (String url : ntpSeverUrlList) {
-            syncStartTime = System.currentTimeMillis();
-            netTime = getWebTime(url);
-            if (netTime == 0) {
-                continue;
-            }
-            syncEndTime = System.currentTimeMillis();
-            NetTimeUrl netTimeUrl = new NetTimeUrl(url, (syncEndTime - syncStartTime));
-            netTimeSevers.add(netTimeUrl);
+            ThreadUtils.asynExecuteRunnable(()->{
+                syncStartTime = System.currentTimeMillis();
+                netTime = getWebTime(url);
+                if (netTime > 0) {
+                    syncEndTime = System.currentTimeMillis();
+                    NetTimeUrl netTimeUrl = new NetTimeUrl(url, (syncEndTime - syncStartTime));
+                    netTimeSevers.add(netTimeUrl);
+                }
+                latch.countDown();
+            });
+        }
+        try {
+            latch.await(5, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Log.error("等待获取网络时间发生异常");
+            System.exit(0);
+        }
+        if(netTimeSevers.size() < 3){
+            LoggerUtil.COMMON_LOG.warn("可用服务器小于3个");
         }
         Collections.sort(netTimeSevers);
+        LoggerUtil.COMMON_LOG.info("初始化时间服务器完成");
+        LoggerUtil.COMMON_LOG.info("=".repeat(100));
+        netTimeSevers.forEach(d->{
+            LoggerUtil.COMMON_LOG.info("site:{} 耗时:{}",d.getUrl(),d.getTime());
+        });
+        LoggerUtil.COMMON_LOG.info("=".repeat(100));
     }
 
     /**
@@ -260,8 +283,8 @@ public class TimeManager {
     private long getWebTime(String address) {
         try {
             NTPUDPClient client = new NTPUDPClient();
-            client.open();
             client.setDefaultTimeout(500);
+            client.open();
             client.setSoTimeout(500);
             InetAddress inetAddress = InetAddress.getByName(address);
             //Log.debug("start ask time....");
