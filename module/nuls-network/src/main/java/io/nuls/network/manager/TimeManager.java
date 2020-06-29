@@ -116,11 +116,10 @@ public class TimeManager {
         CountDownLatch latch = new CountDownLatch(ntpSeverUrlList.size());
         for (String url : ntpSeverUrlList) {
             ThreadUtils.asynExecuteRunnable(()->{
-                syncStartTime = System.currentTimeMillis();
-                netTime = getWebTime(url);
+                long syncStartTime = System.currentTimeMillis();
+                long netTime = getWebTime(url);
                 if (netTime > 0) {
-                    syncEndTime = System.currentTimeMillis();
-                    NetTimeUrl netTimeUrl = new NetTimeUrl(url, (syncEndTime - syncStartTime));
+                    NetTimeUrl netTimeUrl = new NetTimeUrl(url, (System.currentTimeMillis() - syncStartTime));
                     netTimeSevers.add(netTimeUrl);
                 }
                 latch.countDown();
