@@ -160,7 +160,7 @@ public class PunishManager {
         找到双花交易的节点
         Find the bifurcated nodes
         */
-        byte[] packingAddress = AddressTool.getAddress(block.getHeader().getBlockSignature().getPublicKey(), (short) chain.getConfig().getChainId());
+        byte[] packingAddress = AddressTool.getAddress(block.getHeader().getBlockSignature().getPublicKey(), chain.getConfig().getChainId());
         List<Agent> agentList = chain.getAgentList();
         Agent agent = null;
         for (Agent a : agentList) {
