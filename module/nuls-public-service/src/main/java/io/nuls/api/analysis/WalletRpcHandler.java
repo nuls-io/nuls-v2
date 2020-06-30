@@ -185,7 +185,7 @@ public class WalletRpcHandler {
                 tx.setStatus(TxStatusEnum.CONFIRMED);
             }
             tx.setBlockHeight(height);
-            TransactionInfo txInfo = AnalysisHandler.toTransaction(chainId, tx);
+            TransactionInfo txInfo = AnalysisHandler.toTransaction(chainId, tx, ApiContext.protocolVersion);
 
             return Result.getSuccess(null).setData(txInfo);
         } catch (NulsException e) {
@@ -293,8 +293,9 @@ public class WalletRpcHandler {
     }
 
     private static String crossTokenSystemContract = null;
+
     public static String getCrossTokenSystemContract(int chainId) throws NulsException {
-        if(StringUtils.isBlank(crossTokenSystemContract)) {
+        if (StringUtils.isBlank(crossTokenSystemContract)) {
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.CHAIN_ID, chainId);
             Map map = (Map) RpcCall.request(ModuleE.SC.abbr, CommandConstant.GET_CROSS_TOKEN_SYSTEM_CONTRACT, params);
