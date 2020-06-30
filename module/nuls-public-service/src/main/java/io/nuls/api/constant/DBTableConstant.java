@@ -29,6 +29,8 @@ public interface DBTableConstant {
     String TX_TABLE = "tx_table_";
     //交易关系记录表
     String TX_RELATION_TABLE = "tx_relation_table_";
+
+    String CROSS_TX_RELATION_TABLE = "cross_tx_relation_table_";
     //交易关系记录表
     String TX_UNCONFIRM_RELATION_TABLE = "tx_unconfirm_relation_table_";
     //交易表

@@ -59,6 +59,8 @@ public class SyncService {
     private List<AgentInfo> agentInfoList = new ArrayList<>();
     //记录每个区块交易和账户地址的关系
     private Set<TxRelationInfo> txRelationInfoSet = new HashSet<>();
+    //记录每个跨链交易和账户地址的关系
+    private Set<CrossTxRelationInfo> crossTxRelationInfoSet = new HashSet<>();
     //记录每个区块设置别名信息
     private List<AliasInfo> aliasInfoList = new ArrayList<>();
     //记录每个区块委托共识的信息
@@ -307,8 +309,8 @@ public class SyncService {
                     continue;
                 }
                 addressSet.add(input.getAddress());
-                AccountLedgerInfo ledgerInfo = calcBalance(chainId, input);
-                txRelationInfoSet.add(new TxRelationInfo(input, tx, ledgerInfo.getTotalBalance()));
+                calcBalance(chainId, input);
+                crossTxRelationInfoSet.add(new CrossTxRelationInfo(input, tx));
             }
         }
 
@@ -320,11 +322,11 @@ public class SyncService {
                     continue;
                 }
                 addressSet.add(output.getAddress());
-                if(nrc20CrossTransferBack && output.getAssetsId() != ApiContext.defaultAssetId) {
+                if (nrc20CrossTransferBack && output.getAssetsId() != ApiContext.defaultAssetId) {
                     txRelationInfoSet.add(new TxRelationInfo(output, tx, BigInteger.ZERO));
                 } else {
                     AccountLedgerInfo ledgerInfo = calcBalance(chainId, output);
-                    txRelationInfoSet.add(new TxRelationInfo(output, tx, ledgerInfo.getTotalBalance()));
+                    crossTxRelationInfoSet.add(new CrossTxRelationInfo(output, tx));
                 }
             }
         }
@@ -345,7 +347,7 @@ public class SyncService {
                     continue;
                 }
                 addressSet.add(input.getAddress());
-                if(input.getAssetsId() == ApiContext.defaultAssetId) {
+                if (input.getAssetsId() == ApiContext.defaultAssetId) {
                     AccountLedgerInfo ledgerInfo = calcBalance(chainId, input);
                     txRelationInfoSet.add(new TxRelationInfo(input, tx, ledgerInfo.getTotalBalance()));
                 } else {
@@ -377,7 +379,7 @@ public class SyncService {
     }
 
     private void processCrossTransferTxForNRC20TransferBack(int chainId, TransactionInfo tx) {
-        if(tx.getTxData() != null && tx.getTxData() instanceof ContractCallInfo) {
+        if (tx.getTxData() != null && tx.getTxData() instanceof ContractCallInfo) {
             ContractCallInfo callInfo = (ContractCallInfo) tx.getTxData();
             ContractInfo contractInfo = queryContractInfo(chainId, callInfo.getContractAddress());
             contractInfo.setTxCount(contractInfo.getTxCount() + 1);
@@ -711,8 +713,9 @@ public class SyncService {
                 txRelationInfoSet.add(new TxRelationInfo(to, tx, ledgerInfo.getTotalBalance()));
             }
         }
-
-        chainInfoList.add((ChainInfo) tx.getTxData());
+        ChainInfo chainInfo =(ChainInfo) tx.getTxData();
+        chainInfo.setNew(true);
+        chainInfoList.add(chainInfo);
     }
 
     private void processDestroyChainTx(int chainId, TransactionInfo tx) {
@@ -757,6 +760,7 @@ public class SyncService {
         AssetInfo assetInfo = (AssetInfo) tx.getTxData();
         ChainInfo chainInfo = chainService.getChainInfo(chainId);
         if (chainInfo != null) {
+            chainInfo.setNew(false);
             chainInfo.getAssets().add(assetInfo);
             chainInfoList.add(chainInfo);
         }
@@ -924,6 +928,8 @@ public class SyncService {
 //        time2 = System.currentTimeMillis();
 //        System.out.println("-----------saveTxRelationList, use: " + (time2 - time1) );
 //        time1 = System.currentTimeMillis();
+        //存储跨链交易和地址关系记录
+        txService.saveCrossTxRelationList(chainId, crossTxRelationInfoSet);
 
         //存储别名记录
         aliasService.saveAliasList(chainId, aliasInfoList);
@@ -1086,6 +1092,7 @@ public class SyncService {
         accountLedgerInfoMap.clear();
         agentInfoList.clear();
         txRelationInfoSet.clear();
+        crossTxRelationInfoSet.clear();
         aliasInfoList.clear();
         depositInfoList.clear();
         punishLogList.clear();

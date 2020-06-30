@@ -823,12 +823,14 @@ public class AnalysisHandler {
             io.nuls.api.model.entity.v5.TxChain txChain = new io.nuls.api.model.entity.v5.TxChain();
             txChain.parse(tx.getTxData(), 0);
             chainInfo.setChainId(txChain.getDefaultAsset().getChainId());
+            chainInfo.setChainName(txChain.getName());
 
             AssetInfo assetInfo = new AssetInfo();
             assetInfo.setAssetId(txChain.getDefaultAsset().getAssetId());
             assetInfo.setChainId(txChain.getDefaultAsset().getChainId());
             assetInfo.setSymbol(txChain.getDefaultAsset().getSymbol());
             assetInfo.setInitCoins(txChain.getDefaultAsset().getInitNumber());
+            assetInfo.setDecimals(txChain.getDefaultAsset().getDecimalPlaces());
             chainInfo.setDefaultAsset(assetInfo);
             chainInfo.getAssets().add(assetInfo);
         }
