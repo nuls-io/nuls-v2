@@ -4,7 +4,9 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.InsertManyOptions;
 import com.mongodb.client.model.Sorts;
+import io.nuls.api.ApiContext;
 import io.nuls.api.analysis.WalletRpcHandler;
+import io.nuls.api.constant.DBTableConstant;
 import io.nuls.api.db.TransactionService;
 import io.nuls.api.model.po.*;
 import io.nuls.api.model.po.mini.MiniTransactionInfo;
@@ -221,6 +223,29 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         return pageInfo;
     }
 
+    @Override
+    public PageInfo<CrossTxRelationInfo> getCrossTxList(int chainId, int pageIndex, int pageSize, long startTime, long endTime) {
+        Bson filter = null;
+        if (startTime > 0 && endTime > 0) {
+            filter = Filters.and(Filters.eq("chainId", chainId), Filters.gte("createTime", startTime), Filters.lte("createTime", endTime));
+        } else if (startTime > 0) {
+            filter = Filters.and(Filters.eq("chainId", chainId), Filters.gte("createTime", startTime));
+        } else if (endTime > 0) {
+            filter = Filters.and(Filters.eq("chainId", chainId), Filters.lte("createTime", endTime));
+        } else {
+            filter = Filters.eq("chainId", chainId);
+        }
+        long totalCount = mongoDBService.getCount(CROSS_TX_RELATION_TABLE + chainId, filter);
+        List<Document> docList = this.mongoDBService.pageQuery(CROSS_TX_RELATION_TABLE + ApiContext.defaultChainId, filter, Sorts.descending("createTime"), pageIndex, pageSize);
+        List<CrossTxRelationInfo> txList = new ArrayList<>();
+        for (Document document : docList) {
+            txList.add(CrossTxRelationInfo.toInfo(document));
+        }
+
+        PageInfo<CrossTxRelationInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, totalCount, txList);
+        return pageInfo;
+    }
+
 
     public void saveCrossTxRelationList(int chainId, Set<CrossTxRelationInfo> relationInfos) {
         if (relationInfos.isEmpty()) {
@@ -234,7 +259,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
 
         InsertManyOptions options = new InsertManyOptions();
         options.ordered(false);
-        mongoDBService.insertMany(CROSS_TX_RELATION_TABLE + chainId , documentList, options);
+        mongoDBService.insertMany(CROSS_TX_RELATION_TABLE + chainId, documentList, options);
 //        List<Document> saveList = new ArrayList();
 //        for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
 //            saveList.clear();

@@ -20,6 +20,8 @@ public class CrossTxRelationInfo {
 
     private int assetId;
 
+    private int decimal;
+
     private String symbol;
 
     private BigInteger values;
@@ -33,12 +35,7 @@ public class CrossTxRelationInfo {
 
     }
 
-    public CrossTxRelationInfo(String address, String txHash) {
-        this.address = address;
-        this.txHash = txHash;
-    }
-
-    public CrossTxRelationInfo(CoinToInfo output, TransactionInfo tx) {
+    public CrossTxRelationInfo(CoinToInfo output, TransactionInfo tx, int decimal) {
         this.address = output.getAddress();
         this.chainId = output.getChainId();
         this.assetId = output.getAssetsId();
@@ -47,9 +44,10 @@ public class CrossTxRelationInfo {
         this.txHash = tx.getHash();
         this.createTime = tx.getCreateTime();
         this.transferType = TRANSFER_TO_TYPE;
+        this.decimal = decimal;
     }
 
-    public CrossTxRelationInfo(CoinFromInfo input, TransactionInfo tx) {
+    public CrossTxRelationInfo(CoinFromInfo input, TransactionInfo tx, int decimal) {
         this.address = input.getAddress();
         this.chainId = input.getChainId();
         this.assetId = input.getAssetsId();
@@ -58,6 +56,7 @@ public class CrossTxRelationInfo {
         this.txHash = tx.getHash();
         this.createTime = tx.getCreateTime();
         this.transferType = TRANSFER_FROM_TYPE;
+        this.decimal = decimal;
     }
 
     public Document toDocument() {
@@ -160,4 +159,11 @@ public class CrossTxRelationInfo {
         this.symbol = symbol;
     }
 
+    public int getDecimal() {
+        return decimal;
+    }
+
+    public void setDecimal(int decimal) {
+        this.decimal = decimal;
+    }
 }

@@ -310,7 +310,9 @@ public class SyncService {
                 }
                 addressSet.add(input.getAddress());
                 calcBalance(chainId, input);
-                crossTxRelationInfoSet.add(new CrossTxRelationInfo(input, tx));
+
+                AssetInfo assetInfo = CacheManager.getRegisteredAsset(input.getAssetKey());
+                crossTxRelationInfoSet.add(new CrossTxRelationInfo(input, tx, assetInfo.getDecimals()));
             }
         }
 
@@ -326,7 +328,8 @@ public class SyncService {
                     txRelationInfoSet.add(new TxRelationInfo(output, tx, BigInteger.ZERO));
                 } else {
                     AccountLedgerInfo ledgerInfo = calcBalance(chainId, output);
-                    crossTxRelationInfoSet.add(new CrossTxRelationInfo(output, tx));
+                    AssetInfo assetInfo = CacheManager.getRegisteredAsset(output.getAssetKey());
+                    crossTxRelationInfoSet.add(new CrossTxRelationInfo(output, tx, assetInfo.getDecimals()));
                 }
             }
         }
@@ -713,7 +716,7 @@ public class SyncService {
                 txRelationInfoSet.add(new TxRelationInfo(to, tx, ledgerInfo.getTotalBalance()));
             }
         }
-        ChainInfo chainInfo =(ChainInfo) tx.getTxData();
+        ChainInfo chainInfo = (ChainInfo) tx.getTxData();
         chainInfo.setNew(true);
         chainInfoList.add(chainInfo);
     }
