@@ -68,6 +68,7 @@ public class MongoBlockServiceImpl implements BlockService {
 
     public void saveBLockHeaderInfo(int chainId, BlockHeaderInfo blockHeaderInfo) {
         Document document = DocumentTransferTool.toDocument(blockHeaderInfo, "height");
+        document.remove("mainVersion");
         mongoDBService.insertOne(BLOCK_HEADER_TABLE + chainId, document);
     }
 

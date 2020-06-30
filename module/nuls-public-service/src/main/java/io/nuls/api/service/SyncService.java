@@ -906,8 +906,8 @@ public class SyncService {
 
         long time1, time2;
 
-        SyncInfo syncInfo = chainService.saveNewSyncInfo(chainId, height, blockInfo.getHeader().getAgentVersion());
-        ApiContext.protocolVersion = syncInfo.getVersion();
+        SyncInfo syncInfo = chainService.saveNewSyncInfo(chainId, height, blockInfo.getHeader().getMainVersion());
+
         //存储区块头信息
         time1 = System.currentTimeMillis();
         blockService.saveBLockHeaderInfo(chainId, blockInfo.getHeader());
