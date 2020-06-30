@@ -171,7 +171,7 @@ public class TransactionController {
 
         }
         try {
-            endTime =  Long.parseLong(params.get(6).toString());
+            endTime = Long.parseLong(params.get(6).toString());
         } catch (Exception e) {
 
         }
@@ -389,7 +389,7 @@ public class TransactionController {
             if (result.isSuccess()) {
                 Transaction tx = new Transaction();
                 tx.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
-                TransactionInfo txInfo = AnalysisHandler.toTransaction(chainId, tx);
+                TransactionInfo txInfo = AnalysisHandler.toTransaction(chainId, tx, ApiContext.protocolVersion);
                 txService.saveUnConfirmTx(chainId, txInfo, txHex);
                 return RpcResult.success(result.getData());
             } else {
@@ -430,7 +430,7 @@ public class TransactionController {
             if (result.isSuccess()) {
                 Transaction tx = new Transaction();
                 tx.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
-                TransactionInfo txInfo = AnalysisHandler.toTransaction(chainId, tx);
+                TransactionInfo txInfo = AnalysisHandler.toTransaction(chainId, tx, ApiContext.protocolVersion);
                 txService.saveUnConfirmTx(chainId, txInfo, txHex);
                 return RpcResult.success(result.getData());
             } else {
@@ -471,12 +471,12 @@ public class TransactionController {
             return RpcResult.dataNotFound();
         }
         try {
-            Result result =  WalletRpcHandler.sendCrossTx(chainId, txHex);
+            Result result = WalletRpcHandler.sendCrossTx(chainId, txHex);
 
             if (result.isSuccess()) {
                 Transaction tx = new Transaction();
                 tx.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
-                TransactionInfo txInfo = AnalysisHandler.toTransaction(chainId, tx);
+                TransactionInfo txInfo = AnalysisHandler.toTransaction(chainId, tx, ApiContext.protocolVersion);
                 txService.saveUnConfirmTx(chainId, txInfo, txHex);
                 return RpcResult.success(result.getData());
             } else {
@@ -515,7 +515,7 @@ public class TransactionController {
             if (result.isSuccess()) {
                 Transaction tx = new Transaction();
                 tx.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
-                TransactionInfo txInfo = AnalysisHandler.toTransaction(chainId, tx);
+                TransactionInfo txInfo = AnalysisHandler.toTransaction(chainId, tx, ApiContext.protocolVersion);
                 txService.saveUnConfirmTx(chainId, txInfo, txHex);
                 return RpcResult.success(result.getData());
             } else {

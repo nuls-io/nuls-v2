@@ -42,6 +42,8 @@ public class ChainController {
     private StatisticalService statisticalService;
     @Autowired
     private AgentService agentService;
+    @Autowired
+    private ChainService chainService;
 
     @RpcMethod("getChainInfo")
     public RpcResult getChainInfo(List<Object> params) {
@@ -58,15 +60,18 @@ public class ChainController {
             return RpcResult.paramError("[chainId] is invalid");
         }
 
-        List<Map<String, Object>> chainInfoList = new ArrayList<>();
-        for (ChainInfo chainInfo : CacheManager.getChainInfoMap().values()) {
-            if (chainInfo.getChainId() != chainId) {
-                Map<String, Object> map = new HashMap<>();
-                map.put("chainId", chainInfo.getChainId());
-                map.put("chainName", chainInfo.getChainName());
-                chainInfoList.add(map);
-            }
-        }
+        List<ChainInfo> chainInfoList = chainService.getOtherChainInfoList(chainId);
+//
+//
+//        List<Map<String, Object>> chainInfoList = new ArrayList<>();
+//        for (ChainInfo chainInfo : CacheManager.getChainInfoMap().values()) {
+//            if (chainInfo.getChainId() != chainId) {
+//                Map<String, Object> map = new HashMap<>();
+//                map.put("chainId", chainInfo.getChainId());
+//                map.put("chainName", chainInfo.getChainName());
+//                chainInfoList.add(map);
+//            }
+//        }
         return RpcResult.success(chainInfoList);
 
     }

@@ -1064,6 +1064,9 @@ public class ContractResource extends BaseCmd {
                     continue;
                 }
                 ContractBaseTransaction tx1 = ContractUtil.convertContractTx(chainId, tx);
+                if (tx1 == null) {
+                    continue;
+                }
                 contractResultDto = this.makeContractResultDto(chainId, tx1, txHash);
                 if (contractResultDto == null) {
                     continue;

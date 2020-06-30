@@ -221,6 +221,41 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         return pageInfo;
     }
 
+
+    public void saveCrossTxRelationList(int chainId, Set<CrossTxRelationInfo> relationInfos) {
+        if (relationInfos.isEmpty()) {
+            return;
+        }
+        List<Document> documentList = new ArrayList<>();
+        for (CrossTxRelationInfo relationInfo : relationInfos) {
+            Document document = relationInfo.toDocument();
+            documentList.add(document);
+        }
+
+        InsertManyOptions options = new InsertManyOptions();
+        options.ordered(false);
+        mongoDBService.insertMany(CROSS_TX_RELATION_TABLE + chainId , documentList, options);
+//        List<Document> saveList = new ArrayList();
+//        for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
+//            saveList.clear();
+//            List<Document> documentList = relationMap.get("relation_" + i);
+//            if (documentList.size() == 0) {
+//                continue;
+//            }
+//            for (Document document : documentList) {
+//                saveList.add(document);
+//                if (saveList.size() == 1000) {
+//                    mongoDBService.insertMany(TX_RELATION_TABLE + chainId + "_" + i, saveList, options);
+//                    saveList.clear();
+//                }
+//            }
+//            if (saveList.size() != 0) {
+//                mongoDBService.insertMany(TX_RELATION_TABLE + chainId + "_" + i, saveList, options);
+//            }
+//        }
+    }
+
+
     @Override
     public List<TxHexInfo> getUnConfirmList(int chainId) {
         List<Document> docList = mongoDBService.query(TX_UNCONFIRM_TABLE + chainId);

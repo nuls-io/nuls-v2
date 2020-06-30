@@ -71,6 +71,8 @@ public class BlockHeaderInfo {
 
     private int agentVersion;
 
+    private int mainVersion;
+
     public void setByAgentInfo(AgentInfo agentInfo) {
         this.agentHash = agentInfo.getTxHash();
         this.agentId = agentInfo.getAgentId();
@@ -235,5 +237,13 @@ public class BlockHeaderInfo {
 
     public void setAgentVersion(int agentVersion) {
         this.agentVersion = agentVersion;
+    }
+
+    public int getMainVersion() {
+        return mainVersion;
+    }
+
+    public void setMainVersion(int mainVersion) {
+        this.mainVersion = mainVersion;
     }
 }
