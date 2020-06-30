@@ -11,6 +11,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -174,15 +175,23 @@ public class ConfigurationLoader {
     }
 
     public String getValue(String domain, String key) {
+        return getValueForOptional(domain,key).orElse(null);
+    }
+
+    public Optional<String> getValueForOptional(String domain, String key) {
         ConfigItem configItem = getConfigItem(domain, key);
         if(configItem == null){
-            return null;
+            return Optional.empty();
         }
-        return configItem.value;
+        return Optional.of(configItem.value);
     }
 
     public String getValue(String key) {
         return getValue(GLOBAL_DOMAIN, key);
+    }
+
+    public Optional<String> getValueForOptional(String key) {
+        return getValueForOptional(GLOBAL_DOMAIN, key);
     }
 
     public ConfigItem getConfigItemForGolbal(String key) {
