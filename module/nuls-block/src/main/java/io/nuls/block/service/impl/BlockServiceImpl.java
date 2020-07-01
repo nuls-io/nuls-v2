@@ -44,6 +44,7 @@ import io.nuls.core.basic.Result;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.core.annotation.Value;
 import io.nuls.core.core.config.ConfigurationLoader;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -76,6 +77,14 @@ import static io.nuls.block.constant.Constant.BLOCK_HEADER_INDEX;
  */
 @Component
 public class BlockServiceImpl implements BlockService {
+
+    /**
+     * 快照高度
+     * 如果配置了此参数，大于此高度的区块将不会同步，节点的高度将会停止在指定高度
+     */
+    @Value("snapshotHeight")
+    private Long snapshotHeight;
+
     @Autowired
     private ConfigurationLoader configurationLoader;
     @Autowired
@@ -291,6 +300,10 @@ public class BlockServiceImpl implements BlockService {
         NulsLogger logger = context.getLogger();
         BlockHeader header = block.getHeader();
         long height = header.getHeight();
+        if(snapshotHeight != null && height > snapshotHeight){
+            Log.info("到达快照高度，放弃保存区块");
+            return false;
+        }
         NulsHash hash = header.getHash();
         StampedLock lock = context.getLock();
         long l = 0;
