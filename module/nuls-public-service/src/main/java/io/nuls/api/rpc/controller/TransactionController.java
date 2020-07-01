@@ -526,4 +526,20 @@ public class TransactionController {
             return RpcResult.failed(RpcErrorCode.TX_PARSE_ERROR);
         }
     }
+
+    @RpcMethod("getCrossTxList")
+    public RpcResult getCrossTxList(List<Object> params) {
+        if (!ApiContext.isReady) {
+            return RpcResult.chainNotReady();
+        }
+        VerifyUtils.verifyParams(params, 1);
+        int chainId;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+
+        return null;
+    }
 }

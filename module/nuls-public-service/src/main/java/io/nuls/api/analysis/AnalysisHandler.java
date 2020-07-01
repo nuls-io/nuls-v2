@@ -58,12 +58,14 @@ public class AnalysisHandler {
         //提取智能合约相关交易的hash，查询合约执行结果
         //Extract the hash of smart contract related transactions and query the contract execution results
         List<String> contactHashList = new ArrayList<>();
-        for (Transaction tx : block.getTxs()) {
-            if (tx.getType() == TxType.CREATE_CONTRACT ||
-                    tx.getType() == TxType.CALL_CONTRACT ||
-                    tx.getType() == TxType.DELETE_CONTRACT ||
-                    tx.getType() == TxType.CROSS_CHAIN) {
-                contactHashList.add(tx.getHash().toHex());
+        if(ApiContext.isRunSmartContract) {
+            for (Transaction tx : block.getTxs()) {
+                if (tx.getType() == TxType.CREATE_CONTRACT ||
+                        tx.getType() == TxType.CALL_CONTRACT ||
+                        tx.getType() == TxType.DELETE_CONTRACT ||
+                        tx.getType() == TxType.CROSS_CHAIN) {
+                    contactHashList.add(tx.getHash().toHex());
+                }
             }
         }
 
@@ -337,7 +339,7 @@ public class AnalysisHandler {
         } else if (tx.getType() == TxType.REGISTER_CHAIN_AND_ASSET || tx.getType() == TxType.DESTROY_CHAIN_AND_ASSET) {
             return toChainInfo(tx, version);
         } else if (tx.getType() == TxType.ADD_ASSET_TO_CHAIN || tx.getType() == TxType.REMOVE_ASSET_FROM_CHAIN) {
-            return toAssetInfo(tx);
+            return toAssetInfo(tx, version);
         }
         return null;
     }
@@ -840,9 +842,9 @@ public class AnalysisHandler {
         return chainInfo;
     }
 
-    private static AssetInfo toAssetInfo(Transaction tx) throws NulsException {
+    private static AssetInfo toAssetInfo(Transaction tx, int version) throws NulsException {
         AssetInfo assetInfo = new AssetInfo();
-        if (ApiContext.protocolVersion >= 4) {
+        if (version >= 4) {
             io.nuls.api.model.entity.v4.TxAsset txAsset = new io.nuls.api.model.entity.v4.TxAsset();
             txAsset.parse(new NulsByteBuffer(tx.getTxData()));
 
