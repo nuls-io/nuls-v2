@@ -532,14 +532,38 @@ public class TransactionController {
         if (!ApiContext.isReady) {
             return RpcResult.chainNotReady();
         }
-        VerifyUtils.verifyParams(params, 1);
-        int chainId;
+        VerifyUtils.verifyParams(params, 5);
+        int chainId, pageNumber, pageSize;
+        long startTime = 0, endTime = 0;
         try {
             chainId = (int) params.get(0);
         } catch (Exception e) {
             return RpcResult.paramError("[chainId] is inValid");
         }
+        try {
+            pageNumber = (int) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[pageNumber] is inValid");
+        }
+        try {
+            pageSize = (int) params.get(2);
+        } catch (Exception e) {
+            return RpcResult.paramError("[pageSize] is inValid");
+        }
+        try {
+            startTime = Long.parseLong(params.get(3).toString());
+        } catch (Exception e) {
 
-        return null;
+        }
+        try {
+            endTime = Long.parseLong(params.get(4).toString());
+        } catch (Exception e) {
+
+        }
+        PageInfo<CrossTxRelationInfo> pageInfo;
+        pageInfo = txService.getCrossTxList(chainId, pageNumber, pageSize, startTime, endTime);
+        RpcResult rpcResult = new RpcResult();
+        rpcResult.setResult(pageInfo);
+        return rpcResult;
     }
 }
