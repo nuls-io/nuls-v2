@@ -16,6 +16,8 @@ public class CrossTxRelationInfo {
 
     private long createTime;
 
+    private long height;
+
     private int chainId;
 
     private int assetId;
@@ -39,6 +41,7 @@ public class CrossTxRelationInfo {
         this.address = output.getAddress();
         this.chainId = output.getChainId();
         this.assetId = output.getAssetsId();
+        this.height = tx.getHeight();
         this.symbol = output.getSymbol();
         this.values = output.getAmount();
         this.txHash = tx.getHash();
@@ -51,6 +54,7 @@ public class CrossTxRelationInfo {
         this.address = input.getAddress();
         this.chainId = input.getChainId();
         this.assetId = input.getAssetsId();
+        this.height = tx.getHeight();
         this.symbol = input.getSymbol();
         this.values = input.getAmount();
         this.txHash = tx.getHash();
@@ -62,7 +66,7 @@ public class CrossTxRelationInfo {
     public Document toDocument() {
         Document document = new Document();
         document.append("address", address).append("txHash", txHash).append("createTime", createTime)
-                .append("chainId", chainId).append("assetId", assetId).append("symbol", symbol)
+                .append("chainId", chainId).append("assetId", assetId).append("symbol", symbol).append("height", height)
                 .append("values", values.toString()).append("transferType", transferType);
         return document;
     }
@@ -78,6 +82,7 @@ public class CrossTxRelationInfo {
             relationInfo.setSymbol(document.getString("symbol"));
             relationInfo.setTransferType(document.getInteger("transferType"));
             relationInfo.setValues(new BigInteger(document.getString("values")));
+            relationInfo.setHeight(document.getLong("height"));
             return relationInfo;
         } catch (Exception e) {
             e.printStackTrace();
@@ -165,5 +170,13 @@ public class CrossTxRelationInfo {
 
     public void setDecimal(int decimal) {
         this.decimal = decimal;
+    }
+
+    public long getHeight() {
+        return height;
+    }
+
+    public void setHeight(long height) {
+        this.height = height;
     }
 }
