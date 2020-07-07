@@ -26,11 +26,15 @@ public class Config implements ModuleConfig {
     @Value.NotNull
     private Integer assetsId;
 
+    private String chainName;
+
     private String language;
 
     private String addressPrefix;
 
     private String symbol;
+
+    private int decimals;
 
     public String getAddressPrefix() {
         return addressPrefix;
@@ -90,5 +94,21 @@ public class Config implements ModuleConfig {
 
     public void setProviderType(String providerType) {
         this.providerType = providerType;
+    }
+
+    public String getChainName() {
+        return chainName;
+    }
+
+    public void setChainName(String chainName) {
+        this.chainName = chainName;
+    }
+
+    public int getDecimals() {
+        return decimals;
+    }
+
+    public void setDecimals(int decimals) {
+        this.decimals = decimals;
     }
 }

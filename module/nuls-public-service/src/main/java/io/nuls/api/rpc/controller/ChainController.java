@@ -73,8 +73,27 @@ public class ChainController {
 //            }
 //        }
         return RpcResult.success(chainInfoList);
-
     }
+
+    @RpcMethod("getOtherChainInfo")
+    public RpcResult getOtherChainInfo(List<Object> params) {
+        VerifyUtils.verifyParams(params, 1);
+        int chainId;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is invalid");
+        }
+//        if(chainId == ApiContext.defaultChainId) {
+//
+//        }else {
+//
+//        }
+
+        ChainInfo chainInfo = chainService.getChainInfo(chainId);
+        return RpcResult.success(chainInfo);
+    }
+
 
     @RpcMethod("getInfo")
     public RpcResult getInfo(List<Object> params) {
