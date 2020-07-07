@@ -23,6 +23,8 @@ mainAssetId=1
 #主网主资产符号
 mainSymbol=NULS
 blackHolePublicKey=000000000000000000000000000000000000000000000000000000000000000000
+packageVersion=%PACKAGE_VERSION%
+
 
 [network]
 port=18001

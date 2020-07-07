@@ -1,8 +1,10 @@
 #!/bin/bash
 cd `dirname $0`
 APP_NAME="%APP_NAME%"
+VERSION="%VERSION%"; # %Version 注入
+JAR_FILE="`pwd`/${APP_NAME}-${VERSION}.jar"
 KILL_WAIT_COUNT=120
-APP_PID=`ps -ef|grep -w "name=${APP_NAME} "|grep -v grep|awk '{print $2}'`
+APP_PID=`ps -ef|grep -w "${JAR_FILE}"|grep -v grep|awk '{print $2}'`
 APP=0
 echoRed() { echo $'\e[0;31m'$1$'\e[0m'; }
 echoGreen() { echo $'\e[0;32m'$1$'\e[0m'; }
@@ -36,7 +38,7 @@ stop(){
     kill -9 $pid > /dev/null 2>&1
 }
 
-APP=`ps -ef|grep -w "name=${APP_NAME} "|grep -v grep|wc -l`
+APP=`ps -ef|grep -w "${JAR_FILE}"|grep -v grep|wc -l`
 if [ $APP -eq 1 ]; then
     PID_EXIST=`ps -f -p ${APP_PID} | grep java`
     if [ ! -z "$PID_EXIST" ]; then

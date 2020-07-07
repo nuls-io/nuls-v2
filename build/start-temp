@@ -131,6 +131,9 @@ if [ ! -d ${_logPath} ]; then
 fi
 logpath="-Dlog.path=`get_fullpath ${_logPath}`/$APP_NAME";
 logLevel="-Dlog.level=$_logLevel";
+if [ -n "${LOG_LEVEL}" ]; then  #for env
+   logLevel="-Dlog.level=$LOG_LEVEL";
+fi
 cd $MODULE_PATH
 
 checkLogDir(){
@@ -140,8 +143,8 @@ checkLogDir(){
 }
 
 checkIsRunning(){
-    if [ ! -z "`ps -ef|grep -w "name=${APP_NAME} "|grep -v grep|awk '{print $2}'`" ]; then
-        pid=`ps -ef|grep -w "name=${APP_NAME} "|grep -v grep|awk '{print $2}'`
+    if [ ! -z "`ps -ef|grep -w "${JAR_FILE} "|grep -v grep|awk '{print $2}'`" ]; then
+        pid=`ps -ef|grep -w "${JAR_FILE} "|grep -v grep|awk '{print $2}'`
 
         if [ -n "${RESTART}" ];
         then

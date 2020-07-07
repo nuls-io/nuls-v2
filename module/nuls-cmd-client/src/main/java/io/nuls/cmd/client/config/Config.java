@@ -33,6 +33,7 @@ public class Config implements InitializingBean {
     private String addressPrefix;
     private String language;
 
+    @Value("packageVersion")
     private String clientVersion;
 
     public String getAddressPrefix() {

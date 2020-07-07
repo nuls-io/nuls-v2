@@ -61,6 +61,9 @@ public class AccountController {
     @Autowired
     private AliasService aliasService;
 
+    @Autowired
+    TokenService tokenService;
+
     @RpcMethod("getAccountList")
     public RpcResult getAccountList(List<Object> params) {
         VerifyUtils.verifyParams(params, 3);
@@ -617,4 +620,28 @@ public class AccountController {
         Result<List> result = WalletRpcHandler.getAllAddressPrefix();
         return RpcResult.success(result.getData());
     }
+
+    @RpcMethod("getNRC20Snapshot")
+    public RpcResult getNRC20Snapshot(List<Object> params){
+        VerifyUtils.verifyParams(params, 2);
+        int chainId;
+        String address;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        try {
+            address = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[address] is inValid");
+        }
+        if (!AddressTool.validAddress(chainId, address)) {
+            return RpcResult.paramError("[address] is inValid");
+        }
+        PageInfo<AccountTokenInfo> pageInfo = tokenService.getContractTokens(chainId,address,1,Integer.MAX_VALUE);
+        return RpcResult.success(pageInfo.getList().stream().map(d-> Map.of("address",d.getAddress(),"balance",d.getBalance())).collect(Collectors.toList()));
+    }
+
+
 }
