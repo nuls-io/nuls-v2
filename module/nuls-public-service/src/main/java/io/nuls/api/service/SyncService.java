@@ -720,6 +720,8 @@ public class SyncService {
         ChainInfo chainInfo = (ChainInfo) tx.getTxData();
         chainInfo.setNew(true);
         chainInfoList.add(chainInfo);
+        CacheManager.getChainInfoMap().put(chainInfo.getChainId(), chainInfo);
+        CacheManager.getAssetInfoMap().put(chainInfo.getDefaultAsset().getKey(), chainInfo.getDefaultAsset());
     }
 
     private void processDestroyChainTx(int chainId, TransactionInfo tx) {
@@ -768,6 +770,7 @@ public class SyncService {
             chainInfo.getAssets().add(assetInfo);
             chainInfoList.add(chainInfo);
         }
+        CacheManager.getAssetInfoMap().put(assetInfo.getKey(), assetInfo);
     }
 
     private void processCancelAssetTx(int chainId, TransactionInfo tx) {

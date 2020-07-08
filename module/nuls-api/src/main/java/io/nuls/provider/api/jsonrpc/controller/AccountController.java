@@ -43,6 +43,7 @@ import io.nuls.provider.model.jsonrpc.RpcResult;
 import io.nuls.provider.model.jsonrpc.RpcResultError;
 import io.nuls.provider.rpctools.AccountTools;
 import io.nuls.provider.rpctools.LegderTools;
+import io.nuls.provider.rpctools.vo.Account;
 import io.nuls.provider.rpctools.vo.AccountBalance;
 import io.nuls.provider.utils.Log;
 import io.nuls.provider.utils.ResultUtil;
@@ -56,6 +57,7 @@ import io.nuls.v2.model.dto.AliasDto;
 import io.nuls.v2.model.dto.MultiSignAliasDto;
 import io.nuls.v2.model.dto.SignDto;
 import io.nuls.v2.util.NulsSDKTool;
+import org.checkerframework.checker.units.qual.A;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -960,4 +962,18 @@ public class AccountController {
     }
 
 
+    @RpcMethod("getAddressList")
+    @ApiOperation(description = "查询钱包内创建的账户列表", order = 161)
+    public RpcResult getAddressList(List<Object> params) {
+        Result result = accountService.getAccountList();
+        if (result.isSuccess()) {
+            List<String> addressList = new ArrayList<>();
+            for (Object o : result.getList()) {
+                AccountInfo acc = (AccountInfo) o;
+                addressList.add(acc.getAddress());
+            }
+            result.setList(addressList);
+        }
+        return ResultUtil.getJsonRpcResult(result);
+    }
 }
