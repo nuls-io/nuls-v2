@@ -21,11 +21,14 @@
 package io.nuls.api;
 
 import com.fasterxml.jackson.core.JsonParser;
+import com.google.common.cache.Cache;
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.constant.config.ApiConfig;
 import io.nuls.api.db.mongo.MongoChainServiceImpl;
 import io.nuls.api.db.mongo.MongoDBTableServiceImpl;
+import io.nuls.api.manager.CacheManager;
 import io.nuls.api.manager.ScheduleManager;
+import io.nuls.api.model.po.AssetInfo;
 import io.nuls.api.model.po.ChainInfo;
 import io.nuls.api.model.po.SyncInfo;
 import io.nuls.api.rpc.jsonRpc.JsonRpcServer;
@@ -195,6 +198,7 @@ public class PublicServiceBootstrap extends RpcModule {
             LoggerUtil.commonLog.error(e);
             System.exit(-1);
         }
+        ApiContext.isReady = true;
         return RpcModuleState.Running;
     }
 
@@ -215,6 +219,16 @@ public class PublicServiceBootstrap extends RpcModule {
         SyncInfo syncInfo = chainService.getSyncInfo(ApiContext.defaultChainId);
         if (syncInfo != null) {
             ApiContext.protocolVersion = syncInfo.getVersion();
+        }
+
+        List<ChainInfo> chainInfoList = chainService.getChainInfoList();
+        if (chainInfoList != null) {
+            for (ChainInfo chainInfo : chainInfoList) {
+                CacheManager.getChainInfoMap().put(chainInfo.getChainId(), chainInfo);
+                for (AssetInfo assetInfo : chainInfo.getAssets()) {
+                    CacheManager.getAssetInfoMap().put(assetInfo.getKey(), assetInfo);
+                }
+            }
         }
     }
 

@@ -16,6 +16,10 @@ public interface TransactionService {
 
     PageInfo<MiniTransactionInfo> getTxList(int chainId, int pageIndex, int pageSize, int type, boolean isHidden, long startTime, long endTime);
 
+    PageInfo<CrossTxRelationInfo> getCrossTxList(int chainId, int pageIndex, int pageSize, long startTime, long endTime);
+
+    void saveCrossTxRelationList(int chainId, Set<CrossTxRelationInfo> relationInfos);
+
     List<TxHexInfo> getUnConfirmList(int chainId);
 
     void deleteTxs(int chainId);

@@ -27,9 +27,9 @@ public class ScheduleManager {
 //            executorService.scheduleAtFixedRate(new UnConfirmTxTask(apiCache.getChainInfo().getChainId()), 1, 10, TimeUnit.MINUTES);
 //        }
 
-        ScheduledExecutorService executorService = Executors.newScheduledThreadPool(6);
+        ScheduledExecutorService executorService = Executors.newScheduledThreadPool(7);
         executorService.scheduleAtFixedRate(new DeleteTxsTask(ApiContext.defaultChainId), 2, 60, TimeUnit.SECONDS);
-        executorService.scheduleAtFixedRate(new QueryChainInfoTask(ApiContext.defaultChainId), 2, 60, TimeUnit.SECONDS);
+//        executorService.scheduleAtFixedRate(new QueryChainInfoTask(ApiContext.defaultChainId), 2, 60, TimeUnit.SECONDS);
         executorService.scheduleAtFixedRate(new SyncBlockTask(ApiContext.defaultChainId), 5, 10, TimeUnit.SECONDS);
         executorService.scheduleAtFixedRate(new StatisticalNulsTask(ApiContext.defaultChainId), 0, 20, TimeUnit.MINUTES);
         executorService.scheduleAtFixedRate(new StatisticalTask(ApiContext.defaultChainId), 1, 60, TimeUnit.MINUTES);

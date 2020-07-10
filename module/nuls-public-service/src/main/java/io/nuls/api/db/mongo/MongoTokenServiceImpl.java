@@ -8,6 +8,7 @@ import io.nuls.api.model.po.TokenTransfer;
 import io.nuls.api.utils.DocumentTransferTool;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.model.StringUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -42,6 +43,7 @@ public class MongoTokenServiceImpl implements TokenService {
         List<WriteModel<Document>> modelList = new ArrayList<>();
         for (AccountTokenInfo tokenInfo : accountTokenInfos.values()) {
             Document document = DocumentTransferTool.toDocument(tokenInfo, "key");
+            document.put("balance", BigIntegerUtils.bigIntegerToString(tokenInfo.getBalance(), 32));
             if (tokenInfo.isNew()) {
                 modelList.add(new InsertOneModel(document));
             } else {

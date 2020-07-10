@@ -139,6 +139,8 @@ public class MongoDBTableServiceImpl implements DBTableService {
         mongoDBService.createIndex(DBTableConstant.TOKEN_TRANSFER_TABLE + chainId, Indexes.descending("time"));
         mongoDBService.createIndex(DBTableConstant.TOKEN_TRANSFER_TABLE + chainId, Indexes.descending("contractAddress","fromAddress"));
         mongoDBService.createIndex(DBTableConstant.TOKEN_TRANSFER_TABLE + chainId, Indexes.descending("contractAddress","toAddress"));
+        //跨链交易表索引
+        mongoDBService.createIndex(DBTableConstant.CROSS_TX_RELATION_TABLE + chainId, Indexes.ascending("address"));
     }
 
 }

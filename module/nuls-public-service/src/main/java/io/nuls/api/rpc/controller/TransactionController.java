@@ -171,7 +171,7 @@ public class TransactionController {
 
         }
         try {
-            endTime =  Long.parseLong(params.get(6).toString());
+            endTime = Long.parseLong(params.get(6).toString());
         } catch (Exception e) {
 
         }
@@ -389,7 +389,7 @@ public class TransactionController {
             if (result.isSuccess()) {
                 Transaction tx = new Transaction();
                 tx.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
-                TransactionInfo txInfo = AnalysisHandler.toTransaction(chainId, tx);
+                TransactionInfo txInfo = AnalysisHandler.toTransaction(chainId, tx, ApiContext.protocolVersion);
                 txService.saveUnConfirmTx(chainId, txInfo, txHex);
                 return RpcResult.success(result.getData());
             } else {
@@ -430,7 +430,7 @@ public class TransactionController {
             if (result.isSuccess()) {
                 Transaction tx = new Transaction();
                 tx.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
-                TransactionInfo txInfo = AnalysisHandler.toTransaction(chainId, tx);
+                TransactionInfo txInfo = AnalysisHandler.toTransaction(chainId, tx, ApiContext.protocolVersion);
                 txService.saveUnConfirmTx(chainId, txInfo, txHex);
                 return RpcResult.success(result.getData());
             } else {
@@ -471,12 +471,12 @@ public class TransactionController {
             return RpcResult.dataNotFound();
         }
         try {
-            Result result =  WalletRpcHandler.sendCrossTx(chainId, txHex);
+            Result result = WalletRpcHandler.sendCrossTx(chainId, txHex);
 
             if (result.isSuccess()) {
                 Transaction tx = new Transaction();
                 tx.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
-                TransactionInfo txInfo = AnalysisHandler.toTransaction(chainId, tx);
+                TransactionInfo txInfo = AnalysisHandler.toTransaction(chainId, tx, ApiContext.protocolVersion);
                 txService.saveUnConfirmTx(chainId, txInfo, txHex);
                 return RpcResult.success(result.getData());
             } else {
@@ -515,7 +515,7 @@ public class TransactionController {
             if (result.isSuccess()) {
                 Transaction tx = new Transaction();
                 tx.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
-                TransactionInfo txInfo = AnalysisHandler.toTransaction(chainId, tx);
+                TransactionInfo txInfo = AnalysisHandler.toTransaction(chainId, tx, ApiContext.protocolVersion);
                 txService.saveUnConfirmTx(chainId, txInfo, txHex);
                 return RpcResult.success(result.getData());
             } else {
@@ -525,5 +525,45 @@ public class TransactionController {
             LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.TX_PARSE_ERROR);
         }
+    }
+
+    @RpcMethod("getCrossTxList")
+    public RpcResult getCrossTxList(List<Object> params) {
+        if (!ApiContext.isReady) {
+            return RpcResult.chainNotReady();
+        }
+        VerifyUtils.verifyParams(params, 5);
+        int chainId, pageNumber, pageSize;
+        long startTime = 0, endTime = 0;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        try {
+            pageNumber = (int) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[pageNumber] is inValid");
+        }
+        try {
+            pageSize = (int) params.get(2);
+        } catch (Exception e) {
+            return RpcResult.paramError("[pageSize] is inValid");
+        }
+        try {
+            startTime = Long.parseLong(params.get(3).toString());
+        } catch (Exception e) {
+
+        }
+        try {
+            endTime = Long.parseLong(params.get(4).toString());
+        } catch (Exception e) {
+
+        }
+        PageInfo<CrossTxRelationInfo> pageInfo;
+        pageInfo = txService.getCrossTxList(chainId, pageNumber, pageSize, startTime, endTime);
+        RpcResult rpcResult = new RpcResult();
+        rpcResult.setResult(pageInfo);
+        return rpcResult;
     }
 }

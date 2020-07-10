@@ -17,6 +17,7 @@ import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.BigIntegerUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.checkerframework.checker.units.qual.A;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -168,27 +169,27 @@ public class MongoAccountServiceImpl implements AccountService {
         return pageInfo;
     }
 
-    public PageInfo<TxRelationInfo> getAcctTxs(int chainId, String address, int pageIndex, int pageSize, int type, long startTime, long endTime) {
-        Bson filter;
-        Bson addressFilter = Filters.eq("address", address);
+    public PageInfo<TxRelationInfo> getAcctTxs(int chainId, int assetChainId, int assetId,String address,
+                                               int type, long startTime, long endTime, int pageIndex, int pageSize) {
 
-        if (type > 0 && startTime > 0 && endTime > 0) {
-            filter = Filters.and(addressFilter, Filters.eq("type", type), Filters.gte("createTime", startTime), Filters.lte("createTime", endTime));
-        } else if (type > 0 && startTime > 0) {
-            filter = Filters.and(addressFilter, Filters.eq("type", type), Filters.gte("createTime", startTime));
-        } else if (type > 0 && endTime > 0) {
-            filter = Filters.and(addressFilter, Filters.eq("type", type), Filters.lte("createTime", endTime));
-        } else if (startTime > 0 && endTime > 0) {
-            filter = Filters.and(addressFilter, Filters.gte("createTime", startTime), Filters.lte("createTime", endTime));
-        } else if (startTime > 0) {
-            filter = Filters.and(addressFilter, Filters.gte("createTime", startTime));
-        } else if (endTime > 0) {
-            filter = Filters.and(addressFilter, Filters.lte("createTime", endTime));
-        } else if (type > 0) {
-            filter = Filters.and(addressFilter, Filters.eq("type", type));
-        } else {
-            filter = addressFilter;
+        List<Bson> filters = new ArrayList<>();
+        Bson addressFilter = Filters.eq("address", address);
+        filters.add(addressFilter);
+        if (type > 0) {
+            filters.add(Filters.eq("type", type));
         }
+        if (assetChainId > 0 && assetId > 0) {
+            filters.add(Filters.eq("chainId", assetChainId));
+            filters.add(Filters.eq("assetId", assetId));
+        }
+        if (startTime > 0) {
+            filters.add(Filters.gte("createTime", startTime));
+        }
+        if (endTime > 0) {
+            filters.add(Filters.lte("createTime", endTime));
+        }
+
+        Bson filter = Filters.and(filters);
         int start = (pageIndex - 1) * pageSize;
         int end = pageIndex * pageSize;
         int index = DBUtil.getShardNumber(address);

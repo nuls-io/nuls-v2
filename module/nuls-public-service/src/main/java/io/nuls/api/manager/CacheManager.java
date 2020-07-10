@@ -37,6 +37,9 @@ public class CacheManager {
         ApiCache apiCache = new ApiCache();
         apiCache.setChainInfo(chainInfo);
         apiCache.setConfigInfo(configInfo);
+        chainInfoMap.put(chainInfo.getChainId(), chainInfo);
+        assetInfoMap.put(chainInfo.getDefaultAsset().getKey(), chainInfo.getDefaultAsset());
+
         CoinContextInfo contextInfo = new CoinContextInfo();
         apiCache.setCoinContextInfo(contextInfo);
         apiCacheMap.put(chainInfo.getChainId(), apiCache);

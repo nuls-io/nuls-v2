@@ -47,6 +47,19 @@ public class MongoChainServiceImpl implements ChainService {
         return chainList;
     }
 
+    public List<ChainInfo> getOtherChainInfoList(int chainId) {
+        Bson filter = Filters.ne("_id", chainId);
+        List<Document> documentList = mongoDBService.query(CHAIN_INFO_TABLE, filter);
+        if (documentList.isEmpty()) {
+            return null;
+        }
+        List<ChainInfo> chainList = new ArrayList<>();
+        for (Document document : documentList) {
+            chainList.add(ChainInfo.toInfo(document));
+        }
+        return chainList;
+    }
+
     public void addChainInfo(ChainInfo chainInfo) {
         if (getChainInfo(chainInfo.getChainId()) == null) {
             Document document = chainInfo.toDocument();
