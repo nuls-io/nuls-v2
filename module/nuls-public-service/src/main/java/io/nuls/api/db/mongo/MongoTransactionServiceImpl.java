@@ -224,19 +224,19 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
     }
 
     @Override
-    public PageInfo<CrossTxRelationInfo> getCrossTxList(int chainId, int pageIndex, int pageSize, long startTime, long endTime) {
+    public PageInfo<CrossTxRelationInfo> getCrossTxList(int chainId, int crossChainId, int pageIndex, int pageSize, long startTime, long endTime) {
         Bson filter = null;
         if (startTime > 0 && endTime > 0) {
-            filter = Filters.and(Filters.eq("chainId", chainId), Filters.gte("createTime", startTime), Filters.lte("createTime", endTime));
+            filter = Filters.and(Filters.eq("chainId", crossChainId), Filters.gte("createTime", startTime), Filters.lte("createTime", endTime));
         } else if (startTime > 0) {
-            filter = Filters.and(Filters.eq("chainId", chainId), Filters.gte("createTime", startTime));
+            filter = Filters.and(Filters.eq("chainId", crossChainId), Filters.gte("createTime", startTime));
         } else if (endTime > 0) {
-            filter = Filters.and(Filters.eq("chainId", chainId), Filters.lte("createTime", endTime));
+            filter = Filters.and(Filters.eq("chainId", crossChainId), Filters.lte("createTime", endTime));
         } else {
-            filter = Filters.eq("chainId", chainId);
+            filter = Filters.eq("chainId", crossChainId);
         }
         long totalCount = mongoDBService.getCount(CROSS_TX_RELATION_TABLE + chainId, filter);
-        List<Document> docList = this.mongoDBService.pageQuery(CROSS_TX_RELATION_TABLE + ApiContext.defaultChainId, filter, Sorts.descending("createTime"), pageIndex, pageSize);
+        List<Document> docList = this.mongoDBService.pageQuery(CROSS_TX_RELATION_TABLE + chainId, filter, Sorts.descending("createTime"), pageIndex, pageSize);
         List<CrossTxRelationInfo> txList = new ArrayList<>();
         for (Document document : docList) {
             txList.add(CrossTxRelationInfo.toInfo(document));
