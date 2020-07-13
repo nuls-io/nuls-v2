@@ -91,6 +91,17 @@ public class ChainController {
 //        }
 
         ChainInfo chainInfo = chainService.getChainInfo(chainId);
+        if (chainInfo != null) {
+            if (chainInfo.getChainId() == 9) {
+                chainInfo.setChainName("NerveNetwork");
+            }
+            Result result = WalletRpcHandler.getChainAssetInfo(chainInfo.getDefaultAsset().getChainId(), chainInfo.getDefaultAsset().getAssetId());
+            if(result.isSuccess()) {
+
+            }
+            System.out.println(result);
+        }
+
         return RpcResult.success(chainInfo);
     }
 

@@ -142,5 +142,5 @@ public interface CmdConstant {
      */
     String CMD_GET_ASSETS_BY_ID = "getAssetsById";
 
-
+    String CMD_GET_ASSET_BY_ID = "getAssetById";
 }
