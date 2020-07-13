@@ -58,7 +58,7 @@ public class AnalysisHandler {
         //提取智能合约相关交易的hash，查询合约执行结果
         //Extract the hash of smart contract related transactions and query the contract execution results
         List<String> contactHashList = new ArrayList<>();
-        if(ApiContext.isRunSmartContract) {
+        if (ApiContext.isRunSmartContract) {
             for (Transaction tx : block.getTxs()) {
                 if (tx.getType() == TxType.CREATE_CONTRACT ||
                         tx.getType() == TxType.CALL_CONTRACT ||
@@ -189,6 +189,9 @@ public class AnalysisHandler {
                     punishLog.setRoundIndex(blockHeader.getRoundIndex());
                     punishLog.setPackageIndex(blockHeader.getPackingIndexOfRound());
                 }
+            }
+            if (i != 0) {
+                txInfo.setCreateTime(blockHeader.getCreateTime() - (txs.size() - i));
             }
             txs.add(txInfo);
             blockHeader.getTxHashList().add(txInfo.getHash());
@@ -822,7 +825,7 @@ public class AnalysisHandler {
             assetInfo.setInitCoins(txChain.getDefaultAsset().getInitNumber());
             chainInfo.setDefaultAsset(assetInfo);
             chainInfo.getAssets().add(assetInfo);
-        } else  {
+        } else {
             io.nuls.api.model.entity.v5.TxChain txChain = new io.nuls.api.model.entity.v5.TxChain();
             txChain.parse(tx.getTxData(), 0);
             chainInfo.setChainId(txChain.getDefaultAsset().getChainId());
