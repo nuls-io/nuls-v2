@@ -397,4 +397,20 @@ public class BlockController {
         return ResultUtil.getJsonRpcResult(result);
     }
 
+    @RpcMethod("testGetBlock")
+    public RpcResult testGetBlock(List<Object> params) {
+        while (true) {
+            Result<Block> result = blockTools.getBestBlock(1);
+            if(result.isFailed()) {
+                System.out.println(result.getStatus());
+            }
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
 }

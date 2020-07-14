@@ -81,4 +81,30 @@ public class ChainAssetCmd extends BaseLedgerCmd {
         rtMap.put("assets", rtAssetList);
         return success(rtMap);
     }
+
+
+    @CmdAnnotation(cmd = CmdConstant.CMD_GET_ASSET_BY_ID, version = 1.0,
+            description = "查询链下指定资产集合的金额信息")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "assetChainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "资产链id"),
+            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterDes = "资产id")
+    })
+    @ResponseData(name = "返回值", description = "返回一个List对象",
+            responseType = @TypeDescriptor(value = List.class, collectionElement = Map.class, mapKeys = {
+                    @Key(name = "assetId", valueType = Integer.class, description = "资产id"),
+                    @Key(name = "availableAmount", valueType = BigInteger.class, description = "可用金额"),
+                    @Key(name = "freeze", valueType = BigInteger.class, description = "冻结金额")
+            })
+    )
+    public Response getAssetById(Map params) {
+        int chainId = (Integer) params.get("chainId");
+        int assetChainId = (Integer) params.get("assetChainId");
+        int assetId = (Integer) params.get("assetId");
+        if (!chainHanlder(chainId)) {
+            return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
+        }
+        Map<String, Object> map = chainAssetsService.getAssetByChainAssetId(chainId, assetChainId, assetId);
+        return success(map);
+    }
 }
