@@ -90,4 +90,9 @@ public interface CommandConstant {
     String GET_NETWORK_GROUP = "nw_getGroupByChainId";
 
     String PREVIEW_CALL = "sc_preview_call";
+
+    /**
+     * 获取资产信息
+     */
+    String CMD_GET_ASSET_BY_ID = "getAssetById";
 }

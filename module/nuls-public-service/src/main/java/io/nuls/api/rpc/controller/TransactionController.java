@@ -533,7 +533,7 @@ public class TransactionController {
             return RpcResult.chainNotReady();
         }
         VerifyUtils.verifyParams(params, 5);
-        int chainId, pageNumber, pageSize;
+        int chainId, crossChainId, pageNumber, pageSize;
         long startTime = 0, endTime = 0;
         try {
             chainId = (int) params.get(0);
@@ -541,27 +541,32 @@ public class TransactionController {
             return RpcResult.paramError("[chainId] is inValid");
         }
         try {
-            pageNumber = (int) params.get(1);
+            crossChainId = (int) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        try {
+            pageNumber = (int) params.get(2);
         } catch (Exception e) {
             return RpcResult.paramError("[pageNumber] is inValid");
         }
         try {
-            pageSize = (int) params.get(2);
+            pageSize = (int) params.get(3);
         } catch (Exception e) {
             return RpcResult.paramError("[pageSize] is inValid");
         }
         try {
-            startTime = Long.parseLong(params.get(3).toString());
+            startTime = Long.parseLong(params.get(4).toString());
         } catch (Exception e) {
 
         }
         try {
-            endTime = Long.parseLong(params.get(4).toString());
+            endTime = Long.parseLong(params.get(5).toString());
         } catch (Exception e) {
 
         }
         PageInfo<CrossTxRelationInfo> pageInfo;
-        pageInfo = txService.getCrossTxList(chainId, pageNumber, pageSize, startTime, endTime);
+        pageInfo = txService.getCrossTxList(chainId, crossChainId, pageNumber, pageSize, startTime, endTime);
         RpcResult rpcResult = new RpcResult();
         rpcResult.setResult(pageInfo);
         return rpcResult;

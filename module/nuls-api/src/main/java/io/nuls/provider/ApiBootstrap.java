@@ -1,8 +1,9 @@
 package io.nuls.provider;
 
-import com.sun.net.httpserver.Filter;
+import io.nuls.base.basic.AddressTool;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.I18nUtils;
+import io.nuls.core.rpc.util.AddressPrefixDatas;
 import io.nuls.provider.api.RpcServerManager;
 import io.nuls.base.api.provider.Provider;
 import io.nuls.base.api.provider.ServiceManager;
@@ -18,13 +19,7 @@ import io.nuls.core.rpc.modulebootstrap.Module;
 import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
-import io.nuls.provider.api.config.Config;
-import io.nuls.provider.api.config.Context;
-import io.nuls.provider.api.model.AssetInfo;
-import io.nuls.provider.api.model.ChainInfo;
-import io.nuls.provider.task.ScheduleManager;
 import io.nuls.v2.NulsSDKBootStrap;
-import org.checkerframework.checker.units.qual.A;
 
 import java.util.Map;
 
@@ -43,7 +38,7 @@ public class ApiBootstrap extends RpcModule {
     @Autowired
     MyModule myModule;
     @Autowired
-    private Config config;
+    private AddressPrefixDatas addressPrefixDatas;
 
     public static void main(String[] args) {
         boolean isOffline = false;
@@ -52,7 +47,7 @@ public class ApiBootstrap extends RpcModule {
             //args = new String[]{"ws://192.168.1.40:7771"};
         } else {
             String arg1 = args[0];
-            if (StringUtils.isNotBlank(arg1)) {
+            if(StringUtils.isNotBlank(arg1)) {
                 arg1 = arg1.trim().toLowerCase();
             }
             if ("offline".equals(arg1)) {
@@ -76,6 +71,7 @@ public class ApiBootstrap extends RpcModule {
             SpringLiteContext.init(basePackage);
         }
         initRpcServer(configItemMap);
+
         NulsSDKBootStrap.init(defaultChainId, "");
         try {
             I18nUtils.setLanguage("en");
@@ -119,30 +115,12 @@ public class ApiBootstrap extends RpcModule {
 
     @Override
     public boolean doStart() {
+        AddressTool.init(addressPrefixDatas);
         return true;
     }
 
     @Override
     public RpcModuleState onDependenciesReady() {
-        if (hasDependent(ModuleE.CC)) {
-            Context.isRunCrossChain = true;
-        }
-
-        ChainInfo chainInfo = new ChainInfo();
-        chainInfo.setChainId(config.getChainId());
-        chainInfo.setChainName(config.getChainName());
-
-        AssetInfo assetInfo = new AssetInfo();
-        assetInfo.setChainId(config.getChainId());
-        assetInfo.setAssetId(config.getAssetsId());
-        assetInfo.setSymbol(config.getSymbol());
-        assetInfo.setDecimals(config.getDecimals());
-
-        chainInfo.getAssets().add(assetInfo);
-        Context.defaultChain = chainInfo;
-
-        ScheduleManager scheduleManager = SpringLiteContext.getBean(ScheduleManager.class);
-        scheduleManager.start();
         return myModule.startModule(moduleName);
     }
 

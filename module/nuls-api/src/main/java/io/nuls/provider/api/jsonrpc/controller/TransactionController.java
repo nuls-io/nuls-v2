@@ -340,6 +340,7 @@ public class TransactionController {
     }
 
 
+
     @RpcMethod("transferOtherChainAsset")
     @ApiOperation(description = "单笔转账", order = 306, detailDesc = "发起单账户单资产的转账交易,转账资产为链内的其他平行链资产")
     @Parameters({
