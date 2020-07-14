@@ -105,7 +105,7 @@ public class AccountController {
     @RpcMethod("getAccountTxs")
     public RpcResult getAccountTxs(List<Object> params) {
         VerifyUtils.verifyParams(params, 7);
-        int chainId, pageNumber, pageSize, type;
+        int chainId, assetChainId, assetId, pageNumber, pageSize, type;
         String address;
         long startHeight, endHeight;
         try {
@@ -143,6 +143,16 @@ public class AccountController {
         } catch (Exception e) {
             return RpcResult.paramError("[endHeight] is invalid");
         }
+        try {
+            assetChainId = (int) params.get(7);
+        } catch (Exception e) {
+            return RpcResult.paramError("[assetChainId] is invalid");
+        }
+        try {
+            assetId = (int) params.get(8);
+        } catch (Exception e) {
+            return RpcResult.paramError("[assetId] is invalid");
+        }
         if (!AddressTool.validAddress(chainId, address)) {
             return RpcResult.paramError("[address] is inValid");
         }
@@ -156,7 +166,7 @@ public class AccountController {
         try {
             PageInfo<TxRelationInfo> pageInfo;
             if (CacheManager.isChainExist(chainId)) {
-                pageInfo = accountService.getAccountTxs(chainId, address, pageNumber, pageSize, type, startHeight, endHeight);
+                pageInfo = accountService.getAccountTxs(chainId, address, pageNumber, pageSize, type, startHeight, endHeight, assetChainId, assetId);
                 result.setResult(new PageInfo<>(pageNumber, pageSize, pageInfo.getTotalCount(), pageInfo.getList().stream().map(d -> {
                     Map res = MapUtils.beanToMap(d);
                     AssetInfo assetInfo = CacheManager.getAssetInfoMap().get(d.getChainId() + "-" + d.getAssetId());
@@ -462,10 +472,13 @@ public class AccountController {
             assetId = defaultAsset.getAssetId();
         }
         BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, address, assetChainId, assetId);
-        AccountInfo accountInfo = accountService.getAccountInfo(chainId, address);
-        if (accountInfo != null) {
-            balanceInfo.setConsensusLock(accountInfo.getConsensusLock());
+        if (assetChainId == ApiContext.defaultChainId && assetId == ApiContext.defaultAssetId) {
+            AccountInfo accountInfo = accountService.getAccountInfo(chainId, address);
+            if (accountInfo != null) {
+                balanceInfo.setConsensusLock(accountInfo.getConsensusLock());
+            }
         }
+
         return RpcResult.success(balanceInfo);
 
     }

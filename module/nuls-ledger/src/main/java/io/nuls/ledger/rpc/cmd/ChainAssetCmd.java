@@ -98,21 +98,13 @@ public class ChainAssetCmd extends BaseLedgerCmd {
             })
     )
     public Response getAssetById(Map params) {
-        List<Map<String, Object>> rtAssetList = new ArrayList<>();
         int chainId = (Integer) params.get("chainId");
         int assetChainId = (Integer) params.get("assetChainId");
         int assetId = (Integer) params.get("assetId");
         if (!chainHanlder(chainId)) {
             return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
         }
-        String assetIds = assetId + "";
-        String[] assetIdList = assetIds.split(LedgerConstant.COMMA);
-        for (String assetIdStr : assetIdList) {
-            Map<String, Object> map = chainAssetsService.getAssetByChainAssetId(chainId, assetChainId, Integer.valueOf(assetIdStr));
-            rtAssetList.add(map);
-        }
-        Map<String, Object> rtMap = new HashMap<>();
-        rtMap.put("assets", rtAssetList);
-        return success(rtMap);
+        Map<String, Object> map = chainAssetsService.getAssetByChainAssetId(chainId, assetChainId, assetId);
+        return success(map);
     }
 }

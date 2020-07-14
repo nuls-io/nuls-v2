@@ -84,11 +84,6 @@ public class ChainController {
         } catch (Exception e) {
             return RpcResult.paramError("[chainId] is invalid");
         }
-//        if(chainId == ApiContext.defaultChainId) {
-//
-//        }else {
-//
-//        }
 
         ChainInfo chainInfo = chainService.getChainInfo(chainId);
         if (chainInfo != null) {
