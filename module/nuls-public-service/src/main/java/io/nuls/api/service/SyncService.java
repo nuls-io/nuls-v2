@@ -309,8 +309,8 @@ public class SyncService {
                     continue;
                 }
                 addressSet.add(input.getAddress());
-                calcBalance(chainId, input);
-
+                AccountLedgerInfo ledgerInfo = calcBalance(chainId, input);
+                txRelationInfoSet.add(new TxRelationInfo(input, tx, ledgerInfo.getTotalBalance()));
                 AssetInfo assetInfo = CacheManager.getRegisteredAsset(input.getAssetKey());
                 crossTxRelationInfoSet.add(new CrossTxRelationInfo(input, tx, assetInfo.getDecimals()));
             }
@@ -328,6 +328,7 @@ public class SyncService {
                     txRelationInfoSet.add(new TxRelationInfo(output, tx, BigInteger.ZERO));
                 } else {
                     AccountLedgerInfo ledgerInfo = calcBalance(chainId, output);
+                    txRelationInfoSet.add(new TxRelationInfo(output, tx, ledgerInfo.getTotalBalance()));
                     AssetInfo assetInfo = CacheManager.getRegisteredAsset(output.getAssetKey());
                     crossTxRelationInfoSet.add(new CrossTxRelationInfo(output, tx, assetInfo.getDecimals()));
                 }
@@ -719,6 +720,8 @@ public class SyncService {
         ChainInfo chainInfo = (ChainInfo) tx.getTxData();
         chainInfo.setNew(true);
         chainInfoList.add(chainInfo);
+        CacheManager.getChainInfoMap().put(chainInfo.getChainId(), chainInfo);
+        CacheManager.getAssetInfoMap().put(chainInfo.getDefaultAsset().getKey(), chainInfo.getDefaultAsset());
     }
 
     private void processDestroyChainTx(int chainId, TransactionInfo tx) {
@@ -767,6 +770,7 @@ public class SyncService {
             chainInfo.getAssets().add(assetInfo);
             chainInfoList.add(chainInfo);
         }
+        CacheManager.getAssetInfoMap().put(assetInfo.getKey(), assetInfo);
     }
 
     private void processCancelAssetTx(int chainId, TransactionInfo tx) {

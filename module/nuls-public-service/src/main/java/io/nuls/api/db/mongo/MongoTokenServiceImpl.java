@@ -43,7 +43,7 @@ public class MongoTokenServiceImpl implements TokenService {
         List<WriteModel<Document>> modelList = new ArrayList<>();
         for (AccountTokenInfo tokenInfo : accountTokenInfos.values()) {
             Document document = DocumentTransferTool.toDocument(tokenInfo, "key");
-            document.put("totalBalance", BigIntegerUtils.bigIntegerToString(tokenInfo.getBalance(), 32));
+            document.put("balance", BigIntegerUtils.bigIntegerToString(tokenInfo.getBalance(), 32));
             if (tokenInfo.isNew()) {
                 modelList.add(new InsertOneModel(document));
             } else {

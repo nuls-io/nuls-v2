@@ -17,6 +17,7 @@ import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.BigIntegerUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.checkerframework.checker.units.qual.A;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -127,68 +128,65 @@ public class MongoAccountServiceImpl implements AccountService {
         return pageInfo;
     }
 
-    public PageInfo<TxRelationInfo> getAccountTxs(int chainId, String address, int pageIndex, int pageSize, int type, long startHeight, long endHeight) {
-        Bson filter;
-        Bson addressFilter = Filters.eq("address", address);
-
-        if (type > 0 && startHeight > -1 && endHeight > -1) {
-            filter = Filters.and(addressFilter, Filters.eq("type", type), Filters.gte("height", startHeight), Filters.lte("height", endHeight));
-        } else if (type > 0 && startHeight > -1) {
-            filter = Filters.and(addressFilter, Filters.eq("type", type), Filters.gte("height", startHeight));
-        } else if (type > 0 && endHeight > -1) {
-            filter = Filters.and(addressFilter, Filters.eq("type", type), Filters.lte("height", endHeight));
-        } else if (startHeight > -1 && endHeight > -1) {
-            filter = Filters.and(addressFilter, Filters.gte("height", startHeight), Filters.lte("height", endHeight));
-        } else if (startHeight > -1) {
-            filter = Filters.and(addressFilter, Filters.gte("height", startHeight));
-        } else if (endHeight > -1) {
-            filter = Filters.and(addressFilter, Filters.lte("height", endHeight));
-        } else if (type > 0) {
-            filter = Filters.and(addressFilter, Filters.eq("type", type));
-        } else {
-            filter = addressFilter;
+    public PageInfo<TxRelationInfo> getAccountTxs(int chainId, String address, int pageIndex, int pageSize, int type, long startHeight, long endHeight, int assetChainId, int assetId) {
+        List<Bson> filters = new ArrayList<>();
+        filters.add(Filters.eq("address", address));
+        if (type > 0) {
+            filters.add(Filters.eq("type", type));
         }
+        if (assetChainId > 0 && assetId > 0) {
+            filters.add(Filters.eq("chainId", assetChainId));
+            filters.add(Filters.eq("assetId", assetId));
+        }
+        if (startHeight >= 0) {
+            filters.add(Filters.gte("height", startHeight));
+        }
+        if (endHeight > 0) {
+            filters.add(Filters.lte("height", endHeight));
+        }
+
         int start = (pageIndex - 1) * pageSize;
         int end = pageIndex * pageSize;
         int index = DBUtil.getShardNumber(address);
 
-        long unConfirmCount = mongoDBService.getCount(TX_UNCONFIRM_RELATION_TABLE + chainId, addressFilter);
+        Bson filter = Filters.and(filters);
+        long unConfirmCount = mongoDBService.getCount(TX_UNCONFIRM_RELATION_TABLE + chainId, filter);
         long confirmCount = mongoDBService.getCount(TX_RELATION_TABLE + chainId + "_" + index, filter);
         List<TxRelationInfo> txRelationInfoList;
         if (end <= unConfirmCount) {
             txRelationInfoList = unConfirmLimitQuery(chainId, filter, start, pageSize);
-        } else if (start > unConfirmCount) {
+        } else if (start > unConfirmCount || unConfirmCount == 0) {
             start = (int) (start - unConfirmCount);
             txRelationInfoList = confirmLimitQuery(chainId, index, filter, start, pageSize);
         } else {
-            txRelationInfoList = relationLimitQuery(chainId, index, addressFilter, filter, start, pageSize);
+            txRelationInfoList = relationLimitQuery(chainId, index, filter, filter, start, pageSize);
         }
 
         PageInfo<TxRelationInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, unConfirmCount + confirmCount, txRelationInfoList);
         return pageInfo;
     }
 
-    public PageInfo<TxRelationInfo> getAcctTxs(int chainId, String address, int pageIndex, int pageSize, int type, long startTime, long endTime) {
-        Bson filter;
-        Bson addressFilter = Filters.eq("address", address);
+    public PageInfo<TxRelationInfo> getAcctTxs(int chainId, int assetChainId, int assetId, String address,
+                                               int type, long startTime, long endTime, int pageIndex, int pageSize) {
 
-        if (type > 0 && startTime > 0 && endTime > 0) {
-            filter = Filters.and(addressFilter, Filters.eq("type", type), Filters.gte("createTime", startTime), Filters.lte("createTime", endTime));
-        } else if (type > 0 && startTime > 0) {
-            filter = Filters.and(addressFilter, Filters.eq("type", type), Filters.gte("createTime", startTime));
-        } else if (type > 0 && endTime > 0) {
-            filter = Filters.and(addressFilter, Filters.eq("type", type), Filters.lte("createTime", endTime));
-        } else if (startTime > 0 && endTime > 0) {
-            filter = Filters.and(addressFilter, Filters.gte("createTime", startTime), Filters.lte("createTime", endTime));
-        } else if (startTime > 0) {
-            filter = Filters.and(addressFilter, Filters.gte("createTime", startTime));
-        } else if (endTime > 0) {
-            filter = Filters.and(addressFilter, Filters.lte("createTime", endTime));
-        } else if (type > 0) {
-            filter = Filters.and(addressFilter, Filters.eq("type", type));
-        } else {
-            filter = addressFilter;
+        List<Bson> filters = new ArrayList<>();
+        Bson addressFilter = Filters.eq("address", address);
+        filters.add(addressFilter);
+        if (type > 0) {
+            filters.add(Filters.eq("type", type));
         }
+        if (assetChainId > 0 && assetId > 0) {
+            filters.add(Filters.eq("chainId", assetChainId));
+            filters.add(Filters.eq("assetId", assetId));
+        }
+        if (startTime > 0) {
+            filters.add(Filters.gte("createTime", startTime));
+        }
+        if (endTime > 0) {
+            filters.add(Filters.lte("createTime", endTime));
+        }
+
+        Bson filter = Filters.and(filters);
         int start = (pageIndex - 1) * pageSize;
         int end = pageIndex * pageSize;
         int index = DBUtil.getShardNumber(address);

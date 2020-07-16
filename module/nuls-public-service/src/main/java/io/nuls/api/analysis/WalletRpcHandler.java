@@ -625,4 +625,17 @@ public class WalletRpcHandler {
         }
 
     }
+
+    public static Result getChainAssetInfo(int assetChainId, int assetId) {
+        try {
+            Map<String, Object> params = new HashMap<>();
+            params.put(Constants.CHAIN_ID, ApiContext.defaultChainId);
+            params.put("assetChainId", assetChainId);
+            params.put("assetId", assetId);
+            Map map = (Map) RpcCall.request(ModuleE.LG.abbr, CommandConstant.CMD_GET_ASSET_BY_ID, params);
+            return Result.getSuccess(null).setData(map);
+        } catch (NulsException e) {
+            return Result.getFailed(e.getErrorCode());
+        }
+    }
 }
