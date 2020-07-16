@@ -12,6 +12,7 @@ import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.basic.Result;
+import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
@@ -425,7 +426,13 @@ public class WalletRpcHandler {
     }
 
     private static Result<ContractResultInfo> getContractResultInfo(Map<String, Object> params) throws NulsException {
-        Map map = (Map) RpcCall.request(ModuleE.SC.abbr, CommandConstant.CONTRACT_RESULT, params);
+        Map map = null;
+        try {
+            map = (Map) RpcCall.request(ModuleE.SC.abbr, CommandConstant.CONTRACT_RESULT, params);
+        } catch (NulsException e) {
+            return Result.getFailed(CommonCodeConstanst.DATA_NOT_FOUND);
+        }
+        map = (Map) RpcCall.request(ModuleE.SC.abbr, CommandConstant.CONTRACT_RESULT, params);
         map = (Map) map.get("data");
         if (map == null || map.isEmpty()) {
             return Result.getFailed(ApiErrorCode.DATA_NOT_FOUND);

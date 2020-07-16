@@ -17,4 +17,6 @@ public interface AccountLedgerService {
 
     List<AccountLedgerInfo> getAccountCrossLedgerInfoList(int chainId, String address);
 
+    List<AccountLedgerInfo> getAccountLedgerInfoList(int assetChainId, int assetId);
+
 }

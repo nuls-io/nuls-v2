@@ -2,6 +2,7 @@ package io.nuls.api.model.po;
 
 import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.utils.DBUtil;
+import org.bson.codecs.pojo.annotations.BsonIgnore;
 
 import java.math.BigInteger;
 
@@ -22,6 +23,8 @@ public class AssetInfo extends TxDataInfo {
     private String address;
 
     private int status;
+    //该资产在当前链的总量
+    private BigInteger localTotalCoins;
 
     public AssetInfo() {
         this.status = ApiConstant.ENABLE;
@@ -101,5 +104,13 @@ public class AssetInfo extends TxDataInfo {
 
     public void setDecimals(int decimals) {
         this.decimals = decimals;
+    }
+
+    public BigInteger getLocalTotalCoins() {
+        return localTotalCoins;
+    }
+
+    public void setLocalTotalCoins(BigInteger localTotalCoins) {
+        this.localTotalCoins = localTotalCoins;
     }
 }

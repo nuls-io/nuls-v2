@@ -313,6 +313,26 @@ public class SyncService {
                 txRelationInfoSet.add(new TxRelationInfo(input, tx, ledgerInfo.getTotalBalance()));
                 AssetInfo assetInfo = CacheManager.getRegisteredAsset(input.getAssetKey());
                 crossTxRelationInfoSet.add(new CrossTxRelationInfo(input, tx, assetInfo.getDecimals()));
+
+                if (assetInfo.getChainId() != ApiContext.defaultChainId) {
+                    //资产跨链转出后，修改资产在本链的总余额
+                    ChainInfo chainInfo = queryChainInfo(assetInfo.getChainId());
+                    if (chainInfo != null) {
+                        AssetInfo asset = chainInfo.getDefaultAsset();
+                        if (asset.getAssetId() == assetInfo.getAssetId()) {
+                            asset.setLocalTotalCoins(asset.getLocalTotalCoins().subtract(input.getAmount()));
+                            if (asset.getChainId() == 123) {
+
+                                System.out.println("from:" + input.getAmount() + ",total:" + asset.getLocalTotalCoins());
+                            }
+                        }
+                        for (AssetInfo ass : chainInfo.getAssets()) {
+                            if (ass.getAssetId() == assetInfo.getAssetId()) {
+                                ass.setLocalTotalCoins(ass.getLocalTotalCoins().subtract(input.getAmount()));
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -331,6 +351,25 @@ public class SyncService {
                     txRelationInfoSet.add(new TxRelationInfo(output, tx, ledgerInfo.getTotalBalance()));
                     AssetInfo assetInfo = CacheManager.getRegisteredAsset(output.getAssetKey());
                     crossTxRelationInfoSet.add(new CrossTxRelationInfo(output, tx, assetInfo.getDecimals()));
+
+                    //资产跨链转入后，修改资产在本链的总余额
+                    if (assetInfo.getChainId() != ApiContext.defaultChainId) {
+                        ChainInfo chainInfo = queryChainInfo(assetInfo.getChainId());
+                        if (chainInfo != null) {
+                            AssetInfo asset = chainInfo.getDefaultAsset();
+                            if (asset.getAssetId() == assetInfo.getAssetId()) {
+                                asset.setLocalTotalCoins(asset.getLocalTotalCoins().add(output.getAmount()));
+                                if (asset.getChainId() == 123) {
+                                    System.out.println("to:" + output.getAmount() + ",total:" + asset.getLocalTotalCoins());
+                                }
+                            }
+                            for (AssetInfo ass : chainInfo.getAssets()) {
+                                if (ass.getAssetId() == assetInfo.getAssetId()) {
+                                    ass.setLocalTotalCoins(ass.getLocalTotalCoins().add(output.getAmount()));
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -717,8 +756,24 @@ public class SyncService {
                 txRelationInfoSet.add(new TxRelationInfo(to, tx, ledgerInfo.getTotalBalance()));
             }
         }
+
+
         ChainInfo chainInfo = (ChainInfo) tx.getTxData();
-        chainInfo.setNew(true);
+        ChainInfo info = queryChainInfo(chainInfo.getChainId());
+        if (info != null) {
+            chainInfo.setNew(false);
+            chainInfo.getDefaultAsset().setLocalTotalCoins(info.getDefaultAsset().getLocalTotalCoins());
+            for (AssetInfo assetInfo1 : chainInfo.getAssets()) {
+                for (AssetInfo assetInfo2 : info.getAssets()) {
+                    if (assetInfo1.getAssetId() == assetInfo2.getAssetId()) {
+                        assetInfo1.setLocalTotalCoins(assetInfo2.getLocalTotalCoins());
+                    }
+                }
+            }
+        } else {
+            chainInfo.setNew(true);
+        }
+
         chainInfoList.add(chainInfo);
         CacheManager.getChainInfoMap().put(chainInfo.getChainId(), chainInfo);
         CacheManager.getAssetInfoMap().put(chainInfo.getDefaultAsset().getKey(), chainInfo.getDefaultAsset());
@@ -732,7 +787,8 @@ public class SyncService {
         AccountLedgerInfo ledgerInfo = calcBalance(chainId, input.getChainId(), input.getAssetsId(), accountInfo, tx.getFee().getValue());
         txRelationInfoSet.add(new TxRelationInfo(input, tx, tx.getFee().getValue(), ledgerInfo.getTotalBalance()));
 
-        ChainInfo chainInfo = chainService.getChainInfo(chainId);
+        ChainInfo chainInfo = (ChainInfo) tx.getTxData();
+        chainInfo = chainService.getChainInfo(chainInfo.getChainId());
         chainInfo.setStatus(DISABLE);
         for (AssetInfo assetInfo : chainInfo.getAssets()) {
             assetInfo.setStatus(DISABLE);
@@ -764,7 +820,7 @@ public class SyncService {
         txRelationInfoSet.add(new TxRelationInfo(output, tx, ledgerInfo.getTotalBalance()));
 
         AssetInfo assetInfo = (AssetInfo) tx.getTxData();
-        ChainInfo chainInfo = chainService.getChainInfo(chainId);
+        ChainInfo chainInfo = chainService.getChainInfo(assetInfo.getChainId());
         if (chainInfo != null) {
             chainInfo.setNew(false);
             chainInfo.getAssets().add(assetInfo);
@@ -782,9 +838,12 @@ public class SyncService {
         txRelationInfoSet.add(new TxRelationInfo(input, tx, tx.getFee().getValue(), ledgerInfo.getTotalBalance()));
 
         AssetInfo assetInfo = (AssetInfo) tx.getTxData();
-        ChainInfo chainInfo = chainService.getChainInfo(chainId);
+        ChainInfo chainInfo = chainService.getChainInfo(assetInfo.getChainId());
         chainInfo.getAsset(assetInfo.getAssetId()).setStatus(DISABLE);
         chainInfo.setNew(false);
+        if (assetInfo.getAssetId() == chainInfo.getDefaultAsset().getAssetId()) {
+            chainInfo.getDefaultAsset().setStatus(DISABLE);
+        }
         chainInfoList.add(chainInfo);
     }
 
@@ -1092,6 +1151,19 @@ public class SyncService {
             accountTokenInfo = tokenService.getAccountTokenInfo(chainId, key);
         }
         return accountTokenInfo;
+    }
+
+    private ChainInfo queryChainInfo(int chainId) {
+        for (ChainInfo chainInfo : chainInfoList) {
+            if (chainInfo != null) {
+                return chainInfo;
+            }
+        }
+        ChainInfo chainInfo = chainService.getChainInfo(chainId);
+        if (chainInfo != null) {
+            chainInfoList.add(chainInfo);
+        }
+        return chainInfo;
     }
 
     private void clear(int chainId) {

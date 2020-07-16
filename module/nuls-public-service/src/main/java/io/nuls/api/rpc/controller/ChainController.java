@@ -37,6 +37,8 @@ public class ChainController {
     @Autowired
     private AccountService accountService;
     @Autowired
+    private AccountLedgerService ledgerService;
+    @Autowired
     private ContractService contractService;
     @Autowired
     private StatisticalService statisticalService;
@@ -90,11 +92,6 @@ public class ChainController {
             if (chainInfo.getChainId() == 9) {
                 chainInfo.setChainName("NerveNetwork");
             }
-            Result result = WalletRpcHandler.getChainAssetInfo(chainInfo.getDefaultAsset().getChainId(), chainInfo.getDefaultAsset().getAssetId());
-            if(result.isSuccess()) {
-
-            }
-            System.out.println(result);
         }
 
         return RpcResult.success(chainInfo);

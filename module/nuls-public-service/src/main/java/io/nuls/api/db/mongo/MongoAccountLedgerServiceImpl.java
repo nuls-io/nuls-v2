@@ -1,6 +1,7 @@
 package io.nuls.api.db.mongo;
 
 import com.mongodb.client.model.*;
+import io.nuls.api.ApiContext;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.DBTableConstant;
 import io.nuls.api.db.AccountLedgerService;
@@ -125,6 +126,19 @@ public class MongoAccountLedgerServiceImpl implements AccountLedgerService {
             if (document.getInteger("chainId") == chainId) {
                 continue;
             }
+            AccountLedgerInfo ledgerInfo = DocumentTransferTool.toInfo(document, "key", AccountLedgerInfo.class);
+            accountLedgerInfoList.add(ledgerInfo);
+        }
+        return accountLedgerInfoList;
+    }
+
+    @Override
+    public List<AccountLedgerInfo> getAccountLedgerInfoList(int assetChainId, int assetId) {
+        Bson filter = Filters.and(Filters.eq("chainId", assetChainId), Filters.eq("assetId", assetId));
+        List<Document> documentList = mongoDBService.query(DBTableConstant.ACCOUNT_LEDGER_TABLE + ApiContext.defaultChainId, filter);
+        List<AccountLedgerInfo> accountLedgerInfoList = new ArrayList<>();
+
+        for (Document document : documentList) {
             AccountLedgerInfo ledgerInfo = DocumentTransferTool.toInfo(document, "key", AccountLedgerInfo.class);
             accountLedgerInfoList.add(ledgerInfo);
         }
