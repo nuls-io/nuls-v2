@@ -841,6 +841,9 @@ public class SyncService {
         ChainInfo chainInfo = chainService.getChainInfo(assetInfo.getChainId());
         chainInfo.getAsset(assetInfo.getAssetId()).setStatus(DISABLE);
         chainInfo.setNew(false);
+        if (assetInfo.getAssetId() == chainInfo.getDefaultAsset().getAssetId()) {
+            chainInfo.getDefaultAsset().setStatus(DISABLE);
+        }
         chainInfoList.add(chainInfo);
     }
 
