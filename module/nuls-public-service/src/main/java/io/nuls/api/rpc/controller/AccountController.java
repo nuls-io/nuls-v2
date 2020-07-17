@@ -625,10 +625,10 @@ public class AccountController {
         }
         List<AccountLedgerInfo> list = accountLedgerService.getAccountCrossLedgerInfoList(chainId, address);
         for (AccountLedgerInfo ledgerInfo : list) {
-//            BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, address, ledgerInfo.getChainId(), ledgerInfo.getAssetId());
-//            ledgerInfo.setBalance(balanceInfo.getBalance());
-//            ledgerInfo.setTimeLock(balanceInfo.getTimeLock());
-//            ledgerInfo.setConsensusLock(balanceInfo.getConsensusLock());
+            BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, address, ledgerInfo.getChainId(), ledgerInfo.getAssetId());
+            ledgerInfo.setBalance(balanceInfo.getBalance());
+            ledgerInfo.setTimeLock(balanceInfo.getTimeLock());
+            ledgerInfo.setConsensusLock(balanceInfo.getConsensusLock());
             AssetInfo assetInfo = CacheManager.getAssetInfoMap().get(ledgerInfo.getAssetKey());
             if (assetInfo != null) {
                 ledgerInfo.setSymbol(assetInfo.getSymbol());
