@@ -418,6 +418,24 @@ public class WalletRpcHandler {
         return Result.getSuccess(null).setData(map);
     }
 
+    public static Result<BigInteger> tokenBalance(int chainid, Object contractAddress, Object address) {
+        try {
+            Result<Map> result = invokeView(chainid, contractAddress, "balanceOf", null, new Object[]{address});
+            Map map = result.getData();
+            if (map == null) {
+                return Result.getSuccess(null).setData(BigInteger.ZERO);
+            }
+            Object balance = map.get("result");
+            if (balance == null) {
+                return Result.getSuccess(null).setData(BigInteger.ZERO);
+            }
+            return Result.getSuccess(null).setData(new BigInteger(balance.toString()));
+        } catch (NulsException e) {
+            Log.error(e.format());
+            return Result.getSuccess(null).setData(BigInteger.ZERO);
+        }
+    }
+
     public static Result<ContractResultInfo> getContractResultInfo(int chainId, String hash) throws NulsException {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.CHAIN_ID, chainId);
