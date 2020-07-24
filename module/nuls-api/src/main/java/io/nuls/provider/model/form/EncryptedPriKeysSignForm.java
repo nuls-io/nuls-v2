@@ -2,6 +2,7 @@ package io.nuls.provider.model.form;
 
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
+import io.nuls.v2.model.dto.SignDto;
 
 import java.util.List;
 
@@ -15,7 +16,7 @@ public class EncryptedPriKeysSignForm {
     @ApiModelProperty(description = "地址前缀")
     private String prefix;
 
-    private List<GetPriKeyForm> encryptedPriKeys;
+    private List<SignDto> signDtoList;
 
     public String getTxHex() {
         return txHex;
@@ -41,11 +42,11 @@ public class EncryptedPriKeysSignForm {
         this.prefix = prefix;
     }
 
-    public List<GetPriKeyForm> getEncryptedPriKeys() {
-        return encryptedPriKeys;
+    public List<SignDto> getSignDtoList() {
+        return signDtoList;
     }
 
-    public void setEncryptedPriKeys(List<GetPriKeyForm> encryptedPriKeys) {
-        this.encryptedPriKeys = encryptedPriKeys;
+    public void setSignDtoList(List<SignDto> signDtoList) {
+        this.signDtoList = signDtoList;
     }
 }

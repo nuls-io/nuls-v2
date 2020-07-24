@@ -52,6 +52,7 @@ import io.nuls.v2.model.annotation.ApiOperation;
 import io.nuls.v2.model.dto.AccountDto;
 import io.nuls.v2.model.dto.AliasDto;
 import io.nuls.v2.model.dto.MultiSignAliasDto;
+import io.nuls.v2.model.dto.SignDto;
 import io.nuls.v2.util.NulsSDKTool;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
@@ -61,6 +62,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -540,7 +542,9 @@ public class AccountResource {
     public RpcClientResult encryptedPriKeysSign(EncryptedPriKeysSignForm form) {
 //        io.nuls.core.basic.Result result = NulsSDKTool.sign(form.getTxHex(), form.getAddress(), form.getEncryptedPriKey(), form.getPassword());
 //        return ResultUtil.getRpcClientResult(result);
-        return null;
+//        return null;
+        io.nuls.core.basic.Result result = NulsSDKTool.sign(form.getChainId(), form.getPrefix(), form.getSignDtoList(), form.getTxHex());
+        return ResultUtil.getRpcClientResult(result);
     }
 
     @POST

@@ -32,11 +32,7 @@
             <artifactId>nuls-base</artifactId>
             <version>${nuls.v2.version}</version>
         </dependency>
-        <dependency>
-            <groupId>io.nuls.v2</groupId>
-            <artifactId>nuls-base-api-provider</artifactId>
-            <version>${nuls.v2.version}</version>
-        </dependency>
+
         <dependency>
             <groupId>io.nuls.v2</groupId>
             <artifactId>sdk4j</artifactId>

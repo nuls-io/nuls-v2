@@ -142,7 +142,7 @@ dependent=protocol-update,smart-contract
 #httpServer的启动ip
 serverIp=0.0.0.0
 #httpServer的启动port
-serverPort=18004
+serverPort=8004
 dependent=smart-contract,cross-chain
 
 [protocol-update]

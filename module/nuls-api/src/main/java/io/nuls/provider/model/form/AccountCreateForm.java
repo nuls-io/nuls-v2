@@ -33,7 +33,9 @@ import io.nuls.core.rpc.model.ApiModelProperty;
  * @author: Charlie
  */
 @ApiModel(name = "创建账户表单数据")
-public class AccountCreateForm extends Base{
+public class AccountCreateForm{
+
+    private int chainId;
 
     @ApiModelProperty(description = "新建账户数量")
     private int count;
@@ -68,4 +70,11 @@ public class AccountCreateForm extends Base{
         this.prefix = prefix;
     }
 
+    public int getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(int chainId) {
+        this.chainId = chainId;
+    }
 }
