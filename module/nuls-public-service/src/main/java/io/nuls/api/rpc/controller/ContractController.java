@@ -163,7 +163,11 @@ public class ContractController {
         if (pageInfo != null && pageInfo.getList() != null && pageInfo.getList().size() > 0) {
             List<AccountTokenInfo> list = pageInfo.getList();
             for (AccountTokenInfo tokenInfo : list) {
-                tokenInfo.setBalance(WalletRpcHandler.tokenBalance(chainId, tokenInfo.getContractAddress(), tokenInfo.getAddress()).getData());
+                BigInteger available = WalletRpcHandler.tokenBalance(chainId, tokenInfo.getContractAddress(), tokenInfo.getAddress()).getData();
+                BigInteger total = tokenInfo.getBalance();
+                BigInteger locked = total.subtract(available);
+                tokenInfo.setBalance(available);
+                tokenInfo.setLockedBalance(locked);
             }
         }
 
