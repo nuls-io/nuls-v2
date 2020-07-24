@@ -443,7 +443,7 @@ public class AccountResource {
         if (StringUtils.isBlank(form.getPrefix())) {
             result = NulsSDKTool.createOffLineAccount(form.getCount(), form.getPassword());
         } else {
-            result = NulsSDKTool.createOffLineAccount(form.getCount(), form.getPrefix(), form.getPassword());
+            result = NulsSDKTool.createOffLineAccount(form.getChainId(), form.getCount(), form.getPrefix(), form.getPassword());
         }
         return ResultUtil.getRpcClientResult(result);
     }
@@ -524,6 +524,23 @@ public class AccountResource {
     public RpcClientResult encryptedPriKeySign(EncryptedPriKeySignForm form) {
         io.nuls.core.basic.Result result = NulsSDKTool.sign(form.getTxHex(), form.getAddress(), form.getEncryptedPriKey(), form.getPassword());
         return ResultUtil.getRpcClientResult(result);
+    }
+
+    @POST
+    @Path("/encryptedPriKeys/sign")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(description = "多账号密文私钥摘要签名", order = 156)
+    @Parameters({
+            @Parameter(parameterName = "form", parameterDes = "密文私钥摘要签名表单", requestType = @TypeDescriptor(value = EncryptedPriKeySignForm.class))
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "hash", description = "交易hash"),
+            @Key(name = "txHex", description = "签名后的交易16进制字符串")
+    }))
+    public RpcClientResult encryptedPriKeysSign(EncryptedPriKeysSignForm form) {
+//        io.nuls.core.basic.Result result = NulsSDKTool.sign(form.getTxHex(), form.getAddress(), form.getEncryptedPriKey(), form.getPassword());
+//        return ResultUtil.getRpcClientResult(result);
+        return null;
     }
 
     @POST
