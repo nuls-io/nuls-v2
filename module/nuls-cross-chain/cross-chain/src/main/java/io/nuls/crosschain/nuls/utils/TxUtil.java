@@ -238,6 +238,7 @@ public class TxUtil {
             if(config.isMainNet()){
                 crossTransferData.setHubHash(hash);
             }
+            ctx.setTxData(crossTransferData.serialize());
             NulsHash convertHash = hash;
             if (!config.isMainNet()) {
                 Transaction mainCtx = TxUtil.friendConvertToMain(chain, ctx, TxType.CROSS_CHAIN);
