@@ -21,5 +21,5 @@ echo "" >> NULS_WALLET/nuls.ncf
 echo "[cmd-client]" >> NULS_WALLET/nuls.ncf
 echo "clientVersion=`cat NULS_WALLET/version`" >> NULS_WALLET/nuls.ncf
 cp config/genesis-block.json NULS_Wallet/genesis-block.json
-tar -czf NULS_Wallet_${OS}_v2.1.0.tar NULS_Wallet
+tar -czf NULS_Wallet_${OS}_v2.6.0.1.tar NULS_Wallet
 rm -rf NULS_Wallet
