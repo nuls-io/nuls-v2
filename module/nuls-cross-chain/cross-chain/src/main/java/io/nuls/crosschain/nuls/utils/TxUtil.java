@@ -232,11 +232,11 @@ public class TxUtil {
             CoinData coinData = ctx.getCoinDataInstance();
             int fromChainId = AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress());
             if(fromChainId == chainId){
-                crossTransferData.setSourceHash(hash);
+                crossTransferData.setSourceHash(hash.getBytes());
             }
             //如果当前是nuls主网，设置主网hash
             if(config.isMainNet()){
-                crossTransferData.setHubHash(hash);
+                crossTransferData.setHubHash(hash.getBytes());
             }
             ctx.setTxData(crossTransferData.serialize());
             NulsHash convertHash = hash;
