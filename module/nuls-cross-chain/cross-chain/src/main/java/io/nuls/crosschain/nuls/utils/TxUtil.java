@@ -222,26 +222,14 @@ public class TxUtil {
             String address = (String) packerInfo.get(ParamConstant.PARAM_ADDRESS);
             List<String> packers = (List<String>) packerInfo.get(ParamConstant.PARAM_PACK_ADDRESS_LIST);
             //txData中存储来源链交易hash和nuls主链交易hash，如果发起链是nuls主链，来源链hash和nuls主链hash相同。
-            CrossTransferData crossTransferData = new CrossTransferData();
-            crossTransferData.parse(ctx.getTxData(),0);
-            //NRC20跨链时，交易类型是CONTRACT_TOKEN_CROSS_TRANSFER = 26
-            if(crossTransferData.getSourceType() == null){
-                crossTransferData.setSourceType(TxType.CROSS_CHAIN);
-            }
             //如果当前是来源链，设置来源链交易hash
-            CoinData coinData = ctx.getCoinDataInstance();
-            int fromChainId = AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress());
-            if(fromChainId == chainId){
-                crossTransferData.setSourceHash(hash.getBytes());
-            }
-            //如果当前是nuls主网，设置主网hash
-            if(config.isMainNet()){
-                crossTransferData.setHubHash(hash.getBytes());
-            }
-            ctx.setTxData(crossTransferData.serialize());
             NulsHash convertHash = hash;
             if (!config.isMainNet()) {
                 Transaction mainCtx = TxUtil.friendConvertToMain(chain, ctx, TxType.CROSS_CHAIN);
+                CrossTransferData crossTransferData = new CrossTransferData();
+                crossTransferData.parse(ctx.getTxData(),0);
+                crossTransferData.setSourceHash(hash.getBytes());
+                mainCtx.setTxData(crossTransferData.serialize());
                 convertHash = mainCtx.getHash();
                 convertCtxService.save(hash, mainCtx, chainId);
             }

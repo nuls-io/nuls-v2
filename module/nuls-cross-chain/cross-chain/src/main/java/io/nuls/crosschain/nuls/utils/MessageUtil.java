@@ -20,6 +20,7 @@ import io.nuls.crosschain.base.constant.CrossChainConstant;
 import io.nuls.crosschain.base.message.BroadCtxSignMessage;
 import io.nuls.crosschain.base.message.GetOtherCtxMessage;
 import io.nuls.crosschain.base.model.bo.ChainInfo;
+import io.nuls.crosschain.base.model.bo.txdata.CrossTransferData;
 import io.nuls.crosschain.base.model.bo.txdata.VerifierChangeData;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
@@ -453,6 +454,13 @@ public class MessageUtil {
             if (chain.getChainId() == toChainId) {
                 if (!config.isMainNet()) {
                     packCtx = TxUtil.mainConvertToFriend(ctx, config.getCrossCtxType());
+                    CrossTransferData crossTransferData = new CrossTransferData();
+                    crossTransferData.parse(ctx.getTxData(),0);
+                    if(crossTransferData.getSourceHash() == null){
+                        crossTransferData.setSourceHash(ctx.getHash().getBytes());
+                    }
+                    crossTransferData.setHubHash(ctx.getHash().getBytes());
+                    packCtx.setTxData(crossTransferData.serialize());
                     packCtx.setTransactionSignature(signature.serialize());
                     convertCtxService.save(packCtx.getHash(), ctx, chain.getChainId());
                     chain.getLogger().info("接收到的主网协议跨链交易hash：{}对应的本链协议跨链交易hash:{}", crossTxHashHex, packCtx.getHash().toHex());
