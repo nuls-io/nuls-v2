@@ -3,7 +3,6 @@ package io.nuls.crosschain.base.model.bo.txdata;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
-import io.nuls.base.data.NulsHash;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
@@ -22,8 +21,11 @@ public class CrossTransferData extends BaseNulsData {
 
     Integer sourceType;
 
-    byte[] hubHash;
-
+    /**
+     * 来源链交易hash
+     * 只有在发起链为平行链的情况下，这个字段才有值
+     * 如果来源链交易hash为空，则来源链为nuls主网链，这种情况下，来源链，nuls主网链，接收链的交易hash完全一样。
+     */
     byte[] sourceHash;
 
     @Override
@@ -33,7 +35,6 @@ public class CrossTransferData extends BaseNulsData {
         } else {
             stream.writeUint32(sourceType);
         }
-        stream.writeBytesWithLength(hubHash);
         stream.writeBytesWithLength(sourceHash);
     }
 
@@ -42,9 +43,6 @@ public class CrossTransferData extends BaseNulsData {
         try {
             if (!buffer.isFinished()) {
                 this.sourceType = buffer.readInt32();
-            }
-            if (!buffer.isFinished()) {
-                this.hubHash = buffer.readByLengthByte();
             }
             if (!buffer.isFinished()) {
                 this.sourceHash = buffer.readByLengthByte();
@@ -59,7 +57,6 @@ public class CrossTransferData extends BaseNulsData {
         int s = 0;
         s += SerializeUtils.sizeOfUint32();
         s += SerializeUtils.sizeOfBytes(sourceHash);
-        s += SerializeUtils.sizeOfBytes(hubHash);
         return s;
     }
 
@@ -79,13 +76,6 @@ public class CrossTransferData extends BaseNulsData {
         this.sourceHash = sourceHash;
     }
 
-    public byte[] getHubHash() {
-        return hubHash;
-    }
-
-    public void setHubHash(byte[] hubHash) {
-        this.hubHash = hubHash;
-    }
 
     public static void main(String[] args) throws NulsException, IOException {
         CrossTransferData crossTransferData = new CrossTransferData();
@@ -96,14 +86,10 @@ public class CrossTransferData extends BaseNulsData {
         crossTransferData = new CrossTransferData();
         crossTransferData.setSourceType(26);
         crossTransferData.setSourceHash(HexUtil.decode("792dc5108df2f3ab3575cff3cd1f1cfd7137ecbd05a813b6c255260e38c4d36c"));
-        crossTransferData.setHubHash(HexUtil.decode("3bb11b164b14f09362a3b7ad7020257fadf91a6ac0b4af81cd284e6ce178a117"));
         byte[] hex = crossTransferData.serialize();
         crossTransferData = new CrossTransferData();
         crossTransferData.parse(hex,0);
         Log.info("{}", crossTransferData.sourceType);
-        if(crossTransferData.hubHash != null){
-            Log.info("hubHash:{}", HexUtil.encode(crossTransferData.hubHash));
-        }
         if(crossTransferData.sourceHash != null){
             Log.info("sourceHash:{}", HexUtil.encode(crossTransferData.sourceHash));
         }

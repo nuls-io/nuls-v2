@@ -289,6 +289,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                     ctxStatusList.add(ctxHash);
                     chain.getLogger().debug("跨链交易提交完成，对跨链转账交易做拜占庭验证：{}", ctxHash.toHex());
                     //发起拜占庭验证
+                    ctx.setTransactionSignature(null);
                     chain.getCrossTxThreadPool().execute(new CrossTxHandler(chain, ctx, syncStatus));
                 }
             }

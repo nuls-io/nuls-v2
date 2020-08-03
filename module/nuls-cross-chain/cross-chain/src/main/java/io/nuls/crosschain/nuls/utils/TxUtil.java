@@ -221,10 +221,9 @@ public class TxUtil {
             String password = (String) packerInfo.get(ParamConstant.PARAM_PASSWORD);
             String address = (String) packerInfo.get(ParamConstant.PARAM_ADDRESS);
             List<String> packers = (List<String>) packerInfo.get(ParamConstant.PARAM_PACK_ADDRESS_LIST);
-            //txData中存储来源链交易hash和nuls主链交易hash，如果发起链是nuls主链，来源链hash和nuls主链hash相同。
-            //如果当前是来源链，设置来源链交易hash
             NulsHash convertHash = hash;
             if (!config.isMainNet()) {
+                //txData中存储来源链交易hash和nuls主链交易hash，如果发起链是nuls主链，来源链hash和nuls主链hash相同。
                 Transaction mainCtx = TxUtil.friendConvertToMain(chain, ctx, TxType.CROSS_CHAIN);
                 CrossTransferData crossTransferData = new CrossTransferData();
                 crossTransferData.parse(ctx.getTxData(),0);
