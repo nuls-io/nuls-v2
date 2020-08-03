@@ -454,13 +454,6 @@ public class MessageUtil {
             if (chain.getChainId() == toChainId) {
                 if (!config.isMainNet()) {
                     packCtx = TxUtil.mainConvertToFriend(ctx, config.getCrossCtxType());
-                    CrossTransferData crossTransferData = new CrossTransferData();
-                    crossTransferData.parse(ctx.getTxData(),0);
-                    if(crossTransferData.getSourceHash() == null){
-                        crossTransferData.setSourceHash(ctx.getHash().getBytes());
-                    }
-                    crossTransferData.setHubHash(ctx.getHash().getBytes());
-                    packCtx.setTxData(crossTransferData.serialize());
                     packCtx.setTransactionSignature(signature.serialize());
                     convertCtxService.save(packCtx.getHash(), ctx, chain.getChainId());
                     chain.getLogger().info("接收到的主网协议跨链交易hash：{}对应的本链协议跨链交易hash:{}", crossTxHashHex, packCtx.getHash().toHex());
