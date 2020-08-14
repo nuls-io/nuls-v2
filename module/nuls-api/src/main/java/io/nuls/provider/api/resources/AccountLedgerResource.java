@@ -23,6 +23,8 @@
  */
 package io.nuls.provider.api.resources;
 
+import io.nuls.base.api.provider.crosschain.CrossChainProvider;
+import io.nuls.base.api.provider.crosschain.facade.CreateCrossTxReq;
 import io.nuls.provider.api.config.Config;
 import io.nuls.base.RPCUtil;
 import io.nuls.base.api.provider.Result;
@@ -43,6 +45,7 @@ import io.nuls.provider.model.ErrorData;
 import io.nuls.provider.model.RpcClientResult;
 import io.nuls.provider.model.dto.AccountBalanceDto;
 import io.nuls.provider.model.form.BalanceForm;
+import io.nuls.provider.model.form.CrossTransferForm;
 import io.nuls.provider.model.form.TransferForm;
 import io.nuls.provider.model.form.TxForm;
 import io.nuls.provider.rpctools.ContractTools;
@@ -88,6 +91,9 @@ public class AccountLedgerResource {
     Config config;
 
     TransferService transferService = ServiceManager.get(TransferService.class);
+
+    CrossChainProvider crossChainProvider = ServiceManager.get(CrossChainProvider.class);
+
     LedgerProvider ledgerProvider = ServiceManager.get(LedgerProvider.class);
     @Autowired
     TransactionTools transactionTools;
@@ -285,6 +291,32 @@ public class AccountLedgerResource {
         RpcClientResult clientResult = ResultUtil.getRpcClientResult(result);
         if (clientResult.isSuccess()) {
             return clientResult.resultMap().map("value", clientResult.getData()).mapToData();
+        }
+        return clientResult;
+    }
+
+    @POST
+    @Path("/crossTransfer")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(description = "跨链转账", order = 306, detailDesc = "发起单账户单资产的跨链转账交易")
+    @Parameters({
+            @Parameter(parameterName = "跨链转账", parameterDes = "跨链转账表单", requestType = @TypeDescriptor(value = CrossTransferForm.class))
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "交易hash")
+    }))
+    public RpcClientResult crossTransfer(CrossTransferForm form) {
+        if (form == null) {
+            return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "form is empty"));
+        }
+        CreateCrossTxReq.CreateCrossTxReqBuilder builder = new CreateCrossTxReq.CreateCrossTxReqBuilder(config.getChainId())
+                .addForm(form.getAssetChainId(), form.getAssetId(), form.getAddress(), form.getPassword(), form.getAmount())
+                .addTo(form.getAssetChainId(), form.getAssetId(), form.getToAddress(), form.getAmount())
+                .setRemark(form.getRemark());
+        Result<String> result = crossChainProvider.createCrossTx(builder.build());
+        RpcClientResult clientResult = ResultUtil.getRpcClientResult(result);
+        if (clientResult.isSuccess()) {
+            return clientResult.resultMap().map("txHash", clientResult.getData()).mapToData();
         }
         return clientResult;
     }
