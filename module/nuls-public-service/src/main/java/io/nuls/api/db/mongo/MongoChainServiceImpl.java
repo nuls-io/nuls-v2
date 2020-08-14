@@ -5,6 +5,7 @@ import com.mongodb.client.model.Filters;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.db.ChainService;
 import io.nuls.api.manager.CacheManager;
+import io.nuls.api.model.po.BlockHeaderInfo;
 import io.nuls.api.model.po.ChainConfigInfo;
 import io.nuls.api.model.po.ChainInfo;
 import io.nuls.api.model.po.SyncInfo;
@@ -147,19 +148,25 @@ public class MongoChainServiceImpl implements ChainService {
         return DocumentTransferTool.toInfo(document, "chainId", SyncInfo.class);
     }
 
-    public SyncInfo saveNewSyncInfo(int chainId, long newHeight, int version) {
-        SyncInfo syncInfo = new SyncInfo(chainId, newHeight, version, 0);
-        Document document = DocumentTransferTool.toDocument(syncInfo, "chainId");
-        if (newHeight == 0) {
-            Bson query = Filters.eq("_id", chainId);
-            Document document1 = mongoDBService.findOne(SYNC_INFO_TABLE, query);
-            if (document1 != null) {
-                mongoDBService.updateOne(SYNC_INFO_TABLE, query, document);
-            } else {
-                mongoDBService.insertOne(SYNC_INFO_TABLE, document);
-            }
+    public SyncInfo saveNewSyncInfo(int chainId, long newHeight, BlockHeaderInfo headerInfo) {
+        Bson query = Filters.eq("_id", chainId);
+        Document document = mongoDBService.findOne(SYNC_INFO_TABLE, query);
+        SyncInfo syncInfo;
+        boolean isNew = false;
+        if (document == null) {
+            isNew = true;
+            syncInfo = new SyncInfo(chainId, newHeight, headerInfo);
         } else {
-            Bson query = Filters.eq("_id", chainId);
+            syncInfo = DocumentTransferTool.toInfo(document, "chainId", SyncInfo.class);
+            syncInfo.setVersion(headerInfo.getMainVersion());
+            syncInfo.setBestHeight(headerInfo.getHeight());
+            syncInfo.setTotalSupply(syncInfo.getTotalSupply().add(headerInfo.getReward()).subtract(headerInfo.getTotalFee()));
+        }
+        document = DocumentTransferTool.toDocument(syncInfo, "chainId");
+        if (isNew) {
+            mongoDBService.insertOne(SYNC_INFO_TABLE, document);
+
+        } else {
             mongoDBService.updateOne(SYNC_INFO_TABLE, query, document);
         }
         return syncInfo;

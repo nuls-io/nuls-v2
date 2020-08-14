@@ -373,6 +373,55 @@ public class AccountController {
         return new RpcResult().setResult(pageInfo);
     }
 
+
+    @RpcMethod("getAssetRanking")
+    public RpcResult getAssetRanking(List<Object> params) {
+        VerifyUtils.verifyParams(params, 5);
+        int chainId, assetChainId, assetId, pageNumber, pageSize;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        try {
+            assetChainId = (int) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[assetChainId] is inValid");
+        }
+        try {
+            assetId = (int) params.get(2);
+        } catch (Exception e) {
+            return RpcResult.paramError("[assetId] is inValid");
+        }
+
+        try {
+            pageNumber = (int) params.get(3);
+        } catch (Exception e) {
+            return RpcResult.paramError("[pageNumber] is inValid");
+        }
+        try {
+            pageSize = (int) params.get(4);
+        } catch (Exception e) {
+            return RpcResult.paramError("[pageSize] is inValid");
+        }
+
+        if (pageNumber <= 0) {
+            pageNumber = 1;
+        }
+        if (pageSize <= 0 || pageSize > 100) {
+            pageSize = 10;
+        }
+
+        PageInfo<MiniAccountInfo> pageInfo;
+        if (CacheManager.isChainExist(chainId)) {
+            pageInfo = accountLedgerService.getAssetRanking(chainId, assetChainId, assetId, pageNumber, pageSize);
+        } else {
+            pageInfo = new PageInfo<>(pageNumber, pageSize);
+        }
+        return new RpcResult().setResult(pageInfo);
+    }
+
+
     @RpcMethod("getAccountFreezes")
     public RpcResult getAccountFreezes(List<Object> params) {
         VerifyUtils.verifyParams(params, 6);

@@ -41,12 +41,16 @@ public class TransactionInfo {
 
     private int status;
 
+    private String symbol;
+
     public void calcValue() {
         BigInteger value = BigInteger.ZERO;
-        if (coinTos != null) {
+        if (coinTos != null && !coinTos.isEmpty()) {
             for (CoinToInfo output : coinTos) {
                 value = value.add(output.getAmount());
             }
+            CoinToInfo output = coinTos.get(0);
+            this.symbol = output.getSymbol();
         }
         this.value = value;
 //        if (type == TxType.COIN_BASE ||
@@ -147,7 +151,7 @@ public class TransactionInfo {
                 resultInfo = callInfo.getResultInfo();
             }
             feeInfo = new FeeInfo(assetInfo.getChainId(), assetInfo.getAssetId(), assetInfo.getSymbol());
-            if(resultInfo != null) {
+            if (resultInfo != null) {
                 BigInteger feeValue = new BigInteger(resultInfo.getActualContractFee()).add(new BigInteger(resultInfo.getTxSizeFee()));
                 feeInfo.setValue(feeValue);
             }
@@ -182,7 +186,7 @@ public class TransactionInfo {
     public Document toDocument() {
         Document document = new Document();
         document.append("_id", hash).append("height", height).append("createTime", createTime).append("type", type)
-                .append("value", value.toString()).append("fee", DocumentTransferTool.toDocument(fee)).append("status", status);
+                .append("value", value.toString()).append("fee", DocumentTransferTool.toDocument(fee)).append("status", status).append("symbol", symbol);
         return document;
     }
 
@@ -195,6 +199,7 @@ public class TransactionInfo {
         info.setFee(DocumentTransferTool.toInfo((Document) document.get("fee"), FeeInfo.class));
         info.setValue(new BigInteger(document.getString("value")));
         info.setStatus(document.getInteger("status"));
+        info.setSymbol(document.getString("symbol"));
         return info;
     }
 
@@ -308,5 +313,13 @@ public class TransactionInfo {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
     }
 }

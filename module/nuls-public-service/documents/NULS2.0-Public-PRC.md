@@ -989,7 +989,7 @@ txType:int										//交易类型(txType),type=0时查询所有交易
 {
     "jsonrpc":"2.0",
     "method":"getAccountTxs",
-    "params":[chainId,pageNumber,pageSize,address,txType,startHeight, endHeight],                       
+    "params":[chainId,pageNumber,pageSize,address,txType,startHeight, endHeight,assetChainId, assetId],                       
     "id":1234
 }
 //参数说明
@@ -999,8 +999,9 @@ pageSize:int									//每页显示条数，取值[1-1000]
 address: string									//账户地址
 txType:int										//交易类型(txType),type=0时查询所有交易
 startHeight:long                                //打包交易的块起始高度，默认为-1,不限制
-
 endHeight:long                                  //交易的块截止高度，默认为-1，不限制
+assetChainId:int                                //资产chainId，默认为0
+assetId:int                                     //资产ID，默认为0
 ```
 
 返回：
