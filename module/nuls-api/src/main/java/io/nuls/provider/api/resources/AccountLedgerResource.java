@@ -283,11 +283,20 @@ public class AccountLedgerResource {
         if (form == null) {
             return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "form is empty"));
         }
+        if (form.getAssetChainId() == 0) {
+            form.setAssetChainId(config.getChainId());
+        }
+        if (form.getAssetId() == 0) {
+            form.setAssetId(config.getAssetsId());
+        }
         TransferReq.TransferReqBuilder builder =
-                new TransferReq.TransferReqBuilder(config.getChainId(), config.getAssetsId())
+                new TransferReq.TransferReqBuilder(config.getChainId(), form.getAssetId())
                         .addForm(form.getAddress(), form.getPassword(), form.getAmount())
                         .addTo(form.getToAddress(), form.getAmount()).setRemark(form.getRemark());
-        Result<String> result = transferService.transfer(builder.build(new TransferReq()));
+        TransferReq req = builder.build(new TransferReq());
+        req.getInputs().get(0).setAssetsChainId(form.getAssetChainId());
+        req.getOutputs().get(0).setAssetsChainId(form.getAssetChainId());
+        Result<String> result = transferService.transfer(req);
         RpcClientResult clientResult = ResultUtil.getRpcClientResult(result);
         if (clientResult.isSuccess()) {
             return clientResult.resultMap().map("value", clientResult.getData()).mapToData();

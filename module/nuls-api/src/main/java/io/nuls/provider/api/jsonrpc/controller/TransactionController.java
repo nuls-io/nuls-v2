@@ -428,11 +428,10 @@ public class TransactionController {
         }
     }
 
-
     @RpcMethod("transfer")
-    @ApiOperation(description = "单笔转账", order = 306, detailDesc = "发起单账户单资产的转账交易")
+    @ApiOperation(description = "单笔链内转账", order = 306, detailDesc = "发起单账户单资产的转账交易")
     @Parameters({
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
+            @Parameter(parameterName = "assetChainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "资产链id"),
             @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterDes = "资产id"),
             @Parameter(parameterName = "address", parameterDes = "转出账户地址"),
             @Parameter(parameterName = "toAddress", parameterDes = "转入账户地址"),
@@ -492,9 +491,9 @@ public class TransactionController {
             return RpcResult.paramError("[amount] is inValid");
         }
         TransferReq.TransferReqBuilder builder =
-                new TransferReq.TransferReqBuilder(chainId, assetId)
-                        .addForm(address, password, new BigInteger(amount))
-                        .addTo(toAddress, new BigInteger(amount)).setRemark(remark);
+                new TransferReq.TransferReqBuilder(config.getChainId(), assetId)
+                        .addForm(chainId, assetId, address, password, new BigInteger(amount))
+                        .addTo(chainId, assetId, toAddress, new BigInteger(amount)).setRemark(remark);
         Result<String> result = transferService.transfer(builder.build(new TransferReq()));
         if (result.isSuccess()) {
             Map resultMap = new HashMap(2);

@@ -45,6 +45,12 @@ public class TransferForm {
     @ApiModelProperty(description = "账户密码", required = true)
     private String password;
 
+    @ApiModelProperty(description = "资产链ID", required = false)
+    private int assetChainId;
+
+    @ApiModelProperty(description = "资产ID", required = false)
+    private int assetId;
+
     @ApiModelProperty(description = "金额", required = true)
     private BigInteger amount;
 
@@ -89,5 +95,21 @@ public class TransferForm {
 
     public void setRemark(String remark) {
         this.remark = remark;
+    }
+
+    public int getAssetChainId() {
+        return assetChainId;
+    }
+
+    public void setAssetChainId(int assetChainId) {
+        this.assetChainId = assetChainId;
+    }
+
+    public int getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(int assetId) {
+        this.assetId = assetId;
     }
 }
