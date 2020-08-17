@@ -56,10 +56,7 @@ import io.nuls.provider.utils.Log;
 import io.nuls.provider.utils.ResultUtil;
 import io.nuls.v2.model.annotation.Api;
 import io.nuls.v2.model.annotation.ApiOperation;
-import io.nuls.v2.model.dto.MultiSignTransferDto;
-import io.nuls.v2.model.dto.MultiSignTransferTxFeeDto;
-import io.nuls.v2.model.dto.TransferDto;
-import io.nuls.v2.model.dto.TransferTxFeeDto;
+import io.nuls.v2.model.dto.*;
 import io.nuls.v2.txdata.CallContractData;
 import io.nuls.v2.txdata.CreateContractData;
 import io.nuls.v2.txdata.DeleteContractData;
@@ -353,6 +350,28 @@ public class AccountLedgerResource {
     }
 
     @POST
+    @Path("/createCrossTxOffline")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(description = "离线组装跨链转账交易", order = 350, detailDesc = "根据inputs和outputs离线组装跨链转账交易，用于单账户或多账户的转账交易。" +
+            "交易手续费为inputs里本链主资产金额总和，减去outputs里本链主资产总和，再加上跨链转账的NULS手续费")
+    @Parameters({
+            @Parameter(parameterName = "transferDto", parameterDes = "跨链转账交易表单", requestType = @TypeDescriptor(value = TransferDto.class))
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "hash", description = "交易hash"),
+            @Key(name = "txHex", description = "交易序列化16进制字符串")
+    }))
+    public RpcClientResult createCrossTxOffline(TransferDto transferDto) {
+        try {
+            CommonValidator.checkTransferDto(transferDto);
+            io.nuls.core.basic.Result result = NulsSDKTool.createCrossTransferTxOffline(transferDto);
+            return ResultUtil.getRpcClientResult(result);
+        } catch (NulsException e) {
+            return RpcClientResult.getFailed(new ErrorData(e.getErrorCode().getCode(), e.getMessage()));
+        }
+    }
+
+    @POST
     @Path("/calcTransferTxFee")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(description = "计算离线创建转账交易所需手续费", order = 351)
@@ -366,6 +385,22 @@ public class AccountLedgerResource {
         BigInteger fee = NulsSDKTool.calcTransferTxFee(dto);
         Map map = new HashMap();
         map.put("value", fee.toString());
+        RpcClientResult result = RpcClientResult.getSuccess(map);
+        return result;
+    }
+
+    @POST
+    @Path("/calcCrossTxFee")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(description = "计算离线创建跨链转账交易所需手续费", order = 351)
+    @Parameters({
+            @Parameter(parameterName = "TransferTxFeeDto", parameterDes = "转账交易手续费", requestType = @TypeDescriptor(value = TransferTxFeeDto.class))
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "交易手续费"),
+    }))
+    public RpcClientResult calcCrossTxFee(CrossTransferTxFeeDto dto) {
+        Map<String, BigInteger> map = NulsSDKTool.calcCrossTransferTxFee(dto);
         RpcClientResult result = RpcClientResult.getSuccess(map);
         return result;
     }

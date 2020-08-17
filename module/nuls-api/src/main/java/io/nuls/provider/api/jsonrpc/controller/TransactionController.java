@@ -641,6 +641,68 @@ public class TransactionController {
         }
     }
 
+    @RpcMethod("createCrossTxOffline")
+    @ApiOperation(description = "离线组装转账交易", order = 350, detailDesc = "根据inputs和outputs离线组装跨链转账交易，用于单账户或多账户的跨链转账交易。" +
+            "交易手续费为inputs里本链主资产金额总和，减去outputs里本链主资产总和，加上跨链转账手续费（NULS）")
+    @Parameters({
+            @Parameter(parameterName = "transferDto", parameterDes = "转账交易表单", requestType = @TypeDescriptor(value = TransferDto.class))
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "hash", description = "交易hash"),
+            @Key(name = "txHex", description = "交易序列化16进制字符串")
+    }))
+    public RpcResult createCrossTxOffline(List<Object> params) {
+        List<Map> inputList, outputList;
+        String remark;
+
+        List<CoinFromDto> froms = new ArrayList<>();
+        List<CoinToDto> tos = new ArrayList<>();
+        try {
+            inputList = (List<Map>) params.get(0);
+            for (Map map : inputList) {
+                String amount = map.get("amount").toString();
+                map.put("amount", new BigInteger(amount));
+                CoinFromDto fromDto = JSONUtils.map2pojo(map, CoinFromDto.class);
+                froms.add(fromDto);
+            }
+        } catch (Exception e) {
+            return RpcResult.paramError("[inputList] is inValid");
+        }
+        try {
+            outputList = (List<Map>) params.get(1);
+            for (Map map : outputList) {
+                String amount = map.get("amount").toString();
+                map.put("amount", new BigInteger(amount));
+                CoinToDto toDto = JSONUtils.map2pojo(map, CoinToDto.class);
+                tos.add(toDto);
+            }
+        } catch (Exception e) {
+            return RpcResult.paramError("[outputList] is inValid");
+        }
+        try {
+            remark = (String) params.get(2);
+        } catch (Exception e) {
+            return RpcResult.paramError("[remark] is inValid");
+        }
+
+        try {
+            TransferDto transferDto = new TransferDto();
+            transferDto.setInputs(froms);
+            transferDto.setOutputs(tos);
+            transferDto.setRemark(remark);
+            CommonValidator.checkTransferDto(transferDto);
+            io.nuls.core.basic.Result result = NulsSDKTool.createCrossTransferTxOffline(transferDto);
+            if (result.isSuccess()) {
+                return RpcResult.success(result.getData());
+            } else {
+                return RpcResult.failed(result.getErrorCode(), result.getMsg());
+            }
+        } catch (NulsException e) {
+            return RpcResult.failed(e.getErrorCode(), e.format());
+        }
+    }
+
+
     @RpcMethod("calcTransferTxFee")
     @ApiOperation(description = "计算离线创建转账交易所需手续费", order = 351)
     @Parameters({
@@ -691,6 +753,68 @@ public class TransactionController {
         Map map = new HashMap();
         map.put("value", fee.toString());
 
+        return RpcResult.success(map);
+    }
+
+
+    @RpcMethod("calcCrossTxFee")
+    @ApiOperation(description = "计算离线创建跨链转账交易所需手续费", order = 351)
+    @Parameters({
+            @Parameter(parameterName = "TransferTxFeeDto", parameterDes = "转账交易手续费", requestType = @TypeDescriptor(value = TransferTxFeeDto.class))
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "交易手续费"),
+    }))
+    public RpcResult calcCrossTxFee(List<Object> params) {
+        int assetChainId, assetId, addressCount, fromLength, toLength;
+        String remark;
+        try {
+            assetChainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[assetChainId] is inValid");
+        }
+        try {
+            assetId = (int) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[assetId] is inValid");
+        }
+        try {
+            addressCount = (int) params.get(2);
+        } catch (Exception e) {
+            return RpcResult.paramError("[addressCount] is inValid");
+        }
+        try {
+            fromLength = (int) params.get(3);
+        } catch (Exception e) {
+            return RpcResult.paramError("[fromLength] is inValid");
+        }
+        try {
+            toLength = (int) params.get(4);
+        } catch (Exception e) {
+            return RpcResult.paramError("[toLength] is inValid");
+        }
+        try {
+            remark = (String) params.get(5);
+        } catch (Exception e) {
+            return RpcResult.paramError("[remark] is inValid");
+        }
+//        try {
+//            price = (String) params.get(4);
+//        } catch (Exception e) {
+//            return RpcResult.paramError("[price] is inValid");
+//        }
+//        if (!ValidateUtil.validateBigInteger(price)) {
+//            return RpcResult.paramError("[price] is inValid");
+//        }
+        CrossTransferTxFeeDto dto = new CrossTransferTxFeeDto();
+        dto.setAssetChainId(assetChainId);
+        dto.setAssetId(assetId);
+        dto.setAddressCount(addressCount);
+        dto.setFromLength(fromLength);
+        dto.setToLength(toLength);
+        dto.setRemark(remark);
+
+        Map<String, BigInteger> map = NulsSDKTool.calcCrossTransferTxFee(dto);
         return RpcResult.success(map);
     }
 
