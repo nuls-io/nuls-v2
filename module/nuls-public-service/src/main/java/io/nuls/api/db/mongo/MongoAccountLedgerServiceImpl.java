@@ -2,6 +2,7 @@ package io.nuls.api.db.mongo;
 
 import com.mongodb.client.model.*;
 import io.nuls.api.ApiContext;
+import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.DBTableConstant;
 import io.nuls.api.db.AccountLedgerService;
@@ -145,16 +146,18 @@ public class MongoAccountLedgerServiceImpl implements AccountLedgerService {
         List<MiniAccountInfo> list = new ArrayList<>();
         for (int i = 0; i < documentList.size(); i++) {
             AccountLedgerInfo ledgerInfo = DocumentTransferTool.toInfo(documentList.get(i), "key", AccountLedgerInfo.class);
-
             MiniAccountInfo accountInfo = accountService.getMiniAccountInfo(chainId, ledgerInfo.getAddress());
             accountInfo.setTotalBalance(ledgerInfo.getTotalBalance());
-            accountInfo.setLocked(ledgerInfo.getConsensusLock().add(ledgerInfo.getTimeLock()));
-            accountInfo.setDecimal(ledgerInfo.getDecimals());
+            BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, accountInfo.getAddress(), ledgerInfo.getChainId(), ledgerInfo.getAssetId());
+            accountInfo.setLocked(balanceInfo.getConsensusLock().add(balanceInfo.getTimeLock()));
+            accountInfo.setDecimal(assetInfo.getDecimals());
+
             BigDecimal b1 = new BigDecimal(accountInfo.getTotalBalance());
             BigDecimal b2 = new BigDecimal(assetInfo.getLocalTotalCoins());
-
-            double prop = b1.divide(b2, 5, RoundingMode.HALF_UP).doubleValue() * 100;
-
+            double prop = 0;
+            if (b2.compareTo(BigDecimal.ZERO) > 0) {
+                prop = b1.divide(b2, 5, RoundingMode.HALF_UP).doubleValue() * 100;
+            }
             accountInfo.setProportion(format.format(prop) + "%");
             list.add(accountInfo);
         }
