@@ -160,7 +160,16 @@ public class ContractController {
         } else {
             pageInfo = tokenService.getAccountTokens(chainId, address, pageNumber, pageSize);
         }
-
+        if (pageInfo != null && pageInfo.getList() != null && pageInfo.getList().size() > 0) {
+            List<AccountTokenInfo> list = pageInfo.getList();
+            for (AccountTokenInfo tokenInfo : list) {
+                BigInteger available = WalletRpcHandler.tokenBalance(chainId, tokenInfo.getContractAddress(), tokenInfo.getAddress()).getData();
+                BigInteger total = tokenInfo.getBalance();
+                BigInteger locked = total.subtract(available);
+                tokenInfo.setBalance(available);
+                tokenInfo.setLockedBalance(locked);
+            }
+        }
 
         RpcResult result = new RpcResult();
         result.setResult(pageInfo);

@@ -18,6 +18,8 @@ public class AccountTokenInfo {
 
     private BigInteger balance;
 
+    private BigInteger lockedBalance;
+
     private int status;
 
     private int decimals;
@@ -37,6 +39,14 @@ public class AccountTokenInfo {
         this.balance = BigInteger.ZERO;
         this.decimals = decimals;
         this.isNew = true;
+    }
+
+    public BigInteger getLockedBalance() {
+        return lockedBalance;
+    }
+
+    public void setLockedBalance(BigInteger lockedBalance) {
+        this.lockedBalance = lockedBalance;
     }
 
     public String getKey() {
