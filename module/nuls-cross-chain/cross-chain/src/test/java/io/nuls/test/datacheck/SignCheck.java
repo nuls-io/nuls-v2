@@ -14,7 +14,7 @@ import io.nuls.core.log.Log;
 public class SignCheck {
 
     public static void main(String[] args) throws NulsException {
-        String signStr = "2102b036e93c63a1e591435e9021b76a9f38db9e766f2a38af0f91a3ded3c42f5537473045022100cf9234366129869b84b2880696937c0caa1607e7c56d67d85957fa357fd42cb1022029db4f15eae5946b23c6fa73ca9b941d3d5cdee5b25868161a5e03a650b5d82f";
+        String signStr = "2103a16be2cb8826ab8ea0c53745ebb7962069d542d278cd64482e2b86c178582fdf483046022100fb21c54f4bdc458489813caf8e8e28713145363f99aa1fd0e842b5f99131e3200221009d46983c3929fe4b5f957f87e4e5c2e2ba2168fb3e1302e5b2085f2247a45c72";
 
         TransactionSignature transactionSignature = new TransactionSignature();
         transactionSignature.parse(HexUtil.decode(signStr),0);
