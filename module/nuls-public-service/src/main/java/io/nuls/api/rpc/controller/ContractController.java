@@ -166,7 +166,6 @@ public class ContractController {
                 BigInteger available = WalletRpcHandler.tokenBalance(chainId, tokenInfo.getContractAddress(), tokenInfo.getAddress()).getData();
                 BigInteger total = tokenInfo.getBalance();
                 BigInteger locked = total.subtract(available);
-                tokenInfo.setBalance(available);
                 tokenInfo.setLockedBalance(locked);
             }
         }
