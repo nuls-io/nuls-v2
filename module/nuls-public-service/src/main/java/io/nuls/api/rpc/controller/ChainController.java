@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 public class ChainController {
@@ -74,7 +75,13 @@ public class ChainController {
 //                chainInfoList.add(map);
 //            }
 //        }
-        return RpcResult.success(chainInfoList);
+        ;
+        return RpcResult.success(chainInfoList.stream().map(d->{
+            if(d.getChainId() == 9){
+                d.setChainName("NerveNetwork");
+            }
+            return d;
+        }).collect(Collectors.toList()));
     }
 
     @RpcMethod("getOtherChainInfo")
