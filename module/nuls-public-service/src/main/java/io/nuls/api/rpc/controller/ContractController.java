@@ -177,6 +177,7 @@ public class ContractController {
 
     @RpcMethod("getAccountToken")
     public RpcResult getAccountToken(List<Object> params) {
+        RpcResult result = new RpcResult();
         VerifyUtils.verifyParams(params, 3);
         int chainId;
         String address, contract;
@@ -202,11 +203,14 @@ public class ContractController {
             return RpcResult.paramError("[contract] is invalid");
         }
         AccountTokenInfo tokenInfo = tokenService.getAccountTokenInfo(chainId, address + contract);
+        if (tokenInfo == null) {
+            result.setError(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
+            return result;
+        }
         BigInteger available = WalletRpcHandler.tokenBalance(chainId, tokenInfo.getContractAddress(), tokenInfo.getAddress()).getData();
         BigInteger total = tokenInfo.getBalance();
         BigInteger locked = total.subtract(available);
         tokenInfo.setLockedBalance(locked);
-        RpcResult result = new RpcResult();
         result.setResult(tokenInfo);
         return result;
     }
