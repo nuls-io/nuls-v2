@@ -175,6 +175,42 @@ public class ContractController {
         return result;
     }
 
+    @RpcMethod("getAccountToken")
+    public RpcResult getAccountToken(List<Object> params) {
+        VerifyUtils.verifyParams(params, 3);
+        int chainId;
+        String address, contract;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is invalid");
+        }
+        try {
+            address = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[address] is invalid");
+        }
+        try {
+            contract = (String) params.get(2);
+        } catch (Exception e) {
+            return RpcResult.paramError("[contract] is invalid");
+        }
+        if (!AddressTool.validAddress(chainId, address)) {
+            return RpcResult.paramError("[address] is invalid");
+        }
+        if (!AddressTool.validContractAddress(AddressTool.getAddress(contract), chainId)) {
+            return RpcResult.paramError("[contract] is invalid");
+        }
+        AccountTokenInfo tokenInfo = tokenService.getAccountTokenInfo(chainId, address + contract);
+        BigInteger available = WalletRpcHandler.tokenBalance(chainId, tokenInfo.getContractAddress(), tokenInfo.getAddress()).getData();
+        BigInteger total = tokenInfo.getBalance();
+        BigInteger locked = total.subtract(available);
+        tokenInfo.setLockedBalance(locked);
+        RpcResult result = new RpcResult();
+        result.setResult(tokenInfo);
+        return result;
+    }
+
     @RpcMethod("getContractTokens")
     public RpcResult getContractTokens(List<Object> params) {
         VerifyUtils.verifyParams(params, 4);
