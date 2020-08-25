@@ -2,8 +2,8 @@
 cd `dirname $0`
 APP_NAME="%APP_NAME%"
 . func
-chainName=`getModuleItem ./nuls.ncf "chainName"`
-APP_NAME="${chainName}_kernel"
+#chainName=`getModuleItem ./nuls.ncf "chainName"`
+#APP_NAME="${chainName}_kernel"
 VERSION="%VERSION%"; # %Version 注入
 JAR_FILE="`pwd`/${APP_NAME}-${VERSION}.jar"
 KILL_WAIT_COUNT=120
