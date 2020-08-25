@@ -1,6 +1,8 @@
 #!/bin/bash
 cd `dirname $0`
-APP_NAME="mykernel"
+. func
+chainName=`getModuleItem ./nuls.ncf "chainName"`
+APP_NAME="${chainName}_kernel"
 KILL_WAIT_COUNT=120
 MODULE_PATH=`dirname $0`
 MODULE_PATH=`cd $MODULE_PATH; pwd`;

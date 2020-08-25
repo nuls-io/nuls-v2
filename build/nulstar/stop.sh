@@ -23,7 +23,7 @@ stop(){
     kill -9 $pid > /dev/null 2>&1
 }
 BIN_PATH=`pwd`
-APP_PID=`ps -ef|grep -w "${BIN_PATH}/Modules/Nulstar/0.1.0/Nulstar"|grep -v grep|awk '{print $2}'`
+APP_PID=`ps -ef|grep -w "${BIN_PATH}/Modules/Nulstar/Nulstar/0.1.0/Nulstar"|grep -v grep|awk '{print $2}'`
 if [ -z "${APP_PID}" ]; then
  echo "Nuls wallet not running"
         exit 0
@@ -31,7 +31,7 @@ fi
 echo "stoping"
 for pid in $APP_PID
 do
-   stop $pid "`pwd`/Modules/Nulstar"
+   stop $pid "`pwd`/Modules/Nulstar/Nulstar/0.1.0/Nulstar"
 done
 echo ""
 echo "shutdown success"
