@@ -14,6 +14,8 @@ public interface AccountService {
 
     AccountInfo getAccountInfo(int chainId, String address);
 
+    MiniAccountInfo getMiniAccountInfo(int chainId, String address);
+
     void saveAccounts(int chainId, Map<String, AccountInfo> accountInfoMap);
 
     PageInfo<AccountInfo> pageQuery(int chainId, int pageNumber, int pageSize);

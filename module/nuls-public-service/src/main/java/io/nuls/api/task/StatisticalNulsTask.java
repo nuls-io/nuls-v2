@@ -6,10 +6,12 @@ import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.db.AccountService;
 import io.nuls.api.db.AgentService;
+import io.nuls.api.db.ChainService;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.AssetInfo;
 import io.nuls.api.model.po.CoinContextInfo;
 import io.nuls.api.model.po.DestroyInfo;
+import io.nuls.api.model.po.SyncInfo;
 import io.nuls.api.model.rpc.BalanceInfo;
 import io.nuls.api.utils.AssetTool;
 import io.nuls.api.utils.LoggerUtil;
@@ -30,17 +32,24 @@ public class StatisticalNulsTask implements Runnable {
 
     private AgentService agentService;
 
+    private ChainService chainService;
 
     public StatisticalNulsTask(int chainId) {
         this.chainId = chainId;
         accountService = SpringLiteContext.getBean(AccountService.class);
         agentService = SpringLiteContext.getBean(AgentService.class);
+        chainService = SpringLiteContext.getBean(ChainService.class);
     }
 
     @Override
     public void run() {
         try {
-            BigInteger totalCoin = accountService.getAllAccountBalance(chainId);
+
+            BigInteger totalCoin = BigInteger.ZERO;
+            SyncInfo syncInfo = chainService.getSyncInfo(chainId);
+            if (syncInfo != null) {
+                totalCoin = syncInfo.getTotalSupply();
+            }
             BigInteger consensusTotal = agentService.getConsensusCoinTotal(chainId);
 
             ApiCache apiCache = CacheManager.getCache(chainId);

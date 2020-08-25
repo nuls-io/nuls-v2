@@ -1881,7 +1881,7 @@ _**详细描述: 广播离线组装的交易(不验证),成功返回true,失败�
 }
 ```
 
-### 3.6 单笔转账
+### 3.6 单笔转账(只能转账本链资产)
 #### Cmd: transfer
 _**详细描述: 发起单账户单资产的转账交易**_
 
@@ -1907,6 +1907,49 @@ _**详细描述: 发起单账户单资产的转账交易**_
   "jsonrpc" : "2.0",
   "method" : "transfer",
   "params" : [ 2, 1, "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", "tNULSeBaMhcccH1KeXhMpH5y3pvtRzatAiuMJk", "nuls123456", "10000000000000", "transfer tx" ],
+  "id" : 1234
+}
+```
+
+#### Example response data: 
+
+```json
+{
+  "jsonrpc" : "2.0",
+  "id" : "1234",
+  "result" : {
+    "hash" : "40acabd7e7b7643aa545f2b74d09f8d65eecf885919d968d263a7a24255f8698"
+  }
+}
+```
+
+### 3.6.1 单笔转账(能转账任意链资产)
+#### Cmd: transferOtherChainAsset
+_**详细描述: 发起单账户单资产的转账交易**_
+
+#### 参数列表
+| 参数名       |  参数类型  | 参数描述   | 是否必填 |
+| --------- |:------:| ------ |:----:|
+| chainId   |  int   | 链id    |  是   |
+| assetChainId   |  int   | 资产链id    |  是   |
+| assetId   |  int   | 资产id   |  是   |
+| address   | string | 转出账户地址 |  是   |
+| toAddress | string | 转入账户地址 |  是   |
+| password  | string | 转出账户密码 |  是   |
+| amount    | string | 转出金额   |  是   |
+| remark    | string | 备注     |  是   |
+
+#### 返回值
+| 字段名  |  字段类型  | 参数描述   |
+| ---- |:------:| ------ |
+| hash | string | 交易hash |
+#### Example request data: 
+
+```json
+{
+  "jsonrpc" : "2.0",
+  "method" : "transfer",
+  "params" : [ 2, 1, 1, "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", "tNULSeBaMhcccH1KeXhMpH5y3pvtRzatAiuMJk", "nuls123456", "10000000000000", "transfer tx" ],
   "id" : 1234
 }
 ```

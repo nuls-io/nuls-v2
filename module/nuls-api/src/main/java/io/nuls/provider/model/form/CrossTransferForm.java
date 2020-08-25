@@ -22,36 +22,55 @@
  * SOFTWARE.
  *
  */
-
 package io.nuls.provider.model.form;
 
 
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
 
+import java.math.BigInteger;
+
 /**
- * @author: Charlie
+ * @author Facjas
  */
-@ApiModel(name = "创建账户表单数据")
-public class AccountCreateForm{
+@ApiModel(name = "转账表单数据")
+public class CrossTransferForm {
 
-    private int chainId;
+    @ApiModelProperty(description = "账户地址")
+    private String address;
 
-    @ApiModelProperty(description = "新建账户数量")
-    private int count;
-
-    @ApiModelProperty(description = "地址前缀", required = false)
-    private String prefix;
+    @ApiModelProperty(description = "账户地址")
+    private String toAddress;
 
     @ApiModelProperty(description = "账户密码")
     private String password;
 
-    public int getCount() {
-        return count;
+    @ApiModelProperty(description = "资产chainId")
+    private int assetChainId;
+
+    @ApiModelProperty(description = "资产Id")
+    private int assetId;
+
+    @ApiModelProperty(description = "金额")
+    private BigInteger amount;
+
+    @ApiModelProperty(description = "备注", required = false)
+    private String remark;
+
+    public String getAddress() {
+        return address;
     }
 
-    public void setCount(int count) {
-        this.count = count;
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getToAddress() {
+        return toAddress;
+    }
+
+    public void setToAddress(String toAddress) {
+        this.toAddress = toAddress;
     }
 
     public String getPassword() {
@@ -62,19 +81,35 @@ public class AccountCreateForm{
         this.password = password;
     }
 
-    public String getPrefix() {
-        return prefix;
+    public BigInteger getAmount() {
+        return amount;
     }
 
-    public void setPrefix(String prefix) {
-        this.prefix = prefix;
+    public void setAmount(BigInteger amount) {
+        this.amount = amount;
     }
 
-    public int getChainId() {
-        return chainId;
+    public String getRemark() {
+        return remark;
     }
 
-    public void setChainId(int chainId) {
-        this.chainId = chainId;
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
+
+    public int getAssetChainId() {
+        return assetChainId;
+    }
+
+    public void setAssetChainId(int assetChainId) {
+        this.assetChainId = assetChainId;
+    }
+
+    public int getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(int assetId) {
+        this.assetId = assetId;
     }
 }

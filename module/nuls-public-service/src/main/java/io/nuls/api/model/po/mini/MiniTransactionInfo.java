@@ -22,6 +22,8 @@ public class MiniTransactionInfo {
 
     private int status;
 
+    private String symbol;
+
     public static MiniTransactionInfo toInfo(Document document) {
         MiniTransactionInfo info = new MiniTransactionInfo();
         info.hash = document.getString("_id");
@@ -31,7 +33,7 @@ public class MiniTransactionInfo {
         info.value = new BigInteger(document.getString("value"));
         info.status = document.getInteger("status");
         info.fee = DocumentTransferTool.toInfo((Document) document.get("fee"), FeeInfo.class);
-
+        info.symbol = document.getString("symbol");
         return info;
     }
 
@@ -89,5 +91,13 @@ public class MiniTransactionInfo {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
     }
 }

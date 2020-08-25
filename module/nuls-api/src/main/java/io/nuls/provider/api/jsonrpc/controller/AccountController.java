@@ -576,14 +576,14 @@ public class AccountController {
         if (!FormatValidUtils.validPassword(password)) {
             return RpcResult.paramError("[password] is inValid");
         }
-        if (!Context.isChainExist(chainId)) {
-            return RpcResult.paramError(String.format("chainId [%s] is invalid", chainId));
-        }
+//        if (!Context.isChainExist(chainId)) {
+//            return RpcResult.paramError(String.format("chainId [%s] is invalid", chainId));
+//        }
         io.nuls.core.basic.Result<List<AccountDto>> result;
         if (StringUtils.isBlank(prefix)) {
             result = NulsSDKTool.createOffLineAccount(count, password);
         } else {
-            result = NulsSDKTool.createOffLineAccount(count, prefix, password);
+            result = NulsSDKTool.createOffLineAccount(chainId, count, prefix, password);
         }
         return ResultUtil.getJsonRpcResult(result);
     }

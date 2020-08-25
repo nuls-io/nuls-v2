@@ -5,8 +5,14 @@ cd "${MODULE_PATH}"
 echo "MODULE_PATH is ${MODULE_PATH}"
 
 LOGS_DIR="${MODULE_PATH}/log"
-
+JAVA_FILE_NAME="${MODULE_PATH}/JAVA/JRE/11.0.2/bin/java"
 APP_NAME="nuls-api-offline" # %APP_NAME 注入
+
+if test -x $JAVA_FILE_NAME ; then
+    echo "java file permission ok"
+else
+    chmod +x $JAVA_FILE_NAME
+fi
 
 if [ -d ./JAVA/JRE/11.0.2 ]; then
     JAVA_HOME=`dirname "./JAVA/JRE/11.0.2/bin"`;

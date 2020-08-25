@@ -71,6 +71,30 @@ public class MongoAccountServiceImpl implements AccountService {
         return accountInfo.copy();
     }
 
+    public MiniAccountInfo getMiniAccountInfo(int chainId, String address) {
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        if (apiCache == null) {
+            return null;
+        }
+        AccountInfo accountInfo = apiCache.getAccountInfo(address);
+        if (accountInfo == null) {
+            Document document = mongoDBService.findOne(ACCOUNT_TABLE + chainId, Filters.eq("_id", address));
+            if (document == null) {
+                return null;
+            }
+            accountInfo = DocumentTransferTool.toInfo(document, "address", AccountInfo.class);
+            while (addressList.size() >= cacheSize) {
+                address = addressList.remove(0);
+                apiCache.getAccountMap().remove(address);
+            }
+            apiCache.addAccountInfo(accountInfo);
+            addressList.add(accountInfo.getAddress());
+        }
+
+        return new MiniAccountInfo(accountInfo);
+    }
+
+
     public void saveAccounts(int chainId, Map<String, AccountInfo> accountInfoMap) {
         if (accountInfoMap.isEmpty()) {
             return;
