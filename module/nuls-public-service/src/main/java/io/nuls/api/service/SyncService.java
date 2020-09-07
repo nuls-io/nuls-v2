@@ -253,6 +253,9 @@ public class SyncService {
                 accountInfo.setTotalReward(accountInfo.getTotalReward().add(output.getAmount()));
                 accountInfo.setLastReward(output.getAmount());
             }
+//            AccountLedgerInfo ledgerInfo = queryLedgerInfo(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
+//            ledgerInfo.setTotalBalance(ledgerInfo.getTotalBalance().add(output.getAmount()));
+//            txRelationInfoSet.add(new TxRelationInfo(output, tx, ledgerInfo.getTotalBalance()));
         }
         for (String address : addressSet) {
             AccountInfo accountInfo = queryAccountInfo(chainId, address);
