@@ -72,7 +72,7 @@ public class ForwardSmallBlockHandler implements MessageProcessor {
             NetworkCall.setHashAndHeight(chainId, blockHash, height, nodeId);
         }
         BlockForwardEnum status = SmallBlockCacher.getStatus(chainId, blockHash);
-        logger.debug("recieve " + message + " from node-" + nodeId + ", hash:" + blockHash);
+//        logger.debug("recieve " + message + " from node-" + nodeId + ", hash:" + blockHash);
         List<String> nodes = context.getOrphanBlockRelatedNodes().get(blockHash);
         if (nodes != null && !nodes.contains(nodeId)) {
             nodes.add(nodeId);
