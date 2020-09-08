@@ -111,10 +111,14 @@ public class TrieImpl implements Trie<byte[]> {
         }
 
         private void resolve() {
-            if (!resolveCheck()) {
+            //TODO pierre test +
+            logger.error("Invalid Trie state, can't resolve hash " + toHexString(hash));
+            throw new RuntimeException("Invalid Trie state, can't resolve hash " + toHexString(hash));
+            //TODO pierre -
+            /*if (!resolveCheck()) {
                 logger.error("Invalid Trie state, can't resolve hash " + toHexString(hash));
                 throw new RuntimeException("Invalid Trie state, can't resolve hash " + toHexString(hash));
-            }
+            }*/
         }
 
         public byte[] encode() {
