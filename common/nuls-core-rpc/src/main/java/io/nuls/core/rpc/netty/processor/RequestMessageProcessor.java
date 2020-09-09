@@ -514,8 +514,14 @@ public class RequestMessageProcessor {
         Method method = clz.getDeclaredMethod(invokeMethod, Map.class);
         BaseCmd cmd = (BaseCmd) handlerMap.get(invokeClass);
         if (cmd == null) {
-            return MessageUtil.newFailResponse("",  CMD_NOT_FOUND);
+            return MessageUtil.newFailResponse("", CMD_NOT_FOUND);
         }
-        return (Response) method.invoke(cmd, params);
+        long start = System.currentTimeMillis();
+        Response response = (Response) method.invoke(cmd, params);
+        long use = System.currentTimeMillis() - start;
+        if (use > 1000) {
+            Log.warn(invokeMethod + " , use:{}ms", use);
+        }
+        return response;
     }
 }
