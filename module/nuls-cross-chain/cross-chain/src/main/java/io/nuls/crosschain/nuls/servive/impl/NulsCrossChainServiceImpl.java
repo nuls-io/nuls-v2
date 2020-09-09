@@ -110,7 +110,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             List<CoinTo> coinToList = coinDataManager.assemblyCoinTo(crossTxTransferDTO.getListTo(), chain);
             coinDataManager.verifyCoin(coinFromList, coinToList, chain);
             int txSize = tx.size();
-            txSize += P2PHKSignature.SERIALIZE_LENGTH;
+//            txSize += P2PHKSignature.SERIALIZE_LENGTH;
             CoinData coinData = coinDataManager.getCrossCoinData(chain, coinFromList, coinToList, txSize, config.isMainNet());
             tx.setCoinData(coinData.serialize());
             tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
