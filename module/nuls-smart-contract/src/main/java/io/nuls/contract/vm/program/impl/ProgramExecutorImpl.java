@@ -257,7 +257,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         programInvoke.setSenderPublicKey(programCall.getSenderPublicKey());
         long start = System.nanoTime();
         ProgramResult result = execute(programInvoke);
-        Log.info("=========== total use:{}ns",System.nanoTime()-start);
+        Log.info("=========== total use:{}ms",(System.nanoTime()-start)/1000000);
         return result;
     }
 
