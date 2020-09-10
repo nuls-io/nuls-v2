@@ -255,7 +255,10 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         programInvoke.setInternalCall(programCall.isInternalCall());
         programInvoke.setViewMethod(programCall.isViewMethod());
         programInvoke.setSenderPublicKey(programCall.getSenderPublicKey());
-        return execute(programInvoke);
+        long start = System.nanoTime();
+        ProgramResult result = execute(programInvoke);
+        Log.info("=========== total use:{}ns",System.nanoTime()-start);
+        return result;
     }
 
     private Map<String, Map<ObjectRef, Map<String, Object>>> contractObjects;
@@ -264,6 +267,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
     private Map<String, BigIntegerWrapper> contractObjectRefCount;
 
     private ProgramResult execute(ProgramInvoke programInvoke) {
+        long startTime = System.nanoTime();
         if (programInvoke.getPrice() < 1) {
             return revert("gas price must be greater than zero");
         }
@@ -286,7 +290,9 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         blockNumber = programInvoke.getNumber();
 
         logTime("start");
-
+        long use = System.nanoTime()-startTime;
+        Log.info("================step 0.1 : {}ns",use);
+        startTime = System.nanoTime();
         VM vm = null;
         try {
             byte[] contractAddressBytes = programInvoke.getContractAddress();
@@ -333,7 +339,9 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
             vm = VMFactory.createVM();
             logTime("load vm");
-
+            use = System.nanoTime()-startTime;
+            Log.info("================step 0.2 : {}ns",use);
+            startTime = System.nanoTime();
             vm.setProgramExecutor(this);
             vm.heap.loadClassCodes(classCodes);
             // add by pierre at 2019-11-21 标记 当存在合约内部调用合约，共享同一个合约的内存数据 需要协议升级 done
@@ -392,7 +400,9 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             vm.methodArea.loadClassCodes(classCodes);
 
             logTime("load classes");
-
+            use = System.nanoTime()-startTime;
+            Log.info("================step 0.3 : {}ns",use);
+            startTime = System.nanoTime();
             ClassCode contractClassCode = getContractClassCode(classCodes);
             String methodDesc = ProgramDescriptors.parseDesc(methodDescBase);
             MethodCode methodCode = vm.methodArea.loadMethod(contractClassCode.name, methodName, methodDesc);
@@ -425,7 +435,9 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             }
 
             logTime("load method");
-
+            use = System.nanoTime()-startTime;
+            Log.info("================step 0.4 : {}ns",use);
+            startTime = System.nanoTime();
             ObjectRef objectRef;
             if (programInvoke.isCreate()) {
                 objectRef = vm.heap.newContract(contractAddressBytes, contractClassCode, repository);
@@ -455,7 +467,10 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             // end code by pierre
 
             logTime("load contract ref");
+            use = System.nanoTime()-startTime;
+            Log.info("================step 0.5 : {}ns",use);
 
+            startTime = System.nanoTime();
             if (transferValue.compareTo(BigInteger.ZERO) > 0) {
                 getAccount(contractAddressBytes).addBalance(transferValue);
             }
@@ -464,6 +479,8 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             vm.addGasUsed(contractCodeData == null ? 0 : contractCodeData.length);
 
             logTime("load end");
+            use = System.nanoTime()-startTime;
+            Log.info("================step 0.6 : {}ns",use);
 
             vm.run(objectRef, methodCode, vmContext, programInvoke);
 
