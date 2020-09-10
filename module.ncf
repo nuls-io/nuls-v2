@@ -92,7 +92,7 @@ dependent=protocol-update,smart-contract,cross-chain
 #合约视图方法调用最大消耗的Gas
 maxViewGas=100000000
 systemLogLevel=WARN
-crossTokenSystemContract=tNULSeBaN53PMBv2aFv4mBYegx1chV22NCrCpA
+crossTokenSystemContract=tNULSeBaN5MkYxC7ivr23SbRnHrsmJDg86R7Kv
 dependent=protocol-update
 
 [public-service]
@@ -116,6 +116,8 @@ mappingAddress=
 businessAddress=
 teamAddress=
 communityAddress=
+syncCoinBase=true
+syncAddress=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
 dependent=smart-contract,cross-chain
 
 [cross-chain]

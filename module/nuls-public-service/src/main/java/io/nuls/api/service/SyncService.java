@@ -253,9 +253,20 @@ public class SyncService {
                 accountInfo.setTotalReward(accountInfo.getTotalReward().add(output.getAmount()));
                 accountInfo.setLastReward(output.getAmount());
             }
-//            AccountLedgerInfo ledgerInfo = queryLedgerInfo(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
-//            ledgerInfo.setTotalBalance(ledgerInfo.getTotalBalance().add(output.getAmount()));
-//            txRelationInfoSet.add(new TxRelationInfo(output, tx, ledgerInfo.getTotalBalance()));
+
+            if (ApiContext.syncCoinBase) {
+                if (!ApiContext.syncAddress.isEmpty()) {
+                    if (ApiContext.syncAddress.contains(output.getAddress())) {
+                        AccountLedgerInfo ledgerInfo = queryLedgerInfo(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
+                        ledgerInfo.setTotalBalance(ledgerInfo.getTotalBalance().add(output.getAmount()));
+                        txRelationInfoSet.add(new TxRelationInfo(output, tx, ledgerInfo.getTotalBalance()));
+                    }
+                } else {
+                    AccountLedgerInfo ledgerInfo = queryLedgerInfo(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
+                    ledgerInfo.setTotalBalance(ledgerInfo.getTotalBalance().add(output.getAmount()));
+                    txRelationInfoSet.add(new TxRelationInfo(output, tx, ledgerInfo.getTotalBalance()));
+                }
+            }
         }
         for (String address : addressSet) {
             AccountInfo accountInfo = queryAccountInfo(chainId, address);
@@ -759,7 +770,6 @@ public class SyncService {
                 txRelationInfoSet.add(new TxRelationInfo(to, tx, ledgerInfo.getTotalBalance()));
             }
         }
-
 
         ChainInfo chainInfo = (ChainInfo) tx.getTxData();
         ChainInfo info = queryChainInfo(chainInfo.getChainId());

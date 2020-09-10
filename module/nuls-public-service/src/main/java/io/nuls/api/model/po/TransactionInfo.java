@@ -1,10 +1,8 @@
 package io.nuls.api.model.po;
 
-import io.nuls.api.ApiContext;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.utils.DBUtil;
 import io.nuls.api.utils.DocumentTransferTool;
-import io.nuls.base.basic.AddressTool;
 import io.nuls.core.constant.TxType;
 import org.bson.Document;
 
@@ -43,6 +41,8 @@ public class TransactionInfo {
 
     private String symbol;
 
+    private int decimal;
+
     public void calcValue() {
         BigInteger value = BigInteger.ZERO;
         if (coinTos != null && !coinTos.isEmpty()) {
@@ -51,6 +51,7 @@ public class TransactionInfo {
             }
             CoinToInfo output = coinTos.get(0);
             this.symbol = output.getSymbol();
+            this.decimal = output.getDecimal();
         }
         this.value = value;
 //        if (type == TxType.COIN_BASE ||
@@ -185,7 +186,7 @@ public class TransactionInfo {
 
     public Document toDocument() {
         Document document = new Document();
-        document.append("_id", hash).append("height", height).append("createTime", createTime).append("type", type)
+        document.append("_id", hash).append("height", height).append("createTime", createTime).append("type", type).append("decimal", decimal)
                 .append("value", value.toString()).append("fee", DocumentTransferTool.toDocument(fee)).append("status", status).append("symbol", symbol);
         return document;
     }
@@ -200,6 +201,7 @@ public class TransactionInfo {
         info.setValue(new BigInteger(document.getString("value")));
         info.setStatus(document.getInteger("status"));
         info.setSymbol(document.getString("symbol"));
+        info.setDecimal(document.getInteger("decimal"));
         return info;
     }
 
@@ -321,5 +323,13 @@ public class TransactionInfo {
 
     public void setSymbol(String symbol) {
         this.symbol = symbol;
+    }
+
+    public int getDecimal() {
+        return decimal;
+    }
+
+    public void setDecimal(int decimal) {
+        this.decimal = decimal;
     }
 }

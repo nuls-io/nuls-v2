@@ -41,6 +41,7 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.config.ConfigurationLoader;
 import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.model.ModuleE;
@@ -145,6 +146,12 @@ public class PublicServiceBootstrap extends RpcModule {
         ApiContext.maxAliveConnect = apiConfig.getMaxAliveConnect();
         ApiContext.connectTimeOut = apiConfig.getConnectTimeOut();
         ApiContext.socketTimeout = apiConfig.getSocketTimeout();
+        ApiContext.syncCoinBase = apiConfig.isSyncCoinBase();
+        if (StringUtils.isNotBlank(apiConfig.getSyncAddress())) {
+            for (String address : apiConfig.getSyncAddress().split(",")) {
+                ApiContext.syncAddress.add(address);
+            }
+        }
 
         ApiContext.blackHolePublicKey = Hex.decode(apiConfig.getBlackHolePublicKey());
         if (apiConfig.getDeveloperNodeAddress() != null) {

@@ -811,10 +811,12 @@ public class AnalysisHandler {
             chainInfo.setChainId(txChain.getDefaultAsset().getChainId());
 
             AssetInfo assetInfo = new AssetInfo();
-            assetInfo.setAssetId(txChain.getDefaultAsset().getAssetId());
-            assetInfo.setChainId(txChain.getDefaultAsset().getChainId());
-            assetInfo.setSymbol(txChain.getDefaultAsset().getSymbol());
-            assetInfo.setInitCoins(txChain.getDefaultAsset().getInitNumber());
+            TxAsset txAsset = txChain.getDefaultAsset();
+            assetInfo.setAssetId(txAsset.getAssetId());
+            assetInfo.setChainId(txAsset.getChainId());
+            assetInfo.setSymbol(txAsset.getSymbol());
+            assetInfo.setInitCoins(txAsset.getInitNumber());
+            assetInfo.setDecimals(txAsset.getDecimalPlaces());
             chainInfo.setDefaultAsset(assetInfo);
             chainInfo.getAssets().add(assetInfo);
         } else if (version == 4) {
@@ -823,10 +825,12 @@ public class AnalysisHandler {
             chainInfo.setChainId(txChain.getDefaultAsset().getChainId());
 
             AssetInfo assetInfo = new AssetInfo();
-            assetInfo.setAssetId(txChain.getDefaultAsset().getAssetId());
-            assetInfo.setChainId(txChain.getDefaultAsset().getChainId());
-            assetInfo.setSymbol(txChain.getDefaultAsset().getSymbol());
-            assetInfo.setInitCoins(txChain.getDefaultAsset().getInitNumber());
+            io.nuls.api.model.entity.v4.TxAsset txAsset = txChain.getDefaultAsset();
+            assetInfo.setAssetId(txAsset.getAssetId());
+            assetInfo.setChainId(txAsset.getChainId());
+            assetInfo.setSymbol(txAsset.getSymbol());
+            assetInfo.setInitCoins(txAsset.getInitNumber());
+            assetInfo.setDecimals(txAsset.getDecimalPlaces());
             chainInfo.setDefaultAsset(assetInfo);
             chainInfo.getAssets().add(assetInfo);
         } else {
@@ -836,16 +840,15 @@ public class AnalysisHandler {
             chainInfo.setChainName(txChain.getName());
 
             AssetInfo assetInfo = new AssetInfo();
-            assetInfo.setAssetId(txChain.getDefaultAsset().getAssetId());
-            assetInfo.setChainId(txChain.getDefaultAsset().getChainId());
-            assetInfo.setSymbol(txChain.getDefaultAsset().getSymbol());
-            assetInfo.setInitCoins(txChain.getDefaultAsset().getInitNumber());
-            assetInfo.setDecimals(txChain.getDefaultAsset().getDecimalPlaces());
+            io.nuls.api.model.entity.v5.TxAsset txAsset = txChain.getDefaultAsset();
+            assetInfo.setAssetId(txAsset.getAssetId());
+            assetInfo.setChainId(txAsset.getChainId());
+            assetInfo.setSymbol(txAsset.getSymbol());
+            assetInfo.setInitCoins(txAsset.getInitNumber());
+            assetInfo.setDecimals(txAsset.getDecimalPlaces());
             chainInfo.setDefaultAsset(assetInfo);
             chainInfo.getAssets().add(assetInfo);
         }
-
-
         return chainInfo;
     }
 
@@ -859,6 +862,7 @@ public class AnalysisHandler {
             assetInfo.setChainId(txAsset.getChainId());
             assetInfo.setSymbol(txAsset.getSymbol());
             assetInfo.setInitCoins(txAsset.getInitNumber());
+            assetInfo.setDecimals(txAsset.getDecimalPlaces());
             assetInfo.setAddress("");
         } else {
             TxAsset txAsset = new TxAsset();
@@ -868,6 +872,7 @@ public class AnalysisHandler {
             assetInfo.setChainId(txAsset.getChainId());
             assetInfo.setSymbol(txAsset.getSymbol());
             assetInfo.setInitCoins(txAsset.getInitNumber());
+            assetInfo.setDecimals(txAsset.getDecimalPlaces());
             assetInfo.setAddress(AddressTool.getStringAddressByBytes(txAsset.getAddress()));
         }
 
