@@ -60,12 +60,13 @@ public class ContractCallerImpl implements ContractCaller {
 
     private static ExecutorService TX_EXECUTOR_SERVICE;
     static {
-        int availableProcessors = Runtime.getRuntime().availableProcessors();
+        /*int availableProcessors = Runtime.getRuntime().availableProcessors();
         int threadCount = 4;
         // 线程数最大4个，线程核心小于4时，使用线程核心数
         if(availableProcessors < threadCount) {
             threadCount = availableProcessors;
-        }
+        }*/
+        int threadCount = 1;
         TX_EXECUTOR_SERVICE =
                 new ThreadPoolExecutor(
                         threadCount,
@@ -107,9 +108,9 @@ public class ContractCallerImpl implements ContractCaller {
             Future<ContractResult> contractResultFuture = TX_EXECUTOR_SERVICE.submit(txCallable);
             String hash = tx.getHash().toHex();
             batchInfo.getContractMap().put(hash, contractResultFuture);
-            //if(Log.isDebugEnabled()) {
-            //    Log.debug("contract-tx-executor-pool put hash [{}]", hash);
-            //}
+            if(Log.isDebugEnabled()) {
+                Log.debug("contract-tx-executor-pool put hash [{}]", hash);
+            }
             container.getFutureList().add(contractResultFuture);
 
             return getSuccess();
