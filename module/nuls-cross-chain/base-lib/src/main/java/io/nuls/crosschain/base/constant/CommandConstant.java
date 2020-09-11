@@ -58,4 +58,9 @@ public interface CommandConstant {
      * */
     String  CIRCULATION_MESSAGE = "recvCirculat";
 
+    /**
+     * 对指定跨链交易重新进行拜赞庭签名广播
+     */
+    String CROSS_TX_REHANDLE_MESSAGE = "crossTxRehandle";
+
 }

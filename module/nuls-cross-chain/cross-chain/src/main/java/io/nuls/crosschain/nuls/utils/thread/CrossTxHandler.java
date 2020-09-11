@@ -28,7 +28,6 @@ public class CrossTxHandler implements Runnable {
         }
         if(transaction.getType() == TxType.CROSS_CHAIN){
             TxUtil.localCtxByzantine(transaction,chain);
-
         }else{
             TxUtil.handleNewCtx(transaction,chain,null);
         }
