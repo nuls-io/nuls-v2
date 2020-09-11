@@ -41,6 +41,11 @@ public class CrossChainProviderForRpc extends BaseRpcService implements CrossCha
         });
     }
 
+    @Override
+    public Result<String> rehandleCtx(RehandleCtxReq req) {
+        return  callReturnString("crossTxRehandle",req,"msg");
+    }
+
 
     private <T> Result<T> _call(String method, Object req, Function<Map, Result> callback){
         return call(method,req,callback);

@@ -60,6 +60,9 @@ public class CrossTxRehandleMsgHandler implements MessageProcessor {
                     chain.getLogger().info("该跨链转账交易之前已处理完成，不需重复处理：{}",message.getCtxHash().toHex() );
                     return ;
                 }
+            }else {
+                chain.getLogger().error("处理【重新处理跨链交易拜赞庭签名】失败，ctx hash : [{}] 不正确",message.getCtxHash().toHex());
+                return ;
             }
             chain.getLogger().debug("对ctx:[{}]重新进行拜占庭验证：{}", message.getCtxHash().toHex());
             int syncStatus = BlockCall.getBlockStatus(chain);

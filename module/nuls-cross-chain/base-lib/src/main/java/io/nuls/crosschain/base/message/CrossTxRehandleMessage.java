@@ -55,5 +55,11 @@ public class CrossTxRehandleMessage extends BaseMessage {
         this.ctxHash = ctxHash;
     }
 
+    public long getBlockHeight() {
+        return blockHeight;
+    }
 
+    public void setBlockHeight(long blockHeight) {
+        this.blockHeight = blockHeight;
+    }
 }
