@@ -1,8 +1,14 @@
 package io.nuls.crosschain.nuls.message;
 
 import io.nuls.base.RPCUtil;
+import io.nuls.base.api.provider.Result;
+import io.nuls.base.api.provider.ServiceManager;
+import io.nuls.base.api.provider.transaction.TransferService;
+import io.nuls.base.api.provider.transaction.facade.GetConfirmedTxByHashReq;
+import io.nuls.base.data.Transaction;
 import io.nuls.base.protocol.MessageProcessor;
 import io.nuls.core.constant.TxStatusEnum;
+import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
@@ -36,6 +42,8 @@ public class CrossTxRehandleMsgHandler implements MessageProcessor {
     @Autowired
     private ChainManager chainManager;
 
+    TransferService transferService = ServiceManager.get(TransferService.class);
+
     @Override
     public String getCmd() {
         return CommandConstant.CROSS_TX_REHANDLE_MESSAGE;
@@ -44,15 +52,15 @@ public class CrossTxRehandleMsgHandler implements MessageProcessor {
     @Override
     public void process(int chainId, String nodeId, String messageStr) {
         CrossTxRehandleMessage message = RPCUtil.getInstanceRpcStr(messageStr, CrossTxRehandleMessage.class);
-        String hash;
+        String messageHash;
         try {
-            hash = HexUtil.encode(message.serialize());
+            messageHash = HexUtil.encode(message.serialize());
         } catch (IOException e) {
             Log.error("解析消息CrossTxRehandleMessage消息发生异常");
             return ;
         }
         //如果没有处理过这个消息才处理
-        if(processorOfTx.insertAndCheck(hash)){
+        if(processorOfTx.insertAndCheck(messageHash) || true){
             Chain chain = chainManager.getChainMap().get(chainId);
             CtxStatusPO ctxStatusPO = ctxStatusService.get(message.getCtxHash(), chainId);
             if(ctxStatusPO != null){
@@ -60,14 +68,22 @@ public class CrossTxRehandleMsgHandler implements MessageProcessor {
                     chain.getLogger().info("该跨链转账交易之前已处理完成，不需重复处理：{}",message.getCtxHash().toHex() );
                     return ;
                 }
-            }else {
-                chain.getLogger().error("处理【重新处理跨链交易拜赞庭签名】失败，ctx hash : [{}] 不正确",message.getCtxHash().toHex());
+            }
+            String ctxHash = message.getCtxHash().toHex();
+            chain.getLogger().debug("对ctx:[{}]重新进行拜占庭验证", ctxHash);
+            Result<Transaction> tx = transferService.getConfirmedTxByHash(new GetConfirmedTxByHashReq(ctxHash));
+            if(tx.isFailed()){
+                chain.getLogger().error("处理【重新处理跨链交易拜赞庭签名】失败，ctx hash : [{}] 不正确",ctxHash);
                 return ;
             }
-            chain.getLogger().debug("对ctx:[{}]重新进行拜占庭验证：{}", message.getCtxHash().toHex());
+            Transaction transaction = tx.getData();
+            if(transaction.getType() != TxType.CROSS_CHAIN){
+                chain.getLogger().error("处理【重新处理跨链交易拜赞庭签名】失败，ctx hash : [{}] 不是一个跨链交易",ctxHash);
+                return ;
+            }
             int syncStatus = BlockCall.getBlockStatus(chain);
             //发起拜占庭验证
-            chain.getCrossTxThreadPool().execute(new CrossTxHandler(chain,  ctxStatusPO.getTx(), syncStatus));
+            chain.getCrossTxThreadPool().execute(new CrossTxHandler(chain,  tx.getData(), syncStatus));
         }
     }
 
