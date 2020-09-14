@@ -5,7 +5,7 @@ logPath=../../../../Logs
 logLevel=INFO
 dataPath=../../../../data
 #默认本链ID
-chainId=1
+chainId=2
 #地址前缀
 addressPrefix=NULS
 #默认本链主资产ID
@@ -17,7 +17,7 @@ chainName=nuls
 #本链默认资产符号
 symbol=NULS
 #主网链id
-mainChainId=1
+mainChainId=2
 #主网主资产id
 mainAssetId=1
 #主网主资产符号
@@ -28,11 +28,11 @@ blackHolePublicKey=0000000000000000000000000000000000000000000000000000000000000
 port=8001
 crossPort=8002
 #魔法参数
-packetMagic=20191222
+packetMagic=20200908
 #种子节点
-selfSeedIps=seeda.nuls.io:8001,seedb.nuls.io:8001,seedc.nuls.io:8001,seedd.nuls.io:8001,seede.nuls.io:8001,seedf.nuls.io:8001
+selfSeedIps=192.168.1.37:8001
 #主网的跨链种子连接节点
-moonSeedIps=seeda.nuls.io:8002,seedb.nuls.io:8002,seedc.nuls.io:8002,seedd.nuls.io:8002,seede.nuls.io:8002,seedf.nuls.io:8002
+moonSeedIps=192.168.1.37:8002
 #最大入网连接数
 maxInCount=300
 #最大出网连接数
@@ -50,7 +50,7 @@ extendMaxSize=1024
 #引发分叉链切换的高度差阈值
 chainSwtichThreshold=3
 #最小链接节点数,当链接到的网络节点低于此参数时,会持续等待
-minNodeAmount=2
+minNodeAmount=0
 #区块同步过程中,每次从网络上节点下载的区块数量
 downloadNumber=10
 #从网络节点下载单个区块的超时时间
@@ -63,7 +63,7 @@ dependent=cross-chain,smart-contract,protocol-update
 
 [consensus]
 #种子节点列表
-seedNodes=NULSd6Hge7xHDnvsSpnzbR2gWHd31zJ1How11,NULSd6Hgc5VNP4rF4wxdiXEQKpBKUE4w5RS22,NULSd6HgeQwXLdre69ArkqVZNDqMLU4CaAz33,NULSd6HgcjAKAgq8jjXgBCcNLEJUvJEYcoj44,NULSd6HgiDdTjcuvhqzm3bomyBFZmosV3ei55
+seedNodes=tNULSeBaMoG1oaW1JZnh6Ly65Ttp6raeTFBfCG
 #出块地址密码
 password=nuls123456
 #出块间隔时间(单位：s)
@@ -135,9 +135,9 @@ sendHeight=6
 #跨链交易拜占庭比例
 byzantineRatio=66
 #主网跨链种子节点列表
-crossSeedIps=seeda.nuls.io:8002,seedb.nuls.io:8002,seedc.nuls.io:8002,seedd.nuls.io:8002,seede.nuls.io:8002,seedf.nuls.io:8002
+crossSeedIps=192.168.1.37:8002
 #主网验证人列表
-verifiers=NULSd6Hge7xHDnvsSpnzbR2gWHd31zJ1How11,NULSd6Hgc5VNP4rF4wxdiXEQKpBKUE4w5RS22,NULSd6HgeQwXLdre69ArkqVZNDqMLU4CaAz33,NULSd6HgcjAKAgq8jjXgBCcNLEJUvJEYcoj44,NULSd6HgiDdTjcuvhqzm3bomyBFZmosV3ei55
+verifiers=tNULSeBaMoG1oaW1JZnh6Ly65Ttp6raeTFBfCG
 #主网签名拜占庭比列
 mainByzantineRatio=66
 #主网最大签名数
