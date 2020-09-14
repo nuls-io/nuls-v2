@@ -183,10 +183,17 @@ public class ContractServiceImpl implements ContractService {
             String preStateRoot = batchInfo.getPreStateRoot();
             ProgramExecutor batchExecutor = batchInfo.getBatchExecutor();
             // 等上次的执行完
-            //container.loadFutureList();
+            container.loadFutureList();
             // 多线程执行合约
             Result result = contractCaller.callTx(chainId, container, batchExecutor, wrapperTx, preStateRoot);
             return result;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            Log.error(e);
+            return getFailed().setMsg(e.getMessage());
+        } catch (ExecutionException e) {
+            Log.error(e);
+            return getFailed().setMsg(e.getMessage());
         } catch (NulsException e) {
             Log.error(e);
             return Result.getFailed(e.getErrorCode() == null ? FAILED : e.getErrorCode());
