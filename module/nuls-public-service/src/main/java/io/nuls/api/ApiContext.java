@@ -21,7 +21,9 @@
 package io.nuls.api;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -86,6 +88,10 @@ public class ApiContext {
     public static long networkHeight;
 
     public static int magicNumber;
+
+    public static boolean syncCoinBase;
+
+    public static List<String> syncAddress = new ArrayList<>();
     //开发者节点地址
     public static Set<String> DEVELOPER_NODE_ADDRESS = new HashSet<>();
     //大使节点地址
