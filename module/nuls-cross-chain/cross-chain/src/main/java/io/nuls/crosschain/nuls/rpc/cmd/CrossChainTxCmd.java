@@ -70,11 +70,11 @@ public class CrossChainTxCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = CommandConstant.CROSS_TX_REHANDLE_MESSAGE, version = 1.0, description = "通过交易hash在跨链模块查询交易详情")
     @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
-    @Parameter(parameterName = "txHash", parameterType = "String", parameterDes = "交易hash")
+    @Parameter(parameterName = "ctxHash", parameterType = "String", parameterDes = "交易hash")
     @Parameter(parameterName = "blockHeight", requestType = @TypeDescriptor(value = long.class),  parameterDes = "当前区块高度")
     @ResponseData(description = "")
     public Response crossTxRehandle(Map<String,Object> params) throws IOException {
-        CtxStatusPO transaction = ctxStatusService.get(new NulsHash(HexUtil.decode((String) params.get("txHash"))),config.getChainId());
+        CtxStatusPO transaction = ctxStatusService.get(new NulsHash(HexUtil.decode((String) params.get("ctxHash"))),config.getChainId());
         if(transaction == null || transaction.getTx() == null){
             return failed("not found ctx");
         }
