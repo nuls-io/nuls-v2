@@ -39,7 +39,7 @@ public class ReadCtx {
         Log.info("reday");
         RocksDBService.init("/Users/zhoulijun/workspace/nuls/nuls_2.0/NULS_Wallet/cross-chain");
         List<String> hashList = new ArrayList<>();
-        hashList.add("8779f82717356ab168b5d44ca341b5103b86819fa8a4f5f15fe535cc6cfd87e0");
+        hashList.add("aa7433c8cb9dd86c97be05e0cfe47c9a30423a1e1e1f494fd4b71a389ab73fd7");
         hashList.forEach(hash->{
             resetBroadcast(hash);
         });
