@@ -1,7 +1,13 @@
 package io.nuls.crosschain.nuls.rpc.cmd;
 
+import io.nuls.base.api.provider.Result;
+import io.nuls.base.api.provider.ServiceManager;
+import io.nuls.base.api.provider.transaction.TransferService;
+import io.nuls.base.api.provider.transaction.facade.GetConfirmedTxByHashReq;
+import io.nuls.base.api.provider.transaction.facade.GetTxByHashReq;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
+import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
@@ -43,6 +49,8 @@ public class CrossChainTxCmd extends BaseCmd {
     @Autowired
     private ChainManager chainManager;
 
+    TransferService transferService = ServiceManager.get(TransferService.class);
+
     /**
      * 区块模块高度变化通知跨链模块
      * */
@@ -74,14 +82,23 @@ public class CrossChainTxCmd extends BaseCmd {
     @Parameter(parameterName = "blockHeight", requestType = @TypeDescriptor(value = long.class),  parameterDes = "当前区块高度")
     @ResponseData(description = "")
     public Response crossTxRehandle(Map<String,Object> params) throws IOException {
-        CtxStatusPO transaction = ctxStatusService.get(new NulsHash(HexUtil.decode((String) params.get("ctxHash"))),config.getChainId());
-        if(transaction == null || transaction.getTx() == null){
-            return failed("not found ctx");
+//        CtxStatusPO transaction = ctxStatusService.get(new NulsHash(HexUtil.decode((String) params.get("ctxHash"))),config.getChainId());
+//        if(transaction == null || transaction.getTx() == null){
+//            return failed("not found ctx");
+//        }
+        String ctxHash = (String) params.get("ctxHash");
+        Result<Transaction> tx = transferService.getConfirmedTxByHash(new GetConfirmedTxByHashReq(ctxHash));
+        if(tx.isFailed()){
+            return failed(tx.getMessage());
         }
-        long height = (long) params.get("blockHeight");
+        Transaction transaction = tx.getData();
+        if(transaction.getType() != TxType.CROSS_CHAIN){
+            return failed("not a cross chain tx");
+        }
+        long height = Long.parseLong(params.get("blockHeight").toString());
         int chainId = (int)params.get("chainId");
         CrossTxRehandleMessage crossTxRehandleMessage = new CrossTxRehandleMessage();
-        crossTxRehandleMessage.setCtxHash(transaction.getTx().getHash());
+        crossTxRehandleMessage.setCtxHash(transaction.getHash());
         crossTxRehandleMessage.setBlockHeight(height);
         boolean res = NetWorkCall.broadcast(chainId,crossTxRehandleMessage,CommandConstant.CROSS_TX_REHANDLE_MESSAGE,false);
         if(res){
