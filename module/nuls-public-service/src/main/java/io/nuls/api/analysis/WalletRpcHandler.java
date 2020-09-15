@@ -20,6 +20,7 @@ import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -661,6 +662,38 @@ public class WalletRpcHandler {
             return Result.getSuccess(null).setData(map);
         } catch (NulsException e) {
             return Result.getFailed(e.getErrorCode());
+        }
+    }
+
+    /**
+     * 查询NRC20的资产ID
+     */
+    public static Integer getAssetIdOfNRC20(String contractAddress) {
+        try {
+            Map<String, Object> parameters = new HashMap<>();
+            parameters.put("contractAddress", contractAddress);
+            Map result = (Map) RpcCall.request(ModuleE.LG.abbr, CommandConstant.CMD_CHAIN_ASSET_CONTRACT_ASSETID, parameters);
+            Integer assetId = Integer.parseInt(result.get("assetId").toString());
+            return assetId;
+        } catch (NulsException e) {
+            Log.warn("查询NRC20资产ID异常, msg: {}", e.format());
+            return null;
+        }
+    }
+
+    /**
+     * 查询是否为跨链资产
+     */
+    public static boolean isCrossAssets(int chainId, int assetId) {
+        Map<String, Object> params = new HashMap(4);
+        params.put(Constants.CHAIN_ID, chainId);
+        params.put("assetId", assetId);
+        try {
+            Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CM.abbr, CommandConstant.CMD_ASSET, params);
+            return callResp.isSuccess();
+        } catch (Exception e) {
+            Log.warn("查询是否为跨链资产异常, msg: {}", e.getMessage());
+            return false;
         }
     }
 }

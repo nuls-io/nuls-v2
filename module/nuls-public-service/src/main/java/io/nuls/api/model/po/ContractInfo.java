@@ -64,6 +64,7 @@ public class ContractInfo extends TxDataInfo {
     private ContractResultInfo resultInfo;
 
     private String args;
+    private boolean crossAsset;
     @JsonIgnore
     private boolean isNew;
 
@@ -337,5 +338,13 @@ public class ContractInfo extends TxDataInfo {
 
     public void setArgs(String args) {
         this.args = args;
+    }
+
+    public boolean isCrossAsset() {
+        return crossAsset;
+    }
+
+    public void setCrossAsset(boolean crossAsset) {
+        this.crossAsset = crossAsset;
     }
 }
