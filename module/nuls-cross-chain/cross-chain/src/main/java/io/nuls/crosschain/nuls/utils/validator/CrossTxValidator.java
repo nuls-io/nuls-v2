@@ -8,8 +8,10 @@ import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.crypto.ECKey;
+import io.nuls.core.model.ArraysTool;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.parse.SerializeUtils;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.BroadCtxSignMessage;
 import io.nuls.crosschain.base.model.bo.ChainInfo;
@@ -24,6 +26,7 @@ import io.nuls.crosschain.nuls.rpc.call.ConsensusCall;
 import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
 import io.nuls.crosschain.nuls.srorage.ConvertHashService;
 import io.nuls.crosschain.nuls.srorage.ConvertCtxService;
+import io.nuls.crosschain.nuls.srorage.RegisteredCrossChainService;
 import io.nuls.crosschain.nuls.utils.CommonUtil;
 import io.nuls.crosschain.nuls.utils.TxUtil;
 import io.nuls.core.core.annotation.Autowired;
@@ -59,6 +62,9 @@ public class CrossTxValidator {
     @Autowired
     private ChainManager chainManager;
 
+    @Autowired
+    RegisteredCrossChainService registeredCrossChainService;
+
     /**
      * 验证交易
      * Verifying transactions
@@ -72,19 +78,29 @@ public class CrossTxValidator {
     public boolean validateTx(Chain chain, Transaction tx, BlockHeader blockHeader) throws NulsException, IOException{
         //判断这笔跨链交易是否属于本链
         CoinData coinData = tx.getCoinDataInstance();
-        if (!coinDataValid(chain, coinData, tx.size())) {
-            throw new NulsException(NulsCrossChainErrorCode.COINDATA_VERIFY_FAIL);
-        }
         //如果本链为发起链且本链不为主链,则需要生成主网协议的跨链交易验证并验证签名
         int fromChainId = AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress());
         int toChainId = AddressTool.getChainIdByAddress(coinData.getTo().get(0).getAddress());
-
         if(toChainId == 0){
             throw new NulsException(NulsCrossChainErrorCode.TO_ADDRESS_ERROR);
         }
         //本链协议跨链交易不需要签名拜占庭验证，只需验证交易签名
         if(chain.getChainId() == fromChainId){
             if(tx.getType() == TxType.CROSS_CHAIN){
+                for (CoinFrom from : coinData.getFrom()) {
+                    //如果是合约地址不加入去重判断
+                    if (AddressTool.validContractAddress(from.getAddress(),AddressTool.getChainIdByAddress(from.getAddress()))) {
+                        continue;
+                    }
+
+                    if (!registeredCrossChainService.canCross(from.getAssetsChainId(),from.getAssetsId())){
+                        throw new NulsException(NulsCrossChainErrorCode.ASSET_NOT_REG_CROSS_CHAIN);
+                    }
+
+                }
+                if (!coinDataValid(chain, coinData, tx.size())) {
+                    throw new NulsException(NulsCrossChainErrorCode.COINDATA_VERIFY_FAIL);
+                }
                 //验证From中地址是否都签了名
                 Set<String> fromAddressSet = tx.getCoinDataInstance().getFromAddressList();
                 TransactionSignature transactionSignature = new TransactionSignature();
@@ -109,6 +125,11 @@ public class CrossTxValidator {
                 }
             }
         }else{
+            //验证交易手续费时，不验证签名数据所占的空间
+            int validateTxSize = tx.size() - SerializeUtils.sizeOfBytes(tx.getTransactionSignature());
+            if (!coinDataValid(chain, coinData, validateTxSize)) {
+                throw new NulsException(NulsCrossChainErrorCode.COINDATA_VERIFY_FAIL);
+            }
             Transaction realCtx = tx;
             List<String> verifierList;
             int minPassCount;

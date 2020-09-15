@@ -14,6 +14,7 @@ import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.BroadCtxSignMessage;
 import io.nuls.crosschain.base.message.GetCtxStateMessage;
 import io.nuls.crosschain.base.model.bo.ChainInfo;
+import io.nuls.crosschain.base.model.bo.txdata.CrossTransferData;
 import io.nuls.crosschain.base.model.bo.txdata.RegisteredChainChangeData;
 import io.nuls.crosschain.base.model.bo.txdata.VerifierChangeData;
 import io.nuls.crosschain.base.model.bo.txdata.VerifierInitData;
@@ -81,7 +82,16 @@ public class TxUtil {
         CoinData realCoinData = friendCtx.getCoinDataInstance();
         restoreCoinData(realCoinData);
         mainCtx.setCoinData(realCoinData.serialize());
-
+        int fromChainId = AddressTool.getChainIdByAddress(realCoinData.getFrom().get(0).getAddress());
+        //如果是发起链则需要重构txData，将发起链的交易hash设置到txData中
+        if(chain.getChainId() == fromChainId){
+            CrossTransferData crossTransferData = new CrossTransferData();
+            crossTransferData.parse(friendCtx.getTxData(),0);
+            crossTransferData.setSourceHash(friendCtx.getHash().getBytes());
+            mainCtx.setTxData(crossTransferData.serialize());
+        }else{
+            mainCtx.setTxData(friendCtx.getTxData());
+        }
         if(needSign){
             mainCtx.setTransactionSignature(friendCtx.getTransactionSignature());
         }
@@ -222,6 +232,7 @@ public class TxUtil {
             List<String> packers = (List<String>) packerInfo.get(ParamConstant.PARAM_PACK_ADDRESS_LIST);
             NulsHash convertHash = hash;
             if (!config.isMainNet()) {
+                //txData中存储来源链交易hash和nuls主链交易hash，如果发起链是nuls主链，来源链hash和nuls主链hash相同。
                 Transaction mainCtx = TxUtil.friendConvertToMain(chain, ctx, TxType.CROSS_CHAIN);
                 convertHash = mainCtx.getHash();
                 convertCtxService.save(hash, mainCtx, chainId);

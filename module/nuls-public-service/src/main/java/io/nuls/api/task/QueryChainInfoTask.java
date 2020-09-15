@@ -30,8 +30,15 @@ public class QueryChainInfoTask implements Runnable {
             if (ApiContext.isRunCrossChain) {
                 Result<Map<String, Object>> result = WalletRpcHandler.getRegisteredChainInfoList();
                 Map<String, Object> map = result.getData();
-                CacheManager.setChainInfoMap((Map<Integer, ChainInfo>) map.get("chainInfoMap"));
-                CacheManager.setAssetInfoMap((Map<String, AssetInfo>) map.get("assetInfoMap"));
+                chainInfoMap = (Map<Integer, ChainInfo>) map.get("chainInfoMap");
+                CacheManager.setChainInfoMap(chainInfoMap);
+
+                assetInfoMap = (Map<String, AssetInfo>) map.get("assetInfoMap");
+                for (AssetInfo assetInfo : assetInfoMap.values()) {
+                    if (!CacheManager.getAssetInfoMap().containsKey(assetInfo.getKey())) {
+                        CacheManager.getAssetInfoMap().put(assetInfo.getKey(), assetInfo);
+                    }
+                }
                 ApiContext.isReady = true;
             } else {
                 chainInfoMap = new HashMap<>();
@@ -46,7 +53,7 @@ public class QueryChainInfoTask implements Runnable {
 
                 ApiContext.isReady = true;
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             LoggerUtil.commonLog.error(e);
         }
     }

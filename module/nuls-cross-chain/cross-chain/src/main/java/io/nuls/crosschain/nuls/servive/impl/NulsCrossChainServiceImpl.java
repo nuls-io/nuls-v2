@@ -110,7 +110,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             List<CoinTo> coinToList = coinDataManager.assemblyCoinTo(crossTxTransferDTO.getListTo(), chain);
             coinDataManager.verifyCoin(coinFromList, coinToList, chain);
             int txSize = tx.size();
-            txSize += P2PHKSignature.SERIALIZE_LENGTH;
+//            txSize += P2PHKSignature.SERIALIZE_LENGTH;
             CoinData coinData = coinDataManager.getCrossCoinData(chain, coinFromList, coinToList, txSize, config.isMainNet());
             tx.setCoinData(coinData.serialize());
             tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
@@ -289,6 +289,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                     ctxStatusList.add(ctxHash);
                     chain.getLogger().debug("跨链交易提交完成，对跨链转账交易做拜占庭验证：{}", ctxHash.toHex());
                     //发起拜占庭验证
+                    ctx.setTransactionSignature(null);
                     chain.getCrossTxThreadPool().execute(new CrossTxHandler(chain, ctx, syncStatus));
                 }
             }
