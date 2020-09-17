@@ -17,6 +17,11 @@
             <artifactId>base-lib</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.nuls.v2</groupId>
+            <artifactId>nuls-base-api-provider</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
     <build>

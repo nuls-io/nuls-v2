@@ -24,6 +24,8 @@ public class MiniTransactionInfo {
 
     private String symbol;
 
+    private int decimal;
+
     public static MiniTransactionInfo toInfo(Document document) {
         MiniTransactionInfo info = new MiniTransactionInfo();
         info.hash = document.getString("_id");
@@ -34,6 +36,7 @@ public class MiniTransactionInfo {
         info.status = document.getInteger("status");
         info.fee = DocumentTransferTool.toInfo((Document) document.get("fee"), FeeInfo.class);
         info.symbol = document.getString("symbol");
+        info.decimal = document.getInteger("decimal");
         return info;
     }
 
@@ -99,5 +102,13 @@ public class MiniTransactionInfo {
 
     public void setSymbol(String symbol) {
         this.symbol = symbol;
+    }
+
+    public int getDecimal() {
+        return decimal;
+    }
+
+    public void setDecimal(int decimal) {
+        this.decimal = decimal;
     }
 }

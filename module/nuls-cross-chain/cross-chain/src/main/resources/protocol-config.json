@@ -84,6 +84,11 @@
         "name": "io.nuls.crosschain.base.message.NewOtherCtxMessage",
         "protocolCmd": "recvOtherCtx",
         "handlers": "NewOtherCtxHandlerV1"
+      },
+      {
+        "name": "io.nuls.crosschain.base.message.CrossTxRehandleMessage",
+        "protocolCmd": "ctxRehandle",
+        "handlers": "CrossTxRehandleMsgHandlerV1"
       }
     ],
     "invalidTxs": "",

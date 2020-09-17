@@ -651,12 +651,14 @@ alias: string									//账户别名
 ```
 {
     "jsonrpc":"2.0",
-    "method":"getCoinRanking",
-    "params":[chainId,pageNumber,pageSize],
+    "method":"getAssetRanking",
+    "params":[chainId,assetChainId,assetId,pageNumber,pageSize],
     "id":1234
 }
 //参数说明
 chainId: int									//链的id
+assetChainId: int								//资产链id
+assetId: int									//资产id
 pageNumber:int									//页码
 pageSize:int									//每页显示条数，取值[1-1000]
 ```
@@ -672,14 +674,15 @@ pageSize:int									//每页显示条数，取值[1-1000]
           "pageSize": 10,
           "totalCount": 1,
           "list": [
-               {
-                    "address": "tNULSeBaMmTNYqywL5ZSHbyAQ662uE3wibrgD1",
-                    "alias": null,
-                    "type": 1,
-                    "totalBalance": 1000000000000000,				//余额
-                    "totalOut": 0,									//总支出
-                    "totalIn": 1000000000000000						//总收入
-               }
+            {
+                "address": "NULSd6HhGcgkvEjzGU6Zmx2cxonjKQXA26Cth",		//账户地址
+                "alias": null,											//账户别名
+                "type": 3,												//地址类型,1:普通地址,2:合约地址,3:多签地址
+                "totalBalance": 3029296137980,							//总余额
+                "locked": 0,											//锁定金额
+                "proportion": "0.159%",									//金额总占比
+                "decimal": 8											//资产小数位
+            }
                ……
           ]
      }
@@ -843,6 +846,40 @@ alias:string									//别名
 }
 ```
 
+#### 查询各条链的地址前缀
+
+请求：
+
+```
+{
+    "jsonrpc":"2.0",
+    "method":"getAllAddressPrefix",
+    "params":[],
+    "id":1234
+}
+```
+
+返回：
+
+```
+{
+    "jsonrpc": "2.0",
+    "id": "1234",
+    "result": [
+        {
+            "chainId": 1,						//链ID
+            "addressPrefix": "NULS"				//地址前缀
+        },
+        {
+            "chainId": 9,
+            "addressPrefix": "NERVE"
+        }
+    ]
+}
+```
+
+
+
 ### 交易相关接口[transaction]
 
 #### 查询交易详情
@@ -878,8 +915,8 @@ txHash: string									//交易hash
 ```
 {
     "jsonrpc":"2.0",
-    "method":"getLxList",
-    "params":[chainId,pageNumber,pageSize,address,txType,startHeight,endHeight],                       
+    "method":"getTxList",
+    "params":[chainId,pageNumber,pageSize,txType,isHidden,startTime,endTime],                       
     "id":1234
 }
 //参数说明
@@ -887,7 +924,9 @@ chainId: int									//链的id
 pageNumber:int									//页码
 pageSize:int									//每页显示条数，取值[1-1000]
 txType:int										//交易类型(txType),type=0时查询所有交易
-isHidden:boolean    //是否隐藏共识奖励交易，默认是不隐藏，这个参数只能是type=0时有效
+isHidden:boolean    							//是否隐藏共识奖励交易，默认是不隐藏，这个参数只能是type=0时有效
+startTime:long									//区块开始时间(单位：秒)，默认为0
+endTime:long									//区块结束时间(单位：秒)，默认为0
 ```
 
 返回：

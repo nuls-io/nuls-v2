@@ -72,6 +72,10 @@ public class ApiConfig implements ModuleConfig {
 
     private String blackHolePublicKey;
 
+    private boolean syncCoinBase;
+
+    private String syncAddress;
+
     public String getEncoding() {
         return encoding;
     }
@@ -278,5 +282,21 @@ public class ApiConfig implements ModuleConfig {
 
     public void setSocketTimeout(int socketTimeout) {
         this.socketTimeout = socketTimeout;
+    }
+
+    public boolean isSyncCoinBase() {
+        return syncCoinBase;
+    }
+
+    public void setSyncCoinBase(boolean syncCoinBase) {
+        this.syncCoinBase = syncCoinBase;
+    }
+
+    public String getSyncAddress() {
+        return syncAddress;
+    }
+
+    public void setSyncAddress(String syncAddress) {
+        this.syncAddress = syncAddress;
     }
 }

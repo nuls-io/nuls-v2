@@ -95,4 +95,14 @@ public interface CommandConstant {
      * 获取资产信息
      */
     String CMD_GET_ASSET_BY_ID = "getAssetById";
+
+    /**
+     * 获取合约资产ID
+     */
+    String CMD_CHAIN_ASSET_CONTRACT_ASSETID = "getAssetContractAssetId";
+
+    /**
+     * 获取跨链资产注册信息
+     */
+    String CMD_ASSET = "cm_asset";
 }
