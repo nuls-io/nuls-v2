@@ -24,7 +24,7 @@ public interface TransactionService {
 
     void deleteTxs(int chainId);
 
-    PageInfo<MiniTransactionInfo> getBlockTxList(int chainId, int pageIndex, int pageSize, long blockHeight, int type);
+    List<MiniTransactionInfo> getBlockTxList(int chainId, long blockHeight, int type);
 
     TransactionInfo getTx(int chainId, String txHash);
 

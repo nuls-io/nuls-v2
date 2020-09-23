@@ -195,8 +195,8 @@ public class TransactionController {
 
     @RpcMethod("getBlockTxList")
     public RpcResult getBlockTxList(List<Object> params) {
-        VerifyUtils.verifyParams(params, 4);
-        int chainId, pageNumber, pageSize, type;
+        VerifyUtils.verifyParams(params, 3);
+        int chainId, type;
         long height;
         try {
             chainId = (int) params.get(0);
@@ -204,37 +204,20 @@ public class TransactionController {
             return RpcResult.paramError("[chainId] is inValid");
         }
         try {
-            pageNumber = (int) params.get(1);
-        } catch (Exception e) {
-            return RpcResult.paramError("[pageNumber] is inValid");
-        }
-        try {
-            pageSize = (int) params.get(2);
-        } catch (Exception e) {
-            return RpcResult.paramError("[pageSize] is inValid");
-        }
-        try {
-            height = Long.valueOf(params.get(3).toString());
+            height = Long.valueOf(params.get(1).toString());
         } catch (Exception e) {
             return RpcResult.paramError("[height] is inValid");
         }
         try {
-            type = Integer.parseInt("" + params.get(4));
+            type = Integer.parseInt("" + params.get(2));
         } catch (Exception e) {
             return RpcResult.paramError("[type] is inValid");
         }
-        if (pageNumber <= 0) {
-            pageNumber = 1;
-        }
-        if (pageSize <= 0 || pageSize > 100) {
-            pageSize = 10;
-        }
-
-        PageInfo<MiniTransactionInfo> pageInfo;
+        List<MiniTransactionInfo> pageInfo;
         if (!CacheManager.isChainExist(chainId)) {
-            pageInfo = new PageInfo<>(pageNumber, pageSize);
+            pageInfo = new ArrayList<>();
         } else {
-            pageInfo = txService.getBlockTxList(chainId, pageNumber, pageSize, height, type);
+            pageInfo = txService.getBlockTxList(chainId, height, type);
         }
         RpcResult rpcResult = new RpcResult();
         rpcResult.setResult(pageInfo);

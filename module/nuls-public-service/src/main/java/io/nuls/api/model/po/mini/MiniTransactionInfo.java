@@ -1,6 +1,7 @@
 package io.nuls.api.model.po.mini;
 
 import io.nuls.api.model.po.FeeInfo;
+import io.nuls.api.model.po.TransactionInfo;
 import io.nuls.api.utils.DocumentTransferTool;
 import org.bson.Document;
 
@@ -38,6 +39,22 @@ public class MiniTransactionInfo {
         info.symbol = document.getString("symbol");
         info.decimal = document.getInteger("decimal");
         return info;
+    }
+
+    public MiniTransactionInfo() {
+
+    }
+
+    public MiniTransactionInfo(TransactionInfo tx) {
+        this.hash = tx.getHash();
+        this.type = tx.getType();
+        this.height = tx.getHeight();
+        this.createTime = tx.getCreateTime();
+        this.value = tx.getValue();
+        this.status = tx.getStatus();
+        this.fee = tx.getFee();
+        this.symbol = tx.getSymbol();
+        this.decimal = tx.getDecimal();
     }
 
     public String getHash() {
