@@ -66,6 +66,11 @@ public class ContractController {
         if (contractInfo == null) {
             rpcResult.setError(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
         } else {
+            Integer assetIdOfNRC20 = WalletRpcHandler.getAssetIdOfNRC20(contractAddress);
+            if (assetIdOfNRC20 != null) {
+                boolean crossAssets = WalletRpcHandler.isCrossAssets(chainId, assetIdOfNRC20);
+                contractInfo.setCrossAsset(crossAssets);
+            }
             ApiCache apiCache = CacheManager.getCache(chainId);
             AssetInfo defaultAsset = apiCache.getChainInfo().getDefaultAsset();
             BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, contractAddress, defaultAsset.getChainId(), defaultAsset.getAssetId());
