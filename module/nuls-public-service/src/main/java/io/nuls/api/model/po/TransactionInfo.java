@@ -49,9 +49,11 @@ public class TransactionInfo {
             for (CoinToInfo output : coinTos) {
                 value = value.add(output.getAmount());
             }
-            CoinToInfo output = coinTos.get(0);
-            this.symbol = output.getSymbol();
-            this.decimal = output.getDecimal();
+        }
+        if (coinFroms != null && !coinFroms.isEmpty()) {
+            CoinFromInfo input = coinFroms.get(coinFroms.size() -1);
+            this.symbol = input.getSymbol();
+            this.decimal = input.getDecimal();
         }
         this.value = value;
 //        if (type == TxType.COIN_BASE ||

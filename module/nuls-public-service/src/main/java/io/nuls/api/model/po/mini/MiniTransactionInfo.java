@@ -37,7 +37,11 @@ public class MiniTransactionInfo {
         info.status = document.getInteger("status");
         info.fee = DocumentTransferTool.toInfo((Document) document.get("fee"), FeeInfo.class);
         info.symbol = document.getString("symbol");
-        info.decimal = document.getInteger("decimal");
+        try {
+            info.decimal = document.getInteger("decimal");
+        } catch (Exception e) {
+            info.decimal = 8;
+        }
         return info;
     }
 
