@@ -249,15 +249,26 @@ public class AccountController {
         }
 
         RpcResult result = new RpcResult();
-        PageInfo<TxRelationInfo> pageInfo;
-        if (CacheManager.isChainExist(chainId)) {
-            pageInfo = accountService.getAcctTxs(chainId, assetChainId, assetId, address, type, startTime, endTime, pageNumber, pageSize);
-        } else {
-            pageInfo = new PageInfo<>(pageNumber, pageSize);
+        try {
+            PageInfo<TxRelationInfo> pageInfo;
+            if (CacheManager.isChainExist(chainId)) {
+                pageInfo = accountService.getAcctTxs(chainId, assetChainId, assetId, address, type, startTime, endTime, pageNumber, pageSize);
+                result.setResult(new PageInfo<>(pageNumber, pageSize, pageInfo.getTotalCount(), pageInfo.getList().stream().map(d -> {
+                    Map res = MapUtils.beanToMap(d);
+                    AssetInfo assetInfo = CacheManager.getAssetInfoMap().get(d.getChainId() + "-" + d.getAssetId());
+                    if (assetInfo != null) {
+                        res.put("symbol", assetInfo.getSymbol());
+                        res.put("decimals", assetInfo.getDecimals());
+                    }
+                    return res;
+                }).collect(Collectors.toList())));
+            } else {
+                result.setResult(new PageInfo<>(pageNumber, pageSize));
+            }
+        } catch (Exception e) {
+            LoggerUtil.commonLog.error(e);
         }
-        result.setResult(pageInfo);
         return result;
-
     }
 
     @RpcMethod("getAccount")
