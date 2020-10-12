@@ -14,6 +14,7 @@ import io.nuls.crosschain.base.constant.CrossChainErrorCode;
 import io.nuls.crosschain.base.message.CirculationMessage;
 import io.nuls.crosschain.nuls.constant.ParamConstant;
 import io.nuls.crosschain.nuls.servive.MainNetService;
+import io.nuls.crosschain.nuls.srorage.RegisteredCrossChainService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +29,10 @@ import java.util.Map;
 public class MainNetCmd extends BaseCmd {
     @Autowired
     private MainNetService service;
+
+    @Autowired
+    RegisteredCrossChainService registeredCrossChainService;
+
     /**
      * 友链向主网链管理模块注册跨链信息,链管理模块通知跨链模块
      * */
@@ -171,4 +176,10 @@ public class MainNetCmd extends BaseCmd {
         resultMap.put(ParamConstant.VALUE, List.of(txHash, txHex));
         return success(resultMap);
     }
+
+    @CmdAnnotation(cmd = "cc_getRegisterChainInfo", version = 1.0, description = "获取所有注册的链信息")
+    public Response getRegisterChainInfo(Map<String,Object> params){
+        return success(registeredCrossChainService.get());
+    }
+
 }
