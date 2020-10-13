@@ -183,10 +183,10 @@ public class ValidateServiceImpl implements ValidateService {
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_NAME);
         }
         //判断黑洞资产与锁定资产
-        if(!BigIntegerUtils.isEqual(asset.getDepositNuls(),nulsChainConfig.getAssetDepositNuls())){
+        if (!BigIntegerUtils.isEqual(asset.getDepositNuls(), nulsChainConfig.getAssetDepositNuls())) {
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_DEPOSITNULS);
         }
-        if(!BigIntegerUtils.isEqual(asset.getDestroyNuls(),nulsChainConfig.getAssetDestroyNuls())){
+        if (!BigIntegerUtils.isEqual(asset.getDestroyNuls(), nulsChainConfig.getAssetDestroyNuls())) {
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_DEPOSITNULS);
         }
         return ChainEventResult.getResultSuccess();
@@ -205,6 +205,7 @@ public class ValidateServiceImpl implements ValidateService {
         }
         return ChainEventResult.getResultSuccess();
     }
+
     @Override
     public ChainEventResult batchAssetRegValidatorV3(Asset asset, Map<String, Integer> tempAssets) throws Exception {
         if (assetService.assetExist(asset, tempAssets)) {
@@ -220,14 +221,15 @@ public class ValidateServiceImpl implements ValidateService {
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_NAME);
         }
         //判断黑洞资产与锁定资产
-        if(!BigIntegerUtils.isEqual(asset.getDepositNuls(),nulsChainConfig.getAssetDepositNuls())){
+        if (!BigIntegerUtils.isEqual(asset.getDepositNuls(), nulsChainConfig.getAssetDepositNuls())) {
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_DEPOSITNULS);
         }
-        if(!BigIntegerUtils.isEqual(asset.getDestroyNuls(),nulsChainConfig.getAssetDestroyNuls())){
+        if (!BigIntegerUtils.isEqual(asset.getDestroyNuls(), nulsChainConfig.getAssetDestroyNuls())) {
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_DEPOSITNULS);
         }
         return ChainEventResult.getResultSuccess();
     }
+
     @Override
     public ChainEventResult assetCirculateValidator(int fromChainId, int toChainId, Map<String, BigInteger> fromAssetMap, Map<String, BigInteger> toAssetMap) throws Exception {
         BlockChain fromChain = chainService.getChain(fromChainId);
@@ -262,14 +264,63 @@ public class ValidateServiceImpl implements ValidateService {
                 return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_NOT_EXIST);
             }
             ChainAsset chainAsset = assetService.getChainAsset(fromChainId, CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
-            if(!chainAsset.isFromChainAsset()) {
+            if (!chainAsset.isFromChainAsset()) {
                 BigInteger currentAsset = chainAsset.getInitNumber().add(chainAsset.getInNumber()).subtract(chainAsset.getOutNumber());
-                if (BigIntegerUtils.isLessThan(currentAsset,fromAssetMap.get(assetKey))) {
+                if (BigIntegerUtils.isLessThan(currentAsset, fromAssetMap.get(assetKey))) {
                     LoggerUtil.logger().error("fromChainId={},assetKey={}currentAsset={} fromAsset={} BALANCE_NOT_ENOUGH", fromChainId, assetKey, currentAsset, fromAssetMap.get(assetKey));
                     return ChainEventResult.getResultFail(CmErrorCode.BALANCE_NOT_ENOUGH);
                 }
             }
         }
+        return ChainEventResult.getResultSuccess();
+    }
+
+    @Override
+    public ChainEventResult batchChainRegValidatorV7(BlockChain blockChain, Asset asset, Map<String, Integer> tempChains, Map<String, Integer> tempAssets) throws Exception {
+        ChainEventResult chainEventResult = batchChainRegBaseValidator(blockChain, asset, tempChains, tempAssets);
+        if (!chainEventResult.isSuccess()) {
+            return chainEventResult;
+        }
+        if (asset.getDecimalPlaces() < Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMin()) || asset.getDecimalPlaces() > Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMax())) {
+            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_DECIMALPLACES);
+        }
+        if (!FormatValidUtils.validTokenNameOrSymbol(asset.getSymbol())) {
+            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_SYMBOL);
+        }
+        if (!FormatValidUtils.validTokenNameOrSymbol(asset.getAssetName())) {
+            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_NAME);
+        }
+//        //判断黑洞资产与锁定资产
+//        if(!BigIntegerUtils.isEqual(asset.getDepositNuls(),nulsChainConfig.getAssetDepositNuls())){
+//            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_DEPOSITNULS);
+//        }
+//        if(!BigIntegerUtils.isEqual(asset.getDestroyNuls(),nulsChainConfig.getAssetDestroyNuls())){
+//            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_DEPOSITNULS);
+//        }
+        return ChainEventResult.getResultSuccess();
+    }
+
+    @Override
+    public ChainEventResult batchAssetRegValidatorV7(Asset asset, Map<String, Integer> tempAssets) throws Exception {
+        if (assetService.assetExist(asset, tempAssets)) {
+            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_ID_EXIST);
+        }
+        if (asset.getDecimalPlaces() < Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMin()) || asset.getDecimalPlaces() > Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMax())) {
+            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_DECIMALPLACES);
+        }
+        if (!FormatValidUtils.validTokenNameOrSymbol(asset.getSymbol())) {
+            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_SYMBOL);
+        }
+        if (!FormatValidUtils.validTokenNameOrSymbol(asset.getAssetName())) {
+            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_NAME);
+        }
+        //判断黑洞资产与锁定资产
+//        if (!BigIntegerUtils.isEqual(asset.getDepositNuls(), nulsChainConfig.getAssetDepositNuls())) {
+//            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_DEPOSITNULS);
+//        }
+//        if (!BigIntegerUtils.isEqual(asset.getDestroyNuls(), nulsChainConfig.getAssetDestroyNuls())) {
+//            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_DEPOSITNULS);
+//        }
         return ChainEventResult.getResultSuccess();
     }
 }
