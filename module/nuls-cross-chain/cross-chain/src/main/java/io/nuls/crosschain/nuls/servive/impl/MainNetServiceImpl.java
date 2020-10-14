@@ -219,7 +219,8 @@ public class MainNetServiceImpl implements MainNetService {
             return Result.getFailed(CHAIN_NOT_EXIST);
         }
         try {
-            chainManager.setRegisteredCrossChainList(ChainManagerCall.getRegisteredChainInfo().getChainInfoList());
+
+            chainManager.setRegisteredCrossChainList(ChainManagerCall.getRegisteredChainInfo(chainManager).getChainInfoList());
         } catch (Exception e) {
             chain.getLogger().error("跨链注册信息更新失败");
             chain.getLogger().error(e);
