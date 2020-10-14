@@ -153,13 +153,16 @@ public class CrossChainBootStrap extends BaseCrossChainBootStrap {
                 if(registeredChainMessage != null && registeredChainMessage.getChainInfoList() != null){
                     chainManager.setRegisteredCrossChainList(registeredChainMessage.getChainInfoList());
                 }else{
-                    registeredChainMessage = ChainManagerCall.getRegisteredChainInfo();
+                    registeredChainMessage = ChainManagerCall.getRegisteredChainInfo(chainManager);
                     registeredCrossChainService.save(registeredChainMessage);
                     chainManager.setRegisteredCrossChainList(registeredChainMessage.getChainInfoList());
-
                 }
             }
-
+            chainManager.getRegisteredCrossChainList().stream().filter(d->d.getChainId() == 9)
+                    .forEach(chainInfo -> {
+                        Log.info("chain id {} 验证人列表：{}",chainInfo.getChainId(),chainInfo.getVerifierList());
+                       // Log.info("当前高度:{}",chainManager.getChainHeaderMap().get(1).getHeight());
+                    });;
             /*
              * 如果为账户模块启动，向账户模块发送链前缀
              */

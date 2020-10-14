@@ -235,4 +235,9 @@ public class NetworkBootstrap extends RpcModule {
         }
         return RpcModuleState.Ready;
     }
+
+    @Override
+    protected long getTryRuningTimeout() {
+        return 180L;
+    }
 }
