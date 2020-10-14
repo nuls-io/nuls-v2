@@ -219,11 +219,6 @@ public class NetworkBootstrap extends RpcModule {
     }
 
     @Override
-    protected long getTryRuningTimeout() {
-        return 60L;
-    }
-
-    @Override
     public RpcModuleState onDependenciesLoss(Module dependenciesModule) {
         LoggerUtil.COMMON_LOG.info("onDependenciesLoss module={}......", dependenciesModule.getName());
         try {
