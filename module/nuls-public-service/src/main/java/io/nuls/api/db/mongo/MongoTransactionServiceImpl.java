@@ -5,6 +5,7 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.InsertManyOptions;
 import com.mongodb.client.model.Sorts;
 import io.nuls.api.ApiContext;
+import io.nuls.api.analysis.AnalysisHandler;
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.constant.DBTableConstant;
 import io.nuls.api.db.TransactionService;
@@ -14,6 +15,7 @@ import io.nuls.api.model.rpc.BalanceInfo;
 import io.nuls.api.utils.DocumentTransferTool;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.core.basic.InitializingBean;
+import io.nuls.core.basic.Result;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -293,25 +295,24 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         return txHexInfoList;
     }
 
-    public PageInfo<MiniTransactionInfo> getBlockTxList(int chainId, int pageIndex, int pageSize, long blockHeight, int type) {
-        Bson filter = null;
-        if (type == 0) {
-            filter = eq("height", blockHeight);
-        } else {
-            filter = and(eq("type", type), eq("height", blockHeight));
-        }
+    public List<MiniTransactionInfo> getBlockTxList(int chainId, long blockHeight, int type) {
+        List<MiniTransactionInfo> txList = new ArrayList<>();
         BlockHeaderInfo blockInfo = mongoBlockServiceImpl.getBlockHeader(chainId, blockHeight);
         if (blockInfo == null) {
-            return null;
+            return txList;
         }
-        long count = mongoDBService.getCount(TX_TABLE + chainId, filter);
-        List<MiniTransactionInfo> txList = new ArrayList<>();
-        List<Document> docList = this.mongoDBService.pageQuery(TX_TABLE + chainId, filter, Sorts.descending("height"), pageIndex, pageSize);
-        for (Document document : docList) {
-            txList.add(MiniTransactionInfo.toInfo(document));
+        Result<BlockInfo> result = WalletRpcHandler.getBlockInfo(chainId, blockHeight);
+        if (result.isFailed()) {
+            return txList;
         }
-        PageInfo<MiniTransactionInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, count, txList);
-        return pageInfo;
+        for (TransactionInfo tx : result.getData().getTxList()) {
+            if (type == 0) {
+                txList.add(new MiniTransactionInfo(tx));
+            } else if (tx.getType() == type) {
+                txList.add(new MiniTransactionInfo(tx));
+            }
+        }
+        return txList;
     }
 
     public TransactionInfo getTx(int chainId, String txHash) {

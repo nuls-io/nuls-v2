@@ -44,12 +44,15 @@ public interface ValidateService {
 
     ChainEventResult batchChainRegValidator(BlockChain blockChain, Asset asset, Map<String, Integer> tempChains, Map<String, Integer> tempAssets) throws Exception;
 
-    ChainEventResult batchChainRegValidatorV3(BlockChain blockChain, Asset asset, Map<String, Integer> tempChains,
-                                              Map<String, Integer> tempAssets) throws Exception;
+    ChainEventResult batchChainRegValidatorV3(BlockChain blockChain, Asset asset, Map<String, Integer> tempChains, Map<String, Integer> tempAssets) throws Exception;
 
     ChainEventResult batchAssetRegValidator(Asset asset, Map<String, Integer> tempAssets) throws Exception;
 
     ChainEventResult batchAssetRegValidatorV3(Asset asset, Map<String, Integer> tempAssets) throws Exception;
 
     ChainEventResult assetCirculateValidator(int fromChainId, int toChainId, Map<String, BigInteger> fromAssetMap, Map<String, BigInteger> toAssetMap) throws Exception;
+
+    ChainEventResult batchChainRegValidatorV7(BlockChain blockChain, Asset asset, Map<String, Integer> tempChains, Map<String, Integer> tempAssets) throws Exception;
+
+    ChainEventResult batchAssetRegValidatorV7(Asset asset, Map<String, Integer> tempAssets) throws Exception;
 }

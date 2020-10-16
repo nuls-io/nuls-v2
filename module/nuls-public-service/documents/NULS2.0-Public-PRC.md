@@ -973,13 +973,11 @@ endTime:long									//区块结束时间(单位：秒)，默认为0
 {
     "jsonrpc":"2.0",
     "method":"getBlockTxList",
-    "params":[chainId,pageNumber,pageSize,blockHeight,txType], 
+    "params":[chainId,blockHeight,txType], 
     "id":1234
 }
 //参数说明
 chainId: int									//链的id
-pageNumber:int									//页码
-pageSize:int									//每页显示条数，取值[1-1000]
 blockHeight:long								//区块高度
 txType:int										//交易类型(txType),type=0时查询所有交易
 ```

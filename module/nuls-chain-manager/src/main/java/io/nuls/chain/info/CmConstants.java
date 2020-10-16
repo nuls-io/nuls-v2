@@ -13,4 +13,6 @@ public class CmConstants {
 
     public static final int MIN_SIGNATURE_BFT_RATIO= 66;
     public static final int LATEST_SUPPORT_VERSION = 5;
+    public static final int REMOVE_DEPOSIT_VERSION = 7;
+
 }

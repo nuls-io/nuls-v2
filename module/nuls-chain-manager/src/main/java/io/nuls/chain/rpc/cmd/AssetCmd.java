@@ -3,6 +3,7 @@ package io.nuls.chain.rpc.cmd;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.Transaction;
+import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.chain.config.NulsChainConfig;
 import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.info.CmErrorCode;
@@ -90,8 +91,15 @@ public class AssetCmd extends BaseChainCmd {
             if (!FormatValidUtils.validTokenNameOrSymbol(asset.getAssetName())) {
                 return failed(CmErrorCode.ERROR_ASSET_NAME);
             }
-            asset.setDepositNuls(nulsChainConfig.getAssetDepositNuls());
-            asset.setDestroyNuls(nulsChainConfig.getAssetDestroyNuls());
+
+            int version = ProtocolGroupManager.getCurrentVersion(Integer.valueOf(nulsChainConfig.getMainChainId()));
+            if (version < CmConstants.REMOVE_DEPOSIT_VERSION) {
+                asset.setDepositNuls(nulsChainConfig.getAssetDepositNuls());
+                asset.setDestroyNuls(nulsChainConfig.getAssetDestroyNuls());
+            } else {
+                asset.setDepositNuls(BigInteger.ZERO);
+                asset.setDestroyNuls(BigInteger.ZERO);
+            }
             asset.setAvailable(true);
             BlockChain dbChain = chainService.getChain(asset.getChainId());
             if (null == dbChain) {
@@ -106,7 +114,7 @@ public class AssetCmd extends BaseChainCmd {
             /* 组装交易发送 (Send transaction) */
             Transaction tx = new AddAssetToChainTransaction();
             if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) >= CmConstants.LATEST_SUPPORT_VERSION) {
-                tx.setTxData(TxUtil.parseAssetToTxV4(asset).serialize());
+                tx.setTxData(TxUtil.parseAssetToTxV5(asset).serialize());
             } else {
                 tx.setTxData(TxUtil.parseAssetToTx(asset).serialize());
             }
@@ -116,8 +124,15 @@ public class AssetCmd extends BaseChainCmd {
             if (null != ldErrorCode) {
                 return failed(ldErrorCode);
             }
-            CoinData coinData = this.getRegCoinData(asset, CmRuntimeInfo.getMainIntChainId(),
-                    CmRuntimeInfo.getMainIntAssetId(), tx.size(), accountBalance);
+            CoinData coinData;
+            if (version < CmConstants.REMOVE_DEPOSIT_VERSION) {
+                coinData = this.getRegCoinData(asset, CmRuntimeInfo.getMainIntChainId(),
+                        CmRuntimeInfo.getMainIntAssetId(), tx.size(), accountBalance);
+            } else {
+                coinData = this.getRegCoinDataV7(asset, CmRuntimeInfo.getMainIntChainId(),
+                        CmRuntimeInfo.getMainIntAssetId(), tx.size(), accountBalance);
+            }
+
             tx.setCoinData(coinData.serialize());
 
             /* 判断签名是否正确 (Determine if the signature is correct) */
@@ -169,8 +184,14 @@ public class AssetCmd extends BaseChainCmd {
             if (!FormatValidUtils.validTokenNameOrSymbol(asset.getAssetName())) {
                 return failed(CmErrorCode.ERROR_ASSET_NAME);
             }
-            asset.setDepositNuls(nulsChainConfig.getAssetDepositNuls());
-            asset.setDestroyNuls(nulsChainConfig.getAssetDestroyNuls());
+            int version = ProtocolGroupManager.getCurrentVersion(Integer.valueOf(nulsChainConfig.getMainChainId()));
+            if (version < CmConstants.REMOVE_DEPOSIT_VERSION) {
+                asset.setDepositNuls(nulsChainConfig.getAssetDepositNuls());
+                asset.setDestroyNuls(nulsChainConfig.getAssetDestroyNuls());
+            } else {
+                asset.setDepositNuls(BigInteger.ZERO);
+                asset.setDestroyNuls(BigInteger.ZERO);
+            }
             asset.setAvailable(true);
             BlockChain dbChain = chainService.getChain(asset.getChainId());
             if (null == dbChain) {
@@ -186,7 +207,7 @@ public class AssetCmd extends BaseChainCmd {
             Transaction tx = new AddAssetToChainTransaction();
             LoggerUtil.COMMON_LOG.debug("version= {}", ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()));
             if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) >= CmConstants.LATEST_SUPPORT_VERSION) {
-                tx.setTxData(TxUtil.parseAssetToTxV4(asset).serialize());
+                tx.setTxData(TxUtil.parseAssetToTxV5(asset).serialize());
             } else {
                 tx.setTxData(TxUtil.parseAssetToTx(asset).serialize());
             }
@@ -196,8 +217,14 @@ public class AssetCmd extends BaseChainCmd {
             if (null != ldErrorCode) {
                 return failed(ldErrorCode);
             }
-            CoinData coinData = this.getRegCoinData(asset, CmRuntimeInfo.getMainIntChainId(),
-                    CmRuntimeInfo.getMainIntAssetId(), tx.size(), accountBalance);
+            CoinData coinData;
+            if (version < CmConstants.REMOVE_DEPOSIT_VERSION) {
+                coinData = this.getRegCoinData(asset, CmRuntimeInfo.getMainIntChainId(),
+                        CmRuntimeInfo.getMainIntAssetId(), tx.size(), accountBalance);
+            } else {
+                coinData = this.getRegCoinDataV7(asset, CmRuntimeInfo.getMainIntChainId(),
+                        CmRuntimeInfo.getMainIntAssetId(), tx.size(), accountBalance);
+            }
             tx.setCoinData(coinData.serialize());
 
             /* 判断签名是否正确 (Determine if the signature is correct) */
@@ -279,7 +306,7 @@ public class AssetCmd extends BaseChainCmd {
                 tx = new DestroyAssetAndChainTransaction();
                 try {
                     if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) >= CmConstants.LATEST_SUPPORT_VERSION) {
-                        tx.setTxData(TxUtil.parseChainToTxV4(dbChain, asset).serialize());
+                        tx.setTxData(TxUtil.parseChainToTxV5(dbChain, asset).serialize());
                     } else {
                         tx.setTxData(TxUtil.parseChainToTx(dbChain, asset).serialize());
                     }
@@ -292,7 +319,7 @@ public class AssetCmd extends BaseChainCmd {
                 tx = new RemoveAssetFromChainTransaction();
                 try {
                     if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) >= CmConstants.LATEST_SUPPORT_VERSION) {
-                        tx.setTxData(TxUtil.parseAssetToTxV4(asset).serialize());
+                        tx.setTxData(TxUtil.parseAssetToTxV5(asset).serialize());
                     } else {
                         tx.setTxData(TxUtil.parseAssetToTx(asset).serialize());
                     }
