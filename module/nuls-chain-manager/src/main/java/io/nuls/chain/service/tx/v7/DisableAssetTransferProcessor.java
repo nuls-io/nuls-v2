@@ -71,7 +71,7 @@ public class DisableAssetTransferProcessor implements TransactionProcessor {
 //                    errorList.add(tx);
 //                    continue;
 //                }
-                chainEventResult = validateService.assetDisableValidator(asset);
+                chainEventResult = validateService.assetDisableValidatorV7(asset);
                 if (chainEventResult.isSuccess()) {
                     LoggerUtil.logger().debug("txHash = {},assetKey={} disable batchValidate success!", txHash, CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
                 } else {

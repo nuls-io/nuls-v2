@@ -39,6 +39,8 @@ import java.util.Map;
 public interface ValidateService {
     ChainEventResult assetDisableValidator(Asset asset) throws Exception;
 
+    ChainEventResult assetDisableValidatorV7(Asset asset) throws Exception;
+
     ChainEventResult chainDisableValidator(BlockChain blockChain) throws Exception;
 
 

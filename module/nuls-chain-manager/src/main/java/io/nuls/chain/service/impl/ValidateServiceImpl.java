@@ -98,6 +98,21 @@ public class ValidateServiceImpl implements ValidateService {
     }
 
     @Override
+    public ChainEventResult assetDisableValidatorV7(Asset asset) throws Exception {
+        Asset dbAsset = assetService.getAsset(CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
+        if (!ByteUtils.arrayEquals(asset.getAddress(), dbAsset.getAddress())) {
+            LoggerUtil.logger().error("address={},dbAddr={} ERROR_ADDRESS_ERROR", AddressTool.getStringAddressByBytes(asset.getAddress()),
+                    AddressTool.getStringAddressByBytes(dbAsset.getAddress()));
+            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ADDRESS_ERROR);
+        }
+        if (asset.getChainId() != dbAsset.getChainId()) {
+            LoggerUtil.logger().error("chainId={},dbChainId={} ERROR_CHAIN_ASSET_NOT_MATCH", asset.getChainId(), dbAsset.getChainId());
+            return ChainEventResult.getResultFail(CmErrorCode.ERROR_CHAIN_ASSET_NOT_MATCH);
+        }
+        return ChainEventResult.getResultSuccess();
+    }
+
+    @Override
     public ChainEventResult chainDisableValidator(BlockChain blockChain) throws Exception {
         if (null == blockChain) {
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_CHAIN_NOT_FOUND);
