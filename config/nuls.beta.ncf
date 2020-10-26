@@ -23,7 +23,8 @@ mainAssetId=1
 #主网主资产符号
 mainSymbol=NULS
 blackHolePublicKey=000000000000000000000000000000000000000000000000000000000000000000
-packageVersion=%PACKAGE_VERSION%
+packageVersion=2.7.0-a4354e9
+
 
 
 [network]
@@ -32,9 +33,9 @@ crossPort=18002
 #魔法参数
 packetMagic=20200120
 #种子节点
-selfSeedIps=161.117.11.137:18001,149.129.251.238:18001,47.254.234.223:18001,47.74.86.85:18001,192.168.1.145:18001
+selfSeedIps=39.98.226.51:18001,47.244.186.65:18001,47.254.234.223:18001,47.74.86.85:18001,192.168.1.145:18001
 #主网的跨链种子连接节点
-moonSeedIps=161.117.11.137:18002,149.129.251.238:18002,47.254.234.223:18002,47.74.86.85:18002,47.252.86.42:18002
+moonSeedIps=39.98.226.51:18002,47.244.186.65:18002,47.254.234.223:18002,47.74.86.85:18002
 #最大入网连接数
 maxInCount=100
 #最大出网连接数
@@ -93,7 +94,7 @@ deflationTimeInterval=2592000
 #合约视图方法调用最大消耗的Gas
 maxViewGas=100000000
 systemLogLevel=WARN
-crossTokenSystemContract=tNULSeBaN53PMBv2aFv4mBYegx1chV22NCrCpA
+crossTokenSystemContract=tNULSeBaN5MkYxC7ivr23SbRnHrsmJDg86R7Kv
 
 [public-service]
 #public-service模块对外的rpc端口号
@@ -132,6 +133,15 @@ mainByzantineRatio=66
 maxSignatureCount=100
 
 
+[nuls-module-explorer]
+apiModuleApi=http://127.0.0.1:18003/
+explorerPort=1999
+explorerHost=0.0.0.0
+
+[nuls-module-web-wallet]
+apiModuleApi=http://127.0.0.1:18003/
+webWalletPort=18006
+webWalletHost=0.0.0.0
 
 [protocol-update]
 #每隔多少个区块统计一次协议占比
@@ -142,6 +152,3 @@ interval=10
 server_ip=0.0.0.0
 #httpServer的启动port
 serverPort=18004
-
-[cmd-client]
-clientVersion=2.6.0
