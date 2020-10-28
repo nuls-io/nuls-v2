@@ -555,7 +555,11 @@ public class TxUtil {
                 }
             }
         }
-        if (passCount < byzantineCount) {
+        //由于在3505754高度之前又验证人列表丢失的bug，所以在此高度之前只要有5个种子节点签名的交易就可以验证通过
+        if (ctx.getBlockHeight() <= 3505754 && passCount == 5){
+            return true;
+        }
+        if (passCount < byzantineCount ) {
             chain.getLogger().error("跨链交易签名验证通过数小于拜占庭数量，Hash:{},passCount:{},byzantineCount:{}", ctx.getHash().toHex(), passCount, byzantineCount);
             return false;
         }
