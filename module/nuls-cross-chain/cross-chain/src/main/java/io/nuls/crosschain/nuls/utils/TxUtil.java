@@ -534,7 +534,8 @@ public class TxUtil {
             chain.getLogger().error(e);
             throw e;
         }
-        if (transactionSignature.getP2PHKSignatures().size() < byzantineCount) {
+        //由于在3505754高度之前又验证人列表丢失的bug，所以在此高度之前只要有5个种子节点签名的交易就可以验证通过
+        if (ctx.getBlockHeight() > 3505754 && transactionSignature.getP2PHKSignatures().size() < byzantineCount) {
             chain.getLogger().error("跨链交易签名数量小于拜占庭数量，Hash:{},signCount:{},byzantineCount:{}", ctx.getHash().toHex(), transactionSignature.getP2PHKSignatures().size(), byzantineCount);
             return false;
         }
