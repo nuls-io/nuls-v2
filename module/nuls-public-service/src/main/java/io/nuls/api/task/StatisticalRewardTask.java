@@ -2,6 +2,7 @@ package io.nuls.api.task;
 
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.db.BlockService;
+import io.nuls.api.db.ChainService;
 import io.nuls.api.db.StatisticalService;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.BlockHeaderInfo;

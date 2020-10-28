@@ -339,6 +339,91 @@ public class TransactionController {
         }
     }
 
+
+
+    @RpcMethod("transferOtherChainAsset")
+    @ApiOperation(description = "单笔转账", order = 306, detailDesc = "发起单账户单资产的转账交易,转账资产为链内的其他平行链资产")
+    @Parameters({
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
+            @Parameter(parameterName = "assetChainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "资产链id"),
+            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterDes = "资产id"),
+            @Parameter(parameterName = "address", parameterDes = "转出账户地址"),
+            @Parameter(parameterName = "toAddress", parameterDes = "转入账户地址"),
+            @Parameter(parameterName = "password", parameterDes = "转出账户密码"),
+            @Parameter(parameterName = "amount", parameterDes = "转出金额"),
+            @Parameter(parameterName = "remark", parameterDes = "备注"),
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "hash", description = "交易hash")
+    }))
+    public RpcResult transferOtherChainAsset(List<Object> params) {
+        VerifyUtils.verifyParams(params, 8);
+        int chainId, assetChainId, assetId;
+        String address, toAddress, password, amount, remark;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        try {
+            assetChainId = (int) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[assetChainId] is inValid");
+        }
+        try {
+            assetId = (int) params.get(2);
+        } catch (Exception e) {
+            return RpcResult.paramError("[assetId] is inValid");
+        }
+        try {
+            address = (String) params.get(3);
+        } catch (Exception e) {
+            return RpcResult.paramError("[address] is inValid");
+        }
+        try {
+            toAddress = (String) params.get(4);
+        } catch (Exception e) {
+            return RpcResult.paramError("[toAddress] is inValid");
+        }
+        try {
+            password = (String) params.get(5);
+        } catch (Exception e) {
+            return RpcResult.paramError("[password] is inValid");
+        }
+        try {
+            amount = params.get(6).toString();
+        } catch (Exception e) {
+            return RpcResult.paramError("[amount] is inValid");
+        }
+        try {
+            remark = (String) params.get(7);
+        } catch (Exception e) {
+            return RpcResult.paramError("[remark] is inValid");
+        }
+        if (!AddressTool.validAddress(chainId, address)) {
+            return RpcResult.paramError("[address] is inValid");
+        }
+        if (!AddressTool.validAddress(chainId, toAddress)) {
+            return RpcResult.paramError("[toAddress] is inValid");
+        }
+        if (!ValidateUtil.validateBigInteger(amount)) {
+            return RpcResult.paramError("[amount] is inValid");
+        }
+        TransferReq.TransferReqBuilder builder =
+                new TransferReq.TransferReqBuilder(chainId, assetId)
+                        .addForm(assetChainId,assetId, address, password, new BigInteger(amount))
+                        .addTo(assetChainId,assetId, toAddress, new BigInteger(amount)).setRemark(remark);
+        Result<String> result = transferService.transfer(builder.build(new TransferReq()));
+        if (result.isSuccess()) {
+            Map resultMap = new HashMap(2);
+            resultMap.put("hash", result.getData());
+            return RpcResult.success(resultMap);
+        } else {
+            return RpcResult.failed(ErrorCode.init(result.getStatus()), result.getMessage());
+        }
+    }
+
+
     @RpcMethod("transfer")
     @ApiOperation(description = "单笔转账", order = 306, detailDesc = "发起单账户单资产的转账交易")
     @Parameters({

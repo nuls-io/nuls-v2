@@ -4,7 +4,10 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.InsertManyOptions;
 import com.mongodb.client.model.Sorts;
+import io.nuls.api.ApiContext;
+import io.nuls.api.analysis.AnalysisHandler;
 import io.nuls.api.analysis.WalletRpcHandler;
+import io.nuls.api.constant.DBTableConstant;
 import io.nuls.api.db.TransactionService;
 import io.nuls.api.model.po.*;
 import io.nuls.api.model.po.mini.MiniTransactionInfo;
@@ -12,6 +15,7 @@ import io.nuls.api.model.rpc.BalanceInfo;
 import io.nuls.api.utils.DocumentTransferTool;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.core.basic.InitializingBean;
+import io.nuls.core.basic.Result;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -222,6 +226,64 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
     }
 
     @Override
+    public PageInfo<CrossTxRelationInfo> getCrossTxList(int chainId, int crossChainId, int pageIndex, int pageSize, long startTime, long endTime) {
+        Bson filter = null;
+        if (startTime > 0 && endTime > 0) {
+            filter = Filters.and(Filters.eq("chainId", crossChainId), Filters.gte("createTime", startTime), Filters.lte("createTime", endTime));
+        } else if (startTime > 0) {
+            filter = Filters.and(Filters.eq("chainId", crossChainId), Filters.gte("createTime", startTime));
+        } else if (endTime > 0) {
+            filter = Filters.and(Filters.eq("chainId", crossChainId), Filters.lte("createTime", endTime));
+        } else {
+            filter = Filters.eq("chainId", crossChainId);
+        }
+        long totalCount = mongoDBService.getCount(CROSS_TX_RELATION_TABLE + chainId, filter);
+        List<Document> docList = this.mongoDBService.pageQuery(CROSS_TX_RELATION_TABLE + chainId, filter, Sorts.descending("createTime"), pageIndex, pageSize);
+        List<CrossTxRelationInfo> txList = new ArrayList<>();
+        for (Document document : docList) {
+            txList.add(CrossTxRelationInfo.toInfo(document));
+        }
+
+        PageInfo<CrossTxRelationInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, totalCount, txList);
+        return pageInfo;
+    }
+
+
+    public void saveCrossTxRelationList(int chainId, Set<CrossTxRelationInfo> relationInfos) {
+        if (relationInfos.isEmpty()) {
+            return;
+        }
+        List<Document> documentList = new ArrayList<>();
+        for (CrossTxRelationInfo relationInfo : relationInfos) {
+            Document document = relationInfo.toDocument();
+            documentList.add(document);
+        }
+
+        InsertManyOptions options = new InsertManyOptions();
+        options.ordered(false);
+        mongoDBService.insertMany(CROSS_TX_RELATION_TABLE + chainId, documentList, options);
+//        List<Document> saveList = new ArrayList();
+//        for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
+//            saveList.clear();
+//            List<Document> documentList = relationMap.get("relation_" + i);
+//            if (documentList.size() == 0) {
+//                continue;
+//            }
+//            for (Document document : documentList) {
+//                saveList.add(document);
+//                if (saveList.size() == 1000) {
+//                    mongoDBService.insertMany(TX_RELATION_TABLE + chainId + "_" + i, saveList, options);
+//                    saveList.clear();
+//                }
+//            }
+//            if (saveList.size() != 0) {
+//                mongoDBService.insertMany(TX_RELATION_TABLE + chainId + "_" + i, saveList, options);
+//            }
+//        }
+    }
+
+
+    @Override
     public List<TxHexInfo> getUnConfirmList(int chainId) {
         List<Document> docList = mongoDBService.query(TX_UNCONFIRM_TABLE + chainId);
         List<TxHexInfo> txHexInfoList = new ArrayList<>();
@@ -233,25 +295,24 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         return txHexInfoList;
     }
 
-    public PageInfo<MiniTransactionInfo> getBlockTxList(int chainId, int pageIndex, int pageSize, long blockHeight, int type) {
-        Bson filter = null;
-        if (type == 0) {
-            filter = eq("height", blockHeight);
-        } else {
-            filter = and(eq("type", type), eq("height", blockHeight));
-        }
+    public List<MiniTransactionInfo> getBlockTxList(int chainId, long blockHeight, int type) {
+        List<MiniTransactionInfo> txList = new ArrayList<>();
         BlockHeaderInfo blockInfo = mongoBlockServiceImpl.getBlockHeader(chainId, blockHeight);
         if (blockInfo == null) {
-            return null;
+            return txList;
         }
-        long count = mongoDBService.getCount(TX_TABLE + chainId, filter);
-        List<MiniTransactionInfo> txList = new ArrayList<>();
-        List<Document> docList = this.mongoDBService.pageQuery(TX_TABLE + chainId, filter, Sorts.descending("height"), pageIndex, pageSize);
-        for (Document document : docList) {
-            txList.add(MiniTransactionInfo.toInfo(document));
+        Result<BlockInfo> result = WalletRpcHandler.getBlockInfo(chainId, blockHeight);
+        if (result.isFailed()) {
+            return txList;
         }
-        PageInfo<MiniTransactionInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, count, txList);
-        return pageInfo;
+        for (TransactionInfo tx : result.getData().getTxList()) {
+            if (type == 0) {
+                txList.add(new MiniTransactionInfo(tx));
+            } else if (tx.getType() == type) {
+                txList.add(new MiniTransactionInfo(tx));
+            }
+        }
+        return txList;
     }
 
     public TransactionInfo getTx(int chainId, String txHash) {

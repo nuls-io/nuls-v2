@@ -23,6 +23,7 @@
  */
 package io.nuls.api.rpc.controller.runner;
 
+import io.nuls.api.ApiContext;
 import io.nuls.api.analysis.AnalysisHandler;
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.db.TransactionService;
@@ -58,7 +59,7 @@ public class QueueContractRun implements Runnable {
             if (result.isSuccess()) {
                 Transaction tx = new Transaction();
                 tx.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
-                TransactionInfo txInfo = AnalysisHandler.toTransaction(chainId, tx);
+                TransactionInfo txInfo = AnalysisHandler.toTransaction(chainId, tx, ApiContext.protocolVersion);
                 LoggerUtil.commonLog.info("排队广播指定合约交易[{}]成功", txInfo.getHash());
                 txService.saveUnConfirmTx(chainId, txInfo, txHex);
                 // 休眠10秒

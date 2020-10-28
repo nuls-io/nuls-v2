@@ -1,5 +1,7 @@
 package io.nuls.api.model.po;
 
+import java.math.BigInteger;
+
 public class SyncInfo {
 
     private int chainId;
@@ -8,16 +10,19 @@ public class SyncInfo {
 
     private int version;
 
+    private BigInteger totalSupply;
+
     private int step;
 
     public SyncInfo() {
     }
 
-    public SyncInfo(int chainId, long bestHeight, int version, int step) {
+    public SyncInfo(int chainId, long bestHeight, BlockHeaderInfo headerInfo) {
         this.chainId = chainId;
         this.bestHeight = bestHeight;
-        this.version = version;
-        this.step = step;
+        this.version = headerInfo.getMainVersion();
+        this.totalSupply = headerInfo.getReward();
+        this.step = 0;
     }
 
     public boolean isFinish() {
@@ -54,5 +59,13 @@ public class SyncInfo {
 
     public void setVersion(int version) {
         this.version = version;
+    }
+
+    public BigInteger getTotalSupply() {
+        return totalSupply;
+    }
+
+    public void setTotalSupply(BigInteger totalSupply) {
+        this.totalSupply = totalSupply;
     }
 }

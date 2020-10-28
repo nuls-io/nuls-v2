@@ -52,6 +52,7 @@ import io.nuls.v2.model.annotation.ApiOperation;
 import io.nuls.v2.model.dto.AccountDto;
 import io.nuls.v2.model.dto.AliasDto;
 import io.nuls.v2.model.dto.MultiSignAliasDto;
+import io.nuls.v2.model.dto.SignDto;
 import io.nuls.v2.util.NulsSDKTool;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
@@ -61,6 +62,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -443,7 +445,7 @@ public class AccountResource {
         if (StringUtils.isBlank(form.getPrefix())) {
             result = NulsSDKTool.createOffLineAccount(form.getCount(), form.getPassword());
         } else {
-            result = NulsSDKTool.createOffLineAccount(form.getCount(), form.getPrefix(), form.getPassword());
+            result = NulsSDKTool.createOffLineAccount(form.getChainId(), form.getCount(), form.getPrefix(), form.getPassword());
         }
         return ResultUtil.getRpcClientResult(result);
     }
@@ -523,6 +525,25 @@ public class AccountResource {
     }))
     public RpcClientResult encryptedPriKeySign(EncryptedPriKeySignForm form) {
         io.nuls.core.basic.Result result = NulsSDKTool.sign(form.getTxHex(), form.getAddress(), form.getEncryptedPriKey(), form.getPassword());
+        return ResultUtil.getRpcClientResult(result);
+    }
+
+    @POST
+    @Path("/encryptedPriKeys/sign")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(description = "多账号密文私钥摘要签名", order = 156)
+    @Parameters({
+            @Parameter(parameterName = "form", parameterDes = "密文私钥摘要签名表单", requestType = @TypeDescriptor(value = EncryptedPriKeySignForm.class))
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "hash", description = "交易hash"),
+            @Key(name = "txHex", description = "签名后的交易16进制字符串")
+    }))
+    public RpcClientResult encryptedPriKeysSign(EncryptedPriKeysSignForm form) {
+//        io.nuls.core.basic.Result result = NulsSDKTool.sign(form.getTxHex(), form.getAddress(), form.getEncryptedPriKey(), form.getPassword());
+//        return ResultUtil.getRpcClientResult(result);
+//        return null;
+        io.nuls.core.basic.Result result = NulsSDKTool.sign(form.getChainId(), form.getPrefix(), form.getSignDtoList(), form.getTxHex());
         return ResultUtil.getRpcClientResult(result);
     }
 

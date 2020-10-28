@@ -48,7 +48,7 @@ public class RpcCall {
                 }
 
                 String errorCode = response.getResponseErrorCode();
-                LoggerUtil.commonLog.error("Call interface [{}] error, ErrorCode is {}, ResponseComment:{}", cmd, errorCode, response.getResponseComment());
+            //    LoggerUtil.commonLog.error("Call interface [{}] error, ErrorCode is {}, ResponseComment:{}", cmd, errorCode, response.getResponseComment());
                 if(response.getResponseStatus() == Response.FAIL){
                     //business error
                     if(StringUtils.isBlank(errorCode)){
@@ -65,7 +65,6 @@ public class RpcCall {
             Map data = (Map)response.getResponseData();
             return data.get(cmd);
         } catch (Exception e) {
-            LoggerUtil.commonLog.error(e);
             if(e instanceof NulsException) {
                 throw (NulsException) e;
             }

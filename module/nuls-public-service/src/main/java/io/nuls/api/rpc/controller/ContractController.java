@@ -66,6 +66,11 @@ public class ContractController {
         if (contractInfo == null) {
             rpcResult.setError(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
         } else {
+            Integer assetIdOfNRC20 = WalletRpcHandler.getAssetIdOfNRC20(contractAddress);
+            if (assetIdOfNRC20 != null) {
+                boolean crossAssets = WalletRpcHandler.isCrossAssets(chainId, assetIdOfNRC20);
+                contractInfo.setCrossAsset(crossAssets);
+            }
             ApiCache apiCache = CacheManager.getCache(chainId);
             AssetInfo defaultAsset = apiCache.getChainInfo().getDefaultAsset();
             BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, contractAddress, defaultAsset.getChainId(), defaultAsset.getAssetId());
@@ -160,10 +165,58 @@ public class ContractController {
         } else {
             pageInfo = tokenService.getAccountTokens(chainId, address, pageNumber, pageSize);
         }
-
+        if (pageInfo != null && pageInfo.getList() != null && pageInfo.getList().size() > 0) {
+            List<AccountTokenInfo> list = pageInfo.getList();
+            for (AccountTokenInfo tokenInfo : list) {
+                BigInteger available = WalletRpcHandler.tokenBalance(chainId, tokenInfo.getContractAddress(), tokenInfo.getAddress()).getData();
+                BigInteger total = tokenInfo.getBalance();
+                BigInteger locked = total.subtract(available);
+                tokenInfo.setLockedBalance(locked);
+            }
+        }
 
         RpcResult result = new RpcResult();
         result.setResult(pageInfo);
+        return result;
+    }
+
+    @RpcMethod("getAccountToken")
+    public RpcResult getAccountToken(List<Object> params) {
+        RpcResult result = new RpcResult();
+        VerifyUtils.verifyParams(params, 3);
+        int chainId;
+        String address, contract;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is invalid");
+        }
+        try {
+            address = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[address] is invalid");
+        }
+        try {
+            contract = (String) params.get(2);
+        } catch (Exception e) {
+            return RpcResult.paramError("[contract] is invalid");
+        }
+        if (!AddressTool.validAddress(chainId, address)) {
+            return RpcResult.paramError("[address] is invalid");
+        }
+        if (!AddressTool.validContractAddress(AddressTool.getAddress(contract), chainId)) {
+            return RpcResult.paramError("[contract] is invalid");
+        }
+        AccountTokenInfo tokenInfo = tokenService.getAccountTokenInfo(chainId, address + contract);
+        if (tokenInfo == null) {
+            result.setError(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
+            return result;
+        }
+        BigInteger available = WalletRpcHandler.tokenBalance(chainId, tokenInfo.getContractAddress(), tokenInfo.getAddress()).getData();
+        BigInteger total = tokenInfo.getBalance();
+        BigInteger locked = total.subtract(available);
+        tokenInfo.setLockedBalance(locked);
+        result.setResult(tokenInfo);
         return result;
     }
 

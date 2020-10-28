@@ -1,5 +1,7 @@
 package io.nuls.api.model.po.mini;
 
+import io.nuls.api.model.po.AccountInfo;
+
 import java.math.BigInteger;
 
 public class MiniAccountInfo {
@@ -12,9 +14,21 @@ public class MiniAccountInfo {
 
     private BigInteger totalBalance;
 
-    private BigInteger totalOut;
+    private BigInteger locked;
 
-    private BigInteger totalIn;
+    private String proportion;
+
+    private int decimal;
+
+    public MiniAccountInfo() {
+
+    }
+
+    public MiniAccountInfo(AccountInfo accountInfo) {
+        this.address = accountInfo.getAddress();
+        this.alias = accountInfo.getAlias();
+        this.type = accountInfo.getType();
+    }
 
     public String getAddress() {
         return address;
@@ -40,27 +54,35 @@ public class MiniAccountInfo {
         this.totalBalance = totalBalance;
     }
 
-    public BigInteger getTotalOut() {
-        return totalOut;
-    }
-
-    public void setTotalOut(BigInteger totalOut) {
-        this.totalOut = totalOut;
-    }
-
-    public BigInteger getTotalIn() {
-        return totalIn;
-    }
-
-    public void setTotalIn(BigInteger totalIn) {
-        this.totalIn = totalIn;
-    }
-
     public int getType() {
         return type;
     }
 
     public void setType(int type) {
         this.type = type;
+    }
+
+    public int getDecimal() {
+        return decimal;
+    }
+
+    public void setDecimal(int decimal) {
+        this.decimal = decimal;
+    }
+
+    public BigInteger getLocked() {
+        return locked;
+    }
+
+    public void setLocked(BigInteger locked) {
+        this.locked = locked;
+    }
+
+    public String getProportion() {
+        return proportion;
+    }
+
+    public void setProportion(String proportion) {
+        this.proportion = proportion;
     }
 }
