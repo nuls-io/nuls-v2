@@ -49,4 +49,12 @@ public interface ContractData {
     String getMethodDesc();
 
     String[][] getArgs();
+
+    default int getAssetChainId() {
+        return 0;
+    }
+
+    default int getAssetId() {
+        return 0;
+    }
 }

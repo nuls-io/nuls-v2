@@ -1,18 +1,18 @@
-/*
+/**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2019 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,68 +20,46 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
-package io.nuls.contract.vm.program;
+package io.nuls.contract.model.bo;
+
+import io.nuls.base.data.NulsHash;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
-public class ProgramInternalCall {
+/**
+ * @author: PierreLuo
+ */
+public class ContractMultyAssetMergedTransfer {
 
-    /**
-     * 调用者
-     */
-    private byte[] sender;
-
-    /**
-     * 交易附带的货币量
-     */
-    private BigInteger value;
-
-    /**
-     * 转入资产的链ID
-     */
+    private byte[] from;
     private int assetChainId;
-
-    /**
-     * 转入资产ID
-     */
     private int assetId;
+    private BigInteger value;
+    private List<MultyAssetOutput> outputs;
 
     /**
-     * 合约地址
+     * 智能合约交易hash
      */
-    private byte[] contractAddress;
+    private NulsHash orginHash;
 
     /**
-     * 方法名
+     * 合约转账(从合约转出)交易hash
      */
-    private String methodName;
+    private NulsHash hash;
 
-    /**
-     * 方法签名
-     */
-    private String methodDesc;
-
-    /**
-     * 参数列表
-     */
-    private String[][] args;
-
-    public byte[] getSender() {
-        return sender;
+    public ContractMultyAssetMergedTransfer() {
+        outputs = new ArrayList<>();
     }
 
-    public void setSender(byte[] sender) {
-        this.sender = sender;
+    public byte[] getFrom() {
+        return from;
     }
 
-    public BigInteger getValue() {
-        return value;
-    }
-
-    public void setValue(BigInteger value) {
-        this.value = value;
+    public void setFrom(byte[] from) {
+        this.from = from;
     }
 
     public int getAssetChainId() {
@@ -100,36 +78,35 @@ public class ProgramInternalCall {
         this.assetId = assetId;
     }
 
-    public byte[] getContractAddress() {
-        return contractAddress;
+    public BigInteger getValue() {
+        return value;
     }
 
-    public void setContractAddress(byte[] contractAddress) {
-        this.contractAddress = contractAddress;
+    public void setValue(BigInteger value) {
+        this.value = value;
     }
 
-    public String getMethodName() {
-        return methodName;
+    public List<MultyAssetOutput> getOutputs() {
+        return outputs;
     }
 
-    public void setMethodName(String methodName) {
-        this.methodName = methodName;
+    public void setOutputs(List<MultyAssetOutput> outputs) {
+        this.outputs = outputs;
     }
 
-    public String getMethodDesc() {
-        return methodDesc;
+    public NulsHash getOrginHash() {
+        return orginHash;
     }
 
-    public void setMethodDesc(String methodDesc) {
-        this.methodDesc = methodDesc;
+    public void setOrginHash(NulsHash orginHash) {
+        this.orginHash = orginHash;
     }
 
-    public String[][] getArgs() {
-        return args;
+    public NulsHash getHash() {
+        return hash;
     }
 
-    public void setArgs(String[][] args) {
-        this.args = args;
+    public void setHash(NulsHash hash) {
+        this.hash = hash;
     }
-
 }

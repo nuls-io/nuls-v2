@@ -262,7 +262,7 @@ public class ContractVmTest extends MockBase {
     public void createAndInit() throws Exception {
         // 加载协议升级的数据
         ProtocolGroupManager.setLoadProtocol(false);
-        ProtocolGroupManager.updateProtocol(chainId, (short) 4);
+        ProtocolGroupManager.updateProtocol(chainId, (short) 5);
 
         // -------------------------------------------------------------------------------------//
         InputStream inA = new FileInputStream(getClass().getResource("/contract-vm-testA-testA.jar").getFile());

@@ -25,7 +25,6 @@
 package io.nuls.contract.vm;
 
 import io.nuls.contract.model.dto.BlockHeaderDto;
-import io.nuls.contract.util.Log;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.code.VariableType;
@@ -185,6 +184,8 @@ public class VM {
         programContext.setGasPrice(programInvoke.getPrice());
         programContext.setGas(programInvoke.getGasLimit());
         programContext.setValue(this.heap.newBigInteger(programInvoke.getValue().toString()));
+        programContext.setAssetChainId(programInvoke.getAssetChainId());
+        programContext.setAssetId(programInvoke.getAssetId());
         programContext.setNumber(programInvoke.getNumber());
         programContext.setEstimateGas(programInvoke.isEstimateGas());
         if(programInvoke.getSenderPublicKey() != null) {
@@ -210,22 +211,12 @@ public class VM {
 
     public void run(ObjectRef objectRef, MethodCode methodCode, VMContext vmContext, ProgramInvoke programInvoke) {
         this.vmContext = vmContext;
-        //todo Niels
-        long startTime = System.nanoTime();
         Object[] runArgs = runArgs(objectRef, methodCode, programInvoke.getArgs());
-        long use = System.nanoTime()-startTime;
-        Log.info("===================================================================step 1.1 : {}ns",use);
-        startTime = System.nanoTime();
         if (isEnd()) {
             return;
         }
         initProgramContext(programInvoke);
-        use = System.nanoTime()-startTime;
-        Log.info("===================================================================step 1.2 : {}ns",use);
-        startTime = System.nanoTime();
         run(methodCode, runArgs, true);
-        use = System.nanoTime()-startTime;
-        Log.info("===================================================================step 1.3 : {}ns",use);
     }
 
     private Object[] runArgs(ObjectRef objectRef, MethodCode methodCode, String[][] args) {

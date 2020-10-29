@@ -583,6 +583,14 @@ public class Heap {
         return new BigInteger(value);
     }
 
+    public Integer toInteger(ObjectRef objectRef) {
+        String value = runToString(objectRef);
+        if (value == null) {
+            return null;
+        }
+        return Integer.parseInt(value);
+    }
+
     public ObjectRef newContract(byte[] address, ClassCode contractCode, Repository repository) {
         ObjectRef objectRef = newObject(NativeAddress.toString(address), contractCode);
         this.contract = objectRef;

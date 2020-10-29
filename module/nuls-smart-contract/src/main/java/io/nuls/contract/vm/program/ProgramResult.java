@@ -47,7 +47,7 @@ public class ProgramResult {
     private String stackTrace;
 
     private String nonce;
-    private Map<ByteArrayWrapper, ProgramAccount> accounts;
+    private Map<String, ProgramAccount> accounts;
 
     private List<ProgramTransfer> transfers = new ArrayList<>();
 
@@ -145,11 +145,11 @@ public class ProgramResult {
         this.nonce = nonce;
     }
 
-    public Map<ByteArrayWrapper, ProgramAccount> getAccounts() {
+    public Map<String, ProgramAccount> getAccounts() {
         return accounts;
     }
 
-    public void setAccounts(Map<ByteArrayWrapper, ProgramAccount> accounts) {
+    public void setAccounts(Map<String, ProgramAccount> accounts) {
         this.accounts = accounts;
     }
 

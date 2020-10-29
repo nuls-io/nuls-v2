@@ -121,9 +121,9 @@ public class ContractTxServiceImpl implements ContractTxService {
     @Override
     public Result contractCallTx(int chainId, String sender, BigInteger value, Long gasLimit, Long price, String contractAddress,
                                  String methodName, String methodDesc, String[][] args,
-                                 String password, String remark) {
+                                 String password, String remark, int assetChainId, int assetId) {
         try {
-            Result<CallContractTransaction> result = contractTxHelper.makeCallTx(chainId, sender, value, gasLimit, price, contractAddress, methodName, methodDesc, args, password, remark);
+            Result<CallContractTransaction> result = contractTxHelper.makeCallTx(chainId, sender, value, gasLimit, price, contractAddress, methodName, methodDesc, args, password, remark, assetChainId, assetId);
             if (result.isFailed()) {
                 return result;
             }
@@ -157,14 +157,14 @@ public class ContractTxServiceImpl implements ContractTxService {
 
     @Override
     public Result validateContractCallTx(int chainId, byte[] senderBytes, BigInteger value, Long gasLimit, Long price, byte[] contractAddressBytes,
-                                         String methodName, String methodDesc, String[][] args) {
-        return contractTxHelper.validateCall(chainId, senderBytes, contractAddressBytes, value, gasLimit, price, methodName, methodDesc, args);
+                                         String methodName, String methodDesc, String[][] args, int assetChainId, int assetId) {
+        return contractTxHelper.validateCall(chainId, senderBytes, contractAddressBytes, value, gasLimit, price, methodName, methodDesc, args, assetChainId, assetId);
     }
 
     @Override
     public Result<ContractResult> previewContractCallTx(int chainId, byte[] senderBytes, BigInteger value, Long gasLimit, Long price, byte[] contractAddressBytes,
-                                                        String methodName, String methodDesc, String[][] args) {
-        return contractTxHelper.previewCall(chainId, senderBytes, contractAddressBytes, value, gasLimit, price, methodName, methodDesc, args);
+                                                        String methodName, String methodDesc, String[][] args, int assetChainId, int assetId) {
+        return contractTxHelper.previewCall(chainId, senderBytes, contractAddressBytes, value, gasLimit, price, methodName, methodDesc, args, assetChainId, assetId);
     }
 
     private Result<byte[]> saveUnConfirmedTokenTransfer(int chainId, CallContractTransaction tx, String sender, String contractAddress, String methodName, String[][] args) {

@@ -64,6 +64,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static io.nuls.contract.config.ContractContext.ASSET_ID;
+import static io.nuls.contract.config.ContractContext.CHAIN_ID;
 import static io.nuls.contract.constant.ContractConstant.MAX_GASLIMIT;
 import static io.nuls.contract.constant.ContractConstant.UNLOCKED_TX;
 import static io.nuls.contract.constant.ContractErrorCode.*;
@@ -233,7 +235,7 @@ public class ContractTxHelper {
 
         Chain chain = contractHelper.getChain(chainId);
         int assetsId = chain.getConfig().getAssetId();
-        ContractBalance senderBalance = contractHelper.getUnConfirmedBalanceAndNonce(chainId, sender);
+        ContractBalance senderBalance = contractHelper.getUnConfirmedBalanceAndNonce(chainId, CHAIN_ID, ASSET_ID, sender);
         CoinFrom coinFrom = new CoinFrom(senderBytes, chainId, assetsId, totalValue, RPCUtil.decode(senderBalance.getNonce()), UNLOCKED_TX);
         coinData.addFrom(coinFrom);
 
@@ -268,7 +270,7 @@ public class ContractTxHelper {
 
     public Result<CallContractTransaction> makeCallTx(int chainId, String sender, BigInteger value, Long gasLimit, Long price, String contractAddress,
                                                       String methodName, String methodDesc, String[][] args,
-                                                      String password, String remark) {
+                                                      String password, String remark, int assetChainId, int assetId) {
 
         if (value == null) {
             value = BigInteger.ZERO;
@@ -282,7 +284,7 @@ public class ContractTxHelper {
         byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
         byte[] senderBytes = AddressTool.getAddress(sender);
 
-        Result validateCall = this.validateCall(chainId, senderBytes, contractAddressBytes, value, gasLimit, price, methodName, methodDesc, args);
+        Result validateCall = this.validateCall(chainId, senderBytes, contractAddressBytes, value, gasLimit, price, methodName, methodDesc, args, assetChainId, assetId);
         if (validateCall.isFailed()) {
             return validateCall;
         }
@@ -348,7 +350,7 @@ public class ContractTxHelper {
     }
 
 
-    public Result validateCall(int chainId, byte[] senderBytes, byte[] contractAddressBytes, BigInteger value, Long gasLimit, Long price, String methodName, String methodDesc, String[][] args) {
+    public Result validateCall(int chainId, byte[] senderBytes, byte[] contractAddressBytes, BigInteger value, Long gasLimit, Long price, String methodName, String methodDesc, String[][] args, int assetChainId, int assetId) {
         try {
             if (!ContractUtil.checkPrice(price.longValue())) {
                 return Result.getFailed(CONTRACT_MINIMUM_PRICE_ERROR);
@@ -379,6 +381,8 @@ public class ContractTxHelper {
             }
             // 创建链上交易，包含智能合约
             programCall.setValue(value);
+            programCall.setAssetChainId(assetChainId);
+            programCall.setAssetId(assetId);
             programCall.setPrice(price.longValue());
 
             // 获取VM执行器
@@ -422,7 +426,7 @@ public class ContractTxHelper {
         }
     }
 
-    public Result<ContractResult> previewCall(int chainId, byte[] senderBytes, byte[] contractAddressBytes, BigInteger value, Long gasLimit, Long price, String methodName, String methodDesc, String[][] args) {
+    public Result<ContractResult> previewCall(int chainId, byte[] senderBytes, byte[] contractAddressBytes, BigInteger value, Long gasLimit, Long price, String methodName, String methodDesc, String[][] args, int assetChainId, int assetId) {
         try {
             if (!ContractUtil.checkPrice(price.longValue())) {
                 return Result.getFailed(CONTRACT_MINIMUM_PRICE_ERROR);
@@ -453,6 +457,10 @@ public class ContractTxHelper {
             }
             // 创建链上交易，包含智能合约
             programCall.setValue(value);
+            // add by pierre at 2020-10-29
+            programCall.setAssetChainId(assetChainId);
+            programCall.setAssetId(assetId);
+            // end code by pierre
             programCall.setPrice(price.longValue());
 
             // 获取VM执行器
@@ -593,7 +601,7 @@ public class ContractTxHelper {
                 return Result.getFailed(ContractErrorCode.CONTRACT_DELETE_CREATER);
             }
 
-            ContractBalance balance = contractHelper.getRealBalance(chainId, contractAddress);
+            ContractBalance balance = contractHelper.getRealBalance(chainId, CHAIN_ID, ASSET_ID, contractAddress);
             BigInteger totalBalance = balance.getTotal();
             if (totalBalance.compareTo(BigInteger.ZERO) != 0) {
                 return Result.getFailed(ContractErrorCode.CONTRACT_DELETE_BALANCE);

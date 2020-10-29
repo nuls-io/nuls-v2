@@ -34,6 +34,7 @@ import static io.nuls.contract.util.ContractUtil.asString;
 
 public class ContractMergeContractTransferTest {
 
+    int assetChainId = 2, assetId = 1;
     @BeforeClass
     public static void initClass() {
         Log.info("init log.");
@@ -62,11 +63,11 @@ public class ContractMergeContractTransferTest {
     @Test
     public void mergeContractTransferTest() throws IOException, NulsException {
         List<ProgramTransfer> transfers = new ArrayList<>();
-        transfers.add(new ProgramTransfer(new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8, 1, 2, 3}, new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8, 2, 3, 4}, BigInteger.ONE));
-        transfers.add(new ProgramTransfer(new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8, 1, 2, 3}, new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8, 2, 3, 4}, BigInteger.TWO));
-        transfers.add(new ProgramTransfer(new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8, 3, 4, 5}, new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8, 4, 5, 6}, BigInteger.TEN));
-        transfers.add(new ProgramTransfer(new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8, 1, 2, 3}, new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8, 4, 5, 6}, BigInteger.TWO));
-        transfers.add(new ProgramTransfer(new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8, 1, 2, 3}, new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8, 5, 3, 4}, BigInteger.ONE));
+        transfers.add(new ProgramTransfer(new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8, 1, 2, 3}, new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8, 2, 3, 4}, BigInteger.ONE, assetChainId, assetId, 0));
+        transfers.add(new ProgramTransfer(new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8, 1, 2, 3}, new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8, 2, 3, 4}, BigInteger.TWO, assetChainId, assetId, 0));
+        transfers.add(new ProgramTransfer(new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8, 3, 4, 5}, new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8, 4, 5, 6}, BigInteger.TEN, assetChainId, assetId, 0));
+        transfers.add(new ProgramTransfer(new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8, 1, 2, 3}, new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8, 4, 5, 6}, BigInteger.TWO, assetChainId, assetId, 0));
+        transfers.add(new ProgramTransfer(new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8, 1, 2, 3}, new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8, 5, 3, 4}, BigInteger.ONE, assetChainId, assetId, 0));
         CoinData coinData = null;
         CoinFrom coinFrom = null;
         CoinTo coinTo = null;

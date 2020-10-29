@@ -101,7 +101,7 @@ public class ContractResultDto {
         this.gasLimit = contractData.getGasLimit();
         this.gasUsed = result.getGasUsed();
         this.price = result.getPrice();
-        BigInteger totalFee = tx.getFee();
+        BigInteger totalFee = tx.getCoinDataObj().getFeeByAsset(chainId, 1);
         this.totalFee = bigInteger2String(totalFee);
         // pierre 标记
         if(tx.getType() == TxType.CROSS_CHAIN) {

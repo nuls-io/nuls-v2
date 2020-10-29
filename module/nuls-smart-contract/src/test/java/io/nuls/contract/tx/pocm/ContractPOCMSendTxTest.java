@@ -110,7 +110,7 @@ public class ContractPOCMSendTxTest extends BaseQuery {
 
         //Log.info("begin openConsensus");
         //this.invokeCall(sender, BigInteger.ZERO, contractAddress, "openConsensus", null, "remark");
-        Log.info("begin addOtherAgent");
+        /*Log.info("begin addOtherAgent");
         this.invokeCall(sender, BigInteger.ZERO, contractAddress, "addOtherAgent", null, "remark", List.of("047b1c71c9d99d8adb016def355e207996c573364ec7eace3dae6c1746e62785").toArray());
         Log.info("begin depositForOwn {}", sender);
 
@@ -139,7 +139,7 @@ public class ContractPOCMSendTxTest extends BaseQuery {
         Log.info("sender locked balance is {}", this.invokeView(nrc20Locked, "lockedBalanceOf", sender));
         Log.info("toAddress5 locked balance is {}", this.invokeView(nrc20Locked, "lockedBalanceOf", toAddress5));
         Log.info("toAddress6 locked balance is {}", this.invokeView(nrc20Locked, "lockedBalanceOf", toAddress6));
-        Log.info("pocm locked balance is {}", this.invokeView(nrc20Locked, "lockedBalanceOf", pocm));
+        Log.info("pocm locked balance is {}", this.invokeView(nrc20Locked, "lockedBalanceOf", pocm));*/
     }
 
     @Test

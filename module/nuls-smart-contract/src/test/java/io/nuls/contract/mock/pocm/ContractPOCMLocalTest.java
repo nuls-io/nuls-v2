@@ -87,7 +87,7 @@ public class ContractPOCMLocalTest extends Base {
 
     class VMContextMockBalanceAndBlock extends VMContextMock {
         @Override
-        public ContractBalance getBalance(int chainId, byte[] address) {
+        public ContractBalance getBalance(int chainId, int assetChainId, int assetId, byte[] address) {
             ContractBalance balance = ContractBalance.newInstance();
             balance.setBalance(contractBalance);
             return balance;

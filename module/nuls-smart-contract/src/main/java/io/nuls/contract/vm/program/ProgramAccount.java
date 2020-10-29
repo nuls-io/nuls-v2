@@ -12,11 +12,17 @@ public class ProgramAccount {
 
     private String nonce;
 
-    public ProgramAccount(byte[] address, BigInteger balance, String nonce) {
+    private int assetChainId;
+
+    private int assetId;
+
+    public ProgramAccount(byte[] address, BigInteger balance, String nonce, int assetChainId, int assetId) {
         this.address = address;
         this.balance = balance;
         this.nonce = nonce;
         this.freeze = BigInteger.ZERO;
+        this.assetChainId = assetChainId;
+        this.assetId = assetId;
     }
 
     public byte[] getAddress() {
@@ -36,8 +42,13 @@ public class ProgramAccount {
         return balance.add(freeze);
     }
 
-    public void setFreeze(BigInteger freeze) {
-        this.freeze = freeze;
+    public BigInteger addFreeze(BigInteger value) {
+        freeze = freeze.add(value);
+        return freeze;
+    }
+
+    public BigInteger getFreeze() {
+        return freeze;
     }
 
     public String getNonce() {
@@ -47,4 +58,13 @@ public class ProgramAccount {
     public void setNonce(String nonce) {
         this.nonce = nonce;
     }
+
+    public int getAssetChainId() {
+        return assetChainId;
+    }
+
+    public int getAssetId() {
+        return assetId;
+    }
+
 }

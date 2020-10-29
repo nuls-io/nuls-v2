@@ -1,18 +1,18 @@
-/*
+/**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2019 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,60 +20,28 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
-package io.nuls.contract.vm.program;
+package io.nuls.contract.model.bo;
 
 import java.math.BigInteger;
 
-public class ProgramInternalCall {
-
-    /**
-     * 调用者
-     */
-    private byte[] sender;
-
-    /**
-     * 交易附带的货币量
-     */
+/**
+ * @author: PierreLuo
+ * @date: 2019-03-06
+ */
+public class MultyAssetOutput {
+    private byte[] to;
     private BigInteger value;
-
-    /**
-     * 转入资产的链ID
-     */
     private int assetChainId;
-
-    /**
-     * 转入资产ID
-     */
     private int assetId;
+    private long lockTime;
 
-    /**
-     * 合约地址
-     */
-    private byte[] contractAddress;
-
-    /**
-     * 方法名
-     */
-    private String methodName;
-
-    /**
-     * 方法签名
-     */
-    private String methodDesc;
-
-    /**
-     * 参数列表
-     */
-    private String[][] args;
-
-    public byte[] getSender() {
-        return sender;
+    public byte[] getTo() {
+        return to;
     }
 
-    public void setSender(byte[] sender) {
-        this.sender = sender;
+    public void setTo(byte[] to) {
+        this.to = to;
     }
 
     public BigInteger getValue() {
@@ -100,36 +68,11 @@ public class ProgramInternalCall {
         this.assetId = assetId;
     }
 
-    public byte[] getContractAddress() {
-        return contractAddress;
+    public long getLockTime() {
+        return lockTime;
     }
 
-    public void setContractAddress(byte[] contractAddress) {
-        this.contractAddress = contractAddress;
+    public void setLockTime(long lockTime) {
+        this.lockTime = lockTime;
     }
-
-    public String getMethodName() {
-        return methodName;
-    }
-
-    public void setMethodName(String methodName) {
-        this.methodName = methodName;
-    }
-
-    public String getMethodDesc() {
-        return methodDesc;
-    }
-
-    public void setMethodDesc(String methodDesc) {
-        this.methodDesc = methodDesc;
-    }
-
-    public String[][] getArgs() {
-        return args;
-    }
-
-    public void setArgs(String[][] args) {
-        this.args = args;
-    }
-
 }

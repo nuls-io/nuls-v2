@@ -43,12 +43,20 @@ public class ContractContext {
     /**
      * 主网链ID（卫星链ID）
      */
-    public static int MAIN_CHAIN_ID;
+    public static int MAIN_CHAIN_ID = 1;
 
     /**
      * 主网链资产ID（卫星链资产ID，NULS资产）
      */
-    public static int MAIN_ASSETS_ID;
+    public static int MAIN_ASSETS_ID = 1;
+    /**
+     * 当前链ID
+     */
+    public static int CHAIN_ID = 1;
+    /**
+     * 当前链资产ID
+     */
+    public static int ASSET_ID = 1;
 
     /**
      *  代币跨链系统合约地址
@@ -58,4 +66,6 @@ public class ContractContext {
     public static short UPDATE_VERSION_V240 = 4;
 
     public static short UPDATE_VERSION_V250 = 5;
+
+    public static short UPDATE_VERSION_CONTRACT_ASSET = 8;
 }

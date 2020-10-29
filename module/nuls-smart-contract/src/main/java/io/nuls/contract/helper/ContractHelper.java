@@ -26,6 +26,8 @@ package io.nuls.contract.helper;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.CoinData;
+import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
@@ -38,6 +40,7 @@ import io.nuls.contract.model.bo.*;
 import io.nuls.contract.model.dto.ContractConstructorInfoDto;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
+import io.nuls.contract.model.txdata.CallContractData;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.contract.rpc.call.LedgerCall;
@@ -63,6 +66,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static io.nuls.contract.config.ContractContext.ASSET_ID;
+import static io.nuls.contract.config.ContractContext.CHAIN_ID;
 import static io.nuls.contract.constant.ContractConstant.*;
 import static io.nuls.contract.constant.ContractErrorCode.ADDRESS_ERROR;
 import static io.nuls.contract.util.ContractUtil.*;
@@ -79,8 +84,6 @@ public class ContractHelper {
     private ContractAddressStorageService contractAddressStorageService;
     @Autowired
     private ContractTokenTransferStorageService contractTokenTransferStorageService;
-
-    private ConcurrentHashMap<String, Long> accountLastedPriceMap = MapUtil.createConcurrentHashMap(4);
 
     private static final BigInteger MAXIMUM_DECIMALS = BigInteger.valueOf(18L);
     private static final BigInteger MAXIMUM_TOTAL_SUPPLY = BigInteger.valueOf(2L).pow(256).subtract(BigInteger.ONE);
@@ -408,17 +411,17 @@ public class ContractHelper {
         return getSuccess();
     }
 
-    public ContractBalance getBalance(int chainId, byte[] address) {
+    public ContractBalance getBalance(int chainId, int assetChainId, int assetId, byte[] address) {
         ContractTempBalanceManager tempBalanceManager = getBatchInfoTempBalanceManager(chainId);
         if (tempBalanceManager != null) {
-            Result<ContractBalance> balance = tempBalanceManager.getBalance(address);
+            Result<ContractBalance> balance = tempBalanceManager.getBalance(address, assetChainId, assetId);
             if (balance.isSuccess()) {
                 return balance.getData();
             } else {
                 Log.error("[{}] Get balance error.", AddressTool.getStringAddressByBytes(address));
             }
         } else {
-            ContractBalance realBalance = getRealBalance(chainId, AddressTool.getStringAddressByBytes(address));
+            ContractBalance realBalance = getRealBalance(chainId, assetChainId, assetId, AddressTool.getStringAddressByBytes(address));
             if (realBalance != null) {
                 return realBalance;
             }
@@ -426,9 +429,9 @@ public class ContractHelper {
         return ContractBalance.newInstance();
     }
 
-    public ContractBalance getRealBalance(int chainId, String address) {
+    public ContractBalance getRealBalance(int chainId, int assetChainId, int assetId, String address) {
         try {
-            Map<String, Object> balance = LedgerCall.getConfirmedBalanceAndNonce(getChain(chainId), address);
+            Map<String, Object> balance = LedgerCall.getConfirmedBalanceAndNonce(getChain(chainId), assetChainId, assetId, address);
             ContractBalance contractBalance = ContractBalance.newInstance();
             contractBalance.setBalance(new BigInteger(balance.get("available").toString()));
             contractBalance.setFreeze(new BigInteger(balance.get("freeze").toString()));
@@ -440,9 +443,9 @@ public class ContractHelper {
         }
     }
 
-    public ContractBalance getUnConfirmedBalanceAndNonce(int chainId, String address) {
+    public ContractBalance getUnConfirmedBalanceAndNonce(int chainId, int assetChainId, int assetId, String address) {
         try {
-            Map<String, Object> balance = LedgerCall.getBalanceAndNonce(getChain(chainId), address);
+            Map<String, Object> balance = LedgerCall.getBalanceAndNonce(getChain(chainId), assetChainId, assetId, address);
             ContractBalance contractBalance = ContractBalance.newInstance();
             contractBalance.setBalance(new BigInteger(balance.get("available").toString()));
             contractBalance.setFreeze(new BigInteger(balance.get("freeze").toString()));
@@ -527,25 +530,6 @@ public class ContractHelper {
             return getFailed();
         }
 
-    }
-
-    public void updateLastedPriceForAccount(int chainId, byte[] sender, long price) {
-        if (price <= 0) {
-            return;
-        }
-        String address = AddressTool.getStringAddressByBytes(sender) + chainId;
-        accountLastedPriceMap.put(address, price);
-    }
-
-    public long getLastedPriceForAccount(int chainId, byte[] sender) {
-        String address = AddressTool.getStringAddressByBytes(sender) + chainId;
-        Long price = accountLastedPriceMap.get(address);
-        if (price == null) {
-            price = ContractConstant.CONTRACT_MINIMUM_PRICE;
-        }
-        price = price < ContractConstant.CONTRACT_MINIMUM_PRICE ? ContractConstant.CONTRACT_MINIMUM_PRICE : price;
-        accountLastedPriceMap.put(address, price);
-        return price;
     }
 
     public void dealNrc20Events(int chainId, byte[] newestStateRoot, Transaction tx, ContractResult contractResult, ContractAddressInfoPo po) {
@@ -725,5 +709,18 @@ public class ContractHelper {
         makeContractResult(tx, contractResult);
         callableResult.putFailed(chainId, contractResult);
         return contractResult;
+    }
+
+    public void extractAssetInfoFromCallTransaction(CallContractData contractData, Transaction tx) throws NulsException {
+        contractData.setAssetChainId(CHAIN_ID);
+        contractData.setAssetId(ASSET_ID);
+        CoinData coinData = tx.getCoinDataInstance();
+        List<CoinTo> toList = coinData.getTo();
+        if (toList == null || toList.isEmpty()) {
+            return;
+        }
+        CoinTo to = toList.get(0);
+        contractData.setAssetChainId(to.getAssetsChainId());
+        contractData.setAssetId(to.getAssetsId());
     }
 }

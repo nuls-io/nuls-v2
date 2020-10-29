@@ -43,12 +43,12 @@ import java.util.Map;
  */
 public class LedgerCall {
 
-    public static Map<String, Object> getBalanceAndNonce(Chain chain, String address) throws NulsException {
+    public static Map<String, Object> getBalanceAndNonce(Chain chain, int assetChainId, int assetId, String address) throws NulsException {
         Map<String, Object> params = new HashMap(4);
         params.put(Constants.CHAIN_ID, chain.getConfig().getChainId());
-        params.put("assetChainId", chain.getConfig().getChainId());
+        params.put("assetChainId", assetChainId);
+        params.put("assetId", assetId);
         params.put("address", address);
-        params.put("assetId", chain.getConfig().getAssetId());
         params.put("isConfirmed", false);
         try {
             Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalanceNonce", params);
@@ -61,12 +61,12 @@ public class LedgerCall {
         }
     }
 
-    public static Map<String, Object> getConfirmedBalanceAndNonce(Chain chain, String address) throws NulsException {
+    public static Map<String, Object> getConfirmedBalanceAndNonce(Chain chain, int assetChainId, int assetId, String address) throws NulsException {
         Map<String, Object> params = new HashMap(4);
         params.put(Constants.CHAIN_ID, chain.getConfig().getChainId());
-        params.put("assetChainId", chain.getConfig().getChainId());
+        params.put("assetChainId", assetChainId);
+        params.put("assetId", assetId);
         params.put("address", address);
-        params.put("assetId", chain.getConfig().getAssetId());
         params.put("isConfirmed", true);
         try {
             Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalanceNonce", params);

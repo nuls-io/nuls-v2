@@ -429,7 +429,6 @@ public class ContractServiceImpl implements ContractService {
         if (hash == null || result == null) {
             return Result.getFailed(ContractErrorCode.NULL_PARAMETER);
         }
-        contractHelper.updateLastedPriceForAccount(chainId, result.getSender(), result.getPrice());
         return contractExecuteResultStorageService.saveContractExecuteResult(chainId, hash, result);
     }
 

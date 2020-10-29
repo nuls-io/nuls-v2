@@ -29,6 +29,7 @@ import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractWrapperTransaction;
 import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.core.basic.Result;
+import io.nuls.core.exception.NulsException;
 
 import java.util.List;
 
@@ -42,6 +43,6 @@ public interface ContractCaller {
 
     Result callBatchEnd(int chainId, long blockHeight);
 
-    List<ContractResult> reCallTx(ProgramExecutor batchExecutor, List<ContractWrapperTransaction> reCallTxList, int chainId, String preStateRoot);
+    List<ContractResult> reCallTx(ProgramExecutor batchExecutor, List<ContractWrapperTransaction> reCallTxList, int chainId, String preStateRoot) throws NulsException;
 
 }

@@ -440,6 +440,12 @@ public class ContractUtil {
     }
 
     public static boolean checkPrice(long price) {
+        if (ProtocolGroupManager.getCurrentVersion(ContractContext.CHAIN_ID) >= ContractContext.UPDATE_VERSION_CONTRACT_ASSET) {
+            if (price <= 0) {
+                return false;
+            }
+            return true;
+        }
         if (price < CONTRACT_MINIMUM_PRICE) {
             return false;
         }
@@ -691,14 +697,22 @@ public class ContractUtil {
         return publicKey;
     }
 
-    public static void mapAddBigInteger(LinkedHashMap<String, BigInteger> map, byte[] address, BigInteger amount) {
-        String strAddress = asString(address);
-        BigInteger currentAmount = map.get(strAddress);
+    public static void mapAddBigInteger(LinkedHashMap<String, BigInteger> map, byte[] address, int assetChainId, int assetId, BigInteger amount) {
+        String addressKey = addressKey(address, assetChainId, assetId);
+        BigInteger currentAmount = map.get(addressKey);
         if (currentAmount == null) {
-            map.put(strAddress, amount);
+            map.put(addressKey, amount);
         } else {
-            map.put(strAddress, currentAmount.add(amount));
+            map.put(addressKey, currentAmount.add(amount));
         }
+    }
+
+    public static String addressKey(byte[] address, int assetChainId, int assetId) {
+        return new StringBuilder(asString(address)).append(ContractConstant.LINE).append(assetChainId).append(ContractConstant.LINE).append(assetId).toString();
+    }
+
+    public static String addressLockedKey(byte[] address, int assetChainId, int assetId, long lockedTime) {
+        return new StringBuilder(asString(address)).append(ContractConstant.LINE).append(assetChainId).append(ContractConstant.LINE).append(assetId).append(ContractConstant.LINE).append(lockedTime).toString();
     }
 
     public static String toString(String[][] a) {
