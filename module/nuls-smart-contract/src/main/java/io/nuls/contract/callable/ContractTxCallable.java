@@ -141,10 +141,14 @@ public class ContractTxCallable implements Callable<ContractResult> {
                 // end code by pierre
                 case CALL_CONTRACT:
                     contractResult = contractExecutor.call(executor, contractData, number, preStateRoot, extractPublicKey(tx));
-                    if(!makeContractResultAndCheckGasSerial(tx, contractResult, batchInfo)) {
+
+                    boolean bool = makeContractResultAndCheckGasSerial(tx, contractResult, batchInfo);
+
+                    if(!bool) {
                         break;
                     }
                     checkCallResult(tx, callableResult, contractResult);
+
                     break;
                 case DELETE_CONTRACT:
                     contractResult = contractExecutor.delete(executor, contractData, number, preStateRoot);
@@ -166,7 +170,7 @@ public class ContractTxCallable implements Callable<ContractResult> {
             // end code by pierre
         }
         //if (Log.isDebugEnabled()) {
-        //    Log.debug("[Per Contract Execution Cost Time] TxType is {}, TxHash is {}, Cost Time is {}", tx.getType(), tx.getHash().toString(), System.currentTimeMillis() - start);
+            Log.info("[Per Contract Execution Cost Time] TxType is {}, TxHash is {}, Cost Time is {}", tx.getType(), tx.getHash().toString(), System.currentTimeMillis() - start);
         //}
         return contractResult;
     }

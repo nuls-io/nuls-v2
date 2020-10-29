@@ -10,4 +10,5 @@ Managed=1
 loadLanguage=1
 
 [public-service]
-moduleDynamicDependent=smart-contract,cross-chain
+moduleDynamicDependent=smart-contract,cross-chain,chain-manager
+

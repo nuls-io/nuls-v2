@@ -23,6 +23,8 @@
  */
 package io.nuls.provider.api.resources;
 
+import io.nuls.base.api.provider.crosschain.CrossChainProvider;
+import io.nuls.base.api.provider.crosschain.facade.CreateCrossTxReq;
 import io.nuls.provider.api.config.Config;
 import io.nuls.base.RPCUtil;
 import io.nuls.base.api.provider.Result;
@@ -43,6 +45,7 @@ import io.nuls.provider.model.ErrorData;
 import io.nuls.provider.model.RpcClientResult;
 import io.nuls.provider.model.dto.AccountBalanceDto;
 import io.nuls.provider.model.form.BalanceForm;
+import io.nuls.provider.model.form.CrossTransferForm;
 import io.nuls.provider.model.form.TransferForm;
 import io.nuls.provider.model.form.TxForm;
 import io.nuls.provider.rpctools.ContractTools;
@@ -53,10 +56,7 @@ import io.nuls.provider.utils.Log;
 import io.nuls.provider.utils.ResultUtil;
 import io.nuls.v2.model.annotation.Api;
 import io.nuls.v2.model.annotation.ApiOperation;
-import io.nuls.v2.model.dto.MultiSignTransferDto;
-import io.nuls.v2.model.dto.MultiSignTransferTxFeeDto;
-import io.nuls.v2.model.dto.TransferDto;
-import io.nuls.v2.model.dto.TransferTxFeeDto;
+import io.nuls.v2.model.dto.*;
 import io.nuls.v2.txdata.CallContractData;
 import io.nuls.v2.txdata.CreateContractData;
 import io.nuls.v2.txdata.DeleteContractData;
@@ -88,6 +88,9 @@ public class AccountLedgerResource {
     Config config;
 
     TransferService transferService = ServiceManager.get(TransferService.class);
+
+    CrossChainProvider crossChainProvider = ServiceManager.get(CrossChainProvider.class);
+
     LedgerProvider ledgerProvider = ServiceManager.get(LedgerProvider.class);
     @Autowired
     TransactionTools transactionTools;
@@ -277,14 +280,49 @@ public class AccountLedgerResource {
         if (form == null) {
             return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "form is empty"));
         }
+        if (form.getAssetChainId() == 0) {
+            form.setAssetChainId(config.getChainId());
+        }
+        if (form.getAssetId() == 0) {
+            form.setAssetId(config.getAssetsId());
+        }
         TransferReq.TransferReqBuilder builder =
-                new TransferReq.TransferReqBuilder(config.getChainId(), config.getAssetsId())
+                new TransferReq.TransferReqBuilder(config.getChainId(), form.getAssetId())
                         .addForm(form.getAddress(), form.getPassword(), form.getAmount())
                         .addTo(form.getToAddress(), form.getAmount()).setRemark(form.getRemark());
-        Result<String> result = transferService.transfer(builder.build(new TransferReq()));
+        TransferReq req = builder.build(new TransferReq());
+        req.getInputs().get(0).setAssetsChainId(form.getAssetChainId());
+        req.getOutputs().get(0).setAssetsChainId(form.getAssetChainId());
+        Result<String> result = transferService.transfer(req);
         RpcClientResult clientResult = ResultUtil.getRpcClientResult(result);
         if (clientResult.isSuccess()) {
             return clientResult.resultMap().map("value", clientResult.getData()).mapToData();
+        }
+        return clientResult;
+    }
+
+    @POST
+    @Path("/crossTransfer")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(description = "跨链转账", order = 306, detailDesc = "发起单账户单资产的跨链转账交易")
+    @Parameters({
+            @Parameter(parameterName = "跨链转账", parameterDes = "跨链转账表单", requestType = @TypeDescriptor(value = CrossTransferForm.class))
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "交易hash")
+    }))
+    public RpcClientResult crossTransfer(CrossTransferForm form) {
+        if (form == null) {
+            return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "form is empty"));
+        }
+        CreateCrossTxReq.CreateCrossTxReqBuilder builder = new CreateCrossTxReq.CreateCrossTxReqBuilder(config.getChainId())
+                .addForm(form.getAssetChainId(), form.getAssetId(), form.getAddress(), form.getPassword(), form.getAmount())
+                .addTo(form.getAssetChainId(), form.getAssetId(), form.getToAddress(), form.getAmount())
+                .setRemark(form.getRemark());
+        Result<String> result = crossChainProvider.createCrossTx(builder.build());
+        RpcClientResult clientResult = ResultUtil.getRpcClientResult(result);
+        if (clientResult.isSuccess()) {
+            return clientResult.resultMap().map("txHash", clientResult.getData()).mapToData();
         }
         return clientResult;
     }
@@ -312,6 +350,28 @@ public class AccountLedgerResource {
     }
 
     @POST
+    @Path("/createCrossTxOffline")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(description = "离线组装跨链转账交易", order = 350, detailDesc = "根据inputs和outputs离线组装跨链转账交易，用于单账户或多账户的转账交易。" +
+            "交易手续费为inputs里本链主资产金额总和，减去outputs里本链主资产总和，再加上跨链转账的NULS手续费")
+    @Parameters({
+            @Parameter(parameterName = "transferDto", parameterDes = "跨链转账交易表单", requestType = @TypeDescriptor(value = TransferDto.class))
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "hash", description = "交易hash"),
+            @Key(name = "txHex", description = "交易序列化16进制字符串")
+    }))
+    public RpcClientResult createCrossTxOffline(TransferDto transferDto) {
+        try {
+            CommonValidator.checkTransferDto(transferDto);
+            io.nuls.core.basic.Result result = NulsSDKTool.createCrossTransferTxOffline(transferDto);
+            return ResultUtil.getRpcClientResult(result);
+        } catch (NulsException e) {
+            return RpcClientResult.getFailed(new ErrorData(e.getErrorCode().getCode(), e.getMessage()));
+        }
+    }
+
+    @POST
     @Path("/calcTransferTxFee")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(description = "计算离线创建转账交易所需手续费", order = 351)
@@ -325,6 +385,22 @@ public class AccountLedgerResource {
         BigInteger fee = NulsSDKTool.calcTransferTxFee(dto);
         Map map = new HashMap();
         map.put("value", fee.toString());
+        RpcClientResult result = RpcClientResult.getSuccess(map);
+        return result;
+    }
+
+    @POST
+    @Path("/calcCrossTxFee")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(description = "计算离线创建跨链转账交易所需手续费", order = 351)
+    @Parameters({
+            @Parameter(parameterName = "TransferTxFeeDto", parameterDes = "转账交易手续费", requestType = @TypeDescriptor(value = TransferTxFeeDto.class))
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "交易手续费"),
+    }))
+    public RpcClientResult calcCrossTxFee(CrossTransferTxFeeDto dto) {
+        Map<String, BigInteger> map = NulsSDKTool.calcCrossTransferTxFee(dto);
         RpcClientResult result = RpcClientResult.getSuccess(map);
         return result;
     }

@@ -1,7 +1,9 @@
 package io.nuls.provider;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.I18nUtils;
+import io.nuls.core.rpc.util.AddressPrefixDatas;
 import io.nuls.provider.api.RpcServerManager;
 import io.nuls.base.api.provider.Provider;
 import io.nuls.base.api.provider.ServiceManager;
@@ -35,6 +37,8 @@ public class ApiBootstrap extends RpcModule {
 
     @Autowired
     MyModule myModule;
+    @Autowired
+    private AddressPrefixDatas addressPrefixDatas;
 
     public static void main(String[] args) {
         boolean isOffline = false;
@@ -67,6 +71,7 @@ public class ApiBootstrap extends RpcModule {
             SpringLiteContext.init(basePackage);
         }
         initRpcServer(configItemMap);
+
         NulsSDKBootStrap.init(defaultChainId, "");
         try {
             I18nUtils.setLanguage("en");
@@ -99,7 +104,8 @@ public class ApiBootstrap extends RpcModule {
                 new Module(ModuleE.BL.abbr, ROLE),
                 new Module(ModuleE.AC.abbr, ROLE),
                 new Module(ModuleE.TX.abbr, ROLE),
-                new Module(ModuleE.LG.abbr, ROLE)
+                new Module(ModuleE.LG.abbr, ROLE),
+                new Module(ModuleE.CC.abbr, ROLE)
         };
     }
 
@@ -110,6 +116,7 @@ public class ApiBootstrap extends RpcModule {
 
     @Override
     public boolean doStart() {
+        AddressTool.init(addressPrefixDatas);
         return true;
     }
 

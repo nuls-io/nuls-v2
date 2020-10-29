@@ -23,6 +23,8 @@ mainAssetId=1
 #主网主资产符号
 mainSymbol=NULS
 blackHolePublicKey=000000000000000000000000000000000000000000000000000000000000000000
+packageVersion=%PACKAGE_VERSION%
+
 
 [network]
 port=8001
@@ -58,6 +60,8 @@ singleDownloadTimeout=15000
 cachedBlockSizeLimit=20971520
 #创世块文件路径(支持绝对路径与相对路径,相对路径相对于此配置文件的目录)
 genesisBlockPath=genesis-block.json
+
+
 
 [consensus]
 #种子节点列表
@@ -138,5 +142,14 @@ serverIp=0.0.0.0
 #httpServer的启动port
 serverPort=8004
 
-[cmd-client]
-clientVersion=2.5.0
+
+[nuls-module-web-wallet]
+apiModuleApi=http://127.0.0.1:8003/
+webWalletPort=8006
+webWalletHost=0.0.0.0
+
+[nuls-module-explorer]
+apiModuleApi=http://127.0.0.1:8003/
+explorerPort=1999
+explorerHost=0.0.0.0
+

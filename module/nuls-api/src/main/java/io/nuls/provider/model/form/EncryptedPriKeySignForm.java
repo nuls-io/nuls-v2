@@ -14,6 +14,10 @@ public class EncryptedPriKeySignForm {
     private String encryptedPriKey;
     @ApiModelProperty(description = "账户密码")
     private String password;
+    @ApiModelProperty(description = "地址链ID")
+    private int chainId;
+    @ApiModelProperty(description = "地址前缀")
+    private String prefix;
 
     public String getEncryptedPriKey() {
         return encryptedPriKey;
@@ -47,4 +51,19 @@ public class EncryptedPriKeySignForm {
         this.address = address;
     }
 
+    public int getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(int chainId) {
+        this.chainId = chainId;
+    }
+
+    public String getPrefix() {
+        return prefix;
+    }
+
+    public void setPrefix(String prefix) {
+        this.prefix = prefix;
+    }
 }

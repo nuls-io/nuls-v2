@@ -53,7 +53,7 @@
         </fileSet>
         <fileSet>
             <!-- JAVA running package has been prepared locally -->
-            <directory>${user.home}/Nuls/JRE_ENV/LINUX/V11/JAVA</directory>
+            <directory>E:/work/JAVA</directory>
             <outputDirectory>/JAVA</outputDirectory>
             <excludes>
                 <exclude>**/.DS_Store</exclude>

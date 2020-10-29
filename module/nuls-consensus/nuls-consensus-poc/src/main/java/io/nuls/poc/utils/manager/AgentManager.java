@@ -115,10 +115,13 @@ public class AgentManager {
 
     /**
      * 根据节点地址找节点
-     * */
-    public Agent getAgentByAgentAddress(Chain chain, byte[] agentAddress){
-        for (Agent agent : chain.getAgentList()){
-            if(Arrays.equals(agentAddress, agent.getAgentAddress())){
+     */
+    public Agent getAgentByAgentAddress(Chain chain, byte[] agentAddress) {
+        for (Agent agent : chain.getAgentList()) {
+            if (agent.getDelHeight() > 0) {
+                continue;
+            }
+            if (Arrays.equals(agentAddress, agent.getAgentAddress())) {
                 return agent;
             }
         }
@@ -311,9 +314,9 @@ public class AgentManager {
         agent.setCreditVal(member.getAgent().getRealCreditVal());
     }
 
-    public BigInteger getAgentDeposit(Chain chain, Agent agent){
+    public BigInteger getAgentDeposit(Chain chain, Agent agent) {
         BigInteger totalDeposit = BigInteger.ZERO;
-        for (Deposit deposit : chain.getDepositList()){
+        for (Deposit deposit : chain.getDepositList()) {
             if (!agent.getTxHash().equals(deposit.getAgentHash())) {
                 continue;
             }

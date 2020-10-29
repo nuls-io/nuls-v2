@@ -16,6 +16,8 @@ public class CoinToInfo {
 
     private String symbol;
 
+    private int decimal;
+
     public String getAddress() {
         return address;
     }
@@ -66,5 +68,13 @@ public class CoinToInfo {
 
     public String getAssetKey() {
         return chainId + "-" + assetsId;
+    }
+
+    public int getDecimal() {
+        return decimal;
+    }
+
+    public void setDecimal(int decimal) {
+        this.decimal = decimal;
     }
 }

@@ -79,6 +79,7 @@ public class ProtocolServiceImpl implements ProtocolService {
             list.sort(ProtocolVersionPo.COMPARATOR.reversed());
             ProtocolVersionPo protocolVersionPo = list.get(0);
             ProtocolVersion protocolVersion = PoUtil.getProtocolVersion(protocolVersionPo);
+            System.out.println("---------init currentVersion----------," + protocolVersion.getVersion());
             context.setCurrentProtocolVersion(protocolVersion);
             VersionChangeNotifier.notify(chainId, protocolVersion.getVersion());
             VersionChangeNotifier.reRegister(chainId, context, protocolVersion.getVersion());
@@ -149,6 +150,7 @@ public class ProtocolServiceImpl implements ProtocolService {
         logger.info("height-0, save-" + b + ", new statisticsInfo-" + statisticsInfo);
         //设置新协议版本
         context.setCurrentProtocolVersion(genesisProtocolVersion);
+        System.out.println("---------genesisProtocolVersion----------," + genesisProtocolVersion.getVersion());
         context.setCurrentProtocolVersionCount(statisticsInfo.getCount());
         protocolService.saveCurrentProtocolVersionCount(chainId, context.getCurrentProtocolVersionCount());
         VersionChangeNotifier.notify(chainId, genesisProtocolVersion.getVersion());
@@ -236,6 +238,7 @@ public class ProtocolServiceImpl implements ProtocolService {
                         }
                         //设置新协议版本
                         context.setCurrentProtocolVersion(statictisProtocolVersion);
+                        System.out.println("---------协议升级 save block statictisProtocolVersion----------," + statictisProtocolVersion.getVersion());
                         context.setCurrentProtocolVersionCount(statisticsInfo.getCount());
                         protocolService.saveCurrentProtocolVersionCount(chainId, context.getCurrentProtocolVersionCount());
                         context.getProtocolVersionHistory().push(statictisProtocolVersion);

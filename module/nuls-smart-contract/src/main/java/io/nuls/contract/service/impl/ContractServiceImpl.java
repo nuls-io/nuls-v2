@@ -157,13 +157,13 @@ public class ContractServiceImpl implements ContractService {
     @Override
     public Result invokeContractOneByOne(int chainId, ContractTempTransaction tx) {
         try {
-            if (Log.isDebugEnabled()) {
-                Log.debug("[Invoke Contract] TxType is [{}], hash is [{}]", tx.getType(), tx.getHash().toString());
-            }
+//            if (Log.isDebugEnabled()) {
+            Log.info("[Invoke Contract] TxType is [{}], hash is [{}]", tx.getType(), tx.getHash().toString());
+//            }
             tx.setChainId(chainId);
             ContractWrapperTransaction wrapperTx = ContractUtil.parseContractTransaction(tx, chainManager);
             // add by pierre at 2019-10-20
-            if(wrapperTx == null) {
+            if (wrapperTx == null) {
                 return getSuccess();
             }
             // end code by pierre
@@ -250,13 +250,13 @@ public class ContractServiceImpl implements ContractService {
             ContractPackageDto dto;
             do {
                 dto = batchInfo.getContractPackageDto();
-                if(dto != null) {
+                if (dto != null) {
                     break;
                 }
                 long beforeEndTime = batchInfo.getBeforeEndTime();
                 long now0 = System.currentTimeMillis();
                 long timeOut = 1200 - (now0 - beforeEndTime);
-                if(timeOut <= 0) {
+                if (timeOut <= 0) {
                     Log.warn("超过了预留的超时时间[0]: {}", timeOut);
                     break;
                 }
@@ -269,23 +269,23 @@ public class ContractServiceImpl implements ContractService {
                     Log.error("wait end time out[0]", e.getMessage());
                 }
                 dto = batchInfo.getContractPackageDto();
-                if(dto != null) {
+                if (dto != null) {
                     break;
                 }
                 long now1 = System.currentTimeMillis();
                 Log.info("第一次花费的时间: {}", now1 - beforeEndTime);
                 // 若超过了区块合约gas或者txCount限制，则中断未执行完的线程
-                if(batchInfo.isExceed()) {
+                if (batchInfo.isExceed()) {
                     Map<String, Future<ContractResult>> contractMap = batchInfo.getContractMap();
-                    if(!contractMap.isEmpty()) {
+                    if (!contractMap.isEmpty()) {
                         Set<Map.Entry<String, Future<ContractResult>>> entries = contractMap.entrySet();
                         String hash;
                         Future<ContractResult> _future;
                         int count = 0;
-                        for(Map.Entry<String, Future<ContractResult>> entry : entries) {
+                        for (Map.Entry<String, Future<ContractResult>> entry : entries) {
                             hash = entry.getKey();
                             _future = entry.getValue();
-                            if(_future.isDone()) {
+                            if (_future.isDone()) {
                                 continue;
                             }
                             _future.cancel(true);
@@ -299,7 +299,7 @@ public class ContractServiceImpl implements ContractService {
                 long now2 = System.currentTimeMillis();
                 timeOut = 1500 - (now2 - beforeEndTime);
                 Log.info("预留的超时时间[1]: {}", timeOut);
-                if(timeOut <= 0) {
+                if (timeOut <= 0) {
                     Log.warn("超过了预留的超时时间[1]: {}", timeOut);
                     break;
                 }
@@ -313,12 +313,12 @@ public class ContractServiceImpl implements ContractService {
             BlockHeader currentBlockHeader = batchInfo.getCurrentBlockHeader();
             ProgramExecutor batchExecutor = batchInfo.getBatchExecutor();
             long s = 0L;
-            if(Log.isDebugEnabled()) {
+            if (Log.isDebugEnabled()) {
                 s = System.currentTimeMillis();
             }
             Result<byte[]> batchExecuteResult = contractExecutor.commitBatchExecute(batchExecutor);
             long e;
-            if(Log.isDebugEnabled()) {
+            if (Log.isDebugEnabled()) {
                 e = System.currentTimeMillis();
                 Log.debug("合约提交持久化时间cost: {}", e - s);
             }
@@ -338,7 +338,7 @@ public class ContractServiceImpl implements ContractService {
             ContractPackageDto contractPackageDto = contractHelper.getChain(chainId).getBatchInfo().getContractPackageDto();
             if (contractPackageDto != null) {
                 List<byte[]> offlineTxHashList = contractPackageDto.getOfflineTxHashList();
-                if(offlineTxHashList != null && !offlineTxHashList.isEmpty()) {
+                if (offlineTxHashList != null && !offlineTxHashList.isEmpty()) {
                     BlockHeader header = new BlockHeader();
                     header.parse(RPCUtil.decode(blockHeaderHex), 0);
                     // 保存智能合约链下交易hash

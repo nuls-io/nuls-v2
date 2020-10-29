@@ -64,31 +64,6 @@ public class BlockController {
     @Autowired
     BlockTools blockTools;
 
-    @RpcMethod("info")
-    @ApiOperation(description = "获取本链相关信息,其中共识资产为本链创建共识节点交易和创建委托共识交易时，需要用到的资产", order = 001)
-    @ResponseData(name = "返回值", description = "返回本链信息", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "chainId", description = "本链的ID"),
-            @Key(name = "assetId", description = "本链默认主资产的ID"),
-            @Key(name = "inflationAmount", description = "本链默认主资产的初始数量"),
-            @Key(name = "agentChainId", description = "本链共识资产的链ID"),
-            @Key(name = "agentAssetId", description = "本链共识资产的ID"),
-            @Key(name = "addressPrefix", description = "本链地址前缀"),
-            @Key(name = "symbol", description = "本链主资产符号")
-    }))
-    public RpcResult getInfo(List<Object> params) {
-        Result<Map> result = blockTools.getInfo(config.getChainId());
-        if (result.isSuccess()) {
-            Map map = result.getData();
-            map.put("chainId", config.getChainId());
-            map.put("assetId", config.getAssetsId());
-            map.put("addressPrefix", config.getAddressPrefix());
-            map.put("symbol", config.getSymbol());
-            map.remove("awardAssetId");
-            map.remove("seedNodes");
-        }
-        return ResultUtil.getJsonRpcResult(result);
-    }
-
     @RpcMethod("getHeaderByHeight")
     @ApiOperation(description = "根据区块高度查询区块头", order = 201)
     @Parameters({
@@ -395,6 +370,22 @@ public class BlockController {
         }
         Result<String> result = blockTools.latestHeight(chainId);
         return ResultUtil.getJsonRpcResult(result);
+    }
+
+    @RpcMethod("testGetBlock")
+    public RpcResult testGetBlock(List<Object> params) {
+        while (true) {
+            Result<Block> result = blockTools.getBestBlock(1);
+            if(result.isFailed()) {
+                System.out.println(result.getStatus());
+            }
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 
 }

@@ -217,7 +217,7 @@ public class Constants {
 
     public static final int TRY_COUNT = 3;
 
-    public static final int THREAD_POOL_SIZE = Runtime.getRuntime().availableProcessors() * 2;
+    public static final int THREAD_POOL_SIZE = Runtime.getRuntime().availableProcessors()>=8?Runtime.getRuntime().availableProcessors() * 2:16;
 
     public static final int QUEUE_SIZE = 100000;
 

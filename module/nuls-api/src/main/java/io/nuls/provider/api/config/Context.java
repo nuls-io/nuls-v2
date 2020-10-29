@@ -24,6 +24,10 @@
 package io.nuls.provider.api.config;
 
 import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.provider.api.model.AssetInfo;
+import io.nuls.provider.api.model.ChainInfo;
+
+import java.util.List;
 
 /**
  * @author: PierreLuo
@@ -33,7 +37,15 @@ public class Context {
 
     private static Config config;
 
-    private Context(){};
+    public static boolean isRunCrossChain;
+
+    public static List<ChainInfo> chainList;
+
+    public static List<AssetInfo> assetList;
+
+    public static ChainInfo defaultChain;
+
+
 
     public static Integer getChainId() {
         if(config == null) {

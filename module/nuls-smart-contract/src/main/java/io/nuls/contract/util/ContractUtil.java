@@ -161,6 +161,7 @@ public class ContractUtil {
             // add by pierre at 2019-11-02 需要协议升级 done
             case CROSS_CHAIN:
                 if(ProtocolGroupManager.getCurrentVersion(tx.getChainId()) < ContractContext.UPDATE_VERSION_V250) {
+                    isContractTx = false;
                     break;
                 }
                 contractData = parseCrossChainTx(tx, chainManager);

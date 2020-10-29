@@ -707,10 +707,18 @@ public class TransactionServiceImpl implements TransactionService {
      */
     private boolean getFeeIndirect(Chain chain, List<CoinFrom> listFrom, int txSize, BigInteger targetFee, BigInteger actualFee) throws NulsException {
         ListIterator<CoinFrom> iterator = listFrom.listIterator();
+        out:
         while (iterator.hasNext()) {
             CoinFrom coinFrom = iterator.next();
             //如果不为当前链主资产
             if (!TxUtil.isChainAssetExist(chain, coinFrom)) {
+                //如果FROM中有相同地址有本链资产的coin, 说明前面计算并支出过手续费但余额不足.
+                for (CoinFrom coin : listFrom) {
+                    if (Arrays.equals(coin.getAddress(), coinFrom.getAddress())
+                            && TxUtil.isChainAssetExist(chain, coin)) {
+                        continue out;
+                    }
+                }
                 int assetsChainId = chain.getConfig().getChainId();
                 int assetsId = chain.getConfig().getAssetId();
                 //查询该地址在当前链的主资产余额
@@ -730,10 +738,7 @@ public class TransactionServiceImpl implements TransactionService {
                 //当前还差的手续费
                 BigInteger current = targetFee.subtract(actualFee);
                 //此账户可以支付的手续费
-                //可用余额=当前余额减去本次转出
-                mainAsset = mainAsset.subtract(coinFrom.getAmount());
                 BigInteger fee = BigIntegerUtils.isEqualOrGreaterThan(mainAsset, current) ? current : mainAsset;
-
                 feeCoinFrom.setLocked(AccountConstant.NORMAL_TX_LOCKED);
                 feeCoinFrom.setAssetsChainId(assetsChainId);
                 feeCoinFrom.setAssetsId(assetsId);

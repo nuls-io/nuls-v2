@@ -59,6 +59,8 @@ public class SyncService {
     private List<AgentInfo> agentInfoList = new ArrayList<>();
     //记录每个区块交易和账户地址的关系
     private Set<TxRelationInfo> txRelationInfoSet = new HashSet<>();
+    //记录每个跨链交易和账户地址的关系
+    private Set<CrossTxRelationInfo> crossTxRelationInfoSet = new HashSet<>();
     //记录每个区块设置别名信息
     private List<AliasInfo> aliasInfoList = new ArrayList<>();
     //记录每个区块委托共识的信息
@@ -251,6 +253,20 @@ public class SyncService {
                 accountInfo.setTotalReward(accountInfo.getTotalReward().add(output.getAmount()));
                 accountInfo.setLastReward(output.getAmount());
             }
+
+            if (ApiContext.syncCoinBase) {
+                if (!ApiContext.syncAddress.isEmpty()) {
+                    if (ApiContext.syncAddress.contains(output.getAddress())) {
+                        AccountLedgerInfo ledgerInfo = queryLedgerInfo(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
+                        ledgerInfo.setTotalBalance(ledgerInfo.getTotalBalance().add(output.getAmount()));
+                        txRelationInfoSet.add(new TxRelationInfo(output, tx, ledgerInfo.getTotalBalance()));
+                    }
+                } else {
+                    AccountLedgerInfo ledgerInfo = queryLedgerInfo(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
+                    ledgerInfo.setTotalBalance(ledgerInfo.getTotalBalance().add(output.getAmount()));
+                    txRelationInfoSet.add(new TxRelationInfo(output, tx, ledgerInfo.getTotalBalance()));
+                }
+            }
         }
         for (String address : addressSet) {
             AccountInfo accountInfo = queryAccountInfo(chainId, address);
@@ -309,6 +325,28 @@ public class SyncService {
                 addressSet.add(input.getAddress());
                 AccountLedgerInfo ledgerInfo = calcBalance(chainId, input);
                 txRelationInfoSet.add(new TxRelationInfo(input, tx, ledgerInfo.getTotalBalance()));
+                AssetInfo assetInfo = CacheManager.getRegisteredAsset(input.getAssetKey());
+                crossTxRelationInfoSet.add(new CrossTxRelationInfo(input, tx, assetInfo.getDecimals()));
+
+                if (assetInfo.getChainId() != ApiContext.defaultChainId) {
+                    //资产跨链转出后，修改资产在本链的总余额
+                    ChainInfo chainInfo = queryChainInfo(assetInfo.getChainId());
+                    if (chainInfo != null) {
+                        AssetInfo asset = chainInfo.getDefaultAsset();
+                        if (asset.getAssetId() == assetInfo.getAssetId()) {
+                            asset.setLocalTotalCoins(asset.getLocalTotalCoins().subtract(input.getAmount()));
+                            if (asset.getChainId() == 123) {
+
+                                System.out.println("from:" + input.getAmount() + ",total:" + asset.getLocalTotalCoins());
+                            }
+                        }
+                        for (AssetInfo ass : chainInfo.getAssets()) {
+                            if (ass.getAssetId() == assetInfo.getAssetId()) {
+                                ass.setLocalTotalCoins(ass.getLocalTotalCoins().subtract(input.getAmount()));
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -320,11 +358,32 @@ public class SyncService {
                     continue;
                 }
                 addressSet.add(output.getAddress());
-                if(nrc20CrossTransferBack && output.getAssetsId() != ApiContext.defaultAssetId) {
+                if (nrc20CrossTransferBack && output.getAssetsId() != ApiContext.defaultAssetId) {
                     txRelationInfoSet.add(new TxRelationInfo(output, tx, BigInteger.ZERO));
                 } else {
                     AccountLedgerInfo ledgerInfo = calcBalance(chainId, output);
                     txRelationInfoSet.add(new TxRelationInfo(output, tx, ledgerInfo.getTotalBalance()));
+                    AssetInfo assetInfo = CacheManager.getRegisteredAsset(output.getAssetKey());
+                    crossTxRelationInfoSet.add(new CrossTxRelationInfo(output, tx, assetInfo.getDecimals()));
+
+                    //资产跨链转入后，修改资产在本链的总余额
+                    if (assetInfo.getChainId() != ApiContext.defaultChainId) {
+                        ChainInfo chainInfo = queryChainInfo(assetInfo.getChainId());
+                        if (chainInfo != null) {
+                            AssetInfo asset = chainInfo.getDefaultAsset();
+                            if (asset.getAssetId() == assetInfo.getAssetId()) {
+                                asset.setLocalTotalCoins(asset.getLocalTotalCoins().add(output.getAmount()));
+                                if (asset.getChainId() == 123) {
+                                    System.out.println("to:" + output.getAmount() + ",total:" + asset.getLocalTotalCoins());
+                                }
+                            }
+                            for (AssetInfo ass : chainInfo.getAssets()) {
+                                if (ass.getAssetId() == assetInfo.getAssetId()) {
+                                    ass.setLocalTotalCoins(ass.getLocalTotalCoins().add(output.getAmount()));
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -345,7 +404,7 @@ public class SyncService {
                     continue;
                 }
                 addressSet.add(input.getAddress());
-                if(input.getAssetsId() == ApiContext.defaultAssetId) {
+                if (input.getAssetsId() == ApiContext.defaultAssetId) {
                     AccountLedgerInfo ledgerInfo = calcBalance(chainId, input);
                     txRelationInfoSet.add(new TxRelationInfo(input, tx, ledgerInfo.getTotalBalance()));
                 } else {
@@ -377,7 +436,7 @@ public class SyncService {
     }
 
     private void processCrossTransferTxForNRC20TransferBack(int chainId, TransactionInfo tx) {
-        if(tx.getTxData() != null && tx.getTxData() instanceof ContractCallInfo) {
+        if (tx.getTxData() != null && tx.getTxData() instanceof ContractCallInfo) {
             ContractCallInfo callInfo = (ContractCallInfo) tx.getTxData();
             ContractInfo contractInfo = queryContractInfo(chainId, callInfo.getContractAddress());
             contractInfo.setTxCount(contractInfo.getTxCount() + 1);
@@ -712,7 +771,25 @@ public class SyncService {
             }
         }
 
-        chainInfoList.add((ChainInfo) tx.getTxData());
+        ChainInfo chainInfo = (ChainInfo) tx.getTxData();
+        ChainInfo info = queryChainInfo(chainInfo.getChainId());
+        if (info != null) {
+            chainInfo.setNew(false);
+            chainInfo.getDefaultAsset().setLocalTotalCoins(info.getDefaultAsset().getLocalTotalCoins());
+            for (AssetInfo assetInfo1 : chainInfo.getAssets()) {
+                for (AssetInfo assetInfo2 : info.getAssets()) {
+                    if (assetInfo1.getAssetId() == assetInfo2.getAssetId()) {
+                        assetInfo1.setLocalTotalCoins(assetInfo2.getLocalTotalCoins());
+                    }
+                }
+            }
+        } else {
+            chainInfo.setNew(true);
+        }
+
+        chainInfoList.add(chainInfo);
+        CacheManager.getChainInfoMap().put(chainInfo.getChainId(), chainInfo);
+        CacheManager.getAssetInfoMap().put(chainInfo.getDefaultAsset().getKey(), chainInfo.getDefaultAsset());
     }
 
     private void processDestroyChainTx(int chainId, TransactionInfo tx) {
@@ -723,7 +800,8 @@ public class SyncService {
         AccountLedgerInfo ledgerInfo = calcBalance(chainId, input.getChainId(), input.getAssetsId(), accountInfo, tx.getFee().getValue());
         txRelationInfoSet.add(new TxRelationInfo(input, tx, tx.getFee().getValue(), ledgerInfo.getTotalBalance()));
 
-        ChainInfo chainInfo = chainService.getChainInfo(chainId);
+        ChainInfo chainInfo = (ChainInfo) tx.getTxData();
+        chainInfo = chainService.getChainInfo(chainInfo.getChainId());
         chainInfo.setStatus(DISABLE);
         for (AssetInfo assetInfo : chainInfo.getAssets()) {
             assetInfo.setStatus(DISABLE);
@@ -755,11 +833,13 @@ public class SyncService {
         txRelationInfoSet.add(new TxRelationInfo(output, tx, ledgerInfo.getTotalBalance()));
 
         AssetInfo assetInfo = (AssetInfo) tx.getTxData();
-        ChainInfo chainInfo = chainService.getChainInfo(chainId);
+        ChainInfo chainInfo = chainService.getChainInfo(assetInfo.getChainId());
         if (chainInfo != null) {
+            chainInfo.setNew(false);
             chainInfo.getAssets().add(assetInfo);
             chainInfoList.add(chainInfo);
         }
+        CacheManager.getAssetInfoMap().put(assetInfo.getKey(), assetInfo);
     }
 
     private void processCancelAssetTx(int chainId, TransactionInfo tx) {
@@ -771,9 +851,12 @@ public class SyncService {
         txRelationInfoSet.add(new TxRelationInfo(input, tx, tx.getFee().getValue(), ledgerInfo.getTotalBalance()));
 
         AssetInfo assetInfo = (AssetInfo) tx.getTxData();
-        ChainInfo chainInfo = chainService.getChainInfo(chainId);
+        ChainInfo chainInfo = chainService.getChainInfo(assetInfo.getChainId());
         chainInfo.getAsset(assetInfo.getAssetId()).setStatus(DISABLE);
         chainInfo.setNew(false);
+        if (assetInfo.getAssetId() == chainInfo.getDefaultAsset().getAssetId()) {
+            chainInfo.getDefaultAsset().setStatus(DISABLE);
+        }
         chainInfoList.add(chainInfo);
     }
 
@@ -902,8 +985,8 @@ public class SyncService {
 
         long time1, time2;
 
-        SyncInfo syncInfo = chainService.saveNewSyncInfo(chainId, height, blockInfo.getHeader().getAgentVersion());
-        ApiContext.protocolVersion = syncInfo.getVersion();
+        SyncInfo syncInfo = chainService.saveNewSyncInfo(chainId, height, blockInfo.getHeader());
+
         //存储区块头信息
         time1 = System.currentTimeMillis();
         blockService.saveBLockHeaderInfo(chainId, blockInfo.getHeader());
@@ -924,6 +1007,8 @@ public class SyncService {
 //        time2 = System.currentTimeMillis();
 //        System.out.println("-----------saveTxRelationList, use: " + (time2 - time1) );
 //        time1 = System.currentTimeMillis();
+        //存储跨链交易和地址关系记录
+        txService.saveCrossTxRelationList(chainId, crossTxRelationInfoSet);
 
         //存储别名记录
         aliasService.saveAliasList(chainId, aliasInfoList);
@@ -1081,11 +1166,25 @@ public class SyncService {
         return accountTokenInfo;
     }
 
+    private ChainInfo queryChainInfo(int chainId) {
+        for (ChainInfo chainInfo : chainInfoList) {
+            if (chainInfo != null) {
+                return chainInfo;
+            }
+        }
+        ChainInfo chainInfo = chainService.getChainInfo(chainId);
+        if (chainInfo != null) {
+            chainInfoList.add(chainInfo);
+        }
+        return chainInfo;
+    }
+
     private void clear(int chainId) {
         accountInfoMap.clear();
         accountLedgerInfoMap.clear();
         agentInfoList.clear();
         txRelationInfoSet.clear();
+        crossTxRelationInfoSet.clear();
         aliasInfoList.clear();
         depositInfoList.clear();
         punishLogList.clear();

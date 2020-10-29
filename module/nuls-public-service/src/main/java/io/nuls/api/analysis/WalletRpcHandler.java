@@ -12,6 +12,7 @@ import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.basic.Result;
+import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
@@ -19,6 +20,7 @@ import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -185,7 +187,7 @@ public class WalletRpcHandler {
                 tx.setStatus(TxStatusEnum.CONFIRMED);
             }
             tx.setBlockHeight(height);
-            TransactionInfo txInfo = AnalysisHandler.toTransaction(chainId, tx);
+            TransactionInfo txInfo = AnalysisHandler.toTransaction(chainId, tx, ApiContext.protocolVersion);
 
             return Result.getSuccess(null).setData(txInfo);
         } catch (NulsException e) {
@@ -293,8 +295,9 @@ public class WalletRpcHandler {
     }
 
     private static String crossTokenSystemContract = null;
+
     public static String getCrossTokenSystemContract(int chainId) throws NulsException {
-        if(StringUtils.isBlank(crossTokenSystemContract)) {
+        if (StringUtils.isBlank(crossTokenSystemContract)) {
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.CHAIN_ID, chainId);
             Map map = (Map) RpcCall.request(ModuleE.SC.abbr, CommandConstant.GET_CROSS_TOKEN_SYSTEM_CONTRACT, params);
@@ -416,6 +419,24 @@ public class WalletRpcHandler {
         return Result.getSuccess(null).setData(map);
     }
 
+    public static Result<BigInteger> tokenBalance(int chainid, Object contractAddress, Object address) {
+        try {
+            Result<Map> result = invokeView(chainid, contractAddress, "balanceOf", null, new Object[]{address});
+            Map map = result.getData();
+            if (map == null) {
+                return Result.getSuccess(null).setData(BigInteger.ZERO);
+            }
+            Object balance = map.get("result");
+            if (balance == null) {
+                return Result.getSuccess(null).setData(BigInteger.ZERO);
+            }
+            return Result.getSuccess(null).setData(new BigInteger(balance.toString()));
+        } catch (NulsException e) {
+            Log.error(e.format());
+            return Result.getSuccess(null).setData(BigInteger.ZERO);
+        }
+    }
+
     public static Result<ContractResultInfo> getContractResultInfo(int chainId, String hash) throws NulsException {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.CHAIN_ID, chainId);
@@ -424,7 +445,13 @@ public class WalletRpcHandler {
     }
 
     private static Result<ContractResultInfo> getContractResultInfo(Map<String, Object> params) throws NulsException {
-        Map map = (Map) RpcCall.request(ModuleE.SC.abbr, CommandConstant.CONTRACT_RESULT, params);
+        Map map = null;
+        try {
+            map = (Map) RpcCall.request(ModuleE.SC.abbr, CommandConstant.CONTRACT_RESULT, params);
+        } catch (NulsException e) {
+            return Result.getFailed(CommonCodeConstanst.DATA_NOT_FOUND);
+        }
+        map = (Map) RpcCall.request(ModuleE.SC.abbr, CommandConstant.CONTRACT_RESULT, params);
         map = (Map) map.get("data");
         if (map == null || map.isEmpty()) {
             return Result.getFailed(ApiErrorCode.DATA_NOT_FOUND);
@@ -623,5 +650,50 @@ public class WalletRpcHandler {
             return Result.getFailed(e.getErrorCode());
         }
 
+    }
+
+    public static Result getChainAssetInfo(int assetChainId, int assetId) {
+        try {
+            Map<String, Object> params = new HashMap<>();
+            params.put(Constants.CHAIN_ID, ApiContext.defaultChainId);
+            params.put("assetChainId", assetChainId);
+            params.put("assetId", assetId);
+            Map map = (Map) RpcCall.request(ModuleE.LG.abbr, CommandConstant.CMD_GET_ASSET_BY_ID, params);
+            return Result.getSuccess(null).setData(map);
+        } catch (NulsException e) {
+            return Result.getFailed(e.getErrorCode());
+        }
+    }
+
+    /**
+     * 查询NRC20的资产ID
+     */
+    public static Integer getAssetIdOfNRC20(String contractAddress) {
+        try {
+            Map<String, Object> parameters = new HashMap<>();
+            parameters.put("contractAddress", contractAddress);
+            Map result = (Map) RpcCall.request(ModuleE.LG.abbr, CommandConstant.CMD_CHAIN_ASSET_CONTRACT_ASSETID, parameters);
+            Integer assetId = Integer.parseInt(result.get("assetId").toString());
+            return assetId;
+        } catch (NulsException e) {
+            Log.warn("查询NRC20资产ID异常, msg: {}", e.format());
+            return null;
+        }
+    }
+
+    /**
+     * 查询是否为跨链资产
+     */
+    public static boolean isCrossAssets(int chainId, int assetId) {
+        Map<String, Object> params = new HashMap(4);
+        params.put(Constants.CHAIN_ID, chainId);
+        params.put("assetId", assetId);
+        try {
+            Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CM.abbr, CommandConstant.CMD_ASSET, params);
+            return callResp.isSuccess();
+        } catch (Exception e) {
+            Log.warn("查询是否为跨链资产异常, msg: {}", e.getMessage());
+            return false;
+        }
     }
 }

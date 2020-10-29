@@ -41,4 +41,6 @@ public interface NulsCrossChainErrorCode extends CommonCodeConstanst {
     ErrorCode CROSS_ASSERT_VALID_ERROR = ErrorCode.init("cc_0028");
     ErrorCode TO_ADDRESS_ERROR = ErrorCode.init("cc_0029");
     ErrorCode TO_MANY_VERIFIER_EXIT = ErrorCode.init("cc_0030");
+    //资产没有注册跨链
+    ErrorCode ASSET_NOT_REG_CROSS_CHAIN = ErrorCode.init("cc_0031");
 }

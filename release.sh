@@ -10,16 +10,12 @@ if [ -z "$1" ]; then
 EOF
     exit 0
 fi
+VERSION=`cat version`
 ./package -a smart-contract
 ./package -a chain-manager
 ./package -a cross-chain
 ./package -a protocol-update
 ./package -a nuls-api
 ./package -O ${OS} -o NULS_Wallet
-cp config/nuls.ncf NULS_Wallet/nuls.ncf
-echo "" >> NULS_WALLET/nuls.ncf
-echo "[cmd-client]" >> NULS_WALLET/nuls.ncf
-echo "clientVersion=`cat NULS_WALLET/version`" >> NULS_WALLET/nuls.ncf
-cp config/genesis-block.json NULS_Wallet/genesis-block.json
-tar -czf NULS_Wallet_${OS}_v2.1.0.tar NULS_Wallet
-rm -rf NULS_Wallet
+tar -czf NULS_Wallet_${OS}_v${VERSION}.tar.gz NULS_Wallet
+#rm -rf NULS_Wallet

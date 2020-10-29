@@ -153,7 +153,7 @@ public class SystemProperties {
         values.put("crypto.hash.alg256", "ETH-KECCAK-256");
         values.put("crypto.hash.alg512", "ETH-KECCAK-512");
         values.put("database.maxOpenFiles", 512);
-        values.put("database.prune.enabled", true);
+        values.put("database.prune.enabled", false);
         values.put("database.prune.maxDepth", 192);
         values.put("keyvalue.datasource", "");
         config = ConfigFactory.parseMap(values);

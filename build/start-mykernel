@@ -17,7 +17,7 @@ EOF
     exit 0
 }
 
-
+. func
 #获取绝对路径
 function get_fullpath()
 {
@@ -66,8 +66,25 @@ do
             ?)     exit 2;;
            esac
 done
+#切换上下文到脚本目录
+cd `dirname $0`;
+#验证jdk版本
+BIN_PATH=`pwd`
 
-APP_NAME="mykernel"
+#如果没有指定配置文件，使用default-config.ncf作为默认配置文件
+if [ ! -f "$CONFIG" ]; then
+    CONFIG="${BIN_PATH}/nuls.ncf"
+    if [ ! -f "${CONFIG}" ] ; then
+        mv ${BIN_PATH}/.default-config.ncf nuls.ncf
+        echo "nuls.ncf is created by default-config.ncf."
+        echo "Please re-excute the startup program."
+        exit 0
+    fi
+fi
+
+chainName=`getModuleItem $CONFIG "chainName"`
+
+APP_NAME="${chainName}_kernel"
 #判断是否已经运行
 if [ ! -z "`ps -ef|grep -w "name=${APP_NAME} "|grep -v grep|awk '{print $2}'`" ]; then
     pid=`ps -ef|grep -w "name=${APP_NAME} "|grep -v grep|awk '{print $2}'`
@@ -75,10 +92,8 @@ if [ ! -z "`ps -ef|grep -w "name=${APP_NAME} "|grep -v grep|awk '{print $2}'`" ]
     exit 0;
 fi
 
-#切换上下文到脚本目录
-cd `dirname $0`;
-#验证jdk版本
-BIN_PATH=`pwd`
+
+
 if [ -n "${_JAVA_HOME}" ];
 then
     JAVA="${_JAVA_HOME}/bin/java"
@@ -104,16 +119,6 @@ if [ ! -n "$JAVA_EXIST" ]; then
     exit 0;
 fi
 
-#如果没有指定配置文件，使用default-config.ncf作为默认配置文件
-if [ ! -f "$CONFIG" ]; then
-    CONFIG="${BIN_PATH}/nuls.ncf"
-    if [ ! -f "${CONFIG}" ] ; then
-        mv ${BIN_PATH}/.default-config.ncf nuls.ncf
-        echo "nuls.ncf is created by default-config.ncf."
-        echo "Please re-excute the startup program."
-        exit 0
-    fi
-fi
 #判断用户是否指定日志目录
 if [ -z "$LOGPATH" ];
 then
@@ -135,6 +140,7 @@ else
     fi
     DATAPATH=`get_fullpath ./data`
 fi
+
 echo "LOG PATH    : ${LOGPATH}"
 echo "DATA PATH   : ${DATAPATH}"
 echo "CONFIG FILE : ${CONFIG}"
@@ -143,15 +149,18 @@ echo "JAVA_HOME   : ${JAVA_HOME}"
 echo `${JAVA} -version`
 #切换上下文到nuls模块目录
 cd ./Modules/Nuls
+LIBS_PATH=`get_fullpath ./libs`
 MODULE_PATH=`pwd`
+cd ./mykernel/1.0.0
 echo "===================="
 echo "NULS-WALLET STARTING"
 echo "===================="
+export NERVE_STOP_FILE=$BIN_PATH/.nerve-stop
 if [ -n "${RUNFRONT}" ];
 then
-    ${JAVA} -server -Ddebug="${DEBUG}" -Dapp.name=mykernel -DlogPath="${LOGPATH}" -DdataPath=${DATAPATH} -Dactive.config="$CONFIG" -classpath ./libs/*:./mykernel/1.0.0/mykernel-1.0.0.jar io.nuls.mykernel.MyKernelBootstrap startModule $MODULE_PATH
+    ${JAVA} -server -Ddebug="${DEBUG}" -Dapp.name=${APP_NAME} -DlogPath="${LOGPATH}" -DdataPath=${DATAPATH} -Dactive.config="$CONFIG" -classpath ${LIBS_PATH}/*:./mykernel-1.0.0.jar io.nuls.mykernel.MyKernelBootstrap startModule $MODULE_PATH
 else
-    nohup ${JAVA} -server -Ddebug="${DEBUG}" -Dapp.name=mykernel -DlogPath="${LOGPATH}" -DdataPath=${DATAPATH}  -Dactive.module="$CONFIG"  -classpath ./libs/*:./mykernel/1.0.0/mykernel-1.0.0.jar io.nuls.mykernel.MyKernelBootstrap startModule $MODULE_PATH > "${LOGPATH}/stdut.log" 2>&1 &
+    nohup ${JAVA} -server -Ddebug="${DEBUG}" -Dapp.name=${APP_NAME} -DlogPath="${LOGPATH}" -DdataPath=${DATAPATH}  -Dactive.config="$CONFIG"  -classpath ${LIBS_PATH}/*:./mykernel-1.0.0.jar io.nuls.mykernel.MyKernelBootstrap startModule $MODULE_PATH > "${LOGPATH}/stdut.log" 2>&1 &
 #    ./check-status $CONFIG
 fi
 

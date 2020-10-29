@@ -1,7 +1,8 @@
 package io.nuls.base.protocol;
 
+import io.nuls.core.core.config.ConfigurationLoader;
+import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.io.IoUtils;
-import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
 
 import java.util.*;
@@ -19,7 +20,13 @@ import static io.nuls.base.protocol.ProtocolConstant.PROTOCOL_CONFIG_FILE;
  */
 public class ProtocolLoader {
 
+    /**
+     * 默认的初始协议号
+     */
+    static final short DEFAULT_BEGIN_PROTOCOL_VERSION = 1;
+
     public static void load(int chainId, String protocolConfigJson) throws Exception {
+        ConfigurationLoader configurationLoader = SpringLiteContext.getBean(ConfigurationLoader.class);
         if (ProtocolGroupManager.isLoadProtocol()) {
             List<ProtocolConfigJson> protocolConfigs = JSONUtils.json2list(protocolConfigJson, ProtocolConfigJson.class);
             protocolConfigs.sort(PROTOCOL_CONFIG_COMPARATOR);
@@ -65,9 +72,9 @@ public class ProtocolLoader {
                 protocol.setInvalidMsgs(discardMsgs);
                 protocolsMap.put(protocol.getVersion(), protocol);
             }
-            ProtocolGroupManager.init(chainId, protocolsMap, (short) 1);
+            ProtocolGroupManager.init(chainId, protocolsMap,  DEFAULT_BEGIN_PROTOCOL_VERSION);
         } else {
-            ProtocolGroupManager.init(chainId, null, (short) 1);
+            ProtocolGroupManager.init(chainId, null,  DEFAULT_BEGIN_PROTOCOL_VERSION);
         }
     }
 

@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 public class ChainController {
@@ -37,11 +38,15 @@ public class ChainController {
     @Autowired
     private AccountService accountService;
     @Autowired
+    private AccountLedgerService ledgerService;
+    @Autowired
     private ContractService contractService;
     @Autowired
     private StatisticalService statisticalService;
     @Autowired
     private AgentService agentService;
+    @Autowired
+    private ChainService chainService;
 
     @RpcMethod("getChainInfo")
     public RpcResult getChainInfo(List<Object> params) {
@@ -58,18 +63,47 @@ public class ChainController {
             return RpcResult.paramError("[chainId] is invalid");
         }
 
-        List<Map<String, Object>> chainInfoList = new ArrayList<>();
-        for (ChainInfo chainInfo : CacheManager.getChainInfoMap().values()) {
-            if (chainInfo.getChainId() != chainId) {
-                Map<String, Object> map = new HashMap<>();
-                map.put("chainId", chainInfo.getChainId());
-                map.put("chainName", chainInfo.getChainName());
-                chainInfoList.add(map);
+        List<ChainInfo> chainInfoList = chainService.getOtherChainInfoList(chainId);
+//
+//
+//        List<Map<String, Object>> chainInfoList = new ArrayList<>();
+//        for (ChainInfo chainInfo : CacheManager.getChainInfoMap().values()) {
+//            if (chainInfo.getChainId() != chainId) {
+//                Map<String, Object> map = new HashMap<>();
+//                map.put("chainId", chainInfo.getChainId());
+//                map.put("chainName", chainInfo.getChainName());
+//                chainInfoList.add(map);
+//            }
+//        }
+        ;
+        return RpcResult.success(chainInfoList.stream().map(d->{
+            if(d.getChainId() == 9){
+                d.setChainName("NerveNetwork");
+            }
+            return d;
+        }).collect(Collectors.toList()));
+    }
+
+    @RpcMethod("getOtherChainInfo")
+    public RpcResult getOtherChainInfo(List<Object> params) {
+        VerifyUtils.verifyParams(params, 1);
+        int chainId;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is invalid");
+        }
+
+        ChainInfo chainInfo = chainService.getChainInfo(chainId);
+        if (chainInfo != null) {
+            if (chainInfo.getChainId() == 9) {
+                chainInfo.setChainName("NerveNetwork");
             }
         }
-        return RpcResult.success(chainInfoList);
 
+        return RpcResult.success(chainInfo);
     }
+
 
     @RpcMethod("getInfo")
     public RpcResult getInfo(List<Object> params) {
