@@ -70,6 +70,11 @@ public class ContractController {
             if (assetIdOfNRC20 != null) {
                 boolean crossAssets = WalletRpcHandler.isCrossAssets(chainId, assetIdOfNRC20);
                 contractInfo.setCrossAsset(crossAssets);
+                Result<BigInteger> result = WalletRpcHandler.tokenTotalSupply(chainId, contractAddress);
+                if (result.isSuccess()) {
+                    BigInteger totalSupply = result.getData();
+                    contractInfo.setTotalSupply(totalSupply.toString());
+                }
             }
             ApiCache apiCache = CacheManager.getCache(chainId);
             AssetInfo defaultAsset = apiCache.getChainInfo().getDefaultAsset();
@@ -788,7 +793,7 @@ public class ContractController {
             return RpcResult.dataNotFound();
         }
         RpcResult contractMethodArgsTypesResult = this.getContractMethodArgsTypes(List.of(chainId, contractAddress, methodName, methodDesc));
-        if(contractMethodArgsTypesResult.getError() != null) {
+        if (contractMethodArgsTypesResult.getError() != null) {
             return contractMethodArgsTypesResult;
         }
         List<String> typeList = (List<String>) contractMethodArgsTypesResult.getResult();
@@ -932,7 +937,7 @@ public class ContractController {
             return RpcResult.dataNotFound();
         }
         RpcResult contractMethodArgsTypesResult = this.getContractMethodArgsTypes(List.of(chainId, contractAddress, methodName, methodDesc));
-        if(contractMethodArgsTypesResult.getError() != null) {
+        if (contractMethodArgsTypesResult.getError() != null) {
             return contractMethodArgsTypesResult;
         }
         List<String> typeList = (List<String>) contractMethodArgsTypesResult.getResult();
@@ -998,7 +1003,7 @@ public class ContractController {
             return RpcResult.dataNotFound();
         }
         RpcResult contractMethodArgsTypesResult = this.getContractMethodArgsTypes(List.of(chainId, contractAddress, methodName, methodDesc));
-        if(contractMethodArgsTypesResult.getError() != null) {
+        if (contractMethodArgsTypesResult.getError() != null) {
             return contractMethodArgsTypesResult;
         }
         List<String> typeList = (List<String>) contractMethodArgsTypesResult.getResult();
@@ -1085,7 +1090,7 @@ public class ContractController {
             return RpcResult.paramError("[args] is invalid");
         }
         RpcResult contractMethodArgsTypesResult = this.getContractMethodArgsTypes(List.of(chainId, contractAddress, methodName, methodDesc));
-        if(contractMethodArgsTypesResult.getError() != null) {
+        if (contractMethodArgsTypesResult.getError() != null) {
             return contractMethodArgsTypesResult;
         }
         List<String> typeList = (List<String>) contractMethodArgsTypesResult.getResult();
@@ -1107,7 +1112,7 @@ public class ContractController {
             Object temp;
             for (int i = 0, length = types.length; i < length; i++) {
                 temp = args[i];
-                if(temp == null) {
+                if (temp == null) {
                     continue;
                 }
                 if (types[i].contains("[]") && temp instanceof String && StringUtils.isNotBlank((String) temp)) {
@@ -1126,10 +1131,10 @@ public class ContractController {
         public ContractProgramMethod(Map result) {
             List<Map> args = (List<Map>) result.get("args");
             this.args = new LinkedList<>();
-            if(args == null || args.isEmpty()) {
+            if (args == null || args.isEmpty()) {
                 return;
             }
-            for(Map arg : args) {
+            for (Map arg : args) {
                 this.args.add(new ContractProgramMethodArg(arg));
             }
         }
@@ -1147,6 +1152,7 @@ public class ContractController {
             }
         }
     }
+
     static class ContractProgramMethodArg {
         private String type;
 
