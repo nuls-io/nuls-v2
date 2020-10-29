@@ -18,4 +18,4 @@ VERSION=`cat version`
 ./package -a nuls-api
 ./package -O ${OS} -o NULS_Wallet
 tar -czf NULS_Wallet_${OS}_v${VERSION}.tar.gz NULS_Wallet
-#rm -rf NULS_Wallet
+rm -rf NULS_Wallet
