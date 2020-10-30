@@ -403,8 +403,14 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             }
             int assetChainId = programInvoke.getAssetChainId();
             int assetId = programInvoke.getAssetId();
-            boolean mainAsset = assetChainId == CHAIN_ID && assetId == ASSET_ID;
             if (transferValue.compareTo(BigInteger.ZERO) > 0) {
+                if (assetChainId == 0 && assetId == 0) {
+                    assetChainId = CHAIN_ID;
+                    assetId = ASSET_ID;
+                    programInvoke.setAssetChainId(assetChainId);
+                    programInvoke.setAssetId(assetId);
+                }
+                boolean mainAsset = assetChainId == CHAIN_ID && assetId == ASSET_ID;
                 if (mainAsset) {
                     if (!methodCode.hasPayableAnnotation())
                         return revert(String.format("contract[%s]'s method[%s] is not a payable method", contractAddress, methodCode.name));

@@ -47,6 +47,9 @@ public class ProgramTransfer {
         this.from = from;
         this.to = to;
         this.value = value;
+        this.assetChainId = assetChainId;
+        this.assetId = assetId;
+        this.lockedTime = lockedTime;
     }
 
     public void setFrom(byte[] from) {
