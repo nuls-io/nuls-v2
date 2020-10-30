@@ -177,7 +177,7 @@ public class ContractPOCMLocalTest extends Base {
 
     @Test
     public void createContract() throws IOException {
-        InputStream in = new FileInputStream(InvokeExternalCmdLocalTest.class.getResource("/pocmContract-v3-test2.jar").getFile());
+        InputStream in = new FileInputStream(InvokeExternalCmdLocalTest.class.getResource("/pocmContract-v3").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
 
         ProgramCreate programCreate = new ProgramCreate();

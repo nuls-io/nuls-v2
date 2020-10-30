@@ -90,8 +90,8 @@ public class BaseQuery extends Base {
         importPriKey("bec819ef7d5beeb1593790254583e077e00f481982bce1a43ea2830a2dc4fdf7", password);//29 tNULSeBaMp9wC9PcWEcfesY7YmWrPfeQzkN1xL
         importPriKey("ddddb7cb859a467fbe05d5034735de9e62ad06db6557b64d7c139b6db856b200", password);//30 tNULSeBaMshNPEnuqiDhMdSA4iNs6LMgjY6tcL
         //
-        //importPriKey("979c0ceeba6062e46b8eaa0f8435951ce27859581a39d4d2e7c0eef1baac15d3", password);//5  tNULSeBaMtkzQ1tH8JWBGZDCmRHCmySevE4frM
-        //importPriKey("edacaeb4ae6836ead7dd61d8ab79444b631274a303f91608472c8f99d646bbdf", password);//6  tNULSeBaMhKaLzhQh1AhhecUqh15ZKw98peg29
+        importPriKey("979c0ceeba6062e46b8eaa0f8435951ce27859581a39d4d2e7c0eef1baac15d3", password);//5  tNULSeBaMtkzQ1tH8JWBGZDCmRHCmySevE4frM
+        importPriKey("edacaeb4ae6836ead7dd61d8ab79444b631274a303f91608472c8f99d646bbdf", password);//6  tNULSeBaMhKaLzhQh1AhhecUqh15ZKw98peg29
         //importPriKey("ab69dab113f27ecac4024536c8a72b35f1ad4c8c934e486f7c4edbb14d8b7f9e", password);//7  tNULSeBaMv8q3pWzS7bHpQWW8yypNGo8auRoPf
         //importPriKey("14e86ce16c0a21fe3960e18a86c4ed943d4cf434cb4dc0c761cf811b20486f43", password);//8  tNULSeBaMmbiCH5soCFasXnG4TwqknyTzYBM3S
         //importPriKey("a17e3161cc2b2a5d8ac2777f4113f6147270cda9ec9ba2ca979c06839f264e39", password);//9  tNULSeBaMsUBLVxwoaswjWvghJyoUJfbfB6dja
@@ -181,7 +181,7 @@ public class BaseQuery extends Base {
 
     @Test
     public void getBalance() throws Exception {
-        Map<String, Object> balance0 = LedgerCall.getBalanceAndNonce(chain, chainId, assetId, toAddress7);
+        Map<String, Object> balance0 = LedgerCall.getBalanceAndNonce(chain, chainId, assetId, "tNULSeBaN7opQS7Trq1VcWsBjNZJgtXTr9ieZ9");
         Log.info("balance:{}", JSONUtils.obj2PrettyJson(balance0));
     }
 

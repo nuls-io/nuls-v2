@@ -25,11 +25,9 @@
 package io.nuls.contract.tx.pocm;
 
 
-import io.nuls.contract.mock.basetest.ContractTest;
 import io.nuls.contract.sdk.annotation.View;
 import io.nuls.contract.tx.base.BaseQuery;
 import io.nuls.contract.util.Log;
-import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
@@ -39,7 +37,6 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -50,7 +47,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static io.nuls.contract.constant.ContractCmdConstant.*;
-import static io.nuls.contract.constant.ContractCmdConstant.TRANSFER;
 
 /**
  * @author: PierreLuo
@@ -63,7 +59,7 @@ public class ContractPOCMSendTxTest extends BaseQuery {
      */
     @Test
     public void createConsensusEnhancementContract() throws Exception {
-        String filePath = ContractPOCMSendTxTest.class.getResource("/pocmContract-v3-test2.jar").getFile();
+        String filePath = ContractPOCMSendTxTest.class.getResource("/pocmContract-v3").getFile();
         InputStream in = new FileInputStream(filePath);
         byte[] contractCode = IOUtils.toByteArray(in);
         String remark = "POCM - consensus enhancement contract test - POCM_共识加强合约";
@@ -110,12 +106,13 @@ public class ContractPOCMSendTxTest extends BaseQuery {
 
         //Log.info("begin openConsensus");
         //this.invokeCall(sender, BigInteger.ZERO, contractAddress, "openConsensus", null, "remark");
-        /*Log.info("begin addOtherAgent");
-        this.invokeCall(sender, BigInteger.ZERO, contractAddress, "addOtherAgent", null, "remark", List.of("047b1c71c9d99d8adb016def355e207996c573364ec7eace3dae6c1746e62785").toArray());
+        Log.info("begin addOtherAgent");
+        this.invokeCall(sender, BigInteger.ZERO, contractAddress, "addOtherAgent", null, "remark", List.of("f5202662646e63afa3625f4f02fa07b8f250acd15dcef05fbdfc11f8eb0195b3").toArray());
         Log.info("begin depositForOwn {}", sender);
 
-        //String nrc20Locked = "tNULSeBaN9Mu2No49JFyLc2Q8KvBWu5XoToaQJ";
-        //contractAddress = "tNULSeBaN46smZqFkndwG4WaczH2RRd76axdDq";
+        //String nrc20Locked = "tNULSeBaN8w5ioWD9m2GE16QpuawaKtMDjdDRk";
+        //contractAddress_nrc20 = nrc20Locked;
+        //contractAddress = "tNULSeBaN7opQS7Trq1VcWsBjNZJgtXTr9ieZ9";
         //String pocm = contractAddress;
         this.invokeCall(sender, BigInteger.valueOf(3000_00000000L), contractAddress, "depositForOwn", null, "remark");
         Log.info("begin depositForOwn {}", toAddress5);
@@ -139,7 +136,7 @@ public class ContractPOCMSendTxTest extends BaseQuery {
         Log.info("sender locked balance is {}", this.invokeView(nrc20Locked, "lockedBalanceOf", sender));
         Log.info("toAddress5 locked balance is {}", this.invokeView(nrc20Locked, "lockedBalanceOf", toAddress5));
         Log.info("toAddress6 locked balance is {}", this.invokeView(nrc20Locked, "lockedBalanceOf", toAddress6));
-        Log.info("pocm locked balance is {}", this.invokeView(nrc20Locked, "lockedBalanceOf", pocm));*/
+        Log.info("pocm locked balance is {}", this.invokeView(nrc20Locked, "lockedBalanceOf", pocm));
     }
 
     @Test
@@ -220,8 +217,8 @@ public class ContractPOCMSendTxTest extends BaseQuery {
 
     private String pocm(String nrc20Locked, String authCode) throws Exception {
         Log.info("begin create pocm");
-        String filePath = "/Users/pierreluo/IdeaProjects/pocmContract-ConsensusEnhancement/target/pocmContract-v3-test2.jar";
-        //String filePath = ContractPOCMSendTxTest.class.getResource("/pocmContract-v3-test2.jar").getFile();
+        //String filePath = "/Users/pierreluo/IdeaProjects/pocmContract-ConsensusEnhancement/target/pocmContract-v3-1.0.2.RELEASE.jar";
+        String filePath = ContractPOCMSendTxTest.class.getResource("/pocmContract-v3").getFile();
         InputStream in = new FileInputStream(filePath);
         byte[] contractCode = IOUtils.toByteArray(in);
         String remark = "POCM - consensus enhancement contract test - POCM_共识加强合约";
@@ -442,6 +439,7 @@ public class ContractPOCMSendTxTest extends BaseQuery {
     @View
     @Test
     public void getContractWholeInfo() throws Exception {
+        contractAddress = "tNULSeBaN7opQS7Trq1VcWsBjNZJgtXTr9ieZ9";
         String methodName = "wholeConsensusInfo";
         Log.info(invokeView(contractAddress, methodName));
     }

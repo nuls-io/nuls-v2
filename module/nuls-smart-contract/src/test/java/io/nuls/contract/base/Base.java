@@ -327,7 +327,7 @@ public class Base {
         params.put("sender", sender);
         params.put("password", password);
         params.put("alias", alias);
-        params.put("gasLimit", 200000L);
+        params.put("gasLimit", 800000L);
         params.put("price", 25);
         params.put("contractCode", HexUtil.encode(contractCode));
         params.put("args", args);

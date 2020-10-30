@@ -139,7 +139,7 @@ public class ContractNewTxFromOtherModuleHandler {
                 contractBytes = asBytes(keySplit[0]);
                 assetChainId = Integer.parseInt(keySplit[1]);
                 assetId = Integer.parseInt(keySplit[2]);
-                programExecutor.getAccount(contractBytes, assetChainId, assetId).addBalance(lockFrom.getValue().negate());
+                programExecutor.getAccount(contractBytes, assetChainId, assetId).addFreeze(lockFrom.getValue().negate());
             }
             // 扣除转出
             Set<Map.Entry<String, BigInteger>> _froms = contractFromValue.entrySet();
@@ -246,10 +246,6 @@ public class ContractNewTxFromOtherModuleHandler {
             List<CoinTo> tos = coinData.getTo();
 
             for (CoinFrom from : froms) {
-                // 只记录主资产的余额变化 //TODO pierre // add by pierre at 2020-10-28 注释
-                //if(from.getAssetsChainId() != chainId || from.getAssetsId() != assetId) {
-                //    continue;
-                //}
                 fromAddress = from.getAddress();
                 if (!ContractUtil.isLegalContractAddress(chainId, fromAddress)) {
                     continue;
@@ -264,10 +260,6 @@ public class ContractNewTxFromOtherModuleHandler {
             }
 
             for (CoinTo to : tos) {
-                // 只记录主资产的余额变化 //TODO pierre // add by pierre at 2020-10-28 注释
-                //if(to.getAssetsChainId() != chainId || to.getAssetsId() != assetId) {
-                //    continue;
-                //}
                 toAddress = to.getAddress();
                 if (!ContractUtil.isLegalContractAddress(chainId, toAddress)) {
                     continue;
