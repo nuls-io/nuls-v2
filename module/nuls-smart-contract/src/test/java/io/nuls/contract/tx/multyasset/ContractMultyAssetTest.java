@@ -27,6 +27,7 @@ import io.nuls.contract.mock.basetest.ContractTest;
 import io.nuls.contract.tx.base.BaseQuery;
 import io.nuls.contract.util.Log;
 import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
@@ -35,6 +36,7 @@ import org.junit.Test;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
@@ -78,16 +80,16 @@ public class ContractMultyAssetTest extends BaseQuery {
         // 转入 3.2 NULS
         this.callByParams("_payable", "3.2", null);
         // 转出 1.1 NULS
-        Object[] args = new Object[]{toAddress17, new BigInteger("1.1").multiply(BigInteger.TEN.pow(8))};
+        Object[] args = new Object[]{toAddress17, new BigDecimal("1.1").multiply(BigDecimal.TEN.pow(8)).toBigInteger()};
         this.callByParams("transferNuls", "0", args);
         // 转出 1.2 NULS
-        Object[] argsLock = new Object[]{toAddress17, new BigInteger("1.1").multiply(BigInteger.TEN.pow(8)), minutes_3};
+        Object[] argsLock = new Object[]{toAddress17, new BigDecimal("1.2").multiply(BigDecimal.TEN.pow(8)).toBigInteger(), minutes_3};
         this.callByParams("transferNulsLock", "0", argsLock);
     }
 
     /**
      * 其他资产转入、转出、转出锁定
-     *
+     * <p>
      * 如 2-2, 假设资产decimals=8
      */
     @Test
@@ -95,10 +97,10 @@ public class ContractMultyAssetTest extends BaseQuery {
         // 转入 3.2
         this.callOfDesignatedAssetByParams("_payableMultyAsset", "3.2", null, 2, 2);
         // 转出 1.1
-        Object[] args = new Object[]{toAddress17, new BigInteger("1.1").multiply(BigInteger.TEN.pow(8)), 2, 2};
+        Object[] args = new Object[]{toAddress17, new BigDecimal("1.1").multiply(BigDecimal.TEN.pow(8)).toBigInteger(), 2, 2};
         this.callOfDesignatedAssetByParams("transferDesignatedAsset", "0", args, 0, 0);
         // 转出 1.2
-        Object[] argsLock = new Object[]{toAddress17, new BigInteger("1.2").multiply(BigInteger.TEN.pow(8)), 2, 2, minutes_3};
+        Object[] argsLock = new Object[]{toAddress17, new BigDecimal("1.2").multiply(BigDecimal.TEN.pow(8)).toBigInteger(), 2, 2, minutes_3};
         this.callOfDesignatedAssetByParams("transferDesignatedAssetLock", "0", argsLock, 0, 0);
     }
 
@@ -109,34 +111,38 @@ public class ContractMultyAssetTest extends BaseQuery {
     @Test
     public void innerCall() throws Exception {
         String methodName = "callOtherContract";
-        String otherContract = "";
-        // 转入 6.6 NULS
+        String otherContract = "tNULSeBaN2zgVKHYKQknBbMgegR5X7DzNet8xh";
+        // 转入 6.6 NULS (外部合约)
+        this.callByParams("_payable", "6.6", null);
+        // 转入 6.6 NULS (内部合约)
         this.innerCallByParams(methodName, otherContract, "_payable", null, "6.6");
         // 转出 3.3 NULS
-        Object[] innerArgs = new Object[]{toAddress17, new BigInteger("3.3").multiply(BigInteger.TEN.pow(8))};
+        Object[] innerArgs = new Object[]{toAddress17, new BigDecimal("3.3").multiply(BigDecimal.TEN.pow(8)).toBigInteger()};
         this.innerCallByParams(methodName, otherContract, "transferNuls", innerArgs, "0");
         // 转出 1.1 NULS(锁定)
-        Object[] innerArgsLock = new Object[]{toAddress17, new BigInteger("1.1").multiply(BigInteger.TEN.pow(8)), minutes_3};
-        this.innerCallByParams(methodName, otherContract, "transferNuls", innerArgsLock, "0");
+        Object[] innerArgsLock = new Object[]{toAddress17, new BigDecimal("1.1").multiply(BigDecimal.TEN.pow(8)).toBigInteger(), minutes_3};
+        this.innerCallByParams(methodName, otherContract, "transferNulsLock", innerArgsLock, "0");
     }
 
     /**
      * 内部调用其他合约, 转入NULS，转出NULS，转出NULS(锁定)
-     *
+     * <p>
      * 内部调用带返回值
      */
     @Test
     public void innerCallWithReturnValue() throws Exception {
         String methodName = "callWithReturnValueOfOtherContract";
-        String otherContract = "";
-        // 转入 6.6 NULS
+        String otherContract = "tNULSeBaN2zgVKHYKQknBbMgegR5X7DzNet8xh";
+        // 转入 6.6 NULS (外部合约)
+        this.callByParams("_payable", "6.6", null);
+        // 转入 6.6 NULS (内部合约)
         this.innerCallByParams(methodName, otherContract, "_payable", null, "6.6");
         // 转出 3.3 NULS
-        Object[] innerArgs = new Object[]{toAddress17, new BigInteger("3.3").multiply(BigInteger.TEN.pow(8))};
+        Object[] innerArgs = new Object[]{toAddress17, new BigDecimal("3.3").multiply(BigDecimal.TEN.pow(8)).toBigInteger()};
         this.innerCallByParams(methodName, otherContract, "transferNuls", innerArgs, "0");
         // 转出 1.1 NULS(锁定)
-        Object[] innerArgsLock = new Object[]{toAddress17, new BigInteger("1.1").multiply(BigInteger.TEN.pow(8)), minutes_3};
-        this.innerCallByParams(methodName, otherContract, "transferNuls", innerArgsLock, "0");
+        Object[] innerArgsLock = new Object[]{toAddress17, new BigDecimal("1.1").multiply(BigDecimal.TEN.pow(8)).toBigInteger(), minutes_3};
+        this.innerCallByParams(methodName, otherContract, "transferNulsLock", innerArgsLock, "0");
     }
 
     /**
@@ -147,19 +153,62 @@ public class ContractMultyAssetTest extends BaseQuery {
     @Test
     public void innerCallWithReturnValueOfDesignatedAsset() throws Exception {
         String methodName = "callWithReturnValueOfOtherContractOfDesignatedAsset";
-        String otherContract = "";
-        // 转入 6.6 2-2
-        this.innerCallOfDesignatedAssetByParams(methodName, otherContract, "_payable", null, "6.6", 2, 2);
+        String otherContract = "tNULSeBaN2zgVKHYKQknBbMgegR5X7DzNet8xh";
+        // 转入 6.6 2-2 (外部合约)
+        this.callOfDesignatedAssetByParams("_payableMultyAsset", "6.6", null, 2, 2);
+        // 转入 6.6 2-2 (内部合约)
+        this.innerCallOfDesignatedAssetByParams(methodName, otherContract, "_payableMultyAsset", null, "6.6", 2, 2);
         // 转出 3.3 2-2
-        Object[] innerArgs = new Object[]{toAddress17, new BigInteger("3.3").multiply(BigInteger.TEN.pow(8))};
-        this.innerCallOfDesignatedAssetByParams(methodName, otherContract, "transferNuls", innerArgs, "0", 0, 0);
+        Object[] innerArgs = new Object[]{toAddress17, new BigDecimal("3.3").multiply(BigDecimal.TEN.pow(8)).toBigInteger(), 2, 2};
+        this.innerCallOfDesignatedAssetByParams(methodName, otherContract, "transferDesignatedAsset", innerArgs, "0", 0, 0);
         // 转出 1.1 2-2(锁定)
-        Object[] innerArgsLock = new Object[]{toAddress17, new BigInteger("1.1").multiply(BigInteger.TEN.pow(8)), minutes_3};
-        this.innerCallOfDesignatedAssetByParams(methodName, otherContract, "transferNuls", innerArgsLock, "0", 0, 0);
+        Object[] innerArgsLock = new Object[]{toAddress17, new BigDecimal("1.1").multiply(BigDecimal.TEN.pow(8)).toBigInteger(), 2, 2, minutes_3};
+        this.innerCallOfDesignatedAssetByParams(methodName, otherContract, "transferDesignatedAssetLock", innerArgsLock, "0", 0, 0);
+    }
+
+    /**
+     * 查询所有资产
+     */
+    @Test
+    public void getAllAssetReg() throws Exception {
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.CHAIN_ID, chainId);
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getAssetRegInfo", params);
+        System.out.println(JSONUtils.obj2PrettyJson(response));
+    }
+
+    /**
+     * 注册一个资产
+     */
+    @Test
+    public void assetRegisterTest() throws Exception {
+        Map<String, Object> params = new HashMap<>();
+        params.put("assetSymbol", "MTA");
+        params.put("assetName", "MTA");
+        params.put("initNumber", 100000000);
+        params.put("decimalPlace", 8);
+        params.put("txCreatorAddress", sender);
+        params.put("assetOwnerAddress", sender);
+        params.put("password", "nuls123456");
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "chainAssetTxReg", params);
+        System.out.println(JSONUtils.obj2PrettyJson(response));
+    }
+
+    /**
+     * 根据注册资产的交易hash查询资产信息
+     */
+    @Test
+    public void getAssetRegInfoByHashTest() throws Exception {
+        // Build params map
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("txHash", "b51947d09b1eeca55de84703f840faf2638257f6d1b833e46efcc62229383b43");
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getAssetRegInfoByHash", params);
+        System.out.println(JSONUtils.obj2PrettyJson(response));
     }
 
     protected void callByParams(String methodName, String valueStr, Object[] args) throws Exception {
-        BigInteger value = new BigInteger(valueStr).multiply(BigInteger.TEN.pow(8));
+        BigInteger value = new BigDecimal(valueStr).multiply(BigDecimal.TEN.pow(8)).toBigInteger();
         Map params = this.makeCallParams(sender, value, contractAddress, methodName, null, "", args);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
@@ -169,7 +218,7 @@ public class ContractMultyAssetTest extends BaseQuery {
     }
 
     protected void callOfDesignatedAssetByParams(String methodName, String valueStr, Object[] args, int assetChainId, int assetId) throws Exception {
-        BigInteger value = new BigInteger(valueStr).multiply(BigInteger.TEN.pow(8));
+        BigInteger value = new BigDecimal(valueStr).multiply(BigDecimal.TEN.pow(8)).toBigInteger();
         Map params = this.makeCallParams(sender, value, gasLimit, gasPrice, contractAddress, methodName, null, "", assetChainId, assetId, args);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
@@ -179,7 +228,7 @@ public class ContractMultyAssetTest extends BaseQuery {
     }
 
     protected void innerCallByParams(String methodName, String otherContract, String innerMethod, Object[] innerArgs, String innerValueStr) throws Exception {
-        BigInteger innerValue = new BigInteger(innerValueStr).multiply(BigInteger.TEN.pow(8));
+        BigInteger innerValue = new BigDecimal(innerValueStr).multiply(BigDecimal.TEN.pow(8)).toBigInteger();
         Object[] args = new Object[]{otherContract, innerMethod, innerArgs, innerValue};
         Map params = this.makeCallParams(sender, BigInteger.ZERO, contractAddress, methodName, null, "", args);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
@@ -190,7 +239,7 @@ public class ContractMultyAssetTest extends BaseQuery {
     }
 
     protected void innerCallOfDesignatedAssetByParams(String methodName, String otherContract, String innerMethod, Object[] innerArgs, String innerValueStr, int assetChainId, int assetId) throws Exception {
-        BigInteger innerValue = new BigInteger(innerValueStr).multiply(BigInteger.TEN.pow(8));
+        BigInteger innerValue = new BigDecimal(innerValueStr).multiply(BigDecimal.TEN.pow(8)).toBigInteger();
         Object[] args = new Object[]{otherContract, innerMethod, innerArgs, innerValue, assetChainId, assetId};
         Map params = this.makeCallParams(sender, BigInteger.ZERO, contractAddress, methodName, null, "", args);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);

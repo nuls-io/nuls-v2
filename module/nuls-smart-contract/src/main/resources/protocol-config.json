@@ -1,7 +1,7 @@
 [
   {
     "version": "8",
-    "extend": "1",
+    "extend": "4",
     "validTxs": [
       {
         "type": "16",

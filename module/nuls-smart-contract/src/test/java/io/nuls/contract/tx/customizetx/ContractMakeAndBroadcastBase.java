@@ -73,6 +73,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static io.nuls.contract.config.ContractContext.ASSET_ID;
+import static io.nuls.contract.config.ContractContext.CHAIN_ID;
 import static io.nuls.contract.constant.ContractErrorCode.FAILED;
 import static io.nuls.contract.util.ContractUtil.getFailed;
 import static io.nuls.contract.util.ContractUtil.getSuccess;
@@ -201,7 +203,7 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
         }
         byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
         byte[] senderBytes = AddressTool.getAddress(sender);
-        return contractTxHelper.newCallTx(chainId, sender, senderBytes, value, gasLimit, price, contractAddressBytes, methodName, methodDesc, args, remark);
+        return contractTxHelper.newCallTx(chainId, sender, senderBytes, value, gasLimit, price, contractAddressBytes, methodName, methodDesc, args, remark, CHAIN_ID, ASSET_ID);
     }
 
     protected Result broadcastCallTx(CallContractTransaction tx) {

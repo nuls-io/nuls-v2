@@ -310,7 +310,7 @@ public class ContractTransferHandler {
                 coinData = new CoinData();
                 coinFrom = new CoinFrom(from, assetChainId, assetId, value, nonceBytes, (byte) 0);
                 coinData.getFrom().add(coinFrom);
-                coinTo = new CoinTo(to, assetChainId, assetId, value, blockTime + lockedTime);
+                coinTo = new CoinTo(to, assetChainId, assetId, value, lockedTime == 0 ? lockedTime : (blockTime + lockedTime));
                 coinData.getTo().add(coinTo);
                 mergeCoinToMap.put(addressLockedKey(to, assetChainId, assetId, lockedTime), coinTo);
                 //timeOffset = tx.getOrder() + (i++);

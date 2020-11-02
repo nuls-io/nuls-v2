@@ -181,8 +181,18 @@ public class BaseQuery extends Base {
 
     @Test
     public void getBalance() throws Exception {
-        Map<String, Object> balance0 = LedgerCall.getBalanceAndNonce(chain, chainId, assetId, "tNULSeBaN7opQS7Trq1VcWsBjNZJgtXTr9ieZ9");
-        Log.info("balance:{}", JSONUtils.obj2PrettyJson(balance0));
+        this.getBalanceByAccount(toAddress17);
+        System.out.println("---------------------------------------------------");
+        this.getBalanceByAccount(contractAddress);
+        System.out.println("---------------------------------------------------");
+        this.getBalanceByAccount("tNULSeBaN2zgVKHYKQknBbMgegR5X7DzNet8xh");
+    }
+
+    protected void getBalanceByAccount(String account) throws Exception {
+        Map<String, Object> balance0 = LedgerCall.getBalanceAndNonce(chain, chainId, assetId, account);
+        System.out.println(String.format("NULS balance: %s", JSONUtils.obj2PrettyJson(balance0)));
+        Map<String, Object> balance1 = LedgerCall.getBalanceAndNonce(chain, chainId, 2, account);
+        System.out.println(String.format("MTA  balance: %s", JSONUtils.obj2PrettyJson(balance1)));
     }
 
     @Test

@@ -29,6 +29,7 @@ import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.mock.basetest.MockBase;
 import io.nuls.contract.util.Log;
+import io.nuls.contract.vm.VMFactory;
 import io.nuls.contract.vm.program.ProgramMethod;
 import io.nuls.contract.vm.program.ProgramResult;
 import io.nuls.contract.vm.program.ProgramTransfer;
@@ -263,8 +264,9 @@ public class ContractVmTest extends MockBase {
     public void createAndInit() throws Exception {
         // 加载协议升级的数据
         ContractContext.CHAIN_ID = 2;
+        short version = 5;
         ProtocolGroupManager.setLoadProtocol(false);
-        ProtocolGroupManager.updateProtocol(chainId, (short) 5);
+        ProtocolGroupManager.updateProtocol(chainId, version);
 
         // -------------------------------------------------------------------------------------//
         InputStream inA = new FileInputStream(getClass().getResource("/contract-vm-testA-testA.jar").getFile());

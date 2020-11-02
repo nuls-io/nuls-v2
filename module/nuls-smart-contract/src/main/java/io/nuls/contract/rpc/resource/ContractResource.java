@@ -327,7 +327,7 @@ public class ContractResource extends BaseCmd {
             Object[] args = argsList != null ? argsList.toArray() : null;
             String remark = (String) params.get("remark");
 
-            if (value.compareTo(BigInteger.ZERO) < 0 || gasLimit < 0 || price < 0 || assetChainId <= 0 || assetId <= 0) {
+            if (value.compareTo(BigInteger.ZERO) < 0 || gasLimit < 0 || price < 0 || assetChainId < 0 || assetId < 0) {
                 return failed(ContractErrorCode.PARAMETER_ERROR);
             }
 

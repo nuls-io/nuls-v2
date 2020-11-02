@@ -129,6 +129,7 @@ public class ProtocolGroupManager {
                     }
                 });
                 messageDispatcher.setProcessors(messageProcessors);
+                RegisterHelper.registerTx(chainId, protocol);
             }
         }
     }

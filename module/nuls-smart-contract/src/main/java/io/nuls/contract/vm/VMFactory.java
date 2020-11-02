@@ -314,11 +314,12 @@ public class VMFactory {
 
     public static void reInitVM_v8() {
         waitV8 = new CountDownLatch(1);
-        VM = loadVM_v8();
         MethodArea.INIT_CLASS_CODES.clear();
         MethodArea.INIT_METHOD_CODES.clear();
         Heap.INIT_OBJECTS.clear();
         Heap.INIT_ARRAYS.clear();
+
+        VM = loadVM_v8();
 
         MethodArea.INIT_CLASS_CODES.putAll(VM.methodArea.getClassCodes());
         MethodArea.INIT_METHOD_CODES.putAll(VM.methodArea.getMethodCodes());

@@ -107,7 +107,7 @@ public class ContractPOCMSendTxTest extends BaseQuery {
         //Log.info("begin openConsensus");
         //this.invokeCall(sender, BigInteger.ZERO, contractAddress, "openConsensus", null, "remark");
         Log.info("begin addOtherAgent");
-        this.invokeCall(sender, BigInteger.ZERO, contractAddress, "addOtherAgent", null, "remark", List.of("f5202662646e63afa3625f4f02fa07b8f250acd15dcef05fbdfc11f8eb0195b3").toArray());
+        this.invokeCall(sender, BigInteger.ZERO, contractAddress, "addOtherAgent", null, "remark", List.of("2de47d6fa7d7f26b48a1b75e668bb299c903e8f76b8ae0335ecd5a0cd7d0741b").toArray());
         Log.info("begin depositForOwn {}", sender);
 
         //String nrc20Locked = "tNULSeBaN8w5ioWD9m2GE16QpuawaKtMDjdDRk";
@@ -439,7 +439,6 @@ public class ContractPOCMSendTxTest extends BaseQuery {
     @View
     @Test
     public void getContractWholeInfo() throws Exception {
-        contractAddress = "tNULSeBaN7opQS7Trq1VcWsBjNZJgtXTr9ieZ9";
         String methodName = "wholeConsensusInfo";
         Log.info(invokeView(contractAddress, methodName));
     }
