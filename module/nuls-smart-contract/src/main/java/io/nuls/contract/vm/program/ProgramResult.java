@@ -29,6 +29,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.ethereum.db.ByteArrayWrapper;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -58,6 +59,18 @@ public class ProgramResult {
 
     private List<ProgramInvokeRegisterCmd> invokeRegisterCmds = new ArrayList<>();
     private List<Object> orderedInnerTxs = new ArrayList<>();
+
+    // add by pierre at 2020-11-03 可能影响兼容性，考虑协议升级
+    private LinkedList<String> stackTraces = new LinkedList<>();
+
+    public LinkedList<String> getStackTraces() {
+        return stackTraces;
+    }
+
+    public void setStackTraces(LinkedList<String> stackTraces) {
+        this.stackTraces = stackTraces;
+    }
+    // end code by pierre
 
     public ProgramResult revert(String errorMessage) {
         this.revert = true;

@@ -24,6 +24,8 @@
  */
 package io.nuls.contract.vm.program;
 
+import io.nuls.base.basic.AddressTool;
+
 import java.math.BigInteger;
 import java.util.Arrays;
 
@@ -132,9 +134,9 @@ public class ProgramTransfer {
     public String toString() {
         final StringBuilder sb = new StringBuilder("{");
         sb.append("\"from\":")
-                .append(Arrays.toString(from));
+                .append(AddressTool.getStringAddressByBytes(from));
         sb.append(",\"to\":")
-                .append(Arrays.toString(to));
+                .append(AddressTool.getStringAddressByBytes(to));
         sb.append(",\"value\":")
                 .append(value);
         sb.append(",\"assetChainId\":")

@@ -40,6 +40,7 @@ import io.nuls.contract.vm.program.impl.ProgramInvoke;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Iterator;
 
 import static io.nuls.contract.config.ContractContext.ASSET_ID;
 import static io.nuls.contract.config.ContractContext.CHAIN_ID;
@@ -392,16 +393,25 @@ public class NativeAddress {
 
         ProgramResult programResult = frame.vm.getProgramExecutor().callProgramExecutor().call(programCall);
 
+
         frame.vm.addGasUsed(programResult.getGasUsed());
+        // add by pierre at 2020-11-03 从`isSuccess`代码段中移出，可能影响兼容性，考虑协议升级
+        frame.vm.getDebugEvents().addAll(programResult.getDebugEvents());
+        // end code by pierre
         if (programResult.isSuccess()) {
             frame.vm.getTransfers().addAll(programResult.getTransfers());
             frame.vm.getInternalCalls().addAll(programResult.getInternalCalls());
             frame.vm.getEvents().addAll(programResult.getEvents());
-            frame.vm.getDebugEvents().addAll(programResult.getDebugEvents());
             frame.vm.getInvokeRegisterCmds().addAll(programResult.getInvokeRegisterCmds());
             frame.vm.getOrderedInnerTxs().addAll(programResult.getOrderedInnerTxs());
             return programResult;
         } else {
+            // add by pierre at 2020-11-03 可能影响兼容性，考虑协议升级
+            Iterator<String> descendingIterator = programResult.getStackTraces().descendingIterator();
+            while (descendingIterator.hasNext()) {
+                frame.vm.getStackTraces().addFirst(descendingIterator.next());
+            }
+            // end code by pierre
             frame.throwRuntimeException(programResult.getErrorMessage());
             return programResult;
         }

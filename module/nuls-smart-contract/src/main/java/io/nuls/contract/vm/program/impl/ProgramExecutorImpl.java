@@ -493,6 +493,13 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                     String stackTrace = vm.heap.stackTrace((ObjectRef) resultValue);
                     programResult.error(error);
                     programResult.setStackTrace(stackTrace);
+                    // add by pierre at 2020-11-03 增加内部合约调用的异常堆栈信息列表，可能影响兼容性，考虑协议升级
+                    programResult.getStackTraces().addFirst(stackTrace);
+                    Iterator<String> descendingIterator = vm.getStackTraces().descendingIterator();
+                    while (descendingIterator.hasNext()) {
+                        programResult.getStackTraces().addFirst(descendingIterator.next());
+                    }
+                    // end code by pierre
                 } else {
                     programResult.error(null);
                 }

@@ -66,6 +66,7 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import static io.nuls.contract.constant.ContractConstant.BALANCE_TRIGGER_FOR_CONSENSUS_CONTRACT_METHOD_DESC_IN_VM;
@@ -121,6 +122,18 @@ public class VM {
     private List<ProgramInvokeRegisterCmd> invokeRegisterCmds = new ArrayList<>();
 
     private List<Object> orderedInnerTxs = new ArrayList<>();
+
+    // add by pierre at 2020-11-03 可能影响兼容性，考虑协议升级
+    private LinkedList<String> stackTraces = new LinkedList<>();
+
+    public LinkedList<String> getStackTraces() {
+        return stackTraces;
+    }
+
+    public void setStackTraces(LinkedList<String> stackTraces) {
+        this.stackTraces = stackTraces;
+    }
+    // end code by pierre
 
     public VM() {
         this.vmStack = new VMStack(VM_STACK_MAX_SIZE);
