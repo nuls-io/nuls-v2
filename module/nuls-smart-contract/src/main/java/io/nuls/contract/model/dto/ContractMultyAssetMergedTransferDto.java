@@ -23,12 +23,10 @@
  */
 package io.nuls.contract.model.dto;
 
-
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.NulsHash;
-import io.nuls.contract.model.bo.ContractMergedTransfer;
-import io.nuls.contract.model.bo.Output;
-import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.contract.model.bo.ContractMultyAssetMergedTransfer;
+import io.nuls.contract.model.bo.MultyAssetOutput;
 import io.nuls.core.rpc.model.ApiModelProperty;
 import io.nuls.core.rpc.model.TypeDescriptor;
 
@@ -40,25 +38,30 @@ import static io.nuls.contract.util.ContractUtil.bigInteger2String;
 /**
  * @author: PierreLuo
  */
-@ApiModel
-public class ContractMergedTransferDto {
+public class ContractMultyAssetMergedTransferDto {
     @ApiModelProperty(description = "合约生成交易：合约转账交易hash")
     private String txHash;
     @ApiModelProperty(description = "转出的合约地址")
     private String from;
     @ApiModelProperty(description = "转账金额")
     private String value;
-    @ApiModelProperty(description = "转入的地址列表", type = @TypeDescriptor(value = List.class, collectionElement = ContractOutputDto.class))
-    private List<ContractOutputDto> outputs;
+    @ApiModelProperty(description = "转账金额资产链ID")
+    private int assetChainId;
+    @ApiModelProperty(description = "转账金额资产ID")
+    private int assetId;
+    @ApiModelProperty(description = "转入的地址列表", type = @TypeDescriptor(value = List.class, collectionElement = MultyAssetOutputDto.class))
+    private List<MultyAssetOutputDto> outputs;
     @ApiModelProperty(description = "调用合约交易hash（源交易hash，合约交易由调用合约交易派生而来）")
     private String orginTxHash;
 
-    public ContractMergedTransferDto() {
+    public ContractMultyAssetMergedTransferDto() {
     }
 
-    public ContractMergedTransferDto(ContractMergedTransfer transfer) {
+    public ContractMultyAssetMergedTransferDto(ContractMultyAssetMergedTransfer transfer) {
         this.from = AddressTool.getStringAddressByBytes(transfer.getFrom());
         this.value = bigInteger2String(transfer.getValue());
+        this.assetChainId = transfer.getAssetChainId();
+        this.assetId = transfer.getAssetId();
         NulsHash thatHash = transfer.getHash();
         this.txHash = thatHash == null ? null : thatHash.toHex();
         NulsHash thatOrginTxHash = transfer.getOrginHash();
@@ -66,11 +69,11 @@ public class ContractMergedTransferDto {
         this.makeOutputs(transfer.getOutputs());
     }
 
-    private void makeOutputs(List<Output> outputs) {
+    private void makeOutputs(List<MultyAssetOutput> outputs) {
         if (outputs != null && !outputs.isEmpty()) {
             this.outputs = new ArrayList<>(outputs.size());
-            for (Output output : outputs) {
-                this.outputs.add(new ContractOutputDto(output));
+            for (MultyAssetOutput output : outputs) {
+                this.outputs.add(new MultyAssetOutputDto(output));
             }
         }
     }
@@ -99,11 +102,27 @@ public class ContractMergedTransferDto {
         this.value = value;
     }
 
-    public List<ContractOutputDto> getOutputs() {
+    public int getAssetChainId() {
+        return assetChainId;
+    }
+
+    public void setAssetChainId(int assetChainId) {
+        this.assetChainId = assetChainId;
+    }
+
+    public int getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(int assetId) {
+        this.assetId = assetId;
+    }
+
+    public List<MultyAssetOutputDto> getOutputs() {
         return outputs;
     }
 
-    public void setOutputs(List<ContractOutputDto> outputs) {
+    public void setOutputs(List<MultyAssetOutputDto> outputs) {
         this.outputs = outputs;
     }
 

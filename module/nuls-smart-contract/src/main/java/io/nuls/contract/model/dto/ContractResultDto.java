@@ -26,6 +26,7 @@ package io.nuls.contract.model.dto;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.enums.CmdRegisterMode;
 import io.nuls.contract.model.bo.ContractMergedTransfer;
+import io.nuls.contract.model.bo.ContractMultyAssetMergedTransfer;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.contract.model.tx.ContractBaseTransaction;
@@ -78,8 +79,10 @@ public class ContractResultDto {
     private String value;
     @ApiModelProperty(description = "异常堆栈踪迹")
     private String stackTrace;
-    @ApiModelProperty(description = "合约转账列表（从合约转出）", type = @TypeDescriptor(value = List.class, collectionElement = ContractMergedTransferDto.class))
+    @ApiModelProperty(description = "合约转账列表（从合约转出主资产）", type = @TypeDescriptor(value = List.class, collectionElement = ContractMergedTransferDto.class))
     private List<ContractMergedTransferDto> transfers;
+    @ApiModelProperty(description = "合约转账列表（从合约转出其他资产）", type = @TypeDescriptor(value = List.class, collectionElement = ContractMultyAssetMergedTransferDto.class))
+    private List<ContractMultyAssetMergedTransferDto> multyAssetTransfers;
     @ApiModelProperty(description = "合约事件列表", type = @TypeDescriptor(value = List.class, collectionElement = String.class))
     private List<String> events;
     @ApiModelProperty(description = "调式合约事件列表", type = @TypeDescriptor(value = List.class, collectionElement = String.class))
@@ -120,7 +123,8 @@ public class ContractResultDto {
         this.success = result.isSuccess();
         this.errorMessage = result.getErrorMessage();
         this.stackTrace = result.getStackTrace();
-        this.setMergedTransfers(result.getMergedTransferList());
+        this.setMergedTransfersDto(result.getMergedTransferList());
+        this.setMergedMultyAssetTransfersDto(result.getMergerdMultyAssetTransferList());
         this.events = result.getEvents();
         this.debugEvents = result.getDebugEvents();
         this.remark = result.getRemark();
@@ -147,7 +151,8 @@ public class ContractResultDto {
         this.success = result.isSuccess();
         this.errorMessage = result.getErrorMessage();
         this.stackTrace = result.getStackTrace();
-        this.setMergedTransfers(result.getMergedTransferList());
+        this.setMergedTransfersDto(result.getMergedTransferList());
+        this.setMergedMultyAssetTransfersDto(result.getMergerdMultyAssetTransferList());
         this.events = result.getEvents();
         this.debugEvents = result.getDebugEvents();
         this.remark = result.getRemark();
@@ -158,6 +163,10 @@ public class ContractResultDto {
             this.makeTokenTransfers(chainId, result.getEvents());
             this.makeInvokeRegisterCmds(result.getInvokeRegisterCmds());
         }
+    }
+
+    public void setMultyAssetTransfers(List<ContractMultyAssetMergedTransferDto> multyAssetTransfers) {
+        this.multyAssetTransfers = multyAssetTransfers;
     }
 
     private void makeInvokeRegisterCmds(List<ProgramInvokeRegisterCmd> invokeRegisterCmds) {
@@ -206,14 +215,30 @@ public class ContractResultDto {
         return transfers == null ? new ArrayList<>() : transfers;
     }
 
-    public void setMergedTransfers(List<ContractMergedTransfer> transfers) {
+
+    public void setMergedTransfersDto(List<ContractMergedTransfer> transferList) {
         List<ContractMergedTransferDto> list = new LinkedList<>();
         this.transfers = list;
-        if (transfers == null || transfers.size() == 0) {
+        if (transferList == null || transferList.size() == 0) {
             return;
         }
-        for (ContractMergedTransfer transfer : transfers) {
+        for (ContractMergedTransfer transfer : transferList) {
             list.add(new ContractMergedTransferDto(transfer));
+        }
+    }
+
+    public List<ContractMultyAssetMergedTransferDto> getMultyAssetTransfers() {
+        return multyAssetTransfers;
+    }
+
+    private void setMergedMultyAssetTransfersDto(List<ContractMultyAssetMergedTransfer> mergerdMultyAssetTransferList) {
+        List<ContractMultyAssetMergedTransferDto> list = new LinkedList<>();
+        this.multyAssetTransfers = list;
+        if (mergerdMultyAssetTransferList == null || mergerdMultyAssetTransferList.size() == 0) {
+            return;
+        }
+        for (ContractMultyAssetMergedTransfer transfer : mergerdMultyAssetTransferList) {
+            list.add(new ContractMultyAssetMergedTransferDto(transfer));
         }
     }
 

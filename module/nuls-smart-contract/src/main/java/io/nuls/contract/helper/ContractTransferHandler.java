@@ -299,7 +299,7 @@ public class ContractTransferHandler {
                     nonceBytes = RPCUtil.decode(contractBalance.getNonce());
                 } else {
                     // 产生另一个合并交易，更新之前的合并交易的hash和账户的nonce
-                    this.updatePreTxHashAndAccountNonce(preTx.get(wrapperFrom), preBalance.get(wrapperFrom));
+                    this.updatePreTxHashAndAccountNonce(preTx.get(compareFrom), preBalance.get(compareFrom));
                     mergeCoinToMap.clear();
                     // 获取新交易的coinFrom的nonce
                     contractBalance = tempBalanceManager.getBalance(from, assetChainId, assetId).getData();
@@ -415,6 +415,7 @@ public class ContractTransferHandler {
             output = new Output();
             output.setTo(to.getAddress());
             output.setValue(to.getAmount());
+            output.setLockTime(to.getLockTime());
             outputs.add(output);
         }
         result.setHash(transfer.getHash());

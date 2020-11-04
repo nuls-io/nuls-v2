@@ -163,6 +163,7 @@ public class ContractMergeContractTransferTest {
             output = new Output();
             output.setTo(to.getAddress());
             output.setValue(to.getAmount());
+            output.setLockTime(to.getLockTime());
             outputs.add(output);
         }
         result.setHash(transfer.getHash());

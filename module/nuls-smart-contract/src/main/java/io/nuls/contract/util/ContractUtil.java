@@ -54,6 +54,7 @@ import io.nuls.core.rpc.model.message.MessageUtil;
 import io.nuls.core.rpc.model.message.Response;
 
 import java.lang.reflect.Array;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -612,6 +613,14 @@ public class ContractUtil {
 
     public static byte[] asBytes(String string) {
         return Base64.getDecoder().decode(string);
+    }
+
+    public static BigDecimal toNuls(BigInteger na) {
+        return new BigDecimal(na).movePointLeft(8);
+    }
+
+    public static BigInteger toNa(BigDecimal nuls) {
+        return nuls.scaleByPowerOfTen(8).toBigInteger();
     }
 
     public static BigInteger minus(BigInteger a, BigInteger b) {

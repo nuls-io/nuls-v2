@@ -24,8 +24,7 @@
 package io.nuls.contract.model.dto;
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.contract.model.bo.Output;
-import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.contract.model.bo.MultyAssetOutput;
 import io.nuls.core.rpc.model.ApiModelProperty;
 
 import static io.nuls.contract.util.ContractUtil.bigInteger2String;
@@ -34,21 +33,26 @@ import static io.nuls.contract.util.ContractUtil.bigInteger2String;
  * @author: PierreLuo
  * @date: 2019-03-06
  */
-@ApiModel
-public class ContractOutputDto {
+public class MultyAssetOutputDto {
     @ApiModelProperty(description = "转入地址")
     private String to;
     @ApiModelProperty(description = "转入金额")
     private String value;
+    @ApiModelProperty(description = "转入金额资产链ID")
+    private int assetChainId;
+    @ApiModelProperty(description = "转入金额资产ID")
+    private int assetId;
     @ApiModelProperty(description = "转入金额锁定时间")
     private long lockTime;
 
-    public ContractOutputDto() {
+    public MultyAssetOutputDto() {
     }
 
-    public ContractOutputDto(Output output) {
+    public MultyAssetOutputDto(MultyAssetOutput output) {
         this.to = AddressTool.getStringAddressByBytes(output.getTo());
         this.value = bigInteger2String(output.getValue());
+        this.assetChainId = output.getAssetChainId();
+        this.assetId = output.getAssetId();
         this.lockTime = output.getLockTime();
     }
 
@@ -66,6 +70,22 @@ public class ContractOutputDto {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    public int getAssetChainId() {
+        return assetChainId;
+    }
+
+    public void setAssetChainId(int assetChainId) {
+        this.assetChainId = assetChainId;
+    }
+
+    public int getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(int assetId) {
+        this.assetId = assetId;
     }
 
     public long getLockTime() {
