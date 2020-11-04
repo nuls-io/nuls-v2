@@ -125,6 +125,11 @@ public class DocumentTransferTool {
             }
             return instance;
         } catch (Exception e) {
+            LoggerUtil.commonLog.error("address:" + document.get("address").toString());
+            LoggerUtil.commonLog.error("balance:" + document.get("balance").toString());
+            LoggerUtil.commonLog.error("lockedBalance" +  document.get("lockedBalance").toString());
+            LoggerUtil.commonLog.error("tokenSymbol" +  document.get("tokenSymbol").toString());
+
             LoggerUtil.commonLog.error(e);
             throw new NulsRuntimeException(ApiErrorCode.DATA_PARSE_ERROR, "Document to Model fail");
         }
