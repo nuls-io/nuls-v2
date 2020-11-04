@@ -6,6 +6,7 @@ import io.nuls.api.model.po.AccountTokenInfo;
 import io.nuls.api.model.po.PageInfo;
 import io.nuls.api.model.po.TokenTransfer;
 import io.nuls.api.utils.DocumentTransferTool;
+import io.nuls.api.utils.LoggerUtil;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.BigIntegerUtils;
@@ -32,8 +33,18 @@ public class MongoTokenServiceImpl implements TokenService {
         if (document == null) {
             return null;
         }
-        AccountTokenInfo tokenInfo = DocumentTransferTool.toInfo(document, "key", AccountTokenInfo.class);
-        return tokenInfo;
+        try {
+            AccountTokenInfo tokenInfo = DocumentTransferTool.toInfo(document, "key", AccountTokenInfo.class);
+            return tokenInfo;
+        } catch (Exception e) {
+            LoggerUtil.commonLog.error("~~~~~~~~~~~~~~~~解析错误~~~~~~~~~~~~~~~~");
+            LoggerUtil.commonLog.error("key:" +  document.get("key").toString());
+            LoggerUtil.commonLog.error("address:" + document.get("address").toString());
+            LoggerUtil.commonLog.error("balance:" + document.get("balance").toString());
+            LoggerUtil.commonLog.error("lockedBalance" +  document.get("lockedBalance").toString());
+            LoggerUtil.commonLog.error("tokenSymbol" +  document.get("tokenSymbol").toString());
+            return null;
+        }
     }
 
     public void saveAccountTokens(int chainId, Map<String, AccountTokenInfo> accountTokenInfos) {
