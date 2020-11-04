@@ -33,18 +33,8 @@ public class MongoTokenServiceImpl implements TokenService {
         if (document == null) {
             return null;
         }
-        try {
-            AccountTokenInfo tokenInfo = DocumentTransferTool.toInfo(document, "key", AccountTokenInfo.class);
-            return tokenInfo;
-        } catch (Exception e) {
-            LoggerUtil.commonLog.error("~~~~~~~~~~~~~~~~解析错误~~~~~~~~~~~~~~~~");
-            LoggerUtil.commonLog.error("key:" +  document.get("key").toString());
-            LoggerUtil.commonLog.error("address:" + document.get("address").toString());
-            LoggerUtil.commonLog.error("balance:" + document.get("balance").toString());
-            LoggerUtil.commonLog.error("lockedBalance" +  document.get("lockedBalance").toString());
-            LoggerUtil.commonLog.error("tokenSymbol" +  document.get("tokenSymbol").toString());
-            return null;
-        }
+        AccountTokenInfo tokenInfo = DocumentTransferTool.toInfo(document, "key", AccountTokenInfo.class);
+        return tokenInfo;
     }
 
     public void saveAccountTokens(int chainId, Map<String, AccountTokenInfo> accountTokenInfos) {

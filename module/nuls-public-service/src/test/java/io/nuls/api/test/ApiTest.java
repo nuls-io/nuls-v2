@@ -3,9 +3,12 @@ package io.nuls.api.test;
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.manager.CacheManager;
+import io.nuls.api.model.po.AccountTokenInfo;
 import io.nuls.api.model.po.ContractInfo;
 import io.nuls.api.model.po.ContractResultInfo;
 import io.nuls.api.model.po.CurrentRound;
+import io.nuls.api.utils.DocumentTransferTool;
+import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.model.DoubleUtils;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.info.NoUse;
@@ -13,6 +16,7 @@ import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.basic.Result;
 import io.nuls.core.exception.NulsException;
 import org.bson.Document;
+import org.checkerframework.checker.units.qual.A;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -116,27 +120,11 @@ public class ApiTest {
 
     @Test
     public void test() {
-        Set<String> set = new HashSet<>();
-        set.add("aaaa1");
-        set.add("aaaa11");
-        set.add("aaaa112");
-        set.add("aaaa13");
-        set.add("aaaa14");
-        set.add("aaaa15");
-        set.add("aaaa16");
-        set.add("aaaa17");
-        set.add("aaaa18");
-        set.add("aaaa19");
-        set.add("aaaa10");
+        AccountTokenInfo info = new AccountTokenInfo();
+        info.setKey("abcde");
+        info.setBalance(new BigInteger("-11111"));
 
-        int i = 0;
-        for (String key : set) {
-            System.out.println(key);
-            i++;
-            if (i == 6) {
-                break;
-            }
-        }
 
+        System.out.println(BigIntegerUtils.bigIntegerToString(info.getBalance(), 32));
     }
 }
