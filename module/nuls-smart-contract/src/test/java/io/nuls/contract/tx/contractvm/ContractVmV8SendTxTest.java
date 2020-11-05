@@ -147,14 +147,16 @@ public class ContractVmV8SendTxTest extends BaseQuery {
     protected long minutes_5 = 60 * 5;
     protected String contractA = "";
     protected String contractB = "";
-    protected boolean createContract = false;
+    protected boolean createContract = true;
 
     @Before
     public void createAndInit() throws Exception {
         // 加载协议升级的数据
         ContractContext.CHAIN_ID = 2;
 
-        if (createContract) {
+        if (!createContract) {
+            // 注册链内资产
+            assetRegisterTest();
             // -------------------------------------------------------------------------------------//
             //InputStream inA = new FileInputStream(getClass().getResource("/contract-vm-v8-testA-1.0-SNAPSHOT.jar").getFile());
             //InputStream inB = new FileInputStream(getClass().getResource("/contract-vm-v8-testB-1.0-SNAPSHOT.jar").getFile());
@@ -164,17 +166,24 @@ public class ContractVmV8SendTxTest extends BaseQuery {
             contractB = this.createContract(inB, "test_b");
 
             // ------------------------------initial----------------------------------------------------//
-            ContractResultDto contractResult = this.callByParams(contractA, sender, "setContractB", "0", new String[]{contractB});
+            ContractResultDto contractResult;
+            contractResult = this.callByParams(contractA, toAddress, "setContractB", "0", new String[]{contractB});
+            Assert.assertTrue("expect success, " + contractResult.getErrorMessage() + ", " + contractResult.getStackTrace(), contractResult.isSuccess());
+            contractResult = this.callByParams(contractB, toAddress, "setContractA", "0", new String[]{contractA});
             Assert.assertTrue("expect success, " + contractResult.getErrorMessage() + ", " + contractResult.getStackTrace(), contractResult.isSuccess());
 
-            contractResult = this.callByParams(contractB, sender, "setContractA", "0", new String[]{contractA});
+            contractResult = this.callByParams(contractA, toAddress, "setSender", "0", new String[]{sender});
+            Assert.assertTrue("expect success, " + contractResult.getErrorMessage() + ", " + contractResult.getStackTrace(), contractResult.isSuccess());
+            contractResult = this.callByParams(contractB, toAddress, "setSender", "0", new String[]{sender});
             Assert.assertTrue("expect success, " + contractResult.getErrorMessage() + ", " + contractResult.getStackTrace(), contractResult.isSuccess());
         }
+        contractA = "tNULSeBaNAVgtrWw2M5kXX7LQznsZ3hmusb9d3";
+        contractB = "tNULSeBaN3KojyoRyuXB8yLNiZA7vjoCqmSV6W";
     }
 
     @Test
     public void testContractResultDto() throws Exception {
-        String hash = "453c5a7caaf8b392b472310029d67f525c398cea7de8687ce4c3fd9d65ba2fea";
+        String hash = "5965fab8fb0074a7f9a8cea907bba0d50dc7d658a025b4396e0a498ad6df8050";
         Map map = this.waitGetContractTx(hash);
         Map map1 = (Map) map.get("contractResult");
         ContractResultDto dto = this.converterDto(map1);
@@ -401,6 +410,11 @@ public class ContractVmV8SendTxTest extends BaseQuery {
 
     protected void testAsset(String contract, String sender, String method, String[] args, BigInteger value, int assetChainId, int assetId, boolean setAsset, String[] addresses, long... expectBalances) throws Exception {
         Assert.assertTrue("地址与期望余额参数不合法", addresses.length * 2 == expectBalances.length);
+        BigInteger[][] prevBalances = new BigInteger[addresses.length][];
+        int k = 0;
+        for (String address : addresses) {
+            prevBalances[k++] = this.getBalanceByAccount(address, assetChainId, assetId);
+        }
         ContractResultDto programResult;
         if (setAsset) {
             programResult = this.callOfDesignatedAssetByParams(contract, sender, method, value.toString(), args, assetChainId, assetId);
@@ -437,9 +451,40 @@ public class ContractVmV8SendTxTest extends BaseQuery {
         Assert.assertTrue(String.format("测试方法[%s]期望 A-锁定: %s, 实际: %s", method, expectBalances[3], toNuls(balanceALock)), balanceALock.longValue() == toNa(BigDecimal.valueOf(expectBalances[3])).longValue());
         Assert.assertTrue(String.format("测试方法[%s]期望 B-锁定: %s, 实际: %s", method, expectBalances[4], toNuls(balanceBLock)), balanceBLock.longValue() == toNa(BigDecimal.valueOf(expectBalances[4])).longValue());
         Assert.assertTrue(String.format("测试方法[%s]期望 sender-锁定: %s, 实际: %s", method, expectBalances[5], toNuls(balanceSenderLock)), balanceSenderLock.longValue() == toNa(BigDecimal.valueOf(expectBalances[5])).longValue());
+
+
+        BigInteger[][] currentBalances = new BigInteger[addresses.length][];
+        k = 0;
+        for (String address : addresses) {
+            currentBalances[k++] = this.getBalanceByAccount(address, assetChainId, assetId);
+        }
+        BigInteger fee = BigInteger.ZERO;
+        boolean mainAsset = assetChainId == this.chainId && assetId == this.assetId;
+        if (mainAsset) {
+            fee = new BigInteger(programResult.getTxSizeFee()).add(new BigInteger(programResult.getActualContractFee()));
+        }
+        balanceA = currentBalances[0][0].subtract(prevBalances[0][0]);
+        balanceB = currentBalances[1][0].subtract(prevBalances[1][0]);
+        balanceSender = currentBalances[2][0].add(toNa(BigDecimal.valueOf(100L))).subtract(prevBalances[2][0]).add(fee);
+        balanceALock = currentBalances[0][1].subtract(prevBalances[0][1]);
+        balanceBLock = currentBalances[1][1].subtract(prevBalances[1][1]);
+        balanceSenderLock = currentBalances[2][1].subtract(prevBalances[2][1]);
+        Assert.assertTrue(String.format("测试方法[%s]期望 A: %s, 实际: %s", method, expectBalances[0], toNuls(balanceA)), balanceA.longValue() == toNa(BigDecimal.valueOf(expectBalances[0])).longValue());
+        Assert.assertTrue(String.format("测试方法[%s]期望 B: %s, 实际: %s", method, expectBalances[1], toNuls(balanceB)), balanceB.longValue() == toNa(BigDecimal.valueOf(expectBalances[1])).longValue());
+        Assert.assertTrue(String.format("测试方法[%s]期望 sender: %s, 实际: %s", method, expectBalances[2], toNuls(balanceSender)), balanceSender.longValue() == toNa(BigDecimal.valueOf(expectBalances[2])).longValue());
+        Assert.assertTrue(String.format("测试方法[%s]期望 A-锁定: %s, 实际: %s", method, expectBalances[3], toNuls(balanceALock)), balanceALock.longValue() == toNa(BigDecimal.valueOf(expectBalances[3])).longValue());
+        Assert.assertTrue(String.format("测试方法[%s]期望 B-锁定: %s, 实际: %s", method, expectBalances[4], toNuls(balanceBLock)), balanceBLock.longValue() == toNa(BigDecimal.valueOf(expectBalances[4])).longValue());
+        Assert.assertTrue(String.format("测试方法[%s]期望 sender-锁定: %s, 实际: %s", method, expectBalances[5], toNuls(balanceSenderLock)), balanceSenderLock.longValue() == toNa(BigDecimal.valueOf(expectBalances[5])).longValue());
     }
 
     protected void testFailed(String contract, String sender, String method, String[] args, BigInteger value, int assetChainId, int assetId, boolean setAsset) throws Exception {
+        System.out.println("清空合约余额");
+        ContractResultDto contractResult;
+        contractResult = this.callByParams(contractA, toAddress, "clear", "0", new String[]{});
+        Assert.assertTrue("expect success, " + contractResult.getErrorMessage() + ", " + contractResult.getStackTrace(), contractResult.isSuccess());
+        contractResult = this.callByParams(contractB, toAddress, "clear", "0", new String[]{});
+        Assert.assertTrue("expect success, " + contractResult.getErrorMessage() + ", " + contractResult.getStackTrace(), contractResult.isSuccess());
+
         ContractResultDto programResult;
         if (setAsset) {
             programResult = this.callOfDesignatedAssetByParams(contract, sender, method, value.toString(), args, assetChainId, assetId);
@@ -471,7 +516,7 @@ public class ContractVmV8SendTxTest extends BaseQuery {
     protected String createContract(InputStream in, String alias) throws Exception {
         byte[] contractCode = IOUtils.toByteArray(in);
         String remark = "test multy asset " + alias;
-        Map params = this.makeCreateParams(sender, contractCode, alias, remark);
+        Map params = this.makeCreateParams(toAddress, contractCode, alias, remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CREATE));
         assertTrue(cmdResp2, result);
@@ -541,5 +586,18 @@ public class ContractVmV8SendTxTest extends BaseQuery {
         Map map1 = (Map) map.get("contractResult");
         ContractResultDto dto = this.converterDto(map1);
         return dto;
+    }
+
+    protected void assetRegisterTest() throws Exception {
+        Map<String, Object> params = new HashMap<>();
+        params.put("assetSymbol", "MTA");
+        params.put("assetName", "MTA");
+        params.put("initNumber", 100000000);
+        params.put("decimalPlace", 8);
+        params.put("txCreatorAddress", sender);
+        params.put("assetOwnerAddress", sender);
+        params.put("password", "nuls123456");
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "chainAssetTxReg", params);
+        Assert.assertTrue(JSONUtils.obj2PrettyJson(response), response.isSuccess());
     }
 }
