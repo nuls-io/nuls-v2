@@ -112,6 +112,17 @@ public class AccountTool {
         return account;
     }
 
+    public static Account createAccountByPubKey(int chainId, String encryptedPriKey, byte[] pubKey) {
+        Address address = new Address(chainId, BaseConstant.DEFAULT_ADDRESS_TYPE, SerializeUtils.sha256hash160(pubKey));
+        Account account = new Account();
+        account.setChainId(chainId);
+        account.setAddress(address);
+        account.setPubKey(pubKey);
+        account.setEncryptedPriKey(HexUtil.decode(encryptedPriKey));
+        account.setCreateTime(NulsDateUtils.getCurrentTimeMillis());
+        return account;
+    }
+
     public static Account createAccount(int chainId) throws NulsException {
         return createAccount(chainId, null);
     }

@@ -97,6 +97,7 @@ public class CommandHandler implements InitializingBean {
         register(getBean(ImportByKeyStoreProcessor.class));
         //import account for private key
         register(getBean(ImportByPrivateKeyProcessor.class));
+        register(getBean(ImportKeyStoreFilesProcessor.class));
         //update account password
         register(getBean(UpdatePasswordProcessor.class));
         //get account info
@@ -259,7 +260,7 @@ public class CommandHandler implements InitializingBean {
         String[] cmdArgs = parseArgs(args);
         try {
             CommandResult commandResult = this.processCommand(cmdArgs);
-            System.out.print( commandResult.toString() + "\n");
+            System.out.print(commandResult.toString() + "\n");
         } catch (Exception e) {
             if (System.Logger.Level.DEBUG.getName().equals(System.getProperty("log.level"))) {
                 e.printStackTrace();
@@ -296,7 +297,7 @@ public class CommandHandler implements InitializingBean {
         PROCESSOR_MAP.put(processor.getCommand(), processor);
     }
 
-    public boolean hasCommand(String command){
+    public boolean hasCommand(String command) {
         return PROCESSOR_MAP.containsKey(command);
     }
 
