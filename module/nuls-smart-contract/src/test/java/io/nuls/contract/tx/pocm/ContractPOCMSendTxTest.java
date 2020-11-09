@@ -25,6 +25,7 @@
 package io.nuls.contract.tx.pocm;
 
 
+import io.nuls.contract.mock.basetest.ContractTest;
 import io.nuls.contract.sdk.annotation.View;
 import io.nuls.contract.tx.base.BaseQuery;
 import io.nuls.contract.util.Log;
@@ -107,7 +108,7 @@ public class ContractPOCMSendTxTest extends BaseQuery {
         //Log.info("begin openConsensus");
         //this.invokeCall(sender, BigInteger.ZERO, contractAddress, "openConsensus", null, "remark");
         Log.info("begin addOtherAgent");
-        this.invokeCall(sender, BigInteger.ZERO, contractAddress, "addOtherAgent", null, "remark", List.of("2de47d6fa7d7f26b48a1b75e668bb299c903e8f76b8ae0335ecd5a0cd7d0741b").toArray());
+        this.invokeCall(sender, BigInteger.ZERO, contractAddress, "addOtherAgent", null, "remark", List.of("445ed18a9b03a252360ebc9264a6d9b59b2f0c8b4f17053aac53d61183c99dba").toArray());
         Log.info("begin depositForOwn {}", sender);
 
         //String nrc20Locked = "tNULSeBaN8w5ioWD9m2GE16QpuawaKtMDjdDRk";
@@ -236,8 +237,8 @@ public class ContractPOCMSendTxTest extends BaseQuery {
 
     private String nrc20Locked(String alias, String name, String symbol, String totalSupply, String decimals) throws Exception {
         Log.info("begin create locked nrc20");
-        String filePath = "/Users/pierreluo/IdeaProjects/NRC20-Locked-Token/target/nrc20-locked-token-test1.jar";
-        //String filePath = ContractTest.class.getResource("/nrc20-locked-token.jar").getFile();
+        //String filePath = "/Users/pierreluo/IdeaProjects/NRC20-Locked-Token/target/nrc20-locked-token-test1.jar";
+        String filePath = ContractTest.class.getResource("/nrc20-locked-token").getFile();
         InputStream in = new FileInputStream(filePath);
         byte[] contractCode = IOUtils.toByteArray(in);
         String remark = "create contract test - " + alias;
@@ -254,8 +255,8 @@ public class ContractPOCMSendTxTest extends BaseQuery {
 
     private String nrc20Locked() throws Exception {
         Log.info("begin create locked nrc20");
-        String filePath = "/Users/pierreluo/IdeaProjects/NRC20-Locked-Token/target/nrc20-locked-token-test1.jar";
-        //String filePath = ContractTest.class.getResource("/nrc20-locked-token.jar").getFile();
+        //String filePath = "/Users/pierreluo/IdeaProjects/NRC20-Locked-Token/target/nrc20-locked-token-test1.jar";
+        String filePath = ContractTest.class.getResource("/nrc20-locked-token").getFile();
         InputStream in = new FileInputStream(filePath);
         byte[] contractCode = IOUtils.toByteArray(in);
         String remark = "create contract test - 锁定空气币";
