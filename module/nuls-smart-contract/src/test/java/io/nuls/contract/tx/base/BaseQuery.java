@@ -181,11 +181,11 @@ public class BaseQuery extends Base {
 
     @Test
     public void getBalance() throws Exception {
-        this.getBalanceByAccount(toAddress17);
+        this.getBalanceByAccount("tNULSeBaNBJT6JuznGqhKM5q6jXFkuSoMUNkHK");
         System.out.println("---------------------------------------------------");
-        //this.getBalanceByAccount(contractAddress);
+        this.getBalanceByAccount("tNULSeBaNAFAVPbGHAzCJ8YZhXLbxK44EujNKF");
         System.out.println("---------------------------------------------------");
-        //this.getBalanceByAccount("tNULSeBaN2zgVKHYKQknBbMgegR5X7DzNet8xh");
+        this.getBalanceByAccount("tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD");
     }
 
     protected void getBalanceByAccount(String account) throws Exception {
@@ -337,6 +337,17 @@ public class BaseQuery extends Base {
         Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getTxs", params);
         Map record = (Map) dpResp.getResponseData();
         Log.info("Page<TransactionPO>:{}", JSONUtils.obj2PrettyJson(record));
+    }
+
+    /**
+     * 查询所有资产
+     */
+    @Test
+    public void getAllAssetReg() throws Exception {
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.CHAIN_ID, chainId);
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getAssetRegInfo", params);
+        System.out.println(JSONUtils.obj2PrettyJson(response));
     }
 
     public TransferService getTransferService() {

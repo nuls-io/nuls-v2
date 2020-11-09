@@ -96,7 +96,7 @@ public class Base {
     protected String toAddress34 = "tNULSeBaMvQr8dVnk3f3DPvwCYX3ctTRtrTurD";
 
     protected String createHash = "002029ca32525f635a15c82c046114657c0d8a96a7163780ac6b425b2383b240bd56";
-    protected String contractAddress = "tNULSeBaN8cW84rugvTDgSrHNUhZEaWEMERAKZ";
+    protected String contractAddress = "tNULSeBaN9Ywf962V1tn89T3qm1K5uvGkcy571";
     protected String contractAddress0 = "tNULSeBaN7vAqBANTtVxsiFsam4NcRUbqrCpzK";
     protected String contractAddress1 = "tNULSeBaNBhqzwK2yN9FuXmNWago7vLt64xggp";
     protected String contractAddress2 = "tNULSeBaN4ahTXVo5RH1DSnUV9tXpYm3JyBqXc";
@@ -285,7 +285,7 @@ public class Base {
     protected void assertTrue(Response cmdResp2, Map result) throws JsonProcessingException {
         if(null == result) {
             Log.error("Contract-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
-            Assert.assertTrue(false);
+            Assert.assertTrue("" + cmdResp2.getResponseComment(), false);
         }
         Log.info("Contract-result:{}", JSONUtils.obj2PrettyJson(result));
     }

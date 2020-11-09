@@ -73,6 +73,23 @@ public class ContractMultyAssetTest extends BaseQuery {
     }
 
     /**
+     * 注册一个资产
+     */
+    @Test
+    public void assetRegisterTest() throws Exception {
+        Map<String, Object> params = new HashMap<>();
+        params.put("assetSymbol", "MTA");
+        params.put("assetName", "MTA");
+        params.put("initNumber", 100000000);
+        params.put("decimalPlace", 8);
+        params.put("txCreatorAddress", sender);
+        params.put("assetOwnerAddress", sender);
+        params.put("password", "nuls123456");
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "chainAssetTxReg", params);
+        System.out.println(JSONUtils.obj2PrettyJson(response));
+    }
+
+    /**
      * 转入NULS，转出NULS，转出NULS锁定
      */
     @Test
@@ -164,34 +181,6 @@ public class ContractMultyAssetTest extends BaseQuery {
         // 转出 1.1 2-2(锁定)
         Object[] innerArgsLock = new Object[]{toAddress17, new BigDecimal("1.1").multiply(BigDecimal.TEN.pow(8)).toBigInteger(), 2, 2, minutes_3};
         this.innerCallOfDesignatedAssetByParams(methodName, otherContract, "transferDesignatedAssetLock", innerArgsLock, "0", 0, 0);
-    }
-
-    /**
-     * 查询所有资产
-     */
-    @Test
-    public void getAllAssetReg() throws Exception {
-        Map<String, Object> params = new HashMap<>();
-        params.put(Constants.CHAIN_ID, chainId);
-        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getAssetRegInfo", params);
-        System.out.println(JSONUtils.obj2PrettyJson(response));
-    }
-
-    /**
-     * 注册一个资产
-     */
-    @Test
-    public void assetRegisterTest() throws Exception {
-        Map<String, Object> params = new HashMap<>();
-        params.put("assetSymbol", "MTA");
-        params.put("assetName", "MTA");
-        params.put("initNumber", 100000000);
-        params.put("decimalPlace", 8);
-        params.put("txCreatorAddress", sender);
-        params.put("assetOwnerAddress", sender);
-        params.put("password", "nuls123456");
-        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "chainAssetTxReg", params);
-        System.out.println(JSONUtils.obj2PrettyJson(response));
     }
 
     /**
