@@ -1,10 +1,13 @@
 package io.nuls.crosschain.nuls;
 
+import io.nuls.base.api.provider.Provider;
+import io.nuls.base.api.provider.ServiceManager;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.base.protocol.RegisterHelper;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.core.config.ConfigurationLoader;
 import io.nuls.core.log.Log;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.rpc.info.HostInfo;
@@ -51,6 +54,10 @@ public class CrossChainBootStrap extends BaseCrossChainBootStrap {
         if (args == null || args.length == 0) {
             args = new String[]{"ws://" + HostInfo.getLocalIP() + ":7771"};
         }
+        ConfigurationLoader configurationLoader = new ConfigurationLoader();
+        configurationLoader.load();
+        int defaultChainId = Integer.parseInt(configurationLoader.getValue("chainId"));
+        ServiceManager.init(defaultChainId, Provider.ProviderType.RPC);
         NulsRpcModuleBootstrap.run(CONTEXT_PATH, args);
     }
     /**
@@ -146,13 +153,16 @@ public class CrossChainBootStrap extends BaseCrossChainBootStrap {
                 if(registeredChainMessage != null && registeredChainMessage.getChainInfoList() != null){
                     chainManager.setRegisteredCrossChainList(registeredChainMessage.getChainInfoList());
                 }else{
-                    registeredChainMessage = ChainManagerCall.getRegisteredChainInfo();
+                    registeredChainMessage = ChainManagerCall.getRegisteredChainInfo(chainManager);
                     registeredCrossChainService.save(registeredChainMessage);
                     chainManager.setRegisteredCrossChainList(registeredChainMessage.getChainInfoList());
-
                 }
             }
-
+            chainManager.getRegisteredCrossChainList().stream().filter(d->d.getChainId() == 9)
+                    .forEach(chainInfo -> {
+                        Log.info("chain id {} 验证人列表：{}",chainInfo.getChainId(),chainInfo.getVerifierList());
+                       // Log.info("当前高度:{}",chainManager.getChainHeaderMap().get(1).getHeight());
+                    });;
             /*
              * 如果为账户模块启动，向账户模块发送链前缀
              */

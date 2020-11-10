@@ -106,6 +106,29 @@ public class BaseChainCmd extends BaseCmd {
         return coinData;
     }
 
+
+    /**
+     * 注册链或资产封装coinData,x%资产进入黑洞，y%资产进入锁定
+     */
+    CoinData getRegCoinDataV7(Asset asset, int nulsChainId, int nulsAssetId, int txSize, AccountBalance accountBalance) throws NulsRuntimeException {
+        txSize = txSize + P2PHKSignature.SERIALIZE_LENGTH;
+        CoinData coinData = new CoinData();
+        //手续费
+        CoinFrom from = new CoinFrom(asset.getAddress(), nulsChainId, nulsAssetId, BigInteger.ZERO, accountBalance.getNonce(), (byte) 0);
+        CoinTo to = new CoinTo(CmConstants.BLACK_HOLE_ADDRESS, nulsChainId, nulsAssetId, BigInteger.ZERO, 0);
+        coinData.addFrom(from);
+        coinData.addTo(to);
+
+        txSize += from.size();
+        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
+        String fromAmount = BigIntegerUtils.bigIntegerToString(fee);
+        if (BigIntegerUtils.isLessThan(accountBalance.getAvailable(), fromAmount)) {
+            throw new NulsRuntimeException(CmErrorCode.BALANCE_NOT_ENOUGH);
+        }
+        from.setAmount(BigIntegerUtils.stringToBigInteger(fromAmount));
+        return coinData;
+    }
+
     /**
      * 注销资产进行处理
      */
@@ -116,15 +139,29 @@ public class BaseChainCmd extends BaseCmd {
         BigInteger lockAmount = asset.getDepositNuls().subtract(asset.getDestroyNuls());
         CoinTo to = new CoinTo(asset.getAddress(), nulsChainId, nulsAssetId, lockAmount, 0);
         CoinData coinData = new CoinData();
-        coinData.addTo(to);
+
         //手续费
-        CoinFrom from = new CoinFrom(asset.getAddress(), nulsChainId, nulsAssetId, lockAmount, TxUtil.getNonceByTxHash(asset.getTxHash()), (byte) -1);
-        coinData.addFrom(from);
-        txSize += to.size();
-        txSize += from.size();
-        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
-        //手续费从抵押里扣除
-        to.setAmount(lockAmount.subtract(fee));
+        if (lockAmount.equals(BigInteger.ZERO)) {
+            CoinFrom from = new CoinFrom(asset.getAddress(), nulsChainId, nulsAssetId, BigInteger.ZERO, accountBalance.getNonce(), (byte) 0);
+            coinData.addFrom(from);
+            coinData.addTo(to);
+            txSize += from.size();
+            BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
+            String fromAmount = BigIntegerUtils.bigIntegerToString(fee);
+            if (BigIntegerUtils.isLessThan(accountBalance.getAvailable(), fromAmount)) {
+                throw new NulsRuntimeException(CmErrorCode.BALANCE_NOT_ENOUGH);
+            }
+            from.setAmount(fee);
+        } else {
+            CoinFrom from = new CoinFrom(asset.getAddress(), nulsChainId, nulsAssetId, lockAmount, TxUtil.getNonceByTxHash(asset.getTxHash()), (byte) -1);
+            coinData.addFrom(from);
+            coinData.addTo(to);
+            txSize += to.size();
+            txSize += from.size();
+            BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
+            //手续费从抵押里扣除
+            to.setAmount(lockAmount.subtract(fee));
+        }
         return coinData;
     }
 

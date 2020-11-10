@@ -115,6 +115,7 @@ buildNumber.properties
 # Nuls output
 # log
 logs/
+/data-prod/
 /data/
 !tools/nuls-tools/base-tools/src/main/java/io/nuls/base/data
 keystore/
@@ -123,3 +124,4 @@ NULS-Wallet-linux64-beta*
 NULS_Wallet*
 config_tmp/
 NULS-Wallet-linux64-alpha*
+.package-version

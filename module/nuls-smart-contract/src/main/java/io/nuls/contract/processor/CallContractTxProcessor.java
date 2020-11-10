@@ -138,6 +138,9 @@ public class CallContractTxProcessor {
             if (contractResult == null) {
                 contractResult = contractService.getContractExecuteResult(chainId, tx.getHash());
             }
+            if (contractResult == null) {
+                return ContractUtil.getSuccess();
+            }
             try {
                 CallContractData contractData = (CallContractData) tx.getContractData();
                 Log.info("rollback call tx, contract data is {}, result is {}", JSONUtils.obj2json(new CallContractDataDto(contractData)), JSONUtils.obj2json(new ContractResultDto(chainId, contractResult, contractData.getGasLimit())));

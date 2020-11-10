@@ -44,7 +44,7 @@ JAVA_OPTS="-Xms128m -Xmx128m -Dapp.name=cmd-client --add-opens java.base/java.la
 
 CLASSPATH=$PUB_LIB:.
 if [ -x ${JAVA} ]; then
-  ${JAVA} $JAVA_OPTS -classpath $CLASSPATH $MAIN_CLASS
+  eval "${JAVA} $JAVA_OPTS -classpath $CLASSPATH $MAIN_CLASS"
   exit 0
 fi
 

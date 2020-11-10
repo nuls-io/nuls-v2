@@ -12,6 +12,7 @@ import io.nuls.crosschain.base.model.bo.txdata.RegisteredChainMessage;
 import io.nuls.crosschain.base.model.bo.AssetInfo;
 import io.nuls.crosschain.base.model.bo.ChainInfo;
 import io.nuls.crosschain.base.model.bo.Circulation;
+import io.nuls.crosschain.nuls.utils.manager.ChainManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -125,9 +126,10 @@ public class ChainManagerCall {
      * 向链管理模块查询已注册链信息
      * @return
      * @throws NulsException
+     * @param chainManager
      */
     @SuppressWarnings("unchecked")
-    public static RegisteredChainMessage getRegisteredChainInfo() throws NulsException {
+    public static RegisteredChainMessage getRegisteredChainInfo(ChainManager chainManager) throws NulsException {
         try {
             HashMap result = (HashMap) CommonCall.request(ModuleE.CM.abbr,"getCrossChainInfos", new HashMap(2));
             List<ChainInfo> chainInfoList = new ArrayList<>();
@@ -143,6 +145,13 @@ public class ChainManagerCall {
                     }
                 }
             }
+            //如果在跨链模块已经存储了验证人列表，应该已跨链模块的验证人列表为准，链管理只存储了初始验证人列表。
+            chainInfoList.forEach(chainInfo -> {
+                ChainInfo oldChainInfo = chainManager.getChainInfo(chainInfo.getChainId());
+                if(oldChainInfo != null && oldChainInfo.getVerifierList() != null && !oldChainInfo.getVerifierList().isEmpty()){
+                    chainInfo.setVerifierList(oldChainInfo.getVerifierList());
+                }
+            });
             RegisteredChainMessage registeredChainMessage = new RegisteredChainMessage();
             registeredChainMessage.setChainInfoList(chainInfoList);
             return registeredChainMessage;

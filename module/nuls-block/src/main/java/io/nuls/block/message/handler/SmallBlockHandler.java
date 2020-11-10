@@ -88,6 +88,10 @@ public class SmallBlockHandler implements MessageProcessor {
         }
 
         BlockHeader header = smallBlock.getHeader();
+
+        if(header.getHeight() == 3125788){
+            return;
+        }
         NulsHash blockHash = header.getHash();
         //阻止恶意节点提前出块,拒绝接收未来一定时间外的区块
         ChainParameters parameters = context.getParameters();

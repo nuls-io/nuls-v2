@@ -35,6 +35,7 @@ import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.config.Config;
 import io.nuls.cmd.client.processor.CommandGroup;
 import io.nuls.cmd.client.processor.CommandProcessor;
+import io.nuls.cmd.client.utils.AssetsUtil;
 import io.nuls.cmd.client.utils.Na;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -103,10 +104,11 @@ public class GetBalanceProcessor implements CommandProcessor {
         if(result.isFailed()){
             return CommandResult.getFailed(result);
         }
+        Integer decimalInt = AssetsUtil.getCrossAssetDecimal(assetChainId, assetId);
         Map<String,Object> r = new HashMap<>(3);
-        r.put("available",config.toBigUnit(result.getData().getAvailable()));
-        r.put("freeze",config.toBigUnit(result.getData().getFreeze()));
-        r.put("total",config.toBigUnit(result.getData().getTotal()));
+        r.put("available",config.toBigUnit(result.getData().getAvailable(),decimalInt));
+        r.put("freeze",config.toBigUnit(result.getData().getFreeze(),decimalInt));
+        r.put("total",config.toBigUnit(result.getData().getTotal(),decimalInt));
         return CommandResult.getSuccess(new Result(r));
     }
 

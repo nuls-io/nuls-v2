@@ -33,6 +33,7 @@ public class Config implements InitializingBean {
     private String addressPrefix;
     private String language;
 
+    @Value("packageVersion")
     private String clientVersion;
 
     public String getAddressPrefix() {
@@ -108,7 +109,11 @@ public class Config implements InitializingBean {
     }
 
     public BigDecimal toBigUnit(BigInteger val) {
-        BigDecimal decimal = BigDecimal.TEN.pow(this.getDecimals());
+        return toBigUnit(val,this.getDecimals());
+    }
+
+    public BigDecimal toBigUnit(BigInteger val,int decimals) {
+        BigDecimal decimal = BigDecimal.TEN.pow(decimals);
         BigDecimal dval = BigDecimal.valueOf(val.longValue());
         return dval.divide(decimal);
     }

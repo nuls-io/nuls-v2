@@ -38,7 +38,7 @@ LOGLEVEL="ERROR"
 command="cmd"
 PARAM=
 JAVAOPT=
-while getopts hl:c:C:P:a:i: name
+while getopts hl:c:C:P:a:i:e: name
 do
             case $name in
             l)     LOGLEVEL="$OPTARG"
@@ -47,6 +47,7 @@ do
             c)     config="$OPTARG";;
             C)     command="$OPTARG";;
             P)     PARAM="$OPTARG";;
+            e)     PARAM="eval \"$OPTARG\"";;
             a)     JAVAOPT="${JAVAOPT} -DassetsId=$OPTARG";;
             i)     JAVAOPT="${JAVAOPT} -DchainId=$OPTARG";;
             h)     help ;;

@@ -28,6 +28,7 @@ package io.nuls.chain.rpc.cmd;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.Transaction;
+import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.chain.config.NulsChainConfig;
 import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.info.CmErrorCode;
@@ -57,6 +58,7 @@ import io.nuls.core.rpc.model.*;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.util.NulsDateUtils;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -170,9 +172,17 @@ public class ChainCmd extends BaseChainCmd {
             if (!FormatValidUtils.validTokenNameOrSymbol(asset.getAssetName())) {
                 return failed(CmErrorCode.ERROR_ASSET_NAME);
             }
+
+            int version = ProtocolGroupManager.getCurrentVersion(Integer.valueOf(nulsChainConfig.getMainChainId()));
             asset.setChainId(blockChain.getChainId());
-            asset.setDepositNuls(nulsChainConfig.getAssetDepositNuls());
-            asset.setDestroyNuls(nulsChainConfig.getAssetDestroyNuls());
+            if(version < CmConstants.REMOVE_DEPOSIT_VERSION) {
+                asset.setDepositNuls(nulsChainConfig.getAssetDepositNuls());
+                asset.setDestroyNuls(nulsChainConfig.getAssetDestroyNuls());
+            }else {
+                asset.setDepositNuls(BigInteger.ZERO);
+                asset.setDestroyNuls(BigInteger.ZERO);
+            }
+
             asset.setAvailable(true);
             BlockChain dbChain = chainService.getChain(blockChain.getChainId());
             if (null != dbChain && dbChain.isDelete()) {
@@ -190,7 +200,7 @@ public class ChainCmd extends BaseChainCmd {
             /* 组装交易发送 (Send transaction) */
             Transaction tx = new RegisterChainAndAssetTransaction();
             if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) >= CmConstants.LATEST_SUPPORT_VERSION) {
-                tx.setTxData(TxUtil.parseChainToTxV4(blockChain, asset).serialize());
+                tx.setTxData(TxUtil.parseChainToTxV5(blockChain, asset).serialize());
             } else {
                 tx.setTxData(TxUtil.parseChainToTx(blockChain, asset).serialize());
             }
@@ -201,9 +211,14 @@ public class ChainCmd extends BaseChainCmd {
             if (null != ldErrorCode) {
                 return failed(ldErrorCode);
             }
-            CoinData coinData = super.getRegCoinData(asset, CmRuntimeInfo.getMainIntChainId(),
-                    CmRuntimeInfo.getMainIntAssetId(), tx.size(),
-                    accountBalance);
+            CoinData coinData;
+            if (version < CmConstants.REMOVE_DEPOSIT_VERSION) {
+                coinData = this.getRegCoinData(asset, CmRuntimeInfo.getMainIntChainId(),
+                        CmRuntimeInfo.getMainIntAssetId(), tx.size(), accountBalance);
+            } else {
+                coinData = this.getRegCoinDataV7(asset, CmRuntimeInfo.getMainIntChainId(),
+                        CmRuntimeInfo.getMainIntAssetId(), tx.size(), accountBalance);
+            }
             tx.setCoinData(coinData.serialize());
 
             /* 判断签名是否正确 (Determine if the signature is correct),取主网的chainid进行签名 */
@@ -297,9 +312,16 @@ public class ChainCmd extends BaseChainCmd {
             if (!FormatValidUtils.validTokenNameOrSymbol(asset.getAssetName())) {
                 return failed(CmErrorCode.ERROR_ASSET_NAME);
             }
+
+            int version = ProtocolGroupManager.getCurrentVersion(Integer.valueOf(nulsChainConfig.getMainChainId()));
             asset.setChainId(blockChain.getChainId());
-            asset.setDepositNuls(nulsChainConfig.getAssetDepositNuls());
-            asset.setDestroyNuls(nulsChainConfig.getAssetDestroyNuls());
+            if(version < CmConstants.REMOVE_DEPOSIT_VERSION) {
+                asset.setDepositNuls(nulsChainConfig.getAssetDepositNuls());
+                asset.setDestroyNuls(nulsChainConfig.getAssetDestroyNuls());
+            }else {
+                asset.setDepositNuls(BigInteger.ZERO);
+                asset.setDestroyNuls(BigInteger.ZERO);
+            }
             asset.setAvailable(true);
             BlockChain dbChain = chainService.getChain(blockChain.getChainId());
             if (null == dbChain) {
@@ -318,7 +340,7 @@ public class ChainCmd extends BaseChainCmd {
             /* 组装交易发送 (Send transaction) */
             Transaction tx = new RegisterChainAndAssetTransaction();
             if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) >= CmConstants.LATEST_SUPPORT_VERSION) {
-                tx.setTxData(TxUtil.parseChainToTxV4(blockChain, asset).serialize());
+                tx.setTxData(TxUtil.parseChainToTxV5(blockChain, asset).serialize());
             } else {
                 tx.setTxData(TxUtil.parseChainToTx(blockChain, asset).serialize());
             }
@@ -328,9 +350,14 @@ public class ChainCmd extends BaseChainCmd {
             if (null != ldErrorCode) {
                 return failed(ldErrorCode);
             }
-            CoinData coinData = super.getRegCoinData(asset, CmRuntimeInfo.getMainIntChainId(),
-                    CmRuntimeInfo.getMainIntAssetId(), tx.size(),
-                    accountBalance);
+            CoinData coinData;
+            if (version < CmConstants.REMOVE_DEPOSIT_VERSION) {
+                coinData = this.getRegCoinData(asset, CmRuntimeInfo.getMainIntChainId(),
+                        CmRuntimeInfo.getMainIntAssetId(), tx.size(), accountBalance);
+            } else {
+                coinData = this.getRegCoinDataV7(asset, CmRuntimeInfo.getMainIntChainId(),
+                        CmRuntimeInfo.getMainIntAssetId(), tx.size(), accountBalance);
+            }
             tx.setCoinData(coinData.serialize());
 
             /* 判断签名是否正确 (Determine if the signature is correct),取主网的chainid进行签名 */

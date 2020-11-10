@@ -26,6 +26,8 @@
 package io.nuls.base.data;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.ByteUtils;
@@ -122,7 +124,14 @@ public class Address {
             throw new NulsRuntimeException(new Exception());
         }
 
-        int chainId = ByteUtils.bytesToShort(hashs);
+        NulsByteBuffer byteBuffer = new NulsByteBuffer(hashs);
+        int chainId;
+        try {
+            chainId = byteBuffer.readUint16();
+        } catch (NulsException e) {
+            Log.error(e);
+            throw new NulsRuntimeException(e);
+        }
         byte addressType = hashs[2];
         byte[] content = new byte[RIPEMD160_LENGTH];
         System.arraycopy(hashs, 3, content, 0, RIPEMD160_LENGTH);

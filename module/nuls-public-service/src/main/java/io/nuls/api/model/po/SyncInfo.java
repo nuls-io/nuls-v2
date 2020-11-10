@@ -10,7 +10,7 @@ public class SyncInfo {
 
     private int version;
 
-    private BigInteger totalSupply;
+    private BigInteger totalSupply = BigInteger.ZERO;
 
     private int step;
 

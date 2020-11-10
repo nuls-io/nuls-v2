@@ -2,7 +2,9 @@ package io.nuls.contract.tx.v1;
 
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
+import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.base.protocol.TransactionProcessor;
+import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.model.bo.ContractResult;
@@ -11,6 +13,7 @@ import io.nuls.contract.model.dto.ContractPackageDto;
 import io.nuls.contract.model.tx.CallContractTransaction;
 import io.nuls.contract.model.txdata.CallContractData;
 import io.nuls.contract.processor.CallContractTxProcessor;
+import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.validator.CallContractTxValidator;
 import io.nuls.core.basic.Result;
@@ -33,6 +36,8 @@ public class CallContractProcessor implements TransactionProcessor {
     private CallContractTxValidator callContractTxValidator;
     @Autowired
     private ContractHelper contractHelper;
+    @Autowired
+    private ChainManager chainManager;
 
     @Override
     public int getType() {
@@ -101,8 +106,19 @@ public class CallContractProcessor implements TransactionProcessor {
             ChainManager.chainHandle(chainId);
             CallContractData call;
             for (Transaction tx : txs) {
-                call = new CallContractData();
-                call.parse(tx.getTxData(), 0);
+                if (tx.getType() == TxType.CROSS_CHAIN) {
+                    // add by pierre at 2019-12-01 处理type10交易的业务回滚, 需要协议升级 done
+                    if(ProtocolGroupManager.getCurrentVersion(chainId) < ContractContext.UPDATE_VERSION_V250) {
+                        continue;
+                    }
+                    call = ContractUtil.parseCrossChainTx(tx, chainManager);
+                    if (call == null) {
+                        continue;
+                    }
+                } else {
+                    call = new CallContractData();
+                    call.parse(tx.getTxData(), 0);
+                }
                 callContractTxProcessor.onRollback(chainId, new ContractWrapperTransaction(tx, call));
             }
             return true;

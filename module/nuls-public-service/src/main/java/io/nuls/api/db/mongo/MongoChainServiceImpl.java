@@ -15,6 +15,7 @@ import io.nuls.core.core.annotation.Component;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -160,7 +161,9 @@ public class MongoChainServiceImpl implements ChainService {
             syncInfo = DocumentTransferTool.toInfo(document, "chainId", SyncInfo.class);
             syncInfo.setVersion(headerInfo.getMainVersion());
             syncInfo.setBestHeight(headerInfo.getHeight());
-            syncInfo.setTotalSupply(syncInfo.getTotalSupply().add(headerInfo.getReward()).subtract(headerInfo.getTotalFee()));
+            BigInteger reward = headerInfo.getReward() == null ? BigInteger.ZERO : headerInfo.getReward();
+            BigInteger totalFee = headerInfo.getTotalFee() == null ? BigInteger.ZERO : headerInfo.getTotalFee();
+            syncInfo.setTotalSupply(syncInfo.getTotalSupply().add(reward).subtract(totalFee));
         }
         document = DocumentTransferTool.toDocument(syncInfo, "chainId");
         if (isNew) {

@@ -67,6 +67,8 @@ public abstract class RpcModule implements InitializingBean {
     @Autowired
     NotifySender notifySender;
 
+    protected String[] startArgs;
+
     @Override
     public final void afterPropertiesSet() throws NulsException {
         try {
@@ -214,7 +216,8 @@ public abstract class RpcModule implements InitializingBean {
      *
      * @param serviceManagerUrl
      */
-    void run(String modulePackage, String serviceManagerUrl) {
+    void run(String modulePackage, String serviceManagerUrl,String[] startArgs) {
+        this.startArgs = startArgs;
         //初始化依赖模块的ready状态
         this.getDependencies().forEach(d -> dependentReadyState.put(d, Boolean.FALSE));
         try {
@@ -300,7 +303,6 @@ public abstract class RpcModule implements InitializingBean {
     }
 
     protected long getTryRuningTimeout() {
-        //TODO pierre 临时测试调整, 需要改回30
         return 30;
     }
 

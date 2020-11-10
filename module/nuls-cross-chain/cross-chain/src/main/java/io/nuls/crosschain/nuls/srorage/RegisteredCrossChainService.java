@@ -22,4 +22,13 @@ public interface RegisteredCrossChainService {
      * @return  已注册跨链的链信息
      * */
     RegisteredChainMessage get();
+
+    /**
+     * 判断指定资产是否可跨链交易
+     * @param assetChainId
+     * @param assetId
+     * @return
+     */
+    boolean canCross(int assetChainId,int assetId);
+
 }

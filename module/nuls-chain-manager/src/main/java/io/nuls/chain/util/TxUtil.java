@@ -90,7 +90,7 @@ public class TxUtil {
         return txChain;
     }
 
-    public static io.nuls.chain.model.tx.txdatav5.TxAsset parseAssetToTxV4(Asset asset) throws IOException {
+    public static io.nuls.chain.model.tx.txdatav5.TxAsset parseAssetToTxV5(Asset asset) throws IOException {
         io.nuls.chain.model.tx.txdatav5.TxAsset txAsset = new io.nuls.chain.model.tx.txdatav5.TxAsset();
         txAsset.setAssetId(asset.getAssetId());
         txAsset.setChainId(asset.getChainId());
@@ -101,7 +101,7 @@ public class TxUtil {
         return txAsset;
     }
 
-    public static io.nuls.chain.model.tx.txdatav5.TxChain parseChainToTxV4(BlockChain blockChain, Asset asset) throws IOException {
+    public static io.nuls.chain.model.tx.txdatav5.TxChain parseChainToTxV5(BlockChain blockChain, Asset asset) throws IOException {
         io.nuls.chain.model.tx.txdatav5.TxChain txChain = new io.nuls.chain.model.tx.txdatav5.TxChain();
         txChain.setAddressType(Short.valueOf(blockChain.getAddressType()));
         txChain.setAddressPrefix(blockChain.getAddressPrefix());
