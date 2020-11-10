@@ -154,21 +154,38 @@ public class CallContractTxValidator {
         CallContractData txData = tx.getTxDataObj();
         byte[] sender = txData.getSender();
         boolean existSender = false;
+        BigInteger senderValue = BigInteger.ZERO;
         for(CoinFrom from : fromList) {
             if(!existSender && Arrays.equals(from.getAddress(), sender)) {
                 existSender = true;
+                senderValue = from.getAmount();
+                break;
             }
         }
+        if (fromList.size() > 2) {
+            Log.error("contract call error: There are too many coinFrom in the contract.");
+            return Result.getFailed(CONTRACT_COIN_FROM_ERROR);
+        }
         Set<String> signatureAddressSet = SignatureUtil.getAddressFromTX(tx, chainId);
-        if (!existSender || !signatureAddressSet.contains(AddressTool.getStringAddressByBytes(sender))) {
-            Log.error("contract call error: The contract caller is not the transaction creator.");
-            return Result.getFailed(CONTRACT_CALLER_ERROR);
+        if (!signatureAddressSet.contains(AddressTool.getStringAddressByBytes(sender))) {
+            Log.error("contract call error: The contract caller is not the transaction signer.");
+            return Result.getFailed(CONTRACT_CALLER_SIGN_ERROR);
         }
         if (!ContractUtil.checkGasLimit(txData.getGasLimit())) {
             Log.error("contract call error: The value of gas limit ranges from 1 to 10,000,000.");
             return Result.getFailed(CONTRACT_GAS_LIMIT_ERROR);
         }
         BigInteger transferValue = txData.getValue();
+        if (transferValue.compareTo(BigInteger.ZERO) > 0) {
+            if (!existSender) {
+                Log.error("contract call error: The contract caller is not the transaction creator.");
+                return Result.getFailed(CONTRACT_CALLER_ERROR);
+            }
+            if (senderValue.compareTo(transferValue) < 0) {
+                Log.error("contract call error: Insufficient balance to transfer to the contract address.");
+                return Result.getFailed(INSUFFICIENT_BALANCE_TO_CONTRACT);
+            }
+        }
         byte[] contractAddress = txData.getContractAddress();
 
         if (!ContractLedgerUtil.isExistContractAddress(chainId, contractAddress)) {
