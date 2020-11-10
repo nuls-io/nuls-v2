@@ -323,7 +323,7 @@ public class ContractTransferHandler {
                 // 增加coinFrom的转账金额
                 coinFrom.setAmount(coinFrom.getAmount().add(value));
                 // 合并coinTo
-                this.mergeCoinTo(mergeCoinToMap, coinData, to, value, assetChainId, assetId, lockedTime);
+                this.mergeCoinTo(mergeCoinToMap, coinData, to, value, assetChainId, assetId, lockedTime, blockTime);
             }
         }
         // 最后产生的合并交易，遍历结束后更新它的hash和账户的nonce
@@ -335,13 +335,13 @@ public class ContractTransferHandler {
         contractResult.setMergerdMultyAssetTransferList(mergerdMultyAssetTransferList);
     }
 
-    private void mergeCoinTo(Map<String, CoinTo> mergeCoinToMap, CoinData coinData, byte[] to, BigInteger value, int assetChainId, int assetId, long lockedTime) {
+    private void mergeCoinTo(Map<String, CoinTo> mergeCoinToMap, CoinData coinData, byte[] to, BigInteger value, int assetChainId, int assetId, long lockedTime, long blockTime) {
         CoinTo coinTo;
         String key = addressLockedKey(to, assetChainId, assetId, lockedTime);
         if ((coinTo = mergeCoinToMap.get(key)) != null) {
             coinTo.setAmount(coinTo.getAmount().add(value));
         } else {
-            coinTo = new CoinTo(to, assetChainId, assetId, value, lockedTime);
+            coinTo = new CoinTo(to, assetChainId, assetId, value, lockedTime == 0 ? lockedTime : (blockTime + lockedTime));
             coinData.getTo().add(coinTo);
             mergeCoinToMap.put(key, coinTo);
         }
