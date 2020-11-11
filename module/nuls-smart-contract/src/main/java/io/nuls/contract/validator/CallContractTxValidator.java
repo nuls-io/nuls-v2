@@ -48,10 +48,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+import static io.nuls.contract.config.ContractContext.ASSET_ID;
+import static io.nuls.contract.config.ContractContext.CHAIN_ID;
 import static io.nuls.contract.constant.ContractConstant.MININUM_TRANSFER_AMOUNT;
 import static io.nuls.contract.constant.ContractErrorCode.*;
 import static io.nuls.contract.util.ContractUtil.getSuccess;
-import static io.nuls.core.constant.TxType.DELETE_CONTRACT;
 
 /**
  * @author: PierreLuo
@@ -88,7 +89,7 @@ public class CallContractTxValidator {
             return Result.getFailed(CONTRACT_CALLER_ERROR);
         }
         if (!ContractUtil.checkPrice(txData.getPrice())) {
-            Log.error("contract call error: The minimum value of price is 25.");
+            Log.error("contract call error: The gas price is error.");
             return Result.getFailed(CONTRACT_MINIMUM_PRICE_ERROR);
         }
         if (!ContractUtil.checkGasLimit(txData.getGasLimit())) {
@@ -136,6 +137,103 @@ public class CallContractTxValidator {
         }
 
         BigInteger realFee = tx.getFee();
+        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size()).add(BigInteger.valueOf(txData.getGasLimit()).multiply(BigInteger.valueOf(txData.getPrice())));
+        if (realFee.compareTo(fee) >= 0) {
+            return getSuccess();
+        } else {
+            Log.error("contract call error: The contract transaction fee is not right.");
+            return Result.getFailed(FEE_NOT_RIGHT);
+        }
+    }
+
+    public Result validateV8(int chainId, CallContractTransaction tx) throws NulsException {
+
+        CoinData coinData = tx.getCoinDataInstance();
+        List<CoinFrom> fromList = coinData.getFrom();
+        List<CoinTo> toList = coinData.getTo();
+        CallContractData txData = tx.getTxDataObj();
+        byte[] sender = txData.getSender();
+
+        if (fromList.size() > 2) {
+            Log.error("contract call error: There are too many coinFrom in the contract.");
+            return Result.getFailed(CONTRACT_COIN_FROM_ERROR);
+        }
+        Set<String> signatureAddressSet = SignatureUtil.getAddressFromTX(tx, chainId);
+        if (!signatureAddressSet.contains(AddressTool.getStringAddressByBytes(sender))) {
+            Log.error("contract call error: The contract caller is not the transaction signer.");
+            return Result.getFailed(CONTRACT_CALLER_SIGN_ERROR);
+        }
+        if (!ContractUtil.checkGasLimit(txData.getGasLimit())) {
+            Log.error("contract call error: The value of gas limit ranges from 1 to 10,000,000.");
+            return Result.getFailed(CONTRACT_GAS_LIMIT_ERROR);
+        }
+
+        byte[] contractAddress = txData.getContractAddress();
+
+        if (!ContractLedgerUtil.isExistContractAddress(chainId, contractAddress)) {
+            Log.error("contract call error: The contract does not exist.");
+            return Result.getFailed(CONTRACT_ADDRESS_NOT_EXIST);
+        }
+
+        int toSize = toList.size();
+        if (toSize > 1) {
+            Log.error("contract call error: There are too many coinTo in the contract.");
+            return Result.getFailed(CONTRACT_COIN_TO_ERROR);
+        }
+        int assetChainId = 0;
+        int assetId = 0;
+        BigInteger transferValue = txData.getValue();
+        BigInteger contractReceivedValue = BigInteger.ZERO;
+        if (toSize == 1) {
+            CoinTo coin = toList.get(0);
+            if (coin.getLockTime() != 0) {
+                Log.error("contract call error: Transfer amount cannot be locked.");
+                return Result.getFailed(AMOUNT_LOCK_ERROR);
+            }
+            byte[] owner = coin.getAddress();
+            if (!Arrays.equals(owner, contractAddress)) {
+                Log.error("contract call error: The receiver is not the contract address.");
+                return Result.getFailed(CONTRACT_RECEIVER_ERROR);
+            } else {
+                contractReceivedValue = contractReceivedValue.add(coin.getAmount());
+            }
+            boolean mainAsset = coin.getAssetsChainId() == CHAIN_ID && coin.getAssetsId() == ASSET_ID;
+            if (mainAsset && coin.getAmount().compareTo(MININUM_TRANSFER_AMOUNT) < 0) {
+                Log.error("contract call error: The amount of the transfer is too small.");
+                return Result.getFailed(TOO_SMALL_AMOUNT);
+            }
+            assetChainId = coin.getAssetsChainId();
+            assetId = coin.getAssetsId();
+
+        }
+        if (contractReceivedValue.compareTo(transferValue) < 0) {
+            Log.error("contract call error: Insufficient balance to transfer to the contract address.");
+            return Result.getFailed(INSUFFICIENT_BALANCE_TO_CONTRACT);
+        }
+
+        boolean existSender = false;
+        BigInteger senderValue = BigInteger.ZERO;
+        for(CoinFrom from : fromList) {
+            if(Arrays.equals(from.getAddress(), sender)) {
+                existSender = true;
+                if (assetChainId == from.getAssetsChainId() && assetId == from.getAssetsId()) {
+                    senderValue = senderValue.add(from.getAmount());
+                }
+            }
+        }
+
+        if (transferValue.compareTo(BigInteger.ZERO) > 0) {
+            if (!existSender) {
+                Log.error("contract call error: The contract caller is not the transaction creator.");
+                return Result.getFailed(CONTRACT_CALLER_ERROR);
+            }
+            if (senderValue.compareTo(transferValue) < 0) {
+                Log.error("contract call error: Insufficient balance to transfer to the contract address.");
+                return Result.getFailed(INSUFFICIENT_BALANCE_TO_CONTRACT);
+            }
+        }
+
+        BigInteger realFee = coinData.getFeeByAsset(CHAIN_ID, ASSET_ID);
         BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size()).add(BigInteger.valueOf(txData.getGasLimit()).multiply(BigInteger.valueOf(txData.getPrice())));
         if (realFee.compareTo(fee) >= 0) {
             return getSuccess();

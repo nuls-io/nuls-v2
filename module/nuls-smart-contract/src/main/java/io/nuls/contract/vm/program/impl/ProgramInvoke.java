@@ -58,6 +58,16 @@ public class ProgramInvoke {
     private BigInteger value;
 
     /**
+     * 转入资产的链ID
+     */
+    private int assetChainId;
+
+    /**
+     * 转入资产ID
+     */
+    private int assetId;
+
+    /**
      * 当前块编号
      */
     private long number;
@@ -147,6 +157,22 @@ public class ProgramInvoke {
 
     public void setValue(BigInteger value) {
         this.value = value;
+    }
+
+    public int getAssetChainId() {
+        return assetChainId;
+    }
+
+    public void setAssetChainId(int assetChainId) {
+        this.assetChainId = assetChainId;
+    }
+
+    public int getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(int assetId) {
+        this.assetId = assetId;
     }
 
     public long getNumber() {

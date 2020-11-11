@@ -47,6 +47,8 @@ public class CallContractData extends BaseNulsData implements ContractData {
     private String methodDesc;
     private short argsCount;
     private String[][] args;
+    private transient int assetChainId;
+    private transient int assetId;
 
 
     @Override
@@ -213,4 +215,21 @@ public class CallContractData extends BaseNulsData implements ContractData {
         this.args = args;
     }
 
+    @Override
+    public int getAssetChainId() {
+        return assetChainId;
+    }
+
+    public void setAssetChainId(int assetChainId) {
+        this.assetChainId = assetChainId;
+    }
+
+    @Override
+    public int getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(int assetId) {
+        this.assetId = assetId;
+    }
 }

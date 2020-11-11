@@ -42,6 +42,10 @@ public class ProgramContext {
 
     //private long gasLimit;
 
+    private int assetChainId;
+
+    private int assetId;
+
     private ObjectRef value;
 
     private long number;
@@ -90,6 +94,22 @@ public class ProgramContext {
 
     public void setGas(long gas) {
         this.gas = gas;
+    }
+
+    public int getAssetChainId() {
+        return assetChainId;
+    }
+
+    public void setAssetChainId(int assetChainId) {
+        this.assetChainId = assetChainId;
+    }
+
+    public int getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(int assetId) {
+        this.assetId = assetId;
     }
 
     public ObjectRef getValue() {

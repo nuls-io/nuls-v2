@@ -1,5 +1,22 @@
 [
   {
+    "version": "8",
+    "extend": "4",
+    "validTxs": [
+      {
+        "type": "16",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "CallContractProcessorV8"
+      }
+    ],
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  },
+  {
     "version": "4",
     "extend": "1",
     "validTxs": [
@@ -59,55 +76,6 @@
         "verifyFee": true,
         "verifySignature": false,
         "handler": ""
-      }
-    ],
-    "validMsgs": [],
-    "invalidTxs": "",
-    "invalidMsgs": ""
-  },
-  {
-    "version": "4",
-    "extend": "",
-    "validTxs": [
-      {
-        "type": "15",
-        "systemTx": false,
-        "unlockTx": false,
-        "verifySignature": true,
-        "verifyFee": true,
-        "handler": "CreateContractProcessor"
-      },
-      {
-        "type": "16",
-        "systemTx": false,
-        "unlockTx": false,
-        "verifySignature": true,
-        "verifyFee": true,
-        "handler": "CallContractProcessor"
-      },
-      {
-        "type": "17",
-        "systemTx": false,
-        "unlockTx": false,
-        "verifySignature": true,
-        "verifyFee": true,
-        "handler": "DeleteContractProcessor"
-      },
-      {
-        "type": "18",
-        "systemTx": true,
-        "unlockTx": false,
-        "verifyFee": true,
-        "verifySignature": false,
-        "handler": ""
-      },
-      {
-        "type": "19",
-        "systemTx": true,
-        "unlockTx": false,
-        "verifyFee": true,
-        "verifySignature": false,
-        "handler": "ContractReturnGasProcessor"
       }
     ],
     "validMsgs": [],

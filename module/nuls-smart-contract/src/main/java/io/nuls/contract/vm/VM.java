@@ -25,7 +25,6 @@
 package io.nuls.contract.vm;
 
 import io.nuls.contract.model.dto.BlockHeaderDto;
-import io.nuls.contract.util.Log;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.code.VariableType;
@@ -67,6 +66,7 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import static io.nuls.contract.constant.ContractConstant.BALANCE_TRIGGER_FOR_CONSENSUS_CONTRACT_METHOD_DESC_IN_VM;
@@ -122,6 +122,18 @@ public class VM {
     private List<ProgramInvokeRegisterCmd> invokeRegisterCmds = new ArrayList<>();
 
     private List<Object> orderedInnerTxs = new ArrayList<>();
+
+    // add by pierre at 2020-11-03 可能影响兼容性，考虑协议升级
+    private LinkedList<String> stackTraces = new LinkedList<>();
+
+    public LinkedList<String> getStackTraces() {
+        return stackTraces;
+    }
+
+    public void setStackTraces(LinkedList<String> stackTraces) {
+        this.stackTraces = stackTraces;
+    }
+    // end code by pierre
 
     public VM() {
         this.vmStack = new VMStack(VM_STACK_MAX_SIZE);
@@ -185,6 +197,8 @@ public class VM {
         programContext.setGasPrice(programInvoke.getPrice());
         programContext.setGas(programInvoke.getGasLimit());
         programContext.setValue(this.heap.newBigInteger(programInvoke.getValue().toString()));
+        programContext.setAssetChainId(programInvoke.getAssetChainId());
+        programContext.setAssetId(programInvoke.getAssetId());
         programContext.setNumber(programInvoke.getNumber());
         programContext.setEstimateGas(programInvoke.isEstimateGas());
         if(programInvoke.getSenderPublicKey() != null) {
@@ -210,22 +224,12 @@ public class VM {
 
     public void run(ObjectRef objectRef, MethodCode methodCode, VMContext vmContext, ProgramInvoke programInvoke) {
         this.vmContext = vmContext;
-        //todo Niels
-        long startTime = System.nanoTime();
         Object[] runArgs = runArgs(objectRef, methodCode, programInvoke.getArgs());
-        long use = System.nanoTime()-startTime;
-        Log.info("===================================================================step 1.1 : {}ns",use);
-        startTime = System.nanoTime();
         if (isEnd()) {
             return;
         }
         initProgramContext(programInvoke);
-        use = System.nanoTime()-startTime;
-        Log.info("===================================================================step 1.2 : {}ns",use);
-        startTime = System.nanoTime();
         run(methodCode, runArgs, true);
-        use = System.nanoTime()-startTime;
-        Log.info("===================================================================step 1.3 : {}ns",use);
     }
 
     private Object[] runArgs(ObjectRef objectRef, MethodCode methodCode, String[][] args) {

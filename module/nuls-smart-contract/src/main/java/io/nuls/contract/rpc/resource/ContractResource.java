@@ -27,6 +27,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
+import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.enums.ContractStatus;
@@ -72,6 +73,8 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static io.nuls.contract.config.ContractContext.ASSET_ID;
+import static io.nuls.contract.config.ContractContext.CHAIN_ID;
 import static io.nuls.contract.constant.ContractCmdConstant.*;
 import static io.nuls.contract.constant.ContractConstant.*;
 import static io.nuls.contract.constant.ContractErrorCode.*;
@@ -128,7 +131,7 @@ public class ContractResource extends BaseCmd {
             Object[] args = argsList != null ? argsList.toArray() : null;
             String remark = (String) params.get("remark");
 
-            if (gasLimit < 0 || price < CONTRACT_MINIMUM_PRICE) {
+            if (gasLimit <= 0 || price <= 0) {
                 return failed(ContractErrorCode.PARAMETER_ERROR);
             }
 
@@ -282,7 +285,9 @@ public class ContractResource extends BaseCmd {
         @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
         @Parameter(parameterName = "sender", parameterDes = "交易创建者账户地址"),
         @Parameter(parameterName = "password", parameterDes = "调用者账户密码"),
-        @Parameter(parameterName = "value", requestType = @TypeDescriptor(value = BigInteger.class), parameterDes = "调用者向合约地址转入的主网资产金额，没有此业务时填BigInteger.ZERO"),
+        @Parameter(parameterName = "value", requestType = @TypeDescriptor(value = BigInteger.class), parameterDes = "调用者向合约地址转入的资产金额，没有此业务时填BigInteger.ZERO"),
+        @Parameter(parameterName = "assetChainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "转入资产链ID"),
+        @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterDes = "转入资产ID"),
         @Parameter(parameterName = "gasLimit", requestType = @TypeDescriptor(value = long.class), parameterDes = "GAS限制"),
         @Parameter(parameterName = "price", requestType = @TypeDescriptor(value = long.class), parameterDes = "GAS单价"),
         @Parameter(parameterName = "contractAddress", parameterDes = "合约地址"),
@@ -300,11 +305,19 @@ public class ContractResource extends BaseCmd {
             ChainManager.chainHandle(chainId);
             String sender = (String) params.get("sender");
             String password = (String) params.get("password");
+
             Object valueObj = params.get("value");
-            if(valueObj == null) {
-                valueObj = "0";
-            }
+            valueObj = valueObj == null ? "0" : valueObj;
+
+            Object assetChainIdObj = params.get("assetChainId");
+            assetChainIdObj = assetChainIdObj == null ? CHAIN_ID : assetChainIdObj;
+
+            Object assetIdObj = params.get("assetId");
+            assetIdObj = assetIdObj == null ? ASSET_ID : assetIdObj;
+
             BigInteger value = new BigInteger(valueObj.toString());
+            int assetChainId = Integer.parseInt(assetChainIdObj.toString());
+            int assetId = Integer.parseInt(assetIdObj.toString());
             Long gasLimit = Long.parseLong(params.get("gasLimit").toString());
             Long price = Long.parseLong(params.get("price").toString());
             String contractAddress = (String) params.get("contractAddress");
@@ -314,7 +327,7 @@ public class ContractResource extends BaseCmd {
             Object[] args = argsList != null ? argsList.toArray() : null;
             String remark = (String) params.get("remark");
 
-            if (value.compareTo(BigInteger.ZERO) < 0 || gasLimit < 0 || price < 0) {
+            if (value.compareTo(BigInteger.ZERO) < 0 || gasLimit < 0 || price < 0 || assetChainId < 0 || assetId < 0) {
                 return failed(ContractErrorCode.PARAMETER_ERROR);
             }
 
@@ -344,7 +357,7 @@ public class ContractResource extends BaseCmd {
                 convertArgs = ContractUtil.twoDimensionalArray(args, method.argsType2Array());
             }
 
-            Result result = contractTxService.contractCallTx(chainId, sender, value, gasLimit, price, contractAddress, methodName, methodDesc, convertArgs, password, remark);
+            Result result = contractTxService.contractCallTx(chainId, sender, value, gasLimit, price, contractAddress, methodName, methodDesc, convertArgs, password, remark, assetChainId, assetId);
 
             if (result.isFailed()) {
                 return wrapperFailed(result);
@@ -361,7 +374,9 @@ public class ContractResource extends BaseCmd {
     @Parameters(value = {
         @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
         @Parameter(parameterName = "sender", parameterDes = "交易创建者账户地址"),
-        @Parameter(parameterName = "value", requestType = @TypeDescriptor(value = BigInteger.class), parameterDes = "调用者向合约地址转入的主网资产金额，没有此业务时填BigInteger.ZERO"),
+        @Parameter(parameterName = "value", requestType = @TypeDescriptor(value = BigInteger.class), parameterDes = "调用者向合约地址转入的资产金额，没有此业务时填BigInteger.ZERO"),
+        @Parameter(parameterName = "assetChainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "转入资产链ID"),
+        @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterDes = "转入资产ID"),
         @Parameter(parameterName = "gasLimit", requestType = @TypeDescriptor(value = long.class), parameterDes = "GAS限制"),
         @Parameter(parameterName = "price", requestType = @TypeDescriptor(value = long.class), parameterDes = "GAS单价"),
         @Parameter(parameterName = "contractAddress", parameterDes = "合约地址"),
@@ -376,10 +391,17 @@ public class ContractResource extends BaseCmd {
             ChainManager.chainHandle(chainId);
             String sender = (String) params.get("sender");
             Object valueObj = params.get("value");
-            if(valueObj == null) {
-                valueObj = "0";
-            }
+            valueObj = valueObj == null ? "0" : valueObj;
+
+            Object assetChainIdObj = params.get("assetChainId");
+            assetChainIdObj = assetChainIdObj == null ? CHAIN_ID : assetChainIdObj;
+
+            Object assetIdObj = params.get("assetId");
+            assetIdObj = assetIdObj == null ? ASSET_ID : assetIdObj;
+
             BigInteger value = new BigInteger(valueObj.toString());
+            int assetChainId = Integer.parseInt(assetChainIdObj.toString());
+            int assetId = Integer.parseInt(assetIdObj.toString());
             Long gasLimit = Long.parseLong(params.get("gasLimit").toString());
             Long price = Long.parseLong(params.get("price").toString());
             String contractAddress = (String) params.get("contractAddress");
@@ -388,7 +410,7 @@ public class ContractResource extends BaseCmd {
             List argsList = (List) params.get("args");
             Object[] args = argsList != null ? argsList.toArray() : null;
 
-            if (value.compareTo(BigInteger.ZERO) < 0 || gasLimit < 0 || price < 0) {
+            if (value.compareTo(BigInteger.ZERO) < 0 || gasLimit < 0 || price < 0 || assetChainId <= 0 || assetId <= 0) {
                 return failed(ContractErrorCode.PARAMETER_ERROR);
             }
 
@@ -419,7 +441,7 @@ public class ContractResource extends BaseCmd {
                 convertArgs = ContractUtil.twoDimensionalArray(args, method.argsType2Array());
             }
 
-            Result result = contractTxService.validateContractCallTx(chainId, senderBytes, value, gasLimit, price, contractAddressBytes, methodName, methodDesc, convertArgs);
+            Result result = contractTxService.validateContractCallTx(chainId, senderBytes, value, gasLimit, price, contractAddressBytes, methodName, methodDesc, convertArgs, assetChainId, assetId);
 
             if (result.isFailed()) {
                 return wrapperFailed(result);
@@ -436,7 +458,9 @@ public class ContractResource extends BaseCmd {
     @Parameters(value = {
         @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
         @Parameter(parameterName = "sender", parameterDes = "交易创建者账户地址"),
-        @Parameter(parameterName = "value", requestType = @TypeDescriptor(value = BigInteger.class), parameterDes = "调用者向合约地址转入的主网资产金额，没有此业务时填BigInteger.ZERO"),
+        @Parameter(parameterName = "value", requestType = @TypeDescriptor(value = BigInteger.class), parameterDes = "调用者向合约地址转入的资产金额，没有此业务时填BigInteger.ZERO"),
+        @Parameter(parameterName = "assetChainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "转入资产链ID"),
+        @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterDes = "转入资产ID"),
         @Parameter(parameterName = "gasLimit", requestType = @TypeDescriptor(value = long.class), parameterDes = "GAS限制"),
         @Parameter(parameterName = "price", requestType = @TypeDescriptor(value = long.class), parameterDes = "GAS单价"),
         @Parameter(parameterName = "contractAddress", parameterDes = "合约地址"),
@@ -451,10 +475,17 @@ public class ContractResource extends BaseCmd {
             ChainManager.chainHandle(chainId);
             String sender = (String) params.get("sender");
             Object valueObj = params.get("value");
-            if(valueObj == null) {
-                valueObj = "0";
-            }
+            valueObj = valueObj == null ? "0" : valueObj;
+
+            Object assetChainIdObj = params.get("assetChainId");
+            assetChainIdObj = assetChainIdObj == null ? CHAIN_ID : assetChainIdObj;
+
+            Object assetIdObj = params.get("assetId");
+            assetIdObj = assetIdObj == null ? ASSET_ID : assetIdObj;
+
             BigInteger value = new BigInteger(valueObj.toString());
+            int assetChainId = Integer.parseInt(assetChainIdObj.toString());
+            int assetId = Integer.parseInt(assetIdObj.toString());
             Long gasLimit = Long.parseLong(params.get("gasLimit").toString());
             Long price = Long.parseLong(params.get("price").toString());
             String contractAddress = (String) params.get("contractAddress");
@@ -463,7 +494,7 @@ public class ContractResource extends BaseCmd {
             List argsList = (List) params.get("args");
             Object[] args = argsList != null ? argsList.toArray() : null;
 
-            if (value.compareTo(BigInteger.ZERO) < 0 || gasLimit < 0 || price < 0) {
+            if (value.compareTo(BigInteger.ZERO) < 0 || gasLimit < 0 || price < 0 || assetChainId <= 0 || assetId <= 0) {
                 return failed(ContractErrorCode.PARAMETER_ERROR);
             }
 
@@ -494,7 +525,7 @@ public class ContractResource extends BaseCmd {
                 convertArgs = ContractUtil.twoDimensionalArray(args, method.argsType2Array());
             }
 
-            Result<ContractResult> result = contractTxService.previewContractCallTx(chainId, senderBytes, value, gasLimit, price, contractAddressBytes, methodName, methodDesc, convertArgs);
+            Result<ContractResult> result = contractTxService.previewContractCallTx(chainId, senderBytes, value, gasLimit, price, contractAddressBytes, methodName, methodDesc, convertArgs, assetChainId, assetId);
 
             if (result.isFailed()) {
                 return wrapperFailed(result);
@@ -515,7 +546,9 @@ public class ContractResource extends BaseCmd {
     @Parameters(value = {
         @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
         @Parameter(parameterName = "sender", parameterDes = "交易创建者账户地址"),
-        @Parameter(parameterName = "value", requestType = @TypeDescriptor(value = BigInteger.class), parameterDes = "调用者向合约地址转入的主网资产金额，没有此业务时填BigInteger.ZERO"),
+        @Parameter(parameterName = "value", requestType = @TypeDescriptor(value = BigInteger.class), parameterDes = "调用者向合约地址转入的资产金额，没有此业务时填BigInteger.ZERO"),
+        @Parameter(parameterName = "assetChainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "转入资产链ID"),
+        @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterDes = "转入资产ID"),
         @Parameter(parameterName = "contractAddress", parameterDes = "合约地址"),
         @Parameter(parameterName = "methodName", parameterDes = "合约方法"),
         @Parameter(parameterName = "methodDesc", parameterDes = "合约方法描述，若合约内方法没有重载，则此参数可以为空", canNull = true),
@@ -535,10 +568,17 @@ public class ContractResource extends BaseCmd {
                 ChainManager.chainHandle(chainId);
                 String sender = (String) params.get("sender");
                 Object valueObj = params.get("value");
-                if(valueObj == null) {
-                    valueObj = "0";
-                }
+                valueObj = valueObj == null ? "0" : valueObj;
+
+                Object assetChainIdObj = params.get("assetChainId");
+                assetChainIdObj = assetChainIdObj == null ? CHAIN_ID : assetChainIdObj;
+
+                Object assetIdObj = params.get("assetId");
+                assetIdObj = assetIdObj == null ? ASSET_ID : assetIdObj;
+
                 BigInteger value = new BigInteger(valueObj.toString());
+                int assetChainId = Integer.parseInt(assetChainIdObj.toString());
+                int assetId = Integer.parseInt(assetIdObj.toString());
                 String contractAddress = (String) params.get("contractAddress");
                 String methodName = (String) params.get("methodName");
                 String methodDesc = (String) params.get("methodDesc");
@@ -569,7 +609,7 @@ public class ContractResource extends BaseCmd {
                 if (method != null) {
                     convertArgs = ContractUtil.twoDimensionalArray(args, method.argsType2Array());
                 }
-                result = contractTxService.validateContractCallTx(chainId, senderBytes, value, MAX_GASLIMIT, CONTRACT_MINIMUM_PRICE, contractAddressBytes, methodName, methodDesc, convertArgs);
+                result = contractTxService.validateContractCallTx(chainId, senderBytes, value, MAX_GASLIMIT, CONTRACT_MINIMUM_PRICE, contractAddressBytes, methodName, methodDesc, convertArgs, assetChainId, assetId);
                 if (result.isFailed()) {
                     break;
                 }
@@ -721,7 +761,7 @@ public class ContractResource extends BaseCmd {
             Result result = contractTxService.contractCallTx(chainId, sender, value, gasLimit, CONTRACT_MINIMUM_PRICE, contractAddress,
                     BALANCE_TRIGGER_METHOD_NAME,
                     BALANCE_TRIGGER_METHOD_DESC,
-                    null, password, remark);
+                    null, password, remark, CHAIN_ID, ASSET_ID);
             if (result.isFailed()) {
                 return wrapperFailed(result);
             }
@@ -804,7 +844,7 @@ public class ContractResource extends BaseCmd {
 
             Result result = contractTxService.contractCallTx(chainId, from, BigInteger.ZERO, gasLimit, CONTRACT_MINIMUM_PRICE, contractAddress,
                     ContractConstant.NRC20_METHOD_TRANSFER, null,
-                    ContractUtil.twoDimensionalArray(argsObj), password, remark);
+                    ContractUtil.twoDimensionalArray(argsObj), password, remark, CHAIN_ID, ASSET_ID);
             if (result.isFailed()) {
                 return wrapperFailed(result);
             }

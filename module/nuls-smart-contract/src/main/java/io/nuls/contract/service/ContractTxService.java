@@ -43,13 +43,13 @@ public interface ContractTxService {
     Result validateContractCreateTx(int chainId, byte[] sender, Long gasLimit, Long price, byte[] contractCode, String[][] args);
 
     Result contractCallTx(int chainId, String sender, BigInteger value, Long gasLimit, Long price, String contractAddress,
-                          String methodName, String methodDesc, String[][] args, String password, String remark);
+                          String methodName, String methodDesc, String[][] args, String password, String remark, int assetChainId, int assetId);
 
     Result validateContractCallTx(int chainId, byte[] senderBytes, BigInteger value, Long gasLimit, Long price, byte[] contractAddressBytes,
-                                  String methodName, String methodDesc, String[][] args);
+                                  String methodName, String methodDesc, String[][] args, int assetChainId, int assetId);
 
     Result<ContractResult> previewContractCallTx(int chainId, byte[] senderBytes, BigInteger value, Long gasLimit, Long price, byte[] contractAddressBytes,
-                                                 String methodName, String methodDesc, String[][] args);
+                                                 String methodName, String methodDesc, String[][] args, int assetChainId, int assetId);
 
     Result contractDeleteTx(int chainId, String sender, String contractAddress, String password, String remark);
 

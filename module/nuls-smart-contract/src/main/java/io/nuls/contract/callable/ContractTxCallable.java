@@ -23,6 +23,9 @@
  */
 package io.nuls.contract.callable;
 
+import io.nuls.base.data.CoinData;
+import io.nuls.base.data.CoinTo;
+import io.nuls.base.data.Transaction;
 import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.helper.ContractConflictChecker;
@@ -31,6 +34,7 @@ import io.nuls.contract.helper.ContractNewTxHandler;
 import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.manager.ContractTempBalanceManager;
 import io.nuls.contract.model.bo.*;
+import io.nuls.contract.model.txdata.CallContractData;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.service.ContractExecutor;
 import io.nuls.contract.util.ContractUtil;
@@ -38,6 +42,7 @@ import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.exception.NulsException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -46,6 +51,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
+import static io.nuls.contract.config.ContractContext.ASSET_ID;
+import static io.nuls.contract.config.ContractContext.CHAIN_ID;
 import static io.nuls.contract.util.ContractUtil.*;
 import static io.nuls.core.constant.TxType.*;
 
@@ -120,7 +127,7 @@ public class ContractTxCallable implements Callable<ContractResult> {
             }
 
             if (type != DELETE_CONTRACT && !ContractUtil.checkPrice(contractData.getPrice())) {
-                contractResult = contractHelper.makeFailedContractResult(chainId, tx, callableResult, "The minimum value of price is 25.");
+                contractResult = contractHelper.makeFailedContractResult(chainId, tx, callableResult, "The gas price is error.");
                 break;
             }
 
@@ -140,6 +147,7 @@ public class ContractTxCallable implements Callable<ContractResult> {
                     }
                 // end code by pierre
                 case CALL_CONTRACT:
+                    contractHelper.extractAssetInfoFromCallTransaction((CallContractData) contractData, tx);
                     contractResult = contractExecutor.call(executor, contractData, number, preStateRoot, extractPublicKey(tx));
 
                     boolean bool = makeContractResultAndCheckGasSerial(tx, contractResult, batchInfo);
@@ -193,7 +201,7 @@ public class ContractTxCallable implements Callable<ContractResult> {
     }
 
 
-    private void checkCallResult(ContractWrapperTransaction tx, CallableResult callableResult, ContractResult contractResult) throws IOException {
+    private void checkCallResult(ContractWrapperTransaction tx, CallableResult callableResult, ContractResult contractResult) throws IOException, NulsException {
         List<ContractResult> reCallList = callableResult.getReCallList();
         boolean isConflict = checker.checkConflict(chainId, tx, contractResult, container.getCommitSet());
         if (isConflict) {
@@ -211,7 +219,7 @@ public class ContractTxCallable implements Callable<ContractResult> {
         }
     }
 
-    private void dealCallResult(ContractWrapperTransaction tx, CallableResult callableResult, ContractResult contractResult, int chainId, long blockTime) throws IOException {
+    private void dealCallResult(ContractWrapperTransaction tx, CallableResult callableResult, ContractResult contractResult, int chainId, long blockTime) throws IOException, NulsException {
         if (contractResult.isSuccess()) {
             // 执行成功，检查与执行失败的交易是否有冲突，把执行失败的交易添加到重新执行的集合中
             checkConflictWithFailedMap(callableResult, contractResult);

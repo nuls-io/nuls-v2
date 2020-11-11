@@ -31,7 +31,12 @@
   },
   {
     "version": "7",
-    "effectiveRatio": "80",
+    "effectiveRatio": "60",
+    "continuousIntervalCount": "10"
+  },
+  {
+    "version": "8",
+    "effectiveRatio": "60",
     "continuousIntervalCount": "10"
   }
 ]

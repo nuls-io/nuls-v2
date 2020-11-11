@@ -95,7 +95,7 @@ public class ContractTransactionDto {
         this.type = tx.getType();
         this.time = tx.getTime();
         this.blockHeight = tx.getBlockHeight();
-        this.fee = bigInteger2String(tx.getFee());
+        this.fee = bigInteger2String(tx.getCoinDataObj().getFeeByAsset(chainId, 1));
         this.size = tx.getSize();
         this.txData = makeTxData(tx);
         long bestBlockHeight = BlockCall.getLatestHeight(chainId);

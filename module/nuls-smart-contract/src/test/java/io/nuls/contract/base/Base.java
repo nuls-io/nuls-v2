@@ -96,7 +96,7 @@ public class Base {
     protected String toAddress34 = "tNULSeBaMvQr8dVnk3f3DPvwCYX3ctTRtrTurD";
 
     protected String createHash = "002029ca32525f635a15c82c046114657c0d8a96a7163780ac6b425b2383b240bd56";
-    protected String contractAddress = "tNULSeBaN8cW84rugvTDgSrHNUhZEaWEMERAKZ";
+    protected String contractAddress = "tNULSeBaN9Ywf962V1tn89T3qm1K5uvGkcy571";
     protected String contractAddress0 = "tNULSeBaN7vAqBANTtVxsiFsam4NcRUbqrCpzK";
     protected String contractAddress1 = "tNULSeBaNBhqzwK2yN9FuXmNWago7vLt64xggp";
     protected String contractAddress2 = "tNULSeBaN4ahTXVo5RH1DSnUV9tXpYm3JyBqXc";
@@ -285,7 +285,7 @@ public class Base {
     protected void assertTrue(Response cmdResp2, Map result) throws JsonProcessingException {
         if(null == result) {
             Log.error("Contract-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
-            Assert.assertTrue(false);
+            Assert.assertTrue("" + cmdResp2.getResponseComment(), false);
         }
         Log.info("Contract-result:{}", JSONUtils.obj2PrettyJson(result));
     }
@@ -327,7 +327,7 @@ public class Base {
         params.put("sender", sender);
         params.put("password", password);
         params.put("alias", alias);
-        params.put("gasLimit", 200000L);
+        params.put("gasLimit", 800000L);
         params.put("price", 25);
         params.put("contractCode", HexUtil.encode(contractCode));
         params.put("args", args);
@@ -336,16 +336,22 @@ public class Base {
     }
 
     protected Map makeCallParams(String sender, BigInteger value, String contractAddress, String methodName, String methodDesc, String remark, Object... args) {
-        return this.makeCallParams(sender, value, 2000000L, contractAddress, methodName, methodDesc, remark, args);
+        return this.makeCallParams(sender, value, 2000000L, 25L, contractAddress, methodName, methodDesc, remark, chainId, assetId, args);
     }
 
     protected Map makeCallParams(String sender, BigInteger value, Long gasLimit, String contractAddress, String methodName, String methodDesc, String remark, Object... args) {
+        return this.makeCallParams(sender, value, gasLimit, 25L, contractAddress, methodName, methodDesc, remark, chainId, assetId, args);
+    }
+
+    protected Map makeCallParams(String sender, BigInteger value, Long gasLimit, Long gasPrice, String contractAddress, String methodName, String methodDesc, String remark, Integer assetChainId, Integer assetId, Object... args) {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.CHAIN_ID, chainId);
         params.put("sender", sender);
         params.put("value", value);
+        params.put("assetChainId", assetChainId);
+        params.put("assetId", assetId);
         params.put("gasLimit", gasLimit);
-        params.put("price", 25);
+        params.put("price", gasPrice);
         params.put("contractAddress", contractAddress);
         params.put("methodName", methodName);
         params.put("methodDesc", methodDesc);

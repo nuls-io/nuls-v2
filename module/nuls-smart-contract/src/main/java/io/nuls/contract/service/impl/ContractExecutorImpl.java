@@ -112,6 +112,8 @@ public class ContractExecutorImpl implements ContractExecutor {
         programCall.setContractAddress(contractAddress);
         programCall.setSender(sender);
         programCall.setValue(call.getValue());
+        programCall.setAssetChainId(call.getAssetChainId());
+        programCall.setAssetId(call.getAssetId());
         programCall.setPrice(price);
         programCall.setGasLimit(call.getGasLimit());
         programCall.setNumber(number);

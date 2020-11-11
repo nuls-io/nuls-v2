@@ -26,13 +26,15 @@ package io.nuls.contract.vm;
 
 import io.nuls.contract.vm.code.ClassCode;
 import io.nuls.contract.vm.code.ClassCodeLoader;
+import org.checkerframework.checker.units.qual.C;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 public class VMFactory {
 
-    public static final VM VM;
+    private static VM VM;
 
     private static final String[] CLINIT_CLASSES = new String[]{
             "io/nuls/contract/sdk/Address",
@@ -286,7 +288,16 @@ public class VMFactory {
         Heap.INIT_ARRAYS.putAll(VM.heap.arrays);
     }
 
+    private static volatile CountDownLatch waitV8;
+
     public static VM createVM() {
+        if (waitV8 != null) {
+            try {
+                waitV8.await();
+            } catch (InterruptedException e) {
+                //nothing
+            }
+        }
         return new VM(VM);
     }
 
@@ -297,6 +308,38 @@ public class VMFactory {
             ClassCode classCode = ClassCodeLoader.loadFromResource(className);
             classCodes.put(classCode.name, classCode);
         }
+        vm.methodArea.loadClassCodes(classCodes);
+        return vm;
+    }
+
+    public static void reInitVM_v8() {
+        waitV8 = new CountDownLatch(1);
+        MethodArea.INIT_CLASS_CODES.clear();
+        MethodArea.INIT_METHOD_CODES.clear();
+        Heap.INIT_OBJECTS.clear();
+        Heap.INIT_ARRAYS.clear();
+
+        VM = loadVM_v8();
+
+        MethodArea.INIT_CLASS_CODES.putAll(VM.methodArea.getClassCodes());
+        MethodArea.INIT_METHOD_CODES.putAll(VM.methodArea.getMethodCodes());
+        Heap.INIT_OBJECTS.putAll(VM.heap.objects);
+        Heap.INIT_ARRAYS.putAll(VM.heap.arrays);
+        waitV8.countDown();
+    }
+
+    private static VM loadVM_v8() {
+        VM vm = new VM();
+        Map<String, ClassCode> classCodes = new LinkedHashMap<>(1024);
+        for (String className : CLINIT_CLASSES) {
+            ClassCode classCode = ClassCodeLoader.loadFromResource_v8(className);
+            classCodes.put(classCode.name, classCode);
+        }
+        // v8 add
+        String className = "io/nuls/contract/sdk/annotation/PayableMultyAsset";
+        ClassCode classCode = ClassCodeLoader.loadFromResource_v8(className);
+        classCodes.put(classCode.name, classCode);
+
         vm.methodArea.loadClassCodes(classCodes);
         return vm;
     }

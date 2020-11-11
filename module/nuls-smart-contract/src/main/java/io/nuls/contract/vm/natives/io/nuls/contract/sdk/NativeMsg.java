@@ -27,10 +27,13 @@ package io.nuls.contract.vm.natives.io.nuls.contract.sdk;
 import io.nuls.contract.sdk.Msg;
 import io.nuls.contract.vm.Frame;
 import io.nuls.contract.vm.MethodArgs;
+import io.nuls.contract.vm.ObjectRef;
 import io.nuls.contract.vm.Result;
 import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.natives.NativeMethod;
 
+import static io.nuls.contract.config.ContractContext.ASSET_ID;
+import static io.nuls.contract.config.ContractContext.CHAIN_ID;
 import static io.nuls.contract.vm.natives.NativeMethod.NOT_SUPPORT_NATIVE;
 import static io.nuls.contract.vm.natives.NativeMethod.SUPPORT_NATIVE;
 
@@ -63,6 +66,24 @@ public class NativeMsg {
                     return SUPPORT_NATIVE;
                 } else {
                     return value(methodCode, methodArgs, frame);
+                }
+            case isMainAssetValue:
+                if (check) {
+                    return SUPPORT_NATIVE;
+                } else {
+                    return isMainAssetValue(methodCode, methodArgs, frame);
+                }
+            case assetChainId:
+                if (check) {
+                    return SUPPORT_NATIVE;
+                } else {
+                    return assetChainId(methodCode, methodArgs, frame);
+                }
+            case assetId:
+                if (check) {
+                    return SUPPORT_NATIVE;
+                } else {
+                    return assetId(methodCode, methodArgs, frame);
                 }
             case gasprice:
                 if (check) {
@@ -131,6 +152,37 @@ public class NativeMsg {
      */
     private static Result value(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         Result result = NativeMethod.result(methodCode, frame.vm.getProgramContext().getValue(), frame);
+        return result;
+    }
+
+    public static final String isMainAssetValue = TYPE + "." + "isMainAssetValue" + "()Z";
+
+    private static Result isMainAssetValue(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
+        boolean mainAsset = frame.vm.getProgramContext().getAssetChainId() == CHAIN_ID && frame.vm.getProgramContext().getAssetId() == ASSET_ID;
+        Result result = NativeMethod.result(methodCode, mainAsset, frame);
+        return result;
+    }
+
+    public static final String assetChainId = TYPE + "." + "assetChainId" + "()I";
+    public static final String assetId = TYPE + "." + "assetId" + "()I";
+
+    /**
+     * native
+     *
+     * @see Msg#assetChainId()
+     */
+    private static Result assetChainId(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
+        Result result = NativeMethod.result(methodCode, frame.vm.getProgramContext().getAssetChainId(), frame);
+        return result;
+    }
+
+    /**
+     * native
+     *
+     * @see Msg#assetId()
+     */
+    private static Result assetId(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
+        Result result = NativeMethod.result(methodCode, frame.vm.getProgramContext().getAssetId(), frame);
         return result;
     }
 

@@ -52,6 +52,16 @@ public class ProgramCall {
     private BigInteger value;
 
     /**
+     * 转入资产的链ID
+     */
+    private int assetChainId;
+
+    /**
+     * 转入资产ID
+     */
+    private int assetId;
+
+    /**
      * 最大Gas消耗
      */
     private long gasLimit;
@@ -156,6 +166,22 @@ public class ProgramCall {
         this.value = value;
     }
 
+    public int getAssetChainId() {
+        return assetChainId;
+    }
+
+    public void setAssetChainId(int assetChainId) {
+        this.assetChainId = assetChainId;
+    }
+
+    public int getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(int assetId) {
+        this.assetId = assetId;
+    }
+
     public long getGasLimit() {
         return gasLimit;
     }
@@ -222,47 +248,28 @@ public class ProgramCall {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
         ProgramCall that = (ProgramCall) o;
 
-        if (number != that.number) {
-            return false;
-        }
-        if (gasLimit != that.gasLimit) {
-            return false;
-        }
-        if (price != that.price) {
-            return false;
-        }
-        if (estimateGas != that.estimateGas) {
-            return false;
-        }
-        if (!Arrays.equals(sender, that.sender)) {
-            return false;
-        }
-        if (!Arrays.equals(senderPublicKey, that.senderPublicKey)) {
-            return false;
-        }
-        if (value != null ? !value.equals(that.value) : that.value != null) {
-            return false;
-        }
-        if (!Arrays.equals(contractAddress, that.contractAddress)) {
-            return false;
-        }
-        if (methodName != null ? !methodName.equals(that.methodName) : that.methodName != null) {
-            return false;
-        }
-        if (methodDesc != null ? !methodDesc.equals(that.methodDesc) : that.methodDesc != null) {
-            return false;
-        }
-        // Probably incorrect - comparing Object[] arrays with Arrays.equals
-        return Arrays.equals(args, that.args);
+        if (number != that.number) return false;
+        if (assetChainId != that.assetChainId) return false;
+        if (assetId != that.assetId) return false;
+        if (gasLimit != that.gasLimit) return false;
+        if (price != that.price) return false;
+        if (estimateGas != that.estimateGas) return false;
+        if (viewMethod != that.viewMethod) return false;
+        if (internalCall != that.internalCall) return false;
+        if (!Arrays.equals(sender, that.sender)) return false;
+        if (!Arrays.equals(senderPublicKey, that.senderPublicKey)) return false;
+        if (value != null ? !value.equals(that.value) : that.value != null) return false;
+        if (!Arrays.equals(contractAddress, that.contractAddress)) return false;
+        if (methodName != null ? !methodName.equals(that.methodName) : that.methodName != null) return false;
+        if (methodDesc != null ? !methodDesc.equals(that.methodDesc) : that.methodDesc != null) return false;
+        if (!Arrays.deepEquals(args, that.args)) return false;
+
+        return true;
     }
 
     @Override
@@ -271,30 +278,54 @@ public class ProgramCall {
         result = 31 * result + Arrays.hashCode(sender);
         result = 31 * result + Arrays.hashCode(senderPublicKey);
         result = 31 * result + (value != null ? value.hashCode() : 0);
+        result = 31 * result + assetChainId;
+        result = 31 * result + assetId;
         result = 31 * result + (int) (gasLimit ^ (gasLimit >>> 32));
         result = 31 * result + (int) (price ^ (price >>> 32));
         result = 31 * result + Arrays.hashCode(contractAddress);
         result = 31 * result + (methodName != null ? methodName.hashCode() : 0);
         result = 31 * result + (methodDesc != null ? methodDesc.hashCode() : 0);
-        result = 31 * result + Arrays.hashCode(args);
+        result = 31 * result + Arrays.deepHashCode(args);
         result = 31 * result + (estimateGas ? 1 : 0);
+        result = 31 * result + (viewMethod ? 1 : 0);
+        result = 31 * result + (internalCall ? 1 : 0);
         return result;
     }
 
     @Override
     public String toString() {
-        return "ProgramCall{" +
-                "number=" + number +
-                ", sender=" + (sender != null ? AddressTool.getStringAddressByBytes(sender) : sender) +
-                ", senderPublicKey=" + (senderPublicKey != null ? HexUtil.encode(senderPublicKey) : senderPublicKey) +
-                ", value=" + value +
-                ", gasLimit=" + gasLimit +
-                ", price=" + price +
-                ", contractAddress=" + (contractAddress != null ? AddressTool.getStringAddressByBytes(contractAddress) : contractAddress) +
-                ", methodName=" + methodName +
-                ", methodDesc=" + methodDesc +
-                ", args=" + argToString(args) +
-                ", estimateGas=" + estimateGas +
-                '}';
+        final StringBuilder sb = new StringBuilder("{");
+        sb.append("\"number\":")
+                .append(number);
+        sb.append(",\"sender\":")
+                .append(AddressTool.getStringAddressByBytes(sender));
+        sb.append(",\"senderPublicKey\":")
+                .append(HexUtil.encode(senderPublicKey));
+        sb.append(",\"value\":")
+                .append(value);
+        sb.append(",\"assetChainId\":")
+                .append(assetChainId);
+        sb.append(",\"assetId\":")
+                .append(assetId);
+        sb.append(",\"gasLimit\":")
+                .append(gasLimit);
+        sb.append(",\"price\":")
+                .append(price);
+        sb.append(",\"contractAddress\":")
+                .append(AddressTool.getStringAddressByBytes(contractAddress));
+        sb.append(",\"methodName\":")
+                .append('\"').append(methodName).append('\"');
+        sb.append(",\"methodDesc\":")
+                .append('\"').append(methodDesc).append('\"');
+        sb.append(",\"args\":")
+                .append(Arrays.deepToString(args));
+        sb.append(",\"estimateGas\":")
+                .append(estimateGas);
+        sb.append(",\"viewMethod\":")
+                .append(viewMethod);
+        sb.append(",\"internalCall\":")
+                .append(internalCall);
+        sb.append('}');
+        return sb.toString();
     }
 }

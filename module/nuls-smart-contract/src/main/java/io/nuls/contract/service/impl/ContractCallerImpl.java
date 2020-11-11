@@ -33,6 +33,7 @@ import io.nuls.contract.helper.ContractNewTxHandler;
 import io.nuls.contract.manager.ContractTempBalanceManager;
 import io.nuls.contract.model.bo.*;
 import io.nuls.contract.model.dto.ContractPackageDto;
+import io.nuls.contract.model.txdata.CallContractData;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.service.ContractCaller;
 import io.nuls.contract.service.ContractExecutor;
@@ -41,6 +42,7 @@ import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.thread.commom.NulsThreadFactory;
 
 import java.util.ArrayList;
@@ -137,7 +139,7 @@ public class ContractCallerImpl implements ContractCaller {
     }
 
     @Override
-    public List<ContractResult> reCallTx(ProgramExecutor batchExecutor, List<ContractWrapperTransaction> reCallTxList, int chainId, String preStateRoot) {
+    public List<ContractResult> reCallTx(ProgramExecutor batchExecutor, List<ContractWrapperTransaction> reCallTxList, int chainId, String preStateRoot) throws NulsException {
         BlockHeader currentBlockHeader = contractHelper.getBatchInfoCurrentBlockHeader(chainId);
         long blockTime = currentBlockHeader.getTime();
         long lastestHeight = currentBlockHeader.getHeight() - 1;
@@ -150,6 +152,7 @@ public class ContractCallerImpl implements ContractCaller {
             contractData = tx.getContractData();
             switch (tx.getType()) {
                 case CALL_CONTRACT:
+                    contractHelper.extractAssetInfoFromCallTransaction((CallContractData) contractData, tx);
                     contractResult = contractExecutor.call(batchExecutor, contractData, lastestHeight, preStateRoot, extractPublicKey(tx));
                     makeContractResult(tx, contractResult);
                     // 处理合约生成的其他交易、临时余额、合约内部转账
