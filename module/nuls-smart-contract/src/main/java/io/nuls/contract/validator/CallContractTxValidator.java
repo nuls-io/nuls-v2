@@ -153,15 +153,7 @@ public class CallContractTxValidator {
         List<CoinTo> toList = coinData.getTo();
         CallContractData txData = tx.getTxDataObj();
         byte[] sender = txData.getSender();
-        boolean existSender = false;
-        BigInteger senderValue = BigInteger.ZERO;
-        for(CoinFrom from : fromList) {
-            if(!existSender && Arrays.equals(from.getAddress(), sender)) {
-                existSender = true;
-                senderValue = from.getAmount();
-                break;
-            }
-        }
+
         if (fromList.size() > 2) {
             Log.error("contract call error: There are too many coinFrom in the contract.");
             return Result.getFailed(CONTRACT_COIN_FROM_ERROR);
@@ -175,17 +167,7 @@ public class CallContractTxValidator {
             Log.error("contract call error: The value of gas limit ranges from 1 to 10,000,000.");
             return Result.getFailed(CONTRACT_GAS_LIMIT_ERROR);
         }
-        BigInteger transferValue = txData.getValue();
-        if (transferValue.compareTo(BigInteger.ZERO) > 0) {
-            if (!existSender) {
-                Log.error("contract call error: The contract caller is not the transaction creator.");
-                return Result.getFailed(CONTRACT_CALLER_ERROR);
-            }
-            if (senderValue.compareTo(transferValue) < 0) {
-                Log.error("contract call error: Insufficient balance to transfer to the contract address.");
-                return Result.getFailed(INSUFFICIENT_BALANCE_TO_CONTRACT);
-            }
-        }
+
         byte[] contractAddress = txData.getContractAddress();
 
         if (!ContractLedgerUtil.isExistContractAddress(chainId, contractAddress)) {
@@ -198,6 +180,9 @@ public class CallContractTxValidator {
             Log.error("contract call error: There are too many coinTo in the contract.");
             return Result.getFailed(CONTRACT_COIN_TO_ERROR);
         }
+        int assetChainId = 0;
+        int assetId = 0;
+        BigInteger transferValue = txData.getValue();
         BigInteger contractReceivedValue = BigInteger.ZERO;
         if (toSize == 1) {
             CoinTo coin = toList.get(0);
@@ -217,10 +202,35 @@ public class CallContractTxValidator {
                 Log.error("contract call error: The amount of the transfer is too small.");
                 return Result.getFailed(TOO_SMALL_AMOUNT);
             }
+            assetChainId = coin.getAssetsChainId();
+            assetId = coin.getAssetsId();
+
         }
         if (contractReceivedValue.compareTo(transferValue) < 0) {
             Log.error("contract call error: Insufficient balance to transfer to the contract address.");
             return Result.getFailed(INSUFFICIENT_BALANCE_TO_CONTRACT);
+        }
+
+        boolean existSender = false;
+        BigInteger senderValue = BigInteger.ZERO;
+        for(CoinFrom from : fromList) {
+            if(Arrays.equals(from.getAddress(), sender)) {
+                existSender = true;
+                if (assetChainId == from.getAssetsChainId() && assetId == from.getAssetsId()) {
+                    senderValue = senderValue.add(from.getAmount());
+                }
+            }
+        }
+
+        if (transferValue.compareTo(BigInteger.ZERO) > 0) {
+            if (!existSender) {
+                Log.error("contract call error: The contract caller is not the transaction creator.");
+                return Result.getFailed(CONTRACT_CALLER_ERROR);
+            }
+            if (senderValue.compareTo(transferValue) < 0) {
+                Log.error("contract call error: Insufficient balance to transfer to the contract address.");
+                return Result.getFailed(INSUFFICIENT_BALANCE_TO_CONTRACT);
+            }
         }
 
         BigInteger realFee = coinData.getFeeByAsset(CHAIN_ID, ASSET_ID);
