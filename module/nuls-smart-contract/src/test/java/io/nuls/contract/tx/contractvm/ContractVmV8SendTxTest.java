@@ -23,6 +23,7 @@
  */
 package io.nuls.contract.tx.contractvm;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.contract.config.ContractContext;
@@ -154,9 +155,9 @@ public class ContractVmV8SendTxTest extends BaseQuery {
         // 加载协议升级的数据
         ContractContext.CHAIN_ID = 2;
 
-        if (createContract) {
+        if (!createContract) {
             // 注册链内资产
-            assetRegisterTest();
+            //assetRegisterTest();
             // -------------------------------------------------------------------------------------//
             //InputStream inA = new FileInputStream(getClass().getResource("/contract-vm-v8-testA-1.0-SNAPSHOT.jar").getFile());
             //InputStream inB = new FileInputStream(getClass().getResource("/contract-vm-v8-testB-1.0-SNAPSHOT.jar").getFile());
@@ -177,14 +178,15 @@ public class ContractVmV8SendTxTest extends BaseQuery {
             contractResult = this.callByParams(contractB, toAddress, "setSender", "0", new String[]{sender});
             Assert.assertTrue("expect success, " + contractResult.getErrorMessage() + ", " + contractResult.getStackTrace(), contractResult.isSuccess());
         } else {
-            contractA = "tNULSeBaN6K66aCdLBu1aVY6PCqQizfFwvFDdA";
-            contractB = "tNULSeBaMyotkeYuWn8jn5b4HY6GtQBttsuNNm";
+            contractA = "tNULSeBaMwVijojTRBneW8zpqGwEgNf8mKVNbD";
+            contractB = "tNULSeBaN9uBG7DWTWJN1WUcDReoGJopNjsbHb";
         }
+        JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
     @Test
     public void testContractResultDto() throws Exception {
-        String hash = "601ac56670a950217f4f1c9bd7f1b33582a8f1e8e25b2e49b6a90b51a563f441";
+        String hash = "db7a99bcd2c6356126a32e8e0f06a6ef7d16bdfea127fda2d852241b0acd35a1";
         Map map = this.waitGetContractTx(hash);
         Map map1 = (Map) map.get("contractResult");
         ContractResultDto dto = this.converterDto(map1);
@@ -545,7 +547,7 @@ public class ContractVmV8SendTxTest extends BaseQuery {
             Assert.assertFalse(String.format("测试方法[%s]expect failed, errorMsg: %s, stackTrace: %s", method, programResult.getErrorMessage(), programResult.getStackTrace()), programResult.isSuccess());
         } catch (Throwable e) {
             if (e.getMessage().contains(errorMsgKey)) {
-                System.out.println(String.format("method [%s] 测试通过，期望失败", method));
+                System.out.println(String.format("method [%s] 测试通过，期望: %s", method, errorMsgKey));
             } else {
                 System.err.println(String.format("method [%s] 测试失败, error: %s", method, e.getMessage()));
             }
