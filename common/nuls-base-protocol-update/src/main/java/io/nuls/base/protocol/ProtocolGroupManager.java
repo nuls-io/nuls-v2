@@ -7,7 +7,10 @@ import io.nuls.core.basic.VersionChangeInvoker;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.log.Log;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -129,7 +132,13 @@ public class ProtocolGroupManager {
                     }
                 });
                 messageDispatcher.setProcessors(messageProcessors);
-                RegisterHelper.registerTx(chainId, protocol);
+                try {
+                    if (ConnectManager.getConnectByRole(ModuleE.TX.abbr) != null) {
+                        RegisterHelper.registerTx(chainId, protocol);
+                    }
+                } catch (Exception e) {
+                    Log.warn(e.getMessage());
+                }
             }
         }
     }
