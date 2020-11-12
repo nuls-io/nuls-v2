@@ -210,6 +210,7 @@ public class CoinDataValidator {
         Map<String, List<FreezeHeightState>> lockedHeightMap = new ConcurrentHashMap<String, List<FreezeHeightState>>();
 
         for (Transaction tx : txs) {
+            tx.setBlockHeight(height);
             if (LoggerUtil.logger(chainId).isDebugEnabled()) {
                 LoggerUtil.logger(chainId).debug("[TEST] blocksValidate tx type: {}, hash: {}", tx.getType(), tx.getHash().toHex());
             }
