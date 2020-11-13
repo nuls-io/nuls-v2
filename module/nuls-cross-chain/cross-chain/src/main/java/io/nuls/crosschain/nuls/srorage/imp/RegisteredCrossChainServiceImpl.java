@@ -29,7 +29,7 @@ public class RegisteredCrossChainServiceImpl implements RegisteredCrossChainServ
         registeredChainMessage.getChainInfoList().stream().filter(d->d.getChainId() == 9)
                 .forEach(chainInfo -> {
                     LoggerUtil.commonLog.info("chain id {} 验证人列表：{}",chainInfo.getChainId(),chainInfo.getVerifierList());
-                    LoggerUtil.commonLog.info("当前高度:{}",chainManager.getChainHeaderMap().get(1).getHeight() + 1);
+//                    LoggerUtil.commonLog.info("当前高度:{}",chainManager.getChainHeaderMap().get(1).getHeight() + 1);
                 });
         try {
             return RocksDBService.put(NulsCrossChainConstant.DB_NAME_REGISTERED_CHAIN, key,registeredChainMessage.serialize());
