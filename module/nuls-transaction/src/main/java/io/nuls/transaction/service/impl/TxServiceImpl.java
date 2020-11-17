@@ -648,6 +648,18 @@ public class TxServiceImpl implements TxService {
             int batchContractTxCount = 0;
             //是否停止执行职能合约,如果位true,则取出的智能合约本次打包不再处理,需要还回待打包队列
             boolean stopInvokeContract = false;
+
+            Random random = new Random();
+            int packageContractTxMaxCount;
+            int availableProcessors = Runtime.getRuntime().availableProcessors();
+            if (availableProcessors <= 4) {
+                packageContractTxMaxCount = 20 + random.nextInt(10);
+            } else if (availableProcessors <= 8) {
+                packageContractTxMaxCount = 50 + random.nextInt(10);
+            } else {
+                packageContractTxMaxCount = 100 + random.nextInt(20);
+            }
+
             for (int index = 0; ; index++) {
                 long currentTimeMillis = NulsDateUtils.getCurrentTimeMillis();
                 long currentReserve = endtimestamp - currentTimeMillis;
@@ -737,7 +749,7 @@ public class TxServiceImpl implements TxService {
                             //限制智能合约交易数量
                             boolean isContract = txRegister.getModuleCode().equals(ModuleE.SC.abbr);
                             if (isContract) {
-                                if (contractTxCount + (++batchContractTxCount) >= TxConstant.PACKAGE_CONTRACT_TX_MAX_COUNT) {
+                                if (contractTxCount + (++batchContractTxCount) >= packageContractTxMaxCount) {
                                     //限制单个区块包含的跨链交易总数，超过跨链交易最大个数，放回去, 然后停止获取交易
                                     packablePool.add(chain, tx);
                                     if (batchProcessListSize > 0) {
