@@ -27,6 +27,7 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Controller;
 import io.nuls.core.core.annotation.RpcMethod;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.log.Log;
 import io.nuls.core.model.StringUtils;
 
 import java.util.ArrayList;
@@ -315,6 +316,10 @@ public class TransactionController {
                     tx.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
                     CreateContractData create = new CreateContractData();
                     create.parse(new NulsByteBuffer(tx.getTxData()));
+                    RpcResult createArgsResult = this.validateContractArgs(create.getArgs());
+                    if (createArgsResult.getError() != null) {
+                        return createArgsResult;
+                    }
                     result = WalletRpcHandler.validateContractCreate(chainId,
                             AddressTool.getStringAddressByBytes(create.getSender()),
                             create.getGasLimit(),
@@ -328,12 +333,17 @@ public class TransactionController {
                     txHash = callTx.getHash().toHex();
                     call = new CallContractData();
                     call.parse(new NulsByteBuffer(callTx.getTxData()));
+                    contract = AddressTool.getStringAddressByBytes(call.getContractAddress());
+                    RpcResult argsResult = this.validateContractArgs(call.getArgs());
+                    if (argsResult.getError() != null) {
+                        return argsResult;
+                    }
                     result = WalletRpcHandler.validateContractCall(chainId,
                             AddressTool.getStringAddressByBytes(call.getSender()),
                             call.getValue(),
                             call.getGasLimit(),
                             call.getPrice(),
-                            (contract = AddressTool.getStringAddressByBytes(call.getContractAddress())),
+                            contract,
                             call.getMethodName(),
                             call.getMethodDesc(),
                             call.getArgs());
@@ -382,6 +392,37 @@ public class TransactionController {
             LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.TX_PARSE_ERROR);
         }
+    }
+
+    private RpcResult validateContractArgs(String[][] args) {
+        if (args == null || args.length == 0) {
+            return RpcResult.success(null);
+        }
+        try {
+            String[] arg;
+            for (int i = 0, length = args.length; i < length; i++) {
+                arg = args[i];
+                if (arg == null || arg.length == 0) {
+                    continue;
+                }
+                for (String str : arg) {
+                    if (!this.checkSpaceArg(str)) {
+                        return RpcResult.failed(RpcErrorCode.CONTRACT_VALIDATION_FAILED);
+                    }
+                }
+            }
+            return RpcResult.success(null);
+        } catch (Exception e) {
+            Log.error("parse args error.", e);
+            return RpcResult.failed(RpcErrorCode.CONTRACT_VALIDATION_FAILED);
+        }
+    }
+
+    private boolean checkSpaceArg(String s) {
+        if (s == null) {
+            return true;
+        }
+        return s.length() == s.trim().length();
     }
 
     @RpcMethod("broadcastTxWithoutAnyValidation")
