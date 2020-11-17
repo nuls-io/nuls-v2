@@ -226,7 +226,7 @@ public class AccountLedgerResource {
 
     private RpcClientResult validateContractArgs(String[][] args) {
         if (args == null || args.length == 0) {
-            return RpcClientResult.getFailed("Illegal space character");
+            return RpcClientResult.getSuccess(null);
         }
         try {
             String[] arg;
