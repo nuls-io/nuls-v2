@@ -66,12 +66,12 @@ public class CrossTxRehandleMsgHandler implements MessageProcessor {
         //如果没有处理过这个消息才处理
         if(processorOfTx.insertAndCheck(messageHash)){
             Chain chain = chainManager.getChainMap().get(chainId);
-            Map packerInfo = ConsensusCall.getPackerInfo(chain);
-            String address = (String) packerInfo.get(ParamConstant.PARAM_ADDRESS);
-            if (!StringUtils.isBlank(address) && chain.getVerifierList().contains(address)) {
-                chain.getLogger().debug("不是共识节点，不处理跨链交易");
-                return ;
-            }
+//            Map packerInfo = ConsensusCall.getPackerInfo(chain);
+//            String address = (String) packerInfo.get(ParamConstant.PARAM_ADDRESS);
+//            if (!StringUtils.isBlank(address) && chain.getVerifierList().contains(address)) {
+//                chain.getLogger().debug("不是共识节点，不处理跨链交易");
+//                return ;
+//            }
             //检查本地是否已经处理完此消息，并且已经确认
             CtxStatusPO ctxStatusPO = ctxStatusService.get(message.getCtxHash(), chainId);
             if(ctxStatusPO != null){
