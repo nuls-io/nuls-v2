@@ -66,20 +66,12 @@ public class CrossTxRehandleMsgHandler implements MessageProcessor {
         //如果没有处理过这个消息才处理
         if(processorOfTx.insertAndCheck(messageHash)){
             Chain chain = chainManager.getChainMap().get(chainId);
-            Map packerInfo = ConsensusCall.getPackerInfo(chain);
-            String address = (String) packerInfo.get(ParamConstant.PARAM_ADDRESS);
-            if (!StringUtils.isBlank(address) && chain.getVerifierList().contains(address)) {
-                chain.getLogger().debug("不是共识节点，不处理跨链交易");
-                return ;
-            }
-            //检查本地是否已经处理完此消息，并且已经确认
-            CtxStatusPO ctxStatusPO = ctxStatusService.get(message.getCtxHash(), chainId);
-            if(ctxStatusPO != null){
-                if(ctxStatusPO.getStatus() == TxStatusEnum.CONFIRMED.getStatus()){
-                    chain.getLogger().info("该跨链转账交易之前已处理完成，将重新进行处理：{}",message.getCtxHash().toHex() );
-                }
-                ctxStatusService.delete(message.getCtxHash(), chainId);
-            }
+//            Map packerInfo = ConsensusCall.getPackerInfo(chain);
+//            String address = (String) packerInfo.get(ParamConstant.PARAM_ADDRESS);
+//            if (!StringUtils.isBlank(address) && chain.getVerifierList().contains(address)) {
+//                chain.getLogger().debug("不是共识节点，不处理跨链交易");
+//                return ;
+//            }
             String ctxHash = message.getCtxHash().toHex();
             Result<Transaction> tx = transferService.getConfirmedTxByHash(new GetConfirmedTxByHashReq(ctxHash));
             if(tx.isFailed()){
@@ -91,9 +83,20 @@ public class CrossTxRehandleMsgHandler implements MessageProcessor {
                 chain.getLogger().error("处理【重新处理跨链交易拜赞庭签名】失败，ctx hash : [{}] 不是一个跨链交易",ctxHash);
                 return ;
             }
+            //检查本地是否已经处理完此消息，并且已经确认
+            CtxStatusPO ctxStatusPO = ctxStatusService.get(message.getCtxHash(), chainId);
+            if(ctxStatusPO != null){
+                if(ctxStatusPO.getStatus() == TxStatusEnum.CONFIRMED.getStatus()){
+                    chain.getLogger().info("该跨链转账交易之前已处理完成，将重新进行处理：{}",message.getCtxHash().toHex() );
+                    ctxStatusPO.setStatus(TxStatusEnum.UNCONFIRM.getStatus());
+                    ctxStatusService.save(message.getCtxHash(),ctxStatusPO, chainId);
+                }
+            }else{
+                chain.getLogger().info("该跨链转账交易之前没有存储到待处理列表中，在ctx_status_po中存储此交易：{}",message.getCtxHash().toHex() );
+                ctxStatusPO = new CtxStatusPO(transaction,TxStatusEnum.UNCONFIRM.getStatus());
+                ctxStatusService.save(message.getCtxHash(),ctxStatusPO,chainId);
+            }
             chain.getLogger().debug("对ctx:[{}]重新进行拜占庭签名验证", ctxHash);
-            ctxStatusPO = new CtxStatusPO(transaction,TxStatusEnum.UNCONFIRM.getStatus());
-            ctxStatusService.save(message.getCtxHash(),ctxStatusPO,chainId);
             int syncStatus = BlockCall.getBlockStatus(chain);
             //发起拜占庭验证
             chain.getCrossTxThreadPool().execute(new CrossTxHandler(chain,  tx.getData(), syncStatus));

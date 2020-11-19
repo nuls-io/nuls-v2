@@ -168,6 +168,10 @@ public class AccountLedgerResource {
                     tx.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
                     CreateContractData create = new CreateContractData();
                     create.parse(new NulsByteBuffer(tx.getTxData()));
+                    RpcClientResult createArgsResult = this.validateContractArgs(create.getArgs());
+                    if (createArgsResult.isFailed()) {
+                        return createArgsResult;
+                    }
                     result = contractTools.validateContractCreate(config.getChainId(),
                             AddressTool.getStringAddressByBytes(create.getSender()),
                             create.getGasLimit(),
@@ -180,6 +184,10 @@ public class AccountLedgerResource {
                     callTx.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
                     CallContractData call = new CallContractData();
                     call.parse(new NulsByteBuffer(callTx.getTxData()));
+                    RpcClientResult argsResult = this.validateContractArgs(call.getArgs());
+                    if (argsResult.isFailed()) {
+                        return argsResult;
+                    }
                     result = contractTools.validateContractCall(config.getChainId(),
                             AddressTool.getStringAddressByBytes(call.getSender()),
                             call.getValue(),
@@ -214,6 +222,37 @@ public class AccountLedgerResource {
             Log.error(e);
             return RpcClientResult.getFailed(e.getMessage());
         }
+    }
+
+    private RpcClientResult validateContractArgs(String[][] args) {
+        if (args == null || args.length == 0) {
+            return RpcClientResult.getSuccess(null);
+        }
+        try {
+            String[] arg;
+            for (int i = 0, length = args.length; i < length; i++) {
+                arg = args[i];
+                if (arg == null || arg.length == 0) {
+                    continue;
+                }
+                for (String str : arg) {
+                    if (!this.checkSpaceArg(str)) {
+                        return RpcClientResult.getFailed("Illegal space character");
+                    }
+                }
+            }
+            return RpcClientResult.getSuccess(null);
+        } catch (Exception e) {
+            Log.error("parse args error.", e);
+            return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.DATA_PARSE_ERROR));
+        }
+    }
+
+    private boolean checkSpaceArg(String s) {
+        if (s == null) {
+            return true;
+        }
+        return s.length() == s.trim().length();
     }
 
     @POST
