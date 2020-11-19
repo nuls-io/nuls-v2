@@ -28,13 +28,16 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 import io.nuls.core.rpc.util.NulsDateUtils;
+import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.tx.txdata.TxLedgerAsset;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -158,6 +161,27 @@ public class LedgerAsset extends BaseNulsData {
         this.setCreateTime(NulsDateUtils.getCurrentTimeSeconds());
         this.assetType = assetType;
 
+    }
+
+    public Map<String, Object> toMap() {
+        LedgerAsset asset = this;
+        Map<String, Object> result = new HashMap<>();
+        if (asset == null) {
+            return result;
+        }
+        result.put("assetChainId", asset.getChainId());
+        result.put("assetId", asset.getAssetId());
+        result.put("initNumber", asset.getInitNumber());
+        result.put("decimalPlace", asset.getDecimalPlace());
+        result.put("assetName", asset.getAssetName());
+        result.put("assetSymbol", asset.getSymbol());
+        short assetType = asset.getAssetType();
+        result.put("assetType", assetType);
+        if(asset.getAssetOwnerAddress() != null) {
+            String address = AddressTool.getStringAddressByBytes(asset.getAssetOwnerAddress());
+            result.put("assetAddress", address);
+        }
+        return result;
     }
 
 
