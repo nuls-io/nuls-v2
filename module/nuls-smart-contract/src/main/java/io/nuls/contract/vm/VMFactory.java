@@ -28,7 +28,9 @@ import io.nuls.contract.vm.code.ClassCode;
 import io.nuls.contract.vm.code.ClassCodeLoader;
 import org.checkerframework.checker.units.qual.C;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
@@ -336,10 +338,13 @@ public class VMFactory {
             classCodes.put(classCode.name, classCode);
         }
         // v8 add
-        String className = "io/nuls/contract/sdk/annotation/PayableMultyAsset";
-        ClassCode classCode = ClassCodeLoader.loadFromResource_v8(className);
-        classCodes.put(classCode.name, classCode);
-
+        List<String> list = new ArrayList<>();
+        list.add("io/nuls/contract/sdk/annotation/PayableMultyAsset");
+        list.add("io/nuls/contract/sdk/MultyAssetValue");
+        for (String className : list) {
+            ClassCode classCode = ClassCodeLoader.loadFromResource_v8(className);
+            classCodes.put(classCode.name, classCode);
+        }
         vm.methodArea.loadClassCodes(classCodes);
         return vm;
     }

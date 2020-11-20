@@ -42,11 +42,9 @@ public class ProgramContext {
 
     //private long gasLimit;
 
-    private int assetChainId;
-
-    private int assetId;
-
     private ObjectRef value;
+
+    private ObjectRef multyAssetValues;
 
     private long number;
 
@@ -96,22 +94,6 @@ public class ProgramContext {
         this.gas = gas;
     }
 
-    public int getAssetChainId() {
-        return assetChainId;
-    }
-
-    public void setAssetChainId(int assetChainId) {
-        this.assetChainId = assetChainId;
-    }
-
-    public int getAssetId() {
-        return assetId;
-    }
-
-    public void setAssetId(int assetId) {
-        this.assetId = assetId;
-    }
-
     public ObjectRef getValue() {
         return value;
     }
@@ -136,4 +118,11 @@ public class ProgramContext {
         this.estimateGas = estimateGas;
     }
 
+    public ObjectRef getMultyAssetValues() {
+        return multyAssetValues;
+    }
+
+    public void setMultyAssetValues(ObjectRef multyAssetValues) {
+        this.multyAssetValues = multyAssetValues;
+    }
 }

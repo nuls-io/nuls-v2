@@ -67,23 +67,11 @@ public class NativeMsg {
                 } else {
                     return value(methodCode, methodArgs, frame);
                 }
-            case isMainAssetValue:
+            case multyAssetValues:
                 if (check) {
                     return SUPPORT_NATIVE;
                 } else {
-                    return isMainAssetValue(methodCode, methodArgs, frame);
-                }
-            case assetChainId:
-                if (check) {
-                    return SUPPORT_NATIVE;
-                } else {
-                    return assetChainId(methodCode, methodArgs, frame);
-                }
-            case assetId:
-                if (check) {
-                    return SUPPORT_NATIVE;
-                } else {
-                    return assetId(methodCode, methodArgs, frame);
+                    return multyAssetValues(methodCode, methodArgs, frame);
                 }
             case gasprice:
                 if (check) {
@@ -155,34 +143,10 @@ public class NativeMsg {
         return result;
     }
 
-    public static final String isMainAssetValue = TYPE + "." + "isMainAssetValue" + "()Z";
+    public static final String multyAssetValues = TYPE + "." + "multyAssetValues" + "()[Lio/nuls/contract/sdk/MultyAssetValue;";
 
-    private static Result isMainAssetValue(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        boolean mainAsset = frame.vm.getProgramContext().getAssetChainId() == CHAIN_ID && frame.vm.getProgramContext().getAssetId() == ASSET_ID;
-        Result result = NativeMethod.result(methodCode, mainAsset, frame);
-        return result;
-    }
-
-    public static final String assetChainId = TYPE + "." + "assetChainId" + "()I";
-    public static final String assetId = TYPE + "." + "assetId" + "()I";
-
-    /**
-     * native
-     *
-     * @see Msg#assetChainId()
-     */
-    private static Result assetChainId(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        Result result = NativeMethod.result(methodCode, frame.vm.getProgramContext().getAssetChainId(), frame);
-        return result;
-    }
-
-    /**
-     * native
-     *
-     * @see Msg#assetId()
-     */
-    private static Result assetId(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        Result result = NativeMethod.result(methodCode, frame.vm.getProgramContext().getAssetId(), frame);
+    private static Result multyAssetValues(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
+        Result result = NativeMethod.result(methodCode, frame.vm.getProgramContext().getMultyAssetValues(), frame);
         return result;
     }
 

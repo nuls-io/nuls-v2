@@ -24,7 +24,10 @@
  */
 package io.nuls.contract.vm.program.impl;
 
+import io.nuls.contract.vm.program.ProgramMultyAssetValue;
+
 import java.math.BigInteger;
+import java.util.List;
 
 public class ProgramInvoke {
 
@@ -53,19 +56,14 @@ public class ProgramInvoke {
     private long gasLimit;
 
     /**
-     * 交易附带的货币量
+     * 交易向合约转入的NULS金额
      */
     private BigInteger value;
 
     /**
-     * 转入资产的链ID
+     * 交易向合约转入的其他资产的金额
      */
-    private int assetChainId;
-
-    /**
-     * 转入资产ID
-     */
-    private int assetId;
+    private List<ProgramMultyAssetValue> multyAssetValues;
 
     /**
      * 当前块编号
@@ -159,20 +157,12 @@ public class ProgramInvoke {
         this.value = value;
     }
 
-    public int getAssetChainId() {
-        return assetChainId;
+    public List<ProgramMultyAssetValue> getMultyAssetValues() {
+        return multyAssetValues;
     }
 
-    public void setAssetChainId(int assetChainId) {
-        this.assetChainId = assetChainId;
-    }
-
-    public int getAssetId() {
-        return assetId;
-    }
-
-    public void setAssetId(int assetId) {
-        this.assetId = assetId;
+    public void setMultyAssetValues(List<ProgramMultyAssetValue> multyAssetValues) {
+        this.multyAssetValues = multyAssetValues;
     }
 
     public long getNumber() {

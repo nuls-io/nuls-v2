@@ -30,6 +30,7 @@ import io.nuls.core.crypto.HexUtil;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.List;
 
 import static io.nuls.contract.util.ContractUtil.argToString;
 
@@ -47,9 +48,13 @@ public class ProgramCall {
     private byte[] senderPublicKey;
 
     /**
-     * 交易附带的货币量
+     * 交易向合约转入的NULS的金额
      */
     private BigInteger value;
+    /**
+     * 交易向合约转入的其他资产的金额
+     */
+    private List<ProgramMultyAssetValue> multyAssetValues;
 
     /**
      * 转入资产的链ID
@@ -246,6 +251,14 @@ public class ProgramCall {
         this.internalCall = internalCall;
     }
 
+    public List<ProgramMultyAssetValue> getMultyAssetValues() {
+        return multyAssetValues;
+    }
+
+    public void setMultyAssetValues(List<ProgramMultyAssetValue> multyAssetValues) {
+        this.multyAssetValues = multyAssetValues;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -264,6 +277,7 @@ public class ProgramCall {
         if (!Arrays.equals(sender, that.sender)) return false;
         if (!Arrays.equals(senderPublicKey, that.senderPublicKey)) return false;
         if (value != null ? !value.equals(that.value) : that.value != null) return false;
+        if (multyAssetValues != null ? !Arrays.deepEquals(multyAssetValues.toArray(), that.multyAssetValues != null ? that.multyAssetValues.toArray() : null) : that.multyAssetValues != null) return false;
         if (!Arrays.equals(contractAddress, that.contractAddress)) return false;
         if (methodName != null ? !methodName.equals(that.methodName) : that.methodName != null) return false;
         if (methodDesc != null ? !methodDesc.equals(that.methodDesc) : that.methodDesc != null) return false;
@@ -285,6 +299,7 @@ public class ProgramCall {
         result = 31 * result + Arrays.hashCode(contractAddress);
         result = 31 * result + (methodName != null ? methodName.hashCode() : 0);
         result = 31 * result + (methodDesc != null ? methodDesc.hashCode() : 0);
+        result = 31 * result + (multyAssetValues != null ? Arrays.deepHashCode(multyAssetValues.toArray()) : 0);
         result = 31 * result + Arrays.deepHashCode(args);
         result = 31 * result + (estimateGas ? 1 : 0);
         result = 31 * result + (viewMethod ? 1 : 0);
@@ -303,6 +318,8 @@ public class ProgramCall {
                 .append(HexUtil.encode(senderPublicKey));
         sb.append(",\"value\":")
                 .append(value);
+        sb.append(",\"value\":")
+                .append(multyAssetValues != null ? Arrays.deepToString(multyAssetValues.toArray()) : "null");
         sb.append(",\"assetChainId\":")
                 .append(assetChainId);
         sb.append(",\"assetId\":")

@@ -47,10 +47,7 @@ import io.nuls.contract.vm.instructions.stack.Pop;
 import io.nuls.contract.vm.instructions.stack.Swap;
 import io.nuls.contract.vm.instructions.stores.*;
 import io.nuls.contract.vm.natives.io.nuls.contract.sdk.NativeAddress;
-import io.nuls.contract.vm.program.ProgramInternalCall;
-import io.nuls.contract.vm.program.ProgramInvokeRegisterCmd;
-import io.nuls.contract.vm.program.ProgramMethodArg;
-import io.nuls.contract.vm.program.ProgramTransfer;
+import io.nuls.contract.vm.program.*;
 import io.nuls.contract.vm.program.impl.ProgramContext;
 import io.nuls.contract.vm.program.impl.ProgramExecutorImpl;
 import io.nuls.contract.vm.program.impl.ProgramInvoke;
@@ -197,8 +194,12 @@ public class VM {
         programContext.setGasPrice(programInvoke.getPrice());
         programContext.setGas(programInvoke.getGasLimit());
         programContext.setValue(this.heap.newBigInteger(programInvoke.getValue().toString()));
-        programContext.setAssetChainId(programInvoke.getAssetChainId());
-        programContext.setAssetId(programInvoke.getAssetId());
+        // 转化多资产列表
+        List<ProgramMultyAssetValue> multyAssetValues = programInvoke.getMultyAssetValues();
+        if (multyAssetValues != null && !multyAssetValues.isEmpty()) {
+            programContext.setMultyAssetValues(this.heap.multyAssetValueArrayToObjectRef(multyAssetValues));
+        }
+
         programContext.setNumber(programInvoke.getNumber());
         programContext.setEstimateGas(programInvoke.isEstimateGas());
         if(programInvoke.getSenderPublicKey() != null) {

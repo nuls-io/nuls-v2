@@ -163,6 +163,7 @@ public class CallContractTxValidator {
             Log.error("contract call error: The contract caller is not the transaction signer.");
             return Result.getFailed(CONTRACT_CALLER_SIGN_ERROR);
         }
+        //TODO pierre 1->25
         if (!ContractUtil.checkGasLimit(txData.getGasLimit())) {
             Log.error("contract call error: The value of gas limit ranges from 1 to 10,000,000.");
             return Result.getFailed(CONTRACT_GAS_LIMIT_ERROR);
@@ -223,6 +224,7 @@ public class CallContractTxValidator {
         }
 
         if (transferValue.compareTo(BigInteger.ZERO) > 0) {
+            //TODO pierre 手续费账户也能支出，向合约转资产
             if (!existSender) {
                 Log.error("contract call error: The contract caller is not the transaction creator.");
                 return Result.getFailed(CONTRACT_CALLER_ERROR);

@@ -248,8 +248,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         programInvoke.setPrice(programCall.getPrice());
         programInvoke.setGasLimit(programCall.getGasLimit());
         programInvoke.setValue(programCall.getValue() != null ? programCall.getValue() : BigInteger.ZERO);
-        programInvoke.setAssetChainId(programCall.getAssetChainId());
-        programInvoke.setAssetId(programCall.getAssetId());
+        programInvoke.setMultyAssetValues(programCall.getMultyAssetValues());
         programInvoke.setNumber(programCall.getNumber());
         programInvoke.setMethodName(programCall.getMethodName());
         programInvoke.setMethodDesc(programCall.getMethodDesc());
@@ -401,24 +400,14 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             if (!methodCode.isPublic) {
                 return revert("can only invoke public method");
             }
-            int assetChainId = programInvoke.getAssetChainId();
-            int assetId = programInvoke.getAssetId();
             if (transferValue.compareTo(BigInteger.ZERO) > 0) {
-                if (assetChainId == 0 && assetId == 0) {
-                    assetChainId = CHAIN_ID;
-                    assetId = ASSET_ID;
-                    programInvoke.setAssetChainId(assetChainId);
-                    programInvoke.setAssetId(assetId);
-                }
-                boolean mainAsset = assetChainId == CHAIN_ID && assetId == ASSET_ID;
-                if (mainAsset) {
-                    if (!methodCode.hasPayableAnnotation())
-                        return revert(String.format("contract[%s]'s method[%s] is not a payable method", contractAddress, methodCode.name));
-                } else {
-                    if (!methodCode.hasPayableMultyAssetAnnotation())
-                        return revert(String.format("contract[%s]'s method[%s] is not a payableMultyAsset method", contractAddress, methodCode.name));
-                }
-
+                if (!methodCode.hasPayableAnnotation())
+                    return revert(String.format("contract[%s]'s method[%s] is not a payable method", contractAddress, methodCode.name));
+            }
+            List<ProgramMultyAssetValue> multyAssetValues = programInvoke.getMultyAssetValues();
+            if (multyAssetValues != null && !multyAssetValues.isEmpty()) {
+                if (!methodCode.hasPayableMultyAssetAnnotation())
+                    return revert(String.format("contract[%s]'s method[%s] is not a payableMultyAsset method", contractAddress, methodCode.name));
             }
             // 不允许非系统调用此方法
             boolean isBalanceTriggerForConsensusContractMethod = BALANCE_TRIGGER_METHOD_NAME.equals(methodName) &&
@@ -468,7 +457,13 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
             if (transferValue.compareTo(BigInteger.ZERO) > 0) {
                 // 合约相应资产余额变化
-                getAccount(contractAddressBytes, assetChainId, assetId).addBalance(transferValue);
+                getAccount(contractAddressBytes, CHAIN_ID, ASSET_ID).addBalance(transferValue);
+            }
+            if (multyAssetValues != null && !multyAssetValues.isEmpty()) {
+                for (ProgramMultyAssetValue assetValue : multyAssetValues) {
+                    // 合约相应资产余额变化
+                    getAccount(contractAddressBytes, assetValue.getAssetChainId(), assetValue.getAssetId()).addBalance(assetValue.getValue());
+                }
             }
             vm.setRepository(repository);
             vm.setGas(programInvoke.getGasLimit());
