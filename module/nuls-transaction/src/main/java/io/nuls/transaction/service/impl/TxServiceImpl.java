@@ -983,7 +983,7 @@ public class TxServiceImpl implements TxService {
             nulsLogger.error(e);
             //可打包交易,孤儿交易,全加回去
             putBackPackablePool(chain, packingTxList, orphanTxSet);
-            return new TxPackage(new ArrayList<>(), preStateRoot, chain.getBestBlockHeight() + 1);
+            return new TxPackage(new ArrayList<>(), null, chain.getBestBlockHeight() + 1);
         } finally {
             chain.getPackageLock().unlock();
         }
