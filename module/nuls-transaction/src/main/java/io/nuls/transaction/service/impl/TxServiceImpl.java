@@ -604,7 +604,7 @@ public class TxServiceImpl implements TxService {
             long batchValidReserve = TxConstant.PACKAGE_MODULE_VALIDATOR_RESERVE_TIME;
             if (packableTime <= batchValidReserve) {
                 //直接打空块
-                return new TxPackage(new ArrayList<>(), preStateRoot, chain.getBestBlockHeight() + 1);
+                return new TxPackage(new ArrayList<>(), null, chain.getBestBlockHeight() + 1);
             }
             //重置标志
             chain.setContractTxFail(false);
@@ -955,7 +955,7 @@ public class TxServiceImpl implements TxService {
                     baseValidateTx(chain, tx, txRegister);
                     chain.getUnverifiedQueue().addLast(new TransactionNetPO(txPackageWrapper.getTx()));
                 }
-                return new TxPackage(new ArrayList<>(), preStateRoot, chain.getBestBlockHeight() + 1);
+                return new TxPackage(new ArrayList<>(), null, chain.getBestBlockHeight() + 1);
             }
             //检测预留传输时间
             long current = NulsDateUtils.getCurrentTimeMillis();
