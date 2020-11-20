@@ -60,12 +60,12 @@ public class ContractCallerImpl implements ContractCaller {
 
     private static ExecutorService TX_EXECUTOR_SERVICE;
     static {
-        int threadCount = 1;
-        //int availableProcessors = Runtime.getRuntime().availableProcessors();
+        int threadCount = 4;
         // 线程数最大4个，线程核心小于4时，使用线程核心数
-        //if(availableProcessors < threadCount) {
-        //    threadCount = availableProcessors;
-        //}
+        int availableProcessors = Runtime.getRuntime().availableProcessors();
+        if(availableProcessors < threadCount) {
+            threadCount = availableProcessors;
+        }
         TX_EXECUTOR_SERVICE =
                 new ThreadPoolExecutor(
                         threadCount,
