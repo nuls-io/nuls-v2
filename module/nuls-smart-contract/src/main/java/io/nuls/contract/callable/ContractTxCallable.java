@@ -194,7 +194,10 @@ public class ContractTxCallable implements Callable<ContractResult> {
 
 
     private void checkCallResult(ContractWrapperTransaction tx, CallableResult callableResult, ContractResult contractResult) throws IOException {
-        List<ContractResult> reCallList = callableResult.getReCallList();
+        // 没有冲突, 处理合约结果
+        dealCallResult(tx, callableResult, contractResult, chainId, blockTime);
+
+        /*List<ContractResult> reCallList = callableResult.getReCallList();
         boolean isConflict = checker.checkConflict(chainId, tx, contractResult, container.getCommitSet());
         if (isConflict) {
             // 冲突后，添加到重新执行的集合中，但是gas消耗完的不再重复执行
@@ -208,13 +211,14 @@ public class ContractTxCallable implements Callable<ContractResult> {
         } else {
             // 没有冲突, 处理合约结果
             dealCallResult(tx, callableResult, contractResult, chainId, blockTime);
-        }
+        }*/
     }
 
     private void dealCallResult(ContractWrapperTransaction tx, CallableResult callableResult, ContractResult contractResult, int chainId, long blockTime) throws IOException {
         if (contractResult.isSuccess()) {
             // 执行成功，检查与执行失败的交易是否有冲突，把执行失败的交易添加到重新执行的集合中
-            checkConflictWithFailedMap(callableResult, contractResult);
+            //checkConflictWithFailedMap(callableResult, contractResult);
+            
             // 本合约与成功执行的其他合约没有冲突，处理业务逻辑，提交本合约
             // 处理合约生成的其他交易、临时余额、合约内部转账
             contractNewTxHandler.handleContractNewTx(chainId, blockTime, tx, contractResult, tempBalanceManager);
