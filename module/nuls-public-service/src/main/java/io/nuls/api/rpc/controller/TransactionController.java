@@ -22,6 +22,7 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.basic.Result;
 import io.nuls.core.constant.CommonCodeConstanst;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Controller;
@@ -307,6 +308,9 @@ public class TransactionController {
                 return RpcResult.dataNotFound();
             }
             int type = this.extractTxTypeFromTx(txHex);
+            if(type == CROSS_CHAIN){
+                return RpcResult.failed(CommonCodeConstanst.PARAMETER_ERROR,"Cross-chain tx pause support");
+            }
             Result result = Result.getSuccess(null);
             CallContractData call = null;
             String contract = null, txHash = null;
