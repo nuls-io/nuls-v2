@@ -34,10 +34,7 @@ import io.nuls.contract.util.Log;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.util.VMContextMock;
 import io.nuls.contract.vm.natives.io.nuls.contract.sdk.NativeAddress;
-import io.nuls.contract.vm.program.ProgramCall;
-import io.nuls.contract.vm.program.ProgramCreate;
-import io.nuls.contract.vm.program.ProgramExecutor;
-import io.nuls.contract.vm.program.ProgramResult;
+import io.nuls.contract.vm.program.*;
 import io.nuls.contract.vm.program.impl.ProgramExecutorImpl;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.rockdb.service.RocksDBService;
@@ -45,6 +42,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 
 import java.math.BigInteger;
+import java.util.List;
 
 /**
  * @author: PierreLuo
@@ -179,10 +177,9 @@ public class MockBase extends Base {
         programCall.setMethodDesc(methodDesc);
         programCall.setArgs(args);
         if (assetChainId != null && assetId != null) {
-            programCall.setAssetChainId(assetChainId);
-            programCall.setAssetId(assetId);
+            programCall.setValue(BigInteger.ZERO);
+            programCall.setMultyAssetValues(List.of(new ProgramMultyAssetValue(value == null ? BigInteger.ZERO : value, assetChainId, assetId)));
         }
-
         ProgramExecutor begin = programExecutor.begin(preStateRoot);
         ProgramExecutor tracking = begin.startTracking();
         ProgramResult programResult = tracking.call(programCall);

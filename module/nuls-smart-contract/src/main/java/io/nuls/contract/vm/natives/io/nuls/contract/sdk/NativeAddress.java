@@ -32,15 +32,13 @@ import io.nuls.contract.vm.*;
 import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.exception.ErrorException;
 import io.nuls.contract.vm.natives.NativeMethod;
-import io.nuls.contract.vm.program.ProgramCall;
-import io.nuls.contract.vm.program.ProgramInternalCall;
-import io.nuls.contract.vm.program.ProgramResult;
-import io.nuls.contract.vm.program.ProgramTransfer;
+import io.nuls.contract.vm.program.*;
 import io.nuls.contract.vm.program.impl.ProgramInvoke;
 
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
 import static io.nuls.contract.config.ContractContext.ASSET_ID;
 import static io.nuls.contract.config.ContractContext.CHAIN_ID;
@@ -252,7 +250,12 @@ public class NativeAddress {
             String methodDesc = "()V";
             String[][] args = null;
             //BigInteger value;
-            call(address, methodName, methodDesc, args, value, frame, assetChainId, assetId);
+            if (!mainAsset) {
+                ProgramMultyAssetValue[] multyAssetValues = new ProgramMultyAssetValue[] {new ProgramMultyAssetValue(value, assetChainId, assetId)};
+                call(address, methodName, methodDesc, args, BigInteger.ZERO, frame, multyAssetValues);
+            } else {
+                call(address, methodName, methodDesc, args, value, frame, null);
+            }
         } else {
             frame.vm.getProgramExecutor().getAccount(from, assetChainId, assetId).addBalance(value.negate());
             ProgramTransfer programTransfer = new ProgramTransfer(from, to, value, assetChainId, assetId, lockedTime);
@@ -274,26 +277,37 @@ public class NativeAddress {
      * @see Address#call(String, String, String[][], BigInteger)
      */
     private static Result call(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        return call(methodCode, methodArgs, frame, false, CHAIN_ID, ASSET_ID);
+        return call(methodCode, methodArgs, frame, false, null);
     }
 
     public static final String callWithReturnValue = TYPE + "." + "callWithReturnValue" + "(Ljava/lang/String;Ljava/lang/String;[[Ljava/lang/String;Ljava/math/BigInteger;)Ljava/lang/String;";
     private static Result callWithReturnValue(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        return call(methodCode, methodArgs, frame, true, CHAIN_ID, ASSET_ID);
+        return call(methodCode, methodArgs, frame, true, null);
     }
 
     public static final String callWithReturnValueAndAssetInfo = TYPE + "." + "callWithReturnValue" + "(Ljava/lang/String;Ljava/lang/String;[[Ljava/lang/String;Ljava/math/BigInteger;[Lio/nuls/contract/sdk/MultyAssetValue;)Ljava/lang/String;";
     private static Result callWithReturnValueAndAssetInfo(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         ObjectRef multyAssetValuesRef = (ObjectRef) methodArgs.invokeArgs[4];
-        //TODO pierre 反解析multyAssetValuesRef
-
-        //Integer assetChainId = frame.heap.toInteger(assetChainIdRef);
-        //Integer assetId = frame.heap.toInteger(assetIdRef);
-
-        return call(methodCode, methodArgs, frame, true, 0, 0);
+        ProgramMultyAssetValue[] multyAssetValues = null;
+        if (multyAssetValuesRef != null) {
+            int length = multyAssetValuesRef.getDimensions()[0];
+            multyAssetValues = new ProgramMultyAssetValue[length];
+            for (int i = 0; i < length; i++) {
+                Object item = frame.heap.getArray(multyAssetValuesRef, i);
+                if (item == null) {
+                    throw new ErrorException(String.format("Empty elements in array"), frame.vm.getGasUsed(), null);
+                }
+                ObjectRef itemRef = (ObjectRef) item;
+                ObjectRef value = (ObjectRef) frame.heap.getField(itemRef, "value");
+                ObjectRef assetChainId = (ObjectRef) frame.heap.getField(itemRef, "assetChainId");
+                ObjectRef assetId = (ObjectRef) frame.heap.getField(itemRef, "assetId");
+                multyAssetValues[i] = new ProgramMultyAssetValue(frame.heap.toBigInteger(value), frame.heap.toInteger(assetChainId), frame.heap.toInteger(assetId));
+            }
+        }
+        return call(methodCode, methodArgs, frame, true, multyAssetValues);
     }
 
-    private static Result call(MethodCode methodCode, MethodArgs methodArgs, Frame frame, boolean returnResult, Integer assetChainId, Integer assetId) {
+    private static Result call(MethodCode methodCode, MethodArgs methodArgs, Frame frame, boolean returnResult, ProgramMultyAssetValue[] multyAssetValues) {
         ObjectRef addressRef = methodArgs.objectRef;
         ObjectRef methodNameRef = (ObjectRef) methodArgs.invokeArgs[0];
         ObjectRef methodDescRef = (ObjectRef) methodArgs.invokeArgs[1];
@@ -308,15 +322,7 @@ public class NativeAddress {
         if (value == null) {
             value = BigInteger.ZERO;
         }
-        if (value.compareTo(BigInteger.ZERO) > 0) {
-            if (assetChainId == null || assetId == null) {
-                throw new ErrorException(String.format("Missing asset information, assetChainId: %s, assetId: %s", assetChainId, assetId), frame.vm.getGasUsed(), null);
-            }
-        } else {
-            assetChainId = CHAIN_ID;
-            assetId = ASSET_ID;
-        }
-        ProgramResult programResult = call(address, methodName, methodDesc, args, value, frame, assetChainId, assetId);
+        ProgramResult programResult = call(address, methodName, methodDesc, args, value, frame, multyAssetValues);
 
         if (!programResult.isSuccess()) {
             return new Result();
@@ -347,7 +353,7 @@ public class NativeAddress {
         return array;
     }
 
-    public static ProgramResult call(String address, String methodName, String methodDesc, String[][] args, BigInteger value, Frame frame, int assetChainId, int assetId) {
+    public static ProgramResult call(String address, String methodName, String methodDesc, String[][] args, BigInteger value, Frame frame, ProgramMultyAssetValue[] multyAssetValues) {
         if (value.compareTo(BigInteger.ZERO) < 0) {
             throw new ErrorException(String.format("amount less than zero, value=%s", value), frame.vm.getGasUsed(), null);
         }
@@ -357,8 +363,7 @@ public class NativeAddress {
         programCall.setNumber(programInvoke.getNumber());
         programCall.setSender(programInvoke.getContractAddress());
         programCall.setValue(value != null ? value : BigInteger.ZERO);
-        programCall.setAssetChainId(assetChainId);
-        programCall.setAssetId(assetId);
+        programCall.setMultyAssetValues(multyAssetValues != null ? List.of(multyAssetValues) : null);
         programCall.setGasLimit(programInvoke.getGasLimit() - frame.vm.getGasUsed());
         programCall.setPrice(programInvoke.getPrice());
         programCall.setContractAddress(NativeAddress.toBytes(address));
@@ -370,20 +375,32 @@ public class NativeAddress {
         programCall.setInternalCall(true);
 
         if (programCall.getValue().compareTo(BigInteger.ZERO) > 0) {
-            checkBalance(programCall.getSender(), assetChainId, assetId, programCall.getValue(), frame);
-            frame.vm.getProgramExecutor().getAccount(programCall.getSender(), assetChainId, assetId).addBalance(programCall.getValue().negate());
-            ProgramTransfer programTransfer = new ProgramTransfer(programCall.getSender(), programCall.getContractAddress(), programCall.getValue(), assetChainId, assetId, 0);
+            checkBalance(programCall.getSender(), CHAIN_ID, ASSET_ID, programCall.getValue(), frame);
+            frame.vm.getProgramExecutor().getAccount(programCall.getSender(), CHAIN_ID, ASSET_ID).addBalance(programCall.getValue().negate());
+            ProgramTransfer programTransfer = new ProgramTransfer(programCall.getSender(), programCall.getContractAddress(), programCall.getValue(), CHAIN_ID, ASSET_ID, 0);
             frame.vm.getTransfers().add(programTransfer);
             // add by pierre at 2019-11-23 标记 按合约执行顺序添加合约生成交易，按此顺序处理合约生成交易的业务 不确定 需要协议升级
             frame.vm.getOrderedInnerTxs().add(programTransfer);
             // end code by pierre
         }
+        if (multyAssetValues != null && multyAssetValues.length > 0) {
+            for (ProgramMultyAssetValue multyAssetValue : multyAssetValues) {
+                int assetChainId = multyAssetValue.getAssetChainId();
+                int assetId = multyAssetValue.getAssetId();
+                checkBalance(programCall.getSender(), assetChainId, assetId, multyAssetValue.getValue(), frame);
+                frame.vm.getProgramExecutor().getAccount(programCall.getSender(), assetChainId, assetId).addBalance(multyAssetValue.getValue().negate());
+                ProgramTransfer programTransfer = new ProgramTransfer(programCall.getSender(), programCall.getContractAddress(), multyAssetValue.getValue(), assetChainId, assetId, 0);
+                frame.vm.getTransfers().add(programTransfer);
+                // add by pierre at 2019-11-23 标记 按合约执行顺序添加合约生成交易，按此顺序处理合约生成交易的业务 不确定 需要协议升级
+                frame.vm.getOrderedInnerTxs().add(programTransfer);
+                // end code by pierre
+            }
+        }
 
         ProgramInternalCall programInternalCall = new ProgramInternalCall();
         programInternalCall.setSender(programCall.getSender());
         programInternalCall.setValue(programCall.getValue());
-        programInternalCall.setAssetChainId(programCall.getAssetChainId());
-        programInternalCall.setAssetId(programCall.getAssetId());
+        programInternalCall.setMultyAssetValues(programCall.getMultyAssetValues());
         programInternalCall.setContractAddress(programCall.getContractAddress());
         programInternalCall.setMethodName(programCall.getMethodName());
         programInternalCall.setMethodDesc(programCall.getMethodDesc());
@@ -497,6 +514,6 @@ public class NativeAddress {
     }
 
     public static ProgramResult call(String address, String methodName, String methodDesc, String[][] args, BigInteger value, Frame frame) {
-        return call(address, methodName, methodDesc, args, value, frame, CHAIN_ID, ASSET_ID);
+        return call(address, methodName, methodDesc, args, value, frame, null);
     }
 }

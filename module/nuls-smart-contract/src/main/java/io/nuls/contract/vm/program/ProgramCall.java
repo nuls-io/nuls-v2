@@ -32,8 +32,6 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 
-import static io.nuls.contract.util.ContractUtil.argToString;
-
 public class ProgramCall {
 
     /**
@@ -55,16 +53,6 @@ public class ProgramCall {
      * 交易向合约转入的其他资产的金额
      */
     private List<ProgramMultyAssetValue> multyAssetValues;
-
-    /**
-     * 转入资产的链ID
-     */
-    private int assetChainId;
-
-    /**
-     * 转入资产ID
-     */
-    private int assetId;
 
     /**
      * 最大Gas消耗
@@ -171,22 +159,6 @@ public class ProgramCall {
         this.value = value;
     }
 
-    public int getAssetChainId() {
-        return assetChainId;
-    }
-
-    public void setAssetChainId(int assetChainId) {
-        this.assetChainId = assetChainId;
-    }
-
-    public int getAssetId() {
-        return assetId;
-    }
-
-    public void setAssetId(int assetId) {
-        this.assetId = assetId;
-    }
-
     public long getGasLimit() {
         return gasLimit;
     }
@@ -267,8 +239,6 @@ public class ProgramCall {
         ProgramCall that = (ProgramCall) o;
 
         if (number != that.number) return false;
-        if (assetChainId != that.assetChainId) return false;
-        if (assetId != that.assetId) return false;
         if (gasLimit != that.gasLimit) return false;
         if (price != that.price) return false;
         if (estimateGas != that.estimateGas) return false;
@@ -292,8 +262,6 @@ public class ProgramCall {
         result = 31 * result + Arrays.hashCode(sender);
         result = 31 * result + Arrays.hashCode(senderPublicKey);
         result = 31 * result + (value != null ? value.hashCode() : 0);
-        result = 31 * result + assetChainId;
-        result = 31 * result + assetId;
         result = 31 * result + (int) (gasLimit ^ (gasLimit >>> 32));
         result = 31 * result + (int) (price ^ (price >>> 32));
         result = 31 * result + Arrays.hashCode(contractAddress);
@@ -320,10 +288,6 @@ public class ProgramCall {
                 .append(value);
         sb.append(",\"value\":")
                 .append(multyAssetValues != null ? Arrays.deepToString(multyAssetValues.toArray()) : "null");
-        sb.append(",\"assetChainId\":")
-                .append(assetChainId);
-        sb.append(",\"assetId\":")
-                .append(assetId);
         sb.append(",\"gasLimit\":")
                 .append(gasLimit);
         sb.append(",\"price\":")

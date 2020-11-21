@@ -131,7 +131,7 @@ public class ContractTxHelper {
              * 多扣除的费用会以ContractReturnGasTransaction交易还给Sender
              */
             CoinData coinData = new CoinData();
-            Result makeCoinDataResult = this.makeCoinData(chainId, sender, senderBytes, contractAddressBytes, gasLimit, price, value, tx.size(), createContractData, coinData, CHAIN_ID, ASSET_ID);
+            Result makeCoinDataResult = this.makeCoinData(chainId, sender, senderBytes, contractAddressBytes, gasLimit, price, value, tx.size(), createContractData, coinData, null);
             if (makeCoinDataResult.isFailed()) {
                 return makeCoinDataResult;
             }
@@ -226,53 +226,51 @@ public class ContractTxHelper {
         return VarInt.sizeOf(size) + size - 1;
     }
 
-    public Result makeCoinData(int chainId, String sender, byte[] senderBytes, byte[] contractAddress, long gasLimit, long price, BigInteger value, int txSize, NulsData txData, CoinData coinData, int assetChainId, int assetId) {
+    public Result makeCoinData(int chainId, String sender, byte[] senderBytes, byte[] contractAddress, long gasLimit, long price, BigInteger value, int txSize, NulsData txData, CoinData coinData, List<ProgramMultyAssetValue> multyAssetValues) {
         long gasUsed = gasLimit;
         BigInteger imputedValue = BigInteger.valueOf(LongUtils.mul(gasUsed, price));
-        boolean mainAsset = assetChainId == CHAIN_ID && assetId == ASSET_ID;
         // 总花费
         BigInteger totalValue = imputedValue;
-        if (mainAsset) {
-            totalValue = totalValue.add(value);
-            ContractBalance senderBalance = contractHelper.getUnConfirmedBalanceAndNonce(chainId, assetChainId, assetId, sender);
-            CoinFrom coinFrom = new CoinFrom(senderBytes, assetChainId, assetId, totalValue, RPCUtil.decode(senderBalance.getNonce()), UNLOCKED_TX);
-            coinData.addFrom(coinFrom);
+        int assetChainId = CHAIN_ID;
+        int assetId = ASSET_ID;
+        totalValue = totalValue.add(value);
+        ContractBalance senderBalance = contractHelper.getUnConfirmedBalanceAndNonce(chainId, assetChainId, assetId, sender);
+        CoinFrom coinFrom = new CoinFrom(senderBytes, assetChainId, assetId, totalValue, RPCUtil.decode(senderBalance.getNonce()), UNLOCKED_TX);
+        coinData.addFrom(coinFrom);
 
-            if (value.compareTo(BigInteger.ZERO) > 0) {
-                CoinTo coinTo = new CoinTo(contractAddress, assetChainId, assetId, value);
-                coinData.addTo(coinTo);
-            }
+        if (value.compareTo(BigInteger.ZERO) > 0) {
+            CoinTo coinTo = new CoinTo(contractAddress, assetChainId, assetId, value);
+            coinData.addTo(coinTo);
+        }
 
-            BigInteger fee = TransactionFeeCalculator.getNormalUnsignedTxFee(txSize + calcSize(txData) + calcSize(coinData));
-            totalValue = totalValue.add(fee);
-            if (senderBalance.getBalance().compareTo(totalValue) < 0) {
-                Log.error("Insufficient balance, asset: {}-{}", CHAIN_ID, ASSET_ID);
-                return Result.getFailed(INSUFFICIENT_BALANCE);
-            }
-            coinFrom.setAmount(totalValue);
-        } else {
-            ContractBalance senderBalanceOfNuls = contractHelper.getUnConfirmedBalanceAndNonce(chainId, CHAIN_ID, ASSET_ID, sender);
-            BigInteger fee = TransactionFeeCalculator.getNormalUnsignedTxFee(txSize + calcSize(txData) + calcSize(coinData));
-            totalValue = totalValue.add(fee);
-            if (senderBalanceOfNuls.getBalance().compareTo(totalValue) < 0) {
-                Log.error("Insufficient balance, asset: {}-{}", CHAIN_ID, ASSET_ID);
-                return Result.getFailed(INSUFFICIENT_BALANCE);
-            }
-            CoinFrom coinFrom = new CoinFrom(senderBytes, CHAIN_ID, ASSET_ID, totalValue, RPCUtil.decode(senderBalanceOfNuls.getNonce()), UNLOCKED_TX);
-            coinData.addFrom(coinFrom);
-
-            ContractBalance senderBalanceOfTransfer = contractHelper.getUnConfirmedBalanceAndNonce(chainId, assetChainId, assetId, sender);
-            if (value.compareTo(BigInteger.ZERO) > 0) {
-                if (senderBalanceOfTransfer.getBalance().compareTo(value) < 0) {
-                    Log.error("Insufficient balance, asset: {}-{}", assetChainId, assetId);
-                    return Result.getFailed(INSUFFICIENT_BALANCE);
+        if (multyAssetValues != null && !multyAssetValues.isEmpty()) {
+            BigInteger _value;
+            for (ProgramMultyAssetValue multyAssetValue : multyAssetValues) {
+                assetChainId = multyAssetValue.getAssetChainId();
+                assetId = multyAssetValue.getAssetId();
+                _value = multyAssetValue.getValue();
+                ContractBalance senderBalanceOfTransfer = contractHelper.getUnConfirmedBalanceAndNonce(chainId, assetChainId, assetId, sender);
+                if (_value.compareTo(BigInteger.ZERO) > 0) {
+                    if (senderBalanceOfTransfer.getBalance().compareTo(_value) < 0) {
+                        Log.error("Insufficient balance, asset: {}-{}", assetChainId, assetId);
+                        return Result.getFailed(INSUFFICIENT_BALANCE);
+                    }
+                    CoinFrom coinFromOfTransfer = new CoinFrom(senderBytes, assetChainId, assetId, _value, RPCUtil.decode(senderBalanceOfTransfer.getNonce()), UNLOCKED_TX);
+                    CoinTo coinTo = new CoinTo(contractAddress, assetChainId, assetId, _value);
+                    coinData.addFrom(coinFromOfTransfer);
+                    coinData.addTo(coinTo);
                 }
-                CoinFrom coinFromOfTransfer = new CoinFrom(senderBytes, assetChainId, assetId, value, RPCUtil.decode(senderBalanceOfTransfer.getNonce()), UNLOCKED_TX);
-                CoinTo coinTo = new CoinTo(contractAddress, assetChainId, assetId, value);
-                coinData.addFrom(coinFromOfTransfer);
-                coinData.addTo(coinTo);
             }
         }
+
+        BigInteger fee = TransactionFeeCalculator.getNormalUnsignedTxFee(txSize + calcSize(txData) + calcSize(coinData));
+        totalValue = totalValue.add(fee);
+        if (senderBalance.getBalance().compareTo(totalValue) < 0) {
+            Log.error("Insufficient balance, asset: {}-{}", CHAIN_ID, ASSET_ID);
+            return Result.getFailed(INSUFFICIENT_BALANCE);
+        }
+        coinFrom.setAmount(totalValue);
+
         return getSuccess();
     }
 
@@ -293,14 +291,10 @@ public class ContractTxHelper {
 
     public Result<CallContractTransaction> makeCallTx(int chainId, String sender, BigInteger value, Long gasLimit, Long price, String contractAddress,
                                                       String methodName, String methodDesc, String[][] args,
-                                                      String password, String remark, int assetChainId, int assetId) {
+                                                      String password, String remark, List<ProgramMultyAssetValue> multyAssetValues) {
 
         if (value == null) {
             value = BigInteger.ZERO;
-        }
-        if (BigInteger.ZERO.equals(value)) {
-            assetChainId = CHAIN_ID;
-            assetId = ASSET_ID;
         }
 
         Result accountResult = AccountCall.validationPassword(chainId, sender, password);
@@ -311,17 +305,17 @@ public class ContractTxHelper {
         byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
         byte[] senderBytes = AddressTool.getAddress(sender);
 
-        Result validateCall = this.validateCall(chainId, senderBytes, contractAddressBytes, value, gasLimit, price, methodName, methodDesc, args, assetChainId, assetId);
+        Result validateCall = this.validateCall(chainId, senderBytes, contractAddressBytes, value, gasLimit, price, methodName, methodDesc, args, multyAssetValues);
         if (validateCall.isFailed()) {
             return validateCall;
         }
 
-        Result<CallContractTransaction> result = this.newCallTx(chainId, sender, senderBytes, value, gasLimit, price, contractAddressBytes, methodName, methodDesc, args, remark, assetChainId, assetId);
+        Result<CallContractTransaction> result = this.newCallTx(chainId, sender, senderBytes, value, gasLimit, price, contractAddressBytes, methodName, methodDesc, args, remark, multyAssetValues);
         return result;
     }
 
     public Result<CallContractTransaction> newCallTx(int chainId, String sender, byte[] senderBytes, BigInteger value, Long gasLimit, Long price, byte[] contractAddressBytes,
-                                                     String methodName, String methodDesc, String[][] args, String remark, int assetChainId, int assetId) {
+                                                     String methodName, String methodDesc, String[][] args, String remark, List<ProgramMultyAssetValue> multyAssetValues) {
         try {
 
             CallContractTransaction tx = new CallContractTransaction();
@@ -341,7 +335,7 @@ public class ContractTxHelper {
              * 多扣除的费用会以CoinBase交易还给Sender
              */
             CoinData coinData = new CoinData();
-            Result makeCoinDataResult = this.makeCoinData(chainId, sender, senderBytes, contractAddressBytes, gasLimit, price, value, tx.size(), callContractData, coinData, assetChainId, assetId);
+            Result makeCoinDataResult = this.makeCoinData(chainId, sender, senderBytes, contractAddressBytes, gasLimit, price, value, tx.size(), callContractData, coinData, multyAssetValues);
             if (makeCoinDataResult.isFailed()) {
                 return makeCoinDataResult;
             }
@@ -377,7 +371,7 @@ public class ContractTxHelper {
     }
 
 
-    public Result validateCall(int chainId, byte[] senderBytes, byte[] contractAddressBytes, BigInteger value, Long gasLimit, Long price, String methodName, String methodDesc, String[][] args, int assetChainId, int assetId) {
+    public Result validateCall(int chainId, byte[] senderBytes, byte[] contractAddressBytes, BigInteger value, Long gasLimit, Long price, String methodName, String methodDesc, String[][] args, List<ProgramMultyAssetValue> multyAssetValues) {
         try {
             if (!ContractUtil.checkPrice(price.longValue())) {
                 return Result.getFailed(CONTRACT_MINIMUM_PRICE_ERROR);
@@ -408,8 +402,7 @@ public class ContractTxHelper {
             }
             // 创建链上交易，包含智能合约
             programCall.setValue(value);
-            programCall.setAssetChainId(assetChainId);
-            programCall.setAssetId(assetId);
+            programCall.setMultyAssetValues(multyAssetValues);
             programCall.setPrice(price.longValue());
 
             // 获取VM执行器
@@ -453,7 +446,7 @@ public class ContractTxHelper {
         }
     }
 
-    public Result<ContractResult> previewCall(int chainId, byte[] senderBytes, byte[] contractAddressBytes, BigInteger value, Long gasLimit, Long price, String methodName, String methodDesc, String[][] args, int assetChainId, int assetId) {
+    public Result<ContractResult> previewCall(int chainId, byte[] senderBytes, byte[] contractAddressBytes, BigInteger value, Long gasLimit, Long price, String methodName, String methodDesc, String[][] args, List<ProgramMultyAssetValue> multyAssetValues) {
         try {
             if (!ContractUtil.checkPrice(price.longValue())) {
                 return Result.getFailed(CONTRACT_MINIMUM_PRICE_ERROR);
@@ -485,8 +478,7 @@ public class ContractTxHelper {
             // 创建链上交易，包含智能合约
             programCall.setValue(value);
             // add by pierre at 2020-10-29
-            programCall.setAssetChainId(assetChainId);
-            programCall.setAssetId(assetId);
+            programCall.setMultyAssetValues(multyAssetValues);
             // end code by pierre
             programCall.setPrice(price.longValue());
 
@@ -576,7 +568,7 @@ public class ContractTxHelper {
              * 没有Gas消耗，在终止智能合约里
              */
             CoinData coinData = new CoinData();
-            Result makeCoinDataResult = this.makeCoinData(chainId, sender, senderBytes, contractAddressBytes, 0L, 0L, BigInteger.ZERO, tx.size(), deleteContractData, coinData, CHAIN_ID, ASSET_ID);
+            Result makeCoinDataResult = this.makeCoinData(chainId, sender, senderBytes, contractAddressBytes, 0L, 0L, BigInteger.ZERO, tx.size(), deleteContractData, coinData, null);
             if (makeCoinDataResult.isFailed()) {
                 return makeCoinDataResult;
             }
