@@ -27,11 +27,13 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.Address;
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.contract.vm.program.ProgramMultyAssetValue;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.List;
 
 /**
  * @Author: PierreLuo
@@ -47,9 +49,7 @@ public class CallContractData extends BaseNulsData implements ContractData {
     private String methodDesc;
     private short argsCount;
     private String[][] args;
-    private transient int assetChainId;
-    private transient int assetId;
-
+    private transient List<ProgramMultyAssetValue> multyAssetValues;
 
     @Override
     public int size() {
@@ -215,21 +215,13 @@ public class CallContractData extends BaseNulsData implements ContractData {
         this.args = args;
     }
 
-    @Override
-    public int getAssetChainId() {
-        return assetChainId;
+    public void setAssetId(){}
+
+    public List<ProgramMultyAssetValue> getMultyAssetValues() {
+        return multyAssetValues;
     }
 
-    public void setAssetChainId(int assetChainId) {
-        this.assetChainId = assetChainId;
-    }
-
-    @Override
-    public int getAssetId() {
-        return assetId;
-    }
-
-    public void setAssetId(int assetId) {
-        this.assetId = assetId;
+    public void setMultyAssetValues(List<ProgramMultyAssetValue> multyAssetValues) {
+        this.multyAssetValues = multyAssetValues;
     }
 }

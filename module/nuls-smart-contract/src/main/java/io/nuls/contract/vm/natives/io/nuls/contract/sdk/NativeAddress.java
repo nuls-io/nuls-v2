@@ -282,15 +282,15 @@ public class NativeAddress {
         return call(methodCode, methodArgs, frame, true, CHAIN_ID, ASSET_ID);
     }
 
-    public static final String callWithReturnValueAndAssetInfo = TYPE + "." + "callWithReturnValue" + "(Ljava/lang/String;Ljava/lang/String;[[Ljava/lang/String;Ljava/math/BigInteger;Ljava/lang/Integer;Ljava/lang/Integer;)Ljava/lang/String;";
+    public static final String callWithReturnValueAndAssetInfo = TYPE + "." + "callWithReturnValue" + "(Ljava/lang/String;Ljava/lang/String;[[Ljava/lang/String;Ljava/math/BigInteger;[Lio/nuls/contract/sdk/MultyAssetValue;)Ljava/lang/String;";
     private static Result callWithReturnValueAndAssetInfo(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        ObjectRef assetChainIdRef = (ObjectRef) methodArgs.invokeArgs[4];
-        ObjectRef assetIdRef = (ObjectRef) methodArgs.invokeArgs[5];
+        ObjectRef multyAssetValuesRef = (ObjectRef) methodArgs.invokeArgs[4];
+        //TODO pierre 反解析multyAssetValuesRef
 
-        Integer assetChainId = frame.heap.toInteger(assetChainIdRef);
-        Integer assetId = frame.heap.toInteger(assetIdRef);
+        //Integer assetChainId = frame.heap.toInteger(assetChainIdRef);
+        //Integer assetId = frame.heap.toInteger(assetIdRef);
 
-        return call(methodCode, methodArgs, frame, true, assetChainId, assetId);
+        return call(methodCode, methodArgs, frame, true, 0, 0);
     }
 
     private static Result call(MethodCode methodCode, MethodArgs methodArgs, Frame frame, boolean returnResult, Integer assetChainId, Integer assetId) {

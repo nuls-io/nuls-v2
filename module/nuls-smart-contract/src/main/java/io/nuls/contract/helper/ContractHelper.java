@@ -60,10 +60,7 @@ import io.nuls.core.model.StringUtils;
 import org.bouncycastle.util.Arrays;
 
 import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static io.nuls.contract.config.ContractContext.ASSET_ID;
@@ -712,15 +709,21 @@ public class ContractHelper {
     }
 
     public void extractAssetInfoFromCallTransaction(CallContractData contractData, Transaction tx) throws NulsException {
-        contractData.setAssetChainId(CHAIN_ID);
-        contractData.setAssetId(ASSET_ID);
         CoinData coinData = tx.getCoinDataInstance();
         List<CoinTo> toList = coinData.getTo();
         if (toList == null || toList.isEmpty()) {
             return;
         }
-        CoinTo to = toList.get(0);
-        contractData.setAssetChainId(to.getAssetsChainId());
-        contractData.setAssetId(to.getAssetsId());
+        List<ProgramMultyAssetValue> list = null;
+        for (CoinTo to : toList) {
+            if (to.getAssetsChainId() == CHAIN_ID && to.getAssetsId() == ASSET_ID) {
+                continue;
+            }
+            if (list == null) {
+                list = new ArrayList<>();
+            }
+            list.add(new ProgramMultyAssetValue(to.getAmount(), to.getAssetsChainId(), to.getAssetsId()));
+        }
+        contractData.setMultyAssetValues(list);
     }
 }

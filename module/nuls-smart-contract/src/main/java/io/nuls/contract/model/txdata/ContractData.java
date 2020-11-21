@@ -23,7 +23,10 @@
  */
 package io.nuls.contract.model.txdata;
 
+import io.nuls.contract.vm.program.ProgramMultyAssetValue;
+
 import java.math.BigInteger;
+import java.util.List;
 
 /**
  * @desription:
@@ -50,11 +53,7 @@ public interface ContractData {
 
     String[][] getArgs();
 
-    default int getAssetChainId() {
-        return 0;
-    }
-
-    default int getAssetId() {
-        return 0;
+    default List<ProgramMultyAssetValue> getMultyAssetValues() {
+        return null;
     }
 }
