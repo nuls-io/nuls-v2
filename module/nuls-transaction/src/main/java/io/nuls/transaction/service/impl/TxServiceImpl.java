@@ -649,8 +649,8 @@ public class TxServiceImpl implements TxService {
             //是否停止执行职能合约,如果位true,则取出的智能合约本次打包不再处理,需要还回待打包队列
             boolean stopInvokeContract = false;
 
-            Random random = new Random();
             int packageContractTxMaxCount;
+            /*Random random = new Random();
             int availableProcessors = Runtime.getRuntime().availableProcessors();
             if (availableProcessors <= 4) {
                 packageContractTxMaxCount = 20 + random.nextInt(10);
@@ -658,7 +658,8 @@ public class TxServiceImpl implements TxService {
                 packageContractTxMaxCount = 50 + random.nextInt(10);
             } else {
                 packageContractTxMaxCount = 100 + random.nextInt(20);
-            }
+            }*/
+            packageContractTxMaxCount = 15;
 
             for (int index = 0; ; index++) {
                 long currentTimeMillis = NulsDateUtils.getCurrentTimeMillis();
