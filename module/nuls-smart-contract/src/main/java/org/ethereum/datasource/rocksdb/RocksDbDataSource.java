@@ -17,12 +17,15 @@
  */
 package org.ethereum.datasource.rocksdb;
 
+import io.nuls.core.rockdb.manager.RocksDBManager;
 import io.nuls.core.rockdb.service.BatchOperation;
 import io.nuls.core.rockdb.service.RocksDBService;
 import org.apache.commons.lang3.ArrayUtils;
 import org.ethereum.config.SystemProperties;
 import org.ethereum.datasource.DbSettings;
 import org.ethereum.datasource.DbSource;
+import org.rocksdb.RocksDB;
+import org.rocksdb.RocksDBException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +50,7 @@ public class RocksDbDataSource implements DbSource<byte[]> {
 
     String name;
     boolean alive;
+    RocksDB rocksDB;
 
     DbSettings settings = DbSettings.DEFAULT;
 
@@ -95,6 +99,7 @@ public class RocksDbDataSource implements DbSource<byte[]> {
             if (!ArrayUtils.contains(areas, AREA)) {
                 RocksDBService.createTable(AREA);
             }
+            rocksDB = RocksDBManager.getTable(AREA);
 
             alive = true;
 
@@ -134,21 +139,27 @@ public class RocksDbDataSource implements DbSource<byte[]> {
     public byte[] get(byte[] key) {
         resetDbLock.readLock().lock();
         try {
-            if (logger.isTraceEnabled()) {
-                logger.trace("~> RocksDbDataSource.get(): " + name + ", key: " + toHexString(key));
-            }
+            //if (logger.isTraceEnabled()) {
+            //    logger.trace("~> RocksDbDataSource.get(): " + name + ", key: " + toHexString(key));
+            //}
             try {
-                byte[] ret = RocksDBService.get(AREA, key);
-                if (logger.isTraceEnabled()) {
-                    logger.trace("<~ RocksDbDataSource.get(): " + name + ", key: " + toHexString(key) + ", " + (ret == null ? "null" : ret.length));
-                }
+
+                byte[] ret = rocksDB.get(key);
+                //if (logger.isTraceEnabled()) {
+                //    logger.trace("<~ RocksDbDataSource.get(): " + name + ", key: " + toHexString(key) + ", " + (ret == null ? "null" : ret.length));
+                //}
                 return ret;
             } catch (Exception e) {
                 logger.warn("Exception. Retrying again...", e);
-                byte[] ret = RocksDBService.get(AREA, key);
-                if (logger.isTraceEnabled()) {
-                    logger.trace("<~ RocksDbDataSource.get(): " + name + ", key: " + toHexString(key) + ", " + (ret == null ? "null" : ret.length));
+                byte[] ret = null;
+                try {
+                    ret = rocksDB.get(key);
+                } catch (RocksDBException ex) {
+                    // skip it
                 }
+                //if (logger.isTraceEnabled()) {
+                //    logger.trace("<~ RocksDbDataSource.get(): " + name + ", key: " + toHexString(key) + ", " + (ret == null ? "null" : ret.length));
+                //}
                 return ret;
             }
         } finally {
@@ -158,38 +169,37 @@ public class RocksDbDataSource implements DbSource<byte[]> {
 
     @Override
     public void put(byte[] key, byte[] value) {
-        resetDbLock.readLock().lock();
+        resetDbLock.writeLock().lock();
         try {
-            if (logger.isTraceEnabled()) {
-                logger.trace("~> RocksDbDataSource.put(): " + name + ", key: " + toHexString(key) + ", " + (value == null ? "null" : value.length));
-            }
-            RocksDBService.put(AREA, key, value);
-            if (logger.isTraceEnabled()) {
-                logger.trace("<~ RocksDbDataSource.put(): " + name + ", key: " + toHexString(key) + ", " + (value == null ? "null" : value.length));
-            }
+            //if (logger.isTraceEnabled()) {
+            //    logger.trace("~> RocksDbDataSource.put(): " + name + ", key: " + toHexString(key) + ", " + (value == null ? "null" : value.length));
+            //}
+            rocksDB.put(key, value);
+            //if (logger.isTraceEnabled()) {
+            //    logger.trace("<~ RocksDbDataSource.put(): " + name + ", key: " + toHexString(key) + ", " + (value == null ? "null" : value.length));
+            //}
         } catch (Exception e) {
             logger.error("RocksDbDataSource.put() error", e);
         } finally {
-            resetDbLock.readLock().unlock();
+            resetDbLock.writeLock().unlock();
         }
     }
 
     @Override
     public void delete(byte[] key) {
-        resetDbLock.readLock().lock();
+        resetDbLock.writeLock().lock();
         try {
-            if (logger.isTraceEnabled()) {
-                logger.trace("~> RocksDbDataSource.delete(): " + name + ", key: " + toHexString(key));
-            }
-            RocksDBService.delete(AREA, key);
-            if (logger.isTraceEnabled()) {
-                logger.trace("<~ RocksDbDataSource.delete(): " + name + ", key: " + toHexString(key));
-            }
+            //if (logger.isTraceEnabled()) {
+            //    logger.trace("~> RocksDbDataSource.delete(): " + name + ", key: " + toHexString(key));
+            //}
+            rocksDB.delete(key);
+            //if (logger.isTraceEnabled()) {
+            //    logger.trace("<~ RocksDbDataSource.delete(): " + name + ", key: " + toHexString(key));
+            //}
         } catch (Exception e) {
-            e.printStackTrace();
             logger.error("RocksDbDataSource.delete() error", e);
         } finally {
-            resetDbLock.readLock().unlock();
+            resetDbLock.writeLock().unlock();
         }
     }
 
@@ -200,7 +210,8 @@ public class RocksDbDataSource implements DbSource<byte[]> {
 
     private void updateBatchInternal(Map<byte[], byte[]> rows) throws Exception {
         BatchOperation batchOperation = RocksDBService.createWriteBatch(AREA);
-        for (Map.Entry<byte[], byte[]> entry : rows.entrySet()) {
+        Set<Map.Entry<byte[], byte[]>> entrySet = rows.entrySet();
+        for (Map.Entry<byte[], byte[]> entry : entrySet) {
             if (entry.getValue() == null) {
                 batchOperation.delete(entry.getKey());
             } else {
@@ -212,31 +223,31 @@ public class RocksDbDataSource implements DbSource<byte[]> {
 
     @Override
     public void updateBatch(Map<byte[], byte[]> rows) {
-        resetDbLock.readLock().lock();
+        resetDbLock.writeLock().lock();
         try {
-            if (logger.isTraceEnabled()) {
-                logger.trace("~> RocksDbDataSource.updateBatch(): " + name + ", " + rows.size());
-            }
+            //if (logger.isTraceEnabled()) {
+            //    logger.trace("~> RocksDbDataSource.updateBatch(): " + name + ", " + rows.size());
+            //}
             try {
                 updateBatchInternal(rows);
-                if (logger.isTraceEnabled()) {
-                    logger.trace("<~ RocksDbDataSource.updateBatch(): " + name + ", " + rows.size());
-                }
+                //if (logger.isTraceEnabled()) {
+                //    logger.trace("<~ RocksDbDataSource.updateBatch(): " + name + ", " + rows.size());
+                //}
             } catch (Exception e) {
                 logger.error("Error, retrying one more time...", e);
                 // try one more time
                 try {
                     updateBatchInternal(rows);
-                    if (logger.isTraceEnabled()) {
-                        logger.trace("<~ RocksDbDataSource.updateBatch(): " + name + ", " + rows.size());
-                    }
+                    //if (logger.isTraceEnabled()) {
+                    //    logger.trace("<~ RocksDbDataSource.updateBatch(): " + name + ", " + rows.size());
+                    //}
                 } catch (Exception e1) {
                     logger.error("Error", e);
                     throw new RuntimeException(e);
                 }
             }
         } finally {
-            resetDbLock.readLock().unlock();
+            resetDbLock.writeLock().unlock();
         }
     }
 
