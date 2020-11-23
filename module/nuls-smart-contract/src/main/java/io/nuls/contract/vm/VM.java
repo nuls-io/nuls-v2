@@ -214,18 +214,18 @@ public class VM {
         long startTime = System.nanoTime();
         Object[] runArgs = runArgs(objectRef, methodCode, programInvoke.getArgs());
         long use = System.nanoTime()-startTime;
-        Log.info("===================================================================step 1.1 : {}ns",use);
+        //Log.info("===================================================================step 1.1 : {}ns",use);
         startTime = System.nanoTime();
         if (isEnd()) {
             return;
         }
         initProgramContext(programInvoke);
         use = System.nanoTime()-startTime;
-        Log.info("===================================================================step 1.2 : {}ns",use);
+        //Log.info("===================================================================step 1.2 : {}ns",use);
         startTime = System.nanoTime();
         run(methodCode, runArgs, true);
         use = System.nanoTime()-startTime;
-        Log.info("===================================================================step 1.3 : {}ns",use);
+        //Log.info("===================================================================step 1.3 : {}ns",use);
     }
 
     private Object[] runArgs(ObjectRef objectRef, MethodCode methodCode, String[][] args) {
