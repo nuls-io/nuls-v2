@@ -1,0 +1,231 @@
+package io.nuls.crosschain.nuls.servive.impl;
+
+import com.google.common.collect.Lists;
+import io.nuls.base.RPCUtil;
+import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.CoinData;
+import io.nuls.base.data.CoinFrom;
+import io.nuls.base.data.Transaction;
+import io.nuls.base.signture.P2PHKSignature;
+import io.nuls.base.signture.TransactionSignature;
+import io.nuls.core.basic.Result;
+import io.nuls.core.constant.TxType;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.crypto.ECKey;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.BigIntegerUtils;
+import io.nuls.core.model.StringUtils;
+import io.nuls.crosschain.base.service.ResetLocalVerifierService;
+import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
+import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
+import io.nuls.crosschain.nuls.constant.NulsCrossChainErrorCode;
+import io.nuls.crosschain.nuls.model.bo.Chain;
+import io.nuls.crosschain.nuls.model.po.LocalVerifierPO;
+import io.nuls.crosschain.nuls.rpc.call.AccountCall;
+import io.nuls.crosschain.nuls.rpc.call.ConsensusCall;
+import io.nuls.crosschain.nuls.rpc.call.LedgerCall;
+import io.nuls.crosschain.nuls.rpc.call.TransactionCall;
+import io.nuls.crosschain.nuls.srorage.LocalVerifierService;
+import io.nuls.crosschain.nuls.utils.manager.ChainManager;
+import io.nuls.crosschain.nuls.utils.manager.CoinDataManager;
+
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static io.nuls.base.basic.TransactionFeeCalculator.NORMAL_PRICE_PRE_1024_BYTES;
+import static io.nuls.core.constant.CommonCodeConstanst.PARAMETER_ERROR;
+import static io.nuls.crosschain.nuls.constant.NulsCrossChainConstant.CHAIN_ID_MIN;
+import static io.nuls.crosschain.nuls.constant.NulsCrossChainErrorCode.*;
+import static io.nuls.crosschain.nuls.constant.ParamConstant.TX_HASH;
+
+/**
+ * @Author: zhoulijun
+ * @Time: 2020/11/23 11:17
+ * @Description: 功能描述
+ */
+public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService {
+
+    @Autowired
+    private ChainManager chainManager;
+
+    @Autowired
+    private CoinDataManager coinDataManager;
+
+    @Autowired
+    NulsCrossChainConfig nulsCrossChainConfig;
+
+    @Autowired
+    LocalVerifierService localVerifierService;
+
+    private List<CoinFrom> assemblyCoinFrom(Chain chain, String addressStr) throws NulsException {
+        List<CoinFrom> coinFroms = new ArrayList<>();
+        byte[] address = AddressTool.getAddress(addressStr);
+        if (!AddressTool.validAddress(chain.getChainId(), addressStr)) {
+            //转账交易转出地址必须是本链地址
+            chain.getLogger().error("跨链交易转出账户不为本链账户");
+            throw new NulsException(ADDRESS_IS_NOT_THE_CURRENT_CHAIN);
+        }
+        int assetChainId = chain.getChainId();
+        int assetId = nulsCrossChainConfig.getAssetId();
+        //检查对应资产余额 是否足够
+        Map<String, Object> result = LedgerCall.getBalanceAndNonce(chain, addressStr, assetChainId, assetId);
+        byte[] nonce = RPCUtil.decode((String) result.get("nonce"));
+        BigInteger balance = new BigInteger(result.get("available").toString());
+        if (BigIntegerUtils.isLessThan(balance, NORMAL_PRICE_PRE_1024_BYTES)) {
+            chain.getLogger().error("账户余额不足");
+            throw new NulsException(INSUFFICIENT_BALANCE);
+        }
+        CoinFrom coinFrom = new CoinFrom(address, assetChainId, assetId, NORMAL_PRICE_PRE_1024_BYTES, nonce, NulsCrossChainConstant.UNLOCKED_TX);
+        coinFroms.add(coinFrom);
+        return coinFroms;
+    }
+
+    /**
+     * 创建并广播一个重置本链验证人交易
+     *
+     * @return
+     */
+    @Override
+    public Result createResetLocalVerifierTx(int chainId, String address, String password) throws NulsException, IOException {
+        if (chainId <= CHAIN_ID_MIN) {
+            return Result.getFailed(PARAMETER_ERROR);
+        }
+        if (StringUtils.isBlank(address) && StringUtils.isBlank(password)) {
+            return Result.getFailed(PARAMETER_ERROR);
+        }
+        Chain chain = chainManager.getChainMap().get(chainId);
+        if (chain == null) {
+            return Result.getFailed(CHAIN_NOT_EXIST);
+        }
+        if (!nulsCrossChainConfig.getSeedNodeList().contains(address)) {
+            return Result.getFailed(PARAMETER_ERROR);
+        }
+        Transaction tx = new Transaction(TxType.RESET_LOCAL_VERIFIER_LIST);
+        CoinData coinData = new CoinData();
+        coinData.setFrom(assemblyCoinFrom(chain, address));
+        coinData.setTo(Lists.newArrayList());
+        tx.setCoinData(coinData.serialize());
+
+        TransactionSignature transactionSignature = new TransactionSignature();
+        List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
+        P2PHKSignature p2PHKSignature = AccountCall.signDigest(address, password, tx.getHash().getBytes());
+        p2PHKSignatures.add(p2PHKSignature);
+        transactionSignature.setP2PHKSignatures(p2PHKSignatures);
+        if (!TransactionCall.sendTx(chain, RPCUtil.encode(tx.serialize()))) {
+            chain.getLogger().error("重置本链验证人列表交易发送交易模块失败\n\n");
+            throw new NulsException(INTERFACE_CALL_FAILED);
+        }
+        Map<String, Object> result = new HashMap<>(2);
+        result.put(TX_HASH, tx.getHash().toHex());
+        return Result.getSuccess(SUCCESS).setData(result);
+    }
+
+    /**
+     * 验证此交易的coin data中的from中只能有1个种子节点签名的交易
+     *
+     * @param chainId     chain ID
+     * @param txs         cross chain transaction list
+     * @param blockHeader block header
+     * @return
+     */
+    @Override
+    public Map<String, Object> validate(int chainId, List<Transaction> txs, BlockHeader blockHeader) {
+        Chain chain = chainManager.getChainMap().get(chainId);
+        Map<String, Object> result = new HashMap<>(2);
+        if (chain == null) {
+            result.put("txList", txs);
+            result.put("errorCode", NulsCrossChainErrorCode.CHAIN_NOT_EXIST.getCode());
+            return result;
+        }
+        //一个区块只处理一条重置交易，其他的丢掉
+        List<Transaction> invalidCtxList =  txs.stream().skip(1).collect(Collectors.toList());
+        String errorCode = null;
+        Transaction tx = txs.get(0);
+        try {
+            CoinData coinData = tx.getCoinDataInstance();
+            //只能有一个from
+            if (coinData.getFrom().size() != 1) {
+                result.put("txList", txs);
+                result.put("errorCode", COINDATA_VERIFY_FAIL.getCode());
+                return result;
+            }
+            //必须是种子节点发出的交易
+            if (coinData.getFromAddressList().stream().noneMatch(d -> nulsCrossChainConfig.getSeedNodeList().contains(d))) {
+                result.put("txList", txs);
+                result.put("errorCode", MUST_SEED_ADDRESS_SIGN.getCode());
+                return result;
+            }
+            TransactionSignature transactionSignature = new TransactionSignature();
+            transactionSignature.parse(tx.getTransactionSignature(), 0);
+            byte[] txHashByte = tx.getHash().getBytes();
+            //只能有一个签名
+            if (transactionSignature.getP2PHKSignatures().size() != 1) {
+                chain.getLogger().error("Signature verification failed");
+                throw new NulsException(new Exception("Transaction signature error !"));
+            }
+
+            //验证签名
+            P2PHKSignature signature = transactionSignature.getP2PHKSignatures().get(0);
+            if (!ECKey.verify(txHashByte, signature.getSignData().getSignBytes(), signature.getPublicKey())) {
+                chain.getLogger().error("Signature verification failed");
+                throw new NulsException(new Exception("Transaction signature error !"));
+            }
+            //签名必须是种子节点
+            String signAddress = AddressTool.getStringAddressByBytes(AddressTool.getAddress(signature.getPublicKey(), chain.getChainId()));
+            if (!nulsCrossChainConfig.getSeedNodeList().contains(signAddress)) {
+                chain.getLogger().error("Signature verification failed");
+                throw new NulsException(NulsCrossChainErrorCode.SIGNATURE_ERROR);
+            }
+        } catch (NulsException e) {
+            invalidCtxList.add(tx);
+            chain.getLogger().error("reset local verifier Transaction Verification Failure");
+            chain.getLogger().error(e);
+            errorCode = e.getErrorCode().getCode();
+        }
+        result.put("txList", invalidCtxList);
+        result.put("errorCode", errorCode);
+        return result;
+    }
+
+    /**
+     * 1.将当前的本链验证人列表存储在old_local_verifier表中 key为高度
+     * 2.从共识模块获取最新的节点列表，将出块地址刷新到本链验证人列表中。
+     * 3.组装一个平行链验证人初始化交易广播到平行链
+     *
+     * @param chainId     chain ID
+     * @param txs         cross chain transaction list
+     * @param blockHeader block header
+     * @return
+     */
+    @Override
+    public boolean commitTx(int chainId, List<Transaction> txs, BlockHeader blockHeader) {
+        Chain chain = chainManager.getChainMap().get(chainId);
+        if (chain == null) {
+            return false;
+        }
+        Set<String> allAgentPackingAddress = new HashSet<>(ConsensusCall.getWorkAgentList(chain));
+        allAgentPackingAddress.addAll(nulsCrossChainConfig.getSeedNodeList());
+        chain.getLogger().info("获取到当前网络最新的出块地址列表（包括种子节点）:{}",allAgentPackingAddress);
+
+        //备份当前本链验证人列表
+        localVerifierService.backup(chainId,blockHeader.getHeight());
+        LocalVerifierPO localVerifierPO = new LocalVerifierPO();
+        localVerifierPO.setVerifierList(new ArrayList<>(allAgentPackingAddress));
+        localVerifierService.save(localVerifierPO,chainId);
+        chain.getLogger().info("重置本链验证人列表完成");
+        return true;
+    }
+
+    @Override
+    public boolean rollbackTx(int chainId, List<Transaction> txs, BlockHeader blockHeader) {
+        Chain chain = chainManager.getChainMap().get(chainId);
+        if (chain == null) {
+            return false;
+        }
+        return localVerifierService.rollback(chainId,blockHeader.getHeight());
+    }
+
+}
