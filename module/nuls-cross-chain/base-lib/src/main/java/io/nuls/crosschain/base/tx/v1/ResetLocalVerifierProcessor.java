@@ -42,11 +42,17 @@ public class ResetLocalVerifierProcessor implements TransactionProcessor {
 
     @Override
     public boolean commit(int chainId, List<Transaction> txs, BlockHeader blockHeader) {
+        if(txs.isEmpty()){
+            return true;
+        }
         return resetLocalVerifierService.commitTx(chainId, txs, blockHeader);
     }
 
     @Override
     public boolean rollback(int chainId, List<Transaction> txs, BlockHeader blockHeader) {
+        if(txs.isEmpty()){
+            return true;
+        }
         return resetLocalVerifierService.rollbackTx(chainId, txs, blockHeader);
     }
 
