@@ -23,13 +23,14 @@ import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainErrorCode;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.model.po.LocalVerifierPO;
-import io.nuls.crosschain.nuls.rpc.call.AccountCall;
-import io.nuls.crosschain.nuls.rpc.call.ConsensusCall;
-import io.nuls.crosschain.nuls.rpc.call.LedgerCall;
-import io.nuls.crosschain.nuls.rpc.call.TransactionCall;
+import io.nuls.crosschain.nuls.rpc.call.*;
 import io.nuls.crosschain.nuls.srorage.LocalVerifierService;
+import io.nuls.crosschain.nuls.utils.TxUtil;
 import io.nuls.crosschain.nuls.utils.manager.ChainManager;
 import io.nuls.crosschain.nuls.utils.manager.CoinDataManager;
+import io.nuls.crosschain.nuls.utils.manager.LocalVerifierManager;
+import io.nuls.crosschain.nuls.utils.thread.CrossTxHandler;
+import io.nuls.crosschain.nuls.utils.thread.ResetOtherChainVerifierListHandler;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -63,8 +64,10 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
     @Autowired
     LocalVerifierService localVerifierService;
 
+    @Autowired
+    LocalVerifierManager localVerifierManager;
+
     private CoinData assemblyCoinFrom(Chain chain, String addressStr) throws NulsException {
-        List<CoinFrom> coinFroms = new ArrayList<>();
         byte[] address = AddressTool.getAddress(addressStr);
         if (!AddressTool.validAddress(chain.getChainId(), addressStr)) {
             //转账交易转出地址必须是本链地址
@@ -220,13 +223,29 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
         Set<String> allAgentPackingAddress = new HashSet<>(ConsensusCall.getWorkAgentList(chain));
         allAgentPackingAddress.addAll(nulsCrossChainConfig.getSeedNodeList());
         chain.getLogger().info("获取到当前网络最新的出块地址列表（包括种子节点）:{}",allAgentPackingAddress);
-
         //备份当前本链验证人列表
         localVerifierService.backup(chainId,blockHeader.getHeight());
-        LocalVerifierPO localVerifierPO = new LocalVerifierPO();
-        localVerifierPO.setVerifierList(new ArrayList<>(allAgentPackingAddress));
-        localVerifierService.save(localVerifierPO,chainId);
-        chain.getLogger().info("重置本链验证人列表完成:{}",localVerifierService.get(chainId));
+        chain.getSwitchVerifierLock().writeLock().lock();
+        try{
+            boolean res = LocalVerifierManager.initLocalVerifier(chain,new ArrayList<>(allAgentPackingAddress));
+            if(!res){
+                chain.getLogger().error("重置本链验证人列表失败");
+                return false;
+            }
+        }finally {
+            chain.getSwitchVerifierLock().writeLock().unlock();
+        }
+        chain.getLogger().info("重置本链验证人列表完成:{}",chain.getVerifierList());
+        int syncStatus = BlockCall.getBlockStatus(chain);
+        try {
+            //组装一个重置平行链存储的主网验证人列表的交易
+            Transaction initOtherVeriferTx = TxUtil.createVerifierInitTx(chain.getVerifierList(), NulsDateUtils.getNanoTime(), chainId);
+            chain.getCrossTxThreadPool().execute(
+                    new ResetOtherChainVerifierListHandler(chain, initOtherVeriferTx,syncStatus));
+            chain.getLogger().info("发起一笔重置平行链存储的主链验证人列表的交易,txHash:{}",initOtherVeriferTx.getHash().toHex());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return true;
     }
 
