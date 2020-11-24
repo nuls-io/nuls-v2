@@ -305,14 +305,20 @@ public class TxServiceImpl implements TxService {
         //验证签名
         validateTxSignature(tx, txRegister, chain);
         //如果有coinData, 则进行验证,有一些交易(黄牌)没有coinData数据
-        if (tx.getType() == TxType.YELLOW_PUNISH || tx.getType() == TxType.VERIFIER_CHANGE || tx.getType() == TxType.VERIFIER_INIT  || tx.getType() == TxType.REGISTERED_CHAIN_CHANGE) {
+        int txType = tx.getType();
+        if (txType == TxType.YELLOW_PUNISH
+                || txType == TxType.VERIFIER_CHANGE
+                || txType == TxType.VERIFIER_INIT
+                || txType == TxType.REGISTERED_CHAIN_CHANGE) {
             return;
         }
         CoinData coinData = TxUtil.getCoinData(tx);
         validateCoinFromBase(chain, txRegister, coinData.getFrom());
         validateCoinToBase(chain, txRegister, coinData.getTo());
         if (txRegister.getVerifyFee()) {
-            validateFee(chain, tx.getType(), tx.size(), coinData, txRegister);
+            /* 2020/11/24 基础验证中验证手续费获取交易size时, 去掉交易签名的size */
+            int validateTxSize = tx.size() - SerializeUtils.sizeOfBytes(tx.getTransactionSignature());
+            validateFee(chain, tx.getType(), validateTxSize, coinData, txRegister);
         }
     }
 
