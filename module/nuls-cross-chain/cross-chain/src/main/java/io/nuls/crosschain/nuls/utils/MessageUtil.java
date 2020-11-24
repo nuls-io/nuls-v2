@@ -296,13 +296,10 @@ public class MessageUtil {
             signCount = signature.getSignersCount();
             if (signCount >= byzantineCount) {
                 ctx.setTransactionSignature(signature.serialize());
-                ctxStatusPO.setStatus(TxStatusEnum.CONFIRMED.getStatus());
-                ctxStatusService.save(realHash, ctxStatusPO, chain.getChainId());
                 saveCtxSendHeight(chain, broadHeight, ctx);
                 chain.getLogger().info("跨链交易拜占庭完成，放入待打包队列，等待广播，Hash:{},sendHeight:{},txType:{}",ctx.getHash().toHex(), broadHeight, ctx.getType());
                 //饱和签名数，在最低签名数的基础上上浮30%
-//                int fullByzantineCount = byzantineCount + (int)(byzantineCount * .3);
-                int fullByzantineCount = byzantineCount + 2;
+                int fullByzantineCount = byzantineCount + (int)((agentCount - byzantineCount) * .3);
                 if(signCount >= fullByzantineCount){
                     chain.getLogger().info("跨链交易签名数达到饱和签名数:{}，ctx设置为CONFIRMED状态，本节点不再处理此交易",signCount);
                     ctxStatusPO.setStatus(TxStatusEnum.CONFIRMED.getStatus());
