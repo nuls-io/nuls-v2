@@ -222,6 +222,7 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
         if (chain == null) {
             return false;
         }
+        Transaction tx = txs.get(0);
         Set<String> allAgentPackingAddress = new HashSet<>(ConsensusCall.getWorkAgentList(chain));
         allAgentPackingAddress.addAll(nulsCrossChainConfig.getSeedNodeList());
         chain.getLogger().info("获取到当前网络最新的出块地址列表（包括种子节点）:{}",allAgentPackingAddress);
@@ -241,10 +242,10 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
         int syncStatus = BlockCall.getBlockStatus(chain);
         try {
             //组装一个重置平行链存储的主网验证人列表的交易
-            Transaction initOtherVeriferTx = TxUtil.createVerifierInitTx(chain.getVerifierList(), NulsDateUtils.getNanoTime(), chainId);
+            Transaction initOtherVerifierTx = TxUtil.createVerifierInitTx(chain.getVerifierList(), tx.getTime(), chainId);
             chain.getCrossTxThreadPool().execute(
-                    new ResetOtherChainVerifierListHandler(chain, initOtherVeriferTx,syncStatus));
-            String txHash = initOtherVeriferTx.getHash().toHex();
+                    new ResetOtherChainVerifierListHandler(chain, initOtherVerifierTx,syncStatus));
+            String txHash = initOtherVerifierTx.getHash().toHex();
             resetOtherVerifierTxList.add(txHash);
             chain.getLogger().info("发起一笔重置平行链存储的主链验证人列表的交易,txHash:{}",txHash);
         } catch (IOException e) {
