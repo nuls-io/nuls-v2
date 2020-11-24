@@ -192,6 +192,7 @@ public class CommandHandler implements InitializingBean {
         register(getBean(GetCrossChainRegisterInfoProcessor.class));
         register(getBean(GetCrossAssetInfoProcessor.class));
         register(getBean(GetCrossTxStateProcessor.class));
+        register(getBean(ResetLocalVerifierTxProcessor.class));
         JSONUtils.getInstance().configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
     }
 

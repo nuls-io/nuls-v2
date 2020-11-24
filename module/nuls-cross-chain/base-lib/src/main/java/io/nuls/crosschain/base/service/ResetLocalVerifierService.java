@@ -22,7 +22,7 @@ public interface ResetLocalVerifierService {
      *
      * @return processor result
      * */
-    Result createResetLocalVerifierTx(int chainId,String address,String password) throws NulsException, IOException;
+    Result createResetLocalVerifierTx(int chainId,String address,String password) ;
 
     /**
      * 交易验证

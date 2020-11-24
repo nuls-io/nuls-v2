@@ -12,6 +12,8 @@ import io.nuls.core.rpc.model.message.Response;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.constant.CrossChainErrorCode;
 import io.nuls.crosschain.base.message.CirculationMessage;
+import io.nuls.crosschain.base.model.dto.input.CoinDTO;
+import io.nuls.crosschain.base.service.ResetLocalVerifierService;
 import io.nuls.crosschain.nuls.constant.ParamConstant;
 import io.nuls.crosschain.nuls.servive.MainNetService;
 import io.nuls.crosschain.nuls.srorage.RegisteredCrossChainService;
@@ -32,6 +34,9 @@ public class MainNetCmd extends BaseCmd {
 
     @Autowired
     RegisteredCrossChainService registeredCrossChainService;
+
+    @Autowired
+    ResetLocalVerifierService resetLocalVerifierService;
 
     /**
      * 友链向主网链管理模块注册跨链信息,链管理模块通知跨链模块
@@ -180,6 +185,26 @@ public class MainNetCmd extends BaseCmd {
     @CmdAnnotation(cmd = "cc_getRegisterChainInfo", version = 1.0, description = "获取所有注册的链信息")
     public Response getRegisterChainInfo(Map<String,Object> params){
         return success(registeredCrossChainService.get());
+    }
+
+    @CmdAnnotation(cmd = "createResetLocalVerifierTx", version = 1.0, description = "创建一个重置本链验证人交易交易")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
+    @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "调用地址")
+    @Parameter(parameterName = "password", requestType = @TypeDescriptor(value = String.class), parameterDes = "调用地址密码")
+    @Parameter(parameterName = "remark", parameterType = "String", parameterDes = "备注", canNull = true)
+    @ResponseData(name = "返回值", description = "交易HASH", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "txHash", description = "交易HASH")
+    }))
+    public Response createResetLocalVerifierTx(Map<String,Object> params){
+        int chainId = Integer.parseInt(params.get("chainId").toString());
+        String address = (String) params.get("address");
+        String password = (String) params.get("password");
+        Result<Map> res = resetLocalVerifierService.createResetLocalVerifierTx(chainId,address,password);
+        if(res.isSuccess()){
+            return success(res);
+        }else{
+            return failed(res.getErrorCode());
+        }
     }
 
 }

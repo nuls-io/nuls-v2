@@ -3,19 +3,20 @@ package io.nuls.crosschain.nuls.servive.impl;
 import com.google.common.collect.Lists;
 import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.CoinData;
-import io.nuls.base.data.CoinFrom;
-import io.nuls.base.data.Transaction;
+import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.TransactionSignature;
 import io.nuls.core.basic.Result;
+import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.ECKey;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.log.Log;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.crosschain.base.service.ResetLocalVerifierService;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
@@ -33,6 +34,7 @@ import io.nuls.crosschain.nuls.utils.manager.CoinDataManager;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static io.nuls.base.basic.TransactionFeeCalculator.NORMAL_PRICE_PRE_1024_BYTES;
@@ -46,6 +48,7 @@ import static io.nuls.crosschain.nuls.constant.ParamConstant.TX_HASH;
  * @Time: 2020/11/23 11:17
  * @Description: 功能描述
  */
+@Component
 public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService {
 
     @Autowired
@@ -60,7 +63,7 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
     @Autowired
     LocalVerifierService localVerifierService;
 
-    private List<CoinFrom> assemblyCoinFrom(Chain chain, String addressStr) throws NulsException {
+    private CoinData assemblyCoinFrom(Chain chain, String addressStr) throws NulsException {
         List<CoinFrom> coinFroms = new ArrayList<>();
         byte[] address = AddressTool.getAddress(addressStr);
         if (!AddressTool.validAddress(chain.getChainId(), addressStr)) {
@@ -78,9 +81,10 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
             chain.getLogger().error("账户余额不足");
             throw new NulsException(INSUFFICIENT_BALANCE);
         }
-        CoinFrom coinFrom = new CoinFrom(address, assetChainId, assetId, NORMAL_PRICE_PRE_1024_BYTES, nonce, NulsCrossChainConstant.UNLOCKED_TX);
-        coinFroms.add(coinFrom);
-        return coinFroms;
+        CoinData coinData = new CoinData();
+        coinData.setFrom(List.of(new CoinFrom(address, assetChainId, assetId, NORMAL_PRICE_PRE_1024_BYTES, nonce, NulsCrossChainConstant.UNLOCKED_TX)));
+        coinData.setTo(List.of(new CoinTo(address,assetChainId,assetId,BigInteger.ZERO)));
+        return coinData;
     }
 
     /**
@@ -89,7 +93,7 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
      * @return
      */
     @Override
-    public Result createResetLocalVerifierTx(int chainId, String address, String password) throws NulsException, IOException {
+    public Result createResetLocalVerifierTx(int chainId, String address, String password) {
         if (chainId <= CHAIN_ID_MIN) {
             return Result.getFailed(PARAMETER_ERROR);
         }
@@ -103,24 +107,31 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
         if (!nulsCrossChainConfig.getSeedNodeList().contains(address)) {
             return Result.getFailed(PARAMETER_ERROR);
         }
-        Transaction tx = new Transaction(TxType.RESET_LOCAL_VERIFIER_LIST);
-        CoinData coinData = new CoinData();
-        coinData.setFrom(assemblyCoinFrom(chain, address));
-        coinData.setTo(Lists.newArrayList());
-        tx.setCoinData(coinData.serialize());
-
-        TransactionSignature transactionSignature = new TransactionSignature();
-        List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
-        P2PHKSignature p2PHKSignature = AccountCall.signDigest(address, password, tx.getHash().getBytes());
-        p2PHKSignatures.add(p2PHKSignature);
-        transactionSignature.setP2PHKSignatures(p2PHKSignatures);
-        if (!TransactionCall.sendTx(chain, RPCUtil.encode(tx.serialize()))) {
-            chain.getLogger().error("重置本链验证人列表交易发送交易模块失败\n\n");
-            throw new NulsException(INTERFACE_CALL_FAILED);
+        try {
+            Transaction tx = new Transaction(TxType.RESET_LOCAL_VERIFIER_LIST);
+            tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
+            tx.setCoinData(assemblyCoinFrom(chain,address).serialize());
+            TransactionSignature transactionSignature = new TransactionSignature();
+            List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
+            P2PHKSignature p2PHKSignature = AccountCall.signDigest(address, password, tx.getHash().getBytes());
+            p2PHKSignatures.add(p2PHKSignature);
+            transactionSignature.setP2PHKSignatures(p2PHKSignatures);
+            tx.setTransactionSignature(transactionSignature.serialize());
+            if (!TransactionCall.sendTx(chain, RPCUtil.encode(tx.serialize()))) {
+                chain.getLogger().error("重置本链验证人列表交易发送交易模块失败\n\n");
+                throw new NulsException(INTERFACE_CALL_FAILED);
+            }
+            Map<String, Object> result = new HashMap<>(2);
+            result.put(TX_HASH, tx.getHash().toHex());
+            return Result.getSuccess(SUCCESS).setData(result);
+        }catch (NulsException e){
+            chain.getLogger().error("创建重置本链验证人列表交易时捕获异常",e);
+            return Result.getFailed(e.getErrorCode());
+        }catch (Throwable e){
+            chain.getLogger().error("创建重置本链验证人列表交易时捕获到未知异常,{}",e.getMessage(),e);
+            return Result.getFailed(CommonCodeConstanst.SYS_UNKOWN_EXCEPTION);
         }
-        Map<String, Object> result = new HashMap<>(2);
-        result.put(TX_HASH, tx.getHash().toHex());
-        return Result.getSuccess(SUCCESS).setData(result);
+
     }
 
     /**
@@ -163,15 +174,15 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
             byte[] txHashByte = tx.getHash().getBytes();
             //只能有一个签名
             if (transactionSignature.getP2PHKSignatures().size() != 1) {
-                chain.getLogger().error("Signature verification failed");
-                throw new NulsException(new Exception("Transaction signature error !"));
+                chain.getLogger().error("signatures can not be null");
+                throw new NulsException(NulsCrossChainErrorCode.SIGNATURE_ERROR);
             }
 
             //验证签名
             P2PHKSignature signature = transactionSignature.getP2PHKSignatures().get(0);
             if (!ECKey.verify(txHashByte, signature.getSignData().getSignBytes(), signature.getPublicKey())) {
                 chain.getLogger().error("Signature verification failed");
-                throw new NulsException(new Exception("Transaction signature error !"));
+                throw new NulsException(NulsCrossChainErrorCode.SIGNATURE_ERROR);
             }
             //签名必须是种子节点
             String signAddress = AddressTool.getStringAddressByBytes(AddressTool.getAddress(signature.getPublicKey(), chain.getChainId()));
@@ -215,7 +226,7 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
         LocalVerifierPO localVerifierPO = new LocalVerifierPO();
         localVerifierPO.setVerifierList(new ArrayList<>(allAgentPackingAddress));
         localVerifierService.save(localVerifierPO,chainId);
-        chain.getLogger().info("重置本链验证人列表完成");
+        chain.getLogger().info("重置本链验证人列表完成:{}",localVerifierService.get(chainId));
         return true;
     }
 
