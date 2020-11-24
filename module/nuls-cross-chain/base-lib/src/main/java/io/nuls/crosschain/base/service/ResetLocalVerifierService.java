@@ -54,4 +54,17 @@ public interface ResetLocalVerifierService {
      * */
     boolean rollbackTx(int chainId, List<Transaction> txs, BlockHeader blockHeader);
 
+    /**
+     * 判断初始化验证人交易是不是用于重置平行链上的主链验证人列表
+     * @param txHash
+     * @return
+     */
+    boolean isResetOtherVerifierTx(String txHash);
+
+    /**
+     * 重置平行链上的主链验证人交易已经完成拜占庭签名，从缓存中移除
+     * @param txHash
+     */
+    void finishResetOtherVerifierTx(String txHash);
+
 }

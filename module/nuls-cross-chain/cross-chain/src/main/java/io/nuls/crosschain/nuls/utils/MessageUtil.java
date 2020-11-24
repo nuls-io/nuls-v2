@@ -22,6 +22,7 @@ import io.nuls.crosschain.base.message.GetOtherCtxMessage;
 import io.nuls.crosschain.base.model.bo.ChainInfo;
 import io.nuls.crosschain.base.model.bo.txdata.CrossTransferData;
 import io.nuls.crosschain.base.model.bo.txdata.VerifierChangeData;
+import io.nuls.crosschain.base.service.ResetLocalVerifierService;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.constant.ParamConstant;
@@ -40,6 +41,7 @@ import io.nuls.crosschain.nuls.srorage.SendHeightService;
 import io.nuls.crosschain.nuls.utils.manager.ChainManager;
 
 import java.io.IOException;
+import java.sql.ResultSet;
 import java.util.*;
 
 /**
@@ -51,6 +53,7 @@ import java.util.*;
  */
 @Component
 public class MessageUtil {
+
     @Autowired
     private static ConvertHashService convertHashService;
 
@@ -68,6 +71,9 @@ public class MessageUtil {
 
     @Autowired
     private static SendHeightService sendHeightService;
+
+    @Autowired
+    private static ResetLocalVerifierService resetLocalVerifierService;
 
     /**
      * 对本链广播的交易进行处理
@@ -171,12 +177,22 @@ public class MessageUtil {
         signature.getP2PHKSignatures().add(p2PHKSignature);
         //交易签名拜占庭
         List<String> packAddressList;
+        //拜赞庭签名饱和度上浮值 0为不上浮
+        Float signCountOverflow = 0F;
         if (ctx.getType() == TxType.VERIFIER_INIT) {
-            packAddressList = (List<String>) ConsensusCall.getSeedNodeList(chain).get(ParamConstant.PARAM_PACK_ADDRESS_LIST);
+            String txHash = realHash.toHex();
+            //这是一笔特殊的初始化验证人交易，用户重置平行链上存储的主网验证人列表
+            if(resetLocalVerifierService.isResetOtherVerifierTx(txHash)){
+                packAddressList = chain.getVerifierList();
+                //1为上浮到全部
+                signCountOverflow = 1F;
+            }else{
+                packAddressList = (List<String>) ConsensusCall.getSeedNodeList(chain).get(ParamConstant.PARAM_PACK_ADDRESS_LIST);
+            }
         } else {
             packAddressList = chain.getVerifierList();
         }
-        signByzantineInChain(chain, ctx, signature, packAddressList, realHash);
+        signByzantineInChain(chain, ctx, signature, packAddressList, realHash,signCountOverflow);
         NetWorkCall.broadcast(chainId, messageBody, excludeNodes, CommandConstant.BROAD_CTX_SIGN_MESSAGE, false);
         chain.getLogger().info("将新收到的跨链交易签名广播给链接到的其他节点,Hash:{},签名:{}\n\n", nativeHex, signHex);
     }
@@ -195,14 +211,33 @@ public class MessageUtil {
             Transaction ctx,
             TransactionSignature signature,
             List<String> packAddressList,
-            NulsHash realHash) throws NulsException, IOException {
+            NulsHash realHash,
+            Float signCountOverflow) throws NulsException, IOException{
         if (ctx.getType() == TxType.VERIFIER_INIT) {
-            return verifierInitLocalByzantine(chain, ctx, signature, packAddressList, realHash,0F);
+            return verifierInitLocalByzantine(chain, ctx, signature, packAddressList, realHash,signCountOverflow);
         } else if (ctx.getType() == TxType.VERIFIER_CHANGE) {
             return verifierChangeLocalByzantine(chain, ctx, signature, realHash);
         } else {
             return crossTransferLocalByzantine(chain, ctx, signature, realHash);
         }
+    }
+
+    /**
+     * 交易签名拜占庭验证
+     *
+     * @param chain           本链信息
+     * @param ctx             跨链交易
+     * @param signature       签名列表
+     * @param packAddressList 验证账户列表
+     * @return 拜占庭验证是否通过
+     */
+    public static boolean signByzantineInChain(
+            Chain chain,
+            Transaction ctx,
+            TransactionSignature signature,
+            List<String> packAddressList,
+            NulsHash realHash) throws NulsException, IOException {
+        return signByzantineInChain(chain,ctx,signature,packAddressList,realHash,0F);
     }
 
     /**
@@ -250,6 +285,7 @@ public class MessageUtil {
                 if(signCount >= fullByzantineCount){
                     chain.getLogger().info("初始化验证人交易签名数达到饱和签名数:{}，ctx设置为CONFIRMED状态，本节点不再处理此交易",signCount);
                     ctxStatusPO.setStatus(TxStatusEnum.CONFIRMED.getStatus());
+                    resetLocalVerifierService.finishResetOtherVerifierTx(realHash.toHex());
                 }else{
                     chain.getLogger().debug("初始化验证人交易签名数达到最低签名数:{}，但为达到饱和签名数:{}，本节点将继续处理此交易",signCount,fullByzantineCount);
                 }

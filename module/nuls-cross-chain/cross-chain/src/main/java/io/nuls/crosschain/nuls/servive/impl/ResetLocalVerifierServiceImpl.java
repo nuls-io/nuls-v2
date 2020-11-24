@@ -1,6 +1,5 @@
 package io.nuls.crosschain.nuls.servive.impl;
 
-import com.google.common.collect.Lists;
 import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
@@ -13,7 +12,6 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.ECKey;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.log.Log;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.util.NulsDateUtils;
@@ -22,20 +20,17 @@ import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainErrorCode;
 import io.nuls.crosschain.nuls.model.bo.Chain;
-import io.nuls.crosschain.nuls.model.po.LocalVerifierPO;
 import io.nuls.crosschain.nuls.rpc.call.*;
 import io.nuls.crosschain.nuls.srorage.LocalVerifierService;
 import io.nuls.crosschain.nuls.utils.TxUtil;
 import io.nuls.crosschain.nuls.utils.manager.ChainManager;
 import io.nuls.crosschain.nuls.utils.manager.CoinDataManager;
 import io.nuls.crosschain.nuls.utils.manager.LocalVerifierManager;
-import io.nuls.crosschain.nuls.utils.thread.CrossTxHandler;
 import io.nuls.crosschain.nuls.utils.thread.ResetOtherChainVerifierListHandler;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static io.nuls.base.basic.TransactionFeeCalculator.NORMAL_PRICE_PRE_1024_BYTES;
@@ -66,6 +61,13 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
 
     @Autowired
     LocalVerifierManager localVerifierManager;
+
+    /**
+     * 缓存重置异构链存储的主链验证人的初始化验证人交易的hash
+     * 用于在处理拜占庭签名时与普通的初始化验证人交易进行区别
+     * 本节点处理完此交易后交易hash从此列表移除
+     */
+    private Set<String> resetOtherVerifierTxList = new HashSet<>();
 
     private CoinData assemblyCoinFrom(Chain chain, String addressStr) throws NulsException {
         byte[] address = AddressTool.getAddress(addressStr);
@@ -242,12 +244,16 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
             Transaction initOtherVeriferTx = TxUtil.createVerifierInitTx(chain.getVerifierList(), NulsDateUtils.getNanoTime(), chainId);
             chain.getCrossTxThreadPool().execute(
                     new ResetOtherChainVerifierListHandler(chain, initOtherVeriferTx,syncStatus));
-            chain.getLogger().info("发起一笔重置平行链存储的主链验证人列表的交易,txHash:{}",initOtherVeriferTx.getHash().toHex());
+            String txHash = initOtherVeriferTx.getHash().toHex();
+            resetOtherVerifierTxList.add(txHash);
+            chain.getLogger().info("发起一笔重置平行链存储的主链验证人列表的交易,txHash:{}",txHash);
         } catch (IOException e) {
             e.printStackTrace();
         }
         return true;
     }
+
+
 
     @Override
     public boolean rollbackTx(int chainId, List<Transaction> txs, BlockHeader blockHeader) {
@@ -256,6 +262,16 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
             return false;
         }
         return localVerifierService.rollback(chainId,blockHeader.getHeight());
+    }
+
+    @Override
+    public boolean isResetOtherVerifierTx(String txHash) {
+        return resetOtherVerifierTxList.contains(txHash);
+    }
+
+    @Override
+    public void finishResetOtherVerifierTx(String txHash) {
+        resetOtherVerifierTxList.remove(txHash);
     }
 
 }
