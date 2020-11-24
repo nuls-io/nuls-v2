@@ -1,5 +1,6 @@
 package io.nuls.crosschain.nuls.servive.impl;
 
+import com.google.common.collect.Lists;
 import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
@@ -15,6 +16,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.util.NulsDateUtils;
+import io.nuls.crosschain.base.model.bo.ChainInfo;
 import io.nuls.crosschain.base.service.ResetLocalVerifierService;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
@@ -61,6 +63,8 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
 
     @Autowired
     LocalVerifierManager localVerifierManager;
+
+
 
     /**
      * 缓存重置异构链存储的主链验证人的初始化验证人交易的hash
@@ -240,17 +244,26 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
         }
         chain.getLogger().info("重置本链验证人列表完成:{}",chain.getVerifierList());
         int syncStatus = BlockCall.getBlockStatus(chain);
-        try {
-            //组装一个重置平行链存储的主网验证人列表的交易
-            Transaction initOtherVerifierTx = TxUtil.createVerifierInitTx(chain.getVerifierList(), tx.getTime(), chainId);
+        List<ChainInfo> otherChainInfoList = chainManager.getRegisteredCrossChainList().stream().filter(d->d.getChainId() != chainId).collect(Collectors.toList()); ;
+        List<Transaction> newTxList = Lists.newArrayList();
+        otherChainInfoList.forEach(chainInfo -> {
+            try {
+                    //组装一个重置平行链存储的主网验证人列表的交易
+                    newTxList.add(TxUtil.createVerifierInitTx(chain.getVerifierList(), chainInfo.getRegisterTime(), chainInfo.getChainId()));
+            } catch (IOException e) {
+                chain.getLogger().error("组装重置平行链存储的主网验证人列表的交易失败",e);
+            }
+        });
+        if(otherChainInfoList.size() != newTxList.size()){
+            return false;
+        }
+        newTxList.forEach(initOtherVerifierTx->{
             chain.getCrossTxThreadPool().execute(
                     new ResetOtherChainVerifierListHandler(chain, initOtherVerifierTx,syncStatus));
             String txHash = initOtherVerifierTx.getHash().toHex();
             resetOtherVerifierTxList.add(txHash);
             chain.getLogger().info("发起一笔重置平行链存储的主链验证人列表的交易,txHash:{}",txHash);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        });
         return true;
     }
 
