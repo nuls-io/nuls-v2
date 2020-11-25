@@ -213,7 +213,7 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
     /**
      * 1.将当前的本链验证人列表存储在old_local_verifier表中 key为高度
      * 2.从共识模块获取最新的节点列表，将出块地址刷新到本链验证人列表中。
-     * 3.组装一个平行链验证人初始化交易广播到平行链
+     * 3.组装一个平行链验证人初始化交易广播到平行链,所有注册的平行链都要广播。
      *
      * @param chainId     chain ID
      * @param txs         cross chain transaction list
