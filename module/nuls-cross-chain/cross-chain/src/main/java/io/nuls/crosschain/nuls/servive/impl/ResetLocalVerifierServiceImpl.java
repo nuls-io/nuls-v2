@@ -249,7 +249,7 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
         otherChainInfoList.forEach(chainInfo -> {
             try {
                     //组装一个重置平行链存储的主网验证人列表的交易
-                    newTxList.add(TxUtil.createVerifierInitTx(chain.getVerifierList(), chainInfo.getRegisterTime(), chainInfo.getChainId()));
+                    newTxList.add(TxUtil.createVerifierInitTx(chain.getVerifierList(), tx.getTime(), chainInfo.getChainId()));
             } catch (IOException e) {
                 chain.getLogger().error("组装重置平行链存储的主网验证人列表的交易失败",e);
             }
