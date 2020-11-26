@@ -16,10 +16,8 @@ fi
 ./package -a protocol-update
 ./package -a nuls-api
 ./package -O ${OS} -o NULS_Wallet
-cp config/nuls.ncf NULS_Wallet/nuls.ncf
-echo "" >> NULS_WALLET/nuls.ncf
-echo "[cmd-client]" >> NULS_WALLET/nuls.ncf
-echo "clientVersion=`cat NULS_WALLET/version`" >> NULS_WALLET/nuls.ncf
+PACKAGE_VERSION=`cat NULS_WALLET/version`
+eval "sed -e 's/%PACKAGE_VERSION%/${PACKAGE_VERSION}/g' config/nuls.ncf > NULS_Wallet/nuls.ncf"
 cp config/genesis-block.json NULS_Wallet/genesis-block.json
 tar -czf NULS_Wallet_${OS}_v2.6.0.1.tar NULS_Wallet
 rm -rf NULS_Wallet

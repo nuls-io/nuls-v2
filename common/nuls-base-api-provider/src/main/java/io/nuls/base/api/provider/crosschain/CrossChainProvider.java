@@ -32,4 +32,11 @@ public interface CrossChainProvider {
      */
     Result<String> rehandleCtx(RehandleCtxReq req);
 
+    /**
+     * 创建一个通知所有节点重置本地验证人列表的交易
+     * @param req
+     * @return
+     */
+    Result<String> resetLocalVerifier(CreateResetLocalVerifierTxReq req);
+
 }
