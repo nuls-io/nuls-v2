@@ -382,8 +382,8 @@ public class MessageUtil {
                 ctx.setTransactionSignature(signature.serialize());
                 saveCtxSendHeight(chain, broadHeight, ctx);
                 chain.getLogger().info("跨链交易拜占庭完成，放入待打包队列，等待广播，Hash:{},sendHeight:{},txType:{}",ctx.getHash().toHex(), broadHeight, ctx.getType());
-                //饱和签名数，在最低签名数的基础上上浮30%
-                float overflow = (agentCount - byzantineCount) * .3F;
+                //饱和签名数，在最低签名数的基础上上浮5%
+                float overflow = (agentCount - byzantineCount) * .05F;
                 int fullByzantineCount = byzantineCount + (int)(Math.ceil(overflow));
                 if(fullByzantineCount > agentCount){
                     fullByzantineCount = agentCount;
