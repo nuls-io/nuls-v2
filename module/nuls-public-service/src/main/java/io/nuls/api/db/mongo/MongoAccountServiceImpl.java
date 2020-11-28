@@ -20,10 +20,7 @@ import org.bson.conversions.Bson;
 import org.checkerframework.checker.units.qual.A;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static io.nuls.api.constant.DBTableConstant.*;
 
@@ -33,7 +30,7 @@ public class MongoAccountServiceImpl implements AccountService {
     @Autowired
     private MongoDBService mongoDBService;
 
-    private List<String> addressList = new LinkedList<>();
+    private static List<String> addressList = Collections.synchronizedList(new ArrayList<>());
 
     public static int cacheSize = 5000;
 
