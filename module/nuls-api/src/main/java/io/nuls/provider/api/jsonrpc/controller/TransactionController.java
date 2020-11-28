@@ -204,9 +204,9 @@ public class TransactionController {
                 return RpcResult.dataNotFound();
             }
             int type = extractTxTypeFromTx(txHex);
-            if(type == CROSS_CHAIN){
-                return RpcResult.failed(CommonCodeConstanst.PARAMETER_ERROR,"Cross-chain tx pause support");
-            }
+          //  if(type == CROSS_CHAIN){
+           //     return RpcResult.failed(CommonCodeConstanst.PARAMETER_ERROR,"Cross-chain tx pause support");
+           // }
             Result result = new Result();
             switch (type) {
                 case CREATE_CONTRACT:
