@@ -23,6 +23,7 @@ mainAssetId=1
 #主网主资产符号
 mainSymbol=NULS
 blackHolePublicKey=000000000000000000000000000000000000000000000000000000000000000000
+packageVersion=2.7.0-a4354e9
 
 [network]
 port=18001
@@ -50,7 +51,7 @@ extendMaxSize=1024
 #引发分叉链切换的高度差阈值
 chainSwtichThreshold=3
 #最小链接节点数,当链接到的网络节点低于此参数时,会持续等待
-minNodeAmount=1
+minNodeAmount=2
 #区块同步过程中,每次从网络上节点下载的区块数量
 downloadNumber=10
 #从网络节点下载单个区块的超时时间
@@ -106,16 +107,14 @@ databasePort=27017
 maxAliveConnect=20
 #连接最大等待时间
 maxWaitTime=120000
-#连接最大持续时间
-socketTimeout=300000
 #连接超时时间
 connectTimeOut=30000
-developerNodeAddress=
-ambassadorNodeAddress=
-mappingAddress=
-businessAddress=
-teamAddress=
-communityAddress=
+developerNodeAddress=tNULSeBaMuKuKY4UstKpXvGxd7LEvEBtd3NXAG,tNULSeBaMns1C6kTePxcQS7rGAu37foAwAMpri
+ambassadorNodeAddress=tNULSeBaMhWyQBHc54oXLXB13WhJsyrTobMYYU,tNULSeBaMtCmUuBHMDAjKVSoVBsAEvLoWCspyE
+mappingAddress=tNULSeBaMqTC6rnF56dnJqz1Fb8gMdVxGGvxSf,tNULSeBaMkroWKUKj6X4zURBE3V47VZwMJdHPm
+businessAddress=tNULSeBaMnf1qfX7emr14att2DsSb2TSPcPBSL
+teamAddress=tNULSeBaMqTvaS2NEEZfdrmPzoRvd8zN6T57LH
+communityAddress=tNULSeBaMm9RQLKKUBXKJ1rQ7g4iobmWAB73mS
 dependent=smart-contract,cross-chain
 
 [cross-chain]
