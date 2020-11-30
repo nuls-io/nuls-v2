@@ -305,14 +305,20 @@ public class TxServiceImpl implements TxService {
         //验证签名
         validateTxSignature(tx, txRegister, chain);
         //如果有coinData, 则进行验证,有一些交易(黄牌)没有coinData数据
-        if (tx.getType() == TxType.YELLOW_PUNISH || tx.getType() == TxType.VERIFIER_CHANGE || tx.getType() == TxType.VERIFIER_INIT  || tx.getType() == TxType.REGISTERED_CHAIN_CHANGE) {
+        int txType = tx.getType();
+        if (txType == TxType.YELLOW_PUNISH
+                || txType == TxType.VERIFIER_CHANGE
+                || txType == TxType.VERIFIER_INIT
+                || txType == TxType.REGISTERED_CHAIN_CHANGE) {
             return;
         }
         CoinData coinData = TxUtil.getCoinData(tx);
         validateCoinFromBase(chain, txRegister, coinData.getFrom());
         validateCoinToBase(chain, txRegister, coinData.getTo());
         if (txRegister.getVerifyFee()) {
-            validateFee(chain, tx.getType(), tx.size(), coinData, txRegister);
+            /* 2020/11/24 基础验证中验证手续费获取交易size时, 去掉交易签名的size */
+            int validateTxSize = tx.size() - SerializeUtils.sizeOfBytes(tx.getTransactionSignature());
+            validateFee(chain, tx.getType(), validateTxSize, coinData, txRegister);
         }
     }
 
@@ -604,7 +610,7 @@ public class TxServiceImpl implements TxService {
             long batchValidReserve = TxConstant.PACKAGE_MODULE_VALIDATOR_RESERVE_TIME;
             if (packableTime <= batchValidReserve) {
                 //直接打空块
-                return new TxPackage(new ArrayList<>(), preStateRoot, chain.getBestBlockHeight() + 1);
+                return new TxPackage(new ArrayList<>(), null, chain.getBestBlockHeight() + 1);
             }
             //重置标志
             chain.setContractTxFail(false);
@@ -649,8 +655,8 @@ public class TxServiceImpl implements TxService {
             //是否停止执行职能合约,如果位true,则取出的智能合约本次打包不再处理,需要还回待打包队列
             boolean stopInvokeContract = false;
 
-            Random random = new Random();
             int packageContractTxMaxCount;
+            /*Random random = new Random();
             int availableProcessors = Runtime.getRuntime().availableProcessors();
             if (availableProcessors <= 4) {
                 packageContractTxMaxCount = 20 + random.nextInt(10);
@@ -658,7 +664,8 @@ public class TxServiceImpl implements TxService {
                 packageContractTxMaxCount = 50 + random.nextInt(10);
             } else {
                 packageContractTxMaxCount = 100 + random.nextInt(20);
-            }
+            }*/
+            packageContractTxMaxCount = 15;
 
             for (int index = 0; ; index++) {
                 long currentTimeMillis = NulsDateUtils.getCurrentTimeMillis();
@@ -684,7 +691,7 @@ public class TxServiceImpl implements TxService {
                     //放回可打包交易和孤儿
                     putBackPackablePool(chain, packingTxList, orphanTxSet);
                     //直接打空块
-                    return new TxPackage(new ArrayList<>(), preStateRoot, chain.getBestBlockHeight() + 1);
+                    return new TxPackage(new ArrayList<>(), null, chain.getBestBlockHeight() + 1);
                 }
                 //如果本地最新区块+1 大于当前在打包区块的高度, 说明本地最新区块已更新,需要重新打包,把取出的交易放回到打包队列
                 if (blockHeight < chain.getBestBlockHeight() + 1) {
@@ -955,7 +962,7 @@ public class TxServiceImpl implements TxService {
                     baseValidateTx(chain, tx, txRegister);
                     chain.getUnverifiedQueue().addLast(new TransactionNetPO(txPackageWrapper.getTx()));
                 }
-                return new TxPackage(new ArrayList<>(), preStateRoot, chain.getBestBlockHeight() + 1);
+                return new TxPackage(new ArrayList<>(), null, chain.getBestBlockHeight() + 1);
             }
             //检测预留传输时间
             long current = NulsDateUtils.getCurrentTimeMillis();
@@ -983,7 +990,7 @@ public class TxServiceImpl implements TxService {
             nulsLogger.error(e);
             //可打包交易,孤儿交易,全加回去
             putBackPackablePool(chain, packingTxList, orphanTxSet);
-            return new TxPackage(new ArrayList<>(), preStateRoot, chain.getBestBlockHeight() + 1);
+            return new TxPackage(new ArrayList<>(), null, chain.getBestBlockHeight() + 1);
         } finally {
             chain.getPackageLock().unlock();
         }

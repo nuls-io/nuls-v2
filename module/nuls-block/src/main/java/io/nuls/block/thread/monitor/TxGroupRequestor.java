@@ -84,13 +84,13 @@ public class TxGroupRequestor extends BaseMonitor {
             map.get(chainId).put(hash, txGroupTasks);
         }
         boolean add = txGroupTasks.add(task);
-        logger.debug("TxGroupRequestor add TxGroupTask, hash-" + hash + ", task-" + task + ", result-" + add);
+//        logger.debug("TxGroupRequestor add TxGroupTask, hash-" + hash + ", task-" + task + ", result-" + add);
     }
 
     public static void removeTask(int chainId, NulsHash hash) {
         NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         DelayQueue<TxGroupTask> remove = map.get(chainId).remove(hash.toHex());
-        logger.debug("TxGroupRequestor remove TxGroupTask, hash-" + hash + ", size-" + (remove == null ? 0 : remove.size()));
+//        logger.debug("TxGroupRequestor remove TxGroupTask, hash-" + hash + ", size-" + (remove == null ? 0 : remove.size()));
     }
 
     @Override
@@ -104,12 +104,12 @@ public class TxGroupRequestor extends BaseMonitor {
                 HashListMessage hashListMessage = task.getRequest();
                 List<NulsHash> hashList = hashListMessage.getTxHashList();
                 int original = hashList.size();
-                logger.debug("TxGroupRequestor send getTxgroupMessage, original hashList size-" + original + ", blockHash-" + blockHash);
+//                logger.debug("TxGroupRequestor send getTxgroupMessage, original hashList size-" + original + ", blockHash-" + blockHash);
                 List<Transaction> existTransactions = TransactionCall.getTransactions(chainId, hashList, false);
                 List<NulsHash> existHashes = existTransactions.stream().map(Transaction::getHash).collect(Collectors.toList());
                 hashList = CollectionUtils.removeAll(hashList, existHashes);
                 int filtered = hashList.size();
-                logger.debug("TxGroupRequestor send getTxgroupMessage, filtered hashList size-" + filtered + ", blockHash-" + blockHash);
+//                logger.debug("TxGroupRequestor send getTxgroupMessage, filtered hashList size-" + filtered + ", blockHash-" + blockHash);
                 CachedSmallBlock cachedSmallBlock = SmallBlockCacher.getCachedSmallBlock(chainId, NulsHash.fromHex(blockHash));
                 if (cachedSmallBlock == null) {
                     continue;

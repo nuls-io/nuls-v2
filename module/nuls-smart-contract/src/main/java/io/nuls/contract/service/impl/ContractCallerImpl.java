@@ -60,9 +60,9 @@ public class ContractCallerImpl implements ContractCaller {
 
     private static ExecutorService TX_EXECUTOR_SERVICE;
     static {
-        int availableProcessors = Runtime.getRuntime().availableProcessors();
         int threadCount = 4;
         // 线程数最大4个，线程核心小于4时，使用线程核心数
+        int availableProcessors = Runtime.getRuntime().availableProcessors();
         if(availableProcessors < threadCount) {
             threadCount = availableProcessors;
         }
@@ -146,7 +146,7 @@ public class ContractCallerImpl implements ContractCaller {
         ContractData contractData;
         ContractResult contractResult;
         for (ContractWrapperTransaction tx : reCallTxList) {
-            Log.info("[ReCall] Tx hash is {}", tx.getHash());
+            Log.info("[ReCall] Tx hash is {}", tx.getHash().toHex());
             contractData = tx.getContractData();
             switch (tx.getType()) {
                 case CALL_CONTRACT:

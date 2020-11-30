@@ -22,6 +22,22 @@ public interface LocalVerifierService {
     boolean save(LocalVerifierPO po, int chainID);
 
     /**
+     * 将当前验证人列表备份到备份表中
+     * @param chainID
+     * @param blockHeight
+     * @return
+     */
+    boolean backup(int chainID,long blockHeight);
+
+    /**
+     * 从指定高度的备份中恢复本链验证人列表
+     * @param chainID
+     * @param blockHeight
+     * @return
+     */
+    boolean rollback(int chainID,long blockHeight);
+
+    /**
      * 查询
      * @param chainID   链ID
      * @return          高度对应的交易Hash列表

@@ -56,10 +56,8 @@ public class ClassCodeLoader {
 
     static {
         CACHE = CacheBuilder.newBuilder()
-                //.initialCapacity(100)
-                //.maximumSize(1024)
-                .initialCapacity(50)
-                .maximumSize(512)
+                .initialCapacity(100)
+                .maximumSize(4096)
                 .expireAfterAccess(10 * 60, TimeUnit.SECONDS)
                 .build(new CacheLoader<ClassCodeCacheKey, Map<String, ClassCode>>() {
                     @Override

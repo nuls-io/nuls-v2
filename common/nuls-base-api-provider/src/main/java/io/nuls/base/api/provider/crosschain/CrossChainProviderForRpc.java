@@ -46,6 +46,11 @@ public class CrossChainProviderForRpc extends BaseRpcService implements CrossCha
         return  callReturnString("ctxRehandle",req,"msg");
     }
 
+    @Override
+    public Result<String> resetLocalVerifier(CreateResetLocalVerifierTxReq req) {
+        return callReturnString("createResetLocalVerifierTx",req,"txHash");
+    }
+
 
     private <T> Result<T> _call(String method, Object req, Function<Map, Result> callback){
         return call(method,req,callback);

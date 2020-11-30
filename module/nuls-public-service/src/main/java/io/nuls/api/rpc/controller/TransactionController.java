@@ -482,6 +482,9 @@ public class TransactionController {
         if (!ApiContext.isReady) {
             return RpcResult.chainNotReady();
         }
+        //if(true){
+         //   return RpcResult.failed(CommonCodeConstanst.PARAMETER_ERROR,"Cross-chain tx pause support");
+        //}
         VerifyUtils.verifyParams(params, 2);
         int chainId;
         String txHex;

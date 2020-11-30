@@ -49,6 +49,10 @@ public interface NulsCrossChainConstant {
     /**本地验证人信息表*/
     String DB_NAME_LOCAL_VERIFIER ="local_verifier";
 
+    /**使用重置本链验证人列表交易重置本链验证人后，将改变前的验证人列表存在此表中*/
+    String DB_NAME_OLD_LOCAL_VERIFIER ="old_local_verifier";
+
+
 
     /**
      * config
@@ -66,6 +70,11 @@ public interface NulsCrossChainConstant {
     String COMMON_LOG_NAME = "common";
 
     int CHAIN_ID_MIN = 0;
+
+    /**
+     * 非锁定交易
+     */
+    byte UNLOCKED_TX = (byte) 0;
 
     /**
      * 跨链交易固定为非解锁交易

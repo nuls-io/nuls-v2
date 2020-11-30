@@ -257,7 +257,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         programInvoke.setSenderPublicKey(programCall.getSenderPublicKey());
         long start = System.nanoTime();
         ProgramResult result = execute(programInvoke);
-        Log.info("=========== total use:{}ms",(System.nanoTime()-start)/1000000);
+        //Log.info("=========== total use:{}ms",(System.nanoTime()-start)/1000000);
         return result;
     }
 
@@ -291,7 +291,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
         logTime("start");
         long use = System.nanoTime()-startTime;
-        Log.info("================step 0.1 : {}ns",use);
+        //Log.info("================step 0.1 : {}ns",use);
         startTime = System.nanoTime();
         VM vm = null;
         try {
@@ -340,7 +340,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             vm = VMFactory.createVM();
             logTime("load vm");
             use = System.nanoTime()-startTime;
-            Log.info("================step 0.2 : {}ns",use);
+            //Log.info("================step 0.2 : {}ns",use);
             startTime = System.nanoTime();
             vm.setProgramExecutor(this);
             vm.heap.loadClassCodes(classCodes);
@@ -401,7 +401,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
             logTime("load classes");
             use = System.nanoTime()-startTime;
-            Log.info("================step 0.3 : {}ns",use);
+            //Log.info("================step 0.3 : {}ns",use);
             startTime = System.nanoTime();
             ClassCode contractClassCode = getContractClassCode(classCodes);
             String methodDesc = ProgramDescriptors.parseDesc(methodDescBase);
@@ -436,7 +436,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
             logTime("load method");
             use = System.nanoTime()-startTime;
-            Log.info("================step 0.4 : {}ns",use);
+            //Log.info("================step 0.4 : {}ns",use);
             startTime = System.nanoTime();
             ObjectRef objectRef;
             if (programInvoke.isCreate()) {
@@ -468,7 +468,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
             logTime("load contract ref");
             use = System.nanoTime()-startTime;
-            Log.info("================step 0.5 : {}ns",use);
+            //Log.info("================step 0.5 : {}ns",use);
 
             startTime = System.nanoTime();
             if (transferValue.compareTo(BigInteger.ZERO) > 0) {
@@ -480,7 +480,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
             logTime("load end");
             use = System.nanoTime()-startTime;
-            Log.info("================step 0.6 : {}ns",use);
+            //Log.info("================step 0.6 : {}ns",use);
 
             vm.run(objectRef, methodCode, vmContext, programInvoke);
 
