@@ -441,12 +441,6 @@ public class ContractUtil {
     }
 
     public static boolean checkPrice(long price) {
-        if (ProtocolGroupManager.getCurrentVersion(ContractContext.CHAIN_ID) >= ContractContext.UPDATE_VERSION_CONTRACT_ASSET) {
-            if (price <= 0) {
-                return false;
-            }
-            return true;
-        }
         if (price < CONTRACT_MINIMUM_PRICE) {
             return false;
         }

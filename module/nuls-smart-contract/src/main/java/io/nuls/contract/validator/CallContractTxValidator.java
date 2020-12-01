@@ -163,9 +163,8 @@ public class CallContractTxValidator {
             Log.error("contract call error: The contract caller is not the transaction signer.");
             return Result.getFailed(CONTRACT_CALLER_SIGN_ERROR);
         }
-        //TODO pierre 1->25
         if (!ContractUtil.checkGasLimit(txData.getGasLimit())) {
-            Log.error("contract call error: The value of gas limit ranges from 1 to 10,000,000.");
+            Log.error("contract call error: The value of gas limit ranges from 25 to 10,000,000.");
             return Result.getFailed(CONTRACT_GAS_LIMIT_ERROR);
         }
 

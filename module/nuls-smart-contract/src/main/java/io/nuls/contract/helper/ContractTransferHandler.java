@@ -252,7 +252,6 @@ public class ContractTransferHandler {
             return getSuccess();
         }
         for (ProgramTransfer transfer : transfers) {
-            //TODO pierre 多资产是否最小金额校验
             if (transfer.getAssetChainId() == CHAIN_ID && transfer.getAssetId() == ASSET_ID && transfer.getValue().compareTo(MININUM_TRANSFER_AMOUNT) < 0) {
                 return Result.getFailed(TOO_SMALL_AMOUNT);
             }
