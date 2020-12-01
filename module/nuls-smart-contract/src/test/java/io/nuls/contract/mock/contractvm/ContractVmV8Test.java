@@ -34,6 +34,7 @@ import io.nuls.contract.vm.VMFactory;
 import io.nuls.contract.vm.program.ProgramResult;
 import io.nuls.contract.vm.program.ProgramTransfer;
 import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.parse.JSONUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Before;
@@ -146,7 +147,8 @@ public class ContractVmV8Test extends MockBase {
     @Before
     public void createAndInit() throws Exception {
         // 加载协议升级的数据
-        ContractContext.CHAIN_ID = 2;
+        ContractContext.CHAIN_ID = chainId;
+        ContractContext.ASSET_ID = assetId;
         short version = 8;
         ProtocolGroupManager.setLoadProtocol(false);
         ProtocolGroupManager.updateProtocol(chainId, version);
@@ -228,7 +230,7 @@ public class ContractVmV8Test extends MockBase {
         this.testFailed(contractA, prevStateRoot, SENDER, "test9", new String[]{}, BigDecimal.valueOf(100L), chainId, assetId, false);
     }
 
-    @Test
+    /*@Test
     public void test1v2() throws Exception {
         this.testAsset(contractA, prevStateRoot, SENDER, "test1", new String[]{}, BigDecimal.valueOf(100L), chainId, assetId, true, new String[]{contractA, contractB, SENDER}, 0, 30, 70, 0, 0, 0);
     }
@@ -266,7 +268,7 @@ public class ContractVmV8Test extends MockBase {
     @Test
     public void test9v2() throws Exception {
         this.testFailed(contractA, prevStateRoot, SENDER, "test9", new String[]{}, BigDecimal.valueOf(100L), chainId, assetId, true);
-    }
+    }*/
 
     @Test
     public void test11() throws Exception {
@@ -310,49 +312,49 @@ public class ContractVmV8Test extends MockBase {
 
     @Test
     public void test21() throws Exception {
-        this.testAsset(contractA, prevStateRoot, SENDER, "test1", new String[]{}, BigDecimal.valueOf(100L), chainId, assetId, true, new String[]{contractA, contractB, SENDER}, 0, 30, 70, 0, 0, 0);
+        this.testAsset(contractA, prevStateRoot, SENDER, "test1", new String[]{}, BigDecimal.valueOf(100L), chainId, assetId, false, new String[]{contractA, contractB, SENDER}, 0, 30, 70, 0, 0, 0);
         this.testAsset(contractA, prevStateRoot, SENDER, "test11", new String[]{}, BigDecimal.valueOf(100L), chainId, 2, true, new String[]{contractA, contractB, SENDER}, 0, 30, 70, 0, 0, 0);
     }
 
     @Test
     public void test22() throws Exception {
-        this.testAsset(contractA, prevStateRoot, SENDER, "test2", new String[]{}, BigDecimal.valueOf(100L), chainId, assetId, true, new String[]{contractA, contractB, SENDER}, 20, 10, 70, 0, 0, 0);
+        this.testAsset(contractA, prevStateRoot, SENDER, "test2", new String[]{}, BigDecimal.valueOf(100L), chainId, assetId, false, new String[]{contractA, contractB, SENDER}, 20, 10, 70, 0, 0, 0);
         this.testAsset(contractA, prevStateRoot, SENDER, "test12", new String[]{}, BigDecimal.valueOf(100L), chainId, 2, true, new String[]{contractA, contractB, SENDER}, 20, 10, 70, 0, 0, 0);
     }
 
     @Test
     public void test23() throws Exception {
-        this.testAsset(contractA, prevStateRoot, SENDER, "test3", new String[]{}, BigDecimal.valueOf(100L), chainId, assetId, true, new String[]{contractA, contractB, SENDER}, 20, 10, 60, 0, 0, 10);
+        this.testAsset(contractA, prevStateRoot, SENDER, "test3", new String[]{}, BigDecimal.valueOf(100L), chainId, assetId, false, new String[]{contractA, contractB, SENDER}, 20, 10, 60, 0, 0, 10);
         this.testAsset(contractA, prevStateRoot, SENDER, "test13", new String[]{}, BigDecimal.valueOf(100L), chainId, 2, true, new String[]{contractA, contractB, SENDER}, 20, 10, 60, 0, 0, 10);
     }
 
     @Test
     public void test24() throws Exception {
-        this.testAsset(contractA, prevStateRoot, SENDER, "test4", new String[]{}, BigDecimal.valueOf(100L), chainId, assetId, true, new String[]{contractA, contractB, SENDER}, 0, 30, 50, 0, 0, 20);
+        this.testAsset(contractA, prevStateRoot, SENDER, "test4", new String[]{}, BigDecimal.valueOf(100L), chainId, assetId, false, new String[]{contractA, contractB, SENDER}, 0, 30, 50, 0, 0, 20);
         this.testAsset(contractA, prevStateRoot, SENDER, "test14", new String[]{}, BigDecimal.valueOf(100L), chainId, 2, true, new String[]{contractA, contractB, SENDER}, 0, 30, 50, 0, 0, 20);
     }
 
     @Test
     public void test26() throws Exception {
-        this.testFailed(contractA, prevStateRoot, SENDER, "test6", new String[]{}, BigDecimal.valueOf(100L), chainId, assetId, true);
+        this.testFailed(contractA, prevStateRoot, SENDER, "test6", new String[]{}, BigDecimal.valueOf(100L), chainId, assetId, false);
         this.testFailed(contractA, prevStateRoot, SENDER, "test16", new String[]{}, BigDecimal.valueOf(100L), chainId, 2, true);
     }
 
     @Test
     public void test27() throws Exception {
-        this.testFailed(contractA, prevStateRoot, SENDER, "test7", new String[]{}, BigDecimal.valueOf(100L), chainId, assetId, true);
+        this.testFailed(contractA, prevStateRoot, SENDER, "test7", new String[]{}, BigDecimal.valueOf(100L), chainId, assetId, false);
         this.testFailed(contractA, prevStateRoot, SENDER, "test17", new String[]{}, BigDecimal.valueOf(100L), chainId, 2, true);
     }
 
     @Test
     public void test28() throws Exception {
-        this.testFailed(contractA, prevStateRoot, SENDER, "test8", new String[]{}, BigDecimal.valueOf(100L), chainId, assetId, true);
+        this.testFailed(contractA, prevStateRoot, SENDER, "test8", new String[]{}, BigDecimal.valueOf(100L), chainId, assetId, false);
         this.testFailed(contractA, prevStateRoot, SENDER, "test18", new String[]{}, BigDecimal.valueOf(100L), chainId, 2, true);
     }
 
     @Test
     public void test29() throws Exception {
-        this.testFailed(contractA, prevStateRoot, SENDER, "test9", new String[]{}, BigDecimal.valueOf(100L), chainId, assetId, true);
+        this.testFailed(contractA, prevStateRoot, SENDER, "test9", new String[]{}, BigDecimal.valueOf(100L), chainId, assetId, false);
         this.testFailed(contractA, prevStateRoot, SENDER, "test19", new String[]{}, BigDecimal.valueOf(100L), chainId, 2, true);
     }
 
@@ -428,6 +430,7 @@ public class ContractVmV8Test extends MockBase {
         programResult = (ProgramResult) objects[1];
         Assert.assertTrue(String.format("测试方法[%s]expect success, errorMsg: %s, stackTrace: %s", method, programResult.getErrorMessage(), Arrays.deepToString(programResult.getStackTraces().toArray())), programResult.isSuccess());
 
+        Log.info(JSONUtils.obj2PrettyJson(programResult));
         List<ProgramTransfer> transfers = programResult.getTransfers();
         LinkedHashMap<String, BigInteger>[] contracts = this.filterContractValue(transfers);
         BigInteger[][] balanceList = this.balanceList(assetChainId, assetId, contracts, addresses);

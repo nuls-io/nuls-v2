@@ -767,8 +767,8 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                     method.setArgs(methodCode.args);
                     method.setReturnArg(methodCode.returnArg);
                     method.setView(false);
-                    //TODO pierre payable
                     method.setPayable(false);
+                    method.setPayableMultyAsset(false);
                     method.setJsonSerializable(false);
                     method.setEvent(true);
                     return method;

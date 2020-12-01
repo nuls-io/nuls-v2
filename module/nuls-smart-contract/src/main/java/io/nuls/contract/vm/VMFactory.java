@@ -26,7 +26,7 @@ package io.nuls.contract.vm;
 
 import io.nuls.contract.vm.code.ClassCode;
 import io.nuls.contract.vm.code.ClassCodeLoader;
-import org.checkerframework.checker.units.qual.C;
+import io.nuls.contract.vm.program.impl.ProgramConstants;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -346,6 +346,12 @@ public class VMFactory {
             classCodes.put(classCode.name, classCode);
         }
         vm.methodArea.loadClassCodes(classCodes);
+
+        ProgramConstants.SDK_CLASS_NAMES = new String[ProgramConstants.SDK_CLASSES_V8.length];
+        for (int i = 0; i < ProgramConstants.SDK_CLASSES_V8.length; i++) {
+            ProgramConstants.SDK_CLASS_NAMES[i] = ProgramConstants.classNameReplace(ProgramConstants.SDK_CLASSES_V8[i].getName());
+        }
+
         return vm;
     }
 

@@ -42,11 +42,10 @@ import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.BigIntegerUtils;
 
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static io.nuls.contract.config.ContractContext.ASSET_ID;
 import static io.nuls.contract.config.ContractContext.CHAIN_ID;
@@ -154,10 +153,6 @@ public class CallContractTxValidator {
         CallContractData txData = tx.getTxDataObj();
         byte[] sender = txData.getSender();
 
-        if (fromList.size() > 2) {
-            Log.error("contract call error: There are too many coinFrom in the contract.");
-            return Result.getFailed(CONTRACT_COIN_FROM_ERROR);
-        }
         Set<String> signatureAddressSet = SignatureUtil.getAddressFromTX(tx, chainId);
         if (!signatureAddressSet.contains(AddressTool.getStringAddressByBytes(sender))) {
             Log.error("contract call error: The contract caller is not the transaction signer.");
@@ -175,60 +170,86 @@ public class CallContractTxValidator {
             return Result.getFailed(CONTRACT_ADDRESS_NOT_EXIST);
         }
 
-        int toSize = toList.size();
-        if (toSize > 1) {
-            Log.error("contract call error: There are too many coinTo in the contract.");
-            return Result.getFailed(CONTRACT_COIN_TO_ERROR);
-        }
-        int assetChainId = 0;
-        int assetId = 0;
-        BigInteger transferValue = txData.getValue();
-        BigInteger contractReceivedValue = BigInteger.ZERO;
-        if (toSize == 1) {
-            CoinTo coin = toList.get(0);
-            if (coin.getLockTime() != 0) {
-                Log.error("contract call error: Transfer amount cannot be locked.");
-                return Result.getFailed(AMOUNT_LOCK_ERROR);
-            }
-            byte[] owner = coin.getAddress();
-            if (!Arrays.equals(owner, contractAddress)) {
-                Log.error("contract call error: The receiver is not the contract address.");
-                return Result.getFailed(CONTRACT_RECEIVER_ERROR);
+        Map<String, BigInteger> multyAssetMap = new HashMap<>();
+        Set<String> multyAssetKeys = new HashSet<>();
+        int assetChainId, assetId;
+        String assetKey;
+        BigInteger nulsValue = BigInteger.ZERO;
+        for(CoinFrom from : fromList) {
+            assetChainId = from.getAssetsChainId();
+            assetId = from.getAssetsId();
+            assetKey = assetChainId + "_" + assetId;
+            if (CHAIN_ID == assetChainId && ASSET_ID == assetId) {
+                nulsValue = nulsValue.add(from.getAmount());
             } else {
-                contractReceivedValue = contractReceivedValue.add(coin.getAmount());
+                multyAssetKeys.add(assetKey);
+                BigInteger multyAssetValue = multyAssetMap.getOrDefault(assetKey + "from", BigInteger.ZERO);
+                multyAssetMap.put(assetKey + "from", multyAssetValue.add(from.getAmount()));
             }
-            boolean mainAsset = coin.getAssetsChainId() == CHAIN_ID && coin.getAssetsId() == ASSET_ID;
-            if (mainAsset && coin.getAmount().compareTo(MININUM_TRANSFER_AMOUNT) < 0) {
-                Log.error("contract call error: The amount of the transfer is too small.");
-                return Result.getFailed(TOO_SMALL_AMOUNT);
+        }
+
+        int toSize = toList.size();
+        BigInteger transferNulsValue = txData.getValue();
+        BigInteger contractReceivedNulsValue = BigInteger.ZERO;
+        if (toSize > 0) {
+            for (CoinTo coin : toList) {
+                coin = toList.get(0);
+                if (coin.getLockTime() != 0) {
+                    Log.error("contract call error: Transfer amount cannot be locked.");
+                    return Result.getFailed(AMOUNT_LOCK_ERROR);
+                }
+                byte[] owner = coin.getAddress();
+                if (!Arrays.equals(owner, contractAddress)) {
+                    Log.error("contract call error: The receiver is not the contract address.");
+                    return Result.getFailed(CONTRACT_RECEIVER_ERROR);
+                }
+                assetChainId = coin.getAssetsChainId();
+                assetId = coin.getAssetsId();
+                boolean mainAsset = assetChainId == CHAIN_ID && assetId == ASSET_ID;
+                if (!mainAsset) {
+                    assetKey = assetChainId + "_" + assetId;
+                    multyAssetKeys.add(assetKey);
+                    BigInteger multyAssetValue = multyAssetMap.getOrDefault(assetKey + "to", BigInteger.ZERO);
+                    multyAssetMap.put(assetKey + "to", multyAssetValue.add(coin.getAmount()));
+                    continue;
+                }
+                if (coin.getAmount().compareTo(MININUM_TRANSFER_AMOUNT) < 0) {
+                    Log.error("contract call error: The amount of the transfer is too small.");
+                    return Result.getFailed(TOO_SMALL_AMOUNT);
+                }
+                contractReceivedNulsValue = contractReceivedNulsValue.add(coin.getAmount());
             }
-            assetChainId = coin.getAssetsChainId();
-            assetId = coin.getAssetsId();
 
         }
-        if (contractReceivedValue.compareTo(transferValue) < 0) {
-            Log.error("contract call error: Insufficient balance to transfer to the contract address.");
+
+        // 其他资产校验
+        BigInteger assetKeyFrom, assetKeyTo;
+        for (String multyAssetKey : multyAssetKeys) {
+            assetKeyFrom = multyAssetMap.get(multyAssetKey + "from");
+            assetKeyTo = multyAssetMap.get(multyAssetKey + "to");
+            if(null == assetKeyFrom){
+                Log.error("contract call error: Illegal coinFrom in the contract.");
+                return Result.getFailed(CONTRACT_COIN_FROM_ERROR);
+            }
+            if (null == assetKeyTo) {
+                Log.error("contract call error: Illegal coinTo in the contract.");
+                return Result.getFailed(CONTRACT_COIN_TO_ERROR);
+            }
+            if (!BigIntegerUtils.isEqual(assetKeyFrom, assetKeyTo)) {
+                Log.error("contract call error: The amount of coin data is error.");
+                return Result.getFailed(CONTRACT_COIN_ASSETS_ERROR);
+            }
+        }
+
+        // 主资产校验
+        if (contractReceivedNulsValue.compareTo(transferNulsValue) < 0) {
+            Log.error("contract call error: Insufficient balance of nuls to transfer to the contract address.");
             return Result.getFailed(INSUFFICIENT_BALANCE_TO_CONTRACT);
         }
 
-        boolean existSender = false;
-        BigInteger senderValue = BigInteger.ZERO;
-        for(CoinFrom from : fromList) {
-            if(Arrays.equals(from.getAddress(), sender)) {
-                existSender = true;
-                if (assetChainId == from.getAssetsChainId() && assetId == from.getAssetsId()) {
-                    senderValue = senderValue.add(from.getAmount());
-                }
-            }
-        }
-
-        if (transferValue.compareTo(BigInteger.ZERO) > 0) {
-            //TODO pierre 手续费账户也能支出，向合约转资产
-            if (!existSender) {
-                Log.error("contract call error: The contract caller is not the transaction creator.");
-                return Result.getFailed(CONTRACT_CALLER_ERROR);
-            }
-            if (senderValue.compareTo(transferValue) < 0) {
+        if (transferNulsValue.compareTo(BigInteger.ZERO) > 0) {
+            // 手续费账户也能支出，向合约转资产
+            if (nulsValue.compareTo(transferNulsValue) < 0) {
                 Log.error("contract call error: Insufficient balance to transfer to the contract address.");
                 return Result.getFailed(INSUFFICIENT_BALANCE_TO_CONTRACT);
             }

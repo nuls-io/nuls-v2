@@ -271,6 +271,7 @@ public class ProgramResult {
                 ", transfers=" + transfers +
                 ", internalCalls=" + internalCalls +
                 ", events=" + events +
+                ", debugEvents=" + debugEvents +
                 ", invokeRegisterCmds=" + invokeRegisterCmds +
                 '}';
     }

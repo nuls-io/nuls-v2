@@ -299,9 +299,9 @@ public class NativeAddress {
                 }
                 ObjectRef itemRef = (ObjectRef) item;
                 ObjectRef value = (ObjectRef) frame.heap.getField(itemRef, "value");
-                ObjectRef assetChainId = (ObjectRef) frame.heap.getField(itemRef, "assetChainId");
-                ObjectRef assetId = (ObjectRef) frame.heap.getField(itemRef, "assetId");
-                multyAssetValues[i] = new ProgramMultyAssetValue(frame.heap.toBigInteger(value), frame.heap.toInteger(assetChainId), frame.heap.toInteger(assetId));
+                Integer assetChainId = (Integer) frame.heap.getField(itemRef, "assetChainId");
+                Integer assetId = (Integer) frame.heap.getField(itemRef, "assetId");
+                multyAssetValues[i] = new ProgramMultyAssetValue(frame.heap.toBigInteger(value), assetChainId, assetId);
             }
         }
         return call(methodCode, methodArgs, frame, true, multyAssetValues);
