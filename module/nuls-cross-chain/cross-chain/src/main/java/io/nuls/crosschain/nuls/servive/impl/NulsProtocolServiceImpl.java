@@ -227,7 +227,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
                 Log.error("解析交易签名失败");
                 return;
             }
-            if(transactionSignature.getP2PHKSignatures().size() < byzantineCount){
+            if(transactionSignature.getP2PHKSignatures().size() < byzantineCount && ctxStatusPO.getStatus() == TxStatusEnum.UNCONFIRM.getStatus()){
                 chain.getLogger().info("The cross chain transaction obtained has not been confirmed at this node,hash:{}",nativeHex);
                 return;
             }
