@@ -37,6 +37,7 @@ import io.nuls.contract.rpc.call.LedgerCall;
 import io.nuls.contract.tx.base.BaseQuery;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
+import io.nuls.contract.vm.program.ProgramMultyAssetValue;
 import io.nuls.core.basic.Result;
 import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.crypto.HexUtil;
@@ -55,6 +56,7 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -76,15 +78,17 @@ import static io.nuls.contract.constant.ContractCmdConstant.CREATE;
 public class ContractMultyAssetTest extends BaseQuery {
 
     protected long gasLimit = 200000L;
-    protected long gasPrice = 1L;
+    protected long gasPrice = 25L;
     protected long minutes_3 = 60 * 3;
+    protected String otherContract = "tNULSeBaN5npy43YB6GpdXie83a4mt9Zb2Ut1w";
 
     /**
      * 创建合约
      */
     @Test
     public void createContract() throws Exception {
-        InputStream in = new FileInputStream(ContractTest.class.getResource("/multi-asset-contract").getFile());
+        //InputStream in = new FileInputStream(ContractTest.class.getResource("/multi-asset-contract").getFile());
+        InputStream in = new FileInputStream(new File("/Users/pierreluo/IdeaProjects/contract-multi-asset/target/multi-asset-contract-1.0-SNAPSHOT.jar"));
         byte[] contractCode = IOUtils.toByteArray(in);
         String remark = "test multy asset";
         Map params = this.makeCreateParams(sender, contractCode, "asset", remark);
@@ -140,10 +144,10 @@ public class ContractMultyAssetTest extends BaseQuery {
         this.callOfDesignatedAssetByParams("_payableMultyAsset", "3.2", null, 2, 2);
         // 转出 1.1
         Object[] args = new Object[]{toAddress17, new BigDecimal("1.1").multiply(BigDecimal.TEN.pow(8)).toBigInteger(), 2, 2};
-        this.callOfDesignatedAssetByParams("transferDesignatedAsset", "0", args, 0, 0);
+        this.callByParams("transferDesignatedAsset", "0", args);
         // 转出 1.2
         Object[] argsLock = new Object[]{toAddress17, new BigDecimal("1.2").multiply(BigDecimal.TEN.pow(8)).toBigInteger(), 2, 2, minutes_3};
-        this.callOfDesignatedAssetByParams("transferDesignatedAssetLock", "0", argsLock, 0, 0);
+        this.callByParams("transferDesignatedAssetLock", "0", argsLock);
     }
 
 
@@ -153,7 +157,6 @@ public class ContractMultyAssetTest extends BaseQuery {
     @Test
     public void innerCall() throws Exception {
         String methodName = "callOtherContract";
-        String otherContract = "tNULSeBaN74aQ3n2p9DbyvudrUHMzABQuKAEMH";
         // 转入 6.6 NULS (外部合约)
         this.callByParams("_payable", "6.6", null);
         // 转入 6.6 NULS (内部合约)
@@ -174,7 +177,6 @@ public class ContractMultyAssetTest extends BaseQuery {
     @Test
     public void innerCallWithReturnValue() throws Exception {
         String methodName = "callWithReturnValueOfOtherContract";
-        String otherContract = "tNULSeBaN74aQ3n2p9DbyvudrUHMzABQuKAEMH";
         // 转入 6.6 NULS (外部合约)
         this.callByParams("_payable", "6.6", null);
         // 转入 6.6 NULS (内部合约)
@@ -195,11 +197,12 @@ public class ContractMultyAssetTest extends BaseQuery {
     @Test
     public void innerCallWithReturnValueOfDesignatedAsset() throws Exception {
         String methodName = "callWithReturnValueOfOtherContractOfDesignatedAsset";
-        String otherContract = "tNULSeBaN74aQ3n2p9DbyvudrUHMzABQuKAEMH";
+
         // 转入 6.6 2-2 (外部合约)
         this.callOfDesignatedAssetByParams("_payableMultyAsset", "6.6", null, 2, 2);
         // 转入 6.6 2-2 (内部合约)
         this.innerCallOfDesignatedAssetByParams(methodName, otherContract, "_payableMultyAsset", null, "6.6", 2, 2);
+
         // 转出 3.3 2-2
         Object[] innerArgs = new Object[]{toAddress17, new BigDecimal("3.3").multiply(BigDecimal.TEN.pow(8)).toBigInteger(), 2, 2};
         this.innerCallOfDesignatedAssetByParams(methodName, otherContract, "transferDesignatedAsset", innerArgs, "0", 0, 0);
@@ -378,7 +381,7 @@ public class ContractMultyAssetTest extends BaseQuery {
 
     protected void callOfDesignatedAssetByParams(String methodName, String valueStr, Object[] args, int assetChainId, int assetId) throws Exception {
         BigInteger value = new BigDecimal(valueStr).multiply(BigDecimal.TEN.pow(8)).toBigInteger();
-        Map params = this.makeCallParams(sender, value, gasLimit, gasPrice, contractAddress, methodName, null, "", assetChainId, assetId, args);
+        Map params = this.makeCallParams(sender, null, gasLimit, gasPrice, contractAddress, methodName, null, "", new ProgramMultyAssetValue[]{new ProgramMultyAssetValue(value, assetChainId, assetId)}, args);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
         assertTrue(cmdResp2, result);

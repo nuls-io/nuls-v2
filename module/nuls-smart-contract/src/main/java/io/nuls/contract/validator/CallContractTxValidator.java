@@ -207,6 +207,10 @@ public class CallContractTxValidator {
                 assetId = coin.getAssetsId();
                 boolean mainAsset = assetChainId == CHAIN_ID && assetId == ASSET_ID;
                 if (!mainAsset) {
+                    if (coin.getAmount().compareTo(BigInteger.ZERO) == 0) {
+                        Log.error("contract call error: Transfer amount cannot be zero.");
+                        return Result.getFailed(TOO_SMALL_AMOUNT);
+                    }
                     assetKey = assetChainId + "_" + assetId;
                     multyAssetKeys.add(assetKey);
                     BigInteger multyAssetValue = multyAssetMap.getOrDefault(assetKey + "to", BigInteger.ZERO);

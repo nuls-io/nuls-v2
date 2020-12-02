@@ -32,6 +32,7 @@ import io.nuls.contract.rpc.call.LedgerCall;
 import io.nuls.contract.tx.base.BaseQuery;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.util.MapUtil;
+import io.nuls.contract.vm.program.ProgramMultyAssetValue;
 import io.nuls.contract.vm.program.ProgramTransfer;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.model.ModuleE;
@@ -143,7 +144,7 @@ import static io.nuls.contract.util.ContractUtil.*;
 public class ContractVmV8SendTxTest extends BaseQuery {
 
     protected long gasLimit = 200000L;
-    protected long gasPrice = 1L;
+    protected long gasPrice = 25L;
     protected long minutes_3 = 60 * 3;
     protected long minutes_5 = 60 * 5;
     protected String contractA = "";
@@ -153,7 +154,7 @@ public class ContractVmV8SendTxTest extends BaseQuery {
     @Before
     public void createAndInit() throws Exception {
         // 加载协议升级的数据
-        ContractContext.CHAIN_ID = 2;
+        ContractContext.CHAIN_ID = chainId;
 
         if (!createContract) {
             // 注册链内资产
@@ -178,8 +179,10 @@ public class ContractVmV8SendTxTest extends BaseQuery {
             contractResult = this.callByParams(contractB, toAddress, "setSender", "0", new String[]{sender});
             Assert.assertTrue("expect success, " + contractResult.getErrorMessage() + ", " + contractResult.getStackTrace(), contractResult.isSuccess());
         } else {
-            contractA = "tNULSeBaMwVijojTRBneW8zpqGwEgNf8mKVNbD";
-            contractB = "tNULSeBaN9uBG7DWTWJN1WUcDReoGJopNjsbHb";
+            //contractA = "tNULSeBaMy6NZRUzvKSMpKjw87ABAgietZ2THh";
+            //contractB = "tNULSeBaN8Ytuc6AuwD37gGozqrPSVi8qCLmqy";
+            contractA = "tNULSeBaMwPWQbZWZvQDd8FGSB4sNUPVLBmkAh";
+            contractB = "tNULSeBaN76yL5YGd46spCx2srGykNtoRPavqw";
         }
         JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
@@ -203,14 +206,6 @@ public class ContractVmV8SendTxTest extends BaseQuery {
         test7();
         test8();
         test9();
-        test1v2();
-        test2v2();
-        test3v2();
-        test4v2();
-        test6v2();
-        test7v2();
-        test8v2();
-        test9v2();
         test11();
         test12();
         test13();
@@ -270,7 +265,7 @@ public class ContractVmV8SendTxTest extends BaseQuery {
         this.testFailed(contractA, sender, "test9", new String[]{}, BigInteger.valueOf(100L), chainId, assetId, false, errorMsgKey);
     }
 
-    @Test
+    /*@Test
     public void test1v2() throws Exception {
         this.testAsset(contractA, sender, "test1", new String[]{}, BigInteger.valueOf(100L), chainId, assetId, true, new String[]{contractA, contractB, sender}, 0, 30, 70, 0, 0, 0);
     }
@@ -312,7 +307,7 @@ public class ContractVmV8SendTxTest extends BaseQuery {
     public void test9v2() throws Exception {
         String errorMsgKey = "Cannot transfer the locked amount to the contract address";
         this.testFailed(contractA, sender, "test9", new String[]{}, BigInteger.valueOf(100L), chainId, assetId, true, errorMsgKey);
-    }
+    }*/
 
     @Test
     public void test11() throws Exception {
@@ -635,7 +630,7 @@ public class ContractVmV8SendTxTest extends BaseQuery {
 
     protected ContractResultDto callOfDesignatedAssetByParams(String contract, String sender, String methodName, String valueStr, Object[] args, int assetChainId, int assetId) throws Exception {
         BigInteger value = toNa(new BigDecimal(valueStr));
-        Map params = this.makeCallParams(sender, value, gasLimit, gasPrice, contract, methodName, null, "", assetChainId, assetId, args);
+        Map params = this.makeCallParams(sender, null, gasLimit, gasPrice, contract, methodName, null, "", new ProgramMultyAssetValue[]{new ProgramMultyAssetValue(value, assetChainId, assetId)}, args);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
         assertTrue(cmdResp2, result);

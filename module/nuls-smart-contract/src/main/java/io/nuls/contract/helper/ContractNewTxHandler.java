@@ -85,21 +85,28 @@ public class ContractNewTxHandler {
         byte[] contractAddress = contractData.getContractAddress();
         CoinData coinData = tx.getCoinDataInstance();
         List<CoinTo> toList = coinData.getTo();
-        int assetChainId = CHAIN_ID, assetId = ASSET_ID;
+        int assetChainId, assetId;
+        boolean mainAsset;
         if (toList != null && !toList.isEmpty()) {
             for (CoinTo to : toList) {
                 if (Arrays.equals(to.getAddress(), contractAddress)) {
                     assetChainId = to.getAssetsChainId();
                     assetId = to.getAssetsId();
+                    mainAsset = assetChainId == CHAIN_ID && assetId == ASSET_ID;
+                    if (!mainAsset) {
+                        // 初始化其他资产的临时余额
+                        tempBalanceManager.getBalance(contractAddress, assetChainId, assetId);
+                        tempBalanceManager.addTempBalance(contractAddress, to.getAmount(), assetChainId, assetId);
+                    }
                 }
             }
         }
-        // 增加调用合约时转入的金额
+        // 增加调用合约时转入的NULS金额
         BigInteger value = contractData.getValue();
         if (value.compareTo(BigInteger.ZERO) > 0) {
-            // 初始化临时余额
-            tempBalanceManager.getBalance(contractAddress, assetChainId, assetId);
-            tempBalanceManager.addTempBalance(contractAddress, value, assetChainId, assetId);
+            // 初始化NULS主资产临时余额
+            tempBalanceManager.getBalance(contractAddress, CHAIN_ID, ASSET_ID);
+            tempBalanceManager.addTempBalance(contractAddress, value, CHAIN_ID, ASSET_ID);
         }
 
         boolean isSuccess = true;
@@ -153,6 +160,9 @@ public class ContractNewTxHandler {
                         if(rollbackTx instanceof ProgramNewTx) {
                             contractNewTxFromOtherModuleHandler.rollbackTempBalance(chainId, contractResult.getContractAddress(), List.of((ProgramNewTx) rollbackTx), tempBalanceManager);
                         }
+                        //else if(rollbackTx instanceof ProgramTransfer) {
+                        //    contractTransferHandler.rollbackContractTempBalance(chainId, List.of((ProgramTransfer) rollbackTx), tempBalanceManager);
+                        //}
                     }
                     contractResult.getInvokeRegisterCmds().clear();
                     break;
@@ -163,7 +173,20 @@ public class ContractNewTxHandler {
         if (!isSuccess) {
             // 回滚 - 扣除调用合约时转入的金额
             if (value.compareTo(BigInteger.ZERO) > 0) {
-                tempBalanceManager.minusTempBalance(contractAddress, value, assetChainId, assetId);
+                tempBalanceManager.minusTempBalance(contractAddress, value, CHAIN_ID, ASSET_ID);
+            }
+            if (toList != null && !toList.isEmpty()) {
+                for (CoinTo to : toList) {
+                    if (Arrays.equals(to.getAddress(), contractAddress)) {
+                        assetChainId = to.getAssetsChainId();
+                        assetId = to.getAssetsId();
+                        mainAsset = assetChainId == CHAIN_ID && assetId == ASSET_ID;
+                        if (!mainAsset) {
+                            // 回滚 - 扣除其他资产的临时余额
+                            tempBalanceManager.minusTempBalance(contractAddress, to.getAmount(), assetChainId, assetId);
+                        }
+                    }
+                }
             }
         }
 

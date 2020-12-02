@@ -25,7 +25,9 @@ package io.nuls.contract.base;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.contract.model.bo.Chain;
+import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
+import io.nuls.contract.vm.program.ProgramMultyAssetValue;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.Constants;
@@ -336,20 +338,19 @@ public class Base {
     }
 
     protected Map makeCallParams(String sender, BigInteger value, String contractAddress, String methodName, String methodDesc, String remark, Object... args) {
-        return this.makeCallParams(sender, value, 2000000L, 25L, contractAddress, methodName, methodDesc, remark, chainId, assetId, args);
+        return this.makeCallParams(sender, value, 2000000L, 25L, contractAddress, methodName, methodDesc, remark, null, args);
     }
 
     protected Map makeCallParams(String sender, BigInteger value, Long gasLimit, String contractAddress, String methodName, String methodDesc, String remark, Object... args) {
-        return this.makeCallParams(sender, value, gasLimit, 25L, contractAddress, methodName, methodDesc, remark, chainId, assetId, args);
+        return this.makeCallParams(sender, value, gasLimit, 25L, contractAddress, methodName, methodDesc, remark, null, args);
     }
 
-    protected Map makeCallParams(String sender, BigInteger value, Long gasLimit, Long gasPrice, String contractAddress, String methodName, String methodDesc, String remark, Integer assetChainId, Integer assetId, Object... args) {
+    protected Map makeCallParams(String sender, BigInteger value, Long gasLimit, Long gasPrice, String contractAddress, String methodName, String methodDesc, String remark, ProgramMultyAssetValue[] multyAssetValues, Object... args) {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.CHAIN_ID, chainId);
         params.put("sender", sender);
         params.put("value", value);
-        params.put("assetChainId", assetChainId);
-        params.put("assetId", assetId);
+        params.put("multyAssetValues", ContractUtil.multyAssetStringArray(multyAssetValues));
         params.put("gasLimit", gasLimit);
         params.put("price", gasPrice);
         params.put("contractAddress", contractAddress);

@@ -43,6 +43,7 @@ import io.nuls.contract.model.txdata.CreateContractData;
 import io.nuls.contract.model.txdata.DeleteContractData;
 import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.contract.rpc.call.ChainManagerCall;
+import io.nuls.contract.vm.program.ProgramMultyAssetValue;
 import io.nuls.core.basic.Result;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
@@ -749,5 +750,33 @@ public class ContractUtil {
         }
         msg += ", debugEvents: " + debugEvents.toString();
         result.setMsg(msg);
+    }
+
+    public static String[][] multyAssetStringArray(ProgramMultyAssetValue[] multyAssetValues) {
+        int length;
+        if (multyAssetValues == null || (length = multyAssetValues.length) == 0) {
+            return null;
+        }
+        String[][] array = new String[length][];
+        ProgramMultyAssetValue value;
+        for (int i=0;i<length;i++) {
+            value = multyAssetValues[i];
+            array[i] = new String[]{value.getValue().toString(), String.valueOf(value.getAssetChainId()), String.valueOf(value.getAssetId())};
+        }
+        return array;
+    }
+
+    public static ProgramMultyAssetValue[] multyAssetObjectArray(String[][] multyAssetValues) {
+        int length;
+        if (multyAssetValues == null || (length = multyAssetValues.length) == 0) {
+            return null;
+        }
+        ProgramMultyAssetValue[] array = new ProgramMultyAssetValue[length];
+        String[] value;
+        for (int i=0;i<length;i++) {
+            value = multyAssetValues[i];
+            array[i] = new ProgramMultyAssetValue(new BigInteger(value[0]), Integer.valueOf(value[1]), Integer.valueOf(value[2]));
+        }
+        return array;
     }
 }

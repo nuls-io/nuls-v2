@@ -300,7 +300,13 @@ public class NativeAddress {
                 ObjectRef itemRef = (ObjectRef) item;
                 ObjectRef value = (ObjectRef) frame.heap.getField(itemRef, "value");
                 Integer assetChainId = (Integer) frame.heap.getField(itemRef, "assetChainId");
+                if (assetChainId == null || assetChainId.intValue() == 0) {
+                    throw new ErrorException(String.format("Zero assetChainId"), frame.vm.getGasUsed(), null);
+                }
                 Integer assetId = (Integer) frame.heap.getField(itemRef, "assetId");
+                if (assetId == null || assetId.intValue() == 0) {
+                    throw new ErrorException(String.format("Zero assetId"), frame.vm.getGasUsed(), null);
+                }
                 multyAssetValues[i] = new ProgramMultyAssetValue(frame.heap.toBigInteger(value), assetChainId, assetId);
             }
         }

@@ -1,5 +1,7 @@
 package io.nuls.contract.vm.program;
 
+import io.nuls.base.basic.AddressTool;
+
 import java.math.BigInteger;
 
 public class ProgramAccount {
@@ -67,4 +69,22 @@ public class ProgramAccount {
         return assetId;
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("{");
+        sb.append("\"address\":")
+                .append(AddressTool.getStringAddressByBytes(address));
+        sb.append(",\"balance\":")
+                .append(balance);
+        sb.append(",\"freeze\":")
+                .append(freeze);
+        sb.append(",\"nonce\":")
+                .append('\"').append(nonce).append('\"');
+        sb.append(",\"assetChainId\":")
+                .append(assetChainId);
+        sb.append(",\"assetId\":")
+                .append(assetId);
+        sb.append('}');
+        return sb.toString();
+    }
 }
