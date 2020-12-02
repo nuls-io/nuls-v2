@@ -365,6 +365,10 @@ public class MongoDBService implements InitializingBean {
         return getCount(collName, null);
     }
 
+    public long getEstimateCount(String collName) {
+        return getCollection(collName).estimatedDocumentCount();
+    }
+
     public BulkWriteResult bulkWrite(String collName, List<? extends WriteModel<? extends Document>> modelList) {
         MongoCollection<Document> collection = getCollection(collName);
         return collection.bulkWrite(modelList);

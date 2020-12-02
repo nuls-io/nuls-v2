@@ -74,7 +74,7 @@ public class MongoRoundServiceImpl implements RoundService {
     }
 
     public long getTotalCount(int chainId) {
-        return this.mongoDBService.getCount(ROUND_TABLE + chainId);
+        return this.mongoDBService.getEstimateCount(ROUND_TABLE + chainId);
     }
 
     public List<PocRound> getRoundList(int chainId, int pageIndex, int pageSize) {

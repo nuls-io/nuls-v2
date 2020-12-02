@@ -6,12 +6,10 @@ import com.mongodb.client.model.InsertOneModel;
 import com.mongodb.client.model.Sorts;
 import com.mongodb.client.model.WriteModel;
 import io.nuls.api.cache.ApiCache;
+import io.nuls.api.db.AgentService;
 import io.nuls.api.db.BlockService;
 import io.nuls.api.manager.CacheManager;
-import io.nuls.api.model.po.BlockHeaderInfo;
-import io.nuls.api.model.po.BlockHexInfo;
-import io.nuls.api.model.po.PageInfo;
-import io.nuls.api.model.po.SyncInfo;
+import io.nuls.api.model.po.*;
 import io.nuls.api.model.po.mini.MiniBlockHeaderInfo;
 import io.nuls.api.utils.DocumentTransferTool;
 import io.nuls.core.core.annotation.Autowired;
@@ -34,6 +32,8 @@ public class MongoBlockServiceImpl implements BlockService {
     private MongoDBService mongoDBService;
     @Autowired
     private MongoChainServiceImpl mongoChainServiceImpl;
+    @Autowired
+    AgentService agentService;
 
     public BlockHeaderInfo getBestBlockHeader(int chainId) {
         ApiCache apiCache = CacheManager.getCache(chainId);
@@ -154,7 +154,17 @@ public class MongoBlockServiceImpl implements BlockService {
                 filter = Filters.and(filter, Filters.gt("txCount", 1));
             }
         }
-        long totalCount = mongoDBService.getCount(BLOCK_HEADER_TABLE + chainId, filter);
+        long totalCount;
+        if(StringUtils.isNotBlank(packingAddress)){
+            AgentInfo agentInfo = agentService.getAgentByPackingAddress(chainId,packingAddress);
+            if(agentInfo == null){
+                totalCount = 0;
+            }else {
+                totalCount = agentInfo.getTotalPackingCount();
+            }
+        }else{
+            totalCount = mongoDBService.getEstimateCount(BLOCK_HEADER_TABLE + chainId);
+        }
         BasicDBObject fields = new BasicDBObject();
         fields.append("_id", 1).append("createTime", 1).append("txCount", 1).append("agentHash", 1).
                 append("agentId", 1).append("agentAlias", 1).append("size", 1).append("reward", 1);

@@ -141,7 +141,7 @@ public class MongoAccountServiceImpl implements AccountService {
     public PageInfo<AccountInfo> pageQuery(int chainId, int pageNumber, int pageSize) {
         List<Document> docsList = this.mongoDBService.pageQuery(ACCOUNT_TABLE + chainId, pageNumber, pageSize);
         List<AccountInfo> accountInfoList = new ArrayList<>();
-        long totalCount = mongoDBService.getCount(ACCOUNT_TABLE + chainId);
+        long totalCount = mongoDBService.getEstimateCount(ACCOUNT_TABLE + chainId);
         for (Document document : docsList) {
             accountInfoList.add(DocumentTransferTool.toInfo(document, "address", AccountInfo.class));
         }

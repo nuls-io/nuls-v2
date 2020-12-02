@@ -75,7 +75,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
 
 
     public void deleteTxs(int chainId) {
-        long totalCount = mongoDBService.getCount(TX_TABLE + chainId);
+        long totalCount = mongoDBService.getEstimateCount(TX_TABLE + chainId);
         if (totalCount > 1000000) {
             int deleteCount = (int) (totalCount - 1000000);
             BasicDBObject fields = new BasicDBObject();

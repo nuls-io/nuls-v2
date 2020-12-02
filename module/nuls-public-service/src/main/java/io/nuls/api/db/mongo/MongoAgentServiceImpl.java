@@ -241,7 +241,7 @@ public class MongoAgentServiceImpl implements AgentService {
 
     @Override
     public PageInfo<AgentInfo> getAgentList(int chainId, int pageNumber, int pageSize) {
-        long totalCount = this.mongoDBService.getCount(AGENT_TABLE + chainId);
+        long totalCount = this.mongoDBService.getEstimateCount(AGENT_TABLE + chainId);
         List<Document> docsList = this.mongoDBService.pageQuery(AGENT_TABLE + chainId, Sorts.descending("createTime"), pageNumber, pageSize);
         List<AgentInfo> agentInfoList = new ArrayList<>();
         for (Document document : docsList) {
