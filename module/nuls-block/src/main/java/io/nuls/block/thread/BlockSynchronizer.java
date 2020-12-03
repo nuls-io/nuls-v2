@@ -177,23 +177,23 @@ public class BlockSynchronizer implements Runnable {
 
     /**
      * 回滚区块到指定高度
-     * */
-    private void rollbackToHeight(long latestHeight, int chainId){
+     */
+    private void rollbackToHeight(long latestHeight, int chainId) {
         BlockConfig blockConfig = SpringLiteContext.getBean(BlockConfig.class);
         long height = blockConfig.getRollbackHeight();
-        if(height > 0){
+        if (height > 0) {
             RollbackStorageService rollbackService = SpringLiteContext.getBean(RollbackStorageService.class);
             RollbackInfoPo po = rollbackService.get(chainId);
-            if(po == null || po.getHeight() != height){
-                if(latestHeight > height + 1000){
+            if (po == null || po.getHeight() != height) {
+                if (latestHeight > height + 1000) {
                     ContextManager.getContext(chainId).getLogger().warn("If the rollback height is greater than 1000,p;ease replace the data package");
                     System.exit(1);
                 }
-                while (latestHeight >= height){
-                    if(!blockService.rollbackBlock(chainId, latestHeight--, true)){
+                while (latestHeight >= height) {
+                    if (!blockService.rollbackBlock(chainId, latestHeight--, true)) {
                         latestHeight++;
                     }
-                    if ( latestHeight == 0) {
+                    if (latestHeight == 0) {
                         break;
                     }
                 }
@@ -206,7 +206,6 @@ public class BlockSynchronizer implements Runnable {
     /**
      * 等待网络稳定
      * 每隔5秒请求一次getAvailableNodes,连续5次节点数大于minNodeAmount就认为网络稳定
-     *
      */
     private List<Node> waitUntilNetworkStable() throws InterruptedException {
         ChainContext context = ContextManager.getContext(chainId);
@@ -252,7 +251,7 @@ public class BlockSynchronizer implements Runnable {
         BlockDownloaderParams downloaderParams = statistics(availableNodes, context);
         context.setDownloaderParams(downloaderParams);
 
-        if(downloaderParams.getNodes() == null || downloaderParams.getNodes().isEmpty()){
+        if (downloaderParams.getNodes() == null || downloaderParams.getNodes().isEmpty()) {
             //网络上没有可用的一致节点,就是节点高度都不一致,或者一致的节点比例不够
             logger.warn("There are no consistent nodes available on the network, availableNodes-" + availableNodes);
             return false;
@@ -462,7 +461,8 @@ public class BlockSynchronizer implements Runnable {
         long netHeight = params.getNetLatestHeight();
         //得到共同高度
         long commonHeight = Math.min(localHeight, netHeight);
-        if (checkHashEquality(params)) {
+        CheckResult result = checkHashEquality(params);
+        if (result.isResult() || result.isTimeout()) {
             //commonHeight区块的hash一致,正常,比远程节点落后,下载区块
             if (commonHeight < netHeight) {
                 return INCONSISTENT;
@@ -487,7 +487,8 @@ public class BlockSynchronizer implements Runnable {
         BlockHeader latestBlockHeader = blockService.getLatestBlockHeader(chainId);
         params.setLocalLatestHeight(latestBlockHeader.getHeight());
         params.setLocalLatestHash(latestBlockHeader.getHash());
-        if (checkHashEquality(params)) {
+        CheckResult result = checkHashEquality(params);
+        if (result.isResult() || result.isTimeout()) {
             return INCONSISTENT;
         }
         return checkRollback(rollbackCount + 1, params);
@@ -500,7 +501,7 @@ public class BlockSynchronizer implements Runnable {
      * @date 18-11-9 下午6:13
      * @version 1.0
      */
-    private boolean checkHashEquality(BlockDownloaderParams params) {
+    private CheckResult checkHashEquality(BlockDownloaderParams params) {
         NulsHash localHash = params.getLocalLatestHash();
         long localHeight = params.getLocalLatestHeight();
         long netHeight = params.getNetLatestHeight();
@@ -513,15 +514,15 @@ public class BlockSynchronizer implements Runnable {
                 Block remoteBlock = BlockUtil.downloadBlockByHash(chainId, localHash, node.getId(), commonHeight);
                 if (remoteBlock != null) {
                     netHash = remoteBlock.getHeader().getHash();
-                    return localHash.equals(netHash);
+                    return new CheckResult(localHash.equals(netHash), false);
                 }
             }
             //如果从网络上下载区块失败,返回false
-            return false;
+            return new CheckResult(false, true);
         }
         if (commonHeight < localHeight) {
             localHash = blockService.getBlockHash(chainId, commonHeight);
         }
-        return localHash.equals(netHash);
+        return new CheckResult(localHash.equals(netHash), false);
     }
 }
