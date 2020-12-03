@@ -25,10 +25,7 @@ package io.nuls.contract.helper;
 
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.CoinData;
-import io.nuls.base.data.CoinTo;
-import io.nuls.base.data.Transaction;
+import io.nuls.base.data.*;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.enums.ContractStatus;
@@ -40,6 +37,7 @@ import io.nuls.contract.model.bo.*;
 import io.nuls.contract.model.dto.ContractConstructorInfoDto;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
+import io.nuls.contract.model.tx.ContractReturnGasTransaction;
 import io.nuls.contract.model.txdata.CallContractData;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.rpc.call.BlockCall;
@@ -48,7 +46,6 @@ import io.nuls.contract.storage.ContractAddressStorageService;
 import io.nuls.contract.storage.ContractTokenTransferStorageService;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
-import io.nuls.contract.util.MapUtil;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.program.*;
 import io.nuls.core.basic.Result;
@@ -56,18 +53,22 @@ import io.nuls.core.basic.VarInt;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.ByteArrayWrapper;
+import io.nuls.core.model.LongUtils;
 import io.nuls.core.model.StringUtils;
 import org.bouncycastle.util.Arrays;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static io.nuls.contract.config.ContractContext.ASSET_ID;
 import static io.nuls.contract.config.ContractContext.CHAIN_ID;
 import static io.nuls.contract.constant.ContractConstant.*;
 import static io.nuls.contract.constant.ContractErrorCode.ADDRESS_ERROR;
 import static io.nuls.contract.util.ContractUtil.*;
+import static io.nuls.core.constant.TxType.CROSS_CHAIN;
+import static io.nuls.core.constant.TxType.DELETE_CONTRACT;
 import static io.nuls.core.model.FormatValidUtils.validTokenNameOrSymbol;
 
 @Component
@@ -465,6 +466,22 @@ public class ContractHelper {
         chain.getBatchInfo().setCurrentBlockHeader(tempHeader);
     }
 
+    public ContractTempBalanceManager getBatchInfoTempBalanceManagerV8(int chainId) {
+        BatchInfoV8 batchInfo;
+        if((batchInfo = getChain(chainId).getBatchInfoV8()) == null) {
+            return null;
+        }
+        return batchInfo.getTempBalanceManager();
+    }
+
+    public BlockHeader getBatchInfoCurrentBlockHeaderV8(int chainId) {
+        BatchInfoV8 batchInfo;
+        if((batchInfo = getChain(chainId).getBatchInfoV8()) == null) {
+            return null;
+        }
+        return batchInfo.getCurrentBlockHeader();
+    }
+
     public ContractTempBalanceManager getBatchInfoTempBalanceManager(int chainId) {
         BatchInfo batchInfo;
         if((batchInfo = getChain(chainId).getBatchInfo()) == null) {
@@ -704,7 +721,9 @@ public class ContractHelper {
     public ContractResult makeFailedContractResult(int chainId, ContractWrapperTransaction tx, CallableResult callableResult, String errorMsg) {
         ContractResult contractResult = ContractResult.genFailed(tx.getContractData(), errorMsg);
         makeContractResult(tx, contractResult);
-        callableResult.putFailed(chainId, contractResult);
+        if (callableResult != null) {
+            callableResult.putFailed(chainId, contractResult);
+        }
         return contractResult;
     }
 
@@ -725,5 +744,58 @@ public class ContractHelper {
             list.add(new ProgramMultyAssetValue(to.getAmount(), to.getAssetsChainId(), to.getAssetsId()));
         }
         contractData.setMultyAssetValues(list);
+    }
+
+    public ContractReturnGasTransaction makeReturnGasTx(List<ContractResult> resultList, long time) throws IOException {
+        ContractWrapperTransaction wrapperTx;
+        ContractData contractData;
+        Map<ByteArrayWrapper, BigInteger> returnMap = new HashMap<>();
+        for (ContractResult contractResult : resultList) {
+            wrapperTx = contractResult.getTx();
+            // 终止合约不消耗Gas，跳过
+            if (wrapperTx.getType() == DELETE_CONTRACT) {
+                continue;
+            }
+            // add by pierre at 2019-12-03 代币跨链交易的合约调用是系统调用，不计算Gas消耗，跳过
+            if (wrapperTx.getType() == CROSS_CHAIN) {
+                continue;
+            }
+            // end code by pierre
+            contractData = wrapperTx.getContractData();
+            long realGasUsed = contractResult.getGasUsed();
+            long txGasUsed = contractData.getGasLimit();
+            long returnGas;
+
+            BigInteger returnValue;
+            if (txGasUsed > realGasUsed) {
+                returnGas = txGasUsed - realGasUsed;
+                returnValue = BigInteger.valueOf(LongUtils.mul(returnGas, contractData.getPrice()));
+
+                ByteArrayWrapper sender = new ByteArrayWrapper(contractData.getSender());
+                BigInteger senderValue = returnMap.get(sender);
+                if (senderValue == null) {
+                    senderValue = returnValue;
+                } else {
+                    senderValue = senderValue.add(returnValue);
+                }
+                returnMap.put(sender, senderValue);
+            }
+        }
+        if (!returnMap.isEmpty()) {
+            CoinData coinData = new CoinData();
+            List<CoinTo> toList = coinData.getTo();
+            Set<Map.Entry<ByteArrayWrapper, BigInteger>> entries = returnMap.entrySet();
+            CoinTo returnCoin;
+            for (Map.Entry<ByteArrayWrapper, BigInteger> entry : entries) {
+                returnCoin = new CoinTo(entry.getKey().getBytes(), CHAIN_ID, ASSET_ID, entry.getValue(), 0L);
+                toList.add(returnCoin);
+            }
+            ContractReturnGasTransaction tx = new ContractReturnGasTransaction();
+            tx.setTime(time);
+            tx.setCoinData(coinData.serialize());
+            tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
+            return tx;
+        }
+        return null;
     }
 }

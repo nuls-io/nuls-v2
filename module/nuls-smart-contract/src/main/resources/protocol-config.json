@@ -4,12 +4,28 @@
     "extend": "4",
     "validTxs": [
       {
+        "type": "15",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "CreateContractProcessorV8"
+      },
+      {
         "type": "16",
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
         "verifyFee": true,
         "handler": "CallContractProcessorV8"
+      },
+      {
+        "type": "17",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "DeleteContractProcessorV8"
       }
     ],
     "validMsgs": [],

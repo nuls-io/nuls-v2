@@ -2,21 +2,18 @@ package io.nuls.contract.tx.v8;
 
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
-import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.base.protocol.TransactionProcessor;
-import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.model.bo.BatchInfoV8;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractWrapperTransaction;
 import io.nuls.contract.model.dto.ContractPackageDto;
-import io.nuls.contract.model.tx.CallContractTransaction;
-import io.nuls.contract.model.txdata.CallContractData;
-import io.nuls.contract.processor.CallContractTxProcessor;
-import io.nuls.contract.util.ContractUtil;
+import io.nuls.contract.model.tx.DeleteContractTransaction;
+import io.nuls.contract.model.txdata.DeleteContractData;
+import io.nuls.contract.processor.DeleteContractTxProcessor;
 import io.nuls.contract.util.Log;
-import io.nuls.contract.validator.CallContractTxValidator;
+import io.nuls.contract.validator.DeleteContractTxValidator;
 import io.nuls.core.basic.Result;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
@@ -28,21 +25,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Component("CallContractProcessorV8")
-public class CallContractProcessorV8 implements TransactionProcessor {
+@Component("DeleteContractProcessorV8")
+public class DeleteContractProcessorV8 implements TransactionProcessor {
 
     @Autowired
-    private CallContractTxProcessor callContractTxProcessor;
+    private DeleteContractTxProcessor deleteContractTxProcessor;
     @Autowired
-    private CallContractTxValidator callContractTxValidator;
+    private DeleteContractTxValidator deleteContractTxValidator;
     @Autowired
     private ContractHelper contractHelper;
-    @Autowired
-    private ChainManager chainManager;
 
     @Override
     public int getType() {
-        return TxType.CALL_CONTRACT;
+        return TxType.DELETE_CONTRACT;
     }
 
     @Override
@@ -52,12 +47,12 @@ public class CallContractProcessorV8 implements TransactionProcessor {
         List<Transaction> errorList = new ArrayList<>();
         result.put("txList", errorList);
         String errorCode = null;
-        CallContractTransaction callTx;
+        DeleteContractTransaction deleteTx;
         for(Transaction tx : txs) {
-            callTx = new CallContractTransaction();
-            callTx.copyTx(tx);
+            deleteTx = new DeleteContractTransaction();
+            deleteTx.copyTx(tx);
             try {
-                Result validate = callContractTxValidator.validateV8(chainId, callTx);
+                Result validate = deleteContractTxValidator.validate(chainId, deleteTx);
                 if(validate.isFailed()) {
                     errorCode = validate.getErrorCode().getCode();
                     errorList.add(tx);
@@ -85,12 +80,12 @@ public class CallContractProcessorV8 implements TransactionProcessor {
                     txHash = tx.getHash().toString();
                     contractResult = contractResultMap.get(txHash);
                     if (contractResult == null) {
-                        Log.warn("empty contract result with txHash: {}, txType: {}", txHash, tx.getType());
+                        Log.warn("empty contract result with txHash: {}", txHash);
                         continue;
                     }
                     wrapperTx = contractResult.getTx();
                     wrapperTx.setContractResult(contractResult);
-                    callContractTxProcessor.onCommitV8(chainId, wrapperTx);
+                    deleteContractTxProcessor.onCommitV8(chainId, wrapperTx);
                 }
             }
 
@@ -105,25 +100,14 @@ public class CallContractProcessorV8 implements TransactionProcessor {
     public boolean rollback(int chainId, List<Transaction> txs, BlockHeader blockHeader) {
         try {
             ChainManager.chainHandle(chainId);
-            CallContractData call;
+            DeleteContractData delete;
             for (Transaction tx : txs) {
-                if (tx.getType() == TxType.CROSS_CHAIN) {
-                    // add by pierre at 2019-12-01 处理type10交易的业务回滚, 需要协议升级 done
-                    if(ProtocolGroupManager.getCurrentVersion(chainId) < ContractContext.UPDATE_VERSION_V250) {
-                        continue;
-                    }
-                    call = ContractUtil.parseCrossChainTx(tx, chainManager);
-                    if (call == null) {
-                        continue;
-                    }
-                } else {
-                    call = new CallContractData();
-                    call.parse(tx.getTxData(), 0);
-                }
-                callContractTxProcessor.onRollbackV8(chainId, new ContractWrapperTransaction(tx, call));
+                delete = new DeleteContractData();
+                delete.parse(tx.getTxData(), 0);
+                deleteContractTxProcessor.onRollbackV8(chainId, new ContractWrapperTransaction(tx, delete));
             }
             return true;
-        } catch (NulsException e) {
+        } catch (Exception e) {
             Log.error(e);
             return false;
         }

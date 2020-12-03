@@ -138,7 +138,7 @@ public class ContractBatchEndCallable implements Callable<ContractPackageDto> {
                 }
             }
             // 生成退还剩余Gas的交易
-            ContractReturnGasTransaction contractReturnGasTx = makeReturnGasTx(chainId, contractResultList, blockTime, contractHelper);
+            ContractReturnGasTransaction contractReturnGasTx = contractHelper.makeReturnGasTx(contractResultList, blockTime);
             if (contractReturnGasTx != null) {
                 resultTxList.add(RPCUtil.encode(contractReturnGasTx.serialize()));
             }
@@ -160,61 +160,6 @@ public class ContractBatchEndCallable implements Callable<ContractPackageDto> {
             Log.error("", e);
             return null;
         }
-    }
-
-    private static ContractReturnGasTransaction makeReturnGasTx(int chainId, List<ContractResult> resultList, long time, ContractHelper contractHelper) throws IOException {
-        int assetsId = contractHelper.getChain(chainId).getConfig().getAssetId();
-        ContractWrapperTransaction wrapperTx;
-        ContractData contractData;
-        Map<ByteArrayWrapper, BigInteger> returnMap = new HashMap<>();
-        for (ContractResult contractResult : resultList) {
-            wrapperTx = contractResult.getTx();
-            // 终止合约不消耗Gas，跳过
-            if (wrapperTx.getType() == DELETE_CONTRACT) {
-                continue;
-            }
-            // add by pierre at 2019-12-03 代币跨链交易的合约调用是系统调用，不计算Gas消耗，跳过
-            if (wrapperTx.getType() == CROSS_CHAIN) {
-                continue;
-            }
-            // end code by pierre
-            contractData = wrapperTx.getContractData();
-            long realGasUsed = contractResult.getGasUsed();
-            long txGasUsed = contractData.getGasLimit();
-            long returnGas;
-
-            BigInteger returnValue;
-            if (txGasUsed > realGasUsed) {
-                returnGas = txGasUsed - realGasUsed;
-                returnValue = BigInteger.valueOf(LongUtils.mul(returnGas, contractData.getPrice()));
-
-                ByteArrayWrapper sender = new ByteArrayWrapper(contractData.getSender());
-                BigInteger senderValue = returnMap.get(sender);
-                if (senderValue == null) {
-                    senderValue = returnValue;
-                } else {
-                    senderValue = senderValue.add(returnValue);
-                }
-                returnMap.put(sender, senderValue);
-            }
-        }
-        if (!returnMap.isEmpty()) {
-            CoinData coinData = new CoinData();
-            List<CoinTo> toList = coinData.getTo();
-            Set<Map.Entry<ByteArrayWrapper, BigInteger>> entries = returnMap.entrySet();
-            CoinTo returnCoin;
-            for (Map.Entry<ByteArrayWrapper, BigInteger> entry : entries) {
-                returnCoin = new CoinTo(entry.getKey().getBytes(), chainId, assetsId, entry.getValue(), 0L);
-                toList.add(returnCoin);
-            }
-            ContractReturnGasTransaction tx = new ContractReturnGasTransaction();
-            tx.setTime(time);
-            tx.setCoinData(coinData.serialize());
-            tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
-            return tx;
-        }
-
-        return null;
     }
 
 }

@@ -28,36 +28,37 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
+import io.nuls.contract.callable.ContractTxCallableV8;
 import io.nuls.contract.constant.ContractErrorCode;
+import io.nuls.contract.enums.CmdRegisterMode;
 import io.nuls.contract.helper.ContractConflictChecker;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.manager.ChainManager;
+import io.nuls.contract.manager.ContractTempBalanceManager;
 import io.nuls.contract.manager.ContractTxProcessorManager;
 import io.nuls.contract.manager.ContractTxValidatorManager;
 import io.nuls.contract.model.bo.*;
 import io.nuls.contract.model.dto.ContractPackageDto;
 import io.nuls.contract.model.po.ContractOfflineTxHashPo;
-import io.nuls.contract.model.tx.CallContractTransaction;
-import io.nuls.contract.model.tx.CreateContractTransaction;
-import io.nuls.contract.model.tx.DeleteContractTransaction;
-import io.nuls.contract.model.txdata.CallContractData;
+import io.nuls.contract.model.tx.*;
 import io.nuls.contract.model.txdata.ContractData;
-import io.nuls.contract.model.txdata.CreateContractData;
-import io.nuls.contract.model.txdata.DeleteContractData;
 import io.nuls.contract.service.*;
 import io.nuls.contract.storage.ContractExecuteResultStorageService;
 import io.nuls.contract.storage.ContractOfflineTxHashListStorageService;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.ProgramExecutor;
+import io.nuls.contract.vm.program.ProgramInvokeRegisterCmd;
+import io.nuls.contract.vm.program.ProgramNewTx;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.StringUtils;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.io.IOException;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -125,6 +126,31 @@ public class ContractServiceImpl implements ContractService {
         return getSuccess();
     }
 
+    @Override
+    public Result beginV8(int chainId, long blockHeight, long blockTime, String packingAddress, String preStateRoot) {
+
+        Log.info("[Begin contract batch] packaging blockHeight is [{}], packaging address is [{}], preStateRoot is [{}]", blockHeight, packingAddress, preStateRoot);
+        Chain chain = contractHelper.getChain(chainId);
+        BatchInfoV8 batchInfo = new BatchInfoV8(blockHeight);
+        // 初始化批量执行基本数据
+        chain.setBatchInfoV8(batchInfo);
+        // 准备临时余额和当前区块头
+        ContractTempBalanceManager tempBalanceManager = ContractTempBalanceManager.newInstance(chainId);
+        BlockHeader tempHeader = new BlockHeader();
+        tempHeader.setHeight(blockHeight);
+        tempHeader.setTime(blockTime);
+        tempHeader.setPackingAddress(AddressTool.getAddress(packingAddress));
+        batchInfo.setTempBalanceManager(tempBalanceManager);
+        batchInfo.setCurrentBlockHeader(tempHeader);
+        // 准备批量执行器
+        ProgramExecutor batchExecutor = contractExecutor.createBatchExecute(chainId, RPCUtil.decode(preStateRoot));
+        batchInfo.setBatchExecutor(batchExecutor);
+        batchInfo.setPreStateRoot(preStateRoot);
+        Map<String, String> result = new HashMap<>();
+        return getSuccess().setData(result);
+    }
+
+
     private Result validContractTx(int chainId, Transaction tx) {
         try {
             Result result;
@@ -157,9 +183,7 @@ public class ContractServiceImpl implements ContractService {
     @Override
     public Result invokeContractOneByOne(int chainId, ContractTempTransaction tx) {
         try {
-//            if (Log.isDebugEnabled()) {
             Log.info("[Invoke Contract] TxType is [{}], hash is [{}]", tx.getType(), tx.getHash().toString());
-//            }
             tx.setChainId(chainId);
             ContractWrapperTransaction wrapperTx = ContractUtil.parseContractTransaction(tx, chainManager);
             // add by pierre at 2019-10-20
@@ -199,6 +223,98 @@ public class ContractServiceImpl implements ContractService {
             return Result.getFailed(e.getErrorCode() == null ? FAILED : e.getErrorCode());
         }
     }
+
+    @Override
+    public Result invokeContractOneByOneV8(int chainId, ContractTempTransaction tx) {
+        try {
+            Log.info("[Invoke Contract] TxType is [{}], hash is [{}]", tx.getType(), tx.getHash().toString());
+            tx.setChainId(chainId);
+            ContractWrapperTransaction wrapperTx = ContractUtil.parseContractTransaction(tx, chainManager);
+            // add by pierre at 2019-10-20
+            if (wrapperTx == null) {
+                return getSuccess();
+            }
+            // end code by pierre
+            Chain chain = contractHelper.getChain(chainId);
+            BatchInfoV8 batchInfo = chain.getBatchInfoV8();
+            wrapperTx.setOrder(batchInfo.getAndIncreaseTxCounter());
+            // 验证合约交易
+            Result validResult = this.validContractTx(chainId, tx);
+            if (validResult.isFailed()) {
+                return validResult;
+            }
+            String preStateRoot = batchInfo.getPreStateRoot();
+            ProgramExecutor batchExecutor = batchInfo.getBatchExecutor();
+            // 执行合约
+            Result result = callTx(chainId, batchExecutor, wrapperTx, preStateRoot, batchInfo);
+            return result;
+        } catch (NulsException e) {
+            Log.error(e);
+            return Result.getFailed(e.getErrorCode() == null ? FAILED : e.getErrorCode());
+        }
+    }
+
+    protected Result callTx(int chainId, ProgramExecutor batchExecutor, ContractWrapperTransaction tx, String preStateRoot, BatchInfoV8 batchInfo) {
+        try {
+            ContractData contractData = tx.getContractData();
+            Integer blockType = Chain.currentThreadBlockType();
+            byte[] contractAddressBytes = contractData.getContractAddress();
+            String contract = AddressTool.getStringAddressByBytes(contractAddressBytes);
+            BlockHeader currentBlockHeader = batchInfo.getCurrentBlockHeader();
+            long blockTime = currentBlockHeader.getTime();
+            long lastestHeight = currentBlockHeader.getHeight() - 1;
+            ContractTxCallableV8 txCallable = new ContractTxCallableV8(chainId, blockType, blockTime, batchExecutor, contract, tx, lastestHeight, preStateRoot);
+            ContractResult contractResult = txCallable.call();
+            batchInfo.getContractResultMap().put(tx.getHash().toString(), contractResult);
+            // 提取需要返回的结果数据
+            Map<String, Object> result = this.extractDataFromContractResult(contractResult);
+            batchInfo.getOfflineTxHashList().addAll((List<byte[]>)result.get("txHashList"));
+            return getSuccess().setData(result);
+        } catch (Exception e) {
+            Log.error(e);
+            return getFailed();
+        }
+    }
+
+    protected Map<String, Object> extractDataFromContractResult(ContractResult contractResult) throws IOException {
+        List<byte[]> offlineTxHashList = new ArrayList<>();
+        List<String> resultTxList = new ArrayList<>();
+        List<ContractTransferTransaction> contractTransferList;
+        List<ProgramInvokeRegisterCmd> invokeRegisterCmds;
+        String newTx, newTxHash;
+        ProgramNewTx programNewTx;
+        // [外部模块调用生成的交易]
+        invokeRegisterCmds = contractResult.getInvokeRegisterCmds();
+        for (ProgramInvokeRegisterCmd invokeRegisterCmd : invokeRegisterCmds) {
+            if (!invokeRegisterCmd.getCmdRegisterMode().equals(CmdRegisterMode.NEW_TX)) {
+                continue;
+            }
+            programNewTx = invokeRegisterCmd.getProgramNewTx();
+            if (StringUtils.isNotBlank(newTxHash = programNewTx.getTxHash())) {
+                offlineTxHashList.add(RPCUtil.decode(newTxHash));
+            }
+            if (StringUtils.isNotBlank(newTx = programNewTx.getTxString())) {
+                resultTxList.add(newTx);
+            }
+        }
+        // [合约内部转账交易]
+        contractTransferList = contractResult.getContractTransferList();
+        for(Transaction tx : contractTransferList) {
+            newTx = RPCUtil.encode(tx.serialize());
+            contractResult.getContractTransferTxStringList().add(newTx);
+            resultTxList.add(newTx);
+            offlineTxHashList.add(tx.getHash().getBytes());
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", contractResult.isSuccess());
+        result.put("gasUsed", contractResult.getGasUsed());
+        result.put("txList", resultTxList);
+        result.put("txHashList", offlineTxHashList);
+        return result;
+    }
+
+
 
     @Override
     public Result beforeEnd(int chainId, long blockHeight) {
@@ -333,95 +449,34 @@ public class ContractServiceImpl implements ContractService {
     }
 
     @Override
-    public Result commitProcessor(int chainId, List<String> txDataList, String blockHeaderHex) {
+    public Result endV8(int chainId, long blockHeight) {
         try {
-            ContractPackageDto contractPackageDto = contractHelper.getChain(chainId).getBatchInfo().getContractPackageDto();
-            if (contractPackageDto != null) {
-                List<byte[]> offlineTxHashList = contractPackageDto.getOfflineTxHashList();
-                if (offlineTxHashList != null && !offlineTxHashList.isEmpty()) {
-                    BlockHeader header = new BlockHeader();
-                    header.parse(RPCUtil.decode(blockHeaderHex), 0);
-                    // 保存智能合约链下交易hash
-                    contractOfflineTxHashListStorageService.saveOfflineTxHashList(chainId, header.getHash().getBytes(), new ContractOfflineTxHashPo(offlineTxHashList));
-                }
+            BatchInfoV8 batchInfo = contractHelper.getChain(chainId).getBatchInfoV8();
+            BlockHeader currentBlockHeader = batchInfo.getCurrentBlockHeader();
+            ProgramExecutor batchExecutor = batchInfo.getBatchExecutor();
+            Result<byte[]> batchExecuteResult = contractExecutor.commitBatchExecute(batchExecutor);
+            byte[] stateRoot = batchExecuteResult.getData();
+            currentBlockHeader.setStateRoot(stateRoot);
 
-                Map<String, ContractResult> contractResultMap = contractPackageDto.getContractResultMap();
-                ContractResult contractResult;
-                ContractWrapperTransaction wrapperTx;
-                if (Log.isDebugEnabled()) {
-                    Log.debug("contract execute txDataSize is {}, commit txDataSize is {}", contractResultMap.keySet().size(), txDataList.size());
-                }
-                for (String txData : txDataList) {
-                    contractResult = contractResultMap.get(txData);
-                    if (contractResult == null) {
-                        Log.warn("empty contract result with txData: {}", txData);
-                        continue;
-                    }
-                    wrapperTx = contractResult.getTx();
-                    wrapperTx.setContractResult(contractResult);
-                    switch (wrapperTx.getType()) {
-                        case CREATE_CONTRACT:
-                            contractTxProcessorManager.createCommit(chainId, wrapperTx);
-                            break;
-                        case CALL_CONTRACT:
-                            contractTxProcessorManager.callCommit(chainId, wrapperTx);
-                            break;
-                        case DELETE_CONTRACT:
-                            contractTxProcessorManager.deleteCommit(chainId, wrapperTx);
-                            break;
-                        default:
-                            break;
-                    }
-                }
+            List<String> txList = new ArrayList<>();
+            // 生成退还剩余Gas的交易
+            ContractReturnGasTransaction returnGasTx = contractHelper.makeReturnGasTx(new ArrayList<>(batchInfo.getContractResultMap().values()), batchInfo.getCurrentBlockHeader().getTime());
+            if (returnGasTx != null) {
+                txList.add(RPCUtil.encode(returnGasTx.serialize()));
             }
-
-            return getSuccess();
-        } catch (Exception e) {
-            Log.error(e);
-            return getFailed();
-        } finally {
-            // 移除临时余额, 临时区块头等当前批次执行数据
-            Chain chain = contractHelper.getChain(chainId);
-            chain.setBatchInfo(null);
-        }
-    }
-
-    @Override
-    public Result rollbackProcessor(int chainId, List<String> txDataList, String blockHeaderHex) {
-        try {
-            Transaction tx;
-            for (String txData : txDataList) {
-                tx = new Transaction();
-                tx.parse(RPCUtil.decode(txData), 0);
-                switch (tx.getType()) {
-                    case CREATE_CONTRACT:
-                        CreateContractData create = new CreateContractData();
-                        create.parse(tx.getTxData(), 0);
-                        contractTxProcessorManager.createRollback(chainId, new ContractWrapperTransaction(tx, create));
-                        break;
-                    case CALL_CONTRACT:
-                        CallContractData call = new CallContractData();
-                        call.parse(tx.getTxData(), 0);
-                        contractTxProcessorManager.callRollback(chainId, new ContractWrapperTransaction(tx, call));
-                        break;
-                    case DELETE_CONTRACT:
-                        DeleteContractData delete = new DeleteContractData();
-                        delete.parse(tx.getTxData(), 0);
-                        contractTxProcessorManager.deleteRollback(chainId, new ContractWrapperTransaction(tx, delete));
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            return getSuccess();
-        } catch (NulsException e) {
-            Log.error(e);
-            return Result.getFailed(e.getErrorCode() == null ? FAILED : e.getErrorCode());
+            Map<String, Object> result = new HashMap<>();
+            result.put("stateRoot", HexUtil.encode(stateRoot));
+            result.put("txList", txList);
+            return getSuccess().setData(result);
         } catch (Exception e) {
             Log.error(e);
             return getFailed().setMsg(e.getMessage());
         }
+    }
+
+    @Override
+    public Result packageEndV8(int chainId, long blockHeight) {
+        return this.endV8(chainId, blockHeight);
     }
 
     @Override
