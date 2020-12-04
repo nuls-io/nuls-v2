@@ -29,6 +29,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.ethereum.db.ByteArrayWrapper;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -47,7 +48,7 @@ public class ProgramResult {
     private String stackTrace;
 
     private String nonce;
-    private Map<ByteArrayWrapper, ProgramAccount> accounts;
+    private Map<String, ProgramAccount> accounts;
 
     private List<ProgramTransfer> transfers = new ArrayList<>();
 
@@ -58,6 +59,18 @@ public class ProgramResult {
 
     private List<ProgramInvokeRegisterCmd> invokeRegisterCmds = new ArrayList<>();
     private List<Object> orderedInnerTxs = new ArrayList<>();
+
+    // add by pierre at 2020-11-03 可能影响兼容性，考虑协议升级
+    private LinkedList<String> stackTraces = new LinkedList<>();
+
+    public LinkedList<String> getStackTraces() {
+        return stackTraces;
+    }
+
+    public void setStackTraces(LinkedList<String> stackTraces) {
+        this.stackTraces = stackTraces;
+    }
+    // end code by pierre
 
     public ProgramResult revert(String errorMessage) {
         this.revert = true;
@@ -145,11 +158,11 @@ public class ProgramResult {
         this.nonce = nonce;
     }
 
-    public Map<ByteArrayWrapper, ProgramAccount> getAccounts() {
+    public Map<String, ProgramAccount> getAccounts() {
         return accounts;
     }
 
-    public void setAccounts(Map<ByteArrayWrapper, ProgramAccount> accounts) {
+    public void setAccounts(Map<String, ProgramAccount> accounts) {
         this.accounts = accounts;
     }
 
@@ -258,6 +271,7 @@ public class ProgramResult {
                 ", transfers=" + transfers +
                 ", internalCalls=" + internalCalls +
                 ", events=" + events +
+                ", debugEvents=" + debugEvents +
                 ", invokeRegisterCmds=" + invokeRegisterCmds +
                 '}';
     }

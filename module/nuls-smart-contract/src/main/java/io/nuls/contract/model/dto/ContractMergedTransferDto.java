@@ -53,6 +53,9 @@ public class ContractMergedTransferDto {
     @ApiModelProperty(description = "调用合约交易hash（源交易hash，合约交易由调用合约交易派生而来）")
     private String orginTxHash;
 
+    public ContractMergedTransferDto() {
+    }
+
     public ContractMergedTransferDto(ContractMergedTransfer transfer) {
         this.from = AddressTool.getStringAddressByBytes(transfer.getFrom());
         this.value = bigInteger2String(transfer.getValue());

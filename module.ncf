@@ -1,21 +1,21 @@
 [global]
 encoding=UTF-8
 language=en
-logPath=E:/work/src/nuls-v2/Logs
-logLevel=INFO
-dataPath=E:/work/src/nuls-v2/data
+logPath=../../../../Logs
+logLevel=DEBUG
+dataPath=../../../../data
 #默认本链ID
 chainId=2
 #地址前缀
 addressPrefix=tNULS
 #默认本链主资产ID
 assetId=1
+#默认资产小数位数
+decimals=8
 #默认链名称
 chainName=nuls2
 #本链默认资产符号
 symbol=NULS
-#默认资产的小数精确位数
-decimals=8
 #主网链id
 mainChainId=2
 #主网主资产id
@@ -23,25 +23,24 @@ mainAssetId=1
 #主网主资产符号
 mainSymbol=NULS
 blackHolePublicKey=000000000000000000000000000000000000000000000000000000000000000000
-packageVersion=2.7.0-a4354e9
 
 [network]
 port=18001
 crossPort=18002
 #魔法参数
-packetMagic=20200120
+packetMagic=202001173
 #种子节点
-selfSeedIps=39.98.226.51:18001,47.244.186.65:18001,47.254.234.223:18001,47.74.86.85:18001,192.168.1.145:18001
+selfSeedIps=192.168.1.39:18001,192.168.1.40:18001,192.168.1.70:18001
 #主网的跨链种子连接节点
-moonSeedIps=39.98.226.51:18002,47.244.186.65:18002,47.254.234.223:18002,47.74.86.85:18002
+moonSeedIps=192.168.1.39:18002
 #最大入网连接数
-maxInCount=100
+maxInCount=300
 #最大出网连接数
 maxOutCount=20
 
 [account]
 keystoreFolder=/keystore/backup
-dependent=protocol-update,smart-contract
+dependent=protocol-update
 
 [block]
 #区块最大字节数
@@ -51,7 +50,7 @@ extendMaxSize=1024
 #引发分叉链切换的高度差阈值
 chainSwtichThreshold=3
 #最小链接节点数,当链接到的网络节点低于此参数时,会持续等待
-minNodeAmount=2
+minNodeAmount=1
 #区块同步过程中,每次从网络上节点下载的区块数量
 downloadNumber=10
 #从网络节点下载单个区块的超时时间
@@ -59,8 +58,8 @@ singleDownloadTimeout=15000
 #区块同步过程中缓存的区块字节数上限(20M)
 cachedBlockSizeLimit=20971520
 #创世块文件路径(支持绝对路径与相对路径,相对路径相对于此配置文件的目录)
-genesisBlockPath=genesis-block.json
-dependent=cross-chain,smart-contract,protocol-update
+genesisBlockPath=genesis-block_dev.json
+dependent=cross-chain,protocol-update,smart-contract
 
 [consensus]
 #种子节点列表
@@ -79,62 +78,67 @@ awardAssetId=1
 feeUnit=100000
 #总通胀量
 totalInflationAmount=11000000000000000
-#初始通胀金额500w/265*30
+#初始通胀金额500w/365*30
 inflationAmount=41095890410959
 #通胀开始计算时间(单位:S)2020-07-12 00:00:00
 initTime=1594483200
 #通缩比例(如果没有通缩则设为100)
-deflationRatio=99.6
+deflationRatio=0.4
 #通缩间隔时间(单位：S),30天
 deflationTimeInterval=2592000
+dataPath=../../../../../data
+logPath=../../../../../Logs
 dependent=protocol-update,smart-contract,cross-chain
+
+[transaction]
+dependent=protocol-update,smart-contract
+
+[ledger]
+dependent=protocol-update
 
 [smart-contract]
 #合约视图方法调用最大消耗的Gas
 maxViewGas=100000000
-systemLogLevel=WARN
-crossTokenSystemContract=tNULSeBaN5MkYxC7ivr23SbRnHrsmJDg86R7Kv
+crossTokenSystemContract=tNULSeBaN2Agkr2cuMPvzXb337jubehUgLQPSH
 dependent=protocol-update
+
+[chain-manager]
+dependent=smart-contract,protocol-update
 
 [public-service]
 #public-service模块对外的rpc端口号
 rpcPort=18003
 #数据库url地址
-databaseUrl=127.0.0.1
+databaseUrl=192.168.1.40
 #数据库端口号
 databasePort=27017
 #连接池最大数
 maxAliveConnect=20
 #连接最大等待时间
 maxWaitTime=120000
+#连接最大持续时间
+socketTimeout=300000
 #连接超时时间
 connectTimeOut=30000
-developerNodeAddress=tNULSeBaMuKuKY4UstKpXvGxd7LEvEBtd3NXAG,tNULSeBaMns1C6kTePxcQS7rGAu37foAwAMpri
-ambassadorNodeAddress=tNULSeBaMhWyQBHc54oXLXB13WhJsyrTobMYYU,tNULSeBaMtCmUuBHMDAjKVSoVBsAEvLoWCspyE
-mappingAddress=tNULSeBaMqTC6rnF56dnJqz1Fb8gMdVxGGvxSf,tNULSeBaMkroWKUKj6X4zURBE3V47VZwMJdHPm
-businessAddress=tNULSeBaMnf1qfX7emr14att2DsSb2TSPcPBSL
-teamAddress=tNULSeBaMqTvaS2NEEZfdrmPzoRvd8zN6T57LH
-communityAddress=tNULSeBaMm9RQLKKUBXKJ1rQ7g4iobmWAB73mS
-dependent=smart-contract,cross-chain
+dependent=smart-contract,cross-chain,chain-manager
 
 [cross-chain]
 #跨链节点链接的最小值
-minNodeAmount=2
+minNodeAmount=3
 #跨链节点链接的最大值
 sendHeight=6
 #跨链交易拜占庭比例
 byzantineRatio=66
 #主网跨链种子节点列表
-crossSeedIps=39.98.226.51:18002,47.244.186.65:18002,47.254.234.223:18002,47.74.86.85:18002,192.168.1.145:18002
+crossSeedIps=192.168.1.39:18002
 #主网验证人列表
-verifiers=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMmShSTVwbU4rHkZjpD98JgFgg6rmhF,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
+verifiers=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
 #主网签名拜占庭比列
 mainByzantineRatio=66
 #主网最大签名数
 maxSignatureCount=100
-dependent=protocol-update,smart-contract
-
-[chain-manager]
+dataPath=../../../../../data
+logPath=../../../../../Logs
 dependent=protocol-update,smart-contract
 
 [nuls-api]
@@ -145,9 +149,10 @@ serverPort=18004
 dependent=smart-contract,cross-chain
 
 [protocol-update]
+continuousIntervalCountMinimum=2
 #每隔多少个区块统计一次协议占比
 interval=10
 dependent=smart-contract,cross-chain
 
-[transaction]
-dependent=protocol-update,smart-contract
+[cmd-client]
+clientVersion=2.7.0

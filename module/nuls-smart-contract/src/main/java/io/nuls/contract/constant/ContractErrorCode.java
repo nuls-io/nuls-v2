@@ -74,6 +74,9 @@ public interface ContractErrorCode extends CommonCodeConstanst {
     ErrorCode CONTRACT_COIN_TO_EMPTY_ERROR = ErrorCode.init(ModuleE.SC.getPrefix() + "_0038");
     ErrorCode CONTRACT_ALIAS_FORMAT_ERROR = ErrorCode.init(ModuleE.SC.getPrefix() + "_0039");
     ErrorCode DUPLICATE_CONTRACT_RETURN_GAS_TX = ErrorCode.init(ModuleE.SC.getPrefix() + "_0040");
+    ErrorCode CONTRACT_COIN_TO_ERROR = ErrorCode.init(ModuleE.SC.getPrefix() + "_0041");
+    ErrorCode CONTRACT_COIN_FROM_ERROR = ErrorCode.init(ModuleE.SC.getPrefix() + "_0042");
+    ErrorCode CONTRACT_CALLER_SIGN_ERROR = ErrorCode.init(ModuleE.SC.getPrefix() + "_0043");
 
     ErrorCode INSUFFICIENT_BALANCE = ErrorCode.init(ModuleE.SC.getPrefix() + "_0100");
     ErrorCode FEE_NOT_RIGHT = ErrorCode.init(ModuleE.SC.getPrefix() + "_0101");
