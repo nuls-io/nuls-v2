@@ -247,6 +247,14 @@ public class ContractServiceImpl implements ContractService {
             ProgramExecutor batchExecutor = batchInfo.getBatchExecutor();
             // 执行合约
             Result result = callTx(chainId, batchExecutor, wrapperTx, preStateRoot, batchInfo);
+            if (result.isSuccess()) {
+                Map<String, Object> _result = new HashMap<>();
+                Map<String, Object> map = (Map<String, Object>) result.getData();
+                _result.put("success", map.get("success"));
+                _result.put("gasUsed", map.get("gasUsed"));
+                _result.put("txList", map.get("txList"));
+                return result.setData(_result);
+            }
             return result;
         } catch (NulsException e) {
             Log.error(e);

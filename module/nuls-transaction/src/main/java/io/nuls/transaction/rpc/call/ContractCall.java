@@ -78,12 +78,16 @@ public class ContractCall {
      * @throws NulsException
      */
     public static boolean invokeContract(Chain chain, String tx, int blockType) throws NulsException {
+        return invokeContract(chain, tx, blockType, null);
+    }
+
+    public static boolean invokeContract(Chain chain, String tx, int blockType, Long timeOut) throws NulsException {
         try {
             Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("tx", tx);
             params.put("blockType", blockType);
-            HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.SC.abbr, "sc_invoke_contract", params);
+            HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.SC.abbr, "sc_invoke_contract", params, timeOut);
             Boolean value = (Boolean) result.get("value");
             if(null == value){
                 chain.getLogger().error("call sc_invoke_contract response value is null, error:{}",
@@ -91,6 +95,37 @@ public class ContractCall {
                 throw new NulsException(TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND);
             }
             return value;
+        } catch (RuntimeException e) {
+            chain.getLogger().error(e);
+            throw new NulsException(TxErrorCode.RPC_REQUEST_FAILD);
+        }
+    }
+
+    /**
+     * 调用智能合约, 合约执行成功与否,不影响交易的打包
+     * @param chain
+     * @param tx
+     * @param blockType 该调用的处理模式, 打包:0, 验证区块:1
+     * @return
+     * @throws NulsException
+     */
+    public static Map<String, Object> invokeContractV8(Chain chain, String tx, int blockType) throws NulsException {
+        return invokeContractV8(chain, tx, blockType, null);
+    }
+
+    public static Map<String, Object> invokeContractV8(Chain chain, String tx, int blockType, Long timeOut) throws NulsException {
+        try {
+            Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
+            params.put(Constants.CHAIN_ID, chain.getChainId());
+            params.put("tx", tx);
+            params.put("blockType", blockType);
+            HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.SC.abbr, "sc_invoke_contract", params, timeOut);
+            if(null == result){
+                chain.getLogger().error("call sc_invoke_contract response result is null, error:{}",
+                        TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
+                throw new NulsException(TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND);
+            }
+            return result;
         } catch (RuntimeException e) {
             chain.getLogger().error(e);
             throw new NulsException(TxErrorCode.RPC_REQUEST_FAILD);
@@ -130,12 +165,16 @@ public class ContractCall {
      * @throws NulsException
      */
     public static Map<String, Object> contractBatchEnd(Chain chain, long blockHeight) throws NulsException {
+        return contractBatchEnd(chain, blockHeight, null);
+    }
+
+    public static Map<String, Object> contractBatchEnd(Chain chain, long blockHeight, Long timeOut) throws NulsException {
 
         Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_4);
         params.put(Constants.CHAIN_ID, chain.getChainId());
         params.put("blockHeight", blockHeight);
         try {
-            Map result = (Map) TransactionCall.requestAndResponse(ModuleE.SC.abbr, "sc_batch_end", params);
+            Map result = (Map) TransactionCall.requestAndResponse(ModuleE.SC.abbr, "sc_batch_end", params, timeOut);
             return result;
         }catch (Exception e) {
             chain.getLogger().error(e);
