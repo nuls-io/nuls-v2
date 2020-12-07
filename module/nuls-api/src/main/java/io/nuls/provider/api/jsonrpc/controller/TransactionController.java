@@ -54,6 +54,7 @@ import io.nuls.provider.rpctools.ContractTools;
 import io.nuls.provider.rpctools.TransactionTools;
 import io.nuls.provider.utils.Log;
 import io.nuls.provider.utils.ResultUtil;
+import io.nuls.provider.utils.Utils;
 import io.nuls.provider.utils.VerifyUtils;
 import io.nuls.v2.model.annotation.Api;
 import io.nuls.v2.model.annotation.ApiOperation;
@@ -234,6 +235,7 @@ public class TransactionController {
                     if (argsResult.getError() != null) {
                         return argsResult;
                     }
+                    String[][] multyAssetValues = Utils.extractMultyAssetInfoFromCallTransaction(callTx.getCoinDataInstance(), config.getChainId(), config.getAssetsId());
                     result = contractTools.validateContractCall(chainId,
                             AddressTool.getStringAddressByBytes(call.getSender()),
                             call.getValue(),
@@ -242,7 +244,8 @@ public class TransactionController {
                             AddressTool.getStringAddressByBytes(call.getContractAddress()),
                             call.getMethodName(),
                             call.getMethodDesc(),
-                            call.getArgs());
+                            call.getArgs(),
+                            multyAssetValues);
                     break;
                 case DELETE_CONTRACT:
                     Transaction deleteTx = new Transaction();

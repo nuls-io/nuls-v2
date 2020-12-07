@@ -126,7 +126,7 @@ public class ContractTools implements CallRpc {
     }
 
     public Result<Map> validateContractCall(int chainId, Object sender, Object value, Object gasLimit, Object price,
-                                            Object contractAddress, Object methodName, Object methodDesc, Object args) {
+                                            Object contractAddress, Object methodName, Object methodDesc, Object args, Object multyAssetValues) {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.CHAIN_ID, chainId);
         params.put("sender", sender);
@@ -137,6 +137,7 @@ public class ContractTools implements CallRpc {
         params.put("methodName", methodName);
         params.put("methodDesc", methodDesc);
         params.put("args", args);
+        params.put("multyAssetValues", multyAssetValues);
         Map map = new HashMap(4);
         try {
             return callRpc(ModuleE.SC.abbr, VALIDATE_CALL, params,(Function<Map<String,Object>, Result<Map>>) res->{

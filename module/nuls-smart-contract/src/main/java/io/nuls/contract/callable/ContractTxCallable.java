@@ -147,7 +147,6 @@ public class ContractTxCallable implements Callable<ContractResult> {
                     }
                 // end code by pierre
                 case CALL_CONTRACT:
-                    contractHelper.extractAssetInfoFromCallTransaction((CallContractData) contractData, tx);
                     contractResult = contractExecutor.call(executor, contractData, number, preStateRoot, extractPublicKey(tx));
 
                     boolean bool = makeContractResultAndCheckGasSerial(tx, contractResult, batchInfo);

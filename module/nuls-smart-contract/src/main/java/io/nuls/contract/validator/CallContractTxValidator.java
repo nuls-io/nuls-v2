@@ -193,7 +193,6 @@ public class CallContractTxValidator {
         BigInteger contractReceivedNulsValue = BigInteger.ZERO;
         if (toSize > 0) {
             for (CoinTo coin : toList) {
-                coin = toList.get(0);
                 if (coin.getLockTime() != 0) {
                     Log.error("contract call error: Transfer amount cannot be locked.");
                     return Result.getFailed(AMOUNT_LOCK_ERROR);

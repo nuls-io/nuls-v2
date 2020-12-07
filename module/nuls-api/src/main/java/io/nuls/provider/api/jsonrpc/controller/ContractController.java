@@ -743,7 +743,8 @@ public class ContractController {
             @Parameter(parameterName = "contractAddress", parameterDes = "合约地址"),
             @Parameter(parameterName = "methodName", parameterDes = "合约方法"),
             @Parameter(parameterName = "methodDesc", parameterDes = "合约方法描述，若合约内方法没有重载，则此参数可以为空", canNull = true),
-            @Parameter(parameterName = "args", requestType = @TypeDescriptor(value = Object[].class), parameterDes = "参数列表", canNull = true)
+            @Parameter(parameterName = "args", requestType = @TypeDescriptor(value = Object[].class), parameterDes = "参数列表", canNull = true),
+            @Parameter(parameterName = "multyAssetValues", requestType = @TypeDescriptor(value = String[][].class), parameterDes = "调用者向合约地址转入的其他资产金额，没有此业务时填空，规则: [[<value>,<assetChainId>,<assetId>]]", canNull = true)
     })
     @ResponseData(name = "返回值", description = "返回消耗的gas值", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "success", valueType = boolean.class, description = "验证成功与否"),
@@ -769,7 +770,8 @@ public class ContractController {
                 params.get(5),
                 params.get(6),
                 params.get(7),
-                params.get(8)
+                params.get(8),
+                params.get(9)
         );
         return ResultUtil.getJsonRpcResult(mapResult);
     }

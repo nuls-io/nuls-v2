@@ -729,20 +729,7 @@ public class ContractHelper {
 
     public void extractAssetInfoFromCallTransaction(CallContractData contractData, Transaction tx) throws NulsException {
         CoinData coinData = tx.getCoinDataInstance();
-        List<CoinTo> toList = coinData.getTo();
-        if (toList == null || toList.isEmpty()) {
-            return;
-        }
-        List<ProgramMultyAssetValue> list = null;
-        for (CoinTo to : toList) {
-            if (to.getAssetsChainId() == CHAIN_ID && to.getAssetsId() == ASSET_ID) {
-                continue;
-            }
-            if (list == null) {
-                list = new ArrayList<>();
-            }
-            list.add(new ProgramMultyAssetValue(to.getAmount(), to.getAssetsChainId(), to.getAssetsId()));
-        }
+        List<ProgramMultyAssetValue> list = extractMultyAssetInfoFromCallTransaction(coinData);
         contractData.setMultyAssetValues(list);
     }
 

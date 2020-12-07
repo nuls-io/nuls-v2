@@ -52,17 +52,17 @@ public class Heap {
 
     private VM vm;
 
-    //TODO pierre 标记
+    // pierre 标记
     public Map<ObjectRef, Map<String, Object>> objects = new LinkedHashMap<>(1024);
     // end code by pierre
     //public final Map<ObjectRef, Map<String, Object>> objects = new HashMap<>(1024);
 
-    //TODO pierre 标记
+    // pierre 标记
     public Map<String, Object> arrays = new LinkedHashMap<>(1024);
     // end code by pierre
     //public final Map<String, Object> arrays = new HashMap<>(1024);
 
-    //TODO pierre 标记
+    // pierre 标记
     public Set<ObjectRef> changes = new LinkedHashSet<>(1024);
     // end code by pierre
     //private final Set<ObjectRef> changes = new HashSet<>(1024);

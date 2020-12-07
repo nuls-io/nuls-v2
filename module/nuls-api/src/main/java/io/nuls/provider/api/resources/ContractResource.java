@@ -468,7 +468,8 @@ public class ContractResource {
                 form.getContractAddress(),
                 form.getMethodName(),
                 form.getMethodDesc(),
-                form.getArgs());
+                form.getArgs(),
+                form.getMultyAssetValues());
         return ResultUtil.getRpcClientResult(mapResult);
     }
 

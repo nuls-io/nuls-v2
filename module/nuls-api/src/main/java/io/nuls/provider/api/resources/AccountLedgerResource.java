@@ -54,6 +54,7 @@ import io.nuls.provider.rpctools.TransactionTools;
 import io.nuls.provider.rpctools.vo.AccountBalance;
 import io.nuls.provider.utils.Log;
 import io.nuls.provider.utils.ResultUtil;
+import io.nuls.provider.utils.Utils;
 import io.nuls.v2.model.annotation.Api;
 import io.nuls.v2.model.annotation.ApiOperation;
 import io.nuls.v2.model.dto.*;
@@ -188,6 +189,7 @@ public class AccountLedgerResource {
                     if (argsResult.isFailed()) {
                         return argsResult;
                     }
+                    String[][] multyAssetValues = Utils.extractMultyAssetInfoFromCallTransaction(callTx.getCoinDataInstance(), config.getChainId(), config.getAssetsId());
                     result = contractTools.validateContractCall(config.getChainId(),
                             AddressTool.getStringAddressByBytes(call.getSender()),
                             call.getValue(),
@@ -196,7 +198,8 @@ public class AccountLedgerResource {
                             AddressTool.getStringAddressByBytes(call.getContractAddress()),
                             call.getMethodName(),
                             call.getMethodDesc(),
-                            call.getArgs());
+                            call.getArgs(),
+                            multyAssetValues);
                     break;
                 case DELETE_CONTRACT:
                     Transaction deleteTx = new Transaction();
