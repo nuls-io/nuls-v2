@@ -124,7 +124,7 @@ public class ContractMultyAssetTest extends BaseQuery {
     @Test
     public void nulsTest() throws Exception {
         // 转入 3.2 NULS
-        this.callByParams("_payable", "3.2", null);
+        this.callByParams("_payable", "6.2", null);
         // 转出 1.1 NULS
         Object[] args = new Object[]{toAddress17, new BigDecimal("1.1").multiply(BigDecimal.TEN.pow(8)).toBigInteger()};
         this.callByParams("transferNuls", "0", args);
@@ -225,10 +225,50 @@ public class ContractMultyAssetTest extends BaseQuery {
     }
 
     /**
-     * 多账户调用合约
+     * 多账户调用合约 - 转入
      */
     @Test
-    public void manyAccountCall() throws Exception {
+    public void transferInOfmanyAccountCall() throws Exception {
+        NulsSDKBootStrap.init(chainId, "http://localhost:18004/");
+        String feeAccount = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
+        String feeAccountPri = "9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b";
+        String sender = "tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD";
+        String senderPri = "477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75";
+        BigInteger value = new BigDecimal("6.6").movePointRight(8).toBigInteger();
+        String contractAddress = "tNULSeBaNAVAKkKhA2AoHk7eoVXbqtVVA8tu5Y";
+        String remark = "";
+        this.callTxOffline(feeAccount, feeAccountPri, sender, senderPri,
+                value,
+                contractAddress,
+                "_payable", "", remark, null, null, null, true);
+
+    }
+
+    /**
+     * 多账户调用合约 - 转入（A账户支出，合约记录B账户）
+     */
+    @Test
+    public void transferInOfmanyAccountCall_1() throws Exception {
+        NulsSDKBootStrap.init(chainId, "http://localhost:18004/");
+        String feeAccount = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
+        String feeAccountPri = "9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b";
+        String sender = "tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD";
+        String senderPri = "477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75";
+        BigInteger value = new BigDecimal("6.6").movePointRight(8).toBigInteger();
+        String contractAddress = "tNULSeBaNAVAKkKhA2AoHk7eoVXbqtVVA8tu5Y";
+        String remark = "";
+        this.callTxOffline(feeAccount, feeAccountPri, sender, senderPri,
+                value,
+                contractAddress,
+                "_payable", "", remark, null, null, null, true);
+
+    }
+
+    /**
+     * 多账户调用合约 - 转出
+     */
+    @Test
+    public void transferOutOfmanyAccountCall() throws Exception {
         NulsSDKBootStrap.init(chainId, "http://localhost:18004/");
         //importPriKey("9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b", password);//25 tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
         //importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//26 tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
@@ -237,24 +277,29 @@ public class ContractMultyAssetTest extends BaseQuery {
         String sender = "tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD";
         String senderPri = "477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75";
         BigInteger value = BigInteger.ZERO;
-        String contractAddress = "tNULSeBaN7Fd9yMXAcL5EUhjyq4AUWJ3pw1Gu9";
-        //String contractAddress = "tNULSeBaNA1AvcgZh1geK8upzgiabUTSyBy5R2";
+        String contractAddress = "tNULSeBaNAVAKkKhA2AoHk7eoVXbqtVVA8tu5Y";
         String methodName = "transferNuls";
         String methodDesc = "";
         String remark = "";
         // 转出 0.1 NULS
         Object[] args = new Object[]{toAddress17, new BigDecimal("0.1").multiply(BigDecimal.TEN.pow(8)).toBigInteger()};
         String[] argsType = new String[]{"Address", "BigInteger"};
-        this.callTxOffline(feeAccount, feeAccountPri, sender, senderPri,
-                new BigDecimal("3.2").multiply(BigDecimal.TEN.pow(8)).toBigInteger(),
-                contractAddress,
-                "_payable", "", remark, null, null, true);
-        this.callTxOffline(feeAccount, feeAccountPri, sender, senderPri, value, contractAddress, methodName, methodDesc, remark, args, argsType, true);
-
+        this.callTxOffline(feeAccount, feeAccountPri, sender, senderPri, value, contractAddress, methodName, methodDesc, remark, args, argsType, null, true);
     }
 
     protected void callTxOffline(String feeAccount, String feeAccountPri,
                                  String sender, String senderPri,
+                                 BigInteger value, String contractAddress,
+                                 String methodName, String methodDesc,
+                                 String remark,
+                                 Object[] args, String[] argsType, ProgramMultyAssetValue[] multyAssetValues, boolean isBroadcastTx) throws Exception{
+
+    }
+
+    //TODO pierre 设置CoinData
+    protected void callTxOfflineBase(List<CoinFrom> froms, List<CoinTo> tos,
+                                 String feeAccount,
+                                 String contractSender,
                                  BigInteger value, String contractAddress,
                                  String methodName, String methodDesc,
                                  String remark,
@@ -270,12 +315,12 @@ public class ContractMultyAssetTest extends BaseQuery {
 
         // 组装交易的txData
         byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
-        byte[] senderBytes = AddressTool.getAddress(sender);
+        byte[] senderBytes = AddressTool.getAddress(contractSender);
         CallContractData callContractData = new CallContractData();
         callContractData.setContractAddress(contractAddressBytes);
         callContractData.setSender(senderBytes);
         callContractData.setValue(value);
-        callContractData.setPrice(1);
+        callContractData.setPrice(25);
         callContractData.setGasLimit(gasLimit);
         callContractData.setMethodName(methodName);
         callContractData.setMethodDesc(methodDesc);
@@ -326,14 +371,14 @@ public class ContractMultyAssetTest extends BaseQuery {
         tx.setCoinData(coinData.serialize());
         // 签名
         List<SignDto> signDtoList = new ArrayList<>();
-        SignDto signDto = new SignDto();
+        /*SignDto signDto = new SignDto();
         signDto.setAddress(sender);
         signDto.setPriKey(senderPri);
         signDtoList.add(signDto);
         signDto = new SignDto();
         signDto.setAddress(feeAccount);
         signDto.setPriKey(feeAccountPri);
-        signDtoList.add(signDto);
+        signDtoList.add(signDto);*/
 
         byte[] txBytes = tx.serialize();
         String txHex = HexUtil.encode(txBytes);
@@ -410,4 +455,6 @@ public class ContractMultyAssetTest extends BaseQuery {
         String hash = (String) result.get("txHash");
         Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(waitGetContractTx(hash)));
     }
+
+
 }
