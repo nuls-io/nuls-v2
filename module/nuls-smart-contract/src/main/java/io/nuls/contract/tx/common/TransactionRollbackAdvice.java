@@ -33,6 +33,7 @@ import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.storage.ContractOfflineTxHashListStorageService;
 import io.nuls.contract.tx.v1.CallContractProcessor;
+import io.nuls.contract.tx.v8.CallContractProcessorV8;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -53,17 +54,24 @@ public class TransactionRollbackAdvice implements CommonAdvice {
     private ContractOfflineTxHashListStorageService contractOfflineTxHashListStorageService;
     @Autowired
     private CallContractProcessor callContractProcessor;
+    @Autowired
+    private CallContractProcessorV8 callContractProcessorV8;
 
     @Override
     public void begin(int chainId, List<Transaction> txList, BlockHeader header) {
         try {
             ChainManager.chainHandle(chainId, BlockType.VERIFY_BLOCK.type());
+            Short currentVersion = ProtocolGroupManager.getCurrentVersion(chainId);
             // 删除智能合约链下交易hash
             contractOfflineTxHashListStorageService.deleteOfflineTxHashList(chainId, header.getHash().getBytes());
             // add by pierre at 2019-12-01 处理type10交易的业务回滚, 需要协议升级 done
-            if(ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_V250) {
+            if(currentVersion >= ContractContext.UPDATE_VERSION_V250) {
                 List<Transaction> crossTxList = txList.stream().filter(tx -> tx.getType() == TxType.CROSS_CHAIN).collect(Collectors.toList());
-                callContractProcessor.rollback(chainId, crossTxList, header);
+                if(currentVersion >= ContractContext.UPDATE_VERSION_CONTRACT_ASSET ) {
+                    callContractProcessorV8.rollback(chainId, crossTxList, header);
+                } else {
+                    callContractProcessor.rollback(chainId, crossTxList, header);
+                }
             }
             // end code by pierre
         } catch (Exception e) {

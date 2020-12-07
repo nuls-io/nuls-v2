@@ -46,6 +46,10 @@ public class ContractWrapperTransaction extends Transaction {
 
     private BlockHeader blockHeader;
 
+    private String uuid;
+
+    private byte[] valueSender;
+
     public ContractWrapperTransaction(Transaction tx, String txHex, ContractData contractData) {
         this.txHex = txHex;
         this.contractData = contractData;
@@ -104,5 +108,21 @@ public class ContractWrapperTransaction extends Transaction {
 
     public void setBlockHeader(BlockHeader blockHeader) {
         this.blockHeader = blockHeader;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
+    public byte[] getValueSender() {
+        return valueSender;
+    }
+
+    public void setValueSender(byte[] valueSender) {
+        this.valueSender = valueSender;
     }
 }

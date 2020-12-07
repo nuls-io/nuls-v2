@@ -75,8 +75,7 @@ public class RocksDBService {
      * @return
      */
     public static boolean existTable(String table) {
-        String[] tables = RocksDBManager.listTable();
-        return Arrays.asList(tables).contains(table);
+        return RocksDBManager.getTable(table) != null;
     }
 
 

@@ -29,6 +29,7 @@ import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.config.ContractConfig;
+import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.enums.CmdRegisterMode;
 import io.nuls.contract.manager.ContractTempBalanceManager;
 import io.nuls.contract.model.bo.ContractBalance;
@@ -49,6 +50,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigInteger;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static io.nuls.contract.util.ContractUtil.asBytes;
 import static io.nuls.contract.util.ContractUtil.mapAddBigInteger;
@@ -67,7 +69,6 @@ public class ContractNewTxFromOtherModuleHandler {
      */
     public Transaction updateNonceAndVmBalance(int chainId, byte[] contractAddressBytes, String txHash, String txStr, Frame frame) {
         try {
-            int assetId = contractConfig.getAssetId();
             byte[] txBytes = RPCUtil.decode(txStr);
             Transaction tx = new Transaction();
             tx.parse(txBytes, 0);
@@ -90,13 +91,8 @@ public class ContractNewTxFromOtherModuleHandler {
             if(!existContract) {
                 throw new RuntimeException("Illegal transaction: contract address must be exist in data of coin-from.");
             }
-            //CoinFrom from0 = fromList.get(0);
-            //addressBytes = from0.getAddress();
-            //if (!Arrays.equals(contractAddressBytes, addressBytes)) {
-            //    throw new RuntimeException("not contract address");
-            //}
             boolean isUnlockTx = contractFrom.getLocked() == (byte) -1;
-            ProgramAccount account = frame.vm.getProgramExecutor().getAccount(contractAddressBytes);
+            ProgramAccount account = frame.vm.getProgramExecutor().getAccount(contractAddressBytes, contractFrom.getAssetsChainId(), contractFrom.getAssetsId());
 
             // 普通交易，更新nonce
             if(!isUnlockTx) {
@@ -106,54 +102,57 @@ public class ContractNewTxFromOtherModuleHandler {
             }
 
             // 更新vm balance
-            LinkedHashMap<String, BigInteger> contractFromValue = MapUtil.createLinkedHashMap(4);
-            LinkedHashMap<String, BigInteger> contractToValue = MapUtil.createLinkedHashMap(4);
-            byte[] fromAddress, toAddress;
-            long txTime;
-            txTime = tx.getTime();
-            List<CoinFrom> froms = coinData.getFrom();
-            List<CoinTo> tos = coinData.getTo();
-            for (CoinFrom from : froms) {
-                // 只记录主资产的余额变化
-                if(from.getAssetsChainId() != chainId || from.getAssetsId() != assetId) {
-                    continue;
-                }
-                fromAddress = from.getAddress();
-                if (!ContractUtil.isLegalContractAddress(chainId, fromAddress)) {
-                    continue;
-                }
-                if(!isLockedAmount(txTime, from.getLocked())) {
-                    mapAddBigInteger(contractFromValue, fromAddress, from.getAmount());
-                }
-            }
-            for (CoinTo to : tos) {
-                // 只记录主资产的余额变化
-                if(to.getAssetsChainId() != chainId || to.getAssetsId() != assetId) {
-                    continue;
-                }
-                toAddress = to.getAddress();
-                if (!ContractUtil.isLegalContractAddress(chainId, toAddress)) {
-                    continue;
-                }
-                if (!isLockedAmount(txTime, to.getLockTime())) {
-                    mapAddBigInteger(contractToValue, toAddress, to.getAmount());
-                }
+            LinkedHashMap<String, BigInteger>[] contracts = this.filterContractValue(chainId, List.of(tx));
+            LinkedHashMap<String, BigInteger> contractFromValue = contracts[0];
+            LinkedHashMap<String, BigInteger> contractFromLockValue = contracts[1];
+            LinkedHashMap<String, BigInteger> contractToValue = contracts[2];
+            LinkedHashMap<String, BigInteger> contractToLockValue = contracts[3];
 
-            }
             byte[] contractBytes;
+            int assetChainId, assetId;
             ProgramExecutorImpl programExecutor = frame.vm.getProgramExecutor();
-            // 扣除转出
-            Set<Map.Entry<String, BigInteger>> _froms = contractFromValue.entrySet();
-            for (Map.Entry<String, BigInteger> from : _froms) {
-                contractBytes = asBytes(from.getKey());
-                programExecutor.getAccount(contractBytes).addBalance(from.getValue().negate());
+            // 增加锁定转入
+            Set<Map.Entry<String, BigInteger>> lockTos = contractToLockValue.entrySet();
+            for (Map.Entry<String, BigInteger> lockTo : lockTos) {
+                String key = lockTo.getKey();
+                String[] keySplit = key.split(ContractConstant.LINE);
+                contractBytes = asBytes(keySplit[0]);
+                assetChainId = Integer.parseInt(keySplit[1]);
+                assetId = Integer.parseInt(keySplit[2]);
+                programExecutor.getAccount(contractBytes, assetChainId, assetId).addFreeze(lockTo.getValue());
             }
             // 增加转入
             Set<Map.Entry<String, BigInteger>> _tos = contractToValue.entrySet();
             for (Map.Entry<String, BigInteger> to : _tos) {
-                contractBytes = asBytes(to.getKey());
-                programExecutor.getAccount(contractBytes).addBalance(to.getValue());
+                String key = to.getKey();
+                String[] keySplit = key.split(ContractConstant.LINE);
+                contractBytes = asBytes(keySplit[0]);
+                assetChainId = Integer.parseInt(keySplit[1]);
+                assetId = Integer.parseInt(keySplit[2]);
+                programExecutor.getAccount(contractBytes, assetChainId, assetId).addBalance(to.getValue());
             }
+            // 扣除锁定转出
+            Set<Map.Entry<String, BigInteger>> lockFroms = contractFromLockValue.entrySet();
+            for (Map.Entry<String, BigInteger> lockFrom : lockFroms) {
+                String key = lockFrom.getKey();
+                String[] keySplit = key.split(ContractConstant.LINE);
+                contractBytes = asBytes(keySplit[0]);
+                assetChainId = Integer.parseInt(keySplit[1]);
+                assetId = Integer.parseInt(keySplit[2]);
+                programExecutor.getAccount(contractBytes, assetChainId, assetId).addFreeze(lockFrom.getValue().negate());
+            }
+            // 扣除转出
+            Set<Map.Entry<String, BigInteger>> _froms = contractFromValue.entrySet();
+            for (Map.Entry<String, BigInteger> from : _froms) {
+                String key = from.getKey();
+                String[] keySplit = key.split(ContractConstant.LINE);
+                contractBytes = asBytes(keySplit[0]);
+                assetChainId = Integer.parseInt(keySplit[1]);
+                assetId = Integer.parseInt(keySplit[2]);
+                programExecutor.getAccount(contractBytes, assetChainId, assetId).addBalance(from.getValue().negate());
+            }
+
+
             return tx;
         } catch (NulsException e) {
             Log.error(e);
@@ -161,64 +160,63 @@ public class ContractNewTxFromOtherModuleHandler {
         }
     }
 
-    //public boolean refreshTempBalance(int chainId, ContractResult contractResult, ContractTempBalanceManager tempBalanceManager) {
-    //    List<ProgramInvokeRegisterCmd> invokeRegisterCmds = contractResult.getInvokeRegisterCmds();
-    //    if (invokeRegisterCmds.isEmpty()) {
-    //        return true;
-    //    }
-    //    List<ProgramNewTx> programNewTxList = new ArrayList<>();
-    //    for (ProgramInvokeRegisterCmd invokeRegisterCmd : invokeRegisterCmds) {
-    //        if (!CmdRegisterMode.NEW_TX.equals(invokeRegisterCmd.getCmdRegisterMode())) {
-    //            continue;
-    //        }
-    //        programNewTxList.add(invokeRegisterCmd.getProgramNewTx());
-    //    }
-    //    if (programNewTxList.isEmpty()) {
-    //        return true;
-    //    }
-    //    byte[] contractAddressBytes = contractResult.getContractAddress();
-    //    return this.refreshTempBalance(chainId, contractAddressBytes, programNewTxList, tempBalanceManager);
-    //}
-
     public boolean refreshTempBalance(int chainId, byte[] contractAddressBytes, List<ProgramNewTx> programNewTxList, ContractTempBalanceManager tempBalanceManager) {
         try {
-            LinkedHashMap<String, BigInteger>[] contracts = this.filterContractValue(chainId, programNewTxList);
+            List<Transaction> collect = programNewTxList.stream().map(a -> a.getTx()).collect(Collectors.toList());
+            LinkedHashMap<String, BigInteger>[] contracts = this.filterContractValue(chainId, collect);
             LinkedHashMap<String, BigInteger> contractFromValue = contracts[0];
             LinkedHashMap<String, BigInteger> contractFromLockValue = contracts[1];
             LinkedHashMap<String, BigInteger> contractToValue = contracts[2];
             LinkedHashMap<String, BigInteger> contractToLockValue = contracts[3];
             byte[] contractBytes;
+            int assetChainId, assetId;
             // 增加锁定转入
             Set<Map.Entry<String, BigInteger>> lockTos = contractToLockValue.entrySet();
             for (Map.Entry<String, BigInteger> lockTo : lockTos) {
-                contractBytes = asBytes(lockTo.getKey());
+                String key = lockTo.getKey();
+                String[] keySplit = key.split(ContractConstant.LINE);
+                contractBytes = asBytes(keySplit[0]);
+                assetChainId = Integer.parseInt(keySplit[1]);
+                assetId = Integer.parseInt(keySplit[2]);
                 // 初始化临时余额
-                tempBalanceManager.getBalance(contractBytes);
-                tempBalanceManager.addLockedTempBalance(contractBytes, lockTo.getValue());
+                tempBalanceManager.getBalance(contractBytes, assetChainId, assetId);
+                tempBalanceManager.addLockedTempBalance(contractBytes, lockTo.getValue(), assetChainId, assetId);
             }
             // 增加转入
             Set<Map.Entry<String, BigInteger>> tos = contractToValue.entrySet();
             for (Map.Entry<String, BigInteger> to : tos) {
-                contractBytes = asBytes(to.getKey());
+                String key = to.getKey();
+                String[] keySplit = key.split(ContractConstant.LINE);
+                contractBytes = asBytes(keySplit[0]);
+                assetChainId = Integer.parseInt(keySplit[1]);
+                assetId = Integer.parseInt(keySplit[2]);
                 // 初始化临时余额
-                tempBalanceManager.getBalance(contractBytes);
-                tempBalanceManager.addTempBalance(contractBytes, to.getValue());
+                tempBalanceManager.getBalance(contractBytes, assetChainId, assetId);
+                tempBalanceManager.addTempBalance(contractBytes, to.getValue(), assetChainId, assetId);
             }
             // 扣除锁定转出
             Set<Map.Entry<String, BigInteger>> lockFroms = contractFromLockValue.entrySet();
             for (Map.Entry<String, BigInteger> lockFrom : lockFroms) {
-                contractBytes = asBytes(lockFrom.getKey());
+                String key = lockFrom.getKey();
+                String[] keySplit = key.split(ContractConstant.LINE);
+                contractBytes = asBytes(keySplit[0]);
+                assetChainId = Integer.parseInt(keySplit[1]);
+                assetId = Integer.parseInt(keySplit[2]);
                 // 初始化临时余额
-                tempBalanceManager.getBalance(contractBytes);
-                tempBalanceManager.minusLockedTempBalance(contractBytes, lockFrom.getValue());
+                tempBalanceManager.getBalance(contractBytes, assetChainId, assetId);
+                tempBalanceManager.minusLockedTempBalance(contractBytes, lockFrom.getValue(), assetChainId, assetId);
             }
             // 扣除转出
             Set<Map.Entry<String, BigInteger>> froms = contractFromValue.entrySet();
             for (Map.Entry<String, BigInteger> from : froms) {
-                contractBytes = asBytes(from.getKey());
+                String key = from.getKey();
+                String[] keySplit = key.split(ContractConstant.LINE);
+                contractBytes = asBytes(keySplit[0]);
+                assetChainId = Integer.parseInt(keySplit[1]);
+                assetId = Integer.parseInt(keySplit[2]);
                 // 初始化临时余额
-                tempBalanceManager.getBalance(contractBytes);
-                tempBalanceManager.minusTempBalance(contractBytes, from.getValue());
+                tempBalanceManager.getBalance(contractBytes, assetChainId, assetId);
+                tempBalanceManager.minusTempBalance(contractBytes, from.getValue(), assetChainId, assetId);
             }
             return true;
         } catch (NulsException e) {
@@ -227,8 +225,7 @@ public class ContractNewTxFromOtherModuleHandler {
         }
     }
 
-    private LinkedHashMap<String, BigInteger>[] filterContractValue(int chainId, List<ProgramNewTx> programNewTxList) throws NulsException {
-        int assetId = contractConfig.getAssetId();
+    private LinkedHashMap<String, BigInteger>[] filterContractValue(int chainId, List<Transaction> programNewTxList) throws NulsException {
         LinkedHashMap<String, BigInteger> contractFromValue = MapUtil.createLinkedHashMap(4);
         LinkedHashMap<String, BigInteger> contractFromLockValue = MapUtil.createLinkedHashMap(4);
         LinkedHashMap<String, BigInteger> contractToValue = MapUtil.createLinkedHashMap(4);
@@ -241,9 +238,7 @@ public class ContractNewTxFromOtherModuleHandler {
 
         byte[] fromAddress, toAddress;
         long txTime;
-        Transaction tx;
-        for (ProgramNewTx programNewTx : programNewTxList) {
-            tx = programNewTx.getTx();
+        for (Transaction tx : programNewTxList) {
             txTime = tx.getTime();
             CoinData coinData = tx.getCoinDataInstance();
 
@@ -251,38 +246,32 @@ public class ContractNewTxFromOtherModuleHandler {
             List<CoinTo> tos = coinData.getTo();
 
             for (CoinFrom from : froms) {
-                // 只记录主资产的余额变化
-                if(from.getAssetsChainId() != chainId || from.getAssetsId() != assetId) {
-                    continue;
-                }
                 fromAddress = from.getAddress();
                 if (!ContractUtil.isLegalContractAddress(chainId, fromAddress)) {
                     continue;
                 }
+                int assetChainId = from.getAssetsChainId();
+                int assetId = from.getAssetsId();
                 if(isLockedAmount(txTime, from.getLocked())) {
-                    mapAddBigInteger(contractFromLockValue, fromAddress, from.getAmount());
+                    mapAddBigInteger(contractFromLockValue, fromAddress, assetChainId, assetId, from.getAmount());
                 } else {
-                    mapAddBigInteger(contractFromValue, fromAddress, from.getAmount());
+                    mapAddBigInteger(contractFromValue, fromAddress, assetChainId, assetId, from.getAmount());
                 }
             }
 
             for (CoinTo to : tos) {
-                // 只记录主资产的余额变化
-                if(to.getAssetsChainId() != chainId || to.getAssetsId() != assetId) {
-                    continue;
-                }
                 toAddress = to.getAddress();
                 if (!ContractUtil.isLegalContractAddress(chainId, toAddress)) {
                     continue;
                 }
+                int assetChainId = to.getAssetsChainId();
+                int assetId = to.getAssetsId();
                 if (isLockedAmount(txTime, to.getLockTime())) {
-                    mapAddBigInteger(contractToLockValue, toAddress, to.getAmount());
+                    mapAddBigInteger(contractToLockValue, toAddress, assetChainId, assetId, to.getAmount());
                 } else {
-                    mapAddBigInteger(contractToValue, toAddress, to.getAmount());
+                    mapAddBigInteger(contractToValue, toAddress, assetChainId, assetId, to.getAmount());
                 }
-
             }
-
         }
         return contracts;
     }
@@ -297,74 +286,67 @@ public class ContractNewTxFromOtherModuleHandler {
         return false;
     }
 
-    //public void rollbackTempBalance(int chainId, ContractResult contractResult, ContractTempBalanceManager tempBalanceManager) {
-    //    try {
-    //        List<ProgramInvokeRegisterCmd> invokeRegisterCmds = contractResult.getInvokeRegisterCmds();
-    //        if (invokeRegisterCmds.isEmpty()) {
-    //            return;
-    //        }
-    //        List<ProgramNewTx> programNewTxList = new ArrayList<>();
-    //        for (ProgramInvokeRegisterCmd invokeRegisterCmd : invokeRegisterCmds) {
-    //            if (!CmdRegisterMode.NEW_TX.equals(invokeRegisterCmd.getCmdRegisterMode())) {
-    //                continue;
-    //            }
-    //            programNewTxList.add(invokeRegisterCmd.getProgramNewTx());
-    //        }
-    //        if (programNewTxList.isEmpty()) {
-    //            return;
-    //        }
-    //        byte[] contractAddressBytes = contractResult.getContractAddress();
-    //        this.rollbackTempBalance(chainId, contractAddressBytes, programNewTxList, tempBalanceManager);
-    //
-    //        contractResult.getInvokeRegisterCmds().clear();
-    //    } catch (Exception e) {
-    //        Log.error(e);
-    //    }
-    //}
-
     public boolean rollbackTempBalance(int chainId, byte[] contractAddressBytes, List<ProgramNewTx> programNewTxList, ContractTempBalanceManager tempBalanceManager) {
         try {
-            LinkedHashMap<String, BigInteger>[] contracts = this.filterContractValue(chainId, programNewTxList);
+            List<Transaction> collect = programNewTxList.stream().map(a -> a.getTx()).collect(Collectors.toList());
+            LinkedHashMap<String, BigInteger>[] contracts = this.filterContractValue(chainId, collect);
             LinkedHashMap<String, BigInteger> contractFromValue = contracts[0];
             LinkedHashMap<String, BigInteger> contractFromLockValue = contracts[1];
             LinkedHashMap<String, BigInteger> contractToValue = contracts[2];
             LinkedHashMap<String, BigInteger> contractToLockValue = contracts[3];
             byte[] contractBytes;
+            int assetChainId, assetId;
             // 增加转出
             Set<Map.Entry<String, BigInteger>> froms = contractFromValue.entrySet();
             for (Map.Entry<String, BigInteger> from : froms) {
-                contractBytes = asBytes(from.getKey());
-                ContractBalance balance = tempBalanceManager.getBalance(contractBytes).getData();
+                String key = from.getKey();
+                String[] keySplit = key.split(ContractConstant.LINE);
+                contractBytes = asBytes(keySplit[0]);
+                assetChainId = Integer.parseInt(keySplit[1]);
+                assetId = Integer.parseInt(keySplit[2]);
+                ContractBalance balance = tempBalanceManager.getBalance(contractBytes, assetChainId, assetId).getData();
                 if (StringUtils.isNotBlank(balance.getPreNonce())) {
                     balance.setNonce(balance.getPreNonce());
                 }
-                tempBalanceManager.addTempBalance(contractBytes, from.getValue());
+                tempBalanceManager.addTempBalance(contractBytes, from.getValue(), assetChainId, assetId);
             }
             // 增加锁定转出
             Set<Map.Entry<String, BigInteger>> lockFroms = contractFromLockValue.entrySet();
             for (Map.Entry<String, BigInteger> lockFrom : lockFroms) {
-                contractBytes = asBytes(lockFrom.getKey());
-                ContractBalance balance = tempBalanceManager.getBalance(contractBytes).getData();
+                String key = lockFrom.getKey();
+                String[] keySplit = key.split(ContractConstant.LINE);
+                contractBytes = asBytes(keySplit[0]);
+                assetChainId = Integer.parseInt(keySplit[1]);
+                assetId = Integer.parseInt(keySplit[2]);
+                ContractBalance balance = tempBalanceManager.getBalance(contractBytes, assetChainId, assetId).getData();
                 if(StringUtils.isNotBlank(balance.getPreNonce())) {
                     balance.setNonce(balance.getPreNonce());
                 }
-                tempBalanceManager.addLockedTempBalance(contractBytes, lockFrom.getValue());
+                tempBalanceManager.addLockedTempBalance(contractBytes, lockFrom.getValue(), assetChainId, assetId);
             }
             // 扣除转入
             Set<Map.Entry<String, BigInteger>> tos = contractToValue.entrySet();
             for (Map.Entry<String, BigInteger> to : tos) {
-                contractBytes = asBytes(to.getKey());
+                String key = to.getKey();
+                String[] keySplit = key.split(ContractConstant.LINE);
+                contractBytes = asBytes(keySplit[0]);
+                assetChainId = Integer.parseInt(keySplit[1]);
+                assetId = Integer.parseInt(keySplit[2]);
                 // 初始化临时余额
-                tempBalanceManager.getBalance(contractBytes);
-                tempBalanceManager.minusTempBalance(contractBytes, to.getValue());
+                tempBalanceManager.getBalance(contractBytes, assetChainId, assetId);
+                tempBalanceManager.minusTempBalance(contractBytes, to.getValue(), assetChainId, assetId);
             }
             // 扣除锁定转入
             Set<Map.Entry<String, BigInteger>> lockTos = contractToLockValue.entrySet();
             for (Map.Entry<String, BigInteger> lockTo : lockTos) {
-                contractBytes = asBytes(lockTo.getKey());
+                String key = lockTo.getKey();
+                String[] keySplit = key.split(ContractConstant.LINE);
+                contractBytes = asBytes(keySplit[0]);
+                assetChainId = Integer.parseInt(keySplit[1]);
+                assetId = Integer.parseInt(keySplit[2]);
                 // 初始化临时余额
-                tempBalanceManager.getBalance(contractBytes);
-                tempBalanceManager.minusLockedTempBalance(contractBytes, lockTo.getValue());
+                tempBalanceManager.getBalance(contractBytes, assetChainId, assetId);
+                tempBalanceManager.minusLockedTempBalance(contractBytes, lockTo.getValue(), assetChainId, assetId);
             }
 
             return true;

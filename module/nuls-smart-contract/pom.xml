@@ -95,7 +95,7 @@
         <dependency>
             <groupId>io.nuls.sdk</groupId>
             <artifactId>sdk-contract-vm</artifactId>
-            <version>2.0.0.RELEASE</version>
+            <version>2.1.0.RELEASE</version>
         </dependency>
 
         <dependency>
@@ -131,6 +131,12 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.8</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.nuls.v2</groupId>
+            <artifactId>sdk4j</artifactId>
+            <version>1.1.2.RELEASE</version>
             <scope>test</scope>
         </dependency>
 

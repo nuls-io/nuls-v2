@@ -6,6 +6,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
+import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.base.protocol.TxRegisterDetail;
 import io.nuls.base.signture.MultiSignTxSignature;
 import io.nuls.base.signture.P2PHKSignature;
@@ -22,6 +23,7 @@ import io.nuls.core.rpc.model.message.Response;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxCmd;
 import io.nuls.transaction.constant.TxConstant;
+import io.nuls.transaction.constant.TxContext;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.manager.TxManager;
@@ -205,7 +207,13 @@ public class TransactionCmd extends BaseCmd {
             String packingAddress = (String) params.get("packingAddress");
             String preStateRoot = (String) params.get("preStateRoot");
 
-            TxPackage txPackage = txService.getPackableTxs(chain, endTimestamp, maxTxDataSize, blockTime, packingAddress, preStateRoot);
+            TxPackage txPackage;
+            if(ProtocolGroupManager.getCurrentVersion(chain.getChainId()) >= TxContext.UPDATE_VERSION_CONTRACT_ASSET ) {
+                txPackage = txService.getPackableTxsV8(chain, endTimestamp, maxTxDataSize, blockTime, packingAddress, preStateRoot);
+            } else {
+                txPackage = txService.getPackableTxs(chain, endTimestamp, maxTxDataSize, blockTime, packingAddress, preStateRoot);
+            }
+
             Map<String, Object> map = new HashMap<>(TxConstant.INIT_CAPACITY_4);
             map.put("list", txPackage.getList());
             map.put("stateRoot", txPackage.getStateRoot());
@@ -657,7 +665,12 @@ public class TransactionCmd extends BaseCmd {
 
             String preStateRoot = (String) params.get("preStateRoot");
 
-            Map<String, Object> resultMap = txService.batchVerify(chain, txList, blockHeader, blockHeaderStr, preStateRoot);
+            Map<String, Object> resultMap;
+            if(ProtocolGroupManager.getCurrentVersion(chain.getChainId()) >= TxContext.UPDATE_VERSION_CONTRACT_ASSET ) {
+                resultMap = txService.batchVerifyV8(chain, txList, blockHeader, blockHeaderStr, preStateRoot);
+            } else {
+                resultMap = txService.batchVerify(chain, txList, blockHeader, blockHeaderStr, preStateRoot);
+            }
             return success(resultMap);
         } catch (NulsException e) {
             errorLogProcess(chain, e);

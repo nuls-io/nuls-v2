@@ -152,4 +152,12 @@ public class TxManager {
     public static boolean isCrossTx(int txType) {
         return txType == TxType.CROSS_CHAIN || txType == TxType.CONTRACT_TOKEN_CROSS_TRANSFER;
     }
+
+    public static boolean isGasCostContractTransaction(int txType) {
+        if(txType == TxType.CREATE_CONTRACT
+                || txType == TxType.CALL_CONTRACT) {
+            return true;
+        }
+        return false;
+    }
 }

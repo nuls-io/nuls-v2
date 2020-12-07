@@ -27,10 +27,13 @@ package io.nuls.contract.vm.natives.io.nuls.contract.sdk;
 import io.nuls.contract.sdk.Msg;
 import io.nuls.contract.vm.Frame;
 import io.nuls.contract.vm.MethodArgs;
+import io.nuls.contract.vm.ObjectRef;
 import io.nuls.contract.vm.Result;
 import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.natives.NativeMethod;
 
+import static io.nuls.contract.config.ContractContext.ASSET_ID;
+import static io.nuls.contract.config.ContractContext.CHAIN_ID;
 import static io.nuls.contract.vm.natives.NativeMethod.NOT_SUPPORT_NATIVE;
 import static io.nuls.contract.vm.natives.NativeMethod.SUPPORT_NATIVE;
 
@@ -63,6 +66,12 @@ public class NativeMsg {
                     return SUPPORT_NATIVE;
                 } else {
                     return value(methodCode, methodArgs, frame);
+                }
+            case multyAssetValues:
+                if (check) {
+                    return SUPPORT_NATIVE;
+                } else {
+                    return multyAssetValues(methodCode, methodArgs, frame);
                 }
             case gasprice:
                 if (check) {
@@ -131,6 +140,13 @@ public class NativeMsg {
      */
     private static Result value(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         Result result = NativeMethod.result(methodCode, frame.vm.getProgramContext().getValue(), frame);
+        return result;
+    }
+
+    public static final String multyAssetValues = TYPE + "." + "multyAssetValues" + "()[Lio/nuls/contract/sdk/MultyAssetValue;";
+
+    private static Result multyAssetValues(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
+        Result result = NativeMethod.result(methodCode, frame.vm.getProgramContext().getMultyAssetValues(), frame);
         return result;
     }
 
