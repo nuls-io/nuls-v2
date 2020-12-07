@@ -50,7 +50,6 @@ import org.ethereum.core.AccountState;
 import org.ethereum.core.Block;
 import org.ethereum.core.Repository;
 import org.ethereum.datasource.Source;
-import org.ethereum.db.ByteArrayWrapper;
 import org.ethereum.db.RepositoryRoot;
 import org.ethereum.db.StateSource;
 import org.ethereum.util.FastByteComparisons;
@@ -62,8 +61,11 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static io.nuls.contract.config.ContractContext.ASSET_ID;
+import static io.nuls.contract.config.ContractContext.CHAIN_ID;
 import static io.nuls.contract.constant.ContractConstant.BALANCE_TRIGGER_FOR_CONSENSUS_CONTRACT_METHOD_DESC;
 import static io.nuls.contract.constant.ContractConstant.BALANCE_TRIGGER_METHOD_NAME;
+import static io.nuls.contract.util.ContractUtil.addressKey;
 
 public class ProgramExecutorImpl implements ProgramExecutor {
 
@@ -81,7 +83,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
     private final long beginTime;
 
-    private final Map<ByteArrayWrapper, ProgramAccount> accounts;
+    private final Map<String, ProgramAccount> accounts;
 
     private long blockNumber;
 
@@ -99,7 +101,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
     }
 
     private ProgramExecutorImpl(ProgramExecutorImpl programExecutor, VMContext vmContext, Source<byte[], byte[]> source, Repository repository, byte[] prevStateRoot,
-                                Map<ByteArrayWrapper, ProgramAccount> accounts, Thread thread) {
+                                Map<String, ProgramAccount> accounts, Thread thread) {
         this.parent = programExecutor;
         this.vmContext = vmContext;
         this.source = source;
@@ -246,6 +248,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         programInvoke.setPrice(programCall.getPrice());
         programInvoke.setGasLimit(programCall.getGasLimit());
         programInvoke.setValue(programCall.getValue() != null ? programCall.getValue() : BigInteger.ZERO);
+        programInvoke.setMultyAssetValues(programCall.getMultyAssetValues());
         programInvoke.setNumber(programCall.getNumber());
         programInvoke.setMethodName(programCall.getMethodName());
         programInvoke.setMethodDesc(programCall.getMethodDesc());
@@ -255,9 +258,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         programInvoke.setInternalCall(programCall.isInternalCall());
         programInvoke.setViewMethod(programCall.isViewMethod());
         programInvoke.setSenderPublicKey(programCall.getSenderPublicKey());
-        long start = System.nanoTime();
         ProgramResult result = execute(programInvoke);
-        //Log.info("=========== total use:{}ms",(System.nanoTime()-start)/1000000);
         return result;
     }
 
@@ -267,7 +268,6 @@ public class ProgramExecutorImpl implements ProgramExecutor {
     private Map<String, BigIntegerWrapper> contractObjectRefCount;
 
     private ProgramResult execute(ProgramInvoke programInvoke) {
-        long startTime = System.nanoTime();
         if (programInvoke.getPrice() < 1) {
             return revert("gas price must be greater than zero");
         }
@@ -290,9 +290,6 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         blockNumber = programInvoke.getNumber();
 
         logTime("start");
-        long use = System.nanoTime()-startTime;
-        //Log.info("================step 0.1 : {}ns",use);
-        startTime = System.nanoTime();
         VM vm = null;
         try {
             byte[] contractAddressBytes = programInvoke.getContractAddress();
@@ -339,16 +336,9 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
             vm = VMFactory.createVM();
             logTime("load vm");
-            use = System.nanoTime()-startTime;
-            //Log.info("================step 0.2 : {}ns",use);
-            startTime = System.nanoTime();
             vm.setProgramExecutor(this);
             vm.heap.loadClassCodes(classCodes);
             // add by pierre at 2019-11-21 标记 当存在合约内部调用合约，共享同一个合约的内存数据 需要协议升级 done
-            //Log.debug("++++++++++++++++++++");
-            //Log.warn(programInvoke.toString());
-            //Log.info("this.contractObjectRefCount: {}", this.contractObjectRefCount);
-            //Log.info("vm.heap.objectRefCount: {}", vm.heap.objectRefCount);
             boolean isUpgradedV240 = ProtocolGroupManager.getCurrentVersion(getCurrentChainId()) >= ContractContext.UPDATE_VERSION_V240;
             if(isUpgradedV240) {
                 if(contractObjects == null) {
@@ -400,9 +390,6 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             vm.methodArea.loadClassCodes(classCodes);
 
             logTime("load classes");
-            use = System.nanoTime()-startTime;
-            //Log.info("================step 0.3 : {}ns",use);
-            startTime = System.nanoTime();
             ClassCode contractClassCode = getContractClassCode(classCodes);
             String methodDesc = ProgramDescriptors.parseDesc(methodDescBase);
             MethodCode methodCode = vm.methodArea.loadMethod(contractClassCode.name, methodName, methodDesc);
@@ -413,8 +400,14 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             if (!methodCode.isPublic) {
                 return revert("can only invoke public method");
             }
-            if (!methodCode.hasPayableAnnotation() && transferValue.compareTo(BigInteger.ZERO) > 0) {
-                return revert(String.format("contract[%s]'s method[%s] is not a payable method", contractAddress, methodCode.name));
+            if (transferValue.compareTo(BigInteger.ZERO) > 0) {
+                if (!methodCode.hasPayableAnnotation())
+                    return revert(String.format("contract[%s]'s method[%s] is not a payable method", contractAddress, methodCode.name));
+            }
+            List<ProgramMultyAssetValue> multyAssetValues = programInvoke.getMultyAssetValues();
+            if (multyAssetValues != null && !multyAssetValues.isEmpty()) {
+                if (!methodCode.hasPayableMultyAssetAnnotation())
+                    return revert(String.format("contract[%s]'s method[%s] is not a payableMultyAsset method", contractAddress, methodCode.name));
             }
             // 不允许非系统调用此方法
             boolean isBalanceTriggerForConsensusContractMethod = BALANCE_TRIGGER_METHOD_NAME.equals(methodName) &&
@@ -435,9 +428,6 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             }
 
             logTime("load method");
-            use = System.nanoTime()-startTime;
-            //Log.info("================step 0.4 : {}ns",use);
-            startTime = System.nanoTime();
             ObjectRef objectRef;
             if (programInvoke.isCreate()) {
                 objectRef = vm.heap.newContract(contractAddressBytes, contractClassCode, repository);
@@ -448,18 +438,15 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             // add by pierre at 2019-11-21 标记 当存在合约内部调用合约，共享同一个合约的内存数据 需要协议升级 done
             if(isUpgradedV240) {
                 if(contractObjectRefCount == null) {
-                    //Log.info("新建map和heap.objectRefCount");
                     contractObjectRefCount = new HashMap<>();
                     contractObjectRefCount.put(contractAddress, vm.heap.objectRefCount);
                 } else {
                     BigIntegerWrapper objectRefCount = contractObjectRefCount.get(contractAddress);
                     if(objectRefCount != null) {
                         if(programInvoke.isInternalCall()) {
-                            //Log.info("共享heap.objectRefCount: {}", objectRefCount.hashCode());
                             vm.heap.objectRefCount = objectRefCount;
                         }
                     } else {
-                        //Log.info("新增heap.objectRefCount");
                         contractObjectRefCount.put(contractAddress, vm.heap.objectRefCount);
                     }
                 }
@@ -467,20 +454,22 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             // end code by pierre
 
             logTime("load contract ref");
-            use = System.nanoTime()-startTime;
-            //Log.info("================step 0.5 : {}ns",use);
 
-            startTime = System.nanoTime();
             if (transferValue.compareTo(BigInteger.ZERO) > 0) {
-                getAccount(contractAddressBytes).addBalance(transferValue);
+                // 合约相应资产余额变化
+                getAccount(contractAddressBytes, CHAIN_ID, ASSET_ID).addBalance(transferValue);
+            }
+            if (multyAssetValues != null && !multyAssetValues.isEmpty()) {
+                for (ProgramMultyAssetValue assetValue : multyAssetValues) {
+                    // 合约相应资产余额变化
+                    getAccount(contractAddressBytes, assetValue.getAssetChainId(), assetValue.getAssetId()).addBalance(assetValue.getValue());
+                }
             }
             vm.setRepository(repository);
             vm.setGas(programInvoke.getGasLimit());
             vm.addGasUsed(contractCodeData == null ? 0 : contractCodeData.length);
 
             logTime("load end");
-            use = System.nanoTime()-startTime;
-            //Log.info("================step 0.6 : {}ns",use);
 
             vm.run(objectRef, methodCode, vmContext, programInvoke);
 
@@ -499,6 +488,13 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                     String stackTrace = vm.heap.stackTrace((ObjectRef) resultValue);
                     programResult.error(error);
                     programResult.setStackTrace(stackTrace);
+                    // add by pierre at 2020-11-03 增加内部合约调用的异常堆栈信息列表，可能影响兼容性，考虑协议升级
+                    programResult.getStackTraces().addFirst(stackTrace);
+                    Iterator<String> descendingIterator = vm.getStackTraces().descendingIterator();
+                    while (descendingIterator.hasNext()) {
+                        programResult.getStackTraces().addFirst(descendingIterator.next());
+                    }
+                    // end code by pierre
                 } else {
                     programResult.error(null);
                 }
@@ -544,14 +540,11 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             Map<DataWord, DataWord> contractState = vm.heap.contractState();
             logTime("contract state");
 
-            //Log.error(programInvoke.toString());
             for (Map.Entry<DataWord, DataWord> entry : contractState.entrySet()) {
                 DataWord key = entry.getKey();
                 DataWord value = entry.getValue();
-                //Log.info("add storage row, key: {}, value: {}", key.asString(), value.asString());
                 repository.addStorageRow(contractAddressBytes, key, value);
             }
-            //Log.debug("---------------------\n");
             logTime("add contract state");
 
             if (programInvoke.isCreate()) {
@@ -600,7 +593,8 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         if (!FastByteComparisons.equal(sender, accountState.getOwner())) {
             return revert("only the owner can stop the contract");
         }
-        BigInteger balance = getTotalBalance(address, null);
+        // 链主资产
+        BigInteger balance = getTotalBalance(address, null, CHAIN_ID, ASSET_ID);
         if (BigInteger.ZERO.compareTo(balance) != 0) {
             return revert("contract balance is not zero");
         }
@@ -633,14 +627,14 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         }
     }
 
-    public ProgramAccount getAccount(byte[] address) {
-        ByteArrayWrapper addressWrapper = new ByteArrayWrapper(address);
-        ProgramAccount account = accounts.get(addressWrapper);
+    public ProgramAccount getAccount(byte[] address, int assetChainId, int assetId) {
+        String accountKey = addressKey(address, assetChainId, assetId);
+        ProgramAccount account = accounts.get(accountKey);
         if (account == null) {
             BigInteger balance;
             BigInteger freeze;
             String nonce = null;
-            ContractBalance contractBalance = getBalance(address);
+            ContractBalance contractBalance = getBalance(address, assetChainId, assetId);
             if (contractBalance != null) {
                 balance = contractBalance.getBalance();
                 freeze = contractBalance.getFreeze();
@@ -649,25 +643,25 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                 balance = BigInteger.ZERO;
                 freeze = BigInteger.ZERO;
             }
-            account = new ProgramAccount(address, balance, nonce);
-            account.setFreeze(freeze);
-            accounts.put(addressWrapper, account);
+            account = new ProgramAccount(address, balance, nonce, assetChainId, assetId);
+            account.addFreeze(freeze);
+            accounts.put(accountKey, account);
         }
         return account;
     }
 
-    private ContractBalance getBalance(byte[] address) {
+    private ContractBalance getBalance(byte[] address, int assetChainId, int assetId) {
         ContractBalance contractBalance = null;
         if (vmContext != null) {
-            contractBalance = vmContext.getBalance(getCurrentChainId(), address);
+            contractBalance = vmContext.getBalance(getCurrentChainId(), assetChainId, assetId, address);
         }
         return contractBalance;
     }
 
-    private BigInteger getTotalBalance(byte[] address, Long blockNumber) {
+    private BigInteger getTotalBalance(byte[] address, Long blockNumber, int assetChainId, int assetId) {
         BigInteger balance = BigInteger.ZERO;
         if (vmContext != null) {
-            balance = vmContext.getTotalBalance(getCurrentChainId(), address);
+            balance = vmContext.getTotalBalance(getCurrentChainId(), assetChainId, assetId, address);
         }
         return balance;
     }
@@ -709,6 +703,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             method.setReturnArg(methodCode.returnArg);
             method.setView(methodCode.hasViewAnnotation());
             method.setPayable(methodCode.hasPayableAnnotation());
+            method.setPayableMultyAsset(methodCode.hasPayableMultyAssetAnnotation());
             method.setJsonSerializable(methodCode.hasJSONSerializableAnnotation());
             method.setEvent(false);
             return method;
@@ -773,6 +768,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                     method.setReturnArg(methodCode.returnArg);
                     method.setView(false);
                     method.setPayable(false);
+                    method.setPayableMultyAsset(false);
                     method.setJsonSerializable(false);
                     method.setEvent(true);
                     return method;

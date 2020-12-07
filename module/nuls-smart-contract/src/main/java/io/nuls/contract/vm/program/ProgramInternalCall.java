@@ -25,6 +25,7 @@
 package io.nuls.contract.vm.program;
 
 import java.math.BigInteger;
+import java.util.List;
 
 public class ProgramInternalCall {
 
@@ -34,9 +35,14 @@ public class ProgramInternalCall {
     private byte[] sender;
 
     /**
-     * 交易附带的货币量
+     * 交易向合约转入的NULS的金额
      */
     private BigInteger value;
+
+    /**
+     * 交易向合约转入的其他资产的金额
+     */
+    private List<ProgramMultyAssetValue> multyAssetValues;
 
     /**
      * 合约地址
@@ -72,6 +78,14 @@ public class ProgramInternalCall {
 
     public void setValue(BigInteger value) {
         this.value = value;
+    }
+
+    public List<ProgramMultyAssetValue> getMultyAssetValues() {
+        return multyAssetValues;
+    }
+
+    public void setMultyAssetValues(List<ProgramMultyAssetValue> multyAssetValues) {
+        this.multyAssetValues = multyAssetValues;
     }
 
     public byte[] getContractAddress() {

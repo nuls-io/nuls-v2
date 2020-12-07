@@ -43,6 +43,7 @@ import io.nuls.contract.model.txdata.CreateContractData;
 import io.nuls.contract.model.txdata.DeleteContractData;
 import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.contract.rpc.call.ChainManagerCall;
+import io.nuls.contract.vm.program.ProgramMultyAssetValue;
 import io.nuls.core.basic.Result;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
@@ -54,6 +55,7 @@ import io.nuls.core.rpc.model.message.MessageUtil;
 import io.nuls.core.rpc.model.message.Response;
 
 import java.lang.reflect.Array;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -608,6 +610,14 @@ public class ContractUtil {
         return Base64.getDecoder().decode(string);
     }
 
+    public static BigDecimal toNuls(BigInteger na) {
+        return new BigDecimal(na).movePointLeft(8);
+    }
+
+    public static BigInteger toNa(BigDecimal nuls) {
+        return nuls.scaleByPowerOfTen(8).toBigInteger();
+    }
+
     public static BigInteger minus(BigInteger a, BigInteger b) {
         BigInteger result = a.subtract(b);
         if (result.compareTo(BigInteger.ZERO) < 0) {
@@ -691,14 +701,22 @@ public class ContractUtil {
         return publicKey;
     }
 
-    public static void mapAddBigInteger(LinkedHashMap<String, BigInteger> map, byte[] address, BigInteger amount) {
-        String strAddress = asString(address);
-        BigInteger currentAmount = map.get(strAddress);
+    public static void mapAddBigInteger(LinkedHashMap<String, BigInteger> map, byte[] address, int assetChainId, int assetId, BigInteger amount) {
+        String addressKey = addressKey(address, assetChainId, assetId);
+        BigInteger currentAmount = map.get(addressKey);
         if (currentAmount == null) {
-            map.put(strAddress, amount);
+            map.put(addressKey, amount);
         } else {
-            map.put(strAddress, currentAmount.add(amount));
+            map.put(addressKey, currentAmount.add(amount));
         }
+    }
+
+    public static String addressKey(byte[] address, int assetChainId, int assetId) {
+        return new StringBuilder(asString(address)).append(ContractConstant.LINE).append(assetChainId).append(ContractConstant.LINE).append(assetId).toString();
+    }
+
+    public static String addressLockedKey(byte[] address, int assetChainId, int assetId, long lockedTime) {
+        return new StringBuilder(asString(address)).append(ContractConstant.LINE).append(assetChainId).append(ContractConstant.LINE).append(assetId).append(ContractConstant.LINE).append(lockedTime).toString();
     }
 
     public static String toString(String[][] a) {
@@ -732,5 +750,33 @@ public class ContractUtil {
         }
         msg += ", debugEvents: " + debugEvents.toString();
         result.setMsg(msg);
+    }
+
+    public static String[][] multyAssetStringArray(ProgramMultyAssetValue[] multyAssetValues) {
+        int length;
+        if (multyAssetValues == null || (length = multyAssetValues.length) == 0) {
+            return null;
+        }
+        String[][] array = new String[length][];
+        ProgramMultyAssetValue value;
+        for (int i=0;i<length;i++) {
+            value = multyAssetValues[i];
+            array[i] = new String[]{value.getValue().toString(), String.valueOf(value.getAssetChainId()), String.valueOf(value.getAssetId())};
+        }
+        return array;
+    }
+
+    public static ProgramMultyAssetValue[] multyAssetObjectArray(String[][] multyAssetValues) {
+        int length;
+        if (multyAssetValues == null || (length = multyAssetValues.length) == 0) {
+            return null;
+        }
+        ProgramMultyAssetValue[] array = new ProgramMultyAssetValue[length];
+        String[] value;
+        for (int i=0;i<length;i++) {
+            value = multyAssetValues[i];
+            array[i] = new ProgramMultyAssetValue(new BigInteger(value[0]), Integer.valueOf(value[1]), Integer.valueOf(value[2]));
+        }
+        return array;
     }
 }

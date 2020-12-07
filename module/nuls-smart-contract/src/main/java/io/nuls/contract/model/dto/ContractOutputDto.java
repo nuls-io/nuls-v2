@@ -40,10 +40,16 @@ public class ContractOutputDto {
     private String to;
     @ApiModelProperty(description = "转入金额")
     private String value;
+    @ApiModelProperty(description = "转入金额锁定时间")
+    private long lockTime;
+
+    public ContractOutputDto() {
+    }
 
     public ContractOutputDto(Output output) {
         this.to = AddressTool.getStringAddressByBytes(output.getTo());
         this.value = bigInteger2String(output.getValue());
+        this.lockTime = output.getLockTime();
     }
 
     public String getTo() {
@@ -60,5 +66,13 @@ public class ContractOutputDto {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    public long getLockTime() {
+        return lockTime;
+    }
+
+    public void setLockTime(long lockTime) {
+        this.lockTime = lockTime;
     }
 }

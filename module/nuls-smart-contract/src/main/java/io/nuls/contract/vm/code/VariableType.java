@@ -112,6 +112,8 @@ public class VariableType {
     public static final VariableType ABSTRACT_COLLECTION_TYPE = valueOf("Ljava/util/AbstractCollection;");
     public static final VariableType HASH_MAP_TYPE = valueOf("Ljava/util/HashMap;");
     public static final VariableType HASH_MAP_NODE_TYPE = valueOf("Ljava/util/HashMap$Node;");
+    public static final VariableType MULTY_ASSET_VALUE_TYPE = valueOf("Lio/nuls/contract/sdk/MultyAssetValue;");
+    public static final VariableType MULTY_ASSET_VALUE_ARRAY_TYPE = valueOf("[Lio/nuls/contract/sdk/MultyAssetValue;");
 
     public static final VariableType[] WRAPPER_TYPE = new VariableType[]{
             INT_WRAPPER_TYPE,

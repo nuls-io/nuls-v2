@@ -24,6 +24,7 @@
 package io.nuls.contract.config;
 
 import io.nuls.contract.model.bo.config.ConfigBean;
+import io.nuls.contract.tx.SmartContractVersionChangeInvoker;
 import io.nuls.core.basic.ModuleConfig;
 import io.nuls.core.basic.VersionChangeInvoker;
 import io.nuls.core.core.annotation.Component;
@@ -165,7 +166,6 @@ public class ContractConfig implements ModuleConfig {
 
     @Override
     public VersionChangeInvoker getVersionChangeInvoker() throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-        Class<?> aClass = Class.forName("io.nuls.contract.tx.SmartContractVersionChangeInvoker");
-        return (VersionChangeInvoker) aClass.getDeclaredConstructor().newInstance();
+        return SmartContractVersionChangeInvoker.instance();
     }
 }

@@ -87,7 +87,7 @@ public class ContractPOCMLocalTest extends Base {
 
     class VMContextMockBalanceAndBlock extends VMContextMock {
         @Override
-        public ContractBalance getBalance(int chainId, byte[] address) {
+        public ContractBalance getBalance(int chainId, int assetChainId, int assetId, byte[] address) {
             ContractBalance balance = ContractBalance.newInstance();
             balance.setBalance(contractBalance);
             return balance;
@@ -177,7 +177,7 @@ public class ContractPOCMLocalTest extends Base {
 
     @Test
     public void createContract() throws IOException {
-        InputStream in = new FileInputStream(InvokeExternalCmdLocalTest.class.getResource("/pocmContract-v3-test2.jar").getFile());
+        InputStream in = new FileInputStream(InvokeExternalCmdLocalTest.class.getResource("/pocmContract-v3").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
 
         ProgramCreate programCreate = new ProgramCreate();
