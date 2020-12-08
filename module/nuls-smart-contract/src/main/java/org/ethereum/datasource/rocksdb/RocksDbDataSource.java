@@ -17,18 +17,24 @@
  */
 package org.ethereum.datasource.rocksdb;
 
+import io.nuls.contract.config.ContractConfig;
+import io.nuls.contract.util.Log;
+import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.model.StringUtils;
 import io.nuls.core.rockdb.manager.RocksDBManager;
 import io.nuls.core.rockdb.service.BatchOperation;
 import io.nuls.core.rockdb.service.RocksDBService;
+import io.nuls.core.rockdb.util.DBUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.ethereum.config.SystemProperties;
 import org.ethereum.datasource.DbSettings;
 import org.ethereum.datasource.DbSource;
-import org.rocksdb.RocksDB;
-import org.rocksdb.RocksDBException;
+import org.rocksdb.*;
+import org.rocksdb.util.SizeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -96,10 +102,10 @@ public class RocksDbDataSource implements DbSource<byte[]> {
 
 
             String[] areas = RocksDBService.listTable();
-            if (!ArrayUtils.contains(areas, AREA)) {
-                RocksDBService.createTable(AREA);
+            if (ArrayUtils.contains(areas, AREA)) {
+                RocksDBManager.closeTable(AREA);
             }
-            rocksDB = RocksDBManager.getTable(AREA);
+            rocksDB = createTable(AREA);
 
             alive = true;
 
@@ -109,6 +115,51 @@ public class RocksDbDataSource implements DbSource<byte[]> {
         } finally {
             resetDbLock.writeLock().unlock();
         }
+    }
+
+    private RocksDB createTable(String area) {
+        try {
+            if (StringUtils.isBlank(area)) {
+                throw new RuntimeException("empty area");
+            }
+            ContractConfig contractConfig = SpringLiteContext.getBean(ContractConfig.class);
+            String dataPath = contractConfig.getDataPath();
+            File pathDir = DBUtils.loadDataPath(dataPath);
+            dataPath = pathDir.getPath();
+            dataPath += File.separator + "smart-contract";
+            File dir = new File(dataPath + File.separator + area);
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+            dataPath = dataPath + File.separator + area + File.separator + "rocksdb";
+            Log.info("Contract dataPath is " + dataPath);
+
+            Options options = new Options();
+            options.setCreateIfMissing(true);
+            /**
+             * 优化读取性能方案
+             */
+            options.setAllowMmapReads(true);
+            options.setCompressionType(CompressionType.NO_COMPRESSION);
+            options.setMaxOpenFiles(-1);
+
+            BlockBasedTableConfig tableOption = new BlockBasedTableConfig();
+            tableOption.setBlockCache(new LRUCache(32 * 1024 * 1024));
+            tableOption.setCacheIndexAndFilterBlocks(true);
+            tableOption.setPinL0FilterAndIndexBlocksInCache(true);
+            tableOption.setBlockRestartInterval(4);
+            tableOption.setFilterPolicy(new BloomFilter(10, true));
+            options.setTableFormatConfig(tableOption);
+
+            options.setNewTableReaderForCompactionInputs(true);
+            //为压缩的输入，打开RocksDB层的预读取
+            options.setCompactionReadaheadSize(128 * SizeUnit.KB);
+            return RocksDB.open(options, dataPath);
+        } catch (Exception e) {
+            Log.error("error create table: " + area, e);
+            throw new RuntimeException("error create table: " + area);
+        }
+
     }
 
     @Override
@@ -137,6 +188,7 @@ public class RocksDbDataSource implements DbSource<byte[]> {
 
     @Override
     public byte[] get(byte[] key) {
+        //long startTime = System.nanoTime();
         resetDbLock.readLock().lock();
         try {
             //if (logger.isTraceEnabled()) {
@@ -145,8 +197,8 @@ public class RocksDbDataSource implements DbSource<byte[]> {
             try {
 
                 byte[] ret = rocksDB.get(key);
-                //if (logger.isTraceEnabled()) {
-                //    logger.trace("<~ RocksDbDataSource.get(): " + name + ", key: " + toHexString(key) + ", " + (ret == null ? "null" : ret.length));
+                //if (Log.isInfoEnabled()) {
+                //    Log.info("<~ db.get(): " + name + ", key: " + toHexString(key) + ", " + (ret == null ? "null" : ret.length) + ", cost {}", System.nanoTime() - startTime);
                 //}
                 return ret;
             } catch (Exception e) {
@@ -175,8 +227,8 @@ public class RocksDbDataSource implements DbSource<byte[]> {
             //    logger.trace("~> RocksDbDataSource.put(): " + name + ", key: " + toHexString(key) + ", " + (value == null ? "null" : value.length));
             //}
             rocksDB.put(key, value);
-            //if (logger.isTraceEnabled()) {
-            //    logger.trace("<~ RocksDbDataSource.put(): " + name + ", key: " + toHexString(key) + ", " + (value == null ? "null" : value.length));
+            //if (logger.isInfoEnabled()) {
+            //    logger.info("<~ RocksDbDataSource.put(): " + name + ", key: " + toHexString(key) + ", " + (value == null ? "null" : value.length));
             //}
         } catch (Exception e) {
             logger.error("RocksDbDataSource.put() error", e);
@@ -193,8 +245,8 @@ public class RocksDbDataSource implements DbSource<byte[]> {
             //    logger.trace("~> RocksDbDataSource.delete(): " + name + ", key: " + toHexString(key));
             //}
             rocksDB.delete(key);
-            //if (logger.isTraceEnabled()) {
-            //    logger.trace("<~ RocksDbDataSource.delete(): " + name + ", key: " + toHexString(key));
+            //if (logger.isInfoEnabled()) {
+            //    logger.info("<~ RocksDbDataSource.delete(): " + name + ", key: " + toHexString(key));
             //}
         } catch (Exception e) {
             logger.error("RocksDbDataSource.delete() error", e);
@@ -209,20 +261,33 @@ public class RocksDbDataSource implements DbSource<byte[]> {
     }
 
     private void updateBatchInternal(Map<byte[], byte[]> rows) throws Exception {
-        BatchOperation batchOperation = RocksDBService.createWriteBatch(AREA);
-        Set<Map.Entry<byte[], byte[]>> entrySet = rows.entrySet();
-        for (Map.Entry<byte[], byte[]> entry : entrySet) {
-            if (entry.getValue() == null) {
-                batchOperation.delete(entry.getKey());
-            } else {
-                batchOperation.put(entry.getKey(), entry.getValue());
+        WriteBatch batch = null;
+        try {
+            batch = new WriteBatch();
+            Set<Map.Entry<byte[], byte[]>> entrySet = rows.entrySet();
+            for (Map.Entry<byte[], byte[]> entry : entrySet) {
+                if (entry.getValue() == null) {
+                    batch.delete(entry.getKey());
+                } else {
+                    batch.put(entry.getKey(), entry.getValue());
+                }
+            }
+            rocksDB.write(new WriteOptions(), batch);
+        } catch (Exception e) {
+            throw e;
+        } finally {
+            // Make sure you close the batch to avoid resource leaks.
+            // 关闭批量操作对象释放资源
+            if (batch != null) {
+                batch.close();
             }
         }
-        batchOperation.executeBatch();
+
     }
 
     @Override
     public void updateBatch(Map<byte[], byte[]> rows) {
+        //long startTime = System.nanoTime();
         resetDbLock.writeLock().lock();
         try {
             //if (logger.isTraceEnabled()) {
@@ -230,8 +295,8 @@ public class RocksDbDataSource implements DbSource<byte[]> {
             //}
             try {
                 updateBatchInternal(rows);
-                //if (logger.isTraceEnabled()) {
-                //    logger.trace("<~ RocksDbDataSource.updateBatch(): " + name + ", " + rows.size());
+                //if (Log.isInfoEnabled()) {
+                //    Log.info("<~ RocksDbDataSource.updateBatch(): " + name + ", " + rows.size() + ", cost {}", System.nanoTime() - startTime);
                 //}
             } catch (Exception e) {
                 logger.error("Error, retrying one more time...", e);

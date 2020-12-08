@@ -145,7 +145,7 @@ public class SystemProperties {
     public SystemProperties() {
         Map<String, Object> values = new HashMap<>();
         values.put("cache.flush.writeCacheSize", 64);
-        values.put("cache.flush.blocks", 10000);
+        values.put("cache.flush.blocks", 0);
         values.put("cache.flush.shortSyncFlush", true);
         values.put("cache.stateCacheSize", 384);
         values.put("crypto.providerName", "BC");

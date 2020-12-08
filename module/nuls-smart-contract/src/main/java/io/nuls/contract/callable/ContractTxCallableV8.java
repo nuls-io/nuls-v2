@@ -183,7 +183,11 @@ public class ContractTxCallableV8 {
     private void dealCallResult(ContractWrapperTransaction tx, ContractResult contractResult, int chainId) throws IOException, NulsException {
         if (contractResult.isSuccess()) {
             // 处理合约生成的其他交易、临时余额、合约内部转账
-            contractNewTxHandler.handleContractNewTx(chainId, blockTime, tx, contractResult, tempBalanceManager);
+            boolean isSuccess = contractNewTxHandler.handleContractNewTx(chainId, blockTime, tx, contractResult, tempBalanceManager);
+            if (!isSuccess) {
+                // 处理调用失败的合约，把需要退还的NULS 生成一笔合约内部转账交易，退还给调用者
+                this.handleFailedContract(contractResult);
+            }
         } else {
             // 处理调用失败的合约，把需要退还的NULS 生成一笔合约内部转账交易，退还给调用者
             this.handleFailedContract(contractResult);
@@ -226,11 +230,10 @@ public class ContractTxCallableV8 {
             ContractTransferTransaction tx = this.generateContractTransferTransaction(orginTxHash, contractAddress, sender, value, CHAIN_ID, ASSET_ID);
             contractResult.getContractTransferList().add(tx);
         }
-
+        //TODO pierre 多个账户向合约转入多个资产，合约执行失败后，退还转入的资产金额
         int toSize = toList.size();
         if (toSize > 0) {
             for (CoinTo coin : toList) {
-                coin = toList.get(0);
                 assetChainId = coin.getAssetsChainId();
                 assetId = coin.getAssetsId();
                 boolean mainAsset = assetChainId == CHAIN_ID && assetId == ASSET_ID;

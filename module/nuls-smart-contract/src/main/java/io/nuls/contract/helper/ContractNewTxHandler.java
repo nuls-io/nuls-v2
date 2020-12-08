@@ -57,7 +57,7 @@ public class ContractNewTxHandler {
     @Autowired
     private ContractNewTxFromOtherModuleHandler contractNewTxFromOtherModuleHandler;
 
-    public void handleContractNewTx(int chainId, long blockTime, ContractWrapperTransaction tx, ContractResult contractResult, ContractTempBalanceManager tempBalanceManager) throws NulsException {
+    public boolean handleContractNewTx(int chainId, long blockTime, ContractWrapperTransaction tx, ContractResult contractResult, ContractTempBalanceManager tempBalanceManager) throws NulsException {
         Map<String, ProgramAccount> accountMap = contractResult.getAccounts();
         // 维护临时余额管理器
         if(accountMap != null) {
@@ -189,7 +189,7 @@ public class ContractNewTxHandler {
                 }
             }
         }
-
+        return isSuccess;
     }
 
 }
