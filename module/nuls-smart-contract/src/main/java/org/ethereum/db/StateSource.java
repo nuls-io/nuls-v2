@@ -41,6 +41,8 @@ public class StateSource extends SourceChainBox<byte[], byte[], byte[], byte[]>
         int maxCapacity = 16 * 1024 * 2;
         if (memorySize >= 7500) {
             maxCapacity = maxCapacity * 12;
+        } else if (memorySize >= 4500) {
+            maxCapacity = maxCapacity * 6;
         } else if (memorySize >= 2500) {
             maxCapacity = maxCapacity * 3;
         }
@@ -72,6 +74,8 @@ public class StateSource extends SourceChainBox<byte[], byte[], byte[], byte[]>
         int maxCapacity = size * 1024 * 2;
         if (memorySize >= 7500) {
             maxCapacity = maxCapacity * 10;
+        } else if (memorySize >= 4500) {
+            maxCapacity = maxCapacity * 5;
         } else if (memorySize >= 2500) {
             maxCapacity = maxCapacity * 2;
         }
