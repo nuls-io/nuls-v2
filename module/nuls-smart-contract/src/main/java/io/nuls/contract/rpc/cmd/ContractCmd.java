@@ -144,6 +144,13 @@ public class ContractCmd extends BaseCmd {
                 if (result.isFailed()) {
                     return wrapperFailed(result);
                 }
+                if (result.getData() == null) {
+                    Map<String, Object> resultData = new HashMap<>();
+                    resultData.put("success", true);
+                    resultData.put("gasUsed", 0);
+                    resultData.put("txList", List.of());
+                    return success(resultData);
+                }
                 return success(result.getData());
             } else {
                 if(!contractHelper.getChain(chainId).getBatchInfo().checkGasCostTotal(hash)) {
