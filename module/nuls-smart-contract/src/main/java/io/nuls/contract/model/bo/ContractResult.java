@@ -87,7 +87,6 @@ public class ContractResult {
      */
     private List<ProgramTransfer> transfers = new ArrayList<>();
     private List<ContractMergedTransfer> mergedTransferList = new ArrayList<>();
-    private List<ContractMultyAssetMergedTransfer> mergerdMultyAssetTransferList = new ArrayList<>();
     private transient List<ContractTransferTransaction> contractTransferList = new ArrayList<>();
     private List<String> contractTransferTxStringList = new ArrayList<>();
     /**
@@ -99,6 +98,7 @@ public class ContractResult {
     private String remark;
     private boolean isTerminated;
     private Set<String> contractAddressInnerCallSet;
+    private List<ContractMultyAssetMergedTransfer> mergerdMultyAssetTransferList = new ArrayList<>();
 
     private transient Object txTrack;
     private transient Map<String, ProgramAccount> accounts;
