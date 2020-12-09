@@ -88,6 +88,7 @@ public class ContractResult {
     private List<ProgramTransfer> transfers = new ArrayList<>();
     private List<ContractMergedTransfer> mergedTransferList = new ArrayList<>();
     private List<ContractMultyAssetMergedTransfer> mergerdMultyAssetTransferList = new ArrayList<>();
+
     private transient List<ContractTransferTransaction> contractTransferList = new ArrayList<>();
     private List<String> contractTransferTxStringList = new ArrayList<>();
     /**

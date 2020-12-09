@@ -34,6 +34,7 @@ import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.manager.LedgerChainManager;
 import io.nuls.ledger.model.po.LedgerAsset;
+import io.nuls.ledger.rpc.call.CallRpcService;
 import io.nuls.ledger.service.ChainAssetsService;
 import io.nuls.ledger.storage.AssetRegMngRepository;
 import io.nuls.ledger.storage.CrossChainAssetRegMngRepository;
@@ -61,7 +62,7 @@ public class ChainAssetCmd extends BaseLedgerCmd {
     @Autowired
     LedgerChainManager ledgerChainManager;
     @Autowired
-    CrossChainAssetRegMngRepository crossChainAssetRegMngRepository;
+    CallRpcService callRpcService;
 
     @CmdAnnotation(cmd = CmdConstant.CMD_GET_ASSETS_BY_ID, version = 1.0,
             description = "查询链下指定资产集合的金额信息")
@@ -149,13 +150,14 @@ public class ChainAssetCmd extends BaseLedgerCmd {
             int chainId = Integer.parseInt(params.get("chainId").toString());
             // 获取所有注册的链内资产
             List<LedgerAsset> localAssetList = assetRegMngRepository.getAllRegLedgerAssets(chainId);
-            List<Map<String, Object>> localAssets = localAssetList.stream().map(asset -> asset.toMap()).collect(Collectors.toList());
-            localAssets.add(ledgerChainManager.getLocalChainDefaultAsset());
+            List<Map<String, Object>> assets = localAssetList.stream().map(asset -> asset.toMap()).collect(Collectors.toList());
+            assets.add(ledgerChainManager.getLocalChainDefaultAsset());
             // 获取所有登记的跨链资产
-            List<LedgerAsset> ledgerAssetList = crossChainAssetRegMngRepository.getAllCrossChainAssets(chainId);
-            List<Map<String, Object>> assets = ledgerAssetList.stream().map(asset -> asset.toMap()).collect(Collectors.toList());
-            // 合并集合
-            assets.addAll(localAssets);
+            List<Map<String, Object>> crossAssetList = callRpcService.getRegisteredChainInfoList(chainId);
+            if (crossAssetList != null) {
+                assets.addAll(crossAssetList);
+            }
+
             rtMap.put("assets", assets);
         } catch (Exception e) {
             LoggerUtil.COMMON_LOG.error(e);
