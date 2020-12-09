@@ -205,18 +205,21 @@ public class ContractTxCallableV8 {
         BigInteger value = contractData.getValue();
         byte[] contractAddress = contractData.getContractAddress();
 
-        Map<String, byte[]> multyAssetMap = new HashMap<>();
+        //Map<String, byte[]> multyAssetMap = new HashMap<>();
         int assetChainId, assetId;
-        String assetKey;
+        //String assetKey;
         CoinData orginTxCoinData = orginTx.getCoinDataInstance();
         List<CoinFrom> fromList = orginTxCoinData.getFrom();
-        List<CoinTo> toList = orginTxCoinData.getTo();
+        //List<CoinTo> toList = orginTxCoinData.getTo();
         for(CoinFrom from : fromList) {
             assetChainId = from.getAssetsChainId();
             assetId = from.getAssetsId();
-            assetKey = assetChainId + "_" + assetId;
+            //assetKey = assetChainId + "_" + assetId;
             if (CHAIN_ID != assetChainId || ASSET_ID != assetId) {
-                multyAssetMap.put(assetKey, from.getAddress());
+                //multyAssetMap.put(assetKey, from.getAddress());
+                // 多个账户向合约转入多个资产，合约执行失败后，退还转入的资产金额
+                ContractTransferTransaction tx = this.generateContractTransferTransaction(orginTxHash, contractAddress, from.getAddress(), from.getAmount(), assetChainId, assetId);
+                contractResult.getContractTransferList().add(tx);
             } else if (from.getAmount().compareTo(value) >= 0){
                 orginTx.setValueSender(from.getAddress());
             }
@@ -230,8 +233,7 @@ public class ContractTxCallableV8 {
             ContractTransferTransaction tx = this.generateContractTransferTransaction(orginTxHash, contractAddress, sender, value, CHAIN_ID, ASSET_ID);
             contractResult.getContractTransferList().add(tx);
         }
-        //TODO pierre 多个账户向合约转入多个资产，合约执行失败后，退还转入的资产金额
-        int toSize = toList.size();
+        /*int toSize = toList.size();
         if (toSize > 0) {
             for (CoinTo coin : toList) {
                 assetChainId = coin.getAssetsChainId();
@@ -247,7 +249,7 @@ public class ContractTxCallableV8 {
                     contractResult.getContractTransferList().add(tx);
                 }
             }
-        }
+        }*/
         contractResult.setMergedTransferList(contractTransferHandler.contractTransfer2mergedTransfer(orginTx, contractResult.getContractTransferList()));
         contractResult.setMergerdMultyAssetTransferList(contractTransferHandler.contractMultyAssetTransfer2mergedTransfer(orginTx, contractResult.getContractTransferList()));
     }

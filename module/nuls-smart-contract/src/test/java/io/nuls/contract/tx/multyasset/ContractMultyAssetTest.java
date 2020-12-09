@@ -63,10 +63,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static io.nuls.contract.constant.ContractCmdConstant.CALL;
 import static io.nuls.contract.constant.ContractCmdConstant.CREATE;
@@ -80,7 +77,8 @@ public class ContractMultyAssetTest extends BaseQuery {
     protected long gasLimit = 200000L;
     protected long gasPrice = 25L;
     protected long minutes_3 = 60 * 3;
-    protected String otherContract = "tNULSeBaN5npy43YB6GpdXie83a4mt9Zb2Ut1w";
+    protected String otherContract = "tNULSeBaN8oAwguKBxE2sZSQvTCMJW1kFnF9mk";
+    protected String offlineContract = "tNULSeBaN9hZLrqjvCrmHrdvKZPfBh9A2uneZc";
 
     /**
      * 创建合约
@@ -107,8 +105,8 @@ public class ContractMultyAssetTest extends BaseQuery {
     @Test
     public void assetRegisterTest() throws Exception {
         Map<String, Object> params = new HashMap<>();
-        params.put("assetSymbol", "MTA");
-        params.put("assetName", "MTA");
+        params.put("assetSymbol", "MTAX");
+        params.put("assetName", "MTAX");
         params.put("initNumber", 100000000);
         params.put("decimalPlace", 8);
         params.put("txCreatorAddress", sender);
@@ -235,7 +233,7 @@ public class ContractMultyAssetTest extends BaseQuery {
         String sender = "tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD";
         String senderPri = "477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75";
         BigInteger value = new BigDecimal("6.6").movePointRight(8).toBigInteger();
-        String contractAddress = "tNULSeBaNAVAKkKhA2AoHk7eoVXbqtVVA8tu5Y";
+        String contractAddress = offlineContract;
         String remark = "";
         this.callTxOffline(feeAccount, feeAccountPri, sender, senderPri,
                 value,
@@ -245,22 +243,50 @@ public class ContractMultyAssetTest extends BaseQuery {
     }
 
     /**
-     * 多账户调用合约 - 转入（A账户支出，合约记录B账户）
+     * 多账户调用合约 - 转入其他资产，如 2-2, 2-3
      */
     @Test
-    public void transferInOfmanyAccountCall_1() throws Exception {
+    public void transferInOfmanyAccountCallII() throws Exception {
+        NulsSDKBootStrap.init(chainId, "http://localhost:18004/");
+        String feeAccount = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
+        String feeAccountPri = "9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b";
+        String sender = "tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD";
+        String senderPri = "477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75";
+        BigInteger value = BigInteger.ZERO;
+        String contractAddress = offlineContract;
+        String remark = "";
+        ProgramMultyAssetValue[] multyAssetValues = new ProgramMultyAssetValue[]{
+                new ProgramMultyAssetValue(BigInteger.valueOf(2_0000_0000L), 2, 2),
+                new ProgramMultyAssetValue(BigInteger.valueOf(3_0000_0000L), 2, 3)
+        };
+        this.callTxOffline(feeAccount, feeAccountPri, sender, senderPri,
+                value,
+                contractAddress,
+                "_payableMultyAsset", "", remark, null, null, multyAssetValues, true);
+
+    }
+
+    /**
+     * 多账户调用合约 - 同时转入NULS资产和其他资产，如 2-1, 2-2, 2-3
+     */
+    @Test
+    public void transferInOfmanyAccountCallIII() throws Exception {
         NulsSDKBootStrap.init(chainId, "http://localhost:18004/");
         String feeAccount = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
         String feeAccountPri = "9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b";
         String sender = "tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD";
         String senderPri = "477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75";
         BigInteger value = new BigDecimal("6.6").movePointRight(8).toBigInteger();
-        String contractAddress = "tNULSeBaNAVAKkKhA2AoHk7eoVXbqtVVA8tu5Y";
+        String contractAddress = offlineContract;
         String remark = "";
-        this.callTxOffline(feeAccount, feeAccountPri, sender, senderPri,
+        ProgramMultyAssetValue[] multyAssetValues = new ProgramMultyAssetValue[]{
+                new ProgramMultyAssetValue(BigInteger.valueOf(2_0000_0000L), 2, 2),
+                new ProgramMultyAssetValue(BigInteger.valueOf(3_0000_0000L), 2, 3)
+        };
+        this.callTxOfflineII(feeAccount, feeAccountPri, sender, senderPri,
                 value,
                 contractAddress,
-                "_payable", "", remark, null, null, null, true);
+                "receiveAllAssetsFailed", "", remark, null, null, multyAssetValues, true);
 
     }
 
@@ -277,7 +303,7 @@ public class ContractMultyAssetTest extends BaseQuery {
         String sender = "tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD";
         String senderPri = "477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75";
         BigInteger value = BigInteger.ZERO;
-        String contractAddress = "tNULSeBaNAVAKkKhA2AoHk7eoVXbqtVVA8tu5Y";
+        String contractAddress = offlineContract;
         String methodName = "transferNuls";
         String methodDesc = "";
         String remark = "";
@@ -288,16 +314,122 @@ public class ContractMultyAssetTest extends BaseQuery {
     }
 
     protected void callTxOffline(String feeAccount, String feeAccountPri,
-                                 String sender, String senderPri,
+                                 String contractSender, String contractSenderPri,
                                  BigInteger value, String contractAddress,
                                  String methodName, String methodDesc,
                                  String remark,
                                  Object[] args, String[] argsType, ProgramMultyAssetValue[] multyAssetValues, boolean isBroadcastTx) throws Exception{
+        List<SignDto> txSingers = new ArrayList<>();
+        SignDto dto1 = new SignDto();
+        dto1.setAddress(contractSender);
+        dto1.setPriKey(contractSenderPri);
+        SignDto dto2 = new SignDto();
+        dto2.setAddress(feeAccount);
+        dto2.setPriKey(feeAccountPri);
+        txSingers.add(dto1);
+        txSingers.add(dto2);
+        //ContractBalance senderBalance = getUnConfirmedBalanceAndNonce(chainId, assetId, sender);
+        //byte[] senderBytes = AddressTool.getAddress(sender);
+        byte[] feeAccountBytes = AddressTool.getAddress(feeAccount);
+        byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
+
+        List<CoinFrom> froms = new ArrayList<>();
+        List<CoinTo> tos = new ArrayList<>();
+        if (value.compareTo(BigInteger.ZERO) > 0) {
+            String payAccount = feeAccount;
+            //String payAccount = contractSender;
+            ContractBalance payAccountBalance = getUnConfirmedBalanceAndNonce(chainId, assetId, payAccount);
+            CoinFrom coinFrom = new CoinFrom(AddressTool.getAddress(payAccount), chainId, assetId, value, RPCUtil.decode(payAccountBalance.getNonce()), (byte) 0);
+            froms.add(coinFrom);
+            CoinTo coinTo = new CoinTo(contractAddressBytes, chainId, assetId, value);
+            tos.add(coinTo);
+        }
+        if (multyAssetValues != null) {
+            for (ProgramMultyAssetValue multyAssetValue : multyAssetValues) {
+                int assetChainId = multyAssetValue.getAssetChainId();
+                int assetId = multyAssetValue.getAssetId();
+                BigInteger _value = multyAssetValue.getValue();
+                ContractBalance account = getUnConfirmedBalanceAndNonce(assetChainId, assetId, feeAccount);
+                CoinFrom coinFrom = new CoinFrom(feeAccountBytes, assetChainId, assetId, _value, RPCUtil.decode(account.getNonce()), (byte) 0);
+                froms.add(coinFrom);
+                CoinTo coinTo = new CoinTo(contractAddressBytes, assetChainId, assetId, _value);
+                tos.add(coinTo);
+            }
+        }
+        this.callTxOfflineBase(txSingers, froms, tos, feeAccount, contractSender, value, contractAddress, methodName, methodDesc, remark,
+                args, argsType, isBroadcastTx);
 
     }
 
-    //TODO pierre 设置CoinData
-    protected void callTxOfflineBase(List<CoinFrom> froms, List<CoinTo> tos,
+    /**
+     * 两个账户支出同一个资产
+     */
+    protected void callTxOfflineII(String feeAccount, String feeAccountPri,
+                                 String contractSender, String contractSenderPri,
+                                 BigInteger value, String contractAddress,
+                                 String methodName, String methodDesc,
+                                 String remark,
+                                 Object[] args, String[] argsType, ProgramMultyAssetValue[] multyAssetValues, boolean isBroadcastTx) throws Exception{
+        List<SignDto> txSingers = new ArrayList<>();
+        SignDto dto1 = new SignDto();
+        dto1.setAddress(contractSender);
+        dto1.setPriKey(contractSenderPri);
+        SignDto dto2 = new SignDto();
+        dto2.setAddress(feeAccount);
+        dto2.setPriKey(feeAccountPri);
+        // importPriKey("8212e7ba23c8b52790c45b0514490356cd819db15d364cbe08659b5888339e78", password);//27 tNULSeBaMrbMRiFAUeeAt6swb4xVBNyi81YL24
+        SignDto dto3 = new SignDto();
+        dto3.setAddress("tNULSeBaMrbMRiFAUeeAt6swb4xVBNyi81YL24");
+        dto3.setPriKey("8212e7ba23c8b52790c45b0514490356cd819db15d364cbe08659b5888339e78");
+        txSingers.add(dto1);
+        txSingers.add(dto2);
+        txSingers.add(dto3);
+        //ContractBalance senderBalance = getUnConfirmedBalanceAndNonce(chainId, assetId, sender);
+        //byte[] senderBytes = AddressTool.getAddress(sender);
+        byte[] feeAccountBytes = AddressTool.getAddress(feeAccount);
+        byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
+
+        List<CoinFrom> froms = new ArrayList<>();
+        List<CoinTo> tos = new ArrayList<>();
+        if (value.compareTo(BigInteger.ZERO) > 0) {
+            String payAccount = feeAccount;
+            //String payAccount = contractSender;
+            ContractBalance payAccountBalance = getUnConfirmedBalanceAndNonce(chainId, assetId, payAccount);
+            CoinFrom coinFrom = new CoinFrom(AddressTool.getAddress(payAccount), chainId, assetId, value, RPCUtil.decode(payAccountBalance.getNonce()), (byte) 0);
+            froms.add(coinFrom);
+            CoinTo coinTo = new CoinTo(contractAddressBytes, chainId, assetId, value);
+            tos.add(coinTo);
+        }
+        if (multyAssetValues != null) {
+            String payAccount;
+            for (ProgramMultyAssetValue multyAssetValue : multyAssetValues) {
+                BigInteger _value = multyAssetValue.getValue();
+                BigInteger divide = _value.divide(BigInteger.valueOf(2));
+                int assetChainId = multyAssetValue.getAssetChainId();
+                int assetId = multyAssetValue.getAssetId();
+
+                payAccount = feeAccount;
+                ContractBalance account = getUnConfirmedBalanceAndNonce(assetChainId, assetId, payAccount);
+                CoinFrom coinFrom = new CoinFrom(AddressTool.getAddress(payAccount), assetChainId, assetId, _value.subtract(divide), RPCUtil.decode(account.getNonce()), (byte) 0);
+                froms.add(coinFrom);
+
+
+                payAccount = "tNULSeBaMrbMRiFAUeeAt6swb4xVBNyi81YL24";
+                account = getUnConfirmedBalanceAndNonce(assetChainId, assetId, payAccount);
+                coinFrom = new CoinFrom(AddressTool.getAddress(payAccount), assetChainId, assetId, divide, RPCUtil.decode(account.getNonce()), (byte) 0);
+                froms.add(coinFrom);
+
+                CoinTo coinTo = new CoinTo(contractAddressBytes, assetChainId, assetId, _value);
+                tos.add(coinTo);
+            }
+        }
+        this.callTxOfflineBase(txSingers, froms, tos, feeAccount, contractSender, value, contractAddress, methodName, methodDesc, remark,
+                args, argsType, isBroadcastTx);
+
+    }
+
+
+    protected void callTxOfflineBase(List<SignDto> txSingers, List<CoinFrom> froms, List<CoinTo> tos,
                                  String feeAccount,
                                  String contractSender,
                                  BigInteger value, String contractAddress,
@@ -336,53 +468,50 @@ public class ContractMultyAssetTest extends BaseQuery {
         tx.setTime(System.currentTimeMillis() / 1000);
         // 计算CoinData
         CoinData coinData = new CoinData();
-        ContractBalance feeAccountBalance = getUnConfirmedBalanceAndNonce(chainId, assetId, feeAccount);
-        ContractBalance senderBalance = getUnConfirmedBalanceAndNonce(chainId, assetId, sender);
+        coinData.setFrom(froms);
+        coinData.setTo(tos);
 
         long gasUsed = callContractData.getGasLimit();
         BigInteger imputedValue = BigInteger.valueOf(LongUtils.mul(gasUsed, callContractData.getPrice()));
-        // 总花费
-        BigInteger sendValue = callContractData.getValue();
-        if (senderBalance.getBalance().compareTo(sendValue) < 0) {
-            // Insufficient balance
-            throw new RuntimeException("Insufficient balance to transfer to contract");
-        }
+        byte[] feeAccountBytes = AddressTool.getAddress(feeAccount);
         BigInteger feeValue = imputedValue;
-        if (value.compareTo(BigInteger.ZERO) > 0) {
+        CoinFrom feeAccountFrom = null;
+        for (CoinFrom from : froms) {
+            int assetChainId = from.getAssetsChainId();
+            int assetId = from.getAssetsId();
+            if (Arrays.equals(from.getAddress(), feeAccountBytes) && assetChainId == this.chainId && assetId == this.assetId) {
+                from.setAmount(from.getAmount().add(feeValue));
+                feeAccountFrom = from;
+                break;
+            }
+        }
+        if (feeAccountFrom == null) {
+            ContractBalance feeAccountBalance = getUnConfirmedBalanceAndNonce(chainId, assetId, feeAccount);
+            feeAccountFrom = new CoinFrom(feeAccountBytes, chainId, assetId, feeValue, RPCUtil.decode(feeAccountBalance.getNonce()), (byte) 0);
+            coinData.addFrom(feeAccountFrom);
+        }
+        /*if (value.compareTo(BigInteger.ZERO) > 0) {
             CoinFrom coinFrom = new CoinFrom(callContractData.getSender(), chainId, assetId, sendValue, RPCUtil.decode(senderBalance.getNonce()), (byte) 0);
             coinData.addFrom(coinFrom);
 
             CoinTo coinTo = new CoinTo(callContractData.getContractAddress(), chainId, assetId, value);
             coinData.addTo(coinTo);
-        }
-        CoinFrom feeCoinFrom = new CoinFrom(AddressTool.getAddress(feeAccount), chainId, assetId, feeValue, RPCUtil.decode(feeAccountBalance.getNonce()), (byte) 0);
-        coinData.addFrom(feeCoinFrom);
+        }*/
 
         tx.setCoinData(coinData.serialize());
         tx.setTxData(callContractData.serialize());
 
-        BigInteger txSizeFee = TransactionFeeCalculator.getNormalUnsignedTxFee(tx.getSize() + 260);
-        feeValue = feeValue.add(txSizeFee);
-        feeCoinFrom.setAmount(feeValue);
-        if (feeAccountBalance.getBalance().compareTo(feeValue) < 0) {
+        BigInteger txSizeFee = TransactionFeeCalculator.getNormalUnsignedTxFee(tx.getSize() + 130 * froms.size());
+        feeAccountFrom.setAmount(feeAccountFrom.getAmount().add(txSizeFee));
+        /*if (feeAccountBalance.getBalance().compareTo(feeValue) < 0) {
             // Insufficient balance
             throw new RuntimeException("Insufficient balance to pay fee");
-        }
+        }*/
         tx.setCoinData(coinData.serialize());
         // 签名
-        List<SignDto> signDtoList = new ArrayList<>();
-        /*SignDto signDto = new SignDto();
-        signDto.setAddress(sender);
-        signDto.setPriKey(senderPri);
-        signDtoList.add(signDto);
-        signDto = new SignDto();
-        signDto.setAddress(feeAccount);
-        signDto.setPriKey(feeAccountPri);
-        signDtoList.add(signDto);*/
-
         byte[] txBytes = tx.serialize();
         String txHex = HexUtil.encode(txBytes);
-        Result<Map> signTxR = NulsSDKTool.sign(signDtoList, txHex);
+        Result<Map> signTxR = NulsSDKTool.sign(txSingers, txHex);
 
         Assert.assertTrue(JSONUtils.obj2PrettyJson(signTxR), signTxR.isSuccess());
         Map resultData = signTxR.getData();
