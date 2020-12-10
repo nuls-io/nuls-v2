@@ -1080,11 +1080,14 @@ public class ContractResource extends BaseCmd {
             dto.setBlockHeight(po.getBlockHeight());
             dto.setTokenType(po.getTokenType());
             dto.setNrc20(po.isNrc20());
-            if (po.isNrc20()) {
+            boolean isNrc721 = ContractConstant.TOKEN_TYPE_NRC721 == po.getTokenType();
+            if (po.isNrc20() || isNrc721) {
                 dto.setNrc20TokenName(po.getNrc20TokenName());
                 dto.setNrc20TokenSymbol(po.getNrc20TokenSymbol());
-                dto.setDecimals(po.getDecimals());
-                dto.setTotalSupply(ContractUtil.bigInteger2String(po.getTotalSupply()));
+                if (po.isNrc20()) {
+                    dto.setDecimals(po.getDecimals());
+                    dto.setTotalSupply(ContractUtil.bigInteger2String(po.getTotalSupply()));
+                }
             }
             dto.setStatus(status.name());
             dto.setMethod(methods);

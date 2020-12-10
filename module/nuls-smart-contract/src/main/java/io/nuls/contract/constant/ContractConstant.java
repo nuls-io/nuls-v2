@@ -121,6 +121,8 @@ public interface ContractConstant {
     String NRC721_SAFETRANSFERFROM = "safeTransferFrom";
     String NRC721_SAFETRANSFERFROM_DATA = "safeTransferFrom-data";
     String NRC721_STANDARD_FILE = "nrc721.json";
+    String NRC721_EVENT_TRANSFER = "Transfer";
+    String NRC721_EVENT_APPROVAL = "Approval";
 
     int DEFAULT_MAX_VIEW_GAS = 100000000;
     String SYS_FILE_ENCODING = "file.encoding";
