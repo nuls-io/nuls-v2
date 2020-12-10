@@ -93,6 +93,12 @@ public interface ContractConstant {
     String CONTRACT_EVENT_ADDRESS = "contractAddress";
     String CONTRACT_EVENT_DATA = "payload";
 
+    String FROM = "from";
+    String TO = "to";
+    String VALUE = "value";
+    String TOKEN_ID = "tokenId";
+    int TOKEN_TYPE_NRC20 = 1;
+    int TOKEN_TYPE_NRC721 = 2;
     /**
      * NRC20
      */

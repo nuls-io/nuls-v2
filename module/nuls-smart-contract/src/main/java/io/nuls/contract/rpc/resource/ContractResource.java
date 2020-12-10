@@ -554,9 +554,7 @@ public class ContractResource extends BaseCmd {
             }
             ContractResult contractResult = result.getData();
             ContractResultDto contractResultDto = new ContractResultDto(chainId, contractResult, gasLimit);
-            List<ContractTokenTransferDto> tokenTransfers = contractResultDto.getTokenTransfers();
-            List<ContractTokenTransferDto> realTokenTransfers = this.filterRealTokenTransfers(chainId, tokenTransfers);
-            contractResultDto.setTokenTransfers(realTokenTransfers);
+            this.filterRealTokenTransfers(chainId, contractResultDto);
             return success(contractResultDto);
         } catch (Exception e) {
             Log.error(e);
@@ -1135,9 +1133,7 @@ public class ContractResource extends BaseCmd {
                 if (contractResultDto == null) {
                     continue;
                 }
-                List<ContractTokenTransferDto> tokenTransfers = contractResultDto.getTokenTransfers();
-                List<ContractTokenTransferDto> realTokenTransfers = this.filterRealTokenTransfers(chainId, tokenTransfers);
-                contractResultDto.setTokenTransfers(realTokenTransfers);
+                this.filterRealTokenTransfers(chainId, contractResultDto);
                 resultMap.put(hash, contractResultDto);
             }
             return success(resultMap);
@@ -1197,9 +1193,7 @@ public class ContractResource extends BaseCmd {
                 resultMap.put("msg", msg);
             }
             if (flag && contractResultDto != null) {
-                List<ContractTokenTransferDto> tokenTransfers = contractResultDto.getTokenTransfers();
-                List<ContractTokenTransferDto> realTokenTransfers = this.filterRealTokenTransfers(chainId, tokenTransfers);
-                contractResultDto.setTokenTransfers(realTokenTransfers);
+                this.filterRealTokenTransfers(chainId, contractResultDto);
                 resultMap.put("data", contractResultDto);
             }
             if (!flag) {
@@ -1225,33 +1219,66 @@ public class ContractResource extends BaseCmd {
         return contractResultDto;
     }
 
-    private List<ContractTokenTransferDto> filterRealTokenTransfers(int chainId, List<ContractTokenTransferDto> tokenTransfers) {
-        if (tokenTransfers == null || tokenTransfers.isEmpty()) {
-            return tokenTransfers;
-        }
-        List<ContractTokenTransferDto> resultDto = new ArrayList<>();
-        Map<String, ContractAddressInfoPo> cache = MapUtil.createHashMap(tokenTransfers.size());
-        for (ContractTokenTransferDto tokenTransfer : tokenTransfers) {
-            try {
-                if (StringUtils.isBlank(tokenTransfer.getName())) {
-                    String contractAddress = tokenTransfer.getContractAddress();
-                    ContractAddressInfoPo po = cache.get(contractAddress);
-                    if (po == null) {
-                        po = contractHelper.getContractAddressInfo(
-                                chainId, AddressTool.getAddress(contractAddress)).getData();
-                        cache.put(contractAddress, po);
-                    }
-                    if (po == null || !po.isNrc20()) {
-                        continue;
-                    }
-                    tokenTransfer.setNrc20Info(po);
-                    resultDto.add(tokenTransfer);
-                }
-            } catch (Exception e) {
-                Log.error(e);
+    private void filterRealTokenTransfers(int chainId, ContractResultDto contractResultDto) {
+        List<ContractTokenTransferDto> tokenTransfers = contractResultDto.getTokenTransfers();
+        List<ContractToken721TransferDto> token721Transfers = contractResultDto.getToken721Transfers();
+        Map<String, ContractAddressInfoPo> cache = MapUtil.createHashMap(tokenTransfers.size() + token721Transfers.size());
+        do {
+            if (tokenTransfers == null || tokenTransfers.isEmpty()) {
+                break;
             }
-        }
-        return resultDto;
+            List<ContractTokenTransferDto> resultDto = new ArrayList<>();
+            for (ContractTokenTransferDto tokenTransfer : tokenTransfers) {
+                try {
+                    if (StringUtils.isBlank(tokenTransfer.getName())) {
+                        String contractAddress = tokenTransfer.getContractAddress();
+                        ContractAddressInfoPo po = cache.get(contractAddress);
+                        if (po == null) {
+                            po = contractHelper.getContractAddressInfo(
+                                    chainId, AddressTool.getAddress(contractAddress)).getData();
+                            cache.put(contractAddress, po);
+                        }
+                        if (po == null || !po.isNrc20()) {
+                            continue;
+                        }
+                        tokenTransfer.setNrc20Info(po);
+                        resultDto.add(tokenTransfer);
+                    }
+                } catch (Exception e) {
+                    Log.error(e);
+                }
+            }
+            contractResultDto.setTokenTransfers(resultDto);
+        } while (false);
+
+        do {
+            if (token721Transfers == null || token721Transfers.isEmpty()) {
+                break;
+            }
+            List<ContractToken721TransferDto> result721Dto = new ArrayList<>();
+            for (ContractToken721TransferDto token721Transfer : token721Transfers) {
+                try {
+                    if (StringUtils.isBlank(token721Transfer.getName())) {
+                        String contractAddress = token721Transfer.getContractAddress();
+                        ContractAddressInfoPo po = cache.get(contractAddress);
+                        if (po == null) {
+                            po = contractHelper.getContractAddressInfo(
+                                    chainId, AddressTool.getAddress(contractAddress)).getData();
+                            cache.put(contractAddress, po);
+                        }
+                        if (po == null || TOKEN_TYPE_NRC721 != po.getTokenType()) {
+                            continue;
+                        }
+                        token721Transfer.setNrc721Info(po);
+                        result721Dto.add(token721Transfer);
+                    }
+                } catch (Exception e) {
+                    Log.error(e);
+                }
+            }
+            contractResultDto.setToken721Transfers(result721Dto);
+        } while (false);
+
     }
 
     @CmdAnnotation(cmd = CONTRACT_TX, version = 1.0, description = "合约交易/contract tx")
@@ -1290,9 +1317,7 @@ public class ContractResource extends BaseCmd {
             // 计算交易实际发生的金额
             calTransactionValue(txDto);
             if (contractResultDto != null) {
-                List<ContractTokenTransferDto> tokenTransfers = contractResultDto.getTokenTransfers();
-                List<ContractTokenTransferDto> realTokenTransfers = this.filterRealTokenTransfers(chainId, tokenTransfers);
-                contractResultDto.setTokenTransfers(realTokenTransfers);
+                this.filterRealTokenTransfers(chainId, contractResultDto);
                 txDto.setContractResult(contractResultDto);
             }
 

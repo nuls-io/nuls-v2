@@ -331,7 +331,10 @@ public class ContractHelper {
         List<ProgramMethod> methods = this.getAllMethods(chainId, createContractData.getCode());
         Map<String, ProgramMethod> contractMethodsMap = new HashMap<>();
         boolean isNrc20 = this.checkNrc20Contract(methods, contractMethodsMap);
-        boolean isNrc721 = this.checkNrc721Contract(methods, contractMethodsMap);
+        boolean isNrc721 = false;
+        if (!isNrc20) {
+            isNrc721 = this.checkNrc721Contract(methods, contractMethodsMap);
+        }
         if(isNrc20) {
             contractResult.setTokenType(TokenTypeStatus.NRC20.status());
         } else if(isNrc721) {
@@ -340,7 +343,7 @@ public class ContractHelper {
         boolean isAcceptDirectTransfer = this.checkAcceptDirectTransfer(methods);
         contractResult.setNrc20(isNrc20);
         contractResult.setAcceptDirectTransfer(isAcceptDirectTransfer);
-        if (isNrc20) {
+        if (isNrc20 || isNrc721) {
             // NRC20 tokenName 验证代币名称格式
             ProgramResult programResult = this.invokeViewMethod(chainId, track, null, bestBlockHeight, contractAddress, NRC20_METHOD_NAME, null, null);
             if (programResult.isSuccess()) {
@@ -368,40 +371,42 @@ public class ContractHelper {
                 }
             }
 
-            programResult = this.invokeViewMethod(chainId, track, null, bestBlockHeight, contractAddress, NRC20_METHOD_DECIMALS, null, null);
-            BigInteger decimalsBig = BigInteger.ZERO;
-            if (programResult.isSuccess()) {
-                String decimals = programResult.getResult();
-                if (StringUtils.isNotBlank(decimals)) {
-                    try {
-                        decimalsBig = new BigInteger(decimals);
-                        if (decimalsBig.compareTo(BigInteger.ZERO) < 0 || decimalsBig.compareTo(MAXIMUM_DECIMALS) > 0) {
-                            contractResult.setError(true);
-                            contractResult.setErrorMessage("The value of decimals ranges from 0 to 18.");
-                            return getFailed();
+            if (isNrc20) {
+                programResult = this.invokeViewMethod(chainId, track, null, bestBlockHeight, contractAddress, NRC20_METHOD_DECIMALS, null, null);
+                BigInteger decimalsBig = BigInteger.ZERO;
+                if (programResult.isSuccess()) {
+                    String decimals = programResult.getResult();
+                    if (StringUtils.isNotBlank(decimals)) {
+                        try {
+                            decimalsBig = new BigInteger(decimals);
+                            if (decimalsBig.compareTo(BigInteger.ZERO) < 0 || decimalsBig.compareTo(MAXIMUM_DECIMALS) > 0) {
+                                contractResult.setError(true);
+                                contractResult.setErrorMessage("The value of decimals ranges from 0 to 18.");
+                                return getFailed();
+                            }
+                            contractResult.setTokenDecimals(decimalsBig.intValue());
+                        } catch (Exception e) {
+                            Log.error("Get nrc20 decimals error.", e);
+                            // skip it
                         }
-                        contractResult.setTokenDecimals(decimalsBig.intValue());
-                    } catch (Exception e) {
-                        Log.error("Get nrc20 decimals error.", e);
-                        // skip it
                     }
                 }
-            }
-            programResult = this.invokeViewMethod(chainId, track, null, bestBlockHeight, contractAddress, NRC20_METHOD_TOTAL_SUPPLY, null, null);
-            if (programResult.isSuccess()) {
-                String totalSupply = programResult.getResult();
-                if (StringUtils.isNotBlank(totalSupply)) {
-                    try {
-                        BigInteger totalSupplyBig = new BigInteger(totalSupply);
-                        if (totalSupplyBig.compareTo(BigInteger.ZERO) <= 0 || totalSupplyBig.compareTo(MAXIMUM_TOTAL_SUPPLY.multiply(BigInteger.TEN.pow(decimalsBig.intValue()))) > 0) {
-                            contractResult.setErrorMessage("The value of totalSupply ranges from 1 to 2^256 - 1.");
-                            contractResult.setError(true);
-                            return getFailed();
+                programResult = this.invokeViewMethod(chainId, track, null, bestBlockHeight, contractAddress, NRC20_METHOD_TOTAL_SUPPLY, null, null);
+                if (programResult.isSuccess()) {
+                    String totalSupply = programResult.getResult();
+                    if (StringUtils.isNotBlank(totalSupply)) {
+                        try {
+                            BigInteger totalSupplyBig = new BigInteger(totalSupply);
+                            if (totalSupplyBig.compareTo(BigInteger.ZERO) <= 0 || totalSupplyBig.compareTo(MAXIMUM_TOTAL_SUPPLY.multiply(BigInteger.TEN.pow(decimalsBig.intValue()))) > 0) {
+                                contractResult.setErrorMessage("The value of totalSupply ranges from 1 to 2^256 - 1.");
+                                contractResult.setError(true);
+                                return getFailed();
+                            }
+                            contractResult.setTokenTotalSupply(totalSupplyBig);
+                        } catch (Exception e) {
+                            Log.error("Get nrc20 totalSupply error.", e);
+                            // skip it
                         }
-                        contractResult.setTokenTotalSupply(totalSupplyBig);
-                    } catch (Exception e) {
-                        Log.error("Get nrc20 totalSupply error.", e);
-                        // skip it
                     }
                 }
             }

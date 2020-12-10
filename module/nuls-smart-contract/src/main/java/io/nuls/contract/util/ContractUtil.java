@@ -35,6 +35,7 @@ import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.model.bo.*;
+import io.nuls.contract.model.dto.ContractTokenTransferInfo;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.contract.model.tx.*;
 import io.nuls.contract.model.txdata.CallContractData;
@@ -301,6 +302,53 @@ public class ContractUtil {
                     i++;
                 }
                 return po;
+            }
+            return null;
+        } catch (Exception e) {
+            Log.error(e);
+            return null;
+        }
+    }
+
+    public static ContractTokenTransferInfo convertJsonToTokenTransferInfo(int chainId, String event) {
+        if (isBlank(event)) {
+            return null;
+        }
+        ContractTokenTransferInfo info;
+        try {
+            Map<String, Object> eventMap = JSONUtils.json2map(event);
+            String eventName = (String) eventMap.get(CONTRACT_EVENT);
+            String contractAddress = (String) eventMap.get(CONTRACT_EVENT_ADDRESS);
+            info = new ContractTokenTransferInfo();
+            info.setContractAddress(contractAddress);
+            if (NRC20_EVENT_TRANSFER.equals(eventName)) {
+                boolean isNRC20, isNRC721 = false;
+                Map<String, Object> data = (Map<String, Object>) eventMap.get(CONTRACT_EVENT_DATA);
+                isNRC20 = data.containsKey(VALUE);
+                if (!isNRC20) {
+                    isNRC721 = data.containsKey(TOKEN_ID);
+                }
+                if (!isNRC20 && !isNRC721) {
+                    return null;
+                }
+                String from = (String) data.get(FROM);
+                String to = (String) data.get(TO);
+                String value = (String) data.get(VALUE);
+                String tokenId = (String) data.get(TOKEN_ID);
+                if (AddressTool.validAddress(chainId, from)) {
+                    info.setFrom(from);
+                }
+                if (AddressTool.validAddress(chainId, to)) {
+                    info.setTo(to);
+                }
+                if (isNRC20) {
+                    info.setTokenType(TOKEN_TYPE_NRC20);
+                    info.setValue(isBlank(value) ? BigInteger.ZERO : new BigInteger(value));
+                } else if (isNRC721) {
+                    info.setTokenType(TOKEN_TYPE_NRC721);
+                    info.setValue(isBlank(tokenId) ? BigInteger.ZERO : new BigInteger(tokenId));
+                }
+                return info;
             }
             return null;
         } catch (Exception e) {
