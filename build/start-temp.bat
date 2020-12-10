@@ -87,6 +87,10 @@ rem  # %JAVA_OPTS reject
 SET JAVA_OPT=%JAVA_OPTS%
 set JAR_FILE=%MODULE_PATH%%APP_NAME%-%VERSION%.jar
 
+if %JOPT_XMX% == dynamic (
+    SET JOPT_XMX=6144
+)
+
 REM echo "%JAR_FILE% > %LOG_PATH%log.log"
 SET CLASSPATH=""
 for /f %%i in (dependent.conf) do (
