@@ -87,8 +87,9 @@ rem  # %JAVA_OPTS reject
 SET JAVA_OPT=%JAVA_OPTS%
 set JAR_FILE=%MODULE_PATH%%APP_NAME%-%VERSION%.jar
 
+set XMX=%JOPT_XMX%
 if %JOPT_XMX% == dynamic (
-    SET JOPT_XMX=6144
+    SET XMX=6144
 )
 
 REM echo "%JAR_FILE% > %LOG_PATH%log.log"
@@ -100,7 +101,7 @@ for /f %%i in (dependent.conf) do (
 SET CLASSPATH=-classpath %CLASSPATH%%JAR_FILE%
 REM ;%JAR_FILE%
 REM SET CPOPT=-cp "%JAR_FILE%"
-SET JAVA_OPT=-server -XX:+UseG1GC -XX:MaxGCPauseMillis=50 -Xms%JOPT_XMS%m -Xmx%JOPT_XMX%m -XX:MetaspaceSize=%JOPT_METASPACESIZE%m -XX:MaxMetaspaceSize=%JOPT_MAXMETASPACESIZE%m -XX:+ParallelRefProcEnabled -XX:+TieredCompilation -XX:+ExplicitGCInvokesConcurrent
+SET JAVA_OPT=-server %JAVA_OPT% -XX:+UseG1GC -XX:MaxGCPauseMillis=50 -Xms%JOPT_XMS%m -Xmx%XMX%m -XX:MetaspaceSize=%JOPT_METASPACESIZE%m -XX:MaxMetaspaceSize=%JOPT_MAXMETASPACESIZE%m -XX:+ParallelRefProcEnabled -XX:+TieredCompilation -XX:+ExplicitGCInvokesConcurrent
 SET JAVA_OOM_DUMP=-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath="%LOG_PATH%\oom-%START_DATE%.hprof" -Dlog.path="%LOG_PATH%" -DdataPath="%DATA_PATH%" -Dlog.level=%LOG_LEVEL% -Dactive.config="%CONFIG_FILE%"
 SET JAVA_OPT=%JAVA_OPT% %JAVA_GC_LOG% %JAVA_OOM_DUMP%  -Dapp.name=%APP_NAME%
 
