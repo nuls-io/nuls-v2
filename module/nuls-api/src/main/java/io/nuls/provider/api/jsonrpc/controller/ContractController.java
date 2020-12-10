@@ -762,6 +762,10 @@ public class ContractController {
         if (!Context.isChainExist(chainId)) {
             return RpcResult.paramError(String.format("chainId [%s] is invalid", chainId));
         }
+        Object multyAssetValues = null;
+        if (params.size() > 9) {
+            multyAssetValues = params.get(9);
+        }
         Result<Map> mapResult = contractTools.validateContractCall(chainId,
                 params.get(1),
                 params.get(2),
@@ -771,7 +775,7 @@ public class ContractController {
                 params.get(6),
                 params.get(7),
                 params.get(8),
-                params.get(9)
+                multyAssetValues
         );
         return ResultUtil.getJsonRpcResult(mapResult);
     }
