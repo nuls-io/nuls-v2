@@ -125,7 +125,7 @@ public class ContractResource {
         if (call.getPrice() < 0) {
             return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), String.format("price [%s] is invalid", call.getPrice())));
         }
-        CallContractReq req = new CallContractReq();
+        /*CallContractReq req = new CallContractReq();
         req.setChainId(config.getChainId());
         req.setSender(call.getSender());
         req.setPassword(call.getPassword());
@@ -141,8 +141,21 @@ public class ContractResource {
         RpcClientResult clientResult = ResultUtil.getRpcClientResult(result);
         if(clientResult.isSuccess()) {
             return clientResult.resultMap().map("txHash", clientResult.getData()).mapToData();
-        }
-        return clientResult;
+        }*/
+        Result<Map> mapResult = contractTools.contractCall(config.getChainId(),
+                call.getSender(),
+                call.getPassword(),
+                call.getValue(),
+                call.getGasLimit(),
+                call.getPrice(),
+                call.getContractAddress(),
+                call.getMethodName(),
+                call.getMethodDesc(),
+                call.getArgs(),
+                call.getRemark(),
+                call.getMultyAssetValues()
+        );
+        return ResultUtil.getRpcClientResult(mapResult);
     }
 
 
@@ -539,7 +552,8 @@ public class ContractResource {
                 form.getContractAddress(),
                 form.getMethodName(),
                 form.getMethodDesc(),
-                form.getArgs());
+                form.getArgs(),
+                form.getMultyAssetValues());
         return ResultUtil.getRpcClientResult(mapResult);
     }
 
