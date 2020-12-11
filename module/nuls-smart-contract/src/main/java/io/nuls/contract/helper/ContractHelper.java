@@ -50,6 +50,7 @@ import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.program.*;
 import io.nuls.core.basic.Result;
 import io.nuls.core.basic.VarInt;
+import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
@@ -727,7 +728,14 @@ public class ContractHelper {
         return contractResult;
     }
 
+    /**
+     * 提取合约多资产转入的信息
+     */
     public void extractAssetInfoFromCallTransaction(CallContractData contractData, Transaction tx) throws NulsException {
+        // 过滤特殊的交易，token跨链转入交易(to中包含其他资产)
+        if (CROSS_CHAIN == tx.getType()) {
+            return;
+        }
         CoinData coinData = tx.getCoinDataInstance();
         List<ProgramMultyAssetValue> list = extractMultyAssetInfoFromCallTransaction(coinData);
         contractData.setMultyAssetValues(list);
