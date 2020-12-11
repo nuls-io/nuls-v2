@@ -658,7 +658,7 @@ public class TxServiceImpl implements TxService {
             boolean stopInvokeContract = false;
 
             int packageContractTxMaxCount;
-            /*Random random = new Random();
+            Random random = new Random();
             int availableProcessors = Runtime.getRuntime().availableProcessors();
             if (availableProcessors <= 4) {
                 packageContractTxMaxCount = 20 + random.nextInt(10);
@@ -666,8 +666,8 @@ public class TxServiceImpl implements TxService {
                 packageContractTxMaxCount = 50 + random.nextInt(10);
             } else {
                 packageContractTxMaxCount = 100 + random.nextInt(20);
-            }*/
-            packageContractTxMaxCount = 15;
+            }
+            //packageContractTxMaxCount = 15;
 
             for (int index = 0; ; index++) {
                 long currentTimeMillis = NulsDateUtils.getCurrentTimeMillis();
