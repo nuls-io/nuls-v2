@@ -560,7 +560,7 @@ public class MessageUtil {
                 }
             }
             TransactionCall.sendTx(chain, RPCUtil.encode(packCtx.serialize()));
-            chain.getLogger().debug("跨链转账交易验证完成，发送给交易模块处理，hash:{}", crossTxHashHex);
+            chain.getLogger().info("跨链转账交易验证完成，发送给交易模块处理，hash:{}", crossTxHashHex);
         } catch (NulsException | IOException e) {
             chain.getLogger().error(e);
             return false;
