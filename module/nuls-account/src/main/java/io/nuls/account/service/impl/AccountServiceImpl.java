@@ -588,8 +588,8 @@ public class AccountServiceImpl implements AccountService {
         accountCacheService.getLocalAccountMaps().put(account.getAddress().getBase58(), account);
         //backup account to keystore
         keyStoreService.backupAccountToKeyStore(null, chainId, account.getAddress().getBase58(), password);
-        if(!ContractCall.invokeAccountContract(chain, account.getAddress().getBase58())){
-           chain.getLogger().warn("importAccountByPrikey invokeAccountContract failed. -address:{}", account.getAddress().getBase58());
+        if (!ContractCall.invokeAccountContract(chain, account.getAddress().getBase58())) {
+            chain.getLogger().warn("importAccountByPrikey invokeAccountContract failed. -address:{}", account.getAddress().getBase58());
         }
         return account;
     }
@@ -634,7 +634,7 @@ public class AccountServiceImpl implements AccountService {
                     byte[] bytes = Base58.decode(keyStore.getAddress());
                     byte[] originalAddressHash160 = new byte[Address.RIPEMD160_LENGTH];
                     System.arraycopy(bytes, 3, originalAddressHash160, 0, Address.RIPEMD160_LENGTH);
-                    if(!Arrays.equals(newAccountHash160, originalAddressHash160)) {
+                    if (!Arrays.equals(newAccountHash160, originalAddressHash160)) {
                         throw new NulsRuntimeException(AccountErrorCode.ACCOUNTKEYSTORE_FILE_DAMAGED);
                     }
                 } catch (Exception e) {
@@ -658,7 +658,7 @@ public class AccountServiceImpl implements AccountService {
                     byte[] bytes = Base58.decode(keyStore.getAddress());
                     byte[] originalAddressHash160 = new byte[Address.RIPEMD160_LENGTH];
                     System.arraycopy(bytes, 3, originalAddressHash160, 0, Address.RIPEMD160_LENGTH);
-                    if(!Arrays.equals(newAccountHash160, originalAddressHash160)) {
+                    if (!Arrays.equals(newAccountHash160, originalAddressHash160)) {
                         throw new NulsRuntimeException(AccountErrorCode.ACCOUNTKEYSTORE_FILE_DAMAGED);
                     }
                 } catch (Exception e) {
@@ -688,10 +688,29 @@ public class AccountServiceImpl implements AccountService {
         //backup account to keystore
         keyStoreService.backupAccountToKeyStore(null, chainId, account.getAddress().getBase58(), password);
 
-        if(!ContractCall.invokeAccountContract(chain, account.getAddress().getBase58())){
+        if (!ContractCall.invokeAccountContract(chain, account.getAddress().getBase58())) {
             chain.getLogger().warn("importAccountByPrikey invokeAccountContract failed. -address:{}", account.getAddress().getBase58());
         }
         return account;
+    }
+
+    @Override
+    public void importAccountListByKeystore(List<AccountKeyStore> keyStoreList, Chain chain) throws NulsException {
+        int chainId = chain.getChainId();
+        Account account;
+        try {
+            for (AccountKeyStore keyStore : keyStoreList) {
+                account = AccountTool.createAccountByPubKey(chainId, keyStore.getEncryptedPrivateKey(), keyStore.getPubKey());
+                account.setAlias(aliasService.getAliasByAddress(chainId, account.getAddress().getBase58()));
+                //save account to storage
+                accountStorageService.saveAccount(new AccountPO(account));
+                //put the account in local cache
+                accountCacheService.getLocalAccountMaps().put(account.getAddress().getBase58(), account);
+            }
+        } catch (Exception e) {
+            LoggerUtil.LOG.error(e.getMessage());
+            throw new NulsException(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
     }
 
     @Override

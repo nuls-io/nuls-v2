@@ -27,6 +27,8 @@ package io.nuls.contract.vm.code;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import io.nuls.base.protocol.ProtocolGroupManager;
+import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.vm.util.Constants;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -51,15 +53,14 @@ import java.util.jar.JarInputStream;
 public class ClassCodeLoader {
 
     private static final Map<String, ClassCode> RESOURCE_CLASS_CODES;
+    private static final Map<String, ClassCode> RESOURCE_CLASS_CODES_V8;
 
     private static final LoadingCache<ClassCodeCacheKey, Map<String, ClassCode>> CACHE;
 
     static {
         CACHE = CacheBuilder.newBuilder()
-                //.initialCapacity(100)
-                //.maximumSize(1024)
-                .initialCapacity(50)
-                .maximumSize(512)
+                .initialCapacity(100)
+                .maximumSize(4096)
                 .expireAfterAccess(10 * 60, TimeUnit.SECONDS)
                 .build(new CacheLoader<ClassCodeCacheKey, Map<String, ClassCode>>() {
                     @Override
@@ -68,6 +69,7 @@ public class ClassCodeLoader {
                     }
                 });
         RESOURCE_CLASS_CODES = loadFromResource();
+        RESOURCE_CLASS_CODES_V8 = loadFromResource_v8();
     }
 
     public static ClassCode load(String className) {
@@ -88,7 +90,19 @@ public class ClassCodeLoader {
         }
     }
 
+    public static ClassCode loadFromResource_v8(String className) {
+        ClassCode classCode = RESOURCE_CLASS_CODES_V8.get(className);
+        if (classCode == null) {
+            throw new RuntimeException("can't load class " + className);
+        } else {
+            return classCode;
+        }
+    }
+
     public static ClassCode getFromResource(String className) {
+        if (ProtocolGroupManager.getCurrentVersion(ContractContext.CHAIN_ID) >= ContractContext.UPDATE_VERSION_CONTRACT_ASSET) {
+            return RESOURCE_CLASS_CODES_V8.get(className);
+        }
         return RESOURCE_CLASS_CODES.get(className);
     }
 
@@ -170,8 +184,16 @@ public class ClassCodeLoader {
     }
 
     private static Map<String, ClassCode> loadFromResource() {
+        return loadFromResourceWithResourceName("/used_classes_sdk");
+    }
+
+    private static Map<String, ClassCode> loadFromResource_v8() {
+        return loadFromResourceWithResourceName("/used_classes_sdk_v8");
+    }
+
+    private static Map<String, ClassCode> loadFromResourceWithResourceName(String usedClassesName) {
         try (InputStream baseInputStream = ClassCodeLoader.class.getResourceAsStream("/used_classes_base");
-             InputStream sdkInputStream = ClassCodeLoader.class.getResourceAsStream("/used_classes_sdk");
+             InputStream sdkInputStream = ClassCodeLoader.class.getResourceAsStream(usedClassesName);
         ) {
             if (baseInputStream == null) {
                 return new HashMap<>(0);
@@ -191,24 +213,6 @@ public class ClassCodeLoader {
             throw new RuntimeException(e);
         }
     }
-
-    //private static Map<String, ClassCode> loadFromResource() {
-    //    InputStream baseInputStream = null;
-    //    InputStream sdkInputStream = null;
-    //    try {
-    //        baseInputStream = ClassCodeLoader.class.getResourceAsStream("/used_classes");
-    //        if (baseInputStream == null) {
-    //            return new HashMap<>(0);
-    //        } else {
-    //            return loadJar(baseInputStream);
-    //        }
-    //    } catch (Exception e) {
-    //        throw new RuntimeException(e);
-    //    } finally {
-    //        IOUtils.closeQuietly(baseInputStream);
-    //        IOUtils.closeQuietly(sdkInputStream);
-    //    }
-    //}
 
     private static Map<String, ClassCode> loadJar(byte[] bytes) {
         InputStream inputStream = new ByteArrayInputStream(bytes);

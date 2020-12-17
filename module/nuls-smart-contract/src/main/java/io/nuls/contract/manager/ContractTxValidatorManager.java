@@ -23,6 +23,8 @@
  */
 package io.nuls.contract.manager;
 
+import io.nuls.base.protocol.ProtocolGroupManager;
+import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.model.tx.CallContractTransaction;
 import io.nuls.contract.model.tx.CreateContractTransaction;
 import io.nuls.contract.model.tx.DeleteContractTransaction;
@@ -53,6 +55,9 @@ public class ContractTxValidatorManager {
     }
 
     public Result callValidator(int chainId, CallContractTransaction tx) throws NulsException {
+        if (ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_CONTRACT_ASSET) {
+            return callContractTxValidator.validateV8(chainId, tx);
+        }
         return callContractTxValidator.validate(chainId, tx);
     }
 

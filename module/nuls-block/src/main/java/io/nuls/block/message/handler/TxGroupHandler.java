@@ -72,7 +72,7 @@ public class TxGroupHandler implements MessageProcessor {
             logger.warn("recieved a null txGroup form " + nodeId);
             return;
         }
-        logger.debug("recieve TxGroupMessage from network node-" + nodeId + ", txcount:" + transactions.size());
+//        logger.debug("recieve TxGroupMessage from network node-" + nodeId + ", txcount:" + transactions.size());
         NulsHash blockHash = message.getBlockHash();
         BlockForwardEnum status = SmallBlockCacher.getStatus(chainId, blockHash);
         //1.已收到完整区块,丢弃
@@ -95,7 +95,7 @@ public class TxGroupHandler implements MessageProcessor {
             Block block = BlockUtil.assemblyBlock(header, txMap, smallBlock.getTxHashList());
             block.setNodeId(nodeId);
             TxGroupRequestor.removeTask(chainId, blockHash);
-            logger.debug("record recv block, block create time-" + DateUtils.timeStamp2DateStr(block.getHeader().getTime() * 1000) + ", hash-" + block.getHeader().getHash());
+//            logger.debug("record recv block, block create time-" + DateUtils.timeStamp2DateStr(block.getHeader().getTime() * 1000) + ", hash-" + block.getHeader().getHash());
             boolean b = blockService.saveBlock(chainId, block, 1, true, false, true);
             if (!b) {
                 SmallBlockCacher.setStatus(chainId, blockHash, ERROR);

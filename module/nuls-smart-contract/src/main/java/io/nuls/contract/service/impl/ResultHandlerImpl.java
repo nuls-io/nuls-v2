@@ -49,6 +49,8 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static io.nuls.contract.config.ContractContext.ASSET_ID;
+import static io.nuls.contract.config.ContractContext.CHAIN_ID;
 import static io.nuls.core.constant.TxType.CALL_CONTRACT;
 
 /**
@@ -108,7 +110,7 @@ public class ResultHandlerImpl implements ResultHanlder {
                 ContractTransferData txData = new ContractTransferData(orginTx.getHash(), contractAddress);
 
                 CoinData coinData = new CoinData();
-                ContractBalance balance = tempBalanceManager.getBalance(contractAddress).getData();
+                ContractBalance balance = tempBalanceManager.getBalance(contractAddress, CHAIN_ID, ASSET_ID).getData();
                 byte[] nonceBytes = RPCUtil.decode(balance.getNonce());
 
                 CoinFrom coinFrom = new CoinFrom(contractAddress, chainId, assetsId, value, nonceBytes, (byte) 0);
@@ -131,11 +133,12 @@ public class ResultHandlerImpl implements ResultHanlder {
                 tx.setHash(hash);
                 contractResult.getContractTransferList().add(tx);
                 contractResult.setMergedTransferList(contractTransferHandler.contractTransfer2mergedTransfer(orginTx, contractResult.getContractTransferList()));
+                contractResult.setMergerdMultyAssetTransferList(contractTransferHandler.contractMultyAssetTransfer2mergedTransfer(orginTx, contractResult.getContractTransferList()));
             }
         }
     }
 
-    private List<ContractResult> reCall(ProgramExecutor batchExecutor, AnalyzerResult analyzerResult, int chainId, String preStateRoot) {
+    private List<ContractResult> reCall(ProgramExecutor batchExecutor, AnalyzerResult analyzerResult, int chainId, String preStateRoot) throws NulsException {
         // 重新执行合约
         List<ContractResult> list = analyzerResult.getReCallTxList();
         List<ContractWrapperTransaction> collectTxs = list.stream().sorted(CompareTxOrderAsc.getInstance()).map(c -> c.getTx()).collect(Collectors.toList());

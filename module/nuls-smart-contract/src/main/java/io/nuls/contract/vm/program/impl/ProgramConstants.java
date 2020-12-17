@@ -26,6 +26,7 @@ package io.nuls.contract.vm.program.impl;
 
 import io.nuls.contract.sdk.*;
 import io.nuls.contract.sdk.annotation.Payable;
+import io.nuls.contract.sdk.annotation.PayableMultyAsset;
 import io.nuls.contract.sdk.annotation.Required;
 import io.nuls.contract.sdk.annotation.View;
 import io.nuls.contract.sdk.event.DebugEvent;
@@ -52,6 +53,22 @@ public class ProgramConstants {
             Required.class,
             Payable.class,
             DebugEvent.class
+    };
+
+    public static final Class[] SDK_CLASSES_V8 = new Class[]{
+            Address.class,
+            Block.class,
+            BlockHeader.class,
+            Contract.class,
+            Event.class,
+            Msg.class,
+            Utils.class,
+            View.class,
+            Required.class,
+            Payable.class,
+            DebugEvent.class,
+            PayableMultyAsset.class,
+            MultyAssetValue.class
     };
 
     public static final Class[] CONTRACT_USED_CLASSES = new Class[]{
@@ -92,7 +109,7 @@ public class ProgramConstants {
             StackOverflowError.class,
     };
 
-    public static final String[] SDK_CLASS_NAMES = new String[SDK_CLASSES.length];
+    public static String[] SDK_CLASS_NAMES = new String[SDK_CLASSES.length];
 
     public static final String[] CONTRACT_USED_CLASS_NAMES = new String[CONTRACT_USED_CLASSES.length];
 

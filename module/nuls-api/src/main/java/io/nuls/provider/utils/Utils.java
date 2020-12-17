@@ -2,6 +2,8 @@ package io.nuls.provider.utils;
 
 import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.data.CoinData;
+import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
@@ -117,6 +119,32 @@ public class Utils {
             throw new RuntimeException(e);
         }
         return max;
+    }
+
+    public static String[][] extractMultyAssetInfoFromCallTransaction(CoinData coinData, int mainChainId, int mainAssetId) {
+        List<CoinTo> toList = coinData.getTo();
+        if (toList == null || toList.isEmpty()) {
+            return null;
+        }
+        List<String[]> list = null;
+        for (CoinTo to : toList) {
+            if (to.getAssetsChainId() == mainChainId && to.getAssetsId() == mainAssetId) {
+                continue;
+            }
+            if (list == null) {
+                list = new ArrayList<>();
+            }
+            list.add(new String[]{to.getAmount().toString(), String.valueOf(to.getAssetsChainId()), String.valueOf(to.getAssetsId())});
+        }
+        if (list == null) {
+            return null;
+        }
+        int length = list.size();
+        String[][] array = new String[length][];
+        for (int i = 0; i < length; i++) {
+            array[i] = list.get(i);
+        }
+        return array;
     }
 
 }

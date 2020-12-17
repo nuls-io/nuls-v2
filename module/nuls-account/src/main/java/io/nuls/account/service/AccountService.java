@@ -47,7 +47,7 @@ public interface AccountService {
      * all the accounts are encrypted by the same password
      * if the password is NULL or "", the accounts will be unencrypted.
      *
-     * @param chain  链ID
+     * @param chain    链ID
      * @param count    想要创建的账户个数
      * @param count    the number of account you want to create.
      * @param password the password of the accounts.
@@ -76,6 +76,7 @@ public interface AccountService {
     /**
      * 获取指定链所有账户集合
      * Gets all account sets in the specified chain
+     *
      * @param chainId
      * @return
      */
@@ -246,6 +247,9 @@ public interface AccountService {
      * @throws NulsException
      */
     Account importAccountByKeyStore(AccountKeyStore keyStore, Chain chain, String password, boolean overwrite) throws NulsException;
+
+
+    void importAccountListByKeystore(List<AccountKeyStore> keyStoreList, Chain chain) throws NulsException;
 
     /**
      * 数据摘要签名

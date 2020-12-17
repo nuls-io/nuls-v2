@@ -70,6 +70,10 @@ public class RocksDBManager {
      * @throws Exception 数据库打开连接异常
      */
     public static void init(final String path) throws Exception {
+        init(path, null);
+    }
+
+    public static void init(final String path, Options options) throws Exception {
         synchronized (RocksDBManager.class) {
             File dir = DBUtils.loadDataPath(path);
             dataPath = dir.getPath();
@@ -84,7 +88,11 @@ public class RocksDBManager {
                 }
                 try {
                     dbPath = tableFile.getPath() + File.separator + BASE_DB_NAME;
-                    db = initOpenDB(dbPath);
+                    if (options == null) {
+                        db = initOpenDB(dbPath);
+                    } else {
+                        db = initOpenDB(dbPath, options);
+                    }
                     if (db != null) {
                         TABLES.put(tableFile.getName(), db);
                     }
@@ -95,6 +103,14 @@ public class RocksDBManager {
             }
         }
 
+    }
+
+    private static RocksDB initOpenDB(final String dbPath, Options options) throws RocksDBException {
+        File checkFile = new File(dbPath + File.separator + "CURRENT");
+        if (!checkFile.exists()) {
+            return null;
+        }
+        return RocksDB.open(options, dbPath);
     }
 
     /**
@@ -112,6 +128,11 @@ public class RocksDBManager {
         return RocksDB.open(options, dbPath);
     }
 
+    private static RocksDB openDB(final String dbPath, final boolean createIfMissing, Options options) throws RocksDBException {
+        options.setCreateIfMissing(createIfMissing);
+        return RocksDB.open(options, dbPath);
+    }
+
     /**
      * 装载数据库.
      * load database
@@ -126,14 +147,7 @@ public class RocksDBManager {
         return RocksDB.open(options, dbPath);
     }
 
-    /**
-     * 根据名称创建对应的数据库.
-     * Create database based by name
-     *
-     * @param tableName 数据库表名称
-     * @return Result 创建结果
-     */
-    public static boolean createTable(final String tableName) throws Exception {
+    public static boolean createTable(final String tableName, Options options) throws Exception {
         lock.lock();
         try {
             if (StringUtils.isBlank(tableName)) {
@@ -151,7 +165,12 @@ public class RocksDBManager {
                     dir.mkdir();
                 }
                 String filePath = dataPath + File.separator + tableName + File.separator + BASE_DB_NAME;
-                RocksDB db = openDB(filePath, true);
+                RocksDB db;
+                if (options == null) {
+                    db = openDB(filePath, true);
+                } else {
+                    db = openDB(filePath, true, options);
+                }
                 TABLES.put(tableName, db);
             } catch (Exception e) {
                 Log.error("error create table: " + tableName, e);
@@ -161,6 +180,17 @@ public class RocksDBManager {
         } finally {
             lock.unlock();
         }
+    }
+
+    /**
+     * 根据名称创建对应的数据库.
+     * Create database based by name
+     *
+     * @param tableName 数据库表名称
+     * @return Result 创建结果
+     */
+    public static boolean createTable(final String tableName) throws Exception {
+        return createTable(tableName, null);
     }
 
     /**
