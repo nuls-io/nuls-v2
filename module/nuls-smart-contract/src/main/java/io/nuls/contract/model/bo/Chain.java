@@ -64,6 +64,15 @@ public class Chain {
     private BatchInfo verifyBatchInfo;
 
     /**
+     * 打包区块时批量执行信息(版本8及以上)
+     */
+    private BatchInfoV8 batchInfoV8;
+    /**
+     * 验证区块时批量执行信息(版本8及以上)
+     */
+    private BatchInfoV8 verifyBatchInfoV8;
+
+    /**
      * 向合约模块注册接口提供给合约来调用
      */
     private Map<String, CmdRegister> cmdRegisterMap = new ConcurrentHashMap<>();
@@ -169,6 +178,37 @@ public class Chain {
         }
         if(blockType == BlockType.VERIFY_BLOCK.type()) {
             this.verifyBatchInfo = batchInfo;
+            return;
+        }
+        Log.error("Setting value error. Unkown blockType! - [{}]", blockType);
+    }
+
+    public BatchInfoV8 getBatchInfoV8() {
+        Integer blockType = currentThreadBlockType.get();
+        if(blockType == null) {
+            return null;
+        }
+        if(blockType == BlockType.PACKAGE_BLOCK.type()) {
+            return batchInfoV8;
+        }
+        if(blockType == BlockType.VERIFY_BLOCK.type()) {
+            return verifyBatchInfoV8;
+        }
+        Log.error("Unkown blockType! - [{}]", blockType);
+        return null;
+    }
+
+    public void setBatchInfoV8(BatchInfoV8 batchInfo) {
+        Integer blockType = currentThreadBlockType.get();
+        if(blockType == null) {
+            return;
+        }
+        if(blockType == BlockType.PACKAGE_BLOCK.type()) {
+            this.batchInfoV8 = batchInfo;
+            return;
+        }
+        if(blockType == BlockType.VERIFY_BLOCK.type()) {
+            this.verifyBatchInfoV8 = batchInfo;
             return;
         }
         Log.error("Setting value error. Unkown blockType! - [{}]", blockType);

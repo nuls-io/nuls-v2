@@ -23,6 +23,8 @@ import io.nuls.crosschain.nuls.utils.thread.handler.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static io.nuls.crosschain.nuls.constant.NulsCrossChainConstant.DB_NAME_OLD_LOCAL_VERIFIER;
+
 /**
  * 链管理类,负责各条链的初始化,运行,启动,参数维护等
  * Chain management class, responsible for the initialization, operation, start-up, parameter maintenance of each chain, etc.
@@ -261,6 +263,12 @@ public class ChainManager {
             value:List<chainId>
             */
             RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_CROSS_CHANGE_FAILED+ chainId);
+
+            /*
+            使用重置本链验证人列表交易重置本链验证人后，将改变前的验证人列表存在此表中
+             */
+            RocksDBService.createTable(DB_NAME_OLD_LOCAL_VERIFIER + chainId);
+
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e.getMessage());
         }

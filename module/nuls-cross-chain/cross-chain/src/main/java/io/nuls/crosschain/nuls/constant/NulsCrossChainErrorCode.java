@@ -43,4 +43,9 @@ public interface NulsCrossChainErrorCode extends CommonCodeConstanst {
     ErrorCode TO_MANY_VERIFIER_EXIT = ErrorCode.init("cc_0030");
     //资产没有注册跨链
     ErrorCode ASSET_NOT_REG_CROSS_CHAIN = ErrorCode.init("cc_0031");
+
+    /**
+     * 交易必须种子节点签名
+     */
+    ErrorCode MUST_SEED_ADDRESS_SIGN = ErrorCode.init("cc_0032");
 }

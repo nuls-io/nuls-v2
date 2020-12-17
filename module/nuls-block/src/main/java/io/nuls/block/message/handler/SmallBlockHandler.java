@@ -102,7 +102,7 @@ public class SmallBlockHandler implements MessageProcessor {
             return;
         }
 
-        logger.debug("recieve smallBlockMessage from node-" + nodeId + ", height:" + header.getHeight() + ", hash:" + header.getHash());
+//        logger.debug("recieve smallBlockMessage from node-" + nodeId + ", height:" + header.getHeight() + ", hash:" + header.getHash());
         context.getCachedHashHeightMap().put(blockHash, header.getHeight());
         NetworkCall.setHashAndHeight(chainId, blockHash, header.getHeight(), nodeId);
         if (context.getStatus().equals(StatusEnum.SYNCHRONIZING)) {
@@ -190,7 +190,7 @@ public class SmallBlockHandler implements MessageProcessor {
             TxGroupRequestor.removeTask(chainId, blockHash);
             Block block = BlockUtil.assemblyBlock(header, txMap, txHashList);
             block.setNodeId(nodeId);
-            logger.debug("record recv block, block create time-" + DateUtils.timeStamp2DateStr(block.getHeader().getTime() * 1000) + ", hash-" + block.getHeader().getHash());
+//            logger.debug("record recv block, block create time-" + DateUtils.timeStamp2DateStr(block.getHeader().getTime() * 1000) + ", hash-" + block.getHeader().getHash());
             boolean b = blockService.saveBlock(chainId, block, 1, true, false, true);
             if (!b) {
                 SmallBlockCacher.setStatus(chainId, blockHash, ERROR);

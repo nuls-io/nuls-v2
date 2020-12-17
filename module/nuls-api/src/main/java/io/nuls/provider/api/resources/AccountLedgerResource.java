@@ -54,6 +54,7 @@ import io.nuls.provider.rpctools.TransactionTools;
 import io.nuls.provider.rpctools.vo.AccountBalance;
 import io.nuls.provider.utils.Log;
 import io.nuls.provider.utils.ResultUtil;
+import io.nuls.provider.utils.Utils;
 import io.nuls.v2.model.annotation.Api;
 import io.nuls.v2.model.annotation.ApiOperation;
 import io.nuls.v2.model.dto.*;
@@ -168,6 +169,10 @@ public class AccountLedgerResource {
                     tx.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
                     CreateContractData create = new CreateContractData();
                     create.parse(new NulsByteBuffer(tx.getTxData()));
+                    RpcClientResult createArgsResult = this.validateContractArgs(create.getArgs());
+                    if (createArgsResult.isFailed()) {
+                        return createArgsResult;
+                    }
                     result = contractTools.validateContractCreate(config.getChainId(),
                             AddressTool.getStringAddressByBytes(create.getSender()),
                             create.getGasLimit(),
@@ -180,6 +185,11 @@ public class AccountLedgerResource {
                     callTx.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
                     CallContractData call = new CallContractData();
                     call.parse(new NulsByteBuffer(callTx.getTxData()));
+                    RpcClientResult argsResult = this.validateContractArgs(call.getArgs());
+                    if (argsResult.isFailed()) {
+                        return argsResult;
+                    }
+                    String[][] multyAssetValues = Utils.extractMultyAssetInfoFromCallTransaction(callTx.getCoinDataInstance(), config.getChainId(), config.getAssetsId());
                     result = contractTools.validateContractCall(config.getChainId(),
                             AddressTool.getStringAddressByBytes(call.getSender()),
                             call.getValue(),
@@ -188,7 +198,8 @@ public class AccountLedgerResource {
                             AddressTool.getStringAddressByBytes(call.getContractAddress()),
                             call.getMethodName(),
                             call.getMethodDesc(),
-                            call.getArgs());
+                            call.getArgs(),
+                            multyAssetValues);
                     break;
                 case DELETE_CONTRACT:
                     Transaction deleteTx = new Transaction();
@@ -214,6 +225,37 @@ public class AccountLedgerResource {
             Log.error(e);
             return RpcClientResult.getFailed(e.getMessage());
         }
+    }
+
+    private RpcClientResult validateContractArgs(String[][] args) {
+        if (args == null || args.length == 0) {
+            return RpcClientResult.getSuccess(null);
+        }
+        try {
+            String[] arg;
+            for (int i = 0, length = args.length; i < length; i++) {
+                arg = args[i];
+                if (arg == null || arg.length == 0) {
+                    continue;
+                }
+                for (String str : arg) {
+                    if (!this.checkSpaceArg(str)) {
+                        return RpcClientResult.getFailed("Illegal space character");
+                    }
+                }
+            }
+            return RpcClientResult.getSuccess(null);
+        } catch (Exception e) {
+            Log.error("parse args error.", e);
+            return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.DATA_PARSE_ERROR));
+        }
+    }
+
+    private boolean checkSpaceArg(String s) {
+        if (s == null) {
+            return true;
+        }
+        return s.length() == s.trim().length();
     }
 
     @POST

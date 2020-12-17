@@ -82,4 +82,9 @@ public interface DataBaseArea {
     String TB_LEDGER_ASSET_REG_MNG = "ledger_asset_reg_mng";
     String TB_LEDGER_ASSET_REG_HASH_INDEX = "ledger_asset_reg_hash_index";
     String TB_LEDGER_ASSET_REG_CONTRACT_INDEX = "ledger_asset_reg_contract_index";
+
+    /**
+     *   跨链资产登记表
+     */
+    String TB_LEDGER_CROSS_CHAIN_ASSET = "ledger_cross_chain_asset";
 }

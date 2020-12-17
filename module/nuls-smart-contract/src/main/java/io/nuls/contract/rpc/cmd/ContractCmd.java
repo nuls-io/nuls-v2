@@ -108,8 +108,13 @@ public class ContractCmd extends BaseCmd {
             Long blockTime = Long.parseLong(params.get("blockTime").toString());
             String packingAddress = (String) params.get("packingAddress");
             String preStateRoot = (String) params.get("preStateRoot");
-            Result result = contractService.begin(chainId, blockHeight, blockTime, packingAddress, preStateRoot);
-            return success();
+            if(ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_CONTRACT_ASSET ) {
+                Result result = contractService.beginV8(chainId, blockHeight, blockTime, packingAddress, preStateRoot);
+                return success(result.getData());
+            } else {
+                contractService.begin(chainId, blockHeight, blockTime, packingAddress, preStateRoot);
+                return success();
+            }
         } catch (Exception e) {
             Log.error(e);
             return failed(e.getMessage());
@@ -134,17 +139,32 @@ public class ContractCmd extends BaseCmd {
             tx.parse(RPCUtil.decode(txData), 0);
             String hash = tx.getHash().toHex();
             Map<String, Boolean> dealResult = new HashMap<>(2);
-            if(!contractHelper.getChain(chainId).getBatchInfo().checkGasCostTotal(hash)) {
-                Log.warn("Exceed tx count [600] or gas limit of block [13,000,000 gas], the contract transaction [{}] revert to package queue.", hash);
-                dealResult.put(RPC_RESULT_KEY, false);
+            if(ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_CONTRACT_ASSET ) {
+                Result result = contractService.invokeContractOneByOneV8(chainId, tx);
+                if (result.isFailed()) {
+                    return wrapperFailed(result);
+                }
+                if (result.getData() == null) {
+                    Map<String, Object> resultData = new HashMap<>();
+                    resultData.put("success", true);
+                    resultData.put("gasUsed", 0);
+                    resultData.put("txList", List.of());
+                    return success(resultData);
+                }
+                return success(result.getData());
+            } else {
+                if(!contractHelper.getChain(chainId).getBatchInfo().checkGasCostTotal(hash)) {
+                    Log.warn("Exceed tx count [600] or gas limit of block [13,000,000 gas], the contract transaction [{}] revert to package queue.", hash);
+                    dealResult.put(RPC_RESULT_KEY, false);
+                    return success(dealResult);
+                }
+                Result result = contractService.invokeContractOneByOne(chainId, tx);
+                if (result.isFailed()) {
+                    return wrapperFailed(result);
+                }
+                dealResult.put(RPC_RESULT_KEY, true);
                 return success(dealResult);
             }
-            Result result = contractService.invokeContractOneByOne(chainId, tx);
-            if (result.isFailed()) {
-                return wrapperFailed(result);
-            }
-            dealResult.put(RPC_RESULT_KEY, true);
-            return success(dealResult);
         } catch (Exception e) {
             Log.error(e);
             return failed(e.getMessage());
@@ -163,6 +183,10 @@ public class ContractCmd extends BaseCmd {
             Integer chainId = (Integer) params.get("chainId");
             Integer blockType = (Integer) params.get("blockType");
             ChainManager.chainHandle(chainId, blockType);
+            // 版本8及以上，跳过处理
+            if(ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_CONTRACT_ASSET ) {
+                return success();
+            }
             Long blockHeight = Long.parseLong(params.get("blockHeight").toString());
             Result result = contractService.beforeEnd(chainId, blockHeight);
             Log.info("[Before End Result] contract batch, result is {}", result.toString());
@@ -183,7 +207,7 @@ public class ContractCmd extends BaseCmd {
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象，包含两个key", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
         @Key(name = "stateRoot", description = "当前stateRoot"),
-        @Key(name = "txList", valueType = List.class, valueElement = String.class, description = "合约新生成的交易序列化字符串列表(可能有合约转账、合约共识、合约返回GAS)")
+        @Key(name = "txList", valueType = List.class, valueElement = String.class, description = "合约新生成的交易序列化字符串列表(可能有合约转账、合约共识、合约返回GAS), 版本8及以上只返回合约返回GAS交易")
     }))
     public Response batchEnd(Map<String, Object> params) {
         try {
@@ -192,6 +216,13 @@ public class ContractCmd extends BaseCmd {
             Long blockHeight = Long.parseLong(params.get("blockHeight").toString());
             Log.info("[End Contract Batch] contract batch request start, height is {}", blockHeight);
 
+            if(ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_CONTRACT_ASSET ) {
+                Result result = contractService.endV8(chainId, blockHeight);
+                if (result.isFailed()) {
+                    return wrapperFailed(result);
+                }
+                return success(result.getData());
+            }
             Result result = contractService.end(chainId, blockHeight);
             if (result.isFailed()) {
                 return wrapperFailed(result);
@@ -221,7 +252,7 @@ public class ContractCmd extends BaseCmd {
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象，包含两个key", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "stateRoot", description = "当前stateRoot"),
-            @Key(name = "txList", valueType = List.class, valueElement = String.class, description = "合约新生成的交易序列化字符串列表(可能有合约转账、合约共识、合约返回GAS)")
+            @Key(name = "txList", valueType = List.class, valueElement = String.class, description = "合约新生成的交易序列化字符串列表(可能有合约转账、合约共识、合约返回GAS), 版本8及以上只返回合约返回GAS交易")
     }))
     public Response packageBatchEnd(Map<String, Object> params) {
         try {
@@ -229,6 +260,15 @@ public class ContractCmd extends BaseCmd {
             ChainManager.chainHandle(chainId, BlockType.PACKAGE_BLOCK.type());
             Long blockHeight = Long.parseLong(params.get("blockHeight").toString());
             Log.info("[End Package Contract Batch] contract batch request start, height is {}", blockHeight);
+
+            if(ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_CONTRACT_ASSET ) {
+                Result result = contractService.packageEndV8(chainId, blockHeight);
+                if (result.isFailed()) {
+                    return wrapperFailed(result);
+                }
+                Log.info("[End Package Contract Batch] packaging blockHeight is [{}], packaging StateRoot is [{}]", blockHeight, ((Map)result.getData()).get("stateRoot"));
+                return success(result.getData());
+            }
 
             Result result = contractService.packageEnd(chainId, blockHeight);
             if (result.isFailed()) {

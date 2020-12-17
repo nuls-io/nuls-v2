@@ -17,6 +17,7 @@
  */
 package org.ethereum.db;
 
+import io.nuls.contract.util.Log;
 import org.ethereum.config.CommonConfig;
 import org.ethereum.config.SystemProperties;
 import org.ethereum.datasource.*;
@@ -35,7 +36,17 @@ public class StateSource extends SourceChainBox<byte[], byte[], byte[], byte[]>
 
     public StateSource(Source<byte[], byte[]> src, boolean pruningEnabled) {
         super(src);
-        add(readCache = new ReadCache.BytesKey<>(src).withMaxCapacity(16 * 1024 * 1024 / 512)); // 512 - approx size of a node
+        long memorySize = Runtime.getRuntime().maxMemory() / 1024 / 1024;
+        Log.info("Total RAM：{} MB", memorySize);
+        int maxCapacity = 16 * 1024 * 2;
+        if (memorySize >= 7500) {
+            maxCapacity = maxCapacity * 12;
+        } else if (memorySize >= 4500) {
+            maxCapacity = maxCapacity * 6;
+        } else if (memorySize >= 2500) {
+            maxCapacity = maxCapacity * 3;
+        }
+        add(readCache = new ReadCache.BytesKey<>(src).withMaxCapacity(maxCapacity)); // 512 - approx size of a node
         readCache.setFlushSource(true);
         writeCache = new AsyncWriteCache<byte[], byte[]>(readCache) {
             @Override
@@ -58,7 +69,17 @@ public class StateSource extends SourceChainBox<byte[], byte[], byte[], byte[]>
 
     public void setConfig(SystemProperties config) {
         int size = config.getConfig().getInt("cache.stateCacheSize");
-        readCache.withMaxCapacity(size * 1024 * 1024 / 512); // 512 - approx size of a node
+        long memorySize = Runtime.getRuntime().maxMemory() / 1024 / 1024;
+        Log.info("Total RAM：{} MB", memorySize);
+        int maxCapacity = size * 1024 * 2;
+        if (memorySize >= 7500) {
+            maxCapacity = maxCapacity * 10;
+        } else if (memorySize >= 4500) {
+            maxCapacity = maxCapacity * 5;
+        } else if (memorySize >= 2500) {
+            maxCapacity = maxCapacity * 2;
+        }
+        readCache.withMaxCapacity(maxCapacity); // 512 - approx size of a node
     }
 
     public void setCommonConfig(CommonConfig commonConfig) {

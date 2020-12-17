@@ -60,6 +60,8 @@ public interface CommandConstant {
     String CONSTRUCTOR = "sc_constructor";
     //验证创建合约
     String VALIDATE_CREATE = "sc_validate_create";
+    //调用合约
+    String CALL = "sc_call";
     //验证调用合约
     String VALIDATE_CALL = "sc_validate_call";
     //验证删除合约

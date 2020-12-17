@@ -60,6 +60,7 @@ public interface AccountService {
      */
     Result<String> importAccountByKeyStore(ImportAccountByKeyStoreReq req);
 
+    Result<String> importKeyStoreFiles(ImportKeyStoreFilesReq req);
     /**
      * 修改账户密码
      * reset account password

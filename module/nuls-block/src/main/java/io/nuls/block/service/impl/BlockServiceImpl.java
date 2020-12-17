@@ -257,7 +257,7 @@ public class BlockServiceImpl implements BlockService {
                 return null;
             }
             block.setTxs(transactions);
-            logger.debug("get block time-" + (System.nanoTime() - l) + ", height-" + height);
+//            logger.debug("get block time-" + (System.nanoTime() - l) + ", height-" + height);
             return block;
         } catch (Exception e) {
             logger.error("error when getBlock by height", e);
@@ -314,7 +314,7 @@ public class BlockServiceImpl implements BlockService {
             //1.验证区块
             Result result = verifyBlock(chainId, block, localInit, download);
             if (result.isFailed()) {
-                logger.debug("verifyBlock fail! height-" + height);
+//                logger.debug("verifyBlock fail! height-" + height);
                 return false;
             }
             //同步\链切换\孤儿链对接过程中不进行区块广播
@@ -600,7 +600,7 @@ public class BlockServiceImpl implements BlockService {
         //分叉验证
         boolean forkVerify = BlockUtil.forkVerify(chainId, block);
         if (!forkVerify) {
-            logger.debug("forkVerify-" + forkVerify);
+//            logger.debug("forkVerify-" + forkVerify);
             return Result.getFailed(BlockErrorCode.BLOCK_VERIFY_ERROR);
         }
         //共识验证

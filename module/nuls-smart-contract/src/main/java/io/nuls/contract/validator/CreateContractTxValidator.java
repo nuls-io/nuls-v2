@@ -111,7 +111,7 @@ public class CreateContractTxValidator {
             return Result.getFailed(CONTRACT_ALIAS_FORMAT_ERROR);
         }
         if (!ContractUtil.checkPrice(txData.getPrice())) {
-            Log.error("contract create error: The minimum value of price is 25.");
+            Log.error("contract create error: The gas price is error.");
             return Result.getFailed(CONTRACT_MINIMUM_PRICE_ERROR);
         }
         if (!ContractUtil.checkGasLimit(txData.getGasLimit())) {

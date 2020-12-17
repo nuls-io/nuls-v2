@@ -25,6 +25,7 @@ import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
+import io.nuls.block.model.CheckResult;
 import io.nuls.block.rpc.call.ConsensusCall;
 import io.nuls.block.rpc.call.TransactionCall;
 import io.nuls.core.log.logback.NulsLogger;
@@ -55,6 +56,7 @@ public class ForkChainsMonitor extends BaseMonitor {
     protected void process(int chainId, ChainContext context, NulsLogger commonLog) {
         StampedLock lock = context.getLock();
         long stamp = lock.tryOptimisticRead();
+        StatusEnum status = StatusEnum.RUNNING;
         try {
             for (; ; stamp = lock.writeLock()) {
                 if (stamp == 0L) {
@@ -96,8 +98,12 @@ public class ForkChainsMonitor extends BaseMonitor {
                 context.setStatus(StatusEnum.SWITCHING);
                 ConsensusCall.notice(chainId, MODULE_WAITING);
                 TransactionCall.notice(chainId, MODULE_WAITING);
-                if (BlockChainManager.switchChain(chainId, masterChain, switchChain)) {
+                CheckResult checkResult = BlockChainManager.switchChain(chainId, masterChain, switchChain);
+                if (checkResult.isResult()) {
                     commonLog.info("chainId-" + chainId + ", switchChain success");
+                } else if (checkResult.isTimeout()) {
+                    status = StatusEnum.WAITING;
+                    break;
                 } else {
                     commonLog.info("chainId-" + chainId + ", switchChain fail, auto rollback success");
                 }
@@ -107,7 +113,7 @@ public class ForkChainsMonitor extends BaseMonitor {
                 break;
             }
         } finally {
-            context.setStatus(StatusEnum.RUNNING);
+            context.setStatus(status);
             if (StampedLock.isWriteLockStamp(stamp)) {
                 lock.unlockWrite(stamp);
             }

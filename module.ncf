@@ -2,7 +2,7 @@
 encoding=UTF-8
 language=en
 logPath=E:/work/src/nuls-v2/Logs
-logLevel=DEBUG
+logLevel=INFO
 dataPath=E:/work/src/nuls-v2/data
 #默认本链ID
 chainId=2
@@ -23,6 +23,7 @@ mainAssetId=1
 #主网主资产符号
 mainSymbol=NULS
 blackHolePublicKey=000000000000000000000000000000000000000000000000000000000000000000
+packageVersion=2.7.0-a4354e9
 
 [network]
 port=18001
@@ -30,9 +31,9 @@ crossPort=18002
 #魔法参数
 packetMagic=20200120
 #种子节点
-selfSeedIps=192.168.1.60:18001
+selfSeedIps=39.98.226.51:18001,47.244.186.65:18001,47.254.234.223:18001,47.74.86.85:18001,192.168.1.145:18001
 #主网的跨链种子连接节点
-moonSeedIps=192.168.1.60:18002
+moonSeedIps=39.98.226.51:18002,47.244.186.65:18002,47.254.234.223:18002,47.74.86.85:18002
 #最大入网连接数
 maxInCount=100
 #最大出网连接数
@@ -50,7 +51,7 @@ extendMaxSize=1024
 #引发分叉链切换的高度差阈值
 chainSwtichThreshold=3
 #最小链接节点数,当链接到的网络节点低于此参数时,会持续等待
-minNodeAmount=0
+minNodeAmount=2
 #区块同步过程中,每次从网络上节点下载的区块数量
 downloadNumber=10
 #从网络节点下载单个区块的超时时间
@@ -63,7 +64,7 @@ dependent=cross-chain,smart-contract,protocol-update
 
 [consensus]
 #种子节点列表
-seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
+seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMmShSTVwbU4rHkZjpD98JgFgg6rmhF
 #出块地址密码
 password=nuls123456
 #出块间隔时间(单位：s)
@@ -92,7 +93,7 @@ dependent=protocol-update,smart-contract,cross-chain
 #合约视图方法调用最大消耗的Gas
 maxViewGas=100000000
 systemLogLevel=WARN
-crossTokenSystemContract=tNULSeBaN53PMBv2aFv4mBYegx1chV22NCrCpA
+crossTokenSystemContract=tNULSeBaN5MkYxC7ivr23SbRnHrsmJDg86R7Kv
 dependent=protocol-update
 
 [public-service]
@@ -106,16 +107,14 @@ databasePort=27017
 maxAliveConnect=20
 #连接最大等待时间
 maxWaitTime=120000
-#连接最大持续时间
-socketTimeout=300000
 #连接超时时间
 connectTimeOut=30000
-developerNodeAddress=
-ambassadorNodeAddress=
-mappingAddress=
-businessAddress=
-teamAddress=
-communityAddress=
+developerNodeAddress=tNULSeBaMuKuKY4UstKpXvGxd7LEvEBtd3NXAG,tNULSeBaMns1C6kTePxcQS7rGAu37foAwAMpri
+ambassadorNodeAddress=tNULSeBaMhWyQBHc54oXLXB13WhJsyrTobMYYU,tNULSeBaMtCmUuBHMDAjKVSoVBsAEvLoWCspyE
+mappingAddress=tNULSeBaMqTC6rnF56dnJqz1Fb8gMdVxGGvxSf,tNULSeBaMkroWKUKj6X4zURBE3V47VZwMJdHPm
+businessAddress=tNULSeBaMnf1qfX7emr14att2DsSb2TSPcPBSL
+teamAddress=tNULSeBaMqTvaS2NEEZfdrmPzoRvd8zN6T57LH
+communityAddress=tNULSeBaMm9RQLKKUBXKJ1rQ7g4iobmWAB73mS
 dependent=smart-contract,cross-chain
 
 [cross-chain]
@@ -126,9 +125,9 @@ sendHeight=6
 #跨链交易拜占庭比例
 byzantineRatio=66
 #主网跨链种子节点列表
-crossSeedIps=192.168.1.60:18002
+crossSeedIps=39.98.226.51:18002,47.244.186.65:18002,47.254.234.223:18002,47.74.86.85:18002,192.168.1.145:18002
 #主网验证人列表
-verifiers=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
+verifiers=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMmShSTVwbU4rHkZjpD98JgFgg6rmhF,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
 #主网签名拜占庭比列
 mainByzantineRatio=66
 #主网最大签名数

@@ -74,7 +74,7 @@ public class ImportByKeyStoreProcessor extends AccountBaseProcessor implements C
         String path = args[1];
         String password = CommandHelper.getPwdOptional();
         String keystore = accountService.getAccountKeystoreDto(path);
-        ImportAccountByKeyStoreReq req = new ImportAccountByKeyStoreReq(password, HexUtil.encode(keystore.getBytes()),false);
+        ImportAccountByKeyStoreReq req = new ImportAccountByKeyStoreReq(password, HexUtil.encode(keystore.getBytes()),true);
         Result<String> result = accountService.importAccountByKeyStore(req);
         if(result.isFailed()){
             return CommandResult.getFailed(result);

@@ -60,4 +60,17 @@ public class DeleteContractTxProcessor {
         return contractService.deleteContractExecuteResult(chainId, tx.getHash());
     }
 
+    public Result onCommitV8(int chainId, ContractWrapperTransaction tx) {
+        BlockHeader blockHeader = contractHelper.getBatchInfoCurrentBlockHeaderV8(chainId);
+        long blockHeight = blockHeader.getHeight();
+        ContractResult contractResult = tx.getContractResult();
+        contractResult.setBlockHeight(blockHeight);
+        return contractService.saveContractExecuteResult(chainId, tx.getHash(), contractResult);
+    }
+
+    public Result onRollbackV8(int chainId, ContractWrapperTransaction tx) {
+        Log.info("rollback delete tx, hash is {}", tx.getHash().toString());
+        return contractService.deleteContractExecuteResult(chainId, tx.getHash());
+    }
+
 }

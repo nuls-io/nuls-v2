@@ -277,6 +277,69 @@ public class TxUtil {
         }
     }
 
+
+    /**
+     * 重置平行链存储的主链验证人列表
+     * Cross-Chain Transaction Processing
+     */
+    @SuppressWarnings("unchecked")
+    public static void handleResetOtherVerifierListCtx(Transaction ctx, Chain chain) {
+        int chainId = chain.getChainId();
+        NulsHash hash = ctx.getHash();
+        String hashHex = hash.toHex();
+        /*
+        判断本节点是否为共识节点，如果为共识节点则签名，如果不为共识节点则广播该交易
+        */
+        Map packerInfo;
+        List<String> verifierList = chain.getVerifierList();
+        packerInfo = ConsensusCall.getPackerInfo(chain);
+        String password = (String) packerInfo.get(ParamConstant.PARAM_PASSWORD);
+        String address = (String) packerInfo.get(ParamConstant.PARAM_ADDRESS);
+        BroadCtxSignMessage message = new BroadCtxSignMessage();
+        message.setLocalHash(hash);
+        CtxStatusPO ctxStatusPO = new CtxStatusPO(ctx, TxStatusEnum.UNCONFIRM.getStatus());
+        boolean byzantinePass = false;
+        //验证人变更，减少的验证人不签名
+        boolean sign = verifierList.contains(address);
+        if (sign) {
+            chain.getLogger().info("本节点为共识节点，对跨链交易签名,Hash:{}", hashHex);
+            P2PHKSignature p2PHKSignature;
+            try {
+                p2PHKSignature = AccountCall.signDigest(address, password, hash.getBytes());
+                message.setSignature(p2PHKSignature.serialize());
+                TransactionSignature signature = new TransactionSignature();
+                List<P2PHKSignature> p2PHKSignatureList = new ArrayList<>();
+                p2PHKSignatureList.add(p2PHKSignature);
+                signature.setP2PHKSignatures(p2PHKSignatureList);
+                ctx.setTransactionSignature(signature.serialize());
+                byzantinePass = MessageUtil.verifierInitLocalByzantine(chain, ctx, signature, verifierList,hash,1F);
+            } catch (Exception e) {
+                chain.getLogger().error(e);
+                chain.getLogger().error("签名错误!,hash:{}", hashHex);
+                return;
+            }
+            if (!chain.getWaitBroadSignMap().keySet().contains(hash)) {
+                chain.getWaitBroadSignMap().put(hash, new HashSet<>());
+            }
+            /*
+            保存并广播该交易
+            */
+            chain.getWaitBroadSignMap().get(hash).add(new WaitBroadSignMessage(null, message));
+        }else{
+            chain.getLogger().debug("本节点不是共识节点，不对交易此交易进行签名,Hash:{}",hashHex);
+            ctxStatusService.save(hash, ctxStatusPO, chainId);
+        }
+        if (byzantinePass) {
+            chain.getFutureMessageMap().remove(hash);
+        } else {
+            if (chain.getFutureMessageMap().containsKey(hash)) {
+                chain.getSignMessageByzantineQueue().addAll(chain.getFutureMessageMap().remove(hash));
+            }
+        }
+        MessageUtil.broadcastCtx(chain, hash, chainId, hashHex);
+    }
+
+
     /**
      * 跨链交易处理
      * Cross-Chain Transaction Processing

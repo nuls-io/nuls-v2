@@ -28,6 +28,7 @@ package io.nuls.contract.manager;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Address;
+import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.model.bo.ContractBalance;
@@ -76,19 +77,19 @@ public class ContractTempBalanceManager {
      * @param bestHeight
      * @return
      */
-    public Result<ContractBalance> getBalance(byte[] address) {
+    public Result<ContractBalance> getBalance(byte[] address, int assetChainId, int assetId) {
         lock.lock();
         try {
             if (address == null || address.length != Address.ADDRESS_LENGTH) {
                 return Result.getFailed(ContractErrorCode.PARAMETER_ERROR);
             }
 
-            String addressKey = balanceKey(address);
+            String addressKey = balanceKey(address, assetChainId,  assetId);
             ContractBalance balance = tempBalanceMap.get(addressKey);
             // 临时余额区没有余额，则从真实余额中取值
             if (balance == null) {
                 // 初始化临时余额区
-                balance = contractHelper.getRealBalance(chainId, AddressTool.getStringAddressByBytes(address));
+                balance = contractHelper.getRealBalance(chainId, assetChainId, assetId, AddressTool.getStringAddressByBytes(address));
                 tempBalanceMap.put(addressKey, balance);
             }
             return getSuccess().setData(balance);
@@ -97,14 +98,14 @@ public class ContractTempBalanceManager {
         }
     }
 
-    private String balanceKey(byte[] address) {
-        return chainId + asString(address);
+    private String balanceKey(byte[] address, int assetChainId, int assetId) {
+        return new StringBuilder(chainId).append(asString(address)).append(ContractConstant.LINE).append(assetChainId).append(ContractConstant.LINE).append(assetId).toString();
     }
 
-    public void addTempBalance(byte[] address, BigInteger amount) {
+    public void addTempBalance(byte[] address, BigInteger amount, int assetChainId, int assetId) {
         lock.lock();
         try {
-            ContractBalance contractBalance = tempBalanceMap.get(balanceKey(address));
+            ContractBalance contractBalance = tempBalanceMap.get(balanceKey(address, assetChainId,  assetId));
             if (contractBalance != null) {
                 contractBalance.addTemp(amount);
             }
@@ -113,10 +114,10 @@ public class ContractTempBalanceManager {
         }
     }
 
-    public void minusTempBalance(byte[] address, BigInteger amount) {
+    public void minusTempBalance(byte[] address, BigInteger amount, int assetChainId, int assetId) {
         lock.lock();
         try {
-            ContractBalance contractBalance = tempBalanceMap.get(balanceKey(address));
+            ContractBalance contractBalance = tempBalanceMap.get(balanceKey(address, assetChainId,  assetId));
             if (contractBalance != null) {
                 contractBalance.minusTemp(amount);
             }
@@ -125,10 +126,10 @@ public class ContractTempBalanceManager {
         }
     }
 
-    public void addLockedTempBalance(byte[] address, BigInteger amount) {
+    public void addLockedTempBalance(byte[] address, BigInteger amount, int assetChainId, int assetId) {
         lock.lock();
         try {
-            ContractBalance contractBalance = tempBalanceMap.get(balanceKey(address));
+            ContractBalance contractBalance = tempBalanceMap.get(balanceKey(address, assetChainId,  assetId));
             if (contractBalance != null) {
                 contractBalance.addLockedTemp(amount);
             }
@@ -137,10 +138,10 @@ public class ContractTempBalanceManager {
         }
     }
 
-    public void minusLockedTempBalance(byte[] address, BigInteger amount) {
+    public void minusLockedTempBalance(byte[] address, BigInteger amount, int assetChainId, int assetId) {
         lock.lock();
         try {
-            ContractBalance contractBalance = tempBalanceMap.get(balanceKey(address));
+            ContractBalance contractBalance = tempBalanceMap.get(balanceKey(address, assetChainId,  assetId));
             if (contractBalance != null) {
                 contractBalance.minusLockedTemp(amount);
             }
