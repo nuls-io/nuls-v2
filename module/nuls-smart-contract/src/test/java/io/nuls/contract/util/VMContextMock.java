@@ -44,12 +44,12 @@ public class VMContextMock extends VMContext {
     }
 
     @Override
-    public ContractBalance getBalance(int chainId, byte[] address) {
+    public ContractBalance getBalance(int chainId, int assetChainId, int assetId, byte[] address) {
         return ContractBalance.newInstance();
     }
 
     @Override
-    public BigInteger getTotalBalance(int chainId, byte[] address) {
+    public BigInteger getTotalBalance(int chainId, int assetChainId, int assetId, byte[] address) {
         return BigInteger.valueOf(chainId);
     }
 

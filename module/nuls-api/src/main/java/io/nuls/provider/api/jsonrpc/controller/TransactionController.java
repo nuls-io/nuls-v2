@@ -51,6 +51,7 @@ import io.nuls.provider.rpctools.ContractTools;
 import io.nuls.provider.rpctools.TransactionTools;
 import io.nuls.provider.utils.Log;
 import io.nuls.provider.utils.ResultUtil;
+import io.nuls.provider.utils.Utils;
 import io.nuls.provider.utils.VerifyUtils;
 import io.nuls.v2.model.annotation.Api;
 import io.nuls.v2.model.annotation.ApiOperation;
@@ -198,6 +199,9 @@ public class TransactionController {
                 return RpcResult.dataNotFound();
             }
             int type = extractTxTypeFromTx(txHex);
+          //  if(type == CROSS_CHAIN){
+           //     return RpcResult.failed(CommonCodeConstanst.PARAMETER_ERROR,"Cross-chain tx pause support");
+           // }
             Result result = new Result();
             switch (type) {
                 case CREATE_CONTRACT:
@@ -205,6 +209,10 @@ public class TransactionController {
                     tx.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
                     CreateContractData create = new CreateContractData();
                     create.parse(new NulsByteBuffer(tx.getTxData()));
+                    RpcResult createArgsResult = this.validateContractArgs(create.getArgs());
+                    if (createArgsResult.getError() != null) {
+                        return createArgsResult;
+                    }
                     result = contractTools.validateContractCreate(chainId,
                             AddressTool.getStringAddressByBytes(create.getSender()),
                             create.getGasLimit(),
@@ -217,6 +225,11 @@ public class TransactionController {
                     callTx.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
                     CallContractData call = new CallContractData();
                     call.parse(new NulsByteBuffer(callTx.getTxData()));
+                    RpcResult argsResult = this.validateContractArgs(call.getArgs());
+                    if (argsResult.getError() != null) {
+                        return argsResult;
+                    }
+                    String[][] multyAssetValues = Utils.extractMultyAssetInfoFromCallTransaction(callTx.getCoinDataInstance(), config.getChainId(), config.getAssetsId());
                     result = contractTools.validateContractCall(chainId,
                             AddressTool.getStringAddressByBytes(call.getSender()),
                             call.getValue(),
@@ -225,7 +238,8 @@ public class TransactionController {
                             AddressTool.getStringAddressByBytes(call.getContractAddress()),
                             call.getMethodName(),
                             call.getMethodDesc(),
-                            call.getArgs());
+                            call.getArgs(),
+                            multyAssetValues);
                     break;
                 case DELETE_CONTRACT:
                     Transaction deleteTx = new Transaction();
@@ -255,6 +269,37 @@ public class TransactionController {
             Log.error(e);
             return RpcResult.failed(RpcErrorCode.TX_PARSE_ERROR);
         }
+    }
+
+    private RpcResult validateContractArgs(String[][] args) {
+        if (args == null || args.length == 0) {
+            return RpcResult.success(null);
+        }
+        try {
+            String[] arg;
+            for (int i = 0, length = args.length; i < length; i++) {
+                arg = args[i];
+                if (arg == null || arg.length == 0) {
+                    continue;
+                }
+                for (String str : arg) {
+                    if (!this.checkSpaceArg(str)) {
+                        return RpcResult.failed(RpcErrorCode.CONTRACT_VALIDATION_FAILED);
+                    }
+                }
+            }
+            return RpcResult.success(null);
+        } catch (Exception e) {
+            io.nuls.core.log.Log.error("parse args error.", e);
+            return RpcResult.failed(RpcErrorCode.CONTRACT_VALIDATION_FAILED);
+        }
+    }
+
+    private boolean checkSpaceArg(String s) {
+        if (s == null) {
+            return true;
+        }
+        return s.length() == s.trim().length();
     }
 
     @RpcMethod("broadcastTxWithNoContractValidation")

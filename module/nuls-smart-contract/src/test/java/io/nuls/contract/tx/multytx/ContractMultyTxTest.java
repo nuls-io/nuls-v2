@@ -157,8 +157,9 @@ public class ContractMultyTxTest extends BaseQuery {
      */
     @Test
     public void multySenderCallOneContract() throws Exception {
+        this.contractAddress_nrc20 = "tNULSeBaMyjLVA3J8YeaTfd4sopWYiKmBVYh1A";
         int times = 35;
-        contractNRC20TokenSendTxTest.setContractAddress_nrc20(address("getContractAddress_nrc20", 0));
+        contractNRC20TokenSendTxTest.setContractAddress_nrc20(contractAddress_nrc20);
         contractNRC20TokenSendTxTest.setMethodName("approve");
         for (int i = 0; i < times; i++) {
             contractNRC20TokenSendTxTest.setSender(address("getToAddress", i));
@@ -173,9 +174,9 @@ public class ContractMultyTxTest extends BaseQuery {
     public void multySenderCallMultyContracts() throws Exception {
         int times = 35;
         contractNRC20TokenSendTxTest.setMethodName("approve");
-        for (int i = 0; i < times; i++) {
+        for (int i = 0; i < 200; i++) {
             contractNRC20TokenSendTxTest.setSender(address("getToAddress", i));
-            contractNRC20TokenSendTxTest.setContractAddress_nrc20(address("getContractAddress_nrc20", i));
+            contractNRC20TokenSendTxTest.setContractAddress_nrc20(address("getContractAddress_nrc20", i % times));
             contractNRC20TokenSendTxTest.callContract();
         }
     }

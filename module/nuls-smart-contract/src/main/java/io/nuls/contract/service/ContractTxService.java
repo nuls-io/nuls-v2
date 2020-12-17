@@ -26,6 +26,7 @@ package io.nuls.contract.service;
 
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
+import io.nuls.contract.vm.program.ProgramMultyAssetValue;
 import io.nuls.core.basic.Result;
 
 import java.math.BigInteger;
@@ -43,13 +44,13 @@ public interface ContractTxService {
     Result validateContractCreateTx(int chainId, byte[] sender, Long gasLimit, Long price, byte[] contractCode, String[][] args);
 
     Result contractCallTx(int chainId, String sender, BigInteger value, Long gasLimit, Long price, String contractAddress,
-                          String methodName, String methodDesc, String[][] args, String password, String remark);
+                          String methodName, String methodDesc, String[][] args, String password, String remark, List<ProgramMultyAssetValue> multyAssetValues);
 
     Result validateContractCallTx(int chainId, byte[] senderBytes, BigInteger value, Long gasLimit, Long price, byte[] contractAddressBytes,
-                                  String methodName, String methodDesc, String[][] args);
+                                  String methodName, String methodDesc, String[][] args, List<ProgramMultyAssetValue> multyAssetValues);
 
     Result<ContractResult> previewContractCallTx(int chainId, byte[] senderBytes, BigInteger value, Long gasLimit, Long price, byte[] contractAddressBytes,
-                                                 String methodName, String methodDesc, String[][] args);
+                                                 String methodName, String methodDesc, String[][] args, List<ProgramMultyAssetValue> multyAssetValues);
 
     Result contractDeleteTx(int chainId, String sender, String contractAddress, String password, String remark);
 

@@ -84,6 +84,11 @@ public interface RpcParameterNameConstant {
     String FILE_PATH = "filePath";
 
     /**
+     * dirPath
+     */
+    String DIR_PATH = "dirPath";
+
+    /**
      * keyStore
      */
     String KEYSTORE = "keyStore";

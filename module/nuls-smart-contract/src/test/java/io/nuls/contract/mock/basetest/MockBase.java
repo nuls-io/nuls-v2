@@ -34,10 +34,7 @@ import io.nuls.contract.util.Log;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.util.VMContextMock;
 import io.nuls.contract.vm.natives.io.nuls.contract.sdk.NativeAddress;
-import io.nuls.contract.vm.program.ProgramCall;
-import io.nuls.contract.vm.program.ProgramCreate;
-import io.nuls.contract.vm.program.ProgramExecutor;
-import io.nuls.contract.vm.program.ProgramResult;
+import io.nuls.contract.vm.program.*;
 import io.nuls.contract.vm.program.impl.ProgramExecutorImpl;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.rockdb.service.RocksDBService;
@@ -45,6 +42,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 
 import java.math.BigInteger;
+import java.util.List;
 
 /**
  * @author: PierreLuo
@@ -132,7 +130,20 @@ public class MockBase extends Base {
     }
 
     protected Object[] call(String contractAddress, byte[] preStateRoot,  String sender, String methodName, String methodDesc, String[] args, BigInteger value) throws JsonProcessingException {
-        Object[] objects = execute(contractAddress, preStateRoot, sender, methodName, methodDesc, args, value);
+        Object[] objects = execute(contractAddress, preStateRoot, sender, methodName, methodDesc, args, value, null, null);
+        ProgramExecutor track = (ProgramExecutor) objects[0];
+        track.commit();
+        ProgramResult programResult = (ProgramResult) objects[1];
+        byte[] newRootBytes = track.getRoot();
+        return new Object[]{newRootBytes, programResult};
+    }
+
+    protected Object[] call(String contractAddress, byte[] preStateRoot,  String sender, String methodName, String[] args, BigInteger value, Integer assetChainId, Integer assetId) throws JsonProcessingException {
+        return call(contractAddress, preStateRoot, sender, methodName, null, args, value, assetChainId, assetId);
+    }
+
+    protected Object[] call(String contractAddress, byte[] preStateRoot,  String sender, String methodName, String methodDesc, String[] args, BigInteger value, Integer assetChainId, Integer assetId) throws JsonProcessingException {
+        Object[] objects = execute(contractAddress, preStateRoot, sender, methodName, methodDesc, args, value, assetChainId, assetId);
         ProgramExecutor track = (ProgramExecutor) objects[0];
         track.commit();
         ProgramResult programResult = (ProgramResult) objects[1];
@@ -154,7 +165,7 @@ public class MockBase extends Base {
         return view(contractAddress, preStateRoot, methodName, null, args);
     }
 
-    private Object[] execute(String contractAddress, byte[] preStateRoot, String sender, String methodName, String methodDesc, String[] args, BigInteger value) throws JsonProcessingException {
+    private Object[] execute(String contractAddress, byte[] preStateRoot, String sender, String methodName, String methodDesc, String[] args, BigInteger value, Integer assetChainId, Integer assetId) throws JsonProcessingException {
         ProgramCall programCall = new ProgramCall();
         programCall.setContractAddress(contractAddress == null ? NativeAddress.toBytes(ADDRESS) : NativeAddress.toBytes(contractAddress));
         programCall.setSender(NativeAddress.toBytes(sender));
@@ -165,7 +176,10 @@ public class MockBase extends Base {
         programCall.setMethodName(methodName);
         programCall.setMethodDesc(methodDesc);
         programCall.setArgs(args);
-
+        if (assetChainId != null && assetId != null) {
+            programCall.setValue(BigInteger.ZERO);
+            programCall.setMultyAssetValues(List.of(new ProgramMultyAssetValue(value == null ? BigInteger.ZERO : value, assetChainId, assetId)));
+        }
         ProgramExecutor begin = programExecutor.begin(preStateRoot);
         ProgramExecutor tracking = begin.startTracking();
         ProgramResult programResult = tracking.call(programCall);

@@ -42,6 +42,14 @@
         "verifySignature": false,
         "verifyFee": true,
         "handler": "RegisteredChainChangeProcessorV1"
+      },
+      {
+        "type": "61",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": false,
+        "verifyFee": true,
+        "handler": "ResetLocalVerifierProcessorV1"
       }
     ],
     "validMsgs": [

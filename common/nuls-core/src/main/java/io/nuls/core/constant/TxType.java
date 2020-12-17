@@ -144,4 +144,10 @@ public class TxType {
      */
     public static final int REGISTERED_CHAIN_CHANGE = 60;
 
+    /**
+     * 重置跨链模块存储的本链验证人列表
+     * 本交易必须由种子节点发出，节点收到本交易后从共识模块获取到最新的共识节点出块地址列表，覆盖跨链模块本地存储的本链验证人列表。
+     */
+    public static final int RESET_LOCAL_VERIFIER_LIST = 61;
+
 }

@@ -74,7 +74,7 @@ public class GetBlocksHandler implements MessageProcessor {
             logger.error("PARAMETER_ERROR");
             return;
         }
-        logger.debug("recieve HeightRangeMessage from node-" + nodeId + ", start:" + startHeight + ", end:" + endHeight);
+//        logger.debug("recieve HeightRequestMessage from node-" + nodeId + ", start:" + startHeight + ", end:" + endHeight);
         NulsHash requestHash;
         try {
             requestHash = NulsHash.calcHash(message.serialize());

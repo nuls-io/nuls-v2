@@ -8,6 +8,7 @@ import io.nuls.base.protocol.RegisterHelper;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.config.ConfigurationLoader;
+import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.log.Log;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.rpc.info.HostInfo;
@@ -29,6 +30,8 @@ import io.nuls.crosschain.nuls.utils.manager.ChainManager;
 
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import static io.nuls.crosschain.nuls.constant.NulsCrossChainConstant.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -174,6 +177,11 @@ public class CrossChainBootStrap extends BaseCrossChainBootStrap {
             if (module.getName().equals(ModuleE.SC.abbr)) {
                 chainManager.registerContractTx();
             }
+
+            ConfigurationLoader configurationLoader = SpringLiteContext.getBean(ConfigurationLoader.class);
+            nulsCrossChainConfig.setSeedNodeList(Arrays.stream(configurationLoader.getValue(ModuleE.Constant.CONSENSUS, "seedNodes").split(","))
+            .collect(Collectors.toSet()));
+
         }catch (Exception e){
             Log.error(e);
         }

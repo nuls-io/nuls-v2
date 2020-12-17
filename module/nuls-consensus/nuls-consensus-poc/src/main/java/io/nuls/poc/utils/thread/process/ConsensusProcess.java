@@ -314,6 +314,7 @@ public class ConsensusProcess {
         if (!(bd.getPreHash().equals(bestBlock.getHash()) && realPackageHeight > packageHeight)) {
             bd.setHeight(realPackageHeight);
             bd.setPreHash(bestBlock.getHash());
+            bestBlock = chain.getNewestHeader();
         }
 
         BlockExtendsData bestExtendsData = bestBlock.getExtendsData();

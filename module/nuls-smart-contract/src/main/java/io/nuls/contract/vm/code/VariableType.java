@@ -45,10 +45,8 @@ public class VariableType {
 
     static {
         CACHE = CacheBuilder.newBuilder()
-                //.initialCapacity(1024)
-                //.maximumSize(102400)
-                .initialCapacity(512)
-                .maximumSize(51200)
+                .initialCapacity(1024)
+                .maximumSize(409600)
                 .expireAfterAccess(10, TimeUnit.MINUTES)
                 .build(new CacheLoader<String, VariableType>() {
                     @Override
@@ -57,10 +55,8 @@ public class VariableType {
                     }
                 });
         CACHE_LIST = CacheBuilder.newBuilder()
-                //.initialCapacity(1024)
-                //.maximumSize(10240)
-                .initialCapacity(512)
-                .maximumSize(5120)
+                .initialCapacity(1024)
+                .maximumSize(40960)
                 .expireAfterAccess(10, TimeUnit.MINUTES)
                 .build(new CacheLoader<String, List<VariableType>>() {
                     @Override
@@ -116,6 +112,8 @@ public class VariableType {
     public static final VariableType ABSTRACT_COLLECTION_TYPE = valueOf("Ljava/util/AbstractCollection;");
     public static final VariableType HASH_MAP_TYPE = valueOf("Ljava/util/HashMap;");
     public static final VariableType HASH_MAP_NODE_TYPE = valueOf("Ljava/util/HashMap$Node;");
+    public static final VariableType MULTY_ASSET_VALUE_TYPE = valueOf("Lio/nuls/contract/sdk/MultyAssetValue;");
+    public static final VariableType MULTY_ASSET_VALUE_ARRAY_TYPE = valueOf("[Lio/nuls/contract/sdk/MultyAssetValue;");
 
     public static final VariableType[] WRAPPER_TYPE = new VariableType[]{
             INT_WRAPPER_TYPE,

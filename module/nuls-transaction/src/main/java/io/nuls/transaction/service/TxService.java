@@ -102,6 +102,9 @@ public interface TxService {
     TxPackage getPackableTxs(Chain chain, long endtimestamp, long maxTxDataSize, long blockTime,
                              String packingAddress, String preStateRoot);
 
+    TxPackage getPackableTxsV8(Chain chain, long endtimestamp, long maxTxDataSize, long blockTime,
+                             String packingAddress, String preStateRoot);
+
     /**
      * 收到新区快时，验证完整交易列表
      * @param chain
@@ -111,6 +114,8 @@ public interface TxService {
      * @throws NulsException
      */
     Map<String, Object> batchVerify(Chain chain, List<String> list, BlockHeader blockHeader, String blockHeaderStr, String preStateRoot) throws Exception;
+
+    Map<String, Object> batchVerifyV8(Chain chain, List<String> list, BlockHeader blockHeader, String blockHeaderStr, String preStateRoot) throws Exception;
 
 
 

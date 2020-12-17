@@ -24,6 +24,8 @@
  */
 package io.nuls.contract.vm.program;
 
+import io.nuls.base.basic.AddressTool;
+
 import java.math.BigInteger;
 import java.util.Arrays;
 
@@ -35,12 +37,21 @@ public class ProgramTransfer {
 
     private BigInteger value;
 
+    private int assetChainId;
+
+    private int assetId;
+
+    private long lockedTime;
+
     public ProgramTransfer() {}
 
-    public ProgramTransfer(byte[] from, byte[] to, BigInteger value) {
+    public ProgramTransfer(byte[] from, byte[] to, BigInteger value, int assetChainId, int assetId, long lockedTime) {
         this.from = from;
         this.to = to;
         this.value = value;
+        this.assetChainId = assetChainId;
+        this.assetId = assetId;
+        this.lockedTime = lockedTime;
     }
 
     public void setFrom(byte[] from) {
@@ -67,24 +78,45 @@ public class ProgramTransfer {
         return value;
     }
 
+    public int getAssetChainId() {
+        return assetChainId;
+    }
+
+    public void setAssetChainId(int assetChainId) {
+        this.assetChainId = assetChainId;
+    }
+
+    public int getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(int assetId) {
+        this.assetId = assetId;
+    }
+
+    public long getLockedTime() {
+        return lockedTime;
+    }
+
+    public void setLockedTime(long lockedTime) {
+        this.lockedTime = lockedTime;
+    }
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
         ProgramTransfer that = (ProgramTransfer) o;
 
-        if (!Arrays.equals(from, that.from)) {
-            return false;
-        }
-        if (!Arrays.equals(to, that.to)) {
-            return false;
-        }
-        return value != null ? value.equals(that.value) : that.value == null;
+        if (assetChainId != that.assetChainId) return false;
+        if (assetId != that.assetId) return false;
+        if (lockedTime != that.lockedTime) return false;
+        if (!Arrays.equals(from, that.from)) return false;
+        if (!Arrays.equals(to, that.to)) return false;
+        if (value != null ? !value.equals(that.value) : that.value != null) return false;
+
+        return true;
     }
 
     @Override
@@ -92,16 +124,28 @@ public class ProgramTransfer {
         int result = Arrays.hashCode(from);
         result = 31 * result + Arrays.hashCode(to);
         result = 31 * result + (value != null ? value.hashCode() : 0);
+        result = 31 * result + assetChainId;
+        result = 31 * result + assetId;
+        result = 31 * result + (int) (lockedTime ^ (lockedTime >>> 32));
         return result;
     }
 
     @Override
     public String toString() {
-        return "ProgramTransfer{" +
-                "from=" + Arrays.toString(from) +
-                ", to=" + Arrays.toString(to) +
-                ", value=" + value +
-                '}';
+        final StringBuilder sb = new StringBuilder("{");
+        sb.append("\"from\":")
+                .append(AddressTool.getStringAddressByBytes(from));
+        sb.append(",\"to\":")
+                .append(AddressTool.getStringAddressByBytes(to));
+        sb.append(",\"value\":")
+                .append(value);
+        sb.append(",\"assetChainId\":")
+                .append(assetChainId);
+        sb.append(",\"assetId\":")
+                .append(assetId);
+        sb.append(",\"lockedTime\":")
+                .append(lockedTime);
+        sb.append('}');
+        return sb.toString();
     }
-
 }

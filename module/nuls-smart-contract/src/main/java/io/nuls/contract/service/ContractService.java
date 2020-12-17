@@ -31,8 +31,6 @@ import io.nuls.contract.model.po.ContractOfflineTxHashPo;
 import io.nuls.core.basic.Result;
 import io.nuls.core.exception.NulsException;
 
-import java.util.List;
-
 /**
  * @author: PierreLuo
  * @date: 2018/11/19
@@ -41,17 +39,21 @@ public interface ContractService {
 
     Result begin(int chainId, long blockHeight, long blockTime, String packingAddress, String preStateRoot);
 
+    Result beginV8(int chainId, long blockHeight, long blockTime, String packingAddress, String preStateRoot);
+
     Result beforeEnd(int chainId, long blockHeight);
 
     Result end(int chainId, long blockHeight);
 
+    Result endV8(int chainId, long blockHeight);
+
     Result packageEnd(int chainId, long blockHeight);
+
+    Result packageEndV8(int chainId, long blockHeight);
 
     Result invokeContractOneByOne(int chainId, ContractTempTransaction tx);
 
-    Result commitProcessor(int chainId, List<String> txDataList, String blockHeaderData);
-
-    Result rollbackProcessor(int chainId, List<String> txDataList, String blockHeaderData);
+    Result invokeContractOneByOneV8(int chainId, ContractTempTransaction tx);
 
     Result saveContractExecuteResult(int chainId, NulsHash hash, ContractResult contractResult);
 

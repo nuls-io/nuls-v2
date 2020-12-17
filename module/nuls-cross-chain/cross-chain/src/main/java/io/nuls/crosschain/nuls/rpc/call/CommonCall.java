@@ -42,8 +42,13 @@ public class CommonCall {
                     errorMsg = String.format("Remote call fail. ResponseComment: %s ", cmdResp.getResponseComment());
                 }else {
                     Map map = (Map) resData.get(cmd);
-                    errorMsg = String.format("Remote call fail. msg: %s - code: %s - module: %s - interface: %s \n- params: %s ",
-                            map.get("msg"), map.get("code"), moduleCode, cmd, JSONUtils.obj2PrettyJson(params));
+                    if(map != null) {
+                        errorMsg = String.format("Remote call fail. msg: %s - code: %s - module: %s - interface: %s \n- params: %s ",
+                                map.get("msg"), map.get("code"), moduleCode, cmd, JSONUtils.obj2PrettyJson(params));
+                    }else {
+                        Log.error("response error info is {}", cmdResp);
+                    }
+
                 }
                 throw new Exception(errorMsg);
             }

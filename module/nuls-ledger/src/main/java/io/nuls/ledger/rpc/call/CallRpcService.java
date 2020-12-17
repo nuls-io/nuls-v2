@@ -29,6 +29,9 @@ import io.nuls.base.data.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * @author lan
  * @description 调用外部区块模块接口
@@ -36,6 +39,7 @@ import io.nuls.core.exception.NulsException;
  **/
 public interface CallRpcService {
     long getBlockLatestHeight(int chainId);
+
     /**
      * 交易签名
      * transaction signature
@@ -46,6 +50,8 @@ public interface CallRpcService {
      * @param tx
      */
     ErrorCode transactionSignature(int chainId, String address, String password, Transaction tx) throws NulsException;
+
     ErrorCode newTx(Transaction tx);
 
+    List<Map<String, Object>> getRegisteredChainInfoList(int chainId);
 }

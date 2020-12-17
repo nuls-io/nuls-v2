@@ -43,6 +43,7 @@ import io.nuls.contract.model.txdata.CreateContractData;
 import io.nuls.contract.model.txdata.DeleteContractData;
 import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.contract.rpc.call.ChainManagerCall;
+import io.nuls.contract.vm.program.ProgramMultyAssetValue;
 import io.nuls.core.basic.Result;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
@@ -54,10 +55,13 @@ import io.nuls.core.rpc.model.message.MessageUtil;
 import io.nuls.core.rpc.model.message.Response;
 
 import java.lang.reflect.Array;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static io.nuls.contract.config.ContractContext.ASSET_ID;
+import static io.nuls.contract.config.ContractContext.CHAIN_ID;
 import static io.nuls.contract.constant.ContractConstant.*;
 import static io.nuls.contract.constant.ContractErrorCode.FAILED;
 import static io.nuls.core.constant.TxType.*;
@@ -74,7 +78,7 @@ public class ContractUtil {
         if (args == null) {
             return null;
         } else {
-            if(types != null && types.length != args.length) {
+            if (types != null && types.length != args.length) {
                 throw new NulsRuntimeException(ContractErrorCode.PARAMETER_ERROR);
             }
             int length = args.length;
@@ -160,12 +164,12 @@ public class ContractUtil {
                 break;
             // add by pierre at 2019-11-02 需要协议升级 done
             case CROSS_CHAIN:
-                if(ProtocolGroupManager.getCurrentVersion(tx.getChainId()) < ContractContext.UPDATE_VERSION_V250) {
+                if (ProtocolGroupManager.getCurrentVersion(tx.getChainId()) < ContractContext.UPDATE_VERSION_V250) {
                     isContractTx = false;
                     break;
                 }
                 contractData = parseCrossChainTx(tx, chainManager);
-                if(contractData == null) {
+                if (contractData == null) {
                     isContractTx = false;
                     break;
                 }
@@ -194,18 +198,18 @@ public class ContractUtil {
         CoinTo coinTo = toList.get(0);
         byte[] toAddress = coinTo.getAddress();
         int chainIdByToAddress = AddressTool.getChainIdByAddress(toAddress);
-        if(chainIdByToAddress != ContractContext.MAIN_CHAIN_ID) {
+        if (chainIdByToAddress != ContractContext.MAIN_CHAIN_ID) {
             // 接收者非主链地址，不是跨链转入交易
-            if(Log.isDebugEnabled()) {
+            if (Log.isDebugEnabled()) {
                 Log.warn("接收者[{}]非主链地址，不是跨链转入交易", AddressTool.getStringAddressByBytes(toAddress));
             }
             return null;
         }
         int assetsChainId = coinTo.getAssetsChainId();
         Chain chain = chainManager.getChainMap().get(assetsChainId);
-        if(chain == null) {
+        if (chain == null) {
             // 未知链
-            if(Log.isDebugEnabled()) {
+            if (Log.isDebugEnabled()) {
                 Log.warn("未知链[{}]", assetsChainId);
             }
             return null;
@@ -213,17 +217,17 @@ public class ContractUtil {
         int assetsId = coinTo.getAssetsId();
         Map<String, String> tokenAssetsContractAddressInfoMap = chain.getTokenAssetsContractAddressInfoMap();
         String nrcContractAddress = tokenAssetsContractAddressInfoMap.get(assetsChainId + "-" + assetsId);
-        if(StringUtils.isBlank(nrcContractAddress)) {
+        if (StringUtils.isBlank(nrcContractAddress)) {
             // 没有注册合约资产
-            if(Log.isDebugEnabled()) {
+            if (Log.isDebugEnabled()) {
                 Log.warn("没有注册合约资产[{}]", assetsChainId + "-" + assetsId);
             }
             return null;
         }
         boolean isCrossAssets = ChainManagerCall.isCrossAssets(assetsChainId, assetsId);
-        if(!isCrossAssets) {
+        if (!isCrossAssets) {
             // 没有注册跨链资产
-            if(Log.isDebugEnabled()) {
+            if (Log.isDebugEnabled()) {
                 Log.warn("没有注册跨链资产[{}]", assetsChainId + "-" + assetsId);
             }
             return null;
@@ -551,8 +555,8 @@ public class ContractUtil {
             synchronized (batchInfo) {
                 int txOrder = tx.getOrder();
                 int serialOrder = batchInfo.getSerialOrder();
-                if(serialOrder == txOrder) {
-                    if(Log.isDebugEnabled()) {
+                if (serialOrder == txOrder) {
+                    if (Log.isDebugEnabled()) {
                         Log.debug("串行交易order - [{}]", txOrder);
                     }
                     batchInfo.setSerialOrder(serialOrder + 1);
@@ -565,7 +569,7 @@ public class ContractUtil {
                     return checkGas;
                 } else {
                     i++;
-                    if(Log.isDebugEnabled()) {
+                    if (Log.isDebugEnabled()) {
                         Log.debug("等待的交易order - [{}], [{}]线程等待次数 - [{}]", txOrder, Thread.currentThread().getName(), i);
                     }
                     try {
@@ -574,7 +578,7 @@ public class ContractUtil {
                         Log.error(e);
                     }
                     // 防止唤醒线程意外终止，导致等待线程永远等待
-                    if(i > 4) {
+                    if (i > 4) {
                         return false;
                     }
                 }
@@ -585,9 +589,9 @@ public class ContractUtil {
     private static boolean checkGas(ContractResult contractResult, BatchInfo batchInfo) {
         long gasUsed = contractResult.getGasUsed();
         boolean isAdded = batchInfo.addGasCostTotal(gasUsed, contractResult.getHash());
-        if(!isAdded) {
+        if (!isAdded) {
             contractResult.setError(true);
-            contractResult.setErrorMessage("Exceed tx count [600] or gas limit of block [13,000,000 gas], the contract transaction ["+ contractResult.getHash() +"] revert to package queue.");
+            contractResult.setErrorMessage("Exceed tx count [600] or gas limit of block [13,000,000 gas], the contract transaction [" + contractResult.getHash() + "] revert to package queue.");
         }
         return isAdded;
     }
@@ -606,6 +610,14 @@ public class ContractUtil {
 
     public static byte[] asBytes(String string) {
         return Base64.getDecoder().decode(string);
+    }
+
+    public static BigDecimal toNuls(BigInteger na) {
+        return new BigDecimal(na).movePointLeft(8);
+    }
+
+    public static BigInteger toNa(BigDecimal nuls) {
+        return nuls.scaleByPowerOfTen(8).toBigInteger();
     }
 
     public static BigInteger minus(BigInteger a, BigInteger b) {
@@ -636,7 +648,7 @@ public class ContractUtil {
                 break;
             // pierre 标记 需要协议升级 done
             case CROSS_CHAIN:
-                if(ProtocolGroupManager.getCurrentVersion(chainId) < ContractContext.UPDATE_VERSION_V250) {
+                if (ProtocolGroupManager.getCurrentVersion(chainId) < ContractContext.UPDATE_VERSION_V250) {
                     break;
                 }
                 resultTx = new CrossTokenContractTransaction();
@@ -660,7 +672,7 @@ public class ContractUtil {
             if (StringUtils.isBlank(msg)) {
                 msg = errorCode.getMsg();
             }
-            Response res = MessageUtil.newFailResponse("",msg);
+            Response res = MessageUtil.newFailResponse("", msg);
             res.setResponseErrorCode(errorCode.getCode());
             return res;
         } else {
@@ -675,7 +687,7 @@ public class ContractUtil {
     }
 
     public static byte[] extractPublicKey(Transaction tx) {
-        if(tx.getTransactionSignature() == null) {
+        if (tx.getTransactionSignature() == null) {
             return null;
         }
         TransactionSignature signature = new TransactionSignature();
@@ -691,14 +703,22 @@ public class ContractUtil {
         return publicKey;
     }
 
-    public static void mapAddBigInteger(LinkedHashMap<String, BigInteger> map, byte[] address, BigInteger amount) {
-        String strAddress = asString(address);
-        BigInteger currentAmount = map.get(strAddress);
+    public static void mapAddBigInteger(LinkedHashMap<String, BigInteger> map, byte[] address, int assetChainId, int assetId, BigInteger amount) {
+        String addressKey = addressKey(address, assetChainId, assetId);
+        BigInteger currentAmount = map.get(addressKey);
         if (currentAmount == null) {
-            map.put(strAddress, amount);
+            map.put(addressKey, amount);
         } else {
-            map.put(strAddress, currentAmount.add(amount));
+            map.put(addressKey, currentAmount.add(amount));
         }
+    }
+
+    public static String addressKey(byte[] address, int assetChainId, int assetId) {
+        return new StringBuilder(asString(address)).append(ContractConstant.LINE).append(assetChainId).append(ContractConstant.LINE).append(assetId).toString();
+    }
+
+    public static String addressLockedKey(byte[] address, int assetChainId, int assetId, long lockedTime) {
+        return new StringBuilder(asString(address)).append(ContractConstant.LINE).append(assetChainId).append(ContractConstant.LINE).append(assetId).append(ContractConstant.LINE).append(lockedTime).toString();
     }
 
     public static String toString(String[][] a) {
@@ -723,14 +743,74 @@ public class ContractUtil {
     }
 
     public static void addDebugEvents(List<String> debugEvents, Result result) {
-        if(debugEvents.isEmpty()) {
+        if (debugEvents.isEmpty()) {
             return;
         }
         String msg = result.getMsg();
-        if(msg == null) {
+        if (msg == null) {
             msg = EMPTY;
         }
         msg += ", debugEvents: " + debugEvents.toString();
         result.setMsg(msg);
+    }
+
+    public static List<ProgramMultyAssetValue> extractMultyAssetInfoFromCallTransaction(CoinData coinData) {
+        List<CoinTo> toList = coinData.getTo();
+        if (toList == null || toList.isEmpty()) {
+            return null;
+        }
+        List<ProgramMultyAssetValue> list = null;
+        for (CoinTo to : toList) {
+            if (to.getAssetsChainId() == CHAIN_ID && to.getAssetsId() == ASSET_ID) {
+                continue;
+            }
+            if (list == null) {
+                list = new ArrayList<>();
+            }
+            list.add(new ProgramMultyAssetValue(to.getAmount(), to.getAssetsChainId(), to.getAssetsId()));
+        }
+        return list;
+    }
+
+    public static String[][] multyAssetStringArray(List<ProgramMultyAssetValue> multyAssetValues) {
+        int length;
+        if (multyAssetValues == null || (length = multyAssetValues.size()) == 0) {
+            return null;
+        }
+        String[][] array = new String[length][];
+        ProgramMultyAssetValue value;
+        for (int i = 0; i < length; i++) {
+            value = multyAssetValues.get(i);
+            array[i] = new String[]{value.getValue().toString(), String.valueOf(value.getAssetChainId()), String.valueOf(value.getAssetId())};
+        }
+        return array;
+    }
+
+    public static String[][] multyAssetStringArray(ProgramMultyAssetValue[] multyAssetValues) {
+        int length;
+        if (multyAssetValues == null || (length = multyAssetValues.length) == 0) {
+            return null;
+        }
+        String[][] array = new String[length][];
+        ProgramMultyAssetValue value;
+        for (int i = 0; i < length; i++) {
+            value = multyAssetValues[i];
+            array[i] = new String[]{value.getValue().toString(), String.valueOf(value.getAssetChainId()), String.valueOf(value.getAssetId())};
+        }
+        return array;
+    }
+
+    public static ProgramMultyAssetValue[] multyAssetObjectArray(String[][] multyAssetValues) {
+        int length;
+        if (multyAssetValues == null || (length = multyAssetValues.length) == 0) {
+            return null;
+        }
+        ProgramMultyAssetValue[] array = new ProgramMultyAssetValue[length];
+        String[] value;
+        for (int i = 0; i < length; i++) {
+            value = multyAssetValues[i];
+            array[i] = new ProgramMultyAssetValue(new BigInteger(value[0]), Integer.valueOf(value[1]), Integer.valueOf(value[2]));
+        }
+        return array;
     }
 }

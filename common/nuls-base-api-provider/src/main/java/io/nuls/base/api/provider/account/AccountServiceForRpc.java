@@ -56,6 +56,14 @@ public class AccountServiceForRpc extends BaseRpcService implements AccountServi
     }
 
     @Override
+    public Result<String> importKeyStoreFiles(ImportKeyStoreFilesReq req) {
+        return _call("ac_importsKeyStoreFiles", req, res -> {
+            Boolean data = (Boolean) res.get("value");
+            return success(data);
+        });
+    }
+
+    @Override
     public Result<Boolean> updatePassword(UpdatePasswordReq req) {
         return _call("ac_updatePassword", req, res -> {
             Boolean data = (Boolean) res.get("value");
