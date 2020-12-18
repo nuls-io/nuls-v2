@@ -188,17 +188,17 @@ public class RocksDbDataSource implements DbSource<byte[]> {
 
     @Override
     public byte[] get(byte[] key) {
-        //long startTime = System.nanoTime();
+        long startTime = System.nanoTime();
         resetDbLock.readLock().lock();
         try {
-            //if (logger.isTraceEnabled()) {
-            //    logger.trace("~> RocksDbDataSource.get(): " + name + ", key: " + toHexString(key));
+            //if (Log.isTraceEnabled()) {
+            //    Log.trace("~> RocksDbDataSource.get(): " + name + ", key: " + toHexString(key));
             //}
             try {
 
                 byte[] ret = rocksDB.get(key);
                 //if (Log.isInfoEnabled()) {
-                //    Log.info("<~ db.get(): " + name + ", key: " + toHexString(key) + ", " + (ret == null ? "null" : ret.length) + ", cost {}", System.nanoTime() - startTime);
+                    Log.info("<~ db.get(): " + name + ", key: " + toHexString(key) + ", " + (ret == null ? "null" : ret.length) + ", cost {}", System.nanoTime() - startTime);
                 //}
                 return ret;
             } catch (Exception e) {
@@ -209,8 +209,8 @@ public class RocksDbDataSource implements DbSource<byte[]> {
                 } catch (RocksDBException ex) {
                     // skip it
                 }
-                //if (logger.isTraceEnabled()) {
-                //    logger.trace("<~ RocksDbDataSource.get(): " + name + ", key: " + toHexString(key) + ", " + (ret == null ? "null" : ret.length));
+                //if (Log.isTraceEnabled()) {
+                //    Log.trace("<~ RocksDbDataSource.get(): " + name + ", key: " + toHexString(key) + ", " + (ret == null ? "null" : ret.length));
                 //}
                 return ret;
             }
@@ -223,12 +223,12 @@ public class RocksDbDataSource implements DbSource<byte[]> {
     public void put(byte[] key, byte[] value) {
         resetDbLock.writeLock().lock();
         try {
-            //if (logger.isTraceEnabled()) {
-            //    logger.trace("~> RocksDbDataSource.put(): " + name + ", key: " + toHexString(key) + ", " + (value == null ? "null" : value.length));
+            //if (Log.isTraceEnabled()) {
+            //    Log.trace("~> RocksDbDataSource.put(): " + name + ", key: " + toHexString(key) + ", " + (value == null ? "null" : value.length));
             //}
             rocksDB.put(key, value);
-            //if (logger.isInfoEnabled()) {
-            //    logger.info("<~ RocksDbDataSource.put(): " + name + ", key: " + toHexString(key) + ", " + (value == null ? "null" : value.length));
+            //if (Log.isInfoEnabled()) {
+            Log.info("<~ RocksDbDataSource.put(): " + name + ", key: " + toHexString(key) + ", " + (value == null ? "null" : value.length));
             //}
         } catch (Exception e) {
             logger.error("RocksDbDataSource.put() error", e);
@@ -241,15 +241,15 @@ public class RocksDbDataSource implements DbSource<byte[]> {
     public void delete(byte[] key) {
         resetDbLock.writeLock().lock();
         try {
-            //if (logger.isTraceEnabled()) {
-            //    logger.trace("~> RocksDbDataSource.delete(): " + name + ", key: " + toHexString(key));
+            //if (Log.isTraceEnabled()) {
+            //    Log.trace("~> RocksDbDataSource.delete(): " + name + ", key: " + toHexString(key));
             //}
             rocksDB.delete(key);
-            //if (logger.isInfoEnabled()) {
-            //    logger.info("<~ RocksDbDataSource.delete(): " + name + ", key: " + toHexString(key));
+            //if (Log.isInfoEnabled()) {
+            //    Log.info("<~ RocksDbDataSource.delete(): " + name + ", key: " + toHexString(key));
             //}
         } catch (Exception e) {
-            logger.error("RocksDbDataSource.delete() error", e);
+            Log.error("RocksDbDataSource.delete() error", e);
         } finally {
             resetDbLock.writeLock().unlock();
         }
@@ -267,8 +267,10 @@ public class RocksDbDataSource implements DbSource<byte[]> {
             Set<Map.Entry<byte[], byte[]>> entrySet = rows.entrySet();
             for (Map.Entry<byte[], byte[]> entry : entrySet) {
                 if (entry.getValue() == null) {
+                    Log.info("<~ RocksDbDataSource.delete(): " + name + ", key: " + toHexString(entry.getKey()));
                     batch.delete(entry.getKey());
                 } else {
+                    Log.info("<~ RocksDbDataSource.put(): " + name + ", key: " + toHexString(entry.getKey()) + ", " + (entry.getValue() == null ? "null" : entry.getValue().length));
                     batch.put(entry.getKey(), entry.getValue());
                 }
             }
@@ -287,27 +289,27 @@ public class RocksDbDataSource implements DbSource<byte[]> {
 
     @Override
     public void updateBatch(Map<byte[], byte[]> rows) {
-        //long startTime = System.nanoTime();
+        long startTime = System.nanoTime();
         resetDbLock.writeLock().lock();
         try {
-            //if (logger.isTraceEnabled()) {
-            //    logger.trace("~> RocksDbDataSource.updateBatch(): " + name + ", " + rows.size());
+            //if (Log.isTraceEnabled()) {
+            //    Log.trace("~> RocksDbDataSource.updateBatch(): " + name + ", " + rows.size());
             //}
             try {
                 updateBatchInternal(rows);
                 //if (Log.isInfoEnabled()) {
-                //    Log.info("<~ RocksDbDataSource.updateBatch(): " + name + ", " + rows.size() + ", cost {}", System.nanoTime() - startTime);
+                    Log.info("<~ RocksDbDataSource.updateBatch(): " + name + ", " + rows.size() + ", cost {}", System.nanoTime() - startTime);
                 //}
             } catch (Exception e) {
-                logger.error("Error, retrying one more time...", e);
+                Log.error("Error, retrying one more time...", e);
                 // try one more time
                 try {
                     updateBatchInternal(rows);
-                    //if (logger.isTraceEnabled()) {
-                    //    logger.trace("<~ RocksDbDataSource.updateBatch(): " + name + ", " + rows.size());
+                    //if (Log.isTraceEnabled()) {
+                    //    Log.trace("<~ RocksDbDataSource.updateBatch(): " + name + ", " + rows.size());
                     //}
                 } catch (Exception e1) {
-                    logger.error("Error", e);
+                    Log.error("Error", e);
                     throw new RuntimeException(e);
                 }
             }

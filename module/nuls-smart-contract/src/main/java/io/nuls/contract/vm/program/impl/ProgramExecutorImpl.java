@@ -320,6 +320,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                 if ("<init>".equals(methodName)) {
                     return revert("can't invoke <init> method");
                 }
+                //TODO pierre 耗时
                 AccountState accountState = repository.getAccountState(contractAddressBytes);
                 if (accountState == null) {
                     return revert(String.format("contract[%s] does not exist", contractAddress));

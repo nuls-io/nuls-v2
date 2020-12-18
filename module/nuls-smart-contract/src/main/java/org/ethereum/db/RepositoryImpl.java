@@ -17,6 +17,7 @@
  */
 package org.ethereum.db;
 
+import io.nuls.base.basic.AddressTool;
 import org.ethereum.config.SystemProperties;
 import org.ethereum.core.AccountState;
 import org.ethereum.core.Block;
@@ -74,6 +75,7 @@ public class RepositoryImpl implements Repository, org.ethereum.facade.Repositor
 
     @Override
     public synchronized AccountState getAccountState(byte[] addr) {
+        System.out.println(String.format("DB get AccountState - addr: %s", AddressTool.getStringAddressByBytes(addr)));
         return accountStateCache.get(addr);
     }
 
@@ -132,6 +134,7 @@ public class RepositoryImpl implements Repository, org.ethereum.facade.Repositor
 
     @Override
     public synchronized byte[] getCode(byte[] addr) {
+        System.out.println(String.format("DB get code - addr: %s", AddressTool.getStringAddressByBytes(addr)));
         byte[] codeHash = getCodeHash(addr);
         return codeHash == null || FastByteComparisons.equal(codeHash, HashUtil.EMPTY_DATA_HASH) ?
                 ByteUtil.EMPTY_BYTE_ARRAY : codeCache.get(codeKey(codeHash, addr));
@@ -150,6 +153,7 @@ public class RepositoryImpl implements Repository, org.ethereum.facade.Repositor
 
     @Override
     public synchronized void addStorageRow(byte[] addr, DataWord key, DataWord value) {
+        System.out.println(String.format("DB put - addr: %s, put key: %s, put value: %s", AddressTool.getStringAddressByBytes(addr), key.toString(), value.toString()));
         getOrCreateAccountState(addr);
 
         Source<DataWord, DataWord> contractStorage = storageCache.get(addr);
@@ -158,6 +162,7 @@ public class RepositoryImpl implements Repository, org.ethereum.facade.Repositor
 
     @Override
     public synchronized DataWord getStorageValue(byte[] addr, DataWord key) {
+        System.out.println(String.format("DB get - addr: %s, get key: %s", AddressTool.getStringAddressByBytes(addr), key.toString()));
         AccountState accountState = getAccountState(addr);
         return accountState == null ? null : storageCache.get(addr).get(key);
     }
