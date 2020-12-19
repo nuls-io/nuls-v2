@@ -79,7 +79,7 @@ public class CrossTxRehandleMsgHandler implements MessageProcessor {
                 return ;
             }
             Transaction transaction = tx.getData();
-            if(transaction.getType() != TxType.CROSS_CHAIN || transaction.getType() != TxType.CONTRACT_TOKEN_CROSS_TRANSFER){
+            if(transaction.getType() != TxType.CROSS_CHAIN && transaction.getType() != TxType.CONTRACT_TOKEN_CROSS_TRANSFER){
                 chain.getLogger().error("处理【重新处理跨链交易拜赞庭签名】失败，ctx hash : [{}] 不是一个跨链交易",ctxHash);
                 return ;
             }
