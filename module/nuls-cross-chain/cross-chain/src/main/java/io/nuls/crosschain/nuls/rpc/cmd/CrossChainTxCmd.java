@@ -92,7 +92,7 @@ public class CrossChainTxCmd extends BaseCmd {
             return failed(tx.getMessage());
         }
         Transaction transaction = tx.getData();
-        if(transaction.getType() != TxType.CROSS_CHAIN){
+        if(transaction.getType() != TxType.CROSS_CHAIN || transaction.getType() != TxType.CONTRACT_TOKEN_CROSS_TRANSFER){
             return failed("not a cross chain tx");
         }
         long height = Long.parseLong(params.get("blockHeight").toString());
