@@ -361,7 +361,8 @@ public class TxUtil {
         /*
         判断本节点是否为共识节点，如果为共识节点则签名，如果不为共识节点则广播该交易
         */
-        Map packerInfo;
+        Map packerInfo = ConsensusCall.getPackerInfo(chain);
+        List<String> localPackers = (List<String>) packerInfo.get(ParamConstant.PARAM_ADDRESS + "es");
         List<String> verifierList = chain.getVerifierList();
         if (ctx.getType() == TxType.VERIFIER_INIT) {
             packerInfo = ConsensusCall.getSeedNodeList(chain);
@@ -371,8 +372,7 @@ public class TxUtil {
         }
         String password = (String) packerInfo.get(ParamConstant.PARAM_PASSWORD);
         String address = (String) packerInfo.get(ParamConstant.PARAM_ADDRESS);
-        BroadCtxSignMessage message = new BroadCtxSignMessage();
-        message.setLocalHash(hash);
+
         CtxStatusPO ctxStatusPO = new CtxStatusPO(ctx, TxStatusEnum.UNCONFIRM.getStatus());
         boolean byzantinePass = false;
         //验证人变更，减少的验证人不签名
@@ -382,13 +382,25 @@ public class TxUtil {
         }
         if (sign) {
             chain.getLogger().info("本节点为共识节点，对跨链交易签名,Hash:{}", hashHex);
-            P2PHKSignature p2PHKSignature;
-            try {
-                p2PHKSignature = AccountCall.signDigest(address, password, hash.getBytes());
-                message.setSignature(p2PHKSignature.serialize());
-                TransactionSignature signature = new TransactionSignature();
-                List<P2PHKSignature> p2PHKSignatureList = new ArrayList<>();
-                p2PHKSignatureList.add(p2PHKSignature);
+            TransactionSignature signature = new TransactionSignature();
+            HashSet<WaitBroadSignMessage> messageList = new HashSet<>();
+            List<P2PHKSignature> p2PHKSignatureList = new ArrayList<>();
+            for (var packageAddress : localPackers){
+                P2PHKSignature p2PHKSignature;
+                try {
+                    p2PHKSignature = AccountCall.signDigest(packageAddress, password, hash.getBytes());
+                    BroadCtxSignMessage message = new BroadCtxSignMessage();
+                    message.setLocalHash(hash);
+                    message.setSignature(p2PHKSignature.serialize());
+                    messageList.add(new WaitBroadSignMessage(null, message));
+                    p2PHKSignatureList.add(p2PHKSignature);
+                } catch (Exception e) {
+                    chain.getLogger().error(e);
+                    chain.getLogger().error("签名错误!,hash:{}", hashHex);
+                    return;
+                }
+            }
+            try{
                 signature.setP2PHKSignatures(p2PHKSignatureList);
                 ctx.setTransactionSignature(signature.serialize());
                 byzantinePass = MessageUtil.signByzantineInChain(chain, ctx, signature, verifierList, hash);
@@ -397,13 +409,14 @@ public class TxUtil {
                 chain.getLogger().error("签名错误!,hash:{}", hashHex);
                 return;
             }
-            if (!chain.getWaitBroadSignMap().keySet().contains(hash)) {
-                chain.getWaitBroadSignMap().put(hash, new HashSet<>());
-            }
             /*
             保存并广播该交易
             */
-            chain.getWaitBroadSignMap().get(hash).add(new WaitBroadSignMessage(null, message));
+            if (!chain.getWaitBroadSignMap().keySet().contains(hash)) {
+                chain.getWaitBroadSignMap().put(hash, messageList);
+            }else{
+                chain.getWaitBroadSignMap().get(hash).addAll(messageList);
+            }
         } else {
             ctxStatusService.save(hash, ctxStatusPO, chainId);
         }
