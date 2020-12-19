@@ -56,6 +56,10 @@ public class CrossTxRehandleMsgHandler implements MessageProcessor {
     @Override
     public void process(int chainId, String nodeId, String messageStr) {
         CrossTxRehandleMessage message = RPCUtil.getInstanceRpcStr(messageStr, CrossTxRehandleMessage.class);
+        process(chainId,message);
+    }
+
+    public void process(int chainId, CrossTxRehandleMessage message){
         String messageHash;
         try {
             messageHash = HexUtil.encode(message.serialize());
@@ -102,5 +106,6 @@ public class CrossTxRehandleMsgHandler implements MessageProcessor {
             chain.getCrossTxThreadPool().execute(new CrossTxHandler(chain,  tx.getData(), syncStatus));
         }
     }
+
 
 }

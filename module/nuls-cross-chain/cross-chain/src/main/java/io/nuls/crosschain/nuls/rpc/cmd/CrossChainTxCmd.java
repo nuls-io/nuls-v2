@@ -20,6 +20,7 @@ import io.nuls.core.rpc.model.message.Response;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.CrossTxRehandleMessage;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
+import io.nuls.crosschain.nuls.message.CrossTxRehandleMsgHandler;
 import io.nuls.crosschain.nuls.model.po.CtxStatusPO;
 import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
 import io.nuls.crosschain.nuls.srorage.ConvertCtxService;
@@ -48,6 +49,9 @@ public class CrossChainTxCmd extends BaseCmd {
 
     @Autowired
     private ChainManager chainManager;
+
+    @Autowired
+    CrossTxRehandleMsgHandler crossTxRehandleMsgHandler;
 
     TransferService transferService = ServiceManager.get(TransferService.class);
 
@@ -100,6 +104,7 @@ public class CrossChainTxCmd extends BaseCmd {
         CrossTxRehandleMessage crossTxRehandleMessage = new CrossTxRehandleMessage();
         crossTxRehandleMessage.setCtxHash(transaction.getHash());
         crossTxRehandleMessage.setBlockHeight(height);
+        crossTxRehandleMsgHandler.process(chainId,crossTxRehandleMessage);
         boolean res = NetWorkCall.broadcast(chainId,crossTxRehandleMessage,CommandConstant.CROSS_TX_REHANDLE_MESSAGE,false);
         if(res){
             return success(Map.of("msg","broadcast success"));
