@@ -260,6 +260,7 @@ public class Heap {
             value = getArrayInit(arrayRef, chunkNum);
         }
         if (value == null) {
+            //TODO pierre 为什么要去DB中查询
             value = getArrayChunkFromState(arrayRef, arrayKey);
             if (value != null) {
                 arrays.put(arrayKey, value);
@@ -638,7 +639,7 @@ public class Heap {
 
     public Map<DataWord, DataWord> contractState() {
         Map<DataWord, DataWord> contractState = new LinkedHashMap<>(1024);
-        //Log.info("=-=-=-=-=-= contractState - objectRefCount: {}, hashCode: {}", this.objectRefCount, this.objectRefCount.hashCode());
+        Log.info("=-=-=-=-=-= contractState - objectRefCount: {}, hashCode: {}", this.objectRefCount, this.objectRefCount.hashCode());
         contractState.put(OBJECT_REF_COUNT, new DataWord(this.objectRefCount.getValue()));
         Set<ObjectRef> stateObjectRefs = new LinkedHashSet<>(1024);
         String className = this.contract.getVariableType().getType();
@@ -646,22 +647,23 @@ public class Heap {
         stateObjectRefs(stateObjectRefs, staticObjectRef);
         stateObjectRefs(stateObjectRefs, this.contract);
         List<ObjectRef> clearList = new ArrayList<>();
-        //int j = 0;
+        int j = 0;
         for (ObjectRef objectRef : stateObjectRefs) {
-            //j++;
+            j++;
+            Log.debug("Per[{}] objectRef: {}", j, objectRef);
             if (!this.changes.contains(objectRef)) {
-                //Log.warn("[{}]null changes objectRef: {}", j, objectRef);
+                Log.warn("[{}]null changes objectRef: {}", j, objectRef);
                 continue;
             }
             Map<String, Object> fields = getFieldsInit(objectRef);
             if (fields == null) {
-                //Log.info("[{}]null fields objectRef: {}", j, objectRef);
+                Log.info("[{}]null fields objectRef: {}", j, objectRef);
                 continue;
             }
             String key = JsonUtils.encode(objectRef, classNames);
             String value = JsonUtils.encode(fields, classNames);
-            //Log.info("[{}]modified objectRef: {}, fields: {}", j, objectRef, fields);
-            //Log.info("[{}]modified key: {}, value: {}", j, key, value);
+            Log.info("[{}]modified objectRef: {}, fields: {}", j, objectRef, fields);
+            Log.info("[{}]modified key: {}, value: {}", j, key, value);
             contractState.put(new DataWord(key), new DataWord(value));
             if (objectRef.isArray()) {
                 for (String k : fields.keySet()) {
@@ -677,7 +679,7 @@ public class Heap {
                             clazz = ObjectRef.class;
                         }
                         String arrayValue = JsonUtils.encodeArray(object, clazz, classNames);
-                        //Log.info("[{}]modified arrayKey: {}, arrayValue: {}", j, arrayKey, arrayValue);
+                        Log.info("[{}]modified arrayKey: {}, arrayValue: {}", j, arrayKey, arrayValue);
                         contractState.put(new DataWord(arrayKey), new DataWord(arrayValue));
                     }
                 }

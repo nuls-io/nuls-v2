@@ -320,7 +320,6 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                 if ("<init>".equals(methodName)) {
                     return revert("can't invoke <init> method");
                 }
-                //TODO pierre 耗时
                 AccountState accountState = repository.getAccountState(contractAddressBytes);
                 if (accountState == null) {
                     return revert(String.format("contract[%s] does not exist", contractAddress));
@@ -340,6 +339,10 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             vm.setProgramExecutor(this);
             vm.heap.loadClassCodes(classCodes);
             // add by pierre at 2019-11-21 标记 当存在合约内部调用合约，共享同一个合约的内存数据 需要协议升级 done
+            Log.debug("++++++++++++++++++++");
+            Log.warn(programInvoke.toString());
+            Log.info("this.contractObjectRefCount: {}", this.contractObjectRefCount);
+            Log.info("vm.heap.objectRefCount: {}", vm.heap.objectRefCount);
             boolean isUpgradedV240 = ProtocolGroupManager.getCurrentVersion(getCurrentChainId()) >= ContractContext.UPDATE_VERSION_V240;
             if(isUpgradedV240) {
                 if(contractObjects == null) {
@@ -349,7 +352,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                     Map<ObjectRef, Map<String, Object>> objectRefMapMap = contractObjects.get(contractAddress);
                     if(objectRefMapMap != null) {
                         if(programInvoke.isInternalCall()) {
-                            //Log.info("共享heap.objects");
+                            Log.info("共享heap.objects");
                             vm.heap.objects = objectRefMapMap;
                         }
                     } else {
@@ -363,7 +366,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                     Map<String, Object> arraysMap = contractArrays.get(contractAddress);
                     if(arraysMap != null) {
                         if(programInvoke.isInternalCall()) {
-                            //Log.info("共享heap.arrays");
+                            Log.info("共享heap.arrays");
                             vm.heap.arrays = arraysMap;
                         }
                     } else {
@@ -371,18 +374,18 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                     }
                 }
                 if(contractChanges == null) {
-                    //Log.info("新建map和heap.changes");
+                    Log.info("新建map和heap.changes");
                     contractChanges = new HashMap<>();
                     contractChanges.put(contractAddress, vm.heap.changes);
                 } else {
                     Set<ObjectRef> changesObjectRefs = contractChanges.get(contractAddress);
                     if(changesObjectRefs != null) {
                         if(programInvoke.isInternalCall()) {
-                            //Log.info("共享heap.changes: {}", changesObjectRefs.hashCode());
+                            Log.info("共享heap.changes: {}", changesObjectRefs.hashCode());
                             vm.heap.changes = changesObjectRefs;
                         }
                     } else {
-                        //Log.info("新增heap.changes");
+                        Log.info("新增heap.changes");
                         contractChanges.put(contractAddress, vm.heap.changes);
                     }
                 }
@@ -439,15 +442,24 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             // add by pierre at 2019-11-21 标记 当存在合约内部调用合约，共享同一个合约的内存数据 需要协议升级 done
             if(isUpgradedV240) {
                 if(contractObjectRefCount == null) {
+                    Log.info("新建map和heap.objectRefCount");
+
                     contractObjectRefCount = new HashMap<>();
                     contractObjectRefCount.put(contractAddress, vm.heap.objectRefCount);
                 } else {
                     BigIntegerWrapper objectRefCount = contractObjectRefCount.get(contractAddress);
                     if(objectRefCount != null) {
                         if(programInvoke.isInternalCall()) {
+                            Log.info("共享heap.objectRefCount: {}", objectRefCount.hashCode());
+
                             vm.heap.objectRefCount = objectRefCount;
+                        } else {
+                            Log.info("问题heap.objectRefCount");
                         }
+
                     } else {
+                        Log.info("新增heap.objectRefCount");
+
                         contractObjectRefCount.put(contractAddress, vm.heap.objectRefCount);
                     }
                 }
@@ -544,8 +556,10 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             for (Map.Entry<DataWord, DataWord> entry : contractState.entrySet()) {
                 DataWord key = entry.getKey();
                 DataWord value = entry.getValue();
+                Log.info("add storage row, key: {}, value: {}", key.asString(), value.asString());
                 repository.addStorageRow(contractAddressBytes, key, value);
             }
+            Log.debug("---------------------");
             logTime("add contract state");
 
             if (programInvoke.isCreate()) {

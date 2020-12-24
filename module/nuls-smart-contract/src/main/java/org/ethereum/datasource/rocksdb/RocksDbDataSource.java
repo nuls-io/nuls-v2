@@ -40,6 +40,7 @@ import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import static org.ethereum.db.RepositoryImpl.threadLocal;
 import static org.ethereum.util.ByteUtil.toHexString;
 
 /**
@@ -198,7 +199,7 @@ public class RocksDbDataSource implements DbSource<byte[]> {
 
                 byte[] ret = rocksDB.get(key);
                 //if (Log.isInfoEnabled()) {
-                    Log.info("<~ db.get(): " + name + ", key: " + toHexString(key) + ", " + (ret == null ? "null" : ret.length) + ", cost {}", System.nanoTime() - startTime);
+                    Log.info("[{}]<~ db.get(): " + name + ", key: " + toHexString(key) + ", " + (ret == null ? "null" : ret.length) + ", cost {}", threadLocal.get(), System.nanoTime() - startTime);
                 //}
                 return ret;
             } catch (Exception e) {
@@ -298,7 +299,7 @@ public class RocksDbDataSource implements DbSource<byte[]> {
             try {
                 updateBatchInternal(rows);
                 //if (Log.isInfoEnabled()) {
-                    Log.info("<~ RocksDbDataSource.updateBatch(): " + name + ", " + rows.size() + ", cost {}", System.nanoTime() - startTime);
+                    Log.info("<~ RocksDbDataSource.updateBatch(): " + name + ", " + rows.size() + ", cost {}", System.nanoTime() - startTime + "\n");
                 //}
             } catch (Exception e) {
                 Log.error("Error, retrying one more time...", e);

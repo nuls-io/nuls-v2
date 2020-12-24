@@ -18,6 +18,7 @@
 package org.ethereum.db;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.contract.util.Log;
 import org.ethereum.config.SystemProperties;
 import org.ethereum.core.AccountState;
 import org.ethereum.core.Block;
@@ -75,7 +76,7 @@ public class RepositoryImpl implements Repository, org.ethereum.facade.Repositor
 
     @Override
     public synchronized AccountState getAccountState(byte[] addr) {
-        System.out.println(String.format("DB get AccountState - addr: %s", AddressTool.getStringAddressByBytes(addr)));
+        Log.debug(String.format("[%s]DB get AccountState - addr: %s", threadLocal.get(), AddressTool.getStringAddressByBytes(addr)));
         return accountStateCache.get(addr);
     }
 
@@ -134,7 +135,7 @@ public class RepositoryImpl implements Repository, org.ethereum.facade.Repositor
 
     @Override
     public synchronized byte[] getCode(byte[] addr) {
-        System.out.println(String.format("DB get code - addr: %s", AddressTool.getStringAddressByBytes(addr)));
+        Log.warn(String.format("DB get code - addr: %s", AddressTool.getStringAddressByBytes(addr)));
         byte[] codeHash = getCodeHash(addr);
         return codeHash == null || FastByteComparisons.equal(codeHash, HashUtil.EMPTY_DATA_HASH) ?
                 ByteUtil.EMPTY_BYTE_ARRAY : codeCache.get(codeKey(codeHash, addr));
@@ -153,18 +154,26 @@ public class RepositoryImpl implements Repository, org.ethereum.facade.Repositor
 
     @Override
     public synchronized void addStorageRow(byte[] addr, DataWord key, DataWord value) {
-        System.out.println(String.format("DB put - addr: %s, put key: %s, put value: %s", AddressTool.getStringAddressByBytes(addr), key.toString(), value.toString()));
+        Log.warn(String.format("DB put - addr: %s, put key: %s, put value: %s", AddressTool.getStringAddressByBytes(addr), key.toString(), value.toString()));
         getOrCreateAccountState(addr);
 
         Source<DataWord, DataWord> contractStorage = storageCache.get(addr);
         contractStorage.put(key, value.isZero() ? null : value);
     }
 
+    public static ThreadLocal<Integer> threadLocal = new ThreadLocal<>();
+    static {
+        threadLocal.set(0);
+    }
     @Override
     public synchronized DataWord getStorageValue(byte[] addr, DataWord key) {
-        System.out.println(String.format("DB get - addr: %s, get key: %s", AddressTool.getStringAddressByBytes(addr), key.toString()));
+        threadLocal.set(threadLocal.get() + 1);
         AccountState accountState = getAccountState(addr);
-        return accountState == null ? null : storageCache.get(addr).get(key);
+        DataWord dataWord = accountState == null ? null : storageCache.get(addr).get(key);
+        Log.warn(String.format("[%s]DB get - addr: %s, get key: %s, get value: %s", threadLocal.get(), AddressTool.getStringAddressByBytes(addr), key.toString(),
+                dataWord == null ? null : dataWord.asString()));
+        return dataWord;
+        //return accountState == null ? null : storageCache.get(addr).get(key);
     }
 
     @Override
