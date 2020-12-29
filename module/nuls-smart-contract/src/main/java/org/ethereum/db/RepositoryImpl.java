@@ -167,11 +167,12 @@ public class RepositoryImpl implements Repository, org.ethereum.facade.Repositor
     }
     @Override
     public synchronized DataWord getStorageValue(byte[] addr, DataWord key) {
-        threadLocal.set(threadLocal.get() + 1);
+
         AccountState accountState = getAccountState(addr);
         DataWord dataWord = accountState == null ? null : storageCache.get(addr).get(key);
         Log.warn(String.format("[%s]DB get - addr: %s, get key: %s, get value: %s", threadLocal.get(), AddressTool.getStringAddressByBytes(addr), key.toString(),
                 dataWord == null ? null : dataWord.asString()));
+        threadLocal.set(threadLocal.get() + 1);
         return dataWord;
         //return accountState == null ? null : storageCache.get(addr).get(key);
     }

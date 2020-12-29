@@ -24,7 +24,10 @@
 package io.nuls.contract.mock.basetest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.contract.base.Base;
+import io.nuls.contract.config.ContractConfig;
+import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.manager.CmdRegisterManager;
 import io.nuls.contract.model.bo.Chain;
@@ -33,6 +36,7 @@ import io.nuls.contract.util.BeanUtilTest;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.util.VMContextMock;
+import io.nuls.contract.vm.VMFactory;
 import io.nuls.contract.vm.natives.io.nuls.contract.sdk.NativeAddress;
 import io.nuls.contract.vm.program.*;
 import io.nuls.contract.vm.program.impl.ProgramExecutorImpl;
@@ -48,28 +52,40 @@ import java.util.List;
  * @author: PierreLuo
  * @date: 2019-06-11
  */
-public class MockBase extends Base {
+public abstract class MockBase extends Base {
 
     protected static final String ADDRESS = "tNULSeBaN7vAqBANTtVxsiFsam4NcRUbqrCpzK";
     protected static final String SENDER = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
     protected ProgramExecutor programExecutor;
     private VMContext vmContext;
     private CmdRegisterManager cmdRegisterManager;
+    protected static String dataPath = "./data";
 
     @BeforeClass
     public static void initClass() {
         Log.info("init log.");
-        RocksDBService.init("./data");
+        RocksDBService.init(dataPath);
     }
+
+    protected abstract void protocolUpdate();
 
     @Before
     public void setUp() {
+        // 加载协议升级的数据
+        ContractContext.CHAIN_ID = chainId;
+        ContractContext.ASSET_ID = assetId;
+
         Chain chain = new Chain();
         ConfigBean configBean = new ConfigBean();
         configBean.setChainId(2);
         configBean.setAssetId(1);
         configBean.setMaxViewGas(100000000L);
         chain.setConfig(configBean);
+
+        ContractConfig contractConfig = new ContractConfig();
+        contractConfig.setDataPath(dataPath);
+        SpringLiteContext.putBean(ContractConfig.class.getName(), contractConfig);
+
         vmContext = new VMContextMock();
         programExecutor = new ProgramExecutorImpl(vmContext, chain);
         chain.setProgramExecutor(programExecutor);
@@ -79,6 +95,8 @@ public class MockBase extends Base {
         chainManager.getChainMap().put(chain.getChainId(), chain);
         BeanUtilTest.setBean(cmdRegisterManager, chainManager);
         SpringLiteContext.putBean(CmdRegisterManager.class.getName(), cmdRegisterManager);
+
+        protocolUpdate();
     }
 
     protected byte[] create(byte[] prevStateRoot, String sender, byte[] contractCode, String... args) {
@@ -170,7 +188,7 @@ public class MockBase extends Base {
         programCall.setContractAddress(contractAddress == null ? NativeAddress.toBytes(ADDRESS) : NativeAddress.toBytes(contractAddress));
         programCall.setSender(NativeAddress.toBytes(sender));
         programCall.setPrice(1);
-        programCall.setGasLimit(1000000);
+        programCall.setGasLimit(10000000);
         programCall.setNumber(1);
         programCall.setValue(value == null ? BigInteger.ZERO : value);
         programCall.setMethodName(methodName);
