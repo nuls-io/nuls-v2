@@ -676,14 +676,14 @@ public class Heap {
         int j = 0;
         for (ObjectRef objectRef : stateObjectRefs) {
             j++;
-            Log.debug("Per[{}] objectRef: {}", j, objectRef);
+            //Log.debug("Per[{}] objectRef: {}", j, objectRef);
             if (!this.changes.contains(objectRef)) {
-                Log.warn("[{}]null changes objectRef: {}", j, objectRef);
+                //Log.warn("[{}]null changes objectRef: {}", j, objectRef);
                 continue;
             }
             Map<String, Object> fields = getFieldsInit(objectRef);
             if (fields == null) {
-                Log.info("[{}]null fields objectRef: {}", j, objectRef);
+                //Log.info("[{}]null fields objectRef: {}", j, objectRef);
                 continue;
             }
             String key = JsonUtils.encode(objectRef, classNames);
