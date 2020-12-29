@@ -32,6 +32,7 @@ import org.ethereum.vm.DataWord;
 import javax.annotation.Nullable;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by Anton Nashatyrev on 07.10.2016.
@@ -161,10 +162,7 @@ public class RepositoryImpl implements Repository, org.ethereum.facade.Repositor
         contractStorage.put(key, value.isZero() ? null : value);
     }
 
-    public static ThreadLocal<Integer> threadLocal = new ThreadLocal<>();
-    static {
-        threadLocal.set(0);
-    }
+    public static AtomicInteger threadLocal = new AtomicInteger(0);
     @Override
     public synchronized DataWord getStorageValue(byte[] addr, DataWord key) {
 
@@ -172,7 +170,7 @@ public class RepositoryImpl implements Repository, org.ethereum.facade.Repositor
         DataWord dataWord = accountState == null ? null : storageCache.get(addr).get(key);
         Log.warn(String.format("[%s]DB get - addr: %s, get key: %s, get value: %s", threadLocal.get(), AddressTool.getStringAddressByBytes(addr), key.toString(),
                 dataWord == null ? null : dataWord.asString()));
-        threadLocal.set(threadLocal.get() + 1);
+        threadLocal.incrementAndGet();
         return dataWord;
         //return accountState == null ? null : storageCache.get(addr).get(key);
     }
