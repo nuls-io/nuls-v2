@@ -265,7 +265,7 @@ public class Heap {
         } else {
             value = getArrayInit(arrayRef, chunkNum);
         }
-        if (value == null && loadDB) {
+        if (value == null && chunkNum != 0 && loadDB) {
             //TODO pierre 为什么要去DB中查询
             value = getArrayChunkFromState(arrayRef, arrayKey);
             if (value != null) {

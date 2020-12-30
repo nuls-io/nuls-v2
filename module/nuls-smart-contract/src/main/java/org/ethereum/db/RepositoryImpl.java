@@ -170,6 +170,13 @@ public class RepositoryImpl implements Repository, org.ethereum.facade.Repositor
         DataWord dataWord = accountState == null ? null : storageCache.get(addr).get(key);
         Log.warn(String.format("[%s]DB get - addr: %s, get key: %s, get value: %s", threadLocal.get(), AddressTool.getStringAddressByBytes(addr), key.toString(),
                 dataWord == null ? null : dataWord.asString()));
+        try {
+            if (dataWord == null) {
+                throw new Exception("empty dataWord!");
+            }
+        } catch (Exception e) {
+            Log.error(e);
+        }
         threadLocal.incrementAndGet();
         return dataWord;
         //return accountState == null ? null : storageCache.get(addr).get(key);
