@@ -94,7 +94,7 @@ deflationTimeInterval=2592000
 #合约视图方法调用最大消耗的Gas
 maxViewGas=100000000
 systemLogLevel=WARN
-crossTokenSystemContract=tNULSeBaN5MkYxC7ivr23SbRnHrsmJDg86R7Kv
+crossTokenSystemContract=tNULSeBaN7uzhZpsoRrNnLGuznogReEQPejiM1
 
 [public-service]
 #public-service模块对外的rpc端口号
