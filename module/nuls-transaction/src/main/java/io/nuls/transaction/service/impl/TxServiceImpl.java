@@ -469,7 +469,7 @@ public class TxServiceImpl implements TxService {
                 throw new NulsException(TxErrorCode.TX_FROM_CANNOT_HAS_CONTRACT_ADDRESS);
             }
 
-            if(!txRegister.getUnlockTx() && coinFrom.getLocked() == -1){
+            if (!txRegister.getUnlockTx() && coinFrom.getLocked() == -1) {
                 chain.getLogger().error("This transaction type can not unlock the token");
                 throw new NulsException(TxErrorCode.TX_VERIFY_FAIL);
             }
@@ -688,12 +688,15 @@ public class TxServiceImpl implements TxService {
                     throw new NulsException(TxErrorCode.PACKAGE_TIME_OUT);
                 }
                 if (chain.getProtocolUpgrade().get()) {
+                    chain.getCanProtocolUpgrade().set(false);
                     nulsLogger.info("Protocol Upgrade Package stop -chain:{} -best block height", chain.getChainId(), chain.getBestBlockHeight());
                     backTempPackablePool(chain, currentBatchPackableTxs);
                     //放回可打包交易和孤儿
                     putBackPackablePool(chain, packingTxList, orphanTxSet);
                     //直接打空块
-                    return new TxPackage(new ArrayList<>(), null, chain.getBestBlockHeight() + 1);
+                    TxPackage txPackage = new TxPackage(new ArrayList<>(), null, chain.getBestBlockHeight() + 1);
+                    chain.getCanProtocolUpgrade().set(true);
+                    return txPackage;
                 }
                 //如果本地最新区块+1 大于当前在打包区块的高度, 说明本地最新区块已更新,需要重新打包,把取出的交易放回到打包队列
                 if (blockHeight < chain.getBestBlockHeight() + 1) {
@@ -1197,7 +1200,7 @@ public class TxServiceImpl implements TxService {
             while (iterator.hasNext()) {
                 TxPackageWrapper txPackageWrapper = iterator.next();
                 if (TxManager.isUnSystemSmartContract(chain, txPackageWrapper.getTx().getType())) {
-                     if (setLimitedRollbackOriginTx.contains(txPackageWrapper.getTx().getHash().toHex())) {
+                    if (setLimitedRollbackOriginTx.contains(txPackageWrapper.getTx().getHash().toHex())) {
                         // 有加回次数限制的交易
                         addOrphanTxSet(chain, orphanTxSet, txPackageWrapper);
                     } else {
@@ -1846,6 +1849,7 @@ public class TxServiceImpl implements TxService {
     }
 
     long MAX_GAS_COST_IN_BLOCK = 13000000L;
+
     @Override
     public TxPackage getPackableTxsV8(Chain chain, long endtimestamp, long maxTxDataSize, long blockTime, String packingAddress, String preStateRoot) {
         chain.getPackageLock().lock();
@@ -2622,7 +2626,7 @@ public class TxServiceImpl implements TxService {
     }
 
     private Map processContractResultV8(Chain chain, List<TxPackageWrapper> packingTxList, Set<TxPackageWrapper> orphanTxSet, List<String> contractGenerateTxs, List<String> originTxList,
-                                      long blockHeight, boolean contractBefore, String stateRoot) throws IOException {
+                                        long blockHeight, boolean contractBefore, String stateRoot) throws IOException {
 
         boolean hasTxbackPackablePool = false;
         /**当contractBefore通知失败,或者contractBatchEnd失败则需要将智能合约交易还回待打包队列*/

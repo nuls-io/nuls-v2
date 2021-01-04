@@ -113,6 +113,8 @@ public class Chain {
      * 执行协议升级的处理
      */
     private AtomicBoolean protocolUpgrade;
+    private AtomicBoolean canProtocolUpgrade;
+
 
 
     private Set<Integer> contractGenerateTxTypes;
@@ -247,6 +249,14 @@ public class Chain {
 
     public AtomicBoolean getProtocolUpgrade() {
         return protocolUpgrade;
+    }
+
+    public AtomicBoolean getCanProtocolUpgrade() {
+        return canProtocolUpgrade;
+    }
+
+    public void setCanProtocolUpgrade(AtomicBoolean canProtocolUpgrade) {
+        this.canProtocolUpgrade = canProtocolUpgrade;
     }
 
     public AtomicBoolean getPackableState() {
