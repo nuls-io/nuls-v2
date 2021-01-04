@@ -954,6 +954,7 @@ public class TxServiceImpl implements TxService {
             //孤儿交易加回待打包队列去
             putBackPackablePool(chain, orphanTxSet);
             if (chain.getProtocolUpgrade().get()) {
+                chain.getCanProtocolUpgrade().set(false);
                 //协议升级直接打空块,取出的交易，倒序放入新交易处理队列
                 int size = packingTxList.size();
                 for (int i = size - 1; i >= 0; i--) {
@@ -967,7 +968,9 @@ public class TxServiceImpl implements TxService {
                     baseValidateTx(chain, tx, txRegister);
                     chain.getUnverifiedQueue().addLast(new TransactionNetPO(txPackageWrapper.getTx()));
                 }
-                return new TxPackage(new ArrayList<>(), null, chain.getBestBlockHeight() + 1);
+                TxPackage txPackage = new TxPackage(new ArrayList<>(), null, chain.getBestBlockHeight() + 1);
+                chain.getCanProtocolUpgrade().set(true);
+                return txPackage;
             }
             //检测预留传输时间
             long current = NulsDateUtils.getCurrentTimeMillis();
@@ -1947,12 +1950,16 @@ public class TxServiceImpl implements TxService {
                     throw new NulsException(TxErrorCode.PACKAGE_TIME_OUT);
                 }
                 if (chain.getProtocolUpgrade().get()) {
+                    chain.getCanProtocolUpgrade().set(false);
                     nulsLogger.info("Protocol Upgrade Package stop -chain:{} -best block height", chain.getChainId(), chain.getBestBlockHeight());
                     backTempPackablePool(chain, currentBatchPackableTxs);
                     //放回可打包交易和孤儿
                     putBackPackablePool(chain, packingTxList, orphanTxSet);
                     //直接打空块
-                    return new TxPackage(new ArrayList<>(), null, chain.getBestBlockHeight() + 1);
+                    TxPackage txPackage = new TxPackage(new ArrayList<>(), null, chain.getBestBlockHeight() + 1);
+                    chain.getCanProtocolUpgrade().set(true);
+                    return txPackage;
+
                 }
                 //如果本地最新区块+1 大于当前在打包区块的高度, 说明本地最新区块已更新,需要重新打包,把取出的交易放回到打包队列
                 if (blockHeight < chain.getBestBlockHeight() + 1) {
@@ -2229,6 +2236,7 @@ public class TxServiceImpl implements TxService {
             //孤儿交易加回待打包队列去
             putBackPackablePool(chain, orphanTxSet);
             if (chain.getProtocolUpgrade().get()) {
+                chain.getCanProtocolUpgrade().set(false);
                 //协议升级直接打空块,取出的交易，倒序放入新交易处理队列
                 int size = packingTxList.size();
                 for (int i = size - 1; i >= 0; i--) {
@@ -2242,7 +2250,9 @@ public class TxServiceImpl implements TxService {
                     baseValidateTx(chain, tx, txRegister);
                     chain.getUnverifiedQueue().addLast(new TransactionNetPO(txPackageWrapper.getTx()));
                 }
-                return new TxPackage(new ArrayList<>(), null, chain.getBestBlockHeight() + 1);
+                TxPackage txPackage = new TxPackage(new ArrayList<>(), null, chain.getBestBlockHeight() + 1);
+                chain.getCanProtocolUpgrade().set(true);
+                return txPackage;
             }
             //检测预留传输时间
             long current = NulsDateUtils.getCurrentTimeMillis();
