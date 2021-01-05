@@ -75,7 +75,7 @@ public class ContractMultyAssetOfflineTest {
     protected long gasLimit = 200000L;
     protected long gasPrice = 25L;
     protected long minutes_3 = 60 * 3;
-    protected String offlineContract = "tNULSeBaN5ZoJhP84ePhDsSENXMs5NzK24JjLX";
+    protected String offlineContract = "tNULSeBaN31HBrLhXsWDkSz1bjhw5qGBcjafVJ";
     // "http://localhost:18004/"
     protected String apiURL = "http://beta.api.nuls.io/";
 

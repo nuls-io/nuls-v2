@@ -157,7 +157,7 @@ public class Utils {
         String[] value;
         for (int i = 0; i < length; i++) {
             value = multyAssetValues[i];
-            list.add(new ProgramMultyAssetValue(new BigInteger(value[0]), String.valueOf(value[1]), Integer.valueOf(value[2]), Integer.valueOf(value[3])));
+            list.add(new ProgramMultyAssetValue(new BigInteger(value[0]), String.valueOf(value[3]), Integer.valueOf(value[1]), Integer.valueOf(value[2])));
         }
         return list;
     }

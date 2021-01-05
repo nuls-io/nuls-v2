@@ -1076,8 +1076,8 @@ public class ContractController {
             }
 
             String[][] multyAssetValues = null;
-            if (params.size() > 8) {
-                List multyAssetValueList = (List) params.get(8);
+            if (params.size() > 12) {
+                List multyAssetValueList = (List) params.get(12);
                 Object[] objArray = multyAssetValueList != null ? multyAssetValueList.toArray() : null;
                 multyAssetValues = ContractUtil.twoDimensionalArray(objArray);
             }
