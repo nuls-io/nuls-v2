@@ -48,10 +48,7 @@ import io.nuls.contract.vm.instructions.stack.Pop;
 import io.nuls.contract.vm.instructions.stack.Swap;
 import io.nuls.contract.vm.instructions.stores.*;
 import io.nuls.contract.vm.natives.io.nuls.contract.sdk.NativeAddress;
-import io.nuls.contract.vm.program.ProgramInternalCall;
-import io.nuls.contract.vm.program.ProgramInvokeRegisterCmd;
-import io.nuls.contract.vm.program.ProgramMethodArg;
-import io.nuls.contract.vm.program.ProgramTransfer;
+import io.nuls.contract.vm.program.*;
 import io.nuls.contract.vm.program.impl.ProgramContext;
 import io.nuls.contract.vm.program.impl.ProgramExecutorImpl;
 import io.nuls.contract.vm.program.impl.ProgramInvoke;
@@ -67,6 +64,7 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import static io.nuls.contract.constant.ContractConstant.BALANCE_TRIGGER_FOR_CONSENSUS_CONTRACT_METHOD_DESC_IN_VM;
@@ -122,6 +120,18 @@ public class VM {
     private List<ProgramInvokeRegisterCmd> invokeRegisterCmds = new ArrayList<>();
 
     private List<Object> orderedInnerTxs = new ArrayList<>();
+
+    // add by pierre at 2020-11-03 可能影响兼容性，考虑协议升级
+    private LinkedList<String> stackTraces = new LinkedList<>();
+
+    public LinkedList<String> getStackTraces() {
+        return stackTraces;
+    }
+
+    public void setStackTraces(LinkedList<String> stackTraces) {
+        this.stackTraces = stackTraces;
+    }
+    // end code by pierre
 
     public VM() {
         this.vmStack = new VMStack(VM_STACK_MAX_SIZE);
@@ -185,6 +195,12 @@ public class VM {
         programContext.setGasPrice(programInvoke.getPrice());
         programContext.setGas(programInvoke.getGasLimit());
         programContext.setValue(this.heap.newBigInteger(programInvoke.getValue().toString()));
+        // 转化多资产列表
+        List<ProgramMultyAssetValue> multyAssetValues = programInvoke.getMultyAssetValues();
+        if (multyAssetValues != null && !multyAssetValues.isEmpty()) {
+            programContext.setMultyAssetValues(this.heap.multyAssetValueArrayToObjectRef(multyAssetValues));
+        }
+
         programContext.setNumber(programInvoke.getNumber());
         programContext.setEstimateGas(programInvoke.isEstimateGas());
         if(programInvoke.getSenderPublicKey() != null) {

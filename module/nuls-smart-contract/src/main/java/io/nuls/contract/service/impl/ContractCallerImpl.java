@@ -33,6 +33,7 @@ import io.nuls.contract.helper.ContractNewTxHandler;
 import io.nuls.contract.manager.ContractTempBalanceManager;
 import io.nuls.contract.model.bo.*;
 import io.nuls.contract.model.dto.ContractPackageDto;
+import io.nuls.contract.model.txdata.CallContractData;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.service.ContractCaller;
 import io.nuls.contract.service.ContractExecutor;
@@ -41,6 +42,7 @@ import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.thread.commom.NulsThreadFactory;
 
 import java.util.ArrayList;
@@ -60,9 +62,9 @@ public class ContractCallerImpl implements ContractCaller {
 
     private static ExecutorService TX_EXECUTOR_SERVICE;
     static {
-        int availableProcessors = Runtime.getRuntime().availableProcessors();
         int threadCount = 4;
         // 线程数最大4个，线程核心小于4时，使用线程核心数
+        int availableProcessors = Runtime.getRuntime().availableProcessors();
         if(availableProcessors < threadCount) {
             threadCount = availableProcessors;
         }
@@ -137,7 +139,7 @@ public class ContractCallerImpl implements ContractCaller {
     }
 
     @Override
-    public List<ContractResult> reCallTx(ProgramExecutor batchExecutor, List<ContractWrapperTransaction> reCallTxList, int chainId, String preStateRoot) {
+    public List<ContractResult> reCallTx(ProgramExecutor batchExecutor, List<ContractWrapperTransaction> reCallTxList, int chainId, String preStateRoot) throws NulsException {
         BlockHeader currentBlockHeader = contractHelper.getBatchInfoCurrentBlockHeader(chainId);
         long blockTime = currentBlockHeader.getTime();
         long lastestHeight = currentBlockHeader.getHeight() - 1;
@@ -146,7 +148,7 @@ public class ContractCallerImpl implements ContractCaller {
         ContractData contractData;
         ContractResult contractResult;
         for (ContractWrapperTransaction tx : reCallTxList) {
-            Log.info("[ReCall] Tx hash is {}", tx.getHash());
+            Log.info("[ReCall] Tx hash is {}", tx.getHash().toHex());
             contractData = tx.getContractData();
             switch (tx.getType()) {
                 case CALL_CONTRACT:

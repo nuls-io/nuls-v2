@@ -1,4 +1,3 @@
-
 # Created by https://www.gitignore.io/api/macos,maven,jetbrains+iml
 
 ### JetBrains+iml ###
@@ -115,7 +114,8 @@ buildNumber.properties
 # Nuls output
 # log
 logs/
-/data/
+/data-prod/
+/data*/
 !tools/nuls-tools/base-tools/src/main/java/io/nuls/base/data
 keystore/
 Modules/
@@ -123,3 +123,7 @@ NULS-Wallet-linux64-beta*
 NULS_Wallet*
 config_tmp/
 NULS-Wallet-linux64-alpha*
+.package-version
+genesis-block_*.json
+module_*.ncf
+nuls-v2.zip

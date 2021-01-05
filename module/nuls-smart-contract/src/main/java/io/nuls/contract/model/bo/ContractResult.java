@@ -98,16 +98,17 @@ public class ContractResult {
     private String remark;
     private boolean isTerminated;
     private Set<String> contractAddressInnerCallSet;
+    private List<ContractMultyAssetMergedTransfer> mergerdMultyAssetTransferList = new ArrayList<>();
 
     private transient Object txTrack;
-    private transient Map<ByteArrayWrapper, ProgramAccount> accounts;
+    private transient Map<String, ProgramAccount> accounts;
     private transient List<Object> orderedInnerTxs = new ArrayList<>();
 
-    public Map<ByteArrayWrapper, ProgramAccount> getAccounts() {
+    public Map<String, ProgramAccount> getAccounts() {
         return accounts;
     }
 
-    public void setAccounts(Map<ByteArrayWrapper, ProgramAccount> accounts) {
+    public void setAccounts(Map<String, ProgramAccount> accounts) {
         this.accounts = accounts;
     }
 
@@ -177,6 +178,7 @@ public class ContractResult {
                 ", isNrc20=" + isNrc20 +
                 ", transfersSize=" + (transfers != null ? transfers.size() : 0) +
                 ", mergedTransferList=" + (mergedTransferList != null ? mergedTransferList.size() : 0) +
+                ", mergerdMultyAssetTransferList=" + (mergerdMultyAssetTransferList != null ? mergerdMultyAssetTransferList.size() : 0) +
                 ", contractTransferList=" + (contractTransferList != null ? contractTransferList.size() : 0) +
                 ", invokeRegisterCmds=" + (invokeRegisterCmds != null ? invokeRegisterCmds.size() : 0) +
                 ", events=" + events +
@@ -376,6 +378,14 @@ public class ContractResult {
 
     public void setMergedTransferList(List<ContractMergedTransfer> mergedTransferList) {
         this.mergedTransferList = mergedTransferList;
+    }
+
+    public List<ContractMultyAssetMergedTransfer> getMergerdMultyAssetTransferList() {
+        return mergerdMultyAssetTransferList;
+    }
+
+    public void setMergerdMultyAssetTransferList(List<ContractMultyAssetMergedTransfer> mergerdMultyAssetTransferList) {
+        this.mergerdMultyAssetTransferList = mergerdMultyAssetTransferList;
     }
 
     public List<ContractTransferTransaction> getContractTransferList() {

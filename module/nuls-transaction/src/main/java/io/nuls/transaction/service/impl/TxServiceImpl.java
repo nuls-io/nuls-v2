@@ -41,11 +41,13 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.log.Log;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.model.ByteArrayWrapper;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.parse.SerializeUtils;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.core.thread.ThreadUtils;
@@ -305,14 +307,20 @@ public class TxServiceImpl implements TxService {
         //验证签名
         validateTxSignature(tx, txRegister, chain);
         //如果有coinData, 则进行验证,有一些交易(黄牌)没有coinData数据
-        if (tx.getType() == TxType.YELLOW_PUNISH || tx.getType() == TxType.VERIFIER_CHANGE || tx.getType() == TxType.VERIFIER_INIT  || tx.getType() == TxType.REGISTERED_CHAIN_CHANGE) {
+        int txType = tx.getType();
+        if (txType == TxType.YELLOW_PUNISH
+                || txType == TxType.VERIFIER_CHANGE
+                || txType == TxType.VERIFIER_INIT
+                || txType == TxType.REGISTERED_CHAIN_CHANGE) {
             return;
         }
         CoinData coinData = TxUtil.getCoinData(tx);
         validateCoinFromBase(chain, txRegister, coinData.getFrom());
         validateCoinToBase(chain, txRegister, coinData.getTo());
         if (txRegister.getVerifyFee()) {
-            validateFee(chain, tx.getType(), tx.size(), coinData, txRegister);
+            /* 2020/11/24 基础验证中验证手续费获取交易size时, 去掉交易签名的size */
+            int validateTxSize = tx.size() - SerializeUtils.sizeOfBytes(tx.getTransactionSignature());
+            validateFee(chain, tx.getType(), validateTxSize, coinData, txRegister);
         }
     }
 
@@ -604,7 +612,7 @@ public class TxServiceImpl implements TxService {
             long batchValidReserve = TxConstant.PACKAGE_MODULE_VALIDATOR_RESERVE_TIME;
             if (packableTime <= batchValidReserve) {
                 //直接打空块
-                return new TxPackage(new ArrayList<>(), preStateRoot, chain.getBestBlockHeight() + 1);
+                return new TxPackage(new ArrayList<>(), null, chain.getBestBlockHeight() + 1);
             }
             //重置标志
             chain.setContractTxFail(false);
@@ -648,6 +656,19 @@ public class TxServiceImpl implements TxService {
             int batchContractTxCount = 0;
             //是否停止执行职能合约,如果位true,则取出的智能合约本次打包不再处理,需要还回待打包队列
             boolean stopInvokeContract = false;
+
+            int packageContractTxMaxCount;
+            Random random = new Random();
+            int availableProcessors = Runtime.getRuntime().availableProcessors();
+            if (availableProcessors <= 4) {
+                packageContractTxMaxCount = 20 + random.nextInt(10);
+            } else if (availableProcessors <= 8) {
+                packageContractTxMaxCount = 50 + random.nextInt(10);
+            } else {
+                packageContractTxMaxCount = 100 + random.nextInt(20);
+            }
+            //packageContractTxMaxCount = 15;
+
             for (int index = 0; ; index++) {
                 long currentTimeMillis = NulsDateUtils.getCurrentTimeMillis();
                 long currentReserve = endtimestamp - currentTimeMillis;
@@ -672,7 +693,7 @@ public class TxServiceImpl implements TxService {
                     //放回可打包交易和孤儿
                     putBackPackablePool(chain, packingTxList, orphanTxSet);
                     //直接打空块
-                    return new TxPackage(new ArrayList<>(), preStateRoot, chain.getBestBlockHeight() + 1);
+                    return new TxPackage(new ArrayList<>(), null, chain.getBestBlockHeight() + 1);
                 }
                 //如果本地最新区块+1 大于当前在打包区块的高度, 说明本地最新区块已更新,需要重新打包,把取出的交易放回到打包队列
                 if (blockHeight < chain.getBestBlockHeight() + 1) {
@@ -737,7 +758,7 @@ public class TxServiceImpl implements TxService {
                             //限制智能合约交易数量
                             boolean isContract = txRegister.getModuleCode().equals(ModuleE.SC.abbr);
                             if (isContract) {
-                                if (contractTxCount + (++batchContractTxCount) >= TxConstant.PACKAGE_CONTRACT_TX_MAX_COUNT) {
+                                if (contractTxCount + (++batchContractTxCount) >= packageContractTxMaxCount) {
                                     //限制单个区块包含的跨链交易总数，超过跨链交易最大个数，放回去, 然后停止获取交易
                                     packablePool.add(chain, tx);
                                     if (batchProcessListSize > 0) {
@@ -943,7 +964,7 @@ public class TxServiceImpl implements TxService {
                     baseValidateTx(chain, tx, txRegister);
                     chain.getUnverifiedQueue().addLast(new TransactionNetPO(txPackageWrapper.getTx()));
                 }
-                return new TxPackage(new ArrayList<>(), preStateRoot, chain.getBestBlockHeight() + 1);
+                return new TxPackage(new ArrayList<>(), null, chain.getBestBlockHeight() + 1);
             }
             //检测预留传输时间
             long current = NulsDateUtils.getCurrentTimeMillis();
@@ -971,7 +992,7 @@ public class TxServiceImpl implements TxService {
             nulsLogger.error(e);
             //可打包交易,孤儿交易,全加回去
             putBackPackablePool(chain, packingTxList, orphanTxSet);
-            return new TxPackage(new ArrayList<>(), preStateRoot, chain.getBestBlockHeight() + 1);
+            return new TxPackage(new ArrayList<>(), null, chain.getBestBlockHeight() + 1);
         } finally {
             chain.getPackageLock().unlock();
         }
@@ -1824,4 +1845,883 @@ public class TxServiceImpl implements TxService {
         }
     }
 
+    long MAX_GAS_COST_IN_BLOCK = 13000000L;
+    @Override
+    public TxPackage getPackableTxsV8(Chain chain, long endtimestamp, long maxTxDataSize, long blockTime, String packingAddress, String preStateRoot) {
+        chain.getPackageLock().lock();
+        long startTime = NulsDateUtils.getCurrentTimeMillis();
+        List<TxPackageWrapper> packingTxList = new ArrayList<>();
+        //记录账本的孤儿交易,返回给共识的时候给过滤出去,因为在因高度变化而导致重新打包的时候,需要还原到待打包队列
+        Set<TxPackageWrapper> orphanTxSet = new HashSet<>();
+        NulsLogger nulsLogger = chain.getLogger();
+        try {
+            //本次打包高度
+            long blockHeight = chain.getBestBlockHeight() + 1;
+
+            long packableTime = endtimestamp - startTime;
+            nulsLogger.info("[Package start] -可打包时间：{}, -可打包容量：{}B , - height:{}, - 当前待打包队列交易hash数:{}, - 待打包队列实际交易数:{}",
+                    packableTime, maxTxDataSize, blockHeight, packablePool.packableHashQueueSize(chain), packablePool.packableTxMapSize(chain));
+            long batchValidReserve = TxConstant.PACKAGE_MODULE_VALIDATOR_RESERVE_TIME;
+            if (packableTime <= batchValidReserve) {
+                //直接打空块
+                return new TxPackage(new ArrayList<>(), null, chain.getBestBlockHeight() + 1);
+            }
+            //重置标志
+            chain.setContractTxFail(false);
+            //组装统一验证参数数据,key为各模块统一验证器cmd
+            Map<String, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+
+            long packingTime = endtimestamp - startTime;
+            //统计总等待时间
+            int allSleepTime = 0;
+            //循环获取交易使用时间
+            long whileTime;
+            //验证账本总时间
+            long totalLedgerTime = 0;
+            //模块统一验证使用总时间
+            long batchModuleTime;
+            long totalSize = 0L;
+            //获取交易时计算区块总size大小临时值
+            long totalSizeTemp = 0L;
+            int maxCount = TxConstant.PACKAGE_TX_MAX_COUNT - TxConstant.PACKAGE_TX_VERIFY_COINDATA_NUMBER_OF_TIMES_TO_PROCESS;
+            //通过配置的百分比，计算从总的打包时间中预留给批量验证的时间
+            //            long batchValidReserve = packagingReservationTime(chain, packingTime);
+            long packageRpcReserveTime = chain.getConfig().getPackageRpcReserveTime();
+
+            //智能合约通知标识,出现的第一个智能合约交易并且调用验证器通过时,有则只第一次时通知.
+            boolean contractNotify = false;
+
+            //向账本模块发送要批量验证coinData的标识
+            LedgerCall.coinDataBatchNotify(chain);
+            //取出的交易集合(需要发送给账本验证)
+            List<String> batchProcessList = new ArrayList<>();
+            Set<String> duplicatesVerify = new HashSet<>();
+            //取出的交易集合
+            List<TxPackageWrapper> currentBatchPackableTxs = new ArrayList<>();
+            //本次打包包含跨链交易个数
+            int corssTxCount = 0;
+            //一批次处理，包含跨链交易个数
+            int batchCorssTxCount = 0;
+            //本次打包包含合约交易个数
+            int contractTxCount = 0;
+            //一批次处理，包含合约交易个数
+            int batchContractTxCount = 0;
+            //是否停止执行职能合约,如果位true,则取出的智能合约本次打包不再处理,需要还回待打包队列
+            boolean stopInvokeContract = false;
+
+            int packageContractTxMaxCount;
+            /*Random random = new Random();
+            int availableProcessors = Runtime.getRuntime().availableProcessors();
+            if (availableProcessors <= 4) {
+                packageContractTxMaxCount = 20 + random.nextInt(10);
+            } else if (availableProcessors <= 8) {
+                packageContractTxMaxCount = 50 + random.nextInt(10);
+            } else {
+                packageContractTxMaxCount = 100 + random.nextInt(20);
+            }*/
+            packageContractTxMaxCount = 300;
+            long totalGasInBlock = 0;
+            List<String> contractGenerateTxs = new ArrayList<>();
+            List<String> originTxList = new ArrayList<>();
+
+            for (int index = 0; ; index++) {
+                long currentTimeMillis = NulsDateUtils.getCurrentTimeMillis();
+                long currentReserve = endtimestamp - currentTimeMillis;
+                if (currentReserve <= batchValidReserve) {
+                    if (nulsLogger.isDebugEnabled()) {
+                        nulsLogger.debug("获取交易时间到,进入模块验证阶段: currentTimeMillis:{}, -endtimestamp:{}, -offset:{}, -remaining:{}",
+                                currentTimeMillis, endtimestamp, batchValidReserve, currentReserve);
+                    }
+                    backTempPackablePool(chain, currentBatchPackableTxs);
+                    break;
+                }
+                if (currentReserve < packageRpcReserveTime) {
+                    //超时,留给最后数据组装和RPC传输时间不足
+                    nulsLogger.error("getPackableTxs time out, endtimestamp:{}, current:{}, endtimestamp-current:{}, reserveTime:{}",
+                            endtimestamp, currentTimeMillis, currentReserve, packageRpcReserveTime);
+                    backTempPackablePool(chain, currentBatchPackableTxs);
+                    throw new NulsException(TxErrorCode.PACKAGE_TIME_OUT);
+                }
+                if (chain.getProtocolUpgrade().get()) {
+                    nulsLogger.info("Protocol Upgrade Package stop -chain:{} -best block height", chain.getChainId(), chain.getBestBlockHeight());
+                    backTempPackablePool(chain, currentBatchPackableTxs);
+                    //放回可打包交易和孤儿
+                    putBackPackablePool(chain, packingTxList, orphanTxSet);
+                    //直接打空块
+                    return new TxPackage(new ArrayList<>(), null, chain.getBestBlockHeight() + 1);
+                }
+                //如果本地最新区块+1 大于当前在打包区块的高度, 说明本地最新区块已更新,需要重新打包,把取出的交易放回到打包队列
+                if (blockHeight < chain.getBestBlockHeight() + 1) {
+                    nulsLogger.info("获取交易过程中最新区块高度已增长,把取出的交易以及孤儿放回到打包队列, 重新打包...");
+                    backTempPackablePool(chain, currentBatchPackableTxs);
+                    //放回可打包交易和孤儿
+                    putBackPackablePool(chain, packingTxList, orphanTxSet);
+                    return getPackableTxsV8(chain, endtimestamp, maxTxDataSize, blockTime, packingAddress, preStateRoot);
+                }
+                if (packingTxList.size() > maxCount) {
+                    if (nulsLogger.isDebugEnabled()) {
+                        nulsLogger.debug("获取交易已达max count,进入模块验证阶段: currentTimeMillis:{}, -endtimestamp:{}, -offset:{}, -remaining:{}",
+                                currentTimeMillis, endtimestamp, batchValidReserve, endtimestamp - currentTimeMillis);
+                    }
+                    backTempPackablePool(chain, currentBatchPackableTxs);
+                    break;
+                }
+                int batchProcessListSize = batchProcessList.size();
+                boolean process = false;
+                Transaction tx = null;
+                boolean maxDataSize = false;
+                try {
+                    tx = packablePool.poll(chain);
+                    if (tx == null && batchProcessListSize == 0) {
+                        Thread.sleep(10L);
+                        allSleepTime += 10;
+                        continue;
+                    } else if (tx == null && batchProcessListSize > 0) {
+                        //达到处理该批次的条件
+                        process = true;
+                    } else if (tx != null) {
+                        if (!duplicatesVerify.add(tx.getHash().toHex())) {
+                            //加入不进去表示已存在
+                            continue;
+                        }
+                        long txSize = tx.size();
+                        if ((totalSizeTemp + txSize) > maxTxDataSize) {
+                            packablePool.offerFirstOnlyHash(chain, tx);
+                            nulsLogger.info("交易已达最大容量, 实际值: {}, totalSizeTemp:{}, 当前交易size：{} - 预定最大值maxTxDataSize:{}, txhash:{}", totalSize, totalSizeTemp, txSize, maxTxDataSize, tx.getHash().toHex());
+                            maxDataSize = true;
+                            if (batchProcessListSize > 0) {
+                                //达到处理该批次的条件
+                                process = true;
+                            } else {
+                                break;
+                            }
+                        } else {
+                            TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
+                            //限制跨链交易数量
+                            if (txRegister.getModuleCode().equals(ModuleE.CC.abbr)) {
+                                if (corssTxCount + (++batchCorssTxCount) >= TxConstant.PACKAGE_CROSS_TX_MAX_COUNT) {
+                                    //限制单个区块包含的跨链交易总数，超过跨链交易最大个数，放回去, 然后停止获取交易
+                                    packablePool.add(chain, tx);
+                                    if (batchProcessListSize > 0) {
+                                        //达到处理该批次的条件
+                                        process = true;
+                                    } else {
+                                        break;
+                                    }
+                                }
+                            }
+                            //限制智能合约交易数量
+                            boolean isContract = txRegister.getModuleCode().equals(ModuleE.SC.abbr);
+                            if (isContract) {
+                                if (contractTxCount + (++batchContractTxCount) >= packageContractTxMaxCount) {
+                                    //限制单个区块包含的跨链交易总数，超过跨链交易最大个数，放回去, 然后停止获取交易
+                                    packablePool.add(chain, tx);
+                                    if (batchProcessListSize > 0) {
+                                        //达到处理该批次的条件
+                                        process = true;
+                                    } else {
+                                        break;
+                                    }
+                                }
+                            }
+                            String txHex;
+                            try {
+                                txHex = RPCUtil.encode(tx.serialize());
+                            } catch (Exception e) {
+                                nulsLogger.warn(e.getMessage(), e);
+                                nulsLogger.error("丢弃获取hex出错交易, txHash:{}, - type:{}, - time:{}", tx.getHash().toHex(), tx.getType(), tx.getTime());
+                                clearInvalidTx(chain, tx);
+                                continue;
+                            }
+                            TxPackageWrapper txPackageWrapper = new TxPackageWrapper(tx, index, txHex);
+                            batchProcessList.add(txHex);
+                            currentBatchPackableTxs.add(txPackageWrapper);
+                            if (batchProcessList.size() == TxConstant.PACKAGE_TX_VERIFY_COINDATA_NUMBER_OF_TIMES_TO_PROCESS) {
+                                //达到处理该批次的条件
+                                process = true;
+                            }
+                        }
+                        //总大小加上当前批次各笔交易大小
+                        totalSizeTemp += txSize;
+                    }
+                    if (process) {
+                        long verifyLedgerStart = NulsDateUtils.getCurrentTimeMillis();
+                        if (!chain.getPackableState().get()) {
+                            nulsLogger.info("获取交易过程中保存或回滚区块触发账本提交或回滚, 重新打包...");
+                            //放回可打包交易和孤儿
+                            packingTxList.addAll(currentBatchPackableTxs);
+                            putBackPackablePool(chain, packingTxList, orphanTxSet);
+                            Thread.sleep(30L);
+                            return getPackableTxsV8(chain, endtimestamp, maxTxDataSize, blockTime, packingAddress, preStateRoot);
+                        }
+                        verifyLedger(chain, batchProcessList, currentBatchPackableTxs, orphanTxSet, false, false);
+                        totalLedgerTime += NulsDateUtils.getCurrentTimeMillis() - verifyLedgerStart;
+
+                        Iterator<TxPackageWrapper> it = currentBatchPackableTxs.iterator();
+                        while (it.hasNext()) {
+                            TxPackageWrapper txPackageWrapper = it.next();
+                            Transaction transaction = txPackageWrapper.getTx();
+                            TxRegister txRegister = TxManager.getTxRegister(chain, transaction.getType());
+                            String moduleCode = txRegister.getModuleCode();
+                            boolean isSmartContractTx = moduleCode.equals(ModuleE.SC.abbr);
+                            boolean isCrossTx = moduleCode.equals(ModuleE.CC.abbr);
+                            // add by pierre at 2019-11-02 跨链转账交易发送到智能合约模块进行解析，是否为合约资产跨链转账 需要协议升级 done
+                            if (ProtocolGroupManager.getCurrentVersion(chain.getChainId()) >= TxContext.UPDATE_VERSION_V250) {
+                                boolean isCrossTransferTx = TxType.CROSS_CHAIN == transaction.getType();
+                                if (!isSmartContractTx && txConfig.isCollectedSmartContractModule()) {
+                                    isSmartContractTx = isCrossTransferTx;
+                                }
+                            }
+                            // end code by pierre
+                            if (isSmartContractTx) {
+                                if (stopInvokeContract) {
+                                    //该标志true,表示不再处理智能合约交易,需要暂存交易,统一还回待打包队列
+                                    orphanTxSet.add(txPackageWrapper);
+                                    it.remove();
+                                    continue;
+                                }
+                                // 出现智能合约,且通知标识为false,则先调用通知
+                                if (!contractNotify) {
+                                    ContractCall.contractBatchBegin(chain, blockHeight, blockTime, packingAddress, preStateRoot, 0);
+                                    contractNotify = true;
+                                }
+                                try {
+                                    // 调用执行智能合约
+                                    Map<String, Object> invokeContractRs = ContractCall.invokeContractV8(chain, txPackageWrapper.getTxHex(), 0);
+                                    //boolean success = (boolean) invokeContractRs.get("success");
+                                    long gasUsed = Long.valueOf(invokeContractRs.get("gasUsed").toString());
+                                    List<String> txList = (List<String>) invokeContractRs.get("txList");
+                                    totalGasInBlock += gasUsed;
+                                    if (txList != null && !txList.isEmpty()) {
+                                        contractGenerateTxs.addAll(txList);
+                                        String txHash = transaction.getHash().toString();
+                                        for (int i = 0, size = txList.size(); i < size; i++) {
+                                            originTxList.add(txHash);
+                                        }
+                                    }
+
+                                    // 检查区块中已使用的GAS
+                                    if (totalGasInBlock >= MAX_GAS_COST_IN_BLOCK) {
+                                        //不再发invoke
+                                        stopInvokeContract = true;
+                                        continue;
+                                    }
+                                } catch (NulsException e) {
+                                    chain.getLogger().error(e);
+                                    clearInvalidTx(chain, transaction);
+                                    continue;
+                                }
+                            }
+                            totalSize += transaction.getSize();
+
+                            //计算跨链交易的数量
+                            if (isCrossTx) {
+                                corssTxCount++;
+                            }
+                            //计算合约交易的数量
+                            if (isSmartContractTx) {
+                                contractTxCount++;
+                            }
+                            //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
+                            TxUtil.moduleGroups(moduleVerifyMap, txRegister, RPCUtil.encode(transaction.serialize()));
+                            // 检查剩余打包时间
+                            long _currentTimeMillis = NulsDateUtils.getCurrentTimeMillis();
+                            long _currentReserve = endtimestamp - _currentTimeMillis;
+                            if (_currentReserve <= batchValidReserve) {
+                                nulsLogger.info("打包交易时间到,进入模块验证阶段: currentTimeMillis:{}, -endtimestamp:{}, -offset:{}, -remaining:{}",
+                                        _currentTimeMillis, endtimestamp, batchValidReserve, _currentReserve);
+                                //不再发invoke
+                                stopInvokeContract = true;
+                                continue;
+                            }
+                        }
+                        //更新到当前最新区块交易大小总值
+                        totalSizeTemp = totalSize;
+                        packingTxList.addAll(currentBatchPackableTxs);
+
+                        //批次结束重置数据
+                        batchProcessList.clear();
+                        currentBatchPackableTxs.clear();
+                        batchCorssTxCount = 0;
+                        batchContractTxCount = 0;
+                        if (maxDataSize) {
+                            break;
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    currentBatchPackableTxs.clear();
+                    nulsLogger.error("打包交易异常, txHash:{}, - type:{}, - time:{}", tx.getHash().toHex(), tx.getType(), tx.getTime());
+                    nulsLogger.error(e);
+                    continue;
+                }
+
+            }
+            //循环获取交易使用时间
+            whileTime = NulsDateUtils.getCurrentTimeMillis() - startTime;
+            nulsLogger.info("-取出的交易 -count:{} - data size:{}", packingTxList.size(), totalSize);
+
+            boolean contractBefore = false;
+            if (contractNotify) {
+                contractBefore = ContractCall.contractBatchBeforeEnd(chain, blockHeight, 0);
+            }
+            //处理智能合约
+            String stateRoot = preStateRoot;
+            boolean hasTxbackPackablePool = false;
+            long contractStart = NulsDateUtils.getCurrentTimeMillis();
+            /** 智能合约 当通知标识为true, 则表明有智能合约被调用执行*/
+            if (contractNotify && !chain.getContractTxFail()) {
+                //处理智能合约执行结果
+                Map map = processContractResultV8(chain, packingTxList, orphanTxSet, contractGenerateTxs, originTxList, blockHeight, contractBefore, stateRoot);
+                stateRoot = (String) map.get("stateRoot");
+                hasTxbackPackablePool = (boolean) map.get("hasTxbackPackablePool");
+            }
+            //如果合约invoke时有需要还回去的合约交易,或者合约执行结果有还回去的交易,都需要重新验证账本
+            if (stopInvokeContract || hasTxbackPackablePool) {
+                //如果智能合约有退回或者验证不通过的交易 则需要再次账本验证
+                moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_16);
+                verifyAgain(chain, moduleVerifyMap, packingTxList, orphanTxSet, true);
+            }
+            long contractTime = NulsDateUtils.getCurrentTimeMillis() - contractStart;
+
+            //模块统一验证器
+            long batchStart = NulsDateUtils.getCurrentTimeMillis();
+            txModuleValidatorPackable(chain, moduleVerifyMap, packingTxList, orphanTxSet);
+            //模块统一验证使用总时间
+            batchModuleTime = NulsDateUtils.getCurrentTimeMillis() - batchStart;
+
+            List<String> packableTxs = new ArrayList<>();
+            Iterator<TxPackageWrapper> iterator = packingTxList.iterator();
+            Map<NulsHash, Integer> txPackageOrphanMap = chain.getTxPackageOrphanMap();
+            while (iterator.hasNext()) {
+                TxPackageWrapper txPackageWrapper = iterator.next();
+                Transaction tx = txPackageWrapper.getTx();
+                NulsHash hash = tx.getHash();
+                if (txPackageOrphanMap.containsKey(hash)) {
+                    txPackageOrphanMap.remove(hash);
+                }
+                try {
+                    packableTxs.add(RPCUtil.encode(tx.serialize()));
+                } catch (Exception e) {
+                    clearInvalidTx(chain, tx);
+                    iterator.remove();
+                    throw new NulsException(e);
+                }
+            }
+            //将智能合约生成的返还GAS的tx加到队尾
+            if (contractGenerateTxs.size() > 0) {
+                String csTxStr = contractGenerateTxs.get(contractGenerateTxs.size() - 1);
+                if (TxUtil.extractTxTypeFromTx(csTxStr) == TxType.CONTRACT_RETURN_GAS) {
+                    packableTxs.add(csTxStr);
+                }
+            }
+            //检测最新高度
+            if (blockHeight < chain.getBestBlockHeight() + 1) {
+                //这个阶段已经不够时间再打包,所以直接超时异常处理交易回滚至待打包队列,打空块
+                nulsLogger.info("获取交易完成时,当前最新高度已增长,不够时间重新打包,直接超时异常处理交易回滚至待打包队列,打空块");
+                throw new NulsException(TxErrorCode.HEIGHT_UPDATE_UNABLE_TO_REPACKAGE);
+            }
+
+            //孤儿交易加回待打包队列去
+            putBackPackablePool(chain, orphanTxSet);
+            if (chain.getProtocolUpgrade().get()) {
+                //协议升级直接打空块,取出的交易，倒序放入新交易处理队列
+                int size = packingTxList.size();
+                for (int i = size - 1; i >= 0; i--) {
+                    TxPackageWrapper txPackageWrapper = packingTxList.get(i);
+                    Transaction tx = txPackageWrapper.getTx();
+                    //执行交易基础验证
+                    TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
+                    if (null == txRegister) {
+                        throw new NulsException(TxErrorCode.TX_TYPE_INVALID);
+                    }
+                    baseValidateTx(chain, tx, txRegister);
+                    chain.getUnverifiedQueue().addLast(new TransactionNetPO(txPackageWrapper.getTx()));
+                }
+                return new TxPackage(new ArrayList<>(), null, chain.getBestBlockHeight() + 1);
+            }
+            //检测预留传输时间
+            long current = NulsDateUtils.getCurrentTimeMillis();
+            if (endtimestamp - current < packageRpcReserveTime) {
+                //超时,留给最后数据组装和RPC传输时间不足
+                nulsLogger.error("getPackableTxs time out, endtimestamp:{}, current:{}, endtimestamp-current:{}, reserveTime:{}",
+                        endtimestamp, current, endtimestamp - current, packageRpcReserveTime);
+                throw new NulsException(TxErrorCode.PACKAGE_TIME_OUT);
+            }
+
+            TxPackage txPackage = new TxPackage(packableTxs, stateRoot, blockHeight);
+
+            long totalTime = NulsDateUtils.getCurrentTimeMillis() - startTime;
+            nulsLogger.info("[打包时间统计]  总执行时间:{}, 剩余时间:{}, 打包可用时间:{}, 获取交易(循环)总等待时间:{}, " +
+                            "获取交易(循环)执行时间:{}, 获取交易(循环)验证账本总时间:{}, 模块统一验证执行时间:{}, " +
+                            "合约执行时间:{},", totalTime, endtimestamp - NulsDateUtils.getCurrentTimeMillis(),
+                    packingTime, allSleepTime, whileTime, totalLedgerTime, batchModuleTime,
+                    contractTime);
+
+            nulsLogger.info("[Package end] - height:{} - 本次打包交易数:{} - 当前待打包队列交易hash数:{}, - 待打包队列实际交易数:{}" + TxUtil.nextLine(),
+                    blockHeight, packableTxs.size(), packablePool.packableHashQueueSize(chain), packablePool.packableTxMapSize(chain));
+
+            return txPackage;
+        } catch (Exception e) {
+            nulsLogger.error(e);
+            //可打包交易,孤儿交易,全加回去
+            putBackPackablePool(chain, packingTxList, orphanTxSet);
+            return new TxPackage(new ArrayList<>(), null, chain.getBestBlockHeight() + 1);
+        } finally {
+            chain.getPackageLock().unlock();
+        }
+    }
+
+    @Override
+    public Map<String, Object> batchVerifyV8(Chain chain, List<String> txStrList, BlockHeader blockHeader, String blockHeaderStr, String preStateRoot) throws NulsException {
+        NulsLogger logger = chain.getLogger();
+        long s1 = NulsDateUtils.getCurrentTimeMillis();
+        long blockHeight = blockHeader.getHeight();
+        logger.info("[验区块交易] 开始 -----高度:{} -----区块交易数:{}", blockHeight, txStrList.size());
+        List<TxVerifyWrapper> txList = new ArrayList<>();
+        //验证区块中只允许有一个的交易不能有多个
+        Set<Integer> onlyOneTxTypes = new HashSet<>();
+        //智能合约通知标识,出现的第一个智能合约交易并且调用验证器通过时,有则只第一次时通知.
+        boolean contractNotify = false;
+        Transaction scReturnGas = null;
+        long blockTime = blockHeader.getTime();
+        List<Future<Boolean>> futures = new ArrayList<>();
+        //组装统一验证参数数据,key为各模块统一验证器cmd
+        Map<String, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+        int chainId = chain.getChainId();
+        long timeF1;
+        long timeF2;
+        long timeF3;
+        long timeF4;
+        List<byte[]> keys = new ArrayList<>();
+        long f1 = System.currentTimeMillis();
+        long totalGasInBlock = 0;
+        List<String> contractGenerateTxs = new ArrayList<>();
+
+        for (String txStr : txStrList) {
+            Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
+            txList.add(new TxVerifyWrapper(tx, txStr));
+            int type = tx.getType();
+            verifySysTxCount(onlyOneTxTypes, type);
+            TxRegister txRegister = TxManager.getTxRegister(chain, type);
+            if (null == txRegister) {
+                throw new NulsException(TxErrorCode.TX_TYPE_INVALID);
+            }
+            if (type == TxType.CONTRACT_RETURN_GAS) {
+                //记录gas返还交易
+                scReturnGas = tx;
+            }
+            boolean isSmartContractTx = TxManager.isUnSystemSmartContract(txRegister);
+            // add by pierre at 2019-11-02 跨链转账交易发送到智能合约模块进行解析，是否为合约资产跨链转账 需要协议升级 done
+            if (ProtocolGroupManager.getCurrentVersion(chain.getChainId()) >= TxContext.UPDATE_VERSION_V250) {
+                boolean isCrossTransferTx = TxType.CROSS_CHAIN == type;
+                if (!isSmartContractTx && txConfig.isCollectedSmartContractModule()) {
+                    isSmartContractTx = isCrossTransferTx;
+                }
+            }
+            // end code by pierre
+            /** 智能合约*/
+            if (isSmartContractTx) {
+                // 检查区块中已使用的GAS
+                if (totalGasInBlock >= MAX_GAS_COST_IN_BLOCK) {
+                    if (TxManager.isGasCostContractTransaction(type)) {
+                        Log.error("verify block failed: Excess block gas limit of contract transaction detected.");
+                        throw new NulsException(TxErrorCode.CONTRACT_VERIFY_FAIL);
+                    }
+                }
+                /** 出现智能合约,且通知标识为false,则先调用通知 */
+                if (!contractNotify) {
+                    String packingAddress = AddressTool.getStringAddressByBytes(blockHeader.getPackingAddress(chain.getChainId()));
+                    ContractCall.contractBatchBegin(chain, blockHeight, blockTime, packingAddress, preStateRoot, 1);
+                    contractNotify = true;
+                }
+                try {
+                    // 调用执行智能合约
+                    Map<String, Object> invokeContractRs = ContractCall.invokeContractV8(chain, RPCUtil.encode(tx.serialize()), 1, Constants.TIMEOUT_TIMEMILLIS * 2);
+                    //boolean success = (boolean) invokeContractRs.get("success");
+                    long gasUsed = Long.valueOf(invokeContractRs.get("gasUsed").toString());
+                    List<String> contractTxList = (List<String>) invokeContractRs.get("txList");
+                    totalGasInBlock += gasUsed;
+                    if (contractTxList != null && !contractTxList.isEmpty()) {
+                        contractGenerateTxs.addAll(contractTxList);
+                    }
+                } catch (IOException e) {
+                    throw new NulsException(TxErrorCode.SERIALIZE_ERROR);
+                }
+            }
+            if (chain.getContractGenerateTxTypes().contains(tx.getType())) {
+                //包含了合约模块生成的并且不应该放在区块交易列表中的交易
+                throw new NulsException(TxErrorCode.SYS_CONTRACT_TX_NON_CIRCULATING);
+            }
+            keys.add(tx.getHash().getBytes());
+            //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
+            TxUtil.moduleGroups(moduleVerifyMap, txRegister, txStr);
+        }
+        if (!contractNotify && null != scReturnGas) {
+            throw new NulsException(TxErrorCode.EXIST_GAS_RETURN_WITHOUT_SC_RETURN);
+        }
+
+        long f2 = System.currentTimeMillis();
+        timeF1 = f2 - f1;
+        //验证交易是否已确认过
+        List<byte[]> confirmedList = confirmedTxStorageService.getExistTxs(chainId, keys);
+        if (!confirmedList.isEmpty()) {
+            logger.error("There are confirmed transactions");
+            try {
+                for (byte[] cfmtx : confirmedList) {
+                    logger.error("confirmed hash:{}", TxUtil.getTransaction(cfmtx).getHash().toHex());
+                }
+            } finally {
+                logger.error("Show confirmed transaction deserialize fail");
+                throw new NulsException(TxErrorCode.TX_CONFIRMED);
+            }
+        }
+        long f3 = System.currentTimeMillis();
+        timeF2 = f3 - f2;
+
+        //验证本地没有的交易
+        List<String> unconfirmedList = unconfirmedTxStorageService.getExistKeysStr(chainId, keys);
+
+        long f4 = System.currentTimeMillis();
+        timeF3 = f4 - f3;
+
+        Set<String> set = new HashSet<>();
+        set.addAll(unconfirmedList);
+        long d = 0L;
+        for (TxVerifyWrapper txVerifyWrapper : txList) {
+            Transaction tx = txVerifyWrapper.getTx();
+            tx.setBlockHeight(blockHeight);
+            //能加入表明未确认中没有,则需要处理
+            if (set.add(tx.getHash().toHex())) {
+                long d1 = System.currentTimeMillis();
+                //不在未确认中就进行基础验证
+                //多线程处理单个交易
+                Future<Boolean> res = verifySignExecutor.submit(new Callable<Boolean>() {
+                    @Override
+                    public Boolean call() {
+                        try {
+                            //只验证单个交易的基础内容(TX模块本地验证)
+                            TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
+                            if (null == txRegister) {
+                                throw new NulsException(TxErrorCode.TX_TYPE_INVALID);
+                            }
+                            baseValidateTx(chain, tx, txRegister);
+                        } catch (Exception e) {
+                            logger.error("batchVerify failed, single tx verify failed. hash:{}, -type:{}", tx.getHash().toHex(), tx.getType());
+                            logger.error(e);
+                            return false;
+                        }
+                        return true;
+                    }
+                });
+                futures.add(res);
+                d += (System.currentTimeMillis() - d1);
+            }
+        }
+
+        timeF4 = System.currentTimeMillis() - f4;
+        logger.info("[验区块交易] 反序列化,合约,分组:{} -是否确认过:{} -是否在未确认中:{}, -单个验证:{} -单内部处理:{} -合计时间:{}",
+                timeF1, timeF2, timeF3, d, timeF4, NulsDateUtils.getCurrentTimeMillis() - s1);
+
+        if (contractNotify) {
+            ContractCall.contractBatchBeforeEnd(chain, blockHeight, 1);
+        }
+
+        long coinDataV = NulsDateUtils.getCurrentTimeMillis();
+        //账本验证
+        if (!LedgerCall.verifyBlockTxsCoinData(chain, txStrList, blockHeight)) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("batch verifyCoinData failed.");
+            }
+            throw new NulsException(TxErrorCode.TX_LEDGER_VERIFY_FAIL);
+        }
+        if (logger.isDebugEnabled()) {
+            logger.debug("[验区块交易] coinData -距方法开始的时间:{}，-验证时间:{}",
+                    NulsDateUtils.getCurrentTimeMillis() - s1, NulsDateUtils.getCurrentTimeMillis() - coinDataV);
+        }
+
+        //模块统一验证器
+        long moduleV = NulsDateUtils.getCurrentTimeMillis();
+        Iterator<Map.Entry<String, List<String>>> it = moduleVerifyMap.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<String, List<String>> entry = it.next();
+            List<String> txHashList = TransactionCall.txModuleValidator(chain,
+                    entry.getKey(), entry.getValue(), blockHeaderStr);
+            if (txHashList != null && txHashList.size() > 0) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("batch module verify fail, module-code:{},  return count:{}", entry.getKey(), txHashList.size());
+                }
+                throw new NulsException(TxErrorCode.TX_VERIFY_FAIL);
+            }
+        }
+        if (logger.isDebugEnabled()) {
+            logger.debug("[验区块交易] 模块统一验证时间:{}", NulsDateUtils.getCurrentTimeMillis() - moduleV);
+            logger.debug("[验区块交易] 模块统一验证 -距方法开始的时间:{}", NulsDateUtils.getCurrentTimeMillis() - s1);
+        }
+
+        /** 智能合约 当通知标识为true, 则表明有智能合约被调用执行*/
+        String scStateRoot = preStateRoot;
+        if (contractNotify) {
+            Map<String, Object> map;
+            try {
+                map = ContractCall.contractBatchEnd(chain, blockHeight, Constants.TIMEOUT_TIMEMILLIS * 3);
+            } catch (NulsException e) {
+                logger.error(e);
+                throw new NulsException(TxErrorCode.CONTRACT_VERIFY_FAIL);
+            }
+            scStateRoot = (String) map.get("stateRoot");
+            List<String> returnGasTx = (List<String>) map.get("txList");
+            contractGenerateTxs.addAll(returnGasTx);
+            /**
+             * 1.共识验证 如果有
+             * 2.如果只有智能合约的共识交易失败，isRollbackPackablePool=true
+             * 3.如果只有其他共识交易失败，单独删掉
+             * 4.混合 执行2.
+             */
+            List<String> scNewConsensusList = new ArrayList<>();
+            List<String> scNewTokenCrossTransferList = new ArrayList<>();
+            for (String scNewTx : contractGenerateTxs) {
+                int scNewTxType = TxUtil.extractTxTypeFromTx(scNewTx);
+                if (scNewTxType == TxType.CONTRACT_CREATE_AGENT
+                        || scNewTxType == TxType.CONTRACT_DEPOSIT
+                        || scNewTxType == TxType.CONTRACT_CANCEL_DEPOSIT
+                        || scNewTxType == TxType.CONTRACT_STOP_AGENT) {
+                    scNewConsensusList.add(scNewTx);
+                } else if (scNewTxType == TxType.CONTRACT_TOKEN_CROSS_TRANSFER) {
+                    scNewTokenCrossTransferList.add(scNewTx);
+                }
+            }
+            if (!scNewConsensusList.isEmpty() || !scNewTokenCrossTransferList.isEmpty()) {
+                //收集共识模块/跨链模块所有交易, 加上新产生的智能合约共识交易，一起再次进行模块统一验证
+                List<String> consensusList = new ArrayList<>();
+                List<String> crossTransferList = new ArrayList<>();
+                int txType;
+                for (TxVerifyWrapper txVerifyWrapper : txList) {
+                    Transaction tx = txVerifyWrapper.getTx();
+                    txType = tx.getType();
+                    // 区块中的包含了智能合约生成的共识交易，不重复添加
+                    if (txType == TxType.CONTRACT_CREATE_AGENT
+                            || txType == TxType.CONTRACT_DEPOSIT
+                            || txType == TxType.CONTRACT_CANCEL_DEPOSIT
+                            || txType == TxType.CONTRACT_STOP_AGENT) {
+                        continue;
+                    }
+                    TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
+                    if (txRegister.getModuleCode().equals(ModuleE.CS.abbr)) {
+                        consensusList.add(txVerifyWrapper.getTxStr());
+                    }
+                    if (txRegister.getModuleCode().equals(ModuleE.CC.abbr)) {
+                        crossTransferList.add(txVerifyWrapper.getTxStr());
+                    }
+                }
+                consensusList.addAll(scNewConsensusList);
+                crossTransferList.addAll(scNewTokenCrossTransferList);
+                if (!consensusList.isEmpty()) {
+                    boolean rsProcess = processContractTxs(chain, ModuleE.CS.abbr, consensusList, null, true);
+                    if (rsProcess) {
+                        logger.error("contract tx consensus module verify fail.");
+                        throw new NulsException(TxErrorCode.CONTRACT_VERIFY_FAIL);
+                    }
+                }
+                if (!crossTransferList.isEmpty()) {
+                    boolean rsProcess = processContractTxs(chain, ModuleE.CC.abbr, crossTransferList, null, true);
+                    if (rsProcess) {
+                        logger.error("contract tx cross-chain module verify fail.");
+                        throw new NulsException(TxErrorCode.CONTRACT_VERIFY_FAIL);
+                    }
+                }
+            }
+            //验证智能合约gas返回的交易hex 是否正确.打包时返回的交易是加入到区块交易的队尾
+            int size = contractGenerateTxs.size();
+            if (size > 0) {
+                int txSize = txStrList.size();
+                String scNewTxHex = null;
+                int returnGasIndex = -1;
+                for (int i = size - 1; i >= 0; i--) {
+                    String hex = contractGenerateTxs.get(i);
+                    int txType = TxUtil.extractTxTypeFromTx(hex);
+                    if (txType == TxType.CONTRACT_RETURN_GAS) {
+                        scNewTxHex = hex;
+                        returnGasIndex = i;
+                        break;
+                    }
+                }
+                if (scNewTxHex != null) {
+                    String receivedScNewTxHex = null;
+                    boolean rs = false;
+                    for (int i = txSize - 1; i >= 0; i--) {
+                        String txHex = txStrList.get(i);
+                        int txType = TxUtil.extractTxTypeFromTx(txHex);
+                        if (txType == TxType.CONTRACT_RETURN_GAS) {
+                            receivedScNewTxHex = txHex;
+                            if (txHex.equals(scNewTxHex)) {
+                                rs = true;
+                            }
+                            break;
+                        }
+                    }
+                    if (!rs) {
+                        logger.error("contract error.生成的合约gas返还交易:{}, - 收到的合约gas返还交易：{}", scNewTxHex, receivedScNewTxHex);
+                        throw new NulsException(TxErrorCode.CONTRACT_VERIFY_FAIL);
+                    }
+                    //返回智能合约交易给区块
+                    if (returnGasIndex != -1) {
+                        contractGenerateTxs.remove(returnGasIndex);
+                    }
+                } else {
+                    if (null != scReturnGas) {
+                        throw new NulsException(TxErrorCode.EXIST_GAS_RETURN_WITHOUT_SC_RETURN);
+                    }
+                }
+            } else {
+                if (null != scReturnGas) {
+                    throw new NulsException(TxErrorCode.EXIST_GAS_RETURN_WITHOUT_SC_RETURN);
+                }
+            }
+        }
+        //stateRoot发到共识,处理完再比较
+        String coinBaseTx = null;
+        for (TxVerifyWrapper txVerifyWrapper : txList) {
+            Transaction tx = txVerifyWrapper.getTx();
+            if (tx.getType() == TxType.COIN_BASE) {
+                coinBaseTx = txVerifyWrapper.getTxStr();
+                break;
+            }
+        }
+        String stateRootNew = ConsensusCall.triggerCoinBaseContract(chain, coinBaseTx, blockHeaderStr, scStateRoot);
+        String stateRoot = RPCUtil.encode(blockHeader.getExtendsData().getStateRoot());
+        if (!stateRoot.equals(stateRootNew)) {
+            logger.warn("contract stateRoot error.");
+            throw new NulsException(TxErrorCode.CONTRACT_VERIFY_FAIL);
+        }
+
+        //多线程处理结果
+        try {
+            for (Future<Boolean> future : futures) {
+                if (!future.get()) {
+                    logger.error("batchVerify failed, single tx verify failed");
+                    throw new NulsException(TxErrorCode.TX_VERIFY_FAIL);
+                }
+            }
+        } catch (InterruptedException e) {
+            logger.error(e);
+            throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+        } catch (ExecutionException e) {
+            logger.error(e);
+            throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("[验区块交易] 合计执行时间:{}, - 高度:{} - 区块交易数:{}" + TxUtil.nextLine(),
+                    NulsDateUtils.getCurrentTimeMillis() - s1, blockHeight, txStrList.size());
+        }
+        Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_4);
+        resultMap.put("value", true);
+        resultMap.put("contractList", contractGenerateTxs);
+        return resultMap;
+    }
+
+    private Map processContractResultV8(Chain chain, List<TxPackageWrapper> packingTxList, Set<TxPackageWrapper> orphanTxSet, List<String> contractGenerateTxs, List<String> originTxList,
+                                      long blockHeight, boolean contractBefore, String stateRoot) throws IOException {
+
+        boolean hasTxbackPackablePool = false;
+        /**当contractBefore通知失败,或者contractBatchEnd失败则需要将智能合约交易还回待打包队列*/
+        boolean isRollbackPackablePool = false;
+        /**
+         * 当出现智能合约生成的共识交易验证不通过时, 对应的原始交易有限制次数的还回待打包队列
+         * (记录有还回限制次数的合约原始交易hash)
+         */
+        Set<String> setLimitedRollbackOriginTx = new HashSet<>();
+        if (!contractBefore) {
+            isRollbackPackablePool = true;
+        } else {
+            try {
+                Map<String, Object> map = ContractCall.contractPackageBatchEnd(chain, blockHeight);
+                List<String> returnGasTx = (List<String>) map.get("txList");
+                contractGenerateTxs.addAll(returnGasTx);
+                if (null != contractGenerateTxs) {
+                    /**
+                     * 1.共识验证 如果有
+                     * 2.如果只有智能合约的共识交易失败，isRollbackPackablePool=true
+                     * 3.如果只有其他共识交易失败，单独删掉
+                     * 4.混合 执行2.
+                     */
+                    List<String> scNewConsensusList = new ArrayList<>();
+                    List<String> scNewTokenCrossTransferList = new ArrayList<>();
+//                    for (String scNewTx : scNewList) {
+                    for (int i = 0; i < contractGenerateTxs.size(); i++) {
+                        String scNewTx = contractGenerateTxs.get(i);
+                        int scNewTxType = TxUtil.extractTxTypeFromTx(scNewTx);
+                        if (scNewTxType == TxType.CONTRACT_CREATE_AGENT
+                                || scNewTxType == TxType.CONTRACT_DEPOSIT
+                                || scNewTxType == TxType.CONTRACT_CANCEL_DEPOSIT
+                                || scNewTxType == TxType.CONTRACT_STOP_AGENT) {
+                            scNewConsensusList.add(scNewTx);
+                            setLimitedRollbackOriginTx.add(originTxList.get(i));
+                        } else if (scNewTxType == TxType.CONTRACT_TOKEN_CROSS_TRANSFER) {
+                            scNewTokenCrossTransferList.add(scNewTx);
+                        }
+                    }
+                    if (!scNewConsensusList.isEmpty() || !scNewTokenCrossTransferList.isEmpty()) {
+                        //收集共识模块/跨链模块所有交易, 加上新产生的智能合约共识交易，一起再次进行模块统一验证
+                        List<String> consensusList = new ArrayList<>();
+                        List<String> crossTransferList = new ArrayList<>();
+                        for (TxPackageWrapper txPackageWrapper : packingTxList) {
+                            Transaction tx = txPackageWrapper.getTx();
+                            TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
+                            if (txRegister.getModuleCode().equals(ModuleE.CS.abbr)) {
+                                consensusList.add(RPCUtil.encode(txPackageWrapper.getTx().serialize()));
+                            }
+                            if (txRegister.getModuleCode().equals(ModuleE.CC.abbr)) {
+                                crossTransferList.add(RPCUtil.encode(txPackageWrapper.getTx().serialize()));
+                            }
+                        }
+                        consensusList.addAll(scNewConsensusList);
+                        crossTransferList.addAll(scNewTokenCrossTransferList);
+                        if (!consensusList.isEmpty()) {
+                            isRollbackPackablePool = processContractTxs(chain, ModuleE.CS.abbr, consensusList, packingTxList, false);
+                        }
+                        if (!isRollbackPackablePool && !crossTransferList.isEmpty()) {
+                            isRollbackPackablePool = processContractTxs(chain, ModuleE.CC.abbr, crossTransferList, packingTxList, false);
+                        }
+                    }
+                    if (!isRollbackPackablePool) {
+                        // 合约共识 合约跨链都没有失败的交易 则获取使用新的stateRoot
+                        String sr = (String) map.get("stateRoot");
+                        if (null != sr) {
+                            stateRoot = sr;
+                        }
+                    }
+                }
+            } catch (NulsException e) {
+                chain.getLogger().error(e);
+                isRollbackPackablePool = true;
+            }
+        }
+        // 判断智能合约出现需要加回待打包队列的情况
+        if (isRollbackPackablePool) {
+            Iterator<TxPackageWrapper> iterator = packingTxList.iterator();
+            while (iterator.hasNext()) {
+                TxPackageWrapper txPackageWrapper = iterator.next();
+                if (TxManager.isUnSystemSmartContract(chain, txPackageWrapper.getTx().getType())) {
+                    if (setLimitedRollbackOriginTx.contains(txPackageWrapper.getTx().getHash().toHex())) {
+                        // 有加回次数限制的交易
+                        addOrphanTxSet(chain, orphanTxSet, txPackageWrapper);
+                    } else {
+                        // 没有加回次数限制的情况, 直接加入集合,可以与孤儿交易合用一个集合
+                        orphanTxSet.add(txPackageWrapper);
+                    }
+                    //从可打包集合中删除
+                    iterator.remove();
+                    if (!hasTxbackPackablePool) {
+                        hasTxbackPackablePool = true;
+                    }
+                }
+            }
+        }
+        Map rs = new HashMap();
+        rs.put("stateRoot", stateRoot);
+        rs.put("hasTxbackPackablePool", hasTxbackPackablePool);
+        return rs;
+    }
 }

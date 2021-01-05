@@ -148,6 +148,7 @@ public class TxCirculateCmd extends BaseChainCmd {
                 resultMap.put("value", true);
                 return success(resultMap);
             } else {
+                LoggerUtil.COMMON_LOG.error("--------assetCirculateValidator error:" + chainEventResult.getErrorCode().getCode());
                 return failed(chainEventResult.getErrorCode());
             }
         } catch (Exception e) {
@@ -257,8 +258,8 @@ public class TxCirculateCmd extends BaseChainCmd {
     @CmdAnnotation(cmd = RpcConstants.CMD_UPDATE_CHAIN_ASSET, version = 1.0,
             description = "查询更新流通资产信息")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class),  parameterValidRange = "[1-65535]", parameterDes = "资产链ID,取值区间[1-65535]"),
-            @Parameter(parameterName = "assets", requestType = @TypeDescriptor(value = List.class,collectionElement = Map.class, mapKeys = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产链ID,取值区间[1-65535]"),
+            @Parameter(parameterName = "assets", requestType = @TypeDescriptor(value = List.class, collectionElement = Map.class, mapKeys = {
                     @Key(name = "assetId", valueType = Integer.class, description = "资产id"),
                     @Key(name = "availableAmount", valueType = BigInteger.class, description = "可用金额"),
                     @Key(name = "freeze", valueType = BigInteger.class, description = "冻结金额"),

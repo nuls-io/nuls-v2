@@ -8,6 +8,7 @@ import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.crosschain.nuls.model.bo.config.ConfigBean;
 
 import java.io.File;
+import java.util.Set;
 
 /**
  * 跨链模块配置类
@@ -41,6 +42,11 @@ public class NulsCrossChainConfig extends ConfigBean implements ModuleConfig {
 
     /**默认链接到的跨链节点*/
     private String crossSeedIps;
+
+    /**
+     * 种子节点列表
+     */
+    private Set<String> seedNodeList;
 
     public String getDataPath() {
         return dataPath;
@@ -116,5 +122,13 @@ public class NulsCrossChainConfig extends ConfigBean implements ModuleConfig {
 
     public void setCrossSeedIps(String crossSeedIps) {
         this.crossSeedIps = crossSeedIps;
+    }
+
+    public Set<String> getSeedNodeList() {
+        return seedNodeList;
+    }
+
+    public void setSeedNodeList(Set<String> seedNodeList) {
+        this.seedNodeList = seedNodeList;
     }
 }

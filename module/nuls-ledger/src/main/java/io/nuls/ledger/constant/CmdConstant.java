@@ -53,6 +53,7 @@ public interface CmdConstant {
 
 
     String CMD_CHAIN_ASSET_REG_INFO = "getAssetRegInfo";
+    String CMD_GET_ALL_ASSET = "lg_get_all_asset";
     String CMD_CHAIN_ASSET_REG_INFO_BY_HASH = "getAssetRegInfoByHash";
     String CMD_CHAIN_ASSET_REG_INFO_BY_ASSETID = "getAssetRegInfoByAssetId";
     String CMD_CHAIN_ASSET_TX_REG = "chainAssetTxReg";

@@ -32,6 +32,7 @@ import io.nuls.contract.vm.code.FieldCode;
 import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.code.VariableType;
 import io.nuls.contract.vm.natives.io.nuls.contract.sdk.NativeAddress;
+import io.nuls.contract.vm.program.ProgramMultyAssetValue;
 import io.nuls.contract.vm.util.CloneUtils;
 import io.nuls.contract.vm.util.Constants;
 import io.nuls.contract.vm.util.JsonUtils;
@@ -51,17 +52,17 @@ public class Heap {
 
     private VM vm;
 
-    //TODO pierre 标记
+    // pierre 标记
     public Map<ObjectRef, Map<String, Object>> objects = new LinkedHashMap<>(1024);
     // end code by pierre
     //public final Map<ObjectRef, Map<String, Object>> objects = new HashMap<>(1024);
 
-    //TODO pierre 标记
+    // pierre 标记
     public Map<String, Object> arrays = new LinkedHashMap<>(1024);
     // end code by pierre
     //public final Map<String, Object> arrays = new HashMap<>(1024);
 
-    //TODO pierre 标记
+    // pierre 标记
     public Set<ObjectRef> changes = new LinkedHashSet<>(1024);
     // end code by pierre
     //private final Set<ObjectRef> changes = new HashSet<>(1024);
@@ -466,6 +467,24 @@ public class Heap {
         return objectRef;
     }
 
+    public ObjectRef multyAssetValueArrayToObjectRef(List<ProgramMultyAssetValue> multyAssetValueArray) {
+        ObjectRef objectRef = newArray(VariableType.MULTY_ASSET_VALUE_ARRAY_TYPE, multyAssetValueArray.size());
+        int i = 0;
+        for(ProgramMultyAssetValue value : multyAssetValueArray) {
+            putArray(objectRef, i++, newMultyAssetValue(value));
+        }
+        return objectRef;
+    }
+
+    private ObjectRef newMultyAssetValue(ProgramMultyAssetValue value) {
+        // MULTY_ASSET_VALUE_TYPE
+        ObjectRef objectRef = newObject(VariableType.MULTY_ASSET_VALUE_TYPE);
+        putField(objectRef, "value", newBigInteger(value.getValue().toString()));
+        putField(objectRef, "assetChainId", value.getAssetChainId());
+        putField(objectRef, "assetId", value.getAssetId());
+        return objectRef;
+    }
+
     public ObjectRef stringTwoDimensionalArrayToObjectRef(String[][] resultArray) {
         ObjectRef objectRef = newArray(VariableType.STRING_TWO_DIMENSIONAL_ARRAY_TYPE, resultArray.length, 0);
         int i = 0;
@@ -581,6 +600,14 @@ public class Heap {
             return null;
         }
         return new BigInteger(value);
+    }
+
+    public Integer toInteger(ObjectRef objectRef) {
+        String value = runToString(objectRef);
+        if (value == null) {
+            return null;
+        }
+        return Integer.parseInt(value);
     }
 
     public ObjectRef newContract(byte[] address, ClassCode contractCode, Repository repository) {

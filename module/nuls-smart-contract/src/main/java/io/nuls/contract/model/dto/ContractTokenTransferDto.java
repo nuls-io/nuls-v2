@@ -65,6 +65,13 @@ public class ContractTokenTransferDto {
         this.decimals = po.getDecimals();
     }
 
+    public ContractTokenTransferDto(ContractTokenTransferInfo info) {
+        this.contractAddress = info.getContractAddress();
+        this.from = info.getFrom();
+        this.to = info.getTo();
+        this.value = ContractUtil.bigInteger2String(info.getValue());
+    }
+
     public void setNrc20Info(ContractAddressInfoPo po) {
         this.name = po.getNrc20TokenName();
         this.symbol = po.getNrc20TokenSymbol();

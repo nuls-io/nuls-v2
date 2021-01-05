@@ -25,12 +25,9 @@
 package io.nuls.contract.tx.nrc721;
 
 
-import io.nuls.contract.mock.basetest.ContractTest;
 import io.nuls.contract.tx.base.BaseQuery;
 import io.nuls.contract.util.Log;
-import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
-import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
@@ -38,14 +35,13 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
-import static io.nuls.contract.constant.ContractCmdConstant.*;
+import static io.nuls.contract.constant.ContractCmdConstant.CREATE;
 
 /**
  * @author: PierreLuo
@@ -59,7 +55,8 @@ public class ContractNRC721TokenSendTxTest extends BaseQuery {
     @Test
     public void createContract() throws Exception {
         //sender = toAddress32;
-        InputStream in = new FileInputStream(ContractTest.class.getResource("/NRC721Metadata-test.jar").getFile());
+        //InputStream in = new FileInputStream(ContractTest.class.getResource("/NRC721Metadata-test.jar").getFile());
+        InputStream in = new FileInputStream(new File("/Users/pierreluo/IdeaProjects/NRC721Metadata/target/NRC721Metadata-test.jar"));
         byte[] contractCode = IOUtils.toByteArray(in);
         String remark = "create contract test - 空气币";
         String name = "KQB";

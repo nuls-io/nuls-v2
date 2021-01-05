@@ -29,7 +29,6 @@ import io.nuls.contract.mock.basetest.ContractTest;
 import io.nuls.contract.sdk.annotation.View;
 import io.nuls.contract.tx.base.BaseQuery;
 import io.nuls.contract.util.Log;
-import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
@@ -39,7 +38,6 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -50,7 +48,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static io.nuls.contract.constant.ContractCmdConstant.*;
-import static io.nuls.contract.constant.ContractCmdConstant.TRANSFER;
 
 /**
  * @author: PierreLuo
@@ -63,7 +60,7 @@ public class ContractPOCMSendTxTest extends BaseQuery {
      */
     @Test
     public void createConsensusEnhancementContract() throws Exception {
-        String filePath = ContractPOCMSendTxTest.class.getResource("/pocmContract-v3-test2.jar").getFile();
+        String filePath = ContractPOCMSendTxTest.class.getResource("/pocmContract-v3").getFile();
         InputStream in = new FileInputStream(filePath);
         byte[] contractCode = IOUtils.toByteArray(in);
         String remark = "POCM - consensus enhancement contract test - POCM_共识加强合约";
@@ -89,7 +86,7 @@ public class ContractPOCMSendTxTest extends BaseQuery {
         params.put(Constants.CHAIN_ID,2);
         params.put("deposit","2000000000000");
         params.put("commissionRate",10);
-        params.put("packingAddress",toAddress34);
+        params.put("packingAddress","tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe");
         params.put("password","nuls123456");
         params.put("rewardAddress",sender);
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", params);
@@ -97,11 +94,40 @@ public class ContractPOCMSendTxTest extends BaseQuery {
     }
 
     /**
+     * 委托节点
+     * */
+    @Test
+    public void depositAgent()throws Exception{
+        Map<String,Object> params = new HashMap<>();
+        params.put(Constants.CHAIN_ID,2);
+        params.put("address",sender);
+        params.put("agentHash","08423ef3f75ad4426f285e950626aeeeeaba07df3dd05161f31c4f49103ef5d4");
+        params.put("deposit","30000000000000");
+        params.put("password", "nuls123456");
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_depositToAgent", params);
+        System.out.println(cmdResp.getResponseData());
+    }
+
+    /**
+     * 取消委托节点
+     * */
+    @Test
+    public void withdraw()throws Exception{
+        Map<String,Object>params = new HashMap<>();
+        params.put(Constants.CHAIN_ID,2);
+        params.put("address", sender);
+        params.put("txHash","b7bf0b75b972e040f2a071e5ef3825a7dee69d864a300e75d8200d7f0c596cdd");
+        params.put("password", "nuls123456");
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_withdraw", params);
+        System.out.println(cmdResp.getResponseData());
+    }
+
+    /**
      * 流程 - 创建TOKEN, POCM, 添加节点，抵押，退出
      */
     @Test
     public void testConsensusDepositOthersProcessor() throws Exception {
-        String authCode = "1a4123aa-7cbb-42f5-80be-8d8dc8331522";
+        /*String authCode = "1a4123aa-7cbb-42f5-80be-8d8dc8331522";
         String nrc20Locked = nrc20Locked();
         this.contractAddress_nrc20 = nrc20Locked;
         String pocm = pocm(nrc20Locked, authCode);
@@ -111,18 +137,26 @@ public class ContractPOCMSendTxTest extends BaseQuery {
         //Log.info("begin openConsensus");
         //this.invokeCall(sender, BigInteger.ZERO, contractAddress, "openConsensus", null, "remark");
         Log.info("begin addOtherAgent");
-        this.invokeCall(sender, BigInteger.ZERO, contractAddress, "addOtherAgent", null, "remark", List.of("047b1c71c9d99d8adb016def355e207996c573364ec7eace3dae6c1746e62785").toArray());
-        Log.info("begin depositForOwn {}", sender);
+        this.invokeCall(sender, BigInteger.ZERO, contractAddress, "addOtherAgent", null, "remark", List.of("08423ef3f75ad4426f285e950626aeeeeaba07df3dd05161f31c4f49103ef5d4").toArray());
+        Log.info("begin depositForOwn {}", sender);*/
 
-        //String nrc20Locked = "tNULSeBaN9Mu2No49JFyLc2Q8KvBWu5XoToaQJ";
-        //contractAddress = "tNULSeBaN46smZqFkndwG4WaczH2RRd76axdDq";
-        //String pocm = contractAddress;
+        String nrc20Locked = "tNULSeBaN2VmScSuWZt9VWHRrwcFPGQ3MUQ9um";
+        contractAddress_nrc20 = nrc20Locked;
+        contractAddress = "tNULSeBaN2hxBq9S6Qn1iRjNLHERcZjizE1R8d";
+        String pocm = contractAddress;
+        //Log.info("begin quit {}", sender);
+        //this.invokeCall(sender, BigInteger.ZERO, contractAddress, "quit", null, "remark", "0");
+        //Log.info("begin quit {}", toAddress5);
+        //this.invokeCall(toAddress5, BigInteger.ZERO, contractAddress, "quit", null, "remark", "0");
+        //Log.info("begin quit {}", toAddress6);
+        //this.invokeCall(toAddress6, BigInteger.ZERO, contractAddress, "quit", null, "remark", "0");
+        //
         this.invokeCall(sender, BigInteger.valueOf(3000_00000000L), contractAddress, "depositForOwn", null, "remark");
         Log.info("begin depositForOwn {}", toAddress5);
         this.invokeCall(toAddress5, BigInteger.valueOf(2100_00000000L), contractAddress, "depositForOwn", null, "remark");
         Log.info("begin depositForOwn {}", toAddress6);
         this.invokeCall(toAddress6, BigInteger.valueOf(1200_00000000L), contractAddress, "depositForOwn", null, "remark");
-        TimeUnit.SECONDS.sleep(30);
+        /*TimeUnit.SECONDS.sleep(30);
 
         Log.info("begin quit {}", sender);
         this.invokeCall(sender, BigInteger.ZERO, contractAddress, "quit", null, "remark", "0");
@@ -139,7 +173,7 @@ public class ContractPOCMSendTxTest extends BaseQuery {
         Log.info("sender locked balance is {}", this.invokeView(nrc20Locked, "lockedBalanceOf", sender));
         Log.info("toAddress5 locked balance is {}", this.invokeView(nrc20Locked, "lockedBalanceOf", toAddress5));
         Log.info("toAddress6 locked balance is {}", this.invokeView(nrc20Locked, "lockedBalanceOf", toAddress6));
-        Log.info("pocm locked balance is {}", this.invokeView(nrc20Locked, "lockedBalanceOf", pocm));
+        Log.info("pocm locked balance is {}", this.invokeView(nrc20Locked, "lockedBalanceOf", pocm));*/
     }
 
     @Test
@@ -220,8 +254,8 @@ public class ContractPOCMSendTxTest extends BaseQuery {
 
     private String pocm(String nrc20Locked, String authCode) throws Exception {
         Log.info("begin create pocm");
-        String filePath = "/Users/pierreluo/IdeaProjects/pocmContract-ConsensusEnhancement/target/pocmContract-v3-test2.jar";
-        //String filePath = ContractPOCMSendTxTest.class.getResource("/pocmContract-v3-test2.jar").getFile();
+        //String filePath = "/Users/pierreluo/IdeaProjects/pocmContract-ConsensusEnhancement/target/pocmContract-v3-1.0.2.RELEASE.jar";
+        String filePath = ContractPOCMSendTxTest.class.getResource("/pocmContract-v3").getFile();
         InputStream in = new FileInputStream(filePath);
         byte[] contractCode = IOUtils.toByteArray(in);
         String remark = "POCM - consensus enhancement contract test - POCM_共识加强合约";
@@ -239,8 +273,8 @@ public class ContractPOCMSendTxTest extends BaseQuery {
 
     private String nrc20Locked(String alias, String name, String symbol, String totalSupply, String decimals) throws Exception {
         Log.info("begin create locked nrc20");
-        String filePath = "/Users/pierreluo/IdeaProjects/NRC20-Locked-Token/target/nrc20-locked-token-test1.jar";
-        //String filePath = ContractTest.class.getResource("/nrc20-locked-token.jar").getFile();
+        //String filePath = "/Users/pierreluo/IdeaProjects/NRC20-Locked-Token/target/nrc20-locked-token-test1.jar";
+        String filePath = ContractTest.class.getResource("/nrc20-locked-token").getFile();
         InputStream in = new FileInputStream(filePath);
         byte[] contractCode = IOUtils.toByteArray(in);
         String remark = "create contract test - " + alias;
@@ -257,8 +291,8 @@ public class ContractPOCMSendTxTest extends BaseQuery {
 
     private String nrc20Locked() throws Exception {
         Log.info("begin create locked nrc20");
-        String filePath = "/Users/pierreluo/IdeaProjects/NRC20-Locked-Token/target/nrc20-locked-token-test1.jar";
-        //String filePath = ContractTest.class.getResource("/nrc20-locked-token.jar").getFile();
+        //String filePath = "/Users/pierreluo/IdeaProjects/NRC20-Locked-Token/target/nrc20-locked-token-test1.jar";
+        String filePath = ContractTest.class.getResource("/nrc20-locked-token").getFile();
         InputStream in = new FileInputStream(filePath);
         byte[] contractCode = IOUtils.toByteArray(in);
         String remark = "create contract test - 锁定空气币";

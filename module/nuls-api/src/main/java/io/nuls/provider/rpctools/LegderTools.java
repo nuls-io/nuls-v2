@@ -9,6 +9,7 @@ import io.nuls.provider.rpctools.vo.AccountBalance;
 
 import java.math.BigInteger;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -53,4 +54,19 @@ public class LegderTools implements CallRpc {
     }
 
 
+    public Result<List> getAllAsset(int chainId) {
+        Map<String, Object> params = new HashMap(2);
+        params.put(Constants.CHAIN_ID, chainId);
+        try {
+            return callRpc(ModuleE.LG.abbr, "lg_get_all_asset", params, (Function<Map<String, Object>, Result<List>>) map -> {
+                if (map == null) {
+                    return null;
+                }
+                List assets = (List) map.get("assets");
+                return new Result<>(assets);
+            });
+        } catch (NulsRuntimeException e) {
+            return Result.fail(e.getCode(), e.getMessage());
+        }
+    }
 }

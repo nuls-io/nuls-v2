@@ -27,6 +27,8 @@ package io.nuls.provider.model.form.contract;
 
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
+import io.nuls.core.rpc.model.Parameter;
+import io.nuls.core.rpc.model.TypeDescriptor;
 import io.nuls.provider.model.form.Base;
 import io.nuls.v2.util.ContractUtil;
 
@@ -41,6 +43,8 @@ public class ContractValidateCall extends Base {
     private String sender;
     @ApiModelProperty(description = "调用者向合约地址转入的主网资产金额，没有此业务时填0", required = false)
     private long value;
+    @ApiModelProperty(description = "调用者向合约地址转入的其他资产金额，没有此业务时填空，规则: [[\\<value\\>,\\<assetChainId\\>,\\<assetId\\>]]", required = false)
+    private String[][] multyAssetValues;
     @ApiModelProperty(description = "最大gas消耗", required = true)
     private long gasLimit;
     @ApiModelProperty(description = "执行合约单价", required = true)
@@ -53,6 +57,14 @@ public class ContractValidateCall extends Base {
     private String methodDesc;
     @ApiModelProperty(description = "参数列表", required = false)
     private Object[] args;
+
+    public String[][] getMultyAssetValues() {
+        return multyAssetValues;
+    }
+
+    public void setMultyAssetValues(String[][] multyAssetValues) {
+        this.multyAssetValues = multyAssetValues;
+    }
 
     public String[][] getArgs(String[] types) {
         return ContractUtil.twoDimensionalArray(args, types);

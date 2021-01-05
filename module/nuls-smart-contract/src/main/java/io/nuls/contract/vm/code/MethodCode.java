@@ -43,6 +43,7 @@ public class MethodCode {
 
     public static final String VIEW_ANNOTATION_DESC = "Lio/nuls/contract/sdk/annotation/View;";
     public static final String PAYABLE_ANNOTATION_DESC = "Lio/nuls/contract/sdk/annotation/Payable;";
+    public static final String PAYABLEMULTYASSET_ANNOTATION_DESC = "Lio/nuls/contract/sdk/annotation/PayableMultyAsset;";
     public static final String REQUIRED_ANNOTATION_DESC = "Lio/nuls/contract/sdk/annotation/Required;";
     public static final String JSONSERIALIZABLE_ANNOTATION_DESC = "Lio/nuls/contract/sdk/annotation/JSONSerializable;";
 
@@ -323,6 +324,10 @@ public class MethodCode {
 
     public boolean hasPayableAnnotation() {
         return hasAnnotation(PAYABLE_ANNOTATION_DESC);
+    }
+
+    public boolean hasPayableMultyAssetAnnotation() {
+        return hasAnnotation(PAYABLEMULTYASSET_ANNOTATION_DESC);
     }
 
     public boolean hasAnnotation(String annotation) {

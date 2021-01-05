@@ -18,6 +18,23 @@ JOPT_METASPACESIZE="%JOPT_METASPACESIZE%"  # %JOPT_METASPACESIZE 注入
 JOPT_MAXMETASPACESIZE="%JOPT_MAXMETASPACESIZE%"  # %JOPT_MAXMETASPACESIZE 注入
 JAVA_OPTS="%JAVA_OPTS%"  # %JAVA_OPTS 注入
 
+xmx=`echo $JOPT_XMX | awk -F, '{print $1}'`
+if [ "$xmx" == "dynamic" ];
+then
+      totalMem=`free | awk '/Mem/ {print $2}'`
+      if [ "$totalMem" -lt 8010000 ]
+      then
+          JOPT_XMX=3072
+      else
+          if [ "$totalMem" -lt 16000000 ];
+          then
+             JOPT_XMX=5120
+          else
+             JOPT_XMX=8192
+          fi
+      fi
+fi
+
 getModuleItem(){
     while read line
 	do

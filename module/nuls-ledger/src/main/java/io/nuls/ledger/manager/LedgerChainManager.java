@@ -31,6 +31,7 @@ import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.ledger.config.LedgerConfig;
+import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.LedgerChain;
 import io.nuls.ledger.service.AssetRegMngService;
 import io.nuls.ledger.service.BlockDataService;
@@ -40,6 +41,7 @@ import io.nuls.ledger.storage.impl.RepositoryImpl;
 import io.nuls.ledger.utils.LoggerUtil;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -59,6 +61,7 @@ public class LedgerChainManager {
     @Autowired
     LedgerConfig ledgerConfig;
     private Map<Integer, LedgerChain> chainMap = new ConcurrentHashMap<>();
+    Map<String, Object> localChainDefaultAsset = new HashMap<>(16);
 
     /**
      * 增加链
@@ -136,5 +139,20 @@ public class LedgerChainManager {
 
     public LedgerChain getChain(int key) {
         return this.chainMap.get(key);
+    }
+
+    public Map<String, Object> getLocalChainDefaultAsset() {
+        if (localChainDefaultAsset.size() > 0) {
+            return localChainDefaultAsset;
+        }
+        localChainDefaultAsset.put("assetChainId", ledgerConfig.getChainId());
+        localChainDefaultAsset.put("assetId", ledgerConfig.getAssetId());
+        localChainDefaultAsset.put("initNumber", 0);
+        localChainDefaultAsset.put("decimalPlace", ledgerConfig.getDecimals());
+        localChainDefaultAsset.put("assetName", ledgerConfig.getSymbol());
+        localChainDefaultAsset.put("assetSymbol", ledgerConfig.getSymbol());
+        localChainDefaultAsset.put("assetType", LedgerConstant.COMMON_ASSET_TYPE);
+        localChainDefaultAsset.put("assetAddress", "");
+        return localChainDefaultAsset;
     }
 }

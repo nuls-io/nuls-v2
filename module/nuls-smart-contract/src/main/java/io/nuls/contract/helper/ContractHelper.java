@@ -25,8 +25,7 @@ package io.nuls.contract.helper;
 
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.Transaction;
+import io.nuls.base.data.*;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.enums.ContractStatus;
@@ -38,6 +37,8 @@ import io.nuls.contract.model.bo.*;
 import io.nuls.contract.model.dto.ContractConstructorInfoDto;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
+import io.nuls.contract.model.tx.ContractReturnGasTransaction;
+import io.nuls.contract.model.txdata.CallContractData;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.contract.rpc.call.LedgerCall;
@@ -45,27 +46,30 @@ import io.nuls.contract.storage.ContractAddressStorageService;
 import io.nuls.contract.storage.ContractTokenTransferStorageService;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
-import io.nuls.contract.util.MapUtil;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.program.*;
 import io.nuls.core.basic.Result;
 import io.nuls.core.basic.VarInt;
+import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.ByteArrayWrapper;
+import io.nuls.core.model.LongUtils;
 import io.nuls.core.model.StringUtils;
 import org.bouncycastle.util.Arrays;
 
+import java.io.IOException;
 import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.*;
 
+import static io.nuls.contract.config.ContractContext.ASSET_ID;
+import static io.nuls.contract.config.ContractContext.CHAIN_ID;
 import static io.nuls.contract.constant.ContractConstant.*;
 import static io.nuls.contract.constant.ContractErrorCode.ADDRESS_ERROR;
 import static io.nuls.contract.util.ContractUtil.*;
+import static io.nuls.core.constant.TxType.CROSS_CHAIN;
+import static io.nuls.core.constant.TxType.DELETE_CONTRACT;
 import static io.nuls.core.model.FormatValidUtils.validTokenNameOrSymbol;
 
 @Component
@@ -79,8 +83,6 @@ public class ContractHelper {
     private ContractAddressStorageService contractAddressStorageService;
     @Autowired
     private ContractTokenTransferStorageService contractTokenTransferStorageService;
-
-    private ConcurrentHashMap<String, Long> accountLastedPriceMap = MapUtil.createConcurrentHashMap(4);
 
     private static final BigInteger MAXIMUM_DECIMALS = BigInteger.valueOf(18L);
     private static final BigInteger MAXIMUM_TOTAL_SUPPLY = BigInteger.valueOf(2L).pow(256).subtract(BigInteger.ONE);
@@ -330,7 +332,10 @@ public class ContractHelper {
         List<ProgramMethod> methods = this.getAllMethods(chainId, createContractData.getCode());
         Map<String, ProgramMethod> contractMethodsMap = new HashMap<>();
         boolean isNrc20 = this.checkNrc20Contract(methods, contractMethodsMap);
-        boolean isNrc721 = this.checkNrc721Contract(methods, contractMethodsMap);
+        boolean isNrc721 = false;
+        if (!isNrc20) {
+            isNrc721 = this.checkNrc721Contract(methods, contractMethodsMap);
+        }
         if(isNrc20) {
             contractResult.setTokenType(TokenTypeStatus.NRC20.status());
         } else if(isNrc721) {
@@ -339,7 +344,7 @@ public class ContractHelper {
         boolean isAcceptDirectTransfer = this.checkAcceptDirectTransfer(methods);
         contractResult.setNrc20(isNrc20);
         contractResult.setAcceptDirectTransfer(isAcceptDirectTransfer);
-        if (isNrc20) {
+        if (isNrc20 || isNrc721) {
             // NRC20 tokenName 验证代币名称格式
             ProgramResult programResult = this.invokeViewMethod(chainId, track, null, bestBlockHeight, contractAddress, NRC20_METHOD_NAME, null, null);
             if (programResult.isSuccess()) {
@@ -367,40 +372,42 @@ public class ContractHelper {
                 }
             }
 
-            programResult = this.invokeViewMethod(chainId, track, null, bestBlockHeight, contractAddress, NRC20_METHOD_DECIMALS, null, null);
-            BigInteger decimalsBig = BigInteger.ZERO;
-            if (programResult.isSuccess()) {
-                String decimals = programResult.getResult();
-                if (StringUtils.isNotBlank(decimals)) {
-                    try {
-                        decimalsBig = new BigInteger(decimals);
-                        if (decimalsBig.compareTo(BigInteger.ZERO) < 0 || decimalsBig.compareTo(MAXIMUM_DECIMALS) > 0) {
-                            contractResult.setError(true);
-                            contractResult.setErrorMessage("The value of decimals ranges from 0 to 18.");
-                            return getFailed();
+            if (isNrc20) {
+                programResult = this.invokeViewMethod(chainId, track, null, bestBlockHeight, contractAddress, NRC20_METHOD_DECIMALS, null, null);
+                BigInteger decimalsBig = BigInteger.ZERO;
+                if (programResult.isSuccess()) {
+                    String decimals = programResult.getResult();
+                    if (StringUtils.isNotBlank(decimals)) {
+                        try {
+                            decimalsBig = new BigInteger(decimals);
+                            if (decimalsBig.compareTo(BigInteger.ZERO) < 0 || decimalsBig.compareTo(MAXIMUM_DECIMALS) > 0) {
+                                contractResult.setError(true);
+                                contractResult.setErrorMessage("The value of decimals ranges from 0 to 18.");
+                                return getFailed();
+                            }
+                            contractResult.setTokenDecimals(decimalsBig.intValue());
+                        } catch (Exception e) {
+                            Log.error("Get nrc20 decimals error.", e);
+                            // skip it
                         }
-                        contractResult.setTokenDecimals(decimalsBig.intValue());
-                    } catch (Exception e) {
-                        Log.error("Get nrc20 decimals error.", e);
-                        // skip it
                     }
                 }
-            }
-            programResult = this.invokeViewMethod(chainId, track, null, bestBlockHeight, contractAddress, NRC20_METHOD_TOTAL_SUPPLY, null, null);
-            if (programResult.isSuccess()) {
-                String totalSupply = programResult.getResult();
-                if (StringUtils.isNotBlank(totalSupply)) {
-                    try {
-                        BigInteger totalSupplyBig = new BigInteger(totalSupply);
-                        if (totalSupplyBig.compareTo(BigInteger.ZERO) <= 0 || totalSupplyBig.compareTo(MAXIMUM_TOTAL_SUPPLY.multiply(BigInteger.TEN.pow(decimalsBig.intValue()))) > 0) {
-                            contractResult.setErrorMessage("The value of totalSupply ranges from 1 to 2^256 - 1.");
-                            contractResult.setError(true);
-                            return getFailed();
+                programResult = this.invokeViewMethod(chainId, track, null, bestBlockHeight, contractAddress, NRC20_METHOD_TOTAL_SUPPLY, null, null);
+                if (programResult.isSuccess()) {
+                    String totalSupply = programResult.getResult();
+                    if (StringUtils.isNotBlank(totalSupply)) {
+                        try {
+                            BigInteger totalSupplyBig = new BigInteger(totalSupply);
+                            if (totalSupplyBig.compareTo(BigInteger.ZERO) <= 0 || totalSupplyBig.compareTo(MAXIMUM_TOTAL_SUPPLY.multiply(BigInteger.TEN.pow(decimalsBig.intValue()))) > 0) {
+                                contractResult.setErrorMessage("The value of totalSupply ranges from 1 to 2^256 - 1.");
+                                contractResult.setError(true);
+                                return getFailed();
+                            }
+                            contractResult.setTokenTotalSupply(totalSupplyBig);
+                        } catch (Exception e) {
+                            Log.error("Get nrc20 totalSupply error.", e);
+                            // skip it
                         }
-                        contractResult.setTokenTotalSupply(totalSupplyBig);
-                    } catch (Exception e) {
-                        Log.error("Get nrc20 totalSupply error.", e);
-                        // skip it
                     }
                 }
             }
@@ -408,17 +415,17 @@ public class ContractHelper {
         return getSuccess();
     }
 
-    public ContractBalance getBalance(int chainId, byte[] address) {
+    public ContractBalance getBalance(int chainId, int assetChainId, int assetId, byte[] address) {
         ContractTempBalanceManager tempBalanceManager = getBatchInfoTempBalanceManager(chainId);
         if (tempBalanceManager != null) {
-            Result<ContractBalance> balance = tempBalanceManager.getBalance(address);
+            Result<ContractBalance> balance = tempBalanceManager.getBalance(address, assetChainId, assetId);
             if (balance.isSuccess()) {
                 return balance.getData();
             } else {
                 Log.error("[{}] Get balance error.", AddressTool.getStringAddressByBytes(address));
             }
         } else {
-            ContractBalance realBalance = getRealBalance(chainId, AddressTool.getStringAddressByBytes(address));
+            ContractBalance realBalance = getRealBalance(chainId, assetChainId, assetId, AddressTool.getStringAddressByBytes(address));
             if (realBalance != null) {
                 return realBalance;
             }
@@ -426,9 +433,9 @@ public class ContractHelper {
         return ContractBalance.newInstance();
     }
 
-    public ContractBalance getRealBalance(int chainId, String address) {
+    public ContractBalance getRealBalance(int chainId, int assetChainId, int assetId, String address) {
         try {
-            Map<String, Object> balance = LedgerCall.getConfirmedBalanceAndNonce(getChain(chainId), address);
+            Map<String, Object> balance = LedgerCall.getConfirmedBalanceAndNonce(getChain(chainId), assetChainId, assetId, address);
             ContractBalance contractBalance = ContractBalance.newInstance();
             contractBalance.setBalance(new BigInteger(balance.get("available").toString()));
             contractBalance.setFreeze(new BigInteger(balance.get("freeze").toString()));
@@ -440,9 +447,9 @@ public class ContractHelper {
         }
     }
 
-    public ContractBalance getUnConfirmedBalanceAndNonce(int chainId, String address) {
+    public ContractBalance getUnConfirmedBalanceAndNonce(int chainId, int assetChainId, int assetId, String address) {
         try {
-            Map<String, Object> balance = LedgerCall.getBalanceAndNonce(getChain(chainId), address);
+            Map<String, Object> balance = LedgerCall.getBalanceAndNonce(getChain(chainId), assetChainId, assetId, address);
             ContractBalance contractBalance = ContractBalance.newInstance();
             contractBalance.setBalance(new BigInteger(balance.get("available").toString()));
             contractBalance.setFreeze(new BigInteger(balance.get("freeze").toString()));
@@ -463,6 +470,22 @@ public class ContractHelper {
         Chain chain = getChain(chainId);
         chain.getBatchInfo().setTempBalanceManager(tempBalanceManager);
         chain.getBatchInfo().setCurrentBlockHeader(tempHeader);
+    }
+
+    public ContractTempBalanceManager getBatchInfoTempBalanceManagerV8(int chainId) {
+        BatchInfoV8 batchInfo;
+        if((batchInfo = getChain(chainId).getBatchInfoV8()) == null) {
+            return null;
+        }
+        return batchInfo.getTempBalanceManager();
+    }
+
+    public BlockHeader getBatchInfoCurrentBlockHeaderV8(int chainId) {
+        BatchInfoV8 batchInfo;
+        if((batchInfo = getChain(chainId).getBatchInfoV8()) == null) {
+            return null;
+        }
+        return batchInfo.getCurrentBlockHeader();
     }
 
     public ContractTempBalanceManager getBatchInfoTempBalanceManager(int chainId) {
@@ -527,25 +550,6 @@ public class ContractHelper {
             return getFailed();
         }
 
-    }
-
-    public void updateLastedPriceForAccount(int chainId, byte[] sender, long price) {
-        if (price <= 0) {
-            return;
-        }
-        String address = AddressTool.getStringAddressByBytes(sender) + chainId;
-        accountLastedPriceMap.put(address, price);
-    }
-
-    public long getLastedPriceForAccount(int chainId, byte[] sender) {
-        String address = AddressTool.getStringAddressByBytes(sender) + chainId;
-        Long price = accountLastedPriceMap.get(address);
-        if (price == null) {
-            price = ContractConstant.CONTRACT_MINIMUM_PRICE;
-        }
-        price = price < ContractConstant.CONTRACT_MINIMUM_PRICE ? ContractConstant.CONTRACT_MINIMUM_PRICE : price;
-        accountLastedPriceMap.put(address, price);
-        return price;
     }
 
     public void dealNrc20Events(int chainId, byte[] newestStateRoot, Transaction tx, ContractResult contractResult, ContractAddressInfoPo po) {
@@ -723,7 +727,75 @@ public class ContractHelper {
     public ContractResult makeFailedContractResult(int chainId, ContractWrapperTransaction tx, CallableResult callableResult, String errorMsg) {
         ContractResult contractResult = ContractResult.genFailed(tx.getContractData(), errorMsg);
         makeContractResult(tx, contractResult);
-        callableResult.putFailed(chainId, contractResult);
+        if (callableResult != null) {
+            callableResult.putFailed(chainId, contractResult);
+        }
         return contractResult;
+    }
+
+    /**
+     * 提取合约多资产转入的信息
+     */
+    public void extractAssetInfoFromCallTransaction(CallContractData contractData, Transaction tx) throws NulsException {
+        // 过滤特殊的交易，token跨链转入交易(to中包含其他资产)
+        if (CROSS_CHAIN == tx.getType()) {
+            return;
+        }
+        CoinData coinData = tx.getCoinDataInstance();
+        List<ProgramMultyAssetValue> list = extractMultyAssetInfoFromCallTransaction(coinData);
+        contractData.setMultyAssetValues(list);
+    }
+
+    public ContractReturnGasTransaction makeReturnGasTx(List<ContractResult> resultList, long time) throws IOException {
+        ContractWrapperTransaction wrapperTx;
+        ContractData contractData;
+        Map<ByteArrayWrapper, BigInteger> returnMap = new HashMap<>();
+        for (ContractResult contractResult : resultList) {
+            wrapperTx = contractResult.getTx();
+            // 终止合约不消耗Gas，跳过
+            if (wrapperTx.getType() == DELETE_CONTRACT) {
+                continue;
+            }
+            // add by pierre at 2019-12-03 代币跨链交易的合约调用是系统调用，不计算Gas消耗，跳过
+            if (wrapperTx.getType() == CROSS_CHAIN) {
+                continue;
+            }
+            // end code by pierre
+            contractData = wrapperTx.getContractData();
+            long realGasUsed = contractResult.getGasUsed();
+            long txGasUsed = contractData.getGasLimit();
+            long returnGas;
+
+            BigInteger returnValue;
+            if (txGasUsed > realGasUsed) {
+                returnGas = txGasUsed - realGasUsed;
+                returnValue = BigInteger.valueOf(LongUtils.mul(returnGas, contractData.getPrice()));
+
+                ByteArrayWrapper sender = new ByteArrayWrapper(contractData.getSender());
+                BigInteger senderValue = returnMap.get(sender);
+                if (senderValue == null) {
+                    senderValue = returnValue;
+                } else {
+                    senderValue = senderValue.add(returnValue);
+                }
+                returnMap.put(sender, senderValue);
+            }
+        }
+        if (!returnMap.isEmpty()) {
+            CoinData coinData = new CoinData();
+            List<CoinTo> toList = coinData.getTo();
+            Set<Map.Entry<ByteArrayWrapper, BigInteger>> entries = returnMap.entrySet();
+            CoinTo returnCoin;
+            for (Map.Entry<ByteArrayWrapper, BigInteger> entry : entries) {
+                returnCoin = new CoinTo(entry.getKey().getBytes(), CHAIN_ID, ASSET_ID, entry.getValue(), 0L);
+                toList.add(returnCoin);
+            }
+            ContractReturnGasTransaction tx = new ContractReturnGasTransaction();
+            tx.setTime(time);
+            tx.setCoinData(coinData.serialize());
+            tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
+            return tx;
+        }
+        return null;
     }
 }
