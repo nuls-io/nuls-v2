@@ -47,6 +47,8 @@ public class ProgramMethod {
     private boolean event;
     @ApiModelProperty(description = "是否是可接受主链资产转账的方法")
     private boolean payable;
+    @ApiModelProperty(description = "是否是可接受其他资产转账的方法")
+    private boolean payableMultyAsset;
     @ApiModelProperty(description = "方法返回值是否JSON序列化")
     private boolean jsonSerializable;
 
@@ -107,6 +109,14 @@ public class ProgramMethod {
 
     public void setPayable(boolean payable) {
         this.payable = payable;
+    }
+
+    public boolean isPayableMultyAsset() {
+        return payableMultyAsset;
+    }
+
+    public void setPayableMultyAsset(boolean payableMultyAsset) {
+        this.payableMultyAsset = payableMultyAsset;
     }
 
     public boolean isJsonSerializable() {

@@ -44,6 +44,8 @@ public class ProgramContext {
 
     private ObjectRef value;
 
+    private ObjectRef multyAssetValues;
+
     private long number;
 
     //private long difficulty;
@@ -116,4 +118,11 @@ public class ProgramContext {
         this.estimateGas = estimateGas;
     }
 
+    public ObjectRef getMultyAssetValues() {
+        return multyAssetValues;
+    }
+
+    public void setMultyAssetValues(ObjectRef multyAssetValues) {
+        this.multyAssetValues = multyAssetValues;
+    }
 }

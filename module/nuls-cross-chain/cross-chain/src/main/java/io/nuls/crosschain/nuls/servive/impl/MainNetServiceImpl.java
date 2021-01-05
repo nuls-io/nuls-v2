@@ -108,7 +108,6 @@ public class MainNetServiceImpl implements MainNetService {
             if(registeredChainMessage.haveOtherChain(chainInfo.getChainId(), chain.getChainId())){
                 chain.getLogger().info("将新注册的链信息广播给已注册的链");
                 chain.getCrossTxThreadPool().execute(new CrossTxHandler(chain, TxUtil.createCrossChainChangeTx(chainInfo,chainInfo.getRegisterTime(),chainInfo.getChainId(), ChainInfoChangeType.NEW_REGISTER_CHAIN.getType()),syncStatus));
-
             }
         } catch (IOException e) {
             chain.getLogger().error(e);

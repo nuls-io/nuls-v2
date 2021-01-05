@@ -32,6 +32,11 @@ public class BigIntegerUtils {
     }
 
     public static String bigIntegerToString(BigInteger bigInteger, int size) {
+        String symbol = "";
+        if (bigInteger.compareTo(BigInteger.ZERO) < 0) {
+            symbol = "-";
+            bigInteger = bigInteger.abs();
+        }
         String value = bigInteger.toString();
         int length = size - value.length();
         if (length > 0) {
@@ -41,7 +46,7 @@ public class BigIntegerUtils {
             }
             value = buffer.append(value).toString();
         }
-        return value;
+        return symbol + value;
     }
 
     /**

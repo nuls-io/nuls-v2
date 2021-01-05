@@ -34,7 +34,11 @@ import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.*;
 import io.nuls.core.rpc.model.message.Response;
+import org.checkerframework.checker.units.qual.A;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -530,7 +534,7 @@ public class AccountCmd extends BaseCmd {
             }
             int chainId = chain.getChainId();
             Account account = accountService.getAccount(chainId, address);
-            unencryptedPrivateKey = accountService.getPrivateKey(chain.getChainId(),account, password);
+            unencryptedPrivateKey = accountService.getPrivateKey(chain.getChainId(), account, password);
             Map<String, Object> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
             map.put("priKey", unencryptedPrivateKey);
             map.put("pubKey", HexUtil.encode(account.getPubKey()));
@@ -757,6 +761,94 @@ public class AccountCmd extends BaseCmd {
         } catch (Exception e) {
             errorLogProcess(chain, e);
             return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+        return success(map);
+    }
+
+
+    /**
+     * 导入一个文件夹下的所有keystore文件
+     * import accounts by AccountKeyStore
+     *
+     * @param params [chainId,dirPath,password]
+     * @return
+     */
+    @CmdAnnotation(cmd = "ac_importsKeyStoreFiles", version = 1.0, description = "根据AccountKeyStore导入账户/Import accounts by AccountKeyStore")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
+            @Parameter(parameterName = "dirPath", parameterType = "String", parameterDes = "文件夹路径"),
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = RpcConstant.ADDRESS, description = "导入的账户地址")
+    }))
+    public Response importsKeyStoreFiles(Map params) {
+        Chain chain = null;
+        Map<String, String> map = new HashMap<>();
+        BufferedReader reader = null;
+        StringBuffer stringBuffer = null;
+        try {
+            Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
+            Object pathObj = params == null ? null : params.get(RpcParameterNameConstant.DIR_PATH);
+            if (params == null || chainIdObj == null || pathObj == null) {
+                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
+            }
+            chain = chainManager.getChain((Integer) chainIdObj);
+            if (null == chain) {
+                throw new NulsException(AccountErrorCode.CHAIN_NOT_EXIST);
+            }
+            //dirPath
+            String dirPath = (String) pathObj;
+            File baseDir = new File(dirPath);
+            if (!baseDir.exists() || !baseDir.isDirectory()) {
+                throw new NulsException(AccountErrorCode.ACCOUNTKEYSTORE_FILE_NOT_EXIST);
+            }
+
+            File[] array = baseDir.listFiles();
+            String keystore;
+            List<AccountKeyStore> accountKeyStoreList = new ArrayList<>();
+            for (int i = 0; i < array.length; i++) {
+                //如果是keystore文件
+                if (array[i].isFile() && array[i].getName().endsWith(".keystore")) {
+                    //获取文件内容
+                    reader = new BufferedReader(new FileReader(array[i]));
+                    stringBuffer = new StringBuffer();
+                    String tempStr;
+                    while ((tempStr = reader.readLine()) != null) {
+                        stringBuffer.append(tempStr);
+                    }
+                    reader.close();
+                    keystore = stringBuffer.toString();
+
+                    AccountKeyStoreDTO accountKeyStoreDto;
+                    try {
+                        accountKeyStoreDto = JSONUtils.json2pojo(keystore, AccountKeyStoreDTO.class);
+                        if (StringUtils.isBlank(accountKeyStoreDto.getAddress()) ||
+                                StringUtils.isBlank(accountKeyStoreDto.getEncryptedPrivateKey()) ||
+                                StringUtils.isBlank(accountKeyStoreDto.getPubKey())
+                        ) {
+                            throw new NulsException(AccountErrorCode.ACCOUNTKEYSTORE_FILE_DAMAGED, array[i].getName());
+                        }
+                        accountKeyStoreList.add(accountKeyStoreDto.toAccountKeyStore());
+                    } catch (IOException e) {
+                        throw new NulsException(AccountErrorCode.ACCOUNTKEYSTORE_FILE_DAMAGED, array[i].getName());
+                    }
+                }
+            }
+            accountService.importAccountListByKeystore(accountKeyStoreList, chain);
+        } catch (NulsException e) {
+            errorLogProcess(chain, e);
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
         }
         return success(map);
     }

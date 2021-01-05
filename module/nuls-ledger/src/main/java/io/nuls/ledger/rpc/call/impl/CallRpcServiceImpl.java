@@ -38,6 +38,7 @@ import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.core.rpc.util.RpcCall;
 import io.nuls.ledger.config.LedgerConfig;
 import io.nuls.ledger.constant.CmdConstant;
 import io.nuls.ledger.constant.LedgerErrorCode;
@@ -126,6 +127,41 @@ public class CallRpcServiceImpl implements CallRpcService {
         } catch (Exception e) {
             LoggerUtil.COMMON_LOG.error(e);
             return LedgerErrorCode.ERROR_SIGNDIGEST;
+        }
+        return null;
+    }
+
+    @Override
+    public List<Map<String, Object>> getRegisteredChainInfoList(int chainId) {
+        try {
+            Map<String, Object> map = (Map) RpcCall.request(ModuleE.CC.abbr, "getRegisteredChainInfoList", new HashMap());
+            List<Map<String, Object>> resultList = (List<Map<String, Object>>) map.get("list");
+
+            List<Map<String, Object>> assetList = new ArrayList<>();
+            for (Map<String, Object> resultMap : resultList) {
+                int id = (Integer) resultMap.get("chainId");
+                if (id != chainId) {
+                    List<Map<String, Object>> list = (List<Map<String, Object>>) resultMap.get("assetInfoList");
+                    if (list != null) {
+                        for (Map<String, Object> assetMap : list) {
+                            assetMap.put("assetChainId", id);
+                            assetMap.put("assetSymbol", assetMap.get("symbol"));
+                            assetMap.put("decimalPlace", assetMap.get("decimalPlaces"));
+                            assetMap.put("assetAddress", "");
+                            assetMap.put("initNumber", 0);
+                            assetMap.put("assetType", 1);
+
+                            assetMap.remove("symbol");
+                            assetMap.remove("usable");
+                            assetMap.remove("decimalPlaces");
+                        }
+                        assetList.addAll(list);
+                    }
+                }
+            }
+            return assetList;
+        } catch (NulsException e) {
+            LoggerUtil.COMMON_LOG.error(e);
         }
         return null;
     }

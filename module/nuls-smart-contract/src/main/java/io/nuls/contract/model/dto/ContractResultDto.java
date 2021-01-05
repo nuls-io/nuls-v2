@@ -26,6 +26,7 @@ package io.nuls.contract.model.dto;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.enums.CmdRegisterMode;
 import io.nuls.contract.model.bo.ContractMergedTransfer;
+import io.nuls.contract.model.bo.ContractMultyAssetMergedTransfer;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.contract.model.tx.ContractBaseTransaction;
@@ -45,6 +46,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import static io.nuls.contract.constant.ContractConstant.TOKEN_TYPE_NRC20;
+import static io.nuls.contract.constant.ContractConstant.TOKEN_TYPE_NRC721;
 import static io.nuls.contract.util.ContractUtil.bigInteger2String;
 
 /**
@@ -78,14 +81,18 @@ public class ContractResultDto {
     private String value;
     @ApiModelProperty(description = "异常堆栈踪迹")
     private String stackTrace;
-    @ApiModelProperty(description = "合约转账列表（从合约转出）", type = @TypeDescriptor(value = List.class, collectionElement = ContractMergedTransferDto.class))
+    @ApiModelProperty(description = "合约转账列表（从合约转出主资产）", type = @TypeDescriptor(value = List.class, collectionElement = ContractMergedTransferDto.class))
     private List<ContractMergedTransferDto> transfers;
+    @ApiModelProperty(description = "合约转账列表（从合约转出其他资产）", type = @TypeDescriptor(value = List.class, collectionElement = ContractMultyAssetMergedTransferDto.class))
+    private List<ContractMultyAssetMergedTransferDto> multyAssetTransfers;
     @ApiModelProperty(description = "合约事件列表", type = @TypeDescriptor(value = List.class, collectionElement = String.class))
     private List<String> events;
     @ApiModelProperty(description = "调式合约事件列表", type = @TypeDescriptor(value = List.class, collectionElement = String.class))
     private List<String> debugEvents;
     @ApiModelProperty(description = "合约token转账列表", type = @TypeDescriptor(value = List.class, collectionElement = ContractTokenTransferDto.class))
     private List<ContractTokenTransferDto> tokenTransfers;
+    @ApiModelProperty(description = "合约NRC721-token转账列表", type = @TypeDescriptor(value = List.class, collectionElement = ContractToken721TransferDto.class))
+    private List<ContractToken721TransferDto> token721Transfers;
     @ApiModelProperty(description = "合约调用外部命令的调用记录列表", type = @TypeDescriptor(value = List.class, collectionElement = ContractInvokeRegisterCmdDto.class))
     private List<ContractInvokeRegisterCmdDto> invokeRegisterCmds;
     @ApiModelProperty(description = "合约生成交易的序列化字符串列表", type = @TypeDescriptor(value = List.class, collectionElement = String.class))
@@ -101,7 +108,7 @@ public class ContractResultDto {
         this.gasLimit = contractData.getGasLimit();
         this.gasUsed = result.getGasUsed();
         this.price = result.getPrice();
-        BigInteger totalFee = tx.getFee();
+        BigInteger totalFee = tx.getCoinDataObj().getFeeByAsset(chainId, 1);
         this.totalFee = bigInteger2String(totalFee);
         // pierre 标记
         if(tx.getType() == TxType.CROSS_CHAIN) {
@@ -120,7 +127,8 @@ public class ContractResultDto {
         this.success = result.isSuccess();
         this.errorMessage = result.getErrorMessage();
         this.stackTrace = result.getStackTrace();
-        this.setMergedTransfers(result.getMergedTransferList());
+        this.setMergedTransfersDto(result.getMergedTransferList());
+        this.setMergedMultyAssetTransfersDto(result.getMergerdMultyAssetTransferList());
         this.events = result.getEvents();
         this.debugEvents = result.getDebugEvents();
         this.remark = result.getRemark();
@@ -147,7 +155,8 @@ public class ContractResultDto {
         this.success = result.isSuccess();
         this.errorMessage = result.getErrorMessage();
         this.stackTrace = result.getStackTrace();
-        this.setMergedTransfers(result.getMergedTransferList());
+        this.setMergedTransfersDto(result.getMergedTransferList());
+        this.setMergedMultyAssetTransfersDto(result.getMergerdMultyAssetTransferList());
         this.events = result.getEvents();
         this.debugEvents = result.getDebugEvents();
         this.remark = result.getRemark();
@@ -158,6 +167,10 @@ public class ContractResultDto {
             this.makeTokenTransfers(chainId, result.getEvents());
             this.makeInvokeRegisterCmds(result.getInvokeRegisterCmds());
         }
+    }
+
+    public void setMultyAssetTransfers(List<ContractMultyAssetMergedTransferDto> multyAssetTransfers) {
+        this.multyAssetTransfers = multyAssetTransfers;
     }
 
     private void makeInvokeRegisterCmds(List<ProgramInvokeRegisterCmd> invokeRegisterCmds) {
@@ -172,14 +185,6 @@ public class ContractResultDto {
         }
     }
 
-    public ContractResultDto(int chainId, ContractResult contractExecuteResult, ContractBaseTransaction tx, ContractTokenTransferInfoPo transferInfoPo) throws NulsException {
-        this(chainId, contractExecuteResult, tx);
-        if (transferInfoPo != null) {
-            this.tokenTransfers = new ArrayList<>();
-            this.tokenTransfers.add(new ContractTokenTransferDto(transferInfoPo));
-        }
-    }
-
     public List<ContractTokenTransferDto> getTokenTransfers() {
         return tokenTransfers == null ? new ArrayList<>() : tokenTransfers;
     }
@@ -188,32 +193,62 @@ public class ContractResultDto {
         this.tokenTransfers = tokenTransfers;
     }
 
+    public List<ContractToken721TransferDto> getToken721Transfers() {
+        return token721Transfers == null ? new ArrayList<>() : token721Transfers;
+    }
+
+    public void setToken721Transfers(List<ContractToken721TransferDto> token721Transfers) {
+        this.token721Transfers = token721Transfers;
+    }
+
     private void makeTokenTransfers(int chainId, List<String> tokenTransferEvents) {
         List<ContractTokenTransferDto> result = new ArrayList<>();
+        List<ContractToken721TransferDto> result721 = new ArrayList<>();
         if (tokenTransferEvents != null && tokenTransferEvents.size() > 0) {
-            ContractTokenTransferInfoPo po;
+            ContractTokenTransferInfo info;
             for (String event : tokenTransferEvents) {
-                po = ContractUtil.convertJsonToTokenTransferInfoPo(chainId, event);
-                if (po != null) {
-                    result.add(new ContractTokenTransferDto(po));
+                info = ContractUtil.convertJsonToTokenTransferInfo(chainId, event);
+                if (info != null) {
+                    if (TOKEN_TYPE_NRC20 == info.getTokenType()) {
+                        result.add(new ContractTokenTransferDto(info));
+                    } else if (TOKEN_TYPE_NRC721 == info.getTokenType()) {
+                        result721.add(new ContractToken721TransferDto(info));
+                    }
                 }
             }
         }
         this.tokenTransfers = result;
+        this.token721Transfers = result721;
     }
 
     public List<ContractMergedTransferDto> getTransfers() {
         return transfers == null ? new ArrayList<>() : transfers;
     }
 
-    public void setMergedTransfers(List<ContractMergedTransfer> transfers) {
+
+    public void setMergedTransfersDto(List<ContractMergedTransfer> transferList) {
         List<ContractMergedTransferDto> list = new LinkedList<>();
         this.transfers = list;
-        if (transfers == null || transfers.size() == 0) {
+        if (transferList == null || transferList.size() == 0) {
             return;
         }
-        for (ContractMergedTransfer transfer : transfers) {
+        for (ContractMergedTransfer transfer : transferList) {
             list.add(new ContractMergedTransferDto(transfer));
+        }
+    }
+
+    public List<ContractMultyAssetMergedTransferDto> getMultyAssetTransfers() {
+        return multyAssetTransfers;
+    }
+
+    private void setMergedMultyAssetTransfersDto(List<ContractMultyAssetMergedTransfer> mergerdMultyAssetTransferList) {
+        List<ContractMultyAssetMergedTransferDto> list = new LinkedList<>();
+        this.multyAssetTransfers = list;
+        if (mergerdMultyAssetTransferList == null || mergerdMultyAssetTransferList.size() == 0) {
+            return;
+        }
+        for (ContractMultyAssetMergedTransfer transfer : mergerdMultyAssetTransferList) {
+            list.add(new ContractMultyAssetMergedTransferDto(transfer));
         }
     }
 

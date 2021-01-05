@@ -32,6 +32,7 @@ import java.math.BigInteger;
 public class Output {
     private byte[] to;
     private BigInteger value;
+    private long lockTime;
 
     public byte[] getTo() {
         return to;
@@ -47,5 +48,13 @@ public class Output {
 
     public void setValue(BigInteger value) {
         this.value = value;
+    }
+
+    public long getLockTime() {
+        return lockTime;
+    }
+
+    public void setLockTime(long lockTime) {
+        this.lockTime = lockTime;
     }
 }

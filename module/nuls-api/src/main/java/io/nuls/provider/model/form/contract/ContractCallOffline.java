@@ -51,6 +51,8 @@ public class ContractCallOffline extends Base {
     private long gasLimit;
     @ApiModelProperty(description = "调用者向合约地址转入的主网资产金额，没有此业务时填0")
     private BigInteger value;
+    @ApiModelProperty(description = "调用者向合约地址转入的其他资产金额，没有此业务时填空，规则: [[\\<value\\>,\\<assetChainId\\>,\\<assetId\\>,\\<nonce\\>]]", required = false)
+    private String[][] multyAssetValues;
     @ApiModelProperty(description = "方法名", required = true)
     private String methodName;
     @ApiModelProperty(description = "方法描述，若合约内方法没有重载，则此参数可以为空", required = false)
@@ -61,6 +63,14 @@ public class ContractCallOffline extends Base {
     private String[] argsType;
     @ApiModelProperty(description = "备注", required = false)
     private String remark;
+
+    public String[][] getMultyAssetValues() {
+        return multyAssetValues;
+    }
+
+    public void setMultyAssetValues(String[][] multyAssetValues) {
+        this.multyAssetValues = multyAssetValues;
+    }
 
     public String[][] getArgs(String[] types) {
         return ContractUtil.twoDimensionalArray(args, types);

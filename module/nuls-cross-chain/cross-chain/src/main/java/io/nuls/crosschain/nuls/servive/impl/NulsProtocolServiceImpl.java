@@ -3,26 +3,31 @@ package io.nuls.crosschain.nuls.servive.impl;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
+import io.nuls.base.signture.TransactionSignature;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.log.Log;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.*;
 import io.nuls.crosschain.base.model.bo.Circulation;
 import io.nuls.crosschain.base.service.ProtocolService;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
+import io.nuls.crosschain.nuls.constant.ParamConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.model.bo.CtxStateEnum;
 import io.nuls.crosschain.nuls.model.bo.message.UntreatedMessage;
 import io.nuls.crosschain.nuls.model.bo.message.WaitBroadSignMessage;
 import io.nuls.crosschain.nuls.model.po.CtxStatusPO;
+import io.nuls.crosschain.nuls.rpc.call.ConsensusCall;
 import io.nuls.crosschain.nuls.rpc.call.LedgerCall;
 import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
 import io.nuls.crosschain.nuls.srorage.*;
+import io.nuls.crosschain.nuls.utils.CommonUtil;
 import io.nuls.crosschain.nuls.utils.TxUtil;
 import io.nuls.crosschain.nuls.utils.manager.ChainManager;
 
@@ -212,9 +217,20 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             chain.getLogger().error("交易不存在,hash:{}",nativeHex);
             return;
         }
-        if(ctxStatusPO.getStatus() != TxStatusEnum.CONFIRMED.getStatus()){
-            chain.getLogger().info("The cross chain transaction obtained has not been confirmed at this node,hash:{}",nativeHex);
-            return;
+        if (ctxStatusPO.getTx().getType() != TxType.VERIFIER_INIT) {
+            List<String> packAddressList = chain.getVerifierList();
+            int byzantineCount = CommonUtil.getByzantineCount(chain, packAddressList.size());
+            TransactionSignature transactionSignature = new TransactionSignature();
+            try {
+                transactionSignature.parse(ctxStatusPO.getTx().getTransactionSignature(),0);
+            } catch (NulsException e) {
+                Log.error("解析交易签名失败");
+                return;
+            }
+            if(transactionSignature.getP2PHKSignatures().size() < byzantineCount && ctxStatusPO.getStatus() == TxStatusEnum.UNCONFIRM.getStatus()){
+                chain.getLogger().info("The cross chain transaction obtained has not been confirmed at this node,hash:{}",nativeHex);
+                return;
+            }
         }
         Transaction localCtx = ctxStatusPO.getTx();
         /*

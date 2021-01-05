@@ -25,10 +25,13 @@ import io.nuls.base.data.NulsHash;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.ChainTypeEnum;
 import io.nuls.block.model.Chain;
+import io.nuls.block.model.CheckResult;
 import io.nuls.block.rpc.call.ConsensusCall;
+import io.nuls.block.rpc.call.NetworkCall;
 import io.nuls.block.rpc.call.TransactionCall;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.storage.ChainStorageService;
+import io.nuls.block.thread.BlockSynchronizer;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -82,7 +85,7 @@ public class BlockChainManager {
      * @param forkChain
      * @return
      */
-    public static boolean switchChain(int chainId, Chain masterChain, Chain forkChain) {
+    public static CheckResult switchChain(int chainId, Chain masterChain, Chain forkChain) {
         NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         try {
             logger.info("*switch chain start");
@@ -99,7 +102,13 @@ public class BlockChainManager {
             long masterChainEndHeight = masterChain.getEndHeight();
             if (masterChainEndHeight < forkHeight) {
                 logger.error("*masterChainEndHeight < forkHeight, data error");
-                System.exit(1);
+                //重置网络
+                NetworkCall.resetNetwork(chainId);
+                //重新开启区块同步线程
+                ConsensusCall.notice(chainId, MODULE_WAITING);
+                TransactionCall.notice(chainId, MODULE_WAITING);
+                BlockSynchronizer.syn(chainId);
+                return new CheckResult(false, true);
             }
             logger.info("*calculate fork point complete, forkHeight=" + forkHeight);
 
@@ -119,7 +128,7 @@ public class BlockChainManager {
                 } else {
                     logger.info("*rollback master chain doing, fail hash=" + hash);
                     saveBlockToMasterChain(chainId, blockStack);
-                    return false;
+                    return new CheckResult(false, false);
                 }
             } while (rollbackHeight >= forkHeight);
             logger.info("*rollback master chain end");
@@ -147,7 +156,7 @@ public class BlockChainManager {
             if (!chainStorageService.save(chainId, blockStack)) {
                 logger.info("*error occur when save masterForkChain");
                 append(masterChain, masterForkChain);
-                return false;
+                return new CheckResult(false, false);
             }
             //至此,主链回滚完成
             logger.info("*masterChain rollback complete");
@@ -169,7 +178,7 @@ public class BlockChainManager {
                             subChain + ",masterForkChain-" + masterForkChain);
                     deleteForkChain(chainId, topForkChain, true);
                     append(masterChain, masterForkChain);
-                    return false;
+                    return new CheckResult(false, false);
                 }
             }
             //6.收尾工作
@@ -179,7 +188,7 @@ public class BlockChainManager {
             logger.error("block chain switch fail, auto rollback fail, process exit.");
             System.exit(1);
         }
-        return true;
+        return new CheckResult(true, false);
     }
 
     private static void saveBlockToMasterChain(int chainId, Stack<Block> blockStack) {
@@ -419,8 +428,8 @@ public class BlockChainManager {
     /**
      * 递归删除孤儿链
      *
-     * @param chainId 链Id/chain id
-     * @param orphanChain      要删除的孤儿链
+     * @param chainId     链Id/chain id
+     * @param orphanChain 要删除的孤儿链
      */
     public static void deleteOrphanChain(int chainId, Chain orphanChain) {
         orphanChains.get(chainId).remove(orphanChain);

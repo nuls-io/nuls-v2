@@ -43,6 +43,8 @@ public class ImputedGasContractCall extends Base {
     private String sender;
     @ApiModelProperty(description = "调用者向合约地址转入的主网资产金额，没有此业务时填0", required = false)
     private BigInteger value;
+    @ApiModelProperty(description = "调用者向合约地址转入的其他资产金额，没有此业务时填空，规则: [[\\<value\\>,\\<assetChainId\\>,\\<assetId\\>]]", required = false)
+    private String[][] multyAssetValues;
     @ApiModelProperty(description = "智能合约地址", required = true)
     private String contractAddress;
     @ApiModelProperty(description = "方法名称", required = true)
@@ -51,6 +53,14 @@ public class ImputedGasContractCall extends Base {
     private String methodDesc;
     @ApiModelProperty(description = "参数列表", required = false)
     private Object[] args;
+
+    public String[][] getMultyAssetValues() {
+        return multyAssetValues;
+    }
+
+    public void setMultyAssetValues(String[][] multyAssetValues) {
+        this.multyAssetValues = multyAssetValues;
+    }
 
     public String[][] getArgs(String[] types) {
         return ContractUtil.twoDimensionalArray(args, types);

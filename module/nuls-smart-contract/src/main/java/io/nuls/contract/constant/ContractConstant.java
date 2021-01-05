@@ -93,6 +93,12 @@ public interface ContractConstant {
     String CONTRACT_EVENT_ADDRESS = "contractAddress";
     String CONTRACT_EVENT_DATA = "payload";
 
+    String FROM = "from";
+    String TO = "to";
+    String VALUE = "value";
+    String TOKEN_ID = "tokenId";
+    int TOKEN_TYPE_NRC20 = 1;
+    int TOKEN_TYPE_NRC721 = 2;
     /**
      * NRC20
      */
@@ -115,6 +121,8 @@ public interface ContractConstant {
     String NRC721_SAFETRANSFERFROM = "safeTransferFrom";
     String NRC721_SAFETRANSFERFROM_DATA = "safeTransferFrom-data";
     String NRC721_STANDARD_FILE = "nrc721.json";
+    String NRC721_EVENT_TRANSFER = "Transfer";
+    String NRC721_EVENT_APPROVAL = "Approval";
 
     int DEFAULT_MAX_VIEW_GAS = 100000000;
     String SYS_FILE_ENCODING = "file.encoding";
@@ -135,4 +143,5 @@ public interface ContractConstant {
 
     String RPC_RESULT_KEY = "value";
     String RPC_COLLECTION_RESULT_KEY = "list";
+    String LINE = "_";
 }

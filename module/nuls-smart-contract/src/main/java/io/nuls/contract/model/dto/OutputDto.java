@@ -50,6 +50,9 @@ public class OutputDto {
     @ApiModelProperty(description = "锁定时间")
     private long lockTime;
 
+    public OutputDto() {
+    }
+
     public OutputDto(CoinTo to) {
         this.address = AddressTool.getStringAddressByBytes(to.getAddress());
         this.assetsChainId = to.getAssetsChainId();

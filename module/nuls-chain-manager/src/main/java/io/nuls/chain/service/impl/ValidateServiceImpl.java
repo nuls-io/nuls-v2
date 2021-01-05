@@ -267,6 +267,7 @@ public class ValidateServiceImpl implements ValidateService {
             String assetKey = toAsset.toString();
             Asset asset = assetService.getAsset(assetKey);
             if (null == asset || !asset.isAvailable()) {
+                Log.info("asset not exist", assetKey);
                 return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_NOT_EXIST);
             }
         }
@@ -276,6 +277,7 @@ public class ValidateServiceImpl implements ValidateService {
             String assetKey = fromAsset.toString();
             Asset asset = assetService.getAsset(assetKey);
             if (null == asset || !asset.isAvailable()) {
+                Log.info("asset not exist", assetKey);
                 return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_NOT_EXIST);
             }
             ChainAsset chainAsset = assetService.getChainAsset(fromChainId, CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));

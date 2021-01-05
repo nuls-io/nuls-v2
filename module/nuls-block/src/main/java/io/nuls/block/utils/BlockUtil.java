@@ -186,7 +186,7 @@ public class BlockUtil {
 
         //2.收到的区块可以连到主链,验证通过
         if (blockHeight == masterChainEndHeight + 1 && blockPreviousHash.equals(masterChainEndHash)) {
-            logger.debug("received continuous block of masterChain, height:" + blockHeight + ", hash:" + blockHash);
+//            logger.debug("received continuous block of masterChain, height:" + blockHeight + ", hash:" + blockHash);
             return Result.getSuccess(BlockErrorCode.SUCCESS);
         }
 
@@ -194,7 +194,7 @@ public class BlockUtil {
             //3.收到的区块是主链上的重复区块,丢弃
             BlockHeaderPo masterHeader = blockService.getBlockHeaderPo(chainId, blockHeight);
             if (blockHash.equals(masterHeader.getHash())) {
-                logger.debug("received duplicate block of masterChain, height:" + blockHeight + ", hash:" + blockHash);
+//                logger.debug("received duplicate block of masterChain, height:" + blockHeight + ", hash:" + blockHash);
                 return Result.getFailed(BlockErrorCode.DUPLICATE_MAIN_BLOCK);
             }
             //4.收到的区块是主链上的分叉区块,保存区块,并新增一条分叉链链接到主链

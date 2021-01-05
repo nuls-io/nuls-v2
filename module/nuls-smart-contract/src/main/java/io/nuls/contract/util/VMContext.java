@@ -161,8 +161,8 @@ public class VMContext {
      * @param address     合约地址
      * @param blockHeight 区块高度, 如果不传, 则按主链最新高度查询
      */
-    public ContractBalance getBalance(int chainId, byte[] address) {
-        ContractBalance balance = contractHelper.getBalance(chainId, address);
+    public ContractBalance getBalance(int chainId, int assetChainId, int assetId, byte[] address) {
+        ContractBalance balance = contractHelper.getBalance(chainId, assetChainId, assetId, address);
         return balance;
     }
 
@@ -172,8 +172,8 @@ public class VMContext {
      * @param address     合约地址
      * @param blockHeight 区块高度, 如果不传, 则按主链最新高度查询
      */
-    public BigInteger getTotalBalance(int chainId, byte[] address) {
-        ContractBalance balance = contractHelper.getBalance(chainId, address);
+    public BigInteger getTotalBalance(int chainId, int assetChainId, int assetId, byte[] address) {
+        ContractBalance balance = contractHelper.getBalance(chainId, assetChainId, assetId, address);
         if (balance != null) {
             return balance.getTotal();
         }
