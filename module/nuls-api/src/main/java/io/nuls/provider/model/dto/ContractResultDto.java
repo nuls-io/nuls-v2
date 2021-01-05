@@ -62,20 +62,40 @@ public class ContractResultDto {
     private String value;
     @ApiModelProperty(description = "异常堆栈踪迹")
     private String stackTrace;
-    @ApiModelProperty(description = "合约转账列表（从合约转出）", type = @TypeDescriptor(value = List.class, collectionElement = ContractMergedTransferDto.class))
+    @ApiModelProperty(description = "合约转账列表（从合约转出主资产）", type = @TypeDescriptor(value = List.class, collectionElement = ContractMergedTransferDto.class))
     private List<ContractMergedTransferDto> transfers;
+    @ApiModelProperty(description = "合约转账列表（从合约转出其他资产）", type = @TypeDescriptor(value = List.class, collectionElement = ContractMultyAssetMergedTransferDto.class))
+    private List<ContractMultyAssetMergedTransferDto> multyAssetTransfers;
     @ApiModelProperty(description = "合约事件列表", type = @TypeDescriptor(value = List.class, collectionElement = String.class))
     private List<String> events;
     @ApiModelProperty(description = "调式合约事件列表", type = @TypeDescriptor(value = List.class, collectionElement = String.class))
     private List<String> debugEvents;
     @ApiModelProperty(description = "合约token转账列表", type = @TypeDescriptor(value = List.class, collectionElement = ContractTokenTransferDto.class))
     private List<ContractTokenTransferDto> tokenTransfers;
+    @ApiModelProperty(description = "合约NRC721-token转账列表", type = @TypeDescriptor(value = List.class, collectionElement = ContractToken721TransferDto.class))
+    private List<ContractToken721TransferDto> token721Transfers;
     @ApiModelProperty(description = "合约调用外部命令的调用记录列表", type = @TypeDescriptor(value = List.class, collectionElement = ContractInvokeRegisterCmdDto.class))
     private List<ContractInvokeRegisterCmdDto> invokeRegisterCmds;
     @ApiModelProperty(description = "合约生成交易的序列化字符串列表", type = @TypeDescriptor(value = List.class, collectionElement = String.class))
     private List<String> contractTxList;
     @ApiModelProperty(description = "备注")
     private String remark;
+
+    public List<ContractMultyAssetMergedTransferDto> getMultyAssetTransfers() {
+        return multyAssetTransfers;
+    }
+
+    public void setMultyAssetTransfers(List<ContractMultyAssetMergedTransferDto> multyAssetTransfers) {
+        this.multyAssetTransfers = multyAssetTransfers;
+    }
+
+    public List<ContractToken721TransferDto> getToken721Transfers() {
+        return token721Transfers;
+    }
+
+    public void setToken721Transfers(List<ContractToken721TransferDto> token721Transfers) {
+        this.token721Transfers = token721Transfers;
+    }
 
     public boolean isSuccess() {
         return success;

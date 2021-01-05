@@ -20,12 +20,13 @@
 
 package io.nuls.provider.api.jsonrpc.controller;
 
-import io.nuls.base.api.provider.contract.facade.*;
-import io.nuls.provider.api.config.Config;
-import io.nuls.provider.api.config.Context;
 import io.nuls.base.api.provider.Result;
 import io.nuls.base.api.provider.ServiceManager;
 import io.nuls.base.api.provider.contract.ContractProvider;
+import io.nuls.base.api.provider.contract.facade.CreateContractReq;
+import io.nuls.base.api.provider.contract.facade.DeleteContractReq;
+import io.nuls.base.api.provider.contract.facade.TokenTransferReq;
+import io.nuls.base.api.provider.contract.facade.TransferToContractReq;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.core.annotation.Autowired;
@@ -34,6 +35,8 @@ import io.nuls.core.core.annotation.RpcMethod;
 import io.nuls.core.model.FormatValidUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.model.*;
+import io.nuls.provider.api.config.Config;
+import io.nuls.provider.api.config.Context;
 import io.nuls.provider.model.dto.*;
 import io.nuls.provider.model.jsonrpc.RpcErrorCode;
 import io.nuls.provider.model.jsonrpc.RpcResult;
@@ -41,10 +44,12 @@ import io.nuls.provider.model.jsonrpc.RpcResultError;
 import io.nuls.provider.rpctools.ContractTools;
 import io.nuls.provider.utils.Log;
 import io.nuls.provider.utils.ResultUtil;
+import io.nuls.provider.utils.Utils;
 import io.nuls.provider.utils.VerifyUtils;
 import io.nuls.v2.model.annotation.Api;
 import io.nuls.v2.model.annotation.ApiOperation;
 import io.nuls.v2.model.annotation.ApiType;
+import io.nuls.v2.util.ContractUtil;
 import io.nuls.v2.util.NulsSDKTool;
 
 import java.math.BigInteger;
@@ -153,7 +158,7 @@ public class ContractController {
             @Parameter(parameterName = "methodDesc",  parameterDes = "合约方法描述，若合约内方法没有重载，则此参数可以为空", canNull = true),
             @Parameter(parameterName = "args", requestType = @TypeDescriptor(value = Object[].class), parameterDes = "参数列表", canNull = true),
             @Parameter(parameterName = "remark",  parameterDes = "交易备注", canNull = true),
-            @Parameter(parameterName = "multyAssetValues", requestType = @TypeDescriptor(value = String[][].class), parameterDes = "调用者向合约地址转入的其他资产金额，没有此业务时填空，规则: [[<value>,<assetChainId>,<assetId>]]", canNull = true)
+            @Parameter(parameterName = "multyAssetValues", requestType = @TypeDescriptor(value = String[][].class), parameterDes = "调用者向合约地址转入的其他资产金额，没有此业务时填空，规则: [[\\<value\\>,\\<assetChainId\\>,\\<assetId\\>]]", canNull = true)
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "txHash", description = "调用合约的交易hash")
@@ -763,7 +768,7 @@ public class ContractController {
             @Parameter(parameterName = "methodName", parameterDes = "合约方法"),
             @Parameter(parameterName = "methodDesc", parameterDes = "合约方法描述，若合约内方法没有重载，则此参数可以为空", canNull = true),
             @Parameter(parameterName = "args", requestType = @TypeDescriptor(value = Object[].class), parameterDes = "参数列表", canNull = true),
-            @Parameter(parameterName = "multyAssetValues", requestType = @TypeDescriptor(value = String[][].class), parameterDes = "调用者向合约地址转入的其他资产金额，没有此业务时填空，规则: [[<value>,<assetChainId>,<assetId>]]", canNull = true)
+            @Parameter(parameterName = "multyAssetValues", requestType = @TypeDescriptor(value = String[][].class), parameterDes = "调用者向合约地址转入的其他资产金额，没有此业务时填空，规则: [[\\<value\\>,\\<assetChainId\\>,\\<assetId\\>]]", canNull = true)
     })
     @ResponseData(name = "返回值", description = "返回消耗的gas值", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "success", valueType = boolean.class, description = "验证成功与否"),
@@ -869,7 +874,7 @@ public class ContractController {
             @Parameter(parameterName = "methodName", parameterDes = "合约方法"),
             @Parameter(parameterName = "methodDesc", parameterDes = "合约方法描述，若合约内方法没有重载，则此参数可以为空", canNull = true),
             @Parameter(parameterName = "args", requestType = @TypeDescriptor(value = Object[].class), parameterDes = "参数列表", canNull = true),
-            @Parameter(parameterName = "multyAssetValues", requestType = @TypeDescriptor(value = String[][].class), parameterDes = "调用者向合约地址转入的其他资产金额，没有此业务时填空，规则: [[<value>,<assetChainId>,<assetId>]]", canNull = true)
+            @Parameter(parameterName = "multyAssetValues", requestType = @TypeDescriptor(value = String[][].class), parameterDes = "调用者向合约地址转入的其他资产金额，没有此业务时填空，规则: [[\\<value\\>,\\<assetChainId\\>,\\<assetId\\>]]", canNull = true)
     })
     @ResponseData(name = "返回值", description = "返回消耗的gas值", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "gasLimit", valueType = Long.class, description = "消耗的gas值，执行失败返回数值1")
@@ -1020,7 +1025,8 @@ public class ContractController {
         @Parameter(parameterName = "methodDesc",  parameterDes = "合约方法描述，若合约内方法没有重载，则此参数可以为空", canNull = true),
         @Parameter(parameterName = "args", requestType = @TypeDescriptor(value = Object[].class), parameterDes = "参数列表", canNull = true),
         @Parameter(parameterName = "argsType", requestType = @TypeDescriptor(value = String[].class), parameterDes = "参数类型列表", canNull = true),
-        @Parameter(parameterName = "remark",  parameterDes = "交易备注", canNull = true)
+        @Parameter(parameterName = "remark",  parameterDes = "交易备注", canNull = true),
+        @Parameter(parameterName = "multyAssetValues", requestType = @TypeDescriptor(value = String[][].class), parameterDes = "调用者向合约地址转入的其他资产金额，没有此业务时填空，规则: [[\\<value\\>,\\<assetChainId\\>,\\<assetId\\>,\\<nonce\\>]]", canNull = true)
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
         @Key(name = "hash", description = "交易hash"),
@@ -1069,6 +1075,13 @@ public class ContractController {
                 return RpcResult.paramError("methodName is empty");
             }
 
+            String[][] multyAssetValues = null;
+            if (params.size() > 8) {
+                List multyAssetValueList = (List) params.get(8);
+                Object[] objArray = multyAssetValueList != null ? multyAssetValueList.toArray() : null;
+                multyAssetValues = ContractUtil.twoDimensionalArray(objArray);
+            }
+            // 增加多资产转入的参数
             io.nuls.core.basic.Result<Map> result = NulsSDKTool.callContractTxOffline(
                     sender,
                     senderBalance,
@@ -1080,7 +1093,8 @@ public class ContractController {
                     methodDesc,
                     args,
                     argsType,
-                    remark);
+                    remark,
+                    Utils.multyAssetObjectArray(multyAssetValues));
             return ResultUtil.getJsonRpcResult(result);
         } catch (Exception e) {
             Log.error(e);

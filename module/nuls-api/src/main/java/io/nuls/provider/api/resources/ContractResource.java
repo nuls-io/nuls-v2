@@ -23,17 +23,20 @@
  */
 package io.nuls.provider.api.resources;
 
-import io.nuls.base.api.provider.contract.facade.*;
-import io.nuls.provider.api.config.Config;
 import io.nuls.base.api.provider.Result;
 import io.nuls.base.api.provider.ServiceManager;
 import io.nuls.base.api.provider.contract.ContractProvider;
+import io.nuls.base.api.provider.contract.facade.CreateContractReq;
+import io.nuls.base.api.provider.contract.facade.DeleteContractReq;
+import io.nuls.base.api.provider.contract.facade.TokenTransferReq;
+import io.nuls.base.api.provider.contract.facade.TransferToContractReq;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.model.*;
+import io.nuls.provider.api.config.Config;
 import io.nuls.provider.model.ErrorData;
 import io.nuls.provider.model.RpcClientResult;
 import io.nuls.provider.model.dto.*;
@@ -41,6 +44,7 @@ import io.nuls.provider.model.form.contract.*;
 import io.nuls.provider.rpctools.ContractTools;
 import io.nuls.provider.utils.Log;
 import io.nuls.provider.utils.ResultUtil;
+import io.nuls.provider.utils.Utils;
 import io.nuls.v2.model.annotation.Api;
 import io.nuls.v2.model.annotation.ApiOperation;
 import io.nuls.v2.util.NulsSDKTool;
@@ -619,6 +623,8 @@ public class ContractResource {
         @Key(name = "txHex", description = "交易序列化字符串")
     }))
     public RpcClientResult callTxOffline(ContractCallOffline form) {
+        // 增加多资产转入参数
+        String[][] multyAssetValues = form.getMultyAssetValues();
         io.nuls.core.basic.Result<Map> result = NulsSDKTool.callContractTxOffline(
                 form.getSender(),
                 form.getSenderBalance(),
@@ -630,7 +636,8 @@ public class ContractResource {
                 form.getMethodDesc(),
                 form.getArgs(),
                 form.getArgsType(),
-                form.getRemark());
+                form.getRemark(),
+                Utils.multyAssetObjectArray(multyAssetValues));
         return ResultUtil.getRpcClientResult(result);
     }
 
