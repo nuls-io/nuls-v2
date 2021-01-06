@@ -1662,7 +1662,7 @@ public class TxServiceImpl implements TxService {
         if (contractNotify) {
             Map<String, Object> map = null;
             try {
-                map = ContractCall.contractBatchEnd(chain, blockHeight);
+                map = ContractCall.contractBatchEnd(chain, blockHeight, Constants.TIMEOUT_TIMEMILLIS * 3);
             } catch (NulsException e) {
                 logger.error(e);
                 throw new NulsException(TxErrorCode.CONTRACT_VERIFY_FAIL);
