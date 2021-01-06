@@ -689,6 +689,7 @@ public class TxServiceImpl implements TxService {
                 }
                 if (chain.getProtocolUpgrade().get()) {
                     chain.getCanProtocolUpgrade().set(false);
+                    nulsLogger.info("1_chain.getCanProtocolUpgrade().set(false);");
                     nulsLogger.info("Protocol Upgrade Package stop -chain:{} -best block height", chain.getChainId(), chain.getBestBlockHeight());
                     backTempPackablePool(chain, currentBatchPackableTxs);
                     //放回可打包交易和孤儿
@@ -696,6 +697,7 @@ public class TxServiceImpl implements TxService {
                     //直接打空块
                     TxPackage txPackage = new TxPackage(new ArrayList<>(), null, chain.getBestBlockHeight() + 1);
                     chain.getCanProtocolUpgrade().set(true);
+                    nulsLogger.info("1_chain.getCanProtocolUpgrade().set(true);");
                     return txPackage;
                 }
                 //如果本地最新区块+1 大于当前在打包区块的高度, 说明本地最新区块已更新,需要重新打包,把取出的交易放回到打包队列
@@ -955,6 +957,7 @@ public class TxServiceImpl implements TxService {
             putBackPackablePool(chain, orphanTxSet);
             if (chain.getProtocolUpgrade().get()) {
                 chain.getCanProtocolUpgrade().set(false);
+                nulsLogger.info("2_chain.getCanProtocolUpgrade().set(false);");
                 //协议升级直接打空块,取出的交易，倒序放入新交易处理队列
                 int size = packingTxList.size();
                 for (int i = size - 1; i >= 0; i--) {
@@ -970,6 +973,7 @@ public class TxServiceImpl implements TxService {
                 }
                 TxPackage txPackage = new TxPackage(new ArrayList<>(), null, chain.getBestBlockHeight() + 1);
                 chain.getCanProtocolUpgrade().set(true);
+                nulsLogger.info("2_chain.getCanProtocolUpgrade().set(true);");
                 return txPackage;
             }
             //检测预留传输时间
@@ -1662,7 +1666,7 @@ public class TxServiceImpl implements TxService {
         if (contractNotify) {
             Map<String, Object> map = null;
             try {
-                map = ContractCall.contractBatchEnd(chain, blockHeight, Constants.TIMEOUT_TIMEMILLIS * 3);
+                map = ContractCall.contractBatchEnd(chain, blockHeight);
             } catch (NulsException e) {
                 logger.error(e);
                 throw new NulsException(TxErrorCode.CONTRACT_VERIFY_FAIL);
@@ -1951,6 +1955,7 @@ public class TxServiceImpl implements TxService {
                 }
                 if (chain.getProtocolUpgrade().get()) {
                     chain.getCanProtocolUpgrade().set(false);
+                    nulsLogger.info("3_chain.getCanProtocolUpgrade().set(false);");
                     nulsLogger.info("Protocol Upgrade Package stop -chain:{} -best block height", chain.getChainId(), chain.getBestBlockHeight());
                     backTempPackablePool(chain, currentBatchPackableTxs);
                     //放回可打包交易和孤儿
@@ -1958,6 +1963,7 @@ public class TxServiceImpl implements TxService {
                     //直接打空块
                     TxPackage txPackage = new TxPackage(new ArrayList<>(), null, chain.getBestBlockHeight() + 1);
                     chain.getCanProtocolUpgrade().set(true);
+                    nulsLogger.info("3_chain.getCanProtocolUpgrade().set(true);");
                     return txPackage;
 
                 }
@@ -2237,6 +2243,7 @@ public class TxServiceImpl implements TxService {
             putBackPackablePool(chain, orphanTxSet);
             if (chain.getProtocolUpgrade().get()) {
                 chain.getCanProtocolUpgrade().set(false);
+                nulsLogger.info("4_chain.getCanProtocolUpgrade().set(false);");
                 //协议升级直接打空块,取出的交易，倒序放入新交易处理队列
                 int size = packingTxList.size();
                 for (int i = size - 1; i >= 0; i--) {
@@ -2252,6 +2259,7 @@ public class TxServiceImpl implements TxService {
                 }
                 TxPackage txPackage = new TxPackage(new ArrayList<>(), null, chain.getBestBlockHeight() + 1);
                 chain.getCanProtocolUpgrade().set(true);
+                nulsLogger.info("4_chain.getCanProtocolUpgrade().set(true);");
                 return txPackage;
             }
             //检测预留传输时间
