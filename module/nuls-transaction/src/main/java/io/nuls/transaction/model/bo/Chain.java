@@ -131,7 +131,7 @@ public class Chain {
         this.orphanList = new LinkedList<>();
         this.orphanMap = new ConcurrentHashMap<>();
         this.protocolUpgrade = new AtomicBoolean(false);
-        this.canProtocolUpgrade = new AtomicBoolean(false);
+        this.canProtocolUpgrade = new AtomicBoolean(true);
         this.orphanListDataSize = new AtomicInteger(0);
         this.contractGenerateTxTypes = new HashSet<>();
     }
