@@ -43,10 +43,10 @@ public class SmartContractVersionChangeInvoker implements VersionChangeInvoker {
         ChainManager.chainHandle(currentChainId);
         Short currentVersion = ProtocolGroupManager.getCurrentVersion(currentChainId);
         Log.info("触发协议升级，chainId: [{}], 版本为: [{}]", currentChainId, currentVersion);
-        if (currentVersion >= ContractContext.UPDATE_VERSION_CONTRACT_ASSET) {
-            this.loadV8(currentVersion);
-        }
         ChainManager chainManager = SpringLiteContext.getBean(ChainManager.class);
+        if (currentVersion >= ContractContext.UPDATE_VERSION_CONTRACT_ASSET) {
+            this.loadV8(chainManager.getChainMap().get(currentChainId), currentVersion);
+        }
         // 缓存token注册资产的资产ID和token合约地址
         Map<Integer, Chain> chainMap = chainManager.getChainMap();
         for (Chain chain : chainMap.values()) {
@@ -75,10 +75,11 @@ public class SmartContractVersionChangeInvoker implements VersionChangeInvoker {
         }
     }
 
-    private void loadV8(int currentVersion) {
+    private void loadV8(Chain chain, int currentVersion) {
         if (isloadV8) {
             return;
         }
+        chain.clearOldBatchInfo();
         Log.info("版本[{}]协议升级成功，重新初始化智能合约VM", currentVersion);
         VMFactory.reInitVM_v8();
         isloadV8 = true;
