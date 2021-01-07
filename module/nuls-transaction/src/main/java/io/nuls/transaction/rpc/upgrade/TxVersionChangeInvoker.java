@@ -42,6 +42,7 @@ public class TxVersionChangeInvoker implements VersionChangeInvoker {
         try {
             //等待正在处理的交易处理结束(打包过程中的交易、新交易)
             while (!chain.getCanProtocolUpgrade().get()) {
+                chain.getLogger().info("GetCanProtocolUpgrade waiting, chainId:[{}]", chainId);
                 Thread.sleep(100L);
             }
         } catch (InterruptedException e) {

@@ -1649,9 +1649,7 @@ public class TxServiceImpl implements TxService {
             List<String> txHashList = TransactionCall.txModuleValidator(chain,
                     entry.getKey(), entry.getValue(), blockHeaderStr);
             if (txHashList != null && txHashList.size() > 0) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("batch module verify fail, module-code:{},  return count:{}", entry.getKey(), txHashList.size());
-                }
+                logger.error("batch module verify fail, module-code:{},  return count:{}", entry.getKey(), txHashList.size());
                 throw new NulsException(TxErrorCode.TX_VERIFY_FAIL);
             }
         }
@@ -2486,7 +2484,7 @@ public class TxServiceImpl implements TxService {
         if (contractNotify) {
             Map<String, Object> map;
             try {
-                map = ContractCall.contractBatchEnd(chain, blockHeight, Constants.TIMEOUT_TIMEMILLIS * 3);
+                map = ContractCall.contractBatchEnd(chain, blockHeight, Constants.TIMEOUT_TIMEMILLIS * 10);
             } catch (NulsException e) {
                 logger.error(e);
                 throw new NulsException(TxErrorCode.CONTRACT_VERIFY_FAIL);

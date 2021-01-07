@@ -1,9 +1,9 @@
 [global]
 encoding=UTF-8
 language=en
-logPath=../../../../Logs
+logPath=/Users/pierreluo/IdeaProjects/nuls_newer_2.0/logs
 logLevel=INFO
-dataPath=../../../../data
+dataPath=/Users/pierreluo/IdeaProjects/nuls_newer_2.0/data
 #默认本链ID
 chainId=1
 #地址前缀
@@ -86,8 +86,6 @@ initTime=1594483200
 deflationRatio=0.4
 #通缩间隔时间(单位：S),30天
 deflationTimeInterval=2592000
-dataPath=../../../../../data
-logPath=../../../../../Logs
 dependent=protocol-update,smart-contract,cross-chain
 
 [ledger]
@@ -129,8 +127,6 @@ communityAddress=NULSd6HgjDZmLMbZSmH9tqb6smdzZHCxsCRD3
 dependent=smart-contract,cross-chain
 
 [cross-chain]
-dataPath=../../../../../data
-logPath=../../../../../Logs
 #跨链节点链接的最小值
 minNodeAmount=3
 #跨链节点链接的最大值
