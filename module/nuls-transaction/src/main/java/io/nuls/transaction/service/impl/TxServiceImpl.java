@@ -1664,9 +1664,9 @@ public class TxServiceImpl implements TxService {
         List<String> scNewList = new ArrayList<>();
         String scStateRoot = preStateRoot;
         if (contractNotify) {
-            Map<String, Object> map = null;
+            Map<String, Object> map;
             try {
-                map = ContractCall.contractBatchEnd(chain, blockHeight);
+                map = ContractCall.contractBatchEnd(chain, blockHeight, Constants.TIMEOUT_TIMEMILLIS * 10);
             } catch (NulsException e) {
                 logger.error(e);
                 throw new NulsException(TxErrorCode.CONTRACT_VERIFY_FAIL);
