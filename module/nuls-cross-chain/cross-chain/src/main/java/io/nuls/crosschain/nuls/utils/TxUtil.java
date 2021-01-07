@@ -228,8 +228,11 @@ public class TxUtil {
         try {
             Map packerInfo = ConsensusCall.getPackerInfo(chain);
             String password = (String) packerInfo.get(ParamConstant.PARAM_PASSWORD);
-            String address = (String) packerInfo.get(ParamConstant.PARAM_ADDRESS);
-            List<String> packers = (List<String>) packerInfo.get(ParamConstant.PARAM_PACK_ADDRESS_LIST);
+            List<String> localPackers = (List<String>) packerInfo.get(ParamConstant.PARAM_ADDRESS + "es");
+
+            List<String> packAddressList = (List<String>) packerInfo.get(ParamConstant.PARAM_PACK_ADDRESS_LIST);
+
+
             NulsHash convertHash = hash;
             if (!config.isMainNet()) {
                 //txData中存储来源链交易hash和nuls主链交易hash，如果发起链是nuls主链，来源链hash和nuls主链hash相同。
@@ -239,7 +242,7 @@ public class TxUtil {
             }
             CtxStatusPO ctxStatusPO = new CtxStatusPO(ctx, TxStatusEnum.UNCONFIRM.getStatus());
             //如果本节点是共识节点，则需要签名并做拜占庭，否则只需广播本地收集到的签名信息
-            if (!StringUtils.isBlank(address) && chain.getVerifierList().contains(address)) {
+            if (!localPackers.isEmpty()) {
                 BroadCtxSignMessage message = new BroadCtxSignMessage();
                 message.setLocalHash(hash);
                 TransactionSignature transactionSignature = new TransactionSignature();
@@ -249,22 +252,28 @@ public class TxUtil {
                     List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
                     transactionSignature.setP2PHKSignatures(p2PHKSignatures);
                 }
-                if (config.isMainNet()) {
-                    if (ctx.getType() == TxType.CROSS_CHAIN && ctx.getCoinDataInstance().getFromAddressList().contains(address)) {
-                        message.setSignature(transactionSignature.getP2PHKSignatures().get(0).serialize());
+                //循环本地所有打包地址
+                for (String packerAddress : localPackers) {
+                    if (!chain.getVerifierList().contains(packerAddress)) {
+                        continue;
+                    }
+                    if (config.isMainNet()) {
+                        if (ctx.getType() == TxType.CROSS_CHAIN && ctx.getCoinDataInstance().getFromAddressList().contains(packerAddress)) {
+                            message.setSignature(transactionSignature.getP2PHKSignatures().get(0).serialize());
+                        } else {
+                            P2PHKSignature p2PHKSignature = AccountCall.signDigest(packerAddress, password, hash.getBytes());
+                            transactionSignature.getP2PHKSignatures().add(p2PHKSignature);
+                            message.setSignature(p2PHKSignature.serialize());
+                        }
                     } else {
-                        P2PHKSignature p2PHKSignature = AccountCall.signDigest(address, password, hash.getBytes());
+                        P2PHKSignature p2PHKSignature = AccountCall.signDigest(packerAddress, password, convertHash.getBytes());
                         transactionSignature.getP2PHKSignatures().add(p2PHKSignature);
                         message.setSignature(p2PHKSignature.serialize());
                     }
-                } else {
-                    P2PHKSignature p2PHKSignature = AccountCall.signDigest(address, password, convertHash.getBytes());
-                    transactionSignature.getP2PHKSignatures().add(p2PHKSignature);
-                    message.setSignature(p2PHKSignature.serialize());
+                    NetWorkCall.broadcast(chainId, message, CommandConstant.BROAD_CTX_SIGN_MESSAGE, false);
                 }
-                MessageUtil.signByzantineInChain(chain, ctx, transactionSignature, packers,hash);
-                NetWorkCall.broadcast(chainId, message, CommandConstant.BROAD_CTX_SIGN_MESSAGE, false);
-            }else{
+                MessageUtil.signByzantineInChain(chain, ctx, transactionSignature, packAddressList, hash);
+            } else {
                 ctxStatusService.save(hash, ctxStatusPO, chainId);
             }
             //将收到的签名消息加入消息队列
@@ -352,7 +361,8 @@ public class TxUtil {
         /*
         判断本节点是否为共识节点，如果为共识节点则签名，如果不为共识节点则广播该交易
         */
-        Map packerInfo;
+        Map packerInfo = ConsensusCall.getPackerInfo(chain);
+        List<String> localPackers = (List<String>) packerInfo.get(ParamConstant.PARAM_ADDRESS + "es");
         List<String> verifierList = chain.getVerifierList();
         if (ctx.getType() == TxType.VERIFIER_INIT) {
             packerInfo = ConsensusCall.getSeedNodeList(chain);
@@ -362,8 +372,7 @@ public class TxUtil {
         }
         String password = (String) packerInfo.get(ParamConstant.PARAM_PASSWORD);
         String address = (String) packerInfo.get(ParamConstant.PARAM_ADDRESS);
-        BroadCtxSignMessage message = new BroadCtxSignMessage();
-        message.setLocalHash(hash);
+
         CtxStatusPO ctxStatusPO = new CtxStatusPO(ctx, TxStatusEnum.UNCONFIRM.getStatus());
         boolean byzantinePass = false;
         //验证人变更，减少的验证人不签名
@@ -373,29 +382,42 @@ public class TxUtil {
         }
         if (sign) {
             chain.getLogger().info("本节点为共识节点，对跨链交易签名,Hash:{}", hashHex);
-            P2PHKSignature p2PHKSignature;
-            try {
-                p2PHKSignature = AccountCall.signDigest(address, password, hash.getBytes());
-                message.setSignature(p2PHKSignature.serialize());
-                TransactionSignature signature = new TransactionSignature();
-                List<P2PHKSignature> p2PHKSignatureList = new ArrayList<>();
-                p2PHKSignatureList.add(p2PHKSignature);
+            TransactionSignature signature = new TransactionSignature();
+            HashSet<WaitBroadSignMessage> messageList = new HashSet<>();
+            List<P2PHKSignature> p2PHKSignatureList = new ArrayList<>();
+            for (var packageAddress : localPackers){
+                P2PHKSignature p2PHKSignature;
+                try {
+                    p2PHKSignature = AccountCall.signDigest(packageAddress, password, hash.getBytes());
+                    BroadCtxSignMessage message = new BroadCtxSignMessage();
+                    message.setLocalHash(hash);
+                    message.setSignature(p2PHKSignature.serialize());
+                    messageList.add(new WaitBroadSignMessage(null, message));
+                    p2PHKSignatureList.add(p2PHKSignature);
+                } catch (Exception e) {
+                    chain.getLogger().error(e);
+                    chain.getLogger().error("签名错误!,hash:{}", hashHex);
+                    return;
+                }
+            }
+            try{
                 signature.setP2PHKSignatures(p2PHKSignatureList);
                 ctx.setTransactionSignature(signature.serialize());
-                byzantinePass = MessageUtil.signByzantineInChain(chain, ctx, signature, verifierList,hash);
+                byzantinePass = MessageUtil.signByzantineInChain(chain, ctx, signature, verifierList, hash);
             } catch (Exception e) {
                 chain.getLogger().error(e);
                 chain.getLogger().error("签名错误!,hash:{}", hashHex);
                 return;
             }
-            if (!chain.getWaitBroadSignMap().keySet().contains(hash)) {
-                chain.getWaitBroadSignMap().put(hash, new HashSet<>());
-            }
             /*
             保存并广播该交易
             */
-            chain.getWaitBroadSignMap().get(hash).add(new WaitBroadSignMessage(null, message));
-        }else{
+            if (!chain.getWaitBroadSignMap().keySet().contains(hash)) {
+                chain.getWaitBroadSignMap().put(hash, messageList);
+            }else{
+                chain.getWaitBroadSignMap().get(hash).addAll(messageList);
+            }
+        } else {
             ctxStatusService.save(hash, ctxStatusPO, chainId);
         }
         if (!config.isMainNet()) {
@@ -620,7 +642,7 @@ public class TxUtil {
             }
         }
         //由于在3505754高度之前又验证人列表丢失的bug，所以在此高度之前只要有5个种子节点签名的交易就可以验证通过
-        if (ctx.getBlockHeight() <= 3505754 && passCount == 5){
+        if (ctx.getBlockHeight() <= 3505754 && passCount == 5) {
             return true;
         }
         if (passCount < byzantineCount ) {

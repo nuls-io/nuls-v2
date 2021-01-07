@@ -16,6 +16,7 @@ import io.nuls.core.exception.CryptoException;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.model.ObjectUtils;
+import io.nuls.v2.model.dto.ProgramMultyAssetValue;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -145,6 +146,20 @@ public class Utils {
             array[i] = list.get(i);
         }
         return array;
+    }
+
+    public static List<ProgramMultyAssetValue> multyAssetObjectArray(String[][] multyAssetValues) {
+        int length;
+        if (multyAssetValues == null || (length = multyAssetValues.length) == 0) {
+            return null;
+        }
+        List<ProgramMultyAssetValue> list = new ArrayList<>(length);
+        String[] value;
+        for (int i = 0; i < length; i++) {
+            value = multyAssetValues[i];
+            list.add(new ProgramMultyAssetValue(new BigInteger(value[0]), String.valueOf(value[3]), Integer.valueOf(value[1]), Integer.valueOf(value[2])));
+        }
+        return list;
     }
 
 }

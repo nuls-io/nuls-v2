@@ -67,6 +67,7 @@ public class ApiDocTool {
         baseType.add(String.class);
         baseType.add(Object[].class);
         baseType.add(String[].class);
+        baseType.add(String[][].class);
         baseType.add(BigInteger.class);
         baseType.add(BigDecimal.class);
     }
@@ -454,7 +455,7 @@ public class ApiDocTool {
                     } else if(field.getType() == Set.class) {
                         o1 = new HashSet<>();
                     } else if(field.getType().isArray()) {
-                        o1 = Array.newInstance(field.getType(), 0);
+                        o1 = Array.newInstance(field.getType().getComponentType(), 0);
                     } else {
                         o1 = field.getType().newInstance();
 

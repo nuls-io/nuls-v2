@@ -21,14 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.contract.model.dto;
+package io.nuls.provider.model.dto;
 
-import io.nuls.base.basic.AddressTool;
-import io.nuls.contract.model.bo.MultyAssetOutput;
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
-
-import static io.nuls.contract.util.ContractUtil.bigInteger2String;
 
 /**
  * @author: PierreLuo
@@ -48,14 +44,6 @@ public class MultyAssetOutputDto {
     private long lockTime;
 
     public MultyAssetOutputDto() {
-    }
-
-    public MultyAssetOutputDto(MultyAssetOutput output) {
-        this.to = AddressTool.getStringAddressByBytes(output.getTo());
-        this.value = bigInteger2String(output.getValue());
-        this.assetChainId = output.getAssetChainId();
-        this.assetId = output.getAssetId();
-        this.lockTime = output.getLockTime();
     }
 
     public String getTo() {

@@ -56,6 +56,10 @@ public class CrossTxRehandleMsgHandler implements MessageProcessor {
     @Override
     public void process(int chainId, String nodeId, String messageStr) {
         CrossTxRehandleMessage message = RPCUtil.getInstanceRpcStr(messageStr, CrossTxRehandleMessage.class);
+        process(chainId,message);
+    }
+
+    public void process(int chainId, CrossTxRehandleMessage message){
         String messageHash;
         try {
             messageHash = HexUtil.encode(message.serialize());
@@ -79,7 +83,7 @@ public class CrossTxRehandleMsgHandler implements MessageProcessor {
                 return ;
             }
             Transaction transaction = tx.getData();
-            if(transaction.getType() != TxType.CROSS_CHAIN){
+            if(transaction.getType() != TxType.CROSS_CHAIN && transaction.getType() != TxType.CONTRACT_TOKEN_CROSS_TRANSFER){
                 chain.getLogger().error("处理【重新处理跨链交易拜赞庭签名】失败，ctx hash : [{}] 不是一个跨链交易",ctxHash);
                 return ;
             }
@@ -102,5 +106,6 @@ public class CrossTxRehandleMsgHandler implements MessageProcessor {
             chain.getCrossTxThreadPool().execute(new CrossTxHandler(chain,  tx.getData(), syncStatus));
         }
     }
+
 
 }

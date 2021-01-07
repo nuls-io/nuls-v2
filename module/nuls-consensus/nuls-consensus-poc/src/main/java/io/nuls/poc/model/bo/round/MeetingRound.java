@@ -100,6 +100,7 @@ public class MeetingRound {
      * */
     @ApiModelProperty(description = "当前节点出块信息")
     private MeetingMember myMember;
+    private List<MeetingMember> myMemberList = new ArrayList<>();
 
     public MeetingRound getPreRound() {
         return preRound;
@@ -203,9 +204,9 @@ public class MeetingRound {
     }
 
     /**
-    * 根据节点地址获取节点对应的打包信息
-    * Get the packing information corresponding to the node according to the address of the node
-    */
+     * 根据节点地址获取节点对应的打包信息
+     * Get the packing information corresponding to the node according to the address of the node
+     */
     public MeetingMember getMemberByAgentAddress(byte[] address) {
         for (MeetingMember member : memberList) {
             if (Arrays.equals(address, member.getAgent().getAgentAddress())) {
@@ -236,12 +237,16 @@ public class MeetingRound {
         return myMember;
     }
 
+    public List<MeetingMember> getLocalMembers(){
+        return myMemberList;
+    }
+
     public void calcLocalPacker(List<byte[]> localAddressList,Chain chain) {
         for (byte[] address:localAddressList) {
             MeetingMember member = getMember(address,chain);
             if (null != member) {
                 myMember = member;
-                break;
+                myMemberList.add(member);
             }
         }
         if(myMember != null && !chain.isPacker()){
