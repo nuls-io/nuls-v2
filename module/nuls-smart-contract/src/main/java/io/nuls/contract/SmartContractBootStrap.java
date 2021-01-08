@@ -27,7 +27,7 @@ import io.nuls.core.io.IoUtils;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
-import io.nuls.core.rockdb.service.RocksDBService;
+import io.nuls.core.rockdb.manager.RocksDBManager;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.modulebootstrap.Module;
@@ -38,11 +38,12 @@ import io.nuls.core.rpc.util.AddressPrefixDatas;
 import io.nuls.core.rpc.util.NulsDateUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static io.nuls.contract.constant.ContractConstant.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -183,8 +184,10 @@ public class SmartContractBootStrap extends RpcModule {
      * 初始化数据库
      * Initialization database
      */
-    private void initDB() throws IOException {
-        RocksDBService.init(ContractContext.DATA_PATH);
+    private void initDB() throws Exception {
+        Set<String> skipTables = new HashSet<>();
+        skipTables.add(ContractDBConstant.DB_NAME_CONTRACT + "_" + contractConfig.getChainConfig().getChainId());
+        RocksDBManager.init(ContractContext.DATA_PATH, null, skipTables);
         ContractUtil.createTable(ContractDBConstant.DB_NAME_CONGIF);
     }
 

@@ -39,6 +39,7 @@ public interface ContractDBConstant {
      */
     String DB_NAME_CONGIF = "contract_config";
 
+    String DB_NAME_CONTRACT = "contract";
     String DB_NAME_CONTRACT_ADDRESS = "contract_address";
     String DB_NAME_CONTRACT_EXECUTE_RESULT = "contract_execute_result";
 
