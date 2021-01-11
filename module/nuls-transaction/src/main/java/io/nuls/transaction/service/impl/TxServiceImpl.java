@@ -935,7 +935,7 @@ public class TxServiceImpl implements TxService {
                 }
             }
             //将智能合约生成的返还GAS的tx加到队尾
-            if (contractGenerateTxs.size() > 0) {
+            if (!hasTxbackPackablePool && contractGenerateTxs.size() > 0) {
                 String csTxStr = contractGenerateTxs.get(contractGenerateTxs.size() - 1);
                 if (TxUtil.extractTxTypeFromTx(csTxStr) == TxType.CONTRACT_RETURN_GAS) {
                     packableTxs.add(csTxStr);
@@ -2209,7 +2209,7 @@ public class TxServiceImpl implements TxService {
                 }
             }
             //将智能合约生成的返还GAS的tx加到队尾
-            if (contractGenerateTxs.size() > 0) {
+            if (!hasTxbackPackablePool && contractGenerateTxs.size() > 0) {
                 String csTxStr = contractGenerateTxs.get(contractGenerateTxs.size() - 1);
                 if (TxUtil.extractTxTypeFromTx(csTxStr) == TxType.CONTRACT_RETURN_GAS) {
                     packableTxs.add(csTxStr);
