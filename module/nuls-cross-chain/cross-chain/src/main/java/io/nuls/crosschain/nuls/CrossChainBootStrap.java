@@ -161,11 +161,11 @@ public class CrossChainBootStrap extends BaseCrossChainBootStrap {
                     chainManager.setRegisteredCrossChainList(registeredChainMessage.getChainInfoList());
                 }
             }
-            chainManager.getRegisteredCrossChainList().stream().filter(d->d.getChainId() == 9)
-                    .forEach(chainInfo -> {
-                        Log.info("chain id {} 验证人列表：{}",chainInfo.getChainId(),chainInfo.getVerifierList());
-                       // Log.info("当前高度:{}",chainManager.getChainHeaderMap().get(1).getHeight());
-                    });;
+//            chainManager.getRegisteredCrossChainList().stream().filter(d->d.getChainId() == 9)
+//                    .forEach(chainInfo -> {
+//                        Log.info("chain id {} 验证人列表：{}",chainInfo.getChainId(),chainInfo.getVerifierList());
+//                       // Log.info("当前高度:{}",chainManager.getChainHeaderMap().get(1).getHeight());
+//                    });;
             /*
              * 如果为账户模块启动，向账户模块发送链前缀
              */
