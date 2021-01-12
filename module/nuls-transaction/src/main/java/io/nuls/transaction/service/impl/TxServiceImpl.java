@@ -940,7 +940,7 @@ public class TxServiceImpl implements TxService {
                 }
             }
             //将智能合约生成的返还GAS的tx加到队尾
-            if (contractGenerateTxs.size() > 0) {
+            if (!hasTxbackPackablePool && contractGenerateTxs.size() > 0) {
                 String csTxStr = contractGenerateTxs.get(contractGenerateTxs.size() - 1);
                 if (TxUtil.extractTxTypeFromTx(csTxStr) == TxType.CONTRACT_RETURN_GAS) {
                     packableTxs.add(csTxStr);
@@ -1256,6 +1256,8 @@ public class TxServiceImpl implements TxService {
                 //都执行通过
                 return false;
             }
+            chain.getLogger().warn("Package module verify failed -txModuleValidator Exception:{}, module-code:{}, count:{} , return count:{}",
+                    BaseConstant.TX_VALIDATOR, moduleCode, verifyList.size(), txHashList.size());
             if (batchVerify) {
                 //如果是验证区块交易，有不通过的 直接返回
                 return true;
@@ -1292,7 +1294,7 @@ public class TxServiceImpl implements TxService {
                     }
                 }
                 Iterator<String> itcs = verifyList.iterator();
-                while (its.hasNext()) {
+                while (itcs.hasNext()) {
                     Transaction tx = TxUtil.getInstanceRpcStr(itcs.next(), Transaction.class);
                     if (hash.equals(tx.getHash().toHex())) {
                         itcs.remove();
@@ -2224,7 +2226,7 @@ public class TxServiceImpl implements TxService {
                 }
             }
             //将智能合约生成的返还GAS的tx加到队尾
-            if (contractGenerateTxs.size() > 0) {
+            if (!hasTxbackPackablePool && contractGenerateTxs.size() > 0) {
                 String csTxStr = contractGenerateTxs.get(contractGenerateTxs.size() - 1);
                 if (TxUtil.extractTxTypeFromTx(csTxStr) == TxType.CONTRACT_RETURN_GAS) {
                     packableTxs.add(csTxStr);

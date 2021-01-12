@@ -30,6 +30,8 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 
 import java.util.HashMap;
 import java.util.List;
@@ -93,6 +95,18 @@ public class TransactionCall {
         try {
             Map<String, Boolean> baseValidateResult = (Map<String, Boolean>) CallHelper.request(ModuleE.TX.abbr, "tx_baseValidateTx", params);
             return baseValidateResult.get("value");
+        } catch (Exception e) {
+            throw new NulsException(e);
+        }
+    }
+
+    public static boolean setContractGenerateTxTypes(int chainId, List<Integer> txTypeList) throws NulsException {
+        try {
+            Map<String, Object> params = new HashMap(4);
+            params.put(Constants.CHAIN_ID, chainId);
+            params.put("txTypeList", txTypeList);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_setContractGenerateTxTypes", params);
+            return cmdResp.isSuccess();
         } catch (Exception e) {
             throw new NulsException(e);
         }
