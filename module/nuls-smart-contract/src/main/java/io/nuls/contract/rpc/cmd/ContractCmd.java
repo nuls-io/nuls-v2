@@ -644,36 +644,6 @@ public class ContractCmd extends BaseCmd {
         }
     }
 
-    @CmdAnnotation(cmd = GET_TX_TYPE_LIST_FROM_CONTRACT_GENERATED, version = 1.0, description = "通知当前批次结束并返回结果/batch end")
-    @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id")
-    })
-    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "list", valueType = List.class, valueElement = String.class, description = "智能合约模块会新生成的交易类型列表(合约返回GAS交易除外)")
-    }))
-    public Response getTxTypeListFromContractGenerated(Map<String, Object> params) {
-        try {
-            Integer chainId = (Integer) params.get("chainId");
-            ChainManager.chainHandle(chainId);
-            Log.info("The generated list of transaction types is sent to the transaction module");
-            Map<String, Object> resultMap = MapUtil.createHashMap(2);
-            List<Integer> list = List.of(
-                    TxType.CONTRACT_TRANSFER,
-                    TxType.CONTRACT_CREATE_AGENT,
-                    TxType.CONTRACT_DEPOSIT,
-                    TxType.CONTRACT_CANCEL_DEPOSIT,
-                    TxType.CONTRACT_STOP_AGENT);
-            if(ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_V250) {
-                list.add(TxType.CONTRACT_TOKEN_CROSS_TRANSFER);
-            }
-            resultMap.put("list", list);
-            return success(resultMap);
-        } catch (Exception e) {
-            Log.error(e);
-            return failed(e.getMessage());
-        }
-    }
-
     private String extractMsg(Result result) {
         if(result == null) {
             return EMPTY;

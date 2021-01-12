@@ -202,29 +202,4 @@ public class ContractCall {
         }
     }
 
-    /**
-     * 获取智能合约模块生成的系统交易类型（包括共识，跨链等；不包含gas返还交易）
-     * @param chain
-     * @return
-     * @throws NulsException
-     */
-    public static Set<Integer> getContractGenerateTxTypes(Chain chain) throws NulsException {
-        try {
-            Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
-            params.put(Constants.CHAIN_ID, chain.getChainId());
-            HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.SC.abbr, "sc_get_tx_type_list_from_contract_generated", params);
-            List<Integer> value = (List) result.get("list");
-            if(null == value){
-                chain.getLogger().error("call sc_get_tx_type_list_from_contract_generated response data is null, error:{}",
-                        TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
-                throw new NulsException(TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND);
-            }
-            Set<Integer> contractGenerateTxTypes = new HashSet<>();
-            contractGenerateTxTypes.addAll(value);
-            return contractGenerateTxTypes;
-        } catch (RuntimeException e) {
-            chain.getLogger().error(e);
-            throw new NulsException(TxErrorCode.RPC_REQUEST_FAILD);
-        }
-    }
 }
