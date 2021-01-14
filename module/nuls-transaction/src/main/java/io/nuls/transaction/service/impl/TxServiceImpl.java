@@ -1533,7 +1533,7 @@ public class TxServiceImpl implements TxService {
                     contractNotify = true;
                 }
                 try {
-                    if (!ContractCall.invokeContract(chain, RPCUtil.encode(tx.serialize()), 1)) {
+                    if (!ContractCall.invokeContract(chain, RPCUtil.encode(tx.serialize()), 1, Constants.TIMEOUT_TIMEMILLIS * 10)) {
                         if (logger.isDebugEnabled()) {
                             logger.debug("batch verify failed. invokeContract fail");
                         }
@@ -2359,7 +2359,7 @@ public class TxServiceImpl implements TxService {
                 }
                 try {
                     // 调用执行智能合约
-                    Map<String, Object> invokeContractRs = ContractCall.invokeContractV8(chain, RPCUtil.encode(tx.serialize()), 1, Constants.TIMEOUT_TIMEMILLIS * 2);
+                    Map<String, Object> invokeContractRs = ContractCall.invokeContractV8(chain, RPCUtil.encode(tx.serialize()), 1, Constants.TIMEOUT_TIMEMILLIS * 10);
                     //boolean success = (boolean) invokeContractRs.get("success");
                     long gasUsed = Long.valueOf(invokeContractRs.get("gasUsed").toString());
                     List<String> contractTxList = (List<String>) invokeContractRs.get("txList");
