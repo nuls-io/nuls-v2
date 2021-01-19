@@ -44,8 +44,6 @@ import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.util.*;
 
-import static org.ethereum.db.RepositoryImpl.threadLocal;
-
 public class Heap {
 
     public static final Map<ObjectRef, Map<String, Object>> INIT_OBJECTS = new HashMap<>(1024);
@@ -296,7 +294,7 @@ public class Heap {
         if (this.repository == null) {
             return null;
         }
-        Log.error("[{}]!!!!!!!getArrayChunkFromState, arrayRef: {}, arrayKey: {}", threadLocal.get(), arrayRef.toString(), arrayKey.toString());
+        //Log.error("[{}]!!!!!!!getArrayChunkFromState, arrayRef: {}, arrayKey: {}", threadLocal.get(), arrayRef.toString(), arrayKey.toString());
         DataWord dataWord = this.repository.getStorageValue(this.address, new DataWord(arrayKey));
         if (dataWord == null) {
             return null;
