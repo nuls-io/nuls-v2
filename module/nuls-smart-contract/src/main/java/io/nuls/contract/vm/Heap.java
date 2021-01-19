@@ -264,7 +264,6 @@ public class Heap {
             value = getArrayInit(arrayRef, chunkNum);
         }
         if (value == null && chunkNum != 0 && loadDB) {
-            //TODO pierre 为什么要去DB中查询
             value = getArrayChunkFromState(arrayRef, arrayKey);
             if (value != null) {
                 arrays.put(arrayKey, value);
@@ -671,9 +670,9 @@ public class Heap {
         stateObjectRefs(stateObjectRefs, staticObjectRef);
         stateObjectRefs(stateObjectRefs, this.contract);
         List<ObjectRef> clearList = new ArrayList<>();
-        int j = 0;
+        //int j = 0;
         for (ObjectRef objectRef : stateObjectRefs) {
-            j++;
+            //j++;
             //Log.debug("Per[{}] objectRef: {}", j, objectRef);
             if (!this.changes.contains(objectRef)) {
                 //Log.warn("[{}]null changes objectRef: {}", j, objectRef);
