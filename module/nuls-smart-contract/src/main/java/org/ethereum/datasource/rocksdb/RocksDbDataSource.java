@@ -22,7 +22,6 @@ import io.nuls.contract.util.Log;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.rockdb.manager.RocksDBManager;
-import io.nuls.core.rockdb.service.BatchOperation;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.rockdb.util.DBUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -39,9 +38,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
-import static org.ethereum.db.RepositoryImpl.threadLocal;
-import static org.ethereum.util.ByteUtil.toHexString;
 
 /**
  * @author Roman Mandeleil
@@ -91,7 +87,7 @@ public class RocksDbDataSource implements DbSource<byte[]> {
         this.settings = settings;
         resetDbLock.writeLock().lock();
         try {
-            logger.debug("~> RocksDbDataSource.init(): " + name);
+            //logger.debug("~> RocksDbDataSource.init(): " + name);
 
             if (isAlive()) {
                 return;
@@ -110,7 +106,7 @@ public class RocksDbDataSource implements DbSource<byte[]> {
 
             alive = true;
 
-            logger.debug("<~ RocksDbDataSource.init(): " + name);
+            //logger.debug("<~ RocksDbDataSource.init(): " + name);
         } catch (Exception e) {
             logger.error("RocksDbDataSource.init() error", e);
         } finally {
@@ -133,7 +129,7 @@ public class RocksDbDataSource implements DbSource<byte[]> {
                 dir.mkdirs();
             }
             dataPath = dataPath + File.separator + area + File.separator + "rocksdb";
-            Log.info("Contract dataPath is " + dataPath);
+            //Log.info("Contract dataPath is " + dataPath);
 
             Options options = new Options();
             options.setCreateIfMissing(true);
@@ -189,7 +185,7 @@ public class RocksDbDataSource implements DbSource<byte[]> {
 
     @Override
     public byte[] get(byte[] key) {
-        long startTime = System.nanoTime();
+        //long startTime = System.nanoTime();
         resetDbLock.readLock().lock();
         try {
             //if (Log.isTraceEnabled()) {
@@ -199,7 +195,7 @@ public class RocksDbDataSource implements DbSource<byte[]> {
 
                 byte[] ret = rocksDB.get(key);
                 //if (Log.isInfoEnabled()) {
-                    Log.info("[{}]<~ db.get(): " + name + ", key: " + toHexString(key) + ", " + (ret == null ? "null" : ret.length) + ", cost {}", threadLocal.get(), System.nanoTime() - startTime);
+                //    Log.info("[{}]<~ db.get(): " + name + ", key: " + toHexString(key) + ", " + (ret == null ? "null" : ret.length) + ", cost {}", threadLocal.get(), System.nanoTime() - startTime);
                 //}
                 return ret;
             } catch (Exception e) {
@@ -229,7 +225,7 @@ public class RocksDbDataSource implements DbSource<byte[]> {
             //}
             rocksDB.put(key, value);
             //if (Log.isInfoEnabled()) {
-            Log.info("<~ RocksDbDataSource.put(): " + name + ", key: " + toHexString(key) + ", " + (value == null ? "null" : value.length));
+            //Log.info("<~ RocksDbDataSource.put(): " + name + ", key: " + toHexString(key) + ", " + (value == null ? "null" : value.length));
             //}
         } catch (Exception e) {
             logger.error("RocksDbDataSource.put() error", e);
@@ -268,10 +264,10 @@ public class RocksDbDataSource implements DbSource<byte[]> {
             Set<Map.Entry<byte[], byte[]>> entrySet = rows.entrySet();
             for (Map.Entry<byte[], byte[]> entry : entrySet) {
                 if (entry.getValue() == null) {
-                    Log.info("<~ RocksDbDataSource.delete(): " + name + ", key: " + toHexString(entry.getKey()));
+                    //Log.info("<~ RocksDbDataSource.delete(): " + name + ", key: " + toHexString(entry.getKey()));
                     batch.delete(entry.getKey());
                 } else {
-                    Log.info("<~ RocksDbDataSource.put(): " + name + ", key: " + toHexString(entry.getKey()) + ", " + (entry.getValue() == null ? "null" : entry.getValue().length));
+                    //Log.info("<~ RocksDbDataSource.put(): " + name + ", key: " + toHexString(entry.getKey()) + ", " + (entry.getValue() == null ? "null" : entry.getValue().length));
                     batch.put(entry.getKey(), entry.getValue());
                 }
             }
@@ -290,7 +286,7 @@ public class RocksDbDataSource implements DbSource<byte[]> {
 
     @Override
     public void updateBatch(Map<byte[], byte[]> rows) {
-        long startTime = System.nanoTime();
+        //long startTime = System.nanoTime();
         resetDbLock.writeLock().lock();
         try {
             //if (Log.isTraceEnabled()) {
@@ -299,7 +295,7 @@ public class RocksDbDataSource implements DbSource<byte[]> {
             try {
                 updateBatchInternal(rows);
                 //if (Log.isInfoEnabled()) {
-                    Log.info("<~ RocksDbDataSource.updateBatch(): " + name + ", " + rows.size() + ", cost {}", System.nanoTime() - startTime + "\n");
+                //    Log.info("<~ RocksDbDataSource.updateBatch(): " + name + ", " + rows.size() + ", cost {}", System.nanoTime() - startTime + "\n");
                 //}
             } catch (Exception e) {
                 Log.error("Error, retrying one more time...", e);

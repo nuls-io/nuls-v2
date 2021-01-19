@@ -665,7 +665,7 @@ public class Heap {
 
     public Map<DataWord, DataWord> contractState() {
         Map<DataWord, DataWord> contractState = new LinkedHashMap<>(1024);
-        Log.info("=-=-=-=-=-= contractState - objectRefCount: {}, hashCode: {}", this.objectRefCount, this.objectRefCount.hashCode());
+        //Log.info("=-=-=-=-=-= contractState - objectRefCount: {}, hashCode: {}", this.objectRefCount, this.objectRefCount.hashCode());
         contractState.put(OBJECT_REF_COUNT, new DataWord(this.objectRefCount.getValue()));
         Set<ObjectRef> stateObjectRefs = new LinkedHashSet<>(1024);
         String className = this.contract.getVariableType().getType();
@@ -688,8 +688,8 @@ public class Heap {
             }
             String key = JsonUtils.encode(objectRef, classNames);
             String value = JsonUtils.encode(fields, classNames);
-            Log.info("[{}]modified objectRef: {}, fields: {}", j, objectRef, fields);
-            Log.info("[{}]modified key: {}, value: {}", j, key, value);
+            //Log.info("[{}]modified objectRef: {}, fields: {}", j, objectRef, fields);
+            //Log.info("[{}]modified key: {}, value: {}", j, key, value);
             contractState.put(new DataWord(key), new DataWord(value));
             if (objectRef.isArray()) {
                 for (String k : fields.keySet()) {
@@ -705,7 +705,7 @@ public class Heap {
                             clazz = ObjectRef.class;
                         }
                         String arrayValue = JsonUtils.encodeArray(object, clazz, classNames);
-                        Log.info("[{}]modified arrayKey: {}, arrayValue: {}", j, arrayKey, arrayValue);
+                        //Log.info("[{}]modified arrayKey: {}, arrayValue: {}", j, arrayKey, arrayValue);
                         contractState.put(new DataWord(arrayKey), new DataWord(arrayValue));
                     }
                 }
