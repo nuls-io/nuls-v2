@@ -17,8 +17,6 @@
  */
 package org.ethereum.db;
 
-import io.nuls.base.basic.AddressTool;
-import io.nuls.contract.util.Log;
 import org.ethereum.config.SystemProperties;
 import org.ethereum.core.AccountState;
 import org.ethereum.core.Block;
@@ -32,7 +30,6 @@ import org.ethereum.vm.DataWord;
 import javax.annotation.Nullable;
 import java.math.BigInteger;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by Anton Nashatyrev on 07.10.2016.
