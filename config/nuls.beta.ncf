@@ -94,7 +94,7 @@ deflationTimeInterval=2592000
 #合约视图方法调用最大消耗的Gas
 maxViewGas=100000000
 systemLogLevel=WARN
-crossTokenSystemContract=tNULSeBaN7uzhZpsoRrNnLGuznogReEQPejiM1
+crossTokenSystemContract=tNULSeBaMy9k29Nj4rd3U4tonVr93mrDLHMNNd
 
 [public-service]
 #public-service模块对外的rpc端口号
@@ -149,6 +149,6 @@ interval=10
 
 [nuls-api]
 #httpServer的启动ip
-server_ip=0.0.0.0
+serverIp=0.0.0.0
 #httpServer的启动port
 serverPort=18004
