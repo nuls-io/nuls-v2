@@ -2359,7 +2359,7 @@ public class TxServiceImpl implements TxService {
                 }
                 try {
                     // 调用执行智能合约
-                    Map<String, Object> invokeContractRs = ContractCall.invokeContractV8(chain, RPCUtil.encode(tx.serialize()), 1, Constants.TIMEOUT_TIMEMILLIS * 10);
+                    Map<String, Object> invokeContractRs = ContractCall.invokeContractV8(chain, RPCUtil.encode(tx.serialize()), 1, Constants.TIMEOUT_TIMEMILLIS * 20);
                     //boolean success = (boolean) invokeContractRs.get("success");
                     long gasUsed = Long.valueOf(invokeContractRs.get("gasUsed").toString());
                     List<String> contractTxList = (List<String>) invokeContractRs.get("txList");
@@ -2486,7 +2486,7 @@ public class TxServiceImpl implements TxService {
         if (contractNotify) {
             Map<String, Object> map;
             try {
-                map = ContractCall.contractBatchEnd(chain, blockHeight, Constants.TIMEOUT_TIMEMILLIS * 10);
+                map = ContractCall.contractBatchEnd(chain, blockHeight, Constants.TIMEOUT_TIMEMILLIS * 20);
             } catch (NulsException e) {
                 logger.error(e);
                 throw new NulsException(TxErrorCode.CONTRACT_VERIFY_FAIL);
