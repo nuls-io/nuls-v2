@@ -59,7 +59,7 @@ public class ContractContext {
     public static int ASSET_ID = 1;
 
     /**
-     *  代币跨链系统合约地址
+     * 代币跨链系统合约地址
      */
     public static byte[] CROSS_CHAIN_SYSTEM_CONTRACT;
 
@@ -68,4 +68,6 @@ public class ContractContext {
     public static short UPDATE_VERSION_V250 = 5;
 
     public static short UPDATE_VERSION_CONTRACT_ASSET = 8;
+
+    public static short UPDATE_VERSION_CONTRACT_BALANCE = 9;
 }

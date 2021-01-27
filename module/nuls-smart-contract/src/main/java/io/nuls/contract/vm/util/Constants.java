@@ -92,4 +92,8 @@ public class Constants {
 
     public static final String MAP_ENTRY_VALUE_METHOD_DESC = null;
 
+    public static final String SIZE = "size";
+
+    public static final String SIZE_DESC = "()I";
+
 }

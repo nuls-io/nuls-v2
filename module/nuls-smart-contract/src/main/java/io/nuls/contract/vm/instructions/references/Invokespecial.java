@@ -24,6 +24,8 @@
  */
 package io.nuls.contract.vm.instructions.references;
 
+import io.nuls.base.protocol.ProtocolGroupManager;
+import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.vm.Frame;
 import io.nuls.contract.vm.MethodArgs;
 import io.nuls.contract.vm.ObjectRef;
@@ -61,7 +63,27 @@ public class Invokespecial {
             return;
         }
 
+        if (ProtocolGroupManager.getCurrentVersion(ContractContext.CHAIN_ID) >= ContractContext.UPDATE_VERSION_CONTRACT_BALANCE) {
+            if (methodCode.isMethod(GROW_CLASS_NAME, GROW_METHOD_NAME, GROW_METHOD_DESC)) {
+                // ArrayList 扩容
+                MethodCode methodCode1 = frame.vm.methodArea.loadMethod(className, Constants.SIZE, Constants.SIZE_DESC);
+                frame.vm.run(methodCode1, new Object[]{objectRef}, false);
+                Object result1 = frame.vm.getResultValue();
+                int value = (int)  result1;
+                //Log.info("=--=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=List size: {}", value);
+                // 9369
+                if (value >= 9369) {
+                    frame.throwRuntimeException("Max size of ArrayList is 9369");
+                    return;
+                }
+
+            }
+        }
+
         frame.vm.run(methodCode, methodArgs.frameArgs, true);
     }
 
+    private static final String GROW_CLASS_NAME = "java/util/ArrayList";
+    private static final String GROW_METHOD_NAME = "grow";
+    private static final String GROW_METHOD_DESC = "(I)V";
 }

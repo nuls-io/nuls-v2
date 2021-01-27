@@ -110,9 +110,20 @@ public class StorageStructureContract extends MockBase {
     }
 
     @Test
+    public void testMapAdd() throws Exception {
+        byte[] prevStateRoot = HexUtil.decode("eaa90d836849ec31698bdbaa7a7e94fd9a4292e33a0f405565a10128375bc9c8");
+        Object[] objects = super.call(prevStateRoot, SENDER, "addMap", new String[]{"g", "1"});
+        byte[] stateRoot = (byte[]) objects[0];
+        ProgramResult programResult = (ProgramResult) objects[1];
+        Log.info(JSONUtils.obj2PrettyJson(programResult));
+        Log.info("stateRoot: " + HexUtil.encode(stateRoot) + "\n");
+        TimeUnit.SECONDS.sleep(6);
+    }
+
+    @Test
     public void testListAdd() throws Exception {
-        byte[] prevStateRoot = HexUtil.decode("32b05b57e5ddc8eabba05a9a7b006b3cd4c8d8d7662cb0553c3c05e471cd61fe");
-        Object[] objects = super.call(prevStateRoot, SENDER, "addList", new String[]{"a", "1310"});
+        byte[] prevStateRoot = HexUtil.decode("db69e39b1108b3b607fb6b8622a9ff23f95b50e3536fc29109586b2832bcad07");
+        Object[] objects = super.call(prevStateRoot, SENDER, "addList", new String[]{"f", "1"});
         byte[] stateRoot = (byte[]) objects[0];
         ProgramResult programResult = (ProgramResult) objects[1];
         Log.info(JSONUtils.obj2PrettyJson(programResult));
@@ -144,17 +155,6 @@ public class StorageStructureContract extends MockBase {
         Log.info(JSONUtils.obj2PrettyJson(programResult));
         Log.info("stateRoot: " + HexUtil.encode(stateRoot) + "\n");
         TimeUnit.SECONDS.sleep(1);
-    }
-
-    @Test
-    public void testMapAdd() throws Exception {
-        byte[] prevStateRoot = HexUtil.decode("978b6d7889168f85322f8ca246e2c362242a76fac96b7d86cbdbcee4fe655399");
-        Object[] objects = super.call(prevStateRoot, SENDER, "addMap", new String[]{"b", "2000"});
-        byte[] stateRoot = (byte[]) objects[0];
-        ProgramResult programResult = (ProgramResult) objects[1];
-        Log.info(JSONUtils.obj2PrettyJson(programResult));
-        Log.info("stateRoot: " + HexUtil.encode(stateRoot) + "\n");
-        TimeUnit.SECONDS.sleep(6);
     }
 
     @Test
