@@ -9,7 +9,7 @@ if [ ! -f "${CONFIG}" ] ; then
         exit 0
 fi
 availableMem=`free | awk '/Mem/ {print $7}'`
-xmsMem=10000000
+xmsMem=8000000
 if [ "$availableMem" -lt $xmsMem ]
 then
     echo "available mem must be equal or greater than ${xmsMem}KB";
