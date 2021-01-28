@@ -151,6 +151,7 @@ public class LoadLargeContractTest {
         List<String> correctList = new ArrayList<>();
         List<String> errorList = new ArrayList<>();
         for (String contract : errorArray) {
+            contract = contract.trim();
             if (!checkOne(root, contract)) {
                 errorList.add(contract);
             } else {
