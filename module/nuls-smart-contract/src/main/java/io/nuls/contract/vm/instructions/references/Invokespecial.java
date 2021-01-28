@@ -71,9 +71,9 @@ public class Invokespecial {
                 Object result1 = frame.vm.getResultValue();
                 int value = (int)  result1;
                 //Log.info("=--=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=List size: {}", value);
-                // 9369
-                if (value >= 9369) {
-                    frame.throwRuntimeException("Max size of ArrayList is 9369");
+                // 9369 14053
+                if (value >= 14053) {
+                    frame.throwRuntimeException("Max size of ArrayList is 14053");
                     return;
                 }
 
