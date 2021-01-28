@@ -125,49 +125,64 @@ public class LoadLargeContractTest {
         RepositoryRoot root = (RepositoryRoot) field.get(executor);
 
         List<ContractAddressInfoPo> contracts = allContracts();
+        List<String> correctList = new ArrayList<>();
+        List<String> errorList = new ArrayList<>();
         for (ContractAddressInfoPo contractInfo : contracts) {
-            checkOne(root, AddressTool.getStringAddressByBytes(contractInfo.getContractAddress()));
+            String contract = AddressTool.getStringAddressByBytes(contractInfo.getContractAddress());
+            if (!checkOne(root, contract)) {
+                errorList.add(contract);
+            } else {
+                correctList.add(contract);
+            }
         }
+        System.out.println("correct: " + Arrays.toString(correctList.toArray()));
+        System.out.println("error: " + Arrays.toString(errorList.toArray()));
     }
 
-    void checkOne(RepositoryRoot root, String contract) throws Exception {
-        System.out.println(String.format("contract address: %s", contract));
-        byte[] contractBytes = AddressTool.getAddress(contract);
-        String key = String.format("R_%s,0", contract);
-        //key = "objectRefCount";
+    boolean checkOne(RepositoryRoot root, String contract) {
+        try {
+            System.out.println(String.format("contract address: %s", contract));
+            byte[] contractBytes = AddressTool.getAddress(contract);
+            String key = String.format("R_%s,0", contract);
+            //key = "objectRefCount";
 
-        DataWord dataWord = getDataWord(root, contractBytes, key);
-        if (dataWord == null) {
-            System.err.println("NULL DataWord");
-            return;
-        }
-        Map<String, Object> map = JSONUtils.json2map(dataWord.asString());
-        for (Map.Entry<String, Object> e : map.entrySet()) {
-            if (e.getValue() == null) {
-                continue;
+            DataWord dataWord = getDataWord(root, contractBytes, key);
+            if (dataWord == null) {
+                System.err.println("NULL DataWord");
+                return false;
             }
-            String value = e.getValue().toString();
-            if (value.endsWith(",m")) {
-                // Map
-                DataWord dw = getDataWord(root, contractBytes, value);
-                Map<String, Object> _map = JSONUtils.json2map(dw.asString());
-                int mapSize = Integer.parseInt(_map.get("size").toString().substring(2));
-                System.out.println(String.format("mapSize: %s", mapSize));
-            } else if (value.endsWith(",g")) {
-                // list集合
-                DataWord dw = getDataWord(root, contractBytes, value);
-                Map<String, Object> _map = JSONUtils.json2map(dw.asString());
-                int listSize = Integer.parseInt(_map.get("size").toString().substring(2));
-                System.out.println(String.format("listSize: %s", listSize));
-            } else if (value.endsWith(",Ljava/util/HashSet;")) {
-                // set集合
-                DataWord dw = getDataWord(root, contractBytes, value);
-                Map<String, Object> _map = JSONUtils.json2map(dw.asString());
-                dw = getDataWord(root, contractBytes, _map.get("map").toString());
-                _map = JSONUtils.json2map(dw.asString());
-                int size = Integer.parseInt(_map.get("size").toString().substring(2));
-                System.out.println(String.format("setSize: %s", size));
+            Map<String, Object> map = JSONUtils.json2map(dataWord.asString());
+            for (Map.Entry<String, Object> e : map.entrySet()) {
+                if (e.getValue() == null) {
+                    continue;
+                }
+                String value = e.getValue().toString();
+                if (value.endsWith(",m")) {
+                    // Map
+                    DataWord dw = getDataWord(root, contractBytes, value);
+                    Map<String, Object> _map = JSONUtils.json2map(dw.asString());
+                    int mapSize = Integer.parseInt(_map.get("size").toString().substring(2));
+                    System.out.println(String.format("mapSize: %s", mapSize));
+                } else if (value.endsWith(",g")) {
+                    // list集合
+                    DataWord dw = getDataWord(root, contractBytes, value);
+                    Map<String, Object> _map = JSONUtils.json2map(dw.asString());
+                    int listSize = Integer.parseInt(_map.get("size").toString().substring(2));
+                    System.out.println(String.format("listSize: %s", listSize));
+                } else if (value.endsWith(",Ljava/util/HashSet;")) {
+                    // set集合
+                    DataWord dw = getDataWord(root, contractBytes, value);
+                    Map<String, Object> _map = JSONUtils.json2map(dw.asString());
+                    dw = getDataWord(root, contractBytes, _map.get("map").toString());
+                    _map = JSONUtils.json2map(dw.asString());
+                    int size = Integer.parseInt(_map.get("size").toString().substring(2));
+                    System.out.println(String.format("setSize: %s", size));
+                }
             }
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
     }
 
