@@ -139,6 +139,28 @@ public class LoadLargeContractTest {
         System.out.println("error: " + Arrays.toString(errorList.toArray()));
     }
 
+    @Test
+    public void testList() throws Exception {
+        ProgramExecutor executor = programExecutor.begin(HexUtil.decode("06b8a30da445372e3c5a86aa9171a033393c269da610b6dfdf0c2b4e03856dd0"));
+        Field field = ProgramExecutorImpl.class.getDeclaredField("repository");
+        field.setAccessible(true);
+        RepositoryRoot root = (RepositoryRoot) field.get(executor);
+
+        String errors = "NULSd6HgkvPrGrBnFAVXUBhBSTE7LqkY5u3g9, NULSd6HgmDR4r87eqfGA4AGt8iKAnrbsjSxri, NULSd6Hgn2dYQJGsFUS7gHNjE1WJ6qssrWAqi, NULSd6HgnBmk2bTEzHxwnnrkcjtnyBcS4Vg3S, NULSd6HgnHpNekxNX4nWdr3eEeJx7MEC4K9Mw, NULSd6HgnTbBoGqcB21cJUVG8zdDy7teGWksM, NULSd6HgpFSmNq8n6UMkprTQydz6KDFP2fXQ8, NULSd6HgprwPitNSX9w3J63h2xo7JtcWrR1gP, NULSd6HgqBJpKWZEfLEZSSUo1k5wS1tgTND1H, NULSd6HgqGyr75doz1JcRNV3N9Wo2Kert7wko, NULSd6HgqJo2X6P2hnexnY4gBvPX7mce3N5GZ, NULSd6HgqMAcVy9zmM1hsa1R95VFq2Lje44YT, NULSd6Hgqih9QqCMT1Z4357aTZ3we7jQJDu3T, NULSd6HgrXc4tbP5YUskoANtHNYZddHcuewpE, NULSd6HgsuqaW7KbHTyDK3AWaPuKUYvJ59xiw, NULSd6HgtBdVXy5HwNEAKXMvbN3MxM1Nf4VS9, NULSd6Hgucy2C5wq8YaqrhAZFguj4d3bCgpfE, NULSd6HgugbpQf76wayhtXyH3obWaLezkTBn5, NULSd6HguqaGqz7Ebvv7DhPdCXdwTF8tEWNQD, NULSd6HguxLQyW4bsNNX9gFhpXs38KsxAEwUt, NULSd6HgvBKiEEs9xtXLb9mGzqhF66S9jZsVK, NULSd6HgvLiBxzAJfz38oCjw74nibNjTjCP7g, NULSd6HgvSbwWG2fFi6DLPpHSKV6XLuEnm3HH, NULSd6HgvaJB79QiRrF8xBtpiR9cE81GxgkcE, NULSd6Hgw3sQnrwtfNhksdn9W3DbQoMdGZRaP, NULSd6HgwDs3jxGLnAE4VJnPxzDmRfXm6V7qb, NULSd6HgwK6i17Co27sWNG1492KbjJRxeZMcK, NULSd6HgwLcQgpfSEAYJDyQ8iYjRVyU8tf6Td, NULSd6HgwYKDK2EW8mhPtxkqCi9PgsKL8uyWw, NULSd6HgwbqTQNa5k35RkEMqCNSe6XbHk9Thz, NULSd6HgwjhaxDFZ6KH7fkohJLwW13DiozLhF, NULSd6Hgwx8p3j7cUKsM2cEtPxZGuRstBqVoN, NULSd6HgyFS6ReN2GM8rdCHKG5WcZPsQuw99e, NULSd6HgyfP1gJSCGUZHrvxEMqYAeFfjtuVJ6, NULSd6HgyviMiAWqKhTJmhjT275QEVTKSaWSj, NULSd6HgywfqAy7QizT6vTBEVzVmapn6Qs3VR, NULSd6HgzE7XxP9CFZRHC7P4qAVQdBqETNex7, NULSd6HgzQkQ2RifH32KU7tJSkWFuB6nDmgbG, NULSd6Hh13dkDiP2P7xzmzVXGfYqucvNiS45m, NULSd6Hh1LJU8VMfApFsQqvpCJqXmpsjLyfV1";
+        String[] errorArray = errors.split(",");
+        List<String> correctList = new ArrayList<>();
+        List<String> errorList = new ArrayList<>();
+        for (String contract : errorArray) {
+            if (!checkOne(root, contract)) {
+                errorList.add(contract);
+            } else {
+                correctList.add(contract);
+            }
+        }
+        System.out.println("correct: " + Arrays.toString(correctList.toArray()));
+        System.out.println("error: " + Arrays.toString(errorList.toArray()));
+    }
+
     int limitMap = 1;
     int limitList = 1;
 
@@ -218,7 +240,7 @@ public class LoadLargeContractTest {
     DataWord getDataWord(RepositoryRoot root, byte[] contractBytes, String keySub, Integer index) {
         String key;
         if (index != null) {
-            if (index > 20) return null;
+            if (index > 50) return null;
             key = keySub + index;
         } else {
             key = keySub;
