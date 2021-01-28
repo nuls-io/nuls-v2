@@ -139,36 +139,48 @@ public class LoadLargeContractTest {
         System.out.println("error: " + Arrays.toString(errorList.toArray()));
     }
 
+    int limitMap = 1;
+    int limitList = 1;
+
     boolean checkOne(RepositoryRoot root, String contract) {
         try {
-            System.out.println(String.format("contract address: %s", contract));
+            StringBuilder sb = new StringBuilder(String.format("contract address: %s", contract));
             byte[] contractBytes = AddressTool.getAddress(contract);
             String key = String.format("R_%s,0", contract);
             //key = "objectRefCount";
 
             DataWord dataWord = getDataWord(root, contractBytes, key);
             if (dataWord == null) {
-                System.err.println("NULL DataWord");
+                System.err.println(contract + " error: NULL DataWord");
                 return false;
             }
+            sb.append("\n" + String.format("DB get - get key: %s, get value: %s", key.toString(), dataWord == null ? null : dataWord.asString()));
             Map<String, Object> map = JSONUtils.json2map(dataWord.asString());
+            boolean display = false;
             for (Map.Entry<String, Object> e : map.entrySet()) {
                 if (e.getValue() == null) {
                     continue;
                 }
+                String dwKey = e.getKey();
                 String value = e.getValue().toString();
                 if (value.endsWith(",m")) {
                     // Map
                     DataWord dw = getDataWord(root, contractBytes, value);
                     Map<String, Object> _map = JSONUtils.json2map(dw.asString());
                     int mapSize = Integer.parseInt(_map.get("size").toString().substring(2));
-                    System.out.println(String.format("mapSize: %s", mapSize));
+                    sb.append("\n" + String.format("dwKey: %s, mapSize: %s", dwKey, mapSize));
+                    if (mapSize >= limitMap) {
+                        display = true;
+                    }
                 } else if (value.endsWith(",g")) {
                     // list集合
                     DataWord dw = getDataWord(root, contractBytes, value);
                     Map<String, Object> _map = JSONUtils.json2map(dw.asString());
                     int listSize = Integer.parseInt(_map.get("size").toString().substring(2));
-                    System.out.println(String.format("listSize: %s", listSize));
+                    sb.append("\n" + String.format("dwKey: %s, listSize: %s", dwKey, listSize));
+                    if (listSize >= limitList) {
+                        display = true;
+                    }
                 } else if (value.endsWith(",Ljava/util/HashSet;")) {
                     // set集合
                     DataWord dw = getDataWord(root, contractBytes, value);
@@ -176,8 +188,15 @@ public class LoadLargeContractTest {
                     dw = getDataWord(root, contractBytes, _map.get("map").toString());
                     _map = JSONUtils.json2map(dw.asString());
                     int size = Integer.parseInt(_map.get("size").toString().substring(2));
-                    System.out.println(String.format("setSize: %s", size));
+                    sb.append("\n" + String.format("dwKey: %s, setSize: %s", dwKey, size));
+                    if (size >= limitList) {
+                        display = true;
+                    }
                 }
+            }
+            if (display) {
+                System.out.println(sb.toString());
+                System.out.println();
             }
             return true;
         } catch (Exception e) {
@@ -205,9 +224,9 @@ public class LoadLargeContractTest {
             key = keySub;
         }
         DataWord dataWord = root.getStorageValue(contractBytes, new DataWord(key));
-        if (dataWord != null && index != null) {
+        /*if (dataWord != null && index != null) {
             System.out.println(String.format("DB get - get key: %s, get value: %s", key.toString(), dataWord == null ? null : dataWord.asString()));
-        }
+        }*/
         if (dataWord == null && index != null) {
             dataWord = getDataWord(root, contractBytes, keySub, index + 1);
         }
