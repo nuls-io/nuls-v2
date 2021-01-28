@@ -48,7 +48,7 @@ public class StorageStructureContract extends MockBase {
 
     @Override
     protected void protocolUpdate() {
-        short version = 8;
+        short version = 9;
         ProtocolGroupManager.setLoadProtocol(false);
         ProtocolGroupManager.updateProtocol(chainId, version);
         if (version >= 8) {
@@ -328,6 +328,5 @@ public class StorageStructureContract extends MockBase {
         String balanceOf = super.view(prevStateRoot, "balanceOf", new String[]{toAddress0});
         Log.info("view result: " + balanceOf);
     }
-
 
 }
