@@ -66,14 +66,15 @@ public class Invokespecial {
         if (ProtocolGroupManager.getCurrentVersion(ContractContext.CHAIN_ID) >= ContractContext.UPDATE_VERSION_CONTRACT_BALANCE) {
             if (methodCode.isMethod(GROW_CLASS_NAME, GROW_METHOD_NAME, GROW_METHOD_DESC)) {
                 // ArrayList 扩容
-                MethodCode methodCode1 = frame.vm.methodArea.loadMethod(className, Constants.SIZE, Constants.SIZE_DESC);
-                frame.vm.run(methodCode1, new Object[]{objectRef}, false);
-                Object result1 = frame.vm.getResultValue();
-                int value = (int)  result1;
-                //Log.info("=--=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=List size: {}", value);
+                MethodCode sizeMethod = frame.vm.methodArea.loadMethod(className, Constants.SIZE, Constants.SIZE_DESC);
+                frame.vm.run(sizeMethod, methodArgs.frameArgs, false);
+                Object sizeResult = frame.vm.getResultValue();
+                int size = (int)  sizeResult;
+                //Log.info("=--=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=List size: {}", size);
                 // 9369 14053
-                if (value >= 14053) {
-                    frame.throwRuntimeException("Max size of ArrayList is 14053");
+                // 71140
+                if (size >= Constants.LIST_MAX_CAPACITY) {
+                    frame.throwRuntimeException("Max size of ArrayList is " + Constants.LIST_MAX_CAPACITY);
                     return;
                 }
 

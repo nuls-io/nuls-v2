@@ -184,6 +184,17 @@ public class Heap {
         }
         byte[] value = dataWord.getNoLeadZeroesData();
         Map<String, Object> map = (Map<String, Object>) JsonUtils.decode(new String(value), classNames);
+        if (!VariableType.HASH_MAP_TYPE.getDesc().equals(objectRef.getDesc())) {
+            return map;
+        }
+        Float loadFactor = (Float) map.get("loadFactor");
+        ObjectRef tableRef = (ObjectRef) map.get("table");
+        int capacity = tableRef == null ? 0 : tableRef.getDimensions()[0];
+        if (loadFactor.floatValue() == 0.75 && capacity >= Constants.MAP_MAX_CAPACITY) {
+            map.put("threshold", capacity);
+            map.put("loadFactor", 1.0f);
+            change(objectRef);
+        }
         return map;
     }
 
