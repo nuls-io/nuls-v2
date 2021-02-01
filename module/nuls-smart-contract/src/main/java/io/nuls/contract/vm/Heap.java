@@ -26,6 +26,8 @@ package io.nuls.contract.vm;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import io.nuls.base.protocol.ProtocolGroupManager;
+import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.code.ClassCode;
 import io.nuls.contract.vm.code.FieldCode;
@@ -184,6 +186,9 @@ public class Heap {
         }
         byte[] value = dataWord.getNoLeadZeroesData();
         Map<String, Object> map = (Map<String, Object>) JsonUtils.decode(new String(value), classNames);
+        if (ProtocolGroupManager.getCurrentVersion(ContractContext.CHAIN_ID) < ContractContext.UPDATE_VERSION_CONTRACT_BALANCE ) {
+            return map;
+        }
         if (!VariableType.HASH_MAP_TYPE.getDesc().equals(objectRef.getDesc())) {
             return map;
         }
