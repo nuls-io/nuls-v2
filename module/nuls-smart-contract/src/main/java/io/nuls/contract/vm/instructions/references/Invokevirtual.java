@@ -78,28 +78,24 @@ public class Invokevirtual {
             return;
         }
 
-        if (ProtocolGroupManager.getCurrentVersion(ContractContext.CHAIN_ID) >= ContractContext.UPDATE_VERSION_CONTRACT_BALANCE ) {
+        if (ProtocolGroupManager.getCurrentVersion(ContractContext.CHAIN_ID) >= ContractContext.UPDATE_VERSION_CONTRACT_BALANCE) {
             if (methodCode.isMethod(RESIZE_CLASS_NAME, RESIZE_METHOD_NAME, RESIZE_METHOD_DESC)) {
-                // HashMap 扩容
+                // HashMap 扩容限制
                 MethodCode sizeMethod = frame.vm.methodArea.loadMethod(className, Constants.SIZE, Constants.SIZE_DESC);
                 frame.vm.run(sizeMethod, methodArgs.frameArgs, false);
                 Object sizeResult = frame.vm.getResultValue();
-                int size = (int)  sizeResult;
-                //Log.info("=--=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=map size: {}", size);
-                // 16384 * 0.75 = 12288
-                // 65536
+                int size = (int) sizeResult;
                 if (size > Constants.MAP_MAX_CAPACITY) {
                     frame.throwRuntimeException("Max size of map is " + Constants.MAP_MAX_CAPACITY);
                     return;
                 }
                 if (size > Constants.MAP_MIN_TRIGGER_RESIZE_CAPACITY) {
-                    // 扩容到65536
+                    // 扩容机制
                     MethodCode capacityMethod = frame.vm.methodArea.loadMethod(className, CAPACITY_METHOD_NAME, CAPACITY_METHOD_DESC);
                     frame.vm.run(capacityMethod, methodArgs.frameArgs, false);
                     Object capacityResult = frame.vm.getResultValue();
-                    int capacity = (int)  capacityResult;
+                    int capacity = (int) capacityResult;
                     int resizeCount = log2(Constants.MAP_MAX_CAPACITY / capacity) - 1;
-                    //Log.info("=--=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=map capacity: {}, resizeCount: {}", capacity, resizeCount + 1);
                     if (resizeCount > 0) {
                         for (int i = 0; i < resizeCount; i++) {
                             frame.vm.run(methodCode, methodArgs.frameArgs, true);
@@ -108,6 +104,7 @@ public class Invokevirtual {
                 }
             }
         }
+        
         frame.vm.run(methodCode, methodArgs.frameArgs, true);
     }
 
