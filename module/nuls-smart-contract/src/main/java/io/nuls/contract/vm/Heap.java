@@ -26,6 +26,8 @@ package io.nuls.contract.vm;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import io.nuls.base.protocol.ProtocolGroupManager;
+import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.code.ClassCode;
 import io.nuls.contract.vm.code.FieldCode;
@@ -184,6 +186,20 @@ public class Heap {
         }
         byte[] value = dataWord.getNoLeadZeroesData();
         Map<String, Object> map = (Map<String, Object>) JsonUtils.decode(new String(value), classNames);
+        if (ProtocolGroupManager.getCurrentVersion(ContractContext.CHAIN_ID) < ContractContext.UPDATE_VERSION_CONTRACT_BALANCE ) {
+            return map;
+        }
+        if (!VariableType.HASH_MAP_TYPE.getDesc().equals(objectRef.getDesc())) {
+            return map;
+        }
+        Float loadFactor = (Float) map.get("loadFactor");
+        ObjectRef tableRef = (ObjectRef) map.get("table");
+        int capacity = tableRef == null ? 0 : tableRef.getDimensions()[0];
+        if (loadFactor.floatValue() == 0.75 && capacity >= Constants.MAP_MAX_CAPACITY) {
+            map.put("threshold", capacity);
+            map.put("loadFactor", 1.0f);
+            change(objectRef);
+        }
         return map;
     }
 

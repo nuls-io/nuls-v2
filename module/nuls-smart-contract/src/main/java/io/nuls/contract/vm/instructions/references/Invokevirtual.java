@@ -24,6 +24,8 @@
  */
 package io.nuls.contract.vm.instructions.references;
 
+import io.nuls.base.protocol.ProtocolGroupManager;
+import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.vm.Frame;
 import io.nuls.contract.vm.MethodArgs;
 import io.nuls.contract.vm.ObjectRef;
@@ -76,7 +78,49 @@ public class Invokevirtual {
             return;
         }
 
+        if (ProtocolGroupManager.getCurrentVersion(ContractContext.CHAIN_ID) >= ContractContext.UPDATE_VERSION_CONTRACT_BALANCE) {
+            if (methodCode.isMethod(RESIZE_CLASS_NAME, RESIZE_METHOD_NAME, RESIZE_METHOD_DESC)) {
+                // HashMap 扩容限制
+                MethodCode sizeMethod = frame.vm.methodArea.loadMethod(className, Constants.SIZE, Constants.SIZE_DESC);
+                frame.vm.run(sizeMethod, methodArgs.frameArgs, false);
+                Object sizeResult = frame.vm.getResultValue();
+                int size = (int) sizeResult;
+                if (size > Constants.MAP_MAX_CAPACITY) {
+                    frame.throwRuntimeException("Max size of map is " + Constants.MAP_MAX_CAPACITY);
+                    return;
+                }
+                if (size > Constants.MAP_MIN_TRIGGER_RESIZE_CAPACITY) {
+                    // 扩容机制
+                    MethodCode capacityMethod = frame.vm.methodArea.loadMethod(className, CAPACITY_METHOD_NAME, CAPACITY_METHOD_DESC);
+                    frame.vm.run(capacityMethod, methodArgs.frameArgs, false);
+                    Object capacityResult = frame.vm.getResultValue();
+                    int capacity = (int) capacityResult;
+                    int resizeCount = log2(Constants.MAP_MAX_CAPACITY / capacity) - 1;
+                    if (resizeCount > 0) {
+                        for (int i = 0; i < resizeCount; i++) {
+                            frame.vm.run(methodCode, methodArgs.frameArgs, true);
+                        }
+                    }
+                }
+            }
+        }
+        
         frame.vm.run(methodCode, methodArgs.frameArgs, true);
+    }
+
+    private static final String RESIZE_CLASS_NAME = "java/util/HashMap";
+    private static final String RESIZE_METHOD_NAME = "resize";
+    private static final String RESIZE_METHOD_DESC = "()[Ljava/util/HashMap$Node;";
+
+    private static final String CAPACITY_METHOD_NAME = "capacity";
+    private static final String CAPACITY_METHOD_DESC = "()I";
+
+    static int log2(int digit) {
+        int count = 0;
+        while ((digit = digit / 2) != 0) {
+            count++;
+        }
+        return count;
     }
 
 }

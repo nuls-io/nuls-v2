@@ -48,7 +48,7 @@ public class StorageStructureContract extends MockBase {
 
     @Override
     protected void protocolUpdate() {
-        short version = 8;
+        short version = 9;
         ProtocolGroupManager.setLoadProtocol(false);
         ProtocolGroupManager.updateProtocol(chainId, version);
         if (version >= 8) {
@@ -106,50 +106,18 @@ public class StorageStructureContract extends MockBase {
         byte[] stateRoot = super.create(prevStateRoot, SENDER, contractCode);
 
         Log.info("stateRoot: " + HexUtil.encode(stateRoot) + "\n");
-        TimeUnit.SECONDS.sleep(1);
-    }
-
-    @Test
-    public void testListAdd() throws Exception {
-        byte[] prevStateRoot = HexUtil.decode("32b05b57e5ddc8eabba05a9a7b006b3cd4c8d8d7662cb0553c3c05e471cd61fe");
-        Object[] objects = super.call(prevStateRoot, SENDER, "addList", new String[]{"a", "1310"});
-        byte[] stateRoot = (byte[]) objects[0];
-        ProgramResult programResult = (ProgramResult) objects[1];
-        Log.info(JSONUtils.obj2PrettyJson(programResult));
-        Log.info("stateRoot: " + HexUtil.encode(stateRoot) + "\n");
-        TimeUnit.SECONDS.sleep(3);
-    }
-    @Test
-    public void getListByIndex() throws Exception {
-        byte[] prevStateRoot = HexUtil.decode("3f7a4dbed0dfd416b51217480350ba8428ee4a20f9837d9be92f5a74d5fb34e0");
-        Object[] objects = super.call(prevStateRoot, SENDER, "getListByIndex", new String[]{"0"});
-        byte[] stateRoot = (byte[]) objects[0];
-        ProgramResult programResult = (ProgramResult) objects[1];
-        Log.info(JSONUtils.obj2PrettyJson(programResult));
-        Log.info("stateRoot: " + HexUtil.encode(stateRoot) + "\n");
-        TimeUnit.SECONDS.sleep(1);
-
-        prevStateRoot = stateRoot;
-        objects = super.call(prevStateRoot, SENDER, "getListByIndex", new String[]{"310"});
-        stateRoot = (byte[]) objects[0];
-        programResult = (ProgramResult) objects[1];
-        Log.info(JSONUtils.obj2PrettyJson(programResult));
-        Log.info("stateRoot: " + HexUtil.encode(stateRoot) + "\n");
-        TimeUnit.SECONDS.sleep(1);
-
-        prevStateRoot = stateRoot;
-        objects = super.call(prevStateRoot, SENDER, "getListByIndex", new String[]{"1210"});
-        stateRoot = (byte[]) objects[0];
-        programResult = (ProgramResult) objects[1];
-        Log.info(JSONUtils.obj2PrettyJson(programResult));
-        Log.info("stateRoot: " + HexUtil.encode(stateRoot) + "\n");
+        // 32b05b57e5ddc8eabba05a9a7b006b3cd4c8d8d7662cb0553c3c05e471cd61fe
         TimeUnit.SECONDS.sleep(1);
     }
 
     @Test
     public void testMapAdd() throws Exception {
-        byte[] prevStateRoot = HexUtil.decode("978b6d7889168f85322f8ca246e2c362242a76fac96b7d86cbdbcee4fe655399");
-        Object[] objects = super.call(prevStateRoot, SENDER, "addMap", new String[]{"b", "2000"});
+        // eaa90d836849ec31698bdbaa7a7e94fd9a4292e33a0f405565a10128375bc9c8 12288 再添加一个，就触发resize
+        // 8fd0a0b82976ecdc98d6f14e406b0ec8409d3c64b85da0f98b319944db15ecc6 接eaa, 扩容因子被改变成1
+        // 87fa8f0b5f708c909961ab4abab30777c2e1455ca58aa6e5adae5601826501af 接eaa, 被扩容到65536
+        // 096917a2d4a70bcdbecef243887f87feeba693d1e8ac518460ae2f8e7b58b243 接87f
+        byte[] prevStateRoot = HexUtil.decode("6ee749e0360819359387c0c089928b27faaeab91fbd71427afc52c457df47e5c");
+        Object[] objects = super.call(prevStateRoot, SENDER, "addMap", new String[]{"q", "1"});
         byte[] stateRoot = (byte[]) objects[0];
         ProgramResult programResult = (ProgramResult) objects[1];
         Log.info(JSONUtils.obj2PrettyJson(programResult));
@@ -158,9 +126,46 @@ public class StorageStructureContract extends MockBase {
     }
 
     @Test
+    public void testListAdd() throws Exception {
+        byte[] prevStateRoot = HexUtil.decode("1837fbeef99a7671e5ebd2eebcf83bb118a384ebaafb414da18ab9b3ed7fd140");
+        Object[] objects = super.call(prevStateRoot, SENDER, "addList", new String[]{"a11-", "1"});
+        byte[] stateRoot = (byte[]) objects[0];
+        ProgramResult programResult = (ProgramResult) objects[1];
+        Log.info(JSONUtils.obj2PrettyJson(programResult));
+        Log.info("stateRoot: " + HexUtil.encode(stateRoot) + "\n");
+        TimeUnit.SECONDS.sleep(3);
+    }
+    @Test
+    public void getListByIndex() throws Exception {
+        byte[] prevStateRoot = HexUtil.decode("eb38cb09d83bd402b2637d118e5b489f216131daea35a404dab29b1c2afc679f");
+        Object[] objects = super.call(prevStateRoot, SENDER, "getListByIndex", new String[]{"71139"});
+        byte[] stateRoot = (byte[]) objects[0];
+        ProgramResult programResult = (ProgramResult) objects[1];
+        Log.info(JSONUtils.obj2PrettyJson(programResult));
+        Log.info("stateRoot: " + HexUtil.encode(stateRoot) + "\n");
+        TimeUnit.SECONDS.sleep(1);
+
+        prevStateRoot = stateRoot;
+        objects = super.call(prevStateRoot, SENDER, "getListByIndex", new String[]{"32110"});
+        stateRoot = (byte[]) objects[0];
+        programResult = (ProgramResult) objects[1];
+        Log.info(JSONUtils.obj2PrettyJson(programResult));
+        Log.info("stateRoot: " + HexUtil.encode(stateRoot) + "\n");
+        TimeUnit.SECONDS.sleep(1);
+
+        prevStateRoot = stateRoot;
+        objects = super.call(prevStateRoot, SENDER, "getListByIndex", new String[]{"15210"});
+        stateRoot = (byte[]) objects[0];
+        programResult = (ProgramResult) objects[1];
+        Log.info(JSONUtils.obj2PrettyJson(programResult));
+        Log.info("stateRoot: " + HexUtil.encode(stateRoot) + "\n");
+        TimeUnit.SECONDS.sleep(1);
+    }
+
+    @Test
     public void getMapValue() throws Exception {
-        byte[] prevStateRoot = HexUtil.decode("7945b873f1b21c0b622c6488780c45e2fca37642ef28c1e02ac50afc05697229");
-        Object[] objects = super.call(prevStateRoot, SENDER, "getMapValue", new String[]{"b1211"});
+        byte[] prevStateRoot = HexUtil.decode("6ee749e0360819359387c0c089928b27faaeab91fbd71427afc52c457df47e5c");
+        Object[] objects = super.call(prevStateRoot, SENDER, "getMapValue", new String[]{"p0"});
         byte[] stateRoot = (byte[]) objects[0];
         ProgramResult programResult = (ProgramResult) objects[1];
         Log.info(JSONUtils.obj2PrettyJson(programResult));
@@ -328,6 +333,5 @@ public class StorageStructureContract extends MockBase {
         String balanceOf = super.view(prevStateRoot, "balanceOf", new String[]{toAddress0});
         Log.info("view result: " + balanceOf);
     }
-
 
 }
