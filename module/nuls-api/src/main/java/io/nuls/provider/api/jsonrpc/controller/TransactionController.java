@@ -205,9 +205,9 @@ public class TransactionController {
                 return RpcResult.dataNotFound();
             }
             int type = extractTxTypeFromTx(txHex);
-          //  if(type == CROSS_CHAIN){
-           //     return RpcResult.failed(CommonCodeConstanst.PARAMETER_ERROR,"Cross-chain tx pause support");
-           // }
+            //  if(type == CROSS_CHAIN){
+            //     return RpcResult.failed(CommonCodeConstanst.PARAMETER_ERROR,"Cross-chain tx pause support");
+            // }
             Result result = new Result();
             switch (type) {
                 case CREATE_CONTRACT:
@@ -801,7 +801,6 @@ public class TransactionController {
         return RpcResult.success(map);
     }
 
-
     @RpcMethod("calcCrossTxFee")
     @ApiOperation(description = "计算离线创建跨链转账交易所需手续费", order = 351)
     @Parameters({
@@ -811,55 +810,38 @@ public class TransactionController {
             @Key(name = "value", description = "交易手续费"),
     }))
     public RpcResult calcCrossTxFee(List<Object> params) {
-        int assetChainId, assetId, addressCount, fromLength, toLength;
+        int addressCount, fromLength, toLength;
         String remark;
         try {
-            assetChainId = (int) params.get(0);
-        } catch (Exception e) {
-            return RpcResult.paramError("[assetChainId] is inValid");
-        }
-        try {
-            assetId = (int) params.get(1);
-        } catch (Exception e) {
-            return RpcResult.paramError("[assetId] is inValid");
-        }
-        try {
-            addressCount = (int) params.get(2);
+            addressCount = (int) params.get(0);
         } catch (Exception e) {
             return RpcResult.paramError("[addressCount] is inValid");
         }
         try {
-            fromLength = (int) params.get(3);
+            fromLength = (int) params.get(1);
         } catch (Exception e) {
             return RpcResult.paramError("[fromLength] is inValid");
         }
         try {
-            toLength = (int) params.get(4);
+            toLength = (int) params.get(2);
         } catch (Exception e) {
             return RpcResult.paramError("[toLength] is inValid");
         }
         try {
-            remark = (String) params.get(5);
+            remark = (String) params.get(3);
         } catch (Exception e) {
             return RpcResult.paramError("[remark] is inValid");
         }
-//        try {
-//            price = (String) params.get(4);
-//        } catch (Exception e) {
-//            return RpcResult.paramError("[price] is inValid");
-//        }
-//        if (!ValidateUtil.validateBigInteger(price)) {
-//            return RpcResult.paramError("[price] is inValid");
-//        }
+
         CrossTransferTxFeeDto dto = new CrossTransferTxFeeDto();
-        dto.setAssetChainId(assetChainId);
-        dto.setAssetId(assetId);
         dto.setAddressCount(addressCount);
         dto.setFromLength(fromLength);
         dto.setToLength(toLength);
         dto.setRemark(remark);
 
-        Map<String, BigInteger> map = NulsSDKTool.calcCrossTransferTxFee(dto);
+        BigInteger fee = NulsSDKTool.calcCrossTransferNulsTxFee(dto);
+        Map map = new HashMap();
+        map.put("value", fee.toString());
         return RpcResult.success(map);
     }
 
