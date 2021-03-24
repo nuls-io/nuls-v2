@@ -21,20 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.contract.model.dto;
+package io.nuls.provider.model.dto;
 
-import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.NulsHash;
-import io.nuls.contract.model.bo.ContractMultyAssetMergedTransfer;
-import io.nuls.contract.model.bo.MultyAssetOutput;
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
 import io.nuls.core.rpc.model.TypeDescriptor;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import static io.nuls.contract.util.ContractUtil.bigInteger2String;
 
 /**
  * @author: PierreLuo
@@ -57,27 +50,6 @@ public class ContractMultyAssetMergedTransferDto {
     private String orginTxHash;
 
     public ContractMultyAssetMergedTransferDto() {
-    }
-
-    public ContractMultyAssetMergedTransferDto(ContractMultyAssetMergedTransfer transfer) {
-        this.from = AddressTool.getStringAddressByBytes(transfer.getFrom());
-        this.value = bigInteger2String(transfer.getValue());
-        this.assetChainId = transfer.getAssetChainId();
-        this.assetId = transfer.getAssetId();
-        NulsHash thatHash = transfer.getHash();
-        this.txHash = thatHash == null ? null : thatHash.toHex();
-        NulsHash thatOrginTxHash = transfer.getOrginHash();
-        this.orginTxHash = thatOrginTxHash == null ? null : thatOrginTxHash.toHex();
-        this.makeOutputs(transfer.getOutputs());
-    }
-
-    private void makeOutputs(List<MultyAssetOutput> outputs) {
-        if (outputs != null && !outputs.isEmpty()) {
-            this.outputs = new ArrayList<>(outputs.size());
-            for (MultyAssetOutput output : outputs) {
-                this.outputs.add(new MultyAssetOutputDto(output));
-            }
-        }
     }
 
     public String getTxHash() {

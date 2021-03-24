@@ -576,13 +576,20 @@ public class AgentServiceImpl implements AgentService {
         }
         try {
             MeetingRound round = roundManager.getCurrentRound(chain);
-            MeetingMember member = null;
-            if(round != null){
-                member = round.getMyMember();
+            List<MeetingMember> members = null;
+            if (round != null) {
+                members = round.getLocalMembers();
             }
             Map<String, Object> resultMap = new HashMap<>(4);
-            if (member != null) {
-                resultMap.put("address", AddressTool.getStringAddressByBytes(member.getAgent().getPackingAddress()));
+            if (members != null) {
+                List<String> localPackAddressList = new ArrayList<>();
+                for (MeetingMember meetingMember : members) {
+                    localPackAddressList.add(AddressTool.getStringAddressByBytes(meetingMember.getAgent().getPackingAddress()));
+                }
+                if (null != localPackAddressList && !localPackAddressList.isEmpty()) {
+                    resultMap.put("address", localPackAddressList.get(0));
+                }
+                resultMap.put("addresses", localPackAddressList);
                 resultMap.put("password", chain.getConfig().getPassword());
             }
             List<String> packAddressList = new ArrayList<>();

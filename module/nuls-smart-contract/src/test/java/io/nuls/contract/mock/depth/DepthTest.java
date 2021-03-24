@@ -77,4 +77,8 @@ public class DepthTest extends MockBase {
         Log.info("\n");
     }
 
+    @Override
+    protected void protocolUpdate() {
+
+    }
 }

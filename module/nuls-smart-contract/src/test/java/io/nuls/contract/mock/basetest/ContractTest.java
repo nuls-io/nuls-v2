@@ -348,4 +348,8 @@ public class ContractTest extends MockBase{
         }
     }
 
+    @Override
+    protected void protocolUpdate() {
+
+    }
 }

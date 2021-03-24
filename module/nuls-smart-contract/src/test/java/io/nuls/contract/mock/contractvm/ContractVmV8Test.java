@@ -144,18 +144,18 @@ public class ContractVmV8Test extends MockBase {
     String contractB = "tNULSeBaN1gZJobF3bxuLwXxvvAosdwQTVxWFn";
     byte[] prevStateRoot;
 
-    @Before
-    public void createAndInit() throws Exception {
-        // 加载协议升级的数据
-        ContractContext.CHAIN_ID = chainId;
-        ContractContext.ASSET_ID = assetId;
+    @Override
+    protected void protocolUpdate() {
         short version = 8;
         ProtocolGroupManager.setLoadProtocol(false);
         ProtocolGroupManager.updateProtocol(chainId, version);
         if (version >= 8) {
             VMFactory.reInitVM_v8();
         }
+    }
 
+    @Before
+    public void createAndInit() throws Exception {
         // -------------------------------------------------------------------------------------//
         //InputStream inA = new FileInputStream(getClass().getResource("/contract-vm-v8-testA-1.0-SNAPSHOT.jar").getFile());
         //InputStream inB = new FileInputStream(getClass().getResource("/contract-vm-v8-testB-1.0-SNAPSHOT.jar").getFile());

@@ -26,6 +26,8 @@ package io.nuls.contract.helper;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
+import io.nuls.base.protocol.ProtocolGroupManager;
+import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.enums.ContractStatus;
@@ -162,11 +164,12 @@ public class ContractHelper {
     private boolean checkNrc20Contract(List<ProgramMethod> methods) {
         return checkNrc20Contract(methods, null);
     }
+
     private boolean checkNrc20Contract(List<ProgramMethod> methods, Map<String, ProgramMethod> contractMethodsMap) {
         if (methods == null || methods.size() == 0) {
             return false;
         }
-        if(contractMethodsMap == null) {
+        if (contractMethodsMap == null) {
             contractMethodsMap = new HashMap<>(methods.size());
         }
         for (ProgramMethod method : methods) {
@@ -216,23 +219,23 @@ public class ContractHelper {
         }
         boolean hasSafe = false;
         boolean hasSafeData = false;
-        for(ProgramMethod method : methods) {
-            if(NRC721_SAFETRANSFERFROM.equals(method.getName())) {
+        for (ProgramMethod method : methods) {
+            if (NRC721_SAFETRANSFERFROM.equals(method.getName())) {
                 int size = method.getArgs().size();
-                if(size == 3 && VMContext.getNrc721OverloadMethodSafe().equalsNrc721Method(method)) {
+                if (size == 3 && VMContext.getNrc721OverloadMethodSafe().equalsNrc721Method(method)) {
                     hasSafe = true;
                     continue;
                 }
-                if(size == 4 && VMContext.getNrc721OverloadMethodSafeData().equalsNrc721Method(method)) {
+                if (size == 4 && VMContext.getNrc721OverloadMethodSafeData().equalsNrc721Method(method)) {
                     hasSafeData = true;
                     continue;
                 }
             }
-            if(hasSafe && hasSafeData){
+            if (hasSafe && hasSafeData) {
                 break;
             }
         }
-        if(hasSafe && hasSafeData) {
+        if (hasSafe && hasSafeData) {
             return true;
         }
         return false;
@@ -244,7 +247,7 @@ public class ContractHelper {
         }
         for (ProgramMethod method : methods) {
             if (BALANCE_TRIGGER_METHOD_NAME.equals(method.getName())
-                && BALANCE_TRIGGER_METHOD_DESC.equals(method.getDesc())) {
+                    && BALANCE_TRIGGER_METHOD_DESC.equals(method.getDesc())) {
                 return method.isPayable();
             }
         }
@@ -332,16 +335,19 @@ public class ContractHelper {
         List<ProgramMethod> methods = this.getAllMethods(chainId, createContractData.getCode());
         Map<String, ProgramMethod> contractMethodsMap = new HashMap<>();
         boolean isNrc20 = this.checkNrc20Contract(methods, contractMethodsMap);
-        boolean isNrc721 = this.checkNrc721Contract(methods, contractMethodsMap);
-        if(isNrc20) {
+        boolean isNrc721 = false;
+        if (!isNrc20) {
+            isNrc721 = this.checkNrc721Contract(methods, contractMethodsMap);
+        }
+        if (isNrc20) {
             contractResult.setTokenType(TokenTypeStatus.NRC20.status());
-        } else if(isNrc721) {
+        } else if (isNrc721) {
             contractResult.setTokenType(TokenTypeStatus.NRC721.status());
         }
         boolean isAcceptDirectTransfer = this.checkAcceptDirectTransfer(methods);
         contractResult.setNrc20(isNrc20);
         contractResult.setAcceptDirectTransfer(isAcceptDirectTransfer);
-        if (isNrc20) {
+        if (isNrc20 || isNrc721) {
             // NRC20 tokenName 验证代币名称格式
             ProgramResult programResult = this.invokeViewMethod(chainId, track, null, bestBlockHeight, contractAddress, NRC20_METHOD_NAME, null, null);
             if (programResult.isSuccess()) {
@@ -369,40 +375,42 @@ public class ContractHelper {
                 }
             }
 
-            programResult = this.invokeViewMethod(chainId, track, null, bestBlockHeight, contractAddress, NRC20_METHOD_DECIMALS, null, null);
-            BigInteger decimalsBig = BigInteger.ZERO;
-            if (programResult.isSuccess()) {
-                String decimals = programResult.getResult();
-                if (StringUtils.isNotBlank(decimals)) {
-                    try {
-                        decimalsBig = new BigInteger(decimals);
-                        if (decimalsBig.compareTo(BigInteger.ZERO) < 0 || decimalsBig.compareTo(MAXIMUM_DECIMALS) > 0) {
-                            contractResult.setError(true);
-                            contractResult.setErrorMessage("The value of decimals ranges from 0 to 18.");
-                            return getFailed();
+            if (isNrc20) {
+                programResult = this.invokeViewMethod(chainId, track, null, bestBlockHeight, contractAddress, NRC20_METHOD_DECIMALS, null, null);
+                BigInteger decimalsBig = BigInteger.ZERO;
+                if (programResult.isSuccess()) {
+                    String decimals = programResult.getResult();
+                    if (StringUtils.isNotBlank(decimals)) {
+                        try {
+                            decimalsBig = new BigInteger(decimals);
+                            if (decimalsBig.compareTo(BigInteger.ZERO) < 0 || decimalsBig.compareTo(MAXIMUM_DECIMALS) > 0) {
+                                contractResult.setError(true);
+                                contractResult.setErrorMessage("The value of decimals ranges from 0 to 18.");
+                                return getFailed();
+                            }
+                            contractResult.setTokenDecimals(decimalsBig.intValue());
+                        } catch (Exception e) {
+                            Log.error("Get nrc20 decimals error.", e);
+                            // skip it
                         }
-                        contractResult.setTokenDecimals(decimalsBig.intValue());
-                    } catch (Exception e) {
-                        Log.error("Get nrc20 decimals error.", e);
-                        // skip it
                     }
                 }
-            }
-            programResult = this.invokeViewMethod(chainId, track, null, bestBlockHeight, contractAddress, NRC20_METHOD_TOTAL_SUPPLY, null, null);
-            if (programResult.isSuccess()) {
-                String totalSupply = programResult.getResult();
-                if (StringUtils.isNotBlank(totalSupply)) {
-                    try {
-                        BigInteger totalSupplyBig = new BigInteger(totalSupply);
-                        if (totalSupplyBig.compareTo(BigInteger.ZERO) <= 0 || totalSupplyBig.compareTo(MAXIMUM_TOTAL_SUPPLY.multiply(BigInteger.TEN.pow(decimalsBig.intValue()))) > 0) {
-                            contractResult.setErrorMessage("The value of totalSupply ranges from 1 to 2^256 - 1.");
-                            contractResult.setError(true);
-                            return getFailed();
+                programResult = this.invokeViewMethod(chainId, track, null, bestBlockHeight, contractAddress, NRC20_METHOD_TOTAL_SUPPLY, null, null);
+                if (programResult.isSuccess()) {
+                    String totalSupply = programResult.getResult();
+                    if (StringUtils.isNotBlank(totalSupply)) {
+                        try {
+                            BigInteger totalSupplyBig = new BigInteger(totalSupply);
+                            if (totalSupplyBig.compareTo(BigInteger.ZERO) <= 0 || totalSupplyBig.compareTo(MAXIMUM_TOTAL_SUPPLY.multiply(BigInteger.TEN.pow(decimalsBig.intValue()))) > 0) {
+                                contractResult.setErrorMessage("The value of totalSupply ranges from 1 to 2^256 - 1.");
+                                contractResult.setError(true);
+                                return getFailed();
+                            }
+                            contractResult.setTokenTotalSupply(totalSupplyBig);
+                        } catch (Exception e) {
+                            Log.error("Get nrc20 totalSupply error.", e);
+                            // skip it
                         }
-                        contractResult.setTokenTotalSupply(totalSupplyBig);
-                    } catch (Exception e) {
-                        Log.error("Get nrc20 totalSupply error.", e);
-                        // skip it
                     }
                 }
             }
@@ -411,7 +419,12 @@ public class ContractHelper {
     }
 
     public ContractBalance getBalance(int chainId, int assetChainId, int assetId, byte[] address) {
-        ContractTempBalanceManager tempBalanceManager = getBatchInfoTempBalanceManager(chainId);
+        ContractTempBalanceManager tempBalanceManager;
+        if (ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_CONTRACT_BALANCE) {
+            tempBalanceManager = getBatchInfoTempBalanceManagerV8(chainId);
+        } else {
+            tempBalanceManager = getBatchInfoTempBalanceManager(chainId);
+        }
         if (tempBalanceManager != null) {
             Result<ContractBalance> balance = tempBalanceManager.getBalance(address, assetChainId, assetId);
             if (balance.isSuccess()) {
@@ -469,7 +482,7 @@ public class ContractHelper {
 
     public ContractTempBalanceManager getBatchInfoTempBalanceManagerV8(int chainId) {
         BatchInfoV8 batchInfo;
-        if((batchInfo = getChain(chainId).getBatchInfoV8()) == null) {
+        if ((batchInfo = getChain(chainId).getBatchInfoV8()) == null) {
             return null;
         }
         return batchInfo.getTempBalanceManager();
@@ -477,7 +490,7 @@ public class ContractHelper {
 
     public BlockHeader getBatchInfoCurrentBlockHeaderV8(int chainId) {
         BatchInfoV8 batchInfo;
-        if((batchInfo = getChain(chainId).getBatchInfoV8()) == null) {
+        if ((batchInfo = getChain(chainId).getBatchInfoV8()) == null) {
             return null;
         }
         return batchInfo.getCurrentBlockHeader();
@@ -485,7 +498,7 @@ public class ContractHelper {
 
     public ContractTempBalanceManager getBatchInfoTempBalanceManager(int chainId) {
         BatchInfo batchInfo;
-        if((batchInfo = getChain(chainId).getBatchInfo()) == null) {
+        if ((batchInfo = getChain(chainId).getBatchInfo()) == null) {
             return null;
         }
         return batchInfo.getTempBalanceManager();
@@ -493,7 +506,7 @@ public class ContractHelper {
 
     public BlockHeader getBatchInfoCurrentBlockHeader(int chainId) {
         BatchInfo batchInfo;
-        if((batchInfo = getChain(chainId).getBatchInfo()) == null) {
+        if ((batchInfo = getChain(chainId).getBatchInfo()) == null) {
             return null;
         }
         return batchInfo.getCurrentBlockHeader();
@@ -639,7 +652,7 @@ public class ContractHelper {
                         continue;
                     }
                     Boolean isNRC20 = isNRC20Map.get(contractAddress);
-                    if(isNRC20 == null) {
+                    if (isNRC20 == null) {
                         byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
                         Result<ContractAddressInfoPo> contractAddressInfoResult = this.getContractAddressInfo(chainId, contractAddressBytes);
                         contractAddressInfo = contractAddressInfoResult.getData();
@@ -656,10 +669,10 @@ public class ContractHelper {
 
                     // 回滚token余额
                     this.rollbackContractToken(chainId, tokenTransferInfoPo);
-                    if(tokenTransferInfoPo.getFrom() != null) {
+                    if (tokenTransferInfoPo.getFrom() != null) {
                         contractTokenTransferStorageService.deleteTokenTransferInfo(chainId, Arrays.concatenate(tokenTransferInfoPo.getFrom(), txHashBytes, new VarInt(i).encode()));
                     }
-                    if(tokenTransferInfoPo.getTo() != null) {
+                    if (tokenTransferInfoPo.getTo() != null) {
                         contractTokenTransferStorageService.deleteTokenTransferInfo(chainId, Arrays.concatenate(tokenTransferInfoPo.getTo(), txHashBytes, new VarInt(i).encode()));
                     }
 

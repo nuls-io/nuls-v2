@@ -245,19 +245,27 @@ public class CreateContractTxProcessor {
         info.setBlockHeight(blockHeight);
 
         boolean isNrc20Contract = contractResult.isNrc20();
+        boolean isNrc721Contract = ContractConstant.TOKEN_TYPE_NRC721 == contractResult.getTokenType();
         boolean acceptDirectTransfer = contractResult.isAcceptDirectTransfer();
         info.setAcceptDirectTransfer(acceptDirectTransfer);
         info.setNrc20(isNrc20Contract);
         info.setTokenType(contractResult.getTokenType());
-        // 获取 token tracker
-        if (isNrc20Contract) {
-            // NRC20 token 标准方法获取名称数据
+        do {
+            if (!isNrc20Contract && !isNrc721Contract) {
+                break;
+            }
+            // 获取 token tracker
+            // 处理NRC20/NRC721 token数据
             String tokenName = contractResult.getTokenName();
             String tokenSymbol = contractResult.getTokenSymbol();
             int tokenDecimals = contractResult.getTokenDecimals();
             BigInteger tokenTotalSupply = contractResult.getTokenTotalSupply();
             info.setNrc20TokenName(tokenName);
             info.setNrc20TokenSymbol(tokenSymbol);
+            if (!isNrc20Contract) {
+                break;
+            }
+            // 处理NRC20 token数据
             info.setDecimals(tokenDecimals);
             info.setTotalSupply(tokenTotalSupply);
             byte[] newestStateRoot = blockHeader.getStateRoot();
@@ -294,7 +302,8 @@ public class CreateContractTxProcessor {
                 }
             }
             // end code by pierre
-        }
+        } while (false);
+
         return contractAddressStorageService.saveContractAddress(chainId, contractAddress, info);
     }
 

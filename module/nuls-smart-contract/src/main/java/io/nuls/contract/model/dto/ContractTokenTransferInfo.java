@@ -23,28 +23,61 @@
  *
  */
 
-package io.nuls.contract.constant;
+package io.nuls.contract.model.dto;
+
+import java.io.Serializable;
+import java.math.BigInteger;
 
 /**
- * 交易数据存储常量
- * Transaction entity storage constants
- *
  * @author: PierreLuo
+ * @date: 2018/7/23
  */
-public interface ContractDBConstant {
+public class ContractTokenTransferInfo implements Serializable {
 
-    /**
-     * 配置信息表名
-     * chain configuration table name
-     */
-    String DB_NAME_CONGIF = "contract_config";
+    private String from;
+    private String to;
+    private BigInteger value;
+    private String contractAddress;
+    // token类型, 0 - 非token, 1 - NRC20, 2 - NRC721
+    private int tokenType;
 
-    String DB_NAME_CONTRACT = "contract";
-    String DB_NAME_CONTRACT_ADDRESS = "contract_address";
-    String DB_NAME_CONTRACT_EXECUTE_RESULT = "contract_execute_result";
+    public String getFrom() {
+        return from;
+    }
 
-    String DB_NAME_CONTRACT_NRC20_TOKEN_TRANSFER = "contract_nrc20_token_transfer";
-    String DB_NAME_CONTRACT_NRC20_TOKEN_ADDRESS = "contract_nrc20_token_address";
-    String DB_NAME_CONTRACT_OFFLINE_TX_HASH_LIST = "contract_offline_tx_hash_list";
+    public void setFrom(String from) {
+        this.from = from;
+    }
 
+    public String getTo() {
+        return to;
+    }
+
+    public void setTo(String to) {
+        this.to = to;
+    }
+
+    public BigInteger getValue() {
+        return value;
+    }
+
+    public void setValue(BigInteger value) {
+        this.value = value;
+    }
+
+    public String getContractAddress() {
+        return contractAddress;
+    }
+
+    public void setContractAddress(String contractAddress) {
+        this.contractAddress = contractAddress;
+    }
+
+    public int getTokenType() {
+        return tokenType;
+    }
+
+    public void setTokenType(int tokenType) {
+        this.tokenType = tokenType;
+    }
 }

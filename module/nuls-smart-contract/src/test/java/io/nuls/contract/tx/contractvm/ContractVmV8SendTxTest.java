@@ -150,6 +150,7 @@ public class ContractVmV8SendTxTest extends BaseQuery {
     protected String contractA = "";
     protected String contractB = "";
     protected boolean createContract = true;
+    int multyAssetId = 2;
 
     @Before
     public void createAndInit() throws Exception {
@@ -181,8 +182,8 @@ public class ContractVmV8SendTxTest extends BaseQuery {
         } else {
             //contractA = "tNULSeBaMy6NZRUzvKSMpKjw87ABAgietZ2THh";
             //contractB = "tNULSeBaN8Ytuc6AuwD37gGozqrPSVi8qCLmqy";
-            contractA = "tNULSeBaMwPWQbZWZvQDd8FGSB4sNUPVLBmkAh";
-            contractB = "tNULSeBaN76yL5YGd46spCx2srGykNtoRPavqw";
+            contractA = "tNULSeBaN2XQNq6Z83Ner1rf2u61ovyYACRKXW";
+            contractB = "tNULSeBaMydn9HiYWf9KovR3Bmr1ePZGTsGPoa";
         }
         JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
@@ -194,6 +195,14 @@ public class ContractVmV8SendTxTest extends BaseQuery {
         Map map1 = (Map) map.get("contractResult");
         ContractResultDto dto = this.converterDto(map1);
         System.out.println(JSONUtils.obj2PrettyJson(dto));
+    }
+
+    @Test
+    public void testSome() throws Exception {
+        test3();
+        test9();
+        test13();
+        test14();
     }
 
     @Test
@@ -311,46 +320,46 @@ public class ContractVmV8SendTxTest extends BaseQuery {
 
     @Test
     public void test11() throws Exception {
-        this.testAsset(contractA, sender, "test11", new String[]{}, BigInteger.valueOf(100L), chainId, 2, true, new String[]{contractA, contractB, sender}, 0, 30, 70, 0, 0, 0);
+        this.testAsset(contractA, sender, "test11", new String[]{}, BigInteger.valueOf(100L), chainId, multyAssetId, true, new String[]{contractA, contractB, sender}, 0, 30, 70, 0, 0, 0);
     }
 
     @Test
     public void test12() throws Exception {
-        this.testAsset(contractA, sender, "test12", new String[]{}, BigInteger.valueOf(100L), chainId, 2, true, new String[]{contractA, contractB, sender}, 20, 10, 70, 0, 0, 0);
+        this.testAsset(contractA, sender, "test12", new String[]{}, BigInteger.valueOf(100L), chainId, multyAssetId, true, new String[]{contractA, contractB, sender}, 20, 10, 70, 0, 0, 0);
     }
 
     @Test
     public void test13() throws Exception {
-        this.testAsset(contractA, sender, "test13", new String[]{}, BigInteger.valueOf(100L), chainId, 2, true, new String[]{contractA, contractB, sender}, 20, 10, 60, 0, 0, 10);
+        this.testAsset(contractA, sender, "test13", new String[]{}, BigInteger.valueOf(100L), chainId, multyAssetId, true, new String[]{contractA, contractB, sender}, 20, 10, 60, 0, 0, 10);
     }
 
     @Test
     public void test14() throws Exception {
-        this.testAsset(contractA, sender, "test14", new String[]{}, BigInteger.valueOf(100L), chainId, 2, true, new String[]{contractA, contractB, sender}, 0, 30, 50, 0, 0, 20);
+        this.testAsset(contractA, sender, "test14", new String[]{}, BigInteger.valueOf(100L), chainId, multyAssetId, true, new String[]{contractA, contractB, sender}, 0, 30, 50, 0, 0, 20);
     }
 
     @Test
     public void test16() throws Exception {
         String errorMsgKey = "not enough balance";
-        this.testFailed(contractA, sender, "test16", new String[]{}, BigInteger.valueOf(100L), chainId, 2, true, errorMsgKey);
+        this.testFailed(contractA, sender, "test16", new String[]{}, BigInteger.valueOf(100L), chainId, multyAssetId, true, errorMsgKey);
     }
 
     @Test
     public void test17() throws Exception {
         String errorMsgKey = "not enough balance";
-        this.testFailed(contractA, sender, "test17", new String[]{}, BigInteger.valueOf(100L), chainId, 2, true, errorMsgKey);
+        this.testFailed(contractA, sender, "test17", new String[]{}, BigInteger.valueOf(100L), chainId, multyAssetId, true, errorMsgKey);
     }
 
     @Test
     public void test18() throws Exception {
         String errorMsgKey = "not enough balance";
-        this.testFailed(contractA, sender, "test18", new String[]{}, BigInteger.valueOf(100L), chainId, 2, true, errorMsgKey);
+        this.testFailed(contractA, sender, "test18", new String[]{}, BigInteger.valueOf(100L), chainId, multyAssetId, true, errorMsgKey);
     }
 
     @Test
     public void test19() throws Exception {
         String errorMsgKey = "Cannot transfer the locked amount to the contract address";
-        this.testFailed(contractA, sender, "test19", new String[]{}, BigInteger.valueOf(100L), chainId, 2, true, errorMsgKey);
+        this.testFailed(contractA, sender, "test19", new String[]{}, BigInteger.valueOf(100L), chainId, multyAssetId, true, errorMsgKey);
     }
 
     protected BigInteger[][] balanceList(int assetChainId, int assetId, LinkedHashMap<String, BigInteger>[] contracts, String... addresses) {
@@ -541,7 +550,7 @@ public class ContractVmV8SendTxTest extends BaseQuery {
             System.out.println("errorMsg: " + programResult.getErrorMessage());
             Assert.assertFalse(String.format("测试方法[%s]expect failed, errorMsg: %s, stackTrace: %s", method, programResult.getErrorMessage(), programResult.getStackTrace()), programResult.isSuccess());
         } catch (Throwable e) {
-            if (e.getMessage().contains(errorMsgKey)) {
+            if (e.getMessage() != null && e.getMessage().contains(errorMsgKey)) {
                 System.out.println(String.format("method [%s] 测试通过，期望: %s", method, errorMsgKey));
             } else {
                 System.err.println(String.format("method [%s] 测试失败, error: %s", method, e.getMessage()));

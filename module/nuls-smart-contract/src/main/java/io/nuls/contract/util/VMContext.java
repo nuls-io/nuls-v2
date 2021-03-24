@@ -26,6 +26,7 @@ package io.nuls.contract.util;
 
 
 import io.nuls.base.data.BlockHeader;
+import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.contract.config.ContractConfig;
 import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.helper.ContractHelper;
@@ -142,7 +143,12 @@ public class VMContext {
      * @throws IOException
      */
     public BlockHeaderDto getCurrentBlockHeader(int chainId) {
-        BlockHeader blockHeader = contractHelper.getBatchInfoCurrentBlockHeader(chainId);
+        BlockHeader blockHeader;
+        if(ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_CONTRACT_BALANCE ) {
+            blockHeader = contractHelper.getBatchInfoCurrentBlockHeaderV8(chainId);
+        } else {
+            blockHeader = contractHelper.getBatchInfoCurrentBlockHeader(chainId);
+        }
         if (blockHeader == null) {
             // edit by pierre at 2019-10-24 如果为空，说明是验证合约时，合约虚拟机调用此方法，此时需要手工设置当前打包区块数据，可手工设置的数据有区块高度和区块时间
             BlockHeaderDto header = getNewestBlockHeader(chainId);
@@ -213,7 +219,12 @@ public class VMContext {
     }
 
     public long getBestHeight(int chainId) {
-        BlockHeader currentBlockHeader = contractHelper.getBatchInfoCurrentBlockHeader(chainId);
+        BlockHeader currentBlockHeader;
+        if(ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_CONTRACT_BALANCE ) {
+            currentBlockHeader = contractHelper.getBatchInfoCurrentBlockHeaderV8(chainId);
+        } else {
+            currentBlockHeader = contractHelper.getBatchInfoCurrentBlockHeader(chainId);
+        }
         if (currentBlockHeader != null) {
             return currentBlockHeader.getHeight() - 1;
         } else {

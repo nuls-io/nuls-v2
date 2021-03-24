@@ -21,13 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.contract.model.dto;
+package io.nuls.provider.model.dto;
 
 
-import io.nuls.base.basic.AddressTool;
-import io.nuls.contract.model.po.ContractAddressInfoPo;
-import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
-import io.nuls.contract.util.ContractUtil;
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
 
@@ -35,48 +31,19 @@ import io.nuls.core.rpc.model.ApiModelProperty;
  * @author: PierreLuo
  */
 @ApiModel
-public class ContractTokenTransferDto {
+public class ContractToken721TransferDto {
     @ApiModelProperty(description = "合约地址")
     private String contractAddress;
     @ApiModelProperty(description = "付款方")
     private String from;
     @ApiModelProperty(description = "收款方")
     private String to;
-    @ApiModelProperty(description = "转账金额")
-    private String value;
+    @ApiModelProperty(description = "tokenId")
+    private String tokenId;
     @ApiModelProperty(description = "token名称")
     private String name;
     @ApiModelProperty(description = "token符号")
     private String symbol;
-    @ApiModelProperty(description = "token支持的小数位数")
-    private long decimals;
-
-    public ContractTokenTransferDto(ContractTokenTransferInfoPo po) {
-        this.contractAddress = po.getContractAddress();
-        if (po.getFrom() != null) {
-            this.from = AddressTool.getStringAddressByBytes(po.getFrom());
-        }
-        if (po.getTo() != null) {
-            this.to = AddressTool.getStringAddressByBytes(po.getTo());
-        }
-        this.value = ContractUtil.bigInteger2String(po.getValue());
-        this.name = po.getName();
-        this.symbol = po.getSymbol();
-        this.decimals = po.getDecimals();
-    }
-
-    public ContractTokenTransferDto(ContractTokenTransferInfo info) {
-        this.contractAddress = info.getContractAddress();
-        this.from = info.getFrom();
-        this.to = info.getTo();
-        this.value = ContractUtil.bigInteger2String(info.getValue());
-    }
-
-    public void setNrc20Info(ContractAddressInfoPo po) {
-        this.name = po.getNrc20TokenName();
-        this.symbol = po.getNrc20TokenSymbol();
-        this.decimals = po.getDecimals();
-    }
 
     public String getContractAddress() {
         return contractAddress;
@@ -102,12 +69,12 @@ public class ContractTokenTransferDto {
         this.to = to;
     }
 
-    public String getValue() {
-        return value;
+    public String getTokenId() {
+        return tokenId;
     }
 
-    public void setValue(String value) {
-        this.value = value;
+    public void setTokenId(String tokenId) {
+        this.tokenId = tokenId;
     }
 
     public String getName() {
@@ -124,13 +91,5 @@ public class ContractTokenTransferDto {
 
     public void setSymbol(String symbol) {
         this.symbol = symbol;
-    }
-
-    public long getDecimals() {
-        return decimals;
-    }
-
-    public void setDecimals(long decimals) {
-        this.decimals = decimals;
     }
 }

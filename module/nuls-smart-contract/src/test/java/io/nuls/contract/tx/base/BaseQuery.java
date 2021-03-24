@@ -165,6 +165,50 @@ public class BaseQuery extends Base {
         System.out.println(transferService.transfer(builder.build(new TransferReq())).getData());
     }
 
+    @Test
+    public void transferMultyAsset() {
+        TransferReq.TransferReqBuilder builder = new TransferReq.TransferReqBuilder(2, 3)
+                .addForm(sender, password, BigInteger.valueOf(39_1000_0000_0000L))
+                .addTo(toAddress, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress0, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress1, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress2, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress3, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress4, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress5, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress6, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress7, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress8, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress9, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress10, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress11, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress12, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress13, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress14, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress15, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress16, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress17, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress18, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress19, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress20, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress21, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress22, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress23, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress24, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress25, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress26, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress27, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress28, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress29, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress30, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress31, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress32, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress33, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress34, BigInteger.valueOf(1000000000000L))
+                .addTo("tNULSeBaMrNuXBLLUS1zJSERqbf3jm5c633fiS", BigInteger.valueOf(3_1000_0000_0000L));
+        System.out.println(transferService.transfer(builder.build(new TransferReq())).getData());
+    }
+
     @Before
     public void before() throws Exception {
         NoUse.mockModule();
@@ -188,7 +232,7 @@ public class BaseQuery extends Base {
         System.out.println("---------------------------------------------------");
         //this.getBalanceByAccount("tNULSeBaNAFAVPbGHAzCJ8YZhXLbxK44EujNKF");
         System.out.println("---------------------------------------------------");
-        this.getBalanceByAccount("tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD");
+        this.getBalanceByAccount("tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp");
     }
 
     protected void getBalanceByAccount(String account) throws Exception {
@@ -206,6 +250,8 @@ public class BaseQuery extends Base {
         System.out.println(String.format("NULS balance: %s", JSONUtils.obj2PrettyJson(balance0)));
         Map<String, Object> balance1 = LedgerCall.getBalanceAndNonce(chain, chainId, 2, account);
         System.out.println(String.format("MTA  balance: %s", JSONUtils.obj2PrettyJson(balance1)));
+        Map<String, Object> balance2 = LedgerCall.getBalanceAndNonce(chain, chainId, 3, account);
+        System.out.println(String.format("MTA  balance: %s", JSONUtils.obj2PrettyJson(balance2)));
     }
 
     @Test
