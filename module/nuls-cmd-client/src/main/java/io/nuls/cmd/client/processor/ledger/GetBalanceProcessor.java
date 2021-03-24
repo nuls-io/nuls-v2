@@ -105,6 +105,9 @@ public class GetBalanceProcessor implements CommandProcessor {
             return CommandResult.getFailed(result);
         }
         Integer decimalInt = AssetsUtil.getCrossAssetDecimal(assetChainId, assetId);
+        if(decimalInt == null){
+            decimalInt = config.getDecimals();
+        }
         Map<String,Object> r = new HashMap<>(3);
         r.put("available",config.toBigUnit(result.getData().getAvailable(),decimalInt));
         r.put("freeze",config.toBigUnit(result.getData().getFreeze(),decimalInt));
