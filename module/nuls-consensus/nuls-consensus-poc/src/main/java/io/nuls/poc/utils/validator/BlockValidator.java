@@ -67,6 +67,10 @@ public class BlockValidator {
             chain.getLogger().error("Block Header Verification Error!");
             throw new NulsException(ConsensusErrorCode.SIGNATURE_ERROR);
         }
+        if (block.getHeader().getTime() - 10 > NulsDateUtils.getCurrentTimeSeconds()) {
+            chain.getLogger().error("There is a big difference between the block time and the actual time!");
+            throw new NulsException(ConsensusErrorCode.ERROR_UNLOCK_TIME);
+        }
         RoundValidResult roundValidResult;
         String blockHeaderHash = blockHeader.getHash().toHex();
         try {
@@ -220,10 +224,10 @@ public class BlockValidator {
         try {
             Transaction newYellowPunishTX = punishManager.createYellowPunishTx(chain, chain.getNewestHeader(), member, currentRound);
             boolean isMatch = (yellowPunishTx == null && newYellowPunishTX == null) || (yellowPunishTx != null && newYellowPunishTX != null);
-            if(!isMatch){
+            if (!isMatch) {
                 chain.getLogger().error("The yellow punish tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + blockHeaderHash);
                 return false;
-            }else if(yellowPunishTx != null && !yellowPunishTx.getHash().equals(newYellowPunishTX.getHash())){
+            } else if (yellowPunishTx != null && !yellowPunishTx.getHash().equals(newYellowPunishTX.getHash())) {
                 chain.getLogger().error("The yellow punish tx's hash is wrong! height: " + block.getHeader().getHeight() + " , hash : " + blockHeaderHash);
                 return false;
             }
@@ -318,7 +322,7 @@ public class BlockValidator {
                 roundIndex[i] = blockExtendsData.getRoundIndex();
             }
             //验证三次分叉是否是100轮以内
-            if(roundIndex[ConsensusConstant.REDPUNISH_BIFURCATION - 1] - roundIndex[0] > ConsensusConstant.VALUE_OF_ONE_HUNDRED){
+            if (roundIndex[ConsensusConstant.REDPUNISH_BIFURCATION - 1] - roundIndex[0] > ConsensusConstant.VALUE_OF_ONE_HUNDRED) {
                 throw new NulsException(ConsensusErrorCode.BLOCK_RED_PUNISH_ERROR);
             }
         }
@@ -360,7 +364,7 @@ public class BlockValidator {
         if (null == coinBaseTransaction) {
             chain.getLogger().error("the coin base tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + blockHeaderHash);
             return false;
-        }else if(!tx.getHash().equals(coinBaseTransaction.getHash())){
+        } else if (!tx.getHash().equals(coinBaseTransaction.getHash())) {
             CoinFromComparator fromComparator = new CoinFromComparator();
             CoinToComparator toComparator = new CoinToComparator();
 
@@ -370,13 +374,13 @@ public class BlockValidator {
             coinBaseTransaction.setCoinData(coinBaseCoinData.serialize());
 
             Transaction originTransaction = new Transaction();
-            originTransaction.parse(tx.serialize() , 0);
-            CoinData originCoinData  = originTransaction.getCoinDataInstance();
+            originTransaction.parse(tx.serialize(), 0);
+            CoinData originCoinData = originTransaction.getCoinDataInstance();
             originCoinData.getFrom().sort(fromComparator);
             originCoinData.getTo().sort(toComparator);
             originTransaction.setCoinData(originCoinData.serialize());
 
-            if(!originTransaction.getHash().equals(coinBaseTransaction.getHash())){
+            if (!originTransaction.getHash().equals(coinBaseTransaction.getHash())) {
                 chain.getLogger().error("the coin base tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + blockHeaderHash);
                 return false;
             }
@@ -417,7 +421,7 @@ public class BlockValidator {
             coinData.getFrom().sort(fromComparator);
             coinData.getTo().sort(toComparator);
             CoinData txCoinData = new CoinData();
-            txCoinData.parse(tx.getCoinData(),0);
+            txCoinData.parse(tx.getCoinData(), 0);
             txCoinData.getFrom().sort(fromComparator);
             txCoinData.getTo().sort(toComparator);
             if (!Arrays.equals(coinData.serialize(), txCoinData.serialize())) {
