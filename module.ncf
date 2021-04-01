@@ -1,9 +1,9 @@
 [global]
 encoding=UTF-8
 language=en
-logPath=E:/work/src/nuls-v2/Logs
+logPath=/Users/niels/workspace/nuls-v2/Logs
 logLevel=INFO
-dataPath=E:/work/src/nuls-v2/data
+dataPath=/Users/niels/workspace/nuls-v2/data
 #默认本链ID
 chainId=1
 #地址前缀
