@@ -1,7 +1,7 @@
 [global]
 encoding=UTF-8
 language=en
-logPath=/Users/niels/workspace/nuls-v2/logs
+logPath=/Users/niels/workspace/nuls-v2/Logs
 logLevel=INFO
 dataPath=/Users/niels/workspace/nuls-v2/data
 #默认本链ID
@@ -88,6 +88,9 @@ deflationRatio=0.4
 deflationTimeInterval=2592000
 dependent=protocol-update,smart-contract,cross-chain
 
+[ledger]
+dependent=protocol-update
+
 [transaction]
 dependent=protocol-update,smart-contract
 
@@ -153,5 +156,5 @@ interval=1000
 dependent=smart-contract,cross-chain
 
 [cmd-client]
-clientVersion=2.5.0
+clientVersion=2.7.0
 

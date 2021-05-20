@@ -74,6 +74,7 @@ public class RepositoryImpl implements Repository, org.ethereum.facade.Repositor
 
     @Override
     public synchronized AccountState getAccountState(byte[] addr) {
+        //Log.debug(String.format("[%s]DB get AccountState - addr: %s", threadLocal.get(), AddressTool.getStringAddressByBytes(addr)));
         return accountStateCache.get(addr);
     }
 
@@ -132,6 +133,7 @@ public class RepositoryImpl implements Repository, org.ethereum.facade.Repositor
 
     @Override
     public synchronized byte[] getCode(byte[] addr) {
+        //Log.warn(String.format("DB get code - addr: %s", AddressTool.getStringAddressByBytes(addr)));
         byte[] codeHash = getCodeHash(addr);
         return codeHash == null || FastByteComparisons.equal(codeHash, HashUtil.EMPTY_DATA_HASH) ?
                 ByteUtil.EMPTY_BYTE_ARRAY : codeCache.get(codeKey(codeHash, addr));
@@ -150,16 +152,31 @@ public class RepositoryImpl implements Repository, org.ethereum.facade.Repositor
 
     @Override
     public synchronized void addStorageRow(byte[] addr, DataWord key, DataWord value) {
+        //Log.warn(String.format("DB put - addr: %s, put key: %s, put value: %s", AddressTool.getStringAddressByBytes(addr), key.toString(), value.toString()));
         getOrCreateAccountState(addr);
 
         Source<DataWord, DataWord> contractStorage = storageCache.get(addr);
         contractStorage.put(key, value.isZero() ? null : value);
     }
 
+    //public static AtomicInteger threadLocal = new AtomicInteger(0);
     @Override
     public synchronized DataWord getStorageValue(byte[] addr, DataWord key) {
+
         AccountState accountState = getAccountState(addr);
-        return accountState == null ? null : storageCache.get(addr).get(key);
+        DataWord dataWord = accountState == null ? null : storageCache.get(addr).get(key);
+        //Log.warn(String.format("[%s]DB get - addr: %s, get key: %s, get value: %s", threadLocal.get(), AddressTool.getStringAddressByBytes(addr), key.toString(),
+        //        dataWord == null ? null : dataWord.asString()));
+        //try {
+        //    if (dataWord == null) {
+        //        throw new Exception("empty dataWord!");
+        //    }
+        //} catch (Exception e) {
+        //    Log.error(e);
+        //}
+        //threadLocal.incrementAndGet();
+        return dataWord;
+        //return accountState == null ? null : storageCache.get(addr).get(key);
     }
 
     @Override

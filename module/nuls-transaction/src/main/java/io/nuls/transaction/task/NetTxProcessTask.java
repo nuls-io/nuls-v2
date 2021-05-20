@@ -80,7 +80,7 @@ public class NetTxProcessTask implements Runnable {
                 }
                 if (chain.getProtocolUpgrade().get()) {
                     chain.getLogger().info("Protocol upgrade pause process new tx..");
-                    Thread.sleep(3000L);
+                    Thread.sleep(10000L);
                     continue;
                 }
                 List<TransactionNetPO> txNetList = new ArrayList<>(TxConstant.NET_TX_PROCESS_NUMBER_ONCE);

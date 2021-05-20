@@ -115,6 +115,8 @@ mappingAddress=NULSd6HgcfwWCD5TLEfehrJ1fFYuZ6nqGbfiu,NULSd6HggAGpQbhhSHU9R1yRxKK
 businessAddress=NULSd6HgdemcQDAaiEJWq9ESMhtUHXRsNJ4KM
 teamAddress=NULSd6HgbfkSuRGKSLJJzAPAihgDQtaUhuE4L
 communityAddress=NULSd6HgjDZmLMbZSmH9tqb6smdzZHCxsCRD3
+syncCoinBase=false
+syncAddress=
 
 [cross-chain]
 #跨链节点链接的最小值

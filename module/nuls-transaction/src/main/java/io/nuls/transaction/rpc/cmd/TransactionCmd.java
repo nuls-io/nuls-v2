@@ -682,6 +682,38 @@ public class TransactionCmd extends BaseCmd {
 
     }
 
+    @CmdAnnotation(cmd = TxCmd.TX_SETCONTRACTGENERATETXTYPES, priority = CmdPriority.HIGH, version = 1.0, description = "设置智能合约模块生成的系统交易类型（包括共识，跨链等；不包含gas返还交易）")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
+            @Parameter(parameterName = "txTypeList", requestType = @TypeDescriptor(value = List.class, collectionElement = Integer.class), parameterDes = "智能合约模块生成的系统交易类型（包括共识，跨链等；不包含gas返还交易）"),
+    })
+    @ResponseData(description = "无特定返回值，没有错误即设置成功")
+    public Response setContractGenerateTxTypes(Map params) {
+        Chain chain = null;
+        try {
+            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("txTypeList"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            chain = chainManager.getChain((Integer) params.get("chainId"));
+            if (null == chain) {
+                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
+            }
+            List<Integer> txTypeList = (List<Integer>) params.get("txTypeList");
+            if (txTypeList == null) {
+                txTypeList = new ArrayList<>();
+            }
+            chain.setContractGenerateTxTypes(new HashSet<>(txTypeList));
+            chain.getLogger().info("设置智能合约生成交易类型: {}", Arrays.toString(txTypeList.toArray()));
+            return success();
+        } catch (NulsException e) {
+            errorLogProcess(chain, e);
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+
+    }
+
     @CmdAnnotation(cmd = TxCmd.TX_CS_STATE, version = 1.0, description = "设置节点打包状态(由共识模块设置)/Set the node packaging state")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),

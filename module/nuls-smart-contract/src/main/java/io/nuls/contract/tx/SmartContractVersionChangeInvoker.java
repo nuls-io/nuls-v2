@@ -6,13 +6,15 @@ import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.model.bo.ContractTokenAssetsInfo;
 import io.nuls.contract.rpc.call.LedgerCall;
+import io.nuls.contract.rpc.call.TransactionCall;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.VMFactory;
 import io.nuls.core.basic.VersionChangeInvoker;
-import io.nuls.core.core.annotation.Component;
+import io.nuls.core.constant.TxType;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.exception.NulsException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -43,10 +45,12 @@ public class SmartContractVersionChangeInvoker implements VersionChangeInvoker {
         ChainManager.chainHandle(currentChainId);
         Short currentVersion = ProtocolGroupManager.getCurrentVersion(currentChainId);
         Log.info("触发协议升级，chainId: [{}], 版本为: [{}]", currentChainId, currentVersion);
-        if (currentVersion >= ContractContext.UPDATE_VERSION_CONTRACT_ASSET) {
-            this.loadV8(currentVersion);
-        }
         ChainManager chainManager = SpringLiteContext.getBean(ChainManager.class);
+        if (currentVersion >= ContractContext.UPDATE_VERSION_CONTRACT_ASSET) {
+            this.loadV8(chainManager.getChainMap().get(currentChainId), currentVersion);
+        }
+        // 向交易模块设置智能合约生成交易类型
+        setContractGenerateTxTypes(currentChainId, currentVersion);
         // 缓存token注册资产的资产ID和token合约地址
         Map<Integer, Chain> chainMap = chainManager.getChainMap();
         for (Chain chain : chainMap.values()) {
@@ -75,10 +79,30 @@ public class SmartContractVersionChangeInvoker implements VersionChangeInvoker {
         }
     }
 
-    private void loadV8(int currentVersion) {
+    private void setContractGenerateTxTypes(int currentChainId, Short currentVersion) {
+        List<Integer> list = List.of(
+                TxType.CONTRACT_TRANSFER,
+                TxType.CONTRACT_CREATE_AGENT,
+                TxType.CONTRACT_DEPOSIT,
+                TxType.CONTRACT_CANCEL_DEPOSIT,
+                TxType.CONTRACT_STOP_AGENT);
+        List<Integer> resultList = new ArrayList<>();
+        resultList.addAll(list);
+        if(currentVersion >= ContractContext.UPDATE_VERSION_V250) {
+            resultList.add(TxType.CONTRACT_TOKEN_CROSS_TRANSFER);
+        }
+        try {
+            TransactionCall.setContractGenerateTxTypes(currentChainId, resultList);
+        } catch (NulsException e) {
+            Log.warn("获取智能合约生成交易类型异常", e);
+        }
+    }
+
+    private void loadV8(Chain chain, int currentVersion) {
         if (isloadV8) {
             return;
         }
+        chain.clearOldBatchInfo();
         Log.info("版本[{}]协议升级成功，重新初始化智能合约VM", currentVersion);
         VMFactory.reInitVM_v8();
         isloadV8 = true;

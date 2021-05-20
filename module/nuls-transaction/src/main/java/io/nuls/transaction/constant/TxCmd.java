@@ -52,6 +52,8 @@ public final class TxCmd {
     public static final String TX_BLOCK_HEIGHT = "tx_blockHeight";
     public static final String TX_VERIFYTX = "tx_verifyTx";
 
+    public static final String TX_SETCONTRACTGENERATETXTYPES = "tx_setContractGenerateTxTypes";
+
     /**
      * 修改节点共识状态
      * Modify the node consensus state

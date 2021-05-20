@@ -70,10 +70,10 @@ public class RocksDBManager {
      * @throws Exception 数据库打开连接异常
      */
     public static void init(final String path) throws Exception {
-        init(path, null);
+        init(path, null, null);
     }
 
-    public static void init(final String path, Options options) throws Exception {
+    public static void init(final String path, Options options, Set<String> skipTables) throws Exception {
         synchronized (RocksDBManager.class) {
             File dir = DBUtils.loadDataPath(path);
             dataPath = dir.getPath();
@@ -82,7 +82,11 @@ public class RocksDBManager {
             RocksDB db;
             String dbPath = null;
             for (File tableFile : tableFiles) {
-                //缓存中已存在的数据库连接不再重复打开
+                // 跳过初始化
+                if (skipTables != null && skipTables.contains(tableFile.getName())) {
+                    continue;
+                }
+                // 缓存中已存在的数据库连接不再重复打开
                 if (!tableFile.isDirectory() || TABLES.get(tableFile.getName()) != null) {
                     continue;
                 }

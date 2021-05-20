@@ -26,6 +26,8 @@ package io.nuls.contract.vm;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import io.nuls.base.protocol.ProtocolGroupManager;
+import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.code.ClassCode;
 import io.nuls.contract.vm.code.FieldCode;
@@ -184,6 +186,20 @@ public class Heap {
         }
         byte[] value = dataWord.getNoLeadZeroesData();
         Map<String, Object> map = (Map<String, Object>) JsonUtils.decode(new String(value), classNames);
+        if (ProtocolGroupManager.getCurrentVersion(ContractContext.CHAIN_ID) < ContractContext.UPDATE_VERSION_CONTRACT_BALANCE ) {
+            return map;
+        }
+        if (!VariableType.HASH_MAP_TYPE.getDesc().equals(objectRef.getDesc())) {
+            return map;
+        }
+        Float loadFactor = (Float) map.get("loadFactor");
+        ObjectRef tableRef = (ObjectRef) map.get("table");
+        int capacity = tableRef == null ? 0 : tableRef.getDimensions()[0];
+        if (loadFactor.floatValue() == 0.75 && capacity >= Constants.MAP_MAX_CAPACITY) {
+            map.put("threshold", capacity);
+            map.put("loadFactor", 1.0f);
+            change(objectRef);
+        }
         return map;
     }
 
@@ -250,16 +266,20 @@ public class Heap {
     }
 
     public Object getArrayChunk(ObjectRef arrayRef, int chunkNum, boolean write) {
+        return this.getArrayChunk(arrayRef, chunkNum, write, true);
+    }
+
+    public Object getArrayChunk(ObjectRef arrayRef, int chunkNum, boolean write, boolean loadDB) {
         getFields(arrayRef);
         String key = Integer.toString(chunkNum);
         String arrayKey = arrayRef.getRef() + "_" + key;
-        Object value = null;
+        Object value;
         if (write) {
             value = putArrayInit(arrayRef, chunkNum);
         } else {
             value = getArrayInit(arrayRef, chunkNum);
         }
-        if (value == null) {
+        if (value == null && chunkNum != 0 && loadDB) {
             value = getArrayChunkFromState(arrayRef, arrayKey);
             if (value != null) {
                 arrays.put(arrayKey, value);
@@ -289,6 +309,7 @@ public class Heap {
         if (this.repository == null) {
             return null;
         }
+        //Log.error("[{}]!!!!!!!getArrayChunkFromState, arrayRef: {}, arrayKey: {}", threadLocal.get(), arrayRef.toString(), arrayKey.toString());
         DataWord dataWord = this.repository.getStorageValue(this.address, new DataWord(arrayKey));
         if (dataWord == null) {
             return null;
@@ -326,6 +347,10 @@ public class Heap {
     }
 
     public void arraycopy(Object src, int srcPos, Object dest, int destPos, int length) {
+        this.arraycopy(src, srcPos, dest, destPos, length, true);
+    }
+
+    public void arraycopy(Object src, int srcPos, Object dest, int destPos, int length, boolean loadDB) {
         if (length < 1) {
             return;
         }
@@ -342,24 +367,28 @@ public class Heap {
             int index = Math.max(srcIndex, destIndex);
             int copyLength = 1024 - index;
             copyLength = Math.min(copyLength, length);
-            arrayChunkCopy(src, srcChunk, srcIndex, dest, destChunk, destIndex, copyLength);
+            arrayChunkCopy(src, srcChunk, srcIndex, dest, destChunk, destIndex, copyLength, loadDB);
             srcPos += copyLength;
             destPos += copyLength;
             length -= copyLength;
         }
     }
 
-    public void arrayChunkCopy(Object src, int srcChunk, int srcPos, Object dest, int destChunk, int destPos, int length) {
+    //public void arrayChunkCopy(Object src, int srcChunk, int srcPos, Object dest, int destChunk, int destPos, int length) {
+    //    this.arrayChunkCopy(src, srcChunk, srcPos, dest, destChunk, destPos, length, true);
+    //}
+
+    public void arrayChunkCopy(Object src, int srcChunk, int srcPos, Object dest, int destChunk, int destPos, int length, boolean loadDB) {
         Object srcArray = src;
         if (src instanceof ObjectRef) {
-            srcArray = getArrayChunk((ObjectRef) src, srcChunk, false);
+            srcArray = getArrayChunk((ObjectRef) src, srcChunk, false, loadDB);
         } else {
             srcPos = srcChunk * 1024 + srcPos;
         }
         Object destArray = dest;
         if (dest instanceof ObjectRef) {
             ObjectRef destObjectRef = (ObjectRef) dest;
-            destArray = getArrayChunk(destObjectRef, destChunk, true);
+            destArray = getArrayChunk(destObjectRef, destChunk, true, loadDB);
             change(destObjectRef);
         } else {
             destPos = destChunk * 1024 + destPos;
@@ -375,6 +404,17 @@ public class Heap {
         arraycopy(chars, 0, objectRef, 0, chars.length);
         return objectRef;
     }
+
+    // add by pierre at 2020-12-28
+    public ObjectRef newArrayWithoutDB(char[] chars) {
+        if (chars == null) {
+            return null;
+        }
+        ObjectRef objectRef = newArray(VariableType.CHAR_ARRAY_TYPE, chars.length);
+        arraycopy(chars, 0, objectRef, 0, chars.length, false);
+        return objectRef;
+    }
+    // end code by pierre
 
     public ObjectRef newArray(byte[] bytes) {
         if (bytes == null) {
@@ -405,7 +445,7 @@ public class Heap {
         }
         ObjectRef objectRef = newObjectRef(VariableType.STRING_TYPE.getDesc());
         putField(objectRef, Constants.HASH, str.hashCode());
-        putField(objectRef, Constants.VALUE, newArray(str.toCharArray()));
+        putField(objectRef, Constants.VALUE, newArrayWithoutDB(str.toCharArray()));
         return objectRef;
     }
 
@@ -649,6 +689,7 @@ public class Heap {
         //int j = 0;
         for (ObjectRef objectRef : stateObjectRefs) {
             //j++;
+            //Log.debug("Per[{}] objectRef: {}", j, objectRef);
             if (!this.changes.contains(objectRef)) {
                 //Log.warn("[{}]null changes objectRef: {}", j, objectRef);
                 continue;
