@@ -260,14 +260,15 @@ public class ContractVmTest extends MockBase {
     String contractB = "tNULSeBaN1gZJobF3bxuLwXxvvAosdwQTVxWFn";
     byte[] prevStateRoot;
 
-    @Before
-    public void createAndInit() throws Exception {
-        // 加载协议升级的数据
-        ContractContext.CHAIN_ID = 2;
+    @Override
+    protected void protocolUpdate() {
         short version = 5;
         ProtocolGroupManager.setLoadProtocol(false);
         ProtocolGroupManager.updateProtocol(chainId, version);
+    }
 
+    @Before
+    public void createAndInit() throws Exception {
         // -------------------------------------------------------------------------------------//
         InputStream inA = new FileInputStream(getClass().getResource("/contract-vm-testA-testA.jar").getFile());
         InputStream inB = new FileInputStream(getClass().getResource("/contract-vm-testB-testB.jar").getFile());
@@ -610,4 +611,5 @@ public class ContractVmTest extends MockBase {
         //Assert.assertTrue(String.format("测试方法[test14]View期望map1a=105, 实际map1a=%s", a), "105".equals(a));
         //// -------------------------------------------------------------------------------------//
     }
+
 }

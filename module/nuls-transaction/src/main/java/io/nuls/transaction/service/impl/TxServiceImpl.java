@@ -469,7 +469,7 @@ public class TxServiceImpl implements TxService {
                 throw new NulsException(TxErrorCode.TX_FROM_CANNOT_HAS_CONTRACT_ADDRESS);
             }
 
-            if(!txRegister.getUnlockTx() && coinFrom.getLocked() == -1){
+            if (!txRegister.getUnlockTx() && coinFrom.getLocked() == -1) {
                 chain.getLogger().error("This transaction type can not unlock the token");
                 throw new NulsException(TxErrorCode.TX_VERIFY_FAIL);
             }
@@ -688,12 +688,17 @@ public class TxServiceImpl implements TxService {
                     throw new NulsException(TxErrorCode.PACKAGE_TIME_OUT);
                 }
                 if (chain.getProtocolUpgrade().get()) {
+                    chain.getCanProtocolUpgrade().set(false);
+                    nulsLogger.info("1_chain.getCanProtocolUpgrade().set(false);");
                     nulsLogger.info("Protocol Upgrade Package stop -chain:{} -best block height", chain.getChainId(), chain.getBestBlockHeight());
                     backTempPackablePool(chain, currentBatchPackableTxs);
                     //放回可打包交易和孤儿
                     putBackPackablePool(chain, packingTxList, orphanTxSet);
                     //直接打空块
-                    return new TxPackage(new ArrayList<>(), null, chain.getBestBlockHeight() + 1);
+                    TxPackage txPackage = new TxPackage(new ArrayList<>(), null, chain.getBestBlockHeight() + 1);
+                    chain.getCanProtocolUpgrade().set(true);
+                    nulsLogger.info("1_chain.getCanProtocolUpgrade().set(true);");
+                    return txPackage;
                 }
                 //如果本地最新区块+1 大于当前在打包区块的高度, 说明本地最新区块已更新,需要重新打包,把取出的交易放回到打包队列
                 if (blockHeight < chain.getBestBlockHeight() + 1) {
@@ -935,7 +940,7 @@ public class TxServiceImpl implements TxService {
                 }
             }
             //将智能合约生成的返还GAS的tx加到队尾
-            if (contractGenerateTxs.size() > 0) {
+            if (!hasTxbackPackablePool && contractGenerateTxs.size() > 0) {
                 String csTxStr = contractGenerateTxs.get(contractGenerateTxs.size() - 1);
                 if (TxUtil.extractTxTypeFromTx(csTxStr) == TxType.CONTRACT_RETURN_GAS) {
                     packableTxs.add(csTxStr);
@@ -951,6 +956,8 @@ public class TxServiceImpl implements TxService {
             //孤儿交易加回待打包队列去
             putBackPackablePool(chain, orphanTxSet);
             if (chain.getProtocolUpgrade().get()) {
+                chain.getCanProtocolUpgrade().set(false);
+                nulsLogger.info("2_chain.getCanProtocolUpgrade().set(false);");
                 //协议升级直接打空块,取出的交易，倒序放入新交易处理队列
                 int size = packingTxList.size();
                 for (int i = size - 1; i >= 0; i--) {
@@ -964,7 +971,10 @@ public class TxServiceImpl implements TxService {
                     baseValidateTx(chain, tx, txRegister);
                     chain.getUnverifiedQueue().addLast(new TransactionNetPO(txPackageWrapper.getTx()));
                 }
-                return new TxPackage(new ArrayList<>(), null, chain.getBestBlockHeight() + 1);
+                TxPackage txPackage = new TxPackage(new ArrayList<>(), null, chain.getBestBlockHeight() + 1);
+                chain.getCanProtocolUpgrade().set(true);
+                nulsLogger.info("2_chain.getCanProtocolUpgrade().set(true);");
+                return txPackage;
             }
             //检测预留传输时间
             long current = NulsDateUtils.getCurrentTimeMillis();
@@ -1197,7 +1207,7 @@ public class TxServiceImpl implements TxService {
             while (iterator.hasNext()) {
                 TxPackageWrapper txPackageWrapper = iterator.next();
                 if (TxManager.isUnSystemSmartContract(chain, txPackageWrapper.getTx().getType())) {
-                     if (setLimitedRollbackOriginTx.contains(txPackageWrapper.getTx().getHash().toHex())) {
+                    if (setLimitedRollbackOriginTx.contains(txPackageWrapper.getTx().getHash().toHex())) {
                         // 有加回次数限制的交易
                         addOrphanTxSet(chain, orphanTxSet, txPackageWrapper);
                     } else {
@@ -1246,6 +1256,8 @@ public class TxServiceImpl implements TxService {
                 //都执行通过
                 return false;
             }
+            chain.getLogger().warn("Package module verify failed -txModuleValidator Exception:{}, module-code:{}, count:{} , return count:{}",
+                    BaseConstant.TX_VALIDATOR, moduleCode, verifyList.size(), txHashList.size());
             if (batchVerify) {
                 //如果是验证区块交易，有不通过的 直接返回
                 return true;
@@ -1282,7 +1294,7 @@ public class TxServiceImpl implements TxService {
                     }
                 }
                 Iterator<String> itcs = verifyList.iterator();
-                while (its.hasNext()) {
+                while (itcs.hasNext()) {
                     Transaction tx = TxUtil.getInstanceRpcStr(itcs.next(), Transaction.class);
                     if (hash.equals(tx.getHash().toHex())) {
                         itcs.remove();
@@ -1521,7 +1533,7 @@ public class TxServiceImpl implements TxService {
                     contractNotify = true;
                 }
                 try {
-                    if (!ContractCall.invokeContract(chain, RPCUtil.encode(tx.serialize()), 1)) {
+                    if (!ContractCall.invokeContract(chain, RPCUtil.encode(tx.serialize()), 1, Constants.TIMEOUT_TIMEMILLIS * 10)) {
                         if (logger.isDebugEnabled()) {
                             logger.debug("batch verify failed. invokeContract fail");
                         }
@@ -1639,9 +1651,7 @@ public class TxServiceImpl implements TxService {
             List<String> txHashList = TransactionCall.txModuleValidator(chain,
                     entry.getKey(), entry.getValue(), blockHeaderStr);
             if (txHashList != null && txHashList.size() > 0) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("batch module verify fail, module-code:{},  return count:{}", entry.getKey(), txHashList.size());
-                }
+                logger.error("batch module verify fail, module-code:{},  return count:{}", entry.getKey(), txHashList.size());
                 throw new NulsException(TxErrorCode.TX_VERIFY_FAIL);
             }
         }
@@ -1654,9 +1664,9 @@ public class TxServiceImpl implements TxService {
         List<String> scNewList = new ArrayList<>();
         String scStateRoot = preStateRoot;
         if (contractNotify) {
-            Map<String, Object> map = null;
+            Map<String, Object> map;
             try {
-                map = ContractCall.contractBatchEnd(chain, blockHeight);
+                map = ContractCall.contractBatchEnd(chain, blockHeight, Constants.TIMEOUT_TIMEMILLIS * 10);
             } catch (NulsException e) {
                 logger.error(e);
                 throw new NulsException(TxErrorCode.CONTRACT_VERIFY_FAIL);
@@ -1846,6 +1856,7 @@ public class TxServiceImpl implements TxService {
     }
 
     long MAX_GAS_COST_IN_BLOCK = 13000000L;
+
     @Override
     public TxPackage getPackableTxsV8(Chain chain, long endtimestamp, long maxTxDataSize, long blockTime, String packingAddress, String preStateRoot) {
         chain.getPackageLock().lock();
@@ -1943,12 +1954,18 @@ public class TxServiceImpl implements TxService {
                     throw new NulsException(TxErrorCode.PACKAGE_TIME_OUT);
                 }
                 if (chain.getProtocolUpgrade().get()) {
+                    chain.getCanProtocolUpgrade().set(false);
+                    nulsLogger.info("3_chain.getCanProtocolUpgrade().set(false);");
                     nulsLogger.info("Protocol Upgrade Package stop -chain:{} -best block height", chain.getChainId(), chain.getBestBlockHeight());
                     backTempPackablePool(chain, currentBatchPackableTxs);
                     //放回可打包交易和孤儿
                     putBackPackablePool(chain, packingTxList, orphanTxSet);
                     //直接打空块
-                    return new TxPackage(new ArrayList<>(), null, chain.getBestBlockHeight() + 1);
+                    TxPackage txPackage = new TxPackage(new ArrayList<>(), null, chain.getBestBlockHeight() + 1);
+                    chain.getCanProtocolUpgrade().set(true);
+                    nulsLogger.info("3_chain.getCanProtocolUpgrade().set(true);");
+                    return txPackage;
+
                 }
                 //如果本地最新区块+1 大于当前在打包区块的高度, 说明本地最新区块已更新,需要重新打包,把取出的交易放回到打包队列
                 if (blockHeight < chain.getBestBlockHeight() + 1) {
@@ -2209,7 +2226,7 @@ public class TxServiceImpl implements TxService {
                 }
             }
             //将智能合约生成的返还GAS的tx加到队尾
-            if (contractGenerateTxs.size() > 0) {
+            if (!hasTxbackPackablePool && contractGenerateTxs.size() > 0) {
                 String csTxStr = contractGenerateTxs.get(contractGenerateTxs.size() - 1);
                 if (TxUtil.extractTxTypeFromTx(csTxStr) == TxType.CONTRACT_RETURN_GAS) {
                     packableTxs.add(csTxStr);
@@ -2225,6 +2242,8 @@ public class TxServiceImpl implements TxService {
             //孤儿交易加回待打包队列去
             putBackPackablePool(chain, orphanTxSet);
             if (chain.getProtocolUpgrade().get()) {
+                chain.getCanProtocolUpgrade().set(false);
+                nulsLogger.info("4_chain.getCanProtocolUpgrade().set(false);");
                 //协议升级直接打空块,取出的交易，倒序放入新交易处理队列
                 int size = packingTxList.size();
                 for (int i = size - 1; i >= 0; i--) {
@@ -2238,7 +2257,10 @@ public class TxServiceImpl implements TxService {
                     baseValidateTx(chain, tx, txRegister);
                     chain.getUnverifiedQueue().addLast(new TransactionNetPO(txPackageWrapper.getTx()));
                 }
-                return new TxPackage(new ArrayList<>(), null, chain.getBestBlockHeight() + 1);
+                TxPackage txPackage = new TxPackage(new ArrayList<>(), null, chain.getBestBlockHeight() + 1);
+                chain.getCanProtocolUpgrade().set(true);
+                nulsLogger.info("4_chain.getCanProtocolUpgrade().set(true);");
+                return txPackage;
             }
             //检测预留传输时间
             long current = NulsDateUtils.getCurrentTimeMillis();
@@ -2337,7 +2359,7 @@ public class TxServiceImpl implements TxService {
                 }
                 try {
                     // 调用执行智能合约
-                    Map<String, Object> invokeContractRs = ContractCall.invokeContractV8(chain, RPCUtil.encode(tx.serialize()), 1, Constants.TIMEOUT_TIMEMILLIS * 2);
+                    Map<String, Object> invokeContractRs = ContractCall.invokeContractV8(chain, RPCUtil.encode(tx.serialize()), 1, Constants.TIMEOUT_TIMEMILLIS * 20);
                     //boolean success = (boolean) invokeContractRs.get("success");
                     long gasUsed = Long.valueOf(invokeContractRs.get("gasUsed").toString());
                     List<String> contractTxList = (List<String>) invokeContractRs.get("txList");
@@ -2464,7 +2486,7 @@ public class TxServiceImpl implements TxService {
         if (contractNotify) {
             Map<String, Object> map;
             try {
-                map = ContractCall.contractBatchEnd(chain, blockHeight, Constants.TIMEOUT_TIMEMILLIS * 3);
+                map = ContractCall.contractBatchEnd(chain, blockHeight, Constants.TIMEOUT_TIMEMILLIS * 20);
             } catch (NulsException e) {
                 logger.error(e);
                 throw new NulsException(TxErrorCode.CONTRACT_VERIFY_FAIL);
@@ -2622,7 +2644,7 @@ public class TxServiceImpl implements TxService {
     }
 
     private Map processContractResultV8(Chain chain, List<TxPackageWrapper> packingTxList, Set<TxPackageWrapper> orphanTxSet, List<String> contractGenerateTxs, List<String> originTxList,
-                                      long blockHeight, boolean contractBefore, String stateRoot) throws IOException {
+                                        long blockHeight, boolean contractBefore, String stateRoot) throws IOException {
 
         boolean hasTxbackPackablePool = false;
         /**当contractBefore通知失败,或者contractBatchEnd失败则需要将智能合约交易还回待打包队列*/

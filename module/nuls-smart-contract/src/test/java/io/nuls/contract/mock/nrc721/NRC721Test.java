@@ -470,4 +470,8 @@ public class NRC721Test extends MockBase {
         Log.info("\n");
     }
 
+    @Override
+    protected void protocolUpdate() {
+
+    }
 }

@@ -40,8 +40,12 @@ public class TxVersionChangeInvoker implements VersionChangeInvoker {
         //设置升级的标志,暂停打包交易(出空块)暂停新交易处理
         chain.getProtocolUpgrade().set(true);
         try {
-            //等待正在处理的交易处理结束(打包过程中的交易、新交易)
             Thread.sleep(3000L);
+            //等待正在处理的交易处理结束(打包过程中的交易、新交易)
+            while (!chain.getCanProtocolUpgrade().get()) {
+                chain.getLogger().info("GetCanProtocolUpgrade waiting, chainId:[{}]", chainId);
+                Thread.sleep(100L);
+            }
         } catch (InterruptedException e) {
             chain.getLogger().error(e);
         }
@@ -52,9 +56,9 @@ public class TxVersionChangeInvoker implements VersionChangeInvoker {
         while (hasNext) {
             //从队尾开始取
             Transaction tx = packablePool.pollLast(chain);
-            if(null != tx) {
+            if (null != tx) {
                 addBack(chain, tx);
-            }else{
+            } else {
                 hasNext = false;
             }
         }
@@ -65,16 +69,17 @@ public class TxVersionChangeInvoker implements VersionChangeInvoker {
         chain.getLogger().info("Version Change process, chainId:[{}]", chainId);
     }
 
-    private void addBack(Chain chain, Transaction tx){
+    private void addBack(Chain chain, Transaction tx) {
         addBack(chain, new TransactionNetPO(tx));
     }
 
     /**
      * 加回到新交易队列
+     *
      * @param chain
      * @param txNet
      */
-    private void addBack(Chain chain, TransactionNetPO txNet){
+    private void addBack(Chain chain, TransactionNetPO txNet) {
         try {
             Transaction tx = txNet.getTx();
             //执行交易基础验证
@@ -82,8 +87,8 @@ public class TxVersionChangeInvoker implements VersionChangeInvoker {
             if (null == txRegister) {
                 throw new NulsException(TxErrorCode.TX_TYPE_INVALID);
             }
-            TxService txService =  SpringLiteContext.getBean(TxService.class);
-            txService.baseValidateTx(chain,tx, txRegister);
+            TxService txService = SpringLiteContext.getBean(TxService.class);
+            txService.baseValidateTx(chain, tx, txRegister);
             chain.getUnverifiedQueue().addFirst(txNet);
         } catch (NulsException e) {
             chain.getLogger().warn("TxVersionChangeInvoker verify failed", e);

@@ -92,4 +92,12 @@ public class Constants {
 
     public static final String MAP_ENTRY_VALUE_METHOD_DESC = null;
 
+    public static final String SIZE = "size";
+
+    public static final String SIZE_DESC = "()I";
+
+    public static final int LIST_MAX_CAPACITY = 71140;
+    public static final int MAP_MAX_CAPACITY = 65536;
+    public static final int MAP_MIN_TRIGGER_RESIZE_CAPACITY = 3072;
+
 }

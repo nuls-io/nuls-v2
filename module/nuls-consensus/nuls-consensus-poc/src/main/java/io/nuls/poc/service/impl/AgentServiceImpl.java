@@ -586,8 +586,10 @@ public class AgentServiceImpl implements AgentService {
                 for (MeetingMember meetingMember : members) {
                     localPackAddressList.add(AddressTool.getStringAddressByBytes(meetingMember.getAgent().getPackingAddress()));
                 }
+                if (null != localPackAddressList && !localPackAddressList.isEmpty()) {
+                    resultMap.put("address", localPackAddressList.get(0));
+                }
                 resultMap.put("addresses", localPackAddressList);
-                resultMap.put("address", localPackAddressList.get(0));
                 resultMap.put("password", chain.getConfig().getPassword());
             }
             List<String> packAddressList = new ArrayList<>();

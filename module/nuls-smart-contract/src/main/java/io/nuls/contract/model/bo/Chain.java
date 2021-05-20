@@ -183,6 +183,12 @@ public class Chain {
         Log.error("Setting value error. Unkown blockType! - [{}]", blockType);
     }
 
+    public void clearOldBatchInfo() {
+        Log.info("clear Old BatchInfo.");
+        this.batchInfo = null;
+        this.verifyBatchInfo = null;
+    }
+
     public BatchInfoV8 getBatchInfoV8() {
         Integer blockType = currentThreadBlockType.get();
         if(blockType == null) {
