@@ -20,7 +20,7 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
-            <version>4.1.33.Final</version>
+            <version>4.1.42.Final</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.google.protobuf</groupId>
