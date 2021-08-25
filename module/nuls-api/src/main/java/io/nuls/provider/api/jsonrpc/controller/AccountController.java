@@ -20,35 +20,38 @@
 
 package io.nuls.provider.api.jsonrpc.controller;
 
-import io.nuls.base.api.provider.account.facade.*;
-import io.nuls.provider.api.config.Config;
-import io.nuls.provider.api.config.Context;
 import io.nuls.base.api.provider.Result;
 import io.nuls.base.api.provider.ServiceManager;
 import io.nuls.base.api.provider.account.AccountService;
+import io.nuls.base.api.provider.account.facade.*;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Controller;
 import io.nuls.core.core.annotation.RpcMethod;
+import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.model.FormatValidUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.model.*;
-import io.nuls.provider.model.dto.AccountBalanceDto;
+import io.nuls.provider.api.config.Config;
+import io.nuls.provider.api.config.Context;
 import io.nuls.provider.model.dto.AccountKeyStoreDto;
 import io.nuls.provider.model.form.PriKeyForm;
 import io.nuls.provider.model.jsonrpc.RpcResult;
 import io.nuls.provider.model.jsonrpc.RpcResultError;
 import io.nuls.provider.rpctools.AccountTools;
 import io.nuls.provider.rpctools.LegderTools;
-import io.nuls.provider.rpctools.vo.Account;
 import io.nuls.provider.rpctools.vo.AccountBalance;
 import io.nuls.provider.utils.Log;
 import io.nuls.provider.utils.ResultUtil;
 import io.nuls.provider.utils.VerifyUtils;
+import io.nuls.v2.SDKContext;
 import io.nuls.v2.error.AccountErrorCode;
+import io.nuls.v2.model.Account;
 import io.nuls.v2.model.annotation.Api;
 import io.nuls.v2.model.annotation.ApiOperation;
 import io.nuls.v2.model.annotation.ApiType;
@@ -56,13 +59,17 @@ import io.nuls.v2.model.dto.AccountDto;
 import io.nuls.v2.model.dto.AliasDto;
 import io.nuls.v2.model.dto.MultiSignAliasDto;
 import io.nuls.v2.model.dto.SignDto;
+import io.nuls.v2.util.AccountTool;
 import io.nuls.v2.util.NulsSDKTool;
-import org.checkerframework.checker.units.qual.A;
 
 import java.io.IOException;
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static io.nuls.v2.util.ValidateUtil.validateChainId;
 
 /**
  * @author Niels
@@ -976,4 +983,128 @@ public class AccountController {
         }
         return ResultUtil.getJsonRpcResult(result);
     }
+
+    @RpcMethod("signMessage")
+    @ApiOperation(description = "明文私钥摘要签名消息", order = 162)
+    @Parameters({
+            @Parameter(parameterName = "message", parameterType = "String", parameterDes = "消息"),
+            @Parameter(parameterName = "privateKey", parameterType = "String", parameterDes = "私钥")
+    })
+    @ResponseData(name = "signedMessage", description = "消息签名")
+    public RpcResult signMessage(List<Object> params) {
+        String message, priKey;
+        try {
+            message = (String) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[message] is inValid");
+        }
+        try {
+            priKey = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[priKey] is inValid");
+        }
+        if (StringUtils.isBlank(message)) {
+            return RpcResult.paramError("[message] is inValid");
+        }
+        if (StringUtils.isBlank(priKey)) {
+            return RpcResult.paramError("[priKey] is inValid");
+        }
+
+        ECKey ecKey = ECKey.fromPrivate(new BigInteger(1, HexUtil.decode(priKey)));
+        byte[] signbytes = ecKey.sign(dataToBytes(message));
+        return RpcResult.success(HexUtil.encode(signbytes));
+    }
+
+    @RpcMethod("verifySignedMessage")
+    @ApiOperation(description = "验证消息签名", order = 163)
+    @Parameters({
+            @Parameter(parameterName = "message", parameterType = "String", parameterDes = "消息"),
+            @Parameter(parameterName = "signature", parameterType = "String", parameterDes = "消息签名"),
+            @Parameter(parameterName = "publicKey", parameterType = "String", parameterDes = "公钥")
+    })
+    @ResponseData(description = "验证是否成功", responseType = @TypeDescriptor(value = Boolean.class))
+    public RpcResult verifySignedMessage(List<Object> params) {
+        String message, signature, publicKey;
+        try {
+            message = (String) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[message] is inValid");
+        }
+        try {
+            signature = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[signature] is inValid");
+        }
+        try {
+            publicKey = (String) params.get(2);
+        } catch (Exception e) {
+            return RpcResult.paramError("[publicKey] is inValid");
+        }
+        if (StringUtils.isBlank(message)) {
+            return RpcResult.paramError("[message] is inValid");
+        }
+        if (StringUtils.isBlank(signature)) {
+            return RpcResult.paramError("[signature] is inValid");
+        }
+        if (StringUtils.isBlank(publicKey)) {
+            return RpcResult.paramError("[publicKey] is inValid");
+        }
+
+        boolean verify = ECKey.verify(dataToBytes(message), HexUtil.decode(signature), HexUtil.decode(publicKey));
+        return RpcResult.success(verify);
+    }
+
+    @RpcMethod("getPubKeyByPriKey")
+    @ApiOperation(description = "根据私钥获取公钥", order = 164)
+    @Parameters({
+            @Parameter(parameterName = "原始私钥", parameterDes = "私钥表单", requestType = @TypeDescriptor(value = PriKeyForm.class))
+    })
+    @ResponseData(name = "返回值", description = "公钥的HEX编码字符串")
+    public RpcResult getPubKeyByPriKey(List<Object> params) {
+        String priKey;
+        try {
+            priKey = (String) params.get(0);
+            validateChainId();
+            if (!ECKey.isValidPrivteHex(priKey)) {
+                throw new NulsRuntimeException(AccountErrorCode.PRIVATE_KEY_WRONG);
+            }
+            Account account;
+            try {
+                if (StringUtils.isBlank(SDKContext.addressPrefix)) {
+                    account = AccountTool.createAccount(SDKContext.main_chain_id, priKey);
+                } else {
+                    account = AccountTool.createAccount(SDKContext.main_chain_id, priKey, SDKContext.addressPrefix);
+                }
+            } catch (NulsException e) {
+                throw new NulsRuntimeException(AccountErrorCode.PRIVATE_KEY_WRONG);
+            }
+            return RpcResult.success(HexUtil.encode(account.getPubKey()));
+        } catch (Exception e) {
+            return RpcResult.paramError("[priKey] is inValid");
+        }
+    }
+
+    protected byte[] dataToBytes(String data) {
+        if (StringUtils.isBlank(data)) {
+            return null;
+        }
+        try {
+            boolean isHex = true;
+            char[] chars = data.toCharArray();
+            for (char c : chars) {
+                int digit = Character.digit(c, 16);
+                if (digit == -1) {
+                    isHex = false;
+                    break;
+                }
+            }
+            if (isHex) {
+                return HexUtil.decode(data);
+            }
+            return data.getBytes(StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            return data.getBytes(StandardCharsets.UTF_8);
+        }
+    }
+
 }
