@@ -48,6 +48,7 @@ import io.nuls.provider.rpctools.LegderTools;
 import io.nuls.provider.rpctools.vo.AccountBalance;
 import io.nuls.provider.utils.Log;
 import io.nuls.provider.utils.ResultUtil;
+import io.nuls.provider.utils.Utils;
 import io.nuls.provider.utils.VerifyUtils;
 import io.nuls.v2.SDKContext;
 import io.nuls.v2.error.AccountErrorCode;
@@ -1011,7 +1012,7 @@ public class AccountController {
         }
 
         ECKey ecKey = ECKey.fromPrivate(new BigInteger(1, HexUtil.decode(priKey)));
-        byte[] signbytes = ecKey.sign(dataToBytes(message));
+        byte[] signbytes = ecKey.sign(Utils.dataToBytes(message));
         return RpcResult.success(HexUtil.encode(signbytes));
     }
 
@@ -1050,7 +1051,7 @@ public class AccountController {
             return RpcResult.paramError("[publicKey] is inValid");
         }
 
-        boolean verify = ECKey.verify(dataToBytes(message), HexUtil.decode(signature), HexUtil.decode(publicKey));
+        boolean verify = ECKey.verify(Utils.dataToBytes(message), HexUtil.decode(signature), HexUtil.decode(publicKey));
         return RpcResult.success(verify);
     }
 
@@ -1081,29 +1082,6 @@ public class AccountController {
             return RpcResult.success(HexUtil.encode(account.getPubKey()));
         } catch (Exception e) {
             return RpcResult.paramError("[priKey] is inValid");
-        }
-    }
-
-    protected byte[] dataToBytes(String data) {
-        if (StringUtils.isBlank(data)) {
-            return null;
-        }
-        try {
-            boolean isHex = true;
-            char[] chars = data.toCharArray();
-            for (char c : chars) {
-                int digit = Character.digit(c, 16);
-                if (digit == -1) {
-                    isHex = false;
-                    break;
-                }
-            }
-            if (isHex) {
-                return HexUtil.decode(data);
-            }
-            return data.getBytes(StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            return data.getBytes(StandardCharsets.UTF_8);
         }
     }
 
