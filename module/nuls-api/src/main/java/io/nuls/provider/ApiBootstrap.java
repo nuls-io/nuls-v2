@@ -46,7 +46,7 @@ public class ApiBootstrap extends RpcModule {
             //args = new String[]{"ws://192.168.1.40:7771"};
         } else {
             String arg1 = args[0];
-            if(StringUtils.isNotBlank(arg1)) {
+            if (StringUtils.isNotBlank(arg1)) {
                 arg1 = arg1.trim().toLowerCase();
             }
             if ("offline".equals(arg1)) {
@@ -104,7 +104,8 @@ public class ApiBootstrap extends RpcModule {
                 new Module(ModuleE.AC.abbr, ROLE),
                 new Module(ModuleE.TX.abbr, ROLE),
                 new Module(ModuleE.LG.abbr, ROLE),
-                new Module(ModuleE.CC.abbr, ROLE)
+                new Module(ModuleE.CC.abbr, ROLE),
+                new Module(ModuleE.NW.abbr, ROLE)
         };
     }
 

@@ -27,7 +27,6 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
-import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.enums.ContractStatus;
@@ -68,10 +67,7 @@ import io.nuls.core.rpc.model.message.Response;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
-import java.util.stream.Collectors;
 
-import static io.nuls.contract.config.ContractContext.ASSET_ID;
-import static io.nuls.contract.config.ContractContext.CHAIN_ID;
 import static io.nuls.contract.constant.ContractCmdConstant.*;
 import static io.nuls.contract.constant.ContractConstant.*;
 import static io.nuls.contract.constant.ContractErrorCode.*;
@@ -772,7 +768,7 @@ public class ContractResource extends BaseCmd {
             gasParams.put("value", value);
             gasParams.put("contractAddress", contractAddress);
             gasParams.put("methodName", BALANCE_TRIGGER_METHOD_NAME);
-            gasParams.put("methodDesc", BALANCE_TRIGGER_METHOD_DESC);
+            gasParams.put("methodDesc", VOID_METHOD_DESC);
 
             Response response = this.imputedCallGas(gasParams);
             if (!response.isSuccess()) {
@@ -782,7 +778,7 @@ public class ContractResource extends BaseCmd {
             Long gasLimit = Long.valueOf(responseData.get("gasLimit").toString());
             Result result = contractTxService.contractCallTx(chainId, sender, value, gasLimit, CONTRACT_MINIMUM_PRICE, contractAddress,
                     BALANCE_TRIGGER_METHOD_NAME,
-                    BALANCE_TRIGGER_METHOD_DESC,
+                    VOID_METHOD_DESC,
                     null, password, remark, null);
             if (result.isFailed()) {
                 return wrapperFailed(result);
@@ -1054,14 +1050,26 @@ public class ContractResource extends BaseCmd {
             ProgramExecutor track = contractHelper.getProgramExecutor(chainId).begin(prevStateRoot);
             ProgramStatus status = track.status(contractAddressBytes);
             List<ProgramMethod> methods = track.method(contractAddressBytes);
+            boolean isAcceptDirectTransferByOtherAsset = false;
             if(methods != null && !methods.isEmpty()) {
-                methods = methods.stream().filter(m -> {
+                int removeIndex = -1;
+                boolean isQueriedPayableOtherAsset = false;
+                for (int i = 0, size = methods.size(); i < size; i++) {
+                    if (removeIndex > -1 && isQueriedPayableOtherAsset) break;
+                    ProgramMethod m = methods.get(i);
                     if (BALANCE_TRIGGER_METHOD_NAME.equals(m.getName())
                             && BALANCE_TRIGGER_FOR_CONSENSUS_CONTRACT_METHOD_DESC.equals(m.getDesc())) {
-                        return false;
+                        removeIndex = i;
+                    } else if (OTHER_ASSET_PAYABLE_METHOD_NAME.equals(m.getName())
+                            && VOID_METHOD_DESC.equals(m.getDesc())) {
+                        isAcceptDirectTransferByOtherAsset = m.isPayableMultyAsset();
+                        isQueriedPayableOtherAsset = true;
                     }
-                    return true;
-                }).collect(Collectors.toList());
+                }
+                if (removeIndex > -1) {
+                    methods.remove(removeIndex);
+                }
+
             }
 
             ContractInfoDto dto = new ContractInfoDto();
@@ -1092,6 +1100,7 @@ public class ContractResource extends BaseCmd {
             dto.setStatus(status.name());
             dto.setMethod(methods);
             dto.setDirectPayable(po.isAcceptDirectTransfer());
+            dto.setDirectPayableByOtherAsset(isAcceptDirectTransferByOtherAsset);
             return success(dto);
         } catch (Exception e) {
             Log.error(e);

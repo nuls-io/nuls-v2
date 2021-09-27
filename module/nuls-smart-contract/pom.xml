@@ -101,7 +101,7 @@
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
-            <version>1.2.58</version>
+            <version>1.2.76</version>
         </dependency>
 
         <dependency>
@@ -124,7 +124,7 @@
         <dependency>
             <groupId>commons-beanutils</groupId>
             <artifactId>commons-beanutils</artifactId>
-            <version>1.9.3</version>
+            <version>1.9.4</version>
         </dependency>
 
         <dependency>
@@ -136,7 +136,7 @@
         <dependency>
             <groupId>io.nuls.v2</groupId>
             <artifactId>sdk4j</artifactId>
-            <version>1.1.4.RELEASE</version>
+            <version>1.1.6.RELEASE</version>
             <scope>test</scope>
         </dependency>
 

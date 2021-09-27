@@ -51,6 +51,8 @@ public class ContractInfoDto {
     private long blockHeight;
     @ApiModelProperty(description = "是否接受直接转账")
     private boolean directPayable;
+    @ApiModelProperty(description = "是否接受其他资产直接转账")
+    private boolean directPayableByOtherAsset;
     @ApiModelProperty(description = "token类型, 0 - 非token, 1 - NRC20, 2 - NRC721")
     private int tokenType;
     @ApiModelProperty(description = "是否是NRC20合约")
@@ -130,6 +132,14 @@ public class ContractInfoDto {
 
     public void setDirectPayable(boolean directPayable) {
         this.directPayable = directPayable;
+    }
+
+    public boolean isDirectPayableByOtherAsset() {
+        return directPayableByOtherAsset;
+    }
+
+    public void setDirectPayableByOtherAsset(boolean directPayableByOtherAsset) {
+        this.directPayableByOtherAsset = directPayableByOtherAsset;
     }
 
     public boolean isNrc20() {
