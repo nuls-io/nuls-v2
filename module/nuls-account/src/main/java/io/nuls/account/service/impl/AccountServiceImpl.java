@@ -57,6 +57,7 @@ import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.CryptoException;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.log.Log;
 import io.nuls.core.model.FormatValidUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
@@ -474,7 +475,7 @@ public class AccountServiceImpl implements AccountService {
                 byte[] priKeyBytes = account.getPriKey(password);
                 return HexUtil.encode(priKeyBytes);
             } catch (NulsException e) {
-                throw new NulsRuntimeException(AccountErrorCode.PASSWORD_IS_WRONG);
+                throw new NulsRuntimeException(AccountErrorCode.PASSWORD_IS_WRONG, "chainId=" + chainId + ", account=" + account.getAddress().getBase58() + ", pwd=" + password + ".");
             }
         } else {
             return null;
