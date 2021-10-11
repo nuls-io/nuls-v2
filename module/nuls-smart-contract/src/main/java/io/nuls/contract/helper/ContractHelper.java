@@ -52,7 +52,6 @@ import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.program.*;
 import io.nuls.core.basic.Result;
 import io.nuls.core.basic.VarInt;
-import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
@@ -247,7 +246,7 @@ public class ContractHelper {
         }
         for (ProgramMethod method : methods) {
             if (BALANCE_TRIGGER_METHOD_NAME.equals(method.getName())
-                    && BALANCE_TRIGGER_METHOD_DESC.equals(method.getDesc())) {
+                    && VOID_METHOD_DESC.equals(method.getDesc())) {
                 return method.isPayable();
             }
         }

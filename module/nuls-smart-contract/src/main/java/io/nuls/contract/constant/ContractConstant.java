@@ -47,8 +47,9 @@ public interface ContractConstant {
 
     long CONTRACT_TRANSFER_GAS_COST = 1000;
 
+    String OTHER_ASSET_PAYABLE_METHOD_NAME = "_payableMultyAsset";
     String BALANCE_TRIGGER_METHOD_NAME = "_payable";
-    String BALANCE_TRIGGER_METHOD_DESC = "() return void";
+    String VOID_METHOD_DESC = "() return void";
     String BALANCE_TRIGGER_FOR_CONSENSUS_CONTRACT_METHOD_DESC = "(String[][] args) return void";
     String BALANCE_TRIGGER_FOR_CONSENSUS_CONTRACT_METHOD_DESC_IN_VM = "([[Ljava/lang/String;)V";
 
