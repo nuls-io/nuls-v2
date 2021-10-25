@@ -2,17 +2,21 @@ package io.nuls.provider.api.jsonrpc.controller;
 
 
 import io.nuls.base.api.provider.Result;
+import io.nuls.base.api.provider.ServiceManager;
+import io.nuls.base.api.provider.crosschain.ChainManageProvider;
+import io.nuls.base.api.provider.crosschain.facade.CrossAssetRegisterInfo;
+import io.nuls.base.api.provider.crosschain.facade.GetCrossAssetInfoReq;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Controller;
 import io.nuls.core.core.annotation.RpcMethod;
-import io.nuls.core.rpc.model.Key;
-import io.nuls.core.rpc.model.ResponseData;
-import io.nuls.core.rpc.model.TypeDescriptor;
+import io.nuls.core.rpc.model.*;
 import io.nuls.provider.api.config.Config;
 import io.nuls.provider.api.config.Context;
+import io.nuls.provider.model.dto.ProgramMethod;
 import io.nuls.provider.model.jsonrpc.RpcResult;
 import io.nuls.provider.rpctools.BlockTools;
 import io.nuls.provider.utils.ResultUtil;
+import io.nuls.provider.utils.VerifyUtils;
 import io.nuls.v2.model.annotation.Api;
 import io.nuls.v2.model.annotation.ApiOperation;
 import io.nuls.v2.model.annotation.ApiType;
@@ -24,6 +28,7 @@ import java.util.Map;
 @Api(type = ApiType.JSONRPC)
 public class ChainController {
 
+    ChainManageProvider chainManageProvider = ServiceManager.get(ChainManageProvider.class);
     @Autowired
     private Config config;
     @Autowired
@@ -68,6 +73,36 @@ public class ChainController {
         } else {
             return RpcResult.success(Context.defaultChain.getAssets());
         }
+    }
+
+    /**
+     * 获取平行链资产信息
+     *
+     * @param params
+     * @return
+     */
+    @RpcMethod("getCrossAssetInfo")
+    @ApiOperation(description = "获取平行链资产信息", order = 603)
+    @Parameters({
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "资产链ID"),
+            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterDes = "资产ID"),
+    })
+    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = CrossAssetRegisterInfo.class))
+    public RpcResult getCrossAssetInfo(List<Object> params) {
+        VerifyUtils.verifyParams(params, 2);
+        int chainId, assetId;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is invalid");
+        }
+        try {
+            assetId = (int) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[assetId] is invalid");
+        }
+        Result<CrossAssetRegisterInfo> result = chainManageProvider.getCrossAssetInfo(new GetCrossAssetInfoReq(chainId,assetId));
+        return ResultUtil.getJsonRpcResult(result);
     }
 
 }
