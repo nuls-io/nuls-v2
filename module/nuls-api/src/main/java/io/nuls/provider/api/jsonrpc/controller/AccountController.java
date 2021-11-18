@@ -88,6 +88,8 @@ public class AccountController {
 
     AccountService accountService = ServiceManager.get(AccountService.class);
 
+    private long time;
+
     @RpcMethod("createAccount")
     @ApiOperation(description = "批量创建账户", order = 101, detailDesc = "创建的账户存在于本地钱包内")
     @Parameters(value = {
@@ -175,6 +177,10 @@ public class AccountController {
         if (!FormatValidUtils.validPassword(newPassword)) {
             return RpcResult.paramError("[newPassword] is inValid");
         }
+        if (System.currentTimeMillis() - time < 3000L) {
+            return RpcResult.paramError("Access frequency limit.");
+        }
+        time = System.currentTimeMillis();
         UpdatePasswordReq req = new UpdatePasswordReq(address, oldPassword, newPassword);
         req.setChainId(chainId);
         Result<Boolean> result = accountService.updatePassword(req);
@@ -221,6 +227,11 @@ public class AccountController {
         if (!FormatValidUtils.validPassword(password)) {
             return RpcResult.paramError("[password] is inValid");
         }
+
+        if (System.currentTimeMillis() - time < 3000L) {
+            return RpcResult.paramError("Access frequency limit.");
+        }
+        time = System.currentTimeMillis();
 
         GetAccountPrivateKeyByAddressReq req = new GetAccountPrivateKeyByAddressReq(password, address);
         req.setChainId(chainId);
@@ -364,6 +375,12 @@ public class AccountController {
         if (!FormatValidUtils.validPassword(password)) {
             return RpcResult.paramError("[password] is inValid");
         }
+
+        if (System.currentTimeMillis() - time < 3000L) {
+            return RpcResult.paramError("Access frequency limit.");
+        }
+        time = System.currentTimeMillis();
+
         KeyStoreReq req = new KeyStoreReq(password, address);
         req.setChainId(chainId);
         Result<String> result = accountService.getAccountKeyStore(req);
