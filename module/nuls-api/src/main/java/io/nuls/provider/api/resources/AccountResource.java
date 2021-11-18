@@ -82,6 +82,7 @@ public class AccountResource {
     AccountService accountService = ServiceManager.get(AccountService.class);
     @Autowired
     private AccountTools accountTools;
+    private long time;
 
 
     @POST
@@ -139,6 +140,10 @@ public class AccountResource {
         if (!FormatValidUtils.validPassword(form.getNewPassword())) {
             return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "[newPassword] is invalid"));
         }
+        if (System.currentTimeMillis() - time < 3000L) {
+            return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "Access frequency limit."));
+        }
+        time = System.currentTimeMillis();
         UpdatePasswordReq req = new UpdatePasswordReq(address, form.getPassword(), form.getNewPassword());
         req.setChainId(config.getChainId());
         Result<Boolean> result = accountService.updatePassword(req);
@@ -167,6 +172,10 @@ public class AccountResource {
         if (address == null) {
             return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "address is empty"));
         }
+        if (System.currentTimeMillis() - time < 3000L) {
+            return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "Access frequency limit."));
+        }
+        time = System.currentTimeMillis();
         GetAccountPrivateKeyByAddressReq req = new GetAccountPrivateKeyByAddressReq(form.getPassword(), address);
         req.setChainId(config.getChainId());
         Result<String> result = accountService.getAccountPrivateKey(req);
@@ -312,6 +321,10 @@ public class AccountResource {
         if (address == null) {
             return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "address is empty"));
         }
+        if (System.currentTimeMillis() - time < 3000L) {
+            return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "Access frequency limit."));
+        }
+        time = System.currentTimeMillis();
         BackupAccountReq req = new BackupAccountReq(form.getPassword(), address, form.getPath());
         req.setChainId(config.getChainId());
         Result<String> result = accountService.backupAccount(req);
