@@ -40,10 +40,12 @@ import io.nuls.core.rpc.model.*;
 import io.nuls.provider.api.config.Config;
 import io.nuls.provider.api.config.Context;
 import io.nuls.provider.model.dto.AccountKeyStoreDto;
+import io.nuls.provider.model.dto.ContractTokenInfoDto;
 import io.nuls.provider.model.form.PriKeyForm;
 import io.nuls.provider.model.jsonrpc.RpcResult;
 import io.nuls.provider.model.jsonrpc.RpcResultError;
 import io.nuls.provider.rpctools.AccountTools;
+import io.nuls.provider.rpctools.ContractTools;
 import io.nuls.provider.rpctools.LegderTools;
 import io.nuls.provider.rpctools.vo.AccountBalance;
 import io.nuls.provider.utils.Log;
@@ -62,6 +64,7 @@ import io.nuls.v2.model.dto.MultiSignAliasDto;
 import io.nuls.v2.model.dto.SignDto;
 import io.nuls.v2.util.AccountTool;
 import io.nuls.v2.util.NulsSDKTool;
+import org.checkerframework.checker.units.qual.A;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -79,6 +82,8 @@ import static io.nuls.v2.util.ValidateUtil.validateChainId;
 @Api(type = ApiType.JSONRPC)
 public class AccountController {
 
+    @Autowired
+    private ContractTools contractTools;
     @Autowired
     private LegderTools legderTools;
     @Autowired
@@ -423,6 +428,54 @@ public class AccountController {
         }
         RpcResult rpcResult = new RpcResult();
         Result<AccountBalance> balanceResult = legderTools.getBalanceAndNonce(chainId, assetChainId, assetId, address);
+        if (balanceResult.isFailed()) {
+            return rpcResult.setError(new RpcResultError(balanceResult.getStatus(), balanceResult.getMessage(), null));
+        }
+        return rpcResult.setResult(balanceResult.getData());
+    }
+
+
+
+    /**
+     * 查询用户资产合计
+     * @param params
+     * @return
+     */
+    @RpcMethod("getBalanceList")
+    @ApiOperation(description = "查询账户余额", order = 107, detailDesc = "根据资产链ID和资产ID，查询本链账户对应资产的余额与nonce值集合")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
+            @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "账户地址"),
+            @Parameter(parameterName = "assetIdList", requestType = @TypeDescriptor(value = List.class), parameterDes = "资产的ID集合")
+    })
+    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = AccountBalance.class))
+    public RpcResult getBalanceList(List<Object> params) {
+        VerifyUtils.verifyParams(params, 3);
+        String address;
+        int chainId;
+        List<Map> coinDtoList;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        try {
+            address = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[address] is inValid");
+        }
+        try {
+            coinDtoList = (List<Map> ) params.get(2);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+
+        if (!AddressTool.validAddress(chainId, address)) {
+            return RpcResult.paramError("[address] is inValid");
+        }
+        RpcResult rpcResult = new RpcResult();
+
+        Result<List<AccountBalance>> balanceResult = legderTools.getBalanceList(chainId, coinDtoList, address);
         if (balanceResult.isFailed()) {
             return rpcResult.setError(new RpcResultError(balanceResult.getStatus(), balanceResult.getMessage(), null));
         }
