@@ -1,13 +1,16 @@
 package io.nuls.provider.rpctools;
 
 import io.nuls.base.api.provider.Result;
+import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.provider.model.dto.ContractTokenInfoDto;
 import io.nuls.provider.rpctools.vo.AccountBalance;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +23,9 @@ import java.util.function.Function;
  */
 @Component
 public class LegderTools implements CallRpc {
+
+    @Autowired
+    private ContractTools contractTools;
 
     /**
      * 获取可用余额和nonce
@@ -68,5 +74,46 @@ public class LegderTools implements CallRpc {
         } catch (NulsRuntimeException e) {
             return Result.fail(e.getCode(), e.getMessage());
         }
+    }
+
+    public Result<List<AccountBalance>> getBalanceList(int chainId, List<Map> coinDtoList, String address) {
+        try {
+            List<AccountBalance> accountBalanceList = new ArrayList<>();
+            for (int i = 0; i < coinDtoList.size(); i++) {
+                Map map = coinDtoList.get(i);
+                int assetChainId = (int) map.get("chainId");
+                int assetId = (int) map.get("assetId");
+                String contractAddress = (String) map.get("contractAddress");
+                if (assetId > 0) {
+                    AccountBalance accountBalance = getBalanceAndNonce(chainId, assetChainId, assetId, address).getData();
+                    accountBalance.setAssetChainId(assetChainId);
+                    accountBalance.setAssetId(assetId);
+                    accountBalance.setContractAddress(contractAddress);
+                    accountBalanceList.add(accountBalance);
+                } else {
+                    ContractTokenInfoDto dto = contractTools.getTokenBalance(chainId, contractAddress, address).getData();
+                    AccountBalance accountBalance = new AccountBalance();
+                    accountBalance.setAssetChainId(assetChainId);
+                    accountBalance.setAssetId(assetId);
+                    accountBalance.setContractAddress(contractAddress);
+                    if (dto == null) {
+                        accountBalance.setBalance("0");
+                        accountBalance.setTotalBalance("0");
+                    } else {
+                        accountBalance.setBalance(dto.getAmount());
+                        accountBalance.setTotalBalance(dto.getAmount());
+                    }
+
+                    accountBalance.setTimeLock("0");
+                    accountBalance.setConsensusLock("0");
+                    accountBalance.setFreeze("0");
+                    accountBalanceList.add(accountBalance);
+                }
+            }
+            return new Result<List<AccountBalance>>(accountBalanceList);
+        } catch (NulsRuntimeException e) {
+            return Result.fail(e.getCode(), e.getMessage());
+        }
+
     }
 }

@@ -446,6 +446,54 @@ public class AccountController {
         return rpcResult.setResult(balanceResult.getData());
     }
 
+
+    /**
+     * 查询用户资产合计
+     * @param params
+     * @return
+     */
+    @RpcMethod("getBalanceList")
+    @ApiOperation(description = "查询账户余额", order = 107, detailDesc = "根据资产链ID和资产ID，查询本链账户对应资产的余额与nonce值集合")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
+            @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "账户地址"),
+            @Parameter(parameterName = "assetIdList", requestType = @TypeDescriptor(value = List.class), parameterDes = "资产的ID集合")
+    })
+    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = AccountBalance.class))
+    public RpcResult getBalanceList(List<Object> params) {
+        VerifyUtils.verifyParams(params, 3);
+        String address;
+        int chainId;
+        List<Map> coinDtoList;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        try {
+            address = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[address] is inValid");
+        }
+        try {
+            coinDtoList = (List<Map> ) params.get(2);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+
+        if (!AddressTool.validAddress(chainId, address)) {
+            return RpcResult.paramError("[address] is inValid");
+        }
+        RpcResult rpcResult = new RpcResult();
+
+        Result<List<AccountBalance>> balanceResult = legderTools.getBalanceList(chainId, coinDtoList, address);
+        if (balanceResult.isFailed()) {
+            return rpcResult.setError(new RpcResultError(balanceResult.getStatus(), balanceResult.getMessage(), null));
+        }
+        return rpcResult.setResult(balanceResult.getData());
+    }
+
+
     @RpcMethod("setAlias")
     @ApiOperation(description = "设置账户别名", order = 108, detailDesc = "别名格式为1-20位小写字母和数字的组合，设置别名会销毁1个NULS")
     @Parameters({
