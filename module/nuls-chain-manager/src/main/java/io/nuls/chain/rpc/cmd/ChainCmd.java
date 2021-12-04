@@ -143,6 +143,7 @@ public class ChainCmd extends BaseChainCmd {
             /* 组装BlockChain (BlockChain object) */
             BlockChain blockChain = new BlockChain();
             blockChain.map2pojo(params);
+            //todo 临时处理
 //            if (blockChain.getChainId() == BaseConstant.MAINNET_CHAIN_ID || blockChain.getChainId() == BaseConstant.TESTNET_CHAIN_ID) {
 //                return failed(CmErrorCode.ERROR_CHAIN_SYSTEM_USED);
 //            }
