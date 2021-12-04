@@ -143,9 +143,9 @@ public class ChainCmd extends BaseChainCmd {
             /* 组装BlockChain (BlockChain object) */
             BlockChain blockChain = new BlockChain();
             blockChain.map2pojo(params);
-            if (blockChain.getChainId() == BaseConstant.MAINNET_CHAIN_ID || blockChain.getChainId() == BaseConstant.TESTNET_CHAIN_ID) {
-                return failed(CmErrorCode.ERROR_CHAIN_SYSTEM_USED);
-            }
+//            if (blockChain.getChainId() == BaseConstant.MAINNET_CHAIN_ID || blockChain.getChainId() == BaseConstant.TESTNET_CHAIN_ID) {
+//                return failed(CmErrorCode.ERROR_CHAIN_SYSTEM_USED);
+//            }
             String addressPrefix = (String) params.get("addressPrefix");
             if (StringUtils.isBlank(addressPrefix)) {
                 return failed(CmErrorCode.ERROR_CHAIN_ADDRESS_PREFIX);
