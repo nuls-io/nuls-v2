@@ -65,9 +65,11 @@ public class ConfigLoader {
      * 加载配置文件
      */
     public static void load() {
+        int chainId = protocolConfig.getChainId();
+        loadVersions(chainId);
         List<ChainParameters> list = service.getList();
         if (list == null || list.size() == 0) {
-            loadDefault();
+            loadDefault(chainId);
         } else {
             for (ChainParameters chainParameters : list) {
                 ContextManager.init(chainParameters, versions);
@@ -78,9 +80,7 @@ public class ConfigLoader {
     /**
      * 加载默认配置文件
      */
-    private static void loadDefault() {
-        int chainId = protocolConfig.getChainId();
-        loadVersions(chainId);
+    private static void loadDefault(int chainId) {
         ContextManager.init(protocolConfig, versions);
         service.save(protocolConfig, chainId);
     }
