@@ -9,8 +9,9 @@ import org.junit.Test;
 
 import java.util.List;
 
-public class ChainInfoTest {
+public class StorageTest {
     static String DB_PATH = "/Users/niels/workspace/nuls-v2/data/cross-chain";
+    static String DB_PATH2 = "/Users/niels/workspace/nuls-v2/data-beta/cross-chain";
 
     static final String TABLE = "registered_chain";
 
@@ -21,5 +22,14 @@ public class ChainInfoTest {
         RegisteredChainMessage registeredChainMessage = new RegisteredChainMessage();
         registeredChainMessage.parse(b,0);
         Log.info("{}",registeredChainMessage);
+    }
+
+    @Test
+    public void readRegisterChain2() throws NulsException {
+        RocksDBService.init(DB_PATH2);
+        byte[] b = RocksDBService.get(TABLE, TABLE.getBytes());
+        RegisteredChainMessage registeredChainMessage = new RegisteredChainMessage();
+        registeredChainMessage.parse(b, 0);
+        Log.info("{}", registeredChainMessage);
     }
 }

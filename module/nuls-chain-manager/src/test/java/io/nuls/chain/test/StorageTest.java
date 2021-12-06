@@ -4,6 +4,7 @@ import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.model.po.ChainAsset;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
+import io.nuls.core.model.ByteUtils;
 import io.nuls.core.rockdb.service.RocksDBService;
 import org.junit.Test;
 
@@ -17,6 +18,7 @@ public class StorageTest {
 
     static final String TABLE1 = "chain_asset";
     static final String TABLE2 = "block_chain";
+    static final String TABLE3 = "chain_circulate";
 
 
     @Test
@@ -63,6 +65,28 @@ public class StorageTest {
             BlockChain registeredChainMessage = new BlockChain();
             registeredChainMessage.parse(b, 0);
             Log.info("{}", registeredChainMessage);
+        }
+        System.out.println(blist.size());
+    }
+
+    @Test
+    public void readChainCirculate() throws NulsException {
+        RocksDBService.init(DB_PATH1);
+        List<byte[]> blist = RocksDBService.keyList(TABLE3);
+        for (byte[] b : blist) {
+            byte[] val = RocksDBService.get(TABLE3, b);
+            Log.info("{}:  {}", new String(b), ByteUtils.bytesToBigInteger(val));
+        }
+        System.out.println(blist.size());
+    }
+
+    @Test
+    public void readChainCirculate2() throws NulsException {
+        RocksDBService.init(DB_PATH2);
+        List<byte[]> blist = RocksDBService.keyList(TABLE3);
+        for (byte[] b : blist) {
+            byte[] val = RocksDBService.get(TABLE3, b);
+            Log.info("{}:  {}", new String(b), ByteUtils.bytesToBigInteger(val));
         }
         System.out.println(blist.size());
     }
