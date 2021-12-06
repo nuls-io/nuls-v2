@@ -33,8 +33,7 @@ public interface Constant {
      * 协议版本配置文件名称
      * Module configuration file name.
      */
-    String PROTOCOL_CONFIG_FILE_PREFIX = "versions";
-    String PROTOCOL_CONFIG_FILE_SUBFIX = ".json";
+    String PROTOCOL_CONFIG_FILE = "versions.json";
 
     /**
      * 存储每条链的配置信息

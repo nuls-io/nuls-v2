@@ -35,7 +35,7 @@ import io.nuls.protocol.storage.ParametersStorageService;
 import java.util.List;
 
 import static io.nuls.protocol.ProtocolUpdateBootstrap.protocolConfig;
-import static io.nuls.protocol.constant.Constant.*;
+import static io.nuls.protocol.constant.Constant.PROTOCOL_CONFIG_FILE;
 
 /**
  * 配置加载器
@@ -51,9 +51,9 @@ public class ConfigLoader {
     private static ParametersStorageService service;
     private static List<ProtocolVersion> versions;
 
-    private static void loadVersions(int chainId) {
+    static {
         try {
-            versions = JSONUtils.json2list(IoUtils.read(PROTOCOL_CONFIG_FILE_PREFIX + chainId + PROTOCOL_CONFIG_FILE_SUBFIX), ProtocolVersion.class);
+            versions = JSONUtils.json2list(IoUtils.read(PROTOCOL_CONFIG_FILE), ProtocolVersion.class);
         } catch (Exception e) {
             Log.error(e);
             System.exit(1);
@@ -63,13 +63,12 @@ public class ConfigLoader {
 
     /**
      * 加载配置文件
+     *
      */
     public static void load() {
-        int chainId = protocolConfig.getChainId();
-        loadVersions(chainId);
         List<ChainParameters> list = service.getList();
         if (list == null || list.size() == 0) {
-            loadDefault(chainId);
+            loadDefault();
         } else {
             for (ChainParameters chainParameters : list) {
                 ContextManager.init(chainParameters, versions);
@@ -79,8 +78,10 @@ public class ConfigLoader {
 
     /**
      * 加载默认配置文件
+     *
      */
-    private static void loadDefault(int chainId) {
+    private static void loadDefault() {
+        int chainId = protocolConfig.getChainId();
         ContextManager.init(protocolConfig, versions);
         service.save(protocolConfig, chainId);
     }
