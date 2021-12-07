@@ -10,8 +10,8 @@ import org.junit.Test;
 import java.util.List;
 
 public class StorageTest {
-    static String DB_PATH = "/Users/niels/workspace/nuls-v2/data/cross-chain";
-    static String DB_PATH2 = "/Users/niels/workspace/nuls-v2/data-beta/cross-chain";
+    static String DB_PATH = "/Users/niels/workspace/nuls-v2/data-ing/cross-chain";
+    static String DB_PATH2 = "/Users/niels/workspace/nuls-v2/data/cross-chain";
 
     static final String TABLE = "registered_chain";
 
