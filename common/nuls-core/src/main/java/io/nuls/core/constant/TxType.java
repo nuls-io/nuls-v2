@@ -118,13 +118,13 @@ public class TxType {
     /**
      * 验证人变更
      * Verifier Change
-     * */
+     */
     public static final int VERIFIER_CHANGE = 24;
 
     /**
      * 验证人初始化
      * Verifier init
-     * */
+     */
     public static final int VERIFIER_INIT = 25;
 
     /**
@@ -141,13 +141,13 @@ public class TxType {
     /**
      * 追加节点保证金
      * Additional agent margin
-     * */
+     */
     public static final int APPEND_AGENT_DEPOSIT = 28;
 
     /**
      * 撤销节点保证金
      * Cancel agent deposit
-     * */
+     */
     public static final int REDUCE_AGENT_DEPOSIT = 29;
 
     /**
@@ -289,5 +289,7 @@ public class TxType {
      * 本交易必须由种子节点发出，节点收到本交易后从共识模块获取到最新的共识节点出块地址列表，覆盖跨链模块本地存储的本链验证人列表。
      */
     public static final int RESET_LOCAL_VERIFIER_LIST = 61;
+
+    public static final int RESET_CHAIN_INFO = 62;
 
 }

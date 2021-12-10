@@ -40,10 +40,12 @@ import io.nuls.core.rpc.model.*;
 import io.nuls.provider.api.config.Config;
 import io.nuls.provider.api.config.Context;
 import io.nuls.provider.model.dto.AccountKeyStoreDto;
+import io.nuls.provider.model.dto.ContractTokenInfoDto;
 import io.nuls.provider.model.form.PriKeyForm;
 import io.nuls.provider.model.jsonrpc.RpcResult;
 import io.nuls.provider.model.jsonrpc.RpcResultError;
 import io.nuls.provider.rpctools.AccountTools;
+import io.nuls.provider.rpctools.ContractTools;
 import io.nuls.provider.rpctools.LegderTools;
 import io.nuls.provider.rpctools.vo.AccountBalance;
 import io.nuls.provider.utils.Log;
@@ -79,6 +81,8 @@ import static io.nuls.v2.util.ValidateUtil.validateChainId;
 @Api(type = ApiType.JSONRPC)
 public class AccountController {
 
+    @Autowired
+    private ContractTools contractTools;
     @Autowired
     private LegderTools legderTools;
     @Autowired
