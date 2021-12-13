@@ -1,5 +1,6 @@
 package io.nuls.chain.service.impl;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.chain.config.NulsChainConfig;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.po.Asset;
@@ -178,7 +179,22 @@ public class AssetServiceImpl implements AssetService {
      */
     @Override
     public Asset getAsset(String assetKey) throws Exception {
-        return assetStorage.load(assetKey);
+        Asset asset =  assetStorage.load(assetKey);
+        //todo 临时测试用
+//        if(assetKey.equals("2-0")&&asset==null){
+//            asset = new Asset();
+//            asset.setAssetId(0);
+//            asset.setAssetName("TEST");
+//            asset.setChainId(2);
+//            asset.setCreateTime(0);
+//            asset.setDecimalPlaces((short) 4);
+//            asset.setAddress(AddressTool.getAddress("tNULSeBaMmShSTVwbU4rHkZjpD98JgFgg6rmhF"));
+//            asset.setAvailable(true);
+//            asset.setDepositNuls(BigInteger.ZERO);
+//            asset.setInitNumber(BigInteger.valueOf(1000000000000L));
+//            asset.setSymbol("TEST");
+//        }
+        return asset;
     }
 
     /**
