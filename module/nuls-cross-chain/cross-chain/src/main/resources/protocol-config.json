@@ -1,5 +1,22 @@
 [
   {
+    "version": "10",
+    "extend": "1",
+    "validTxs": [
+      {
+        "type": "62",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "ResetChainInfoTxProcessor"
+      }
+    ],
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  },
+  {
     "version": "1",
     "extend": "",
     "validTxs": [
