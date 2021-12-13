@@ -30,6 +30,7 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.*;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.contract.model.txdata.CallContractData;
+import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.model.txdata.CreateContractData;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
@@ -44,6 +45,7 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -100,5 +102,23 @@ public class TxSerialization {
         System.out.println(HexUtil.encode(tx.serialize()));
     }
 
+    @Test
+    public void test26() throws NulsException {
+        String hex="1000c710266100aa010001c3d790463856a0e8b0f8f10ea8f4703dcd1b24e2010002a9ae0501816eee73f8a2b2048197bec81d0247d50000000000000000000000000000000000000000000000000000000000000000d9800000000000001900000000000000087472616e73666572000201254e554c53643648676675704e70515876507774787339594c77787466747561656942596f420118313030303030303030303030303030303030303030303030480117010001c3d790463856a0e8b0f8f10ea8f4703dcd1b24e201000100d11b0e000000000000000000000000000000000000000000000000000000000008f3506f703333db3d00006921037331dd5df517ae177951b47c29d94e1bc850fada766a9a83fb0042436d43d1da46304402206ac8e190d01a5d70fd5e72dab79ab66cdf6ec754fd7e1d669539e6b577762e82022061a113288b2d1c7d45417183948e01d374b3057a9514a46a1faba39261f8c365";
+        Transaction tx = new Transaction();
+        tx.parse(HexUtil.decode(hex), 0);
+        CallContractData data = new CallContractData();
+        data.parse(tx.getTxData(), 0);
+        System.out.println();
+    }
+
+    @Test
+    public void desContractData() throws NulsException {
+        String base64 = "AQABw9eQRjhWoOiw+PEOqPRwPc0bJOIBAAKprgUBgW7uc/iisgSBl77IHQJH1QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA2YAAAAAAAAAZAAAAAAAAAAh0cmFuc2ZlcgACASVOVUxTZDZIZ2Z1cE5wUVh2UHd0eHM5WUx3eHRmdHVhZWlCWW9CARgxMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=";
+        byte[] decode = Base64.getDecoder().decode(base64);
+        CallContractData data = new CallContractData();
+        data.parse(decode, 0);
+        System.out.println();
+    }
 
 }

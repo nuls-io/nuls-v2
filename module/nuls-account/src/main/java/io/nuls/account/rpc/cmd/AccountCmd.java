@@ -1080,7 +1080,7 @@ public class AccountCmd extends BaseCmd {
             //check the account is exist
             Account account = accountService.getAccount(chainId, address);
             if (null == account) {
-                throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
+                throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST, address);
             }
             //verify that the account password is correct
             boolean result = account.validatePassword(password);

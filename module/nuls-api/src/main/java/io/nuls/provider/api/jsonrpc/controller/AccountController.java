@@ -20,35 +20,41 @@
 
 package io.nuls.provider.api.jsonrpc.controller;
 
-import io.nuls.base.api.provider.account.facade.*;
-import io.nuls.provider.api.config.Config;
-import io.nuls.provider.api.config.Context;
 import io.nuls.base.api.provider.Result;
 import io.nuls.base.api.provider.ServiceManager;
 import io.nuls.base.api.provider.account.AccountService;
+import io.nuls.base.api.provider.account.facade.*;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Controller;
 import io.nuls.core.core.annotation.RpcMethod;
+import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.model.FormatValidUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.model.*;
-import io.nuls.provider.model.dto.AccountBalanceDto;
+import io.nuls.provider.api.config.Config;
+import io.nuls.provider.api.config.Context;
 import io.nuls.provider.model.dto.AccountKeyStoreDto;
+import io.nuls.provider.model.dto.ContractTokenInfoDto;
 import io.nuls.provider.model.form.PriKeyForm;
 import io.nuls.provider.model.jsonrpc.RpcResult;
 import io.nuls.provider.model.jsonrpc.RpcResultError;
 import io.nuls.provider.rpctools.AccountTools;
+import io.nuls.provider.rpctools.ContractTools;
 import io.nuls.provider.rpctools.LegderTools;
-import io.nuls.provider.rpctools.vo.Account;
 import io.nuls.provider.rpctools.vo.AccountBalance;
 import io.nuls.provider.utils.Log;
 import io.nuls.provider.utils.ResultUtil;
+import io.nuls.provider.utils.Utils;
 import io.nuls.provider.utils.VerifyUtils;
+import io.nuls.v2.SDKContext;
 import io.nuls.v2.error.AccountErrorCode;
+import io.nuls.v2.model.Account;
 import io.nuls.v2.model.annotation.Api;
 import io.nuls.v2.model.annotation.ApiOperation;
 import io.nuls.v2.model.annotation.ApiType;
@@ -56,13 +62,17 @@ import io.nuls.v2.model.dto.AccountDto;
 import io.nuls.v2.model.dto.AliasDto;
 import io.nuls.v2.model.dto.MultiSignAliasDto;
 import io.nuls.v2.model.dto.SignDto;
+import io.nuls.v2.util.AccountTool;
 import io.nuls.v2.util.NulsSDKTool;
-import org.checkerframework.checker.units.qual.A;
 
 import java.io.IOException;
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static io.nuls.v2.util.ValidateUtil.validateChainId;
 
 /**
  * @author Niels
@@ -72,6 +82,8 @@ import java.util.Map;
 public class AccountController {
 
     @Autowired
+    private ContractTools contractTools;
+    @Autowired
     private LegderTools legderTools;
     @Autowired
     private AccountTools accountTools;
@@ -79,6 +91,8 @@ public class AccountController {
     private Config config;
 
     AccountService accountService = ServiceManager.get(AccountService.class);
+
+    private long time;
 
     @RpcMethod("createAccount")
     @ApiOperation(description = "批量创建账户", order = 101, detailDesc = "创建的账户存在于本地钱包内")
@@ -167,6 +181,10 @@ public class AccountController {
         if (!FormatValidUtils.validPassword(newPassword)) {
             return RpcResult.paramError("[newPassword] is inValid");
         }
+        if (System.currentTimeMillis() - time < 3000L) {
+            return RpcResult.paramError("Access frequency limit.");
+        }
+        time = System.currentTimeMillis();
         UpdatePasswordReq req = new UpdatePasswordReq(address, oldPassword, newPassword);
         req.setChainId(chainId);
         Result<Boolean> result = accountService.updatePassword(req);
@@ -213,6 +231,11 @@ public class AccountController {
         if (!FormatValidUtils.validPassword(password)) {
             return RpcResult.paramError("[password] is inValid");
         }
+
+        if (System.currentTimeMillis() - time < 3000L) {
+            return RpcResult.paramError("Access frequency limit.");
+        }
+        time = System.currentTimeMillis();
 
         GetAccountPrivateKeyByAddressReq req = new GetAccountPrivateKeyByAddressReq(password, address);
         req.setChainId(chainId);
@@ -356,6 +379,12 @@ public class AccountController {
         if (!FormatValidUtils.validPassword(password)) {
             return RpcResult.paramError("[password] is inValid");
         }
+
+        if (System.currentTimeMillis() - time < 3000L) {
+            return RpcResult.paramError("Access frequency limit.");
+        }
+        time = System.currentTimeMillis();
+
         KeyStoreReq req = new KeyStoreReq(password, address);
         req.setChainId(chainId);
         Result<String> result = accountService.getAccountKeyStore(req);
@@ -420,6 +449,54 @@ public class AccountController {
         }
         return rpcResult.setResult(balanceResult.getData());
     }
+
+
+    /**
+     * 查询用户资产合计
+     * @param params
+     * @return
+     */
+    @RpcMethod("getBalanceList")
+    @ApiOperation(description = "查询账户余额", order = 107, detailDesc = "根据资产链ID和资产ID，查询本链账户对应资产的余额与nonce值集合")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
+            @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "账户地址"),
+            @Parameter(parameterName = "assetIdList", requestType = @TypeDescriptor(value = List.class), parameterDes = "资产的ID集合")
+    })
+    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = AccountBalance.class))
+    public RpcResult getBalanceList(List<Object> params) {
+        VerifyUtils.verifyParams(params, 3);
+        String address;
+        int chainId;
+        List<Map> coinDtoList;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        try {
+            address = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[address] is inValid");
+        }
+        try {
+            coinDtoList = (List<Map> ) params.get(2);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+
+        if (!AddressTool.validAddress(chainId, address)) {
+            return RpcResult.paramError("[address] is inValid");
+        }
+        RpcResult rpcResult = new RpcResult();
+
+        Result<List<AccountBalance>> balanceResult = legderTools.getBalanceList(chainId, coinDtoList, address);
+        if (balanceResult.isFailed()) {
+            return rpcResult.setError(new RpcResultError(balanceResult.getStatus(), balanceResult.getMessage(), null));
+        }
+        return rpcResult.setResult(balanceResult.getData());
+    }
+
 
     @RpcMethod("setAlias")
     @ApiOperation(description = "设置账户别名", order = 108, detailDesc = "别名格式为1-20位小写字母和数字的组合，设置别名会销毁1个NULS")
@@ -976,4 +1053,105 @@ public class AccountController {
         }
         return ResultUtil.getJsonRpcResult(result);
     }
+
+    @RpcMethod("signMessage")
+    @ApiOperation(description = "明文私钥摘要签名消息", order = 162)
+    @Parameters({
+            @Parameter(parameterName = "message", parameterType = "String", parameterDes = "消息"),
+            @Parameter(parameterName = "privateKey", parameterType = "String", parameterDes = "私钥")
+    })
+    @ResponseData(name = "signedMessage", description = "消息签名")
+    public RpcResult signMessage(List<Object> params) {
+        String message, priKey;
+        try {
+            message = (String) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[message] is inValid");
+        }
+        try {
+            priKey = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[priKey] is inValid");
+        }
+        if (StringUtils.isBlank(message)) {
+            return RpcResult.paramError("[message] is inValid");
+        }
+        if (StringUtils.isBlank(priKey)) {
+            return RpcResult.paramError("[priKey] is inValid");
+        }
+
+        ECKey ecKey = ECKey.fromPrivate(new BigInteger(1, HexUtil.decode(priKey)));
+        byte[] signbytes = ecKey.sign(Utils.dataToBytes(message));
+        return RpcResult.success(HexUtil.encode(signbytes));
+    }
+
+    @RpcMethod("verifySignedMessage")
+    @ApiOperation(description = "验证消息签名", order = 163)
+    @Parameters({
+            @Parameter(parameterName = "message", parameterType = "String", parameterDes = "消息"),
+            @Parameter(parameterName = "signature", parameterType = "String", parameterDes = "消息签名"),
+            @Parameter(parameterName = "publicKey", parameterType = "String", parameterDes = "公钥")
+    })
+    @ResponseData(description = "验证是否成功", responseType = @TypeDescriptor(value = Boolean.class))
+    public RpcResult verifySignedMessage(List<Object> params) {
+        String message, signature, publicKey;
+        try {
+            message = (String) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[message] is inValid");
+        }
+        try {
+            signature = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[signature] is inValid");
+        }
+        try {
+            publicKey = (String) params.get(2);
+        } catch (Exception e) {
+            return RpcResult.paramError("[publicKey] is inValid");
+        }
+        if (StringUtils.isBlank(message)) {
+            return RpcResult.paramError("[message] is inValid");
+        }
+        if (StringUtils.isBlank(signature)) {
+            return RpcResult.paramError("[signature] is inValid");
+        }
+        if (StringUtils.isBlank(publicKey)) {
+            return RpcResult.paramError("[publicKey] is inValid");
+        }
+
+        boolean verify = ECKey.verify(Utils.dataToBytes(message), HexUtil.decode(signature), HexUtil.decode(publicKey));
+        return RpcResult.success(verify);
+    }
+
+    @RpcMethod("getPubKeyByPriKey")
+    @ApiOperation(description = "根据私钥获取公钥", order = 164)
+    @Parameters({
+            @Parameter(parameterName = "原始私钥", parameterDes = "私钥表单", requestType = @TypeDescriptor(value = PriKeyForm.class))
+    })
+    @ResponseData(name = "返回值", description = "公钥的HEX编码字符串")
+    public RpcResult getPubKeyByPriKey(List<Object> params) {
+        String priKey;
+        try {
+            priKey = (String) params.get(0);
+            validateChainId();
+            if (!ECKey.isValidPrivteHex(priKey)) {
+                throw new NulsRuntimeException(AccountErrorCode.PRIVATE_KEY_WRONG);
+            }
+            Account account;
+            try {
+                if (StringUtils.isBlank(SDKContext.addressPrefix)) {
+                    account = AccountTool.createAccount(SDKContext.main_chain_id, priKey);
+                } else {
+                    account = AccountTool.createAccount(SDKContext.main_chain_id, priKey, SDKContext.addressPrefix);
+                }
+            } catch (NulsException e) {
+                throw new NulsRuntimeException(AccountErrorCode.PRIVATE_KEY_WRONG);
+            }
+            return RpcResult.success(HexUtil.encode(account.getPubKey()));
+        } catch (Exception e) {
+            return RpcResult.paramError("[priKey] is inValid");
+        }
+    }
+
 }

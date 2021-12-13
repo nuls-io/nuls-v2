@@ -11,6 +11,12 @@ import io.nuls.core.rpc.model.ApiModelProperty;
 @ApiModel
 public class AccountBalance {
 
+    private int assetChainId;
+
+    private int assetId;
+
+    private String contractAddress;
+
     @ApiModelProperty(description = "总余额")
     private String totalBalance;
     @ApiModelProperty(description = "可用余额")
@@ -80,5 +86,29 @@ public class AccountBalance {
 
     public void setNonceType(int nonceType) {
         this.nonceType = nonceType;
+    }
+
+    public int getAssetChainId() {
+        return assetChainId;
+    }
+
+    public void setAssetChainId(int assetChainId) {
+        this.assetChainId = assetChainId;
+    }
+
+    public int getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(int assetId) {
+        this.assetId = assetId;
+    }
+
+    public String getContractAddress() {
+        return contractAddress;
+    }
+
+    public void setContractAddress(String contractAddress) {
+        this.contractAddress = contractAddress;
     }
 }

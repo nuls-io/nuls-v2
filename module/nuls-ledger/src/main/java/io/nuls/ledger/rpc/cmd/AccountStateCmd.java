@@ -118,6 +118,65 @@ public class AccountStateCmd extends BaseLedgerCmd {
         return response;
     }
 
+
+    @CmdAnnotation(cmd = "getBalanceList", version = 1.0,
+            description = "获取账户资产的集合")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "assetKeyList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "资产key集合, [assetChainId-assetId]"),
+            @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "资产所在地址"),
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象",
+            responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+                    @Key(name = "list", valueType = Map.class, description = "账户资产集合")
+            })
+    )
+    public Response getBalanceList(Map params) {
+        Integer chainId = (Integer) params.get("chainId");
+        List<String> assetKeyList = (List<String>) params.get("assetKeyList");
+        if (assetKeyList == null) {
+            return failed(LedgerErrorCode.PARAMETER_ERROR, "invalid `assetKeyList`");
+        }
+        String address = LedgerUtil.getRealAddressStr((String) params.get("address"));
+        if (!chainHanlder(chainId)) {
+            return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
+        }
+        Map<String, Map> resultList = new HashMap<>();
+        Map<String, Object> resultMap = new HashMap<>();
+        for (String assetKey : assetKeyList) {
+            assetKey = assetKey.trim();
+            String[] assetInfo = assetKey.split("-");
+            int assetChainId = Integer.parseInt(assetInfo[0].trim());
+            int assetId = Integer.parseInt(assetInfo[1].trim());
+
+            AccountState accountState = accountStateService.getAccountStateReCal(address, chainId, assetChainId, assetId);
+            Map<String, Object> rtMap = new HashMap<>(5);
+            rtMap.put("freeze", accountState.getFreezeTotal());
+            rtMap.put("total", accountState.getTotalAmount());
+            rtMap.put("available", accountState.getAvailableAmount());
+            BigInteger permanentLocked = BigInteger.ZERO;
+            BigInteger timeHeightLocked = BigInteger.ZERO;
+            for (FreezeLockTimeState freezeLockTimeState : accountState.getFreezeLockTimeStates()) {
+                if (LedgerUtil.isPermanentLock(freezeLockTimeState.getLockTime())) {
+                    permanentLocked = permanentLocked.add(freezeLockTimeState.getAmount());
+                } else {
+                    timeHeightLocked = timeHeightLocked.add(freezeLockTimeState.getAmount());
+                }
+            }
+            for (FreezeHeightState freezeHeightState : accountState.getFreezeHeightStates()) {
+                timeHeightLocked = timeHeightLocked.add(freezeHeightState.getAmount());
+            }
+            rtMap.put("permanentLocked", permanentLocked);
+            rtMap.put("timeHeightLocked", timeHeightLocked);
+
+            resultList.put(assetKey, rtMap);
+        }
+        resultMap.put("list", resultList);
+        Response response = success(resultMap);
+        return response;
+    }
+
+
     /**
      * 获取账户锁定列表
      * get user account freeze
@@ -252,6 +311,7 @@ public class AccountStateCmd extends BaseLedgerCmd {
                     @Key(name = "nonce", valueType = String.class, description = "账户资产nonce值"),
                     @Key(name = "nonceType", valueType = Integer.class, description = "1：已确认的nonce值,0：未确认的nonce值"),
                     @Key(name = "available", valueType = BigInteger.class, description = "可用金额"),
+                    @Key(name = "freeze", valueType = BigInteger.class, description = "总锁定金额"),
                     @Key(name = "permanentLocked", valueType = BigInteger.class, description = "永久锁定金额"),
                     @Key(name = "timeHeightLocked", valueType = BigInteger.class, description = "高度或时间锁定金额")
             })

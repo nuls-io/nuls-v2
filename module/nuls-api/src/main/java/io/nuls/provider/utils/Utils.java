@@ -16,6 +16,7 @@ import io.nuls.core.exception.CryptoException;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.model.ObjectUtils;
+import io.nuls.core.model.StringUtils;
 import io.nuls.v2.model.dto.ProgramMultyAssetValue;
 
 import java.io.IOException;
@@ -23,6 +24,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -162,4 +164,35 @@ public class Utils {
         return list;
     }
 
+    public static byte[] dataToBytes(String data) {
+        if (StringUtils.isBlank(data)) {
+            return null;
+        }
+        try {
+            boolean isHex = true;
+            String validData = cleanHexPrefix(data);
+            char[] chars = validData.toCharArray();
+            for (char c : chars) {
+                int digit = Character.digit(c, 16);
+                if (digit == -1) {
+                    isHex = false;
+                    break;
+                }
+            }
+            if (isHex) {
+                return HexUtil.decode(validData);
+            }
+            return data.getBytes(StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            return data.getBytes(StandardCharsets.UTF_8);
+        }
+    }
+
+    private static String cleanHexPrefix(String input) {
+        return containsHexPrefix(input) ? input.substring(2) : input;
+    }
+
+    private static boolean containsHexPrefix(String input) {
+        return !StringUtils.isBlank(input) && input.length() > 1 && input.charAt(0) == '0' && input.charAt(1) == 'x';
+    }
 }

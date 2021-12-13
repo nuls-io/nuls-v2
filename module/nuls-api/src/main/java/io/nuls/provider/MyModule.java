@@ -3,7 +3,9 @@ package io.nuls.provider;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.provider.api.config.Config;
 import io.nuls.provider.rpctools.TransactionTools;
+import io.nuls.v2.SDKContext;
 
 /**
  * @Author: zhoulijun
@@ -15,6 +17,8 @@ public class MyModule {
 
     @Autowired
     TransactionTools transactionTools;
+    @Autowired
+    private Config config;
 
     /**
      * 启动模块
@@ -25,6 +29,7 @@ public class MyModule {
     public RpcModuleState startModule(String moduleName){
         //注册交易
         //transactionTools.registerTx(moduleName,200);
+        SDKContext.addressPrefix = config.getAddressPrefix();
         return RpcModuleState.Running;
     }
 
