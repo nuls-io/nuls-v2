@@ -4,6 +4,7 @@ import io.nuls.base.api.provider.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.provider.model.dto.ContractTokenInfoDto;
@@ -85,7 +86,7 @@ public class LegderTools implements CallRpc {
                 int assetChainId = (int) map.get("chainId");
                 int assetId = (int) map.get("assetId");
                 String contractAddress = (String) map.get("contractAddress");
-                if (assetId > 0) {
+                if (StringUtils.isBlank(contractAddress)) {
                     AccountBalance accountBalance = getBalanceAndNonce(chainId, assetChainId, assetId, address).getData();
                     accountBalance.setAssetChainId(assetChainId);
                     accountBalance.setAssetId(assetId);
