@@ -1,9 +1,9 @@
 [global]
 encoding=UTF-8
 language=en
-logPath=/Users/zhouwei/data/nuls-v2/Logs
+logPath=/Users/niels/workspace/nuls-v2/Logs
 logLevel=INFO
-dataPath=/Users/zhouwei/data/nuls-v2/data
+dataPath=/Users/niels/workspace/nuls-v2/data
 #默认本链ID
 chainId=2
 #地址前缀
@@ -33,7 +33,7 @@ crossPort=18002
 #魔法参数
 packetMagic=20200120
 #种子节点
-selfSeedIps=39.98.226.51:18001,47.244.186.65:18001,47.254.234.223:18001,47.74.86.85:18001,192.168.1.145:18001
+selfSeedIps=149.129.251.238:18001,47.244.186.65:18001,47.254.234.223:18001,47.74.86.85:18001,192.168.1.145:18001
 #主网的跨链种子连接节点
 moonSeedIps=39.98.226.51:18002,47.244.186.65:18002,47.254.234.223:18002,47.74.86.85:18002
 #最大入网连接数
@@ -44,6 +44,7 @@ maxOutCount=20
 
 [account]
 keystoreFolder=/keystore/backup
+dependent=protocol-update
 
 [block]
 #区块最大字节数
@@ -62,6 +63,7 @@ singleDownloadTimeout=15000
 cachedBlockSizeLimit=20971520
 #创世块文件路径(支持绝对路径与相对路径,相对路径相对于此配置文件的目录)
 genesisBlockPath=genesis-block.json
+dependent=cross-chain,smart-contract,protocol-update
 
 [consensus]
 #种子节点列表
@@ -88,14 +90,20 @@ initTime=1594483200
 deflationRatio=99.6
 #通缩间隔时间(单位：S),30天
 deflationTimeInterval=2592000
+dependent=protocol-update,smart-contract,cross-chain
 
+[transaction]
+dependent=protocol-update,smart-contract
 
 [smart-contract]
 #合约视图方法调用最大消耗的Gas
 maxViewGas=100000000
 systemLogLevel=WARN
 crossTokenSystemContract=tNULSeBaMy9k29Nj4rd3U4tonVr93mrDLHMNNd
+dependent=protocol-update
 
+[chain-manager]
+dependent=smart-contract,protocol-update
 [public-service]
 #public-service模块对外的rpc端口号
 rpcPort=18003
@@ -117,6 +125,7 @@ teamAddress=tNULSeBaMqTvaS2NEEZfdrmPzoRvd8zN6T57LH
 communityAddress=tNULSeBaMm9RQLKKUBXKJ1rQ7g4iobmWAB73mS
 syncCoinBase=false
 syncAddress=
+dependent=smart-contract,cross-chain
 
 [cross-chain]
 #跨链节点链接的最小值
@@ -133,7 +142,7 @@ verifiers=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMmShSTVwbU4rHkZjpD98JgF
 mainByzantineRatio=66
 #主网最大签名数
 maxSignatureCount=100
-
+dependent=protocol-update,smart-contract
 
 [nuls-module-explorer]
 apiModuleApi=http://127.0.0.1:18003/
@@ -148,9 +157,11 @@ webWalletHost=0.0.0.0
 [protocol-update]
 #每隔多少个区块统计一次协议占比
 interval=10
+dependent=smart-contract,cross-chain
 
 [nuls-api]
 #httpServer的启动ip
 serverIp=0.0.0.0
 #httpServer的启动port
 serverPort=18004
+dependent=smart-contract,cross-chain
