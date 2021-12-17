@@ -69,34 +69,34 @@ public class BlockUtil {
     public static boolean basicVerify(int chainId, Block block) {
         NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         if (block == null) {
-            logger.debug("basicVerify fail, block is null!");
+            logger.error("basicVerify fail, block is null!");
             return false;
         }
 
         BlockHeader header = block.getHeader();
         if (header == null) {
-            logger.debug("basicVerify fail, blockHeader is null!");
+            logger.error("basicVerify fail, blockHeader is null!");
             return false;
         }
 
         if (!headerVerify(chainId, header)) {
-            logger.debug("basicVerify fail, blockHeader error! height-" + header.getHeight() + ", hash-" + header.getHash());
+            logger.error("basicVerify fail, blockHeader error! height-" + header.getHeight() + ", hash-" + header.getHash());
             return false;
         }
 
         if (block.getTxs() == null || block.getTxs().isEmpty()) {
-            logger.debug("basicVerify fail, transaction is null! height-" + header.getHeight() + ", hash-" + header.getHash());
+            logger.error("basicVerify fail, transaction is null! height-" + header.getHeight() + ", hash-" + header.getHash());
             return false;
         }
 
         if (block.getTxs().size() != header.getTxCount()) {
-            logger.debug("basicVerify fail, transaction count not equals! height-" + header.getHeight() + ", hash-" + header.getHash());
+            logger.error("basicVerify fail, transaction count not equals! height-" + header.getHeight() + ", hash-" + header.getHash());
             return false;
         }
 
         ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
         if (block.size() > parameters.getBlockMaxSize()) {
-            logger.debug("basicVerify fail, beyond blockMaxSize! height-" + header.getHeight() + ", hash-" + header.getHash());
+            logger.error("basicVerify fail, beyond blockMaxSize! height-" + header.getHeight() + ", hash-" + header.getHash());
             return false;
         }
 
@@ -106,22 +106,22 @@ public class BlockUtil {
     public static boolean headerVerify(int chainId, BlockHeader header) {
         NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         if (header.getHash() == null) {
-            logger.debug("headerVerify fail, block hash can not be null! height-" + header.getHeight() + ", hash-" + header.getHash());
+            logger.error("headerVerify fail, block hash can not be null! height-" + header.getHeight() + ", hash-" + header.getHash());
             return false;
         }
 
         if (header.getHeight() < 0) {
-            logger.debug("headerVerify fail, block height can not be less than 0! height-" + header.getHeight() + ", hash-" + header.getHash());
+            logger.error("headerVerify fail, block height can not be less than 0! height-" + header.getHeight() + ", hash-" + header.getHash());
             return false;
         }
 
         if (null == header.getPackingAddress(chainId)) {
-            logger.debug("headerVerify fail, block packingAddress can not be null! height-" + header.getHeight() + ", hash-" + header.getHash());
+            logger.error("headerVerify fail, block packingAddress can not be null! height-" + header.getHeight() + ", hash-" + header.getHash());
             return false;
         }
         ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
         if (header.getExtend() != null && header.getExtend().length > parameters.getExtendMaxSize()) {
-            logger.debug("headerVerify fail, block extend too long! height-" + header.getHeight() + ", hash-" + header.getHash());
+            logger.error("headerVerify fail, block extend too long! height-" + header.getHeight() + ", hash-" + header.getHash());
             return false;
         }
 
@@ -180,7 +180,7 @@ public class BlockUtil {
         ChainParameters parameters = context.getParameters();
         NulsLogger logger = context.getLogger();
         if (Math.abs(blockHeight - masterChainEndHeight) > parameters.getHeightRange()) {
-            logger.debug("received out of range block, height:" + blockHeight + ", hash:" + blockHash);
+            logger.error("received out of range block, height:" + blockHeight + ", hash:" + blockHash);
             return Result.getFailed(BlockErrorCode.OUT_OF_RANGE);
         }
 
@@ -205,7 +205,7 @@ public class BlockUtil {
                 chainStorageService.save(chainId, block);
                 Chain forkChain = ChainGenerator.generate(chainId, block, masterChain, ChainTypeEnum.FORK);
                 BlockChainManager.addForkChain(chainId, forkChain);
-                logger.info("received fork block of masterChain, height:" + blockHeight + ", hash:" + blockHash);
+                logger.error("received fork block of masterChain, height:" + blockHeight + ", hash:" + blockHash);
                 ConsensusCall.evidence(chainId, blockService, header);
                 return Result.getFailed(BlockErrorCode.FORK_BLOCK);
             }
@@ -263,13 +263,13 @@ public class BlockUtil {
                 if (blockHeight == forkChainEndHeight + 1 && blockPreviousHash.equals(forkChainEndHash)) {
                     chainStorageService.save(chainId, block);
                     forkChain.addLast(block);
-                    logger.debug("received continuous block of forkChain, height:" + blockHeight + ", hash:" + blockHash);
+                    logger.error("received continuous block of forkChain, height:" + blockHeight + ", hash:" + blockHash);
                     ConsensusCall.evidence(chainId, blockService, header);
                     return Result.getFailed(BlockErrorCode.FORK_BLOCK);
                 }
                 //2.重复,丢弃
                 if (forkChainStartHeight <= blockHeight && blockHeight <= forkChainEndHeight && forkChain.getHashList().contains(blockHash)) {
-                    logger.debug("received duplicate block of forkChain, height:" + blockHeight + ", hash:" + blockHash);
+                    logger.error("received duplicate block of forkChain, height:" + blockHeight + ", hash:" + blockHash);
                     return Result.getFailed(BlockErrorCode.FORK_BLOCK);
                 }
                 //3.分叉
@@ -277,7 +277,7 @@ public class BlockUtil {
                     chainStorageService.save(chainId, block);
                     Chain newForkChain = ChainGenerator.generate(chainId, block, forkChain, ChainTypeEnum.FORK);
                     BlockChainManager.addForkChain(chainId, newForkChain);
-                    logger.debug("received fork block of forkChain, height:" + blockHeight + ", hash:" + blockHash);
+                    logger.error("received fork block of forkChain, height:" + blockHeight + ", hash:" + blockHash);
                     ConsensusCall.evidence(chainId, blockService, header);
                     return Result.getFailed(BlockErrorCode.FORK_BLOCK);
                 }

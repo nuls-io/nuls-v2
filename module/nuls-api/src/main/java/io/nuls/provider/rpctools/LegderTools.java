@@ -8,6 +8,7 @@ import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.provider.model.dto.ContractTokenInfoDto;
 import io.nuls.provider.rpctools.vo.AccountBalance;
+import org.checkerframework.checker.units.qual.A;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -49,8 +50,8 @@ public class LegderTools implements CallRpc {
                 balanceInfo.setFreeze(map.get("freeze").toString());
                 balanceInfo.setNonce((String) map.get("nonce"));
                 balanceInfo.setTotalBalance(new BigInteger(balanceInfo.getBalance())
-                                .add(new BigInteger(balanceInfo.getConsensusLock()))
-                                .add(new BigInteger(balanceInfo.getTimeLock())).toString());
+                        .add(new BigInteger(balanceInfo.getConsensusLock()))
+                        .add(new BigInteger(balanceInfo.getTimeLock())).toString());
                 balanceInfo.setNonceType((Integer) map.get("nonceType"));
                 return new Result<>(balanceInfo);
             });

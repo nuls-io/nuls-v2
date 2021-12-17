@@ -301,7 +301,7 @@ public class BlockServiceImpl implements BlockService {
         BlockHeader header = block.getHeader();
         long height = header.getHeight();
         if(snapshotHeight != null && height > snapshotHeight){
-            Log.info("到达快照高度，放弃保存区块");
+            logger.error("到达快照高度，放弃保存区块");
             return false;
         }
         NulsHash hash = header.getHash();
@@ -314,7 +314,7 @@ public class BlockServiceImpl implements BlockService {
             //1.验证区块
             Result result = verifyBlock(chainId, block, localInit, download);
             if (result.isFailed()) {
-//                logger.debug("verifyBlock fail! height-" + height);
+                logger.error("verifyBlock fail! height-" + height);
                 return false;
             }
             //同步\链切换\孤儿链对接过程中不进行区块广播
@@ -589,10 +589,10 @@ public class BlockServiceImpl implements BlockService {
         //1.验证一些基本信息如区块大小限制、字段非空验证
         boolean basicVerify = BlockUtil.basicVerify(chainId, block);
         if (localInit) {
-            logger.debug("basicVerify-" + basicVerify);
             if (basicVerify) {
                 return Result.getSuccess(BlockErrorCode.SUCCESS);
             } else {
+                logger.error("basicVerify-" + basicVerify);
                 return Result.getFailed(BlockErrorCode.BLOCK_VERIFY_ERROR);
             }
         }
@@ -600,7 +600,7 @@ public class BlockServiceImpl implements BlockService {
         //分叉验证
         boolean forkVerify = BlockUtil.forkVerify(chainId, block);
         if (!forkVerify) {
-//            logger.debug("forkVerify-" + forkVerify);
+            logger.error("forkVerify-" + forkVerify);
             return Result.getFailed(BlockErrorCode.BLOCK_VERIFY_ERROR);
         }
         //共识验证
