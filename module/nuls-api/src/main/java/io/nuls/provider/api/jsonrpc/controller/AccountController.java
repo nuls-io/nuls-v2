@@ -64,7 +64,6 @@ import io.nuls.v2.model.dto.MultiSignAliasDto;
 import io.nuls.v2.model.dto.SignDto;
 import io.nuls.v2.util.AccountTool;
 import io.nuls.v2.util.NulsSDKTool;
-import org.checkerframework.checker.units.qual.A;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -92,6 +91,8 @@ public class AccountController {
     private Config config;
 
     AccountService accountService = ServiceManager.get(AccountService.class);
+
+    private long time;
 
     @RpcMethod("createAccount")
     @ApiOperation(description = "批量创建账户", order = 101, detailDesc = "创建的账户存在于本地钱包内")
@@ -180,6 +181,10 @@ public class AccountController {
         if (!FormatValidUtils.validPassword(newPassword)) {
             return RpcResult.paramError("[newPassword] is inValid");
         }
+        if (System.currentTimeMillis() - time < 3000L) {
+            return RpcResult.paramError("Access frequency limit.");
+        }
+        time = System.currentTimeMillis();
         UpdatePasswordReq req = new UpdatePasswordReq(address, oldPassword, newPassword);
         req.setChainId(chainId);
         Result<Boolean> result = accountService.updatePassword(req);
@@ -226,6 +231,11 @@ public class AccountController {
         if (!FormatValidUtils.validPassword(password)) {
             return RpcResult.paramError("[password] is inValid");
         }
+
+        if (System.currentTimeMillis() - time < 3000L) {
+            return RpcResult.paramError("Access frequency limit.");
+        }
+        time = System.currentTimeMillis();
 
         GetAccountPrivateKeyByAddressReq req = new GetAccountPrivateKeyByAddressReq(password, address);
         req.setChainId(chainId);
@@ -369,6 +379,12 @@ public class AccountController {
         if (!FormatValidUtils.validPassword(password)) {
             return RpcResult.paramError("[password] is inValid");
         }
+
+        if (System.currentTimeMillis() - time < 3000L) {
+            return RpcResult.paramError("Access frequency limit.");
+        }
+        time = System.currentTimeMillis();
+
         KeyStoreReq req = new KeyStoreReq(password, address);
         req.setChainId(chainId);
         Result<String> result = accountService.getAccountKeyStore(req);
@@ -435,7 +451,6 @@ public class AccountController {
     }
 
 
-
     /**
      * 查询用户资产合计
      * @param params
@@ -481,6 +496,7 @@ public class AccountController {
         }
         return rpcResult.setResult(balanceResult.getData());
     }
+
 
     @RpcMethod("setAlias")
     @ApiOperation(description = "设置账户别名", order = 108, detailDesc = "别名格式为1-20位小写字母和数字的组合，设置别名会销毁1个NULS")
