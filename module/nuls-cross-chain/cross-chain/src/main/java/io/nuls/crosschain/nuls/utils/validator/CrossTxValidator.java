@@ -92,9 +92,9 @@ public class CrossTxValidator {
                     if (AddressTool.validContractAddress(from.getAddress(),AddressTool.getChainIdByAddress(from.getAddress()))) {
                         continue;
                     }
-
+                    //todo
                     if (!registeredCrossChainService.canCross(from.getAssetsChainId(),from.getAssetsId())){
-                        throw new NulsException(NulsCrossChainErrorCode.ASSET_NOT_REG_CROSS_CHAIN);
+//                        throw new NulsException(NulsCrossChainErrorCode.ASSET_NOT_REG_CROSS_CHAIN);
                     }
 
                 }
