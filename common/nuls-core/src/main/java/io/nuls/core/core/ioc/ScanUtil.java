@@ -131,7 +131,7 @@ public class ScanUtil {
                 try {
                     String className = jarEntry.getName().replace("/", ".").replace(CLASS_TYPE, "");
                     clazz = CLASS_LOADER.loadClass(className);
-                } catch (ClassNotFoundException e) {
+                } catch (ClassNotFoundException|NoClassDefFoundError e) {
                     continue;
                 }
                 list.add(clazz);

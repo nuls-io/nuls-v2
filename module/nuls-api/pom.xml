@@ -43,8 +43,8 @@
                     <artifactId>nuls-base-api-provider</artifactId>
                 </exclusion>
                 <exclusion>
-                    <groupId>org.mybatis</groupId>
-                    <artifactId>mybatis</artifactId>
+                    <groupId>io.nuls.v2</groupId>
+                    <artifactId>nuls-core-h2</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
