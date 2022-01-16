@@ -49,6 +49,11 @@ public class BlockServiceForRpc extends BaseRpcService implements BlockService {
     }
 
     @Override
+    public Result<BlockHeaderData> rollback(GetBlockHeaderByHeightReq req) {
+        return _call("roll_back", req, this::tranderBlockHeader);
+    }
+
+    @Override
     protected <T, R> Result<T> call(String method, Object req, Function<R, Result> res) {
         return callRpc(ModuleE.BL.abbr, method, req, res);
     }

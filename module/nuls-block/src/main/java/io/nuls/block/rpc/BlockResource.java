@@ -478,6 +478,42 @@ public class BlockResource extends BaseCmd {
     }
 
     /**
+     * 根据高度获取区块
+     *
+     * @param map
+     * @return
+     */
+    @CmdAnnotation(cmd = "roll_back", version = 1.0, description = "Roll back a number of blocks")
+    @Parameters({
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
+            @Parameter(parameterName = "height", requestType = @TypeDescriptor(value = long.class), parameterDes = "区块高度")
+    })
+    @ResponseData(name = "返回值", description = "successful", responseType = @TypeDescriptor(value = String.class))
+    public Response rollback(Map map) {
+        try {
+            int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
+            ChainContext context = ContextManager.getContext(chainId);
+            if (context == null) {
+                return success();
+            }
+            long count = Long.parseLong(map.get("height").toString());
+            Block block = service.getLatestBlock(chainId);
+            for (long height = block.getHeader().getHeight(); height > block.getHeader().getHeight() - count; height--) {
+                service.rollbackBlock(chainId, height, true);
+            }
+            Map<String, String> responseData = new HashMap<>(2);
+            if (block == null) {
+                return success(responseData);
+            }
+            responseData.put("value", "success");
+            return success(responseData);
+        } catch (Exception e) {
+            COMMON_LOG.error("", e);
+            return failed(e.getMessage());
+        }
+    }
+
+    /**
      * 根据hash获取区块头
      *
      * @param map
@@ -499,7 +535,7 @@ public class BlockResource extends BaseCmd {
             NulsHash hash = NulsHash.fromHex(map.get("hash").toString());
             BlockHeader blockHeader = service.getBlockHeader(chainId, hash);
             Map<String, String> responseData = new HashMap<>(2);
-            if(blockHeader == null) {
+            if (blockHeader == null) {
                 return success(responseData);
             }
             responseData.put("value", RPCUtil.encode(blockHeader.serialize()));
@@ -532,7 +568,7 @@ public class BlockResource extends BaseCmd {
             NulsHash hash = NulsHash.fromHex(map.get("hash").toString());
             BlockHeaderPo blockHeader = service.getBlockHeaderPo(chainId, hash);
             Map<String, String> responseData = new HashMap<>(2);
-            if(blockHeader == null) {
+            if (blockHeader == null) {
                 return success(responseData);
             }
             responseData.put("value", RPCUtil.encode(blockHeader.serialize()));
@@ -565,7 +601,7 @@ public class BlockResource extends BaseCmd {
             NulsHash hash = NulsHash.fromHex(map.get("hash").toString());
             Block block = service.getBlock(chainId, hash);
             Map<String, String> responseData = new HashMap<>(2);
-            if(block == null) {
+            if (block == null) {
                 return success(responseData);
             }
             responseData.put("value", RPCUtil.encode(block.serialize()));

@@ -9,7 +9,6 @@ import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.provider.model.dto.ContractTokenInfoDto;
 import io.nuls.provider.rpctools.vo.AccountBalance;
-import org.checkerframework.checker.units.qual.A;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
