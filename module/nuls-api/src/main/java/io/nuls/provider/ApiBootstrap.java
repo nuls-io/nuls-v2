@@ -8,8 +8,10 @@ import io.nuls.core.core.annotation.Service;
 import io.nuls.core.core.config.ConfigurationLoader;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.io.IoUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.I18nUtils;
+import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.modulebootstrap.Module;
@@ -18,8 +20,11 @@ import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.core.rpc.util.AddressPrefixDatas;
 import io.nuls.provider.api.RpcServerManager;
+import io.nuls.provider.api.config.Context;
+import io.nuls.provider.utils.Log;
 import io.nuls.v2.NulsSDKBootStrap;
 
+import java.util.List;
 import java.util.Map;
 
 import static io.nuls.provider.api.constant.SdkConstant.SDK_API;
@@ -79,6 +84,11 @@ public class ApiBootstrap extends RpcModule {
         }
     }
 
+    @Override
+    public void init() {
+        initBlackAddressList();
+    }
+
     private static void initRpcServer(Map<String, ConfigurationLoader.ConfigItem> configItemMap) {
         String server_ip = "0.0.0.0";
         int server_port = 18004;
@@ -130,4 +140,17 @@ public class ApiBootstrap extends RpcModule {
         return RpcModuleState.Running;
     }
 
+    private void initBlackAddressList() {
+        try {
+            String json = IoUtils.read("black_address.json");
+            if (StringUtils.isBlank(json)) {
+                return;
+            }
+            Map map = JSONUtils.json2map(json);
+            List<String> addressList = (List<String>) map.get("addressList");
+            Context.blackAddressList = addressList;
+        } catch (Exception e) {
+            Log.error(e);
+        }
+    }
 }

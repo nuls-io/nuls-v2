@@ -28,6 +28,9 @@ import io.nuls.base.api.provider.block.facade.BlockHeaderData;
 import io.nuls.base.api.provider.block.facade.GetBlockHeaderByHeightReq;
 import io.nuls.base.api.provider.crosschain.CrossChainProvider;
 import io.nuls.base.api.provider.crosschain.facade.CreateCrossTxReq;
+import io.nuls.base.data.CoinData;
+import io.nuls.base.data.CoinFrom;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.provider.api.config.Config;
 import io.nuls.provider.api.config.Context;
 import io.nuls.base.RPCUtil;
@@ -263,6 +266,8 @@ public class TransactionController {
             if (contractMap != null && Boolean.FALSE.equals(contractMap.get("success"))) {
                 return RpcResult.failed(CommonCodeConstanst.DATA_ERROR, (String) contractMap.get("msg"));
             }
+
+
 
             result = transactionTools.newTx(chainId, txHex);
 
@@ -972,5 +977,20 @@ public class TransactionController {
         map.put("value", fee);
 
         return RpcResult.success(map);
+    }
+
+    private boolean validateBlackAddress(Transaction tx) throws NulsException {
+        if (tx.getCoinData() == null) {
+            return true;
+        }
+        CoinData coinData = tx.getCoinDataInstance();
+        for (CoinFrom from : coinData.getFrom()) {
+            String address = HexUtil.encode(from.getAddress());
+            if (Context.blackAddressList.contains(address)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
