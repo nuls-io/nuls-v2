@@ -36,15 +36,6 @@ public class Config implements ModuleConfig {
 
     private int decimals;
 
-    private String blackListPath;
-
-    public String getBlackListPath() {
-        return blackListPath;
-    }
-
-    public void setBlackListPath(String blackListPath) {
-        this.blackListPath = blackListPath;
-    }
 
     public String getAddressPrefix() {
         return addressPrefix;

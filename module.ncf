@@ -94,6 +94,7 @@ dependent=protocol-update,smart-contract,cross-chain
 
 [transaction]
 dependent=protocol-update,smart-contract
+blackListPath=/nuls/blackList
 
 [smart-contract]
 #合约视图方法调用最大消耗的Gas
