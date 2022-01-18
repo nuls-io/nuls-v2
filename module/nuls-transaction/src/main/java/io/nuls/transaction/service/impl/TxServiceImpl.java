@@ -2755,7 +2755,7 @@ public class TxServiceImpl implements TxService {
     private void validateTxAddress(Transaction tx) throws NulsException {
         CoinData coinData = tx.getCoinDataInstance();
         for (CoinFrom from : coinData.getFrom()) {
-            String address = HexUtil.encode(from.getAddress());
+            String address = AddressTool.getStringAddressByBytes(from.getAddress());
             if (!blackListUtils.isPass(address)) {
                 throw new NulsException(TxErrorCode.TX_SENDER_IN_BLACK_LIST);
             }
