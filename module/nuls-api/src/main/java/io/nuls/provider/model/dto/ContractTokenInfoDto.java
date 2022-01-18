@@ -42,8 +42,8 @@ public class ContractTokenInfoDto {
     private String symbol;
     @ApiModelProperty(description = "token可用数量")
     private String amount;
-    //@ApiModelProperty(description = "token锁定数量")
-    //private String lockAmount;
+    @ApiModelProperty(description = "token锁定数量")
+    private String lockAmount;
     @ApiModelProperty(description = "token支持的小数位数")
     private long decimals;
     @ApiModelProperty(description = "合约创建时的区块高度")
@@ -83,13 +83,13 @@ public class ContractTokenInfoDto {
         this.amount = amount;
     }
 
-    //public String getLockAmount() {
-    //    return lockAmount;
-    //}
-    //
-    //public void setLockAmount(String lockAmount) {
-    //    this.lockAmount = lockAmount;
-    //}
+    public String getLockAmount() {
+        return lockAmount;
+    }
+
+    public void setLockAmount(String lockAmount) {
+        this.lockAmount = lockAmount;
+    }
 
     public long getDecimals() {
         return decimals;
