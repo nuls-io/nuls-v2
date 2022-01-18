@@ -17,9 +17,9 @@ import java.util.Set;
  * @COPYRIGHT www.xianma360.com
  */
 @Component
-public class BlockListUtils implements InitializingBean {
+public class BlackListUtils implements InitializingBean {
 
-    public Set<String> blockList;
+    public Set<String> blackList;
 
     @Autowired
     Config config;
@@ -30,24 +30,24 @@ public class BlockListUtils implements InitializingBean {
      * @return 黑名单中存在返回false
      */
     public boolean isPass(String address){
-        return !blockList.contains(address);
+        return !blackList.contains(address);
     }
     
     @Override
     public void afterPropertiesSet() throws NulsException {
-        if(StringUtils.isBlank(config.getBlockListPath())){
+        if(StringUtils.isBlank(config.getBlackListPath())){
             Log.error("未配置黑名单地址");
             System.exit(0);
         }
         try {
-            FileReader reader = new FileReader(new File(config.getBlockListPath()));
+            FileReader reader = new FileReader(new File(config.getBlackListPath()));
             BufferedReader buff = new BufferedReader(reader);
             String line = buff.readLine();
             while(line != null){
-                blockList.add(line);
+                blackList.add(line);
             }
             buff.close();
-            Log.info("初始化黑名单完成，共记录{}个黑名单地址",blockList.size());
+            Log.info("初始化黑名单完成，共记录{}个黑名单地址", blackList.size());
         } catch (FileNotFoundException e) {
             Log.error("黑名单地址错误，文件不存在");
             System.exit(0);

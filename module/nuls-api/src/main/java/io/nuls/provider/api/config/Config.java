@@ -36,14 +36,14 @@ public class Config implements ModuleConfig {
 
     private int decimals;
 
-    private String blockListPath;
+    private String blackListPath;
 
-    public String getBlockListPath() {
-        return blockListPath;
+    public String getBlackListPath() {
+        return blackListPath;
     }
 
-    public void setBlockListPath(String blockListPath) {
-        this.blockListPath = blockListPath;
+    public void setBlackListPath(String blackListPath) {
+        this.blackListPath = blackListPath;
     }
 
     public String getAddressPrefix() {
