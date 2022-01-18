@@ -8,6 +8,7 @@ import io.nuls.core.model.StringUtils;
 import io.nuls.provider.api.config.Config;
 
 import java.io.*;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -19,7 +20,7 @@ import java.util.Set;
 @Component
 public class BlackListUtils implements InitializingBean {
 
-    public Set<String> blackList;
+    public Set<String> blackList = new HashSet<>();
 
     @Autowired
     Config config;

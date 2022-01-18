@@ -55,10 +55,7 @@ import io.nuls.provider.model.jsonrpc.RpcErrorCode;
 import io.nuls.provider.model.jsonrpc.RpcResult;
 import io.nuls.provider.rpctools.ContractTools;
 import io.nuls.provider.rpctools.TransactionTools;
-import io.nuls.provider.utils.Log;
-import io.nuls.provider.utils.ResultUtil;
-import io.nuls.provider.utils.Utils;
-import io.nuls.provider.utils.VerifyUtils;
+import io.nuls.provider.utils.*;
 import io.nuls.v2.model.annotation.Api;
 import io.nuls.v2.model.annotation.ApiOperation;
 import io.nuls.v2.model.annotation.ApiType;
@@ -92,6 +89,8 @@ public class TransactionController {
     private TransactionTools transactionTools;
     @Autowired
     private ContractTools contractTools;
+    @Autowired
+    private BlackListUtils blackListUtils;
 
     TransferService transferService = ServiceManager.get(TransferService.class);
 
@@ -267,7 +266,11 @@ public class TransactionController {
                 return RpcResult.failed(CommonCodeConstanst.DATA_ERROR, (String) contractMap.get("msg"));
             }
 
-
+            Transaction tx = new Transaction();
+            tx.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
+            if (!validateBlackAddress(tx)) {
+                return RpcResult.failed(CommonCodeConstanst.DATA_ERROR, "This is black NULS address");
+            }
 
             result = transactionTools.newTx(chainId, txHex);
 
@@ -986,7 +989,7 @@ public class TransactionController {
         CoinData coinData = tx.getCoinDataInstance();
         for (CoinFrom from : coinData.getFrom()) {
             String address = HexUtil.encode(from.getAddress());
-            if (Context.blackAddressList.contains(address)) {
+            if (!blackListUtils.isPass(address)) {
                 return false;
             }
         }
