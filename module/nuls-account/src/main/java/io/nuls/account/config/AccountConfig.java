@@ -44,6 +44,16 @@ public class AccountConfig implements ModuleConfig {
 
     private String blackHolePublicKey;
 
+    private String blockAccountManager;
+
+    public String getBlockAccountManager() {
+        return blockAccountManager;
+    }
+
+    public void setBlockAccountManager(String blockAccountManager) {
+        this.blockAccountManager = blockAccountManager;
+    }
+
     public String getBlackHolePublicKey() {
         return blackHolePublicKey;
     }

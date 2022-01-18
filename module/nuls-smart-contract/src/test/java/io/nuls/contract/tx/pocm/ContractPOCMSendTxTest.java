@@ -86,10 +86,52 @@ public class ContractPOCMSendTxTest extends BaseQuery {
         params.put(Constants.CHAIN_ID,2);
         params.put("deposit","2000000000000");
         params.put("commissionRate",10);
-        params.put("packingAddress","tNULSeBaMvQr8dVnk3f3DPvwCYX3ctTRtrTurD");
+        params.put("packingAddress","tNULSeBaMqywZjfSrKNQKBfuQtVxAHBQ8rB2Zn");
         params.put("password","nuls123456");
-        params.put("rewardAddress",sender);
+        params.put("rewardAddress","tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG");
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", params);
+        System.out.println(JSONUtils.obj2PrettyJson(cmdResp));
+    }
+
+    /**
+     * 创建节点2
+     * */
+    @Test
+    public void createAgent2()throws Exception{
+        Map<String,Object> params = new HashMap<>();
+        params.put("agentAddress","tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD");
+        params.put(Constants.CHAIN_ID,2);
+        params.put("deposit","2000000000000");
+        params.put("commissionRate",10);
+        params.put("packingAddress","tNULSeBaMuU6sq72mptyghDXDWQXKJ5QUaWhGj");
+        params.put("password","nuls123456");
+        params.put("rewardAddress","tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD");
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", params);
+        System.out.println(JSONUtils.obj2PrettyJson(cmdResp));
+    }
+
+
+    /**
+     * 停止节点
+     * */
+    @Test
+    public void stopAgent()throws Exception{
+        Map<String,Object>params = new HashMap<>();
+        params.put(Constants.CHAIN_ID,2);
+        //params.put("address","tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG");
+        params.put("address","tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD");
+        params.put("password", "nuls123456");
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_stopAgent", params);
+        System.out.println(cmdResp.getResponseData());
+    }
+
+    @Test
+    public void getAgentInfo()throws Exception{
+        Map<String,Object>params = new HashMap<>();
+        params.put(Constants.CHAIN_ID,2);
+        // c5f2c0d00cbca36c39912f9332e91ec3098aedc3e47c26e2135a2057949da989
+        params.put("agentHash","07dece0a400508d749a5e4e5f7d821c3e2836cb4de78c5083897dbe1f4d9caf9");
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_getAgentInfo", params);
         System.out.println(JSONUtils.obj2PrettyJson(cmdResp));
     }
 
@@ -120,15 +162,6 @@ public class ContractPOCMSendTxTest extends BaseQuery {
         params.put("password", "nuls123456");
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_withdraw", params);
         System.out.println(cmdResp.getResponseData());
-    }
-
-    @Test
-    public void getAgentInfo()throws Exception{
-        Map<String,Object>params = new HashMap<>();
-        params.put(Constants.CHAIN_ID,2);
-        params.put("agentHash","4dce090750b1900c1e741b961b32e75ce9f9d9c69997388ec73e9dd62cb8c835");
-        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_getAgentInfo", params);
-        System.out.println(JSONUtils.obj2PrettyJson(cmdResp));
     }
 
     /**

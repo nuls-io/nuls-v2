@@ -43,6 +43,7 @@ maxOutCount=20
 
 
 [account]
+blockAccountManager=tNULSeBaNE8nFpFo6qYiPiNHSbsGyKSceJLwQt
 keystoreFolder=/keystore/backup
 
 [block]
