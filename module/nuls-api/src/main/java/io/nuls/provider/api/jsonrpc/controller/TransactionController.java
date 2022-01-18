@@ -89,8 +89,6 @@ public class TransactionController {
     private TransactionTools transactionTools;
     @Autowired
     private ContractTools contractTools;
-    @Autowired
-    private BlackListUtils blackListUtils;
 
     TransferService transferService = ServiceManager.get(TransferService.class);
 
@@ -264,12 +262,6 @@ public class TransactionController {
             Map contractMap = (Map) result.getData();
             if (contractMap != null && Boolean.FALSE.equals(contractMap.get("success"))) {
                 return RpcResult.failed(CommonCodeConstanst.DATA_ERROR, (String) contractMap.get("msg"));
-            }
-
-            Transaction tx = new Transaction();
-            tx.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
-            if (!validateBlackAddress(tx)) {
-                return RpcResult.failed(CommonCodeConstanst.DATA_ERROR, "This is black NULS address");
             }
 
             result = transactionTools.newTx(chainId, txHex);
@@ -982,18 +974,4 @@ public class TransactionController {
         return RpcResult.success(map);
     }
 
-    private boolean validateBlackAddress(Transaction tx) throws NulsException {
-        if (tx.getCoinData() == null) {
-            return true;
-        }
-        CoinData coinData = tx.getCoinDataInstance();
-        for (CoinFrom from : coinData.getFrom()) {
-            String address = HexUtil.encode(from.getAddress());
-            if (!blackListUtils.isPass(address)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
 }

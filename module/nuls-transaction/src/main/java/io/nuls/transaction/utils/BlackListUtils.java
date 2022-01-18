@@ -47,6 +47,7 @@ public class BlackListUtils implements InitializingBean {
             String line = buff.readLine();
             while(line != null){
                 blackList.add(line);
+                line = buff.readLine();
             }
             buff.close();
             Log.info("初始化黑名单完成，共记录{}个黑名单地址", blackList.size());
