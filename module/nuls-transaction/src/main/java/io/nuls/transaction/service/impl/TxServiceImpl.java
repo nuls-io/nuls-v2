@@ -68,6 +68,7 @@ import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.storage.ConfirmedTxStorageService;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
+import io.nuls.transaction.utils.BlackListUtils;
 import io.nuls.transaction.utils.TxDuplicateRemoval;
 import io.nuls.transaction.utils.TxUtil;
 
@@ -90,6 +91,9 @@ public class TxServiceImpl implements TxService {
 
     @Autowired
     private PackablePool packablePool;
+
+    @Autowired
+    private BlackListUtils blackListUtils;
 
     @Autowired
     private UnconfirmedTxStorageService unconfirmedTxStorageService;
@@ -153,6 +157,7 @@ public class TxServiceImpl implements TxService {
                 //节点区块同步中或回滚中,暂停接纳新交易
                 throw new NulsException(TxErrorCode.PAUSE_NEWTX);
             }
+            validateTxAddress(tx);
             NulsHash hash = tx.getHash();
             if (isTxExists(chain, hash)) {
                 throw new NulsException(TxErrorCode.TX_ALREADY_EXISTS);
@@ -306,6 +311,7 @@ public class TxServiceImpl implements TxService {
         }
         //验证签名
         validateTxSignature(tx, txRegister, chain);
+
         //如果有coinData, 则进行验证,有一些交易(黄牌)没有coinData数据
         int txType = tx.getType();
         if (txType == TxType.YELLOW_PUNISH
@@ -422,6 +428,9 @@ public class TxServiceImpl implements TxService {
 
         for (CoinFrom coinFrom : listFrom) {
             byte[] addrBytes = coinFrom.getAddress();
+            if (type != TxType.DEPOSIT && type != TxType.CANCEL_DEPOSIT && TxUtil.isBlockAddress(chainId, addrBytes)) {
+                throw new NulsException(TxErrorCode.BLOCK_ADDRESS, "address is blockAddress Exception");
+            }
             if (AddressTool.isBlackHoleAddress(TxUtil.blackHolePublicKey, chainId, addrBytes)) {
                 throw new NulsException(TxErrorCode.INVALID_ADDRESS, "address is blackHoleAddress Exception");
             }
@@ -2745,5 +2754,16 @@ public class TxServiceImpl implements TxService {
         rs.put("stateRoot", stateRoot);
         rs.put("hasTxbackPackablePool", hasTxbackPackablePool);
         return rs;
+    }
+
+    private void validateTxAddress(Transaction tx) throws NulsException {
+        CoinData coinData = tx.getCoinDataInstance();
+        for (CoinFrom from : coinData.getFrom()) {
+            String address = AddressTool.getStringAddressByBytes(from.getAddress());
+            if (!blackListUtils.isPass(address)) {
+                throw new NulsException(TxErrorCode.BLOCK_ADDRESS);
+            }
+        }
+        return;
     }
 }

@@ -194,6 +194,9 @@ public class AccountBootstrap extends RpcModule {
             if (!RocksDBService.existTable(AccountStorageConstant.DB_NAME_MULTI_SIG_ACCOUNT)) {
                 RocksDBService.createTable(AccountStorageConstant.DB_NAME_MULTI_SIG_ACCOUNT);
             }
+            if (!RocksDBService.existTable(AccountStorageConstant.DB_NAME_ACCOUNT_BLOCK)) {
+                RocksDBService.createTable(AccountStorageConstant.DB_NAME_ACCOUNT_BLOCK);
+            }
         } catch (Exception e) {
             if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
                 LoggerUtil.LOG.error(e.getMessage());

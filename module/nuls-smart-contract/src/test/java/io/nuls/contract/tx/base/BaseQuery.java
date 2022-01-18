@@ -61,6 +61,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 
@@ -166,6 +167,16 @@ public class BaseQuery extends Base {
     }
 
     @Test
+    public void transferOne() {
+        String from = "tNULSeBaMtkzQ1tH8JWBGZDCmRHCmySevE4frM";
+        String to = "tNULSeBaNNgHMQAwzaJU4rtXD4WEhiRrnrnZWo";
+        TransferReq.TransferReqBuilder builder = new TransferReq.TransferReqBuilder(chain.getChainId(), chain.getConfig().getAssetId())
+                .addForm(from, password, new BigDecimal("100.001").movePointRight(8).toBigInteger())
+                .addTo(to, new BigDecimal("100").movePointRight(8).toBigInteger());
+        System.out.println(transferService.transfer(builder.build(new TransferReq())).getData());
+    }
+
+    @Test
     public void transferMultyAsset() {
         TransferReq.TransferReqBuilder builder = new TransferReq.TransferReqBuilder(2, 3)
                 .addForm(sender, password, BigInteger.valueOf(39_1000_0000_0000L))
@@ -227,12 +238,25 @@ public class BaseQuery extends Base {
     }
 
     @Test
+    public void getAgentInfoForContractTest() throws Exception {
+        Map params = new HashMap();
+        params.put("chainId", 2);
+        params.put("agentHash", "89109b062f7bf611421ac3c8c456ab29e8bf71b5f38622ede4943ec8a8f2a0cb");
+        params.put("contractAddress", "tNULSeBaN3wibWfHcc1YhvszihX9eLS4ruueXY");
+        params.put("contractSender", "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG");
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_getContractAgentInfo", params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_getContractAgentInfo"));
+        Assert.assertTrue(null != result);
+        Log.info("accountContracts-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
+    }
+
+    @Test
     public void getBalance() throws Exception {
         //this.getBalanceByAccount("tNULSeBaNBJT6JuznGqhKM5q6jXFkuSoMUNkHK");
         System.out.println("---------------------------------------------------");
         //this.getBalanceByAccount("tNULSeBaNAFAVPbGHAzCJ8YZhXLbxK44EujNKF");
         System.out.println("---------------------------------------------------");
-        this.getBalanceByAccount("tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp");
+        this.getBalanceByAccount("tNULSeBaMu38g1vnJsSZUCwTDU9GsE5TVNUtpD");
     }
 
     protected void getBalanceByAccount(String account) throws Exception {
@@ -307,7 +331,7 @@ public class BaseQuery extends Base {
      */
     @Test
     public void contractResult() throws Exception {
-        Object[] objects = getContractResult("edf019bbc5070181fae5fd97cf89d8574e53595686c336540934849981d3ade1");
+        Object[] objects = getContractResult("177c05a636ca62aeb41564f413b4672f7e3d692e04481271d9d36dc95791edde");
         Log.info("contractResult-result:{}", JSONUtils.obj2PrettyJson(objects[0]));
         Assert.assertTrue(null != objects[1]);
     }
@@ -344,7 +368,7 @@ public class BaseQuery extends Base {
     public void getTxClient() throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.CHAIN_ID, chainId);
-        params.put("txHash", "f0de6f185c99dd2c8b20ec0a17e83d8278552fe5aaf4ed45e3f436ddaccbc8d1");
+        params.put("txHash", "dddc5949ca4986528741c839e9131450c52fd684836622ad18222c3d959833f8");
         Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getTxClient", params);
         Map record = (Map) dpResp.getResponseData();
         Map resultMap = (Map) record.get("tx_getTxClient");

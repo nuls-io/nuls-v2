@@ -34,6 +34,16 @@ public class TxConfig extends ConfigBean implements ModuleConfig {
     private long unconfirmedTxExpire;
     private String blackHolePublicKey;
 
+    private String blackListPath;
+
+    public String getBlackListPath() {
+        return blackListPath;
+    }
+
+    public void setBlackListPath(String blackListPath) {
+        this.blackListPath = blackListPath;
+    }
+
     public String getBlackHolePublicKey() {
         return blackHolePublicKey;
     }
