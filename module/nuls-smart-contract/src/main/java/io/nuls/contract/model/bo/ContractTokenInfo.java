@@ -39,7 +39,7 @@ public class ContractTokenInfo {
     private String name;
     private String symbol;
     private BigInteger amount;
-    private BigInteger lockAmount;
+    //private BigInteger lockAmount;
     private long decimals;
     private long blockHeight;
     private ContractStatus status;
@@ -50,20 +50,20 @@ public class ContractTokenInfo {
     public ContractTokenInfo(String contractAddress, String name, long decimals, BigInteger amount, String symbol, long blockHeight) {
         this.name = name;
         this.amount = amount;
-        this.lockAmount = BigInteger.ZERO;
+        //this.lockAmount = BigInteger.ZERO;
         this.contractAddress = contractAddress;
         this.decimals = decimals;
         this.symbol = symbol;
         this.blockHeight = blockHeight;
     }
 
-    public BigInteger getLockAmount() {
-        return lockAmount;
-    }
-
-    public void setLockAmount(BigInteger lockAmount) {
-        this.lockAmount = lockAmount;
-    }
+    //public BigInteger getLockAmount() {
+    //    return lockAmount;
+    //}
+    //
+    //public void setLockAmount(BigInteger lockAmount) {
+    //    this.lockAmount = lockAmount;
+    //}
 
     public ContractTokenInfo setName(String name) {
         this.name = name;

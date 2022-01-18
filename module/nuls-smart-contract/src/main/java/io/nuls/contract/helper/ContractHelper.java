@@ -515,7 +515,7 @@ public class ContractHelper {
         return contractAddressStorageService.getContractAddressInfo(chainId, contractAddressBytes);
     }
 
-    private Set<String> unlockedNrc20Set = new HashSet<>();
+    //private Set<String> unlockedNrc20Set = new HashSet<>();
     public Result<ContractTokenInfo> getContractToken(int chainId, BlockHeader blockHeader, String address, String contractAddress) {
         try {
             if (StringUtils.isBlank(contractAddress) || StringUtils.isBlank(address)) {
@@ -546,23 +546,23 @@ public class ContractHelper {
                 result = getFailed();
                 result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
             } else {
-                BigInteger lockAmount = BigInteger.ZERO;
-                if (!unlockedNrc20Set.contains(contractAddress)) {
-                    ProgramResult lockedProgramResult = this.invokeViewMethod(chainId, null, false, currentStateRoot, blockHeight, contractAddressBytes, "lockedBalanceOf", null, ContractUtil.twoDimensionalArray(new Object[]{address}));
-                    if (!lockedProgramResult.isSuccess()) {
-                        String errorMessage = lockedProgramResult.getErrorMessage();
-                        if (errorMessage != null && errorMessage.contains("can't find method")) {
-                            unlockedNrc20Set.add(contractAddress);
-                        }
-                    } else {
-                        lockAmount = new BigInteger(lockedProgramResult.getResult());
-                    }
-                }
+                //BigInteger lockAmount = BigInteger.ZERO;
+                //if (!unlockedNrc20Set.contains(contractAddress)) {
+                //    ProgramResult lockedProgramResult = this.invokeViewMethod(chainId, null, false, currentStateRoot, blockHeight, contractAddressBytes, "lockedBalanceOf", null, ContractUtil.twoDimensionalArray(new Object[]{address}));
+                //    if (!lockedProgramResult.isSuccess()) {
+                //        String errorMessage = lockedProgramResult.getErrorMessage();
+                //        if (errorMessage != null && errorMessage.contains("can't find method")) {
+                //            unlockedNrc20Set.add(contractAddress);
+                //        }
+                //    } else {
+                //        lockAmount = new BigInteger(lockedProgramResult.getResult());
+                //    }
+                //}
                 result = getSuccess();
                 ContractTokenInfo tokenInfo = new ContractTokenInfo(contractAddress, po.getNrc20TokenName(), po.getDecimals(), new BigInteger(programResult.getResult()), po.getNrc20TokenSymbol(), po.getBlockHeight());
                 ProgramExecutor track = getProgramExecutor(chainId).begin(currentStateRoot);
                 tokenInfo.setStatus(ContractStatus.getStatus(track.status(AddressTool.getAddress(tokenInfo.getContractAddress())).ordinal()));
-                tokenInfo.setLockAmount(lockAmount);
+                //tokenInfo.setLockAmount(lockAmount);
                 result.setData(tokenInfo);
             }
             return result;
