@@ -157,6 +157,7 @@ public class TxServiceImpl implements TxService {
                 //节点区块同步中或回滚中,暂停接纳新交易
                 throw new NulsException(TxErrorCode.PAUSE_NEWTX);
             }
+            validateTxAddress(tx);
             NulsHash hash = tx.getHash();
             if (isTxExists(chain, hash)) {
                 throw new NulsException(TxErrorCode.TX_ALREADY_EXISTS);
@@ -310,7 +311,7 @@ public class TxServiceImpl implements TxService {
         }
         //验证签名
         validateTxSignature(tx, txRegister, chain);
-        validateTxAddress(tx);
+
         //如果有coinData, 则进行验证,有一些交易(黄牌)没有coinData数据
         int txType = tx.getType();
         if (txType == TxType.YELLOW_PUNISH
