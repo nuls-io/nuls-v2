@@ -292,4 +292,8 @@ public class TxType {
 
     public static final int RESET_CHAIN_INFO = 62;
 
+    public static final int BLOCK_ACCOUNT = 63;
+
+    public static final int UNBLOCK_ACCOUNT = 64;
+
 }

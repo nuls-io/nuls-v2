@@ -25,12 +25,30 @@
 package io.nuls.account.tx;
 
 import io.nuls.account.constant.AccountConstant;
+import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.RpcConstant;
+import io.nuls.account.model.bo.Account;
+import io.nuls.account.model.bo.Chain;
+import io.nuls.account.model.bo.config.ConfigBean;
+import io.nuls.account.model.bo.tx.txdata.AccountBlockData;
 import io.nuls.account.model.dto.CoinDTO;
+import io.nuls.account.util.AccountTool;
 import io.nuls.account.util.LoggerUtil;
+import io.nuls.account.util.TxUtil;
 import io.nuls.base.RPCUtil;
-import io.nuls.base.data.NulsHash;
-import io.nuls.base.data.Transaction;
+import io.nuls.base.basic.AddressTool;
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.data.*;
+import io.nuls.base.signture.MultiSignTxSignature;
+import io.nuls.base.signture.P2PHKSignature;
+import io.nuls.base.signture.SignatureUtil;
+import io.nuls.base.signture.TransactionSignature;
+import io.nuls.core.constant.TxType;
+import io.nuls.core.crypto.ECKey;
+import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.info.NoUse;
@@ -38,10 +56,16 @@ import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import org.junit.Before;
+import org.junit.Test;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author: Charlie
@@ -71,15 +95,308 @@ public class Transfer implements Runnable {
 
     private String addressTo;
 
-    public Transfer(String addressFrom, String addressTo) {
-        this.addressFrom = addressFrom;
-        this.addressTo = addressTo;
-    }
+    public Transfer(){}
+
+    //public Transfer(String addressFrom, String addressTo) {
+    //    this.addressFrom = addressFrom;
+    //    this.addressTo = addressTo;
+    //}
 
     @Before
     public void before() throws Exception {
         NoUse.mockModule();
         ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":7771");
+    }
+
+    @Test
+    public void createMultiSigAccountTest() throws Exception {
+        //create 3 account
+        List<Account> accountList = new ArrayList<>();
+        accountList.add(AccountTool.createAccount(2));
+        accountList.add(AccountTool.createAccount(2));
+        accountList.add(AccountTool.createAccount(2));
+
+        Map<String, Object> params = new HashMap<>();
+        List<String> pubKeys = new ArrayList<>();
+        for (Account account:accountList ) {
+            System.out.println(HexUtil.encode(account.getPriKey()));
+            pubKeys.add(HexUtil.encode(account.getPubKey()));
+        }
+        params.put(Constants.VERSION_KEY_STR, "1.0");
+        params.put(Constants.CHAIN_ID, chainId);
+        params.put("pubKeys", pubKeys);
+        params.put("minSigns", 2);
+        //create the multi sign accout
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createMultiSignAccount", params);
+        assertNotNull(cmdResp);
+        System.out.println(JSONUtils.obj2PrettyJson(cmdResp));
+        HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createMultiSignAccount");
+        assertNotNull(result);
+        String address = (String) result.get("address");
+        assertNotNull(address);
+        int resultMinSigns = (int) result.get("minSign");
+        assertEquals(resultMinSigns,2);
+        List<String> resultPubKeys = (List<String>) result.get("pubKeys");
+        assertNotNull(resultPubKeys);
+        assertEquals(pubKeys.size(),3);
+    }
+
+    @Test
+    public void accountBlockTest() throws Exception {
+        Chain chain = new Chain();
+        ConfigBean configBean = new ConfigBean();
+        configBean.setChainId(chainId);
+        configBean.setAssetId(assetId);
+        chain.setConfig(configBean);
+
+        Transaction tx = new Transaction();
+        tx.setType(TxType.BLOCK_ACCOUNT);
+        CoinData coinData = new CoinData();
+        //String fromKey = "9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b";
+        //byte[] from = AddressTool.getAddress("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG");
+        String fromKey = "477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75";
+        byte[] from = AddressTool.getAddress("tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD");
+        byte[] nonce = TxUtil.getBalanceNonce(chain, assetChainId, assetId, from).getNonce();
+        if(null == nonce){
+            nonce = HexUtil.decode("0000000000000000");
+        }
+        coinData.addFrom(new CoinFrom(
+                from,
+                assetChainId,
+                assetId,
+                new BigDecimal("0.001").movePointRight(8).toBigInteger(),
+                nonce,
+                (byte) 0
+        ));
+        coinData.addTo(new CoinTo(
+                from,
+                assetChainId,
+                assetId,
+                BigInteger.ZERO,
+                (byte) 0
+        ));
+        tx.setCoinData(coinData.serialize());
+        AccountBlockData data = new AccountBlockData();
+        data.setAddresses(new String[]{
+                "tNULSeBaMrbMRiFAUeeAt6swb4xVBNyi81YL24",
+                "tNULSeBaMu38g1vnJsSZUCwTDU9GsE5TVNUtpD",
+                "tNULSeBaMp9wC9PcWEcfesY7YmWrPfeQzkN1xL",
+                "tNULSeBaMshNPEnuqiDhMdSA4iNs6LMgjY6tcL"
+        });
+        tx.setTxData(data.serialize());
+        tx.setTime(System.currentTimeMillis() / 1000);
+
+        tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
+        TransactionSignature transactionSignature = new TransactionSignature();
+        List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
+        //根据密码获得ECKey get ECKey from Password
+        ECKey ecKey =  ECKey.fromPrivate(new BigInteger(1, HexUtil.decode(fromKey)));
+        byte[] signBytes = SignatureUtil.signDigest(tx.getHash().getBytes(), ecKey).serialize();
+        P2PHKSignature signature = new P2PHKSignature(signBytes, ecKey.getPubKey()); // TxUtil.getInstanceRpcStr(signatureStr, P2PHKSignature.class);
+        p2PHKSignatures.add(signature);
+        //交易签名
+        transactionSignature.setP2PHKSignatures(p2PHKSignatures);
+        tx.setTransactionSignature(transactionSignature.serialize());
+        Response response = this.newTx(tx);
+        System.out.println(JSONUtils.obj2PrettyJson(response));
+    }
+
+    @Test
+    public void accountBlockMultiSignTest() throws Exception {
+        Chain chain = new Chain();
+        ConfigBean configBean = new ConfigBean();
+        configBean.setChainId(chainId);
+        configBean.setAssetId(assetId);
+        chain.setConfig(configBean);
+
+        Transaction tx = new Transaction();
+        tx.setType(TxType.BLOCK_ACCOUNT);
+        CoinData coinData = new CoinData();
+        byte[] from = AddressTool.getAddress("tNULSeBaNNgHMQAwzaJU4rtXD4WEhiRrnrnZWo");
+        byte[] nonce = TxUtil.getBalanceNonce(chain, assetChainId, assetId, from).getNonce();
+        if(null == nonce){
+            nonce = HexUtil.decode("0000000000000000");
+        }
+        coinData.addFrom(new CoinFrom(
+                from,
+                assetChainId,
+                assetId,
+                new BigDecimal("0.001").movePointRight(8).toBigInteger(),
+                nonce,
+                (byte) 0
+        ));
+        coinData.addTo(new CoinTo(
+                from,
+                assetChainId,
+                assetId,
+                BigInteger.ZERO,
+                (byte) 0
+        ));
+        tx.setCoinData(coinData.serialize());
+        AccountBlockData data = new AccountBlockData();
+        data.setAddresses(new String[]{
+                "tNULSeBaMtkzQ1tH8JWBGZDCmRHCmySevE4frM",
+                "tNULSeBaMhKaLzhQh1AhhecUqh15ZKw98peg29",
+                "tNULSeBaMv8q3pWzS7bHpQWW8yypNGo8auRoPf",
+                "tNULSeBaMmbiCH5soCFasXnG4TwqknyTzYBM3S",
+                "tNULSeBaMsUBLVxwoaswjWvghJyoUJfbfB6dja"
+        });
+        tx.setTxData(data.serialize());
+        tx.setTime(System.currentTimeMillis() / 1000);
+        tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
+
+        String[] pubkeys = new String[]{"02f01ab55fff126dd22f7b13671829c1663a167f62553d9ac9a490785c72b38f42", "02721315241ba2511f757fffea4534fdef912e8c74a4f0df416809c9080a5393e6", "037623bbe485c3089180722114b524ec72a75a4f055b82ab25e28b5f03619d86cd"};
+        List<String> pubkeyList = Arrays.asList(pubkeys);
+        List<byte[]> collect = pubkeyList.stream().map(p -> HexUtil.decode(p)).collect(Collectors.toList());
+        MultiSignTxSignature transactionSignature = new MultiSignTxSignature();
+        List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
+        transactionSignature.setM((byte) 2);
+        transactionSignature.setPubKeyList(collect);
+
+        List<String> priKeyList = new ArrayList<>();
+        priKeyList.add("dc9514bbb1b19337f39f2b90b39a4087a531e842727c3a1fa77c2e20fb8c7ce5");
+        priKeyList.add("a4757aebd10331b52fd8bc3a4c79ac025187bc65f6c4d944a07f7b77a9ff9161");
+        priKeyList.add("d5aa0f4b360a913fb01fd257e22a67916ac842467fb241ca692a60e4d85511b3");
+        for (String pri : priKeyList) {
+            ECKey eckey = ECKey.fromPrivate(new BigInteger(1, HexUtil.decode(pri)));
+            P2PHKSignature p2PHKSignature = SignatureUtil.createSignatureByEckey(tx, eckey);
+            p2PHKSignatures.add(p2PHKSignature);
+            transactionSignature.setP2PHKSignatures(p2PHKSignatures);
+        }
+        tx.setTransactionSignature(transactionSignature.serialize());
+        Response response = this.newTx(tx);
+        System.out.println(JSONUtils.obj2PrettyJson(response));
+    }
+
+    @Test
+    public void getAllBlockAccount() throws Exception {
+        // ac_getAllBlockAccount
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.VERSION_KEY_STR, "1.0");
+        params.put(Constants.CHAIN_ID, chainId);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAllBlockAccount", params);
+        System.out.println(JSONUtils.obj2PrettyJson(cmdResp));
+    }
+
+    @Test
+    public void accountUnBlockTest() throws Exception {
+        Chain chain = new Chain();
+        ConfigBean configBean = new ConfigBean();
+        configBean.setChainId(chainId);
+        configBean.setAssetId(assetId);
+        chain.setConfig(configBean);
+
+        Transaction tx = new Transaction();
+        tx.setType(TxType.UNBLOCK_ACCOUNT);
+        CoinData coinData = new CoinData();
+        String fromKey = "477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75";
+        byte[] from = AddressTool.getAddress("tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD");
+        byte[] nonce = TxUtil.getBalanceNonce(chain, assetChainId, assetId, from).getNonce();
+        if(null == nonce){
+            nonce = HexUtil.decode("0000000000000000");
+        }
+        coinData.addFrom(new CoinFrom(
+                from,
+                assetChainId,
+                assetId,
+                new BigDecimal("0.001").movePointRight(8).toBigInteger(),
+                nonce,
+                (byte) 0
+        ));
+        coinData.addTo(new CoinTo(
+                from,
+                assetChainId,
+                assetId,
+                BigInteger.ZERO,
+                (byte) 0
+        ));
+        tx.setCoinData(coinData.serialize());
+        AccountBlockData data = new AccountBlockData();
+        data.setAddresses(new String[]{
+                "tNULSeBaMrbMRiFAUeeAt6swb4xVBNyi81YL24",
+                "tNULSeBaMu38g1vnJsSZUCwTDU9GsE5TVNUtpD"
+        });
+        tx.setTxData(data.serialize());
+        tx.setTime(System.currentTimeMillis() / 1000);
+
+        tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
+        TransactionSignature transactionSignature = new TransactionSignature();
+        List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
+        //根据密码获得ECKey get ECKey from Password
+        ECKey ecKey =  ECKey.fromPrivate(new BigInteger(1, HexUtil.decode(fromKey)));
+        byte[] signBytes = SignatureUtil.signDigest(tx.getHash().getBytes(), ecKey).serialize();
+        P2PHKSignature signature = new P2PHKSignature(signBytes, ecKey.getPubKey()); // TxUtil.getInstanceRpcStr(signatureStr, P2PHKSignature.class);
+        p2PHKSignatures.add(signature);
+        //交易签名
+        transactionSignature.setP2PHKSignatures(p2PHKSignatures);
+        tx.setTransactionSignature(transactionSignature.serialize());
+        Response response = this.newTx(tx);
+        System.out.println(JSONUtils.obj2PrettyJson(response));
+    }
+
+    @Test
+    public void accountUnBlockMultiSignTest() throws Exception {
+        Chain chain = new Chain();
+        ConfigBean configBean = new ConfigBean();
+        configBean.setChainId(chainId);
+        configBean.setAssetId(assetId);
+        chain.setConfig(configBean);
+
+        Transaction tx = new Transaction();
+        tx.setType(TxType.UNBLOCK_ACCOUNT);
+        CoinData coinData = new CoinData();
+        byte[] from = AddressTool.getAddress("tNULSeBaNNgHMQAwzaJU4rtXD4WEhiRrnrnZWo");
+        byte[] nonce = TxUtil.getBalanceNonce(chain, assetChainId, assetId, from).getNonce();
+        if(null == nonce){
+            nonce = HexUtil.decode("0000000000000000");
+        }
+        coinData.addFrom(new CoinFrom(
+                from,
+                assetChainId,
+                assetId,
+                new BigDecimal("0.001").movePointRight(8).toBigInteger(),
+                nonce,
+                (byte) 0
+        ));
+        coinData.addTo(new CoinTo(
+                from,
+                assetChainId,
+                assetId,
+                BigInteger.ZERO,
+                (byte) 0
+        ));
+        tx.setCoinData(coinData.serialize());
+        AccountBlockData data = new AccountBlockData();
+        data.setAddresses(new String[]{
+                "tNULSeBaMhKaLzhQh1AhhecUqh15ZKw98peg29",
+                "tNULSeBaMtkzQ1tH8JWBGZDCmRHCmySevE4frM",
+                "tNULSeBaMp9wC9PcWEcfesY7YmWrPfeQzkN1xL"
+        });
+        tx.setTxData(data.serialize());
+        tx.setTime(System.currentTimeMillis() / 1000);
+        tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
+
+        String[] pubkeys = new String[]{"02f01ab55fff126dd22f7b13671829c1663a167f62553d9ac9a490785c72b38f42", "02721315241ba2511f757fffea4534fdef912e8c74a4f0df416809c9080a5393e6", "037623bbe485c3089180722114b524ec72a75a4f055b82ab25e28b5f03619d86cd"};
+        List<String> pubkeyList = Arrays.asList(pubkeys);
+        List<byte[]> collect = pubkeyList.stream().map(p -> HexUtil.decode(p)).collect(Collectors.toList());
+        MultiSignTxSignature transactionSignature = new MultiSignTxSignature();
+        List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
+        transactionSignature.setM((byte) 2);
+        transactionSignature.setPubKeyList(collect);
+
+        List<String> priKeyList = new ArrayList<>();
+        priKeyList.add("dc9514bbb1b19337f39f2b90b39a4087a531e842727c3a1fa77c2e20fb8c7ce5");
+        priKeyList.add("a4757aebd10331b52fd8bc3a4c79ac025187bc65f6c4d944a07f7b77a9ff9161");
+        priKeyList.add("d5aa0f4b360a913fb01fd257e22a67916ac842467fb241ca692a60e4d85511b3");
+        for (String pri : priKeyList) {
+            ECKey eckey = ECKey.fromPrivate(new BigInteger(1, HexUtil.decode(pri)));
+            P2PHKSignature p2PHKSignature = SignatureUtil.createSignatureByEckey(tx, eckey);
+            p2PHKSignatures.add(p2PHKSignature);
+            transactionSignature.setP2PHKSignatures(p2PHKSignatures);
+        }
+        tx.setTransactionSignature(transactionSignature.serialize());
+        Response response = this.newTx(tx);
+        System.out.println(JSONUtils.obj2PrettyJson(response));
     }
 
     @Override

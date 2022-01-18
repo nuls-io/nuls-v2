@@ -140,8 +140,8 @@
             <scope>test</scope>
             <exclusions>
                 <exclusion>
-                    <groupId>io.nuls.v2</groupId>
-                    <artifactId>nuls-core-h2</artifactId>
+                    <groupId>org.mybatis</groupId>
+                    <artifactId>mybatis</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
