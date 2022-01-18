@@ -2760,7 +2760,7 @@ public class TxServiceImpl implements TxService {
         for (CoinFrom from : coinData.getFrom()) {
             String address = AddressTool.getStringAddressByBytes(from.getAddress());
             if (!blackListUtils.isPass(address)) {
-                throw new NulsException(TxErrorCode.TX_SENDER_IN_BLACK_LIST);
+                throw new NulsException(TxErrorCode.BLOCK_ADDRESS);
             }
         }
         return;
