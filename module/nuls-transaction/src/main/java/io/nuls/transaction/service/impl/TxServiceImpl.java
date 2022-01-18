@@ -422,6 +422,9 @@ public class TxServiceImpl implements TxService {
 
         for (CoinFrom coinFrom : listFrom) {
             byte[] addrBytes = coinFrom.getAddress();
+            if (type != TxType.DEPOSIT && type != TxType.CANCEL_DEPOSIT && TxUtil.isBlockAddress(chainId, addrBytes)) {
+                throw new NulsException(TxErrorCode.BLOCK_ADDRESS, "address is blockAddress Exception");
+            }
             if (AddressTool.isBlackHoleAddress(TxUtil.blackHolePublicKey, chainId, addrBytes)) {
                 throw new NulsException(TxErrorCode.INVALID_ADDRESS, "address is blackHoleAddress Exception");
             }

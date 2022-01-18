@@ -139,7 +139,7 @@ public class ContractMultyAssetTest extends BaseQuery {
     @Test
     public void otherAssetTest() throws Exception {
         // 转入 3.2
-        this.callOfDesignatedAssetByParams("_payableMultyAsset", "3.2", null, 2, 2);
+        this.callOfDesignatedAssetByParams(contractAddress, "_payableMultyAsset", "3.2", null, 2, 2);
         // 转出 1.1
         Object[] args = new Object[]{toAddress17, new BigDecimal("1.1").multiply(BigDecimal.TEN.pow(8)).toBigInteger(), 2, 2};
         this.callByParams("transferDesignatedAsset", "0", args);
@@ -197,7 +197,7 @@ public class ContractMultyAssetTest extends BaseQuery {
         String methodName = "callWithReturnValueOfOtherContractOfDesignatedAsset";
 
         // 转入 6.6 2-2 (外部合约)
-        this.callOfDesignatedAssetByParams("_payableMultyAsset", "6.6", null, 2, 2);
+        this.callOfDesignatedAssetByParams(contractAddress,"_payableMultyAsset", "6.6", null, 2, 2);
         // 转入 6.6 2-2 (内部合约)
         this.innerCallOfDesignatedAssetByParams(methodName, otherContract, "_payableMultyAsset", null, "6.6", 2, 2);
 
@@ -311,6 +311,12 @@ public class ContractMultyAssetTest extends BaseQuery {
         Object[] args = new Object[]{toAddress17, new BigDecimal("0.1").multiply(BigDecimal.TEN.pow(8)).toBigInteger()};
         String[] argsType = new String[]{"Address", "BigInteger"};
         this.callTxOffline(feeAccount, feeAccountPri, sender, senderPri, value, contractAddress, methodName, methodDesc, remark, args, argsType, null, true);
+    }
+
+    @Test
+    public void sendPayableMultyAssetTest() throws Exception {
+        // 转入
+        this.callOfDesignatedAssetByParams("tNULSeBaN7mVkoh9ArP6RGvwgs7wmMpRsD5tuM", "_payableMultyAsset", "1000000", null, 2, 2);
     }
 
     protected void callTxOffline(String feeAccount, String feeAccountPri,
@@ -553,7 +559,7 @@ public class ContractMultyAssetTest extends BaseQuery {
         Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(waitGetContractTx(hash)));
     }
 
-    protected void callOfDesignatedAssetByParams(String methodName, String valueStr, Object[] args, int assetChainId, int assetId) throws Exception {
+    protected void callOfDesignatedAssetByParams(String contractAddress, String methodName, String valueStr, Object[] args, int assetChainId, int assetId) throws Exception {
         BigInteger value = new BigDecimal(valueStr).multiply(BigDecimal.TEN.pow(8)).toBigInteger();
         Map params = this.makeCallParams(sender, null, gasLimit, gasPrice, contractAddress, methodName, null, "", new ProgramMultyAssetValue[]{new ProgramMultyAssetValue(value, assetChainId, assetId)}, args);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
