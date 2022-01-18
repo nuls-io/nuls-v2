@@ -84,11 +84,6 @@ public class ApiBootstrap extends RpcModule {
         }
     }
 
-    @Override
-    public void init() {
-        initBlackAddressList();
-    }
-
     private static void initRpcServer(Map<String, ConfigurationLoader.ConfigItem> configItemMap) {
         String server_ip = "0.0.0.0";
         int server_port = 18004;
@@ -138,19 +133,5 @@ public class ApiBootstrap extends RpcModule {
     @Override
     public RpcModuleState onDependenciesLoss(Module dependenciesModule) {
         return RpcModuleState.Running;
-    }
-
-    private void initBlackAddressList() {
-        try {
-            String json = IoUtils.read("black_address.json");
-            if (StringUtils.isBlank(json)) {
-                return;
-            }
-            Map map = JSONUtils.json2map(json);
-            List<String> addressList = (List<String>) map.get("addressList");
-            Context.blackAddressList = addressList;
-        } catch (Exception e) {
-            Log.error(e);
-        }
     }
 }

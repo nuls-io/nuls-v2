@@ -1,9 +1,9 @@
 [global]
 encoding=UTF-8
 language=en
-logPath=/Users/niels/workspace/nuls-v2/Logs
+logPath=/Users/
 logLevel=INFO
-dataPath=/Users/niels/workspace/nuls-v2/data
+dataPath=/Users/zhouwei/data/nuls-v2/data
 #默认本链ID
 chainId=2
 #地址前缀
@@ -166,3 +166,4 @@ serverIp=0.0.0.0
 #httpServer的启动port
 serverPort=18004
 dependent=smart-contract,cross-chain
+blackListPath=/Users/zhouwei/data/nuls-v2/account
