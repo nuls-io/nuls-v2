@@ -69,10 +69,11 @@ public class BlackListUtils implements InitializingBean,Runnable {
             buff.close();
             Log.info("重置黑名单地址完成，共记录{}个黑名单地址", blackList.size());
         } catch (FileNotFoundException e) {
-            Log.error("黑名单地址错误，文件不存在");
+            Log.error("黑名单地址错误，文件不存在",e);
             System.exit(0);
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.error("读取黑名单文件错误",e);
+            System.exit(0);
         }
     }
 }
