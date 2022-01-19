@@ -48,8 +48,8 @@ public class BlackListUtils implements InitializingBean,Runnable {
             return ;
         }
         if(!new File(config.getBlackListPath()).exists()){
-            Log.warn("黑名单地址配置错误");
-            System.exit(0);
+            Log.warn("黑名单地址文件不存在，黑名单地址为空");
+            return ;
         }
         ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
         executorService.scheduleAtFixedRate(this, 2, 60, TimeUnit.SECONDS);
