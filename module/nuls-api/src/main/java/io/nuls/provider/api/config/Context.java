@@ -27,6 +27,7 @@ import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.provider.api.model.AssetInfo;
 import io.nuls.provider.api.model.ChainInfo;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -43,6 +44,8 @@ public class Context {
 
     public static List<AssetInfo> assetList;
 
+    public static List<String> blackAddressList = new ArrayList<>();
+
     public static ChainInfo defaultChain;
 
 
@@ -57,4 +60,5 @@ public class Context {
     public static boolean isChainExist(int chainId) {
         return getChainId() == chainId;
     }
+
 }
