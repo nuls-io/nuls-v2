@@ -93,10 +93,6 @@ dataPath=../../../../../data
 logPath=../../../../../Logs
 dependent=protocol-update,smart-contract,cross-chain
 
-[transaction]
-dependent=protocol-update,smart-contract
-blackListPath=/Users/zhouwei/data/nuls-v2/account
-
 [ledger]
 dependent=protocol-update
 
