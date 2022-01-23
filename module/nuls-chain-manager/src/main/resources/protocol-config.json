@@ -1,5 +1,23 @@
 [
   {
+    "version": "12",
+    "extend": "7",
+    "validTxs": [
+      {
+        "type": "13",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "AddAssetTxProcessorV12"
+      }
+    ],
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  },
+
+  {
     "version": "7",
     "extend": "",
     "validTxs": [

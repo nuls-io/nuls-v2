@@ -68,7 +68,7 @@ public class AccountBlockHelper {
         CoinFrom coinFrom = listFrom.get(0);
         String fromStr = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
         if (!fromStr.equals(accountConfig.getBlockAccountManager())) {
-            chain.getLogger().error("error: not manager");
+            chain.getLogger().error("error: not manager, tx: {}, config: {}", fromStr, accountConfig.getBlockAccountManager());
             return Result.getFailed(AccountErrorCode.COINDATA_IS_INCOMPLETE);
         }
         AccountBlockData txData = new AccountBlockData();
