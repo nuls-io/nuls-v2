@@ -23,10 +23,11 @@
  *
  */
 
-package io.nuls.account.model.po;
+package io.nuls.account.model.dto;
 
 
 import io.nuls.account.model.bo.tx.AccountBlockInfo;
+import io.nuls.account.model.po.AccountBlockExtendPO;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.Address;
@@ -38,45 +39,23 @@ import java.io.IOException;
 
 /**
  * @author: PierreLuo
- * @date: 2022/1/18
+ * @date: 2022/1/23
  */
-public class AccountBlockPO extends BaseNulsData {
+public class AccountBlockDTO {
 
     private byte[] address;
+    private AccountBlockInfo info;
 
-    private byte[] extend;
-
-    public AccountBlockPO() {
+    public AccountBlockDTO() {
     }
 
-    public AccountBlockPO(byte[] address) {
+    public AccountBlockDTO(byte[] address) {
         this.address = address;
     }
 
-    public AccountBlockPO(byte[] address, AccountBlockInfo info) throws NulsException, IOException {
+    public AccountBlockDTO(byte[] address, AccountBlockInfo info) throws NulsException, IOException {
         this.address = address;
-        AccountBlockExtendPO po = new AccountBlockExtendPO(address, info);
-        this.extend = po.serialize();
-    }
-
-    @Override
-    public int size() {
-        int size = 0;
-        size += Address.ADDRESS_LENGTH;
-        size += SerializeUtils.sizeOfBytes(extend);
-        return size;
-    }
-
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.write(address);
-        stream.writeBytesWithLength(extend);
-    }
-
-    @Override
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.address = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
-        this.extend = byteBuffer.readByLengthByte();
+        this.info = info;
     }
 
     public byte[] getAddress() {
@@ -87,11 +66,11 @@ public class AccountBlockPO extends BaseNulsData {
         this.address = address;
     }
 
-    public byte[] getExtend() {
-        return extend;
+    public AccountBlockInfo getInfo() {
+        return info;
     }
 
-    public void setExtend(byte[] extend) {
-        this.extend = extend;
+    public void setInfo(AccountBlockInfo info) {
+        this.info = info;
     }
 }

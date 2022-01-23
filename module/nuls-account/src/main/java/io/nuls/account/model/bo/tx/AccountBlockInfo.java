@@ -40,10 +40,12 @@ import java.io.IOException;
  */
 public class AccountBlockInfo extends BaseNulsData {
 
+    /**
+     * 0-默认账户全锁定 1-增加白名单 2-删除白名单
+     */
+    private int operationType;
     private int[] types;
-
     private String[] contracts;
-
     private byte[] extend;
 
     public AccountBlockInfo() {
@@ -52,25 +54,84 @@ public class AccountBlockInfo extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
+        size += SerializeUtils.sizeOfUint16();
         // length
         size += SerializeUtils.sizeOfUint16();
+        if (types != null) {
+            size += SerializeUtils.sizeOfUint16() * types.length;
+        }
+        size += SerializeUtils.sizeOfUint16();
+        if (contracts != null) {
+            for (String contract : contracts) {
+                size += SerializeUtils.sizeOfString(contract);
+            }
+        }
         size += SerializeUtils.sizeOfBytes(extend);
         return size;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeUint16(operationType);
+        if (types == null) {
+            stream.writeUint16(0);
+        } else {
+            stream.writeUint16(types.length);
+            for (int type : types) {
+                stream.writeUint16(type);
+            }
+        }
+        if (contracts == null) {
+            stream.writeUint16(0);
+        } else {
+            stream.writeUint16(contracts.length);
+            for (String address : contracts) {
+                stream.writeString(address);
+            }
+        }
         stream.writeBytesWithLength(extend);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.operationType = byteBuffer.readUint16();
+        int length0 = byteBuffer.readUint16();
+        int[] _types = new int[length0];
+        for (int i = 0; i < length0; i++) {
+            _types[i] = byteBuffer.readUint16();
+        }
         int length = byteBuffer.readUint16();
         String[] _addresses = new String[length];
         for (int i = 0; i < length; i++) {
             _addresses[i] = byteBuffer.readString();
         }
+        this.types = _types;
+        this.contracts = _addresses;
         this.extend = byteBuffer.readByLengthByte();
+    }
+
+    public int getOperationType() {
+        return operationType;
+    }
+
+    public void setOperationType(int operationType) {
+        this.operationType = operationType;
+    }
+
+    public int[] getTypes() {
+        return types;
+    }
+
+    public void setTypes(int[] types) {
+        this.types = types;
+    }
+
+    public String[] getContracts() {
+        return contracts;
+    }
+
+    public void setContracts(String[] contracts) {
+        this.contracts = contracts;
     }
 
     public byte[] getExtend() {

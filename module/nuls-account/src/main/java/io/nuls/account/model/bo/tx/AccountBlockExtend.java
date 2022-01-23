@@ -79,6 +79,14 @@ public class AccountBlockExtend extends BaseNulsData {
         this.extend = byteBuffer.readByLengthByte();
     }
 
+    public AccountBlockInfo[] getInfos() {
+        return infos;
+    }
+
+    public void setInfos(AccountBlockInfo[] infos) {
+        this.infos = infos;
+    }
+
     public byte[] getExtend() {
         return extend;
     }

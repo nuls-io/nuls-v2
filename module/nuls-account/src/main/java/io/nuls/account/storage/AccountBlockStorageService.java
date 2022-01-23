@@ -25,6 +25,7 @@
 
 package io.nuls.account.storage;
 
+import io.nuls.account.model.dto.AccountBlockDTO;
 import io.nuls.account.model.po.AccountBlockPO;
 import io.nuls.account.model.po.AccountPO;
 import io.nuls.base.data.Address;
@@ -37,6 +38,8 @@ import java.util.List;
  */
 public interface AccountBlockStorageService {
 
+    boolean operateAccountList(List<AccountBlockDTO> accountList);
+    boolean rollbackOperateAccountList(List<AccountBlockDTO> accountList);
     boolean saveAccountList(List<AccountBlockPO> accountList);
     boolean removeAccountList(List<String> accountList);
     List<AccountBlockPO> getAccountList();

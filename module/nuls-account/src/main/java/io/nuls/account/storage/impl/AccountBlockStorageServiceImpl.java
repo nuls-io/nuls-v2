@@ -27,6 +27,7 @@ package io.nuls.account.storage.impl;
 
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.AccountStorageConstant;
+import io.nuls.account.model.dto.AccountBlockDTO;
 import io.nuls.account.model.po.AccountBlockPO;
 import io.nuls.account.storage.AccountBlockStorageService;
 import io.nuls.account.util.LoggerUtil;
@@ -50,6 +51,18 @@ public class AccountBlockStorageServiceImpl implements AccountBlockStorageServic
 
     @Override
     public void afterPropertiesSet() {
+    }
+
+    @Override
+    public boolean operateAccountList(List<AccountBlockDTO> accountList) {
+        //TODO pierre auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean rollbackOperateAccountList(List<AccountBlockDTO> accountList) {
+        //TODO pierre auto-generated method stub
+        return false;
     }
 
     @Override
