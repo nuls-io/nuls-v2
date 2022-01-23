@@ -392,6 +392,9 @@ public class TxServiceImpl implements TxService {
             }
         }
         for (CoinFrom coinFrom : coinData.getFrom()) {
+            if (ProtocolGroupManager.getCurrentVersion(chainId) >= TxContext.UPDATE_VERSION_ACCOUNT_BLOCK_UPGRADE) {
+
+            }
             if (tx.getType() == TxType.STOP_AGENT) {
                 //停止节点from中第一笔为签名地址, 只验证from中第一个
                 break;
@@ -428,7 +431,7 @@ public class TxServiceImpl implements TxService {
 
         for (CoinFrom coinFrom : listFrom) {
             byte[] addrBytes = coinFrom.getAddress();
-            if (type != TxType.DEPOSIT && type != TxType.CANCEL_DEPOSIT && TxUtil.isBlockAddress(chainId, addrBytes)) {
+            if (ProtocolGroupManager.getCurrentVersion(chainId) < TxContext.UPDATE_VERSION_ACCOUNT_BLOCK_UPGRADE && type != TxType.DEPOSIT && type != TxType.CANCEL_DEPOSIT && TxUtil.isBlockAddress(chainId, addrBytes)) {
                 throw new NulsException(TxErrorCode.BLOCK_ADDRESS, "address is blockAddress Exception");
             }
             if (AddressTool.isBlackHoleAddress(TxUtil.blackHolePublicKey, chainId, addrBytes)) {

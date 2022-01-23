@@ -65,4 +65,21 @@ public class AccountCall {
             return false;
         }
     }
+
+    public static Object getBlockAccount(int chainId, String address) {
+        try {
+            if (StringUtils.isBlank(address)) {
+                return false;
+            }
+            Map<String, Object> params = new HashMap<>(4);
+            params.put(Constants.CHAIN_ID, chainId);
+            params.put("address", address);
+            Map resultMap = (Map) TransactionCall.requestAndResponse(ModuleE.AC.abbr, "ac_isBlockAccount", params);
+            String objHex = (String) resultMap.get("value");
+            return null;
+        } catch (Exception e) {
+            Log.error(e);
+            return false;
+        }
+    }
 }

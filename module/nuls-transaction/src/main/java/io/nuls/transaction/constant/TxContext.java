@@ -33,4 +33,6 @@ public class TxContext {
     public static short UPDATE_VERSION_CONTRACT_ASSET = 8;
 
     public static short UPDATE_VERSION_ACCOUNT_BLOCK = 11;
+
+    public static short UPDATE_VERSION_ACCOUNT_BLOCK_UPGRADE = 12;
 }
