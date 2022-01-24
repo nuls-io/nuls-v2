@@ -7,6 +7,8 @@ import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.log.Log;
+import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.MapUtils;
 import io.nuls.core.parse.SerializeUtils;
 import io.nuls.core.rpc.info.Constants;
@@ -82,6 +84,28 @@ public class AccountTools implements CallRpc {
         return callRpc(ModuleE.AC.abbr, "ac_getPriKeyByAddress", callParams, (Function<Map<String, Object>, T>) res -> (T) res.get(key));
     }
 
+
+    public boolean isBlockAccount(int chainId, String address) {
+        try {
+            if (StringUtils.isBlank(address)) {
+                return false;
+            }
+            Map<String, Object> params = new HashMap<>(4);
+            params.put(Constants.CHAIN_ID, chainId);
+            params.put("address", address);
+            boolean isBlock = callRpc(ModuleE.AC.abbr, "ac_isBlockAccount", params, (Function<Map<String, Object>, Boolean>) res -> {
+                if (res == null) {
+                    return false;
+                }
+                return (boolean) res.get("value");
+
+            });
+            return isBlock;
+        } catch (Exception e) {
+            Log.error(e);
+            return false;
+        }
+    }
 
     public MultiSigAccount createMultiSigAccount(int chainId, List<String> pubKeys, int minSigns) throws NulsException {
         //验证公钥是否重复

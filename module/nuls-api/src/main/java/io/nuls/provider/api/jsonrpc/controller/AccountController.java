@@ -840,6 +840,38 @@ public class AccountController {
         return ResultUtil.getJsonRpcResult(result);
     }
 
+    @RpcMethod("isBlockAccount")
+    @ApiOperation(description = "是否锁定账户", order = 165)
+    @Parameters({
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
+            @Parameter(parameterName = "address", parameterType = "String", parameterDes = "账户地址"),
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "是否锁定"),
+    }))
+    public RpcResult isBlockAccount(List<Object> params) {
+        int chainId;
+        String address;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        try {
+            address = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[address] is inValid");
+        }
+        if (!Context.isChainExist(chainId)) {
+            return RpcResult.paramError(String.format("chainId [%s] is invalid", chainId));
+        }
+        if (!AddressTool.validAddress(chainId, address)) {
+            return RpcResult.paramError("[address] is inValid");
+        }
+        boolean blockAccount = accountTools.isBlockAccount(chainId, address);
+        return RpcResult.success(Map.of("value", blockAccount));
+    }
+
     @RpcMethod("encryptedPriKeySign")
     @ApiOperation(description = "密文私钥摘要签名", order = 156)
     @Parameters({
