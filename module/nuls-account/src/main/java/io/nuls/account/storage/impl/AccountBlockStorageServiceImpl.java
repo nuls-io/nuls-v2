@@ -27,7 +27,9 @@ package io.nuls.account.storage.impl;
 
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.AccountStorageConstant;
+import io.nuls.account.model.bo.tx.AccountBlockInfo;
 import io.nuls.account.model.dto.AccountBlockDTO;
+import io.nuls.account.model.po.AccountBlockExtendPO;
 import io.nuls.account.model.po.AccountBlockPO;
 import io.nuls.account.storage.AccountBlockStorageService;
 import io.nuls.account.util.LoggerUtil;
@@ -37,10 +39,8 @@ import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.rockdb.service.RocksDBService;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -53,16 +53,153 @@ public class AccountBlockStorageServiceImpl implements AccountBlockStorageServic
     public void afterPropertiesSet() {
     }
 
-    @Override
-    public boolean operateAccountList(List<AccountBlockDTO> accountList) {
-        //TODO pierre auto-generated method stub
-        return false;
+    private Set<Integer> intArray2set(int[] _array) {
+        Set<Integer> result = new HashSet<>();
+        for (int a : _array) {
+            result.add(Integer.valueOf(a));
+        }
+        return result;
+    }
+
+    private int[] set2intArray(Set<Integer> set) {
+        int[] result = new int[set.size()];
+        int i = 0;
+        for (Integer s : set) {
+            result[i++] = s.intValue();
+        }
+        return result;
     }
 
     @Override
-    public boolean rollbackOperateAccountList(List<AccountBlockDTO> accountList) {
-        //TODO pierre auto-generated method stub
-        return false;
+    public boolean operateAccountList(List<AccountBlockDTO> accountList) throws Exception {
+        if (null == accountList || accountList.size() == 0) {
+            throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
+        }
+        List<AccountBlockPO> poList = new ArrayList<>();
+        for (AccountBlockDTO dto : accountList) {
+            byte[] address = dto.getAddress();
+            AccountBlockInfo info = dto.getInfo();
+            if (info == null) {
+                // 账户完全锁定
+                poList.add(new AccountBlockPO(address));
+            } else {
+                AccountBlockPO po = this.getAccount(address);
+                if (po == null) {
+                    // 首次添加白名单
+                    poList.add(new AccountBlockPO(address, info));
+                } else if (po.getExtend() == null) {
+                    // 首次添加白名单
+                    po.setExtend(new AccountBlockExtendPO(address, info).serialize());
+                    poList.add(po);
+                } else {
+                    // 更新白名单
+                    AccountBlockExtendPO extendPO = new AccountBlockExtendPO();
+                    extendPO.parse(po.getExtend(), 0);
+                    int[] types = extendPO.getTypes();
+                    String[] contracts = extendPO.getContracts();
+                    int operationType = info.getOperationType();
+                    if (operationType == 1) {
+                        // 添加白名单
+                        int[] _types = info.getTypes();
+                        if (_types != null) {
+                            Set<Integer> typeSet = types == null ? new HashSet<>() : this.intArray2set(types);
+                            typeSet.addAll(this.intArray2set(_types));
+                            extendPO.setTypes(this.set2intArray(typeSet));
+                        }
+                        String[] _contracts = info.getContracts();
+                        if (_contracts != null) {
+                            Set<String> contractSet = contracts == null ? new HashSet<>() : new HashSet<>(Arrays.asList(contracts));
+                            contractSet.addAll(Arrays.asList(_contracts));
+                            extendPO.setContracts(contractSet.toArray(new String[contractSet.size()]));
+                        }
+                        po.setExtend(extendPO.serialize());
+                        poList.add(po);
+                    } else if (operationType == 2) {
+                        // 移除白名单
+                        int[] _types = info.getTypes();
+                        if (_types != null) {
+                            Set<Integer> typeSet = types == null ? new HashSet<>() : this.intArray2set(types);
+                            typeSet.removeAll(this.intArray2set(_types));
+                            extendPO.setTypes(this.set2intArray(typeSet));
+                        }
+                        String[] _contracts = info.getContracts();
+                        if (_contracts != null) {
+                            Set<String> contractSet = contracts == null ? new HashSet<>() : new HashSet<>(Arrays.asList(contracts));
+                            contractSet.removeAll(Arrays.asList(_contracts));
+                            extendPO.setContracts(contractSet.toArray(new String[contractSet.size()]));
+                        }
+                        po.setExtend(extendPO.serialize());
+                        poList.add(po);
+                    }
+                }
+            }
+        }
+        return this.saveAccountList(poList);
+    }
+
+    @Override
+    public boolean cancelOperateAccountList(List<AccountBlockDTO> accountList) throws Exception {
+        if (null == accountList || accountList.size() == 0) {
+            throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
+        }
+        List<byte[]> accountRemoveList = new ArrayList<>();
+        List<AccountBlockPO> poList = new ArrayList<>();
+        for (AccountBlockDTO dto : accountList) {
+            byte[] address = dto.getAddress();
+            AccountBlockInfo info = dto.getInfo();
+            if (info == null) {
+                // 取消账户完全锁定
+                accountRemoveList.add(address);
+            } else {
+                AccountBlockPO po = this.getAccount(address);
+                if (po == null) {
+                    continue;
+                }
+                // 取消更新白名单
+                AccountBlockExtendPO extendPO = new AccountBlockExtendPO();
+                extendPO.parse(po.getExtend(), 0);
+                int[] types = extendPO.getTypes();
+                String[] contracts = extendPO.getContracts();
+                int operationType = info.getOperationType();
+                if (operationType == 1) {
+                    // 取消添加白名单
+                    int[] _types = info.getTypes();
+                    if (_types != null) {
+                        Set<Integer> typeSet = types == null ? new HashSet<>() : this.intArray2set(types);
+                        typeSet.removeAll(this.intArray2set(_types));
+                        extendPO.setTypes(this.set2intArray(typeSet));
+                    }
+                    String[] _contracts = info.getContracts();
+                    if (_contracts != null) {
+                        Set<String> contractSet = contracts == null ? new HashSet<>() : new HashSet<>(Arrays.asList(contracts));
+                        contractSet.removeAll(Arrays.asList(_contracts));
+                        extendPO.setContracts(contractSet.toArray(new String[contractSet.size()]));
+                    }
+                    po.setExtend(extendPO.serialize());
+                    poList.add(po);
+                } else if (operationType == 2) {
+                    // 取消移除白名单
+                    int[] _types = info.getTypes();
+                    if (_types != null) {
+                        Set<Integer> typeSet = types == null ? new HashSet<>() : this.intArray2set(types);
+                        typeSet.addAll(this.intArray2set(_types));
+                        extendPO.setTypes(this.set2intArray(typeSet));
+                    }
+                    String[] _contracts = info.getContracts();
+                    if (_contracts != null) {
+                        Set<String> contractSet = contracts == null ? new HashSet<>() : new HashSet<>(Arrays.asList(contracts));
+                        contractSet.addAll(Arrays.asList(_contracts));
+                        extendPO.setContracts(contractSet.toArray(new String[contractSet.size()]));
+                    }
+                    po.setExtend(extendPO.serialize());
+                    poList.add(po);
+                }
+            }
+        }
+        if (!accountRemoveList.isEmpty()) {
+            RocksDBService.deleteKeys(AccountStorageConstant.DB_NAME_ACCOUNT_BLOCK, accountRemoveList);
+        }
+        return this.saveAccountList(poList);
     }
 
     @Override
@@ -130,6 +267,15 @@ public class AccountBlockStorageServiceImpl implements AccountBlockStorageServic
         }
         return accountPo;
     }
+    @Override
+    public byte[] getAccountBytes(byte[] address) {
+        byte[] accountBytes = RocksDBService.get(AccountStorageConstant.DB_NAME_ACCOUNT_BLOCK, address);
+        if (null == accountBytes) {
+            return null;
+        }
+        return accountBytes;
+    }
+
     @Override
     public boolean existAccount(byte[] address) {
         byte[] accountBytes = RocksDBService.get(AccountStorageConstant.DB_NAME_ACCOUNT_BLOCK, address);

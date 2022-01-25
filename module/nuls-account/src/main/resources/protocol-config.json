@@ -1,5 +1,22 @@
 [
   {
+    "version": "12",
+    "extend": "11",
+    "validTxs": [
+      {
+        "type": "63",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "AccountLockProcessorV12"
+      }
+    ],
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  },
+  {
     "version": "11",
     "extend": "1",
     "validTxs": [

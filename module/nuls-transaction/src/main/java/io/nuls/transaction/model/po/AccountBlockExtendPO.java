@@ -23,11 +23,12 @@
  *
  */
 
-package io.nuls.account.model.bo.tx;
+package io.nuls.transaction.model.po;
 
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
+import io.nuls.base.data.Address;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
@@ -36,25 +37,25 @@ import java.io.IOException;
 
 /**
  * @author: PierreLuo
- * @date: 2022/1/21
+ * @date: 2022/1/18
  */
-public class AccountBlockInfo extends BaseNulsData {
+public class AccountBlockExtendPO extends BaseNulsData {
 
-    /**
-     * 1-增加白名单 2-删除白名单
-     */
-    private int operationType;
+    private byte[] address;
+
     private int[] types;
+
     private String[] contracts;
+
     private byte[] extend;
 
-    public AccountBlockInfo() {
+    public AccountBlockExtendPO() {
     }
 
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfUint16();
+        size += Address.ADDRESS_LENGTH;
         // length
         size += SerializeUtils.sizeOfUint16();
         if (types != null) {
@@ -72,7 +73,7 @@ public class AccountBlockInfo extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeUint16(operationType);
+        stream.write(address);
         if (types == null) {
             stream.writeUint16(0);
         } else {
@@ -94,7 +95,7 @@ public class AccountBlockInfo extends BaseNulsData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.operationType = byteBuffer.readUint16();
+        this.address = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
         int length0 = byteBuffer.readUint16();
         int[] _types = new int[length0];
         for (int i = 0; i < length0; i++) {
@@ -108,14 +109,6 @@ public class AccountBlockInfo extends BaseNulsData {
         this.types = _types;
         this.contracts = _addresses;
         this.extend = byteBuffer.readByLengthByte();
-    }
-
-    public int getOperationType() {
-        return operationType;
-    }
-
-    public void setOperationType(int operationType) {
-        this.operationType = operationType;
     }
 
     public int[] getTypes() {
@@ -132,6 +125,14 @@ public class AccountBlockInfo extends BaseNulsData {
 
     public void setContracts(String[] contracts) {
         this.contracts = contracts;
+    }
+
+    public byte[] getAddress() {
+        return address;
+    }
+
+    public void setAddress(byte[] address) {
+        this.address = address;
     }
 
     public byte[] getExtend() {

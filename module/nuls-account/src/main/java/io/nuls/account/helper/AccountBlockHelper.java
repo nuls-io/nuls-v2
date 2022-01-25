@@ -80,6 +80,7 @@ public class AccountBlockHelper {
             chain.getLogger().error("empty addresses");
             return Result.getFailed(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
         }
+        // 检查白名单
         byte[] txDataExtend = txData.getExtend();
         if (txDataExtend != null) {
             AccountBlockExtend abExtend = new AccountBlockExtend();

@@ -10,6 +10,9 @@ import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
+import io.nuls.transaction.model.dto.AccountBlockDTO;
+import io.nuls.transaction.model.po.AccountBlockExtendPO;
+import io.nuls.transaction.model.po.AccountBlockPO;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.util.HashMap;
@@ -66,20 +69,34 @@ public class AccountCall {
         }
     }
 
-    public static Object getBlockAccount(int chainId, String address) {
+    public static AccountBlockDTO getBlockAccount(int chainId, String address) {
         try {
             if (StringUtils.isBlank(address)) {
-                return false;
+                return null;
             }
             Map<String, Object> params = new HashMap<>(4);
             params.put(Constants.CHAIN_ID, chainId);
             params.put("address", address);
-            Map resultMap = (Map) TransactionCall.requestAndResponse(ModuleE.AC.abbr, "ac_isBlockAccount", params);
-            String objHex = (String) resultMap.get("value");
-            return null;
+            Map resultMap = (Map) TransactionCall.requestAndResponse(ModuleE.AC.abbr, "ac_getBlockAccountBytes", params);
+            String hex = (String) resultMap.get("value");
+            if (StringUtils.isBlank(hex)) {
+                return null;
+            }
+            AccountBlockPO po = new AccountBlockPO();
+            po.parse(HexUtil.decode(hex), 0);
+            AccountBlockDTO dto = new AccountBlockDTO();
+            dto.setAddress(po.getAddress());
+            if (po.getExtend() != null) {
+                AccountBlockExtendPO extendPO = new AccountBlockExtendPO();
+                extendPO.parse(po.getExtend(), 0);
+                dto.setTypes(extendPO.getTypes());
+                dto.setContracts(extendPO.getContracts());
+                dto.setExtend(extendPO.getExtend());
+            }
+            return dto;
         } catch (Exception e) {
             Log.error(e);
-            return false;
+            return null;
         }
     }
 }

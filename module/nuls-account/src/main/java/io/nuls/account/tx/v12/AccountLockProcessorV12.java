@@ -111,7 +111,8 @@ public class AccountLockProcessorV12 implements TransactionProcessor {
                     }
                 }
                 result = accountBlockStorageService.operateAccountList(list);
-            } catch (NulsException e) {
+            } catch (Exception e) {
+                LoggerUtil.LOG.error("ac_commitTx block_account tx commit error", e);
                 result = false;
             }
             if (!result) {
@@ -139,7 +140,7 @@ public class AccountLockProcessorV12 implements TransactionProcessor {
                             dto.setInfo(infos[i++]);
                         }
                     }
-                    rollback = accountBlockStorageService.rollbackOperateAccountList(list);
+                    rollback = accountBlockStorageService.cancelOperateAccountList(list);
                 }
                 //回滚失败，抛异常
                 if (!rollback) {
@@ -176,8 +177,9 @@ public class AccountLockProcessorV12 implements TransactionProcessor {
                         dto.setInfo(infos[i++]);
                     }
                 }
-                result = accountBlockStorageService.rollbackOperateAccountList(list);
-            } catch (NulsException e) {
+                result = accountBlockStorageService.cancelOperateAccountList(list);
+            } catch (Exception e) {
+                LoggerUtil.LOG.error("ac_rollbackTx block_account tx rollback error", e);
                 result = false;
             }
             if (!result) {
@@ -214,7 +216,7 @@ public class AccountLockProcessorV12 implements TransactionProcessor {
                     throw new NulsException(AccountErrorCode.ALIAS_SAVE_ERROR);
                 }
             }
-        } catch (NulsException e) {
+        } catch (Exception e) {
             errorLogProcess(chain, e);
             result = false;
         }

@@ -39,6 +39,7 @@ import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.model.*;
 import io.nuls.provider.api.config.Config;
 import io.nuls.provider.api.config.Context;
+import io.nuls.provider.model.dto.AccountBlockDTO;
 import io.nuls.provider.model.dto.AccountKeyStoreDto;
 import io.nuls.provider.model.dto.ContractTokenInfoDto;
 import io.nuls.provider.model.form.PriKeyForm;
@@ -838,6 +839,71 @@ public class AccountController {
 
         io.nuls.core.basic.Result result = NulsSDKTool.sign(txHex, address, priKey);
         return ResultUtil.getJsonRpcResult(result);
+    }
+
+    @RpcMethod("isBlockAccount")
+    @ApiOperation(description = "是否锁定账户", order = 165)
+    @Parameters({
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
+            @Parameter(parameterName = "address", parameterType = "String", parameterDes = "账户地址"),
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "是否锁定"),
+    }))
+    public RpcResult isBlockAccount(List<Object> params) {
+        int chainId;
+        String address;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        try {
+            address = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[address] is inValid");
+        }
+        if (!Context.isChainExist(chainId)) {
+            return RpcResult.paramError(String.format("chainId [%s] is invalid", chainId));
+        }
+        if (!AddressTool.validAddress(chainId, address)) {
+            return RpcResult.paramError("[address] is inValid");
+        }
+        boolean blockAccount = accountTools.isBlockAccount(chainId, address);
+        return RpcResult.success(Map.of("value", blockAccount));
+    }
+
+    @RpcMethod("getBlockAccountInfo")
+    @ApiOperation(description = "查询锁定账户信息", order = 166)
+    @Parameters({
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
+            @Parameter(parameterName = "address", parameterType = "String", parameterDes = "账户地址"),
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = AccountBlockDTO.class))
+    public RpcResult getBlockAccountInfo(List<Object> params) {
+        int chainId;
+        String address;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        try {
+            address = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[address] is inValid");
+        }
+        if (!Context.isChainExist(chainId)) {
+            return RpcResult.paramError(String.format("chainId [%s] is invalid", chainId));
+        }
+        if (!AddressTool.validAddress(chainId, address)) {
+            return RpcResult.paramError("[address] is inValid");
+        }
+        AccountBlockDTO dto = accountTools.getBlockAccountInfo(chainId, address);
+        if (dto == null) {
+            return RpcResult.failed(AccountErrorCode.DATA_NOT_FOUND);
+        }
+        return RpcResult.success(dto);
     }
 
     @RpcMethod("encryptedPriKeySign")
