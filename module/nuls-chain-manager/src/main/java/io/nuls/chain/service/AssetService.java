@@ -81,6 +81,8 @@ public interface AssetService {
      */
     boolean assetExist(Asset asset) throws Exception;
 
+    boolean assetExistAndAvailable(Asset asset) throws Exception;
+
     /**
      * juge asset exist in chain
      *

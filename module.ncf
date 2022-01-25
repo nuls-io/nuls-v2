@@ -123,6 +123,9 @@ socketTimeout=300000
 connectTimeOut=30000
 dependent=smart-contract,cross-chain,chain-manager
 
+[transaction]
+dependent=protocol-update,smart-contract
+
 [cross-chain]
 #跨链节点链接的最小值
 minNodeAmount=2
