@@ -2,7 +2,7 @@ package io.nuls.transaction.rpc.call;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.MultiSigAccount;
-import io.nuls.core.basic.Result;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.StringUtils;
@@ -10,12 +10,13 @@ import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
+import io.nuls.transaction.model.dto.AccountBlockDTO;
+import io.nuls.transaction.model.po.AccountBlockExtendPO;
+import io.nuls.transaction.model.po.AccountBlockPO;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import static io.nuls.core.constant.CommonCodeConstanst.NULL_PARAMETER;
 
 /**
  * 调用其他模块跟交易相关的接口
@@ -63,6 +64,37 @@ public class AccountCall {
         } catch (Exception e) {
             Log.error(e);
             return false;
+        }
+    }
+
+    public static AccountBlockDTO getBlockAccount(int chainId, String address) {
+        try {
+            if (StringUtils.isBlank(address)) {
+                return null;
+            }
+            Map<String, Object> params = new HashMap<>(4);
+            params.put(Constants.CHAIN_ID, chainId);
+            params.put("address", address);
+            Map resultMap = (Map) TransactionCall.requestAndResponse(ModuleE.AC.abbr, "ac_getBlockAccountBytes", params);
+            String hex = (String) resultMap.get("value");
+            if (StringUtils.isBlank(hex)) {
+                return null;
+            }
+            AccountBlockPO po = new AccountBlockPO();
+            po.parse(HexUtil.decode(hex), 0);
+            AccountBlockDTO dto = new AccountBlockDTO();
+            dto.setAddress(po.getAddress());
+            if (po.getExtend() != null) {
+                AccountBlockExtendPO extendPO = new AccountBlockExtendPO();
+                extendPO.parse(po.getExtend(), 0);
+                dto.setTypes(extendPO.getTypes());
+                dto.setContracts(extendPO.getContracts());
+                dto.setExtend(extendPO.getExtend());
+            }
+            return dto;
+        } catch (Exception e) {
+            Log.error(e);
+            return null;
         }
     }
 }

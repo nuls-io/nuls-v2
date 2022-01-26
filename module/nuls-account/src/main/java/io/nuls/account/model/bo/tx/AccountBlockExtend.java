@@ -23,13 +23,11 @@
  *
  */
 
-package io.nuls.account.model.po;
+package io.nuls.account.model.bo.tx;
 
 
-import io.nuls.account.model.bo.tx.AccountBlockInfo;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.data.Address;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
@@ -38,53 +36,55 @@ import java.io.IOException;
 
 /**
  * @author: PierreLuo
- * @date: 2022/1/18
+ * @date: 2022/1/21
  */
-public class AccountBlockPO extends BaseNulsData {
+public class AccountBlockExtend extends BaseNulsData {
 
-    private byte[] address;
+    private AccountBlockInfo[] infos;
 
     private byte[] extend;
 
-    public AccountBlockPO() {
-    }
-
-    public AccountBlockPO(byte[] address) {
-        this.address = address;
-    }
-
-    public AccountBlockPO(byte[] address, AccountBlockInfo info) throws IOException {
-        this.address = address;
-        AccountBlockExtendPO po = new AccountBlockExtendPO(address, info);
-        this.extend = po.serialize();
+    public AccountBlockExtend() {
     }
 
     @Override
     public int size() {
         int size = 0;
-        size += Address.ADDRESS_LENGTH;
+        // length
+        size += SerializeUtils.sizeOfUint16();
+        for (AccountBlockInfo info : infos) {
+            size += SerializeUtils.sizeOfNulsData(info);
+        }
         size += SerializeUtils.sizeOfBytes(extend);
         return size;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.write(address);
+        stream.writeUint16(infos.length);
+        for (AccountBlockInfo info : infos) {
+            stream.writeNulsData(info);
+        }
         stream.writeBytesWithLength(extend);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.address = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
+        int length = byteBuffer.readUint16();
+        AccountBlockInfo[] _infos = new AccountBlockInfo[length];
+        for (int i = 0; i < length; i++) {
+            _infos[i] = byteBuffer.readNulsData(new AccountBlockInfo());
+        }
+        this.infos = _infos;
         this.extend = byteBuffer.readByLengthByte();
     }
 
-    public byte[] getAddress() {
-        return address;
+    public AccountBlockInfo[] getInfos() {
+        return infos;
     }
 
-    public void setAddress(byte[] address) {
-        this.address = address;
+    public void setInfos(AccountBlockInfo[] infos) {
+        this.infos = infos;
     }
 
     public byte[] getExtend() {

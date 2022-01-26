@@ -23,26 +23,54 @@
  *
  */
 
-package io.nuls.account.storage;
+package io.nuls.account.model.dto;
 
-import io.nuls.account.model.dto.AccountBlockDTO;
-import io.nuls.account.model.po.AccountBlockPO;
 
-import java.util.List;
+import io.nuls.account.model.bo.tx.AccountBlockInfo;
+import io.nuls.account.model.po.AccountBlockExtendPO;
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.basic.NulsOutputStreamBuffer;
+import io.nuls.base.data.Address;
+import io.nuls.base.data.BaseNulsData;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.parse.SerializeUtils;
+
+import java.io.IOException;
 
 /**
  * @author: PierreLuo
- * @date: 2022/1/18
+ * @date: 2022/1/23
  */
-public interface AccountBlockStorageService {
+public class AccountBlockDTO {
 
-    boolean operateAccountList(List<AccountBlockDTO> accountList) throws Exception;
-    boolean cancelOperateAccountList(List<AccountBlockDTO> accountList)throws Exception;
-    boolean saveAccountList(List<AccountBlockPO> accountList);
-    boolean removeAccountList(List<String> accountList);
-    List<AccountBlockPO> getAccountList();
-    AccountBlockPO getAccount(byte[] address);
-    byte[] getAccountBytes(byte[] address);
-    boolean existAccount(byte[] address);
+    private byte[] address;
+    private AccountBlockInfo info;
 
+    public AccountBlockDTO() {
+    }
+
+    public AccountBlockDTO(byte[] address) {
+        this.address = address;
+    }
+
+    public AccountBlockDTO(byte[] address, AccountBlockInfo info) throws NulsException, IOException {
+        this.address = address;
+        this.info = info;
+    }
+
+    public byte[] getAddress() {
+        return address;
+    }
+
+    public void setAddress(byte[] address) {
+        this.address = address;
+    }
+
+    public AccountBlockInfo getInfo() {
+        return info;
+    }
+
+    public void setInfo(AccountBlockInfo info) {
+        this.info = info;
+    }
 }
