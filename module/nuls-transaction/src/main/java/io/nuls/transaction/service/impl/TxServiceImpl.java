@@ -526,7 +526,12 @@ public class TxServiceImpl implements TxService {
                         break;
                     }
                     // 验证合约地址白名单
-                    if (txType == TxType.CALL_CONTRACT && dto.getContracts() != null) {
+                    if (txType == TxType.CALL_CONTRACT) {
+                        if (dto.getContracts() == null || dto.getContracts().length == 0) {
+                            // 不在合约地址白名单中，需要验证签名
+                            needAccountManagerSign = true;
+                            break;
+                        }
                         String[] contracts = dto.getContracts();
                         NulsByteBuffer byteBuffer = new NulsByteBuffer(tx.getTxData());
                         byteBuffer.readBytes(Address.ADDRESS_LENGTH);

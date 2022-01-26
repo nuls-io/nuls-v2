@@ -2,7 +2,7 @@ package io.nuls.transaction.rpc.call;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.MultiSigAccount;
-import io.nuls.core.basic.Result;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.StringUtils;
@@ -17,8 +17,6 @@ import io.nuls.transaction.utils.TxUtil;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import static io.nuls.core.constant.CommonCodeConstanst.NULL_PARAMETER;
 
 /**
  * 调用其他模块跟交易相关的接口
