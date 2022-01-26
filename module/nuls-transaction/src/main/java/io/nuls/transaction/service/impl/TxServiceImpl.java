@@ -69,7 +69,6 @@ import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.storage.ConfirmedTxStorageService;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
-import io.nuls.transaction.utils.BlackListUtils;
 import io.nuls.transaction.utils.TxDuplicateRemoval;
 import io.nuls.transaction.utils.TxUtil;
 
@@ -92,9 +91,6 @@ public class TxServiceImpl implements TxService {
 
     @Autowired
     private PackablePool packablePool;
-
-    @Autowired
-    private BlackListUtils blackListUtils;
 
     @Autowired
     private UnconfirmedTxStorageService unconfirmedTxStorageService;
@@ -158,7 +154,6 @@ public class TxServiceImpl implements TxService {
                 //节点区块同步中或回滚中,暂停接纳新交易
                 throw new NulsException(TxErrorCode.PAUSE_NEWTX);
             }
-            validateTxAddress(tx);
             NulsHash hash = tx.getHash();
             if (isTxExists(chain, hash)) {
                 throw new NulsException(TxErrorCode.TX_ALREADY_EXISTS);
@@ -2919,14 +2914,4 @@ public class TxServiceImpl implements TxService {
         return rs;
     }
 
-    private void validateTxAddress(Transaction tx) throws NulsException {
-        CoinData coinData = tx.getCoinDataInstance();
-        for (CoinFrom from : coinData.getFrom()) {
-            String address = AddressTool.getStringAddressByBytes(from.getAddress());
-            if (!blackListUtils.isPass(address)) {
-                throw new NulsException(TxErrorCode.BLOCK_ADDRESS);
-            }
-        }
-        return;
-    }
 }
