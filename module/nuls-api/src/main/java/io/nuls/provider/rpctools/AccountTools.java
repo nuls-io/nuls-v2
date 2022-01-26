@@ -13,6 +13,7 @@ import io.nuls.core.parse.MapUtils;
 import io.nuls.core.parse.SerializeUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.provider.model.dto.AccountBlockDTO;
 import io.nuls.provider.rpctools.vo.Account;
 import io.nuls.v2.error.AccountErrorCode;
 import io.nuls.v2.util.AccountTool;
@@ -104,6 +105,37 @@ public class AccountTools implements CallRpc {
         } catch (Exception e) {
             Log.error(e);
             return false;
+        }
+    }
+
+    public AccountBlockDTO getBlockAccountInfo(int chainId, String address) {
+        try {
+            if (StringUtils.isBlank(address)) {
+                return null;
+            }
+            Map<String, Object> params = new HashMap<>(4);
+            params.put(Constants.CHAIN_ID, chainId);
+            params.put("address", address);
+            AccountBlockDTO dto = callRpc(ModuleE.AC.abbr, "ac_getBlockAccountInfo", params, (Function<Map<String, Object>, AccountBlockDTO>) res -> {
+                if (res == null) {
+                    return null;
+                }
+                AccountBlockDTO result = new AccountBlockDTO();
+                result.setAddress((String) res.get("address"));
+                Object obj0 = res.get("types");
+                if (obj0 != null) {
+                    result.setTypes((List<Integer>) obj0);
+                }
+                Object obj1 = res.get("contracts");
+                if (obj1 != null) {
+                    result.setContracts((List<String>) obj1);
+                }
+                return result;
+            });
+            return dto;
+        } catch (Exception e) {
+            io.nuls.provider.utils.Log.error(e);
+            return null;
         }
     }
 

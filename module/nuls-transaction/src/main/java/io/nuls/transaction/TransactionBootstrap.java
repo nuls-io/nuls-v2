@@ -31,6 +31,7 @@ import io.nuls.base.protocol.RegisterHelper;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.model.StringUtils;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.model.ModuleE;
@@ -42,12 +43,15 @@ import io.nuls.core.rpc.util.AddressPrefixDatas;
 import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
+import io.nuls.transaction.constant.TxContext;
 import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.utils.DBUtil;
 import io.nuls.transaction.utils.TxUtil;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Set;
 
 import static io.nuls.transaction.utils.LoggerUtil.LOG;
@@ -83,6 +87,7 @@ public class TransactionBootstrap extends RpcModule {
             initSys();
             //初始化数据库配置文件
             initDB();
+            initTransactionContext();
             chainManager.initChain();
             TxUtil.blackHolePublicKey = HexUtil.decode(txConfig.getBlackHolePublicKey());
             ModuleHelper.init(this);
@@ -197,5 +202,15 @@ public class TransactionBootstrap extends RpcModule {
         }
     }
 
-
+    private void initTransactionContext(){
+        String accountBlockManagerPublicKeys = txConfig.getAccountBlockManagerPublicKeys();
+        if (StringUtils.isNotBlank(accountBlockManagerPublicKeys)) {
+            String[] split = accountBlockManagerPublicKeys.split(",");
+            for (String pubkey : split) {
+                TxContext.ACCOUNT_BLOCK_MANAGER_ADDRESS_SET.add(AddressTool.getAddressString(HexUtil.decode(pubkey.trim()), txConfig.getChainId()));
+            }
+            int size = TxContext.ACCOUNT_BLOCK_MANAGER_ADDRESS_SET.size();
+            TxContext.ACCOUNT_BLOCK_MIN_SIGN_COUNT = BigDecimal.valueOf(size).multiply(BigDecimal.valueOf(6)).divide(BigDecimal.TEN, 0, RoundingMode.UP).intValue();
+        }
+	}
 }

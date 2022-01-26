@@ -93,10 +93,6 @@ dataPath=../../../../../data
 logPath=../../../../../Logs
 dependent=protocol-update,smart-contract,cross-chain
 
-[transaction]
-dependent=protocol-update,smart-contract
-blackListPath=/Users/zhouwei/data/nuls-v2/account
-
 [ledger]
 dependent=protocol-update
 
@@ -126,6 +122,9 @@ socketTimeout=300000
 #连接超时时间
 connectTimeOut=30000
 dependent=smart-contract,cross-chain,chain-manager
+
+[transaction]
+dependent=protocol-update,smart-contract
 
 [cross-chain]
 #跨链节点链接的最小值

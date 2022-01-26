@@ -100,13 +100,15 @@ public class LegderTools implements CallRpc {
                     if (dto == null) {
                         accountBalance.setBalance("0");
                         accountBalance.setTotalBalance("0");
+                        accountBalance.setConsensusLock("0");
                     } else {
                         accountBalance.setBalance(dto.getAmount());
-                        accountBalance.setTotalBalance(dto.getAmount());
+                        accountBalance.setConsensusLock(dto.getLockAmount());
+                        BigInteger balance = new BigInteger(dto.getAmount());
+                        BigInteger lockBalance = new BigInteger(dto.getLockAmount());
+                        accountBalance.setTotalBalance(balance.add(lockBalance).toString());
                     }
-
                     accountBalance.setTimeLock("0");
-                    accountBalance.setConsensusLock("0");
                     accountBalance.setFreeze("0");
                     accountBalanceList.add(accountBalance);
                 }

@@ -66,8 +66,12 @@ public class NulsRuntimeException extends RuntimeException {
     public NulsRuntimeException(ErrorCode errorCode, String message) {
         super(errorCode.getMsg());
         this.code = errorCode.getCode();
-        this.message = errorCode.getMsg() + ";" + message;
         this.errorCode = errorCode;
+        if (StringUtils.isNotBlank(errorCode.getMsg())) {
+            this.message = errorCode.getMsg() + ";" + message;
+        } else {
+            this.message = message;
+        }
     }
 
     /**
@@ -111,8 +115,12 @@ public class NulsRuntimeException extends RuntimeException {
     public NulsRuntimeException(ErrorCode errorCode, String message, Throwable cause) {
         super(errorCode.getMsg(), cause);
         this.code = errorCode.getCode();
-        this.message = errorCode.getMsg() + ":" + message;
         this.errorCode = errorCode;
+        if (StringUtils.isNotBlank(errorCode.getMsg())) {
+            this.message = errorCode.getMsg() + ";" + message;
+        } else {
+            this.message = message;
+        }
     }
 
     /**
@@ -183,7 +191,7 @@ public class NulsRuntimeException extends RuntimeException {
         return errorCode;
     }
 
-    public String format(){
-       return MessageFormat.format("NulsRuntimeException -code: [{0}], -msg: {1}", this.code, this.message);
+    public String format() {
+        return MessageFormat.format("NulsRuntimeException -code: [{0}], -msg: {1}", this.code, this.message);
     }
 }
