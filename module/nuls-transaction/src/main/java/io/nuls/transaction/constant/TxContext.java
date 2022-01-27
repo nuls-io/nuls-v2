@@ -23,6 +23,9 @@
  */
 package io.nuls.transaction.constant;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * @author: PierreLuo
  * @date: 2019-12-04
@@ -33,4 +36,10 @@ public class TxContext {
     public static short UPDATE_VERSION_CONTRACT_ASSET = 8;
 
     public static short UPDATE_VERSION_ACCOUNT_BLOCK = 11;
+
+    public static short UPDATE_VERSION_ACCOUNT_BLOCK_UPGRADE = 12;
+
+    public static Set<String> ACCOUNT_BLOCK_MANAGER_ADDRESS_SET = new HashSet<>();
+    // 最小签名数
+    public static int ACCOUNT_BLOCK_MIN_SIGN_COUNT = 0;
 }
