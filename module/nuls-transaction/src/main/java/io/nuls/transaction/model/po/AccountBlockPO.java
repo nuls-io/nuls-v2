@@ -23,10 +23,9 @@
  *
  */
 
-package io.nuls.account.model.po;
+package io.nuls.transaction.model.po;
 
 
-import io.nuls.account.model.bo.tx.AccountBlockInfo;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.Address;
@@ -47,16 +46,6 @@ public class AccountBlockPO extends BaseNulsData {
     private byte[] extend;
 
     public AccountBlockPO() {
-    }
-
-    public AccountBlockPO(byte[] address) {
-        this.address = address;
-    }
-
-    public AccountBlockPO(byte[] address, AccountBlockInfo info) throws IOException {
-        this.address = address;
-        AccountBlockExtendPO po = new AccountBlockExtendPO(address, info);
-        this.extend = po.serialize();
     }
 
     @Override

@@ -27,6 +27,8 @@ import io.nuls.account.config.AccountConfig;
 import io.nuls.account.config.NulsConfig;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Chain;
+import io.nuls.account.model.bo.tx.AccountBlockExtend;
+import io.nuls.account.model.bo.tx.AccountBlockInfo;
 import io.nuls.account.model.bo.tx.txdata.AccountBlockData;
 import io.nuls.account.util.TxUtil;
 import io.nuls.base.basic.AddressTool;
@@ -77,6 +79,17 @@ public class AccountBlockHelper {
         if (addresses.length == 0) {
             chain.getLogger().error("empty addresses");
             return Result.getFailed(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
+        }
+        // 检查白名单
+        byte[] txDataExtend = txData.getExtend();
+        if (txDataExtend != null) {
+            AccountBlockExtend abExtend = new AccountBlockExtend();
+            abExtend.parse(txDataExtend, 0);
+            AccountBlockInfo[] infos = abExtend.getInfos();
+            if (addresses.length != infos.length) {
+                chain.getLogger().error("inconsistent address data in txData");
+                return Result.getFailed(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
+            }
         }
         for (String addr : addresses) {
             if (addr.equals(accountConfig.getBlockAccountManager())) {
