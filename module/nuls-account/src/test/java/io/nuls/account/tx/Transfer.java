@@ -47,6 +47,7 @@ import io.nuls.core.constant.TxType;
 import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.io.IoUtils;
 import io.nuls.core.log.Log;
 import io.nuls.core.parse.I18nUtils;
 import io.nuls.core.parse.JSONUtils;
@@ -56,12 +57,16 @@ import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.v2.model.dto.RpcResult;
 import io.nuls.v2.util.JsonRpcUtil;
+import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -96,7 +101,8 @@ public class Transfer implements Runnable {
 
     private String addressTo;
 
-    public Transfer(){}
+    public Transfer() {
+    }
 
     //public Transfer(String addressFrom, String addressTo) {
     //    this.addressFrom = addressFrom;
@@ -133,7 +139,7 @@ public class Transfer implements Runnable {
 
         Map<String, Object> params = new HashMap<>();
         List<String> pubKeys = new ArrayList<>();
-        for (Account account:accountList ) {
+        for (Account account : accountList) {
             System.out.println(HexUtil.encode(account.getPriKey()));
             pubKeys.add(HexUtil.encode(account.getPubKey()));
         }
@@ -150,14 +156,15 @@ public class Transfer implements Runnable {
         String address = (String) result.get("address");
         assertNotNull(address);
         int resultMinSigns = (int) result.get("minSign");
-        assertEquals(resultMinSigns,2);
+        assertEquals(resultMinSigns, 2);
         List<String> resultPubKeys = (List<String>) result.get("pubKeys");
         assertNotNull(resultPubKeys);
-        assertEquals(pubKeys.size(),3);
+        assertEquals(pubKeys.size(), 3);
     }
 
-    String fromStr,rpcAddress;
+    String fromStr, rpcAddress;
     String fromKey;
+
     private void setDev() {
         chainId = 2;
         assetChainId = 2;
@@ -199,13 +206,12 @@ public class Transfer implements Runnable {
         CoinData coinData = new CoinData();
 
 
-
         byte[] from = AddressTool.getAddress(fromStr);
         byte[] nonce;
         RpcResult request = JsonRpcUtil.request(rpcAddress, "getAccountBalance", List.of(chainId, assetChainId, assetId, fromStr));
         Map result = (Map) request.getResult();
         String nonceStr = (String) result.get("nonce");
-        if(null == nonceStr){
+        if (null == nonceStr) {
             nonce = HexUtil.decode("0000000000000000");
         } else {
             nonce = HexUtil.decode(nonceStr);
@@ -274,10 +280,10 @@ public class Transfer implements Runnable {
         CoinData coinData = new CoinData();
         byte[] from = AddressTool.getAddress(fromStr);
         byte[] nonce;
-        RpcResult request = JsonRpcUtil.request(rpcAddress, "getAccountBalance", List.of(chainId, assetChainId, assetId, fromStr));
-        Map result = (Map) request.getResult();
-        String nonceStr = (String) result.get("nonce");
-        if(null == nonceStr){
+        RpcResult request0 = JsonRpcUtil.request(rpcAddress, "getAccountBalance", List.of(chainId, assetChainId, assetId, fromStr));
+        Map result0 = (Map) request0.getResult();
+        String nonceStr = (String) result0.get("nonce");
+        if (null == nonceStr) {
             nonce = HexUtil.decode("0000000000000000");
         } else {
             nonce = HexUtil.decode(nonceStr);
@@ -286,12 +292,40 @@ public class Transfer implements Runnable {
         coinData.addTo(new CoinTo(from, assetChainId, assetId, BigInteger.ZERO, (byte) 0));
         tx.setCoinData(coinData.serialize());
 
-        List<Object[]> blockDatas = new ArrayList<>();
+        //List<Object[]> blockDatas = new ArrayList<>();
+        //// 锁定列表: 地址，操作类型(1-加入白名单 2-移除白名单)，白名单交易类型清单，白名单合约地址清单
+        //blockDatas.add(new Object[]{"tNULSeBaMhKaLzhQh1AhhecUqh15ZKw98peg29", 2, List.of(16), List.of("tNULSeBaN2pQjawtQXr7k7KFN442XQ2CmpsUGr")});
+        //blockDatas.add(new Object[]{"tNULSeBaMv8q3pWzS7bHpQWW8yypNGo8auRoPf", 2, List.of(2)});
+        //blockDatas.add(new Object[]{"tNULSeBaMmbiCH5soCFasXnG4TwqknyTzYBM3S", 1, List.of(2)});
+        File file0 = new File("/Users/pierreluo/Nuls/pocm_deposit.txt");
+        List<String> list0 = IOUtils.readLines(new FileInputStream(file0), StandardCharsets.UTF_8.name());
+        System.out.println("read 0 length: " + list0.size());
+        Map<String, Set<String>> userMap = new HashMap<>();
+        for (String str : list0) {
+            String[] split = str.split("\\s+");
+            String contract = split[1].trim();
+            String user = split[2].trim();
+            RpcResult request = JsonRpcUtil.request(rpcAddress, "isBlockAccount", List.of(chainId, user));
+            Map result = (Map) request.getResult();
+            Boolean isBlock = (Boolean) result.get("value");
+            if (!isBlock) {
+                System.out.println(String.format("用户[%s]未锁定", user));
+                continue;
+            }
+            Set<String> userContractList = userMap.computeIfAbsent(user, u -> new HashSet<>());
+            userContractList.add(contract);
+        }
         // 锁定列表: 地址，操作类型(1-加入白名单 2-移除白名单)，白名单交易类型清单，白名单合约地址清单
-        blockDatas.add(new Object[]{"tNULSeBaMtkzQ1tH8JWBGZDCmRHCmySevE4frM", 1, List.of(2, 3)});
-        blockDatas.add(new Object[]{"tNULSeBaMhKaLzhQh1AhhecUqh15ZKw98peg29", 1, List.of(61), List.of("", "")});
-        blockDatas.add(new Object[]{"tNULSeBaMv8q3pWzS7bHpQWW8yypNGo8auRoPf", 1, List.of(71)});
-        blockDatas.add(new Object[]{"tNULSeBaMmbiCH5soCFasXnG4TwqknyTzYBM3S", 1, List.of()});
+        List<Object[]> blockDatas = new ArrayList<>();
+        Set<Map.Entry<String, Set<String>>> entries = userMap.entrySet();
+        for (Map.Entry<String, Set<String>> entry : entries) {
+            String user = entry.getKey();
+            Set<String> contracts = entry.getValue();
+            if (contracts.isEmpty()) {
+                System.out.println(String.format("用户[%s]没有质押的合约", user));
+            }
+            blockDatas.add(new Object[]{user, 1, List.of(16), contracts.stream().collect(Collectors.toList())});
+        }
         AccountBlockData data = this.makeTxData(blockDatas);
 
         tx.setTxData(data.serialize());
@@ -328,6 +362,44 @@ public class Transfer implements Runnable {
     }
 
     @Test
+    public void makeDataFromPocmUserTest() throws Exception {
+        setMain();
+        File file0 = new File("/Users/pierreluo/Nuls/pocm_deposit.txt");
+        List<String> list0 = IOUtils.readLines(new FileInputStream(file0), StandardCharsets.UTF_8.name());
+        System.out.println("read 0 length: " + list0.size());
+
+        Map<String, Set<String>> userMap = new HashMap<>();
+        for (String str : list0) {
+            String[] split = str.split("\\s+");
+            String contract = split[1].trim();
+            String user = split[2].trim();
+            RpcResult request = JsonRpcUtil.request(rpcAddress, "isBlockAccount", List.of(chainId, user));
+            Map result = (Map) request.getResult();
+            Boolean isBlock = (Boolean) result.get("value");
+            if (!isBlock) {
+                System.out.println(String.format("用户[%s]未锁定", user));
+                continue;
+            }
+            Set<String> userContractList = userMap.computeIfAbsent(user, u -> new HashSet<>());
+            userContractList.add(contract);
+        }
+        // 锁定列表: 地址，操作类型(1-加入白名单 2-移除白名单)，白名单交易类型清单，白名单合约地址清单
+        List<Object[]> blockDatas = new ArrayList<>();
+        Set<Map.Entry<String, Set<String>>> entries = userMap.entrySet();
+        for (Map.Entry<String, Set<String>> entry : entries) {
+            String user = entry.getKey();
+            Set<String> contracts = entry.getValue();
+            if (contracts.isEmpty()) {
+                System.out.println(String.format("用户[%s]没有质押的合约", user));
+            }
+            blockDatas.add(new Object[]{user, 1, List.of(16), contracts.stream().collect(Collectors.toList())});
+        }
+        AccountBlockData data = this.makeTxData(blockDatas);
+        System.out.println();
+
+    }
+
+    @Test
     public void accountUnBlockMultiSignTest() throws Exception {
         setMain();
         Chain chain = new Chain();
@@ -345,7 +417,7 @@ public class Transfer implements Runnable {
         RpcResult request = JsonRpcUtil.request(rpcAddress, "getAccountBalance", List.of(chainId, assetChainId, assetId, fromStr));
         Map result = (Map) request.getResult();
         String nonceStr = (String) result.get("nonce");
-        if(null == nonceStr){
+        if (null == nonceStr) {
             nonce = HexUtil.decode("0000000000000000");
         } else {
             nonce = HexUtil.decode(nonceStr);
@@ -355,9 +427,7 @@ public class Transfer implements Runnable {
         tx.setCoinData(coinData.serialize());
         AccountBlockData data = new AccountBlockData();
         data.setAddresses(new String[]{
-                "NULSd6HgbbZXaNpTnsX8xV6Ba71LcZTHj8h2m",
-                "NULSd6HgcepyBE29opHVxRe45i6hj1CkRFC77",
-                "NULSd6HgfigP5197KYBha4wjMavVfgXaZLT4z"
+                "NULSd6HgULxH4pjz6aeq1icmgKEZeqcsESG7i"
         });
         tx.setTxData(data.serialize());
         tx.setTime(System.currentTimeMillis() / 1000);
@@ -391,9 +461,9 @@ public class Transfer implements Runnable {
 
     @Test
     public void appendSignature() throws Exception {
-        setDev();
-        String pri = fromKey;
-        String txHex = "020042dff06100008c011702000125d3ea472bcaf2e917dc94d8adb8b63b98a5267002000100a06a0d540200000000000000000000000000000000000000000000000000000008bf3753c5a554083b000117020003a5ddfee2b74c41e0ed2c6a42e0fa305578ab26e40200010000e40b54020000000000000000000000000000000000000000000000000000000000000000000000692102c4171414b582549b178b148e5825d372ac8c4217832f111da56185d6c8b97a0246304402200ba77797e2e4b8f6f0d5245b036091319db1755eebf08c403691644c0de4bc8f0220173edbb8c5bc5991b1b9e54b1ddc58c20d064c9b8e3376b3874196b9e6727335";
+        //setDev();
+        String pri = "???";
+        String txHex = "0200ca5af1611e7472616e73666572207472616e73616374696f6e2072656d61726b2e2e2e008c011702000125d3ea472bcaf2e917dc94d8adb8b63b98a5267002000100a08eb02f0000000000000000000000000000000000000000000000000000000008f14e5e70f2072dc5000117020001f7ec6473df12e751d64cf20a8baa7edd50810f81020001000008af2f000000000000000000000000000000000000000000000000000000000000000000000000fd3c012102c4171414b582549b178b148e5825d372ac8c4217832f111da56185d6c8b97a0247304502203bbe4619384bc102aa61991a6977cb93d2408e4279e65b81cc6039c640f01dc4022100f4374970a80e68e57b852e3b7280f8dc67206920f568d5659e845a5a61d1f2862102b2e32f94116d2364af6f06ae9af7f58824b0d3a57fca9170b1a36b665aa9319546304402203c215cca926884b1496e2ffd989cc0dfe89d5fa011a5b0940aaf3ccc6d8e70d902200fb5e65f457551d8d68d95e80ec7c88fe5594ab6de7fd878d1ee2538971478b021020aee2c9cde73f50c5e2eef756b92aeb138bc3cda3438b31a68b56f16004bebf846304402204e6a1de48907f478f5d926d6d8cc915863d1745ba62e14f92d81b95bbdab26d2022018c37949d032d4b7924ff603b61a0e8c207b0a01db4ef65a11fd6fa77ba179ae";
         Transaction tx = new Transaction();
         tx.parse(HexUtil.decode(txHex), 0);
         TransactionSignature transactionSignature = new TransactionSignature();
@@ -408,9 +478,8 @@ public class Transfer implements Runnable {
 
     @Test
     public void txMultiSignTest() throws Exception {
-        //String filePath = "???";
-        //String txHex = IoUtils.readBytesToString(new File(filePath));
-        String txHex = "40003ffbef6100290100254e554c536436486758506772733263386d4341364d6251794c445a357061474d5948656773008c011701000345b919fcffa7d778598fc60864819d6c1127a0770100010080969800000000000000000000000000000000000000000000000000000000000872421542c80a40e900011701000345b919fcffa7d778598fc60864819d6c1127a0770100010000000000000000000000000000000000000000000000000000000000000000000000000000000000fd7e010305210225a6a872a4110c9b9c9a71bfdbe896e04bc83bb9fe38e27f3e18957d9b2a25ad21029f8ab66d157ddfd12d89986833eb2a8d6dc0d92c87da12225d02690583ae10202102784d89575c16f9407c7218f8ca6c6a80d44023cd37796fc5458cbce1ede88adb21020aee2c9cde73f50c5e2eef756b92aeb138bc3cda3438b31a68b56f16004bebf82102b2e32f94116d2364af6f06ae9af7f58824b0d3a57fca9170b1a36b665aa931952102b2e32f94116d2364af6f06ae9af7f58824b0d3a57fca9170b1a36b665aa931954630440220125a086dc6262f5c9ff5b372ac5781d5a3fa8e70d6353fea02035f0cebf84f58022061da9fee4bdc4f0e5c92324b0172e632aa1761be77320cd485c5431a2d301b1d21029f8ab66d157ddfd12d89986833eb2a8d6dc0d92c87da12225d02690583ae10204630440220053d02a0da09ff43e1e6b9551fe79809c06f59d829bc205c9814860476cfb64f02200a6d09c8d57a8c53c5b4963e838bdaea20ba1a7a59fe5528bf0a83c26b0fcaed";
+        String filePath = "???";
+        String txHex = IoUtils.readBytesToString(new File(filePath));
         String pri = "???";
         Transaction tx = new Transaction();
         tx.parse(HexUtil.decode(txHex), 0);
@@ -460,11 +529,12 @@ public class Transfer implements Runnable {
     private int[] list2array(List<Integer> list) {
         int[] result = new int[list.size()];
         int i = 0;
-        for(Integer a : list) {
+        for (Integer a : list) {
             result[i++] = a.intValue();
         }
         return result;
     }
+
     private AccountBlockData makeTxData(List<Object[]> list) throws Exception {
         List<AccountBlockInfo> infoList = new ArrayList<>();
         String[] addresses = new String[list.size()];
@@ -505,7 +575,7 @@ public class Transfer implements Runnable {
         CoinData coinData = new CoinData();
         byte[] from = AddressTool.getAddress(fromStr);
         byte[] nonce = TxUtil.getBalanceNonce(chain, assetChainId, assetId, from).getNonce();
-        if(null == nonce){
+        if (null == nonce) {
             nonce = HexUtil.decode("0000000000000000");
         }
         coinData.addFrom(new CoinFrom(from, assetChainId, assetId, new BigDecimal("0.001").movePointRight(8).toBigInteger(), nonce, (byte) 0));
@@ -516,7 +586,7 @@ public class Transfer implements Runnable {
         // 锁定列表: 地址，操作类型(1-加入白名单 2-移除白名单)，白名单交易类型清单
         blockDatas.add(new Object[]{"tNULSeBaMtkzQ1tH8JWBGZDCmRHCmySevE4frM", 2, List.of(3)});
         blockDatas.add(new Object[]{"tNULSeBaMhKaLzhQh1AhhecUqh15ZKw98peg29", 2, List.of(), List.of("tNULSeBaNA8cXq6wxnAwtgCJrYX9P1iosCzd1H")});
-        blockDatas.add(new Object[]{"tNULSeBaMv8q3pWzS7bHpQWW8yypNGo8auRoPf", 1, List.of(2,3)});
+        blockDatas.add(new Object[]{"tNULSeBaMv8q3pWzS7bHpQWW8yypNGo8auRoPf", 1, List.of(2, 3)});
         blockDatas.add(new Object[]{"tNULSeBaMmbiCH5soCFasXnG4TwqknyTzYBM3S", 1, List.of(3)});
         AccountBlockData data = this.makeTxData(blockDatas);
 
@@ -526,7 +596,7 @@ public class Transfer implements Runnable {
         TransactionSignature transactionSignature = new TransactionSignature();
         List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
         //根据密码获得ECKey get ECKey from Password
-        ECKey ecKey =  ECKey.fromPrivate(new BigInteger(1, HexUtil.decode(fromKey)));
+        ECKey ecKey = ECKey.fromPrivate(new BigInteger(1, HexUtil.decode(fromKey)));
         byte[] signBytes = SignatureUtil.signDigest(tx.getHash().getBytes(), ecKey).serialize();
         P2PHKSignature signature = new P2PHKSignature(signBytes, ecKey.getPubKey()); // TxUtil.getInstanceRpcStr(signatureStr, P2PHKSignature.class);
         p2PHKSignatures.add(signature);
@@ -551,7 +621,7 @@ public class Transfer implements Runnable {
         String fromKey = "???";
         byte[] from = AddressTool.getAddress("tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD");
         byte[] nonce = TxUtil.getBalanceNonce(chain, assetChainId, assetId, from).getNonce();
-        if(null == nonce){
+        if (null == nonce) {
             nonce = HexUtil.decode("0000000000000000");
         }
         coinData.addFrom(new CoinFrom(from, assetChainId, assetId, new BigDecimal("0.001").movePointRight(8).toBigInteger(), nonce, (byte) 0));
@@ -569,7 +639,7 @@ public class Transfer implements Runnable {
         TransactionSignature transactionSignature = new TransactionSignature();
         List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
         //根据密码获得ECKey get ECKey from Password
-        ECKey ecKey =  ECKey.fromPrivate(new BigInteger(1, HexUtil.decode(fromKey)));
+        ECKey ecKey = ECKey.fromPrivate(new BigInteger(1, HexUtil.decode(fromKey)));
         byte[] signBytes = SignatureUtil.signDigest(tx.getHash().getBytes(), ecKey).serialize();
         P2PHKSignature signature = new P2PHKSignature(signBytes, ecKey.getPubKey()); // TxUtil.getInstanceRpcStr(signatureStr, P2PHKSignature.class);
         p2PHKSignatures.add(signature);
@@ -583,7 +653,7 @@ public class Transfer implements Runnable {
     @Test
     public void blockTest() {
         Set<String> nodes = new HashSet<>();
-        for (int i=7396000;i<7399782;i++) {
+        for (int i = 7396000; i < 7399782; i++) {
             System.out.println(String.format("load block header: %s", i));
             RpcResult request = JsonRpcUtil.request("https://api.nuls.io/jsonrpc", "getHeaderByHeight", List.of(1, Long.valueOf(i)));
             Map result = (Map) request.getResult();
@@ -609,7 +679,7 @@ public class Transfer implements Runnable {
         }
     }
 
-    private NulsHash transfer(NulsHash hash) throws Exception{
+    private NulsHash transfer(NulsHash hash) throws Exception {
         //Map transferMap = CreateTx.createTransferTx(addressFrom, addressTo, new BigInteger("1000000000"));
         Map transferMap = CreateTx.createAssetsTransferTx(addressFrom, addressTo);
         Transaction tx = CreateTx.assemblyTransaction((List<CoinDTO>) transferMap.get("inputs"),
@@ -623,7 +693,7 @@ public class Transfer implements Runnable {
     }
 
 
-    private Response newTx(Transaction tx)  throws Exception{
+    private Response newTx(Transaction tx) throws Exception {
         Map<String, Object> params = new HashMap<>(AccountConstant.INIT_CAPACITY_8);
         params.put(Constants.VERSION_KEY_STR, RpcConstant.TX_NEW_VERSION);
         params.put(RpcConstant.TX_CHAIN_ID, chainId);

@@ -182,7 +182,7 @@ public class AccountController {
         if (!FormatValidUtils.validPassword(newPassword)) {
             return RpcResult.paramError("[newPassword] is inValid");
         }
-        if (System.currentTimeMillis() - time < 3000L) {
+        if (Context.accessLimit && System.currentTimeMillis() - time < 3000L) {
             return RpcResult.paramError("Access frequency limit.");
         }
         time = System.currentTimeMillis();
@@ -233,7 +233,7 @@ public class AccountController {
             return RpcResult.paramError("[password] is inValid");
         }
 
-        if (System.currentTimeMillis() - time < 3000L) {
+        if (Context.accessLimit && System.currentTimeMillis() - time < 3000L) {
             return RpcResult.paramError("Access frequency limit.");
         }
         time = System.currentTimeMillis();
@@ -381,7 +381,7 @@ public class AccountController {
             return RpcResult.paramError("[password] is inValid");
         }
 
-        if (System.currentTimeMillis() - time < 3000L) {
+        if (Context.accessLimit && System.currentTimeMillis() - time < 3000L) {
             return RpcResult.paramError("Access frequency limit.");
         }
         time = System.currentTimeMillis();

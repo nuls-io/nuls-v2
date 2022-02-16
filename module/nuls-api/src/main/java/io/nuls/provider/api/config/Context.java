@@ -47,6 +47,7 @@ public class Context {
     public static List<String> blackAddressList = new ArrayList<>();
 
     public static ChainInfo defaultChain;
+    public static boolean accessLimit;
 
 
 
