@@ -36,7 +36,6 @@ public class Config implements ModuleConfig {
 
     private int decimals;
 
-
     public String getAddressPrefix() {
         return addressPrefix;
     }

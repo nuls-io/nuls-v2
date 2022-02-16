@@ -75,7 +75,9 @@ public class ApiBootstrap extends RpcModule {
             SpringLiteContext.init(basePackage);
         }
         initRpcServer(configItemMap);
-
+        if (null != configItemMap && configItemMap.get("accessLimit") != null) {
+            Context.accessLimit = Boolean.parseBoolean(configItemMap.get("accessLimit").getValue());
+        }
         NulsSDKBootStrap.init(defaultChainId, "");
         try {
             I18nUtils.setLanguage("en");
