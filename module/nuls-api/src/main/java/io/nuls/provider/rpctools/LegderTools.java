@@ -1,12 +1,15 @@
 package io.nuls.provider.rpctools;
 
 import io.nuls.base.api.provider.Result;
+import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.provider.api.cache.LedgerAssetCache;
+import io.nuls.provider.api.model.AssetInfo;
 import io.nuls.provider.model.dto.ContractTokenInfoDto;
 import io.nuls.provider.rpctools.vo.AccountBalance;
 
@@ -27,6 +30,8 @@ public class LegderTools implements CallRpc {
 
     @Autowired
     private ContractTools contractTools;
+    @Autowired
+    private LedgerAssetCache ledgerAssetCache;
 
     /**
      * 获取可用余额和nonce
@@ -53,6 +58,10 @@ public class LegderTools implements CallRpc {
                         .add(new BigInteger(balanceInfo.getConsensusLock()))
                         .add(new BigInteger(balanceInfo.getTimeLock())).toString());
                 balanceInfo.setNonceType((Integer) map.get("nonceType"));
+                AssetInfo assetInfo = ledgerAssetCache.getAssetInfo(assetChainId, assetId);
+                if (assetInfo != null) {
+                    balanceInfo.setDecimals(assetInfo.getDecimals());
+                }
                 return new Result<>(balanceInfo);
             });
         } catch (NulsRuntimeException e) {
@@ -61,16 +70,34 @@ public class LegderTools implements CallRpc {
     }
 
 
-    public Result<List> getAllAsset(int chainId) {
+    public Result<Map> getAllAsset(int chainId) {
         Map<String, Object> params = new HashMap(2);
         params.put(Constants.CHAIN_ID, chainId);
         try {
-            return callRpc(ModuleE.LG.abbr, "lg_get_all_asset", params, (Function<Map<String, Object>, Result<List>>) map -> {
+            return callRpc(ModuleE.LG.abbr, "lg_get_all_asset", params, (Function<Map<String, Object>, Result<Map>>) map -> {
                 if (map == null) {
                     return null;
                 }
                 List assets = (List) map.get("assets");
                 return new Result<>(assets);
+            });
+        } catch (NulsRuntimeException e) {
+            return Result.fail(e.getCode(), e.getMessage());
+        }
+    }
+
+    public Result<AssetInfo> getAsset(int assetChainId, int assetId) {
+        Map<String, Object> params = new HashMap(2);
+        params.put(Constants.CHAIN_ID, assetChainId);
+        params.put("assetId", assetId);
+        try {
+            return callRpc(ModuleE.LG.abbr, "getAssetRegInfoByAssetId", params, (Function<Map<String, Object>, Result<AssetInfo>>) map -> {
+                if (map == null || map.get("assetSymbol") == null) {
+                    return Result.fail(CommonCodeConstanst.DATA_NOT_FOUND.getCode(), null);
+                }
+                int decimalPlace = Integer.parseInt(map.get("decimalPlace").toString());
+                String symbol = map.get("assetSymbol").toString();
+                return new Result<>(new AssetInfo(assetChainId, assetId, symbol, decimalPlace));
             });
         } catch (NulsRuntimeException e) {
             return Result.fail(e.getCode(), e.getMessage());
@@ -97,6 +124,7 @@ public class LegderTools implements CallRpc {
                     accountBalance.setAssetChainId(assetChainId);
                     accountBalance.setAssetId(assetId);
                     accountBalance.setContractAddress(contractAddress);
+                    accountBalance.setDecimals((int) dto.getDecimals());
                     if (dto == null) {
                         accountBalance.setBalance("0");
                         accountBalance.setTotalBalance("0");

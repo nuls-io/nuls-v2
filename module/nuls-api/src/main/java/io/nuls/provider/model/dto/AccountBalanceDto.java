@@ -25,6 +25,8 @@ public class AccountBalanceDto {
     private String nonce;
     @ApiModelProperty(description = "1：已确认的nonce值,0：未确认的nonce值")
     private int nonceType;
+    @ApiModelProperty(description = "资产精度")
+    private int decimals;
 
     public AccountBalanceDto() {
 
@@ -38,6 +40,15 @@ public class AccountBalanceDto {
         this.consensusLock = info.getConsensusLock();
         this.nonce = info.getNonce();
         this.nonceType = info.getNonceType();
+        this.decimals = info.getDecimals();
+    }
+
+    public int getDecimals() {
+        return decimals;
+    }
+
+    public void setDecimals(int decimals) {
+        this.decimals = decimals;
     }
 
     public String getTotal() {
