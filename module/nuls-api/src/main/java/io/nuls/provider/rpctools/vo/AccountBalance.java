@@ -10,13 +10,12 @@ import io.nuls.core.rpc.model.ApiModelProperty;
  */
 @ApiModel
 public class AccountBalance {
-
+    @ApiModelProperty(description = "资产链ID")
     private int assetChainId;
-
+    @ApiModelProperty(description = "资产ID")
     private int assetId;
-
+    @ApiModelProperty(description = "合约地址")
     private String contractAddress;
-
     @ApiModelProperty(description = "总余额")
     private String totalBalance;
     @ApiModelProperty(description = "可用余额")
@@ -31,6 +30,16 @@ public class AccountBalance {
     private String nonce;
     @ApiModelProperty(description = "1：已确认的nonce值,0：未确认的nonce值")
     private int nonceType;
+    @ApiModelProperty(description = "资产精度")
+    private int decimals;
+
+    public int getDecimals() {
+        return decimals;
+    }
+
+    public void setDecimals(int decimals) {
+        this.decimals = decimals;
+    }
 
     public String getTotalBalance() {
         return totalBalance;
