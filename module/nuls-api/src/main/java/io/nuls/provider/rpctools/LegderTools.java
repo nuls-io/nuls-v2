@@ -12,6 +12,7 @@ import io.nuls.provider.api.cache.LedgerAssetCache;
 import io.nuls.provider.api.model.AssetInfo;
 import io.nuls.provider.model.dto.ContractTokenInfoDto;
 import io.nuls.provider.rpctools.vo.AccountBalance;
+import io.nuls.provider.rpctools.vo.AccountBalanceWithDecimals;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -49,6 +50,34 @@ public class LegderTools implements CallRpc {
                     return null;
                 }
                 AccountBalance balanceInfo = new AccountBalance();
+                balanceInfo.setBalance(map.get("available").toString());
+                balanceInfo.setTimeLock(map.get("timeHeightLocked").toString());
+                balanceInfo.setConsensusLock(map.get("permanentLocked").toString());
+                balanceInfo.setFreeze(map.get("freeze").toString());
+                balanceInfo.setNonce((String) map.get("nonce"));
+                balanceInfo.setTotalBalance(new BigInteger(balanceInfo.getBalance())
+                        .add(new BigInteger(balanceInfo.getConsensusLock()))
+                        .add(new BigInteger(balanceInfo.getTimeLock())).toString());
+                balanceInfo.setNonceType((Integer) map.get("nonceType"));
+                return new Result<>(balanceInfo);
+            });
+        } catch (NulsRuntimeException e) {
+            return Result.fail(e.getCode(), e.getMessage());
+        }
+    }
+
+    public Result<AccountBalanceWithDecimals> getBalanceAndNonceWithDecimals(int chainId, int assetChainId, int assetId, String address) {
+        Map<String, Object> params = new HashMap(4);
+        params.put(Constants.CHAIN_ID, chainId);
+        params.put("assetChainId", assetChainId);
+        params.put("address", address);
+        params.put("assetId", assetId);
+        try {
+            return callRpc(ModuleE.LG.abbr, "getBalanceNonce", params, (Function<Map<String, Object>, Result<AccountBalanceWithDecimals>>) map -> {
+                if (map == null) {
+                    return null;
+                }
+                AccountBalanceWithDecimals balanceInfo = new AccountBalanceWithDecimals();
                 balanceInfo.setBalance(map.get("available").toString());
                 balanceInfo.setTimeLock(map.get("timeHeightLocked").toString());
                 balanceInfo.setConsensusLock(map.get("permanentLocked").toString());
@@ -104,6 +133,50 @@ public class LegderTools implements CallRpc {
         }
     }
 
+    public Result<List<AccountBalanceWithDecimals>> getBalanceWithDecimalsList(int chainId, List<Map> coinDtoList, String address) {
+        try {
+            List<AccountBalanceWithDecimals> accountBalanceList = new ArrayList<>();
+            for (int i = 0; i < coinDtoList.size(); i++) {
+                Map map = coinDtoList.get(i);
+                int assetChainId = (int) map.get("chainId");
+                int assetId = (int) map.get("assetId");
+                String contractAddress = (String) map.get("contractAddress");
+                if (StringUtils.isBlank(contractAddress)) {
+                    AccountBalanceWithDecimals accountBalance = getBalanceAndNonceWithDecimals(chainId, assetChainId, assetId, address).getData();
+                    accountBalance.setAssetChainId(assetChainId);
+                    accountBalance.setAssetId(assetId);
+                    accountBalance.setContractAddress(contractAddress);
+                    accountBalanceList.add(accountBalance);
+                } else {
+                    ContractTokenInfoDto dto = contractTools.getTokenBalance(chainId, contractAddress, address).getData();
+                    AccountBalanceWithDecimals accountBalance = new AccountBalanceWithDecimals();
+                    accountBalance.setAssetChainId(assetChainId);
+                    accountBalance.setAssetId(assetId);
+                    accountBalance.setContractAddress(contractAddress);
+                    accountBalance.setDecimals((int) dto.getDecimals());
+                    if (dto == null) {
+                        accountBalance.setBalance("0");
+                        accountBalance.setTotalBalance("0");
+                        accountBalance.setConsensusLock("0");
+                    } else {
+                        accountBalance.setBalance(dto.getAmount());
+                        accountBalance.setConsensusLock(dto.getLockAmount());
+                        BigInteger balance = new BigInteger(dto.getAmount());
+                        BigInteger lockBalance = new BigInteger(dto.getLockAmount());
+                        accountBalance.setTotalBalance(balance.add(lockBalance).toString());
+                    }
+                    accountBalance.setTimeLock("0");
+                    accountBalance.setFreeze("0");
+                    accountBalanceList.add(accountBalance);
+                }
+            }
+            return new Result<List<AccountBalanceWithDecimals>>(accountBalanceList);
+        } catch (NulsRuntimeException e) {
+            return Result.fail(e.getCode(), e.getMessage());
+        }
+
+    }
+
     public Result<List<AccountBalance>> getBalanceList(int chainId, List<Map> coinDtoList, String address) {
         try {
             List<AccountBalance> accountBalanceList = new ArrayList<>();
@@ -124,7 +197,6 @@ public class LegderTools implements CallRpc {
                     accountBalance.setAssetChainId(assetChainId);
                     accountBalance.setAssetId(assetId);
                     accountBalance.setContractAddress(contractAddress);
-                    accountBalance.setDecimals((int) dto.getDecimals());
                     if (dto == null) {
                         accountBalance.setBalance("0");
                         accountBalance.setTotalBalance("0");
