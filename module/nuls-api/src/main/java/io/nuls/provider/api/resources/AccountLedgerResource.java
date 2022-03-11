@@ -23,12 +23,11 @@
  */
 package io.nuls.provider.api.resources;
 
-import io.nuls.base.api.provider.crosschain.CrossChainProvider;
-import io.nuls.base.api.provider.crosschain.facade.CreateCrossTxReq;
-import io.nuls.provider.api.config.Config;
 import io.nuls.base.RPCUtil;
 import io.nuls.base.api.provider.Result;
 import io.nuls.base.api.provider.ServiceManager;
+import io.nuls.base.api.provider.crosschain.CrossChainProvider;
+import io.nuls.base.api.provider.crosschain.facade.CreateCrossTxReq;
 import io.nuls.base.api.provider.ledger.LedgerProvider;
 import io.nuls.base.api.provider.transaction.TransferService;
 import io.nuls.base.api.provider.transaction.facade.TransferReq;
@@ -41,9 +40,11 @@ import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.model.*;
+import io.nuls.provider.api.config.Config;
 import io.nuls.provider.model.ErrorData;
 import io.nuls.provider.model.RpcClientResult;
 import io.nuls.provider.model.dto.AccountBalanceDto;
+import io.nuls.provider.model.dto.AccountBalanceWithDecimalsDto;
 import io.nuls.provider.model.form.BalanceForm;
 import io.nuls.provider.model.form.CrossTransferForm;
 import io.nuls.provider.model.form.TransferForm;
@@ -52,6 +53,7 @@ import io.nuls.provider.rpctools.ContractTools;
 import io.nuls.provider.rpctools.LegderTools;
 import io.nuls.provider.rpctools.TransactionTools;
 import io.nuls.provider.rpctools.vo.AccountBalance;
+import io.nuls.provider.rpctools.vo.AccountBalanceWithDecimals;
 import io.nuls.provider.utils.Log;
 import io.nuls.provider.utils.ResultUtil;
 import io.nuls.provider.utils.Utils;
@@ -122,6 +124,32 @@ public class AccountLedgerResource {
         RpcClientResult clientResult = ResultUtil.getRpcClientResult(balanceResult);
         if (clientResult.isSuccess()) {
             clientResult.setData(new AccountBalanceDto((AccountBalance) clientResult.getData()));
+        }
+        return clientResult;
+    }
+
+    @POST
+    @Path("/balanceWithDecimals/{address}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(description = "查询账户余额", order = 109, detailDesc = "根据资产链ID和资产ID，查询本链账户对应资产的余额与nonce值")
+    @Parameters({
+            @Parameter(parameterName = "balanceDto", parameterDes = "账户余额表单", requestType = @TypeDescriptor(value = BalanceForm.class))
+    })
+    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = AccountBalanceWithDecimalsDto.class))
+    public RpcClientResult getBalanceWithDecimals(@PathParam("address") String address, BalanceForm form) {
+        if (!AddressTool.validAddress(config.getChainId(), address)) {
+            return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "address is invalid"));
+        }
+        if (form.getAssetChainId() < 1 || form.getAssetChainId() > 65535) {
+            return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "assetChainId is invalid"));
+        }
+        if (form.getAssetId() < 1 || form.getAssetId() > 65535) {
+            return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "assetId is invalid"));
+        }
+        Result<AccountBalanceWithDecimals> balanceResult = legderTools.getBalanceAndNonceWithDecimals(config.getChainId(), form.getAssetChainId(), form.getAssetId(), address);
+        RpcClientResult clientResult = ResultUtil.getRpcClientResult(balanceResult);
+        if (clientResult.isSuccess()) {
+            clientResult.setData(new AccountBalanceWithDecimalsDto((AccountBalanceWithDecimals) clientResult.getData()));
         }
         return clientResult;
     }
