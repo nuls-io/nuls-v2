@@ -563,7 +563,7 @@ public class AccountController {
             @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "账户地址"),
             @Parameter(parameterName = "assetIdList", requestType = @TypeDescriptor(value = List.class), parameterDes = "资产的ID集合")
     })
-    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = AccountBalance.class))
+    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = AccountBalanceWithDecimals.class))
     public RpcResult getBalanceWithDecimalsList(List<Object> params) {
         VerifyUtils.verifyParams(params, 3);
         String address;

@@ -30,16 +30,6 @@ public class AccountBalance {
     private String nonce;
     @ApiModelProperty(description = "1：已确认的nonce值,0：未确认的nonce值")
     private int nonceType;
-    @ApiModelProperty(description = "资产精度")
-    private int decimals;
-
-    public int getDecimals() {
-        return decimals;
-    }
-
-    public void setDecimals(int decimals) {
-        this.decimals = decimals;
-    }
 
     public String getTotalBalance() {
         return totalBalance;
