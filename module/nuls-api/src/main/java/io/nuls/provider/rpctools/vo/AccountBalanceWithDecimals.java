@@ -4,12 +4,11 @@ import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
 
 /**
- * @Author: zhoulijun
- * @Time: 2019-06-12 17:33
- * @Description: 账户余额和nonce
+ * @author: PierreLuo
+ * @date: 2022/3/11
  */
 @ApiModel
-public class AccountBalance {
+public class AccountBalanceWithDecimals {
     @ApiModelProperty(description = "资产链ID")
     private int assetChainId;
     @ApiModelProperty(description = "资产ID")
@@ -30,6 +29,31 @@ public class AccountBalance {
     private String nonce;
     @ApiModelProperty(description = "1：已确认的nonce值,0：未确认的nonce值")
     private int nonceType;
+    @ApiModelProperty(description = "资产精度")
+    private int decimals;
+
+    public AccountBalance toAccountBalance() {
+        AccountBalance accountBalance = new AccountBalance();
+        accountBalance.setAssetChainId(assetChainId);
+        accountBalance.setAssetId(assetId);
+        accountBalance.setContractAddress(contractAddress);
+        accountBalance.setTotalBalance(totalBalance);
+        accountBalance.setBalance(balance);
+        accountBalance.setTimeLock(timeLock);
+        accountBalance.setConsensusLock(consensusLock);
+        accountBalance.setFreeze(freeze);
+        accountBalance.setNonce(nonce);
+        accountBalance.setNonceType(nonceType);
+        return accountBalance;
+    }
+
+    public int getDecimals() {
+        return decimals;
+    }
+
+    public void setDecimals(int decimals) {
+        this.decimals = decimals;
+    }
 
     public String getTotalBalance() {
         return totalBalance;

@@ -2,14 +2,14 @@ package io.nuls.provider.model.dto;
 
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
-import io.nuls.provider.rpctools.vo.AccountBalance;
+import io.nuls.provider.rpctools.vo.AccountBalanceWithDecimals;
 
 /**
  * @author: PierreLuo
  * @date: 2019-06-30
  */
 @ApiModel
-public class AccountBalanceDto {
+public class AccountBalanceWithDecimalsDto {
 
     @ApiModelProperty(description = "总余额")
     private String total;
@@ -25,12 +25,14 @@ public class AccountBalanceDto {
     private String nonce;
     @ApiModelProperty(description = "1：已确认的nonce值,0：未确认的nonce值")
     private int nonceType;
+    @ApiModelProperty(description = "资产精度")
+    private int decimals;
 
-    public AccountBalanceDto() {
+    public AccountBalanceWithDecimalsDto() {
 
     }
 
-    public AccountBalanceDto(AccountBalance info) {
+    public AccountBalanceWithDecimalsDto(AccountBalanceWithDecimals info) {
         this.total = info.getTotalBalance();
         this.freeze = info.getFreeze();
         this.available = info.getBalance();
@@ -38,6 +40,15 @@ public class AccountBalanceDto {
         this.consensusLock = info.getConsensusLock();
         this.nonce = info.getNonce();
         this.nonceType = info.getNonceType();
+        this.decimals = info.getDecimals();
+    }
+
+    public int getDecimals() {
+        return decimals;
+    }
+
+    public void setDecimals(int decimals) {
+        this.decimals = decimals;
     }
 
     public String getTotal() {
