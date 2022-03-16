@@ -27,9 +27,7 @@ import io.nuls.account.config.AccountConfig;
 import io.nuls.account.config.NulsConfig;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Chain;
-import io.nuls.account.model.bo.tx.AccountBlockExtend;
-import io.nuls.account.model.bo.tx.AccountBlockInfo;
-import io.nuls.account.model.bo.tx.txdata.AccountBlockData;
+import io.nuls.account.model.bo.tx.txdata.AccountContractCallData;
 import io.nuls.account.util.TxUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinData;
@@ -50,13 +48,13 @@ import static io.nuls.account.util.TxUtil.getSuccess;
  * @date: 2022/1/18
  */
 @Component
-public class AccountBlockHelper {
+public class AccountContractCallHelper {
 
     @Autowired
     private AccountConfig accountConfig;
 
 
-    public Result blockAccountTxValidate(Chain chain, Transaction tx) throws NulsException {
+    public Result validate(Chain chain, Transaction tx) throws NulsException {
         CoinData coinData = TxUtil.getCoinData(tx);
         List<CoinFrom> listFrom = coinData.getFrom();
         List<CoinTo> listTo = coinData.getTo();
@@ -73,25 +71,23 @@ public class AccountBlockHelper {
             chain.getLogger().error("error: not manager, tx: {}, config: {}", fromStr, accountConfig.getBlockAccountManager());
             return Result.getFailed(AccountErrorCode.COINDATA_IS_INCOMPLETE);
         }
-        AccountBlockData txData = new AccountBlockData();
+        AccountContractCallData txData = new AccountContractCallData();
         txData.parse(tx.getTxData(), 0);
+        int type = txData.getType();
+        if (type != 1 && type != 2) {
+            chain.getLogger().error("error type: {}", type);
+            return Result.getFailed(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
+        }
         String[] addresses = txData.getAddresses();
         if (addresses.length == 0) {
             chain.getLogger().error("empty addresses");
             return Result.getFailed(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
         }
-        // 检查白名单
-        byte[] txDataExtend = txData.getExtend();
-        if (txDataExtend != null) {
-            AccountBlockExtend abExtend = new AccountBlockExtend();
-            abExtend.parse(txDataExtend, 0);
-            AccountBlockInfo[] infos = abExtend.getInfos();
-            if (addresses.length != infos.length) {
-                chain.getLogger().error("inconsistent address data in txData");
+        for (String addr : addresses) {
+            if (AddressTool.validAddress(chainId, addr)) {
+                chain.getLogger().error("error address: {}", addr);
                 return Result.getFailed(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
             }
-        }
-        for (String addr : addresses) {
             if (addr.equals(accountConfig.getBlockAccountManager())) {
                 chain.getLogger().error("error: manager can not in it");
                 return Result.getFailed(AccountErrorCode.TX_DATA_VALIDATION_ERROR);

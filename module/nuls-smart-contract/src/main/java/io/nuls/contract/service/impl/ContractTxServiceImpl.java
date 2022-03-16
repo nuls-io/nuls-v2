@@ -32,6 +32,7 @@ import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.helper.ContractTxHelper;
 import io.nuls.contract.manager.ContractTokenBalanceManager;
 import io.nuls.contract.model.bo.ContractResult;
+import io.nuls.contract.model.dto.AccountAmountDto;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.contract.model.tx.CallContractTransaction;
@@ -122,9 +123,9 @@ public class ContractTxServiceImpl implements ContractTxService {
     @Override
     public Result contractCallTx(int chainId, String sender, BigInteger value, Long gasLimit, Long price, String contractAddress,
                                  String methodName, String methodDesc, String[][] args,
-                                 String password, String remark, List<ProgramMultyAssetValue> multyAssetValues) {
+                                 String password, String remark, List<ProgramMultyAssetValue> multyAssetValues, List<AccountAmountDto> nulsValueToOtherList) {
         try {
-            Result<CallContractTransaction> result = contractTxHelper.makeCallTx(chainId, sender, value, gasLimit, price, contractAddress, methodName, methodDesc, args, password, remark, multyAssetValues);
+            Result<CallContractTransaction> result = contractTxHelper.makeCallTx(chainId, sender, value, gasLimit, price, contractAddress, methodName, methodDesc, args, password, remark, multyAssetValues, nulsValueToOtherList);
             if (result.isFailed()) {
                 return result;
             }

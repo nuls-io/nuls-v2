@@ -296,4 +296,9 @@ public class TxType {
 
     public static final int UNBLOCK_ACCOUNT = 64;
 
+    /**
+     * 调用合约允许普通转账的账户白名单
+     */
+    public static final int ACCOUNT_FOR_TRANSFER_ON_CONTRACT_CALL = 65;
+
 }

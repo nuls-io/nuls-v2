@@ -23,38 +23,29 @@
  *
  */
 
-package io.nuls.account.constant;
+package io.nuls.account.storage;
+
+import io.nuls.account.model.po.AccountContractCallPO;
+import io.nuls.account.model.po.AccountPO;
+import io.nuls.base.data.Address;
+
+import java.util.List;
 
 /**
- * @author: qinyifeng
+ * 调用合约允许普通转账的账户白名单
+ * @author: PierreLuo
+ * @date: 2022/3/16
  */
-public interface AccountStorageConstant {
+public interface AccountForTransferOnContractCallStorageService {
 
-    /**
-     * 账户表的名称
-     * The name of the account table
-     */
-    String DB_NAME_ACCOUNT = "account";
-    String DB_NAME_MULTI_SIG_ACCOUNT = "multi_account";
+    boolean saveAccountList(List<AccountContractCallPO> accountPOList);
 
-    /**
-     * 以别名为key的别名表名称
-     * The name of the alias table which key is alias
-     */
-    String DB_NAME_ACCOUNT_ALIAS_KEY_ALIAS = "account_alias_key_alias";
+    boolean removeAccount(List<byte[]> address);
 
-    /**
-     * 以地址为key的别名表名称
-     * The name of the alias table which key is address
-     */
-    String DB_NAME_ACCOUNT_ALIAS_KEY_ADDRESS = "account_alias_key_address";
+    List<AccountContractCallPO> getAccountList();
 
-    /**
-     * 账户模块配置信息表名称
-     * Account Module Configuration Information Table Name
-     */
-    String DB_NAME_ACCOUNT_CONGIF = "config";
-    String DB_NAME_ACCOUNT_BLOCK = "account_block";
-    String DB_NAME_ACCOUNT_CONTRACT_CALL = "account_contract_call";
+    AccountContractCallPO getAccount(byte[] address);
+
+    boolean exist(byte[] address);
 
 }

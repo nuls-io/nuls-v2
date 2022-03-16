@@ -1,18 +1,18 @@
-/*
+/**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2019 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,41 +20,46 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
+package io.nuls.contract.model.dto;
 
-package io.nuls.account.constant;
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
+
+import java.math.BigInteger;
 
 /**
- * @author: qinyifeng
+ * @author: PierreLuo
+ * @date: 2019-03-06
  */
-public interface AccountStorageConstant {
+@ApiModel
+public class AccountAmountDto {
+    @ApiModelProperty(description = "转入金额")
+    private BigInteger value;
+    @ApiModelProperty(description = "转入地址")
+    private String to;
 
-    /**
-     * 账户表的名称
-     * The name of the account table
-     */
-    String DB_NAME_ACCOUNT = "account";
-    String DB_NAME_MULTI_SIG_ACCOUNT = "multi_account";
+    public AccountAmountDto(BigInteger value, String to) {
+        this.value = value;
+        this.to = to;
+    }
 
-    /**
-     * 以别名为key的别名表名称
-     * The name of the alias table which key is alias
-     */
-    String DB_NAME_ACCOUNT_ALIAS_KEY_ALIAS = "account_alias_key_alias";
+    public AccountAmountDto() {
+    }
 
-    /**
-     * 以地址为key的别名表名称
-     * The name of the alias table which key is address
-     */
-    String DB_NAME_ACCOUNT_ALIAS_KEY_ADDRESS = "account_alias_key_address";
+    public BigInteger getValue() {
+        return value;
+    }
 
-    /**
-     * 账户模块配置信息表名称
-     * Account Module Configuration Information Table Name
-     */
-    String DB_NAME_ACCOUNT_CONGIF = "config";
-    String DB_NAME_ACCOUNT_BLOCK = "account_block";
-    String DB_NAME_ACCOUNT_CONTRACT_CALL = "account_contract_call";
+    public void setValue(BigInteger value) {
+        this.value = value;
+    }
 
+    public String getTo() {
+        return to;
+    }
+
+    public void setTo(String to) {
+        this.to = to;
+    }
 }

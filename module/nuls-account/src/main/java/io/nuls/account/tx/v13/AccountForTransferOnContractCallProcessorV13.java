@@ -1,16 +1,12 @@
-package io.nuls.account.tx.v12;
+package io.nuls.account.tx.v13;
 
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
-import io.nuls.account.helper.AccountBlockHelper;
+import io.nuls.account.helper.AccountContractCallHelper;
 import io.nuls.account.model.bo.Chain;
-import io.nuls.account.model.bo.tx.AccountBlockExtend;
-import io.nuls.account.model.bo.tx.AccountBlockInfo;
-import io.nuls.account.model.bo.tx.txdata.AccountBlockData;
-import io.nuls.account.model.dto.AccountBlockDTO;
-import io.nuls.account.model.po.AccountBlockPO;
-import io.nuls.account.service.AliasService;
-import io.nuls.account.storage.AccountBlockStorageService;
+import io.nuls.account.model.bo.tx.txdata.AccountContractCallData;
+import io.nuls.account.model.po.AccountContractCallPO;
+import io.nuls.account.storage.AccountForTransferOnContractCallStorageService;
 import io.nuls.account.util.LoggerUtil;
 import io.nuls.account.util.manager.ChainManager;
 import io.nuls.base.basic.AddressTool;
@@ -29,19 +25,19 @@ import java.util.stream.Collectors;
 
 import static io.nuls.account.util.LoggerUtil.LOG;
 
-@Component("AccountLockProcessorV12")
-public class AccountLockProcessorV12 implements TransactionProcessor {
+@Component("AccountForTransferOnContractCallProcessorV13")
+public class AccountForTransferOnContractCallProcessorV13 implements TransactionProcessor {
 
     @Autowired
     private ChainManager chainManager;
     @Autowired
-    private AccountBlockHelper accountBlockHelper;
+    private AccountContractCallHelper accountContractCallHelper;
     @Autowired
-    private AccountBlockStorageService accountBlockStorageService;
+    private AccountForTransferOnContractCallStorageService accountForTransferOnContractCallStorageService;
 
     @Override
     public int getType() {
-        return TxType.BLOCK_ACCOUNT;
+        return TxType.ACCOUNT_FOR_TRANSFER_ON_CONTRACT_CALL;
     }
 
     @Override
@@ -62,7 +58,7 @@ public class AccountLockProcessorV12 implements TransactionProcessor {
             List<Transaction> txList = new ArrayList<>();
             for (Transaction tx : txs) {
                 try {
-                    Result rs =  accountBlockHelper.blockAccountTxValidate(chain, tx);
+                    Result rs =  accountContractCallHelper.validate(chain, tx);
                     if (rs.isFailed()) {
                         errorCode = rs.getErrorCode().getCode();
                         txList.add(tx);
@@ -93,28 +89,26 @@ public class AccountLockProcessorV12 implements TransactionProcessor {
         Chain chain = chainManager.getChain(chainId);
         List<Transaction> commitSucTxList = new ArrayList<>();
         for (Transaction tx : txs) {
-            AccountBlockData data = new AccountBlockData();
+            AccountContractCallData data = new AccountContractCallData();
             try {
                 data.parse(new NulsByteBuffer(tx.getTxData()));
                 String[] addresses = data.getAddresses();
-                List<AccountBlockDTO> list = Arrays.asList(addresses).stream().map(a -> new AccountBlockDTO(AddressTool.getAddress(a))).collect(Collectors.toList());
-                byte[] extend = data.getExtend();
-                if (extend != null) {
-                    AccountBlockExtend abExtend = new AccountBlockExtend();
-                    abExtend.parse(extend, 0);
-                    AccountBlockInfo[] infos = abExtend.getInfos();
-                    int i = 0;
-                    for (AccountBlockDTO dto : list) {
-                        dto.setInfo(infos[i++]);
-                    }
+                int type = data.getType();
+                if (type == 1) {
+                    // 添加白名单
+                    List<AccountContractCallPO> list = Arrays.asList(addresses).stream().map(a -> new AccountContractCallPO(AddressTool.getAddress(a))).collect(Collectors.toList());
+                    result = accountForTransferOnContractCallStorageService.saveAccountList(list);
+                } else {
+                    // type=2, 移除白名单
+                    List<byte[]> list = Arrays.asList(addresses).stream().map(a -> AddressTool.getAddress(a)).collect(Collectors.toList());
+                    result = accountForTransferOnContractCallStorageService.removeAccount(list);
                 }
-                result = accountBlockStorageService.operateAccountList(list);
             } catch (Exception e) {
-                LoggerUtil.LOG.error("ac_commitTx block_account tx commit error", e);
+                LoggerUtil.LOG.error("AccountForTransferOnContractCall tx commit error", e);
                 result = false;
             }
             if (!result) {
-                LoggerUtil.LOG.warn("ac_commitTx block_account tx commit error");
+                LoggerUtil.LOG.warn("AccountForTransferOnContractCall tx commit error");
                 break;
             }
             commitSucTxList.add(tx);
@@ -124,25 +118,22 @@ public class AccountLockProcessorV12 implements TransactionProcessor {
             if (!result) {
                 boolean rollback = true;
                 for (Transaction tx : commitSucTxList) {
-                    AccountBlockData data = new AccountBlockData();
+                    AccountContractCallData data = new AccountContractCallData();
                     data.parse(new NulsByteBuffer(tx.getTxData()));
                     String[] addresses = data.getAddresses();
-                    List<AccountBlockDTO> list = Arrays.asList(addresses).stream().map(a -> new AccountBlockDTO(AddressTool.getAddress(a))).collect(Collectors.toList());
-                    byte[] extend = data.getExtend();
-                    if (extend != null) {
-                        AccountBlockExtend abExtend = new AccountBlockExtend();
-                        abExtend.parse(extend, 0);
-                        AccountBlockInfo[] infos = abExtend.getInfos();
-                        int i = 0;
-                        for (AccountBlockDTO dto : list) {
-                            dto.setInfo(infos[i++]);
-                        }
+                    int type = data.getType();
+                    if (type == 1) {
+                        List<byte[]> list = Arrays.asList(addresses).stream().map(a -> AddressTool.getAddress(a)).collect(Collectors.toList());
+                        rollback = accountForTransferOnContractCallStorageService.removeAccount(list);
+                    } else {
+                        List<AccountContractCallPO> list = Arrays.asList(addresses).stream().map(a -> new AccountContractCallPO(AddressTool.getAddress(a))).collect(Collectors.toList());
+                        rollback = accountForTransferOnContractCallStorageService.saveAccountList(list);
                     }
-                    rollback = accountBlockStorageService.cancelOperateAccountList(list);
+
                 }
                 //回滚失败，抛异常
                 if (!rollback) {
-                    LoggerUtil.LOG.error("ac_commitTx block_account tx rollback error");
+                    LoggerUtil.LOG.error("AccountForTransferOnContractCall tx rollback error");
                     throw new NulsException(AccountErrorCode.ALIAS_ROLLBACK_ERROR);
                 }
             }
@@ -160,28 +151,25 @@ public class AccountLockProcessorV12 implements TransactionProcessor {
         Chain chain = chainManager.getChain(chainId);
         List<Transaction> rollbackSucTxList = new ArrayList<>();
         for (Transaction tx : txs) {
-            AccountBlockData data = new AccountBlockData();
+            AccountContractCallData data = new AccountContractCallData();
             try {
                 data.parse(new NulsByteBuffer(tx.getTxData()));
                 String[] addresses = data.getAddresses();
-                List<AccountBlockDTO> list = Arrays.asList(addresses).stream().map(a -> new AccountBlockDTO(AddressTool.getAddress(a))).collect(Collectors.toList());
-                byte[] extend = data.getExtend();
-                if (extend != null) {
-                    AccountBlockExtend abExtend = new AccountBlockExtend();
-                    abExtend.parse(extend, 0);
-                    AccountBlockInfo[] infos = abExtend.getInfos();
-                    int i = 0;
-                    for (AccountBlockDTO dto : list) {
-                        dto.setInfo(infos[i++]);
-                    }
+                int type = data.getType();
+                if (type == 1) {
+                    List<byte[]> list = Arrays.asList(addresses).stream().map(a -> AddressTool.getAddress(a)).collect(Collectors.toList());
+                    result = accountForTransferOnContractCallStorageService.removeAccount(list);
+                } else {
+                    List<AccountContractCallPO> list = Arrays.asList(addresses).stream().map(a -> new AccountContractCallPO(AddressTool.getAddress(a))).collect(Collectors.toList());
+                    result = accountForTransferOnContractCallStorageService.saveAccountList(list);
                 }
-                result = accountBlockStorageService.cancelOperateAccountList(list);
+
             } catch (Exception e) {
-                LoggerUtil.LOG.error("ac_rollbackTx block_account tx rollback error", e);
+                LoggerUtil.LOG.error("AccountForTransferOnContractCall tx rollback error", e);
                 result = false;
             }
             if (!result) {
-                LoggerUtil.LOG.warn("ac_rollbackTx block_account tx rollback error");
+                LoggerUtil.LOG.warn("AccountForTransferOnContractCall tx rollback error");
                 break;
             }
             rollbackSucTxList.add(tx);
@@ -192,25 +180,22 @@ public class AccountLockProcessorV12 implements TransactionProcessor {
             if (!result) {
                 boolean commit = true;
                 for (Transaction tx : rollbackSucTxList) {
-                    AccountBlockData data = new AccountBlockData();
+                    AccountContractCallData data = new AccountContractCallData();
                     data.parse(new NulsByteBuffer(tx.getTxData()));
                     String[] addresses = data.getAddresses();
-                    List<AccountBlockDTO> list = Arrays.asList(addresses).stream().map(a -> new AccountBlockDTO(AddressTool.getAddress(a))).collect(Collectors.toList());
-                    byte[] extend = data.getExtend();
-                    if (extend != null) {
-                        AccountBlockExtend abExtend = new AccountBlockExtend();
-                        abExtend.parse(extend, 0);
-                        AccountBlockInfo[] infos = abExtend.getInfos();
-                        int i = 0;
-                        for (AccountBlockDTO dto : list) {
-                            dto.setInfo(infos[i++]);
-                        }
+                    int type = data.getType();
+                    if (type == 1) {
+                        List<AccountContractCallPO> list = Arrays.asList(addresses).stream().map(a -> new AccountContractCallPO(AddressTool.getAddress(a))).collect(Collectors.toList());
+                        commit = accountForTransferOnContractCallStorageService.saveAccountList(list);
+                    } else {
+                        List<byte[]> list = Arrays.asList(addresses).stream().map(a -> AddressTool.getAddress(a)).collect(Collectors.toList());
+                        commit = accountForTransferOnContractCallStorageService.removeAccount(list);
                     }
-                    commit = accountBlockStorageService.operateAccountList(list);
+
                 }
                 //保存失败，抛异常
                 if (!commit) {
-                    LoggerUtil.LOG.error("ac_rollbackTx block_account tx commit error");
+                    LoggerUtil.LOG.error("AccountForTransferOnContractCall tx commit error");
                     throw new NulsException(AccountErrorCode.ALIAS_SAVE_ERROR);
                 }
             }
