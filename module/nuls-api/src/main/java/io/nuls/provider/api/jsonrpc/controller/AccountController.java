@@ -1005,6 +1005,29 @@ public class AccountController {
         return RpcResult.success(dto);
     }
 
+    @RpcMethod("getAllContractCallAccount")
+    @ApiOperation(description = "查询调用合约允许普通转账的账户白名单", order = 167)
+    @Parameters({
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = AccountBlockDTO.class))
+    public RpcResult getAllContractCallAccount(List<Object> params) {
+        int chainId;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        if (!Context.isChainExist(chainId)) {
+            return RpcResult.paramError(String.format("chainId [%s] is invalid", chainId));
+        }
+        Map map = accountTools.getAllContractCallAccount(chainId);
+        if (map == null) {
+            return RpcResult.failed(AccountErrorCode.DATA_NOT_FOUND);
+        }
+        return RpcResult.success(map);
+    }
+
     @RpcMethod("encryptedPriKeySign")
     @ApiOperation(description = "密文私钥摘要签名", order = 156)
     @Parameters({

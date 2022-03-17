@@ -25,6 +25,7 @@ package io.nuls.contract.service;
 
 
 import io.nuls.contract.model.bo.ContractResult;
+import io.nuls.contract.model.dto.AccountAmountDto;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.contract.vm.program.ProgramMultyAssetValue;
 import io.nuls.core.basic.Result;
@@ -44,7 +45,7 @@ public interface ContractTxService {
     Result validateContractCreateTx(int chainId, byte[] sender, Long gasLimit, Long price, byte[] contractCode, String[][] args);
 
     Result contractCallTx(int chainId, String sender, BigInteger value, Long gasLimit, Long price, String contractAddress,
-                          String methodName, String methodDesc, String[][] args, String password, String remark, List<ProgramMultyAssetValue> multyAssetValues);
+                          String methodName, String methodDesc, String[][] args, String password, String remark, List<ProgramMultyAssetValue> multyAssetValues, List<AccountAmountDto> nulsValueToOtherList);
 
     Result validateContractCallTx(int chainId, byte[] senderBytes, BigInteger value, Long gasLimit, Long price, byte[] contractAddressBytes,
                                   String methodName, String methodDesc, String[][] args, List<ProgramMultyAssetValue> multyAssetValues);

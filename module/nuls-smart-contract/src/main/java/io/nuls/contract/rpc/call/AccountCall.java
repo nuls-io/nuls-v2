@@ -84,6 +84,23 @@ public class AccountCall {
         }
     }
 
+    public static boolean validationWhitelistForTransferOnContractCall(int chainId, String address) {
+        try {
+            if (StringUtils.isBlank(address)) {
+                return false;
+            }
+            Map<String, Object> params = new HashMap<>(4);
+            params.put(Constants.CHAIN_ID, chainId);
+            params.put("address", address);
+            Map resultMap = (Map) CallHelper.request(ModuleE.AC.abbr, "ac_validationWhitelistForTransferOnContractCall", params);
+            boolean validate = (boolean) resultMap.get("value");
+            return validate;
+        } catch (Exception e) {
+            Log.error(e);
+            return false;
+        }
+    }
+
     public static void transactionSignature(int chainId, String address, String password, Transaction tx) throws NulsException {
         try {
             P2PHKSignature p2PHKSignature = new P2PHKSignature();

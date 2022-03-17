@@ -21,55 +21,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.contract.config;
+package io.nuls.contract.model.dto;
 
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
+
+import java.math.BigInteger;
 
 /**
  * @author: PierreLuo
- * @date: 2019-03-15
+ * @date: 2019-03-06
  */
-public class ContractContext {
+@ApiModel
+public class AccountAmountDto {
+    @ApiModelProperty(description = "转入金额")
+    private BigInteger value;
+    @ApiModelProperty(description = "转入地址")
+    private String to;
 
-    public static Charset DEFAULT_ENCODING = StandardCharsets.UTF_8;
+    public AccountAmountDto(BigInteger value, String to) {
+        this.value = value;
+        this.to = to;
+    }
 
-    /**
-     * 数据库存储地址
-     * database path
-     */
-    public static String DATA_PATH;
+    public AccountAmountDto() {
+    }
 
-    /**
-     * 主网链ID（卫星链ID）
-     */
-    public static int MAIN_CHAIN_ID = 1;
+    public BigInteger getValue() {
+        return value;
+    }
 
-    /**
-     * 主网链资产ID（卫星链资产ID，NULS资产）
-     */
-    public static int MAIN_ASSETS_ID = 1;
-    /**
-     * 当前链ID
-     */
-    public static int CHAIN_ID = 1;
-    /**
-     * 当前链资产ID
-     */
-    public static int ASSET_ID = 1;
+    public void setValue(BigInteger value) {
+        this.value = value;
+    }
 
-    /**
-     * 代币跨链系统合约地址
-     */
-    public static byte[] CROSS_CHAIN_SYSTEM_CONTRACT;
+    public String getTo() {
+        return to;
+    }
 
-    public static short UPDATE_VERSION_V240 = 4;
-
-    public static short UPDATE_VERSION_V250 = 5;
-
-    public static short UPDATE_VERSION_CONTRACT_ASSET = 8;
-
-    public static short UPDATE_VERSION_CONTRACT_BALANCE = 9;
-
-    public static short UPDATE_VERSION_ACCOUNT_TRANSFER_ON_CONTRACT_CALL = 13;
+    public void setTo(String to) {
+        this.to = to;
+    }
 }

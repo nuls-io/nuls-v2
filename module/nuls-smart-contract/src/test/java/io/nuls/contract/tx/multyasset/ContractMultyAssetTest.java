@@ -31,6 +31,7 @@ import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
 import io.nuls.contract.mock.basetest.ContractTest;
 import io.nuls.contract.model.bo.ContractBalance;
+import io.nuls.contract.model.dto.AccountAmountDto;
 import io.nuls.contract.model.tx.CallContractTransaction;
 import io.nuls.contract.model.txdata.CallContractData;
 import io.nuls.contract.rpc.call.LedgerCall;
@@ -105,8 +106,8 @@ public class ContractMultyAssetTest extends BaseQuery {
     @Test
     public void assetRegisterTest() throws Exception {
         Map<String, Object> params = new HashMap<>();
-        params.put("assetSymbol", "MTAX");
-        params.put("assetName", "MTAX");
+        params.put("assetSymbol", "MTAX3");
+        params.put("assetName", "MTAX3");
         params.put("initNumber", 100000000);
         params.put("decimalPlace", 8);
         params.put("txCreatorAddress", sender);
@@ -207,6 +208,37 @@ public class ContractMultyAssetTest extends BaseQuery {
         // 转出 3.3 2-2(锁定)
         Object[] innerArgsLock = new Object[]{toAddress17, new BigDecimal("3.3").multiply(BigDecimal.TEN.pow(8)).toBigInteger(), 2, 2, minutes_3};
         this.innerCallOfDesignatedAssetByParams(methodName, otherContract, "transferDesignatedAssetLock", innerArgsLock, "0", 0, 0);
+    }
+
+    /**
+     * 调用合约的同时，向另外一个账户转账
+     */
+    @Test
+    public void callContractWithNulsValueToOthers() throws Exception {
+        sender = "tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD";
+        contractAddress = "tNULSeBaNAEf7r7pk63xtGixpTJCPCPkm5DtZf";
+
+        //BigInteger value = new BigDecimal("6.6").movePointRight(8).toBigInteger();
+        BigInteger value = new BigDecimal("0").movePointRight(8).toBigInteger();
+        methodName = "_payableMultyAsset";
+        // "tNULSeBaMkzsRE6qc9RVoeY6gHq8k1xSMcdrc7",
+        // "tNULSeBaMfXDQeT4MJZim1RusCJRPx5j9bMKQN"
+        AccountAmountDto[] amountDtos = new AccountAmountDto[]{
+                new AccountAmountDto(BigInteger.valueOf(300000000L), "tNULSeBaMkzsRE6qc9RVoeY6gHq8k1xSMcdrc7")
+        };
+        ProgramMultyAssetValue[] multyAssetValues = new ProgramMultyAssetValue[]{
+                new ProgramMultyAssetValue(BigInteger.valueOf(2_0000_0000L), 2, 2),
+                new ProgramMultyAssetValue(BigInteger.valueOf(3_0000_0000L), 2, 3)
+        };
+        String methodDesc = "";
+        String remark = "call contract test - 向合约转账的同时，向另外一个账户转账";
+        Map params = this.makeCallParams(
+                sender, value, 2000000L, 25L, contractAddress, methodName, methodDesc, remark, multyAssetValues, amountDtos, new Object[]{});
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
+        assertTrue(cmdResp2, result);
+        String hash = (String) result.get("txHash");
+        Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(waitGetContractTx(hash)));
     }
 
     /**

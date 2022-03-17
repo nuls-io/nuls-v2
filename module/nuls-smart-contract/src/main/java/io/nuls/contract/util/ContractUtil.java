@@ -35,6 +35,7 @@ import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.model.bo.*;
+import io.nuls.contract.model.dto.AccountAmountDto;
 import io.nuls.contract.model.dto.ContractTokenTransferInfo;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.contract.model.tx.*;
@@ -858,6 +859,20 @@ public class ContractUtil {
         for (int i = 0; i < length; i++) {
             value = multyAssetValues[i];
             array[i] = new String[]{value.getValue().toString(), String.valueOf(value.getAssetChainId()), String.valueOf(value.getAssetId())};
+        }
+        return array;
+    }
+
+    public static String[][] nulsValueToOthersStringArray(AccountAmountDto[] nulsValueToOthers) {
+        int length;
+        if (nulsValueToOthers == null || (length = nulsValueToOthers.length) == 0) {
+            return null;
+        }
+        String[][] array = new String[length][];
+        AccountAmountDto dto;
+        for (int i = 0; i < length; i++) {
+            dto = nulsValueToOthers[i];
+            array[i] = new String[]{dto.getValue().toString(), dto.getTo()};
         }
         return array;
     }

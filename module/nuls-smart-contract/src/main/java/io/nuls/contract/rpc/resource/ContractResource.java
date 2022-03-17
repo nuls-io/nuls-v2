@@ -286,7 +286,8 @@ public class ContractResource extends BaseCmd {
         @Parameter(parameterName = "methodName", parameterDes = "合约方法"),
         @Parameter(parameterName = "methodDesc", parameterDes = "合约方法描述，若合约内方法没有重载，则此参数可以为空", canNull = true),
         @Parameter(parameterName = "args", requestType = @TypeDescriptor(value = Object[].class), parameterDes = "参数列表", canNull = true),
-        @Parameter(parameterName = "remark", parameterDes = "交易备注", canNull = true)
+        @Parameter(parameterName = "remark", parameterDes = "交易备注", canNull = true),
+        @Parameter(parameterName = "nulsValueToOthers", requestType = @TypeDescriptor(value = String[][].class), parameterDes = "调用者向其他账户地址转入的NULS资产金额，没有此业务时填空，规则: [[<value>,<address>]]")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "txHash", description = "调用合约的交易hash")
@@ -310,6 +311,8 @@ public class ContractResource extends BaseCmd {
 
             List multyAssetValuesList = (List) params.get("multyAssetValues");
             Object[] multyAssetValues = multyAssetValuesList != null ? multyAssetValuesList.toArray() : null;
+            List nulsValueToOthersList = (List) params.get("nulsValueToOthers");
+            Object[] nulsValueToOthers = nulsValueToOthersList != null ? nulsValueToOthersList.toArray() : null;
 
             String remark = (String) params.get("remark");
 
@@ -351,8 +354,16 @@ public class ContractResource extends BaseCmd {
                 }
                 multyAssetValueList = multyAssetValueListResult.getData();
             }
+            List<AccountAmountDto> nulsValueToOtherList = null;
+            if (nulsValueToOthers != null) {
+                Result<List<AccountAmountDto>> nulsValueToOtherListResult = convertNulsValueToOthers(nulsValueToOthers);
+                if (nulsValueToOtherListResult.isFailed()) {
+                    return failed(nulsValueToOtherListResult.getErrorCode());
+                }
+                nulsValueToOtherList = nulsValueToOtherListResult.getData();
+            }
 
-            Result result = contractTxService.contractCallTx(chainId, sender, value, gasLimit, price, contractAddress, methodName, methodDesc, convertArgs, password, remark, multyAssetValueList);
+            Result result = contractTxService.contractCallTx(chainId, sender, value, gasLimit, price, contractAddress, methodName, methodDesc, convertArgs, password, remark, multyAssetValueList, nulsValueToOtherList);
 
             if (result.isFailed()) {
                 return wrapperFailed(result);
@@ -371,16 +382,31 @@ public class ContractResource extends BaseCmd {
         if (convertMultyAssetValues != null && convertMultyAssetValues.length > 0) {
             results = new ArrayList<>();
             int assetChainId, assetId;
-            for (String[] value : convertMultyAssetValues) {
-                if (value == null || value.length != 3) {
+            for (String[] args : convertMultyAssetValues) {
+                if (args == null || args.length != 3) {
                     return Result.getFailed(PARAMETER_ERROR);
                 }
-                assetChainId = Integer.parseInt(value[1]);
-                assetId = Integer.parseInt(value[2]);
+                assetChainId = Integer.parseInt(args[1]);
+                assetId = Integer.parseInt(args[2]);
                 if (assetChainId <= 0 || assetId <= 0) {
                     return Result.getFailed(PARAMETER_ERROR);
                 }
-                results.add(new ProgramMultyAssetValue(new BigInteger(value[0]), assetChainId, assetId));
+                results.add(new ProgramMultyAssetValue(new BigInteger(args[0]), assetChainId, assetId));
+            }
+        }
+        return Result.getSuccess(results);
+    }
+
+    private Result<List<AccountAmountDto>> convertNulsValueToOthers(Object[] nulsValueToOthers) {
+        List<AccountAmountDto> results = null;
+        String[][] convertNulsValueToOthers = ContractUtil.twoDimensionalArray(nulsValueToOthers);
+        if (convertNulsValueToOthers != null && convertNulsValueToOthers.length > 0) {
+            results = new ArrayList<>();
+            for (String[] args : convertNulsValueToOthers) {
+                if (args == null || args.length != 2) {
+                    return Result.getFailed(PARAMETER_ERROR);
+                }
+                results.add(new AccountAmountDto(new BigInteger(args[0].trim()), args[1].trim()));
             }
         }
         return Result.getSuccess(results);
@@ -779,7 +805,7 @@ public class ContractResource extends BaseCmd {
             Result result = contractTxService.contractCallTx(chainId, sender, value, gasLimit, CONTRACT_MINIMUM_PRICE, contractAddress,
                     BALANCE_TRIGGER_METHOD_NAME,
                     VOID_METHOD_DESC,
-                    null, password, remark, null);
+                    null, password, remark, null, null);
             if (result.isFailed()) {
                 return wrapperFailed(result);
             }
@@ -862,7 +888,7 @@ public class ContractResource extends BaseCmd {
 
             Result result = contractTxService.contractCallTx(chainId, from, BigInteger.ZERO, gasLimit, CONTRACT_MINIMUM_PRICE, contractAddress,
                     ContractConstant.NRC20_METHOD_TRANSFER, null,
-                    ContractUtil.twoDimensionalArray(argsObj), password, remark, null);
+                    ContractUtil.twoDimensionalArray(argsObj), password, remark, null, null);
             if (result.isFailed()) {
                 return wrapperFailed(result);
             }
