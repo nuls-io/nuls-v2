@@ -32,6 +32,7 @@ import io.nuls.account.model.bo.config.ConfigBean;
 import io.nuls.account.model.bo.tx.AccountBlockExtend;
 import io.nuls.account.model.bo.tx.AccountBlockInfo;
 import io.nuls.account.model.bo.tx.txdata.AccountBlockData;
+import io.nuls.account.model.bo.tx.txdata.AccountContractCallData;
 import io.nuls.account.model.dto.CoinDTO;
 import io.nuls.account.util.AccountTool;
 import io.nuls.account.util.LoggerUtil;
@@ -52,6 +53,8 @@ import io.nuls.core.log.Log;
 import io.nuls.core.parse.I18nUtils;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.Constants;
+import io.nuls.core.rpc.info.HostInfo;
+import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
@@ -233,7 +236,9 @@ public class Transfer implements Runnable {
         System.out.println("deduplication length: " + set.size());
         System.out.println(Arrays.toString(set.toArray()));
         data.setAddresses(set.toArray(new String[set.size()]));*/
-        data.setAddresses(new String[]{"NULSd6HgijKWAgsFDf469CSgzUA4x3vUqh9Ky"});
+        data.setAddresses(new String[]{
+                "NULSd6Hgbcn7gdGuapjgM8QsSTBtqsgKZ7Y8v"
+        });
         tx.setTxData(data.serialize());
         tx.setTime(System.currentTimeMillis() / 1000);
         tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
@@ -292,23 +297,28 @@ public class Transfer implements Runnable {
         coinData.addTo(new CoinTo(from, assetChainId, assetId, BigInteger.ZERO, (byte) 0));
         tx.setCoinData(coinData.serialize());
 
-        //List<Object[]> blockDatas = new ArrayList<>();
-        //// 锁定列表: 地址，操作类型(1-加入白名单 2-移除白名单)，白名单交易类型清单，白名单合约地址清单
-        //blockDatas.add(new Object[]{"tNULSeBaMhKaLzhQh1AhhecUqh15ZKw98peg29", 2, List.of(16), List.of("tNULSeBaN2pQjawtQXr7k7KFN442XQ2CmpsUGr")});
-        //blockDatas.add(new Object[]{"tNULSeBaMv8q3pWzS7bHpQWW8yypNGo8auRoPf", 2, List.of(2)});
-        //blockDatas.add(new Object[]{"tNULSeBaMmbiCH5soCFasXnG4TwqknyTzYBM3S", 1, List.of(2)});
-        File file0 = new File("/Users/pierreluo/Nuls/pocm_deposit.txt");
+        List<Object[]> blockDatas = new ArrayList<>();
+        // 锁定列表: 地址，操作类型(1-加入白名单 2-移除白名单)，白名单交易类型清单，白名单合约地址清单
+        blockDatas.add(new Object[]{"NULSd6HgZkPDuWG7vZP8yQiLwMSxEFzY1rUNr", 1, List.of(16), List.of("NULSd6HgntyX6aBo9ipFSxh9v7Tp2JZmG4rSA")});
+        AccountBlockData data = this.makeTxData(blockDatas);
+        /*File file0 = new File("/Users/pierreluo/Nuls/pocm_deposit.txt");
         List<String> list0 = IOUtils.readLines(new FileInputStream(file0), StandardCharsets.UTF_8.name());
         System.out.println("read 0 length: " + list0.size());
+        Set<String> unLockUsers = new HashSet<>();
         Map<String, Set<String>> userMap = new HashMap<>();
         for (String str : list0) {
             String[] split = str.split("\\s+");
             String contract = split[1].trim();
             String user = split[2].trim();
+            if (unLockUsers.contains(user)) {
+                System.out.println(String.format("用户[%s]未锁定[已检查]", user));
+                continue;
+            }
             RpcResult request = JsonRpcUtil.request(rpcAddress, "isBlockAccount", List.of(chainId, user));
             Map result = (Map) request.getResult();
             Boolean isBlock = (Boolean) result.get("value");
             if (!isBlock) {
+                unLockUsers.add(user);
                 System.out.println(String.format("用户[%s]未锁定", user));
                 continue;
             }
@@ -326,7 +336,7 @@ public class Transfer implements Runnable {
             }
             blockDatas.add(new Object[]{user, 1, List.of(16), contracts.stream().collect(Collectors.toList())});
         }
-        AccountBlockData data = this.makeTxData(blockDatas);
+        AccountBlockData data = this.makeTxData(blockDatas);*/
 
         tx.setTxData(data.serialize());
         tx.setTime(System.currentTimeMillis() / 1000);
@@ -401,7 +411,8 @@ public class Transfer implements Runnable {
 
     @Test
     public void accountUnBlockMultiSignTest() throws Exception {
-        setMain();
+        //setMain();
+        setTest();
         Chain chain = new Chain();
         ConfigBean configBean = new ConfigBean();
         configBean.setChainId(chainId);
@@ -427,7 +438,7 @@ public class Transfer implements Runnable {
         tx.setCoinData(coinData.serialize());
         AccountBlockData data = new AccountBlockData();
         data.setAddresses(new String[]{
-                "NULSd6HgULxH4pjz6aeq1icmgKEZeqcsESG7i"
+                "tNULSeBaMrENtjYwHzpZNadKpd3gvAAy39LUKb"
         });
         tx.setTxData(data.serialize());
         tx.setTime(System.currentTimeMillis() / 1000);
@@ -648,6 +659,131 @@ public class Transfer implements Runnable {
         tx.setTransactionSignature(transactionSignature.serialize());
         Response response = this.newTx(tx);
         System.out.println(JSONUtils.obj2PrettyJson(response));
+    }
+
+    /**
+     * 设置 调用合约允许普通转账的账户白名单
+     */
+    @Test
+    public void accountForTransferOnContractCallTest() throws Exception {
+        setDev();
+        // 设置增加或者移除白名单
+        String type = "ADD"; // ADD or REMOVE
+
+        Chain chain = new Chain();
+        ConfigBean configBean = new ConfigBean();
+        configBean.setChainId(chainId);
+        configBean.setAssetId(assetId);
+        chain.setConfig(configBean);
+        Transaction tx = new Transaction();
+        tx.setType(TxType.ACCOUNT_FOR_TRANSFER_ON_CONTRACT_CALL);
+        CoinData coinData = new CoinData();
+        String fromKey = "477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75";
+        byte[] from = AddressTool.getAddress("tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD");
+        byte[] nonce = TxUtil.getBalanceNonce(chain, assetChainId, assetId, from).getNonce();
+        if (null == nonce) {
+            nonce = HexUtil.decode("0000000000000000");
+        }
+        coinData.addFrom(new CoinFrom(from, assetChainId, assetId, new BigDecimal("0.001").movePointRight(8).toBigInteger(), nonce, (byte) 0));
+        coinData.addTo(new CoinTo(from, assetChainId, assetId, BigInteger.ZERO, (byte) 0));
+        tx.setCoinData(coinData.serialize());
+        AccountContractCallData data = new AccountContractCallData();
+        data.setAddresses(new String[]{
+                "tNULSeBaMkzsRE6qc9RVoeY6gHq8k1xSMcdrc7",
+                "tNULSeBaMfXDQeT4MJZim1RusCJRPx5j9bMKQN"
+        });
+        if (!"ADD".equalsIgnoreCase(type) && !"REMOVE".equalsIgnoreCase(type)) {
+            throw new Exception("错误的类型，设置增加或者移除白名单。ADD or REMOVE");
+        }
+        data.setType("ADD".equalsIgnoreCase(type) ? 1 : 2);
+        tx.setTxData(data.serialize());
+        tx.setTime(System.currentTimeMillis() / 1000);
+
+        tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
+        TransactionSignature transactionSignature = new TransactionSignature();
+        List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
+        //根据密码获得ECKey get ECKey from Password
+        ECKey ecKey = ECKey.fromPrivate(new BigInteger(1, HexUtil.decode(fromKey)));
+        byte[] signBytes = SignatureUtil.signDigest(tx.getHash().getBytes(), ecKey).serialize();
+        P2PHKSignature signature = new P2PHKSignature(signBytes, ecKey.getPubKey()); // TxUtil.getInstanceRpcStr(signatureStr, P2PHKSignature.class);
+        p2PHKSignatures.add(signature);
+        //交易签名
+        transactionSignature.setP2PHKSignatures(p2PHKSignatures);
+        tx.setTransactionSignature(transactionSignature.serialize());
+        Response response = this.newTx(tx);
+        System.out.println(JSONUtils.obj2PrettyJson(response));
+    }
+
+    @Test
+    public void accountForTransferOnContractCallMultiSignTest() throws Exception {
+        //setMain();
+        setTest();
+
+        // 设置增加或者移除白名单
+        String type = "ADD"; // ADD or REMOVE
+        String[] whitelist = {
+                "tNULSeBaMkzsRE6qc9RVoeY6gHq8k1xSMcdrc7"
+        };
+
+        Chain chain = new Chain();
+        ConfigBean configBean = new ConfigBean();
+        configBean.setChainId(chainId);
+        configBean.setAssetId(assetId);
+        chain.setConfig(configBean);
+
+        Transaction tx = new Transaction();
+        tx.setType(TxType.ACCOUNT_FOR_TRANSFER_ON_CONTRACT_CALL);
+        CoinData coinData = new CoinData();
+
+
+        byte[] from = AddressTool.getAddress(fromStr);
+        byte[] nonce;
+        RpcResult request = JsonRpcUtil.request(rpcAddress, "getAccountBalance", List.of(chainId, assetChainId, assetId, fromStr));
+        Map result = (Map) request.getResult();
+        String nonceStr = (String) result.get("nonce");
+        if (null == nonceStr) {
+            nonce = HexUtil.decode("0000000000000000");
+        } else {
+            nonce = HexUtil.decode(nonceStr);
+        }
+        coinData.addFrom(new CoinFrom(from, assetChainId, assetId, new BigDecimal("0.001").movePointRight(8).toBigInteger(), nonce, (byte) 0));
+        coinData.addTo(new CoinTo(from, assetChainId, assetId, BigInteger.ZERO, (byte) 0));
+        tx.setCoinData(coinData.serialize());
+        AccountContractCallData data = new AccountContractCallData();
+        data.setAddresses(whitelist);
+        if (!"ADD".equalsIgnoreCase(type) && !"REMOVE".equalsIgnoreCase(type)) {
+            throw new Exception("错误的类型，设置增加或者移除白名单。ADD or REMOVE");
+        }
+        data.setType("ADD".equalsIgnoreCase(type) ? 1 : 2);
+        tx.setTxData(data.serialize());
+        tx.setTime(System.currentTimeMillis() / 1000);
+        tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
+        System.out.println(String.format("交易大小: %s", tx.size()));
+
+        String[] pubkeys = new String[]{
+                "0225a6a872a4110c9b9c9a71bfdbe896e04bc83bb9fe38e27f3e18957d9b2a25ad",
+                "029f8ab66d157ddfd12d89986833eb2a8d6dc0d92c87da12225d02690583ae1020",
+                "02784d89575c16f9407c7218f8ca6c6a80d44023cd37796fc5458cbce1ede88adb",
+                "020aee2c9cde73f50c5e2eef756b92aeb138bc3cda3438b31a68b56f16004bebf8",
+                "02b2e32f94116d2364af6f06ae9af7f58824b0d3a57fca9170b1a36b665aa93195"};
+        List<String> pubkeyList = Arrays.asList(pubkeys);
+        List<byte[]> collect = pubkeyList.stream().map(p -> HexUtil.decode(p)).collect(Collectors.toList());
+        MultiSignTxSignature transactionSignature = new MultiSignTxSignature();
+        transactionSignature.setM((byte) 3);
+        transactionSignature.setPubKeyList(collect);
+        tx.setTransactionSignature(transactionSignature.serialize());
+
+        List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
+        List<String> priKeyList = new ArrayList<>();
+        priKeyList.add("???");
+        for (String pri : priKeyList) {
+            ECKey eckey = ECKey.fromPrivate(new BigInteger(1, HexUtil.decode(pri)));
+            P2PHKSignature p2PHKSignature = SignatureUtil.createSignatureByEckey(tx, eckey);
+            p2PHKSignatures.add(p2PHKSignature);
+            transactionSignature.setP2PHKSignatures(p2PHKSignatures);
+        }
+        tx.setTransactionSignature(transactionSignature.serialize());
+        System.out.println(HexUtil.encode(tx.serialize()));
     }
 
     @Test
