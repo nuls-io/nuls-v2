@@ -69,7 +69,7 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
         String symbol = "LOCK_KongQiBi";
         String amount = BigDecimal.TEN.pow(10).toPlainString();
         String decimals = "2";
-        Map params = this.makeCreateParams("tNULSeBaMoG1oaW1JZnh6Ly65Ttp6raeTFBfCG", contractCode, "kqb", remark, name, symbol, amount, decimals);
+        Map params = this.makeCreateParams("tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD", contractCode, "kqb", remark, name, symbol, amount, decimals);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CREATE));
         assertTrue(cmdResp2, result);
@@ -138,17 +138,16 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
      */
     @Test
     public void callContractWithNulsValueToOthers() throws Exception {
-        sender = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
+        sender = "tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD";
         tokenReceiver = "tNULSeBaMrbMRiFAUeeAt6swb4xVBNyi81YL24";
-        contractAddress_nrc20 = "";
+        contractAddress_nrc20 = "tNULSeBaN8UY4k5qD9SG8GjMJNKhERBN7cgtEG";
 
         BigInteger value = BigInteger.ZERO;
         methodName = "transfer";
         // "tNULSeBaMkzsRE6qc9RVoeY6gHq8k1xSMcdrc7",
         // "tNULSeBaMfXDQeT4MJZim1RusCJRPx5j9bMKQN"
         AccountAmountDto[] amountDtos = new AccountAmountDto[]{
-                new AccountAmountDto(BigInteger.valueOf(200000000L), "tNULSeBaMkzsRE6qc9RVoeY6gHq8k1xSMcdrc7"),
-                new AccountAmountDto(BigInteger.valueOf(300000000L), "tNULSeBaMfXDQeT4MJZim1RusCJRPx5j9bMKQN")
+                new AccountAmountDto(BigInteger.valueOf(300000000L), "tNULSeBaMkzsRE6qc9RVoeY6gHq8k1xSMcdrc7")
         };
         String methodDesc = "";
         String remark = "call contract test - 空气币转账的同时，向另外一个账户转账";

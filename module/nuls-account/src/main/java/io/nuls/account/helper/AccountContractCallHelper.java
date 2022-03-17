@@ -84,7 +84,7 @@ public class AccountContractCallHelper {
             return Result.getFailed(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
         }
         for (String addr : addresses) {
-            if (AddressTool.validAddress(chainId, addr)) {
+            if (!AddressTool.validAddress(chainId, addr)) {
                 chain.getLogger().error("error address: {}", addr);
                 return Result.getFailed(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
             }

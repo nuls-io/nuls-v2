@@ -355,7 +355,7 @@ public class ContractResource extends BaseCmd {
                 multyAssetValueList = multyAssetValueListResult.getData();
             }
             List<AccountAmountDto> nulsValueToOtherList = null;
-            if (multyAssetValues != null) {
+            if (nulsValueToOthers != null) {
                 Result<List<AccountAmountDto>> nulsValueToOtherListResult = convertNulsValueToOthers(nulsValueToOthers);
                 if (nulsValueToOtherListResult.isFailed()) {
                     return failed(nulsValueToOtherListResult.getErrorCode());
