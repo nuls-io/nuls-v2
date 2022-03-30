@@ -104,9 +104,6 @@ public class RpcResult<T> {
     public static RpcResult failed(ErrorCode errorCode) {
         RpcResult rpcResult = new RpcResult();
         RpcResultError error = new RpcResultError(errorCode.getCode(), errorCode.getMsg(), null);
-        if(StringUtils.isBlank(error.getMessage())){
-            error.setMessage(error.getData().toString());
-        }
         rpcResult.setError(error);
         return rpcResult;
     }
@@ -115,7 +112,7 @@ public class RpcResult<T> {
         RpcResult rpcResult = new RpcResult();
         RpcResultError error = new RpcResultError(errorCode.getCode(), errorCode.getMsg(), data);
         if(StringUtils.isBlank(error.getMessage())){
-            error.setMessage(error.getData().toString());
+            error.setMessage(data);
         }
         rpcResult.setError(error);
 
