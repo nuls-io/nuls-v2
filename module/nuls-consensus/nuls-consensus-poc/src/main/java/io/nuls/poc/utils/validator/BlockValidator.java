@@ -160,17 +160,17 @@ public class BlockValidator {
             chain.getLogger().error("block height " + blockHeader.getHeight() + " round startTime is error! hash :" + blockHeaderHash);
             throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
         }
-        if (blockHeader.getHeight() < 8084100 && extendsData.getConsensusMemberCount() != currentRound.getMemberCount()) {
+        if (blockHeader.getHeight() > 8084000 && blockHeader.getHeight() < 8084100 && extendsData.getConsensusMemberCount() != currentRound.getMemberCount()) {
             chain.getLogger().error("block height " + blockHeader.getHeight() + " packager count is error! hash :" + blockHeaderHash);
             throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
         }
         // 验证打包人是否正确
         MeetingMember member = currentRound.getMember(extendsData.getPackingIndexOfRound());
-        if (blockHeader.getHeight() < 8084100 && !Arrays.equals(member.getAgent().getPackingAddress(), blockHeader.getPackingAddress(chain.getConfig().getChainId()))) {
+        if (blockHeader.getHeight() > 8084000 && blockHeader.getHeight() < 8084100 && !Arrays.equals(member.getAgent().getPackingAddress(), blockHeader.getPackingAddress(chain.getConfig().getChainId()))) {
             chain.getLogger().error("block height " + blockHeader.getHeight() + " packager error! hash :" + blockHeaderHash);
             throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
         }
-        if (blockHeader.getHeight() < 8084100 && member.getPackEndTime() != blockHeader.getTime()) {
+        if (blockHeader.getHeight() > 8084000 && blockHeader.getHeight() < 8084100 && member.getPackEndTime() != blockHeader.getTime()) {
             chain.getLogger().error("block height " + blockHeader.getHeight() + " time error! hash :" + blockHeaderHash);
             throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
         }
