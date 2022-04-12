@@ -126,7 +126,7 @@ public class TxValidator {
         AgentPo agentPo = agentStorageService.get(stopAgent.getCreateTxHash(), chain.getConfig().getChainId());
         if (agentPo == null || agentPo.getDelHeight() > 0) {
             //todo Temporarily solve the problem that agent data on some nodes fails to be updated,For the official repair version, wait until 2.13.0
-            if (null == agentPo || !agentPo.getHash().toHex().equals("528a630b43f5d1eeea5b4567e87c7f7f3d4b86046b8a3d079ef0b9a1aea64360")) {
+            if (null == agentPo || (!agentPo.getHash().toHex().equals("528a630b43f5d1eeea5b4567e87c7f7f3d4b86046b8a3d079ef0b9a1aea64360") && !agentPo.getHash().toHex().equals("ad82dc5237378a39abb3bbd8174ac0f77c882573a02c8fac01b4c7a058a96d90"))) {
                 throw new NulsException(ConsensusErrorCode.AGENT_NOT_EXIST);
             }
         }
@@ -421,7 +421,7 @@ public class TxValidator {
         AgentPo agentPo = agentStorageService.get(deposit.getAgentHash(), chain.getConfig().getChainId());
         if (agentPo == null || agentPo.getDelHeight() > 0) {
             //todo Temporarily solve the problem that agent data on some nodes fails to be updated，For the official repair version, wait until 2.13.0
-            if (null == agentPo || !agentPo.getHash().toHex().equals("d11d29e38b3db75aec0ebb69dc66eb4f6276d0a1d9c7faa6a4fa33b699637447")) {
+            if (null == agentPo || (!agentPo.getHash().toHex().equals("d11d29e38b3db75aec0ebb69dc66eb4f6276d0a1d9c7faa6a4fa33b699637447") && !agentPo.getHash().toHex().equals("ad82dc5237378a39abb3bbd8174ac0f77c882573a02c8fac01b4c7a058a96d90"))) {
                 throw new NulsException(ConsensusErrorCode.AGENT_NOT_EXIST);
             }
         }

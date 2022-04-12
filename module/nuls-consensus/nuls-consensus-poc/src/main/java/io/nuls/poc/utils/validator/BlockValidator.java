@@ -89,7 +89,7 @@ public class BlockValidator {
             throw new NulsException(ConsensusErrorCode.BLOCK_PUNISH_VALID_ERROR);
         }
         validResult = coinBaseValidate(block, currentRound, member, chain, blockHeaderHash);
-        if ((blockHeader.getHeight() < 8084000 || blockHeader.getHeight() > 8084100) && !validResult) {
+        if ((blockHeader.getHeight() < 8083990 || blockHeader.getHeight() > 8084100) && !validResult) {
             if (roundValidResult.isValidResult()) {
                 roundManager.rollBackRound(chain, currentRound.getIndex());
             }
@@ -160,17 +160,17 @@ public class BlockValidator {
             chain.getLogger().error("block height " + blockHeader.getHeight() + " round startTime is error! hash :" + blockHeaderHash);
             throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
         }
-        if ((blockHeader.getHeight() < 8084000 || blockHeader.getHeight() > 8084500) && extendsData.getConsensusMemberCount() != currentRound.getMemberCount()) {
+        if ((blockHeader.getHeight() < 8083990 || blockHeader.getHeight() > 8084500) && extendsData.getConsensusMemberCount() != currentRound.getMemberCount()) {
             chain.getLogger().error("block height " + blockHeader.getHeight() + " packager count is error! hash :" + blockHeaderHash);
             throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
         }
         // 验证打包人是否正确
         MeetingMember member = currentRound.getMember(extendsData.getPackingIndexOfRound());
-        if ((blockHeader.getHeight() < 8084000 || blockHeader.getHeight() > 8084500) && !Arrays.equals(member.getAgent().getPackingAddress(), blockHeader.getPackingAddress(chain.getConfig().getChainId()))) {
+        if ((blockHeader.getHeight() < 8083990 || blockHeader.getHeight() > 8084500) && !Arrays.equals(member.getAgent().getPackingAddress(), blockHeader.getPackingAddress(chain.getConfig().getChainId()))) {
             chain.getLogger().error("block height " + blockHeader.getHeight() + " packager error! hash :" + blockHeaderHash);
             throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
         }
-        if ((blockHeader.getHeight() < 8084000 || blockHeader.getHeight() > 8084500) && member.getPackEndTime() != blockHeader.getTime()) {
+        if ((blockHeader.getHeight() < 8083990 || blockHeader.getHeight() > 8084500) && member.getPackEndTime() != blockHeader.getTime()) {
             chain.getLogger().error("block height " + blockHeader.getHeight() + " time error! hash :" + blockHeaderHash);
             throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
         }
@@ -192,6 +192,10 @@ public class BlockValidator {
      * @param chain        chain info
      */
     private boolean punishValidate(Block block, MeetingRound currentRound, MeetingMember member, Chain chain, String blockHeaderHash) throws NulsException {
+        //todo Temporarily solve the problem that agent data on some nodes fails to be updated
+        if (block.getHeader().getHeight()>8084000&&block.getHeader().getHeight()<8084100) {
+            return true;
+        }
         List<Transaction> txs = block.getTxs();
         List<Transaction> redPunishTxList = new ArrayList<>();
         Transaction yellowPunishTx = null;

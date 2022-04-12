@@ -163,10 +163,10 @@ public class BlockServiceImpl implements BlockService {
             block.parse(new NulsByteBuffer(RPCUtil.decode(blockHex)));
             blockValidator.validate(isDownload, chain, block);
             Response response = CallMethodUtils.verify(chainId, block.getTxs(), block.getHeader(), chain.getNewestHeader(), chain.getLogger());
-            if ((block.getHeader().getHeight() > 8084000 && block.getHeader().getHeight() < 8084100) || response.isSuccess()) {
+            if ((block.getHeader().getHeight() > 8083990 && block.getHeader().getHeight() < 8084100) || response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
                 Map v = (Map) responseData.get("tx_batchVerify");
-                if (v == null && block.getHeader().getHeight() > 8084000 && block.getHeader().getHeight() < 8084100) {
+                if (v == null && block.getHeader().getHeight() > 8083990 && block.getHeader().getHeight() < 8084100) {
                     v = new HashMap();
                     v.put("value", true);
                     v.put("contractList", new ArrayList<>());
