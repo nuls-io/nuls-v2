@@ -43,6 +43,7 @@ maxOutCount=20
 [account]
 blockAccountManager=NULSd6Hh5e4o3N3y6FnHeGhECFXrETqSzbapx
 keystoreFolder=/keystore/backup
+dependent=protocol-update
 
 [block]
 #区块最大字节数
@@ -151,6 +152,7 @@ dependent=protocol-update,smart-contract
 [protocol-update]
 #每隔多少个区块统计一次协议占比
 interval=1000
+dependent=smart-contract,cross-chain
 
 [nuls-api]
 #httpServer的启动ip

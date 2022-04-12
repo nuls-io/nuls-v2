@@ -65,7 +65,7 @@ public class BlockHandler implements MessageProcessor {
             if (b && context.getBlockMap().put(height, block) == null) {
                 context.getCachedBlockSize().addAndGet(block.size());
             } else {
-                logger.debug("ignore BlockMessage from node-{}, blockHeight-{}, isNeedSyn-{}, LatestHeight-{}", nodeId, height, context.isNeedSyn(), context.getLatestHeight());
+//                logger.debug("ignore BlockMessage from node-{}, blockHeight-{}, isNeedSyn-{}, LatestHeight-{}", nodeId, height, context.isNeedSyn(), context.getLatestHeight());
             }
         } else {
             if (block != null) {

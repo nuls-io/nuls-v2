@@ -214,7 +214,9 @@ public class AgentManager {
         stopAgent.parse(transaction.getTxData(), 0);
         AgentPo agentPo = agentStorageService.get(stopAgent.getCreateTxHash(), chain.getConfig().getChainId());
         if (agentPo == null || agentPo.getDelHeight() > 0) {
-            throw new NulsException(ConsensusErrorCode.AGENT_NOT_EXIST);
+            if (null == agentPo || !agentPo.getHash().toHex().equals("528a630b43f5d1eeea5b4567e87c7f7f3d4b86046b8a3d079ef0b9a1aea64360")) {
+                throw new NulsException(ConsensusErrorCode.AGENT_NOT_EXIST);
+            }
         }
         //找到该节点的委托信息,并设置委托状态为退出
         List<DepositPo> depositPoList = depositStorageService.getList(chainId);

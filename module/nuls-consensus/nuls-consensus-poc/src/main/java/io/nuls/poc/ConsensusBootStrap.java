@@ -184,7 +184,7 @@ public class ConsensusBootStrap extends RpcModule {
             po.parse(arr, 0);
             boolean up = false;
             if (po.getHash().toHex().equals("528a630b43f5d1eeea5b4567e87c7f7f3d4b86046b8a3d079ef0b9a1aea64360") && po.getDelHeight() < 7865610L) {
-                po.setDelHeight(7865610L);
+                po.setDelHeight(-1L);
                 up = true;
             }
             if (po.getHash().toHex().equals("a27170a4ad246758cc7fb45ded14b065f6a1919836a2bba34e6dcd9335a054da") && po.getDelHeight() < 8084100) {
