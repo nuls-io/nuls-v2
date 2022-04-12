@@ -2,7 +2,6 @@ package io.nuls.poc.utils.manager;
 
 import io.nuls.poc.model.bo.config.ConfigBean;
 import io.nuls.poc.model.bo.config.ConfigItem;
-import io.nuls.poc.storage.ConfigService;
 import io.nuls.core.core.ioc.SpringLiteContext;
 
 import java.lang.reflect.Field;
@@ -53,11 +52,11 @@ public class ConfigManager {
         保存配置信息到数据库
         Save configuration information to database
         */
-        ConfigService configService = SpringLiteContext.getBean(ConfigService.class);
-        boolean saveSuccess = configService.save(bean,bean.getChainId());
-        if(saveSuccess){
+//        ConfigService configService = SpringLiteContext.getBean(ConfigService.class);
+//        boolean saveSuccess = configService.save(bean,bean.getChainId());
+//        if(saveSuccess){
             return bean;
-        }
-        return null;
+//        }
+//        return null;
     }
 }
