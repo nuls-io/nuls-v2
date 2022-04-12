@@ -125,7 +125,7 @@ public class TxValidator {
         stopAgent.parse(tx.getTxData(), 0);
         AgentPo agentPo = agentStorageService.get(stopAgent.getCreateTxHash(), chain.getConfig().getChainId());
         if (agentPo == null || agentPo.getDelHeight() > 0) {
-            //todo 临时解决数据写入冲突的问题,将在2.13.0版本时彻底修复该问题
+            //todo Temporarily solve the problem that agent data on some nodes fails to be updated,For the official repair version, wait until 2.13.0
             if (null == agentPo || !agentPo.getHash().toHex().equals("528a630b43f5d1eeea5b4567e87c7f7f3d4b86046b8a3d079ef0b9a1aea64360")) {
                 throw new NulsException(ConsensusErrorCode.AGENT_NOT_EXIST);
             }
@@ -420,7 +420,10 @@ public class TxValidator {
     private boolean createDepositInfoValid(Chain chain, Deposit deposit) throws NulsException {
         AgentPo agentPo = agentStorageService.get(deposit.getAgentHash(), chain.getConfig().getChainId());
         if (agentPo == null || agentPo.getDelHeight() > 0) {
-            throw new NulsException(ConsensusErrorCode.AGENT_NOT_EXIST);
+            //todo Temporarily solve the problem that agent data on some nodes fails to be updated，For the official repair version, wait until 2.13.0
+            if (null == agentPo || !agentPo.getHash().toHex().equals("d11d29e38b3db75aec0ebb69dc66eb4f6276d0a1d9c7faa6a4fa33b699637447")) {
+                throw new NulsException(ConsensusErrorCode.AGENT_NOT_EXIST);
+            }
         }
         List<DepositPo> poList = this.getDepositListByAgent(chain, deposit.getAgentHash());
         //节点当前委托总金额
