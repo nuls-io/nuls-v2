@@ -18,7 +18,6 @@ import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.config.ConfigBean;
 import io.nuls.poc.model.dto.CmdRegisterDto;
 import io.nuls.poc.rpc.call.CallMethodUtils;
-//import io.nuls.poc.storage.ConfigService;
 import io.nuls.poc.utils.LoggerUtil;
 
 import java.math.BigInteger;
