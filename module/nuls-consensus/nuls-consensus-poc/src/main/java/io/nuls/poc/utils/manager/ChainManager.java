@@ -18,7 +18,7 @@ import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.config.ConfigBean;
 import io.nuls.poc.model.dto.CmdRegisterDto;
 import io.nuls.poc.rpc.call.CallMethodUtils;
-import io.nuls.poc.storage.ConfigService;
+//import io.nuls.poc.storage.ConfigService;
 import io.nuls.poc.utils.LoggerUtil;
 
 import java.math.BigInteger;
@@ -37,8 +37,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Component
 public class ChainManager {
-    @Autowired
-    private ConfigService configService;
+    //    @Autowired
+//    private ConfigService configService;
     @Autowired
     private AgentManager agentManager;
     @Autowired
@@ -59,14 +59,14 @@ public class ChainManager {
     /**
      * 初始化
      * Initialization chain
-     * */
+     */
     public void initChain() throws Exception {
         Map<Integer, ConfigBean> configMap = configChain();
         if (configMap == null || configMap.size() == 0) {
             Log.info("链初始化失败！");
             return;
         }
-        for (Map.Entry<Integer, ConfigBean> entry : configMap.entrySet()){
+        for (Map.Entry<Integer, ConfigBean> entry : configMap.entrySet()) {
             Chain chain = new Chain();
             int chainId = entry.getKey();
             ConfigBean configBean = entry.getValue();
@@ -83,10 +83,10 @@ public class ChainManager {
             initTable(chain);
             chainMap.put(chainId, chain);
             ProtocolLoader.load(chainId);
-            Map<String,Object> param = new HashMap<>(4);
+            Map<String, Object> param = new HashMap<>(4);
             double deflationRatio = DoubleUtils.sub(ConsensusConstant.VALUE_OF_ONE_HUNDRED, config.getDeflationRatio());
-            param.put(ParamConstant.CONSENUS_CONFIG, new ConsensusConfigInfo(chainId,configBean.getAssetId(),configBean.getPackingInterval(),
-                    configBean.getInflationAmount(),configBean.getTotalInflationAmount(),configBean.getInitTime(),deflationRatio,configBean.getDeflationTimeInterval(),configBean.getAwardAssetId()));
+            param.put(ParamConstant.CONSENUS_CONFIG, new ConsensusConfigInfo(chainId, configBean.getAssetId(), configBean.getPackingInterval(),
+                    configBean.getInflationAmount(), configBean.getTotalInflationAmount(), configBean.getInitTime(), deflationRatio, configBean.getDeflationTimeInterval(), configBean.getAwardAssetId()));
             economicService.registerConfig(param);
         }
     }
@@ -94,9 +94,9 @@ public class ChainManager {
     /**
      * 注册链交易
      * Registration Chain Transaction
-     * */
-    public void registerTx(){
-        for (Chain chain:chainMap.values()) {
+     */
+    public void registerTx() {
+        for (Chain chain : chainMap.values()) {
             /*
              * 链交易注册
              * Chain Trading Registration
@@ -108,9 +108,9 @@ public class ChainManager {
 
     /**
      * 注册智能合约交易
-     * */
-    public void registerContractTx(){
-        for (Chain chain:chainMap.values()) {
+     */
+    public void registerContractTx() {
+        for (Chain chain : chainMap.values()) {
             /*
              * 注册智能合约交易
              * Chain Trading Registration
@@ -136,9 +136,9 @@ public class ChainManager {
     /**
      * 加载链缓存数据并启动链
      * Load the chain to cache data and start the chain
-     * */
-    public void runChain(){
-        for (Chain chain:chainMap.values()) {
+     */
+    public void runChain() {
+        for (Chain chain : chainMap.values()) {
             /*
             加载链缓存数据
             Load chain caching entity
@@ -182,20 +182,16 @@ public class ChainManager {
             读取数据库链信息配置
             Read database chain information configuration
              */
-            Map<Integer, ConfigBean> configMap = configService.getList();
+//            Map<Integer, ConfigBean> configMap = configService.getList();
             /*
             如果系统是第一次运行，则本地数据库没有存储链信息，此时需要从配置文件读取主链配置信息
             If the system is running for the first time, the local database does not have chain information,
             and the main chain configuration information needs to be read from the configuration file at this time.
             */
-            if (configMap == null || configMap.size() == 0) {
-                ConfigBean configBean = config;
-                configBean.setBlockReward(configBean.getInflationAmount().divide(ConsensusConstant.YEAR_MILLISECOND.divide(BigInteger.valueOf(configBean.getPackingInterval()))));
-                boolean saveSuccess = configService.save(configBean,configBean.getChainId());
-                if(saveSuccess){
-                    configMap.put(configBean.getChainId(), configBean);
-                }
-            }
+            Map<Integer, ConfigBean> configMap = new HashMap<>();
+            ConfigBean configBean = config;
+            configBean.setBlockReward(configBean.getInflationAmount().divide(ConsensusConstant.YEAR_MILLISECOND.divide(BigInteger.valueOf(configBean.getPackingInterval()))));
+            configMap.put(configBean.getChainId(), configBean);
             return configMap;
         } catch (Exception e) {
             Log.error(e);
@@ -264,7 +260,7 @@ public class ChainManager {
             agentManager.loadAgents(chain);
             depositManager.loadDeposits(chain);
             punishManager.loadPunishes(chain);
-            if(chain.getBlockHeaderList().size()>1){
+            if (chain.getBlockHeaderList().size() > 1) {
                 roundManager.initRound(chain);
             }
             chain.setCacheLoaded(true);

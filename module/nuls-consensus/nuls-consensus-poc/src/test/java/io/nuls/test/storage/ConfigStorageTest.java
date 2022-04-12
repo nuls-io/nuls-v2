@@ -3,7 +3,8 @@ package io.nuls.test.storage;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.config.ConfigBean;
-import io.nuls.poc.storage.ConfigService;
+import io.nuls.poc.storage.ConfigServicebak;
+import io.nuls.poc.storage.ConfigServicebak;
 import io.nuls.test.TestUtil;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.log.Log;
@@ -17,7 +18,7 @@ import java.util.Properties;
 import static org.junit.Assert.assertNotNull;
 
 public class ConfigStorageTest {
-    private ConfigService configService;
+    private ConfigServicebak configService;
     @Before
     public void init(){
         try {
@@ -29,7 +30,7 @@ public class ConfigStorageTest {
             Log.error(e);
         }
         SpringLiteContext.init(ConsensusConstant.CONTEXT_PATH);
-        configService = SpringLiteContext.getBean(ConfigService.class);
+        configService = SpringLiteContext.getBean(ConfigServicebak.class);
     }
 
     @Test

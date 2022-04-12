@@ -11,7 +11,7 @@ import java.util.Map;
  * @author tag
  * 2018/11/8
  * */
-public interface ConfigService {
+public interface ConfigServicebak {
     /**
      * 保存指定链的配置信息
      * Save configuration information for the specified chain

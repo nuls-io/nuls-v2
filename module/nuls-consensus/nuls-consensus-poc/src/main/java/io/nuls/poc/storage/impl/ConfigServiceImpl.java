@@ -1,15 +1,13 @@
 package io.nuls.poc.storage.impl;
 
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.log.Log;
+import io.nuls.core.model.ByteUtils;
 import io.nuls.core.rockdb.model.Entry;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.config.ConfigBean;
-import io.nuls.poc.storage.ConfigService;
-import io.nuls.core.core.annotation.Service;
-import io.nuls.core.model.ByteUtils;
-import io.nuls.core.model.ObjectUtils;
-import io.nuls.core.log.Log;
+import io.nuls.poc.storage.ConfigServicebak;
 
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +21,7 @@ import java.util.Map;
  * 2018/11/8
  * */
 @Component
-public class ConfigServiceImpl implements ConfigService {
+public class ConfigServiceImpl implements ConfigServicebak {
     @Override
     public boolean save(ConfigBean bean, int chainID) throws Exception{
         if(bean == null){
