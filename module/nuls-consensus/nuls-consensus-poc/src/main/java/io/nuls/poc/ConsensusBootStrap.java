@@ -180,8 +180,11 @@ public class ConsensusBootStrap extends RpcModule {
         List<byte[]> list2;
         try {
             list2 = RocksDBService.valueList("consensus_agent1");
-        }catch (Exception e){
+        } catch (Exception e) {
             Log.error(e);
+            return;
+        }
+        if (list2 == null) {
             return;
         }
         for (byte[] arr : list2) {
