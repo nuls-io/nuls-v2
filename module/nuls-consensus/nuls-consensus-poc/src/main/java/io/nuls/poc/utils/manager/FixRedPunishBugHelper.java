@@ -14,7 +14,7 @@ public class FixRedPunishBugHelper {
     private AgentStorageService agentStorageService;
 
     /**
-     *
+     * This method is used to solve the problem of inconsistent node list caused by the massive node fork event that occurred on 2022-04-10. This method forces four nodes to stop at different heights, and then modifs the affected data through other transaction types to maintain the security and consistency of data on the main network.
      * @param chainId
      * @param agent
      * @param startBlockHeight
