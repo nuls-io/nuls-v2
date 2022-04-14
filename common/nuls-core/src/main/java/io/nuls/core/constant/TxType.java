@@ -170,6 +170,9 @@ public class TxType {
      */
     public static final int BATCH_STAKING_MERGE = 33;
 
+
+    public static final int DELAY_STOP_AGENT = 34;
+
     /**
      * 创建交易对
      */
