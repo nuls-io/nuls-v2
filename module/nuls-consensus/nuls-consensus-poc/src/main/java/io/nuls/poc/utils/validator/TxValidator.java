@@ -24,6 +24,7 @@ import io.nuls.poc.model.po.AgentPo;
 import io.nuls.poc.model.po.DepositPo;
 import io.nuls.poc.model.po.PunishLogPo;
 import io.nuls.poc.rpc.call.CallMethodUtils;
+import io.nuls.poc.rpc.call.LedgerRPCUtils;
 import io.nuls.poc.storage.AgentStorageService;
 import io.nuls.poc.storage.DepositStorageService;
 import io.nuls.poc.utils.compare.CoinFromComparator;
@@ -67,7 +68,7 @@ public class TxValidator {
      * @param tx    交易/transaction info
      * @return boolean
      */
-    public boolean validateTx(Chain chain, Transaction tx) throws NulsException,IOException{
+    public boolean validateTx(Chain chain, Transaction tx) throws NulsException, IOException {
         switch (tx.getType()) {
             case (TxType.REGISTER_AGENT):
             case (TxType.CONTRACT_CREATE_AGENT):
@@ -79,11 +80,30 @@ public class TxValidator {
             case (TxType.CONTRACT_DEPOSIT):
                 return validateDeposit(chain, tx);
             case (TxType.CANCEL_DEPOSIT):
+            case (TxType.DELAY_STOP_AGENT):
+                return validateDelayStopAgent(chain, tx);
             case (TxType.CONTRACT_CANCEL_DEPOSIT):
                 return validateWithdraw(chain, tx);
             default:
                 return false;
         }
+    }
+
+    private boolean validateDelayStopAgent(Chain chain, Transaction tx) throws NulsException {
+        DelayStopAgent txData = new DelayStopAgent();
+        txData.parse(tx.getTxData(), 0);
+        //todo 判断节点已经停止，但是资产却未解锁
+        AgentPo agentPo = this.agentStorageService.get(txData.getAgentHash(), chain.getConfig().getChainId());
+        if (null == agentPo || agentPo.getDelHeight() <= 1) {
+            chain.getLogger().warn("agent hash not right,{}", txData.getAgentHash().toHex());
+            return false;
+        }
+        //验证coindata
+        LedgerRPCUtils.validateDeleyStopAgentCoinData();
+        //验证签名
+
+        //不准重复
+        return false;
     }
 
     /**
@@ -117,7 +137,7 @@ public class TxValidator {
      * @param tx    停止节点交易/stop agent transaction
      * @return boolean
      */
-    private boolean validateStopAgent(Chain chain, Transaction tx) throws NulsException,IOException{
+    private boolean validateStopAgent(Chain chain, Transaction tx) throws NulsException, IOException {
         if (tx.getTxData() == null) {
             throw new NulsException(ConsensusErrorCode.AGENT_NOT_EXIST);
         }
@@ -167,19 +187,19 @@ public class TxValidator {
             //验证手续费是否足够
             try {
                 int size = tx.serialize().length;
-                if(AddressTool.isMultiSignAddress(coinData.getFrom().get(0).getAddress())){
+                if (AddressTool.isMultiSignAddress(coinData.getFrom().get(0).getAddress())) {
                     MultiSignTxSignature transactionSignature = new MultiSignTxSignature();
-                    transactionSignature.parse(tx.getTransactionSignature(),0);
+                    transactionSignature.parse(tx.getTransactionSignature(), 0);
                     size += transactionSignature.getM() * P2PHKSignature.SERIALIZE_LENGTH;
                     size -= tx.getTransactionSignature().length;
                 }
 
                 BigInteger fee = TransactionFeeCalculator.getConsensusTxFee(size, chain.getConfig().getFeeUnit());
-                if(fee.compareTo(consensusManager.getFee(coinData, chain.getConfig().getAgentChainId(), chain.getConfig().getAgentAssetId())) > 0){
+                if (fee.compareTo(consensusManager.getFee(coinData, chain.getConfig().getAgentChainId(), chain.getConfig().getAgentAssetId())) > 0) {
                     chain.getLogger().error("手续费不足！");
                     throw new NulsException(ConsensusErrorCode.FEE_NOT_ENOUGH);
                 }
-            }catch (IOException e){
+            } catch (IOException e) {
                 chain.getLogger().error("数据序列化错误！");
                 throw new NulsException(ConsensusErrorCode.SERIALIZE_ERROR);
             }
@@ -226,16 +246,16 @@ public class TxValidator {
             throw new NulsException(ConsensusErrorCode.DATA_ERROR);
         }
         //验证nonce值是否正确
-        if(!ArraysTool.arrayEquals(CallMethodUtils.getNonce(cancelDeposit.getJoinTxHash().getBytes()), coinData.getFrom().get(0).getNonce())){
+        if (!ArraysTool.arrayEquals(CallMethodUtils.getNonce(cancelDeposit.getJoinTxHash().getBytes()), coinData.getFrom().get(0).getNonce())) {
             throw new NulsException(ConsensusErrorCode.COIN_DATA_VALID_ERROR);
         }
         //退出委托金额是否正确
-        if(depositPo.getDeposit().compareTo(coinData.getFrom().get(0).getAmount()) != 0 || coinData.getTo().get(0).getAmount().compareTo(BigInteger.ZERO) <= 0){
+        if (depositPo.getDeposit().compareTo(coinData.getFrom().get(0).getAmount()) != 0 || coinData.getTo().get(0).getAmount().compareTo(BigInteger.ZERO) <= 0) {
             throw new NulsException(ConsensusErrorCode.DATA_ERROR);
         }
-        if(tx.getType() == TxType.CONTRACT_CANCEL_DEPOSIT && coinData.getTo().get(0).getAmount().compareTo(depositPo.getDeposit()) > 0){
+        if (tx.getType() == TxType.CONTRACT_CANCEL_DEPOSIT && coinData.getTo().get(0).getAmount().compareTo(depositPo.getDeposit()) > 0) {
             throw new NulsException(ConsensusErrorCode.DATA_ERROR);
-        }else if(tx.getType() == TxType.CANCEL_DEPOSIT && coinData.getTo().get(0).getAmount().compareTo(depositPo.getDeposit()) >= 0){
+        } else if (tx.getType() == TxType.CANCEL_DEPOSIT && coinData.getTo().get(0).getAmount().compareTo(depositPo.getDeposit()) >= 0) {
             throw new NulsException(ConsensusErrorCode.DATA_ERROR);
         }
         return true;
@@ -281,18 +301,18 @@ public class TxValidator {
             //验证手续费是否足够
             try {
                 int size = tx.serialize().length;
-                if(AddressTool.isMultiSignAddress(coinData.getFrom().get(0).getAddress())){
+                if (AddressTool.isMultiSignAddress(coinData.getFrom().get(0).getAddress())) {
                     MultiSignTxSignature transactionSignature = new MultiSignTxSignature();
-                    transactionSignature.parse(tx.getTransactionSignature(),0);
+                    transactionSignature.parse(tx.getTransactionSignature(), 0);
                     size += transactionSignature.getM() * P2PHKSignature.SERIALIZE_LENGTH;
                     size -= tx.getTransactionSignature().length;
                 }
                 BigInteger fee = TransactionFeeCalculator.getConsensusTxFee(size, chain.getConfig().getFeeUnit());
-                if(fee.compareTo(consensusManager.getFee(coinData, chain.getConfig().getAgentChainId(), chain.getConfig().getAgentAssetId())) > 0){
+                if (fee.compareTo(consensusManager.getFee(coinData, chain.getConfig().getAgentChainId(), chain.getConfig().getAgentAssetId())) > 0) {
                     chain.getLogger().error("手续费不足！");
                     throw new NulsException(ConsensusErrorCode.FEE_NOT_ENOUGH);
                 }
-            }catch (IOException e){
+            } catch (IOException e) {
                 chain.getLogger().error("数据序列化错误！");
                 throw new NulsException(ConsensusErrorCode.SERIALIZE_ERROR);
             }
@@ -300,7 +320,7 @@ public class TxValidator {
         Set<String> addressSet = new HashSet<>();
         int lockCount = 0;
         for (CoinTo coin : coinData.getTo()) {
-            if(coin.getAssetsChainId() != chain.getConfig().getAgentChainId() || coin.getAssetsId() != chain.getConfig().getAgentAssetId()){
+            if (coin.getAssetsChainId() != chain.getConfig().getAgentChainId() || coin.getAssetsId() != chain.getConfig().getAgentAssetId()) {
                 chain.getLogger().error("锁定资产不合法");
                 throw new NulsException(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
             }
@@ -379,7 +399,7 @@ public class TxValidator {
      * @param coinData 交易的CoinData/coinData
      * @return boolean
      */
-    private boolean stopAgentCoinDataValid(Chain chain, Transaction tx, AgentPo agentPo, StopAgent stopAgent, CoinData coinData) throws NulsException,IOException{
+    private boolean stopAgentCoinDataValid(Chain chain, Transaction tx, AgentPo agentPo, StopAgent stopAgent, CoinData coinData) throws NulsException, IOException {
         Agent agent = agentManager.poToAgent(agentPo);
         CoinData localCoinData = coinDataManager.getStopAgentCoinData(chain, agent, coinData.getTo().get(0).getLockTime());
         //coinData和localCoinData排序
@@ -390,14 +410,14 @@ public class TxValidator {
         localCoinData.getFrom().sort(fromComparator);
         localCoinData.getTo().sort(toComparator);
         CoinTo last = localCoinData.getTo().get(localCoinData.getTo().size() - 1);
-        if(tx.getType() == TxType.STOP_AGENT){
+        if (tx.getType() == TxType.STOP_AGENT) {
             int size = tx.size();
-            if(!AddressTool.isMultiSignAddress(agentPo.getAgentAddress())){
+            if (!AddressTool.isMultiSignAddress(agentPo.getAgentAddress())) {
                 size += P2PHKSignature.SERIALIZE_LENGTH;
-            }else{
+            } else {
                 MultiSignTxSignature transactionSignature = new MultiSignTxSignature();
-                transactionSignature.parse(tx.getTransactionSignature(),0);
-                size +=  transactionSignature.getM() * P2PHKSignature.SERIALIZE_LENGTH;
+                transactionSignature.parse(tx.getTransactionSignature(), 0);
+                size += transactionSignature.getM() * P2PHKSignature.SERIALIZE_LENGTH;
             }
             size -= tx.getTransactionSignature().length;
             BigInteger fee = TransactionFeeCalculator.getNormalTxFee(size);
@@ -445,7 +465,7 @@ public class TxValidator {
      * @param coinData 交易的CoinData/CoinData
      * @return boolean
      */
-    private boolean isDepositOk(BigInteger deposit, CoinData coinData) throws NulsException{
+    private boolean isDepositOk(BigInteger deposit, CoinData coinData) throws NulsException {
         if (coinData == null || coinData.getTo().size() == 0) {
             throw new NulsException(ConsensusErrorCode.COIN_DATA_VALID_ERROR);
         }
@@ -516,20 +536,20 @@ public class TxValidator {
      * 获取区块交易列表中，红牌交易或停止节点交易对应的节点Hash列表
      * Get the node Hash list corresponding to the block transaction list, the red card transaction or the stop node transaction
      *
-     * @param redPunishTxs        红牌交易/Red card penalty node address
-     * @param stopAgentTxs        停止节点交易列表/Stop Node Trading List
-     * @param chain               chain info
+     * @param redPunishTxs 红牌交易/Red card penalty node address
+     * @param stopAgentTxs 停止节点交易列表/Stop Node Trading List
+     * @param chain        chain info
      */
-    public Set<NulsHash> getInvalidAgentHash(List<Transaction> redPunishTxs, List<Transaction> contractStopAgentTxs, List<Transaction> stopAgentTxs, Chain chain){
+    public Set<NulsHash> getInvalidAgentHash(List<Transaction> redPunishTxs, List<Transaction> contractStopAgentTxs, List<Transaction> stopAgentTxs, Chain chain) {
         Set<String> redPunishAddressSet = new HashSet<>();
-        if(redPunishTxs != null && redPunishTxs.size() >0){
-            for (Transaction redPunishTx:redPunishTxs) {
+        if (redPunishTxs != null && redPunishTxs.size() > 0) {
+            for (Transaction redPunishTx : redPunishTxs) {
                 RedPunishData redPunishData = new RedPunishData();
                 try {
                     redPunishData.parse(redPunishTx.getTxData(), 0);
                     String addressHex = HexUtil.encode(redPunishData.getAddress());
                     redPunishAddressSet.add(addressHex);
-                }catch (NulsException e){
+                } catch (NulsException e) {
                     chain.getLogger().error(e);
                 }
             }
@@ -565,7 +585,7 @@ public class TxValidator {
                     agentHashSet.add(stopAgent.getCreateTxHash());
                 }
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             chain.getLogger().error(e);
         }
         return agentHashSet;

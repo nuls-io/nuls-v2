@@ -46,7 +46,7 @@ import java.util.Set;
  */
 public class DelayStopAgent extends BaseNulsData {
 
-    private NulsHash createTxHash;
+    private NulsHash agentHash;
 
     private long height;
 
@@ -55,29 +55,28 @@ public class DelayStopAgent extends BaseNulsData {
      */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.write(this.createTxHash.getBytes());
+        stream.write(this.agentHash.getBytes());
         stream.writeUint32(height);
 
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.createTxHash = byteBuffer.readHash();
+        this.agentHash = byteBuffer.readHash();
         this.height = byteBuffer.readUint32();
     }
 
     @Override
     public int size() {
-        return this.createTxHash.getBytes().length + SerializeUtils.sizeOfUint32();
+        return this.agentHash.getBytes().length + SerializeUtils.sizeOfUint32();
     }
 
-
-    public NulsHash getCreateTxHash() {
-        return createTxHash;
+    public NulsHash getAgentHash() {
+        return agentHash;
     }
 
-    public void setCreateTxHash(NulsHash createTxHash) {
-        this.createTxHash = createTxHash;
+    public void setAgentHash(NulsHash agentHash) {
+        this.agentHash = agentHash;
     }
 
     public long getHeight() {
