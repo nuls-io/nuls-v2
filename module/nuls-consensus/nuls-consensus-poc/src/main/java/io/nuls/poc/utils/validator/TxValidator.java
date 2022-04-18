@@ -8,9 +8,11 @@ import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.MultiSignTxSignature;
 import io.nuls.base.signture.P2PHKSignature;
+import io.nuls.base.signture.TransactionSignature;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.ArraysTool;
@@ -24,7 +26,6 @@ import io.nuls.poc.model.po.AgentPo;
 import io.nuls.poc.model.po.DepositPo;
 import io.nuls.poc.model.po.PunishLogPo;
 import io.nuls.poc.rpc.call.CallMethodUtils;
-import io.nuls.poc.rpc.call.LedgerRPCUtils;
 import io.nuls.poc.storage.AgentStorageService;
 import io.nuls.poc.storage.DepositStorageService;
 import io.nuls.poc.utils.compare.CoinFromComparator;
@@ -89,20 +90,52 @@ public class TxValidator {
         }
     }
 
-    private boolean validateDelayStopAgent(Chain chain, Transaction tx) throws NulsException {
+    private boolean validateDelayStopAgent(Chain chain, Transaction tx) throws NulsException, IOException {
         DelayStopAgent txData = new DelayStopAgent();
         txData.parse(tx.getTxData(), 0);
-        //todo 判断节点已经停止，但是资产却未解锁
         AgentPo agentPo = this.agentStorageService.get(txData.getAgentHash(), chain.getConfig().getChainId());
         if (null == agentPo || agentPo.getDelHeight() <= 1) {
             chain.getLogger().warn("agent hash not right,{}", txData.getAgentHash().toHex());
             return false;
         }
-        //验证coindata
-        LedgerRPCUtils.validateDeleyStopAgentCoinData();
-        //验证签名
+        Agent agent = null;
+        for (Agent a : chain.getAgentList()) {
+            if (agent.getTxHash().equals(agentPo.getHash())) {
+                agent = a;
+                break;
+            }
+        }
 
-        //不准重复
+        if (null == agent || agent.getDelHeight() <= 1) {
+            chain.getLogger().warn("Cache agent deleteHeight not right,{}", txData.getAgentHash().toHex());
+            return false;
+        }
+
+        //验证coindata共识相关性
+        CoinData csCoinData = coinDataManager.getStopAgentCoinData(chain, agent, 0);
+        if (!ArraysTool.arrayEquals(csCoinData.serialize(), tx.getCoinData())) {
+            chain.getLogger().warn("Delay stop agent coindata not right,{}", txData.getAgentHash().toHex());
+            return false;
+        }
+        //验证签名
+        TransactionSignature signature = new TransactionSignature();
+        signature.parse(tx.getTransactionSignature(), 0);
+        if (signature.getSignersCount() > 1) {
+            chain.getLogger().warn("Delay stop agent signature count not right,{}", txData.getAgentHash().toHex());
+            return false;
+        }
+        P2PHKSignature sig = signature.getP2PHKSignatures().get(0);
+        if (!ECKey.verify(tx.getHash().getBytes(), sig.getSignData().getSignBytes(), sig.getPublicKey())) {
+            chain.getLogger().warn("Delay stop agent signature not right,{}", txData.getAgentHash().toHex());
+            return false;
+        }
+        byte[] address = AddressTool.getAddress(sig.getPublicKey(), chain.getConfig().getChainId());
+        String addr = AddressTool.getStringAddressByBytes(address);
+        List<String> seedList = new ArrayList<>(Arrays.asList(chain.getConfig().getSeedNodes().split(",")));
+        if (!seedList.contains(addr)) {
+            chain.getLogger().warn("Delay stop agent tx must sended by a seed address,{}", txData.getAgentHash().toHex());
+            return false;
+        }
         return false;
     }
 
