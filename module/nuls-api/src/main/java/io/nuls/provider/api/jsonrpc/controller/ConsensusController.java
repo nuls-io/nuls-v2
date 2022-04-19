@@ -25,6 +25,7 @@ import io.nuls.base.api.provider.ServiceManager;
 import io.nuls.base.api.provider.consensus.ConsensusProvider;
 import io.nuls.base.api.provider.consensus.facade.*;
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.CoinData;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Controller;
 import io.nuls.core.core.annotation.RpcMethod;
@@ -175,6 +176,34 @@ public class ConsensusController {
         StopAgentReq req = new StopAgentReq(address, password);
         req.setChainId(chainId);
         Result<String> result = consensusProvider.stopAgent(req);
+        RpcResult rpcResult = ResultUtil.getJsonRpcResult(result);
+        return rpcResult;
+    }
+
+    @RpcMethod("stopAgentCoinData")
+    @ApiOperation(description = "获取注销共识节点的coindata", order = 502)
+    @Parameters({
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
+            @Parameter(parameterName = "agentHash", parameterDes = "节点hash", requestType = @TypeDescriptor(value = String.class))
+    })
+    @ResponseData(name = "返回值", description = "返回一个CoinData", responseType = @TypeDescriptor(value = String.class))
+    public RpcResult getStopAgentCoinData(List<Object> params) {
+        int chainId;
+        String agentHash;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        try {
+            agentHash = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[agentHash] is inValid");
+        }
+
+        GetStopAgentCoinDataReq req = new GetStopAgentCoinDataReq(agentHash,0L);
+        req.setChainId(chainId);
+        Result<String> result = consensusProvider.getStopAgentCoinData(req);
         RpcResult rpcResult = ResultUtil.getJsonRpcResult(result);
         return rpcResult;
     }

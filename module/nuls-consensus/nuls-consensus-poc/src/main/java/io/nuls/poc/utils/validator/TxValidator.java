@@ -98,6 +98,10 @@ public class TxValidator {
             chain.getLogger().warn("agent hash not right,{}", txData.getAgentHash().toHex());
             return false;
         }
+        if (txData.getHeight() != agentPo.getDelHeight()) {
+            chain.getLogger().warn("agent delHeight not right,{}", txData.getAgentHash().toHex());
+            return false;
+        }
         Agent agent = null;
         for (Agent a : chain.getAgentList()) {
             if (agent.getTxHash().equals(agentPo.getHash())) {

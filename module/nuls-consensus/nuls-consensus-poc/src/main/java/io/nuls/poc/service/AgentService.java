@@ -98,4 +98,6 @@ public interface AgentService {
      * @return Result
      * */
     Result getSeedNodeInfo(Map<String,Object> params);
+
+    Result getStopAgentCoinData(Map<String, Object> params);
 }

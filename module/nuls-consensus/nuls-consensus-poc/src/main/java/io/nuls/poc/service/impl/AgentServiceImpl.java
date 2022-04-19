@@ -12,6 +12,7 @@ import io.nuls.core.basic.Result;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.log.Log;
@@ -120,7 +121,7 @@ public class AgentServiceImpl implements AgentService {
             Agent agent = TxUtil.createAgent(dto);
             tx.setTxData(agent.serialize());
             //3.2.组装coinData
-            CoinData coinData = coinDataManager.getCoinData(agent.getAgentAddress(), chain, new BigInteger(dto.getDeposit()), ConsensusConstant.CONSENSUS_LOCK_TIME, tx.size() + P2PHKSignature.SERIALIZE_LENGTH,chain.getConfig().getAgentChainId(),chain.getConfig().getAgentAssetId());
+            CoinData coinData = coinDataManager.getCoinData(agent.getAgentAddress(), chain, new BigInteger(dto.getDeposit()), ConsensusConstant.CONSENSUS_LOCK_TIME, tx.size() + P2PHKSignature.SERIALIZE_LENGTH, chain.getConfig().getAgentChainId(), chain.getConfig().getAgentAssetId());
             tx.setCoinData(coinData.serialize());
             //4.交易签名
             String priKey = (String) callResult.get("priKey");
@@ -181,6 +182,44 @@ public class AgentServiceImpl implements AgentService {
             chain.getLogger().error(e);
             return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
         }
+    }
+
+    @Override
+    public Result getStopAgentCoinData(Map<String, Object> params) {
+        int chainId;
+        String agentHash;
+        long lockHeight;
+        try {
+            chainId = (int) params.get("chainId");
+            agentHash = (String) params.get("agentHash");
+            lockHeight = Long.parseLong("" + params.get("lockHeight"));
+            ObjectUtils.canNotEmpty(agentHash, "agentHash can not be null");
+        } catch (Exception e) {
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
+        Chain chain = chainManager.getChainMap().get(chainId);
+        if (chain == null) {
+            return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
+        }
+        List<Agent> agentList = chain.getAgentList();
+        Agent agent = null;
+        for (Agent a : agentList) {
+            if (a.getTxHash().toHex().equals(agentHash)) {
+                agent = a;
+                break;
+            }
+        }
+        try {
+            CoinData coinData = coinDataManager.getStopAgentCoinData(chain, agent, lockHeight);
+            if (null != coinData) {
+                Map<String, String> result = new HashMap<>();
+                result.put("value", HexUtil.encode(coinData.serialize()));
+                return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
+            }
+        } catch (Exception e) {
+            chain.getLogger().error(e);
+        }
+        return Result.getFailed(ConsensusErrorCode.DATA_NOT_FOUND);
     }
 
     /**
@@ -593,12 +632,12 @@ public class AgentServiceImpl implements AgentService {
                 resultMap.put("password", chain.getConfig().getPassword());
             }
             List<String> packAddressList = new ArrayList<>();
-            if(round != null){
+            if (round != null) {
                 for (MeetingMember meetingMember : round.getMemberList()) {
                     packAddressList.add(AddressTool.getStringAddressByBytes(meetingMember.getAgent().getPackingAddress()));
                 }
-            }else {
-                if(chain.isCacheLoaded()) {
+            } else {
+                if (chain.isCacheLoaded()) {
                     packAddressList = new ArrayList<>(Arrays.asList(chain.getConfig().getSeedNodes().split(",")));
                 }
             }
@@ -628,13 +667,13 @@ public class AgentServiceImpl implements AgentService {
             List<String> packAddressList = Arrays.asList(chain.getConfig().getSeedNodes().split(","));
             MeetingRound round = roundManager.getCurrentRound(chain);
             MeetingMember member = null;
-            if(round != null){
+            if (round != null) {
                 member = round.getMyMember();
             }
             Map<String, Object> resultMap = new HashMap<>(4);
             if (member != null) {
                 String address = AddressTool.getStringAddressByBytes(member.getAgent().getPackingAddress());
-                if(packAddressList.contains(address)){
+                if (packAddressList.contains(address)) {
                     resultMap.put("address", address);
                     resultMap.put("password", chain.getConfig().getPassword());
                 }
@@ -646,4 +685,5 @@ public class AgentServiceImpl implements AgentService {
             return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
         }
     }
+
 }
