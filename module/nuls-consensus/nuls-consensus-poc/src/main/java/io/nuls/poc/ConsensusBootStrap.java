@@ -183,24 +183,8 @@ public class ConsensusBootStrap extends RpcModule {
 //            AgentPo po = new AgentPo();
 //            po.parse(arr, 0);
 //            boolean up = false;
-//            if (po.getHash().toHex().equals("528a630b43f5d1eeea5b4567e87c7f7f3d4b86046b8a3d079ef0b9a1aea64360") && po.getDelHeight() < 7865610L) {
-//                po.setDelHeight(-1L);
-//                up = true;
-//            }
-//            if (po.getHash().toHex().equals("a27170a4ad246758cc7fb45ded14b065f6a1919836a2bba34e6dcd9335a054da") && po.getDelHeight() < 8084100) {
-//                po.setDelHeight(-1);
-//                up = true;
-//            }
-//            if (po.getHash().toHex().equals("ab00e76ba14fdc1e14dc1a3c7d86e9751de81fa0dfa98c98b5f236f6638a3cc0") && po.getDelHeight() < 8084100) {
-//                po.setDelHeight(-1L);
-//                up = true;
-//            }
-//            if (po.getHash().toHex().equals("cc1b60c282d297f4431c283bc88615f8d70f81e065405d0d8448190620032a91") && po.getDelHeight() < 8084100) {
-//                po.setDelHeight(-1);
-//                up = true;
-//            }
-//            if (po.getHash().toHex().equals("d11d29e38b3db75aec0ebb69dc66eb4f6276d0a1d9c7faa6a4fa33b699637447") && po.getDelHeight() < 8084100) {
-//                po.setDelHeight(-1);
+//            if (po.getHash().toHex().equals("44fd2f9ab6d0833024a4f77d601ff34c19b7a01490dcf01659034f7013c980f1") && po.getDelHeight() < 7865610L) {
+//                po.setDelHeight(30L);
 //                up = true;
 //            }
 //            if (up) {
