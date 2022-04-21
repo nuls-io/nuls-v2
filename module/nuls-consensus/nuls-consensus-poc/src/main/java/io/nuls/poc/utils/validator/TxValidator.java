@@ -104,7 +104,7 @@ public class TxValidator {
         }
         Agent agent = null;
         for (Agent a : chain.getAgentList()) {
-            if (agent.getTxHash().equals(agentPo.getHash())) {
+            if (a.getTxHash().equals(agentPo.getHash())) {
                 agent = a;
                 break;
             }
@@ -116,7 +116,7 @@ public class TxValidator {
         }
 
         //验证coindata共识相关性
-        CoinData csCoinData = coinDataManager.getStopAgentCoinData(chain, agent, 0);
+        CoinData csCoinData = coinDataManager.getStopAgentCoinData(chain, agent, 1);
         if (!ArraysTool.arrayEquals(csCoinData.serialize(), tx.getCoinData())) {
             chain.getLogger().warn("Delay stop agent coindata not right,{}", txData.getAgentHash().toHex());
             return false;
@@ -140,7 +140,7 @@ public class TxValidator {
             chain.getLogger().warn("Delay stop agent tx must sended by a seed address,{}", txData.getAgentHash().toHex());
             return false;
         }
-        return false;
+        return true;
     }
 
     /**

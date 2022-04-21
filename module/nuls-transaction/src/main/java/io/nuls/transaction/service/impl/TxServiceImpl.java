@@ -392,7 +392,7 @@ public class TxServiceImpl implements TxService {
             }
         }
         for (CoinFrom coinFrom : coinData.getFrom()) {
-            if (tx.getType() == TxType.STOP_AGENT) {
+            if (tx.getType() == TxType.STOP_AGENT || tx.getType()==TxType.DELAY_STOP_AGENT) {
                 //停止节点from中第一笔为签名地址, 只验证from中第一个
                 break;
             }
@@ -476,7 +476,7 @@ public class TxServiceImpl implements TxService {
             }
         }
         for (CoinFrom coinFrom : coinData.getFrom()) {
-            if (tx.getType() == TxType.STOP_AGENT) {
+            if (tx.getType() == TxType.STOP_AGENT || tx.getType()==TxType.DELAY_STOP_AGENT) {
                 //停止节点from中第一笔为签名地址, 只验证from中第一个
                 break;
             }

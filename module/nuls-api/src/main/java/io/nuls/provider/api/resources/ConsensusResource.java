@@ -144,7 +144,7 @@ public class ConsensusResource {
             return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "form is empty"));
         }
         GetStopAgentCoinDataReq req = new GetStopAgentCoinDataReq(
-                form.getAgentHash(), 0L);
+                form.getAgentHash(), 1L);
         req.setChainId(config.getChainId());
         Result<String> result = consensusProvider.getStopAgentCoinData(req);
         RpcClientResult clientResult = ResultUtil.getRpcClientResult(result);

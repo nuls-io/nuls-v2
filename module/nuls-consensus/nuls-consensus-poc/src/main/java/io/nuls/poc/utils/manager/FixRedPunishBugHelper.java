@@ -20,7 +20,6 @@ public class FixRedPunishBugHelper {
      * @param startBlockHeight
      */
     public void v13Filter(int chainId, Agent agent, long startBlockHeight) {
-        execute(chainId, "528a630b43f5d1eeea5b4567e87c7f7f3d4b86046b8a3d079ef0b9a1aea64360", startBlockHeight, 7865610L, agent);
         execute(chainId, "a27170a4ad246758cc7fb45ded14b065f6a1919836a2bba34e6dcd9335a054da", startBlockHeight, 8083986L, agent);
         execute(chainId, "ad82dc5237378a39abb3bbd8174ac0f77c882573a02c8fac01b4c7a058a96d90", startBlockHeight, 8083892L, agent);
         execute(chainId, "d11d29e38b3db75aec0ebb69dc66eb4f6276d0a1d9c7faa6a4fa33b699637447", startBlockHeight, 8084009L, agent);

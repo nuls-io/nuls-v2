@@ -201,7 +201,7 @@ public class ConsensusController {
             return RpcResult.paramError("[agentHash] is inValid");
         }
 
-        GetStopAgentCoinDataReq req = new GetStopAgentCoinDataReq(agentHash,0L);
+        GetStopAgentCoinDataReq req = new GetStopAgentCoinDataReq(agentHash,1L);
         req.setChainId(chainId);
         Result<String> result = consensusProvider.getStopAgentCoinData(req);
         RpcResult rpcResult = ResultUtil.getJsonRpcResult(result);
