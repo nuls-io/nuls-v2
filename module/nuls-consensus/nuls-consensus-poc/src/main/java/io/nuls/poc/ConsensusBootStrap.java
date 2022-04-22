@@ -18,14 +18,12 @@ import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.poc.constant.ConsensusConfig;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.Chain;
-import io.nuls.poc.model.po.AgentPo;
 import io.nuls.poc.rpc.call.CallMethodUtils;
 import io.nuls.poc.utils.enumeration.ConsensusStatus;
 import io.nuls.poc.utils.manager.ChainManager;
 
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
-import java.util.List;
 import java.util.Set;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -174,42 +172,5 @@ public class ConsensusBootStrap extends RpcModule {
     private void initDB() throws Exception {
         RocksDBService.init(consensusConfig.getDataFolder());
         RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSUME_CONGIF);
-        if (consensusConfig.getMainChainId() != 1) {
-            return;
-        }
-
-        List<byte[]> list2 = RocksDBService.valueList("consensus_agent1");
-        for (byte[] arr : list2) {
-            AgentPo po = new AgentPo();
-            po.parse(arr, 0);
-            boolean up = false;
-            if (po.getHash().toHex().equals("528a630b43f5d1eeea5b4567e87c7f7f3d4b86046b8a3d079ef0b9a1aea64360") && po.getDelHeight() < 7865610L) {
-                po.setDelHeight(7865610L);
-                up = true;
-            }
-            if (po.getHash().toHex().equals("a27170a4ad246758cc7fb45ded14b065f6a1919836a2bba34e6dcd9335a054da") && po.getDelHeight() < 8084100) {
-                po.setDelHeight(8083986);
-                up = true;
-            }
-            if (po.getHash().toHex().equals("ab00e76ba14fdc1e14dc1a3c7d86e9751de81fa0dfa98c98b5f236f6638a3cc0") && po.getDelHeight() < 8084100) {
-                po.setDelHeight(-1L);
-                up = true;
-            }
-            if (po.getHash().toHex().equals("cc1b60c282d297f4431c283bc88615f8d70f81e065405d0d8448190620032a91") && po.getDelHeight() < 8084100) {
-                po.setDelHeight(-1);
-                up = true;
-            }
-            if (po.getHash().toHex().equals("d11d29e38b3db75aec0ebb69dc66eb4f6276d0a1d9c7faa6a4fa33b699637447") && po.getDelHeight() < 8084100) {
-                po.setDelHeight(8084009);
-                up = true;
-            }
-            if (up) {
-                byte[] key = po.getHash().getBytes();
-                byte[] value = po.serialize();
-                RocksDBService.put("consensus_agent1", key, value);
-            }
-
-        }
-
     }
 }

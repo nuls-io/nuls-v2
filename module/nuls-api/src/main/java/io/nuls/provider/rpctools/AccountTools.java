@@ -139,6 +139,23 @@ public class AccountTools implements CallRpc {
         }
     }
 
+    public Map getAllContractCallAccount(int chainId) {
+        try {
+            Map<String, Object> params = new HashMap<>(4);
+            params.put(Constants.CHAIN_ID, chainId);
+            Map result = callRpc(ModuleE.AC.abbr, "ac_getAllContractCallAccount", params, (Function<Map<String, Object>, Map>) res -> {
+                if (res == null) {
+                    return null;
+                }
+                return res;
+            });
+            return result;
+        } catch (Exception e) {
+            io.nuls.provider.utils.Log.error(e);
+            return null;
+        }
+    }
+
     public MultiSigAccount createMultiSigAccount(int chainId, List<String> pubKeys, int minSigns) throws NulsException {
         //验证公钥是否重复
         Set<String> pubkeySet = new HashSet<>(pubKeys);

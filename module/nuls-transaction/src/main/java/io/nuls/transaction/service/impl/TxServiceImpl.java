@@ -392,7 +392,7 @@ public class TxServiceImpl implements TxService {
             }
         }
         for (CoinFrom coinFrom : coinData.getFrom()) {
-            if (tx.getType() == TxType.STOP_AGENT) {
+            if (tx.getType() == TxType.STOP_AGENT || tx.getType() == TxType.DELAY_STOP_AGENT) {
                 //停止节点from中第一笔为签名地址, 只验证from中第一个
                 break;
             }
@@ -476,7 +476,7 @@ public class TxServiceImpl implements TxService {
             }
         }
         for (CoinFrom coinFrom : coinData.getFrom()) {
-            if (tx.getType() == TxType.STOP_AGENT) {
+            if (tx.getType() == TxType.STOP_AGENT || tx.getType() == TxType.DELAY_STOP_AGENT) {
                 //停止节点from中第一笔为签名地址, 只验证from中第一个
                 break;
             }
@@ -491,7 +491,7 @@ public class TxServiceImpl implements TxService {
         do {
             int txType = tx.getType();
             // 质押和退出质押不验证锁定地址
-            if (txType == TxType.DEPOSIT || txType == TxType.CANCEL_DEPOSIT || txType == TxType.STOP_AGENT) {
+            if (txType == TxType.DEPOSIT || txType == TxType.CANCEL_DEPOSIT || txType == TxType.STOP_AGENT || txType == TxType.DELAY_STOP_AGENT) {
                 break;
             }
             boolean needAccountManagerSign = false;
@@ -641,7 +641,7 @@ public class TxServiceImpl implements TxService {
                 throw new NulsException(TxErrorCode.TX_VERIFY_FAIL);
             }
         }
-        if (null != existMultiSignAddress && type != TxType.STOP_AGENT && type != TxType.RED_PUNISH) {
+        if (null != existMultiSignAddress && type != TxType.STOP_AGENT && type != TxType.DELAY_STOP_AGENT && type != TxType.RED_PUNISH) {
             //如果from中含有多签地址,则表示该交易是多签交易,则必须满足,froms中只存在这一个多签地址
             for (CoinFrom coinFrom : listFrom) {
                 if (!Arrays.equals(existMultiSignAddress, coinFrom.getAddress())) {

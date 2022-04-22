@@ -25,6 +25,7 @@ package io.nuls.contract.base;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.contract.model.bo.Chain;
+import io.nuls.contract.model.dto.AccountAmountDto;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.ProgramMultyAssetValue;
@@ -346,6 +347,10 @@ public class Base {
     }
 
     protected Map makeCallParams(String sender, BigInteger value, Long gasLimit, Long gasPrice, String contractAddress, String methodName, String methodDesc, String remark, ProgramMultyAssetValue[] multyAssetValues, Object... args) {
+        return this.makeCallParams(sender, value, gasLimit, gasPrice, contractAddress, methodName, methodDesc, remark, multyAssetValues, null, args);
+    }
+
+    protected Map makeCallParams(String sender, BigInteger value, Long gasLimit, Long gasPrice, String contractAddress, String methodName, String methodDesc, String remark, ProgramMultyAssetValue[] multyAssetValues, AccountAmountDto[] nulsValueToOthers, Object... args) {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.CHAIN_ID, chainId);
         params.put("sender", sender);
@@ -359,6 +364,7 @@ public class Base {
         params.put("args", args);
         params.put("password", password);
         params.put("remark", remark);
+        params.put("nulsValueToOthers", ContractUtil.nulsValueToOthersStringArray(nulsValueToOthers));
         return params;
     }
 

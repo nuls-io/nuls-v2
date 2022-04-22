@@ -10,9 +10,12 @@ import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.dto.AccountKeyStoreDTO;
 import io.nuls.account.model.dto.AccountOfflineDTO;
 import io.nuls.account.model.dto.SimpleAccountDTO;
+import io.nuls.account.model.po.AccountBlockPO;
+import io.nuls.account.model.po.AccountContractCallPO;
 import io.nuls.account.service.AccountKeyStoreService;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.TransactionService;
+import io.nuls.account.storage.AccountForTransferOnContractCallStorageService;
 import io.nuls.account.util.AccountTool;
 import io.nuls.account.util.Preconditions;
 import io.nuls.account.util.manager.ChainManager;
@@ -40,10 +43,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static io.nuls.account.util.LoggerUtil.LOG;
 
@@ -63,6 +64,11 @@ public class AccountCmd extends BaseCmd {
     private TransactionService transactionService;
     @Autowired
     private ChainManager chainManager;
+    @Autowired
+    private AccountForTransferOnContractCallStorageService accountForTransferOnContractCallStorageService;
+
+    public AccountCmd() {
+    }
 
     @CmdAnnotation(cmd = "ac_createAccount", version = 1.0, description = "创建指定个数的账户/create a specified number of accounts")
     @Parameters(value = {
@@ -1093,6 +1099,83 @@ public class AccountCmd extends BaseCmd {
             return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         return success(map);
+    }
+
+    @CmdAnnotation(cmd = "ac_validationWhitelistForTransferOnContractCall", version = 1.0, description = "验证账户是否在合约白名单中")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
+            @Parameter(parameterName = "address", parameterType = "String", parameterDes = "账户地址")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = RpcConstant.VALUE, valueType = boolean.class, description = "账户是否在合约白名单中")
+    }))
+    public Response validationWhitelistForTransferOnContractCall(Map params) {
+        Map<String, Boolean> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
+        Chain chain = null;
+        try {
+            // check parameters
+            Preconditions.checkNotNull(params, AccountErrorCode.NULL_PARAMETER);
+            Object chainIdObj = params.get(RpcParameterNameConstant.CHAIN_ID);
+            Object addressObj = params.get(RpcParameterNameConstant.ADDRESS);
+            if (chainIdObj == null || addressObj == null) {
+                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
+            }
+
+            // parse params
+            //链ID
+            int chainId = (int) chainIdObj;
+            chain = chainManager.getChain((Integer) chainIdObj);
+            if (null == chain) {
+                throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
+            }
+            //账户地址
+            String address = (String) addressObj;
+
+            //check the account
+            boolean result = accountService.validationWhitelistForTransferOnContractCall(chainId, address);
+            map.put(RpcConstant.VALUE, result);
+        } catch (NulsRuntimeException e) {
+            errorLogProcess(chain, e);
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+        return success(map);
+    }
+
+    @CmdAnnotation(cmd = "ac_getAllContractCallAccount", version = 1.0, description = "查询调用合约允许普通转账的账户白名单")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class))
+    public Response getAllContractCallAccount(Map params) {
+        Chain chain = null;
+        Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
+        try {
+            // check parameters
+            if (params == null || chainIdObj == null) {
+                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
+            }
+            chain = chainManager.getChain((Integer) chainIdObj);
+            if (null == chain) {
+                throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
+            }
+            List<AccountContractCallPO> accountList = accountForTransferOnContractCallStorageService.getAccountList();
+            if (accountList == null) {
+                accountList = Collections.EMPTY_LIST;
+            }
+            List<String> collect = accountList.stream().map(a -> AddressTool.getStringAddressByBytes(a.getAddress())).collect(Collectors.toList());
+            Map<String, Object> result = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
+            result.put("value", collect);
+            return success(result);
+        } catch (NulsRuntimeException e) {
+            errorLogProcess(chain, e);
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
     }
 
     /**
