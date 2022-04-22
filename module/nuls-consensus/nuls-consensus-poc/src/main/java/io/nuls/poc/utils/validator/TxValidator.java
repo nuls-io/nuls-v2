@@ -81,10 +81,10 @@ public class TxValidator {
             case (TxType.CONTRACT_DEPOSIT):
                 return validateDeposit(chain, tx);
             case (TxType.CANCEL_DEPOSIT):
-            case (TxType.DELAY_STOP_AGENT):
-                return validateDelayStopAgent(chain, tx);
             case (TxType.CONTRACT_CANCEL_DEPOSIT):
                 return validateWithdraw(chain, tx);
+            case (TxType.DELAY_STOP_AGENT):
+                return validateDelayStopAgent(chain, tx);
             default:
                 return false;
         }
