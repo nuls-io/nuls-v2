@@ -235,7 +235,7 @@ public class TransactionController {
                     if (argsResult.getError() != null) {
                         return argsResult;
                     }
-                    String[][] multyAssetValues = Utils.extractMultyAssetInfoFromCallTransaction(callTx.getCoinDataInstance(), config.getChainId(), config.getAssetsId());
+                    String[][] multyAssetValues = Utils.extractMultyAssetInfoFromCallTransaction(call.getContractAddress(), callTx.getCoinDataInstance(), config.getChainId(), config.getAssetsId());
                     result = contractTools.validateContractCall(chainId,
                             AddressTool.getStringAddressByBytes(call.getSender()),
                             call.getValue(),

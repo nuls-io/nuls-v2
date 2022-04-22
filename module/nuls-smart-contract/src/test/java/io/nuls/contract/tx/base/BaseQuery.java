@@ -252,11 +252,15 @@ public class BaseQuery extends Base {
 
     @Test
     public void getBalance() throws Exception {
+        // tNULSeBaMkzsRE6qc9RVoeY6gHq8k1xSMcdrc7
+        // tNULSeBaMfXDQeT4MJZim1RusCJRPx5j9bMKQN
         //this.getBalanceByAccount("tNULSeBaNBJT6JuznGqhKM5q6jXFkuSoMUNkHK");
         System.out.println("---------------------------------------------------");
         //this.getBalanceByAccount("tNULSeBaNAFAVPbGHAzCJ8YZhXLbxK44EujNKF");
         System.out.println("---------------------------------------------------");
-        this.getBalanceByAccount("tNULSeBaMu38g1vnJsSZUCwTDU9GsE5TVNUtpD");
+        this.getBalanceByAccount("tNULSeBaMkzsRE6qc9RVoeY6gHq8k1xSMcdrc7");
+        this.getBalanceByAccount("tNULSeBaMfXDQeT4MJZim1RusCJRPx5j9bMKQN");
+        this.getBalanceByAccount("tNULSeBaNAEf7r7pk63xtGixpTJCPCPkm5DtZf");
     }
 
     protected void getBalanceByAccount(String account) throws Exception {
@@ -275,7 +279,7 @@ public class BaseQuery extends Base {
         Map<String, Object> balance1 = LedgerCall.getBalanceAndNonce(chain, chainId, 2, account);
         System.out.println(String.format("MTA  balance: %s", JSONUtils.obj2PrettyJson(balance1)));
         Map<String, Object> balance2 = LedgerCall.getBalanceAndNonce(chain, chainId, 3, account);
-        System.out.println(String.format("MTA  balance: %s", JSONUtils.obj2PrettyJson(balance2)));
+        System.out.println(String.format("MTA3  balance: %s", JSONUtils.obj2PrettyJson(balance2)));
     }
 
     @Test

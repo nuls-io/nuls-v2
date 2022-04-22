@@ -217,7 +217,7 @@ public class AccountLedgerResource {
                     if (argsResult.isFailed()) {
                         return argsResult;
                     }
-                    String[][] multyAssetValues = Utils.extractMultyAssetInfoFromCallTransaction(callTx.getCoinDataInstance(), config.getChainId(), config.getAssetsId());
+                    String[][] multyAssetValues = Utils.extractMultyAssetInfoFromCallTransaction(call.getContractAddress(), callTx.getCoinDataInstance(), config.getChainId(), config.getAssetsId());
                     result = contractTools.validateContractCall(config.getChainId(),
                             AddressTool.getStringAddressByBytes(call.getSender()),
                             call.getValue(),

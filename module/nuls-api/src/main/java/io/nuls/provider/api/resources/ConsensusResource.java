@@ -132,6 +132,29 @@ public class ConsensusResource {
     }
 
     @POST
+    @Path("/agent/stopCoinData")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(description = "注销共识节点的coinData", order = 502)
+    @Parameters({
+            @Parameter(parameterName = "StopAgentForm", parameterDes = "注销共识节点表单", requestType = @TypeDescriptor(value = StopAgentForm.class))
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = String.class))
+    public RpcClientResult getStopAgentCoinData(GetStopAgentCoinDataForm form) {
+        if (form == null) {
+            return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "form is empty"));
+        }
+        GetStopAgentCoinDataReq req = new GetStopAgentCoinDataReq(
+                form.getAgentHash(), 1L);
+        req.setChainId(config.getChainId());
+        Result<String> result = consensusProvider.getStopAgentCoinData(req);
+        RpcClientResult clientResult = ResultUtil.getRpcClientResult(result);
+        if (clientResult.isSuccess()) {
+            return clientResult.resultMap().map("value", clientResult.getData()).mapToData();
+        }
+        return clientResult;
+    }
+
+    @POST
     @Path("/deposit")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(description = "委托参与共识", order = 503)

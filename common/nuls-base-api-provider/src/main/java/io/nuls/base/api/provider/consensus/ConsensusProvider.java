@@ -32,6 +32,7 @@ public interface ConsensusProvider {
      * @return
      */
     Result<String> stopAgent(StopAgentReq req);
+    Result<String> getStopAgentCoinData(GetStopAgentCoinDataReq req);
 
     /**
      * stop consensus node

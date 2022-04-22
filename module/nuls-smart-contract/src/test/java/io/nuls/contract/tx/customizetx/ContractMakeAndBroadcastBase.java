@@ -203,7 +203,7 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
         }
         byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
         byte[] senderBytes = AddressTool.getAddress(sender);
-        return contractTxHelper.newCallTx(chainId, sender, senderBytes, value, gasLimit, price, contractAddressBytes, methodName, methodDesc, args, remark, null);
+        return contractTxHelper.newCallTx(chainId, sender, senderBytes, value, gasLimit, price, contractAddressBytes, methodName, methodDesc, args, remark, null, null);
     }
 
     protected Result broadcastCallTx(CallContractTransaction tx) {
