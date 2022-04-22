@@ -35,6 +35,8 @@ public class AccountLockProcessorV12 implements TransactionProcessor {
     @Autowired
     private ChainManager chainManager;
     @Autowired
+    private AliasService aliasService;
+    @Autowired
     private AccountBlockHelper accountBlockHelper;
     @Autowired
     private AccountBlockStorageService accountBlockStorageService;

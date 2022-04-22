@@ -41,7 +41,9 @@ public class ConsensusProviderForRpc extends BaseRpcService implements Consensus
     public Result<String> stopAgent(StopAgentReq req) {
         return callReturnString("cs_stopAgent",req,"txHash");
     }
-
+    public Result<String> getStopAgentCoinData(GetStopAgentCoinDataReq req){
+        return callReturnString("cs_getStopAgentCoinData",req,"value");
+    }
     @Override
     public Result<MultiSignTransferRes> stopAgentForMultiSignAccount(StopMultiSignAgentReq req) {
         return callRpc(ModuleE.CS.abbr,"cs_stopMultiAgent",req,(Function<Map,Result>)(data-> success(MapUtils.mapToBean(data,new MultiSignTransferRes()))));

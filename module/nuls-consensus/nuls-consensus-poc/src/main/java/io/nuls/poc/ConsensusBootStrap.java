@@ -18,12 +18,14 @@ import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.poc.constant.ConsensusConfig;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.Chain;
+import io.nuls.poc.model.po.AgentPo;
 import io.nuls.poc.rpc.call.CallMethodUtils;
 import io.nuls.poc.utils.enumeration.ConsensusStatus;
 import io.nuls.poc.utils.manager.ChainManager;
 
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.Set;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -172,5 +174,25 @@ public class ConsensusBootStrap extends RpcModule {
     private void initDB() throws Exception {
         RocksDBService.init(consensusConfig.getDataFolder());
         RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSUME_CONGIF);
+        if (consensusConfig.getMainChainId() != 1) {
+            return;
+        }
+
+//        List<byte[]> list2 = RocksDBService.valueList("consensus_agent1");
+//        for (byte[] arr : list2) {
+//            AgentPo po = new AgentPo();
+//            po.parse(arr, 0);
+//            boolean up = false;
+//            if (po.getHash().toHex().equals("44fd2f9ab6d0833024a4f77d601ff34c19b7a01490dcf01659034f7013c980f1") && po.getDelHeight() < 7865610L) {
+//                po.setDelHeight(30L);
+//                up = true;
+//            }
+//            if (up) {
+//                byte[] key = po.getHash().getBytes();
+//                byte[] value = po.serialize();
+//                RocksDBService.put("consensus_agent1", key, value);
+//            }
+//        }
+
     }
 }
