@@ -89,7 +89,7 @@ public class BlockValidator {
             throw new NulsException(ConsensusErrorCode.BLOCK_PUNISH_VALID_ERROR);
         }
         validResult = coinBaseValidate(block, currentRound, member, chain, blockHeaderHash);
-        if (!validResult) {
+        if ( !validResult) {
             if (roundValidResult.isValidResult()) {
                 roundManager.rollBackRound(chain, currentRound.getIndex());
             }
@@ -166,11 +166,11 @@ public class BlockValidator {
         }
         // 验证打包人是否正确
         MeetingMember member = currentRound.getMember(extendsData.getPackingIndexOfRound());
-        if (!Arrays.equals(member.getAgent().getPackingAddress(), blockHeader.getPackingAddress(chain.getConfig().getChainId()))) {
+        if (  !Arrays.equals(member.getAgent().getPackingAddress(), blockHeader.getPackingAddress(chain.getConfig().getChainId()))) {
             chain.getLogger().error("block height " + blockHeader.getHeight() + " packager error! hash :" + blockHeaderHash);
             throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
         }
-        if (member.getPackEndTime() != blockHeader.getTime()) {
+        if (  member.getPackEndTime() != blockHeader.getTime()) {
             chain.getLogger().error("block height " + blockHeader.getHeight() + " time error! hash :" + blockHeaderHash);
             throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
         }

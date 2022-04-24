@@ -27,14 +27,14 @@ packageVersion=%PACKAGE_VERSION%
 
 
 [network]
-port=8001
-crossPort=8002
+port=28001
+crossPort=28002
 #魔法参数
-packetMagic=20191222
+packetMagic=20220418
 #种子节点
-selfSeedIps=seeda.nuls.io:8001,seedb.nuls.io:8001,seedc.nuls.io:8001,seedd.nuls.io:8001,seede.nuls.io:8001,seedf.nuls.io:8001
+selfSeedIps=127.0.0.1:28001
 #主网的跨链种子连接节点
-moonSeedIps=seeda.nuls.io:8002,seedb.nuls.io:8002,seedc.nuls.io:8002,seedd.nuls.io:8002,seede.nuls.io:8002,seedf.nuls.io:8002
+moonSeedIps=127.0.0.1:28002
 #最大入网连接数
 maxInCount=300
 #最大出网连接数
@@ -53,7 +53,7 @@ extendMaxSize=1024
 #引发分叉链切换的高度差阈值
 chainSwtichThreshold=3
 #最小链接节点数,当链接到的网络节点低于此参数时,会持续等待
-minNodeAmount=2
+minNodeAmount=0
 #区块同步过程中,每次从网络上节点下载的区块数量
 downloadNumber=10
 #从网络节点下载单个区块的超时时间
@@ -67,7 +67,7 @@ dependent=cross-chain,protocol-update,smart-contract
 
 [consensus]
 #种子节点列表
-seedNodes=NULSd6Hge7xHDnvsSpnzbR2gWHd31zJ1How11,NULSd6Hgc5VNP4rF4wxdiXEQKpBKUE4w5RS22,NULSd6HgeQwXLdre69ArkqVZNDqMLU4CaAz33,NULSd6HgcjAKAgq8jjXgBCcNLEJUvJEYcoj44,NULSd6HgiDdTjcuvhqzm3bomyBFZmosV3ei55
+seedNodes=NULSd6HgUs9HyHvcdfxeW6Q8sA6zvkjtCHSLP
 #出块地址密码
 password=nuls123456
 #出块间隔时间(单位：s)
@@ -151,7 +151,7 @@ dependent=protocol-update,smart-contract
 
 [protocol-update]
 #每隔多少个区块统计一次协议占比
-interval=1000
+interval=10
 dependent=smart-contract,cross-chain
 
 [nuls-api]

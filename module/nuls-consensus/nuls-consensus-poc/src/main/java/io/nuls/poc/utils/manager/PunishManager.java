@@ -701,6 +701,9 @@ public class PunishManager {
         List<DepositPo> depositPoList = depositStorageService.getList(chainId);
         List<DepositPo> updatedList = new ArrayList<>();
         for (DepositPo po : depositPoList) {
+            if(!po.getAgentHash().equals(agent.getHash())){
+                continue;
+            }
             if (po.getDelHeight() == blockHeight) {
                 po.setDelHeight(-1);
             }

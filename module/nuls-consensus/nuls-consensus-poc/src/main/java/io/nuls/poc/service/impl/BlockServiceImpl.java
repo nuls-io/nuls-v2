@@ -44,6 +44,7 @@ public class BlockServiceImpl implements BlockService {
 
     @Autowired
     private BlockValidator blockValidator;
+
     /**
      * 缓存最新区块
      */
@@ -116,9 +117,9 @@ public class BlockServiceImpl implements BlockService {
         try {
             List<String> headerList = (List<String>) params.get(ConsensusConstant.HEADER_LIST);
             List<BlockHeader> blockHeaderList = new ArrayList<>();
-            for (String header:headerList) {
+            for (String header : headerList) {
                 BlockHeader blockHeader = new BlockHeader();
-                blockHeader.parse(RPCUtil.decode(header),0);
+                blockHeader.parse(RPCUtil.decode(header), 0);
                 blockHeaderList.add(blockHeader);
             }
             List<BlockHeader> localBlockHeaders = chain.getBlockHeaderList();
@@ -162,11 +163,11 @@ public class BlockServiceImpl implements BlockService {
             block.parse(new NulsByteBuffer(RPCUtil.decode(blockHex)));
             blockValidator.validate(isDownload, chain, block);
             Response response = CallMethodUtils.verify(chainId, block.getTxs(), block.getHeader(), chain.getNewestHeader(), chain.getLogger());
-            if (response.isSuccess()) {
+            if ( response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
                 Map v = (Map) responseData.get("tx_batchVerify");
                 return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(v);
-            }else{
+            } else {
                 chain.getLogger().info("Block transaction validation failed!");
             }
         } catch (NulsException e) {
