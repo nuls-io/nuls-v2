@@ -6,6 +6,7 @@ import io.nuls.cmd.client.config.Config;
 import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.crypto.ECKey;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.parse.SerializeUtils;
 
 /**
@@ -57,5 +58,7 @@ public class Tools {
                 System.exit(0);
         }
     }
+
+
 
 }
