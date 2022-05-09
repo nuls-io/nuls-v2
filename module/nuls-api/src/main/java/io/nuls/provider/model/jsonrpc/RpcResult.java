@@ -115,7 +115,7 @@ public class RpcResult<T> {
         RpcResult rpcResult = new RpcResult();
         RpcResultError error = new RpcResultError(errorCode.getCode(), errorCode.getMsg(), data);
         if(StringUtils.isBlank(error.getMessage())){
-            error.setMessage(error.getData().toString());
+            error.setMessage(data);
         }
         rpcResult.setError(error);
 

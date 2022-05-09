@@ -72,7 +72,7 @@ public class GetPrivateKeyProcessor extends AccountBaseProcessor implements Comm
     @Override
     public CommandResult execute(String[] args) {
         String address = args[1];
-        String password = getPwd("Enter your account password");
+        String password = getPwd("Enter your account password:");
         Result<String> result = accountService.getAccountPrivateKey(new GetAccountPrivateKeyByAddressReq(password,address));
         if(result.isFailed()){
             return CommandResult.getFailed(result);

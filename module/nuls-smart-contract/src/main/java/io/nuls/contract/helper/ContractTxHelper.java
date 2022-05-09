@@ -32,6 +32,7 @@ import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.manager.ContractTxValidatorManager;
 import io.nuls.contract.model.bo.ContractBalance;
 import io.nuls.contract.model.bo.ContractResult;
+import io.nuls.contract.model.dto.AccountAmountDto;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
 import io.nuls.contract.model.tx.CallContractTransaction;
 import io.nuls.contract.model.tx.CreateContractTransaction;
@@ -131,7 +132,7 @@ public class ContractTxHelper {
              * 多扣除的费用会以ContractReturnGasTransaction交易还给Sender
              */
             CoinData coinData = new CoinData();
-            Result makeCoinDataResult = this.makeCoinData(chainId, sender, senderBytes, contractAddressBytes, gasLimit, price, value, tx.size(), createContractData, coinData, null);
+            Result makeCoinDataResult = this.makeCoinData(chainId, sender, senderBytes, contractAddressBytes, gasLimit, price, value, tx.size(), createContractData, coinData, null, null);
             if (makeCoinDataResult.isFailed()) {
                 return makeCoinDataResult;
             }
@@ -226,7 +227,7 @@ public class ContractTxHelper {
         return VarInt.sizeOf(size) + size - 1;
     }
 
-    public Result makeCoinData(int chainId, String sender, byte[] senderBytes, byte[] contractAddress, long gasLimit, long price, BigInteger value, int txSize, NulsData txData, CoinData coinData, List<ProgramMultyAssetValue> multyAssetValues) {
+    public Result makeCoinData(int chainId, String sender, byte[] senderBytes, byte[] contractAddress, long gasLimit, long price, BigInteger value, int txSize, NulsData txData, CoinData coinData, List<ProgramMultyAssetValue> multyAssetValues, List<AccountAmountDto> nulsValueToOtherList) {
         long gasUsed = gasLimit;
         BigInteger imputedValue = BigInteger.valueOf(LongUtils.mul(gasUsed, price));
         // 总花费
@@ -234,14 +235,18 @@ public class ContractTxHelper {
         int assetChainId = CHAIN_ID;
         int assetId = ASSET_ID;
         totalValue = totalValue.add(value);
+        if (value.compareTo(BigInteger.ZERO) > 0) {
+            coinData.addTo(new CoinTo(contractAddress, assetChainId, assetId, value));
+        }
+        if (nulsValueToOtherList != null && !nulsValueToOtherList.isEmpty()) {
+            for (AccountAmountDto dto : nulsValueToOtherList) {
+                totalValue = totalValue.add(dto.getValue());
+                coinData.addTo(new CoinTo(AddressTool.getAddress(dto.getTo()), assetChainId, assetId, dto.getValue()));
+            }
+        }
         ContractBalance senderBalance = contractHelper.getUnConfirmedBalanceAndNonce(chainId, assetChainId, assetId, sender);
         CoinFrom coinFrom = new CoinFrom(senderBytes, assetChainId, assetId, totalValue, RPCUtil.decode(senderBalance.getNonce()), UNLOCKED_TX);
         coinData.addFrom(coinFrom);
-
-        if (value.compareTo(BigInteger.ZERO) > 0) {
-            CoinTo coinTo = new CoinTo(contractAddress, assetChainId, assetId, value);
-            coinData.addTo(coinTo);
-        }
 
         if (multyAssetValues != null && !multyAssetValues.isEmpty()) {
             BigInteger _value;
@@ -291,7 +296,7 @@ public class ContractTxHelper {
 
     public Result<CallContractTransaction> makeCallTx(int chainId, String sender, BigInteger value, Long gasLimit, Long price, String contractAddress,
                                                       String methodName, String methodDesc, String[][] args,
-                                                      String password, String remark, List<ProgramMultyAssetValue> multyAssetValues) {
+                                                      String password, String remark, List<ProgramMultyAssetValue> multyAssetValues, List<AccountAmountDto> nulsValueToOtherList) {
 
         if (value == null) {
             value = BigInteger.ZERO;
@@ -310,12 +315,12 @@ public class ContractTxHelper {
             return validateCall;
         }
 
-        Result<CallContractTransaction> result = this.newCallTx(chainId, sender, senderBytes, value, gasLimit, price, contractAddressBytes, methodName, methodDesc, args, remark, multyAssetValues);
+        Result<CallContractTransaction> result = this.newCallTx(chainId, sender, senderBytes, value, gasLimit, price, contractAddressBytes, methodName, methodDesc, args, remark, multyAssetValues, nulsValueToOtherList);
         return result;
     }
 
     public Result<CallContractTransaction> newCallTx(int chainId, String sender, byte[] senderBytes, BigInteger value, Long gasLimit, Long price, byte[] contractAddressBytes,
-                                                     String methodName, String methodDesc, String[][] args, String remark, List<ProgramMultyAssetValue> multyAssetValues) {
+                                                     String methodName, String methodDesc, String[][] args, String remark, List<ProgramMultyAssetValue> multyAssetValues, List<AccountAmountDto> nulsValueToOtherList) {
         try {
 
             CallContractTransaction tx = new CallContractTransaction();
@@ -335,7 +340,7 @@ public class ContractTxHelper {
              * 多扣除的费用会以CoinBase交易还给Sender
              */
             CoinData coinData = new CoinData();
-            Result makeCoinDataResult = this.makeCoinData(chainId, sender, senderBytes, contractAddressBytes, gasLimit, price, value, tx.size(), callContractData, coinData, multyAssetValues);
+            Result makeCoinDataResult = this.makeCoinData(chainId, sender, senderBytes, contractAddressBytes, gasLimit, price, value, tx.size(), callContractData, coinData, multyAssetValues, nulsValueToOtherList);
             if (makeCoinDataResult.isFailed()) {
                 return makeCoinDataResult;
             }
@@ -568,7 +573,7 @@ public class ContractTxHelper {
              * 没有Gas消耗，在终止智能合约里
              */
             CoinData coinData = new CoinData();
-            Result makeCoinDataResult = this.makeCoinData(chainId, sender, senderBytes, contractAddressBytes, 0L, 0L, BigInteger.ZERO, tx.size(), deleteContractData, coinData, null);
+            Result makeCoinDataResult = this.makeCoinData(chainId, sender, senderBytes, contractAddressBytes, 0L, 0L, BigInteger.ZERO, tx.size(), deleteContractData, coinData, null, null);
             if (makeCoinDataResult.isFailed()) {
                 return makeCoinDataResult;
             }

@@ -1,5 +1,39 @@
 [
   {
+    "version": "13",
+    "extend": "12",
+    "validTxs": [
+      {
+        "type": "65",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "AccountForTransferOnContractCallProcessorV13"
+      }
+    ],
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  },
+  {
+    "version": "12",
+    "extend": "11",
+    "validTxs": [
+      {
+        "type": "63",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "AccountLockProcessorV12"
+      }
+    ],
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  },
+  {
     "version": "11",
     "extend": "1",
     "validTxs": [

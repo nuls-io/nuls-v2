@@ -8,10 +8,9 @@ import io.nuls.core.core.annotation.Service;
 import io.nuls.core.core.config.ConfigurationLoader;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.io.IoUtils;
+import io.nuls.core.log.Log;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.I18nUtils;
-import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.modulebootstrap.Module;
@@ -20,11 +19,11 @@ import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.core.rpc.util.AddressPrefixDatas;
 import io.nuls.provider.api.RpcServerManager;
+import io.nuls.provider.api.cache.LedgerAssetCache;
+import io.nuls.provider.api.config.Config;
 import io.nuls.provider.api.config.Context;
-import io.nuls.provider.utils.Log;
 import io.nuls.v2.NulsSDKBootStrap;
 
-import java.util.List;
 import java.util.Map;
 
 import static io.nuls.provider.api.constant.SdkConstant.SDK_API;
@@ -43,6 +42,10 @@ public class ApiBootstrap extends RpcModule {
     MyModule myModule;
     @Autowired
     private AddressPrefixDatas addressPrefixDatas;
+    @Autowired
+    private LedgerAssetCache ledgerAssetCache;
+    @Autowired
+    private Config config;
 
     public static void main(String[] args) {
         boolean isOffline = false;
@@ -75,7 +78,9 @@ public class ApiBootstrap extends RpcModule {
             SpringLiteContext.init(basePackage);
         }
         initRpcServer(configItemMap);
-
+        if (null != configItemMap && configItemMap.get("accessLimit") != null) {
+            Context.accessLimit = Boolean.parseBoolean(configItemMap.get("accessLimit").getValue());
+        }
         NulsSDKBootStrap.init(defaultChainId, "");
         try {
             I18nUtils.setLanguage("en");
@@ -123,6 +128,16 @@ public class ApiBootstrap extends RpcModule {
     public boolean doStart() {
         AddressTool.init(addressPrefixDatas);
         return true;
+    }
+
+    @Override
+    public void onDependenciesReady(Module module) {
+        Log.info("dependencies [{}] ready", module.getName());
+        if (ModuleE.LG.abbr.equals(module.getName())) {
+            Log.info("onDependenciesReady ledger");
+            ledgerAssetCache.initial(config.getChainId());
+        }
+
     }
 
     @Override

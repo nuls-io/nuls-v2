@@ -27,6 +27,8 @@ import io.nuls.account.config.AccountConfig;
 import io.nuls.account.config.NulsConfig;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Chain;
+import io.nuls.account.model.bo.tx.AccountBlockExtend;
+import io.nuls.account.model.bo.tx.AccountBlockInfo;
 import io.nuls.account.model.bo.tx.txdata.AccountBlockData;
 import io.nuls.account.util.TxUtil;
 import io.nuls.base.basic.AddressTool;
@@ -68,7 +70,7 @@ public class AccountBlockHelper {
         CoinFrom coinFrom = listFrom.get(0);
         String fromStr = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
         if (!fromStr.equals(accountConfig.getBlockAccountManager())) {
-            chain.getLogger().error("error: not manager");
+            chain.getLogger().error("error: not manager, tx: {}, config: {}", fromStr, accountConfig.getBlockAccountManager());
             return Result.getFailed(AccountErrorCode.COINDATA_IS_INCOMPLETE);
         }
         AccountBlockData txData = new AccountBlockData();
@@ -78,6 +80,17 @@ public class AccountBlockHelper {
             chain.getLogger().error("empty addresses");
             return Result.getFailed(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
         }
+        // 检查白名单
+        byte[] txDataExtend = txData.getExtend();
+        if (txDataExtend != null) {
+            AccountBlockExtend abExtend = new AccountBlockExtend();
+            abExtend.parse(txDataExtend, 0);
+            AccountBlockInfo[] infos = abExtend.getInfos();
+            if (addresses.length != infos.length) {
+                chain.getLogger().error("inconsistent address data in txData");
+                return Result.getFailed(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
+            }
+        }
         for (String addr : addresses) {
             if (addr.equals(accountConfig.getBlockAccountManager())) {
                 chain.getLogger().error("error: manager can not in it");
@@ -86,7 +99,7 @@ public class AccountBlockHelper {
         }
         int addrChainId = AddressTool.getChainIdByAddress(coinFrom.getAddress());
         //黑洞地址不能发起转账
-        if(AddressTool.isBlackHoleAddress(NulsConfig.BLACK_HOLE_PUB_KEY,addrChainId,coinFrom.getAddress())){
+        if (AddressTool.isBlackHoleAddress(NulsConfig.BLACK_HOLE_PUB_KEY, addrChainId, coinFrom.getAddress())) {
             return Result.getFailed(AccountErrorCode.ADDRESS_TRANSFER_BAN);
         }
         // 发送方from中地址对应的链id必须是发起链的id

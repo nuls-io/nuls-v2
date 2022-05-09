@@ -556,8 +556,12 @@ public class ApiDocTool {
         }
 
         public static List<ResultDes> classToResultDes(Class<?> clzs) {
+            if (clzs == Void.class) {
+                return null;
+            }
             Annotation annotation = clzs.getAnnotation(ApiModel.class);
             if (annotation == null) {
+                System.err.println(clzs.getName());
                 throw new IllegalArgumentException("返回值是复杂对象时必须声明ApiModule注解 + " + clzs.getSimpleName());
             }
             List<Field> list = new LinkedList();
@@ -1194,17 +1198,17 @@ public class ApiDocTool {
             private List<String> path;
 
             public Url() {
-                this.protocol = "http";
+                this.protocol = "https";
                 this.host = new ArrayList<>();
-                this.host.add("localhost");
-                this.port = "18004";
+                this.host.add("api.nuls.io");
+                this.port = null;
                 this.path = new ArrayList<>();
             }
 
             public static Url jsonrpcInstance() {
                 Url url = new Url();
                 url.path.add("jsonrpc");
-                url.raw = "http://localhost:18004/jsonrpc";
+                url.raw = "https://api.nuls.io/jsonrpc";
                 return url;
             }
 

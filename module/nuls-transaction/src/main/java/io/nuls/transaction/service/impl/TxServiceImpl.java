@@ -59,6 +59,7 @@ import io.nuls.transaction.constant.TxContext;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.manager.TxManager;
 import io.nuls.transaction.model.bo.*;
+import io.nuls.transaction.model.dto.AccountBlockDTO;
 import io.nuls.transaction.model.dto.ModuleTxRegisterDTO;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
 import io.nuls.transaction.model.po.TransactionNetPO;
@@ -68,7 +69,6 @@ import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.storage.ConfirmedTxStorageService;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
-import io.nuls.transaction.utils.BlackListUtils;
 import io.nuls.transaction.utils.TxDuplicateRemoval;
 import io.nuls.transaction.utils.TxUtil;
 
@@ -91,9 +91,6 @@ public class TxServiceImpl implements TxService {
 
     @Autowired
     private PackablePool packablePool;
-
-    @Autowired
-    private BlackListUtils blackListUtils;
 
     @Autowired
     private UnconfirmedTxStorageService unconfirmedTxStorageService;
@@ -157,7 +154,6 @@ public class TxServiceImpl implements TxService {
                 //节点区块同步中或回滚中,暂停接纳新交易
                 throw new NulsException(TxErrorCode.PAUSE_NEWTX);
             }
-            validateTxAddress(tx);
             NulsHash hash = tx.getHash();
             if (isTxExists(chain, hash)) {
                 throw new NulsException(TxErrorCode.TX_ALREADY_EXISTS);
@@ -310,7 +306,11 @@ public class TxServiceImpl implements TxService {
             throw new NulsException(TxErrorCode.TX_SIZE_TOO_LARGE);
         }
         //验证签名
-        validateTxSignature(tx, txRegister, chain);
+        if (ProtocolGroupManager.getCurrentVersion(chain.getChainId()) >= TxContext.UPDATE_VERSION_ACCOUNT_BLOCK_UPGRADE) {
+            validateTxSignatureProtocol12(tx, txRegister, chain);
+        } else {
+            validateTxSignature(tx, txRegister, chain);
+        }
 
         //如果有coinData, 则进行验证,有一些交易(黄牌)没有coinData数据
         int txType = tx.getType();
@@ -392,7 +392,7 @@ public class TxServiceImpl implements TxService {
             }
         }
         for (CoinFrom coinFrom : coinData.getFrom()) {
-            if (tx.getType() == TxType.STOP_AGENT) {
+            if (tx.getType() == TxType.STOP_AGENT || tx.getType() == TxType.DELAY_STOP_AGENT) {
                 //停止节点from中第一笔为签名地址, 只验证from中第一个
                 break;
             }
@@ -404,6 +404,164 @@ public class TxServiceImpl implements TxService {
                 throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH_COINFROM);
             }
         }
+        if (!SignatureUtil.validateTransactionSignture(chainId, tx)) {
+            throw new NulsException(TxErrorCode.SIGNATURE_ERROR);
+        }
+    }
+
+    private void validateTxSignatureProtocol12(Transaction tx, TxRegister txRegister, Chain chain) throws NulsException {
+        //只需要验证,需要验证签名的交易(一些系统交易不用签名)
+        if (!txRegister.getVerifySignature()) {
+            //注册时不需要验证签名的交易(一些系统交易)
+            return;
+        }
+        CoinData coinData = TxUtil.getCoinData(tx);
+        if (null == coinData || null == coinData.getFrom() || coinData.getFrom().size() <= 0) {
+            throw new NulsException(TxErrorCode.COINDATA_NOT_FOUND);
+        }
+        if (txRegister.getModuleCode().equals(ModuleE.CC.abbr)) {
+            if (tx.getType() != TxType.CROSS_CHAIN) {
+                // 跨链模块的非本链协议的跨链转账交易(单独处理).
+                return;
+            }
+            int fromChainId = AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress());
+            // 跨链模块的非本链协议跨链交易(单独处理).
+            if (chain.getChainId() != fromChainId) {
+                return;
+            }
+        }
+        //获取交易签名者地址列表
+        Set<String> addressSet = SignatureUtil.getAddressFromTX(tx, chain.getChainId());
+        if (addressSet == null) {
+            throw new NulsException(TxErrorCode.SIGNATURE_ERROR);
+        }
+        int chainId = chain.getChainId();
+        byte[] multiSignAddress = null;
+        if (tx.isMultiSignTx()) {
+            /**
+             * 如果是多签交易, 则先从签名对象中取出多签地址原始创建者的公钥列表和最小签名数,
+             * 生成一个新的多签地址,来与交易from中的多签地址匹配，匹配不上这验证不通过.
+             */
+            MultiSignTxSignature multiSignTxSignature = new MultiSignTxSignature();
+            multiSignTxSignature.parse(new NulsByteBuffer(tx.getTransactionSignature()));
+            //验证签名者够不够最小签名数
+            if (addressSet.size() < multiSignTxSignature.getM()) {
+                throw new NulsException(TxErrorCode.INSUFFICIENT_SIGNATURES);
+            }
+            //签名者是否是多签账户创建者之一
+            for (String address : addressSet) {
+                boolean rs = false;
+                for (byte[] bytes : multiSignTxSignature.getPubKeyList()) {
+                    String addr = AddressTool.getStringAddressByBytes(AddressTool.getAddress(bytes, chainId));
+                    if (address.equals(addr)) {
+                        rs = true;
+                    }
+                }
+                if (!rs) {
+                    throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH_COINFROM);
+                }
+            }
+            //生成一个多签地址
+            List<String> pubKeys = new ArrayList<>();
+            for (byte[] pubkey : multiSignTxSignature.getPubKeyList()) {
+                pubKeys.add(HexUtil.encode(pubkey));
+            }
+            try {
+                byte[] hash160 = SerializeUtils.sha256hash160(AddressTool.createMultiSigAccountOriginBytes(chainId, multiSignTxSignature.getM(), pubKeys));
+                Address address = new Address(chainId, BaseConstant.P2SH_ADDRESS_TYPE, hash160);
+                multiSignAddress = address.getAddressBytes();
+            } catch (Exception e) {
+                chain.getLogger().error(e);
+                throw new NulsException(TxErrorCode.SIGNATURE_ERROR);
+            }
+        }
+        for (CoinFrom coinFrom : coinData.getFrom()) {
+            if (tx.getType() == TxType.STOP_AGENT || tx.getType() == TxType.DELAY_STOP_AGENT) {
+                //停止节点from中第一笔为签名地址, 只验证from中第一个
+                break;
+            }
+            if (tx.isMultiSignTx()) {
+                if (!Arrays.equals(coinFrom.getAddress(), multiSignAddress)) {
+                    throw new NulsException(TxErrorCode.SIGNATURE_ERROR);
+                }
+            } else if (!addressSet.contains(AddressTool.getStringAddressByBytes(coinFrom.getAddress()))) {
+                throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH_COINFROM);
+            }
+        }
+        do {
+            int txType = tx.getType();
+            // 质押和退出质押不验证锁定地址
+            if (txType == TxType.DEPOSIT || txType == TxType.CANCEL_DEPOSIT || txType == TxType.STOP_AGENT || txType == TxType.DELAY_STOP_AGENT) {
+                break;
+            }
+            boolean needAccountManagerSign = false;
+            for (CoinFrom coinFrom : coinData.getFrom()) {
+                byte[] fromAddress = coinFrom.getAddress();
+                AccountBlockDTO dto = AccountCall.getBlockAccount(chainId, AddressTool.getStringAddressByBytes(fromAddress));
+                if (dto == null) {
+                    continue;
+                }
+                int[] types = dto.getTypes();
+                if (types == null) {
+                    // 完全锁定账户，需要验证签名
+                    needAccountManagerSign = true;
+                    break;
+                } else {
+                    // 交易类型白名单
+                    boolean whiteType = false;
+                    for (int type : types) {
+                        if (txType == type) {
+                            whiteType = true;
+                            break;
+                        }
+                    }
+                    if (!whiteType) {
+                        // 不在交易类型白名单中，需要验证签名
+                        needAccountManagerSign = true;
+                        break;
+                    }
+                    // 验证合约地址白名单
+                    if (txType == TxType.CALL_CONTRACT) {
+                        if (dto.getContracts() == null || dto.getContracts().length == 0) {
+                            // 不在合约地址白名单中，需要验证签名
+                            needAccountManagerSign = true;
+                            break;
+                        }
+                        String[] contracts = dto.getContracts();
+                        NulsByteBuffer byteBuffer = new NulsByteBuffer(tx.getTxData());
+                        byteBuffer.readBytes(Address.ADDRESS_LENGTH);
+                        byte[] contractAddressBytes = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
+                        String contractAddress = AddressTool.getStringAddressByBytes(contractAddressBytes);
+                        // 合约地址白名单
+                        boolean whiteContract = false;
+                        for (String contract : contracts) {
+                            if (contractAddress.equals(contract)) {
+                                whiteContract = true;
+                                break;
+                            }
+                        }
+                        if (!whiteContract) {
+                            // 不在合约地址白名单中，需要验证签名
+                            needAccountManagerSign = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (needAccountManagerSign) {
+                // 五分之三签名，从配置文件中读取锁定账户管理员公钥，算出地址，在`addressSet`中匹配，>=60% 即满足
+                int count = 0;
+                for (String signedAddress : addressSet) {
+                    if (TxContext.ACCOUNT_BLOCK_MANAGER_ADDRESS_SET.contains(signedAddress)) {
+                        count++;
+                    }
+                }
+                if (count < TxContext.ACCOUNT_BLOCK_MIN_SIGN_COUNT) {
+                    throw new NulsException(TxErrorCode.BLOCK_ADDRESS, "address is blockAddress Exception");
+                }
+            }
+        } while (false);
+
         if (!SignatureUtil.validateTransactionSignture(chainId, tx)) {
             throw new NulsException(TxErrorCode.SIGNATURE_ERROR);
         }
@@ -428,7 +586,7 @@ public class TxServiceImpl implements TxService {
 
         for (CoinFrom coinFrom : listFrom) {
             byte[] addrBytes = coinFrom.getAddress();
-            if (type != TxType.DEPOSIT && type != TxType.CANCEL_DEPOSIT && TxUtil.isBlockAddress(chainId, addrBytes)) {
+            if (ProtocolGroupManager.getCurrentVersion(chainId) < TxContext.UPDATE_VERSION_ACCOUNT_BLOCK_UPGRADE && type != TxType.DEPOSIT && type != TxType.CANCEL_DEPOSIT && TxUtil.isBlockAddress(chainId, addrBytes)) {
                 throw new NulsException(TxErrorCode.BLOCK_ADDRESS, "address is blockAddress Exception");
             }
             if (AddressTool.isBlackHoleAddress(TxUtil.blackHolePublicKey, chainId, addrBytes)) {
@@ -483,7 +641,7 @@ public class TxServiceImpl implements TxService {
                 throw new NulsException(TxErrorCode.TX_VERIFY_FAIL);
             }
         }
-        if (null != existMultiSignAddress && type != TxType.STOP_AGENT && type != TxType.RED_PUNISH) {
+        if (null != existMultiSignAddress && type != TxType.STOP_AGENT && type != TxType.DELAY_STOP_AGENT && type != TxType.RED_PUNISH) {
             //如果from中含有多签地址,则表示该交易是多签交易,则必须满足,froms中只存在这一个多签地址
             for (CoinFrom coinFrom : listFrom) {
                 if (!Arrays.equals(existMultiSignAddress, coinFrom.getAddress())) {
@@ -2756,14 +2914,4 @@ public class TxServiceImpl implements TxService {
         return rs;
     }
 
-    private void validateTxAddress(Transaction tx) throws NulsException {
-        CoinData coinData = tx.getCoinDataInstance();
-        for (CoinFrom from : coinData.getFrom()) {
-            String address = AddressTool.getStringAddressByBytes(from.getAddress());
-            if (!blackListUtils.isPass(address)) {
-                throw new NulsException(TxErrorCode.BLOCK_ADDRESS);
-            }
-        }
-        return;
-    }
 }
