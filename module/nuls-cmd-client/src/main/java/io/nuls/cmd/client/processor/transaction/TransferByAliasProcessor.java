@@ -113,7 +113,7 @@ public class TransferByAliasProcessor  extends TransactionBaseProcessor implemen
         BigInteger amount = new BigInteger(args[3]);
         TransferReq.TransferReqBuilder builder =
                 new TransferReq.TransferReqBuilder(config.getChainId(),config.getAssetsId())
-                        .addForm(formAddress,getPwd("Enter your account password"), amount)
+                        .addForm(formAddress,getPwd("Enter your account password:"), amount)
                         .addTo(toAddress,amount);
         if(args.length == 5){
             builder.setRemark(args[4]);

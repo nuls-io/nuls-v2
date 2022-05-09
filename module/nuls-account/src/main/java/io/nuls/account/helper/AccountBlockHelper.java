@@ -99,7 +99,7 @@ public class AccountBlockHelper {
         }
         int addrChainId = AddressTool.getChainIdByAddress(coinFrom.getAddress());
         //黑洞地址不能发起转账
-        if(AddressTool.isBlackHoleAddress(NulsConfig.BLACK_HOLE_PUB_KEY,addrChainId,coinFrom.getAddress())){
+        if (AddressTool.isBlackHoleAddress(NulsConfig.BLACK_HOLE_PUB_KEY, addrChainId, coinFrom.getAddress())) {
             return Result.getFailed(AccountErrorCode.ADDRESS_TRANSFER_BAN);
         }
         // 发送方from中地址对应的链id必须是发起链的id

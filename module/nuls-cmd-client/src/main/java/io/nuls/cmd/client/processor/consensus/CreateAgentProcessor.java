@@ -81,7 +81,7 @@ public class CreateAgentProcessor extends ConsensusBaseProcessor implements Comm
     @Override
     public CommandResult execute(String[] args) {
         String agentAddress = args[1];
-        String password = getPwd("Enter agent address password");
+        String password = getPwd("Enter agent address password:");
         String packingAddress = args[2];
         Integer commissionRate = Integer.parseInt(args[3]);
 

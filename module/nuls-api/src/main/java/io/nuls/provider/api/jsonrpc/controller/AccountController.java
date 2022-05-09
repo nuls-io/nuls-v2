@@ -41,7 +41,6 @@ import io.nuls.provider.api.config.Config;
 import io.nuls.provider.api.config.Context;
 import io.nuls.provider.model.dto.AccountBlockDTO;
 import io.nuls.provider.model.dto.AccountKeyStoreDto;
-import io.nuls.provider.model.dto.ContractTokenInfoDto;
 import io.nuls.provider.model.form.PriKeyForm;
 import io.nuls.provider.model.jsonrpc.RpcResult;
 import io.nuls.provider.model.jsonrpc.RpcResultError;
@@ -49,6 +48,7 @@ import io.nuls.provider.rpctools.AccountTools;
 import io.nuls.provider.rpctools.ContractTools;
 import io.nuls.provider.rpctools.LegderTools;
 import io.nuls.provider.rpctools.vo.AccountBalance;
+import io.nuls.provider.rpctools.vo.AccountBalanceWithDecimals;
 import io.nuls.provider.utils.Log;
 import io.nuls.provider.utils.ResultUtil;
 import io.nuls.provider.utils.Utils;
@@ -68,8 +68,8 @@ import io.nuls.v2.util.NulsSDKTool;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -182,7 +182,7 @@ public class AccountController {
         if (!FormatValidUtils.validPassword(newPassword)) {
             return RpcResult.paramError("[newPassword] is inValid");
         }
-        if (System.currentTimeMillis() - time < 3000L) {
+        if (Context.accessLimit && System.currentTimeMillis() - time < 3000L) {
             return RpcResult.paramError("Access frequency limit.");
         }
         time = System.currentTimeMillis();
@@ -233,7 +233,7 @@ public class AccountController {
             return RpcResult.paramError("[password] is inValid");
         }
 
-        if (System.currentTimeMillis() - time < 3000L) {
+        if (Context.accessLimit && System.currentTimeMillis() - time < 3000L) {
             return RpcResult.paramError("Access frequency limit.");
         }
         time = System.currentTimeMillis();
@@ -381,7 +381,7 @@ public class AccountController {
             return RpcResult.paramError("[password] is inValid");
         }
 
-        if (System.currentTimeMillis() - time < 3000L) {
+        if (Context.accessLimit && System.currentTimeMillis() - time < 3000L) {
             return RpcResult.paramError("Access frequency limit.");
         }
         time = System.currentTimeMillis();
@@ -448,6 +448,59 @@ public class AccountController {
         if (balanceResult.isFailed()) {
             return rpcResult.setError(new RpcResultError(balanceResult.getStatus(), balanceResult.getMessage(), null));
         }
+        AccountBalance resultData = balanceResult.getData();
+        if (resultData != null) {
+            return rpcResult.setResult(resultData);
+        } else {
+            return rpcResult.setResult(null);
+        }
+    }
+
+    @RpcMethod("getAccountBalanceWithDecimals")
+    @ApiOperation(description = "查询账户余额", order = 107, detailDesc = "根据资产链ID和资产ID，查询本链账户对应资产的余额与nonce值")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
+            @Parameter(parameterName = "assetChainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "资产的链ID"),
+            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterDes = "资产ID"),
+            @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "账户地址")
+    })
+    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = AccountBalanceWithDecimals.class))
+    public RpcResult getAccountBalanceWithDecimals(List<Object> params) {
+        VerifyUtils.verifyParams(params, 4);
+        int chainId, assetChainId, assetId;
+        String address;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        try {
+            assetChainId = (int) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[assetChainId] is inValid");
+        }
+        try {
+            assetId = (int) params.get(2);
+        } catch (Exception e) {
+            return RpcResult.paramError("[assetId] is inValid");
+        }
+        try {
+            address = (String) params.get(3);
+        } catch (Exception e) {
+            return RpcResult.paramError("[address] is inValid");
+        }
+        if (!AddressTool.validAddress(chainId, address)) {
+            return RpcResult.paramError("[address] is inValid");
+        }
+
+        if (!Context.isChainExist(chainId)) {
+            return RpcResult.dataNotFound();
+        }
+        RpcResult rpcResult = new RpcResult();
+        Result<AccountBalanceWithDecimals> balanceResult = legderTools.getBalanceAndNonceWithDecimals(chainId, assetChainId, assetId, address);
+        if (balanceResult.isFailed()) {
+            return rpcResult.setError(new RpcResultError(balanceResult.getStatus(), balanceResult.getMessage(), null));
+        }
         return rpcResult.setResult(balanceResult.getData());
     }
 
@@ -492,6 +545,52 @@ public class AccountController {
         RpcResult rpcResult = new RpcResult();
 
         Result<List<AccountBalance>> balanceResult = legderTools.getBalanceList(chainId, coinDtoList, address);
+        if (balanceResult.isFailed()) {
+            return rpcResult.setError(new RpcResultError(balanceResult.getStatus(), balanceResult.getMessage(), null));
+        }
+        List<AccountBalance> list = balanceResult.getData();
+        if (list != null && !list.isEmpty()) {
+            return rpcResult.setResult(list);
+        } else {
+            return rpcResult.setResult(Collections.emptyList());
+        }
+    }
+
+    @RpcMethod("getBalanceWithDecimalsList")
+    @ApiOperation(description = "查询账户余额", order = 107, detailDesc = "根据资产链ID和资产ID，查询本链账户对应资产的余额与nonce值集合")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
+            @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "账户地址"),
+            @Parameter(parameterName = "assetIdList", requestType = @TypeDescriptor(value = List.class), parameterDes = "资产的ID集合")
+    })
+    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = AccountBalance.class))
+    public RpcResult getBalanceWithDecimalsList(List<Object> params) {
+        VerifyUtils.verifyParams(params, 3);
+        String address;
+        int chainId;
+        List<Map> coinDtoList;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        try {
+            address = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[address] is inValid");
+        }
+        try {
+            coinDtoList = (List<Map> ) params.get(2);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+
+        if (!AddressTool.validAddress(chainId, address)) {
+            return RpcResult.paramError("[address] is inValid");
+        }
+        RpcResult rpcResult = new RpcResult();
+
+        Result<List<AccountBalanceWithDecimals>> balanceResult = legderTools.getBalanceWithDecimalsList(chainId, coinDtoList, address);
         if (balanceResult.isFailed()) {
             return rpcResult.setError(new RpcResultError(balanceResult.getStatus(), balanceResult.getMessage(), null));
         }
@@ -904,6 +1003,29 @@ public class AccountController {
             return RpcResult.failed(AccountErrorCode.DATA_NOT_FOUND);
         }
         return RpcResult.success(dto);
+    }
+
+    @RpcMethod("getAllContractCallAccount")
+    @ApiOperation(description = "查询调用合约允许普通转账的账户白名单", order = 167)
+    @Parameters({
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = AccountBlockDTO.class))
+    public RpcResult getAllContractCallAccount(List<Object> params) {
+        int chainId;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        if (!Context.isChainExist(chainId)) {
+            return RpcResult.paramError(String.format("chainId [%s] is invalid", chainId));
+        }
+        Map map = accountTools.getAllContractCallAccount(chainId);
+        if (map == null) {
+            return RpcResult.failed(AccountErrorCode.DATA_NOT_FOUND);
+        }
+        return RpcResult.success(map);
     }
 
     @RpcMethod("encryptedPriKeySign")

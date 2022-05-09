@@ -4,6 +4,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsHash;
+import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
@@ -33,6 +34,10 @@ import java.util.*;
  */
 @Component
 public class RoundManager {
+
+    @Autowired
+    private FixRedPunishBugHelper fixRedPunishBugHelper;
+
     /**
      * 添加轮次信息到轮次列表中
      * Add Round Information to Round List
@@ -556,6 +561,7 @@ public class RoundManager {
         List<Agent> resultList = new ArrayList<>();
         for (int i = agentList.size() - 1; i >= 0; i--) {
             Agent agent = agentList.get(i);
+            fixRedPunishBugHelper.v13Filter(chain.getConfig().getChainId(), agent,startBlockHeight);
             if (agent.getDelHeight() != -1L && agent.getDelHeight() <= startBlockHeight) {
                 continue;
             }

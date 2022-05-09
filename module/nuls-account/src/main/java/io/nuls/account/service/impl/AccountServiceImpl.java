@@ -38,6 +38,7 @@ import io.nuls.account.service.AccountCacheService;
 import io.nuls.account.service.AccountKeyStoreService;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.AliasService;
+import io.nuls.account.storage.AccountForTransferOnContractCallStorageService;
 import io.nuls.account.storage.AccountStorageService;
 import io.nuls.account.util.AccountTool;
 import io.nuls.account.util.LoggerUtil;
@@ -83,6 +84,8 @@ public class AccountServiceImpl implements AccountService {
 
     @Autowired
     private AccountKeyStoreService keyStoreService;
+    @Autowired
+    private AccountForTransferOnContractCallStorageService accountForTransferOnContractCallStorageService;
 
     private AccountCacheService accountCacheService = AccountCacheService.getInstance();
 
@@ -145,6 +148,16 @@ public class AccountServiceImpl implements AccountService {
         //check the account is exist
         Account account = getAccountByAddress(chainId, address);
         return account;
+    }
+
+    @Override
+    public boolean validationWhitelistForTransferOnContractCall(int chainId, String address) {
+        //check params
+        if (!AddressTool.validAddress(chainId, address)) {
+            throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
+        }
+        //check the account
+        return accountForTransferOnContractCallStorageService.exist(AddressTool.getAddress(address));
     }
 
     @Override

@@ -26,8 +26,10 @@ package io.nuls.contract.tx.nrc20;
 
 
 import io.nuls.contract.mock.basetest.ContractTest;
+import io.nuls.contract.model.dto.AccountAmountDto;
 import io.nuls.contract.tx.base.BaseQuery;
 import io.nuls.contract.util.Log;
+import io.nuls.contract.vm.program.ProgramMultyAssetValue;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
@@ -67,7 +69,7 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
         String symbol = "LOCK_KongQiBi";
         String amount = BigDecimal.TEN.pow(10).toPlainString();
         String decimals = "2";
-        Map params = this.makeCreateParams("tNULSeBaMoG1oaW1JZnh6Ly65Ttp6raeTFBfCG", contractCode, "kqb", remark, name, symbol, amount, decimals);
+        Map params = this.makeCreateParams("tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD", contractCode, "kqb", remark, name, symbol, amount, decimals);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CREATE));
         assertTrue(cmdResp2, result);
@@ -126,6 +128,34 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
         Map params = this.makeTokenTransferParams(sender, contractAddress, contractAddress_nrc20, value, remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TOKEN_TRANSFER, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(TOKEN_TRANSFER));
+        assertTrue(cmdResp2, result);
+        String hash = (String) result.get("txHash");
+        Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(waitGetContractTx(hash)));
+    }
+
+    /**
+     * 调用合约的同时，向另外一个账户转账
+     */
+    @Test
+    public void callContractWithNulsValueToOthers() throws Exception {
+        sender = "tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD";
+        tokenReceiver = "tNULSeBaMrbMRiFAUeeAt6swb4xVBNyi81YL24";
+        contractAddress_nrc20 = "tNULSeBaN8UY4k5qD9SG8GjMJNKhERBN7cgtEG";
+
+        BigInteger value = BigInteger.ZERO;
+        methodName = "transfer";
+        // "tNULSeBaMkzsRE6qc9RVoeY6gHq8k1xSMcdrc7",
+        // "tNULSeBaMfXDQeT4MJZim1RusCJRPx5j9bMKQN"
+        AccountAmountDto[] amountDtos = new AccountAmountDto[]{
+                new AccountAmountDto(BigInteger.valueOf(300000000L), "tNULSeBaMkzsRE6qc9RVoeY6gHq8k1xSMcdrc7")
+        };
+        String methodDesc = "";
+        String remark = "call contract test - 空气币转账的同时，向另外一个账户转账";
+        String token = BigInteger.valueOf(800L).toString();
+        Map params = this.makeCallParams(
+                sender, value, 2000000L, 25L, contractAddress_nrc20, methodName, methodDesc, remark, null, amountDtos, new Object[]{tokenReceiver, token});
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
         assertTrue(cmdResp2, result);
         String hash = (String) result.get("txHash");
         Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(waitGetContractTx(hash)));
