@@ -71,7 +71,7 @@ public class GetCrossTxStateProcessor extends CrossChainBaseProcessor {
             TransactionSignature signature = new TransactionSignature();
             signature.parse(tx.getTransactionSignature(), 0);
             Log.debug("txHex:{}", HexUtil.encode(tx.serialize()));
-            Log.debug("txType:{}",tx.getType());
+            Log.debug("txType:{}",tx.getType()); 
             Log.debug("txSignCount:{}", signature.getSignersCount());
             Set<String> addressSets = new HashSet<>();
             Log.debug("signer:");
