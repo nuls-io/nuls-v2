@@ -23,8 +23,6 @@
  */
 package io.nuls.contract.util;
 
-import com.alibaba.fastjson.JSONObject;
-import io.nuls.core.basic.Result;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.parse.JSONUtils;
 import org.junit.Test;
@@ -87,14 +85,14 @@ public class BeanUtilTest {
         }
     }
 
-    @Test
-    public void test() throws IOException {
-        String json = "{\"jsonrpc\":\"2.0\",\"id\":2103470749,\"result\":{\"address\":\"tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD\",\"alias\":null,\"type\":1,\"txCount\":27,\"totalOut\":70800000,\"totalIn\":1000000060219650,\"consensusLock\":0,\"timeLock\":0,\"balance\":999999989419650,\"totalBalance\":999999989419650,\"totalReward\":1000000060219650,\"tokens\":[\"tNULSeBaNCHAhqG84z2kdeHx6AuFH6Zk6TmDDG,POCMTEST\"]}}";
-        RpcResult<Map> rpcResult = JSONObject.parseObject(json, RpcResult.class);
-        System.out.println(rpcResult);
-        RpcResult rpcResult1 = JSONUtils.json2pojo(json, RpcResult.class);
-        System.out.println(rpcResult1);
-    }
+//    @Test
+//    public void test() throws IOException {
+//        String json = "{\"jsonrpc\":\"2.0\",\"id\":2103470749,\"result\":{\"address\":\"tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD\",\"alias\":null,\"type\":1,\"txCount\":27,\"totalOut\":70800000,\"totalIn\":1000000060219650,\"consensusLock\":0,\"timeLock\":0,\"balance\":999999989419650,\"totalBalance\":999999989419650,\"totalReward\":1000000060219650,\"tokens\":[\"tNULSeBaNCHAhqG84z2kdeHx6AuFH6Zk6TmDDG,POCMTEST\"]}}";
+//        RpcResult<Map> rpcResult = JSONObject.parseObject(json, RpcResult.class);
+//        System.out.println(rpcResult);
+//        RpcResult rpcResult1 = JSONUtils.json2pojo(json, RpcResult.class);
+//        System.out.println(rpcResult1);
+//    }
 
     class RpcResult<T> {
 

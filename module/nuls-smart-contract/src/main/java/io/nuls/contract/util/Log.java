@@ -1,10 +1,10 @@
 package io.nuls.contract.util;
 
 import ch.qos.logback.classic.Level;
-import com.alibaba.fastjson.JSONObject;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.core.io.IoUtils;
 import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.core.parse.JSONUtils;
 
 import java.io.InputStream;
 import java.util.HashMap;
@@ -191,9 +191,9 @@ public class Log {
         if(DEFAULT_BASIC_LOGGER == null) {
             try (InputStream configInput = Log.class.getClassLoader().getResourceAsStream(MODULE_CONFIG_FILE)) {
                 String str = IoUtils.readBytesToString(configInput);
-                JSONObject json = JSONObject.parseObject(str);
+                Map<String,Object> json = JSONUtils.json2map(str);
                 LogUtil.configDefaultLog(ContractConstant.LOG_FILE_NAME,
-                        json.getString("packageLogPackages"), json.getString("packageLogLevels"));
+                        (String) json.get("packageLogPackages"), (String) json.get("packageLogLevels"));
             } catch (Exception e) {
                 LogUtil.configDefaultLog(ContractConstant.LOG_FILE_NAME);
             }

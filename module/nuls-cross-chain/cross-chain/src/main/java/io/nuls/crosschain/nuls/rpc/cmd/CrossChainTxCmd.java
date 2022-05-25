@@ -106,6 +106,7 @@ public class CrossChainTxCmd extends BaseCmd {
         crossTxRehandleMessage.setBlockHeight(height);
         crossTxRehandleMsgHandler.process(chainId,crossTxRehandleMessage);
         boolean res = NetWorkCall.broadcast(chainId,crossTxRehandleMessage,CommandConstant.CROSS_TX_REHANDLE_MESSAGE,false);
+
         if(res){
             return success(Map.of("msg","broadcast success"));
         }else{

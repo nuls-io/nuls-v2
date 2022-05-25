@@ -1,12 +1,13 @@
 package io.nuls.contract.util;
 
-import com.alibaba.fastjson.JSONObject;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.model.bo.ContractResult;
+import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rockdb.service.RocksDBService;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 
@@ -35,7 +36,13 @@ public class ContractDBUtilTest {
     @Test
     public void newInstance() {
         String json = "{\"acceptDirectTransfer\":false,\"balance\":0,\"contractAddress\":\"OTACBl9m97GO964IHLFSyjPj9EtnTd4=\",\"error\":false,\"events\":[\"{\\\"contractAddress\\\":\\\"5MR_3PyDN5hzZVEw8Jv21TNFZ5P5fNuvETj\\\",\\\"blockNumber\\\":29,\\\"event\\\":\\\"TransferEvent\\\",\\\"payload\\\":{\\\"from\\\":null,\\\"to\\\":\\\"5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo\\\",\\\"value\\\":\\\"1000000000000\\\"}}\"],\"gasUsed\":15794,\"hash\":\"0020342527f7320dedcb47c1efd7a86d0573d0669cd77077aa25879f74e79ff74106\",\"mergedTransferList\":[],\"nonce\":1,\"nrc20\":true,\"price\":25,\"remark\":\"create\",\"revert\":false,\"sender\":\"OTAB7k8OT0MWMF0uePRSkJQlgkRNnA8=\",\"stateRoot\":\"nIeL/Gtr7oZPMGlI6UdeM5q12F8XSKmn5yYCofXfHbQ=\",\"success\":true,\"terminated\":false,\"tokenDecimals\":2,\"tokenName\":\"KQB\",\"tokenSymbol\":\"KongQiBi\",\"tokenTotalSupply\":1000000000000,\"transfers\":[],\"txTime\":1553099238363,\"value\":0}";
-        ContractResult result = JSONObject.parseObject(json, ContractResult.class);
+        ContractResult result = null;
+        try {
+            result = JSONUtils.json2pojo(json, ContractResult.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
         System.out.println(result.toString());
     }
 
