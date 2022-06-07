@@ -688,8 +688,8 @@ public class NativeUtils {
         if (!programResult.isSuccess()) {
             return new Result();
         }
-        //TODO pierre 处理创建合约的业务，参考 CreateContractProcessorV8
-        ProgramInternalCreate create = frame.vm.getInternalCreates().get(0);
+        List<ProgramInternalCreate> internalCreates = frame.vm.getInternalCreates();
+        ProgramInternalCreate create = frame.vm.getInternalCreates().get(internalCreates.size() - 1);
         Object resultValue = frame.heap.newString(AddressTool.getStringAddressByBytes(create.getContractAddress()));
         Result result = NativeMethod.result(methodCode, resultValue, frame);
         return result;
@@ -698,15 +698,17 @@ public class NativeUtils {
     private static ProgramResult createContract(int chainId, String salt, String codeAddress, String[][] args, Frame frame) throws IOException {
         ProgramInvoke programInvoke = frame.vm.getProgramInvoke();
         // 查找contractCode
-        byte[] codes = frame.vm.getRepository().getCode(AddressTool.getAddress(codeAddress));
+        byte[] codeAddressBytes = AddressTool.getAddress(codeAddress);
+        byte[] codes = frame.vm.getRepository().getCode(codeAddressBytes);
+        byte[] codeHash = frame.vm.getRepository().getCodeHash(codeAddressBytes);
 
         // 根据规则生成合约地址
         ProgramCreateData createData = new ProgramCreateData(
                 programInvoke.getContractAddress(),
                 Utils.dataToBytes(salt),
-                codes,
-                (short) (args != null ? args.length : 0),
-                args);
+                codeHash);
+        //TODO pierre 增加创建合约的gasUsed
+        frame.vm.addGasUsed(500000L);
         Address newAddress = new Address(chainId, BaseConstant.CONTRACT_ADDRESS_TYPE, SerializeUtils.sha256hash160(KeccakHash.keccakBytes(createData.serialize(), 256)));
 
         ProgramCreate programCreate = new ProgramCreate();
@@ -726,6 +728,7 @@ public class NativeUtils {
         programInternalCreate.setSender(programCreate.getSender());
         programInternalCreate.setContractAddress(programCreate.getContractAddress());
         programInternalCreate.setContractCode(programCreate.getContractCode());
+        programInternalCreate.setCodeCopyBy(codeAddressBytes);
         programInternalCreate.setArgs(programCreate.getArgs());
 
         frame.vm.getInternalCreates().add(programInternalCreate);

@@ -40,37 +40,44 @@ public class ProgramCreateData extends BaseNulsData {
     private final byte hard = (byte) 255;
     private byte[] sender;
     private byte[] salt;
-    private byte[] code;
-    private short argsCount;
-    private String[][] args;
+    private byte[] codeHash;
+    //private short argsCount;
+    //private String[][] args;
 
-    public ProgramCreateData(byte[] sender, byte[] salt, byte[] code, short argsCount, String[][] args) {
+
+    public ProgramCreateData(byte[] sender, byte[] salt, byte[] codeHash) {
         this.sender = sender;
         this.salt = salt;
-        this.code = code;
-        this.argsCount = argsCount;
-        this.args = args;
+        this.codeHash = codeHash;
     }
+
+    //public ProgramCreateData(byte[] sender, byte[] salt, byte[] code, short argsCount, String[][] args) {
+    //    this.sender = sender;
+    //    this.salt = salt;
+    //    this.code = code;
+    //    this.argsCount = argsCount;
+    //    this.args = args;
+    //}
 
     @Override
     public int size() {
         int size = 1;
         size += Address.ADDRESS_LENGTH;
         size += SerializeUtils.sizeOfBytes(salt);
-        size += SerializeUtils.sizeOfBytes(code);
-        size += 1;
-        if (args != null) {
-            for (String[] arg : args) {
-                if (arg == null) {
-                    size += 1;
-                } else {
-                    size += 1;
-                    for (String str : arg) {
-                        size += SerializeUtils.sizeOfString(str);
-                    }
-                }
-            }
-        }
+        size += SerializeUtils.sizeOfBytes(codeHash);
+        //size += 1;
+        //if (args != null) {
+        //    for (String[] arg : args) {
+        //        if (arg == null) {
+        //            size += 1;
+        //        } else {
+        //            size += 1;
+        //            for (String str : arg) {
+        //                size += SerializeUtils.sizeOfString(str);
+        //            }
+        //        }
+        //    }
+        //}
         return size;
     }
 
@@ -79,20 +86,20 @@ public class ProgramCreateData extends BaseNulsData {
         stream.write(hard);
         stream.write(sender);
         stream.writeBytesWithLength(salt);
-        stream.writeBytesWithLength(code);
-        stream.writeUint8(argsCount);
-        if (args != null) {
-            for (String[] arg : args) {
-                if (arg == null) {
-                    stream.writeUint8((short) 0);
-                } else {
-                    stream.writeUint8((short) arg.length);
-                    for (String str : arg) {
-                        stream.writeString(str);
-                    }
-                }
-            }
-        }
+        stream.writeBytesWithLength(codeHash);
+        //stream.writeUint8(argsCount);
+        //if (args != null) {
+        //    for (String[] arg : args) {
+        //        if (arg == null) {
+        //            stream.writeUint8((short) 0);
+        //        } else {
+        //            stream.writeUint8((short) arg.length);
+        //            for (String str : arg) {
+        //                stream.writeString(str);
+        //            }
+        //        }
+        //    }
+        //}
     }
 
     @Override
@@ -100,22 +107,22 @@ public class ProgramCreateData extends BaseNulsData {
         byteBuffer.readByte();
         this.sender = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
         this.salt = byteBuffer.readByLengthByte();
-        this.code = byteBuffer.readByLengthByte();
-        this.argsCount = byteBuffer.readUint8();
-        short length = this.argsCount;
-        this.args = new String[length][];
-        for (short i = 0; i < length; i++) {
-            short argCount = byteBuffer.readUint8();
-            if (argCount == 0) {
-                args[i] = new String[0];
-            } else {
-                String[] arg = new String[argCount];
-                for (short k = 0; k < argCount; k++) {
-                    arg[k] = byteBuffer.readString();
-                }
-                args[i] = arg;
-            }
-        }
+        this.codeHash = byteBuffer.readByLengthByte();
+        //this.argsCount = byteBuffer.readUint8();
+        //short length = this.argsCount;
+        //this.args = new String[length][];
+        //for (short i = 0; i < length; i++) {
+        //    short argCount = byteBuffer.readUint8();
+        //    if (argCount == 0) {
+        //        args[i] = new String[0];
+        //    } else {
+        //        String[] arg = new String[argCount];
+        //        for (short k = 0; k < argCount; k++) {
+        //            arg[k] = byteBuffer.readString();
+        //        }
+        //        args[i] = arg;
+        //    }
+        //}
     }
 
     public byte getHard() {
@@ -138,27 +145,27 @@ public class ProgramCreateData extends BaseNulsData {
         this.salt = salt;
     }
 
-    public byte[] getCode() {
-        return code;
+    public byte[] getCodeHash() {
+        return codeHash;
     }
 
-    public void setCode(byte[] code) {
-        this.code = code;
+    public void setCodeHash(byte[] codeHash) {
+        this.codeHash = codeHash;
     }
 
-    public short getArgsCount() {
-        return argsCount;
-    }
-
-    public void setArgsCount(short argsCount) {
-        this.argsCount = argsCount;
-    }
-
-    public String[][] getArgs() {
-        return args;
-    }
-
-    public void setArgs(String[][] args) {
-        this.args = args;
-    }
+    //public short getArgsCount() {
+    //    return argsCount;
+    //}
+    //
+    //public void setArgsCount(short argsCount) {
+    //    this.argsCount = argsCount;
+    //}
+    //
+    //public String[][] getArgs() {
+    //    return args;
+    //}
+    //
+    //public void setArgs(String[][] args) {
+    //    this.args = args;
+    //}
 }

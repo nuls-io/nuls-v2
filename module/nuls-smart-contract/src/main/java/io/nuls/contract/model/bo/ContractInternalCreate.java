@@ -22,34 +22,46 @@
  * SOFTWARE.
  *
  */
-package io.nuls.contract.vm.program;
+package io.nuls.contract.model.bo;
 
-import java.util.List;
+import java.math.BigInteger;
 
-public interface ProgramExecutor {
+// add by pierre at 2022/6/1 p14
+public class ContractInternalCreate extends ContractCreate{
+    private byte[] sender;// 创建者
+    private byte[] contractAddress;// 合约地址
+    private byte[] codeCopyBy;// 内部创建合约，所依据的合约
+    private String[][] args;// 参数列表
 
-    ProgramExecutor begin(byte[] prevStateRoot);
+    public byte[] getSender() {
+        return sender;
+    }
 
-    ProgramExecutor startTracking();
+    public void setSender(byte[] sender) {
+        this.sender = sender;
+    }
 
-    void commit();
+    public byte[] getContractAddress() {
+        return contractAddress;
+    }
 
-    byte[] getRoot();
+    public void setContractAddress(byte[] contractAddress) {
+        this.contractAddress = contractAddress;
+    }
 
-    ProgramResult create(ProgramCreate programCreate);
+    public byte[] getCodeCopyBy() {
+        return codeCopyBy;
+    }
 
-    ProgramResult call(ProgramCall programCall);
+    public void setCodeCopyBy(byte[] codeCopyBy) {
+        this.codeCopyBy = codeCopyBy;
+    }
 
-    ProgramResult stop(long blockNumber, byte[] address, byte[] sender);
+    public String[][] getArgs() {
+        return args;
+    }
 
-    List<ProgramMethod> method(byte[] address);
-
-    byte[] contractCode(byte[] address);
-
-    List<ProgramMethod> jarMethod(byte[] jarData);
-
-    ProgramStatus status(byte[] address);
-
-    int getCurrentChainId();
-
+    public void setArgs(String[][] args) {
+        this.args = args;
+    }
 }

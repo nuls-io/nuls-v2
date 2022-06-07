@@ -43,9 +43,22 @@ public class ProgramInternalCreate {
     private byte[] contractCode;
 
     /**
+     * 内部创建合约，所依据的合约
+     */
+    private byte[] codeCopyBy;
+
+    /**
      * 参数列表
      */
     private String[][] args;
+
+    public byte[] getCodeCopyBy() {
+        return codeCopyBy;
+    }
+
+    public void setCodeCopyBy(byte[] codeCopyBy) {
+        this.codeCopyBy = codeCopyBy;
+    }
 
     public byte[] getSender() {
         return sender;

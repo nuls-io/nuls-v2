@@ -235,6 +235,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         programInvoke.setInternalCall(false);
         programInvoke.setViewMethod(false);
         programInvoke.setSenderPublicKey(programCreate.getSenderPublicKey());
+        //TODO pierre 增加创建合约的gasUsed
         return execute(programInvoke);
     }
 
@@ -527,6 +528,8 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             programResult.setEvents(vm.getEvents());
             programResult.setInvokeRegisterCmds(vm.getInvokeRegisterCmds());
             programResult.setOrderedInnerTxs(vm.getOrderedInnerTxs());
+            // add by pierre at 2022/6/2 p14
+            programResult.setInternalCreates(vm.getInternalCreates());
 
             if (resultValue != null) {
                 if (resultValue instanceof ObjectRef) {
@@ -688,6 +691,14 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         this.revert = true;
         byte[] codes = repository.getCode(address);
         return jarMethod(codes);
+    }
+
+    @Override
+    public byte[] contractCode(byte[] address) {
+        checkThread();
+        this.revert = true;
+        byte[] codes = repository.getCode(address);
+        return codes;
     }
 
     @Override

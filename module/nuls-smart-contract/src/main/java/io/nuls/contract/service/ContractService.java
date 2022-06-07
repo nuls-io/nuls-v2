@@ -55,6 +55,9 @@ public interface ContractService {
 
     Result invokeContractOneByOneV8(int chainId, ContractTempTransaction tx);
 
+    // add by pierre at 2022/6/2 p14
+    Result invokeContractOneByOneV14(int chainId, ContractTempTransaction tx);
+
     Result saveContractExecuteResult(int chainId, NulsHash hash, ContractResult contractResult);
 
     Result deleteContractExecuteResult(int chainId, NulsHash hash);

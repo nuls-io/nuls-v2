@@ -69,6 +69,10 @@ public class ProgramResult {
         return internalCreates;
     }
 
+    public void setInternalCreates(List<ProgramInternalCreate> internalCreates) {
+        this.internalCreates = internalCreates;
+    }
+
     public LinkedList<String> getStackTraces() {
         return stackTraces;
     }
