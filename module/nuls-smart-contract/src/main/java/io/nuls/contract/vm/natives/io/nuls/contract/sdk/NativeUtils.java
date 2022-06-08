@@ -566,6 +566,12 @@ public class NativeUtils {
                 String[] args = (String[]) frame.heap.getObject(argsRef);
                 return encodePacked(args, methodCode, frame);
             }
+        } else if ("computeAddress".equals(cmdName)) {
+            // add by pierre at 2022/6/1 p14
+            if(ProtocolGroupManager.getCurrentVersion(currentChainId) >= ContractContext.PROTOCOL_14 ) {
+                String[] args = (String[]) frame.heap.getObject(argsRef);
+                return computeAddress(args, methodCode, frame);
+            }
         }
         String[] args = (String[]) frame.heap.getObject(argsRef);
 
@@ -642,6 +648,28 @@ public class NativeUtils {
         return result;
     }
 
+    private static Result computeAddress(String[] args, MethodCode methodCode, Frame frame) {
+        try {
+            int currentChainId = frame.vm.getProgramExecutor().getCurrentChainId();
+            String salt = args[0];
+            String codeHash = args[1];
+            String sender = args[2];
+
+            // 根据规则生成合约地址
+            ProgramCreateData createData = new ProgramCreateData(
+                    AddressTool.getAddress(sender),
+                    Utils.dataToBytes(salt),
+                    HexUtil.decode(codeHash));
+            Address newAddress = new Address(currentChainId, BaseConstant.CONTRACT_ADDRESS_TYPE, SerializeUtils.sha256hash160(KeccakHash.keccakBytes(createData.serialize(), 256)));
+
+            Object resultValue = frame.heap.newString(newAddress.toString());
+            Result result = NativeMethod.result(methodCode, resultValue, frame);
+            return result;
+        } catch (IOException e) {
+            throw new ErrorException("Invoke external cmd failed. When computeAddress.", frame.vm.getGasUsed(), e.getMessage());
+        }
+    }
+
     private static Result encodePacked(String[] args, MethodCode methodCode, Frame frame) {
         try {
             ProgramEncodePacked encodePacked;
@@ -696,6 +724,8 @@ public class NativeUtils {
     }
 
     private static ProgramResult createContract(int chainId, String salt, String codeAddress, String[][] args, Frame frame) throws IOException {
+        //TODO pierre 增加创建合约的gasUsed
+        frame.vm.addGasUsed(500000L);
         ProgramInvoke programInvoke = frame.vm.getProgramInvoke();
         // 查找contractCode
         byte[] codeAddressBytes = AddressTool.getAddress(codeAddress);
@@ -707,8 +737,6 @@ public class NativeUtils {
                 programInvoke.getContractAddress(),
                 Utils.dataToBytes(salt),
                 codeHash);
-        //TODO pierre 增加创建合约的gasUsed
-        frame.vm.addGasUsed(500000L);
         Address newAddress = new Address(chainId, BaseConstant.CONTRACT_ADDRESS_TYPE, SerializeUtils.sha256hash160(KeccakHash.keccakBytes(createData.serialize(), 256)));
 
         ProgramCreate programCreate = new ProgramCreate();
