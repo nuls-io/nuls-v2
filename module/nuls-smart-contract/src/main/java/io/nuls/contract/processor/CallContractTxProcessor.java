@@ -276,7 +276,7 @@ public class CallContractTxProcessor {
             if (internalCreates != null && !internalCreates.isEmpty()) {
                 for (ContractInternalCreate internalCreate : internalCreates) {
                     Result result = contractHelper.onCommitForCreateV14(chainId, blockHeader, internalCreate, tx.getHash(), tx.getTime(), internalCreate.getContractAddress(),
-                            internalCreate.getSender(), contractHelper.getContractCode(chainId, internalCreate.getCodeCopyBy()), "internal_create", infoPoMap);
+                            internalCreate.getSender(), contractHelper.getContractCode(chainId, stateRoot, internalCreate.getCodeCopyBy()), "internal_create", infoPoMap);
                     if (result.isFailed()) {
                         return result;
                     }

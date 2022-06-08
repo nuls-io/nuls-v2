@@ -140,8 +140,9 @@ public class ContractHelper {
         return getProgramExecutor(chainId).jarMethod(contractCode);
     }
 
-    public byte[] getContractCode(int chainId, byte[] codeAddress) {
-        return getProgramExecutor(chainId).contractCode(codeAddress);
+    public byte[] getContractCode(int chainId, byte[] currentStateRoot, byte[] codeAddress) {
+        ProgramExecutor track = getProgramExecutor(chainId).begin(currentStateRoot);
+        return track.contractCode(codeAddress);
     }
 
     private ProgramMethod getMethodInfo(String methodName, String methodDesc, List<ProgramMethod> methods) {
@@ -337,11 +338,11 @@ public class ContractHelper {
     public Result validateNrc20Contract(int chainId, ProgramExecutor track, ContractWrapperTransaction tx, ContractResult contractResult) {
         ContractData createContractData = tx.getContractData();
         byte[] contractCode = createContractData.getCode();
-        return this.validateNrc20Contract(chainId, track, contractCode, contractResult);
+        return this.validateNrc20Contract(chainId, track, contractResult.getContractAddress(), contractCode, contractResult);
     }
 
     public Result validateNrc20ContractByInternalCreate(int chainId, ProgramExecutor track, ProgramInternalCreate internalCreate, ContractResult contractResult) {
-        Result result = this.validateNrc20Contract(chainId, track, internalCreate.getContractCode(), contractResult);
+        Result result = this.validateNrc20Contract(chainId, track, internalCreate.getContractAddress(), internalCreate.getContractCode(), contractResult);
         if (result.isSuccess()) {
             ContractInternalCreate create = new ContractInternalCreate();
             create.setSender(internalCreate.getSender());
@@ -368,11 +369,10 @@ public class ContractHelper {
         return result;
     }
 
-    public Result validateNrc20Contract(int chainId, ProgramExecutor track, byte[] contractCode, ContractResult contractResult) {
+    public Result validateNrc20Contract(int chainId, ProgramExecutor track, byte[] contractAddress, byte[] contractCode, ContractResult contractResult) {
         if (contractResult == null) {
             return Result.getFailed(ContractErrorCode.NULL_PARAMETER);
         }
-        byte[] contractAddress = contractResult.getContractAddress();
         long bestBlockHeight = vmContext.getBestHeight(chainId);
         List<ProgramMethod> methods = this.getAllMethods(chainId, contractCode);
         Map<String, ProgramMethod> contractMethodsMap = new HashMap<>();
