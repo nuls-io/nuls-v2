@@ -27,11 +27,9 @@ package io.nuls.contract.vm;
 import io.nuls.contract.vm.code.ClassCode;
 import io.nuls.contract.vm.code.ClassCodeLoader;
 import io.nuls.contract.vm.program.impl.ProgramConstants;
+import org.apache.commons.lang3.ArrayUtils;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
 public class VMFactory {
@@ -290,12 +288,12 @@ public class VMFactory {
         Heap.INIT_ARRAYS.putAll(VM.heap.arrays);
     }
 
-    private static volatile CountDownLatch waitV8;
+    private static volatile CountDownLatch waitCreate;
 
     public static VM createVM() {
-        if (waitV8 != null) {
+        if (waitCreate != null) {
             try {
-                waitV8.await();
+                waitCreate.await();
             } catch (InterruptedException e) {
                 //nothing
             }
@@ -315,7 +313,7 @@ public class VMFactory {
     }
 
     public static void reInitVM_v8() {
-        waitV8 = new CountDownLatch(1);
+        waitCreate = new CountDownLatch(1);
         MethodArea.INIT_CLASS_CODES.clear();
         MethodArea.INIT_METHOD_CODES.clear();
         Heap.INIT_OBJECTS.clear();
@@ -327,7 +325,23 @@ public class VMFactory {
         MethodArea.INIT_METHOD_CODES.putAll(VM.methodArea.getMethodCodes());
         Heap.INIT_OBJECTS.putAll(VM.heap.objects);
         Heap.INIT_ARRAYS.putAll(VM.heap.arrays);
-        waitV8.countDown();
+        waitCreate.countDown();
+    }
+
+    public static void reInitVM_v14() {
+        waitCreate = new CountDownLatch(1);
+        MethodArea.INIT_CLASS_CODES.clear();
+        MethodArea.INIT_METHOD_CODES.clear();
+        Heap.INIT_OBJECTS.clear();
+        Heap.INIT_ARRAYS.clear();
+
+        VM = loadVM_v14();
+
+        MethodArea.INIT_CLASS_CODES.putAll(VM.methodArea.getClassCodes());
+        MethodArea.INIT_METHOD_CODES.putAll(VM.methodArea.getMethodCodes());
+        Heap.INIT_OBJECTS.putAll(VM.heap.objects);
+        Heap.INIT_ARRAYS.putAll(VM.heap.arrays);
+        waitCreate.countDown();
     }
 
     private static VM loadVM_v8() {
@@ -338,19 +352,45 @@ public class VMFactory {
             classCodes.put(classCode.name, classCode);
         }
         // v8 add
-        List<String> list = new ArrayList<>();
-        list.add("io/nuls/contract/sdk/annotation/PayableMultyAsset");
-        list.add("io/nuls/contract/sdk/MultyAssetValue");
-        for (String className : list) {
+        //List<String> list = new ArrayList<>();
+        //list.add("io/nuls/contract/sdk/annotation/PayableMultyAsset");
+        //list.add("io/nuls/contract/sdk/MultyAssetValue");
+        for (String className : ProgramConstants.SDK_CLASS_NAMES_V8_ADD) {
             ClassCode classCode = ClassCodeLoader.loadFromResource_v8(className);
             classCodes.put(classCode.name, classCode);
         }
         vm.methodArea.loadClassCodes(classCodes);
+        ProgramConstants.SDK_CLASS_NAMES = ArrayUtils.addAll(ProgramConstants.SDK_CLASS_NAMES, ProgramConstants.SDK_CLASS_NAMES_V8_ADD);
+        return vm;
+    }
 
-        ProgramConstants.SDK_CLASS_NAMES = new String[ProgramConstants.SDK_CLASSES_V8.length];
-        for (int i = 0; i < ProgramConstants.SDK_CLASSES_V8.length; i++) {
-            ProgramConstants.SDK_CLASS_NAMES[i] = ProgramConstants.classNameReplace(ProgramConstants.SDK_CLASSES_V8[i].getName());
+    private static VM loadVM_v14() {
+        VM vm = new VM();
+        Map<String, ClassCode> classCodes = new LinkedHashMap<>(1024);
+        for (String className : CLINIT_CLASSES) {
+            ClassCode classCode = ClassCodeLoader.loadFromResource_v14(className);
+            classCodes.put(classCode.name, classCode);
         }
+        // v8 add
+        //List<String> list = new ArrayList<>();
+        //list.add("io/nuls/contract/sdk/annotation/PayableMultyAsset");
+        //list.add("io/nuls/contract/sdk/MultyAssetValue");
+        //// v14 add
+        //list.add("io/nuls/contract/sdk/token/AssetWrapper");
+        //list.add("io/nuls/contract/sdk/token/NRC20Wrapper");
+        //list.add("io/nuls/contract/sdk/token/Token");
+        for (String className : ProgramConstants.SDK_CLASS_NAMES_V8_ADD) {
+            ClassCode classCode = ClassCodeLoader.loadFromResource_v14(className);
+            classCodes.put(classCode.name, classCode);
+        }
+        for (String className : ProgramConstants.SDK_CLASS_NAMES_V14_ADD) {
+            ClassCode classCode = ClassCodeLoader.loadFromResource_v14(className);
+            classCodes.put(classCode.name, classCode);
+        }
+        vm.methodArea.loadClassCodes(classCodes);
+
+        ProgramConstants.SDK_CLASS_NAMES = ArrayUtils.addAll(ProgramConstants.SDK_CLASS_NAMES, ProgramConstants.SDK_CLASS_NAMES_V8_ADD);
+        ProgramConstants.SDK_CLASS_NAMES = ArrayUtils.addAll(ProgramConstants.SDK_CLASS_NAMES, ProgramConstants.SDK_CLASS_NAMES_V14_ADD);
 
         return vm;
     }

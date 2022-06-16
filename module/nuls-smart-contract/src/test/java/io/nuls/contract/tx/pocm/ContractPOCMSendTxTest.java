@@ -26,7 +26,6 @@ package io.nuls.contract.tx.pocm;
 
 
 import io.nuls.contract.mock.basetest.ContractTest;
-import io.nuls.contract.sdk.annotation.View;
 import io.nuls.contract.tx.base.BaseQuery;
 import io.nuls.contract.util.Log;
 import io.nuls.core.parse.JSONUtils;
@@ -518,7 +517,6 @@ public class ContractPOCMSendTxTest extends BaseQuery {
     /**
      * 调用视图方法 - 合约整体信息
      */
-    @View
     @Test
     public void getContractWholeInfo() throws Exception {
         String methodName = "wholeConsensusInfo";

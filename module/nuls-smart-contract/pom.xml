@@ -92,11 +92,11 @@
             <version>${asm.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>io.nuls.sdk</groupId>
-            <artifactId>sdk-contract-vm</artifactId>
-            <version>2.1.0.RELEASE</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>io.nuls.sdk</groupId>-->
+<!--            <artifactId>sdk-contract-vm</artifactId>-->
+<!--            <version>2.1.0.RELEASE</version>-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>junit</groupId>

@@ -235,7 +235,6 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         programInvoke.setInternalCall(false);
         programInvoke.setViewMethod(false);
         programInvoke.setSenderPublicKey(programCreate.getSenderPublicKey());
-        //TODO pierre 增加创建合约的gasUsed
         return execute(programInvoke);
     }
 
@@ -482,7 +481,12 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             }
             vm.setRepository(repository);
             vm.setGas(programInvoke.getGasLimit());
-            vm.addGasUsed(contractCodeData == null ? 0 : contractCodeData.length);
+            // add by pierre at 2022/6/16 p14
+            if (ProtocolGroupManager.getCurrentVersion(getCurrentChainId()) >= ContractContext.PROTOCOL_14) {
+                vm.addGasUsed(contractCodeData == null ? 0 : contractCodeData.length * GasCost.CREATE_PER_BYTE);
+            } else {
+                vm.addGasUsed(contractCodeData == null ? 0 : contractCodeData.length);
+            }
 
             logTime("load end");
 

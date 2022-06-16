@@ -54,5 +54,7 @@ public class GasCost {
      * 调用虚拟机外部方法(其他模块注册的方法)
      */
     public static final int INVOKE_EXTERNAL_METHOD = 5000;
+    public static final int CREATE_PER_BYTE = 7;
+    public static final int OBJ_TO_JSON_PER_CHAR = 4;
 
 }

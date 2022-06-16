@@ -33,6 +33,7 @@ public class SmartContractVersionChangeInvoker implements VersionChangeInvoker {
     }
 
     private boolean isloadV8 = false;
+    private boolean isloadV14 = false;
 
     /**
      *
@@ -46,7 +47,9 @@ public class SmartContractVersionChangeInvoker implements VersionChangeInvoker {
         Short currentVersion = ProtocolGroupManager.getCurrentVersion(currentChainId);
         Log.info("触发协议升级，chainId: [{}], 版本为: [{}]", currentChainId, currentVersion);
         ChainManager chainManager = SpringLiteContext.getBean(ChainManager.class);
-        if (currentVersion >= ContractContext.UPDATE_VERSION_CONTRACT_ASSET) {
+        if (currentVersion >= ContractContext.PROTOCOL_14) {
+            this.loadV14(chainManager.getChainMap().get(currentChainId), currentVersion);
+        } else if (currentVersion >= ContractContext.UPDATE_VERSION_CONTRACT_ASSET) {
             this.loadV8(chainManager.getChainMap().get(currentChainId), currentVersion);
         }
         // 向交易模块设置智能合约生成交易类型
@@ -106,5 +109,15 @@ public class SmartContractVersionChangeInvoker implements VersionChangeInvoker {
         Log.info("版本[{}]协议升级成功，重新初始化智能合约VM", currentVersion);
         VMFactory.reInitVM_v8();
         isloadV8 = true;
+    }
+
+    private void loadV14(Chain chain, int currentVersion) {
+        if (isloadV14) {
+            return;
+        }
+        chain.clearBatchInfo();
+        Log.info("版本[{}]协议升级成功，重新初始化智能合约VM", currentVersion);
+        VMFactory.reInitVM_v14();
+        isloadV14 = true;
     }
 }

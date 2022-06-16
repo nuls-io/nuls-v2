@@ -32,6 +32,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -40,7 +41,7 @@ import java.util.Map;
  */
 public class ContractCreateSendTxTest extends BaseQuery {
 
-    String contractA = "tNULSeBaN6RsxRsLph4wqmB21jtLZsR2qFct7g";
+    String contractA = "tNULSeBaMxq6jYc7TeRfeMb8EHHHaiXqC1A6TQ";
 
     private String createContractA() throws Exception {
         Log.info("开始创建虚拟机测试合约A");
@@ -54,15 +55,30 @@ public class ContractCreateSendTxTest extends BaseQuery {
     public void createAndInit() throws Exception {
         this.contractA = createContractA();
         System.out.println(contractA);
-
     }
 
     @Test
     public void testCreate() throws Exception {
-        Map resultA = this.invokeCall(sender, null, contractA, "createContract", null, null, new String[]{"tNULSeBaN1yJ1rZmwCwGjoRs86cajmbBWZ6he5", "tccc", "777"});
-        boolean success = Boolean.parseBoolean(resultA.get("success").toString());
-        Assert.assertTrue("expect success, " + resultA.get("errorMessage") + ", " + resultA.get("stackTrace"), success);
-        // tNULSeBaN5wa9Eo82aVyn43k3F4UGZYdEvBCsQ
+        Map resultA = this.invokeCall(sender, null, contractA, "createContract", null, null,
+                new String[]{"tNULSeBaN1yJ1rZmwCwGjoRs86cajmbBWZ6he5", "tccc3", "777"});
+        Map contractResult = (Map) resultA.get("contractResult");
+        boolean success = Boolean.parseBoolean(contractResult.get("success").toString());
+        Assert.assertTrue("expect success, " + contractResult.get("errorMessage") + ", " + contractResult.get("stackTrace"), success);
+    }
+
+    @Test
+    public void testASD() throws Exception {
+        Map resultA = this.invokeCall(sender, null, "tNULSeBaMxq6jYc7TeRfeMb8EHHHaiXqC1A6TQ", "submit", null, null,
+                new String[]{"aaa", "111"});
+        Map contractResult = (Map) resultA.get("contractResult");
+        boolean success = Boolean.parseBoolean(contractResult.get("success").toString());
+        Assert.assertTrue("expect success, " + contractResult.get("errorMessage") + ", " + contractResult.get("stackTrace"), success);
+    }
+
+    @Test
+    public void invokeViewTest() throws Exception {
+        String view = this.invokeView("tNULSeBaMxq6jYc7TeRfeMb8EHHHaiXqC1A6TQ", "getValue1", List.of("bbb", "aaa"));
+        System.out.println(view);
     }
 
 }
