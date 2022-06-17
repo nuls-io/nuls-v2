@@ -28,10 +28,6 @@ import java.math.BigInteger;
 
 // add by pierre at 2022/6/1 p14
 public class ContractCreate {
-    //private byte[] sender;// 创建者
-    //private byte[] contractAddress;// 合约地址
-    //private byte[] codeCopyBy;// 内部创建合约，所依据的合约
-    //private String[][] args;// 参数列表
     private boolean acceptDirectTransfer;
     // token类型, 0 - 非token, 1 - NRC20, 2 - NRC721
     private int tokenType;

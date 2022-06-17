@@ -267,6 +267,47 @@ public class ProgramExecutorImpl implements ProgramExecutor {
     private Map<String, Map<String, Object>> contractArrays;
     private Map<String, BigIntegerWrapper> contractObjectRefCount;
 
+    private ProgramResult checkExecute(ProgramInvoke programInvoke, MethodCode methodCode) {
+        String methodName = programInvoke.getMethodName();
+        String methodDescBase = programInvoke.getMethodDesc();
+        BigInteger transferValue = programInvoke.getValue();
+        String contractAddress = programInvoke.getAddress();
+        byte[] sender = programInvoke.getSender();
+        if (methodCode == null) {
+            return revert(String.format("can't find method %s%s", methodName, methodDescBase == null ? "" : methodDescBase));
+        }
+        if (!methodCode.isPublic) {
+            return revert("can only invoke public method");
+        }
+        if (transferValue.compareTo(BigInteger.ZERO) > 0) {
+            if (!methodCode.hasPayableAnnotation())
+                return revert(String.format("contract[%s]'s method[%s] is not a payable method", contractAddress, methodCode.name));
+        }
+        List<ProgramMultyAssetValue> multyAssetValues = programInvoke.getMultyAssetValues();
+        if (multyAssetValues != null && !multyAssetValues.isEmpty()) {
+            if (!methodCode.hasPayableMultyAssetAnnotation())
+                return revert(String.format("contract[%s]'s method[%s] is not a payableMultyAsset method", contractAddress, methodCode.name));
+        }
+        // 不允许非系统调用此方法
+        boolean isBalanceTriggerForConsensusContractMethod = BALANCE_TRIGGER_METHOD_NAME.equals(methodName) &&
+                BALANCE_TRIGGER_FOR_CONSENSUS_CONTRACT_METHOD_DESC.equals(methodDescBase);
+        if (isBalanceTriggerForConsensusContractMethod) {
+            if (sender != null) {
+                return revert("can't invoke _payable(String[][] args) method");
+            }
+        }
+        if (methodCode.argsVariableType.size() != programInvoke.getArgs().length) {
+            do {
+                if (isBalanceTriggerForConsensusContractMethod && programInvoke.getArgs().length > 0) {
+                    break;
+                }
+                return revert(String.format("require %s parameters in method [%s%s]",
+                        methodCode.argsVariableType.size(), methodCode.name, methodCode.normalDesc));
+            } while (false);
+        }
+        return null;
+    }
+
     private ProgramResult execute(ProgramInvoke programInvoke) {
         if (programInvoke.getPrice() < 1) {
             return revert("gas price must be greater than zero");
@@ -299,6 +340,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             String methodDescBase = programInvoke.getMethodDesc();
             byte[] contractCodeData = programInvoke.getData();
             BigInteger transferValue = programInvoke.getValue();
+            List<ProgramMultyAssetValue> multyAssetValues = programInvoke.getMultyAssetValues();
             Map<String, ClassCode> classCodes;
             if (programInvoke.isCreate()) {
                 if (contractCodeData == null) {
@@ -336,6 +378,10 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
             vm = VMFactory.createVM();
             logTime("load vm");
+            // add by pierre at 2022/6/16 p14
+            if (ProtocolGroupManager.getCurrentVersion(getCurrentChainId()) >= ContractContext.PROTOCOL_14) {
+                vm.addGasUsed(contractCodeData == null ? 0 : contractCodeData.length * GasCost.CREATE_PER_BYTE);
+            }
             vm.setProgramExecutor(this);
             vm.heap.loadClassCodes(classCodes);
             // add by pierre at 2019-11-21 标记 当存在合约内部调用合约，共享同一个合约的内存数据 需要协议升级 done
@@ -398,7 +444,15 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             String methodDesc = ProgramDescriptors.parseDesc(methodDescBase);
             MethodCode methodCode = vm.methodArea.loadMethod(contractClassCode.name, methodName, methodDesc);
 
-            if (methodCode == null) {
+            ProgramResult checkExecute = this.checkExecute(programInvoke, methodCode);
+            if (checkExecute != null) {
+                // add by pierre at 2022/6/17 p14
+                if (ProtocolGroupManager.getCurrentVersion(getCurrentChainId()) >= ContractContext.PROTOCOL_14 && programInvoke.isCreate()) {
+                    checkExecute.setGasUsed(vm.getGasUsed());
+                }
+                return checkExecute;
+            }
+            /*if (methodCode == null) {
                 return revert(String.format("can't find method %s%s", methodName, methodDescBase == null ? "" : methodDescBase));
             }
             if (!methodCode.isPublic) {
@@ -429,7 +483,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                     return revert(String.format("require %s parameters in method [%s%s]",
                             methodCode.argsVariableType.size(), methodCode.name, methodCode.normalDesc));
                 } while (false);
-            }
+            }*/
 
             logTime("load method");
             ObjectRef objectRef;
@@ -482,9 +536,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             vm.setRepository(repository);
             vm.setGas(programInvoke.getGasLimit());
             // add by pierre at 2022/6/16 p14
-            if (ProtocolGroupManager.getCurrentVersion(getCurrentChainId()) >= ContractContext.PROTOCOL_14) {
-                vm.addGasUsed(contractCodeData == null ? 0 : contractCodeData.length * GasCost.CREATE_PER_BYTE);
-            } else {
+            if (ProtocolGroupManager.getCurrentVersion(getCurrentChainId()) < ContractContext.PROTOCOL_14) {
                 vm.addGasUsed(contractCodeData == null ? 0 : contractCodeData.length);
             }
 
@@ -702,6 +754,14 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         checkThread();
         this.revert = true;
         byte[] codes = repository.getCode(address);
+        return codes;
+    }
+
+    @Override
+    public byte[] contractCodeHash(byte[] address) {
+        checkThread();
+        this.revert = true;
+        byte[] codes = repository.getCodeHash(address);
         return codes;
     }
 

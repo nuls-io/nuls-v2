@@ -29,8 +29,6 @@ import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.NulsHash;
-import io.nuls.base.protocol.ProtocolGroupManager;
-import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.helper.ContractNewTxHandler;
 import io.nuls.contract.helper.ContractTransferHandler;
@@ -119,12 +117,7 @@ public class ContractTxCallableV14 {
                     contractResult = contractExecutor.create(executor, contractData, number, preStateRoot, extractPublicKey(tx));
                     checkCreateResult(tx, contractResult);
                     break;
-                // add by pierre at 2019-10-20 需要协议升级 done
                 case CROSS_CHAIN:
-                    if(ProtocolGroupManager.getCurrentVersion(chainId) < ContractContext.UPDATE_VERSION_V250) {
-                        break;
-                    }
-                // end code by pierre
                 case CALL_CONTRACT:
                     // 创建合约无论成功与否，后续的其他的跳过执行，视作失败 -> 合约锁定中或者合约不存在
                     if (batchInfo.getCreateSet().contains(contract)) {
@@ -149,12 +142,9 @@ public class ContractTxCallableV14 {
             }
         } while (false);
         if (contractResult != null) {
-            // pierre 标记 需要协议升级 done
             if(!contractResult.isSuccess()) {
                 Log.error("Failed TxType [{}] Execute ContractResult is {}", tx.getType(), contractResult.toString());
-                contractResult.setGasUsed(contractData.getGasLimit());
             }
-            // end code by pierre
         }
         Log.info("[Per Contract Execution Cost Time] TxType is {}, TxHash is {}, Cost Time is {}", tx.getType(), hash, System.currentTimeMillis() - start);
         return contractResult;
@@ -199,7 +189,7 @@ public class ContractTxCallableV14 {
                             break;
                         }
                         //TODO pierre 测试内部创建合约后，同一个区块中，发出调用此合约的交易
-                        //batchInfo.getCreateSet().add(AddressTool.getStringAddressByBytes(internalCreate.getContractAddress()));
+                        batchInfo.getCreateSet().add(AddressTool.getStringAddressByBytes(internalCreate.getContractAddress()));
                     }
                 }
             }
@@ -224,18 +214,13 @@ public class ContractTxCallableV14 {
         BigInteger value = contractData.getValue();
         byte[] contractAddress = contractData.getContractAddress();
 
-        //Map<String, byte[]> multyAssetMap = new HashMap<>();
         int assetChainId, assetId;
-        //String assetKey;
         CoinData orginTxCoinData = orginTx.getCoinDataInstance();
         List<CoinFrom> fromList = orginTxCoinData.getFrom();
-        //List<CoinTo> toList = orginTxCoinData.getTo();
         for(CoinFrom from : fromList) {
             assetChainId = from.getAssetsChainId();
             assetId = from.getAssetsId();
-            //assetKey = assetChainId + "_" + assetId;
             if (CHAIN_ID != assetChainId || ASSET_ID != assetId) {
-                //multyAssetMap.put(assetKey, from.getAddress());
                 // 多个账户向合约转入多个资产，合约执行失败后，退还转入的资产金额
                 ContractTransferTransaction tx = this.generateContractTransferTransaction(orginTxHash, contractAddress, from.getAddress(), from.getAmount(), assetChainId, assetId);
                 contractResult.getContractTransferList().add(tx);
@@ -252,23 +237,6 @@ public class ContractTxCallableV14 {
             ContractTransferTransaction tx = this.generateContractTransferTransaction(orginTxHash, contractAddress, sender, value, CHAIN_ID, ASSET_ID);
             contractResult.getContractTransferList().add(tx);
         }
-        /*int toSize = toList.size();
-        if (toSize > 0) {
-            for (CoinTo coin : toList) {
-                assetChainId = coin.getAssetsChainId();
-                assetId = coin.getAssetsId();
-                boolean mainAsset = assetChainId == CHAIN_ID && assetId == ASSET_ID;
-                if (!mainAsset) {
-                    assetKey = assetChainId + "_" + assetId;
-                    byte[] recipient = multyAssetMap.get(assetKey);
-                    if (recipient == null) {
-                        continue;
-                    }
-                    ContractTransferTransaction tx = this.generateContractTransferTransaction(orginTxHash, contractAddress, recipient, coin.getAmount(), assetChainId, assetId);
-                    contractResult.getContractTransferList().add(tx);
-                }
-            }
-        }*/
         contractResult.setMergedTransferList(contractTransferHandler.contractTransfer2mergedTransfer(orginTx, contractResult.getContractTransferList()));
         contractResult.setMergerdMultyAssetTransferList(contractTransferHandler.contractMultyAssetTransfer2mergedTransfer(orginTx, contractResult.getContractTransferList()));
     }

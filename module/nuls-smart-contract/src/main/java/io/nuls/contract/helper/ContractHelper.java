@@ -145,6 +145,11 @@ public class ContractHelper {
         return track.contractCode(codeAddress);
     }
 
+    public byte[] getContractCodeHash(int chainId, byte[] currentStateRoot, byte[] codeAddress) {
+        ProgramExecutor track = getProgramExecutor(chainId).begin(currentStateRoot);
+        return track.contractCodeHash(codeAddress);
+    }
+
     private ProgramMethod getMethodInfo(String methodName, String methodDesc, List<ProgramMethod> methods) {
         if (methods != null && methods.size() > 0) {
             boolean emptyDesc = StringUtils.isBlank(methodDesc);
@@ -801,6 +806,10 @@ public class ContractHelper {
 
     public ContractResult makeFailedContractResult(int chainId, ContractWrapperTransaction tx, CallableResult callableResult, String errorMsg) {
         ContractResult contractResult = ContractResult.genFailed(tx.getContractData(), errorMsg);
+        // add by pierre at 2022/6/17 p14 没有经过虚拟机的交易，不再扣除Gas费用
+        if (ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.PROTOCOL_14) {
+            contractResult.setGasUsed(0);
+        }
         makeContractResult(tx, contractResult);
         if (callableResult != null) {
             callableResult.putFailed(chainId, contractResult);

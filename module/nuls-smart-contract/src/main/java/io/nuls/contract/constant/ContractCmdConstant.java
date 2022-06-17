@@ -73,4 +73,5 @@ public interface ContractCmdConstant {
     String TOKEN_TRANSFER_LIST = "sc_token_transfer_list";
     String ACCOUNT_CONTRACTS = "sc_account_contracts";
     String GET_CROSS_TOKEN_SYSTEM_CONTRACT = "sc_get_cross_token_system_contract";
+    String CODE_HASH = "sc_code_hash";
 }

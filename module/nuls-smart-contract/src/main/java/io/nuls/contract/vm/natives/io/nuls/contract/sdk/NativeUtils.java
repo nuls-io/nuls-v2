@@ -756,8 +756,6 @@ public class NativeUtils {
         // 查找contractCode
         byte[] codes = frame.vm.getRepository().getCode(codeAddressBytes);
         byte[] codeHash = frame.vm.getRepository().getCodeHash(codeAddressBytes);
-        // 增加创建合约的gasUsed
-        //frame.vm.addGasUsed(codes.length * GasCost.CREATE_PER_BYTE);
 
         // 根据规则生成合约地址
         ProgramCreateData createData = new ProgramCreateData(
@@ -770,7 +768,7 @@ public class NativeUtils {
         programCreate.setContractAddress(newAddress.getAddressBytes());
         programCreate.setSender(programInvoke.getContractAddress());
         programCreate.setValue(BigInteger.ZERO);
-        programCreate.setPrice(25);
+        programCreate.setPrice(programInvoke.getPrice());
         programCreate.setGasLimit(frame.vm.getGasLeft());
         programCreate.setNumber(programInvoke.getNumber());
         programCreate.setContractCode(codes);

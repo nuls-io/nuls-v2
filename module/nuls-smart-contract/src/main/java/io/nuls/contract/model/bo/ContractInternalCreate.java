@@ -24,13 +24,11 @@
  */
 package io.nuls.contract.model.bo;
 
-import java.math.BigInteger;
-
 // add by pierre at 2022/6/1 p14
 public class ContractInternalCreate extends ContractCreate{
     private byte[] sender;// 创建者
     private byte[] contractAddress;// 合约地址
-    private byte[] codeCopyBy;// 内部创建合约，所依据的合约
+    private byte[] codeCopyBy;// 内部创建所依据的合约
     private String[][] args;// 参数列表
 
     public byte[] getSender() {

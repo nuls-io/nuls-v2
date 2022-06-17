@@ -158,7 +158,7 @@ public class ContractResult {
         return result;
     }
 
-    public static ContractResult genFailed(ContractData contractData) {
+    private static ContractResult genFailed(ContractData contractData) {
         ContractResult contractResult = new ContractResult();
         contractResult.setContractAddress(contractData.getContractAddress());
         contractResult.setGasUsed(contractData.getGasLimit());
