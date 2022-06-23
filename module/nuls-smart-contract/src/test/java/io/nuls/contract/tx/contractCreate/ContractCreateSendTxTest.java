@@ -25,6 +25,10 @@ package io.nuls.contract.tx.contractCreate;
 
 import io.nuls.contract.tx.base.BaseQuery;
 import io.nuls.contract.util.Log;
+import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -32,8 +36,13 @@ import org.junit.Test;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static io.nuls.contract.constant.ContractCmdConstant.TOKEN_TRANSFER;
 
 /**
  * @author: PierreLuo
@@ -74,6 +83,23 @@ public class ContractCreateSendTxTest extends BaseQuery {
     public void invokeViewTest() throws Exception {
         String view = this.invokeView(contractA, "codeHash", List.of("tNULSeBaN1yJ1rZmwCwGjoRs86cajmbBWZ6he5"));
         System.out.println(view);
+    }
+
+    /**
+     * token转账
+     */
+    @Test
+    public void tokenTransfer() throws Exception {
+        String token = "tNULSeBaN3QBonpwopxJv7MZ9ueLxEK3umzw3U";
+        String to = "tNULSeBaNRJrWyAfNtA6aiAozaJdemWA5WbBFU";
+        BigInteger value = new BigDecimal("10").movePointRight(8).toBigInteger();
+        String remark = "token transfer to " + to;
+        Map params = this.makeTokenTransferParams(sender, to, token, value, remark);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TOKEN_TRANSFER, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(TOKEN_TRANSFER));
+        assertTrue(cmdResp2, result);
+        String hash = (String) result.get("txHash");
+        Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(waitGetContractTx(hash)));
     }
 
     private void resultCheck(Map resultA) {

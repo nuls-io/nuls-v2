@@ -28,6 +28,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
 import io.nuls.base.protocol.ProtocolGroupManager;
+import io.nuls.base.signture.MultiSignTxSignature;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.TransactionSignature;
 import io.nuls.contract.config.ContractContext;
@@ -749,18 +750,25 @@ public class ContractUtil {
         return byteBuffer.readUint16();
     }
 
-    public static byte[] extractPublicKey(Transaction tx) {
+    public static byte[] extractPublicKey(Transaction tx) throws NulsException {
         if (tx.getTransactionSignature() == null) {
             return null;
         }
-        TransactionSignature signature = new TransactionSignature();
-        try {
-            signature.parse(tx.getTransactionSignature(), 0);
-        } catch (NulsException e) {
-            Log.error(e);
-            return null;
+        List<P2PHKSignature> p2PHKSignatures;
+        if (tx.isMultiSignTx()) {
+            MultiSignTxSignature transactionSignature = new MultiSignTxSignature();
+            transactionSignature.parse(tx.getTransactionSignature(), 0);
+            p2PHKSignatures = transactionSignature.getP2PHKSignatures();
+        } else {
+            TransactionSignature signature = new TransactionSignature();
+            try {
+                signature.parse(tx.getTransactionSignature(), 0);
+            } catch (NulsException e) {
+                Log.error(e);
+                return null;
+            }
+            p2PHKSignatures = signature.getP2PHKSignatures();
         }
-        List<P2PHKSignature> p2PHKSignatures = signature.getP2PHKSignatures();
         P2PHKSignature p2PHKSignature = p2PHKSignatures.get(0);
         byte[] publicKey = p2PHKSignature.getPublicKey();
         return publicKey;

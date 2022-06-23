@@ -169,7 +169,7 @@ public class BaseQuery extends Base {
     @Test
     public void transferOne() {
         String from = "tNULSeBaMtkzQ1tH8JWBGZDCmRHCmySevE4frM";
-        String to = "tNULSeBaNNgHMQAwzaJU4rtXD4WEhiRrnrnZWo";
+        String to = "tNULSeBaNRJrWyAfNtA6aiAozaJdemWA5WbBFU";
         TransferReq.TransferReqBuilder builder = new TransferReq.TransferReqBuilder(chain.getChainId(), chain.getConfig().getAssetId())
                 .addForm(from, password, new BigDecimal("100.001").movePointRight(8).toBigInteger())
                 .addTo(to, new BigDecimal("100").movePointRight(8).toBigInteger());
@@ -335,7 +335,7 @@ public class BaseQuery extends Base {
      */
     @Test
     public void contractResult() throws Exception {
-        Object[] objects = getContractResult("177c05a636ca62aeb41564f413b4672f7e3d692e04481271d9d36dc95791edde");
+        Object[] objects = getContractResult("d4a4788ac35d04af4a31ae36df9c6f928d8e368876b2aa481f59ea57c374f888");
         Log.info("contractResult-result:{}", JSONUtils.obj2PrettyJson(objects[0]));
         Assert.assertTrue(null != objects[1]);
     }

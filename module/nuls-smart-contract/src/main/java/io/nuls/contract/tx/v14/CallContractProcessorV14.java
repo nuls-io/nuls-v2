@@ -57,7 +57,7 @@ public class CallContractProcessorV14 implements TransactionProcessor {
             callTx = new CallContractTransaction();
             callTx.copyTx(tx);
             try {
-                Result validate = callContractTxValidator.validateV13(chainId, callTx);
+                Result validate = callContractTxValidator.validateV14(chainId, callTx);
                 if(validate.isFailed()) {
                     errorCode = validate.getErrorCode().getCode();
                     errorList.add(tx);
