@@ -85,7 +85,7 @@ public class MultiSignTxTest extends BaseQuery {
     @Test
     public void callContractByMultiAddress() throws Exception {
         String multiAddress = "tNULSeBaNRJrWyAfNtA6aiAozaJdemWA5WbBFU";
-        String contractAddress = "tNULSeBaN3QBonpwopxJv7MZ9ueLxEK3umzw3U";
+        String contractAddress = "tNULSeBaN1t29KzTAVQMKaYup5uyK7raQUGoNY";
         byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
         byte[] multiAddressBytes = AddressTool.getAddress(multiAddress);
         Transaction tx = new Transaction();

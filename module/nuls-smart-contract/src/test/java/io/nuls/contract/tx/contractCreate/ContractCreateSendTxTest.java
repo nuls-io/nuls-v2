@@ -50,7 +50,7 @@ import static io.nuls.contract.constant.ContractCmdConstant.TOKEN_TRANSFER;
  */
 public class ContractCreateSendTxTest extends BaseQuery {
 
-    String contractA = "tNULSeBaN7MCLavwRjJqH28w9NCmahUbybYC6K";
+    String contractA = "tNULSeBaMwJNC9FUQbiTk2mnCLqYSnF1Ub7nt5";
 
     @Test
     public void createAndInit() throws Exception {
@@ -61,7 +61,7 @@ public class ContractCreateSendTxTest extends BaseQuery {
     @Test
     public void testCreate() throws Exception {
         Map resultA = this.invokeCall(sender, null, contractA, "createContract", null, null,
-                new String[]{"tNULSeBaN1yJ1rZmwCwGjoRs86cajmbBWZ6he5", "tccc5", "777"});
+                new String[]{"tNULSeBaMy3Tw7pHNDYwSMaewDypQMdNywXXUJ", "tccc5", "777"});
         resultCheck(resultA);
     }
 
@@ -90,7 +90,7 @@ public class ContractCreateSendTxTest extends BaseQuery {
      */
     @Test
     public void tokenTransfer() throws Exception {
-        String token = "tNULSeBaN3QBonpwopxJv7MZ9ueLxEK3umzw3U";
+        String token = "tNULSeBaN1t29KzTAVQMKaYup5uyK7raQUGoNY";
         String to = "tNULSeBaNRJrWyAfNtA6aiAozaJdemWA5WbBFU";
         BigInteger value = new BigDecimal("10").movePointRight(8).toBigInteger();
         String remark = "token transfer to " + to;
