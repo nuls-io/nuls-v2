@@ -24,12 +24,6 @@
  */
 package io.nuls.contract.vm.program.impl;
 
-import io.nuls.contract.sdk.*;
-import io.nuls.contract.sdk.annotation.Payable;
-import io.nuls.contract.sdk.annotation.PayableMultyAsset;
-import io.nuls.contract.sdk.annotation.Required;
-import io.nuls.contract.sdk.annotation.View;
-import io.nuls.contract.sdk.event.DebugEvent;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -37,39 +31,63 @@ import java.util.*;
 
 public class ProgramConstants {
 
-    public static final String CONTRACT_INTERFACE_NAME = classNameReplace(Contract.class.getName());
+    public static final String CONTRACT_INTERFACE_NAME = "io/nuls/contract/sdk/Contract";
 
-    public static final String EVENT_INTERFACE_NAME = classNameReplace(Event.class.getName());
+    public static final String EVENT_INTERFACE_NAME = "io/nuls/contract/sdk/Event";
 
-    public static final Class[] SDK_CLASSES = new Class[]{
-            Address.class,
-            Block.class,
-            BlockHeader.class,
-            Contract.class,
-            Event.class,
-            Msg.class,
-            Utils.class,
-            View.class,
-            Required.class,
-            Payable.class,
-            DebugEvent.class
+    public static String[] SDK_CLASS_NAMES = new String[] {
+            "io/nuls/contract/sdk/Address",
+            "io/nuls/contract/sdk/Block",
+            "io/nuls/contract/sdk/BlockHeader",
+            "io/nuls/contract/sdk/Contract",
+            "io/nuls/contract/sdk/Event",
+            "io/nuls/contract/sdk/Msg",
+            "io/nuls/contract/sdk/Utils",
+            "io/nuls/contract/sdk/annotation/View",
+            "io/nuls/contract/sdk/annotation/Required",
+            "io/nuls/contract/sdk/annotation/Payable",
+            "io/nuls/contract/sdk/event/DebugEvent"
     };
 
-    public static final Class[] SDK_CLASSES_V8 = new Class[]{
-            Address.class,
-            Block.class,
-            BlockHeader.class,
-            Contract.class,
-            Event.class,
-            Msg.class,
-            Utils.class,
-            View.class,
-            Required.class,
-            Payable.class,
-            DebugEvent.class,
-            PayableMultyAsset.class,
-            MultyAssetValue.class
+    public static String[] SDK_CLASS_NAMES_V8_ADD = new String[] {
+            "io/nuls/contract/sdk/annotation/PayableMultyAsset",
+            "io/nuls/contract/sdk/MultyAssetValue"
     };
+
+    public static String[] SDK_CLASS_NAMES_V14_ADD = new String[] {
+            "io/nuls/contract/sdk/token/AssetWrapper",
+            "io/nuls/contract/sdk/token/NRC20Wrapper",
+            "io/nuls/contract/sdk/token/Token"
+    };
+    //public static final Class[] SDK_CLASSES = new Class[]{
+    //        Address.class,
+    //        Block.class,
+    //        BlockHeader.class,
+    //        Contract.class,
+    //        Event.class,
+    //        Msg.class,
+    //        Utils.class,
+    //        View.class,
+    //        Required.class,
+    //        Payable.class,
+    //        DebugEvent.class
+    //};
+
+    //public static final Class[] SDK_CLASSES_V8 = new Class[]{
+    //        Address.class,
+    //        Block.class,
+    //        BlockHeader.class,
+    //        Contract.class,
+    //        Event.class,
+    //        Msg.class,
+    //        Utils.class,
+    //        View.class,
+    //        Required.class,
+    //        Payable.class,
+    //        DebugEvent.class,
+    //        PayableMultyAsset.class,
+    //        MultyAssetValue.class
+    //};
 
     public static final Class[] CONTRACT_USED_CLASSES = new Class[]{
             Boolean.class,
@@ -109,7 +127,7 @@ public class ProgramConstants {
             StackOverflowError.class,
     };
 
-    public static String[] SDK_CLASS_NAMES = new String[SDK_CLASSES.length];
+    //public static String[] SDK_CLASS_NAMES = new String[SDK_CLASSES.length];
 
     public static final String[] CONTRACT_USED_CLASS_NAMES = new String[CONTRACT_USED_CLASSES.length];
 
@@ -118,9 +136,10 @@ public class ProgramConstants {
     public static final String[] VM_INIT_CLASS_NAMES = new String[VM_INIT_CLASSES.length];
 
     static {
-        for (int i = 0; i < SDK_CLASSES.length; i++) {
-            SDK_CLASS_NAMES[i] = classNameReplace(SDK_CLASSES[i].getName());
-        }
+        //for (int i = 0; i < SDK_CLASSES.length; i++) {
+        //    SDK_CLASS_NAMES[i] = classNameReplace(SDK_CLASSES[i].getName());
+        //}
+
         for (int i = 0; i < CONTRACT_USED_CLASSES.length; i++) {
             CONTRACT_USED_CLASS_NAMES[i] = classNameReplace(CONTRACT_USED_CLASSES[i].getName());
         }

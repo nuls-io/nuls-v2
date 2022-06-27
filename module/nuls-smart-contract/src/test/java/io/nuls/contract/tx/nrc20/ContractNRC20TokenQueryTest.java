@@ -214,7 +214,8 @@ public class ContractNRC20TokenQueryTest extends BaseQuery {
     @Test
     public void tokenBalance() throws Exception {
         // tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
-        Map params = this.makeTokenBalanceParams(contractAddress_nrc20, "tNULSeBaMp9wC9PcWEcfesY7YmWrPfeQzkN1xL");
+        contractAddress_nrc20 = "tNULSeBaNBjScvcfjniHFcJ2iyzndUYL3snwQy";
+        Map params = this.makeTokenBalanceParams(contractAddress_nrc20, "tNULSeBaN6RsxRsLph4wqmB21jtLZsR2qFct7g");
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TOKEN_BALANCE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(TOKEN_BALANCE));
         Assert.assertTrue(JSONUtils.obj2PrettyJson(cmdResp2), null != result);
@@ -277,6 +278,8 @@ public class ContractNRC20TokenQueryTest extends BaseQuery {
      */
     @Test
     public void invokeView() throws Exception {
+        contractAddress0 = "tNULSeBaN5wa9Eo82aVyn43k3F4UGZYdEvBCsQ";
+        toAddress0 = "tNULSeBaN6RsxRsLph4wqmB21jtLZsR2qFct7g";
         String methodName = "balanceOf";
         String methodDesc = "";
         Map params = this.makeInvokeViewParams(contractAddress0, methodName, methodDesc, toAddress0);

@@ -24,8 +24,22 @@
 package io.nuls.contract.tx.multiSign;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.CoinData;
+import io.nuls.base.data.CoinFrom;
+import io.nuls.base.data.CoinTo;
+import io.nuls.base.data.Transaction;
+import io.nuls.base.signture.MultiSignTxSignature;
+import io.nuls.base.signture.P2PHKSignature;
+import io.nuls.base.signture.SignatureUtil;
+import io.nuls.contract.model.txdata.CallContractData;
+import io.nuls.contract.rpc.call.TransactionCall;
 import io.nuls.contract.tx.base.BaseQuery;
+import io.nuls.contract.util.ContractUtil;
+import io.nuls.contract.util.LedgerTestUtil;
 import io.nuls.contract.vm.util.JsonUtils;
+import io.nuls.core.constant.TxType;
+import io.nuls.core.crypto.ECKey;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.log.Log;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.Constants;
@@ -34,10 +48,12 @@ import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -64,6 +80,68 @@ public class MultiSignTxTest extends BaseQuery {
         //create the multi sign accout
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createMultiSignAccount", params);
         Log.info(JSONUtils.obj2PrettyJson(cmdResp));
+    }
+
+    @Test
+    public void callContractByMultiAddress() throws Exception {
+        String multiAddress = "tNULSeBaNRJrWyAfNtA6aiAozaJdemWA5WbBFU";
+        String contractAddress = "tNULSeBaN1t29KzTAVQMKaYup5uyK7raQUGoNY";
+        byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
+        byte[] multiAddressBytes = AddressTool.getAddress(multiAddress);
+        Transaction tx = new Transaction();
+        tx.setType(TxType.CALL_CONTRACT);
+        tx.setTime(System.currentTimeMillis() / 1000);
+        tx.setRemark("multi address call test".getBytes(StandardCharsets.UTF_8));
+        CoinData coinData = new CoinData();
+        byte[] nonce = HexUtil.decode(LedgerTestUtil.getUnConfirmedBalanceAndNonce(chain, chainId, assetId, multiAddress).getNonce());
+        if (null == nonce) {
+            nonce = HexUtil.decode("0000000000000000");
+        }
+        long gasLimit = 200000L;
+        long gasPrice = 25;
+        coinData.addFrom(new CoinFrom(multiAddressBytes, chainId, assetId, new BigDecimal("0.001").movePointRight(8).toBigInteger().add(BigInteger.valueOf(gasLimit * gasPrice)), nonce, (byte) 0));
+        //coinData.addTo(new CoinTo(multiAddressBytes, chainId, assetId, BigInteger.ZERO, (byte) 0));
+        tx.setCoinData(coinData.serialize());
+        CallContractData callContractData = new CallContractData();
+        callContractData.setContractAddress(contractAddressBytes);
+        callContractData.setSender(multiAddressBytes);
+        callContractData.setValue(BigInteger.ZERO);
+        callContractData.setPrice(gasPrice);
+        callContractData.setGasLimit(gasLimit);
+        callContractData.setMethodName("transfer");
+        String[][] args = ContractUtil.twoDimensionalArray(new String[]{"tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", new BigDecimal("3").movePointRight(8).toPlainString()});
+        if (args != null) {
+            callContractData.setArgsCount((short) args.length);
+            callContractData.setArgs(args);
+        }
+        tx.setTxData(callContractData.serialize());
+        String[] pubkeys = new String[]{
+                "03958b790c331954ed367d37bac901de5c2f06ac8368b37d7bd6cd5ae143c1d7e3",
+                "0318f683066b45e7a5225779061512e270044cc40a45c924afcf78bb7587758ca0",
+                "02c2b4e37fa297879c3ed824d021c0ee4692c6f87fcaf1681d712ccd485784b9bd"};
+        List<String> pubkeyList = Arrays.asList(pubkeys);
+        List<byte[]> collect = pubkeyList.stream().map(p -> HexUtil.decode(p)).collect(Collectors.toList());
+        MultiSignTxSignature transactionSignature = new MultiSignTxSignature();
+        transactionSignature.setM((byte) 2);
+        transactionSignature.setPubKeyList(collect);
+        tx.setTransactionSignature(transactionSignature.serialize());
+
+        List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
+        List<String> priKeyList = new ArrayList<>();
+        priKeyList.add("9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b");
+        priKeyList.add("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75");
+        priKeyList.add("8212e7ba23c8b52790c45b0514490356cd819db15d364cbe08659b5888339e78");
+        for (String pri : priKeyList) {
+            ECKey eckey = ECKey.fromPrivate(new BigInteger(1, HexUtil.decode(pri)));
+            P2PHKSignature p2PHKSignature = SignatureUtil.createSignatureByEckey(tx, eckey);
+            p2PHKSignatures.add(p2PHKSignature);
+            transactionSignature.setP2PHKSignatures(p2PHKSignatures);
+        }
+        tx.setTransactionSignature(transactionSignature.serialize());
+        String txHex = HexUtil.encode(tx.serialize());
+        System.out.println(String.format("txHash: %s", tx.getHash().toString()));
+        System.out.println(String.format("txHex: %s", txHex));
+        TransactionCall.newTx(chainId, txHex);
     }
 
     public SimpleAccountDTO getAccountByAddress(int chainId, String address) throws Exception {

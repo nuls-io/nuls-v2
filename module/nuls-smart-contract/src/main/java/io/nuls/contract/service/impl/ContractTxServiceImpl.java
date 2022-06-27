@@ -139,12 +139,12 @@ public class ContractTxServiceImpl implements ContractTxService {
                 return signAndBroadcastTxResult;
             }
 
-            // 保存未确认Token转账
+            /*// 保存未确认Token转账
             Result<byte[]> unConfirmedTokenTransferResult = this.saveUnConfirmedTokenTransfer(chainId, tx, sender, contractAddress, methodName, args);
             if (unConfirmedTokenTransferResult.isFailed()) {
                 return unConfirmedTokenTransferResult;
             }
-            byte[] infoKey = unConfirmedTokenTransferResult.getData();
+            byte[] infoKey = unConfirmedTokenTransferResult.getData();*/
 
             Map<String, Object> resultMap = new HashMap<>(2);
             resultMap.put("txHash", tx.getHash().toHex());
@@ -169,6 +169,7 @@ public class ContractTxServiceImpl implements ContractTxService {
         return contractTxHelper.previewCall(chainId, senderBytes, contractAddressBytes, value, gasLimit, price, methodName, methodDesc, args, multyAssetValues);
     }
 
+    @Deprecated
     private Result<byte[]> saveUnConfirmedTokenTransfer(int chainId, CallContractTransaction tx, String sender, String contractAddress, String methodName, String[][] args) {
         try {
             ContractTokenBalanceManager tokenBalanceManager = contractHelper.getChain(chainId).getContractTokenBalanceManager();

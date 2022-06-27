@@ -26,7 +26,6 @@ package io.nuls.contract.tx.pocm;
 
 
 import io.nuls.contract.mock.basetest.ContractTest;
-import io.nuls.contract.sdk.annotation.View;
 import io.nuls.contract.tx.base.BaseQuery;
 import io.nuls.contract.util.Log;
 import io.nuls.core.parse.JSONUtils;
@@ -60,15 +59,22 @@ public class ContractPOCMSendTxTest extends BaseQuery {
      */
     @Test
     public void createConsensusEnhancementContract() throws Exception {
-        String filePath = ContractPOCMSendTxTest.class.getResource("/pocmContract-v3").getFile();
-        InputStream in = new FileInputStream(filePath);
+        //String filePath = ContractPOCMSendTxTest.class.getResource("/pocmContract-v3").getFile();
+        InputStream in = new FileInputStream("/Users/pierreluo/IdeaProjects/pocmContract-new/target/pocmContract-new-1.0-SNAPSHOT.jar");
         byte[] contractCode = IOUtils.toByteArray(in);
-        String remark = "POCM - consensus enhancement contract test - POCM_共识加强合约";
-        // String tokenAddress, BigInteger cycleRewardTokenAmount, int awardingCycle,
-        // BigInteger minimumDepositNULS, int minimumLocked, boolean openConsensus,
-        // int lockedTokenDay, String authorizationCode, String rewardHalvingCycle, String maximumDepositAddressCount
-        Object[] args = new Object[]{"tNULSeBaN152GXtPK5MZX57zeFR7QKvjNKkVA5", 5000, 2, 200, 2, false, 1, null, null, null};
-        Map params = this.makeCreateParams(sender, contractCode, "pocm_enhancement", remark, args);
+        String remark = "POCM new";
+        //Address candyToken,
+        //int candyAssetChainId,
+        //int candyAssetId,
+        //BigInteger candyPerBlock,
+        //BigInteger candySupply,
+        //int lockedTokenDay,
+        //BigInteger minimumStaking,
+        //boolean openConsensus,
+        //boolean openAwardConsensusNodeProvider,
+        //String authorizationCode
+        Object[] args = new Object[]{"tNULSeBaMy3Tw7pHNDYwSMaewDypQMdNywXXUJ", 0, 0, 20000000, 200000000000000L, 1, 10000000000L, true, false, "qwerqwerasd"};
+        Map params = this.makeCreateParams(sender, contractCode, "pocm_new", remark, args);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CREATE));
         assertTrue(cmdResp2, result);
@@ -518,7 +524,6 @@ public class ContractPOCMSendTxTest extends BaseQuery {
     /**
      * 调用视图方法 - 合约整体信息
      */
-    @View
     @Test
     public void getContractWholeInfo() throws Exception {
         String methodName = "wholeConsensusInfo";

@@ -22,37 +22,28 @@
  * SOFTWARE.
  *
  */
-package io.nuls.contract.vm.program;
+package io.nuls.provider.model.form.contract;
 
-import java.util.List;
 
-public interface ProgramExecutor {
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
+import io.nuls.provider.model.form.Base;
 
-    ProgramExecutor begin(byte[] prevStateRoot);
+/**
+ * @author: PierreLuo
+ * @date: 2022/6/17
+ */
+@ApiModel(description = "获取合约的codeHash表单数据")
+public class ContractCodeHash extends Base {
 
-    ProgramExecutor startTracking();
+    @ApiModelProperty(description = "合约地址", required = true)
+    private String contractAddress;
 
-    void commit();
+    public String getContractAddress() {
+        return contractAddress;
+    }
 
-    byte[] getRoot();
-
-    ProgramResult create(ProgramCreate programCreate);
-
-    ProgramResult call(ProgramCall programCall);
-
-    ProgramResult stop(long blockNumber, byte[] address, byte[] sender);
-
-    List<ProgramMethod> method(byte[] address);
-
-    byte[] contractCode(byte[] address);
-
-    // add by pierre at 2022/6/17 p14
-    byte[] contractCodeHash(byte[] address);
-
-    List<ProgramMethod> jarMethod(byte[] jarData);
-
-    ProgramStatus status(byte[] address);
-
-    int getCurrentChainId();
-
+    public void setContractAddress(String contractAddress) {
+        this.contractAddress = contractAddress;
+    }
 }

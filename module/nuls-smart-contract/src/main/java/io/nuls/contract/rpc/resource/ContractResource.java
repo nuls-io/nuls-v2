@@ -1009,6 +1009,45 @@ public class ContractResource extends BaseCmd {
         }
     }
 
+    @CmdAnnotation(cmd = CODE_HASH, version = 1.0, description = "get code hash of contract")
+    @Parameters(value = {
+        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
+        @Parameter(parameterName = "contractAddress", parameterDes = "合约地址"),
+    })
+    @ResponseData(name = "返回值", description = "返回Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "result", description = "code hash(Keccak256)")
+    }))
+    public Response codeHash(Map<String, Object> params) {
+        try {
+            Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
+            String contractAddress = (String) params.get("contractAddress");
+
+            if (!AddressTool.validAddress(chainId, contractAddress)) {
+                return failed(ADDRESS_ERROR);
+            }
+            byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
+            if (!ContractLedgerUtil.isExistContractAddress(chainId, contractAddressBytes)) {
+                return failed(CONTRACT_ADDRESS_NOT_EXIST);
+            }
+            BlockHeader blockHeader = BlockCall.getLatestBlockHeader(chainId);
+            // 当前区块状态根
+            byte[] prevStateRoot = ContractUtil.getStateRoot(blockHeader);
+            byte[] codeHash = contractHelper.getContractCodeHash(chainId, prevStateRoot, contractAddressBytes);
+            if (codeHash == null) {
+                Result result = Result.getFailed(ContractErrorCode.DATA_NOT_FOUND);
+                return wrapperFailed(result);
+            } else {
+                Map<String, String> resultMap = MapUtil.createLinkedHashMap(2);
+                resultMap.put("result", HexUtil.encode(codeHash));
+                return success(resultMap);
+            }
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
 
     @CmdAnnotation(cmd = CONSTRUCTOR, version = 1.0, description = "contract code constructor")
     @Parameters(description = "参数", value = {

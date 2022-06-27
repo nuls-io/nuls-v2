@@ -51,9 +51,10 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
 public class ClassCodeLoader {
-
+    private static final Map<String, ClassCode> BASE_USED_CLASSES;
     private static final Map<String, ClassCode> RESOURCE_CLASS_CODES;
     private static final Map<String, ClassCode> RESOURCE_CLASS_CODES_V8;
+    private static final Map<String, ClassCode> RESOURCE_CLASS_CODES_V14;
 
     private static final LoadingCache<ClassCodeCacheKey, Map<String, ClassCode>> CACHE;
 
@@ -68,8 +69,10 @@ public class ClassCodeLoader {
                         return ClassCodeLoader.loadJar(cacheKey.getBytes());
                     }
                 });
+        BASE_USED_CLASSES = loadBaseFromResource();
         RESOURCE_CLASS_CODES = loadFromResource();
         RESOURCE_CLASS_CODES_V8 = loadFromResource_v8();
+        RESOURCE_CLASS_CODES_V14 = loadFromResource_v14();
     }
 
     public static ClassCode load(String className) {
@@ -99,7 +102,19 @@ public class ClassCodeLoader {
         }
     }
 
+    public static ClassCode loadFromResource_v14(String className) {
+        ClassCode classCode = RESOURCE_CLASS_CODES_V14.get(className);
+        if (classCode == null) {
+            throw new RuntimeException("can't load class " + className);
+        } else {
+            return classCode;
+        }
+    }
+
     public static ClassCode getFromResource(String className) {
+        if (ProtocolGroupManager.getCurrentVersion(ContractContext.CHAIN_ID) >= ContractContext.PROTOCOL_14) {
+            return RESOURCE_CLASS_CODES_V14.get(className);
+        }
         if (ProtocolGroupManager.getCurrentVersion(ContractContext.CHAIN_ID) >= ContractContext.UPDATE_VERSION_CONTRACT_ASSET) {
             return RESOURCE_CLASS_CODES_V8.get(className);
         }
@@ -183,6 +198,19 @@ public class ClassCodeLoader {
         return classCode;
     }
 
+    private static Map<String, ClassCode> loadBaseFromResource() {
+        try (InputStream baseInputStream = ClassCodeLoader.class.getResourceAsStream("/used_classes_base")) {
+            if (baseInputStream == null) {
+                return new HashMap<>(0);
+            } else {
+                Map<String, ClassCode> usedClasses = loadJar(baseInputStream);
+                return usedClasses;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private static Map<String, ClassCode> loadFromResource() {
         return loadFromResourceWithResourceName("/used_classes_sdk");
     }
@@ -191,24 +219,22 @@ public class ClassCodeLoader {
         return loadFromResourceWithResourceName("/used_classes_sdk_v8");
     }
 
+    private static Map<String, ClassCode> loadFromResource_v14() {
+        return loadFromResourceWithResourceName("/used_classes_sdk_v14");
+    }
+
     private static Map<String, ClassCode> loadFromResourceWithResourceName(String usedClassesName) {
-        try (InputStream baseInputStream = ClassCodeLoader.class.getResourceAsStream("/used_classes_base");
-             InputStream sdkInputStream = ClassCodeLoader.class.getResourceAsStream(usedClassesName);
-        ) {
-            if (baseInputStream == null) {
-                return new HashMap<>(0);
+        try (InputStream sdkInputStream = ClassCodeLoader.class.getResourceAsStream(usedClassesName)) {
+            if (sdkInputStream == null) {
+                return BASE_USED_CLASSES;
             } else {
-                Map<String, ClassCode> usedClasses = loadJar(baseInputStream);
-                if (sdkInputStream == null) {
-                    return usedClasses;
-                } else {
-                    Map<String, ClassCode> sdkClasses = loadJar(sdkInputStream);
-                    if (sdkClasses != null && usedClasses != null) {
-                        usedClasses.putAll(sdkClasses);
-                    }
-                    return usedClasses;
+                Map<String, ClassCode> sdkClasses = loadJar(sdkInputStream);
+                if (sdkClasses != null) {
+                    sdkClasses.putAll(BASE_USED_CLASSES);
                 }
+                return sdkClasses;
             }
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
