@@ -46,6 +46,8 @@ import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.v2.model.dto.RpcResult;
+import io.nuls.v2.util.JsonRpcUtil;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -63,6 +65,36 @@ import static org.junit.Assert.assertNotNull;
  * @date: 2019-12-31
  */
 public class MultiSignTxTest extends BaseQuery {
+
+    static int chainId = 2;
+    static int assetChainId = 2;
+    static int assetId = 1;
+    static String rpcAddress;
+
+    private void setDev() {
+        chainId = 2;
+        assetChainId = 2;
+        assetId = 1;
+    }
+
+    private void setTest() {
+        chainId = 2;
+        assetChainId = 2;
+        assetId = 1;
+        rpcAddress = "http://beta.api.nuls.io/jsonrpc";
+    }
+
+    private void setMain() {
+        chainId = 1;
+        assetChainId = 1;
+        assetId = 1;
+        rpcAddress = "https://api.nuls.io/jsonrpc";
+    }
+
+    @Override
+    protected void updateSyncKernel() {
+        this.syncKernel = false;
+    }
 
     @Test
     public void createMultiSigAccountTest() throws Exception {
@@ -84,8 +116,9 @@ public class MultiSignTxTest extends BaseQuery {
 
     @Test
     public void callContractByMultiAddress() throws Exception {
+        setTest();
         String multiAddress = "tNULSeBaNRJrWyAfNtA6aiAozaJdemWA5WbBFU";
-        String contractAddress = "tNULSeBaN1t29KzTAVQMKaYup5uyK7raQUGoNY";
+        String contractAddress = "tNULSeBaMxCJQwsXpY3xfo6nwY3k8tRacs9pBH";
         byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
         byte[] multiAddressBytes = AddressTool.getAddress(multiAddress);
         Transaction tx = new Transaction();
@@ -93,10 +126,20 @@ public class MultiSignTxTest extends BaseQuery {
         tx.setTime(System.currentTimeMillis() / 1000);
         tx.setRemark("multi address call test".getBytes(StandardCharsets.UTF_8));
         CoinData coinData = new CoinData();
-        byte[] nonce = HexUtil.decode(LedgerTestUtil.getUnConfirmedBalanceAndNonce(chain, chainId, assetId, multiAddress).getNonce());
-        if (null == nonce) {
+        //byte[] nonce = HexUtil.decode(LedgerTestUtil.getUnConfirmedBalanceAndNonce(chain, chainId, assetId, multiAddress).getNonce());
+        //if (null == nonce) {
+        //    nonce = HexUtil.decode("0000000000000000");
+        //}
+        byte[] nonce;
+        RpcResult request = JsonRpcUtil.request(rpcAddress, "getAccountBalance", List.of(chainId, assetChainId, assetId, multiAddress));
+        Map result = (Map) request.getResult();
+        String nonceStr = (String) result.get("nonce");
+        if (null == nonceStr) {
             nonce = HexUtil.decode("0000000000000000");
+        } else {
+            nonce = HexUtil.decode(nonceStr);
         }
+
         long gasLimit = 200000L;
         long gasPrice = 25;
         coinData.addFrom(new CoinFrom(multiAddressBytes, chainId, assetId, new BigDecimal("0.001").movePointRight(8).toBigInteger().add(BigInteger.valueOf(gasLimit * gasPrice)), nonce, (byte) 0));
@@ -109,7 +152,7 @@ public class MultiSignTxTest extends BaseQuery {
         callContractData.setPrice(gasPrice);
         callContractData.setGasLimit(gasLimit);
         callContractData.setMethodName("transfer");
-        String[][] args = ContractUtil.twoDimensionalArray(new String[]{"tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", new BigDecimal("3").movePointRight(8).toPlainString()});
+        String[][] args = ContractUtil.twoDimensionalArray(new String[]{"tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", new BigDecimal("3").movePointRight(6).toPlainString()});
         if (args != null) {
             callContractData.setArgsCount((short) args.length);
             callContractData.setArgs(args);
@@ -141,7 +184,9 @@ public class MultiSignTxTest extends BaseQuery {
         String txHex = HexUtil.encode(tx.serialize());
         System.out.println(String.format("txHash: %s", tx.getHash().toString()));
         System.out.println(String.format("txHex: %s", txHex));
-        TransactionCall.newTx(chainId, txHex);
+        //TransactionCall.newTx(chainId, txHex);
+        RpcResult newTx = JsonRpcUtil.request(rpcAddress, "broadcastTx", List.of(chainId, txHex));
+        System.out.println(JSONUtils.obj2PrettyJson(newTx));
     }
 
     public SimpleAccountDTO getAccountByAddress(int chainId, String address) throws Exception {

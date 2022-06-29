@@ -58,12 +58,14 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.ByteArrayWrapper;
+import io.nuls.core.model.FormatValidUtils;
 import io.nuls.core.model.LongUtils;
 import io.nuls.core.model.StringUtils;
 import org.bouncycastle.util.Arrays;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static io.nuls.contract.config.ContractContext.ASSET_ID;
@@ -73,7 +75,6 @@ import static io.nuls.contract.constant.ContractErrorCode.ADDRESS_ERROR;
 import static io.nuls.contract.util.ContractUtil.*;
 import static io.nuls.core.constant.TxType.CROSS_CHAIN;
 import static io.nuls.core.constant.TxType.DELETE_CONTRACT;
-import static io.nuls.core.model.FormatValidUtils.validTokenNameOrSymbol;
 
 @Component
 public class ContractHelper {
@@ -374,6 +375,27 @@ public class ContractHelper {
         return result;
     }
 
+    private boolean validTokenNameOrSymbol(int chainId, String name) {
+        if(ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.PROTOCOL_14 ) {
+            if (StringUtils.isBlank(name)) {
+                return false;
+            }
+
+            String upperCaseName = name.toUpperCase();
+            if(upperCaseName.equals(ContractConstant.NULS)) {
+                return false;
+            }
+
+            byte[] aliasBytes = name.getBytes(StandardCharsets.UTF_8);
+            if (aliasBytes.length < 1 || aliasBytes.length > 20) {
+                return false;
+            }
+            return name.matches("^([a-zA-Z0-9]+[a-zA-Z0-9_]*[a-zA-Z0-9]+)|[a-zA-Z0-9]+${1,20}");
+        } else {
+            return FormatValidUtils.validTokenNameOrSymbol(name);
+        }
+    }
+
     public Result validateNrc20Contract(int chainId, ProgramExecutor track, byte[] contractAddress, byte[] contractCode, ContractResult contractResult) {
         if (contractResult == null) {
             return Result.getFailed(ContractErrorCode.NULL_PARAMETER);
@@ -400,7 +422,7 @@ public class ContractHelper {
             if (programResult.isSuccess()) {
                 String tokenName = programResult.getResult();
                 if (StringUtils.isNotBlank(tokenName)) {
-                    if (!validTokenNameOrSymbol(tokenName)) {
+                    if (!validTokenNameOrSymbol(chainId, tokenName)) {
                         contractResult.setError(true);
                         contractResult.setErrorMessage("The format of the name is incorrect.");
                         return getFailed();
@@ -413,7 +435,7 @@ public class ContractHelper {
             if (programResult.isSuccess()) {
                 String symbol = programResult.getResult();
                 if (StringUtils.isNotBlank(symbol)) {
-                    if (!validTokenNameOrSymbol(symbol)) {
+                    if (!validTokenNameOrSymbol(chainId, symbol)) {
                         contractResult.setError(true);
                         contractResult.setErrorMessage("The format of the symbol is incorrect.");
                         return getFailed();

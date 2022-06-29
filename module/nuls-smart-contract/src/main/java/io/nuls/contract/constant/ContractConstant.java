@@ -145,4 +145,5 @@ public interface ContractConstant {
     String RPC_RESULT_KEY = "value";
     String RPC_COLLECTION_RESULT_KEY = "list";
     String LINE = "_";
+    String NULS = "NULS";
 }

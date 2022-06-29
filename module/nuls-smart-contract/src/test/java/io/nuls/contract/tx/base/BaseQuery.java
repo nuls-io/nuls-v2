@@ -220,13 +220,19 @@ public class BaseQuery extends Base {
         System.out.println(transferService.transfer(builder.build(new TransferReq())).getData());
     }
 
+    protected boolean syncKernel = true;
     @Before
     public void before() throws Exception {
-        NoUse.mockModule();
-        ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":7771");
+        updateSyncKernel();
+        if (syncKernel) {
+            NoUse.mockModule();
+            ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":7771");
+        }
         chain = new Chain();
         chain.setConfig(new ConfigBean(assetId, chainId, 100000000L));
     }
+
+    protected void updateSyncKernel() {}
 
     protected TransferService transferService = ServiceManager.get(TransferService.class);
 
