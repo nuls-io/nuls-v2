@@ -66,6 +66,14 @@ public interface AccountService {
     Account getAccount(int chainId, String address);
 
     /**
+     * 账户是否在合约白名单中
+     * @param chainId
+     * @param address
+     * @return
+     */
+    boolean validationWhitelistForTransferOnContractCall(int chainId, String address);
+
+    /**
      * 获取所有账户集合,并放入缓存
      * Query all account collections and put them in cache.
      *

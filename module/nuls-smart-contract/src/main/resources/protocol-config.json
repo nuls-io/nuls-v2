@@ -1,5 +1,47 @@
 [
   {
+    "version": "14",
+    "extend": "13",
+    "validTxs": [
+      {
+        "type": "15",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "CreateContractProcessorV14"
+      },
+      {
+        "type": "16",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "CallContractProcessorV14"
+      }
+    ],
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  },
+  {
+    "version": "13",
+    "extend": "8",
+    "validTxs": [
+      {
+        "type": "16",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "CallContractProcessorV13"
+      }
+    ],
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  },
+  {
     "version": "8",
     "extend": "4",
     "validTxs": [

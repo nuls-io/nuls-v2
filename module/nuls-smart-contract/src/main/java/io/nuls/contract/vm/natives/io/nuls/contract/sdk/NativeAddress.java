@@ -25,9 +25,6 @@
 package io.nuls.contract.vm.natives.io.nuls.contract.sdk;
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.protocol.ProtocolGroupManager;
-import io.nuls.contract.config.ContractContext;
-import io.nuls.contract.sdk.Address;
 import io.nuls.contract.vm.*;
 import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.exception.ErrorException;
@@ -147,7 +144,7 @@ public class NativeAddress {
     /**
      * native
      *
-     * @see Address#balance()
+     * see Address#balance()
      */
     private static Result balance(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         ObjectRef objectRef = methodArgs.objectRef;
@@ -175,7 +172,7 @@ public class NativeAddress {
     /**
      * native
      *
-     * @see Address#totalBalance()
+     * see Address#totalBalance()
      */
     private static Result totalBalance(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         ObjectRef objectRef = methodArgs.objectRef;
@@ -204,7 +201,7 @@ public class NativeAddress {
     /**
      * native
      *
-     * @see Address#transfer(BigInteger)
+     * see Address#transfer(BigInteger)
      */
     private static Result transfer(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         return transferBase(methodCode, methodArgs, frame, CHAIN_ID, ASSET_ID, 0);
@@ -274,7 +271,7 @@ public class NativeAddress {
     /**
      * native
      *
-     * @see Address#call(String, String, String[][], BigInteger)
+     * see Address#call(String, String, String[][], BigInteger)
      */
     private static Result call(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         return call(methodCode, methodArgs, frame, false, null);
@@ -459,7 +456,7 @@ public class NativeAddress {
     /**
      * native
      *
-     * @see Address#valid(String)
+     * see Address#valid(String)
      */
     private static Result valid(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         ObjectRef objectRef = (ObjectRef) methodArgs.invokeArgs[0];

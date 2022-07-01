@@ -54,5 +54,7 @@ public interface AccountStorageConstant {
      * Account Module Configuration Information Table Name
      */
     String DB_NAME_ACCOUNT_CONGIF = "config";
+    String DB_NAME_ACCOUNT_BLOCK = "account_block";
+    String DB_NAME_ACCOUNT_CONTRACT_CALL = "account_contract_call";
 
 }

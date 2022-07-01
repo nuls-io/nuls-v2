@@ -108,7 +108,7 @@ public class AssetCmd extends BaseChainCmd {
             if (dbChain.isDelete()) {
                 return failed(CmErrorCode.ERROR_CHAIN_REG_CMD);
             }
-            if (assetService.assetExist(asset) && asset.isAvailable()) {
+            if (assetService.assetExistAndAvailable(asset)) {
                 return failed(CmErrorCode.ERROR_ASSET_ID_EXIST);
             }
             /* 组装交易发送 (Send transaction) */

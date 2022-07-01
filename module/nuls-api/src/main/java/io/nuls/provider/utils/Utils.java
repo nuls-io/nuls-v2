@@ -124,7 +124,7 @@ public class Utils {
         return max;
     }
 
-    public static String[][] extractMultyAssetInfoFromCallTransaction(CoinData coinData, int mainChainId, int mainAssetId) {
+    public static String[][] extractMultyAssetInfoFromCallTransaction(byte[] contractAddress, CoinData coinData, int mainChainId, int mainAssetId) {
         List<CoinTo> toList = coinData.getTo();
         if (toList == null || toList.isEmpty()) {
             return null;
@@ -132,6 +132,9 @@ public class Utils {
         List<String[]> list = null;
         for (CoinTo to : toList) {
             if (to.getAssetsChainId() == mainChainId && to.getAssetsId() == mainAssetId) {
+                continue;
+            }
+            if (!Arrays.equals(contractAddress, to.getAddress())) {
                 continue;
             }
             if (list == null) {

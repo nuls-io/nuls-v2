@@ -2,6 +2,7 @@ package io.nuls.base.api.provider.crosschain;
 
 import io.nuls.base.api.provider.Result;
 import io.nuls.base.api.provider.crosschain.facade.*;
+import io.nuls.base.data.Transaction;
 
 /**
  * @Author: zhoulijun
@@ -24,6 +25,14 @@ public interface CrossChainProvider {
      * @return
      */
     Result<Integer> getCrossTxState(GetCrossTxStateReq req);
+
+
+    /**
+     * 查询跨链交易在其他链的处理状态
+     * @param req
+     * @return
+     */
+    Result<Transaction> getCrossTx(GetCrossTxStateReq req);
 
     /**
      * 给全网发信号，对指定跨链交易重新进行拜赞庭验证

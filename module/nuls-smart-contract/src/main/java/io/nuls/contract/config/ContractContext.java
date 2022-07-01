@@ -70,4 +70,7 @@ public class ContractContext {
     public static short UPDATE_VERSION_CONTRACT_ASSET = 8;
 
     public static short UPDATE_VERSION_CONTRACT_BALANCE = 9;
+
+    public static short UPDATE_VERSION_ACCOUNT_TRANSFER_ON_CONTRACT_CALL = 13;
+    public static short PROTOCOL_14 = 14;
 }

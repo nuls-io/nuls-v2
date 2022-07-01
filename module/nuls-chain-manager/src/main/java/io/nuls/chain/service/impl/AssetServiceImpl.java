@@ -234,6 +234,12 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
+    public boolean assetExistAndAvailable(Asset asset) throws Exception {
+        Asset dbAsset = assetStorage.load(CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
+        return dbAsset != null&&dbAsset.isAvailable();
+    }
+
+    @Override
     public boolean assetExist(Asset asset, Map<String, Integer> map) throws Exception {
         String assetKey = CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId());
         Asset dbAsset = assetStorage.load(assetKey);
