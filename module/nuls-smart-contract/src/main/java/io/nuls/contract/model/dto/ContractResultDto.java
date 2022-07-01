@@ -25,6 +25,7 @@ package io.nuls.contract.model.dto;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.enums.CmdRegisterMode;
+import io.nuls.contract.model.bo.ContractInternalCreate;
 import io.nuls.contract.model.bo.ContractMergedTransfer;
 import io.nuls.contract.model.bo.ContractMultyAssetMergedTransfer;
 import io.nuls.contract.model.bo.ContractResult;
@@ -41,8 +42,10 @@ import io.nuls.core.rpc.model.TypeDescriptor;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static io.nuls.contract.constant.ContractConstant.TOKEN_TYPE_NRC20;
 import static io.nuls.contract.constant.ContractConstant.TOKEN_TYPE_NRC721;
@@ -97,6 +100,8 @@ public class ContractResultDto {
     private List<String> contractTxList;
     @ApiModelProperty(description = "备注")
     private String remark;
+    @ApiModelProperty(description = "内部创建的合约列表", type = @TypeDescriptor(value = List.class, collectionElement = ContractInternalCreateDto.class))
+    private List<ContractInternalCreateDto> internalCreates;
 
     public ContractResultDto() {
     }
@@ -136,6 +141,7 @@ public class ContractResultDto {
         if (result.isSuccess()) {
             this.makeTokenTransfers(chainId, result.getEvents());
             this.makeInvokeRegisterCmds(result.getInvokeRegisterCmds());
+            this.makeInternalCreates(result.getInternalCreates());
         }
     }
 
@@ -164,6 +170,7 @@ public class ContractResultDto {
         if (result.isSuccess()) {
             this.makeTokenTransfers(chainId, result.getEvents());
             this.makeInvokeRegisterCmds(result.getInvokeRegisterCmds());
+            this.makeInternalCreates(result.getInternalCreates());
         }
     }
 
@@ -180,6 +187,14 @@ public class ContractResultDto {
                 contractTxList.add(invokeRegisterCmd.getProgramNewTx().getTxString());
             }
             this.invokeRegisterCmds.add(new ContractInvokeRegisterCmdDto(invokeRegisterCmd));
+        }
+    }
+
+    private void makeInternalCreates(List<ContractInternalCreate> internalCreates) {
+        if (internalCreates != null && internalCreates.size() > 0) {
+            this.internalCreates = internalCreates.stream().map(ic -> new ContractInternalCreateDto(ic)).collect(Collectors.toList());
+        } else {
+            this.internalCreates = Collections.EMPTY_LIST;
         }
     }
 
@@ -396,5 +411,13 @@ public class ContractResultDto {
 
     public void setContractTxList(List<String> contractTxList) {
         this.contractTxList = contractTxList;
+    }
+
+    public List<ContractInternalCreateDto> getInternalCreates() {
+        return internalCreates == null ? Collections.EMPTY_LIST : internalCreates;
+    }
+
+    public void setInternalCreates(List<ContractInternalCreateDto> internalCreates) {
+        this.internalCreates = internalCreates;
     }
 }

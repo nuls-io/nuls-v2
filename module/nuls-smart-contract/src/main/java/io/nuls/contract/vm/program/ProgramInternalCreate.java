@@ -22,55 +22,73 @@
  * SOFTWARE.
  *
  */
-package io.nuls.core.constant;
+package io.nuls.contract.vm.program;
 
-/**
- * 交易状态枚举
- * Enumeration of transaction status
- * 0: not packaged
- * 1: packaged and saved
- * 2: packaged and saved
- * @author Niels
- */
-public enum TxStatusEnum {
+// add by pierre at 2022/6/1 p14
+public class ProgramInternalCreate {
 
     /**
-     * 未确认状态
-     * not packaged
+     * 创建者
      */
-    UNCONFIRM((byte)0),
+    private byte[] sender;
+
     /**
-     * 已确认状态
-     * packaged and saved
+     * 合约地址
      */
-    CONFIRMED((byte)1),
+    private byte[] contractAddress;
+
     /**
-     * 已打包状态
-     * packaged and saved
+     * 合约代码
      */
-    BYZANTINE_COMPLETE((byte)2);
+    private byte[] contractCode;
 
-    private byte status;
+    /**
+     * 内部创建合约，所依据的合约
+     */
+    private byte[] codeCopyBy;
 
-    TxStatusEnum(byte status) {
-        this.status = status;
+    /**
+     * 参数列表
+     */
+    private String[][] args;
+
+    public byte[] getCodeCopyBy() {
+        return codeCopyBy;
     }
 
-    public byte getStatus() {
-        return status;
+    public void setCodeCopyBy(byte[] codeCopyBy) {
+        this.codeCopyBy = codeCopyBy;
     }
 
-    public void setStatus(byte status) {
-        this.status = status;
+    public byte[] getSender() {
+        return sender;
     }
 
-    public static TxStatusEnum getStatus(int status) {
-        if(status == 0) {
-            return UNCONFIRM;
-        }
-        if(status == 1) {
-            return CONFIRMED;
-        }
-        return null;
+    public void setSender(byte[] sender) {
+        this.sender = sender;
+    }
+
+    public byte[] getContractAddress() {
+        return contractAddress;
+    }
+
+    public void setContractAddress(byte[] contractAddress) {
+        this.contractAddress = contractAddress;
+    }
+
+    public byte[] getContractCode() {
+        return contractCode;
+    }
+
+    public void setContractCode(byte[] contractCode) {
+        this.contractCode = contractCode;
+    }
+
+    public String[][] getArgs() {
+        return args;
+    }
+
+    public void setArgs(String[][] args) {
+        this.args = args;
     }
 }

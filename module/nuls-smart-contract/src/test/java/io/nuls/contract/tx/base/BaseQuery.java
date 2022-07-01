@@ -83,9 +83,9 @@ public class BaseQuery extends Base {
 
     @Test
     public void importPriKeyTest() {
-        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//打包地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
+        //importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//打包地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
         //importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//打包地址 tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
-        //importPriKey("fbcae491407b54aa3904ff295f2d644080901fda0d417b2b427f5c1487b2b499", password);//打包地址 tNULSeBaMmShSTVwbU4rHkZjpD98JgFgg6rmhF
+        importPriKey("fbcae491407b54aa3904ff295f2d644080901fda0d417b2b427f5c1487b2b499", password);//打包地址 tNULSeBaMmShSTVwbU4rHkZjpD98JgFgg6rmhF
 
         importPriKey("9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b", password);//25 tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
         importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//26 tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
@@ -169,7 +169,7 @@ public class BaseQuery extends Base {
     @Test
     public void transferOne() {
         String from = "tNULSeBaMtkzQ1tH8JWBGZDCmRHCmySevE4frM";
-        String to = "tNULSeBaNNgHMQAwzaJU4rtXD4WEhiRrnrnZWo";
+        String to = "tNULSeBaNRJrWyAfNtA6aiAozaJdemWA5WbBFU";
         TransferReq.TransferReqBuilder builder = new TransferReq.TransferReqBuilder(chain.getChainId(), chain.getConfig().getAssetId())
                 .addForm(from, password, new BigDecimal("100.001").movePointRight(8).toBigInteger())
                 .addTo(to, new BigDecimal("100").movePointRight(8).toBigInteger());
@@ -220,13 +220,19 @@ public class BaseQuery extends Base {
         System.out.println(transferService.transfer(builder.build(new TransferReq())).getData());
     }
 
+    protected boolean syncKernel = true;
     @Before
     public void before() throws Exception {
-        NoUse.mockModule();
-        ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":7771");
+        updateSyncKernel();
+        if (syncKernel) {
+            NoUse.mockModule();
+            ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":7771");
+        }
         chain = new Chain();
         chain.setConfig(new ConfigBean(assetId, chainId, 100000000L));
     }
+
+    protected void updateSyncKernel() {}
 
     protected TransferService transferService = ServiceManager.get(TransferService.class);
 
@@ -335,7 +341,7 @@ public class BaseQuery extends Base {
      */
     @Test
     public void contractResult() throws Exception {
-        Object[] objects = getContractResult("177c05a636ca62aeb41564f413b4672f7e3d692e04481271d9d36dc95791edde");
+        Object[] objects = getContractResult("a92f2928b6c3ee3944a8e0c7e895f4185fb1b9991f82ca5dac1efe82a6adadec");
         Log.info("contractResult-result:{}", JSONUtils.obj2PrettyJson(objects[0]));
         Assert.assertTrue(null != objects[1]);
     }

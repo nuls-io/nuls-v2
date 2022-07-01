@@ -25,7 +25,6 @@
 package io.nuls.contract.vm.natives.io.nuls.contract.sdk;
 
 import io.nuls.contract.model.dto.BlockHeaderDto;
-import io.nuls.contract.sdk.Block;
 import io.nuls.contract.vm.Frame;
 import io.nuls.contract.vm.MethodArgs;
 import io.nuls.contract.vm.ObjectRef;
@@ -77,7 +76,7 @@ public class NativeBlock {
     /**
      * native
      *
-     * @see Block#getBlockHeader(long)
+     * see Block#getBlockHeader(long)
      */
     private static Result getBlockHeader(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         long blockNumber = (long) methodArgs.invokeArgs[0];
@@ -91,7 +90,7 @@ public class NativeBlock {
     /**
      * native
      *
-     * @see Block#currentBlockHeader()
+     * see Block#currentBlockHeader()
      */
     private static Result currentBlockHeader(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         long blockNumber = frame.vm.getProgramInvoke().getNumber();
@@ -105,7 +104,7 @@ public class NativeBlock {
     /**
      * native
      *
-     * @see Block#newestBlockHeader()
+     * see Block#newestBlockHeader()
      */
     private static Result newestBlockHeader(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         long blockNumber = frame.vm.getProgramInvoke().getNumber();

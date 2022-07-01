@@ -25,6 +25,7 @@
 package io.nuls.contract.vm.natives.io.nuls.contract.sdk;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.Address;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.Transaction;
@@ -41,7 +42,7 @@ import io.nuls.contract.model.bo.CmdRegister;
 import io.nuls.contract.model.bo.ContractTokenAssetsInfo;
 import io.nuls.contract.model.dto.BlockHeaderDto;
 import io.nuls.contract.rpc.call.ChainManagerCall;
-import io.nuls.contract.sdk.Event;
+import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.*;
 import io.nuls.contract.vm.code.ClassCode;
@@ -50,26 +51,24 @@ import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.code.VariableType;
 import io.nuls.contract.vm.exception.ErrorException;
 import io.nuls.contract.vm.natives.NativeMethod;
-import io.nuls.contract.vm.program.ProgramAccount;
-import io.nuls.contract.vm.program.ProgramInvokeRegisterCmd;
-import io.nuls.contract.vm.program.ProgramNewTx;
-import io.nuls.contract.vm.program.ProgramResult;
+import io.nuls.contract.vm.program.*;
 import io.nuls.contract.vm.program.impl.ProgramInvoke;
 import io.nuls.contract.vm.util.Constants;
 import io.nuls.contract.vm.util.JsonUtils;
 import io.nuls.contract.vm.util.Utils;
+import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.crypto.KeccakHash;
 import io.nuls.core.crypto.Sha3Hash;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.parse.SerializeUtils;
 import io.nuls.core.rpc.model.message.Response;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static io.nuls.contract.config.ContractContext.ASSET_ID;
 import static io.nuls.contract.config.ContractContext.CHAIN_ID;
@@ -166,7 +165,7 @@ public class NativeUtils {
     /**
      * native
      *
-     * @see Utils#revert(String)
+     * see Utils#revert(String)
      */
     private static Result revert(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         ObjectRef objectRef = (ObjectRef) methodArgs.invokeArgs[0];
@@ -182,7 +181,7 @@ public class NativeUtils {
     /**
      * native
      *
-     * @see Utils#emit(Event)
+     * see Utils#emit(Event)
      */
     private static Result emit(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         ObjectRef objectRef = (ObjectRef) methodArgs.invokeArgs[0];
@@ -384,7 +383,7 @@ public class NativeUtils {
     /**
      * native
      *
-     * @see Utils#sha3(String)
+     * see Utils#sha3(String)
      */
     private static Result sha3(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         frame.vm.addGasUsed(GasCost.SHA3);
@@ -404,7 +403,7 @@ public class NativeUtils {
     /**
      * native
      *
-     * @see Utils#sha3(byte[])
+     * see Utils#sha3(byte[])
      */
     private static Result sha3Bytes(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         frame.vm.addGasUsed(GasCost.SHA3);
@@ -554,6 +553,29 @@ public class NativeUtils {
             ObjectRef objectRef = frame.heap.newString(crossTokenSystemContract);
             Result result = NativeMethod.result(methodCode, objectRef, frame);
             return result;
+        } else if ("createContract".equals(cmdName)) {
+            // add by pierre at 2022/6/1 p14
+            if(ProtocolGroupManager.getCurrentVersion(currentChainId) >= ContractContext.PROTOCOL_14 ) {
+                return createContract(methodCode, methodArgs, frame);
+            }
+        } else if ("encodePacked".equals(cmdName)) {
+            // add by pierre at 2022/6/1 p14
+            if(ProtocolGroupManager.getCurrentVersion(currentChainId) >= ContractContext.PROTOCOL_14 ) {
+                String[] args = (String[]) frame.heap.getObject(argsRef);
+                return encodePacked(args, methodCode, frame);
+            }
+        } else if ("computeAddress".equals(cmdName)) {
+            // add by pierre at 2022/6/1 p14
+            if(ProtocolGroupManager.getCurrentVersion(currentChainId) >= ContractContext.PROTOCOL_14 ) {
+                String[] args = (String[]) frame.heap.getObject(argsRef);
+                return computeAddress(args, methodCode, frame);
+            }
+        } else if ("getCodeHash".equals(cmdName)) {
+            // add by pierre at 2022/6/16 p14
+            if(ProtocolGroupManager.getCurrentVersion(currentChainId) >= ContractContext.PROTOCOL_14 ) {
+                String[] args = (String[]) frame.heap.getObject(argsRef);
+                return getCodeHash(args, methodCode, frame);
+            }
         }
         String[] args = (String[]) frame.heap.getObject(argsRef);
 
@@ -628,6 +650,157 @@ public class NativeUtils {
         frame.vm.getInvokeRegisterCmds().add(invokeRegisterCmd);
         result = NativeMethod.result(methodCode, objectRef, frame);
         return result;
+    }
+
+    private static Result getCodeHash(String[] args, MethodCode methodCode, Frame frame) {
+        try {
+            String codeAddress = args[0];
+
+            // 查找contractCode
+            byte[] codeAddressBytes = AddressTool.getAddress(codeAddress);
+            // 验证codeAddress是合约地址
+            if (!NativeAddress.isContract(codeAddressBytes, frame)) {
+                throw new Exception("Not contract address");
+            }
+            byte[] codeHash = frame.vm.getRepository().getCodeHash(codeAddressBytes);
+            Object resultValue = frame.heap.newString(HexUtil.encode(codeHash));
+            Result result = NativeMethod.result(methodCode, resultValue, frame);
+            return result;
+        } catch (Exception e) {
+            throw new ErrorException("Invoke external cmd failed. When getCodeHash.", frame.vm.getGasUsed(), e.getMessage());
+        }
+    }
+
+    private static Result computeAddress(String[] args, MethodCode methodCode, Frame frame) {
+        try {
+            int currentChainId = frame.vm.getProgramExecutor().getCurrentChainId();
+            String salt = args[0];
+            String codeHash = args[1];
+            String sender = args[2];
+
+            // 根据规则生成合约地址
+            ProgramCreateData createData = new ProgramCreateData(
+                    AddressTool.getAddress(sender),
+                    Utils.dataToBytes(salt),
+                    HexUtil.decode(codeHash));
+            Address newAddress = new Address(currentChainId, BaseConstant.CONTRACT_ADDRESS_TYPE, SerializeUtils.sha256hash160(KeccakHash.keccakBytes(createData.serialize(), 256)));
+
+            Object resultValue = frame.heap.newString(newAddress.toString());
+            Result result = NativeMethod.result(methodCode, resultValue, frame);
+            return result;
+        } catch (IOException e) {
+            throw new ErrorException("Invoke external cmd failed. When computeAddress.", frame.vm.getGasUsed(), e.getMessage());
+        }
+    }
+
+    private static Result encodePacked(String[] args, MethodCode methodCode, Frame frame) {
+        try {
+            ProgramEncodePacked encodePacked;
+            if (args == null) {
+                encodePacked = new ProgramEncodePacked((short) 0, args);
+            } else {
+                encodePacked = new ProgramEncodePacked((short) args.length, args);
+            }
+            Object resultValue = frame.heap.newString(HexUtil.encode(encodePacked.serialize()));
+            Result result = NativeMethod.result(methodCode, resultValue, frame);
+            return result;
+        } catch (IOException e) {
+            throw new ErrorException("Invoke external cmd failed. When encodePacked.", frame.vm.getGasUsed(), e.getMessage());
+        }
+    }
+
+    private static Result createContract(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
+        ProgramInvoke programInvoke = frame.vm.getProgramInvoke();
+        if (programInvoke.isCreate()) {
+            throw new ErrorException("Invoke external cmd failed. This method cannot be called when creating a contract.", frame.vm.getGasUsed(), null);
+        }
+        int currentChainId = frame.vm.getProgramExecutor().getCurrentChainId();
+
+        ObjectRef argsRef = (ObjectRef) methodArgs.invokeArgs[1];
+        String[] _args = (String[]) frame.heap.getObject(argsRef);
+        int length = _args.length;
+        // 验证codeAddress是合约地址
+        String codeAddress = _args[0];
+        byte[] codeAddressBytes = AddressTool.getAddress(codeAddress);
+        if (!NativeAddress.isContract(codeAddressBytes, frame)) {
+            throw new ErrorException("Invoke external cmd failed. When creating a contract. [codeCopy] is not a contract address.", frame.vm.getGasUsed(), null);
+        }
+        String salt = _args[1];
+        String[][] args;
+        if (length == 2) {
+            args = null;
+        } else {
+            String[] subArgs = new String[length - 2];
+            System.arraycopy(_args, 2, subArgs, 0, length - 2);
+            args = ContractUtil.twoDimensionalArray(subArgs);
+        }
+        ProgramResult programResult;
+        try {
+            programResult = createContract(currentChainId, salt, codeAddressBytes, args, frame);
+        } catch (IOException e) {
+            throw new ErrorException("Invoke external cmd failed. When creating a contract.", frame.vm.getGasUsed(), e.getMessage());
+        }
+
+        if (!programResult.isSuccess()) {
+            return new Result();
+        }
+        List<ProgramInternalCreate> internalCreates = frame.vm.getInternalCreates();
+        ProgramInternalCreate create = frame.vm.getInternalCreates().get(internalCreates.size() - 1);
+        Object resultValue = frame.heap.newString(AddressTool.getStringAddressByBytes(create.getContractAddress()));
+        Result result = NativeMethod.result(methodCode, resultValue, frame);
+        return result;
+    }
+
+    private static ProgramResult createContract(int chainId, String salt, byte[] codeAddressBytes, String[][] args, Frame frame) throws IOException {
+        ProgramInvoke programInvoke = frame.vm.getProgramInvoke();
+        // 查找contractCode
+        byte[] codes = frame.vm.getRepository().getCode(codeAddressBytes);
+        byte[] codeHash = frame.vm.getRepository().getCodeHash(codeAddressBytes);
+
+        // 根据规则生成合约地址
+        ProgramCreateData createData = new ProgramCreateData(
+                programInvoke.getContractAddress(),
+                Utils.dataToBytes(salt),
+                codeHash);
+        Address newAddress = new Address(chainId, BaseConstant.CONTRACT_ADDRESS_TYPE, SerializeUtils.sha256hash160(KeccakHash.keccakBytes(createData.serialize(), 256)));
+
+        ProgramCreate programCreate = new ProgramCreate();
+        programCreate.setContractAddress(newAddress.getAddressBytes());
+        programCreate.setSender(programInvoke.getContractAddress());
+        programCreate.setValue(BigInteger.ZERO);
+        programCreate.setPrice(programInvoke.getPrice());
+        programCreate.setGasLimit(frame.vm.getGasLeft());
+        programCreate.setNumber(programInvoke.getNumber());
+        programCreate.setContractCode(codes);
+        programCreate.setArgs(args);
+        programCreate.setSenderPublicKey(programInvoke.getSenderPublicKey());
+        programCreate.setInternalCreate(true);
+        programCreate.setEstimateGas(programInvoke.isEstimateGas());
+
+        ProgramInternalCreate programInternalCreate = new ProgramInternalCreate();
+        programInternalCreate.setSender(programCreate.getSender());
+        programInternalCreate.setContractAddress(programCreate.getContractAddress());
+        programInternalCreate.setContractCode(programCreate.getContractCode());
+        programInternalCreate.setCodeCopyBy(codeAddressBytes);
+        programInternalCreate.setArgs(programCreate.getArgs());
+
+        frame.vm.getInternalCreates().add(programInternalCreate);
+
+        ProgramResult programResult = frame.vm.getProgramExecutor().callProgramExecutor().create(programCreate);
+
+        frame.vm.addGasUsed(programResult.getGasUsed());
+        frame.vm.getDebugEvents().addAll(programResult.getDebugEvents());
+        if (programResult.isSuccess()) {
+            frame.vm.getEvents().addAll(programResult.getEvents());
+            return programResult;
+        } else {
+            Iterator<String> descendingIterator = programResult.getStackTraces().descendingIterator();
+            while (descendingIterator.hasNext()) {
+                frame.vm.getStackTraces().addFirst(descendingIterator.next());
+            }
+            frame.throwRuntimeException(programResult.getErrorMessage());
+            return programResult;
+        }
     }
 
     private static ObjectRef tokenOutCrossChainCmdProcessor(int currentChainId, byte[] senderBytes, String contractSender,
@@ -862,7 +1035,7 @@ public class NativeUtils {
     /**
      * native
      *s
-     * @see io.nuls.contract.sdk.Utils#obj2Json(Object)
+     * see io.nuls.contract.sdk.Utils#obj2Json(Object)
      */
     private static Result obj2Json(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         frame.vm.addGasUsed(GasCost.OBJ_TO_JSON);
@@ -870,6 +1043,11 @@ public class NativeUtils {
         ObjectRef ref = null;
         if (objectRef != null) {
             String json = objectRef2Json(objectRef, frame.heap, frame.methodArea);
+            // add by pierre at 2022/6/16 p14
+            int currentChainId = frame.vm.getProgramExecutor().getCurrentChainId();
+            if(ProtocolGroupManager.getCurrentVersion(currentChainId) >= ContractContext.PROTOCOL_14 ) {
+                frame.vm.addGasUsed(GasCost.OBJ_TO_JSON_PER_CHAR * json.length());
+            }
             ref = frame.heap.newString(json);
         }
         Result result = NativeMethod.result(methodCode, ref, frame);
