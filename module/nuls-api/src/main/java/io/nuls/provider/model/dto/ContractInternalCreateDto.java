@@ -21,56 +21,55 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.contract.config;
+package io.nuls.provider.model.dto;
 
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
+
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
 
 /**
  * @author: PierreLuo
- * @date: 2019-03-15
  */
-public class ContractContext {
+@ApiModel
+public class ContractInternalCreateDto {
+    @ApiModelProperty(description = "交易创建者地址")
+    private String sender;
+    @ApiModelProperty(description = "创建的合约地址")
+    private String contractAddress;
+    @ApiModelProperty(description = "内部创建所依据的合约")
+    private String codeCopyBy;
+    @ApiModelProperty(description = "参数列表")
+    private String args;
 
-    public static Charset DEFAULT_ENCODING = StandardCharsets.UTF_8;
+    public String getSender() {
+        return sender;
+    }
 
-    /**
-     * 数据库存储地址
-     * database path
-     */
-    public static String DATA_PATH;
+    public void setSender(String sender) {
+        this.sender = sender;
+    }
 
-    /**
-     * 主网链ID（卫星链ID）
-     */
-    public static int MAIN_CHAIN_ID = 1;
+    public String getContractAddress() {
+        return contractAddress;
+    }
 
-    /**
-     * 主网链资产ID（卫星链资产ID，NULS资产）
-     */
-    public static int MAIN_ASSETS_ID = 1;
-    /**
-     * 当前链ID
-     */
-    public static int CHAIN_ID = 1;
-    /**
-     * 当前链资产ID
-     */
-    public static int ASSET_ID = 1;
+    public void setContractAddress(String contractAddress) {
+        this.contractAddress = contractAddress;
+    }
 
-    /**
-     * 代币跨链系统合约地址
-     */
-    public static byte[] CROSS_CHAIN_SYSTEM_CONTRACT;
+    public String getCodeCopyBy() {
+        return codeCopyBy;
+    }
 
-    public static short UPDATE_VERSION_V240 = 4;
+    public void setCodeCopyBy(String codeCopyBy) {
+        this.codeCopyBy = codeCopyBy;
+    }
 
-    public static short UPDATE_VERSION_V250 = 5;
+    public String getArgs() {
+        return args;
+    }
 
-    public static short UPDATE_VERSION_CONTRACT_ASSET = 8;
-
-    public static short UPDATE_VERSION_CONTRACT_BALANCE = 9;
-
-    public static short UPDATE_VERSION_ACCOUNT_TRANSFER_ON_CONTRACT_CALL = 13;
-    public static short PROTOCOL_14 = 14;
+    public void setArgs(String args) {
+        this.args = args;
+    }
 }

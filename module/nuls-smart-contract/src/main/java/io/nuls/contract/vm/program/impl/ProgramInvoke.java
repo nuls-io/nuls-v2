@@ -100,6 +100,15 @@ public class ProgramInvoke {
     private boolean create;
 
     private boolean internalCall;
+    private boolean internalCreate;
+
+    public boolean isInternalCreate() {
+        return internalCreate;
+    }
+
+    public void setInternalCreate(boolean internalCreate) {
+        this.internalCreate = internalCreate;
+    }
 
     public byte[] getContractAddress() {
         return contractAddress;

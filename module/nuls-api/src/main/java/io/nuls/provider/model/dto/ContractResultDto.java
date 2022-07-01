@@ -80,6 +80,8 @@ public class ContractResultDto {
     private List<String> contractTxList;
     @ApiModelProperty(description = "备注")
     private String remark;
+    @ApiModelProperty(description = "内部创建的合约列表", type = @TypeDescriptor(value = List.class, collectionElement = ContractInternalCreateDto.class))
+    private List<ContractInternalCreateDto> internalCreates;
 
     public List<ContractMultyAssetMergedTransferDto> getMultyAssetTransfers() {
         return multyAssetTransfers;
@@ -255,5 +257,13 @@ public class ContractResultDto {
 
     public void setRemark(String remark) {
         this.remark = remark;
+    }
+
+    public List<ContractInternalCreateDto> getInternalCreates() {
+        return internalCreates;
+    }
+
+    public void setInternalCreates(List<ContractInternalCreateDto> internalCreates) {
+        this.internalCreates = internalCreates;
     }
 }

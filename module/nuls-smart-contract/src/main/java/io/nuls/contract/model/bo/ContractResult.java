@@ -30,9 +30,9 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.model.tx.ContractTransferTransaction;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.vm.program.ProgramAccount;
+import io.nuls.contract.vm.program.ProgramInternalCreate;
 import io.nuls.contract.vm.program.ProgramInvokeRegisterCmd;
 import io.nuls.contract.vm.program.ProgramTransfer;
-import org.ethereum.db.ByteArrayWrapper;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -99,10 +99,29 @@ public class ContractResult {
     private boolean isTerminated;
     private Set<String> contractAddressInnerCallSet;
     private List<ContractMultyAssetMergedTransfer> mergerdMultyAssetTransferList = new ArrayList<>();
+    // add by pierre at 2022/6/2 p14
+    private List<ContractInternalCreate> internalCreates = new ArrayList<>();
+    private transient List<ProgramInternalCreate> programInternalCreates = new ArrayList<>();
 
     private transient Object txTrack;
     private transient Map<String, ProgramAccount> accounts;
     private transient List<Object> orderedInnerTxs = new ArrayList<>();
+
+    public List<ContractInternalCreate> getInternalCreates() {
+        return internalCreates;
+    }
+
+    public void setInternalCreates(List<ContractInternalCreate> internalCreates) {
+        this.internalCreates = internalCreates;
+    }
+
+    public List<ProgramInternalCreate> getProgramInternalCreates() {
+        return programInternalCreates;
+    }
+
+    public void setProgramInternalCreates(List<ProgramInternalCreate> programInternalCreates) {
+        this.programInternalCreates = programInternalCreates;
+    }
 
     public Map<String, ProgramAccount> getAccounts() {
         return accounts;
@@ -139,7 +158,7 @@ public class ContractResult {
         return result;
     }
 
-    public static ContractResult genFailed(ContractData contractData) {
+    private static ContractResult genFailed(ContractData contractData) {
         ContractResult contractResult = new ContractResult();
         contractResult.setContractAddress(contractData.getContractAddress());
         contractResult.setGasUsed(contractData.getGasLimit());

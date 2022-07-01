@@ -584,6 +584,25 @@ public class ContractResource {
         return ResultUtil.getRpcClientResult(mapResult);
     }
 
+    @POST
+    @Path("/codeHash")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(description = "获取合约的codeHash", order = 419)
+    @Parameters(value = {
+        @Parameter(parameterName = "获取合约的codeHash", parameterDes = "获取合约的codeHash", requestType = @TypeDescriptor(value = ContractCodeHash.class))
+    })
+    @ResponseData(name = "返回值", description = "返回Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+        @Key(name = "result", description = "合约的codeHash")
+    }))
+    public RpcClientResult codeHash(ContractCodeHash form) {
+        if (form == null) {
+            return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "form data is empty"));
+        }
+        Result<Map> mapResult = contractTools.codeHash(config.getChainId(),
+                form.getContractAddress());
+        return ResultUtil.getRpcClientResult(mapResult);
+    }
+
 
     @POST
     @Path("/create/offline")

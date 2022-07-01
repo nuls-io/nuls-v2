@@ -62,6 +62,16 @@ public class ProgramResult {
 
     // add by pierre at 2020-11-03 可能影响兼容性，考虑协议升级
     private LinkedList<String> stackTraces = new LinkedList<>();
+    // add by pierre at 2022/6/1 p14
+    private List<ProgramInternalCreate> internalCreates = new ArrayList<>();
+
+    public List<ProgramInternalCreate> getInternalCreates() {
+        return internalCreates;
+    }
+
+    public void setInternalCreates(List<ProgramInternalCreate> internalCreates) {
+        this.internalCreates = internalCreates;
+    }
 
     public LinkedList<String> getStackTraces() {
         return stackTraces;
