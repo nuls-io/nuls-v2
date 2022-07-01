@@ -54,9 +54,7 @@ import io.nuls.core.exception.NulsException;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static io.nuls.contract.config.ContractContext.ASSET_ID;
 import static io.nuls.contract.config.ContractContext.CHAIN_ID;

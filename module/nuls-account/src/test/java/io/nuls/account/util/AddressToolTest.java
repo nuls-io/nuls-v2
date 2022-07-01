@@ -40,6 +40,12 @@ public class AddressToolTest {
     }
 
     @Test
+    public void createAddress(){
+        ECKey ecKey = new ECKey();
+        System.out.println(AddressTool.getAddressString(ecKey.getPubKey(),1)+" ==== "+ecKey.getPrivateKeyAsHex());
+    }
+
+    @Test
     public void createAccountByPrefix() {
         AddressTool.addPrefix(4, "LJS");
         for (int i = 0; i < 10; i++) {

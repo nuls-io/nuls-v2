@@ -60,6 +60,7 @@ public class RegisteredCrossChainServiceImpl implements RegisteredCrossChainServ
     public boolean canCross(int assetChainId, int assetId) {
         RegisteredChainMessage all = get();
         if(all == null || all.getChainInfoList() == null){
+            Log.error("数据为空了");
             return false;
         }
         return all.getChainInfoList().stream().

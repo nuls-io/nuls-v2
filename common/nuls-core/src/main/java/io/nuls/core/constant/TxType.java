@@ -170,6 +170,9 @@ public class TxType {
      */
     public static final int BATCH_STAKING_MERGE = 33;
 
+
+    public static final int DELAY_STOP_AGENT = 34;
+
     /**
      * 创建交易对
      */
@@ -291,5 +294,14 @@ public class TxType {
     public static final int RESET_LOCAL_VERIFIER_LIST = 61;
 
     public static final int RESET_CHAIN_INFO = 62;
+
+    public static final int BLOCK_ACCOUNT = 63;
+
+    public static final int UNBLOCK_ACCOUNT = 64;
+
+    /**
+     * 调用合约允许普通转账的账户白名单
+     */
+    public static final int ACCOUNT_FOR_TRANSFER_ON_CONTRACT_CALL = 65;
 
 }

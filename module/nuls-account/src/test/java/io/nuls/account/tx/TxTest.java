@@ -87,13 +87,13 @@ public class TxTest {
 
     @Test
     public void mTransfer() throws Exception {
-        Transfer transfer1 = new Transfer(address21, address20);
-        Thread thread1 = new Thread(transfer1);
-        thread1.start();
+        //Transfer transfer1 = new Transfer(address21, address20);
+        //Thread thread1 = new Thread(transfer1);
+        //thread1.start();
 //        Transfer transfer2 = new Transfer(address25, address20);
 //        Thread thread2 = new Thread(transfer2);
 //        thread2.start();
-        thread1.join();
+//        thread1.join();
 //        thread2.join();
     }
 

@@ -130,7 +130,7 @@ public class Agent extends BaseNulsData {
 
     /**
      * 总委托金额，用于页面展示（由于2.4.1智能合约BUG引起，临时添加字段，后续版本需要删除）
-     * todo
+     *
      * */
     private transient BigInteger reTotalDeposit = BigInteger.ZERO;
 

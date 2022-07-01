@@ -189,6 +189,12 @@ public class Chain {
         this.verifyBatchInfo = null;
     }
 
+    public void clearBatchInfo() {
+        Log.info("clear BatchInfo.");
+        this.batchInfoV8 = null;
+        this.verifyBatchInfoV8 = null;
+    }
+
     public BatchInfoV8 getBatchInfoV8() {
         Integer blockType = currentThreadBlockType.get();
         if(blockType == null) {

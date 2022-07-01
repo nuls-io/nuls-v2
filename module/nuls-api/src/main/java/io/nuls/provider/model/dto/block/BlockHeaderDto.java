@@ -55,7 +55,7 @@ public class BlockHeaderDto {
 
     @ApiModelProperty(description = "区块生成时间")
     private String time;
-
+    @ApiModelProperty(description = "区块生成时间戳")
     private long timestamp;
 
     @ApiModelProperty(description = "区块高度")
@@ -81,7 +81,7 @@ public class BlockHeaderDto {
 
     @ApiModelProperty(description = "当前共识轮开始时间")
     private String roundStartTime;
-
+    @ApiModelProperty(description = "当前共识轮开始时间戳")
     private long roundStartTimestamp;
 
     @ApiModelProperty(description = "当前轮次打包出块的名次")

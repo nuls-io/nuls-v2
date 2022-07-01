@@ -11,4 +11,3 @@ Managed=1
 
 [transaction]
 moduleDynamicDependent=protocol-update,smart-contract
-

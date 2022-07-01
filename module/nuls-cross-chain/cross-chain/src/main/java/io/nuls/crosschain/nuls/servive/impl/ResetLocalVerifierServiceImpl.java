@@ -244,7 +244,7 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
         }
         chain.getLogger().info("重置本链验证人列表完成:{}",chain.getVerifierList());
         int syncStatus = BlockCall.getBlockStatus(chain);
-        List<ChainInfo> otherChainInfoList = chainManager.getRegisteredCrossChainList().stream().filter(d->d.getChainId() != chainId).collect(Collectors.toList()); ;
+        List<ChainInfo> otherChainInfoList = chainManager.getRegisteredCrossChainList().stream().filter(d->d.getChainId() != chainId).collect(Collectors.toList());
         List<Transaction> newTxList = Lists.newArrayList();
         otherChainInfoList.forEach(chainInfo -> {
             try {

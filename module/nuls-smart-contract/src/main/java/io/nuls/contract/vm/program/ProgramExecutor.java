@@ -44,6 +44,11 @@ public interface ProgramExecutor {
 
     List<ProgramMethod> method(byte[] address);
 
+    byte[] contractCode(byte[] address);
+
+    // add by pierre at 2022/6/17 p14
+    byte[] contractCodeHash(byte[] address);
+
     List<ProgramMethod> jarMethod(byte[] jarData);
 
     ProgramStatus status(byte[] address);

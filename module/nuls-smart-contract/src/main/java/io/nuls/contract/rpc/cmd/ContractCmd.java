@@ -139,7 +139,21 @@ public class ContractCmd extends BaseCmd {
             tx.parse(RPCUtil.decode(txData), 0);
             String hash = tx.getHash().toHex();
             Map<String, Boolean> dealResult = new HashMap<>(2);
-            if(ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_CONTRACT_ASSET ) {
+            if(ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.PROTOCOL_14 ) {
+                // add by pierre at 2022/6/2 p14
+                Result result = contractService.invokeContractOneByOneV14(chainId, tx);
+                if (result.isFailed()) {
+                    return wrapperFailed(result);
+                }
+                if (result.getData() == null) {
+                    Map<String, Object> resultData = new HashMap<>();
+                    resultData.put("success", true);
+                    resultData.put("gasUsed", 0);
+                    resultData.put("txList", List.of());
+                    return success(resultData);
+                }
+                return success(result.getData());
+            } else if(ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_CONTRACT_ASSET ) {
                 Result result = contractService.invokeContractOneByOneV8(chainId, tx);
                 if (result.isFailed()) {
                     return wrapperFailed(result);

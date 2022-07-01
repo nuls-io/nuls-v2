@@ -40,6 +40,7 @@ import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.manager.TxManager;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
+import io.nuls.transaction.rpc.call.AccountCall;
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;
@@ -446,5 +447,18 @@ public class TxUtil {
         }
         // end code by pierre
         return AddressTool.BLOCK_HOLE_ADDRESS_SET.contains(contractAddress);
+    }
+
+    public static boolean isBlockAddress(int chainId, byte[] address) {
+        // add by pierre at 2022-01-18 协议升级锁定地址
+        if(address == null) {
+            return false;
+        }
+        if (ProtocolGroupManager.getCurrentVersion(chainId) < TxContext.UPDATE_VERSION_ACCOUNT_BLOCK) {
+            return false;
+        }
+        String addressStr = AddressTool.getStringAddressByBytes(address);
+        return AccountCall.isBlockAccount(chainId, addressStr);
+        // end code by pierre
     }
 }

@@ -31,15 +31,10 @@ import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.helper.ContractHelper;
-import io.nuls.contract.model.bo.Chain;
-import io.nuls.contract.model.bo.ContractResult;
-import io.nuls.contract.model.bo.ContractTokenAssetsInfo;
-import io.nuls.contract.model.bo.ContractWrapperTransaction;
-import io.nuls.contract.model.dto.CallContractDataDto;
+import io.nuls.contract.model.bo.*;
 import io.nuls.contract.model.dto.ContractResultDto;
 import io.nuls.contract.model.dto.CreateContractDataDto;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
-import io.nuls.contract.model.txdata.CallContractData;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.model.txdata.CreateContractData;
 import io.nuls.contract.rpc.call.LedgerCall;
@@ -53,11 +48,9 @@ import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.parse.JSONUtils;
-import java.math.BigInteger;
-import java.util.List;
-import java.util.Map;
 
 import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -344,6 +337,70 @@ public class CreateContractTxProcessor {
             return result;
         }
         result = contractTokenAddressStorageService.deleteTokenAddress(chainId, contractAddress);
+        if (result.isFailed()) {
+            return result;
+        }
+        return contractService.deleteContractExecuteResult(chainId, tx.getHash());
+    }
+
+    // add by pierre at 2022/6/6 p14
+    public Result onCommitV14(int chainId, ContractWrapperTransaction tx) throws Exception {
+        BlockHeader blockHeader = contractHelper.getBatchInfoCurrentBlockHeaderV8(chainId);
+        long blockHeight = blockHeader.getHeight();
+        tx.setBlockHeight(blockHeight);
+        ContractResult contractResult = tx.getContractResult();
+        contractResult.setBlockHeight(blockHeight);
+        Result saveContractExecuteResult = contractService.saveContractExecuteResult(chainId, tx.getHash(), contractResult);
+        if (saveContractExecuteResult.isFailed()) {
+            return saveContractExecuteResult;
+        }
+        // 执行失败的合约直接返回
+        if (!contractResult.isSuccess()) {
+            return getSuccess();
+        }
+        CreateContractData txData = (CreateContractData) tx.getContractData();
+        byte[] contractAddress = txData.getContractAddress();
+        byte[] sender = txData.getSender();
+        String alias = txData.getAlias();
+        byte[] code = txData.getCode();
+        byte[] newestStateRoot = blockHeader.getStateRoot();
+
+        ContractCreate create = new ContractCreate();
+        create.setTokenType(contractResult.getTokenType());
+        create.setTokenName(contractResult.getTokenName());
+        create.setTokenSymbol(contractResult.getTokenSymbol());
+        create.setTokenDecimals(contractResult.getTokenDecimals());
+        create.setTokenTotalSupply(contractResult.getTokenTotalSupply());
+        create.setAcceptDirectTransfer(contractResult.isAcceptDirectTransfer());
+        Map<String, ContractAddressInfoPo> infoPoMap = new HashMap<>();
+        Result result = contractHelper.onCommitForCreateV14(chainId, blockHeader, create, tx.getHash(), tx.getTime(), contractAddress, sender, code, alias, infoPoMap);
+        if (result.isFailed()) {
+            return result;
+        }
+        //处理NRC20合约事件
+        contractHelper.dealNrc20Events(chainId, newestStateRoot, blockHeight, tx.getHash(), tx.getTime(), contractResult.getEvents(), contractResult.isSuccess(), infoPoMap);
+        return result;
+    }
+
+    public Result onRollbackV14(int chainId, ContractWrapperTransaction tx) throws Exception {
+        ContractData txData = tx.getContractData();
+        byte[] contractAddress = txData.getContractAddress();
+        // 回滚代币转账交易
+        ContractResult contractResult = tx.getContractResult();
+        if (contractResult == null) {
+            contractResult = contractService.getContractExecuteResult(chainId, tx.getHash());
+        }
+        if (contractResult == null) {
+            return Result.getSuccess(null);
+        }
+        try {
+            CreateContractData contractData = (CreateContractData) tx.getContractData();
+            Log.info("rollback create tx, contract data is {}, result is {}", JSONUtils.obj2json(new CreateContractDataDto(contractData)), JSONUtils.obj2json(new ContractResultDto(chainId, contractResult, contractData.getGasLimit())));
+        } catch (Exception e) {
+            Log.warn("failed to trace create rollback log, error is {}", e.getMessage());
+        }
+        contractHelper.rollbackNrc20Events(chainId, tx.getHash(), contractResult.getEvents());
+        Result result = contractHelper.onRollbackForCreateV14(chainId, contractAddress, contractResult.isNrc20());
         if (result.isFailed()) {
             return result;
         }

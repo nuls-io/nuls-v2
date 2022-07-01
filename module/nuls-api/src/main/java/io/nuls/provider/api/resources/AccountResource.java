@@ -38,6 +38,7 @@ import io.nuls.core.model.FormatValidUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.model.*;
+import io.nuls.provider.api.config.Context;
 import io.nuls.provider.model.ErrorData;
 import io.nuls.provider.model.RpcClientResult;
 import io.nuls.provider.model.dto.AccountKeyStoreDto;
@@ -140,7 +141,7 @@ public class AccountResource {
         if (!FormatValidUtils.validPassword(form.getNewPassword())) {
             return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "[newPassword] is invalid"));
         }
-        if (System.currentTimeMillis() - time < 3000L) {
+        if (Context.accessLimit && System.currentTimeMillis() - time < 3000L) {
             return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "Access frequency limit."));
         }
         time = System.currentTimeMillis();
@@ -172,7 +173,7 @@ public class AccountResource {
         if (address == null) {
             return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "address is empty"));
         }
-        if (System.currentTimeMillis() - time < 3000L) {
+        if (Context.accessLimit && System.currentTimeMillis() - time < 3000L) {
             return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "Access frequency limit."));
         }
         time = System.currentTimeMillis();

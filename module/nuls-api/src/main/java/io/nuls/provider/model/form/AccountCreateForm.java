@@ -34,7 +34,7 @@ import io.nuls.core.rpc.model.ApiModelProperty;
  */
 @ApiModel(name = "创建账户表单数据")
 public class AccountCreateForm{
-
+    @ApiModelProperty(description = "链ID")
     private int chainId;
 
     @ApiModelProperty(description = "新建账户数量")

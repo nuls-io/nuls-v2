@@ -78,7 +78,7 @@ public class StopAgentProcessor extends ConsensusBaseProcessor implements Comman
     @Override
     public CommandResult execute(String[] args) {
         String address = args[1];
-        String password = getPwd("Enter your account password");
+        String password = getPwd("Enter your account password:");
         Result<String> result = consensusProvider.stopAgent(new StopAgentReq(address,password));
         if (result.isFailed()) {
             return CommandResult.getFailed(result);

@@ -26,6 +26,9 @@ package io.nuls.contract.vm.util;
 
 import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.model.StringUtils;
+
+import java.nio.charset.StandardCharsets;
 
 public class Utils {
 
@@ -47,4 +50,35 @@ public class Utils {
         return ECKey.verify(dataBytes, signatureBytes, pubBytes);
     }
 
+    public static byte[] dataToBytes(String data) {
+        if (StringUtils.isBlank(data)) {
+            return null;
+        }
+        try {
+            boolean isHex = true;
+            String validData = cleanHexPrefix(data);
+            char[] chars = validData.toCharArray();
+            for (char c : chars) {
+                int digit = Character.digit(c, 16);
+                if (digit == -1) {
+                    isHex = false;
+                    break;
+                }
+            }
+            if (isHex) {
+                return HexUtil.decode(validData);
+            }
+            return data.getBytes(StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            return data.getBytes(StandardCharsets.UTF_8);
+        }
+    }
+
+    private static String cleanHexPrefix(String input) {
+        return containsHexPrefix(input) ? input.substring(2) : input;
+    }
+
+    private static boolean containsHexPrefix(String input) {
+        return !StringUtils.isBlank(input) && input.length() > 1 && input.charAt(0) == '0' && input.charAt(1) == 'x';
+    }
 }

@@ -23,7 +23,6 @@
  */
 package io.nuls.contract.service.impl;
 
-import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.helper.ContractTxHelper;
@@ -39,9 +38,6 @@ import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
 
 import java.math.BigInteger;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @author: PierreLuo
@@ -154,6 +150,8 @@ public class ContractExecutorImpl implements ContractExecutor {
         contractResult.setInvokeRegisterCmds(programResult.getInvokeRegisterCmds());
         contractResult.setOrderedInnerTxs(programResult.getOrderedInnerTxs());
         contractResult.setContractAddressInnerCallSet(contractTxHelper.generateInnerCallSet(programResult.getInternalCalls()));
+        // add by pierre at 2022/6/2 p14
+        contractResult.setProgramInternalCreates(programResult.getInternalCreates());
         contractResult.setAccounts(programResult.getAccounts());
 
         return contractResult;

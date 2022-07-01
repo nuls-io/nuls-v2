@@ -80,6 +80,16 @@ public class ProgramCreate {
      * 是否估计Gas
      */
     private boolean estimateGas;
+    // add by pierre at 2022/6/1 p14
+    private boolean internalCreate;
+
+    public boolean isInternalCreate() {
+        return internalCreate;
+    }
+
+    public void setInternalCreate(boolean internalCreate) {
+        this.internalCreate = internalCreate;
+    }
 
     public void args(String... args) {
         setArgs(args);

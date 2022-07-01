@@ -25,7 +25,6 @@
 package io.nuls.contract.tx.randomseed;
 
 
-import io.nuls.contract.sdk.annotation.View;
 import io.nuls.contract.tx.base.BaseQuery;
 import io.nuls.contract.util.Log;
 import io.nuls.core.parse.JSONUtils;
@@ -42,7 +41,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static io.nuls.contract.constant.ContractCmdConstant.CALL;
 import static io.nuls.contract.constant.ContractCmdConstant.CREATE;
 
 /**
@@ -153,7 +151,6 @@ public class RandomSeedSendTxTest extends BaseQuery {
     /**
      * 调用视图方法 - 合约整体信息
      */
-    @View
     @Test
     public void getContractWholeInfo() throws Exception {
         Log.info("viewRandomSeedByCountAndAlg is {}", invokeView(contractAddress, "viewRandomSeedByCountAndAlg", 10, 5, "sha3"));

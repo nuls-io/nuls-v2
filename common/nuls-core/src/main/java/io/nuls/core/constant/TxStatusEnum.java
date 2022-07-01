@@ -27,7 +27,9 @@ package io.nuls.core.constant;
 /**
  * 交易状态枚举
  * Enumeration of transaction status
- *
+ * 0: not packaged
+ * 1: packaged and saved
+ * 2: packaged and saved
  * @author Niels
  */
 public enum TxStatusEnum {
