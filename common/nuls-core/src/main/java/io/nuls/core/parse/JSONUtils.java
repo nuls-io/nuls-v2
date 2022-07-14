@@ -145,7 +145,7 @@ public final class JSONUtils {
      * @return 转换得到的MAP
      */
     public static <T> Map<String, T> json2map(String jsonStr, Class<T> clazz) throws IOException {
-        Map<String, Map<String, Object>> map = OBJECT_MAPPER.readValue(jsonStr, new TypeReference<Map<String, T>>() {
+        Map<String, Map<String, Object>> map = OBJECT_MAPPER.readValue(jsonStr, new TypeReference<Map<String, Map<String, Object>>>() {
         });
         Map<String, T> result = new HashMap<>();
         for (Map.Entry<String, Map<String, Object>> entry : map.entrySet()) {
@@ -162,7 +162,7 @@ public final class JSONUtils {
      * @return 转换后得到的List
      */
     public static <T> List<T> json2list(String jsonArrayStr, Class<T> clazz) throws IOException {
-        List<Map<String, Object>> list = OBJECT_MAPPER.readValue(jsonArrayStr, new TypeReference<List<T>>() {
+        List<Map<String, Object>> list = OBJECT_MAPPER.readValue(jsonArrayStr, new TypeReference<List<Map<String, Object>>>() {
         });
         List<T> result = new ArrayList<T>();
         for (Map<String, Object> map : list) {
