@@ -56,17 +56,18 @@ import java.util.*;
 public class SignatureUtil {
 
     private static final int MAIN_CHAIN_ID = 1;
+
     /**
      * 验证交易中所有签名正确性
      *
      * @param chainId 当前链ID
-     * @param tx 交易
+     * @param tx      交易
      */
     public static boolean validateTransactionSignture(int chainId, Transaction tx) throws NulsException {
         // 判断硬分叉,需要一个高度
         long hardForkingHeight = 878000;
         boolean forked = tx.getBlockHeight() <= 0 || tx.getBlockHeight() > hardForkingHeight;
-        if(chainId != MAIN_CHAIN_ID) {
+        if (chainId != MAIN_CHAIN_ID) {
             forked = true;
         }
         try {
@@ -132,7 +133,7 @@ public class SignatureUtil {
      *
      * @param tx 交易
      */
-    public static boolean ctxSignatureValid(int chainId,Transaction tx)throws NulsException{
+    public static boolean ctxSignatureValid(int chainId, Transaction tx) throws NulsException {
         if (tx.getTransactionSignature() == null || tx.getTransactionSignature().length == 0) {
             throw new NulsException(new Exception());
         }
@@ -150,7 +151,7 @@ public class SignatureUtil {
                 throw new NulsException(new Exception("Transaction signature error !"));
             }
             signAddress = AddressTool.getStringAddressByBytes(AddressTool.getAddress(signature.getPublicKey(), chainId));
-            if(!fromAddressSet.contains(signAddress)){
+            if (!fromAddressSet.contains(signAddress)) {
                 continue;
             }
             fromAddressSet.remove(signAddress);
@@ -159,7 +160,7 @@ public class SignatureUtil {
                 break;
             }
         }
-        if(passCount < signCount || !fromAddressSet.isEmpty()){
+        if (passCount < signCount || !fromAddressSet.isEmpty()) {
             throw new NulsException(new Exception("Transaction signature error !"));
         }
         return true;
@@ -251,6 +252,44 @@ public class SignatureUtil {
         } catch (NulsException e) {
             Log.error("TransactionSignature parse error!");
             throw e;
+        }
+        return addressSet;
+    }
+
+    /**
+     *  验证签名（不包含多签），如果签名验证通过则返回签名中的地址
+     * @param chainId
+     * @param data
+     * @param signatureBytes
+     * @return
+     */
+    public static Set<String> getAddressesAndVerifySignature(int chainId, byte[] data, byte[] signatureBytes) {
+        if (signatureBytes == null || signatureBytes.length == 0) {
+            return null;
+        }
+        List<P2PHKSignature> p2PHKSignatures;
+        Set<String> addressSet = new HashSet<>();
+        try {
+            TransactionSignature transactionSignature = new TransactionSignature();
+            transactionSignature.parse(signatureBytes, 0);
+            p2PHKSignatures = transactionSignature.getP2PHKSignatures();
+        } catch (Exception e) {
+           return null;
+        }
+        if ((p2PHKSignatures == null || p2PHKSignatures.size() == 0)) {
+            return null;
+        }
+        for (P2PHKSignature signature : p2PHKSignatures) {
+            try {
+                if(!validateSignture(data,signature)){
+                    return null;
+                }
+            } catch (NulsException e) {
+                return null;
+            }
+            if (signature.getPublicKey() != null && signature.getPublicKey().length != 0) {
+                addressSet.add(AddressTool.getStringAddressByBytes(AddressTool.getAddress(signature.getPublicKey(), chainId)));
+            }
         }
         return addressSet;
     }
