@@ -70,7 +70,22 @@ public class FormatValidUtils {
         }
         return name.matches("^([a-zA-Z0-9]+[a-zA-Z0-9_]*[a-zA-Z0-9]+)|[a-zA-Z0-9]+${1,20}");
     }
+    public static boolean validTokenNameOrSymbolV15(String name) {
+        if (StringUtils.isBlank(name)) {
+            return false;
+        }
 
+        String upperCaseName = name.toUpperCase();
+        if(upperCaseName.equals(NULS)) {
+            return false;
+        }
+
+        byte[] aliasBytes = name.getBytes(StandardCharsets.UTF_8);
+        if (aliasBytes.length < 1 || aliasBytes.length > 20) {
+            return false;
+        }
+        return name.matches("^([a-zA-Z0-9]+[a-zA-Z0-9_]*[a-zA-Z0-9]+)|[a-zA-Z0-9]+${1,20}");
+    }
     /**
      * 备注规则: 可以为空,或者不大于60字节
      * @param remark   备注
