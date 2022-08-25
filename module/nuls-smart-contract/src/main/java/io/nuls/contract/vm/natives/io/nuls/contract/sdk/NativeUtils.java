@@ -576,7 +576,7 @@ public class NativeUtils {
                 String[] args = (String[]) frame.heap.getObject(argsRef);
                 return getCodeHash(args, methodCode, frame);
             }
-        }else if ("assetDecimals".equals(cmdName)) {
+        } else if ("assetDecimals".equals(cmdName)) {
             // add by pierre at 2022/7/18 p15
             if(ProtocolGroupManager.getCurrentVersion(currentChainId) >= ContractContext.PROTOCOL_15 ) {
                 String[] args = (String[]) frame.heap.getObject(argsRef);
@@ -588,6 +588,12 @@ public class NativeUtils {
                 ObjectRef objectRef = frame.heap.newString(frame.vm.getProgramExecutor().getCurrentChainId() + "");
                 Result result = NativeMethod.result(methodCode, objectRef, frame);
                 return result;
+            }
+        } else if ("getAddressByPublicKey".equals(cmdName)) {
+            // add by pierre at 2022/8/25 p15
+            if(ProtocolGroupManager.getCurrentVersion(currentChainId) >= ContractContext.PROTOCOL_15 ) {
+                String[] args = (String[]) frame.heap.getObject(argsRef);
+                return getAddressByPublicKey(args, methodCode, frame);
             }
         }
         String[] args = (String[]) frame.heap.getObject(argsRef);
@@ -681,6 +687,25 @@ public class NativeUtils {
             return result;
         } catch (Exception e) {
             throw new ErrorException("Invoke external cmd failed. When getCodeHash.", frame.vm.getGasUsed(), e.getMessage());
+        }
+    }
+
+    private static Result getAddressByPublicKey(String[] args, MethodCode methodCode, Frame frame) {
+        try {
+            int currentChainId = frame.vm.getProgramExecutor().getCurrentChainId();
+            String pubkey = args[0];
+            String resultStr = "";
+            if (Utils.isHexString(pubkey)) {
+                byte[] publicKey = HexUtil.decode(pubkey);
+                if (publicKey != null && publicKey.length == 33) {
+                    resultStr = AddressTool.getAddressString(publicKey, currentChainId);
+                }
+            }
+            Object resultValue = frame.heap.newString(resultStr);
+            Result result = NativeMethod.result(methodCode, resultValue, frame);
+            return result;
+        } catch (Exception e) {
+            throw new ErrorException("Invoke external cmd failed. When getAddressByPublicKey.", frame.vm.getGasUsed(), e.getMessage());
         }
     }
 
