@@ -29,10 +29,12 @@ import io.nuls.base.data.BlockHeader;
 import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.contract.config.ContractConfig;
 import io.nuls.contract.config.ContractContext;
+import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.model.bo.ContractBalance;
 import io.nuls.contract.model.dto.BlockHeaderDto;
 import io.nuls.contract.rpc.call.BlockCall;
+import io.nuls.contract.rpc.call.ChainManagerCall;
 import io.nuls.contract.rpc.call.ConsensusCall;
 import io.nuls.contract.vm.program.ProgramMethod;
 import io.nuls.core.core.annotation.Autowired;
@@ -44,8 +46,10 @@ import io.nuls.core.model.StringUtils;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static io.nuls.contract.constant.ContractConstant.INITIAL_STATE_ROOT;
 
@@ -60,6 +64,7 @@ public class VMContext {
     private ContractHelper contractHelper;
     @Autowired
     private ContractConfig contractConfig;
+    private Map<String, Integer> assetDecimalsCache = new ConcurrentHashMap<>();
 
     private static Map<String, ProgramMethod> NRC20_METHODS = null;
     private static Map<String, ProgramMethod> NRC721_METHODS = null;
@@ -184,6 +189,19 @@ public class VMContext {
             return balance.getTotal();
         }
         return BigInteger.ZERO;
+    }
+
+    public int getCrossAssetsDecimals(int assetChainId, int assetId) {
+        String key = assetChainId + ContractConstant.LINE + assetId;
+        Integer decimals = assetDecimalsCache.get(key);
+        if (decimals == null || decimals.intValue() == 0) {
+            int callResult = ChainManagerCall.getCrossAssetsDecimals(assetChainId, assetId);
+            if (callResult > 0) {
+                assetDecimalsCache.put(key, callResult);
+            }
+            return callResult;
+        }
+        return decimals;
     }
 
     public static Map<String, ProgramMethod> getNrc20Methods() {

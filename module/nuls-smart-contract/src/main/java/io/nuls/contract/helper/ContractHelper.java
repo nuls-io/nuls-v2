@@ -397,6 +397,14 @@ public class ContractHelper {
     }
 
     public Result validateNrc20Contract(int chainId, ProgramExecutor track, byte[] contractAddress, byte[] contractCode, ContractResult contractResult) {
+        if(ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.PROTOCOL_15) {
+            return validateNrc20ContractP16(chainId, track, contractAddress, contractCode, contractResult);
+        } else {
+            return validateNrc20ContractP0(chainId, track, contractAddress, contractCode, contractResult);
+        }
+    }
+
+    private Result validateNrc20ContractP0(int chainId, ProgramExecutor track, byte[] contractAddress, byte[] contractCode, ContractResult contractResult) {
         if (contractResult == null) {
             return Result.getFailed(ContractErrorCode.NULL_PARAMETER);
         }
@@ -472,6 +480,97 @@ public class ContractHelper {
                             BigInteger totalSupplyBig = new BigInteger(totalSupply);
                             if (totalSupplyBig.compareTo(BigInteger.ZERO) <= 0 || totalSupplyBig.compareTo(MAXIMUM_TOTAL_SUPPLY.multiply(BigInteger.TEN.pow(decimalsBig.intValue()))) > 0) {
                                 contractResult.setErrorMessage("The value of totalSupply ranges from 1 to 2^256 - 1.");
+                                contractResult.setError(true);
+                                return getFailed();
+                            }
+                            contractResult.setTokenTotalSupply(totalSupplyBig);
+                        } catch (Exception e) {
+                            Log.error("Get nrc20 totalSupply error.", e);
+                            // skip it
+                        }
+                    }
+                }
+            }
+        }
+        return getSuccess();
+    }
+
+    private Result validateNrc20ContractP16(int chainId, ProgramExecutor track, byte[] contractAddress, byte[] contractCode, ContractResult contractResult) {
+        if (contractResult == null) {
+            return Result.getFailed(ContractErrorCode.NULL_PARAMETER);
+        }
+        long bestBlockHeight = vmContext.getBestHeight(chainId);
+        List<ProgramMethod> methods = this.getAllMethods(chainId, contractCode);
+        Map<String, ProgramMethod> contractMethodsMap = new HashMap<>();
+        boolean isNrc20 = this.checkNrc20Contract(methods, contractMethodsMap);
+        boolean isNrc721 = false;
+        if (!isNrc20) {
+            isNrc721 = this.checkNrc721Contract(methods, contractMethodsMap);
+        }
+        if (isNrc20) {
+            contractResult.setTokenType(TokenTypeStatus.NRC20.status());
+        } else if (isNrc721) {
+            contractResult.setTokenType(TokenTypeStatus.NRC721.status());
+        }
+        boolean isAcceptDirectTransfer = this.checkAcceptDirectTransfer(methods);
+        contractResult.setNrc20(isNrc20);
+        contractResult.setAcceptDirectTransfer(isAcceptDirectTransfer);
+        if (isNrc20 || isNrc721) {
+            // NRC20 tokenName 验证代币名称格式
+            ProgramResult programResult = this.invokeViewMethod(chainId, track, null, bestBlockHeight, contractAddress, NRC20_METHOD_NAME, null, null);
+            if (programResult.isSuccess()) {
+                String tokenName = programResult.getResult();
+                if (StringUtils.isNotBlank(tokenName)) {
+                    if (!validTokenNameOrSymbol(chainId, tokenName)) {
+                        contractResult.setError(true);
+                        contractResult.setErrorMessage("The format of the name is incorrect.");
+                        return getFailed();
+                    }
+                    contractResult.setTokenName(tokenName);
+                }
+            }
+            // NRC20 tokenSymbol 验证代币符号的格式
+            programResult = this.invokeViewMethod(chainId, track, null, bestBlockHeight, contractAddress, NRC20_METHOD_SYMBOL, null, null);
+            if (programResult.isSuccess()) {
+                String symbol = programResult.getResult();
+                if (StringUtils.isNotBlank(symbol)) {
+                    if (!validTokenNameOrSymbol(chainId, symbol)) {
+                        contractResult.setError(true);
+                        contractResult.setErrorMessage("The format of the symbol is incorrect.");
+                        return getFailed();
+                    }
+                    contractResult.setTokenSymbol(symbol);
+                }
+            }
+
+            if (isNrc20) {
+                programResult = this.invokeViewMethod(chainId, track, null, bestBlockHeight, contractAddress, NRC20_METHOD_DECIMALS, null, null);
+                BigInteger decimalsBig = BigInteger.ZERO;
+                if (programResult.isSuccess()) {
+                    String decimals = programResult.getResult();
+                    if (StringUtils.isNotBlank(decimals)) {
+                        try {
+                            decimalsBig = new BigInteger(decimals);
+                            if (decimalsBig.compareTo(BigInteger.ZERO) < 0 || decimalsBig.compareTo(MAXIMUM_DECIMALS) > 0) {
+                                contractResult.setError(true);
+                                contractResult.setErrorMessage("The value of decimals ranges from 0 to 18.");
+                                return getFailed();
+                            }
+                            contractResult.setTokenDecimals(decimalsBig.intValue());
+                        } catch (Exception e) {
+                            Log.error("Get nrc20 decimals error.", e);
+                            // skip it
+                        }
+                    }
+                }
+                programResult = this.invokeViewMethod(chainId, track, null, bestBlockHeight, contractAddress, NRC20_METHOD_TOTAL_SUPPLY, null, null);
+                if (programResult.isSuccess()) {
+                    String totalSupply = programResult.getResult();
+                    if (StringUtils.isNotBlank(totalSupply)) {
+                        try {
+                            BigInteger totalSupplyBig = new BigInteger(totalSupply);
+                            if (totalSupplyBig.compareTo(BigInteger.ZERO) < 0 || totalSupplyBig.compareTo(MAXIMUM_TOTAL_SUPPLY.multiply(BigInteger.TEN.pow(decimalsBig.intValue()))) > 0) {
+                                contractResult.setErrorMessage("The value of totalSupply ranges from 0 to 2^256 - 1.");
                                 contractResult.setError(true);
                                 return getFailed();
                             }

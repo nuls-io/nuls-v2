@@ -55,6 +55,7 @@ public class ClassCodeLoader {
     private static final Map<String, ClassCode> RESOURCE_CLASS_CODES;
     private static final Map<String, ClassCode> RESOURCE_CLASS_CODES_V8;
     private static final Map<String, ClassCode> RESOURCE_CLASS_CODES_V14;
+    private static final Map<String, ClassCode> RESOURCE_CLASS_CODES_V15;
 
     private static final LoadingCache<ClassCodeCacheKey, Map<String, ClassCode>> CACHE;
 
@@ -73,6 +74,7 @@ public class ClassCodeLoader {
         RESOURCE_CLASS_CODES = loadFromResource();
         RESOURCE_CLASS_CODES_V8 = loadFromResource_v8();
         RESOURCE_CLASS_CODES_V14 = loadFromResource_v14();
+        RESOURCE_CLASS_CODES_V15 = loadFromResource_v15();
     }
 
     public static ClassCode load(String className) {
@@ -111,7 +113,19 @@ public class ClassCodeLoader {
         }
     }
 
+    public static ClassCode loadFromResource_v15(String className) {
+        ClassCode classCode = RESOURCE_CLASS_CODES_V15.get(className);
+        if (classCode == null) {
+            throw new RuntimeException("can't load class " + className);
+        } else {
+            return classCode;
+        }
+    }
+
     public static ClassCode getFromResource(String className) {
+        if (ProtocolGroupManager.getCurrentVersion(ContractContext.CHAIN_ID) >= ContractContext.PROTOCOL_15) {
+            return RESOURCE_CLASS_CODES_V15.get(className);
+        }
         if (ProtocolGroupManager.getCurrentVersion(ContractContext.CHAIN_ID) >= ContractContext.PROTOCOL_14) {
             return RESOURCE_CLASS_CODES_V14.get(className);
         }
@@ -221,6 +235,10 @@ public class ClassCodeLoader {
 
     private static Map<String, ClassCode> loadFromResource_v14() {
         return loadFromResourceWithResourceName("/used_classes_sdk_v14");
+    }
+
+    private static Map<String, ClassCode> loadFromResource_v15() {
+        return loadFromResourceWithResourceName("/used_classes_sdk_v15");
     }
 
     private static Map<String, ClassCode> loadFromResourceWithResourceName(String usedClassesName) {

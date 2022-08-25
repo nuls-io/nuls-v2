@@ -151,6 +151,30 @@ public class AssetRegMngServiceImpl implements AssetRegMngService {
     }
 
     @Override
+    public ErrorCode batchAssetRegValidatorV15(TxLedgerAsset txLedgerAsset, byte[] address, BigInteger destroyAsset, int chainId) {
+        ErrorCode errorCode = commonRegValidatorV15(txLedgerAsset);
+        if (null != errorCode) {
+            return errorCode;
+        }
+        //判断地址是否为本地chainId地址
+        boolean isAddressValidate = (AddressTool.getChainIdByAddress(txLedgerAsset.getAddress()) == chainId);
+        if (!isAddressValidate) {
+            return LedgerErrorCode.ERROR_ADDRESS_ERROR;
+        }
+        //判断黑洞地址
+        if (!Arrays.equals(address, AddressTool.getAddressByPubKeyStr(ledgerConfig.getBlackHolePublicKey(), chainId))) {
+            LoggerUtil.COMMON_LOG.error("toAddress is not blackHole");
+            return LedgerErrorCode.TX_IS_WRONG;
+        }
+        long decimal = (long) Math.pow(10, Integer.valueOf(ledgerConfig.getDecimals()));
+        BigInteger destroyAssetTx = BigInteger.valueOf(ledgerConfig.getAssetRegDestroyAmount()).multiply(BigInteger.valueOf(decimal));
+        if (!BigIntegerUtils.isEqual(destroyAsset, destroyAssetTx)) {
+            LoggerUtil.COMMON_LOG.error("destroyNuls={} is error", destroyAsset);
+            return LedgerErrorCode.TX_IS_WRONG;
+        }
+        return null;
+    }
+    @Override
     public ErrorCode commonRegValidator(TxLedgerAsset asset) {
         if (asset.getDecimalPlace() < LedgerConstant.DECIMAL_PLACES_MIN || asset.getDecimalPlace() > LedgerConstant.DECIMAL_PLACES_MAX) {
             return LedgerErrorCode.ERROR_ASSET_DECIMALPLACES;
@@ -159,6 +183,19 @@ public class AssetRegMngServiceImpl implements AssetRegMngService {
             return LedgerErrorCode.ERROR_ASSET_SYMBOL;
         }
         if (!FormatValidUtils.validTokenNameOrSymbol(asset.getName())) {
+            return LedgerErrorCode.ERROR_ASSET_NAME;
+        }
+        return null;
+    }
+
+    public ErrorCode commonRegValidatorV15(TxLedgerAsset asset) {
+        if (asset.getDecimalPlace() < LedgerConstant.DECIMAL_PLACES_MIN || asset.getDecimalPlace() > LedgerConstant.DECIMAL_PLACES_MAX) {
+            return LedgerErrorCode.ERROR_ASSET_DECIMALPLACES;
+        }
+        if (!FormatValidUtils.validTokenNameOrSymbolV15(asset.getSymbol())) {
+            return LedgerErrorCode.ERROR_ASSET_SYMBOL;
+        }
+        if (!FormatValidUtils.validTokenNameOrSymbolV15(asset.getName())) {
             return LedgerErrorCode.ERROR_ASSET_NAME;
         }
         return null;
