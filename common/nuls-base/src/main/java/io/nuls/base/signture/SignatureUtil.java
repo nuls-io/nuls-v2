@@ -295,6 +295,35 @@ public class SignatureUtil {
     }
 
     /**
+     * 从签名中提取地址列表（不验证签名）
+     * @param chainId
+     * @param signatureBytes
+     * @return
+     */
+    public static Set<String> getAddressesFromSignature(int chainId,  byte[] signatureBytes) {
+        if (signatureBytes == null || signatureBytes.length == 0) {
+            return null;
+        }
+        List<P2PHKSignature> p2PHKSignatures;
+        Set<String> addressSet = new HashSet<>();
+        try {
+            TransactionSignature transactionSignature = new TransactionSignature();
+            transactionSignature.parse(signatureBytes, 0);
+            p2PHKSignatures = transactionSignature.getP2PHKSignatures();
+        } catch (Exception e) {
+            return null;
+        }
+        if ((p2PHKSignatures == null || p2PHKSignatures.size() == 0)) {
+            return null;
+        }
+        for (P2PHKSignature signature : p2PHKSignatures) {
+            if (signature.getPublicKey() != null && signature.getPublicKey().length != 0) {
+                addressSet.add(AddressTool.getStringAddressByBytes(AddressTool.getAddress(signature.getPublicKey(), chainId)));
+            }
+        }
+        return addressSet;
+    }
+    /**
      * 生成交易TransactionSignture
      *
      * @param tx         交易
