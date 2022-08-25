@@ -45,6 +45,7 @@ public interface AssetRegMngService {
     int getAndSetAssetIdByTemp(int chainId, int assetSize);
 
     ErrorCode batchAssetRegValidator(TxLedgerAsset txLedgerAsset, byte[] address, BigInteger destroyAsset, int chainId);
+    ErrorCode batchAssetRegValidatorV15(TxLedgerAsset txLedgerAsset, byte[] address, BigInteger destroyAsset, int chainId);
 
     ErrorCode commonRegValidator(TxLedgerAsset asset);
 

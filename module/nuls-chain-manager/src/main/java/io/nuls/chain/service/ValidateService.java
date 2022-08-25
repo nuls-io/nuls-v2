@@ -56,6 +56,9 @@ public interface ValidateService {
 
     ChainEventResult batchChainRegValidatorV7(BlockChain blockChain, Asset asset, Map<String, Integer> tempChains, Map<String, Integer> tempAssets) throws Exception;
 
+    ChainEventResult batchChainRegValidatorV15(BlockChain blockChain, Asset asset, Map<String, Integer> tempChains, Map<String, Integer> tempAssets) throws Exception;
+
     ChainEventResult batchAssetRegValidatorV7(Asset asset, Map<String, Integer> tempAssets) throws Exception;
     ChainEventResult batchAssetRegValidatorV12(Asset asset, Map<String, Integer> tempAssets) throws Exception;
+    ChainEventResult batchAssetRegValidatorV15(Asset asset, Map<String, Integer> tempAssets) throws Exception;
 }

@@ -1,5 +1,30 @@
 [
   {
+    "version": "15",
+    "extend": "12",
+    "validTxs": [
+      {
+        "type": "11",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "RegChainTxProcessorV15"
+      },
+      {
+        "type": "13",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "AddAssetTxProcessorV15"
+      }
+    ],
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  },
+  {
     "version": "12",
     "extend": "7",
     "validTxs": [
