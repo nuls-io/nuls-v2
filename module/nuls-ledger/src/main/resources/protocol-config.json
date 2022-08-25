@@ -1,7 +1,7 @@
 [
   {
-    "version": "6",
-    "extend": "1",
+    "version": "15",
+    "extend": "6",
     "validTxs": [
       {
         "type": "27",
@@ -9,13 +9,29 @@
         "unlockTx": false,
         "verifySignature": true,
         "verifyFee": true,
-        "handler": "AssetRegTransferProcessorV5"
+        "handler": "AssetRegTransferProcessorV15"
       }
     ],
     "validMsgs": [],
     "invalidTxs": "",
     "invalidMsgs": ""
-  },
+  },{
+  "version": "6",
+  "extend": "1",
+  "validTxs": [
+    {
+      "type": "27",
+      "systemTx": false,
+      "unlockTx": false,
+      "verifySignature": true,
+      "verifyFee": true,
+      "handler": "AssetRegTransferProcessorV5"
+    }
+  ],
+  "validMsgs": [],
+  "invalidTxs": "",
+  "invalidMsgs": ""
+},
   {
     "version": "1",
     "extend": "",

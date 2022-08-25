@@ -73,4 +73,5 @@ public class ContractContext {
 
     public static short UPDATE_VERSION_ACCOUNT_TRANSFER_ON_CONTRACT_CALL = 13;
     public static short PROTOCOL_14 = 14;
+    public static short PROTOCOL_15 = 15;
 }
