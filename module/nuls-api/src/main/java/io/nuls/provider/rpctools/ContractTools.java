@@ -71,6 +71,22 @@ public class ContractTools implements CallRpc {
         }
     }
 
+    public Result<Map> getContractTx(int chainId, String hash) {
+        Map<String, Object> params = new HashMap(4);
+        params.put(Constants.CHAIN_ID, chainId);
+        params.put("hash", hash);
+        try {
+            return  callRpc(ModuleE.SC.abbr, CONTRACT_TX, params,(Function<Map<String,Object>, Result<Map>>) res->{
+                if(res == null){
+                    return new Result();
+                }
+                return new Result(res);
+            });
+        } catch (NulsRuntimeException e) {
+            return Result.fail(e.getCode(), e.getMessage());
+        }
+    }
+
     public Result<Map> getContractResultList(int chainId, List<String> hashList) {
         Map<String, Object> params = new HashMap(4);
         params.put(Constants.CHAIN_ID, chainId);
