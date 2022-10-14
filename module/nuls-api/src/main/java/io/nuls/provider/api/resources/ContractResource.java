@@ -603,6 +603,22 @@ public class ContractResource {
         return ResultUtil.getRpcClientResult(mapResult);
     }
 
+    @GET
+    @Path("/tx/{hash}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(description = "获取智能合约交易详情", order = 420)
+    @Parameters({
+            @Parameter(parameterName = "hash", parameterDes = "交易hash")
+    })
+    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = ContractTransactionDto.class))
+    public RpcClientResult getContractTx(@PathParam("hash") String hash) {
+        if (hash == null) {
+            return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "hash is empty"));
+        }
+        Result<Map> result = contractTools.getContractTx(config.getChainId(), hash);
+        RpcClientResult clientResult = ResultUtil.getRpcClientResult(result);
+        return clientResult;
+    }
 
     @POST
     @Path("/create/offline")

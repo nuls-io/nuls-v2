@@ -56,6 +56,7 @@ public interface CommandConstant {
     String CONTRACT_INFO = "sc_contract_info";
     //查询智能合约执行结果
     String CONTRACT_RESULT = "sc_contract_result";
+    String CONTRACT_TX = "sc_contract_tx";
     //查询智能合约构造函数
     String CONSTRUCTOR = "sc_constructor";
     //验证创建合约
