@@ -20,6 +20,10 @@
 
 package io.nuls.transaction.tx;
 
+import io.nuls.base.signture.TransactionSignature;
+import io.nuls.core.crypto.HexUtil;
+import org.junit.Test;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -151,4 +155,12 @@ public class TxSignTest {
     list.add("NULSd6HgUxiPz3EMdZSuMHZf1caN8dVYCxRJx  3885  690661d1d5fc58bfbbdfa90f5874382b0f12ac5aa5382639bb956c14961236b6");
     list.add("NULSd6HgdwgigpqWvDBjt5ptPeioGsp49fTbp  2775  ddbcd47c767df7f89fa42412e9bf9105d498b452e6076852795b1590654473b5");
      */
+
+    @Test
+    public void signData() throws Exception {
+        String txSign = "210232bdaf6573319eba3b433ed88d6d4b0d06ea3ad9a504596fe967a2dbf95fc07c473045022100f4e1f683803a103b79eeb420a6d04089a673f93b2ea3d3012508320846f91c5302205c133ff512d6865fcb47c7fe07c7d930dfe6857cd5d69ab8065609435929a439";
+        TransactionSignature sign = new TransactionSignature();
+        sign.parse(HexUtil.decode(txSign),0);
+        System.out.println(HexUtil.encode(sign.getP2PHKSignatures().get(0).getPublicKey()));
+    }
 }
