@@ -237,7 +237,7 @@ public class Transfer implements Runnable {
         System.out.println(Arrays.toString(set.toArray()));
         data.setAddresses(set.toArray(new String[set.size()]));*/
         data.setAddresses(new String[]{
-                "NULSd6Hgbcn7gdGuapjgM8QsSTBtqsgKZ7Y8v"
+                "NULSd6HgUGY1T1QaYYkw4BoA3YH4WmPkJ16hK\n"
         });
         tx.setTxData(data.serialize());
         tx.setTime(System.currentTimeMillis() / 1000);

@@ -22,63 +22,25 @@ package io.nuls.provider.api.jsonrpc.controller;
 
 import io.nuls.base.api.provider.Result;
 import io.nuls.base.api.provider.ServiceManager;
-import io.nuls.base.api.provider.account.AccountService;
-import io.nuls.base.api.provider.account.facade.*;
 import io.nuls.base.api.provider.block.BlockService;
 import io.nuls.base.api.provider.block.facade.GetBlockHeaderByLastHeightReq;
 import io.nuls.base.api.provider.crosschain.CrossChainProvider;
 import io.nuls.base.api.provider.crosschain.facade.RehandleCtxReq;
-import io.nuls.base.basic.AddressTool;
-import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Controller;
 import io.nuls.core.core.annotation.RpcMethod;
-import io.nuls.core.crypto.ECKey;
-import io.nuls.core.crypto.HexUtil;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.model.FormatValidUtils;
-import io.nuls.core.model.StringUtils;
-import io.nuls.core.parse.JSONUtils;
-import io.nuls.core.rpc.model.*;
-import io.nuls.provider.api.config.Config;
-import io.nuls.provider.api.config.Context;
-import io.nuls.provider.model.dto.AccountBlockDTO;
-import io.nuls.provider.model.dto.AccountKeyStoreDto;
-import io.nuls.provider.model.form.PriKeyForm;
+import io.nuls.core.rpc.model.Parameter;
+import io.nuls.core.rpc.model.Parameters;
+import io.nuls.core.rpc.model.ResponseData;
+import io.nuls.core.rpc.model.TypeDescriptor;
 import io.nuls.provider.model.jsonrpc.RpcErrorCode;
 import io.nuls.provider.model.jsonrpc.RpcResult;
-import io.nuls.provider.model.jsonrpc.RpcResultError;
-import io.nuls.provider.rpctools.AccountTools;
-import io.nuls.provider.rpctools.ContractTools;
-import io.nuls.provider.rpctools.LegderTools;
-import io.nuls.provider.rpctools.vo.AccountBalance;
-import io.nuls.provider.rpctools.vo.AccountBalanceWithDecimals;
-import io.nuls.provider.utils.Log;
-import io.nuls.provider.utils.ResultUtil;
-import io.nuls.provider.utils.Utils;
 import io.nuls.provider.utils.VerifyUtils;
-import io.nuls.v2.SDKContext;
-import io.nuls.v2.error.AccountErrorCode;
-import io.nuls.v2.model.Account;
 import io.nuls.v2.model.annotation.Api;
 import io.nuls.v2.model.annotation.ApiOperation;
 import io.nuls.v2.model.annotation.ApiType;
-import io.nuls.v2.model.dto.AccountDto;
-import io.nuls.v2.model.dto.AliasDto;
-import io.nuls.v2.model.dto.MultiSignAliasDto;
-import io.nuls.v2.model.dto.SignDto;
-import io.nuls.v2.util.AccountTool;
-import io.nuls.v2.util.NulsSDKTool;
 
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-
-import static io.nuls.v2.util.ValidateUtil.validateChainId;
 
 /**
  * @author Niels
@@ -87,11 +49,12 @@ import static io.nuls.v2.util.ValidateUtil.validateChainId;
 @Api(type = ApiType.JSONRPC)
 public class CrossChainController {
 
-    @Autowired
-    private BlockService blockService;
+    private BlockService blockService = ServiceManager.get(BlockService.class);
 
-    @Autowired
-    private CrossChainProvider crossChainProvider;
+    private CrossChainProvider crossChainProvider = ServiceManager.get(CrossChainProvider.class);
+    public CrossChainController(){
+        System.out.println();
+    }
 
     @RpcMethod("rehandlectx")
     @ApiOperation(description = "重发已经卡主的交易", order = 901, detailDesc = "重发只代表本节点的尝试，不能保证最终结果")
@@ -100,7 +63,7 @@ public class CrossChainController {
     })
     @ResponseData(name = "返回值", description = "是否成功", responseType = @TypeDescriptor(value = Boolean.class))
     public RpcResult createAccount(List<Object> params) {
-        VerifyUtils.verifyParams(params, 3);
+        VerifyUtils.verifyParams(params, 1);
         String hash;
         try {
             hash = (String) params.get(0);
