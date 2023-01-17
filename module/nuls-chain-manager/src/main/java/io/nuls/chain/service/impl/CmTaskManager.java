@@ -47,7 +47,7 @@ public class CmTaskManager {
     private ScheduledThreadPoolExecutor executorService;
 
     public void start() {
-        executorService = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("cmThread"));
+//        executorService = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("cmThread"));
 //        chainAssetsCirculateUpdate();
     }
 

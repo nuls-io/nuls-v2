@@ -261,8 +261,8 @@ public class ChainManagerBootstrap extends RpcModule {
             LoggerUtil.logger().error("启动异常退出....");
             System.exit(-1);
         }
-        CmTaskManager cmTaskManager = SpringLiteContext.getBean(CmTaskManager.class);
-        cmTaskManager.start();
+//        CmTaskManager cmTaskManager = SpringLiteContext.getBean(CmTaskManager.class);
+//        cmTaskManager.start();
         NulsDateUtils.getInstance().start(5 * 60 * 1000);
         LoggerUtil.logger().info("onDependenciesReady ok....");
         return RpcModuleState.Running;
