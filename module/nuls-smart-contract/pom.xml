@@ -16,6 +16,13 @@
         <concurrent-locks.version>1.0.0</concurrent-locks.version>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>nuls-release</id>
+            <name>nuls-release</name>
+            <url>https://nexus.nuls.io/repository/nuls-release/</url>
+        </repository>
+    </repositories>
     <dependencies>
         <dependency>
             <groupId>io.nuls.v2</groupId>

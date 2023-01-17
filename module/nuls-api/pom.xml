@@ -20,7 +20,13 @@
         <nuls.v2.version>1.0.0-SNAPSHOT</nuls.v2.version>
         <skip.assembly.plugin>false</skip.assembly.plugin>
     </properties>
-
+    <repositories>
+        <repository>
+            <id>nuls-release</id>
+            <name>nuls-release</name>
+            <url>https://nexus.nuls.io/repository/nuls-release/</url>
+        </repository>
+    </repositories>
     <dependencies>
         <dependency>
             <groupId>io.nuls.v2</groupId>
