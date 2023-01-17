@@ -63,7 +63,7 @@ public class CrossChainController {
     })
     @ResponseData(name = "返回值", description = "是否成功", responseType = @TypeDescriptor(value = Boolean.class))
     public RpcResult createAccount(List<Object> params) {
-        VerifyUtils.verifyParams(params, 3);
+        VerifyUtils.verifyParams(params, 1);
         String hash;
         try {
             hash = (String) params.get(0);
