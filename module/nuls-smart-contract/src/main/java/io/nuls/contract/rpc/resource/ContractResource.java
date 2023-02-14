@@ -169,12 +169,14 @@ public class ContractResource extends BaseCmd {
         @Parameter(parameterName = "args", requestType = @TypeDescriptor(value = Object[].class), parameterDes = "参数列表", canNull = true)
     })
     @ResponseData(name = "返回值", description = "返回消耗的gas值", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "gasLimit", valueType = Long.class, description = "消耗的gas值，执行失败返回数值1")
+            @Key(name = "gasLimit", valueType = Long.class, description = "消耗的gas值，执行失败返回数值1"),
+            @Key(name = "errorMsg", valueType = String.class, description = "执行失败的错误信息")
     }))
     public Response imputedCreateGas(Map<String, Object> params) {
         try {
             Map<String, Object> resultMap = MapUtil.createHashMap(1);
             resultMap.put("gasLimit", 1);
+            String errorMsg = null;
             boolean isImputed = false;
             Result result = null;
             do {
@@ -199,6 +201,7 @@ public class ContractResource extends BaseCmd {
                 }
                 result = contractTxService.validateContractCreateTx(chainId, senderBytes, MAX_GASLIMIT, CONTRACT_MINIMUM_PRICE, contractCodeBytes, convertArgs);
                 if (result.isFailed()) {
+                    errorMsg = result.getMsg();
                     break;
                 }
                 isImputed = true;
@@ -210,6 +213,8 @@ public class ContractResource extends BaseCmd {
                 gasUsed += gasUsed >> 1;
                 gasUsed = gasUsed > MAX_GASLIMIT ? MAX_GASLIMIT : gasUsed;
                 resultMap.put("gasLimit", gasUsed);
+            } else if (StringUtils.isNotBlank(errorMsg)) {
+                resultMap.put("errorMsg", errorMsg);
             }
 
             return success(resultMap);
@@ -596,12 +601,14 @@ public class ContractResource extends BaseCmd {
         @Parameter(parameterName = "args", requestType = @TypeDescriptor(value = Object[].class), parameterDes = "参数列表", canNull = true)
     })
     @ResponseData(name = "返回值", description = "返回消耗的gas值", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-        @Key(name = "gasLimit", valueType = Long.class, description = "消耗的gas值，执行失败返回数值1")
+        @Key(name = "gasLimit", valueType = Long.class, description = "消耗的gas值，执行失败返回数值1"),
+        @Key(name = "errorMsg", valueType = String.class, description = "执行失败的错误信息")
     }))
     public Response imputedCallGas(Map<String, Object> params) {
         try {
             Map<String, Object> resultMap = MapUtil.createHashMap(1);
             resultMap.put("gasLimit", 1);
+            String errorMsg = null;
             boolean isImputed = false;
             Result result = null;
             do {
@@ -655,6 +662,7 @@ public class ContractResource extends BaseCmd {
 
                 result = contractTxService.validateContractCallTx(chainId, senderBytes, value, MAX_GASLIMIT, CONTRACT_MINIMUM_PRICE, contractAddressBytes, methodName, methodDesc, convertArgs, multyAssetValueList);
                 if (result.isFailed()) {
+                    errorMsg = result.getMsg();
                     break;
                 }
                 isImputed = true;
@@ -667,6 +675,8 @@ public class ContractResource extends BaseCmd {
                 gasUsed += gasUsed >> 1;
                 gasUsed = gasUsed > MAX_GASLIMIT ? MAX_GASLIMIT : gasUsed;
                 resultMap.put("gasLimit", gasUsed);
+            } else if (StringUtils.isNotBlank(errorMsg)) {
+                resultMap.put("errorMsg", errorMsg);
             }
 
             return success(resultMap);
