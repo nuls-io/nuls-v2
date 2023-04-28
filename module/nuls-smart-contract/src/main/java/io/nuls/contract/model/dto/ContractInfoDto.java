@@ -53,7 +53,7 @@ public class ContractInfoDto {
     private boolean directPayable;
     @ApiModelProperty(description = "是否接受其他资产直接转账")
     private boolean directPayableByOtherAsset;
-    @ApiModelProperty(description = "token类型, 0 - 非token, 1 - NRC20, 2 - NRC721")
+    @ApiModelProperty(description = "token类型, 0 - 非token, 1 - NRC20, 2 - NRC721, 3 - NRC1155")
     private int tokenType;
     @ApiModelProperty(description = "是否是NRC20合约")
     private boolean nrc20;
@@ -69,6 +69,16 @@ public class ContractInfoDto {
     private String status;
     @ApiModelProperty(description = "合约方法列表", type = @TypeDescriptor(value = List.class, collectionElement = ProgramMethod.class))
     private List<ProgramMethod> method;
+    @ApiModelProperty(description = "tokenUri")
+    private String tokenUri;
+
+    public String getTokenUri() {
+        return tokenUri;
+    }
+
+    public void setTokenUri(String tokenUri) {
+        this.tokenUri = tokenUri;
+    }
 
     public int getTokenType() {
         return tokenType;

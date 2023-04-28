@@ -31,74 +31,38 @@ import io.nuls.core.rpc.model.ApiModelProperty;
  * @author: PierreLuo
  */
 @ApiModel
-public class ContractToken721TransferDto {
+public class ContractToken1155TransferDto {
     @ApiModelProperty(description = "合约地址")
     private String contractAddress;
+    @ApiModelProperty(description = "操作方")
+    private String operator;
     @ApiModelProperty(description = "付款方")
     private String from;
     @ApiModelProperty(description = "收款方")
     private String to;
     @ApiModelProperty(description = "tokenId")
-    private String tokenId;
+    private String[] ids;
+    @ApiModelProperty(description = "转账数量")
+    private String[] values;
     @ApiModelProperty(description = "token名称")
     private String name;
     @ApiModelProperty(description = "token符号")
     private String symbol;
 
-    public ContractToken721TransferDto(ContractTokenTransferInfo info) {
+    public ContractToken1155TransferDto(ContractTokenTransferInfo info) {
         this.contractAddress = info.getContractAddress();
+        this.operator = info.getOperator();
         this.from = info.getFrom();
         this.to = info.getTo();
-        this.tokenId = info.getValue();
         this.name = info.getName();
         this.symbol = info.getSymbol();
+        if (info.getIds() != null) {
+            this.ids = info.getIds();
+            this.values = info.getValues();
+        } else {
+            this.ids = new String[]{info.getId().toString()};
+            this.values = new String[]{info.getValue().toString()};
+        }
     }
 
-    public String getContractAddress() {
-        return contractAddress;
-    }
-
-    public void setContractAddress(String contractAddress) {
-        this.contractAddress = contractAddress;
-    }
-
-    public String getFrom() {
-        return from;
-    }
-
-    public void setFrom(String from) {
-        this.from = from;
-    }
-
-    public String getTo() {
-        return to;
-    }
-
-    public void setTo(String to) {
-        this.to = to;
-    }
-
-    public String getTokenId() {
-        return tokenId;
-    }
-
-    public void setTokenId(String tokenId) {
-        this.tokenId = tokenId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getSymbol() {
-        return symbol;
-    }
-
-    public void setSymbol(String symbol) {
-        this.symbol = symbol;
-    }
 }

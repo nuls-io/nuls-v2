@@ -68,8 +68,7 @@ public class VMContext {
 
     private static Map<String, ProgramMethod> NRC20_METHODS = null;
     private static Map<String, ProgramMethod> NRC721_METHODS = null;
-    private static ProgramMethod NRC721_OVERLOAD_METHOD_SAFE_DATA = null;
-    private static ProgramMethod NRC721_OVERLOAD_METHOD_SAFE = null;
+    private static Map<String, ProgramMethod> NRC1155_METHODS = null;
 
     /**
      * @param hash
@@ -220,20 +219,12 @@ public class VMContext {
         NRC721_METHODS = nrc721Methods;
     }
 
-    public static ProgramMethod getNrc721OverloadMethodSafeData() {
-        return NRC721_OVERLOAD_METHOD_SAFE_DATA;
+    public static Map<String, ProgramMethod> getNrc1155Methods() {
+        return NRC1155_METHODS;
     }
 
-    public static void setNrc721OverloadMethodSafeData(ProgramMethod nrc721OverloadMethodSafeData) {
-        NRC721_OVERLOAD_METHOD_SAFE_DATA = nrc721OverloadMethodSafeData;
-    }
-
-    public static ProgramMethod getNrc721OverloadMethodSafe() {
-        return NRC721_OVERLOAD_METHOD_SAFE;
-    }
-
-    public static void setNrc721OverloadMethodSafe(ProgramMethod nrc721OverloadMethodSafe) {
-        NRC721_OVERLOAD_METHOD_SAFE = nrc721OverloadMethodSafe;
+    public static void setNrc1155Methods(Map<String, ProgramMethod> nrc1155Methods) {
+        NRC1155_METHODS = nrc1155Methods;
     }
 
     public long getBestHeight(int chainId) {

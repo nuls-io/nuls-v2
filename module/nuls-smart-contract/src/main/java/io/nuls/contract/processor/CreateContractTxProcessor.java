@@ -30,6 +30,7 @@ import io.nuls.base.data.NulsHash;
 import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.constant.ContractConstant;
+import io.nuls.contract.enums.TokenTypeStatus;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.model.bo.*;
 import io.nuls.contract.model.dto.ContractResultDto;
@@ -238,7 +239,7 @@ public class CreateContractTxProcessor {
         info.setBlockHeight(blockHeight);
 
         boolean isNrc20Contract = contractResult.isNrc20();
-        boolean isNrc721Contract = ContractConstant.TOKEN_TYPE_NRC721 == contractResult.getTokenType();
+        boolean isNrc721Contract = TokenTypeStatus.NRC721.status() == contractResult.getTokenType();
         boolean acceptDirectTransfer = contractResult.isAcceptDirectTransfer();
         info.setAcceptDirectTransfer(acceptDirectTransfer);
         info.setNrc20(isNrc20Contract);

@@ -25,7 +25,6 @@ package io.nuls.contract.model.dto;
 
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.contract.model.po.ContractAddressInfoPo;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.core.rpc.model.ApiModel;
@@ -69,13 +68,11 @@ public class ContractTokenTransferDto {
         this.contractAddress = info.getContractAddress();
         this.from = info.getFrom();
         this.to = info.getTo();
-        this.value = ContractUtil.bigInteger2String(info.getValue());
-    }
+        this.value = info.getValue();
+        this.name = info.getName();
+        this.symbol = info.getSymbol();
+        this.decimals = info.getDecimals();
 
-    public void setNrc20Info(ContractAddressInfoPo po) {
-        this.name = po.getNrc20TokenName();
-        this.symbol = po.getNrc20TokenSymbol();
-        this.decimals = po.getDecimals();
     }
 
     public String getContractAddress() {
