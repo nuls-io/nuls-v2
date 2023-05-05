@@ -1173,7 +1173,7 @@ public class ContractResource extends BaseCmd {
                     dto.setDecimals(po.getDecimals());
                     dto.setTotalSupply(ContractUtil.bigInteger2String(po.getTotalSupply()));
                 } else if (isNrc1155) {
-                    ProgramResult uriResult = contractHelper.invokeViewMethod(chainId, contractAddressBytes, "uri", null, null);
+                    ProgramResult uriResult = contractHelper.invokeViewMethod(chainId, contractAddressBytes, "uri", "() return String", null);
                     String uri = uriResult.getResult();
                     dto.setTokenUri(uri);
                 }

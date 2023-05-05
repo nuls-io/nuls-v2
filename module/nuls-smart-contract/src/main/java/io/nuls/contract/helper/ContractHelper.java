@@ -1070,7 +1070,7 @@ public class ContractHelper {
         info.setNrc20(isNrc20Contract);
         info.setTokenType(contractCreate.getTokenType());
         do {
-            if (contractCreate.getTokenType() != TokenTypeStatus.NOT_TOKEN.status()) {
+            if (contractCreate.getTokenType() == TokenTypeStatus.NOT_TOKEN.status()) {
                 break;
             }
             // 获取 token tracker
