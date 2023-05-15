@@ -24,6 +24,7 @@
 package io.nuls.contract.rpc.resource;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.Address;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
@@ -51,15 +52,19 @@ import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.util.MapUtil;
 import io.nuls.contract.vm.program.*;
+import io.nuls.contract.vm.util.Utils;
 import io.nuls.core.basic.Page;
 import io.nuls.core.basic.Result;
+import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.crypto.KeccakHash;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.FormatValidUtils;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.parse.SerializeUtils;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.*;
@@ -1053,6 +1058,49 @@ public class ContractResource extends BaseCmd {
                 resultMap.put("result", HexUtil.encode(codeHash));
                 return success(resultMap);
             }
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
+    @CmdAnnotation(cmd = COMPUTE_ADDRESS, version = 1.0, description = "compute contract")
+    @Parameters(value = {
+        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
+        @Parameter(parameterName = "sender", parameterDes = "sender"),
+        @Parameter(parameterName = "codeHash", parameterDes = "codeHash"),
+        @Parameter(parameterName = "salt", parameterDes = "salt")
+    })
+    @ResponseData(name = "返回值", description = "返回Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "contractAddress", description = "合约地址")
+    }))
+    public Response computeAddress(Map<String, Object> params) {
+        try {
+            Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
+            String sender = (String) params.get("sender");
+            String codeHash = (String) params.get("codeHash");
+            List saltList = (List) params.get("salt");
+            if (saltList == null || saltList.isEmpty()) {
+                return failed(PARAMETER_ERROR);
+            }
+            int size = saltList.size();
+            String[] salts = new String[size];
+            for (int i=0;i<size;i++) {
+                salts[i] = saltList.get(i).toString();
+            }
+            ProgramEncodePacked encodePacked = new ProgramEncodePacked((short) size, salts);
+            if (!AddressTool.validAddress(chainId, sender)) {
+                return failed(ADDRESS_ERROR);
+            }
+            ProgramCreateData createData = new ProgramCreateData(
+                    AddressTool.getAddress(sender),
+                    encodePacked.serialize(),
+                    HexUtil.decode(codeHash));
+            Address newAddress = new Address(chainId, BaseConstant.CONTRACT_ADDRESS_TYPE, SerializeUtils.sha256hash160(KeccakHash.keccakBytes(createData.serialize(), 256)));
+            Map<String, String> resultMap = MapUtil.createLinkedHashMap(2);
+            resultMap.put("contractAddress", newAddress.toString());
+            return success(resultMap);
         } catch (Exception e) {
             Log.error(e);
             return failed(e.getMessage());

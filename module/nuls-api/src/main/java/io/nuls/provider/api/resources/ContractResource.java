@@ -603,6 +603,25 @@ public class ContractResource {
         return ResultUtil.getRpcClientResult(mapResult);
     }
 
+    @POST
+    @Path("/computeAddress")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(description = "计算合约地址", order = 421)
+    @Parameters(value = {
+        @Parameter(parameterName = "计算合约地址", parameterDes = "计算合约地址", requestType = @TypeDescriptor(value = ContractComputeAddress.class))
+    })
+    @ResponseData(name = "返回值", description = "返回Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+        @Key(name = "result", description = "合约的codeHash")
+    }))
+    public RpcClientResult computeAddress(ContractComputeAddress form) {
+        if (form == null) {
+            return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "form data is empty"));
+        }
+        Result<Map> mapResult = contractTools.computeAddress(config.getChainId(),
+                form.getSender(), form.getCodeHash(), form.getSalt());
+        return ResultUtil.getRpcClientResult(mapResult);
+    }
+
     @GET
     @Path("/tx/{hash}")
     @Produces(MediaType.APPLICATION_JSON)
