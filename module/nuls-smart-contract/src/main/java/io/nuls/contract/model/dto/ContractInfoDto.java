@@ -71,6 +71,8 @@ public class ContractInfoDto {
     private List<ProgramMethod> method;
     @ApiModelProperty(description = "tokenUri")
     private String tokenUri;
+    @ApiModelProperty(description = "codeHash")
+    private String codeHash;
 
     public String getTokenUri() {
         return tokenUri;
@@ -206,5 +208,13 @@ public class ContractInfoDto {
 
     public void setMethod(List<ProgramMethod> method) {
         this.method = method;
+    }
+
+    public String getCodeHash() {
+        return codeHash;
+    }
+
+    public void setCodeHash(String codeHash) {
+        this.codeHash = codeHash;
     }
 }

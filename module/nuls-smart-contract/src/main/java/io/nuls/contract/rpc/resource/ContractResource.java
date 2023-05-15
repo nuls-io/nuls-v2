@@ -1172,6 +1172,7 @@ public class ContractResource extends BaseCmd {
             byte[] prevStateRoot = ContractUtil.getStateRoot(blockHeader);
 
             ProgramExecutor track = contractHelper.getProgramExecutor(chainId).begin(prevStateRoot);
+            byte[] codeHash = track.contractCodeHash(contractAddressBytes);
             ProgramStatus status = track.status(contractAddressBytes);
             List<ProgramMethod> methods = track.method(contractAddressBytes);
             boolean isAcceptDirectTransferByOtherAsset = false;
@@ -1230,6 +1231,7 @@ public class ContractResource extends BaseCmd {
             dto.setMethod(methods);
             dto.setDirectPayable(po.isAcceptDirectTransfer());
             dto.setDirectPayableByOtherAsset(isAcceptDirectTransferByOtherAsset);
+            dto.setCodeHash(HexUtil.encode(codeHash));
             return success(dto);
         } catch (Exception e) {
             Log.error(e);
