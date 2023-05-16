@@ -584,23 +584,39 @@ public class ContractResource {
         return ResultUtil.getRpcClientResult(mapResult);
     }
 
-    @POST
-    @Path("/codeHash")
+    @GET
+    @Path("/codeHash/{contractAddress}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(description = "获取合约的codeHash", order = 419)
     @Parameters(value = {
-        @Parameter(parameterName = "获取合约的codeHash", parameterDes = "获取合约的codeHash", requestType = @TypeDescriptor(value = ContractCodeHash.class))
+        @Parameter(parameterName = "contractAddress", parameterDes = "contractAddress")
     })
     @ResponseData(name = "返回值", description = "返回Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
         @Key(name = "result", description = "合约的codeHash")
     }))
-    public RpcClientResult codeHash(ContractCodeHash form) {
-        if (form == null) {
-            return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "form data is empty"));
+    public RpcClientResult codeHash(@PathParam("contractAddress") String contractAddress) {
+        if (contractAddress == null) {
+            return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "contractAddress data is empty"));
         }
-        Result<Map> mapResult = contractTools.codeHash(config.getChainId(),
-                form.getContractAddress());
+        Result<Map> mapResult = contractTools.codeHash(config.getChainId(), contractAddress);
         return ResultUtil.getRpcClientResult(mapResult);
+    }
+
+    @GET
+    @Path("/tx/{hash}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(description = "获取智能合约交易详情", order = 420)
+    @Parameters({
+            @Parameter(parameterName = "hash", parameterDes = "交易hash")
+    })
+    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = ContractTransactionDto.class))
+    public RpcClientResult getContractTx(@PathParam("hash") String hash) {
+        if (hash == null) {
+            return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "hash is empty"));
+        }
+        Result<Map> result = contractTools.getContractTx(config.getChainId(), hash);
+        RpcClientResult clientResult = ResultUtil.getRpcClientResult(result);
+        return clientResult;
     }
 
     @POST
@@ -623,20 +639,21 @@ public class ContractResource {
     }
 
     @GET
-    @Path("/tx/{hash}")
+    @Path("/contractCode/{contractAddress}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "获取智能合约交易详情", order = 420)
-    @Parameters({
-            @Parameter(parameterName = "hash", parameterDes = "交易hash")
+    @ApiOperation(description = "获取合约的code", order = 422)
+    @Parameters(value = {
+            @Parameter(parameterName = "contractAddress", parameterDes = "contractAddress")
     })
-    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = ContractTransactionDto.class))
-    public RpcClientResult getContractTx(@PathParam("hash") String hash) {
-        if (hash == null) {
-            return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "hash is empty"));
+    @ResponseData(name = "返回值", description = "返回Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "result", description = "合约的code")
+    }))
+    public RpcClientResult contractCode(@PathParam("contractAddress") String contractAddress) {
+        if (contractAddress == null) {
+            return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "contractAddress data is empty"));
         }
-        Result<Map> result = contractTools.getContractTx(config.getChainId(), hash);
-        RpcClientResult clientResult = ResultUtil.getRpcClientResult(result);
-        return clientResult;
+        Result<Map> mapResult = contractTools.contractCode(config.getChainId(), contractAddress);
+        return ResultUtil.getRpcClientResult(mapResult);
     }
 
     @POST

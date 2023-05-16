@@ -82,5 +82,6 @@ public interface CommandConstant {
     //查询已注册的跨链信息
     String GET_REGISTERED_CHAIN = "getRegisteredChainInfoList";
     String CODE_HASH = "sc_code_hash";
+    String CONTRACT_CODE = "sc_contract_code";
     String COMPUTE_ADDRESS = "sc_compute_address";
 }
