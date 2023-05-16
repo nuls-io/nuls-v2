@@ -989,6 +989,30 @@ public class ContractController {
         return ResultUtil.getJsonRpcResult(mapResult);
     }
 
+    @RpcMethod("contractCode")
+    @ApiOperation(description = "获取合约的code", order = 421)
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
+            @Parameter(parameterName = "contractAddress", parameterDes = "合约地址")
+    })
+    @ResponseData(name = "返回值", description = "返回Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "result", description = "合约的code")
+    }))
+    public RpcResult contractCode(List<Object> params) {
+        VerifyUtils.verifyParams(params, 2);
+        int chainId;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is invalid");
+        }
+        if (!Context.isChainExist(chainId)) {
+            return RpcResult.paramError(String.format("chainId [%s] is invalid", chainId));
+        }
+        Result<Map> mapResult = contractTools.contractCode(chainId, params.get(1));
+        return ResultUtil.getJsonRpcResult(mapResult);
+    }
+
 
     @RpcMethod("contractCreateOffline")
     @ApiOperation(description = "离线 - 发布合约交易", order = 450)
