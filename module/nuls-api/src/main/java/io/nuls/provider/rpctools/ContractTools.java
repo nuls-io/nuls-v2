@@ -291,4 +291,38 @@ public class ContractTools implements CallRpc {
         }
     }
 
+    public Result<Map> contractCode(int chainId, Object contractAddress) {
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.CHAIN_ID, chainId);
+        params.put("contractAddress", contractAddress);
+        try {
+            return callRpc(ModuleE.SC.abbr, CONTRACT_CODE, params,(Function<Map<String,Object>, Result<Map>>) res->{
+                if(res == null){
+                    return null;
+                }
+                return new Result(res);
+            });
+        } catch (NulsRuntimeException e) {
+            return Result.fail(e.getCode(), e.getMessage());
+        }
+    }
+
+    public Result<Map> computeAddress(int chainId, Object sender, Object codeHash, Object salt) {
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.CHAIN_ID, chainId);
+        params.put("sender", sender);
+        params.put("codeHash", codeHash);
+        params.put("salt", salt);
+        try {
+            return callRpc(ModuleE.SC.abbr, COMPUTE_ADDRESS, params,(Function<Map<String,Object>, Result<Map>>) res->{
+                if(res == null){
+                    return null;
+                }
+                return new Result(res);
+            });
+        } catch (NulsRuntimeException e) {
+            return Result.fail(e.getCode(), e.getMessage());
+        }
+    }
+
 }

@@ -584,22 +584,21 @@ public class ContractResource {
         return ResultUtil.getRpcClientResult(mapResult);
     }
 
-    @POST
-    @Path("/codeHash")
+    @GET
+    @Path("/codeHash/{contractAddress}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(description = "获取合约的codeHash", order = 419)
     @Parameters(value = {
-        @Parameter(parameterName = "获取合约的codeHash", parameterDes = "获取合约的codeHash", requestType = @TypeDescriptor(value = ContractCodeHash.class))
+        @Parameter(parameterName = "contractAddress", parameterDes = "contractAddress")
     })
     @ResponseData(name = "返回值", description = "返回Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
         @Key(name = "result", description = "合约的codeHash")
     }))
-    public RpcClientResult codeHash(ContractCodeHash form) {
-        if (form == null) {
-            return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "form data is empty"));
+    public RpcClientResult codeHash(@PathParam("contractAddress") String contractAddress) {
+        if (contractAddress == null) {
+            return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "contractAddress data is empty"));
         }
-        Result<Map> mapResult = contractTools.codeHash(config.getChainId(),
-                form.getContractAddress());
+        Result<Map> mapResult = contractTools.codeHash(config.getChainId(), contractAddress);
         return ResultUtil.getRpcClientResult(mapResult);
     }
 
@@ -618,6 +617,43 @@ public class ContractResource {
         Result<Map> result = contractTools.getContractTx(config.getChainId(), hash);
         RpcClientResult clientResult = ResultUtil.getRpcClientResult(result);
         return clientResult;
+    }
+
+    @POST
+    @Path("/computeAddress")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(description = "计算合约地址", order = 421)
+    @Parameters(value = {
+        @Parameter(parameterName = "计算合约地址", parameterDes = "计算合约地址", requestType = @TypeDescriptor(value = ContractComputeAddress.class))
+    })
+    @ResponseData(name = "返回值", description = "返回Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+        @Key(name = "result", description = "合约的codeHash")
+    }))
+    public RpcClientResult computeAddress(ContractComputeAddress form) {
+        if (form == null) {
+            return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "form data is empty"));
+        }
+        Result<Map> mapResult = contractTools.computeAddress(config.getChainId(),
+                form.getSender(), form.getCodeHash(), form.getSalt());
+        return ResultUtil.getRpcClientResult(mapResult);
+    }
+
+    @GET
+    @Path("/contractCode/{contractAddress}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(description = "获取合约的code", order = 422)
+    @Parameters(value = {
+            @Parameter(parameterName = "contractAddress", parameterDes = "contractAddress")
+    })
+    @ResponseData(name = "返回值", description = "返回Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "result", description = "合约的code")
+    }))
+    public RpcClientResult contractCode(@PathParam("contractAddress") String contractAddress) {
+        if (contractAddress == null) {
+            return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "contractAddress data is empty"));
+        }
+        Result<Map> mapResult = contractTools.contractCode(config.getChainId(), contractAddress);
+        return ResultUtil.getRpcClientResult(mapResult);
     }
 
     @POST

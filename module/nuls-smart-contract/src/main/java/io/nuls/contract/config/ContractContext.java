@@ -23,8 +23,19 @@
  */
 package io.nuls.contract.config;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import io.nuls.base.basic.AddressTool;
+import io.nuls.contract.enums.TokenTypeStatus;
+import io.nuls.contract.helper.ContractHelper;
+import io.nuls.contract.model.po.ContractAddressInfoPo;
+import io.nuls.core.basic.Result;
+
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author: PierreLuo
@@ -74,4 +85,52 @@ public class ContractContext {
     public static short UPDATE_VERSION_ACCOUNT_TRANSFER_ON_CONTRACT_CALL = 13;
     public static short PROTOCOL_14 = 14;
     public static short PROTOCOL_15 = 15;
+    public static short PROTOCOL_16 = 16;
+    private static final LoadingCache<String, ContractAddressInfoPo> CONTRACT_INFO_CACHE;
+    private static ContractHelper contractHelper;
+
+    static {
+        CONTRACT_INFO_CACHE = CacheBuilder.newBuilder()
+                .initialCapacity(200)
+                .maximumSize(200)
+                .expireAfterAccess(10, TimeUnit.MINUTES)
+                .build(new CacheLoader<String, ContractAddressInfoPo>() {
+                    @Override
+                    public ContractAddressInfoPo load(String contract) {
+                        Result<ContractAddressInfoPo> contractAddressInfoResult = contractHelper.getContractAddressInfo(CHAIN_ID, AddressTool.getAddress(contract));
+                        ContractAddressInfoPo po = contractAddressInfoResult.getData();
+                        return po;
+                    }
+                });
+    }
+
+    public static void loadContractAddressInfo(ContractAddressInfoPo info) {
+        if (info != null) {
+            CONTRACT_INFO_CACHE.put(AddressTool.getStringAddressByBytes(info.getContractAddress()), info);
+        }
+    }
+
+    public static int getTokenType(String contract) {
+        ContractAddressInfoPo contractAddressInfo = getContractAddressInfo(contract);
+        if (contractAddressInfo == null) {
+            return TokenTypeStatus.NOT_TOKEN.status();
+        }
+        return contractAddressInfo.getTokenType();
+    }
+
+    public static ContractAddressInfoPo getContractAddressInfo(String contract) {
+        try {
+            return CONTRACT_INFO_CACHE.get(contract);
+        } catch (ExecutionException e) {
+            return null;
+        }
+    }
+
+    public static void setContractHelper(ContractHelper contractHelper) {
+        if (contractHelper == null) {
+            return;
+        }
+        ContractContext.contractHelper = contractHelper;
+    }
+
 }
