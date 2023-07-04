@@ -36,10 +36,17 @@ public class ContractTokenTransferInfo implements Serializable {
 
     private String from;
     private String to;
-    private BigInteger value;
+    private String value;
     private String contractAddress;
-    // token类型, 0 - 非token, 1 - NRC20, 2 - NRC721
+    // token类型, 0 - 非token, 1 - NRC20, 2 - NRC721, 3 - NRC1155
     private int tokenType;
+    private String name;
+    private String symbol;
+    private long decimals;
+    private String operator;
+    private String id;
+    private String[] ids;
+    private String[] values;
 
     public String getFrom() {
         return from;
@@ -57,14 +64,6 @@ public class ContractTokenTransferInfo implements Serializable {
         this.to = to;
     }
 
-    public BigInteger getValue() {
-        return value;
-    }
-
-    public void setValue(BigInteger value) {
-        this.value = value;
-    }
-
     public String getContractAddress() {
         return contractAddress;
     }
@@ -79,5 +78,69 @@ public class ContractTokenTransferInfo implements Serializable {
 
     public void setTokenType(int tokenType) {
         this.tokenType = tokenType;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
+    }
+
+    public long getDecimals() {
+        return decimals;
+    }
+
+    public void setDecimals(long decimals) {
+        this.decimals = decimals;
+    }
+
+    public String getOperator() {
+        return operator;
+    }
+
+    public void setOperator(String operator) {
+        this.operator = operator;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String[] getIds() {
+        return ids;
+    }
+
+    public void setIds(String[] ids) {
+        this.ids = ids;
+    }
+
+    public String[] getValues() {
+        return values;
+    }
+
+    public void setValues(String[] values) {
+        this.values = values;
     }
 }
