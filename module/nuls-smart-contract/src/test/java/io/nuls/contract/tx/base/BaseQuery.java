@@ -83,7 +83,7 @@ public class BaseQuery extends Base {
 
     @Test
     public void importPriKeyTest() {
-        //importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//打包地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
+        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//打包地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
         //importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//打包地址 tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
         importPriKey("fbcae491407b54aa3904ff295f2d644080901fda0d417b2b427f5c1487b2b499", password);//打包地址 tNULSeBaMmShSTVwbU4rHkZjpD98JgFgg6rmhF
 
@@ -322,7 +322,7 @@ public class BaseQuery extends Base {
      */
     @Test
     public void contractInfo() throws Exception {
-        Map params = this.makeContractInfoParams("tNULSeBaN6GoEavdatSmFy6mzb88oNupqosF91");
+        Map params = this.makeContractInfoParams("tNULSeBaN4aTDUzAan3NmoAfyc1tTxsmp7ksZC");
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_INFO, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_INFO));
         Log.info("contract_info-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));

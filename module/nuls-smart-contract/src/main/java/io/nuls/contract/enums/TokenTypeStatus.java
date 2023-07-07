@@ -32,10 +32,11 @@ import java.util.Map;
  * @date: 2019-08-20
  */
 public enum TokenTypeStatus {
-    // 0 - 非token, 1 - NRC20, 2 - NRC721
+    // 0 - 非token, 1 - NRC20, 2 - NRC721, 3 - NRC1155
     NOT_TOKEN(0),
     NRC20(1),
-    NRC721(2);
+    NRC721(2),
+    NRC1155(3);
 
     private int status;
     private static Map<Integer, TokenTypeStatus> map;

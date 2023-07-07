@@ -1,0 +1,287 @@
+{
+  "safeTransferFrom": {
+    "name": "safeTransferFrom",
+    "desc": "(Address from, Address to, BigInteger id, BigInteger amount, String data) return void",
+    "args": [
+      {
+        "type": "Address",
+        "name": "from",
+        "required": true
+      },
+      {
+        "type": "Address",
+        "name": "to",
+        "required": true
+      },
+      {
+        "type": "BigInteger",
+        "name": "id",
+        "required": true
+      },
+      {
+        "type": "BigInteger",
+        "name": "amount",
+        "required": true
+      },
+      {
+        "type": "String",
+        "name": "data",
+        "required": true
+      }
+    ],
+    "returnArg": "void",
+    "view": false,
+    "event": false,
+    "payable": false,
+    "payableMultyAsset": false,
+    "jsonSerializable": false
+  },
+  "safeBatchTransferFrom": {
+    "name": "safeBatchTransferFrom",
+    "desc": "(Address from, Address to, String[] ids, String[] amounts, String data) return void",
+    "args": [
+      {
+        "type": "Address",
+        "name": "from",
+        "required": false
+      },
+      {
+        "type": "Address",
+        "name": "to",
+        "required": false
+      },
+      {
+        "type": "String[]",
+        "name": "ids",
+        "required": false
+      },
+      {
+        "type": "String[]",
+        "name": "amounts",
+        "required": false
+      },
+      {
+        "type": "String",
+        "name": "data",
+        "required": false
+      }
+    ],
+    "returnArg": "void",
+    "view": false,
+    "event": false,
+    "payable": false,
+    "payableMultyAsset": false,
+    "jsonSerializable": false
+  },
+  "balanceOf": {
+    "name": "balanceOf",
+    "desc": "(Address account, BigInteger id) return BigInteger",
+    "args": [
+      {
+        "type": "Address",
+        "name": "account",
+        "required": true
+      },
+      {
+        "type": "BigInteger",
+        "name": "id",
+        "required": true
+      }
+    ],
+    "returnArg": "BigInteger",
+    "view": true,
+    "event": false,
+    "payable": false,
+    "payableMultyAsset": false,
+    "jsonSerializable": false
+  },
+  "balanceOfBatch": {
+    "name": "balanceOfBatch",
+    "desc": "(String[] accounts, String[] ids) return BigInteger[]",
+    "args": [
+      {
+        "type": "String[]",
+        "name": "accounts",
+        "required": false
+      },
+      {
+        "type": "String[]",
+        "name": "ids",
+        "required": false
+      }
+    ],
+    "returnArg": "BigInteger[]",
+    "view": true,
+    "event": false,
+    "payable": false,
+    "payableMultyAsset": false,
+    "jsonSerializable": false
+  },
+  "setApprovalForAll": {
+    "name": "setApprovalForAll",
+    "desc": "(Address operator, boolean approved) return void",
+    "args": [
+      {
+        "type": "Address",
+        "name": "operator",
+        "required": false
+      },
+      {
+        "type": "boolean",
+        "name": "approved",
+        "required": false
+      }
+    ],
+    "returnArg": "void",
+    "view": false,
+    "event": false,
+    "payable": false,
+    "payableMultyAsset": false,
+    "jsonSerializable": false
+  },
+  "isApprovedForAll": {
+    "name": "isApprovedForAll",
+    "desc": "(Address owner, Address operator) return boolean",
+    "args": [
+      {
+        "type": "Address",
+        "name": "owner",
+        "required": false
+      },
+      {
+        "type": "Address",
+        "name": "operator",
+        "required": false
+      }
+    ],
+    "returnArg": "boolean",
+    "view": false,
+    "event": false,
+    "payable": false,
+    "payableMultyAsset": false,
+    "jsonSerializable": false
+  },
+  "TransferSingle": {
+    "name": "TransferSingle",
+    "desc": "(Address operator, Address from, Address to, BigInteger id, BigInteger value) return void",
+    "args": [
+      {
+        "type": "Address",
+        "name": "operator",
+        "required": false
+      },
+      {
+        "type": "Address",
+        "name": "from",
+        "required": false
+      },
+      {
+        "type": "Address",
+        "name": "to",
+        "required": false
+      },
+      {
+        "type": "BigInteger",
+        "name": "id",
+        "required": false
+      },
+      {
+        "type": "BigInteger",
+        "name": "value",
+        "required": false
+      }
+    ],
+    "returnArg": "void",
+    "view": false,
+    "event": true,
+    "payable": false,
+    "payableMultyAsset": false,
+    "jsonSerializable": false
+  },
+  "URI": {
+    "name": "URI",
+    "desc": "(String value, BigInteger id) return void",
+    "args": [
+      {
+        "type": "String",
+        "name": "value",
+        "required": false
+      },
+      {
+        "type": "BigInteger",
+        "name": "id",
+        "required": false
+      }
+    ],
+    "returnArg": "void",
+    "view": false,
+    "event": true,
+    "payable": false,
+    "payableMultyAsset": false,
+    "jsonSerializable": false
+  },
+  "ApprovalForAll": {
+    "name": "ApprovalForAll",
+    "desc": "(Address owner, Address operator, Boolean approved) return void",
+    "args": [
+      {
+        "type": "Address",
+        "name": "owner",
+        "required": false
+      },
+      {
+        "type": "Address",
+        "name": "operator",
+        "required": false
+      },
+      {
+        "type": "Boolean",
+        "name": "approved",
+        "required": false
+      }
+    ],
+    "returnArg": "void",
+    "view": false,
+    "event": true,
+    "payable": false,
+    "payableMultyAsset": false,
+    "jsonSerializable": false
+  },
+  "TransferBatch": {
+    "name": "TransferBatch",
+    "desc": "(Address operator, Address from, Address to, BigInteger[] ids, BigInteger[] values) return void",
+    "args": [
+      {
+        "type": "Address",
+        "name": "operator",
+        "required": false
+      },
+      {
+        "type": "Address",
+        "name": "from",
+        "required": false
+      },
+      {
+        "type": "Address",
+        "name": "to",
+        "required": false
+      },
+      {
+        "type": "BigInteger[]",
+        "name": "ids",
+        "required": false
+      },
+      {
+        "type": "BigInteger[]",
+        "name": "values",
+        "required": false
+      }
+    ],
+    "returnArg": "void",
+    "view": false,
+    "event": true,
+    "payable": false,
+    "payableMultyAsset": false,
+    "jsonSerializable": false
+  }
+}

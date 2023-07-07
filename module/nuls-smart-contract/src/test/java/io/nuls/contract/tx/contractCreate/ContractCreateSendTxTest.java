@@ -53,6 +53,14 @@ public class ContractCreateSendTxTest extends BaseQuery {
     String contractA = "tNULSeBaN7MCLavwRjJqH28w9NCmahUbybYC6K";
 
     @Test
+    public void createNRC1155() throws Exception {
+        InputStream in = new FileInputStream("/Users/pierreluo/IdeaProjects/NULS-NRC1155Demo/target/NULS-NRC1155Demo-1.0-SNAPSHOT.jar");
+        byte[] contractCode = IOUtils.toByteArray(in);
+        String remark = "create 1155 A";
+        String create = this.invokeCreate(sender, contractCode, "test_c", remark, "asdasdasd3", "name1155", "SYMBOL1155v6");
+        System.out.println(create);
+    }
+    @Test
     public void createAndInit() throws Exception {
         this.contractA = createContractA();
         System.out.println(contractA);

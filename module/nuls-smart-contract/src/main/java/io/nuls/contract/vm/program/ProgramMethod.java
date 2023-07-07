@@ -159,7 +159,7 @@ public class ProgramMethod {
         return returnArg != null ? returnArg.equals(that.returnArg) : that.returnArg == null;
     }
 
-    public boolean equalsNrc20Method(Object o) {
+    public boolean equalsTokenMethod(Object o) {
         if (this == o) {
             return true;
         }
@@ -182,41 +182,7 @@ public class ProgramMethod {
             if (that.args == null) {
                 return false;
             }
-            if (!isEqualNrc20Args(args, that.args)) {
-                return false;
-            }
-        } else {
-            if (that.args != null) {
-                return false;
-            }
-        }
-        return returnArg != null ? returnArg.equals(that.returnArg) : that.returnArg == null;
-    }
-
-    public boolean equalsNrc721Method(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        ProgramMethod that = (ProgramMethod) o;
-
-        if (view != that.view) {
-            return false;
-        }
-        if (event != that.event) {
-            return false;
-        }
-        if (name != null ? !name.equals(that.name) : that.name != null) {
-            return false;
-        }
-        if (args != null) {
-            if (that.args == null) {
-                return false;
-            }
-            if (!isEqualNrc721Args(args, that.args)) {
+            if (!isEqualTokenArgs(args, that.args)) {
                 return false;
             }
         } else {
@@ -240,44 +206,7 @@ public class ProgramMethod {
         }
     }
 
-    private boolean isEqualNrc20Args(List<ProgramMethodArg> a, List<ProgramMethodArg> b) {
-        if (a.size() != b.size()) {
-            return false;
-        } else {
-            /*
-            // 参数类型、名称完全相同
-            Map<String, ProgramMethodArg> mapA = a.stream().collect(Collectors.toMap(ProgramMethodArg::getName, Function.identity(), (key1, key2) -> key2, LinkedHashMap::new));
-            Map<String, ProgramMethodArg> mapB = b.stream().collect(Collectors.toMap(ProgramMethodArg::getName, Function.identity(), (key1, key2) -> key2, LinkedHashMap::new));
-            Set<Map.Entry<String, ProgramMethodArg>> entriesA = mapA.entrySet();
-            String methodName;
-            ProgramMethodArg methodArg;
-            for(Map.Entry<String, ProgramMethodArg> entryA : entriesA) {
-                methodName = entryA.getKey();
-                if(!mapB.containsKey(methodName)) {
-                    return false;
-                }
-                methodArg = entryA.getValue();
-                if(!methodArg.equalsNrc20(mapB.get(methodName))) {
-                    return false;
-                }
-            }
-            */
-
-            // 参数类型相同
-            int size = a.size();
-            ProgramMethodArg argA, argB;
-            for (int i = 0; i < size; i++) {
-                argA = a.get(i);
-                argB = b.get(i);
-                if (!argA.equalsNrc20(argB)) {
-                    return false;
-                }
-            }
-            return true;
-        }
-    }
-
-    private boolean isEqualNrc721Args(List<ProgramMethodArg> a, List<ProgramMethodArg> b) {
+    private boolean isEqualTokenArgs(List<ProgramMethodArg> a, List<ProgramMethodArg> b) {
         if (a.size() != b.size()) {
             return false;
         } else {
@@ -287,7 +216,7 @@ public class ProgramMethod {
             for (int i = 0; i < size; i++) {
                 argA = a.get(i);
                 argB = b.get(i);
-                if (!argA.equalsNrc721(argB)) {
+                if (!argA.equalsTokenArg(argB)) {
                     return false;
                 }
             }
