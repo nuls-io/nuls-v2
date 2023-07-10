@@ -75,7 +75,7 @@ public class ContractResult {
     private String errorMessage;
     private String stackTrace;
     private boolean acceptDirectTransfer;
-    // token类型, 0 - 非token, 1 - NRC20, 2 - NRC721
+    // token类型, 0 - 非token, 1 - NRC20, 2 - NRC721, 3 - NRC1155
     private int tokenType;
     private boolean isNrc20;
     private String tokenName;

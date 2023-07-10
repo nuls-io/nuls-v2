@@ -90,7 +90,7 @@ public class ProgramMethodArg {
         return name != null ? name.equals(that.name) : that.name == null;
     }
 
-    public boolean equalsNrc20(Object o) {
+    public boolean equalsTokenArg(Object o) {
         if (this == o) {
             return true;
         }
@@ -106,21 +106,7 @@ public class ProgramMethodArg {
         return type != null ? type.equals(that.type) : that.type == null;
     }
 
-    public boolean equalsNrc721(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
 
-        ProgramMethodArg that = (ProgramMethodArg) o;
-
-        if (required != that.required) {
-            return false;
-        }
-        return type != null ? type.equals(that.type) : that.type == null;
-    }
 
     @Override
     public int hashCode() {
