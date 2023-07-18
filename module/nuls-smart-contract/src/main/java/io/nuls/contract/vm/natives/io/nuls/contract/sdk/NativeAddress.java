@@ -25,6 +25,8 @@
 package io.nuls.contract.vm.natives.io.nuls.contract.sdk;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.protocol.ProtocolGroupManager;
+import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.vm.*;
 import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.exception.ErrorException;
@@ -424,6 +426,12 @@ public class NativeAddress {
             frame.vm.getEvents().addAll(programResult.getEvents());
             frame.vm.getInvokeRegisterCmds().addAll(programResult.getInvokeRegisterCmds());
             frame.vm.getOrderedInnerTxs().addAll(programResult.getOrderedInnerTxs());
+            // add by pierre at 2022/7/18 p14
+            int currentChainId = frame.vm.getProgramExecutor().getCurrentChainId();
+            if(ProtocolGroupManager.getCurrentVersion(currentChainId) >= ContractContext.PROTOCOL_15 ) {
+                frame.vm.getInternalCreates().addAll(programResult.getInternalCreates());
+            }
+            // end code by pierre
             return programResult;
         } else {
             // add by pierre at 2020-11-03 可能影响兼容性，考虑协议升级

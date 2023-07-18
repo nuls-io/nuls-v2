@@ -9,6 +9,7 @@ import io.nuls.contract.config.ContractConfig;
 import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractDBConstant;
+import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.model.bo.ContractTokenAssetsInfo;
@@ -64,6 +65,8 @@ public class SmartContractBootStrap extends RpcModule {
     private ChainManager chainManager;
     @Autowired
     private AddressPrefixDatas addressPrefixDatas;
+    @Autowired
+    private ContractHelper contractHelper;
 
     public static void main(String[] args) throws Exception {
         systemConfig();
@@ -88,6 +91,7 @@ public class SmartContractBootStrap extends RpcModule {
             initDB();
             initNRC20Standard();
             initNRC721Standard();
+            initNRC1155Standard();
             chainManager.initChain();
             ModuleHelper.init(this);
         } catch (Exception e) {
@@ -106,6 +110,7 @@ public class SmartContractBootStrap extends RpcModule {
         if (StringUtils.isNotBlank(contractConfig.getCrossTokenSystemContract())) {
             ContractContext.CROSS_CHAIN_SYSTEM_CONTRACT = AddressTool.getAddress(contractConfig.getCrossTokenSystemContract());
         }
+        ContractContext.setContractHelper(contractHelper);
     }
 
     /**
@@ -173,11 +178,31 @@ public class SmartContractBootStrap extends RpcModule {
         } catch (Exception e) {
             Log.error("init NRC721Standard map error.", e);
         }
-        ProgramMethod overloadMethodSafeData = jsonMap.remove(NRC721_SAFETRANSFERFROM_DATA);
-        ProgramMethod overloadMethodSafe = jsonMap.remove(NRC721_SAFETRANSFERFROM);
         VMContext.setNrc721Methods(jsonMap);
-        VMContext.setNrc721OverloadMethodSafeData(overloadMethodSafeData);
-        VMContext.setNrc721OverloadMethodSafe(overloadMethodSafe);
+    }
+
+    /**
+     * 初始化NRC1155合约标准格式
+     */
+    private void initNRC1155Standard() {
+        String json = null;
+        try {
+            json = IoUtils.read(NRC1155_STANDARD_FILE);
+        } catch (Exception e) {
+            // skip it
+            Log.error("init NRC1155Standard error.", e);
+        }
+        if (json == null) {
+            return;
+        }
+
+        Map<String, ProgramMethod> jsonMap = null;
+        try {
+            jsonMap = JSONUtils.json2map(json, ProgramMethod.class);
+        } catch (Exception e) {
+            Log.error("init NRC20Standard map error.", e);
+        }
+        VMContext.setNrc1155Methods(jsonMap);
     }
 
     /**

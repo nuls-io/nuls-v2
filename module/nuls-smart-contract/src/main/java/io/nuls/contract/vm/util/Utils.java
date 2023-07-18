@@ -74,6 +74,24 @@ public class Utils {
         }
     }
 
+    public static boolean isHexString(String data) {
+        if (StringUtils.isBlank(data)) {
+            return false;
+        }
+        try {
+            char[] chars = data.toCharArray();
+            for (char c : chars) {
+                int digit = Character.digit(c, 16);
+                if (digit == -1) {
+                    return false;
+                }
+            }
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     private static String cleanHexPrefix(String input) {
         return containsHexPrefix(input) ? input.substring(2) : input;
     }

@@ -34,10 +34,12 @@ import io.nuls.base.signture.TransactionSignature;
 import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
+import io.nuls.contract.enums.TokenTypeStatus;
 import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.model.bo.*;
 import io.nuls.contract.model.dto.AccountAmountDto;
 import io.nuls.contract.model.dto.ContractTokenTransferInfo;
+import io.nuls.contract.model.po.ContractAddressInfoPo;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.contract.model.tx.*;
 import io.nuls.contract.model.txdata.CallContractData;
@@ -46,6 +48,8 @@ import io.nuls.contract.model.txdata.CreateContractData;
 import io.nuls.contract.model.txdata.DeleteContractData;
 import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.contract.rpc.call.ChainManagerCall;
+import io.nuls.contract.vm.program.ProgramMethod;
+import io.nuls.contract.vm.program.ProgramMethodArg;
 import io.nuls.contract.vm.program.ProgramMultyAssetValue;
 import io.nuls.core.basic.Result;
 import io.nuls.core.constant.ErrorCode;
@@ -277,6 +281,9 @@ public class ContractUtil {
             Map<String, Object> eventMap = JSONUtils.json2map(event);
             String eventName = (String) eventMap.get(CONTRACT_EVENT);
             String contractAddress = (String) eventMap.get(CONTRACT_EVENT_ADDRESS);
+            if (ContractContext.getTokenType(contractAddress) != TokenTypeStatus.NRC20.status()) {
+                return null;
+            }
             po = new ContractTokenTransferInfoPo();
             po.setContractAddress(contractAddress);
             if (NRC20_EVENT_TRANSFER.equals(eventName)) {
@@ -321,48 +328,145 @@ public class ContractUtil {
             Map<String, Object> eventMap = JSONUtils.json2map(event);
             String eventName = (String) eventMap.get(CONTRACT_EVENT);
             String contractAddress = (String) eventMap.get(CONTRACT_EVENT_ADDRESS);
+            ContractAddressInfoPo contractAddressInfo = ContractContext.getContractAddressInfo(contractAddress);
+            int tokenType = contractAddressInfo.getTokenType();
             info = new ContractTokenTransferInfo();
             info.setContractAddress(contractAddress);
             if (NRC20_EVENT_TRANSFER.equals(eventName)) {
-                boolean isNRC20;
-                Map<String, Object> data = (Map<String, Object>) eventMap.get(CONTRACT_EVENT_DATA);
-                isNRC20 = data.containsKey(VALUE);
-                if (!isNRC20) {
+                if (tokenType != TokenTypeStatus.NRC20.status()) {
                     return null;
                 }
-                String from = (String) data.get(FROM);
-                String to = (String) data.get(TO);
-                String value = (String) data.get(VALUE);
-                if (AddressTool.validAddress(chainId, from)) {
-                    info.setFrom(from);
-                }
-                if (AddressTool.validAddress(chainId, to)) {
-                    info.setTo(to);
-                }
-                if (isNRC20) {
-                    info.setTokenType(TOKEN_TYPE_NRC20);
-                    info.setValue(isBlank(value) ? BigInteger.ZERO : new BigInteger(value));
+                Map<String, Object> data = (Map<String, Object>) eventMap.get(CONTRACT_EVENT_DATA);
+                info.setTokenType(TokenTypeStatus.NRC20.status());
+                info.setName(contractAddressInfo.getNrc20TokenName());
+                info.setSymbol(contractAddressInfo.getNrc20TokenSymbol());
+                info.setDecimals(contractAddressInfo.getDecimals());
+                Collection<Object> values = data.values();
+                int i = 0;
+                String transferEventdata;
+                for (Object object : values) {
+                    transferEventdata = (String) object;
+                    if (i == 0 || i == 1) {
+                        if (AddressTool.validAddress(chainId, transferEventdata)) {
+                            if (i == 0) {
+                                info.setFrom(transferEventdata);
+                            } else {
+                                info.setTo(transferEventdata);
+                            }
+                        }
+                    }
+                    if (i == 2) {
+                        info.setValue(isBlank(transferEventdata) ? "0" : transferEventdata);
+                        break;
+                    }
+                    i++;
                 }
                 return info;
             } else if (NRC721_EVENT_TRANSFER.equals(eventName)) {
-                boolean isNRC721;
-                Map<String, Object> data = (Map<String, Object>) eventMap.get(CONTRACT_EVENT_DATA);
-                isNRC721 = data.containsKey(TOKEN_ID);
-                if (!isNRC721) {
+                if (tokenType != TokenTypeStatus.NRC721.status()) {
                     return null;
                 }
-                String from = (String) data.get(FROM);
-                String to = (String) data.get(TO);
-                String tokenId = (String) data.get(TOKEN_ID);
-                if (AddressTool.validAddress(chainId, from)) {
-                    info.setFrom(from);
+                Map<String, Object> data = (Map<String, Object>) eventMap.get(CONTRACT_EVENT_DATA);
+                info.setTokenType(TokenTypeStatus.NRC721.status());
+                info.setName(contractAddressInfo.getNrc20TokenName());
+                info.setSymbol(contractAddressInfo.getNrc20TokenSymbol());
+                Collection<Object> values = data.values();
+                int i = 0;
+                String transferEventdata;
+                for (Object object : values) {
+                    transferEventdata = (String) object;
+                    if (i == 0 || i == 1) {
+                        if (AddressTool.validAddress(chainId, transferEventdata)) {
+                            if (i == 0) {
+                                info.setFrom(transferEventdata);
+                            } else {
+                                info.setTo(transferEventdata);
+                            }
+                        }
+                    }
+                    if (i == 2) {
+                        info.setValue(isBlank(transferEventdata) ? "0" : transferEventdata);
+                        break;
+                    }
+                    i++;
                 }
-                if (AddressTool.validAddress(chainId, to)) {
-                    info.setTo(to);
+                return info;
+            } else if (NRC1155_EVENT_TRANSFER_SINGLE.equals(eventName)) {
+                if (tokenType != TokenTypeStatus.NRC1155.status()) {
+                    return null;
                 }
-                if (isNRC721) {
-                    info.setTokenType(TOKEN_TYPE_NRC721);
-                    info.setValue(isBlank(tokenId) ? BigInteger.ZERO : new BigInteger(tokenId));
+                Map<String, Object> data = (Map<String, Object>) eventMap.get(CONTRACT_EVENT_DATA);
+                info.setTokenType(TokenTypeStatus.NRC1155.status());
+                info.setName(contractAddressInfo.getNrc20TokenName());
+                info.setSymbol(contractAddressInfo.getNrc20TokenSymbol());
+                Collection<Object> values = data.values();
+                int i = 0;
+                String transferEventdata;
+                for (Object object : values) {
+                    transferEventdata = (String) object;
+                    if (i <= 2) {
+                        if (AddressTool.validAddress(chainId, transferEventdata)) {
+                            if (i == 0) {
+                                info.setOperator(transferEventdata);
+                            } else if (i == 1) {
+                                info.setFrom(transferEventdata);
+                            } else {
+                                info.setTo(transferEventdata);
+                            }
+                        }
+                    }
+                    if (i == 3) {
+                        info.setId(isBlank(transferEventdata) ? "0" : transferEventdata);
+                    } else if (i == 4) {
+                        info.setValue(isBlank(transferEventdata) ? "0" : transferEventdata);
+                        break;
+                    }
+                    i++;
+                }
+                return info;
+            } else if (NRC1155_EVENT_TRANSFER_BATCH.equals(eventName)) {
+                if (tokenType != TokenTypeStatus.NRC1155.status()) {
+                    return null;
+                }
+                Map<String, Object> data = (Map<String, Object>) eventMap.get(CONTRACT_EVENT_DATA);
+                info.setTokenType(TokenTypeStatus.NRC1155.status());
+                info.setName(contractAddressInfo.getNrc20TokenName());
+                info.setSymbol(contractAddressInfo.getNrc20TokenSymbol());
+                Collection<Object> datas = data.values();
+                int i = 0;
+                String transferEventdata;
+                for (Object object : datas) {
+                    if (i <= 2) {
+                        transferEventdata = (String) object;
+                        if (AddressTool.validAddress(chainId, transferEventdata)) {
+                            if (i == 0) {
+                                info.setOperator(transferEventdata);
+                            } else if (i == 1) {
+                                info.setFrom(transferEventdata);
+                            } else {
+                                info.setTo(transferEventdata);
+                            }
+                        }
+                    }
+                    if (i == 3) {
+                        List<String> ids = (List) object;
+                        String[] _ids = null;
+                        if (ids != null) {
+                            _ids = new String[ids.size()];
+                            ids.toArray(_ids);
+                        }
+                        info.setIds(_ids);
+                    } else if (i == 4) {
+                        List<String> values = (List) object;
+                        String[] _values = null;
+                        if (values != null) {
+                            _values = new String[values.size()];
+                            values.toArray(_values);
+                        }
+                        info.setValues(_values);
+                        break;
+                    }
+                    i++;
                 }
                 return info;
             }
@@ -371,6 +475,22 @@ public class ContractUtil {
             Log.error(e);
             return null;
         }
+    }
+
+    public static String[] big2strArray(BigInteger[] bigArray) {
+        String[] result = new String[bigArray.length];
+        for (int i = 0; i < bigArray.length; i++) {
+            result[i] = bigArray[i].toString();
+        }
+        return result;
+    }
+
+    public static BigInteger[] str2bigArray(String[] strArrays) {
+        BigInteger[] result = new BigInteger[strArrays.length];
+        for (int i = 0; i < strArrays.length; i++) {
+            result[i] = new BigInteger(strArrays[i]);
+        }
+        return result;
     }
 
     public static boolean isContractTransaction(Transaction tx) {
@@ -897,5 +1017,18 @@ public class ContractUtil {
             array[i] = new ProgramMultyAssetValue(new BigInteger(value[0]), Integer.valueOf(value[1]), Integer.valueOf(value[2]));
         }
         return array;
+    }
+
+    public static String methodSignature(ProgramMethod method) {
+        List<ProgramMethodArg> args = method.getArgs();
+        StringBuilder key = new StringBuilder(method.getName()).append("(");
+        if (args != null && !args.isEmpty()) {
+            for (int i=0;i<args.size();i++) {
+                key.append(args.get(i).getType()).append(",");
+            }
+            key.deleteCharAt(key.length() - 1);
+        }
+        key.append(")");
+        return key.toString();
     }
 }

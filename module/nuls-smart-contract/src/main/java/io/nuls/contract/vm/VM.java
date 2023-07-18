@@ -1144,6 +1144,15 @@ public class VM {
         }
     }
 
+    // add by pierre at 2022/7/18 p15
+    public int getCrossAssetsDecimals(int assetChainId, int assetId) {
+        if (this.vmContext != null) {
+            return this.vmContext.getCrossAssetsDecimals(assetChainId, assetId);
+        } else {
+            throw new RuntimeException(String.format("vmContext is null, parms: %s, %s", assetChainId, assetId));
+        }
+    }
+
     public String getRandomSeed(long endHeight, int count, String algorithm) {
         if (this.vmContext != null) {
             String seed;

@@ -24,12 +24,14 @@
 package io.nuls.contract.rpc.resource;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.Address;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.enums.ContractStatus;
+import io.nuls.contract.enums.TokenTypeStatus;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.manager.ContractTokenBalanceManager;
@@ -50,15 +52,19 @@ import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.util.MapUtil;
 import io.nuls.contract.vm.program.*;
+import io.nuls.contract.vm.util.Utils;
 import io.nuls.core.basic.Page;
 import io.nuls.core.basic.Result;
+import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.crypto.KeccakHash;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.FormatValidUtils;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.parse.SerializeUtils;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.*;
@@ -169,12 +175,14 @@ public class ContractResource extends BaseCmd {
         @Parameter(parameterName = "args", requestType = @TypeDescriptor(value = Object[].class), parameterDes = "参数列表", canNull = true)
     })
     @ResponseData(name = "返回值", description = "返回消耗的gas值", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "gasLimit", valueType = Long.class, description = "消耗的gas值，执行失败返回数值1")
+            @Key(name = "gasLimit", valueType = Long.class, description = "消耗的gas值，执行失败返回数值1"),
+            @Key(name = "errorMsg", valueType = String.class, description = "执行失败的错误信息")
     }))
     public Response imputedCreateGas(Map<String, Object> params) {
         try {
             Map<String, Object> resultMap = MapUtil.createHashMap(1);
             resultMap.put("gasLimit", 1);
+            String errorMsg = null;
             boolean isImputed = false;
             Result result = null;
             do {
@@ -199,6 +207,7 @@ public class ContractResource extends BaseCmd {
                 }
                 result = contractTxService.validateContractCreateTx(chainId, senderBytes, MAX_GASLIMIT, CONTRACT_MINIMUM_PRICE, contractCodeBytes, convertArgs);
                 if (result.isFailed()) {
+                    errorMsg = result.getMsg();
                     break;
                 }
                 isImputed = true;
@@ -210,6 +219,8 @@ public class ContractResource extends BaseCmd {
                 gasUsed += gasUsed >> 1;
                 gasUsed = gasUsed > MAX_GASLIMIT ? MAX_GASLIMIT : gasUsed;
                 resultMap.put("gasLimit", gasUsed);
+            } else if (StringUtils.isNotBlank(errorMsg)) {
+                resultMap.put("errorMsg", errorMsg);
             }
 
             return success(resultMap);
@@ -576,7 +587,7 @@ public class ContractResource extends BaseCmd {
             }
             ContractResult contractResult = result.getData();
             ContractResultDto contractResultDto = new ContractResultDto(chainId, contractResult, gasLimit);
-            this.filterRealTokenTransfers(chainId, contractResultDto);
+            //this.filterRealTokenTransfers(chainId, contractResultDto);
             return success(contractResultDto);
         } catch (Exception e) {
             Log.error(e);
@@ -596,12 +607,14 @@ public class ContractResource extends BaseCmd {
         @Parameter(parameterName = "args", requestType = @TypeDescriptor(value = Object[].class), parameterDes = "参数列表", canNull = true)
     })
     @ResponseData(name = "返回值", description = "返回消耗的gas值", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-        @Key(name = "gasLimit", valueType = Long.class, description = "消耗的gas值，执行失败返回数值1")
+        @Key(name = "gasLimit", valueType = Long.class, description = "消耗的gas值，执行失败返回数值1"),
+        @Key(name = "errorMsg", valueType = String.class, description = "执行失败的错误信息")
     }))
     public Response imputedCallGas(Map<String, Object> params) {
         try {
             Map<String, Object> resultMap = MapUtil.createHashMap(1);
             resultMap.put("gasLimit", 1);
+            String errorMsg = null;
             boolean isImputed = false;
             Result result = null;
             do {
@@ -655,6 +668,7 @@ public class ContractResource extends BaseCmd {
 
                 result = contractTxService.validateContractCallTx(chainId, senderBytes, value, MAX_GASLIMIT, CONTRACT_MINIMUM_PRICE, contractAddressBytes, methodName, methodDesc, convertArgs, multyAssetValueList);
                 if (result.isFailed()) {
+                    errorMsg = result.getMsg();
                     break;
                 }
                 isImputed = true;
@@ -667,6 +681,8 @@ public class ContractResource extends BaseCmd {
                 gasUsed += gasUsed >> 1;
                 gasUsed = gasUsed > MAX_GASLIMIT ? MAX_GASLIMIT : gasUsed;
                 resultMap.put("gasLimit", gasUsed);
+            } else if (StringUtils.isNotBlank(errorMsg)) {
+                resultMap.put("errorMsg", errorMsg);
             }
 
             return success(resultMap);
@@ -1048,6 +1064,88 @@ public class ContractResource extends BaseCmd {
         }
     }
 
+    @CmdAnnotation(cmd = CONTRACT_CODE, version = 1.0, description = "get code of contract")
+    @Parameters(value = {
+        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
+        @Parameter(parameterName = "contractAddress", parameterDes = "合约地址"),
+    })
+    @ResponseData(name = "返回值", description = "返回Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "result", description = "code")
+    }))
+    public Response contractCode(Map<String, Object> params) {
+        try {
+            Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
+            String contractAddress = (String) params.get("contractAddress");
+
+            if (!AddressTool.validAddress(chainId, contractAddress)) {
+                return failed(ADDRESS_ERROR);
+            }
+            byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
+            if (!ContractLedgerUtil.isExistContractAddress(chainId, contractAddressBytes)) {
+                return failed(CONTRACT_ADDRESS_NOT_EXIST);
+            }
+            BlockHeader blockHeader = BlockCall.getLatestBlockHeader(chainId);
+            // 当前区块状态根
+            byte[] prevStateRoot = ContractUtil.getStateRoot(blockHeader);
+            byte[] code = contractHelper.getContractCode(chainId, prevStateRoot, contractAddressBytes);
+            if (code == null) {
+                Result result = Result.getFailed(ContractErrorCode.DATA_NOT_FOUND);
+                return wrapperFailed(result);
+            } else {
+                Map<String, String> resultMap = MapUtil.createLinkedHashMap(2);
+                resultMap.put("result", HexUtil.encode(code));
+                return success(resultMap);
+            }
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
+    @CmdAnnotation(cmd = COMPUTE_ADDRESS, version = 1.0, description = "compute contract")
+    @Parameters(value = {
+        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
+        @Parameter(parameterName = "sender", parameterDes = "sender"),
+        @Parameter(parameterName = "codeHash", parameterDes = "codeHash"),
+        @Parameter(parameterName = "salt", parameterDes = "salt")
+    })
+    @ResponseData(name = "返回值", description = "返回Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "contractAddress", description = "合约地址")
+    }))
+    public Response computeAddress(Map<String, Object> params) {
+        try {
+            Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
+            String sender = (String) params.get("sender");
+            String codeHash = (String) params.get("codeHash");
+            List saltList = (List) params.get("salt");
+            if (saltList == null || saltList.isEmpty()) {
+                return failed(PARAMETER_ERROR);
+            }
+            int size = saltList.size();
+            String[] salts = new String[size];
+            for (int i=0;i<size;i++) {
+                salts[i] = saltList.get(i).toString();
+            }
+            ProgramEncodePacked encodePacked = new ProgramEncodePacked((short) size, salts);
+            if (!AddressTool.validAddress(chainId, sender)) {
+                return failed(ADDRESS_ERROR);
+            }
+            ProgramCreateData createData = new ProgramCreateData(
+                    AddressTool.getAddress(sender),
+                    encodePacked.serialize(),
+                    HexUtil.decode(codeHash));
+            Address newAddress = new Address(chainId, BaseConstant.CONTRACT_ADDRESS_TYPE, SerializeUtils.sha256hash160(KeccakHash.keccakBytes(createData.serialize(), 256)));
+            Map<String, String> resultMap = MapUtil.createLinkedHashMap(2);
+            resultMap.put("contractAddress", newAddress.toString());
+            return success(resultMap);
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
 
     @CmdAnnotation(cmd = CONSTRUCTOR, version = 1.0, description = "contract code constructor")
     @Parameters(description = "参数", value = {
@@ -1113,6 +1211,7 @@ public class ContractResource extends BaseCmd {
             byte[] prevStateRoot = ContractUtil.getStateRoot(blockHeader);
 
             ProgramExecutor track = contractHelper.getProgramExecutor(chainId).begin(prevStateRoot);
+            byte[] codeHash = track.contractCodeHash(contractAddressBytes);
             ProgramStatus status = track.status(contractAddressBytes);
             List<ProgramMethod> methods = track.method(contractAddressBytes);
             boolean isAcceptDirectTransferByOtherAsset = false;
@@ -1153,19 +1252,25 @@ public class ContractResource extends BaseCmd {
             dto.setBlockHeight(po.getBlockHeight());
             dto.setTokenType(po.getTokenType());
             dto.setNrc20(po.isNrc20());
-            boolean isNrc721 = ContractConstant.TOKEN_TYPE_NRC721 == po.getTokenType();
-            if (po.isNrc20() || isNrc721) {
+            boolean isNrc721 = TokenTypeStatus.NRC721.status() == po.getTokenType();
+            boolean isNrc1155 = TokenTypeStatus.NRC1155.status() == po.getTokenType();
+            if (po.isNrc20() || isNrc721 || isNrc1155) {
                 dto.setNrc20TokenName(po.getNrc20TokenName());
                 dto.setNrc20TokenSymbol(po.getNrc20TokenSymbol());
                 if (po.isNrc20()) {
                     dto.setDecimals(po.getDecimals());
                     dto.setTotalSupply(ContractUtil.bigInteger2String(po.getTotalSupply()));
+                } else if (isNrc1155) {
+                    ProgramResult uriResult = contractHelper.invokeViewMethod(chainId, contractAddressBytes, "uri", "() return String", null);
+                    String uri = uriResult.getResult();
+                    dto.setTokenUri(uri);
                 }
             }
             dto.setStatus(status.name());
             dto.setMethod(methods);
             dto.setDirectPayable(po.isAcceptDirectTransfer());
             dto.setDirectPayableByOtherAsset(isAcceptDirectTransferByOtherAsset);
+            dto.setCodeHash(HexUtil.encode(codeHash));
             return success(dto);
         } catch (Exception e) {
             Log.error(e);
@@ -1210,7 +1315,7 @@ public class ContractResource extends BaseCmd {
                 if (contractResultDto == null) {
                     continue;
                 }
-                this.filterRealTokenTransfers(chainId, contractResultDto);
+                //this.filterRealTokenTransfers(chainId, contractResultDto);
                 resultMap.put(hash, contractResultDto);
             }
             return success(resultMap);
@@ -1270,7 +1375,7 @@ public class ContractResource extends BaseCmd {
                 resultMap.put("msg", msg);
             }
             if (flag && contractResultDto != null) {
-                this.filterRealTokenTransfers(chainId, contractResultDto);
+                //this.filterRealTokenTransfers(chainId, contractResultDto);
                 resultMap.put("data", contractResultDto);
             }
             if (!flag) {
@@ -1294,68 +1399,6 @@ public class ContractResource extends BaseCmd {
             tx1.setBlockHeight(contractExecuteResult.getBlockHeight());
         }
         return contractResultDto;
-    }
-
-    private void filterRealTokenTransfers(int chainId, ContractResultDto contractResultDto) {
-        List<ContractTokenTransferDto> tokenTransfers = contractResultDto.getTokenTransfers();
-        List<ContractToken721TransferDto> token721Transfers = contractResultDto.getToken721Transfers();
-        Map<String, ContractAddressInfoPo> cache = MapUtil.createHashMap(tokenTransfers.size() + token721Transfers.size());
-        do {
-            if (tokenTransfers == null || tokenTransfers.isEmpty()) {
-                break;
-            }
-            List<ContractTokenTransferDto> resultDto = new ArrayList<>();
-            for (ContractTokenTransferDto tokenTransfer : tokenTransfers) {
-                try {
-                    if (StringUtils.isBlank(tokenTransfer.getName())) {
-                        String contractAddress = tokenTransfer.getContractAddress();
-                        ContractAddressInfoPo po = cache.get(contractAddress);
-                        if (po == null) {
-                            po = contractHelper.getContractAddressInfo(
-                                    chainId, AddressTool.getAddress(contractAddress)).getData();
-                            cache.put(contractAddress, po);
-                        }
-                        if (po == null || !po.isNrc20()) {
-                            continue;
-                        }
-                        tokenTransfer.setNrc20Info(po);
-                        resultDto.add(tokenTransfer);
-                    }
-                } catch (Exception e) {
-                    Log.error(e);
-                }
-            }
-            contractResultDto.setTokenTransfers(resultDto);
-        } while (false);
-
-        do {
-            if (token721Transfers == null || token721Transfers.isEmpty()) {
-                break;
-            }
-            List<ContractToken721TransferDto> result721Dto = new ArrayList<>();
-            for (ContractToken721TransferDto token721Transfer : token721Transfers) {
-                try {
-                    if (StringUtils.isBlank(token721Transfer.getName())) {
-                        String contractAddress = token721Transfer.getContractAddress();
-                        ContractAddressInfoPo po = cache.get(contractAddress);
-                        if (po == null) {
-                            po = contractHelper.getContractAddressInfo(
-                                    chainId, AddressTool.getAddress(contractAddress)).getData();
-                            cache.put(contractAddress, po);
-                        }
-                        if (po == null || TOKEN_TYPE_NRC721 != po.getTokenType()) {
-                            continue;
-                        }
-                        token721Transfer.setNrc721Info(po);
-                        result721Dto.add(token721Transfer);
-                    }
-                } catch (Exception e) {
-                    Log.error(e);
-                }
-            }
-            contractResultDto.setToken721Transfers(result721Dto);
-        } while (false);
-
     }
 
     @CmdAnnotation(cmd = CONTRACT_TX, version = 1.0, description = "合约交易/contract tx")
@@ -1394,7 +1437,7 @@ public class ContractResource extends BaseCmd {
             // 计算交易实际发生的金额
             calTransactionValue(txDto);
             if (contractResultDto != null) {
-                this.filterRealTokenTransfers(chainId, contractResultDto);
+                //this.filterRealTokenTransfers(chainId, contractResultDto);
                 txDto.setContractResult(contractResultDto);
             }
 

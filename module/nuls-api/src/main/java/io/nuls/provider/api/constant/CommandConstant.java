@@ -56,6 +56,7 @@ public interface CommandConstant {
     String CONTRACT_INFO = "sc_contract_info";
     //查询智能合约执行结果
     String CONTRACT_RESULT = "sc_contract_result";
+    String CONTRACT_TX = "sc_contract_tx";
     //查询智能合约构造函数
     String CONSTRUCTOR = "sc_constructor";
     //验证创建合约
@@ -81,4 +82,6 @@ public interface CommandConstant {
     //查询已注册的跨链信息
     String GET_REGISTERED_CHAIN = "getRegisteredChainInfoList";
     String CODE_HASH = "sc_code_hash";
+    String CONTRACT_CODE = "sc_contract_code";
+    String COMPUTE_ADDRESS = "sc_compute_address";
 }

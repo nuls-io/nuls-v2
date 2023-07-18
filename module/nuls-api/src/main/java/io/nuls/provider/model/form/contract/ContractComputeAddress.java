@@ -22,36 +22,46 @@
  * SOFTWARE.
  *
  */
-package io.nuls.chain.service.impl;
+package io.nuls.provider.model.form.contract;
 
-import io.nuls.chain.config.NulsChainConfig;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.thread.ThreadUtils;
-import io.nuls.core.thread.commom.NulsThreadFactory;
 
-import java.util.concurrent.ScheduledThreadPoolExecutor;
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
+import io.nuls.v2.util.ContractUtil;
 
-/**
- * 线程任务管理
- * threads   manager
- *
- * @author lan
- * @date 2018/11/01
- */
-@Component
-public class CmTaskManager {
-    @Autowired
-    private NulsChainConfig nulsChainConfig;
+import java.math.BigInteger;
 
-    private ScheduledThreadPoolExecutor executorService;
+@ApiModel
+public class ContractComputeAddress {
 
-    public void start() {
-//        executorService = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("cmThread"));
-//        chainAssetsCirculateUpdate();
+    @ApiModelProperty(description = "交易创建者")
+    private String sender;
+    @ApiModelProperty(description = "codeHash")
+    private String codeHash;
+    @ApiModelProperty(description = "salts", required = false)
+    private Object[] salt;
+
+    public String getSender() {
+        return sender;
     }
 
-    private void chainAssetsCirculateUpdate() {
-//        executorService.scheduleWithFixedDelay(new ChainAssetUpdateTask(), 1, nulsChainConfig.getChainAssetsTaskIntervalMinute(), TimeUnit.MINUTES);
+    public void setSender(String sender) {
+        this.sender = sender;
+    }
+
+    public String getCodeHash() {
+        return codeHash;
+    }
+
+    public void setCodeHash(String codeHash) {
+        this.codeHash = codeHash;
+    }
+
+    public Object[] getSalt() {
+        return salt;
+    }
+
+    public void setSalt(Object[] salt) {
+        this.salt = salt;
     }
 }

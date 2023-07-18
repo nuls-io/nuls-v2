@@ -98,8 +98,6 @@ public interface ContractConstant {
     String TO = "to";
     String VALUE = "value";
     String TOKEN_ID = "tokenId";
-    int TOKEN_TYPE_NRC20 = 1;
-    int TOKEN_TYPE_NRC721 = 2;
     /**
      * NRC20
      */
@@ -124,6 +122,13 @@ public interface ContractConstant {
     String NRC721_STANDARD_FILE = "nrc721.json";
     String NRC721_EVENT_TRANSFER = "Transfer";
     String NRC721_EVENT_APPROVAL = "Approval";
+
+    /**
+     * NRC1155
+     */
+    String NRC1155_STANDARD_FILE = "nrc1155.json";
+    String NRC1155_EVENT_TRANSFER_SINGLE = "TransferSingle";
+    String NRC1155_EVENT_TRANSFER_BATCH = "TransferBatch";
 
     int DEFAULT_MAX_VIEW_GAS = 100000000;
     String SYS_FILE_ENCODING = "file.encoding";

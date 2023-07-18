@@ -29,7 +29,7 @@ import java.math.BigInteger;
 // add by pierre at 2022/6/1 p14
 public class ContractCreate {
     private boolean acceptDirectTransfer;
-    // token类型, 0 - 非token, 1 - NRC20, 2 - NRC721
+    // token类型, 0 - 非token, 1 - NRC20, 2 - NRC721, 3 - NRC1155
     private int tokenType;
     private String tokenName;
     private String tokenSymbol;

@@ -26,8 +26,7 @@ package io.nuls.contract.processor;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
-import io.nuls.contract.constant.ContractConstant;
-import io.nuls.contract.constant.ContractErrorCode;
+import io.nuls.contract.enums.TokenTypeStatus;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.model.bo.ContractInternalCreate;
 import io.nuls.contract.model.bo.ContractResult;
@@ -43,7 +42,6 @@ import io.nuls.contract.storage.ContractTokenTransferStorageService;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.ProgramStatus;
-import io.nuls.contract.vm.util.JsonUtils;
 import io.nuls.core.basic.Result;
 import io.nuls.core.basic.VarInt;
 import io.nuls.core.core.annotation.Autowired;
@@ -314,7 +312,7 @@ public class CallContractTxProcessor {
             List<ContractInternalCreate> internalCreates = contractResult.getInternalCreates();
             if (internalCreates != null && !internalCreates.isEmpty()) {
                 for (ContractInternalCreate internalCreate : internalCreates) {
-                    Result result = contractHelper.onRollbackForCreateV14(chainId, internalCreate.getContractAddress(), internalCreate.getTokenType() == ContractConstant.TOKEN_TYPE_NRC20);
+                    Result result = contractHelper.onRollbackForCreateV14(chainId, internalCreate.getContractAddress(), internalCreate.getTokenType() == TokenTypeStatus.NRC20.status());
                     if (result.isFailed()) {
                         return result;
                     }
