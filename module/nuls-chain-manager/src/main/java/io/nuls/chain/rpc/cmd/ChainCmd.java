@@ -167,10 +167,10 @@ public class ChainCmd extends BaseChainCmd {
             if (asset.getDecimalPlaces() < Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMin()) || asset.getDecimalPlaces() > Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMax())) {
                 return failed(CmErrorCode.ERROR_ASSET_DECIMALPLACES);
             }
-            if (!FormatValidUtils.validTokenNameOrSymbol(asset.getSymbol())) {
+            if (!FormatValidUtils.validTokenNameOrSymbolV15(asset.getSymbol())) {
                 return failed(CmErrorCode.ERROR_ASSET_SYMBOL);
             }
-            if (!FormatValidUtils.validTokenNameOrSymbol(asset.getAssetName())) {
+            if (!FormatValidUtils.validTokenNameOrSymbolV15(asset.getAssetName())) {
                 return failed(CmErrorCode.ERROR_ASSET_NAME);
             }
 
@@ -307,10 +307,10 @@ public class ChainCmd extends BaseChainCmd {
             if (asset.getDecimalPlaces() < Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMin()) || asset.getDecimalPlaces() > Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMax())) {
                 return failed(CmErrorCode.ERROR_ASSET_DECIMALPLACES);
             }
-            if (!FormatValidUtils.validTokenNameOrSymbol(asset.getSymbol())) {
+            if (!FormatValidUtils.validTokenNameOrSymbolV15(asset.getSymbol())) {
                 return failed(CmErrorCode.ERROR_ASSET_SYMBOL);
             }
-            if (!FormatValidUtils.validTokenNameOrSymbol(asset.getAssetName())) {
+            if (!FormatValidUtils.validTokenNameOrSymbolV15(asset.getAssetName())) {
                 return failed(CmErrorCode.ERROR_ASSET_NAME);
             }
 

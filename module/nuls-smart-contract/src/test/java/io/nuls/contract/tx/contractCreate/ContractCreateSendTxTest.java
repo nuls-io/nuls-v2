@@ -50,8 +50,16 @@ import static io.nuls.contract.constant.ContractCmdConstant.TOKEN_TRANSFER;
  */
 public class ContractCreateSendTxTest extends BaseQuery {
 
-    String contractA = "tNULSeBaMwJNC9FUQbiTk2mnCLqYSnF1Ub7nt5";
+    String contractA = "tNULSeBaN7MCLavwRjJqH28w9NCmahUbybYC6K";
 
+    @Test
+    public void createNRC1155() throws Exception {
+        InputStream in = new FileInputStream("/Users/pierreluo/IdeaProjects/NULS-NRC1155Demo/target/NULS-NRC1155Demo-1.0-SNAPSHOT.jar");
+        byte[] contractCode = IOUtils.toByteArray(in);
+        String remark = "create 1155 A";
+        String create = this.invokeCreate(sender, contractCode, "test_c", remark, "asdasdasd3", "name1155", "SYMBOL1155v6");
+        System.out.println(create);
+    }
     @Test
     public void createAndInit() throws Exception {
         this.contractA = createContractA();
@@ -60,8 +68,17 @@ public class ContractCreateSendTxTest extends BaseQuery {
 
     @Test
     public void testCreate() throws Exception {
-        Map resultA = this.invokeCall(sender, null, contractA, "createContract", null, null,
-                new String[]{"tNULSeBaMy3Tw7pHNDYwSMaewDypQMdNywXXUJ", "tccc5", "777"});
+        contractA = "tNULSeBaMznzh3a6QZedEABuMiydtN4QgV7Euh";
+        Map resultA = this.invokeCall(sender, null, contractA, "createContract4", null, null,
+                new String[]{"tNULSeBaN7MCLavwRjJqH28w9NCmahUbybYC6K", "2"});
+        resultCheck(resultA);
+    }
+
+    @Test
+    public void testInnerCallForCreate() throws Exception {
+        contractA = "tNULSeBaMznzh3a6QZedEABuMiydtN4QgV7Euh";
+        Map resultA = this.invokeCall(sender, null, contractA, "innerCall", null, null,
+                new String[]{"tNULSeBaN8w6ivxm6nqPMrUVV5hp1gVVd3HpDA", "tccc9"});
         resultCheck(resultA);
     }
 
@@ -81,7 +98,8 @@ public class ContractCreateSendTxTest extends BaseQuery {
 
     @Test
     public void invokeViewTest() throws Exception {
-        String view = this.invokeView(contractA, "codeHash", List.of("tNULSeBaN1yJ1rZmwCwGjoRs86cajmbBWZ6he5"));
+        contractA = "tNULSeBaMznzh3a6QZedEABuMiydtN4QgV7Euh";
+        String view = this.invokeView(contractA, "decimals", 2, 1);
         System.out.println(view);
     }
 

@@ -316,7 +316,30 @@ public class ValidateServiceImpl implements ValidateService {
 //        }
         return ChainEventResult.getResultSuccess();
     }
-
+    @Override
+    public ChainEventResult batchChainRegValidatorV15(BlockChain blockChain, Asset asset, Map<String, Integer> tempChains, Map<String, Integer> tempAssets) throws Exception {
+        ChainEventResult chainEventResult = batchChainRegBaseValidator(blockChain, asset, tempChains, tempAssets);
+        if (!chainEventResult.isSuccess()) {
+            return chainEventResult;
+        }
+        if (asset.getDecimalPlaces() < Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMin()) || asset.getDecimalPlaces() > Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMax())) {
+            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_DECIMALPLACES);
+        }
+        if (!FormatValidUtils.validTokenNameOrSymbolV15(asset.getSymbol())) {
+            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_SYMBOL);
+        }
+        if (!FormatValidUtils.validTokenNameOrSymbolV15(asset.getAssetName())) {
+            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_NAME);
+        }
+//        //判断黑洞资产与锁定资产
+//        if(!BigIntegerUtils.isEqual(asset.getDepositNuls(),nulsChainConfig.getAssetDepositNuls())){
+//            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_DEPOSITNULS);
+//        }
+//        if(!BigIntegerUtils.isEqual(asset.getDestroyNuls(),nulsChainConfig.getAssetDestroyNuls())){
+//            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_DEPOSITNULS);
+//        }
+        return ChainEventResult.getResultSuccess();
+    }
     @Override
     public ChainEventResult batchAssetRegValidatorV7(Asset asset, Map<String, Integer> tempAssets) throws Exception {
         if (assetService.assetExist(asset, tempAssets)) {
@@ -353,6 +376,30 @@ public class ValidateServiceImpl implements ValidateService {
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_SYMBOL);
         }
         if (!FormatValidUtils.validTokenNameOrSymbol(asset.getAssetName())) {
+            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_NAME);
+        }
+        //判断黑洞资产与锁定资产
+//        if (!BigIntegerUtils.isEqual(asset.getDepositNuls(), nulsChainConfig.getAssetDepositNuls())) {
+//            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_DEPOSITNULS);
+//        }
+//        if (!BigIntegerUtils.isEqual(asset.getDestroyNuls(), nulsChainConfig.getAssetDestroyNuls())) {
+//            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_DEPOSITNULS);
+//        }
+        return ChainEventResult.getResultSuccess();
+    }
+
+    @Override
+    public ChainEventResult batchAssetRegValidatorV15(Asset asset, Map<String, Integer> tempAssets) throws Exception {
+        if (assetService.regChainAssetExist(asset, tempAssets)) {
+            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_ID_EXIST);
+        }
+        if (asset.getDecimalPlaces() < Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMin()) || asset.getDecimalPlaces() > Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMax())) {
+            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_DECIMALPLACES);
+        }
+        if (!FormatValidUtils.validTokenNameOrSymbolV15(asset.getSymbol())) {
+            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_SYMBOL);
+        }
+        if (!FormatValidUtils.validTokenNameOrSymbolV15(asset.getAssetName())) {
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_NAME);
         }
         //判断黑洞资产与锁定资产

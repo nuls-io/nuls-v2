@@ -23,7 +23,7 @@
  */
 package io.nuls.contract.rpc.call;
 
-import io.nuls.contract.model.bo.Chain;
+import io.nuls.contract.rpc.CallHelper;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
@@ -51,6 +51,27 @@ public class ChainManagerCall {
             return callResp.isSuccess();
         } catch (Exception e) {
             throw new NulsException(e);
+        }
+    }
+
+    public static int getCrossAssetsDecimals(int chainId, int assetId) {
+        Map<String, Object> params = new HashMap(4);
+        params.put(Constants.CHAIN_ID, chainId);
+        params.put("assetId", assetId);
+        try {
+            Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CM.abbr, "cm_asset", params);
+            if (!callResp.isSuccess()) {
+                return 0;
+            }
+            Map resData = (Map) callResp.getResponseData();
+            Map resultMap = (Map) resData.get("cm_asset");
+            Object decimalPlaces = resultMap.get("decimalPlaces");
+            if (decimalPlaces == null) {
+                return 0;
+            }
+            return Integer.parseInt(decimalPlaces.toString());
+        } catch (Exception e) {
+            return 0;
         }
     }
 }

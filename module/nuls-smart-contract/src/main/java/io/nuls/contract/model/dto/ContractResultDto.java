@@ -25,6 +25,7 @@ package io.nuls.contract.model.dto;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.enums.CmdRegisterMode;
+import io.nuls.contract.enums.TokenTypeStatus;
 import io.nuls.contract.model.bo.ContractInternalCreate;
 import io.nuls.contract.model.bo.ContractMergedTransfer;
 import io.nuls.contract.model.bo.ContractMultyAssetMergedTransfer;
@@ -47,8 +48,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static io.nuls.contract.constant.ContractConstant.TOKEN_TYPE_NRC20;
-import static io.nuls.contract.constant.ContractConstant.TOKEN_TYPE_NRC721;
 import static io.nuls.contract.util.ContractUtil.bigInteger2String;
 
 /**
@@ -94,6 +93,8 @@ public class ContractResultDto {
     private List<ContractTokenTransferDto> tokenTransfers;
     @ApiModelProperty(description = "合约NRC721-token转账列表", type = @TypeDescriptor(value = List.class, collectionElement = ContractToken721TransferDto.class))
     private List<ContractToken721TransferDto> token721Transfers;
+    @ApiModelProperty(description = "合约NRC1155-token转账列表", type = @TypeDescriptor(value = List.class, collectionElement = ContractToken1155TransferDto.class))
+    private List<ContractToken1155TransferDto> token1155Transfers;
     @ApiModelProperty(description = "合约调用外部命令的调用记录列表", type = @TypeDescriptor(value = List.class, collectionElement = ContractInvokeRegisterCmdDto.class))
     private List<ContractInvokeRegisterCmdDto> invokeRegisterCmds;
     @ApiModelProperty(description = "合约生成交易的序列化字符串列表", type = @TypeDescriptor(value = List.class, collectionElement = String.class))
@@ -217,21 +218,25 @@ public class ContractResultDto {
     private void makeTokenTransfers(int chainId, List<String> tokenTransferEvents) {
         List<ContractTokenTransferDto> result = new ArrayList<>();
         List<ContractToken721TransferDto> result721 = new ArrayList<>();
+        List<ContractToken1155TransferDto> result1155 = new ArrayList<>();
         if (tokenTransferEvents != null && tokenTransferEvents.size() > 0) {
             ContractTokenTransferInfo info;
             for (String event : tokenTransferEvents) {
                 info = ContractUtil.convertJsonToTokenTransferInfo(chainId, event);
                 if (info != null) {
-                    if (TOKEN_TYPE_NRC20 == info.getTokenType()) {
+                    if (TokenTypeStatus.NRC20.status() == info.getTokenType()) {
                         result.add(new ContractTokenTransferDto(info));
-                    } else if (TOKEN_TYPE_NRC721 == info.getTokenType()) {
+                    } else if (TokenTypeStatus.NRC721.status() == info.getTokenType()) {
                         result721.add(new ContractToken721TransferDto(info));
+                    } else if (TokenTypeStatus.NRC1155.status() == info.getTokenType()) {
+                        result1155.add(new ContractToken1155TransferDto(info));
                     }
                 }
             }
         }
         this.tokenTransfers = result;
         this.token721Transfers = result721;
+        this.token1155Transfers = result1155;
     }
 
     public List<ContractMergedTransferDto> getTransfers() {
@@ -419,5 +424,13 @@ public class ContractResultDto {
 
     public void setInternalCreates(List<ContractInternalCreateDto> internalCreates) {
         this.internalCreates = internalCreates;
+    }
+
+    public List<ContractToken1155TransferDto> getToken1155Transfers() {
+        return token1155Transfers == null ? new ArrayList<>() : token1155Transfers;
+    }
+
+    public void setToken1155Transfers(List<ContractToken1155TransferDto> token1155Transfers) {
+        this.token1155Transfers = token1155Transfers;
     }
 }

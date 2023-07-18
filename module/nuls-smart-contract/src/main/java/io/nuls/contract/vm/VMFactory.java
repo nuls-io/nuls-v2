@@ -344,6 +344,22 @@ public class VMFactory {
         waitCreate.countDown();
     }
 
+    public static void reInitVM_v15() {
+        waitCreate = new CountDownLatch(1);
+        MethodArea.INIT_CLASS_CODES.clear();
+        MethodArea.INIT_METHOD_CODES.clear();
+        Heap.INIT_OBJECTS.clear();
+        Heap.INIT_ARRAYS.clear();
+
+        VM = loadVM_v15();
+
+        MethodArea.INIT_CLASS_CODES.putAll(VM.methodArea.getClassCodes());
+        MethodArea.INIT_METHOD_CODES.putAll(VM.methodArea.getMethodCodes());
+        Heap.INIT_OBJECTS.putAll(VM.heap.objects);
+        Heap.INIT_ARRAYS.putAll(VM.heap.arrays);
+        waitCreate.countDown();
+    }
+
     private static VM loadVM_v8() {
         VM vm = new VM();
         Map<String, ClassCode> classCodes = new LinkedHashMap<>(1024);
@@ -385,6 +401,29 @@ public class VMFactory {
         }
         for (String className : ProgramConstants.SDK_CLASS_NAMES_V14_ADD) {
             ClassCode classCode = ClassCodeLoader.loadFromResource_v14(className);
+            classCodes.put(classCode.name, classCode);
+        }
+        vm.methodArea.loadClassCodes(classCodes);
+
+        ProgramConstants.SDK_CLASS_NAMES = ArrayUtils.addAll(ProgramConstants.SDK_CLASS_NAMES, ProgramConstants.SDK_CLASS_NAMES_V8_ADD);
+        ProgramConstants.SDK_CLASS_NAMES = ArrayUtils.addAll(ProgramConstants.SDK_CLASS_NAMES, ProgramConstants.SDK_CLASS_NAMES_V14_ADD);
+
+        return vm;
+    }
+
+    private static VM loadVM_v15() {
+        VM vm = new VM();
+        Map<String, ClassCode> classCodes = new LinkedHashMap<>(1024);
+        for (String className : CLINIT_CLASSES) {
+            ClassCode classCode = ClassCodeLoader.loadFromResource_v15(className);
+            classCodes.put(classCode.name, classCode);
+        }
+        for (String className : ProgramConstants.SDK_CLASS_NAMES_V8_ADD) {
+            ClassCode classCode = ClassCodeLoader.loadFromResource_v15(className);
+            classCodes.put(classCode.name, classCode);
+        }
+        for (String className : ProgramConstants.SDK_CLASS_NAMES_V14_ADD) {
+            ClassCode classCode = ClassCodeLoader.loadFromResource_v15(className);
             classCodes.put(classCode.name, classCode);
         }
         vm.methodArea.loadClassCodes(classCodes);

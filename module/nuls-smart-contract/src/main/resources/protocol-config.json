@@ -1,5 +1,30 @@
 [
   {
+    "version": "16",
+    "extend": "14",
+    "validTxs": [
+      {
+        "type": "15",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "CreateContractProcessorV16"
+      },
+      {
+        "type": "16",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "CallContractProcessorV16"
+      }
+    ],
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  },
+  {
     "version": "14",
     "extend": "13",
     "validTxs": [
