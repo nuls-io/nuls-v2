@@ -1,0 +1,26 @@
+[
+  {
+    "version": "1",
+    "extend": "",
+    "validTxs": [],
+    "validMsgs": [
+      {
+        "name": "io.nuls.transaction.message.ForwardTxMessage",
+        "protocolCmd": "newHash",
+        "handlers": "ForwardTxMessageHandlerV1"
+      },
+      {
+        "name": "io.nuls.transaction.message.GetTxMessage",
+        "protocolCmd": "askTx",
+        "handlers": "GetTxMessageHandlerV1"
+      },
+      {
+        "name": "io.nuls.transaction.message.BroadcastTxMessage",
+        "protocolCmd": "receiveTx",
+        "handlers": "BroadcastTxMessageHandlerV1"
+      }
+    ],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  }
+]
