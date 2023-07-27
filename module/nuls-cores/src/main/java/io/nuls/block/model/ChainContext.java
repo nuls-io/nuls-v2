@@ -30,6 +30,7 @@ import io.nuls.block.thread.monitor.TxGroupRequestor;
 import io.nuls.block.utils.LoggerUtil;
 import io.nuls.block.utils.SingleBlockCacher;
 import io.nuls.block.utils.SmallBlockCacher;
+import io.nuls.common.ConfigBean;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.CollectionUtils;
 
@@ -84,7 +85,7 @@ public class ChainContext {
     /**
      * 链的运行时参数
      */
-    private ChainParameters parameters;
+    private ConfigBean parameters;
 
     /**
      * 获取锁对象
@@ -216,11 +217,11 @@ public class ChainContext {
         this.genesisBlock = genesisBlock;
     }
 
-    public ChainParameters getParameters() {
+    public ConfigBean getParameters() {
         return parameters;
     }
 
-    public void setParameters(ChainParameters parameters) {
+    public void setParameters(ConfigBean parameters) {
         this.parameters = parameters;
     }
 

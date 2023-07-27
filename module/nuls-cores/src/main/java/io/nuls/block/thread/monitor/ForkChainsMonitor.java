@@ -24,7 +24,7 @@ import io.nuls.block.constant.StatusEnum;
 import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
-import io.nuls.block.model.ChainParameters;
+import io.nuls.common.ConfigBean;
 import io.nuls.block.model.CheckResult;
 import io.nuls.block.rpc.call.ConsensusCall;
 import io.nuls.block.rpc.call.TransactionCall;
@@ -73,7 +73,7 @@ public class ForkChainsMonitor extends BaseMonitor {
                 context.printChains();
                 //遍历当前分叉链,与主链进行比对,找出最大高度差,与默认参数chainSwtichThreshold对比,确定要切换的分叉链
                 Chain masterChain = BlockChainManager.getMasterChain(chainId);
-                ChainParameters parameters = context.getParameters();
+                ConfigBean parameters = context.getParameters();
                 int chainSwtichThreshold = parameters.getChainSwtichThreshold();
                 Chain switchChain = new Chain();
                 int maxHeightDifference = 0;

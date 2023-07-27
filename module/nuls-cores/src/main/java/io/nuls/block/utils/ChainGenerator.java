@@ -28,8 +28,8 @@ import io.nuls.base.data.NulsHash;
 import io.nuls.block.constant.ChainTypeEnum;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;
-import io.nuls.block.model.ChainParameters;
 import io.nuls.block.service.BlockService;
+import io.nuls.common.ConfigBean;
 
 import java.util.ArrayDeque;
 
@@ -148,7 +148,7 @@ public class ChainGenerator {
         chain.setPreviousHash(header.getPreHash());
         chain.setStartHashCode(header.getHash().hashCode());
         ArrayDeque<NulsHash> hashs = new ArrayDeque<>();
-        ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
+        ConfigBean parameters = ContextManager.getContext(chainId).getParameters();
         int heightRange = parameters.getHeightRange();
         long start = height - heightRange + 1;
         start = start >= 0 ? start : 0;

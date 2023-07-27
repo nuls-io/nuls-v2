@@ -28,7 +28,7 @@ import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.HeightRangeMessage;
 import io.nuls.block.model.BlockDownloaderParams;
 import io.nuls.block.model.ChainContext;
-import io.nuls.block.model.ChainParameters;
+import io.nuls.common.ConfigBean;
 import io.nuls.block.model.Node;
 import io.nuls.block.rpc.call.NetworkCall;
 import io.nuls.core.exception.NulsRuntimeException;

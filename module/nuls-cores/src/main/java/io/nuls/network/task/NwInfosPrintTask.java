@@ -24,8 +24,8 @@
  */
 package io.nuls.network.task;
 
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.core.ioc.SpringLiteContext;
-import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.TimeManager;
 import io.nuls.network.model.Node;
@@ -52,7 +52,7 @@ public class NwInfosPrintTask implements Runnable {
     private void printlnPeer() {
         NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
         List<NodeGroup> nodeGroupList = nodeGroupManager.getNodeGroups();
-        NetworkConfig networkConfig = SpringLiteContext.getBean(NetworkConfig.class);
+        NulsCoresConfig networkConfig = SpringLiteContext.getBean(NulsCoresConfig.class);
         if (networkConfig.isMoonNode()) {
             for (NodeGroup nodeGroup : nodeGroupList) {
                 if (nodeGroup.isMoonCrossGroup()) {

@@ -26,6 +26,7 @@
 package io.nuls.ledger.service.impl;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -33,7 +34,6 @@ import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.core.model.FormatValidUtils;
-import io.nuls.ledger.config.LedgerConfig;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.model.po.AccountState;
@@ -60,7 +60,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Component
 public class AssetRegMngServiceImpl implements AssetRegMngService {
     @Autowired
-    LedgerConfig ledgerConfig;
+    NulsCoresConfig ledgerConfig;
     @Autowired
     ChainAssetsService chainAssetsService;
     /**

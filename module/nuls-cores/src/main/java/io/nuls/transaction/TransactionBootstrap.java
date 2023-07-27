@@ -25,86 +25,67 @@
 package io.nuls.transaction;
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.protocol.ModuleHelper;
-import io.nuls.base.protocol.ProtocolGroupManager;
-import io.nuls.base.protocol.RegisterHelper;
+import io.nuls.common.INulsCoresBootstrap;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.rockdb.service.RocksDBService;
-import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.modulebootstrap.Module;
-import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
-import io.nuls.core.rpc.modulebootstrap.RpcModule;
-import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.core.rpc.util.AddressPrefixDatas;
-import io.nuls.core.rpc.util.NulsDateUtils;
-import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxContext;
-import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.manager.ChainManager;
-import io.nuls.transaction.model.bo.Chain;
-import io.nuls.transaction.utils.DBUtil;
 import io.nuls.transaction.utils.TxUtil;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Set;
 
 import static io.nuls.transaction.utils.LoggerUtil.LOG;
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * @author: Charlie
  * @date: 2019/3/4
  */
 @Component
-public class TransactionBootstrap extends RpcModule {
+public class TransactionBootstrap implements INulsCoresBootstrap {
 
     @Autowired
-    private TxConfig txConfig;
+    private NulsCoresConfig txConfig;
     @Autowired
     private AddressPrefixDatas addressPrefixDatas;
     @Autowired
     private ChainManager chainManager;
 
-    public static void main(String[] args) {
-        if (args == null || args.length == 0) {
-            args = new String[]{"ws://" + HostInfo.getLocalIP() + ":7771"};
-        }
-        NulsRpcModuleBootstrap.run("io.nuls", args);
+    @Override
+    public int order() {
+        return 3;
     }
 
     @Override
+    public void mainFunction(String[] args) {
+        this.init();
+    }
+
     public void init() {
         try {
-            //初始化地址工具
-            AddressTool.init(addressPrefixDatas);
-            //初始化系统参数
-            initSys();
             //初始化数据库配置文件
             initDB();
             initTransactionContext();
             chainManager.initChain();
             TxUtil.blackHolePublicKey = HexUtil.decode(txConfig.getBlackHolePublicKey());
-            ModuleHelper.init(this);
         } catch (Exception e) {
             LOG.error("Transaction init error!");
             LOG.error(e);
         }
     }
 
-    @Override
-    public boolean doStart() {
+    private boolean doStart() {
         try {
             chainManager.runChain();
-            while (!isDependencieReady(ModuleE.NW.abbr)){
-                LOG.debug("wait depend modules ready");
-                Thread.sleep(2000L);
-            }
             LOG.info("Transaction Ready...");
             return true;
         } catch (Exception e) {
@@ -116,57 +97,11 @@ public class TransactionBootstrap extends RpcModule {
 
 
     @Override
-    public void onDependenciesReady(Module module) {
+    public void onDependenciesReady() {
+        doStart();
         // add by pierre at 2019-12-04 增加与智能合约模块的连接标志
-        LOG.info("module [{}] is connected, version [{}]", module.getName(), module.getVersion());
-        if (ModuleE.SC.abbr.equals(module.getName())) {
-            txConfig.setCollectedSmartContractModule(true);
-        }
+        txConfig.setCollectedSmartContractModule(true);
         // end code by pierre
-        if (ModuleE.NW.abbr.equals(module.getName())) {
-            RegisterHelper.registerMsg(ProtocolGroupManager.getOneProtocol());
-        }
-        if (ModuleE.PU.abbr.equals(module.getName())) {
-            chainManager.getChainMap().keySet().forEach(RegisterHelper::registerProtocol);
-        }
-    }
-
-    @Override
-    public RpcModuleState onDependenciesReady() {
-        LOG.info("Transaction onDependenciesReady");
-        NulsDateUtils.getInstance().start();
-        return RpcModuleState.Running;
-    }
-
-    @Override
-    public RpcModuleState onDependenciesLoss(Module module) {
-        // add by pierre at 2019-12-04 增加与智能合约模块的连接标志
-        LOG.info("module [{}] has lost connection, version [{}]", module.getName(), module.getVersion());
-        if (ModuleE.SC.abbr.equals(module.getName())) {
-            txConfig.setCollectedSmartContractModule(false);
-        }
-        // end code by pierre
-        if (ModuleE.BL.abbr.equals(module.getName())) {
-            for(Chain chain : chainManager.getChainMap().values()) {
-                chain.getProcessTxStatus().set(false);
-            }
-        }
-        if (ModuleE.CS.abbr.equals(module.getName())) {
-            for(Chain chain : chainManager.getChainMap().values()) {
-                chain.getPackaging().set(false);
-            }
-        }
-        return RpcModuleState.Ready;
-    }
-
-    @Override
-    public Module[] declareDependent() {
-        return new Module[]{
-                Module.build(ModuleE.NW),
-                Module.build(ModuleE.LG),
-                Module.build(ModuleE.BL),
-                Module.build(ModuleE.AC)
-        };
     }
 
     @Override
@@ -174,29 +109,10 @@ public class TransactionBootstrap extends RpcModule {
         return new Module(ModuleE.TX.abbr, TxConstant.RPC_VERSION);
     }
 
-    @Override
-    public Set<String> getRpcCmdPackage() {
-        return Set.of(TxConstant.TX_CMD_PATH);
-    }
-
-    /**
-     * 初始化系统编码
-     */
-    private void initSys() {
-        try {
-            System.setProperty(TxConstant.SYS_ALLOW_NULL_ARRAY_ELEMENT, "true");
-            System.setProperty(TxConstant.SYS_FILE_ENCODING, UTF_8.name());
-        } catch (Exception e) {
-            LOG.error(e);
-        }
-    }
-
     public void initDB() {
         try {
             //数据文件存储地址
-            RocksDBService.init(txConfig.getTxDataRoot());
-            //模块配置表
-            DBUtil.createTable(TxDBConstant.DB_MODULE_CONGIF);
+            RocksDBService.init(txConfig.getDataPath() + File.separator + ModuleE.TX.name);
         } catch (Exception e) {
             LOG.error(e);
         }

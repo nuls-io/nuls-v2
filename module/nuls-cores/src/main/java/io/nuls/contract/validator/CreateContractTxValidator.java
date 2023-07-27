@@ -31,7 +31,7 @@ import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.signture.SignatureUtil;
-import io.nuls.contract.config.ContractConfig;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.model.tx.CreateContractTransaction;
@@ -63,7 +63,7 @@ public class CreateContractTxValidator {
     @Autowired
     private ContractHelper contractHelper;
     @Autowired
-    private ContractConfig contractConfig;
+    private NulsCoresConfig contractConfig;
 
     public Result validate(int chainId, CreateContractTransaction tx) throws NulsException {
         CoinData coinData = tx.getCoinDataInstance();

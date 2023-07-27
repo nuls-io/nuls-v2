@@ -24,9 +24,9 @@
  */
 package io.nuls.network.utils;
 
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.log.Log;
-import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.NetworkConstant;
 
 import java.net.*;
@@ -50,7 +50,7 @@ public class IpUtil {
     }
 
     public static boolean isSelf(String ip) {
-        NetworkConfig networkConfig = SpringLiteContext.getBean(NetworkConfig.class);
+        NulsCoresConfig networkConfig = SpringLiteContext.getBean(NulsCoresConfig.class);
         return (ips.contains(ip) || networkConfig.getLocalIps().contains(ip));
     }
 

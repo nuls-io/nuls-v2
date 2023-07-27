@@ -29,7 +29,6 @@ import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
-import io.nuls.chain.config.NulsChainConfig;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.dto.ChainEventResult;
 import io.nuls.chain.model.dto.CoinDataAssets;
@@ -40,6 +39,7 @@ import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.service.TxCirculateService;
 import io.nuls.chain.storage.ChainAssetStorage;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Service;
 import io.nuls.core.exception.NulsException;
@@ -62,7 +62,7 @@ public class TxCirculateServiceImpl implements TxCirculateService {
     @Autowired
     ChainAssetStorage chainAssetStorage;
     @Autowired
-    NulsChainConfig nulsChainConfig;
+    NulsCoresConfig nulsChainConfig;
 
     @Override
     public List<CoinDataAssets> getChainAssetList(byte[] coinDataByte) throws NulsException {

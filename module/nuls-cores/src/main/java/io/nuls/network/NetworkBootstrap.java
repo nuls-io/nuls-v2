@@ -25,19 +25,16 @@
 package io.nuls.network;
 
 
+import io.nuls.common.INulsCoresBootstrap;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.rockdb.service.RocksDBService;
-import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.modulebootstrap.Module;
-import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
-import io.nuls.core.rpc.modulebootstrap.RpcModule;
-import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
-import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.ManagerStatusEnum;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.manager.*;
@@ -58,16 +55,19 @@ import java.util.List;
  * @date 2018/11/01
  */
 @Component
-public class NetworkBootstrap extends RpcModule {
+public class NetworkBootstrap implements INulsCoresBootstrap {
     @Autowired
-    NetworkConfig networkConfig;
+    NulsCoresConfig networkConfig;
     private boolean hadRun = false;
 
-    public static void main(String[] args) {
-        if (args == null || args.length == 0) {
-            args = new String[]{"ws://" + HostInfo.getLocalIP() + ":7771"};
-        }
-        NulsRpcModuleBootstrap.run("io.nuls", args);
+    @Override
+    public int order() {
+        return 2;
+    }
+
+    @Override
+    public void mainFunction(String[] args) {
+        this.init();
     }
 
     private boolean validatCfg() {
@@ -146,13 +146,8 @@ public class NetworkBootstrap extends RpcModule {
 
     }
 
-    /**
-     * 初始化模块信息，比如初始化RockDB等，在此处初始化后，可在其他bean的afterPropertiesSet中使用
-     */
-    @Override
     public void init() {
         try {
-            super.init();
             System.setProperty("io.netty.tryReflectionSetAccessible", "true");
             if (!validatCfg()) {
                 System.exit(-1);
@@ -169,21 +164,10 @@ public class NetworkBootstrap extends RpcModule {
     }
 
     @Override
-    public Module[] declareDependent() {
-        return new Module[]{new Module(ModuleE.BL.abbr, ROLE)};
-    }
-
-    @Override
     public Module moduleInfo() {
-        return new Module(ModuleE.NW.abbr, ROLE);
+        return new Module(ModuleE.NW.abbr, "1.0");
     }
 
-    /**
-     * doStart是让自身变为ready与onDependenciesReady没有先后顺序
-     *
-     * @return
-     */
-    @Override
     public boolean doStart() {
         Log.info("doStart begin=========");
         NodeGroupManager.getInstance().start();
@@ -197,9 +181,10 @@ public class NetworkBootstrap extends RpcModule {
      * @return
      */
     @Override
-    public RpcModuleState onDependenciesReady() {
+    public void onDependenciesReady() {
         LoggerUtil.COMMON_LOG.info("network onDependenciesReady");
         try {
+            doStart();
             if (!hadRun) {
                 ConnectionManager.getInstance().start();
                 TaskManager.getInstance().start();
@@ -215,24 +200,6 @@ public class NetworkBootstrap extends RpcModule {
             System.exit(-1);
         }
         LoggerUtil.COMMON_LOG.info("network RUNNING......");
-        return RpcModuleState.Running;
     }
 
-    @Override
-    public RpcModuleState onDependenciesLoss(Module dependenciesModule) {
-        LoggerUtil.COMMON_LOG.info("onDependenciesLoss module={}......", dependenciesModule.getName());
-        try {
-            //关闭连接
-            ConnectionManager.getInstance().change(ManagerStatusEnum.STOPED);
-            NodeGroupManager.getInstance().change(ManagerStatusEnum.STOPED);
-        } catch (Exception e) {
-            LoggerUtil.COMMON_LOG.error(e);
-        }
-        return RpcModuleState.Ready;
-    }
-
-    @Override
-    protected long getTryRuningTimeout() {
-        return 180L;
-    }
 }

@@ -2,11 +2,7 @@ package io.nuls.chain;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.protocol.CommonAdvice;
-import io.nuls.base.protocol.ProtocolGroupManager;
-import io.nuls.base.protocol.ProtocolLoader;
-import io.nuls.base.protocol.RegisterHelper;
 import io.nuls.base.protocol.cmd.TransactionDispatcher;
-import io.nuls.chain.config.NulsChainConfig;
 import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.po.BlockChain;
@@ -15,25 +11,21 @@ import io.nuls.chain.rpc.call.impl.RpcServiceImpl;
 import io.nuls.chain.service.CacheDataService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.service.impl.ChainServiceImpl;
-import io.nuls.chain.service.impl.CmTaskManager;
 import io.nuls.chain.service.tx.v1.ChainAssetCommitAdvice;
 import io.nuls.chain.service.tx.v1.ChainAssetRollbackAdvice;
 import io.nuls.chain.storage.InitDB;
 import io.nuls.chain.storage.impl.*;
 import io.nuls.chain.util.LoggerUtil;
+import io.nuls.common.INulsCoresBootstrap;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.rockdb.service.RocksDBService;
-import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.modulebootstrap.Module;
-import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
-import io.nuls.core.rpc.modulebootstrap.RpcModule;
-import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.core.rpc.util.AddressPrefixDatas;
-import io.nuls.core.rpc.util.NulsDateUtils;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -51,9 +43,9 @@ import java.util.Map;
  * @date 2018/11/7
  */
 @Component
-public class ChainManagerBootstrap extends RpcModule {
+public class ChainManagerBootstrap implements INulsCoresBootstrap {
     @Autowired
-    private NulsChainConfig nulsChainConfig;
+    private NulsCoresConfig nulsChainConfig;
     @Autowired
     private AddressPrefixDatas addressPrefixDatas;
     @Autowired
@@ -61,21 +53,23 @@ public class ChainManagerBootstrap extends RpcModule {
     @Autowired
     private ChainService chainService;
 
-    public static void main(String[] args) {
-        if (args == null || args.length == 0) {
-            args = new String[]{"ws://" + HostInfo.getLocalIP() + ":7771"};
-        }
-        NulsRpcModuleBootstrap.run("io.nuls", args);
+    @Override
+    public int order() {
+        return 6;
     }
 
+    @Override
+    public void mainFunction(String[] args) {
+        this.init();
+    }
 
     /**
      * 读取resources/module.ini，初始化配置
      * Read resources/module.ini to initialize the configuration
      */
     private void initCfg() throws Exception {
-        CmRuntimeInfo.nulsAssetId = nulsChainConfig.getMainAssetId();
-        CmRuntimeInfo.nulsChainId = nulsChainConfig.getMainChainId();
+        CmRuntimeInfo.nulsAssetId = String.valueOf(nulsChainConfig.getMainAssetId());
+        CmRuntimeInfo.nulsChainId = String.valueOf(nulsChainConfig.getMainChainId());
         long decimal = (long) Math.pow(10, Integer.valueOf(nulsChainConfig.getDefaultDecimalPlaces()));
         BigInteger initNumber = BigIntegerUtils.stringToBigInteger(nulsChainConfig.getNulsAssetInitNumberMax()).multiply(
                 BigInteger.valueOf(decimal));
@@ -150,34 +144,14 @@ public class ChainManagerBootstrap extends RpcModule {
 
 
     @Override
-    public Module[] declareDependent() {
-        return new Module[]{
-                Module.build(ModuleE.TX),
-                Module.build(ModuleE.LG),
-                Module.build(ModuleE.NW),
-                Module.build(ModuleE.AC),
-                Module.build(ModuleE.CS)
-        };
-    }
-
-    @Override
     public Module moduleInfo() {
         return new Module(ModuleE.CM.abbr, "1.0");
     }
 
-    /**
-     * 初始化模块信息，比如初始化RockDB等，在此处初始化后，可在其他bean的afterPropertiesSet中使用
-     */
-    @Override
     public void init() {
-        super.init();
         try {
             /* Read resources/module.ini to initialize the configuration */
             initCfg();
-            /**
-             * 地址工具初始化
-             */
-            AddressTool.init(addressPrefixDatas);
             LoggerUtil.logger().info("initCfg complete.....");
             /*storage info*/
             initWithDatabase();
@@ -192,8 +166,7 @@ public class ChainManagerBootstrap extends RpcModule {
         }
     }
 
-    @Override
-    public boolean doStart() {
+    private boolean doStart() {
         TransactionDispatcher transactionDispatcher = SpringLiteContext.getBean(TransactionDispatcher.class);
         CommonAdvice commitAdvice = SpringLiteContext.getBean(ChainAssetCommitAdvice.class);
         CommonAdvice rollbackAdvice = SpringLiteContext.getBean(ChainAssetRollbackAdvice.class);
@@ -202,48 +175,35 @@ public class ChainManagerBootstrap extends RpcModule {
         return true;
     }
 
-    @Override
-    public void onDependenciesReady(Module module) {
+    public void onDependenciesReady() {
         try {
-            ProtocolLoader.load(CmRuntimeInfo.getMainIntChainId());
-            /*注册交易处理器*/
-            if (ModuleE.TX.abbr.equals(module.getName())) {
-                int chainId = CmRuntimeInfo.getMainIntChainId();
-                boolean regSuccess = RegisterHelper.registerTx(chainId, ProtocolGroupManager.getCurrentProtocol(chainId));
-                if (!regSuccess) {
-                    LoggerUtil.logger().error("RegisterHelper.registerTx fail..");
-                    System.exit(-1);
-                }
-                LoggerUtil.logger().info("regTxRpc complete.....");
+            doStart();
+            try {
+                /* 进行数据库数据初始化（避免异常关闭造成的事务不一致） */
+                initChainDatas();
+            } catch (Exception e) {
+                LoggerUtil.logger().error(e);
+                LoggerUtil.logger().error("启动异常退出....");
+                System.exit(-1);
             }
-            if (ModuleE.PU.abbr.equals(module.getName())) {
-                //注册相关交易
-                boolean regSuccess = RegisterHelper.registerProtocol(CmRuntimeInfo.getMainIntChainId());
-                if (!regSuccess) {
-                    LoggerUtil.logger().error("RegisterHelper.registerProtocol fail..");
-                    System.exit(-1);
-                }
-                LoggerUtil.logger().info("register protocol ...");
-            }
-            if (ModuleE.AC.abbr.equals(module.getName())) {
-                //取跨链注册地址前缀数据给AC
-                try {
-                    List<BlockChain> blockChains = chainService.getBlockList();
-                    List<Map<String, Object>> list = new ArrayList<>();
-                    for (BlockChain blockChain : blockChains) {
-                        if (blockChain.getChainId() == Integer.valueOf(nulsChainConfig.getMainChainId())) {
-                            continue;
-                        }
-                        Map<String, Object> prefix = new HashMap<>();
-                        prefix.put("chainId", blockChain.getChainId());
-                        prefix.put("addressPrefix", blockChain.getAddressPrefix());
-                        list.add(prefix);
+            //取跨链注册地址前缀数据给AC
+            try {
+                List<BlockChain> blockChains = chainService.getBlockList();
+                List<Map<String, Object>> list = new ArrayList<>();
+                for (BlockChain blockChain : blockChains) {
+                    if (blockChain.getChainId() == Integer.valueOf(nulsChainConfig.getMainChainId())) {
+                        continue;
                     }
-                    rpcService.addAcAddressPrefix(list);
-                } catch (Exception e) {
-                    LoggerUtil.logger().error(e);
+                    Map<String, Object> prefix = new HashMap<>();
+                    prefix.put("chainId", blockChain.getChainId());
+                    prefix.put("addressPrefix", blockChain.getAddressPrefix());
+                    list.add(prefix);
                 }
+                rpcService.addAcAddressPrefix(list);
+            } catch (Exception e) {
+                LoggerUtil.logger().error(e);
             }
+            LoggerUtil.logger().info("onDependenciesReady ok....");
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
             System.exit(-1);
@@ -251,25 +211,4 @@ public class ChainManagerBootstrap extends RpcModule {
         }
     }
 
-    @Override
-    public RpcModuleState onDependenciesReady() {
-        try {
-            /* 进行数据库数据初始化（避免异常关闭造成的事务不一致） */
-            initChainDatas();
-        } catch (Exception e) {
-            LoggerUtil.logger().error(e);
-            LoggerUtil.logger().error("启动异常退出....");
-            System.exit(-1);
-        }
-//        CmTaskManager cmTaskManager = SpringLiteContext.getBean(CmTaskManager.class);
-//        cmTaskManager.start();
-        NulsDateUtils.getInstance().start(5 * 60 * 1000);
-        LoggerUtil.logger().info("onDependenciesReady ok....");
-        return RpcModuleState.Running;
-    }
-
-    @Override
-    public RpcModuleState onDependenciesLoss(Module dependenciesModule) {
-        return RpcModuleState.Start;
-    }
 }

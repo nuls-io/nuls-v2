@@ -3,19 +3,13 @@ package io.nuls.consensus.utils.manager;
 import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
-import io.nuls.core.basic.Result;
-import io.nuls.core.constant.TxType;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.common.NulsCoresConfig;
+import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.economic.base.service.EconomicService;
 import io.nuls.consensus.economic.nuls.constant.ParamConstant;
 import io.nuls.consensus.economic.nuls.model.bo.AgentInfo;
 import io.nuls.consensus.economic.nuls.model.bo.DepositInfo;
 import io.nuls.consensus.economic.nuls.model.bo.RoundInfo;
-import io.nuls.consensus.constant.ConsensusConfig;
-import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.model.bo.BlockData;
 import io.nuls.consensus.model.bo.Chain;
 import io.nuls.consensus.model.bo.ChargeResultData;
@@ -24,6 +18,13 @@ import io.nuls.consensus.model.bo.round.MeetingRound;
 import io.nuls.consensus.model.bo.tx.txdata.Agent;
 import io.nuls.consensus.model.bo.tx.txdata.Deposit;
 import io.nuls.consensus.rpc.call.CallMethodUtils;
+import io.nuls.core.basic.Result;
+import io.nuls.core.constant.TxType;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
+
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -40,7 +41,7 @@ public class ConsensusManager {
     @Autowired
     private PunishManager punishManager;
     @Autowired
-    private ConsensusConfig config;
+    private NulsCoresConfig config;
     @Autowired
     private CoinDataManager coinDataManager;
     @Autowired

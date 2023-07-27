@@ -25,11 +25,11 @@ package io.nuls.contract.mock.storagestructure;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.protocol.ProtocolGroupManager;
-import io.nuls.contract.config.ContractConfig;
+import io.nuls.common.ConfigBean;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.constant.ContractDBConstant;
 import io.nuls.contract.model.bo.Chain;
-import io.nuls.contract.model.bo.config.ConfigBean;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
 import io.nuls.contract.util.ContractDBUtil;
 import io.nuls.contract.util.Log;
@@ -87,9 +87,9 @@ public class LoadLargeContractTest {
         configBean.setMaxViewGas(100000000L);
         chain.setConfig(configBean);
 
-        ContractConfig contractConfig = new ContractConfig();
+        NulsCoresConfig contractConfig = new NulsCoresConfig();
         contractConfig.setDataPath(dataPath);
-        SpringLiteContext.putBean(ContractConfig.class.getName(), contractConfig);
+        SpringLiteContext.putBean(NulsCoresConfig.class.getName(), contractConfig);
 
         vmContext = new VMContextMock();
         programExecutor = new ProgramExecutorImpl(vmContext, chain);

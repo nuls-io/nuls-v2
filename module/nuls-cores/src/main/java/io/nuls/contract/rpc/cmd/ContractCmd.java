@@ -30,7 +30,7 @@ import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.protocol.ProtocolGroupManager;
-import io.nuls.contract.config.ContractConfig;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.enums.BlockType;
 import io.nuls.contract.enums.CmdRegisterMode;
@@ -87,7 +87,7 @@ public class ContractCmd extends BaseCmd {
     @Autowired
     private CmdRegisterManager cmdRegisterManager;
     @Autowired
-    private ContractConfig contractConfig;
+    private NulsCoresConfig contractConfig;
 
     @CmdAnnotation(cmd = BATCH_BEGIN, version = 1.0, description = "执行合约一个批次的开始通知，生成当前批次的信息/batch begin")
     @Parameters(value = {

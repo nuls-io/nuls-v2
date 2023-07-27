@@ -21,7 +21,7 @@
 package io.nuls.block.thread.monitor;
 
 import io.nuls.block.model.ChainContext;
-import io.nuls.block.model.ChainParameters;
+import io.nuls.common.ConfigBean;
 import io.nuls.block.rpc.call.ConsensusCall;
 import io.nuls.block.rpc.call.NetworkCall;
 import io.nuls.block.rpc.call.TransactionCall;
@@ -50,7 +50,7 @@ public class NetworkResetMonitor extends BaseMonitor {
 
     @Override
     protected void process(int chainId, ChainContext context, NulsLogger commonLog) {
-        ChainParameters parameters = context.getParameters();
+        ConfigBean parameters = context.getParameters();
         long reset = parameters.getResetTime();
         long time = context.getLatestBlock().getHeader().getTime() * 1000;
         //如果(当前时间戳-最新区块时间戳)>重置网络阈值,通知网络模块重置可用节点

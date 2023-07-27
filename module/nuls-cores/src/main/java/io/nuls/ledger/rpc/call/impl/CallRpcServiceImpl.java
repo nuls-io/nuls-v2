@@ -29,6 +29,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -39,7 +40,6 @@ import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.rpc.util.RpcCall;
-import io.nuls.ledger.config.LedgerConfig;
 import io.nuls.ledger.constant.CmdConstant;
 import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.rpc.call.CallRpcService;
@@ -55,7 +55,7 @@ import java.util.*;
 @Component
 public class CallRpcServiceImpl implements CallRpcService {
     @Autowired
-    LedgerConfig ledgerConfig;
+    NulsCoresConfig ledgerConfig;
 
     @Override
     public long getBlockLatestHeight(int chainId) {

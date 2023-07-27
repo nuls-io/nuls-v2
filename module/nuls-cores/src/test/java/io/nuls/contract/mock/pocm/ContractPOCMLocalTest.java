@@ -24,6 +24,7 @@
 package io.nuls.contract.mock.pocm;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.nuls.common.ConfigBean;
 import io.nuls.contract.base.Base;
 import io.nuls.contract.enums.CmdRegisterMode;
 import io.nuls.contract.enums.CmdRegisterReturnType;
@@ -38,7 +39,6 @@ import io.nuls.contract.manager.interfaces.RequestAndResponseInterface;
 import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.model.bo.CmdRegister;
 import io.nuls.contract.model.bo.ContractBalance;
-import io.nuls.contract.model.bo.config.ConfigBean;
 import io.nuls.contract.model.dto.BlockHeaderDto;
 import io.nuls.contract.util.*;
 import io.nuls.contract.vm.natives.io.nuls.contract.sdk.NativeAddress;

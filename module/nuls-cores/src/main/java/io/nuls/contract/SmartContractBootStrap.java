@@ -1,11 +1,10 @@
 package io.nuls.contract;
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.protocol.ModuleHelper;
 import io.nuls.base.protocol.ProtocolGroupManager;
-import io.nuls.base.protocol.RegisterHelper;
 import io.nuls.base.protocol.cmd.TransactionDispatcher;
-import io.nuls.contract.config.ContractConfig;
+import io.nuls.common.INulsCoresBootstrap;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractDBConstant;
@@ -29,14 +28,9 @@ import io.nuls.core.log.Log;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rockdb.manager.RocksDBManager;
-import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.modulebootstrap.Module;
-import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
-import io.nuls.core.rpc.modulebootstrap.RpcModule;
-import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.core.rpc.util.AddressPrefixDatas;
-import io.nuls.core.rpc.util.NulsDateUtils;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -57,10 +51,10 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * @date: 2019-03-14
  */
 @Component
-public class SmartContractBootStrap extends RpcModule {
+public class SmartContractBootStrap implements INulsCoresBootstrap {
 
     @Autowired
-    private ContractConfig contractConfig;
+    private NulsCoresConfig contractConfig;
     @Autowired
     private ChainManager chainManager;
     @Autowired
@@ -68,24 +62,19 @@ public class SmartContractBootStrap extends RpcModule {
     @Autowired
     private ContractHelper contractHelper;
 
-    public static void main(String[] args) throws Exception {
-        systemConfig();
-        if (args == null || args.length == 0) {
-            args = new String[]{"ws://" + HostInfo.getLocalIP() + ":7771"};
-        }
-        NulsRpcModuleBootstrap.run("io.nuls", args);
+    @Override
+    public int order() {
+        return 7;
     }
 
-
-    /**
-     * 初始化模块信息，比如初始化RockDB等，在此处初始化后，可在其他bean的afterPropertiesSet中使用
-     */
     @Override
+    public void mainFunction(String[] args) {
+        this.init();
+    }
+
     public void init() {
         try {
-            super.init();
-            //增加地址工具类初始化
-            AddressTool.init(addressPrefixDatas);
+            systemConfig();
             initContractDefaultLog();
             initNulsConfig();
             initDB();
@@ -93,7 +82,6 @@ public class SmartContractBootStrap extends RpcModule {
             initNRC721Standard();
             initNRC1155Standard();
             chainManager.initChain();
-            ModuleHelper.init(this);
         } catch (Exception e) {
             Log.error("ContractBootsrap init error!");
             throw new RuntimeException(e);
@@ -211,25 +199,9 @@ public class SmartContractBootStrap extends RpcModule {
      */
     private void initDB() throws Exception {
         Set<String> skipTables = new HashSet<>();
-        skipTables.add(ContractDBConstant.DB_NAME_CONTRACT + "_" + contractConfig.getChainConfig().getChainId());
+        skipTables.add(ContractDBConstant.DB_NAME_CONTRACT + "_" + contractConfig.getChainId());
         RocksDBManager.init(ContractContext.DATA_PATH, null, skipTables);
         ContractUtil.createTable(ContractDBConstant.DB_NAME_CONGIF);
-    }
-
-    /**
-     * 返回此模块的依赖模块
-     * 可写作 return new Module[]{new Module(ModuleE.LG.abbr, "1.0"),new Module(ModuleE.TX.abbr, "1.0")}
-     *
-     * @return
-     */
-    @Override
-    public Module[] declareDependent() {
-        return new Module[]{new Module(ModuleE.TX.abbr, "1.0"),
-                new Module(ModuleE.LG.abbr, "1.0"),
-                new Module(ModuleE.BL.abbr, "1.0"),
-                new Module(ModuleE.AC.abbr, "1.0"),
-                new Module(ModuleE.NW.abbr, "1.0"),
-                new Module(ModuleE.CS.abbr, "1.0")};
     }
 
     /**
@@ -242,13 +214,7 @@ public class SmartContractBootStrap extends RpcModule {
         return new Module(ModuleE.SC.abbr, "1.0");
     }
 
-    /**
-     * 已完成spring init注入，开始启动模块
-     *
-     * @return 如果启动完成返回true，模块将进入ready状态，若启动失败返回false，10秒后会再次调用此方法
-     */
-    @Override
-    public boolean doStart() {
+    private boolean doStart() {
         TransactionDispatcher dispatcher = SpringLiteContext.getBean(TransactionDispatcher.class);
         TransactionCommitAdvice commitAdvice = SpringLiteContext.getBean(TransactionCommitAdvice.class);
         TransactionRollbackAdvice rollbackAdvice = SpringLiteContext.getBean(TransactionRollbackAdvice.class);
@@ -257,82 +223,36 @@ public class SmartContractBootStrap extends RpcModule {
         return true;
     }
 
-    /**
-     * 所有外部依赖进入ready状态后会调用此方法，正常启动后返回Running状态
-     *
-     * @return
-     */
-    @Override
-    public RpcModuleState onDependenciesReady() {
+    public void onDependenciesReady() {
+        doStart();
         Log.info("all dependency module ready");
-        NulsDateUtils.getInstance().start();
-        return RpcModuleState.Running;
-    }
-
-    @Override
-    public void onDependenciesReady(Module module) {
-        Log.info("dependencies [{}] ready", module.getName());
-        if (module.getName().equals(ModuleE.TX.abbr)) {
-            /*
-             * 注册交易到交易管理模块
-             */
-            Map<Integer, Chain> chainMap = chainManager.getChainMap();
-            for (Chain chain : chainMap.values()) {
-                int chainId = chain.getChainId();
-                boolean registerTx = RegisterHelper.registerTx(chainId, ProtocolGroupManager.getCurrentProtocol(chainId));
-                Log.info("register tx type to tx module, chain id is {}, result is {}", chainId, registerTx);
-            }
-        }
         // add by pierre at 2019-11-02 需要协议升级 done
-        if (module.getName().equals(ModuleE.LG.abbr)) {
-            // 缓存token注册资产的资产ID和token合约地址
-            Map<Integer, Chain> chainMap = chainManager.getChainMap();
-            for (Chain chain : chainMap.values()) {
-                int chainId = chain.getChainId();
-                if(ProtocolGroupManager.getCurrentVersion(chainId) < ContractContext.UPDATE_VERSION_V250) {
-                    continue;
-                }
-                List<Map> regTokenList;
-                try {
-                    regTokenList = LedgerCall.getRegTokenList(chainId);
-                    if(regTokenList != null && !regTokenList.isEmpty()) {
-                        Map<String, ContractTokenAssetsInfo> tokenAssetsInfoMap = chain.getTokenAssetsInfoMap();
-                        Map<String, String> tokenAssetsContractAddressInfoMap = chain.getTokenAssetsContractAddressInfoMap();
-                        regTokenList.stream().forEach(map -> {
-                            int assetId = Integer.parseInt(map.get("assetId").toString());
-                            String tokenContractAddress = map.get("assetOwnerAddress").toString();
-                            tokenAssetsInfoMap.put(tokenContractAddress, new ContractTokenAssetsInfo(chainId, assetId));
-                            tokenAssetsContractAddressInfoMap.put(chainId + "-" + assetId, tokenContractAddress);
-                        });
-                    }
-                } catch (NulsException e) {
-                    throw new RuntimeException(e);
-                }
-                Log.info("initial cross token asset completed");
+        // 缓存token注册资产的资产ID和token合约地址
+        Map<Integer, Chain> chainMap = chainManager.getChainMap();
+        for (Chain chain : chainMap.values()) {
+            int chainId = chain.getChainId();
+            if(ProtocolGroupManager.getCurrentVersion(chainId) < ContractContext.UPDATE_VERSION_V250) {
+                continue;
             }
+            List<Map> regTokenList;
+            try {
+                regTokenList = LedgerCall.getRegTokenList(chainId);
+                if(regTokenList != null && !regTokenList.isEmpty()) {
+                    Map<String, ContractTokenAssetsInfo> tokenAssetsInfoMap = chain.getTokenAssetsInfoMap();
+                    Map<String, String> tokenAssetsContractAddressInfoMap = chain.getTokenAssetsContractAddressInfoMap();
+                    regTokenList.stream().forEach(map -> {
+                        int assetId = Integer.parseInt(map.get("assetId").toString());
+                        String tokenContractAddress = map.get("assetOwnerAddress").toString();
+                        tokenAssetsInfoMap.put(tokenContractAddress, new ContractTokenAssetsInfo(chainId, assetId));
+                        tokenAssetsContractAddressInfoMap.put(chainId + "-" + assetId, tokenContractAddress);
+                    });
+                }
+            } catch (NulsException e) {
+                throw new RuntimeException(e);
+            }
+            Log.info("initial cross token asset completed");
         }
         // end code by pierre
-        if (module.getName().equals(ModuleE.PU.abbr)) {
-            /*
-             * 注册协议到协议升级模块
-             */
-            Map<Integer, Chain> chainMap = chainManager.getChainMap();
-            for (Chain chain : chainMap.values()) {
-                int chainId = chain.getChainId();
-                RegisterHelper.registerProtocol(chainId);
-                Log.info("register protocol to pu module, chain id is {}", chainId);
-            }
-        }
     }
 
-    /**
-     * 某个外部依赖连接丢失后，会调用此方法，可控制模块状态，如果返回Ready,则表明模块退化到Ready状态，当依赖重新准备完毕后，将重新触发onDependenciesReady方法，若返回的状态是Running，将不会重新触发onDependenciesReady
-     *
-     * @param dependenciesModule
-     * @return
-     */
-    @Override
-    public RpcModuleState onDependenciesLoss(Module dependenciesModule) {
-        return RpcModuleState.Ready;
-    }
 }

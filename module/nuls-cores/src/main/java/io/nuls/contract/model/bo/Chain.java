@@ -1,9 +1,9 @@
 package io.nuls.contract.model.bo;
 
+import io.nuls.common.ConfigBean;
 import io.nuls.contract.enums.BlockType;
 import io.nuls.contract.manager.ContractTokenBalanceManager;
 import io.nuls.contract.manager.ContractTxCreateUnconfirmedManager;
-import io.nuls.contract.model.bo.config.ConfigBean;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.ProgramExecutor;
 import org.ethereum.config.CommonConfig;

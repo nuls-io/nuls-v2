@@ -27,8 +27,8 @@ import io.nuls.base.data.Transaction;
 import io.nuls.block.constant.BlockForwardEnum;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.CachedSmallBlock;
-import io.nuls.block.model.ChainParameters;
 import io.nuls.block.service.BlockService;
+import io.nuls.common.ConfigBean;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.CollectionUtils;
@@ -144,7 +144,7 @@ public class SmallBlockCacher {
      * @param chainId 链Id/chain id
      */
     public static void init(int chainId) {
-        ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
+        ConfigBean parameters = ContextManager.getContext(chainId).getParameters();
         int config = parameters.getSmallBlockCache();
         Map<NulsHash, CachedSmallBlock> map = CollectionUtils.getSynSizedMap(config);
         smallBlockCacheMap.put(chainId, map);

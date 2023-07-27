@@ -29,7 +29,7 @@ import io.nuls.base.protocol.ProtocolLoader;
 import io.nuls.base.protocol.RegisterHelper;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
+import io.nuls.crosschain.constant.NulsCrossChainConstant;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -47,7 +47,7 @@ import static io.nuls.transaction.utils.LoggerUtil.LOG;
 public class ConfigManager {
 
     @Autowired
-    private NulsCoreConfig config;
+    private NulsCoresConfig config;
 
     /**
      * 初始化并启动链

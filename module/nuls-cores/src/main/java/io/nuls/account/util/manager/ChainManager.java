@@ -24,17 +24,14 @@
  */
 package io.nuls.account.util.manager;
 
-import io.nuls.account.config.AccountConfig;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.AccountStorageConstant;
 import io.nuls.account.model.bo.Chain;
-import io.nuls.account.model.bo.config.ConfigBean;
 import io.nuls.account.service.AccountService;
-import io.nuls.account.storage.ConfigService;
 import io.nuls.account.util.LoggerUtil;
-import io.nuls.base.protocol.ProtocolGroupManager;
-import io.nuls.base.protocol.ProtocolLoader;
-import io.nuls.base.protocol.RegisterHelper;
+import io.nuls.common.CommonContext;
+import io.nuls.common.ConfigBean;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.ioc.SpringLiteContext;
@@ -56,10 +53,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ChainManager {
 
     @Autowired
-    private ConfigService configService;
-
-    @Autowired
-    AccountConfig accountConfig;
+    NulsCoresConfig accountConfig;
 
     private Map<Integer, Chain> chainMap = new ConcurrentHashMap<>();
 
@@ -87,7 +81,6 @@ public class ChainManager {
             */
             initTable(chainId);
             chainMap.put(chainId, chain);
-            ProtocolLoader.load(chainId);
         }
 
         AccountService accountService = SpringLiteContext.getBean(AccountService.class);
@@ -120,23 +113,9 @@ public class ChainManager {
      */
     private Map<Integer, ConfigBean> configChain() {
         try {
-            /*
-            读取数据库链信息配置
-            Read database chain information configuration
-             */
-            Map<Integer, ConfigBean> configMap = configService.getList();
-            /*
-            如果系统是第一次运行，则本地数据库没有存储链信息，此时需要从配置文件读取主链配置信息
-            If the system is running for the first time, the local database does not have chain information,
-            and the main chain configuration information needs to be read from the configuration file at this time.
-            */
-            if (configMap == null || configMap.size() == 0) {
-                ConfigBean configBean = accountConfig.getChainConfig();
-                if (configBean == null) {
-                    return null;
-                }
-                configMap.put(configBean.getChainId(), configBean);
-            }
+            Map<Integer, ConfigBean> configMap = CommonContext.CONFIG_BEAN_MAP;
+            ConfigBean configBean = accountConfig;
+            configMap.put(configBean.getChainId(), configBean);
             return configMap;
         } catch (Exception e) {
             LoggerUtil.LOG.error(e);
@@ -176,21 +155,6 @@ public class ChainManager {
         LoggerUtil.init(chain);
     }
 
-    /**
-     * 注册交易
-     */
-    public void registerTx() {
-        try {
-            for (Chain chain : chainMap.values()) {
-                //注册账户相关交易
-                int chainId = chain.getConfig().getChainId();
-                RegisterHelper.registerTx(chainId, ProtocolGroupManager.getCurrentProtocol(chainId));
-            }
-        } catch (Exception e) {
-            LoggerUtil.LOG.error("registerTx error!");
-            throw new RuntimeException(e);
-        }
-    }
 
     public Map<Integer, Chain> getChainMap() {
         return chainMap;

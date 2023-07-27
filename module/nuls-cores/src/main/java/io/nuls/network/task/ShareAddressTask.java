@@ -24,8 +24,8 @@
  */
 package io.nuls.network.task;
 
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.core.ioc.SpringLiteContext;
-import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.MessageManager;
 import io.nuls.network.manager.NodeGroupManager;
@@ -45,7 +45,7 @@ import java.util.*;
  */
 public class ShareAddressTask implements Runnable {
 
-    private final NetworkConfig networkConfig = SpringLiteContext.getBean(NetworkConfig.class);
+    private final NulsCoresConfig networkConfig = SpringLiteContext.getBean(NulsCoresConfig.class);
     private NodeGroup nodeGroup = null;
     private boolean isCross = false;
 

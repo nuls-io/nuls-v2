@@ -30,7 +30,7 @@ import io.nuls.block.message.HashListMessage;
 import io.nuls.block.message.SmallBlockMessage;
 import io.nuls.block.model.CachedSmallBlock;
 import io.nuls.block.model.ChainContext;
-import io.nuls.block.model.ChainParameters;
+import io.nuls.common.ConfigBean;
 import io.nuls.block.model.TxGroupTask;
 import io.nuls.block.rpc.call.NetworkCall;
 import io.nuls.block.rpc.call.TransactionCall;
@@ -94,7 +94,7 @@ public class SmallBlockHandler implements MessageProcessor {
         }
         NulsHash blockHash = header.getHash();
         //阻止恶意节点提前出块,拒绝接收未来一定时间外的区块
-        ChainParameters parameters = context.getParameters();
+        ConfigBean parameters = context.getParameters();
         int validBlockInterval = parameters.getValidBlockInterval();
         long currentTime = NulsDateUtils.getCurrentTimeMillis();
         if (header.getTime() * 1000 > (currentTime + validBlockInterval)) {

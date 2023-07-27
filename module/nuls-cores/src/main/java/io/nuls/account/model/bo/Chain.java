@@ -1,6 +1,6 @@
 package io.nuls.account.model.bo;
 
-import io.nuls.account.model.bo.config.ConfigBean;
+import io.nuls.common.ConfigBean;
 import io.nuls.core.log.logback.NulsLogger;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;

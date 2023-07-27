@@ -21,7 +21,7 @@
 package io.nuls.block.manager;
 
 import io.nuls.block.model.ChainContext;
-import io.nuls.block.model.ChainParameters;
+import io.nuls.common.ConfigBean;
 
 import java.util.List;
 import java.util.Map;
@@ -46,7 +46,7 @@ public class ContextManager {
     private ContextManager() {
     }
 
-    public static void init(ChainParameters chainParameters) {
+    public static void init(ConfigBean chainParameters) {
         ChainContext chainContext = new ChainContext();
         int chainId = chainParameters.getChainId();
         CHAIN_ID_LIST.add(chainId);

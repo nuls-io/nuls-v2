@@ -25,7 +25,7 @@ import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
-import io.nuls.block.model.ChainParameters;
+import io.nuls.common.ConfigBean;
 import io.nuls.core.log.logback.NulsLogger;
 
 import java.util.SortedSet;
@@ -52,7 +52,7 @@ public class StorageSizeMonitor extends BaseMonitor {
     @Override
     protected void process(int chainId, ChainContext context, NulsLogger commonLog) {
         //获取配置项
-        ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
+        ConfigBean parameters = ContextManager.getContext(chainId).getParameters();
         int heightRange = parameters.getHeightRange();
         int orphanChainMaxAge = parameters.getOrphanChainMaxAge();
         context.setStatus(StatusEnum.STORAGE_CLEANING);

@@ -25,11 +25,11 @@
 
 package io.nuls.network.manager;
 
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.thread.ThreadUtils;
-import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
@@ -99,7 +99,7 @@ public class TimeManager {
 
     private TimeManager() {
         if (0 == ntpSeverUrlList.size()) {
-            NetworkConfig networkConfig = SpringLiteContext.getBean(NetworkConfig.class);
+            NulsCoresConfig networkConfig = SpringLiteContext.getBean(NulsCoresConfig.class);
             String timeServers = networkConfig.getTimeServers();
             if (StringUtils.isNotBlank(timeServers)) {
                 String[] urlArray = timeServers.split(NetworkConstant.COMMA);

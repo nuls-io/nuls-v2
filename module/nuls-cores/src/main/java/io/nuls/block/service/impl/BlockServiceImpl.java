@@ -30,7 +30,7 @@ import io.nuls.block.message.HashMessage;
 import io.nuls.block.message.SmallBlockMessage;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
-import io.nuls.block.model.ChainParameters;
+import io.nuls.common.ConfigBean;
 import io.nuls.block.model.GenesisBlock;
 import io.nuls.block.rpc.call.*;
 import io.nuls.block.service.BlockService;

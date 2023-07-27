@@ -27,7 +27,7 @@ package io.nuls.contract.util;
 
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.protocol.ProtocolGroupManager;
-import io.nuls.contract.config.ContractConfig;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.helper.ContractHelper;
@@ -39,19 +39,14 @@ import io.nuls.contract.rpc.call.ConsensusCall;
 import io.nuls.contract.vm.program.ProgramMethod;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.StringUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import static io.nuls.contract.constant.ContractConstant.INITIAL_STATE_ROOT;
 
 /**
  * @Author: PierreLuo
@@ -63,7 +58,7 @@ public class VMContext {
     @Autowired
     private ContractHelper contractHelper;
     @Autowired
-    private ContractConfig contractConfig;
+    private NulsCoresConfig contractConfig;
     private Map<String, Integer> assetDecimalsCache = new ConcurrentHashMap<>();
 
     private static Map<String, ProgramMethod> NRC20_METHODS = null;

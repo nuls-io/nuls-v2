@@ -33,7 +33,7 @@ import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.util.NulsDateUtils;
-import io.nuls.transaction.constant.TxConfig;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxContext;
 import io.nuls.transaction.constant.TxErrorCode;

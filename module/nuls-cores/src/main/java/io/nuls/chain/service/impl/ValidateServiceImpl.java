@@ -25,7 +25,6 @@
 package io.nuls.chain.service.impl;
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.chain.config.NulsChainConfig;
 import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.info.CmErrorCode;
 import io.nuls.chain.info.CmRuntimeInfo;
@@ -38,6 +37,7 @@ import io.nuls.chain.service.ChainService;
 import io.nuls.chain.service.ValidateService;
 import io.nuls.chain.util.ChainManagerUtil;
 import io.nuls.chain.util.LoggerUtil;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Service;
 import io.nuls.core.log.Log;
@@ -64,7 +64,7 @@ public class ValidateServiceImpl implements ValidateService {
     @Autowired
     ChainService chainService;
     @Autowired
-    private NulsChainConfig nulsChainConfig;
+    private NulsCoresConfig nulsChainConfig;
 
     @Override
     public ChainEventResult assetDisableValidator(Asset asset) throws Exception {

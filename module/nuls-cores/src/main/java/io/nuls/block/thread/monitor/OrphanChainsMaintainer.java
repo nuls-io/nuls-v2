@@ -26,7 +26,7 @@ import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
-import io.nuls.block.model.ChainParameters;
+import io.nuls.common.ConfigBean;
 import io.nuls.block.model.Node;
 import io.nuls.block.rpc.call.NetworkCall;
 import io.nuls.block.storage.ChainStorageService;
@@ -70,7 +70,7 @@ public class OrphanChainsMaintainer extends BaseMonitor {
 
     @Override
     protected void process(int chainId, ChainContext context, NulsLogger commonLog) {
-        ChainParameters parameters = context.getParameters();
+        ConfigBean parameters = context.getParameters();
         int orphanChainMaxAge = parameters.getOrphanChainMaxAge();
 
         StampedLock lock = context.getLock();

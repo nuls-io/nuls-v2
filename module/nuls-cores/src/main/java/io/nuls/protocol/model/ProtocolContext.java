@@ -24,6 +24,7 @@ package io.nuls.protocol.model;
 
 import io.nuls.base.basic.ProtocolVersion;
 import io.nuls.base.protocol.Protocol;
+import io.nuls.common.ConfigBean;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.protocol.model.po.StatisticsInfo;
 
@@ -93,7 +94,7 @@ public class ProtocolContext {
     /**
      * 链的运行时参数
      */
-    private ChainParameters parameters;
+    private ConfigBean parameters;
 
     /**
      * 记录通用日志
@@ -190,11 +191,11 @@ public class ProtocolContext {
         this.lastValidStatisticsInfo = lastValidStatisticsInfo;
     }
 
-    public ChainParameters getParameters() {
+    public ConfigBean getParameters() {
         return parameters;
     }
 
-    public void setParameters(ChainParameters parameters) {
+    public void setParameters(ConfigBean parameters) {
         this.parameters = parameters;
     }
 

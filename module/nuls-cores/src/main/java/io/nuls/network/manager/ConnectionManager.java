@@ -28,12 +28,12 @@ package io.nuls.network.manager;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.log.Log;
 import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.core.thread.ThreadUtils;
 import io.nuls.core.thread.commom.NulsThreadFactory;
-import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.ManagerStatusEnum;
 import io.nuls.network.constant.NodeConnectStatusEnum;
 import io.nuls.network.constant.NodeStatusEnum;
@@ -61,7 +61,7 @@ import java.util.concurrent.ExecutorService;
  * @date 2018/11/01
  */
 public class ConnectionManager extends BaseManager {
-    NetworkConfig networkConfig = SpringLiteContext.getBean(NetworkConfig.class);
+    NulsCoresConfig networkConfig = SpringLiteContext.getBean(NulsCoresConfig.class);
     NettyServer server = null;
     NettyServer serverCross = null;
     private static ConnectionManager instance = new ConnectionManager();

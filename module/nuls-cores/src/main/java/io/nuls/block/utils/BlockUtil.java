@@ -30,7 +30,7 @@ import io.nuls.block.message.HashMessage;
 import io.nuls.block.message.HeightMessage;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
-import io.nuls.block.model.ChainParameters;
+import io.nuls.common.ConfigBean;
 import io.nuls.block.rpc.call.ConsensusCall;
 import io.nuls.block.rpc.call.NetworkCall;
 import io.nuls.block.rpc.call.TransactionCall;
@@ -94,7 +94,7 @@ public class BlockUtil {
             return false;
         }
 
-        ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
+        ConfigBean parameters = ContextManager.getContext(chainId).getParameters();
         if (block.size() > parameters.getBlockMaxSize()) {
             logger.error("basicVerify fail, beyond blockMaxSize! height-" + header.getHeight() + ", hash-" + header.getHash());
             return false;
@@ -119,7 +119,7 @@ public class BlockUtil {
             logger.error("headerVerify fail, block packingAddress can not be null! height-" + header.getHeight() + ", hash-" + header.getHash());
             return false;
         }
-        ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
+        ConfigBean parameters = ContextManager.getContext(chainId).getParameters();
         if (header.getExtend() != null && header.getExtend().length > parameters.getExtendMaxSize()) {
             logger.error("headerVerify fail, block extend too long! height-" + header.getHeight() + ", hash-" + header.getHash());
             return false;
@@ -177,7 +177,7 @@ public class BlockUtil {
 
         //1.收到的区块与主链最新高度差大于1000(可配置),丢弃
         ChainContext context = ContextManager.getContext(chainId);
-        ChainParameters parameters = context.getParameters();
+        ConfigBean parameters = context.getParameters();
         NulsLogger logger = context.getLogger();
         if (Math.abs(blockHeight - masterChainEndHeight) > parameters.getHeightRange()) {
             logger.error("received out of range block, height:" + blockHeight + ", hash:" + blockHash);

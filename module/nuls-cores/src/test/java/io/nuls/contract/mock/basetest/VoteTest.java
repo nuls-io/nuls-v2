@@ -25,8 +25,8 @@
 package io.nuls.contract.mock.basetest;
 
 
+import io.nuls.common.ConfigBean;
 import io.nuls.contract.model.bo.Chain;
-import io.nuls.contract.model.bo.config.ConfigBean;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.util.VMContextMock;

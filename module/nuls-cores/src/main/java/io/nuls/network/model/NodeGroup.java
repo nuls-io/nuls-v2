@@ -25,9 +25,9 @@
  */
 package io.nuls.network.model;
 
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.log.Log;
-import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NodeConnectStatusEnum;
 import io.nuls.network.constant.NodeStatusEnum;
@@ -38,8 +38,6 @@ import io.nuls.network.model.po.*;
 import io.nuls.network.netty.container.NodesContainer;
 import io.nuls.network.utils.LoggerUtil;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.*;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
@@ -54,7 +52,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @date 2018/11/01
  */
 public class NodeGroup implements Dto {
-    NetworkConfig networkConfig = SpringLiteContext.getBean(NetworkConfig.class);
+    NulsCoresConfig networkConfig = SpringLiteContext.getBean(NulsCoresConfig.class);
     /**
      * 缓存网络组种无法及时处理的信息
      */

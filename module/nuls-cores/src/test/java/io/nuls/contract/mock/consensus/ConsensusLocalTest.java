@@ -24,12 +24,12 @@
 package io.nuls.contract.mock.consensus;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.nuls.common.ConfigBean;
 import io.nuls.contract.mock.invokeexternalcmd.InvokeExternalCmdLocalTest;
 import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.manager.CmdRegisterManager;
 import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.model.bo.CmdRegister;
-import io.nuls.contract.model.bo.config.ConfigBean;
 import io.nuls.contract.util.BeanUtilTest;
 import io.nuls.contract.base.Base;
 import io.nuls.contract.util.Log;

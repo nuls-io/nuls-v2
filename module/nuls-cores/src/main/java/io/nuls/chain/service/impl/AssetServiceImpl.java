@@ -1,7 +1,5 @@
 package io.nuls.chain.service.impl;
 
-import io.nuls.base.basic.AddressTool;
-import io.nuls.chain.config.NulsChainConfig;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
@@ -14,6 +12,7 @@ import io.nuls.chain.storage.ChainAssetStorage;
 import io.nuls.chain.storage.ChainCirculateStorage;
 import io.nuls.chain.util.LoggerUtil;
 import io.nuls.chain.util.TxUtil;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.BigIntegerUtils;
@@ -44,7 +43,7 @@ public class AssetServiceImpl implements AssetService {
     @Autowired
     private RpcService rpcService;
     @Autowired
-    private NulsChainConfig nulsChainConfig;
+    private NulsCoresConfig nulsChainConfig;
 
     @Autowired
     private ChainCirculateStorage chainCirculateStorage;

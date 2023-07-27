@@ -23,7 +23,6 @@
  */
 package io.nuls.account.helper;
 
-import io.nuls.account.config.AccountConfig;
 import io.nuls.account.config.NulsConfig;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Chain;
@@ -34,6 +33,7 @@ import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -51,7 +51,7 @@ import static io.nuls.account.util.TxUtil.getSuccess;
 public class AccountContractCallHelper {
 
     @Autowired
-    private AccountConfig accountConfig;
+    private NulsCoresConfig accountConfig;
 
 
     public Result validate(Chain chain, Transaction tx) throws NulsException {

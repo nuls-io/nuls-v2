@@ -25,17 +25,17 @@
 package io.nuls.transaction.manager;
 
 import io.nuls.base.protocol.ProtocolLoader;
+import io.nuls.common.CommonContext;
+import io.nuls.common.ConfigBean;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.rockdb.constant.DBErrorCode;
 import io.nuls.core.rockdb.service.RocksDBService;
-import io.nuls.transaction.constant.TxConfig;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.model.bo.Chain;
-import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.po.TransactionNetPO;
-import io.nuls.transaction.storage.ConfigStorageService;
 import io.nuls.transaction.utils.LoggerUtil;
 
 import java.util.Map;
@@ -56,13 +56,10 @@ import static io.nuls.transaction.utils.LoggerUtil.LOG;
 public class ChainManager {
 
     @Autowired
-    private ConfigStorageService configService;
-
-    @Autowired
     private SchedulerManager schedulerManager;
 
     @Autowired
-    private TxConfig txConfig;
+    private NulsCoresConfig txConfig;
 
     private Map<Integer, Chain> chainMap = new ConcurrentHashMap<>();
 
@@ -123,7 +120,7 @@ public class ChainManager {
             读取数据库链信息配置
             Read database chain information configuration
              */
-            Map<Integer, ConfigBean> configMap = configService.getList();
+            Map<Integer, ConfigBean> configMap = CommonContext.CONFIG_BEAN_MAP;
 
             /*
             如果系统是第一次运行，则本地数据库没有存储链信息，此时需要从配置文件读取主链配置信息
@@ -132,11 +129,7 @@ public class ChainManager {
             */
             if (configMap.isEmpty()) {
                 ConfigBean configBean = txConfig;
-
-                boolean saveSuccess = configService.save(configBean, configBean.getChainId());
-                if(saveSuccess){
-                    configMap.put(configBean.getChainId(), configBean);
-                }
+                configMap.put(configBean.getChainId(), configBean);
             }
             return configMap;
         } catch (Exception e) {

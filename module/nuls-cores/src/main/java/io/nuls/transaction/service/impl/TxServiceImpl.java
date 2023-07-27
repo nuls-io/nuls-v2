@@ -49,11 +49,12 @@ import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.parse.SerializeUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.core.thread.ThreadUtils;
 import io.nuls.core.thread.commom.NulsThreadFactory;
 import io.nuls.transaction.cache.PackablePool;
-import io.nuls.transaction.constant.TxConfig;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxContext;
 import io.nuls.transaction.constant.TxErrorCode;
@@ -102,7 +103,7 @@ public class TxServiceImpl implements TxService {
     private ConfirmedTxStorageService confirmedTxStorageService;
 
     @Autowired
-    private TxConfig txConfig;
+    private NulsCoresConfig txConfig;
 
     private ExecutorService verifySignExecutor = ThreadUtils.createThreadPool(Runtime.getRuntime().availableProcessors(), CACHED_SIZE, new NulsThreadFactory(TxConstant.VERIFY_TX_SIGN_THREAD));
 
@@ -180,9 +181,8 @@ public class TxServiceImpl implements TxService {
             unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
             //广播完整交易
             boolean broadcastResult = false;
-            TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
             for (int i = 0; i < 3; i++) {
-                if (txRegister.getModuleCode().equals(ModuleE.CC.abbr)) {
+                if (ModuleE.CC.abbr.equals(ResponseMessageProcessor.TX_TYPE_MODULE_MAP.get(tx.getType()))) {
                     broadcastResult = NetworkCall.forwardTxHash(chain, tx.getHash());
                 } else {
                     broadcastResult = NetworkCall.broadcastTx(chain, tx);
@@ -338,7 +338,7 @@ public class TxServiceImpl implements TxService {
      * @throws NulsException
      */
     private void validateTxSignature(Transaction tx, TxRegister txRegister, Chain chain) throws NulsException {
-        if (!txRegister.getVerifySignature() || txRegister.getModuleCode().equals(ModuleE.CC.abbr)) {
+        if (!txRegister.getVerifySignature() || ModuleE.CC.abbr.equals(ResponseMessageProcessor.TX_TYPE_MODULE_MAP.get(tx.getType()))) {
             //注册时不需要验证签名的交易(一些系统交易),以及跨链模块的交易(单独处理).
             return;
         }
@@ -419,7 +419,7 @@ public class TxServiceImpl implements TxService {
         if (null == coinData || null == coinData.getFrom() || coinData.getFrom().size() <= 0) {
             throw new NulsException(TxErrorCode.COINDATA_NOT_FOUND);
         }
-        if (txRegister.getModuleCode().equals(ModuleE.CC.abbr)) {
+        if (ModuleE.CC.abbr.equals(ResponseMessageProcessor.TX_TYPE_MODULE_MAP.get(tx.getType()))) {
             if (tx.getType() != TxType.CROSS_CHAIN) {
                 // 跨链模块的非本链协议的跨链转账交易(单独处理).
                 return;
@@ -913,9 +913,8 @@ public class TxServiceImpl implements TxService {
                                 break;
                             }
                         } else {
-                            TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
                             //限制跨链交易数量
-                            if (txRegister.getModuleCode().equals(ModuleE.CC.abbr)) {
+                            if (ModuleE.CC.abbr.equals(ResponseMessageProcessor.TX_TYPE_MODULE_MAP.get(tx.getType()))) {
                                 if (corssTxCount + (++batchCorssTxCount) >= TxConstant.PACKAGE_CROSS_TX_MAX_COUNT) {
                                     //限制单个区块包含的跨链交易总数，超过跨链交易最大个数，放回去, 然后停止获取交易
                                     packablePool.add(chain, tx);
@@ -928,7 +927,7 @@ public class TxServiceImpl implements TxService {
                                 }
                             }
                             //限制智能合约交易数量
-                            boolean isContract = txRegister.getModuleCode().equals(ModuleE.SC.abbr);
+                            boolean isContract = ModuleE.SC.abbr.equals(ResponseMessageProcessor.TX_TYPE_MODULE_MAP.get(tx.getType()));
                             if (isContract) {
                                 if (contractTxCount + (++batchContractTxCount) >= packageContractTxMaxCount) {
                                     //限制单个区块包含的跨链交易总数，超过跨链交易最大个数，放回去, 然后停止获取交易
@@ -980,8 +979,8 @@ public class TxServiceImpl implements TxService {
                             Transaction transaction = txPackageWrapper.getTx();
                             TxRegister txRegister = TxManager.getTxRegister(chain, transaction.getType());
                             String moduleCode = txRegister.getModuleCode();
-                            boolean isSmartContractTx = moduleCode.equals(ModuleE.SC.abbr);
-                            boolean isCrossTx = moduleCode.equals(ModuleE.CC.abbr);
+                            boolean isSmartContractTx = ModuleE.SC.abbr.equals(ResponseMessageProcessor.TX_TYPE_MODULE_MAP.get(transaction.getType()));
+                            boolean isCrossTx = ModuleE.CC.abbr.equals(ResponseMessageProcessor.TX_TYPE_MODULE_MAP.get(transaction.getType()));
                             // add by pierre at 2019-11-02 跨链转账交易发送到智能合约模块进行解析，是否为合约资产跨链转账 需要协议升级 done
                             if (ProtocolGroupManager.getCurrentVersion(chain.getChainId()) >= TxContext.UPDATE_VERSION_V250) {
                                 boolean isCrossTransferTx = TxType.CROSS_CHAIN == transaction.getType();
@@ -1314,11 +1313,10 @@ public class TxServiceImpl implements TxService {
                         List<String> crossTransferList = new ArrayList<>();
                         for (TxPackageWrapper txPackageWrapper : packingTxList) {
                             Transaction tx = txPackageWrapper.getTx();
-                            TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
-                            if (txRegister.getModuleCode().equals(ModuleE.CS.abbr)) {
+                            if (ModuleE.CS.abbr.equals(ResponseMessageProcessor.TX_TYPE_MODULE_MAP.get(tx.getType()))) {
                                 consensusList.add(RPCUtil.encode(txPackageWrapper.getTx().serialize()));
                             }
-                            if (txRegister.getModuleCode().equals(ModuleE.CC.abbr)) {
+                            if (ModuleE.CC.abbr.equals(ResponseMessageProcessor.TX_TYPE_MODULE_MAP.get(tx.getType()))) {
                                 crossTransferList.add(RPCUtil.encode(txPackageWrapper.getTx().serialize()));
                             }
                         }
@@ -1879,11 +1877,10 @@ public class TxServiceImpl implements TxService {
                             || txType == TxType.CONTRACT_STOP_AGENT) {
                         continue;
                     }
-                    TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
-                    if (txRegister.getModuleCode().equals(ModuleE.CS.abbr)) {
+                    if (ModuleE.CS.abbr.equals(ResponseMessageProcessor.TX_TYPE_MODULE_MAP.get(tx.getType()))) {
                         consensusList.add(txVerifyWrapper.getTxStr());
                     }
-                    if (txRegister.getModuleCode().equals(ModuleE.CC.abbr)) {
+                    if (ModuleE.CC.abbr.equals(ResponseMessageProcessor.TX_TYPE_MODULE_MAP.get(tx.getType()))) {
                         crossTransferList.add(txVerifyWrapper.getTxStr());
                     }
                 }
@@ -2180,9 +2177,8 @@ public class TxServiceImpl implements TxService {
                                 break;
                             }
                         } else {
-                            TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
                             //限制跨链交易数量
-                            if (txRegister.getModuleCode().equals(ModuleE.CC.abbr)) {
+                            if (ModuleE.CC.abbr.equals(ResponseMessageProcessor.TX_TYPE_MODULE_MAP.get(tx.getType()))) {
                                 if (corssTxCount + (++batchCorssTxCount) >= TxConstant.PACKAGE_CROSS_TX_MAX_COUNT) {
                                     //限制单个区块包含的跨链交易总数，超过跨链交易最大个数，放回去, 然后停止获取交易
                                     packablePool.add(chain, tx);
@@ -2195,7 +2191,7 @@ public class TxServiceImpl implements TxService {
                                 }
                             }
                             //限制智能合约交易数量
-                            boolean isContract = txRegister.getModuleCode().equals(ModuleE.SC.abbr);
+                            boolean isContract = ModuleE.SC.abbr.equals(ResponseMessageProcessor.TX_TYPE_MODULE_MAP.get(tx.getType()));
                             if (isContract) {
                                 if (contractTxCount + (++batchContractTxCount) >= packageContractTxMaxCount) {
                                     //限制单个区块包含的跨链交易总数，超过跨链交易最大个数，放回去, 然后停止获取交易
@@ -2246,9 +2242,8 @@ public class TxServiceImpl implements TxService {
                             TxPackageWrapper txPackageWrapper = it.next();
                             Transaction transaction = txPackageWrapper.getTx();
                             TxRegister txRegister = TxManager.getTxRegister(chain, transaction.getType());
-                            String moduleCode = txRegister.getModuleCode();
-                            boolean isSmartContractTx = moduleCode.equals(ModuleE.SC.abbr);
-                            boolean isCrossTx = moduleCode.equals(ModuleE.CC.abbr);
+                            boolean isSmartContractTx = ModuleE.SC.abbr.equals(ResponseMessageProcessor.TX_TYPE_MODULE_MAP.get(transaction.getType()));
+                            boolean isCrossTx = ModuleE.CC.abbr.equals(ResponseMessageProcessor.TX_TYPE_MODULE_MAP.get(transaction.getType()));
                             // add by pierre at 2019-11-02 跨链转账交易发送到智能合约模块进行解析，是否为合约资产跨链转账 需要协议升级 done
                             if (ProtocolGroupManager.getCurrentVersion(chain.getChainId()) >= TxContext.UPDATE_VERSION_V250) {
                                 boolean isCrossTransferTx = TxType.CROSS_CHAIN == transaction.getType();
@@ -2695,11 +2690,10 @@ public class TxServiceImpl implements TxService {
                             || txType == TxType.CONTRACT_STOP_AGENT) {
                         continue;
                     }
-                    TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
-                    if (txRegister.getModuleCode().equals(ModuleE.CS.abbr)) {
+                    if (ModuleE.CS.abbr.equals(ResponseMessageProcessor.TX_TYPE_MODULE_MAP.get(tx.getType()))) {
                         consensusList.add(txVerifyWrapper.getTxStr());
                     }
-                    if (txRegister.getModuleCode().equals(ModuleE.CC.abbr)) {
+                    if (ModuleE.CC.abbr.equals(ResponseMessageProcessor.TX_TYPE_MODULE_MAP.get(tx.getType()))) {
                         crossTransferList.add(txVerifyWrapper.getTxStr());
                     }
                 }
@@ -2857,11 +2851,10 @@ public class TxServiceImpl implements TxService {
                         List<String> crossTransferList = new ArrayList<>();
                         for (TxPackageWrapper txPackageWrapper : packingTxList) {
                             Transaction tx = txPackageWrapper.getTx();
-                            TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
-                            if (txRegister.getModuleCode().equals(ModuleE.CS.abbr)) {
+                            if (ModuleE.CS.abbr.equals(ResponseMessageProcessor.TX_TYPE_MODULE_MAP.get(tx.getType()))) {
                                 consensusList.add(RPCUtil.encode(txPackageWrapper.getTx().serialize()));
                             }
-                            if (txRegister.getModuleCode().equals(ModuleE.CC.abbr)) {
+                            if (ModuleE.CC.abbr.equals(ResponseMessageProcessor.TX_TYPE_MODULE_MAP.get(tx.getType()))) {
                                 crossTransferList.add(RPCUtil.encode(txPackageWrapper.getTx().serialize()));
                             }
                         }

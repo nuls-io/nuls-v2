@@ -4,7 +4,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
-import io.nuls.consensus.model.bo.config.ConfigBean;
+import io.nuls.common.ConfigBean;
 import io.nuls.consensus.model.bo.consensus.Evidence;
 import io.nuls.consensus.model.bo.round.MeetingRound;
 import io.nuls.consensus.model.bo.tx.txdata.Agent;

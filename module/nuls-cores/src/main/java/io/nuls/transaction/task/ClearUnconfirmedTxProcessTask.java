@@ -25,10 +25,10 @@
 package io.nuls.transaction.task;
 
 import io.nuls.base.data.Transaction;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.transaction.cache.PackablePool;
-import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.po.TransactionUnconfirmedPO;
 import io.nuls.transaction.service.TxService;
@@ -46,7 +46,7 @@ public class ClearUnconfirmedTxProcessTask implements Runnable {
     private PackablePool packablePool = SpringLiteContext.getBean(PackablePool.class);
     private TxService txService = SpringLiteContext.getBean(TxService.class);
     private UnconfirmedTxStorageService unconfirmedTxStorageService = SpringLiteContext.getBean(UnconfirmedTxStorageService.class);
-    private TxConfig txConfig = SpringLiteContext.getBean(TxConfig.class);
+    private NulsCoresConfig txConfig = SpringLiteContext.getBean(NulsCoresConfig.class);
     private Chain chain;
 
     public ClearUnconfirmedTxProcessTask(Chain chain) {

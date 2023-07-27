@@ -24,9 +24,9 @@
  */
 package io.nuls.network.manager;
 
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.log.Log;
-import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.manager.handler.MessageHandlerFactory;
 import io.nuls.network.manager.handler.base.BaseMeesageHandlerInf;
@@ -59,7 +59,7 @@ import java.util.Random;
 public class MessageFactory {
     private static MessageFactory instance = new MessageFactory();
     private static final Map<String, Class<? extends BaseMessage>> MESSAGE_MAP = new HashMap<>();
-    NetworkConfig networkConfig = SpringLiteContext.getBean(NetworkConfig.class);
+    NulsCoresConfig networkConfig = SpringLiteContext.getBean(NulsCoresConfig.class);
     private NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
 
     private MessageFactory() {

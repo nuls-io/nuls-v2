@@ -1,7 +1,6 @@
 package io.nuls.chain.service.impl;
 
 import io.nuls.base.data.Transaction;
-import io.nuls.chain.config.NulsChainConfig;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
@@ -10,6 +9,7 @@ import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.storage.ChainStorage;
 import io.nuls.chain.util.TxUtil;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Service;
@@ -28,7 +28,7 @@ import java.util.*;
 @Service
 public class ChainServiceImpl implements ChainService {
     @Autowired
-    private NulsChainConfig nulsChainConfig;
+    private NulsCoresConfig nulsChainConfig;
 
     @Autowired
     private ChainStorage chainStorage;
@@ -86,7 +86,7 @@ public class ChainServiceImpl implements ChainService {
             return;
         }
         chain = new BlockChain();
-        int assetId = Integer.parseInt(nulsChainConfig.getMainAssetId());
+        int assetId = Integer.valueOf(nulsChainConfig.getMainAssetId());
         chain.setChainId(chainId);
         chain.setRegAssetId(assetId);
         chain.setChainName(nulsChainConfig.getChainName());

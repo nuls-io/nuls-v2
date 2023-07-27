@@ -42,7 +42,8 @@ public class ModuleHelper {
     }
 
     public static void init(RpcModule module) {
-        supportProtocolUpdate = enableProtocolUpdate(module);
+//        supportProtocolUpdate = enableProtocolUpdate(module);
+        supportProtocolUpdate = true;
         supportSmartContract = enableSmartContract(module);
         supportCrossChain = enableCrossChain(module);
         Log.info("----------------ModuleHelper----------------");

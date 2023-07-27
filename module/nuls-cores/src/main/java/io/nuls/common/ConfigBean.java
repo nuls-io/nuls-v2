@@ -24,25 +24,16 @@
  */
 package io.nuls.common;
 
-import io.nuls.base.basic.AddressTool;
-import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.data.BaseNulsData;
-import io.nuls.core.crypto.HexUtil;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.model.StringUtils;
-import io.nuls.core.parse.SerializeUtils;
-
-import java.io.IOException;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Transaction module chain setting
  * @author: Charlie
  * @date: 2019/03/14
  */
-public class ConfigBean extends BaseNulsData {
+public class ConfigBean {
 
     /** chain id*/
     private int chainId;
@@ -191,53 +182,58 @@ public class ConfigBean extends BaseNulsData {
     private Set<String> verifierSet = new HashSet<>();
 
     /*-------------------------[Consensus]-----------------------------*/
+
     /**
      * 打包间隔时间
      * Packing interval time
      */
     private long packingInterval;
-
     /**
      * 获得红牌保证金锁定时间
      * Lock-in time to get a red card margin
      */
     private long redPublishLockTime;
-
     /**
      * 注销节点保证金锁定时间
      * Log-off node margin locking time
      */
     private long stopAgentLockTime;
-
     /**
-     * 减少保证金锁定时间
-     * Reduce margin lock-in time
+     * 佣金比例的最小值
+     * Minimum commission ratio
      */
-    private long reducedDepositLockTime;
-
+    private byte commissionRateMin;
+    /**
+     * 佣金比例的最大值
+     * Maximum commission ratio
+     */
+    private byte commissionRateMax;
     /**
      * 创建节点的保证金最小值
      * Minimum margin for creating nodes
      */
     private BigInteger depositMin;
-
     /**
-     * 节点的保证金最大值
+     * 创建节点的保证金最大值
      * Maximum margin for creating nodes
      */
     private BigInteger depositMax;
-
     /**
-     * 节点参与共识节点竞选最小委托金
-     * Minimum Trust Fund for node participating in consensus node campaign
+     * 节点出块委托金额最小值
+     * Minimum Delegation Amount of Node Block
      */
-    private BigInteger packDepositMin;
+    private BigInteger commissionMin;
+    /**
+     * 节点委托金额最大值
+     * Maximum Node Delegation Amount
+     */
+    private BigInteger commissionMax;
 
     /**
      * 委托最小金额
      * Minimum amount entrusted
      */
-    private BigInteger entrustMin;
+    private BigInteger entrusterDepositMin;
 
     /**
      * 种子节点
@@ -246,19 +242,16 @@ public class ConfigBean extends BaseNulsData {
     private String seedNodes;
 
     /**
-     * 种子节点对应公钥
-     */
-    private String pubKeyList;
-
-    /**
      * 出块节点密码
-     */
+     * */
     private String password;
 
     /**
-     * 打包区块最大值
-     */
-    private long blockConsensusMaxSize;
+     * 打包一个区块获得的共识奖励
+     * 每年通胀/每年出块数
+     * */
+    private BigInteger blockReward;
+
 
     /**
      * 创建节点资产ID
@@ -271,6 +264,7 @@ public class ConfigBean extends BaseNulsData {
      * Create node asset chain ID
      */
     private int agentChainId;
+
 
     /**
      * 共识奖励资产ID
@@ -298,608 +292,40 @@ public class ConfigBean extends BaseNulsData {
 
     /**
      * 通胀开始时间
-     */
-    private long initHeight;
+     * */
+    private long initTime;
 
     /**
      * 通缩比例
-     */
+     * */
     private double deflationRatio;
 
     /**
      * 通缩间隔时间
-     */
-    private long deflationHeightInterval;
+     * */
+    private long deflationTimeInterval;
+
+    /*-------------------------[SmartContract]-----------------------------*/
     /**
-     * 追加保证金最小金额
-     * Minimum amount of additional margin
+     * view方法最大消耗gas
      */
-    private BigInteger appendAgentDepositMin;
+    private long maxViewGas;
 
+    /*-------------------------[Transaction]-----------------------------*/
+    /** 单个交易数据最大值(B)*/
+    private long txMaxSize;
     /**
-     * 退出保证金最小金额
-     * Minimum amount of withdrawal deposit
+     * 打包时在获取交易之后留给模块统一验证的时间阈值,
+     * 包括统一验证有被过滤掉的交易时需要重新验证等.
      */
-    private BigInteger reduceAgentDepositMin;
-
-    private int byzantineRate;
-    /**
-     * 共识节点最大数量
-     */
-    private int agentCountMax;
-
-    /**
-     * 本链主资产的权重基数
-     */
-    private double localAssertBase;
-
-    /**
-     * 节点保证金基数
-     */
-    private double agentDepositBase;
-    /**
-     * 虚拟银行保证金基数
-     */
-    private double superAgentDepositBase;
-    /**
-     * 后备节点保证金基数
-     */
-    private double reservegentDepositBase;
-
-
-    private int maxCoinToOfCoinbase;
-    private long minRewardHeight;
-    private long depositAwardChangeHeight;
-    private long depositVerifyHeight;
-    private Long v1_3_0Height;
-    private Long v1_6_0Height;
-    private Long v1_7_0Height;
-    private BigInteger minStakingAmount;
-    private BigInteger minAppendAndExitAmount;
-    private Integer exitStakingLockHours;
-
-
-    public Map<String, Integer> weightMap = new HashMap<>();
-
-    public void putWeight(int chainId, int assetId, int weight) {
-        weightMap.put(chainId + "-" + assetId, weight);
-    }
-
-    public int getWeight(int chainId, int assetId) {
-        Integer weight = weightMap.get(chainId + "-" + assetId);
-        if (null == weight) {
-            return 1;
-        }
-        return weight.intValue();
-    }
-
-    public long getDepositAwardChangeHeight() {
-        return depositAwardChangeHeight;
-    }
-
-    public void setDepositAwardChangeHeight(long depositAwardChangeHeight) {
-        this.depositAwardChangeHeight = depositAwardChangeHeight;
-    }
-
-    public long getDepositVerifyHeight() {
-        return depositVerifyHeight;
-    }
-
-    public void setDepositVerifyHeight(long depositVerifyHeight) {
-        this.depositVerifyHeight = depositVerifyHeight;
-    }
-
-    public int getMaxCoinToOfCoinbase() {
-        return maxCoinToOfCoinbase;
-    }
-
-    public void setMaxCoinToOfCoinbase(int maxCoinToOfCoinbase) {
-        this.maxCoinToOfCoinbase = maxCoinToOfCoinbase;
-    }
-
-    public long getMinRewardHeight() {
-        return minRewardHeight;
-    }
-
-    public void setMinRewardHeight(long minRewardHeight) {
-        this.minRewardHeight = minRewardHeight;
-    }
-
-    public long getPackingInterval() {
-        return packingInterval;
-    }
-
-    public void setPackingInterval(long packingInterval) {
-        this.packingInterval = packingInterval;
-    }
-
-
-    public long getRedPublishLockTime() {
-        return redPublishLockTime;
-    }
-
-    public void setRedPublishLockTime(long redPublishLockTime) {
-        this.redPublishLockTime = redPublishLockTime;
-    }
-
-    public long getStopAgentLockTime() {
-        return stopAgentLockTime;
-    }
-
-    public void setStopAgentLockTime(long stopAgentLockTime) {
-        this.stopAgentLockTime = stopAgentLockTime;
-    }
-
-    public BigInteger getDepositMin() {
-        return depositMin;
-    }
-
-    public void setDepositMin(BigInteger depositMin) {
-        this.depositMin = depositMin;
-    }
-
-    public BigInteger getDepositMax() {
-        return depositMax;
-    }
-
-    public void setDepositMax(BigInteger depositMax) {
-        this.depositMax = depositMax;
-    }
-
-    public String getSeedNodes() {
-        //不再配置种子节点地址，而是从公钥计算得到
-        if (StringUtils.isBlank(seedNodes)) {
-            String[] pubkeys = this.pubKeyList.split(",");
-            StringBuilder ss = new StringBuilder("");
-            for (String pub : pubkeys) {
-                ss.append(",").append(AddressTool.getAddressString(HexUtil.decode(pub), this.chainId));
-            }
-            this.seedNodes = ss.toString().substring(1);
-        }
-        return seedNodes;
-    }
-
-    public String getPubKeyList() {
-        return pubKeyList;
-    }
-
-    public void setPubKeyList(String pubKeyList) {
-        this.pubKeyList = pubKeyList;
-    }
-
-
-    public BigInteger getInflationAmount() {
-        return inflationAmount;
-    }
-
-    public void setInflationAmount(BigInteger inflationAmount) {
-        this.inflationAmount = inflationAmount;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public long getBlockConsensusMaxSize() {
-        return blockConsensusMaxSize;
-    }
-
-    public void setBlockConsensusMaxSize(long blockConsensusMaxSize) {
-        this.blockConsensusMaxSize = blockConsensusMaxSize;
-    }
-
-    public int getAgentAssetId() {
-        return agentAssetId;
-    }
-
-    public void setAgentAssetId(int agentAssetId) {
-        this.agentAssetId = agentAssetId;
-    }
-
-    public int getAgentChainId() {
-        return agentChainId;
-    }
-
-    public void setAgentChainId(int agentChainId) {
-        this.agentChainId = agentChainId;
-    }
-
-    public int getAwardAssetId() {
-        return awardAssetId;
-    }
-
-    public void setAwardAssetId(int awardAssetId) {
-        this.awardAssetId = awardAssetId;
-    }
-
-    public long getFeeUnit() {
-        return feeUnit;
-    }
-
-    public void setFeeUnit(long feeUnit) {
-        this.feeUnit = feeUnit;
-    }
-
-    public long getInitHeight() {
-        return initHeight;
-    }
-
-    public void setInitHeight(long initHeight) {
-        this.initHeight = initHeight;
-    }
-
-    public long getDeflationHeightInterval() {
-        return deflationHeightInterval;
-    }
-
-    public void setDeflationHeightInterval(long deflationHeightInterval) {
-        this.deflationHeightInterval = deflationHeightInterval;
-    }
-
-    public double getAgentDepositBase() {
-        return agentDepositBase;
-    }
-
-    public void setAgentDepositBase(double agentDepositBase) {
-        this.agentDepositBase = agentDepositBase;
-    }
-
-    public double getSuperAgentDepositBase() {
-        return superAgentDepositBase;
-    }
-
-    public void setSuperAgentDepositBase(double superAgentDepositBase) {
-        this.superAgentDepositBase = superAgentDepositBase;
-    }
-
-    public double getDeflationRatio() {
-        return deflationRatio;
-    }
-
-    public void setDeflationRatio(double deflationRatio) {
-        this.deflationRatio = deflationRatio;
-    }
-
-    public BigInteger getTotalInflationAmount() {
-        return totalInflationAmount;
-    }
-
-    public void setTotalInflationAmount(BigInteger totalInflationAmount) {
-        this.totalInflationAmount = totalInflationAmount;
-    }
-
-    public BigInteger getPackDepositMin() {
-        return packDepositMin;
-    }
-
-    public void setPackDepositMin(BigInteger packDepositMin) {
-        this.packDepositMin = packDepositMin;
-    }
-
-
-    public long getReducedDepositLockTime() {
-        return reducedDepositLockTime;
-    }
-
-    public void setReducedDepositLockTime(long reducedDepositLockTime) {
-        this.reducedDepositLockTime = reducedDepositLockTime;
-    }
-
-    public BigInteger getEntrustMin() {
-        return entrustMin;
-    }
-
-    public void setEntrustMin(BigInteger entrustMin) {
-        this.entrustMin = entrustMin;
-    }
-
-    public BigInteger getAppendAgentDepositMin() {
-        return appendAgentDepositMin;
-    }
-
-    public void setAppendAgentDepositMin(BigInteger appendAgentDepositMin) {
-        this.appendAgentDepositMin = appendAgentDepositMin;
-    }
-
-    public BigInteger getReduceAgentDepositMin() {
-        return reduceAgentDepositMin;
-    }
-
-    public void setReduceAgentDepositMin(BigInteger reduceAgentDepositMin) {
-        this.reduceAgentDepositMin = reduceAgentDepositMin;
-    }
-
-    public int getByzantineRate() {
-        return byzantineRate;
-    }
-
-    public void setByzantineRate(int byzantineRate) {
-        this.byzantineRate = byzantineRate;
-    }
-
-    public int getAgentCountMax() {
-        return agentCountMax;
-    }
-
-    public void setAgentCountMax(int agentCountMax) {
-        this.agentCountMax = agentCountMax;
-    }
-
-    public double getLocalAssertBase() {
-        return localAssertBase;
-    }
-
-    public void setLocalAssertBase(double localAssertBase) {
-        this.localAssertBase = localAssertBase;
-    }
-
-    public long getPackingIntervalMills() {
-        return 1000 * this.getPackingInterval();
-    }
-
-    public double getReservegentDepositBase() {
-        return reservegentDepositBase;
-    }
-
-    public void setReservegentDepositBase(double reservegentDepositBase) {
-        this.reservegentDepositBase = reservegentDepositBase;
-    }
-
-    public void setV130Height(Long v130Height) {
-        this.v1_3_0Height = v130Height;
-    }
-
-    public Long getV130Height() {
-        return v1_3_0Height;
-    }
-
-    public Long getV1_7_0Height() {
-        return v1_7_0Height;
-    }
-
-    public void setV1_7_0Height(Long v1_7_0Height) {
-        this.v1_7_0Height = v1_7_0Height;
-    }
-
-    public Long getV1_6_0Height() {
-        return v1_6_0Height;
-    }
-
-    public void setV1_6_0Height(Long v1_6_0Height) {
-        this.v1_6_0Height = v1_6_0Height;
-    }
-
-    public void setMinStakingAmount(BigInteger minStakingAmount) {
-        this.minStakingAmount = minStakingAmount;
-    }
-
-    public BigInteger getMinStakingAmount() {
-        return minStakingAmount;
-    }
-
-    public void setMinAppendAndExitAmount(BigInteger minAppendAndExitAmount) {
-        this.minAppendAndExitAmount = minAppendAndExitAmount;
-    }
-
-    public BigInteger getMinAppendAndExitAmount() {
-        return minAppendAndExitAmount;
-    }
-
-    public void setExitStakingLockHours(Integer exitStakingLockHours) {
-        this.exitStakingLockHours = exitStakingLockHours;
-    }
-
-    public Integer getExitStakingLockHours() {
-        return exitStakingLockHours;
-    }
-
-
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        // block
-        stream.writeUint16(chainId);
-        stream.writeUint16(assetId);
-        stream.writeUint32(blockMaxSize);
-        stream.writeUint32(resetTime);
-        stream.writeByte(chainSwtichThreshold);
-        stream.writeUint16(cacheSize);
-        stream.writeUint16(heightRange);
-        stream.writeUint16(maxRollback);
-        stream.writeByte(consistencyNodePercent);
-        stream.writeByte(minNodeAmount);
-        stream.writeByte(downloadNumber);
-        stream.writeUint16(extendMaxSize);
-        stream.writeUint16(validBlockInterval);
-        stream.writeByte(smallBlockCache);
-        stream.writeByte(orphanChainMaxAge);
-        stream.writeString(logLevel);
-        stream.writeUint16(singleDownloadTimeout);
-        stream.writeUint16(waitNetworkInterval);
-        stream.writeString(genesisBlockPath);
-        stream.writeUint32(cachedBlockSizeLimit);
-        // protocol
-        stream.writeShort(interval);
-        stream.writeByte(effectiveRatioMinimum);
-        stream.writeShort(continuousIntervalCountMinimum);
-        // cross
-        stream.writeUint16(minNodes);
-        stream.writeUint16(maxOutAmount);
-        stream.writeUint16(maxInAmount);
-        stream.writeUint16(sendHeight);
-        stream.writeUint16(byzantineRatio);
-        stream.writeUint16(minSignature);
-        stream.writeString(verifiers);
-        stream.writeUint16(mainByzantineRatio);
-        stream.writeUint16(maxSignatureCount);
-        int registerCount = verifierSet == null ? 0 : verifierSet.size();
-        stream.writeVarInt(registerCount);
-        if(verifierSet != null){
-            for (String registerAgent:verifierSet) {
-                stream.writeString(registerAgent);
-            }
-        }
-        // consensus
-        stream.writeUint32(packingInterval);
-        stream.writeUint32(redPublishLockTime);
-        stream.writeUint32(stopAgentLockTime);
-        stream.writeUint32(reducedDepositLockTime);
-        stream.writeBigInteger(depositMin);
-        stream.writeBigInteger(depositMax);
-        stream.writeBigInteger(packDepositMin);
-        stream.writeBigInteger(entrustMin);
-        stream.writeString(seedNodes);
-        stream.writeString(pubKeyList);
-        stream.writeString(password);
-        stream.writeUint48(blockConsensusMaxSize);
-        stream.writeUint16(agentAssetId);
-        stream.writeUint16(agentChainId);
-        stream.writeUint16(awardAssetId);
-        stream.writeUint32(feeUnit);
-        stream.writeBigInteger(totalInflationAmount);
-        stream.writeBigInteger(inflationAmount);
-        stream.writeUint32(initHeight);
-        stream.writeDouble(deflationRatio);
-        stream.writeUint32(deflationHeightInterval);
-        stream.writeBigInteger(appendAgentDepositMin);
-        stream.writeBigInteger(reduceAgentDepositMin);
-        stream.writeUint16(byzantineRate);
-        stream.writeUint16(agentCountMax);
-        stream.writeDouble(0);
-        stream.writeDouble(localAssertBase);
-        stream.writeDouble(agentDepositBase);
-        stream.writeDouble(superAgentDepositBase);
-        stream.writeDouble(reservegentDepositBase);
-        stream.writeUint32(this.maxCoinToOfCoinbase);
-        stream.writeUint32(this.minRewardHeight);
-    }
-
-    @Override
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        //block
-        this.chainId = byteBuffer.readUint16();
-        this.assetId = byteBuffer.readUint16();
-        this.blockMaxSize = byteBuffer.readUint32();
-        this.resetTime = byteBuffer.readUint32();
-        this.chainSwtichThreshold = byteBuffer.readByte();
-        this.cacheSize = byteBuffer.readUint16();
-        this.heightRange = byteBuffer.readUint16();
-        this.maxRollback = byteBuffer.readUint16();
-        this.consistencyNodePercent = byteBuffer.readByte();
-        this.minNodeAmount = byteBuffer.readByte();
-        this.downloadNumber = byteBuffer.readByte();
-        this.extendMaxSize = byteBuffer.readUint16();
-        this.validBlockInterval = byteBuffer.readUint16();
-        this.smallBlockCache = byteBuffer.readByte();
-        this.orphanChainMaxAge = byteBuffer.readByte();
-        this.logLevel = byteBuffer.readString();
-        this.singleDownloadTimeout = byteBuffer.readUint16();
-        this.waitNetworkInterval = byteBuffer.readUint16();
-        this.genesisBlockPath = byteBuffer.readString();
-        this.cachedBlockSizeLimit = byteBuffer.readUint32();
-        //protocol
-        this.interval = byteBuffer.readShort();
-        this.effectiveRatioMinimum = byteBuffer.readByte();
-        this.continuousIntervalCountMinimum = byteBuffer.readShort();
-        //cross
-        this.minNodes = byteBuffer.readUint16();
-        this.maxOutAmount = byteBuffer.readUint16();
-        this.maxInAmount = byteBuffer.readUint16();
-        this.sendHeight = byteBuffer.readUint16();
-        this.byzantineRatio = byteBuffer.readUint16();
-        this.minNodes = byteBuffer.readUint16();
-        this.verifiers = byteBuffer.readString();
-        this.mainByzantineRatio = byteBuffer.readUint16();
-        this.maxSignatureCount = byteBuffer.readUint16();
-        int registerCount = (int) byteBuffer.readVarInt();
-        if(registerCount > 0){
-            Set<String> verifierSet = new HashSet<>();
-            for (int i = 0; i < registerCount; i++) {
-                verifierSet.add(byteBuffer.readString());
-            }
-            this.verifierSet = verifierSet;
-        }
-        this.packingInterval = byteBuffer.readUint32();
-        this.redPublishLockTime = byteBuffer.readUint32();
-        this.stopAgentLockTime = byteBuffer.readUint32();
-        this.reducedDepositLockTime = byteBuffer.readUint32();
-        this.depositMin = byteBuffer.readBigInteger();
-        this.depositMax = byteBuffer.readBigInteger();
-        this.packDepositMin = byteBuffer.readBigInteger();
-        this.entrustMin = byteBuffer.readBigInteger();
-        this.seedNodes = byteBuffer.readString();
-        this.pubKeyList = byteBuffer.readString();
-        this.password = byteBuffer.readString();
-        this.blockConsensusMaxSize = byteBuffer.readUint48();
-        this.agentAssetId = byteBuffer.readUint16();
-        this.agentChainId = byteBuffer.readUint16();
-        this.awardAssetId = byteBuffer.readUint16();
-        this.feeUnit = byteBuffer.readUint32();
-        this.totalInflationAmount = byteBuffer.readBigInteger();
-        this.inflationAmount = byteBuffer.readBigInteger();
-        this.initHeight = byteBuffer.readUint32();
-        this.deflationRatio = byteBuffer.readDouble();
-        this.deflationHeightInterval = byteBuffer.readUint32();
-        this.appendAgentDepositMin = byteBuffer.readBigInteger();
-        this.reduceAgentDepositMin = byteBuffer.readBigInteger();
-        this.byzantineRate = byteBuffer.readUint16();
-        this.agentCountMax = byteBuffer.readUint16();
-        byteBuffer.readDouble();
-        this.localAssertBase = byteBuffer.readDouble();
-        this.agentDepositBase = byteBuffer.readDouble();
-        this.superAgentDepositBase = byteBuffer.readDouble();
-        this.reservegentDepositBase = byteBuffer.readDouble();
-        this.maxCoinToOfCoinbase = (int) byteBuffer.readUint32();
-        this.minRewardHeight = byteBuffer.readUint32();
-    }
-
-    @Override
-    public int size() {
-        // block
-        int size = 36;
-        size += SerializeUtils.sizeOfString(logLevel);
-        size += SerializeUtils.sizeOfString(genesisBlockPath);
-        // protocol
-        size += 5;
-        // cross
-        size += SerializeUtils.sizeOfUint16() * 8;
-        size += SerializeUtils.sizeOfString(verifiers);
-        size += SerializeUtils.sizeOfVarInt(verifierSet == null ? 0 : verifierSet.size());
-        if(verifierSet != null){
-            for (String verifier:verifierSet) {
-                size += SerializeUtils.sizeOfString(verifier);
-            }
-        }
-        // consensus
-        size += SerializeUtils.sizeOfUint48();
-        size += SerializeUtils.sizeOfUint32() * 6;
-        size += SerializeUtils.sizeOfDouble(deflationRatio);
-        size += SerializeUtils.sizeOfBigInteger() * 8;
-        size += SerializeUtils.sizeOfString(seedNodes);
-        size += SerializeUtils.sizeOfString(pubKeyList);
-        size += SerializeUtils.sizeOfUint16() * 5;
-        size += SerializeUtils.sizeOfString(password);
-        size += SerializeUtils.sizeOfUint32();
-        size += SerializeUtils.sizeOfDouble(localAssertBase);
-        size += SerializeUtils.sizeOfDouble(0.0);
-        size += SerializeUtils.sizeOfDouble(agentDepositBase);
-        size += SerializeUtils.sizeOfDouble(superAgentDepositBase);
-        size += SerializeUtils.sizeOfDouble(reservegentDepositBase);
-        size += SerializeUtils.sizeOfUint32();
-        size += SerializeUtils.sizeOfUint32();
-        return  size;
-    }
-
-    public ConfigBean() {
-    }
-
-    public ConfigBean(int chainId, int assetId) {
-        this.chainId = chainId;
-        this.assetId = assetId;
-    }
+    private int moduleVerifyPercent;
+    /** 打包获取交易给RPC传输到共识的预留时间,超时则需要处理交易还原待打包队列*/
+    private int packageRpcReserveTime;
+    /** 接收网络新交易队列的最大容量 未处理的交易队列**/
+    private long txUnverifiedQueueSize;
+    /** 孤儿交易生命时间,超过会被清理**/
+    private int orphanTtl;
+    /*----------------------------------------------------------------------*/
 
     public int getChainId() {
         return chainId;
@@ -1163,5 +589,229 @@ public class ConfigBean extends BaseNulsData {
 
     public void setVerifierSet(Set<String> verifierSet) {
         this.verifierSet = verifierSet;
+    }
+
+    public long getPackingInterval() {
+        return packingInterval;
+    }
+
+    public void setPackingInterval(long packingInterval) {
+        this.packingInterval = packingInterval;
+    }
+
+    public long getRedPublishLockTime() {
+        return redPublishLockTime;
+    }
+
+    public void setRedPublishLockTime(long redPublishLockTime) {
+        this.redPublishLockTime = redPublishLockTime;
+    }
+
+    public long getStopAgentLockTime() {
+        return stopAgentLockTime;
+    }
+
+    public void setStopAgentLockTime(long stopAgentLockTime) {
+        this.stopAgentLockTime = stopAgentLockTime;
+    }
+
+    public byte getCommissionRateMin() {
+        return commissionRateMin;
+    }
+
+    public void setCommissionRateMin(byte commissionRateMin) {
+        this.commissionRateMin = commissionRateMin;
+    }
+
+    public byte getCommissionRateMax() {
+        return commissionRateMax;
+    }
+
+    public void setCommissionRateMax(byte commissionRateMax) {
+        this.commissionRateMax = commissionRateMax;
+    }
+
+    public BigInteger getDepositMin() {
+        return depositMin;
+    }
+
+    public void setDepositMin(BigInteger depositMin) {
+        this.depositMin = depositMin;
+    }
+
+    public BigInteger getDepositMax() {
+        return depositMax;
+    }
+
+    public void setDepositMax(BigInteger depositMax) {
+        this.depositMax = depositMax;
+    }
+
+    public BigInteger getCommissionMin() {
+        return commissionMin;
+    }
+
+    public void setCommissionMin(BigInteger commissionMin) {
+        this.commissionMin = commissionMin;
+    }
+
+    public BigInteger getCommissionMax() {
+        return commissionMax;
+    }
+
+    public void setCommissionMax(BigInteger commissionMax) {
+        this.commissionMax = commissionMax;
+    }
+
+    public BigInteger getEntrusterDepositMin() {
+        return entrusterDepositMin;
+    }
+
+    public void setEntrusterDepositMin(BigInteger entrusterDepositMin) {
+        this.entrusterDepositMin = entrusterDepositMin;
+    }
+
+    public String getSeedNodes() {
+        return seedNodes;
+    }
+
+    public void setSeedNodes(String seedNodes) {
+        this.seedNodes = seedNodes;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public BigInteger getBlockReward() {
+        return blockReward;
+    }
+
+    public void setBlockReward(BigInteger blockReward) {
+        this.blockReward = blockReward;
+    }
+
+    public int getAgentAssetId() {
+        return agentAssetId;
+    }
+
+    public void setAgentAssetId(int agentAssetId) {
+        this.agentAssetId = agentAssetId;
+    }
+
+    public int getAgentChainId() {
+        return agentChainId;
+    }
+
+    public void setAgentChainId(int agentChainId) {
+        this.agentChainId = agentChainId;
+    }
+
+    public int getAwardAssetId() {
+        return awardAssetId;
+    }
+
+    public void setAwardAssetId(int awardAssetId) {
+        this.awardAssetId = awardAssetId;
+    }
+
+    public long getFeeUnit() {
+        return feeUnit;
+    }
+
+    public void setFeeUnit(long feeUnit) {
+        this.feeUnit = feeUnit;
+    }
+
+    public BigInteger getTotalInflationAmount() {
+        return totalInflationAmount;
+    }
+
+    public void setTotalInflationAmount(BigInteger totalInflationAmount) {
+        this.totalInflationAmount = totalInflationAmount;
+    }
+
+    public BigInteger getInflationAmount() {
+        return inflationAmount;
+    }
+
+    public void setInflationAmount(BigInteger inflationAmount) {
+        this.inflationAmount = inflationAmount;
+    }
+
+    public long getInitTime() {
+        return initTime;
+    }
+
+    public void setInitTime(long initTime) {
+        this.initTime = initTime;
+    }
+
+    public double getDeflationRatio() {
+        return deflationRatio;
+    }
+
+    public void setDeflationRatio(double deflationRatio) {
+        this.deflationRatio = deflationRatio;
+    }
+
+    public long getDeflationTimeInterval() {
+        return deflationTimeInterval;
+    }
+
+    public void setDeflationTimeInterval(long deflationTimeInterval) {
+        this.deflationTimeInterval = deflationTimeInterval;
+    }
+
+    public long getMaxViewGas() {
+        return maxViewGas;
+    }
+
+    public void setMaxViewGas(long maxViewGas) {
+        this.maxViewGas = maxViewGas;
+    }
+
+    public long getTxMaxSize() {
+        return txMaxSize;
+    }
+
+    public void setTxMaxSize(long txMaxSize) {
+        this.txMaxSize = txMaxSize;
+    }
+
+    public int getModuleVerifyPercent() {
+        return moduleVerifyPercent;
+    }
+
+    public void setModuleVerifyPercent(int moduleVerifyPercent) {
+        this.moduleVerifyPercent = moduleVerifyPercent;
+    }
+
+    public int getPackageRpcReserveTime() {
+        return packageRpcReserveTime;
+    }
+
+    public void setPackageRpcReserveTime(int packageRpcReserveTime) {
+        this.packageRpcReserveTime = packageRpcReserveTime;
+    }
+
+    public long getTxUnverifiedQueueSize() {
+        return txUnverifiedQueueSize;
+    }
+
+    public void setTxUnverifiedQueueSize(long txUnverifiedQueueSize) {
+        this.txUnverifiedQueueSize = txUnverifiedQueueSize;
+    }
+
+    public int getOrphanTtl() {
+        return orphanTtl;
+    }
+
+    public void setOrphanTtl(int orphanTtl) {
+        this.orphanTtl = orphanTtl;
     }
 }

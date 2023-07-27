@@ -1,25 +1,23 @@
 package io.nuls.consensus.utils.manager;
 
-import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.base.protocol.ProtocolLoader;
-import io.nuls.base.protocol.RegisterHelper;
+import io.nuls.common.CommonContext;
+import io.nuls.common.ConfigBean;
+import io.nuls.common.NulsCoresConfig;
+import io.nuls.consensus.constant.ConsensusConstant;
+import io.nuls.consensus.economic.base.service.EconomicService;
+import io.nuls.consensus.economic.nuls.constant.ParamConstant;
+import io.nuls.consensus.economic.nuls.model.bo.ConsensusConfigInfo;
+import io.nuls.consensus.model.bo.Chain;
+import io.nuls.consensus.model.dto.CmdRegisterDto;
+import io.nuls.consensus.rpc.call.CallMethodUtils;
+import io.nuls.consensus.utils.LoggerUtil;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.DoubleUtils;
 import io.nuls.core.rockdb.constant.DBErrorCode;
 import io.nuls.core.rockdb.service.RocksDBService;
-import io.nuls.consensus.economic.base.service.EconomicService;
-import io.nuls.consensus.economic.nuls.constant.ParamConstant;
-import io.nuls.consensus.economic.nuls.model.bo.ConsensusConfigInfo;
-import io.nuls.consensus.constant.ConsensusConfig;
-import io.nuls.consensus.constant.ConsensusConstant;
-import io.nuls.consensus.model.bo.Chain;
-import io.nuls.consensus.model.bo.config.ConfigBean;
-import io.nuls.consensus.model.dto.CmdRegisterDto;
-import io.nuls.consensus.rpc.call.CallMethodUtils;
-import io.nuls.consensus.storage.ConfigService;
-import io.nuls.consensus.utils.LoggerUtil;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -38,8 +36,6 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class ChainManager {
     @Autowired
-    private ConfigService configService;
-    @Autowired
     private AgentManager agentManager;
     @Autowired
     private DepositManager depositManager;
@@ -50,7 +46,7 @@ public class ChainManager {
     @Autowired
     private SchedulerManager schedulerManager;
     @Autowired
-    private ConsensusConfig config;
+    private NulsCoresConfig config;
     @Autowired
     private EconomicService economicService;
 
@@ -91,20 +87,6 @@ public class ChainManager {
         }
     }
 
-    /**
-     * 注册链交易
-     * Registration Chain Transaction
-     * */
-    public void registerTx(){
-        for (Chain chain:chainMap.values()) {
-            /*
-             * 链交易注册
-             * Chain Trading Registration
-             * */
-            int chainId = chain.getConfig().getChainId();
-            RegisterHelper.registerTx(chainId, ProtocolGroupManager.getCurrentProtocol(chainId));
-        }
-    }
 
     /**
      * 注册智能合约交易
@@ -182,7 +164,7 @@ public class ChainManager {
             读取数据库链信息配置
             Read database chain information configuration
              */
-            Map<Integer, ConfigBean> configMap = configService.getList();
+            Map<Integer, ConfigBean> configMap = CommonContext.CONFIG_BEAN_MAP;
             /*
             如果系统是第一次运行，则本地数据库没有存储链信息，此时需要从配置文件读取主链配置信息
             If the system is running for the first time, the local database does not have chain information,
@@ -191,10 +173,7 @@ public class ChainManager {
             if (configMap == null || configMap.size() == 0) {
                 ConfigBean configBean = config;
                 configBean.setBlockReward(configBean.getInflationAmount().divide(ConsensusConstant.YEAR_MILLISECOND.divide(BigInteger.valueOf(configBean.getPackingInterval()))));
-                boolean saveSuccess = configService.save(configBean,configBean.getChainId());
-                if(saveSuccess){
-                    configMap.put(configBean.getChainId(), configBean);
-                }
+                configMap.put(configBean.getChainId(), configBean);
             }
             return configMap;
         } catch (Exception e) {

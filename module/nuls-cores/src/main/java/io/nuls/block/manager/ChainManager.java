@@ -24,7 +24,6 @@
  */
 package io.nuls.block.manager;
 
-import io.nuls.base.protocol.ProtocolLoader;
 import io.nuls.block.rpc.call.TransactionCall;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.utils.ConfigLoader;
@@ -58,7 +57,6 @@ public class ChainManager {
         List<Integer> chainIds = ContextManager.CHAIN_ID_LIST;
         for (Integer chainId : chainIds) {
             initTable(chainId);
-            ProtocolLoader.load(chainId);
         }
     }
 

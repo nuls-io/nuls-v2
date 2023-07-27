@@ -29,7 +29,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.protocol.ProtocolGroupManager;
-import io.nuls.chain.config.NulsChainConfig;
 import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.info.CmErrorCode;
 import io.nuls.chain.info.CmRuntimeInfo;
@@ -46,7 +45,7 @@ import io.nuls.chain.service.ChainService;
 import io.nuls.chain.util.ChainManagerUtil;
 import io.nuls.chain.util.LoggerUtil;
 import io.nuls.chain.util.TxUtil;
-import io.nuls.core.constant.BaseConstant;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -79,7 +78,7 @@ public class ChainCmd extends BaseChainCmd {
     @Autowired
     private RpcService rpcService;
     @Autowired
-    NulsChainConfig nulsChainConfig;
+    NulsCoresConfig nulsChainConfig;
 
     @CmdAnnotation(cmd = RpcConstants.CMD_CHAIN, version = 1.0,
             description = "查看链信息")

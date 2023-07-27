@@ -1,6 +1,5 @@
 package io.nuls.crosschain.resend;
 
-import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.TransactionSignature;
 import io.nuls.core.constant.ErrorCode;
@@ -16,8 +15,8 @@ import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.BroadCtxSignMessage;
-import io.nuls.crosschain.nuls.model.po.CtxStatusPO;
-import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
+import io.nuls.crosschain.model.po.CtxStatusPO;
+import io.nuls.crosschain.rpc.call.NetWorkCall;
 
 import java.io.IOException;
 import java.util.ArrayList;

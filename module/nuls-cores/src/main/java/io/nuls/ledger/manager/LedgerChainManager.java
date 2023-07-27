@@ -24,13 +24,12 @@
  */
 package io.nuls.ledger.manager;
 
-import io.nuls.base.protocol.ProtocolLoader;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.rpc.model.ModuleE;
-import io.nuls.ledger.config.LedgerConfig;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.LedgerChain;
 import io.nuls.ledger.service.AssetRegMngService;
@@ -59,7 +58,7 @@ public class LedgerChainManager {
     @Autowired
     AssetRegMngService assetRegMngService;
     @Autowired
-    LedgerConfig ledgerConfig;
+    NulsCoresConfig ledgerConfig;
     private Map<Integer, LedgerChain> chainMap = new ConcurrentHashMap<>();
     Map<String, Object> localChainDefaultAsset = new HashMap<>(16);
 
@@ -76,7 +75,6 @@ public class LedgerChainManager {
         LedgerChain ledgerChain = new LedgerChain(chainId);
         //建立日志
         LoggerUtil.createLogger(chainId);
-        ProtocolLoader.load(chainId, false);
         //建立数据库
         SpringLiteContext.getBean(RepositoryImpl.class).initChainDb(chainId);
         SpringLiteContext.getBean(LgBlockSyncRepositoryImpl.class).initChainDb(chainId);

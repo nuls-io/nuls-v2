@@ -24,6 +24,7 @@
  */
 package io.nuls.network.rpc.cmd;
 
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.Log;
@@ -31,7 +32,6 @@ import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.*;
 import io.nuls.core.rpc.model.message.Response;
-import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.CmdConstant;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkErrorCode;
@@ -54,7 +54,7 @@ import java.util.*;
 @Component
 public class NodeGroupRpc extends BaseCmd {
     @Autowired
-    NetworkConfig networkConfig;
+    NulsCoresConfig networkConfig;
 
     /**
      * nw_createNodeGroup

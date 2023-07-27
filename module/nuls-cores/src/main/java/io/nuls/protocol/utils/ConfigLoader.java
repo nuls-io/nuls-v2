@@ -23,6 +23,8 @@
 package io.nuls.protocol.utils;
 
 import io.nuls.base.basic.ProtocolVersion;
+import io.nuls.common.CommonContext;
+import io.nuls.common.ConfigBean;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.io.IoUtils;
@@ -32,6 +34,7 @@ import io.nuls.protocol.manager.ContextManager;
 import io.nuls.protocol.model.ChainParameters;
 import io.nuls.protocol.storage.ParametersStorageService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static io.nuls.protocol.ProtocolUpdateBootstrap.protocolConfig;
@@ -66,11 +69,11 @@ public class ConfigLoader {
      *
      */
     public static void load() {
-        List<ChainParameters> list = service.getList();
+        List<ConfigBean> list = new ArrayList<>(CommonContext.CONFIG_BEAN_MAP.values());
         if (list == null || list.size() == 0) {
             loadDefault();
         } else {
-            for (ChainParameters chainParameters : list) {
+            for (ConfigBean chainParameters : list) {
                 ContextManager.init(chainParameters, versions);
             }
         }
@@ -83,7 +86,6 @@ public class ConfigLoader {
     private static void loadDefault() {
         int chainId = protocolConfig.getChainId();
         ContextManager.init(protocolConfig, versions);
-        service.save(protocolConfig, chainId);
     }
 
 }

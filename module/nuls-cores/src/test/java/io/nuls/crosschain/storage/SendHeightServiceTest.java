@@ -2,9 +2,9 @@ package io.nuls.crosschain.storage;
 
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
-import io.nuls.crosschain.nuls.CrossChainBootStrap;
-import io.nuls.crosschain.nuls.model.po.SendCtxHashPO;
-import io.nuls.crosschain.nuls.srorage.SendHeightService;
+import io.nuls.crosschain.CrossChainBootStrap;
+import io.nuls.crosschain.model.po.SendCtxHashPO;
+import io.nuls.crosschain.srorage.SendHeightService;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.crypto.HexUtil;
 import org.junit.BeforeClass;
@@ -21,7 +21,7 @@ public class SendHeightServiceTest {
 
     @BeforeClass
     public static void beforeTest() {
-        CrossChainBootStrap.main(null);
+        //CrossChainBootStrap.main(null);
         CrossChainBootStrap accountBootstrap = SpringLiteContext.getBean(CrossChainBootStrap.class);
         //初始化配置
         accountBootstrap.init();

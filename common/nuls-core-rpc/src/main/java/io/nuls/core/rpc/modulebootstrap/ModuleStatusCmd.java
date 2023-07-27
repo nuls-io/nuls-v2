@@ -7,6 +7,8 @@ import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.CmdAnnotation;
+import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.model.NerveCoreCmd;
 import io.nuls.core.rpc.model.message.Response;
 
 import java.util.Map;
@@ -17,6 +19,7 @@ import java.util.Map;
  * @Description: 功能描述
  */
 @Component
+@NerveCoreCmd(module = ModuleE.NC)
 public class ModuleStatusCmd extends BaseCmd {
 
     @Autowired

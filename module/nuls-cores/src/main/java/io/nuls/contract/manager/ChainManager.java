@@ -25,11 +25,12 @@
 package io.nuls.contract.manager;
 
 import io.nuls.base.protocol.ProtocolLoader;
-import io.nuls.contract.config.ContractConfig;
+import io.nuls.common.CommonContext;
+import io.nuls.common.ConfigBean;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractDBConstant;
 import io.nuls.contract.model.bo.Chain;
-import io.nuls.contract.model.bo.config.ConfigBean;
 import io.nuls.contract.storage.ConfigStorageService;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.util.LogUtil;
@@ -59,7 +60,7 @@ public class ChainManager {
     @Autowired
     private ConfigStorageService configStorageService;
     @Autowired
-    private ContractConfig contractConfig;
+    private NulsCoresConfig contractConfig;
 
     private Map<Integer, Chain> chainMap = new ConcurrentHashMap<>();
 
@@ -146,7 +147,7 @@ public class ChainManager {
             /*
             读取数据库链信息配置/Read database chain information configuration
              */
-            Map<Integer, ConfigBean> configMap = configStorageService.getList();
+            Map<Integer, ConfigBean> configMap = CommonContext.CONFIG_BEAN_MAP;
             /*
             如果系统是第一次运行，则本地数据库没有存储链信息，此时需要从配置文件读取主链配置信息
             If the system is running for the first time, the local database does not have chain information,
@@ -156,7 +157,7 @@ public class ChainManager {
                 //String configJson = IoUtils.read(ContractConstant.CONFIG_FILE_PATH);
                 //List<ConfigItem> configItemList = JSONUtils.json2list(configJson, ConfigItem.class);
                 //ConfigBean configBean = ConfigManager.initManager(configItemList);
-                ConfigBean configBean = contractConfig.getChainConfig();
+                ConfigBean configBean = contractConfig;
                 if (configBean == null) {
                     return null;
                 }
@@ -176,7 +177,7 @@ public class ChainManager {
      * @param chain
      */
     private void initTable(Chain chain) {
-        int chainId = chain.getConfig().getChainId();
+        int chainId = chain.getChainId();
         try {
             // 合约地址表
             RocksDBService.createTable(ContractDBConstant.DB_NAME_CONTRACT_ADDRESS + "_" + chainId);

@@ -16,7 +16,7 @@ import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.transaction.cache.PackablePool;
-import io.nuls.transaction.constant.TxConfig;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxContext;
 import io.nuls.transaction.constant.TxErrorCode;
@@ -58,7 +58,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
     private TxService txService;
 
     @Autowired
-    private TxConfig txConfig;
+    private NulsCoresConfig txConfig;
 
     @Override
     public TransactionConfirmedPO getConfirmedTransaction(Chain chain, NulsHash hash) {

@@ -25,13 +25,13 @@ package io.nuls.contract.mock.basetest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.base.protocol.ProtocolGroupManager;
+import io.nuls.common.ConfigBean;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.contract.base.Base;
-import io.nuls.contract.config.ContractConfig;
 import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.manager.CmdRegisterManager;
 import io.nuls.contract.model.bo.Chain;
-import io.nuls.contract.model.bo.config.ConfigBean;
 import io.nuls.contract.util.BeanUtilTest;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.util.VMContext;
@@ -82,9 +82,9 @@ public abstract class MockBase extends Base {
         configBean.setMaxViewGas(100000000L);
         chain.setConfig(configBean);
 
-        ContractConfig contractConfig = new ContractConfig();
+        NulsCoresConfig contractConfig = new NulsCoresConfig();
         contractConfig.setDataPath(dataPath);
-        SpringLiteContext.putBean(ContractConfig.class.getName(), contractConfig);
+        SpringLiteContext.putBean(NulsCoresConfig.class.getName(), contractConfig);
 
         vmContext = new VMContextMock();
         programExecutor = new ProgramExecutorImpl(vmContext, chain);

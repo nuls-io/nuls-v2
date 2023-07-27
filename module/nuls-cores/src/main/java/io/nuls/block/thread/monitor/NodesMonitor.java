@@ -22,7 +22,7 @@ package io.nuls.block.thread.monitor;
 
 import io.nuls.block.constant.StatusEnum;
 import io.nuls.block.model.ChainContext;
-import io.nuls.block.model.ChainParameters;
+import io.nuls.common.ConfigBean;
 import io.nuls.block.rpc.call.ConsensusCall;
 import io.nuls.block.rpc.call.NetworkCall;
 import io.nuls.block.rpc.call.TransactionCall;
@@ -55,7 +55,7 @@ public class NodesMonitor extends BaseMonitor {
 
     @Override
     protected void process(int chainId, ChainContext context, NulsLogger commonLog) {
-        ChainParameters parameters = context.getParameters();
+        ConfigBean parameters = context.getParameters();
         int minNodeAmount = parameters.getMinNodeAmount();
         int size = NetworkCall.getAvailableNodes(chainId).size();
         if (size < minNodeAmount && StatusEnum.RUNNING.equals(context.getStatus())) {

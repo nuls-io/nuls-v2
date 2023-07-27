@@ -15,6 +15,8 @@ import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.CmdAnnotation;
+import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.model.NerveCoreCmd;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
 
@@ -32,6 +34,7 @@ import java.util.stream.Collectors;
  * @date 2019/5/24 19:02
  */
 @Component
+@NerveCoreCmd(module = ModuleE.NC)
 public final class TransactionDispatcher extends BaseCmd {
 
     private List<TransactionProcessor> processors;

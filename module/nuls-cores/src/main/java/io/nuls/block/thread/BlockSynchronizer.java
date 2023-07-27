@@ -39,6 +39,8 @@ import io.nuls.block.storage.BlockStorageService;
 import io.nuls.block.storage.RollbackStorageService;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.block.utils.ChainGenerator;
+import io.nuls.common.ConfigBean;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.DoubleUtils;
@@ -179,7 +181,7 @@ public class BlockSynchronizer implements Runnable {
      * 回滚区块到指定高度
      */
     private void rollbackToHeight(long latestHeight, int chainId) {
-        BlockConfig blockConfig = SpringLiteContext.getBean(BlockConfig.class);
+        NulsCoresConfig blockConfig = SpringLiteContext.getBean(NulsCoresConfig.class);
         long height = blockConfig.getRollbackHeight();
         if (height > 0) {
             RollbackStorageService rollbackService = SpringLiteContext.getBean(RollbackStorageService.class);
@@ -209,7 +211,7 @@ public class BlockSynchronizer implements Runnable {
      */
     private List<Node> waitUntilNetworkStable() throws InterruptedException {
         ChainContext context = ContextManager.getContext(chainId);
-        ChainParameters parameters = context.getParameters();
+        ConfigBean parameters = context.getParameters();
         int waitNetworkInterval = parameters.getWaitNetworkInterval();
         int minNodeAmount = parameters.getMinNodeAmount();
         NulsLogger logger = context.getLogger();
@@ -238,7 +240,7 @@ public class BlockSynchronizer implements Runnable {
         List<Node> availableNodes = waitUntilNetworkStable();
         //2.判断可用节点数是否满足最小配置
         ChainContext context = ContextManager.getContext(chainId);
-        ChainParameters parameters = context.getParameters();
+        ConfigBean parameters = context.getParameters();
         int minNodeAmount = parameters.getMinNodeAmount();
         if (minNodeAmount == 0 && availableNodes.isEmpty()) {
             logger.info("Skip block syn, because minNodeAmount is set to 0, minNodeAmount should't set to 0 otherwise you want run local node without connect with network");
@@ -382,7 +384,7 @@ public class BlockSynchronizer implements Runnable {
                 key = entry.getKey();
             }
         }
-        ChainParameters parameters = context.getParameters();
+        ConfigBean parameters = context.getParameters();
         double div = DoubleUtils.div(count, filterAvailableNodes.size(), 2);
         byte percent = calculateConsistencyNodePercent(parameters.getConsistencyNodePercent(), filterAvailableNodes.size());
         if (div * 100 < percent) {
@@ -476,7 +478,7 @@ public class BlockSynchronizer implements Runnable {
 
     private LocalBlockStateEnum checkRollback(int rollbackCount, BlockDownloaderParams params) {
         //每次最多回滚maxRollback个区块,等待下次同步,这样可以避免被恶意节点攻击,大量回滚正常区块.
-        ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
+        ConfigBean parameters = ContextManager.getContext(chainId).getParameters();
         if (params.getLocalLatestHeight() == 0) {
             return CONFLICT;
         }

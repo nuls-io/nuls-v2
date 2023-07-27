@@ -24,8 +24,8 @@
  */
 package io.nuls.network.manager;
 
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.core.ioc.SpringLiteContext;
-import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.ManagerStatusEnum;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
@@ -77,7 +77,7 @@ public class NodeGroupManager extends BaseManager {
      * @return
      */
     public List<IpAddressShare> getAvailableShareNodes(Node node, int getChainId, boolean isCrossAddress) {
-        NetworkConfig networkConfig = SpringLiteContext.getBean(NetworkConfig.class);
+        NulsCoresConfig networkConfig = SpringLiteContext.getBean(NulsCoresConfig.class);
 
         List<IpAddressShare> addressList = new ArrayList<>();
         List nodesList = new ArrayList();
@@ -156,7 +156,7 @@ public class NodeGroupManager extends BaseManager {
     }
 
     public NodeGroup getMoonMainNet() {
-        NetworkConfig networkConfig = SpringLiteContext.getBean(NetworkConfig.class);
+        NulsCoresConfig networkConfig = SpringLiteContext.getBean(NulsCoresConfig.class);
         if (networkConfig.isMoonNode()) {
             return getNodeGroupByChainId(networkConfig.getChainId());
         }
@@ -204,7 +204,7 @@ public class NodeGroupManager extends BaseManager {
     @Override
     public void init() {
         NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
-        NetworkConfig networkConfig = SpringLiteContext.getBean(NetworkConfig.class);
+        NulsCoresConfig networkConfig = SpringLiteContext.getBean(NulsCoresConfig.class);
         /*
          * 获取配置的信息，进行自有网络的nodeGroup配置初始化
          * Obtain the configuration information and initialize the nodeGroup configuration of the own netw
