@@ -27,6 +27,7 @@ import java.util.Map;
  * @date 2019/4/23
  */
 @Component
+@NulsCoresCmd(module = ModuleE.CC)
 public class MainNetCmd extends BaseCmd {
     @Autowired
     private MainNetService service;

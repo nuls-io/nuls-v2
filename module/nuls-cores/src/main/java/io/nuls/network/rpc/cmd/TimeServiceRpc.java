@@ -26,10 +26,7 @@ package io.nuls.network.rpc.cmd;
 
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.rpc.cmd.BaseCmd;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.Key;
-import io.nuls.core.rpc.model.ResponseData;
-import io.nuls.core.rpc.model.TypeDescriptor;
+import io.nuls.core.rpc.model.*;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.network.constant.CmdConstant;
 import io.nuls.network.manager.TimeManager;
@@ -43,6 +40,7 @@ import java.util.Map;
  * @date 2018/12/05
  **/
 @Component
+@NulsCoresCmd(module = ModuleE.NW)
 public class TimeServiceRpc extends BaseCmd {
     @CmdAnnotation(cmd = CmdConstant.CMD_NW_CURRENT_TIME, version = 1.0,
             description = "获取节点网络时间")

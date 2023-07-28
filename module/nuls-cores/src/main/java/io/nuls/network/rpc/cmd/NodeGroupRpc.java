@@ -52,6 +52,7 @@ import java.util.*;
  * @date 2018/11/07
  **/
 @Component
+@NulsCoresCmd(module = ModuleE.NW)
 public class NodeGroupRpc extends BaseCmd {
     @Autowired
     NulsCoresConfig networkConfig;

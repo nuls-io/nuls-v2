@@ -54,6 +54,7 @@ import static io.nuls.account.util.LoggerUtil.LOG;
  * @date: 2018/11/5
  */
 @Component
+@NulsCoresCmd(module = ModuleE.AC)
 public class AccountCmd extends BaseCmd {
 
     @Autowired

@@ -87,6 +87,7 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
  * @date: 2019-03-11
  */
 @Component
+@NulsCoresCmd(module = ModuleE.SC)
 public class ContractResource extends BaseCmd {
 
     @Autowired

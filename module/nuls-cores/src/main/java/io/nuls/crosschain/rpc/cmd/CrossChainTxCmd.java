@@ -11,10 +11,7 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.rpc.cmd.BaseCmd;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.Parameter;
-import io.nuls.core.rpc.model.ResponseData;
-import io.nuls.core.rpc.model.TypeDescriptor;
+import io.nuls.core.rpc.model.*;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.CrossTxRehandleMessage;
@@ -35,6 +32,7 @@ import java.util.Map;
  * @Description: 功能描述
  */
 @Component
+@NulsCoresCmd(module = ModuleE.CC)
 public class CrossChainTxCmd extends BaseCmd {
 
     @Autowired

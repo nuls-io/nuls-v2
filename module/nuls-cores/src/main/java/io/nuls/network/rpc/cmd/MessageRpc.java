@@ -51,6 +51,7 @@ import java.util.*;
  * @date 2018/11/12
  **/
 @Component
+@NulsCoresCmd(module = ModuleE.NW)
 public class MessageRpc extends BaseCmd {
 
     private MessageHandlerFactory messageHandlerFactory = MessageHandlerFactory.getInstance();

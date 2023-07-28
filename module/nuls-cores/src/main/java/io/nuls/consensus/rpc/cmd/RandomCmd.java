@@ -44,6 +44,7 @@ import java.util.Map;
  * @date: 2019-07-17
  */
 @Component
+@NulsCoresCmd(module = ModuleE.CS)
 public class RandomCmd extends BaseCmd {
     @Autowired
     private RandomSeedsStorageService randomSeedService;

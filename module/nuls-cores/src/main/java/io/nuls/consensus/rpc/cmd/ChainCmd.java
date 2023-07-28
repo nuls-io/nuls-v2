@@ -22,6 +22,7 @@ import java.util.Map;
  * 2018/11/7
  */
 @Component
+@NulsCoresCmd(module = ModuleE.CS)
 public class ChainCmd extends BaseCmd {
     @Autowired
     private ChainService service;

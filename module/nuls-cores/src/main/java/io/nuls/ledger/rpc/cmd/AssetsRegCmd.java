@@ -46,6 +46,7 @@ import java.util.Map;
  * @date 2019/10/22
  */
 @Component
+@NulsCoresCmd(module = ModuleE.LG)
 public class AssetsRegCmd extends BaseLedgerCmd {
     @Autowired
     NulsCoresConfig ledgerConfig;

@@ -18,6 +18,7 @@ import java.util.Map;
  * 2018/11/7
  * */
 @Component
+@NulsCoresCmd(module = ModuleE.CS)
 public class DepositCmd extends BaseCmd {
     @Autowired
     private DepositService service;

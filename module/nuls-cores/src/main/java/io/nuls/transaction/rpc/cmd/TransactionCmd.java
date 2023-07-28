@@ -46,6 +46,7 @@ import static io.nuls.transaction.utils.LoggerUtil.LOG;
  * @date: 2018/11/12
  */
 @Component
+@NulsCoresCmd(module = ModuleE.TX)
 public class TransactionCmd extends BaseCmd {
 
     @Autowired

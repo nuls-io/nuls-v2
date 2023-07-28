@@ -56,6 +56,7 @@ import static io.nuls.protocol.constant.CommandConstant.*;
  * @date 18-11-9 下午2:04
  */
 @Component
+@NulsCoresCmd(module = ModuleE.PU)
 public class ProtocolResource extends BaseCmd {
     @Autowired
     private ProtocolService service;

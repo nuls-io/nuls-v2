@@ -52,6 +52,7 @@ import java.util.Map;
  * @author lanjinsheng
  */
 @Component
+@NulsCoresCmd(module = ModuleE.LG)
 public class ValidatorCmd extends BaseLedgerCmd {
     @Autowired
     CoinDataValidator coinDataValidator;

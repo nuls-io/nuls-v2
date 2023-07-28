@@ -56,6 +56,7 @@ import java.util.Map;
  * @author lanjinsheng .
  */
 @Component
+@NulsCoresCmd(module = ModuleE.LG)
 public class AccountStateCmd extends BaseLedgerCmd {
 
 

@@ -24,6 +24,7 @@ import java.util.Map;
  * @Description: 网络信息查询接口
  */
 @Component
+@NulsCoresCmd(module = ModuleE.NW)
 public class NetworkInfoRpc extends BaseCmd {
 
     @CmdAnnotation(cmd = CmdConstant.CMD_NW_INFO, version = 1.0,

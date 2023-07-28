@@ -1,11 +1,8 @@
 package io.nuls.crosschain.rpc.cmd;
 
-import io.nuls.core.rpc.model.ResponseData;
-import io.nuls.core.rpc.model.TypeDescriptor;
+import io.nuls.core.rpc.model.*;
 import io.nuls.crosschain.servive.BlockService;
 import io.nuls.core.rpc.cmd.BaseCmd;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
@@ -19,6 +16,7 @@ import java.util.Map;
  * @date 2019/4/25
  */
 @Component
+@NulsCoresCmd(module = ModuleE.CC)
 public class BlockCmd extends BaseCmd {
     @Autowired
     private BlockService service;

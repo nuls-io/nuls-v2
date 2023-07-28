@@ -19,6 +19,7 @@ import java.util.Map;
  * 2018/11/7
  */
 @Component
+@NulsCoresCmd(module = ModuleE.CS)
 public class AgentCmd extends BaseCmd {
     @Autowired
     private AgentService service;

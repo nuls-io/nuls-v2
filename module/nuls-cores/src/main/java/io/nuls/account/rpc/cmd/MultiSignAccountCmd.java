@@ -37,6 +37,7 @@ import static io.nuls.account.util.LoggerUtil.LOG;
  * @date: Dec.20th 2018
  */
 @Component
+@NulsCoresCmd(module = ModuleE.AC)
 public class MultiSignAccountCmd extends BaseCmd {
     @Autowired
     private MultiSignAccountService multiSignAccountService;

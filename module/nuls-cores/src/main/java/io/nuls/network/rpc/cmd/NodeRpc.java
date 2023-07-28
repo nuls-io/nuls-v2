@@ -54,6 +54,7 @@ import java.util.Map;
  * @create 2018/11/09
  **/
 @Component
+@NulsCoresCmd(module = ModuleE.NW)
 public class NodeRpc extends BaseCmd {
     private NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
     private static final int STATE_ALL = 0;

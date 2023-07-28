@@ -49,6 +49,7 @@ import java.util.Map;
  * @date 2018/11/20
  */
 @Component
+@NulsCoresCmd(module = ModuleE.LG)
 public class TransactionCmd extends BaseLedgerCmd {
 
     @Autowired

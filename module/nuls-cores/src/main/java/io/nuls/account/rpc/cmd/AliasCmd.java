@@ -27,6 +27,7 @@ import static io.nuls.account.util.LoggerUtil.LOG;
  * @date: Nov.20th 2018
  */
 @Component
+@NulsCoresCmd(module = ModuleE.AC)
 public class AliasCmd extends BaseCmd {
 
     @Autowired

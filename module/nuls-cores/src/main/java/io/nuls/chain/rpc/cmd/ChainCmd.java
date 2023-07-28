@@ -69,6 +69,7 @@ import java.util.Map;
  * @description
  */
 @Component
+@NulsCoresCmd(module = ModuleE.CM)
 public class ChainCmd extends BaseChainCmd {
 
     @Autowired

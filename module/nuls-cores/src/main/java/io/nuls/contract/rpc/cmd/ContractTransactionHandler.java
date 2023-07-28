@@ -22,6 +22,7 @@ import static io.nuls.contract.util.ContractUtil.wrapperFailed;
 import static io.nuls.core.constant.TxType.*;
 
 @Service
+@NulsCoresCmd(module = ModuleE.SC)
 public class ContractTransactionHandler extends BaseCmd {
 
     @Autowired

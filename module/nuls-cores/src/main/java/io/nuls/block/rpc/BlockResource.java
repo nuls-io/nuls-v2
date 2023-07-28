@@ -56,6 +56,7 @@ import static io.nuls.block.utils.LoggerUtil.COMMON_LOG;
  * @date 18-11-9 下午2:04
  */
 @Component
+@NulsCoresCmd(module = ModuleE.BL)
 public class BlockResource extends BaseCmd {
     @Autowired
     private BlockService service;

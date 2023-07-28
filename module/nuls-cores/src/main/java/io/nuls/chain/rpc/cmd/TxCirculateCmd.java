@@ -58,6 +58,7 @@ import java.util.Map;
  * @date 2019/02/21
  **/
 @Component
+@NulsCoresCmd(module = ModuleE.CM)
 public class TxCirculateCmd extends BaseChainCmd {
 
 

@@ -54,6 +54,7 @@ import java.util.stream.Collectors;
  * @date 2019/02/14
  **/
 @Component
+@NulsCoresCmd(module = ModuleE.LG)
 public class ChainAssetCmd extends BaseLedgerCmd {
     @Autowired
     ChainAssetsService chainAssetsService;

@@ -23,6 +23,7 @@ import java.util.Map;
  * @date: 2018/11/5
  */
 @Component
+@NulsCoresCmd(module = ModuleE.AC)
 public class AddressPrefixCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = "ac_getAllAddressPrefix", version = 1.0, description = "获取所有链的地址前缀")

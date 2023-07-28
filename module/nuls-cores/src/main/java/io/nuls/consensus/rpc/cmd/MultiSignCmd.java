@@ -18,6 +18,7 @@ import java.util.Map;
  * 2019/7/25
  * */
 @Component
+@NulsCoresCmd(module = ModuleE.CS)
 public class MultiSignCmd extends BaseCmd {
     @Autowired
     private MultiSignService service;

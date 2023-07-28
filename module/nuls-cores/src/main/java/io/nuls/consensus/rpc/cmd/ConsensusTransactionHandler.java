@@ -17,6 +17,7 @@ import java.util.Map;
  * @date 2019/6/1
  */
 @Component
+@NulsCoresCmd(module = ModuleE.CS)
 public class ConsensusTransactionHandler extends BaseCmd {
 
     @Autowired
