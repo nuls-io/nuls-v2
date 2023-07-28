@@ -30,7 +30,6 @@ import io.nuls.block.message.HashMessage;
 import io.nuls.block.message.SmallBlockMessage;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
-import io.nuls.common.ConfigBean;
 import io.nuls.block.model.GenesisBlock;
 import io.nuls.block.rpc.call.*;
 import io.nuls.block.service.BlockService;
@@ -40,6 +39,7 @@ import io.nuls.block.utils.BlockUtil;
 import io.nuls.block.utils.ChainGenerator;
 import io.nuls.block.utils.LoggerUtil;
 import io.nuls.block.utils.SmallBlockCacher;
+import io.nuls.common.ConfigBean;
 import io.nuls.core.basic.Result;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
@@ -48,7 +48,6 @@ import io.nuls.core.core.annotation.Value;
 import io.nuls.core.core.config.ConfigurationLoader;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.log.Log;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.SerializeUtils;
@@ -621,7 +620,7 @@ public class BlockServiceImpl implements BlockService {
             genesisBlock = getGenesisBlock(chainId);
             //1.判断有没有创世块,如果没有就初始化创世块并保存
             if (null == genesisBlock) {
-                ChainParameters chainParameters = context.getParameters();
+                ConfigBean chainParameters = context.getParameters();
                 String genesisBlockPath = chainParameters.getGenesisBlockPath();
                 if (StringUtils.isBlank(genesisBlockPath)) {
                     genesisBlock = GenesisBlock.getInstance(chainId, chainParameters.getAssetId());

@@ -25,17 +25,22 @@
  */
 package io.nuls.ledger.storage.impl;
 
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.basic.InitializingBean;
+import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.ByteUtils;
+import io.nuls.core.rockdb.manager.RocksDBManager;
 import io.nuls.core.rockdb.service.RocksDBService;
+import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.po.BlockSnapshotTxs;
 import io.nuls.ledger.storage.DataBaseArea;
 import io.nuls.ledger.storage.LgBlockSyncRepository;
 import io.nuls.ledger.utils.LoggerUtil;
 
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,6 +53,9 @@ import static io.nuls.ledger.utils.LoggerUtil.logger;
  */
 @Component
 public class LgBlockSyncRepositoryImpl implements LgBlockSyncRepository, InitializingBean {
+
+    @Autowired
+    private NulsCoresConfig config;
 
     public LgBlockSyncRepositoryImpl() {
 
@@ -160,6 +168,7 @@ public class LgBlockSyncRepositoryImpl implements LgBlockSyncRepository, Initial
      */
     public void initChainDb(int addressChainId) {
         try {
+            RocksDBManager.setDataPath(config.getDataPath() + File.separator + ModuleE.LG.name);
             if (!RocksDBService.existTable(getLedgerNonceTableName(addressChainId))) {
                 RocksDBService.createTable(getLedgerNonceTableName(addressChainId));
             }
@@ -188,6 +197,7 @@ public class LgBlockSyncRepositoryImpl implements LgBlockSyncRepository, Initial
     @Override
     public void saveAccountNonces(int chainId, Map<byte[], byte[]> noncesMap) throws Exception {
         String table = getLedgerNonceTableName(chainId);
+        RocksDBManager.setDataPath(config.getDataPath() + File.separator + ModuleE.LG.name);
         if (!RocksDBService.existTable(table)) {
             RocksDBService.createTable(table);
         }

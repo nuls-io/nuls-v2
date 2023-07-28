@@ -6,29 +6,31 @@ import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.constant.TxType;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.ECKey;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.core.parse.SerializeUtils;
 import io.nuls.crosschain.base.model.bo.ChainInfo;
-import io.nuls.crosschain.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.constant.NulsCrossChainErrorCode;
 import io.nuls.crosschain.model.bo.Chain;
 import io.nuls.crosschain.rpc.call.ChainManagerCall;
-import io.nuls.crosschain.srorage.ConvertHashService;
 import io.nuls.crosschain.srorage.ConvertCtxService;
+import io.nuls.crosschain.srorage.ConvertHashService;
 import io.nuls.crosschain.srorage.RegisteredCrossChainService;
 import io.nuls.crosschain.utils.CommonUtil;
 import io.nuls.crosschain.utils.TxUtil;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.crosschain.utils.manager.ChainManager;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * 跨链交易验证工具类
@@ -40,7 +42,7 @@ import java.util.*;
 @Component
 public class CrossTxValidator {
     @Autowired
-    private NulsCrossChainConfig config;
+    private NulsCoresConfig config;
 
     @Autowired
     private ConvertHashService convertHashService;

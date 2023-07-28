@@ -29,11 +29,11 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
 import io.nuls.base.protocol.ProtocolGroupManager;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.util.NulsDateUtils;
-import io.nuls.common.NulsCoresConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxContext;
 import io.nuls.transaction.constant.TxErrorCode;
@@ -128,7 +128,7 @@ public class TxUtil {
     }
 
     public static boolean isNulsAsset(int chainId, int assetId) {
-        TxConfig txConfig = SpringLiteContext.getBean(TxConfig.class);
+        NulsCoresConfig txConfig = SpringLiteContext.getBean(NulsCoresConfig.class);
         return chainId == txConfig.getMainChainId()
                 && assetId == txConfig.getMainAssetId();
     }

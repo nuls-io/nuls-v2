@@ -24,11 +24,9 @@
  */
 package io.nuls.chain.service.impl;
 
-import io.nuls.chain.config.NulsChainConfig;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.core.thread.ThreadUtils;
-import io.nuls.core.thread.commom.NulsThreadFactory;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
@@ -42,7 +40,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 @Component
 public class CmTaskManager {
     @Autowired
-    private NulsChainConfig nulsChainConfig;
+    private NulsCoresConfig nulsChainConfig;
 
     private ScheduledThreadPoolExecutor executorService;
 

@@ -26,6 +26,7 @@ package io.nuls.transaction;
 
 import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
+import io.nuls.common.ConfigBean;
 import io.nuls.core.basic.Page;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.JSONUtils;
@@ -36,7 +37,6 @@ import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.transaction.model.bo.Chain;
-import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.dto.CoinDTO;
 import io.nuls.transaction.rpc.call.LedgerCall;
 import org.junit.Assert;
@@ -411,7 +411,7 @@ public class TestTx {
         NoUse.mockModule();
         ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":7771");
         chain = new Chain();
-        chain.setConfig(new ConfigBean(chainId, assetId, 1024*1024,1000,20,20000,60000));
+        //chain.setConfig(new ConfigBean(chainId, assetId, 1024*1024,1000,20,20000,60000));
     }
 
     @Test

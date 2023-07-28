@@ -3,11 +3,11 @@ package io.nuls.account.rpc.cmd;
 import io.nuls.account.ServiceInitializer;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.Chain;
-import io.nuls.account.model.bo.config.ConfigBean;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.MultiSignAccountService;
 import io.nuls.base.data.Address;
 import io.nuls.base.data.MultiSigAccount;
+import io.nuls.common.ConfigBean;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.rpc.info.Constants;
@@ -164,7 +164,7 @@ public class MultiSigAccountCmdTest {
      * */
     public List<Account> createAccount(int count) {
         chain = new Chain();
-        chain.setConfig(new ConfigBean(chainId, assetId));
+        //chain.setConfig(new ConfigBean(chainId, assetId));
         List<Account> accountList = accountService.createAccount(chain, count, password);
         assertNotNull(accountList);
         return accountList;

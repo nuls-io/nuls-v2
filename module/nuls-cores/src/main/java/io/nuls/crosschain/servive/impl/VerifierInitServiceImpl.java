@@ -3,23 +3,22 @@ package io.nuls.crosschain.servive.impl;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.SignatureUtil;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.crosschain.base.constant.CrossChainConstant;
-import io.nuls.crosschain.base.model.bo.txdata.RegisteredChainMessage;
 import io.nuls.crosschain.base.model.bo.ChainInfo;
+import io.nuls.crosschain.base.model.bo.txdata.RegisteredChainMessage;
 import io.nuls.crosschain.base.model.bo.txdata.VerifierInitData;
 import io.nuls.crosschain.base.service.VerifierInitService;
 import io.nuls.crosschain.base.utils.enumeration.ChainInfoChangeType;
-import io.nuls.crosschain.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.constant.NulsCrossChainErrorCode;
 import io.nuls.crosschain.constant.ParamConstant;
 import io.nuls.crosschain.model.bo.Chain;
 import io.nuls.crosschain.rpc.call.BlockCall;
 import io.nuls.crosschain.rpc.call.ConsensusCall;
-import io.nuls.crosschain.srorage.ConfigService;
 import io.nuls.crosschain.srorage.ConvertHashService;
 import io.nuls.crosschain.srorage.RegisteredCrossChainService;
 import io.nuls.crosschain.utils.TxUtil;
@@ -39,15 +38,14 @@ import java.util.*;
 @Component
 public class VerifierInitServiceImpl implements VerifierInitService {
     @Autowired
-    private NulsCrossChainConfig config;
+    private NulsCoresConfig config;
     @Autowired
     private ChainManager chainManager;
     @Autowired
     private ConvertHashService convertHashService;
     @Autowired
     private RegisteredCrossChainService registeredCrossChainService;
-    @Autowired
-    private ConfigService configService;
+
     @Override
     public Map<String, Object> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {
         List<Transaction> invalidTxList = new ArrayList<>();

@@ -26,7 +26,8 @@ public class VersionChangeNotifier {
     public static boolean notify(int chainId, short version) {
         long begin = System.nanoTime();
         List<String> noticedModule = new ArrayList<>();
-        noticedModule.add(ModuleE.CS.abbr);
+        noticedModule.add(ModuleE.NC.abbr);
+        /*noticedModule.add(ModuleE.CS.abbr);
         noticedModule.add(ModuleE.BL.abbr);
         noticedModule.add(ModuleE.AC.abbr);
         noticedModule.add(ModuleE.LG.abbr);
@@ -37,7 +38,7 @@ public class VersionChangeNotifier {
         if (ModuleHelper.isSupportCrossChain()) {
             noticedModule.add(ModuleE.CC.abbr);
             noticedModule.add(ModuleE.CM.abbr);
-        }
+        }*/
         for (String module : noticedModule) {
             long l = System.nanoTime();
             Map<String, Object> params = new HashMap<>(4);

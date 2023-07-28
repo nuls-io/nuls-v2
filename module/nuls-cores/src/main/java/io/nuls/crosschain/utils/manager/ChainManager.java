@@ -14,7 +14,6 @@ import io.nuls.crosschain.model.bo.Chain;
 import io.nuls.crosschain.model.bo.CmdRegisterDto;
 import io.nuls.crosschain.rpc.call.BlockCall;
 import io.nuls.crosschain.rpc.call.SmartContractCall;
-import io.nuls.crosschain.srorage.ConfigService;
 import io.nuls.crosschain.srorage.RegisteredCrossChainService;
 import io.nuls.crosschain.utils.LoggerUtil;
 import io.nuls.crosschain.utils.thread.handler.GetCtxStateHandler;
@@ -34,8 +33,6 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Component
 public class ChainManager {
-    @Autowired
-    private ConfigService configService;
     @Autowired
     private NulsCoresConfig config;
     @Autowired

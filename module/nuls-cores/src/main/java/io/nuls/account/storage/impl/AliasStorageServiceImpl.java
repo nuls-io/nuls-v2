@@ -32,12 +32,18 @@ import io.nuls.account.model.po.AliasPO;
 import io.nuls.account.storage.AliasStorageService;
 import io.nuls.account.util.LoggerUtil;
 import io.nuls.base.basic.AddressTool;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.basic.InitializingBean;
+import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.rockdb.manager.RocksDBManager;
 import io.nuls.core.rockdb.service.RocksDBService;
+import io.nuls.core.rpc.model.ModuleE;
+
+import java.io.File;
 
 /**
  * @author EdwardChan
@@ -48,6 +54,9 @@ import io.nuls.core.rockdb.service.RocksDBService;
  */
 @Component
 public class AliasStorageServiceImpl implements AliasStorageService, InitializingBean {
+
+    @Autowired
+    private NulsCoresConfig config;
 
     /**
      * Initialize the storage when the application boot up
@@ -133,6 +142,7 @@ public class AliasStorageServiceImpl implements AliasStorageService, Initializin
         String tableNameKeyIsAddress = AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS_KEY_ADDRESS + chainId;
         boolean result = false;
         try {
+            RocksDBManager.setDataPath(config.getDataPath() + File.separator + ModuleE.AC.name);
             //check if the table is exist
             if (!RocksDBService.existTable(tableNameKeyIsAlias)) {
                 result = RocksDBService.createTable(tableNameKeyIsAlias);

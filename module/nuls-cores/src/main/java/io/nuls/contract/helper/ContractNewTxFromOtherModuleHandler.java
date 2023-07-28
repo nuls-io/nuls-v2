@@ -28,18 +28,15 @@ import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
-import io.nuls.contract.config.ContractConfig;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.contract.constant.ContractConstant;
-import io.nuls.contract.enums.CmdRegisterMode;
 import io.nuls.contract.manager.ContractTempBalanceManager;
 import io.nuls.contract.model.bo.ContractBalance;
-import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.util.MapUtil;
 import io.nuls.contract.vm.Frame;
 import io.nuls.contract.vm.program.ProgramAccount;
-import io.nuls.contract.vm.program.ProgramInvokeRegisterCmd;
 import io.nuls.contract.vm.program.ProgramNewTx;
 import io.nuls.contract.vm.program.impl.ProgramExecutorImpl;
 import io.nuls.core.core.annotation.Autowired;
@@ -63,7 +60,7 @@ import static io.nuls.contract.util.ContractUtil.mapAddBigInteger;
 public class ContractNewTxFromOtherModuleHandler {
 
     @Autowired
-    private ContractConfig contractConfig;
+    private NulsCoresConfig contractConfig;
     /**
      * 更新临时nonce和vm内维护的合约余额
      */

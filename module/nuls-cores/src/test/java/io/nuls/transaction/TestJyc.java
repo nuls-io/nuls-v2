@@ -24,11 +24,11 @@
 
 package io.nuls.transaction;
 
+import io.nuls.common.ConfigBean;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.transaction.model.bo.Chain;
-import io.nuls.transaction.model.bo.config.ConfigBean;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -55,7 +55,7 @@ public class TestJyc {
         NoUse.mockModule();
         ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":7771");
         chain = new Chain();
-        chain.setConfig(new ConfigBean(CHAIN_ID, ASSET_ID, 1024 * 1024, 1000, 20, 20000, 60000));
+        //chain.setConfig(new ConfigBean(CHAIN_ID, ASSET_ID, 1024 * 1024, 1000, 20, 20000, 60000));
     }
 
     @Test

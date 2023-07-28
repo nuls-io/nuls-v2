@@ -23,12 +23,11 @@ package io.nuls.protocol.service.impl;
 import io.nuls.base.basic.ProtocolVersion;
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
+import io.nuls.common.ConfigBean;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.protocol.manager.ContextManager;
-import io.nuls.protocol.model.ChainParameters;
 import io.nuls.protocol.model.ProtocolContext;
 import io.nuls.protocol.model.po.ProtocolVersionPo;
 import io.nuls.protocol.model.po.StatisticsInfo;
@@ -196,7 +195,7 @@ public class ProtocolServiceImpl implements ProtocolService {
             //重新计算统计信息
             proportionMap.merge(newProtocolVersion, 1, Integer::sum);
         }
-        ChainParameters parameters = context.getParameters();
+        ConfigBean parameters = context.getParameters();
         short interval = parameters.getInterval();
         //每1000块进行一次统计
         if (count == interval) {
@@ -313,7 +312,7 @@ public class ProtocolServiceImpl implements ProtocolService {
             proportionMap.merge(newProtocolVersion, 1, (a, b) -> a - b);
         }
         //缓存统计总数==0时,从数据库加载上一条统计记录
-        ChainParameters parameters = context.getParameters();
+        ConfigBean parameters = context.getParameters();
         short interval = parameters.getInterval();
         //区块高度到达阈值,从数据库删除一条统计记录
         if (count < 0) {
@@ -365,7 +364,7 @@ public class ProtocolServiceImpl implements ProtocolService {
         if (currentProtocolVersion.getVersion() > blockVersion) {
             return false;
         }
-        ChainParameters parameters = context.getParameters();
+        ConfigBean parameters = context.getParameters();
         byte effectiveRatio = data.getEffectiveRatio();
         if (effectiveRatio < parameters.getEffectiveRatioMinimum()) {
             return false;

@@ -17,7 +17,7 @@
  */
 package org.ethereum.datasource.rocksdb;
 
-import io.nuls.contract.config.ContractConfig;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.contract.util.Log;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.model.StringUtils;
@@ -119,7 +119,7 @@ public class RocksDbDataSource implements DbSource<byte[]> {
             if (StringUtils.isBlank(area)) {
                 throw new RuntimeException("empty area");
             }
-            ContractConfig contractConfig = SpringLiteContext.getBean(ContractConfig.class);
+            NulsCoresConfig contractConfig = SpringLiteContext.getBean(NulsCoresConfig.class);
             String dataPath = contractConfig.getDataPath();
             File pathDir = DBUtils.loadDataPath(dataPath);
             dataPath = pathDir.getPath();

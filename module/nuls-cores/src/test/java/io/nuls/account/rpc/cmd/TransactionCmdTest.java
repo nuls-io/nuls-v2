@@ -2,13 +2,13 @@ package io.nuls.account.rpc.cmd;
 
 import io.nuls.account.constant.RpcConstant;
 import io.nuls.account.model.bo.Chain;
-import io.nuls.account.model.bo.config.ConfigBean;
 import io.nuls.account.model.dto.TransferDTO;
 import io.nuls.account.rpc.call.LedgerCall;
 import io.nuls.account.rpc.common.CommonRpcOperation;
 import io.nuls.account.util.TxUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
+import io.nuls.common.ConfigBean;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.log.Log;
 import io.nuls.core.parse.JSONUtils;
@@ -63,7 +63,7 @@ public class TransactionCmdTest {
         NoUse.mockModule();
         importKeyStore();
         chain = new Chain();
-        chain.setConfig(new ConfigBean(chainId, assetId));
+        //chain.setConfig(new ConfigBean(chainId, assetId));
     }
 
 

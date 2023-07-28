@@ -31,8 +31,6 @@ import io.nuls.core.io.IoUtils;
 import io.nuls.core.log.Log;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.protocol.manager.ContextManager;
-import io.nuls.protocol.model.ChainParameters;
-import io.nuls.protocol.storage.ParametersStorageService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,8 +48,6 @@ import static io.nuls.protocol.constant.Constant.PROTOCOL_CONFIG_FILE;
 @Component
 public class ConfigLoader {
 
-    @Autowired
-    private static ParametersStorageService service;
     private static List<ProtocolVersion> versions;
 
     static {
@@ -84,7 +80,6 @@ public class ConfigLoader {
      *
      */
     private static void loadDefault() {
-        int chainId = protocolConfig.getChainId();
         ContextManager.init(protocolConfig, versions);
     }
 

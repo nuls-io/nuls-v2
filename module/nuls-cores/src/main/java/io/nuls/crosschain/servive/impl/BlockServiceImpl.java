@@ -5,11 +5,11 @@ import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.basic.Result;
 import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.crosschain.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.constant.NulsCrossChainErrorCode;
 import io.nuls.crosschain.constant.ParamConstant;
@@ -43,7 +43,7 @@ public class BlockServiceImpl implements BlockService {
     private SendedHeightService sendedHeightService;
 
     @Autowired
-    private NulsCrossChainConfig config;
+    private NulsCoresConfig config;
 
     @Autowired
     private ConvertCtxService convertCtxService;

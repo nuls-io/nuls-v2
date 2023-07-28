@@ -35,9 +35,9 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
+import io.nuls.common.ConfigBean;
 import io.nuls.contract.base.Base;
 import io.nuls.contract.model.bo.Chain;
-import io.nuls.contract.model.bo.config.ConfigBean;
 import io.nuls.contract.model.dto.ContractTransactionDto;
 import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.contract.rpc.call.LedgerCall;
@@ -229,7 +229,7 @@ public class BaseQuery extends Base {
             ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":7771");
         }
         chain = new Chain();
-        chain.setConfig(new ConfigBean(assetId, chainId, 100000000L));
+        //chain.setConfig(new ConfigBean(assetId, chainId, 100000000L));
     }
 
     protected void updateSyncKernel() {}

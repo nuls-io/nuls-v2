@@ -6,6 +6,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.basic.Result;
 import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.constant.TxType;
@@ -18,19 +19,17 @@ import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.crosschain.base.model.bo.ChainInfo;
 import io.nuls.crosschain.base.service.ResetLocalVerifierService;
-import io.nuls.crosschain.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.constant.NulsCrossChainErrorCode;
 import io.nuls.crosschain.constant.ParamConstant;
 import io.nuls.crosschain.model.bo.Chain;
-import io.nuls.crosschain.nuls.rpc.call.*;
+import io.nuls.crosschain.rpc.call.*;
 import io.nuls.crosschain.srorage.LocalVerifierService;
 import io.nuls.crosschain.utils.TxUtil;
 import io.nuls.crosschain.utils.manager.ChainManager;
 import io.nuls.crosschain.utils.manager.CoinDataManager;
 import io.nuls.crosschain.utils.manager.LocalVerifierManager;
 import io.nuls.crosschain.utils.thread.ResetOtherChainVerifierListHandler;
-import io.nuls.crosschain.rpc.call.*;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -55,7 +54,7 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
     private CoinDataManager coinDataManager;
 
     @Autowired
-    NulsCrossChainConfig nulsCrossChainConfig;
+    NulsCoresConfig nulsCrossChainConfig;
 
     @Autowired
     LocalVerifierService localVerifierService;

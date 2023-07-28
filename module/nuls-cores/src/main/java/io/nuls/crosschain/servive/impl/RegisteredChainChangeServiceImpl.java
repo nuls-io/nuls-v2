@@ -3,6 +3,7 @@ package io.nuls.crosschain.servive.impl;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.SignatureUtil;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
@@ -11,7 +12,6 @@ import io.nuls.crosschain.base.model.bo.ChainInfo;
 import io.nuls.crosschain.base.model.bo.txdata.RegisteredChainChangeData;
 import io.nuls.crosschain.base.service.RegisteredChainChangeService;
 import io.nuls.crosschain.base.utils.enumeration.ChainInfoChangeType;
-import io.nuls.crosschain.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.constant.NulsCrossChainErrorCode;
 import io.nuls.crosschain.model.bo.Chain;
@@ -28,7 +28,7 @@ public class RegisteredChainChangeServiceImpl implements RegisteredChainChangeSe
     private ChainManager chainManager;
 
     @Autowired
-    private NulsCrossChainConfig config;
+    private NulsCoresConfig config;
 
     @Autowired
     private RegisteredCrossChainService registeredCrossChainService;

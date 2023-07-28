@@ -25,7 +25,6 @@
 package io.nuls.account.tx;
 
 import io.nuls.account.model.bo.Chain;
-import io.nuls.account.model.bo.config.ConfigBean;
 import io.nuls.account.model.dto.CoinDTO;
 import io.nuls.account.util.TxUtil;
 import io.nuls.base.basic.AddressTool;
@@ -33,6 +32,7 @@ import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.common.ConfigBean;
 import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;

@@ -22,7 +22,6 @@ package io.nuls.protocol.manager;
 
 import io.nuls.base.basic.ProtocolVersion;
 import io.nuls.common.ConfigBean;
-import io.nuls.protocol.model.ChainParameters;
 import io.nuls.protocol.model.ProtocolContext;
 import io.nuls.protocol.utils.LoggerUtil;
 

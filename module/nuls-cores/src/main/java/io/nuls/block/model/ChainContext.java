@@ -276,6 +276,9 @@ public class ChainContext {
     }
 
     public long getLatestHeight() {
+        if (null == latestBlock || null == latestBlock.getHeader()) {
+            return -1;
+        }
         return latestBlock.getHeader().getHeight();
     }
 

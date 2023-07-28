@@ -4,19 +4,18 @@ import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.SignatureUtil;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
-import io.nuls.crosschain.base.model.bo.txdata.RegisteredChainMessage;
 import io.nuls.crosschain.base.model.bo.ChainInfo;
+import io.nuls.crosschain.base.model.bo.txdata.RegisteredChainMessage;
 import io.nuls.crosschain.base.model.bo.txdata.VerifierChangeData;
 import io.nuls.crosschain.base.service.VerifierChangeTxService;
-import io.nuls.crosschain.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.constant.NulsCrossChainErrorCode;
 import io.nuls.crosschain.model.bo.Chain;
 import io.nuls.crosschain.rpc.call.BlockCall;
-import io.nuls.crosschain.srorage.ConfigService;
 import io.nuls.crosschain.srorage.ConvertHashService;
 import io.nuls.crosschain.srorage.RegisteredCrossChainService;
 import io.nuls.crosschain.utils.CommonUtil;
@@ -24,7 +23,10 @@ import io.nuls.crosschain.utils.TxUtil;
 import io.nuls.crosschain.utils.manager.ChainManager;
 import io.nuls.crosschain.utils.manager.LocalVerifierManager;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 验证人变更交易实现类
@@ -35,15 +37,13 @@ import java.util.*;
 @Component
 public class VerifierChangeTxServiceImpl implements VerifierChangeTxService {
     @Autowired
-    private NulsCrossChainConfig config;
+    private NulsCoresConfig config;
     @Autowired
     private ChainManager chainManager;
     @Autowired
     private ConvertHashService convertHashService;
     @Autowired
     private RegisteredCrossChainService registeredCrossChainService;
-    @Autowired
-    private ConfigService configService;
 
     @Override
     public Map<String, Object> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {

@@ -4,11 +4,11 @@ import io.nuls.account.AccountBootstrap;
 import io.nuls.account.config.NulsConfig;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.Chain;
-import io.nuls.account.model.bo.config.ConfigBean;
 import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.account.model.po.AliasPO;
 import io.nuls.account.service.AccountService;
 import io.nuls.base.basic.AddressTool;
+import io.nuls.common.ConfigBean;
 import io.nuls.core.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.rockdb.service.RocksDBService;
@@ -120,7 +120,7 @@ public class AliasStorageServiceTest {
             accountService = SpringLiteContext.getBean(AccountService.class);
         }
         Chain chain = new Chain();
-        chain.setConfig(new ConfigBean(chainId, assetId));
+        //chain.setConfig(new ConfigBean(chainId, assetId));
         List<Account> accounts = accountService.createAccount(chain,1,null);
         String aliasStr = "Hi,我的别名是" + System.currentTimeMillis();
         Alias alias = new Alias();

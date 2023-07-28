@@ -28,9 +28,9 @@ import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.HeightRangeMessage;
 import io.nuls.block.model.BlockDownloaderParams;
 import io.nuls.block.model.ChainContext;
-import io.nuls.common.ConfigBean;
 import io.nuls.block.model.Node;
 import io.nuls.block.rpc.call.NetworkCall;
+import io.nuls.common.ConfigBean;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.log.logback.NulsLogger;
 
@@ -68,7 +68,7 @@ public class BlockDownloader implements Callable<Boolean> {
         NulsLogger logger = context.getLogger();
         try {
             logger.info("BlockDownloader start work from " + startHeight + " to " + netLatestHeight + ", nodes-" + nodes);
-            ChainParameters chainParameters = context.getParameters();
+            ConfigBean chainParameters = context.getParameters();
             long cachedBlockSizeLimit = chainParameters.getCachedBlockSizeLimit();
             int downloadNumber = chainParameters.getDownloadNumber();
             AtomicInteger cachedBlockSize = context.getCachedBlockSize();

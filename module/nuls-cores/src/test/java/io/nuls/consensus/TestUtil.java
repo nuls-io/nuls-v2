@@ -3,7 +3,6 @@ package io.nuls.consensus;
 import io.nuls.core.model.ObjectUtils;
 import io.nuls.core.rockdb.constant.DBErrorCode;
 import io.nuls.core.rockdb.service.RocksDBService;
-import io.nuls.consensus.constant.ConsensusConfig;
 import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.core.log.Log;
 
@@ -32,8 +31,5 @@ public class TestUtil {
                 Log.info(e.getMessage());
             }
         }
-    }
-    public static void main(String []args){
-        byte [] objs=ObjectUtils.objectToBytes(new ConsensusConfig());
     }
 }

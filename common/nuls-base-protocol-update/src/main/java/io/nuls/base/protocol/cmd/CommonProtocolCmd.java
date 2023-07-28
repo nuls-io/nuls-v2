@@ -30,7 +30,7 @@ import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.ModuleE;
-import io.nuls.core.rpc.model.NerveCoreCmd;
+import io.nuls.core.rpc.model.NulsCoresCmd;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
 
@@ -45,7 +45,7 @@ import java.util.Map;
  * @date 18-11-14 下午4:23
  */
 @Component
-@NerveCoreCmd(module = ModuleE.NC)
+@NulsCoresCmd(module = ModuleE.NC)
 public class CommonProtocolCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = "protocolVersionChange", version = 1.0, scope = Constants.PRIVATE, description = "")

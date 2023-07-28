@@ -26,19 +26,24 @@
 package io.nuls.ledger.storage.impl;
 
 import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.basic.InitializingBean;
+import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.ByteUtils;
+import io.nuls.core.rockdb.manager.RocksDBManager;
 import io.nuls.core.rockdb.model.Entry;
 import io.nuls.core.rockdb.service.RocksDBService;
+import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.ledger.model.ChainHeight;
 import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.model.po.BlockSnapshotAccounts;
 import io.nuls.ledger.storage.DataBaseArea;
 import io.nuls.ledger.storage.Repository;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +58,9 @@ import static io.nuls.ledger.utils.LoggerUtil.logger;
  */
 @Component
 public class RepositoryImpl implements Repository, InitializingBean {
+
+    @Autowired
+    private NulsCoresConfig config;
     /**
      * key1=chainId,  Map1=确认账户状态， key2= addr+assetkey  value=AccountState
      */
@@ -215,6 +223,7 @@ public class RepositoryImpl implements Repository, InitializingBean {
      */
     public void initChainDb(int addressChainId) {
         try {
+            RocksDBManager.setDataPath(config.getDataPath() + File.separator + ModuleE.LG.name);
             if (!RocksDBService.existTable(getLedgerAccountTableName(addressChainId))) {
                 RocksDBService.createTable(getLedgerAccountTableName(addressChainId));
             }
@@ -234,6 +243,7 @@ public class RepositoryImpl implements Repository, InitializingBean {
     @Override
     public void initTableName() throws NulsException {
         try {
+            RocksDBManager.setDataPath(config.getDataPath() + File.separator + ModuleE.LG.name);
             if (!RocksDBService.existTable(getChainsHeightTableName())) {
                 RocksDBService.createTable(getChainsHeightTableName());
             } else {

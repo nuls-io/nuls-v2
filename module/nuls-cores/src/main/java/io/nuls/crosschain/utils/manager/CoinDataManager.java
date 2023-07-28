@@ -8,13 +8,13 @@ import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.signture.P2PHKSignature;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.crosschain.base.model.bo.ChainInfo;
 import io.nuls.crosschain.base.model.dto.input.CoinDTO;
-import io.nuls.crosschain.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.constant.NulsCrossChainErrorCode;
 import io.nuls.crosschain.model.bo.Chain;
@@ -32,7 +32,7 @@ import java.util.*;
 @Component
 public class CoinDataManager {
     @Autowired
-    private NulsCrossChainConfig config;
+    private NulsCoresConfig config;
     @Autowired
     private ChainManager chainManager;
 

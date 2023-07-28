@@ -31,7 +31,6 @@ import io.nuls.common.NulsCoresConfig;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractDBConstant;
 import io.nuls.contract.model.bo.Chain;
-import io.nuls.contract.storage.ConfigStorageService;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.util.LogUtil;
 import io.nuls.contract.util.VMContext;
@@ -57,8 +56,6 @@ public class ChainManager {
 
     @Autowired
     private VMContext vmContext;
-    @Autowired
-    private ConfigStorageService configStorageService;
     @Autowired
     private NulsCoresConfig contractConfig;
 

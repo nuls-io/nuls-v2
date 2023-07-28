@@ -18,7 +18,7 @@ import io.nuls.core.rpc.model.TypeDescriptor;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.CrossTxRehandleMessage;
-import io.nuls.crosschain.constant.NulsCrossChainConfig;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.crosschain.message.CrossTxRehandleMsgHandler;
 import io.nuls.crosschain.model.po.CtxStatusPO;
 import io.nuls.crosschain.rpc.call.NetWorkCall;
@@ -44,7 +44,7 @@ public class CrossChainTxCmd extends BaseCmd {
     private CtxStatusService ctxStatusService;
 
     @Autowired
-    NulsCrossChainConfig config;
+    NulsCoresConfig config;
 
     @Autowired
     private ChainManager chainManager;

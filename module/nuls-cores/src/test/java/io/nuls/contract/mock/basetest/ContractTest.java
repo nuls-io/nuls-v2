@@ -26,19 +26,11 @@ package io.nuls.contract.mock.basetest;
 
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.contract.model.bo.Chain;
-import io.nuls.contract.model.bo.config.ConfigBean;
-import io.nuls.contract.util.Log;
-import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.natives.io.nuls.contract.sdk.NativeAddress;
 import io.nuls.contract.vm.program.*;
-import io.nuls.contract.vm.program.impl.ProgramExecutorImpl;
-import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.crypto.HexUtil;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.FileInputStream;

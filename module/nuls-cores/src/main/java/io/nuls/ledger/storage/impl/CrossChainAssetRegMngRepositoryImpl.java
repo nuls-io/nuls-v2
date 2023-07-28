@@ -25,15 +25,20 @@
  */
 package io.nuls.ledger.storage.impl;
 
+import io.nuls.common.NulsCoresConfig;
+import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.ByteUtils;
+import io.nuls.core.rockdb.manager.RocksDBManager;
 import io.nuls.core.rockdb.service.BatchOperation;
 import io.nuls.core.rockdb.service.RocksDBService;
+import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.po.LedgerAsset;
 import io.nuls.ledger.storage.CrossChainAssetRegMngRepository;
 import io.nuls.ledger.storage.DataBaseArea;
 
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,10 +52,14 @@ import java.util.Map;
 @Component
 public class CrossChainAssetRegMngRepositoryImpl implements CrossChainAssetRegMngRepository {
 
+    @Autowired
+    private NulsCoresConfig config;
+
     String tableNamePrefix = DataBaseArea.TB_LEDGER_CROSS_CHAIN_ASSET + LedgerConstant.DOWN_LINE;
 
     String getTableName(int chainId) throws Exception {
         String tableName = tableNamePrefix + chainId;
+        RocksDBManager.setDataPath(config.getDataPath() + File.separator + ModuleE.LG.name);
         if (!RocksDBService.existTable(tableName)) {
             RocksDBService.createTable(tableName);
         }

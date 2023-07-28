@@ -25,16 +25,21 @@
  */
 package io.nuls.ledger.storage.impl;
 
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.basic.InitializingBean;
+import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.ByteUtils;
+import io.nuls.core.rockdb.manager.RocksDBManager;
 import io.nuls.core.rockdb.service.RocksDBService;
+import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.po.LedgerAsset;
 import io.nuls.ledger.storage.AssetRegMngRepository;
 import io.nuls.ledger.storage.DataBaseArea;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +51,9 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Component
 public class AssetRegMngRepositoryImpl implements AssetRegMngRepository, InitializingBean {
+
+    @Autowired
+    private NulsCoresConfig config;
     /**
      * 缓存合约资产id
      */
@@ -53,6 +61,7 @@ public class AssetRegMngRepositoryImpl implements AssetRegMngRepository, Initial
 
     String getLedgerAssetRegMngTableName(int chainId) throws Exception {
         String tableName = DataBaseArea.TB_LEDGER_ASSET_REG_MNG + LedgerConstant.DOWN_LINE + chainId;
+        RocksDBManager.setDataPath(config.getDataPath() + File.separator + ModuleE.LG.name);
         if (!RocksDBService.existTable(tableName)) {
             RocksDBService.createTable(tableName);
         }
@@ -61,6 +70,7 @@ public class AssetRegMngRepositoryImpl implements AssetRegMngRepository, Initial
 
     String getLedgerAssetRegHashIndexTableName(int chainId) throws Exception {
         String tableName = DataBaseArea.TB_LEDGER_ASSET_REG_HASH_INDEX + "_" + chainId;
+        RocksDBManager.setDataPath(config.getDataPath() + File.separator + ModuleE.LG.name);
         if (!RocksDBService.existTable(tableName)) {
             RocksDBService.createTable(tableName);
         }
@@ -69,6 +79,7 @@ public class AssetRegMngRepositoryImpl implements AssetRegMngRepository, Initial
 
     String getLedgerAssetRegContractAddrIndexTableName(int chainId) throws Exception {
         String tableName = DataBaseArea.TB_LEDGER_ASSET_REG_CONTRACT_INDEX + "_" + chainId;
+        RocksDBManager.setDataPath(config.getDataPath() + File.separator + ModuleE.LG.name);
         if (!RocksDBService.existTable(tableName)) {
             RocksDBService.createTable(tableName);
         }

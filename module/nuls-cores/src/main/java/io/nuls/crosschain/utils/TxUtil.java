@@ -4,6 +4,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
@@ -18,12 +19,11 @@ import io.nuls.crosschain.base.model.bo.txdata.CrossTransferData;
 import io.nuls.crosschain.base.model.bo.txdata.RegisteredChainChangeData;
 import io.nuls.crosschain.base.model.bo.txdata.VerifierChangeData;
 import io.nuls.crosschain.base.model.bo.txdata.VerifierInitData;
-import io.nuls.crosschain.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.constant.ParamConstant;
-import io.nuls.crosschain.model.bo.message.WaitBroadSignMessage;
 import io.nuls.crosschain.model.bo.Chain;
 import io.nuls.crosschain.model.bo.CtxStateEnum;
+import io.nuls.crosschain.model.bo.message.WaitBroadSignMessage;
 import io.nuls.crosschain.model.po.CtxStatusPO;
 import io.nuls.crosschain.rpc.call.AccountCall;
 import io.nuls.crosschain.rpc.call.ConsensusCall;
@@ -49,7 +49,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class TxUtil {
     @Autowired
-    private static NulsCrossChainConfig config;
+    private static NulsCoresConfig config;
     @Autowired
     private static ConvertCtxService convertCtxService;
     @Autowired

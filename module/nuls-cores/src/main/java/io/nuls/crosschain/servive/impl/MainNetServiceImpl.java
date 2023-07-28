@@ -3,8 +3,12 @@ package io.nuls.crosschain.servive.impl;
 import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.TransactionFeeCalculator;
-import io.nuls.base.data.*;
+import io.nuls.base.data.CoinData;
+import io.nuls.base.data.CoinFrom;
+import io.nuls.base.data.CoinTo;
+import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.P2PHKSignature;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.basic.Result;
 import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.constant.TxType;
@@ -17,17 +21,20 @@ import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.crosschain.base.constant.CommandConstant;
-import io.nuls.crosschain.base.message.*;
+import io.nuls.crosschain.base.message.CirculationMessage;
+import io.nuls.crosschain.base.message.GetCirculationMessage;
 import io.nuls.crosschain.base.model.bo.AssetInfo;
 import io.nuls.crosschain.base.model.bo.ChainInfo;
 import io.nuls.crosschain.base.model.bo.txdata.RegisteredChainMessage;
 import io.nuls.crosschain.base.utils.enumeration.ChainInfoChangeType;
-import io.nuls.crosschain.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.constant.NulsCrossChainErrorCode;
 import io.nuls.crosschain.constant.ParamConstant;
 import io.nuls.crosschain.model.bo.Chain;
-import io.nuls.crosschain.nuls.rpc.call.*;
+import io.nuls.crosschain.rpc.call.BlockCall;
+import io.nuls.crosschain.rpc.call.ChainManagerCall;
+import io.nuls.crosschain.rpc.call.ConsensusCall;
+import io.nuls.crosschain.rpc.call.NetWorkCall;
 import io.nuls.crosschain.servive.MainNetService;
 import io.nuls.crosschain.srorage.CtxStatusService;
 import io.nuls.crosschain.srorage.RegisteredCrossChainService;
@@ -37,10 +44,6 @@ import io.nuls.crosschain.utils.manager.ChainManager;
 import io.nuls.crosschain.utils.manager.LocalVerifierManager;
 import io.nuls.crosschain.utils.thread.CrossTxHandler;
 import io.nuls.crosschain.utils.validator.CrossTxValidator;
-import io.nuls.crosschain.rpc.call.BlockCall;
-import io.nuls.crosschain.rpc.call.ChainManagerCall;
-import io.nuls.crosschain.rpc.call.ConsensusCall;
-import io.nuls.crosschain.rpc.call.NetWorkCall;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -49,10 +52,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.nuls.core.constant.CommonCodeConstanst.DATA_PARSE_ERROR;
-import static io.nuls.core.constant.CommonCodeConstanst.PARAMETER_ERROR;
-import static io.nuls.core.constant.CommonCodeConstanst.SERIALIZE_ERROR;
-import static io.nuls.core.constant.CommonCodeConstanst.SUCCESS;
+import static io.nuls.core.constant.CommonCodeConstanst.*;
 
 
 /**
@@ -66,7 +66,7 @@ public class MainNetServiceImpl implements MainNetService {
     @Autowired
     private ChainManager chainManager;
     @Autowired
-    private NulsCrossChainConfig nulsCrossChainConfig;
+    private NulsCoresConfig nulsCrossChainConfig;
 
     @Autowired
     private RegisteredCrossChainService registeredCrossChainService;

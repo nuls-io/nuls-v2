@@ -1,12 +1,12 @@
 package io.nuls.account.rpc.cmd;
 
 import io.nuls.account.model.bo.Chain;
-import io.nuls.account.model.bo.config.ConfigBean;
 import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.account.rpc.call.LedgerCall;
 import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Transaction;
+import io.nuls.common.ConfigBean;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.NoUse;
@@ -115,7 +115,7 @@ public class AliasCmdTest {
     @Test
     public void setAliasTest() throws Exception {
         Chain chain = new Chain();
-        chain.setConfig(new ConfigBean(chainId, assetId));
+        //chain.setConfig(new ConfigBean(chainId, assetId));
         //create an account for test
         //String address = createAnAccount();
         String address="tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";

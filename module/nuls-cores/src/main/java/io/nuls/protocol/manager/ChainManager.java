@@ -24,15 +24,18 @@
  */
 package io.nuls.protocol.manager;
 
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.rockdb.service.RocksDBService;
+import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.protocol.constant.Constant;
 import io.nuls.protocol.model.ProtocolContext;
 import io.nuls.protocol.service.ProtocolService;
 import io.nuls.protocol.utils.ConfigLoader;
 
+import java.io.File;
 import java.util.List;
 
 /**
@@ -47,10 +50,13 @@ public class ChainManager {
 
     @Autowired
     private ProtocolService protocolService;
+    @Autowired
+    private NulsCoresConfig config;
 
     public void initChain() {
         //加载配置
         ConfigLoader.load();
+        RocksDBService.init(config.getDataPath() + File.separator + ModuleE.PU.name);
         ContextManager.chainIds.forEach(this::initTable);
     }
 

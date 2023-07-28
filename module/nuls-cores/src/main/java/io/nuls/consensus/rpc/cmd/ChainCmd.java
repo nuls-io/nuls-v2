@@ -1,16 +1,16 @@
 package io.nuls.consensus.rpc.cmd;
 
+import io.nuls.common.ConfigBean;
+import io.nuls.consensus.model.bo.round.MeetingRound;
+import io.nuls.consensus.model.dto.output.AccountConsensusInfoDTO;
+import io.nuls.consensus.model.dto.output.WholeNetConsensusInfoDTO;
+import io.nuls.consensus.service.ChainService;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.*;
 import io.nuls.core.rpc.model.message.Response;
-import io.nuls.consensus.model.bo.config.ConfigBean;
-import io.nuls.consensus.model.bo.round.MeetingRound;
-import io.nuls.consensus.model.dto.output.AccountConsensusInfoDTO;
-import io.nuls.consensus.model.dto.output.WholeNetConsensusInfoDTO;
-import io.nuls.consensus.service.ChainService;
 
 import java.util.List;
 import java.util.Map;

@@ -4,7 +4,6 @@ import io.nuls.account.AccountBootstrap;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.Chain;
-import io.nuls.account.model.bo.config.ConfigBean;
 import io.nuls.account.model.bo.tx.AliasTransaction;
 import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.base.basic.AddressTool;
@@ -12,6 +11,7 @@ import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.signture.P2PHKSignature;
+import io.nuls.common.ConfigBean;
 import io.nuls.core.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.crypto.HexUtil;
@@ -52,7 +52,7 @@ public class AccountServiceTest {
 //        启动时间同步线程
         TimeService.getInstance().start();
         accountService = SpringLiteContext.getBean(AccountService.class);
-        chain.setConfig(new ConfigBean(chainId, assetId));
+        //chain.setConfig(new ConfigBean(chainId, assetId));
     }
 
 
@@ -78,7 +78,7 @@ public class AccountServiceTest {
 //        }
         try {
             //Test the largest number of generated accounts.
-            chain.setConfig(new ConfigBean(assetId, 5));
+            //chain.setConfig(new ConfigBean(assetId, 5));
             List<Account> accountList = accountService.createAccount(chain, 6, password);
             for(Account acc : accountList){
                 System.out.println(acc.getAddress().getBase58());
@@ -100,7 +100,7 @@ public class AccountServiceTest {
     public void setPasswordTest() {
         // create account
         Chain chain = new Chain();
-        chain.setConfig(new ConfigBean(chainId, assetId));
+        //chain.setConfig(new ConfigBean(chainId, assetId));
         List<Account> result = accountService.createAccount(chain, 1, null);
         assertTrue(result != null && result.size() == 1);
         Account account = result.get(0);

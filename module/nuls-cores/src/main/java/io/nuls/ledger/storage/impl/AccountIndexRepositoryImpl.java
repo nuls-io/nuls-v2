@@ -25,14 +25,19 @@
  */
 package io.nuls.ledger.storage.impl;
 
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.basic.InitializingBean;
+import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.ByteUtils;
+import io.nuls.core.rockdb.manager.RocksDBManager;
 import io.nuls.core.rockdb.service.RocksDBService;
+import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.ledger.storage.AccountIndexRepository;
 import io.nuls.ledger.storage.DataBaseArea;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -45,6 +50,8 @@ import static io.nuls.ledger.utils.LoggerUtil.logger;
 @Component
 public class AccountIndexRepositoryImpl implements AccountIndexRepository, InitializingBean {
 
+    @Autowired
+    private NulsCoresConfig config;
 
     String getLedgerAssetIndexTableName(int chainId) {
         return  DataBaseArea.TB_LEDGER_ASSET_INDEX+ "_" +chainId;
@@ -59,6 +66,7 @@ public class AccountIndexRepositoryImpl implements AccountIndexRepository, Initi
     public String initAssetsIndexDb(int addressChainId) {
         String table = getLedgerAssetIndexTableName(addressChainId);
         try {
+            RocksDBManager.setDataPath(config.getDataPath() + File.separator + ModuleE.LG.name);
             if (!RocksDBService.existTable(table)) {
                 RocksDBService.createTable(table);
             }
@@ -71,6 +79,7 @@ public class AccountIndexRepositoryImpl implements AccountIndexRepository, Initi
     public String initLedgerAddressIndexDb(int addressChainId,int assetChainId,int assetId) {
         String table = getLedgerAddressIndexTableName(addressChainId,assetChainId,assetId);
         try {
+            RocksDBManager.setDataPath(config.getDataPath() + File.separator + ModuleE.LG.name);
             if (!RocksDBService.existTable(table)) {
                 RocksDBService.createTable(table);
             }

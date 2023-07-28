@@ -12,7 +12,7 @@ import io.nuls.crosschain.base.model.bo.ChainInfo;
 import io.nuls.crosschain.base.model.bo.txdata.RegisteredChainMessage;
 import io.nuls.crosschain.base.model.bo.txdata.ResetChainInfoData;
 import io.nuls.crosschain.base.service.ResetChainService;
-import io.nuls.crosschain.constant.NulsCrossChainConfig;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.crosschain.constant.NulsCrossChainErrorCode;
 import io.nuls.crosschain.model.bo.Chain;
 import io.nuls.crosschain.srorage.RegisteredCrossChainService;
@@ -28,7 +28,7 @@ public class ResetChainServiceImpl implements ResetChainService {
     private ChainManager chainManager;
 
     @Autowired
-    private NulsCrossChainConfig config;
+    private NulsCoresConfig config;
     @Autowired
     private RegisteredCrossChainService registeredCrossChainService;
 

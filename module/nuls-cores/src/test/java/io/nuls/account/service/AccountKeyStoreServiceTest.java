@@ -4,7 +4,7 @@ import io.nuls.account.AccountBootstrap;
 import io.nuls.account.config.NulsConfig;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.Chain;
-import io.nuls.account.model.bo.config.ConfigBean;
+import io.nuls.common.ConfigBean;
 import io.nuls.core.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.rockdb.service.RocksDBService;
@@ -47,7 +47,7 @@ public class AccountKeyStoreServiceTest {
     public void backupAccountToKeyStoreTest() {
         //Create password accounts
         Chain chain = new Chain();
-        chain.setConfig(new ConfigBean(chainId, assetId));
+        //chain.setConfig(new ConfigBean(chainId, assetId));
         List<Account> accountList = accountService.createAccount(chain, 1, password);
         String address = accountList.get(0).getAddress().getBase58();
         //测试不指定备份路径

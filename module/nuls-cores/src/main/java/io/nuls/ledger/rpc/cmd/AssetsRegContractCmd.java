@@ -26,12 +26,12 @@
 package io.nuls.ledger.rpc.cmd;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.model.*;
 import io.nuls.core.rpc.model.message.Response;
-import io.nuls.ledger.config.LedgerConfig;
 import io.nuls.ledger.constant.CmdConstant;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.po.LedgerAsset;
@@ -53,7 +53,7 @@ import java.util.Map;
 @Component
 public class AssetsRegContractCmd extends BaseLedgerCmd {
     @Autowired
-    LedgerConfig ledgerConfig;
+    NulsCoresConfig ledgerConfig;
     @Autowired
     CallRpcService rpcService;
     @Autowired

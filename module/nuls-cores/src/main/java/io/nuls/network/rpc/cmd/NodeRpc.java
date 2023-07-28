@@ -24,13 +24,13 @@
  */
 package io.nuls.network.rpc.cmd;
 
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.*;
 import io.nuls.core.rpc.model.message.Response;
-import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.CmdConstant;
 import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.constant.NodeConnectStatusEnum;
@@ -60,7 +60,7 @@ public class NodeRpc extends BaseCmd {
     private static final int STATE_CONNECT = 1;
     private static final int STATE_DIS_CONNECT = 2;
     @Autowired
-    NetworkConfig networkConfig;
+    NulsCoresConfig networkConfig;
 
     /**
      * nw_addNodes
