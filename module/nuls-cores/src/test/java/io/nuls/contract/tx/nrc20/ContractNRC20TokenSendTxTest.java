@@ -62,7 +62,7 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
     @Test
     public void createContract() throws Exception {
         //sender = toAddress32;
-        InputStream in = new FileInputStream(ContractTest.class.getResource("/nrc20-locked-token").getFile());
+        InputStream in = new FileInputStream(ContractTest.class.getResource("/contract/nrc20-locked-token").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
         String remark = "create contract test - 空气币";
         String name = "NulsSwap";
@@ -95,7 +95,7 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
         String methodDesc = "";
         String remark = "call contract test - 空气币转账";
         String token = BigInteger.valueOf(800L).toString();
-        Map params = this.makeCallParams(sender, value, "tNULSeBaMy3Tw7pHNDYwSMaewDypQMdNywXXUJ", methodName, methodDesc, remark, tokenReceiver, token);
+        Map params = this.makeCallParams(sender, value, "tNULSeBaN4R14qCCc4S6vS2Vi68Y5xAnWB5DUQ", methodName, methodDesc, remark, tokenReceiver, token);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
         assertTrue(cmdResp2, result);

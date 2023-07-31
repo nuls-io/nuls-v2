@@ -598,7 +598,7 @@ public class TxServiceImpl implements TxService {
             String addr = AddressTool.getStringAddressByBytes(addrBytes);
             //验证交易地址合法性,跨链模块交易需要取地址中的原始链id来验证
             int validAddressChainId = chainId;
-            if (ModuleE.CC.abbr.equals(txRegister.getModuleCode())) {
+            if (ModuleE.CC.abbr.equals(ResponseMessageProcessor.TX_TYPE_MODULE_MAP.get(type))) {
                 validAddressChainId = AddressTool.getChainIdByAddress(addrBytes);
             }
             if (!AddressTool.validAddress(validAddressChainId, addr)) {
@@ -654,7 +654,7 @@ public class TxServiceImpl implements TxService {
     private void validateCoinToBase(Chain chain, TxRegister txRegister, List<CoinTo> listTo) throws NulsException {
         String moduleCode = txRegister.getModuleCode();
         int type = txRegister.getTxType();
-        if (type != TxType.COIN_BASE && !ModuleE.SC.abbr.equals(moduleCode)) {
+        if (type != TxType.COIN_BASE && !ModuleE.SC.abbr.equals(ResponseMessageProcessor.TX_TYPE_MODULE_MAP.get(type))) {
             if (null == listTo || listTo.size() == 0) {
                 throw new NulsException(TxErrorCode.COINTO_NOT_FOUND);
             }
@@ -668,7 +668,7 @@ public class TxServiceImpl implements TxService {
 
             //验证交易地址合法性,跨链模块交易需要取地址中的原始链id来验证
             int validAddressChainId = txChainId;
-            if (ModuleE.CC.abbr.equals(txRegister.getModuleCode())) {
+            if (ModuleE.CC.abbr.equals(ResponseMessageProcessor.TX_TYPE_MODULE_MAP.get(type))) {
                 validAddressChainId = AddressTool.getChainIdByAddress(coinTo.getAddress());
             }
             if (!AddressTool.validAddress(validAddressChainId, addr)) {

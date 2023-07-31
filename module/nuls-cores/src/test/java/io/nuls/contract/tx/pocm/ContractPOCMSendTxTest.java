@@ -70,10 +70,11 @@ public class ContractPOCMSendTxTest extends BaseQuery {
         //BigInteger candySupply,
         //int lockedTokenDay,
         //BigInteger minimumStaking,
+        //BigInteger maximumStaking,
         //boolean openConsensus,
         //boolean openAwardConsensusNodeProvider,
         //String authorizationCode
-        Object[] args = new Object[]{"tNULSeBaMy3Tw7pHNDYwSMaewDypQMdNywXXUJ", 0, 0, 20000000, 200000000000000L, 1, 10000000000L, true, false, "qwerqwerasd"};
+        Object[] args = new Object[]{"tNULSeBaMy3Tw7pHNDYwSMaewDypQMdNywXXUJ", 0, 0, 20000000, 200000000000000L, 1, 10000000000L, 10000000000L, true, false, "qwerqwerasd"};
         Map params = this.makeCreateParams(sender, contractCode, "pocm_new", remark, args);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CREATE));

@@ -213,7 +213,7 @@ public class ClassCodeLoader {
     }
 
     private static Map<String, ClassCode> loadBaseFromResource() {
-        try (InputStream baseInputStream = ClassCodeLoader.class.getResourceAsStream("contract" + File.separator + "used_classes_base")) {
+        try (InputStream baseInputStream = ClassCodeLoader.class.getResourceAsStream(File.separator + "contract" + File.separator + "used_classes_base")) {
             if (baseInputStream == null) {
                 return new HashMap<>(0);
             } else {
@@ -226,19 +226,19 @@ public class ClassCodeLoader {
     }
 
     private static Map<String, ClassCode> loadFromResource() {
-        return loadFromResourceWithResourceName("contract" + File.separator + "used_classes_sdk");
+        return loadFromResourceWithResourceName(File.separator + "contract" + File.separator + "used_classes_sdk");
     }
 
     private static Map<String, ClassCode> loadFromResource_v8() {
-        return loadFromResourceWithResourceName("contract" + File.separator + "used_classes_sdk_v8");
+        return loadFromResourceWithResourceName(File.separator + "contract" + File.separator + "used_classes_sdk_v8");
     }
 
     private static Map<String, ClassCode> loadFromResource_v14() {
-        return loadFromResourceWithResourceName("contract" + File.separator + "used_classes_sdk_v14");
+        return loadFromResourceWithResourceName(File.separator + "contract" + File.separator + "used_classes_sdk_v14");
     }
 
     private static Map<String, ClassCode> loadFromResource_v15() {
-        return loadFromResourceWithResourceName("contract" + File.separator + "used_classes_sdk_v15");
+        return loadFromResourceWithResourceName(File.separator + "contract" + File.separator + "used_classes_sdk_v15");
     }
 
     private static Map<String, ClassCode> loadFromResourceWithResourceName(String usedClassesName) {

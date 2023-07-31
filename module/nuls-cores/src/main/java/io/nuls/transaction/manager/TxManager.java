@@ -27,6 +27,7 @@ package io.nuls.transaction.manager;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
 
@@ -95,25 +96,13 @@ public class TxManager {
     }
 
     /**
-     * 是否是智能合约交易
-     * @param txType
-     * @return
-     */
-    public static boolean isSmartContract(Chain chain, int txType){
-        if(ModuleE.SC.abbr.equals(getModuleCode(chain, txType))){
-            return true;
-        }
-        return false;
-    }
-
-    /**
      * 是否是智能合约非系统交易
      * @param txType
      * @return
      */
     public static boolean isUnSystemSmartContract(Chain chain, int txType){
         TxRegister txRegister = getTxRegister(chain, txType);
-        if(ModuleE.SC.abbr.equals(txRegister.getModuleCode()) && !txRegister.getSystemTx()){
+        if(ModuleE.SC.abbr.equals(ResponseMessageProcessor.TX_TYPE_MODULE_MAP.get(txType)) && !txRegister.getSystemTx()){
             return true;
         }
         return false;
@@ -123,7 +112,7 @@ public class TxManager {
         if (txRegister == null) {
             return false;
         }
-        if(ModuleE.SC.abbr.equals(txRegister.getModuleCode()) && !txRegister.getSystemTx()){
+        if(ModuleE.SC.abbr.equals(ResponseMessageProcessor.TX_TYPE_MODULE_MAP.get(txRegister.getTxType())) && !txRegister.getSystemTx()){
             return true;
         }
         return false;
@@ -139,14 +128,14 @@ public class TxManager {
         if (txRegister == null) {
             return false;
         }
-        return ModuleE.SC.abbr.equals(txRegister.getModuleCode()) && txRegister.getSystemTx();
+        return ModuleE.SC.abbr.equals(ResponseMessageProcessor.TX_TYPE_MODULE_MAP.get(txType)) && txRegister.getSystemTx();
     }
 
     public static boolean isSystemSmartContract(TxRegister txRegister){
         if (txRegister == null) {
             return false;
         }
-        return ModuleE.SC.abbr.equals(txRegister.getModuleCode()) && txRegister.getSystemTx();
+        return ModuleE.SC.abbr.equals(ResponseMessageProcessor.TX_TYPE_MODULE_MAP.get(txRegister.getTxType())) && txRegister.getSystemTx();
     }
 
     public static boolean isCrossTx(int txType) {

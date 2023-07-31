@@ -133,6 +133,7 @@ public class SmartContractBootStrap implements INulsCoresBootstrap {
             Log.error("init NRC20Standard error.", e);
         }
         if (json == null) {
+            Log.warn("init NRC20Standard empty data file!");
             return;
         }
 
@@ -157,6 +158,7 @@ public class SmartContractBootStrap implements INulsCoresBootstrap {
             Log.error("init NRC721Standard error.", e);
         }
         if (json == null) {
+            Log.warn("init NRC721Standard empty data file!");
             return;
         }
 
@@ -181,6 +183,7 @@ public class SmartContractBootStrap implements INulsCoresBootstrap {
             Log.error("init NRC1155Standard error.", e);
         }
         if (json == null) {
+            Log.warn("init NRC1155Standard empty data file!");
             return;
         }
 
