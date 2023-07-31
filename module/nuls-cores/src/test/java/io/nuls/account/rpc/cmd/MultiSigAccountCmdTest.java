@@ -164,7 +164,11 @@ public class MultiSigAccountCmdTest {
      * */
     public List<Account> createAccount(int count) {
         chain = new Chain();
-        //chain.setConfig(new ConfigBean(chainId, assetId));
+        ConfigBean configBean = new ConfigBean();
+        configBean.setChainId(chainId);
+        configBean.setAssetId(assetId);
+        configBean.setMaxViewGas(100000000L);
+        chain.setConfig(configBean);
         List<Account> accountList = accountService.createAccount(chain, count, password);
         assertNotNull(accountList);
         return accountList;

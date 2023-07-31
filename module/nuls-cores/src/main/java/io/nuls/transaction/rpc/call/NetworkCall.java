@@ -112,35 +112,6 @@ public class NetworkCall {
     }
 
     /**
-     * 向网络模块注册网络消息协议
-     * register Network Message Protocol with Network Module
-     *
-     * @return
-     */
-    public static boolean registerProtocol() throws NulsException {
-        try {
-            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_4);
-            List<Map<String, String>> cmds = new ArrayList<>();
-            params.put("role", ModuleE.TX.abbr);
-            //模块启动时向网络模块注册网络协议处理器
-            List<String> list = List.of(NW_NEW_HASH, NW_ASK_TX, NW_RECEIVE_TX);
-            for (String s : list) {
-                Map<String, String> cmd = new HashMap<>(TxConstant.INIT_CAPACITY_4);
-                cmd.put("protocolCmd", s);
-                cmd.put("handler", s);
-                cmds.add(cmd);
-            }
-            params.put("protocolCmds", cmds);
-
-            TransactionCall.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", params);
-            return true;
-        } catch (RuntimeException e) {
-            LOG.error(e);
-            throw new NulsException(TxErrorCode.RPC_REQUEST_FAILD);
-        }
-    }
-
-    /**
      * 转发交易
      * 发送hash到其他节点
      * Forward transaction hash to other peer nodes

@@ -412,6 +412,11 @@ public class TestTx {
         ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":7771");
         chain = new Chain();
         //chain.setConfig(new ConfigBean(chainId, assetId, 1024*1024,1000,20,20000,60000));
+        ConfigBean configBean = new ConfigBean();
+        configBean.setChainId(chainId);
+        configBean.setAssetId(assetId);
+        configBean.setMaxViewGas(100000000L);
+        chain.setConfig(configBean);
     }
 
     @Test

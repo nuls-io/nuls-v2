@@ -63,7 +63,11 @@ public class TransactionCmdTest {
         NoUse.mockModule();
         importKeyStore();
         chain = new Chain();
-        //chain.setConfig(new ConfigBean(chainId, assetId));
+        ConfigBean configBean = new ConfigBean();
+        configBean.setChainId(chainId);
+        configBean.setAssetId(assetId);
+        configBean.setMaxViewGas(100000000L);
+        chain.setConfig(configBean);
     }
 
 

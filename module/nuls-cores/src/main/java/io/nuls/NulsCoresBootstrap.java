@@ -32,8 +32,10 @@ import io.nuls.base.api.provider.Provider;
 import io.nuls.base.api.provider.ServiceManager;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.protocol.ModuleHelper;
+import io.nuls.common.CommonVersionChangeInvoker;
 import io.nuls.common.ConfigManager;
 import io.nuls.common.INulsCoresBootstrap;
+import io.nuls.contract.tx.SmartContractVersionChangeInvoker;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.config.ConfigurationLoader;
@@ -56,6 +58,7 @@ import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.common.NulsCoresConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.manager.ChainManager;
+import io.nuls.transaction.rpc.upgrade.TxVersionChangeInvoker;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -95,6 +98,8 @@ public class NulsCoresBootstrap extends RpcModule {
     public void init() {
         try {
             super.init();
+            CommonVersionChangeInvoker.addProcess(TxVersionChangeInvoker.instance());
+            CommonVersionChangeInvoker.addProcess(SmartContractVersionChangeInvoker.instance());
             //初始化配置项
             initCfg();
             ModuleHelper.init(this);

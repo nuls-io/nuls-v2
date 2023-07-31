@@ -1,6 +1,7 @@
 package io.nuls.transaction.rpc.upgrade;
 
 import io.nuls.base.data.Transaction;
+import io.nuls.common.CommonVersionChangeInvoker;
 import io.nuls.core.basic.VersionChangeInvoker;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.exception.NulsException;
@@ -20,6 +21,12 @@ import io.nuls.transaction.service.TxService;
  * @date: 2019/05/20
  */
 public class TxVersionChangeInvoker implements VersionChangeInvoker {
+
+    private static TxVersionChangeInvoker txVersionChangeInvoker = new TxVersionChangeInvoker();
+    private TxVersionChangeInvoker() {}
+    public static TxVersionChangeInvoker instance() {
+        return txVersionChangeInvoker;
+    }
 
     @Override
     public void process(int chainId) {

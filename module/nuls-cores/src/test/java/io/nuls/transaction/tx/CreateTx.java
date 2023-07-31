@@ -62,6 +62,11 @@ public class CreateTx {
 
     static {
         //chain.setConfig(new ConfigBean(chainId, assetId, 1024 * 1024, 1000, 20, 20000, 60000));
+        ConfigBean configBean = new ConfigBean();
+        configBean.setChainId(chainId);
+        configBean.setAssetId(assetId);
+        configBean.setMaxViewGas(100000000L);
+        chain.setConfig(configBean);
     }
     /**
      * 创建普通转账交易

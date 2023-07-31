@@ -43,8 +43,6 @@ public interface ContractDBConstant {
     String DB_NAME_CONTRACT_ADDRESS = "contract_address";
     String DB_NAME_CONTRACT_EXECUTE_RESULT = "contract_execute_result";
 
-    String DB_NAME_CONTRACT_NRC20_TOKEN_TRANSFER = "contract_nrc20_token_transfer";
-    String DB_NAME_CONTRACT_NRC20_TOKEN_ADDRESS = "contract_nrc20_token_address";
     String DB_NAME_CONTRACT_OFFLINE_TX_HASH_LIST = "contract_offline_tx_hash_list";
 
 }

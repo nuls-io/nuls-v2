@@ -127,7 +127,7 @@ public class SmartContractBootStrap implements INulsCoresBootstrap {
     private void initNRC20Standard() {
         String json = null;
         try {
-            json = IoUtils.read(NRC20_STANDARD_FILE);
+            json = IoUtils.read("contract" + File.separator + NRC20_STANDARD_FILE);
         } catch (Exception e) {
             // skip it
             Log.error("init NRC20Standard error.", e);
@@ -151,7 +151,7 @@ public class SmartContractBootStrap implements INulsCoresBootstrap {
     private void initNRC721Standard() {
         String json = null;
         try {
-            json = IoUtils.read(NRC721_STANDARD_FILE);
+            json = IoUtils.read("contract" + File.separator + NRC721_STANDARD_FILE);
         } catch (Exception e) {
             // skip it
             Log.error("init NRC721Standard error.", e);
@@ -175,7 +175,7 @@ public class SmartContractBootStrap implements INulsCoresBootstrap {
     private void initNRC1155Standard() {
         String json = null;
         try {
-            json = IoUtils.read(NRC1155_STANDARD_FILE);
+            json = IoUtils.read("contract" + File.separator + NRC1155_STANDARD_FILE);
         } catch (Exception e) {
             // skip it
             Log.error("init NRC1155Standard error.", e);

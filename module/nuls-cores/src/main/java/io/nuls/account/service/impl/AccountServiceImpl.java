@@ -32,7 +32,6 @@ import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.AccountKeyStore;
 import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.po.AccountPO;
-import io.nuls.account.rpc.call.ContractCall;
 import io.nuls.account.rpc.call.EventCall;
 import io.nuls.account.service.AccountCacheService;
 import io.nuls.account.service.AccountKeyStoreService;
@@ -58,7 +57,6 @@ import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.CryptoException;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.log.Log;
 import io.nuls.core.model.FormatValidUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
@@ -602,9 +600,6 @@ public class AccountServiceImpl implements AccountService {
         accountCacheService.getLocalAccountMaps().put(account.getAddress().getBase58(), account);
         //backup account to keystore
         keyStoreService.backupAccountToKeyStore(null, chainId, account.getAddress().getBase58(), password);
-        if (!ContractCall.invokeAccountContract(chain, account.getAddress().getBase58())) {
-            chain.getLogger().warn("importAccountByPrikey invokeAccountContract failed. -address:{}", account.getAddress().getBase58());
-        }
         return account;
     }
 
@@ -702,9 +697,6 @@ public class AccountServiceImpl implements AccountService {
         //backup account to keystore
         keyStoreService.backupAccountToKeyStore(null, chainId, account.getAddress().getBase58(), password);
 
-        if (!ContractCall.invokeAccountContract(chain, account.getAddress().getBase58())) {
-            chain.getLogger().warn("importAccountByPrikey invokeAccountContract failed. -address:{}", account.getAddress().getBase58());
-        }
         return account;
     }
 

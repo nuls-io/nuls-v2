@@ -57,5 +57,4 @@ public interface ContractTxService {
 
     Result validateContractDeleteTx(int chainId, String sender, String contractAddress);
 
-    Result<List<ContractTokenTransferInfoPo>> getTokenTransferInfoList(int chainId, String address);
 }

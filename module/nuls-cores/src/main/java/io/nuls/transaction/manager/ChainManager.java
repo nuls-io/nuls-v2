@@ -80,7 +80,7 @@ public class ChainManager {
             initTable(chain);
             chainMap.put(chainId, chain);
             chain.getLogger().debug("Chain:{} init success..", chainId);
-            ProtocolLoader.load(chainId);
+            //ProtocolLoader.load(chainId);
         }
     }
 

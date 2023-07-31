@@ -56,6 +56,11 @@ public class TestJyc {
         ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":7771");
         chain = new Chain();
         //chain.setConfig(new ConfigBean(CHAIN_ID, ASSET_ID, 1024 * 1024, 1000, 20, 20000, 60000));
+        ConfigBean configBean = new ConfigBean();
+        configBean.setChainId(CHAIN_ID);
+        configBean.setAssetId(ASSET_ID);
+        configBean.setMaxViewGas(100000000L);
+        chain.setConfig(configBean);
     }
 
     @Test

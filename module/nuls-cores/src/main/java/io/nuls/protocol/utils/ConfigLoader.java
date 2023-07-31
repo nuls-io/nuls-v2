@@ -32,6 +32,7 @@ import io.nuls.core.log.Log;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.protocol.manager.ContextManager;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,7 +53,7 @@ public class ConfigLoader {
 
     static {
         try {
-            versions = JSONUtils.json2list(IoUtils.read(PROTOCOL_CONFIG_FILE), ProtocolVersion.class);
+            versions = JSONUtils.json2list(IoUtils.read("protocol" + File.separator + PROTOCOL_CONFIG_FILE), ProtocolVersion.class);
         } catch (Exception e) {
             Log.error(e);
             System.exit(1);

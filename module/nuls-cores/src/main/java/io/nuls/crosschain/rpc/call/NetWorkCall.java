@@ -27,28 +27,6 @@ import static io.nuls.crosschain.base.constant.CommandConstant.*;
  * 2019/4/10
  */
 public class NetWorkCall {
-    /**
-     * 注册消息处理器
-     * @return
-     */
-    public static boolean register() {
-        try {
-            Map<String, Object> map = new HashMap<>(2);
-            List<Map<String, String>> cmds = new ArrayList<>();
-            map.put("role", ModuleE.CC.abbr);
-            List<String> list = List.of(GET_OTHER_CTX_MESSAGE,NEW_OTHER_CTX_MESSAGE,VERIFY_CTX_MESSAGE,CTX_VERIFY_RESULT_MESSAGE,GET_CTX_STATE_MESSAGE,CTX_STATE_MESSAGE,BROAD_CTX_HASH_MESSAGE,BROAD_CTX_SIGN_MESSAGE,GET_CIRCULLAT_MESSAGE);
-            map.put("protocolCmds", list);
-            boolean success = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map).isSuccess();
-            while (!success) {
-                Thread.sleep(1000L);
-                success = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map).isSuccess();
-            }
-            return true;
-        } catch (Exception e) {
-            LoggerUtil.commonLog.error(e);
-        }
-        return false;
-    }
 
     /**
      * 给网络上节点广播消息

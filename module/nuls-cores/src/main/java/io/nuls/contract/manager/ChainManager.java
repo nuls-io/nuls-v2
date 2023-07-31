@@ -24,7 +24,6 @@
  */
 package io.nuls.contract.manager;
 
-import io.nuls.base.protocol.ProtocolLoader;
 import io.nuls.common.CommonContext;
 import io.nuls.common.ConfigBean;
 import io.nuls.common.NulsCoresConfig;
@@ -86,10 +85,6 @@ public class ChainManager {
              */
             initContractExecutor(chain);
             /*
-             * 初始化智能合约nrc20-token管理器
-             */
-            initTokenBalanceManager(chain);
-            /*
              * 初始化智能合约创建合约未确认交易管理器
              */
             initContractTxCreateUnconfirmedManager(chain);
@@ -98,13 +93,7 @@ public class ChainManager {
              */
             initContractChainLog(chainId);
             chainMap.put(chainId, chain);
-            ProtocolLoader.load(chainId);
         }
-    }
-
-    private void initTokenBalanceManager(Chain chain) {
-        ContractTokenBalanceManager tokenBalanceManager = ContractTokenBalanceManager.newInstance(chain.getChainId());
-        chain.setContractTokenBalanceManager(tokenBalanceManager);
     }
 
     private void initContractTxCreateUnconfirmedManager(Chain chain) {
@@ -180,10 +169,6 @@ public class ChainManager {
             RocksDBService.createTable(ContractDBConstant.DB_NAME_CONTRACT_ADDRESS + "_" + chainId);
             // 执行结果表
             RocksDBService.createTable(ContractDBConstant.DB_NAME_CONTRACT_EXECUTE_RESULT + "_" + chainId);
-            // nrc20-token地址表
-            RocksDBService.createTable(ContractDBConstant.DB_NAME_CONTRACT_NRC20_TOKEN_ADDRESS + "_" + chainId);
-            // nrc20-token转账表
-            RocksDBService.createTable(ContractDBConstant.DB_NAME_CONTRACT_NRC20_TOKEN_TRANSFER + "_" + chainId);
             // 合约生成交易离线保存hash关系表
             RocksDBService.createTable(ContractDBConstant.DB_NAME_CONTRACT_OFFLINE_TX_HASH_LIST + "_" + chainId);
 

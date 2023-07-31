@@ -120,7 +120,11 @@ public class AliasStorageServiceTest {
             accountService = SpringLiteContext.getBean(AccountService.class);
         }
         Chain chain = new Chain();
-        //chain.setConfig(new ConfigBean(chainId, assetId));
+        ConfigBean configBean = new ConfigBean();
+        configBean.setChainId(chainId);
+        configBean.setAssetId(assetId);
+        configBean.setMaxViewGas(100000000L);
+        chain.setConfig(configBean);
         List<Account> accounts = accountService.createAccount(chain,1,null);
         String aliasStr = "Hi,我的别名是" + System.currentTimeMillis();
         Alias alias = new Alias();

@@ -47,7 +47,11 @@ public class AccountKeyStoreServiceTest {
     public void backupAccountToKeyStoreTest() {
         //Create password accounts
         Chain chain = new Chain();
-        //chain.setConfig(new ConfigBean(chainId, assetId));
+        ConfigBean configBean = new ConfigBean();
+        configBean.setChainId(chainId);
+        configBean.setAssetId(assetId);
+        configBean.setMaxViewGas(100000000L);
+        chain.setConfig(configBean);
         List<Account> accountList = accountService.createAccount(chain, 1, password);
         String address = accountList.get(0).getAddress().getBase58();
         //测试不指定备份路径

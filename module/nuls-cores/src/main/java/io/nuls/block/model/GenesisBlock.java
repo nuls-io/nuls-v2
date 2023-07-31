@@ -36,6 +36,7 @@ import io.nuls.core.io.IoUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
@@ -115,7 +116,7 @@ public final class GenesisBlock extends Block {
     }
 
     public static GenesisBlock getInstance(int chainId, int assetsId) throws Exception {
-        String json = IoUtils.read(GENESIS_BLOCK_FILE);
+        String json = IoUtils.read("block" + File.separator + GENESIS_BLOCK_FILE);
         return new GenesisBlock(chainId, assetsId, json);
     }
 

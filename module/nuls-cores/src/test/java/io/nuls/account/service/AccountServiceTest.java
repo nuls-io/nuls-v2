@@ -52,7 +52,11 @@ public class AccountServiceTest {
 //        启动时间同步线程
         TimeService.getInstance().start();
         accountService = SpringLiteContext.getBean(AccountService.class);
-        //chain.setConfig(new ConfigBean(chainId, assetId));
+        ConfigBean configBean = new ConfigBean();
+        configBean.setChainId(chainId);
+        configBean.setAssetId(assetId);
+        configBean.setMaxViewGas(100000000L);
+        chain.setConfig(configBean);
     }
 
 
@@ -78,7 +82,11 @@ public class AccountServiceTest {
 //        }
         try {
             //Test the largest number of generated accounts.
-            //chain.setConfig(new ConfigBean(assetId, 5));
+            ConfigBean configBean = new ConfigBean();
+            configBean.setChainId(chainId);
+            configBean.setAssetId(5);
+            configBean.setMaxViewGas(100000000L);
+            chain.setConfig(configBean);
             List<Account> accountList = accountService.createAccount(chain, 6, password);
             for(Account acc : accountList){
                 System.out.println(acc.getAddress().getBase58());
@@ -100,7 +108,11 @@ public class AccountServiceTest {
     public void setPasswordTest() {
         // create account
         Chain chain = new Chain();
-        //chain.setConfig(new ConfigBean(chainId, assetId));
+        ConfigBean configBean = new ConfigBean();
+        configBean.setChainId(chainId);
+        configBean.setAssetId(assetId);
+        configBean.setMaxViewGas(100000000L);
+        chain.setConfig(configBean);
         List<Account> result = accountService.createAccount(chain, 1, null);
         assertTrue(result != null && result.size() == 1);
         Account account = result.get(0);

@@ -42,7 +42,6 @@ import io.nuls.contract.rpc.call.LedgerCall;
 import io.nuls.contract.service.ContractService;
 import io.nuls.contract.service.ContractTxService;
 import io.nuls.contract.storage.ContractAddressStorageService;
-import io.nuls.contract.storage.ContractTokenAddressStorageService;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.ProgramMethod;
 import io.nuls.core.basic.Result;
@@ -67,8 +66,6 @@ public class CreateContractTxProcessor {
 
     @Autowired
     private ContractAddressStorageService contractAddressStorageService;
-    @Autowired
-    private ContractTokenAddressStorageService contractTokenAddressStorageService;
     @Autowired
     private ContractService contractService;
     @Autowired
@@ -126,14 +123,6 @@ public class CreateContractTxProcessor {
             info.setNrc20TokenSymbol(tokenSymbol);
             info.setDecimals(tokenDecimals);
             info.setTotalSupply(tokenTotalSupply);
-            byte[] newestStateRoot = blockHeader.getStateRoot();
-            //处理NRC20合约事件
-            contractHelper.dealNrc20Events(chainId, newestStateRoot, tx, contractResult, info);
-            // 保存NRC20-token地址
-            Result result = contractTokenAddressStorageService.saveTokenAddress(chainId, contractAddress);
-            if (result.isFailed()) {
-                return result;
-            }
             // add by pierre at 2019-11-02 调用账本模块，登记资产id，当NRC20合约存在[transferCrossChain]方法时，才登记资产id 需要协议升级 done
             if(ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_V250 ) {
                 List<ProgramMethod> methods = contractHelper.getAllMethods(chainId, txData.getCode());
@@ -195,12 +184,7 @@ public class CreateContractTxProcessor {
             }
         }
         // end code by pierre
-        contractHelper.rollbackNrc20Events(chainId, tx, contractResult);
         Result result = contractAddressStorageService.deleteContractAddress(chainId, contractAddress);
-        if (result.isFailed()) {
-            return result;
-        }
-        result = contractTokenAddressStorageService.deleteTokenAddress(chainId, contractAddress);
         if (result.isFailed()) {
             return result;
         }
@@ -262,14 +246,6 @@ public class CreateContractTxProcessor {
             // 处理NRC20 token数据
             info.setDecimals(tokenDecimals);
             info.setTotalSupply(tokenTotalSupply);
-            byte[] newestStateRoot = blockHeader.getStateRoot();
-            //处理NRC20合约事件
-            contractHelper.dealNrc20Events(chainId, newestStateRoot, tx, contractResult, info);
-            // 保存NRC20-token地址
-            Result result = contractTokenAddressStorageService.saveTokenAddress(chainId, contractAddress);
-            if (result.isFailed()) {
-                return result;
-            }
             // add by pierre at 2019-11-02 调用账本模块，登记资产id，当NRC20合约存在[transferCrossChain]方法时，才登记资产id 需要协议升级 done
             if(ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_V250 ) {
                 List<ProgramMethod> methods = contractHelper.getAllMethods(chainId, txData.getCode());
@@ -332,12 +308,7 @@ public class CreateContractTxProcessor {
             }
         }
         // end code by pierre
-        contractHelper.rollbackNrc20Events(chainId, tx, contractResult);
         Result result = contractAddressStorageService.deleteContractAddress(chainId, contractAddress);
-        if (result.isFailed()) {
-            return result;
-        }
-        result = contractTokenAddressStorageService.deleteTokenAddress(chainId, contractAddress);
         if (result.isFailed()) {
             return result;
         }
@@ -364,7 +335,6 @@ public class CreateContractTxProcessor {
         byte[] sender = txData.getSender();
         String alias = txData.getAlias();
         byte[] code = txData.getCode();
-        byte[] newestStateRoot = blockHeader.getStateRoot();
 
         ContractCreate create = new ContractCreate();
         create.setTokenType(contractResult.getTokenType());
@@ -375,11 +345,6 @@ public class CreateContractTxProcessor {
         create.setAcceptDirectTransfer(contractResult.isAcceptDirectTransfer());
         Map<String, ContractAddressInfoPo> infoPoMap = new HashMap<>();
         Result result = contractHelper.onCommitForCreateV14(chainId, blockHeader, create, tx.getHash(), tx.getTime(), contractAddress, sender, code, alias, infoPoMap);
-        if (result.isFailed()) {
-            return result;
-        }
-        //处理NRC20合约事件
-        contractHelper.dealNrc20Events(chainId, newestStateRoot, blockHeight, tx.getHash(), tx.getTime(), contractResult.getEvents(), contractResult.isSuccess(), infoPoMap);
         return result;
     }
 
@@ -400,7 +365,6 @@ public class CreateContractTxProcessor {
         } catch (Exception e) {
             Log.warn("failed to trace create rollback log, error is {}", e.getMessage());
         }
-        contractHelper.rollbackNrc20Events(chainId, tx.getHash(), contractResult.getEvents());
         Result result = contractHelper.onRollbackForCreateV14(chainId, contractAddress, contractResult.isNrc20());
         if (result.isFailed()) {
             return result;

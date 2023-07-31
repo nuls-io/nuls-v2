@@ -35,7 +35,10 @@ import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.enums.BlockType;
 import io.nuls.contract.enums.CmdRegisterMode;
 import io.nuls.contract.helper.ContractHelper;
-import io.nuls.contract.manager.*;
+import io.nuls.contract.manager.ChainManager;
+import io.nuls.contract.manager.CmdRegisterManager;
+import io.nuls.contract.manager.ContractTxProcessorManager;
+import io.nuls.contract.manager.ContractTxValidatorManager;
 import io.nuls.contract.model.bo.BatchInfo;
 import io.nuls.contract.model.bo.ContractTempTransaction;
 import io.nuls.contract.model.dto.ContractPackageDto;
@@ -437,38 +440,6 @@ public class ContractCmd extends BaseCmd {
                 resultList.add(RPCUtil.encode(hash));
             }
             return success(TransactionCall.getTxList(chainId, resultList));
-        } catch (Exception e) {
-            Log.error(e);
-            return failed(e.getMessage());
-        }
-    }
-
-    @CmdAnnotation(cmd = INITIAL_ACCOUNT_TOKEN, version = 1.0, description = "初始化账户token信息，节点导入账户时调用/initial account token")
-    @Parameters(value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
-        @Parameter(parameterName = "address", parameterType = "String", parameterDes = "账户地址")
-    })
-    @ResponseData(description = "无特定返回值，没有错误即成功")
-    public Response initialAccountToken(Map<String, Object> params) {
-        try {
-            Integer chainId = (Integer) params.get("chainId");
-            ChainManager.chainHandle(chainId);
-            String address = (String) params.get("address");
-            if (!AddressTool.validAddress(chainId, address)) {
-                return failed(ADDRESS_ERROR);
-            }
-
-            ContractTokenBalanceManager contractTokenBalanceManager = contractHelper.getChain(chainId).getContractTokenBalanceManager();
-            if (contractTokenBalanceManager == null) {
-                return failed(DATA_ERROR);
-            }
-
-            Result result = contractTokenBalanceManager.initAllTokensByImportAccount(address);
-            if (result.isFailed()) {
-                return wrapperFailed(result);
-            }
-
-            return success();
         } catch (Exception e) {
             Log.error(e);
             return failed(e.getMessage());

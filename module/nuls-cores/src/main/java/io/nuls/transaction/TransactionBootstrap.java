@@ -25,6 +25,7 @@
 package io.nuls.transaction;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.common.CommonVersionChangeInvoker;
 import io.nuls.common.INulsCoresBootstrap;
 import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.core.annotation.Autowired;
@@ -38,6 +39,7 @@ import io.nuls.core.rpc.util.AddressPrefixDatas;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxContext;
 import io.nuls.transaction.manager.ChainManager;
+import io.nuls.transaction.rpc.upgrade.TxVersionChangeInvoker;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.io.File;

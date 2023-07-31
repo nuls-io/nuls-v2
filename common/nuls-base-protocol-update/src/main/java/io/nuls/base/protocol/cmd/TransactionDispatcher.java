@@ -55,6 +55,7 @@ public final class TransactionDispatcher extends BaseCmd {
     private CommonAdvice rollbackAdvice;
 
     public void register(CommonAdvice commitAdvice, CommonAdvice rollbackAdvice) {
+        //TODO pierre 按实际模块注册
         if (commitAdvice != null) {
             this.commitAdvice = commitAdvice;
         }
@@ -142,6 +143,7 @@ public final class TransactionDispatcher extends BaseCmd {
             Transaction tx = RPCUtil.getInstanceRpcStr(txStr, Transaction.class);
             txs.add(tx);
         }
+        //TODO pierre 按实际模块调用
         commitAdvice.begin(chainId, txs, blockHeader);
         Map<Integer, List<Transaction>> map = new HashMap<>();
         for (TransactionProcessor processor : processors) {
@@ -155,7 +157,11 @@ public final class TransactionDispatcher extends BaseCmd {
         Map<String, Boolean> resultMap = new HashMap<>(2);
         List<TransactionProcessor> completedProcessors = new ArrayList<>();
         for (TransactionProcessor processor : processors) {
-            boolean commit = processor.commit(chainId, map.get(processor.getType()), blockHeader);
+            List<Transaction> transactions = map.get(processor.getType());
+            if (transactions.isEmpty()) {
+                continue;
+            }
+            boolean commit = processor.commit(chainId, transactions, blockHeader);
             if (!commit) {
                 completedProcessors.forEach(e -> e.rollback(chainId, map.get(e.getType()), blockHeader));
                 resultMap.put("value", commit);

@@ -167,9 +167,6 @@ public class CallContractProcessorV16 implements TransactionProcessor {
                     }
                 }
             }
-            // 处理合约事件
-            contractHelper.dealNrc20Events(chainId, stateRoot, blockHeight, tx.getHash(), tx.getTime(), contractResult.getEvents(), contractResult.isSuccess(), infoPoMap);
-
             // 保存合约执行结果
             return contractService.saveContractExecuteResult(chainId, tx.getHash(), contractResult);
         } catch (Exception e) {
@@ -194,7 +191,6 @@ public class CallContractProcessorV16 implements TransactionProcessor {
             } catch (Exception e) {
                 Log.warn("failed to trace call rollback log, error is {}", e.getMessage());
             }
-            contractHelper.rollbackNrc20Events(chainId, tx.getHash(), contractResult.getEvents());
             // 处理内部创建合约
             List<ContractInternalCreate> internalCreates = contractResult.getInternalCreates();
             if (internalCreates != null && !internalCreates.isEmpty()) {

@@ -157,8 +157,6 @@ public class CreateContractProcessorV16 implements TransactionProcessor {
         if (result.isFailed()) {
             return result;
         }
-        //处理NRC20合约事件
-        contractHelper.dealNrc20Events(chainId, newestStateRoot, blockHeight, tx.getHash(), tx.getTime(), contractResult.getEvents(), contractResult.isSuccess(), infoPoMap);
         return result;
     }
 
@@ -179,7 +177,6 @@ public class CreateContractProcessorV16 implements TransactionProcessor {
         } catch (Exception e) {
             Log.warn("failed to trace create rollback log, error is {}", e.getMessage());
         }
-        contractHelper.rollbackNrc20Events(chainId, tx.getHash(), contractResult.getEvents());
         Result result = contractHelper.onRollbackForCreateV16(chainId, contractAddress, contractResult.isNrc20());
         if (result.isFailed()) {
             return result;

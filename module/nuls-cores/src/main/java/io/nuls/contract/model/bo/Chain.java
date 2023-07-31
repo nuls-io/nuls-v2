@@ -2,7 +2,6 @@ package io.nuls.contract.model.bo;
 
 import io.nuls.common.ConfigBean;
 import io.nuls.contract.enums.BlockType;
-import io.nuls.contract.manager.ContractTokenBalanceManager;
 import io.nuls.contract.manager.ContractTxCreateUnconfirmedManager;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.ProgramExecutor;
@@ -42,11 +41,6 @@ public class Chain {
      */
     private CommonConfig commonConfig;
     private DefaultConfig defaultConfig;
-
-    /**
-     * 智能合约token余额管理
-     */
-    private ContractTokenBalanceManager contractTokenBalanceManager;
 
     /**
      * 智能合约创建合约未确认交易管理器
@@ -130,14 +124,6 @@ public class Chain {
 
     public void setDefaultConfig(DefaultConfig defaultConfig) {
         this.defaultConfig = defaultConfig;
-    }
-
-    public ContractTokenBalanceManager getContractTokenBalanceManager() {
-        return contractTokenBalanceManager;
-    }
-
-    public void setContractTokenBalanceManager(ContractTokenBalanceManager contractTokenBalanceManager) {
-        this.contractTokenBalanceManager = contractTokenBalanceManager;
     }
 
     public ContractTxCreateUnconfirmedManager getContractTxCreateUnconfirmedManager() {

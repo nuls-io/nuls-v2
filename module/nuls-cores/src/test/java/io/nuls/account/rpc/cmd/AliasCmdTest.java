@@ -115,7 +115,11 @@ public class AliasCmdTest {
     @Test
     public void setAliasTest() throws Exception {
         Chain chain = new Chain();
-        //chain.setConfig(new ConfigBean(chainId, assetId));
+        ConfigBean configBean = new ConfigBean();
+        configBean.setChainId(chainId);
+        configBean.setAssetId(assetId);
+        configBean.setMaxViewGas(100000000L);
+        chain.setConfig(configBean);
         //create an account for test
         //String address = createAnAccount();
         String address="tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";

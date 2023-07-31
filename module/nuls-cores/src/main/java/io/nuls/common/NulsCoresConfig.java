@@ -853,7 +853,6 @@ public class NulsCoresConfig extends ConfigBean implements ModuleConfig {
 
     @Override
     public VersionChangeInvoker getVersionChangeInvoker() throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-        Class<?> aClass = Class.forName("io.nuls.transaction.rpc.upgrade.TxVersionChangeInvoker");
-        return (VersionChangeInvoker) aClass.getDeclaredConstructor().newInstance();
+        return CommonVersionChangeInvoker.instance();
     }
 }

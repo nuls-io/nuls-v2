@@ -34,25 +34,21 @@ import io.nuls.contract.enums.ContractStatus;
 import io.nuls.contract.enums.TokenTypeStatus;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.manager.ChainManager;
-import io.nuls.contract.manager.ContractTokenBalanceManager;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractTokenInfo;
 import io.nuls.contract.model.dto.*;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
-import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.contract.model.tx.ContractBaseTransaction;
 import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.contract.rpc.call.TransactionCall;
 import io.nuls.contract.service.ContractService;
 import io.nuls.contract.service.ContractTxService;
 import io.nuls.contract.storage.ContractAddressStorageService;
-import io.nuls.contract.storage.ContractTokenTransferStorageService;
 import io.nuls.contract.util.ContractLedgerUtil;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.util.MapUtil;
 import io.nuls.contract.vm.program.*;
-import io.nuls.contract.vm.util.Utils;
 import io.nuls.core.basic.Page;
 import io.nuls.core.basic.Result;
 import io.nuls.core.constant.BaseConstant;
@@ -96,8 +92,6 @@ public class ContractResource extends BaseCmd {
     private ContractService contractService;
     @Autowired
     private ContractTxService contractTxService;
-    @Autowired
-    private ContractTokenTransferStorageService contractTokenTransferStorageService;
     @Autowired
     private ContractAddressStorageService contractAddressStorageService;
 
@@ -1468,160 +1462,6 @@ public class ContractResource extends BaseCmd {
         }
         txDto.setValue(bigInteger2String(value));
     }
-
-    @CmdAnnotation(cmd = TOKEN_ASSETS_LIST, version = 1.0, description = "token资产集合/token assets list")
-    @Parameters(value = {
-        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
-        @Parameter(parameterName = "address", parameterDes = "账户地址"),
-        @Parameter(parameterName = "pageNumber", requestType = @TypeDescriptor(value = int.class), parameterDes = "页码", canNull = true),
-        @Parameter(parameterName = "pageSize", requestType = @TypeDescriptor(value = int.class), parameterDes = "每页大小", canNull = true)
-    })
-    @ResponseData(name = "返回值", description = "返回一个Page对象，这里只描述Page对象中的集合",
-        responseType = @TypeDescriptor(value = List.class, collectionElement = ContractTokenInfoDto.class)
-    )
-    public Response tokenAssetsList(Map<String, Object> params) {
-        try {
-            Integer chainId = (Integer) params.get("chainId");
-            ChainManager.chainHandle(chainId);
-            String address = (String) params.get("address");
-            Integer pageNumber = (Integer) params.get("pageNumber");
-            Integer pageSize = (Integer) params.get("pageSize");
-
-            if (null == pageNumber || pageNumber == 0) {
-                pageNumber = 1;
-            }
-            if (null == pageSize || pageSize == 0) {
-                pageSize = 10;
-            }
-            if (pageNumber < 0 || pageSize < 0 || pageSize > 100) {
-                return failed(PARAMETER_ERROR);
-            }
-
-            if (!AddressTool.validAddress(chainId, address)) {
-                return failed(ADDRESS_ERROR);
-            }
-
-            ContractTokenBalanceManager tokenBalanceManager = contractHelper.getChain(chainId).getContractTokenBalanceManager();
-            Result<List<ContractTokenInfo>> tokenListResult = tokenBalanceManager.getAllTokensByAccount(address);
-            if (tokenListResult.isFailed()) {
-                return wrapperFailed(tokenListResult);
-            }
-
-            List<ContractTokenInfo> tokenInfoList = tokenListResult.getData();
-
-            List<ContractTokenInfoDto> tokenInfoDtoList = new ArrayList<>();
-            Page<ContractTokenInfoDto> page = new Page<>(pageNumber, pageSize, tokenInfoList.size());
-            int start = pageNumber * pageSize - pageSize;
-            if (start >= page.getTotal()) {
-                return success(page);
-            }
-
-            int end = start + pageSize;
-            if (end > page.getTotal()) {
-                end = (int) page.getTotal();
-            }
-
-            if (tokenInfoList.size() > 0) {
-                for (int i = start; i < end; i++) {
-                    ContractTokenInfo info = tokenInfoList.get(i);
-                    tokenInfoDtoList.add(new ContractTokenInfoDto(info));
-                }
-            }
-            if (tokenInfoDtoList != null && tokenInfoDtoList.size() > 0) {
-                BlockHeader blockHeader = BlockCall.getLatestBlockHeader(chainId);
-                byte[] prevStateRoot = ContractUtil.getStateRoot(blockHeader);
-                ProgramExecutor track = contractHelper.getProgramExecutor(chainId).begin(prevStateRoot);
-                for (ContractTokenInfoDto tokenInfo : tokenInfoDtoList) {
-                    tokenInfo.setStatus(track.status(AddressTool.getAddress(tokenInfo.getContractAddress())).ordinal());
-                }
-            }
-            page.setList(tokenInfoDtoList);
-
-            return success(page);
-        } catch (NulsException e) {
-            Log.error(e);
-            return failed(e.getErrorCode());
-        }
-    }
-
-    @CmdAnnotation(cmd = TOKEN_TRANSFER_LIST, version = 1.0, description = "token转账交易列表/token transfer list")
-    @Parameters(value = {
-        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
-        @Parameter(parameterName = "address", parameterDes = "账户地址"),
-        @Parameter(parameterName = "pageNumber", requestType = @TypeDescriptor(value = int.class), parameterDes = "页码", canNull = true),
-        @Parameter(parameterName = "pageSize", requestType = @TypeDescriptor(value = int.class), parameterDes = "每页大小", canNull = true)
-    })
-    @ResponseData(name = "返回值", description = "返回一个Page对象，这里只描述Page对象中的集合",
-        responseType = @TypeDescriptor(value = List.class, collectionElement = ContractTokenTransferTransactionDto.class)
-    )
-    public Response tokenTransferList(Map<String, Object> params) {
-        try {
-            Integer chainId = (Integer) params.get("chainId");
-            ChainManager.chainHandle(chainId);
-            String address = (String) params.get("address");
-            Integer pageNumber = (Integer) params.get("pageNumber");
-            Integer pageSize = (Integer) params.get("pageSize");
-
-            if (null == pageNumber || pageNumber == 0) {
-                pageNumber = 1;
-            }
-            if (null == pageSize || pageSize == 0) {
-                pageSize = 10;
-            }
-            if (pageNumber < 0 || pageSize < 0 || pageSize > 100) {
-                return failed(PARAMETER_ERROR);
-            }
-
-            if (!AddressTool.validAddress(chainId, address)) {
-                return failed(ADDRESS_ERROR);
-            }
-            byte[] addressBytes = AddressTool.getAddress(address);
-
-            Result<List<ContractTokenTransferInfoPo>> tokenTransferInfoListResult = contractTxService.getTokenTransferInfoList(chainId, address);
-            if (tokenTransferInfoListResult.isFailed()) {
-                return wrapperFailed(tokenTransferInfoListResult);
-            }
-
-            List<ContractTokenTransferInfoPo> list = tokenTransferInfoListResult.getData();
-            if (list == null) {
-                list = new ArrayList<>();
-            }
-            if (list.size() > 0) {
-                list.sort(new Comparator<ContractTokenTransferInfoPo>() {
-                    @Override
-                    public int compare(ContractTokenTransferInfoPo o1, ContractTokenTransferInfoPo o2) {
-                        return o1.compareTo(o2.getTime());
-                    }
-                });
-            }
-
-            List<ContractTokenTransferTransactionDto> result = new ArrayList<>();
-            Page<ContractTokenTransferTransactionDto> page = new Page<>(pageNumber, pageSize, list.size());
-            int start = pageNumber * pageSize - pageSize;
-            if (start >= page.getTotal()) {
-                return success(page);
-            }
-
-            int end = start + pageSize;
-            if (end > page.getTotal()) {
-                end = (int) page.getTotal();
-            }
-
-            ContractTokenTransferInfoPo info;
-            for (int i = start; i < end; i++) {
-                info = list.get(i);
-                result.add(new ContractTokenTransferTransactionDto(info, addressBytes));
-            }
-
-            page.setList(result);
-
-            return success(page);
-        } catch (Exception e) {
-            Log.error(e);
-            return failed(e.getMessage());
-        }
-    }
-
 
     @CmdAnnotation(cmd = ACCOUNT_CONTRACTS, version = 1.0, description = "账户的合约地址列表/account contract list")
     @Parameters(value = {

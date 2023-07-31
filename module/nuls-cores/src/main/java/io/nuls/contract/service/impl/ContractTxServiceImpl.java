@@ -26,30 +26,22 @@ package io.nuls.contract.service.impl;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.NulsHash;
-import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.helper.ContractTxHelper;
-import io.nuls.contract.manager.ContractTokenBalanceManager;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.dto.AccountAmountDto;
-import io.nuls.contract.model.po.ContractAddressInfoPo;
-import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.contract.model.tx.CallContractTransaction;
 import io.nuls.contract.model.tx.CreateContractTransaction;
 import io.nuls.contract.model.tx.DeleteContractTransaction;
 import io.nuls.contract.service.ContractTxService;
-import io.nuls.contract.storage.ContractTokenTransferStorageService;
-import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.util.MapUtil;
 import io.nuls.contract.vm.program.ProgramMultyAssetValue;
 import io.nuls.core.basic.Result;
-import io.nuls.core.basic.VarInt;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.model.ArraysTool;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -58,7 +50,6 @@ import java.util.List;
 import java.util.Map;
 
 import static io.nuls.contract.constant.ContractErrorCode.FAILED;
-import static io.nuls.contract.util.ContractUtil.getFailed;
 import static io.nuls.contract.util.ContractUtil.getSuccess;
 
 /**
@@ -69,8 +60,6 @@ import static io.nuls.contract.util.ContractUtil.getSuccess;
 @Component
 public class ContractTxServiceImpl implements ContractTxService {
 
-    @Autowired
-    private ContractTokenTransferStorageService contractTokenTransferStorageService;
     @Autowired
     private ContractHelper contractHelper;
     @Autowired
@@ -169,72 +158,6 @@ public class ContractTxServiceImpl implements ContractTxService {
         return contractTxHelper.previewCall(chainId, senderBytes, contractAddressBytes, value, gasLimit, price, methodName, methodDesc, args, multyAssetValues);
     }
 
-    @Deprecated
-    private Result<byte[]> saveUnConfirmedTokenTransfer(int chainId, CallContractTransaction tx, String sender, String contractAddress, String methodName, String[][] args) {
-        try {
-            ContractTokenBalanceManager tokenBalanceManager = contractHelper.getChain(chainId).getContractTokenBalanceManager();
-            byte[] senderBytes = AddressTool.getAddress(sender);
-            byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
-            Result<ContractAddressInfoPo> contractAddressInfoResult = contractHelper.getContractAddressInfo(chainId, contractAddressBytes);
-            ContractAddressInfoPo po = contractAddressInfoResult.getData();
-            if (po != null && po.isNrc20() && ContractUtil.isTransferMethod(methodName)) {
-                byte[] txHashBytes = tx.getHash().getBytes();
-                byte[] infoKey = ArraysTool.concatenate(senderBytes, txHashBytes, new VarInt(0).encode());
-                ContractTokenTransferInfoPo tokenTransferInfoPo = new ContractTokenTransferInfoPo();
-                if (ContractConstant.NRC20_METHOD_TRANSFER.equals(methodName)) {
-                    String to = args[0][0];
-                    String tokenValue = args[1][0];
-                    BigInteger token = new BigInteger(tokenValue);
-                    Result result = tokenBalanceManager.subtractContractToken(sender, contractAddress, token);
-                    if (result.isFailed()) {
-                        return result;
-                    }
-                    tokenBalanceManager.addContractToken(to, contractAddress, token);
-                    tokenTransferInfoPo.setFrom(senderBytes);
-                    tokenTransferInfoPo.setTo(AddressTool.getAddress(to));
-                    tokenTransferInfoPo.setValue(token);
-                } else {
-                    String from = args[0][0];
-                    // 转出的不是自己的代币（代币授权逻辑），则不保存token待确认交易，因为有调用合约的待确认交易
-                    if (!sender.equals(from)) {
-                        return getSuccess();
-                    }
-                    String to = args[1][0];
-                    String tokenValue = args[2][0];
-                    BigInteger token = new BigInteger(tokenValue);
-                    Result result = tokenBalanceManager.subtractContractToken(from, contractAddress, token);
-                    if (result.isFailed()) {
-                        return result;
-                    }
-                    tokenBalanceManager.addContractToken(to, contractAddress, token);
-                    tokenTransferInfoPo.setFrom(AddressTool.getAddress(from));
-                    tokenTransferInfoPo.setTo(AddressTool.getAddress(to));
-                    tokenTransferInfoPo.setValue(token);
-                }
-
-                tokenTransferInfoPo.setName(po.getNrc20TokenName());
-                tokenTransferInfoPo.setSymbol(po.getNrc20TokenSymbol());
-                tokenTransferInfoPo.setDecimals(po.getDecimals());
-                tokenTransferInfoPo.setTime(tx.getTime());
-                tokenTransferInfoPo.setContractAddress(contractAddress);
-                tokenTransferInfoPo.setBlockHeight(tx.getBlockHeight());
-                tokenTransferInfoPo.setTxHash(txHashBytes);
-                tokenTransferInfoPo.setStatus((byte) 0);
-                Result result = contractTokenTransferStorageService.saveTokenTransferInfo(chainId, infoKey, tokenTransferInfoPo);
-                if (result.isFailed()) {
-                    return result;
-                }
-                return getSuccess().setData(infoKey);
-            }
-            return getSuccess();
-        } catch (Exception e) {
-            Log.error(e);
-            Result result = Result.getFailed(ContractErrorCode.CONTRACT_OTHER_ERROR);
-            result.setMsg(e.getMessage());
-            return result;
-        }
-    }
-
     @Override
     public Result contractDeleteTx(int chainId, String sender, String contractAddress,
                                    String password, String remark) {
@@ -270,15 +193,4 @@ public class ContractTxServiceImpl implements ContractTxService {
         return contractTxHelper.validateDelete(chainId, senderBytes, contractAddress, contractAddressBytes);
     }
 
-    @Override
-    public Result<List<ContractTokenTransferInfoPo>> getTokenTransferInfoList(int chainId, String address) {
-        try {
-            byte[] addressBytes = AddressTool.getAddress(address);
-            List<ContractTokenTransferInfoPo> tokenTransferInfoListByAddress = contractTokenTransferStorageService.getTokenTransferInfoListByAddress(chainId, addressBytes);
-            return getSuccess().setData(tokenTransferInfoListByAddress);
-        } catch (Exception e) {
-            Log.error(e);
-            return getFailed();
-        }
-    }
 }

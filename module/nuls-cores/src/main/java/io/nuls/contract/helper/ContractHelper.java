@@ -34,11 +34,9 @@ import io.nuls.contract.enums.ContractStatus;
 import io.nuls.contract.enums.TokenTypeStatus;
 import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.manager.ContractTempBalanceManager;
-import io.nuls.contract.manager.ContractTokenBalanceManager;
 import io.nuls.contract.model.bo.*;
 import io.nuls.contract.model.dto.ContractConstructorInfoDto;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
-import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.contract.model.tx.ContractReturnGasTransaction;
 import io.nuls.contract.model.txdata.CallContractData;
 import io.nuls.contract.model.txdata.ContractData;
@@ -46,14 +44,11 @@ import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.contract.rpc.call.LedgerCall;
 import io.nuls.contract.service.ContractService;
 import io.nuls.contract.storage.ContractAddressStorageService;
-import io.nuls.contract.storage.ContractTokenAddressStorageService;
-import io.nuls.contract.storage.ContractTokenTransferStorageService;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.program.*;
 import io.nuls.core.basic.Result;
-import io.nuls.core.basic.VarInt;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
@@ -61,7 +56,6 @@ import io.nuls.core.model.ByteArrayWrapper;
 import io.nuls.core.model.FormatValidUtils;
 import io.nuls.core.model.LongUtils;
 import io.nuls.core.model.StringUtils;
-import org.bouncycastle.util.Arrays;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -85,10 +79,6 @@ public class ContractHelper {
     private ChainManager chainManager;
     @Autowired
     private ContractAddressStorageService contractAddressStorageService;
-    @Autowired
-    private ContractTokenTransferStorageService contractTokenTransferStorageService;
-    @Autowired
-    private ContractTokenAddressStorageService contractTokenAddressStorageService;
     @Autowired
     private ContractService contractService;
 
@@ -787,184 +777,6 @@ public class ContractHelper {
 
     }
 
-    public void dealNrc20Events(int chainId, byte[] newestStateRoot, Transaction tx, ContractResult contractResult, ContractAddressInfoPo po) {
-        if (po == null) {
-            return;
-        }
-        Map<String, ContractAddressInfoPo> infoPoMap = new HashMap<>();
-        infoPoMap.put(AddressTool.getStringAddressByBytes(po.getContractAddress()), po);
-        this.dealNrc20Events(chainId, newestStateRoot, tx.getBlockHeight(), tx.getHash(), tx.getTime(), contractResult.getEvents(), contractResult.isSuccess(), infoPoMap);
-    }
-
-    public void dealNrc20Events(int chainId, byte[] newestStateRoot, long blockHeight, NulsHash txHash, long txTime, List<String> events, boolean execSuccess, Map<String, ContractAddressInfoPo> infoPoMap) {
-        try {
-            int size = events.size();
-            // 目前只处理Transfer事件, 为了刷新账户的token余额
-            String event;
-            ContractAddressInfoPo contractAddressInfo;
-            if (events != null && size > 0) {
-                for (int i = 0; i < size; i++) {
-                    event = events.get(i);
-                    // 按照NRC20标准，TransferEvent事件中第一个参数是转出地址-from，第二个参数是转入地址-to, 第三个参数是金额
-                    ContractTokenTransferInfoPo tokenTransferInfoPo = ContractUtil.convertJsonToTokenTransferInfoPo(chainId, event);
-                    if (tokenTransferInfoPo == null) {
-                        continue;
-                    }
-                    String contractAddress = tokenTransferInfoPo.getContractAddress();
-                    if (StringUtils.isBlank(contractAddress)) {
-                        continue;
-                    }
-                    if (!AddressTool.validAddress(chainId, contractAddress)) {
-                        continue;
-                    }
-                    contractAddressInfo = infoPoMap.get(contractAddress);
-                    if (contractAddressInfo == null) {
-                        byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
-                        Result<ContractAddressInfoPo> contractAddressInfoResult = this.getContractAddressInfo(chainId, contractAddressBytes);
-                        contractAddressInfo = contractAddressInfoResult.getData();
-                    }
-                    //if (Arrays.areEqual(po.getContractAddress(), contractAddressBytes)) {
-                    //    contractAddressInfo = po;
-                    //} else {
-                    //    Result<ContractAddressInfoPo> contractAddressInfoResult = this.getContractAddressInfo(chainId, contractAddressBytes);
-                    //    contractAddressInfo = contractAddressInfoResult.getData();
-                    //}
-
-                    if (contractAddressInfo == null) {
-                        continue;
-                    }
-                    // 事件不是NRC20合约的事件
-                    if (!contractAddressInfo.isNrc20()) {
-                        continue;
-                    }
-                    byte[] txHashBytes;
-                    byte[] from = tokenTransferInfoPo.getFrom();
-                    byte[] to = tokenTransferInfoPo.getTo();
-                    tokenTransferInfoPo.setName(contractAddressInfo.getNrc20TokenName());
-                    tokenTransferInfoPo.setSymbol(contractAddressInfo.getNrc20TokenSymbol());
-                    tokenTransferInfoPo.setDecimals(contractAddressInfo.getDecimals());
-                    tokenTransferInfoPo.setTime(txTime);
-                    tokenTransferInfoPo.setBlockHeight(blockHeight);
-                    txHashBytes = txHash.getBytes();
-                    tokenTransferInfoPo.setTxHash(txHashBytes);
-                    tokenTransferInfoPo.setStatus((byte) (execSuccess ? 1 : 2));
-
-                    if (from != null) {
-                        this.refreshTokenBalance(chainId, newestStateRoot, blockHeight, contractAddressInfo, AddressTool.getStringAddressByBytes(from), contractAddress);
-                        this.saveTokenTransferInfo(chainId, from, txHashBytes, new VarInt(i).encode(), tokenTransferInfoPo);
-                    }
-                    if (to != null) {
-                        this.refreshTokenBalance(chainId, newestStateRoot, blockHeight, contractAddressInfo, AddressTool.getStringAddressByBytes(to), contractAddress);
-                        this.saveTokenTransferInfo(chainId, to, txHashBytes, new VarInt(i).encode(), tokenTransferInfoPo);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            Log.warn("contract event parse error.", e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void rollbackNrc20Events(int chainId, Transaction tx, ContractResult contractResult) {
-        this.rollbackNrc20Events(chainId, tx.getHash(), contractResult.getEvents());
-    }
-
-    public void rollbackNrc20Events(int chainId, NulsHash txHasah, List<String> events) {
-        try {
-            byte[] txHashBytes = txHasah.getBytes();
-            int size = events.size();
-            // 目前只处理Transfer事件, 为了刷新账户的token余额
-            String event;
-            ContractAddressInfoPo contractAddressInfo;
-            if (events != null && size > 0) {
-                Map<String, Boolean> isNRC20Map = new HashMap<>();
-                for (int i = size - 1; i >= 0; i--) {
-                    event = events.get(i);
-                    // 按照NRC20标准，TransferEvent事件中第一个参数是转出地址-from，第二个参数是转入地址-to, 第三个参数是金额
-                    ContractTokenTransferInfoPo tokenTransferInfoPo = ContractUtil.convertJsonToTokenTransferInfoPo(chainId, event);
-                    if (tokenTransferInfoPo == null) {
-                        continue;
-                    }
-                    String contractAddress = tokenTransferInfoPo.getContractAddress();
-                    if (StringUtils.isBlank(contractAddress)) {
-                        continue;
-                    }
-                    Boolean isNRC20 = isNRC20Map.get(contractAddress);
-                    if (isNRC20 == null) {
-                        byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
-                        Result<ContractAddressInfoPo> contractAddressInfoResult = this.getContractAddressInfo(chainId, contractAddressBytes);
-                        contractAddressInfo = contractAddressInfoResult.getData();
-                        if (contractAddressInfo == null) {
-                            continue;
-                        }
-                        isNRC20 = contractAddressInfo.isNrc20();
-                        isNRC20Map.put(contractAddress, isNRC20);
-                    }
-                    // 事件不是NRC20合约的事件
-                    if (!isNRC20) {
-                        continue;
-                    }
-
-                    // 回滚token余额
-                    this.rollbackContractToken(chainId, tokenTransferInfoPo);
-                    if (tokenTransferInfoPo.getFrom() != null) {
-                        contractTokenTransferStorageService.deleteTokenTransferInfo(chainId, Arrays.concatenate(tokenTransferInfoPo.getFrom(), txHashBytes, new VarInt(i).encode()));
-                    }
-                    if (tokenTransferInfoPo.getTo() != null) {
-                        contractTokenTransferStorageService.deleteTokenTransferInfo(chainId, Arrays.concatenate(tokenTransferInfoPo.getTo(), txHashBytes, new VarInt(i).encode()));
-                    }
-
-                }
-            }
-        } catch (Exception e) {
-            Log.warn("contract event parse error.", e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void rollbackContractToken(int chainId, ContractTokenTransferInfoPo po) {
-        try {
-            String contractAddressStr = po.getContractAddress();
-            byte[] from = po.getFrom();
-            byte[] to = po.getTo();
-            BigInteger token = po.getValue();
-            String fromStr;
-            String toStr;
-            ContractTokenBalanceManager contractTokenBalanceManager = getChain(chainId).getContractTokenBalanceManager();
-            if (from != null) {
-                fromStr = AddressTool.getStringAddressByBytes(from);
-                contractTokenBalanceManager.addContractToken(fromStr, contractAddressStr, token);
-            }
-            if (to != null) {
-                toStr = AddressTool.getStringAddressByBytes(to);
-                contractTokenBalanceManager.subtractContractToken(toStr, contractAddressStr, token);
-            }
-        } catch (Exception e) {
-            // skip it
-            Log.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void saveTokenTransferInfo(int chainId, byte[] address, byte[] txHashBytes, byte[] index, ContractTokenTransferInfoPo tokenTransferInfoPo) {
-        contractTokenTransferStorageService.saveTokenTransferInfo(chainId, Arrays.concatenate(address, txHashBytes, index), tokenTransferInfoPo);
-    }
-
-    public void refreshTokenBalance(int chainId, byte[] stateRoot, long blockHeight, ContractAddressInfoPo po, String address, String contractAddress) {
-        this.refreshTokenBalance(chainId, null, stateRoot, blockHeight, po, address, contractAddress);
-    }
-
-    private void refreshTokenBalance(int chainId, ProgramExecutor executor, byte[] stateRoot, long blockHeight, ContractAddressInfoPo po, String address, String contractAddress) {
-        byte[] contractAddressBytes = po.getContractAddress();
-        ProgramResult programResult = this.invokeViewMethod(chainId, executor, stateRoot, blockHeight, contractAddressBytes, NRC20_METHOD_BALANCE_OF, null, address);
-        if (!programResult.isSuccess()) {
-            return;
-        } else {
-            getChain(chainId).getContractTokenBalanceManager().refreshContractToken(address, contractAddress, po, new BigInteger(programResult.getResult()));
-        }
-
-    }
-
     public ProgramStatus getContractStatus(int chainId, byte[] stateRoot, byte[] contractAddress) {
         ProgramExecutor track = getProgramExecutor(chainId).begin(stateRoot);
         return track.status(contractAddress);
@@ -1088,11 +900,6 @@ public class ContractHelper {
             info.setDecimals(tokenDecimals);
             info.setTotalSupply(tokenTotalSupply);
 
-            // 保存NRC20-token地址
-            Result result = contractTokenAddressStorageService.saveTokenAddress(chainId, contractAddress);
-            if (result.isFailed()) {
-                return result;
-            }
             // 调用账本模块，登记资产id，当NRC20合约存在[transferCrossChain]方法时，才登记资产id
             List<ProgramMethod> methods = this.getAllMethods(chainId, contractCode);
             boolean isNewNrc20 = false;
@@ -1135,12 +942,8 @@ public class ContractHelper {
                 tokenAssetsContractAddressInfoMap.remove(chainId + "-" + tokenAssetsInfo.getAssetId());
             }
         }
-        //this.rollbackNrc20Events(chainId, tx, contractResult);
         Result result = contractAddressStorageService.deleteContractAddress(chainId, contractAddress);
-        if (result.isFailed()) {
-            return result;
-        }
-        return contractTokenAddressStorageService.deleteTokenAddress(chainId, contractAddress);
+        return result;
     }
 
     public Result onCommitForCreateV16(int chainId, BlockHeader blockHeader, ContractCreate contractCreate,

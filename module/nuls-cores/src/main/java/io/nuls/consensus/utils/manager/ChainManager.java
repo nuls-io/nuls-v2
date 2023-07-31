@@ -78,7 +78,7 @@ public class ChainManager {
             */
             initTable(chain);
             chainMap.put(chainId, chain);
-            ProtocolLoader.load(chainId);
+            //ProtocolLoader.load(chainId);
             Map<String,Object> param = new HashMap<>(4);
             double deflationRatio = DoubleUtils.sub(ConsensusConstant.VALUE_OF_ONE_HUNDRED, config.getDeflationRatio());
             param.put(ParamConstant.CONSENUS_CONFIG, new ConsensusConfigInfo(chainId,configBean.getAssetId(),configBean.getPackingInterval(),
