@@ -218,7 +218,7 @@ public class SmartContractBootStrap implements INulsCoresBootstrap {
         TransactionDispatcher dispatcher = SpringLiteContext.getBean(TransactionDispatcher.class);
         TransactionCommitAdvice commitAdvice = SpringLiteContext.getBean(TransactionCommitAdvice.class);
         TransactionRollbackAdvice rollbackAdvice = SpringLiteContext.getBean(TransactionRollbackAdvice.class);
-        dispatcher.register(commitAdvice, rollbackAdvice);
+        dispatcher.register(ModuleE.SC, commitAdvice, rollbackAdvice);
         Log.info("module chain do start");
         return true;
     }

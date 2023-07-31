@@ -170,7 +170,7 @@ public class ChainManagerBootstrap implements INulsCoresBootstrap {
         TransactionDispatcher transactionDispatcher = SpringLiteContext.getBean(TransactionDispatcher.class);
         CommonAdvice commitAdvice = SpringLiteContext.getBean(ChainAssetCommitAdvice.class);
         CommonAdvice rollbackAdvice = SpringLiteContext.getBean(ChainAssetRollbackAdvice.class);
-        transactionDispatcher.register(commitAdvice, rollbackAdvice);
+        transactionDispatcher.register(ModuleE.CM, commitAdvice, rollbackAdvice);
         LoggerUtil.logger().info("doStart ok....");
         return true;
     }

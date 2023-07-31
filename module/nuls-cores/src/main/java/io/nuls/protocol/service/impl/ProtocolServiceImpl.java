@@ -237,7 +237,6 @@ public class ProtocolServiceImpl implements ProtocolService {
                         }
                         //设置新协议版本
                         context.setCurrentProtocolVersion(statictisProtocolVersion);
-                        System.out.println("---------协议升级 save block statictisProtocolVersion----------," + statictisProtocolVersion.getVersion());
                         context.setCurrentProtocolVersionCount(statisticsInfo.getCount());
                         protocolService.saveCurrentProtocolVersionCount(chainId, context.getCurrentProtocolVersionCount());
                         context.getProtocolVersionHistory().push(statictisProtocolVersion);

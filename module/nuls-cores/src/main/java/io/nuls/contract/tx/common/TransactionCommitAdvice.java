@@ -67,7 +67,7 @@ public class TransactionCommitAdvice implements CommonAdvice {
         try {
             ChainManager.chainHandle(chainId, BlockType.VERIFY_BLOCK.type());
             Short currentVersion = ProtocolGroupManager.getCurrentVersion(chainId);
-            if(currentVersion >= ContractContext.UPDATE_VERSION_CONTRACT_ASSET ) {
+            if(currentVersion >= ContractContext.UPDATE_VERSION_CONTRACT_ASSET) {
                 BatchInfoV8 batchInfo = contractHelper.getChain(chainId).getBatchInfoV8();
                 if (batchInfo != null) {
                     Log.info("contract execute txDataSize is {}, commit txDataSize is {}", batchInfo.getContractResultMap().size(), txList.size());
@@ -93,7 +93,7 @@ public class TransactionCommitAdvice implements CommonAdvice {
             // add by pierre at 2019-12-01 处理type10交易的业务提交, 需要协议升级 done
             if(currentVersion >= ContractContext.UPDATE_VERSION_V250) {
                 List<Transaction> crossTxList = txList.stream().filter(tx -> tx.getType() == TxType.CROSS_CHAIN).collect(Collectors.toList());
-                if(currentVersion >= ContractContext.UPDATE_VERSION_CONTRACT_ASSET ) {
+                if(currentVersion >= ContractContext.UPDATE_VERSION_CONTRACT_ASSET) {
                     callContractProcessorV8.commit(chainId, crossTxList, header);
                 } else {
                     callContractProcessor.commit(chainId, crossTxList, header);
