@@ -164,6 +164,8 @@ public class MainNetCmd extends BaseCmd {
     @Parameter(parameterName = "contractSender", parameterDes = "合约调用者地址")
     @Parameter(parameterName = "contractBalance", parameterDes = "合约地址的当前余额")
     @Parameter(parameterName = "contractNonce", parameterDes = "合约地址的当前nonce值")
+    @Parameter(parameterName = "contractMainChainBalance", parameterDes = "合约地址的当前卫星链的余额")
+    @Parameter(parameterName = "contractMainChainNonce", parameterDes = "合约地址的当前卫星链的nonce值")
     @Parameter(parameterName = "blockTime", requestType = @TypeDescriptor(value = long.class), parameterDes = "当前打包的区块时间")
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "txHash",valueType = Boolean.class, description = "交易hash"),

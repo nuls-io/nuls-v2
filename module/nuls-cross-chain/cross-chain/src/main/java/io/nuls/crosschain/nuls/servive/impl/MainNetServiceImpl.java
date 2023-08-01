@@ -272,8 +272,8 @@ public class MainNetServiceImpl implements MainNetService {
         String toAddress = (String) params.get(ParamConstant.TO);
         BigInteger amount = new BigInteger((String) params.get(ParamConstant.VALUE));
         String contractAddress = (String) params.get("contractAddress");
-        String contractToken = (String) params.get("contractNonce");
-        String contractBalance = (String) params.get("contractBalance");
+        String contractMainChainNonce = (String) params.get("contractMainChainNonce");
+        String contractMainChainBalance = (String) params.get("contractMainChainBalance");
         long blockTime = Long.valueOf(params.get("blockTime").toString());
         Transaction tx = new Transaction(TxType.CONTRACT_TOKEN_CROSS_TRANSFER);
         tx.setTime(blockTime);
@@ -295,11 +295,11 @@ public class MainNetServiceImpl implements MainNetService {
             txSize += coinData.size();
             //计算手续费
             BigInteger targetFee = TransactionFeeCalculator.getCrossTxFee(txSize);
-            CoinFrom feeFrom = new CoinFrom(AddressTool.getAddress(contractAddress), nulsCrossChainConfig.getMainChainId(), nulsCrossChainConfig.getMainAssetId(), targetFee, HexUtil.decode(contractToken), (byte) 0);
+            CoinFrom feeFrom = new CoinFrom(AddressTool.getAddress(contractAddress), nulsCrossChainConfig.getMainChainId(), nulsCrossChainConfig.getMainAssetId(), targetFee, HexUtil.decode(contractMainChainNonce), (byte) 0);
             txSize += feeFrom.size();
             targetFee = TransactionFeeCalculator.getCrossTxFee(txSize);
             feeFrom.setAmount(targetFee);
-            BigInteger available = new BigInteger(contractBalance);
+            BigInteger available = new BigInteger(contractMainChainBalance);
             if (BigIntegerUtils.isLessThan(available, targetFee)) {
                 chain.getLogger().warn("手续费不足");
                 return Result.getFailed(INSUFFICIENT_FEE);

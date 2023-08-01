@@ -6,6 +6,7 @@ import io.nuls.base.data.Transaction;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.BroadCtxHashMessage;
@@ -113,8 +114,10 @@ public class BroadCtxUtil {
             broadResult = false;
         } else {
             if (!config.isMainNet()) {
-                NulsHash convertHash = TxUtil.friendConvertToMain(chain, ctx, TxType.CROSS_CHAIN).getHash();
+                Transaction convertToMain = TxUtil.friendConvertToMain(chain, ctx, TxType.CROSS_CHAIN);
+                NulsHash convertHash = convertToMain.getHash();
                 message.setConvertHash(convertHash);
+                chain.getLogger().warn("pierre test=== 本链tx:{}对应的主网tx:{}", HexUtil.encode(ctx.serialize()), HexUtil.encode(convertToMain.serialize()));
                 chain.getLogger().info("广播跨链转账交易给主网，本链协议hash:{}对应的主网协议hash:{}", ctx.getHash().toHex(), convertHash.toHex());
             }
             broadResult = NetWorkCall.broadcast(toId, message, CommandConstant.BROAD_CTX_HASH_MESSAGE, true);

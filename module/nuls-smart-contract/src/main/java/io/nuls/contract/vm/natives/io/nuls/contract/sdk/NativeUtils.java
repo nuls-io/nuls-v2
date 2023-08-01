@@ -70,8 +70,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
 
-import static io.nuls.contract.config.ContractContext.ASSET_ID;
-import static io.nuls.contract.config.ContractContext.CHAIN_ID;
+import static io.nuls.contract.config.ContractContext.*;
 import static io.nuls.contract.constant.ContractConstant.RPC_RESULT_KEY;
 import static io.nuls.contract.vm.natives.NativeMethod.NOT_SUPPORT_NATIVE;
 import static io.nuls.contract.vm.natives.NativeMethod.SUPPORT_NATIVE;
@@ -658,6 +657,10 @@ public class NativeUtils {
                         String.format("Invoke external cmd failed. There is no registration information. chainId: [%s] cmdName: [%s](1)",
                                 currentChainId, cmdName), frame.vm.getGasUsed(), null);
             }
+            // 使用虚拟机内部维护的合约余额
+            ProgramAccount account = frame.vm.getProgramExecutor().getAccount(contractAddressBytes, MAIN_CHAIN_ID, MAIN_ASSETS_ID);
+            argsMap.put("contractMainChainBalance", account.getBalance().toString());
+            argsMap.put("contractMainChainNonce", account.getNonce());
             objectRef = NativeUtils.tokenOutCrossChainCmdProcessor(currentChainId, senderBytes, contractSender, args, contractAddress, contractAddressBytes, cmdRegisterManager, moduleCode, cmdName, argsMap, invokeRegisterCmd, frame);
         // end code by pierre
         } else {
@@ -901,7 +904,7 @@ public class NativeUtils {
             List<CoinFrom> froms = coinData.getFrom();
             BigInteger txFee = BigInteger.ZERO;
             for(CoinFrom from : froms) {
-                if(from.getAssetsChainId() == currentChainId && from.getAssetsId() == 1) {
+                if(from.getAssetsChainId() == MAIN_CHAIN_ID && from.getAssetsId() == MAIN_ASSETS_ID) {
                     txFee = txFee.add(from.getAmount());
                 }
             }
