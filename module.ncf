@@ -1,8 +1,8 @@
 [global]
 encoding=UTF-8
 language=en
-logLevel=DEBUG
 logPath=/Users/pierreluo/IdeaProjects/nuls_newer_2.0/logs
+logLevel=DEBUG
 dataPath=/Users/pierreluo/IdeaProjects/nuls_newer_2.0/data
 #默认本链ID
 chainId=2
@@ -30,15 +30,16 @@ crossPort=18002
 #魔法参数
 packetMagic=202001177
 #种子节点
-selfSeedIps=192.168.5.118:18001
+selfSeedIps=192.168.5.118:18001,192.168.5.38:18001,192.168.5.40:18001
 #主网的跨链种子连接节点
-moonSeedIps=192.168.5.118:18002
+moonSeedIps=192.168.5.118:18002,192.168.5.38:18002,192.168.5.40:18002
 #最大入网连接数
 maxInCount=300
 #最大出网连接数
 maxOutCount=20
 
 [account]
+blockAccountManager=tNULSeBaNE8nFpFo6qYiPiNHSbsGyKSceJLwQt
 keystoreFolder=/keystore/backup
 dependent=protocol-update
 
@@ -50,7 +51,7 @@ extendMaxSize=1024
 #引发分叉链切换的高度差阈值
 chainSwtichThreshold=3
 #最小链接节点数,当链接到的网络节点低于此参数时,会持续等待
-minNodeAmount=0
+minNodeAmount=2
 #区块同步过程中,每次从网络上节点下载的区块数量
 downloadNumber=10
 #从网络节点下载单个区块的超时时间
@@ -63,7 +64,7 @@ dependent=cross-chain,protocol-update,smart-contract
 
 [consensus]
 #种子节点列表
-seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
+seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMmShSTVwbU4rHkZjpD98JgFgg6rmhF
 #出块地址密码
 password=nuls123456
 #出块间隔时间(单位：s)
@@ -97,7 +98,8 @@ dependent=protocol-update
 [smart-contract]
 #合约视图方法调用最大消耗的Gas
 maxViewGas=100000000
-crossTokenSystemContract=tNULSeBaN2Agkr2cuMPvzXb337jubehUgLQPSH
+systemLogLevel=WARN
+crossTokenSystemContract=tNULSeBaMy9k29Nj4rd3U4tonVr93mrDLHMNNd
 dependent=protocol-update
 
 [chain-manager]
@@ -107,7 +109,7 @@ dependent=smart-contract,protocol-update
 #public-service模块对外的rpc端口号
 rpcPort=18003
 #数据库url地址
-databaseUrl=192.168.0.107
+databaseUrl=192.168.1.39
 #数据库端口号
 databasePort=27017
 #连接池最大数
@@ -128,9 +130,9 @@ sendHeight=6
 #跨链交易拜占庭比例
 byzantineRatio=66
 #主网跨链种子节点列表
-crossSeedIps=192.168.0.107:18002
+crossSeedIps=192.168.5.104:18002,192.168.5.10:18002,192.168.5.40:18002
 #主网验证人列表
-verifiers=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
+verifiers=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMmShSTVwbU4rHkZjpD98JgFgg6rmhF
 #主网签名拜占庭比列
 mainByzantineRatio=66
 #主网最大签名数
