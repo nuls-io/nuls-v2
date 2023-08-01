@@ -18,7 +18,6 @@
     <modules>
         <module>nuls-account</module>
         <module>nuls-block</module>
-        <module>nuls-chain-manager</module>
         <module>nuls-consensus</module>
         <module>nuls-cross-chain</module>
         <module>nuls-ledger</module>

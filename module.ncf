@@ -17,13 +17,13 @@ chainName=sitelite
 #本链默认资产符号
 symbol=SITE
 #主网链id
-mainChainId=1
+mainChainId=2
 #主网主资产id
 mainAssetId=1
 #主网主资产符号
 mainSymbol=NULS
 blackHolePublicKey=000000000000000000000000000000000000000000000000000000000000000000
-packageVersion=%PACKAGE_VERSION%
+packageVersion=2.16.1
 
 
 [network]
@@ -34,7 +34,7 @@ packetMagic=20230801
 #种子节点
 selfSeedIps=127.0.0.1:28001
 #主网的跨链种子连接节点
-moonSeedIps=seeda.nuls.io:8002,seedb.nuls.io:8002,seedc.nuls.io:8002,seedd.nuls.io:8002,seede.nuls.io:8002,seedf.nuls.io:8002
+moonSeedIps=39.98.226.51:18002,47.244.186.65:18002,47.254.234.223:18002,47.74.86.85:18002
 #最大入网连接数
 maxInCount=20
 #最大出网连接数
@@ -98,7 +98,7 @@ dependent=protocol-update
 [smart-contract]
 #合约视图方法调用最大消耗的Gas
 maxViewGas=100000000
-crossTokenSystemContract=NULSd6HgsyGNK1xTcx2GnC9y3Jr1DKd3qL2HS
+crossTokenSystemContract=SITEd51ejzuM2ZAJc89fsf74UAvEjjSBWEgKqk
 dependent=protocol-update
 
 [chain-manager]
@@ -109,15 +109,15 @@ dependent=protocol-update,smart-contract
 
 [cross-chain]
 #跨链节点链接的最小值
-minNodeAmount=3
+minNodeAmount=1
 #跨链节点链接的最大值
 sendHeight=6
 #跨链交易拜占庭比例
 byzantineRatio=66
 #主网跨链种子节点列表
-crossSeedIps=seeda.nuls.io:8002,seedb.nuls.io:8002,seedc.nuls.io:8002,seedd.nuls.io:8002,seede.nuls.io:8002,seedf.nuls.io:8002
+crossSeedIps=39.98.226.51:18002,47.244.186.65:18002,47.254.234.223:18002,47.74.86.85:18002
 #主网验证人列表
-verifiers=NULSd6Hge7xHDnvsSpnzbR2gWHd31zJ1How11,NULSd6Hgc5VNP4rF4wxdiXEQKpBKUE4w5RS22,NULSd6HgeQwXLdre69ArkqVZNDqMLU4CaAz33,NULSd6HgcjAKAgq8jjXgBCcNLEJUvJEYcoj44,NULSd6HgiDdTjcuvhqzm3bomyBFZmosV3ei55
+verifiers=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMmShSTVwbU4rHkZjpD98JgFgg6rmhF
 #主网签名拜占庭比列
 mainByzantineRatio=66
 #主网最大签名数
