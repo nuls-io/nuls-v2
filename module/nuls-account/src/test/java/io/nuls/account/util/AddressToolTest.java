@@ -47,11 +47,11 @@ public class AddressToolTest {
 
     @Test
     public void createAccountByPrefix() {
-        AddressTool.addPrefix(4, "LJS");
+        AddressTool.addPrefix(44, "SITE");
         for (int i = 0; i < 10; i++) {
             ECKey key = new ECKey();
-            Address address = new Address(4, BaseConstant.DEFAULT_ADDRESS_TYPE, SerializeUtils.sha256hash160(key.getPubKey()));
-            System.out.println(address.toString() + "================" + address.getBase58() + "===========" + key.getPrivateKeyAsHex());
+            Address address = new Address(44, BaseConstant.DEFAULT_ADDRESS_TYPE, SerializeUtils.sha256hash160(key.getPubKey()));
+            System.out.println(address.toString() + "===========" + key.getPrivateKeyAsHex());
         }
     }
 
