@@ -1,2 +1,8 @@
 测试token：
 SITEd51ek2R78qDL7xj9sg4BFPvVg5HY6FdjXj
+
+跨链合约：
+SITEd51ejzuM2ZAJc89fsf74UAvEjjSBWEgKqk
+
+种子节点：
+SITEd51ejrJo4ZxbEmuRmREVgtp35kRXKLto22
