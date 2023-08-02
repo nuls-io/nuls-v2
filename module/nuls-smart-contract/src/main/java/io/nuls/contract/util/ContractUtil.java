@@ -205,10 +205,10 @@ public class ContractUtil {
         CoinTo coinTo = toList.get(0);
         byte[] toAddress = coinTo.getAddress();
         int chainIdByToAddress = AddressTool.getChainIdByAddress(toAddress);
-        if (chainIdByToAddress != ContractContext.MAIN_CHAIN_ID) {
+        if (chainIdByToAddress != ContractContext.CHAIN_ID) {
             // 接收者非主链地址，不是跨链转入交易
             if (Log.isDebugEnabled()) {
-                Log.warn("接收者[{}]非主链地址，不是跨链转入交易", AddressTool.getStringAddressByBytes(toAddress));
+                Log.warn("接收者[{}]非本链地址，不是跨链转入交易", AddressTool.getStringAddressByBytes(toAddress));
             }
             return null;
         }

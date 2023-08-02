@@ -1,9 +1,9 @@
 [global]
 encoding=UTF-8
 language=en
-logPath=/Users/niels/workspace/nuls-v2/logs
+logPath=/Users/pierreluo/IdeaProjects/nuls_new_2.0/logs
 logLevel=INFO
-dataPath=/Users/niels/workspace/nuls-v2/data
+dataPath=/Users/pierreluo/IdeaProjects/nuls_new_2.0/data
 #默认本链ID
 chainId=44
 #地址前缀
@@ -98,7 +98,7 @@ dependent=protocol-update
 [smart-contract]
 #合约视图方法调用最大消耗的Gas
 maxViewGas=100000000
-crossTokenSystemContract=SITEd51ejzuM2ZAJc89fsf74UAvEjjSBWEgKqk
+crossTokenSystemContract=SITEd51ek9iWyKBWkPW24dfTeUBYtPeJNaxNoy
 dependent=protocol-update
 
 [chain-manager]

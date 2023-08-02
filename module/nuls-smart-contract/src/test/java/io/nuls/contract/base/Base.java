@@ -55,7 +55,7 @@ import static io.nuls.contract.constant.ContractCmdConstant.CONTRACT_TX;
 public class Base {
 
     protected Chain chain;
-    protected static int chainId = 2;
+    protected static int chainId = 44;
     protected static int assetId = 1;
 
     protected static String password = "nuls123456";//"nuls123456";

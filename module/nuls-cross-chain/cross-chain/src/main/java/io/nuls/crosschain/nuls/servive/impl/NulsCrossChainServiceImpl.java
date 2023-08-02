@@ -238,6 +238,10 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             List<NulsHash> ctxStatusList = new ArrayList<>();
             List<NulsHash> otherCtxList = new ArrayList<>();
             for (Transaction ctx : txs) {
+                if (ctx.getType() == 26) {
+                    ctx.setType(10);
+                    ctx.setHash(null);
+                }
                 NulsHash ctxHash = ctx.getHash();
                 if (verifiedCtxMap.get(chainId) != null) {
                     verifiedCtxMap.get(chainId).remove(ctxHash);
