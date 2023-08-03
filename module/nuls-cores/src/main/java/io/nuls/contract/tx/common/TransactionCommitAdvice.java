@@ -64,13 +64,14 @@ public class TransactionCommitAdvice implements CommonAdvice {
 
     @Override
     public void begin(int chainId, List<Transaction> txList, BlockHeader header) {
+        Log.info("height: {} call begin", header != null ? header.getHeight() : 0);
         try {
             ChainManager.chainHandle(chainId, BlockType.VERIFY_BLOCK.type());
             Short currentVersion = ProtocolGroupManager.getCurrentVersion(chainId);
             if(currentVersion >= ContractContext.UPDATE_VERSION_CONTRACT_ASSET) {
                 BatchInfoV8 batchInfo = contractHelper.getChain(chainId).getBatchInfoV8();
                 if (batchInfo != null) {
-                    Log.info("contract execute txDataSize is {}, commit txDataSize is {}", batchInfo.getContractResultMap().size(), txList.size());
+                    Log.info("height: {}, contract execute txDataSize is {}, commit txDataSize is {}", header != null ? header.getHeight() : 0, batchInfo.getContractResultMap().size(), txList.size());
 
                     List<byte[]> offlineTxHashList = batchInfo.getOfflineTxHashList();
                     if(offlineTxHashList != null && !offlineTxHashList.isEmpty()) {
@@ -81,7 +82,7 @@ public class TransactionCommitAdvice implements CommonAdvice {
             } else {
                 ContractPackageDto contractPackageDto = contractHelper.getChain(chainId).getBatchInfo().getContractPackageDto();
                 if (contractPackageDto != null) {
-                    Log.info("contract execute txDataSize is {}, commit txDataSize is {}", contractPackageDto.getContractResultMap().keySet().size(), txList.size());
+                    Log.info("height: {}, contract execute txDataSize is {}, commit txDataSize is {}", header != null ? header.getHeight() : 0, contractPackageDto.getContractResultMap().keySet().size(), txList.size());
 
                     List<byte[]> offlineTxHashList = contractPackageDto.getOfflineTxHashList();
                     if(offlineTxHashList != null && !offlineTxHashList.isEmpty()) {
@@ -101,12 +102,14 @@ public class TransactionCommitAdvice implements CommonAdvice {
             }
             // end code by pierre
         } catch (Exception e) {
+            Log.error(e);
             throw new RuntimeException(e);
         }
     }
 
     @Override
     public void end(int chainId, List<Transaction> txList, BlockHeader blockHeader) {
+        Log.info("height: {} call end", blockHeader != null ? blockHeader.getHeight() : 0);
         // 移除临时余额, 临时区块头等当前批次执行数据
         Chain chain = contractHelper.getChain(chainId);
         if(ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_CONTRACT_ASSET ) {
