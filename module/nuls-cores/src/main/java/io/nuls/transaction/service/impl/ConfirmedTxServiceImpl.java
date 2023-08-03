@@ -149,11 +149,11 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         logger.debug("[保存区块] 存已确认交易DB 执行时间:{}", NulsDateUtils.getCurrentTimeMillis()- dbStart);
 
         // add by pierre at 2019-12-01 把type10交易发送到合约模块筛选处理，需要协议升级 done
-        if (ProtocolGroupManager.getCurrentVersion(chain.getChainId()) >= TxContext.UPDATE_VERSION_V250
+        /*if (ProtocolGroupManager.getCurrentVersion(chain.getChainId()) >= TxContext.UPDATE_VERSION_V250
                 && !crossChainTxList.isEmpty() && txConfig.isCollectedSmartContractModule()) {
             List<String> contractList = moduleVerifyMap.computeIfAbsent(ResponseMessageProcessor.ROLE_MAPPING.get(ModuleE.SC.abbr), code -> new ArrayList<>());
             contractList.addAll(crossChainTxList);
-        }
+        } 模块合并后，所有交易都在一个module中，不必再单独添加，否则导致交易重复*/
         // end code by pierre
         long commitStart = NulsDateUtils.getCurrentTimeMillis();
         if (!commitTxs(chain, moduleVerifyMap, blockHeaderStr, true)) {
