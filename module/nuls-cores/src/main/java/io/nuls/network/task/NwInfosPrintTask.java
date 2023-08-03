@@ -107,9 +107,10 @@ public class NwInfosPrintTask implements Runnable {
             sb1.append("(failed):").append(n.getId()).append(",failCount=")
                     .append(n.getFailCount()).append(",connStatus=").append(n.getConnectStatus()).append("\n");
         }
-        LoggerUtil.logger(nodeGroup.getChainId()).info(sb1.toString());
-        LoggerUtil.logger(nodeGroup.getChainId()).info("END @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-        LoggerUtil.logger(nodeGroup.getChainId()).info("");
+        //TODO pierre test
+        LoggerUtil.logger(nodeGroup.getChainId()).debug(sb1.toString());
+        LoggerUtil.logger(nodeGroup.getChainId()).debug("END @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+        LoggerUtil.logger(nodeGroup.getChainId()).debug("");
     }
 
     private void printLocalNet(NodeGroup nodeGroup) {
@@ -149,8 +150,9 @@ public class NwInfosPrintTask implements Runnable {
             sb1.append("(failed):").append(n.getId()).append(",failCount=")
                     .append(n.getFailCount()).append(",connStatus=").append(n.getConnectStatus()).append("\n");
         }
-        LoggerUtil.logger(nodeGroup.getChainId()).info(sb1.toString());
-        LoggerUtil.logger(nodeGroup.getChainId()).info("END @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-        LoggerUtil.logger(nodeGroup.getChainId()).info("");
+        //TODO pierre test
+        LoggerUtil.logger(nodeGroup.getChainId()).debug(sb1.toString());
+        LoggerUtil.logger(nodeGroup.getChainId()).debug("END @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+        LoggerUtil.logger(nodeGroup.getChainId()).debug("");
     }
 }

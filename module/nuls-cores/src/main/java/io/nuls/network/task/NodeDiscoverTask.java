@@ -233,7 +233,8 @@ public class NodeDiscoverTask implements Runnable {
         }
         discoverList.forEach(n -> {
             try {
-                LoggerUtil.logger(n.get().getNodeGroup().getChainId()).info("discover node={},status={}", n.get().getId(), n.get().getStatus());
+                //TODO pierre test
+                LoggerUtil.logger(n.get().getNodeGroup().getChainId()).debug("discover node={},status={}", n.get().getId(), n.get().getStatus());
             } catch (InterruptedException e) {
                 LoggerUtil.COMMON_LOG.error(e);
             } catch (ExecutionException e) {

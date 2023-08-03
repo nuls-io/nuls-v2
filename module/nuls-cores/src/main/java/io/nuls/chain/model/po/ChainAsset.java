@@ -125,4 +125,23 @@ public class ChainAsset extends BaseNulsData {
     public boolean isFromChainAsset(){
         return (addressChainId == assetChainId);
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("{");
+        sb.append("\"addressChainId\":")
+                .append(addressChainId);
+        sb.append(",\"assetChainId\":")
+                .append(assetChainId);
+        sb.append(",\"assetId\":")
+                .append(assetId);
+        sb.append(",\"initNumber\":")
+                .append(initNumber);
+        sb.append(",\"inNumber\":")
+                .append(inNumber);
+        sb.append(",\"outNumber\":")
+                .append(outNumber);
+        sb.append('}');
+        return sb.toString();
+    }
 }

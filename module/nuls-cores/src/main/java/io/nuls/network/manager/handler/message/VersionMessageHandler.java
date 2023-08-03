@@ -215,7 +215,8 @@ public class VersionMessageHandler extends BaseMessageHandler {
         }
         //client:接收到server端消息，进行verack答复
         VerackMessage verackMessage = MessageFactory.getInstance().buildVerackMessage(node, message.getHeader().getMagicNumber(), VerackMessageBody.VER_SUCCESS);
-        LoggerUtil.logger(node.getNodeGroup().getChainId()).info("rec node={} ver msg success.go response verackMessage..cross={}", node.getId(), node.isCrossConnect());
+        //TODO pierre test
+        LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("rec node={} ver msg success.go response verackMessage..cross={}", node.getId(), node.isCrossConnect());
         MessageManager.getInstance().sendHandlerMsg(verackMessage, node, true);
         if (node.isSeedNode()) {
             //向种子节点请求地址
@@ -234,7 +235,8 @@ public class VersionMessageHandler extends BaseMessageHandler {
     @Override
     public NetworkEventResult recieve(BaseMessage message, Node node) {
         int chainId = NodeGroupManager.getInstance().getChainIdByMagicNum(message.getHeader().getMagicNumber());
-        LoggerUtil.logger(chainId).info("VersionMessageHandler recieve:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
+        //TODO pierre test
+        LoggerUtil.logger(chainId).debug("VersionMessageHandler recieve:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
         if (Node.IN == node.getType()) {
             serverRecieveHandler(message, node);
         } else {

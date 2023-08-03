@@ -244,6 +244,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                 int fromChainId = AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress());
                 int toChainId = AddressTool.getChainIdByAddress(coinData.getTo().get(0).getAddress());
                 if (chainId == toChainId) {
+                    //跨入
                     NulsHash convertHash = ctxHash;
                     if (!config.isMainNet()) {
                         convertHash = TxUtil.friendConvertToMain(chain, ctx, TxType.CROSS_CHAIN).getHash();
@@ -259,6 +260,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                     }
                     otherCtxList.add(convertHash);
                 } else {
+                    //跨出
                     if (!config.isMainNet()) {
                         NulsHash convertHash = TxUtil.friendConvertToMain(chain, ctx, TxType.CROSS_CHAIN).getHash();
                         if (!convertHashService.save(convertHash, ctxHash, chainId)) {

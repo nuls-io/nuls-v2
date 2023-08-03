@@ -86,7 +86,8 @@ public class GetAddrMessageHandler extends BaseMessageHandler {
 
     @Override
     public NetworkEventResult send(BaseMessage message, Node node, boolean asyn) {
-        LoggerUtil.logger(node.getNodeGroup().getChainId()).info("GetAddrMessageHandler Send:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
+        //TODO pierre test
+        LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("GetAddrMessageHandler Send:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
         return super.send(message, node, asyn);
     }
 

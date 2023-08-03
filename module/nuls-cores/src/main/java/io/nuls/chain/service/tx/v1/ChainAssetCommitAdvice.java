@@ -23,6 +23,7 @@ public class ChainAssetCommitAdvice implements CommonAdvice {
     public void begin(int chainId, List<Transaction> txList, BlockHeader blockHeader) {
         try {
             long commitHeight = blockHeader.getHeight();
+            LoggerUtil.logger().warn("pierre test===ChainManager Asset Commit begin, height: {}, txs size: {}", commitHeight, txList.size());
             /*begin bak datas*/
             BlockHeight dbHeight = cacheDataService.getBlockHeight(chainId);
             cacheDataService.bakBlockTxs(chainId, commitHeight, txList, false);
@@ -43,6 +44,7 @@ public class ChainAssetCommitAdvice implements CommonAdvice {
             cacheDataService.endBakBlockHeight(chainId, commitHeight);
             /*end bak height*/
             rpcService.crossChainRegisterChange(CmRuntimeInfo.getMainIntChainId());
+            LoggerUtil.logger().warn("pierre test===ChainManager Asset Commit end, height: {}, txs size: {}", commitHeight, txList.size());
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
             throw new RuntimeException(e);

@@ -39,6 +39,7 @@ import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.service.TxCirculateService;
 import io.nuls.chain.storage.ChainAssetStorage;
+import io.nuls.chain.util.LoggerUtil;
 import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Service;
@@ -79,6 +80,7 @@ public class TxCirculateServiceImpl implements TxCirculateService {
         // 从CoinData中取出from的资产信息，放入Map中（同类型相加）
         List<CoinFrom> listFrom = coinData.getFrom();
         for (CoinFrom coinFrom : listFrom) {
+            LoggerUtil.logger().warn("pierre test===coinFrom: {}", coinFrom.toString());
             fromChainId = AddressTool.getChainIdByAddress(coinFrom.getAddress());
             String assetKey = CmRuntimeInfo.getAssetKey(coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
             BigInteger amount = coinFrom.getAmount();
@@ -92,6 +94,7 @@ public class TxCirculateServiceImpl implements TxCirculateService {
         // 从CoinData中取出to的资产信息，放入Map中（同类型相加）
         List<CoinTo> listTo = coinData.getTo();
         for (CoinTo coinTo : listTo) {
+            LoggerUtil.logger().warn("pierre test===coinTo: {}", coinTo.toString());
             toChainId = AddressTool.getChainIdByAddress(coinTo.getAddress());
             int assetChainId = coinTo.getAssetsChainId();
             int assetId = coinTo.getAssetsId();
@@ -130,10 +133,17 @@ public class TxCirculateServiceImpl implements TxCirculateService {
     @Override
     public ChainEventResult circulateCommit(List<Transaction> txs) throws Exception {
 
+        try {
+            ChainAsset chainAsset = assetService.getChainAsset(1, "9-1");
+            LoggerUtil.logger().warn("pierre test===NVT chainAsset: {}", chainAsset.toString());
+        } catch (Exception e) {
+
+        }
         Map<String, BlockChain> batchUpdateBlockChain = new HashMap<>();
         Map<String, Asset> batchUpdateAsset = new HashMap<>();
         Map<String, ChainAsset> batchUpdateChainAsset = new HashMap<>();
         for (Transaction tx : txs) {
+            LoggerUtil.logger().warn("pierre test===CM module circulateCommit tx: {}, hash: {}", tx.getType(), tx.getHash().toHex());
             List<CoinDataAssets> list = getChainAssetList(tx.getCoinData());
             CoinDataAssets fromCoinDataAssets = list.get(0);
             CoinDataAssets toCoinDataAssets = list.get(1);
