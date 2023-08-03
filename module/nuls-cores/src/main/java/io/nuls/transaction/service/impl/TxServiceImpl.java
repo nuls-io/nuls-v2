@@ -1323,10 +1323,10 @@ public class TxServiceImpl implements TxService {
                         consensusList.addAll(scNewConsensusList);
                         crossTransferList.addAll(scNewTokenCrossTransferList);
                         if (!consensusList.isEmpty()) {
-                            isRollbackPackablePool = processContractTxs(chain, ModuleE.CS.abbr, consensusList, packingTxList, false);
+                            isRollbackPackablePool = processContractTxs(chain, ResponseMessageProcessor.ROLE_MAPPING.get(ModuleE.CS.abbr), consensusList, packingTxList, false);
                         }
                         if (!isRollbackPackablePool && !crossTransferList.isEmpty()) {
-                            isRollbackPackablePool = processContractTxs(chain, ModuleE.CC.abbr, crossTransferList, packingTxList, false);
+                            isRollbackPackablePool = processContractTxs(chain, ResponseMessageProcessor.ROLE_MAPPING.get(ModuleE.CC.abbr), crossTransferList, packingTxList, false);
                         }
                     }
                     if (!isRollbackPackablePool) {
@@ -1887,14 +1887,14 @@ public class TxServiceImpl implements TxService {
                 consensusList.addAll(scNewConsensusList);
                 crossTransferList.addAll(scNewTokenCrossTransferList);
                 if (!consensusList.isEmpty()) {
-                    boolean rsProcess = processContractTxs(chain, ModuleE.CS.abbr, consensusList, null, true);
+                    boolean rsProcess = processContractTxs(chain, ResponseMessageProcessor.ROLE_MAPPING.get(ModuleE.CS.abbr), consensusList, null, true);
                     if (rsProcess) {
                         logger.error("contract tx consensus module verify fail.");
                         throw new NulsException(TxErrorCode.CONTRACT_VERIFY_FAIL);
                     }
                 }
                 if (!crossTransferList.isEmpty()) {
-                    boolean rsProcess = processContractTxs(chain, ModuleE.CC.abbr, crossTransferList, null, true);
+                    boolean rsProcess = processContractTxs(chain, ResponseMessageProcessor.ROLE_MAPPING.get(ModuleE.CC.abbr), crossTransferList, null, true);
                     if (rsProcess) {
                         logger.error("contract tx cross-chain module verify fail.");
                         throw new NulsException(TxErrorCode.CONTRACT_VERIFY_FAIL);
@@ -2700,14 +2700,14 @@ public class TxServiceImpl implements TxService {
                 consensusList.addAll(scNewConsensusList);
                 crossTransferList.addAll(scNewTokenCrossTransferList);
                 if (!consensusList.isEmpty()) {
-                    boolean rsProcess = processContractTxs(chain, ModuleE.CS.abbr, consensusList, null, true);
+                    boolean rsProcess = processContractTxs(chain, ResponseMessageProcessor.ROLE_MAPPING.get(ModuleE.CS.abbr), consensusList, null, true);
                     if (rsProcess) {
                         logger.error("contract tx consensus module verify fail.");
                         throw new NulsException(TxErrorCode.CONTRACT_VERIFY_FAIL);
                     }
                 }
                 if (!crossTransferList.isEmpty()) {
-                    boolean rsProcess = processContractTxs(chain, ModuleE.CC.abbr, crossTransferList, null, true);
+                    boolean rsProcess = processContractTxs(chain, ResponseMessageProcessor.ROLE_MAPPING.get(ModuleE.CC.abbr), crossTransferList, null, true);
                     if (rsProcess) {
                         logger.error("contract tx cross-chain module verify fail.");
                         throw new NulsException(TxErrorCode.CONTRACT_VERIFY_FAIL);
@@ -2861,10 +2861,10 @@ public class TxServiceImpl implements TxService {
                         consensusList.addAll(scNewConsensusList);
                         crossTransferList.addAll(scNewTokenCrossTransferList);
                         if (!consensusList.isEmpty()) {
-                            isRollbackPackablePool = processContractTxs(chain, ModuleE.CS.abbr, consensusList, packingTxList, false);
+                            isRollbackPackablePool = processContractTxs(chain, ResponseMessageProcessor.ROLE_MAPPING.get(ModuleE.CS.abbr), consensusList, packingTxList, false);
                         }
                         if (!isRollbackPackablePool && !crossTransferList.isEmpty()) {
-                            isRollbackPackablePool = processContractTxs(chain, ModuleE.CC.abbr, crossTransferList, packingTxList, false);
+                            isRollbackPackablePool = processContractTxs(chain, ResponseMessageProcessor.ROLE_MAPPING.get(ModuleE.CC.abbr), crossTransferList, packingTxList, false);
                         }
                     }
                     if (!isRollbackPackablePool) {

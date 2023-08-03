@@ -32,9 +32,7 @@ import io.nuls.base.api.provider.Provider;
 import io.nuls.base.api.provider.ServiceManager;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.protocol.ModuleHelper;
-import io.nuls.common.CommonVersionChangeInvoker;
-import io.nuls.common.ConfigManager;
-import io.nuls.common.INulsCoresBootstrap;
+import io.nuls.common.*;
 import io.nuls.contract.tx.SmartContractVersionChangeInvoker;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -55,7 +53,6 @@ import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.rpc.util.AddressPrefixDatas;
 import io.nuls.core.rpc.util.NulsDateUtils;
-import io.nuls.common.NulsCoresConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.rpc.upgrade.TxVersionChangeInvoker;
@@ -157,6 +154,7 @@ public class NulsCoresBootstrap extends RpcModule {
     public RpcModuleState onDependenciesReady() {
         LOG.info("Transaction onDependenciesReady");
         NulsDateUtils.getInstance().start();
+        CommonContext.START_BOOT.countDown();
         return RpcModuleState.Running;
     }
 

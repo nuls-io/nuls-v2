@@ -27,6 +27,7 @@ import io.nuls.core.rpc.model.InvokeBean;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * @author: PierreLuo
@@ -36,4 +37,5 @@ public class CommonContext {
 
     public static final Map<String, InvokeBean> INVOKE_BEAN_MAP = new HashMap<>();
     public static final Map<Integer, ConfigBean> CONFIG_BEAN_MAP = new HashMap<>();
+    public static final CountDownLatch START_BOOT = new CountDownLatch(1);
 }

@@ -219,8 +219,11 @@ public class ResponseMessageProcessor {
             InvokeBean invokeBean = INVOKE_BEAN_MAP.get(key);
             if (invokeBean != null) {
                 return LocalModuleCall.requestAndResponse(invokeBean, role, cmd, params, timeOut);
+            } else {
+                Log.warn("Empty requestAndResponse key: {}", key);
             }
         }
+        //Log.warn("pierre test===request key 2: {}", role + "_" + cmd);
         Request request = MessageUtil.newRequest(cmd, params, Constants.BOOLEAN_FALSE, Constants.ZERO, Constants.ZERO);
         request.setTimeOut(String.valueOf(timeOut));
         ResponseContainer responseContainer = sendRequest(role, request);
@@ -312,6 +315,8 @@ public class ResponseMessageProcessor {
             InvokeBean invokeBean = INVOKE_BEAN_MAP.get(key);
             if (invokeBean != null) {
                 return LocalModuleCall.requestOnly(invokeBean, next.getValue(), role, request);
+            } else {
+                Log.warn("Empty requestOnly key: {}", key);
             }
         }
         String mappingRole = ROLE_MAPPING.getOrDefault(role, role);

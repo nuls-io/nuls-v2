@@ -14,6 +14,7 @@ import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.common.NulsCoresConfig;
@@ -150,7 +151,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         // add by pierre at 2019-12-01 把type10交易发送到合约模块筛选处理，需要协议升级 done
         if (ProtocolGroupManager.getCurrentVersion(chain.getChainId()) >= TxContext.UPDATE_VERSION_V250
                 && !crossChainTxList.isEmpty() && txConfig.isCollectedSmartContractModule()) {
-            List<String> contractList = moduleVerifyMap.computeIfAbsent(ModuleE.SC.abbr, code -> new ArrayList<>());
+            List<String> contractList = moduleVerifyMap.computeIfAbsent(ResponseMessageProcessor.ROLE_MAPPING.get(ModuleE.SC.abbr), code -> new ArrayList<>());
             contractList.addAll(crossChainTxList);
         }
         // end code by pierre
@@ -338,7 +339,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         // add by pierre at 2019-12-01 把type10交易发送到合约模块筛选处理，需要协议升级 done
         if (ProtocolGroupManager.getCurrentVersion(chain.getChainId()) >= TxContext.UPDATE_VERSION_V250
                 && !crossChainTxList.isEmpty() && txConfig.isCollectedSmartContractModule()) {
-            List<String> contractList = moduleVerifyMap.computeIfAbsent(ModuleE.SC.abbr, code -> new ArrayList<>());
+            List<String> contractList = moduleVerifyMap.computeIfAbsent(ResponseMessageProcessor.ROLE_MAPPING.get(ModuleE.SC.abbr), code -> new ArrayList<>());
             contractList.addAll(crossChainTxList);
         }
         // end code by pierre

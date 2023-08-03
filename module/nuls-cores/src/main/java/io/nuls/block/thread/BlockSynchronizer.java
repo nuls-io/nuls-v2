@@ -39,6 +39,7 @@ import io.nuls.block.storage.BlockStorageService;
 import io.nuls.block.storage.RollbackStorageService;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.block.utils.ChainGenerator;
+import io.nuls.common.CommonContext;
 import io.nuls.common.ConfigBean;
 import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.core.ioc.SpringLiteContext;
@@ -119,6 +120,7 @@ public class BlockSynchronizer implements Runnable {
         context.setStatus(StatusEnum.SYNCHRONIZING);
         NulsLogger logger = context.getLogger();
         try {
+            CommonContext.START_BOOT.await();
             BlockStorageService blockStorageService = SpringLiteContext.getBean(BlockStorageService.class);
             long latestHeight = blockStorageService.queryLatestHeight(chainId);
             BlockHeaderPo blockHeaderPo = blockStorageService.query(chainId, latestHeight);
