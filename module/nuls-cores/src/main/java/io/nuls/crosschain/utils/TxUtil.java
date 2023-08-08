@@ -380,16 +380,16 @@ public class TxUtil {
         if (sign && cancelList != null) {
             sign = !cancelList.contains(address);
         }
-//        chain.getLogger().debug("sign:{}",sign);
-//        if(!sign){
-//            chain.getLogger().debug("address:{}",address);
-//            chain.getLogger().info("verifierList size:{}",verifierList.size());
-//            if(verifierList != null){
-//                verifierList.forEach(d->{
-//                    chain.getLogger().info("{}",d);
-//                });
-//            }
-//        }
+        chain.getLogger().warn("pierre test===cross chain sign:{}",sign);
+        if(!sign){
+            chain.getLogger().warn("pierre test===cross chain address:{}",address);
+            chain.getLogger().warn("pierre test===cross chain verifierList size:{}",verifierList.size());
+            if(verifierList != null){
+                verifierList.forEach(d->{
+                    chain.getLogger().warn("pierre test===cross chain {}",d);
+                });
+            }
+        }
         if (sign) {
             chain.getLogger().info("本节点为共识节点，对跨链交易签名,Hash:{}", hashHex);
             TransactionSignature signature = new TransactionSignature();
@@ -428,6 +428,11 @@ public class TxUtil {
                 chain.getWaitBroadSignMap().get(hash).addAll(messageList);
             }
         } else {
+            try {
+                chain.getLogger().warn("pierre test===cross chain ctxStatusService save: {}, ctxStatusPO: {}", hash.toHex(), ctxStatusPO.serialize());
+            } catch (Exception e) {
+                chain.getLogger().error("pierre test===", e);
+            }
             ctxStatusService.save(hash, ctxStatusPO, chainId);
         }
         if (!config.isMainNet()) {

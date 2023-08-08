@@ -7,6 +7,7 @@ import io.nuls.base.signture.SignatureUtil;
 import io.nuls.common.NulsCoresConfig;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.crosschain.base.model.bo.ChainInfo;
 import io.nuls.crosschain.base.model.bo.txdata.RegisteredChainMessage;
@@ -23,6 +24,7 @@ import io.nuls.crosschain.utils.TxUtil;
 import io.nuls.crosschain.utils.manager.ChainManager;
 import io.nuls.crosschain.utils.manager.LocalVerifierManager;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -94,11 +96,11 @@ public class VerifierChangeTxServiceImpl implements VerifierChangeTxService {
                     throw new NulsException(NulsCrossChainErrorCode.CHAIN_UNREGISTERED_VERIFIER);
                 }
                 if (!SignatureUtil.validateCtxSignture(verifierChangeTx)) {
-                    chain.getLogger().info("主网协议跨链交易签名验证失败！");
+                    chain.getLogger().error("主网协议跨链交易签名验证失败！");
                     throw new NulsException(NulsCrossChainErrorCode.SIGNATURE_ERROR);
                 }
                 if (!TxUtil.signByzantineVerify(chain, verifierChangeTx, verifierList, minPassCount,verifierChainId)) {
-                    chain.getLogger().info("签名拜占庭验证失败！");
+                    chain.getLogger().error("签名拜占庭验证失败！");
                     throw new NulsException(NulsCrossChainErrorCode.CTX_SIGN_BYZANTINE_FAIL);
                 }
             } catch (NulsException e) {
@@ -124,7 +126,9 @@ public class VerifierChangeTxServiceImpl implements VerifierChangeTxService {
         for (Transaction verifierChangeTx : txs) {
             try {
                 NulsHash ctxHash = verifierChangeTx.getHash();
+                chain.getLogger().warn("pierre test===cross chain save txType: {}, ctxHash: {}, chainId: {}", verifierChangeTx.getType(), ctxHash, chainId);
                 if (!convertHashService.save(ctxHash, ctxHash, chainId)) {
+                    chain.getLogger().warn("pierre test===cross chain save ctxHash error: {}, chainId: {}", commitSuccessList.size(), chainId);
                     rollback(chainId, commitSuccessList, blockHeader);
                     return false;
                 }
@@ -187,6 +191,11 @@ public class VerifierChangeTxServiceImpl implements VerifierChangeTxService {
             return false;
         }
         for (Transaction verifierChangeTx : txs) {
+            try {
+                chain.getLogger().warn("pierre test===cross chain [rollback] verifierChangeTx: {}", HexUtil.encode(verifierChangeTx.serialize()));
+            } catch (IOException e) {
+                chain.getLogger().error("pierre test===", e);
+            }
             try {
                 NulsHash ctxHash = verifierChangeTx.getHash();
                 if (!convertHashService.delete(ctxHash, chainId)) {

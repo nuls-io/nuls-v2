@@ -237,7 +237,9 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
                 chain.getLogger().error("重置本链验证人列表失败");
                 return false;
             }
-        }finally {
+        } catch (Exception e) {
+            chain.getLogger().error(e.getMessage(), e);
+        } finally {
             chain.getSwitchVerifierLock().writeLock().unlock();
         }
         chain.getLogger().info("重置本链验证人列表完成:{}",chain.getVerifierList());
