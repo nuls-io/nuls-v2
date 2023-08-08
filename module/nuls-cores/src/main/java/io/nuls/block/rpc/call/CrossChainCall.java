@@ -18,9 +18,10 @@ public class CrossChainCall {
      * @param chainId 链Id/chain id
      * @param height
      * @param blockHeader
+     * @param download 0区块下载中,1接收到最新区块
      * @return
      */
-    public static void heightNotice(int chainId, long height, String blockHeader) {
+    public static void heightNotice(int chainId, long height, String blockHeader, int download) {
         if (!ModuleHelper.isSupportCrossChain()) {
             return;
         }
@@ -31,6 +32,7 @@ public class CrossChainCall {
             params.put(Constants.CHAIN_ID, chainId);
             params.put("height", height);
             params.put("blockHeader", blockHeader);
+            params.put("download", download);
             ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, "newBlockHeight", params);
         } catch (Exception e) {
             logger.error("", e);

@@ -10,6 +10,7 @@ import io.nuls.core.basic.Result;
 import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.crosschain.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.constant.NulsCrossChainErrorCode;
 import io.nuls.crosschain.constant.ParamConstant;
@@ -142,6 +143,7 @@ public class BlockServiceImpl implements BlockService {
             return Result.getFailed(CommonCodeConstanst.PARAMETER_ERROR);
         }
         int chainId = (int) params.get(ParamConstant.CHAIN_ID);
+        int download = (int) params.get("download");
         if (chainId <= 0) {
             return Result.getFailed(CommonCodeConstanst.PARAMETER_ERROR);
         }
@@ -164,9 +166,9 @@ public class BlockServiceImpl implements BlockService {
                 return Result.getSuccess(CommonCodeConstanst.SUCCESS);
             }
             /*
-            检测是否有轮次变化，如果有轮次变化，查询共识模块共识节点是否有变化，如果有变化则创建验证人变更交易(该操作需要在验证人初始化交易之后)
+            区块链在运行状态(download 0区块下载中,1接收到最新区块)，检测是否有轮次变化，如果有轮次变化，查询共识模块共识节点是否有变化，如果有变化则创建验证人变更交易(该操作需要在验证人初始化交易之后)
             */
-            if(chain.getVerifierList() != null && !chain.getVerifierList().isEmpty()){
+            if(download == 1 && chain.getVerifierList() != null && !chain.getVerifierList().isEmpty()){
                 Map<String,List<String>> agentChangeMap;
                 BlockHeader localHeader = chainManager.getChainHeaderMap().get(chainId);
                 if(localHeader != null){
@@ -193,6 +195,7 @@ public class BlockServiceImpl implements BlockService {
                     if(verifierChange){
                         chain.getLogger().info("有验证人变化，创建验证人变化交易，最新轮次与上一轮共有的出块地址为：{},新增的验证人列表：{},减少的验证人列表：{}", chain.getVerifierList().toString(),registerAgentList,cancelAgentList);
                         Transaction verifierChangeTx = TxUtil.createVerifierChangeTx(registerAgentList, cancelAgentList, blockHeader.getExtendsData().getRoundStartTime(),chainId);
+                        chain.getLogger().info("pierre test===cross chain verifierChangeTx: {}", HexUtil.encode(verifierChangeTx.serialize()));
                         chain.getCrossTxThreadPool().execute(new VerifierChangeTxHandler(chain, verifierChangeTx, blockHeader.getHeight()));
                     }
                 }

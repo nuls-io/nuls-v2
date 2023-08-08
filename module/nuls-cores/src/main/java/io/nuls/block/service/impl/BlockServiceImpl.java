@@ -389,7 +389,7 @@ public class BlockServiceImpl implements BlockService {
             }
             try {
                 TransactionCall.heightNotice(chainId, height);
-                CrossChainCall.heightNotice(chainId, height, RPCUtil.encode(block.getHeader().serialize()));
+                CrossChainCall.heightNotice(chainId, height, RPCUtil.encode(block.getHeader().serialize()), download);
             } catch (Exception e) {
                 LoggerUtil.COMMON_LOG.error(e);
             }
@@ -527,7 +527,7 @@ public class BlockServiceImpl implements BlockService {
             }
             try {
                 TransactionCall.heightNotice(chainId, height - 1);
-                CrossChainCall.heightNotice(chainId, height - 1, RPCUtil.encode(blockHeader.serialize()));
+                CrossChainCall.heightNotice(chainId, height - 1, RPCUtil.encode(blockHeader.serialize()), 0);
             } catch (Exception e) {
                 LoggerUtil.COMMON_LOG.error(e);
             }
