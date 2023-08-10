@@ -126,9 +126,7 @@ public class VerifierChangeTxServiceImpl implements VerifierChangeTxService {
         for (Transaction verifierChangeTx : txs) {
             try {
                 NulsHash ctxHash = verifierChangeTx.getHash();
-                chain.getLogger().warn("pierre test===cross chain save txType: {}, ctxHash: {}, chainId: {}", verifierChangeTx.getType(), ctxHash, chainId);
                 if (!convertHashService.save(ctxHash, ctxHash, chainId)) {
-                    chain.getLogger().warn("pierre test===cross chain save ctxHash error: {}, chainId: {}", commitSuccessList.size(), chainId);
                     rollback(chainId, commitSuccessList, blockHeader);
                     return false;
                 }
@@ -191,11 +189,6 @@ public class VerifierChangeTxServiceImpl implements VerifierChangeTxService {
             return false;
         }
         for (Transaction verifierChangeTx : txs) {
-            try {
-                chain.getLogger().warn("pierre test===cross chain [rollback] verifierChangeTx: {}", HexUtil.encode(verifierChangeTx.serialize()));
-            } catch (IOException e) {
-                chain.getLogger().error("pierre test===", e);
-            }
             try {
                 NulsHash ctxHash = verifierChangeTx.getHash();
                 if (!convertHashService.delete(ctxHash, chainId)) {

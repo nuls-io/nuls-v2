@@ -215,7 +215,6 @@ public class ResponseMessageProcessor {
     public static Response requestAndResponse(String role, String cmd, Map params, long timeOut) throws Exception {
         if (ModuleE.NC.abbr.equalsIgnoreCase(ConnectManager.LOCAL.getAbbreviation())) {
             String key = role + "_" + cmd;
-            //Log.warn("pierre test===request key 1: {}", key);
             InvokeBean invokeBean = INVOKE_BEAN_MAP.get(key);
             if (invokeBean != null) {
                 return LocalModuleCall.requestAndResponse(invokeBean, role, cmd, params, timeOut);
@@ -223,7 +222,6 @@ public class ResponseMessageProcessor {
                 Log.warn("Empty requestAndResponse key: {}", key);
             }
         }
-        //Log.warn("pierre test===request key 2: {}", role + "_" + cmd);
         Request request = MessageUtil.newRequest(cmd, params, Constants.BOOLEAN_FALSE, Constants.ZERO, Constants.ZERO);
         request.setTimeOut(String.valueOf(timeOut));
         ResponseContainer responseContainer = sendRequest(role, request);
@@ -311,7 +309,6 @@ public class ResponseMessageProcessor {
             Map<String, Object> requestMethods = request.getRequestMethods();
             Map.Entry<String, Object> next = requestMethods.entrySet().iterator().next();
             String key = role + "_" + next.getKey();
-            //Log.warn("pierre test===request key 2: {}", key);
             InvokeBean invokeBean = INVOKE_BEAN_MAP.get(key);
             if (invokeBean != null) {
                 return LocalModuleCall.requestOnly(invokeBean, next.getValue(), role, request);
@@ -322,8 +319,6 @@ public class ResponseMessageProcessor {
         String mappingRole = ROLE_MAPPING.getOrDefault(role, role);
         Message message = MessageUtil.basicMessage(MessageType.RequestOnly);
         message.setMessageData(request);
-        //Log.warn("pierre test===当前模块: {}", ConnectManager.LOCAL.getAbbreviation());
-        //Log.warn("pierre test===15, request: {}", request.getRequestMethods());
         Channel channel = ConnectManager.getConnectByRole(mappingRole);
         if (!channel.isWritable()) {
             Log.info("当前请求堆积过多,等待请求处理");
@@ -346,8 +341,6 @@ public class ResponseMessageProcessor {
         String mappingRole = ROLE_MAPPING.getOrDefault(role, role);
         Message message = MessageUtil.basicMessage(MessageType.Request);
         message.setMessageData(request);
-        //Log.warn("pierre test===当前模块: {}", ConnectManager.LOCAL.getAbbreviation());
-        //Log.warn("pierre test===16, request: {}", request.getRequestMethods());
         Channel channel = ConnectManager.getConnectByRole(mappingRole);
 
         ResponseContainer responseContainer = RequestContainer.putRequest(message.getMessageID());
