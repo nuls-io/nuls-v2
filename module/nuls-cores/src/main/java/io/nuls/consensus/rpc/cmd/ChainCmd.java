@@ -156,7 +156,7 @@ public class ChainCmd extends BaseCmd {
     }))
     @SuppressWarnings("unchecked")
     public Response getConsensusConfig(Map<String, Object> params) {
-        Result<ConfigBean> result = service.getConsensusConfig(params);
+        Result result = service.getConsensusConfig(params);
         if (result.isFailed()) {
             return failed(result.getErrorCode());
         }
