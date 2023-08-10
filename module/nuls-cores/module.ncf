@@ -1,5 +1,5 @@
 [JAVA]
-APP_NAME=nerve-core
+APP_NAME=nuls-cores
 MAIN_CLASS=io.nuls.NulsCoresBootstrap
 VERSION=1.0.0
 JOPT_XMS=1024
