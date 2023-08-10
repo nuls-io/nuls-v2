@@ -39,7 +39,6 @@ public class LocalVerifierServiceImpl implements LocalVerifierService {
 
     @Override
     public boolean rollback(int chainID, long blockHeight) {
-        Log.warn("pierre test===cross chain rollback localVerifier: {}", blockHeight);
         byte[] value = RocksDBService.get(NulsCrossChainConstant.DB_NAME_OLD_LOCAL_VERIFIER + chainID,ByteUtils.longToBytes(blockHeight));
         if(value == null){
             Log.error("没有找到备份数据" );

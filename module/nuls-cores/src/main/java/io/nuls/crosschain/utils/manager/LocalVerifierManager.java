@@ -48,13 +48,11 @@ public class LocalVerifierManager {
             chain.getLogger().error("Local verifier is empty, data is abnormal" );
             return false;
         }
-        chain.getLogger().warn("pierre test===cross chain init localVerifierList: {}", Arrays.toString(verifierList.toArray()));
         boolean saveResult =  localVerifierService.save(new LocalVerifierPO(verifierList), chain.getChainId());
         if(!saveResult){
             chain.getLogger().error("Failed to save local initialization verifier list");
             return false;
         }
-        chain.getLogger().warn("pierre test===cross chain init localVerifierList storage: {}", Arrays.toString(localVerifierService.get(chain.getChainId()).getVerifierList().toArray()));
         chain.setVerifierList(verifierList);
         chain.getLogger().info("Local verifier initialization complete,verifierList:{}",verifierList );
         return true;
@@ -70,31 +68,21 @@ public class LocalVerifierManager {
             chain.getLogger().error("Local verifier is empty, data is abnormal" );
             return false;
         }
-        chain.getLogger().warn("pierre test===cross chain syncStatus: {}, height: {}, localVerifierPO: {}", syncStatus, height, Arrays.toString(localVerifierPO.getVerifierList().toArray()));
         chain.getSwitchVerifierLock().writeLock().lock();
         try {
             if(reduceList != null && !reduceList.isEmpty()){
-                chain.getLogger().warn("pierre test===cross chain reduceList: {}", Arrays.toString(reduceList.toArray()));
                 localVerifierPO.getVerifierList().removeAll(reduceList);
             }
             if(appendList != null && !appendList.isEmpty()){
-                chain.getLogger().warn("pierre test===cross chain appendList: {}", Arrays.toString(appendList.toArray()));
                 localVerifierPO.getVerifierList().addAll(appendList);
             }
-            chain.getLogger().warn("pierre test===cross chain localVerifierPO: {}", Arrays.toString(localVerifierPO.getVerifierList().toArray()));
             boolean saveResult = localVerifierService.save(localVerifierPO, chain.getChainId());
             if(!saveResult){
                 chain.getLogger().error("Failed to update local initialization verifier list");
                 return false;
             }
-            chain.getLogger().warn("pierre test===cross chain localVerifierPO storage: {}", Arrays.toString(localVerifierService.get(chain.getChainId()).getVerifierList().toArray()));
             //跨链交易状态不用回滚
             CtxStatusPO ctxStatusPO = new CtxStatusPO(ctx, TxStatusEnum.CONFIRMED.getStatus());
-            try {
-                chain.getLogger().warn("pierre test===cross chain ctxStatusService save: {}, ctxStatusPO: {}", txHash.toHex(), ctxStatusPO.serialize());
-            } catch (Exception e) {
-                chain.getLogger().error("pierre test===", e);
-            }
             saveResult = ctxStatusService.save(txHash, ctxStatusPO, chain.getChainId());
             if(!saveResult){
                 chain.getLogger().error("Transaction processing status save error");

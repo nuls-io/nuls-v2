@@ -45,11 +45,6 @@ public class VerifierChangeTxHandler implements Runnable {
         }
         do {
             Transaction processTx = chain.isExistVerifierChangeTx(transaction);
-            try {
-                chain.getLogger().warn("pierre test===cross chain processTx: {}", processTx != null ? processTx.serialize() : null);
-            } catch (Exception e) {
-                chain.getLogger().error("pierre test===", e);
-            }
             if(processTx != null){
                 VerifierChangeData processTxData = new VerifierChangeData();
                 try {
@@ -68,7 +63,6 @@ public class VerifierChangeTxHandler implements Runnable {
                     chain.getLogger().info("The number of exit nodes of the currently processing verifier change transaction is greater than or equal to 30%, and it needs to wait for the completion of the transaction processing");
                     result = false;
                 } else {
-                    chain.getLogger().warn("pierre test===cross chain merge mergeVerifierChangeTx");
                     txData = mergeVerifierChangeTx(txData, processTxData);
                     txChanged = true;
                 }
@@ -133,15 +127,6 @@ public class VerifierChangeTxHandler implements Runnable {
      * Judge whether the current verifier's change transaction needs to be split. If the number of exiting nodes is greater than or equal to 30% of the current number of nodes, it needs to be split
      */
     private void verifierSplitHandle(Chain chain, Transaction transaction,long height, VerifierChangeData txData, boolean txChanged){
-        try {
-            chain.getLogger().warn("pierre test===cross chain txData: add-{}, remove-{}, txChanged: {}, tx: {}",
-                    txData.getRegisterAgentList() != null ? Arrays.toString(txData.getRegisterAgentList().toArray()) : null,
-                    txData.getCancelAgentList() != null ? Arrays.toString(txData.getCancelAgentList().toArray()) : null,
-                    txChanged,
-                    transaction.serialize());
-        } catch (Exception e) {
-            chain.getLogger().error("pierre test===cross chain", e);
-        }
         boolean needSplit = false;
         int maxCount = 0;
         int cancelCount = 0;
@@ -152,7 +137,6 @@ public class VerifierChangeTxHandler implements Runnable {
                 needSplit = true;
             }
         }
-        chain.getLogger().warn("pierre test===cross chain needSplit: {}", needSplit);
         if(needSplit){
             //如果交易已变更则前面已排过序,验证人排序，然后拆分退出验证人列表
             if(!txChanged){
