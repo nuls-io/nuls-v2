@@ -628,7 +628,7 @@ public class MessageUtil {
             }
         }
         if (passCount < minPassCount) {
-            chain.getLogger().error("签名验证通过数量小于拜占庭验证最小数量,passCount{},minPassCount{}", passCount, minPassCount);
+            chain.getLogger().error("签名验证通过数量小于拜占庭验证最小数量,passCount:{},minPassCount:{}", passCount, minPassCount);
             return false;
         }
         return true;
