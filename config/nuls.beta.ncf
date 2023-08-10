@@ -121,7 +121,7 @@ syncAddress=
 
 [cross-chain]
 #跨链节点链接的最小值
-minNodeAmount=2
+minNodes=2
 #跨链节点链接的最大值
 sendHeight=6
 #跨链交易拜占庭比例
