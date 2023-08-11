@@ -180,17 +180,17 @@ public class MessageUtil {
         if (ctx.getType() == TxType.VERIFIER_INIT) {
             String txHash = realHash.toHex();
             //这是一笔特殊的初始化验证人交易，用户重置平行链上存储的主网验证人列表
-            if(resetLocalVerifierService.isResetOtherVerifierTx(txHash)){
+            if (resetLocalVerifierService.isResetOtherVerifierTx(txHash)) {
                 packAddressList = chain.getVerifierList();
                 //1为上浮到全部
                 signCountOverflow = 1F;
-            }else{
+            } else {
                 packAddressList = (List<String>) ConsensusCall.getSeedNodeList(chain).get(ParamConstant.PARAM_PACK_ADDRESS_LIST);
             }
         } else {
             packAddressList = chain.getVerifierList();
         }
-        signByzantineInChain(chain, ctx, signature, packAddressList, realHash,signCountOverflow);
+        signByzantineInChain(chain, ctx, signature, packAddressList, realHash, signCountOverflow);
         NetWorkCall.broadcast(chainId, messageBody, excludeNodes, CommandConstant.BROAD_CTX_SIGN_MESSAGE, false);
         chain.getLogger().info("将新收到的跨链交易签名广播给链接到的其他节点,Hash:{},签名:{}\n\n", nativeHex, signHex);
     }
@@ -210,9 +210,9 @@ public class MessageUtil {
             TransactionSignature signature,
             List<String> packAddressList,
             NulsHash realHash,
-            Float signCountOverflow) throws NulsException, IOException{
+            Float signCountOverflow) throws NulsException, IOException {
         if (ctx.getType() == TxType.VERIFIER_INIT) {
-            return verifierInitLocalByzantine(chain, ctx, signature, packAddressList, realHash,signCountOverflow);
+            return verifierInitLocalByzantine(chain, ctx, signature, packAddressList, realHash, signCountOverflow);
         } else if (ctx.getType() == TxType.VERIFIER_CHANGE) {
             return verifierChangeLocalByzantine(chain, ctx, signature, realHash);
         } else {
@@ -235,19 +235,20 @@ public class MessageUtil {
             TransactionSignature signature,
             List<String> packAddressList,
             NulsHash realHash) throws NulsException, IOException {
-        return signByzantineInChain(chain,ctx,signature,packAddressList,realHash,0F);
+        return signByzantineInChain(chain, ctx, signature, packAddressList, realHash, 0F);
     }
 
     /**
      * 验证人初始化交易本地拜占庭签名
+     *
      * @param chain
      * @param ctx
      * @param signature
      * @param packAddressList
      * @param realHash
-     * @param signCountOverflow     饱和签名上浮的幅度 0.3 在达到最低签名数后再上浮数量（上浮数量等于 总签名数减去最低签名数后的百分比）
-     *                              示例： 总签名数100，最低签名数60，上浮 0.3 就等于 （100 - 60）* 0.3 = 12 ，则饱和签名数为 72.
-     *                              当签名数达到60后，就会想其他链广播交易，当签名数达到72后，停止处理签名。
+     * @param signCountOverflow 饱和签名上浮的幅度 0.3 在达到最低签名数后再上浮数量（上浮数量等于 总签名数减去最低签名数后的百分比）
+     *                          示例： 总签名数100，最低签名数60，上浮 0.3 就等于 （100 - 60）* 0.3 = 12 ，则饱和签名数为 72.
+     *                          当签名数达到60后，就会想其他链广播交易，当签名数达到72后，停止处理签名。
      * @return
      * @throws IOException
      */
@@ -257,7 +258,7 @@ public class MessageUtil {
             TransactionSignature signature,
             List<String> packAddressList,
             NulsHash realHash,
-            Float signCountOverflow) throws  IOException {
+            Float signCountOverflow) throws IOException {
         List<String> handleAddressList = new ArrayList<>(packAddressList);
         int agentCount = handleAddressList.size();
         //交易签名拜占庭
@@ -276,16 +277,16 @@ public class MessageUtil {
                 }
                 saveCtxSendHeight(chain, sendHeight, ctx);
                 chain.getLogger().info("初始化验证人交易签名拜占庭验证通过,保存验证人变更高度等待广播，Hash{},广播高度{}", ctx.getHash().toHex(), sendHeight);
-                if(signCountOverflow == null){
+                if (signCountOverflow == null) {
                     signCountOverflow = 0F;
                 }
-                int fullByzantineCount = byzantineCount + (int)((agentCount - byzantineCount) * signCountOverflow);
-                if(signCount >= fullByzantineCount){
-                    chain.getLogger().info("初始化验证人交易签名数达到饱和签名数:{}，ctx设置为CONFIRMED状态，本节点不再处理此交易",signCount);
+                int fullByzantineCount = byzantineCount + (int) ((agentCount - byzantineCount) * signCountOverflow);
+                if (signCount >= fullByzantineCount) {
+                    chain.getLogger().info("初始化验证人交易签名数达到饱和签名数:{}，ctx设置为CONFIRMED状态，本节点不再处理此交易", signCount);
                     ctxStatusPO.setStatus(TxStatusEnum.CONFIRMED.getStatus());
                     resetLocalVerifierService.finishResetOtherVerifierTx(realHash.toHex());
-                }else{
-                    chain.getLogger().debug("初始化验证人交易签名数达到最低签名数:{}，但为达到饱和签名数:{}，本节点将继续处理此交易",signCount,fullByzantineCount);
+                } else {
+                    chain.getLogger().debug("初始化验证人交易签名数达到最低签名数:{}，但为达到饱和签名数:{}，本节点将继续处理此交易", signCount, fullByzantineCount);
                 }
                 ctxStatusService.save(realHash, ctxStatusPO, chain.getChainId());
                 return true;
@@ -342,6 +343,7 @@ public class MessageUtil {
 
     /**
      * 跨链交易
+     *
      * @param chain
      * @param ctx
      * @param signature
@@ -378,18 +380,18 @@ public class MessageUtil {
             if (signCount >= byzantineCount) {
                 ctx.setTransactionSignature(signature.serialize());
                 saveCtxSendHeight(chain, broadHeight, ctx);
-                chain.getLogger().info("跨链交易拜占庭完成，放入待打包队列，等待广播，Hash:{},sendHeight:{},txType:{}",ctx.getHash().toHex(), broadHeight, ctx.getType());
+                chain.getLogger().info("跨链交易拜占庭完成，放入待打包队列，等待广播，Hash:{},sendHeight:{},txType:{}", ctx.getHash().toHex(), broadHeight, ctx.getType());
                 //饱和签名数，在最低签名数的基础上上浮5%
                 float overflow = (agentCount - byzantineCount) * .05F;
-                int fullByzantineCount = byzantineCount + (int)(Math.ceil(overflow));
-                if(fullByzantineCount > agentCount){
+                int fullByzantineCount = byzantineCount + (int) (Math.ceil(overflow));
+                if (fullByzantineCount > agentCount) {
                     fullByzantineCount = agentCount;
                 }
-                if(signCount >= fullByzantineCount){
-                    chain.getLogger().info("跨链交易签名数达到饱和签名数:{}，ctx设置为CONFIRMED状态，本节点不再处理此交易",signCount);
+                if (signCount >= fullByzantineCount) {
+                    chain.getLogger().info("跨链交易签名数达到饱和签名数:{}，ctx设置为CONFIRMED状态，本节点不再处理此交易", signCount);
                     ctxStatusPO.setStatus(TxStatusEnum.CONFIRMED.getStatus());
-                }else{
-                    chain.getLogger().debug("跨链交易签名数达到最低签名数:{}，但为达到饱和签名数:{}，本节点将继续处理此交易",signCount,fullByzantineCount);
+                } else {
+                    chain.getLogger().debug("跨链交易签名数达到最低签名数:{}，但为达到饱和签名数:{}，本节点将继续处理此交易", signCount, fullByzantineCount);
                 }
                 ctxStatusService.save(realHash, ctxStatusPO, chain.getChainId());
                 return true;
@@ -414,7 +416,7 @@ public class MessageUtil {
     public static boolean handleOtherChainCtx(Transaction ctx, Chain chain, int fromChainId) {
         NulsHash ctxHash = ctx.getHash();
         try {
-            if(ctx.getType() == TxType.REGISTERED_CHAIN_CHANGE && config.isMainNet()){
+            if (ctx.getType() == TxType.REGISTERED_CHAIN_CHANGE && config.isMainNet()) {
                 return false;
             }
             TransactionSignature signature = new TransactionSignature();
@@ -432,12 +434,12 @@ public class MessageUtil {
                 if (!handleOtherChainVerifierChangeTx(chain, ctx, signature, verifierChainId)) {
                     return false;
                 }
-            } else if(ctx.getType() == TxType.VERIFIER_INIT){
+            } else if (ctx.getType() == TxType.VERIFIER_INIT) {
                 if (!handleOtherChainVerifierInitTx(chain, ctx, signature, verifierChainId)) {
                     return false;
                 }
-            }else{
-                if(!handleOtherChainCrossTx(chain, ctx, signature, verifierChainId)){
+            } else {
+                if (!handleOtherChainCrossTx(chain, ctx, signature, verifierChainId)) {
                     return false;
                 }
             }
@@ -631,6 +633,7 @@ public class MessageUtil {
             chain.getLogger().error("签名验证通过数量小于拜占庭验证最小数量,passCount:{},minPassCount:{}", passCount, minPassCount);
             return false;
         }
+        chain.getLogger().info("签名验证通过,passCount:{},minPassCount:{}, of: {}", passCount, minPassCount, ctx.getHash().toHex());
         return true;
     }
 
