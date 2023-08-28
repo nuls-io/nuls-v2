@@ -130,9 +130,12 @@ public class BlockServiceImpl implements BlockService {
                         }
                     }
                     if(broadFailCtxHash.size() > 0){
-                        po.setHashList(broadFailCtxHash);
-                        sendHeightService.save(cacheHeight, po, chainId);
-                        chain.getLogger().error("区块高度为{}的跨链交易广播失败",cacheHeight);
+                        int ONE_DAY_HEIGHT = 360 * 24;
+                        if(height - cacheHeight < ONE_DAY_HEIGHT){
+                            po.setHashList(broadFailCtxHash);
+                            sendHeightService.save(cacheHeight, po, chainId);
+                            chain.getLogger().error("区块高度为{}的跨链交易广播失败",cacheHeight);
+                        }
                     }else{
                         sendHeightService.delete(cacheHeight, chainId);
                         chain.getLogger().info("区块高度为{}的跨链交易广播成功",cacheHeight);
