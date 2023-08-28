@@ -3,6 +3,7 @@ package io.nuls.core.rpc.netty.processor;
 import io.netty.channel.Channel;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Address;
+import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.HexUtil;
@@ -11,13 +12,16 @@ import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.invoke.BaseInvoke;
 import io.nuls.core.rpc.invoke.KernelInvoke;
+import io.nuls.core.rpc.model.InvokeBean;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.*;
 import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.core.rpc.netty.processor.container.RequestContainer;
 import io.nuls.core.rpc.netty.processor.container.ResponseContainer;
+import io.nuls.core.rpc.util.LocalModuleCall;
 import io.nuls.core.rpc.util.SerializeUtil;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -32,7 +36,22 @@ import java.util.concurrent.TimeUnit;
 public class ResponseMessageProcessor {
 
     private static final Long REGISTER_API_TIME_OUT = 180L * 1000L;
-
+    public static final Map<String, InvokeBean> INVOKE_BEAN_MAP = new HashMap<>();
+    public static final Map<String, String> ROLE_MAPPING = new HashMap<>();
+    public static final Map<Integer, String> TX_TYPE_MODULE_MAP = new HashMap<>();
+    static {
+        ROLE_MAPPING.put(ModuleE.AC.abbr, ModuleE.NC.abbr);
+        ROLE_MAPPING.put(ModuleE.BL.abbr, ModuleE.NC.abbr);
+        ROLE_MAPPING.put(ModuleE.CS.abbr, ModuleE.NC.abbr);
+        ROLE_MAPPING.put(ModuleE.CC.abbr, ModuleE.NC.abbr);
+        ROLE_MAPPING.put(ModuleE.CM.abbr, ModuleE.NC.abbr);
+        ROLE_MAPPING.put(ModuleE.LG.abbr, ModuleE.NC.abbr);
+        ROLE_MAPPING.put(ModuleE.NW.abbr, ModuleE.NC.abbr);
+        ROLE_MAPPING.put(ModuleE.PU.abbr, ModuleE.NC.abbr);
+        ROLE_MAPPING.put(ModuleE.TX.abbr, ModuleE.NC.abbr);
+        ROLE_MAPPING.put(ModuleE.SC.abbr, ModuleE.NC.abbr);
+        BaseConstant.NULS_CORES_DOMAINS.addAll(ROLE_MAPPING.keySet());
+    }
     /**
      * 与已连接的模块握手
      * Shake hands with the core module (Manager)
@@ -194,6 +213,15 @@ public class ResponseMessageProcessor {
      * @throws Exception 请求超时（timeOut），timeout (timeOut)
      */
     public static Response requestAndResponse(String role, String cmd, Map params, long timeOut) throws Exception {
+        if (ModuleE.NC.abbr.equalsIgnoreCase(ConnectManager.LOCAL.getAbbreviation())) {
+            String key = role + "_" + cmd;
+            InvokeBean invokeBean = INVOKE_BEAN_MAP.get(key);
+            if (invokeBean != null) {
+                return LocalModuleCall.requestAndResponse(invokeBean, role, cmd, params, timeOut);
+            } else {
+                Log.warn("Empty requestAndResponse key: {}", key);
+            }
+        }
         Request request = MessageUtil.newRequest(cmd, params, Constants.BOOLEAN_FALSE, Constants.ZERO, Constants.ZERO);
         request.setTimeOut(String.valueOf(timeOut));
         ResponseContainer responseContainer = sendRequest(role, request);
@@ -276,11 +304,23 @@ public class ResponseMessageProcessor {
      * @return 远程方法的返回结果，Response of the remote method
      * @throws Exception 请求超时（1分钟），timeout (1 minute)
      */
-    public static String requestOnly(String role, Request request)throws Exception{
+    public static String requestOnly(String role, Request request) throws Exception {
+        if (ModuleE.NC.abbr.equalsIgnoreCase(ConnectManager.LOCAL.getAbbreviation())) {
+            Map<String, Object> requestMethods = request.getRequestMethods();
+            Map.Entry<String, Object> next = requestMethods.entrySet().iterator().next();
+            String key = role + "_" + next.getKey();
+            InvokeBean invokeBean = INVOKE_BEAN_MAP.get(key);
+            if (invokeBean != null) {
+                return LocalModuleCall.requestOnly(invokeBean, next.getValue(), role, request);
+            } else {
+                Log.warn("Empty requestOnly key: {}", key);
+            }
+        }
+        String mappingRole = ROLE_MAPPING.getOrDefault(role, role);
         Message message = MessageUtil.basicMessage(MessageType.RequestOnly);
         message.setMessageData(request);
-        Channel channel = ConnectManager.getConnectByRole(role);
-        if(!channel.isWritable()){
+        Channel channel = ConnectManager.getConnectByRole(mappingRole);
+        if (!channel.isWritable()) {
             Log.info("当前请求堆积过多,等待请求处理");
             return "0";
         }
@@ -298,11 +338,10 @@ public class ResponseMessageProcessor {
      * @throws Exception JSON格式转换错误、连接失败 / JSON format conversion error, connection failure
      */
     private static ResponseContainer sendRequest(String role, Request request) throws Exception {
-
+        String mappingRole = ROLE_MAPPING.getOrDefault(role, role);
         Message message = MessageUtil.basicMessage(MessageType.Request);
         message.setMessageData(request);
-
-        Channel channel = ConnectManager.getConnectByRole(role);
+        Channel channel = ConnectManager.getConnectByRole(mappingRole);
 
         ResponseContainer responseContainer = RequestContainer.putRequest(message.getMessageID());
 
