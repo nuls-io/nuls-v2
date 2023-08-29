@@ -16,18 +16,19 @@
         <java.version>11</java.version>
     </properties>
     <modules>
-        <module>nuls-account</module>
-        <module>nuls-block</module>
-        <module>nuls-chain-manager</module>
-        <module>nuls-consensus</module>
-        <module>nuls-cross-chain</module>
-        <module>nuls-ledger</module>
-        <module>nuls-network</module>
-        <module>nuls-protocol-update</module>
-        <module>nuls-smart-contract</module>
-        <module>nuls-transaction</module>
+<!--        <module>nuls-account</module>-->
+<!--        <module>nuls-block</module>-->
+<!--        <module>nuls-chain-manager</module>-->
+<!--        <module>nuls-consensus</module>-->
+<!--        <module>nuls-cross-chain</module>-->
+<!--        <module>nuls-ledger</module>-->
+<!--        <module>nuls-network</module>-->
+<!--        <module>nuls-protocol-update</module>-->
+<!--        <module>nuls-smart-contract</module>-->
+<!--        <module>nuls-transaction</module>-->
         <module>nuls-cmd-client</module>
         <module>nuls-api</module>
+        <module>nuls-cores</module>
     </modules>
 
     <dependencies>

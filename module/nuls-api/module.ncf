@@ -15,7 +15,7 @@ chainId=1
 assetsId=1
 
 [nuls-api]
-moduleDynamicDependent=smart-contract,cross-chain,chain-manager
+moduleDynamicDependent=nuls-cores
 #httpServer的启动ip
 serverIp=0.0.0.0
 #httpServer的启动port

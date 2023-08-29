@@ -1,0 +1,802 @@
+[
+  {
+    "version": "16",
+    "extend": "15",
+    "validTxs": [
+      {
+        "type": "15",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "CreateContractProcessorV16"
+      },
+      {
+        "type": "16",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "CallContractProcessorV16"
+      }
+    ],
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  },
+  {
+    "version": "15",
+    "extend": "14",
+    "validTxs": [
+      {
+        "type": "27",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "AssetRegTransferProcessorV15"
+      },
+      {
+        "type": "11",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "RegChainTxProcessorV15"
+      },
+      {
+        "type": "13",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "AddAssetTxProcessorV15"
+      }
+    ],
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  },
+  {
+    "version": "14",
+    "extend": "13",
+    "validTxs": [
+      {
+        "type": "15",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "CreateContractProcessorV14"
+      },
+      {
+        "type": "16",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "CallContractProcessorV14"
+      }
+    ],
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  },
+  {
+    "version": "13",
+    "extend": "12",
+    "validTxs": [
+      {
+        "type": "16",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "CallContractProcessorV13"
+      },
+      {
+        "type": "34",
+        "systemTx": false,
+        "unlockTx": true,
+        "verifySignature": true,
+        "verifyFee": false,
+        "handler": "DelayStopAgentProcessorV1"
+      },
+      {
+        "type": "65",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "AccountForTransferOnContractCallProcessorV13"
+      }
+    ],
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  },
+
+  {
+    "version": "12",
+    "extend": "11",
+    "validTxs": [
+      {
+        "type": "13",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "AddAssetTxProcessorV12"
+      },
+      {
+        "type": "63",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "AccountLockProcessorV12"
+      }
+    ],
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  },
+
+  {
+    "version": "11",
+    "extend": "10",
+    "validTxs": [
+      {
+        "type": "63",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "AccountLockProcessorV11"
+      },
+      {
+        "type": "64",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "AccountUnlockProcessorV11"
+      }
+    ],
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  },
+  {
+    "version": "10",
+    "extend": "8",
+    "validTxs": [
+      {
+        "type": "62",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "ResetChainInfoTxProcessor"
+      }
+    ],
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  },
+  {
+    "version": "8",
+    "extend": "7",
+    "validTxs": [
+      {
+        "type": "15",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "CreateContractProcessorV8"
+      },
+      {
+        "type": "16",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "CallContractProcessorV8"
+      },
+      {
+        "type": "17",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "DeleteContractProcessorV8"
+      }
+    ],
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  },
+  {
+    "version": "7",
+    "extend": "6",
+    "validTxs": [
+      {
+        "type": "11",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "RegChainTxProcessorV7"
+      },
+      {
+        "type": "12",
+        "systemTx": false,
+        "unlockTx": true,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "DestroyChainTxProcessorV7"
+      },
+      {
+        "type": "13",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "AddAssetTxProcessorV7"
+      },
+      {
+        "type": "14",
+        "systemTx": false,
+        "unlockTx": true,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "DisableAssetTxProcessorV7"
+      }
+    ],
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  },
+  {
+    "version": "6",
+    "extend": "5",
+    "validTxs": [
+      {
+        "type": "27",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "AssetRegTransferProcessorV5"
+      }
+    ],
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  },
+  {
+    "version": "5",
+    "extend": "4",
+    "validTxs": [
+      {
+        "type": "11",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "RegChainTxProcessorV5"
+      },
+      {
+        "type": "12",
+        "systemTx": false,
+        "unlockTx": true,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "DestroyChainTxProcessorV5"
+      },
+      {
+        "type": "13",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "AddAssetTxProcessorV5"
+      },
+      {
+        "type": "14",
+        "systemTx": false,
+        "unlockTx": true,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "DisableAssetTxProcessorV5"
+      }
+    ],
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  },
+  {
+    "version": "4",
+    "extend": "3",
+    "validTxs": [
+      {
+        "type": "19",
+        "systemTx": true,
+        "unlockTx": false,
+        "verifyFee": true,
+        "verifySignature": false,
+        "handler": "ContractReturnGasProcessor"
+      },
+      {
+        "type": "4",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": false,
+        "handler": "CreateAgentProcessorV4"
+      },
+      {
+        "type": "5",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": false,
+        "handler": "DepositProcessorV4"
+      },
+      {
+        "type": "6",
+        "systemTx": false,
+        "unlockTx": true,
+        "verifySignature": true,
+        "verifyFee": false,
+        "handler": "WithdrawProcessorV4"
+      },
+      {
+        "type": "8",
+        "systemTx": true,
+        "unlockTx": true,
+        "verifySignature": false,
+        "verifyFee": false,
+        "handler": "RedPunishProcessorV4"
+      },
+      {
+        "type": "9",
+        "systemTx": false,
+        "unlockTx": true,
+        "verifySignature": true,
+        "verifyFee": false,
+        "handler": "StopAgentProcessorV4"
+      }
+    ],
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  },
+
+  {
+    "version": "3",
+    "extend": "2",
+    "validTxs": [
+      {
+        "type": "4",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": false,
+        "handler": "CreateAgentProcessorV3"
+      },
+      {
+        "type": "5",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": false,
+        "handler": "DepositProcessorV3"
+      },
+      {
+        "type": "6",
+        "systemTx": false,
+        "unlockTx": true,
+        "verifySignature": true,
+        "verifyFee": false,
+        "handler": "WithdrawProcessorV3"
+      },
+      {
+        "type": "9",
+        "systemTx": false,
+        "unlockTx": true,
+        "verifySignature": true,
+        "verifyFee": false,
+        "handler": "StopAgentProcessorV3"
+      },
+      {
+        "type": "21",
+        "systemTx": true,
+        "unlockTx": false,
+        "verifySignature": false,
+        "handler": "ContractDepositProcessorV3"
+      },
+      {
+        "type": "23",
+        "systemTx": true,
+        "unlockTx": true,
+        "verifySignature": false,
+        "handler": "ContractStopAgentProcessorV2"
+      }
+    ],
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  },
+
+  {
+    "version": "2",
+    "extend": "1",
+    "validTxs": [
+      {
+        "type": "5",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": false,
+        "handler": "DepositProcessorV2"
+      },
+      {
+        "type": "21",
+        "systemTx": true,
+        "unlockTx": false,
+        "verifySignature": false,
+        "handler": "ContractDepositProcessorV2"
+      },
+      {
+        "type": "9",
+        "systemTx": false,
+        "unlockTx": true,
+        "verifySignature": true,
+        "verifyFee": false,
+        "handler": "StopAgentProcessorV2"
+      },
+      {
+        "type": "23",
+        "systemTx": true,
+        "unlockTx": true,
+        "verifySignature": false,
+        "handler": "ContractStopAgentProcessorV2"
+      }
+    ],
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  },
+  {
+    "version": "1",
+    "extend": "",
+    "validTxs": [
+      {
+        "type": "10",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": false,
+        "verifyFee": true,
+        "handler": "CrossChainProcessorV1"
+      },
+      {
+        "type": "24",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": false,
+        "verifyFee": true,
+        "handler": "VerifierChangeProcessorV1"
+      },
+      {
+        "type": "25",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": false,
+        "verifyFee": true,
+        "handler": "VerifierInitProcessorV1"
+      },
+      {
+        "type": "26",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": false,
+        "verifyFee": true,
+        "handler": "ContractCrossChainProcessorV1"
+      },
+      {
+        "type": "60",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": false,
+        "verifyFee": true,
+        "handler": "RegisteredChainChangeProcessorV1"
+      },
+      {
+        "type": "61",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": false,
+        "verifyFee": true,
+        "handler": "ResetLocalVerifierProcessorV1"
+      },
+      {
+        "type": "15",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "CreateContractProcessor"
+      },
+      {
+        "type": "16",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "CallContractProcessor"
+      },
+      {
+        "type": "17",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "DeleteContractProcessor"
+      },
+      {
+        "type": "18",
+        "systemTx": true,
+        "unlockTx": false,
+        "verifyFee": true,
+        "verifySignature": false,
+        "handler": ""
+      },
+      {
+        "type": "19",
+        "systemTx": true,
+        "unlockTx": false,
+        "verifyFee": true,
+        "verifySignature": false,
+        "handler": ""
+      },
+      {
+        "type": "2",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "TransferProcessorV1"
+      },
+      {
+        "type": "3",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "AliasProcessorV1"
+      },
+      {
+        "type": "11",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "RegChainTxProcessorV1"
+      },
+      {
+        "type": "12",
+        "systemTx": false,
+        "unlockTx": true,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "DestroyChainTxProcessorV1"
+      },
+      {
+        "type": "13",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "AddAssetTxProcessorV1"
+      },
+      {
+        "type": "14",
+        "systemTx": false,
+        "unlockTx": true,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "DisableAssetTxProcessorV1"
+      },
+      {
+        "type": "1",
+        "systemTx": true,
+        "unlockTx": false,
+        "verifySignature": false,
+        "verifyFee": false,
+        "handler": "CoinBaseProcessorV1"
+      },
+      {
+        "type": "4",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": false,
+        "handler": "CreateAgentProcessorV1"
+      },
+      {
+        "type": "5",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": false,
+        "handler": "DepositProcessorV1"
+      },
+      {
+        "type": "6",
+        "systemTx": false,
+        "unlockTx": true,
+        "verifySignature": true,
+        "verifyFee": false,
+        "handler": "WithdrawProcessorV1"
+      },
+      {
+        "type": "7",
+        "systemTx": true,
+        "unlockTx": false,
+        "verifySignature": false,
+        "verifyFee": false,
+        "handler": "YellowPunishProcessorV1"
+      },
+      {
+        "type": "8",
+        "systemTx": true,
+        "unlockTx": true,
+        "verifySignature": false,
+        "verifyFee": false,
+        "handler": "RedPunishProcessorV1"
+      },
+      {
+        "type": "9",
+        "systemTx": false,
+        "unlockTx": true,
+        "verifySignature": true,
+        "verifyFee": false,
+        "handler": "StopAgentProcessorV1"
+      },
+      {
+        "type": "20",
+        "systemTx": true,
+        "unlockTx": false,
+        "verifySignature": false,
+        "handler": "ContractCreateAgentProcessorV1"
+      },
+      {
+        "type": "21",
+        "systemTx": true,
+        "unlockTx": false,
+        "verifySignature": false,
+        "handler": "ContractDepositProcessorV1"
+      },
+      {
+        "type": "22",
+        "systemTx": true,
+        "unlockTx": true,
+        "verifySignature": false,
+        "handler": "ContractWithdrawProcessorV1"
+      },
+      {
+        "type": "23",
+        "systemTx": true,
+        "unlockTx": true,
+        "verifySignature": false,
+        "handler": "ContractStopAgentProcessorV1"
+      }
+    ],
+    "validMsgs": [
+      {
+        "name": "io.nuls.transaction.message.ForwardTxMessage",
+        "protocolCmd": "newHash",
+        "handlers": "ForwardTxMessageHandlerV1"
+      },
+      {
+        "name": "io.nuls.transaction.message.GetTxMessage",
+        "protocolCmd": "askTx",
+        "handlers": "GetTxMessageHandlerV1"
+      },
+      {
+        "name": "io.nuls.transaction.message.BroadcastTxMessage",
+        "protocolCmd": "receiveTx",
+        "handlers": "BroadcastTxMessageHandlerV1"
+      },
+      {
+        "name": "io.nuls.crosschain.base.message.BroadCtxHashMessage",
+        "protocolCmd": "recvCtxHash",
+        "handlers": "BroadCtxHashHandlerV1"
+      },
+      {
+        "name": "io.nuls.crosschain.base.message.BroadCtxSignMessage",
+        "protocolCmd": "recvCtxSign",
+        "handlers": "BroadCtxSignHandlerV1"
+      },
+      {
+        "name": "io.nuls.crosschain.base.message.CirculationMessage",
+        "protocolCmd": "recvCirculat",
+        "handlers": "CirculationHandlerV1"
+      },
+      {
+        "name": "io.nuls.crosschain.base.message.CtxStateMessage",
+        "protocolCmd": "recvCtxState",
+        "handlers": "CtxStateHandlerV1"
+      },
+      {
+        "name": "io.nuls.crosschain.base.message.GetCirculationMessage",
+        "protocolCmd": "getCirculat",
+        "handlers": "GetCirculationHandlerV1"
+      },
+      {
+        "name": "io.nuls.crosschain.base.message.GetCtxStateMessage",
+        "protocolCmd": "getCtxState",
+        "handlers": "GetCtxStateHandlerV1"
+      },
+      {
+        "name": "io.nuls.crosschain.base.message.GetOtherCtxMessage",
+        "protocolCmd": "getOtherCtx",
+        "handlers": "GetOtherCtxHandlerV1"
+      },
+      {
+        "name": "io.nuls.crosschain.base.message.NewOtherCtxMessage",
+        "protocolCmd": "recvOtherCtx",
+        "handlers": "NewOtherCtxHandlerV1"
+      },
+      {
+        "name": "io.nuls.crosschain.base.message.CrossTxRehandleMessage",
+        "protocolCmd": "ctxRehandle",
+        "handlers": "CrossTxRehandleMsgHandlerV1"
+      },
+      {
+        "name": "io.nuls.block.message.BlockMessage",
+        "protocolCmd": "block",
+        "handlers": "BlockHandlerV1"
+      },
+      {
+        "name": "io.nuls.block.message.CompleteMessage",
+        "protocolCmd": "complete",
+        "handlers": "CompleteHandlerV1"
+      },
+      {
+        "name": "io.nuls.block.message.HashListMessage",
+        "protocolCmd": "getTxs",
+        "handlers": "GetTxGroupHandlerV1"
+      },
+      {
+        "name": "io.nuls.block.message.HashMessage",
+        "protocolCmd": "getBlock,forward,getsBlock",
+        "handlers": "ForwardSmallBlockHandlerV1,GetBlockHandlerV1,GetSmallBlockHandlerV1"
+      },
+      {
+        "name": "io.nuls.block.message.HeightRangeMessage",
+        "protocolCmd": "getBlocks",
+        "handlers": "GetBlocksHandlerV1"
+      },
+      {
+        "name": "io.nuls.block.message.HeightMessage",
+        "protocolCmd": "getBlockH",
+        "handlers": "GetBlockByHeightHandlerV1"
+      },
+      {
+        "name": "io.nuls.block.message.SmallBlockMessage",
+        "protocolCmd": "sBlock",
+        "handlers": "SmallBlockHandlerV1"
+      },
+      {
+        "name": "io.nuls.block.message.TxGroupMessage",
+        "protocolCmd": "txs",
+        "handlers": "TxGroupHandlerV1"
+      }
+    ],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  }
+]
