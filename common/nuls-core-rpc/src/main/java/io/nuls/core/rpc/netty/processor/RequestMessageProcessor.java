@@ -517,7 +517,8 @@ public class RequestMessageProcessor {
             return MessageUtil.newFailResponse("", CMD_NOT_FOUND);
         }
         long start = System.currentTimeMillis();
-        Log.info("-=-=-=-::{},{}",method.toString(),cmd);
+        Log.info("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
+        Log.info("-=-=-=-::{},{}",method.toString(),cmd.getClass().getName());
         Log.info("-=-=-=-::{}",JSONUtils.obj2json(params));
         Object invoke = method.invoke(cmd, params);
         Log.info("cmd: {}, invoke obj: {}", cmd.getClass().getName(), invoke.getClass().getName());
