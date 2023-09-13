@@ -519,7 +519,10 @@ public class RequestMessageProcessor {
         long start = System.currentTimeMillis();
         Log.info("-=-=-=-::{},{}",method.toString(),cmd);
         Log.info("-=-=-=-::{}",JSONUtils.obj2json(params));
-        Response response = (Response) method.invoke(cmd, params);
+        Object invoke = method.invoke(cmd, params);
+        Log.info("cmd: {}, invoke obj: {}", cmd.getClass().getName(), invoke.getClass().getName());
+        Response response = (Response) invoke;
+//        Response response = (Response) method.invoke(cmd, params);
         long use = System.currentTimeMillis() - start;
         if (use > 1000) {
             Log.warn(invokeMethod + " , use:{}ms", use);
