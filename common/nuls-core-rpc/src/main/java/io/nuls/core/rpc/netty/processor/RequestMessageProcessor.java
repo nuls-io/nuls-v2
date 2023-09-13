@@ -517,6 +517,8 @@ public class RequestMessageProcessor {
             return MessageUtil.newFailResponse("", CMD_NOT_FOUND);
         }
         long start = System.currentTimeMillis();
+        Log.info("-=-=-=-::{},{}",method.toString(),cmd);
+        Log.info("-=-=-=-::{}",JSONUtils.obj2json(params));
         Response response = (Response) method.invoke(cmd, params);
         long use = System.currentTimeMillis() - start;
         if (use > 1000) {
