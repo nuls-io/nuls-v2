@@ -1,6 +1,5 @@
 package io.nuls.consensus.rpc.cmd;
 
-import io.nuls.base.data.CoinData;
 import io.nuls.core.rpc.model.*;
 import io.nuls.consensus.model.dto.output.AgentDTO;
 import io.nuls.consensus.service.AgentService;

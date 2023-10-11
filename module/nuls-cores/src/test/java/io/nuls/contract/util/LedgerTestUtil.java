@@ -21,48 +21,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.transaction.model.dto;
+package io.nuls.contract.util;
+
+import io.nuls.contract.model.bo.Chain;
+import io.nuls.contract.model.bo.ContractBalance;
+import io.nuls.contract.rpc.call.LedgerCall;
+import io.nuls.core.exception.NulsException;
+
+import java.math.BigInteger;
+import java.util.Map;
 
 /**
  * @author: PierreLuo
- * @date: 2022/1/24
+ * @date: 2022/6/23
  */
-public class AccountBlockDTO {
-
-    private byte[] address;
-    private int[] types;
-    private String[] contracts;
-    private byte[] extend;
-
-    public byte[] getAddress() {
-        return address;
-    }
-
-    public void setAddress(byte[] address) {
-        this.address = address;
-    }
-
-    public int[] getTypes() {
-        return types;
-    }
-
-    public void setTypes(int[] types) {
-        this.types = types;
-    }
-
-    public String[] getContracts() {
-        return contracts;
-    }
-
-    public void setContracts(String[] contracts) {
-        this.contracts = contracts;
-    }
-
-    public byte[] getExtend() {
-        return extend;
-    }
-
-    public void setExtend(byte[] extend) {
-        this.extend = extend;
+public class LedgerTestUtil {
+    public static ContractBalance getUnConfirmedBalanceAndNonce(Chain chain, int assetChainId, int assetId, String address) {
+        try {
+            Map<String, Object> balance = LedgerCall.getBalanceAndNonce(chain, assetChainId, assetId, address);
+            ContractBalance contractBalance = ContractBalance.newInstance();
+            contractBalance.setBalance(new BigInteger(balance.get("available").toString()));
+            contractBalance.setFreeze(new BigInteger(balance.get("freeze").toString()));
+            contractBalance.setNonce((String) balance.get("nonce"));
+            return contractBalance;
+        } catch (NulsException e) {
+            Log.error(e);
+            return ContractBalance.newInstance();
+        }
     }
 }

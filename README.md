@@ -94,7 +94,7 @@ Note: Some documents are in the process of being updated, so please understand i
 
 ## Contribution
 
-Contributions to NULS are welcomed! We sincerely invite developers who are experienced in the blockchain field to join the NULS technology community. Details: https://forum.nuls.io/c/tech/34. To be a great community, Nuls needs to welcome developers from all walks of life, with different backgrounds, and with a wide range of experience.
+Contributions to NULS are welcomed! We sincerely invite developers who are experienced in the blockchain field to join the NULS technology community. Details: https://nuls.community/d/9-invitation-of-community-developers. To be a great community, Nuls needs to welcome developers from all walks of life, with different backgrounds, and with a wide range of experience.
 
 ## License
 
@@ -108,6 +108,7 @@ Modules added in the future may be released under a different license specified 
 - [Facebook](https://www.facebook.com/nulscommunity/)
 - [YouTube channel](https://www.youtube.com/channel/UC8FkLeF4QW6Undm4B3InN1Q?view_as=subscriber)
 - Telegram [NULS Community](https://t.me/Nulsio)
+- Telegram [NULS 中文社区](https://t.me/Nulscn)
 
 ####  
 

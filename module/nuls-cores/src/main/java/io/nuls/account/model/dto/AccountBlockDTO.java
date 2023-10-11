@@ -1,5 +1,4 @@
 /*
- *
  * MIT License
  *
  * Copyright (c) 2017-2019 nuls.io
@@ -24,27 +23,54 @@
  *
  */
 
-package io.nuls.provider.model.form.consensus;
+package io.nuls.account.model.dto;
 
 
-import io.nuls.core.rpc.model.ApiModel;
-import io.nuls.core.rpc.model.ApiModelProperty;
-import io.nuls.provider.model.form.Base;
+import io.nuls.account.model.bo.tx.AccountBlockInfo;
+import io.nuls.account.model.po.AccountBlockExtendPO;
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.basic.NulsOutputStreamBuffer;
+import io.nuls.base.data.Address;
+import io.nuls.base.data.BaseNulsData;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.parse.SerializeUtils;
+
+import java.io.IOException;
 
 /**
- * @author Niels
+ * @author: PierreLuo
+ * @date: 2022/1/23
  */
-@ApiModel(description = "获取停止节点表单数据")
-public class GetStopAgentCoinDataForm extends Base {
+public class AccountBlockDTO {
 
-    @ApiModelProperty(description = "共识节点hash", required = true)
-    private String agentHash;
+    private byte[] address;
+    private AccountBlockInfo info;
 
-    public String getAgentHash() {
-        return agentHash;
+    public AccountBlockDTO() {
     }
 
-    public void setAgentHash(String agentHash) {
-        this.agentHash = agentHash;
+    public AccountBlockDTO(byte[] address) {
+        this.address = address;
+    }
+
+    public AccountBlockDTO(byte[] address, AccountBlockInfo info) throws NulsException, IOException {
+        this.address = address;
+        this.info = info;
+    }
+
+    public byte[] getAddress() {
+        return address;
+    }
+
+    public void setAddress(byte[] address) {
+        this.address = address;
+    }
+
+    public AccountBlockInfo getInfo() {
+        return info;
+    }
+
+    public void setInfo(AccountBlockInfo info) {
+        this.info = info;
     }
 }
