@@ -9,6 +9,8 @@ import io.nuls.core.model.ObjectUtils;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.CmdAnnotation;
+import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.model.NulsCoresCmd;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
 
@@ -24,6 +26,7 @@ import java.util.Map;
  * @date 2019/5/23 21:05
  */
 @Component
+@NulsCoresCmd(module = ModuleE.NC)
 public final class MessageDispatcher extends BaseCmd {
 
     private List<MessageProcessor> processors;

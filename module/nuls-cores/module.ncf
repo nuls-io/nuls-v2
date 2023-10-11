@@ -1,0 +1,10 @@
+[JAVA]
+APP_NAME=nuls-cores
+MAIN_CLASS=io.nuls.NulsCoresBootstrap
+VERSION=1.0.0
+JOPT_XMS=1024
+JOPT_XMX=2048
+
+[Core]
+Managed=1
+loadLanguage=1
