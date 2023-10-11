@@ -166,11 +166,13 @@ public class NulsLogger {
     public void error(String msg, Object... objs) {
         String logContent = getLogTrace() + ":" + msg;
         try {
-            List<String> objStrs = new ArrayList<>();
-            for (Object obj: objs) {
-                if(obj instanceof String){
-                    objStrs.add((String)obj);
-                }else{
+            List<Object> objStrs = new ArrayList<>();
+            for (Object obj : objs) {
+                if (obj instanceof String) {
+                    objStrs.add((String) obj);
+                } else if (obj instanceof Throwable) {
+                    objStrs.add(obj);
+                } else {
                     objStrs.add(JSONUtils.obj2json(obj));
                 }
             }
