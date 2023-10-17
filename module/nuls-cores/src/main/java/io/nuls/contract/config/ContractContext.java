@@ -86,6 +86,7 @@ public class ContractContext {
     public static short PROTOCOL_14 = 14;
     public static short PROTOCOL_15 = 15;
     public static short PROTOCOL_16 = 16;
+    public static short PROTOCOL_17 = 17;
     private static final LoadingCache<String, ContractAddressInfoPo> CONTRACT_INFO_CACHE;
     private static ContractHelper contractHelper;
 
