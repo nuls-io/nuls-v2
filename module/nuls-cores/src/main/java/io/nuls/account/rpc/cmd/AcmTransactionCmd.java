@@ -40,7 +40,7 @@ import static io.nuls.account.util.LoggerUtil.LOG;
  */
 @Component
 @NulsCoresCmd(module = ModuleE.AC)
-public class TransactionCmd extends BaseCmd {
+public class AcmTransactionCmd extends BaseCmd {
 
     @Autowired
     private TransactionService transactionService;

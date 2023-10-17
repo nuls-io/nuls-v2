@@ -1,9 +1,9 @@
 [global]
 encoding=UTF-8
 language=en
-logPath=/Volumes/Niels-1T/nuls_prod_pro/logs
+logPath=/Users/niels/workspace/nuls-v2/logs
 logLevel=INFO
-dataPath=/Volumes/Niels-1T/nuls_prod_pro/data
+dataPath=/Volumes/Niels-1T/version-data/nuls-data
 #默认本链ID
 chainId=1
 #地址前缀
@@ -43,7 +43,6 @@ maxOutCount=20
 [account]
 blockAccountManager=NULSd6Hh5e4o3N3y6FnHeGhECFXrETqSzbapx
 keystoreFolder=/keystore/backup
-dependent=protocol-update
 
 [block]
 #区块最大字节数
@@ -62,7 +61,7 @@ singleDownloadTimeout=15000
 cachedBlockSizeLimit=20971520
 #创世块文件路径(支持绝对路径与相对路径,相对路径相对于此配置文件的目录)
 genesisBlockPath=genesis-block.json
-dependent=cross-chain,protocol-update,smart-contract
+
 
 
 [consensus]
@@ -90,19 +89,11 @@ initTime=1594483200
 deflationRatio=0.4
 #通缩间隔时间(单位：S),30天
 deflationTimeInterval=2592000
-dependent=protocol-update,smart-contract,cross-chain
-
-[ledger]
-dependent=protocol-update
 
 [smart-contract]
 #合约视图方法调用最大消耗的Gas
 maxViewGas=100000000
 crossTokenSystemContract=NULSd6HgsyGNK1xTcx2GnC9y3Jr1DKd3qL2HS
-dependent=protocol-update
-
-[chain-manager]
-dependent=smart-contract,protocol-update
 
 [public-service]
 #public-service模块对外的rpc端口号
@@ -127,10 +118,6 @@ teamAddress=NULSd6Hh6m73yRYCn8ff2jo9qN93bh4GpzFDn
 communityAddress=NULSd6Hh76ja8dHkTdYvTJS9gEAygiU1uLRGR,NULSd6Hh84g7u61ntrWhrdEMjXvM9STRPxFZx,NULSd6Hh8xn55HeTWKwRAG31fj2eHtq6Aw2Rg
 syncCoinBase=false
 syncAddress=
-dependent=smart-contract,cross-chain,chain-manager
-
-[transaction]
-dependent=protocol-update,smart-contract
 
 [cross-chain]
 #跨链节点链接的最小值
@@ -147,25 +134,22 @@ verifiers=NULSd6Hge7xHDnvsSpnzbR2gWHd31zJ1How11,NULSd6Hgc5VNP4rF4wxdiXEQKpBKUE4w
 mainByzantineRatio=66
 #主网最大签名数
 maxSignatureCount=100
-dependent=protocol-update,smart-contract
 
 [protocol-update]
 #每隔多少个区块统计一次协议占比
 interval=1000
-dependent=smart-contract,cross-chain
 
 [nuls-api]
 #httpServer的启动ip
 serverIp=0.0.0.0
 #httpServer的启动port
 serverPort=8004
-dependent=smart-contract,cross-chain,chain-manager
+
 
 [nuls-module-web-wallet]
 apiModuleApi=http://127.0.0.1:8003/
 webWalletPort=8006
 webWalletHost=0.0.0.0
-dependent=smart-contract,cross-chain
 
 [nuls-module-explorer]
 apiModuleApi=http://127.0.0.1:8003/
