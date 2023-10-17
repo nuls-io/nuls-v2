@@ -49,7 +49,8 @@ public enum ModuleE {
     PU("pu", Constant.PROTOCOL_UPDATE, ModuleE.DOMAIN),
     CC("cc", Constant.CROSS_CHAIN, ModuleE.DOMAIN),
     SC("sc", Constant.SMART_CONTRACT, ModuleE.DOMAIN),
-    AP("ap", Constant.PUBLIC_SERVICE, ModuleE.DOMAIN);
+    AP("ap", Constant.PUBLIC_SERVICE, ModuleE.DOMAIN),
+    NC("nc", Constant.NULS_CORES, ModuleE.DOMAIN);
 
     public static final String DOMAIN = "Nuls";
 
@@ -82,6 +83,8 @@ public enum ModuleE {
         public static final String PUBLIC_SERVICE = "public-service";
 
         public static final String CMD = "cmd-client";
+
+        public static final String NULS_CORES = "nuls-cores";
     }
 
     public final String abbr;

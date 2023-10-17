@@ -62,6 +62,10 @@ public class RocksDBManager {
      */
     private static String dataPath;
 
+    public static void setDataPath(String dataPath) {
+        RocksDBManager.dataPath = dataPath;
+    }
+
     /**
      * 根据传入的数据库路径将已存在的数据库连接打开，并缓存DB连接.
      * 如果有数据表连接被关闭需要重新打开连接也可以，执行初始化连接

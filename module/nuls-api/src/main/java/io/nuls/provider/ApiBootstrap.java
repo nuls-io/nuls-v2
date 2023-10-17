@@ -109,13 +109,14 @@ public class ApiBootstrap extends RpcModule {
     @Override
     public Module[] declareDependent() {
         return new Module[]{
-                new Module(ModuleE.CS.abbr, ROLE),
-                new Module(ModuleE.BL.abbr, ROLE),
-                new Module(ModuleE.AC.abbr, ROLE),
-                new Module(ModuleE.TX.abbr, ROLE),
-                new Module(ModuleE.LG.abbr, ROLE),
-                new Module(ModuleE.CC.abbr, ROLE),
-                new Module(ModuleE.NW.abbr, ROLE)
+                new Module(ModuleE.NC.abbr, ROLE)
+                //new Module(ModuleE.CS.abbr, ROLE),
+                //new Module(ModuleE.BL.abbr, ROLE),
+                //new Module(ModuleE.AC.abbr, ROLE),
+                //new Module(ModuleE.TX.abbr, ROLE),
+                //new Module(ModuleE.LG.abbr, ROLE),
+                //new Module(ModuleE.CC.abbr, ROLE),
+                //new Module(ModuleE.NW.abbr, ROLE)
         };
     }
 
@@ -133,8 +134,8 @@ public class ApiBootstrap extends RpcModule {
     @Override
     public void onDependenciesReady(Module module) {
         Log.info("dependencies [{}] ready", module.getName());
-        if (ModuleE.LG.abbr.equals(module.getName())) {
-            Log.info("onDependenciesReady ledger");
+        if (ModuleE.NC.abbr.equals(module.getName())) {
+            Log.info("onDependenciesReady nuls cores");
             ledgerAssetCache.initial(config.getChainId());
         }
 

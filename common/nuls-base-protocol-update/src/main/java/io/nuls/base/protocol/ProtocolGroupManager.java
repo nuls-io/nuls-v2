@@ -132,13 +132,13 @@ public class ProtocolGroupManager {
                     }
                 });
                 messageDispatcher.setProcessors(messageProcessors);
-                try {
-                    if (ConnectManager.getConnectByRole(ModuleE.TX.abbr) != null) {
-                        RegisterHelper.registerTx(chainId, protocol);
-                    }
-                } catch (Exception e) {
-                    Log.warn(e.getMessage());
-                }
+                //try {
+                //    if (ConnectManager.getConnectByRole(ModuleE.TX.abbr) != null) {
+                //        RegisterHelper.registerTx(chainId, protocol);
+                //    }
+                //} catch (Exception e) {
+                //    Log.warn(e.getMessage());
+                //}
             }
         }
     }
