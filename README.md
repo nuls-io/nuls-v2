@@ -2,6 +2,7 @@
 
 ## Welcome to NULS! ##
 
+NULS — Making It Easier To Innovate
 
 ## Introduction
 
@@ -60,29 +61,15 @@ Note: The command will automatically end when all modules are started.
 
 Stay tuned
 
-## Explorer and Web Wallet
+## Explorer
 
-Explorer URL:  [http://beta.nulscan.io/](http://beta.nulscan.io/)
-
-Web Wallet: [http://beta.wallet.nuls.io/](http://beta.wallet.nuls.io/)
+Explorer URL:  [https://nulscan.io/](https://nulscan.io/)
 
 ## ChainBox Tutorial
 
 Please check the following documents：
 
 [https://docs.nuls.io/NULS2.0/chainBoxGuide.html](https://docs.nuls.io/NULS2.0/chainBoxGuide.html)
-
-## Debug
-
-Stay tuned
-
-## Configuration
-
-Stay tuned
-
-## Interfaces
-
-Stay tuned
 
 ## Modules Description
 
@@ -101,15 +88,11 @@ Contributions to NULS are welcomed! We sincerely invite developers who are exper
 Nuls is released under the [MIT](http://opensource.org/licenses/MIT) license.
 Modules added in the future may be released under a different license specified in their module library path.
 
-## Community
+## Contact Us
 
-- [nuls.io](https://nuls.io/)
-- [@Twitter](https://twitter.com/nulsservice)
+- [Discord](https://discord.com/invite/aRCwbj47WN/)
+- [Website](https://nuls.io/)
+- [Telegram](https://t.me/Nulsio/)
+- [Reddit](https://www.reddit.com/r/nulsservice/)
+- [Twitter](https://twitter.com/Nuls/)
 - [Facebook](https://www.facebook.com/nulscommunity/)
-- [YouTube channel](https://www.youtube.com/channel/UC8FkLeF4QW6Undm4B3InN1Q?view_as=subscriber)
-- Telegram [NULS Community](https://t.me/Nulsio)
-- Telegram [NULS 中文社区](https://t.me/Nulscn)
-
-####  
-
-test
