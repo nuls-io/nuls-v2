@@ -50,7 +50,7 @@ import java.util.Map;
  */
 @Component
 @NulsCoresCmd(module = ModuleE.LG)
-public class TransactionCmd extends BaseLedgerCmd {
+public class LgmTransactionCmd extends BaseLedgerCmd {
 
     @Autowired
     private TransactionService transactionService;

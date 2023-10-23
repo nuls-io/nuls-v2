@@ -18,7 +18,7 @@ import java.util.Map;
  * */
 @Component
 @NulsCoresCmd(module = ModuleE.CS)
-public class ContractCmd extends BaseCmd {
+public class CsmContractCmd extends BaseCmd {
     @Autowired
     private ContractService service;
 

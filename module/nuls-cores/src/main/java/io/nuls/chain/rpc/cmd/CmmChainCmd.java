@@ -70,7 +70,7 @@ import java.util.Map;
  */
 @Component
 @NulsCoresCmd(module = ModuleE.CM)
-public class ChainCmd extends BaseChainCmd {
+public class CmmChainCmd extends BaseChainCmd {
 
     @Autowired
     private ChainService chainService;
