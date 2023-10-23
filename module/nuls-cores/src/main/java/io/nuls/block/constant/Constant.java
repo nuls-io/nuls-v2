@@ -17,7 +17,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package io.nuls.block.constant;
 
 import io.nuls.base.data.Block;

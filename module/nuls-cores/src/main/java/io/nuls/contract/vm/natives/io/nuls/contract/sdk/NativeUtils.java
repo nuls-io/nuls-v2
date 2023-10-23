@@ -595,6 +595,12 @@ public class NativeUtils {
                 String[] args = (String[]) frame.heap.getObject(argsRef);
                 return getAddressByPublicKey(args, methodCode, frame);
             }
+        } else if ("keccak".equals(cmdName)) {
+            // add by pierre at 2023/10/07 p17
+            if(ProtocolGroupManager.getCurrentVersion(currentChainId) >= ContractContext.PROTOCOL_17 ) {
+                String[] args = (String[]) frame.heap.getObject(argsRef);
+                return keccak(args, methodCode, frame);
+            }
         }
         String[] args = (String[]) frame.heap.getObject(argsRef);
 
@@ -687,6 +693,18 @@ public class NativeUtils {
             return result;
         } catch (Exception e) {
             throw new ErrorException("Invoke external cmd failed. When getCodeHash.", frame.vm.getGasUsed(), e.getMessage());
+        }
+    }
+
+    private static Result keccak(String[] args, MethodCode methodCode, Frame frame) {
+        try {
+            String hex = args[0];
+            String resultStr = KeccakHash.keccak(hex);
+            Object resultValue = frame.heap.newString(resultStr);
+            Result result = NativeMethod.result(methodCode, resultValue, frame);
+            return result;
+        } catch (Exception e) {
+            throw new ErrorException("Invoke external cmd failed. When keccak.", frame.vm.getGasUsed(), e.getMessage());
         }
     }
 
