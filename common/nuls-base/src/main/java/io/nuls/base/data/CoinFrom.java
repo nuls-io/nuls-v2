@@ -81,7 +81,7 @@ public class CoinFrom extends Coin {
 
     @Override
     public String toString() {
-        return "CoinTo{" +
+        return "CoinFrom{" +
                 "address=" + AddressTool.getStringAddressByBytes(address) +
                 ", assetsChainId=" + assetsChainId +
                 ", assetsId=" + assetsId +

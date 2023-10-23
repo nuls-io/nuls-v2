@@ -1,5 +1,8 @@
 package io.nuls.core.constant;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author tag
  */
@@ -72,4 +75,6 @@ public class BaseConstant {
      * 模块统一交易回滚RPC接口
      */
     public static final String TX_ROLLBACK = "txRollback";
+
+    public static final List<String> NULS_CORES_DOMAINS = new ArrayList<>();
 }
