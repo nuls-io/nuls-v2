@@ -55,6 +55,7 @@ public class IoUtils {
      */
     public static String read(String path) throws Exception {
         ObjectUtils.canNotEmpty(path, "null parameter");
+        path = path.replaceAll("\\\\","/");
         try (InputStream stream = IoUtils.class.getClassLoader().getResourceAsStream(path)) {
             return readRealPath(stream);
         }
