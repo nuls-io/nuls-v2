@@ -165,6 +165,21 @@ public class TxServiceImpl implements TxService {
                         tx.getType(), hash.toHex(), verifyResult.getErrorCode().getCode());
                 throw new NulsException(ErrorCode.init(verifyResult.getErrorCode().getCode()));
             }
+
+            //todo fro 2.18.0 version
+            CoinData cd = tx.getCoinDataInstance();
+            for (CoinFrom from : cd.getFrom()) {
+                if (chain.getChainId() == 1 && AddressTool.getChainIdByAddress(from.getAddress()) == 2) {
+                    throw new NulsException(TxErrorCode.INVALID_ADDRESS, "address is testnet address Exception");
+                }
+            }
+            for (CoinTo to : cd.getTo()) {
+                if (chain.getChainId() == 1 && AddressTool.getChainIdByAddress(to.getAddress()) == 2) {
+                    throw new NulsException(TxErrorCode.INVALID_ADDRESS, "address is testnet address Exception");
+                }
+            }
+
+
             VerifyLedgerResult verifyLedgerResult = LedgerCall.commitUnconfirmedTx(chain, RPCUtil.encode(tx.serialize()));
             if (!verifyLedgerResult.businessSuccess()) {
 
