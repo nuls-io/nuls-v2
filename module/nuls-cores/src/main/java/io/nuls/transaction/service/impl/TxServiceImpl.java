@@ -592,6 +592,9 @@ public class TxServiceImpl implements TxService {
             if (AddressTool.isBlackHoleAddress(TxUtil.blackHolePublicKey, chainId, addrBytes)) {
                 throw new NulsException(TxErrorCode.INVALID_ADDRESS, "address is blackHoleAddress Exception");
             }
+            if (ProtocolGroupManager.getCurrentVersion(chainId) >= TxContext.UPDATE_VERSION_CM_UPGRADE && chainId == 1 && AddressTool.getChainIdByAddress(coinFrom.getAddress()) == 2) {
+                throw new NulsException(TxErrorCode.INVALID_ADDRESS, "address is testnet address Exception");
+            }
             if (forked && TxUtil.isBlackHoleAddress(chainId, addrBytes)) {
                 throw new NulsException(TxErrorCode.INVALID_ADDRESS, "Address is blackHoleAddress Exception[x]");
             }
@@ -659,6 +662,7 @@ public class TxServiceImpl implements TxService {
                 throw new NulsException(TxErrorCode.COINTO_NOT_FOUND);
             }
         }
+        int localChainId = chain.getChainId();
         //验证收款方是不是属于同一条链
         Integer addressChainId = null;
         int txChainId = chain.getChainId();
@@ -671,6 +675,11 @@ public class TxServiceImpl implements TxService {
             if (ModuleE.CC.abbr.equals(ResponseMessageProcessor.TX_TYPE_MODULE_MAP.get(type))) {
                 validAddressChainId = AddressTool.getChainIdByAddress(coinTo.getAddress());
             }
+
+            if (ProtocolGroupManager.getCurrentVersion(localChainId) >= TxContext.UPDATE_VERSION_CM_UPGRADE && localChainId == 1 && AddressTool.getChainIdByAddress(coinTo.getAddress()) == 2) {
+                throw new NulsException(TxErrorCode.INVALID_ADDRESS, "address is testnet address Exception");
+            }
+
             if (!AddressTool.validAddress(validAddressChainId, addr)) {
                 throw new NulsException(TxErrorCode.INVALID_ADDRESS);
             }
