@@ -100,6 +100,23 @@ public class ChainServiceImpl implements ChainService {
         asset.setInitNumber(new BigInteger(nulsChainConfig.getNulsAssetInitNumberMax()));
         asset.setSymbol(nulsChainConfig.getMainSymbol());
         assetService.createAsset(asset);
+        if(chainId == 1){
+            //2.18.0
+            BlockChain chain2 = new BlockChain();
+            chain2.setChainId(2);
+            chain2.setRegAssetId(1);
+            chain2.setChainName("NULS-testnet");
+            chain2.setAddressPrefix("tNULS");
+            chain2.addCreateAssetId("2-1");
+            chain2.addCirculateAssetId("2-1");
+            chainStorage.save(chainId, chain);
+            Asset asset2 = new Asset();
+            asset2.setChainId(2);
+            asset2.setAssetId(1);
+            asset2.setInitNumber(BigInteger.valueOf(10000000000000000L));
+            asset2.setSymbol("tNULS");
+            assetService.createAsset(asset);
+        }
     }
 
     /**
