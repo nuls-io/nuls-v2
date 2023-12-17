@@ -138,6 +138,18 @@ public class TxServiceImpl implements TxService {
         if (!isTxExists(chain, tx.getHash())) {
             try {
                 verifyTransactionInCirculation(chain, tx);
+                //todo fro 2.18.0 version
+                CoinData cd = tx.getCoinDataInstance();
+                for (CoinFrom from : cd.getFrom()) {
+                    if (chain.getChainId() == 1 && AddressTool.getChainIdByAddress(from.getAddress()) == 2) {
+                        throw new NulsException(TxErrorCode.INVALID_ADDRESS, "address is testnet address Exception");
+                    }
+                }
+                for (CoinTo to : cd.getTo()) {
+                    if (chain.getChainId() == 1 && AddressTool.getChainIdByAddress(to.getAddress()) == 2) {
+                        throw new NulsException(TxErrorCode.INVALID_ADDRESS, "address is testnet address Exception");
+                    }
+                }
                 chain.getUnverifiedQueue().addLast(txNet);
             } catch (NulsException e) {
                 chain.getLogger().error(e);
