@@ -1,9 +1,9 @@
 [global]
 encoding=UTF-8
 language=en
-logPath=/Users/niels/workspace/nuls-v2/logs
+logPath=/Users/wangzhijian/workspace/nuls-v2/logs
 logLevel=INFO
-dataPath=/Volumes/Niels-1T/version-data/nuls-data
+dataPath=/Users/wangzhijian/workspace/nuls-v2/data
 #默认本链ID
 chainId=1
 #地址前缀
@@ -30,18 +30,18 @@ packageVersion=%PACKAGE_VERSION%
 port=8001
 crossPort=8002
 #魔法参数
-packetMagic=20191222
+packetMagic=20194444
 #种子节点
-selfSeedIps=seeda.nuls.io:8001,seedb.nuls.io:8001,seedc.nuls.io:8001,seedd.nuls.io:8001,seede.nuls.io:8001,seedf.nuls.io:8001
+selfSeedIps=127.0.0.1:8001
 #主网的跨链种子连接节点
-moonSeedIps=seeda.nuls.io:8002,seedb.nuls.io:8002,seedc.nuls.io:8002,seedd.nuls.io:8002,seede.nuls.io:8002,seedf.nuls.io:8002
+moonSeedIps=127.0.0.1:8002
 #最大入网连接数
 maxInCount=300
 #最大出网连接数
 maxOutCount=20
 
 [account]
-blockAccountManager=NULSd6Hh5e4o3N3y6FnHeGhECFXrETqSzbapx
+blockAccountManager=NULSd6Hgck6xuMvGasN6yo4Ep8DatJfqpqhKZ
 keystoreFolder=/keystore/backup
 
 [block]
@@ -52,7 +52,7 @@ extendMaxSize=1024
 #引发分叉链切换的高度差阈值
 chainSwtichThreshold=3
 #最小链接节点数,当链接到的网络节点低于此参数时,会持续等待
-minNodeAmount=2
+minNodeAmount=0
 #区块同步过程中,每次从网络上节点下载的区块数量
 downloadNumber=10
 #从网络节点下载单个区块的超时时间
@@ -66,7 +66,7 @@ genesisBlockPath=genesis-block.json
 
 [consensus]
 #种子节点列表
-seedNodes=NULSd6Hge7xHDnvsSpnzbR2gWHd31zJ1How11,NULSd6Hgc5VNP4rF4wxdiXEQKpBKUE4w5RS22,NULSd6HgeQwXLdre69ArkqVZNDqMLU4CaAz33,NULSd6HgcjAKAgq8jjXgBCcNLEJUvJEYcoj44,NULSd6HgiDdTjcuvhqzm3bomyBFZmosV3ei55
+seedNodes=NULSd6Hgck6xuMvGasN6yo4Ep8DatJfqpqhKZ
 #出块地址密码
 password=nuls123456
 #出块间隔时间(单位：s)
@@ -127,9 +127,9 @@ sendHeight=6
 #跨链交易拜占庭比例
 byzantineRatio=66
 #主网跨链种子节点列表
-crossSeedIps=seeda.nuls.io:8002,seedb.nuls.io:8002,seedc.nuls.io:8002,seedd.nuls.io:8002,seede.nuls.io:8002,seedf.nuls.io:8002
+crossSeedIps=127.0.0.1:8002
 #主网验证人列表
-verifiers=NULSd6Hge7xHDnvsSpnzbR2gWHd31zJ1How11,NULSd6Hgc5VNP4rF4wxdiXEQKpBKUE4w5RS22,NULSd6HgeQwXLdre69ArkqVZNDqMLU4CaAz33,NULSd6HgcjAKAgq8jjXgBCcNLEJUvJEYcoj44,NULSd6HgiDdTjcuvhqzm3bomyBFZmosV3ei55
+verifiers=NULSd6Hgck6xuMvGasN6yo4Ep8DatJfqpqhKZ
 #主网签名拜占庭比列
 mainByzantineRatio=66
 #主网最大签名数

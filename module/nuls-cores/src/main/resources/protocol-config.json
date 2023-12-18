@@ -1,5 +1,13 @@
 [
   {
+    "version": "18",
+    "extend": "17",
+    "validTxs": [],
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  },
+  {
     "version": "17",
     "extend": "16",
     "validTxs": [],
