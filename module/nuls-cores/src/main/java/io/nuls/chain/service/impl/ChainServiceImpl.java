@@ -109,13 +109,13 @@ public class ChainServiceImpl implements ChainService {
             chain2.setAddressPrefix("tNULS");
             chain2.addCreateAssetId("2-1");
             chain2.addCirculateAssetId("2-1");
-            chainStorage.save(chainId, chain);
+            chainStorage.save(2, chain2);
             Asset asset2 = new Asset();
             asset2.setChainId(2);
             asset2.setAssetId(1);
             asset2.setInitNumber(BigInteger.valueOf(10000000000000000L));
             asset2.setSymbol("tNULS");
-            assetService.createAsset(asset);
+            assetService.createAsset(asset2);
         }
     }
 
