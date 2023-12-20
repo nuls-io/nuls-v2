@@ -3,6 +3,7 @@ package io.nuls.crosschain.utils.validator;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.*;
+import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
@@ -72,6 +73,13 @@ public class CrossTxValidator {
         //如果本链为发起链且本链不为主链,则需要生成主网协议的跨链交易验证并验证签名
         int fromChainId = AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress());
         int toChainId = AddressTool.getChainIdByAddress(coinData.getTo().get(0).getAddress());
+
+        if (ProtocolGroupManager.getCurrentVersion(chain.getChainId()) >= 18) {
+            if (coinData.getTo().size() != 1) {
+                throw new NulsException(NulsCrossChainErrorCode.TO_ADDRESS_ERROR);
+            }
+        }
+        
         if(toChainId == 0){
             throw new NulsException(NulsCrossChainErrorCode.TO_ADDRESS_ERROR);
         }
