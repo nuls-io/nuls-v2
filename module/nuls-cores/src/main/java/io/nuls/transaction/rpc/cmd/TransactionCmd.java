@@ -3,9 +3,7 @@ package io.nuls.transaction.rpc.cmd;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.NulsHash;
-import io.nuls.base.data.Transaction;
+import io.nuls.base.data.*;
 import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.base.protocol.TxRegisterDetail;
 import io.nuls.base.signture.MultiSignTxSignature;
@@ -121,6 +119,18 @@ public class TransactionCmd extends BaseCmd {
             String txStr = (String) params.get("tx");
             //将txStr转换为Transaction对象
             Transaction transaction = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
+            //todo fro 2.18.0 version
+            CoinData cd = transaction.getCoinDataInstance();
+            for (CoinFrom from : cd.getFrom()) {
+                if (chain.getChainId() == 1 && AddressTool.getChainIdByAddress(from.getAddress()) == 2) {
+                    throw new NulsException(TxErrorCode.INVALID_ADDRESS, "address is testnet address Exception");
+                }
+            }
+            for (CoinTo to : cd.getTo()) {
+                if (chain.getChainId() == 1 && AddressTool.getChainIdByAddress(to.getAddress()) == 2) {
+                    throw new NulsException(TxErrorCode.INVALID_ADDRESS, "address is testnet address Exception");
+                }
+            }
             //将交易放入待验证本地交易队列中
             boolean rs = NetworkCall.broadcastTx(chain, transaction);
             Map<String, Object> map = new HashMap<>(TxConstant.INIT_CAPACITY_4);
