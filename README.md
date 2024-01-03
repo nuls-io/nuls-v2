@@ -1,22 +1,23 @@
-# NULS 2.0
+# NULS v2
 
-## Welcome to NULS! ##
+NULS v2 is the main running program of NULS 2.0 nodes. It contains 3 microservice modules:
+- nuls-cores
+- nuls-cmd-client
+- nuls-api
+nuls-cores consists of 11 sub-modules:
+https://github.com/nuls-io/nuls-v2/tree/master/module/nuls-cores/src/main/java/io/nuls
 
-NULS — Making It Easier To Innovate
 
-## Introduction
-
-NULS is a blockchain infrastructure that provides customizable services and is also a global open-source community blockchain project. NULS adopts micro-services to achieve a highly modular underlying architecture, using smart contracts and cross-chain technologies, combined with the ability of ChainBox to quickly build chains, reduce development costs, and accelerate blockchain business application landing.
 
 ## Getting Started
 
-test
+Start a NULS node according to this boot.
 
 ### Download Release
 
 Download URL: [RELEASES](https://github.com/nuls-io/nuls-v2/releases)
 
-## Running NULS 2.0
+## Running NULS v2
 
 ### Bootstrap
 
@@ -47,7 +48,7 @@ Note: The command will automatically end when all modules are started.
 
 ## Docker Quick Start
 
-Stay tuned
+Stay tuned. Join Discord to find out.
 
 ## Explorer
 
@@ -67,20 +68,48 @@ Please check the following documents:
 
 Note: Some documents are in the process of being updated, so please understand if there are some inconsistencies.
 
-## Contribution
+## Contribute to NULS v2
+Click Star and Fork to start contributing improvements to NULS v2.
+Hope more contributors can submit improvement suggestions and bug reports here.
+Issues: https://github.com/nuls-io/nuls-v2/issues
 
-Contributions to NULS are welcomed! We sincerely invite developers who are experienced in the blockchain field to join the NULS technology community. Details: https://nuls.community/d/9-invitation-of-community-developers. To be a great community, Nuls needs to welcome developers from all walks of life, with different backgrounds, and with a wide range of experience.
+
+
+# Welcome to NULS! #
+
+NULS — Making It Easier To Innovate
+
+## Introduction
+
+NULS is a blockchain infrastructure that provides customizable services and is also a global open-source community blockchain project. NULS adopts micro-services to achieve a highly modular underlying architecture, using smart contracts and cross-chain technologies, combined with the ability of ChainBox to quickly build chains, reduce development costs, and accelerate blockchain business application landing.
+
+## Contribute to NULS
+We are committed to making blockchain technology simpler and our slogan is "NULS Making It Easier to Innovate".
+
+Get to know NULS developers
+https://nuls.io/developer
+
+You are welcome to contribute to NULS! We sincerely invite developers with rich experience in the blockchain field to join the NULS technology community.
+https://nuls.io/community
+
+Documentation：https://docs.nuls.io
+NULS Brand Assets: https://nuls.io/brand-assets
+
+
 
 ## License
 
-Nuls is released under the [MIT](http://opensource.org/licenses/MIT) license.
-Modules added in the future may be released under a different license specified in their module library path.
+NULS is released under the [MIT](http://opensource.org/licenses/MIT) license.
+Modules added in the future may be release under different license, will specified in the module library path.
 
-## Contact Us
+## Community
 
-- [Discord](https://discord.com/invite/aRCwbj47WN/)
-- [Website](https://nuls.io/)
-- [Telegram](https://t.me/Nulsio/)
-- [Reddit](https://www.reddit.com/r/nulsservice/)
-- [Twitter](https://twitter.com/Nuls/)
-- [Facebook](https://www.facebook.com/nulscommunity/)
+- Website: https://nuls.io
+- Twitter: https://twitter.com/nuls
+- Discord:https://discord.gg/aRCwbj47WN
+- Telegram: https://t.me/Nulsio)
+- Medium: https://nuls.medium.com
+- Forum: https://forum.nuls.io
+- GitHub: https://github.com/nuls-io
+
+#### 
