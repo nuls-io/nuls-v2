@@ -1,7 +1,0 @@
-{
-  "maxOutAmount":20,
-  "maxInAmount":200,
-  "moduleCode":"cc",
-  "crossCtxType":10,
-  "mainNet":false
-}

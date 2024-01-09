@@ -276,7 +276,7 @@ public class DoubleUtils {
      * @return 商
      */
     public static BigDecimal div(BigDecimal bd1, BigDecimal bd2) {
-        if (bd2.equals(BigDecimal.ZERO)) {
+        if (bd2.compareTo(BigDecimal.ZERO) == 0) {
             throw new IllegalArgumentException("除数不能为0！");
         }
         return bd1.divide(bd2, 12, RoundingMode.HALF_UP);

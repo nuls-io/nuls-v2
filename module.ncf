@@ -1,9 +1,9 @@
 [global]
 encoding=UTF-8
 language=en
-logPath=/Users/niels/workspace/nuls-v2/logs
+logPath=/Users/wangzhijian/workspace/nuls-v2/logs
 logLevel=INFO
-dataPath=/Users/niels/workspace/nuls-v2/data
+dataPath=/Users/wangzhijian/workspace/nuls-v2/data
 #默认本链ID
 chainId=1
 #地址前缀
@@ -30,20 +30,19 @@ packageVersion=%PACKAGE_VERSION%
 port=8001
 crossPort=8002
 #魔法参数
-packetMagic=20191222
+packetMagic=20194444
 #种子节点
-selfSeedIps=seeda.nuls.io:8001,seedb.nuls.io:8001,seedc.nuls.io:8001,seedd.nuls.io:8001,seede.nuls.io:8001,seedf.nuls.io:8001
+selfSeedIps=127.0.0.1:8001
 #主网的跨链种子连接节点
-moonSeedIps=seeda.nuls.io:8002,seedb.nuls.io:8002,seedc.nuls.io:8002,seedd.nuls.io:8002,seede.nuls.io:8002,seedf.nuls.io:8002
+moonSeedIps=127.0.0.1:8002
 #最大入网连接数
 maxInCount=300
 #最大出网连接数
 maxOutCount=20
 
 [account]
-blockAccountManager=NULSd6Hh5e4o3N3y6FnHeGhECFXrETqSzbapx
+blockAccountManager=NULSd6Hgck6xuMvGasN6yo4Ep8DatJfqpqhKZ
 keystoreFolder=/keystore/backup
-dependent=protocol-update
 
 [block]
 #区块最大字节数
@@ -53,7 +52,7 @@ extendMaxSize=1024
 #引发分叉链切换的高度差阈值
 chainSwtichThreshold=3
 #最小链接节点数,当链接到的网络节点低于此参数时,会持续等待
-minNodeAmount=2
+minNodeAmount=0
 #区块同步过程中,每次从网络上节点下载的区块数量
 downloadNumber=10
 #从网络节点下载单个区块的超时时间
@@ -62,12 +61,12 @@ singleDownloadTimeout=15000
 cachedBlockSizeLimit=20971520
 #创世块文件路径(支持绝对路径与相对路径,相对路径相对于此配置文件的目录)
 genesisBlockPath=genesis-block.json
-dependent=cross-chain,protocol-update,smart-contract
+
 
 
 [consensus]
 #种子节点列表
-seedNodes=NULSd6Hge7xHDnvsSpnzbR2gWHd31zJ1How11,NULSd6Hgc5VNP4rF4wxdiXEQKpBKUE4w5RS22,NULSd6HgeQwXLdre69ArkqVZNDqMLU4CaAz33,NULSd6HgcjAKAgq8jjXgBCcNLEJUvJEYcoj44,NULSd6HgiDdTjcuvhqzm3bomyBFZmosV3ei55
+seedNodes=NULSd6Hgck6xuMvGasN6yo4Ep8DatJfqpqhKZ
 #出块地址密码
 password=nuls123456
 #出块间隔时间(单位：s)
@@ -90,19 +89,11 @@ initTime=1594483200
 deflationRatio=0.4
 #通缩间隔时间(单位：S),30天
 deflationTimeInterval=2592000
-dependent=protocol-update,smart-contract,cross-chain
-
-[ledger]
-dependent=protocol-update
 
 [smart-contract]
 #合约视图方法调用最大消耗的Gas
 maxViewGas=100000000
 crossTokenSystemContract=NULSd6HgsyGNK1xTcx2GnC9y3Jr1DKd3qL2HS
-dependent=protocol-update
-
-[chain-manager]
-dependent=smart-contract,protocol-update
 
 [public-service]
 #public-service模块对外的rpc端口号
@@ -127,45 +118,38 @@ teamAddress=NULSd6Hh6m73yRYCn8ff2jo9qN93bh4GpzFDn
 communityAddress=NULSd6Hh76ja8dHkTdYvTJS9gEAygiU1uLRGR,NULSd6Hh84g7u61ntrWhrdEMjXvM9STRPxFZx,NULSd6Hh8xn55HeTWKwRAG31fj2eHtq6Aw2Rg
 syncCoinBase=false
 syncAddress=
-dependent=smart-contract,cross-chain,chain-manager
-
-[transaction]
-dependent=protocol-update,smart-contract
 
 [cross-chain]
 #跨链节点链接的最小值
-minNodeAmount=3
+minNodes=3
 #跨链节点链接的最大值
 sendHeight=6
 #跨链交易拜占庭比例
 byzantineRatio=66
 #主网跨链种子节点列表
-crossSeedIps=seeda.nuls.io:8002,seedb.nuls.io:8002,seedc.nuls.io:8002,seedd.nuls.io:8002,seede.nuls.io:8002,seedf.nuls.io:8002
+crossSeedIps=127.0.0.1:8002
 #主网验证人列表
-verifiers=NULSd6Hge7xHDnvsSpnzbR2gWHd31zJ1How11,NULSd6Hgc5VNP4rF4wxdiXEQKpBKUE4w5RS22,NULSd6HgeQwXLdre69ArkqVZNDqMLU4CaAz33,NULSd6HgcjAKAgq8jjXgBCcNLEJUvJEYcoj44,NULSd6HgiDdTjcuvhqzm3bomyBFZmosV3ei55
+verifiers=NULSd6Hgck6xuMvGasN6yo4Ep8DatJfqpqhKZ
 #主网签名拜占庭比列
 mainByzantineRatio=66
 #主网最大签名数
 maxSignatureCount=100
-dependent=protocol-update,smart-contract
 
 [protocol-update]
 #每隔多少个区块统计一次协议占比
 interval=1000
-dependent=smart-contract,cross-chain
 
 [nuls-api]
 #httpServer的启动ip
 serverIp=0.0.0.0
 #httpServer的启动port
 serverPort=8004
-dependent=smart-contract,cross-chain,chain-manager
+
 
 [nuls-module-web-wallet]
 apiModuleApi=http://127.0.0.1:8003/
 webWalletPort=8006
 webWalletHost=0.0.0.0
-dependent=smart-contract,cross-chain
 
 [nuls-module-explorer]
 apiModuleApi=http://127.0.0.1:8003/

@@ -25,6 +25,7 @@
 package io.nuls.core.core.ioc;
 
 import io.nuls.core.basic.InitializingBean;
+import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.core.annotation.*;
 import io.nuls.core.core.config.ConfigSetting;
 import io.nuls.core.core.config.ConfigurationLoader;
@@ -113,6 +114,8 @@ public class SpringLiteContext {
             Class<?> cls = BEAN_TYPE_MAP.get(key1);
             Configuration configuration = cls.getAnnotation(Configuration.class);
             if (configuration != null) {
+                String domain = configuration.domain();
+                //String mappingDomain = BaseConstant.ROLE_MAPPING.getOrDefault(domain, domain);
                 Set<Field> fields = getFieldSet(cls);
                 fields.forEach(field -> {
                     Value annValue = field.getAnnotation(Value.class);
@@ -124,9 +127,12 @@ public class SpringLiteContext {
                     boolean readPersist = persist != null;
                     ConfigurationLoader.ConfigItem configItem;
                     if (readPersist) {
-                        configItem = configLoader.getConfigItemForPersist(configuration.domain(), key);
+                        configItem = configLoader.getConfigItemForPersist(domain, key);
                     } else {
-                        configItem = configLoader.getConfigItem(configuration.domain(), key);
+                        configItem = configLoader.getConfigItem(domain, key);
+                    }
+                    if ("nuls-cores".equalsIgnoreCase(domain)) {
+                        configItem = configLoader.getConfigItemForCore(key);
                     }
                     if (configItem == null) {
                         Log.warn("config item :{} not setting", key);
@@ -196,8 +202,9 @@ public class SpringLiteContext {
      */
     private static void callAfterPropertiesSet() {
         BEAN_OK_MAP.entrySet().stream()
-                .sorted((e1, e2) ->
-                        getOrderByClass(e1.getValue().getClass()) > getOrderByClass(e2.getValue().getClass()) ? 1 : -1)
+//                .sorted((e1, e2) ->
+//                        getOrderByClass(e1.getValue().getClass()) > getOrderByClass(e2.getValue().getClass()) ? 1 : -1)
+                .sorted(Comparator.comparing(d -> getOrderByClass(d.getValue().getClass())))
                 .forEach(entry -> {
                     Object bean = entry.getValue();
                     if (bean instanceof InitializingBean) {

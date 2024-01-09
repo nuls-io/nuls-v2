@@ -1,7 +1,5 @@
 package io.nuls.base.protocol;
 
-import io.nuls.core.core.config.ConfigurationLoader;
-import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.io.IoUtils;
 import io.nuls.core.parse.JSONUtils;
 
@@ -26,7 +24,6 @@ public class ProtocolLoader {
     static final short DEFAULT_BEGIN_PROTOCOL_VERSION = 1;
 
     public static void load(int chainId, String protocolConfigJson) throws Exception {
-        ConfigurationLoader configurationLoader = SpringLiteContext.getBean(ConfigurationLoader.class);
         if (ProtocolGroupManager.isLoadProtocol()) {
             List<ProtocolConfigJson> protocolConfigs = JSONUtils.json2list(protocolConfigJson, ProtocolConfigJson.class);
             protocolConfigs.sort(PROTOCOL_CONFIG_COMPARATOR);

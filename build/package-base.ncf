@@ -1,10 +1,11 @@
 [package]
-account=1
-block=1
-consensus=1
-ledger=1
-network=1
-transaction=1
+account=0
+block=0
+consensus=0
+ledger=0
+network=0
+transaction=0
+nuls-cores=1
 cmd-client=1
 nuls-api=0
 public-service=0
