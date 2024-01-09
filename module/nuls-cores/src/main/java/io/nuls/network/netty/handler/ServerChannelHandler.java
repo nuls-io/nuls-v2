@@ -87,7 +87,7 @@ public class ServerChannelHandler extends BaseChannelHandler {
         LoggerUtil.COMMON_LOG.error(cause);
         if (!(cause instanceof IOException)) {
             String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-            //通常发生IOException是因为连接的节点断开了
+            //Usually occursIOExceptionIt's because the connected node is disconnected
             LoggerUtil.COMMON_LOG.error("-----------exceptionCaught-----nodeId:{}", nodeId);
             LoggerUtil.COMMON_LOG.error(cause);
         }

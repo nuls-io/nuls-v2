@@ -40,7 +40,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 时间服务类：用于同步网络模块标准时间
+ * Time service category：Used to synchronize network module standard time
  * Time service class:Used to synchronize network standard time.
  *
  * @author vivi
@@ -54,7 +54,7 @@ public class NulsDateUtils extends DateUtils implements Runnable {
     }
 
     /**
-     * 重新同步时间间隔
+     * Resynchronization interval
      * Resynchronize the interval.
      * 1 minutes;
      */
@@ -66,7 +66,7 @@ public class NulsDateUtils extends DateUtils implements Runnable {
 
 
     /**
-     * 启动时间同步线程
+     * Start time synchronization thread
      * Start the time synchronization thread.
      */
     public void start() {

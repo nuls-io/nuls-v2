@@ -10,11 +10,11 @@ import io.nuls.core.rpc.modulebootstrap.Module;
 import io.nuls.protocol.manager.ChainManager;
 
 /**
- * 协议升级模块启动类
+ * Protocol upgrade module startup class
  *
  * @author captain
  * @version 1.0
- * @date 19-3-4 下午4:09
+ * @date 19-3-4 afternoon4:09
  */
 @Component
 public class ProtocolUpdateBootstrap implements INulsCoresBootstrap {
@@ -36,7 +36,7 @@ public class ProtocolUpdateBootstrap implements INulsCoresBootstrap {
     }
 
     /**
-     * 返回当前模块的描述信息
+     * Return the description information of the current module
      * @return
      */
     @Override
@@ -56,7 +56,7 @@ public class ProtocolUpdateBootstrap implements INulsCoresBootstrap {
 
     private boolean doStart() {
         try {
-            //启动链
+            //Start Chain
             chainManager.runChain();
         } catch (Exception e) {
             Log.error("protocol module doStart error!");

@@ -5,7 +5,7 @@ import io.nuls.chain.model.dto.ChainAssetTotalCirculate;
 import java.util.List;
 
 /**
- *消息协议服务接口
+ *Message Protocol Service Interface
  *Message protocol service interface
  *
  * @author lanjinsheng

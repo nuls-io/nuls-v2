@@ -31,12 +31,12 @@ import io.nuls.provider.model.form.Base;
  * @author: PierreLuo
  * @date: 2019-12-18
  */
-@ApiModel(name = "原始随机种子")
+@ApiModel(name = "Original random seed")
 public class RandomRawSeedCountForm extends Base {
 
-    @ApiModelProperty(description = "最大高度")
+    @ApiModelProperty(description = "Maximum height")
     private long height;
-    @ApiModelProperty(description = "原始种子个数")
+    @ApiModelProperty(description = "Original number of seeds")
     private int count;
 
     public long getHeight() {

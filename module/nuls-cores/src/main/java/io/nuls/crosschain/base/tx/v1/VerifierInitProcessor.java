@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 验证人初始化处理类
+ * Verifier initialization processing class
  * Verifier Initialization Processing Class
  *
  * @author tag

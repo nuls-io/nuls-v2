@@ -44,20 +44,20 @@ import java.math.BigInteger;
 public class FreezeHeightState extends BaseNulsData {
 
     /**
-     * 交易的hash值
+     * Transactionalhashvalue
      */
     private String txHash;
     /**
-     * 交易的nonce值
+     * Transactionalnoncevalue
      */
     private byte[] nonce = LedgerConstant.getInitNonceByte();
     /**
-     * 锁定金额
+     * Lock in amount
      */
     private BigInteger amount = BigInteger.ZERO;
 
     /**
-     * 锁定高度
+     * Lock height
      */
     private long height = 0;
 

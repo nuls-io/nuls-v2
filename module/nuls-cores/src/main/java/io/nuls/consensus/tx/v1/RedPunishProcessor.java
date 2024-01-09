@@ -17,7 +17,7 @@ import io.nuls.consensus.utils.manager.PunishManager;
 
 import java.util.*;
 /**
- * 红牌交易处理器
+ * Red card trading processor
  * @author tag
  * @date 2019/6/1
  */
@@ -57,7 +57,7 @@ public class RedPunishProcessor implements TransactionProcessor {
                 redPunishData.parse(tx.getTxData(), 0);
                 String addressHex = HexUtil.encode(redPunishData.getAddress());
                 /*
-                 * 重复的红牌交易不打包
+                 * Repeated red card transactions are not packaged
                  * */
                 if (!addressHexSet.add(addressHex)) {
                     invalidTxList.add(tx);
@@ -97,7 +97,7 @@ public class RedPunishProcessor implements TransactionProcessor {
                 commitResult = false;
             }
         }
-        //回滚已提交成功的交易
+        //Roll back transactions that have been successfully submitted
         if(!commitResult){
             for (Transaction rollbackTx:commitSuccessList) {
                 try {
@@ -133,7 +133,7 @@ public class RedPunishProcessor implements TransactionProcessor {
                 rollbackResult = false;
             }
         }
-        //保存已回滚成功的交易
+        //Save successfully rolled back transactions
         if(!rollbackResult){
             for (Transaction commitTx:rollbackSuccessList) {
                 try {

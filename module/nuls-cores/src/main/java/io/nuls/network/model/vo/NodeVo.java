@@ -33,27 +33,27 @@ import io.nuls.core.rpc.model.ApiModelProperty;
  * @author: lan
  * @create: 2018/11/09
  **/
-@ApiModel(name = "网络组详情")
+@ApiModel(name = "Network group details")
 public class NodeVo implements Ivo {
-    @ApiModelProperty(description = "链ID")
+    @ApiModelProperty(description = "chainID")
     private int chainId;
-    @ApiModelProperty(description = "节点ID")
+    @ApiModelProperty(description = "nodeID")
     private String nodeId;
-    @ApiModelProperty(description = "网络魔法参数")
+    @ApiModelProperty(description = "Network Magic Parameters")
     private long magicNumber;
-    @ApiModelProperty(description = "peer节点区块高度")
+    @ApiModelProperty(description = "peerNode block height")
     private long blockHeight;
-    @ApiModelProperty(description = "peer最新区块hash")
+    @ApiModelProperty(description = "peerLatest Blockhash")
     private String blockHash;
-    @ApiModelProperty(description = "peer连接IP地址")
+    @ApiModelProperty(description = "peerconnectIPaddress")
     private String ip;
-    @ApiModelProperty(description = "peer连接端口号")
+    @ApiModelProperty(description = "peerConnection port number")
     private int port;
-    @ApiModelProperty(description = "0:未完成握手 1:已完成握手的连接")
+    @ApiModelProperty(description = "0:Unfinished handshake 1:Connection with completed handshake")
     private int state;
-    @ApiModelProperty(description = "0:入网连接 1:出网连接")
+    @ApiModelProperty(description = "0:Network connection 1:Outgoing network connection")
     private int isOut;
-    @ApiModelProperty(description = "连接时间毫秒")
+    @ApiModelProperty(description = "Connection time in milliseconds")
     private long time;
 
     public int getChainId() {

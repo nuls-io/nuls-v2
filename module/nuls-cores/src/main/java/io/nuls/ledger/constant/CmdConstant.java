@@ -32,20 +32,20 @@ package io.nuls.ledger.constant;
 public interface CmdConstant {
     /*CALL cmd */
     /**
-     * 根据区块高度获取区块
+     * Obtain blocks based on block height
      */
     String CMD_GET_BLOCK_BY_HEIGHT = "getBlockByHeight";
 
     /**
-     * 获取最新高度
+     * Get the latest altitude
      */
     String CMD_LATEST_HEIGHT = "latestHeight";
     /**
-     * 账户签名校验
+     * Account signature verification
      */
     String CMD_AC_SIGN_DIGEST = "ac_signDigest";
     /**
-     * 发起新交易接口
+     * Initiate new transaction interface
      */
     String CMD_TX_NEW = "tx_newTx";
 
@@ -64,82 +64,82 @@ public interface CmdConstant {
     String CMD_CHAIN_ASSET_CONTRACT_ASSETID = "getAssetContractAssetId";
     String CMD_CHAIN_ASSET_CONTRACT = "getAssetContract";
     /**
-     * 获取确认交易余额
+     * Obtain confirmed transaction balance
      */
     String CMD_GET_BALANCE = "getBalance";
 
 
     /**
-     * 获取含未确认交易的信息
+     * Obtain information containing unconfirmed transactions
      */
     String CMD_GET_BALANCE_NONCE = "getBalanceNonce";
     /**
-     * 获取账户nonce值
+     * Obtain accountnoncevalue
      */
     String CMD_GET_NONCE = "getNonce";
     /**
-     * 获取冻结列表
+     * Get frozen list
      */
     String CMD_GET_FREEZE_LIST = "getFreezeList";
     /**
-     * 提交未确认交易
+     * Submit unconfirmed transactions
      */
     String CMD_COMMIT_UNCONFIRMED_TX = "commitUnconfirmedTx";
     /**
-     * 批量提交未确认交易
+     * Batch submit unconfirmed transactions
      */
     String CMD_COMMIT_UNCONFIRMED_TXS = "commitBatchUnconfirmedTxs";
     /**
-     * 回滚未确认交易
+     * Rolling back unconfirmed transactions
      */
     String CMD_ROLLBACK_UNCONFIRMED_TX = "rollBackUnconfirmTx";
 
     /**
-     * 回滚未确认交易
+     * Rolling back unconfirmed transactions
      */
     String CMD_CLEAR_UNCONFIRMED_TXS = "clearUnconfirmTxs";
 
 
     /**
-     * 提交区块交易
+     * Submit block transaction
      */
     String CMD_COMMIT_BLOCK_TXS = "commitBlockTxs";
 
     /**
-     * 回滚区块交易
+     * Rolling back block transactions
      */
     String CMD_ROLLBACK_BLOCK_TXS = "rollBackBlockTxs";
 
     /**
-     * 区块打包整体校验
+     * Overall verification of block packaging
      */
     String CMD_VERIFY_COINDATA_PACKAGED = "verifyCoinDataPackaged";
 
     /**
-     * 区块打包整体校验
+     * Overall verification of block packaging
      */
     String CMD_VERIFY_COINDATA_BATCH_PACKAGED = "verifyCoinDataBatchPackaged";
 
     /**
-     * 单笔交易校验
+     * Single transaction verification
      */
     String CMD_VERIFY_COINDATA = "verifyCoinData";
 
     /**
-     * 回滚打包交易的状态
+     * Rolling back the status of packaged transactions
      */
     String CMD_ROLLBACKTX_VALIDATE_STATUS = "rollbackTxValidateStatus";
     /**
-     * 批量校验开始
+     * Batch verification start
      */
     String CMD_BATCH_VALIDATE_BEGIN = "batchValidateBegin";
 
     /**
-     * 整区块校验
+     * Whole block verification
      */
     String CMD_BLOCK_VALIDATE = "blockValidate";
     /**
-     * 获取资产信息
+     * Obtain asset information
      */
     String CMD_GET_ASSETS_BY_ID = "getAssetsById";
 

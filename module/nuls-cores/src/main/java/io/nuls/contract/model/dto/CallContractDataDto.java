@@ -36,21 +36,21 @@ import static io.nuls.contract.util.ContractUtil.bigInteger2String;
  */
 @ApiModel
 public class CallContractDataDto {
-    @ApiModelProperty(description = "交易创建者地址")
+    @ApiModelProperty(description = "Transaction creator address")
     private String sender;
-    @ApiModelProperty(description = "合约地址")
+    @ApiModelProperty(description = "Contract address")
     private String contractAddress;
-    @ApiModelProperty(description = "调用者向合约地址转入的主网资产金额，没有此业务时填BigInteger.ZERO")
+    @ApiModelProperty(description = "The amount of main network assets transferred by the caller to the contracted address, to be filled in when this service is not availableBigInteger.ZERO")
     private String value;
-    @ApiModelProperty(description = "GAS限制")
+    @ApiModelProperty(description = "GASlimit")
     private long gasLimit;
-    @ApiModelProperty(description = "GAS单价")
+    @ApiModelProperty(description = "GASunit price")
     private long price;
-    @ApiModelProperty(description = "合约方法")
+    @ApiModelProperty(description = "Contract method")
     private String methodName;
-    @ApiModelProperty(description = "合约方法描述，若合约内方法没有重载，则此参数可以为空")
+    @ApiModelProperty(description = "Contract method description, if the method in the contract is not overloaded, this parameter can be empty")
     private String methodDesc;
-    @ApiModelProperty(description = "参数列表")
+    @ApiModelProperty(description = "parameter list")
     private String[][] args;
 
     public CallContractDataDto(ContractData call) {

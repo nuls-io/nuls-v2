@@ -59,7 +59,7 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
         Map<byte[], byte[]> accountPoMap = new HashMap<>();
         try {
             for (AccountPO po : accountPOList) {
-                //序列化对象为byte数组存储
+                //Serializing objects asbyteArray storage
                 accountPoMap.put(po.getAddressObj().getAddressBytes(), po.serialize());
             }
             return RocksDBService.batchPut(AccountStorageConstant.DB_NAME_ACCOUNT, accountPoMap);
@@ -100,7 +100,7 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
             if (list != null) {
                 for (byte[] value : list) {
                     AccountPO accountPo = new AccountPO();
-                    //将byte数组反序列化为AccountPo返回
+                    //takebyteDeserialize an array asAccountPoreturn
                     accountPo.parse(value, 0);
                     accountPOList.add(accountPo);
                 }
@@ -120,7 +120,7 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
         }
         AccountPO accountPo = new AccountPO();
         try {
-            //将byte数组反序列化为AccountPo返回
+            //takebyteDeserialize an array asAccountPoreturn
             accountPo.parse(accountBytes, 0);
         } catch (Exception e) {
             LoggerUtil.LOG.error(e.getMessage());
@@ -137,13 +137,13 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
         if (null == po.getAddressObj()) {
             po.setAddressObj(new Address(po.getAddress()));
         }
-        //校验该账户是否存在
+        //Verify if the account exists
         AccountPO account = getAccount(po.getAddressObj().getAddressBytes());
         if (null == account) {
             throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
         try {
-            //更新账户数据
+            //Update account data
             return RocksDBService.put(AccountStorageConstant.DB_NAME_ACCOUNT, po.getAddressObj().getAddressBytes(), po.serialize());
         } catch (Exception e) {
             LoggerUtil.LOG.error(e.getMessage());

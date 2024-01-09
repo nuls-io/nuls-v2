@@ -16,7 +16,7 @@ assetsId=1
 
 [nuls-api]
 moduleDynamicDependent=nuls-cores
-#httpServer的启动ip
+#httpServerStart ofip
 serverIp=0.0.0.0
-#httpServer的启动port
+#httpServerStart ofport
 serverPort=8004

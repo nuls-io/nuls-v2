@@ -129,7 +129,7 @@ public class ContractPOCMLocalTest extends Base {
         cmdRegisterMap.put("cs_getContractAgentInfo", new CmdRegister("cs", "cs_getContractAgentInfo", CmdRegisterMode.QUERY_DATA, List.of("agentHash"), CmdRegisterReturnType.STRING_ARRAY));
         cmdRegisterMap.put("cs_getContractDepositInfo", new CmdRegister("cs", "cs_getContractDepositInfo", CmdRegisterMode.QUERY_DATA, List.of("joinAgentHash"), CmdRegisterReturnType.STRING_ARRAY));
         BeanUtilTest.setBean(cmdRegisterManager, chainManager);
-        // 默认的requestAndResponseInterface
+        // DefaultrequestAndResponseInterface
         BeanUtilTest.setBean(cmdRegisterManager, "requestAndResponseInterface", new RequestAndResponseInterface() {
             @Override
             public Response requestAndResponse(String moduleCode, String cmdName, Map args) throws Exception {

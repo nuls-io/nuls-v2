@@ -56,12 +56,12 @@ public class CmdUnconfirmedTxTest {
 //        CmdDispatcher.syncKernel("ws://127.0.0.1:7771");
     }
     //    String address = "JgT2JCQvKGRKRjKqyfxRAj2zSCpGca01f";
-    //入账金额
+    //Entry amount
     BigInteger amount = BigInteger.valueOf(100000000000000L);
     String address = "tNULSeBaMfi17CxRHVqFZbSFGYeyRLHWw2ctho";
     String addressTo = "tNULSeBaMmp4U2k653V5FmmPf4HDECWK2ExYVr";
     Transaction buildTransaction(String fromAddr, String toAddr, BigInteger tranAmount) throws Exception {
-        //封装交易执行
+        //Encapsulation transaction execution
         Transaction tx = new Transaction();
         CoinData coinData = new CoinData();
         CoinFrom coinFrom = new CoinFrom();
@@ -91,7 +91,7 @@ public class CmdUnconfirmedTxTest {
         return tx;
     }
     Transaction buildLockedTimeTransaction(String fromAddr, String toAddr, BigInteger tranAmount) throws Exception {
-        //封装交易执行
+        //Encapsulation transaction execution
         Transaction tx = new Transaction();
         CoinData coinData = new CoinData();
         CoinFrom coinFrom = new CoinFrom();
@@ -122,7 +122,7 @@ public class CmdUnconfirmedTxTest {
     }
 
     Transaction buildUnLockedTimeTransaction(String fromAddr, String toAddr, BigInteger tranAmount) throws Exception {
-        //封装交易执行
+        //Encapsulation transaction execution
         String hash = "00202f4c51b04d06b338e9917e99ecb4dfe3b02147e7f206a4c3b3aaf7a1dd86aea1";
         String unLockNonce = LedgerUtil.getNonceEncodeByTxHash(hash);
         Transaction tx = new Transaction();
@@ -187,8 +187,8 @@ public class CmdUnconfirmedTxTest {
         params.put("tx", RPCUtil.encode(transaction.serialize()));
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "commitUnconfirmedTx", params);
         Log.info("response {}", response);
-        Log.info("获取 address={},res={}", address, getBalanceNonce(address));
-        Log.info("获取 address={},res={}", "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", getBalanceNonce("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG"));
+        Log.info("obtain address={},res={}", address, getBalanceNonce(address));
+        Log.info("obtain address={},res={}", "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", getBalanceNonce("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG"));
     }
 
     @Test
@@ -200,8 +200,8 @@ public class CmdUnconfirmedTxTest {
         params.put("tx", RPCUtil.encode(transaction.serialize()));
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "commitUnconfirmedTx", params);
         Log.info("response {}", response);
-        Log.info("获取 address={},res={}", address, getBalanceNonce(address));
-        Log.info("获取 address={},res={}", "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", getBalanceNonce("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG"));
+        Log.info("obtain address={},res={}", address, getBalanceNonce(address));
+        Log.info("obtain address={},res={}", "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", getBalanceNonce("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG"));
     }
 
     @Test
@@ -213,7 +213,7 @@ public class CmdUnconfirmedTxTest {
         params.put("tx", RPCUtil.encode(transaction.serialize()));
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "commitUnconfirmedTx", params);
         Log.info("response {}", response);
-        Log.info("获取 address={},res={}", address, getBalanceNonce(address));
-        Log.info("获取 address={},res={}", "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", getBalanceNonce("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG"));
+        Log.info("obtain address={},res={}", address, getBalanceNonce(address));
+        Log.info("obtain address={},res={}", "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", getBalanceNonce("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG"));
     }
 }

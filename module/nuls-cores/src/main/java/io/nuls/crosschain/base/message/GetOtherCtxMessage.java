@@ -9,13 +9,13 @@ import io.nuls.core.parse.SerializeUtils;
 
 import java.io.IOException;
 /**
- * 向其他链获取跨链交易
+ * Obtain cross chain transactions from other chains
  * @author tag
  * @date 2019/4/4
  */
 public class GetOtherCtxMessage extends BaseMessage {
     /**
-     * 被请求链协议跨链交易Hash
+     * Cross chain transaction of requested chain protocolHash
      * */
     private NulsHash requestHash;
 

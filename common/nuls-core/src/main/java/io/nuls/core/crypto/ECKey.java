@@ -252,10 +252,10 @@ public class ECKey {
     }
 
     /**
-     * 根据EncryptedData和公钥生成ECKey
+     * according toEncryptedDataAnd public key generationECKey
      *
-     * @param encryptedPrivateKey 私钥封装类
-     * @param pubKey              公钥
+     * @param encryptedPrivateKey Private key encapsulation class
+     * @param pubKey              Public key
      * @return ECKey
      */
     public static ECKey fromEncrypted(EncryptedData encryptedPrivateKey, byte[] pubKey) {
@@ -500,9 +500,9 @@ public class ECKey {
     public static boolean FAKE_SIGNATURES = false;
 
     /**
-     * 验证16进制私钥字符串是否正确
+     * validate16Is the base private key string correct
      *
-     * @return boolean 正确返回true,否则返回false
+     * @return boolean Returning correctlytrue,Otherwise, returnfalse
      */
     public static boolean isValidPrivteHex(String privateHex) {
         int len = privateHex.length();
@@ -514,21 +514,21 @@ public class ECKey {
     }
 
     /**
-     * 用私钥对数据进行签名
+     * Sign data with private key
      *
-     * @param hash 需签名数据
-     * @return byte[] 签名
+     * @param hash Signature data required
+     * @return byte[] autograph
      */
     public byte[] sign(byte[] hash) {
         return doSign(hash, priv);
     }
 
     /**
-     * 用私钥对数据进行签名
+     * Sign data with private key
      *
-     * @param input                需签名数据
-     * @param privateKeyForSigning 私钥
-     * @return byte[] 签名
+     * @param input                Signature data required
+     * @param privateKeyForSigning Private key
+     * @return byte[] autograph
      */
     protected byte[] doSign(byte[] input, BigInteger privateKeyForSigning) {
         HexUtil.checkNotNull(privateKeyForSigning);
@@ -583,10 +583,10 @@ public class ECKey {
     }
 
     /**
-     * 用私钥对数据进行签名
+     * Sign data with private key
      *
-     * @param hash 需签名数据
-     * @return byte[] 签名
+     * @param hash Signature data required
+     * @return byte[] autograph
      */
     public byte[] sign(Sha256Hash hash) {
         return doSign(hash.getBytes(), priv);

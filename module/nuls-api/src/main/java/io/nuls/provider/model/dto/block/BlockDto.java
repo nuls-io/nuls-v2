@@ -38,12 +38,12 @@ import java.util.List;
  * @author: PierreLuo
  * @date: 2019-06-29
  */
-@ApiModel(description = "blockJSON 区块信息(包含区块头信息, 交易信息), 只返回对应的部分数据")
+@ApiModel(description = "blockJSON Block information(Include block header information, Transaction information), Only return the corresponding partial data")
 public class BlockDto {
 
-    @ApiModelProperty(description = "区块头信息, 只返回对应的部分数据")
+    @ApiModelProperty(description = "Block header information, Only return the corresponding partial data")
     private BlockHeaderDto header;
-    @ApiModelProperty(description = "交易列表", type = @TypeDescriptor(value = List.class, collectionElement = TransactionDto.class))
+    @ApiModelProperty(description = "Transaction List", type = @TypeDescriptor(value = List.class, collectionElement = TransactionDto.class))
     private List<TransactionDto> txs;
 
     public BlockDto() {

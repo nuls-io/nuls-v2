@@ -11,7 +11,7 @@ import java.lang.reflect.Method;
  * @Author: zhoulijun
  * @Time: 2019-03-15 18:07
  * @Description:
- * 在调用注解 {@link io.nuls.core.core.annotation.Configuration}了的类的setter方法时，判断setter方法修改的field是否有 {@link io.nuls.core.core.annotation.Persist}注解，如果有这将保存最新的值到disk，供下次启动时注入
+ * When calling annotations {@link io.nuls.core.core.annotation.Configuration}The class ofsetterWhen using the method, make a judgmentsetterMethod modificationfieldIs there any {@link io.nuls.core.core.annotation.Persist}Annotations, if available, will save the latest values todiskFor injection on the next startup
  */
 @Interceptor(Configuration.class)
 public class PersistConfigInterceptor implements BeanMethodInterceptor<Configuration> {

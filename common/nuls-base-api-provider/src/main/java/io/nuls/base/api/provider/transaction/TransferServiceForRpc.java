@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
  * @Author: zhoulijun
  * @Time: 2019-03-08 17:00
  * @Description:
- * 交易服务
+ * Transaction Services
  */
 @Provider(Provider.ProviderType.RPC)
 public class TransferServiceForRpc extends BaseRpcService implements TransferService {
@@ -125,7 +125,7 @@ public class TransferServiceForRpc extends BaseRpcService implements TransferSer
             transaction.setStatus(state == TxStatusEnum.UNCONFIRM.getStatus() ? TxStatusEnum.UNCONFIRM : TxStatusEnum.CONFIRMED);
             return success(transaction);
         } catch (NulsException e) {
-            Log.error("反序列化transaction发生异常",e);
+            Log.error("Deserializationtransactionexception occurred",e);
             return fail(CommonCodeConstanst.DESERIALIZE_ERROR);
         }
     }
@@ -152,7 +152,7 @@ public class TransferServiceForRpc extends BaseRpcService implements TransferSer
             res.setTo(transaction.getCoinDataInstance().getTo().stream().map(this::buildTransactionCoinData).collect(Collectors.toList()));
             return success(res);
         } catch (NulsException e) {
-            Log.error("反序列化transaction发生异常",e);
+            Log.error("Deserializationtransactionexception occurred",e);
             return fail(CommonCodeConstanst.DESERIALIZE_ERROR);
         }
     }

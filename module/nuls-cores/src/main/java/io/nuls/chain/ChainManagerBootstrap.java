@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 链管理模块启动类
+ * Chain management module startup class
  * Main class of BlockChain module
  *
  * @author tangyi
@@ -64,7 +64,7 @@ public class ChainManagerBootstrap implements INulsCoresBootstrap {
     }
 
     /**
-     * 读取resources/module.ini，初始化配置
+     * readresources/module.ini, initialize configuration
      * Read resources/module.ini to initialize the configuration
      */
     private void initCfg() throws Exception {
@@ -94,13 +94,13 @@ public class ChainManagerBootstrap implements INulsCoresBootstrap {
     }
 
     /**
-     * 如果数据库中有相同的配置，则以数据库为准
+     * If there are identical configurations in the database, the database shall prevail
      * If the database has the same configuration, use the database entity
      *
      * @throws Exception Any error will throw an exception
      */
     private void initWithDatabase() throws Exception {
-        /* 打开数据库连接 (Open database connection) */
+        /* Open database connection (Open database connection) */
         RocksDBService.init(nulsChainConfig.getDataPath() + File.separator + ModuleE.CM.name);
         InitDB assetStorage = SpringLiteContext.getBean(AssetStorageImpl.class);
         assetStorage.initTableName();
@@ -124,7 +124,7 @@ public class ChainManagerBootstrap implements INulsCoresBootstrap {
 
 
     /**
-     * 把Nuls2.0主网信息存入数据库中
+     * holdNuls2.0Store the main network information in the database
      * Store the Nuls2.0 main network information into the database
      *
      * @throws Exception Any error will throw an exception
@@ -156,12 +156,12 @@ public class ChainManagerBootstrap implements INulsCoresBootstrap {
             /*storage info*/
             initWithDatabase();
             LoggerUtil.logger().info("initWithDatabase complete.....");
-            /* 把Nuls2.0主网信息存入数据库中 (Store the Nuls2.0 main network information into the database) */
+            /* holdNuls2.0Store the main network information in the database (Store the Nuls2.0 main network information into the database) */
             initMainChain();
             LoggerUtil.logger().info("initMainChain complete.....");
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
-            LoggerUtil.logger().error("初始化异常退出....");
+            LoggerUtil.logger().error("Exit due to initialization exception....");
             System.exit(-1);
         }
     }
@@ -179,14 +179,14 @@ public class ChainManagerBootstrap implements INulsCoresBootstrap {
         try {
             doStart();
             try {
-                /* 进行数据库数据初始化（避免异常关闭造成的事务不一致） */
+                /* Perform database data initialization（To avoid inconsistent transactions caused by abnormal shutdowns） */
                 initChainDatas();
             } catch (Exception e) {
                 LoggerUtil.logger().error(e);
-                LoggerUtil.logger().error("启动异常退出....");
+                LoggerUtil.logger().error("Start abnormal exit....");
                 System.exit(-1);
             }
-            //取跨链注册地址前缀数据给AC
+            //Take cross chain registration address prefix data toAC
             try {
                 List<BlockChain> blockChains = chainService.getBlockList();
                 List<Map<String, Object>> list = new ArrayList<>();

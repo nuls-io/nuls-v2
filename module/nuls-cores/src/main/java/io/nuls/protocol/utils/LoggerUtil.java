@@ -31,12 +31,12 @@ import io.nuls.protocol.manager.ContextManager;
 import io.nuls.protocol.model.ProtocolContext;
 
 /**
- * 日志工具类
+ * Logging tool class
  * Logging utility class
  *
  * @author captain
  * @version 1.0
- * @date 19-1-25 上午11:40
+ * @date 19-1-25 morning11:40
  */
 public class LoggerUtil {
 

@@ -117,7 +117,7 @@ public class CallContractProcessor extends ContractBaseProcessor {
                 boolean isType0R = "-r".equals(argType0);
                 boolean isType1R = "-r".equals(argType1);
                 if((isType0D && isType1D) || (isType0R && isType1R)) {
-                    // 不能同时为-d或-r
+                    // Cannot be for both-dor-r
                     return null;
                 }
                 if(isType0D) {

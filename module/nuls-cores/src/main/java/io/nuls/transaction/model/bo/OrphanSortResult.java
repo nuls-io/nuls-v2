@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *  孤儿交易排序结果类(工具类)
+ *  Orphan transaction sorting result class(Tool class)
  * @author: Charlie
  * @date: 2019/7/23
  */

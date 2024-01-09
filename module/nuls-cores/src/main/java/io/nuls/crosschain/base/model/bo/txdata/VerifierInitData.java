@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 验证人初始化交易txdata
+ * Verifier initializes transactiontxdata
  * Verifier initializes transaction txdata
  *
  * @author tag

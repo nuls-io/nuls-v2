@@ -8,7 +8,7 @@ import java.math.BigInteger;
  * @Author: zhoulijun
  * @Time: 2019-03-11 11:44
  * @Description:
- *  创建共识节点
+ *  Create consensus nodes
  *  create consensus agent node
  */
 public class CreateAgentReq extends BaseReq {

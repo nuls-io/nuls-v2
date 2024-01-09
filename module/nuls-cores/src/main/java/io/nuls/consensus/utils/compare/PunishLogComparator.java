@@ -30,7 +30,7 @@ import io.nuls.consensus.model.po.PunishLogPo;
 import java.util.Comparator;
 
 /**
- * 惩罚信息比较器
+ * Penalty information comparator
  * Punishment Information Comparator
  *
  * @author tag

@@ -34,7 +34,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 
 /**
- * rocksdb数据库连接管理、数据存储、查询、删除操作.
+ * rocksdbDatabase Connection Management、data storage、query、Delete operation.
  * Rocksdb database connection management, entity storage, query, delete operation
  *
  * @author qinyf
@@ -43,22 +43,22 @@ import java.util.concurrent.locks.ReentrantLock;
 public class RocksDBManager {
 
     /**
-     * 数据库已打开的连接缓存.
+     * Database opened connection cache.
      */
     private static final ConcurrentHashMap<String, RocksDB> TABLES = new ConcurrentHashMap<>();
 
     /**
-     * 数据表基础文件夹名.
+     * Data Table Basic Folder Name.
      */
     private static final String BASE_DB_NAME = "rocksdb";
 
     /**
-     * 数据操作同步锁.
+     * Data operation synchronization lock.
      */
     private static ReentrantLock lock = new ReentrantLock();
 
     /**
-     * 数据库根目录绝对路径.
+     * Absolute path to database root directory.
      */
     private static String dataPath;
 
@@ -67,11 +67,11 @@ public class RocksDBManager {
     }
 
     /**
-     * 根据传入的数据库路径将已存在的数据库连接打开，并缓存DB连接.
-     * 如果有数据表连接被关闭需要重新打开连接也可以，执行初始化连接
+     * Open existing database connections based on the incoming database path and cache themDBconnect.
+     * If a data table connection is closed and needs to be reopened, it is also possible to initialize the connection
      *
-     * @param path 数据库地址
-     * @throws Exception 数据库打开连接异常
+     * @param path Database address
+     * @throws Exception Database open connection exception
      */
     public static void init(final String path) throws Exception {
         init(path, null, null);
@@ -86,11 +86,11 @@ public class RocksDBManager {
             RocksDB db;
             String dbPath = null;
             for (File tableFile : tableFiles) {
-                // 跳过初始化
+                // Skip initialization
                 if (skipTables != null && skipTables.contains(tableFile.getName())) {
                     continue;
                 }
-                // 缓存中已存在的数据库连接不再重复打开
+                // Database connections that already exist in the cache will no longer be opened repeatedly
                 if (!tableFile.isDirectory() || TABLES.get(tableFile.getName()) != null) {
                     continue;
                 }
@@ -122,9 +122,9 @@ public class RocksDBManager {
     }
 
     /**
-     * @param dbPath 数据库地址
-     * @return RocksDB 数据库连接对象
-     * @throws RocksDBException 数据库连接异常
+     * @param dbPath Database address
+     * @return RocksDB Database Connection Object
+     * @throws RocksDBException Database connection exception
      */
     private static RocksDB initOpenDB(final String dbPath) throws RocksDBException {
         File checkFile = new File(dbPath + File.separator + "CURRENT");
@@ -142,13 +142,13 @@ public class RocksDBManager {
     }
 
     /**
-     * 装载数据库.
+     * Mount database.
      * load database
      *
-     * @param dbPath          数据库地址
-     * @param createIfMissing 数据库不存在时是否默认创建
+     * @param dbPath          Database address
+     * @param createIfMissing Is it created by default when the database does not exist
      * @return RocksDB
-     * @throws RocksDBException 数据库连接异常
+     * @throws RocksDBException Database connection exception
      */
     private static RocksDB openDB(final String dbPath, final boolean createIfMissing) throws RocksDBException {
         Options options = getCommonOptions(createIfMissing);
@@ -191,21 +191,21 @@ public class RocksDBManager {
     }
 
     /**
-     * 根据名称创建对应的数据库.
+     * Create a corresponding database based on the name.
      * Create database based by name
      *
-     * @param tableName 数据库表名称
-     * @return Result 创建结果
+     * @param tableName Database Table Name
+     * @return Result Create Results
      */
     public static boolean createTable(final String tableName) throws Exception {
         return createTable(tableName, null);
     }
 
     /**
-     * 根据名称获得对应的数据库对象.
+     * Obtain the corresponding database object based on its name.
      * Get database objects by name
      *
-     * @param tableName 数据库表名称
+     * @param tableName Database Table Name
      * @return RocksDB
      */
     public static RocksDB getTable(final String tableName) {
@@ -213,10 +213,10 @@ public class RocksDBManager {
     }
 
     /**
-     * 根据名称删除对应的数据库.
+     * Delete the corresponding database by name.
      * Delete database by name
      *
-     * @param tableName 数据库表名称
+     * @param tableName Database Table Name
      * @return Result
      */
     public static boolean destroyTable(final String tableName) throws Exception {
@@ -243,10 +243,10 @@ public class RocksDBManager {
     }
 
     /**
-     * 删除数据表.
+     * Delete Data Table.
      *
-     * @param dbPath 数据库名称
-     * @throws RocksDBException 数据库连接异常
+     * @param dbPath Database Name
+     * @throws RocksDBException Database connection exception
      */
     private static void destroyDB(final String dbPath) throws RocksDBException {
         Options options = new Options();
@@ -254,7 +254,7 @@ public class RocksDBManager {
     }
 
     /**
-     * 关闭所有数据库连接.
+     * Close all database connections.
      * close all table
      */
     public static void close() {
@@ -270,10 +270,10 @@ public class RocksDBManager {
     }
 
     /**
-     * 关闭指定数据库连接.
+     * Close the specified database connection.
      * close a table
      *
-     * @param tableName 数据库表名称
+     * @param tableName Database Table Name
      */
     public static void closeTable(final String tableName) {
         try {
@@ -285,11 +285,11 @@ public class RocksDBManager {
     }
 
     /**
-     * 数据库基本校验.
+     * Basic Database Verification.
      * Basic database check
      *
-     * @param tableName 数据库表名称
-     * @return boolean 校验是否成功
+     * @param tableName Database Table Name
+     * @return boolean Verify if successful
      */
     private static boolean baseCheckTable(final String tableName) {
         if (StringUtils.isBlank(tableName) || !TABLES.containsKey(tableName)) {
@@ -300,10 +300,10 @@ public class RocksDBManager {
     }
 
     /**
-     * 查询所有的数据库名称.
+     * Query all database names.
      * query all table names
      *
-     * @return 所有数据表名称
+     * @return All data table names
      */
     public static String[] listTable() {
         int i = 0;
@@ -320,13 +320,13 @@ public class RocksDBManager {
     }
 
     /**
-     * 新增或者修改数据.
+     * Add or modify data.
      * Add or modify entity to specified table
      *
-     * @param table 表名
-     * @param key   数据键
-     * @param value 数据值
-     * @return 保存是否成功
+     * @param table Table Name
+     * @param key   Data keys
+     * @param value Data value
+     * @return Whether the save was successful
      */
     public static boolean put(final String table, final byte[] key, final byte[] value) throws Exception {
         if (!baseCheckTable(table)) {
@@ -346,12 +346,12 @@ public class RocksDBManager {
     }
 
     /**
-     * 删除数据.
+     * Delete data.
      * delete entity from specified table
      *
-     * @param table 数据库表名称
-     * @param key   删除标识
-     * @return 删除是否成功
+     * @param table Database Table Name
+     * @param key   Delete identification
+     * @return Whether the deletion was successful
      */
     public static boolean delete(final String table, final byte[] key) throws Exception {
         if (!baseCheckTable(table)) {
@@ -371,12 +371,12 @@ public class RocksDBManager {
     }
 
     /**
-     * 批量保存数据.
+     * Batch Save Data.
      * batch save entity
      *
-     * @param table 数据库表名称
-     * @param kvs   保存数据的键值对
-     * @return 批量保存是否成功
+     * @param table Database Table Name
+     * @param kvs   Save key value pairs for data
+     * @return Whether batch saving was successful
      */
     public static boolean batchPut(final String table, final Map<byte[], byte[]> kvs) throws Exception {
         if (!baseCheckTable(table)) {
@@ -399,12 +399,12 @@ public class RocksDBManager {
     }
 
     /**
-     * 批量删除数据.
+     * Batch deletion of data.
      * batch delete entity
      *
-     * @param table 数据库表名称
-     * @param keys  批量删除标识
-     * @return 批量删除是否成功
+     * @param table Database Table Name
+     * @param keys  Batch deletion of identification
+     * @return Whether batch deletion was successful
      */
     public static boolean deleteKeys(final String table, final List<byte[]> keys) throws Exception {
         if (!baseCheckTable(table)) {
@@ -427,12 +427,12 @@ public class RocksDBManager {
     }
 
     /**
-     * 根据key查询数据.
+     * according tokeyQuery data.
      * query entity in a specified table by key
      *
-     * @param table 数据库表名称
-     * @param key   查询关键字
-     * @return 查询结果
+     * @param table Database Table Name
+     * @param key   Query keywords
+     * @return Query Results
      */
     public static byte[] get(final String table, final byte[] key) {
         if (!baseCheckTable(table)) {
@@ -453,11 +453,11 @@ public class RocksDBManager {
     }
 
     /**
-     * 查询key是否存在.
+     * querykeyDoes it exist.
      *
-     * @param table 数据库表名称
-     * @param key   查询关键字
-     * @return 查询结果
+     * @param table Database Table Name
+     * @param key   Query keywords
+     * @return Query Results
      */
     public static boolean keyMayExist(final String table, final byte[] key) {
         if (!baseCheckTable(table)) {
@@ -479,12 +479,12 @@ public class RocksDBManager {
     }
 
     /**
-     * 批量查询指定keys的Map集合.
+     * Batch query specificationkeysofMapaggregate.
      * batch query the Map set of the specified keys.
      *
-     * @param table 数据库表名称
-     * @param keys  批量查询关键字
-     * @return 批量查询结果键值对集合
+     * @param table Database Table Name
+     * @param keys  Batch query keywords
+     * @return Batch query result key value pair set
      */
     public static Map<byte[], byte[]> multiGet(final String table, final List<byte[]> keys) {
         if (!baseCheckTable(table)) {
@@ -505,7 +505,7 @@ public class RocksDBManager {
     }
 
     /**
-     * 批量查询交易
+     * Batch query transactions
      * @param table
      * @param keys
      * @return
@@ -519,7 +519,7 @@ public class RocksDBManager {
         }
         try {
             RocksDB db = TABLES.get(table);
-            //该方法获取的结果包含查不到的key, 将以null 值放入返回的list中,因此需要把空值去除.
+            //The results obtained by this method include those that cannot be foundkey, Will be replaced withnull Value put into returnedlistin,Therefore, it is necessary to remove the null values.
             List<byte[]> list = db.multiGetAsList(keys);
             List<byte[]> rs = new ArrayList<>();
             for(byte[] tx : list){
@@ -534,12 +534,12 @@ public class RocksDBManager {
     }
 
     /**
-     * 批量查询指定keys的List集合
+     * Batch query specificationkeysofListaggregate
      * batch query the List set of the specified keys.
      *
-     * @param table 数据库表名称
-     * @param keys  批量查询关键字
-     * @return 批量查询结果值字节数组集合
+     * @param table Database Table Name
+     * @param keys  Batch query keywords
+     * @return Batch query result value byte array collection
      */
     public static List<byte[]> multiGetValueList(final String table, final List<byte[]> keys) {
         List<byte[]> list = new ArrayList<>();
@@ -565,12 +565,12 @@ public class RocksDBManager {
     }
 
     /**
-     * 批量查询指定keys的List集合
+     * Batch query specificationkeysofListaggregate
      * batch query the List set of the specified keys.
      *
-     * @param table 数据库表名称
-     * @param keys  批量查询关键字
-     * @return 批量查询结果值字节数组集合
+     * @param table Database Table Name
+     * @param keys  Batch query keywords
+     * @return Batch query result value byte array collection
      */
     public static List<byte[]> multiGetKeyList(final String table, final List<byte[]> keys) {
         List<byte[]> list = new ArrayList<>();
@@ -596,11 +596,11 @@ public class RocksDBManager {
     }
 
     /**
-     * 查询指定表的key-List集合.
+     * Query the specified tablekey-Listaggregate.
      * query the key-List collection of the specified table
      *
-     * @param table 数据库表名称
-     * @return 该表的所有键
+     * @param table Database Table Name
+     * @return All keys of this table
      */
     public static List<byte[]> keyList(final String table) {
         if (!baseCheckTable(table)) {
@@ -624,11 +624,11 @@ public class RocksDBManager {
     }
 
     /**
-     * 查询指定表的value-List集合.
+     * Query the specified tablevalue-Listaggregate.
      * query the value-List collection of the specified table
      *
-     * @param table 数据库表名称
-     * @return 该表的所有值
+     * @param table Database Table Name
+     * @return All values in this table
      */
     public static List<byte[]> valueList(final String table) {
         if (!baseCheckTable(table)) {
@@ -652,11 +652,11 @@ public class RocksDBManager {
     }
 
     /**
-     * 查询指定表的entry-List集合.
+     * Query the specified tableentry-Listaggregate.
      * query the entry-List collection of the specified table
      *
-     * @param table 数据库表名称
-     * @return 该表所有键值对集合
+     * @param table Database Table Name
+     * @return The set of all key value pairs in this table
      */
     public static List<Entry<byte[], byte[]>> entryList(final String table) {
         if (!baseCheckTable(table)) {
@@ -680,17 +680,17 @@ public class RocksDBManager {
     }
 
     /**
-     * 获得公共的数据库连接属性.
+     * Obtain public database connection properties.
      *
-     * @param createIfMissing 是否默认表
-     * @return 数据库连接属性
+     * @param createIfMissing Default Table
+     * @return Database Connection Properties
      */
     private static synchronized Options getCommonOptions(final boolean createIfMissing) {
         Options options = new Options();
 
         options.setCreateIfMissing(createIfMissing);
         /**
-         * 优化读取性能方案
+         * Optimize reading performance plan
          */
         options.setAllowMmapReads(true);
         options.setCompressionType(CompressionType.NO_COMPRESSION);
@@ -703,7 +703,7 @@ public class RocksDBManager {
 
         options.setMaxBackgroundCompactions(16);
         options.setNewTableReaderForCompactionInputs(true);
-        //为压缩的输入，打开RocksDB层的预读取
+        //For compressed input, openRocksDBPre reading of layers
         options.setCompactionReadaheadSize(128 * SizeUnit.KB);
         options.setNewTableReaderForCompactionInputs(true);
 

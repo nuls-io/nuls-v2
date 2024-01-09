@@ -15,14 +15,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 与账户模块交互类
+ * Interaction with account module
  * Interaction class with account module
  * @author tag
  * 2019/4/10
  */
 public class AccountCall {
     /**
-     * 查询地址私钥
+     * Query address private key
      * Query address private key
      */
     public static String getPrikey(String address, String password) throws NulsException {
@@ -40,7 +40,7 @@ public class AccountCall {
         }
     }
     /**
-     * 查询地址是否加密
+     * Check if the address is encrypted
      * Is address Encrypted
      */
     public static boolean isEncrypted(String address) throws NulsException {
@@ -58,7 +58,7 @@ public class AccountCall {
     }
 
     /**
-     * 查询多签账户
+     * Query multiple signed accounts
      * Query multi-sign account
      *
      * @param multiSignAddress
@@ -81,10 +81,10 @@ public class AccountCall {
     }
 
     /**
-     * 通过账户模块对数据进行签名
+     * Sign data through the account module
      * @param address
      * @param password
-     * @param data 待签名的数据
+     * @param data Data to be signed
      * @return P2PHKSignature
      * @throws NulsException
      */
@@ -106,8 +106,8 @@ public class AccountCall {
     }
 
     /**
-     * 将链地址前缀发送给账户模块
-     * @param prefixList       链前缀列表
+     * Send the chain address prefix to the account module
+     * @param prefixList       Chain prefix list
      * @throws NulsException
      */
     public static void addAddressPrefix(List<Map<String,Object>> prefixList) throws NulsException {

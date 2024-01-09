@@ -13,7 +13,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * 链区块管理类
+ * Chain blockchain management
  * Chain Block Management Class
  *
  * @author tag
@@ -28,7 +28,7 @@ public class BlockManager {
     private PunishManager punishManager;
 
     /**
-     * 收到最新区块头，更新链区块缓存数据
+     * Received the latest block header and updated the blockchain cache data
      * Receive the latest block header, update the chain block cache entity
      *
      * @param chain       chain info
@@ -36,7 +36,7 @@ public class BlockManager {
      */
     public void addNewBlock(Chain chain, BlockHeader blockHeader) {
         /*
-        如果新增区块有轮次变化，则删除最小轮次区块
+        If there is a round change in the newly added block, delete the minimum round block
          */
         BlockHeader newestHeader = chain.getNewestHeader();
         BlockExtendsData newestExtendsData = newestHeader.getExtendsData();
@@ -55,26 +55,26 @@ public class BlockManager {
                         break;
                     }
                 }
-                //清理轮次缓存
+                //Cleaning the round cache
                 punishManager.clear(chain);
             }
         }
         chain.getBlockHeaderList().add(blockHeader);
         chain.setNewestHeader(blockHeader);
-        chain.getLogger().info("区块保存，高度为：" + blockHeader.getHeight() + " , txCount: " + blockHeader.getTxCount() + ",本地最新区块高度为：" + chain.getNewestHeader().getHeight() + ", 轮次:" + receiveExtendsData.getRoundIndex());
-        //清除已经缓存了的比本节点轮次大的轮次信息
+        chain.getLogger().info("Block save, with a height of：" + blockHeader.getHeight() + " , txCount: " + blockHeader.getTxCount() + ",The latest local block height is：" + chain.getNewestHeader().getHeight() + ", Round:" + receiveExtendsData.getRoundIndex());
+        //Clear cached round information that is larger than the current node's round
         roundManager.clearRound(chain,receiveRoundIndex);
     }
 
     /**
-     * 链分叉，区块回滚
+     * Chain fork, block rollback
      * Chain bifurcation, block rollback
      *
      * @param chain  chain info
      * @param height block height
      */
     public void chainRollBack(Chain chain, int height) {
-        chain.getLogger().info("区块开始回滚，回滚到的高度：" + height);
+        chain.getLogger().info("The height at which the block starts rolling back：" + height);
         List<BlockHeader> headerList = chain.getBlockHeaderList();
         headerList.sort(new BlockHeaderComparator());
         BlockHeader originalBlocHeader = chain.getNewestHeader();
@@ -92,7 +92,7 @@ public class BlockManager {
         BlockHeader newestBlocHeader = chain.getNewestHeader();
         BlockExtendsData bestExtendsData = newestBlocHeader.getExtendsData();
         long currentRound = bestExtendsData.getRoundIndex();
-        //如果有轮次变化，回滚之后如果本地区块不足指定轮次的区块，则需向区块获取区块补足并回滚本地
+        //If there is a round change, after rolling back, if the local block is not enough for the specified round of blocks, it is necessary to obtain blocks from the block to make up for it and roll back the local block
         if(currentRound != originalRound){
             BlockHeader lastestBlocHeader = chain.getBlockHeaderList().get(0);
             BlockExtendsData lastestExtendsData = lastestBlocHeader.getExtendsData();
@@ -107,7 +107,7 @@ public class BlockManager {
                 }
             }
             long roundIndex;
-            //回滚轮次
+            //Rollback round
             if(bestExtendsData.getPackingIndexOfRound() > 1){
                 roundIndex = bestExtendsData.getRoundIndex();
             }else{
@@ -115,6 +115,6 @@ public class BlockManager {
             }
             roundManager.rollBackRound(chain, roundIndex);
         }
-        chain.getLogger().info("区块回滚成功，回滚到的高度为：" + height + ",本地最新区块高度为：" + chain.getNewestHeader().getHeight());
+        chain.getLogger().info("Block rollback successful, rolled back to a height of：" + height + ",The latest local block height is：" + chain.getNewestHeader().getHeight());
     }
 }

@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
 
 /**
  * @author lan
- * @description 查询链资产接口
+ * @description Query Chain Asset Interface
  * @date 2019/02/14
  **/
 @Component
@@ -66,16 +66,16 @@ public class ChainAssetCmd extends BaseLedgerCmd {
     CallRpcService callRpcService;
 
     @CmdAnnotation(cmd = CmdConstant.CMD_GET_ASSETS_BY_ID, version = 1.0,
-            description = "查询链下指定资产集合的金额信息")
+            description = "Query the amount information of a specified set of assets off the chain")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "assetIds", requestType = @TypeDescriptor(value = String.class), parameterDes = "资产id,逗号分隔")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Running ChainId,Value range[1-65535]"),
+            @Parameter(parameterName = "assetIds", requestType = @TypeDescriptor(value = String.class), parameterDes = "assetid,Comma separated")
     })
-    @ResponseData(name = "返回值", description = "返回一个List对象",
+    @ResponseData(name = "Return value", description = "Return aListobject",
             responseType = @TypeDescriptor(value = List.class, collectionElement = Map.class, mapKeys = {
-                    @Key(name = "assetId", valueType = Integer.class, description = "资产id"),
-                    @Key(name = "availableAmount", valueType = BigInteger.class, description = "可用金额"),
-                    @Key(name = "freeze", valueType = BigInteger.class, description = "冻结金额")
+                    @Key(name = "assetId", valueType = Integer.class, description = "assetid"),
+                    @Key(name = "availableAmount", valueType = BigInteger.class, description = "Available amount"),
+                    @Key(name = "freeze", valueType = BigInteger.class, description = "Freeze amount")
             })
     )
     public Response getAssetsById(Map params) {
@@ -98,17 +98,17 @@ public class ChainAssetCmd extends BaseLedgerCmd {
 
 
     @CmdAnnotation(cmd = CmdConstant.CMD_GET_ASSET_BY_ID, version = 1.0,
-            description = "查询链下指定资产集合的金额信息")
+            description = "Query the amount information of a specified set of assets off the chain")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "assetChainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "资产链id"),
-            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterDes = "资产id")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Running ChainId,Value range[1-65535]"),
+            @Parameter(parameterName = "assetChainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "Asset Chainid"),
+            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterDes = "assetid")
     })
-    @ResponseData(name = "返回值", description = "返回一个List对象",
+    @ResponseData(name = "Return value", description = "Return aListobject",
             responseType = @TypeDescriptor(value = List.class, collectionElement = Map.class, mapKeys = {
-                    @Key(name = "assetId", valueType = Integer.class, description = "资产id"),
-                    @Key(name = "availableAmount", valueType = BigInteger.class, description = "可用金额"),
-                    @Key(name = "freeze", valueType = BigInteger.class, description = "冻结金额")
+                    @Key(name = "assetId", valueType = Integer.class, description = "assetid"),
+                    @Key(name = "availableAmount", valueType = BigInteger.class, description = "Available amount"),
+                    @Key(name = "freeze", valueType = BigInteger.class, description = "Freeze amount")
             })
     )
     public Response getAssetById(Map params) {
@@ -123,37 +123,37 @@ public class ChainAssetCmd extends BaseLedgerCmd {
     }
 
     /**
-     * 查看所有登记资产信息
+     * View all registered asset information
      *
      * @param params
      * @return
      */
     @CmdAnnotation(cmd = CmdConstant.CMD_GET_ALL_ASSET, version = 1.0,
-            description = "查看所有登记资产信息")
+            description = "View all registered asset information")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行链Id,取值区间[1-65535]")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Run ChainId,Value range[1-65535]")
     })
-    @ResponseData(name = "返回值", description = "返回一个list对象",
+    @ResponseData(name = "Return value", description = "Return alistobject",
             responseType = @TypeDescriptor(value = List.class, collectionElement = Map.class, mapKeys = {
-                    @Key(name = "assetChainId", valueType = int.class, description = "资产链id"),
-                    @Key(name = "assetId", valueType = int.class, description = "资产id"),
-                    @Key(name = "assetType", valueType = int.class, description = "资产类型 [1-链内普通资产 2-链内合约资产 3-平行链资产 4-异构链资产 5-链内普通资产绑定异构链资产 6-平行链资产绑定异构链资产 7-链内普通资产绑定多异构链资产 8-平行链资产绑定多异构链资产 9-异构链资产绑定多异构链资产]"),
-                    @Key(name = "assetAddress", valueType = String.class, description = "资产地址"),
-                    @Key(name = "initNumber", valueType = BigInteger.class, description = "资产初始化值"),
-                    @Key(name = "decimalPlace", valueType = int.class, description = "小数点分割位数"),
-                    @Key(name = "assetName", valueType = String.class, description = "资产名"),
-                    @Key(name = "assetSymbol", valueType = String.class, description = "资产符号")
+                    @Key(name = "assetChainId", valueType = int.class, description = "Asset Chainid"),
+                    @Key(name = "assetId", valueType = int.class, description = "assetid"),
+                    @Key(name = "assetType", valueType = int.class, description = "Asset type [1-On chain ordinary assets 2-On chain contract assets 3-Parallel chain assets 4-Heterogeneous chain assets 5-On chain ordinary assets bound to heterogeneous chain assets 6-Parallel chain assets bound to heterogeneous chain assets 7-Binding ordinary assets within the chain to multiple heterogeneous chain assets 8-Binding Parallel Chain Assets to Multiple Heterogeneous Chain Assets 9-Binding heterogeneous chain assets to multiple heterogeneous chain assets]"),
+                    @Key(name = "assetAddress", valueType = String.class, description = "Asset address"),
+                    @Key(name = "initNumber", valueType = BigInteger.class, description = "Asset initialization value"),
+                    @Key(name = "decimalPlace", valueType = int.class, description = "Decimal Division"),
+                    @Key(name = "assetName", valueType = String.class, description = "Asset Name"),
+                    @Key(name = "assetSymbol", valueType = String.class, description = "Asset symbols")
             })
     )
     public Response getAllCrossChainAssets(Map params) {
         Map<String, Object> rtMap = new HashMap<>(2);
         try {
             int chainId = Integer.parseInt(params.get("chainId").toString());
-            // 获取所有注册的链内资产
+            // Obtain all registered in chain assets
             List<LedgerAsset> localAssetList = assetRegMngRepository.getAllRegLedgerAssets(chainId);
             List<Map<String, Object>> assets = localAssetList.stream().map(asset -> asset.toMap()).collect(Collectors.toList());
             assets.add(ledgerChainManager.getLocalChainDefaultAsset());
-            // 获取所有登记的跨链资产
+            // Obtain all registered cross chain assets
             List<Map<String, Object>> crossAssetList = callRpcService.getRegisteredChainInfoList(chainId);
             if (crossAssetList != null) {
                 assets.addAll(crossAssetList);

@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 共识节点相关接口
+ * Consensus node related interfaces
  *
  * @author tag
  * 2018/11/7
@@ -25,18 +25,18 @@ public class AgentCmd extends BaseCmd {
     private AgentService service;
 
     /**
-     * 创建节点
+     * Create nodes
      */
-    @CmdAnnotation(cmd = "cs_createAgent", version = 1.0, description = "创建节点交易/create agent transaction")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
-    @Parameter(parameterName = "agentAddress", parameterType = "String", parameterDes = "节点地址")
-    @Parameter(parameterName = "packingAddress", parameterType = "String", parameterDes = "节点出块地址")
-    @Parameter(parameterName = "rewardAddress", parameterType = "String", parameterDes = "奖励地址,默认节点地址", canNull = true)
-    @Parameter(parameterName = "commissionRate", requestType = @TypeDescriptor(value = int.class), parameterDes = "佣金比例")
-    @Parameter(parameterName = "deposit", parameterType = "String", parameterDes = "抵押金额")
-    @Parameter(parameterName = "password", parameterType = "String", parameterDes = "密码")
-    @ResponseData(name = "返回值", description = "创建节点交易HASH", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "txHash", description = "创建节点交易HASH")
+    @CmdAnnotation(cmd = "cs_createAgent", version = 1.0, description = "Create node transactions/create agent transaction")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid")
+    @Parameter(parameterName = "agentAddress", parameterType = "String", parameterDes = "Node address")
+    @Parameter(parameterName = "packingAddress", parameterType = "String", parameterDes = "Node block address")
+    @Parameter(parameterName = "rewardAddress", parameterType = "String", parameterDes = "Reward Address,Default node address", canNull = true)
+    @Parameter(parameterName = "commissionRate", requestType = @TypeDescriptor(value = int.class), parameterDes = "commission rate")
+    @Parameter(parameterName = "deposit", parameterType = "String", parameterDes = "Mortgage amount")
+    @Parameter(parameterName = "password", parameterType = "String", parameterDes = "password")
+    @ResponseData(name = "Return value", description = "Create node transactionsHASH", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "txHash", description = "Create node transactionsHASH")
     }))
     public Response createAgent(Map<String, Object> params) {
         Result result = service.createAgent(params);
@@ -47,14 +47,14 @@ public class AgentCmd extends BaseCmd {
     }
 
     /**
-     * 注销节点
+     * Unregister node
      */
-    @CmdAnnotation(cmd = "cs_stopAgent", version = 1.0, description = "注销节点/stop agent")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
-    @Parameter(parameterName = "address", parameterType = "String", parameterDes = "节点地址")
-    @Parameter(parameterName = "password", parameterType = "String", parameterDes = "密码")
-    @ResponseData(name = "返回值", description = "停止节点交易HASH", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "txHash", description = "停止节点交易HASH")
+    @CmdAnnotation(cmd = "cs_stopAgent", version = 1.0, description = "Unregister node/stop agent")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid")
+    @Parameter(parameterName = "address", parameterType = "String", parameterDes = "Node address")
+    @Parameter(parameterName = "password", parameterType = "String", parameterDes = "password")
+    @ResponseData(name = "Return value", description = "Stop node transactionsHASH", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "txHash", description = "Stop node transactionsHASH")
     }))
     public Response stopAgent(Map<String, Object> params) {
         Result result = service.stopAgent(params);
@@ -65,13 +65,13 @@ public class AgentCmd extends BaseCmd {
     }
 
     /**
-     * 获取注销节点coindata
+     * Get deregistered nodescoindata
      */
-    @CmdAnnotation(cmd = "cs_getStopAgentCoinData", version = 1.0, description = "获取注销节点CoinData")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
-    @Parameter(parameterName = "agentHash", parameterType = "String", parameterDes = "节点hash")
-    @Parameter(parameterName = "lockHeight", parameterType = "Long", parameterDes = "锁定高度")
-    @ResponseData(name = "返回值", description = "停止节点交易CoinData的Hex", responseType = @TypeDescriptor(value = String.class))
+    @CmdAnnotation(cmd = "cs_getStopAgentCoinData", version = 1.0, description = "Get deregistered nodesCoinData")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid")
+    @Parameter(parameterName = "agentHash", parameterType = "String", parameterDes = "nodehash")
+    @Parameter(parameterName = "lockHeight", parameterType = "Long", parameterDes = "Lock height")
+    @ResponseData(name = "Return value", description = "Stop node transactionsCoinDataofHex", responseType = @TypeDescriptor(value = String.class))
     public Response cs_getStopAgentCoinData(Map<String, Object> params) {
         Result result = service.getStopAgentCoinData(params);
         if (result.isFailed()) {
@@ -81,14 +81,14 @@ public class AgentCmd extends BaseCmd {
     }
 
     /**
-     * 查询共识节点列表
+     * Query consensus node list
      */
-    @CmdAnnotation(cmd = "cs_getAgentList", version = 1.0, description = "查询当前网络中的共识节点列表/Query the list of consensus nodes in the current network")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
-    @Parameter(parameterName = "pageNumber", requestType = @TypeDescriptor(value = int.class), parameterDes = "页码", canNull = true)
-    @Parameter(parameterName = "pageSize", requestType = @TypeDescriptor(value = int.class), parameterDes = "每页大小", canNull = true)
-    @Parameter(parameterName = "keyWord", parameterType = "String", parameterDes = "关键字", canNull = true)
-    @ResponseData(name = "返回值", description = "返回一个Page对象，这里只描述Page对象中的集合",
+    @CmdAnnotation(cmd = "cs_getAgentList", version = 1.0, description = "Query the list of consensus nodes in the current network/Query the list of consensus nodes in the current network")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid")
+    @Parameter(parameterName = "pageNumber", requestType = @TypeDescriptor(value = int.class), parameterDes = "Page number", canNull = true)
+    @Parameter(parameterName = "pageSize", requestType = @TypeDescriptor(value = int.class), parameterDes = "Page size", canNull = true)
+    @Parameter(parameterName = "keyWord", parameterType = "String", parameterDes = "keyword", canNull = true)
+    @ResponseData(name = "Return value", description = "Return aPageObject, only described herePageCollection in objects",
             responseType = @TypeDescriptor(value = List.class, collectionElement = AgentDTO.class)
     )
     public Response getAgentList(Map<String, Object> params) {
@@ -100,12 +100,12 @@ public class AgentCmd extends BaseCmd {
     }
 
     /**
-     * 查询指定节点信息
+     * Query specified node information
      */
-    @CmdAnnotation(cmd = "cs_getAgentInfo", version = 1.0, description = "查询指点节点节点详细信息/Query pointer node details")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
-    @Parameter(parameterName = "agentHash", parameterType = "String", parameterDes = "节点HASH")
-    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = AgentDTO.class))
+    @CmdAnnotation(cmd = "cs_getAgentInfo", version = 1.0, description = "Query detailed information of pointing nodes/Query pointer node details")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid")
+    @Parameter(parameterName = "agentHash", parameterType = "String", parameterDes = "nodeHASH")
+    @ResponseData(name = "Return value", responseType = @TypeDescriptor(value = AgentDTO.class))
     public Response getAgentInfo(Map<String, Object> params) {
         Result result = service.getAgentInfo(params);
         if (result.isFailed()) {
@@ -115,12 +115,12 @@ public class AgentCmd extends BaseCmd {
     }
 
     /**
-     * 获取当前节点出块地址
+     * Get the current node's outbound address
      */
-    @CmdAnnotation(cmd = "cs_getNodePackingAddress", version = 1.0, description = "获取当前节点出块地址/Get the current node's out-of-block address")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
-    @ResponseData(name = "返回值", description = "当前节点出块地址", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "packAddress", description = "当前节点出块地址")
+    @CmdAnnotation(cmd = "cs_getNodePackingAddress", version = 1.0, description = "Get the current node's outbound address/Get the current node's out-of-block address")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid")
+    @ResponseData(name = "Return value", description = "Current node block address", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "packAddress", description = "Current node block address")
     }))
     public Response getNodePackingAddress(Map<String, Object> params) {
         Result result = service.getNodePackingAddress(params);
@@ -131,12 +131,12 @@ public class AgentCmd extends BaseCmd {
     }
 
     /**
-     * 获取所有节点出块地址/指定N个区块出块地址
+     * Get all node block addresses/specifyNBlock output address
      */
-    @CmdAnnotation(cmd = "cs_getAgentAddressList", version = 1.0, description = "获取当前网络共识节点出块地址列表或则查询最近N个区块的出块地址/Get all node out-of-block addresses or specify N block out-of-block designations")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
-    @ResponseData(name = "返回值", description = "共识节点列表", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "packAddress", description = "共识节点列表")
+    @CmdAnnotation(cmd = "cs_getAgentAddressList", version = 1.0, description = "Obtain the current consensus node block address list or query the most recentNOutbound address of blocks/Get all node out-of-block addresses or specify N block out-of-block designations")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid")
+    @ResponseData(name = "Return value", description = "Consensus node list", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "packAddress", description = "Consensus node list")
     }))
     public Response getAgentAddressList(Map<String, Object> params) {
         Result result = service.getAgentAddressList(params);
@@ -147,13 +147,13 @@ public class AgentCmd extends BaseCmd {
     }
 
     /**
-     * 查询指定共识节点状态
+     * Query the status of specified consensus nodes
      */
-    @CmdAnnotation(cmd = "cs_getAgentStatus", version = 1.0, description = "查询指定共识节点状态/query the specified consensus node status 1.0")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
-    @Parameter(parameterName = "agentHash", parameterType = "String", parameterDes = "节点HASH")
-    @ResponseData(name = "返回值", description = "节点状态", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "status", valueType = Byte.class, description = "节点状态")
+    @CmdAnnotation(cmd = "cs_getAgentStatus", version = 1.0, description = "Query the status of specified consensus nodes/query the specified consensus node status 1.0")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid")
+    @Parameter(parameterName = "agentHash", parameterType = "String", parameterDes = "nodeHASH")
+    @ResponseData(name = "Return value", description = "Node status", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "status", valueType = Byte.class, description = "Node status")
     }))
     public Response getAgentStatus(Map<String, Object> params) {
         Result result = service.getAgentStatus(params);
@@ -164,11 +164,11 @@ public class AgentCmd extends BaseCmd {
     }
 
     /**
-     * 修改节点共识状态
+     * Modify node consensus status
      */
-    @CmdAnnotation(cmd = "cs_updateAgentConsensusStatus", version = 1.0, description = "修改节点共识状态/modifying the Node Consensus State")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
-    @ResponseData(description = "无特定返回值，无错误则表示节点共识状态修改成功")
+    @CmdAnnotation(cmd = "cs_updateAgentConsensusStatus", version = 1.0, description = "Modify node consensus status/modifying the Node Consensus State")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid")
+    @ResponseData(description = "No specific return value, no error indicates successful modification of node consensus state")
     public Response updateAgentConsensusStatus(Map<String, Object> params) {
         Result result = service.updateAgentConsensusStatus(params);
         if (result.isFailed()) {
@@ -178,12 +178,12 @@ public class AgentCmd extends BaseCmd {
     }
 
     /**
-     * 修改节点打包状态
+     * Modify node packaging status
      */
-    @CmdAnnotation(cmd = "cs_updateAgentStatus", version = 1.0, description = "修改节点打包状态/modifying the Packing State of Nodes")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
-    @Parameter(parameterName = "status", requestType = @TypeDescriptor(value = int.class), parameterDes = "节点状态")
-    @ResponseData(description = "无特定返回值，无错误则表示节点打包状态修改成功")
+    @CmdAnnotation(cmd = "cs_updateAgentStatus", version = 1.0, description = "Modify node packaging status/modifying the Packing State of Nodes")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid")
+    @Parameter(parameterName = "status", requestType = @TypeDescriptor(value = int.class), parameterDes = "Node status")
+    @ResponseData(description = "No specific return value, no error indicates successful modification of node packaging status")
     public Response updateAgentStatus(Map<String, Object> params) {
         Result result = service.updateAgentStatus(params);
         if (result.isFailed()) {
@@ -193,14 +193,14 @@ public class AgentCmd extends BaseCmd {
     }
 
     /**
-     * 获取当前节点的出块账户信息
+     * Obtain the outbound account information of the current node
      */
-    @CmdAnnotation(cmd = "cs_getPackerInfo", version = 1.0, description = "获取当前节点的出块账户信息/modifying the Packing State of Nodes")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "address", description = "当前节点出块地址"),
-            @Key(name = "password", description = "当前节点密码"),
-            @Key(name = "packAddressList", valueType = List.class, valueElement = String.class, description = "当前打包地址列表"),
+    @CmdAnnotation(cmd = "cs_getPackerInfo", version = 1.0, description = "Obtain the outbound account information of the current node/modifying the Packing State of Nodes")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "address", description = "Current node block address"),
+            @Key(name = "password", description = "Current node password"),
+            @Key(name = "packAddressList", valueType = List.class, valueElement = String.class, description = "Current packaging address list"),
     }))
     public Response getPackerInfo(Map<String, Object> params) {
         Result result = service.getPackerInfo(params);
@@ -211,14 +211,14 @@ public class AgentCmd extends BaseCmd {
     }
 
     /**
-     * 获取当前节点的出块账户信息
+     * Obtain the outbound account information of the current node
      */
-    @CmdAnnotation(cmd = "cs_getSeedNodeInfo", version = 1.0, description = "获取种子节点信息/get seed node info")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "address", description = "当前节点出块地址"),
-            @Key(name = "password", description = "当前节点密码"),
-            @Key(name = "packAddressList", valueType = List.class, valueElement = String.class, description = "当前打包地址列表"),
+    @CmdAnnotation(cmd = "cs_getSeedNodeInfo", version = 1.0, description = "Obtain seed node information/get seed node info")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "address", description = "Current node block address"),
+            @Key(name = "password", description = "Current node password"),
+            @Key(name = "packAddressList", valueType = List.class, valueElement = String.class, description = "Current packaging address list"),
     }))
     public Response getSeedNodeInfo(Map<String, Object> params) {
         Result result = service.getSeedNodeInfo(params);

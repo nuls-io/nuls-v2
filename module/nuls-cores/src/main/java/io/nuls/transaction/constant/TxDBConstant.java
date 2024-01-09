@@ -26,25 +26,25 @@
 package io.nuls.transaction.constant;
 
 /**
- * 交易数据存储常量
+ * Transaction data storage constant
  * Transaction entity storage constants
  * @author: qinyifeng
  */
 public interface TxDBConstant {
     /**
-     * 配置信息表名
+     * Configuration Information Table Name
      * chain configuration table name
      */
     String DB_MODULE_CONGIF = "config";
 
     /**
-     * 已确认交易表名
+     * Confirmed transaction table name
      * Confirmed transaction table name
      */
     String DB_TRANSACTION_CONFIRMED_PREFIX = "tx_table_confirmed_";
 
     /**
-     * 验证通过但未打包的交易(未确认)
+     * Transactions that have been validated but not packaged(Unconfirmed)
      */
      String DB_TRANSACTION_UNCONFIRMED_PREFIX = "tx_table_unconfirmed_";
 }

@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * netty服务器端实现类
+ * nettyServer side implementation class
  * Server-side implementation class
  *
  * @author tag
@@ -21,10 +21,10 @@ import java.util.Set;
 public class NettyServer {
 
     /**
-     * 根据预定义模块获得一个服务实例
+     * Obtain a service instance based on predefined modules
      * Get a server instance with predefined module
      *
-     * @param moduleE 预定义模块 / Pre-defined module
+     * @param moduleE Predefined modules / Pre-defined module
      * @return WsServer
      */
     public static NettyServer getInstance(ModuleE moduleE) {
@@ -32,12 +32,12 @@ public class NettyServer {
     }
 
     /**
-     * 根据参数获得一个服务实例
+     * Obtain a service instance based on parameters
      * Get a server instance with Abbreviation & Name
      *
-     * @param abbr   角色 / Role
-     * @param name   名称 / Name
-     * @param domain 域名 / Domian
+     * @param abbr   role / Role
+     * @param name   name / Name
+     * @param domain domain name / Domian
      * @return WsServer
      */
     public static NettyServer getInstance(String abbr, String name, String domain) {
@@ -57,7 +57,7 @@ public class NettyServer {
     }
 
     /**
-     * 启动netty服务器，监听指定端口
+     * start-upnettyServer, listen to specified port
      * Start the netty server to listen on the specified port
      */
     public static void startServer(int port, String host, String path) {
@@ -66,7 +66,7 @@ public class NettyServer {
     }
 
     /**
-     * 启动netty服务器，监听指定端口
+     * start-upnettyServer, listen to specified port
      * Start the netty server to listen on the specified port
      */
     public static void startServer(int port) {
@@ -75,11 +75,11 @@ public class NettyServer {
     }
 
     /**
-     * 设置本模块的依赖角色
+     * Set the dependent roles for this module
      * Setting Dependent Roles for this Module
      *
-     * @param key   依赖的角色 / Dependent roles
-     * @param value 依赖角色的版本 / Version of dependent roles
+     * @param key   Dependent roles / Dependent roles
+     * @param value Version of dependent roles / Version of dependent roles
      * @return WsServer
      */
     public NettyServer dependencies(String key, String value) {
@@ -88,10 +88,10 @@ public class NettyServer {
     }
 
     /**
-     * 设置本模块的角色（角色名默认为模块编号）
+     * Set the role of this module（Role name is assumed to be module number by default）
      * Setting up the role of this module(Role name defaults to module code)
      *
-     * @param value 角色版本 / Version of role
+     * @param value Character version / Version of role
      * @return WsServer
      */
     public NettyServer moduleRoles(String[] value) {
@@ -100,11 +100,11 @@ public class NettyServer {
     }
 
     /**
-     * 设置本模块的角色
+     * Set the role of this module
      * Setting up the role of this module
      *
-     * @param key   角色 / Role
-     * @param value 角色版本 / Version of role
+     * @param key   role / Role
+     * @param value Character version / Version of role
      * @return WsServer
      */
     public NettyServer moduleRoles(String key, String[] value) {
@@ -113,10 +113,10 @@ public class NettyServer {
     }
 
     /**
-     * 设置模块版本
+     * Set module version
      * Set module version
      *
-     * @param moduleVersion 模块的版本 / Version of module
+     * @param moduleVersion Version of the module / Version of module
      * @return WsServer
      */
     public NettyServer moduleVersion(String moduleVersion) {
@@ -125,12 +125,12 @@ public class NettyServer {
     }
 
     /**
-     * 扫描指定路径，得到所有接口的详细信息
+     * Scan the specified path to obtain detailed information about all interfaces
      * Scan the specified path for details of all interfaces
      *
-     * @param scanPackage 需要扫描的包路径 / Packet paths to be scanned
+     * @param scanPackage Package path to be scanned / Packet paths to be scanned
      * @return WsServer
-     * @throws Exception 找到重复命令(cmd) / Find duplicate commands (cmd)
+     * @throws Exception Found duplicate commands(cmd) / Find duplicate commands (cmd)
      */
     public NettyServer scanPackage(Set<String>scanPackage) throws Exception {
         ConnectManager.scanPackage(scanPackage);
@@ -138,7 +138,7 @@ public class NettyServer {
     }
 
     /**
-     * 添加RPC接口
+     * AddRPCinterface
      * add RPC insterface
      *
      * @param cmdClass

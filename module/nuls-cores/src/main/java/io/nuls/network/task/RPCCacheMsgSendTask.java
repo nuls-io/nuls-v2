@@ -45,7 +45,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 处理转发,未能及时处理的RPC消息
+ * Process forwarding,Failure to handle in a timely mannerRPCnews
  *
  * @author lanjinsheng
  * @date 2019-07-16
@@ -69,7 +69,7 @@ public class RPCCacheMsgSendTask implements Runnable {
                             LoggerUtil.logger(chainId).error("chainId = {},cmd={},tryTimes={},createTime={},RPC fail,drop from cache", chainId, peerMessage.getCmd(), peerMessage.getTryTimes(), peerMessage.getCreateTime());
                             continue;
                         }
-                        //发送消息
+                        //send message
                         Map<String, CmdPriority> protocolRoles = MessageHandlerFactory.getInstance().getProtocolRoleHandlerMap(peerMessage.getCmd());
                         boolean fail = false;
                         for (Map.Entry<String, CmdPriority> entry : protocolRoles.entrySet()) {

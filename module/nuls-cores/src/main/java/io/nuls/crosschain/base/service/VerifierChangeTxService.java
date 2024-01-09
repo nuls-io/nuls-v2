@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 验证人变更交易处理类
+ * Verifier change transaction processing class
  * @author tag
  * @date 2019/6/19
  */
@@ -14,7 +14,7 @@ import java.util.Map;
 public interface VerifierChangeTxService {
 
     /**
-     * 跨链交易批量验证
+     * Cross chain transaction batch verification
      * @param chainId       chain ID
      * @param txs           cross chain transaction list
      * @param txMap         Consensus Module All Transaction Classification
@@ -25,7 +25,7 @@ public interface VerifierChangeTxService {
     Map<String, Object> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader);
 
     /**
-     * 验证人变更交易提交
+     * Verifier change transaction submission
      * @param chainId       chain ID
      * @param txs           cross chain transaction list
      * @param blockHeader   block header
@@ -35,7 +35,7 @@ public interface VerifierChangeTxService {
     boolean commit(int chainId, List<Transaction> txs, BlockHeader blockHeader);
 
     /**
-     * 验证人变更交易回滚
+     * Verifier change transaction rollback
      * @param chainId       chain ID
      * @param txs           cross chain transaction list
      * @param blockHeader   block header

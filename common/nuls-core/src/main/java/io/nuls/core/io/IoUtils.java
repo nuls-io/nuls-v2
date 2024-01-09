@@ -14,10 +14,10 @@ public class IoUtils {
     private static final int SIZE = 1024 * 8;
 
     /**
-     * 读取远程文件字节流
+     * Read remote file byte stream
      *
-     * @param urlStr 远程文件地址
-     * @return 读取回的字节流
+     * @param urlStr Remote file address
+     * @return Bytestream read and retrieved
      */
     public static byte[] download(String urlStr) throws IOException {
         Log.info("Get the version info file from " + urlStr);
@@ -31,10 +31,10 @@ public class IoUtils {
 
 
     /**
-     * 从输入流中获取字节数组
+     * Get byte array from input stream
      *
-     * @param inputStream 输入流
-     * @return 读取的字节数组
+     * @param inputStream Input stream
+     * @return Byte array read
      */
     public static byte[] readInputStream(InputStream inputStream) throws IOException {
         byte[] buffer = new byte[inputStream.available()];
@@ -48,23 +48,24 @@ public class IoUtils {
     }
 
     /**
-     * 读取本地指定路径的文件信息（不换行）
+     * Read file information for the local specified path（nowrap）
      *
-     * @param path 文件路径
-     * @return 文件内容
+     * @param path File path
+     * @return File content
      */
     public static String read(String path) throws Exception {
         ObjectUtils.canNotEmpty(path, "null parameter");
+        path = path.replaceAll("\\\\","/");
         try (InputStream stream = IoUtils.class.getClassLoader().getResourceAsStream(path)) {
             return readRealPath(stream);
         }
     }
 
     /**
-     * 读取本地指定绝对路径的文件信息
+     * Read file information for locally specified absolute path
      *
-     * @param stream 文件的绝对路径
-     * @return 文件内容
+     * @param stream The absolute path of the file
+     * @return File content
      */
     public static String readRealPath(InputStream stream) throws Exception {
         InputStreamReader inReader = null;
@@ -96,21 +97,21 @@ public class IoUtils {
     }
 
     /**
-     * 以字节流的方式读取到字符串。
+     * Read a string as a byte stream.
      *
-     * @param is 输入流
-     * @return 字符串
+     * @param is Input stream
+     * @return character string
      */
     public static String readBytesToString(InputStream is) {
         return new String(readBytes(is));
     }
 
     /**
-     * 以字节流的方式读取到字符串。
+     * Read a string as a byte stream.
      *
-     * @param is          输入流
-     * @param charsetName 字符集
-     * @return 字符串
+     * @param is          Input stream
+     * @param charsetName character set
+     * @return character string
      */
     public static String readBytesToString(InputStream is, String charsetName) {
         try {
@@ -122,11 +123,11 @@ public class IoUtils {
     }
 
     /**
-     * 以字节流的方式从文件中读取字符串
+     * Read strings from files in a byte stream format
      *
-     * @param file        文件
-     * @param charsetName 字符集
-     * @return 字符串
+     * @param file        file
+     * @param charsetName character set
+     * @return character string
      */
     public static String readBytesToString(File file, String charsetName) {
         try {
@@ -139,20 +140,20 @@ public class IoUtils {
     }
 
     /**
-     * 以字节流的方式从文件中读取字符串。
+     * Read strings from files in a byte stream format.
      *
-     * @param file 文件
-     * @return 字符串
+     * @param file file
+     * @return character string
      */
     public static String readBytesToString(File file) {
         return new String(readBytes(file));
     }
 
     /**
-     * 以字节流的方式读取到字符串。
+     * Read a string as a byte stream.
      *
-     * @param is 输入流
-     * @return 字节数组
+     * @param is Input stream
+     * @return Byte array
      */
     public static byte[] readBytes(InputStream is) {
         byte[] bytes = null;
@@ -179,11 +180,11 @@ public class IoUtils {
     }
 
     /**
-     * 以字符流的方式读取到字符串。
+     * Read a string as a character stream.
      *
-     * @param is          输入流
-     * @param charsetName 编码
-     * @return 字符数组
+     * @param is          Input stream
+     * @param charsetName coding
+     * @return Character array
      */
     public static char[] readChars(InputStream is, String charsetName) {
         char[] chars = null;
@@ -216,10 +217,10 @@ public class IoUtils {
     }
 
     /**
-     * 以字符流的方式读取到字符串。
+     * Read a string as a character stream.
      *
-     * @param file 文件
-     * @return 字符串
+     * @param file file
+     * @return character string
      */
     public static String readCharsToString(File file) {
         try {
@@ -231,11 +232,11 @@ public class IoUtils {
     }
 
     /**
-     * 以字节流的方式读取到字符串。
+     * Read a string as a byte stream.
      *
-     * @param file    文件
-     * @param charset 字符集
-     * @return 字符串
+     * @param file    file
+     * @param charset character set
+     * @return character string
      */
     public static String readCharsToString(File file, String charset) {
         try {
@@ -247,33 +248,33 @@ public class IoUtils {
     }
 
     /**
-     * 以字符流的方式读取到字符串。默认编码
+     * Read a string as a character stream. Default encoding
      *
-     * @param is 输入流
-     * @return 字符串
+     * @param is Input stream
+     * @return character string
      */
     public static String readCharsToString(InputStream is) {
         return new String(readChars(is, null));
     }
 
     /**
-     * 以字符流的方式读取到字符串。
+     * Read a string as a character stream.
      *
-     * @param is          输入流
-     * @param charsetName 编码
-     * @return 字符串
+     * @param is          Input stream
+     * @param charsetName coding
+     * @return character string
      */
     public static String readCharsToString(InputStream is, String charsetName) {
         return new String(readChars(is, charsetName));
     }
 
-    // ---------------readCharsToString 完成。分割线-----------------------
+    // ---------------readCharsToString Complete. Division line-----------------------
 
     /**
-     * 以字节流的方式读取到字符串。
+     * Read a string as a byte stream.
      *
-     * @param file 文件
-     * @return 字节数组
+     * @param file file
+     * @return Byte array
      */
     public static byte[] readBytes(File file) {
         try {
@@ -285,11 +286,11 @@ public class IoUtils {
     }
 
     /**
-     * 以字符流的方式读取到字符串。
+     * Read a string as a character stream.
      *
-     * @param file        文件
-     * @param charsetName 编码
-     * @return 字符数组
+     * @param file        file
+     * @param charsetName coding
+     * @return Character array
      */
     public static char[] readChars(File file, String charsetName) {
         try {
@@ -302,22 +303,22 @@ public class IoUtils {
 
 
     /**
-     * 通过字节输出流输出bytes
+     * Output through byte output streambytes
      *
-     * @param os   输出流
-     * @param text 字节数组
+     * @param os   Output stream
+     * @param text Byte array
      */
     public static void writeBytes(OutputStream os, byte[] text) {
         writeBytes(os, text, 0, text.length);
     }
 
     /**
-     * 通过字节输出流输出bytes
+     * Output through byte output streambytes
      *
-     * @param os     输出流
-     * @param text   字节数组
-     * @param off    数组起始下标
-     * @param lenght 长度
+     * @param os     Output stream
+     * @param text   Byte array
+     * @param off    Starting index of array
+     * @param lenght length
      */
     public static void writeBytes(OutputStream os, byte[] text, int off, int lenght) {
         try {
@@ -334,24 +335,24 @@ public class IoUtils {
 
 
     /**
-     * 通过字符输出流输出chars
+     * Output through character output streamchars
      *
-     * @param os          输出流
-     * @param text        字节数组
-     * @param charsetName 编码方式
+     * @param os          Output stream
+     * @param text        Byte array
+     * @param charsetName Encoding method
      */
     public static void writeChars(OutputStream os, char[] text, String charsetName) {
         writeChars(os, text, 0, text.length, charsetName);
     }
 
     /**
-     * 通过字符输出流输出chars
+     * Output through character output streamchars
      *
-     * @param os          输出流
-     * @param text        字节数组
-     * @param off         数组起始下标
-     * @param lenght      长度
-     * @param charsetName 编码方式
+     * @param os          Output stream
+     * @param text        Byte array
+     * @param off         Starting index of array
+     * @param lenght      length
+     * @param charsetName Encoding method
      */
     public static void writeChars(OutputStream os, char[] text, int off, int lenght, String charsetName) {
         try {
@@ -377,24 +378,24 @@ public class IoUtils {
 
 
     /**
-     * 将字符串以默认编码写入文件
+     * Write a string to a file with default encoding
      *
-     * @param file 文件
-     * @param text 字符串
+     * @param file file
+     * @param text character string
      */
     public static void writeString(File file, boolean append, String text) {
         writeString(file, append, text, 0, text.length(), null);
     }
 
     /**
-     * 将字符串写入文件
+     * Write a string to a file
      *
-     * @param file        文件
-     * @param append      是否追加
-     * @param text        字符串
-     * @param off         起始下标
-     * @param lenght      长度
-     * @param charsetName 编码名称
+     * @param file        file
+     * @param append      Whether to add
+     * @param text        character string
+     * @param off         Starting index
+     * @param lenght      length
+     * @param charsetName Encoding name
      */
     public static void writeString(File file, boolean append, String text, int off, int lenght, String charsetName) {
         try {
@@ -405,57 +406,57 @@ public class IoUtils {
     }
 
     /**
-     * 将字符串以默认编码写入文件
+     * Write a string to a file with default encoding
      *
-     * @param file 文件
-     * @param text 字符串
+     * @param file file
+     * @param text character string
      */
     public static void writeString(File file, String text) {
         writeString(file, false, text, 0, text.length(), null);
     }
 
     /**
-     * 将字符串写入文件（默认覆盖）
+     * Write a string to a file（Default overlay）
      *
-     * @param file        文件
-     * @param append      是否追加
-     * @param text        字符串
-     * @param charsetName 编码名称
+     * @param file        file
+     * @param append      Whether to add
+     * @param text        character string
+     * @param charsetName Encoding name
      */
     public static void writeString(File file, boolean append, String text, String charsetName) {
         writeString(file, append, text, 0, text.length(), charsetName);
     }
 
     /**
-     * 将字符串写入文件（默认覆盖）
+     * Write a string to a file（Default overlay）
      *
-     * @param file        文件
-     * @param text        字符串
-     * @param charsetName 编码名称
+     * @param file        file
+     * @param text        character string
+     * @param charsetName Encoding name
      */
     public static void writeString(File file, String text, String charsetName) {
         writeString(file, false, text, 0, text.length(), charsetName);
     }
 
     /**
-     * 字符输出流输出字符串
+     * Character output stream output string
      *
-     * @param os          输出流
-     * @param text        字符串
-     * @param charsetName 编码
+     * @param os          Output stream
+     * @param text        character string
+     * @param charsetName coding
      */
     public static void writeString(OutputStream os, String text, String charsetName) {
         writeString(os, text, 0, text.length(), charsetName);
     }
 
     /**
-     * 字符输出流输出字符串
+     * Character output stream output string
      *
-     * @param os          输出流
-     * @param text        字符串
-     * @param off         起始下标
-     * @param lenght      长度
-     * @param charsetName 编码
+     * @param os          Output stream
+     * @param text        character string
+     * @param off         Starting index
+     * @param lenght      length
+     * @param charsetName coding
      */
     public static void writeString(OutputStream os, String text, int off, int lenght, String charsetName) {
         try {

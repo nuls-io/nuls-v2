@@ -5,8 +5,8 @@ import java.lang.annotation.*;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-04 13:34
- * @Description: 标记bean的加载顺序，以及实现了InitializingBean接口类执行afterPropertiesSet的顺序
- * 如果不设置此注解，加载权重值为1
+ * @Description: signbeanThe loading order and implementation ofInitializingBeanInterface class executionafterPropertiesSetOrder of
+ * If this annotation is not set, load the weight value as1
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)

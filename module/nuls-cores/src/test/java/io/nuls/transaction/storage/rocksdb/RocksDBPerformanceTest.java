@@ -64,7 +64,7 @@ public class RocksDBPerformanceTest {
         /*RocksDBService.createTableIfNotExist(TABLE_NAME_1);
         RocksDBService.createTableIfNotExist(TABLE_NAME_2);*/
         long end = System.currentTimeMillis();
-        System.out.println("数据库连接初始化测试耗时：" + (end - start) + "ms");
+        System.out.println("Database connection initialization test time consumption：" + (end - start) + "ms");
     }
 
     static List<Transaction> txs = new ArrayList<>();
@@ -74,7 +74,7 @@ public class RocksDBPerformanceTest {
         initTest();
         long start = System.currentTimeMillis();
         int count = 2000000;
-        Log.info("开始新增数据 合计插入:{}条数据", count);
+        Log.info("Start adding new data Total insertion:{}Piece of data", count);
         for (int i = 0; i < count; i++) {
             Transaction tx = assemblyTransaction(i);
             try {
@@ -125,7 +125,7 @@ public class RocksDBPerformanceTest {
             }
             int count = RocksDBService.keyList(TABLE_NAME_1).size();
             System.out.println("[count]:" + count);
-            /*System.out.println("[keyMayExist 存在]:");
+            /*System.out.println("[keyMayExist existence]:");
             for (int i = 0; i < 10; i++) {
                 long s1 = System.currentTimeMillis();
                 for (Transaction tx : txs) {
@@ -135,7 +135,7 @@ public class RocksDBPerformanceTest {
                 System.out.println("time:" + s2);
             }
             System.out.println("");
-            System.out.println("[keyMayExist 不存在]:");
+            System.out.println("[keyMayExist Not present]:");
             for (int i = 0; i < 10; i++) {
 
                 long s1 = System.currentTimeMillis();
@@ -147,7 +147,7 @@ public class RocksDBPerformanceTest {
             }
             System.out.println("");*/
 
-//            System.out.println("[get 存在]:");
+//            System.out.println("[get existence]:");
 //            for (int i = 0; i < 10; i++) {
 //                long s1 = System.currentTimeMillis();
 //                for (Transaction tx : txs) {
@@ -157,7 +157,7 @@ public class RocksDBPerformanceTest {
 //                System.out.println("time:" + s2);
 //            }
 //            System.out.println("");
-            System.out.println("[get 不存在]:");
+            System.out.println("[get Not present]:");
             for (int i = 0; i < 10; i++) {
                 long s1 = System.currentTimeMillis();
                 for (Transaction tx : noExistList) {
@@ -168,7 +168,7 @@ public class RocksDBPerformanceTest {
             }
             System.out.println("");
             ////////////////////////////////////////////////////////
-//            System.out.println("[批量取 存在]:");
+//            System.out.println("[Batch retrieval existence]:");
 //            for (int i = 0; i < 10; i++) {
 //                long s1 = System.currentTimeMillis();
 //                List<byte[]> keys = new ArrayList<>();
@@ -180,7 +180,7 @@ public class RocksDBPerformanceTest {
 //                System.out.println("timeno:" + s2 + " count1:" + list1.size());
 //            }
 //            System.out.println("");
-            System.out.println("[批量取multiGet 不存在]:");
+            System.out.println("[Batch retrievalmultiGet Not present]:");
             for (int i = 0; i < 10; i++) {
                 long s1 = System.currentTimeMillis();
                 List<byte[]> keys = new ArrayList<>();
@@ -193,7 +193,7 @@ public class RocksDBPerformanceTest {
             }
             System.out.println("");
 
-            System.out.println("[multiGetAsList 不存在]:");
+            System.out.println("[multiGetAsList Not present]:");
             for (int i = 0; i < 10; i++) {
                 long s1 = System.currentTimeMillis();
                 List<byte[]> keys = new ArrayList<>();
@@ -240,7 +240,7 @@ public class RocksDBPerformanceTest {
     private Transaction assemblyTransaction(int i) {
         Transaction tx = new Transaction(2);
         tx.setTime(NulsDateUtils.getCurrentTimeMillis() / 1000);
-        tx.setRemark(StringUtils.bytes("测试一下交易测试一下交易测试一下交易测试一下交易测试一下交易测试一下交易测试一下" + i));
+        tx.setRemark(StringUtils.bytes("Test the transaction, test the transaction, test the transaction, test the transaction, test the transaction" + i));
         try {
             CoinData coinData = new CoinData();
             CoinFrom coinFrom = new CoinFrom(AddressTool.getAddress("tNULSeBaMqywZjfSrKNQKBfuQtVxAHBQ8rB2Zn"),
@@ -257,7 +257,7 @@ public class RocksDBPerformanceTest {
             List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
             P2PHKSignature signature = new P2PHKSignature();
             p2PHKSignatures.add(signature);
-            //交易签名
+            //Transaction signature
             transactionSignature.setP2PHKSignatures(p2PHKSignatures);
             tx.setTransactionSignature(transactionSignature.serialize());
             return tx;

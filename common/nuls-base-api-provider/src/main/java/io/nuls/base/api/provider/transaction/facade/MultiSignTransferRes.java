@@ -3,7 +3,7 @@ package io.nuls.base.api.provider.transaction.facade;
 /**
  * @Author: zhoulijun
  * @Time: 2019-07-18 15:18
- * @Description: 创建多签交易返回对象
+ * @Description: Create multiple transaction return objects
  */
 public class MultiSignTransferRes {
 

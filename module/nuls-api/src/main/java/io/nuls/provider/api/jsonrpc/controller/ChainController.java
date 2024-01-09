@@ -35,15 +35,15 @@ public class ChainController {
     BlockTools blockTools;
 
     @RpcMethod("info")
-    @ApiOperation(description = "获取本链相关信息,其中共识资产为本链创建共识节点交易和创建委托共识交易时，需要用到的资产", order = 001)
-    @ResponseData(name = "返回值", description = "返回本链信息", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "chainId", description = "本链的ID"),
-            @Key(name = "assetId", description = "本链默认主资产的ID"),
-            @Key(name = "inflationAmount", description = "本链默认主资产的初始数量"),
-            @Key(name = "agentChainId", description = "本链共识资产的链ID"),
-            @Key(name = "agentAssetId", description = "本链共识资产的ID"),
-            @Key(name = "addressPrefix", description = "本链地址前缀"),
-            @Key(name = "symbol", description = "本链主资产符号")
+    @ApiOperation(description = "Obtain information related to this chain,Among them, consensus assets are the assets required for creating consensus node transactions and creating delegated consensus transactions in this chain", order = 001)
+    @ResponseData(name = "Return value", description = "Return this chain information", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "chainId", description = "This chain'sID"),
+            @Key(name = "assetId", description = "This chain defaults to the main asset'sID"),
+            @Key(name = "inflationAmount", description = "The initial quantity of the default main asset in this chain"),
+            @Key(name = "agentChainId", description = "The chain of consensus assets in this chainID"),
+            @Key(name = "agentAssetId", description = "The consensus assets of this chainID"),
+            @Key(name = "addressPrefix", description = "Prefix for this chain address"),
+            @Key(name = "symbol", description = "Main asset symbol of this chain")
     }))
     public RpcResult getInfo(List<Object> params) {
         Result<Map> result = blockTools.getInfo(config.getChainId());
@@ -61,7 +61,7 @@ public class ChainController {
 
 
     /**
-     * 获取资产信息
+     * Obtain asset information
      *
      * @param params
      * @return
@@ -76,18 +76,18 @@ public class ChainController {
     }
 
     /**
-     * 获取平行链资产信息
+     * Obtain parallel chain asset information
      *
      * @param params
      * @return
      */
     @RpcMethod("getCrossAssetInfo")
-    @ApiOperation(description = "获取平行链资产信息", order = 603)
+    @ApiOperation(description = "Obtain parallel chain asset information", order = 603)
     @Parameters({
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "资产链ID"),
-            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterDes = "资产ID"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "Asset ChainID"),
+            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterDes = "assetID"),
     })
-    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = CrossAssetRegisterInfo.class))
+    @ResponseData(name = "Return value", responseType = @TypeDescriptor(value = CrossAssetRegisterInfo.class))
     public RpcResult getCrossAssetInfo(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
         int chainId, assetId;

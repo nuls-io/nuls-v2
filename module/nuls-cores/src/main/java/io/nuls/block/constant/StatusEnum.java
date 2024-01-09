@@ -21,59 +21,59 @@
 package io.nuls.block.constant;
 
 /**
- * 模块运行状态枚举
+ * Module operation status enumeration
  * The module runs state enumeration.
  *
  * @author captain
  * @version 1.0
- * @date 18-11-28 下午5:58
+ * @date 18-11-28 afternoon5:58
  */
 public enum StatusEnum {
 
     /**
-     * 模块正在初始化
+     * Module is initializing
      * initializing
      */
     INITIALIZING,
 
     /**
-     * 模块正在等待
+     * Module is waiting
      * initializing
      */
     WAITING,
 
     /**
-     * 同步区块中
+     * In synchronized blocks
      * synchronizing
      */
     SYNCHRONIZING,
 
     /**
-     * 分叉链切换中
+     * Switching forked chains
      * switching
      */
     SWITCHING,
 
     /**
-     * 模块正常运行中
+     * Module is running normally
      * running
      */
     RUNNING,
 
     /**
-     * 维护孤儿链
+     * Maintaining orphan chains
      * Clean up the database
      */
     UPDATE_ORPHAN_CHAINS,
 
     /**
-     * 维护孤儿链
+     * Maintaining orphan chains
      * Clean up the database
      */
     MAINTAIN_ORPHAN_CHAINS,
 
     /**
-     * 清理数据库中
+     * Clean up the database
      * Clean up the database
      */
     STORAGE_CLEANING,

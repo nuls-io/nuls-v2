@@ -23,7 +23,7 @@ import java.util.function.Function;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-20 11:08
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Path("/remote/")
 @Component
@@ -85,7 +85,7 @@ public class RemoteTestController {
         } catch (TestFailException e) {
             return new RemoteResult(false,e.getMessage());
         } catch (Throwable e){
-            return new RemoteResult(false,"系统异常："+e.getMessage());
+            return new RemoteResult(false,"System abnormality："+e.getMessage());
         }
     }
 

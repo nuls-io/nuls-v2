@@ -50,7 +50,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 用于获取账户余额及账户nonce值
+ * Used to obtain account balance and account informationnoncevalue
  * Created by wangkun23 on 2018/11/19
  *
  * @author lanjinsheng .
@@ -66,25 +66,25 @@ public class AccountStateCmd extends BaseLedgerCmd {
     private UnconfirmedStateService unconfirmedStateService;
 
     /**
-     * 获取账户资产余额
+     * Obtain account asset balance
      * get user account balance
      *
      * @param params
      * @return
      */
     @CmdAnnotation(cmd = CmdConstant.CMD_GET_BALANCE, version = 1.0,
-            description = "获取账户资产(已入区块)")
+            description = "Obtain account assets(Blocked)")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "assetChainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "资产所在地址")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Run ChainId,Value range[1-65535]"),
+            @Parameter(parameterName = "assetChainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Asset ChainId,Value range[1-65535]"),
+            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "assetId,Value range[1-65535]"),
+            @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "Asset location address")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象",
+    @ResponseData(name = "Return value", description = "Return aMapobject",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-                    @Key(name = "total", valueType = BigInteger.class, description = "总金额"),
-                    @Key(name = "freeze", valueType = BigInteger.class, description = "冻结金额"),
-                    @Key(name = "available", valueType = String.class, description = "可用金额")
+                    @Key(name = "total", valueType = BigInteger.class, description = "Total amount"),
+                    @Key(name = "freeze", valueType = BigInteger.class, description = "Freeze amount"),
+                    @Key(name = "available", valueType = String.class, description = "Available amount")
             })
     )
     public Response getBalance(Map params) {
@@ -121,15 +121,15 @@ public class AccountStateCmd extends BaseLedgerCmd {
 
 
     @CmdAnnotation(cmd = "getBalanceList", version = 1.0,
-            description = "获取账户资产的集合")
+            description = "Obtain a collection of account assets")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "assetKeyList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "资产key集合, [assetChainId-assetId]"),
-            @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "资产所在地址"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Running ChainId,Value range[1-65535]"),
+            @Parameter(parameterName = "assetKeyList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "assetkeyaggregate, [assetChainId-assetId]"),
+            @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "Asset location address"),
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象",
+    @ResponseData(name = "Return value", description = "Return aMapobject",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-                    @Key(name = "list", valueType = Map.class, description = "账户资产集合")
+                    @Key(name = "list", valueType = Map.class, description = "Account asset collection")
             })
     )
     public Response getBalanceList(Map params) {
@@ -179,28 +179,28 @@ public class AccountStateCmd extends BaseLedgerCmd {
 
 
     /**
-     * 获取账户锁定列表
+     * Obtain account lock list
      * get user account freeze
      *
      * @param params
      * @return
      */
     @CmdAnnotation(cmd = CmdConstant.CMD_GET_FREEZE_LIST, version = 1.0,
-            description = "分页获取账户锁定资产列表")
+            description = "Paging to obtain account locked asset list")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "assetChainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "资产所在地址"),
-            @Parameter(parameterName = "pageNumber", requestType = @TypeDescriptor(value = int.class), parameterDes = "起始页数"),
-            @Parameter(parameterName = "pageSize", requestType = @TypeDescriptor(value = int.class), parameterDes = "每页显示数量")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Run ChainId,Value range[1-65535]"),
+            @Parameter(parameterName = "assetChainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Asset ChainId,Value range[1-65535]"),
+            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "assetId,Value range[1-65535]"),
+            @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "Asset location address"),
+            @Parameter(parameterName = "pageNumber", requestType = @TypeDescriptor(value = int.class), parameterDes = "Starting page count"),
+            @Parameter(parameterName = "pageSize", requestType = @TypeDescriptor(value = int.class), parameterDes = "Display quantity per page")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象",
+    @ResponseData(name = "Return value", description = "Return aMapobject",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-                    @Key(name = "totalCount", valueType = Integer.class, description = "记录总数"),
-                    @Key(name = "pageNumber", valueType = Integer.class, description = "起始页数"),
-                    @Key(name = "pageSize", valueType = Integer.class, description = "每页显示数量"),
-                    @Key(name = "list", valueType = List.class, valueElement = FreezeLockState.class, description = "锁定金额列表")
+                    @Key(name = "totalCount", valueType = Integer.class, description = "Total number of records"),
+                    @Key(name = "pageNumber", valueType = Integer.class, description = "Starting page count"),
+                    @Key(name = "pageSize", valueType = Integer.class, description = "Display quantity per page"),
+                    @Key(name = "list", valueType = List.class, valueElement = FreezeLockState.class, description = "Lock Amount List")
             })
     )
     public Response getFreezeList(Map params) {
@@ -250,26 +250,26 @@ public class AccountStateCmd extends BaseLedgerCmd {
     }
 
     /**
-     * 获取账户nonce值
+     * Obtain accountnoncevalue
      * get user account nonce
      *
      * @param params
      * @return
      */
     @CmdAnnotation(cmd = CmdConstant.CMD_GET_NONCE, version = 1.0,
-            description = "获取账户资产NONCE值")
+            description = "Obtain account assetsNONCEvalue")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "assetChainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "资产所在地址"),
-            @Parameter(parameterName = "isConfirmed", requestType = @TypeDescriptor(value = boolean.class), parameterDes = "选填项,默认false. 填true,则必须从已确认交易里获取")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Running ChainId,Value range[1-65535]"),
+            @Parameter(parameterName = "assetChainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Asset ChainId,Value range[1-65535]"),
+            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "assetId,Value range[1-65535]"),
+            @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "Asset location address"),
+            @Parameter(parameterName = "isConfirmed", requestType = @TypeDescriptor(value = boolean.class), parameterDes = "Optional items,defaultfalse. filltrue,Then it must be obtained from the confirmed transaction")
 
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象",
+    @ResponseData(name = "Return value", description = "Return aMapobject",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-                    @Key(name = "nonce", valueType = String.class, description = "账户资产nonce值"),
-                    @Key(name = "nonceType", valueType = Integer.class, description = "1：已确认的nonce值,0：未确认的nonce值")
+                    @Key(name = "nonce", valueType = String.class, description = "Account assetsnoncevalue"),
+                    @Key(name = "nonceType", valueType = Integer.class, description = "1：Confirmednoncevalue,0：unacknowledgednoncevalue")
 
             })
     )
@@ -299,22 +299,22 @@ public class AccountStateCmd extends BaseLedgerCmd {
     }
 
     @CmdAnnotation(cmd = CmdConstant.CMD_GET_BALANCE_NONCE, version = 1.0,
-            description = "获取账户资产余额与NONCE值")
+            description = "Obtain account asset balance andNONCEvalue")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "assetChainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "资产所在地址"),
-            @Parameter(parameterName = "isConfirmed", requestType = @TypeDescriptor(value = boolean.class), parameterDes = "选填项,默认false. 填true,则必须从已确认交易里获取")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Running ChainId,Value range[1-65535]"),
+            @Parameter(parameterName = "assetChainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Asset ChainId,Value range[1-65535]"),
+            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "assetId,Value range[1-65535]"),
+            @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "Asset location address"),
+            @Parameter(parameterName = "isConfirmed", requestType = @TypeDescriptor(value = boolean.class), parameterDes = "Optional items,defaultfalse. filltrue,Then it must be obtained from the confirmed transaction")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象",
+    @ResponseData(name = "Return value", description = "Return aMapobject",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-                    @Key(name = "nonce", valueType = String.class, description = "账户资产nonce值"),
-                    @Key(name = "nonceType", valueType = Integer.class, description = "1：已确认的nonce值,0：未确认的nonce值"),
-                    @Key(name = "available", valueType = BigInteger.class, description = "可用金额"),
-                    @Key(name = "freeze", valueType = BigInteger.class, description = "总锁定金额"),
-                    @Key(name = "permanentLocked", valueType = BigInteger.class, description = "永久锁定金额"),
-                    @Key(name = "timeHeightLocked", valueType = BigInteger.class, description = "高度或时间锁定金额")
+                    @Key(name = "nonce", valueType = String.class, description = "Account assetsnoncevalue"),
+                    @Key(name = "nonceType", valueType = Integer.class, description = "1：Confirmednoncevalue,0：unacknowledgednoncevalue"),
+                    @Key(name = "available", valueType = BigInteger.class, description = "Available amount"),
+                    @Key(name = "freeze", valueType = BigInteger.class, description = "Total locked amount"),
+                    @Key(name = "permanentLocked", valueType = BigInteger.class, description = "Permanently locked amount"),
+                    @Key(name = "timeHeightLocked", valueType = BigInteger.class, description = "Height or Time Locked Amount")
             })
     )
     public Response getBalanceNonce(Map params) {

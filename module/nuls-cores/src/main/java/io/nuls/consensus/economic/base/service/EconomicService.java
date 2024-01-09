@@ -5,22 +5,22 @@ import io.nuls.core.basic.Result;
 import java.util.Map;
 
 /**
- * 经济模型接口类
+ * Economic Model Interface Class
  * @author tag
  * @date 2019/7/22
  */
 public interface EconomicService {
     /**
-     * 计算共识奖励
-     * @param params 计算共识奖励所需参数
+     * Calculate consensus rewards
+     * @param params Parameters required for calculating consensus rewards
      *
      * @return processor result
      * */
     Result calcReward(Map<String,Object> params);
 
     /**
-     * 注册共识模块初始参数
-     * @param params 共识模块初始参数
+     * Initial parameters for registering consensus module
+     * @param params Initial parameters of consensus module
      *
      * @return processor result
      * */

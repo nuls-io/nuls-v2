@@ -56,7 +56,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import static io.nuls.ledger.utils.LoggerUtil.logger;
 
 /**
- * 交易业务处理实现
+ * Implementation of transaction business processing
  *
  * @author lanjinsheng
  */
@@ -84,33 +84,33 @@ public class TransactionServiceImpl implements TransactionService {
     @Autowired
     AssetRegMngService assetRegMngService;
     /**
-     * 缓存一个区块的nonce值
+     * Cache a blocknoncevalue
      */
     private Map<String, Integer> ledgerNonce = new ConcurrentHashMap<String, Integer>(5120);
     /**
-     * 缓存一个区块的hash值
+     * Cache a blockhashvalue
      */
     private Map<String, Integer> ledgerHash = new ConcurrentHashMap<>(5120);
 
 
     /**
-     * 未确认交易数据处理
+     * Unconfirmed transaction data processing
      *
      * @param transaction
      */
 
     @Override
     public ValidateResult unConfirmTxProcess(int addressChainId, Transaction transaction) throws Exception {
-        //直接更新未确认交易
+        //Directly update unconfirmed transactions
         CoinData coinData = CoinDataUtil.parseCoinData(transaction.getCoinData());
         if (null == coinData) {
-            //例如黄牌交易，直接返回
+            //For example, in a yellow card transaction, return directly
             return ValidateResult.getSuccess();
         }
         if (!coinDataValidator.validateTxAmount(coinData, transaction.getType())) {
             return ValidateResult.getResult(LedgerErrorCode.TX_AMOUNT_INVALIDATE, new String[]{transaction.getHash().toHex()});
         }
-        /*未确认交易的校验*/
+        /*Verification of unconfirmed transactions*/
         Map<String, TxUnconfirmed> accountsMap = new ConcurrentHashMap<>(8);
         byte[] txNonce = LedgerUtil.getNonceByTx(transaction);
         ValidateResult validateResult = coinDataValidator.analysisCoinData(addressChainId, transaction, accountsMap, txNonce);
@@ -138,10 +138,10 @@ public class TransactionServiceImpl implements TransactionService {
             String nonce8Str = LedgerUtil.getNonceEncode(nonce8Bytes);
             String txHash = transaction.getHash().toHex();
             ledgerHash.put(txHash, 1);
-            //从缓存校验交易
+            //Verify transactions from cache
             CoinData coinData = CoinDataUtil.parseCoinData(transaction.getCoinData());
             if (null == coinData) {
-                //例如黄牌交易，种子节点产生的coinbase直接返回
+                //For example, in yellow card trading, seed nodes generatecoinbaseDirectly return
                 LoggerUtil.logger(addressChainId).info("txHash = {},coinData is null continue.", txHash);
                 continue;
             }
@@ -149,10 +149,10 @@ public class TransactionServiceImpl implements TransactionService {
             for (CoinFrom from : froms) {
                 String address = LedgerUtil.getRealAddressStr(from.getAddress());
                 if (LedgerUtil.isNotLocalChainAccount(addressChainId, from.getAddress())) {
-                    //非本地网络账户地址,不进行处理
+                    //Non local network account address,Not processed
                     logger(addressChainId).info("address={} not localChainAccount", address);
                     if (LedgerUtil.isCrossTx(transaction.getType())) {
-                        //非本地网络账户地址,不进行处理
+                        //Non local network account address,Not processed
                         continue;
                     } else {
                         LoggerUtil.logger(addressChainId).error("address={} Not local chain Exception", address);
@@ -160,25 +160,25 @@ public class TransactionServiceImpl implements TransactionService {
                     }
                 }
                 if (assetRegMngService.isContractAsset(from.getAssetsChainId(), from.getAssetsId())) {
-                    //账本非跨链交易如果收到from是合约资产的，报错
+                    //If non cross chain transactions are received in the ledgerfromIt is a contract asset, reporting an error
                     LoggerUtil.logger(addressChainId).info("hash={} asset={}-{}  from is contract asset", txHash, from.getAssetsChainId(), from.getAssetsId());
                     continue;
                 }
                 boolean process;
                 AccountBalance accountBalance = getAccountBalance(addressChainId, from, updateAccounts, address);
-                //归集链下有多少种类资产，资产下有多少地址
+                //How many types of assets are under the collection chain, and how many addresses are under the assets
                 LedgerUtil.dealAssetAddressIndex(assetAddressIndex, from.getAssetsChainId(), from.getAssetsId(), address);
                 if (from.getLocked() == 0) {
                     AmountNonce amountNonce = new AmountNonce(from.getNonce(), nonce8Bytes, from.getAmount());
                     accountBalance.getPreAccountState().getNonces().add(amountNonce);
-                    //判断是否存在未确认过程交易，如果存在则进行确认记录，如果不存在，则进行未确认的清空记录
+                    //Determine if there is an unconfirmed process transaction. If it exists, make a confirmation record. If it does not exist, clear the unconfirmed record
                     String accountKeyStr = LedgerUtil.getKeyStr(address, from.getAssetsChainId(), from.getAssetsId());
                     if (unconfirmedStateService.existTxUnconfirmedTx(addressChainId, accountKeyStr, nonce8Str)) {
                         delUncfd2CfdKeys.add(new Uncfd2CfdKey(accountKeyStr, nonce8Str));
                     } else {
                         clearUncfs.put(accountKeyStr, 1);
                     }
-                    //非解锁交易处理
+                    //Non unlocked transaction processing
                     process = commontTransactionProcessor.processFromCoinData(from, nonce8Bytes, accountBalance.getNowAccountState());
                     ledgerNonce.put(LedgerUtil.getAccountNoncesStrKey(address, from.getAssetsChainId(), from.getAssetsId(), nonce8Str), 1);
                 } else {
@@ -193,7 +193,7 @@ public class TransactionServiceImpl implements TransactionService {
             for (CoinTo to : tos) {
                 String address = LedgerUtil.getRealAddressStr(to.getAddress());
                 if (LedgerUtil.isNotLocalChainAccount(addressChainId, to.getAddress())) {
-                    //非本地网络账户地址,不进行处理
+                    //Non local network account address,Not processed
                     logger(addressChainId).info("address={} not localChainAccount", address);
                     if (LedgerUtil.isCrossTx(transaction.getType())) {
                         continue;
@@ -203,18 +203,18 @@ public class TransactionServiceImpl implements TransactionService {
                     }
                 }
                 if (assetRegMngService.isContractAsset(to.getAssetsChainId(), to.getAssetsId())) {
-                    //账本非跨链交易如果收到to是合约资产的,不进行入账
+                    //If non cross chain transactions are received in the ledgertoIt is a contractual asset,Not recorded
                     LoggerUtil.logger(addressChainId).info("hash={} asset={}-{} rec contract asset", txHash, to.getAssetsChainId(), to.getAssetsId());
                     continue;
                 }
                 AccountBalance accountBalance = getAccountBalance(addressChainId, to, updateAccounts, address);
-                //归集链下有多少种类资产，资产下有多少地址
+                //How many types of assets are under the collection chain, and how many addresses are under the assets
                 LedgerUtil.dealAssetAddressIndex(assetAddressIndex, to.getAssetsChainId(), to.getAssetsId(), address);
                 if (to.getLockTime() == 0) {
-                    //非锁定交易处理
+                    //Non locked transaction processing
                     commontTransactionProcessor.processToCoinData(to, accountBalance.getNowAccountState());
                 } else {
-                    //锁定交易处理
+                    //Lock transaction processing
                     lockedTransactionProcessor.processCoinData(to, nonce8Bytes, txHash, accountBalance.getNowAccountState(), transaction.getTime(), address, false);
                 }
             }
@@ -223,8 +223,8 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     /**
-     * 已确认区块数据处理
-     * 提交交易：1.交易存库（上一个账户状态进行镜像,存储最近x=500区块以内交易） 2.更新账户
+     * Confirmed block data processing
+     * Submit transaction：1.Transaction repository（Mirror the previous account status,Store Recentlyx=500Within block transactions） 2.Update account
      *
      * @param addressChainId
      * @param txList
@@ -238,15 +238,15 @@ public class TransactionServiceImpl implements TransactionService {
             LockerUtil.LEDGER_LOCKER.lock();
             long currentDbHeight = repository.getBlockHeight(addressChainId);
             if ((blockHeight - currentDbHeight) != 1) {
-                //高度不一致，数据出问题了
+                //The height is inconsistent, and there is an issue with the data
                 logger(addressChainId).error("addressChainId ={},blockHeight={},ledgerBlockHeight={}", addressChainId, blockHeight, currentDbHeight);
                 return false;
             }
             int accountMapSize = txList.size() * 3;
-            //批量交易按交易进行账户的金额处理，再按区块为原子性进行提交,updateAccounts用于账户计算缓存，最后统一处理
+            //Batch transactions are processed based on the transaction amount of the account, and then submitted as atomic blocks,updateAccountsUsed for account calculation caching, and finally processed uniformly
             Map<String, AccountBalance> updateAccounts = new HashMap<>(accountMapSize);
             Map<String, AccountState> updateMemAccounts = new HashMap<>(accountMapSize);
-            //整体区块备份
+            //Overall block backup
             BlockSnapshotAccounts blockSnapshotAccounts = new BlockSnapshotAccounts();
             Map<byte[], byte[]> accountStatesMap = new HashMap<>(accountMapSize);
             List<Uncfd2CfdKey> delUncfd2CfdKeys = new ArrayList<>();
@@ -256,10 +256,10 @@ public class TransactionServiceImpl implements TransactionService {
                 if (!confirmBlockTxProcess(blockHeight, addressChainId, txList, updateAccounts, delUncfd2CfdKeys, clearUncfs, assetAddressIndex)) {
                     return false;
                 }
-                //整体交易的处理
-                //更新账本信息
+                //Handling of overall transactions
+                //Update ledger information
                 for (Map.Entry<String, AccountBalance> entry : updateAccounts.entrySet()) {
-                    //缓存数据
+                    //Caching data
                     blockSnapshotAccounts.addAccountState(entry.getValue().getPreAccountState());
                     freezeStateService.recalculateFreeze(addressChainId, entry.getValue().getNowAccountState());
                     entry.getValue().getNowAccountState().setLatestUnFreezeTime(NulsDateUtils.getCurrentTimeSeconds());
@@ -272,35 +272,35 @@ public class TransactionServiceImpl implements TransactionService {
                 cleanBlockCommitTempDatas();
                 return false;
             }
-            //提交整体数据
+            //Submit overall data
             try {
-                //备份历史
+                //Backup History
                 repository.saveBlockSnapshot(addressChainId, blockHeight, blockSnapshotAccounts);
-                //更新链下资产种类，及资产地址集合数据。
+                //Update off chain asset types and asset address collection data.
                 chainAssetsService.updateChainAssets(addressChainId, assetAddressIndex);
-                //更新账本
+                //Update ledger
                 if (accountStatesMap.size() > 0) {
                     repository.batchUpdateAccountState(addressChainId, accountStatesMap, updateMemAccounts);
                 }
                 for (Map.Entry<String, Integer> entry : clearUncfs.entrySet()) {
-                    //进行收到网络其他节点的交易，刷新本地未确认数据处理
+                    //Perform transactions received from other nodes in the network, refresh local unconfirmed data processing
                     unconfirmedStateService.clearAccountUnconfirmed(addressChainId, entry.getKey());
                 }
-                //删除跃迁的未确认交易
+                //Delete unconfirmed transactions for jumps
                 unconfirmedStateService.batchDeleteUnconfirmedTx(addressChainId, delUncfd2CfdKeys);
-                //删除过期缓存数据
+                //Delete expired cache data
                 if (blockHeight > LedgerConstant.CACHE_ACCOUNT_BLOCK) {
                     repository.delBlockSnapshot(addressChainId, (blockHeight - LedgerConstant.CACHE_ACCOUNT_BLOCK));
                 }
             } catch (Exception e) {
-                //需要回滚数据
+                //Need to roll back data
                 cleanBlockCommitTempDatas();
                 logger(addressChainId).error(e);
                 LoggerUtil.logger(addressChainId).error("confirmBlockProcess  error! go rollBackBlock!addrChainId={},height={}", addressChainId, blockHeight);
                 rollBackBlock(addressChainId, blockSnapshotAccounts.getAccounts(), blockHeight);
                 return false;
             }
-            //完全提交,存储当前高度。
+            //Fully submit,Store the current height.
             repository.saveOrUpdateBlockHeight(addressChainId, blockHeight);
             return true;
         } catch (Exception e) {
@@ -320,7 +320,7 @@ public class TransactionServiceImpl implements TransactionService {
         String key = LedgerUtil.getKeyStr(address, assetChainId, assetId);
         AccountBalance accountBalance = updateAccounts.get(key);
         if (null == accountBalance) {
-            //交易里的账户处理缓存AccountBalance
+            //Account processing cache in transactionsAccountBalance
             AccountState accountState = accountStateService.getAccountStateReCal(address, addressChainId, assetChainId, assetId);
             AccountStateSnapshot bakAccountState = new AccountStateSnapshot(addressChainId, assetChainId, assetId, address, accountState.deepClone());
             accountBalance = new AccountBalance(accountState, bakAccountState);
@@ -337,9 +337,9 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public synchronized boolean rollBackBlock(int addressChainId, List<AccountStateSnapshot> preAccountStates, long blockHeight) {
         try {
-            //回滚账号信息
+            //Rollback account information
             accountStateService.rollAccountState(addressChainId, preAccountStates);
-            //回滚备份数据
+            //Rollback backup data
             repository.delBlockSnapshot(addressChainId, blockHeight);
         } catch (Exception e) {
             logger(addressChainId).error("rollBackBlock error!!", e);
@@ -363,7 +363,7 @@ public class TransactionServiceImpl implements TransactionService {
                 return true;
             }
             if (blockHeight != currentDbHeight) {
-                //高度不一致，数据出问题了
+                //The height is inconsistent, and there is an issue with the data
                 logger(addressChainId).error("addressChainId ={},blockHeight={},ledgerBlockHeight={}", addressChainId, blockHeight, currentDbHeight);
                 return false;
             }
@@ -372,25 +372,25 @@ public class TransactionServiceImpl implements TransactionService {
                 logger(addressChainId).error("addressChainId ={},blockHeight={},blockSnapshotAccounts is null.", addressChainId, blockHeight);
                 return false;
             }
-            //回滚高度
+            //Rollback height
             repository.saveOrUpdateBlockHeight(addressChainId, (blockHeight - 1));
             List<AccountStateSnapshot> preAccountStates = blockSnapshotAccounts.getAccounts();
             accountStateService.rollAccountState(addressChainId, preAccountStates);
-            //删除备份数据
+            //Delete backup data
             repository.delBlockSnapshot(addressChainId, blockHeight);
-            //回滚nonce缓存信息
+            //RollBACKnonceCache information
             txs.forEach(tx -> {
                 String txHash = tx.getHash().toHex();
-                //从缓存校验交易
+                //Verify transactions from cache
                 CoinData coinData = CoinDataUtil.parseCoinData(tx.getCoinData());
-                //删除备份的hash
+                //Delete backuphash
                 try {
                     lgBlockSyncRepository.deleteAccountHash(addressChainId, txHash);
                 } catch (Exception e) {
                     LoggerUtil.logger(addressChainId).error(e);
                 }
                 if (null != coinData) {
-                    //更新账户状态
+                    //Update account status
                     String nonce8BytesStr = LedgerUtil.getNonceEncodeByTx(tx);
                     List<CoinFrom> froms = coinData.getFrom();
                     for (CoinFrom from : froms) {
@@ -399,7 +399,7 @@ public class TransactionServiceImpl implements TransactionService {
                         }
                         if (from.getLocked() == 0) {
                             try {
-                                //删除备份的花费nonce值。
+                                //The cost of deleting backupsnonceValue.
                                 lgBlockSyncRepository.deleteAccountNonces(addressChainId, LedgerUtil.getAccountNoncesStrKey(LedgerUtil.getRealAddressStr(from.getAddress()), from.getAssetsChainId(), from.getAssetsId(), nonce8BytesStr));
                             } catch (Exception e) {
                                 LoggerUtil.logger(addressChainId).error(e);
@@ -420,19 +420,19 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public boolean rollBackUnconfirmTx(int addressChainId, Transaction transaction) {
-        //回滚未确认交易,就是回滚未确认nonce值
+        //Rolling back unconfirmed transactions,It's just rolling back unconfirmednoncevalue
         CoinData coinData = CoinDataUtil.parseCoinData(transaction.getCoinData());
         if (null == coinData) {
-            //例如黄牌交易，直接返回
+            //For example, in a yellow card transaction, return directly
             return true;
         }
         List<CoinFrom> froms = coinData.getFrom();
         String txHash = transaction.getHash().toHex();
         for (CoinFrom from : froms) {
             if (LedgerUtil.isNotLocalChainAccount(addressChainId, from.getAddress())) {
-                //非本地网络账户地址,不进行处理
+                //Non local network account address,Not processed
                 if (LedgerUtil.isCrossTx(transaction.getType())) {
-                    //非本地网络账户地址,不进行处理
+                    //Non local network account address,Not processed
                     continue;
                 } else {
                     LoggerUtil.logger(addressChainId).error("address={} Not local chain Exception", LedgerUtil.getRealAddressStr(from.getAddress()));
@@ -449,7 +449,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     /**
-     * 清除区块提交时候的缓存数据
+     * Clear cached data during block submission
      *
      * @return
      */

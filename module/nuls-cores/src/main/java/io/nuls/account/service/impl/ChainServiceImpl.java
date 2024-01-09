@@ -33,7 +33,7 @@ import io.nuls.core.core.annotation.Component;
 import java.util.Map;
 
 /**
- * 管理链的运行和停止接口实现
+ * Implementation of the interface for running and stopping the management chain
  * Management chain run and stop interface implementation
  * @author: qinyifeng
  * @date: 2018/12/13

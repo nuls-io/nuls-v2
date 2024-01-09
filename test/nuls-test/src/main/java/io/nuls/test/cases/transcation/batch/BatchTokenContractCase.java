@@ -103,7 +103,7 @@ public class BatchTokenContractCase extends TestCaseChain {
 
     @Override
     public String title() {
-        return "批量token交易";
+        return "batchtokentransaction";
     }
 
     @Override

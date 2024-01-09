@@ -32,21 +32,21 @@ import io.nuls.core.rpc.model.ApiModelProperty;
  * @date 2019/06/17
  * @description
  */
-@ApiModel(description = "资产信息")
+@ApiModel(description = "Asset information")
 public class AssetDto {
     /**
-     * 资产id
+     * assetid
      * asset id
      */
-    @ApiModelProperty(description = "资产id")
+    @ApiModelProperty(description = "assetid")
     private int assetId;
-    @ApiModelProperty(description = "资产符号")
+    @ApiModelProperty(description = "Asset symbols")
     private String symbol;
-    @ApiModelProperty(description = "资产名称")
+    @ApiModelProperty(description = "Asset Name")
     private String assetName;
-    @ApiModelProperty(description = "资产是否可用")
+    @ApiModelProperty(description = "Is the asset available")
     private boolean usable;
-    @ApiModelProperty(description = "资产精确度")
+    @ApiModelProperty(description = "Asset accuracy")
     private short decimalPlaces;
 
     public int getAssetId() {

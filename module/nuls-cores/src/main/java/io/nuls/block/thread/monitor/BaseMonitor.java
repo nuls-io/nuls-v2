@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 定时调度任务基类
+ * Timed scheduling task base class
  *
  * @author captain
  * @version 1.0
@@ -19,12 +19,12 @@ import java.util.List;
 public abstract class BaseMonitor implements Runnable {
 
     /**
-     * 可执行业务逻辑的状态列表(默认只包含{@link StatusEnum#RUNNING})
+     * List of executable business logic states(Default only includes{@link StatusEnum#RUNNING})
      */
     protected List<StatusEnum> runningStatusEnumList = new ArrayList<>();
 
     /**
-     * 线程标志
+     * Thread Flag
      */
     protected String symbol;
 
@@ -45,7 +45,7 @@ public abstract class BaseMonitor implements Runnable {
             NulsLogger logger = context.getLogger();
             StatusEnum status = context.getStatus();
             try {
-                //判断该链的运行状态,只有正常运行时才运行定时监控线程
+                //Determine the operational status of the chain,Only run scheduled monitoring threads during normal operation
                 if (runningStatusEnumList.contains(status)) {
                     process(chainId, context, logger);
 //                } else {
@@ -59,7 +59,7 @@ public abstract class BaseMonitor implements Runnable {
     }
 
     /**
-     * 具体业务处理方法
+     * Specific business processing methods
      *
      * @param chainId
      * @param context

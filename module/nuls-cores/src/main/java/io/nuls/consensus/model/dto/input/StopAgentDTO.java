@@ -1,7 +1,7 @@
 package io.nuls.consensus.model.dto.input;
 
 /**
- * 停止节点参数类
+ * Stop node parameter class
  * Stop Node Parameter Class
  *
  * @author tag

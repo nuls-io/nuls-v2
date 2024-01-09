@@ -8,7 +8,7 @@ import io.nuls.transaction.model.po.TransactionUnconfirmedPO;
 import java.util.List;
 
 /**
- * 验证通过但未打包的交易(未确认交易)
+ * Transactions that have been validated but not packaged(Unconfirmed transaction)
  * Save verified transaction (unpackaged)
  *
  * @author: Charlie
@@ -17,17 +17,17 @@ import java.util.List;
 public interface UnconfirmedTxStorageService {
 
     /**
-     * 保存已验证交易
+     * Save Verified Transactions
      *
      * @param chainId
      * @param tx
-     * @return 保存是否成功
+     * @return Whether the save was successful
      */
     boolean putTx(int chainId, Transaction tx);
 
 
     /**
-     * 批量保存未确认交易
+     * Batch save unconfirmed transactions
      * @param chainId
      * @param txNetPOList
      * @return
@@ -35,16 +35,16 @@ public interface UnconfirmedTxStorageService {
     boolean putTxList(int chainId, List<TransactionNetPO> txNetPOList);
 
     /**
-     * 根据交易hash查询已验证交易数据
+     * According to the transactionhashQuery verified transaction data
      *
      * @param chainId
      * @param hash
-     * @return 交易数据
+     * @return transaction data
      */
     TransactionUnconfirmedPO getTx(int chainId, NulsHash hash);
 
     /**
-     * 判断交易是否在未确认交易数据库中存在
+     * Determine if the transaction exists in the unconfirmed transaction database
      * @param chainId
      * @param hash
      * @return
@@ -52,45 +52,45 @@ public interface UnconfirmedTxStorageService {
     boolean isExists(int chainId, NulsHash hash);
 
     /**
-     * 根据交易hash查询已验证交易数据
+     * According to the transactionhashQuery verified transaction data
      *
      * @param chainId
      * @param hash
-     * @return 交易数据
+     * @return transaction data
      */
     TransactionUnconfirmedPO getTx(int chainId, String hash);
 
     /**
-     * 根据交易hash删除已验证交易数据
+     * According to the transactionhashDelete verified transaction data
      *
      * @param chainId
      * @param hash
-     * @return 删除是否成功
+     * @return Whether the deletion was successful
      */
     boolean removeTx(int chainId, NulsHash hash);
 
     boolean removeTx(int chainId, byte[] hash);
 
     /**
-     * 根据交易hash批量查询已验证交易数据
+     * According to the transactionhashBatch query of verified transaction data
      *
      * @param chainId
      * @param hashList NulsHash serialize entity
-     * @return 交易数据列表
+     * @return Transaction Data List
      */
     List<Transaction> getTxList(int chainId, List<byte[]> hashList);
 
     /**
-     * 根据交易hash批量删除已验证交易数据
+     * According to the transactionhashBatch deletion of verified transaction data
      *
      * @param chainId
      * @param hashList NulsHash serialize entity
-     * @return 删除是否成功
+     * @return Whether the deletion was successful
      */
     boolean removeTxList(int chainId, List<byte[]> hashList);
 
     /**
-     * 查询所有未确认交易的key
+     * Query all unconfirmed transactionskey
      *
      * @param chainId
      * @return
@@ -98,7 +98,7 @@ public interface UnconfirmedTxStorageService {
     List<byte[]> getAllTxkeyList(int chainId);
 
     /**
-     * 查询未确认交易数据，包含保存时间
+     * Query unconfirmed transaction data, including save time
      *
      * @param chainId
      * @return
@@ -106,7 +106,7 @@ public interface UnconfirmedTxStorageService {
     List<TransactionUnconfirmedPO> getTransactionUnconfirmedPOList(int chainId, List<byte[]> hashList);
 
     /**
-     * 根据hash 获取存在的key
+     * according tohash Obtain existingkey
      * @param chainId
      * @param hashList
      * @return
@@ -114,7 +114,7 @@ public interface UnconfirmedTxStorageService {
     List<byte[]> getExistKeys(int chainId, List<byte[]> hashList);
 
     /**
-     * 根据hash 获取存在的key
+     * according tohash Obtain existingkey
      * @param chainId
      * @param hashList
      * @return

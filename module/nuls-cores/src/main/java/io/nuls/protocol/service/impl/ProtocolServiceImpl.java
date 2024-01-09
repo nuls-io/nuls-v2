@@ -44,11 +44,11 @@ import java.util.stream.Collectors;
 import static io.nuls.base.data.BlockHeader.BLOCK_HEADER_COMPARATOR;
 
 /**
- * 区块服务实现类
+ * Block service implementation class
  *
  * @author captain
  * @version 1.0
- * @date 18-11-20 上午11:09
+ * @date 18-11-20 morning11:09
  */
 @Component
 public class ProtocolServiceImpl implements ProtocolService {
@@ -110,7 +110,7 @@ public class ProtocolServiceImpl implements ProtocolService {
             newProtocolVersion.setVersion(data.getBlockVersion());
             newProtocolVersion.setEffectiveRatio(data.getEffectiveRatio());
             newProtocolVersion.setContinuousIntervalCount(data.getContinuousIntervalCount());
-            //重新计算统计信息
+            //Recalculate statistics
             proportionMap.merge(newProtocolVersion, 1, Integer::sum);
 
         }
@@ -118,7 +118,7 @@ public class ProtocolServiceImpl implements ProtocolService {
     }
 
     /**
-     * 保存创世块，特殊对待
+     * Save the Genesis Block, Special Treatment
      *
      * @param chainId
      * @param blockHeader
@@ -135,10 +135,10 @@ public class ProtocolServiceImpl implements ProtocolService {
         genesisProtocolVersion.setEffectiveRatio(data.getEffectiveRatio());
         genesisProtocolVersion.setContinuousIntervalCount(data.getContinuousIntervalCount());
         logger.debug("save block, height-0, data-" + data);
-        //计算统计信息
+        //Calculate statistical information
         proportionMap.put(genesisProtocolVersion, 1);
 
-        //初始化一条新协议统计信息,与区块高度绑定,并存到数据库
+        //Initialize a new protocol statistics information,Highly bound to blocks,Coexist in database
         StatisticsInfo statisticsInfo = new StatisticsInfo();
         statisticsInfo.setHeight(0);
         statisticsInfo.setProtocolVersion(genesisProtocolVersion);
@@ -147,18 +147,18 @@ public class ProtocolServiceImpl implements ProtocolService {
 
         boolean b = service.save(chainId, statisticsInfo);
         logger.info("height-0, save-" + b + ", new statisticsInfo-" + statisticsInfo);
-        //设置新协议版本
+        //Set new protocol version
         context.setCurrentProtocolVersion(genesisProtocolVersion);
         System.out.println("---------genesisProtocolVersion----------," + genesisProtocolVersion.getVersion());
         context.setCurrentProtocolVersionCount(statisticsInfo.getCount());
         protocolService.saveCurrentProtocolVersionCount(chainId, context.getCurrentProtocolVersionCount());
         VersionChangeNotifier.notify(chainId, genesisProtocolVersion.getVersion());
-        //保存新协议
+        //Save new agreement
         protocolService.save(chainId, PoUtil.getProtocolVersionPo(genesisProtocolVersion, 0, 0));
         logger.info("height-0, new protocol version available-" + genesisProtocolVersion);
         context.setCount(0);
         context.setLastValidStatisticsInfo(statisticsInfo);
-        //清除旧统计数据
+        //Clear old statistical data
         proportionMap.clear();
         return true;
     }
@@ -173,7 +173,7 @@ public class ProtocolServiceImpl implements ProtocolService {
         if (height == 0) {
             return saveGenesisBlock(chainId, blockHeader);
         }
-        //缓存统计总数+1
+        //Total cache statistics+1
         int count = context.getCount();
         count++;
         context.setCount(count);
@@ -192,33 +192,33 @@ public class ProtocolServiceImpl implements ProtocolService {
             newProtocolVersion.setEffectiveRatio(data.getEffectiveRatio());
             newProtocolVersion.setContinuousIntervalCount(data.getContinuousIntervalCount());
             logger.info("save block, height-" + height + ", data-" + data);
-            //重新计算统计信息
+            //Recalculate statistics
             proportionMap.merge(newProtocolVersion, 1, Integer::sum);
         }
         ConfigBean parameters = context.getParameters();
         short interval = parameters.getInterval();
-        //每1000块进行一次统计
+        //each1000Perform a block count once
         if (count == interval) {
             int already = 0;
             Map<Short, ProtocolVersion> localVersionMap = getLocalVersionMap(context);
             for (Map.Entry<ProtocolVersion, Integer> entry : proportionMap.entrySet()) {
-                //这是网络上传输过来的区块中包含的协议配置对象,如果localProtocolVersion==null,统计时使用这个对象进行统计，表示网络上发过来的区块版本号本地没有对应的配置
+                //This is the protocol configuration object contained in the blocks transmitted over the network,IflocalProtocolVersion==null,When using this object for statistics, it indicates that there is no corresponding configuration for the block version number sent from the network locally
                 ProtocolVersion netProtocolVersion = entry.getKey();
-                //这是本地配置文件根据版本号读取出来的协议配置对象,统计时优先使用这个对象进行统计，表示网络上发过来的区块版本号本地有对应的配置
+                //This is the protocol configuration object read from the local configuration file based on the version number,Prioritize using this object for statistics, indicating that the block version number sent from the network has a corresponding configuration locally
                 ProtocolVersion localProtocolVersion = localVersionMap.get(netProtocolVersion.getVersion());
-                //真正用来统计的配置信息
+                //The configuration information that is truly used for statistics
                 ProtocolVersion statictisProtocolVersion = localProtocolVersion == null ? netProtocolVersion : localProtocolVersion;
                 int real = entry.getValue();
                 already += real;
                 int expect = interval * statictisProtocolVersion.getEffectiveRatio() / 100;
-                //占比超过阈值,保存一条新协议统计记录到数据库
+                //The proportion exceeds the threshold,Save a new protocol statistics record to the database
                 if (!statictisProtocolVersion.equals(currentProtocolVersion) && real >= expect) {
-                    //初始化一条新协议统计信息,与区块高度绑定,并存到数据库
+                    //Initialize a new protocol statistics information,Highly bound to blocks,Coexist in database
                     StatisticsInfo statisticsInfo = new StatisticsInfo();
                     statisticsInfo.setHeight(height);
                     statisticsInfo.setProtocolVersion(statictisProtocolVersion);
                     statisticsInfo.setProtocolVersionMap(proportionMap);
-                    //计数统计
+                    //Count statistics
                     if (lastValidStatisticsInfo.getProtocolVersion().equals(statictisProtocolVersion)) {
                         statisticsInfo.setCount((short) (lastValidStatisticsInfo.getCount() + 1));
                     } else {
@@ -226,7 +226,7 @@ public class ProtocolServiceImpl implements ProtocolService {
                     }
                     boolean b = service.save(chainId, statisticsInfo);
                     logger.info("height-" + height + ", save-" + b + ", new statisticsInfo-" + statisticsInfo);
-                    //如果某协议版本连续统计确认数大于阈值,则进行版本升级
+                    //If the number of consecutive confirmation counts for a certain protocol version exceeds the threshold,Upgrade the version accordingly
                     if (statisticsInfo.getCount() >= statictisProtocolVersion.getContinuousIntervalCount() && statictisProtocolVersion.getVersion() > currentProtocolVersion.getVersion()) {
                         short localVersion = context.getLocalProtocolVersion().getVersion();
                         if (statictisProtocolVersion.getVersion() > localVersion) {
@@ -235,7 +235,7 @@ public class ProtocolServiceImpl implements ProtocolService {
                             logger.error("Older versions of the wallet automatically stop working, Please upgrade the latest version of the wallet!");
                             System.exit(1);
                         }
-                        //设置新协议版本
+                        //Set new protocol version
                         context.setCurrentProtocolVersion(statictisProtocolVersion);
                         context.setCurrentProtocolVersionCount(statisticsInfo.getCount());
                         protocolService.saveCurrentProtocolVersionCount(chainId, context.getCurrentProtocolVersionCount());
@@ -243,30 +243,30 @@ public class ProtocolServiceImpl implements ProtocolService {
                         VersionChangeNotifier.notify(chainId, statictisProtocolVersion.getVersion());
                         VersionChangeNotifier.reRegister(chainId, context, statictisProtocolVersion.getVersion());
                         ProtocolVersionPo oldProtocolVersionPo = protocolService.get(chainId, currentProtocolVersion.getVersion());
-                        //旧协议版本失效,更新协议终止高度,并更新
+                        //Old protocol version invalid,Update the termination height of the agreement,And update
                         oldProtocolVersionPo.setEndHeight(height);
                         protocolService.save(chainId, oldProtocolVersionPo);
-                        //保存新协议
+                        //Save new agreement
                         protocolService.save(chainId, PoUtil.getProtocolVersionPo(statictisProtocolVersion, height + 1, 0));
                         logger.info("height-" + height + ", new protocol version available-" + statictisProtocolVersion);
                     }
                     context.setCount(0);
                     context.setLastValidStatisticsInfo(statisticsInfo);
-                    //清除旧统计数据
+                    //Clear old statistical data
                     proportionMap.clear();
                     return true;
                 }
-                //已经统计了1000个区块中的400个,但是还没有新协议生效,后面的就不需要统计了
+                //It has been counted1000In blocks400individual,But the new agreement has not yet come into effect,The rest doesn't need to be counted anymore
                 if (already > interval - (interval * parameters.getEffectiveRatioMinimum() / 100)) {
                     break;
                 }
             }
-            //初始化一条旧统计信息,与区块高度绑定,并存到数据库
+            //Initialize an old statistical information,Highly bound to blocks,Coexist in database
             StatisticsInfo statisticsInfo = new StatisticsInfo();
             statisticsInfo.setHeight(height);
             statisticsInfo.setProtocolVersion(currentProtocolVersion);
             statisticsInfo.setProtocolVersionMap(proportionMap);
-            //计数统计
+            //Count statistics
             statisticsInfo.setCount((short) (context.getCurrentProtocolVersionCount() + 1));
             context.setCurrentProtocolVersionCount(context.getCurrentProtocolVersionCount() + 1);
             protocolService.saveCurrentProtocolVersionCount(chainId, context.getCurrentProtocolVersionCount());
@@ -274,7 +274,7 @@ public class ProtocolServiceImpl implements ProtocolService {
             logger.info("height-" + height + ", save-" + b + ", new statisticsInfo-" + statisticsInfo);
             context.setCount(0);
             context.setLastValidStatisticsInfo(statisticsInfo);
-            //清除旧统计数据
+            //Clear old statistical data
             proportionMap.clear();
         }
         return true;
@@ -292,7 +292,7 @@ public class ProtocolServiceImpl implements ProtocolService {
         NulsLogger logger = context.getLogger();
         BlockExtendsData data = blockHeader.getExtendsData();
         long height = blockHeader.getHeight();
-        //缓存统计总数-1
+        //Total cache statistics-1
         int count = context.getCount();
         count--;
         Map<ProtocolVersion, Integer> proportionMap = context.getProportionMap();
@@ -307,13 +307,13 @@ public class ProtocolServiceImpl implements ProtocolService {
             newProtocolVersion.setEffectiveRatio(data.getEffectiveRatio());
             newProtocolVersion.setContinuousIntervalCount(data.getContinuousIntervalCount());
             logger.info("rollback block, height-" + height + ", protocol-" + newProtocolVersion);
-            //重新计算统计信息
+            //Recalculate statistics
             proportionMap.merge(newProtocolVersion, 1, (a, b) -> a - b);
         }
-        //缓存统计总数==0时,从数据库加载上一条统计记录
+        //Total cache statistics==0Time,Load the previous statistical record from the database
         ConfigBean parameters = context.getParameters();
         short interval = parameters.getInterval();
-        //区块高度到达阈值,从数据库删除一条统计记录
+        //Block height reaches threshold,Delete a statistical record from the database
         if (count < 0) {
             StatisticsInfo oldValidStatisticsInfo = service.get(chainId, height);
             boolean b = service.delete(chainId, height);
@@ -327,7 +327,7 @@ public class ProtocolServiceImpl implements ProtocolService {
             protocolService.saveCurrentProtocolVersionCount(chainId, context.getCurrentProtocolVersionCount());
             ProtocolVersion currentProtocolVersion = context.getCurrentProtocolVersion();
             if (newValidStatisticsInfo.getProtocolVersion().equals(currentProtocolVersion) && newValidStatisticsInfo.getCount() < currentProtocolVersion.getContinuousIntervalCount()) {
-                //设置新协议版本
+                //Set new protocol version
                 Deque<ProtocolVersion> history = context.getProtocolVersionHistory();
                 if (history.size() > 1) {
                     ProtocolVersion pop = history.pop();
@@ -335,9 +335,9 @@ public class ProtocolServiceImpl implements ProtocolService {
                     context.setCurrentProtocolVersion(protocolVersion);
                     VersionChangeNotifier.notify(chainId, protocolVersion.getVersion());
                     VersionChangeNotifier.reRegister(chainId, context, protocolVersion.getVersion());
-                    //删除失效协议
+                    //Delete Invalid Protocol
                     protocolService.delete(chainId, pop.getVersion());
-                    //更新上一个协议的结束高度
+                    //Update the end height of the previous agreement
                     ProtocolVersionPo protocolVersionPo = protocolService.get(chainId, protocolVersion.getVersion());
                     protocolVersionPo.setEndHeight(0);
                     protocolService.save(chainId, protocolVersionPo);
@@ -351,7 +351,7 @@ public class ProtocolServiceImpl implements ProtocolService {
     }
 
     /**
-     * 验证区块头协议信息正确性
+     * Verify the correctness of block header protocol information
      *
      * @param data
      * @param context

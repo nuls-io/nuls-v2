@@ -36,50 +36,50 @@ import io.nuls.core.model.BigIntegerUtils;
 
 
 /**
- * 节点信息类
+ * Node information class
  * Node information class
  *
  * @author tag
  * 2018/11/20
  */
-@ApiModel(name = "节点信息详情")
+@ApiModel(name = "Node information details")
 public class AgentDTO {
-    @ApiModelProperty(description = "节点HASH")
+    @ApiModelProperty(description = "nodeHASH")
     private String agentHash;
-    @ApiModelProperty(description = "节点地址")
+    @ApiModelProperty(description = "Node address")
     private String agentAddress;
-    @ApiModelProperty(description = "节点出块地址")
+    @ApiModelProperty(description = "Node block address")
     private String packingAddress;
-    @ApiModelProperty(description = "节点奖励地址")
+    @ApiModelProperty(description = "Node reward address")
     private String rewardAddress;
-    @ApiModelProperty(description = "抵押金额")
+    @ApiModelProperty(description = "Mortgage amount")
     private String deposit;
-    @ApiModelProperty(description = "佣金比例")
+    @ApiModelProperty(description = "commission rate")
     private byte commissionRate;
-    @ApiModelProperty(description = "节点名称")
+    @ApiModelProperty(description = "Node Name")
     private String agentName;
-    @ApiModelProperty(description = "节点ID")
+    @ApiModelProperty(description = "nodeID")
     private String agentId;
     @JsonIgnore
-    @ApiModelProperty(description = "节点简介")
+    @ApiModelProperty(description = "Node Introduction")
     private String introduction;
-    @ApiModelProperty(description = "节点创建时间")
+    @ApiModelProperty(description = "Node creation time")
     private long time;
-    @ApiModelProperty(description = "节点打包高度")
+    @ApiModelProperty(description = "Node packaging height")
     private long blockHeight;
-    @ApiModelProperty(description = "节点失效高度")
+    @ApiModelProperty(description = "Node failure height")
     private long delHeight;
-    @ApiModelProperty(description = "状态")
+    @ApiModelProperty(description = "state")
     private int status;
-    @ApiModelProperty(description = "信誉值")
+    @ApiModelProperty(description = "Reputation value")
     private double creditVal;
-    @ApiModelProperty(description = "总委托金额")
+    @ApiModelProperty(description = "Total entrusted amount")
     private String totalDeposit;
-    @ApiModelProperty(description = "创建节点交易HASH")
+    @ApiModelProperty(description = "Create node transactionsHASH")
     private String txHash;
-    @ApiModelProperty(description = "委托人数")
+    @ApiModelProperty(description = "Number of Commissioners")
     private final int memberCount;
-    @ApiModelProperty(description = "版本")
+    @ApiModelProperty(description = "version")
     private String version;
     public AgentDTO(Agent agent) {
         this.agentHash = agent.getTxHash().toHex();

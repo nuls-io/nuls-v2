@@ -10,28 +10,28 @@ import java.util.Map;
  * */
 public interface BlockService {
     /**
-     * 验证区块正确性
+     * Verify block correctness
      * @param params
      * @return Result
      * */
     Result validBlock(Map<String,Object> params);
 
     /**
-     * 缓存最新区块
+     * Cache the latest block
      * @param params
      * @return Result
      * */
     Result addBlock(Map<String,Object> params);
 
     /**
-     * 接收需缓存的区块
+     * Receive blocks that require caching
      * @param params
      * @return Result
      * */
     Result receiveHeaderList(Map<String,Object> params);
 
     /**
-     * 连分叉区块回滚
+     * Rolling back forked blocks
      * @param params
      * @return Result
      * */

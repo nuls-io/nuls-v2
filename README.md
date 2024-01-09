@@ -108,7 +108,7 @@ Modules added in the future may be released under a different license specified 
 - [Facebook](https://www.facebook.com/nulscommunity/)
 - [YouTube channel](https://www.youtube.com/channel/UC8FkLeF4QW6Undm4B3InN1Q?view_as=subscriber)
 - Telegram [NULS Community](https://t.me/Nulsio)
-- Telegram [NULS 中文社区](https://t.me/Nulscn)
+- Telegram [NULS Chinese community](https://t.me/Nulscn)
 
 ####  
 

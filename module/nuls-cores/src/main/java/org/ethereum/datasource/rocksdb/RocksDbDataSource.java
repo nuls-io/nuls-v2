@@ -134,7 +134,7 @@ public class RocksDbDataSource implements DbSource<byte[]> {
             Options options = new Options();
             options.setCreateIfMissing(true);
             /**
-             * 优化读取性能方案
+             * Optimize reading performance plan
              */
             options.setAllowMmapReads(true);
             options.setCompressionType(CompressionType.NO_COMPRESSION);
@@ -149,7 +149,7 @@ public class RocksDbDataSource implements DbSource<byte[]> {
             options.setTableFormatConfig(tableOption);
 
             options.setNewTableReaderForCompactionInputs(true);
-            //为压缩的输入，打开RocksDB层的预读取
+            //For compressed input, openRocksDBPre reading of layers
             options.setCompactionReadaheadSize(128 * SizeUnit.KB);
             return RocksDB.open(options, dataPath);
         } catch (Exception e) {
@@ -276,7 +276,7 @@ public class RocksDbDataSource implements DbSource<byte[]> {
             throw e;
         } finally {
             // Make sure you close the batch to avoid resource leaks.
-            // 关闭批量操作对象释放资源
+            // Close batch operation objects to release resources
             if (batch != null) {
                 batch.close();
             }

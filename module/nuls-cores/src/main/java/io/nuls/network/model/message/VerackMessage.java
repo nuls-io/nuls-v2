@@ -32,7 +32,7 @@ import io.nuls.core.exception.NulsException;
 
 /**
  * @author lan
- * @description 握手应答消息 verackMessage
+ * @description Handshake response message verackMessage
  * @date 2018/11/01
  */
 public class VerackMessage extends BaseMessage<VerackMessageBody> {

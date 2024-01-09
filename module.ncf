@@ -1,26 +1,26 @@
 [global]
 encoding=UTF-8
 language=en
-logPath=/Users/niels/workspace/nuls-v2/logs
+logPath=/Users/wangzhijian/workspace/nuls-v2/logs
 logLevel=INFO
-dataPath=/Volumes/Niels-1T/version-data/nuls-data
-#默认本链ID
+dataPath=/Users/wangzhijian/workspace/nuls-v2/data
+#Default This ChainID
 chainId=1
-#地址前缀
+#Address prefix
 addressPrefix=NULS
-#默认本链主资产ID
+#Default main asset of this chainID
 assetId=1
-#默认资产小数位数
+#Default Decimal Places for Assets
 decimals=8
-#默认链名称
+#Default Chain Name
 chainName=nuls
-#本链默认资产符号
+#The default asset symbol for this chain
 symbol=NULS
-#主网链id
+#Main network chainid
 mainChainId=1
-#主网主资产id
+#Main network assetsid
 mainAssetId=1
-#主网主资产符号
+#Main network main asset symbol
 mainSymbol=NULS
 blackHolePublicKey=000000000000000000000000000000000000000000000000000000000000000000
 packageVersion=%PACKAGE_VERSION%
@@ -29,86 +29,86 @@ packageVersion=%PACKAGE_VERSION%
 [network]
 port=8001
 crossPort=8002
-#魔法参数
-packetMagic=20191222
-#种子节点
-selfSeedIps=seeda.nuls.io:8001,seedb.nuls.io:8001,seedc.nuls.io:8001,seedd.nuls.io:8001,seede.nuls.io:8001,seedf.nuls.io:8001
-#主网的跨链种子连接节点
-moonSeedIps=seeda.nuls.io:8002,seedb.nuls.io:8002,seedc.nuls.io:8002,seedd.nuls.io:8002,seede.nuls.io:8002,seedf.nuls.io:8002
-#最大入网连接数
+#Magic parameters
+packetMagic=20194444
+#Seed node
+selfSeedIps=127.0.0.1:8001
+#Cross chain seed connection nodes of the main network
+moonSeedIps=127.0.0.1:8002
+#Maximum number of network connections
 maxInCount=300
-#最大出网连接数
+#Maximum number of outbound connections
 maxOutCount=20
 
 [account]
-blockAccountManager=NULSd6Hh5e4o3N3y6FnHeGhECFXrETqSzbapx
+blockAccountManager=NULSd6Hgck6xuMvGasN6yo4Ep8DatJfqpqhKZ
 keystoreFolder=/keystore/backup
 
 [block]
-#区块最大字节数
+#Maximum number of bytes in a block
 blockMaxSize=5242880
-#区块扩展字段最大字节数
+#Maximum number of bytes for block extension fields
 extendMaxSize=1024
-#引发分叉链切换的高度差阈值
+#Threshold of height difference that triggers fork chain switching
 chainSwtichThreshold=3
-#最小链接节点数,当链接到的网络节点低于此参数时,会持续等待
-minNodeAmount=2
-#区块同步过程中,每次从网络上节点下载的区块数量
+#Minimum number of linked nodes,When the network node linked to is below this parameter,Will continue to wait
+minNodeAmount=0
+#During block synchronization process,The number of blocks downloaded from nodes on the network each time
 downloadNumber=10
-#从网络节点下载单个区块的超时时间
+#The timeout for downloading a single block from a network node
 singleDownloadTimeout=15000
-#区块同步过程中缓存的区块字节数上限(20M)
+#Maximum number of cached block bytes during block synchronization process(20M)
 cachedBlockSizeLimit=20971520
-#创世块文件路径(支持绝对路径与相对路径,相对路径相对于此配置文件的目录)
+#Genesis block file path(Supports absolute and relative paths,Relative path relative to the directory of this configuration file)
 genesisBlockPath=genesis-block.json
 
 
 
 [consensus]
-#种子节点列表
-seedNodes=NULSd6Hge7xHDnvsSpnzbR2gWHd31zJ1How11,NULSd6Hgc5VNP4rF4wxdiXEQKpBKUE4w5RS22,NULSd6HgeQwXLdre69ArkqVZNDqMLU4CaAz33,NULSd6HgcjAKAgq8jjXgBCcNLEJUvJEYcoj44,NULSd6HgiDdTjcuvhqzm3bomyBFZmosV3ei55
-#出块地址密码
+#Seed node list
+seedNodes=NULSd6Hgck6xuMvGasN6yo4Ep8DatJfqpqhKZ
+#Block address password
 password=nuls123456
-#出块间隔时间(单位：s)
+#Block output interval time(unit：s)
 packingInterval=10
-#共识委托抵押资产链ID
+#Consensus entrusted mortgage asset chainID
 agentChainId=1
-#共识委托抵押资产ID
+#Consensus entrusted mortgage assetsID
 agentAssetId=1
-#共识奖励资产ID(共识奖励必须为本链资产)
+#Consensus reward assetsID(Consensus rewards must be assets of the same chain)
 awardAssetId=1
-#共识交易手续费单价
+#Consensus transaction fee unit price
 feeUnit=100000
-#总通胀量
+#Total Inflation
 totalInflationAmount=11000000000000000
-#初始通胀金额500w/365*30
+#Initial inflation amount500w/365*30
 inflationAmount=41095890410959
-#通胀开始计算时间(单位:S)2020-07-12 00:00:00
+#Inflation start calculation time(unit:S)2020-07-12 00:00:00
 initTime=1594483200
-#通缩比例(如果没有通缩则设为100)
+#Deflationary ratio(If there is no deflation, set to100)
 deflationRatio=0.4
-#通缩间隔时间(单位：S),30天
+#Deflation interval time(unit：S),30day
 deflationTimeInterval=2592000
 
 [smart-contract]
-#合约视图方法调用最大消耗的Gas
+#The maximum consumption of contract view method callsGas
 maxViewGas=100000000
 crossTokenSystemContract=NULSd6HgsyGNK1xTcx2GnC9y3Jr1DKd3qL2HS
 
 [public-service]
-#public-service模块对外的rpc端口号
+#public-serviceModule ExternalrpcPort number
 rpcPort=8003
-#数据库url地址
+#databaseurladdress
 databaseUrl=127.0.0.1
-#数据库端口号
+#Database port number
 databasePort=27017
-#连接池最大数
+#Maximum number of connection pools
 maxAliveConnect=20
-#连接最大等待时间
+#Maximum waiting time for connection
 maxWaitTime=120000
-#连接最大持续时间
+#Maximum duration of connection
 socketTimeout=300000
-#连接超时时间
+#Connection timeout
 connectTimeOut=30000
 developerNodeAddress=NULSd6Hgf15aUZj6918tEwy9aT4JG1ZQotXRF
 ambassadorNodeAddress=NULSd6HgcfGtsmm79QDoBK1MAjqNmm3rgKXSj
@@ -120,29 +120,29 @@ syncCoinBase=false
 syncAddress=
 
 [cross-chain]
-#跨链节点链接的最小值
+#The minimum value of cross chain node links
 minNodes=3
-#跨链节点链接的最大值
+#Maximum value of cross chain node links
 sendHeight=6
-#跨链交易拜占庭比例
+#Byzantine proportion of cross chain transactions
 byzantineRatio=66
-#主网跨链种子节点列表
-crossSeedIps=seeda.nuls.io:8002,seedb.nuls.io:8002,seedc.nuls.io:8002,seedd.nuls.io:8002,seede.nuls.io:8002,seedf.nuls.io:8002
-#主网验证人列表
-verifiers=NULSd6Hge7xHDnvsSpnzbR2gWHd31zJ1How11,NULSd6Hgc5VNP4rF4wxdiXEQKpBKUE4w5RS22,NULSd6HgeQwXLdre69ArkqVZNDqMLU4CaAz33,NULSd6HgcjAKAgq8jjXgBCcNLEJUvJEYcoj44,NULSd6HgiDdTjcuvhqzm3bomyBFZmosV3ei55
-#主网签名拜占庭比列
+#Main network cross chain seed node list
+crossSeedIps=127.0.0.1:8002
+#List of main network validators
+verifiers=NULSd6Hgck6xuMvGasN6yo4Ep8DatJfqpqhKZ
+#Main network signature Byzantine comparison
 mainByzantineRatio=66
-#主网最大签名数
+#Maximum number of signatures on the main network
 maxSignatureCount=100
 
 [protocol-update]
-#每隔多少个区块统计一次协议占比
+#How many blocks do we count the proportion of protocols per second
 interval=1000
 
 [nuls-api]
-#httpServer的启动ip
+#httpServerStart ofip
 serverIp=0.0.0.0
-#httpServer的启动port
+#httpServerStart ofport
 serverPort=8004
 
 

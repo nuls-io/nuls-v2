@@ -115,12 +115,12 @@ public class TxSignTest {
         //        System.out.println(genAddress);
         //        boolean invalid = !address.equals(genAddress);
         //        if (invalid) {
-        //            System.err.println("地址不一致");
+        //            System.err.println("Inconsistent address");
         //        }
         //        ECKey ecKey = ECKey.fromPublicOnly(pub);
         //        boolean result = ecKey.verify(HexUtil.decode(txHash), signature.getSignData().getSignBytes());
         //        if (!result) {
-        //            System.err.println("验证失败");
+        //            System.err.println("Verification failed");
         //        }
         //        System.out.println(result);
         //        //if (!ECKey.verify(HexUtil.decode(txHash), signature.getSignData().getSignBytes(), signature.getPublicKey())) {

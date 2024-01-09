@@ -164,7 +164,7 @@ public class LgBlockSyncRepositoryImpl implements LgBlockSyncRepository, Initial
     }
 
     /**
-     * 初始化数据库
+     * Initialize database
      */
     public void initChainDb(int addressChainId) {
         try {

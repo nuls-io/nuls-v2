@@ -39,11 +39,11 @@ import static io.nuls.block.constant.Constant.CACHED_BLOCK;
 import static io.nuls.block.utils.LoggerUtil.COMMON_LOG;
 
 /**
- * 链存储实现类
+ * Chain storage implementation class
  *
  * @author captain
  * @version 1.0
- * @date 18-11-20 上午11:09
+ * @date 18-11-20 morning11:09
  */
 @Component
 public class ChainStorageServiceImpl implements ChainStorageService {

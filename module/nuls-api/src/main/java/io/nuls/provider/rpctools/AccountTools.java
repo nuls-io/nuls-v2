@@ -25,13 +25,13 @@ import java.util.function.Function;
 /**
  * @Author: zhoulijun
  * @Time: 2019-06-12 14:06
- * @Description: 账户模块工具类
+ * @Description: Account module tool class
  */
 @Component
 public class AccountTools implements CallRpc {
 
     /**
-     * 获取账户信息
+     * Obtain account information
      * @param chainId
      * @param address
      * @return
@@ -51,7 +51,7 @@ public class AccountTools implements CallRpc {
 
 
     /**
-     * 账户验证
+     * Account verification
      * account validate
      *
      * @param chainId
@@ -65,7 +65,7 @@ public class AccountTools implements CallRpc {
 
 
     /**
-     * 获取账户私钥
+     * Obtain account private key
      * account validate
      *
      * @param chainId
@@ -157,12 +157,12 @@ public class AccountTools implements CallRpc {
     }
 
     public MultiSigAccount createMultiSigAccount(int chainId, List<String> pubKeys, int minSigns) throws NulsException {
-        //验证公钥是否重复
+        //Verify if the public key is duplicated
         Set<String> pubkeySet = new HashSet<>(pubKeys);
         if(pubkeySet.size() < pubKeys.size()){
             throw new NulsException(AccountErrorCode.PUBKEY_REPEAT);
         }
-        //公钥排序, 按固定的顺序来生成多签账户地址
+        //Public key sorting, Generate multiple account addresses in a fixed order
         pubKeys = new ArrayList<String>(pubKeys);
         Collections.sort(pubKeys, new Comparator<String>() {
             private Comparator<byte[]> comparator = UnsignedBytes.lexicographicalComparator();

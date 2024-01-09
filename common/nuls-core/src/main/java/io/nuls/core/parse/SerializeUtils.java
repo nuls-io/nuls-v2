@@ -154,10 +154,10 @@ public class SerializeUtils {
         return (short) (bytes[offset] & 0xff);
     }
     /**
-     * Parse 2 bytes from the byte array (starting at the offset) as unsigned 16-bit integer in little endian format./从字节数组（以偏移量开始）解析2字节，以小端格式的无符号16位整数
+     * Parse 2 bytes from the byte array (starting at the offset) as unsigned 16-bit integer in little endian format./From byte array（Starting with offset）analysis2Bytes, unsigned in small end format16Bit integer
      *
-     * @param bytes  字节数组
-     * @param offset 偏移量（数组下标）
+     * @param bytes  Byte array
+     * @param offset Offset（Array index）
      */
     public static int readUint16LE(byte[] bytes, int offset) {
         return (bytes[offset] & 0xff) |
@@ -165,10 +165,10 @@ public class SerializeUtils {
     }
 
     /**
-     * Parse 2 bytes from the byte array (starting at the offset) as unsigned 16-bit integer in big endian format./从字节数组（以偏移量开始）解析2字节，以大端格式的无符号32位整数
+     * Parse 2 bytes from the byte array (starting at the offset) as unsigned 16-bit integer in big endian format./From byte array（Starting with offset）analysis2Bytes, unsigned in large end format32Bit integer
      *
-     * @param bytes  字节数组
-     * @param offset 偏移量（数组下标）
+     * @param bytes  Byte array
+     * @param offset Offset（Array index）
      */
     public static int readUint16BE(byte[] bytes, int offset) {
         return ((bytes[offset] & 0xff) << 8) |
@@ -177,10 +177,10 @@ public class SerializeUtils {
 
     /**
      * Parse 2 bytes from the byte array (starting at the offset) as unsigned 16-bit integer in little endian format.
-     * 从字节数组（以偏移量开始）解析2字节，以端格式的无符号16位整数
+     * From byte array（Starting with offset）analysis2Bytes, unsigned in end format16Bit integer
      *
      * @param bytes  byte[]
-     * @param offset int偏移量
+     * @param offset intOffset
      * @return int
      */
     public static int readUint16(byte[] bytes, int offset) {
@@ -189,10 +189,10 @@ public class SerializeUtils {
     }
 
     /**
-     * Parse 4 bytes from the byte array (starting at the offset) as unsigned 32-bit integer in little endian format./从字节数组（以偏移量开始）解析4字节，以小端格式的无符号32位整数
+     * Parse 4 bytes from the byte array (starting at the offset) as unsigned 32-bit integer in little endian format./From byte array（Starting with offset）analysis4Bytes, unsigned in small end format32Bit integer
      *
-     * @param bytes  字节数组
-     * @param offset 偏移量（数组下标）
+     * @param bytes  Byte array
+     * @param offset Offset（Array index）
      */
     public static long readUint32LE(byte[] bytes, int offset) {
         return (bytes[offset] & 0xffL) |
@@ -203,10 +203,10 @@ public class SerializeUtils {
 
 
     /**
-     * Parse 4 bytes from the byte array (starting at the offset) as unsigned 32-bit integer in little endian format./从字节数组（以偏移量开始）解析4字节，以小端格式的无符号32位整数
+     * Parse 4 bytes from the byte array (starting at the offset) as unsigned 32-bit integer in little endian format./From byte array（Starting with offset）analysis4Bytes, unsigned in small end format32Bit integer
      *
-     * @param bytes  字节数组
-     * @param offset 偏移量（数组下标）
+     * @param bytes  Byte array
+     * @param offset Offset（Array index）
      */
     public static int readInt32LE(byte[] bytes, int offset) {
         return (bytes[offset] & 0xff) |
@@ -216,10 +216,10 @@ public class SerializeUtils {
     }
 
     /**
-     * Parse 4 bytes from the byte array (starting at the offset) as unsigned 32-bit integer in big endian format./从字节数组（以偏移量开始）解析4字节，以大端格式的无符号32位整数
+     * Parse 4 bytes from the byte array (starting at the offset) as unsigned 32-bit integer in big endian format./From byte array（Starting with offset）analysis4Bytes, unsigned in large end format32Bit integer
      *
-     * @param bytes  字节数组
-     * @param offset 偏移量（数组下标）
+     * @param bytes  Byte array
+     * @param offset Offset（Array index）
      */
     public static long readUint32BE(byte[] bytes, int offset) {
         return ((bytes[offset] & 0xffL) << 24) |
@@ -230,10 +230,10 @@ public class SerializeUtils {
 
     /**
      * Parse 4 bytes from the byte array (starting at the offset) as unsigned 32-bit integer in little endian format.
-     * 从字节数组（以偏移量开始）解析4字节，以端格式的无符号32位整数
+     * From byte array（Starting with offset）analysis4Bytes, unsigned in end format32Bit integer
      *
      * @param bytes  byte[]
-     * @param offset int偏移量
+     * @param offset intOffset
      * @return int
      */
     public static long readUint32(byte[] bytes, int offset) {
@@ -245,10 +245,10 @@ public class SerializeUtils {
 
     /**
      * Parse 6 bytes from the byte array (starting at the offset) as unsigned 48-bit integer in little endian format.
-     * 从字节数组（以偏移量开始）解析6字节，以端格式的无符号48位整数
+     * From byte array（Starting with offset）analysis6Bytes, unsigned in end format48Bit integer
      *
      * @param bytes  byte[]
-     * @param offset int偏移量
+     * @param offset intOffset
      * @return int
      */
     public static long readUint48(byte[] bytes, int offset) {
@@ -261,10 +261,10 @@ public class SerializeUtils {
     }
 
     /**
-     * Parse 8 bytes from the byte array (starting at the offset) as unsigned 64-bit integer in little endian format./从字节数组（以偏移量开始）解析8字节，以小端格式的无符号64位整数
+     * Parse 8 bytes from the byte array (starting at the offset) as unsigned 64-bit integer in little endian format./From byte array（Starting with offset）analysis8Bytes, unsigned in small end format64Bit integer
      *
-     * @param bytes  字节数组
-     * @param offset 偏移量（数组下标）
+     * @param bytes  Byte array
+     * @param offset Offset（Array index）
      */
     public static long readInt64LE(byte[] bytes, int offset) {
         return (bytes[offset] & 0xffL) |
@@ -279,10 +279,10 @@ public class SerializeUtils {
 
     /**
      * Parse 8 bytes from the byte array (starting at the offset) as unsigned 64-bit integer in little endian format.
-     * 从字节数组（以偏移量开始）解析8字节，以端格式的无符号64位整数
+     * From byte array（Starting with offset）analysis8Bytes, unsigned in end format64Bit integer
      *
      * @param bytes  byte[]
-     * @param offset int偏移量
+     * @param offset intOffset
      * @return int
      */
     public static long readUint64(byte[] bytes, int offset) {
@@ -297,7 +297,7 @@ public class SerializeUtils {
     }
 
     /**
-     * int转byte[] (只转int数据四个字节中的两个字节)
+     * intturnbyte[] (Only rotateintTwo bytes out of four data bytes)
      *
      * @param x int
      * @return byte[]
@@ -310,7 +310,7 @@ public class SerializeUtils {
     }
 
     /**
-     * int转byte[]
+     * intturnbyte[]
      *
      * @param x int
      * @return byte[]
@@ -325,7 +325,7 @@ public class SerializeUtils {
     }
 
     /**
-     * long数据转byte[](只转前6个字节)
+     * longData conversionbyte[](Only before turning6Bytes)
      *
      * @param val long
      * @return byte[]
@@ -342,7 +342,7 @@ public class SerializeUtils {
     }
 
     /**
-     * long数据转byte[]
+     * longData conversionbyte[]
      *
      * @param val long
      * @return byte[]
@@ -363,7 +363,7 @@ public class SerializeUtils {
     /**
      * Calculates RIPEMD160(SHA256(input)). This is used in Address calculations.
      *
-     * @param input 字节数组
+     * @param input Byte array
      */
     public static byte[] sha256hash160(byte[] input) {
         byte[] sha256 = Sha256Hash.hash(input);
@@ -396,11 +396,11 @@ public class SerializeUtils {
 
 
     /**
-     * 将一个short型数据以小端格式存储到指定字节数组指定的偏移量的连续2个字节中
+     * Add ashortType data is stored in small end format as a continuous offset specified in a specified byte array2Out of bytes
      *
-     * @param val    short数据
-     * @param out    存放short型数据的字节数组
-     * @param offset 偏移量
+     * @param val    shortdata
+     * @param out    depositshortByte array of type data
+     * @param offset Offset
      */
     public static void int16ToByteArrayLE(short val, byte[] out, int offset) {
         out[offset] = (byte) (0xFF & val);
@@ -408,11 +408,11 @@ public class SerializeUtils {
     }
 
     /**
-     * 将一个Long型数据以大端格式存储到指定字节数组指定的偏移量的连续4个字节中
+     * Add aLongType data is stored in large end format as a continuous offset specified in a specified byte array4Out of bytes
      *
-     * @param val    long数据
-     * @param out    存放Long型数据的字节数组
-     * @param offset 偏移量
+     * @param val    longdata
+     * @param out    depositLongByte array of type data
+     * @param offset Offset
      */
     public static void uint32ToByteArrayBE(long val, byte[] out, int offset) {
         out[offset] = (byte) (0xFF & (val >> 24));
@@ -422,11 +422,11 @@ public class SerializeUtils {
     }
 
     /**
-     * 将一个Long型数据以小端格式存储到指定字节数组指定的偏移量的连续4个字节中
+     * Add aLongType data is stored in small end format as a continuous offset specified in a specified byte array4Out of bytes
      *
-     * @param val    long数据
-     * @param out    存放Long型数据的字节数组
-     * @param offset 偏移量
+     * @param val    longdata
+     * @param out    depositLongByte array of type data
+     * @param offset Offset
      */
     public static void uint32ToByteArrayLE(long val, byte[] out, int offset) {
         out[offset] = (byte) (0xFF & val);
@@ -436,11 +436,11 @@ public class SerializeUtils {
     }
 
     /**
-     * 将一个int型数据以小端格式存储到指定字节数组指定的偏移量的连续4个字节中
+     * Add aintType data is stored in small end format as a continuous offset specified in a specified byte array4Out of bytes
      *
-     * @param val    int数据
-     * @param out    存放int型数据的字节数组
-     * @param offset 偏移量
+     * @param val    intdata
+     * @param out    depositintByte array of type data
+     * @param offset Offset
      */
     public static void int32ToByteArrayLE(int val, byte[] out, int offset) {
         out[offset] = (byte) (0xFF & val);
@@ -450,11 +450,11 @@ public class SerializeUtils {
     }
 
     /**
-     * 将一个Long型数据以小端格式存储到指定字节数组指定的偏移量的连续8个字节中
+     * Add aLongType data is stored in small end format as a continuous offset specified in a specified byte array8Out of bytes
      *
-     * @param val    long数据
-     * @param out    存放Long型数据的字节数组
-     * @param offset 偏移量
+     * @param val    longdata
+     * @param out    depositLongByte array of type data
+     * @param offset Offset
      */
     public static void uint64ToByteArrayLE(long val, byte[] out, int offset) {
         out[offset] = (byte) (0xFF & val);
@@ -471,10 +471,10 @@ public class SerializeUtils {
         stream.write((short) (0xFF & val));
     }
     /**
-     * Write 2 bytes to the output stream as unsigned 16-bit short in little endian format./将2字节写入输出流作为无符号16位short型数据，以小端格式
+     * Write 2 bytes to the output stream as unsigned 16-bit short in little endian format./take2Byte write output stream as unsigned16positionshortType data, in small end format
      *
-     * @param val    short数据
-     * @param stream 输出流
+     * @param val    shortdata
+     * @param stream Output stream
      */
     public static void int16ToByteStreamLE(short val, OutputStream stream) throws IOException {
         stream.write((byte) (0xFF & val));
@@ -482,10 +482,10 @@ public class SerializeUtils {
     }
 
     /**
-     * Write 2 bytes to the output stream as unsigned 16-bit integer in little endian format./将2字节写入输出流作为无符号16位整数，以小端格式
+     * Write 2 bytes to the output stream as unsigned 16-bit integer in little endian format./take2Byte write output stream as unsigned16Bit integer, in small end format
      *
-     * @param val    int数据
-     * @param stream 输出流
+     * @param val    intdata
+     * @param stream Output stream
      */
     public static void uint16ToByteStreamLE(int val, OutputStream stream) throws IOException {
         stream.write((int) (0xFF & val));
@@ -493,10 +493,10 @@ public class SerializeUtils {
     }
 
     /**
-     * Write 4 bytes to the output stream as unsigned 32-bit long in little endian format./将4字节写入输出流作为无符号32位long型数据，以小端格式
+     * Write 4 bytes to the output stream as unsigned 32-bit long in little endian format./take4Byte write output stream as unsigned32positionlongType data, in small end format
      *
-     * @param val    long数据
-     * @param stream 输出流
+     * @param val    longdata
+     * @param stream Output stream
      */
     public static void uint32ToByteStreamLE(long val, OutputStream stream) throws IOException {
         stream.write((int) (0xFF & val));
@@ -506,10 +506,10 @@ public class SerializeUtils {
     }
 
     /**
-     * Write 8 bytes to the output stream as unsigned 64-bit long in little endian format./将8字节写入输出流作为无符号64位long型数据，以小端格式
+     * Write 8 bytes to the output stream as unsigned 64-bit long in little endian format./take8Byte write output stream as unsigned64positionlongType data, in small end format
      *
-     * @param val    long数据
-     * @param stream 输出流
+     * @param val    longdata
+     * @param stream Output stream
      */
     public static void int64ToByteStreamLE(long val, OutputStream stream) throws IOException {
         stream.write((int) (0xFF & val));
@@ -524,10 +524,10 @@ public class SerializeUtils {
 
 
     /**
-     * Write 8 bytes to the output stream as unsigned 64-bit BigInteger in little endian format./将8字节写入输出流作为无符号64位BigInteger型数据，以小端格式
+     * Write 8 bytes to the output stream as unsigned 64-bit BigInteger in little endian format./take8Byte write output stream as unsigned64positionBigIntegerType data, in small end format
      *
-     * @param val    BigInteger数据
-     * @param stream 输出流
+     * @param val    BigIntegerdata
+     * @param stream Output stream
      */
     public static void uint64ToByteStreamLE(BigInteger val, OutputStream stream) throws IOException {
         byte[] bytes = val.toByteArray();
@@ -544,10 +544,10 @@ public class SerializeUtils {
     }
 
     /**
-     * 将Double类型数据写入输出流
+     * takeDoubleWrite type data to output stream
      *
-     * @param val    BigInteger数据
-     * @param stream 输出流
+     * @param val    BigIntegerdata
+     * @param stream Output stream
      */
     public static void doubleToByteStream(double val, OutputStream stream) throws IOException {
         stream.write(ByteUtils.doubleToBytes(val));
@@ -558,7 +558,7 @@ public class SerializeUtils {
     }
 
     /**
-     * 字符串转为byte[]的长度
+     * Convert string tobyte[]The length of
      *
      * @param val String
      * @return int
@@ -578,7 +578,7 @@ public class SerializeUtils {
     }
 
     /**
-     * 计算Long型数据占几个字节
+     * calculateLongHow many bytes does type data occupy
      *
      * @param val Long
      * @return int
@@ -588,7 +588,7 @@ public class SerializeUtils {
     }
 
     /**
-     * 获取Int16数据占的字节数
+     * obtainInt16Bytes occupied by data
      *
      * @return int
      */
@@ -597,7 +597,7 @@ public class SerializeUtils {
     }
 
     /**
-     * 获取BigInteger数据占的字节数
+     * obtainBigIntegerBytes occupied by data
      *
      * @return int
      */
@@ -606,7 +606,7 @@ public class SerializeUtils {
     }
 
     /**
-     * 获取Uint16数据占的字节数
+     * obtainUint16Bytes occupied by data
      *
      * @return int
      */
@@ -614,7 +614,7 @@ public class SerializeUtils {
         return 2;
     }
     /**
-     * 获取Uint8数据占的字节数
+     * obtainUint8Bytes occupied by data
      *
      * @return int
      */
@@ -622,7 +622,7 @@ public class SerializeUtils {
         return 1;
     }
     /**
-     * 获取Int32数据占的字节数
+     * obtainInt32Bytes occupied by data
      *
      * @return int
      */
@@ -631,7 +631,7 @@ public class SerializeUtils {
     }
 
     /**
-     * 获取Uint32数据占的字节数
+     * obtainUint32Bytes occupied by data
      *
      * @return int
      */
@@ -640,7 +640,7 @@ public class SerializeUtils {
     }
 
     /**
-     * 获取Unit48数据占的字节数
+     * obtainUnit48Bytes occupied by data
      *
      * @return int
      */
@@ -649,7 +649,7 @@ public class SerializeUtils {
     }
 
     /**
-     * 获取Int64数据占的字节数
+     * obtainInt64Bytes occupied by data
      *
      * @return int
      */
@@ -658,7 +658,7 @@ public class SerializeUtils {
     }
 
     /**
-     * 获取指定Integer占用的最小字节数
+     * Get specifiedIntegerMinimum number of bytes occupied
      *
      * @param val Integer
      * @return int
@@ -668,7 +668,7 @@ public class SerializeUtils {
     }
 
     /**
-     * 获取Boolean数据占的字节数
+     * obtainBooleanBytes occupied by data
      *
      * @return int
      */
@@ -678,7 +678,7 @@ public class SerializeUtils {
 
 
     /**
-     * 获取nonce数据占的字节数
+     * obtainnonceBytes occupied by data
      *
      * @return int
      */
@@ -687,7 +687,7 @@ public class SerializeUtils {
     }
 
     /**
-     * 获取byte[]占用的最小字节数（byte[]长度占用的最小字节数+byte[]长度）
+     * obtainbyte[]Minimum number of bytes occupied（byte[]The minimum number of bytes occupied by length+byte[]length）
      */
     public static int sizeOfBytes(byte[] val) {
         if (null == val) {
@@ -697,7 +697,7 @@ public class SerializeUtils {
     }
 
     /**
-     * 获取NulsData对象所占字节长度
+     * obtainNulsDataByte length occupied by the object
      *
      * @param val NulsData
      * @return int
@@ -712,11 +712,11 @@ public class SerializeUtils {
 
 
     /**
-     * 根据字节数组生成对应的大整数
+     * Generate corresponding large integers based on byte arrays
      * Generate corresponding large integers from byte arrays
      *
-     * @param array 小端序的字节数组/Small-endian byte array
-     * @return 大整数
+     * @param array Byte array of small end sequence/Small-endian byte array
+     * @return Large integer
      */
     public static BigInteger bigIntegerFromBytes(byte[] array) {
         array = arrayReverse(array);
@@ -724,11 +724,11 @@ public class SerializeUtils {
     }
 
     /**
-     * 将大整数转为字节数组，结果是小端序字节数组
+     * Convert large integers to byte arrays, resulting in a small end order byte array
      * Converting large integers to byte arrays results in small endian byte arrays
      *
-     * @param value 大整数、BigInteger
-     * @return 字节数组
+     * @param value Large integer、BigInteger
+     * @return Byte array
      */
     public static byte[] bigInteger2Bytes(BigInteger value) {
         byte[] bytes = new byte[32];
@@ -743,10 +743,10 @@ public class SerializeUtils {
 
 
     /**
-     * 数组反转工具方法，会返回一个顺序颠倒的新的字节数组
+     * The array inversion tool method returns a new byte array in reverse order
      * The array inversion tool method returns a new byte array in reverse order
      *
-     * @param bytes 需要反转的字节数组
+     * @param bytes Byte array that needs to be reversed
      * @return a new byte array in reverse order
      */
     private static byte[] arrayReverse(byte[] bytes) {

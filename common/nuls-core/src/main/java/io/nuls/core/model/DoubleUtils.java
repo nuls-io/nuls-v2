@@ -12,10 +12,10 @@ public class DoubleUtils {
     public static final int DEFAULT_SCALE = 8;
 
     /**
-     * 创建一个BigDecimal类型对象
+     * Create aBigDecimalType Object
      *
-     * @param value 初始值
-     * @return 生成的BigDecimal对象
+     * @param value Initial value
+     * @return GeneratedBigDecimalobject
      */
     public static BigDecimal createBigDecimal(double value) {
         return BigDecimal.valueOf(value);
@@ -23,12 +23,12 @@ public class DoubleUtils {
 
 
     /**
-     * 双精度浮点数根据指定保留小数位数，指定小数保留模式处理double数据
+     * Double precision floating-point numbers are processed according to the specified number of decimal places and the specified decimal retention modedoubledata
      *
-     * @param value        需处理的double数据
-     * @param scale        须保留的小数位数
-     * @param roundingMode 小数的保留模式
-     * @return 处理后的double数据
+     * @param value        To be processeddoubledata
+     * @param scale        Decimal Places to be Retained
+     * @param roundingMode Decimal retention mode
+     * @return Processeddoubledata
      */
     public static double round(double value, int scale, RoundingMode roundingMode) {
         BigDecimal bd = createBigDecimal(value);
@@ -38,33 +38,33 @@ public class DoubleUtils {
 
 
     /**
-     * 双精度浮点数根据指定保留小数位数，默认小数保留模式处理double数据
+     * Double precision floating-point numbers are processed according to the specified number of decimal places and default decimal retention modedoubledata
      *
-     * @param value 需处理的double数据
-     * @param scale 须保留的小数位数
-     * @return 处理后的double数据
+     * @param value To be processeddoubledata
+     * @param scale Decimal Places to be Retained
+     * @return Processeddoubledata
      */
     public static double round(double value, int scale) {
         return round(value, scale, RoundingMode.HALF_UP);
     }
 
     /**
-     * 双精度浮点数根据默认保留小数位数（八位），默认小数保留模式处理double数据
+     * Double precision floating-point numbers retain decimal places by default（Eight digit）, default decimal retention mode processingdoubledata
      *
-     * @param value 需处理的double数据
-     * @return 处理后的double数据
+     * @param value To be processeddoubledata
+     * @return Processeddoubledata
      */
     public static double round(double value) {
         return round(value, DEFAULT_SCALE);
     }
 
     /**
-     * double数据根据指定保留小数位数，默认小数保留模式处理后再根据double数据显示规则转为字符串
+     * doubleThe data is processed according to the specified decimal places, with default decimal retention mode, and then processed according to thedoubleConvert data display rules to strings
      *
-     * @param value        需处理的double数据
-     * @param scale        须保留的小数位数
-     * @param hasThousands 转换规则（每三位是否需要用','分隔）
-     * @return 转换后的字符串
+     * @param value        To be processeddoubledata
+     * @param scale        Decimal Places to be Retained
+     * @param hasThousands Conversion rules（Do you need to use every three digits','separate）
+     * @return Converted string
      */
     public static String getRoundStr(Double value, int scale, boolean hasThousands) {
         if (null == value) {
@@ -86,21 +86,21 @@ public class DoubleUtils {
     }
 
     /**
-     * double数据根据指定保留小数位数，默认小数保留模式处理后再根据double数据默认显示规则转为字符串
+     * doubleThe data is processed according to the specified decimal places, with default decimal retention mode, and then processed according to thedoubleConvert default data display rules to strings
      *
-     * @param value 需处理的double数据
-     * @param scale 须保留的小数位数
-     * @return 转换后的字符串
+     * @param value To be processeddoubledata
+     * @param scale Decimal Places to be Retained
+     * @return Converted string
      */
     public static String getRoundStr(Double value, int scale) {
         return getRoundStr(value, scale, false);
     }
 
     /**
-     * double数据根据默认保留小数位数，默认小数保留模式处理后再根据double数据默认显示规则转为字符串
+     * doubleThe data is processed according to the default decimal places, and then processed according to the default decimal retention modedoubleConvert default data display rules to strings
      *
-     * @param value 需处理的double数据
-     * @return 转换后的字符串
+     * @param value To be processeddoubledata
+     * @return Converted string
      */
     public static String getRoundStr(Double value) {
         return getRoundStr(value, DEFAULT_SCALE, false);
@@ -108,10 +108,10 @@ public class DoubleUtils {
 
 
     /**
-     * 将数字字符串转为Double数据
+     * Convert numeric strings toDoubledata
      *
-     * @param value 数字字符串
-     * @return 转换得到的Double数据
+     * @param value Number string
+     * @return ConvertedDoubledata
      */
     public static Double parseDouble(String value) {
         if (null == value || "".equals(value.trim())) {
@@ -122,11 +122,11 @@ public class DoubleUtils {
 
 
     /**
-     * 将数字字符串转为Double数据，保留指定小数位
+     * Convert numeric strings toDoubleData, retain specified decimal places
      *
-     * @param value 数字字符串
-     * @param scale 小数位
-     * @return 转换得到的Double数据
+     * @param value Number string
+     * @param scale Decimal places
+     * @return ConvertedDoubledata
      */
     public static Double parseDouble(String value, int scale) {
         if (null == value || "".equals(value.trim())) {
@@ -137,11 +137,11 @@ public class DoubleUtils {
 
 
     /**
-     * 两个double数据相加
+     * TwodoubleData addition
      *
-     * @param d1 被加数
-     * @param d2 加数
-     * @return 和
+     * @param d1 Addend
+     * @param d2 Addend
+     * @return and
      */
     public static double sum(double d1, double d2) {
         return round(createBigDecimal(d1).add(createBigDecimal(d2)).doubleValue());
@@ -152,11 +152,11 @@ public class DoubleUtils {
     }
 
     /**
-     * 两个double数据相减
+     * TwodoubleData subtraction
      *
-     * @param d1 被减数
-     * @param d2 减数
-     * @return 差
+     * @param d1 Subtracted number
+     * @param d2 Subtraction
+     * @return difference
      */
     public static double sub(double d1, double d2) {
         return round(sub(createBigDecimal(d1), createBigDecimal(d2)).doubleValue());
@@ -167,11 +167,11 @@ public class DoubleUtils {
     }
 
     /**
-     * 两个double数据相乘
+     * TwodoubleData multiplication
      *
-     * @param d1 被乘数
-     * @param d2 乘数
-     * @return 积
+     * @param d1 Multiplicand
+     * @param d2 multiplier
+     * @return product
      */
     public static double mul(double d1, double d2) {
         return mul(createBigDecimal(d1), createBigDecimal(d2)).doubleValue();
@@ -183,12 +183,12 @@ public class DoubleUtils {
 
 
     /**
-     * 两个double数据相乘，保留指定位数
+     * TwodoubleMultiplying data while retaining specified digits
      *
-     * @param d1    被乘数
-     * @param d2    乘数
-     * @param scale 须保留的位数
-     * @return 积
+     * @param d1    Multiplicand
+     * @param d2    multiplier
+     * @param scale Number of digits to be retained
+     * @return product
      */
     public static double mul(double d1, double d2, int scale) {
         return round(mul(createBigDecimal(d1), createBigDecimal(d2)).doubleValue(), scale);
@@ -196,12 +196,12 @@ public class DoubleUtils {
 
 
     /**
-     * 两个double数据相除，保留指定位数
+     * TwodoubleData division, retaining specified number of digits
      *
-     * @param d1    被除数
-     * @param d2    除数
-     * @param scale 须保留的位数
-     * @return 商
+     * @param d1    Dividend
+     * @param d2    Divisor
+     * @param scale Number of digits to be retained
+     * @return merchant
      */
     public static double div(double d1, double d2, int scale) {
         return round(div(createBigDecimal(d1), createBigDecimal(d2)).doubleValue(), scale);
@@ -218,11 +218,11 @@ public class DoubleUtils {
     }
 
     /**
-     * 两个double数据相除
+     * TwodoubleData division
      *
-     * @param d1 被除数
-     * @param d2 除数
-     * @return 商
+     * @param d1 Dividend
+     * @param d2 Divisor
+     * @return merchant
      */
     public static double div(double d1, double d2) {
         return div(d1, d2, DEFAULT_SCALE);
@@ -233,11 +233,11 @@ public class DoubleUtils {
     }
 
     /**
-     * 两个BigDecimal数据相加
+     * TwoBigDecimalData addition
      *
-     * @param bd1 被加数
-     * @param bd2 加数
-     * @return 和
+     * @param bd1 Addend
+     * @param bd2 Addend
+     * @return and
      */
     public static BigDecimal sum(BigDecimal bd1, BigDecimal bd2) {
         return bd1.add(bd2);
@@ -245,11 +245,11 @@ public class DoubleUtils {
 
 
     /**
-     * 两个BigDecimal数据相减
+     * TwoBigDecimalData subtraction
      *
-     * @param bd1 被减数
-     * @param bd2 减数
-     * @return 差
+     * @param bd1 Subtracted number
+     * @param bd2 Subtraction
+     * @return difference
      */
     public static BigDecimal sub(BigDecimal bd1, BigDecimal bd2) {
         return bd1.subtract(bd2);
@@ -257,11 +257,11 @@ public class DoubleUtils {
 
 
     /**
-     * 两个BigDecimal数据相乘
+     * TwoBigDecimalData multiplication
      *
-     * @param bd1 被乘数
-     * @param bd2 乘数
-     * @return 积
+     * @param bd1 Multiplicand
+     * @param bd2 multiplier
+     * @return product
      */
     public static BigDecimal mul(BigDecimal bd1, BigDecimal bd2) {
         return bd1.multiply(bd2);
@@ -269,25 +269,25 @@ public class DoubleUtils {
 
 
     /**
-     * 两个BigDecimal数据相除
+     * TwoBigDecimalData division
      *
-     * @param bd1 被除数
-     * @param bd2 除数
-     * @return 商
+     * @param bd1 Dividend
+     * @param bd2 Divisor
+     * @return merchant
      */
     public static BigDecimal div(BigDecimal bd1, BigDecimal bd2) {
         if (bd2.compareTo(BigDecimal.ZERO) == 0) {
-            throw new IllegalArgumentException("除数不能为0！");
+            throw new IllegalArgumentException("The divisor cannot be0！");
         }
         return bd1.divide(bd2, 12, RoundingMode.HALF_UP);
     }
 
     /**
-     * BigDecimal数据与double数据相加
+     * BigDecimalData anddoubleData addition
      *
-     * @param bd1 被加数
-     * @param d2  加数
-     * @return 和
+     * @param bd1 Addend
+     * @param d2  Addend
+     * @return and
      */
     public static BigDecimal sum(BigDecimal bd1, double d2) {
         return sum(bd1, createBigDecimal(d2));
@@ -295,33 +295,33 @@ public class DoubleUtils {
 
 
     /**
-     * BigDecimal数据与double数据相减
+     * BigDecimalData anddoubleData subtraction
      *
-     * @param bd1 被减数
-     * @param d2  减数
-     * @return 差
+     * @param bd1 Subtracted number
+     * @param d2  Subtraction
+     * @return difference
      */
     public static BigDecimal sub(BigDecimal bd1, double d2) {
         return sub(bd1, createBigDecimal(d2));
     }
 
     /**
-     * BigDecimal数据与double数据相乘
+     * BigDecimalData anddoubleData multiplication
      *
-     * @param bd1 被乘数
-     * @param d2  乘数
-     * @return 积
+     * @param bd1 Multiplicand
+     * @param d2  multiplier
+     * @return product
      */
     public static BigDecimal mul(BigDecimal bd1, double d2) {
         return mul(bd1, createBigDecimal(d2));
     }
 
     /**
-     * BigDecimal数据与double数据相除
+     * BigDecimalData anddoubleData division
      *
-     * @param bd1 被除数
-     * @param d2  除数
-     * @return 商
+     * @param bd1 Dividend
+     * @param d2  Divisor
+     * @return merchant
      */
     public static BigDecimal div(BigDecimal bd1, double d2) {
         return div(bd1, createBigDecimal(d2));
@@ -329,31 +329,31 @@ public class DoubleUtils {
 
 
     /**
-     * 求绝对值
+     * Find absolute value
      *
-     * @param d1 double数据
-     * @return 绝对值
+     * @param d1 doubledata
+     * @return absolute value
      */
     public static double abs(double d1) {
         return Math.abs(d1);
     }
 
     /**
-     * double数据转long型数据
+     * doubleData conversionlongType data
      *
-     * @param val double数据
-     * @return 转换得到的long数据
+     * @param val doubledata
+     * @return Convertedlongdata
      */
     public static long longValue(double val) {
         return createBigDecimal(val).longValue();
     }
 
     /**
-     * 两个double数据比较大小
+     * TwodoubleData comparison size
      *
-     * @param d1 被比较数
-     * @param d2 比较数
-     * @return 比较结果
+     * @param d1 Number of Comparables
+     * @param d2 Comparison number
+     * @return Comparison results
      */
     public static int compare(double d1, double d2) {
         return createBigDecimal(d1).compareTo(createBigDecimal(d2));

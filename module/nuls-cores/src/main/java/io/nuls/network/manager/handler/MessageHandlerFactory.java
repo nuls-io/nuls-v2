@@ -39,7 +39,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 映射 message 与 message handler 的关系
+ * mapping message Related to message handler The relationship between
  * message handler factory
  * Map the relationship between message and message handler
  *

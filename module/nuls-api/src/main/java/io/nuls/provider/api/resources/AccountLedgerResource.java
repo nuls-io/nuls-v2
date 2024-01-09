@@ -105,11 +105,11 @@ public class AccountLedgerResource {
     @POST
     @Path("/balance/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "查询账户余额", order = 109, detailDesc = "根据资产链ID和资产ID，查询本链账户对应资产的余额与nonce值")
+    @ApiOperation(description = "Query account balance", order = 109, detailDesc = "According to the asset chainIDAnd assetsID, query the balance of assets corresponding to this chain account andnoncevalue")
     @Parameters({
-            @Parameter(parameterName = "balanceDto", parameterDes = "账户余额表单", requestType = @TypeDescriptor(value = BalanceForm.class))
+            @Parameter(parameterName = "balanceDto", parameterDes = "Account Balance Form", requestType = @TypeDescriptor(value = BalanceForm.class))
     })
-    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = AccountBalanceDto.class))
+    @ResponseData(name = "Return value", responseType = @TypeDescriptor(value = AccountBalanceDto.class))
     public RpcClientResult getBalance(@PathParam("address") String address, BalanceForm form) {
         if (!AddressTool.validAddress(config.getChainId(), address)) {
             return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "address is invalid"));
@@ -131,11 +131,11 @@ public class AccountLedgerResource {
     @POST
     @Path("/balanceWithDecimals/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "查询账户余额", order = 109, detailDesc = "根据资产链ID和资产ID，查询本链账户对应资产的余额与nonce值")
+    @ApiOperation(description = "Query account balance", order = 109, detailDesc = "According to the asset chainIDAnd assetsID, query the balance of assets corresponding to this chain account andnoncevalue")
     @Parameters({
-            @Parameter(parameterName = "balanceDto", parameterDes = "账户余额表单", requestType = @TypeDescriptor(value = BalanceForm.class))
+            @Parameter(parameterName = "balanceDto", parameterDes = "Account Balance Form", requestType = @TypeDescriptor(value = BalanceForm.class))
     })
-    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = AccountBalanceWithDecimalsDto.class))
+    @ResponseData(name = "Return value", responseType = @TypeDescriptor(value = AccountBalanceWithDecimalsDto.class))
     public RpcClientResult getBalanceWithDecimals(@PathParam("address") String address, BalanceForm form) {
         if (!AddressTool.validAddress(config.getChainId(), address)) {
             return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "address is invalid"));
@@ -157,12 +157,12 @@ public class AccountLedgerResource {
     @POST
     @Path("/transaction/validate")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "验证交易", order = 302, detailDesc = "验证离线组装的交易,验证成功返回交易hash值,失败返回错误提示信息")
+    @ApiOperation(description = "Verify transactions", order = 302, detailDesc = "Verify transactions for offline assembly,Successful verification returns transactionhashvalue,Failure returns error message")
     @Parameters({
-            @Parameter(parameterName = "验证交易是否正确", parameterDes = "验证交易是否正确表单", requestType = @TypeDescriptor(value = TxForm.class))
+            @Parameter(parameterName = "Verify if the transaction is correct", parameterDes = "Verify the correctness of the transaction form", requestType = @TypeDescriptor(value = TxForm.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", description = "交易hash")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "transactionhash")
     }))
     public RpcClientResult validate(TxForm form) {
         if (form == null || StringUtils.isBlank(form.getTxHex())) {
@@ -175,13 +175,13 @@ public class AccountLedgerResource {
     @POST
     @Path("/transaction/broadcast")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "广播交易", order = 303, detailDesc = "广播离线组装的交易,成功返回true,失败返回错误提示信息")
+    @ApiOperation(description = "Broadcasting transactions", order = 303, detailDesc = "Broadcast offline assembly transactions,Successfully returnedtrue,Failure returns error message")
     @Parameters({
-            @Parameter(parameterName = "广播交易", parameterDes = "广播交易表单", requestType = @TypeDescriptor(value = TxForm.class))
+            @Parameter(parameterName = "Broadcasting transactions", parameterDes = "Broadcast transaction form", requestType = @TypeDescriptor(value = TxForm.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", valueType = boolean.class, description = "是否成功"),
-            @Key(name = "hash", description = "交易hash")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", valueType = boolean.class, description = "Whether successful"),
+            @Key(name = "hash", description = "transactionhash")
     }))
     public RpcClientResult broadcast(TxForm form) {
         if (form == null || StringUtils.isBlank(form.getTxHex())) {
@@ -289,13 +289,13 @@ public class AccountLedgerResource {
     @POST
     @Path("/transaction/broadcastWithNoContractValidation")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "广播交易(不验证合约)", order = 304, detailDesc = "广播离线组装的交易(不验证合约),成功返回true,失败返回错误提示信息")
+    @ApiOperation(description = "Broadcasting transactions(Not verifying contracts)", order = 304, detailDesc = "Broadcast offline assembly transactions(Not verifying contracts),Successfully returnedtrue,Failure returns error message")
     @Parameters({
-            @Parameter(parameterName = "广播交易(不验证合约)", parameterDes = "广播交易(不验证合约)表单", requestType = @TypeDescriptor(value = TxForm.class))
+            @Parameter(parameterName = "Broadcasting transactions(Not verifying contracts)", parameterDes = "Broadcasting transactions(Not verifying contracts)form", requestType = @TypeDescriptor(value = TxForm.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", valueType = boolean.class, description = "是否成功"),
-            @Key(name = "hash", description = "交易hash")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", valueType = boolean.class, description = "Whether successful"),
+            @Key(name = "hash", description = "transactionhash")
     }))
     public RpcClientResult broadcastWithNoContractValidation(TxForm form) {
         if (form == null || StringUtils.isBlank(form.getTxHex())) {
@@ -314,13 +314,13 @@ public class AccountLedgerResource {
     @POST
     @Path("/transaction/broadcastTxWithoutAnyValidation")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "广播交易(不验证)", order = 305, detailDesc = "广播离线组装的交易(不验证),成功返回true,失败返回错误提示信息")
+    @ApiOperation(description = "Broadcasting transactions(Do not verify)", order = 305, detailDesc = "Broadcast offline assembly transactions(Do not verify),Successfully returnedtrue,Failure returns error message")
     @Parameters({
-            @Parameter(parameterName = "广播交易(不验证)", parameterDes = "广播交易(不验证)表单", requestType = @TypeDescriptor(value = TxForm.class))
+            @Parameter(parameterName = "Broadcasting transactions(Do not verify)", parameterDes = "Broadcasting transactions(Do not verify)form", requestType = @TypeDescriptor(value = TxForm.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", valueType = boolean.class, description = "是否成功"),
-            @Key(name = "hash", description = "交易hash")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", valueType = boolean.class, description = "Whether successful"),
+            @Key(name = "hash", description = "transactionhash")
     }))
     public RpcClientResult broadcastTxWithoutAnyValidation(TxForm form) {
         if (form == null || StringUtils.isBlank(form.getTxHex())) {
@@ -339,12 +339,12 @@ public class AccountLedgerResource {
     @POST
     @Path("/transfer")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "单笔转账", order = 306, detailDesc = "发起单账户单资产的转账交易")
+    @ApiOperation(description = "Single transfer", order = 306, detailDesc = "Initiate transfer transactions for a single account or asset")
     @Parameters({
-            @Parameter(parameterName = "单笔转账", parameterDes = "单笔转账表单", requestType = @TypeDescriptor(value = TransferForm.class))
+            @Parameter(parameterName = "Single transfer", parameterDes = "Single transfer form", requestType = @TypeDescriptor(value = TransferForm.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", description = "交易hash")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "transactionhash")
     }))
     public RpcClientResult transfer(TransferForm form) {
         if (form == null) {
@@ -374,12 +374,12 @@ public class AccountLedgerResource {
     @POST
     @Path("/crossTransfer")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "跨链转账", order = 306, detailDesc = "发起单账户单资产的跨链转账交易")
+    @ApiOperation(description = "Cross chain transfer", order = 306, detailDesc = "Initiate cross chain transfer transactions for single account and single asset transactions")
     @Parameters({
-            @Parameter(parameterName = "跨链转账", parameterDes = "跨链转账表单", requestType = @TypeDescriptor(value = CrossTransferForm.class))
+            @Parameter(parameterName = "Cross chain transfer", parameterDes = "Cross chain transfer form", requestType = @TypeDescriptor(value = CrossTransferForm.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", description = "交易hash")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "transactionhash")
     }))
     public RpcClientResult crossTransfer(CrossTransferForm form) {
         if (form == null) {
@@ -400,14 +400,14 @@ public class AccountLedgerResource {
     @POST
     @Path("/createTransferTxOffline")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "离线组装转账交易", order = 350, detailDesc = "根据inputs和outputs离线组装转账交易，用于单账户或多账户的转账交易。" +
-            "交易手续费为inputs里本链主资产金额总和，减去outputs里本链主资产总和")
+    @ApiOperation(description = "Offline assembly transfer transaction", order = 350, detailDesc = "according toinputsandoutputsOffline assembly transfer transaction, used for single account or multi account transfer transactions." +
+            "The transaction fee isinputsThe total amount of main assets in the Li Ben Chain, minusoutputsThe total amount of main assets in the Li Ben Chain")
     @Parameters({
-            @Parameter(parameterName = "transferDto", parameterDes = "转账交易表单", requestType = @TypeDescriptor(value = TransferDto.class))
+            @Parameter(parameterName = "transferDto", parameterDes = "Transfer transaction form", requestType = @TypeDescriptor(value = TransferDto.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "hash", description = "交易hash"),
-            @Key(name = "txHex", description = "交易序列化16进制字符串")
+    @ResponseData(name = "Return value", description = "Return aMapobject", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "hash", description = "transactionhash"),
+            @Key(name = "txHex", description = "Transaction serialization16Hexadecimal Strings")
     }))
     public RpcClientResult createTransferTxOffline(TransferDto transferDto) {
         try {
@@ -422,14 +422,14 @@ public class AccountLedgerResource {
     @POST
     @Path("/createCrossTxOffline")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "离线组装跨链转账交易", order = 350, detailDesc = "根据inputs和outputs离线组装跨链转账交易，用于单账户或多账户的转账交易。" +
-            "交易手续费为inputs里本链主资产金额总和，减去outputs里本链主资产总和，再加上跨链转账的NULS手续费")
+    @ApiOperation(description = "Offline assembly of cross chain transfer transactions", order = 350, detailDesc = "according toinputsandoutputsOffline assembly of cross chain transfer transactions, used for single account or multi account transfer transactions." +
+            "The transaction fee isinputsThe total amount of main assets in the Li Ben Chain, minusoutputsThe total amount of main assets in the local chain, plus the cross chain transferNULSHandling fees")
     @Parameters({
-            @Parameter(parameterName = "transferDto", parameterDes = "跨链转账交易表单", requestType = @TypeDescriptor(value = TransferDto.class))
+            @Parameter(parameterName = "transferDto", parameterDes = "Cross chain transfer transaction form", requestType = @TypeDescriptor(value = TransferDto.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "hash", description = "交易hash"),
-            @Key(name = "txHex", description = "交易序列化16进制字符串")
+    @ResponseData(name = "Return value", description = "Return aMapobject", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "hash", description = "transactionhash"),
+            @Key(name = "txHex", description = "Transaction serialization16Hexadecimal Strings")
     }))
     public RpcClientResult createCrossTxOffline(TransferDto transferDto) {
         try {
@@ -444,12 +444,12 @@ public class AccountLedgerResource {
     @POST
     @Path("/calcTransferTxFee")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "计算离线创建转账交易所需手续费", order = 351)
+    @ApiOperation(description = "Calculate the transaction fee required for offline creation of transfer transactions", order = 351)
     @Parameters({
-            @Parameter(parameterName = "TransferTxFeeDto", parameterDes = "转账交易手续费", requestType = @TypeDescriptor(value = TransferTxFeeDto.class))
+            @Parameter(parameterName = "TransferTxFeeDto", parameterDes = "Transfer transaction fees", requestType = @TypeDescriptor(value = TransferTxFeeDto.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", description = "交易手续费"),
+    @ResponseData(name = "Return value", description = "Return aMapobject", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "Transaction fees"),
     }))
     public RpcClientResult calcTransferTxFee(TransferTxFeeDto dto) {
         BigInteger fee = NulsSDKTool.calcTransferTxFee(dto);
@@ -462,12 +462,12 @@ public class AccountLedgerResource {
     @POST
     @Path("/calcCrossTxFee")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "计算离线创建跨链转账交易所需手续费", order = 351)
+    @ApiOperation(description = "Calculate the transaction fee required for offline creation of cross chain transfer transactions", order = 351)
     @Parameters({
-            @Parameter(parameterName = "TransferTxFeeDto", parameterDes = "转账交易手续费", requestType = @TypeDescriptor(value = TransferTxFeeDto.class))
+            @Parameter(parameterName = "TransferTxFeeDto", parameterDes = "Transfer transaction fees", requestType = @TypeDescriptor(value = TransferTxFeeDto.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", description = "交易手续费"),
+    @ResponseData(name = "Return value", description = "Return aMapobject", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "Transaction fees"),
     }))
     public RpcClientResult calcCrossTxFee(CrossTransferTxFeeDto dto) {
         Map<String, BigInteger> map = NulsSDKTool.calcCrossTransferTxFee(dto);
@@ -478,14 +478,14 @@ public class AccountLedgerResource {
     @POST
     @Path("/createMultiSignTransferTxOffline")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "多签账户离线组装转账交易", order = 352, detailDesc = "根据inputs和outputs离线组装转账交易，用于单账户或多账户的转账交易。" +
-            "交易手续费为inputs里本链主资产金额总和，减去outputs里本链主资产总和")
+    @ApiOperation(description = "Multiple account offline assembly transfer transactions", order = 352, detailDesc = "according toinputsandoutputsOffline assembly transfer transaction, used for single account or multi account transfer transactions." +
+            "The transaction fee isinputsThe total amount of main assets in the Li Ben Chain, minusoutputsThe total amount of main assets in the Li Ben Chain")
     @Parameters({
-            @Parameter(parameterName = "transferDto", parameterDes = "多签账户转账交易表单", requestType = @TypeDescriptor(value = MultiSignTransferDto.class))
+            @Parameter(parameterName = "transferDto", parameterDes = "Multi signature account transfer transaction form", requestType = @TypeDescriptor(value = MultiSignTransferDto.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "hash", description = "交易hash"),
-            @Key(name = "txHex", description = "交易序列化16进制字符串")
+    @ResponseData(name = "Return value", description = "Return aMapobject", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "hash", description = "transactionhash"),
+            @Key(name = "txHex", description = "Transaction serialization16Hexadecimal Strings")
     }))
     public RpcClientResult createMultiTransferTxOffline(MultiSignTransferDto transferDto) {
         try {
@@ -500,12 +500,12 @@ public class AccountLedgerResource {
     @POST
     @Path("/calcMultiSignTransferTxFee")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "计算离线创建多签账户转账交易所需手续费", order = 353)
+    @ApiOperation(description = "Calculate the transaction fee required for offline creation of multi signature account transfer transactions", order = 353)
     @Parameters({
-            @Parameter(parameterName = "MultiSignTransferTxFeeDto", parameterDes = "多签账户转账交易手续费表单", requestType = @TypeDescriptor(value = MultiSignTransferTxFeeDto.class))
+            @Parameter(parameterName = "MultiSignTransferTxFeeDto", parameterDes = "Multiple account transfer transaction fee form", requestType = @TypeDescriptor(value = MultiSignTransferTxFeeDto.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", description = "交易手续费"),
+    @ResponseData(name = "Return value", description = "Return aMapobject", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "Transaction fees"),
     }))
     public RpcClientResult calcMultiSignTransferTxFee(MultiSignTransferTxFeeDto dto) {
         BigInteger fee = NulsSDKTool.calcMultiSignTransferTxFee(dto);

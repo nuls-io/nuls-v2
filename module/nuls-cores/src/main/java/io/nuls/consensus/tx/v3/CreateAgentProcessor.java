@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * 创建节点处理器
+ * Create Node Processor
  * @author tag
  * @date 2019/6/1
  */
@@ -98,13 +98,13 @@ public class CreateAgentProcessor implements TransactionProcessor {
                 agent.parse(createAgentTx.getTxData(), 0);
                 String agentAddressHex = HexUtil.encode(agent.getAgentAddress());
                 String packAddressHex = HexUtil.encode(agent.getPackingAddress());
-                //验证签名及coinData地址
+                //Verify signature andcoinDataaddress
                 if (!verifyV3(chain, createAgentTx, agent.getAgentAddress())) {
                     invalidTxList.add(createAgentTx);
                     continue;
                 }
                 /*
-                 * 获得过红牌交易的地址不能创建节点
+                 * An address that has obtained a red card transaction cannot create a node
                  * */
                 if (!redPunishAddressSet.isEmpty()) {
                     if (redPunishAddressSet.contains(agentAddressHex) || redPunishAddressSet.contains(packAddressHex)) {
@@ -115,7 +115,7 @@ public class CreateAgentProcessor implements TransactionProcessor {
                     }
                 }
                 /*
-                 * 重复创建节点
+                 * Repeatedly creating nodes
                  * */
                 if (!createAgentAddressSet.add(agentAddressHex) || !createAgentAddressSet.add(packAddressHex)) {
                     invalidTxList.add(createAgentTx);
@@ -159,7 +159,7 @@ public class CreateAgentProcessor implements TransactionProcessor {
                 commitResult = false;
             }
         }
-        //回滚已提交成功的交易
+        //Roll back transactions that have been successfully submitted
         if(!commitResult){
             for (Transaction rollbackTx:commitSuccessList) {
                 try {
@@ -193,7 +193,7 @@ public class CreateAgentProcessor implements TransactionProcessor {
                 rollbackResult = false;
             }
         }
-        //保存已回滚成功的交易
+        //Save successfully rolled back transactions
         if(!rollbackResult){
             for (Transaction commitTx:rollbackSuccessList) {
                 try {
@@ -208,14 +208,14 @@ public class CreateAgentProcessor implements TransactionProcessor {
     }
 
     /**
-     * 版本三新增的验证
+     * Verification added in version three
      *
-     * @param chain   链信息
-     * @param tx      委托交易
-     * @param creator 委托账户地址
+     * @param chain   Chain information
+     * @param tx      Entrusted transaction
+     * @param creator Entrusted account address
      */
     private boolean verifyV3(Chain chain, Transaction tx, byte[] creator) throws NulsException {
-        //验证签名是否为节点创建者签名
+        //Verify if the signature is the signature of the node creator
         TransactionSignature transactionSignature = new TransactionSignature();
         if (tx.getTransactionSignature() == null) {
             chain.getLogger().error("Unsigned Commission transaction");
@@ -229,7 +229,7 @@ public class CreateAgentProcessor implements TransactionProcessor {
             chain.getLogger().error("The signature of the entrusted transaction is not the signature of the entrusting party");
             throw new NulsException(ConsensusErrorCode.TX_CREATOR_NOT_SIGNED);
         }
-        //验证from中地址与to中地址是否相同且为委托者
+        //validatefromMiddle address andtoIs the middle address the same and is it the principal
         CoinData coinData = tx.getCoinDataInstance();
         if (!Arrays.equals(creator, coinData.getFrom().get(0).getAddress()) || !Arrays.equals(creator, coinData.getTo().get(0).getAddress())) {
             chain.getLogger().error("From address or to address in coinData is not the principal address");

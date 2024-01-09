@@ -31,7 +31,7 @@ public class ForkChainsMonitorTest {
         long forkHeight = 100;
         long rollbackHeight = 999;
         do{
-            //模拟回滚成功
+            //Simulated rollback successful
             rollbackHeight--;
             count++;
         } while (rollbackHeight >= forkHeight);

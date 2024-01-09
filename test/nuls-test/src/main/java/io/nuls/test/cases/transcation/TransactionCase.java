@@ -8,7 +8,7 @@ import io.nuls.core.core.annotation.Component;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-21 20:07
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @TestCase("transaction")
 @Component
@@ -23,6 +23,6 @@ public class TransactionCase extends TestCaseChain {
 
     @Override
     public String title() {
-        return "交易模块";
+        return "Transaction module";
     }
 }

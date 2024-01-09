@@ -6,7 +6,7 @@ import io.nuls.base.api.provider.BaseReq;
  * @Author: zhoulijun
  * @Time: 2019-03-07 17:50
  * @Description:
- * 删除指定账户
+ * Delete specified account
  * remove account by address
  */
 public class RemoveAccountReq extends BaseReq {

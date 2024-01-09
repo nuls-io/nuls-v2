@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * 停止节点交易处理器
+ * Stop node transaction processor
  *
  * @author tag
  * @date 2019/6/1
@@ -96,7 +96,7 @@ public class StopAgentProcessor implements TransactionProcessor {
                     chain.getLogger().info("Intelligent Contract Exit Node Trading Verification Failed");
                     continue;
                 }
-                //验证停止节点交易时间正确性
+                //Verify the correctness of stopping node transaction time
                 long time = NulsDateUtils.getCurrentTimeSeconds();
                 if(blockHeader != null){
                     time = blockHeader.getTime();
@@ -181,7 +181,7 @@ public class StopAgentProcessor implements TransactionProcessor {
                 commitResult = false;
             }
         }
-        //回滚已提交成功的交易
+        //Roll back transactions that have been successfully submitted
         if (!commitResult) {
             for (Transaction rollbackTx : commitSuccessList) {
                 try {
@@ -215,7 +215,7 @@ public class StopAgentProcessor implements TransactionProcessor {
                 rollbackResult = false;
             }
         }
-        //保存已回滚成功的交易
+        //Save successfully rolled back transactions
         if (!rollbackResult) {
             for (Transaction commitTx : rollbackSuccessList) {
                 try {

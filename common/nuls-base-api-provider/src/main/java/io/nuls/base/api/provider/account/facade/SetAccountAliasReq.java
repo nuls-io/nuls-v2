@@ -6,7 +6,7 @@ import io.nuls.base.api.provider.BaseReq;
  * @Author: zhoulijun
  * @Time: 2019-03-08 14:39
  * @Description:
- * 设置账户别名
+ * Set account alias
  * set account alias
  */
 public class SetAccountAliasReq extends BaseReq {

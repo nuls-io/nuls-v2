@@ -33,16 +33,16 @@ import io.nuls.v2.util.ContractUtil;
  * @author: PierreLuo
  * @date: 2019-07-05
  */
-@ApiModel(description = "调用不上链的智能合约函数表单数据")
+@ApiModel(description = "Call the form data of the smart contract function that is not on the chain")
 public class ContractViewCall {
 
-    @ApiModelProperty(description = "智能合约地址", required = true)
+    @ApiModelProperty(description = "Smart contract address", required = true)
     private String contractAddress;
-    @ApiModelProperty(description = "方法名称", required = true)
+    @ApiModelProperty(description = "Method Name", required = true)
     private String methodName;
-    @ApiModelProperty(description = "方法描述，若合约内方法没有重载，则此参数可以为空", required = false)
+    @ApiModelProperty(description = "Method description, if the method in the contract is not overloaded, this parameter can be empty", required = false)
     private String methodDesc;
-    @ApiModelProperty(description = "参数列表", required = false)
+    @ApiModelProperty(description = "parameter list", required = false)
     private Object[] args;
 
     public String[][] getArgs(String[] types) {

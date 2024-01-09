@@ -99,7 +99,7 @@ public class ContractUtil {
                 }
                 if (arg instanceof String) {
                     String argStr = (String) arg;
-                    // 非String类型参数，若传参是空字符串，则赋值为空一维数组，避免数字类型转化异常 -> 空字符串转化为数字
+                    // wrongStringType parameter. If the passed parameter is an empty string, assign it to an empty one-dimensional array to avoid abnormal conversion of numerical types -> Convert empty strings to numbers
                     if (types != null && isBlank(argStr) && !STRING.equalsIgnoreCase(types[i])) {
                         two[i] = new String[0];
                     } else {
@@ -169,7 +169,7 @@ public class ContractUtil {
                 create.parse(tx.getTxData(), 0);
                 contractData = create;
                 break;
-            // add by pierre at 2019-11-02 需要协议升级 done
+            // add by pierre at 2019-11-02 Protocol upgrade required done
             case CROSS_CHAIN:
                 if (ProtocolGroupManager.getCurrentVersion(tx.getChainId()) < ContractContext.UPDATE_VERSION_V250) {
                     isContractTx = false;
@@ -200,24 +200,24 @@ public class ContractUtil {
 
     public static CallContractData parseCrossChainTx(Transaction tx, ChainManager chainManager) throws NulsException {
         CoinData coinData = tx.getCoinDataInstance();
-        // 解析交易资产ID，跨链转账to资产识别为已注册的合约跨链资产，则设置合约调用
+        // Analyze trading assetsIDCross chain transfertoIf the asset is identified as a registered contract cross chain asset, set the contract call
         List<CoinTo> toList = coinData.getTo();
         CoinTo coinTo = toList.get(0);
         byte[] toAddress = coinTo.getAddress();
         int chainIdByToAddress = AddressTool.getChainIdByAddress(toAddress);
         if (chainIdByToAddress != ContractContext.MAIN_CHAIN_ID) {
-            // 接收者非主链地址，不是跨链转入交易
+            // The recipient is not the main chain address and is not a cross chain transfer transaction
             if (Log.isDebugEnabled()) {
-                Log.warn("接收者[{}]非主链地址，不是跨链转入交易", AddressTool.getStringAddressByBytes(toAddress));
+                Log.warn("Receiver[{}]Non main chain address, not cross chain transfer transaction", AddressTool.getStringAddressByBytes(toAddress));
             }
             return null;
         }
         int assetsChainId = coinTo.getAssetsChainId();
         Chain chain = chainManager.getChainMap().get(assetsChainId);
         if (chain == null) {
-            // 未知链
+            // Unknown Chain
             if (Log.isDebugEnabled()) {
-                Log.warn("未知链[{}]", assetsChainId);
+                Log.warn("Unknown Chain[{}]", assetsChainId);
             }
             return null;
         }
@@ -225,21 +225,21 @@ public class ContractUtil {
         Map<String, String> tokenAssetsContractAddressInfoMap = chain.getTokenAssetsContractAddressInfoMap();
         String nrcContractAddress = tokenAssetsContractAddressInfoMap.get(assetsChainId + "-" + assetsId);
         if (StringUtils.isBlank(nrcContractAddress)) {
-            // 没有注册合约资产
+            // Unregistered contract assets
             if (Log.isDebugEnabled()) {
-                Log.warn("没有注册合约资产[{}]", assetsChainId + "-" + assetsId);
+                Log.warn("Unregistered contract assets[{}]", assetsChainId + "-" + assetsId);
             }
             return null;
         }
         boolean isCrossAssets = ChainManagerCall.isCrossAssets(assetsChainId, assetsId);
         if (!isCrossAssets) {
-            // 没有注册跨链资产
+            // No cross chain assets registered
             if (Log.isDebugEnabled()) {
-                Log.warn("没有注册跨链资产[{}]", assetsChainId + "-" + assetsId);
+                Log.warn("No cross chain assets registered[{}]", assetsChainId + "-" + assetsId);
             }
             return null;
         }
-        // 解析跨链转账交易，设置调用合约的参数，特殊设置 sender == null
+        // Analyze cross chain transfer transactions, set parameters for calling contracts, special settings sender == null
         List<CoinFrom> fromList = coinData.getFrom();
         CoinFrom from = fromList.get(0);
         byte[] fromAddress = from.getAddress();
@@ -696,7 +696,7 @@ public class ContractUtil {
 
     /**
      * @param contractResultList
-     * @return 去掉重复的交易，并按照时间降序排列
+     * @return Remove duplicate transactions and arrange them in descending chronological order
      */
     public static List<ContractResult> deduplicationAndOrder(List<ContractResult> contractResultList) {
         return contractResultList.stream().collect(Collectors.toSet()).stream()
@@ -705,7 +705,7 @@ public class ContractUtil {
 
     /**
      * @param contractResultList
-     * @return 收集合约执行中所有出现过的合约地址，包括内部调用合约，合约转账
+     * @return Collect all contract addresses that have appeared during contract execution, including internal call contracts and contract transfers
      */
     public static Map<String, Set<ContractResult>> collectAddressMap(int chainId, List<ContractResult> contractResultList) {
         Map<String, Set<ContractResult>> map = new HashMap<>();
@@ -734,14 +734,14 @@ public class ContractUtil {
 
     public static boolean makeContractResultAndCheckGasSerial(ContractWrapperTransaction tx, ContractResult contractResult, BatchInfo batchInfo) {
         int i = 0;
-        // 所以交易都按顺序串行执行checkGas
+        // So the transactions are executed sequentially and seriallycheckGas
         while (true) {
             synchronized (batchInfo) {
                 int txOrder = tx.getOrder();
                 int serialOrder = batchInfo.getSerialOrder();
                 if (serialOrder == txOrder) {
                     if (Log.isDebugEnabled()) {
-                        Log.debug("串行交易order - [{}]", txOrder);
+                        Log.debug("Serial tradingorder - [{}]", txOrder);
                     }
                     batchInfo.setSerialOrder(serialOrder + 1);
                     contractResult.setTx(tx);
@@ -754,14 +754,14 @@ public class ContractUtil {
                 } else {
                     i++;
                     if (Log.isDebugEnabled()) {
-                        Log.debug("等待的交易order - [{}], [{}]线程等待次数 - [{}]", txOrder, Thread.currentThread().getName(), i);
+                        Log.debug("Waiting transactionsorder - [{}], [{}]Thread wait count - [{}]", txOrder, Thread.currentThread().getName(), i);
                     }
                     try {
                         batchInfo.wait(5000);
                     } catch (InterruptedException e) {
                         Log.error(e);
                     }
-                    // 防止唤醒线程意外终止，导致等待线程永远等待
+                    // Prevent accidental termination of wake-up threads, causing waiting threads to wait forever
                     if (i > 4) {
                         return false;
                     }
@@ -830,7 +830,7 @@ public class ContractUtil {
             case CONTRACT_RETURN_GAS:
                 resultTx = new ContractReturnGasTransaction();
                 break;
-            // pierre 标记 需要协议升级 done
+            // pierre sign Protocol upgrade required done
             case CROSS_CHAIN:
                 if (ProtocolGroupManager.getCurrentVersion(chainId) < ContractContext.UPDATE_VERSION_V250) {
                     break;

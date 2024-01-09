@@ -7,7 +7,7 @@ package io.nuls.chain.info;
  */
 public class CmConstants {
     /**
-     * 黑洞地址，该地址的资产无法找回
+     * Black hole address, the assets at this address cannot be retrieved
      */
     public static  byte[] BLACK_HOLE_ADDRESS = null;
 

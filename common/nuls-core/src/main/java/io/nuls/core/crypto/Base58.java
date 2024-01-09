@@ -43,7 +43,7 @@ public class Base58 {
     }
 
     /**
-     * Encodes the given bytes as a base58 string (no checksum is appended)./将给定字节编码为Base58字符串（不追加校验和）
+     * Encodes the given bytes as a base58 string (no checksum is appended)./Encode the given byte asBase58character string（Do not add checksum）
      *
      * @param input the bytes to encode
      * @return the base58-encoded string
@@ -85,7 +85,7 @@ public class Base58 {
     }
 
     /**
-     * Decodes the given base58 string into the original entity bytes./将给定的Base58字符串解码为原始数据字节
+     * Decodes the given base58 string into the original entity bytes./Set the givenBase58Decode the string into raw data bytes
      *
      * @param input the base58-encoded string to decode
      * @return the decoded entity bytes
@@ -128,8 +128,8 @@ public class Base58 {
     }
 
     /***
-     * 先将给定的Base58字符串解码为原始数据字节，然后再将字节数组转为对应的BigInteger
-     * @param input   Base58字符串
+     * First, convert the givenBase58Decode the string into raw data bytes, and then convert the byte array into the correspondingBigInteger
+     * @param input   Base58character string
      * */
     public static BigInteger decodeToBigInteger(String input) throws Exception {
         return new BigInteger(1, decode(input));
@@ -139,7 +139,7 @@ public class Base58 {
      * Decodes the given base58 string into the original entity bytes, using the checksum in the
      * last 4 bytes of the decoded entity to verify that the rest are correct. The checksum is
      * removed from the returned entity.
-     * 将给定的Base58字符串解码为原始数据字节，使用解码数据的最后4字节以验证其余数据是否正确校验和是从返回的数据中删除
+     * Set the givenBase58Decode the string into raw data bytes, using the last bit of decoded data4Bytes are used to verify if the remaining data is correct. The checksum is removed from the returned data
      *
      * @param input the base58-encoded string to decode (which should include the checksum)
      * @return byte[]
@@ -163,7 +163,7 @@ public class Base58 {
      * Divides a number, represented as an array of bytes each containing a single digit
      * in the specified base, by the given divisor. The given number is modified in-place
      * to contain the quotient, and the return value is the remainder.
-     * 将一个数字表示为一个字节数组，每个字节包含一个数字在指定的基数中，由给定的除数。给定的数字被修改到位包含商，返回值为余数。
+     * Represent a number as a byte array, with each byte containing a number in a specified cardinality, divided by a given divisor. The given number is modified to include the quotient, and the return value is the remainder.
      *
      * @param number     the number to divide
      * @param firstDigit the index within the array of the first non-zero digit

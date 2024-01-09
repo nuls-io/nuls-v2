@@ -47,7 +47,7 @@ public class ChainAssetUpdateTask implements Runnable {
         ChainServiceImpl chainService = SpringLiteContext.getBean(ChainServiceImpl.class);
         RpcServiceImpl rpcService = SpringLiteContext.getBean(RpcServiceImpl.class);
         MessageServiceImpl messageService = SpringLiteContext.getBean(MessageServiceImpl.class);
-        //查询所有链列表
+        //Query all chain lists
         try {
             List<BlockChain> blockChainList = chainService.getBlockList();
             for (BlockChain blockChain : blockChainList) {
@@ -59,7 +59,7 @@ public class ChainAssetUpdateTask implements Runnable {
                     }
                     LoggerUtil.logger().debug("chainId={}=====assets={}",blockChain.getChainId(),assets);
                     if (blockChain.getChainId() == CmRuntimeInfo.getMainIntChainId()) {
-                        //处理主网值更新
+                        //Handling updates to the main network value
                         if(assets.length()>0) {
                             List<ChainAssetTotalCirculate> mainChainAssets = rpcService.getLgAssetsById(blockChain.getChainId(), assets.substring(0, assets.length() - 1));
                             messageService.dealMainChainIssuingAssets(mainChainAssets);
@@ -67,11 +67,11 @@ public class ChainAssetUpdateTask implements Runnable {
                         continue;
                     }
                     messageService.initChainIssuingAssets(blockChain.getChainId());
-                    //发送链请求信息，并且增加30s后的处理线程，sleep30s.
+                    //Send chain request information and add30sPost processing thread,sleep30s.
                     if (assets.length() > 0) {
                         rpcService.requestCrossIssuingAssets(blockChain.getChainId(), assets.substring(0, assets.length() - 1));
                     }
-                    //30s交互时间
+                    //30sInteraction time
                     Thread.sleep(30000);
                     messageService.dealChainIssuingAssets(blockChain.getChainId());
                 }

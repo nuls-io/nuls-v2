@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-07 16:23
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class TestCreateProcessor {
 
@@ -130,7 +130,7 @@ public class TestCreateProcessor {
                                 .addTo(chainId, assetId, caddress, amount);
                 Result<String> result = transferService.transfer(builder.build(new TransferReq()));
                 if(result.isFailed()){
-                    Log.error("失败:{}",result.getMessage());
+                    Log.error("fail:{}",result.getMessage());
                 }else{
                     Log.info("{}",result);
                 }

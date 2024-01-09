@@ -42,29 +42,29 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * 委托信息类
+ * Entrusted Information
  * Delegated information class
  *
  * @author tag
  * 2018/11/28
  */
-@ApiModel(name = "委托信息")
+@ApiModel(name = "Entrustment information")
 public class Deposit extends BaseNulsData {
-    @ApiModelProperty(description = "委托金额")
+    @ApiModelProperty(description = "Entrusted amount")
     private BigInteger deposit;
-    @ApiModelProperty(description = "委托的节点HASH")
+    @ApiModelProperty(description = "Delegated nodesHASH")
     private NulsHash agentHash;
-    @ApiModelProperty(description = "委托账户")
+    @ApiModelProperty(description = "Entrusted account")
     private byte[] address;
-    @ApiModelProperty(description = "委托时间")
+    @ApiModelProperty(description = "Entrustment time")
     private transient long time;
-    @ApiModelProperty(description = "状态")
+    @ApiModelProperty(description = "state")
     private transient int status;
-    @ApiModelProperty(description = "委托交易HASH")
+    @ApiModelProperty(description = "Entrusted transactionHASH")
     private transient NulsHash txHash;
-    @ApiModelProperty(description = "委托交易被打包的高度")
+    @ApiModelProperty(description = "The height at which the entrusted transaction is packaged")
     private transient long blockHeight = -1L;
-    @ApiModelProperty(description = "退出委托高度")
+    @ApiModelProperty(description = "Exit commission height")
     private transient long delHeight = -1L;
 
     /**

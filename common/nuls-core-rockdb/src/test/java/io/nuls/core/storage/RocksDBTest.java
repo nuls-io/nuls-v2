@@ -89,11 +89,11 @@ public class RocksDBTest {
         long start = System.currentTimeMillis();
         RocksDBService.init(dataPath);
         long end = System.currentTimeMillis();
-        System.out.println("数据库连接初始化测试耗时：" + (end - start) + "ms");
+        System.out.println("Database connection initialization test time consumption：" + (end - start) + "ms");
     }
 
     /**
-     * 判断数据表是否存在
+     * Determine if the data table exists
      */
     @Ignore
     @Test
@@ -110,7 +110,7 @@ public class RocksDBTest {
     }
 
     /**
-     * 创建数据表
+     * Create a data table
      */
     @Ignore
     @Test
@@ -127,7 +127,7 @@ public class RocksDBTest {
     }
 
     /**
-     * 删除数据表
+     * Delete Data Table
      */
     @Ignore
     @Test
@@ -143,7 +143,7 @@ public class RocksDBTest {
     }
 
     /**
-     * 查询所有表名
+     * Query all table names
      */
     @Ignore
     @Test
@@ -223,7 +223,7 @@ public class RocksDBTest {
         keyBytes.add("key1".getBytes());
         keyBytes.add("key2".getBytes());
         keyBytes.add("key3".getBytes());
-        //keyBytes size不能大于65536，否则查询结果为空
+        //keyBytes sizeCannot be greater than65536Otherwise, the query result will be empty
         Map<byte[], byte[]> map = multiGet(table, keyBytes);
         for (Map.Entry<byte[], byte[]> entry : map.entrySet()) {
             result.put(new String(entry.getKey()), new String(entry.getValue()));
@@ -259,7 +259,7 @@ public class RocksDBTest {
         List<byte[]> list = keyList(table);
         long end = System.currentTimeMillis();
         if (list != null) {
-            System.out.println(list.size() + "查询测试耗时：" + (end - start) + "ms");
+            System.out.println(list.size() + "Query testing time：" + (end - start) + "ms");
             for (byte[] value : list) {
                 System.out.println(new String(value));
             }
@@ -292,10 +292,10 @@ public class RocksDBTest {
         Map<byte[], byte[]> updateMap = new HashMap<>();
         for (int i = 0; i < 65536; i++) {
             list.add(randomstr().getBytes());
-            insertMap.put(list.get(i), ("rocksDB批量新增测试-" + i + "-" + System.currentTimeMillis()).getBytes());
-            updateMap.put(list.get(i), ("rocksDB批量修改测试-" + i + "-" + System.currentTimeMillis()).getBytes());
+            insertMap.put(list.get(i), ("rocksDBBatch addition testing-" + i + "-" + System.currentTimeMillis()).getBytes());
+            updateMap.put(list.get(i), ("rocksDBBatch modification testing-" + i + "-" + System.currentTimeMillis()).getBytes());
         }
-        //批量添加测试
+        //Batch Add Test
         {
             long start = System.currentTimeMillis();
             try {
@@ -304,10 +304,10 @@ public class RocksDBTest {
                 e.printStackTrace();
             }
             long end = System.currentTimeMillis();
-            System.out.println(list.size() + "次批量添加测试耗时：" + (end - start) + "ms");
+            System.out.println(list.size() + "Time consumption for batch addition testing：" + (end - start) + "ms");
             //System.out.println("last insert entity======" + new String(get(table,list.get(list.size() - 1))));
         }
-        //批量修改测试
+        //Batch modification testing
         {
             long start = System.currentTimeMillis();
             try {
@@ -316,16 +316,16 @@ public class RocksDBTest {
                 e.printStackTrace();
             }
             long end = System.currentTimeMillis();
-            System.out.println(list.size() + "次批量修改测试耗时：" + (end - start) + "ms");
+            System.out.println(list.size() + "Time consumption for batch modification testing：" + (end - start) + "ms");
         }
-//        //批量查询测试
+//        //Batch query testing
 //        {
 //            long start = System.currentTimeMillis();
 //            Map<byte[], byte[]> map = multiGet(table, list);
 //            long end = System.currentTimeMillis();
-//            System.out.println(map.size() + "次批量查询测试耗时：" + (end - start) + "ms");
+//            System.out.println(map.size() + "Time consumption for batch query testing：" + (end - start) + "ms");
 //        }
-        //批量删除测试
+        //Batch deletion test
         {
             long start = System.currentTimeMillis();
             try {
@@ -334,7 +334,7 @@ public class RocksDBTest {
                 e.printStackTrace();
             }
             long end = System.currentTimeMillis();
-            System.out.println(list.size() + "次批量删除测试耗时：" + (end - start) + "ms");
+            System.out.println(list.size() + "Time consumption for batch deletion testing：" + (end - start) + "ms");
         }
     }
 
@@ -350,7 +350,7 @@ public class RocksDBTest {
                 e.printStackTrace();
             }
             long end = System.currentTimeMillis();
-            System.out.println(list.size() + "次批量删除测试耗时：" + (end - start) + "ms");
+            System.out.println(list.size() + "Time consumption for batch deletion testing：" + (end - start) + "ms");
             list = keyList(table);
             Assert.assertEquals(0, list.size());
         }
@@ -359,7 +359,7 @@ public class RocksDBTest {
     @Ignore
     @Test
     public void executeBatchTest() {
-        //批量操作测试
+        //Batch operation testing
         {
             try {
                 BatchOperation batch = RocksDBService.createWriteBatch(table);
@@ -385,7 +385,7 @@ public class RocksDBTest {
     }
 
     /**
-     * 随机生成不重复的key
+     * Randomly generate non repeatingkey
      *
      * @return
      */

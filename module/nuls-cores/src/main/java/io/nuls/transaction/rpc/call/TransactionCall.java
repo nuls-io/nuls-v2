@@ -18,7 +18,7 @@ import java.util.Map;
 import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 /**
- * 调用其他模块跟交易相关的接口
+ * Calling other modules and transaction related interfaces
  *
  * @author: qinyifeng
  * @date: 2018/12/05
@@ -30,7 +30,7 @@ public class TransactionCall {
         return requestAndResponse(moduleCode, cmd, params, null);
     }
     /**
-     * 调用其他模块接口
+     * Call other module interfaces
      * Call other module interfaces
      */
     public static Object requestAndResponse(String moduleCode, String cmd, Map params, Long timeout) throws NulsException {
@@ -61,7 +61,7 @@ public class TransactionCall {
     }
 
     /**
-     * 调用交易的 commit 或者 rollback
+     * Call transaction commit perhaps rollback
      * @param chain
      * @param cmd
      * @param moduleCode
@@ -70,7 +70,7 @@ public class TransactionCall {
      */
     public static boolean txProcess(Chain chain, String cmd, String moduleCode,  List<String> txList, String blockHeader) {
         try {
-            //调用单个交易验证器
+            //Calling a single transaction validator
             Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("txList", txList);
@@ -90,10 +90,10 @@ public class TransactionCall {
     }
 
     /**
-     * 模块交易统一验证器
+     * Module Transaction Unified Verifier
      * Single module transaction integrate validator
      *
-     * @return 返回未通过验证的交易hash, 如果出现异常那么交易全部返回(不通过) / return unverified transaction hash
+     * @return Return unverified transactionshash, If there is an exception, all transactions will be returned(Not passed) / return unverified transaction hash
      */
     public static Map<String, Object> txModuleValidator(Chain chain, String moduleCode, String tx) throws NulsException {
         List<String> txList = new ArrayList<>();
@@ -102,23 +102,23 @@ public class TransactionCall {
     }
 
     /**
-     * 模块交易统一验证器
+     * Module Transaction Unified Verifier
      * Single module transaction integrate validator
      *
-     * @return 返回未通过验证的交易hash, 如果出现异常那么交易全部返回(不通过) / return unverified transaction hash
+     * @return Return unverified transactionshash, If there is an exception, all transactions will be returned(Not passed) / return unverified transaction hash
      */
     public static List<String> txModuleValidator(Chain chain, String moduleCode, List<String> txList) throws NulsException {
         return txModuleValidator(chain, moduleCode, txList, null);
     }
 
     /**
-     * 模块交易统一验证器
+     * Module Transaction Unified Verifier
      * Single module transaction integrate validator
      *
-     * @return 返回未通过验证的交易hash, 如果出现异常那么交易全部返回(不通过) / return unverified transaction hash
+     * @return Return unverified transactionshash, If there is an exception, all transactions will be returned(Not passed) / return unverified transaction hash
      */
     public static List<String> txModuleValidator(Chain chain, String moduleCode, List<String> txList, String blockHeaderStr) throws NulsException {
-        //调用交易模块统一验证器
+        //Call the transaction module's unified validator
         Map<String, Object> result = callTxModuleValidator(chain, moduleCode, txList, blockHeaderStr);
         return (List<String>) result.get("list");
     }

@@ -5,53 +5,53 @@ import io.nuls.core.basic.Result;
 import java.util.Map;
 
 /**
- * 智能合约与共识交互接口定义类
+ * Smart Contract and Consensus Interaction Interface Definition Class
  * @author tag
  * 2019/5/5
  * */
 public interface ContractService {
     /**
-     * 创建节点
+     * Create nodes
      * */
     Result createAgent(Map<String,Object> params);
 
     /**
-     * 注销节点
+     * Unregister node
      * @param params
      * return Result
      * */
     Result stopAgent(Map<String,Object> params);
 
     /**
-     * 委托共识
+     * Commission consensus
      * @param params
      * @return Result
      * */
     Result depositToAgent(Map<String,Object> params);
 
     /**
-     * 退出共识
+     * Exit consensus
      * @param params
      * @return Result
      * */
     Result withdraw(Map<String,Object> params);
 
     /**
-     * 查询节点信息
+     * Query node information
      * @param params
      * @return Result
      * */
     Result getAgentInfo(Map<String,Object> params);
 
     /**
-     * 查询委托信息
+     * Query commission information
      * @param params
      * @return Result
      * */
     Result getDepositInfo(Map<String,Object> params);
 
     /**
-     * 交易模块触发CoinBase智能合约
+     * Transaction module triggeredCoinBaseSmart contracts
      * @param params
      * @return Result
      * */

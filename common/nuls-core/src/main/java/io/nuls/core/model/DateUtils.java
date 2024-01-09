@@ -88,7 +88,7 @@ public class DateUtils {
     }
 
     /**
-     * 把日期转换成yyyy-MM-dd HH:mm:ss格式
+     * Convert date toyyyy-MM-dd HH:mm:ssformat
      *
      * @param date
      * @return String
@@ -101,7 +101,7 @@ public class DateUtils {
     }
 
     /**
-     * 把日期转换成pattern格式
+     * Convert date topatternformat
      *
      * @param date
      * @param pattern
@@ -140,7 +140,7 @@ public class DateUtils {
     }
 
     /**
-     * 判断传入的日期是不是当月的第一天
+     * Determine if the incoming date is the first day of the month
      *
      * @param date
      * @return boolean
@@ -152,7 +152,7 @@ public class DateUtils {
     }
 
     /**
-     * 判断传入的日期是不是当年的第一天
+     * Determine if the incoming date is the first day of the year
      *
      * @param date
      * @return boolean
@@ -164,7 +164,7 @@ public class DateUtils {
     }
 
     /**
-     * 去掉时分秒后返回
+     * Return after removing hours, minutes, and seconds
      *
      * @param date
      * @return Date
@@ -179,7 +179,7 @@ public class DateUtils {
     }
 
     /**
-     * 把时间加上day天后返回，如果传负数代表减day天
+     * Add timedayReturn in days. If negative numbers are passed, they represent subtractiondayday
      *
      * @param date
      * @param day
@@ -193,7 +193,7 @@ public class DateUtils {
     }
 
     /**
-     * 多少个月前后的今天
+     * How many months ago today
      *
      * @param date
      * @param month
@@ -207,7 +207,7 @@ public class DateUtils {
     }
 
     /**
-     * 获取上一个月的第一天
+     * Get the first day of the previous month
      *
      * @return Date
      */
@@ -222,7 +222,7 @@ public class DateUtils {
     }
 
     /**
-     * 获取本月的第一天
+     * Get the first day of this month
      *
      * @return Date
      */
@@ -231,7 +231,7 @@ public class DateUtils {
     }
 
     /**
-     * 获取本月的第一天
+     * Get the first day of this month
      *
      * @param date
      * @return Date
@@ -247,7 +247,7 @@ public class DateUtils {
     }
 
     /**
-     * 获取上一年的第一天
+     * Obtain the first day of the previous year
      *
      * @return Date
      */
@@ -264,12 +264,12 @@ public class DateUtils {
 
 
     /**
-     * 获取两个时间段之间相差日期列表
+     * Get a list of dates that differ between two time periods
      *
-     * @param beginDate 开始时间
-     * @param endDate   结束时间
-     * @param type      1表示获取两个时间之间相差的“月份-日期”列表，2表示两个时间之间相差的“年份-月份”列表
-     * @return 两个时间段之间相差的时间列表
+     * @param beginDate start time
+     * @param endDate   End time
+     * @param type      1Represents obtaining the difference between two times“month-date”List,2Indicating the difference between two times“Year-month”list
+     * @return List of time differences between two time periods
      */
     public static List<String> getDateRange(String beginDate, String endDate,
                                             int type) {
@@ -311,132 +311,132 @@ public class DateUtils {
     }
 
     /**
-     * 判断对象是否为空
+     * Determine if the object is empty
      *
-     * @param obj 对象
-     * @return 如果为空返回true，否则返回false
+     * @param obj object
+     * @return If empty, returntrueOtherwise, returnfalse
      */
     public static boolean isEmpty(Object obj) {
         return obj == null || EMPTY_SRING.equals(obj);
     }
 
     /**
-     * 获取星期几
+     * Get the day of the week
      *
      * @param c
      * @return String
      */
     public static String getWeekDay(Calendar c) {
         if (c == null) {
-            return "星期一";
+            return "Monday";
         }
         if (Calendar.MONDAY == c.get(Calendar.DAY_OF_WEEK)) {
-            return "星期一";
+            return "Monday";
         }
         if (Calendar.TUESDAY == c.get(Calendar.DAY_OF_WEEK)) {
-            return "星期二";
+            return "Tuesday";
         }
         if (Calendar.WEDNESDAY == c.get(Calendar.DAY_OF_WEEK)) {
-            return "星期三";
+            return "Wednesday";
         }
         if (Calendar.THURSDAY == c.get(Calendar.DAY_OF_WEEK)) {
-            return "星期四";
+            return "Thursday";
         }
         if (Calendar.FRIDAY == c.get(Calendar.DAY_OF_WEEK)) {
-            return "星期五";
+            return "Friday";
         }
         if (Calendar.SATURDAY == c.get(Calendar.DAY_OF_WEEK)) {
-            return "星期六";
+            return "Saturday";
         }
         if (Calendar.SUNDAY == c.get(Calendar.DAY_OF_WEEK)) {
-            return "星期日";
+            return "Sunday";
         }
-        return "星期一";
+        return "Monday";
     }
 
     /**
-     * 时间标签  返回两个时间的间隔
+     * Timestamp  Return the interval between two times
      *
-     * @param startTime  开始时间
-     * @param endTime    结束时间
-     * @param showSuffix 是否添加“前”/“后”标签
+     * @param startTime  start time
+     * @param endTime    End time
+     * @param showSuffix Do you want to add it“ago”/“after”label
      * @return String
      */
     public static String convertLebalFull(Date startTime, Date endTime, boolean showSuffix) {
         if (startTime == null || endTime == null) {
             return EMPTY_SRING;
         }
-        // 相差的秒数
+        // The number of seconds of difference
         long time = (startTime.getTime() - endTime.getTime()) / 1000;
         String label = analyzeTime(time, true);
         if (showSuffix) {
-            label += (time > 0) ? "前" : "后";
+            label += (time > 0) ? "ago" : "after";
         }
         return label;
     }
 
     /**
-     * 时间标签  返回两个时间的间隔
+     * Timestamp  Return the interval between two times
      *
-     * @param startTime  开始时间
-     * @param endTime    结束时间
-     * @param showSuffix 是否添加“前”/“后”标签
-     * @return String   返回的时间标签
+     * @param startTime  start time
+     * @param endTime    End time
+     * @param showSuffix Do you want to add it“ago”/“after”label
+     * @return String   Returned timestamp
      */
     public static String convertLebal(Date startTime, Date endTime,
                                       boolean showSuffix) {
         if (startTime == null || endTime == null) {
             return EMPTY_SRING;
         }
-        // 相差的秒数
+        // The number of seconds of difference
         long time = (startTime.getTime() - endTime.getTime()) / 1000;
         String label = analyzeTime(time, false);
         if (showSuffix) {
-            label += (time > 0) ? "前" : "后";
+            label += (time > 0) ? "ago" : "after";
         }
         return label;
     }
 
 
     /**
-     * 把时间戳转为指定显示格式
+     * Convert timestamp to specified display format
      *
-     * @param time     时间
-     * @param showFull 是否全显示
-     * @return 时间的显示字符串
+     * @param time     time
+     * @param showFull Is it all displayed
+     * @return Display string of time
      */
     public static String analyzeTime(long time, boolean showFull) {
         String remark = EMPTY_SRING;
         long tempTime = Math.abs(time);
         if (tempTime < 60) {
-            remark = String.format("%s秒", tempTime);
+            remark = String.format("%ssecond", tempTime);
         } else if (tempTime < 3600) {
-            remark = String.format("%s分%s秒", tempTime / 60, tempTime % 60);
+            remark = String.format("%sbranch%ssecond", tempTime / 60, tempTime % 60);
         } else if (tempTime / 3600 < 24) {
             if (showFull) {
-                remark = String.format("%s小时%s分%s秒", tempTime / 3600,
+                remark = String.format("%shour%sbranch%ssecond", tempTime / 3600,
                         (tempTime / 60) % 60, tempTime % 60);
             } else {
-                remark = String.format("%s小时%s分", tempTime / 3600,
+                remark = String.format("%shour%sbranch", tempTime / 3600,
                         (tempTime / 60) % 60);
             }
         } else if (tempTime / (3600 * 24L) < 30) {
             if (showFull) {
-                remark = String.format("%s天%s小时%s分%s秒",
+                remark = String.format("%sday%shour%sbranch%ssecond",
                         tempTime / (3600 * 24L), (tempTime / 3600) % 24,
                         (tempTime / 60) % 60, tempTime % 60);
             } else {
-                remark = String.format("%s天%s小时", tempTime / (3600 * 24L),
+                remark = String.format("%sday%shour", tempTime / (3600 * 24L),
                         (tempTime / 3600) % 24);
             }
         } else if (tempTime / (3600 * 24 * 30L) <= 12) {
             if (showFull) {
-                remark = String.format("%个月%s天%s小时", tempTime
+                remark = String.format("%Months%sday%shour", tempTime
                                 / (3600 * 24 * 30L), tempTime / (3600 * 24L),
                         (tempTime / 3600) % 24);
             } else {
-                remark = tempTime / (3600 * 24 * 30L) + "个月" + tempTime
-                        / (3600 * 24L) % 30 + "天";
+                remark = tempTime / (3600 * 24 * 30L) + "Months" + tempTime
+                        / (3600 * 24L) % 30 + "day";
             }
         } else if (tempTime / (3600 * 24 * 30L) < 12) {
 
@@ -445,25 +445,25 @@ public class DateUtils {
     }
 
     /**
-     * 获取当前时间的日期
+     * Get the date of the current time
      *
-     * @return 日期
+     * @return date
      */
     public static Date getToday() {
         return rounding(new Date());
     }
 
     /**
-     * 获取昨天的日期
+     * Get yesterday's date
      *
-     * @return 日期
+     * @return date
      */
     public static Date getYesterday() {
         return rounding(dateAdd(new Date(), -1));
     }
 
     /**
-     * 获取两个日期之间的间隔天数
+     * Get the number of days between two dates
      *
      * @param startTime
      * @param endTime
@@ -480,16 +480,16 @@ public class DateUtils {
     }
 
     /**
-     * 获取明天的日期
+     * Get tomorrow's date
      *
-     * @return 日期
+     * @return date
      */
     public static Date getTomorrow() {
         return rounding(dateAdd(new Date(), 1));
     }
 
     /**
-     * 检查传入的时间是否在当前时间小时数之后
+     * Check if the incoming time is after the current time hours
      *
      * @param date
      * @param time
@@ -502,10 +502,10 @@ public class DateUtils {
 
 
     /**
-     * 将一个时间戳，根据其大小转换为对应的‘时分秒毫秒’不同组合的字符串
+     * Convert a timestamp to its corresponding size‘Hours, minutes, seconds, milliseconds’Different combinations of strings
      *
-     * @param offsetTime 时间
-     * @return 时分秒组合的字符串
+     * @param offsetTime time
+     * @return A string that combines time, minutes, and seconds
      */
     public static String getOffsetStringDate(long offsetTime) {
         int p = offsetTime > 0 ? 1 : -1;
@@ -537,10 +537,10 @@ public class DateUtils {
 
 
     /**
-     * 时间加减小时
+     * Time plus or minus hours
      *
-     * @param startDate 要处理的时间，Null则为当前时间
-     * @param hours     加减的小时
+     * @param startDate The time to process,NullThen it is the current time
+     * @param hours     Hours of addition and subtraction
      * @return Date
      */
     public static Date dateAddHours(Date startDate, int hours) {
@@ -553,10 +553,10 @@ public class DateUtils {
     }
 
     /**
-     * 时间加减分钟
+     * Time plus or minus minutes
      *
-     * @param startDate 要处理的时间，Null则为当前时间
-     * @param minutes   加减的分钟
+     * @param startDate The time to process,NullThen it is the current time
+     * @param minutes   Minute addition and subtraction
      * @return
      */
     public static Date dateAddMinutes(Date startDate, int minutes) {
@@ -570,10 +570,10 @@ public class DateUtils {
     }
 
     /**
-     * 时间加减秒数
+     * Time plus or minus seconds
      *
-     * @param startDate 要处理的时间，Null则为当前时间
-     * @param seconds   加减的秒数
+     * @param startDate The time to process,NullThen it is the current time
+     * @param seconds   Seconds of addition and subtraction
      * @return
      */
     public static Date dateAddSeconds(Date startDate, int seconds) {
@@ -587,10 +587,10 @@ public class DateUtils {
     }
 
     /**
-     * 时间加减天数
+     * Time plus or minus days
      *
-     * @param startDate 要处理的时间，Null则为当前时间
-     * @param days      加减的天数
+     * @param startDate The time to process,NullThen it is the current time
+     * @param days      Days of addition and subtraction
      * @return Date
      */
     public static Date dateAddDays(Date startDate, int days) {
@@ -604,10 +604,10 @@ public class DateUtils {
     }
 
     /**
-     * 时间加减月数
+     * Time plus or minus months
      *
-     * @param startDate 要处理的时间，Null则为当前时间
-     * @param months    加减的月数
+     * @param startDate The time to process,NullThen it is the current time
+     * @param months    Months of addition and subtraction
      * @return Date
      */
     public static Date dateAddMonths(Date startDate, int months) {
@@ -621,10 +621,10 @@ public class DateUtils {
     }
 
     /**
-     * 时间加减年数
+     * Time plus or minus years
      *
-     * @param startDate 要处理的时间，Null则为当前时间
-     * @param years     加减的年数
+     * @param startDate The time to process,NullThen it is the current time
+     * @param years     Years of addition and subtraction
      * @return Date
      */
     public static Date dateAddYears(Date startDate, int years) {
@@ -638,10 +638,10 @@ public class DateUtils {
     }
 
     /**
-     * 时间比较（如果myDate>compareDate返回1，<返回-1，相等返回0）
+     * Time comparison（IfmyDate>compareDatereturn1,<return-1, equal return0）
      *
-     * @param myDate      时间
-     * @param compareDate 要比较的时间
+     * @param myDate      time
+     * @param compareDate Time to compare
      * @return int
      */
     public static int dateCompare(Date myDate, Date compareDate) {
@@ -653,11 +653,11 @@ public class DateUtils {
     }
 
     /**
-     * 获取两个时间中最小的一个时间
+     * Obtain the smallest of two times
      *
-     * @param date        被比较时间
-     * @param compareDate 比较时间
-     * @return 结果
+     * @param date        Compared time
+     * @param compareDate Compare time
+     * @return result
      */
     public static Date dateMin(Date date, Date compareDate) {
         if (date == null) {
@@ -675,11 +675,11 @@ public class DateUtils {
     }
 
     /**
-     * 获取两个时间中最大的一个时间
+     * Obtain the largest of two times
      *
-     * @param date        被比较时间
-     * @param compareDate 比较时间
-     * @return 结果
+     * @param date        Compared time
+     * @param compareDate Compare time
+     * @return result
      */
     public static Date dateMax(Date date, Date compareDate) {
         if (date == null) {
@@ -697,7 +697,7 @@ public class DateUtils {
     }
 
     /**
-     * 获取日期时间的年份，如2017-02-13，返回2017
+     * Obtain the year of the date and time, such as2017-02-13, return to2017
      *
      * @param date
      * @return
@@ -709,7 +709,7 @@ public class DateUtils {
     }
 
     /**
-     * 获取日期时间的月份，如2017年2月13日，返回2
+     * Obtain the month of the date and time, such as2017year2month13Day, return2
      *
      * @param date
      * @return
@@ -721,7 +721,7 @@ public class DateUtils {
     }
 
     /**
-     * 获取日期时间的第几天（即返回日期的dd），如2017-02-13，返回13
+     * What day is the date and time obtained（That is, the date of returndd）, such as2017-02-13, return to13
      *
      * @param date
      * @return
@@ -733,10 +733,10 @@ public class DateUtils {
     }
 
     /**
-     * 时间戳转换成日期默认格式字符串
+     * Convert timestamp to date default format string
      *
-     * @param time 时间戳
-     * @return 日期格式字符串
+     * @param time time stamp
+     * @return Date Format String
      */
     public static String timeStamp2DateStr(long time) {
         return DATE_FORMATTER_17.get().format(new Date(time));
@@ -744,11 +744,11 @@ public class DateUtils {
 
 
     /**
-     * 时间戳转换成日期格式字符串
+     * Convert timestamp to date format string
      *
-     * @param time   时间戳
-     * @param format 日期字符串格式
-     * @return 日期字符串
+     * @param time   time stamp
+     * @param format Date string format
+     * @return Date string
      */
     public static String timeStamp2DateStr(long time, String format) {
         if (format == null || format.isEmpty()) {
@@ -759,14 +759,14 @@ public class DateUtils {
     }
 
     /**
-     * 获取时区信息
+     * Obtain time zone information
      */
     public static long getTimeZone() {
         return TIME_ZONE;
     }
 
     /**
-     * 获取时区信息
+     * Obtain time zone information
      */
     public static String getTimeZoneString() {
         return TIME_ZONE_STRING;

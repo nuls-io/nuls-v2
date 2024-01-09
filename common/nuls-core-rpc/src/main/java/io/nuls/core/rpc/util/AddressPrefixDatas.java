@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 地址前缀对象集合管理
+ * Address Prefix Object Collection Management
  *
  * @author lanjinsheng
  * @date 2019-07-25
@@ -45,7 +45,7 @@ import java.util.Map;
 @Component
 public class AddressPrefixDatas implements AddressPrefixInf {
     /**
-     * chainId-地址映射表
+     * chainId-Address Mapping Table
      */
     private static Map<Integer, String> ADDRESS_PREFIX_MAP = new HashMap<Integer, String>();
 

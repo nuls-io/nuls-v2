@@ -6,7 +6,7 @@ import io.nuls.crosschain.model.bo.message.UntreatedMessage;
 import io.nuls.crosschain.utils.MessageUtil;
 
 /**
- * 链内节点广播过来的跨链交易签名拜占庭验证处理线程
+ * Byzantine verification processing thread for cross chain transaction signatures broadcasted by intra chain nodes
  *
  * @author tag
  * 2019/8/8
@@ -25,7 +25,7 @@ public class SignMessageByzantineHandler implements Runnable{
             try {
                 UntreatedMessage untreatedMessage = chain.getSignMessageByzantineQueue().take();
                 String nativeHex = untreatedMessage.getCacheHash().toHex();
-                chain.getLogger().debug("开始对链内节点{}广播过来的跨链交易签名消息做签名拜占庭验证,Hash：{}", untreatedMessage.getNodeId(), nativeHex);
+                chain.getLogger().debug("Start monitoring nodes within the chain{}Cross chain transaction signature message broadcasted for signature Byzantine verification,Hash：{}", untreatedMessage.getNodeId(), nativeHex);
                 MessageUtil.handleSignMessage(chain, untreatedMessage.getCacheHash(), untreatedMessage.getChainId(), untreatedMessage.getNodeId(),(BroadCtxSignMessage)untreatedMessage.getMessage(), nativeHex);
             } catch (Exception e) {
                 chain.getLogger().error(e);

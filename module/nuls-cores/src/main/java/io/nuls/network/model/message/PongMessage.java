@@ -31,7 +31,7 @@ import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.body.PingPongMessageBody;
 
 /**
- * 请求 时间协议消息
+ * request Time Protocol Message
  * get time message
  *
  * @author lan

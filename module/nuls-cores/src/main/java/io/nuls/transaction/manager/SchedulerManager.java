@@ -44,16 +44,16 @@ import java.util.concurrent.TimeUnit;
 public class SchedulerManager {
 
     public boolean createTransactionScheduler(Chain chain) {
-        //网络新交易
+        //New online transactions
         ThreadUtils.createAndRunThread(TxConstant.TX_THREAD, new NetTxProcessTask(chain));
-        //孤儿交易
+        //Orphan Trading
         ScheduledThreadPoolExecutor orphanTxExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory(TxConstant.TX_ORPHAN_THREAD));
         orphanTxExecutor.scheduleAtFixedRate(new OrphanTxProcessTask(chain),
                 TxConstant.TX_ORPHAN_TASK_INITIALDELAY, TxConstant.TX_ORPHAN_TASK_PERIOD, TimeUnit.SECONDS);
 
-        //未确认交易清理机制Task
+        //Unconfirmed transaction clearance mechanismTask
         ScheduledThreadPoolExecutor unconfirmedTxExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory(TxConstant.TX_CLEAN_THREAD));
-        //固定延迟时间
+        //Fixed delay time
         unconfirmedTxExecutor.scheduleWithFixedDelay(new ClearUnconfirmedTxProcessTask(chain),
                 TxConstant.TX_CLEAN_TASK_INITIALDELAY, TxConstant.TX_CLEAN_TASK_PERIOD, TimeUnit.SECONDS);
         return true;

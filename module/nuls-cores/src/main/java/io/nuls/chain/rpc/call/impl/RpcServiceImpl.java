@@ -55,7 +55,7 @@ import java.util.*;
 
 /**
  * @program: nuls2.0
- * @description: 远程接口调用
+ * @description: Remote interface call
  * @author: lan
  * @create: 2018/11/20
  **/
@@ -129,7 +129,7 @@ public class RpcServiceImpl implements RpcService {
             map.put("seedIps", "");
             map.put("isCrossGroup", "true");
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, RpcConstants.CMD_NW_CREATE_NODEGROUP, map);
-            LoggerUtil.logger().info("通知网络模块:createCrossGroup success");
+            LoggerUtil.logger().info("Notification Network Module:createCrossGroup success");
             return response.isSuccess();
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
@@ -144,7 +144,7 @@ public class RpcServiceImpl implements RpcService {
             Map<String, Object> map = new HashMap<>();
             map.put("chainId", blockChain.getChainId());
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, RpcConstants.CMD_NW_DELETE_NODEGROUP, map);
-            LoggerUtil.logger().info("通知网络模块:destroyCrossGroup success");
+            LoggerUtil.logger().info("Notification Network Module:destroyCrossGroup success");
             return response.isSuccess();
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
@@ -173,7 +173,7 @@ public class RpcServiceImpl implements RpcService {
             Map<String, Object> map = new HashMap<>();
             map.put("chainId", chainId);
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, RpcConstants.CMD_CROSS_CHAIN_REGISTER_CHANGE, map, 1000);
-            LoggerUtil.logger().info("通知跨链协议模块:crossChainRegisterChange success");
+            LoggerUtil.logger().info("Notification Cross Chain Protocol Module:crossChainRegisterChange success");
             return response.isSuccess();
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
@@ -188,7 +188,7 @@ public class RpcServiceImpl implements RpcService {
                 return false;
             }
         }
-        LoggerUtil.logger().info("通知跨链协议模块:cmd=registerCrossChain all success size={}", blockChains.size());
+        LoggerUtil.logger().info("Notification Cross Chain Protocol Module:cmd=registerCrossChain all success size={}", blockChains.size());
         return true;
     }
 
@@ -198,10 +198,10 @@ public class RpcServiceImpl implements RpcService {
             Map<String, Object> map = chainService.getBlockAssetsInfo(blockChain);
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, RpcConstants.CMD_REG_CROSS_CHAIN, map);
             if (!response.isSuccess()) {
-                LoggerUtil.logger().info("通知跨链协议模块:cmd=registerCrossChain fail chainId={},error={}", blockChain.getChainId(), response.getResponseComment());
+                LoggerUtil.logger().info("Notification Cross Chain Protocol Module:cmd=registerCrossChain fail chainId={},error={}", blockChain.getChainId(), response.getResponseComment());
                 return false;
             }
-            LoggerUtil.logger().info("通知跨链协议模块:cmd=registerCrossChain success chainId={}", blockChain.getChainId());
+            LoggerUtil.logger().info("Notification Cross Chain Protocol Module:cmd=registerCrossChain success chainId={}", blockChain.getChainId());
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
             return false;
@@ -216,7 +216,7 @@ public class RpcServiceImpl implements RpcService {
                 return false;
             }
         }
-        LoggerUtil.logger().info("通知跨链协议模块:cmd=registerCrossAsset all success size={}", assets.size());
+        LoggerUtil.logger().info("Notification Cross Chain Protocol Module:cmd=registerCrossAsset all success size={}", assets.size());
         return true;
     }
 
@@ -233,10 +233,10 @@ public class RpcServiceImpl implements RpcService {
             assetMap.put("time", registerTime);
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, RpcConstants.CMD_REG_CROSS_ASSET, assetMap);
             if (!response.isSuccess()) {
-                LoggerUtil.logger().info("通知跨链协议模块:cmd=registerCrossAsset fail chainId={},assetId={},error={}", asset.getChainId(), asset.getAssetId(), response.getResponseComment());
+                LoggerUtil.logger().info("Notification Cross Chain Protocol Module:cmd=registerCrossAsset fail chainId={},assetId={},error={}", asset.getChainId(), asset.getAssetId(), response.getResponseComment());
                 return false;
             }
-            LoggerUtil.logger().info("通知跨链协议模块:cmd=registerCrossAsset success chainId={},assetId={}", asset.getChainId(), asset.getAssetId());
+            LoggerUtil.logger().info("Notification Cross Chain Protocol Module:cmd=registerCrossAsset success chainId={},assetId={}", asset.getChainId(), asset.getAssetId());
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
             return false;
@@ -260,10 +260,10 @@ public class RpcServiceImpl implements RpcService {
             chainAssetId.put("time", cancelTime);
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, RpcConstants.CMD_CANCEL_CROSS_CHAIN, chainAssetId);
             if (!response.isSuccess()) {
-                LoggerUtil.logger().info("通知跨链协议模块:cmd=cancelCrossChain fail chainId={},assetId={},error={}", chainAssetId.get("chainId"), chainAssetId.get("assetId"), response.getResponseComment());
+                LoggerUtil.logger().info("Notification Cross Chain Protocol Module:cmd=cancelCrossChain fail chainId={},assetId={},error={}", chainAssetId.get("chainId"), chainAssetId.get("assetId"), response.getResponseComment());
                 return false;
             }
-            LoggerUtil.logger().info("通知跨链协议模块:cmd=cancelCrossChain success. chainId={},assetId={}", chainAssetId.get("chainId"), chainAssetId.get("assetId"));
+            LoggerUtil.logger().info("Notification Cross Chain Protocol Module:cmd=cancelCrossChain success. chainId={},assetId={}", chainAssetId.get("chainId"), chainAssetId.get("assetId"));
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
             return false;
@@ -281,10 +281,10 @@ public class RpcServiceImpl implements RpcService {
             param.put("prefixList", prefixList);
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, RpcConstants.CMD_AC_ADDRESS_PREFIX, param, 1000);
             if (!response.isSuccess()) {
-                LoggerUtil.logger().info("通知AC模块地址前缀添加失败");
+                LoggerUtil.logger().info("noticeACModule address prefix addition failed");
                 return false;
             }
-            LoggerUtil.logger().info("通知AC模块地址前缀添加成功");
+            LoggerUtil.logger().info("noticeACModule address prefix added successfully");
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
             return false;
@@ -373,7 +373,7 @@ public class RpcServiceImpl implements RpcService {
 
 
     /**
-     * 账户验证
+     * Account verification
      * account validate
      *
      * @param chainId
@@ -406,7 +406,7 @@ public class RpcServiceImpl implements RpcService {
 
 
     /**
-     * 交易签名
+     * Transaction signature
      * transaction signature
      *
      * @param chainId
@@ -457,7 +457,7 @@ public class RpcServiceImpl implements RpcService {
             assetMap.put("assetId", assetId);
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, RpcConstants.CMD_LG_GET_ASSETS_REG_INFO_BY_ID, assetMap);
             if (!response.isSuccess()) {
-                LoggerUtil.logger().error("获取账本资产信息失败:chainId={},assetId={},error={}", chainId, assetId, response.getResponseComment());
+                LoggerUtil.logger().error("Failed to obtain ledger asset information:chainId={},assetId={},error={}", chainId, assetId, response.getResponseComment());
                 return null;
             }
             Map<String, Object> result = ResponseUtil.getResultMap(response, RpcConstants.CMD_LG_GET_ASSETS_REG_INFO_BY_ID);

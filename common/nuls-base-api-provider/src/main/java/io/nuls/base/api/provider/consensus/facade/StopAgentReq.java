@@ -6,13 +6,13 @@ import io.nuls.base.api.provider.BaseReq;
  * @Author: zhoulijun
  * @Time: 2019-03-11 11:51
  * @Description:
- * 停止共识
+ * Stop consensus
  * stop  consensus
  */
 public class StopAgentReq extends BaseReq {
 
     /**
-     * 共识地址
+     * Consensus Address
      */
     String address;
 

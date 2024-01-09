@@ -6,7 +6,7 @@ import io.nuls.base.api.provider.BaseReq;
  * @Author: zhoulijun
  * @Time: 2019-03-11 09:33
  * @Description:
- * 通过hash获取区块头
+ * adopthashGet block header
  * get block header by hash
  */
 public class GetBlockHeaderByHashReq extends BaseReq {

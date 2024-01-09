@@ -74,13 +74,13 @@ public class ContractResource {
     @POST
     @Path("/create")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "发布合约",order = 401)
+    @ApiOperation(description = "Publish contract",order = 401)
     @Parameters({
-            @Parameter(parameterName = "发布合约", parameterDes = "发布合约表单", requestType = @TypeDescriptor(value = ContractCreate.class))
+            @Parameter(parameterName = "Publish contract", parameterDes = "Publish Contract Form", requestType = @TypeDescriptor(value = ContractCreate.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象，包含两个属性", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "txHash", description = "发布合约的交易hash"),
-            @Key(name = "contractAddress", description = "生成的合约地址")
+    @ResponseData(name = "Return value", description = "Return aMapObject, containing two properties", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "txHash", description = "Transactions for publishing contractshash"),
+            @Key(name = "contractAddress", description = "Generated contract address")
     }))
     public RpcClientResult createContract(ContractCreate create) {
         if (create == null) {
@@ -109,12 +109,12 @@ public class ContractResource {
     @POST
     @Path("/call")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "调用合约", order = 402)
+    @ApiOperation(description = "Call Contract", order = 402)
     @Parameters({
-            @Parameter(parameterName = "调用合约", parameterDes = "调用合约表单", requestType = @TypeDescriptor(value = ContractCall.class))
+            @Parameter(parameterName = "Call Contract", parameterDes = "Call Contract Form", requestType = @TypeDescriptor(value = ContractCall.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "txHash", description = "调用合约的交易hash")
+    @ResponseData(name = "Return value", description = "Return aMapobject", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "txHash", description = "Transaction calling contracthash")
     }))
     public RpcClientResult callContract(ContractCall call) {
         if (call == null) {
@@ -166,12 +166,12 @@ public class ContractResource {
     @POST
     @Path("/delete")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "删除合约", order = 403)
+    @ApiOperation(description = "Delete contract", order = 403)
     @Parameters({
-            @Parameter(parameterName = "删除合约", parameterDes = "删除合约表单", requestType = @TypeDescriptor(value = ContractDelete.class))
+            @Parameter(parameterName = "Delete contract", parameterDes = "Delete Contract Form", requestType = @TypeDescriptor(value = ContractDelete.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "txHash", description = "删除合约的交易hash")
+    @ResponseData(name = "Return value", description = "Return aMapobject", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "txHash", description = "Delete transactions for contractshash")
     }))
     public RpcClientResult deleteContract(ContractDelete delete) {
         if (delete == null) {
@@ -191,12 +191,12 @@ public class ContractResource {
     @POST
     @Path("/tokentransfer")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "合约token转账", order = 404)
+    @ApiOperation(description = "contracttokenTransfer", order = 404)
     @Parameters({
-            @Parameter(parameterName = "token转账", parameterDes = "token转账表单", requestType = @TypeDescriptor(value = ContractTokenTransfer.class))
+            @Parameter(parameterName = "tokenTransfer", parameterDes = "tokenTransfer Form", requestType = @TypeDescriptor(value = ContractTokenTransfer.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "txHash", description = "交易hash")
+    @ResponseData(name = "Return value", description = "Return aMapobject", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "txHash", description = "transactionhash")
     }))
     public RpcClientResult tokentransfer(ContractTokenTransfer form) {
         if (form == null) {
@@ -224,12 +224,12 @@ public class ContractResource {
     @POST
     @Path("/transfer2contract")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "从账户地址向合约地址转账(主链资产)的合约交易", order = 405)
+    @ApiOperation(description = "Transfer from account address to contract address(Main chain assets)Contract transactions", order = 405)
     @Parameters({
-            @Parameter(parameterName = "向合约地址转账", parameterDes = "向合约地址转账表单", requestType = @TypeDescriptor(value = ContractTransfer.class))
+            @Parameter(parameterName = "Transfer to the contracted address", parameterDes = "Transfer Form to Contract Address", requestType = @TypeDescriptor(value = ContractTransfer.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "txHash", description = "交易hash")
+    @ResponseData(name = "Return value", description = "Return aMapobject", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "txHash", description = "transactionhash")
     }))
     public RpcClientResult transferTocontract(ContractTransfer form) {
         if (form == null) {
@@ -257,12 +257,12 @@ public class ContractResource {
     @GET
     @Path("/balance/token/{contractAddress}/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "获取账户地址的指定合约的token余额", order = 406)
+    @ApiOperation(description = "Obtain the specified contract for the account addresstokenbalance", order = 406)
     @Parameters({
-            @Parameter(parameterName = "contractAddress", parameterDes = "合约地址"),
-            @Parameter(parameterName = "address", parameterDes = "账户地址")
+            @Parameter(parameterName = "contractAddress", parameterDes = "Contract address"),
+            @Parameter(parameterName = "address", parameterDes = "Account address")
     })
-    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = ContractTokenInfoDto.class))
+    @ResponseData(name = "Return value", responseType = @TypeDescriptor(value = ContractTokenInfoDto.class))
     public RpcClientResult getTokenBalance(@PathParam("contractAddress") String contractAddress, @PathParam("address") String address) {
         if (address == null) {
             return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "address is empty"));
@@ -275,11 +275,11 @@ public class ContractResource {
     @GET
     @Path("/info/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "获取智能合约详细信息", order = 407)
+    @ApiOperation(description = "Get detailed information about smart contracts", order = 407)
     @Parameters({
-            @Parameter(parameterName = "address", parameterDes = "合约地址")
+            @Parameter(parameterName = "address", parameterDes = "Contract address")
     })
-    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = ContractInfoDto.class))
+    @ResponseData(name = "Return value", responseType = @TypeDescriptor(value = ContractInfoDto.class))
     public RpcClientResult getContractDetailInfo(@PathParam("address") String address) {
         if (address == null) {
             return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "address is empty"));
@@ -292,11 +292,11 @@ public class ContractResource {
     @GET
     @Path("/result/{hash}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "获取智能合约执行结果", order = 408)
+    @ApiOperation(description = "Obtain the execution results of smart contracts", order = 408)
     @Parameters({
-            @Parameter(parameterName = "hash", parameterDes = "交易hash")
+            @Parameter(parameterName = "hash", parameterDes = "transactionhash")
     })
-    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = ContractResultDto.class))
+    @ResponseData(name = "Return value", responseType = @TypeDescriptor(value = ContractResultDto.class))
     public RpcClientResult getContractResult(@PathParam("hash") String hash) {
         if (hash == null) {
             return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "hash is empty"));
@@ -309,12 +309,12 @@ public class ContractResource {
     @POST
     @Path("/result/list")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "获取智能合约执行结果列表", order = 409)
+    @ApiOperation(description = "Obtain a list of smart contract execution results", order = 409)
     @Parameters({
-            @Parameter(parameterName = "获取智能合约执行结果列表", parameterDes = "获取智能合约执行结果列表表单", requestType = @TypeDescriptor(value = ContractResultListForm.class))
+            @Parameter(parameterName = "Obtain a list of smart contract execution results", parameterDes = "Get the smart contract execution result list form", requestType = @TypeDescriptor(value = ContractResultListForm.class))
     })
-    @ResponseData(name = "返回值", description = "返回交易的合约执行结果列表", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "hash1 or hash2 or hash3...", valueType = ContractResultDto.class, description = "以交易hash列表中的hash值作为key，这里的key name是动态的")
+    @ResponseData(name = "Return value", description = "Return the list of contract execution results for the transaction", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "hash1 or hash2 or hash3...", valueType = ContractResultDto.class, description = "TradinghashIn the listhashValue askeyHerekey nameIt is dynamic")
     }))
     public RpcClientResult getContractResultList(ContractResultListForm form) {
         if (form == null) {
@@ -329,11 +329,11 @@ public class ContractResource {
     @POST
     @Path("/constructor")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "获取合约代码构造函数", order = 410)
+    @ApiOperation(description = "Get contract code constructor", order = 410)
     @Parameters({
-        @Parameter(parameterName = "获取合约代码构造函数", parameterDes = "获取合约代码构造函数表单", requestType = @TypeDescriptor(value = ContractCode.class))
+        @Parameter(parameterName = "Get contract code constructor", parameterDes = "Get Contract Code Constructor Form", requestType = @TypeDescriptor(value = ContractCode.class))
     })
-    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = ContractConstructorInfoDto.class))
+    @ResponseData(name = "Return value", responseType = @TypeDescriptor(value = ContractConstructorInfoDto.class))
     public RpcClientResult getContractConstructor(ContractCode form) {
         if (form == null) {
             return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "form is empty"));
@@ -347,11 +347,11 @@ public class ContractResource {
     @POST
     @Path("/method")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "获取已发布合约指定函数的信息", order = 411)
+    @ApiOperation(description = "Obtain information on the specified function of the published contract", order = 411)
     @Parameters({
-        @Parameter(parameterName = "获取已发布合约指定函数的信息", parameterDes = "获取已发布合约指定函数的信息表单", requestType = @TypeDescriptor(value = ContractMethodForm.class))
+        @Parameter(parameterName = "Obtain information on the specified function of the published contract", parameterDes = "Get the information form for the specified function of the published contract", requestType = @TypeDescriptor(value = ContractMethodForm.class))
     })
-    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = ProgramMethod.class))
+    @ResponseData(name = "Return value", responseType = @TypeDescriptor(value = ProgramMethod.class))
     public RpcClientResult getContractMethod(ContractMethodForm form) {
         int chainId = config.getChainId();
         if (form == null) {
@@ -394,11 +394,11 @@ public class ContractResource {
     @POST
     @Path("/method/argstypes")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "获取已发布合约指定函数的参数类型列表", order = 412)
+    @ApiOperation(description = "Get a list of parameter types for specified functions in published contracts", order = 412)
     @Parameters({
-        @Parameter(parameterName = "获取已发布合约指定函数的参数类型列表", parameterDes = "获取已发布合约指定函数的参数类型表单", requestType = @TypeDescriptor(value = ContractMethodForm.class))
+        @Parameter(parameterName = "Get a list of parameter types for specified functions in published contracts", parameterDes = "Get the parameter type form for the function specified in the published contract", requestType = @TypeDescriptor(value = ContractMethodForm.class))
     })
-    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = List.class, collectionElement = String.class))
+    @ResponseData(name = "Return value", responseType = @TypeDescriptor(value = List.class, collectionElement = String.class))
     public RpcClientResult getContractMethodArgsTypes(ContractMethodForm form) {
         RpcClientResult clientResult = this.getContractMethod(form);
         if(clientResult.isFailed()) {
@@ -426,14 +426,14 @@ public class ContractResource {
     @POST
     @Path("/validate/create")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "验证发布合约", order = 413)
+    @ApiOperation(description = "Verify release contract", order = 413)
     @Parameters(value = {
-        @Parameter(parameterName = "验证发布合约", parameterDes = "验证发布合约表单", requestType = @TypeDescriptor(value = ContractValidateCreate.class))
+        @Parameter(parameterName = "Verify release contract", parameterDes = "Verify and publish the contract form", requestType = @TypeDescriptor(value = ContractValidateCreate.class))
     })
-    @ResponseData(name = "返回值", description = "返回消耗的gas值", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-        @Key(name = "success", valueType = boolean.class, description = "验证成功与否"),
-        @Key(name = "code", description = "验证失败的错误码"),
-        @Key(name = "msg", description = "验证失败的错误信息")
+    @ResponseData(name = "Return value", description = "Return consumedgasvalue", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+        @Key(name = "success", valueType = boolean.class, description = "Verification success or failure"),
+        @Key(name = "code", description = "Error code for verification failure"),
+        @Key(name = "msg", description = "Error message for verification failure")
     }))
     public RpcClientResult validateContractCreate(ContractValidateCreate form) {
         if (form == null) {
@@ -458,14 +458,14 @@ public class ContractResource {
     @POST
     @Path("/validate/call")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "验证调用合约", order = 414)
+    @ApiOperation(description = "Verify Call Contract", order = 414)
     @Parameters(value = {
-        @Parameter(parameterName = "验证调用合约", parameterDes = "验证调用合约表单", requestType = @TypeDescriptor(value = ContractValidateCall.class))
+        @Parameter(parameterName = "Verify Call Contract", parameterDes = "Verify Call Contract Form", requestType = @TypeDescriptor(value = ContractValidateCall.class))
     })
-    @ResponseData(name = "返回值", description = "返回消耗的gas值", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-        @Key(name = "success", valueType = boolean.class, description = "验证成功与否"),
-        @Key(name = "code", description = "验证失败的错误码"),
-        @Key(name = "msg", description = "验证失败的错误信息")
+    @ResponseData(name = "Return value", description = "Return consumedgasvalue", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+        @Key(name = "success", valueType = boolean.class, description = "Verification success or failure"),
+        @Key(name = "code", description = "Error code for verification failure"),
+        @Key(name = "msg", description = "Error message for verification failure")
     }))
     public RpcClientResult validateContractCall(ContractValidateCall form) {
         if (form == null) {
@@ -494,14 +494,14 @@ public class ContractResource {
     @POST
     @Path("/validate/delete")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "验证删除合约", order = 415)
+    @ApiOperation(description = "Verify deletion of contract", order = 415)
     @Parameters(value = {
-        @Parameter(parameterName = "验证删除合约", parameterDes = "验证删除合约表单", requestType = @TypeDescriptor(value = ContractValidateDelete.class))
+        @Parameter(parameterName = "Verify deletion of contract", parameterDes = "Verify Delete Contract Form", requestType = @TypeDescriptor(value = ContractValidateDelete.class))
     })
-    @ResponseData(name = "返回值", description = "返回消耗的gas值", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-        @Key(name = "success", valueType = boolean.class, description = "验证成功与否"),
-        @Key(name = "code", description = "验证失败的错误码"),
-        @Key(name = "msg", description = "验证失败的错误信息")
+    @ResponseData(name = "Return value", description = "Return consumedgasvalue", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+        @Key(name = "success", valueType = boolean.class, description = "Verification success or failure"),
+        @Key(name = "code", description = "Error code for verification failure"),
+        @Key(name = "msg", description = "Error message for verification failure")
     }))
     public RpcClientResult validateContractDelete(ContractValidateDelete form) {
         if (form == null) {
@@ -517,12 +517,12 @@ public class ContractResource {
     @POST
     @Path("/imputedgas/create")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "估算发布合约交易的GAS", order = 416)
+    @ApiOperation(description = "Estimate the release of contract transactionsGAS", order = 416)
     @Parameters(value = {
-        @Parameter(parameterName = "估算发布合约交易的GAS", parameterDes = "估算发布合约交易的GAS表单", requestType = @TypeDescriptor(value = ImputedGasContractCreate.class))
+        @Parameter(parameterName = "Estimate the release of contract transactionsGAS", parameterDes = "Estimate the release of contract transactionsGASform", requestType = @TypeDescriptor(value = ImputedGasContractCreate.class))
     })
-    @ResponseData(name = "返回值", description = "返回消耗的gas值", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-        @Key(name = "gasLimit", valueType = Long.class, description = "消耗的gas值，执行失败返回数值1")
+    @ResponseData(name = "Return value", description = "Return consumedgasvalue", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+        @Key(name = "gasLimit", valueType = Long.class, description = "ConsumablegasValue, return value for execution failure1")
     }))
     public RpcClientResult imputedContractCreateGas(ImputedGasContractCreate form) {
         if (form == null) {
@@ -539,12 +539,12 @@ public class ContractResource {
     @POST
     @Path("/imputedgas/call")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "估算调用合约交易的GAS", order = 417)
+    @ApiOperation(description = "Estimating the call to contract transactionsGAS", order = 417)
     @Parameters(value = {
-        @Parameter(parameterName = "估算调用合约交易的GAS", parameterDes = "估算调用合约交易的GAS表单", requestType = @TypeDescriptor(value = ImputedGasContractCall.class))
+        @Parameter(parameterName = "Estimating the call to contract transactionsGAS", parameterDes = "Estimating the call to contract transactionsGASform", requestType = @TypeDescriptor(value = ImputedGasContractCall.class))
     })
-    @ResponseData(name = "返回值", description = "返回消耗的gas值", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-        @Key(name = "gasLimit", valueType = Long.class, description = "消耗的gas值，执行失败返回数值1")
+    @ResponseData(name = "Return value", description = "Return consumedgasvalue", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+        @Key(name = "gasLimit", valueType = Long.class, description = "ConsumablegasValue, return value for execution failure1")
     }))
     public RpcClientResult imputedContractCallGas(ImputedGasContractCall form) {
         if (form == null) {
@@ -565,12 +565,12 @@ public class ContractResource {
     @POST
     @Path("/view")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "调用合约不上链方法", order = 418)
+    @ApiOperation(description = "Call the contract not on chain method", order = 418)
     @Parameters(value = {
-        @Parameter(parameterName = "调用合约不上链方法", parameterDes = "调用合约不上链方法表单", requestType = @TypeDescriptor(value = ContractViewCall.class))
+        @Parameter(parameterName = "Call the contract not on chain method", parameterDes = "Call contract non chain method form", requestType = @TypeDescriptor(value = ContractViewCall.class))
     })
-    @ResponseData(name = "返回值", description = "返回Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-        @Key(name = "result", description = "视图方法的调用结果")
+    @ResponseData(name = "Return value", description = "returnMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+        @Key(name = "result", description = "The call result of the view method")
     }))
     public RpcClientResult invokeView(ContractViewCall form) {
         if (form == null) {
@@ -587,12 +587,12 @@ public class ContractResource {
     @GET
     @Path("/codeHash/{contractAddress}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "获取合约的codeHash", order = 419)
+    @ApiOperation(description = "Obtaining contractscodeHash", order = 419)
     @Parameters(value = {
         @Parameter(parameterName = "contractAddress", parameterDes = "contractAddress")
     })
-    @ResponseData(name = "返回值", description = "返回Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-        @Key(name = "result", description = "合约的codeHash")
+    @ResponseData(name = "Return value", description = "returnMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+        @Key(name = "result", description = "ContractualcodeHash")
     }))
     public RpcClientResult codeHash(@PathParam("contractAddress") String contractAddress) {
         if (contractAddress == null) {
@@ -605,11 +605,11 @@ public class ContractResource {
     @GET
     @Path("/tx/{hash}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "获取智能合约交易详情", order = 420)
+    @ApiOperation(description = "Get transaction details of smart contracts", order = 420)
     @Parameters({
-            @Parameter(parameterName = "hash", parameterDes = "交易hash")
+            @Parameter(parameterName = "hash", parameterDes = "transactionhash")
     })
-    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = ContractTransactionDto.class))
+    @ResponseData(name = "Return value", responseType = @TypeDescriptor(value = ContractTransactionDto.class))
     public RpcClientResult getContractTx(@PathParam("hash") String hash) {
         if (hash == null) {
             return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "hash is empty"));
@@ -622,12 +622,12 @@ public class ContractResource {
     @POST
     @Path("/computeAddress")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "计算合约地址", order = 421)
+    @ApiOperation(description = "Calculate contract address", order = 421)
     @Parameters(value = {
-        @Parameter(parameterName = "计算合约地址", parameterDes = "计算合约地址", requestType = @TypeDescriptor(value = ContractComputeAddress.class))
+        @Parameter(parameterName = "Calculate contract address", parameterDes = "Calculate contract address", requestType = @TypeDescriptor(value = ContractComputeAddress.class))
     })
-    @ResponseData(name = "返回值", description = "返回Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-        @Key(name = "result", description = "合约的codeHash")
+    @ResponseData(name = "Return value", description = "returnMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+        @Key(name = "result", description = "ContractualcodeHash")
     }))
     public RpcClientResult computeAddress(ContractComputeAddress form) {
         if (form == null) {
@@ -641,12 +641,12 @@ public class ContractResource {
     @GET
     @Path("/contractCode/{contractAddress}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "获取合约的code", order = 422)
+    @ApiOperation(description = "Obtaining contractscode", order = 422)
     @Parameters(value = {
             @Parameter(parameterName = "contractAddress", parameterDes = "contractAddress")
     })
-    @ResponseData(name = "返回值", description = "返回Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "result", description = "合约的code")
+    @ResponseData(name = "Return value", description = "returnMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "result", description = "Contractualcode")
     }))
     public RpcClientResult contractCode(@PathParam("contractAddress") String contractAddress) {
         if (contractAddress == null) {
@@ -659,14 +659,14 @@ public class ContractResource {
     @POST
     @Path("/create/offline")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "离线组装 - 发布合约的交易", order = 450)
+    @ApiOperation(description = "Offline assembly - Transactions for publishing contracts", order = 450)
     @Parameters(value = {
-        @Parameter(parameterName = "发布合约离线交易", parameterDes = "发布合约离线交易表单", requestType = @TypeDescriptor(value = ContractCreateOffline.class))
+        @Parameter(parameterName = "Publish offline transactions for contracts", parameterDes = "Publish offline transaction forms for contracts", requestType = @TypeDescriptor(value = ContractCreateOffline.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-        @Key(name = "hash", description = "交易hash"),
-        @Key(name = "txHex", description = "交易序列化字符串"),
-        @Key(name = "contractAddress", description = "生成的合约地址")
+    @ResponseData(name = "Return value", description = "Return aMapobject", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+        @Key(name = "hash", description = "transactionhash"),
+        @Key(name = "txHex", description = "Transaction serialization string"),
+        @Key(name = "contractAddress", description = "Generated contract address")
     }))
     public RpcClientResult createTxOffline(ContractCreateOffline form) {
         io.nuls.core.basic.Result<Map> result = NulsSDKTool.createContractTxOffline(
@@ -685,16 +685,16 @@ public class ContractResource {
     @POST
     @Path("/call/offline")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "离线组装 - 调用合约的交易", order = 451)
+    @ApiOperation(description = "Offline assembly - Transaction calling contract", order = 451)
     @Parameters(value = {
-        @Parameter(parameterName = "调用合约离线交易", parameterDes = "调用合约离线交易表单", requestType = @TypeDescriptor(value = ContractCallOffline.class))
+        @Parameter(parameterName = "Call contract offline transaction", parameterDes = "Call contract offline transaction form", requestType = @TypeDescriptor(value = ContractCallOffline.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-        @Key(name = "hash", description = "交易hash"),
-        @Key(name = "txHex", description = "交易序列化字符串")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+        @Key(name = "hash", description = "transactionhash"),
+        @Key(name = "txHex", description = "Transaction serialization string")
     }))
     public RpcClientResult callTxOffline(ContractCallOffline form) {
-        // 增加多资产转入参数
+        // Add multi asset transfer parameters
         String[][] multyAssetValues = form.getMultyAssetValues();
         io.nuls.core.basic.Result<Map> result = NulsSDKTool.callContractTxOffline(
                 form.getSender(),
@@ -716,13 +716,13 @@ public class ContractResource {
     @POST
     @Path("/delete/offline")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "离线组装 - 删除合约交易", order = 452)
+    @ApiOperation(description = "Offline assembly - Delete contract transactions", order = 452)
     @Parameters(value = {
-        @Parameter(parameterName = "删除合约离线交易", parameterDes = "删除合约离线交易表单", requestType = @TypeDescriptor(value = ContractDeleteOffline.class))
+        @Parameter(parameterName = "Delete contract offline transaction", parameterDes = "Delete offline transaction form for contract", requestType = @TypeDescriptor(value = ContractDeleteOffline.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-        @Key(name = "hash", description = "交易hash"),
-        @Key(name = "txHex", description = "交易序列化字符串")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+        @Key(name = "hash", description = "transactionhash"),
+        @Key(name = "txHex", description = "Transaction serialization string")
     }))
     public RpcClientResult deleteTxOffline(ContractDeleteOffline form) {
         io.nuls.core.basic.Result<Map> result = NulsSDKTool.deleteContractTxOffline(
@@ -737,13 +737,13 @@ public class ContractResource {
     @POST
     @Path("/tokentransfer/offline")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "离线组装 - 合约token转账交易", order = 453)
+    @ApiOperation(description = "Offline assembly - contracttokenTransfer transaction", order = 453)
     @Parameters(value = {
-        @Parameter(parameterName = "token转账离线交易", parameterDes = "token转账离线交易表单", requestType = @TypeDescriptor(value = ContractTokenTransferOffline.class))
+        @Parameter(parameterName = "tokenOffline transfer transaction", parameterDes = "tokenTransfer Offline Transaction Form", requestType = @TypeDescriptor(value = ContractTokenTransferOffline.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-        @Key(name = "hash", description = "交易hash"),
-        @Key(name = "txHex", description = "交易序列化字符串")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+        @Key(name = "hash", description = "transactionhash"),
+        @Key(name = "txHex", description = "Transaction serialization string")
     }))
     public RpcClientResult tokenTransferOffline(ContractTokenTransferOffline form) {
         io.nuls.core.basic.Result<Map> result = NulsSDKTool.tokenTransferTxOffline(
@@ -761,13 +761,13 @@ public class ContractResource {
     @POST
     @Path("/transfer2contract/offline")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "离线组装 - 从账户地址向合约地址转账(主链资产)的合约交易", order = 454)
+    @ApiOperation(description = "Offline assembly - Transfer from account address to contract address(Main chain assets)Contract transactions", order = 454)
     @Parameters(value = {
-        @Parameter(parameterName = "向合约地址转账离线交易", parameterDes = "向合约地址转账离线交易表单", requestType = @TypeDescriptor(value = ContractTransferOffline.class))
+        @Parameter(parameterName = "Transfer offline transaction to contract address", parameterDes = "Transfer offline transaction form to contract address", requestType = @TypeDescriptor(value = ContractTransferOffline.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-        @Key(name = "hash", description = "交易hash"),
-        @Key(name = "txHex", description = "交易序列化字符串")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+        @Key(name = "hash", description = "transactionhash"),
+        @Key(name = "txHex", description = "Transaction serialization string")
     }))
     public RpcClientResult transferToContractOffline(ContractTransferOffline form) {
         io.nuls.core.basic.Result<Map> result = NulsSDKTool.transferToContractTxOffline(

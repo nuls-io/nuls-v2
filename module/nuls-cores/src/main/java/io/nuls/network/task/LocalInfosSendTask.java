@@ -38,7 +38,7 @@ import java.util.List;
 
 /**
  * Group event monitor
- * 测试 定时打印连接信息
+ * test Timed printing of connection information
  *
  * @author lan
  * @create 2018/11/14
@@ -53,7 +53,7 @@ public class LocalInfosSendTask implements Runnable {
         NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
         List<NodeGroup> nodeGroupList = nodeGroupManager.getNodeGroups();
         for (NodeGroup nodeGroup : nodeGroupList) {
-                //获取本地高度与hash
+                //Obtain local altitude andhash
                 BlockRpcServiceImpl blockRpcServiceImpl = SpringLiteContext.getBean(BlockRpcServiceImpl.class);
                 BestBlockInfo bestBlockInfo = blockRpcServiceImpl.getBestBlockHeader(nodeGroup.getChainId());
                 if (bestBlockInfo.getBlockHeight() == 0) {

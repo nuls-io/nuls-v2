@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-05 15:18
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Component
 public class CmdClientModule extends RpcModule {
@@ -108,7 +108,7 @@ public class CmdClientModule extends RpcModule {
         }
         ThreadUtils.createAndRunThread("cmd", () -> commandHandler.start());
         if(this.hasDependent(ModuleE.CC)){
-            //增加跨链资产信息获取
+            //Increase cross chain asset information acquisition
             AssetsUtil.initRegisteredChainInfo();
         }
 

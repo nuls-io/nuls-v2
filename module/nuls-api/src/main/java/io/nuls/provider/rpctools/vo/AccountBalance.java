@@ -6,29 +6,29 @@ import io.nuls.core.rpc.model.ApiModelProperty;
 /**
  * @Author: zhoulijun
  * @Time: 2019-06-12 17:33
- * @Description: 账户余额和nonce
+ * @Description: Account balance andnonce
  */
 @ApiModel
 public class AccountBalance {
-    @ApiModelProperty(description = "资产链ID")
+    @ApiModelProperty(description = "Asset ChainID")
     private int assetChainId;
-    @ApiModelProperty(description = "资产ID")
+    @ApiModelProperty(description = "assetID")
     private int assetId;
-    @ApiModelProperty(description = "合约地址")
+    @ApiModelProperty(description = "Contract address")
     private String contractAddress;
-    @ApiModelProperty(description = "总余额")
+    @ApiModelProperty(description = "Total balance")
     private String totalBalance;
-    @ApiModelProperty(description = "可用余额")
+    @ApiModelProperty(description = "Available balance")
     private String balance;
-    @ApiModelProperty(description = "时间锁定金额")
+    @ApiModelProperty(description = "Time lock amount")
     private String timeLock;
-    @ApiModelProperty(description = " 共识锁定金额")
+    @ApiModelProperty(description = " Consensus locking amount")
     private String consensusLock;
-    @ApiModelProperty(description = "总锁定余额")
+    @ApiModelProperty(description = "Total locked balance")
     private String freeze;
-    @ApiModelProperty(description = "账户资产nonce值")
+    @ApiModelProperty(description = "Account assetsnoncevalue")
     private String nonce;
-    @ApiModelProperty(description = "1：已确认的nonce值,0：未确认的nonce值")
+    @ApiModelProperty(description = "1：Confirmednoncevalue,0：unacknowledgednoncevalue")
     private int nonceType;
 
     public String getTotalBalance() {

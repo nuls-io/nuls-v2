@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 消息统一分发，各个有消息要处理的模块写具体实现
+ * Unified distribution of messages, specific implementation of modules with messages to be processed
  *
  *
  * @author captain
@@ -41,7 +41,7 @@ public final class MessageDispatcher extends BaseCmd {
     }
 
     /**
-     * 获取最新主链高度
+     * Get the latest main chain height
      *
      * @param params
      * @return

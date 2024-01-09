@@ -36,11 +36,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 区块头存储对象
+ * Block header storage object
  *
  * @author captain
  * @version 1.0
- * @date 18-12-10 下午3:50
+ * @date 18-12-10 afternoon3:50
  */
 public class BlockHeaderPo extends BaseNulsData {
 

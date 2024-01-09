@@ -29,7 +29,7 @@ package io.nuls.core.basic;
 import io.nuls.core.exception.NulsException;
 
 /**
- * 初始化对象接口
+ * Initialize Object Interface
  * Initialize the object interface.
  *
  * @author: Niels Wang
@@ -37,7 +37,7 @@ import io.nuls.core.exception.NulsException;
 public interface InitializingBean {
 
     /**
-     * 该方法在所有属性被设置之后调用，用于辅助对象初始化
+     * This method is called after all properties are set, and is used to initialize auxiliary objects
      * This method is invoked after all properties are set, and is used to assist object initialization.
      *
      * @throws NulsException

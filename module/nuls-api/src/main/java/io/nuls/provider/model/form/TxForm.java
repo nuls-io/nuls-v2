@@ -32,10 +32,10 @@ import io.nuls.core.rpc.model.ApiModelProperty;
  * @author: PierreLuo
  * @date: 2019-07-08
  */
-@ApiModel(name = "交易序列化字符串表单")
+@ApiModel(name = "Transaction Serialization String Form")
 public class TxForm {
 
-    @ApiModelProperty(description = "交易序列化16进制字符串", required = true)
+    @ApiModelProperty(description = "Transaction serialization16Hexadecimal Strings", required = true)
     private String txHex;
 
     public String getTxHex() {

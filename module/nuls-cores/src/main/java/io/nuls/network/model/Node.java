@@ -38,8 +38,8 @@ import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 
 /**
- * 一个peer节点可以同时为多条链使用，
- * 所以存在节点所属不同网络的状态维护
+ * ApeerNodes can be used by multiple chains simultaneously,
+ * So there is state maintenance for nodes belonging to different networks
  *
  * @author lan
  */
@@ -58,7 +58,7 @@ public class Node implements Dto {
 
     private int remotePort = 0;
     /**
-     * 跨链节点才有这个port，存跨链port ,type为OUT情况下此端口有值
+     * Only cross chain nodes have thisport, cross chain storageport ,typebyOUTIn this case, this port has a value
      */
     private int remoteCrossPort = 0;
 
@@ -69,12 +69,12 @@ public class Node implements Dto {
     private Channel channel;
 
     /**
-     * 节点外网Ip
+     * Node External NetworkIp
      */
     private String externalIp;
 
     /**
-     * 是否跨链连接
+     * Is there a cross chain connection
      */
     private boolean isCrossConnect;
 
@@ -98,11 +98,11 @@ public class Node implements Dto {
     private int connectStatus;
     private boolean isSeedNode = false;
     /**
-     * 是否分享过地址
+     * Have you ever shared an address
      */
     private boolean hadShare = false;
     /**
-     * 探测时间
+     * Detection time
      */
     private Long lastProbeTime = 0L;
     private EventListener registerListener;
@@ -308,7 +308,7 @@ public class Node implements Dto {
     }
 
     /**
-     * 设置peer信息
+     * set uppeerinformation
      *
      * @param version     long
      * @param blockHeight long

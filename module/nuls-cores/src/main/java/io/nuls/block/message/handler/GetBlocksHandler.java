@@ -38,11 +38,11 @@ import static io.nuls.block.constant.CommandConstant.BLOCK_MESSAGE;
 import static io.nuls.block.constant.CommandConstant.GET_BLOCKS_BY_HEIGHT_MESSAGE;
 
 /**
- * 处理收到的{@link HeightRangeMessage},用于区块的同步
+ * Process received{@link HeightRangeMessage},Used for block synchronization
  *
  * @author captain
  * @version 1.0
- * @date 18-11-14 下午4:23
+ * @date 18-11-14 afternoon4:23
  */
 @Component("GetBlocksHandlerV1")
 public class GetBlocksHandler implements MessageProcessor {

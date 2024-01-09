@@ -26,10 +26,10 @@ package io.nuls.contract.model.bo;
 
 // add by pierre at 2022/6/1 p14
 public class ContractInternalCreate extends ContractCreate{
-    private byte[] sender;// 创建者
-    private byte[] contractAddress;// 合约地址
-    private byte[] codeCopyBy;// 内部创建所依据的合约
-    private String[][] args;// 参数列表
+    private byte[] sender;// creator
+    private byte[] contractAddress;// Contract address
+    private byte[] codeCopyBy;// The contract on which internal creation is based
+    private String[][] args;// parameter list
 
     public byte[] getSender() {
         return sender;

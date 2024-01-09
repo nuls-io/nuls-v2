@@ -32,25 +32,25 @@ import io.nuls.core.constant.TxType;
 
 public enum BlockChainTxType {
     /**
-     * 注册链（必须同时注册一种资产）
+     * Registration Chain（Must register one asset at the same time）
      * Register chain(An asset must be registered at the same time)
      */
     REGISTER_CHAIN_AND_ASSET(TxType.REGISTER_CHAIN_AND_ASSET),
 
     /**
-     * 销毁链（删除最后一种资产的时候同时销毁链）
+     * Destruction chain（When deleting the last asset, destroy the chain at the same time）
      * Destroy chain (Destroy chain when the last asset is deleted)
      */
     DESTROY_ASSET_AND_CHAIN(TxType.DESTROY_CHAIN_AND_ASSET),
 
     /**
-     * 在链上新增资产
+     * Add assets on the chain
      * Add an asset to the chain
      */
     ADD_ASSET_TO_CHAIN(TxType.ADD_ASSET_TO_CHAIN),
 
     /**
-     * 从链上删除资产
+     * Remove assets from the chain
      * Delete an asset from the chain
      */
     REMOVE_ASSET_FROM_CHAIN(TxType.REMOVE_ASSET_FROM_CHAIN);

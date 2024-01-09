@@ -15,7 +15,7 @@ import io.nuls.core.core.annotation.Component;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-21 11:25
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Component
 public class GetAccountBalanceByPriKeyCase extends BaseTestCase<AccountBalanceInfo,String> {
@@ -31,7 +31,7 @@ public class GetAccountBalanceByPriKeyCase extends BaseTestCase<AccountBalanceIn
 
     @Override
     public String title() {
-        return "通过私钥查询余额";
+        return "Query balance through private key";
     }
 
     @Override

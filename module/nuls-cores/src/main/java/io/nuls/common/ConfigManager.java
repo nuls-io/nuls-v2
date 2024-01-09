@@ -39,7 +39,7 @@ import java.util.Map;
 import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 /**
- * 链管理类,负责各条链的初始化,运行,启动,参数维护等
+ * Chain management,Responsible for initializing each chain,working,start-up,Parameter maintenance, etc
  * Chain management class, responsible for the initialization, operation, start-up, parameter maintenance of each chain, etc.
  *
  */
@@ -50,7 +50,7 @@ public class ConfigManager {
     private NulsCoresConfig config;
 
     /**
-     * 初始化并启动链
+     * Initialize and start the chain
      * Initialize and start the chain
      */
     public void init() throws Exception {
@@ -70,14 +70,14 @@ public class ConfigManager {
         for (Map.Entry<Integer, ConfigBean> entry : configMap.entrySet()) {
             int chainId = entry.getKey();
             ProtocolLoader.load(chainId);
-            /*注册交易处理器*/
+            /*Register transaction processor*/
             boolean regSuccess = RegisterHelper.registerTx(chainId, ProtocolGroupManager.getCurrentProtocol(chainId));
             if (!regSuccess) {
                 LOG.error("RegisterHelper.registerTx fail..");
                 System.exit(-1);
             }
             LOG.info("regTxRpc complete.....");
-            //注册相关交易
+            //Registration related transactions
             regSuccess = RegisterHelper.registerProtocol(chainId);
             if (!regSuccess) {
                 LOG.error("RegisterHelper.registerProtocol fail..");
@@ -90,20 +90,20 @@ public class ConfigManager {
     }
 
     /**
-     * 读取配置文件创建并初始化链
+     * Read configuration file to create and initialize chain
      * Read the configuration file to create and initialize the chain
      */
     private Map<Integer, ConfigBean> configChain() {
         try {
             /*
-            读取数据库链信息配置
+            Read database chain information configuration
             Read database chain information configuration
              */
-            //Map<Integer, ConfigBean> configMap = configService.getList();// 取消持久化config
+            //Map<Integer, ConfigBean> configMap = configService.getList();// Cancel Persistenceconfig
             Map<Integer, ConfigBean> configMap = new HashMap<>();
 
             /*
-            如果系统是第一次运行，则本地数据库没有存储链信息，此时需要从配置文件读取主链配置信息
+            If the system is running for the first time and there is no storage chain information in the local database, it is necessary to read the main chain configuration information from the configuration file
             If the system is running for the first time, the local database does not have chain information,
             and the main chain configuration information needs to be read from the configuration file at this time.
             */
@@ -115,7 +115,7 @@ public class ConfigManager {
                     configBean.setVerifierSet(new HashSet<>());
                 }
 
-                // 取消持久化config
+                // Cancel Persistenceconfig
                 //boolean saveSuccess = configService.save(configBean, configBean.getChainId());
                 //if(saveSuccess){
                 //    configMap.put(configBean.getChainId(), configBean);

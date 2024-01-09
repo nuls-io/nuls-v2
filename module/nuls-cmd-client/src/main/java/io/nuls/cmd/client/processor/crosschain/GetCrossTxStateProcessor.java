@@ -20,7 +20,7 @@ import java.util.Set;
 /**
  * @Author: zhoulijun
  * @Time: 2019-05-07 13:47
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Component
 public class GetCrossTxStateProcessor extends CrossChainBaseProcessor {

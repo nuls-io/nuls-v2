@@ -5,12 +5,12 @@ import java.util.Map;
 public class ProtocolGroup {
 
     /**
-     * 当前协议版本
+     * Current protocol version
      */
     private short version;
 
     /**
-     * 所有协议版本(包括消息、交易映射)
+     * All protocol versions(Including messages、Transaction mapping)
      */
     private Map<Short, Protocol> protocolsMap;
 

@@ -9,12 +9,12 @@ import java.util.List;
 /**
  * @Author: zhoulijun
  * @Time: 2019-05-06 16:56
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class CreateCrossTxReq extends BaseReq {
 
     /**
-     * remark : 跨链转账交易
+     * remark : Cross chain transfer transactions
      */
 
     private String remark;

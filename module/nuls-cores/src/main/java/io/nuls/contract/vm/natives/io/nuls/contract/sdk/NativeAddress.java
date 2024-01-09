@@ -259,7 +259,7 @@ public class NativeAddress {
             frame.vm.getProgramExecutor().getAccount(from, assetChainId, assetId).addBalance(value.negate());
             ProgramTransfer programTransfer = new ProgramTransfer(from, to, value, assetChainId, assetId, lockedTime);
             frame.vm.getTransfers().add(programTransfer);
-            // add by pierre at 2019-11-23 标记 按合约执行顺序添加合约生成交易，按此顺序处理合约生成交易的业务 不确定 需要协议升级
+            // add by pierre at 2019-11-23 sign Add contract generation transactions in the order of contract execution, and process the business of contract generation transactions in this order Uncertain Protocol upgrade required
             frame.vm.getOrderedInnerTxs().add(programTransfer);
             // end code by pierre
         }
@@ -384,7 +384,7 @@ public class NativeAddress {
             frame.vm.getProgramExecutor().getAccount(programCall.getSender(), CHAIN_ID, ASSET_ID).addBalance(programCall.getValue().negate());
             ProgramTransfer programTransfer = new ProgramTransfer(programCall.getSender(), programCall.getContractAddress(), programCall.getValue(), CHAIN_ID, ASSET_ID, 0);
             frame.vm.getTransfers().add(programTransfer);
-            // add by pierre at 2019-11-23 标记 按合约执行顺序添加合约生成交易，按此顺序处理合约生成交易的业务 不确定 需要协议升级
+            // add by pierre at 2019-11-23 sign Add contract generation transactions in the order of contract execution, and process the business of contract generation transactions in this order Uncertain Protocol upgrade required
             frame.vm.getOrderedInnerTxs().add(programTransfer);
             // end code by pierre
         }
@@ -396,7 +396,7 @@ public class NativeAddress {
                 frame.vm.getProgramExecutor().getAccount(programCall.getSender(), assetChainId, assetId).addBalance(multyAssetValue.getValue().negate());
                 ProgramTransfer programTransfer = new ProgramTransfer(programCall.getSender(), programCall.getContractAddress(), multyAssetValue.getValue(), assetChainId, assetId, 0);
                 frame.vm.getTransfers().add(programTransfer);
-                // add by pierre at 2019-11-23 标记 按合约执行顺序添加合约生成交易，按此顺序处理合约生成交易的业务 不确定 需要协议升级
+                // add by pierre at 2019-11-23 sign Add contract generation transactions in the order of contract execution, and process the business of contract generation transactions in this order Uncertain Protocol upgrade required
                 frame.vm.getOrderedInnerTxs().add(programTransfer);
                 // end code by pierre
             }
@@ -417,7 +417,7 @@ public class NativeAddress {
 
 
         frame.vm.addGasUsed(programResult.getGasUsed());
-        // add by pierre at 2020-11-03 从`isSuccess`代码段中移出，可能影响兼容性，考虑协议升级
+        // add by pierre at 2020-11-03 from`isSuccess`Moving out of the code snippet may affect compatibility, consider protocol upgrade
         frame.vm.getDebugEvents().addAll(programResult.getDebugEvents());
         // end code by pierre
         if (programResult.isSuccess()) {
@@ -434,7 +434,7 @@ public class NativeAddress {
             // end code by pierre
             return programResult;
         } else {
-            // add by pierre at 2020-11-03 可能影响兼容性，考虑协议升级
+            // add by pierre at 2020-11-03 May affect compatibility, consider protocol upgrade
             Iterator<String> descendingIterator = programResult.getStackTraces().descendingIterator();
             while (descendingIterator.hasNext()) {
                 frame.vm.getStackTraces().addFirst(descendingIterator.next());

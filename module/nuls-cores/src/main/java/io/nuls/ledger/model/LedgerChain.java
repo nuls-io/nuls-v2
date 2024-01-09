@@ -5,7 +5,7 @@ import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.core.core.ioc.SpringLiteContext;
 
 /**
- * 链信息类
+ * Chain information class
  * Chain information class
  *
  * @author lanjinsheng

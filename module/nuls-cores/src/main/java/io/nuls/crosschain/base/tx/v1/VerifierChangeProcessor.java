@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 验证人变更处理类
+ * Verifier change handling class
  * Verifier Change Handling Class
  *
  * @author tag

@@ -26,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import static io.nuls.core.rpc.info.Constants.CMD_NOT_FOUND;
 
 /**
- * 消息处理器
+ * Message processor
  * Receive message processor
  *
  * @author tag
@@ -37,11 +37,11 @@ public class RequestMessageProcessor {
     public static final Map<String, Class<?>> classMap = new ConcurrentHashMap<>();
 
     /**
-     * 确认握手成功
+     * Confirm successful handshake
      * Confirm successful handshake
      *
-     * @param channel 用于发送消息 / Used to send message
-     * @throws JsonProcessingException JSON解析错误 / JSON parsing error
+     * @param channel Used for sending messages / Used to send message
+     * @throws JsonProcessingException JSONParsing error / JSON parsing error
      */
     public static void negotiateConnectionResponse(Channel channel, Message message) throws JsonProcessingException {
         NegotiateConnectionResponse negotiateConnectionResponse = new NegotiateConnectionResponse();
@@ -53,19 +53,19 @@ public class RequestMessageProcessor {
         rspMsg.setMessageData(negotiateConnectionResponse);
         ConnectManager.sendMessage(channel, SerializeUtil.getBuffer(JSONUtils.obj2ByteArray(rspMsg)));
 
-        //握手成功之后保存channel与角色的对应信息
+        //Save after successful handshakechannelCorresponding information with roles
         NegotiateConnection negotiateConnection = JSONUtils.map2pojo((Map) message.getMessageData(), NegotiateConnection.class);
         ConnectManager.cacheConnect(negotiateConnection.getAbbreviation(), channel, false);
     }
 
 
     /**
-     * 确认收到Request
+     * Confirm receiptRequest
      * Confirm receipt of Request
      *
-     * @param channel   用于发送消息 / Used to send message
-     * @param messageId 原始消息ID / The origin message ID
-     * @throws JsonProcessingException JSON解析错误 / JSON parsing error
+     * @param channel   Used for sending messages / Used to send message
+     * @param messageId Original messageID / The origin message ID
+     * @throws JsonProcessingException JSONParsing error / JSON parsing error
      */
     public static void ack(Channel channel, String messageId) throws JsonProcessingException {
         Ack ack = new Ack();
@@ -76,11 +76,11 @@ public class RequestMessageProcessor {
     }
 
     /**
-     * 服务还未启动完成
+     * The service has not yet been started and completed
      * The service has not been started yet.
      *
-     * @param channel   链接通道
-     * @param messageId 请求ID
+     * @param channel   Link Channel
+     * @param messageId requestID
      */
     public static void serviceNotStarted(Channel channel, String messageId) throws JsonProcessingException {
         Response response = MessageUtil.newFailResponse(messageId, "Service not started!");
@@ -90,11 +90,11 @@ public class RequestMessageProcessor {
     }
 
     /**
-     * 取消订阅
+     * Unsubscribe
      * For Unsubscribe
      *
-     * @param message 取消订阅的消息体 / Unsubscribe message
-     * @serialData 取消订阅的客户端连接信息/Unsubscribed client connection information
+     * @param message Unsubscribed message body / Unsubscribe message
+     * @serialData Unsubscribed client connection information/Unsubscribed client connection information
      */
     public static synchronized void unsubscribe(ConnectData channelData, Message message) {
         Unsubscribe unsubscribe = JSONUtils.map2pojo((Map) message.getMessageData(), Unsubscribe.class);
@@ -104,24 +104,24 @@ public class RequestMessageProcessor {
     }
 
     /**
-     * 处理Request，返回bool类型表示处理完之后是保留还是丢弃
+     * handleRequest, return toboolType represents whether to keep or discard after processing
      * After current processing, do need to keep the Request information and wait for the next processing?
      * True: keep, False: remove
      *
-     * @param channelData 用于发送消息 / Used to send message
-     * @param message     原始消息 / The origin message
-     * @param request     请求 / The request
+     * @param channelData Used for sending messages / Used to send message
+     * @param message     Original message / The origin message
+     * @param request     request / The request
      * @return boolean
      */
     public static boolean responseWithPeriod(ConnectData channelData, Message message, Request request) {
         /*
-        计算如何处理该Request
+        Calculate how to handle thisRequest
         Calculate how to handle the Request
          */
         int nextProcess = nextProcess(channelData, message, Integer.parseInt(request.getSubscriptionPeriod()));
         try {
             /*
-            nextProcess的具体含义参考"Constants.INVOKE_EXECUTE_KEEP"的注释
+            nextProcessFor specific meanings, please refer to"Constants.INVOKE_EXECUTE_KEEP"Annotations for
             The specific meaning of nextProcess refers to the annotation of "Constants.INVOKE_EXECUTE_KEEP"
              */
             switch (nextProcess) {
@@ -148,14 +148,14 @@ public class RequestMessageProcessor {
 
 
     /**
-     * 处理Request，自动调用正确的方法，返回结果
+     * handleRequestAutomatically call the correct method and return the result
      * Processing Request, automatically calling the correct method, returning the result
      *
-     * @param channel        用于发送消息 / Used to send message
-     * @param requestMethods 请求的方法集合 / The collections of request method
-     * @param messageId      原始消息ID / The origin message ID
+     * @param channel        Used for sending messages / Used to send message
+     * @param requestMethods Collection of requested methods / The collections of request method
+     * @param messageId      Original messageID / The origin message ID
      * @param isSubscribe    is subscribe message
-     * @throws JsonProcessingException 服务器端处理异常
+     * @throws JsonProcessingException Server side processing exception
      */
     @SuppressWarnings("unchecked")
     public static void callCommandsWithPeriod(Channel channel, Map requestMethods, String messageId, boolean isSubscribe) throws JsonProcessingException {
@@ -165,13 +165,13 @@ public class RequestMessageProcessor {
             Map params = entry.getValue();
 
             /*
-            构造返回的消息对象
+            Construct the returned message object
             Construct the returned message object
              */
             Response response = MessageUtil.newResponse(messageId, Response.FAIL, "");
             try {
                  /*
-                从本地注册的cmd中得到对应的方法
+                Registered locallycmdObtain the corresponding method in
                 Get the corresponding method from the locally registered CMD
                 */
                 CmdDetail cmdDetail = params == null || params.get(Constants.VERSION_KEY_STR) == null
@@ -179,7 +179,7 @@ public class RequestMessageProcessor {
                         : ConnectManager.getLocalInvokeCmd(method, Double.parseDouble(params.get(Constants.VERSION_KEY_STR).toString()));
 
                 /*
-                找不到本地方法，则返回"CMD_NOT_FOUND"错误
+                If the local method cannot be found, return"CMD_NOT_FOUND"error
                 If the local method cannot be found, the "CMD_NOT_FOUND" error is returned
                 */
                 if (cmdDetail == null) {
@@ -192,7 +192,7 @@ public class RequestMessageProcessor {
                 }
 
                 /*
-                根据注册信息进行参数的基础验证
+                Basic validation of parameters based on registration information
                 Basic verification of parameters based on registration information
                 */
                 String validationString = paramsValidation(cmdDetail, params);
@@ -209,7 +209,7 @@ public class RequestMessageProcessor {
                 ConnectManager.sendMessage(channel, SerializeUtil.getBuffer(JSONUtils.obj2ByteArray(rspMessage)));
 
                 /*
-                执行成功之后判断该接口是否被订阅过，如果被订阅则改变该接口触发次数
+                After successful execution, check whether the interface has been subscribed. If subscribed, change the number of times the interface is triggered
                 After successful execution, determine if the interface has been subscribed, and if subscribed, change the number of triggers for the interface
                 */
                 if (ConnectManager.SUBSCRIBE_COUNT.containsKey(method) && isSubscribe) {
@@ -227,11 +227,11 @@ public class RequestMessageProcessor {
     }
 
     /**
-     * 处理Request，不返回结果
+     * handleRequest, do not return results
      * Processing Request, automatically calling the correct method, returning the result
      *
-     * @param requestMethods 请求的方法集合 / The collections of request method
-     * @throws JsonProcessingException 服务器端处理异常
+     * @param requestMethods Collection of requested methods / The collections of request method
+     * @throws JsonProcessingException Server side processing exception
      */
     @SuppressWarnings("unchecked")
     public static void callCommands(Map requestMethods) throws JsonProcessingException {
@@ -241,7 +241,7 @@ public class RequestMessageProcessor {
             Map params = entry.getValue();
             try {
                  /*
-                从本地注册的cmd中得到对应的方法
+                Registered locallycmdObtain the corresponding method in
                 Get the corresponding method from the locally registered CMD
                 */
                 CmdDetail cmdDetail = params == null || params.get(Constants.VERSION_KEY_STR) == null
@@ -249,7 +249,7 @@ public class RequestMessageProcessor {
                         : ConnectManager.getLocalInvokeCmd(method, Double.parseDouble(params.get(Constants.VERSION_KEY_STR).toString()));
 
                 /*
-                找不到本地方法，则返回"CMD_NOT_FOUND"错误
+                If the local method cannot be found, return"CMD_NOT_FOUND"error
                 If the local method cannot be found, the "CMD_NOT_FOUND" error is returned
                 */
                 if (cmdDetail == null) {
@@ -258,7 +258,7 @@ public class RequestMessageProcessor {
                 }
 
                 /*
-                根据注册信息进行参数的基础验证
+                Basic validation of parameters based on registration information
                 Basic verification of parameters based on registration information
                 */
                 String validationString = paramsValidation(cmdDetail, params);
@@ -274,14 +274,14 @@ public class RequestMessageProcessor {
     }
 
     /**
-     * 调用本地方法，把结果封装为Message对象，通过Websocket返回
+     * Call local methods and encapsulate the results asMessageObject, throughWebsocketreturn
      * Call the local method, encapsulate the result as a Message object, and return it through Websocket
      *
      * @param cmdDetail CmdDetail
      * @param params    Map, {key, value}
-     * @param messageId 原始消息ID / The origin message ID
+     * @param messageId Original messageID / The origin message ID
      * @return Message
-     * @throws Exception 调用的方法返回的任何异常 / Any exception returned by the invoked method
+     * @throws Exception Any exceptions returned by the called method / Any exception returned by the invoked method
      */
     private static Message execute(CmdDetail cmdDetail, Map params, String messageId) throws Exception {
         long startTimemillis = NulsDateUtils.getCurrentTimeMillis();
@@ -298,11 +298,11 @@ public class RequestMessageProcessor {
 
 
     /**
-     * 处理Request，如果达到EventCount的发送条件，则发送
+     * handleRequestIf it reachesEventCountIf the sending conditions are met, then send
      * Processing Request, if EventCount's sending condition is met, then send
      *
-     * @param channel      用于发送消息 / Used to send message
-     * @param realResponse 订阅事件触发，返回数据
+     * @param channel      Used for sending messages / Used to send message
+     * @param realResponse Subscription event triggered, returning data
      */
     public static void responseWithEventCount(Channel channel, Response realResponse) {
         Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
@@ -317,18 +317,18 @@ public class RequestMessageProcessor {
 
 
     /**
-     * 计算如何处理该Request
+     * Calculate how to handle thisRequest
      * Calculate how to handle the Request
      *
-     * @param channelData        服务器端链接信息 / Server-side Link Information
-     * @param message            原始消息 / The origin message
+     * @param channelData        Server side link information / Server-side Link Information
+     * @param message            Original message / The origin message
      * @param subscriptionPeriod Unit: second
      * @return int
      */
     private static int nextProcess(ConnectData channelData, Message message, int subscriptionPeriod) {
         if (subscriptionPeriod == 0) {
             /*
-            不需要重复执行，返回EXECUTE_AND_REMOVE（执行，然后丢弃）
+            No need to execute repeatedly, returnEXECUTE_AND_REMOVE（Execute and then discard）
             No duplication of execution is required, return EXECUTE_AND_REMOVE (execute, then discard)
              */
             return Constants.EXECUTE_AND_REMOVE;
@@ -336,7 +336,7 @@ public class RequestMessageProcessor {
 
         if (!channelData.getCmdInvokeTime().containsKey(message)) {
             /*
-            第一次执行，设置当前时间为执行时间，返回EXECUTE_AND_KEEP（执行，然后保留）
+            First execution, set the current time as the execution time, returnEXECUTE_AND_KEEP（Execute and then retain）
             First execution, set the current time as execution time, return EXECUTE_AND_KEEP (execution, then keep)
              */
             channelData.getCmdInvokeTime().put(message, 0L);
@@ -345,14 +345,14 @@ public class RequestMessageProcessor {
 
         if (NulsDateUtils.getCurrentTimeMillis() - channelData.getCmdInvokeTime().get(message) < subscriptionPeriod * Constants.MILLIS_PER_SECOND) {
             /*
-            没有达到执行条件，返回SKIP_AND_KEEP（不执行，然后保留）
+            Execution conditions not met, returnSKIP_AND_KEEP（Do not execute, then keep）
             If the execution condition is not met, return SKIP_AND_KEEP (not executed, then keep)
              */
             return Constants.SKIP_AND_KEEP;
         }
 
         /*
-        以上都不是，返回EXECUTE_AND_KEEP（执行，然后保留）
+        None of the above, returnEXECUTE_AND_KEEP（Execute and then retain）
         None of the above, return EXECUTE_AND_KEEP (execute, then keep)
          */
         return Constants.EXECUTE_AND_KEEP;
@@ -361,7 +361,7 @@ public class RequestMessageProcessor {
 
 
     /**
-     * 验证参数的有效性
+     * Verify the validity of parameters
      * Verify the validity of the parameters
      *
      * @param cmdDetail CmdDetail
@@ -373,7 +373,7 @@ public class RequestMessageProcessor {
         List<CmdParameter> cmdParameterList = cmdDetail.getParameters();
         for (CmdParameter cmdParameter : cmdParameterList) {
             /*
-            如果定义了参数格式，但是参数为空，返回错误
+            If a parameter format is defined but the parameter is empty, an error is returned
             If the parameter format is specified, but the incoming parameter is empty, an error message is returned.
              */
             if (!StringUtils.isNull(cmdParameter.getParameterValidRange()) || !StringUtils.isNull(cmdParameter.getParameterValidRegExp())) {
@@ -383,7 +383,7 @@ public class RequestMessageProcessor {
             }
 
             /*
-            验证参数是否在定义的范围内
+            Verify if the parameters are within the defined range
             Verify that the parameters are within the defined range
              */
             if (!paramsRangeValidation(cmdParameter, params)) {
@@ -391,7 +391,7 @@ public class RequestMessageProcessor {
             }
 
             /*
-            验证参数是否匹配定义的正则
+            Verify whether the parameters match the defined regularity
             Verify that parameters match defined regular expressions
              */
             if (!paramsRegexValidation(cmdParameter, params)) {
@@ -404,7 +404,7 @@ public class RequestMessageProcessor {
 
 
     /**
-     * 验证参数是否在定义的范围内
+     * Verify if the parameters are within the defined range
      * Verify that the range is correct
      *
      * @param cmdParameter Parameter format
@@ -413,7 +413,7 @@ public class RequestMessageProcessor {
      */
     private static boolean paramsRangeValidation(CmdParameter cmdParameter, Map params) {
         /*
-        没有设定范围，验证为真
+        No range set, verify as true
         If no range is set, Validation is true.
          */
         if (StringUtils.isNull(cmdParameter.getParameterValidRange())) {
@@ -421,7 +421,7 @@ public class RequestMessageProcessor {
         }
 
         /*
-        设定范围格式错误，验证为真
+        Format error in setting range, verify as true
         If the format in the Annotation is incorrect, Validation is true.
          */
         if (!cmdParameter.getParameterValidRange().matches(Constants.RANGE_REGEX)) {
@@ -429,7 +429,7 @@ public class RequestMessageProcessor {
         }
 
         /*
-        参数为空，验证为假
+        Parameter is empty, validation is false
         The parameter is empty, Validation is false
          */
         if (params == null || params.get(cmdParameter.getParameterName()) == null) {
@@ -437,7 +437,7 @@ public class RequestMessageProcessor {
         }
 
         /*
-        获取设定的范围
+        Get the set range
         Get the set range
          */
         String range = cmdParameter.getParameterValidRange();
@@ -453,14 +453,14 @@ public class RequestMessageProcessor {
 
         BigDecimal value = new BigDecimal(params.get(cmdParameter.getParameterName()).toString());
         /*
-        判断是否在范围内
+        Determine if it is within the range
         Judge whether it is within the range
          */
         return value.compareTo(start) >= 0 && value.compareTo(end) <= 0;
     }
 
     /**
-     * 验证参数是否匹配定义的正则
+     * Verify whether the parameters match the defined regularity
      * Verify that parameters match defined regular expressions
      *
      * @param cmdParameter Parameter format
@@ -469,7 +469,7 @@ public class RequestMessageProcessor {
      */
     private static boolean paramsRegexValidation(CmdParameter cmdParameter, Map params) {
         /*
-        没有设定正则，验证为真
+        No regularization set, verify as true
         If no regex is set, Validation is true.
          */
         if (StringUtils.isNull(cmdParameter.getParameterValidRegExp())) {
@@ -477,7 +477,7 @@ public class RequestMessageProcessor {
         }
 
         /*
-        参数为空，验证为假
+        Parameter is empty, validation is false
         The parameter is empty, Validation is false
          */
         if (params == null || params.get(cmdParameter.getParameterName()) == null) {
@@ -485,7 +485,7 @@ public class RequestMessageProcessor {
         }
 
         /*
-        判断是否匹配正则表达式
+        Determine whether to match regular expressions
         Verify that parameters match defined regular expressions
          */
         String value = params.get(cmdParameter.getParameterName()).toString();

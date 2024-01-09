@@ -76,7 +76,7 @@ public class LoadLargeContractTest {
 
     @Before
     public void setUp() {
-        // 加载协议升级的数据
+        // Load protocol upgrade data
         ContractContext.CHAIN_ID = chainId;
         ContractContext.ASSET_ID = assetId;
 
@@ -196,7 +196,7 @@ public class LoadLargeContractTest {
                         display = true;
                     }
                 } else if (value.endsWith(",g")) {
-                    // list集合
+                    // listaggregate
                     DataWord dw = getDataWord(root, contractBytes, value);
                     Map<String, Object> _map = JSONUtils.json2map(dw.asString());
                     int listSize = Integer.parseInt(_map.get("size").toString().substring(2));
@@ -205,7 +205,7 @@ public class LoadLargeContractTest {
                         display = true;
                     }
                 } else if (value.endsWith(",Ljava/util/HashSet;")) {
-                    // set集合
+                    // setaggregate
                     DataWord dw = getDataWord(root, contractBytes, value);
                     Map<String, Object> _map = JSONUtils.json2map(dw.asString());
                     dw = getDataWord(root, contractBytes, _map.get("map").toString());

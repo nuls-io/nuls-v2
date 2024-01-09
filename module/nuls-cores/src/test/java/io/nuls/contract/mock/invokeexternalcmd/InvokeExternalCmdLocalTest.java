@@ -101,7 +101,7 @@ public class InvokeExternalCmdLocalTest {
         cmdRegisterMap.put("returnStringArray", new CmdRegister("sc", "returnStringArray", CmdRegisterMode.QUERY_DATA, List.of("name", "age"), CmdRegisterReturnType.STRING_ARRAY));
         cmdRegisterMap.put("returnString2Array", new CmdRegister("sc", "returnString2Array", CmdRegisterMode.QUERY_DATA, List.of("name", "age"), CmdRegisterReturnType.STRING_TWO_DIMENSIONAL_ARRAY));
         BeanUtilTest.setBean(cmdRegisterManager, chainManager);
-        // 默认的requestAndResponseInterface
+        // DefaultrequestAndResponseInterface
         BeanUtilTest.setBean(cmdRegisterManager, "requestAndResponseInterface", new RequestAndResponseInterface() {
             @Override
             public Response requestAndResponse(String moduleCode, String cmdName, Map args) throws Exception {
@@ -211,7 +211,7 @@ public class InvokeExternalCmdLocalTest {
 
     @Test
     public void testCallReturnString() throws IOException {
-        // 自定义的requestAndResponseInterface
+        // CustomizedrequestAndResponseInterface
         BeanUtilTest.setBean(cmdRegisterManager, "requestAndResponseInterface", new RequestAndResponseInterface() {
             @Override
             public Response requestAndResponse(String moduleCode, String cmdName, Map args) throws Exception {
@@ -260,7 +260,7 @@ public class InvokeExternalCmdLocalTest {
 
     @Test
     public void testCallReturnStringArray() throws IOException {
-        // 自定义的requestAndResponseInterface
+        // CustomizedrequestAndResponseInterface
         BeanUtilTest.setBean(cmdRegisterManager, "requestAndResponseInterface", new RequestAndResponseInterface() {
             @Override
             public Response requestAndResponse(String moduleCode, String cmdName, Map args) throws Exception {
@@ -305,7 +305,7 @@ public class InvokeExternalCmdLocalTest {
 
     @Test
     public void testCallReturnStringArrayList() throws IOException {
-        // 自定义的requestAndResponseInterface
+        // CustomizedrequestAndResponseInterface
         BeanUtilTest.setBean(cmdRegisterManager, "requestAndResponseInterface", new RequestAndResponseInterface() {
             @Override
             public Response requestAndResponse(String moduleCode, String cmdName, Map args) throws Exception {
@@ -350,7 +350,7 @@ public class InvokeExternalCmdLocalTest {
 
     @Test
     public void testCallReturnStringTwoDimensionalArray() throws IOException {
-        // 自定义的requestAndResponseInterface
+        // CustomizedrequestAndResponseInterface
         BeanUtilTest.setBean(cmdRegisterManager, "requestAndResponseInterface", new RequestAndResponseInterface() {
             @Override
             public Response requestAndResponse(String moduleCode, String cmdName, Map args) throws Exception {
@@ -413,7 +413,7 @@ public class InvokeExternalCmdLocalTest {
 
     @Test
     public void testCallReturnStringTwoDimensionalArrayObject() throws IOException {
-        // 自定义的requestAndResponseInterface
+        // CustomizedrequestAndResponseInterface
         BeanUtilTest.setBean(cmdRegisterManager, "requestAndResponseInterface", new RequestAndResponseInterface() {
             @Override
             public Response requestAndResponse(String moduleCode, String cmdName, Map args) throws Exception {
@@ -476,7 +476,7 @@ public class InvokeExternalCmdLocalTest {
 
     @Test
     public void testCallReturnStringTwoDimensionalArrayList() throws IOException {
-        // 自定义的requestAndResponseInterface
+        // CustomizedrequestAndResponseInterface
         BeanUtilTest.setBean(cmdRegisterManager, "requestAndResponseInterface", new RequestAndResponseInterface() {
             @Override
             public Response requestAndResponse(String moduleCode, String cmdName, Map args) throws Exception {
@@ -558,7 +558,7 @@ public class InvokeExternalCmdLocalTest {
 
     @Test
     public void testReturnStringNewTx() throws IOException {
-        // 自定义的requestAndResponseInterface
+        // CustomizedrequestAndResponseInterface
         BeanUtilTest.setBean(cmdRegisterManager, "requestAndResponseInterface", new RequestAndResponseInterface() {
             @Override
             public Response requestAndResponse(String moduleCode, String cmdName, Map args) throws Exception {

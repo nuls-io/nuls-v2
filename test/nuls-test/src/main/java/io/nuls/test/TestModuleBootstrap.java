@@ -9,7 +9,7 @@ import io.nuls.core.core.config.ConfigurationLoader;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-20 14:33
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class TestModuleBootstrap {
 

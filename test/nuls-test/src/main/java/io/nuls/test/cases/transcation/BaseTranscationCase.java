@@ -9,7 +9,7 @@ import io.nuls.core.core.annotation.Autowired;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-21 10:13
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public abstract class BaseTranscationCase<T,P> extends BaseTestCase<T,P> {
 

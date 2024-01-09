@@ -14,7 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * 已注册链信息
+ * Registered Chain Information
  * @author tag
  * @date 2019/5/17
  */

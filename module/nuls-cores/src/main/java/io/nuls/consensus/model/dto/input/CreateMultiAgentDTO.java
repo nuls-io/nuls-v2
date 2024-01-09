@@ -1,6 +1,6 @@
 package io.nuls.consensus.model.dto.input;
 /**
- * 多签账户创建节点参数
+ * Multiple account creation node parameters
  * Multi-Sign Account Creation Node Parameters
  *
  * @author tag

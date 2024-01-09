@@ -48,11 +48,11 @@ import static io.nuls.block.constant.BlockForwardEnum.ERROR;
 import static io.nuls.block.constant.CommandConstant.GET_TXGROUP_MESSAGE;
 
 /**
- * 区块广播过程中,获取本地没有的交易
+ * During the process of block broadcasting,Obtain transactions that are not available locally
  *
  * @author captain
  * @version 1.0
- * @date 19-3-28 下午3:54
+ * @date 19-3-28 afternoon3:54
  */
 public class TxGroupRequestor extends BaseMonitor {
 

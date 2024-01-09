@@ -27,51 +27,51 @@ import io.nuls.protocol.model.po.StatisticsInfo;
 import java.util.List;
 
 /**
- * 版本统计信息存储管理类
+ * Version statistics information storage management class
  * Configuration Information Storage Management Class
  *
  * @author captain
  * @version 1.0
- * @date 19-1-25 下午3:02
+ * @date 19-1-25 afternoon3:02
  */
 public interface StatisticsStorageService {
     /**
-     * 保存指定链的版本统计信息
+     * Save version statistics for the specified chain
      * Save configuration information for the specified chain
      *
-     * @param statisticsInfo 版本统计类/config bean
-     * @param chainId        链Id/chain id
-     * @return 保存是否成功/Is preservation successful?
+     * @param statisticsInfo Version statistics class/config bean
+     * @param chainId        chainId/chain id
+     * @return Whether the save was successful/Is preservation successful?
      * @throws
      */
     boolean save(int chainId, StatisticsInfo statisticsInfo);
 
     /**
-     * 查询某条链的版本统计信息
+     * Query version statistics of a certain chain
      * Query the configuration information of a chain
      *
-     * @param chainId 链Id/chain id
-     * @param height 区块高度
-     * @return 版本统计信息类/config bean
+     * @param chainId chainId/chain id
+     * @param height block height
+     * @return Version statistics information class/config bean
      */
     StatisticsInfo get(int chainId, long height);
 
     /**
-     * 删除某条链的版本统计信息
+     * Delete version statistics for a certain chain
      * Delete configuration information for a chain
      *
-     * @param chainId 链Id/chain id
-     * @param height 区块高度
-     * @return 删除是否成功/Delete success
+     * @param chainId chainId/chain id
+     * @param height block height
+     * @return Whether the deletion was successful/Delete success
      */
     boolean delete(int chainId, long height);
 
     /**
-     * 获取当前节点所有的链信息
+     * Obtain all chain information of the current node
      * Get all the chain information of the current node
      *
-     * @param chainId 链Id/chain id
-     * @return 节点信息列表/Node information list
+     * @param chainId chainId/chain id
+     * @return Node Information List/Node information list
      */
     List<StatisticsInfo> getList(int chainId);
 }

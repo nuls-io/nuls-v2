@@ -12,12 +12,12 @@ public final class ErrorCodeConstants {
     public static final ErrorCode  SYSTEM_ERR = ErrorCode.init("10001");
 
     /**
-     * 参数错误
+     * Parameter error
      */
     public static final ErrorCode PARAM_ERR = ErrorCode.init("10012");
 
     /**
-     * 数据格式异常
+     * Abnormal data format
      */
     public static final ErrorCode DATA_ERROR = ErrorCode.init("10014");
 

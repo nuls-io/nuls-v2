@@ -1,7 +1,7 @@
 package io.nuls.consensus.model.dto.input;
 
 /**
- * 查询委托信息参数
+ * Query commission information parameters
  * Query delegation information parameters
  *
  * @author tag

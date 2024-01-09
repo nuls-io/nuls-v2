@@ -33,7 +33,7 @@ import io.nuls.ledger.model.po.AccountState;
  */
 public interface FreezeStateService {
     /**
-     * 重新结算冻结金额
+     * Re settle frozen amount
      * @param addressChainId
      * @param accountState
      * @return

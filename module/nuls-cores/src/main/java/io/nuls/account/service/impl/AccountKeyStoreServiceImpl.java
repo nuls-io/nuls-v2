@@ -83,7 +83,7 @@ public class AccountKeyStoreServiceImpl implements AccountKeyStoreService {
     }
 
     /**
-     * 账户转为keystore
+     * Account converted tokeystore
      *
      * @param chainId
      * @param address
@@ -101,12 +101,12 @@ public class AccountKeyStoreServiceImpl implements AccountKeyStoreService {
             throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
         AccountKeyStore accountKeyStore = new AccountKeyStore();
-        //验证密码
+        //Verify password
         //verify the password
         if (!account.validatePassword(password)) {
             throw new NulsRuntimeException(AccountErrorCode.PASSWORD_IS_WRONG);
         }
-        //如果账户加密,不导出明文私钥
+        //If the account is encrypted,Do not export plaintext private keys
         //if the account is encrypted , the plaintext private key is not exported
         if (account.isEncrypted()) {
             accountKeyStore.setEncryptedPrivateKey(HexUtil.encode(account.getEncryptedPriKey()));
@@ -119,11 +119,11 @@ public class AccountKeyStoreServiceImpl implements AccountKeyStoreService {
     }
 
     /**
-     * 备份keystore文件
+     * backupskeystorefile
      * backup keystore file
      */
     public String backUpKeyStore(String path, AccountKeyStoreDTO accountKeyStoreDto) {
-        //如果备份地址为空，则使用系统默认备份地址
+        //If the backup address is empty, use the system default backup address
         //if the backup address is empty, the default backup address of the system is used
         if (StringUtils.isBlank(path)) {
             if (StringUtils.isBlank(NulsConfig.ACCOUNTKEYSTORE_FOLDER_NAME)) {
@@ -148,14 +148,14 @@ public class AccountKeyStoreServiceImpl implements AccountKeyStoreService {
                 throw new NulsRuntimeException(AccountErrorCode.FILE_OPERATION_FAILD);
             }
         }
-        //根据账户地址生成文件名
+        //Generate file names based on account addresses
         //generate filename based on account address
         String fileName = accountKeyStoreDto.getAddress().concat(AccountConstant.ACCOUNTKEYSTORE_FILE_SUFFIX);
-        //创建备份文件
+        //Create backup files
         //create backup file
         backupFile = new File(backupFile, fileName);
         try {
-            //如果文件不存在，则创建该文件
+            //If the file does not exist, create the file
             //if the file does not exist, the file is created
             if (!backupFile.exists() && !backupFile.createNewFile()) {
                 throw new NulsRuntimeException(AccountErrorCode.FILE_OPERATION_FAILD);

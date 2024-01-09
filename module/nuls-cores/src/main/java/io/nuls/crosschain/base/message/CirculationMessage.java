@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 链资产发行量消息
+ * Chain asset issuance message
  * @author tag
  * @date 2019/4/4
  */

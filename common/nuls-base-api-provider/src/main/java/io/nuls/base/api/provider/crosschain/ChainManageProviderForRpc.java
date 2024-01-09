@@ -13,7 +13,7 @@ import java.util.function.Function;
 /**
  * @Author: zhoulijun
  * @Time: 2019-05-07 16:08
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Provider(Provider.ProviderType.RPC)
 public class ChainManageProviderForRpc extends BaseRpcService implements ChainManageProvider {

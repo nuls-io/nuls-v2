@@ -32,7 +32,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * WebsocketTool的常量
+ * WebsocketToolConstant of
  * Constants of WebsocketTool
  *
  * @author tangyi
@@ -41,69 +41,69 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Constants {
 
     /**
-     * 不允许实例化
+     * Instantiation not allowed
      * Instantiation is not allowed
      */
     private Constants() {
     }
 
     /**
-     * 1秒 = 1000毫秒
+     * 1second = 1000millisecond
      * One second = 1000 milliseconds
      */
     public static final long MILLIS_PER_SECOND = 1000L;
 
     /**
-     * 循环暂停时间
+     * Loop pause time
      * Loop pause time
      */
     public static final long INTERVAL_TIMEMILLIS = 1L;
 
     /**
-     * 定时任务处理器循环间隔时间
+     * Timed task processor cycle interval time
      * Timed task processor cycle interval
      */
     public static final long PROCESSOR_INTERVAL_TIMEMILLIS = 6L * MILLIS_PER_SECOND;
 
     /**
-     * 超时毫秒数(1分钟)
+     * Timed out milliseconds(1minute)
      * Timeout millisecond(1 minute)
      */
     public static final long TIMEOUT_TIMEMILLIS = 10L * MILLIS_PER_SECOND;
 
     /**
-     * 取消订阅的常量，已经无用
+     * The constant for unsubscribing is no longer useful
      * Constants for unsubscribed, it's useless.
      */
     @Deprecated
     public static final long UNSUBSCRIBE_TIMEMILLIS = -20140217L;
 
     /**
-     * 调用远程方法时，用以传输版本号的参数名
+     * The parameter name used to transfer the version number when calling a remote method
      * When calling a remote method, the parameter name used to transfer the version number
      */
     public static final String VERSION_KEY_STR = "version";
     /**
-     * 调用远程方法时，用以传输链ID
+     * When calling remote methods, used to transport the chainID
      * When calling a remote method, the parameter name used to transfer the chain id
      */
     public static final String CHAIN_ID = "chainId";
 
     /**
-     * 用以保存IP地址的参数名
+     * Used to saveIPThe parameter name of the address
      * The parameter name used to save the IP address
      */
     public static final String KEY_IP = "IP";
 
     /**
-     * 用以保存端口的参数名
+     * The parameter name used to save the port
      * The parameter name used to save the port
      */
     public static final String KEY_PORT = "Port";
 
     /**
-     * 接口权限级别
-     * 第三方应用/平台也能调用的公开接口
+     * Interface permission level
+     * Third party applications/Public interfaces that can also be called by the platform
      * <p>
      * Interface permission level
      * A public interface that third-party applications/platforms can call
@@ -111,8 +111,8 @@ public class Constants {
     public static final String PUBLIC = "public";
 
     /**
-     * 接口权限级别
-     * 只有模块间内部才能调用的接口
+     * Interface permission level
+     * An interface that can only be called internally between modules
      * <p>
      * Interface permission level
      * An interface that can only be invoked internally between modules
@@ -120,8 +120,8 @@ public class Constants {
     public static final String PRIVATE = "private";
 
     /**
-     * 接口权限级别
-     * 专门为管理员设计的特定接口.
+     * Interface permission level
+     * A specific interface designed specifically for administrators.
      * <p>
      * Interface permission level
      * A Specific Interface Designed for Administrators
@@ -130,8 +130,8 @@ public class Constants {
 
 
     /**
-     * 收到Request请求后，根据属性判断如何执行
-     * 1：执行Request，并保留等待下次执行
+     * receiveRequestAfter the request, determine how to execute based on the attributes
+     * 1：implementRequest, and keep it waiting for the next execution
      * <p>
      * After receiving the Request, determine how to execute it based on the attributes
      * 1: Execute Request and keep waiting for the next execution
@@ -139,8 +139,8 @@ public class Constants {
     public static final int EXECUTE_AND_KEEP = 1;
 
     /**
-     * 收到Request请求后，根据属性判断如何执行
-     * 2：执行Request，然后丢弃
+     * receiveRequestAfter the request, determine how to execute based on the attributes
+     * 2：implementRequest, and then discard it
      * <p>
      * After receiving the Request, determine how to execute it based on the attributes
      * 2: Execute Request and discard it
@@ -148,8 +148,8 @@ public class Constants {
     public static final int EXECUTE_AND_REMOVE = 2;
 
     /**
-     * 收到Request请求后，根据属性判断如何执行
-     * 3：不执行Request，但是保留等待下次执行
+     * receiveRequestAfter the request, determine how to execute based on the attributes
+     * 3：Do not executeRequest, but keep waiting for the next execution
      * <p>
      * After receiving the Request, determine how to execute it based on the attributes
      * 3: Do not execute Request, but keep waiting for the next execution
@@ -157,8 +157,8 @@ public class Constants {
     public static final int SKIP_AND_KEEP = 3;
 
     /**
-     * 收到Request请求后，根据属性判断如何执行
-     * 4：不执行Request，并且丢弃
+     * receiveRequestAfter the request, determine how to execute based on the attributes
+     * 4：Do not executeRequestAnd discard it
      * <p>
      * After receiving the Request, determine how to execute it based on the attributes
      * 4: Do not execute Request, and discard it
@@ -166,19 +166,19 @@ public class Constants {
     public static final int SKIP_AND_REMOVE = 4;
 
     /**
-     * 用以生成messageId，自增长，模块内唯一
+     * Used to generatemessageId, self growth, unique within the module
      * Used to generate message Id, self-growing, unique within the module
      */
     private static final AtomicInteger SEQUENCE = new AtomicInteger(0);
 
 
     /**
-     * NULS2.0中的标准，用1代表true
+     * NULS2.0Using the standard in1representativetrue
      * Standard in NULS 2.0, 1 for true
      */
     public static final String BOOLEAN_TRUE = "1";
     /**
-     * NULS2.0中的标准，用0代表false
+     * NULS2.0Using the standard in0representativefalse
      * Standard in NULS 2.0, 0 for false
      */
     public static final String BOOLEAN_FALSE = "0";
@@ -188,7 +188,7 @@ public class Constants {
     public static final String ZERO = "0";
 
     /**
-     * 处理待处理消息的线程池
+     * Thread pool for processing pending messages
      * Thread pool for processing messages to be processed
      */
     public static final ExecutorService THREAD_POOL = ThreadUtils.createThreadPool(3, 500, new NulsThreadFactory("Processor"));
@@ -198,7 +198,7 @@ public class Constants {
     public static final String CMD_DUPLICATE = "Duplicate cmd found";
     //public static final String RANGE_REGEX = "[(\\[]\\d+,\\d+[)\\]]";
     /**
-     * 参数验证正则表达式
+     * Parameter validation regular expression
      * Parametric Verification Regular Expressions
      */
     public static final String RANGE_REGEX = "\\[(\\-|\\+)?\\d+(\\.\\d+)?,(\\-|\\+)?\\d+(\\.\\d+)?\\]";
@@ -208,7 +208,7 @@ public class Constants {
 
 
     /**
-     * 获取下一个messageId
+     * Get NextmessageId
      * Get the next messageId
      */
     public static String nextSequence() {
@@ -224,7 +224,7 @@ public class Constants {
     public static final long QUEUE_MEM_LIMIT_SIZE = 128 * 1024 * 1024;
 
     /**
-     * 参数类型
+     * Parameter type
      * Parameter type
      */
     public static final String PARAM_TYPE_BYTE = "byte";

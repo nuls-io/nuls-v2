@@ -1,5 +1,21 @@
 [
   {
+    "version": "18",
+    "extend": "17",
+    "validTxs": [],
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  },
+  {
+    "version": "17",
+    "extend": "16",
+    "validTxs": [],
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  },
+  {
     "version": "16",
     "extend": "15",
     "validTxs": [
@@ -115,7 +131,6 @@
     "invalidTxs": "",
     "invalidMsgs": ""
   },
-
   {
     "version": "12",
     "extend": "11",
@@ -141,7 +156,6 @@
     "invalidTxs": "",
     "invalidMsgs": ""
   },
-
   {
     "version": "11",
     "extend": "10",
@@ -373,7 +387,6 @@
     "invalidTxs": "",
     "invalidMsgs": ""
   },
-
   {
     "version": "3",
     "extend": "2",
@@ -429,7 +442,6 @@
     "invalidTxs": "",
     "invalidMsgs": ""
   },
-
   {
     "version": "2",
     "extend": "1",

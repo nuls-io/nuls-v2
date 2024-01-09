@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-23 14:35
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public interface ContractProvider  {
 

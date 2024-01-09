@@ -30,7 +30,7 @@ import static io.nuls.test.cases.transcation.batch.BatchCreateAccountCase2.*;
 /**
  * @Author: zhoulijun
  * @Time: 2019-04-25 12:08
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Component
 @TestCase("batchTransfer2")
@@ -59,7 +59,7 @@ public class BatchReadyNodeAccountCase2 extends CallRemoteTestCase<Void, Long> {
 
     @Override
     public String title() {
-        return "本地调试批量创建交易";
+        return "Local debugging batch creation of transactions";
     }
 
     @Override
@@ -72,19 +72,19 @@ public class BatchReadyNodeAccountCase2 extends CallRemoteTestCase<Void, Long> {
         List<String> nodes = getRemoteNodes();
         Long itemCount = total / nodes.size();
         List<BatchParam> params = new ArrayList<>();
-        //给每个节点创建一个中转账户，用于把资产转账到若干出金地址中
+        //Create a transfer account for each node to transfer assets to several withdrawal addresses
         Result<String> accounts = accountService.createAccount(new CreateAccountReq(nodes.size(), Constants.PASSWORD));
-        //转给中间账户的资产总数等于 单个节点参与账户总数 * 10000NULS的手续费（够用100万次） +
+        //The total number of assets transferred to the intermediary account is equal to The total number of accounts participating in a single node * 10000NULSHandling fees for（Enough10010000 times） +
         BigInteger amount =
                 TRANSFER_AMOUNT
-                        //计算最大账户数
+                        //Calculate the maximum number of accounts
                         .multiply(BigInteger.valueOf(itemCount > MAX_ACCOUNT ? MAX_ACCOUNT : itemCount)).multiply(BigInteger.TWO)
-                        //每个账户分配1000个作为消耗的手续费
+                        //Assign to each account1000Handling fees for consumption
                         .multiply(FEE_AMOUNT)
-                        //本账户分配时使用的手续费
+                        //The handling fee used for the allocation of this account
                         .add(BigInteger.valueOf(itemCount / 1000).multiply(BigInteger.TWO).multiply(TRANSFER_AMOUNT));
-        Log.info("每个节点的账户总数:{}", (itemCount > MAX_ACCOUNT ? MAX_ACCOUNT : itemCount) * 2);
-        Log.info("每个中间账户准备资产总数:{}", amount);
+        Log.info("The total number of accounts for each node:{}", (itemCount > MAX_ACCOUNT ? MAX_ACCOUNT : itemCount) * 2);
+        Log.info("Total number of assets prepared for each intermediate account:{}", amount);
         for (int i = 0; i < accounts.getList().size(); i++) {
             String address = accounts.getList().get(i);
             String formAddress = config.getSeedAddress();
@@ -105,7 +105,7 @@ public class BatchReadyNodeAccountCase2 extends CallRemoteTestCase<Void, Long> {
             String node = nodes.get(i);
             BatchParam bp = params.get(i);
             Integer res = doRemoteTest(node, BatchCreateAccountCase2.class, bp);
-            Log.info("成功创建测试账户{}个", res);
+            Log.info("Successfully created test account{}individual", res);
         }
         sleep60.check(null, depth);
         BatchParam bp = new BatchParam();
@@ -119,7 +119,7 @@ public class BatchReadyNodeAccountCase2 extends CallRemoteTestCase<Void, Long> {
                     Boolean res = null;
                     try {
                         res = doRemoteTest(node, BatchCreateTransferCase2.class, bp);
-                        Log.info("成功发起交易:{}", res);
+                        Log.info("Successfully initiated transaction:{}", res);
                         latch.countDown();
                     } catch (TestFailException e) {
                         Log.error(e.getMessage(),e);
@@ -134,7 +134,7 @@ public class BatchReadyNodeAccountCase2 extends CallRemoteTestCase<Void, Long> {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            Log.info("创建交易完成");
+            Log.info("Create transaction completed");
         }
 //        return null;
     }

@@ -25,11 +25,11 @@ import java.util.concurrent.TimeUnit;
 /**
  * @Author: zhoulijun
  * @Time: 2019-02-27 17:41
- * @Description: RPC模块基础类
- * 管理module的启动，状态管理，模块生命周期管理
- * 负责连接servic manager,并调用registerAPI
- * 管理模块生命周期，根据依赖模块的运行状况控制模块本身的生命周期。
- * 定义抽象方法onStart,onDependenciesReady,ononDependenciesLoss等方式抽象生命周期的实现
+ * @Description: RPCModule Foundation Class
+ * AdministrationmoduleStartup, state management, module lifecycle management
+ * Responsible for connectingservic manager,And callregisterAPI
+ * Manage module lifecycle and control the lifecycle of the module itself based on the operational status of dependent modules.
+ * Defining Abstract MethodsonStart,onDependenciesReady,ononDependenciesLossThe implementation of abstract lifecycle in other ways
  */
 @Order(Integer.MIN_VALUE)
 public abstract class RpcModule implements InitializingBean {
@@ -50,17 +50,17 @@ public abstract class RpcModule implements InitializingBean {
     private Set<Module> dependencies;
 
     /**
-     * 模块运行状态
+     * Module operation status
      */
     private RpcModuleState state = RpcModuleState.Start;
 
     /**
-     * 依赖当前模块的其他模块列表
+     * List of other modules that depend on the current module
      */
     private Map<Module, Boolean> followerList = new ConcurrentHashMap<>();
 
     /**
-     * 当前模块依赖的其他模块的运行状态（是否接收到模块推送的ready通知）
+     * The running status of other modules that the current module depends on（Have you received the push from the modulereadynotice）
      */
     private Map<Module, Boolean> dependentReadyState = new ConcurrentHashMap<>();
 
@@ -104,7 +104,7 @@ public abstract class RpcModule implements InitializingBean {
     }
 
     /**
-     * 监听依赖的模块进入ready状态的通知
+     * Listening to dependent modules enteringreadyNotification of status
      *
      * @param module
      */
@@ -122,7 +122,7 @@ public abstract class RpcModule implements InitializingBean {
             ConnectData connectData = ConnectManager.getConnectDataByRole(module.getName());
             connectData.addCloseEvent(() -> {
                 if (!ConnectManager.ROLE_CHANNEL_MAP.containsKey(module.getName())) {
-                    Log.warn("RMB:dependencie:{}模块触发连接断开事件", module);
+                    Log.warn("RMB:dependencie:{}Module triggers connection disconnection event", module);
                     dependentReadyState.put(module, Boolean.FALSE);
                     if(followerList.containsKey(module)){
                         followerList.remove(module);
@@ -145,7 +145,7 @@ public abstract class RpcModule implements InitializingBean {
     }
 
     /**
-     * 监听依赖当前模块的其他模块的注册
+     * Listening to the registration of other modules that depend on the current module
      *
      * @param module
      */
@@ -158,18 +158,18 @@ public abstract class RpcModule implements InitializingBean {
                     dependentReadyState.put(module, Boolean.FALSE);
                 }
                 try {
-                    //监听与follower的连接，如果断开后需要修改通知状态
+                    //Monitoring andfollowerIf the connection is disconnected, the notification status needs to be modified
                     ConnectData connectData = ConnectManager.getConnectDataByRole(module.getName());
                     connectData.addCloseEvent(() -> {
                         if (!ConnectManager.ROLE_CHANNEL_MAP.containsKey(module.getName())) {
-                            Log.warn("RMB:follower:{}模块触发连接断开事件", module);
-                            //修改通知状态为未通知
+                            Log.warn("RMB:follower:{}Module triggers connection disconnection event", module);
+                            //Change notification status to not notified
                             followerList.remove(module);
                         }
                     });
-                    Log.debug("绑定连接断开事件:{}",module.name);
+                    Log.debug("Bind connection disconnection event:{}",module.name);
                 } catch (Exception e) {
-                    Log.error("RMB:获取follower:{}模块连接发生异常.", module, e);
+                    Log.error("RMB:obtainfollower:{}Abnormal module connection.", module, e);
                 }
             }
         }
@@ -179,7 +179,7 @@ public abstract class RpcModule implements InitializingBean {
     }
 
     /**
-     * 通知follower当前模块已经进入ready状态
+     * noticefollowerThe current module has enteredreadystate
      *
      * @param module
      */
@@ -205,20 +205,20 @@ public abstract class RpcModule implements InitializingBean {
     }
 
     /**
-     * 通知所有follower当前模块已经进入ready状态
+     * Notify allfollowerThe current module has enteredreadystate
      */
     private void notifyFollowerReady() {
         followerList.keySet().forEach(this::notifyFollowerReady);
     }
 
     /**
-     * 启动模块
+     * Start module
      *
      * @param serviceManagerUrl
      */
     void run(String modulePackage, String serviceManagerUrl,String[] startArgs) {
         this.startArgs = startArgs;
-        //初始化依赖模块的ready状态
+        //Initialize dependent modulesreadystate
         this.getDependencies().forEach(d -> dependentReadyState.put(d, Boolean.FALSE));
         try {
             // Start server instance
@@ -230,14 +230,14 @@ public abstract class RpcModule implements InitializingBean {
                     .moduleRoles(new String[]{getRole()})
                     .moduleVersion(moduleInfo().getVersion())
                     .scanPackage(scanCmdPackage)
-                    //注册管理模块状态的RPC接口ifc
+                    //Registration Management Module StatusRPCinterfaceifc
                     .addCmdDetail(ModuleStatusCmd.class);
             dependentReadyState.keySet().forEach(d -> server.dependencies(d.getName(), d.getVersion()));
             // Get information from kernel
             ConnectManager.getConnectByUrl(serviceManagerUrl);
-            Log.info("RMB:开始连接service manager:{}",serviceManagerUrl);
+            Log.info("RMB:Start connectingservice manager:{}",serviceManagerUrl);
             ResponseMessageProcessor.syncKernel(serviceManagerUrl, new RegisterInvoke(moduleInfo(), dependentReadyState.keySet()));
-            //模块进入ready状态的准备工作，如果条件未达到，等待10秒重新尝试
+            //Module entryreadyPreparation work for status, if conditions are not met, wait10Second retry
             while (!doStart()) {
                 TimeUnit.SECONDS.sleep(10L);
             }
@@ -252,8 +252,8 @@ public abstract class RpcModule implements InitializingBean {
     }
 
     /**
-     * 尝试启动模块
-     * 如果所有依赖准备就绪就触发onDependenciesReady
+     * Attempt to start the module
+     * Trigger if all dependencies are readyonDependenciesReady
      */
     private synchronized void tryRunModule() {
         if (!isReady()) {
@@ -313,7 +313,7 @@ public abstract class RpcModule implements InitializingBean {
     ;
 
     /**
-     * 模块是否已运行
+     * Is the module running
      *
      * @return
      */
@@ -322,7 +322,7 @@ public abstract class RpcModule implements InitializingBean {
     }
 
     /**
-     * 模块是否已准备好
+     * Is the module ready
      *
      * @return
      */
@@ -331,10 +331,10 @@ public abstract class RpcModule implements InitializingBean {
     }
 
     /**
-     * 获取依赖模块的准备状态
+     * Obtain the readiness status of dependent modules
      *
      * @param module
-     * @return true 已准备好
+     * @return true Ready
      */
     public boolean isDependencieReady(Module module) {
         if (!dependentReadyState.containsKey(module)) {
@@ -356,7 +356,7 @@ public abstract class RpcModule implements InitializingBean {
     }
 
     /**
-     * 依赖模块都以进入Ready状态
+     * Dependent modules are all accessed by enteringReadystate
      */
     protected boolean isDependencieReady() {
         return dependentReadyState.entrySet().stream().allMatch(d -> d.getValue());
@@ -367,14 +367,14 @@ public abstract class RpcModule implements InitializingBean {
     }
 
     /**
-     * 申明此模块的依赖模块
+     * Declare the dependent modules of this module
      *
      * @return
      */
     public abstract Module[] declareDependent();
 
     /**
-     * 指定RpcCmd的包名
+     * specifyRpcCmdPackage Name
      *
      * @return
      */
@@ -384,7 +384,7 @@ public abstract class RpcModule implements InitializingBean {
 
 
     /**
-     * 返回当前模块的描述
+     * Return the description of the current module
      *
      * @return
      */
@@ -397,8 +397,8 @@ public abstract class RpcModule implements InitializingBean {
 
 
     /**
-     * 初始化模块
-     * 在onStart前会调用此方法
+     * Initialize module
+     * stayonStartI will call this method before
      */
     public void init() {
         Log.info("module inited");
@@ -406,26 +406,26 @@ public abstract class RpcModule implements InitializingBean {
 
 
     /**
-     * 已完成spring init注入，开始启动模块
-     * 模块进入ready状态前的准备工作，模块启动时触发
-     * 如果准备完毕返回true
-     * 条件未达到返回false
+     * Completedspring initInject, start module startup
+     * Module entryreadyPreparation work before status, triggered when the module starts
+     * If prepared, returntrue
+     * Return if conditions are not metfalse
      *
      * @return
      */
     public abstract boolean doStart();
 
     /**
-     * 所有外部依赖进入ready状态后会调用此方法，正常启动后返回Running状态
+     * All external dependencies enterreadyThis method will be called after the state is reached, and will return after normal startupRunningstate
      *
      * @return
      */
     public abstract RpcModuleState onDependenciesReady();
 
     /**
-     * 某个外部依赖连接丢失后，会调用此方法，
-     * 可控制模块状态，如果返回Ready,则表明模块退化到Ready状态，当依赖重新准备完毕后，将重新触发onDependenciesReady方法，
-     * 若返回的状态是Running，将不会重新触发onDependenciesReady
+     * After a certain external dependency connection is lost, this method will be called,
+     * Controllable module status, if returnedReady,This indicates that the module has degraded toReadyThe state will be triggered again when the dependency is fully preparedonDependenciesReadyMethod,
+     * If the returned status isRunning, will not be triggered againonDependenciesReady
      *
      * @param dependenciesModule
      * @return

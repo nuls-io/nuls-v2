@@ -35,19 +35,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 多签账户签名
+ * Multiple account signatures
  * @author: Charlie
  * @date: 2018-12-12
  */
 public class MultiSignTxSignature extends TransactionSignature {
 
     /**
-     * 多签地址需要M个公钥的签名可以解锁
+     * Multiple address signatures are requiredMThe signature of a public key can be unlocked
      */
     private byte m;
 
     /**
-     * 生成多签地址所有的公钥
+     * Generate all public keys for multiple signed addresses
      */
     private List<byte[]> pubKeyList;
 
@@ -100,7 +100,7 @@ public class MultiSignTxSignature extends TransactionSignature {
     }
 
     /**
-     * 签名验证
+     * Signature verification
      * */
     public List<P2PHKSignature> getValidSignature(){
         if(m <= 0 || pubKeyList == null || pubKeyList.size() == 0 || m>pubKeyList.size()){

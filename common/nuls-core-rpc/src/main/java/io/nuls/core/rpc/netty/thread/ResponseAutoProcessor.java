@@ -31,7 +31,7 @@ import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.log.Log;
 
 /**
- * 消费从服务端获取的消息
+ * Consumption of messages obtained from the server
  * Consume the messages from servers
  *
  * @author tag
@@ -45,7 +45,7 @@ public class ResponseAutoProcessor implements Runnable {
     }
 
     /**
-     * 消费从服务端获取的消息
+     * Consumption of messages obtained from the server
      * Consume the messages from servers
      */
     @SuppressWarnings("InfiniteLoopStatement")
@@ -54,7 +54,7 @@ public class ResponseAutoProcessor implements Runnable {
         while (connectData.isConnected()) {
             try {
                 /*
-                获取队列中的第一个对象
+                Get the first object in the queue
                 Get the first item of the queue
                  */
                 Response response = connectData.getResponseAutoQueue().take();
@@ -62,13 +62,13 @@ public class ResponseAutoProcessor implements Runnable {
                     continue;
                 }
                 /*
-                获取Response对象，这里得到的对象一定是需要自动调用本地方法
+                obtainResponseObject, the object obtained here must require automatic calling of local methods
                 Get Response object, The object you get here must automatically call the local method
                  */
                 String messageId = response.getRequestID();
 
                 /*
-                自动调用本地方法
+                Automatically call local methods
                 Invoke local method automatically
                  */
                 BaseInvoke baseInvoke = ConnectManager.INVOKE_MAP.get(messageId);

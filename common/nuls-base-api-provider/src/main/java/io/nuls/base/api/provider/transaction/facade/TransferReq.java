@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-08 16:19
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class TransferReq extends BaseReq {
 

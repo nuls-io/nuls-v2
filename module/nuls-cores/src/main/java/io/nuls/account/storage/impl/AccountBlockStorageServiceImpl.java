@@ -80,26 +80,26 @@ public class AccountBlockStorageServiceImpl implements AccountBlockStorageServic
             byte[] address = dto.getAddress();
             AccountBlockInfo info = dto.getInfo();
             if (info == null) {
-                // 账户完全锁定
+                // Account fully locked
                 poList.add(new AccountBlockPO(address));
             } else {
                 AccountBlockPO po = this.getAccount(address);
                 if (po == null) {
-                    // 首次添加白名单
+                    // First time adding whitelist
                     poList.add(new AccountBlockPO(address, info));
                 } else if (po.getExtend() == null) {
-                    // 首次添加白名单
+                    // First time adding whitelist
                     po.setExtend(new AccountBlockExtendPO(address, info).serialize());
                     poList.add(po);
                 } else {
-                    // 更新白名单
+                    // Update whitelist
                     AccountBlockExtendPO extendPO = new AccountBlockExtendPO();
                     extendPO.parse(po.getExtend(), 0);
                     int[] types = extendPO.getTypes();
                     String[] contracts = extendPO.getContracts();
                     int operationType = info.getOperationType();
                     if (operationType == 1) {
-                        // 添加白名单
+                        // Add whitelist
                         int[] _types = info.getTypes();
                         if (_types != null) {
                             Set<Integer> typeSet = types == null ? new HashSet<>() : this.intArray2set(types);
@@ -115,7 +115,7 @@ public class AccountBlockStorageServiceImpl implements AccountBlockStorageServic
                         po.setExtend(extendPO.serialize());
                         poList.add(po);
                     } else if (operationType == 2) {
-                        // 移除白名单
+                        // Remove whitelist
                         int[] _types = info.getTypes();
                         if (_types != null) {
                             Set<Integer> typeSet = types == null ? new HashSet<>() : this.intArray2set(types);
@@ -148,21 +148,21 @@ public class AccountBlockStorageServiceImpl implements AccountBlockStorageServic
             byte[] address = dto.getAddress();
             AccountBlockInfo info = dto.getInfo();
             if (info == null) {
-                // 取消账户完全锁定
+                // Cancel account full lock
                 accountRemoveList.add(address);
             } else {
                 AccountBlockPO po = this.getAccount(address);
                 if (po == null) {
                     continue;
                 }
-                // 取消更新白名单
+                // Cancel updating whitelist
                 AccountBlockExtendPO extendPO = new AccountBlockExtendPO();
                 extendPO.parse(po.getExtend(), 0);
                 int[] types = extendPO.getTypes();
                 String[] contracts = extendPO.getContracts();
                 int operationType = info.getOperationType();
                 if (operationType == 1) {
-                    // 取消添加白名单
+                    // Cancel adding whitelist
                     int[] _types = info.getTypes();
                     if (_types != null) {
                         Set<Integer> typeSet = types == null ? new HashSet<>() : this.intArray2set(types);
@@ -178,7 +178,7 @@ public class AccountBlockStorageServiceImpl implements AccountBlockStorageServic
                     po.setExtend(extendPO.serialize());
                     poList.add(po);
                 } else if (operationType == 2) {
-                    // 取消移除白名单
+                    // Cancel removal from whitelist
                     int[] _types = info.getTypes();
                     if (_types != null) {
                         Set<Integer> typeSet = types == null ? new HashSet<>() : this.intArray2set(types);
@@ -210,7 +210,7 @@ public class AccountBlockStorageServiceImpl implements AccountBlockStorageServic
         Map<byte[], byte[]> accountPoMap = new HashMap<>();
         try {
             for (AccountBlockPO po : accountPOList) {
-                //序列化对象为byte数组存储
+                //Serializing objects asbyteArray storage
                 accountPoMap.put(po.getAddress(), po.serialize());
             }
             return RocksDBService.batchPut(AccountStorageConstant.DB_NAME_ACCOUNT_BLOCK, accountPoMap);
@@ -240,7 +240,7 @@ public class AccountBlockStorageServiceImpl implements AccountBlockStorageServic
             if (list != null) {
                 for (byte[] value : list) {
                     AccountBlockPO accountPo = new AccountBlockPO();
-                    //将byte数组反序列化为AccountPo返回
+                    //takebyteDeserialize an array asAccountPoreturn
                     accountPo.parse(value, 0);
                     accountPOList.add(accountPo);
                 }
@@ -259,7 +259,7 @@ public class AccountBlockStorageServiceImpl implements AccountBlockStorageServic
         }
         AccountBlockPO accountPo = new AccountBlockPO();
         try {
-            //将byte数组反序列化为AccountPo返回
+            //takebyteDeserialize an array asAccountPoreturn
             accountPo.parse(accountBytes, 0);
         } catch (Exception e) {
             LoggerUtil.LOG.error(e.getMessage());

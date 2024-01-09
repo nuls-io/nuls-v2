@@ -41,7 +41,7 @@ public class LocalVerifierServiceImpl implements LocalVerifierService {
     public boolean rollback(int chainID, long blockHeight) {
         byte[] value = RocksDBService.get(NulsCrossChainConstant.DB_NAME_OLD_LOCAL_VERIFIER + chainID,ByteUtils.longToBytes(blockHeight));
         if(value == null){
-            Log.error("没有找到备份数据" );
+            Log.error("No backup data found" );
             return true;
         }
         try {

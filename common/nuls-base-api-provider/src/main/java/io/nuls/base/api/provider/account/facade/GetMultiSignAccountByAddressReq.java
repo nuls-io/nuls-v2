@@ -6,7 +6,7 @@ import io.nuls.base.api.provider.BaseReq;
  * @Author: zhoulijun
  * @Time: 2019-03-08 13:42
  * @Description:
- * 根据地址获取多签账户信息
+ * Obtain multi signature account information based on address
  * get account info by address
  */
 public class GetMultiSignAccountByAddressReq extends BaseReq {

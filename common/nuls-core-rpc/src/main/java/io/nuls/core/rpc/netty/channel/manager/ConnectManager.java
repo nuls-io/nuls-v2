@@ -38,7 +38,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 /**
- * 链接管理类
+ * Link management class
  * Link Management Class
  *
  * @author tag
@@ -47,25 +47,25 @@ import java.util.stream.Collectors;
 public class ConnectManager {
     private static Lock SUB_LOCK = new ReentrantLock();
     /**
-     * 本模块是否可以启动服务（所依赖模块是否可以连接）
+     * Can this module start services（Can the dependent modules be connected）
      * Can this module start the service? (Can the dependent modules be connected?)
      */
     public static boolean startService = false;
 
     /**
-     * 本模块所有对外提供的接口的详细信息
+     * Detailed information of all external interfaces provided in this module
      * local module(io.nuls.rpc.RegisterApi) information
      */
     public static final RegisterApi LOCAL = new RegisterApi();
 
     /**
-     * 本模块各个CMD优先级
+     * Each part of this moduleCMDpriority
      * Each CMD priority of this module
      * */
     public static final Map<String, Integer> CMD_PRIORITY_MAP = new ConcurrentHashMap<>();
 
     /**
-     * 本模块配置信息
+     * Configuration information for this module
      * Configuration information of this module
      * Key: The key
      * Value: Config detail
@@ -73,14 +73,14 @@ public class ConnectManager {
     public static final Map<String, ConfigItem> CONFIG_ITEM_MAP = new ConcurrentHashMap<>();
 
     /**
-     * Key: 角色，Value：角色的连接信息
+     * Key: Role,Value：Connection information for roles
      * Key: role, Value: Connection information of the role
      */
     public static final Map<String, Map> ROLE_MAP = new ConcurrentHashMap<>();
 
     /**
-     * 调用远程方法时，可以设置自动回调的本地方法。
-     * Key：调用远程方法的messageId，Value：自动回调的本地方法
+     * When calling remote methods, you can set the local method for automatic callback.
+     * Key：Calling remote methodsmessageId,Value：Local method for automatic callback
      * <p>
      * When calling a remote method, you can set the local method for automatic callback
      * Key: MessageId that calls remote methods, Value: Local method of automatic callback
@@ -88,45 +88,45 @@ public class ConnectManager {
     public static final Map<String, BaseInvoke> INVOKE_MAP = new ConcurrentHashMap<>();
 
     /**
-     * 链接与链接数据的集合
+     * Links and sets of linked data
      * <p>
      * Key: Channel, Value: ConnectData
      */
     public static final Map<Channel, ConnectData> CHANNEL_DATA_MAP = new ConcurrentHashMap<>();
 
     /**
-     * 角色与链接通道集合
+     * Character and Link Channel Collection
      * KEY:ROLE
      * VALUE:Channel
      */
     public static final Map<String, Channel> ROLE_CHANNEL_MAP = new ConcurrentHashMap<>();
 
     /**
-     * messageId对应链接通道对象，用于取消订阅的Request
-     * Key：messageId, Value：链接通道
+     * messageIdCorresponding link channel object, used for unsubscribingRequest
+     * Key：messageId, Value：Link Channel
      * <p>
      * key: messageId, value: channel
      */
     public static final ConcurrentMap<String, Channel> MSG_ID_KEY_CHANNEL_MAP = new ConcurrentHashMap<>();
 
     /**
-     * 接口被那些Message订阅
+     * The interface is affected by thoseMessagesubscription
      * Interfaces have been subscribed to by those Messages
      * Key:cmd
-     * Value:订阅该接口的message队列/Subscribe to the message of the interface
+     * Value:Subscribe to this interfacemessagequeue/Subscribe to the message of the interface
      */
     public static final Map<String, CopyOnWriteArrayList<Message>> CMD_SUBSCRIBE_MESSAGE_MAP = new ConcurrentHashMap<>();
 
     /**
-     * 订阅接口的Message对应的连接
+     * Subscription interfaceMessageCorresponding connections
      * Connection corresponding to Message of Subscription Interface
-     * Key：订阅消息/Subscribe message
-     * Value:该订阅消息所属连接
+     * Key：Subscription message/Subscribe message
+     * Value:The connection to which this subscription message belongs
      */
     public static final Map<Message, ConnectData> MESSAGE_TO_CHANNEL_MAP = new ConcurrentHashMap<>();
 
     /**
-     * 接口被订阅次数(事件方式)
+     * Number of times the interface has been subscribed(Event mode)
      * Number of changes in the return value of the subscribed interface
      * Key: Cmd
      * Value: subscribe count
@@ -134,7 +134,7 @@ public class ConnectManager {
     public static final Map<String, Integer> SUBSCRIBE_COUNT = new ConcurrentHashMap<>();
 
     /**
-     * 被订阅接口返回值改变次数（事件方式）
+     * The number of times the subscription interface's return value has changed（Event mode）
      * Number of changes in the return value of the subscribed interface
      * Key: Cmd
      * Value: Change count
@@ -142,13 +142,13 @@ public class ConnectManager {
     private static final Map<String, Integer> CMD_CHANGE_COUNT = new ConcurrentHashMap<>();
 
     /**
-     * 当前正在处理的订阅请求数量
+     * The current number of subscription requests being processed
      * Number of subscription requests currently being processed
      */
     public static int subRequestCount = 0;
 
     /**
-     * 根据cmd命令和版本号获取本地方法
+     * according tocmdCommand and version number acquisition local method
      * Getting local methods from CMD commands and version
      *
      * @param cmd        Command of remote method
@@ -160,7 +160,7 @@ public class ConnectManager {
         CmdDetail find = null;
         for (CmdDetail cmdDetail : LOCAL.getMethods()) {
             /*
-            cmd不一致，跳过
+            cmdInconsistent, skip
             CMD inconsistency, skip
              */
             if (!cmdDetail.getMethodName().equals(cmd)) {
@@ -168,7 +168,7 @@ public class ConnectManager {
             }
 
             /*
-            大版本不一样，跳过
+            The big version is different, skip it
             Big version is different, skip
              */
             if ((int) minVersion != (int) cmdDetail.getVersion()) {
@@ -176,7 +176,7 @@ public class ConnectManager {
             }
 
             /*
-            没有备选方法，则设置当前方法为备选方法
+            If there is no alternative method, set the current method as the alternative method
             If there is no alternative method, set the current method as the alternative method
              */
             if (find == null) {
@@ -185,7 +185,7 @@ public class ConnectManager {
             }
 
             /*
-            如果当前方法版本更高，则设置当前方法为备选方法
+            If the current method version is higher, set the current method as an alternative method
             If the current method version is higher, set the current method as an alternative method
              */
             if (cmdDetail.getVersion() > find.getVersion()) {
@@ -197,7 +197,7 @@ public class ConnectManager {
 
 
     /**
-     * 根据cmd命令获取最高版本的方法，逻辑同上
+     * according tocmdThe method of obtaining the highest version of the command follows the same logic as before
      * Getting the highest version of local methods from CMD commands
      *
      * @param cmd Command of remote method
@@ -224,7 +224,7 @@ public class ConnectManager {
 
 
     /**
-     * 扫描指定路径，得到所有接口的详细信息
+     * Scan the specified path to obtain detailed information about all interfaces
      * Scan the specified path for details of all interfaces
      *
      * @param packageName Package full path
@@ -232,7 +232,7 @@ public class ConnectManager {
      */
     public static void scanPackage(Set<String> packageName) throws Exception {
         /*
-        路径为空，跳过
+        Path is empty, skipping
         The path is empty, skip
          */
         if (packageName == null || packageName.size() == 0){
@@ -251,7 +251,7 @@ public class ConnectManager {
                 }
 
                 /*
-                重复接口只注册一次
+                Register duplicate interfaces only once
                 Repeated interfaces are registered only once
                  */
                 if (!isRegister(cmdDetail)) {
@@ -274,7 +274,7 @@ public class ConnectManager {
                 continue;
             }
                 /*
-                重复接口只注册一次
+                Register duplicate interfaces only once
                 Repeated interfaces are registered only once
                  */
             if (!isRegister(cmdDetail)) {
@@ -289,7 +289,7 @@ public class ConnectManager {
     }
 
     /**
-     * 保存所有拥有CmdAnnotation注解的方法
+     * Save all ownedCmdAnnotationThe method of annotation
      * Save all methods that have CmdAnnotation annotations
      *
      * @param method Method
@@ -301,7 +301,7 @@ public class ConnectManager {
         Annotation[] annotations = method.getDeclaredAnnotations();
         for (Annotation annotation : annotations) {
             /*
-            CmdAnnotation中包含了接口的必要信息
+            CmdAnnotationIt contains necessary information for the interface
             The CmdAnnotation contains the necessary information for the interface
              */
             if (annotation instanceof CmdAnnotation) {
@@ -321,7 +321,7 @@ public class ConnectManager {
             }
 
             /*
-            参数详细说明
+            Detailed Description of Parameters
             Detailed description of parameters
              */
             if (annotation instanceof Parameter) {
@@ -353,7 +353,7 @@ public class ConnectManager {
 
 
     /**
-     * 判断是否已经注册过，判断方法为：cmd+version唯一
+     * To determine if it has been registered, the method is：cmd+versiononly
      * Determine if the cmd has been registered
      * 1. The same cmd
      * 2. The same version
@@ -373,7 +373,7 @@ public class ConnectManager {
     }
 
     /**
-     * 返回值改变次数增加1
+     * Increase in the number of changes to the return value1
      * Increase the changes number of return value by 1
      *
      * @param cmd Command of remote method
@@ -390,7 +390,7 @@ public class ConnectManager {
     }
 
     /**
-     * 得到返回值的改变数量
+     * Obtain the number of changes in the return value
      * Get current changes number of return value
      *
      * @param cmd Command of remote method
@@ -402,7 +402,7 @@ public class ConnectManager {
     }
 
     /**
-     * Cmd订阅次数减1
+     * CmdSubscription reduction1
      * Subscription times minus 1
      *
      * @param cmd
@@ -420,7 +420,7 @@ public class ConnectManager {
     }
 
     /**
-     * 取消订阅
+     * Unsubscribe
      * Subscription times minus 1
      *
      * @param message
@@ -434,7 +434,7 @@ public class ConnectManager {
     }
 
     /**
-     * Cmd订阅次数加1
+     * CmdSubscription count increase1
      * Subscription times add 1
      *
      * @param cmd
@@ -449,7 +449,7 @@ public class ConnectManager {
     }
 
     /**
-     * 订阅
+     * subscription
      * Subscription times add 1
      *
      * @param message
@@ -463,11 +463,11 @@ public class ConnectManager {
     }
 
     /**
-     * 订阅接口（按接口改变次数）
+     * Subscription interface（Number of changes by interface）
      * Subscription interface (number of changes per interface)
      *
-     * @param connectData 链接信息
-     * @param message     订阅消息
+     * @param connectData Link information
+     * @param message     Subscription message
      */
     public static void subscribeByEvent(ConnectData connectData, Message message, Request request) {
         MESSAGE_TO_CHANNEL_MAP.put(message, connectData);
@@ -484,10 +484,10 @@ public class ConnectManager {
     }
 
     /**
-     * 取消订阅接口（按接口改变次数）
+     * Unsubscribe interface（Number of changes by interface）
      * Unsubscribe interface (number of changes per interface)
      *
-     * @param message 取消的订阅消息
+     * @param message Unsubscribed subscription message
      */
     public static void unsubscribeByEvent(Message message) {
         MESSAGE_TO_CHANNEL_MAP.remove(message);
@@ -501,7 +501,7 @@ public class ConnectManager {
     }
 
     /**
-     * 订阅接口被调用，判断订阅该接口的事件是否触发
+     * The subscription interface is called, check if the event subscribing to this interface is triggered
      *
      * @param cmd      Command of remote method
      * @param response Response
@@ -509,7 +509,7 @@ public class ConnectManager {
     public static void eventTrigger(String cmd, Response response) {
         try {
              /*
-            找到订阅该接口的Message和WsData,然后判断订阅该接口的Message事件是否触发
+            Find the subscription for this interfaceMessageandWsData,Then determine the subscription to this interfaceMessageIs the event triggered
             */
             CopyOnWriteArrayList<Message> messageList = CMD_SUBSCRIBE_MESSAGE_MAP.get(cmd);
             if (messageList == null) {
@@ -538,7 +538,7 @@ public class ConnectManager {
     }
 
     /**
-     * 封装真正的返回结果
+     * Encapsulate the true return result
      * Encapsulate the true return result
      */
     public static Response getRealResponse(String cmd, String messageId, Response response) {
@@ -557,7 +557,7 @@ public class ConnectManager {
     }
 
     /**
-     * 更新模块是否可启动状态
+     * Is the update module bootable
      * Update module bootAble status
      */
     public static void updateStatus() {
@@ -575,7 +575,7 @@ public class ConnectManager {
     }
 
     /**
-     * 本模块是否可以启动服务（所依赖模块是否可以连接）
+     * Can this module start services（Can the dependent modules be connected）
      * Can this module start the service? (Can the dependent modules be connected?)
      */
     public static boolean isReady() {
@@ -583,7 +583,7 @@ public class ConnectManager {
     }
 
     /**
-     * 根据角色返回角色的连接信息
+     * Return character's connection information based on the character
      * Return the role's connection information based on the role
      */
     public static String getRemoteUri(String role) {
@@ -594,7 +594,7 @@ public class ConnectManager {
     }
 
     /**
-     * 根据channel的连接信息
+     * according tochannelConnection information for
      * Return the role's connection information based on the role
      */
     public static String getRemoteUri(SocketChannel channel) {
@@ -629,7 +629,7 @@ public class ConnectManager {
 
     public static Channel getConnectByUrl(String url) throws Exception {
         /*
-        如果连接已存在，直接返回
+        If the connection already exists, return directly
         If the connection already exists, return directly
          */
         String role = "";
@@ -655,7 +655,7 @@ public class ConnectManager {
 
     public static Channel createConnect(String url) throws Exception {
          /*
-        如 果是第一次连接，则先放入集合
+        as If it is the first connection, put it into the set first
         If it's the first connection, put it in the collection first
          */
 
@@ -673,7 +673,7 @@ public class ConnectManager {
     public static void createConnectData(Channel channel) {
         ConnectData connectData = new ConnectData((SocketChannel) channel);
         /*
-        连接创建成功之后，启动处理连接通道中传输信息所需线程
+        After the connection is successfully created, start the thread required to process the transmission of information in the connection channel
         After the connection is created successfully, start the threads needed
         to process the transmission of information in the connection channel
         */
@@ -687,7 +687,7 @@ public class ConnectManager {
     }
 
     /**
-     * 停止或断开一个连接,清除该连接相关信息
+     * Stop or disconnect a connection,Clear information related to this connection
      * Stop or disconnect a connection
      */
     public static void disConnect(SocketChannel channel) {
@@ -718,10 +718,10 @@ public class ConnectManager {
     }
 
     /**
-     * 判断是否为正整数
+     * Determine whether it is a positive integer
      * Determine whether it is a positive integer
      *
-     * @param string 待验证的值，Value to be verified
+     * @param string Value to be verified,Value to be verified
      * @return boolean
      */
     public static boolean isPureDigital(String string) {
@@ -733,7 +733,7 @@ public class ConnectManager {
     }
 
     public static void sendMessage(Channel channel, ByteBuf message) {
-//        Log.debug("发送消息:{}",message);
+//        Log.debug("send message:{}",message);
         try {
             channel.eventLoop().execute(() -> {
                 ChannelFuture cf = channel.writeAndFlush(new TextWebSocketFrame(message));
@@ -749,7 +749,7 @@ public class ConnectManager {
     }
 
 //    public static void sendMessage(Channel channel, String message) {
-////        Log.debug("发送消息:{}",message);
+////        Log.debug("send message:{}",message);
 //        try {
 //            channel.eventLoop().execute(() -> {
 //                ChannelFuture cf = channel.writeAndFlush(new TextWebSocketFrame(message));
@@ -781,7 +781,7 @@ public class ConnectManager {
     }
 
     /**
-     * 缓存链接信息
+     * Cache link information
      * Cache link information
      */
     public synchronized static Channel cacheConnect(String role, Channel channel, boolean isSender) {

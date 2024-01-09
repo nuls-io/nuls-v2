@@ -50,15 +50,15 @@ public class MultiSignAccountCmd extends BaseCmd {
     @Autowired
     private ChainManager chainManager;
 
-    @CmdAnnotation(cmd = "ac_createMultiSignAccount", version = 1.0, description = "创建多签账户/create a multi sign account")
+    @CmdAnnotation(cmd = "ac_createMultiSignAccount", version = 1.0, description = "Create a multi signature account/create a multi sign account")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid"),
             @Parameter(parameterName = "pubKeys", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class),
-                    parameterDes = "公钥集合(任意普通地址的公钥或存在于当前节点中的普通账户地址)"),
-            @Parameter(parameterName = "minSigns", requestType = @TypeDescriptor(value = int.class), parameterDes = "最小签名数")
+                    parameterDes = "Public key set(Public key of any ordinary address or ordinary account address existing in the current node)"),
+            @Parameter(parameterName = "minSigns", requestType = @TypeDescriptor(value = int.class), parameterDes = "Minimum number of signatures")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "address",  description = "多签账户地址")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "address",  description = "Multiple account addresses signed")
     }))
     public Response createMultiSignAccount(Map params) {
         Chain chain = null;
@@ -110,13 +110,13 @@ public class MultiSignAccountCmd extends BaseCmd {
     }
 
 
-    @CmdAnnotation(cmd = "ac_removeMultiSignAccount", version = 1.0, description = "移除多签账户/remove the multi sign account")
+    @CmdAnnotation(cmd = "ac_removeMultiSignAccount", version = 1.0, description = "Remove multiple signed accounts/remove the multi sign account")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
-            @Parameter(parameterName = "address", parameterType = "String", parameterDes = "多签账户地址")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid"),
+            @Parameter(parameterName = "address", parameterType = "String", parameterDes = "Multiple account addresses signed")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = RpcConstant.VALUE, valueType = boolean.class, description = "是否移除成功")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = RpcConstant.VALUE, valueType = boolean.class, description = "Was removal successful")
     }))
     public Response removeMultiSignAccount(Map params) {
         Map<String, Object> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
@@ -144,18 +144,18 @@ public class MultiSignAccountCmd extends BaseCmd {
         return success(map);
     }
 
-    @CmdAnnotation(cmd = "ac_setMultiSignAlias", version = 1.0, description = "设置多签账户别名/set the alias of multi sign account")
+    @CmdAnnotation(cmd = "ac_setMultiSignAlias", version = 1.0, description = "Set multiple account aliases/set the alias of multi sign account")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
-            @Parameter(parameterName = "address", parameterType = "String", parameterDes = "多签账户地址"),
-            @Parameter(parameterName = "alias", parameterType = "String", parameterDes = "别名"),
-            @Parameter(parameterName = "signAddress", parameterType = "String", canNull = true, parameterDes = "第一个签名账户地址(不填则只创建交易不签名)"),
-            @Parameter(parameterName = "signPassword", parameterType = "String", canNull = true, parameterDes = "第一个签名账户密码(不填则只创建交易不签名)")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid"),
+            @Parameter(parameterName = "address", parameterType = "String", parameterDes = "Multiple account addresses signed"),
+            @Parameter(parameterName = "alias", parameterType = "String", parameterDes = "alias"),
+            @Parameter(parameterName = "signAddress", parameterType = "String", canNull = true, parameterDes = "First signature account address(If left blank, only create transactions without signing)"),
+            @Parameter(parameterName = "signPassword", parameterType = "String", canNull = true, parameterDes = "First signature account password(If left blank, only create transactions without signing)")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map,包含三个key", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "tx",  description = "完整交易序列化字符串,如果交易没达到最小签名数可继续签名"),
-            @Key(name = "txHash",  description = "交易hash"),
-            @Key(name = "completed", valueType = boolean.class, description = "true:交易已完成(已广播),false:交易没完成,没有达到最小签名数")
+    @ResponseData(name = "Return value", description = "Return aMap,Including threekey", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "tx",  description = "Complete transaction serialization string,If the transaction does not reach the minimum number of signatures, you can continue to sign"),
+            @Key(name = "txHash",  description = "transactionhash"),
+            @Key(name = "completed", valueType = boolean.class, description = "true:Transaction completed(Broadcasted),false:Transaction not completed,Not reaching the minimum number of signatures")
     }))
     public Object setMultiAlias(Map params) {
         Chain chain = null;
@@ -215,13 +215,13 @@ public class MultiSignAccountCmd extends BaseCmd {
 
     }
 
-    @CmdAnnotation(cmd = "ac_getMultiSignAccount", version = 1.0, description = "根据多签账户地址获取完整多签账户/Search for multi-signature account by address")
+    @CmdAnnotation(cmd = "ac_getMultiSignAccount", version = 1.0, description = "Obtain the complete multi signature account based on the address of the multi signature account/Search for multi-signature account by address")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
-            @Parameter(parameterName = "address", parameterType = "String", parameterDes = "多签账户地址")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid"),
+            @Parameter(parameterName = "address", parameterType = "String", parameterDes = "Multiple account addresses signed")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = RpcConstant.VALUE,  description = "多签账户序列化数据字符串"),
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = RpcConstant.VALUE,  description = "Serializing data strings for multiple account signatures"),
 
     }))
     public Object getMultiSignAccount(Map params) {
@@ -257,14 +257,14 @@ public class MultiSignAccountCmd extends BaseCmd {
         }
     }
 
-    @CmdAnnotation(cmd = "ac_isMultiSignAccountBuilder", version = 1.0, description = "验证是否多签账户的创建者之一/Whether it is multiSign account Builder")
+    @CmdAnnotation(cmd = "ac_isMultiSignAccountBuilder", version = 1.0, description = "Verify if one of the creators of the multi signed account/Whether it is multiSign account Builder")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
-            @Parameter(parameterName = "address", parameterType = "String", parameterDes = "多签账户地址"),
-            @Parameter(parameterName = "pubKey", parameterType = "String", parameterDes = "创建者公钥或已存在于当前节点的地址")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid"),
+            @Parameter(parameterName = "address", parameterType = "String", parameterDes = "Multiple account addresses signed"),
+            @Parameter(parameterName = "pubKey", parameterType = "String", parameterDes = "Creator public key or address that already exists on the current node")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = RpcConstant.VALUE, valueType = Boolean.class, description = "是否多签账户的创建者之一"),
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = RpcConstant.VALUE, valueType = Boolean.class, description = "Is it one of the creators who signed multiple accounts"),
 
     }))
     public Object isMultiSignAccountBuilder(Map params){
@@ -286,7 +286,7 @@ public class MultiSignAccountCmd extends BaseCmd {
             String pubkey = (String)pubkeyObj;
             byte[] pubkeyByte = null;
             if (AddressTool.validAddress(chain.getChainId(), pubkey) && AddressTool.validNormalAddress(AddressTool.getAddress(pubkey), chain.getChainId())) {
-                //按地址处理,获取该地址的公钥
+                //Process by address,Obtain the public key for this address
                 Account account = accountService.getAccount(chain.getChainId(), pubkey);
                 if(null == account){
                     throw new NulsException(AccountErrorCode.ACCOUNT_NOT_EXIST);

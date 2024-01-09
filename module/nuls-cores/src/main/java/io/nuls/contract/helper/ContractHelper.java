@@ -211,7 +211,7 @@ public class ContractHelper {
     }
 
     public ProgramResult invokeViewMethod(int chainId, byte[] contractAddressBytes, String methodName, String methodDesc, String[][] args) {
-        // 当前区块高度
+        // Current block height
         BlockHeader blockHeader;
         try {
             blockHeader = BlockCall.getLatestBlockHeader(chainId);
@@ -223,7 +223,7 @@ public class ContractHelper {
             return ProgramResult.getFailed("block header is null.");
         }
         long blockHeight = blockHeader.getHeight();
-        // 当前区块状态根
+        // Current block state root
         byte[] currentStateRoot = ContractUtil.getStateRoot(blockHeader);
         return this.invokeViewMethod(chainId, null, false, currentStateRoot, blockHeight, contractAddressBytes, methodName, methodDesc, args);
     }
@@ -233,7 +233,7 @@ public class ContractHelper {
             return ProgramResult.getFailed("block header is null.");
         }
         long blockHeight = blockHeader.getHeight();
-        // 当前区块状态根
+        // Current block state root
         byte[] currentStateRoot = ContractUtil.getStateRoot(blockHeader);
 
         return this.invokeViewMethod(chainId, null, true, currentStateRoot, blockHeight, contractAddressBytes, methodName, methodDesc, args);
@@ -301,7 +301,7 @@ public class ContractHelper {
         } else {
             contractResult.getInternalCreates().clear();
         }
-        // 清空本次验证得到的数据
+        // Clear the data obtained from this validation
         contractResult.setAcceptDirectTransfer(false);
         contractResult.setTokenType(TokenTypeStatus.NOT_TOKEN.status());
         contractResult.setTokenName(null);
@@ -363,7 +363,7 @@ public class ContractHelper {
         contractResult.setNrc20(isNrc20);
         contractResult.setAcceptDirectTransfer(isAcceptDirectTransfer);
         if (isNrc20 || isNrc721) {
-            // NRC20 tokenName 验证代币名称格式
+            // NRC20 tokenName Verify token name format
             ProgramResult programResult = this.invokeViewMethod(chainId, track, null, bestBlockHeight, contractAddress, NRC20_METHOD_NAME, null, null);
             if (programResult.isSuccess()) {
                 String tokenName = programResult.getResult();
@@ -376,7 +376,7 @@ public class ContractHelper {
                     contractResult.setTokenName(tokenName);
                 }
             }
-            // NRC20 tokenSymbol 验证代币符号的格式
+            // NRC20 tokenSymbol Verify the format of token symbols
             programResult = this.invokeViewMethod(chainId, track, null, bestBlockHeight, contractAddress, NRC20_METHOD_SYMBOL, null, null);
             if (programResult.isSuccess()) {
                 String symbol = programResult.getResult();
@@ -454,7 +454,7 @@ public class ContractHelper {
         contractResult.setNrc20(isNrc20);
         contractResult.setAcceptDirectTransfer(isAcceptDirectTransfer);
         if (isNrc20 || isNrc721) {
-            // NRC20 tokenName 验证代币名称格式
+            // NRC20 tokenName Verify token name format
             ProgramResult programResult = this.invokeViewMethod(chainId, track, null, bestBlockHeight, contractAddress, NRC20_METHOD_NAME, null, null);
             if (programResult.isSuccess()) {
                 String tokenName = programResult.getResult();
@@ -467,7 +467,7 @@ public class ContractHelper {
                     contractResult.setTokenName(tokenName);
                 }
             }
-            // NRC20 tokenSymbol 验证代币符号的格式
+            // NRC20 tokenSymbol Verify the format of token symbols
             programResult = this.invokeViewMethod(chainId, track, null, bestBlockHeight, contractAddress, NRC20_METHOD_SYMBOL, null, null);
             if (programResult.isSuccess()) {
                 String symbol = programResult.getResult();
@@ -551,7 +551,7 @@ public class ContractHelper {
         contractResult.setNrc20(isNrc20);
         contractResult.setAcceptDirectTransfer(isAcceptDirectTransfer);
         if (isNrc20 || isNrc721 || isNrc1155) {
-            // tokenName 验证代币名称格式
+            // tokenName Verify token name format
             ProgramResult programResult = this.invokeViewMethod(chainId, track, null, bestBlockHeight, contractAddress, NRC20_METHOD_NAME, null, null);
             if (programResult.isSuccess()) {
                 String tokenName = programResult.getResult();
@@ -564,7 +564,7 @@ public class ContractHelper {
                     contractResult.setTokenName(tokenName);
                 }
             }
-            // tokenSymbol 验证代币符号的格式
+            // tokenSymbol Verify the format of token symbols
             programResult = this.invokeViewMethod(chainId, track, null, bestBlockHeight, contractAddress, NRC20_METHOD_SYMBOL, null, null);
             if (programResult.isSuccess()) {
                 String symbol = programResult.getResult();
@@ -731,7 +731,7 @@ public class ContractHelper {
             }
 
             long blockHeight = blockHeader.getHeight();
-            // 当前区块状态根
+            // Current block state root
             byte[] currentStateRoot = ContractUtil.getStateRoot(blockHeader);
 
             byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
@@ -784,7 +784,7 @@ public class ContractHelper {
 
     public ContractResult makeFailedContractResult(int chainId, ContractWrapperTransaction tx, CallableResult callableResult, String errorMsg) {
         ContractResult contractResult = ContractResult.genFailed(tx.getContractData(), errorMsg);
-        // add by pierre at 2022/6/17 p14 没有经过虚拟机的交易，不再扣除Gas费用
+        // add by pierre at 2022/6/17 p14 No further deductions will be made for transactions that have not been processed through virtual machinesGascost
         if (ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.PROTOCOL_14) {
             contractResult.setGasUsed(0);
         }
@@ -796,10 +796,10 @@ public class ContractHelper {
     }
 
     /**
-     * 提取合约多资产转入的信息
+     * Extracting information on multi asset transfers from contracts
      */
     public void extractAssetInfoFromCallTransaction(CallContractData contractData, Transaction tx) throws NulsException {
-        // 过滤特殊的交易，token跨链转入交易(to中包含其他资产)
+        // Filter special transactions,tokenCross chain transfer transaction(toOther assets included in it)
         if (CROSS_CHAIN == tx.getType()) {
             return;
         }
@@ -814,11 +814,11 @@ public class ContractHelper {
         Map<ByteArrayWrapper, BigInteger> returnMap = new HashMap<>();
         for (ContractResult contractResult : resultList) {
             wrapperTx = contractResult.getTx();
-            // 终止合约不消耗Gas，跳过
+            // Termination of contract without consumptionGasSkip
             if (wrapperTx.getType() == DELETE_CONTRACT) {
                 continue;
             }
-            // add by pierre at 2019-12-03 代币跨链交易的合约调用是系统调用，不计算Gas消耗，跳过
+            // add by pierre at 2019-12-03 The contract call for token cross chain transactions is a system call and not calculatedGasConsumption, skipping
             if (wrapperTx.getType() == CROSS_CHAIN) {
                 continue;
             }
@@ -885,8 +885,8 @@ public class ContractHelper {
             if (contractCreate.getTokenType() == TokenTypeStatus.NOT_TOKEN.status()) {
                 break;
             }
-            // 获取 token tracker
-            // 处理NRC20/NRC721 token数据
+            // obtain token tracker
+            // handleNRC20/NRC721 tokendata
             String tokenName = contractCreate.getTokenName();
             String tokenSymbol = contractCreate.getTokenSymbol();
             int tokenDecimals = contractCreate.getTokenDecimals();
@@ -896,11 +896,11 @@ public class ContractHelper {
             if (!isNrc20Contract) {
                 break;
             }
-            // 处理NRC20 token数据
+            // handleNRC20 tokendata
             info.setDecimals(tokenDecimals);
             info.setTotalSupply(tokenTotalSupply);
 
-            // 调用账本模块，登记资产id，当NRC20合约存在[transferCrossChain]方法时，才登记资产id
+            // Call the ledger module to register assetsidWhenNRC20Contract exists[transferCrossChain]Only register assets when using the methodid
             List<ProgramMethod> methods = this.getAllMethods(chainId, contractCode);
             boolean isNewNrc20 = false;
             for(ProgramMethod method : methods) {
@@ -911,10 +911,10 @@ public class ContractHelper {
                 }
             }
             if(isNewNrc20) {
-                Log.info("CROSS-NRC20-TOKEN contract [{}] 向账本注册合约资产", contractAddressStr);
+                Log.info("CROSS-NRC20-TOKEN contract [{}] Register contract assets with the ledger", contractAddressStr);
                 Map resultMap = LedgerCall.commitNRC20Assets(chainId, tokenName, tokenSymbol, (short) tokenDecimals, tokenTotalSupply, contractAddressStr);
                 if(resultMap != null) {
-                    // 缓存合约地址和合约资产ID
+                    // Cache contract addresses and contract assetsID
                     int assetId = Integer.parseInt(resultMap.get("assetId").toString());
                     Chain chain = this.getChain(chainId);
                     Map<String, ContractTokenAssetsInfo> tokenAssetsInfoMap = chain.getTokenAssetsInfoMap();
@@ -930,10 +930,10 @@ public class ContractHelper {
 
     public Result onRollbackForCreateV14(int chainId, byte[] contractAddress, boolean isNrc20) throws Exception {
         String contractAddressStr = AddressTool.getStringAddressByBytes(contractAddress);
-        // 调用账本模块，回滚已登记的资产id
+        // Call the ledger module to roll back registered assetsid
         if(isNrc20) {
             LedgerCall.rollBackNRC20Assets(chainId, AddressTool.getStringAddressByBytes(contractAddress));
-            // 清理缓存
+            // Clear cache
             Chain chain = this.getChain(chainId);
             Map<String, ContractTokenAssetsInfo> tokenAssetsInfoMap = chain.getTokenAssetsInfoMap();
             ContractTokenAssetsInfo tokenAssetsInfo = tokenAssetsInfoMap.remove(contractAddressStr);

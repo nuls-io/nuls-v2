@@ -9,7 +9,7 @@ import io.nuls.base.basic.ProtocolVersion;
 /**
  * @Author: zhoulijun
  * @Time: 2020-01-15 18:16
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public interface ProtocolProvider {
 

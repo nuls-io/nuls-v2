@@ -38,8 +38,9 @@ public class TxContext {
     public static short UPDATE_VERSION_ACCOUNT_BLOCK = 11;
 
     public static short UPDATE_VERSION_ACCOUNT_BLOCK_UPGRADE = 12;
+    public static short UPDATE_VERSION_CM_UPGRADE = 18;
 
     public static Set<String> ACCOUNT_BLOCK_MANAGER_ADDRESS_SET = new HashSet<>();
-    // 最小签名数
+    // Minimum number of signatures
     public static int ACCOUNT_BLOCK_MIN_SIGN_COUNT = 0;
 }

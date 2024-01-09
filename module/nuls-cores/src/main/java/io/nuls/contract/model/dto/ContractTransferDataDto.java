@@ -35,9 +35,9 @@ import io.nuls.core.rpc.model.ApiModelProperty;
  */
 @ApiModel
 public class ContractTransferDataDto {
-    @ApiModelProperty(description = "调用合约交易hash（源交易hash，合约交易由调用合约交易派生而来）")
+    @ApiModelProperty(description = "Call contract transactionshash（Source transactionhashContract trading is derived from calling contract trading）")
     private String orginTxHash;
-    @ApiModelProperty(description = "合约地址")
+    @ApiModelProperty(description = "Contract address")
     private String contractAddress;
 
     public ContractTransferDataDto(ContractTransferData transferData) {

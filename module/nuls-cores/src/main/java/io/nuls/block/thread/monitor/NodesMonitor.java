@@ -35,11 +35,11 @@ import static io.nuls.block.constant.Constant.MODULE_WAITING;
 import static io.nuls.block.constant.StatusEnum.WAITING;
 
 /**
- * 网络节点数量监控线程
+ * Network node quantity monitoring thread
  *
  * @author captain
  * @version 1.0
- * @date 18-11-14 下午3:53
+ * @date 18-11-14 afternoon3:53
  */
 public class NodesMonitor extends BaseMonitor {
 
@@ -66,7 +66,7 @@ public class NodesMonitor extends BaseMonitor {
         }
         if (size >= minNodeAmount && WAITING.equals(context.getStatus())) {
             commonLog.info("chainId-" + chainId + ", AvailableNodes enough!");
-            //重新开启区块同步线程
+            //Restart the block synchronization thread
             BlockSynchronizer.syn(chainId);
         }
     }

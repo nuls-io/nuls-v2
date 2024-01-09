@@ -29,21 +29,21 @@ import java.util.List;
 public class ScriptUtil {
 
     /**
-     * 根据交易签名和公钥生成解锁脚本 （P2PSH）
+     * Generate unlocking scripts based on transaction signatures and public keys （P2PSH）
      *
-     * @param sigByte    交易签名
-     * @param pubkeyByte 公钥
-     * @return Script      生成的解锁脚本
+     * @param sigByte    Transaction signature
+     * @param pubkeyByte Public key
+     * @return Script      Generate unlock script
      */
     public static Script createP2PKHInputScript(byte[] sigByte, byte[] pubkeyByte) {
         return ScriptBuilder.createNulsInputScript(sigByte, pubkeyByte);
     }
 
     /**
-     * 根据输出地址生成锁定脚本
+     * Generate locking script based on output address
      *
-     * @param address 输出地址
-     * @return Script  生成的锁定脚本
+     * @param address Output address
+     * @return Script  The generated locking script
      */
     public static Script createP2PKHOutputScript(byte[] address) {
         return ScriptBuilder.createOutputScript(address, 1);
@@ -51,42 +51,42 @@ public class ScriptUtil {
 
 
     /**
-     * M-N多重签名模式下根据多个公钥和M-N生成赎回脚本
+     * M-NIn multi signature mode, based on multiple public keys andM-NGenerate redemption script
      *
-     * @param pub_keys 公钥列表
-     * @param m        表示至少需要多少个签名验证通过
-     * @return Script  生成的锁定脚本
+     * @param pub_keys Public Key List
+     * @param m        Indicates at least how many signatures are required for verification to pass
+     * @return Script  The generated locking script
      */
     public static Script creatRredeemScript(List<String> pub_keys, int m) {
         return ScriptBuilder.createNulsRedeemScript(m, pub_keys);
     }
 
     /**
-     * M-N多重签名模式下根据多个公钥和M-N生成解锁脚本（N就是公钥列表长度）
+     * M-NIn multi signature mode, based on multiple public keys andM-NGenerate unlock script（NIt's the length of the public key list）
      *
-     * @param signatures      签名列表
-     * @param multisigProgram 当交易为P2SH时，表示的就是赎回脚本
-     * @return Script     生成的解鎖脚本
+     * @param signatures      Signature List
+     * @param multisigProgram When the transaction isP2SHWhen, it represents the redemption script
+     * @return Script     Generate unlock script
      */
     public static Script createP2SHInputScript(List<byte[]> signatures, Script multisigProgram) {
         return ScriptBuilder.createNulsP2SHMultiSigInputScript(signatures, multisigProgram);
     }
 
     /**
-     * M-N多重签名模式下根据多个公钥和M-N生成锁定脚本（N就是公钥列表长度）
+     * M-NIn multi signature mode, based on multiple public keys andM-NGenerate lock script（NIt's the length of the public key list）
      *
-     * @param redeemScript 贖回腳本
-     * @return Script  生成的锁定脚本
+     * @param redeemScript Redemption script
+     * @return Script  The generated locking script
      */
 /*    public static Script createP2SHOutputScript(Script redeemScript) {
         return ScriptBuilder.createP2SHOutputScript(redeemScript);
     }*/
 
     /**
-     * M-N多重签名模式下，根据输出地址生成锁定脚本
+     * M-NIn multi signature mode, generate locking scripts based on output addresses
      *
-     * @param address 输出地址
-     * @return Script  生成的锁定脚本
+     * @param address Output address
+     * @return Script  The generated locking script
      */
     public static Script createP2SHOutputScript(byte[] address) {
         return ScriptBuilder.createOutputScript(address, 0);
@@ -94,7 +94,7 @@ public class ScriptUtil {
 
     public static void main(String[] args) {
         /**
-         * 脚本序列化测试代码
+         * Script serialization test code
          * */
         try {
             /*TransferTransaction tx = new TransferTransaction();
@@ -147,7 +147,7 @@ public class ScriptUtil {
             }*/
 
             /**
-             * 脚本创建测试代码
+             * Script creation test code
              * */
          /*   //P2PKHInput
             byte[] signbyte = "cVLwRLTvz3BxDAWkvS3yzT9pUcTCup7kQnfT2smRjvmmm1wAP6QT".getBytes();
@@ -174,7 +174,7 @@ public class ScriptUtil {
             System.out.println(redeemScript.getProgram().length);
             Script p2shInput = createP2SHInputScript(signBytes, redeemScript);
             System.out.println("P2SH_INPUT:" + p2shInput.getChunks());
-            ScriptChunk scriptChunk = p2shInput.getChunks().get(p2shInput.getChunks().size() - 1); //scriptChunk.data存放的就是赎回脚本的序列化信息
+            ScriptChunk scriptChunk = p2shInput.getChunks().get(p2shInput.getChunks().size() - 1); //scriptChunk.dataWhat is stored is the serialization information of the redemption script
             Script redeemScriptParse = new Script(scriptChunk.entity);
             System.out.println(redeemScriptParse.getChunks());
             //P2SHOutput
@@ -184,12 +184,12 @@ public class ScriptUtil {
             System.out.println(Arrays.toString(SerializeUtils.sha256hash160("03a690c7f3b07e320566162b0ff7d79c8c9f453c0a4a13305fcd90f4e4f4cf215c".getBytes())));
 */
             /**
-             * P2PKH脚本验证测试代码
+             * P2PKHScript validation test code
              * */
            /* Na values = Na.valueOf(10);
-            byte[] from = "".getBytes();                               //输入地址
-            byte[] to   = "".getBytes();                               //输出地址
-            String pub_key = "";                                       //输入账户公钥
+            byte[] from = "".getBytes();                               //Enter address
+            byte[] to   = "".getBytes();                               //Output address
+            String pub_key = "";                                       //Enter account public key
             String password ="";
             String remark ="";
             Na price = Na.valueOf(5);
@@ -204,7 +204,7 @@ public class ScriptUtil {
             CoinDataResult coinDataResult = accountLedgerService.getCoinData(from, values, tx.size() +  + coinData.size(), price);
             if (!coinDataResult.isEnough()) {
                 //return Result.getFailed(AccountLedgerErrorCode.INSUFFICIENT_BALANCE);
-                System.out.println("余额不足！");
+                System.out.println("Insufficient balance！");
                 return;
             }
             coinData.setFrom(coinDataResult.getCoinList());
@@ -215,7 +215,7 @@ public class ScriptUtil {
             tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
             P2PKHScriptSig sig = new P2PKHScriptSig();
             //sig.setPublicKey(account.getPubKey());*/
-            //用当前交易的hash和账户的私钥账户
+            //Using the current transaction'shashAnd the private key account of the account
             //sig.setSignData(accountService.signDigest(tx.getHash().getBytes(), account, password));
             //tx.setBlockSignature(sig.serialize());
 

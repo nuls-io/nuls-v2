@@ -25,7 +25,7 @@ public class Config implements InitializingBean {
     @Value.NotNull
     private Integer assetsId;
 
-    //默认资产小数位数
+    //Default Decimal Places for Assets
     private Integer decimals;
 
     @Value.NotNull

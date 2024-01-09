@@ -42,7 +42,7 @@ public class AccountContractCallData extends BaseNulsData {
 
     private String[] addresses;
 
-    // 1-添加 2-移除
+    // 1-Add 2-remove
     private int type;
 
     private byte[] extend;

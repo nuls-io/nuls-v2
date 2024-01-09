@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 一个模块对外提供的所有方法的合集
+ * The collection of all methods provided by a module to the outside world
  * A collection of all methods provided by a module
  *
  * @author tangyi

@@ -1,7 +1,7 @@
 package io.nuls.consensus.model.dto.input;
 
 /**
- * 查询红/黄牌牌参数类
+ * Query Red/Yellow card parameter class
  * Query Red/Yellow Card Parameter Class
  *
  * @author tag

@@ -54,12 +54,12 @@ public class FreezeStateServiceImpl implements FreezeStateService {
     private BigInteger unFreezeLockTimeState(List<FreezeLockTimeState> timeList, AccountState accountState) {
         long nowTime = NulsDateUtils.getCurrentTimeSeconds();
         long nowTimeMl = NulsDateUtils.getCurrentTimeMillis();
-        //可移除的时间锁列表
+        //List of removable time locks
         List<FreezeLockTimeState> timeRemove = new ArrayList<>();
         timeList.sort((x, y) -> Long.compare(x.getLockTime(), y.getLockTime()));
         for (FreezeLockTimeState freezeLockTimeState : timeList) {
             if (freezeLockTimeState.getLockTime() <= nowTime) {
-                //永久锁定的,继续处理
+                //Permanently locked,Continue processing
                 if (LedgerUtil.isPermanentLock(freezeLockTimeState.getLockTime())) {
                     continue;
                 }
@@ -77,12 +77,12 @@ public class FreezeStateServiceImpl implements FreezeStateService {
     private BigInteger unFreezeLockTimeStateV2(List<FreezeLockTimeState> timeList, AccountState accountState) {
         long nowTime = NulsDateUtils.getCurrentTimeSeconds();
         long nowTimeMl = NulsDateUtils.getCurrentTimeMillis();
-        //可移除的时间锁列表
+        //List of removable time locks
         List<FreezeLockTimeState> timeRemove = new ArrayList<>();
         timeList.sort((x, y) -> Long.compare(x.getLockTime(), y.getLockTime()));
         for (FreezeLockTimeState freezeLockTimeState : timeList) {
             if ((freezeLockTimeState.getLockTime() <= nowTime) || (freezeLockTimeState.getLockTime() > LedgerConstant.LOCKED_ML_TIME_VALUE && freezeLockTimeState.getLockTime() <= nowTimeMl)) {
-                //永久锁定的,继续处理
+                //Permanently locked,Continue processing
                 if (LedgerUtil.isPermanentLock(freezeLockTimeState.getLockTime())) {
                     continue;
                 }
@@ -98,17 +98,17 @@ public class FreezeStateServiceImpl implements FreezeStateService {
     }
 
     private BigInteger unFreezeLockHeightState(int addressChainId, List<FreezeHeightState> heightList, AccountState accountState) {
-        //此处高度可以做个时间缓存
+        //This height can be used for time caching
         long nowHeight = repository.getBlockHeight(addressChainId);
-        //可移除的高度锁列表
+        //List of height locks that can be removed
         List<FreezeHeightState> heightRemove = new ArrayList<>();
         heightList.sort((x, y) -> Long.compare(x.getHeight(), y.getHeight()));
         for (FreezeHeightState freezeHeightState : heightList) {
             if (freezeHeightState.getHeight() <= nowHeight) {
-                //时间到期，进行解锁
+                //Time expires, unlock
                 heightRemove.add(freezeHeightState);
             } else {
-                //因为正序排列，所以可以跳出
+                //Because it is arranged in positive order, it can be skipped out
                 break;
             }
         }
@@ -121,7 +121,7 @@ public class FreezeStateServiceImpl implements FreezeStateService {
     }
 
     /**
-     * 释放账户的锁定记录
+     * Release account lock records
      *
      * @param addressChainId
      * @param accountState

@@ -10,14 +10,14 @@ import java.util.Map;
  * */
 public interface DepositService {
     /**
-     * 委托共识
+     * Commission consensus
      * @param params
      * @return Result
      * */
     Result depositToAgent(Map<String,Object> params);
 
     /**
-     * 委托共识交易验证
+     * Entrusted consensus transaction verification
      * @param params
      * @return Result
      * */
@@ -25,21 +25,21 @@ public interface DepositService {
 
 
     /**
-     * 退出共识
+     * Exit consensus
      * @param params
      * @return Result
      * */
     Result withdraw(Map<String,Object> params);
 
     /**
-     * 退出共识交易验证
+     * Exit consensus transaction verification
      * @param params
      * @return Result
      * */
     Result withdrawValid(Map<String,Object> params);
 
     /**
-     * 查询委托信息列表
+     * Query delegation information list
      * @param params
      * @return Result
      * */

@@ -98,16 +98,16 @@ public class ContractMergeContractTransferTest {
             BigInteger value = transfer.getValue();
             ByteArrayWrapper wrapperFrom = new ByteArrayWrapper(from);
             if (compareFrom == null || !compareFrom.equals(wrapperFrom)) {
-                // 产生新交易
+                // Generate new transactions
                 if (compareFrom == null) {
-                    // 第一次遍历，获取新交易的coinFrom的nonce
+                    // First traversal to obtain new transactionscoinFromofnonce
                     contractBalance = tempBalanceManager.get(asString(from));
                     nonceBytes = HexUtil.decode(contractBalance.getNonce());
                 } else {
-                    // 产生另一个合并交易，更新之前的合并交易的hash和账户的nonce
+                    // Generate another merger transaction and update the previous merger transactionhashAnd the account'snonce
                     updatePreTxHashAndAccountNonce(contractTransferTx, contractBalance);
                     mergeCoinToMap.clear();
-                    // 获取新交易的coinFrom的nonce
+                    // Obtain new transactionscoinFromofnonce
                     contractBalance = tempBalanceManager.get(asString(from));
                     nonceBytes = HexUtil.decode(contractBalance.getNonce());
                 }
@@ -121,14 +121,14 @@ public class ContractMergeContractTransferTest {
                 contractTransferTx = createContractTransferTx(coinData, txData);
                 contractTransferList.add(contractTransferTx);
             } else {
-                // 增加coinFrom的转账金额
+                // increasecoinFromTransfer amount
                 coinFrom.setAmount(coinFrom.getAmount().add(value));
-                // 合并coinTo
+                // mergecoinTo
                 mergeCoinTo(mergeCoinToMap, coinData, to, assetsId, value);
             }
         }
 
-        // 最后产生的合并交易，遍历结束后更新它的hash和账户的nonce
+        // The final merger transaction is updated after the traversal is completedhashAnd the account'snonce
         this.updatePreTxHashAndAccountNonce(contractTransferTx, contractBalance);
 
         List<ContractMergedTransfer> mergerdTransferList = this.contractTransfer2mergedTransfer(orginHash, contractTransferList);

@@ -21,93 +21,93 @@
 package io.nuls.block.constant;
 
 /**
- * 链的类别
+ * Category of Chain
  *
  * @author captain
  * @version 1.0
- * @date 18-11-28 下午12:01
+ * @date 18-11-28 afternoon12:01
  */
 public enum ChainTypeEnum {
 
     /**
-     * 与主链相连
+     * Connected to the main chain
      * Connected to the master chain
      */
     MASTER_APPEND,
 
     /**
-     * 与主链分叉
+     * Fork from the main chain
      * Forked from the master chain
      */
     MASTER_FORK,
 
     /**
-     * 与分叉链相连
+     * Connected to fork chain
      * Connected to a fork chain
      */
     FORK_APPEND,
 
     /**
-     * 与分叉链分叉
+     * Fork with the forked chain
      * Forked from a fork chain
      */
     FORK_FORK,
 
     /**
-     * 与孤儿链相连
+     * Connected to orphan chains
      * Connected to a orphan chain
      */
     ORPHAN_APPEND,
 
     /**
-     * 与孤儿链分叉
+     * Splitting with Orphan Chain
      * Forked from a orphan chain
      */
     ORPHAN_FORK,
 
     /**
-     * 与主链重复
+     * Repeating with the main chain
      * duplicate chain
      */
     MASTER_DUPLICATE,
 
     /**
-     * 与分叉链重复
+     * Repeating with forked chains
      * duplicate chain
      */
     FORK_DUPLICATE,
 
     /**
-     * 与孤儿链重复
+     * Repeating with Orphan Chain
      * duplicate chain
      */
     ORPHAN_DUPLICATE,
 
     /**
-     * 部分重复
+     * Partial repetition
      */
     PARTIALLY_DUPLICATE,
 
     /**
-     * 链上区块数据错误
+     * On chain block data error
      * orphan chain
      */
     DATA_ERROR,
 
     /**
-     * 孤儿链
+     * Orphan Chain
      * orphan chain
      */
     ORPHAN,
 
     /**
-     * 分叉链
+     * Forked chain
      * fork chain
      */
     FORK,
 
     /**
-     * 主链
+     * Main chain
      * master chain
      */
     MASTER;

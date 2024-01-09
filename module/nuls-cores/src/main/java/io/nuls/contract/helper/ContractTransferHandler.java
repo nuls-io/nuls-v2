@@ -68,7 +68,7 @@ public class ContractTransferHandler {
 
     public boolean refreshTempBalance(int chainId, List<ProgramTransfer> transfers, ContractTempBalanceManager tempBalanceManager) {
         try {
-            // 增加转入, 扣除转出
+            // Increase transfer in, Deduction transfer out
             if (transfers != null && transfers.size() > 0) {
                 LinkedHashMap<String, BigInteger>[] contracts = this.filterContractValue(chainId, transfers);
                 LinkedHashMap<String, BigInteger> contractFromValue = contracts[0];
@@ -76,7 +76,7 @@ public class ContractTransferHandler {
                 LinkedHashMap<String, BigInteger> contractToLockValue = contracts[2];
                 byte[] contractBytes;
                 int assetChainId, assetId;
-                // 增加锁定转入
+                // Increase lock in transfer
                 Set<Map.Entry<String, BigInteger>> lockTos = contractToLockValue.entrySet();
                 for (Map.Entry<String, BigInteger> lockTo : lockTos) {
                     String key = lockTo.getKey();
@@ -84,11 +84,11 @@ public class ContractTransferHandler {
                     contractBytes = asBytes(keySplit[0]);
                     assetChainId = Integer.parseInt(keySplit[1]);
                     assetId = Integer.parseInt(keySplit[2]);
-                    // 初始化临时余额
+                    // Initialize temporary balance
                     tempBalanceManager.getBalance(contractBytes, assetChainId, assetId);
                     tempBalanceManager.addLockedTempBalance(contractBytes, lockTo.getValue(), assetChainId, assetId);
                 }
-                // 增加转入
+                // Increase transfer in
                 Set<Map.Entry<String, BigInteger>> tos = contractToValue.entrySet();
                 for (Map.Entry<String, BigInteger> to : tos) {
                     String key = to.getKey();
@@ -96,11 +96,11 @@ public class ContractTransferHandler {
                     contractBytes = asBytes(keySplit[0]);
                     assetChainId = Integer.parseInt(keySplit[1]);
                     assetId = Integer.parseInt(keySplit[2]);
-                    // 初始化临时余额
+                    // Initialize temporary balance
                     tempBalanceManager.getBalance(contractBytes, assetChainId, assetId);
                     tempBalanceManager.addTempBalance(contractBytes, to.getValue(), assetChainId, assetId);
                 }
-                // 扣除转出
+                // Deduction transfer out
                 Set<Map.Entry<String, BigInteger>> froms = contractFromValue.entrySet();
                 for (Map.Entry<String, BigInteger> from : froms) {
                     String key = from.getKey();
@@ -124,7 +124,7 @@ public class ContractTransferHandler {
 
     public boolean rollbackContractTempBalance(int chainId, List<ProgramTransfer> transfers, ContractTempBalanceManager tempBalanceManager) {
         try {
-            // 增加转出, 扣除转入
+            // Increase transfer out, Deduction of transfer in
             if (transfers != null && transfers.size() > 0) {
                 LinkedHashMap<String, BigInteger>[] contracts = this.filterContractValue(chainId, transfers);
                 LinkedHashMap<String, BigInteger> contractFromValue = contracts[0];
@@ -132,7 +132,7 @@ public class ContractTransferHandler {
                 LinkedHashMap<String, BigInteger> contractToLockValue = contracts[2];
                 byte[] contractBytes;
                 int assetChainId, assetId;
-                // 增加转出
+                // Increase transfer out
                 Set<Map.Entry<String, BigInteger>> froms = contractFromValue.entrySet();
                 for (Map.Entry<String, BigInteger> from : froms) {
                     String key = from.getKey();
@@ -146,7 +146,7 @@ public class ContractTransferHandler {
                     }
                     tempBalanceManager.addTempBalance(contractBytes, from.getValue(), assetChainId, assetId);
                 }
-                // 扣除转入
+                // Deduction of transfer in
                 Set<Map.Entry<String, BigInteger>> tos = contractToValue.entrySet();
                 for (Map.Entry<String, BigInteger> to : tos) {
                     String key = to.getKey();
@@ -156,7 +156,7 @@ public class ContractTransferHandler {
                     assetId = Integer.parseInt(keySplit[2]);
                     tempBalanceManager.minusTempBalance(contractBytes, to.getValue(), assetChainId, assetId);
                 }
-                // 扣除锁定转入
+                // Deduction lock in transfer
                 Set<Map.Entry<String, BigInteger>> lockTos = contractToLockValue.entrySet();
                 for (Map.Entry<String, BigInteger> lockTo : lockTos) {
                     String key = lockTo.getKey();
@@ -164,7 +164,7 @@ public class ContractTransferHandler {
                     contractBytes = asBytes(keySplit[0]);
                     assetChainId = Integer.parseInt(keySplit[1]);
                     assetId = Integer.parseInt(keySplit[2]);
-                    // 初始化临时余额
+                    // Initialize temporary balance
                     tempBalanceManager.getBalance(contractBytes, assetChainId, assetId);
                     tempBalanceManager.minusLockedTempBalance(contractBytes, lockTo.getValue(), assetChainId, assetId);
                 }
@@ -213,17 +213,17 @@ public class ContractTransferHandler {
     public boolean handleContractTransferTxs(int chainId, long blockTime, ContractResult contractResult, ContractTempBalanceManager tempBalanceManager) {
         boolean isCorrectContractTransfer = true;
         List<ProgramTransfer> transfers = contractResult.getTransfers();
-        // 创建合约转账(从合约转出)交易
+        // Create contract transfer(Transfer out from contract)transaction
         if (transfers != null && transfers.size() > 0) {
             Result result;
             do {
-                // 验证合约转账(从合约转出)交易的最小转移金额
+                // Verify contract transfer(Transfer out from contract)Minimum transfer amount for transactions
                 result = this.verifyTransfer(transfers);
                 if (result.isFailed()) {
                     isCorrectContractTransfer = false;
                     break;
                 }
-                // 合并内部转账交易并创建合约内部转账交易
+                // Merge internal transfer transactions and create contract internal transfer transactions
                 try {
                     this.mergeContractTransfer(contractResult, chainId, blockTime, tempBalanceManager);
                 } catch (Exception e) {
@@ -233,14 +233,14 @@ public class ContractTransferHandler {
                 }
             } while (false);
 
-            // 如果合约转账(从合约转出)出现错误，整笔合约交易视作合约执行失败
+            // If the contract transfer is made(Transfer out from contract)If an error occurs, the entire contract transaction will be considered as a contract execution failure
             if (!isCorrectContractTransfer) {
                 Log.warn("contract transfer execution failed, reason: {}", contractResult.getErrorMessage());
                 contractResult.setError(true);
                 contractResult.setErrorMessage(result.getErrorCode().getMsg());
-                // 回滚临时余额
+                // Rollback temporary balance
                 this.rollbackContractTempBalance(chainId, contractResult.getTransfers(), tempBalanceManager);
-                // 清空内部转账列表
+                // Clear internal transfer list
                 transfers.clear();
             }
         }
@@ -279,7 +279,7 @@ public class ContractTransferHandler {
         ContractBalance contractBalance = null;
         Map<String, ContractTransferTransaction> preTx = new HashMap<>();
         Map<String, ContractBalance> preBalance = new HashMap<>();
-        // 合约内部转账交易的时间的偏移量，用于排序（废弃）
+        // The offset of the time for internal transfer transactions within the contract, used for sorting（Abandoned）
         long timeOffset;
         //int i = 0;
         for (ProgramTransfer transfer : transfers) {
@@ -291,16 +291,16 @@ public class ContractTransferHandler {
             long lockedTime = transfer.getLockedTime();
             String wrapperFrom = addressKey(from, assetChainId, assetId);
             if (compareFrom == null || !compareFrom.equals(wrapperFrom)) {
-                // 产生新交易
+                // Generate new transactions
                 if (compareFrom == null) {
-                    // 第一次遍历，获取新交易的coinFrom的nonce
+                    // First traversal to obtain new transactionscoinFromofnonce
                     contractBalance = tempBalanceManager.getBalance(from, assetChainId, assetId).getData();
                     nonceBytes = RPCUtil.decode(contractBalance.getNonce());
                 } else {
-                    // 产生另一个合并交易，更新之前的合并交易的hash和账户的nonce
+                    // Generate another merger transaction and update the previous merger transactionhashAnd the account'snonce
                     this.updatePreTxHashAndAccountNonce(preTx.get(compareFrom), preBalance.get(compareFrom));
                     mergeCoinToMap.clear();
-                    // 获取新交易的coinFrom的nonce
+                    // Obtain new transactionscoinFromofnonce
                     contractBalance = tempBalanceManager.getBalance(from, assetChainId, assetId).getData();
                     nonceBytes = RPCUtil.decode(contractBalance.getNonce());
                 }
@@ -319,13 +319,13 @@ public class ContractTransferHandler {
                 preTx.put(wrapperFrom, contractTransferTx);
                 preBalance.put(wrapperFrom, contractBalance);
             } else {
-                // 增加coinFrom的转账金额
+                // increasecoinFromTransfer amount
                 coinFrom.setAmount(coinFrom.getAmount().add(value));
-                // 合并coinTo
+                // mergecoinTo
                 this.mergeCoinTo(mergeCoinToMap, coinData, to, value, assetChainId, assetId, lockedTime, blockTime);
             }
         }
-        // 最后产生的合并交易，遍历结束后更新它的hash和账户的nonce
+        // The final merger transaction is updated after the traversal is completedhashAnd the account'snonce
         this.updatePreTxHashAndAccountNonce(contractTransferTx, contractBalance);
 
         List<ContractMergedTransfer> mergerdTransferList = this.contractTransfer2mergedTransfer(tx, contractTransferList);

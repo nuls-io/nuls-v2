@@ -27,7 +27,7 @@ package io.nuls.core.rpc.invoke;
 import io.nuls.core.rpc.model.message.Response;
 
 /**
- * 如果一个Response需要自动处理，那么自动处理的类必须继承BaseInvoke，然后重写callBack方法
+ * If aResponseIf automatic processing is required, the automatically processed class must inheritBaseInvoke, and then rewritecallBackmethod
  * If a Response needs to be automatically processed, the automatically processed class must inherit BaseInvoke and then override the callBack method
  *
  * @author tangyi
@@ -35,10 +35,10 @@ import io.nuls.core.rpc.model.message.Response;
  */
 public abstract class BaseInvoke {
     /**
-     * 自动回调的类需要重写的方法
+     * Methods that need to be rewritten for automatic callback classes
      * A method that needs to be rewritten for a class that calls back automatically
      *
-     * @param response 请求的响应信息，Response information to requests
+     * @param response Request response information,Response information to requests
      */
     public abstract void callBack(Response response);
 }

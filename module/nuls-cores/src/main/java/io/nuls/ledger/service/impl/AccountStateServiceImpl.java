@@ -67,7 +67,7 @@ public class AccountStateServiceImpl implements AccountStateService {
 
     @Override
     public void rollAccountState(int chainId, List<AccountStateSnapshot> preAccountStates) throws Exception {
-        //获取当前数据库值
+        //Get the current database value
         Map<byte[], byte[]> accountStates = new HashMap<>(preAccountStates.size());
         Map<String, AccountState> accountStatesMem = new HashMap<>(preAccountStates.size());
         for (AccountStateSnapshot accountStateSnapshot : preAccountStates) {
@@ -75,7 +75,7 @@ public class AccountStateServiceImpl implements AccountStateService {
                     accountStateSnapshot.getAssetChainId(), accountStateSnapshot.getAssetId());
             accountStates.put(assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING), accountStateSnapshot.getAccountState().serialize());
             accountStatesMem.put(assetKey, accountStateSnapshot.getAccountState());
-            //获取当前数据库值
+            //Get the current database value
             Map<String, TxUnconfirmed> unconfirmedNonces = new HashMap<>(64);
             AccountStateUnconfirmed accountStateUnconfirmed = new AccountStateUnconfirmed();
             List<AmountNonce> list = accountStateSnapshot.getNonces();
@@ -86,7 +86,7 @@ public class AccountStateServiceImpl implements AccountStateService {
                 unconfirmedNonces.put(LedgerUtil.getNonceEncode(amountNonce.getNonce()), txUnconfirmed);
                 amount.add(amountNonce.getAmount());
             }
-            //进行nonce的回退合并处理
+            //carry outnonceRollback and merge processing
             if (unconfirmedNonces.size() > 0) {
                 accountStateUnconfirmed.setNonce(list.get(list.size() - 1).getNonce());
                 accountStateUnconfirmed.setFromNonce(list.get(list.size() - 1).getFromNonce());
@@ -102,7 +102,7 @@ public class AccountStateServiceImpl implements AccountStateService {
 
 
     /**
-     * 只返回数据，不同步计算，不进行更新
+     * Only return data, do not synchronize calculations, do not update
      *
      * @param address
      * @param addressChainId
@@ -112,7 +112,7 @@ public class AccountStateServiceImpl implements AccountStateService {
      */
     @Override
     public AccountState getAccountState(String address, int addressChainId, int assetChainId, int assetId) {
-        //尝试缓存获取
+        //Attempting to cache and retrieve
         AccountState accountState = repository.getAccountStateByMemory(addressChainId, LedgerUtil.getKeyStr(address, assetChainId, assetId));
         if (null != accountState) {
             return accountState;
@@ -134,10 +134,10 @@ public class AccountStateServiceImpl implements AccountStateService {
      */
     @Override
     public AccountState getAccountStateReCal(String address, int addressChainId, int assetChainId, int assetId) {
-        //尝试缓存获取
+        //Attempting to cache and retrieve
         AccountState accountState = repository.getAccountStateByMemory(addressChainId, LedgerUtil.getKeyStr(address, assetChainId, assetId));
         if (null == accountState) {
-            //账户处理锁
+            //Account processing lock
             byte[] key = LedgerUtil.getKey(address, assetChainId, assetId);
             accountState = repository.getAccountState(addressChainId, key);
             if (null == accountState) {
@@ -145,7 +145,7 @@ public class AccountStateServiceImpl implements AccountStateService {
                 return accountState;
             }
         }
-        //解冻时间高度锁
+        //Thawing time height lock
         if (accountState.timeAllow()) {
             freezeStateService.recalculateFreeze(addressChainId, accountState);
             accountState.setLatestUnFreezeTime(NulsDateUtils.getCurrentTimeSeconds());

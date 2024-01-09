@@ -4,7 +4,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.filter.ThresholdFilter;
 
 /**
- * 日志打印级别过滤器
+ * Log printing level filter
  * Log Printing Level Filter
  *
  * @author tag
@@ -12,7 +12,7 @@ import ch.qos.logback.classic.filter.ThresholdFilter;
  * */
 public class LogFilter {
     /**
-     * 通过level设置过滤器,小于该level的日志文件都打印
+     * adoptlevelcatalog filter,Less than thislevelAll log files are printed
      * @param level
      * @return
      * */

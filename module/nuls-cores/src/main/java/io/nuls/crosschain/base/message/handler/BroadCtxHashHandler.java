@@ -9,7 +9,7 @@ import io.nuls.crosschain.base.message.BroadCtxHashMessage;
 import io.nuls.crosschain.base.service.ProtocolService;
 
 /**
- * BroadCtxHashMessage处理类
+ * BroadCtxHashMessageProcessing class
  * BroadCtxHashMessage Processing Class
  *
  * @author tag

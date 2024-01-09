@@ -33,14 +33,14 @@ import io.nuls.ledger.model.po.sub.AccountStateSnapshot;
 import java.util.List;
 
 /**
- * 交易业务处理接口
+ * Transaction Business Processing Interface
  * @author lanjinsheng
  */
 public interface TransactionService {
 
 
     /**
-     * 未确认交易数据处理
+     * Unconfirmed transaction data processing
      *
      * @param addressChainId
      * @param transaction
@@ -51,7 +51,7 @@ public interface TransactionService {
 
 
     /**
-     * 已确认区块数据提交
+     * Confirmed block data submission
      *
      * @param addressChainId
      * @param txList
@@ -61,7 +61,7 @@ public interface TransactionService {
     boolean confirmBlockProcess(int addressChainId, List<Transaction> txList, long blockHeight);
 
     /**
-     * 确认交易回滚处理
+     * Confirm transaction rollback processing
      *
      * @param addressChainId
      * @param preAccountStates
@@ -71,7 +71,7 @@ public interface TransactionService {
     boolean rollBackBlock(int addressChainId, List<AccountStateSnapshot> preAccountStates, long blockHeight);
 
     /**
-     * 确认交易回滚处理
+     * Confirm transaction rollback processing
      *
      * @param addressChainId
      * @param blockHeight
@@ -81,7 +81,7 @@ public interface TransactionService {
     boolean rollBackConfirmTxs(int addressChainId, long blockHeight, List<Transaction> txs);
 
     /**
-     * 未确认交易回滚处理
+     * Unconfirmed transaction rollback processing
      * @param addressChainId
      * @param transaction
      * @return
@@ -89,7 +89,7 @@ public interface TransactionService {
     boolean rollBackUnconfirmTx(int addressChainId, Transaction transaction);
 
     /**
-     *  是否提交过
+     *  Have you submitted it before
      * @param addressChainId
      * @param accountNonceKey
      * @return
@@ -98,7 +98,7 @@ public interface TransactionService {
     boolean fromNonceExist(int addressChainId, String accountNonceKey) throws Exception;
 
     /**
-     *是否已存在hash
+     *Does it already existhash
      * @param addressChainId
      * @param hash
      * @return

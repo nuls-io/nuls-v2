@@ -71,7 +71,7 @@ public class BlockDataServiceImpl implements BlockDataService {
 
     @Override
     public void initBlockDatas() throws Exception {
-        //获取确认高度
+        //Obtain confirmation height
         List<ChainHeight> list = getChainsBlockHeight();
         if (null != list) {
             LoggerUtil.COMMON_LOG.info("chainList size = {}", list.size());
@@ -80,7 +80,7 @@ public class BlockDataServiceImpl implements BlockDataService {
                 BlockSnapshotAccounts blockSnapshotAccounts = repository.getBlockSnapshot(chainHeight.getChainId(), chainHeight.getBlockHeight() + 1);
                 if (null != blockSnapshotAccounts) {
                     List<AccountStateSnapshot> preAccountStates = blockSnapshotAccounts.getAccounts();
-                    //回滚高度
+                    //Rollback height
                     accountStateService.rollAccountState(chainHeight.getChainId(), preAccountStates);
                 }
                 LoggerUtil.COMMON_LOG.info("end chain ledger checked..chainId = {},chainHeight={}", chainHeight.getChainId(), chainHeight.getBlockHeight());
@@ -90,7 +90,7 @@ public class BlockDataServiceImpl implements BlockDataService {
 
     @Override
     public void syncBlockHeight() throws Exception {
-        //获取确认高度
+        //Obtain confirmation height
         List<ChainHeight> list = getChainsBlockHeight();
         if (null != list) {
             LoggerUtil.COMMON_LOG.info("syncBlockHeight size = {}", list.size());
@@ -99,15 +99,15 @@ public class BlockDataServiceImpl implements BlockDataService {
                 long blockHeight = callRpcService.getBlockLatestHeight(chainHeight.getChainId());
                 if (blockHeight > 0 && ((blockHeight + 1) == chainHeight.getBlockHeight())) {
                     LoggerUtil.logger(chainHeight.getChainId()).debug("rollBackBlockTxs chainId={},blockHeight={}", chainHeight.getChainId(), chainHeight.getBlockHeight());
-                    //回滚高度
+                    //Rollback height
                     repository.saveOrUpdateBlockHeight(chainHeight.getChainId(), blockHeight);
                     BlockSnapshotAccounts blockSnapshotAccounts = repository.getBlockSnapshot(chainHeight.getChainId(), chainHeight.getBlockHeight());
                     if (null != blockSnapshotAccounts) {
                         List<AccountStateSnapshot> preAccountStates = blockSnapshotAccounts.getAccounts();
-                        //回滚高度
+                        //Rollback height
                         accountStateService.rollAccountState(chainHeight.getChainId(), preAccountStates);
-                        //更新高度，删除备份
-                        //删除备份数据
+                        //Update height, delete backup
+                        //Delete backup data
                         repository.delBlockSnapshot(chainHeight.getChainId(), blockHeight);
                         Log.info("####end syncBlockHeight..chainId = {},chainHeight={}", chainHeight.getChainId(), chainHeight.getBlockHeight());
                     }
@@ -130,14 +130,14 @@ public class BlockDataServiceImpl implements BlockDataService {
         Map<String, List<String>> assetAddressIndex = new HashMap<>();
         BlockSnapshotTxs blockSnapshotTxs = new BlockSnapshotTxs();
         blockSnapshotTxs.setBlockHash(block.getHeader().getHash().toHex());
-        //解析区块
+        //Parsing Blocks
         List<Transaction> txList = block.getTxs();
         for (Transaction transaction : txList) {
             byte[] nonce8Bytes = LedgerUtil.getNonceByTx(transaction);
             String txHash = transaction.getHash().toHex();
             blockSnapshotTxs.addHash(txHash);
             saveHashMap.put(ByteUtils.toBytes(txHash, LedgerConstant.DEFAULT_ENCODING), ByteUtils.longToBytes(height));
-            //从缓存校验交易
+            //Verify transactions from cache
             CoinData coinData = CoinDataUtil.parseCoinData(transaction.getCoinData());
             if (null == coinData) {
                 continue;
@@ -146,7 +146,7 @@ public class BlockDataServiceImpl implements BlockDataService {
             for (CoinFrom from : froms) {
                 String address = LedgerUtil.getRealAddressStr(from.getAddress());
                 if (LedgerUtil.isNotLocalChainAccount(addressChainId, from.getAddress())) {
-                    //非本地网络账户地址,不进行处理
+                    //Non local network account address,Not processed
                     continue;
                 }
                 LedgerUtil.dealAssetAddressIndex(assetAddressIndex, from.getAssetsChainId(), from.getAssetsId(), address);
@@ -160,27 +160,27 @@ public class BlockDataServiceImpl implements BlockDataService {
             List<CoinTo> tos = coinData.getTo();
             for (CoinTo to : tos) {
                 if (LedgerUtil.isNotLocalChainAccount(addressChainId, to.getAddress())) {
-                    //非本地网络账户地址,不进行处理
+                    //Non local network account address,Not processed
                     continue;
                 }
                 String address = LedgerUtil.getRealAddressStr(to.getAddress());
                 LedgerUtil.dealAssetAddressIndex(assetAddressIndex, to.getAssetsChainId(), to.getAssetsId(), address);
             }
         }
-        //存储备份信息
+        //Store backup information
         lgBlockSyncRepository.bakBlockInfosByHeight(addressChainId, height, blockSnapshotTxs);
-        //存储height - hash
+        //storageheight - hash
         lgBlockSyncRepository.saveBlockHashByHeight(addressChainId, height, block.getHeader().getHash().toHex());
         chainAssetsService.updateChainAssets(addressChainId, assetAddressIndex);
         lgBlockSyncRepository.saveAccountNonces(addressChainId, ledgerNonce);
         lgBlockSyncRepository.saveAccountHash(addressChainId, saveHashMap);
-        //存储当前height: chainId-height
+        //Store currentheight: chainId-height
         lgBlockSyncRepository.saveOrUpdateSyncBlockHeight(addressChainId, height);
     }
 
     @Override
     public void clearSurplusBakDatas(int addressChainId, long height) {
-        //删除height-100的缓存
+        //deleteheight-100Cache of
         if (height > LedgerConstant.CACHE_NONCE_INFO_BLOCK) {
             lgBlockSyncRepository.delBlockSnapshotTxs(addressChainId, (height - LedgerConstant.CACHE_NONCE_INFO_BLOCK));
         }

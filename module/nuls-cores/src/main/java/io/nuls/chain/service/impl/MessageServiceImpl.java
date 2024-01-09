@@ -44,7 +44,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 消息协议服务
+ * Message Protocol Service
  * Message protocol service implement
  *
  * @author: lan
@@ -69,7 +69,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     /**
-     * 接收链发行资产
+     * Receiving chain issuance assets
      * recieve Chain Issuing Assets
      *
      * @return
@@ -107,16 +107,16 @@ public class MessageServiceImpl implements MessageService {
                         try {
                             ChainAsset chainAsset = chainAssetStorage.load(chainAssetKey);
                             if (null != chainAsset) {
-                                //将跨链转出部分进行合计
+                                //Total the cross chain transfer out portion
                                 totalAmount = totalAmount.add(chainAsset.getOutNumber()).subtract(chainAsset.getInNumber());
                             }
                             assetService.saveMsgChainCirculateAmount(key, totalAmount);
-                            LoggerUtil.logger().info("友链资产更新完成:key={},amount={}", key, totalAmount);
+                            LoggerUtil.logger().info("Friendly Chain Asset Update Completed:key={},amount={}", key, totalAmount);
                         } catch (Exception e) {
                             LoggerUtil.logger().error(e);
                         }
                     }else{
-                        LoggerUtil.logger().info("友链资产更新失败:key={},amount={}", key, totalAmount);
+                        LoggerUtil.logger().info("Friendly link asset update failed:key={},amount={}", key, totalAmount);
                     }
                 }
             }
@@ -133,16 +133,16 @@ public class MessageServiceImpl implements MessageService {
                 try {
                     ChainAsset chainAsset = chainAssetStorage.load(chainAssetKey);
                     if (null != chainAsset) {
-                        //将跨链转出部分进行合计
+                        //Total the cross chain transfer out portion
                         totalAmount = totalAmount.add(chainAsset.getOutNumber()).subtract(chainAsset.getInNumber());
                     }
                     assetService.saveMsgChainCirculateAmount(key, totalAmount);
-                    LoggerUtil.logger().info("主网资产更新完成:key={},amount={}", key, totalAmount);
+                    LoggerUtil.logger().info("Main network asset update completed:key={},amount={}", key, totalAmount);
                 } catch (Exception e) {
                     LoggerUtil.logger().error(e);
                 }
             }else{
-                LoggerUtil.logger().info("主网资产更新失败:key={},amount={}", key, totalAmount);
+                LoggerUtil.logger().info("Main network asset update failed:key={},amount={}", key, totalAmount);
             }
         }
     }

@@ -27,12 +27,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * token资产类型
+ * tokenAsset type
  * @author: PierreLuo
  * @date: 2019-08-20
  */
 public enum TokenTypeStatus {
-    // 0 - 非token, 1 - NRC20, 2 - NRC721, 3 - NRC1155
+    // 0 - wrongtoken, 1 - NRC20, 2 - NRC721, 3 - NRC1155
     NOT_TOKEN(0),
     NRC20(1),
     NRC721(2),

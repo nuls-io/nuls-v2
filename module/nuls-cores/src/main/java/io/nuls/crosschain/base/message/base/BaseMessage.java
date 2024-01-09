@@ -2,7 +2,7 @@ package io.nuls.crosschain.base.message.base;
 
 import io.nuls.base.data.BaseNulsData;
 /**
- * 通用消息体
+ * General message body
  * @author tag
  * @date 2019/4/4
  */

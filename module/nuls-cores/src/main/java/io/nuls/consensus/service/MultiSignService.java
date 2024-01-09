@@ -5,7 +5,7 @@ import io.nuls.core.basic.Result;
 import java.util.Map;
 
 /**
- * 多签账户相关交易接口类
+ * Multi signature account related transaction interface class
  * Multi-Sign Account Related Transaction Interface Class
  *
  * @author tag
@@ -13,22 +13,22 @@ import java.util.Map;
  * */
 public interface MultiSignService {
     /**
-     * 多签账户创建节点
+     * Multiple account creation nodes
      * */
     Result createMultiAgent(Map<String,Object> params);
 
     /**
-     * 多签账户停止节点
+     * Stop node for multi account signing
      * */
     Result stopMultiAgent(Map<String,Object> params);
 
     /**
-     * 多签账户委托节点
+     * Multiple account delegation nodes
      * */
     Result multiDeposit(Map<String,Object> params);
 
     /**
-     * 多签账户退出委托
+     * Sign multiple accounts to exit the commission
      * */
     Result multiWithdraw(Map<String,Object> params);
 }

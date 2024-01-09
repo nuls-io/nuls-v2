@@ -1,31 +1,31 @@
-# 链管理模块CMD接口
+# Chain management moduleCMDinterface
 
 [TOC]
 
 [^]: 
 
-#### 1 注册一条新的友链
+#### 1 Register a new friend chain
 
-* 功能说明：
+* Function Description：
 
-  注册新的友链到NULS主网。
+  Register a new friend link toNULSMain network.
 
-  注册一条新友链必须含一个注册资产。
+  Registering a new friend chain must include one registered asset.
 
 
-- 接口定义
+- Interface Definition
 
-  - 接口说明
+  - Interface Description
 
-  ​        向链管理模块注册友链信息。
+  ​        Register friend chain information with the chain management module.
 
   ​        method : cm_chainReg
 
-  - 请求示例
+  - Request Example
 
   ```
   {
-          "chainId": "链标识",
+          "chainId": "Chain identification",
           "assetId": 2,
           "chainName": "nuls chain",
           "addressType": "1",
@@ -34,96 +34,96 @@
           "txConfirmedBlockNum":30,
           "address":"NsdxSexqXF4eVXkcGLPpZCPKo92A8xpp",
           "symbol":"NULS",
-          "assetName":"纳斯",
+          "assetName":"Nass",
           "initNumber":"1000000000",
           "decimalPlaces":8,
           "password":"xxxxxxxxxxxxx"
           
   }
   ```
-  - 请求参数说明
+  - Request parameter description
 
   | parameter           | required | type   | description                                 |
   | :------------------ | :------- | :----- | ------------------------------------------- |
-  | chainId             | true     | int    | 链标识                                      |
-  | assetId             | true     | int    | 资产id                                      |
-  | chainName           | true     | string | 链名称                                      |
-  | addressType         | true     | int    | 链上创建的账户的地址类型：1生态内 2非生态内 |
-  | magicNumber         | true     | string | 网络魔法参数                                |
-  | minAvailableNodeNum | true     | int    | 最小可用节点数量                            |
-  | txConfirmBlockNum   | true     | int    | 交易确认块数                                |
-  | symbol              | true     | string | 资产符号                                    |
-  | assetName           | true     | string | 资产名称                                    |
-  | initNumber          | true     | string | 资产初始值                                  |
-  | decimalPlaces       | true     | int    | 最小资产可分割位数                          |
-  | address             | true     | string | 创建链的主网地址                            |
-  | password            | true     | string | 私钥对应的密码                              |
+  | chainId             | true     | int    | Chain identification                                      |
+  | assetId             | true     | int    | assetid                                      |
+  | chainName           | true     | string | Chain Name                                      |
+  | addressType         | true     | int    | The address type of the account created on the chain：1Within the ecosystem 2Non ecological interior |
+  | magicNumber         | true     | string | Network Magic Parameters                                |
+  | minAvailableNodeNum | true     | int    | Minimum number of available nodes                            |
+  | txConfirmBlockNum   | true     | int    | Number of transaction confirmation blocks                                |
+  | symbol              | true     | string | Asset symbols                                    |
+  | assetName           | true     | string | Asset Name                                    |
+  | initNumber          | true     | string | Initial value of assets                                  |
+  | decimalPlaces       | true     | int    | Minimum divisible digits of assets                          |
+  | address             | true     | string | Create the main network address for the chain                            |
+  | password            | true     | string | The password corresponding to the private key                              |
 
-  - 返回示例
+  - Return Example
 
      Failed
 
      ```
-     统一RPC标准格式
+     unifiedRPCstandard format
      
      ```
 
      Success
 
      ```
-     统一RPC标准格式
+     unifiedRPCstandard format
      
      ```
 
-  - 返回字段说明
+  - Return Field Description
 
   | parameter | type   | description |
   | --------- | ------ | ----------- |
-  | txHash    | String | 交易hash    |
+  | txHash    | String | transactionhash    |
 
 
 
 
-#### 2.注销已经存在的友链
+#### 2.Cancel existing friend chains
 
-- 功能说明：
+- Function Description：
 
-  注销已经存在的友链。
-
-
+  Cancel existing friend chains.
 
 
-1. 链是随资产而创建，所以注销链必须进行资产校验，只有删除最后一条资产，链才会随着一起注销。
 
- 2.判断是否允许注销的条件：
 
-​     资产与链存在。
+1. Chains are created with assets, so asset verification must be performed to cancel the chain. Only by deleting the last asset will the chain be cancelled together.
 
-​    随链只有最后一个资产。
+ 2.Determine the conditions for allowing deregistration：
 
-​    链资产有n%资产在自有主链上。 
+​     Assets and chains exist.
 
- 3.链管理模块进行链交易的封装发送给交易模块。
+​    There is only one last asset along the chain.
 
-​     期间需要通过账本模块获取账户余额及交易nonce值。
+​    Chain assets includen%Assets are on their own main chain. 
 
- 4.交易模块会在交易处理过程中进行数据校验的回调。
+ 3.The chain management module encapsulates chain transactions and sends them to the transaction module.
 
- 5.链管理模块通过 交易模块回调 “提交链注销交易”的接口 来进行注销数据提交。
+​     During this period, it is necessary to obtain account balance and transactions through the ledger modulenonceValue.
 
- 6.链管理模块存储数据并将注册信息下发给网络模块。
+ 4.The transaction module will perform data validation callbacks during the transaction processing.
 
- 7.删除链随注销的资产，将退回抵押押金的80%。
+ 5.The chain management module passes through Transaction module callback “Submit Chain Cancellation Transaction”Interface for To submit cancellation data.
 
-- 接口定义
+ 6.The chain management module stores data and distributes registration information to the network module.
 
-  - 接口说明
+ 7.Delete the assets that have been cancelled along with the chain, and the collateral deposit will be refunded80%.
 
-  ​        向链管理模块注销友链信息（调用的是资产注销接口，因为链随最后资产一起注销）。
+- Interface Definition
+
+  - Interface Description
+
+  ​        Unregister friend chain information from the chain management module（The asset deregistration interface was called because the chain was deregistered along with the final asset）.
 
   ​        method : cm_assetDisable
 
-  - 请求示例
+  - Request Example
 
   ```
   {
@@ -135,62 +135,62 @@
   }
   ```
 
-  - 请求参数说明
+  - Request parameter description
 
   | parameter | required | type   | description          |
   | :-------- | :------- | :----- | -------------------- |
-  | chainId   | true     | int    | 链标识               |
-  | assetId   | true     | int    | 资产id               |
-  | address   | true     | string | 创建链的主网账户地址 |
-  | password  | true     | string | 私钥对应的密码       |
+  | chainId   | true     | int    | Chain identification               |
+  | assetId   | true     | int    | assetid               |
+  | address   | true     | string | Create the main network account address for the chain |
+  | password  | true     | string | The password corresponding to the private key       |
 
-  - 返回示例
+  - Return Example
 
     Failed
 
     ```
-    统一RPC标准格式
+    unifiedRPCstandard format
     
     ```
 
     Success
 
     ```
-    统一RPC标准格式
+    unifiedRPCstandard format
     
     ```
 
-  - 返回字段说明
+  - Return Field Description
 
   | parameter | type   | description |
   | --------- | ------ | ----------- |
-  | txHash    | string | 交易hash    |
+  | txHash    | string | transactionhash    |
 
 
 
-#### 3  增加资产信息
+#### 3  Add asset information
 
-- 功能说明：
+- Function Description：
 
-  已有链上登记注册资产。
+  Assets have already been registered on the chain.
 
 
-- 接口定义
+- Interface Definition
 
-  - 接口说明
+  - Interface Description
 
-  ​        向链管理模块注册资产信息。
+  ​        Register asset information with the chain management module.
 
   ​        method : cm_assetReg
 
-  - 请求示例
+  - Request Example
 
   ```
   {
           "chainId": 152,
           "assetId":85,
           "symbol":"NULS",
-          "assetName":"纳斯",
+          "assetName":"Nass",
           "initNumber":"1000000000",
           "decimalPlaces":8,
            "address":"NsdxSexqXF4eVXkcGLPpZCPKo92A8xpp",
@@ -199,55 +199,55 @@
   }
   ```
 
-  - 请求参数说明
+  - Request parameter description
 
   | parameter     | required | type   | description        |
   | :------------ | :------- | :----- | ------------------ |
-  | chainId       | true     | int    | 链标识             |
-  | symbol        | true     | string | 资产符号           |
-  | assetName     | true     | string | 资产名称           |
-  | initNumber    | true     | string | 资产初始值         |
-  | decimalPlaces | true     | int    | 最小资产可分割位数 |
-  | address       | true     | string | 创建链的主网地址   |
-  | password      | true     | string | 私钥对应的密码     |
+  | chainId       | true     | int    | Chain identification             |
+  | symbol        | true     | string | Asset symbols           |
+  | assetName     | true     | string | Asset Name           |
+  | initNumber    | true     | string | Initial value of assets         |
+  | decimalPlaces | true     | int    | Minimum divisible digits of assets |
+  | address       | true     | string | Create the main network address for the chain   |
+  | password      | true     | string | The password corresponding to the private key     |
 
-  - 返回示例
+  - Return Example
 
     Failed
 
     ```
-    统一RPC标准格式
+    unifiedRPCstandard format
     ```
 
     Success
 
     ```
-    统一RPC标准格式
+    unifiedRPCstandard format
     ```
 
-  - 返回字段说明
+  - Return Field Description
 
   | parameter | type   | description |
   | --------- | ------ | ----------- |
-  | txHash    | String | 交易hash值  |
+  | txHash    | String | transactionhashvalue  |
 
 
 
-#### 4 已登记友链删除资产类型
+#### 4 Registered Friend Chain Delete Asset Type
 
-- 功能说明：
+- Function Description：
 
-  对指定友链销毁资产。
+  Destroy assets on designated friend chains.
 
-- 接口定义
+- Interface Definition
 
-  - 接口说明
+  - Interface Description
 
-  ​        向链管理模块注销资产信息。
+  ​        Unregister asset information from the chain management module.
 
   ​        method : cm_assetDisable
 
-  - 请求示例
+  - Request Example
 
   ```
   {
@@ -259,56 +259,56 @@
   }
   ```
 
-  - 请求参数说明
+  - Request parameter description
 
   | parameter | required | type   | description          |
   | :-------- | :------- | :----- | -------------------- |
-  | chainId   | true     | int    | 链标识               |
-  | assetId   | true     | int    | 资产id               |
-  | address   | true     | string | 创建链的主网账户地址 |
-  | password  | true     | string | 私钥对应的密码       |
+  | chainId   | true     | int    | Chain identification               |
+  | assetId   | true     | int    | assetid               |
+  | address   | true     | string | Create the main network account address for the chain |
+  | password  | true     | string | The password corresponding to the private key       |
 
-  - 返回示例
+  - Return Example
 
     Failed
 
     ```
-    统一RPC标准格式
+    unifiedRPCstandard format
     
     ```
 
     Success
 
     ```
-    统一RPC标准格式
+    unifiedRPCstandard format
     
     ```
 
-  - 返回字段说明
+  - Return Field Description
 
   | parameter | type   | description  |
   | --------- | ------ | ------------ |
-  | txHash    | String | 删除指定资产 |
+  | txHash    | String | Delete specified assets |
 
-#### 5  查询注册链信息
+#### 5  Query registration chain information
 
-- 功能说明：
+- Function Description：
 
-  查询注册链信息
+  Query registration chain information
 
-- 流程描述
+- Process Description
 
-​        无
+​        nothing
 
-- 接口定义
+- Interface Definition
 
-  - 接口说明
+  - Interface Description
 
-  ​        查询注册友链信息。
+  ​        Search for registered friend chain information.
 
   ​        method : cm_chain
 
-  - 请求示例
+  - Request Example
 
   ```
   {
@@ -316,18 +316,18 @@
   }
   ```
 
-  - 请求参数说明
+  - Request parameter description
 
   | parameter | required | type | description |
   | :-------- | :------- | :--- | ----------- |
-  | chainId   | true     | int  | 链标识      |
+  | chainId   | true     | int  | Chain identification      |
 
-  - 返回示例
+  - Return Example
 
     Failed
 
     ```
-    统一RPC标准格式
+    unifiedRPCstandard format
     
     ```
 
@@ -350,65 +350,65 @@
     }
     ```
 
-  - 返回字段说明
+  - Return Field Description
 
   | parameter           | type   | description                                           |
   | :------------------ | :----- | ----------------------------------------------------- |
-  | chainId             | int    | 链标识                                                |
-  | chainName           | string | 链名称                                                |
-  | addressType         | int    | 链上创建的账户的地址类型：1生态内 2非生态内           |
-  | magicNumber         | string | 网络魔法参数                                          |
-  | minAvailableNodeNum | int    | 最小可用节点数量                                      |
-  | txConfirmBlockNum   | int    | 交易确认块数                                          |
-  | regTxHash           | string | 交易hash                                              |
-  | regAddress          | string | 创建链的主网地址                                      |
-  | selfAssetKeyList    | list   | 链下注册的资产列表，由chainId_assetId 组合的资产key值 |
-  | totalAssetKeyList   | list   | 链下流通的资产列表，由chainId_assetId 组合的资产key值 |
-  | createTime          | long   | 创建时间                                              |
+  | chainId             | int    | Chain identification                                                |
+  | chainName           | string | Chain Name                                                |
+  | addressType         | int    | The address type of the account created on the chain：1Within the ecosystem 2Non ecological interior           |
+  | magicNumber         | string | Network Magic Parameters                                          |
+  | minAvailableNodeNum | int    | Minimum number of available nodes                                      |
+  | txConfirmBlockNum   | int    | Number of transaction confirmation blocks                                          |
+  | regTxHash           | string | transactionhash                                              |
+  | regAddress          | string | Create the main network address for the chain                                      |
+  | selfAssetKeyList    | list   | List of assets registered off the chain, bychainId_assetId Portfolio assetskeyvalue |
+  | totalAssetKeyList   | list   | The list of assets circulating off the chain, consisting ofchainId_assetId Portfolio assetskeyvalue |
+  | createTime          | long   | Creation time                                              |
   | seeds               | String | cross Seed node                                       |
 
 
 
-#### 6. 查询链下资产信息
+#### 6. Query off chain asset information
 
-- 功能说明：
+- Function Description：
 
-  查询某链资产信息。
+  Query asset information for a certain chain.
 
-- 流程描述
+- Process Description
 
-​        无
+​        nothing
 
-- 接口定义
+- Interface Definition
 
-  - 接口说明
+  - Interface Description
 
-  ​        向链管理模块查询某资产信息。
+  ​        Query asset information from the chain management module.
 
   ​        method : cm_asset
 
-  - 请求示例
+  - Request Example
 
   ```
   {
-     "chainId":4545， 
+     "chainId":4545, 
      "assetId":45
   }
   ```
 
-  - 请求参数说明
+  - Request parameter description
 
   | parameter | required | type | description |
   | :-------- | :------- | :--- | ----------- |
-  | chainId   | true     | int  | 链标识      |
-  | assetId   | true     | int  | 资产id      |
+  | chainId   | true     | int  | Chain identification      |
+  | assetId   | true     | int  | assetid      |
 
-  - 返回示例
+  - Return Example
 
     Failed
 
     ```
-    统一RPC标准格式
+    unifiedRPCstandard format
     
     ```
 
@@ -419,7 +419,7 @@
             "chainId": 152,
             "assetId":85,
             "symbol":"NULS",
-            "assetName":"纳斯",
+            "assetName":"Nass",
             "initNumber":"1000000000",
             "decimalPlaces":8,
             "address":"NsdxSexqXF4eVXkcGLPpZCPKo92A8xpp",
@@ -428,44 +428,44 @@
             }
     ```
 
-  - 返回字段说明
+  - Return Field Description
 
   | parameter     | type   | description        |
   | :------------ | :----- | ------------------ |
-  | chainId       | int    | 链标识             |
-  | symbol        | string | 资产符号           |
-  | assetName     | string | 资产名称           |
-  | initNumber    | string | 资产初始值         |
-  | decimalPlaces | int    | 最小资产可分割位数 |
-  | address       | string | 创建链的主网地址   |
-  | txHash        | string | 交易hash           |
-  | createTime    | long   | 创建时间           |
+  | chainId       | int    | Chain identification             |
+  | symbol        | string | Asset symbols           |
+  | assetName     | string | Asset Name           |
+  | initNumber    | string | Initial value of assets         |
+  | decimalPlaces | int    | Minimum divisible digits of assets |
+  | address       | string | Create the main network address for the chain   |
+  | txHash        | string | transactionhash           |
+  | createTime    | long   | Creation time           |
 
 
-#### 7. 创建跨链交易
+#### 7. Create cross chain transactions
 
-- 功能说明：
+- Function Description：
 
-  创建一笔跨链交易
+  Create a cross chain transaction
 
-- 流程描述
+- Process Description
 
-​        无
+​        nothing
 
-- 接口定义
+- Interface Definition
 
-  - 接口说明
+  - Interface Description
 
-  ​        发起一笔跨链交易
+  ​        Initiate a cross chain transaction
 
   ​        method : createCrossTx
 
-  - 请求示例
+  - Request Example
 
   ```
   {
      "chainId":2, 
-     "remark":"跨链转账交易",
+     "remark":"Cross chain transfer transactions",
      "listFrom":[
      	{
          "address":"8CPcA7kaXSHbWb3GHP7bd5hRLFu8RZv57rY9w",
@@ -487,26 +487,26 @@
   }
   ```
 
-  - 请求参数说明
+  - Request parameter description
 
   | parameter     | required | type       | description |
   | :------------ | :------- | :--------- | ----------- |
-  | chainId       | true     | int        | 链标识      |
-  | remark        | false    | String     | 备注        |
-  | address       | true     | String     | 账户地址    |
-  | assetsChainId | true     | int        | 资产链ID    |
-  | assetsId      | true     | int        | 资产ID      |
-  | amount        | true     | BigInteger | 交易金额    |
-  | password      | true     | String     | 账户密码    |
+  | chainId       | true     | int        | Chain identification      |
+  | remark        | false    | String     | Remarks        |
+  | address       | true     | String     | Account address    |
+  | assetsChainId | true     | int        | Asset ChainID    |
+  | assetsId      | true     | int        | assetID      |
+  | amount        | true     | BigInteger | Transaction amount    |
+  | password      | true     | String     | Account password    |
 
 
 
-  - 返回示例
+  - Return Example
 
     Failed
 
     ```
-    统一RPC标准格式
+    unifiedRPCstandard format
     
     ```
 
@@ -518,32 +518,32 @@
     }
     ```
 
-  - 返回字段说明
+  - Return Field Description
 
   | parameter | type   | description |
   | :-------- | :----- | ----------- |
-  | txHash    | string | 交易hash    |
+  | txHash    | string | transactionhash    |
 
 
-#### 8.查询跨链交易处理状态
+#### 8.Query the status of cross chain transaction processing
 
-- 功能说明：
+- Function Description：
 
-  查询跨链交易在其他链的处理状态
+  Query the processing status of cross chain transactions in other chains
 
-- 流程描述
+- Process Description
 
-​        无
+​        nothing
 
-- 接口定义
+- Interface Definition
 
-  - 接口说明
+  - Interface Description
 
-  ​        查询跨链交易在其他链的处理状态
+  ​        Query the processing status of cross chain transactions in other chains
 
   ​        method : getCrossTxState
 
-  - 请求示例
+  - Request Example
 
     ```
     {
@@ -552,14 +552,14 @@
     }
     ```
 
-  - 参数说明
+  - Parameter Description
 
     | parameter | type   | required | description |
     | --------- | ------ | -------- | ----------- |
-    | chainId   | int    | true     | 链ID        |
-    | txHash    | string | true     | 交易hash    |
+    | chainId   | int    | true     | chainID        |
+    | txHash    | string | true     | transactionhash    |
 
-  - 返回示例
+  - Return Example
 
     Failed
 
@@ -577,10 +577,10 @@
     }
     ```
 
-  - 返回参数说明
+  - Return parameter description
 
     | parameter | type    | description          |
     | --------- | ------- | -------------------- |
-    | value     | boolean | 跨链交易处理是否完成 |
+    | value     | boolean | Is the cross chain transaction processing completed |
 
 

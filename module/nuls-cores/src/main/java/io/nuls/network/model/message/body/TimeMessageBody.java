@@ -36,7 +36,7 @@ import java.io.IOException;
 
 
 /**
- * 时间应答消息
+ * Time response message
  * time response protocol message body
  *
  * @author lan

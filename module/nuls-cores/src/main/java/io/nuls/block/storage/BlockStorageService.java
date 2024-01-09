@@ -27,18 +27,18 @@ import io.nuls.base.data.po.BlockHeaderPo;
 import java.util.List;
 
 /**
- * 区块存储服务
+ * Blockstorage services
  *
  * @author captain
  * @version 1.0
- * @date 18-11-14 上午10:08
+ * @date 18-11-14 morning10:08
  */
 public interface BlockStorageService {
 
     /**
-     * 存储一个{@link BlockHeaderPo}
+     * Store a{@link BlockHeaderPo}
      *
-     * @param chainId 链Id/chain id
+     * @param chainId chainId/chain id
      * @param blockHeader
      * @return
      * @throws Exception
@@ -46,27 +46,27 @@ public interface BlockStorageService {
     boolean save(int chainId, BlockHeaderPo blockHeader);
 
     /**
-     * 根据链ID和区块高度查询一个{@link BlockHeaderPo}
+     * According to the chainIDQuery one with block height{@link BlockHeaderPo}
      *
-     * @param chainId 链Id/chain id
+     * @param chainId chainId/chain id
      * @param height
      * @return
      */
     BlockHeaderPo query(int chainId, long height);
 
     /**
-     * 根据链ID和区块hash查询一个{@link BlockHeaderPo}
+     * According to the chainIDAnd blockshashQuery a{@link BlockHeaderPo}
      *
-     * @param chainId 链Id/chain id
+     * @param chainId chainId/chain id
      * @param hash
      * @return
      */
     BlockHeaderPo query(int chainId, NulsHash hash);
 
     /**
-     * 根据链ID和高度区间查询{@link BlockHeaderPo}列表
+     * According to the chainIDAnd height interval query{@link BlockHeaderPo}list
      *
-     * @param chainId 链Id/chain id
+     * @param chainId chainId/chain id
      * @param startHeight
      * @param endHeight
      * @return
@@ -74,9 +74,9 @@ public interface BlockStorageService {
     List<BlockHeader> query(int chainId, long startHeight, long endHeight);
 
     /**
-     * 根据链ID和高度区间移除{@link BlockHeaderPo}
+     * According to the chainIDRemove from height range{@link BlockHeaderPo}
      *
-     * @param chainId 链Id/chain id
+     * @param chainId chainId/chain id
      * @param height
      * @return
      * @throws Exception
@@ -84,26 +84,26 @@ public interface BlockStorageService {
     boolean remove(int chainId, long height);
 
     /**
-     * 根据链ID销毁数据库文件
+     * According to the chainIDDestroy database files
      *
-     * @param chainId 链Id/chain id
+     * @param chainId chainId/chain id
      * @return
      * @throws Exception
      */
     boolean destroy(int chainId);
 
     /**
-     * 根据链ID查询该链的最新高度
+     * According to the chainIDQuery the latest height of the chain
      *
-     * @param chainId 链Id/chain id
+     * @param chainId chainId/chain id
      * @return
      */
     long queryLatestHeight(int chainId);
 
     /**
-     * 根据链ID设置该链的最新高度
+     * According to the chainIDSet the latest height of the chain
      *
-     * @param chainId 链Id/chain id
+     * @param chainId chainId/chain id
      * @param height
      * @return
      */

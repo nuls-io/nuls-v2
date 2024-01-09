@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-21 16:39
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class TransactionData {
 
@@ -28,7 +28,7 @@ public class TransactionData {
     private int size;
 
     /**
-     * 在区块中的顺序，存储在rocksDB中是无序的，保存区块时赋值，取出后根据此值排序
+     * Order in blocks, stored inrocksDBThe middle is unordered, assigned values when saving blocks, sorted based on this value after retrieval
      */
     private int inBlockIndex;
 

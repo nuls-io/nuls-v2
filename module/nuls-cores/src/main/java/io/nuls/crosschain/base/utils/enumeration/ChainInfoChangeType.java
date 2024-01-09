@@ -2,17 +2,17 @@ package io.nuls.crosschain.base.utils.enumeration;
 
 public enum ChainInfoChangeType {
     /**
-     * 将已注册跨链的所有链信息广播给新注册链
+     * Broadcast all registered cross chain chain information to the new registered chain
      * */
     INIT_REGISTER_CHAIN(0),
 
     /**
-     * 将新注册链信息广播给已注册跨链的链
+     * Broadcast new registration chain information to registered cross chain chains
      * */
     NEW_REGISTER_CHAIN(1),
 
     /**
-     * 链资产变更
+     * Chain asset change
      * */
     REGISTERED_CHAIN_CHANGE(2);
 
