@@ -30,14 +30,14 @@ public class AccountKeyStoreServiceTest {
 
     @BeforeClass
     public static void beforeTest() {
-        //初始化配置
+        //Initialize configuration
         SpringLiteContext.init("io.nuls.account", new ModularServiceMethodInterceptor());
         AccountBootstrap accountBootstrap = SpringLiteContext.getBean(AccountBootstrap.class);
-        //初始化配置
+        //Initialize configuration
         accountBootstrap.initCfg();
-        //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
+        //Read the configuration file, store the data in the root directory, initialize and open all table connections in that directory, and place them in the cache
         RocksDBService.init(NulsConfig.DATA_PATH);
-        //启动时间同步线程
+        //Start time synchronization thread
 //        TimeService.getInstance().start();
         accountService = SpringLiteContext.getBean(AccountService.class);
         accountKeyStoreService = SpringLiteContext.getBean(AccountKeyStoreService.class);
@@ -54,24 +54,24 @@ public class AccountKeyStoreServiceTest {
         chain.setConfig(configBean);
         List<Account> accountList = accountService.createAccount(chain, 1, password);
         String address = accountList.get(0).getAddress().getBase58();
-        //测试不指定备份路径
+        //Test not specifying backup path
         String pathDir = "";
-        //备份账户keystore  backup account keyStore
+        //Backup accountkeystore  backup account keyStore
         String path = accountKeyStoreService.backupAccountToKeyStore(pathDir, chainId, address, password);
         assertNotNull(path);
 
-        //测试指定非windows备份路径
-        pathDir = "测试1/back/up";
-        //备份账户keystore  backup account keyStore
+        //Test specified nonwindowsBackup path
+        pathDir = "test1/back/up";
+        //Backup accountkeystore  backup account keyStore
         path = accountKeyStoreService.backupAccountToKeyStore(pathDir, chainId, address, password);
         assertNotNull(path);
 
-        //测试指定windows备份路径
-        pathDir = "D:\\workspace\\github\\nuls_2.0\\测试2\\back\\up";
+        //Test specifiedwindowsBackup path
+        pathDir = "D:\\workspace\\github\\nuls_2.0\\test2\\back\\up";
         //Create an unencrypted account for test
         accountList = accountService.createAccount(chain, 1, null);
         address = accountList.get(0).getAddress().getBase58();
-        //备份账户keystore  backup account keyStore
+        //Backup accountkeystore  backup account keyStore
         path = accountKeyStoreService.backupAccountToKeyStore(pathDir, chainId, address, password);
         assertNotNull(path);
 

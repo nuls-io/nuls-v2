@@ -35,11 +35,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 区块生成器
+ * Block Generator
  *
  * @author captain
  * @version 1.0
- * @date 18-11-13 下午5:11
+ * @date 18-11-13 afternoon5:11
  */
 public final class BlockGenerator {
 
@@ -50,7 +50,7 @@ public final class BlockGenerator {
     private static final int TX_COUNT = 222;
 
     /**
-     * 生成一个区块
+     * Generate a block
      *
      * @param latestBlock
      * @return
@@ -61,7 +61,7 @@ public final class BlockGenerator {
     }
 
     /**
-     * 生成一个区块
+     * Generate a block
      *
      * @param latestBlock
      * @return

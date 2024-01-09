@@ -41,19 +41,19 @@ import static io.nuls.contract.util.ContractUtil.bigInteger2String;
  */
 @ApiModel
 public class ContractMultyAssetMergedTransferDto {
-    @ApiModelProperty(description = "合约生成交易：合约转账交易hash")
+    @ApiModelProperty(description = "Contract generation transaction：Contract transfer transactionhash")
     private String txHash;
-    @ApiModelProperty(description = "转出的合约地址")
+    @ApiModelProperty(description = "Transferred contract address")
     private String from;
-    @ApiModelProperty(description = "转账金额")
+    @ApiModelProperty(description = "Transfer amount")
     private String value;
-    @ApiModelProperty(description = "转账金额资产链ID")
+    @ApiModelProperty(description = "Transfer amount asset chainID")
     private int assetChainId;
-    @ApiModelProperty(description = "转账金额资产ID")
+    @ApiModelProperty(description = "Transfer amount assetsID")
     private int assetId;
-    @ApiModelProperty(description = "转入的地址列表", type = @TypeDescriptor(value = List.class, collectionElement = MultyAssetOutputDto.class))
+    @ApiModelProperty(description = "Transferred address list", type = @TypeDescriptor(value = List.class, collectionElement = MultyAssetOutputDto.class))
     private List<MultyAssetOutputDto> outputs;
-    @ApiModelProperty(description = "调用合约交易hash（源交易hash，合约交易由调用合约交易派生而来）")
+    @ApiModelProperty(description = "Call contract transactionshash（Source transactionhashContract trading is derived from calling contract trading）")
     private String orginTxHash;
 
     public ContractMultyAssetMergedTransferDto() {

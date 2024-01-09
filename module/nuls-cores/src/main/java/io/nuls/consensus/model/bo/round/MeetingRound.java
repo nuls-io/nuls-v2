@@ -44,61 +44,61 @@ import java.math.BigInteger;
 import java.util.*;
 
 /**
- * 轮次信息类
+ * Round information class
  * Information about rotation
  *
  * @author tag
  * 2018/11/12
  */
-@ApiModel(name = "轮次信息")
+@ApiModel(name = "Round information")
 public class MeetingRound {
     /**
-     * 总权重
+     * Total weight
      * Total weight
      * */
-    @ApiModelProperty(description = "当前轮次总权重")
+    @ApiModelProperty(description = "Total weight of the current round")
     private double totalWeight;
     /**
-     * 本地打包节点在当前轮次的下标
+     * The index of the local packaging node in the current round
      * Subscription of Local Packing Node in Current Round
      * */
-    @ApiModelProperty(description = "轮次下标")
+    @ApiModelProperty(description = "Round index")
     private long index;
     /**
-     * 当前轮次开始打包时间
+     * Starting packaging time of the current round
      * Current Round Start Packing Time
      * */
-    @ApiModelProperty(description = "轮次开始时间")
+    @ApiModelProperty(description = "Start time of round")
     private long startTime;
     /**
-     * 当前轮次打包结束时间
+     * Current round packaging end time
      * End time of front packing
      * */
-    @ApiModelProperty(description = "轮次结束时间")
+    @ApiModelProperty(description = "End time of round")
     private long endTime;
     /**
-     * 当前轮次打包节点数量
+     * Number of packaging nodes in the current round
      * Number of Packing Nodes in Current Round
      * */
-    @ApiModelProperty(description = "本轮次出块节点数")
+    @ApiModelProperty(description = "The number of block nodes in this round")
     private int memberCount;
     /**
-     * 当前轮次打包成员列表
+     * Current round packaging member list
      * Current rounds packaged membership list
      * */
-    @ApiModelProperty(description = "本轮次出块成员信息", type = @TypeDescriptor(value = List.class, collectionElement = MeetingMember.class))
+    @ApiModelProperty(description = "Member information for this round of block production", type = @TypeDescriptor(value = List.class, collectionElement = MeetingMember.class))
     private List<MeetingMember> memberList;
     /**
-     * 上一轮轮次信息
+     * Previous round information
      * Last round of information
      * */
-    @ApiModelProperty(description = "上一轮信息")
+    @ApiModelProperty(description = "Previous round information")
     private MeetingRound preRound;
     /**
-     * 本地打包成员信息
+     * Local packaging member information
      * Locally packaged member information
      * */
-    @ApiModelProperty(description = "当前节点出块信息")
+    @ApiModelProperty(description = "Current node block information")
     private MeetingMember myMember;
     private List<MeetingMember> myMemberList = new ArrayList<>();
 
@@ -127,10 +127,10 @@ public class MeetingRound {
     }
 
     /**
-     * 初始化轮次信息
+     * Initialize round information
      * Initialization Round Information
      *
-     * @param memberList 打包成员信息列表/Packaged Member Information List
+     * @param memberList Package member information list/Packaged Member Information List
      * @param chain      chain info
      * */
     public void init(List<MeetingMember> memberList, Chain chain) {
@@ -150,7 +150,7 @@ public class MeetingRound {
             member.setPackStartTime(startTime + i * chain.getConfig().getPackingInterval());
             member.setPackEndTime(member.getPackStartTime() + chain.getConfig().getPackingInterval());
             /*
-            轮次总权重等于所有节点权重之和，节点权重=(保证金+总委托金额)*节点信用值
+            The total weight of each round is equal to the sum of all node weights, and the node weights=(Margin+Total entrusted amount)*Node credit value
             Round total weight equals the sum of all node weights, node weight = (margin + total Commission amount)* node credit value
             */
             BigInteger ownTotalWeight = BigInteger.ZERO;
@@ -204,7 +204,7 @@ public class MeetingRound {
     }
 
     /**
-     * 根据节点地址获取节点对应的打包信息
+     * Obtain packaging information corresponding to nodes based on their addresses
      * Get the packing information corresponding to the node according to the address of the node
      */
     public MeetingMember getMemberByAgentAddress(byte[] address) {

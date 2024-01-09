@@ -12,15 +12,15 @@ import io.nuls.core.core.annotation.Component;
  * @Author: zhoulijun
  * @Time: 2019-03-20 21:12
  * @Description:
- * 交易相关指令测试
- * 普通交易测试
- * 1.创建一个账户
- * 2.从种子地址{@link Config#getSeedAddress()}转账10个Nuls到【1】中的地址
- * 3.等待10秒，查询交易是否确认
- * 4.查询账户余额是否增加10个NULS(需要减去手续费）
- * 5.查询种子地址余额是否减少10个NULS
- * 6.远程节点查询此交易是否确认
- * 7.远程导入此账户，查询余额是否与本地一致
+ * Transaction related instruction testing
+ * Regular transaction testing
+ * 1.Create an account
+ * 2.From seed address{@link Config#getSeedAddress()}Transfer10individualNulsreach【1】Address in
+ * 3.wait for10Second, check if the transaction is confirmed
+ * 4.Check if the account balance has increased10individualNULS(Need to deduct handling fees）
+ * 5.Check if the balance of the seed address has decreased10individualNULS
+ * 6.Remote node queries whether this transaction is confirmed
+ * 7.Remote import this account and check if the balance matches the local account
  */
 @Component
 public class TransferCase extends TestCaseChain {
@@ -39,6 +39,6 @@ public class TransferCase extends TestCaseChain {
 
     @Override
     public String title() {
-        return "普通转账交易";
+        return "Ordinary transfer transaction";
     }
 }

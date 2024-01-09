@@ -47,93 +47,93 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class BatchInfo {
 
     /**
-     * 当前批量执行超时时间 - 10秒
+     * Current batch execution timeout - 10second
      */
     private static final long TIME_OUT = 10L * 1000L;
     /**
-     * 智能合约临时余额
+     * Temporary balance of smart contract
      */
     private ContractTempBalanceManager tempBalanceManager;
 
     /**
-     * 当前正在打包的区块头
+     * The block header currently being packaged
      */
     private BlockHeader currentBlockHeader;
     /**
-     * 智能合约交易打包结果
+     * Packaging results of smart contract transactions
      */
     private ContractPackageDto contractPackageDto;
 
     /**
-     * 批量执行器
+     * Batch executor
      */
     private ProgramExecutor batchExecutor;
     /**
-     * 打包的交易计数器
+     * Packaged transaction counter
      */
     private int txCounter;
     /**
-     * 打包的区块高度
+     * The height of packaged blocks
      */
     private long height;
     /**
-     * 批量开始执行时间
+     * Batch start execution time
      */
     private long beginTime;
     /**
-     * 停止接收交易开始时间
+     * Stop receiving transaction start time
      */
     private long beforeEndTime;
     /**
-     * 本次批量执行总共消耗的gas
+     * The total consumption of this batch executiongas
      */
     private long gasCostTotal;
     /**
-     * 本次批量执行总交易数
+     * The total number of transactions executed in this batch
      */
     private int txTotal;
     /**
-     * 0 - 未开始， 1 - 已开始
+     * 0 - Not started yet, 1 - Started
      */
     private BatchInfoStatus status;
 
     /**
-     * 上一区块世界状态根
+     * Previous block world state root
      */
     private String preStateRoot;
 
     /**
-     * 并行执行的合约容器
+     * Contract containers for parallel execution
      */
     private LinkedHashMap<String, ContractContainer> contractContainerMap;
 
     /**
-     * 合约执行冲突检测器
+     * Contract Execution Conflict Detector
      */
     private ContractConflictChecker checker;
 
     /**
-     * 打包异步执行结果
+     * Package asynchronous execution results
      */
     private Future<ContractPackageDto> contractPackageDtoFuture;
 
     /**
-     * gas变化锁
+     * gasChange lock
      */
     private final ReadWriteLock gasLock = new ReentrantReadWriteLock();
     /**
-     * 未处理交易hash列表锁
+     * Unprocessed transactionshashList lock
      */
     private final ReentrantLock pendingTxListlock = new ReentrantLock();
 
     /**
-     * 因区块GAS用尽，未处理的合约交易
+     * Due to the blockGASExhausted, unprocessed contract transactions
      */
     private List<String> pendingTxHashList;
     private Map<String, Future<ContractResult>> contractMap;
 
     /**
-     * 串行标记数字
+     * Serial marker number
      */
     private int serialOrder;
 

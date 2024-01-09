@@ -76,7 +76,7 @@ public class EntitySortTest {
                 gotIndex = i + 1;
                 added = true;
             } else if (val == 1 && gotNext) {
-//                需要找到之前的一串，挪动到现在的位置
+//                Need to find the previous string and move it to its current position
                 thisItem = result.getArray()[gotIndex];
                 if (i == gotIndex - 1) {
                     item.setHasFlower(true);
@@ -105,7 +105,7 @@ public class EntitySortTest {
                     thisItem.setHasFlower(true);
                 }
                 item.setHasFlower(true);
-                // 前移后面的元素
+                // Move elements forward and behind
                 for (int x = 0; x < result.getIndex() - gotIndex + 1; x++) {
                     int oldIndex = gotIndex + x + realCount;
                     if (oldIndex <= result.getIndex()) {
@@ -146,7 +146,7 @@ public class EntitySortTest {
                     }
                 }
                 thisItem.setFlower(flower);
-                // 前移后面的元素
+                // Move elements forward and behind
                 for (int x = 0; x < result.getIndex() - i + 1; x++) {
                     int oldIndex = i + x + realCount;
                     if (oldIndex <= result.getIndex()) {
@@ -297,7 +297,7 @@ public class EntitySortTest {
 //            if (o2.getTime() < this.getTime()) {
 //                return 1;
 //            }
-            //当时间相同后的排序逻辑
+            //Sorting logic when time is the same
             if (this.getPreId() == o2.getId()) {
                 return 1;
             }

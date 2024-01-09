@@ -9,7 +9,7 @@ import io.nuls.crosschain.base.message.NewOtherCtxMessage;
 import io.nuls.crosschain.base.service.ProtocolService;
 
 /**
- * NewOtherCtxMessage处理类
+ * NewOtherCtxMessageProcessing class
  * NewOtherCtxMessage Processing Class
  *
  * @author tag

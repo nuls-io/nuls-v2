@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 数据存储接口
+ * Data storage interface
  *
  * @author lanjinsheng
  */
@@ -42,7 +42,7 @@ public interface Repository {
 
 
     /**
-     * 获取账号账本信息
+     * Obtain account ledger information
      * Getting Account Book Information
      *
      * @param chainId
@@ -52,7 +52,7 @@ public interface Repository {
     AccountState getAccountState(int chainId, byte[] key);
 
     /**
-     * 内存获取账户余额对象
+     * Memory acquisition account balance object
      *
      * @param chainId
      * @param key
@@ -61,7 +61,7 @@ public interface Repository {
     AccountState getAccountStateByMemory(int chainId, String key);
 
     /**
-     * 批量更新账号账本信息
+     * Batch update of account ledger information
      * batch update Account ledger Information
      *
      * @param addressChainId
@@ -72,7 +72,7 @@ public interface Repository {
     void clearAccountStateMem(int addressChainId, Map<String, AccountState> accountStateMemMap) throws Exception;
 
     /**
-     * 删除区块快照
+     * Delete block snapshot
      *
      * @param chainId
      * @param height
@@ -81,7 +81,7 @@ public interface Repository {
     void delBlockSnapshot(int chainId, long height) throws Exception;
 
     /**
-     * 存储区块快照
+     * Storage block snapshot
      *
      * @param chainId
      * @param height
@@ -91,7 +91,7 @@ public interface Repository {
     void saveBlockSnapshot(int chainId, long height, BlockSnapshotAccounts blockSnapshotAccounts) throws Exception;
 
     /**
-     * 获取区块快照
+     * Get block snapshot
      *
      * @param chainId
      * @param height
@@ -101,7 +101,7 @@ public interface Repository {
 
 
     /**
-     * 获取区块高度
+     * Obtain block height
      *
      * @param chainId
      * @return
@@ -109,7 +109,7 @@ public interface Repository {
     long getBlockHeight(int chainId);
 
     /**
-     * 保存或更新区块高度
+     * Save or update block height
      *
      * @param chainId
      * @param height
@@ -117,14 +117,14 @@ public interface Repository {
     void saveOrUpdateBlockHeight(int chainId, long height);
 
     /**
-     * 获取区块高度对象
+     * Get block height object
      *
      * @return
      */
     List<ChainHeight> getChainsBlockHeight();
 
     /**
-     * 初始化数据表
+     * Initialize Data Table
      *
      * @throws NulsException
      */

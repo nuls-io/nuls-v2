@@ -21,34 +21,34 @@
 package io.nuls.block.constant;
 
 /**
- * 标记区块广播、转发过程中的状态
+ * Mark Block Broadcast、Status during forwarding process
  *
  * @author captain
  * @version 1.0
- * @date 18-11-28 下午12:01
+ * @date 18-11-28 afternoon12:01
  */
 public enum BlockForwardEnum {
 
     /**
-     * 数据错误,可能是恶意构造的数据
+     * data error,Possible maliciously constructed data
      * Data error, possibly maliciously constructed data
      */
     ERROR,
 
     /**
-     * 没有收到区块
+     * No block received
      * Block not received
      */
     EMPTY,
 
     /**
-     * 收到部分区块,还缺失一部分交易
+     * Received partial blocks,Some transactions are still missing
      * Received part of the block, still missing part of the transaction
      */
     INCOMPLETE,
 
     /**
-     * 收到完整区块
+     * Received complete block
      * Receive full block
      */
     COMPLETE;

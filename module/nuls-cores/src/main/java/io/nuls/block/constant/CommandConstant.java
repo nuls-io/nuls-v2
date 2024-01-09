@@ -21,127 +21,127 @@
 package io.nuls.block.constant;
 
 /**
- * 存储对外提供的接口命令
+ * Store interface commands provided externally
  *
  * @author captain
  * @version 1.0
- * @date 18-11-9 下午2:15
+ * @date 18-11-9 afternoon2:15
  */
 public interface CommandConstant {
 
-    //网络消息对应的RPC命令
+    //Corresponding to network messagesRPCcommand
     /**
-     * 批量获取区块结束时返回的结束消息
+     * End message returned at the end of bulk block retrieval
      */
     String COMPLETE_MESSAGE = "complete";
     /**
-     * 完整的区块消息
+     * Complete block message
      */
     String BLOCK_MESSAGE = "block";
     /**
-     * 根据区块高度获取区块
+     * Obtain blocks based on block height
      */
     String GET_BLOCK_BY_HEIGHT_MESSAGE = "getBlockH";
     /**
-     * 根据区块HASH获取区块
+     * Based on blocksHASHGet blocks
      */
     String GET_BLOCK_MESSAGE = "getBlock";
     /**
-     * 转发区块
+     * Forwarding blocks
      */
     String FORWARD_SMALL_BLOCK_MESSAGE = "forward";
     /**
-     * 批量获取小区块消息
+     * Batch acquisition of community block messages
      */
     String GET_BLOCKS_BY_HEIGHT_MESSAGE = "getBlocks";
     /**
-     * 批量获取交易
+     * Batch acquisition of transactions
      */
     String GET_TXGROUP_MESSAGE = "getTxs";
     /**
-     * 小区块消息
+     * Community block messages
      */
     String SMALL_BLOCK_MESSAGE = "sBlock";
     /**
-     * 获取小区块消息
+     * Get community block messages
      */
     String GET_SMALL_BLOCK_MESSAGE = "getsBlock";
     /**
-     * 批量交易消息
+     * Batch transaction messages
      */
     String TXGROUP_MESSAGE = "txs";
 
-    //普通服务对应的RPC命令
+    //Corresponding to ordinary servicesRPCcommand
     /**
-     * 获取一些信息
+     * Get some information
      */
     String INFO = "info";
     /**
-     * 获取最新高度
+     * Get the latest altitude
      */
     String LATEST_HEIGHT = "latestHeight";
     /**
-     * 获取最新区块头
+     * Get the latest block header
      */
     String LATEST_BLOCK_HEADER = "latestBlockHeader";
     /**
-     * 获取最新区块头PO
+     * Get the latest block headerPO
      */
     String LATEST_BLOCK_HEADER_PO = "latestBlockHeaderPo";
     /**
-     * 获取最新区块
+     * Get the latest blocks
      */
     String LATEST_BLOCK = "latestBlock";
     /**
-     * 根据区块高度获取区块头
+     * Obtain block headers based on block height
      */
     String GET_BLOCK_HEADER_BY_HEIGHT = "getBlockHeaderByHeight";
     /**
-     * 根据区块高度获取区块头PO
+     * Obtain block headers based on block heightPO
      */
     String GET_BLOCK_HEADER_PO_BY_HEIGHT = "getBlockHeaderPoByHeight";
     /**
-     * 根据区块高度获取区块
+     * Obtain blocks based on block height
      */
     String GET_BLOCK_BY_HEIGHT = "getBlockByHeight";
     /**
-     * 根据区块HASH获取区块头
+     * Based on blocksHASHGet block header
      */
     String GET_BLOCK_HEADER_BY_HASH = "getBlockHeaderByHash";
     /**
-     * 根据区块HASH获取区块头PO
+     * Based on blocksHASHGet block headerPO
      */
     String GET_BLOCK_HEADER_PO_BY_HASH = "getBlockHeaderPoByHash";
     /**
-     * 根据区块HASH获取区块
+     * Based on blocksHASHGet blocks
      */
     String GET_BLOCK_BY_HASH = "getBlockByHash";
     /**
-     * 获取最新若干区块头
+     * Get the latest block headers
      */
     String GET_LATEST_BLOCK_HEADERS = "getLatestBlockHeaders";
     /**
-     * 获取最新若干轮区块头
+     * Get the latest block heads for several rounds
      */
     String GET_LATEST_ROUND_BLOCK_HEADERS = "getLatestRoundBlockHeaders";
     /**
-     * 获取若干轮区块头
+     * Obtain several rounds of block heads
      */
     String GET_ROUND_BLOCK_HEADERS = "getRoundBlockHeaders";
     /**
-     * 接收本地节点新打包的区块
+     * Receive newly packaged blocks from local nodes
      */
     String RECEIVE_PACKING_BLOCK = "receivePackingBlock";
     /**
-     * 根据区块高度区间
+     * According to the block height interval
      */
     String GET_BLOCK_HEADERS_BY_HEIGHT_RANGE = "getBlockHeadersByHeightRange";
     /**
-     * 提供给协议升级模块的批量接口
+     * Provide batch interfaces for protocol upgrade modules
      */
     String GET_BLOCK_HEADERS_FOR_PROTOCOL = "getBlockHeadersForProtocol";
     /**
-     * 接收本地节点新打包的区块
+     * Receive newly packaged blocks from local nodes
      */
     String GET_STATUS = "getStatus";
 }

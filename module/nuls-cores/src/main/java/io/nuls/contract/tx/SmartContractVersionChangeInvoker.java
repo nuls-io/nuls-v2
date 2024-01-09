@@ -38,7 +38,7 @@ public class SmartContractVersionChangeInvoker implements VersionChangeInvoker {
 
     /**
      *
-     * 协议升级后，向账本模块请求nrc20-token资产列表，缓存到模块内存中。
+     * After the protocol upgrade, request from the ledger modulenrc20-tokenAsset list, cached in module memory.
      *
      * @param currentChainId
      */
@@ -46,7 +46,7 @@ public class SmartContractVersionChangeInvoker implements VersionChangeInvoker {
     public void process(int currentChainId) {
         ChainManager.chainHandle(currentChainId);
         Short currentVersion = ProtocolGroupManager.getCurrentVersion(currentChainId);
-        Log.info("触发协议升级，chainId: [{}], 版本为: [{}]", currentChainId, currentVersion);
+        Log.info("Trigger protocol upgrade,chainId: [{}], Version is: [{}]", currentChainId, currentVersion);
         ChainManager chainManager = SpringLiteContext.getBean(ChainManager.class);
         if (currentVersion >= ContractContext.PROTOCOL_15) {
             this.loadV15(chainManager.getChainMap().get(currentChainId), currentVersion);
@@ -55,9 +55,9 @@ public class SmartContractVersionChangeInvoker implements VersionChangeInvoker {
         } else if (currentVersion >= ContractContext.UPDATE_VERSION_CONTRACT_ASSET) {
             this.loadV8(chainManager.getChainMap().get(currentChainId), currentVersion);
         }
-        // 向交易模块设置智能合约生成交易类型
+        // Set smart contract generation transaction types to the transaction module
         setContractGenerateTxTypes(currentChainId, currentVersion);
-        // 缓存token注册资产的资产ID和token合约地址
+        // cachetokenRegistered assetsIDandtokenContract address
         Map<Integer, Chain> chainMap = chainManager.getChainMap();
         for (Chain chain : chainMap.values()) {
             int chainId = chain.getChainId();
@@ -65,7 +65,7 @@ public class SmartContractVersionChangeInvoker implements VersionChangeInvoker {
             if(version < ContractContext.UPDATE_VERSION_V250) {
                 continue;
             }
-            Log.info("协议升级成功，向账本模块获取token资产列表，chainId: [{}], 版本为: [{}]", chainId, version);
+            Log.info("Protocol upgrade successful, obtain from ledger moduletokenAsset list,chainId: [{}], Version is: [{}]", chainId, version);
             List<Map> regTokenList;
             try {
                 regTokenList = LedgerCall.getRegTokenList(chainId);
@@ -100,7 +100,7 @@ public class SmartContractVersionChangeInvoker implements VersionChangeInvoker {
         try {
             TransactionCall.setContractGenerateTxTypes(currentChainId, resultList);
         } catch (NulsException e) {
-            Log.warn("获取智能合约生成交易类型异常", e);
+            Log.warn("Exception in obtaining transaction type for smart contract generation", e);
         }
     }
 
@@ -109,7 +109,7 @@ public class SmartContractVersionChangeInvoker implements VersionChangeInvoker {
             return;
         }
         chain.clearOldBatchInfo();
-        Log.info("版本[{}]协议升级成功，重新初始化智能合约VM", currentVersion);
+        Log.info("version[{}]Protocol upgrade successful, reinitialize smart contractVM", currentVersion);
         VMFactory.reInitVM_v8();
         isloadV8 = true;
     }
@@ -119,7 +119,7 @@ public class SmartContractVersionChangeInvoker implements VersionChangeInvoker {
             return;
         }
         chain.clearBatchInfo();
-        Log.info("版本[{}]协议升级成功，重新初始化智能合约VM", currentVersion);
+        Log.info("version[{}]Protocol upgrade successful, reinitialize smart contractVM", currentVersion);
         VMFactory.reInitVM_v14();
         isloadV14 = true;
     }
@@ -129,7 +129,7 @@ public class SmartContractVersionChangeInvoker implements VersionChangeInvoker {
             return;
         }
         chain.clearBatchInfo();
-        Log.info("版本[{}]协议升级成功，重新初始化智能合约VM", currentVersion);
+        Log.info("version[{}]Protocol upgrade successful, reinitialize smart contractVM", currentVersion);
         VMFactory.reInitVM_v15();
         isloadV15 = true;
     }

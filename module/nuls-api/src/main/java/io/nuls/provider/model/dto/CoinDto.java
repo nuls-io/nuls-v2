@@ -32,16 +32,16 @@ import io.nuls.core.rpc.model.ApiModelProperty;
  */
 @ApiModel
 public class CoinDto {
-    @ApiModelProperty(description = "账户地址")
+    @ApiModelProperty(description = "Account address")
     protected String address;
 
-    @ApiModelProperty(description = "资产发行链的id")
+    @ApiModelProperty(description = "Asset issuance chainid")
     protected int assetsChainId;
 
-    @ApiModelProperty(description = "资产id")
+    @ApiModelProperty(description = "assetid")
     protected int assetsId;
 
-    @ApiModelProperty(description = "数量")
+    @ApiModelProperty(description = "quantity")
     protected String amount;
 
     public String getAddress() {

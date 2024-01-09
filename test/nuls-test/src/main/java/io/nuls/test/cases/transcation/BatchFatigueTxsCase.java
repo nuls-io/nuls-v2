@@ -34,7 +34,7 @@ import static io.nuls.test.cases.transcation.batch.BatchCreateAccountCase.TRANSF
 /**
  * @Author: ljs
  * @Time: 2019-04-25 12:08
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Component
 public class BatchFatigueTxsCase extends CallRemoteTestCase<Void,Integer> {
@@ -55,7 +55,7 @@ public class BatchFatigueTxsCase extends CallRemoteTestCase<Void,Integer> {
                     ThreadUtils.createAndRunThread("batch-transfer-" + i , () -> {
                         try {
                             String res = doRemoteTest(n, BatchTxsCase.class, param);
-                            Log.info("成功发起交易:{}", res);
+                            Log.info("Successfully initiated transaction:{}", res);
                             latch.countDown();
                         } catch (TestFailException e) {
                             Log.error(e.getMessage(),e);

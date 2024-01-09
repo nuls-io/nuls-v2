@@ -38,10 +38,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 连接定时器，主要任务：
- * 1>询问种子节点要更多的地址
- * 2>补充未饱和的网络连接
- * 3>清除无效的网络连接
+ * Connection timer, main task：
+ * 1>Ask the seed node for more addresses
+ * 2>Supplementing Unsaturated Network Connections
+ * 3>Clear invalid network connections
  * Connection timer, main tasks:
  * 1> Ask the seed node for more addresses
  * 2>Supply an unsaturated network connection

@@ -30,11 +30,11 @@ import java.io.IOException;
 import static io.nuls.block.utils.LoggerUtil.COMMON_LOG;
 
 /**
- * 批量下载某个高度区间内的区块
+ * Batch download of blocks within a certain height range
  *
  * @author captain
  * @version 1.0
- * @date 18-11-9 下午2:37
+ * @date 18-11-9 afternoon2:37
  */
 public class HeightRangeMessage extends BaseBusinessMessage {
 

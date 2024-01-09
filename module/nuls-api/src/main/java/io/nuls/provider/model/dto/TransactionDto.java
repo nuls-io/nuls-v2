@@ -42,33 +42,33 @@ import java.util.stream.Collectors;
  */
 @ApiModel
 public class TransactionDto {
-    @ApiModelProperty(description = "交易的hash值")
+    @ApiModelProperty(description = "Transactionalhashvalue")
     private String hash;
-    @ApiModelProperty(description = "交易类型")
+    @ApiModelProperty(description = "Transaction type")
     private int type;
-    @ApiModelProperty(description = "交易时间")
+    @ApiModelProperty(description = "Transaction time")
     private String time;
-    @ApiModelProperty(description = "交易时间戳")
+    @ApiModelProperty(description = "Transaction timestamp")
     private long timestamp;
-    @ApiModelProperty(description = "区块高度")
+    @ApiModelProperty(description = "block height")
     private long blockHeight = -1L;
-    @ApiModelProperty(description = "区块hash")
+    @ApiModelProperty(description = "blockhash")
     private String blockHash;
-    @ApiModelProperty(description = "交易备注")
+    @ApiModelProperty(description = "Transaction notes")
     private String remark;
-    @ApiModelProperty(description = "交易签名")
+    @ApiModelProperty(description = "Transaction signature")
     private String transactionSignature;
-    @ApiModelProperty(description = "交易业务数据序列化字符串")
+    @ApiModelProperty(description = "Transaction business data serialization string")
     private String txDataHex;
-    @ApiModelProperty(description = "交易状态 0:unConfirm(待确认), 1:confirm(已确认)")
+    @ApiModelProperty(description = "Transaction status 0:unConfirm(To be confirmed), 1:confirm(Confirmed)")
     private int status = 0;
-    @ApiModelProperty(description = "交易大小")
+    @ApiModelProperty(description = "Transaction size")
     private int size;
-    @ApiModelProperty(description = "在区块中的顺序，存储在rocksDB中是无序的，保存区块时赋值，取出后根据此值排序")
+    @ApiModelProperty(description = "Order in blocks, stored inrocksDBThe middle is unordered, assigned values when saving blocks, sorted based on this value after retrieval")
     private int inBlockIndex;
-    @ApiModelProperty(description = "输入", type = @TypeDescriptor(value = List.class, collectionElement = CoinFromDto.class))
+    @ApiModelProperty(description = "input", type = @TypeDescriptor(value = List.class, collectionElement = CoinFromDto.class))
     private List<CoinFromDto> from;
-    @ApiModelProperty(description = "输出", type = @TypeDescriptor(value = List.class, collectionElement = CoinToDto.class))
+    @ApiModelProperty(description = "output", type = @TypeDescriptor(value = List.class, collectionElement = CoinToDto.class))
     private List<CoinToDto> to;
 
     public TransactionDto() {

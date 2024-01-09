@@ -36,12 +36,12 @@ public class AccountStorageServiceTest {
     public static void beforeTest() {
         SpringLiteContext.init("io.nuls.account", new ModularServiceMethodInterceptor());
         AccountBootstrap accountBootstrap = SpringLiteContext.getBean(AccountBootstrap.class);
-        //初始化配置
+        //Initialize configuration
         accountBootstrap.initCfg();
-        //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
+        //Read the configuration file, store the data in the root directory, initialize and open all table connections in that directory, and place them in the cache
         RocksDBService.init(NulsConfig.DATA_PATH);
-        //springLite容器初始化
-        //启动时间同步线程
+        //springLiteContainer initialization
+        //Start time synchronization thread
         //TimeService.getInstance().start();
         accountStorageService = SpringLiteContext.getBean(AccountStorageService.class);
     }
@@ -60,7 +60,7 @@ public class AccountStorageServiceTest {
             AccountPO po = new AccountPO(account);
             accountPOs.add(po);
         }
-        //批量保存账户数据
+        //Batch Save Account Data
         boolean result = accountStorageService.saveAccountList(accountPOs);
         assertTrue(result);
         assertEquals(accountPOs.size(), count);

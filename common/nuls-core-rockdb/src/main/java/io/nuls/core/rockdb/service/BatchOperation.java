@@ -26,7 +26,7 @@ package io.nuls.core.rockdb.service;
 public interface BatchOperation {
 
     /**
-     * 增加或者更新操作
+     * Add or update operations
      * Add or update operations.
      *
      * @param key
@@ -36,7 +36,7 @@ public interface BatchOperation {
     boolean put(byte[] key, byte[] value) throws Exception;
 
     /**
-     * 删除操作
+     * Delete operation
      * Delete operation
      *
      * @param key
@@ -45,7 +45,7 @@ public interface BatchOperation {
     boolean delete(byte[] key) throws Exception;
 
     /**
-     * 执行批量操作
+     * Perform batch operations
      * Perform batch operation
      *
      * @return

@@ -43,7 +43,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 未确认交易提交，提交失败直接返回错误信息
+ * Unconfirmed transaction submission, submission failure returns error message directly
  *
  * @author lanjinsheng
  * @date 2018/11/20
@@ -58,21 +58,21 @@ public class LgmTransactionCmd extends BaseLedgerCmd {
     private UnconfirmedStateService unconfirmedStateService;
 
     /**
-     * 未确认交易提交
+     * Unconfirmed transaction submission
      *
      * @param params
      * @return
      */
 
     @CmdAnnotation(cmd = CmdConstant.CMD_COMMIT_UNCONFIRMED_TX, version = 1.0,
-            description = "未确认交易提交账本(校验并更新nonce值)")
+            description = "Unconfirmed transaction submission ledger(Verify and updatenoncevalue)")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "交易Hex值")
+            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "Running ChainId,Value range[1-65535]"),
+            @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "transactionHexvalue")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象",
+    @ResponseData(name = "Return value", description = "Return aMapobject",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-                    @Key(name = "orphan", valueType = Boolean.class, description = "true 孤儿交易，false 非孤儿交易")
+                    @Key(name = "orphan", valueType = Boolean.class, description = "true Orphan trading,false Non orphan transactions")
             })
     )
     public Response commitUnconfirmedTx(Map params) {
@@ -105,21 +105,21 @@ public class LgmTransactionCmd extends BaseLedgerCmd {
     }
 
     /**
-     * 未确认交易提交
+     * Unconfirmed transaction submission
      *
      * @param params
      * @return
      */
     @CmdAnnotation(cmd = CmdConstant.CMD_COMMIT_UNCONFIRMED_TXS, version = 1.0,
-            description = "未确认交易批量提交账本(校验并更新nonce值)")
+            description = "Unconfirmed transaction batch submission ledger(Verify and updatenoncevalue)")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "txList", parameterType = "List", parameterDes = "[]交易Hex值列表")
+            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "Running ChainId,Value range[1-65535]"),
+            @Parameter(parameterName = "txList", parameterType = "List", parameterDes = "[]transactionHexValue List")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象",
+    @ResponseData(name = "Return value", description = "Return aMapobject",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-                    @Key(name = "orphan", valueType = List.class, valueElement = String.class, description = "孤儿交易Hash列表"),
-                    @Key(name = "fail", valueType = List.class, valueElement = String.class, description = "校验失败交易Hash列表")
+                    @Key(name = "orphan", valueType = List.class, valueElement = String.class, description = "Orphan TradingHashlist"),
+                    @Key(name = "fail", valueType = List.class, valueElement = String.class, description = "Verification failed transactionHashlist")
             })
     )
     public Response commitBatchUnconfirmedTxs(Map params) {
@@ -160,21 +160,21 @@ public class LgmTransactionCmd extends BaseLedgerCmd {
     }
 
     /**
-     * 区块交易提交
+     * Block transaction submission
      *
      * @param params
      * @return
      */
     @CmdAnnotation(cmd = CmdConstant.CMD_COMMIT_BLOCK_TXS, priority = CmdPriority.HIGH, version = 1.0,
-            description = "提交区块")
+            description = "Submit block")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "txList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "交易Hex值列表"),
-            @Parameter(parameterName = "blockHeight", requestType = @TypeDescriptor(value = long.class), parameterDes = "区块高度")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Running ChainId,Value range[1-65535]"),
+            @Parameter(parameterName = "txList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "transactionHexValue List"),
+            @Parameter(parameterName = "blockHeight", requestType = @TypeDescriptor(value = long.class), parameterDes = "block height")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象",
+    @ResponseData(name = "Return value", description = "Return aMapobject",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-                    @Key(name = "value", valueType = Boolean.class, description = "true 成功，false 失败")
+                    @Key(name = "value", valueType = Boolean.class, description = "true Success,false fail")
             })
     )
     public Response commitBlockTxs(Map params) {
@@ -207,20 +207,20 @@ public class LgmTransactionCmd extends BaseLedgerCmd {
     }
 
     /**
-     * 逐笔回滚未确认交易
+     * Rolling back unconfirmed transactions one by one
      *
      * @param params
      * @return
      */
     @CmdAnnotation(cmd = CmdConstant.CMD_ROLLBACK_UNCONFIRMED_TX, version = 1.0,
-            description = "回滚提交的未确认交易")
+            description = "Rollback submitted unconfirmed transactions")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "tx", requestType = @TypeDescriptor(value = String.class), parameterDes = "交易Hex值")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Running ChainId,Value range[1-65535]"),
+            @Parameter(parameterName = "tx", requestType = @TypeDescriptor(value = String.class), parameterDes = "transactionHexvalue")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象",
+    @ResponseData(name = "Return value", description = "Return aMapobject",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-                    @Key(name = "value", valueType = Boolean.class, description = "true 成功，false 失败")
+                    @Key(name = "value", valueType = Boolean.class, description = "true Success,false fail")
             })
     )
     public Response rollBackUnconfirmTx(Map params) {
@@ -252,13 +252,13 @@ public class LgmTransactionCmd extends BaseLedgerCmd {
     }
 
     @CmdAnnotation(cmd = CmdConstant.CMD_CLEAR_UNCONFIRMED_TXS, version = 1.0,
-            description = "清除所有账户未确认交易")
+            description = "Clear all unconfirmed transactions from accounts")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Running ChainId,Value range[1-65535]")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象",
+    @ResponseData(name = "Return value", description = "Return aMapobject",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-                    @Key(name = "value", valueType = Boolean.class, description = "true 成功，false 失败")
+                    @Key(name = "value", valueType = Boolean.class, description = "true Success,false fail")
             })
     )
     public Response clearUnconfirmTxs(Map params) {
@@ -283,21 +283,21 @@ public class LgmTransactionCmd extends BaseLedgerCmd {
     }
 
     /**
-     * 回滚区块交易
+     * Rolling back block transactions
      *
      * @param params
      * @return
      */
     @CmdAnnotation(cmd = CmdConstant.CMD_ROLLBACK_BLOCK_TXS, priority = CmdPriority.HIGH, version = 1.0,
-            description = "区块回滚")
+            description = "Block rollback")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "txList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "[]交易Hex值列表"),
-            @Parameter(parameterName = "blockHeight", parameterType = "long", parameterDes = "区块高度")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Running ChainId,Value range[1-65535]"),
+            @Parameter(parameterName = "txList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "[]transactionHexValue List"),
+            @Parameter(parameterName = "blockHeight", parameterType = "long", parameterDes = "block height")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象",
+    @ResponseData(name = "Return value", description = "Return aMapobject",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-                    @Key(name = "value", valueType = Boolean.class, description = "true 成功，false 失败")
+                    @Key(name = "value", valueType = Boolean.class, description = "true Success,false fail")
             })
     )
     public Response rollBackBlockTxs(Map params) {

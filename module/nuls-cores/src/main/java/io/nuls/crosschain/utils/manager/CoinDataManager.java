@@ -25,7 +25,7 @@ import java.math.BigInteger;
 import java.util.*;
 
 /**
- * 跨链模块CoinData管理类
+ * Cross chain moduleCoinDataManagement
  *
  * @author tag
  */
@@ -50,38 +50,38 @@ public class CoinDataManager {
             String addressStr = coinDTO.getAddress();
             byte[] address = AddressTool.getAddress(addressStr);
             if (isMultiSign) {
-                //如果为多签交易，所有froms中有且仅有一个地址，并且只能是多签地址，但可以包含多个资产(from)
+                //If it is a multi sign transaction, allfromsThere is only one address in it, and it can only be multiple signed addresses, but it can contain multiple assets(from)
                 if (null == multiAddress) {
                     multiAddress = address;
                 } else if (!Arrays.equals(multiAddress, address)) {
-                    chain.getLogger().error("不支持多签账户多账户转账");
+                    chain.getLogger().error("Multiple account transfers are not supported with multiple signatures");
                     throw new NulsException(NulsCrossChainErrorCode.ONLY_ONE_MULTI_SIGNATURE_ADDRESS_ALLOWED);
                 }
                 if (!AddressTool.isMultiSignAddress(address)) {
-                    chain.getLogger().error("普通账户不允许发送多签账户转账交易");
+                    chain.getLogger().error("Ordinary accounts do not allow sending multiple account transfer transactions");
                     throw new NulsException(NulsCrossChainErrorCode.IS_NOT_MULTI_SIGNATURE_ADDRESS);
                 }
             } else {
-                //不是多签交易，from中不能有多签地址
+                //It's not about signing multiple transactions,fromMultiple signed addresses are not allowed in the middle
                 if (AddressTool.isMultiSignAddress(address)) {
-                    chain.getLogger().error("普通账户转账中不允许包含多签账户");
+                    chain.getLogger().error("Multiple signature accounts are not allowed in regular account transfers");
                     throw new NulsException(NulsCrossChainErrorCode.IS_MULTI_SIGNATURE_ADDRESS);
                 }
             }
             if (!AddressTool.validAddress(chain.getChainId(), addressStr)) {
-                //转账交易转出地址必须是本链地址
-                chain.getLogger().error("跨链交易转出账户不为本链账户");
+                //The transfer transaction transfer address must be a local chain address
+                chain.getLogger().error("Cross chain transaction transfer out account is not a local chain account");
                 throw new NulsException(NulsCrossChainErrorCode.ADDRESS_IS_NOT_THE_CURRENT_CHAIN);
             }
             int assetChainId = coinDTO.getAssetsChainId();
             int assetId = coinDTO.getAssetsId();
-            //检查对应资产余额 是否足够
+            //Check the corresponding asset balance Is it sufficient
             BigInteger amount = coinDTO.getAmount();
             Map<String, Object> result = LedgerCall.getBalanceAndNonce(chain, addressStr, assetChainId, assetId);
             byte[] nonce = RPCUtil.decode((String) result.get("nonce"));
             BigInteger balance = new BigInteger(result.get("available").toString());
             if (BigIntegerUtils.isLessThan(balance, amount)) {
-                chain.getLogger().error("账户余额不足");
+                chain.getLogger().error("Insufficient account balance");
                 throw new NulsException(NulsCrossChainErrorCode.INSUFFICIENT_BALANCE);
             }
             CoinFrom coinFrom = new CoinFrom(address, assetChainId, assetId, amount, nonce, NulsCrossChainConstant.CORSS_TX_LOCKED);
@@ -91,8 +91,8 @@ public class CoinDataManager {
     }
 
     /**
-     * assembly coinTo 组装to
-     * 条件：to中所有地址必须是同一条链的地址
+     * assembly coinTo assembleto
+     * condition：toAll addresses in the must be addresses on the same chain
      *
      * @param listTo Initiator set coinTo
      * @return List<CoinTo>
@@ -107,7 +107,7 @@ public class CoinDataManager {
                 receiveChainId = AddressTool.getChainIdByAddress(address);
             } else {
                 if (receiveChainId != AddressTool.getChainIdByAddress(address)) {
-                    chain.getLogger().error("存在多条连收款方");
+                    chain.getLogger().error("There are multiple consecutive payees");
                     throw new NulsException(NulsCrossChainErrorCode.CROSS_TX_PAYEE_CHAIN_NOT_SAME);
                 }
             }
@@ -124,7 +124,7 @@ public class CoinDataManager {
     }
 
     /**
-     * 验证跨链coin 数据是否存在， from和to不能是同一链
+     * Verify cross chaincoin Does the data exist, fromandtoCannot be the same chain
      *
      * @param coinFromList
      * @param coinToList
@@ -132,19 +132,19 @@ public class CoinDataManager {
      */
     public void verifyCoin(List<CoinFrom> coinFromList, List<CoinTo> coinToList,Chain chain) throws NulsException {
         if (coinFromList.size() == 0 || coinToList.size() == 0) {
-            chain.getLogger().error("付款方或收款方为空");
+            chain.getLogger().error("The payer or payee is empty");
             throw new NulsException(NulsCrossChainErrorCode.COINDATA_IS_INCOMPLETE);
         }
         byte[] toAddress = coinToList.get(0).getAddress();
         int toChainId = AddressTool.getChainIdByAddress(toAddress);
         byte[] fromAddress = coinFromList.get(0).getAddress();
         int fromChainId = AddressTool.getChainIdByAddress(fromAddress);
-        //from和to地址是同一链的地址，则不能创建跨链交易
+        //fromandtoIf the address is on the same chain, cross chain transactions cannot be created
         if (fromChainId == toChainId) {
-            chain.getLogger().error("跨链交易付款方和收款方不能为同一条链账户");
+            chain.getLogger().error("The payer and payee of cross chain transactions cannot be the same chain account");
             throw new NulsException(NulsCrossChainErrorCode.PAYEE_AND_PAYER_IS_THE_SAME_CHAIN);
         }
-        //发起链和接收链是否已注册
+        //Has the initiating chain and receiving chain been registered
         if (!chain.isMainChain()) {
             boolean fromChainRegistered = false;
             boolean toChainRegistered = false;
@@ -160,11 +160,11 @@ public class CoinDataManager {
                 }
             }
             if (!fromChainRegistered) {
-                chain.getLogger().error("本链{}还未注册跨链", fromChainId);
+                chain.getLogger().error("This chain{}Cross chain registration not yet registered", fromChainId);
                 throw new NulsException(NulsCrossChainErrorCode.CURRENT_CHAIN_UNREGISTERED_CROSS_CHAIN);
             }
             if (!toChainRegistered) {
-                chain.getLogger().error("目标链{}还未注册跨链", toChainId);
+                chain.getLogger().error("Target Chain{}Cross chain registration not yet registered", toChainId);
                 throw new NulsException(NulsCrossChainErrorCode.TARGET_CHAIN_UNREGISTERED_CROSS_CHAIN);
             }
             Set<String> verifiedAssets = new HashSet<>();
@@ -179,7 +179,7 @@ public class CoinDataManager {
                         }
                     }
                     if (!assetAvailable) {
-                        chain.getLogger().error("链{}的资产{}未注册跨链", coin.getAssetsChainId(), coin.getAssetsId());
+                        chain.getLogger().error("chain{}Assets of{}Unregistered cross chain", coin.getAssetsChainId(), coin.getAssetsId());
                         throw new NulsException(NulsCrossChainErrorCode.ASSET_UNREGISTERED_CROSS_CHAIN);
                     }
                     verifiedAssets.add(key);
@@ -190,12 +190,12 @@ public class CoinDataManager {
 
     /**
      * assembly coinData
-     * 组装跨链交易在本链的CoinData
+     * Assembling cross chain transactions within this chainCoinData
      *
      * @param listFrom
      * @param listTo
      * @param txSize
-     * @param isMainNet Launching cross-chain transactions 是否为主网
+     * @param isMainNet Launching cross-chain transactions Is it the main network
      * @return
      * @throws NulsException
      */
@@ -205,9 +205,9 @@ public class CoinDataManager {
         coinData.setTo(listTo);
         txSize += coinData.size();
 
-        //本链资产手续费
+        //Asset handling fees for this chain
         BigInteger localFeeTotalFrom = BigInteger.ZERO;
-        //跨链手续费（主网主资产，平行链发起才会有）
+        //Cross chain handling fees（The main asset of the main network can only be obtained through parallel chain initiation）
         BigInteger crossFeeTotalFrom = BigInteger.ZERO;
         for (CoinFrom coinFrom : listFrom) {
             if (CommonUtil.isLocalAsset(coinFrom)) {
@@ -231,43 +231,43 @@ public class CoinDataManager {
             }
         }
 
-        //本交易预计收取的手续费
+        //The expected handling fee for this transaction
         BigInteger targetFee = TransactionFeeCalculator.getCrossTxFee(txSize);
-        //交易中已收取的本链手续费
+        //The transaction fees already charged for this chain in the transaction
         BigInteger localActualFee = localFeeTotalFrom.subtract(localFeeTotalTo);
         if (BigIntegerUtils.isLessThan(localActualFee, BigInteger.ZERO)) {
-            chain.getLogger().error("转出金额小于转入金额");
-            //所有from中账户的余额总和小于to的总和，不够支付手续费
+            chain.getLogger().error("The amount transferred out is less than the amount transferred in");
+            //AllfromThe total balance of the middle account is less thantoThe total amount is not enough to pay the handling fee
             throw new NulsException(NulsCrossChainErrorCode.INSUFFICIENT_FEE);
         } else if (BigIntegerUtils.isLessThan(localActualFee, targetFee)) {
-            //先从有手续费资产的账户收取
+            //Collect from the account with handling fee assets first
             localActualFee = getFeeDirect(chain, listFrom, targetFee, localActualFee, true);
             if (BigIntegerUtils.isLessThan(localActualFee, targetFee)) {
-                //如果没收到足够的手续费，则从CoinFrom中资产不是手续费资产的coin账户中查找资产余额，并组装新的coinfrom来收取手续费
+                //If you have not received enough transaction fees, you will receive them fromCoinFromMedium assets are not fee assetscoinSearch for asset balance in the account and assemble a new onecoinfromTo collect handling fees
                 if (!getFeeIndirect(chain, listFrom, txSize, targetFee, localActualFee, true)) {
-                    chain.getLogger().error("余额不足");
-                    //所有from中账户的余额总和都不够支付手续费
+                    chain.getLogger().error("Insufficient balance");
+                    //AllfromThe total balance of the middle account is not enough to pay the handling fee
                     throw new NulsException(NulsCrossChainErrorCode.INSUFFICIENT_FEE);
                 }
             }
         }
 
-        //如果不是主网，则验证组装跨链手续费
+        //If it is not the main network, verify the assembly cross chain handling fee
         if (!isMainNet){
-            //交易中已收取的手续费
+            //Transaction fees already collected
             BigInteger crossActualFee = crossFeeTotalFrom.subtract(crossFeeTotalTo);
             if (BigIntegerUtils.isLessThan(crossActualFee, BigInteger.ZERO)) {
-                chain.getLogger().error("转出金额小于转入金额");
-                //所有from中账户的余额总和小于to的总和，不够支付手续费
+                chain.getLogger().error("The amount transferred out is less than the amount transferred in");
+                //AllfromThe total balance of the middle account is less thantoThe total amount is not enough to pay the handling fee
                 throw new NulsException(NulsCrossChainErrorCode.INSUFFICIENT_FEE);
             } else if (BigIntegerUtils.isLessThan(crossActualFee, targetFee)) {
-                //先从有手续费资产的账户收取
+                //Collect from the account with handling fee assets first
                 crossActualFee = getFeeDirect(chain, listFrom, targetFee, crossActualFee, false);
                 if (BigIntegerUtils.isLessThan(crossActualFee, targetFee)) {
-                    //如果没收到足够的手续费，则从CoinFrom中资产不是手续费资产的coin账户中查找资产余额，并组装新的coinfrom来收取手续费
+                    //If you have not received enough transaction fees, you will receive them fromCoinFromMedium assets are not fee assetscoinSearch for asset balance in the account and assemble a new onecoinfromTo collect handling fees
                     if (!getFeeIndirect(chain, listFrom, txSize, targetFee, crossActualFee, false)) {
-                        chain.getLogger().error("余额不足");
-                        //所有from中账户的余额总和都不够支付手续费
+                        chain.getLogger().error("Insufficient balance");
+                        //AllfromThe total balance of the middle account is not enough to pay the handling fee
                         throw new NulsException(NulsCrossChainErrorCode.INSUFFICIENT_FEE);
                     }
                 }
@@ -278,12 +278,12 @@ public class CoinDataManager {
 
     /**
      * assembly coinData
-     * 组装跨链交易在本链的CoinData
+     * Assembling cross chain transactions within this chainCoinData
      *
      * @param listFrom
      * @param listTo
      * @param txSize
-     * @param isMainNet Launching cross-chain transactions 是否为主网
+     * @param isMainNet Launching cross-chain transactions Is it the main network
      * @return
      * @throws NulsException
      */
@@ -314,22 +314,22 @@ public class CoinDataManager {
                 }
             }
         }
-        //本交易预计收取的手续费
+        //The expected handling fee for this transaction
         BigInteger targetFee = TransactionFeeCalculator.getCrossTxFee(txSize);
-        //交易中已收取的手续费
+        //Transaction fees already collected
         BigInteger actualFee = feeTotalFrom.subtract(feeTotalTo);
         if (BigIntegerUtils.isLessThan(actualFee, BigInteger.ZERO)) {
-            chain.getLogger().error("转出金额小于转入金额");
-            //所有from中账户的余额总和小于to的总和，不够支付手续费
+            chain.getLogger().error("The amount transferred out is less than the amount transferred in");
+            //AllfromThe total balance of the middle account is less thantoThe total amount is not enough to pay the handling fee
             throw new NulsException(NulsCrossChainErrorCode.INSUFFICIENT_FEE);
         } else if (BigIntegerUtils.isLessThan(actualFee, targetFee)) {
-            //先从有手续费资产的账户收取
+            //Collect from the account with handling fee assets first
             actualFee = getFeeDirect(chain, listFrom, targetFee, actualFee, isMainNet);
             if (BigIntegerUtils.isLessThan(actualFee, targetFee)) {
-                //如果没收到足够的手续费，则从CoinFrom中资产不是手续费资产的coin账户中查找资产余额，并组装新的coinfrom来收取手续费
+                //If you have not received enough transaction fees, you will receive them fromCoinFromMedium assets are not fee assetscoinSearch for asset balance in the account and assemble a new onecoinfromTo collect handling fees
                 if (!getFeeIndirect(chain, listFrom, txSize, targetFee, actualFee, isMainNet)) {
-                    chain.getLogger().error("余额不足");
-                    //所有from中账户的余额总和都不够支付手续费
+                    chain.getLogger().error("Insufficient balance");
+                    //AllfromThe total balance of the middle account is not enough to pay the handling fee
                     throw new NulsException(NulsCrossChainErrorCode.INSUFFICIENT_FEE);
                 }
             }
@@ -342,13 +342,13 @@ public class CoinDataManager {
 
     /**
      * Only collect fees from CoinFrom's coins whose assets are nuls, and return the actual amount charged.
-     * 只从CoinFrom中资产为指定资产的coin中收取手续费，返回实际收取的数额
+     * Only fromCoinFromMedium assets are designated assetscoinCollect transaction fees and return the actual amount collected
      *
-     * @param listFrom  All coins transferred out 转出的所有coin
-     * @param targetFee The amount of the fee that needs to be charged 需要收取的手续费数额
-     * @param actualFee Actual amount charged 实际收取的数额
-     * @param isLocalFee Launching cross-chain transactions 是否为收取本链手续费
-     * @return BigInteger The amount of the fee actually charged 实际收取的手续费数额
+     * @param listFrom  All coins transferred out All transferred outcoin
+     * @param targetFee The amount of the fee that needs to be charged The amount of handling fee to be charged
+     * @param actualFee Actual amount charged Actual amount collected
+     * @param isLocalFee Launching cross-chain transactions Is it for collecting transaction fees on this chain
+     * @return BigInteger The amount of the fee actually charged The actual amount of handling fees collected
      * @throws NulsException
      */
     private BigInteger getFeeDirect(Chain chain, List<CoinFrom> listFrom, BigInteger targetFee, BigInteger actualFee, boolean isLocalFee) throws NulsException {
@@ -371,11 +371,11 @@ public class CoinDataManager {
             if (balance.compareTo(BigInteger.ZERO) == 0) {
                 continue;
             }
-            //可用余额=当前余额减去本次转出
+            //Available balance=Current balance minus current transfer out
             balance = balance.subtract(coinFrom.getAmount());
-            //当前还差的手续费
+            //Current outstanding handling fees
             BigInteger current = targetFee.subtract(actualFee);
-            //如果余额大于等于目标手续费，则直接收取全额手续费
+            //If the balance is greater than or equal to the target handling fee, the full handling fee will be charged directly
             if (BigIntegerUtils.isEqualOrGreaterThan(balance, current)) {
                 coinFrom.setAmount(coinFrom.getAmount().add(current));
                 actualFee = actualFee.add(current);
@@ -389,14 +389,14 @@ public class CoinDataManager {
     }
 
     /**
-     * 从CoinFrom中资产不为nuls的coin中收取nuls手续费，返回是否收取完成
+     * fromCoinFromMedium assets are notnulsofcoinMiddle collectionnulsHandling fee, whether the return has been collected and completed
      * Only collect the nuls fee from the coin in CoinFrom whose assets are not nuls, and return whether the charge is completed.
      *
-     * @param listFrom  All coins transferred out 转出的所有coin
+     * @param listFrom  All coins transferred out All transferred outcoin
      * @param txSize    Current transaction size
      * @param targetFee Estimated fee
      * @param actualFee actual Fee
-     * @param isLocalFee Launching cross-chain transactions 是否为收取本链手续费
+     * @param isLocalFee Launching cross-chain transactions Is it for collecting transaction fees on this chain
      * @return boolean
      * @throws NulsException
      */
@@ -404,7 +404,7 @@ public class CoinDataManager {
         BigInteger balance;
         int chainId;
         int assertId;
-        //如果为发起链则收取本链主资产做手续费，否则收取主网主资产做手续费
+        //If the chain is initiated, a handling fee will be charged to the main asset of the chain; otherwise, a handling fee will be charged to the main network asset
         if(!isLocalFee){
             chainId = config.getMainChainId();
             assertId = config.getMainAssetId();
@@ -427,11 +427,11 @@ public class CoinDataManager {
             feeCoinFrom.setAddress(address);
             feeCoinFrom.setNonce(LedgerCall.getNonce(chain, AddressTool.getStringAddressByBytes(address), chainId, assertId));
             txSize += feeCoinFrom.size();
-            //新增coinfrom，重新计算本交易预计收取的手续费
+            //New additioncoinfromRecalculate the expected transaction fees for this transaction
             targetFee = TransactionFeeCalculator.getCrossTxFee(txSize);
-            //当前还差的手续费
+            //Current outstanding handling fees
             BigInteger current = targetFee.subtract(actualFee);
-            //此账户可以支付的手续费
+            //The handling fees that this account can pay
             BigInteger fee = BigIntegerUtils.isEqualOrGreaterThan(balance, current) ? current : balance;
 
             feeCoinFrom.setLocked(NulsCrossChainConstant.CORSS_TX_LOCKED);
@@ -446,7 +446,7 @@ public class CoinDataManager {
             }
         }
         listFrom.addAll(newCoinFromList);
-        //最终的实际收取数额大于等于预计收取数额，则可以正确组装CoinData
+        //If the final actual collection amount is greater than or equal to the expected collection amount, it can be assembled correctlyCoinData
         if (BigIntegerUtils.isEqualOrGreaterThan(actualFee, targetFee)) {
             return true;
         }
@@ -454,8 +454,8 @@ public class CoinDataManager {
     }
 
     /**
-     * 通过coinfrom计算签名数据的size
-     * 如果coinfrom有重复地址则只计算一次；如果有多签地址，只计算m个地址的size
+     * adoptcoinfromCalculate signature datasize
+     * IfcoinfromCalculate only once if there are duplicate addresses；If there are multiple addresses, only calculatemAddressessize
      *
      * @param coinFroms
      * @return

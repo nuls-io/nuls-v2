@@ -11,7 +11,7 @@ import io.nuls.core.core.annotation.Component;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-21 14:56
- * @Description: 功能描述
+ * @Description: Function Description
  *
  */
 @Component
@@ -21,14 +21,14 @@ public class CheckAliasCase extends BaseTranscationCase<String,String> {
 
     @Override
     public String title() {
-        return "别名是否设置成功";
+        return "Is the alias set successfully";
     }
 
     @Override
     public String doTest(String address, int depth) throws TestFailException {
         AccountInfo accountInfo = accountService.getAccountByAddress(new GetAccountByAddressReq(address)).getData();
         if(!Constants.getAlias(address).equals(accountInfo.getAlias())){
-            throw new TestFailException("账户别名不符合预期");
+            throw new TestFailException("Account alias does not meet expectations");
         }
         return address;
     }

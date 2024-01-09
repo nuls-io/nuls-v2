@@ -43,9 +43,9 @@ import java.util.Map;
 @NulsCoresCmd(module = ModuleE.NW)
 public class TimeServiceRpc extends BaseCmd {
     @CmdAnnotation(cmd = CmdConstant.CMD_NW_CURRENT_TIME, version = 1.0,
-            description = "获取节点网络时间")
-    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "currentTimeMillis", valueType = Long.class, description = "时间毫秒-currentTimeMillis")
+            description = "Obtain node network time")
+    @ResponseData(name = "Return value", description = "Return aMapobject", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "currentTimeMillis", valueType = Long.class, description = "Time milliseconds-currentTimeMillis")
     }))
     public Response currentTimeMillis(Map params) {
         Map<String, Long> responseData = new HashMap<>();

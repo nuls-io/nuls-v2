@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * 未确认交易清理机制
+ * Unconfirmed transaction clearance mechanism
  */
 public class ClearUnconfirmedTxProcessTask implements Runnable {
 
@@ -81,7 +81,7 @@ public class ClearUnconfirmedTxProcessTask implements Runnable {
     }
 
     /**
-     * 过滤指定时间内过期的交易
+     * Filter transactions that expire within a specified time frame
      *
      * @param txKeyList
      * @return expireTxList
@@ -103,15 +103,15 @@ public class ClearUnconfirmedTxProcessTask implements Runnable {
     }
 
     public int processExpireTxs(List<byte[]> queryList){
-        //获取未确认的交易
+        //Obtain unconfirmed transactions
         List<TransactionUnconfirmedPO> list = unconfirmedTxStorageService.getTransactionUnconfirmedPOList(chain.getChainId(), queryList);
-        //计算出超时的未确认交易
+        //Calculate unconfirmed transactions that have exceeded the time limit
         List<Transaction> expireTxList = getExpireTxList(list);
         int count = 0;
         Transaction tx;
         for (int i = 0; i < expireTxList.size(); i++) {
             tx = expireTxList.get(i);
-            //如果该未确认交易不在待打包池中，则认为是过期脏数据，需要清理
+            //If the unconfirmed transaction is not in the pending package pool, it is considered expired dirty data and needs to be cleaned up
             if (!packablePool.exist(chain, tx)) {
                 processTx(chain, tx);
                 count++;
@@ -121,7 +121,7 @@ public class ClearUnconfirmedTxProcessTask implements Runnable {
     }
 
     /**
-     * 过滤指定时间内过期的交易
+     * Filter transactions that expire within a specified time frame
      *
      * @param txPOList
      * @return expireTxList
@@ -129,7 +129,7 @@ public class ClearUnconfirmedTxProcessTask implements Runnable {
     private List<Transaction> getExpireTxList(List<TransactionUnconfirmedPO> txPOList) {
         List<Transaction> expireTxList = new ArrayList<>();
         long currentTimeSeconds = NulsDateUtils.getCurrentTimeSeconds();
-        //过滤指定时间内过期的交易
+        //Filter transactions that expire within a specified time frame
         List<TransactionUnconfirmedPO> expireTxPOList = txPOList.stream().filter(txPo -> currentTimeSeconds - txConfig.getUnconfirmedTxExpire() > txPo.getCreateTime()).collect(Collectors.toList());
         expireTxPOList.forEach(txPo -> expireTxList.add(txPo.getTx()));
         return expireTxList;

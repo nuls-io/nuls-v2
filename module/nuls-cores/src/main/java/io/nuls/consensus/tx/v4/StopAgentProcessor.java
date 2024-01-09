@@ -31,7 +31,7 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * 停止节点交易处理器
+ * Stop node transaction processor
  *
  * @author tag
  * @date 2019/12/2
@@ -104,7 +104,7 @@ public class StopAgentProcessor implements TransactionProcessor {
                     chain.getLogger().info("Intelligent Contract Exit Node Trading Verification Failed");
                     continue;
                 }
-                //验证交易签名是否为节点创建者签名
+                //Verify if the transaction signature is the signature of the node creator
                 StopAgent stopAgent = new StopAgent();
                 stopAgent.parse(stopAgentTx.getTxData(), 0);
                 AgentPo agentPo = agentStorageService.get(stopAgent.getCreateTxHash(), chain.getConfig().getChainId());
@@ -112,7 +112,7 @@ public class StopAgentProcessor implements TransactionProcessor {
                     chain.getLogger().error("Stop node signature verification failed");
                     continue;
                 }
-                //验证停止节点交易时间正确性
+                //Verify the correctness of stopping node transaction time
                 long time = NulsDateUtils.getCurrentTimeSeconds();
                 if (blockHeader != null) {
                     time = blockHeader.getTime();
@@ -195,7 +195,7 @@ public class StopAgentProcessor implements TransactionProcessor {
                 commitResult = false;
             }
         }
-        //回滚已提交成功的交易
+        //Roll back transactions that have been successfully submitted
         if (!commitResult) {
             for (Transaction rollbackTx : commitSuccessList) {
                 try {
@@ -229,7 +229,7 @@ public class StopAgentProcessor implements TransactionProcessor {
                 rollbackResult = false;
             }
         }
-        //保存已回滚成功的交易
+        //Save successfully rolled back transactions
         if (!rollbackResult) {
             for (Transaction commitTx : rollbackSuccessList) {
                 try {
@@ -244,7 +244,7 @@ public class StopAgentProcessor implements TransactionProcessor {
     }
 
     /**
-     * 版本三新增的验证
+     * Verification added in version three
      */
     private boolean verifyV4(Chain chain, Transaction tx, byte[] creator) throws NulsException {
         if (tx.getTransactionSignature() == null) {
@@ -269,7 +269,7 @@ public class StopAgentProcessor implements TransactionProcessor {
             signer = AddressTool.getAddress(transactionSignature.getP2PHKSignatures().get(0).getPublicKey(), chain.getConfig().getChainId());
         }
 
-        //验证签名是否为节点创建者签名
+        //Verify if the signature is the signature of the node creator
         if (!Arrays.equals(creator, signer)) {
             chain.getLogger().error("The signature of the entrusted transaction is not the signature of the entrusting party");
             throw new NulsException(ConsensusErrorCode.TX_CREATOR_NOT_SIGNED);

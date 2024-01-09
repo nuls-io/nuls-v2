@@ -9,38 +9,38 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 跨链模块服务接口类
+ * Cross chain module service interface class
  * @author tag
  * @date 2019/4/8
  */
 public interface CrossChainService {
 
     /**
-     * 创建跨链交易
-     * @param params 创建跨链交易所需参数
+     * Create cross chain transactions
+     * @param params Parameters required to create cross chain transactions
      *
      * @return processor result
      * */
     Result createCrossTx(Map<String,Object> params);
 
     /**
-     * 接收API_MODULE组装的跨链交易
-     * @param params api_module新跨链交易
+     * receiveAPI_MODULECross chain transactions for assembly
+     * @param params api_moduleNew Cross Chain Transactions
      *
      * @return processor result
      * */
     Result newApiModuleCrossTx(Map<String,Object> params);
 
     /**
-     * 跨链交易验证
-     * @param params 跨链交易验证所需参数
+     * Cross chain transaction verification
+     * @param params Parameters required for cross chain transaction verification
      *
      * @return processor result
      * */
     Result validCrossTx(Map<String,Object> params);
 
     /**
-     * 跨链交易提交
+     * Cross chain transaction submission
      * @param chainId       chain ID
      * @param txs           cross chain transaction list
      * @param blockHeader   block header
@@ -50,7 +50,7 @@ public interface CrossChainService {
     boolean commitCrossTx(int chainId, List<Transaction> txs, BlockHeader blockHeader);
 
     /**
-     * 跨链交易回滚
+     * Cross chain transaction rollback
      * @param chainId       chain ID
      * @param txs           cross chain transaction list
      * @param blockHeader   block header
@@ -60,7 +60,7 @@ public interface CrossChainService {
     boolean rollbackCrossTx(int chainId, List<Transaction> txs, BlockHeader blockHeader);
 
     /**
-     * 跨链交易批量验证
+     * Cross chain transaction batch verification
      * @param chainId       chain ID
      * @param txs           cross chain transaction list
      * @param txMap         Consensus Module All Transaction Classification
@@ -71,31 +71,31 @@ public interface CrossChainService {
     Map<String, Object> crossTxBatchValid(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader);
 
     /**
-     * 查询跨链交易在主网的处理结果
-     * @param params 交易Hash
+     * Query the processing results of cross chain transactions on the main network
+     * @param params transactionHash
      *
      * @return processor result
      * */
     Result getCrossTxState(Map<String,Object> params);
 
     /**
-     * 查询已注册跨链的链信息列表
+     * Query the list of registered cross chain chain information
      *
-     * @param params    无
+     * @param params    nothing
      * @return processor result
      * */
     Result getRegisteredChainInfoList(Map<String,Object> params);
 
     /**
-     * 查询已注册跨链的链信息列表
+     * Query the list of registered cross chain chain information
      *
-     * @param params    无
+     * @param params    nothing
      * @return processor result
      * */
     Result getByzantineCount(Map<String,Object> params);
 
     /**
-     * 设置跨链交易类型
+     * Set cross chain transaction types
      * Setting up cross-chain transaction types
      *
      * @return

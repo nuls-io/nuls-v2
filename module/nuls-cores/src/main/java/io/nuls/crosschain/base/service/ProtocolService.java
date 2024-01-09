@@ -3,66 +3,66 @@ package io.nuls.crosschain.base.service;
 import io.nuls.crosschain.base.message.*;
 
 /**
- * 跨链模块协议处理接口类
+ * Cross chain module protocol processing interface class
  * @author tag
  * @date 2019/4/8
  */
 public interface ProtocolService {
     /**
-     * 其他链向本链获取完整跨链交易
-     * @param chainId     消息所属链Id
-     * @param nodeId      发送此消息的节点Id
-     * @param messageBody 消息体
+     * Other chains obtain complete cross chain transactions from this chain
+     * @param chainId     Chain to which the message belongsId
+     * @param nodeId      The node that sent this messageId
+     * @param messageBody Message Body
      * */
     void getOtherCtx(int chainId, String nodeId, GetOtherCtxMessage messageBody);
 
 
     /**
-     * 向其他链查询跨链交易处理状态
-     * @param chainId     消息所属链Id
-     * @param nodeId      发送此消息的节点Id
-     * @param messageBody 消息体
+     * Query cross chain transaction processing status from other chains
+     * @param chainId     Chain to which the message belongsId
+     * @param nodeId      The node that sent this messageId
+     * @param messageBody Message Body
      * */
     void getCtxState(int chainId, String nodeId, GetCtxStateMessage messageBody);
 
     /**
-     * 发起链接收主网发送来的跨链交易处理结果
-     * @param chainId     消息所属链Id
-     * @param nodeId      发送此消息的节点Id
-     * @param messageBody 消息体
+     * Initiate link to receive cross chain transaction processing results sent by the main network
+     * @param chainId     Chain to which the message belongsId
+     * @param nodeId      The node that sent this messageId
+     * @param messageBody Message Body
      * */
     void receiveCtxState(int chainId, String nodeId, CtxStateMessage messageBody);
 
     /**
-     * 发起链接收主网发送来获取链资产消息
-     * @param chainId     消息所属链Id
-     * @param nodeId      发送此消息的节点Id
-     * @param messageBody 消息体
+     * Initiate a link to the main network to receive chain asset messages
+     * @param chainId     Chain to which the message belongsId
+     * @param nodeId      The node that sent this messageId
+     * @param messageBody Message Body
      * */
     void getCirculation(int chainId, String nodeId, GetCirculationMessage messageBody);
 
 
     /**
-     * 接收其他链发送的完整跨链交易
-     * @param chainId     消息所属链Id
-     * @param nodeId      发送此消息的节点Id
-     * @param messageBody 消息体
+     * Receive complete cross chain transactions sent by other chains
+     * @param chainId     Chain to which the message belongsId
+     * @param nodeId      The node that sent this messageId
+     * @param messageBody Message Body
      * */
     void receiveOtherCtx(int chainId, String nodeId, NewOtherCtxMessage messageBody);
 
     /**
-     * 广播跨链交易Hash给其他链节点
-     * @param chainId     消息所属链Id
-     * @param nodeId      发送此消息的节点Id
-     * @param messageBody 消息体
+     * Broadcast Cross Chain TransactionsHashTo other chain nodes
+     * @param chainId     Chain to which the message belongsId
+     * @param nodeId      The node that sent this messageId
+     * @param messageBody Message Body
      * */
     void receiveCtxHash(int chainId,String nodeId,BroadCtxHashMessage messageBody);
 
     /**
-     * 广播跨链交易Hash给链内其他节点
-     * @param chainId     消息所属链Id
-     * @param nodeId      发送此消息的节点Id
-     * @param messageBody 消息体
+     * Broadcast Cross Chain TransactionsHashTo other nodes in the chain
+     * @param chainId     Chain to which the message belongsId
+     * @param nodeId      The node that sent this messageId
+     * @param messageBody Message Body
      * */
     void receiveCtxSign(int chainId,String nodeId,BroadCtxSignMessage messageBody);
 }

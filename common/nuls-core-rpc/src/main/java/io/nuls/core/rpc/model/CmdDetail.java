@@ -31,7 +31,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 /**
- * 对外提供的方法的具体信息
+ * Specific information on the methods provided to the public
  * Detail information on methods provided to the outside world
  *
  * @author tangyi

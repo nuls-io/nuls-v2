@@ -64,7 +64,7 @@ public class AccountCmdTest {
     }
 
     /**
-     * 根据地址查询私钥
+     * Query private key based on address
      *
      * @param chainId
      * @param address
@@ -266,7 +266,7 @@ public class AccountCmdTest {
             List<String> accountList = CommonRpcOperation.createAccount(chainId, 1, password);
             String priKey = getPriKeyByAddress(chainId, accountList.get(0), password);
             assertNotNull(priKey);
-            //账户已存在则覆盖 If the account exists, it covers.
+            //Overwrite if account already exists If the account exists, it covers.
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
             params.put(Constants.CHAIN_ID, chainId);
@@ -277,29 +277,29 @@ public class AccountCmdTest {
             HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_importAccountByPriKey");
             String address = (String) result.get("address");
 //            assertEquals(accountList.get(0), address);
-            //账户已存在，不覆盖，返回错误提示  If the account exists, it will not be covered,return error message.
+            //Account already exists, not overwritten, returning error message  If the account exists, it will not be covered,return error message.
             params.put("overwrite", false);
             cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
             assertNotEquals(AccountConstant.SUCCESS_CODE, cmdResp.getResponseStatus());
 
-            //移除账户，再导入 Remove the account and import it according to the private key.
+            //Remove account and import again Remove the account and import it according to the private key.
             Map<String, Object> params2 = new HashMap<>();
             params2.put(Constants.VERSION_KEY_STR, version);
             params2.put("chainId", chainId);
             params2.put("address", accountList.get(0));
             params2.put("password", password);
             ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_removeAccount", params2);
-            //账户不存在则创建 If account does not exist, create
+            //Create if the account does not exist If account does not exist, create
             params.put("priKey", priKey);
             cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
             assertEquals(AccountConstant.SUCCESS_CODE, cmdResp.getResponseStatus());
 
-            //测试未加密账户
+            //Test unencrypted accounts
             //create an unencrypted account for test
-            //由于getPriKeyByAddress只返回加密账户的私钥，所以无法得到未加密账户私钥，所以使用固定值测试
+            //Due togetPriKeyByAddressOnly the private key of the encrypted account is returned, so it is not possible to obtain the private key of the unencrypted account, so a fixed value test is used
             String addressx = "KMNPqwARu77qAL4UCkd5Vwvj5PAtw3930";
             priKey = "00af59aa43536f6162a7166cdc1a389b32be0a06bc06f71a601a92e08fd2788dfe";
-            //账户已存在则覆盖 If the account exists, it covers.
+            //Overwrite if account already exists If the account exists, it covers.
             params.remove("password");
             params.put("priKey", priKey);
             params.put("overwrite", true);
@@ -322,7 +322,7 @@ public class AccountCmdTest {
             String priKey = getPriKeyByAddress(chainId, accountList.get(0), password);
             assertNotNull(priKey);
 
-            //构造keystore对象
+            //structurekeystoreobject
             SimpleAccountDTO account = getAccountByAddress(chainId, accountList.get(0));
             AccountKeyStoreDTO keyStoreDto = new AccountKeyStoreDTO();
             keyStoreDto.setAddress(account.getAddress());
@@ -330,9 +330,9 @@ public class AccountCmdTest {
             keyStoreDto.setEncryptedPrivateKey(account.getEncryptedPrikeyHex());
             //keyStoreDto.setPrikey(priKey);
 
-            //生成keystore HEX编码
+            //generatekeystore HEXcoding
             String keyStoreHex = HexUtil.encode(JSONUtils.obj2json(keyStoreDto).getBytes());
-            //账户已存在则覆盖 If the account exists, it covers.
+            //Overwrite if account already exists If the account exists, it covers.
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
             params.put(Constants.CHAIN_ID, chainId);
@@ -344,29 +344,29 @@ public class AccountCmdTest {
             String address = (String) result.get("address");
             assertEquals(accountList.get(0), address);
 
-            //账户已存在，不覆盖，返回错误提示  If the account exists, it will not be covered,return error message.
+            //Account already exists, not overwritten, returning error message  If the account exists, it will not be covered,return error message.
             params.put("overwrite", false);
             cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByKeystore", params);
             assertNotEquals(AccountConstant.SUCCESS_CODE, cmdResp.getResponseStatus());
 
-            //移除账户，再导入 Remove the account and import it according to the private key.
+            //Remove account and import again Remove the account and import it according to the private key.
             Map<String, Object> params2 = new HashMap<>();
             params2.put(Constants.VERSION_KEY_STR, version);
             params2.put("chainId", chainId);
             params2.put("address", accountList.get(0));
             params2.put("password", password);
             ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_removeAccount", params2);
-            //账户不存在则创建 If account does not exist, create
+            //Create if the account does not exist If account does not exist, create
             cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByKeystore", params);
             assertEquals(AccountConstant.SUCCESS_CODE, cmdResp.getResponseStatus());
 
-            //测试未加密账户
+            //Test unencrypted accounts
             //Create an unencrypted account for test
-            //由于getPriKeyByAddress只返回加密账户的私钥，所以无法得到未加密账户私钥，所以使用固定值测试
+            //Due togetPriKeyByAddressOnly the private key of the encrypted account is returned, so it is not possible to obtain the private key of the unencrypted account, so a fixed value test is used
             String addressx = "XfbZd1RYgTtQBb7xeP3bziAd2kmQL3930";
             priKey = "00cf6b28b2885c550506006b72fab1ab85cbf7e1aafdc6c1661e2b82f7f0089185";
 
-            //构造keystore对象
+            //structurekeystoreobject
             account = getAccountByAddress(chainId, addressx);
             keyStoreDto = new AccountKeyStoreDTO();
             keyStoreDto.setAddress(account.getAddress());
@@ -374,9 +374,9 @@ public class AccountCmdTest {
             //keyStoreDto.setEncryptedPrivateKey(account.getEncryptedPrikeyHex());
             keyStoreDto.setPrikey(priKey);
 
-            //生成keystore HEX编码
+            //generatekeystore HEXcoding
             keyStoreHex = HexUtil.encode(JSONUtils.obj2json(keyStoreDto).getBytes());
-            //账户已存在则覆盖 If the account exists, it covers.
+            //Overwrite if account already exists If the account exists, it covers.
             params.put("keyStore", keyStoreHex);
             params.remove("password");
             params.put("overwrite", true);
@@ -398,7 +398,7 @@ public class AccountCmdTest {
             List<String> accountList = CommonRpcOperation.createAccount(chainId, 1, password);
             String address = accountList.get(0);
 
-            //测试不指定备份路径
+            //Test not specifying backup path
             String pathDir = "";
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
@@ -406,29 +406,29 @@ public class AccountCmdTest {
             params.put("address", address);
             params.put("password", password);
             params.put("pathDir", pathDir);
-            //导出账户keystore路径  export account keyStore path
+            //Export Accountkeystorepath  export account keyStore path
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_exportAccountKeyStore", params);
             HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_exportAccountKeyStore");
             String path = (String) result.get("path");
             assertNotNull(path);
 
-            //测试指定非windows备份路径
-            pathDir = "测试1/back/up";
+            //Test specified nonwindowsBackup path
+            pathDir = "test1/back/up";
             params.put("pathDir", pathDir);
-            //导出账户keystore路径  export account keyStore path
+            //Export Accountkeystorepath  export account keyStore path
             cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_exportAccountKeyStore", params);
             result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_exportAccountKeyStore");
             path = (String) result.get("path");
             assertNotNull(path);
 
-            //测试指定windows备份路径
+            //Test specifiedwindowsBackup path
             //Create an unencrypted account for test
             accountList = CommonRpcOperation.createAccount(chainId, 1, password);
-            pathDir = "D:\\workspace\\github\\nuls_2.0\\测试2\\back\\up";
+            pathDir = "D:\\workspace\\github\\nuls_2.0\\test2\\back\\up";
             params.put("address", accountList.get(0));
             params.remove("password");
             params.put("pathDir", pathDir);
-            //导出账户keystore路径  export account keyStore path
+            //Export Accountkeystorepath  export account keyStore path
             cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_exportAccountKeyStore", params);
             result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_exportAccountKeyStore");
             path = (String) result.get("path");
@@ -442,11 +442,11 @@ public class AccountCmdTest {
     @Test
     public void setPasswordTest() {
         try {
-            //创建未加密账户 create unencrypted account
+            //Create an unencrypted account create unencrypted account
             List<String> accountList = CommonRpcOperation.createAccount(chainId, 1, password);
             String address = accountList.get(0);
 
-            //为账户设置密码 set password for account
+            //Set password for account set password for account
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
             params.put(Constants.CHAIN_ID, chainId);
@@ -457,9 +457,9 @@ public class AccountCmdTest {
             Boolean value = (Boolean) result.get("value");
             assertTrue(value);
 
-            //为账户重复设置密码 Repeat password for account
+            //Repeat password setting for account Repeat password for account
             cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_setPassword", params);
-            //不能再次设置密码 Password cannot be set again.
+            //Cannot reset password again Password cannot be set again.
             assertNotEquals(AccountConstant.SUCCESS_CODE, cmdResp.getResponseStatus());
         } catch (Exception e) {
             e.printStackTrace();
@@ -469,11 +469,11 @@ public class AccountCmdTest {
     @Test
     public void updatePasswordTest() {
         try {
-            //创建未加密账户 create unencrypted account
+            //Create an unencrypted account create unencrypted account
             List<String> accountList = CommonRpcOperation.createAccount(chainId, 1, password);
             String address = accountList.get(0);
 
-            //为未设置密码的账户修改密码 change password for account
+            //Change password for accounts without password set change password for account
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
             params.put(Constants.CHAIN_ID, chainId);
@@ -481,22 +481,22 @@ public class AccountCmdTest {
             params.put("password", password);
             params.put("newPassword", newPassword);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_updatePassword", params);
-            //未设置密码不能修改密码，必须先设置密码再修改 No password can be changed, password must be set first, then password should be changed.
+            //Password cannot be changed without setting it. You must first set the password before changing it No password can be changed, password must be set first, then password should be changed.
             assertNotEquals(AccountConstant.SUCCESS_CODE, cmdResp.getResponseStatus());
 
-            //为账户设置密码 set password for account
+            //Set password for account set password for account
             cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_setPassword", params);
             Map result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_setPassword");
             Boolean value = (Boolean) result.get("value");
             assertTrue(value);
 
-            //为账户修改密码 change password for account
+            //Change password for account change password for account
             cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_updatePassword", params);
             result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_updatePassword");
             value = (Boolean) result.get("value");
             assertTrue(value);
 
-            //使用错误旧密码为账户修改密码 using old password to change password for account
+            //Change password for account using incorrect old password using old password to change password for account
             params.put("password", "errorpwd123");
             cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_updatePassword", params);
             assertNotEquals(AccountConstant.SUCCESS_CODE, cmdResp.getResponseStatus());
@@ -513,7 +513,7 @@ public class AccountCmdTest {
             params.put(Constants.CHAIN_ID, chainId);
             params.put("count", 1);
             params.put("password", password);
-            //创建未加密离线账户 create unencrypted account
+            //Create an unencrypted offline account create unencrypted account
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createOfflineAccount", params);
             //List<AccountOfflineDto> accountList = JSONUtils.json2list(JSONUtils.obj2json(JSONUtils.json2map(JSONUtils.obj2json(cmdResp.getResponseData())).get("list")), AccountOfflineDto.class);
             List<AccountOfflineDTO> accountList = JSONUtils.json2list(JSONUtils.obj2json(((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createOfflineAccount")).get("list")), AccountOfflineDTO.class);
@@ -526,7 +526,7 @@ public class AccountCmdTest {
             params.put("address", address);
             params.put("priKey", priKey);
             params.put("password", password);
-            //为账户设置密码 set password for account
+            //Set password for account set password for account
             cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_setOfflineAccountPassword", params);
             HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_setOfflineAccountPassword");
             String encryptedPriKey = (String) result.get("encryptedPriKey");
@@ -538,11 +538,11 @@ public class AccountCmdTest {
             params.put("address", address);
             params.put("encryptedPriKey", encryptedPriKey);
             params.put("newPassword", newPassword);
-            //为离线账户重复设置密码 repeat password for account
+            //Repeatedly setting passwords for offline accounts repeat password for account
             cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_setOfflineAccountPassword", params);
             result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_setOfflineAccountPassword");
             String encryptedPriKeyNew = (String) result.get("encryptedPriKey");
-            //可以为离线账户再次设置密码 Password cannot be set again.
+            //Password can be reset for offline accounts Password cannot be set again.
             assertNotEquals(encryptedPriKeyNew, encryptedPriKey);
         } catch (Exception e) {
             e.printStackTrace();
@@ -557,19 +557,19 @@ public class AccountCmdTest {
             params.put(Constants.CHAIN_ID, chainId);
             params.put("count", 1);
             params.put("password", password);
-            //创建未加密离线账户 create unencrypted account
+            //Create an unencrypted offline account create unencrypted account
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createOfflineAccount", params);
             List<AccountOfflineDTO> accountList = JSONUtils.json2list(JSONUtils.obj2json(((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createOfflineAccount")).get("list")), AccountOfflineDTO.class);
             String address = accountList.get(0).getAddress();
             String priKey = accountList.get(0).getPriKey();
 
-            //创建加密离线账户 create encrypted account
+            //Create encrypted offline account create encrypted account
             params.put("password", password);
             cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createOfflineAccount", params);
             accountList = JSONUtils.json2list(JSONUtils.obj2json(((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createOfflineAccount")).get("list")), AccountOfflineDTO.class);
             String encryptedPriKey2 = accountList.get(0).getEncryptedPriKey();
 
-            //为账户设置密码 set password for account
+            //Set password for account set password for account
             params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
             params.put(Constants.CHAIN_ID, chainId);
@@ -581,7 +581,7 @@ public class AccountCmdTest {
             String encryptedPriKey = (String) result.get("encryptedPriKey");
 //            assertNotNull(encryptedPriKey);
 
-            //测试错误的地址 testing the wrong address
+            //Test incorrect address testing the wrong address
             params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
             params.put(Constants.CHAIN_ID, chainId);
@@ -593,21 +593,21 @@ public class AccountCmdTest {
             result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_updateOfflineAccountPassword"));
             assertEquals(AccountErrorCode.ADDRESS_ERROR.getCode(), result.get("code"));
 
-            //测试错误的私钥 testing the wrong private key
+            //Test incorrect private key testing the wrong private key
 //            params.put("address", address);
 //            params.put("priKey", "86" + encryptedPriKey);
 //            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_updateOfflineAccountPassword", params);
 //            result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_updateOfflineAccountPassword"));
 //            assertEquals(AccountErrorCode.PASSWORD_IS_WRONG.getCode(), result.get("code"));
 
-            //测试错误的密码 testing the wrong password
+            //Test incorrect password testing the wrong password
             params.put("priKey", encryptedPriKey);
             params.put("password", password + "errorpwd");
             cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_updateOfflineAccountPassword", params);
             result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_updateOfflineAccountPassword"));
             assertEquals(AccountErrorCode.PASSWORD_IS_WRONG.getCode(), result.get("code"));
 
-            //为离线账户修改密码 modify password for offline account
+            //Change password for offline account modify password for offline account
             params.put(Constants.CHAIN_ID, chainId);
             params.put("address", address);
             params.put("priKey", encryptedPriKey);
@@ -626,7 +626,7 @@ public class AccountCmdTest {
     public void isEncryptedTest() {
         try {
             // create account
-            //创建未加密账户 create unencrypted account
+            //Create an unencrypted account create unencrypted account
             List<String> accountList = CommonRpcOperation.createAccount(chainId, 1, password);
             String address = accountList.get(0);
 
@@ -634,20 +634,20 @@ public class AccountCmdTest {
             params.put(Constants.VERSION_KEY_STR, version);
             params.put(Constants.CHAIN_ID, chainId);
             params.put("address", address);
-            //验证账户是否加密 verify that the account is encrypted
+            //Verify if the account is encrypted verify that the account is encrypted
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_isEncrypted", params);
             HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_isEncrypted");
             Boolean value = (Boolean) result.get("value");
             assertFalse(value);
 
-            //为账户设置密码 set password for account
+            //Set password for account set password for account
             params.put("password", password);
             cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_setPassword", params);
             result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_setPassword");
             value = (Boolean) result.get("value");
             assertTrue(value);
 
-            //验证账户是否加密 verify that the account is encrypted
+            //Verify if the account is encrypted verify that the account is encrypted
             cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_isEncrypted", params);
             result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_isEncrypted");
             value = (Boolean) result.get("value");
@@ -660,11 +660,11 @@ public class AccountCmdTest {
     @Test
     public void validationPasswordTest() {
         try {
-            //创建未加密账户 create unencrypted account
+            //Create an unencrypted account create unencrypted account
             List<String> accountList = CommonRpcOperation.createAccount(chainId, 1, password);
             String address = accountList.get(0);
 
-            //验证账户是否正确 verify that the account password is correct
+            //Verify if the account is correct verify that the account password is correct
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
             params.put(Constants.CHAIN_ID, chainId);
@@ -675,13 +675,13 @@ public class AccountCmdTest {
             Boolean value = (Boolean) result.get("value");
             assertFalse(value);
 
-            //为账户设置密码 set password for account
+            //Set password for account set password for account
             cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_setPassword", params);
             result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_setPassword");
             value = (Boolean) result.get("value");
             assertTrue(value);
 
-            //验证账户是否正确 verify that the account password is correct
+            //Verify if the account is correct verify that the account password is correct
             cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_validationPassword", params);
             result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_validationPassword");
             value = (Boolean) result.get("value");
@@ -694,16 +694,16 @@ public class AccountCmdTest {
     @Test
     public void signDigestTest() {
         try {
-            //创建加密账户 create encrypted account
+            //Create encrypted account create encrypted account
             List<String> accountList = CommonRpcOperation.createAccount(chainId, 1, password);
             String address = accountList.get(0);
             //byte[] addressBytes = accountList.get(0).getAddress().getAddressBytes();
             byte[] addressBytes = accountList.get(0).getBytes();
 
-            //创建一笔设置别名的交易
+            //Create a transaction with alias settings
             AliasTransaction tx = new AliasTransaction();
             tx.setTime(System.currentTimeMillis()/1000);
-            Alias alias = new Alias(addressBytes, "别名");
+            Alias alias = new Alias(addressBytes, "alias");
             tx.setTxData(alias.serialize());
 
 //            CoinDataResult coinDataResult = accountLedgerService.getCoinData(addressBytes, AccountConstant.ALIAS_NA, tx.size() , TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
@@ -723,7 +723,7 @@ public class AccountCmdTest {
             tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
 
             String dataHex = HexUtil.encode(tx.getHash().getBytes());
-            //测试密码正确
+            //Test password is correct
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
             params.put(Constants.CHAIN_ID, chainId);
@@ -735,7 +735,7 @@ public class AccountCmdTest {
             String signatureHex = (String) result.get(RpcConstant.SIGNATURE);
             assertNotNull(signatureHex);
 
-            //测试密码不正确
+            //Incorrect test password
             params.put("password", password + "error");
             cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_signDigest", params);
             result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_signDigest"));

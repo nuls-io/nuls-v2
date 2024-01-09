@@ -40,9 +40,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 /**
- * 消息测试类,测试各种类型的消息序列化与反序列化
+ * Message testing class,Test various types of message serialization and deserialization
  * @author captain
- * @date 18-11-16 下午12:17
+ * @date 18-11-16 afternoon12:17
  * @version 1.0
  */
 public class MessageTest {
@@ -210,13 +210,13 @@ public class MessageTest {
     }
 
     /**
-     * 铸币交易
+     * Coinage trading
      *
      * @return
      * @throws IOException
      */
     private static Transaction buildTransaction(String address) throws IOException {
-        //封装交易执行
+        //Encapsulation transaction execution
         Transaction tx = new Transaction();
         CoinData coinData = new CoinData();
         CoinTo coinTo = new CoinTo();

@@ -60,7 +60,7 @@ public class ProgramResult {
     private List<ProgramInvokeRegisterCmd> invokeRegisterCmds = new ArrayList<>();
     private List<Object> orderedInnerTxs = new ArrayList<>();
 
-    // add by pierre at 2020-11-03 可能影响兼容性，考虑协议升级
+    // add by pierre at 2020-11-03 May affect compatibility, consider protocol upgrade
     private LinkedList<String> stackTraces = new LinkedList<>();
     // add by pierre at 2022/6/1 p14
     private List<ProgramInternalCreate> internalCreates = new ArrayList<>();

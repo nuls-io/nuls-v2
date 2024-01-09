@@ -10,7 +10,7 @@ import io.nuls.core.core.annotation.Component;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-21 15:38
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Component
 public class SyncTxInfoCase extends BaseTranscationCase<TransactionData,String> {
@@ -19,7 +19,7 @@ public class SyncTxInfoCase extends BaseTranscationCase<TransactionData,String> 
 
     @Override
     public String title() {
-        return "交易信息数据一致性";
+        return "Consistency of transaction information data";
     }
 
     @Override
@@ -36,10 +36,10 @@ public class SyncTxInfoCase extends BaseTranscationCase<TransactionData,String> 
 
             @Override
             public String title() {
-                return "远程交易状态一致性";
+                return "Remote transaction status consistency";
             }
         }.check(new RemoteTestParam<>(GetTxInfoCase.class,transaction,hash),depth)){
-            throw new TestFailException("远程交易状态本地不一致");
+            throw new TestFailException("Remote transaction status locally inconsistent");
         }
         return transaction;
     }

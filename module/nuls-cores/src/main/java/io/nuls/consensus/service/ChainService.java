@@ -10,56 +10,56 @@ import java.util.Map;
  * */
 public interface ChainService {
     /**
-     * 共识模块交易提交
+     * Consensus module transaction submission
      * @param params
      * @return Result
      * */
     Result commitCmd(Map<String,Object> params);
 
     /**
-     * 共识模块交易回滚
+     * Consensus module transaction rollback
      * @param params
      * @return Result
      * */
     Result rollbackCmd(Map<String,Object> params);
 
     /**
-     * 查询黄牌列表
+     * Query Yellow Card List
      * @param params
      * @return Result
      * */
     Result getPublishList(Map<String,Object> params);
 
     /**
-     * 查询全网共识信息
+     * Query consensus information across the entire network
      * @param params
      * @return Result
      * */
     Result getWholeInfo(Map<String,Object> params);
 
     /**
-     * 查询指定账户的共识信息
+     * Query consensus information for specified accounts
      * @param params
      * @return Result
      * */
     Result getInfo(Map<String,Object> params);
 
     /**
-     * 批量验证共识模块交易
+     * Batch Verify Consensus Module Transactions
      * @param params
      * @return Result
      * */
     Result batchValid(Map<String,Object> params);
 
     /**
-     * 获取当前轮次信息
+     * Obtain current round information
      * @param params
      * @return Result
      * */
     Result getCurrentRoundInfo(Map<String,Object> params);
 
     /**
-     * 获取指定区块轮次
+     * Obtain specified block rounds
      * @param params
      * @return Result
      * */
@@ -67,42 +67,42 @@ public interface ChainService {
 
 
     /**
-     * 停止一条子链
+     * Stop a sub chain
      * @param params
      * @return Result
      * */
     Result stopChain(Map<String,Object> params);
 
     /**
-     * 运行一条子链
+     * Run a sub chain
      * @param params
      * @return Result
      * */
     Result runChain(Map<String,Object> params);
 
     /**
-     * 运行主链
+     * Running the main chain
      * @param params
      * @return Result
      * */
     Result runMainChain(Map<String,Object> params);
 
     /**
-     * 缓存最新区块
+     * Cache the latest block
      * @param params
      * @return Result
      * */
     Result addEvidenceRecord(Map<String,Object> params);
 
     /**
-     * 双花交易记录
+     * Shuanghua transaction records
      * @param params
      * @return Result
      * */
     Result doubleSpendRecord(Map<String,Object> params);
 
     /**
-     * 获取共模块识配置信息
+     * Obtain common module recognition configuration information
      * @param params
      * @return Result
      * */
@@ -111,7 +111,7 @@ public interface ChainService {
     Result getSeedNodeList(Map<String,Object> params);
 
     /**
-     * 获取共识两轮次间节点变化信息
+     * Obtain node change information between two rounds of consensus
      * @param params
      * @return Result
      * */

@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-19 18:07
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class BlockHeaderData {
 
@@ -40,12 +40,12 @@ public class BlockHeaderData {
     protected int packingIndexOfRound;
 
     /**
-     * 主网当前生效的版本
+     * The current effective version of the main network
      */
     private short mainVersion;
 
     /**
-     * 区块的版本，可以理解为本地钱包的版本
+     * The version of the block can be understood as the version of the local wallet
      */
     private short blockVersion;
 

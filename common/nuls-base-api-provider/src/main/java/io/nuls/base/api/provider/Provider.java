@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-06 14:36
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value={ElementType.TYPE})

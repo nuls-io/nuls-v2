@@ -10,7 +10,7 @@ import io.netty.handler.stream.ChunkedWriteHandler;
 import io.nuls.core.rpc.netty.handler.ServerHandler;
 
 /**
- * 服务器端配置类
+ * Server side configuration class
  * Server Configuration Class
  *
  * @author tag
@@ -27,16 +27,16 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
     @Override
     protected void initChannel(SocketChannel socketChannel) {
         ChannelPipeline pipeline = socketChannel.pipeline();
-        //webSocket协议本身是基于http协议的，所以这边也要使用http解编码器
+        //webSocketThe protocol itself is based onhttpProtocol, so we also need to use it herehttpDecoder
         pipeline.addLast(new HttpServerCodec());
-        //以块的方式来写的处理器
+        //A processor written in blocks
         pipeline.addLast(new ChunkedWriteHandler());
-        //netty是基于分段请求的，HttpObjectAggregator的作用是将请求分段再聚合,参数是聚合字节的最大长度
+        //nettyIt is based on segmented requests,HttpObjectAggregatorThe function of is to segment and re aggregate requests,The parameter is the maximum length of aggregated bytes
         pipeline.addLast(new HttpObjectAggregator(104 * 1024 * 1024));
-        //参数指的是contex_path
+        //The parameters refer tocontex_path
         pipeline.addLast(new WebSocketServerProtocolHandler(path, null, true, 104 * 1024 * 1024));
 
-        //webSocket定义了传递数据的6中frame类型
+        //webSocketDefined the transmission of data6inframetype
         pipeline.addLast(new ServerHandler());
     }
 }

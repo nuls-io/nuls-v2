@@ -16,8 +16,8 @@ import java.util.concurrent.TimeUnit;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-13 14:47
- * @Description: 模块依赖管理状态通知
- * 通过重试的方式确保通知成功。若失败等待1秒重新通知，直到成功为止
+ * @Description: Module Dependency Management Status Notification
+ * Ensure successful notification through retry. If failed, wait1Notify again in seconds until successful
  */
 @Component
 public class NotifySender implements Runnable, InitializingBean {

@@ -39,7 +39,7 @@ public class WsKernel {
 
     @Test
     public  void test() throws Exception {
-        //模拟启动内核模块
+        //Simulate boot kernel module
         NoUse.mockKernel();
 //        int port = 7771;
 //        WsServer s = new WsServer(port);

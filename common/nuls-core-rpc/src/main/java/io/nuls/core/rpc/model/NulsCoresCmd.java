@@ -5,7 +5,7 @@ import java.lang.annotation.*;
 /**
  * @author: PierreLuo
  * @date: 2023/6/27
- * 标记核心模块cmd所属模块
+ * Mark Core ModulecmdModule
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)

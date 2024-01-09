@@ -31,7 +31,7 @@ import io.nuls.ledger.model.po.sub.AccountStateSnapshot;
 import java.util.List;
 
 /**
- * 账本信息业务功能处理
+ * Processing of ledger information business functions
  * Created by wangkun23 on 2018/11/29.
  *
  * @author lanjinsheng
@@ -39,7 +39,7 @@ import java.util.List;
 public interface AccountStateService {
 
     /**
-     * 不用同步锁获取账户信息
+     * No need to synchronize lock to obtain account information
      *
      * @param address        address
      * @param addressChainId addressChainId
@@ -51,7 +51,7 @@ public interface AccountStateService {
 
 
     /**
-     * 获取账本信息，并重新计算冻结的金额的信息
+     * Obtain ledger information and recalculate information on frozen amounts
      *
      * @param address
      * @param addressChainId
@@ -62,7 +62,7 @@ public interface AccountStateService {
     AccountState getAccountStateReCal(String address, int addressChainId, int assetChainId, int assetId);
 
     /**
-     * 回滚账户信息
+     * Rollback account information
      *
      * @param chainId
      * @param preAccountStates

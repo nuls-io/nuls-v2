@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 主网验证人变更消息广播失败消息数据库相关接口实现类
+ * Implementation class for main network verifier change message broadcast failure message database related interface
  * Main Network Verifier Change Message Broadcasting Failure Message Database Related Interface
  *
  * @author  tag

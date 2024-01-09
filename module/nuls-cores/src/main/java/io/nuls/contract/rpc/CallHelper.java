@@ -39,7 +39,7 @@ import java.util.Map;
  */
 public class CallHelper {
     /**
-     * 调用其他模块接口
+     * Call other module interfaces
      * Call other module interfaces
      */
     public static Object request(String moduleCode, String cmd, Map params) throws NulsException {

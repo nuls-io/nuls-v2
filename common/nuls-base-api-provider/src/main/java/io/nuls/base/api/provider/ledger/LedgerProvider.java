@@ -8,12 +8,12 @@ import java.util.Map;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-11 13:42
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public interface LedgerProvider {
 
     /**
-     * 获取账户余额
+     * Obtain account balance
      *
      * @param req
      * @return
@@ -26,7 +26,7 @@ public interface LedgerProvider {
     Result<Map> getContractAsset(ContractAsset req);
 
     /**
-     * 本地资产注册
+     * Local asset registration
      *
      * @param req
      * @return

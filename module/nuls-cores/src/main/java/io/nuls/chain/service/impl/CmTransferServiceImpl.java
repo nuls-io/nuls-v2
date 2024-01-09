@@ -52,15 +52,15 @@ public class CmTransferServiceImpl implements CmTransferService {
     public boolean rollback(int chainId, List<Transaction> txs, BlockHeader blockHeader) {
         try {
             long commitHeight = blockHeader.getHeight();
-            //获取回滚信息
+            //Get rollback information
             CacheDatas moduleTxDatas = cacheDataService.getCacheDatas(commitHeight - 1);
-            //通知远程调用回滚
+            //Notify remote call to roll back
             chainService.rpcBlockChainRollback(txs, blockHeader.getTime());
             if (null == moduleTxDatas) {
                 LoggerUtil.logger().info("chain module height ={} bak datas is null,maybe had rolled", commitHeight);
                 return true;
             }
-            //进行数据回滚
+            //Performing data rollback
             cacheDataService.rollBlockTxs(chainId, commitHeight);
             return true;
         } catch (Exception e) {
@@ -73,15 +73,15 @@ public class CmTransferServiceImpl implements CmTransferService {
     public boolean rollbackV3(int chainId, List<Transaction> txs, BlockHeader blockHeader) {
         try {
             long commitHeight = blockHeader.getHeight();
-            //获取回滚信息
+            //Get rollback information
             CacheDatas moduleTxDatas = cacheDataService.getCacheDatas(commitHeight - 1);
-            //通知远程调用回滚
+            //Notify remote call to roll back
             chainService.rpcBlockChainRollbackV4(txs,blockHeader.getTime());
             if (null == moduleTxDatas) {
                 LoggerUtil.logger().info("chain module height ={} bak datas is null,maybe had rolled", commitHeight);
                 return true;
             }
-            //进行数据回滚
+            //Performing data rollback
             cacheDataService.rollBlockTxs(chainId, commitHeight);
             return true;
         } catch (Exception e) {

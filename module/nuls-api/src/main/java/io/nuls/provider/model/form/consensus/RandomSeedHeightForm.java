@@ -31,14 +31,14 @@ import io.nuls.provider.model.form.Base;
  * @author: PierreLuo
  * @date: 2019-12-18
  */
-@ApiModel(name = "随机种子")
+@ApiModel(name = "Random Seed")
 public class RandomSeedHeightForm extends Base {
 
-    @ApiModelProperty(description = "起始高度")
+    @ApiModelProperty(description = "Starting height")
     private long startHeight;
-    @ApiModelProperty(description = "截止高度")
+    @ApiModelProperty(description = "Cut-off height")
     private long endHeight;
-    @ApiModelProperty(description = "算法标识：SHA3, KECCAK, MERKLE", required = false)
+    @ApiModelProperty(description = "Algorithm identification：SHA3, KECCAK, MERKLE", required = false)
     private String algorithm;
 
     public long getStartHeight() {

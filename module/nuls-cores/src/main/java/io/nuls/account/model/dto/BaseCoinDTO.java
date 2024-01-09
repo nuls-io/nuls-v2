@@ -35,23 +35,23 @@ import java.math.BigInteger;
  */
 @ApiModel
 public class BaseCoinDTO {
-    @ApiModelProperty(description = "账户地址")
+    @ApiModelProperty(description = "Account address")
     protected String address;
 
-    @ApiModelProperty(description = "资产的链ID")
+    @ApiModelProperty(description = "The chain of assetsID")
     protected Integer assetsChainId;
 
-    @ApiModelProperty(description = "资产ID")
+    @ApiModelProperty(description = "assetID")
     protected Integer assetsId;
 
     /**
-     * uint128 转出数量
+     * uint128 Transfer out quantity
      */
-    @ApiModelProperty(description = "数量")
+    @ApiModelProperty(description = "quantity")
     protected BigInteger amount;
 
     /**
-     * 将多签交易客户端参数转换成交易统一处理对象
+     * Convert multi signature transaction client parameters into transaction unified processing objects
      * @return
      */
     public CoinDTO convert(){

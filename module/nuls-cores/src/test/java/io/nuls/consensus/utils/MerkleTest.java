@@ -30,7 +30,7 @@ public class MerkleTest {
     }
 
     /**
-     * 获取关键路径上需要的hash列表
+     * Obtain what is needed on the critical pathhashlist
      *
      * @param hashList
      * @return

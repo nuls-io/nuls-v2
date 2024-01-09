@@ -47,7 +47,7 @@ import java.util.Map;
  */
 public class LedgerAsset extends BaseNulsData {
     /**
-     * 资产是在哪条链上注册的
+     * On which chain is the asset registered
      * Which chain is the asset registered on
      */
     private int chainId = 0;

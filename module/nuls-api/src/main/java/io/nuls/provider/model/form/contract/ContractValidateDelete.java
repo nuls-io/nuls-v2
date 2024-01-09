@@ -33,12 +33,12 @@ import io.nuls.provider.model.form.Base;
  * @author: PierreLuo
  * @date: 2019-07-05
  */
-@ApiModel(description = "验证删除智能合约表单数据")
+@ApiModel(description = "Verify deletion of smart contract form data")
 public class ContractValidateDelete extends Base {
 
-    @ApiModelProperty(description = "交易创建者", required = true)
+    @ApiModelProperty(description = "Transaction Creator", required = true)
     private String sender;
-    @ApiModelProperty(description = "智能合约地址", required = true)
+    @ApiModelProperty(description = "Smart contract address", required = true)
     private String contractAddress;
 
     public String getSender() {

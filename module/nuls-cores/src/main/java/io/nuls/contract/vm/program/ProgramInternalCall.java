@@ -30,37 +30,37 @@ import java.util.List;
 public class ProgramInternalCall {
 
     /**
-     * 调用者
+     * caller
      */
     private byte[] sender;
 
     /**
-     * 交易向合约转入的NULS的金额
+     * Transactions transferred to contractsNULSThe amount of
      */
     private BigInteger value;
 
     /**
-     * 交易向合约转入的其他资产的金额
+     * The amount of other assets transferred from transactions to contracts
      */
     private List<ProgramMultyAssetValue> multyAssetValues;
 
     /**
-     * 合约地址
+     * Contract address
      */
     private byte[] contractAddress;
 
     /**
-     * 方法名
+     * Method name
      */
     private String methodName;
 
     /**
-     * 方法签名
+     * Method signature
      */
     private String methodDesc;
 
     /**
-     * 参数列表
+     * parameter list
      */
     private String[][] args;
 

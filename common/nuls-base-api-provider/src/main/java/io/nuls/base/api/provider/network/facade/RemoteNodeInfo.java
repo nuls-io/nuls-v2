@@ -3,7 +3,7 @@ package io.nuls.base.api.provider.network.facade;
 /**
  * @Author: zhoulijun
  * @Time: 2019-05-28 14:45
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class RemoteNodeInfo {
 

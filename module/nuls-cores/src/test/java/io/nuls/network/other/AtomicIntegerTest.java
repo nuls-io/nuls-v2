@@ -39,7 +39,7 @@ public class AtomicIntegerTest {
     {
         atomicIntegerTest();
     Thread.sleep(3000);
-    System.out.println("最终结果是" + atomicInteger.get());
+    System.out.println("The final result is" + atomicInteger.get());
     }
     private static void atomicIntegerTest() {
         ExecutorService executorService = Executors.newFixedThreadPool(10000);

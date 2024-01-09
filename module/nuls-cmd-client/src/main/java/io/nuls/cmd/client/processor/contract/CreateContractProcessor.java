@@ -153,7 +153,7 @@ public class CreateContractProcessor extends ContractBaseProcessor {
                 Object[] argsObj;
                 if(argsList.size() > 0) {
                     String argsListStr = JSONUtils.obj2PrettyJson(argsList);
-                    // 再次交互输入构造参数
+                    // Interacting with input again to construct parameters
                     String argsJson = getArgsJson(argsListStr);
                     argsObj = CommandHelper.parseArgsJson(argsJson);
                 } else {

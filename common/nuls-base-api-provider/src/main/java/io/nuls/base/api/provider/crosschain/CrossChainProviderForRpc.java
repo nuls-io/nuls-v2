@@ -21,7 +21,7 @@ import java.util.function.Function;
 /**
  * @Author: zhoulijun
  * @Time: 2019-05-06 17:14
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Provider(Provider.ProviderType.RPC)
 public class CrossChainProviderForRpc extends BaseRpcService implements CrossChainProvider {
@@ -78,7 +78,7 @@ public class CrossChainProviderForRpc extends BaseRpcService implements CrossCha
             transaction.parse(new NulsByteBuffer(RPCUtil.decode(hexString)));
             return success(transaction);
         } catch (NulsException e) {
-            Log.error("反序列化transaction发生异常",e);
+            Log.error("Deserializationtransactionexception occurred",e);
             return fail(CommonCodeConstanst.DESERIALIZE_ERROR);
         }
     }

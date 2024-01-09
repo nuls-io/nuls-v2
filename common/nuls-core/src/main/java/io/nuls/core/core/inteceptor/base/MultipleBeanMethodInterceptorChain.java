@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 多重拦截器链:只当一个方法存在多条连接器链时使用，该链每次执行一个方法前初始化、组装
+ * Multiple Interceptor Chain:Only used when there are multiple connector chains for a method, which are initialized before each method execution、assemble
  * Multiple interceptors chain.Only when one method has multiple connector chains,
  * The chain is initialized and assembled every time a method is executed.
  *
@@ -42,29 +42,29 @@ import java.util.List;
 public class MultipleBeanMethodInterceptorChain extends BeanMethodInterceptorChain {
 
     /**
-     * 注解列表
+     * Annotation List
      */
     protected List<Annotation> annotationList = new ArrayList<>();
 
     /**
-     * 执行进度标记
+     * Execution progress markers
      * Progress mark
      */
     protected Integer index = -1;
 
     /**
-     * 方法代理器
+     * Method proxy
      * Method proxy object
      */
     protected MethodProxy methodProxy;
 
 
     /**
-     * 初始化多重拦截器链
+     * Initialize multiple interceptor chains
      * Initialize multiple interceptor chains.
      *
-     * @param annotations 注解列表
-     * @param chainList   拦截器链列表
+     * @param annotations Annotation List
+     * @param chainList   Blocker Chain List
      */
     public MultipleBeanMethodInterceptorChain(List<Annotation> annotations, List<BeanMethodInterceptorChain> chainList) {
         if (null == annotations || annotations.isEmpty()) {
@@ -76,11 +76,11 @@ public class MultipleBeanMethodInterceptorChain extends BeanMethodInterceptorCha
     }
 
     /**
-     * 将一条拦截器链加入到多重拦截器链中
+     * Add an interceptor chain to multiple interceptor chains
      * Add an interceptor chain to the multiple interceptor chain,
      *
-     * @param annotation                 该拦截器链对应的注解、The comment for the interceptor chain.
-     * @param beanMethodInterceptorChain 拦截器链
+     * @param annotation                 The annotation corresponding to this interceptor chain、The comment for the interceptor chain.
+     * @param beanMethodInterceptorChain Interceptor chain
      */
     private void fillInterceptorList(Annotation annotation, BeanMethodInterceptorChain beanMethodInterceptorChain) {
         for (BeanMethodInterceptor interceptor : beanMethodInterceptorChain.interceptorList) {
@@ -91,14 +91,14 @@ public class MultipleBeanMethodInterceptorChain extends BeanMethodInterceptorCha
 
 
     /**
-     * 开始执行拦截器链
+     * Start executing interceptor chain
      * Start executing the interceptor chain.
      *
-     * @param annotation  拦截方法的注解实例/Annotation instances of the intercepting method.
-     * @param object      方法所属对象/Method owner
-     * @param method      方法定义/Method definition
-     * @param params      方法参数列表/Method parameter list
-     * @param methodProxy 方法代理器
+     * @param annotation  Annotation instance of interception method/Annotation instances of the intercepting method.
+     * @param object      Object to which the method belongs/Method owner
+     * @param method      Method definition/Method definition
+     * @param params      Method parameter list/Method parameter list
+     * @param methodProxy Method proxy
      */
     @Override
     public Object startInterceptor(Annotation annotation, Object object, Method method, Object[] params, MethodProxy methodProxy) throws Throwable {
@@ -118,15 +118,15 @@ public class MultipleBeanMethodInterceptorChain extends BeanMethodInterceptorCha
     }
 
     /**
-     * 调用一个具体的拦截器
+     * Call a specific interceptor
      * Call a specific interceptor.
      *
-     * @param annotation 拦截方法的注解实例/Annotation instances of the intercepting method.
-     * @param object     方法所属对象/Method owner
-     * @param method     方法定义/Method definition
-     * @param params     方法参数列表/Method parameter list
-     * @return 返回拦截的方法的返回值，可以对该值进行处理和替换/Returns the return value of the intercepting method, which can be processed and replaced.
-     * @throws Throwable 该方法可能抛出异常，请谨慎处理/This method may throw an exception, handle with care.
+     * @param annotation Annotation instance of interception method/Annotation instances of the intercepting method.
+     * @param object     Object to which the method belongs/Method owner
+     * @param method     Method definition/Method definition
+     * @param params     Method parameter list/Method parameter list
+     * @return The return value of the intercepted method can be processed and replaced/Returns the return value of the intercepting method, which can be processed and replaced.
+     * @throws Throwable This method may throw exceptions, please handle with caution/This method may throw an exception, handle with care.
      */
     @Override
     public Object execute(Annotation annotation, Object object, Method method, Object[] params) throws Throwable {

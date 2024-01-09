@@ -10,7 +10,7 @@ import io.nuls.test.cases.TestCaseIntf;
 /**
  * @Author: zhoulijun
  * @Time: 2019-04-24 17:54
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Component
 public class BatchTestCase2 extends TestCaseChain {
@@ -27,7 +27,7 @@ public class BatchTestCase2 extends TestCaseChain {
 
     @Override
     public String title() {
-        return "本地调试批量创建交易";
+        return "Local debugging batch creation of transactions";
     }
 
     @Override

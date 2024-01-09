@@ -19,12 +19,12 @@ public class UnconfirmedTxStorageServiceTest {
 
     @BeforeClass
     public static void beforeTest() throws Exception {
-        //初始化数据库配置文件
+        //Initialize database configuration file
         new TransactionBootstrap().initDB();
-        //初始化上下文
+        //Initialize Context
         SpringLiteContext.init(TestConstant.CONTEXT_PATH);
         unconfirmedTxStorageService = SpringLiteContext.getBean(UnconfirmedTxStorageService.class);
-        //启动链
+        //Start Chain
         SpringLiteContext.getBean(ChainManager.class).runChain();
     }
 

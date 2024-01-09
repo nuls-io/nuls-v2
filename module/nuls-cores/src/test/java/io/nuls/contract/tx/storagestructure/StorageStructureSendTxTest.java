@@ -54,7 +54,7 @@ import static io.nuls.contract.constant.ContractCmdConstant.*;
 public class StorageStructureSendTxTest extends BaseQuery {
 
     /**
-     * 创建合约
+     * Create Contract
      */
     @Test
     public void createContract() throws Exception {
@@ -73,7 +73,7 @@ public class StorageStructureSendTxTest extends BaseQuery {
     }
 
     /**
-     * map测试
+     * maptest
      */
     @Test
     public void testMapAdd() throws Exception {
@@ -91,7 +91,7 @@ public class StorageStructureSendTxTest extends BaseQuery {
     }
 
     /**
-     * list测试
+     * listtest
      */
     @Test
     public void testListAdd() throws Exception {

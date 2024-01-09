@@ -30,11 +30,11 @@ import io.nuls.core.parse.SerializeUtils;
 import java.io.IOException;
 
 /**
- * 异步请求处理完成响应消息
+ * Asynchronous request processing completion response message
  *
  * @author captain
  * @version 1.0
- * @date 18-11-9 下午2:37
+ * @date 18-11-9 afternoon2:37
  */
 public class CompleteMessage extends BaseBusinessMessage {
 

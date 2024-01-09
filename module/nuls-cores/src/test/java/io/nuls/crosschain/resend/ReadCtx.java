@@ -27,7 +27,7 @@ import java.util.Map;
 /**
  * @Author: zhoulijun
  * @Time: 2020/8/7 10:29
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class ReadCtx {
 

@@ -12,7 +12,7 @@ import java.util.Map;
 /**
  * @Author: zhoulijun
  * @Time: 2019-05-07 10:44
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Component
 public class RegisterCrossChainProcessor extends CrossChainBaseProcessor {
@@ -42,8 +42,8 @@ public class RegisterCrossChainProcessor extends CrossChainBaseProcessor {
                 .newLine("\t<symbol>  register asset symbol - required")
                 .newLine("\t<assetName>  register asset name - required")
                 .newLine("\t<initNumber>  register asset circulation - required")
-                .newLine("\t[decimalPlaces]  register asset decimal digits，default 8 ")
-                .newLine("\t[minAvailableNodeNum]  cross chain tx rely on min node number，default 5 ")
+                .newLine("\t[decimalPlaces]  register asset decimal digits,default 8 ")
+                .newLine("\t[minAvailableNodeNum]  cross chain tx rely on min node number,default 5 ")
                 .toString();
     }
 

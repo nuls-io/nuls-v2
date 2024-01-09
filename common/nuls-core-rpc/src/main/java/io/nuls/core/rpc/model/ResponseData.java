@@ -30,7 +30,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 接口返回值
+ * Interface return value
  *
  * @author: PierreLuo
  * @date: 2019-06-18
@@ -41,7 +41,7 @@ public @interface ResponseData {
 
     String name() default "";
     /**
-     * 描述
+     * describe
      */
     String description() default "";
 

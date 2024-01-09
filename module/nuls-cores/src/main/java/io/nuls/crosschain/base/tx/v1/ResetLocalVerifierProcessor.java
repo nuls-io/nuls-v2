@@ -16,7 +16,7 @@ import java.util.Map;
 /**
  * @Author: zhoulijun
  * @Time: 2020/11/23 12:00
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Component("ResetLocalVerifierProcessorV1")
 public class ResetLocalVerifierProcessor implements TransactionProcessor {

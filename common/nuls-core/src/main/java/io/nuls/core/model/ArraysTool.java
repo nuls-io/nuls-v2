@@ -32,11 +32,11 @@ import java.util.Arrays;
  */
 public class ArraysTool {
     /**
-     * 按照传入的顺序拼接数组为一个包含所有数组的大数组
+     * Splice the array into a large array containing all arrays in the order passed in
      * Splices the array into a large array containing all of the arrays in the incoming order.
      *
-     * @param arrays 想要拼接的数组集合、A collection of arrays that you want to concatenate.
-     * @return 拼接结果、 the result of the Joining together
+     * @param arrays The set of arrays you want to concatenate、A collection of arrays that you want to concatenate.
+     * @return Splicing results、 the result of the Joining together
      */
     public static final byte[] concatenate(byte[]... arrays) {
         int length = 0;

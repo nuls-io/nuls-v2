@@ -31,7 +31,7 @@ import io.nuls.base.data.Address;
 import java.util.List;
 
 /**
- * 账户数据存储服务接口
+ * Account Data Storage Service Interface
  * Account data storage service interface
  *
  * @author: EdwardChan
@@ -39,7 +39,7 @@ import java.util.List;
 public interface MultiSigAccountStorageService {
 
     /**
-     * 创建账户
+     * Create an account
      * save account
      *
      * @return
@@ -47,7 +47,7 @@ public interface MultiSigAccountStorageService {
     boolean saveAccount(MultiSigAccountPO multiSigAccountPo);
 
     /**
-     * 删除账户
+     * Delete account
      * Delete account
      *
      * @param address Account address to be deleted
@@ -56,14 +56,14 @@ public interface MultiSigAccountStorageService {
     boolean removeAccount(Address address);
 
     /**
-     * 获取所有账户
+     * Get all accounts
      *
      * @return the result of the opration and Result<List<Account>>
      */
     List<MultiSigAccountPO> getAccountList();
 
     /**
-     * 根据账户获取账户信息
+     * Obtain account information based on the account
      * According to the account to obtain account information
      *
      * @param address

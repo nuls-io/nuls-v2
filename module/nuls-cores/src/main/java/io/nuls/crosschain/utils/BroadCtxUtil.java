@@ -49,7 +49,7 @@ public class BroadCtxUtil {
     private static CrossChangeBroadFailService crossChangeBroadFailService;
 
     /**
-     * 区块高度变更之后，重新广播之前广播失败的跨链交易
+     * After the height of the block changes, rebroadcast the failed cross chain transactions previously broadcasted
      * After the block height changes, broadcast the failed cross chain transactions before rebroadcasting
      */
     public static boolean broadCtxHash(Chain chain, NulsHash ctxHash, long cacheHeight, Map<Integer, Byte> crossStatusMap, Map<Integer, BroadFailFlag> broadFailMap) {
@@ -74,7 +74,7 @@ public class BroadCtxUtil {
                     broadFailMap.put(verifierInitData.getRegisterChainId(), broadFailFlag);
                     return false;
                 }
-                chain.getLogger().info("验证人初始化交易广播成功，chainId:{}",verifierInitData.getRegisterChainId());
+                chain.getLogger().info("Verifier initialized transaction broadcast successfully,chainId:{}",verifierInitData.getRegisterChainId());
             }else if(ctx.getType() == TxType.REGISTERED_CHAIN_CHANGE){
                 return broadCrossChainChangeTx(chain, message, cacheHeight, crossStatusMap, broadFailMap, ctx);
             }
@@ -86,20 +86,20 @@ public class BroadCtxUtil {
     }
 
     /**
-     * 广播跨链转账交易
+     * Broadcast Cross Chain Transfer Transactions
      * Broadcast cross chain transfer transaction
      *
-     * @param chain          链信息
-     * @param ctx            交易
-     * @param message        消息
-     * @param crossStatusMap 跨链状态缓存，如果为空则无需判断
+     * @param chain          Chain information
+     * @param ctx            transaction
+     * @param message        news
+     * @param crossStatusMap Cross chain state cache, if empty, no need to check
      */
     private static boolean broadCrossTransferTx(Chain chain, Transaction ctx, BroadCtxHashMessage message, Map<Integer, Byte> crossStatusMap, Map<Integer, BroadFailFlag> broadFailMap) throws NulsException, IOException {
         int toId = chain.getChainId();
         if (config.isMainNet()) {
             toId = AddressTool.getChainIdByAddress(ctx.getCoinDataInstance().getTo().get(0).getAddress());
         }
-        //判断当前链是否存在广播失败的验证人变更交/验证人初始化交易，如果有则需等待
+        //Determine if there is a verification person change handover for broadcast failure in the current chain/Verifier initializes transaction, if any, wait
         BroadFailFlag broadFailFlag = broadFailMap.get(toId);
         boolean haveConflict = broadFailFlag != null && (broadFailFlag.isVerifierInitFlag() || broadFailFlag.isVerifierChangeFlag());
         if (haveConflict) {
@@ -115,7 +115,7 @@ public class BroadCtxUtil {
             if (!config.isMainNet()) {
                 NulsHash convertHash = TxUtil.friendConvertToMain(chain, ctx, TxType.CROSS_CHAIN).getHash();
                 message.setConvertHash(convertHash);
-                chain.getLogger().info("广播跨链转账交易给主网，本链协议hash:{}对应的主网协议hash:{}", ctx.getHash().toHex(), convertHash.toHex());
+                chain.getLogger().info("Broadcast cross chain transfer transactions to the main network, this chain protocolhash:{}Corresponding main network protocolhash:{}", ctx.getHash().toHex(), convertHash.toHex());
             }
             broadResult = NetWorkCall.broadcast(toId, message, CommandConstant.BROAD_CTX_HASH_MESSAGE, true);
         }
@@ -131,17 +131,17 @@ public class BroadCtxUtil {
     }
 
     /**
-     * 广播验证人变更
+     * Change of broadcast verifier
      * Change of broadcast verifier
      *
-     * @param chain          链信息
-     * @param message        消息
-     * @param crossStatusMap 跨链状态缓存，如果为空则无需判断
+     * @param chain          Chain information
+     * @param message        news
+     * @param crossStatusMap Cross chain state cache, if empty, no need to check
      */
     private static boolean broadVerifierChangeTx(Chain chain, BroadCtxHashMessage message, long cacheHeight, Map<Integer, Byte> crossStatusMap, Map<Integer, BroadFailFlag> broadFailMap) {
         int chainId = chain.getChainId();
         BroadFailFlag broadFailFlag;
-        //如果为平信链则只需广播给主网
+        //If it is a flat chain, only broadcast to the main network
         if (!chain.isMainChain()) {
             broadFailFlag = broadFailMap.get(chainId);
             boolean haveConflict = broadFailFlag != null && (broadFailFlag.isVerifierInitFlag() || broadFailFlag.isVerifierChangeFlag() || broadFailFlag.isCrossChainTransferFlag() || broadFailFlag.isCrossChainChangeFlag());
@@ -164,12 +164,12 @@ public class BroadCtxUtil {
         } else {
             boolean broadResult = true;
             if (chainManager.getRegisteredCrossChainList() == null || chainManager.getRegisteredCrossChainList().isEmpty() || chainManager.getRegisteredCrossChainList().size() == 1) {
-                chain.getLogger().info("没有注册链信息");
+                chain.getLogger().info("No registration chain information available");
                 return true;
             }
             VerifierChangeSendFailPO po = verifierChangeBroadFailedService.get(cacheHeight, chainId);
             Set<Integer> broadFailChains = new HashSet<>();
-            //如果为之前已广播的交易，则只需要广播给之前广播失败的链，否则需要广播给所有平行链
+            //If it is a previously broadcasted transaction, it only needs to be broadcasted to the chain that failed the previous broadcast, otherwise it needs to be broadcasted to all parallel chains
             if (po != null) {
                 for (Integer toChainId : po.getChains()) {
                     broadFailFlag = broadFailMap.get(toChainId);
@@ -231,16 +231,16 @@ public class BroadCtxUtil {
 
 
     /**
-     * 广播验证人变更
+     * Change of broadcast verifier
      * Change of broadcast verifier
      *
-     * @param chain          链信息
-     * @param message        消息
-     * @param crossStatusMap 跨链状态缓存，如果为空则无需判断
+     * @param chain          Chain information
+     * @param message        news
+     * @param crossStatusMap Cross chain state cache, if empty, no need to check
      */
     private static boolean broadCrossChainChangeTx(Chain chain, BroadCtxHashMessage message, long cacheHeight, Map<Integer, Byte> crossStatusMap, Map<Integer, BroadFailFlag> broadFailMap, Transaction ctx) {
         int chainId = chain.getChainId();
-        //如果为平信链则只需广播给主网
+        //If it is a flat chain, only broadcast to the main network
         if(!chain.isMainChain()){
             chain.getLogger().error("The current chain is not the main network, and there should be no cross chain registration change transaction");
             return true;
@@ -262,7 +262,7 @@ public class BroadCtxUtil {
             }
             byte broadStatus = getBroadStatus(chain, toChainId, crossStatusMap);
             if (broadStatus == 0) {
-                chain.getLogger().warn("消息接收链不存在，toChainId:{}",toChainId);
+                chain.getLogger().warn("The message receiving chain does not exist,toChainId:{}",toChainId);
                 return true;
             }
             if (broadStatus == 1 || !NetWorkCall.broadcast(toChainId, message, CommandConstant.BROAD_CTX_HASH_MESSAGE, true)) {
@@ -273,7 +273,7 @@ public class BroadCtxUtil {
                 broadFailMap.put(toChainId, broadFailFlag);
                 return false;
             }
-            chain.getLogger().info("跨链变更消息广播成功：toChainId:{}",toChainId);
+            chain.getLogger().info("Cross chain change message broadcast successful：toChainId:{}",toChainId);
             return true;
         }else{
             VerifierChangeSendFailPO po = crossChangeBroadFailService.get(cacheHeight, chainId);
@@ -291,7 +291,7 @@ public class BroadCtxUtil {
                 broadChains.remove(config.getMainChainId());
             }
             broadChains.remove(config.getMainChainId());
-            chain.getLogger().info("跨链交易需要广播到broadChains:{}",broadChains);
+            chain.getLogger().info("Cross chain transactions need to be broadcasted tobroadChains:{}",broadChains);
             boolean broadResult = true;
             for (Integer broadChainId : broadChains){
                 broadFailFlag = broadFailMap.get(broadChainId);
@@ -302,7 +302,7 @@ public class BroadCtxUtil {
                 }
                 byte broadStatus = getBroadStatus(chain, broadChainId, crossStatusMap);
                 if (broadStatus == 0) {
-                    chain.getLogger().warn("消息接收链不存在，toChainId:{}",broadChainId);
+                    chain.getLogger().warn("The message receiving chain does not exist,toChainId:{}",broadChainId);
                     continue;
                 }
                 if (broadStatus == 1 || !NetWorkCall.broadcast(broadChainId, message, CommandConstant.BROAD_CTX_HASH_MESSAGE, true)) {
@@ -320,7 +320,7 @@ public class BroadCtxUtil {
             } else {
                 VerifierChangeSendFailPO failPO = new VerifierChangeSendFailPO(broadFailChains);
                 crossChangeBroadFailService.save(cacheHeight, failPO, chainId);
-                chain.getLogger().warn("跨链变更消息广播失败的链broadFailChains：{}",broadFailChains);
+                chain.getLogger().warn("Cross chain change message broadcast failed chainsbroadFailChains：{}",broadFailChains);
             }
             return broadResult;
         }

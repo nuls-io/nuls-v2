@@ -12,18 +12,18 @@ import java.io.IOException;
 /**
  * @Author: zhoulijun
  * @Time: 2020/9/11 11:16
- * @Description: 要求所有节点对指定跨链交易进行重新处理的消息
+ * @Description: Message requiring all nodes to reprocess specified cross chain transactions
  *
  */
 public class CrossTxRehandleMessage extends BaseMessage {
 
     /**
-     * 跨链交易的本地协议交易hash
+     * Local protocol transactions for cross chain transactionshash
      * */
     private NulsHash ctxHash;
 
     /**
-     * 发起广播的高度
+     * The height at which the broadcast was initiated
      */
     private long blockHeight;
 

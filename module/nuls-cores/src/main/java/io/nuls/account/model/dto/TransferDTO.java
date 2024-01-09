@@ -28,29 +28,29 @@ package io.nuls.account.model.dto;
 import java.util.List;
 
 /**
- * 创建转账交易，包括多账户转账
+ * Create transfer transactions, including multi account transfers
  *
  * @author: qinyifeng
  */
 public class TransferDTO {
 
     /**
-     * 链ID
+     * chainID
      */
     private Integer chainId;
 
     /**
-     * 交易输入
+     * Transaction Input
      */
     private List<CoinDTO> inputs;
 
     /**
-     * 交易输出
+     * Transaction output
      */
     private List<CoinDTO> outputs;
 
     /**
-     * 备注
+     * Remarks
      */
     private String remark;
 

@@ -30,94 +30,94 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * 链对象
- * 每一个链ID对应的链都可能形成下图的结构
+ * Chain Object
+ * Each chainIDThe corresponding chains may form the structure shown in the following figure
  * <pre>
- * |--------------------主链
+ * |--------------------Main chain
  * |
  * |
  * |
  * |____
- * |    |---------------分叉链1
- * |    |                               |------------孤儿链1
+ * |    |---------------Forked chain1
+ * |    |                               |------------Orphan Chain1
  * |    |                               |
  * |    |                               |
  * |    |                               |___
- * |                                    |   |--------孤儿链1-1
+ * |                                    |   |--------Orphan Chain1-1
  * |                                    |   |
  * |____                                |   |
- * |    |---------------分叉链2
+ * |    |---------------Forked chain2
  * |    |
  * |    |____
- * |    |    |----------分叉链2-1
+ * |    |    |----------Forked chain2-1
  * |    |    |
  * |    |    |
  * |    |    |
  * <pre/>
- * 主链上区块的存储是由区块管理模块与交易管理模块共同完成,其中区块管理模块存储区块头,交易管理模块存储交易数据.
- * 分叉链的区块存储由区块管理模块全权负责,数据库中缓存(blockHash, blockData),至于每一个hash对应的区块属于哪一个分叉链,则由内存中的Chain对象进行维护
- * 系统正常运行时,内存中会维护主链-masterChain、分叉链集合-forkChains、孤儿链集合-orphanChains
- * 重启系统时,会根据主链最新区块重新在系统中构建masterChain,但是forkChains和orphanChains会废弃掉,数据库文件也会删除.
+ * The storage of blocks on the main chain is jointly completed by the block management module and the transaction management module,The block management module stores block headers,The transaction management module stores transaction data.
+ * The block storage of forked chains is fully managed by the block management module,Cache in database(blockHash, blockData),As for each onehashWhich fork chain does the corresponding block belong to,Then, from the memoryChainObject maintenance
+ * When the system is running normally,The main chain will be maintained in memory-masterChain、Set of forked chains-forkChains、Orphan Chain Collection-orphanChains
+ * When restarting the system,We will rebuild the system based on the latest blocks in the main chainmasterChain,howeverforkChainsandorphanChainsWill be discarded,The database files will also be deleted.
  * @author captain
  * @version 1.0
- * @date 18-11-15 下午1:54
+ * @date 18-11-15 afternoon1:54
  */
 public class Chain {
 
     public static final Comparator<Chain> COMPARATOR = Comparator.comparingLong(Chain::getStartHeight).thenComparingInt(Chain::getStartHashCode).thenComparingLong(Chain::getEndHeight).thenComparingInt(Chain::getEndHashCode);
 
     /**
-     * 标记这个链是从哪个链分叉来的,一个链的parent不一定是主链
+     * Mark which chain this chain forked from,A chain ofparentNot necessarily the main chain
      */
     private Chain parent;
 
     /**
-     * 标记所有从本链直接分叉出去的链集合,默认按起始高度从低到高排序,起始高度相同时,按照起始区块hash转换成int从低到高排序,在移除链时有用
+     * Mark all chain sets that directly branch out of this chain,Default sorting by starting height from low to high,When the starting height is the same,According to the starting blockhashconvert tointSort from low to high,Useful when removing chains
      */
     private SortedSet<Chain> sons = new TreeSet<>(COMPARATOR);
 
     /**
-     * 链ID
+     * chainID
      */
     private int chainId;
 
     /**
-     * 链上起始区块的previousHash
+     * On chain starting blockpreviousHash
      */
     private NulsHash previousHash;
 
     /**
-     * 链的起始高度(包含)
+     * The starting height of the chain(contain)
      */
     private long startHeight;
 
     /**
-     * 链的起始hash转换为int,排序时用
+     * The beginning of the chainhashConvert toint,Use when sorting
      */
     private int startHashCode;
 
     /**
-     * 链的结束高度(包含)
+     * The end height of the chain(contain)
      */
     private long endHeight;
 
     /**
-     * 链上所有区块hash列表,分叉链、孤儿链维护所有区块的hash在内存中,主链只维护ConfigConstant.HEIGHT_RANGE个hash在内存中
+     * All blocks on the chainhashlist,Forked chain、Orphan chain maintains all blockshashIn memory,The main chain is only maintainedConfigConstant.HEIGHT_RANGEindividualhashIn memory
      */
     private Deque<NulsHash> hashList;
 
     /**
-     * 标记该链的类型
+     * Mark the type of the chain
      */
     private ChainTypeEnum type;
 
     /**
-     * 标记该链的年龄,适用于孤儿链
+     * Mark the age of the chain,Suitable for orphan chains
      */
     private AtomicInteger age = new AtomicInteger(0);
 
     /**
-     * 获取链的起始hash
+     * Get the start of the chainhash
      *
      * @return
      */
@@ -126,7 +126,7 @@ public class Chain {
     }
 
     /**
-     * 获取链的结束hash
+     * Get the end of the chainhash
      *
      * @return
      */
@@ -135,7 +135,7 @@ public class Chain {
     }
 
     /**
-     * 获取链的结束hashcode
+     * Get the end of the chainhashcode
      *
      * @return
      */
@@ -144,7 +144,7 @@ public class Chain {
     }
 
     /**
-     * 判断本链是否为主链
+     * Determine whether this chain is the main chain
      *
      * @return
      */
@@ -236,7 +236,7 @@ public class Chain {
     }
 
     /**
-     * 在链头插入一个区块,只有孤儿链会用到这个方法
+     * Insert a block at the chain head,Only orphan chains will use this method
      *
      * @param block
      */
@@ -249,7 +249,7 @@ public class Chain {
     }
 
     /**
-     * 在链尾插入一个区块
+     * Insert a block at the end of the chain
      *
      * @param block
      */

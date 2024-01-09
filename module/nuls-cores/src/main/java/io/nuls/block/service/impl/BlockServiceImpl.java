@@ -68,18 +68,18 @@ import static io.nuls.block.constant.CommandConstant.*;
 import static io.nuls.block.constant.Constant.BLOCK_HEADER_INDEX;
 
 /**
- * 区块服务实现类
+ * Block service implementation class
  *
  * @author captain
  * @version 1.0
- * @date 18-11-20 上午11:09
+ * @date 18-11-20 morning11:09
  */
 @Component
 public class BlockServiceImpl implements BlockService {
 
     /**
-     * 快照高度
-     * 如果配置了此参数，大于此高度的区块将不会同步，节点的高度将会停止在指定高度
+     * Snap height
+     * If this parameter is configured, blocks larger than this height will not be synchronized, and the height of the node will stop at the specified height
      */
     @Value("snapshotHeight")
     private Long snapshotHeight;
@@ -300,7 +300,7 @@ public class BlockServiceImpl implements BlockService {
         BlockHeader header = block.getHeader();
         long height = header.getHeight();
         if(snapshotHeight != null && height > snapshotHeight){
-            logger.error("到达快照高度，放弃保存区块");
+            logger.error("Reached snapshot height, abandoned saving block");
             return false;
         }
         NulsHash hash = header.getHash();
@@ -310,13 +310,13 @@ public class BlockServiceImpl implements BlockService {
             l = lock.writeLock();
         }
         try {
-            //1.验证区块
+            //1.Verify Block
             Result result = verifyBlock(chainId, block, localInit, download);
             if (result.isFailed()) {
                 logger.error("verifyBlock fail! height-" + height);
                 return false;
             }
-            //同步\链切换\孤儿链对接过程中不进行区块广播
+            //synchronization\Chain switching\No block broadcasting during the docking process of orphan chains
             if (download == 1) {
                 SmallBlockCacher.setStatus(chainId, hash, COMPLETE);
                 if (broadcast) {
@@ -326,7 +326,7 @@ public class BlockServiceImpl implements BlockService {
                     forwardBlock(chainId, hash, null);
                 }
             }
-            //2.设置最新高度,如果失败则恢复上一个高度
+            //2.Set the latest height,If failed, restore the previous height
             boolean setHeight = blockStorageService.setLatestHeight(chainId, height);
             if (!setHeight) {
                 if (!blockStorageService.setLatestHeight(chainId, height - 1)) {
@@ -336,7 +336,7 @@ public class BlockServiceImpl implements BlockService {
                 return false;
             }
 
-            //3.保存区块头, 保存交易
+            //3.Save block header, Save transaction
             BlockHeaderPo blockHeaderPo = BlockUtil.toBlockHeaderPo(block);
             boolean headerSave;
             boolean txSave = false;
@@ -353,7 +353,7 @@ public class BlockServiceImpl implements BlockService {
                 logger.error("headerSave-" + headerSave + ", txsSave-" + txSave + ", height-" + height + ", hash-" + hash);
                 return false;
             }
-            //4.通知共识模块
+            //4.Notification consensus module
             boolean csNotice = ConsensusCall.saveNotice(chainId, header, localInit);
             if (!csNotice) {
                 if (!TransactionCall.rollback(chainId, blockHeaderPo)) {
@@ -369,7 +369,7 @@ public class BlockServiceImpl implements BlockService {
                 return false;
             }
 
-            //5.通知协议升级模块,完全保存,更新标记
+            //5.Notification Protocol Upgrade Module,Fully Save,Update tags
             blockHeaderPo.setComplete(true);
             if (!ProtocolCall.saveNotice(chainId, header) || !blockStorageService.save(chainId, blockHeaderPo)) {
                 if (!ConsensusCall.rollbackNotice(chainId, height)) {
@@ -394,7 +394,7 @@ public class BlockServiceImpl implements BlockService {
                 LoggerUtil.COMMON_LOG.error(e);
             }
 
-            //6.如果不是第一次启动,则更新主链属性
+            //6.If it's not the first time it's started,Update the main chain properties
             if (!localInit) {
                 context.setLatestBlock(block);
                 Chain masterChain = BlockChainManager.getMasterChain(chainId);
@@ -491,7 +491,7 @@ public class BlockServiceImpl implements BlockService {
                 if (!blockStorageService.save(chainId, blockHeaderPo)) {
                     throw new NulsRuntimeException(BlockErrorCode.HEADER_SAVE_ERROR);
                 }
-                //todo 待确认
+                //todo To be confirmed
                 if (!TransactionCall.saveNormal(chainId, blockHeaderPo, TransactionCall.getTransactions(chainId, blockHeaderPo.getTxHashList(), true), null)) {
                     throw new NulsRuntimeException(BlockErrorCode.TX_SAVE_ERROR);
                 }
@@ -512,7 +512,7 @@ public class BlockServiceImpl implements BlockService {
                 if (!blockStorageService.save(chainId, blockHeaderPo)) {
                     throw new NulsRuntimeException(BlockErrorCode.HEADER_SAVE_ERROR);
                 }
-                //todo 待确认
+                //todo To be confirmed
                 if (!TransactionCall.saveNormal(chainId, blockHeaderPo, TransactionCall.getTransactions(chainId, blockHeaderPo.getTxHashList(), true), null)) {
                     throw new NulsRuntimeException(BlockErrorCode.TX_SAVE_ERROR);
                 }
@@ -579,13 +579,13 @@ public class BlockServiceImpl implements BlockService {
         ChainContext context = ContextManager.getContext(chainId);
         NulsLogger logger = context.getLogger();
         BlockHeader header = block.getHeader();
-        //0.版本验证：通过获取block中extends字段的版本号
+        //0.Version verification：By obtainingblockinextendsVersion number of the field
         if (header.getHeight() > 0 && !ProtocolCall.checkBlockVersion(chainId, header)) {
             logger.error("checkBlockVersion failed! height-" + header.getHeight());
             return Result.getFailed(BlockErrorCode.BLOCK_VERIFY_ERROR);
         }
 
-        //1.验证一些基本信息如区块大小限制、字段非空验证
+        //1.Verify some basic information such as block size restrictions、Non empty field validation
         boolean basicVerify = BlockUtil.basicVerify(chainId, block);
         if (localInit) {
             if (basicVerify) {
@@ -596,13 +596,13 @@ public class BlockServiceImpl implements BlockService {
             }
         }
 
-        //分叉验证
+        //Bifurcation verification
         boolean forkVerify = BlockUtil.forkVerify(chainId, block);
         if (!forkVerify) {
             logger.error("forkVerify-" + forkVerify);
             return Result.getFailed(BlockErrorCode.BLOCK_VERIFY_ERROR);
         }
-        //共识验证
+        //Consensus verification
         Result consensusVerify = ConsensusCall.verify(chainId, block, download);
         if (consensusVerify.isFailed()) {
             logger.error("consensusVerify-" + consensusVerify);
@@ -618,7 +618,7 @@ public class BlockServiceImpl implements BlockService {
         Block genesisBlock;
         try {
             genesisBlock = getGenesisBlock(chainId);
-            //1.判断有没有创世块,如果没有就初始化创世块并保存
+            //1.Determine if there is a Genesis block,If not, initialize the Genesis block and save it
             if (null == genesisBlock) {
                 ConfigBean chainParameters = context.getParameters();
                 String genesisBlockPath = chainParameters.getGenesisBlockPath();
@@ -642,19 +642,19 @@ public class BlockServiceImpl implements BlockService {
                 }
             }
 
-            //2.获取缓存的最新区块高度（缓存的最新高度与实际的最新高度最多相差1,理论上不会有相差多个高度的情况,所以异常场景也只考虑了高度相差1）
+            //2.Get the latest block height of the cache（The maximum difference between the latest cached height and the actual latest height1,In theory, there won't be a situation where there is a difference of multiple heights,So the abnormal scenario only considered the height difference1）
             long latestHeight = blockStorageService.queryLatestHeight(chainId);
 
-            //3.查询有没有这个高度的区块头
+            //3.Check if there is a block header at this height
             BlockHeaderPo blockHeader = blockStorageService.query(chainId, latestHeight);
-            //如果没有对应高度的header,说明缓存的本地高度错误,更新高度
+            //If there is no corresponding heightheader,Explanation: The local height of the cache is incorrect,Update height
             if (blockHeader == null) {
                 latestHeight = latestHeight - 1;
                 blockStorageService.setLatestHeight(chainId, latestHeight);
             }
-            //4.latestHeight已经维护成功,上面的步骤保证了latestHeight这个高度的区块数据在本地是完整的,但是区块数据的内容并不一定是正确的,区块同步之前会继续验证latestBlock
+            //4.latestHeightSuccessfully maintained,The above steps ensure thatlatestHeightThe block data at this height is complete locally,But the content of block data may not necessarily be correct,Verification will continue before block synchronizationlatestBlock
             block = getBlock(chainId, latestHeight);
-            //5.本地区块维护成功
+            //5.Local block maintenance successful
             context.setLatestBlock(block);
             context.setGenesisBlock(genesisBlock);
             BlockChainManager.setMasterChain(chainId, ChainGenerator.generateMasterChain(chainId, block, this));

@@ -47,9 +47,9 @@ public class TestJSONObj {
     public List<AccountData> readStream() {
         List<AccountData> accountDataList = new ArrayList<>();
         try {
-            //方式一：将文件放入Transaction模块test的resources中,json格式 只保留list部分
+            //Method 1：Put files intoTransactionmoduletestofresourcesin,jsonformat Only keeplistpart
             InputStream inputStream = getClass().getClassLoader().getResource("alpha2.json").openStream();
-            //方式二：定义文件目录
+            //Method 2：Define file directory
             //InputStream inputStream = new FileInputStream("E:/IdeaProjects/nuls_2.0/module/nuls-transaction/src/test/resources/alpha2.json");
             JsonReader reader = new JsonReader(new InputStreamReader(inputStream, "UTF-8"));
             Gson gson = new GsonBuilder().create();
@@ -73,9 +73,9 @@ public class TestJSONObj {
     public List<AccountDataBetaOne> readStreamBetaOne() {
         List<AccountDataBetaOne> accountDataList = new ArrayList<>();
         try {
-            //方式一：将文件放入Transaction模块test的resources中,json格式 只保留list部分
+            //Method 1：Put files intoTransactionmoduletestofresourcesin,jsonformat Only keeplistpart
             InputStream inputStream = getClass().getClassLoader().getResource("beta2.json").openStream();
-            //方式二：定义文件目录
+            //Method 2：Define file directory
             //InputStream inputStream = new FileInputStream("E:/IdeaProjects/nuls_2.0/module/nuls-transaction/src/test/resources/alpha2.json");
             JsonReader reader = new JsonReader(new InputStreamReader(inputStream, "UTF-8"));
             Gson gson = new GsonBuilder().create();

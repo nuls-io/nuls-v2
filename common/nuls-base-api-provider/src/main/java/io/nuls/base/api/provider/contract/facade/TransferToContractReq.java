@@ -7,7 +7,7 @@ import java.math.BigInteger;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-23 16:26
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class TransferToContractReq  extends BaseReq {
 

@@ -43,7 +43,7 @@ public class TxDuplicateRemoval {
     }
 
     /**
-     * 加入，返回false则表示已存在
+     * Join, returnfalseMeans it already exists
      * @param hash
      * @return
      */
@@ -52,12 +52,12 @@ public class TxDuplicateRemoval {
     }
 
     /**
-     * 记录向本节点发送完整交易的其他网络节点，转发hash时排除掉
+     * Record other network nodes that send complete transactions to this node and forward themhashTime exclusion
      */
     private static Map<String, StringBuffer> forwardHashExcludeNodesMap = new ConcurrentHashMap<>();
 
     /**
-     * 超过指定数量则清理
+     * Clean up if the specified quantity is exceeded
      */
     private static int maxSize = 20000;
 

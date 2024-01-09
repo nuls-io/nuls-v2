@@ -40,7 +40,7 @@ import io.nuls.core.model.FormatValidUtils;
 
 /**
  * @author: zhoulijun
- * 设置多签账户别名
+ * Set multiple account aliases
  */
 @Component
 public class SetMultiSignAliasProcessor extends AccountBaseProcessor implements CommandProcessor {

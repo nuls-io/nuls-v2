@@ -8,13 +8,13 @@ import java.util.List;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-06 15:44
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public abstract class BaseService {
 
     /**
-     * 默认chainId
-     * 从配置文件中注入
+     * defaultchainId
+     * Inject from configuration file
      */
     private int chainId;
 

@@ -19,8 +19,8 @@ public class CrossTxHandler implements Runnable {
     @Override
     public void run() {
         /*
-         * 1.如果为同步过程中，签名并广播，返回
-         * 2.处理跨链交易
+         * 1.If during the synchronization process, sign and broadcast, return
+         * 2.Handling Cross Chain Transactions
          * */
         if(syncStatus == 0){
             TxUtil.signAndBroad(chain, transaction);

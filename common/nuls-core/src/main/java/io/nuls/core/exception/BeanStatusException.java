@@ -28,7 +28,7 @@ package io.nuls.core.exception;
 import io.nuls.core.constant.ErrorCode;
 
 /**
- * 系统对象池中的对象实例访问状态不正确时，抛出的异常
+ * The exception thrown when the access status of object instances in the system object pool is incorrect
  * An exception is thrown when the object instance in the system object pool is not in the right state.
  *
  * @author Niels

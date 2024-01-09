@@ -87,7 +87,7 @@ public class TestJyc {
 
     @Test
     public void createCommonContractTest() throws Exception {
-        File path = new File("C:\\Users\\alvin\\Documents\\WeChat Files\\jyc19900913\\FileStorage\\File\\2019-08\\合约代码HEX码");
+        File path = new File("C:\\Users\\alvin\\Documents\\WeChat Files\\jyc19900913\\FileStorage\\File\\2019-08\\Contract codeHEXcode");
         List<String> codes = new ArrayList<>();
         for (String file : path.list()) {
             codes.add(Files.readString(Path.of(file)));
@@ -122,7 +122,7 @@ public class TestJyc {
     }
 
     /**
-     * 导入种子节点
+     * Import seed nodes
      */
     @Test
     public void importSeed() {

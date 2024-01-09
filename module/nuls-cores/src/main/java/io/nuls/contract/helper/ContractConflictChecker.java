@@ -77,7 +77,7 @@ public class ContractConflictChecker {
 
     private boolean containAddress(String address, Set<String> commitSet) {
         for (Set<String> set : contractSetList) {
-            // 排除掉自己线程执行的智能合约，因为自己线程执行的合约是排队顺序执行，不会冲突
+            // Exclude smart contracts executed by one's own thread, as the contracts executed by one's own thread are queued in order and will not conflict
             if (set == commitSet) {
                 continue;
             }

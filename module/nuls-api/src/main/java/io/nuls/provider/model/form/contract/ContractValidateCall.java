@@ -36,26 +36,26 @@ import io.nuls.v2.util.ContractUtil;
  * @author: PierreLuo
  * @date: 2019-07-05
  */
-@ApiModel(description = "验证调用智能合约表单数据")
+@ApiModel(description = "Verify and call smart contract form data")
 public class ContractValidateCall extends Base {
 
-    @ApiModelProperty(description = "交易创建者", required = true)
+    @ApiModelProperty(description = "Transaction Creator", required = true)
     private String sender;
-    @ApiModelProperty(description = "调用者向合约地址转入的主网资产金额，没有此业务时填0", required = false)
+    @ApiModelProperty(description = "The amount of main network assets transferred by the caller to the contracted address, to be filled in when this service is not available0", required = false)
     private long value;
-    @ApiModelProperty(description = "调用者向合约地址转入的其他资产金额，没有此业务时填空，规则: [[\\<value\\>,\\<assetChainId\\>,\\<assetId\\>]]", required = false)
+    @ApiModelProperty(description = "The amount of other assets transferred by the caller to the contract address, fill in the blank if there is no such business, rule: [[\\<value\\>,\\<assetChainId\\>,\\<assetId\\>]]", required = false)
     private String[][] multyAssetValues;
-    @ApiModelProperty(description = "最大gas消耗", required = true)
+    @ApiModelProperty(description = "maximumgasconsume", required = true)
     private long gasLimit;
-    @ApiModelProperty(description = "执行合约单价", required = true)
+    @ApiModelProperty(description = "Execution contract unit price", required = true)
     private long price;
-    @ApiModelProperty(description = "智能合约地址", required = true)
+    @ApiModelProperty(description = "Smart contract address", required = true)
     private String contractAddress;
-    @ApiModelProperty(description = "方法名称", required = true)
+    @ApiModelProperty(description = "Method Name", required = true)
     private String methodName;
-    @ApiModelProperty(description = "方法描述，若合约内方法没有重载，则此参数可以为空", required = false)
+    @ApiModelProperty(description = "Method description, if the method in the contract is not overloaded, this parameter can be empty", required = false)
     private String methodDesc;
-    @ApiModelProperty(description = "参数列表", required = false)
+    @ApiModelProperty(description = "parameter list", required = false)
     private Object[] args;
 
     public String[][] getMultyAssetValues() {

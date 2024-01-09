@@ -3,14 +3,14 @@ package io.nuls.consensus.constant;
 import java.math.BigInteger;
 
 /**
- * 共识模块常量类
+ * Consensus module constant class
  * @author tag
  * 2018/11/6
  * */
 public interface ConsensusConstant {
 
     /**
-     * Consensus module related table name/共识模块相关表名
+     * Consensus module related table name/Consensus module related table names
      * */
     String DB_NAME_CONSENSUS_AGENT = "consensus_agent";
     String DB_NAME_CONSENSUS_DEPOSIT = "consensus_deposit";
@@ -73,7 +73,7 @@ public interface ConsensusConstant {
 
     /**
      * unit:round of consensus
-     * 用于计算信誉值（表示只用最近这么多轮的轮次信息来计算信誉值）
+     * Used to calculate reputation value（Indicates that only the most recent round information is used to calculate the reputation value）
      */
     int RANGE_OF_CAPACITY_COEFFICIENT = 100;
 
@@ -84,41 +84,41 @@ public interface ConsensusConstant {
 
     /**
      * Load the block header of the last specified number of rounds during initialization
-     * 初始化时加载最近指定轮数的惩罚信息
+     * Load penalty information for the most recent specified number of rounds during initialization
      */
     int INIT_PUNISH_OF_ROUND_COUNT = 400;
 
     /**
-     * 系统启动时缓存指定轮次的区块
+     * Cache blocks for specified rounds during system startup
      * Buffer a specified number of blocks at system startup
      * */
     int INIT_BLOCK_HEADER_COUNT = 110;
 
     /**
-     * 系统运行的最小连接节点数量
+     * The minimum number of connected nodes for system operation
      * The number of minimum connection nodes that the system runs.
      */
     int ALIVE_MIN_NODE_COUNT = 1;
 
     /**
-     * 同一个出块地址连续3轮发出两个相同高度，但不同hash的block，节点将会被红牌惩罚
+     * The same outgoing block address is consecutive3The wheel emits two identical heights, but differenthashofblockNodes will be penalized with red cards
      */
     byte REDPUNISH_BIFURCATION = 3;
 
     /**
-     * 空值占位符
+     * Blank value placeholder
      * Null placeholder.
      */
     byte[] PLACE_HOLDER = new byte[]{(byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF};
 
     /**
-     * 每出一个块获得的共识奖励，一年总的共识奖励金5000000，一年总出块数3154600,相除得到每一块的奖励金
+     * Consensus reward obtained for each block, total consensus reward for one year5000000Total number of blocks produced in a year3154600,Divide and receive rewards for each piece
      * value = 5000000/3154600
      */
     BigInteger YEAR_MILLISECOND = new BigInteger("31536000");
 
     /**
-     * 信誉值的最小值，小于等于该值会给红牌处罚
+     * The minimum value of reputation value, less than or equal to this value will result in a red card penalty
      * */
     double RED_PUNISH_CREDIT_VAL = -1D;
 
@@ -127,7 +127,7 @@ public interface ConsensusConstant {
     long CHANGE_NET_HEIGHT_MAX = 900000;
 
     /**
-     * 共识锁定时间
+     * Consensus locking time
      * */
     long CONSENSUS_LOCK_TIME = -1;
 
@@ -137,12 +137,12 @@ public interface ConsensusConstant {
     long LOCK_OF_LOCK_TIME = -1L ;
 
     /**
-     * Map初始值
+     * MapInitial value
      * */
     int  INIT_CAPACITY =16;
 
     /**
-     * RPC接口参数控制
+     * RPCInterface parameter control
      * RPC Interface Parameter Control
      * */
     int MIN_VALUE = 0;
@@ -169,7 +169,7 @@ public interface ConsensusConstant {
     String PUB_KEY = "pubKey";
 
     /**
-     * 共识模块日志管理
+     * Consensus module log management
      * Consensus module log management
      * */
     String CONSENSUS_LOGGER_NAME = "consensus/consensus";

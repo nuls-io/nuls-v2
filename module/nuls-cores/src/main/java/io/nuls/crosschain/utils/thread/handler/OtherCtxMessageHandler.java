@@ -12,7 +12,7 @@ import io.nuls.crosschain.utils.MessageUtil;
 
 
 /**
- * 其他链节点广播过来的完整跨链交易消息处理线程
+ * Complete cross chain transaction message processing threads broadcasted by other chain nodes
  *
  * @author tag
  * 2019/5/14
@@ -34,12 +34,12 @@ public class OtherCtxMessageHandler implements Runnable {
                 otherHash = untreatedMessage.getCacheHash();
                 String otherHex = otherHash.toHex();
                 int fromChainId = untreatedMessage.getChainId();
-                chain.getLogger().debug("开始处理其他链节点：{}发送的跨链交易,Hash:{}", untreatedMessage.getNodeId(), otherHex);
+                chain.getLogger().debug("Start processing other chain nodes：{}Cross chain transactions sent,Hash:{}", untreatedMessage.getNodeId(), otherHex);
                 boolean handleResult = MessageUtil.handleOtherChainCtx(messageBody.getCtx(), chain, fromChainId);
                 if (!handleResult && chain.getOtherHashNodeIdMap().get(otherHash) != null && !chain.getOtherHashNodeIdMap().get(otherHash).isEmpty()) {
                     regainCtx(chain, fromChainId, otherHash, otherHex);
                 }
-                chain.getLogger().debug("新交易处理完成,Hash:{}\n\n", otherHex);
+                chain.getLogger().debug("New transaction processing completed,Hash:{}\n\n", otherHex);
             } catch (Exception e) {
                 chain.getLogger().error(e);
             } finally {
@@ -51,11 +51,11 @@ public class OtherCtxMessageHandler implements Runnable {
     }
 
     /**
-     * 从广播交易hash或签名消息的节点中获取完整跨链交易处理
+     * From broadcast transactionshashObtain complete cross chain transaction processing from the node of the signed message
      *
-     * @param chain     本链信息
-     * @param chainId   发送链ID
-     * @param cacheHash 缓存的交易Hash
+     * @param chain     This chain information
+     * @param chainId   Sending ChainID
+     * @param cacheHash Cached transactionsHash
      */
     private void regainCtx(Chain chain, int chainId, NulsHash cacheHash, String nativeHex) {
         NodeType nodeType = chain.getOtherHashNodeIdMap().get(cacheHash).remove(0);
@@ -65,7 +65,7 @@ public class OtherCtxMessageHandler implements Runnable {
         GetOtherCtxMessage responseMessage = new GetOtherCtxMessage();
         responseMessage.setRequestHash(cacheHash);
         NetWorkCall.sendToNode(chainId, responseMessage, nodeType.getNodeId(), CommandConstant.GET_OTHER_CTX_MESSAGE);
-        chain.getLogger().info("跨链交易处理失败，向其他链节点：{}重新获取跨链交易，Hash:{}", nodeType.getNodeId(), nativeHex);
+        chain.getLogger().info("Cross chain transaction processing failed, sending to other chain nodes：{}Retrieve cross chain transactions again,Hash:{}", nodeType.getNodeId(), nativeHex);
 
     }
 }

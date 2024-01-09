@@ -5,23 +5,23 @@ import io.nuls.core.basic.Result;
 import java.util.Map;
 
 /**
- * 提供给区块模块调用的接口
+ * Provide interfaces for block module calls
  * @author tag
  * @date 2019/4/25
  */
 public interface BlockService {
     /**
-     * 接收最新区块高度
-     * @param params  参数
-     * @return        消息处理结果
+     * Receive the latest block height
+     * @param params  parameter
+     * @return        Message processing results
      * */
     Result newBlockHeight(Map<String,Object> params);
 
     /**
-     * 节点同步状态变更
+     * Node synchronization status change
      * Node synchronization state change
-     * @param params  参数
-     * @return        消息处理结果
+     * @param params  parameter
+     * @return        Message processing results
      * */
     Result syncStatusUpdate(Map<String,Object> params);
 }

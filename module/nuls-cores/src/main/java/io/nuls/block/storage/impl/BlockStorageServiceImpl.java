@@ -40,11 +40,11 @@ import static io.nuls.block.constant.Constant.*;
 import static io.nuls.block.utils.LoggerUtil.COMMON_LOG;
 
 /**
- * 区块存储服务实现类
+ * Implementation class of block storage service
  *
  * @author captain
  * @version 1.0
- * @date 18-11-20 上午11:09
+ * @date 18-11-20 morning11:09
  */
 @Component
 public class BlockStorageServiceImpl implements BlockStorageService {

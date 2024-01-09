@@ -35,7 +35,7 @@ import io.nuls.core.rpc.model.ApiModelProperty;
 @ApiModel
 public class CoinToDto extends CoinDto{
 
-    @ApiModelProperty(description = "解锁时间，-1为永久锁定")
+    @ApiModelProperty(description = "Unlocking time,-1To permanently lock")
     private long lockTime;
 
     public CoinToDto(CoinTo to) {

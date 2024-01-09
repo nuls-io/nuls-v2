@@ -43,11 +43,11 @@ import static io.nuls.block.constant.BlockForwardEnum.ERROR;
 import static io.nuls.block.constant.CommandConstant.TXGROUP_MESSAGE;
 
 /**
- * 处理收到的{@link TxGroupMessage},用于区块的广播与转发
+ * Process received{@link TxGroupMessage},Broadcasting and forwarding for blocks
  *
  * @author captain
  * @version 1.0
- * @date 18-11-14 下午4:23
+ * @date 18-11-14 afternoon4:23
  */
 @Component("TxGroupHandlerV1")
 public class TxGroupHandler implements MessageProcessor {
@@ -75,11 +75,11 @@ public class TxGroupHandler implements MessageProcessor {
 //        logger.debug("recieve TxGroupMessage from network node-" + nodeId + ", txcount:" + transactions.size());
         NulsHash blockHash = message.getBlockHash();
         BlockForwardEnum status = SmallBlockCacher.getStatus(chainId, blockHash);
-        //1.已收到完整区块,丢弃
+        //1.Received complete block,discard
         if (BlockForwardEnum.COMPLETE.equals(status)) {
             return;
         }
-        //2.已收到部分区块,还缺失交易信息,收到的应该就是缺失的交易信息
+        //2.Received partial blocks,Transaction information is still missing,What I received should be the missing transaction information
         if (BlockForwardEnum.INCOMPLETE.equals(status)) {
             CachedSmallBlock cachedSmallBlock = SmallBlockCacher.getCachedSmallBlock(chainId, blockHash);
             if (cachedSmallBlock == null) {
@@ -102,7 +102,7 @@ public class TxGroupHandler implements MessageProcessor {
             }
             return;
         }
-        //3.未收到区块
+        //3.Block not received
         if (BlockForwardEnum.EMPTY.equals(status)) {
             logger.error("It is theoretically impossible to enter this branch");
         }

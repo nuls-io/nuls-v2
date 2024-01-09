@@ -7,13 +7,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 验证人初始化交易处理类
+ * Verifier initializes transaction processing class
  * @author tag
  * @date 2019/8/7
  */
 public interface VerifierInitService {
     /**
-     * 验证人初始化交易验证
+     * Verifier initializes transaction verification
      * @param chainId       chain ID
      * @param txs           cross chain transaction list
      * @param txMap         Consensus Module All Transaction Classification
@@ -24,7 +24,7 @@ public interface VerifierInitService {
     Map<String, Object> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader);
 
     /**
-     * 验证人初始化交易提交
+     * Verifier initializes transaction submission
      * @param chainId       chain ID
      * @param txs           cross chain transaction list
      * @param blockHeader   block header
@@ -34,7 +34,7 @@ public interface VerifierInitService {
     boolean commit(int chainId, List<Transaction> txs, BlockHeader blockHeader);
 
     /**
-     * 验证人初始化交易回滚
+     * Verifier initializes transaction rollback
      * @param chainId       chain ID
      * @param txs           cross chain transaction list
      * @param blockHeader   block header

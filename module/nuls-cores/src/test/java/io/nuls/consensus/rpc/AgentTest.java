@@ -28,7 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 节点相关操作测试
+ * Node related operation testing
  * Node-related operation testing
  *
  * @author tag
@@ -43,7 +43,7 @@ public class AgentTest {
 
     @Test
     /**
-     * 创建节点
+     * Create nodes
      * */
     public void createAgent()throws Exception{
         Map<String,Object> params = new HashMap<>();
@@ -61,15 +61,15 @@ public class AgentTest {
 
     @Test
     /**
-     * 保存节点
+     * Save Node
      * */
     public void createAgentCommit()throws Exception{
         Map<String,Object>params = new HashMap<>();
         params.put(Constants.CHAIN_ID,1);
-        //组装交易
+        //Assembly transaction
         BlockHeader blockHeader = new BlockHeader();
         blockHeader.setHeight(100);
-        //组装blockHeader
+        //assembleblockHeader
         params.put("blockHeader", HexUtil.encode(blockHeader.serialize()));
         //params.put("tx","0400b55977c06701005d204e00000000000000000000000000000100014a25417a133876da5e0cdd04a983a8a5d8e70172010001c5fb68d127dfde22eac3d79f697766ba449e642d010001c833737706ca24c1af266ef599097f796ca05a3c00000000000024406801170100014a25417a133876da5e0cdd04a983a8a5d8e7017201000100c0d401000000000000000000000000000800000000000000000001170100014a25417a133876da5e0cdd04a983a8a5d8e7017201000100204e0000000000000000000000000000ffffffff00");
         params.put("tx","0400a9a87ac06701005d204e0000000000000000000000000000010001f6db7f28888015528eae577ae82f985589dc63f20100012f627a02ca063f0c1c9466290c376c97a86edf95010001197a64059dd812fcf6e2d4c2bf22f0b320554c770000000000002440680117010001f6db7f28888015528eae577ae82f985589dc63f201000100c0d40100000000000000000000000000080000000000000000000117010001f6db7f28888015528eae577ae82f985589dc63f201000100204e0000000000000000000000000000ffffffff00");
@@ -79,7 +79,7 @@ public class AgentTest {
 
     @Test
     /**
-     * 保存节点交易回滚
+     * Save node transaction rollback
      * */
     public void createAgentRollback()throws Exception{
         Map<String,Object>params = new HashMap<>();
@@ -91,7 +91,7 @@ public class AgentTest {
 
     @Test
     /**
-     * 停止节点
+     * Stop node
      * */
     public void stopAgent()throws Exception{
         Map<String,Object>params = new HashMap<>();
@@ -103,7 +103,7 @@ public class AgentTest {
     }
 
     /**
-     * 停止节点
+     * Stop node
      * */
     @Test
     public void stopOtherAgent() throws Exception{
@@ -126,15 +126,15 @@ public class AgentTest {
 
     @Test
     /**
-     * 停止节点提交
+     * Stop node submission
      * */
     public void stopAgentCommit()throws Exception{
         Map<String,Object>params = new HashMap<>();
         params.put(Constants.CHAIN_ID,1);
-        //组装交易
+        //Assembly transaction
         BlockHeader blockHeader = new BlockHeader();
         blockHeader.setHeight(100);
-        //组装blockHeader
+        //assembleblockHeader
         params.put("blockHeader", HexUtil.encode(blockHeader.serialize()));
         params.put("tx","");
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_stopAgentCommit", params);
@@ -143,7 +143,7 @@ public class AgentTest {
 
     @Test
     /**
-     * 停止节点交易回滚
+     * Stop node transaction rollback
      * */
     public void stopAgentRollback()throws Exception{
         Map<String,Object>params = new HashMap<>();
@@ -155,7 +155,7 @@ public class AgentTest {
 
     @Test
     /**
-     * 获取节点列表
+     * Get node list
      * */
     public void getAgentList()throws Exception{
         Map<String,Object>params = new HashMap<>();

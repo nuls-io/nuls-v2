@@ -9,7 +9,7 @@ import io.nuls.core.core.annotation.Component;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-20 20:07
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Component
 public class SyncGetBlockHeaderByHeightCase extends BaseBlockCase<BlockHeaderData,BlockHeaderData> {
@@ -18,7 +18,7 @@ public class SyncGetBlockHeaderByHeightCase extends BaseBlockCase<BlockHeaderDat
 
     @Override
     public String title() {
-        return "通过高度获取区块头网络一致性";
+        return "Obtain block head network consistency through height";
     }
 
     @Override
@@ -29,11 +29,11 @@ public class SyncGetBlockHeaderByHeightCase extends BaseBlockCase<BlockHeaderDat
 
             @Override
             public String title() {
-                return "远程节点通过height查询区块头一致性";
+                return "Remote nodes pass throughheightQuery block header consistency";
             }
         }.check(new RemoteTestParam<>(GetBlockHeaderByHeightCase.class,blockHeaderData,blockHeaderData),depth);
         if(!res){
-            throw new TestFailException(title() + "失败，本地节点与远程节点数据不一致");
+            throw new TestFailException(title() + "Failed, local node and remote node data are inconsistent");
         }
         return blockHeaderData;
     }

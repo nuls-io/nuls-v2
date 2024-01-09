@@ -30,7 +30,7 @@ import static io.nuls.test.cases.transcation.batch.BatchCreateAccountCase.TRANSF
 /**
  * @Author: zhoulijun
  * @Time: 2019-04-25 12:08
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Component
 public class BatchReadyNodeAccountCase extends CallRemoteTestCase<Void,Integer> {
@@ -57,7 +57,7 @@ public class BatchReadyNodeAccountCase extends CallRemoteTestCase<Void,Integer> 
 
     @Override
     public String title() {
-        return "批量交易分解任务";
+        return "Batch transaction decomposition task";
     }
 
     @Override
@@ -65,7 +65,7 @@ public class BatchReadyNodeAccountCase extends CallRemoteTestCase<Void,Integer> 
         List<String> nodes = getRemoteNodes();
         int itemCount = total / nodes.size();
         List<BatchParam> params = new ArrayList<>();
-        //给每个节点创建一个中转账户，用于把资产转账到若干出金地址中
+        //Create a transfer account for each node to transfer assets to several withdrawal addresses
         Result<String> accounts = accountService.createAccount(new CreateAccountReq(nodes.size(), Constants.PASSWORD));
         BigInteger amount = TRANSFER_AMOUNT.multiply(BigInteger.valueOf(itemCount)).multiply(BigInteger.TWO);
         for (int i = 0;i<accounts.getList().size();i++){
@@ -97,7 +97,7 @@ public class BatchReadyNodeAccountCase extends CallRemoteTestCase<Void,Integer> 
 //                }
 //                latch.countDown();
 //            });
-            Log.info("成功创建测试账户{}个",res);
+            Log.info("Successfully created test account{}individual",res);
         }
 //        try {
 //            latch.await(60L, TimeUnit.SECONDS);
@@ -108,7 +108,7 @@ public class BatchReadyNodeAccountCase extends CallRemoteTestCase<Void,Integer> 
         for (int i = 0;i<accounts.getList().size();i++) {
             String node = nodes.get(i);
             Boolean res = doRemoteTest(node, BatchCreateTransferCase.class, itemCount);
-            Log.info("成功发起交易:{}", res);
+            Log.info("Successfully initiated transaction:{}", res);
         }
         return null;
     }

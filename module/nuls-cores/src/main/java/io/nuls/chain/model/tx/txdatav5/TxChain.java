@@ -23,20 +23,20 @@ public class TxChain extends BaseNulsData {
     private boolean supportInflowAsset = true;
     private int minAvailableNodeNum = 1;
     /**
-     * 初始化验证人信息
+     * Initialize Verifier Information
      */
     List<String> verifierList = new ArrayList<String>();
     /**
-     * 按100来计算拜占庭比例
+     * according to100To calculate the Byzantine proportion
      */
     int signatureByzantineRatio = 0;
     /**
-     * 最大签名数量
+     * Maximum number of signatures
      */
     int maxSignatureCount = 0;
 
     /**
-     * 下面这些是创建链的时候，必须携带的资产信息
+     * The following are the asset information that must be carried when creating a chain
      */
     private TxAsset defaultAsset = new TxAsset();
 

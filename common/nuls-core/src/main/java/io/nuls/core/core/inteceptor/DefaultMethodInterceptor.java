@@ -33,22 +33,22 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 /**
- * 系统默认的方法拦截器，用于aop底层实现
+ * System default method interceptor, used foraopBottom level implementation
  * The system's default method interceptor is used for the aop underlying implementation.
  *
  * @author: Niels Wang
  */
 public class DefaultMethodInterceptor implements MethodInterceptor {
     /**
-     * 拦截方法
+     * interceptor method
      * Intercept method
      *
-     * @param obj         方法所属对象/Method owner
-     * @param method      方法定义/Method definition
-     * @param params      方法参数列表/Method parameter list
-     * @param methodProxy 方法代理器
-     * @return 返回拦截的方法的返回值，可以对该值进行处理和替换/Returns the return value of the intercepting method, which can be processed and replaced.
-     * @throws Throwable 该方法可能抛出异常，请谨慎处理/This method may throw an exception, handle with care.
+     * @param obj         Object to which the method belongs/Method owner
+     * @param method      Method definition/Method definition
+     * @param params      Method parameter list/Method parameter list
+     * @param methodProxy Method proxy
+     * @return The return value of the intercepted method can be processed and replaced/Returns the return value of the intercepting method, which can be processed and replaced.
+     * @throws Throwable This method may throw exceptions, please handle with caution/This method may throw an exception, handle with care.
      */
     @Override
     public Object intercept(Object obj, Method method, Object[] params, MethodProxy methodProxy) throws Throwable {

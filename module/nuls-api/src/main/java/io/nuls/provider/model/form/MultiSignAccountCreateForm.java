@@ -35,13 +35,13 @@ import java.util.List;
 /**
  * @author: Charlie
  */
-@ApiModel(name = "创建多签账户表单数据")
+@ApiModel(name = "Create multi signature account form data")
 public class MultiSignAccountCreateForm extends Base{
 
-    @ApiModelProperty(description = "账户公钥集合", type = @TypeDescriptor(value = List.class, collectionElement = String.class))
+    @ApiModelProperty(description = "Account public key collection", type = @TypeDescriptor(value = List.class, collectionElement = String.class))
     private List<String> pubKeys;
 
-    @ApiModelProperty(description = "最小签名数")
+    @ApiModelProperty(description = "Minimum number of signatures")
     private int minSigns;
 
     public List<String> getPubKeys() {

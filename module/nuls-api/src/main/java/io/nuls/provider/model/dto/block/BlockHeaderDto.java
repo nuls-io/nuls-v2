@@ -41,62 +41,62 @@ import java.util.List;
 /**
  * @author: Niels Wang
  */
-@ApiModel(description = "blockHeader 区块头信息, 只返回对应的部分数据")
+@ApiModel(description = "blockHeader Block header information, Only return the corresponding partial data")
 public class BlockHeaderDto {
 
-    @ApiModelProperty(description = "区块的hash值")
+    @ApiModelProperty(description = "Blockedhashvalue")
     private String hash;
 
-    @ApiModelProperty(description = "上一个区块的hash值")
+    @ApiModelProperty(description = "Previous block'shashvalue")
     private String preHash;
 
-    @ApiModelProperty(description = "梅克尔hash")
+    @ApiModelProperty(description = "Merkelhash")
     private String merkleHash;
 
-    @ApiModelProperty(description = "区块生成时间")
+    @ApiModelProperty(description = "Block generation time")
     private String time;
-    @ApiModelProperty(description = "区块生成时间戳")
+    @ApiModelProperty(description = "Block generation timestamp")
     private long timestamp;
 
-    @ApiModelProperty(description = "区块高度")
+    @ApiModelProperty(description = "block height")
     private long height;
 
-    @ApiModelProperty(description = "区块打包交易数量")
+    @ApiModelProperty(description = "Number of block packaging transactions")
     private int txCount;
 
-    @ApiModelProperty(description = "签名Hex.encode(byte[])")
+    @ApiModelProperty(description = "autographHex.encode(byte[])")
     private String blockSignature;
 
-    @ApiModelProperty(description = "大小")
+    @ApiModelProperty(description = "size")
     private int size;
 
-    @ApiModelProperty(description = "打包地址")
+    @ApiModelProperty(description = "Packaging address")
     private String packingAddress;
 
-    @ApiModelProperty(description = "共识轮次")
+    @ApiModelProperty(description = "Consensus round")
     private long roundIndex;
 
-    @ApiModelProperty(description = "参与共识成员数量")
+    @ApiModelProperty(description = "Number of members participating in consensus")
     private int consensusMemberCount;
 
-    @ApiModelProperty(description = "当前共识轮开始时间")
+    @ApiModelProperty(description = "Current consensus round start time")
     private String roundStartTime;
-    @ApiModelProperty(description = "当前共识轮开始时间戳")
+    @ApiModelProperty(description = "Current consensus round start timestamp")
     private long roundStartTimestamp;
 
-    @ApiModelProperty(description = "当前轮次打包出块的名次")
+    @ApiModelProperty(description = "The ranking of the blocks packaged in the current round")
     private int packingIndexOfRound;
 
-    @ApiModelProperty(description = "主网当前生效的版本")
+    @ApiModelProperty(description = "The current effective version of the main network")
     private short mainVersion;
 
-    @ApiModelProperty(description = "区块的版本，可以理解为本地钱包的版本")
+    @ApiModelProperty(description = "The version of the block can be understood as the version of the local wallet")
     private short blockVersion;
 
-    @ApiModelProperty(description = "智能合约世界状态根")
+    @ApiModelProperty(description = "Smart Contract World State Root")
     private String stateRoot;
 
-    @ApiModelProperty(description = "区块打包的交易hash集合", type = @TypeDescriptor(value = List.class, collectionElement = String.class))
+    @ApiModelProperty(description = "Block packaged transactionshashaggregate", type = @TypeDescriptor(value = List.class, collectionElement = String.class))
     private List<String> txHashList;
 
     public BlockHeaderDto() {

@@ -13,11 +13,11 @@ import java.util.*;
 
 public class RegisteredChainChangeData extends BaseMessage {
     /**
-     * 注册链ID
+     * Registration ChainID
      * */
     private int registerChainId;
     /**
-     * 消息类型 0：将已注册跨链的所有链信息广播给新注册链，1：将新注册链信息广播给已注册跨链的链，2：链资产变更（注销/注册资产）
+     * Message type 0：Broadcast all registered cross chain information to the new registered chain,1：Broadcast new registration chain information to registered cross chain chains,2：Chain asset change（logout/Registered assets）
      */
     private int type;
 

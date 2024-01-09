@@ -128,7 +128,7 @@ public class AccountTool {
     }
 
     /**
-     * 创建智能合约地址
+     * Create smart contract address
      * Create smart contract address
      *
      * @param chainId
@@ -144,7 +144,7 @@ public class AccountTool {
      */
     public static BigInteger genPrivKey(byte[] encryptedPriKey, byte[] pw) {
         byte[] privSeedSha256 = Sha256Hash.hash(encryptedPriKey);
-        //get sha256 of encryptedPriKey and  sha256 of pw，
+        //get sha256 of encryptedPriKey and  sha256 of pw,
         byte[] pwSha256 = Sha256Hash.hash(pw);
         //privSeedSha256 + pwPwSha256
         byte[] pwPriBytes = new byte[privSeedSha256.length + pwSha256.length];
@@ -157,7 +157,7 @@ public class AccountTool {
         return new BigInteger(1, Sha256Hash.hash(pwPriBytes));
     }
 
-/*  移至AddressTool
+/*  move toAddressTool
     public static byte[] createMultiSigAccountOriginBytes(int chainId, int m, List<String> pubKeys) {
         byte[] result = null;
         if (m < CREATE_MULTI_SIGACCOUNT_MIN_SIZE) {

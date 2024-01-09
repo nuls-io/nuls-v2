@@ -78,7 +78,7 @@ public class ContractExecutorImpl implements ContractExecutor {
         contractResult.setContractAddress(contractAddress);
         contractResult.setSender(sender);
         contractResult.setRemark(ContractConstant.CREATE_REMARK);
-        // 批量提交方式，交易track放置到外部处理合约执行结果的方法里去提交
+        // Batch submission method, transactiontrackPlace it in the external method for processing contract execution results and submit it
         contractResult.setTxTrack(track);
         contractResult.setDebugEvents(programResult.getDebugEvents());
 
@@ -90,7 +90,7 @@ public class ContractExecutorImpl implements ContractExecutor {
             return contractResult;
         }
 
-        // 返回已使用gas、状态根、消息事件、合约转账(从合约转出)
+        // Return to Usedgas、State root、Message Event、Contract transfer(Transfer out from contract)
         contractResult.setError(false);
         contractResult.setRevert(false);
         contractResult.setEvents(programResult.getEvents());
@@ -129,7 +129,7 @@ public class ContractExecutorImpl implements ContractExecutor {
         contractResult.setSender(sender);
         contractResult.setValue(programCall.getValue().longValue());
         contractResult.setRemark(ContractConstant.CALL_REMARK);
-        // 批量提交方式，交易track放置到外部处理合约执行结果的方法里去提交
+        // Batch submission method, transactiontrackPlace it in the external method for processing contract execution results and submit it
         contractResult.setTxTrack(track);
         contractResult.setDebugEvents(programResult.getDebugEvents());
 
@@ -141,7 +141,7 @@ public class ContractExecutorImpl implements ContractExecutor {
             return contractResult;
         }
 
-        // 返回调用结果、已使用Gas、状态根、消息事件、合约转账(从合约转出)等
+        // Return the call result、UsedGas、State root、Message Event、Contract transfer(Transfer out from contract)etc.
         contractResult.setError(false);
         contractResult.setRevert(false);
         contractResult.setResult(programResult.getResult());
@@ -172,7 +172,7 @@ public class ContractExecutorImpl implements ContractExecutor {
         contractResult.setContractAddress(contractAddress);
         contractResult.setSender(sender);
         contractResult.setRemark(ContractConstant.DELETE_REMARK);
-        // 批量提交方式，交易track放置到外部处理合约执行结果的方法里去提交
+        // Batch submission method, transactiontrackPlace it in the external method for processing contract execution results and submit it
         contractResult.setTxTrack(track);
 
         if (!programResult.isSuccess()) {
@@ -183,7 +183,7 @@ public class ContractExecutorImpl implements ContractExecutor {
             return contractResult;
         }
 
-        // 返回状态根
+        // Return Status Root
         contractResult.setError(false);
         contractResult.setRevert(false);
 

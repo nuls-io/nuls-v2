@@ -12,14 +12,14 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * 用于测试
+ * Used for testing
  *
  * @author tangyi
  * @date 2018/12/3
  */
 public class NoUse {
     /**
-     * 模拟核心模块（Manager），测试专用
+     * Simulate core modules（Manager）, dedicated to testing
      * For internal debugging only
      * Simulate a kernel module
      */
@@ -51,7 +51,7 @@ public class NoUse {
     }
 
     /**
-     * 模拟启动模块，单元测试专用
+     * Simulated startup module, dedicated to unit testing
      * Analog Startup Module, Unit Test Specific
      */
     public static void mockModule() throws Exception {

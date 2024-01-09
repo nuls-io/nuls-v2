@@ -39,7 +39,7 @@ import java.util.List;
 import static io.nuls.block.constant.Constant.*;
 
 /**
- * 链管理类,负责各条链的初始化,运行,启动,参数维护等
+ * Chain management,Responsible for initializing each chain,working,start-up,Parameter maintenance, etc
  * Chain management class, responsible for the initialization, operation, start-up, parameter maintenance of each chain, etc.
  *
  * @author: PierreLuo
@@ -52,7 +52,7 @@ public class ChainManager {
     private BlockService service;
 
     public void initChain() throws Exception {
-        //加载配置
+        //load configuration
         ConfigLoader.load();
         List<Integer> chainIds = ContextManager.CHAIN_ID_LIST;
         for (Integer chainId : chainIds) {
@@ -61,7 +61,7 @@ public class ChainManager {
     }
 
     /**BlockSynchronizer
-     * 初始化并启动链
+     * Initialize and start the chain
      * Initialize and start the chain
      */
     public void runChain() throws InterruptedException {
@@ -73,23 +73,23 @@ public class ChainManager {
                 LoggerUtil.COMMON_LOG.warn("systemTypes doesn't contains coin_base");
                 systemTypes = TransactionCall.getSystemTypes(chainId);
             }
-            //服务初始化
+            //Service initialization
             service.init(chainId);
         }
     }
 
     /**
-     * 停止一条链
+     * Stop a chain
      * Delete a chain
      *
-     * @param chainId 链ID/chain id
+     * @param chainId chainID/chain id
      */
     public void stopChain(int chainId) {
 
     }
 
     /**
-     * 初始化链相关表
+     * Initialize Chain Related Tables
      * Initialization chain correlation table
      *
      * @param chainId

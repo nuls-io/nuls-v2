@@ -40,7 +40,7 @@ import java.util.Map;
 public class ChainManagerCall {
 
     /**
-     * 查询是否为跨链资产
+     * Query whether it is a cross chain asset
      */
     public static boolean isCrossAssets(int chainId, int assetId) throws NulsException {
         Map<String, Object> params = new HashMap(4);

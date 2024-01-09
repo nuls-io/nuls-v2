@@ -37,7 +37,7 @@ import io.nuls.core.model.ByteUtils;
 import java.io.IOException;
 
 /**
- * 所有网络上传输的消息的基类，定义了网络消息的基本格式
+ * The base class for all messages transmitted on the network, which defines the basic format of network messages
  * The base class for all messages transmitted over the network defines the basic format of the network message.
  *
  * @author Niels
@@ -55,7 +55,7 @@ public abstract class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
     }
 
     /**
-     * 初始化基础消息的消息头
+     * Initialize the message header of the base message
      */
     public BaseMessage(String command, long magicNumber) {
         this.header = new MessageHeader(command, magicNumber);

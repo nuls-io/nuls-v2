@@ -33,22 +33,22 @@ import java.math.BigInteger;
 public abstract class Coin extends BaseNulsData {
 
     /**
-     * byte[24] 账户地址
+     * byte[24] Account address
      */
     protected byte[] address;
 
     /**
-     * uint16 资产发行链的id
+     * uint16 Asset issuance chainid
      */
     protected int assetsChainId;
 
     /**
-     * uint16 资产id
+     * uint16 assetid
      */
     protected int assetsId;
 
     /**
-     * uint128 数量
+     * uint128 quantity
      */
     protected BigInteger amount;
 

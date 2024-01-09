@@ -28,7 +28,7 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * 智能合约停止节点处理器
+ * Smart contract stop node processor
  *
  * @author tag
  * @date 2019/6/1
@@ -95,7 +95,7 @@ public class ContractStopAgentProcessor implements TransactionProcessor {
                     errorCode = ConsensusErrorCode.CONFLICT_ERROR.getCode();
                     continue;
                 }
-                //验证停止节点交易时间正确性
+                //Verify the correctness of stopping node transaction time
                 long time = NulsDateUtils.getCurrentTimeSeconds();
                 if(blockHeader != null){
                     time = blockHeader.getTime();
@@ -107,7 +107,7 @@ public class ContractStopAgentProcessor implements TransactionProcessor {
                     errorCode = ConsensusErrorCode.ERROR_UNLOCK_TIME.getCode();
                     continue;
                 }
-                //验证解锁时间正确性
+                //Verify the correctness of unlocking time
                 CoinData coinData = new CoinData();
                 coinData.parse(contractStopAgentTx.getCoinData(), 0);
                 long unlockedTime = contractStopAgentTx.getTime() + chain.getConfig().getStopAgentLockTime();
@@ -173,7 +173,7 @@ public class ContractStopAgentProcessor implements TransactionProcessor {
                 commitResult = false;
             }
         }
-        //回滚已提交成功的交易
+        //Roll back transactions that have been successfully submitted
         if (!commitResult) {
             for (Transaction rollbackTx : commitSuccessList) {
                 try {
@@ -212,7 +212,7 @@ public class ContractStopAgentProcessor implements TransactionProcessor {
                 rollbackResult = false;
             }
         }
-        //保存已回滚成功的交易
+        //Save successfully rolled back transactions
         if (!rollbackResult) {
             for (Transaction commitTx : rollbackSuccessList) {
                 try {

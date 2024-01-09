@@ -12,7 +12,7 @@ import java.util.function.Function;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-13 19:39
- * @Description: 配置项注入到成员变量中
+ * @Description: Injecting configuration items into member variables
  * config setting to field
  */
 public class ConfigSetting {

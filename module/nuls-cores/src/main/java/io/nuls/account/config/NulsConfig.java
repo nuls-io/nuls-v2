@@ -27,7 +27,7 @@ package io.nuls.account.config;
 
 
 /**
- * 用来管理配置项
+ * Used to manage configuration items
  * <p>
  * Used to manage system configuration items.
  *
@@ -36,18 +36,18 @@ package io.nuls.account.config;
 public class NulsConfig {
 
     /**
-     * 系统使用的编码方式
+     * The encoding method used by the system
      * The encoding used by the nuls system.
      */
     public static String DEFAULT_ENCODING = "UTF-8";
 
     /**
-     * 导出keystore备份文件目录
+     * exportkeystoreBackup file directory
      */
     public static String ACCOUNTKEYSTORE_FOLDER_NAME = "keystore/backup";
 
     /**
-     * 数据库存储地址
+     * Database storage address
      * database path
      */
     public static String DATA_PATH;
@@ -58,16 +58,16 @@ public class NulsConfig {
     public static final String CONFIG_FILE_PATH = "account-config.json";
 
     /**
-     * 主网链ID（卫星链ID）
+     * Main network chainID（Satellite chainID）
      */
     public static int MAIN_CHAIN_ID;
     /**
-     * 黑洞地址，该地址的资产无法找回
+     * Black hole address, the assets at this address cannot be retrieved
      */
     public static byte[] BLACK_HOLE_PUB_KEY = null;
 
     /**
-     * 主网链资产ID（卫星链资产ID，NULS资产）
+     * Main network chain assetsID（Satellite chain assetsID,NULSasset）
      */
     public static int MAIN_ASSETS_ID;
 

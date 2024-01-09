@@ -44,12 +44,12 @@ public class AccountServiceTest {
 
     @BeforeClass
     public static void beforeTest() {
-        //初始化配置
+        //Initialize configuration
         SpringLiteContext.init("io.nuls", new ModularServiceMethodInterceptor());
         AccountBootstrap accountBootstrap = SpringLiteContext.getBean(AccountBootstrap.class);
-        //初始化配置
+        //Initialize configuration
         accountBootstrap.init();
-//        启动时间同步线程
+//        Start time synchronization thread
         TimeService.getInstance().start();
         accountService = SpringLiteContext.getBean(AccountService.class);
         ConfigBean configBean = new ConfigBean();
@@ -231,7 +231,7 @@ public class AccountServiceTest {
     public void setRemarkTest() {
         try {
             String remark = "test remark";
-            String errorRemark = "test error remark test error remark test error remark test error remark测试";
+            String errorRemark = "test error remark test error remark test error remark test error remarktest";
             //Create password accounts
             List<Account> accountList = accountService.createAccount(chain, 1, password);
             //Set the correct remarks for the account
@@ -255,15 +255,15 @@ public class AccountServiceTest {
     @Test
     public void signDigestTest() {
         try {
-            //创建加密账户 create encrypted account
+            //Create encrypted account create encrypted account
             List<Account> accountList = accountService.createAccount(chain, 1, password);
             String address = accountList.get(0).getAddress().getBase58();
             byte[] addressBytes = accountList.get(0).getAddress().getAddressBytes();
 
-            //创建一笔设置别名的交易
+            //Create a transaction with alias settings
             AliasTransaction tx = new AliasTransaction();
             tx.setTime(System.currentTimeMillis()/1000);
-            Alias alias = new Alias(addressBytes, "别名");
+            Alias alias = new Alias(addressBytes, "alias");
             tx.setTxData(alias.serialize());
 
 //            CoinDataResult coinDataResult = accountLedgerService.getCoinData(addressBytes, AccountConstant.ALIAS_NA, tx.size() , TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
@@ -282,11 +282,11 @@ public class AccountServiceTest {
             tx.setCoinData(coinData.serialize());
             tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
 
-            //测试密码正确
+            //Test password is correct
             P2PHKSignature signature=accountService.signDigest(tx.getHash().getBytes(), chainId, address, password);
             assertNotNull(signature);
 
-            //测试密码不正确
+            //Incorrect test password
             try {
                 accountService.signDigest(tx.getHash().getBytes(), chainId, address, password + "error");
             } catch (NulsException ex) {

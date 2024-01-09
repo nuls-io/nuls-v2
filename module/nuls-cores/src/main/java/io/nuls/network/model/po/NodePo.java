@@ -47,12 +47,12 @@ public class NodePo extends BasePo {
 
     private int port = 0;
     /**
-     * 非跨链连接中存跨链port，用于跨链连接的地址回复
+     * Cross chain connections exist in non cross chain connectionsportAddress replies for cross chain connections
      */
     private int crossPort = 0;
 
     /**
-     * 是否跨链连接
+     * Is there a cross chain connection
      */
     private boolean isCrossConnect = false;
 

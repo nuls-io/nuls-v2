@@ -5,7 +5,7 @@ import io.nuls.base.api.provider.BaseReq;
 /**
  * @Author: zhoulijun
  * @Time: 2019-05-07 13:35
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class GetCrossTxStateReq extends BaseReq {
 

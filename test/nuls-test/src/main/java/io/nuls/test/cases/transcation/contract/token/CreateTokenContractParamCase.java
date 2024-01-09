@@ -39,7 +39,7 @@ import java.util.Map;
 public class CreateTokenContractParamCase extends BaseTestCase<Map, Integer> {
     @Override
     public String title() {
-        return "token合约创建参数";
+        return "tokenContract creation parameters";
     }
 
     @Override

@@ -40,15 +40,15 @@ import static io.nuls.v2.util.ContractUtil.bigInteger2String;
  */
 @ApiModel
 public class OutputDto {
-    @ApiModelProperty(description = "输出地址")
+    @ApiModelProperty(description = "Output address")
     private String address;
-    @ApiModelProperty(description = "资产链ID")
+    @ApiModelProperty(description = "Asset ChainID")
     private int assetsChainId;
-    @ApiModelProperty(description = "资产ID")
+    @ApiModelProperty(description = "assetID")
     private int assetsId;
-    @ApiModelProperty(description = "输出金额")
+    @ApiModelProperty(description = "Output amount")
     private String amount;
-    @ApiModelProperty(description = "锁定时间")
+    @ApiModelProperty(description = "Lock time")
     private long lockTime;
 
     public OutputDto() {}

@@ -36,7 +36,7 @@ import java.math.BigInteger;
 import java.util.*;
 
 /**
- * 惩罚信息管理，用于惩罚数据证据的记录，红黄牌惩罚生成等
+ * Punishment information management, used for recording punishment data evidence, generating red and yellow card punishment, etc
  * Punishment information management, records of punishment entity evidence, red and yellow card punishment generation, etc.
  *
  * @author tag
@@ -60,10 +60,10 @@ public class PunishManager {
     private RoundManager roundManager;
 
     /**
-     * 加载所有的红牌信息和最近X黃牌数据到缓存
+     * Load all red card information and recent updatesXYellow card data to cache
      * Load all red card information and latest X rotation card entity to the cache
      *
-     * @param chain 链信息/chain info
+     * @param chain Chain information/chain info
      */
     public void loadPunishes(Chain chain) throws Exception {
         BlockHeader blockHeader = chain.getNewestHeader();
@@ -92,10 +92,10 @@ public class PunishManager {
     }
 
     /**
-     * 清理黄牌数据
+     * Clean up yellow card data
      * Clean up yellow card entity
      *
-     * @param chain 链信息/chain info
+     * @param chain Chain information/chain info
      */
     public void clear(Chain chain) {
         BlockHeader blockHeader = chain.getNewestHeader();
@@ -112,7 +112,7 @@ public class PunishManager {
     }
 
     /**
-     * 添加分叉证据
+     * Add fork evidence
      * Adding bifurcation evidence
      *
      * @param chain
@@ -121,7 +121,7 @@ public class PunishManager {
      */
     public void addEvidenceRecord(Chain chain, BlockHeader firstHeader, BlockHeader secondHeader) throws NulsException {
         /*
-        找到分叉的节点
+        Find the forked node
         Find the bifurcated nodes
         */
         Agent agent = null;
@@ -138,7 +138,7 @@ public class PunishManager {
             return;
         }
         /*
-        验证节点是否应该受红牌惩罚
+        Verify whether the node should be penalized with a red card
         Verify whether the node should be punished by a red card
         */
         boolean isRedPunish = isRedPunish(chain, firstHeader, secondHeader);
@@ -148,7 +148,7 @@ public class PunishManager {
     }
 
     /**
-     * 添加双花红牌记录
+     * Add Double Flower Red Card Record
      * Add Double Flower Red Card Record
      *
      * @param chain
@@ -157,7 +157,7 @@ public class PunishManager {
      */
     public void addDoubleSpendRecord(Chain chain, List<Transaction> txs, Block block) throws NulsException {
         /*
-        找到双花交易的节点
+        Find the node for the Double Flower transaction
         Find the bifurcated nodes
         */
         byte[] packingAddress = AddressTool.getAddress(block.getHeader().getBlockSignature().getPublicKey(), chain.getConfig().getChainId());
@@ -177,7 +177,7 @@ public class PunishManager {
         }
         try {
             /*
-            组装双花红牌交易
+            Assembling Double Flower Red Card Trading
             Assembled Double Flower Red Card Trading
             */
             Transaction redPunishTransaction = new Transaction(TxType.RED_PUNISH);
@@ -203,7 +203,7 @@ public class PunishManager {
     }
 
     /**
-     * 更新惩罚证据列表并验证节点是否应该给红牌惩罚
+     * Update the list of punishment evidence and verify whether the node should be given a red card punishment
      * Follow the new penalty evidence list and verify whether the node should give a red card penalty
      *
      * @param chain
@@ -212,19 +212,19 @@ public class PunishManager {
      * @return boolean
      */
     private boolean isRedPunish(Chain chain, BlockHeader firstHeader, BlockHeader secondHeader) {
-        //验证出块地址PackingAddress，记录分叉的连续次数，如达到连续3轮则红牌惩罚/最近100轮中有3次分叉
+        //Verify block addressPackingAddressRecord the number of consecutive forks, if they reach a continuous state3Wheel based red card punishment/recently100In the wheel, there are3Secondary bifurcation
         String packingAddress = AddressTool.getStringAddressByBytes(firstHeader.getPackingAddress(chain.getConfig().getChainId()));
         BlockExtendsData extendsData = firstHeader.getExtendsData();
         long currentRoundIndex = extendsData.getRoundIndex();
         Map<String, List<Evidence>> currentChainEvidences = chain.getEvidenceMap();
         /*
-        首先生成一个证据
+        First, generate evidence
         First generate an evidence
         */
         Evidence evidence = new Evidence(currentRoundIndex, firstHeader, secondHeader);
 
         /*
-        判断是否有当前链的惩罚记录，如果不存在则添加
+        Determine if there is a penalty record for the current chain, and add it if it does not exist
         Determine if there is a penalty record for the current chain, and add if not
         */
         if (currentChainEvidences == null) {
@@ -232,7 +232,7 @@ public class PunishManager {
         }
 
         /*
-        查询本地是否存在当前节点的分叉证据，如果不存在则添加
+        Check if there is evidence of a fork in the current node locally. If it does not exist, add it
         Query whether there is bifurcation evidence for the current node locally, and if not add
         */
         if (!currentChainEvidences.containsKey(packingAddress)) {
@@ -242,8 +242,8 @@ public class PunishManager {
             return false;
         }
         /*
-        1.如果存在该节点分叉证据，则判断当前分叉轮次与该节点上一次分叉轮次是否连续
-        2.如果连续则判断该节点连续分叉数是否已经达到红牌惩罚数，如果达到这生成红牌惩罚交易，如果不连续则清空该节点分叉记录
+        1.If there is evidence of a fork in the node, determine whether the current fork cycle is continuous with the previous fork cycle of the node
+        2.If it is continuous, determine whether the number of consecutive forks of the node has reached the red card penalty number. If it reaches this, generate a red card penalty transaction. If it is not continuous, clear the fork record of the node
         1. If there is evidence of bifurcation of the node, it is judged whether the current bifurcation wheel number is continuous with the previous bifurcation wheel number of the node.
         2. If continuous, judge whether the number of consecutive bifurcations of the node has reached the number of red card penalties. If the number of consecutive bifurcations reaches the number of red card penalties,
            generate a red card penalty transaction, and if not, empty the bifurcation records of the node.
@@ -269,7 +269,7 @@ public class PunishManager {
     }
 
     /**
-     * 创建红牌交易并放入缓存中
+     * Create a red card transaction and place it in the cache
      * Create a red card transaction and put it in the cache
      *
      * @param chain
@@ -282,7 +282,7 @@ public class PunishManager {
         long txTime = 0;
         try {
             /*
-            连续3轮 每一轮两个区块头作为证据 一共 3 * 2 个区块头作为证据
+            continuity3round Two block heads per round as evidence altogether 3 * 2 Using block heads as evidence
             For three consecutive rounds, two blocks in each round are used as evidence, and a total of 3*2 blocks are used as evidence.
             */
             byte[][] headers = new byte[ConsensusConstant.REDPUNISH_BIFURCATION * 2][];
@@ -304,14 +304,14 @@ public class PunishManager {
             redPunishTransaction.setTxData(redPunishData.serialize());
             redPunishTransaction.setTime(txTime);
             /*
-            组装CoinData
+            assembleCoinData
             Assemble CoinData
             */
             CoinData coinData = coinDataManager.getStopAgentCoinData(chain, agent, redPunishTransaction.getTime() + chain.getConfig().getRedPublishLockTime());
             redPunishTransaction.setCoinData(coinData.serialize());
             redPunishTransaction.setHash(NulsHash.calcHash(redPunishTransaction.serializeForHash()));
             /*
-            缓存红牌交易
+            Cache red card transactions
             Assemble Red Punish transaction
             */
             chain.getRedPunishTransactionList().add(redPunishTransaction);
@@ -321,14 +321,14 @@ public class PunishManager {
     }
 
     /**
-     * 组装红/黄牌交易
+     * Assembly Red/Yellow card trading
      * Assemble Red/Yellow Transaction
      *
      * @param chain     Chain info
-     * @param bestBlock Latest local block/本地最新区块
-     * @param txList    A list of transactions to be packaged/需打包的交易列表
-     * @param self      Local Node Packing Information/本地节点打包信息
-     * @param round     Local latest rounds information/本地最新轮次信息
+     * @param bestBlock Latest local block/Latest local blocks
+     * @param txList    A list of transactions to be packaged/List of transactions that need to be packaged
+     * @param self      Local Node Packing Information/Local node packaging information
+     * @param round     Local latest rounds information/Latest local round information
      */
     public void punishTx(Chain chain, BlockHeader bestBlock, List<Transaction> txList, MeetingMember self, MeetingRound round) throws Exception {
         Transaction yellowPunishTransaction = createYellowPunishTx(chain, bestBlock, self, round);
@@ -340,7 +340,7 @@ public class PunishManager {
         }
         txList.add(yellowPunishTransaction);
         /*
-        当连续100个黄牌时，给出一个红牌
+        When continuous100When a yellow card is given, give a red card
         When 100 yellow CARDS in a row, give a red card.
         */
         YellowPunishData yellowPunishData = new YellowPunishData();
@@ -375,7 +375,7 @@ public class PunishManager {
             }
         }
         /*
-         * 待打包交易与红牌交易冲突检测
+         * Conflict detection between packaged transactions and red card transactions
          * Conflict Detection of UnPackaged Trading and Red Card Trading
          * */
         if (chain.getRedPunishTransactionList().size() > 0) {
@@ -384,18 +384,18 @@ public class PunishManager {
     }
 
     /**
-     * 组装黄牌
+     * Assembling yellow cards
      * Assemble Yellow Transaction
      *
-     * @param preBlock Latest local block/本地最新区块
-     * @param self     A list of transactions to be packaged/需打包的交易列表
-     * @param round    Local latest rounds information/本地最新轮次信息
+     * @param preBlock Latest local block/Latest local blocks
+     * @param self     A list of transactions to be packaged/List of transactions that need to be packaged
+     * @param round    Local latest rounds information/Latest local round information
      * @return Transaction
      */
     public Transaction createYellowPunishTx(Chain chain, BlockHeader preBlock, MeetingMember self, MeetingRound round) throws Exception {
         BlockExtendsData preBlockRoundData = preBlock.getExtendsData();
         /*
-        如果本节点当前打包轮次比本地最新区块的轮次大一轮以上则返回不生成黄牌交易
+        If the current packaging round of this node is more than one round larger than the round of the latest local block, return no yellow card transactions generated
         If the current packing rounds of this node are more than one round larger than the rounds of the latest local block,
         no yellow card transaction will be generated.
         */
@@ -403,13 +403,13 @@ public class PunishManager {
             return null;
         }
         /*
-        计算需要生成的黄牌数量，即当前出的块与本地最新区块之间相差的区块数
+        Calculate the number of yellow cards that need to be generated, that is, the number of blocks that differ between the current block and the latest local block
         Calculate the number of yellow cards that need to be generated, that is, the number of blocks that differ from the latest local block
         */
         int yellowCount = 0;
 
         /*
-        如果当前轮次与本地最新区块是同一轮次，则当前节点在本轮次中的出块下标与最新区块之间的差值减一即为需要生成的黄牌交易数
+        If the current round is the same as the latest local block, the difference between the block index of the current node and the latest block in this round minus one is the number of yellow card transactions that need to be generated
         If the current round is the same as the latest local block, then the difference between the block subscript of the current node and the latest block in this round is reduced by one,
         that is, the number of optical beat transactions that need to be generated.
         */
@@ -418,8 +418,8 @@ public class PunishManager {
         }
 
         /*
-        如果当前轮次与本地最新区块不是同一轮次，且当前节点不是本轮次中第一个出块的或则本地最新区块不为它所在轮次中最后一个出块的
-        则黄牌数为：上一轮次出块数-本地最新区块出块下标+当前节点出块下标-1
+        If the current round is not the same as the local latest block, and the current node is not the first block to be generated in this round, or if the local latest block is not the last block to be generated in its round
+        So the number of yellow cards is：Number of blocks produced in the previous round-Local latest block output index+Current node block index-1
         If the current round is not the same as the latest local block, and the current node is not the first block in this round, or the latest local block is not the last block in its round.
         The yellow card number is: the number of blocks out in the last round - local latest block out subscript + current node out block subscript - 1
         */
@@ -435,7 +435,7 @@ public class PunishManager {
         for (int i = 1; i <= yellowCount; i++) {
             int index = self.getPackingIndexOfRound() - i;
             /*
-            本轮次需生成的黄牌
+            Yellow cards to be generated in this round
             Yellow cards to be generated in this round
             */
             if (index > 0) {
@@ -446,14 +446,14 @@ public class PunishManager {
                 addressList.add(member.getAgent().getAgentAddress());
             }
             /*
-            上一轮需要生成的黄牌
+            Yellow cards that need to be generated in the previous round
             Yellow cards needed to be generated in the last round
             */
             else {
                 preRound = round.getPreRound();
                 if (preRound == null) {
                     /*
-                     * 找到round前一轮的第一个区块
+                     * findroundThe first block in the previous round
                      * */
                     if (chain.getRoundList().size() > 0) {
                         preRound = roundManager.getRoundByIndex(chain, round.getIndex()-1);
@@ -484,12 +484,12 @@ public class PunishManager {
     }
 
     /**
-     * 待打包交易与红牌交易冲突检测
+     * Conflict detection between packaged transactions and red card transactions
      * Conflict Detection of UnPackaged Trading and Red Card Trading
      */
     private void conflictValid(Chain chain, List<Transaction> txList) throws NulsException {
         /*
-         * 红牌惩罚的地址
+         * Address for red card punishment
          * */
         Set<String> redPunishAddressSet = redPunishAddressSet(chain);
 
@@ -501,12 +501,12 @@ public class PunishManager {
         Transaction tx;
 
         /*
-         * 无效的节点Hash
+         * Invalid nodeHash
          * */
         Set<NulsHash> invalidAgentTxHash = new HashSet<>();
 
         /*
-         * 无效的加入共识交易的交易Hash
+         * Invalid transaction to join consensus transactionHash
          * */
         Set<NulsHash> invalidDepositTxHash = new HashSet<>();
         while (iterator.hasNext()) {
@@ -551,7 +551,7 @@ public class PunishManager {
     }
 
     /**
-     * 红牌惩罚列表
+     * Red Card Penalty List
      * Red Card Punishment List
      */
     private Set<String> redPunishAddressSet(Chain chain) throws NulsException {
@@ -588,7 +588,7 @@ public class PunishManager {
         punishLogPo.setReasonCode(punishData.getReasonCode());
 
         /*
-        找到被惩罚的节点
+        Find the penalized node
         Find the punished node
          */
         List<AgentPo> agentList = agentStorageService.getList(chainId);
@@ -607,7 +607,7 @@ public class PunishManager {
         }
 
         /*
-        找到被惩罚节点的委托
+        Find the delegate of the penalized node
         Delegation to Find Penalized Nodes
          */
         List<DepositPo> depositPoList = depositStorageService.getList(chainId);
@@ -631,7 +631,7 @@ public class PunishManager {
             updatedList.add(po);
         }
         /*
-         * 保存红牌惩罚信息
+         * Save red card penalty information
          * */
         boolean success = punishStorageService.save(punishLogPo, chainId);
         if (!success) {
@@ -642,7 +642,7 @@ public class PunishManager {
             throw new NulsException(ConsensusErrorCode.SAVE_FAILED);
         }
         /*
-         * 修改惩罚节点信息
+         * Modify penalty node information
          * */
         AgentPo agentPo = agent;
         agentPo.setDelHeight(blockHeight);
@@ -658,7 +658,7 @@ public class PunishManager {
         }
 
         /*
-         * 更新缓存
+         * Update cache
          * */
         if (!updatedList.isEmpty()) {
             for (DepositPo depositPo : updatedList) {
@@ -676,7 +676,7 @@ public class PunishManager {
         RedPunishData punishData = new RedPunishData();
         punishData.parse(tx.getTxData(), 0);
         /*
-        找到被惩罚的节点
+        Find the penalized node
         Find the punished node
          */
         List<AgentPo> agentList = agentStorageService.getList(chainId);
@@ -695,7 +695,7 @@ public class PunishManager {
         }
 
         /*
-        找到被惩罚节点的委托
+        Find the delegate of the penalized node
         Delegation to Find Penalized Nodes
          */
         List<DepositPo> depositPoList = depositStorageService.getList(chainId);
@@ -742,7 +742,7 @@ public class PunishManager {
         }
 
         /*
-         * 修改缓存
+         * Modify cache
          * */
         if (!updatedList.isEmpty()) {
             for (DepositPo po2 : updatedList) {
@@ -816,7 +816,7 @@ public class PunishManager {
     }
 
     /**
-     * 获取固定格式的key
+     * Get fixed formatkey
      */
     private byte[] getPoKey(byte[] address, byte type, long blockHeight, int index) {
         return ByteUtils.concatenate(address, new byte[]{type}, SerializeUtils.uint64ToByteArray(blockHeight), new VarInt(index).encode());

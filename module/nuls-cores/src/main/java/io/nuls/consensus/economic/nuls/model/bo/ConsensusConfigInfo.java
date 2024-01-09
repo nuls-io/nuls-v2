@@ -2,7 +2,7 @@ package io.nuls.consensus.economic.nuls.model.bo;
 import java.math.BigInteger;
 
 /**
- * 共识与经济模型相关配置透传
+ * Consensus and Economic Model Related Configuration Transmission
  * Consensus and economic model-related allocation transmission
  *
  * @author tag

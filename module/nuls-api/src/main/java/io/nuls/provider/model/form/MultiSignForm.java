@@ -7,12 +7,12 @@ import io.nuls.v2.model.dto.SignDto;
 
 import java.util.List;
 
-@ApiModel(description = "多账户签名表单")
+@ApiModel(description = "Multi account signature form")
 public class MultiSignForm {
 
-    @ApiModelProperty(description = "keystore集合", required = true, type = @TypeDescriptor(value = List.class, collectionElement = SignDto.class))
+    @ApiModelProperty(description = "keystoreaggregate", required = true, type = @TypeDescriptor(value = List.class, collectionElement = SignDto.class))
     private List<SignDto> dtoList;
-    @ApiModelProperty(description = "交易序列化Hex字符串")
+    @ApiModelProperty(description = "Transaction serializationHexcharacter string")
     private String txHex;
 
     public List<SignDto> getDtoList() {

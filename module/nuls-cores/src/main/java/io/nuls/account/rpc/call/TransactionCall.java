@@ -19,13 +19,13 @@ import java.util.Map;
 
 /**
  * @author: qinyifeng
- * @description: 交易模块接口调用
+ * @description: Transaction module interface call
  * @date: 2018/11/27
  */
 public class TransactionCall {
 
     /**
-     * 发起新交易
+     * Initiate new transactions
      */
     public static boolean newTx(Chain chain, Transaction tx) throws NulsException {
         try {

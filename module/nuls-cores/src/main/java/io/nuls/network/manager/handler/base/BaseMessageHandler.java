@@ -44,7 +44,7 @@ import io.nuls.network.utils.LoggerUtil;
  */
 public abstract class BaseMessageHandler implements BaseMeesageHandlerInf {
     /**
-     * 实现发送消息
+     * Implement sending messages
      * Implement sending a message
      *
      * @param message message

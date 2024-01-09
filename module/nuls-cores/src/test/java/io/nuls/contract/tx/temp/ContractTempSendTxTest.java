@@ -54,7 +54,7 @@ import static io.nuls.contract.constant.ContractCmdConstant.*;
 public class ContractTempSendTxTest extends BaseQuery {
 
     /**
-     * 创建合约
+     * Create Contract
      */
     @Test
     public void createContract() throws Exception {
@@ -75,7 +75,7 @@ public class ContractTempSendTxTest extends BaseQuery {
     }
 
     /**
-     * 调用合约
+     * Call Contract
      */
     @Test
     public void callContract() throws Exception {

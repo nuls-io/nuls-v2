@@ -4,7 +4,7 @@ import io.nuls.crosschain.model.bo.message.UntreatedMessage;
 import io.nuls.crosschain.utils.TxUtil;
 
 /**
- * 跨链查询跨链交易处理状态
+ * Cross chain query of cross chain transaction processing status
  *
  * @author tag
  * 2019/6/25

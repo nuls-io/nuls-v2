@@ -38,7 +38,7 @@ import java.util.*;
 
 /**
  * share self address task
- * 分享自己外网IP端口任务
+ * Share your own external networkIPPort task
  *
  * @author lan
  * @create 2018/11/14
@@ -71,7 +71,7 @@ public class ShareAddressTask implements Runnable {
         MessageManager.getInstance().sendGetAddressMessage(nodeGroup, false, false, true);
         //local node get Cross address by local net
         if (nodeGroup.isMoonGroup()) {
-            //获取跨链的友链连接列表
+            //Get a list of cross chain friend chain connections
             List<NodeGroup> nodeGroups = NodeGroupManager.getInstance().getNodeGroups();
             for (NodeGroup crossNodeGroup : nodeGroups) {
                 MessageManager.getInstance().sendGetCrossAddressMessage(nodeGroup, crossNodeGroup, false, true, true);
@@ -84,14 +84,14 @@ public class ShareAddressTask implements Runnable {
             return;
         }
         networkConfig.getLocalIps().add(externalIp);
-        /*自有网络的连接分享*/
+        /*Connection sharing of self owned network*/
         if (!nodeGroup.isMoonCrossGroup()) {
             LoggerUtil.logger(nodeGroup.getChainId()).info("begin share self ip  is {}:{}", externalIp, networkConfig.getPort());
             Node myNode = new Node(nodeGroup.getMagicNumber(), externalIp, networkConfig.getPort(), networkConfig.getCrossPort(), Node.OUT, false);
             myNode.setConnectedListener(() -> {
                 myNode.getChannel().close();
                 LoggerUtil.logger(nodeGroup.getChainId()).info("self ip verify success,doShare ：share self ip  is {}:{}", externalIp, networkConfig.getPort());
-                //如果是主网卫星链,自有网络发现需要广播给所有跨链分支,如果是友链，自有网络发现也需要广播给到主网
+                //If it is the main network satellite chain,Self owned network discovery needs to be broadcasted to all cross chain branches,If it is a friend chain, the self owned network discovery also needs to be broadcasted to the main network
                 doShare(externalIp, nodeGroup.getLocalNetNodeContainer().getAvailableNodes(),
                         networkConfig.getPort(), networkConfig.getCrossPort(), false);
             });
@@ -110,7 +110,7 @@ public class ShareAddressTask implements Runnable {
         }
         networkConfig.getLocalIps().add(externalIp);
         if (nodeGroup.isCrossActive()) {
-            //开启了跨链业务
+            //Opened cross chain business
             LoggerUtil.logger(nodeGroup.getChainId()).info("begin cross ip share. self ip  is {}:{}", externalIp, networkConfig.getCrossPort());
             Node crossNode = new Node(nodeGroup.getMagicNumber(), externalIp, networkConfig.getCrossPort(), networkConfig.getCrossPort(), Node.OUT, true);
             crossNode.setConnectedListener(() -> {

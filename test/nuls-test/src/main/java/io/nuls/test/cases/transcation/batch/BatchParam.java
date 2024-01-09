@@ -3,7 +3,7 @@ package io.nuls.test.cases.transcation.batch;
 /**
  * @Author: zhoulijun
  * @Time: 2019-04-25 11:10
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class BatchParam {
 

@@ -31,7 +31,7 @@ import io.nuls.consensus.utils.manager.RoundManager;
 import java.util.*;
 
 /**
- * 共识处理器
+ * Consensus processor
  * Consensus processor
  *
  * @author tag
@@ -59,7 +59,7 @@ public class ConsensusProcess {
     }
 
     /**
-     * 检查节点打包状态
+     * Check node packaging status
      * Check node packing status
      */
     private boolean checkCanPackage(Chain chain) throws Exception {
@@ -67,7 +67,7 @@ public class ConsensusProcess {
             throw new NulsException(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
         /*
-        检查模块状态是否为运行中
+        Check if the module status is running
         Check whether the module status is in operation
         */
         if (chain.getConsensusStatus().ordinal() <= ConsensusStatus.WAIT_RUNNING.ordinal()) {
@@ -75,7 +75,7 @@ public class ConsensusProcess {
         }
 
         /*
-        检查节点状态是否可打包(区块管理模块同步完成之后设置该状态)
+        Check if the node status can be packaged(Set this status after the synchronization of the block management module is completed)
         Check whether the node status can be packaged (set up after the block management module completes synchronization)
         */
         if (!chain.isCanPacking()) {
@@ -87,7 +87,7 @@ public class ConsensusProcess {
 
     private void doWork(Chain chain) throws Exception {
         /*
-        检查节点状态
+        Check node status
         Check node status
         */
         if (chain.getConsensusStatus().ordinal() < ConsensusStatus.RUNNING.ordinal()) {
@@ -95,7 +95,7 @@ public class ConsensusProcess {
         }
 
         /*
-        获取当前轮次信息并验证轮次信息
+        Obtain current round information and verify round information
         Get current round information
          */
         MeetingRound round = roundManager.resetRound(chain, true);
@@ -108,9 +108,9 @@ public class ConsensusProcess {
         }
 
         /*
-        如果是共识节点则判断是否轮到自己出块
-        1.节点是否正在打包
-        2.当前时间是否处于节点打包开始时间和结束时间之间
+        If it is a consensus node, determine whether it is their turn to generate blocks
+        1.Is the node being packaged
+        2.Is the current time between the node packaging start time and end time
         If it's a consensus node, it's time to decide whether it's your turn to come out of the block.
         1. Is the node packing?
         2. Is the current time between the start and end of the node packing?
@@ -119,10 +119,10 @@ public class ConsensusProcess {
             hasPacking = true;
             try {
                 if (consensusLogger.getLogger().isDebugEnabled()) {
-                    consensusLogger.debug("当前网络时间： " + NulsDateUtils.convertDate(new Date(NulsDateUtils.getCurrentTimeMillis())) + " , 我的打包开始时间: " +
-                            NulsDateUtils.convertDate(new Date(member.getPackStartTime() * 1000)) + " , 我的打包结束时间: " +
-                            NulsDateUtils.convertDate(new Date(member.getPackEndTime() * 1000)) + " , 当前轮开始时间: " +
-                            NulsDateUtils.convertDate(new Date(round.getStartTime() * 1000)) + " , 当前轮结束开始时间: " +
+                    consensusLogger.debug("Current network time： " + NulsDateUtils.convertDate(new Date(NulsDateUtils.getCurrentTimeMillis())) + " , My packaging start time: " +
+                            NulsDateUtils.convertDate(new Date(member.getPackStartTime() * 1000)) + " , My packaging end time: " +
+                            NulsDateUtils.convertDate(new Date(member.getPackEndTime() * 1000)) + " , Current round start time: " +
+                            NulsDateUtils.convertDate(new Date(round.getStartTime() * 1000)) + " , Current round end start time: " +
                             NulsDateUtils.convertDate(new Date(round.getEndTime() * 1000)));
                 }
                 packing(chain, member, round);
@@ -143,7 +143,7 @@ public class ConsensusProcess {
     private void packing(Chain chain, MeetingMember self, MeetingRound round) throws Exception {
         waitReceiveNewestBlock(chain, self, round);
         /*
-        等待出块
+        Waiting for block output
         Wait for blocks
         */
         long start = System.currentTimeMillis();
@@ -151,7 +151,7 @@ public class ConsensusProcess {
         consensusLogger.info("doPacking use:" + (System.currentTimeMillis() - start) + "ms" + "\n\n");
 
         /*
-         * 打包完成之后，查看打包区块和主链最新区块是否连续，如果不连续表示打包过程中收到了上一个共识节点打包的区块，此时本地节点需要重新打包区块
+         * After packaging is completed, check if the packaged block and the latest block in the main chain are continuous. If they are not continuous, it indicates that the block packaged by the previous consensus node was received during the packaging process. At this time, the local node needs to repack the block
          * After packaging, check whether the packaged block and the latest block in the main chain are continuous. If the block is not continuous,
          * the local node needs to repackage the block when it receives the packaged block from the previous consensus node in the packaging process.
          */
@@ -167,7 +167,7 @@ public class ConsensusProcess {
     }
 
     /**
-     * 是否到达节点出块的时间点，如果本地最新区块为本轮次中上一节点所出，则直接打包出块，否则等待一定时间之后如果还没有接收到上一节点出的块则直接打包出块
+     * Has it reached the time point when the block was generated by the node? If the latest local block was generated by the previous node in this round, the block will be directly packaged. Otherwise, after waiting for a certain time, if the block from the previous node has not been received, the block will be directly packaged
      * Whether or not to arrive at the time point when the node is out of the block, if the latest local block is out of the previous node in this round, it will be packaged directly.
      * Otherwise, if the block from the previous node has not been received after waiting for a certain time, it will be packed directly.
      */
@@ -182,7 +182,7 @@ public class ConsensusProcess {
         try {
             while (true) {
                 /*
-                判断本地最新区块是否为轮次中上一个节点所出
+                Determine whether the latest local block is from the previous node in the round
                 Determine whether the latest local block is from the last node in the round
                 */
                 hasReceiveNewestBlock = hasReceiveNewestBlock(chain, self, round);
@@ -200,7 +200,7 @@ public class ConsensusProcess {
     }
 
     /**
-     * 判断本地最新区块是否为本轮次上一个出块节点所出
+     * Determine whether the latest local block is from the previous block node in this round
      * Judging whether the latest block in this region is from the last block in this round
      */
     private boolean hasReceiveNewestBlock(Chain chain, MeetingMember self, MeetingRound round) {
@@ -208,7 +208,7 @@ public class ConsensusProcess {
         MeetingMember preMember;
         MeetingRound preRound = round;
         /*
-        如果当前节点为该轮次第一个出块节点，则本地最新区块应该是上一轮的最后一个出块节点所出
+        If the current node is the first out of block node in that round, then the latest local block should be from the last out of block node in the previous round
         If the current node is the first out-of-block node in the round, the latest local block should be the last out-of-block node in the previous round.
         */
         if (myIndex == 1) {
@@ -226,7 +226,7 @@ public class ConsensusProcess {
         }
 
         /*
-        比较本地最新区块出块地址与上一节点的出块地址是否相等，如果相等则表示上一节点已出块，当前节点可以出块了
+        Compare the latest local block output address with the output address of the previous node to see if they are equal. If they are equal, it indicates that the previous node has output the block and the current node can output the block
         Comparing whether the block address of the latest local block is equal to that of the previous node, if equal,
         it means that the previous node has already blocked, and the current node can blocked.
         */
@@ -278,7 +278,7 @@ public class ConsensusProcess {
         extendsData.setRoundStartTime(round.getStartTime());
         fillProtocol(extendsData, chain.getConfig().getChainId());
         /*
-         * 添加底层随机数支持
+         * Add support for underlying random numbers
          */
         int chainId = chain.getConfig().getChainId();
         byte[] packingAddress = self.getAgent().getPackingAddress();
@@ -299,14 +299,14 @@ public class ConsensusProcess {
         RandomSeedUtils.CACHE_SEED = po;
 
         /*
-         * 获取打包的交易
+         * Get packaged transactions
          */
         String packingAddressString = AddressTool.getStringAddressByBytes(packingAddress);
         Map<String, Object> resultMap = CallMethodUtils.getPackingTxList(chain, bd.getTime(), packingAddressString);
         List<Transaction> packingTxList = new ArrayList<>();
 
         /*
-         * 检查组装交易过程中是否收到新区块
+         * Check if new blocks have been received during the assembly transaction process
          * Verify that new blocks are received halfway through packaging
          * */
         bestBlock = chain.getNewestHeader();
@@ -342,7 +342,7 @@ public class ConsensusProcess {
         }
         bd.setExtendsData(extendsData);
         /*
-        组装系统交易（CoinBase/红牌/黄牌）+ 创建区块
+        Assembly system transactions（CoinBase/Red card/Yellow card）+ Create blocks
         Assembly System Transactions (CoinBase/Red/Yellow)+ Create blocks
         */
         ConsensusManager consensusManager = SpringLiteContext.getBean(ConsensusManager.class);
@@ -350,7 +350,7 @@ public class ConsensusProcess {
         bd.setTxList(packingTxList);
         Block newBlock = consensusManager.createBlock(chain, bd, packingAddress, packingAddressString);
         /*
-         * 验证打包中途是否收到新区块
+         * Verify if new blocks have been received during packaging
          * Verify that new blocks are received halfway through packaging
          * */
         bestBlock = chain.getNewestHeader();

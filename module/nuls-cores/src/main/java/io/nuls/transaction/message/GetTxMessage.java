@@ -9,14 +9,14 @@ import io.nuls.core.exception.NulsException;
 import java.io.IOException;
 
 /**
- * 获取完整交易数据
+ * Obtain complete transaction data
  *
  * @author: qinyifeng
  * @date: 2018/12/26
  */
 public class GetTxMessage extends BaseBusinessMessage {
     /**
-     * 交易hash
+     * transactionhash
      */
     private NulsHash txHash;
 

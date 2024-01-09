@@ -21,7 +21,7 @@
 package io.nuls.core.parse.config;
 
 /**
- * 配置项
+ * Configuration items
  * @author lan
  * @date 18-12-17
  * @version 1.0

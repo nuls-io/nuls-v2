@@ -54,10 +54,10 @@ public class HashSetDuplicateProcessorTest {
     }
 
     /**
-     * 获取线程安全的固定大小的set
+     * Get thread safe fixed sizeset
      *
-     * @param size  set元素上限
-     * @return Set  set对象
+     * @param size  setElement upper limit
+     * @return Set  setobject
      */
     public static <T> Set<T> getSizedSet1(int size) {
         return new SizedSet<>(size);
@@ -79,10 +79,10 @@ public class HashSetDuplicateProcessorTest {
     }
 
     /**
-     * 获取线程安全的固定大小的set
+     * Get thread safe fixed sizeset
      *
-     * @param size  set元素上限
-     * @return Set  set对象
+     * @param size  setElement upper limit
+     * @return Set  setobject
      */
     public static <T> Set<T> getSizedSet2(int size) {
         return Collections.synchronizedSet(new HashSet<>(){
@@ -97,10 +97,10 @@ public class HashSetDuplicateProcessorTest {
     }
 
     /**
-     * 获取线程安全的固定大小的set
+     * Get thread safe fixed sizeset
      *
-     * @param size  set元素上限
-     * @return Set  set对象
+     * @param size  setElement upper limit
+     * @return Set  setobject
      */
     public static <T> Set<T> getSizedSet3(int size) {
         return Collections.synchronizedSet(new TreeSet<>(){

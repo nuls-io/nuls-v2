@@ -11,7 +11,7 @@ import io.nuls.consensus.service.MultiSignService;
 import java.util.Map;
 
 /**
- * 多签账户相关接口
+ * Multiple account related interfaces
  * Multi-Sign Account Related Interface
  *
  * @author tag
@@ -24,21 +24,21 @@ public class MultiSignCmd extends BaseCmd {
     private MultiSignService service;
 
     /**
-     * 多签账户创建节点
+     * Multiple account creation nodes
      * */
-    @CmdAnnotation(cmd = "cs_createMultiAgent", version = 1.0, description = "多签账户创建节点/Multi-Sign Account create agent transaction")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
-    @Parameter(parameterName = "agentAddress", parameterType = "String", parameterDes = "节点地址(多签地址)")
-    @Parameter(parameterName = "packingAddress", parameterType = "String", parameterDes = "节点出块地址")
-    @Parameter(parameterName = "rewardAddress", parameterType = "String", parameterDes = "奖励地址,默认节点地址", canNull = true)
-    @Parameter(parameterName = "commissionRate", requestType = @TypeDescriptor(value = int.class), parameterDes = "佣金比例")
-    @Parameter(parameterName = "deposit", parameterType = "String", parameterDes = "抵押金额")
-    @Parameter(parameterName = "password", parameterType = "String", parameterDes = "签名账户密码")
-    @Parameter(parameterName = "signAddress", parameterType = "String", parameterDes = "签名账户地址")
-    @ResponseData(name = "返回值", description = "返回一个Map,包含三个key", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "tx",  description = "完整交易序列化字符串,如果交易没达到最小签名数可继续签名"),
-            @Key(name = "txHash",  description = "交易hash"),
-            @Key(name = "completed", valueType = boolean.class, description = "true:交易已完成(已广播),false:交易没完成,没有达到最小签名数")
+    @CmdAnnotation(cmd = "cs_createMultiAgent", version = 1.0, description = "Multiple account creation nodes/Multi-Sign Account create agent transaction")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid")
+    @Parameter(parameterName = "agentAddress", parameterType = "String", parameterDes = "Node address(Multiple signed addresses)")
+    @Parameter(parameterName = "packingAddress", parameterType = "String", parameterDes = "Node block address")
+    @Parameter(parameterName = "rewardAddress", parameterType = "String", parameterDes = "Reward Address,Default node address", canNull = true)
+    @Parameter(parameterName = "commissionRate", requestType = @TypeDescriptor(value = int.class), parameterDes = "commission rate")
+    @Parameter(parameterName = "deposit", parameterType = "String", parameterDes = "Mortgage amount")
+    @Parameter(parameterName = "password", parameterType = "String", parameterDes = "Signature account password")
+    @Parameter(parameterName = "signAddress", parameterType = "String", parameterDes = "Signature account address")
+    @ResponseData(name = "Return value", description = "Return aMap,Including threekey", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "tx",  description = "Complete transaction serialization string,If the transaction does not reach the minimum number of signatures, you can continue to sign"),
+            @Key(name = "txHash",  description = "transactionhash"),
+            @Key(name = "completed", valueType = boolean.class, description = "true:Transaction completed(Broadcasted),false:Transaction not completed,Not reaching the minimum number of signatures")
     }))
     public Response createMultiAgent(Map<String,Object> params){
         Result result = service.createMultiAgent(params);
@@ -49,17 +49,17 @@ public class MultiSignCmd extends BaseCmd {
     }
 
     /**
-     * 多签账户注销节点
+     * Multiple account cancellation nodes
      * */
-    @CmdAnnotation(cmd = "cs_stopMultiAgent", version = 1.0, description = "多签账户注销节点/Multi-Sign Account stop agent")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
-    @Parameter(parameterName = "address", parameterType = "String", parameterDes = "节点地址(多签地址)")
-    @Parameter(parameterName = "password", parameterType = "String", parameterDes = "签名账户密码")
-    @Parameter(parameterName = "signAddress", parameterType = "String", parameterDes = "签名账户地址")
-    @ResponseData(name = "返回值", description = "返回一个Map,包含三个key", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "tx",  description = "完整交易序列化字符串,如果交易没达到最小签名数可继续签名"),
-            @Key(name = "txHash",  description = "交易hash"),
-            @Key(name = "completed", valueType = boolean.class, description = "true:交易已完成(已广播),false:交易没完成,没有达到最小签名数")
+    @CmdAnnotation(cmd = "cs_stopMultiAgent", version = 1.0, description = "Multiple account cancellation nodes/Multi-Sign Account stop agent")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid")
+    @Parameter(parameterName = "address", parameterType = "String", parameterDes = "Node address(Multiple signed addresses)")
+    @Parameter(parameterName = "password", parameterType = "String", parameterDes = "Signature account password")
+    @Parameter(parameterName = "signAddress", parameterType = "String", parameterDes = "Signature account address")
+    @ResponseData(name = "Return value", description = "Return aMap,Including threekey", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "tx",  description = "Complete transaction serialization string,If the transaction does not reach the minimum number of signatures, you can continue to sign"),
+            @Key(name = "txHash",  description = "transactionhash"),
+            @Key(name = "completed", valueType = boolean.class, description = "true:Transaction completed(Broadcasted),false:Transaction not completed,Not reaching the minimum number of signatures")
     }))
     public Response stopMultiAgent(Map<String,Object> params){
         Result result = service.stopMultiAgent(params);
@@ -70,19 +70,19 @@ public class MultiSignCmd extends BaseCmd {
     }
 
     /**
-     * 多签账户委托共识
+     * Multiple account delegation consensus
      * */
-    @CmdAnnotation(cmd = "cs_multiDeposit", version = 1.0, description = "多签账户委托共识/Multi-Sign Account deposit agent transaction")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
-    @Parameter(parameterName = "address", parameterType = "String", parameterDes = "多签账户地址")
-    @Parameter(parameterName = "agentHash", parameterType = "String", parameterDes = "节点HASH")
-    @Parameter(parameterName = "deposit", parameterType = "String", parameterDes = "委托金额")
-    @Parameter(parameterName = "password", parameterType = "String", parameterDes = "签名账户密码")
-    @Parameter(parameterName = "signAddress", parameterType = "String", parameterDes = "签名账户地址")
-    @ResponseData(name = "返回值", description = "返回一个Map,包含三个key", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "tx",  description = "完整交易序列化字符串,如果交易没达到最小签名数可继续签名"),
-            @Key(name = "txHash",  description = "交易hash"),
-            @Key(name = "completed", valueType = boolean.class, description = "true:交易已完成(已广播),false:交易没完成,没有达到最小签名数")
+    @CmdAnnotation(cmd = "cs_multiDeposit", version = 1.0, description = "Multiple account delegation consensus/Multi-Sign Account deposit agent transaction")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid")
+    @Parameter(parameterName = "address", parameterType = "String", parameterDes = "Multiple account addresses signed")
+    @Parameter(parameterName = "agentHash", parameterType = "String", parameterDes = "nodeHASH")
+    @Parameter(parameterName = "deposit", parameterType = "String", parameterDes = "Entrusted amount")
+    @Parameter(parameterName = "password", parameterType = "String", parameterDes = "Signature account password")
+    @Parameter(parameterName = "signAddress", parameterType = "String", parameterDes = "Signature account address")
+    @ResponseData(name = "Return value", description = "Return aMap,Including threekey", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "tx",  description = "Complete transaction serialization string,If the transaction does not reach the minimum number of signatures, you can continue to sign"),
+            @Key(name = "txHash",  description = "transactionhash"),
+            @Key(name = "completed", valueType = boolean.class, description = "true:Transaction completed(Broadcasted),false:Transaction not completed,Not reaching the minimum number of signatures")
     }))
     public Response multiDeposit(Map<String,Object> params){
         Result result = service.multiDeposit(params);
@@ -93,18 +93,18 @@ public class MultiSignCmd extends BaseCmd {
     }
 
     /**
-     * 多签账户退出共识
+     * Consensus on account exit with multiple signatures
      * */
-    @CmdAnnotation(cmd = "cs_multiWithdraw", version = 1.0, description = "多签账户退出共识/Multi-Sign Account withdraw deposit agent transaction")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
-    @Parameter(parameterName = "address", parameterType = "String", parameterDes = "多签账户地址")
-    @Parameter(parameterName = "txHash", parameterType = "String", parameterDes = "加入共识交易HASH")
-    @Parameter(parameterName = "password", parameterType = "String", parameterDes = "签名账户密码")
-    @Parameter(parameterName = "signAddress", parameterType = "String", parameterDes = "签名账户地址")
-    @ResponseData(name = "返回值", description = "返回一个Map,包含三个key", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "tx",  description = "完整交易序列化字符串,如果交易没达到最小签名数可继续签名"),
-            @Key(name = "txHash",  description = "交易hash"),
-            @Key(name = "completed", valueType = boolean.class, description = "true:交易已完成(已广播),false:交易没完成,没有达到最小签名数")
+    @CmdAnnotation(cmd = "cs_multiWithdraw", version = 1.0, description = "Consensus on account exit with multiple signatures/Multi-Sign Account withdraw deposit agent transaction")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid")
+    @Parameter(parameterName = "address", parameterType = "String", parameterDes = "Multiple account addresses signed")
+    @Parameter(parameterName = "txHash", parameterType = "String", parameterDes = "Join consensus tradingHASH")
+    @Parameter(parameterName = "password", parameterType = "String", parameterDes = "Signature account password")
+    @Parameter(parameterName = "signAddress", parameterType = "String", parameterDes = "Signature account address")
+    @ResponseData(name = "Return value", description = "Return aMap,Including threekey", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "tx",  description = "Complete transaction serialization string,If the transaction does not reach the minimum number of signatures, you can continue to sign"),
+            @Key(name = "txHash",  description = "transactionhash"),
+            @Key(name = "completed", valueType = boolean.class, description = "true:Transaction completed(Broadcasted),false:Transaction not completed,Not reaching the minimum number of signatures")
     }))
     public Response multiWithdraw(Map<String,Object> params){
         Result result = service.multiWithdraw(params);

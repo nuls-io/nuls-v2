@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 账本模块接口调用
+ * Calling the ledger module interface
  *
  * @author: qinyifeng
  * @date: 2018/12/12
@@ -23,7 +23,7 @@ import java.util.Map;
 public class LedgerCall {
 
     /**
-     * 查询账户余额
+     * Query account balance
      */
     public static HashMap getBalanceNonce(Chain chain, int assetChainId, int assetId, String address) {
         try {
@@ -48,7 +48,7 @@ public class LedgerCall {
     }
 
     /**
-     * 查询账户余额
+     * Query account balance
      */
     public static BigInteger getBalance(Chain chain, int assetChainId, int assetId, String address) {
         try {

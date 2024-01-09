@@ -9,11 +9,11 @@ import io.nuls.core.rpc.model.ApiModelProperty;
 @ApiModel
 public class RandomSeedDTO {
 
-    @ApiModelProperty(description = "生成的随机种子")
+    @ApiModelProperty(description = "Generate random seeds")
     private String seed;
-    @ApiModelProperty(description = "算法标识")
+    @ApiModelProperty(description = "Algorithm identification")
     private String algorithm;
-    @ApiModelProperty(description = "原始种子个数")
+    @ApiModelProperty(description = "Original number of seeds")
     private int count;
 
     public String getSeed() {

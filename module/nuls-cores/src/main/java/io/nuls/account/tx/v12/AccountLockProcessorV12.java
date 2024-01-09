@@ -122,7 +122,7 @@ public class AccountLockProcessorV12 implements TransactionProcessor {
             commitSucTxList.add(tx);
         }
         try {
-            //如果提交失败，将已经提交成功的交易回滚
+            //If the submission fails, roll back the transaction that has already been successfully submitted
             if (!result) {
                 boolean rollback = true;
                 for (Transaction tx : commitSucTxList) {
@@ -142,7 +142,7 @@ public class AccountLockProcessorV12 implements TransactionProcessor {
                     }
                     rollback = accountBlockStorageService.cancelOperateAccountList(list);
                 }
-                //回滚失败，抛异常
+                //Rollback failed with exception thrown
                 if (!rollback) {
                     LoggerUtil.LOG.error("ac_commitTx block_account tx rollback error");
                     throw new NulsException(AccountErrorCode.ALIAS_ROLLBACK_ERROR);
@@ -188,9 +188,9 @@ public class AccountLockProcessorV12 implements TransactionProcessor {
             }
             rollbackSucTxList.add(tx);
         }
-        //交易提交
+        //Transaction submission
         try {
-            //如果回滚失败，将已经回滚成功的交易重新保存
+            //If the rollback fails, the transaction that has already been successfully rolled back will be saved again
             if (!result) {
                 boolean commit = true;
                 for (Transaction tx : rollbackSucTxList) {
@@ -210,7 +210,7 @@ public class AccountLockProcessorV12 implements TransactionProcessor {
                     }
                     commit = accountBlockStorageService.operateAccountList(list);
                 }
-                //保存失败，抛异常
+                //Save failed, throw exception
                 if (!commit) {
                     LoggerUtil.LOG.error("ac_rollbackTx block_account tx commit error");
                     throw new NulsException(AccountErrorCode.ALIAS_SAVE_ERROR);

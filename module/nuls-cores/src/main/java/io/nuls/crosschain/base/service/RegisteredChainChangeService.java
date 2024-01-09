@@ -8,7 +8,7 @@ import java.util.Map;
 
 public interface RegisteredChainChangeService {
     /**
-     * 已注册跨链交易初始化批量验证（新链注册时需要将已注册的跨链的链信息发送给注册链）
+     * Registered cross chain transaction initialization batch verification（When registering a new chain, it is necessary to send the registered cross chain information to the registration chain）
      * @param chainId       chain ID
      * @param txs           cross chain transaction list
      * @param txMap         Consensus Module All Transaction Classification
@@ -19,7 +19,7 @@ public interface RegisteredChainChangeService {
     Map<String, Object> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader);
 
     /**
-     * 已注册跨链交易初始化提交
+     * Registered cross chain transaction initialization submission
      * @param chainId       chain ID
      * @param txs           cross chain transaction list
      * @param blockHeader   block header
@@ -29,7 +29,7 @@ public interface RegisteredChainChangeService {
     boolean commit(int chainId, List<Transaction> txs, BlockHeader blockHeader);
 
     /**
-     * 已注册跨链交易初始化回滚
+     * Cross chain transaction initialization rollback registered
      * @param chainId       chain ID
      * @param txs           cross chain transaction list
      * @param blockHeader   block header

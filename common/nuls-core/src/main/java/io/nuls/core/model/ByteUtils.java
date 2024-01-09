@@ -13,11 +13,11 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * */
 public class ByteUtils {
     /**
-     * 按照传入的顺序拼接数组为一个包含所有数组的大数组
+     * Splice the array into a large array containing all arrays in the order passed in
      * Splices the array into a large array containing all of the arrays in the incoming order.
      *
-     * @param arrays 想要拼接的数组集合、A collection of arrays that you want to concatenate.
-     * @return 拼接结果、 the result of the Joining together
+     * @param arrays The set of arrays you want to concatenate、A collection of arrays that you want to concatenate.
+     * @return Splicing results、 the result of the Joining together
      */
     public static final byte[] concatenate(byte[]... arrays) {
         int length = 0;
@@ -34,18 +34,18 @@ public class ByteUtils {
     }
 
     /**
-     * 字节数组是否为空
-     * @param array 校验的字节数组
-     * @return  如果字节数组为null或长度为0返回true否则返回false
+     * Is the byte array empty
+     * @param array Verified byte array
+     * @return  If the byte array isnullOr length is0returntrueOtherwise, returnfalse
      * */
     public static final boolean isEmptyOrNull(byte[] array) {
         return (array == null || array.length == 0);
     }
 
     /**
-     * 比较两个字节数组是否相等
-     * @param array1 需比较的字节数组
-     * @param array2 需比较的字节数组
+     * Compare whether two byte arrays are equal
+     * @param array1 Byte array to be compared
+     * @param array2 Byte array to be compared
      * @return
      * */
     public static boolean arrayEquals(byte[] array1, byte[] array2) {
@@ -64,28 +64,28 @@ public class ByteUtils {
     }
 
     /**
-     * 将字节数组转为字符串
-     * @param value  需转换的字节数组
-     * @return  直接数组转换得到的字符串
+     * Convert byte arrays to strings
+     * @param value  Byte array to be converted
+     * @return  The string obtained by direct array conversion
      * */
     public static String asString(byte[] value) {
         return (value == null) ? null : new String(value, UTF_8);
     }
 
     /**
-     * byte[]转short
+     * byte[]turnshort
      *
-     * @param b 字节数组
-     * @short 转换得到的short
+     * @param b Byte array
+     * @short Convertedshort
      */
     public static short bytesToShort(byte[] b) {
         return (short) (((b[1] << 8) | b[0] & 0xff));
     }
 
     /**
-     * 将字节数组转为整型数
-     * @param bytes  需转换的字节数组
-     * @return  转换得到的整型数
+     * Convert byte arrays to integers
+     * @param bytes  Byte array to be converted
+     * @return  Converted integer
      * */
     public static int bytesToInt(byte[] bytes) {
         int num = 0;
@@ -102,8 +102,8 @@ public class ByteUtils {
     }
 
     /**
-     * 字节数组到long的转换.
-     * @param b 字节数组
+     * Byte array tolongConversion of.
+     * @param b Byte array
      */
     public static long byteToLong(byte[] b) {
         return (b[0] & 0xffL) |
@@ -117,8 +117,8 @@ public class ByteUtils {
     }
     
     /**
-     * 字节数组转BigInteger
-     * @param b  需转换在字节数组
+     * Byte array conversionBigInteger
+     * @param b  Need to convert to byte array
      * @return BigInteger
      * */
     public static BigInteger bytesToBigInteger(byte[] b) {
@@ -132,9 +132,9 @@ public class ByteUtils {
     }
 
     /***
-     * 字节数组转字符串
-     * @param bytearray  字节数组
-     * @return  转换都的字符串
+     * Byte array to string conversion
+     * @param bytearray  Byte array
+     * @return  Convert all strings
      * */
     public static String bytesToString(byte[] bytearray) {
         StringBuilder result = new StringBuilder();
@@ -149,7 +149,7 @@ public class ByteUtils {
     }
 
     /**
-     * 把byte[]转double
+     * holdbyte[]turndouble
      *
      * @return double
      */
@@ -162,8 +162,8 @@ public class ByteUtils {
     }
 
     /**
-     * short到字节数组的转换.
-     * @param num 需转换的整型数
+     * shortConversion to Byte Array.
+     * @param num The integer to be converted
      */
     public static byte[] shortToBytes(short num) {
         byte[] bytes = new byte[2];
@@ -173,9 +173,9 @@ public class ByteUtils {
     }
 
     /**
-     * 将整型数转为对应的字节数组
-     * @param num 需转换的整型数
-     * @return    转换后的字节数组
+     * Convert integers to corresponding byte arrays
+     * @param num The integer to be converted
+     * @return    Converted byte array
      * */
     public static byte[] intToBytes(int num) {
         byte[] bytes = new byte[4];
@@ -187,9 +187,9 @@ public class ByteUtils {
     }
 
     /**
-     * 将长整型数转为对应的字节数组
-     * @param num  需转换的长整型数
-     * @return  转换后得到的字节数组
+     * Convert long integers to corresponding byte arrays
+     * @param num  Long integers to be converted
+     * @return  Byte array obtained after conversion
      * */
     public static byte[] longToBytes(long num) {
         int length = 8;
@@ -201,7 +201,7 @@ public class ByteUtils {
     }
 
     /**
-     * 把double转为byte
+     * holddoubleConvert tobyte
      *
      * @return byte[]
      */
@@ -215,11 +215,11 @@ public class ByteUtils {
     }
 
     /**
-     * 截取字节数组
-     * @param input       源字节数组
-     * @param startIndex  开始截取的下标
-     * @param length      截取的长度
-     * @return            截取出的自己数组
+     * Intercept byte array
+     * @param input       Source byte array
+     * @param startIndex  Start truncating index
+     * @param length      Cut length
+     * @return            The extracted array of oneself
      * */
     public static byte[] subBytes(byte[] input, int startIndex, int length) {
         byte[] bt = new byte[length];
@@ -228,9 +228,9 @@ public class ByteUtils {
     }
 
     /**
-     * 字节数组逆序
-     * @param bytes 源字节数组
-     * @return  逆序字节数组
+     * Byte array in reverse order
+     * @param bytes Source byte array
+     * @return  Reverse byte array
      * */
     public static byte[] reverseBytes(byte[] bytes) {
         // We could use the XOR trick here but it's easier to understand if we don't. If we find this is really a
@@ -244,10 +244,10 @@ public class ByteUtils {
 
 
     /**
-     * 字节数组复制
-     * @param in      源字节数组
-     * @param length  复制的长度
-     * @return        复制出的字节数组
+     * Byte array replication
+     * @param in      Source byte array
+     * @param length  Copy length
+     * @return        The copied byte array
      * */
     public static byte[] copyOf(byte[] in, int length) {
         byte[] out = new byte[length];
@@ -256,9 +256,9 @@ public class ByteUtils {
     }
 
     /**
-     * 字节数组按指定编码转为字符串
-     * @param bytes        字节数组
-     * @param charsetName  编码规则
+     * Convert byte arrays to strings according to specified encoding
+     * @param bytes        Byte array
+     * @param charsetName  Encoding rules
      * */
     public static String toString(byte[] bytes, String charsetName) {
         try {
@@ -269,9 +269,9 @@ public class ByteUtils {
     }
 
     /**
-     * 字符串按指定编码规则转为字节数组
-     * @param str          字符串
-     * @param charsetName  编码规则
+     * Convert strings to byte arrays according to specified encoding rules
+     * @param str          character string
+     * @param charsetName  Encoding rules
      * */
     public static byte[] toBytes(CharSequence str, String charsetName) {
         try {
@@ -282,7 +282,7 @@ public class ByteUtils {
     }
 
     /**
-     * 判断字节数组中是否包含某一个字节数组
+     * Determine whether a byte array is included in the byte array
      * Determine whether or not a byte array is included in the byte array
      *
      * @param byteList
@@ -301,7 +301,7 @@ public class ByteUtils {
     }
 
     /**
-     * 字节数组列表转为字符串列表
+     * Convert byte array list to string list
      * Byte Array List to String List
      *
      * @param byteList

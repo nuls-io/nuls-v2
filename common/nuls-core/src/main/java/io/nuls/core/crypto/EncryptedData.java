@@ -28,7 +28,7 @@ import java.util.Arrays;
 import java.util.Objects;
 
 /**
- * 加密后的数据
+ * Encrypted data
  *
  * @author ln
  */
@@ -39,7 +39,7 @@ public final class EncryptedData {
      */
     private byte[] initialisationVector;
     /**
-     * 加密结果
+     * Encryption result
      */
     private byte[] encryptedBytes;
 

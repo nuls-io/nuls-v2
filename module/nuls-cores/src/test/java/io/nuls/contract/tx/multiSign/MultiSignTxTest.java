@@ -203,7 +203,7 @@ public class MultiSignTxTest extends BaseQuery {
     public void getAccountPubKeyByAddressTest() throws Exception {
         SimpleAccountDTO accountDto = getAccountByAddress(chainId, "tNULSeBaMr8wsRQqyYWFYHUj29AvKiGUVELT2M");
         System.out.println(accountDto);
-        // 多签地址
+        // Multiple signed addresses
         System.out.println(AddressTool.validAddress(2, "tNULSeBaNRJrWyAfNtA6aiAozaJdemWA5WbBFU"));
     }
 
@@ -218,7 +218,7 @@ public class MultiSignTxTest extends BaseQuery {
     }
 
     /**
-     * 多签交易签名
+     * Multiple transaction signatures
      */
     @Test
     public void signMultiSignTxTest() throws Exception {
@@ -242,22 +242,22 @@ public class MultiSignTxTest extends BaseQuery {
 
     static class SimpleAccountDTO {
         /**
-         * 账户地址
+         * Account address
          */
         private String address;
 
         /**
-         * 别名
+         * alias
          */
         private String alias;
 
         /**
-         * 公钥Hex.encode(byte[])
+         * Public keyHex.encode(byte[])
          */
         private String pubkeyHex;
 
         /**
-         * 已加密私钥Hex.encode(byte[])
+         * Encrypted private keyHex.encode(byte[])
          */
         private String encryptedPrikeyHex;
 

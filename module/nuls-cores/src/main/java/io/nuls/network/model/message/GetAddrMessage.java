@@ -31,7 +31,7 @@ import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.body.GetAddrMessageBody;
 
 /**
- * 请求 peer地址协议消息
+ * request peerAddress Protocol Message
  * get addr message
  *
  * @author lan

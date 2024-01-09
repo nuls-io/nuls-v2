@@ -154,7 +154,7 @@ public class TxUtil {
                 if (ArraysTool.arrayEquals(toAddress, CmConstants.BLACK_HOLE_ADDRESS)) {
                     destroyNuls = coinTo.getAmount();
                 } else if (-1 == coinTo.getLockTime()) {
-                    //永久锁定值
+                    //Permanent lock value
                     lockedNuls = coinTo.getAmount();
                 }
             }

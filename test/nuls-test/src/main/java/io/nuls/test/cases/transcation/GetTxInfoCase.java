@@ -10,21 +10,21 @@ import io.nuls.core.core.annotation.Component;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-21 10:46
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Component
 public class GetTxInfoCase extends BaseTranscationCase<TransactionData,String> {
 
     @Override
     public String title() {
-        return "通过hash获取交易信息";
+        return "adopthashObtain transaction information";
     }
 
     @Override
     public TransactionData doTest(String param, int depth) throws TestFailException {
         Result<TransactionData> result = transferService.getSimpleTxDataByHash(new GetConfirmedTxByHashReq(param));
         checkResultStatus(result);
-        check(result.getData().getStatus().equals(TxStatusEnum.CONFIRMED),"交易状态不符合预期，未确认");
+        check(result.getData().getStatus().equals(TxStatusEnum.CONFIRMED),"Transaction status does not meet expectations, unconfirmed");
         return result.getData();
     }
 }

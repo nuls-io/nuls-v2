@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author lan
- * @description 缓存assetId的增长，
+ * @description cacheassetIdGrowth,
  * @date 2019/01/02
  */
 public class TempMaxAssetId {

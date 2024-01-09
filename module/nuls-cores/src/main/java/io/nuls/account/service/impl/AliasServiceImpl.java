@@ -142,9 +142,9 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         }
 
         account.setChainId(chainId);
-        //创建别名交易
+        //Create an alias transaction
         tx = transactionService.createSetAliasTxWithoutSign(chain, account.getAddress(), aliasName);
-        //签名别名交易
+        //Signature alias transaction
         signTransaction(tx, account, password);
 
         TransactionCall.newTx(chain, tx);
@@ -203,7 +203,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         }
         if (null != coinData.getFrom()){
             for(CoinFrom coinFrom : coinData.getFrom()){
-                //txData中别名地址和coinFrom中地址必须一致
+                //txDataMiddle alias address andcoinFromThe middle address must be consistent
                 if(!Arrays.equals(coinFrom.getAddress(), addrByte)){
                     LoggerUtil.LOG.error("alias coin contains multiple different addresses, txhash:{}", transaction.getHash().toHex());
                     return Result.getFailed(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
@@ -230,15 +230,15 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
     public boolean aliasTxCommit(int chainId, Alias alias) throws NulsException {
         boolean result = false;
         try {
-            //提交保存别名
+            //Submit save alias
             result = aliasStorageService.saveAlias(chainId, alias);
             if (!result) {
                 this.rollbackAlias(chainId, alias);
             }
-            //如果对应的地址在本地,则绑定别名数据
+            //If the corresponding address is local,Bind alias data
             byte[] address = alias.getAddress();
             if(AddressTool.isMultiSignAddress(address)){
-                //多签账户地址
+                //Multiple account addresses signed
                 MultiSigAccountPO multiSignAccountPO = multiSigAccountStorageService.getAccount(address);
                 if(null != multiSignAccountPO) {
                     multiSignAccountPO.setAlias(alias.getAlias());
@@ -248,7 +248,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
                     }
                 }
             }else if(AddressTool.validNormalAddress(address, chainId)){
-                //普通账户地址
+                //Regular account address
                 AccountPO po = accountStorageService.getAccount(alias.getAddress());
                 if (null != po) {
                     po.setAlias(alias.getAlias());
@@ -308,23 +308,23 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         } catch (IOException e) {
             throw new NulsException(AccountErrorCode.SERIALIZE_ERROR);
         }
-        //设置别名烧毁账户所属本链的主资产
+        //Setting an alias to burn down the main asset of the account's own chain
         int assetsId = chain.getConfig().getAssetId();
-        //查询账本获取nonce值
+        //Query ledger to obtainnoncevalue
         NonceBalance nonceBalance = TxUtil.getBalanceNonce(chain, account.getChainId(), assetsId, account.getAddress().getAddressBytes());
         byte[] nonce = nonceBalance.getNonce();
         CoinFrom coinFrom = new CoinFrom(account.getAddress().getAddressBytes(), account.getChainId(), assetsId, AccountConstant.ALIAS_FEE, nonce, AccountConstant.NORMAL_TX_LOCKED);
         coinFrom.setAddress(account.getAddress().getAddressBytes());
         CoinTo coinTo = new CoinTo(AddressTool.getAddress(NulsConfig.BLACK_HOLE_PUB_KEY,account.getChainId()), account.getChainId(), assetsId, AccountConstant.ALIAS_FEE);
         int txSize = tx.size() + coinFrom.size() + coinTo.size() + P2PHKSignature.SERIALIZE_LENGTH;
-        //计算手续费
+        //Calculate handling fees
         BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
-        //总费用为
+        //The total cost is
         BigInteger totalAmount = AccountConstant.ALIAS_FEE.add(fee);
         coinFrom.setAmount(totalAmount);
-        //检查余额是否充足
+        //Check if the balance is sufficient
         BigInteger mainAsset = nonceBalance.getAvailable();
-        //余额不足
+        //Insufficient balance
         if (BigIntegerUtils.isLessThan(mainAsset, totalAmount)) {
             throw new NulsRuntimeException(AccountErrorCode.INSUFFICIENT_FEE);
         }
@@ -333,7 +333,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         coinData.setTo(Arrays.asList(coinTo));
         try {
             tx.setCoinData(coinData.serialize());
-            //计算交易数据摘要哈希
+            //Calculate transaction data summary hash
             tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
         } catch (IOException e) {
             throw new NulsException(AccountErrorCode.SERIALIZE_ERROR);

@@ -5,7 +5,7 @@ import io.nuls.base.api.provider.BaseReq;
 /**
  * @Author: zhoulijun
  * @Time: 2020/9/11 15:09
- * @Description: 重新对跨链交易进行拜赞庭验证
+ * @Description: Re validate cross chain transactions through Byzantine verification
  */
 public class RehandleCtxReq extends BaseReq {
 

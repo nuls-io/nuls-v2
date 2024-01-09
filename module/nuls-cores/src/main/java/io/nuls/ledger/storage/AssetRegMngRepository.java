@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 账本资产注册
+ * Ledger asset registration
  *
  * @author lanjinsheng
  */

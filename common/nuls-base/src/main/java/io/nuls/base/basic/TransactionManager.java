@@ -31,10 +31,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 交易反序列化工具
+ * Transaction Deserialization Tool
  *
  * @author captain
- * @date 18-12-6 下午5:02
+ * @date 18-12-6 afternoon5:02
  * @version 1.0
  */
 public class TransactionManager {

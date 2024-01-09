@@ -6,7 +6,7 @@ import io.nuls.base.api.provider.BaseReq;
  * @Author: zhoulijun
  * @Time: 2019-03-07 20:32
  * @Description:
- *  通过私钥导入账户
+ *  Import account through private key
  *  import account by private key
  */
 public class ImportAccountByPrivateKeyReq extends BaseReq {

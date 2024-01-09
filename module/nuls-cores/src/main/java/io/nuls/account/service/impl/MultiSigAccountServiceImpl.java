@@ -73,10 +73,10 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
     private TransactionService transactionService;
 
     /**
-     * 如果是地址则先获取账户信息得到原始公钥字符串
+     * If it is an address, first obtain the account information to obtain the original public key string
      * @param chainId
      * @param pubKeys
-     * @return 返回的都必须是原始公钥字符串
+     * @return All returns must be the original public key string
      */
     private List<String> getOriginalPubKeys(int chainId, List<String> pubKeys){
         //for(String pubKey: pubKeys){
@@ -84,16 +84,16 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
             String pubKey = pubKeys.get(i);
             if(AddressTool.validAddress(chainId, pubKey)) {
                 if (AddressTool.isMultiSignAddress(pubKey)) {
-                    //不能用多签地址创建多签账户
+                    //Cannot create multiple signature accounts with multiple signature addresses
                     throw new NulsRuntimeException(AccountErrorCode.CONTRACT_ADDRESS_CANNOT_CREATE_MULTISIG_ACCOUNT);
                 } else if (AddressTool.validContractAddress(AddressTool.getAddress(pubKey), chainId)) {
-                    //不能用智能合约地址创建多签账户
+                    //Cannot create multiple signed accounts using smart contract addresses
                     throw new NulsRuntimeException(AccountErrorCode.MULTISIG_ADDRESS_CANNOT_CREATE_MULTISIG_ACCOUNT);
                 } else if (AddressTool.validNormalAddress(AddressTool.getAddress(pubKey), chainId)) {
-                    //合法地址
+                    //Legal address
                     Account account = accountService.getAccount(chainId, pubKey);
                     if (account == null) {
-                        //地址账户不存在
+                        //The address account does not exist
                         throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
                     }
                     pubKeys.set(i, HexUtil.encode(account.getPubKey()));
@@ -107,9 +107,9 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
     public MultiSigAccount createMultiSigAccount(Chain chain, List<String> pubKeys, int minSigns) throws NulsException {
         MultiSigAccount multiSigAccount = null;
         int chainId = chain.getChainId();
-        //公钥参数允许传入原始公钥或者账户地址,如果公钥参数里面含有账户地址,则需要查询到该地址并获取原始公钥
+        //The public key parameter allows passing in the original public key or account address,If the public key parameter contains an account address,Then it is necessary to query the address and obtain the original public key
         getOriginalPubKeys(chainId, pubKeys);
-        //验证公钥是否重复
+        //Verify if the public key is duplicated
         Set<String> pubkeySet = new HashSet<>(pubKeys);
         if(pubkeySet.size() < pubKeys.size()){
            throw new NulsException(AccountErrorCode.PUBKEY_REPEAT);
@@ -174,7 +174,7 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
         }
         multiSigAccountPo.setPubKeyList(list);
         multiSigAccountPo.setM((byte) minSigns);
-        //加载别名数据(如果有)
+        //Load alias data(If there is any)
         multiSigAccountPo.setAlias(aliasService.getAliasByAddress(chainId, addressObj.getBase58()));
         boolean result = this.multiSigAccountStorageService.saveAccount(multiSigAccountPo);
         if (result) {

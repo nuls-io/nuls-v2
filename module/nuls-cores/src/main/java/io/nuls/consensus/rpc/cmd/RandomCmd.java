@@ -49,14 +49,14 @@ public class RandomCmd extends BaseCmd {
     @Autowired
     private RandomSeedsStorageService randomSeedService;
 
-    @CmdAnnotation(cmd = "cs_random_seed_count", version = 1.0, description = "根据最大高度和原始种子个数生成一个随机种子并返回")
+    @CmdAnnotation(cmd = "cs_random_seed_count", version = 1.0, description = "Generate a random seed based on the maximum height and the number of original seeds and return it")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
-        @Parameter(parameterName = "height", requestType = @TypeDescriptor(value = long.class), parameterDes = "最大高度"),
-        @Parameter(parameterName = "count", requestType = @TypeDescriptor(value = int.class), parameterDes = "原始种子个数"),
-        @Parameter(parameterName = "algorithm", parameterDes = "算法标识：SHA3, KECCAK, MERKLE")
+        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid"),
+        @Parameter(parameterName = "height", requestType = @TypeDescriptor(value = long.class), parameterDes = "Maximum height"),
+        @Parameter(parameterName = "count", requestType = @TypeDescriptor(value = int.class), parameterDes = "Original number of seeds"),
+        @Parameter(parameterName = "algorithm", parameterDes = "Algorithm identification：SHA3, KECCAK, MERKLE")
     })
-    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = RandomSeedDTO.class))
+    @ResponseData(name = "Return value", responseType = @TypeDescriptor(value = RandomSeedDTO.class))
     public Response getRandomSeedByCount(Map<String,Object> params){
         try{
             Integer chainId = (Integer) params.get("chainId");
@@ -87,14 +87,14 @@ public class RandomCmd extends BaseCmd {
         }
     }
 
-    @CmdAnnotation(cmd = "cs_random_seed_height", version = 1.0, description = "根据高度区间生成一个随机种子并返回")
+    @CmdAnnotation(cmd = "cs_random_seed_height", version = 1.0, description = "Generate a random seed based on the height interval and return it")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
-        @Parameter(parameterName = "startHeight", requestType = @TypeDescriptor(value = long.class), parameterDes = "起始高度"),
-        @Parameter(parameterName = "endHeight", requestType = @TypeDescriptor(value = long.class), parameterDes = "截止高度"),
-        @Parameter(parameterName = "algorithm", parameterDes = "算法标识：SHA3, KECCAK, MERKLE")
+        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid"),
+        @Parameter(parameterName = "startHeight", requestType = @TypeDescriptor(value = long.class), parameterDes = "Starting height"),
+        @Parameter(parameterName = "endHeight", requestType = @TypeDescriptor(value = long.class), parameterDes = "Cut-off height"),
+        @Parameter(parameterName = "algorithm", parameterDes = "Algorithm identification：SHA3, KECCAK, MERKLE")
     })
-    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = RandomSeedDTO.class))
+    @ResponseData(name = "Return value", responseType = @TypeDescriptor(value = RandomSeedDTO.class))
     public Response getRandomSeedByHeight(Map<String,Object> params){
         try{
             Integer chainId = (Integer) params.get("chainId");
@@ -125,13 +125,13 @@ public class RandomCmd extends BaseCmd {
             return failed(e.getMessage());
         }
     }
-    @CmdAnnotation(cmd = "cs_random_raw_seeds_count", version = 1.0, description = "根据高度查找原始种子列表并返回")
+    @CmdAnnotation(cmd = "cs_random_raw_seeds_count", version = 1.0, description = "Search for the original seed list based on height and return")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
-        @Parameter(parameterName = "height", requestType = @TypeDescriptor(value = long.class), parameterDes = "最大高度"),
-        @Parameter(parameterName = "count", requestType = @TypeDescriptor(value = int.class), parameterDes = "原始种子个数")
+        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid"),
+        @Parameter(parameterName = "height", requestType = @TypeDescriptor(value = long.class), parameterDes = "Maximum height"),
+        @Parameter(parameterName = "count", requestType = @TypeDescriptor(value = int.class), parameterDes = "Original number of seeds")
     })
-    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = List.class, collectionElement = String.class))
+    @ResponseData(name = "Return value", responseType = @TypeDescriptor(value = List.class, collectionElement = String.class))
     public Response getRandomRawSeedsByCount(Map<String,Object> params){
         try{
             Integer chainId = (Integer) params.get("chainId");
@@ -152,13 +152,13 @@ public class RandomCmd extends BaseCmd {
         }
     }
 
-    @CmdAnnotation(cmd = "cs_random_raw_seeds_height", version = 1.0, description = "根据高度区间查询原始种子列表并返回")
+    @CmdAnnotation(cmd = "cs_random_raw_seeds_height", version = 1.0, description = "Query the original seed list based on the height interval and return it")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
-        @Parameter(parameterName = "startHeight", requestType = @TypeDescriptor(value = long.class), parameterDes = "起始高度"),
-        @Parameter(parameterName = "endHeight", requestType = @TypeDescriptor(value = long.class), parameterDes = "截止高度")
+        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid"),
+        @Parameter(parameterName = "startHeight", requestType = @TypeDescriptor(value = long.class), parameterDes = "Starting height"),
+        @Parameter(parameterName = "endHeight", requestType = @TypeDescriptor(value = long.class), parameterDes = "Cut-off height")
     })
-    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = List.class, collectionElement = String.class))
+    @ResponseData(name = "Return value", responseType = @TypeDescriptor(value = List.class, collectionElement = String.class))
     public Response getRandomRawSeedsByHeight(Map<String,Object> params){
         try{
             Integer chainId = (Integer) params.get("chainId");

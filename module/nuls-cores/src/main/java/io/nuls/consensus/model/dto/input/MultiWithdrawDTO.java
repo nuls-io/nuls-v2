@@ -1,6 +1,6 @@
 package io.nuls.consensus.model.dto.input;
 /**
- * 多签账户退出委托参数
+ * Multiple account exit delegation parameters
  * Multi-Signed Account Exit Delegation Parameters
  *
  * @author tag

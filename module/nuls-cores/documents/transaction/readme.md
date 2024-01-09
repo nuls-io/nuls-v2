@@ -1,12 +1,12 @@
-# 交易模块
-在NULS2.0的生态体系中，交易会在链中或者链与链之间流转，各条链的节点不仅要处理链内的交易，可能还会处理跨链的交易，于是每个节点需要处理的交易会越来越多，并且更复杂，因此我们需要一个但单独的模块来统一处理各种交易。而从NULS2.0的架构设计来看，我们需要一个独立的模块来处理交易的收集、验证、为区块组装提供安全的交易数据、存储等功能，对于所有交易来说，这些功能具有共用性、统一性，因此我们把交易管理作为一个独立的模块来运行。
+# Transaction module
+stayNULS2.0In the ecosystem, transactions will flow within or between chains, and nodes in each chain not only need to handle transactions within the chain, but may also handle transactions across chains. Therefore, each node needs to handle more and more complex transactions, so we need a separate module to handle various transactions uniformly. And fromNULS2.0From the perspective of architecture design, we need an independent module to handle transaction collection、validate、Provide secure transaction data for block assembly、Storage and other functions are shared for all transactions、Uniformity, therefore we operate transaction management as an independent module.
 
-## 对本地交易进行处理
+## Process local transactions
 
-- 收集交易
-- 本地验证
-- 广播转发交易给其他节点
-- 提取可打包的交易
-- 提交、回滚交易
-- 保存未确认的、可打包的以及已确认的交易
-- 提供交易的数据
+- Collect transactions
+- Local verification
+- Broadcast forwarding transactions to other nodes
+- Extract packable transactions
+- Submit、Rollback transaction
+- Save unconfirmed、Packable and confirmed transactions
+- Provide transaction data

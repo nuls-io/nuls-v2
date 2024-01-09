@@ -32,15 +32,15 @@ import io.nuls.core.rpc.model.ApiModelProperty;
  */
 @ApiModel
 public class MultyAssetOutputDto {
-    @ApiModelProperty(description = "转入地址")
+    @ApiModelProperty(description = "Transfer address")
     private String to;
-    @ApiModelProperty(description = "转入金额")
+    @ApiModelProperty(description = "Transfer amount")
     private String value;
-    @ApiModelProperty(description = "转入金额资产链ID")
+    @ApiModelProperty(description = "Transfer amount to asset chainID")
     private int assetChainId;
-    @ApiModelProperty(description = "转入金额资产ID")
+    @ApiModelProperty(description = "Transferred amount of assetsID")
     private int assetId;
-    @ApiModelProperty(description = "转入金额锁定时间")
+    @ApiModelProperty(description = "Transfer amount lock time")
     private long lockTime;
 
     public MultyAssetOutputDto() {

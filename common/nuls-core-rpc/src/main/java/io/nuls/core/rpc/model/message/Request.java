@@ -32,7 +32,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Map;
 
 /**
- * 请求调用远程方法
+ * Request to call remote method
  * Request to invoke remote methods
  *
  * @author tangyi

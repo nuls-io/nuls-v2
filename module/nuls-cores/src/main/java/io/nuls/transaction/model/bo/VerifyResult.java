@@ -28,7 +28,7 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.transaction.constant.TxErrorCode;
 
 /**
- * 交易验证结果封装类
+ * Transaction verification result encapsulation class
  * @author: Charlie
  * @date: 2019/4/16
  */

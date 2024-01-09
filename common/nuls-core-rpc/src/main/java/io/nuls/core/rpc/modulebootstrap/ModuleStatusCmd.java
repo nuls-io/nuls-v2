@@ -16,7 +16,7 @@ import java.util.Map;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-01 10:51
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Component
 @NulsCoresCmd(module = ModuleE.NC)

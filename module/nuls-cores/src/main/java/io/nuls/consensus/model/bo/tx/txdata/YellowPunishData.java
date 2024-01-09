@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * 黄牌惩罚信息类
+ * Yellow card punishment information
  * Yellow Card Punishment Information Category
  *
  * @author tag
