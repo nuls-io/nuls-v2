@@ -21,14 +21,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 与跨链管理模块交易接口
+ * Transaction interface with cross chain management module
  *
  * @author: tag
  * @date: 2019/4/15
  */
 public class ChainManagerCall {
     /**
-     * 验证跨链交易资产
+     * Verify cross chain transaction assets
      * @param tx
      * @return boolean
      * @throws NulsException
@@ -48,7 +48,7 @@ public class ChainManagerCall {
     }
 
     /**
-     * 跨链交易链资产管理提交
+     * Cross chain transaction chain asset management submission
      * @param txList
      * @param blockHeader
      * @return
@@ -71,7 +71,7 @@ public class ChainManagerCall {
     }
 
     /**
-     * 跨链交易链资产管理回滚
+     * Cross chain transaction chain asset management rollback
      * @param txList
      * @param blockHeader
      * @return
@@ -93,7 +93,7 @@ public class ChainManagerCall {
     }
 
     /**
-     * 将链资产流通量发送给链管理模块
+     * Send the circulation of chain assets to the chain management module
      * @return
      * @throws NulsException
      */
@@ -121,7 +121,7 @@ public class ChainManagerCall {
     }
 
     /**
-     * 向链管理模块查询已注册链信息
+     * Query registered chain information to the chain management module
      * @return
      * @throws NulsException
      * @param chainManager
@@ -143,7 +143,7 @@ public class ChainManagerCall {
                     }
                 }
             }
-            //如果在跨链模块已经存储了验证人列表，应该已跨链模块的验证人列表为准，链管理只存储了初始验证人列表。
+            //If the list of validators has already been stored in the cross chain module, the list of validators in the cross chain module should prevail. Chain management only stores the initial list of validators.
             chainInfoList.forEach(chainInfo -> {
                 ChainInfo oldChainInfo = chainManager.getChainInfo(chainInfo.getChainId());
                 if(oldChainInfo != null && oldChainInfo.getVerifierList() != null && !oldChainInfo.getVerifierList().isEmpty()){

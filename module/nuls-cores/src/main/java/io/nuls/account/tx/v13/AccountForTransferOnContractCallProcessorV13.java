@@ -95,11 +95,11 @@ public class AccountForTransferOnContractCallProcessorV13 implements Transaction
                 String[] addresses = data.getAddresses();
                 int type = data.getType();
                 if (type == 1) {
-                    // 添加白名单
+                    // Add whitelist
                     List<AccountContractCallPO> list = Arrays.asList(addresses).stream().map(a -> new AccountContractCallPO(AddressTool.getAddress(a))).collect(Collectors.toList());
                     result = accountForTransferOnContractCallStorageService.saveAccountList(list);
                 } else {
-                    // type=2, 移除白名单
+                    // type=2, Remove whitelist
                     List<byte[]> list = Arrays.asList(addresses).stream().map(a -> AddressTool.getAddress(a)).collect(Collectors.toList());
                     result = accountForTransferOnContractCallStorageService.removeAccount(list);
                 }
@@ -114,7 +114,7 @@ public class AccountForTransferOnContractCallProcessorV13 implements Transaction
             commitSucTxList.add(tx);
         }
         try {
-            //如果提交失败，将已经提交成功的交易回滚
+            //If the submission fails, roll back the transaction that has already been successfully submitted
             if (!result) {
                 boolean rollback = true;
                 for (Transaction tx : commitSucTxList) {
@@ -131,7 +131,7 @@ public class AccountForTransferOnContractCallProcessorV13 implements Transaction
                     }
 
                 }
-                //回滚失败，抛异常
+                //Rollback failed with exception thrown
                 if (!rollback) {
                     LoggerUtil.LOG.error("AccountForTransferOnContractCall tx rollback error");
                     throw new NulsException(AccountErrorCode.ALIAS_ROLLBACK_ERROR);
@@ -174,9 +174,9 @@ public class AccountForTransferOnContractCallProcessorV13 implements Transaction
             }
             rollbackSucTxList.add(tx);
         }
-        //交易提交
+        //Transaction submission
         try {
-            //如果回滚失败，将已经回滚成功的交易重新保存
+            //If the rollback fails, the transaction that has already been successfully rolled back will be saved again
             if (!result) {
                 boolean commit = true;
                 for (Transaction tx : rollbackSucTxList) {
@@ -193,7 +193,7 @@ public class AccountForTransferOnContractCallProcessorV13 implements Transaction
                     }
 
                 }
-                //保存失败，抛异常
+                //Save failed, throw exception
                 if (!commit) {
                     LoggerUtil.LOG.error("AccountForTransferOnContractCall tx commit error");
                     throw new NulsException(AccountErrorCode.ALIAS_SAVE_ERROR);

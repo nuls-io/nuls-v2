@@ -94,7 +94,7 @@ public interface AssetService {
     boolean assetExist(Asset asset, Map<String, Integer> map) throws Exception;
 
     /**
-     * 注册链 资产判断
+     * Registration Chain Asset judgment
      * @param asset
      * @param map
      * @return
@@ -139,7 +139,7 @@ public interface AssetService {
     void saveMsgChainCirculateAmount(String key, BigInteger amount) throws Exception;
 
     /**
-     * 注册资产
+     * Registered assets
      * Register asset
      *
      * @param asset

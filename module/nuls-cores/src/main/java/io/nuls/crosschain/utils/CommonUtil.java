@@ -25,7 +25,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * 跨链模块基础工具类
+ * Cross chain module basic tool class
  *
  * @author: tag
  * @date: 2019/4/12
@@ -36,7 +36,7 @@ public class CommonUtil {
     private static NulsCoresConfig config;
 
     /**
-     * RPCUtil 反序列化
+     * RPCUtil Deserialization
      * @param data
      * @param clazz
      * @param <T>
@@ -123,7 +123,7 @@ public class CommonUtil {
     }
 
     /**
-     * 获取当前签名拜占庭数量
+     * Obtain the current number of Byzantine signatures
      * */
     @SuppressWarnings("unchecked")
     public static int getByzantineCount(Chain chain, int agentCount){
@@ -132,12 +132,12 @@ public class CommonUtil {
         if(minPassCount == 0){
             minPassCount = 1;
         }
-        chain.getLogger().debug("当前共识节点数量为：{},最少签名数量为:{}",agentCount,minPassCount );
+        chain.getLogger().debug("The current number of consensus nodes is：{},The minimum number of signatures is:{}",agentCount,minPassCount );
         return minPassCount;
     }
 
     /**
-     * 获取当前签名拜占庭数量
+     * Obtain the current number of Byzantine signatures
      * */
     @SuppressWarnings("unchecked")
     public static int getByzantineCount(Transaction ctx, List<String> packAddressList, Chain chain)throws NulsException{
@@ -167,12 +167,12 @@ public class CommonUtil {
         if(minPassCount == 0){
             minPassCount = 1;
         }
-        chain.getLogger().debug("当前共识节点数量为：{},最少签名数量为:{}",agentCount,minPassCount );
+        chain.getLogger().debug("The current number of consensus nodes is：{},The minimum number of signatures is:{}",agentCount,minPassCount );
         return minPassCount;
     }
 
     /**
-     * 获取当前签名拜占庭数量
+     * Obtain the current number of Byzantine signatures
      * */
     @SuppressWarnings("unchecked")
     public static int getByzantineCount(List<String> packAddressList, Chain chain, boolean isFromChain){
@@ -188,12 +188,12 @@ public class CommonUtil {
         if(minPassCount == 0){
             minPassCount = 1;
         }
-        chain.getLogger().debug("当前共识节点数量为：{},最少签名数量为:{}",agentCount,minPassCount );
+        chain.getLogger().debug("The current number of consensus nodes is：{},The minimum number of signatures is:{}",agentCount,minPassCount );
         return minPassCount;
     }
 
     /**
-     * 获取当前共识地址账户
+     * Obtain the current consensus address account
      * */
     @SuppressWarnings("unchecked")
     public static List<String> getCurrentPackAddressList(Chain chain){

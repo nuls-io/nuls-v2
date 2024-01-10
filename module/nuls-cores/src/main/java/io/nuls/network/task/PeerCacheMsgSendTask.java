@@ -39,7 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 处理转发,未能及时处理的peer消息
+ * Process forwarding,Failure to handle in a timely mannerpeernews
  *
  * @author lanjinsheng
  * @date 2019-07-16
@@ -72,7 +72,7 @@ public class PeerCacheMsgSendTask implements Runnable {
                                 count++;
                             }
                             /**
-                             * 如果超过10个，让时间给其他节点处理
+                             * If it exceeds10Let time be allocated to other nodes for processing
                              */
                             if (dealCount > 10) {
                                 break;

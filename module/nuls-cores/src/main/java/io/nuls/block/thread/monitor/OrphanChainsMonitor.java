@@ -41,16 +41,16 @@ import static io.nuls.block.constant.StatusEnum.MAINTAIN_ORPHAN_CHAINS;
 import static io.nuls.block.constant.StatusEnum.RUNNING;
 
 /**
- * 孤儿链的形成原因分析：因为网络问题,在没有收到Block(100)的情况下,已经收到了Block(101),此时Block(101)不能连接到主链上,形成孤儿链
- * 孤儿链定时处理器
- * 孤儿链处理大致流程：
- * 1.清理无效数据
- * 2.标记
- * 3.复制、清除
+ * Analysis of the Causes of Orphan Chain Formation：Due to network issues,I haven't received it yetBlock(100)In the case of,I have received itBlock(101),hereBlock(101)Unable to connect to the main chain,Forming an orphan chain
+ * Orphan chain timing processor
+ * The general process of handling orphan chains：
+ * 1.Clean up invalid data
+ * 2.sign
+ * 3.copy、clean up
  *
  * @author captain
  * @version 1.0
- * @date 18-11-14 下午3:54
+ * @date 18-11-14 afternoon3:54
  */
 public class OrphanChainsMonitor extends BaseMonitor {
 
@@ -86,17 +86,17 @@ public class OrphanChainsMonitor extends BaseMonitor {
                 context.setStatus(MAINTAIN_ORPHAN_CHAINS);
                 Chain masterChain = BlockChainManager.getMasterChain(chainId);
                 SortedSet<Chain> forkChains = BlockChainManager.getForkChains(chainId);
-                //标记、变更链属性阶段
+                //sign、Change Chain Attribute Stage
                 for (Chain orphanChain : orphanChains) {
                     commonLog.debug("OrphanChainsMonitor-mark-begin");
                     mark(orphanChain, masterChain, forkChains, orphanChains);
                     commonLog.debug("OrphanChainsMonitor-mark-end");
                 }
-                //打印标记后孤儿链的类型
+                //Print the type of orphan chain after marking
                 for (Chain orphanChain : orphanChains) {
                     commonLog.debug(orphanChain.toString());
                 }
-                //复制、清除阶段
+                //copy、Clear Phase
                 SortedSet<Chain> maintainedOrphanChains = new TreeSet<>(Chain.COMPARATOR);
                 for (Chain orphanChain : orphanChains) {
                     commonLog.debug("OrphanChainsMonitor-copy-begin");
@@ -118,12 +118,12 @@ public class OrphanChainsMonitor extends BaseMonitor {
     }
 
     /**
-     * 孤儿链与其他链的关系可能是
-     *  相连
-     *  重复
-     *  分叉
-     *  无关
-     * 四种关系
+     * The relationship between orphan chains and other chains may be
+     *  Connected
+     *  repeat
+     *  Fork
+     *  independence
+     * Four types of relationships
      *
      * @param orphanChain
      * @param masterChain
@@ -132,44 +132,44 @@ public class OrphanChainsMonitor extends BaseMonitor {
      */
     private void mark(Chain orphanChain, Chain masterChain, SortedSet<Chain> forkChains, SortedSet<Chain> orphanChains) {
         try {
-            //1.判断与主链是否相连
+            //1.Determine if it is connected to the main chain
             if (orphanChain.getParent() == null && tryAppend(masterChain, orphanChain)) {
                 orphanChain.setType(ChainTypeEnum.MASTER_APPEND);
                 return;
             }
-            //2.判断是否与主链重复
+            //2.Determine if it is duplicated with the main chain
             if (orphanChain.getParent() == null && tryDuplicate(masterChain, orphanChain)) {
                 orphanChain.setType(ChainTypeEnum.MASTER_DUPLICATE);
                 return;
             }
-            //3.判断是否从主链分叉
+            //3.Determine whether to fork from the main chain
             if (orphanChain.getParent() == null && tryFork(masterChain, orphanChain)) {
                 orphanChain.setType(ChainTypeEnum.MASTER_FORK);
                 return;
             }
             for (Chain forkChain : forkChains) {
-                //4.判断与分叉链是否相连
+                //4.Determine if the fork chain is connected
                 if (orphanChain.getParent() == null && tryAppend(forkChain, orphanChain)) {
                     orphanChain.setType(ChainTypeEnum.FORK_APPEND);
                     return;
                 }
-                //5.判断与分叉链是否重复
+                //5.Determine if the forked chain is duplicated
                 if (orphanChain.getParent() == null && tryDuplicate(forkChain, orphanChain)) {
                     orphanChain.setType(ChainTypeEnum.FORK_DUPLICATE);
                     return;
                 }
-                //6.判断是否从分叉链分叉
+                //6.Determine whether to fork from the fork chain
                 if (orphanChain.getParent() == null && tryFork(forkChain, orphanChain)) {
                     orphanChain.setType(ChainTypeEnum.FORK_FORK);
                     return;
                 }
             }
             for (Chain anotherOrphanChain : orphanChains) {
-                //排除自身
+                //Excluding oneself
                 if (anotherOrphanChain.equals(orphanChain)) {
                     continue;
                 }
-                //7.判断与孤儿链是否相连
+                //7.Determine if it is connected to the orphan chain
                 if (anotherOrphanChain.getParent() == null && tryAppend(orphanChain, anotherOrphanChain)) {
                     anotherOrphanChain.setType(ChainTypeEnum.ORPHAN_APPEND);
                     return;
@@ -178,7 +178,7 @@ public class OrphanChainsMonitor extends BaseMonitor {
                     orphanChain.setType(ChainTypeEnum.ORPHAN_APPEND);
                     return;
                 }
-                //8.判断与孤儿链是否重复
+                //8.Determine if it is duplicated with the orphan chain
                 if (anotherOrphanChain.getParent() == null && tryDuplicate(orphanChain, anotherOrphanChain)) {
                     anotherOrphanChain.setType(ChainTypeEnum.ORPHAN_DUPLICATE);
                     return;
@@ -187,7 +187,7 @@ public class OrphanChainsMonitor extends BaseMonitor {
                     orphanChain.setType(ChainTypeEnum.ORPHAN_DUPLICATE);
                     return;
                 }
-                //9.判断是否从孤儿链分叉
+                //9.Determine whether to fork from the orphan chain
                 if (anotherOrphanChain.getParent() == null && tryFork(orphanChain, anotherOrphanChain)) {
                     anotherOrphanChain.setType(ChainTypeEnum.ORPHAN_FORK);
                     return;
@@ -206,66 +206,66 @@ public class OrphanChainsMonitor extends BaseMonitor {
     }
 
     private void copy(Integer chainId, SortedSet<Chain> maintainedOrphanChains, Chain orphanChain) {
-        //如果标记为数据错误,orphanChain不会复制到新的孤儿链集合,也不会进入分叉链集合,所有orphanChain的直接子链移除父链引用,标记为ChainTypeEnum.ORPHAN,就是断开与数据错误的链的关联关系
+        //If marked as data error,orphanChainWill not copy to a new collection of orphan chains,Nor will it enter the set of forked chains,AllorphanChainRemove parent chain reference from direct child chain of,Mark asChainTypeEnum.ORPHAN,It's about breaking the association between the chain and the data error
         if (orphanChain.getType().equals(ChainTypeEnum.DATA_ERROR)) {
             orphanChain.getSons().forEach(e -> {e.setType(ChainTypeEnum.ORPHAN);e.setParent(null);});
             return;
         }
-        //如果标记为主链重复,orphanChain不会复制到新的孤儿链集合,也不会进入分叉链集合,所有orphanChain的直接子链标记为ChainTypeEnum.MASTER_FORK
+        //If marked as duplicate main chain,orphanChainWill not copy to a new collection of orphan chains,Nor will it enter the set of forked chains,AllorphanChainThe direct sub chain of is marked asChainTypeEnum.MASTER_FORK
         if (orphanChain.getType().equals(ChainTypeEnum.MASTER_DUPLICATE)) {
             orphanChain.getSons().forEach(e -> e.setType(ChainTypeEnum.MASTER_FORK));
             return;
         }
-        //如果标记为分叉链重复,orphanChain不会复制到新的孤儿链集合,也不会进入分叉链集合,所有orphanChain的直接子链标记为ChainTypeEnum.FORK_FORK
+        //If marked as duplicate forked chains,orphanChainWill not copy to a new collection of orphan chains,Nor will it enter the set of forked chains,AllorphanChainThe direct sub chain of is marked asChainTypeEnum.FORK_FORK
         if (orphanChain.getType().equals(ChainTypeEnum.FORK_DUPLICATE)) {
             orphanChain.getSons().forEach(e -> e.setType(ChainTypeEnum.FORK_FORK));
             return;
         }
-        //如果标记为孤儿链重复,orphanChain不会复制到新的孤儿链集合,也不会进入分叉链集合,所有orphanChain的直接子链标记为ChainTypeEnum.ORPHAN_FORK
+        //If marked as duplicate orphan chains,orphanChainWill not copy to a new collection of orphan chains,Nor will it enter the set of forked chains,AllorphanChainThe direct sub chain of is marked asChainTypeEnum.ORPHAN_FORK
         if (orphanChain.getType().equals(ChainTypeEnum.ORPHAN_DUPLICATE)) {
             orphanChain.getSons().forEach(e -> e.setType(ChainTypeEnum.ORPHAN_FORK));
             return;
         }
-        //如果标记为与主链相连,orphanChain不会复制到新的孤儿链集合,也不会进入分叉链集合,但是所有orphanChain的直接子链标记为ChainTypeEnum.MASTER_FORK
+        //If marked as connected to the main chain,orphanChainWill not copy to a new collection of orphan chains,Nor will it enter the set of forked chains,But all of itorphanChainThe direct sub chain of is marked asChainTypeEnum.MASTER_FORK
         if (orphanChain.getType().equals(ChainTypeEnum.MASTER_APPEND)) {
             orphanChain.getSons().forEach(e -> e.setType(ChainTypeEnum.MASTER_FORK));
             return;
         }
-        //如果标记为从主链分叉,orphanChain不会复制到新的孤儿链集合,但是会进入分叉链集合,所有orphanChain的直接子链标记为ChainTypeEnum.FORK_FORK
+        //If marked as forking from the main chain,orphanChainWill not copy to a new collection of orphan chains,But it will enter the set of forked chains,AllorphanChainThe direct sub chain of is marked asChainTypeEnum.FORK_FORK
         if (orphanChain.getType().equals(ChainTypeEnum.MASTER_FORK)) {
             BlockChainManager.addForkChain(chainId, orphanChain);
             orphanChain.getSons().forEach(e -> e.setType(ChainTypeEnum.FORK_FORK));
             return;
         }
-        //如果标记为与分叉链相连,orphanChain不会复制到新的孤儿链集合,也不会进入分叉链集合,但是所有orphanChain的直接子链标记为ChainTypeEnum.FORK_FORK
+        //If marked as connected to a forked chain,orphanChainWill not copy to a new collection of orphan chains,Nor will it enter the set of forked chains,But all of itorphanChainThe direct sub chain of is marked asChainTypeEnum.FORK_FORK
         if (orphanChain.getType().equals(ChainTypeEnum.FORK_APPEND)) {
             orphanChain.getSons().forEach(e -> e.setType(ChainTypeEnum.FORK_FORK));
             return;
         }
-        //如果标记为从分叉链分叉,orphanChain不会复制到新的孤儿链集合,但是会进入分叉链集合,所有orphanChain的直接子链标记为ChainTypeEnum.FORK_FORK
+        //If marked as forking from a forked chain,orphanChainWill not copy to a new collection of orphan chains,But it will enter the set of forked chains,AllorphanChainThe direct sub chain of is marked asChainTypeEnum.FORK_FORK
         if (orphanChain.getType().equals(ChainTypeEnum.FORK_FORK)) {
             BlockChainManager.addForkChain(chainId, orphanChain);
             orphanChain.getSons().forEach(e -> e.setType(ChainTypeEnum.FORK_FORK));
             return;
         }
-        //如果标记为与孤儿链相连,不会复制到新的孤儿链集合,所有orphanChain的直接子链会复制到新的孤儿链集合,类型不变
+        //If marked as connected to an orphan chain,Will not copy to a new collection of orphan chains,AllorphanChainThe direct child chains will be copied to the new collection of orphan chains,Type unchanged
         if (orphanChain.getType().equals(ChainTypeEnum.ORPHAN_APPEND)) {
             return;
         }
-        //如果标记为与孤儿链分叉,会复制到新的孤儿链集合,所有orphanChain的直接子链会复制到新的孤儿链集合,类型不变
+        //If marked as forking with orphan chain,Will be copied to a new collection of orphan chains,AllorphanChainThe direct child chains will be copied to the new collection of orphan chains,Type unchanged
         if (orphanChain.getType().equals(ChainTypeEnum.ORPHAN_FORK)) {
             maintainedOrphanChains.add(orphanChain);
             return;
         }
-        //如果标记为孤儿链(未变化),或者从孤儿链分叉,复制到新的孤儿链集合
+        //If marked as an orphan chain(Unchanged),Or fork from the orphan chain,Copy to a new collection of orphan chains
         if (orphanChain.getType().equals(ChainTypeEnum.ORPHAN)) {
             maintainedOrphanChains.add(orphanChain);
         }
     }
 
     /**
-     * 尝试把subChain链接到mainChain的末尾,形成mainChain-subChain的结构
-     * 两个链相连成功,需要从孤儿链集合中删除subChain
+     * Try tosubChainlink tomainChainAt the end of,formationmainChain-subChainStructure of
+     * Two chains successfully connected,Need to remove from orphan chain collectionsubChain
      *
      * @param mainChain
      * @param subChain
@@ -279,8 +279,8 @@ public class OrphanChainsMonitor extends BaseMonitor {
     }
 
     /**
-     * 尝试把subChain分叉到mainChain上
-     * 分叉不需要从链集合中删除分叉的链
+     * Try tosubChainFork tomainChainupper
+     * Forking does not require removing forked chains from the chain set
      *
      * @param mainChain
      * @param subChain
@@ -294,7 +294,7 @@ public class OrphanChainsMonitor extends BaseMonitor {
     }
 
     /**
-     * 判断subChain是否与mainChain重复
+     * judgesubChainIs it related tomainChainrepeat
      *
      * @param mainChain
      * @param subChain

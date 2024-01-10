@@ -33,10 +33,10 @@ import io.nuls.provider.model.form.Base;
  * @author: PierreLuo
  * @date: 2018/4/20
  */
-@ApiModel(description = "智能合约代码表单数据")
+@ApiModel(description = "Smart Contract Code Form Data")
 public class ContractCode extends Base {
 
-    @ApiModelProperty(description = "智能合约代码(字节码的Hex编码字符串)", required = true)
+    @ApiModelProperty(description = "Smart Contract Code(BytecodeHexEncoding string)", required = true)
     private String contractCode;
 
     public String getContractCode() {

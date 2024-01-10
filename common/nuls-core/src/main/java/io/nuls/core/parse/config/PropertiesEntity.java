@@ -38,11 +38,11 @@ public class PropertiesEntity {
     }
 
     /**
-     * 获取Properties指定键指定值类型的值
+     * obtainPropertiesSpecify the value of the specified value type for the specified key
      *
-     * @param name         键
-     * @param defaultValue 值类型
-     * @return 值对象
+     * @param name         key
+     * @param defaultValue Value type
+     * @return Value Object
      */
     public <T> T getPropValue(String name, T defaultValue) {
         if (prop.getProperty(name) == null) {

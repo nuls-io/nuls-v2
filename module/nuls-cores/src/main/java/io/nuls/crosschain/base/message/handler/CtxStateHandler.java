@@ -9,7 +9,7 @@ import io.nuls.crosschain.base.message.CtxStateMessage;
 import io.nuls.crosschain.base.service.ProtocolService;
 
 /**
- * CtxStateMessage处理类
+ * CtxStateMessageProcessing class
  * CtxStateMessage Processing Class
  *
  * @author tag

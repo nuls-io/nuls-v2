@@ -31,24 +31,24 @@ import io.nuls.core.parse.SerializeUtils;
 import java.io.IOException;
 
 /**
- * 完整的区块消息
+ * Complete block message
  *
  * @author captain
  * @version 1.0
- * @date 18-11-20 上午11:08
+ * @date 18-11-20 morning11:08
  */
 public class BlockMessage extends BaseBusinessMessage {
     /**
-     * 用来区分批量获取区块请求和单个区块请求,也可以用来过滤非法消息
+     * Used to distinguish between bulk block acquisition requests and individual block requests,It can also be used to filter illegal messages
      */
     private NulsHash requestHash;
     /**
-     * 区块数据
+     * Block data
      */
     private Block block;
 
     /**
-     * 是否同步中下载的区块
+     * Do you want to synchronize the downloaded blocks
      */
     private boolean syn;
 

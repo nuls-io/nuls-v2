@@ -36,7 +36,7 @@ import io.nuls.core.parse.SerializeUtils;
 import java.io.IOException;
 
 /**
- * 停止节点信息类
+ * Stop node information class
  * Stop Node Information Class
  *
  * @author tag

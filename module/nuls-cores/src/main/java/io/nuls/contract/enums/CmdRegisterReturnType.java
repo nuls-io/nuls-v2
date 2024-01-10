@@ -31,7 +31,7 @@ import java.util.Map;
  * @date: 2019-04-26
  */
 public enum CmdRegisterReturnType {
-    // 0 - 字符串, 1 - 字符串数组, 2 - 字符串二维数组
+    // 0 - character string, 1 - String array, 2 - String two-dimensional array
     STRING(0),
     STRING_ARRAY(1),
     STRING_TWO_DIMENSIONAL_ARRAY(2);

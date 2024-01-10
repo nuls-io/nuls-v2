@@ -22,13 +22,13 @@ import java.util.function.Function;
 /**
  * @Author: zhoulijun
  * @Time: 2019-06-12 14:06
- * @Description: 区块模块工具类
+ * @Description: Block module tool class
  */
 @Component
 public class BlockTools implements CallRpc {
 
     /**
-     * 根据高度获取区块
+     * Obtain blocks based on height
      *
      * @param chainId
      * @param height
@@ -62,7 +62,7 @@ public class BlockTools implements CallRpc {
     }
 
     /**
-     * 根据hash获取区块
+     * according tohashGet blocks
      *
      * @param chainId
      * @param hash
@@ -96,7 +96,7 @@ public class BlockTools implements CallRpc {
     }
 
     /**
-     * 获取最新区块
+     * Get the latest blocks
      *
      * @param chainId
      * @return
@@ -139,7 +139,7 @@ public class BlockTools implements CallRpc {
     }
 
     /**
-     * 根据高度获取区块序列化字符串
+     * Retrieve block serialization strings based on height
      *
      * @param chainId
      * @param height
@@ -163,7 +163,7 @@ public class BlockTools implements CallRpc {
     }
 
     /**
-     * 根据hash获取区块序列化字符串
+     * according tohashGet block serialization string
      *
      * @param chainId
      * @param hash

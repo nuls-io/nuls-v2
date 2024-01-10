@@ -31,12 +31,12 @@ public class TxVersionChangeInvoker implements VersionChangeInvoker {
     @Override
     public void process(int chainId) {
         /**
-         * 1.开启正在进行协议升级的标志
-         *  ** 所有需要重新处理的交易都走网络交易通道重新处理
-         *  。孤儿交易倒序放回未处理交易队列最前面
-         *  。把待打包队里的交易全部拿出来放回未处理交易队列最前面
-         *  。打包中的该标志开启直接放回未处理交易队列最前面(智能合约非系统交易除外)
-         * 2.完成后关闭标志
+         * 1.Turn on the flag for protocol upgrade in progress
+         *  ** All transactions that need to be reprocessed are processed through online transaction channels
+         *  . Orphan transactions are placed back to the front of the unprocessed transaction queue in reverse order
+         *  . Take out all the transactions in the pending packaging queue and put them back at the front of the unprocessed transaction queue
+         *  . The flag in packaging is enabled and placed directly back at the top of the unprocessed transaction queue(Excluding non system transactions in smart contracts)
+         * 2.Close flag after completion
          */
         ChainManager chainManager = SpringLiteContext.getBean(ChainManager.class);
         Chain chain = chainManager.getChain(chainId);
@@ -44,11 +44,11 @@ public class TxVersionChangeInvoker implements VersionChangeInvoker {
             Log.error(TxErrorCode.CHAIN_NOT_FOUND.getCode());
             return;
         }
-        //设置升级的标志,暂停打包交易(出空块)暂停新交易处理
+        //Set upgrade flags,Suspend packaging transactions(Empty block)Suspend new transaction processing
         chain.getProtocolUpgrade().set(true);
         try {
             Thread.sleep(3000L);
-            //等待正在处理的交易处理结束(打包过程中的交易、新交易)
+            //Waiting for the ongoing transaction processing to end(Transactions during packaging process、New transactions)
             while (!chain.getCanProtocolUpgrade().get()) {
                 chain.getLogger().info("GetCanProtocolUpgrade waiting, chainId:[{}]", chainId);
                 Thread.sleep(100L);
@@ -57,11 +57,11 @@ public class TxVersionChangeInvoker implements VersionChangeInvoker {
             chain.getLogger().error(e);
         }
 
-        //处理待打包队列
+        //Process the queue to be packaged
         PackablePool packablePool = SpringLiteContext.getBean(PackablePool.class);
         boolean hasNext = true;
         while (hasNext) {
-            //从队尾开始取
+            //Starting from the end of the team
             Transaction tx = packablePool.pollLast(chain);
             if (null != tx) {
                 addBack(chain, tx);
@@ -71,7 +71,7 @@ public class TxVersionChangeInvoker implements VersionChangeInvoker {
         }
 
         LedgerCall.clearUnconfirmTxs(chain);
-        //处理完成重置标志
+        //Processing completed reset flag
         chain.getProtocolUpgrade().set(false);
         chain.getLogger().info("Version Change process, chainId:[{}]", chainId);
     }
@@ -81,7 +81,7 @@ public class TxVersionChangeInvoker implements VersionChangeInvoker {
     }
 
     /**
-     * 加回到新交易队列
+     * Add back to the new transaction queue
      *
      * @param chain
      * @param txNet
@@ -89,7 +89,7 @@ public class TxVersionChangeInvoker implements VersionChangeInvoker {
     private void addBack(Chain chain, TransactionNetPO txNet) {
         try {
             Transaction tx = txNet.getTx();
-            //执行交易基础验证
+            //Perform basic transaction verification
             TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
             if (null == txRegister) {
                 throw new NulsException(TxErrorCode.TX_TYPE_INVALID);

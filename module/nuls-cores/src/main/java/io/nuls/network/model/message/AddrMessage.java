@@ -31,7 +31,7 @@ import io.nuls.network.model.message.body.AddrMessageBody;
 import io.nuls.core.exception.NulsException;
 
 /**
- * peer地址协议消息
+ * peerAddress Protocol Message
  * addr message
  *
  * @author lan

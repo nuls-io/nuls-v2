@@ -1,7 +1,7 @@
 package io.nuls.consensus.model.dto.input;
 
 /**
- * 智能合约退出共识参数
+ * Smart contract exit consensus parameters
  * Intelligent Contract Exit Consensus Parameters
  *
  * @author tag

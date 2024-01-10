@@ -11,7 +11,7 @@ import io.nuls.core.core.annotation.Autowired;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-23 14:54
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public abstract class ContractBaseProcessor implements CommandProcessor {
 
@@ -27,7 +27,7 @@ public abstract class ContractBaseProcessor implements CommandProcessor {
 
     public Object[] getContractCallArgsJson() {
         Object[] argsObj;
-        // 再次交互输入构造参数
+        // Interacting with input again to construct parameters
         String argsJson = CommandHelper.getArgsJson();
         argsObj = CommandHelper.parseArgsJson(argsJson);
         return argsObj;

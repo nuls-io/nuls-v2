@@ -33,7 +33,7 @@ import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.constant.ErrorCode;
 
 /**
- * 所有对外提供的接口的父类，必须继承BaseCmd才能被反射调用到
+ * All parent classes of externally provided interfaces must inheritBaseCmdCan only be called by reflection to
  * The parent class of all externally provided interfaces, must inherit BaseCmd to be invoked by reflection
  *
  * @author tangyi
@@ -42,7 +42,7 @@ import io.nuls.core.constant.ErrorCode;
 public abstract class BaseCmd {
 
     /**
-     * 设置模块配置参数
+     * Set module configuration parameters
      * Setting Module Configuration Parameters
      *
      * @param key      Key
@@ -55,7 +55,7 @@ public abstract class BaseCmd {
     }
 
     /**
-     * 返回基本的成功对象
+     * Return basic success objects
      * Returns the basic success object
      *
      * @return Response
@@ -66,7 +66,7 @@ public abstract class BaseCmd {
 
 
     /**
-     * 返回有特定内容的成功对象
+     * Return successful objects with specific content
      * Returns a success object with specific content
      *
      * @param responseData Object, can be any values
@@ -79,7 +79,7 @@ public abstract class BaseCmd {
     }
 
     /**
-     * 返回预定义的失败对象
+     * Return predefined failed objects
      * Returns the predefined failed object
      *
      * @param errorCode ErrorCode
@@ -90,7 +90,7 @@ public abstract class BaseCmd {
     }
 
     /**
-     * 返回自定义错误消息的失败对象
+     * Return the failed object for custom error messages
      * Returns the failed object of the custom error message
      *
      * @param errMsg User defined error message
@@ -101,7 +101,7 @@ public abstract class BaseCmd {
     }
 
     /**
-     * 预定义失败对象，同时带有自定义错误消息
+     * Predefine failed objects with custom error messages
      * Predefined failed object with a custom error message
      *
      * @param errorCode ErrorCode

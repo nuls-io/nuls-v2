@@ -24,48 +24,48 @@ import io.nuls.base.data.Block;
 import java.util.Comparator;
 
 /**
- * 常量
+ * constant
  *
  * @author captain
  * @version 1.0
- * @date 19-1-22 下午3:34
+ * @date 19-1-22 afternoon3:34
  */
 public interface Constant {
 
     String ROLLBACK_HEIGHT = "rollback_height";
 
     /**
-     * 存储每条链的协议配置信息
+     * Store protocol configuration information for each chain
      */
     String PROTOCOL_CONFIG = "protocol_config";
     /**
-     * 存储每条链的最新高度
+     * Store the latest height of each chain
      */
     String CHAIN_LATEST_HEIGHT = "chain_latest_height";
     /**
-     * 存储区块头数据
+     * Store block header data
      */
     String BLOCK_HEADER = "block_header_";
     /**
-     * 存储区块头高度与hash的键值对
+     * The height of storage area block heads is related tohashKey value pairs for
      */
     String BLOCK_HEADER_INDEX = "block_header_index_";
     /**
-     * 分叉链、孤儿链区块数据库前缀
+     * Forked chain、Orphan Chain Blockchain Database Prefix
      */
     String CACHED_BLOCK = "cached_block_";
 
     /**
-     * 工作状态
+     * working condition
      */
     int MODULE_WORKING = 1;
     /**
-     * 等待状态
+     * Waiting state
      */
     int MODULE_WAITING = 0;
 
     /**
-     * 区块排序器
+     * Block Sorter
      */
     Comparator<Block> BLOCK_COMPARATOR = (o1, o2) -> (int) (o1.getHeader().getHeight() - o2.getHeader().getHeight());
 

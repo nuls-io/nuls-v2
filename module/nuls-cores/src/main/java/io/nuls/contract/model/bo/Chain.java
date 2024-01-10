@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 链信息类
+ * Chain information class
  * Chain information class
  *
  * @author: PierreLuo
@@ -22,61 +22,61 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Chain {
 
     /**
-     * 打包区块 - 0, 验证区块 - 1
+     * Packaging blocks - 0, Verify Block - 1
      */
     private static ThreadLocal<Integer> currentThreadBlockType = new ThreadLocal<>();
     /**
-     * 链基础配置信息
+     * Chain basic configuration information
      * Chain Foundation Configuration Information
      */
     private ConfigBean config;
 
     /**
-     * 智能合约执行器
+     * Smart contract executor
      */
     private ProgramExecutor programExecutor;
 
     /**
-     * 智能合约执行器一些配置信息
+     * Some configuration information for smart contract executors
      */
     private CommonConfig commonConfig;
     private DefaultConfig defaultConfig;
 
     /**
-     * 智能合约创建合约未确认交易管理器
+     * Smart contract creation contract unconfirmed transaction manager
      */
     private ContractTxCreateUnconfirmedManager contractTxCreateUnconfirmedManager;
 
     /**
-     * 打包区块时批量执行信息
+     * Batch execution information when packaging blocks
      */
     private BatchInfo batchInfo;
 
     /**
-     * 验证区块时批量执行信息
+     * Batch execution information during block validation
      */
     private BatchInfo verifyBatchInfo;
 
     /**
-     * 打包区块时批量执行信息(版本8及以上)
+     * Batch execution information when packaging blocks(version8And above)
      */
     private BatchInfoV8 batchInfoV8;
     /**
-     * 验证区块时批量执行信息(版本8及以上)
+     * Batch execution information during block validation(version8And above)
      */
     private BatchInfoV8 verifyBatchInfoV8;
 
     /**
-     * 向合约模块注册接口提供给合约来调用
+     * Register an interface with the contract module to provide it to the contract for calling
      */
     private Map<String, CmdRegister> cmdRegisterMap = new ConcurrentHashMap<>();
 
     /**
-     * 合约资产ID缓存图
+     * Contract assetsIDCache Graph
      */
     private Map<String, ContractTokenAssetsInfo> tokenAssetsInfoMap = new HashMap<>();
     /**
-     * 合约资产ID - 合约地址缓存图
+     * Contract assetsID - Contract Address Cache Map
      * key - chainId + "-" + assetId
      * value - contractAddress
      */

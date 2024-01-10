@@ -35,7 +35,7 @@ public class TxCompareTool {
             return 0;
         }
 
-        //比较交易hash和nonce的关系
+        //Comparative transactionshashandnonceThe relationship between
         try {
             if (null == o1.getCoinData() && null == o2.getCoinData()) {
                 return 0;
@@ -70,8 +70,8 @@ public class TxCompareTool {
             byte[] o2HashPrefix = TxUtil.getNonce(o2.getHash().getBytes());
             for (CoinFrom o1CoinFrom : o1CoinData.getFrom()) {
                 if (Arrays.equals(o2HashPrefix, o1CoinFrom.getNonce())) {
-                    //o1其中一个账户的nonce等于o2的hash，则需要交换位置(说明o2是o1的前一笔交易)
-                    //命中一个from直接返回
+                    //o1One of the accountsnonceequal too2ofhash, then it is necessary to exchange positions(explaino2yeso1The previous transaction of)
+                    //Hit onefromDirectly return
                     return 1;
                 }
             }
@@ -79,8 +79,8 @@ public class TxCompareTool {
             byte[] o1HashPrefix = TxUtil.getNonce(o1.getHash().getBytes());
             for (CoinFrom o2CoinFrom : o2CoinData.getFrom()) {
                 if (Arrays.equals(o1HashPrefix, o2CoinFrom.getNonce())) {
-                    //o2其中一个账户的nonce等于o1的hash，则不需要交换位置(说明o1是o2的前一笔交易)
-                    //命中一个from直接返回
+                    //o2One of the accountsnonceequal too1ofhashThen there is no need to swap positions(explaino1yeso2The previous transaction of)
+                    //Hit onefromDirectly return
                     return -1;
                 }
             }

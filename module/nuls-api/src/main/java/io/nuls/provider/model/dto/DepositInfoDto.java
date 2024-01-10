@@ -30,19 +30,19 @@ import io.nuls.core.rpc.model.ApiModelProperty;
 @ApiModel
 public class DepositInfoDto {
 
-    @ApiModelProperty(description = "委托金额")
+    @ApiModelProperty(description = "Entrusted amount")
     private String deposit;
-    @ApiModelProperty(description = "节点hash")
+    @ApiModelProperty(description = "nodehash")
     private String agentHash;
-    @ApiModelProperty(description = "账户地址")
+    @ApiModelProperty(description = "Account address")
     private String address;
-    @ApiModelProperty(description = "委托时间")
+    @ApiModelProperty(description = "Entrustment time")
     private long time;
-    @ApiModelProperty(description = "委托交易hash")
+    @ApiModelProperty(description = "Entrusted transactionhash")
     private String txHash;
-    @ApiModelProperty(description = "委托时的区块高度")
+    @ApiModelProperty(description = "Block height at the time of delegation")
     private long blockHeight;
-    @ApiModelProperty(description = "退出委托的区块高度")
+    @ApiModelProperty(description = "Block height for exiting delegation")
     private long delHeight;
 
     public String getDeposit() {

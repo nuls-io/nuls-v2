@@ -3,7 +3,7 @@ package io.nuls.crosschain.srorage;
 import io.nuls.crosschain.base.model.bo.txdata.RegisteredChainMessage;
 
 /**
- * 已注册跨链的交易数据库操作类
+ * Registered cross chain transaction database operation class
  * Registered Cross-Chain Transaction Database Operations Class
  *
  * @author  tag
@@ -11,20 +11,20 @@ import io.nuls.crosschain.base.model.bo.txdata.RegisteredChainMessage;
  * */
 public interface RegisteredCrossChainService {
     /**
-     * 保存
-     * @param   registeredChainMessage  已注册跨链的链列表
-     * @return  保存是否成功
+     * preserve
+     * @param   registeredChainMessage  Registered cross chain chain list
+     * @return  Whether the save was successful
      * */
     boolean save(RegisteredChainMessage registeredChainMessage);
 
     /**
-     * 查询
-     * @return  已注册跨链的链信息
+     * query
+     * @return  Registered cross chain chain information
      * */
     RegisteredChainMessage get();
 
     /**
-     * 判断指定资产是否可跨链交易
+     * Determine whether a specified asset can be traded across chains
      * @param assetChainId
      * @param assetId
      * @return

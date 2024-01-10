@@ -74,7 +74,7 @@ public class AddressToolTest {
     }
 
     /**
-     * 通缩计算
+     * Deflation calculation
      */
     @Test
     public void calc() {

@@ -25,7 +25,7 @@
 package io.nuls.crosschain.model.bo;
 
 /**
- * 交易状态枚举
+ * Transaction status enumeration
  * Enumeration of transaction status
  *
  * @author Niels
@@ -33,17 +33,17 @@ package io.nuls.crosschain.model.bo;
 public enum CtxStateEnum {
 
     /**
-     * 未确认状态
+     * Unconfirmed status
      * not packaged
      */
     UNCONFIRM((byte)0),
     /**
-     * 主网已确认状态
+     * Main network confirmed status
      * packaged and saved
      */
     MAINCONFIRMED((byte)1),
     /**
-     * 已确认完成
+     * Confirmed completion
      * packaged and saved
      */
     CONFIRMED((byte)2);

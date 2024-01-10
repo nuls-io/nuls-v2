@@ -31,13 +31,13 @@ import io.nuls.provider.model.form.Base;
 @ApiModel
 public class ContractDelete extends Base {
 
-    @ApiModelProperty(description = "交易创建者", required = true)
+    @ApiModelProperty(description = "Transaction Creator", required = true)
     private String sender;
-    @ApiModelProperty(description = "智能合约地址", required = true)
+    @ApiModelProperty(description = "Smart contract address", required = true)
     private String contractAddress;
-    @ApiModelProperty(description = "交易创建者账户密码", required = true)
+    @ApiModelProperty(description = "Transaction creator account password", required = true)
     private String password;
-    @ApiModelProperty(description = "备注", required = false)
+    @ApiModelProperty(description = "Remarks", required = false)
     private String remark;
 
     public String getSender() {

@@ -12,12 +12,12 @@ import java.util.Map;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-06 14:34
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class ServiceManager {
 
     /**
-     * 初始化标记
+     * Initialize markers
      */
     public static boolean inited = false;
 
@@ -25,7 +25,7 @@ public class ServiceManager {
     public static Map<Class,Object> serviceImpls = new HashMap<>();
 
     /**
-     * 获取服务实现类
+     * Get Service Implementation Class
      * @param serviceClass
      * @param <T>
      * @return
@@ -38,7 +38,7 @@ public class ServiceManager {
     }
 
     public static void init(Integer defaultChainId, Provider.ProviderType providerType) {
-        //1.初始化提供器类型
+        //1.Initialize provider type
 //        Provider.ProviderType providerType;
 //        Integer defaultChainId;
 //        try {
@@ -51,7 +51,7 @@ public class ServiceManager {
 //        } catch (IOException e) {
 //            throw new RuntimeException("api provider init fail, load module.properties fail");
 //        }
-        //2.加载服务提供类实例
+        //2.Load service provider class instances
         List<Class> imps = ScanUtil.scan("io.nuls.base.api.provider");
         imps.forEach(cls->{
             Provider annotation = (Provider) cls.getAnnotation(Provider.class);

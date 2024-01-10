@@ -27,23 +27,23 @@ package io.nuls.provider.rpctools.vo;
 
 public class Account {
     /**
-     * 账户地址
+     * Account address
      */
     private String address;
 
     /**
-     * 别名
+     * alias
      */
     private String alias;
 
     /**
-     * 公钥Hex.encode(byte[])
+     * Public keyHex.encode(byte[])
      */
     private String pubkeyHex;
 
 
     /**
-     * 已加密私钥Hex.encode(byte[])
+     * Encrypted private keyHex.encode(byte[])
      */
     private String encryptedPrikeyHex;
 

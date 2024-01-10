@@ -27,7 +27,7 @@ package io.nuls.transaction.model.bo;
 import io.nuls.core.constant.ErrorCode;
 
 /**
- * 验证交易结果组合封装 返回结果
+ * Validate transaction result combination encapsulation Return results
  * @author: Charlie
  * @date: 2019-01-11
  */
@@ -62,8 +62,8 @@ public class VerifyLedgerResult {
     }
     
     /**
-     * 账本业务验证成功
-     * 1.账本返回成功，并且不为孤儿交易
+     * Account book business verification successful
+     * 1.The ledger returned successfully and is not an orphan transaction
      * @return
      */
     public boolean businessSuccess() {
@@ -71,7 +71,7 @@ public class VerifyLedgerResult {
     }
 
     /**
-     * 孤儿交易
+     * Orphan Trading
      * @return
      */
     public boolean isOrphan() {

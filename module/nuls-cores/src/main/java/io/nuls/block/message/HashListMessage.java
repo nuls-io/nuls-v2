@@ -33,11 +33,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 批量请求交易消息
+ * Batch request transaction messages
  *
  * @author captain
  * @version 1.0
- * @date 18-11-9 下午2:37
+ * @date 18-11-9 afternoon2:37
  */
 public class HashListMessage extends BaseBusinessMessage {
 

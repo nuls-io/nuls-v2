@@ -34,16 +34,16 @@ import io.nuls.provider.model.form.Base;
 /**
  * @author Niels
  */
-@ApiModel(description = "退出共识表单数据")
+@ApiModel(description = "Exit consensus form data")
 public class WithdrawForm extends Base {
 
-    @ApiModelProperty(description = "节点地址", required = true)
+    @ApiModelProperty(description = "Node address", required = true)
     private String address;
 
-    @ApiModelProperty(description = "加入共识时的交易hash", required = true)
+    @ApiModelProperty(description = "Transactions upon joining consensushash", required = true)
     private String txHash;
 
-    @ApiModelProperty(description = "密码", required = true)
+    @ApiModelProperty(description = "password", required = true)
     private String password;
 
     public String getAddress() {

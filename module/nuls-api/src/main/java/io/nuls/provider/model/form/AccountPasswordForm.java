@@ -32,10 +32,10 @@ import io.nuls.core.rpc.model.ApiModelProperty;
 /**
  * @author: Charlie
  */
-@ApiModel(description = "密码表单数据")
+@ApiModel(description = "Password form data")
 public class AccountPasswordForm {
 
-    @ApiModelProperty(description = "密码", required = true)
+    @ApiModelProperty(description = "password", required = true)
     private String password;
 
     public String getPassword() {

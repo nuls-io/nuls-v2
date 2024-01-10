@@ -88,13 +88,13 @@ public class AccountResource {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "批量创建账户", order = 101, detailDesc = "创建的账户存在于本地钱包内")
+    @ApiOperation(description = "Batch Create Accounts", order = 101, detailDesc = "The created account exists in the local wallet")
     @Parameters({
-            @Parameter(parameterName = "count", parameterDes = "新建账户数量,取值[1-10000]"),
-            @Parameter(parameterName = "password", parameterDes = "账户密码")
+            @Parameter(parameterName = "count", parameterDes = "Number of new accounts created,Value[1-10000]"),
+            @Parameter(parameterName = "password", parameterDes = "Account password")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "list", valueType = List.class, valueElement = String.class, description = "账户地址")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "list", valueType = List.class, valueElement = String.class, description = "Account address")
     }))
     public RpcClientResult create(AccountCreateForm form) {
         if (form == null) {
@@ -120,13 +120,13 @@ public class AccountResource {
     @PUT
     @Path("/password/{address}")
     @Produces({MediaType.APPLICATION_JSON})
-    @ApiOperation(description = "修改账户密码", order = 102)
+    @ApiOperation(description = "Change account password", order = 102)
     @Parameters({
-            @Parameter(parameterName = "address", parameterDes = "账户地址"),
-            @Parameter(parameterName = "form", parameterDes = "账户密码信息表单", requestType = @TypeDescriptor(value = AccountUpdatePasswordForm.class))
+            @Parameter(parameterName = "address", parameterDes = "Account address"),
+            @Parameter(parameterName = "form", parameterDes = "Account Password Information Form", requestType = @TypeDescriptor(value = AccountUpdatePasswordForm.class))
     })
-    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", valueType = Boolean.class, description = "是否修改成功")
+    @ResponseData(name = "Return value", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", valueType = Boolean.class, description = "Is the modification successful")
     }))
     public RpcClientResult updatePassword(@PathParam("address") String address, AccountUpdatePasswordForm form) {
         if (form == null) {
@@ -158,13 +158,13 @@ public class AccountResource {
     @POST
     @Path("/prikey/{address}")
     @Produces({MediaType.APPLICATION_JSON})
-    @ApiOperation(description = "导出账户私钥", order = 103, detailDesc = "只能导出本地钱包已存在账户的私钥")
+    @ApiOperation(description = "Export account private key", order = 103, detailDesc = "Only the private key of an existing account in the local wallet can be exported")
     @Parameters({
-            @Parameter(parameterName = "address", parameterDes = "账户地址"),
-            @Parameter(parameterName = "form", parameterDes = "账户密码信息表单", requestType = @TypeDescriptor(value = AccountPasswordForm.class))
+            @Parameter(parameterName = "address", parameterDes = "Account address"),
+            @Parameter(parameterName = "form", parameterDes = "Account Password Information Form", requestType = @TypeDescriptor(value = AccountPasswordForm.class))
     })
-    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", description = "私钥")
+    @ResponseData(name = "Return value", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "Private key")
     }))
     public RpcClientResult getPriKey(@PathParam("address") String address, AccountPasswordForm form) {
         if (form == null) {
@@ -190,12 +190,12 @@ public class AccountResource {
     @POST
     @Path("/import/pri")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "根据私钥导入账户", order = 104, detailDesc = "导入私钥时，需要输入密码给明文私钥加密")
+    @ApiOperation(description = "Import account based on private key", order = 104, detailDesc = "When importing a private key, you need to enter a password to encrypt the plaintext private key")
     @Parameters({
-            @Parameter(parameterName = "form", parameterDes = "根据私钥导入账户表单", requestType = @TypeDescriptor(value = AccountPriKeyPasswordForm.class))
+            @Parameter(parameterName = "form", parameterDes = "Import account form based on private key", requestType = @TypeDescriptor(value = AccountPriKeyPasswordForm.class))
     })
-    @ResponseData(name = "返回值", description = "返回账户地址", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", description = "账户地址")
+    @ResponseData(name = "Return value", description = "Return account address", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "Account address")
     }))
     public RpcClientResult importPriKey(AccountPriKeyPasswordForm form) {
         if (form == null) {
@@ -218,12 +218,12 @@ public class AccountResource {
     @Path("/import/keystore")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @ApiOperation(description = "根据keyStore导入账户", order = 105)
+    @ApiOperation(description = "according tokeyStoreImport account", order = 105)
     @Parameters({
-            @Parameter(parameterName = "根据私钥导入账户", parameterDes = "根据私钥导入账户表单", requestType = @TypeDescriptor(value = InputStream.class))
+            @Parameter(parameterName = "Import account based on private key", parameterDes = "Import account form based on private key", requestType = @TypeDescriptor(value = InputStream.class))
     })
-    @ResponseData(name = "返回值", description = "返回账户地址", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", description = "账户地址")
+    @ResponseData(name = "Return value", description = "Return account address", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "Account address")
     }))
     public RpcClientResult importAccountByKeystoreFile(@FormDataParam("keystore") InputStream in,
                                                        @FormDataParam("password") String password) {
@@ -252,12 +252,12 @@ public class AccountResource {
     @POST
     @Path("/import/keystore/path")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "根据keystore文件路径导入账户", order = 106)
+    @ApiOperation(description = "according tokeystoreFile path import account", order = 106)
     @Parameters({
-            @Parameter(parameterName = "form", parameterDes = "根据keystore文件路径导入账户表单", requestType = @TypeDescriptor(value = AccountKeyStoreImportForm.class))
+            @Parameter(parameterName = "form", parameterDes = "according tokeystoreFile path import account form", requestType = @TypeDescriptor(value = AccountKeyStoreImportForm.class))
     })
-    @ResponseData(name = "返回值", description = "返回账户地址", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", description = "账户地址")
+    @ResponseData(name = "Return value", description = "Return account address", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "Account address")
     }))
     public RpcClientResult importAccountByKeystoreFilePath(AccountKeyStoreImportForm form) {
         if (form == null) {
@@ -277,12 +277,12 @@ public class AccountResource {
     @POST
     @Path("/import/keystore/json")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "根据keystore字符串导入账户", order = 107)
+    @ApiOperation(description = "according tokeystoreString import account", order = 107)
     @Parameters({
-            @Parameter(parameterName = "form", parameterDes = "根据keystore字符串导入账户表单", requestType = @TypeDescriptor(value = AccountKeyStoreJsonImportForm.class))
+            @Parameter(parameterName = "form", parameterDes = "according tokeystoreString import account form", requestType = @TypeDescriptor(value = AccountKeyStoreJsonImportForm.class))
     })
-    @ResponseData(name = "返回值", description = "返回账户地址", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", description = "账户地址")
+    @ResponseData(name = "Return value", description = "Return account address", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "Account address")
     }))
     public RpcClientResult importAccountByKeystoreJson(AccountKeyStoreJsonImportForm form) {
         if (form == null) {
@@ -307,13 +307,13 @@ public class AccountResource {
     @POST
     @Path("/export/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "账户备份，导出AccountKeyStore文件到指定目录", order = 108)
+    @ApiOperation(description = "Account backup, exportAccountKeyStoreFile to specified directory", order = 108)
     @Parameters({
-            @Parameter(parameterName = "address", parameterDes = "账户地址", requestType = @TypeDescriptor(value = String.class)),
-            @Parameter(parameterName = "form", parameterDes = "keystone导出信息表单", requestType = @TypeDescriptor(value = AccountKeyStoreBackup.class))
+            @Parameter(parameterName = "address", parameterDes = "Account address", requestType = @TypeDescriptor(value = String.class)),
+            @Parameter(parameterName = "form", parameterDes = "keystoneExport Information Form", requestType = @TypeDescriptor(value = AccountKeyStoreBackup.class))
     })
-    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "path", description = "导出的文件路径")
+    @ResponseData(name = "Return value", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "path", description = "Exported file path")
     }))
     public RpcClientResult exportAccountKeyStore(@PathParam("address") String address, AccountKeyStoreBackup form) {
         if (form == null) {
@@ -374,12 +374,12 @@ public class AccountResource {
     @POST
     @Path("/alias")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "账户设置别名", order = 109, detailDesc = "别名格式为1-20位小写字母和数字的组合，设置别名会销毁1个NULS")
+    @ApiOperation(description = "Account setting alias", order = 109, detailDesc = "The alias format is1-20A combination of lowercase letters and numbers, setting an alias will destroy it1individualNULS")
     @Parameters({
-            @Parameter(parameterName = "form", parameterDes = "账户设置别名表单", requestType = @TypeDescriptor(value = SetAliasForm.class))
+            @Parameter(parameterName = "form", parameterDes = "Account alias setting form", requestType = @TypeDescriptor(value = SetAliasForm.class))
     })
-    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", description = "设置别名交易的hash")
+    @ResponseData(name = "Return value", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "Setting up alias transactionshash")
     }))
     public RpcClientResult setAlias(SetAliasForm form) {
         if (!AddressTool.validAddress(config.getChainId(), form.getAddress())) {
@@ -403,11 +403,11 @@ public class AccountResource {
     @POST
     @Path("/address/validate")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "验证地址格式是否正确", order = 110, detailDesc = "验证地址格式是否正确")
+    @ApiOperation(description = "Verify if the address format is correct", order = 110, detailDesc = "Verify if the address format is correct")
     @Parameters({
-            @Parameter(parameterName = "form", parameterDes = "账户设置别名表单", requestType = @TypeDescriptor(value = ValidateAddressForm.class))
+            @Parameter(parameterName = "form", parameterDes = "Account alias setting form", requestType = @TypeDescriptor(value = ValidateAddressForm.class))
     })
-    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+    @ResponseData(name = "Return value", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "value", description = "true")
     }))
     public RpcClientResult validateAddress(ValidateAddressForm form) {
@@ -424,12 +424,12 @@ public class AccountResource {
     @POST
     @Path("/address/publickey")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "根据账户公钥生成账户地址", order = 111, detailDesc = "根据账户公钥生成账户地址")
+    @ApiOperation(description = "Generate account address based on account public key", order = 111, detailDesc = "Generate account address based on account public key")
     @Parameters({
-            @Parameter(parameterName = "form", parameterDes = "根据账户公钥生成账户地址", requestType = @TypeDescriptor(value = AccountPublicKeyForm.class))
+            @Parameter(parameterName = "form", parameterDes = "Generate account address based on account public key", requestType = @TypeDescriptor(value = AccountPublicKeyForm.class))
     })
-    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "address", description = "账户地址")
+    @ResponseData(name = "Return value", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "address", description = "Account address")
     }))
     public RpcClientResult getAddressByPublicKey(AccountPublicKeyForm form) {
         try {
@@ -444,12 +444,12 @@ public class AccountResource {
     @POST
     @Path("/offline")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "离线 - 批量创建账户", order = 151, detailDesc = "创建的账户不会保存到钱包中,接口直接返回账户的keystore信息")
+    @ApiOperation(description = "off-line - Batch Create Accounts", order = 151, detailDesc = "The created account will not be saved to the wallet,The interface directly returns the account'skeystoreinformation")
     @Parameters({
-            @Parameter(parameterName = "form", parameterDes = "离线批量创建账户表单", requestType = @TypeDescriptor(value = AccountCreateForm.class))
+            @Parameter(parameterName = "form", parameterDes = "Offline batch creation of account forms", requestType = @TypeDescriptor(value = AccountCreateForm.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "list", valueType = List.class, valueElement = AccountDto.class, description = "账户keystore列表")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "list", valueType = List.class, valueElement = AccountDto.class, description = "accountkeystorelist")
     }))
     public RpcClientResult createOffline(AccountCreateForm form) {
         if (form == null) {
@@ -467,12 +467,12 @@ public class AccountResource {
     @POST
     @Path("/priKey/offline")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "离线获取账户明文私钥", order = 152)
+    @ApiOperation(description = "Offline acquisition of account plaintext private key", order = 152)
     @Parameters({
-            @Parameter(parameterName = "form", parameterDes = "离线获取账户明文私钥表单", requestType = @TypeDescriptor(value = GetPriKeyForm.class))
+            @Parameter(parameterName = "form", parameterDes = "Offline access to account plaintext private key form", requestType = @TypeDescriptor(value = GetPriKeyForm.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", description = "明文私钥")
+    @ResponseData(name = "Return value", description = "Return aMapobject", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "Clear text private key")
     }))
     public RpcClientResult getPriKeyOffline(GetPriKeyForm form) {
         io.nuls.core.basic.Result result = NulsSDKTool.getPriKeyOffline(form.getAddress(), form.getEncryptedPriKey(), form.getPassword());
@@ -482,12 +482,12 @@ public class AccountResource {
     @PUT
     @Path("/password/offline/")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "离线修改账户密码", order = 153)
+    @ApiOperation(description = "Offline account password modification", order = 153)
     @Parameters({
-            @Parameter(parameterName = "form", parameterDes = "离线修改账户密码表单", requestType = @TypeDescriptor(value = ResetPasswordForm.class))
+            @Parameter(parameterName = "form", parameterDes = "Offline account password modification form", requestType = @TypeDescriptor(value = ResetPasswordForm.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", description = "重置密码后的加密私钥")
+    @ResponseData(name = "Return value", description = "Return aMapobject", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "Encryption private key after resetting password")
     }))
     public RpcClientResult resetPasswordOffline(ResetPasswordForm form) {
         io.nuls.core.basic.Result result = NulsSDKTool.resetPasswordOffline(form.getAddress(), form.getEncryptedPriKey(), form.getOldPassword(), form.getNewPassword());
@@ -497,13 +497,13 @@ public class AccountResource {
     @POST
     @Path("/multi/sign")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "多账户摘要签名", order = 154, detailDesc = "用于签名离线组装的多账户转账交易，调用接口时，参数可以传地址和私钥，或者传地址和加密私钥和加密密码")
+    @ApiOperation(description = "Multiple Account Summary Signature", order = 154, detailDesc = "For multi account transfer transactions used for offline assembly of signatures, when calling the interface, parameters can be passed to the address and private key, or to the address and encrypted private key and encrypted password")
     @Parameters({
-            @Parameter(parameterName = "form", parameterDes = "多账户摘要签名表单", requestType = @TypeDescriptor(value = MultiSignForm.class))
+            @Parameter(parameterName = "form", parameterDes = "Multiple Account Summary Signature Form", requestType = @TypeDescriptor(value = MultiSignForm.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "hash", description = "交易hash"),
-            @Key(name = "txHex", description = "签名后的交易16进制字符串")
+    @ResponseData(name = "Return value", description = "Return aMapobject", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "hash", description = "transactionhash"),
+            @Key(name = "txHex", description = "Signed transaction16Hexadecimal Strings")
     }))
     public RpcClientResult multiSign(MultiSignForm form) {
         io.nuls.core.basic.Result result = NulsSDKTool.sign(form.getDtoList(), form.getTxHex());
@@ -513,13 +513,13 @@ public class AccountResource {
     @POST
     @Path("/priKey/sign")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "明文私钥摘要签名", order = 155)
+    @ApiOperation(description = "Clear text private key digest signature", order = 155)
     @Parameters({
-            @Parameter(parameterName = "form", parameterDes = "明文私钥摘要签名表单", requestType = @TypeDescriptor(value = PriKeySignForm.class))
+            @Parameter(parameterName = "form", parameterDes = "Clear text private key abstract signature form", requestType = @TypeDescriptor(value = PriKeySignForm.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "hash", description = "交易hash"),
-            @Key(name = "txHex", description = "签名后的交易16进制字符串")
+    @ResponseData(name = "Return value", description = "Return aMapobject", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "hash", description = "transactionhash"),
+            @Key(name = "txHex", description = "Signed transaction16Hexadecimal Strings")
     }))
     public RpcClientResult priKeySign(PriKeySignForm form) {
         io.nuls.core.basic.Result result = NulsSDKTool.sign(form.getTxHex(), form.getAddress(), form.getPriKey());
@@ -529,13 +529,13 @@ public class AccountResource {
     @POST
     @Path("/encryptedPriKey/sign")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "密文私钥摘要签名", order = 156)
+    @ApiOperation(description = "Cryptography private key digest signature", order = 156)
     @Parameters({
-            @Parameter(parameterName = "form", parameterDes = "密文私钥摘要签名表单", requestType = @TypeDescriptor(value = EncryptedPriKeySignForm.class))
+            @Parameter(parameterName = "form", parameterDes = "Cryptography private key digest signature form", requestType = @TypeDescriptor(value = EncryptedPriKeySignForm.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "hash", description = "交易hash"),
-            @Key(name = "txHex", description = "签名后的交易16进制字符串")
+    @ResponseData(name = "Return value", description = "Return aMapobject", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "hash", description = "transactionhash"),
+            @Key(name = "txHex", description = "Signed transaction16Hexadecimal Strings")
     }))
     public RpcClientResult encryptedPriKeySign(EncryptedPriKeySignForm form) {
         io.nuls.core.basic.Result result = NulsSDKTool.sign(form.getTxHex(), form.getAddress(), form.getEncryptedPriKey(), form.getPassword());
@@ -545,13 +545,13 @@ public class AccountResource {
     @POST
     @Path("/encryptedPriKeys/sign")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "多账号密文私钥摘要签名", order = 156)
+    @ApiOperation(description = "Multiple account ciphertext private key digest signature", order = 156)
     @Parameters({
-            @Parameter(parameterName = "form", parameterDes = "密文私钥摘要签名表单", requestType = @TypeDescriptor(value = EncryptedPriKeySignForm.class))
+            @Parameter(parameterName = "form", parameterDes = "Cryptography private key digest signature form", requestType = @TypeDescriptor(value = EncryptedPriKeySignForm.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "hash", description = "交易hash"),
-            @Key(name = "txHex", description = "签名后的交易16进制字符串")
+    @ResponseData(name = "Return value", description = "Return aMapobject", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "hash", description = "transactionhash"),
+            @Key(name = "txHex", description = "Signed transaction16Hexadecimal Strings")
     }))
     public RpcClientResult encryptedPriKeysSign(EncryptedPriKeysSignForm form) {
 //        io.nuls.core.basic.Result result = NulsSDKTool.sign(form.getTxHex(), form.getAddress(), form.getEncryptedPriKey(), form.getPassword());
@@ -564,12 +564,12 @@ public class AccountResource {
     @POST
     @Path("/multiSign/create")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "创建多签账户", order = 157, detailDesc = "根据多个账户的公钥创建多签账户，minSigns为多签账户创建交易时需要的最小签名数")
+    @ApiOperation(description = "Create a multi signature account", order = 157, detailDesc = "Create multiple signed accounts based on the public keys of multiple accounts,minSignsThe minimum number of signatures required to create transactions for multi signature accounts")
     @Parameters({
-            @Parameter(parameterName = "form", parameterDes = "创建多签账户表单", requestType = @TypeDescriptor(value = MultiSignAccountCreateForm.class))
+            @Parameter(parameterName = "form", parameterDes = "Create a multi signature account form", requestType = @TypeDescriptor(value = MultiSignAccountCreateForm.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", description = "账户的地址")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "The address of the account")
     }))
     public RpcClientResult createMultiSignAccount(MultiSignAccountCreateForm form) {
         if (form.getPubKeys() == null || form.getPubKeys().isEmpty()) {
@@ -585,13 +585,13 @@ public class AccountResource {
     @POST
     @Path("/aliasTx/create")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "离线创建设置别名交易", order = 158, detailDesc = "根据多个账户的公钥创建多签账户，minSigns为多签账户创建交易时需要的最小签名数")
+    @ApiOperation(description = "Offline creation and setting of alias transactions", order = 158, detailDesc = "Create multiple signed accounts based on the public keys of multiple accounts,minSignsThe minimum number of signatures required to create transactions for multi signature accounts")
     @Parameters({
-            @Parameter(parameterName = "dto", parameterDes = "创建多签账户表单", requestType = @TypeDescriptor(value = AliasDto.class))
+            @Parameter(parameterName = "dto", parameterDes = "Create a multi signature account form", requestType = @TypeDescriptor(value = AliasDto.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "hash", description = "交易hash"),
-            @Key(name = "txHex", description = "交易序列化16进制字符串")
+    @ResponseData(name = "Return value", description = "Return aMapobject", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "hash", description = "transactionhash"),
+            @Key(name = "txHex", description = "Transaction serialization16Hexadecimal Strings")
     }))
     public RpcClientResult createAliasTxOffLine(AliasDto dto) {
         io.nuls.core.basic.Result result = NulsSDKTool.createAliasTxOffline(dto);
@@ -601,13 +601,13 @@ public class AccountResource {
     @POST
     @Path("/multiSign/aliasTx/create")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "多签账户离线创建设置别名交易", order = 159)
+    @ApiOperation(description = "Offline creation and setting of alias transactions for multiple signed accounts", order = 159)
     @Parameters({
-            @Parameter(parameterName = "dto", parameterDes = "创建别名交易表单", requestType = @TypeDescriptor(value = MultiSignAliasDto.class))
+            @Parameter(parameterName = "dto", parameterDes = "Create an alias transaction form", requestType = @TypeDescriptor(value = MultiSignAliasDto.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "hash", description = "交易hash"),
-            @Key(name = "txHex", description = "交易序列化16进制字符串")
+    @ResponseData(name = "Return value", description = "Return aMapobject", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "hash", description = "transactionhash"),
+            @Key(name = "txHex", description = "Transaction serialization16Hexadecimal Strings")
     }))
     public RpcClientResult createMultiSignAliasTxOffLine(MultiSignAliasDto dto) {
         io.nuls.core.basic.Result result = NulsSDKTool.createMultiSignAliasTxOffline(dto);
@@ -617,12 +617,12 @@ public class AccountResource {
     @POST
     @Path("/address/priKey")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "根据私钥获取账户地址格式", order = 160)
+    @ApiOperation(description = "Obtain account address format based on private key", order = 160)
     @Parameters({
-            @Parameter(parameterName = "form", parameterDes = "私钥表单", requestType = @TypeDescriptor(value = PriKeyForm.class))
+            @Parameter(parameterName = "form", parameterDes = "Private Key Form", requestType = @TypeDescriptor(value = PriKeyForm.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", description = "账户地址")
+    @ResponseData(name = "Return value", description = "Return aMapobject", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "Account address")
     }))
     public RpcClientResult getAddressByPriKey(PriKeyForm form) {
         io.nuls.core.basic.Result result = NulsSDKTool.getAddressByPriKey(form.getPriKey());

@@ -73,11 +73,11 @@ public class ValidateResult {
     }
 
     /**
-     * 校验返回编码
+     * Verify return code
      */
     private ErrorCode validateCode;
     /**
-     * 校验返回描述
+     * Verification return description
      */
     private String validateDesc;
 

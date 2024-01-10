@@ -38,11 +38,11 @@ import static io.nuls.block.constant.CommandConstant.GET_TXGROUP_MESSAGE;
 import static io.nuls.block.constant.CommandConstant.TXGROUP_MESSAGE;
 
 /**
- * 处理收到的{@link HashListMessage},用于区块的广播与转发
+ * Process received{@link HashListMessage},Broadcasting and forwarding for blocks
  *
  * @author captain
  * @version 1.0
- * @date 18-11-14 下午4:23
+ * @date 18-11-14 afternoon4:23
  */
 @Component("GetTxGroupHandlerV1")
 public class GetTxGroupHandler implements MessageProcessor {

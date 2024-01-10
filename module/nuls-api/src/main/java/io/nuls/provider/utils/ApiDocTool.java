@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 /**
  * @Author: zhoulijun
  * @Time: 2019-06-19 14:26
- * @Description: 生成rpc接口文档
+ * @Description: generaterpcInterface documentation
  */
 public class ApiDocTool {
 
@@ -267,7 +267,7 @@ public class ApiDocTool {
                     return;
                 }
                 if (exclusion.contains(clazs.getPackageName())) {
-                    Log.info("跳过{}生成文档，所在包{}在排除范围", clazs.getSimpleName(), clazs.getPackageName());
+                    Log.info("skip{}Generate document in package{}Within the exclusion range", clazs.getSimpleName(), clazs.getPackageName());
                     return;
                 }
                 ApiType apiType = api.type();
@@ -361,8 +361,8 @@ public class ApiDocTool {
             jsonrpcCmdDesList.sort((a, b) -> {
                 return a.compareTo(b.order);
             });
-            System.out.println("生成RESTFUL文档成功：" + createMarketDownDoc(restfulCmdDesList, ApiType.RESTFUL, "./readme.md"));
-            System.out.println("生成JSONRPC文档成功：" + createMarketDownDoc(jsonrpcCmdDesList, ApiType.JSONRPC, "./readme.md"));
+            System.out.println("generateRESTFULDocument successful：" + createMarketDownDoc(restfulCmdDesList, ApiType.RESTFUL, "./readme.md"));
+            System.out.println("generateJSONRPCDocument successful：" + createMarketDownDoc(jsonrpcCmdDesList, ApiType.JSONRPC, "./readme.md"));
         }
 
         public static void genJSON() throws IOException {
@@ -376,8 +376,8 @@ public class ApiDocTool {
             jsonrpcCmdDesList.sort((a, b) -> {
                 return a.compareTo(b.order);
             });
-            System.out.println("生成RESTFUL文档成功：" + createJSONConfig(restfulCmdDesList, ApiType.RESTFUL, "./readme.md"));
-            System.out.println("生成JSONRPC文档成功：" + createJSONConfig(jsonrpcCmdDesList, ApiType.JSONRPC, "./readme.md"));
+            System.out.println("generateRESTFULDocument successful：" + createJSONConfig(restfulCmdDesList, ApiType.RESTFUL, "./readme.md"));
+            System.out.println("generateJSONRPCDocument successful：" + createJSONConfig(jsonrpcCmdDesList, ApiType.JSONRPC, "./readme.md"));
         }
 
         public static void genPostmanJSON() throws IOException {
@@ -390,8 +390,8 @@ public class ApiDocTool {
             jsonrpcCmdDesList.sort((a, b) -> {
                 return a.compareTo(b.order);
             });
-            System.out.println("生成Postman-RESTFUL导入文件成功：" + createPostmanJSONConfig(restfulCmdDesList, ApiType.RESTFUL, "./readme.md"));
-            System.out.println("生成Postman-JSONRPC导入文件成功：" + createPostmanJSONConfig(jsonrpcCmdDesList, ApiType.JSONRPC, "./readme.md"));
+            System.out.println("generatePostman-RESTFULImport file successful：" + createPostmanJSONConfig(restfulCmdDesList, ApiType.RESTFUL, "./readme.md"));
+            System.out.println("generatePostman-JSONRPCImport file successful：" + createPostmanJSONConfig(jsonrpcCmdDesList, ApiType.JSONRPC, "./readme.md"));
         }
 
         public static List<ResultDes> buildParam(ApiType apiType, Method method) {
@@ -562,7 +562,7 @@ public class ApiDocTool {
             Annotation annotation = clzs.getAnnotation(ApiModel.class);
             if (annotation == null) {
                 System.err.println(clzs.getName());
-                throw new IllegalArgumentException("返回值是复杂对象时必须声明ApiModule注解 + " + clzs.getSimpleName());
+                throw new IllegalArgumentException("Must be declared when the return value is a complex objectApiModuleannotation + " + clzs.getSimpleName());
             }
             List<Field> list = new LinkedList();
             list.addAll(Arrays.asList(clzs.getDeclaredFields()));
@@ -578,7 +578,7 @@ public class ApiDocTool {
                 Annotation ann = filed.getAnnotation(ApiModelProperty.class);
                 ApiModelProperty apiModelProperty = (ApiModelProperty) ann;
                 if (apiModelProperty == null) {
-                    Log.warn("发现未配置ApiModelProperty注解的filed:{}", clzs.getSimpleName() + "#" + filed.getName());
+                    Log.warn("Discovered unconfiguredApiModelPropertyAnnotatedfiled:{}", clzs.getSimpleName() + "#" + filed.getName());
                     return;
                 }
                 ResultDes filedDes = new ResultDes();
@@ -602,11 +602,11 @@ public class ApiDocTool {
                     } else {
                         Annotation filedAnn = filed.getType().getAnnotation(ApiModel.class);
                         if (filedAnn == null) {
-                            Log.warn("发现ApiModelProperty注解的filed类型为复杂对象，但对象并未注解ApiModel，filed:{}", clzs.getName() + "#" + filed.getName());
+                            Log.warn("findApiModelPropertyAnnotatedfiledThe type is a complex object, but the object is not annotatedApiModel,filed:{}", clzs.getName() + "#" + filed.getName());
                             filedDes.type = filed.getType().getSimpleName().toLowerCase();
                         } else {
                             if (clzs == filed.getType()) {
-                                Log.warn("发现循环引用：{}", clzs);
+                                Log.warn("Discovering circular references：{}", clzs);
                                 filedDes.type = "object&lt;" + clzs.getSimpleName().toLowerCase() + ">";
                             } else {
                                 filedDes.list = classToResultDes(filed.getType());
@@ -626,7 +626,7 @@ public class ApiDocTool {
             String parent = temp.getParentFile().getParent();
             File file = new File(parent + File.separator + tempFile);
             if (!file.exists()) {
-                throw new RuntimeException("模板文件不存在");
+                throw new RuntimeException("The template file does not exist");
             }
             File mdFile = new File(file.getParentFile().getAbsolutePath() + File.separator + "documents" + File.separator + appName + "_" + apiType.name() + ".json");
             if (mdFile.exists()) {
@@ -658,7 +658,7 @@ public class ApiDocTool {
             String parent = temp.getParentFile().getParent();
             File file = new File(parent + File.separator + tempFile);
             if (!file.exists()) {
-                throw new RuntimeException("模板文件不存在");
+                throw new RuntimeException("The template file does not exist");
             }
             File mdFile = new File(file.getParentFile().getAbsolutePath() + File.separator + "documents" + File.separator + appName + "_Postman_" + apiType.name() + ".json");
             if (mdFile.exists()) {
@@ -692,7 +692,7 @@ public class ApiDocTool {
             String parent = temp.getParentFile().getParent();
             File file = new File(parent + File.separator + tempFile);
             if (!file.exists()) {
-                throw new RuntimeException("模板文件不存在");
+                throw new RuntimeException("The template file does not exist");
             }
 
             Map<String, Object> egMap = null;
@@ -716,7 +716,7 @@ public class ApiDocTool {
             }
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(mdFile, true))) {
                 writer.newLine();
-                writer.write(new Heading("接口列表",2).toString());
+                writer.write(new Heading("Interface List",2).toString());
                 writer.newLine();
                 AtomicInteger i = new AtomicInteger(0);
                 for(CmdDes cmd : cmdDesList) {
@@ -750,7 +750,7 @@ public class ApiDocTool {
                 writer.newLine();
                 writer.write(new Heading("Cmd: " + cmd.cmdName.replaceAll("_", "\\\\_"), 4).toString());
                 writer.newLine();
-                writer.write(new Text("_**详细描述: " + cmd.detailDesc + "**_").toString());
+                writer.write(new Text("_**Detailed description: " + cmd.detailDesc + "**_").toString());
                 writer.newLine();
                 if(!jsonrpc) {
                     writer.write(new Heading("HttpMethod: " + cmd.httpMethod, 4).toString());
@@ -759,10 +759,10 @@ public class ApiDocTool {
                 buildParam(writer, cmd.parameters, jsonrpc);
                 buildResult(writer, cmd.result);
 
-                // 增加示例
-                String egReqDesc = "无";
-                String egReqPathDesc = "略";
-                String egRespDesc = "略";
+                // Add examples
+                String egReqDesc = "nothing";
+                String egReqPathDesc = "slightly";
+                String egRespDesc = "slightly";
                 if(egMap != null) {
                     Map egCmdMap = (Map) egMap.get(cmd.cmdName);
                     if(egCmdMap != null) {
@@ -772,13 +772,13 @@ public class ApiDocTool {
                         if(request != null) {
                             egReqDesc = JSONUtils.obj2PrettyJson(request);
                             if(request instanceof Map && ((Map)request).size() == 0) {
-                                egReqDesc = "无";
+                                egReqDesc = "nothing";
                             }
                         }
                         if(requestPath != null && StringUtils.isNotBlank(requestPath.toString())) {
                             egReqPathDesc = requestPath.toString();
                             if(request != null && request instanceof Map && ((Map)request).size() == 0) {
-                                egReqDesc = "无";
+                                egReqDesc = "nothing";
                             }
                         }
                         if(response != null) {
@@ -790,7 +790,7 @@ public class ApiDocTool {
                 writer.write(new Heading("Example request data: ", 4).toString());
                 writer.newLine();
                 if(jsonrpc) {
-                    if("无".equals(egReqDesc)) {
+                    if("nothing".equals(egReqDesc)) {
                         writer.write(new Text(egReqDesc).toString());
                     } else {
                         writer.newLine();
@@ -811,7 +811,7 @@ public class ApiDocTool {
                     writer.newLine();
                     writer.write(new Text("_**request form data:**_").toString());
                     writer.newLine();
-                    if("无".equals(egReqDesc)) {
+                    if("nothing".equals(egReqDesc)) {
                         writer.write(new Text(egReqDesc).toString());
                     } else {
                         writer.newLine();
@@ -827,7 +827,7 @@ public class ApiDocTool {
                 writer.newLine();
                 writer.write(new Heading("Example response data: ", 4).toString());
                 writer.newLine();
-                if("略".equals(egRespDesc)) {
+                if("slightly".equals(egRespDesc)) {
                     writer.write(new Text(egRespDesc).toString());
                 } else {
                     writer.newLine();
@@ -858,15 +858,15 @@ public class ApiDocTool {
         private static void buildResult(BufferedWriter writer, List<ResultDes> result) throws IOException {
             writer.newLine();
             writer.newLine();
-            writer.write(new Heading("返回值", 4).toString());
+            writer.write(new Heading("Return value", 4).toString());
             if (result == null) {
                 writer.newLine();
-                writer.write("无返回值");
+                writer.write("No return value");
                 return;
             }
             Table.Builder tableBuilder = new Table.Builder()
                     .withAlignments(Table.ALIGN_LEFT, Table.ALIGN_CENTER, Table.ALIGN_LEFT)
-                    .addRow("字段名", "字段类型", "参数描述");
+                    .addRow("Field Name", "Field type", "Parameter Description");
             buildResult(tableBuilder, result, 0);
             writer.newLine();
             writer.write(tableBuilder.build().toString());
@@ -903,15 +903,15 @@ public class ApiDocTool {
                 });
             }
             writer.newLine();
-            writer.write(new Heading("参数列表", 4).toString());
+            writer.write(new Heading("parameter list", 4).toString());
             if (parameters == null || parameters.isEmpty()) {
                 writer.newLine();
-                writer.write("无参数");
+                writer.write("No parameters");
                 return;
             }
             Table.Builder tableBuilder = new Table.Builder()
                     .withAlignments(Table.ALIGN_LEFT, Table.ALIGN_CENTER, Table.ALIGN_LEFT, Table.ALIGN_CENTER)
-                    .addRow("参数名", "参数类型", "参数描述", "是否必填");
+                    .addRow("Parameter Name", "Parameter type", "Parameter Description", "Is it mandatory to fill in");
             buildParam(tableBuilder, parameters, 0, jsonrpc);
             writer.newLine();
             writer.write(tableBuilder.build().toString());
@@ -920,7 +920,7 @@ public class ApiDocTool {
         private static void buildParam(Table.Builder tableBuilder, List<ResultDes> result, int depth, boolean jsonrpc) {
             result.forEach(r -> {
                 //if(!jsonrpc || (r.list == null || depth > 0)) {
-                    tableBuilder.addRow("&nbsp;".repeat(depth * 8) + r.name, r.type.toLowerCase(), r.des, !r.canNull ? "是" : "否");
+                    tableBuilder.addRow("&nbsp;".repeat(depth * 8) + r.name, r.type.toLowerCase(), r.des, !r.canNull ? "yes" : "no");
                 //}
                 if (r.list != null) {
                     buildParam(tableBuilder, r.list, depth + 1, jsonrpc);
@@ -947,7 +947,7 @@ public class ApiDocTool {
                 request.setBody(body);
                 request.setDescription(des.md);
                 if(jsonrpc) {
-                    // 排除表单title参数
+                    // Exclude formstitleparameter
                     List<String> nameList = des.getParameters().stream().map(p -> {
                         if(p.list == null) {
                             return p.name;

@@ -1,7 +1,7 @@
 package io.nuls.consensus.model.dto.input;
 
 /**
- * 智能合约创建注销参数
+ * Smart contract creation and cancellation parameters
  * Intelligent Contract Stop Node Parameters
  *
  * @author tag

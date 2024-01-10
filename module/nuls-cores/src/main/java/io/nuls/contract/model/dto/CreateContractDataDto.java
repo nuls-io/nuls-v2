@@ -38,19 +38,19 @@ import static io.nuls.contract.util.ContractUtil.bigInteger2String;
  */
 @ApiModel
 public class CreateContractDataDto {
-    @ApiModelProperty(description = "交易创建者地址")
+    @ApiModelProperty(description = "Transaction creator address")
     private String sender;
-    @ApiModelProperty(description = "创建的合约地址")
+    @ApiModelProperty(description = "Contract address created")
     private String contractAddress;
-    @ApiModelProperty(description = "合约别名")
+    @ApiModelProperty(description = "Contract alias")
     private String alias;
-    @ApiModelProperty(description = "智能合约代码(字节码的Hex编码字符串)")
+    @ApiModelProperty(description = "Smart Contract Code(BytecodeHexEncoding string)")
     private String hexCode;
-    @ApiModelProperty(description = "GAS限制")
+    @ApiModelProperty(description = "GASlimit")
     private long gasLimit;
-    @ApiModelProperty(description = "GAS单价")
+    @ApiModelProperty(description = "GASunit price")
     private long price;
-    @ApiModelProperty(description = "参数列表")
+    @ApiModelProperty(description = "parameter list")
     private String[][] args;
 
     public CreateContractDataDto(ContractData contractData) {

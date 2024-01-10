@@ -4,42 +4,42 @@ import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
 
 /**
- * 交易注册类
+ * Transaction registration class
  * Transaction registration class
  *
  */
-@ApiModel(description = "交易注册")
+@ApiModel(description = "Transaction registration")
 public class TxRegisterDetail {
     /**
-     * 交易类型
+     * Transaction type
      * Transaction type
      */
-    @ApiModelProperty(description = "交易类型")
+    @ApiModelProperty(description = "Transaction type")
     private int txType;
     /**
-     * 是否是系统交易
+     * Is it a system transaction
      * Is it a system transaction
      */
-    @ApiModelProperty(description = "是否是系统交易")
+    @ApiModelProperty(description = "Is it a system transaction")
     private boolean systemTx;
     /**
-     * 是否是解锁交易
+     * Is it an unlocked transaction
      * Is it a unlock transaction
      */
-    @ApiModelProperty(description = "是否是解锁交易")
+    @ApiModelProperty(description = "Is it an unlocked transaction")
     private boolean unlockTx;
     /**
-     * 交易是否需要签名
+     * Do transactions require signatures
      * Is it a sign-required transaction
      */
-    @ApiModelProperty(description = "交易是否需要签名")
+    @ApiModelProperty(description = "Do transactions require signatures")
     private boolean verifySignature;
 
     /**
-     * 交易是否需要验证手续费
+     * Do transactions require verification fees
      * Is it a fee-validate-required transaction
      */
-    @ApiModelProperty(description = "交易是否需要验证手续费")
+    @ApiModelProperty(description = "Do transactions require verification fees")
     private boolean verifyFee;
 
     public int getTxType() {

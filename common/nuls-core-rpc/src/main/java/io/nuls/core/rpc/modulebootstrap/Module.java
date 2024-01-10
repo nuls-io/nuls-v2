@@ -6,7 +6,7 @@ import io.nuls.core.rpc.model.ModuleE;
 /**
  * @Author: zhoulijun
  * @Time: 2019-02-27 17:50
- * @Description: Module 描述对象
+ * @Description: Module Describe the object
  */
 
 public class Module {

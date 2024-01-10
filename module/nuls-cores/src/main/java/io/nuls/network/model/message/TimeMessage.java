@@ -31,7 +31,7 @@ import io.nuls.network.model.message.body.TimeMessageBody;
 import io.nuls.core.exception.NulsException;
 
 /**
- * 时间应答协议消息
+ * Time response protocol message
  * time response message
  *
  * @author lan

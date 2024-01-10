@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 /**
- * 广播跨链交易Hash给链接到的链内其他节点
+ * Broadcast Cross Chain TransactionsHashProvide links to other nodes within the chain
  * @author tag
  * @date 2019/4/4
  */

@@ -31,7 +31,7 @@ import java.util.Map;
  * @date: 2019-03-25
  */
 public enum ContractStatus {
-    // 0 - 不存在或者创建中, 1 - 正常, 2 - 已删除, 3 - 创建失败, 4 - 锁定中
+    // 0 - Does not exist or is being created, 1 - normal, 2 - Removed, 3 - Creation failed, 4 - Locked
     NOT_EXISTS_OR_CONFIRMING(0),
     NORMAL(1),
     HAS_STOPPED(2),

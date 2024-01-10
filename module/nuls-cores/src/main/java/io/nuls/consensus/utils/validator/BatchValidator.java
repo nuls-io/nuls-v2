@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * 共识模块批量验证器
+ * Consensus module batch validator
  * Consensus Module Batch Verifier
  *
  * @author tag
@@ -38,7 +38,7 @@ public class BatchValidator {
     private TxValidator txValidator;
 
     /**
-     * 共识模块交易批量验证方法,返回验证未通过的交易
+     * Batch Verification Method for Consensus Module Transactions,Return transactions that failed verification
      * Batch Verification Method for Consensus Module Transactions
      *
      * @param txList transaction list
@@ -125,7 +125,7 @@ public class BatchValidator {
     }
 
     /**
-     * 共识模块红牌交易批量验证方法
+     * Batch verification method for consensus module red card transactions
      * Bulk Verification Method for Red Card Trading in Consensus Module
      *
      * @param redPunishTxs red punish transaction list
@@ -140,7 +140,7 @@ public class BatchValidator {
             redPunishData.parse(tx.getTxData(), 0);
             String addressHex = HexUtil.encode(redPunishData.getAddress());
             /*
-             * 重复的红牌交易不打包
+             * Repeated red card transactions are not packaged
              * */
             if (!addressHexSet.add(addressHex)) {
                 iterator.remove();
@@ -150,7 +150,7 @@ public class BatchValidator {
     }
 
     /**
-     * 共识模块创建节点交易批量验证方法
+     * Consensus module creation node transaction batch verification method
      * Creating Batch Verification Method for Node Transactions in Consensus Module
      *
      * @param createTxs           create agent transaction list
@@ -179,7 +179,7 @@ public class BatchValidator {
             agentAddressHex = HexUtil.encode(agent.getAgentAddress());
             packAddressHex = HexUtil.encode(agent.getPackingAddress());
             /*
-             * 获得过红牌交易的地址不能创建节点
+             * An address that has obtained a red card transaction cannot create a node
              * */
             if (!redPunishAddressSet.isEmpty()) {
                 if (redPunishAddressSet.contains(agentAddressHex) || redPunishAddressSet.contains(packAddressHex)) {
@@ -188,7 +188,7 @@ public class BatchValidator {
                 }
             }
             /*
-             * 重复创建节点
+             * Repeatedly creating nodes
              * */
             if (!createAgentAddressSet.add(agentAddressHex) || !createAgentAddressSet.add(packAddressHex)) {
                 iterator.remove();
@@ -197,7 +197,7 @@ public class BatchValidator {
     }
 
     /**
-     * 共识模块停止节点交易批量验证方法
+     * Batch verification method for stopping node transactions in consensus module
      * Batch Verification Method for Stopping Node Trading in Consensus Module
      *
      * @param stopAgentTxs        transaction list
@@ -244,7 +244,7 @@ public class BatchValidator {
     }
 
     /**
-     * 共识模块委托交易批量验证方法
+     * Batch verification method for consensus module entrusted transactions
      * Batch Verification Method of Delegated Transactions in Consensus Module
      *
      * @param depositTxs deposit transaction list
@@ -273,7 +273,7 @@ public class BatchValidator {
     }
 
     /**
-     * 共识模块退出委托交易批量验证方法
+     * Batch verification method for consensus module withdrawal from entrusted transactions
      * Volume Verification Method for Consensus Module Exit from Delegated Transactions
      *
      * @param withdrawTxs      withdraw  transaction list
@@ -299,7 +299,7 @@ public class BatchValidator {
             }
             cancelDeposit.parse(tx.getTxData(), 0);
             /*
-             * 重复退出节点
+             * Repeated exit node
              * */
             if (!hashSet.add(cancelDeposit.getJoinTxHash())) {
                 iterator.remove();
@@ -318,11 +318,11 @@ public class BatchValidator {
     }
 
     /**
-     * 获取区块交易列表中，红牌交易或停止节点交易对应的节点Hash列表
+     * Obtain the nodes corresponding to red card transactions or stopped node transactions in the block transaction listHashlist
      * Get the node Hash list corresponding to the block transaction list, the red card transaction or the stop node transaction
      *
-     * @param redPunishAddressSet 红牌处罚节点地址/Red card penalty node address
-     * @param stopAgentTxs        停止节点交易列表/Stop Node Trading List
+     * @param redPunishAddressSet Red card penalty node address/Red card penalty node address
+     * @param stopAgentTxs        Stop node transaction list/Stop Node Trading List
      * @param chain               chain info
      */
     private Set<NulsHash> getInvalidAgentHash(Set<String> redPunishAddressSet, List<Transaction> stopAgentTxs, Chain chain) throws NulsException {

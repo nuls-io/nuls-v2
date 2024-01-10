@@ -23,121 +23,121 @@ import java.util.Map;
  */
 public class BlockChain extends BaseNulsData {
     /**
-     * 链序号
+     * Chain number
      * Chain ID
      */
     private int chainId;
 
     /**
-     * 链名称
+     * Chain Name
      * Chain name
      */
     private String chainName;
 
     /**
-     * 地址类型（Nuls生态，其他）
+     * Address type（NulsEcology, Other）
      * Address type (Nuls ecology and others)
      */
     private String addressType;
     /**
-     * 链地址前缀
+     * Chain Address Prefix
      */
     private String addressPrefix;
     /**
-     * 魔法参数（唯一）
+     * Magic parameters（only）
      * Magic number (Unique)
      */
     private long magicNumber;
 
     /**
-     * 是否支持外链资产流入
+     * Does it support the inflow of external chain assets
      * Whether to support the inflow of external assets
      */
     private boolean supportInflowAsset;
 
     /**
-     * 最小可用节点数
+     * Minimum number of available nodes
      * Minimum number of available nodes
      */
     private int minAvailableNodeNum;
 
 
     /**
-     * 删除链时，设置为true
+     * When deleting a chain, set totrue
      * When deleting a chain, set to true
      */
     private boolean isDelete = false;
 
     /**
-     * 创建时间
+     * Creation time
      * Create time
      */
     private long createTime;
 
     /**
-     * 最后更新时间
+     * Last update time
      * Last update time
      */
     private long lastUpdateTime;
 
     /**
-     * 注册链时使用的地址
+     * The address used when registering the chain
      * The address used when registering the chain
      */
     private byte[] regAddress;
 
     /**
-     * 注册链时的交易哈希
+     * Transaction hash during registration chain
      * Transaction hash when registering the chain
      */
     private String regTxHash;
 
     /**
-     * 注册链时添加的资产序号
+     * Asset serial number added during registration chain
      * The asset ID added when registering the chain
      */
     private int regAssetId;
 
     /**
-     * 删除链时使用的地址
+     * The address used when deleting the chain
      * The address used when deleting the chain
      */
     private byte[] delAddress;
 
     /**
-     * 删除链时的交易哈希
+     * Transaction hash when deleting chain
      * Transaction hash when deleting the chain
      */
     private String delTxHash;
 
     /**
-     * 删除链时删除的资产序号
+     * Number of assets to be deleted when deleting the chain
      * The asset ID deleted when deleting the chain
      */
     private int delAssetId;
 
     /**
-     * 本链创建的所有资产，Key=chaiId_assetId
+     * All assets created in this chain,Key=chaiId_assetId
      * All assets created by this chain, Key=chaiId_assetId
      */
     List<String> selfAssetKeyList = new ArrayList<>();
 
     /**
-     * 链上流通的所有资产，Key=chaiId_assetId
+     * All assets circulating on the chain,Key=chaiId_assetId
      * All assets circulating in the chain, Key=chaiId_assetId
      */
     List<String> totalAssetKeyList = new ArrayList<>();
 
     /**
-     * 初始化验证人信息
+     * Initialize Verifier Information
      */
     List<String> verifierList = new ArrayList<String>();
     /**
-     * 按100来计算拜占庭比例
+     * according to100To calculate the Byzantine proportion
      */
     int signatureByzantineRatio = 0;
     /**
-     * 最大签名数量
+     * Maximum number of signatures
      */
     int maxSignatureCount = 0;
 

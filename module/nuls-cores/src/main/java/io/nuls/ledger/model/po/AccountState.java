@@ -42,9 +42,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 1.用户地址资产账号对应的账本信息
- * 2.该持久化对象是区块确认后的,最终信息：包含nonce值，余额，以及冻结信息。
- * 3.key值:address-assetChainId-assetId
+ * 1.Ledger information corresponding to user address asset account
+ * 2.The persistent object is the one confirmed by the block,Final information：containnonceValue, balance, and freeze information.
+ * 3.keyvalue:address-assetChainId-assetId
  * @author lanjinsheng
  */
 
@@ -52,29 +52,29 @@ public class AccountState extends BaseNulsData {
 
     private byte[] nonce = LedgerConstant.getInitNonceByte();
     /**
-     * 最近一次的账本冻结数据的处理时间,存储秒
+     * The processing time of the most recent frozen data in the ledger,Storage seconds
      */
     private long latestUnFreezeTime = 0;
     /**
-     * 账户总金额出账
-     * 对应coindata里的coinfrom 累加值
+     * Total account amount outgoing
+     * correspondingcoindataInsidecoinfrom Accumulated value
      */
     private BigInteger totalFromAmount = BigInteger.ZERO;
 
     /**
-     * 账户总金额入账
-     * 对应coindata里的cointo 累加值
+     * Total account amount recorded
+     * correspondingcoindataInsidecointo Accumulated value
      */
     private BigInteger totalToAmount = BigInteger.ZERO;
 
 
     /**
-     * 账户冻结的资产(高度冻结)
+     * Assets frozen in accounts(Highly frozen)
      */
     private List<FreezeHeightState> freezeHeightStates = new ArrayList<>();
 
     /**
-     * 账户冻结的资产(时间冻结)
+     * Assets frozen in accounts(Time freeze)
      */
     private List<FreezeLockTimeState> freezeLockTimeStates = new ArrayList<>();
 
@@ -87,7 +87,7 @@ public class AccountState extends BaseNulsData {
     }
 
     /**
-     * 获取账户可用金额（不含锁定金额）
+     * Obtain available account amount（Excluding locked amount）
      *
      * @return BigInteger
      */
@@ -104,7 +104,7 @@ public class AccountState extends BaseNulsData {
     }
 
     /**
-     * 获取账户总金额（含锁定金额）
+     * Obtain the total account amount（Including locked amount）
      *
      * @return BigInteger
      */
@@ -180,7 +180,7 @@ public class AccountState extends BaseNulsData {
     }
 
     /**
-     * 查询用户冻结金额
+     * Query user frozen amount
      *
      * @return
      */

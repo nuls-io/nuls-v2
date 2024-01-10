@@ -6,7 +6,7 @@ import io.nuls.base.api.provider.BaseReq;
  * @Author: zhoulijun
  * @Time: 2019-03-08 11:57
  * @Description:
- * 修改密码
+ * Change password
  * reset account password
  */
 public class UpdatePasswordReq extends BaseReq {

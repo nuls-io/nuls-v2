@@ -39,7 +39,7 @@ public class LoggerUtil {
 
     //update by zlj:  common.log->block.log
     /**
-     * 公共日志
+     * Public logs
      */
     public static final NulsLogger COMMON_LOG = LoggerBuilder.getLogger(ModuleE.Constant.BLOCK);
 

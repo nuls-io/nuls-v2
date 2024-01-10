@@ -47,8 +47,8 @@ import static io.nuls.ledger.utils.LoggerUtil.logger;
  **/
 public class BaseLedgerCmd extends BaseCmd {
     boolean chainHanlder(int chainId) {
-        //链判断？判断是否是有效的.
-        //进行初始化
+        //Chain judgment？Determine if it is valid.
+        //Perform initialization
         try {
             SpringLiteContext.getBean(LedgerChainManager.class).addChain(chainId);
         } catch (Exception e) {

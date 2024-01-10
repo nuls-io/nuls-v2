@@ -30,11 +30,11 @@ import io.nuls.core.parse.SerializeUtils;
 import java.io.IOException;
 
 /**
- * 发送一个hash
+ * Send ahash
  *
  * @author captain
  * @version 1.0
- * @date 18-11-9 下午2:37
+ * @date 18-11-9 afternoon2:37
  */
 public class HashMessage extends BaseBusinessMessage {
 

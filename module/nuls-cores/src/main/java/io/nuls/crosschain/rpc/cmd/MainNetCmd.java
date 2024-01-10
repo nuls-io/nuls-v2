@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 主网跨链模块特有方法
+ * Unique methods for cross chain modules in the main network
  * @author tag
  * @date 2019/4/23
  */
@@ -39,16 +39,16 @@ public class MainNetCmd extends BaseCmd {
     ResetLocalVerifierService resetLocalVerifierService;
 
     /**
-     * 友链向主网链管理模块注册跨链信息,链管理模块通知跨链模块
+     * Friendly Chain registers cross chain information with the main network chain management module,Chain management module notifies cross chain modules
      * */
-    @CmdAnnotation(cmd = "registerCrossChain", version = 1.0, description = "链注册跨链/register Cross Chain")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
-    @Parameter(parameterName = "chainName", parameterType = "String", parameterDes = "链名称")
-    @Parameter(parameterName = "minAvailableNodeNum", requestType = @TypeDescriptor(value = int.class), parameterDes = "最小链接数")
-    @Parameter(parameterName = "assetInfoList", parameterType = "List<AssetInfo>", parameterDes = "资产列表")
-    @Parameter(parameterName = "registerTime", requestType = @TypeDescriptor(value = long.class), parameterDes = "链注册时间")
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", valueType = Boolean.class ,description = "处理结果")
+    @CmdAnnotation(cmd = "registerCrossChain", version = 1.0, description = "Chain registration cross chain/register Cross Chain")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainID")
+    @Parameter(parameterName = "chainName", parameterType = "String", parameterDes = "Chain Name")
+    @Parameter(parameterName = "minAvailableNodeNum", requestType = @TypeDescriptor(value = int.class), parameterDes = "Minimum number of links")
+    @Parameter(parameterName = "assetInfoList", parameterType = "List<AssetInfo>", parameterDes = "Asset List")
+    @Parameter(parameterName = "registerTime", requestType = @TypeDescriptor(value = long.class), parameterDes = "Chain registration time")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", valueType = Boolean.class ,description = "Processing results")
     }))
     public Response registerCrossChain(Map<String,Object> params){
         Result result = service.registerCrossChain(params);
@@ -59,18 +59,18 @@ public class MainNetCmd extends BaseCmd {
     }
 
     /**
-     * 注册链新资产
+     * Register new assets in the chain
      * */
-    @CmdAnnotation(cmd = "registerAsset", version = 1.0, description = "链注册新资产/register Cross Chain")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
-    @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterDes = "资产ID")
-    @Parameter(parameterName = "symbol", parameterType = "String", parameterDes = "资产符号")
-    @Parameter(parameterName = "assetName", parameterType = "String", parameterDes = "资产名称")
-    @Parameter(parameterName = "usable", requestType = @TypeDescriptor(value = boolean.class), parameterDes = "是否可用")
-    @Parameter(parameterName = "decimalPlaces", requestType = @TypeDescriptor(value = int.class), parameterDes = "精度")
-    @Parameter(parameterName = "time", requestType = @TypeDescriptor(value = long.class), parameterDes = "链注册时间")
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", valueType = Boolean.class ,description = "处理结果")
+    @CmdAnnotation(cmd = "registerAsset", version = 1.0, description = "Chain registration of new assets/register Cross Chain")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainID")
+    @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterDes = "assetID")
+    @Parameter(parameterName = "symbol", parameterType = "String", parameterDes = "Asset symbols")
+    @Parameter(parameterName = "assetName", parameterType = "String", parameterDes = "Asset Name")
+    @Parameter(parameterName = "usable", requestType = @TypeDescriptor(value = boolean.class), parameterDes = "Is it available")
+    @Parameter(parameterName = "decimalPlaces", requestType = @TypeDescriptor(value = int.class), parameterDes = "accuracy")
+    @Parameter(parameterName = "time", requestType = @TypeDescriptor(value = long.class), parameterDes = "Chain registration time")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", valueType = Boolean.class ,description = "Processing results")
     }))
     public Response registerAsset(Map<String,Object> params){
         Result result = service.registerAssert(params);
@@ -81,14 +81,14 @@ public class MainNetCmd extends BaseCmd {
     }
 
     /**
-     * 友链注销跨链资产
+     * Friendly Chain Cancellation of Cross Chain Assets
      * */
-    @CmdAnnotation(cmd = "cancelCrossChain", version = 1.0, description = "指定链资产退出跨链/Specified Chain Assets Exit Cross Chain")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
-    @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterDes = "资产ID")
-    @Parameter(parameterName = "time", requestType = @TypeDescriptor(value = long.class), parameterDes = "链注册时间")
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", valueType = Boolean.class ,description = "处理结果")
+    @CmdAnnotation(cmd = "cancelCrossChain", version = 1.0, description = "Designated chain assets exit cross chain/Specified Chain Assets Exit Cross Chain")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainID")
+    @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterDes = "assetID")
+    @Parameter(parameterName = "time", requestType = @TypeDescriptor(value = long.class), parameterDes = "Chain registration time")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", valueType = Boolean.class ,description = "Processing results")
     }))
     public Response cancelCrossChain(Map<String,Object> params){
         Result result = service.cancelCrossChain(params);
@@ -99,11 +99,11 @@ public class MainNetCmd extends BaseCmd {
     }
 
     /**
-     * 友链跨链资产变更
+     * Changes in cross chain assets of Friendly Chain
      */
-    @CmdAnnotation(cmd = "crossChainRegisterChange", version = 1.0, description = "友链跨链资产变更/Registered Cross Chain change")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
-    @ResponseData(description = "无特定返回值，没有错误即成功")
+    @CmdAnnotation(cmd = "crossChainRegisterChange", version = 1.0, description = "Changes in cross chain assets of Friendly Chain/Registered Cross Chain change")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainID")
+    @ResponseData(description = "No specific return value, successful without errors")
     public Response crossChainRegisterChange(Map<String, Object> params) {
         Result result = service.crossChainRegisterChange(params);
         if (result.isFailed()) {
@@ -113,13 +113,13 @@ public class MainNetCmd extends BaseCmd {
     }
 
     /**
-     * 接收其他链节点发送的资产信息
+     * Receive asset information sent by other chain nodes
      * */
-    @CmdAnnotation(cmd = CommandConstant.CIRCULATION_MESSAGE, version = 1.0, description = "接收其他链节点发送的资产信息/Receiving asset information sent by other link nodes")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
-    @Parameter(parameterName = "nodeId", parameterType = "String", parameterDes = "节点IP")
-    @Parameter(parameterName = "messageBody", parameterType = "String", parameterDes = "消息体")
-    @ResponseData(description = "无特定返回值，没有错误即成功")
+    @CmdAnnotation(cmd = CommandConstant.CIRCULATION_MESSAGE, version = 1.0, description = "Receive asset information sent by other chain nodes/Receiving asset information sent by other link nodes")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainID")
+    @Parameter(parameterName = "nodeId", parameterType = "String", parameterDes = "nodeIP")
+    @Parameter(parameterName = "messageBody", parameterType = "String", parameterDes = "Message Body")
+    @ResponseData(description = "No specific return value, successful without errors")
     public Response recvCirculat(Map<String,Object> params){
         int chainId = Integer.parseInt(params.get("chainId").toString());
         String nodeId = params.get("nodeId").toString();
@@ -135,13 +135,13 @@ public class MainNetCmd extends BaseCmd {
     }
 
     /**
-     * 主网链管理模块向跨链模块获取友链资产信息
+     * The main network chain management module obtains friend chain asset information from the cross chain module
      * Access to Friendship Chain Asset Information
      * */
-    @CmdAnnotation(cmd = "getFriendChainCirculate", version = 1.0, description = "获取友链资产信息/Access to Friendship Chain Asset Information")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
-    @Parameter(parameterName = "assetIds", parameterType = "String",parameterDes = "资产ID，多个资产ID用逗号分隔")
-    @ResponseData(description = "无特定返回值，没有错误即成功")
+    @CmdAnnotation(cmd = "getFriendChainCirculate", version = 1.0, description = "Obtaining Friendly Chain Asset Information/Access to Friendship Chain Asset Information")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainID")
+    @Parameter(parameterName = "assetIds", parameterType = "String",parameterDes = "assetIDMultiple assetsIDSeparate with commas")
+    @ResponseData(description = "No specific return value, successful without errors")
     public Response getFriendChainCirculate(Map<String,Object> params){
         Result result = service.getFriendChainCirculation(params);
         if(result.isFailed()){
@@ -151,23 +151,23 @@ public class MainNetCmd extends BaseCmd {
     }
 
     /**
-     * 智能合约资产跨链
+     * Smart contract assets cross chain
      * Smart contract assets cross chain
      * */
-    @CmdAnnotation(cmd = "cc_tokenOutCrossChain", version = 1.0, description = "智能合约资产跨链/Smart contract assets cross chain")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
-    @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterDes = "资产ID")
-    @Parameter(parameterName = "from", parameterDes = "传出地址")
-    @Parameter(parameterName = "to", parameterDes = "地址转入")
-    @Parameter(parameterName = "value", parameterDes = "金额")
-    @Parameter(parameterName = "contractAddress", parameterDes = "合约地址")
-    @Parameter(parameterName = "contractSender", parameterDes = "合约调用者地址")
-    @Parameter(parameterName = "contractBalance", parameterDes = "合约地址的当前余额")
-    @Parameter(parameterName = "contractNonce", parameterDes = "合约地址的当前nonce值")
-    @Parameter(parameterName = "blockTime", requestType = @TypeDescriptor(value = long.class), parameterDes = "当前打包的区块时间")
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "txHash",valueType = Boolean.class, description = "交易hash"),
-            @Key(name = "tx",valueType = Boolean.class, description = "交易字符串")
+    @CmdAnnotation(cmd = "cc_tokenOutCrossChain", version = 1.0, description = "Smart contract assets cross chain/Smart contract assets cross chain")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainID")
+    @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterDes = "assetID")
+    @Parameter(parameterName = "from", parameterDes = "Outgoing address")
+    @Parameter(parameterName = "to", parameterDes = "Address transfer")
+    @Parameter(parameterName = "value", parameterDes = "money")
+    @Parameter(parameterName = "contractAddress", parameterDes = "Contract address")
+    @Parameter(parameterName = "contractSender", parameterDes = "Contract caller address")
+    @Parameter(parameterName = "contractBalance", parameterDes = "Current balance of contract address")
+    @Parameter(parameterName = "contractNonce", parameterDes = "The current contract addressnoncevalue")
+    @Parameter(parameterName = "blockTime", requestType = @TypeDescriptor(value = long.class), parameterDes = "The current packaged block time")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "txHash",valueType = Boolean.class, description = "transactionhash"),
+            @Key(name = "tx",valueType = Boolean.class, description = "Transaction String")
     }))
     public Response tokenOutCrossChain(Map<String,Object> params){
         Result result = service.tokenOutCrossChain(params);
@@ -182,18 +182,18 @@ public class MainNetCmd extends BaseCmd {
         return success(resultMap);
     }
 
-    @CmdAnnotation(cmd = "cc_getRegisterChainInfo", version = 1.0, description = "获取所有注册的链信息")
+    @CmdAnnotation(cmd = "cc_getRegisterChainInfo", version = 1.0, description = "Obtain all registered chain information")
     public Response getRegisterChainInfo(Map<String,Object> params){
         return success(registeredCrossChainService.get());
     }
 
-    @CmdAnnotation(cmd = "createResetLocalVerifierTx", version = 1.0, description = "创建一个重置本链验证人交易交易")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
-    @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "调用地址")
-    @Parameter(parameterName = "password", requestType = @TypeDescriptor(value = String.class), parameterDes = "调用地址密码")
-    @Parameter(parameterName = "remark", parameterType = "String", parameterDes = "备注", canNull = true)
-    @ResponseData(name = "返回值", description = "交易HASH", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "txHash", description = "交易HASH")
+    @CmdAnnotation(cmd = "createResetLocalVerifierTx", version = 1.0, description = "Create a reset chain validator transaction transaction")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainID")
+    @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "Call address")
+    @Parameter(parameterName = "password", requestType = @TypeDescriptor(value = String.class), parameterDes = "Call address password")
+    @Parameter(parameterName = "remark", parameterType = "String", parameterDes = "Remarks", canNull = true)
+    @ResponseData(name = "Return value", description = "transactionHASH", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "txHash", description = "transactionHASH")
     }))
     public Response createResetLocalVerifierTx(Map<String,Object> params){
         int chainId = Integer.parseInt(params.get("chainId").toString());

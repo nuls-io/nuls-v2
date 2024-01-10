@@ -8,7 +8,7 @@ package io.nuls.account.rpc.call;
 public class EventCall {
 
     /**
-     * 事件发送
+     * Event sending
      *
      * @param topic
      * @param data

@@ -25,7 +25,7 @@
 package io.nuls.network.constant;
 
 /**
- * 管理器运行状态枚举
+ * Manager Run Status enumeration
  * The manager runs state enumeration.
  *
  * @author Lan
@@ -33,49 +33,49 @@ package io.nuls.network.constant;
 public enum ManagerStatusEnum {
 
     /**
-     * 未初始化
+     * uninitialized
      * uninitialized
      */
     UNINITIALIZED,
 
     /**
-     * 初始化完成
+     * Initialization completed
      * initialized
      */
     INITIALIZED,
 
     /**
-     * 正在初始化
+     * Initializing
      * initializing
      */
     INITIALIZING,
 
     /**
-     * 启动中
+     * Starting
      * starting
      */
     STARTING,
 
     /**
-     * 运行中
+     * Running
      * running
      */
     RUNNING,
 
     /**
-     * 已停止
+     * Stopped
      * stoped
      */
     STOPED,
 
     /**
-     * 正在停止
+     * Stopping
      * stopping
      */
     STOPPING,
 
     /**
-     * 运行出现异常
+     * Abnormal operation
      * Running exception
      */
     EXCEPTION,;

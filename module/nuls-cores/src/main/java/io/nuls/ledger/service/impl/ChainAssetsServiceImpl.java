@@ -42,7 +42,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 交易业务处理实现
+ * Implementation of transaction business processing
  *
  * @author lanjinsheng
  */
@@ -56,7 +56,7 @@ public class ChainAssetsServiceImpl implements ChainAssetsService {
 
     /**
      * key=assetChainId+assetId  value= address list
-     * 存储chain 下有多少资产，资产下有多少地址
+     * storagechain How many assets are there and how many addresses are there under the assets
      *
      * @param addressChainid
      * @param assetAddressIndex
@@ -69,7 +69,7 @@ public class ChainAssetsServiceImpl implements ChainAssetsService {
                 String assetIndex = entry.getKey();
                 byte[] indexBytes = assetIndex.getBytes(LedgerConstant.DEFAULT_ENCODING);
                 accountIndexRepository.updateAssetsIndex(addressChainid, indexBytes, indexBytes);
-                //地址存储
+                //Address storage
                 List<String> assetAddress = entry.getValue();
                 String[] assetChainAssetId = assetIndex.split("-");
                 int assetChainId = Integer.valueOf(assetChainAssetId[0]);

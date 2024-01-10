@@ -4,7 +4,7 @@ import io.nuls.base.basic.ProtocolVersion;
 import io.nuls.protocol.model.po.ProtocolVersionPo;
 
 /**
- * PO工具类
+ * POTool class
  *
  * @author captain
  * @version 1.0

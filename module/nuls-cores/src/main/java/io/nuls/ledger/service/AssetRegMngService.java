@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 资产登记与管理接口
+ * Asset registration and management interface
  *
  * @author lanjinsheng .
  * @date 2019/10/22

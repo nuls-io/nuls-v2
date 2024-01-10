@@ -97,7 +97,7 @@ public class TxUtil {
     }
 
     /**
-     * RPCUtil 反序列化
+     * RPCUtil Deserialization
      *
      * @param data
      * @param clazz
@@ -110,7 +110,7 @@ public class TxUtil {
     }
 
     /**
-     * HEX反序列化
+     * HEXDeserialization
      *
      * @param hex
      * @param clazz
@@ -139,7 +139,7 @@ public class TxUtil {
     }
 
     /**
-     * 从智能合约TxData中获取地址
+     * From smart contractsTxDataObtain address from
      *
      * @param txData
      * @return
@@ -158,7 +158,7 @@ public class TxUtil {
     }
 
     /**
-     * 获取跨链交易tx中froms里面地址的链id
+     * Obtain cross chain transactionstxinfromsThe chain of addresses insideid
      *
      * @param tx
      * @return
@@ -173,7 +173,7 @@ public class TxUtil {
     }
 
     /**
-     * 获取跨链交易tx中tos里面地址的链id
+     * Obtain cross chain transactionstxintosThe chain of addresses insideid
      *
      * @param tx
      * @return
@@ -239,7 +239,7 @@ public class TxUtil {
                     LOG.debug("\tassetChainId: [{}]", coinFrom.getAssetsChainId());
                     LOG.debug("\tassetId: [{}]", coinFrom.getAssetsId());
                     LOG.debug("\tnonce: {}", HexUtil.encode(coinFrom.getNonce()));
-                    LOG.debug("\tlocked(0普通交易，-1解锁金额交易（退出共识，退出委托)): [{}]", coinFrom.getLocked());
+                    LOG.debug("\tlocked(0Ordinary transactions,-1Unlock amount transaction（Exit consensus, exit delegation)): [{}]", coinFrom.getLocked());
                     LOG.debug("");
                 }
             }
@@ -258,7 +258,7 @@ public class TxUtil {
                     LOG.debug("\tamount: {}", coinTo.getAmount());
                     LOG.debug("\tassetChainId: [{}]", coinTo.getAssetsChainId());
                     LOG.debug("\tassetId: [{}]", coinTo.getAssetsId());
-                    LOG.debug("\tlocked(解锁高度或解锁时间，-1为永久锁定): [{}]", coinTo.getLockTime());
+                    LOG.debug("\tlocked(Unlocking height or unlocking time,-1To permanently lock): [{}]", coinTo.getLockTime());
                     LOG.debug("");
                 }
             }
@@ -272,7 +272,7 @@ public class TxUtil {
 
 
     /**
-     * 对交易进行模块分组
+     * Grouping transactions into modules
      *
      * @param chain
      * @param moduleVerifyMap
@@ -280,7 +280,7 @@ public class TxUtil {
      * @throws NulsException
      */
     public static void moduleGroups(Chain chain, Map<String, List<String>> moduleVerifyMap, Transaction tx) throws NulsException {
-        //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
+        //According to the unified validator name of the module, group all transactions and prepare for unified verification of each module
         String txStr;
         try {
             txStr = RPCUtil.encode(tx.serialize());
@@ -291,7 +291,7 @@ public class TxUtil {
     }
 
     /**
-     * 对交易进行模块分组
+     * Grouping transactions into modules
      *
      * @param chain
      * @param moduleVerifyMap
@@ -300,13 +300,13 @@ public class TxUtil {
      * @throws NulsException
      */
     public static void moduleGroups(Chain chain, Map<String, List<String>> moduleVerifyMap, int txType, String txStr) {
-        //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
+        //According to the unified validator name of the module, group all transactions and prepare for unified verification of each module
         TxRegister txRegister = TxManager.getTxRegister(chain, txType);
         moduleGroups(moduleVerifyMap, txRegister, txStr);
     }
 
     public static void moduleGroups(Map<String, List<String>> moduleVerifyMap, TxRegister txRegister, String txStr) {
-        //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
+        //According to the unified validator name of the module, group all transactions and prepare for unified verification of each module
         String moduleCode = txRegister.getModuleCode();
         if (moduleVerifyMap.containsKey(moduleCode)) {
             moduleVerifyMap.get(moduleCode).add(txStr);
@@ -327,7 +327,7 @@ public class TxUtil {
 
 
     /**
-     * 通过交易字符串解析交易类型
+     * Parsing transaction types through transaction strings
      *
      * @param txString
      * @return
@@ -341,26 +341,26 @@ public class TxUtil {
 
 
     /**
-     * 根据待打包队列存交易的map交易的数据总和, 来计算是放弃当前交易
+     * Store transactions based on the queue to be packagedmapThe total amount of transaction data, To calculate whether to abandon the current transaction
      *
      * @return
      */
     public static boolean discardTx(Chain chain, int packableTxMapDataSize, Transaction tx) {
         Random random = new Random();
-        //随机0~9
+        //random0~9
         int number = random.nextInt(10);
         if (packableTxMapDataSize >= TxConstant.PACKABLE_TX_MAP_MAX_DATA_SIZE) {
-            //扔100%
+            //throw100%
             chain.getLogger().debug("Packable pool tx data size reach the 100% discard transaction threshold, hash:{}", tx.getHash().toHex());
             return true;
         } else if (packableTxMapDataSize >= TxConstant.PACKABLE_TX_MAP_HEAVY_DATA_SIZE) {
-            //扔80%
+            //throw80%
             if (number < 8) {
                 chain.getLogger().debug("Packable pool tx data size reach the 80% discard transaction threshold, hash:{}", tx.getHash().toHex());
                 return true;
             }
         } else if (packableTxMapDataSize >= TxConstant.PACKABLE_TX_MAP_STRESS_DATA_SIZE) {
-            //扔50%
+            //throw50%
             if (number < 5) {
                 chain.getLogger().debug("Packable pool tx data size reach the 50% discard transaction threshold, hash:{}", tx.getHash().toHex());
                 return true;
@@ -372,18 +372,18 @@ public class TxUtil {
 
 
     /**
-     * 获取两个集合的不同元素
+     * Get different elements from two sets
      *
      * @param collectionMax
      * @param collectionMin
      * @return
      */
     public static Collection getDiffent(Collection collectionMax, Collection collectionMin) {
-        //使用LinkeList防止差异过大时,元素拷贝
+        //applyLinkeListPrevent excessive differences,Element copying
         Collection collection = new LinkedList();
         Collection max = collectionMax;
         Collection min = collectionMin;
-        //先比较大小,这样会减少后续map的if判断次数
+        //Compare sizes first,This will reduce the subsequent costsmapofifNumber of judgments
         if (collectionMax.size() < collectionMin.size()) {
             max = collectionMin;
             min = collectionMax;
@@ -408,7 +408,7 @@ public class TxUtil {
     }
 
     /**
-     * 获取两个集合的不同元素,去除重复
+     * Get different elements from two sets,Remove duplicates
      *
      * @param collmax
      * @param collmin
@@ -421,7 +421,7 @@ public class TxUtil {
 
 
     /**
-     * 输出三个换行符, 日志用
+     * Output three line breaks, For logging purposes
      * @return
      */
     public static String nextLine(){
@@ -440,7 +440,7 @@ public class TxUtil {
 
         String contractAddress = AddressTool.getStringAddressByBytes(address);
 
-        // add by pierre at 2020-04-02 协议升级黑洞地址
+        // add by pierre at 2020-04-02 Protocol upgrade black hole address
         if (ProtocolGroupManager.getCurrentVersion(chainId) >= TxContext.UPDATE_VERSION_V250) {
             return AddressTool.BLOCK_HOLE_ADDRESS_SET.contains(contractAddress) ||
                     AddressTool.BLOCK_HOLE_ADDRESS_SET_5.contains(contractAddress);
@@ -450,7 +450,7 @@ public class TxUtil {
     }
 
     public static boolean isBlockAddress(int chainId, byte[] address) {
-        // add by pierre at 2022-01-18 协议升级锁定地址
+        // add by pierre at 2022-01-18 Protocol upgrade lock address
         if(address == null) {
             return false;
         }

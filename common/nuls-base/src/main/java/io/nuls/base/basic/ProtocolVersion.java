@@ -8,28 +8,28 @@ import java.io.IOException;
 import java.util.Comparator;
 
 /**
- * 协议版本
+ * Protocol version
  *
  * @author captain
  * @version 1.0
- * @date 19-1-30 下午3:23
+ * @date 19-1-30 afternoon3:23
  */
 public class ProtocolVersion extends BaseNulsData {
 
     public static final Comparator<ProtocolVersion> COMPARATOR = Comparator.comparingInt(ProtocolVersion::getVersion);
 
     /**
-     * 协议版本号
+     * Protocol version number
      */
     private short version;
 
     /**
-     * 每个统计区间内的最小生效比例(60-100)
+     * The minimum effective ratio within each statistical interval(60-100)
      */
     private byte effectiveRatio;
 
     /**
-     * 协议生效要满足的连续区间数(50-1000)
+     * The number of consecutive intervals that the agreement must meet in order to take effect(50-1000)
      */
     private short continuousIntervalCount;
 

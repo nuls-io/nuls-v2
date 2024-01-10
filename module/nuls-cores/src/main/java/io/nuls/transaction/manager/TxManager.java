@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 交易管理类，存储管理交易注册的基本信息
+ * Transaction management class, storing basic information for managing transaction registration
  *
  * @author: Charlie
  * @date: 2018/11/22
@@ -52,7 +52,7 @@ public class TxManager {
     }
 
     /**
-     * 获取交易的注册对象
+     * Obtain the registered object of the transaction
      *
      * @param type
      * @return
@@ -62,7 +62,7 @@ public class TxManager {
     }
 
     /**
-     * 根据交易类型返回交易类型是否存在
+     * Return whether the transaction type exists based on the transaction type
      *
      * @param type
      * @return
@@ -72,7 +72,7 @@ public class TxManager {
     }
 
     /**
-     * 返回系统交易类型
+     * Return system transaction type
      */
     public static List<Integer> getSysTypes(Chain chain) {
         List<Integer> list = new ArrayList<>();
@@ -85,7 +85,7 @@ public class TxManager {
     }
 
     /**
-     * 判断交易是系统交易
+     * Determine if the transaction is a system transaction
      *
      * @param tx
      * @return
@@ -96,7 +96,7 @@ public class TxManager {
     }
 
     /**
-     * 是否是智能合约非系统交易
+     * Is it a smart contract non system transaction
      * @param txType
      * @return
      */
@@ -119,7 +119,7 @@ public class TxManager {
     }
 
     /**
-     * 是否是智能合约系统交易
+     * Is it a smart contract system transaction
      * @param txType
      * @return
      */

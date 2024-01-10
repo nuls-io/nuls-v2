@@ -81,7 +81,7 @@ public class BaseChainCmd extends BaseCmd {
     }
 
     /**
-     * 注册链或资产封装coinData,x%资产进入黑洞，y%资产进入锁定
+     * Registration chain or asset encapsulationcoinData,x%Assets enter the black hole,y%Asset entry lock
      */
     CoinData getRegCoinData(Asset asset, int nulsChainId, int nulsAssetId, int txSize, AccountBalance accountBalance) throws NulsRuntimeException {
         txSize = txSize + P2PHKSignature.SERIALIZE_LENGTH;
@@ -91,7 +91,7 @@ public class BaseChainCmd extends BaseCmd {
         CoinTo to2 = new CoinTo(CmConstants.BLACK_HOLE_ADDRESS, nulsChainId, nulsAssetId, asset.getDestroyNuls(), 0);
         coinData.addTo(to1);
         coinData.addTo(to2);
-        //手续费
+        //Handling fees
         CoinFrom from = new CoinFrom(asset.getAddress(), nulsChainId, nulsAssetId, asset.getDepositNuls(), accountBalance.getNonce(), (byte) 0);
         coinData.addFrom(from);
         txSize += to1.size();
@@ -108,12 +108,12 @@ public class BaseChainCmd extends BaseCmd {
 
 
     /**
-     * 注册链或资产封装coinData,x%资产进入黑洞，y%资产进入锁定
+     * Registration chain or asset encapsulationcoinData,x%Assets enter the black hole,y%Asset entry lock
      */
     CoinData getRegCoinDataV7(Asset asset, int nulsChainId, int nulsAssetId, int txSize, AccountBalance accountBalance) throws NulsRuntimeException {
         txSize = txSize + P2PHKSignature.SERIALIZE_LENGTH;
         CoinData coinData = new CoinData();
-        //手续费
+        //Handling fees
         CoinFrom from = new CoinFrom(asset.getAddress(), nulsChainId, nulsAssetId, BigInteger.ZERO, accountBalance.getNonce(), (byte) 0);
         CoinTo to = new CoinTo(CmConstants.BLACK_HOLE_ADDRESS, nulsChainId, nulsAssetId, BigInteger.ZERO, 0);
         coinData.addFrom(from);
@@ -130,7 +130,7 @@ public class BaseChainCmd extends BaseCmd {
     }
 
     /**
-     * 注销资产进行处理
+     * Cancel assets for processing
      */
     CoinData getDisableCoinData(Asset asset, int nulsChainId, int nulsAssetId,
                                 int txSize, AccountBalance accountBalance) throws NulsRuntimeException {
@@ -140,7 +140,7 @@ public class BaseChainCmd extends BaseCmd {
         CoinTo to = new CoinTo(asset.getAddress(), nulsChainId, nulsAssetId, lockAmount, 0);
         CoinData coinData = new CoinData();
 
-        //手续费
+        //Handling fees
         if (lockAmount.equals(BigInteger.ZERO)) {
             CoinFrom from = new CoinFrom(asset.getAddress(), nulsChainId, nulsAssetId, BigInteger.ZERO, accountBalance.getNonce(), (byte) 0);
             coinData.addFrom(from);
@@ -159,7 +159,7 @@ public class BaseChainCmd extends BaseCmd {
             txSize += to.size();
             txSize += from.size();
             BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
-            //手续费从抵押里扣除
+            //The handling fee is deducted from the mortgage
             to.setAmount(lockAmount.subtract(fee));
         }
         return coinData;

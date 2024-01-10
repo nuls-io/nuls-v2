@@ -1,7 +1,7 @@
 package io.nuls.core.constant;
 
 /**
- * 交易类型
+ * Transaction type
  *
  * @author captain
  * @version 1.0
@@ -10,163 +10,163 @@ package io.nuls.core.constant;
 public class TxType {
 
     /**
-     * coinBase出块奖励
+     * coinBaseReward for block output
      */
     public static final int COIN_BASE = 1;
     /**
-     * 转账
+     * Transfer
      * the type of the transfer transaction
      */
     public static final int TRANSFER = 2;
 
     /**
-     * 设置账户别名
+     * Set account alias
      * Set the transaction type of account alias.
      */
     public static final int ACCOUNT_ALIAS = 3;
     /**
-     * 新建共识节点`
+     * Create a new consensus node`
      */
     public static final int REGISTER_AGENT = 4;
     /**
-     * 委托参与共识
+     * Entrusting participation in consensus
      */
     public static final int DEPOSIT = 5;
     /**
-     * 取消委托
+     * Cancel delegation
      */
     public static final int CANCEL_DEPOSIT = 6;
     /**
-     * 黄牌
+     * Yellow card
      */
     public static final int YELLOW_PUNISH = 7;
     /**
-     * 红牌
+     * Red card
      */
     public static final int RED_PUNISH = 8;
     /**
-     * 注销共识节点
+     * Unregister consensus node
      */
     public static final int STOP_AGENT = 9;
     /**
-     * 跨链转账
+     * Cross chain transfer
      */
     public static final int CROSS_CHAIN = 10;
 
     /**
-     * 注册链
+     * Registration Chain
      */
     public static final int REGISTER_CHAIN_AND_ASSET = 11;
     /**
-     * 注销链
+     * Unregister Chain
      */
     public static final int DESTROY_CHAIN_AND_ASSET = 12;
     /**
-     * 为链新增一种资产
+     * Add an asset to the chain
      */
     public static final int ADD_ASSET_TO_CHAIN = 13;
     /**
-     * 删除链上资产
+     * Delete on chain assets
      */
     public static final int REMOVE_ASSET_FROM_CHAIN = 14;
     /**
-     * 创建智能合约
+     * Create a smart contract
      */
     public static final int CREATE_CONTRACT = 15;
     /**
-     * 调用智能合约
+     * Calling smart contracts
      */
     public static final int CALL_CONTRACT = 16;
     /**
-     * 删除智能合约
+     * Delete smart contract
      */
     public static final int DELETE_CONTRACT = 17;
     /**
-     * 合约内部转账
+     * Internal transfer of contract
      * contract transfer tx
      */
     public static final int CONTRACT_TRANSFER = 18;
     /**
-     * 合约执行手续费返还
+     * Contract execution fee refund
      * contract return gas tx
      */
     public static final int CONTRACT_RETURN_GAS = 19;
     /**
-     * 合约新建共识节点
+     * Contract New Consensus Node
      * contract create agent tx
      */
     public static final int CONTRACT_CREATE_AGENT = 20;
 
     /**
-     * 合约委托参与共识
+     * Contract Entrustment Participation Consensus
      * contract deposit tx
      */
     public static final int CONTRACT_DEPOSIT = 21;
 
     /**
-     * 合约取消委托共识
+     * Contract cancellation commission consensus
      * contract withdraw tx
      */
     public static final int CONTRACT_CANCEL_DEPOSIT = 22;
 
     /**
-     * 合约注销共识节点
+     * Contract Cancellation Consensus Node
      * contract stop agent tx
      */
     public static final int CONTRACT_STOP_AGENT = 23;
 
     /**
-     * 验证人变更
+     * Verifier change
      * Verifier Change
      */
     public static final int VERIFIER_CHANGE = 24;
 
     /**
-     * 验证人初始化
+     * Verifier initialization
      * Verifier init
      */
     public static final int VERIFIER_INIT = 25;
 
     /**
-     * 合约token跨链转账
+     * contracttokenCross chain transfer
      * contract token cross transfer tx
      */
     public static final int CONTRACT_TOKEN_CROSS_TRANSFER = 26;
     /**
-     * 账本链内资产注册登记
+     * Registration of assets within the ledger chain
      */
     public static final int LEDGER_ASSET_REG_TRANSFER = 27;
 
 
     /**
-     * 追加节点保证金
+     * Additional node margin
      * Additional agent margin
      */
     public static final int APPEND_AGENT_DEPOSIT = 28;
 
     /**
-     * 撤销节点保证金
+     * Revoke node deposit
      * Cancel agent deposit
      */
     public static final int REDUCE_AGENT_DEPOSIT = 29;
 
     /**
-     * 喂价交易
+     * Feed trading
      */
     public static final int QUOTATION = 30;
 
     /**
-     * 最终喂价交易
+     * Final feed price transaction
      */
     public static final int FINAL_QUOTATION = 31;
 
     /**
-     * 批量退出staking交易
+     * Batch exitstakingtransaction
      */
     public static final int BATCH_WITHDRAW = 32;
 
     /**
-     * 合并活期staking记录
+     * Merge current accountsstakingrecord
      */
     public static final int BATCH_STAKING_MERGE = 33;
 
@@ -174,122 +174,122 @@ public class TxType {
     public static final int DELAY_STOP_AGENT = 34;
 
     /**
-     * 创建交易对
+     * Create transaction pairs
      */
     public static final int COIN_TRADING = 228;
 
     /**
-     * 挂单委托
+     * Order commission
      */
     public static final int TRADING_ORDER = 229;
 
     /**
-     * 挂单撤销
+     * Order cancellation
      */
     public static final int TRADING_ORDER_CANCEL = 230;
 
     /**
-     * 挂单成交
+     * Listing transaction
      */
     public static final int TRADING_DEAL = 231;
 
     /**
-     * 修改交易对
+     * Modify transaction pairs
      */
     public static final int EDIT_COIN_TRADING = 232;
 
     /**
-     * 撤单交易确认
+     * Confirmation of cancellation transaction
      */
     public static final int ORDER_CANCEL_CONFIRM = 233;
 
     /**
-     * 确认 虚拟银行变更交易
+     * confirm Virtual Bank Change Transaction
      */
     public static final int CONFIRM_CHANGE_VIRTUAL_BANK = 40;
 
     /**
-     * 虚拟银行变更交易
+     * Virtual Bank Change Transaction
      */
     public static final int CHANGE_VIRTUAL_BANK = 41;
 
     /**
-     * 链内充值交易
+     * On chain recharge transactions
      */
     public static final int RECHARGE = 42;
 
     /**
-     * 提现交易
+     * Withdrawal transactions
      */
     public static final int WITHDRAWAL = 43;
 
     /**
-     * 确认提现成功状态交易
+     * Confirm successful withdrawal status transaction
      */
     public static final int CONFIRM_WITHDRAWAL = 44;
 
     /**
-     * 发起提案交易
+     * Initiate proposal transactions
      */
     public static final int PROPOSAL = 45;
 
     /**
-     * 对提案进行投票交易
+     * Vote on proposals for trading
      */
     public static final int VOTE_PROPOSAL = 46;
 
     /**
-     * 异构链交易手续费补贴
+     * Subsidy for transaction fees for heterogeneous chain transactions
      */
     public static final int DISTRIBUTION_FEE = 47;
 
     /**
-     * 虚拟银行初始化异构链
+     * Virtual Bank Initialize Heterogeneous Chain
      */
     public static final int INITIALIZE_HETEROGENEOUS = 48;
     /**
-     * 异构链合约资产注册等待
+     * Heterogeneous chain contract asset registration waiting
      */
     public static final int HETEROGENEOUS_CONTRACT_ASSET_REG_PENDING = 49;
     /**
-     * 异构链合约资产注册完成
+     * Heterogeneous chain contract asset registration completed
      */
     public static final int HETEROGENEOUS_CONTRACT_ASSET_REG_COMPLETE = 50;
     /**
-     * 确认提案执行交易
+     * Confirm proposal execution transaction
      */
     public static final int CONFIRM_PROPOSAL = 51;
     /**
-     * 重置异构链(合约)虚拟银行
+     * Reset heterogeneous chains(contract)Virtual banking
      */
     public static final int RESET_HETEROGENEOUS_VIRTUAL_BANK = 52;
     /**
-     * 确认重置异构链(合约)虚拟银行
+     * Confirm resetting heterogeneous chains(contract)Virtual banking
      */
     public static final int CONFIRM_HETEROGENEOUS_RESET_VIRTUAL_BANK = 53;
     /**
-     * 异构链充值待确认交易
+     * Heterogeneous chain recharge pending confirmation transaction
      */
     public static final int RECHARGE_UNCONFIRMED = 54;
     /**
-     * 异构链提现已发布到异构链网络
+     * Heterogeneous chain lifting has been released to heterogeneous chain networks
      */
     public static final int WITHDRAWAL_HETEROGENEOUS_SEND = 55;
     /**
-     * 追加提现手续费
+     * Additional withdrawal handling fee
      */
     public static final int WITHDRAWAL_ADDITIONAL_FEE = 56;
     /**
-     * 异构链主资产注册
+     * Heterogeneous Chain Master Asset Registration
      */
     public static final int HETEROGENEOUS_MAIN_ASSET_REG = 57;
     /**
-     * 已注册跨链的链信息变更
+     * Registered cross chain chain information change
      */
     public static final int REGISTERED_CHAIN_CHANGE = 60;
     /**
-     * 重置跨链模块存储的本链验证人列表
-     * 本交易必须由种子节点发出，节点收到本交易后从共识模块获取到最新的共识节点出块地址列表，覆盖跨链模块本地存储的本链验证人列表。
+     * Reset the list of local validators stored in the cross chain module
+     * This transaction must be initiated by the seed node. After receiving this transaction, the node obtains the latest consensus node block address list from the consensus module, covering the list of local chain validators stored in the cross chain module.
      */
     public static final int RESET_LOCAL_VERIFIER_LIST = 61;
 
@@ -300,7 +300,7 @@ public class TxType {
     public static final int UNBLOCK_ACCOUNT = 64;
 
     /**
-     * 调用合约允许普通转账的账户白名单
+     * Call the whitelist of accounts that allow regular transfers in the contract
      */
     public static final int ACCOUNT_FOR_TRANSFER_ON_CONTRACT_CALL = 65;
 

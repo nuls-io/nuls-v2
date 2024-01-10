@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * 交易分发器
+ * Transaction distributor
  *
  * @author captain
  * @version 1.0
@@ -55,7 +55,7 @@ public final class TransactionDispatcher extends BaseCmd {
 
     public void register(ModuleE module, CommonAdvice commitAdvice, CommonAdvice rollbackAdvice) {
         if (module == ModuleE.SC) {
-            // 跨链模块的token跨链转入交易，需要把普通跨链交易转换成调用合约交易来写入系统跨链合约
+            // Cross chain moduletokenCross chain transfer transactions require converting regular cross chain transactions into call contract transactions to be written into system cross chain contracts
             if (commitAdvice != null) {
                 commitAdviceMap.put(String.valueOf(TxType.CROSS_CHAIN), commitAdvice);
             }
@@ -63,7 +63,7 @@ public final class TransactionDispatcher extends BaseCmd {
                 rollbackAdviceMap.put(String.valueOf(TxType.CROSS_CHAIN), rollbackAdvice);
             }
         }
-        // 按实际模块注册
+        // Register according to actual modules
         if (commitAdvice != null) {
             commitAdviceMap.put(module.abbr, commitAdvice);
         }
@@ -73,7 +73,7 @@ public final class TransactionDispatcher extends BaseCmd {
     }
 
     /**
-     * 获取最新主链高度
+     * Get the latest main chain height
      *
      * @param params
      * @return
@@ -133,7 +133,7 @@ public final class TransactionDispatcher extends BaseCmd {
     }
 
     /**
-     * 获取最新主链高度
+     * Get the latest main chain height
      *
      * @param params
      * @return
@@ -173,7 +173,7 @@ public final class TransactionDispatcher extends BaseCmd {
             if (transactions.isEmpty()) {
                 continue;
             }
-            // 按实际模块调用
+            // Call according to actual module
             if (!commitAdviceBegin) {
                 commitAdviceBegin = true;
                 String moduleCode = ResponseMessageProcessor.TX_TYPE_MODULE_MAP.get(processor.getType());
@@ -203,7 +203,7 @@ public final class TransactionDispatcher extends BaseCmd {
     }
 
     /**
-     * 获取最新主链高度
+     * Get the latest main chain height
      *
      * @param params
      * @return
@@ -243,7 +243,7 @@ public final class TransactionDispatcher extends BaseCmd {
             if (transactions.isEmpty()) {
                 continue;
             }
-            // 按实际模块调用
+            // Call according to actual module
             if (!rollbackAdviceBegin) {
                 rollbackAdviceBegin = true;
                 String moduleCode = ResponseMessageProcessor.TX_TYPE_MODULE_MAP.get(processor.getType());

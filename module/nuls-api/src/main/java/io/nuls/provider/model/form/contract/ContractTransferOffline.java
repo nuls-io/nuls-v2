@@ -30,22 +30,22 @@ import io.nuls.provider.model.form.Base;
 
 import java.math.BigInteger;
 
-@ApiModel(description = "从账户地址向合约地址转账(主链资产)的合约交易")
+@ApiModel(description = "Transfer from account address to contract address(Main chain assets)Contract transactions")
 public class ContractTransferOffline extends Base {
 
-    @ApiModelProperty(description = "转出者账户地址", required = true)
+    @ApiModelProperty(description = "Transferor's account address", required = true)
     private String fromAddress;
-    @ApiModelProperty(description = "转出者账户余额")
+    @ApiModelProperty(description = "Transferor account balance")
     private BigInteger senderBalance;
-    @ApiModelProperty(description = "转出者账户nonce值")
+    @ApiModelProperty(description = "Transferor's accountnoncevalue")
     private String nonce;
-    @ApiModelProperty(description = "转入的合约地址", required = true)
+    @ApiModelProperty(description = "Transferred contract address", required = true)
     private String toAddress;
-    @ApiModelProperty(description = "GAS限制")
+    @ApiModelProperty(description = "GASlimit")
     private long gasLimit;
-    @ApiModelProperty(description = "转出的主链资产金额", required = true)
+    @ApiModelProperty(description = "The amount of main chain assets transferred out", required = true)
     private BigInteger amount;
-    @ApiModelProperty(description = "备注", required = false)
+    @ApiModelProperty(description = "Remarks", required = false)
     private String remark;
 
     public String getFromAddress() {

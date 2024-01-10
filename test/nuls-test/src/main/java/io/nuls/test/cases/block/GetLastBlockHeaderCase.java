@@ -11,7 +11,7 @@ import io.nuls.core.core.annotation.Component;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-20 13:40
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Component
 public class GetLastBlockHeaderCase extends BaseBlockCase<BlockHeaderData,Void> {
@@ -20,7 +20,7 @@ public class GetLastBlockHeaderCase extends BaseBlockCase<BlockHeaderData,Void> 
 
     @Override
     public String title() {
-        return "获取最新区块头";
+        return "Get the latest block header";
     }
 
     @Override

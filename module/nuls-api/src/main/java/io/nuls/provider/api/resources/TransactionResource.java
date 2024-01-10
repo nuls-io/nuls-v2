@@ -70,11 +70,11 @@ public class TransactionResource {
     @GET
     @Path("/{hash}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "根据hash获取交易", order = 301)
+    @ApiOperation(description = "according tohashObtain transactions", order = 301)
     @Parameters({
-            @Parameter(parameterName = "hash", requestType = @TypeDescriptor(value = String.class), parameterDes = "交易hash")
+            @Parameter(parameterName = "hash", requestType = @TypeDescriptor(value = String.class), parameterDes = "transactionhash")
     })
-    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = TransactionDto.class))
+    @ResponseData(name = "Return value", responseType = @TypeDescriptor(value = TransactionDto.class))
     public RpcClientResult getTx(@PathParam("hash") String hash) {
         if (hash == null) {
             return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "hash is empty"));

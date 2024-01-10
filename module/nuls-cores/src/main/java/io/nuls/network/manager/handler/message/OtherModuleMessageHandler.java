@@ -64,7 +64,7 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
     }
 
     /**
-     * 接收消息处理
+     * Receive message processing
      * Receive message processing
      *
      * @param message address message

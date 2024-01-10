@@ -27,7 +27,7 @@ package io.nuls.transaction.model.bo;
 import io.nuls.base.data.Transaction;
 
 /**
- * 交易模块打包区块交易时对交易临时封装
+ * Temporary encapsulation of transactions when packaging block transactions in the transaction module
  * @author: Charlie
  * @date: 2019/3/26
  */

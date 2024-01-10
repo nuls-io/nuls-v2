@@ -31,7 +31,7 @@ import io.nuls.core.exception.NulsException;
 import java.util.List;
 
 /**
- * 多签账户Service接口
+ * Multiple account signingServiceinterface
  *
  * MultiSignAccount service definition
  *
@@ -40,11 +40,11 @@ import java.util.List;
 public interface MultiSignAccountService {
 
     /**
-     * 创建多签账户
+     * Create a multi signature account
      *
      * Create a multi sign account
      *
-     * @param chain  链
+     * @param chain  chain
      * @param pubKeys    the public keys
      * @param m    the min number of sign.
      * @return the MultiSigAccount which was created.
@@ -52,7 +52,7 @@ public interface MultiSignAccountService {
      MultiSigAccount createMultiSigAccount(Chain chain, List<String> pubKeys, int m) throws NulsException;
 
     /**
-     * 查询多签账户
+     * Query multiple signed accounts
      *
      * get the multi sign account by address
      *
@@ -62,7 +62,7 @@ public interface MultiSignAccountService {
     MultiSigAccount getMultiSigAccountByAddress(String address);
 
     /**
-     * 查询多签账户
+     * Query multiple signed accounts
      *
      * get the multi sign account by address
      *
@@ -72,11 +72,11 @@ public interface MultiSignAccountService {
     MultiSigAccount getMultiSigAccountByAddress(byte[] address);
 
     /**
-     * 移除多签账户
+     * Remove multiple signed accounts
      *
      * remove the multiSigAccount
      *
-     * @param address  地址
+     * @param address  address
      * @return the result of remove the multiSigAccount
      */
     boolean removeMultiSigAccount(int chainId,String address);

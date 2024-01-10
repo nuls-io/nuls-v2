@@ -32,13 +32,13 @@ import io.nuls.core.rpc.model.ApiModelProperty;
 /**
  * @author: Charlie
  */
-@ApiModel(name = "创建账户表单数据")
+@ApiModel(name = "Create account form data")
 public class ValidateAddressForm {
 
-    @ApiModelProperty(description = "链ID")
+    @ApiModelProperty(description = "chainID")
     private int chainId;
 
-    @ApiModelProperty(description = "账户地址")
+    @ApiModelProperty(description = "Account address")
     private String address;
 
     public String getAddress() {

@@ -43,7 +43,7 @@ import java.math.BigInteger;
 import java.util.*;
 
 /**
- * 组装交易
+ * Assembly transaction
  * @author: Charlie
  * @date: 2019/4/22
  */
@@ -63,7 +63,7 @@ public class CreateTx {
         chain.setConfig(configBean);
     }
     /**
-     * 创建普通转账交易
+     * Create a regular transfer transaction
      *
      * @return
      */
@@ -173,11 +173,11 @@ public class CreateTx {
     }
 
     /**
-     * 组装交易
+     * Assembly transaction
      * @param fromList
      * @param toList
      * @param remark
-     * @param prehash 前一笔交易hash 用于连续发交易时测试
+     * @param prehash Previous transactionhash Used for testing during continuous trading
      * @return
      * @throws NulsException
      */
@@ -185,20 +185,20 @@ public class CreateTx {
         Transaction tx = new Transaction(2);
         tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
         tx.setRemark(StringUtils.bytes(remark));
-        //组装CoinData中的coinFrom、coinTo数据
+        //assembleCoinDataMiddlecoinFrom、coinTodata
         assemblyCoinData(tx, fromList, toList, prehash);
         tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
         TransactionSignature transactionSignature = new TransactionSignature();
         List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
         for (CoinDTO from : fromList) {
-            //根据密码获得ECKey get ECKey from Password
+            //Obtained based on passwordECKey get ECKey from Password
             ECKey ecKey =  ECKey.fromPrivate(new BigInteger(1, HexUtil.decode(accMap.get(from.getAddress()))));
             byte[] signBytes = SignatureUtil.signDigest(tx.getHash().getBytes(), ecKey).serialize();
             P2PHKSignature signature = new P2PHKSignature(signBytes, ecKey.getPubKey()); // TxUtil.getInstanceRpcStr(signatureStr, P2PHKSignature.class);
 //            signature.parse(new NulsByteBuffer(RPCUtil.decode(signatureStr)));
             p2PHKSignatures.add(signature);
         }
-        //交易签名
+        //Transaction signature
         transactionSignature.setP2PHKSignatures(p2PHKSignatures);
         tx.setTransactionSignature(transactionSignature.serialize());
         return tx;
@@ -207,16 +207,16 @@ public class CreateTx {
 
 
     private static Transaction assemblyCoinData(Transaction tx, List<CoinDTO> fromList, List<CoinDTO> toList, NulsHash hash) throws Exception {
-        //组装coinFrom、coinTo数据
+        //assemblecoinFrom、coinTodata
         List<CoinFrom> coinFromList = assemblyCoinFrom( fromList, hash);
         List<CoinTo> coinToList = assemblyCoinTo(toList);
-        //来源地址或转出地址为空
+        //The source address or transfer address is empty
         if (coinFromList.size() == 0 || coinToList.size() == 0) {
             return null;
         }
-        //交易总大小=交易数据大小+签名数据大小
+        //Total transaction size=Transaction data size+Signature data size
         int txSize = tx.size() + getSignatureSize(coinFromList);
-        //组装coinData数据
+        //assemblecoinDatadata
         CoinData coinData = getCoinData(chainId, coinFromList, coinToList, txSize);
         tx.setCoinData(coinData.serialize());
         return tx;
@@ -230,8 +230,8 @@ public class CreateTx {
     }
 
     /**
-     * 通过coinfrom计算签名数据的size
-     * 如果coinfrom有重复地址则只计算一次；如果有多签地址，只计算m个地址的size
+     * adoptcoinfromCalculate signature datasize
+     * IfcoinfromCalculate only once if there are duplicate addresses；If there are multiple addresses, only calculatemAddressessize
      *
      * @param coinFroms
      * @return
@@ -264,7 +264,7 @@ public class CreateTx {
         return HexUtil.decode(nonce8BytesStr);
     }
     /**
-     * 组装coinFrom数据
+     * assemblecoinFromdata
      * assembly coinFrom data
      *
      * @param listFrom Initiator set coinFrom
@@ -276,12 +276,12 @@ public class CreateTx {
         for (CoinDTO coinDto : listFrom) {
             String address = coinDto.getAddress();
             byte[] addressByte = AddressTool.getAddress(address);
-            //检查该链是否有该资产
+            //Check if the chain has the asset
             int assetChainId = coinDto.getAssetsChainId();
             int assetId = coinDto.getAssetsId();
-            //检查对应资产余额是否足够
+            //Check if the corresponding asset balance is sufficient
             BigInteger amount = coinDto.getAmount();
-            //查询账本获取nonce值
+            //Query ledger to obtainnoncevalue
             byte[] nonce = getNonceByPreHash(address,hash);
             CoinFrom coinFrom = new CoinFrom(addressByte, assetChainId, assetId, amount, nonce, (byte) 0);
             coinFroms.add(coinFrom);
@@ -291,9 +291,9 @@ public class CreateTx {
 
 
     /**
-     * 组装coinTo数据
+     * assemblecoinTodata
      * assembly coinTo data
-     * 条件：to中所有地址必须是同一条链的地址
+     * condition：toAll addresses in the must be addresses on the same chain
      *
      * @param listTo Initiator set coinTo
      * @return List<CoinTo>
@@ -304,7 +304,7 @@ public class CreateTx {
         for (CoinDTO coinDto : listTo) {
             String address = coinDto.getAddress();
             byte[] addressByte = AddressTool.getAddress(address);
-            //检查该链是否有该资产
+            //Check if the chain has the asset
             int assetsChainId = coinDto.getAssetsChainId();
             int assetId = coinDto.getAssetsId();
             CoinTo coinTo = new CoinTo();

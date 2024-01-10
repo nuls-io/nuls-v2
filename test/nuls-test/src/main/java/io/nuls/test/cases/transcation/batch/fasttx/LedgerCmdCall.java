@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 账本模块接口调用
+ * Calling the ledger module interface
  *
  * @author: qinyifeng
  * @date: 2018/12/12
@@ -22,7 +22,7 @@ import java.util.Map;
 public class LedgerCmdCall {
 
     /**
-     * 查询账户交易随机数
+     * Query account transaction random number
      */
     public static byte[] getNonce(int chainId, int assetChainId, int assetId, String address) {
         try {

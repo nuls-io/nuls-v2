@@ -7,32 +7,32 @@ import java.math.BigInteger;
 /**
  * @Author: ljs
  * @Time: 2019-08-07 11:41
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class RegAssetDto {
-    @ApiModelProperty(description = "资产链id")
+    @ApiModelProperty(description = "Asset Chainid")
     private int chainId;
-    @ApiModelProperty(description = "资产id")
+    @ApiModelProperty(description = "assetid")
     private int assetId = 0;
-    @ApiModelProperty(description = "资产符号")
+    @ApiModelProperty(description = "Asset symbols")
     private String symbol;
-    @ApiModelProperty(description = "资产名称")
+    @ApiModelProperty(description = "Asset Name")
     private String assetName;
-    @ApiModelProperty(description = "抵押金额")
+    @ApiModelProperty(description = "Mortgage amount")
     private String depositNuls = "0";
-    @ApiModelProperty(description = "销毁金额")
+    @ApiModelProperty(description = "Destruction amount")
     private String destroyNuls = "0";
-    @ApiModelProperty(description = "初始数量")
+    @ApiModelProperty(description = "Initial quantity")
     private String initNumber = "0";
-    @ApiModelProperty(description = "资产可用位数")
+    @ApiModelProperty(description = "Number of available assets")
     private short decimalPlaces = 8;
-    @ApiModelProperty(description = "是否可用")
+    @ApiModelProperty(description = "Is it available")
     private boolean enable = true;
-    @ApiModelProperty(description = "创建时间")
+    @ApiModelProperty(description = "Creation time")
     private long createTime = 0;
-    @ApiModelProperty(description = "创建地址")
+    @ApiModelProperty(description = "Create Address")
     private String address;
-    @ApiModelProperty(description = "交易hash")
+    @ApiModelProperty(description = "transactionhash")
     private String txHash;
 
     public int getChainId() {

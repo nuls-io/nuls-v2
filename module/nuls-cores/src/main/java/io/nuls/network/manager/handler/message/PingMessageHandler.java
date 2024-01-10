@@ -64,7 +64,7 @@ public class PingMessageHandler extends BaseMessageHandler {
         PingMessage pingMessage = (PingMessage) message;
 //        LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("PingMessageHandler Recieve:magicNum={}, node={},randCode={}", pingMessage.getHeader().getMagicNumber(), node.getId(), pingMessage.getMsgBody().getRandomCode());
         /*
-         *  回复Pong消息
+         *  replyPongnews
          */
         PongMessage pongMessage = MessageFactory.getInstance().buildPongMessage(pingMessage);
         MessageManager.getInstance().sendHandlerMsg(pongMessage, node, true);

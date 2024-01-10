@@ -36,13 +36,13 @@ import java.util.Map;
  */
 @ApiModel
 public class ContractInvokeRegisterCmdDto {
-    @ApiModelProperty(description = "命令名称")
+    @ApiModelProperty(description = "Command Name")
     private String cmdName;
-    @ApiModelProperty(description = "命令参数，参数不固定，依据不同的命令而来，故此处不作描述，结构为 {参数名称=参数值}")
+    @ApiModelProperty(description = "Command parameters are not fixed and come from different commands, so they are not described here. The structure is {Parameter Name=Parameter values}")
     private Map args;
-    @ApiModelProperty(description = "注册的命令模式（QUERY\\_DATA or NEW\\_TX）")
+    @ApiModelProperty(description = "Registered Command Mode（QUERY\\_DATA or NEW\\_TX）")
     private String cmdRegisterMode;
-    @ApiModelProperty(description = "生成的交易hash（当调用的命令模式是 NEW\\_TX 时，会生成交易）")
+    @ApiModelProperty(description = "Generated transactionshash（When the command mode being called is NEW\\_TX When, a transaction will be generated）")
     private String newTxHash;
 
 

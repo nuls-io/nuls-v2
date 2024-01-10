@@ -83,5 +83,10 @@
     "version": "17",
     "effectiveRatio": "80",
     "continuousIntervalCount": "10"
+  },
+  {
+    "version": "18",
+    "effectiveRatio": "80",
+    "continuousIntervalCount": "10"
   }
 ]

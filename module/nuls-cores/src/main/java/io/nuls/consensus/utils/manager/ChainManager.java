@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 链管理类,负责各条链的初始化,运行,启动,参数维护等
+ * Chain management,Responsible for initializing each chain,working,start-up,Parameter maintenance, etc
  * Chain management class, responsible for the initialization, operation, start-up, parameter maintenance of each chain, etc.
  *
  * @author tag
@@ -53,13 +53,13 @@ public class ChainManager {
     private Map<Integer, Chain> chainMap = new ConcurrentHashMap<>();
 
     /**
-     * 初始化
+     * initialization
      * Initialization chain
      * */
     public void initChain() throws Exception {
         Map<Integer, ConfigBean> configMap = configChain();
         if (configMap == null || configMap.size() == 0) {
-            Log.info("链初始化失败！");
+            Log.info("Chain initialization failed！");
             return;
         }
         for (Map.Entry<Integer, ConfigBean> entry : configMap.entrySet()){
@@ -68,12 +68,12 @@ public class ChainManager {
             ConfigBean configBean = entry.getValue();
             chain.setConfig(configBean);
             /*
-             * 初始化链日志对象
+             * Initialize Chain Log Object
              * Initialization Chain Log Objects
              * */
             initLogger(chain);
             /*
-            初始化链数据库表
+            Initialize Chain Database Table
             Initialize linked database tables
             */
             initTable(chain);
@@ -89,12 +89,12 @@ public class ChainManager {
 
 
     /**
-     * 注册智能合约交易
+     * Registering smart contract transactions
      * */
     public void registerContractTx(){
         for (Chain chain:chainMap.values()) {
             /*
-             * 注册智能合约交易
+             * Registering smart contract transactions
              * Chain Trading Registration
              * */
             int chainId = chain.getConfig().getChainId();
@@ -116,19 +116,19 @@ public class ChainManager {
     }
 
     /**
-     * 加载链缓存数据并启动链
+     * Load chain cache data and start the chain
      * Load the chain to cache data and start the chain
      * */
     public void runChain(){
         for (Chain chain:chainMap.values()) {
             /*
-            加载链缓存数据
+            Load chain cache data
             Load chain caching entity
             */
             initCache(chain);
 
             /*
-            创建并启动链内任务
+            Create and initiate in chain tasks
             Create and start in-chain tasks
             */
             schedulerManager.createChainScheduler(chain);
@@ -136,17 +136,17 @@ public class ChainManager {
     }
 
     /**
-     * 停止一条链
+     * Stop a chain
      * stop a chain
      *
-     * @param chainId 链ID/chain id
+     * @param chainId chainID/chain id
      */
     public void stopChain(int chainId) {
 
     }
 
     /**
-     * 删除一条链
+     * Delete a chain
      * delete a chain
      */
     public void deleteChain(int chainId) {
@@ -155,18 +155,18 @@ public class ChainManager {
 
 
     /**
-     * 读取配置文件创建并初始化链
+     * Read configuration file to create and initialize chain
      * Read the configuration file to create and initialize the chain
      */
     private Map<Integer, ConfigBean> configChain() {
         try {
             /*
-            读取数据库链信息配置
+            Read database chain information configuration
             Read database chain information configuration
              */
             Map<Integer, ConfigBean> configMap = CommonContext.CONFIG_BEAN_MAP;
             /*
-            如果系统是第一次运行，则本地数据库没有存储链信息，此时需要从配置文件读取主链配置信息
+            If the system is running for the first time and there is no storage chain information in the local database, it is necessary to read the main chain configuration information from the configuration file
             If the system is running for the first time, the local database does not have chain information,
             and the main chain configuration information needs to be read from the configuration file at this time.
             */
@@ -183,7 +183,7 @@ public class ChainManager {
     }
 
     /**
-     * 初始化链相关表
+     * Initialize Chain Related Tables
      * Initialization chain correlation table
      *
      * @param chain chain info
@@ -192,24 +192,24 @@ public class ChainManager {
         int chainId = chain.getConfig().getChainId();
         try {
             /*
-            创建共识节点表
+            Create consensus node table
             Create consensus node tables
             */
             RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSENSUS_AGENT + chainId);
 
             /*
-            创建共识信息表
+            Create consensus information table
             Create consensus information tables
             */
             RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSENSUS_DEPOSIT + chainId);
 
             /*
-            创建红黄牌信息表
+            Create a red and yellow card information table
             Creating Red and Yellow Card Information Table
             */
             RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSENSUS_PUNISH + chainId);
             /*
-            创建底层随机数表
+            Create a low-level random number table
             */
             RocksDBService.createTable(ConsensusConstant.DB_NAME_RANDOM_SEEDS + chainId);
         } catch (Exception e) {
@@ -223,16 +223,16 @@ public class ChainManager {
 
     private void initLogger(Chain chain) {
         /*
-         * 共识模块日志文件对象创建,如果一条链有多类日志文件，可在此添加
-         * Creation of Log File Object in Consensus Module，If there are multiple log files in a chain, you can add them here
+         * Consensus module log file object creation,If a chain has multiple types of log files, you can add them here
+         * Creation of Log File Object in Consensus Module,If there are multiple log files in a chain, you can add them here
          * */
         LoggerUtil.initLogger(chain);
     }
 
     /**
-     * 初始化链缓存数据
-     * 在poc的共识机制下，由于存在轮次信息，节点信息，以及节点被惩罚的红黄牌信息，
-     * 因此需要在初始化的时候，缓存相关的数据，用于计算最新的轮次信息，以及各个节点的信用值等
+     * Initialize chain cache data
+     * staypocUnder the consensus mechanism, due to the existence of round information, node information, and red and yellow card information for node punishment,
+     * Therefore, it is necessary to cache relevant data during initialization to calculate the latest round information, as well as the credit values of each node
      * Initialize chain caching entity
      *
      * @param chain chain info

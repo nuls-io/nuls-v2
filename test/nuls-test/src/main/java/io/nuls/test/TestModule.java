@@ -33,7 +33,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-18 15:05
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Component
 public class TestModule extends RpcModule {
@@ -71,7 +71,7 @@ public class TestModule extends RpcModule {
     @Override
     public boolean doStart()
     {
-        log.info("等待依赖模块准备就绪");
+        log.info("Waiting for dependent modules to be ready");
         return true;
     }
 
@@ -84,7 +84,7 @@ public class TestModule extends RpcModule {
             config.setSeedAddress(result.getData());
             Result<NetworkInfo> networkInfo = networkProvider.getInfo();
             Utils.success("=".repeat(100));
-            Utils.success("网络环境");
+            Utils.success("network environment");
             Utils.success("localBestHeight:"+networkInfo.getData().getLocalBestHeight());
             Utils.success("netBestHeight:"+networkInfo.getData().getNetBestHeight());
             Utils.success("timeOffset:"+networkInfo.getData().getTimeOffset());
@@ -95,7 +95,7 @@ public class TestModule extends RpcModule {
             Utils.success("packetMagic:"+config.getPacketMagic());
             Utils.success("=".repeat(100));
             if(networkProvider.getNodes().getList().size()<config.getTestNodeCount()){
-                log.error("网络节点数量小于要求测试的节点数，不能进行测试，要求测试的节点数:{}",config.getTestNodeCount());
+                log.error("The number of network nodes is less than the required number of nodes for testing, and testing cannot be conducted. The required number of nodes for testing:{}",config.getTestNodeCount());
                 System.exit(0);
             }
             System.out.println();
@@ -115,10 +115,10 @@ public class TestModule extends RpcModule {
                         }
                     }
                     try {
-                        Utils.successDoubleLine("开始测试"+tester.title() + "   " + tester.getClass());
+                        Utils.successDoubleLine("Start testing"+tester.title() + "   " + tester.getClass());
                         tester.check(null,0);
                     } catch (TestFailException e) {
-                        Utils.failLine( "【" + tester.title() + "】 测试失败 :" + e.getMessage());
+                        Utils.failLine( "【" + tester.title() + "】 Test failed :" + e.getMessage());
                         isSuccess.set(false);
                     }
                 });

@@ -49,11 +49,11 @@ import static io.nuls.block.constant.CommandConstant.*;
 import static io.nuls.block.utils.LoggerUtil.COMMON_LOG;
 
 /**
- * 区块管理模块的对外接口类
+ * External Interface Class of Block Management Module
  *
  * @author captain
  * @version 1.0
- * @date 18-11-9 下午2:04
+ * @date 18-11-9 afternoon2:04
  */
 @Component
 @NulsCoresCmd(module = ModuleE.BL)
@@ -62,18 +62,18 @@ public class BlockResource extends BaseCmd {
     private BlockService service;
 
     /**
-     * 获取最新主链高度
+     * Get the latest main chain height
      *
      * @param map
      * @return
      */
     @CmdAnnotation(cmd = INFO, version = 1.0, description = "returns network node height and local node height")
     @Parameters({
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainID")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象，包含两个属性", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "networkHeight", valueType = Long.class, description = "网络节点最新区块高度"),
-            @Key(name = "localHeight", valueType = Long.class, description = "本地节点最新区块高度")})
+    @ResponseData(name = "Return value", description = "Return aMapObject, containing two properties", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "networkHeight", valueType = Long.class, description = "The latest block height of network nodes"),
+            @Key(name = "localHeight", valueType = Long.class, description = "The latest block height of the local node")})
     )
     public Response info(Map map) {
         int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
@@ -88,17 +88,17 @@ public class BlockResource extends BaseCmd {
     }
 
     /**
-     * 获取最新主链高度
+     * Get the latest main chain height
      *
      * @param map
      * @return
      */
     @CmdAnnotation(cmd = LATEST_HEIGHT, version = 1.0, description = "the latest height of master chain")
     @Parameters({
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainID")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象，包含一个属性", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", valueType = Long.class, description = "最新主链高度")})
+    @ResponseData(name = "Return value", description = "Return aMapObject, containing a property", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", valueType = Long.class, description = "Latest main chain height")})
     )
     public Response latestHeight(Map map) {
         int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
@@ -112,16 +112,16 @@ public class BlockResource extends BaseCmd {
     }
 
     /**
-     * 获取最新区块头
+     * Get the latest block header
      *
      * @param map
      * @return
      */
     @CmdAnnotation(cmd = LATEST_BLOCK_HEADER, version = 1.0, description = "the latest block header of master chain")
     @Parameters({
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainID")
     })
-    @ResponseData(name = "返回值", description = "返回一个区块头序列化后的HEX字符串", responseType = @TypeDescriptor(value = String.class))
+    @ResponseData(name = "Return value", description = "Returns a serialized block headerHEXcharacter string", responseType = @TypeDescriptor(value = String.class))
     public Response latestBlockHeader(Map map) {
         try {
             int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
@@ -140,16 +140,16 @@ public class BlockResource extends BaseCmd {
     }
 
     /**
-     * 获取最新区块头PO
+     * Get the latest block headerPO
      *
      * @param map
      * @return
      */
     @CmdAnnotation(cmd = LATEST_BLOCK_HEADER_PO, version = 1.0, description = "the latest block header po of master chain")
     @Parameters({
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainID")
     })
-    @ResponseData(name = "返回值", description = "返回一个区块头PO序列化后的HEX字符串", responseType = @TypeDescriptor(value = String.class))
+    @ResponseData(name = "Return value", description = "Return a block headerPOSerializedHEXcharacter string", responseType = @TypeDescriptor(value = String.class))
     public Response latestBlockHeaderPo(Map map) {
         try {
             int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
@@ -168,16 +168,16 @@ public class BlockResource extends BaseCmd {
     }
 
     /**
-     * 获取最新区块
+     * Get the latest blocks
      *
      * @param map
      * @return
      */
     @CmdAnnotation(cmd = LATEST_BLOCK, version = 1.0, description = "the latest block of master chain")
     @Parameters({
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainID")
     })
-    @ResponseData(name = "返回值", description = "返回一个区块序列化后的HEX字符串", responseType = @TypeDescriptor(value = String.class))
+    @ResponseData(name = "Return value", description = "Returns a serialized blockHEXcharacter string", responseType = @TypeDescriptor(value = String.class))
     public Response bestBlock(Map map) {
         try {
             int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
@@ -196,17 +196,17 @@ public class BlockResource extends BaseCmd {
     }
 
     /**
-     * 根据高度获取区块头
+     * Obtain block heads based on height
      *
      * @param map
      * @return
      */
     @CmdAnnotation(cmd = GET_BLOCK_HEADER_BY_HEIGHT, version = 1.0, description = "get a block header by height")
     @Parameters({
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
-            @Parameter(parameterName = "height", requestType = @TypeDescriptor(value = long.class), parameterDes = "区块高度")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainID"),
+            @Parameter(parameterName = "height", requestType = @TypeDescriptor(value = long.class), parameterDes = "block height")
     })
-    @ResponseData(name = "返回值", description = "返回一个区块头序列化后的HEX字符串", responseType = @TypeDescriptor(value = String.class))
+    @ResponseData(name = "Return value", description = "Returns a serialized block headerHEXcharacter string", responseType = @TypeDescriptor(value = String.class))
     public Response getBlockHeaderByHeight(Map map) {
         try {
             int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
@@ -230,17 +230,17 @@ public class BlockResource extends BaseCmd {
     }
 
     /**
-     * 根据高度获取区块头
+     * Obtain block heads based on height
      *
      * @param map
      * @return
      */
     @CmdAnnotation(cmd = GET_BLOCK_HEADER_PO_BY_HEIGHT, version = 1.0, description = "get a block header po by height")
     @Parameters({
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
-            @Parameter(parameterName = "height", requestType = @TypeDescriptor(value = long.class), parameterDes = "区块高度")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainID"),
+            @Parameter(parameterName = "height", requestType = @TypeDescriptor(value = long.class), parameterDes = "block height")
     })
-    @ResponseData(name = "返回值", description = "返回一个区块头PO序列化后的HEX字符串", responseType = @TypeDescriptor(value = String.class))
+    @ResponseData(name = "Return value", description = "Return a block headerPOSerializedHEXcharacter string", responseType = @TypeDescriptor(value = String.class))
     public Response getBlockHeaderPoByHeight(Map map) {
         try {
             int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
@@ -264,17 +264,17 @@ public class BlockResource extends BaseCmd {
     }
 
     /**
-     * 获取最新若干个区块头
+     * Get the latest block headers
      *
      * @param map
      * @return
      */
     @CmdAnnotation(cmd = GET_LATEST_BLOCK_HEADERS, version = 1.0, description = "get the latest number of block headers")
     @Parameters({
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
-            @Parameter(parameterName = "size", requestType = @TypeDescriptor(value = int.class), parameterDes = "数量")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainID"),
+            @Parameter(parameterName = "size", requestType = @TypeDescriptor(value = int.class), parameterDes = "quantity")
     })
-    @ResponseData(name = "返回值", description = "返回区块头序列化后的HEX字符串List", responseType = @TypeDescriptor(value = List.class, collectionElement = String.class))
+    @ResponseData(name = "Return value", description = "Returns the serialized block headerHEXcharacter stringList", responseType = @TypeDescriptor(value = List.class, collectionElement = String.class))
     public Response getLatestBlockHeaders(Map map) {
         try {
             int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
@@ -301,18 +301,18 @@ public class BlockResource extends BaseCmd {
     }
 
     /**
-     * 获取最新若干轮区块头,提供给POC共识模块使用
+     * Get the latest block heads for several rounds,provide forPOCConsensus module usage
      *
      * @param map
      * @return
      */
     @CmdAnnotation(cmd = GET_ROUND_BLOCK_HEADERS, version = 1.0, description = "get the latest several rounds of block headers")
     @Parameters({
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
-            @Parameter(parameterName = "height", requestType = @TypeDescriptor(value = long.class), parameterDes = "起始高度"),
-            @Parameter(parameterName = "round", requestType = @TypeDescriptor(value = int.class), parameterDes = "共识轮次")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainID"),
+            @Parameter(parameterName = "height", requestType = @TypeDescriptor(value = long.class), parameterDes = "Starting height"),
+            @Parameter(parameterName = "round", requestType = @TypeDescriptor(value = int.class), parameterDes = "Consensus round")
     })
-    @ResponseData(name = "返回值", description = "返回区块头序列化后的HEX字符串List", responseType = @TypeDescriptor(value = List.class, collectionElement = String.class))
+    @ResponseData(name = "Return value", description = "Returns the serialized block headerHEXcharacter stringList", responseType = @TypeDescriptor(value = List.class, collectionElement = String.class))
     public Response getRoundBlockHeaders(Map map) {
         try {
             int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
@@ -338,17 +338,17 @@ public class BlockResource extends BaseCmd {
     }
 
     /**
-     * 获取最新若干轮区块头,提供给POC共识模块使用
+     * Get the latest block heads for several rounds,provide forPOCConsensus module usage
      *
      * @param map
      * @return
      */
     @CmdAnnotation(cmd = GET_LATEST_ROUND_BLOCK_HEADERS, version = 1.0, description = "get the latest several rounds of block headers")
     @Parameters({
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
-            @Parameter(parameterName = "round", requestType = @TypeDescriptor(value = int.class), parameterDes = "共识轮次")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainID"),
+            @Parameter(parameterName = "round", requestType = @TypeDescriptor(value = int.class), parameterDes = "Consensus round")
     })
-    @ResponseData(name = "返回值", description = "返回区块头序列化后的HEX字符串List", responseType = @TypeDescriptor(value = List.class, collectionElement = String.class))
+    @ResponseData(name = "Return value", description = "Returns the serialized block headerHEXcharacter stringList", responseType = @TypeDescriptor(value = List.class, collectionElement = String.class))
     public Response getLatestRoundBlockHeaders(Map map) {
         try {
             int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
@@ -372,17 +372,17 @@ public class BlockResource extends BaseCmd {
     }
 
     /**
-     * 获取区块头,给协议升级模块使用
+     * Get block header,Use the protocol upgrade module
      *
      * @param map
      * @return
      */
     @CmdAnnotation(cmd = GET_BLOCK_HEADERS_FOR_PROTOCOL, version = 1.0, description = "get block headers for protocol upgrade module")
     @Parameters({
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
-            @Parameter(parameterName = "interval", requestType = @TypeDescriptor(value = int.class), parameterDes = "协议升级统计区间")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainID"),
+            @Parameter(parameterName = "interval", requestType = @TypeDescriptor(value = int.class), parameterDes = "Protocol upgrade statistics interval")
     })
-    @ResponseData(name = "返回值", description = "返回区块头序列化后的HEX字符串List", responseType = @TypeDescriptor(value = List.class, collectionElement = String.class))
+    @ResponseData(name = "Return value", description = "Returns the serialized block headerHEXcharacter stringList", responseType = @TypeDescriptor(value = List.class, collectionElement = String.class))
     public Response getBlockHeadersForProtocol(Map map) {
         try {
             int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
@@ -410,18 +410,18 @@ public class BlockResource extends BaseCmd {
     }
 
     /**
-     * 根据高度区间获取区块头
+     * Obtain block heads based on height intervals
      *
      * @param map
      * @return
      */
     @CmdAnnotation(cmd = GET_BLOCK_HEADERS_BY_HEIGHT_RANGE, version = 1.0, description = "get the block headers according to the height range")
     @Parameters({
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
-            @Parameter(parameterName = "begin", requestType = @TypeDescriptor(value = long.class), parameterDes = "起始高度"),
-            @Parameter(parameterName = "end", requestType = @TypeDescriptor(value = long.class), parameterDes = "结束高度")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainID"),
+            @Parameter(parameterName = "begin", requestType = @TypeDescriptor(value = long.class), parameterDes = "Starting height"),
+            @Parameter(parameterName = "end", requestType = @TypeDescriptor(value = long.class), parameterDes = "End height")
     })
-    @ResponseData(name = "返回值", description = "返回区块头序列化后的HEX字符串List", responseType = @TypeDescriptor(value = List.class, collectionElement = String.class))
+    @ResponseData(name = "Return value", description = "Returns the serialized block headerHEXcharacter stringList", responseType = @TypeDescriptor(value = List.class, collectionElement = String.class))
     public Response getBlockHeadersByHeightRange(Map map) {
         try {
             int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
@@ -446,17 +446,17 @@ public class BlockResource extends BaseCmd {
     }
 
     /**
-     * 根据高度获取区块
+     * Obtain blocks based on height
      *
      * @param map
      * @return
      */
     @CmdAnnotation(cmd = GET_BLOCK_BY_HEIGHT, version = 1.0, description = "get a block by height")
     @Parameters({
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
-            @Parameter(parameterName = "height", requestType = @TypeDescriptor(value = long.class), parameterDes = "区块高度")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainID"),
+            @Parameter(parameterName = "height", requestType = @TypeDescriptor(value = long.class), parameterDes = "block height")
     })
-    @ResponseData(name = "返回值", description = "返回区块序列化后的HEX字符串List", responseType = @TypeDescriptor(value = String.class))
+    @ResponseData(name = "Return value", description = "Return the serialized blockHEXcharacter stringList", responseType = @TypeDescriptor(value = String.class))
     public Response getBlockByHeight(Map map) {
         try {
             int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
@@ -479,17 +479,17 @@ public class BlockResource extends BaseCmd {
     }
 
     /**
-     * 根据高度获取区块
+     * Obtain blocks based on height
      *
      * @param map
      * @return
      */
     @CmdAnnotation(cmd = "roll_back", version = 1.0, description = "Roll back a number of blocks")
     @Parameters({
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
-            @Parameter(parameterName = "height", requestType = @TypeDescriptor(value = long.class), parameterDes = "区块高度")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainID"),
+            @Parameter(parameterName = "height", requestType = @TypeDescriptor(value = long.class), parameterDes = "block height")
     })
-    @ResponseData(name = "返回值", description = "successful", responseType = @TypeDescriptor(value = String.class))
+    @ResponseData(name = "Return value", description = "successful", responseType = @TypeDescriptor(value = String.class))
     public Response rollback(Map map) {
         try {
             int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
@@ -515,17 +515,17 @@ public class BlockResource extends BaseCmd {
     }
 
     /**
-     * 根据hash获取区块头
+     * according tohashGet block header
      *
      * @param map
      * @return
      */
     @CmdAnnotation(cmd = GET_BLOCK_HEADER_BY_HASH, version = 1.0, description = "get a block header by hash")
     @Parameters({
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
-            @Parameter(parameterName = "hash", requestType = @TypeDescriptor(value = String.class), parameterDes = "区块hash")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainID"),
+            @Parameter(parameterName = "hash", requestType = @TypeDescriptor(value = String.class), parameterDes = "blockhash")
     })
-    @ResponseData(name = "返回值", description = "返回区块头序列化后的HEX字符串", responseType = @TypeDescriptor(value = String.class))
+    @ResponseData(name = "Return value", description = "Returns the serialized block headerHEXcharacter string", responseType = @TypeDescriptor(value = String.class))
     public Response getBlockHeaderByHash(Map map) {
         try {
             int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
@@ -548,17 +548,17 @@ public class BlockResource extends BaseCmd {
     }
 
     /**
-     * 根据hash获取区块头
+     * according tohashGet block header
      *
      * @param map
      * @return
      */
     @CmdAnnotation(cmd = GET_BLOCK_HEADER_PO_BY_HASH, version = 1.0, description = "get a block header po by hash")
     @Parameters({
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
-            @Parameter(parameterName = "hash", requestType = @TypeDescriptor(value = String.class), parameterDes = "区块hash")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainID"),
+            @Parameter(parameterName = "hash", requestType = @TypeDescriptor(value = String.class), parameterDes = "blockhash")
     })
-    @ResponseData(name = "返回值", description = "返回区块头PO序列化后的HEX字符串", responseType = @TypeDescriptor(value = String.class))
+    @ResponseData(name = "Return value", description = "Return block headerPOSerializedHEXcharacter string", responseType = @TypeDescriptor(value = String.class))
     public Response getBlockHeaderPoByHash(Map map) {
         try {
             int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
@@ -581,17 +581,17 @@ public class BlockResource extends BaseCmd {
     }
 
     /**
-     * 根据hash获取区块
+     * according tohashGet blocks
      *
      * @param map
      * @return
      */
     @CmdAnnotation(cmd = GET_BLOCK_BY_HASH, version = 1.0, description = "get a block by hash")
     @Parameters({
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
-            @Parameter(parameterName = "hash", requestType = @TypeDescriptor(value = String.class), parameterDes = "区块hash")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainID"),
+            @Parameter(parameterName = "hash", requestType = @TypeDescriptor(value = String.class), parameterDes = "blockhash")
     })
-    @ResponseData(name = "返回值", description = "返回区块序列化后的HEX字符串", responseType = @TypeDescriptor(value = String.class))
+    @ResponseData(name = "Return value", description = "Return the serialized blockHEXcharacter string", responseType = @TypeDescriptor(value = String.class))
     public Response getBlockByHash(Map map) {
         try {
             int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
@@ -614,19 +614,19 @@ public class BlockResource extends BaseCmd {
     }
 
     /**
-     * 接收新打包区块
-     * 1.保存区块
-     * 2.广播区块
+     * Receive new packaged blocks
+     * 1.Save Block
+     * 2.Broadcast Block
      *
      * @param map
      * @return
      */
     @CmdAnnotation(cmd = RECEIVE_PACKING_BLOCK, version = 1.0, description = "receive the new packaged block")
     @Parameters({
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
-            @Parameter(parameterName = "block", requestType = @TypeDescriptor(value = String.class), parameterDes = "区块序列化后的HEX字符串")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainID"),
+            @Parameter(parameterName = "block", requestType = @TypeDescriptor(value = String.class), parameterDes = "Block serializedHEXcharacter string")
     })
-    @ResponseData(name = "返回值", description = "无返回值")
+    @ResponseData(name = "Return value", description = "No return value")
     public Response receivePackingBlock(Map map) {
         int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
         ChainContext context = ContextManager.getContext(chainId);
@@ -651,19 +651,19 @@ public class BlockResource extends BaseCmd {
     }
 
     /**
-     * 获取当前运行状态
-     * status-0:同步
-     * status-1:正常运行
+     * Get the current running status
+     * status-0:synchronization
+     * status-1:normal operation
      *
      * @param map
      * @return
      */
     @CmdAnnotation(cmd = GET_STATUS, version = 1.0, description = "receive the new packaged block")
     @Parameters({
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainID")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象，包含一个属性", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "status", valueType = Integer.class, description = "运行状态")})
+    @ResponseData(name = "Return value", description = "Return aMapObject, containing a property", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "status", valueType = Integer.class, description = "running state")})
     )
     public Response getStatus(Map map) {
         int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());

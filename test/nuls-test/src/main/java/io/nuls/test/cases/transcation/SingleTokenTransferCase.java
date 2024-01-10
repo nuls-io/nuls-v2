@@ -53,6 +53,6 @@ public class SingleTokenTransferCase extends TestCaseChain {
 
     @Override
     public String title() {
-        return "合约token交易";
+        return "contracttokentransaction";
     }
 }

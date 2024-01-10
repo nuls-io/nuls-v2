@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * @Author: ljs
  * @Time: 2019-08-07 11:41
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class CrossAssetRegisterInfo {
     private int chainId;

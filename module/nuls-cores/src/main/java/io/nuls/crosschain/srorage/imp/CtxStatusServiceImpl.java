@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 跨链交易数据库相关操作实现类
+ * Implementation class for cross chain transaction database related operations
  * Cross-Chain Transaction Database Related Operations
  *
  * @author  tag

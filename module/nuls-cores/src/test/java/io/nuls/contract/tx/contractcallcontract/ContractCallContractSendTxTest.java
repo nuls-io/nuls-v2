@@ -53,13 +53,13 @@ import static io.nuls.contract.constant.ContractCmdConstant.*;
 public class ContractCallContractSendTxTest extends BaseQuery {
 
     /**
-     * 创建合约
+     * Create Contract
      */
     @Test
     public void createContract() throws Exception {
         InputStream in = new FileInputStream(ContractCallContractSendTxTest.class.getResource("/contract_call_contract").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
-        String remark = "create contract test - 合约内部转账，合约调用合约";
+        String remark = "create contract test - Internal transfer of contract, contract call contract";
         Map params = this.makeCreateParams(sender, contractCode, "inner_call", remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CREATE));
@@ -68,7 +68,7 @@ public class ContractCallContractSendTxTest extends BaseQuery {
     }
 
     /**
-     * 向合约地址转账
+     * Transfer to the contracted address
      */
     @Test
     public void transfer2Contract() throws Exception {
@@ -82,7 +82,7 @@ public class ContractCallContractSendTxTest extends BaseQuery {
     }
 
     /**
-     * 调用合约 - 合约内部转账
+     * Call Contract - Internal transfer of contract
      */
     @Test
     public void callContract_transferOut() throws Exception {
@@ -91,7 +91,7 @@ public class ContractCallContractSendTxTest extends BaseQuery {
             methodName = "multyForAddress";
         }
         String methodDesc = "";
-        String remark = "call contract test - 合约内部转账";
+        String remark = "call contract test - Internal transfer of contract";
         String address1 = toAddress3;
         String address2 = toAddress4;
         String value1 = BigInteger.valueOf(1_0000_0000L).toString();
@@ -105,14 +105,14 @@ public class ContractCallContractSendTxTest extends BaseQuery {
     }
 
     /**
-     * 调用合约 - 合约调用合约
+     * Call Contract - Contract Call Contract
      */
     @Test
     public void callContract_contractCallContract() throws Exception {
         BigInteger value = BigInteger.ZERO;
         String methodName = "callContractWithReturnValue";
         String methodDesc = "";
-        String remark = "call contract test - 合约调用合约";
+        String remark = "call contract test - Contract Call Contract";
 
         String _methodName = "transfer";
         String _token = BigInteger.valueOf(800).toString();
@@ -127,14 +127,14 @@ public class ContractCallContractSendTxTest extends BaseQuery {
     }
 
     /**
-     * 调用合约 - 合约内部转账 && 合约调用合约
+     * Call Contract - Internal transfer of contract && Contract Call Contract
      */
     @Test
     public void callContract_transferOut_contractCallContract() throws Exception {
         BigInteger value = BigInteger.ZERO;
         String methodName = "multyForAddressAndcallContractWithReturnValue";
         String methodDesc = "";
-        String remark = "call contract test - 合约内部转账 && 合约调用合约";
+        String remark = "call contract test - Internal transfer of contract && Contract Call Contract";
 
         String address1 = toAddress3;
         String address2 = toAddress4;
@@ -156,7 +156,7 @@ public class ContractCallContractSendTxTest extends BaseQuery {
 
 
     /**
-     * 删除合约
+     * Delete contract
      */
     @Test
     public void delete() throws Exception {

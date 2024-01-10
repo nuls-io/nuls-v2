@@ -37,15 +37,15 @@ import java.math.BigInteger;
 @ApiModel
 public class ContractDeleteOffline extends Base {
 
-    @ApiModelProperty(description = "交易创建者", required = true)
+    @ApiModelProperty(description = "Transaction Creator", required = true)
     private String sender;
-    @ApiModelProperty(description = "账户余额")
+    @ApiModelProperty(description = "Account balance")
     private BigInteger senderBalance;
-    @ApiModelProperty(description = "账户nonce值")
+    @ApiModelProperty(description = "accountnoncevalue")
     private String nonce;
-    @ApiModelProperty(description = "智能合约地址", required = true)
+    @ApiModelProperty(description = "Smart contract address", required = true)
     private String contractAddress;
-    @ApiModelProperty(description = "备注", required = false)
+    @ApiModelProperty(description = "Remarks", required = false)
     private String remark;
 
     public String getSender() {

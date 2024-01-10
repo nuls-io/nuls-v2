@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * 智能合约创建节点交易处理器
+ * Smart contract creation node transaction processor
  * @author tag
  * @date 2019/6/1
  */
@@ -85,7 +85,7 @@ public class ContractCreateAgentProcessor implements TransactionProcessor {
                 String agentAddressHex = HexUtil.encode(agent.getAgentAddress());
                 String packAddressHex = HexUtil.encode(agent.getPackingAddress());
                 /*
-                 * 获得过红牌交易的地址不能创建节点
+                 * An address that has obtained a red card transaction cannot create a node
                  * */
                 if (!redPunishAddressSet.isEmpty()) {
                     if (redPunishAddressSet.contains(agentAddressHex) || redPunishAddressSet.contains(packAddressHex)) {
@@ -96,7 +96,7 @@ public class ContractCreateAgentProcessor implements TransactionProcessor {
                     }
                 }
                 /*
-                 * 重复创建节点
+                 * Repeatedly creating nodes
                  * */
                 if (!createAgentAddressSet.add(agentAddressHex) || !createAgentAddressSet.add(packAddressHex)) {
                     invalidTxList.add(contractCreateAgentTx);
@@ -140,7 +140,7 @@ public class ContractCreateAgentProcessor implements TransactionProcessor {
                 commitResult = false;
             }
         }
-        //回滚已提交成功的交易
+        //Roll back transactions that have been successfully submitted
         if(!commitResult){
             for (Transaction rollbackTx:commitSuccessList) {
                 try {
@@ -179,7 +179,7 @@ public class ContractCreateAgentProcessor implements TransactionProcessor {
                 rollbackResult = false;
             }
         }
-        //保存已回滚成功的交易
+        //Save successfully rolled back transactions
         if(!rollbackResult){
             for (Transaction commitTx:rollbackSuccessList) {
                 try {

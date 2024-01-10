@@ -44,11 +44,11 @@ import java.util.concurrent.TimeUnit;
 public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase {
 
     /**
-     * 创建合约的交易造假测试
+     * Transaction fraud testing for creating contracts
      */
 
     /**
-     * 减少coinData的from的花费金额 ---> 目的：不支付合约手续费，偷走区块中其他交易的手续费
+     * reducecoinDataoffromThe amount of expenses incurred ---> objective：Not paying contract fees and stealing fees from other transactions in the block
      */
     @Test
     public void fakeCreateTx_stealMoney() throws Exception {
@@ -64,7 +64,7 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
     }
 
     /**
-     * 减少coinData的from的花费金额 ---> 目的：不支付合约手续费
+     * reducecoinDataoffromThe amount of expenses incurred ---> objective：Not paying contract fees
      */
     @Test
     public void fakeCreateTx_notPaying() throws Exception {
@@ -80,14 +80,14 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
     }
 
     /**
-     * 增加coinData的to
+     * increasecoinDataofto
      */
     @Test
     public void fakeCreateTx_addCoinTo() throws Exception {
         new MakeAndBroadcastCreateTxTest()
                 .make()
                 .fake(new ExecuteFake() {
-                    // 测试网黑洞地址 - tNULSeBaMhZnRteniCy3UZqPjTbnWKBPHX1a5d
+                    // Test network black hole address - tNULSeBaMhZnRteniCy3UZqPjTbnWKBPHX1a5d
                     @Override
                     public void execute(ContractBaseTransaction tx) throws Exception {
                         txFakeAddCoinTo(tx, "tNULSeBaMhZnRteniCy3UZqPjTbnWKBPHX1a5d", 1_0000L);
@@ -97,7 +97,7 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
     }
 
     /**
-     * 更改sender
+     * changesender
      */
     @Test
     public void fakeCreateTx_ContractSender() throws Exception {
@@ -113,7 +113,7 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
     }
 
     /**
-     * 更改contractAddress
+     * changecontractAddress
      */
     @Test
     public void fakeCreateTx_ContractAddress() throws Exception {
@@ -129,7 +129,7 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
     }
 
     /**
-     * 更改gasLimit
+     * changegasLimit
      */
     @Test
     public void fakeCreateTx_GasLimit() throws Exception {
@@ -145,7 +145,7 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
     }
 
     /**
-     * 更改price
+     * changeprice
      */
     @Test
     public void fakeCreateTx_Price() throws Exception {
@@ -161,7 +161,7 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
     }
 
     /**
-     * 正常创建合约
+     * Creating contracts normally
      */
     @Test
     public void fakeCreateTx_normal() throws Exception {
@@ -173,18 +173,18 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
     }
 
     /**
-     * 减少coinData的from的花费金额 ---> 目的：不支付合约手续费
-     * 条件(二选一)：
-     *      1_1 配合发送一个转账交易, 手续费设置大于合约的Gas消耗费用
-     *          如果执行合约后，还有剩余的Gas，那么剩余的gas会按照Gas*price退还给用户(退还的手续费)，而伪造的交易没有真正花费Gas(修改coinFrom)
-     *          那么，这部分手续费就会从打包区块中的其他交易的手续费扣出来退还给用户
-     *          相当于，通过伪造这笔交易，偷走了区块中的一部分手续费，并且不支付执行合约的Gas手续费(前提：区块中有足够的的其他交易的手续费)
+     * reducecoinDataoffromThe amount of expenses incurred ---> objective：Not paying contract fees
+     * condition(Choose one from two)：
+     *      1_1 Cooperate in sending a transfer transaction, The handling fee setting is greater than the contractGasConsumption expenses
+     *          If there is any remaining balance after executing the contractGasSo the remaininggasWill followGas*priceReturn to user(Refund of handling fees)And the forged transaction did not actually cost anythingGas(modifycoinFrom)
+     *          So, this portion of the transaction fee will be deducted from the transaction fee of other transactions in the packaged block and refunded to the user
+     *          Equivalent to, by forging this transaction, stealing a portion of the transaction fee from the block and not paying for the execution contractGasHandling fees(premise：There are sufficient transaction fees for other transactions in the block)
      *
-     *      1_2 设置gaslimit刚好是执行合约的Gas数，没有合约退还金额，此时不需要再配合发送另外的交易来冲抵手续费
-     *          此时，正确打包后的合约交易，消耗的手续费仅仅只有交易Size的手续费
+     *      1_2 set upgaslimitCoincidentally executing the contractGasNumber, there is no contract to refund the amount, and there is no need to cooperate in sending another transaction to offset the handling fee at this time
+     *          At this point, the correctly packaged contract transaction only consumes transaction feesSizeHandling fees for
      */
     private void createTxFake1_1(CreateContractTransaction tx) throws NulsException {
-        // 配合发送转账交易
+        // Cooperate in sending transfer transactions
         TransferReq.TransferReqBuilder builder = new TransferReq.TransferReqBuilder(chain.getChainId(), chain.getConfig().getAssetId())
                 .addForm(toAddress0, password, BigInteger.valueOf(10001_0000_0000L))
                 .addTo(toAddress5,BigInteger.valueOf(10000_0000_0000L));
@@ -212,7 +212,7 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
 
 
     /**
-     * 调用合约的交易造假测试
+     * Transaction fraud test for calling contracts
      */
 
 
@@ -224,7 +224,7 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
     }
 
     /**
-     * 增加coinData的to
+     * increasecoinDataofto
      */
     @Test
     public void fakeCallTx_addCoinTo() throws Exception {
@@ -241,7 +241,7 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
     }
 
     /**
-     * 更改coinData的to
+     * changecoinDataofto
      */
     @Test
     public void fakeCallTx_modifyCoinTo() throws Exception {
@@ -259,7 +259,7 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
     }
 
     /**
-     * 更改sender
+     * changesender
      */
     @Test
     public void fakeCallTx_ContractSender() throws Exception {
@@ -276,7 +276,7 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
     }
 
     /**
-     * 更改contractAddress
+     * changecontractAddress
      */
     @Test
     public void fakeCallTx_ContractAddress() throws Exception {
@@ -293,7 +293,7 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
     }
 
     /**
-     * 更改gasLimit
+     * changegasLimit
      */
     @Test
     public void fakeCallTx_GasLimit() throws Exception {
@@ -310,7 +310,7 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
     }
 
     /**
-     * 更改price
+     * changeprice
      */
     @Test
     public void fakeCallTx_Price() throws Exception {
@@ -328,7 +328,7 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
     }
 
     /**
-     * 更改price, gasLimit
+     * changeprice, gasLimit
      */
     @Test
     public void fakeCallTx_PriceAndGasLimit() throws Exception {
@@ -347,7 +347,7 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
     }
 
     /**
-     * 更改value
+     * changevalue
      */
     @Test
     public void fakeCallTx_Value() throws Exception {
@@ -366,7 +366,7 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
     }
 
     /**
-     * 正常调用合约
+     * Normal Call Contract
      */
     @Test
     public void fakeCallTx_normal() throws Exception {
@@ -382,11 +382,11 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
 
 
     /**
-     * 删除合约的交易造假测试
+     * Transaction fraud test for deleting contracts
      */
 
     /**
-     * 更改sender
+     * changesender
      */
     @Test
     public void fakeDeleteTx_ContractSender() throws Exception {
@@ -403,7 +403,7 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
     }
 
     /**
-     * 更改contractAddress
+     * changecontractAddress
      */
     @Test
     public void fakeDeleteTx_ContractAddress() throws Exception {
@@ -420,7 +420,7 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
     }
 
     /**
-     * 非合约创建者不能删除合约
+     * Non contract creators cannot delete contracts
      */
     @Test
     public void fakeDeleteTx_NonCreatorCannotDeleteContract() throws Exception {
@@ -432,7 +432,7 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
     }
 
     /**
-     * 余额不为0
+     * The balance is not0
      */
     @Test
     public void fakeDeleteTx_BalanceRemaining() throws Exception {
@@ -453,7 +453,7 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
     }
 
     /**
-     * 正常删除合约
+     * Normal deletion of contracts
      */
     @Test
     public void fakeDeleteTx_normal() throws Exception {

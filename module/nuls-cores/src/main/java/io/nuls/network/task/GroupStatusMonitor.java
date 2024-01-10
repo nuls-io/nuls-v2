@@ -36,7 +36,7 @@ import java.util.List;
 /**
  * @author lan
  * @description Group event monitor
- * 判断网络组的连接情况，是否稳定连接,将网络状态进行事件通告
+ * Determine the connection status of the network group and whether it is stable,Notify network status of events
  * @date 2018/11/14
  **/
 public class GroupStatusMonitor implements Runnable {
@@ -59,10 +59,10 @@ public class GroupStatusMonitor implements Runnable {
     private void updateStatus(NodesContainer nodesContainer, NodeGroup nodeGroup,boolean isCross) {
         if (NodeGroup.WAIT1 == nodesContainer.getStatus()) {
             long time = nodesContainer.getLatestHandshakeSuccTime() + NetworkConstant.NODEGROUP_NET_STABLE_TIME_MILLIONS;
-            //最近10s没有新的网络连接产生
+            //recently10sNo new network connection generated
             if (time < System.currentTimeMillis() && nodesContainer.getAvailableNodes().size() > 0) {
-                //通知链管理模块
-                //发布网络状态事件
+                //Notification Chain Management Module
+                //Publish network status events
                 nodesContainer.setStatus(NodeGroup.WAIT2);
                 LoggerUtil.logger(nodeGroup.getChainId()).info("ChainId={} isCross={} NET STATUS UPDATE TO OK", nodeGroup.getChainId(),isCross);
             } else {
@@ -71,7 +71,7 @@ public class GroupStatusMonitor implements Runnable {
         } else if (NodeGroup.WAIT2 == nodesContainer.getStatus()) {
             if (nodeGroup.isActive(isCross)) {
                 nodesContainer.setStatus(NodeGroup.OK);
-                //执行分享地址线程
+                //Execute shared address thread
                 if(!nodesContainer.isHadShareAddr()) {
                     TaskManager.getInstance().createShareAddressTask(nodeGroup, isCross);
                     nodesContainer.setHadShareAddr(true);
@@ -79,7 +79,7 @@ public class GroupStatusMonitor implements Runnable {
             }
         } else if (NodeGroup.OK == nodesContainer.getStatus()) {
             if (!nodeGroup.isActive(isCross)) {
-                //发布网络状态事件
+                //Publish network status events
                 nodesContainer.setStatus(NodeGroup.WAIT2);
                 LoggerUtil.logger(nodeGroup.getChainId()).info("ChainId={},isCross={} NET STATUS UPDATE TO WAITING", nodeGroup.getChainId(),isCross);
             }

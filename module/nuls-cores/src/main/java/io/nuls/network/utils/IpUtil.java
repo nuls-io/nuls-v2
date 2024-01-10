@@ -206,7 +206,7 @@ public class IpUtil {
     }
 
     /**
-     * 判断是否为合法IP * @return the ip
+     * Determine if it is legalIP * @return the ip
      */
     public static boolean isboolIp(String ipAddress) {
         String ip = "([1-9]|[1-9]\\d|1\\d{2}|2[0-4]\\d|25[0-5])(\\.(\\d|[1-9]\\d|1\\d{2}|2[0-4]\\d|25[0-5])){3}";

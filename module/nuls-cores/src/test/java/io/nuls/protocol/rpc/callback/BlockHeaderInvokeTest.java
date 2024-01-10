@@ -23,7 +23,7 @@ package io.nuls.protocol.rpc.callback;
 //    }
 //
 //    /**
-//     * 测试连续升级(中途统计没有波动,没有跨版本升级)
+//     * Testing continuous upgrades(There is no fluctuation in the midway statistics,No cross version upgrade)
 //     *
 //     * @throws IOException
 //     */
@@ -31,7 +31,7 @@ package io.nuls.protocol.rpc.callback;
 //    public void test1() throws IOException {
 //        ProtocolContext context = ContextManager.getContext(chainId);
 //        BlockHeaderInvoke invoke = new BlockHeaderInvoke(chainId);
-//        //模拟V1持续运行一段时间
+//        //simulationV1Continuously running for a period of time
 //        for (int i = 1; i <= 1888; i++) {
 //            BlockHeader blockHeader = new BlockHeader();
 //            blockHeader.setHeight(i);
@@ -43,7 +43,7 @@ package io.nuls.protocol.rpc.callback;
 //            blockHeader.setExtend(data.serialize());
 //            invoke.callBack(response(HexUtil.encode(blockHeader.serialize())));
 //        }
-//        //V1-->V2,并且V2持续运行一段时间
+//        //V1-->V2,alsoV2Continuously running for a period of time
 //        for (int i = 1889; i <= 18888; i++) {
 //            BlockHeader blockHeader = new BlockHeader();
 //            blockHeader.setHeight(i);
@@ -70,7 +70,7 @@ package io.nuls.protocol.rpc.callback;
 //                assertEquals(2, version);
 //            }
 //        }
-//        //V2-->V3,并且V3持续运行一段时间
+//        //V2-->V3,alsoV3Continuously running for a period of time
 //        for (int i = 18889; i <= 28888; i++) {
 //            BlockHeader blockHeader = new BlockHeader();
 //            blockHeader.setHeight(i);
@@ -100,7 +100,7 @@ package io.nuls.protocol.rpc.callback;
 //    }
 //
 //    /**
-//     * 测试连续升级(中途统计有波动,没有跨版本升级)
+//     * Testing continuous upgrades(There are fluctuations in the midway statistics,No cross version upgrade)
 //     *
 //     * @throws IOException
 //     */
@@ -108,7 +108,7 @@ package io.nuls.protocol.rpc.callback;
 //    public void test2() throws IOException {
 //        ProtocolContext context = ContextManager.getContext(chainId);
 //        BlockHeaderInvoke invoke = new BlockHeaderInvoke(chainId);
-//        //模拟V1持续运行一段时间
+//        //simulationV1Continuously running for a period of time
 //        for (int i = 1; i <= 1888; i++) {
 //            BlockHeader blockHeader = new BlockHeader();
 //            blockHeader.setHeight(i);
@@ -120,7 +120,7 @@ package io.nuls.protocol.rpc.callback;
 //            blockHeader.setExtend(data.serialize());
 //            invoke.callBack(response(HexUtil.encode(blockHeader.serialize())));
 //        }
-//        //V1-->V2,并且V2持续运行一段时间
+//        //V1-->V2,alsoV2Continuously running for a period of time
 //        for (int i = 1889; i <= 18888; i++) {
 //            BlockHeader blockHeader = new BlockHeader();
 //            blockHeader.setHeight(i);
@@ -164,7 +164,7 @@ package io.nuls.protocol.rpc.callback;
 //                assertEquals(2, version);
 //            }
 //        }
-//        //V2-->V3,并且V3持续运行一段时间
+//        //V2-->V3,alsoV3Continuously running for a period of time
 //        for (int i = 18889; i <= 28888; i++) {
 //            BlockHeader blockHeader = new BlockHeader();
 //            blockHeader.setHeight(i);
@@ -194,7 +194,7 @@ package io.nuls.protocol.rpc.callback;
 //    }
 //
 //    /**
-//     * 测试连续升级(中途统计没有波动,有跨版本升级)
+//     * Testing continuous upgrades(There is no fluctuation in the midway statistics,There are cross version upgrades available)
 //     *
 //     * @throws IOException
 //     */
@@ -202,7 +202,7 @@ package io.nuls.protocol.rpc.callback;
 //    public void test3() throws IOException {
 //        ProtocolContext context = ContextManager.getContext(chainId);
 //        BlockHeaderInvoke invoke = new BlockHeaderInvoke(chainId);
-//        //模拟V1持续运行一段时间
+//        //simulationV1Continuously running for a period of time
 //        for (int i = 1; i <= 1888; i++) {
 //            BlockHeader blockHeader = new BlockHeader();
 //            blockHeader.setHeight(i);
@@ -214,7 +214,7 @@ package io.nuls.protocol.rpc.callback;
 //            blockHeader.setExtend(data.serialize());
 //            invoke.callBack(response(HexUtil.encode(blockHeader.serialize())));
 //        }
-//        //V1-->V2,V2连续确认数不足,V3介入,V3升级成功
+//        //V1-->V2,V2Insufficient consecutive confirmations,V3intervention,V3Upgrade successful
 //        for (int i = 1889; i <= 2333; i++) {
 //            BlockHeader blockHeader = new BlockHeader();
 //            blockHeader.setHeight(i);
@@ -243,7 +243,7 @@ package io.nuls.protocol.rpc.callback;
 //                assertEquals(2, context.getLastValidStatisticsInfo().getProtocolVersion().getVersion());
 //            }
 //        }
-//        //V2-->V3,并且V3持续运行一段时间
+//        //V2-->V3,alsoV3Continuously running for a period of time
 //        for (int i = 2334; i <= 28888; i++) {
 //            BlockHeader blockHeader = new BlockHeader();
 //            blockHeader.setHeight(i);
@@ -273,7 +273,7 @@ package io.nuls.protocol.rpc.callback;
 //    }
 //
 //    /**
-//     * 测试连续升级(中途统计有波动,有跨版本升级)
+//     * Testing continuous upgrades(There are fluctuations in the midway statistics,There are cross version upgrades available)
 //     *
 //     * @throws IOException
 //     */
@@ -281,7 +281,7 @@ package io.nuls.protocol.rpc.callback;
 //    public void test4() throws IOException {
 //        ProtocolContext context = ContextManager.getContext(chainId);
 //        BlockHeaderInvoke invoke = new BlockHeaderInvoke(chainId);
-//        //模拟V1持续运行一段时间
+//        //simulationV1Continuously running for a period of time
 //        for (int i = 1; i <= 1888; i++) {
 //            BlockHeader blockHeader = new BlockHeader();
 //            blockHeader.setHeight(i);
@@ -293,7 +293,7 @@ package io.nuls.protocol.rpc.callback;
 //            blockHeader.setExtend(data.serialize());
 //            invoke.callBack(response(HexUtil.encode(blockHeader.serialize())));
 //        }
-//        //V1-->V2,V2统计有波动,并且V2持续运行一段时间
+//        //V1-->V2,V2Statistics fluctuate,alsoV2Continuously running for a period of time
 //        for (int i = 1889; i <= 18888; i++) {
 //            BlockHeader blockHeader = new BlockHeader();
 //            blockHeader.setHeight(i);
@@ -337,7 +337,7 @@ package io.nuls.protocol.rpc.callback;
 //                assertEquals(2, version);
 //            }
 //        }
-//        //V2-->V3,V3连续确认数不足,V4介入,V4升级成功
+//        //V2-->V3,V3Insufficient consecutive confirmations,V4intervention,V4Upgrade successful
 //        for (int i = 18889; i <= 19222; i++) {
 //            BlockHeader blockHeader = new BlockHeader();
 //            blockHeader.setHeight(i);
@@ -361,7 +361,7 @@ package io.nuls.protocol.rpc.callback;
 //                assertEquals(3, context.getLastValidStatisticsInfo().getProtocolVersion().getVersion());
 //            }
 //        }
-//        //V3-->V4,并且V4持续运行一段时间
+//        //V3-->V4,alsoV4Continuously running for a period of time
 //        for (int i = 19223; i <= 28888; i++) {
 //            BlockHeader blockHeader = new BlockHeader();
 //            blockHeader.setHeight(i);
@@ -391,7 +391,7 @@ package io.nuls.protocol.rpc.callback;
 //    }
 //
 //    /**
-//     * 测试连续升级后连续回滚降级(中途统计没有波动,没有跨版本升级)
+//     * Test continuous upgrade followed by continuous rollback and degradation(There is no fluctuation in the midway statistics,No cross version upgrade)
 //     *
 //     * @throws IOException
 //     */
@@ -400,7 +400,7 @@ package io.nuls.protocol.rpc.callback;
 //        Stack<BlockHeader> rollback = new Stack<>();
 //        ProtocolContext context = ContextManager.getContext(chainId);
 //        BlockHeaderInvoke invoke = new BlockHeaderInvoke(chainId);
-//        //模拟V1持续运行一段时间
+//        //simulationV1Continuously running for a period of time
 //        for (int i = 1; i <= 888; i++) {
 //            BlockHeader blockHeader = new BlockHeader();
 //            blockHeader.setHeight(i);
@@ -413,7 +413,7 @@ package io.nuls.protocol.rpc.callback;
 //            invoke.callBack(response(HexUtil.encode(blockHeader.serialize())));
 //            rollback.push(blockHeader);
 //        }
-//        //V1-->V2,并且V2持续运行一段时间
+//        //V1-->V2,alsoV2Continuously running for a period of time
 //        for (int i = 889; i <= 4888; i++) {
 //            BlockHeader blockHeader = new BlockHeader();
 //            blockHeader.setHeight(i);
@@ -441,7 +441,7 @@ package io.nuls.protocol.rpc.callback;
 //            }
 //            rollback.add(blockHeader);
 //        }
-//        //V2-->V3,并且V3持续运行一段时间
+//        //V2-->V3,alsoV3Continuously running for a period of time
 //        for (int i = 4889; i <= 8889; i++) {
 //            BlockHeader blockHeader = new BlockHeader();
 //            blockHeader.setHeight(i);
@@ -471,14 +471,14 @@ package io.nuls.protocol.rpc.callback;
 //        }
 //
 //        Stack<BlockHeader> add = new Stack<>();
-//        //开始回滚
+//        //Start rollback
 //        for (int i = rollback.size() - 1; i >= 0; i--) {
 //            BlockHeader blockHeader = rollback.pop();
 //            add.push(blockHeader);
 //            invoke.callBack(response(HexUtil.encode(blockHeader.serialize())));
 //        }
 //
-//        //再次添加
+//        //Add again
 //        for (int i = add.size() - 1; i >= 0; i--) {
 //            BlockHeader blockHeader = add.pop();
 //            invoke.callBack(response(HexUtil.encode(blockHeader.serialize())));
@@ -486,7 +486,7 @@ package io.nuls.protocol.rpc.callback;
 //    }
 //
 //    /**
-//     * 测试连续升级后连续回滚降级(中途统计有波动,没有跨版本升级)
+//     * Test continuous upgrade followed by continuous rollback and degradation(There are fluctuations in the midway statistics,No cross version upgrade)
 //     *
 //     * @throws IOException
 //     */
@@ -495,7 +495,7 @@ package io.nuls.protocol.rpc.callback;
 //        Stack<BlockHeader> rollback = new Stack<>();
 //        ProtocolContext context = ContextManager.getContext(chainId);
 //        BlockHeaderInvoke invoke = new BlockHeaderInvoke(chainId);
-//        //模拟V1持续运行一段时间
+//        //simulationV1Continuously running for a period of time
 //        for (int i = 1; i <= 1888; i++) {
 //            BlockHeader blockHeader = new BlockHeader();
 //            blockHeader.setHeight(i);
@@ -508,7 +508,7 @@ package io.nuls.protocol.rpc.callback;
 //            invoke.callBack(response(HexUtil.encode(blockHeader.serialize())));
 //            rollback.push(blockHeader);
 //        }
-//        //V1-->V2,并且V2持续运行一段时间
+//        //V1-->V2,alsoV2Continuously running for a period of time
 //        for (int i = 1889; i <= 18888; i++) {
 //            BlockHeader blockHeader = new BlockHeader();
 //            blockHeader.setHeight(i);
@@ -553,7 +553,7 @@ package io.nuls.protocol.rpc.callback;
 //            }
 //            rollback.push(blockHeader);
 //        }
-//        //V2-->V3,并且V3持续运行一段时间
+//        //V2-->V3,alsoV3Continuously running for a period of time
 //        for (int i = 18889; i <= 28888; i++) {
 //            BlockHeader blockHeader = new BlockHeader();
 //            blockHeader.setHeight(i);
@@ -583,14 +583,14 @@ package io.nuls.protocol.rpc.callback;
 //        }
 //
 //        Stack<BlockHeader> add = new Stack<>();
-//        //开始回滚
+//        //Start rollback
 //        for (int i = rollback.size() - 1; i >= 0; i--) {
 //            BlockHeader blockHeader = rollback.pop();
 //            add.push(blockHeader);
 //            invoke.callBack(response(HexUtil.encode(blockHeader.serialize())));
 //        }
 //
-//        //再次添加
+//        //Add again
 //        for (int i = add.size() - 1; i >= 0; i--) {
 //            BlockHeader blockHeader = add.pop();
 //            invoke.callBack(response(HexUtil.encode(blockHeader.serialize())));
@@ -598,7 +598,7 @@ package io.nuls.protocol.rpc.callback;
 //    }
 //
 //    /**
-//     * 测试连续升级后连续回滚降级(中途统计没有波动,有跨版本升级)
+//     * Test continuous upgrade followed by continuous rollback and degradation(There is no fluctuation in the midway statistics,There are cross version upgrades available)
 //     *
 //     * @throws IOException
 //     */
@@ -607,7 +607,7 @@ package io.nuls.protocol.rpc.callback;
 //        Stack<BlockHeader> rollback = new Stack<>();
 //        ProtocolContext context = ContextManager.getContext(chainId);
 //        BlockHeaderInvoke invoke = new BlockHeaderInvoke(chainId);
-//        //模拟V1持续运行一段时间
+//        //simulationV1Continuously running for a period of time
 //        for (int i = 1; i <= 1888; i++) {
 //            BlockHeader blockHeader = new BlockHeader();
 //            blockHeader.setHeight(i);
@@ -620,7 +620,7 @@ package io.nuls.protocol.rpc.callback;
 //            invoke.callBack(response(HexUtil.encode(blockHeader.serialize())));
 //            rollback.push(blockHeader);
 //        }
-//        //V1-->V2,V2连续确认数不足,V3介入,V3升级成功
+//        //V1-->V2,V2Insufficient consecutive confirmations,V3intervention,V3Upgrade successful
 //        for (int i = 1889; i <= 2333; i++) {
 //            BlockHeader blockHeader = new BlockHeader();
 //            blockHeader.setHeight(i);
@@ -650,7 +650,7 @@ package io.nuls.protocol.rpc.callback;
 //            }
 //            rollback.push(blockHeader);
 //        }
-//        //V2-->V3,并且V3持续运行一段时间
+//        //V2-->V3,alsoV3Continuously running for a period of time
 //        for (int i = 2334; i <= 28888; i++) {
 //            BlockHeader blockHeader = new BlockHeader();
 //            blockHeader.setHeight(i);
@@ -680,14 +680,14 @@ package io.nuls.protocol.rpc.callback;
 //        }
 //
 //        Stack<BlockHeader> add = new Stack<>();
-//        //开始回滚
+//        //Start rollback
 //        for (int i = rollback.size() - 1; i >= 0; i--) {
 //            BlockHeader blockHeader = rollback.pop();
 //            add.push(blockHeader);
 //            invoke.callBack(response(HexUtil.encode(blockHeader.serialize())));
 //        }
 //
-//        //再次添加
+//        //Add again
 //        for (int i = add.size() - 1; i >= 0; i--) {
 //            BlockHeader blockHeader = add.pop();
 //            invoke.callBack(response(HexUtil.encode(blockHeader.serialize())));
@@ -695,7 +695,7 @@ package io.nuls.protocol.rpc.callback;
 //    }
 //
 //    /**
-//     * 测试连续升级后连续回滚降级(中途统计有波动,有跨版本升级)
+//     * Test continuous upgrade followed by continuous rollback and degradation(There are fluctuations in the midway statistics,There are cross version upgrades available)
 //     *
 //     * @throws IOException
 //     */
@@ -704,7 +704,7 @@ package io.nuls.protocol.rpc.callback;
 //        Stack<BlockHeader> rollback = new Stack<>();
 //        ProtocolContext context = ContextManager.getContext(chainId);
 //        BlockHeaderInvoke invoke = new BlockHeaderInvoke(chainId);
-//        //模拟V1持续运行一段时间
+//        //simulationV1Continuously running for a period of time
 //        for (int i = 1; i <= 1888; i++) {
 //            BlockHeader blockHeader = new BlockHeader();
 //            blockHeader.setHeight(i);
@@ -717,7 +717,7 @@ package io.nuls.protocol.rpc.callback;
 //            invoke.callBack(response(HexUtil.encode(blockHeader.serialize())));
 //            rollback.push(blockHeader);
 //        }
-//        //V1-->V2,V2统计有波动,并且V2持续运行一段时间
+//        //V1-->V2,V2Statistics fluctuate,alsoV2Continuously running for a period of time
 //        for (int i = 1889; i <= 18888; i++) {
 //            BlockHeader blockHeader = new BlockHeader();
 //            blockHeader.setHeight(i);
@@ -762,7 +762,7 @@ package io.nuls.protocol.rpc.callback;
 //            }
 //            rollback.push(blockHeader);
 //        }
-//        //V2-->V3,V3连续确认数不足,V4介入,V4升级成功
+//        //V2-->V3,V3Insufficient consecutive confirmations,V4intervention,V4Upgrade successful
 //        for (int i = 18889; i <= 19222; i++) {
 //            BlockHeader blockHeader = new BlockHeader();
 //            blockHeader.setHeight(i);
@@ -787,7 +787,7 @@ package io.nuls.protocol.rpc.callback;
 //            }
 //            rollback.push(blockHeader);
 //        }
-//        //V3-->V4,并且V4持续运行一段时间
+//        //V3-->V4,alsoV4Continuously running for a period of time
 //        for (int i = 19223; i <= 28888; i++) {
 //            BlockHeader blockHeader = new BlockHeader();
 //            blockHeader.setHeight(i);
@@ -817,14 +817,14 @@ package io.nuls.protocol.rpc.callback;
 //        }
 //
 //        Stack<BlockHeader> add = new Stack<>();
-//        //开始回滚
+//        //Start rollback
 //        for (int i = rollback.size() - 1; i >= 0; i--) {
 //            BlockHeader blockHeader = rollback.pop();
 //            add.push(blockHeader);
 //            invoke.callBack(response(HexUtil.encode(blockHeader.serialize())));
 //        }
 //
-//        //再次添加
+//        //Add again
 //        for (int i = add.size() - 1; i >= 0; i--) {
 //            BlockHeader blockHeader = add.pop();
 //            invoke.callBack(response(HexUtil.encode(blockHeader.serialize())));

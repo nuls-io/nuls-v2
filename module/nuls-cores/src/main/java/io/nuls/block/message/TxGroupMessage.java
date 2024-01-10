@@ -34,12 +34,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 获取交易组消息
- * 收到其他节点转发的区块时,如果区块中包含的交易在本地没有,则发送此消息批量获取交易
+ * Get transaction group messages
+ * When receiving blocks forwarded by other nodes,If the transactions contained in the block are not available locally,Send this message to batch obtain transactions
  *
  * @author captain
  * @version 1.0
- * @date 18-11-9 下午2:37
+ * @date 18-11-9 afternoon2:37
  */
 public class TxGroupMessage extends BaseBusinessMessage {
 

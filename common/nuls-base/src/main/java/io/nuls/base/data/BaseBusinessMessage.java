@@ -30,11 +30,11 @@ import io.nuls.core.exception.NulsRuntimeException;
 import java.io.IOException;
 
 /**
- * 通用消息体
+ * General message body
  *
  * @author captain
  * @version 1.0
- * @date 18-11-20 上午10:44
+ * @date 18-11-20 morning10:44
  */
 public abstract class BaseBusinessMessage extends BaseNulsData {
 

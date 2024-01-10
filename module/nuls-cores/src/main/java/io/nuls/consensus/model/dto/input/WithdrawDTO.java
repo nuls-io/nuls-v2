@@ -29,7 +29,7 @@ package io.nuls.consensus.model.dto.input;
 import io.nuls.core.model.StringUtils;
 
 /**
- * 退出委托交易参数类
+ * Exit entrusted transaction parameter class
  * Exit Delegation Trading Parameter Class
  *
  * @author tag

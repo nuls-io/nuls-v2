@@ -29,7 +29,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * 消息确认对象，表示已经收到
+ * Message confirmation object, indicating that it has been received
  * Message confirmation object, indicating that it has been received
  *
  * @author tangyi
@@ -38,7 +38,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Ack {
     /**
-     * 请求的消息号
+     * Request message number
      * This is the original request ID referred by a Request message
      */
     @JsonProperty

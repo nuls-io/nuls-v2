@@ -149,7 +149,7 @@ public class VMContext {
             blockHeader = contractHelper.getBatchInfoCurrentBlockHeader(chainId);
         }
         if (blockHeader == null) {
-            // edit by pierre at 2019-10-24 如果为空，说明是验证合约时，合约虚拟机调用此方法，此时需要手工设置当前打包区块数据，可手工设置的数据有区块高度和区块时间
+            // edit by pierre at 2019-10-24 If it is empty, it means that when verifying the contract, the contract virtual machine calls this method. At this time, the current packaged block data needs to be manually set, and the manually set data includes block height and block time
             BlockHeaderDto header = getNewestBlockHeader(chainId);
             if(header != null) {
                 header.setHeight(header.getHeight() + 1);
@@ -161,10 +161,10 @@ public class VMContext {
     }
 
     /**
-     * 查询可用余额
+     * Query available balance
      *
-     * @param address     合约地址
-     * @param blockHeight 区块高度, 如果不传, 则按主链最新高度查询
+     * @param address     Contract address
+     * @param blockHeight block height, If not transmitted, Then query according to the latest height of the main chain
      */
     public ContractBalance getBalance(int chainId, int assetChainId, int assetId, byte[] address) {
         ContractBalance balance = contractHelper.getBalance(chainId, assetChainId, assetId, address);
@@ -172,10 +172,10 @@ public class VMContext {
     }
 
     /**
-     * 查询总余额
+     * Query total balance
      *
-     * @param address     合约地址
-     * @param blockHeight 区块高度, 如果不传, 则按主链最新高度查询
+     * @param address     Contract address
+     * @param blockHeight block height, If not transmitted, Then query according to the latest height of the main chain
      */
     public BigInteger getTotalBalance(int chainId, int assetChainId, int assetId, byte[] address) {
         ContractBalance balance = contractHelper.getBalance(chainId, assetChainId, assetId, address);

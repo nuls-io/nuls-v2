@@ -13,14 +13,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 调用其他模块跟交易相关的接口
+ * Calling other modules and transaction related interfaces
  *
  * @author: tag
  * @date: 2019/4/12
  */
 public class ConsensusCall {
     /**
-     * 查询本节点是不是共识节点，如果是则返回，共识账户和密码
+     * Query whether this node is a consensus node. If so, return the consensus account and password
      * Query whether the node is a consensus node, if so, return, consensus account and password
      * */
     @SuppressWarnings("unchecked")
@@ -40,7 +40,7 @@ public class ConsensusCall {
     }
 
     /**
-     * 查询当前网络的所有共识节点列表
+     * Query the list of all consensus nodes in the current network
      * Query whether the node is a consensus node, if so, return, consensus account and password
      * */
     @SuppressWarnings("unchecked")
@@ -60,7 +60,7 @@ public class ConsensusCall {
     }
 
     /**
-     * 查询本节点是不是共识节点，如果是则返回共识账户和密码，并查询当前种子节点列表
+     * Query whether this node is a consensus node. If so, return the consensus account and password, and query the current list of seed nodes
      * Query whether the node is a consensus node, if so, return, consensus account and password
      * */
     @SuppressWarnings("unchecked")
@@ -80,7 +80,7 @@ public class ConsensusCall {
     }
 
     /**
-     * 查询指定时间轮次所有出块地址列表
+     * Query the list of all outgoing block addresses for the specified time round
      * Query the list of all out-of-block addresses for a specified time round
      * */
     @SuppressWarnings("unchecked")
@@ -101,7 +101,7 @@ public class ConsensusCall {
     }
 
     /**
-     * 查询两轮次间节变化信息
+     * Query information on node changes between two rounds
      * Query for two rounds of inter-section change information
      * */
     @SuppressWarnings("unchecked")

@@ -46,7 +46,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * 节点组对象
+ * Node Group Object
  *
  * @author lan
  * @date 2018/11/01
@@ -54,7 +54,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class NodeGroup implements Dto {
     NulsCoresConfig networkConfig = SpringLiteContext.getBean(NulsCoresConfig.class);
     /**
-     * 缓存网络组种无法及时处理的信息
+     * Information that cannot be processed in a timely manner by caching network groups
      */
     private BlockingDeque<RpcCacheMessage> cacheMsgQueue = new LinkedBlockingDeque<>(NetworkConstant.INIT_CACHE_MSG_QUEUE_NUMBER);
 
@@ -63,7 +63,7 @@ public class NodeGroup implements Dto {
     private int maxOut;
     private int maxIn;
     /**
-     * 跨链最大连接数
+     * Maximum number of cross chain connections
      */
     private int maxCrossOut = 0;
     private int maxCrossIn = 0;
@@ -71,19 +71,19 @@ public class NodeGroup implements Dto {
     private int minAvailableCount;
 
     /**
-     * 跨链网络是否激活,卫星链上的默认跨链true,
-     * 友链默认false，在跨链模块请求时候这个属性才为true
+     * Is the cross chain network activated,Default cross chain on satellite chaintrue,
+     * Friend Chain DefaultfalseThis property is only applicable when requesting cross chain modulestrue
      */
     private boolean isCrossActive = false;
 
 
     /**
-     * localNet-自有网络的节点
+     * localNet-Nodes in their own network
      */
     private NodesContainer localNetNodeContainer = new NodesContainer();
 
     /**
-     * 跨链-跨链连接的节点
+     * Cross chain-Cross chain connected nodes
      */
     private NodesContainer crossNodeContainer = new NodesContainer();
 
@@ -94,9 +94,9 @@ public class NodeGroup implements Dto {
     private Lock locker = new ReentrantLock();
     /**
      * GROUP  STATUS
-     * INITIALIZED 状态，等待连接中
-     * 初始创建时候不可用状态是WAIT1
-     * 到达OK后震荡不可用状态是WAIT2
+     * INITIALIZED Status, waiting to connect
+     * The unavailable state during initial creation isWAIT1
+     * reachOKThe unavailable state of post shock isWAIT2
      */
     public final static int WAIT1 = 1;
     public final static int WAIT2 = 2;
@@ -108,11 +108,11 @@ public class NodeGroup implements Dto {
     public static Map<String, String> statusMap = new HashMap<>();
 
     static {
-        statusMap.put(String.valueOf(WAIT1), "netInit(初始化)");
-        statusMap.put(String.valueOf(WAIT2), "waitConnected(待组网)");
-        statusMap.put(String.valueOf(OK), "running(运行中)");
-        statusMap.put(String.valueOf(DESTROY), "destroy(注销中)");
-        statusMap.put(String.valueOf(RECONNECT), "reconnect(重连中)");
+        statusMap.put(String.valueOf(WAIT1), "netInit(initialization)");
+        statusMap.put(String.valueOf(WAIT2), "waitConnected(To be networked)");
+        statusMap.put(String.valueOf(OK), "running(Running)");
+        statusMap.put(String.valueOf(DESTROY), "destroy(Cancelling)");
+        statusMap.put(String.valueOf(RECONNECT), "reconnect(Reconnection)");
     }
 
     public String getLocalStatus() {
@@ -250,12 +250,12 @@ public class NodeGroup implements Dto {
     }
 
     /**
-     * 是否为友链注册的跨链Group
+     * Is it a cross chain registration for a friend chainGroup
      *
      * @return
      */
     public boolean isMoonCrossGroup() {
-        //在卫星链上，链id不等于默认id，则是用户注册的跨链
+        //On the satellite chain, the chainidNot equal to defaultid, it is the cross chain registration of the user
         if (networkConfig.isMoonNode() && networkConfig.getChainId() != chainId) {
             return true;
         }
@@ -271,8 +271,8 @@ public class NodeGroup implements Dto {
     }
 
     /**
-     * 1.在可用连接充足情况下，保留一个种子连接，其他的种子连接需要断开
-     * 2.在可用连接不够取代种子情况下，按可用连接数来断开种子连接
+     * 1.When there are sufficient available connections, keep one seed connection and disconnect the other seed connections
+     * 2.When there are not enough available connections to replace the seed, disconnect the seed connection based on the number of available connections
      *
      * @param isCross
      * @return
@@ -288,7 +288,7 @@ public class NodeGroup implements Dto {
                 nodes = localNetNodeContainer.getConnectedSeedNodes();
                 canConnectNodesNum = localNetNodeContainer.getCanConnectNodes().size();
             }
-            //连接的种子数量大于1，并且可用连接数量大于0
+            //The number of connected seeds is greater than1And the number of available connections is greater than0
             if (nodes.size() > 1 && canConnectNodesNum > 0) {
                 Collections.shuffle(nodes);
                 while (canConnectNodesNum < nodes.size()) {
@@ -297,7 +297,7 @@ public class NodeGroup implements Dto {
             } else {
                 return;
             }
-            //断开连接
+            //Disconnect
             for (Node node : nodes) {
                 node.close();
             }
@@ -307,7 +307,7 @@ public class NodeGroup implements Dto {
     }
 
     /**
-     * 是否为主网链
+     * Is it the main network link
      *
      * @return
      */
@@ -373,7 +373,7 @@ public class NodeGroup implements Dto {
                 Node newNode = new Node(magicNumber, ip, port, crossPort, Node.OUT, isCross);
                 boolean localAdd = localNetNodeContainer.addNeedCheckNode(newNode);
                 if (crossPort > 0 && localAdd) {
-                    /*是本地新增节点 并且 跨链端口存在，则放入跨链待检测队列中*/
+                    /*It is a locally added node also If a cross chain port exists, it will be placed in the cross chain pending detection queue*/
                     addCrossCheckNodes(ip, crossPort, crossPort);
                 }
                 return localAdd;
@@ -395,7 +395,7 @@ public class NodeGroup implements Dto {
             connectedNodes = localNetNodeContainer.getConnectedNodes();
         }
         for (Node node : allNodes) {
-            //排除已经连接的信息,作为server存在in连接了
+            //Exclude connected information,As aserverexistenceinConnected
             if (node.getStatus() == NodeStatusEnum.CONNECTABLE) {
                 if (null == connectedNodes.get(node.getId())) {
                     nodeList.add(node);
@@ -478,7 +478,7 @@ public class NodeGroup implements Dto {
     }
 
     /**
-     * 网络是否可使用 非自有网络满足跨链连接最小数
+     * Is the network usable Non owned networks meet the minimum number of cross chain connections
      *
      * @return boolean
      */

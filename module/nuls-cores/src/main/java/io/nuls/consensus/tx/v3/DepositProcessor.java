@@ -26,7 +26,7 @@ import java.math.BigInteger;
 import java.util.*;
 
 /**
- * 委托交易处理器
+ * Entrusted transaction processor
  *
  * @author tag
  * @date 2019/12/2
@@ -60,7 +60,7 @@ public class DepositProcessor implements TransactionProcessor {
         List<Transaction> invalidTxList = new ArrayList<>();
         String errorCode = null;
         Set<NulsHash> invalidHashSet = txValidator.getInvalidAgentHash(txMap.get(TxType.RED_PUNISH), txMap.get(TxType.CONTRACT_STOP_AGENT), txMap.get(TxType.STOP_AGENT), chain);
-        //各节点总委托金额
+        //Total commission amount for each node
         Map<NulsHash, BigInteger> agentDepositTotalMap = new HashMap<>(16);
         try {
             Map<NulsHash, BigInteger> contractDepositMap = getContractDepositMap(chain, txMap.get(TxType.CONTRACT_DEPOSIT));
@@ -74,7 +74,7 @@ public class DepositProcessor implements TransactionProcessor {
             try {
                 Deposit deposit = new Deposit();
                 deposit.parse(depositTx.getTxData(), 0);
-                //验证签名及coinData地址
+                //Verify signature andcoinDataaddress
                 if (!verifyV3(chain, depositTx, deposit.getAddress())) {
                     invalidTxList.add(depositTx);
                     continue;
@@ -144,7 +144,7 @@ public class DepositProcessor implements TransactionProcessor {
                 commitResult = false;
             }
         }
-        //回滚已提交成功的交易
+        //Roll back transactions that have been successfully submitted
         if (!commitResult) {
             for (Transaction rollbackTx : commitSuccessList) {
                 try {
@@ -178,7 +178,7 @@ public class DepositProcessor implements TransactionProcessor {
                 rollbackResult = false;
             }
         }
-        //保存已回滚成功的交易
+        //Save successfully rolled back transactions
         if (!rollbackResult) {
             for (Transaction commitTx : rollbackSuccessList) {
                 try {
@@ -193,14 +193,14 @@ public class DepositProcessor implements TransactionProcessor {
     }
 
     /**
-     * 版本三新增的验证
+     * Verification added in version three
      *
-     * @param chain   链信息
-     * @param tx      委托交易
-     * @param creator 委托账户地址
+     * @param chain   Chain information
+     * @param tx      Entrusted transaction
+     * @param creator Entrusted account address
      */
     private boolean verifyV3(Chain chain, Transaction tx, byte[] creator) throws NulsException {
-        //验证签名是否为委托者签名
+        //Verify if the signature is the signature of the delegate
         TransactionSignature transactionSignature = new TransactionSignature();
         if (tx.getTransactionSignature() == null) {
             chain.getLogger().error("Unsigned Commission transaction");
@@ -214,7 +214,7 @@ public class DepositProcessor implements TransactionProcessor {
             chain.getLogger().error("The signature of the entrusted transaction is not the signature of the entrusting party");
             throw new NulsException(ConsensusErrorCode.TX_CREATOR_NOT_SIGNED);
         }
-        //验证from中地址与to中地址是否相同且为委托者
+        //validatefromMiddle address andtoIs the middle address the same and is it the principal
         CoinData coinData = tx.getCoinDataInstance();
         if (!Arrays.equals(creator, coinData.getFrom().get(0).getAddress()) || !Arrays.equals(creator, coinData.getTo().get(0).getAddress())) {
             chain.getLogger().error("From address or to address in coinData is not the principal address");
@@ -224,8 +224,8 @@ public class DepositProcessor implements TransactionProcessor {
     }
 
     /**
-     * 获取智能合约委托交易金额
-     * @param contractDepositList  智能合约委托交易列表
+     * Obtain smart contract commission transaction amount
+     * @param contractDepositList  List of smart contract entrusted transactions
      * */
     private Map<NulsHash, BigInteger> getContractDepositMap(Chain chain, List<Transaction> contractDepositList) throws NulsException{
         if(contractDepositList == null || contractDepositList.size() == 0){

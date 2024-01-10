@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 账户资产索引存储接口
+ * Account Asset Index Storage Interface
  *
  * @author lanjinsheng
  */

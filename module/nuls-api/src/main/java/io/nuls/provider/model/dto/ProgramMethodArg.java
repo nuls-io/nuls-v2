@@ -27,14 +27,14 @@ package io.nuls.provider.model.dto;
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
 
-@ApiModel(name = "合约方法参数详情")
+@ApiModel(name = "Contract Method Parameter Details")
 public class ProgramMethodArg {
 
-    @ApiModelProperty(description = "参数类型")
+    @ApiModelProperty(description = "Parameter type")
     private String type;
-    @ApiModelProperty(description = "参数名称")
+    @ApiModelProperty(description = "Parameter Name")
     private String name;
-    @ApiModelProperty(description = "是否必填")
+    @ApiModelProperty(description = "Is it mandatory to fill in")
     private boolean required;
 
     public String getType() {

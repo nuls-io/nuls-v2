@@ -3,14 +3,14 @@ package io.nuls.base.protocol;
 public interface MessageProcessor {
 
     /**
-     * 获取要处理的消息对应的cmd
+     * Obtain the corresponding message to be processedcmd
      *
      * @return
      */
     String getCmd();
 
     /**
-     * 消息处理方法
+     * Message processing methods
      *
      * @param chainId
      * @param message

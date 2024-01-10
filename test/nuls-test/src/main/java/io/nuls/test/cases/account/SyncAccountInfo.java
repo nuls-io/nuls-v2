@@ -14,11 +14,11 @@ import io.nuls.core.core.annotation.Component;
  * @Author: zhoulijun
  * @Time: 2019-03-21 11:21
  * @Description:
- * 账户余额一致性测试
- * 1.查询本地余额
- * 2.通过地址查询私钥
- * 3.远程通过私钥查询余额
- * 4.比对本地与远程一致性
+ * Account balance consistency test
+ * 1.Query local balance
+ * 2.Query private key through address
+ * 3.Remote balance query through private key
+ * 4.Compare local and remote consistency
  */
 @Component
 public class SyncAccountInfo extends BaseAccountCase<String, String> {
@@ -33,7 +33,7 @@ public class SyncAccountInfo extends BaseAccountCase<String, String> {
 
     @Override
     public String title() {
-        return "网络节点余额一致性";
+        return "Network node balance consistency";
     }
 
     @Override
@@ -44,18 +44,18 @@ public class SyncAccountInfo extends BaseAccountCase<String, String> {
 
             @Override
             public String title() {
-                return "远程节点通过私钥导入账户";
+                return "Remote nodes import accounts through private keys";
             }
         }.check(new RemoteTestParam<>(ImportAccountByPriKeyCase.class,address,priKey),depth);
         boolean res = new SyncRemoteTestCase<AccountInfo>(){
 
             @Override
             public String title() {
-                return "远程比对账户信息一致性";
+                return "Remote comparison of account information consistency";
             }
         }.check(new RemoteTestParam<>(GetAccountByAddressCase.class,accountInfo,address),depth);
         if(!res){
-            throw new TestFailException("远程账户信息与本地不一致");
+            throw new TestFailException("Remote account information is inconsistent with local information");
         }
         return address;
     }

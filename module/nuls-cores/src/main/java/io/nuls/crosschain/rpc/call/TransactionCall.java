@@ -12,14 +12,14 @@ import io.nuls.crosschain.model.bo.Chain;
 import java.util.HashMap;
 import java.util.Map;
 /**
- * 与交易模块交互类
+ * Interaction class with transaction module
  * Interaction class with transaction module
  * @author tag
  * 2019/4/10
  */
 public class TransactionCall {
     /**
-     * 将新创建的交易发送给交易管理模块
+     * Send the newly created transaction to the transaction management module
      * The newly created transaction is sent to the transaction management module
      *
      * @param chain chain info

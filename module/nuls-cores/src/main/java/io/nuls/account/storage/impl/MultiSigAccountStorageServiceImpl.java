@@ -83,7 +83,7 @@ public class MultiSigAccountStorageServiceImpl implements MultiSigAccountStorage
             if (list != null) {
                 for (byte[] value : list) {
                     MultiSigAccountPO multiSigAccountPo = new MultiSigAccountPO();
-                    //将byte数组反序列化为AccountPo返回
+                    //takebyteDeserialize an array asAccountPoreturn
                     multiSigAccountPo.parse(value, 0);
                     multiSigAccountPOList.add(multiSigAccountPo);
                 }
@@ -103,7 +103,7 @@ public class MultiSigAccountStorageServiceImpl implements MultiSigAccountStorage
         }
         MultiSigAccountPO multiSigAccountPo = new MultiSigAccountPO();
         try {
-            //将byte数组反序列化为AccountPo返回
+            //takebyteDeserialize an array asAccountPoreturn
             multiSigAccountPo.parse(multiSigAccountPoBytes, 0);
         } catch (Exception e) {
             LoggerUtil.LOG.error(e.getMessage());

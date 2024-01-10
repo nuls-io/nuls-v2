@@ -226,7 +226,7 @@ public class CallContractTxValidator {
 
         }
 
-        // 其他资产校验
+        // Other asset verification
         BigInteger assetKeyFrom, assetKeyTo;
         for (String multyAssetKey : multyAssetKeys) {
             assetKeyFrom = multyAssetMap.get(multyAssetKey + "from");
@@ -245,14 +245,14 @@ public class CallContractTxValidator {
             }
         }
 
-        // 主资产校验
+        // Main asset verification
         if (contractReceivedNulsValue.compareTo(transferNulsValue) < 0) {
             Log.error("contract call error: Insufficient balance of nuls to transfer to the contract address.");
             return Result.getFailed(INSUFFICIENT_BALANCE_TO_CONTRACT);
         }
 
         if (transferNulsValue.compareTo(BigInteger.ZERO) > 0) {
-            // 手续费账户也能支出，向合约转资产
+            // Handling fee accounts can also be used to transfer assets to contracts
             if (nulsValue.compareTo(transferNulsValue) < 0) {
                 Log.error("contract call error: Insufficient balance to transfer to the contract address.");
                 return Result.getFailed(INSUFFICIENT_BALANCE_TO_CONTRACT);
@@ -270,7 +270,7 @@ public class CallContractTxValidator {
     }
 
     /**
-     * 1. 新增功能，调用合约时可以转账给其他地址
+     * 1. New feature, allowing transfer to other addresses when calling contracts
      */
     public Result validateV13(int chainId, CallContractTransaction tx) throws NulsException {
 
@@ -318,7 +318,7 @@ public class CallContractTxValidator {
         int toSize = toList.size();
         BigInteger transferNulsToContractValue = txData.getValue();
         BigInteger contractReceivedNulsValue = BigInteger.ZERO;
-        // 调用者在调用合约的同时，向其他账户转账
+        // The caller transfers funds to other accounts while calling the contract
         BigInteger transferNulsToOtherAccountValue = BigInteger.ZERO;
         if (toSize > 0) {
             for (CoinTo coin : toList) {
@@ -349,7 +349,7 @@ public class CallContractTxValidator {
                 if (isContractReceiver) {
                     contractReceivedNulsValue = contractReceivedNulsValue.add(coin.getAmount());
                 } else {
-                    // 检查to地址是否在账户白名单中
+                    // inspecttoIs the address on the account whitelist
                     String toStr = AddressTool.getStringAddressByBytes(to);
                     boolean whiteAddress = AccountCall.validationWhitelistForTransferOnContractCall(chainId, toStr);
                     if (!whiteAddress) {
@@ -362,7 +362,7 @@ public class CallContractTxValidator {
 
         }
 
-        // 其他资产校验
+        // Other asset verification
         BigInteger assetKeyFrom, assetKeyTo;
         for (String multyAssetKey : multyAssetKeys) {
             assetKeyFrom = multyAssetMap.get(multyAssetKey + "from");
@@ -381,14 +381,14 @@ public class CallContractTxValidator {
             }
         }
 
-        // 主资产校验
+        // Main asset verification
         if (contractReceivedNulsValue.compareTo(transferNulsToContractValue) < 0) {
             Log.error("contract call error: Insufficient balance of nuls to transfer to the contract address.");
             return Result.getFailed(INSUFFICIENT_BALANCE_TO_CONTRACT);
         }
 
         if (transferNulsToContractValue.compareTo(BigInteger.ZERO) > 0) {
-            // 手续费账户也能支出，向合约转资产
+            // Handling fee accounts can also be used to transfer assets to contracts
             if (nulsValue.compareTo(transferNulsToContractValue.add(transferNulsToOtherAccountValue)) < 0) {
                 Log.error("contract call error: Insufficient balance to transfer to the contract address.");
                 return Result.getFailed(INSUFFICIENT_BALANCE_TO_CONTRACT);
@@ -405,7 +405,7 @@ public class CallContractTxValidator {
         }
     }
     /**
-     * 1. 新增功能，调用合约时支持多签地址
+     * 1. New feature that supports multiple address signatures when calling contracts
      */
     public Result validateV14(int chainId, CallContractTransaction tx) throws NulsException {
 
@@ -463,7 +463,7 @@ public class CallContractTxValidator {
         int toSize = toList.size();
         BigInteger transferNulsToContractValue = txData.getValue();
         BigInteger contractReceivedNulsValue = BigInteger.ZERO;
-        // 调用者在调用合约的同时，向其他账户转账
+        // The caller transfers funds to other accounts while calling the contract
         BigInteger transferNulsToOtherAccountValue = BigInteger.ZERO;
         if (toSize > 0) {
             for (CoinTo coin : toList) {
@@ -494,7 +494,7 @@ public class CallContractTxValidator {
                 if (isContractReceiver) {
                     contractReceivedNulsValue = contractReceivedNulsValue.add(coin.getAmount());
                 } else {
-                    // 检查to地址是否在账户白名单中
+                    // inspecttoIs the address on the account whitelist
                     String toStr = AddressTool.getStringAddressByBytes(to);
                     boolean whiteAddress = AccountCall.validationWhitelistForTransferOnContractCall(chainId, toStr);
                     if (!whiteAddress) {
@@ -507,7 +507,7 @@ public class CallContractTxValidator {
 
         }
 
-        // 其他资产校验
+        // Other asset verification
         BigInteger assetKeyFrom, assetKeyTo;
         for (String multyAssetKey : multyAssetKeys) {
             assetKeyFrom = multyAssetMap.get(multyAssetKey + "from");
@@ -526,14 +526,14 @@ public class CallContractTxValidator {
             }
         }
 
-        // 主资产校验
+        // Main asset verification
         if (contractReceivedNulsValue.compareTo(transferNulsToContractValue) < 0) {
             Log.error("contract call error: Insufficient balance of nuls to transfer to the contract address.");
             return Result.getFailed(INSUFFICIENT_BALANCE_TO_CONTRACT);
         }
 
         if (transferNulsToContractValue.compareTo(BigInteger.ZERO) > 0) {
-            // 手续费账户也能支出，向合约转资产
+            // Handling fee accounts can also be used to transfer assets to contracts
             if (nulsValue.compareTo(transferNulsToContractValue.add(transferNulsToOtherAccountValue)) < 0) {
                 Log.error("contract call error: Insufficient balance to transfer to the contract address.");
                 return Result.getFailed(INSUFFICIENT_BALANCE_TO_CONTRACT);

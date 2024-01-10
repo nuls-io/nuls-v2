@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 公共日志类
+ * Public log class
  * Public Log Class
  *
  * @author tag
@@ -21,9 +21,9 @@ public class Log {
     public static NulsLogger BASIC_LOGGER = LoggerBuilder.getLogger(BASIC_NAME);
 
     /**
-     * 提供debug级别基本的日志输出
+     * providedebugBasic level log output
      *
-     * @param msg 需要显示的消息
+     * @param msg Message to be displayed
      */
     public static void debug(String msg) {
         BASIC_LOGGER.debug(msg);
@@ -46,19 +46,19 @@ public class Log {
     }
 
     /**
-     * 提供debug级别基本的日志输出
+     * providedebugBasic level log output
      *
-     * @param msg       需要显示的消息
-     * @param throwable 异常信息
+     * @param msg       Message to be displayed
+     * @param throwable Abnormal information
      */
     public static void debug(String msg, Throwable throwable) {
             BASIC_LOGGER.debug(msg, throwable);
     }
 
     /**
-     * 提供info级别基本的日志输出
+     * provideinfoBasic level log output
      *
-     * @param msg 需要显示的消息
+     * @param msg Message to be displayed
      */
     public static void info(String msg) {
         BASIC_LOGGER.info(msg);
@@ -81,19 +81,19 @@ public class Log {
     }
 
     /**
-     * 提供info级别基本的日志输出
+     * provideinfoBasic level log output
      *
-     * @param msg       需要显示的消息
-     * @param throwable 异常信息
+     * @param msg       Message to be displayed
+     * @param throwable Abnormal information
      */
     public static void info(String msg, Throwable throwable) {
         BASIC_LOGGER.info(msg, throwable);
     }
 
     /**
-     * 提供warn级别基本的日志输出
+     * providewarnBasic level log output
      *
-     * @param msg 需要显示的消息
+     * @param msg Message to be displayed
      */
     public static void warn(String msg) {
         BASIC_LOGGER.warn(msg);
@@ -116,10 +116,10 @@ public class Log {
     }
 
     /**
-     * 提供warn级别基本的日志输出
+     * providewarnBasic level log output
      *
-     * @param msg       需要显示的消息
-     * @param throwable 异常信息
+     * @param msg       Message to be displayed
+     * @param throwable Abnormal information
      */
     public static void warn(String msg, Throwable throwable) {
         BASIC_LOGGER.warn(msg, throwable);
@@ -130,9 +130,9 @@ public class Log {
     }
 
     /**
-     * 提供error级别基本的日志输出
+     * provideerrorBasic level log output
      *
-     * @param msg 需要显示的消息
+     * @param msg Message to be displayed
      */
     public static void error(String msg) {
         BASIC_LOGGER.error(msg);
@@ -158,10 +158,10 @@ public class Log {
     }
 
     /**
-     * 提供error级别基本的日志输出
+     * provideerrorBasic level log output
      *
-     * @param msg       需要显示的消息
-     * @param throwable 异常信息
+     * @param msg       Message to be displayed
+     * @param throwable Abnormal information
      */
     public static void error(String msg, Throwable throwable) {
         BASIC_LOGGER.error(msg, throwable);
@@ -172,19 +172,19 @@ public class Log {
     }
 
     /**
-     * 提供trace级别基本的日志输出
+     * providetraceBasic level log output
      *
-     * @param msg 需要显示的消息
+     * @param msg Message to be displayed
      */
     public static void trace(String msg) {
         BASIC_LOGGER.trace(msg);
     }
 
     /**
-     * 提供trace级别基本的日志输出
+     * providetraceBasic level log output
      *
-     * @param msg       需要显示的消息
-     * @param throwable 异常信息
+     * @param msg       Message to be displayed
+     * @param throwable Abnormal information
      */
     public static void trace(String msg, Throwable throwable) {
         BASIC_LOGGER.trace(msg, throwable);

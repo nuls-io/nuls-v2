@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 跨链交易协议Hash对应表处理类
+ * Cross chain transaction protocolHashCorresponding Table Processing Class
  * Hash Correspondence Table of Cross-Chain Transaction Protocol
  *
  * @author  tag

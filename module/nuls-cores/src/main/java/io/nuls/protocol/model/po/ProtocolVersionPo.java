@@ -13,27 +13,27 @@ public class ProtocolVersionPo extends BaseNulsData {
     public static final Comparator<ProtocolVersionPo> COMPARATOR = Comparator.comparingInt(ProtocolVersionPo::getVersion);
 
     /**
-     * 协议版本号
+     * Protocol version number
      */
     private short version;
 
     /**
-     * 每个统计区间内的最小生效比例(60-100)
+     * The minimum effective ratio within each statistical interval(60-100)
      */
     private byte effectiveRatio;
 
     /**
-     * 协议生效要满足的连续区间数(50-1000)
+     * The number of consecutive intervals that the agreement must meet in order to take effect(50-1000)
      */
     private short continuousIntervalCount;
 
     /**
-     * 协议生效起始高度
+     * Starting height of agreement effectiveness
      */
     private long beginHeight;
 
     /**
-     * 协议生效结束高度
+     * The height at which the agreement takes effect and ends
      */
     private long endHeight;
 

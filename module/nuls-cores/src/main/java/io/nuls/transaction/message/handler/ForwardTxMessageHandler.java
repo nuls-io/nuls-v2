@@ -18,7 +18,7 @@ import static io.nuls.transaction.constant.TxCmd.NW_NEW_HASH;
 import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 /**
- * 接收处理网络中其他节点转发的交易hash的消息
+ * Receive and process transactions forwarded by other nodes in the networkhashMessage from
  */
 @Component("ForwardTxMessageHandlerV1")
 public class ForwardTxMessageHandler implements MessageProcessor {
@@ -38,11 +38,11 @@ public class ForwardTxMessageHandler implements MessageProcessor {
         Chain chain = null;
         try {
             chain = chainManager.getChain(chainId);
-            //根据区块同步状态,决定是否开始处理交易hash
+            //Based on block synchronization status,Decide whether to start processing transactionshash
             if(!chain.getProcessTxStatus().get()){
                 return;
             }
-            //解析广播交易hash消息
+            //Analyzing Broadcasting Transactionshashnews
             ForwardTxMessage message = RPCUtil.getInstanceRpcStr(msgStr, ForwardTxMessage.class);
             if (message == null) {
                 return;
@@ -50,13 +50,13 @@ public class ForwardTxMessageHandler implements MessageProcessor {
             NulsHash hash = message.getTxHash();
 //            chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
 //                    "recieve [newHash] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, hash.toHex());
-            //只判断是否存在
+            //Only determine if it exists
             String hashHex = hash.toHex();
             if (TxDuplicateRemoval.exist(hashHex)) {
                 TxDuplicateRemoval.putExcludeNode(hashHex, nodeId);
                 return;
             }
-            //去该节点查询完整交易
+            //Go to this node to query complete transactions
             GetTxMessage getTxMessage = new GetTxMessage();
             getTxMessage.setTxHash(hash);
             NetworkCall.sendToNode(chain, getTxMessage, nodeId, NW_ASK_TX);

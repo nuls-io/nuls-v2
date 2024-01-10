@@ -31,7 +31,7 @@ import java.util.Map;
  * @date: 2019-04-25
  */
 public enum CmdRegisterMode {
-    // 0 - 创建新交易, 1 - 数据查询
+    // 0 - Create a new transaction, 1 - Data Query
     NEW_TX(0),
     QUERY_DATA(1);
 

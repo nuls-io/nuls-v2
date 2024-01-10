@@ -35,7 +35,7 @@ import static io.nuls.block.constant.CommandConstant.GET_BLOCKS_BY_HEIGHT_MESSAG
 import static io.nuls.block.constant.CommandConstant.GET_BLOCK_MESSAGE;
 
 /**
- * 需要单节点运行起来,再执行这个测试类,测试的是消息收发逻辑
+ * Need to run on a single node,Execute this test class again,Tested the message sending and receiving logic
  */
 public class MessageHandlerTest {
 

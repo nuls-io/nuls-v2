@@ -29,7 +29,7 @@ public class ChainCmdTest {
     @Test
     public void  importPriKey() {
         try {
-            //账户已存在则覆盖 If the account exists, it covers.
+            //Overwrite if account already exists If the account exists, it covers.
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.CHAIN_ID, 2);
 //            477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75

@@ -19,7 +19,7 @@ import java.math.BigInteger;
 import java.util.*;
 
 /**
- * CoinData操作工具类
+ * CoinDataOperational tools
  * CoinData operation tool class
  *
  * @author tag
@@ -28,28 +28,28 @@ import java.util.*;
 @Component
 public class CoinDataManager {
     /**
-     * 组装CoinData
+     * assembleCoinData
      * Assemble CoinData
      *
-     * @param address      账户地址/Account address
+     * @param address      Account address/Account address
      * @param chain        chain info
-     * @param amount       金额/amount
-     * @param lockTime     锁定时间/lock time
-     * @param txSize       交易大小/transaction size
-     * @param assetChainId 抵押资产所属ChainId
-     * @param assetId      抵押资产ID
-     * @return 组装的CoinData/Assembled CoinData
+     * @param amount       money/amount
+     * @param lockTime     Lock time/lock time
+     * @param txSize       Transaction size/transaction size
+     * @param assetChainId Mortgage asset ownershipChainId
+     * @param assetId      Mortgage assetsID
+     * @return AssembledCoinData/Assembled CoinData
      */
     public CoinData getCoinData(byte[] address, Chain chain, BigInteger amount, long lockTime, int txSize, int assetChainId, int assetId) throws NulsException {
         CoinData coinData = new CoinData();
         CoinTo to = new CoinTo(address, assetChainId, assetId, amount, lockTime);
         coinData.addTo(to);
         txSize += to.size();
-        //抵押资产金额
+        //Mortgage asset amount
         Map<String, Object> result = CallMethodUtils.getBalanceAndNonce(chain, AddressTool.getStringAddressByBytes(address),assetChainId,assetId);
         byte[] nonce = RPCUtil.decode((String) result.get("nonce"));
         BigInteger available = new BigInteger(result.get("available").toString());
-        //验证账户余额是否足够
+        //Verify if the account balance is sufficient
         CoinFrom from = new CoinFrom(address, assetChainId, assetId, amount, nonce, (byte) 0);
         txSize += from.size();
         BigInteger fee = TransactionFeeCalculator.getConsensusTxFee(txSize,chain.getConfig().getFeeUnit());
@@ -63,16 +63,16 @@ public class CoinDataManager {
     }
 
     /**
-     * 组装智能合约CoinData
+     * Assembling smart contractsCoinData
      * Assemble Contract CoinData
      *
-     * @param address   账户地址/Account address
+     * @param address   Account address/Account address
      * @param chain     chain info
-     * @param amount    金额/amount
-     * @param lockTime  锁定时间/lock time
-     * @param nonce     nonce值
-     * @param available 账户余额
-     * @return 组装的CoinData/Assembled CoinData
+     * @param amount    money/amount
+     * @param lockTime  Lock time/lock time
+     * @param nonce     noncevalue
+     * @param available Account balance
+     * @return AssembledCoinData/Assembled CoinData
      */
     public CoinData getContractCoinData(byte[] address, Chain chain, BigInteger amount, long lockTime, byte[] nonce, BigInteger available) throws NulsException {
         CoinData coinData = new CoinData();
@@ -87,15 +87,15 @@ public class CoinDataManager {
     }
 
     /**
-     * 组装解锁金额的CoinData（from中nonce为空）
+     * Assembly unlocking amountCoinData（frominnonceEmpty）
      * Assemble Coin Data for the amount of unlock (from non CE is empty)
      *
-     * @param address  账户地址/Account address
+     * @param address  Account address/Account address
      * @param chain    chain info
-     * @param amount   金额/amount
-     * @param lockTime 锁定时间/lock time
-     * @param txSize   交易大小/transaction size
-     * @return 组装的CoinData/Assembled CoinData
+     * @param amount   money/amount
+     * @param lockTime Lock time/lock time
+     * @param txSize   Transaction size/transaction size
+     * @return AssembledCoinData/Assembled CoinData
      */
     public CoinData getUnlockCoinData(byte[] address, Chain chain, BigInteger amount, long lockTime, int txSize) throws NulsException {
         int agentChainId = chain.getConfig().getAgentChainId();
@@ -109,7 +109,7 @@ public class CoinDataManager {
         CoinTo to = new CoinTo(address, agentChainId, agentAssetId, amount, lockTime);
         coinData.addTo(to);
         txSize += to.size();
-        //手续费
+        //Handling fees
         CoinFrom from = new CoinFrom(address, agentChainId, agentAssetId, amount, (byte) -1);
         coinData.addFrom(from);
         txSize += from.size();
@@ -120,14 +120,14 @@ public class CoinDataManager {
     }
 
     /**
-     * 组装解锁金额的CoinData（from中nonce为空）
+     * Assembly unlocking amountCoinData（frominnonceEmpty）
      * Assemble Coin Data for the amount of unlock (from non CE is empty)
      *
-     * @param address  账户地址/Account address
+     * @param address  Account address/Account address
      * @param chain    chain info
-     * @param amount   金额/amount
-     * @param lockTime 锁定时间/lock time
-     * @return 组装的CoinData/Assembled CoinData
+     * @param amount   money/amount
+     * @param lockTime Lock time/lock time
+     * @return AssembledCoinData/Assembled CoinData
      */
     public CoinData getContractUnlockCoinData(byte[] address, Chain chain, BigInteger amount, long lockTime) throws NulsException {
         Map<String, Object> balanceMap = CallMethodUtils.getBalance(chain, AddressTool.getStringAddressByBytes(address),chain.getConfig().getChainId(),chain.getConfig().getAssetId());
@@ -138,7 +138,7 @@ public class CoinDataManager {
         CoinData coinData = new CoinData();
         CoinTo to = new CoinTo(address, chain.getConfig().getChainId(), chain.getConfig().getAssetId(), amount, lockTime);
         coinData.addTo(to);
-        //手续费
+        //Handling fees
         CoinFrom from = new CoinFrom(address, chain.getConfig().getChainId(), chain.getConfig().getAssetId(), amount, (byte) -1);
         coinData.addFrom(from);
         to.setAmount(amount);
@@ -146,12 +146,12 @@ public class CoinDataManager {
     }
 
     /**
-     * 根据节点地址组装停止节点的coinData
+     * Assemble stop nodes based on their addressescoinData
      * Assemble coinData of stop node according to node address
      *
      * @param chain    chain info
-     * @param address  agent address/节点地址
-     * @param lockTime The end point of the lock (lock start time + lock time) is the length of the lock before./锁定的结束时间点(锁定开始时间点+锁定时长)，之前为锁定的时长
+     * @param address  agent address/Node address
+     * @param lockTime The end point of the lock (lock start time + lock time) is the length of the lock before./Locked end time point(Lock start time point+Lock duration), previously locked for a certain duration
      * @return CoinData
      */
     public CoinData getStopAgentCoinData(Chain chain, byte[] address, long lockTime) throws NulsException {
@@ -168,12 +168,12 @@ public class CoinDataManager {
     }
 
     /**
-     * 根据节点组装停止节点的coinData
+     * Stop node assembly based on node assemblycoinData
      * Assemble the coinData of the stop node according to the node
      *
      * @param chain    chain info
-     * @param agent    agent info/节点对象
-     * @param lockTime The end point of the lock (lock start time + lock time) is the length of the lock before./锁定的结束时间点(锁定开始时间点+锁定时长)，之前为锁定的时长
+     * @param agent    agent info/Node Object
+     * @param lockTime The end point of the lock (lock start time + lock time) is the length of the lock before./Locked end time point(Lock start time point+Lock duration), previously locked for a certain duration
      * @return CoinData
      */
     public CoinData getStopAgentCoinData(Chain chain, Agent agent, long lockTime) throws NulsException {
@@ -181,13 +181,13 @@ public class CoinDataManager {
     }
 
     /**
-     * 组装节点CoinData锁定类型为时间或区块高度
+     * Assembly nodesCoinDataLock type is time or block height
      * Assembly node CoinData lock type is time or block height
      *
      * @param chain    chain info
-     * @param agent    agent info/节点
-     * @param lockTime lock time/锁定时间
-     * @param height   lock block height/锁定区块
+     * @param agent    agent info/node
+     * @param lockTime lock time/Lock time
+     * @param height   lock block height/Lock block
      * @return CoinData
      */
     private CoinData getStopAgentCoinData(Chain chain, Agent agent, long lockTime, Long height) throws NulsException {
@@ -207,7 +207,7 @@ public class CoinDataManager {
             List<CoinFrom> fromList = new ArrayList<>();
             toList.add(new CoinTo(agent.getAgentAddress(), agentChainId, agentAssetId, agent.getDeposit(), lockTime));
             /*
-            根据创建节点交易的CoinData中的输出 组装退出节点交易的输入
+            Based on the creation of node transactionsCoinDataOutput in Input for assembling exit node transactions
             Assemble the input to exit the node transaction based on the output in CoinData that creates the node transaction
             */
             CoinData createCoinData = new CoinData();
@@ -226,7 +226,7 @@ public class CoinDataManager {
             }
             coinData.setFrom(fromList);
             /*
-            获取该节点的委托信息，并将委托金额返回给委托人
+            Obtain the delegation information of the node and return the delegation amount to the principal
             Obtain the delegation information of the node and return the amount of the delegation to the principal
             */
             List<Deposit> deposits = chain.getDepositList();
@@ -271,7 +271,7 @@ public class CoinDataManager {
     }
 
     /**
-     * 查看CoinBase交易中是否存在智能合约账户
+     * checkCoinBaseIs there a smart contract account in the transaction
      *
      * @param coinData coinData
      * @param chainId  chainId

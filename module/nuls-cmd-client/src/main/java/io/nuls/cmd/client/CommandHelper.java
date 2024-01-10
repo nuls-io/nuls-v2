@@ -70,7 +70,7 @@ public class CommandHelper {
 
 
     //    /**
-//     * 确认新密码
+//     * Confirm new password
 //     * @param newPwd
 //     */
     public static boolean confirmPwd(String newPwd) {
@@ -109,8 +109,8 @@ public class CommandHelper {
 
     //
 //    /**
-//     * 得到用户输入的密码,必须输入
-//     * 提示信息为默认
+//     * Obtain the password entered by the user,Must be entered
+//     * Prompt information is default
 //     * @return
 //     */
     public static String getPwd() {
@@ -118,8 +118,8 @@ public class CommandHelper {
     }
 
     //    /**
-//     * 得到用户输入的密码,必须输入
-//     * @param prompt 提示信息
+//     * Obtain the password entered by the user,Must be entered
+//     * @param prompt Prompt information
 //     * @return
 //     */
     public static String getPwd(String prompt) {
@@ -153,7 +153,7 @@ public class CommandHelper {
 
     //
     /**
-     * 得到用户输入的密码,允许不输入
+     * Obtain the password entered by the user,Allow no input
      * @param prompt
      * @return
      */
@@ -213,8 +213,8 @@ public class CommandHelper {
 
 
     /**
-     * 得到用户输入的密码,允许不输入
-     * 提示信息为默认
+     * Obtain the password entered by the user,Allow no input
+     * Prompt information is default
      *
      * @return
      */

@@ -21,7 +21,7 @@ import java.util.*;
 /**
  * @Author: zhoulijun
  * @Time: 2019-06-19 14:26
- * @Description: 生成rpc接口文档
+ * @Description: generaterpcInterface documentation
  */
 public class DocTool {
 
@@ -244,7 +244,7 @@ public class DocTool {
             cmdList.forEach(cmd -> {
                 Class<?> clazs = cmd.getClass();
                 if(exclusion.contains(clazs.getPackageName())){
-                    Log.info("跳过{}生成文档，所在包{}在排除范围",clazs.getSimpleName(),clazs.getPackageName());
+                    Log.info("skip{}Generate document in package{}Within the exclusion range",clazs.getSimpleName(),clazs.getPackageName());
                     return ;
                 }
                 Method[] methods = clazs.getMethods();
@@ -274,14 +274,14 @@ public class DocTool {
         public static void genDoc() throws IOException {
             List<CmdDes> cmdDesList = buildData();
             System.out.println(JSONUtils.obj2json(cmdDesList));
-            System.out.println("生成文档成功："+createMarketDownDoc(cmdDesList,"./readme.md"));
+            System.out.println("Successfully generated document："+createMarketDownDoc(cmdDesList,"./readme.md"));
 //            System.exit(0);
         }
 
         public static void genJSON() throws IOException {
             List<CmdDes> cmdDesList = buildData();
             Log.info("{}",cmdDesList);
-            System.out.println("生成文档成功："+createJSONConfig(cmdDesList,"/Users/zhoulijun/workspace/test"));
+            System.out.println("Successfully generated document："+createJSONConfig(cmdDesList,"/Users/zhoulijun/workspace/test"));
 //            System.exit(0);
         }
 
@@ -404,7 +404,7 @@ public class DocTool {
         public static List<ResultDes> classToResultDes(Class<?> clzs) {
             Annotation annotation = clzs.getAnnotation(ApiModel.class);
             if (annotation == null) {
-                throw new IllegalArgumentException("返回值是复杂对象时必须声明ApiModule注解 + " + clzs.getSimpleName());
+                throw new IllegalArgumentException("Must be declared when the return value is a complex objectApiModuleannotation + " + clzs.getSimpleName());
             }
             List<Field> list = new LinkedList();
             list.addAll(Arrays.asList(clzs.getDeclaredFields()));
@@ -420,7 +420,7 @@ public class DocTool {
                 Annotation ann = filed.getAnnotation(ApiModelProperty.class);
                 ApiModelProperty apiModelProperty = (ApiModelProperty) ann;
                 if(apiModelProperty == null){
-                    Log.warn("发现未配置ApiModelProperty注解的filed:{}",clzs.getSimpleName() + "#" + filed.getName());
+                    Log.warn("Discovered unconfiguredApiModelPropertyAnnotatedfiled:{}",clzs.getSimpleName() + "#" + filed.getName());
                     return ;
                 }
                 ResultDes filedDes = new ResultDes();
@@ -444,11 +444,11 @@ public class DocTool {
                     }else{
                         Annotation filedAnn = filed.getType().getAnnotation(ApiModel.class);
                         if(filedAnn == null){
-                            Log.warn("发现ApiModelProperty注解的filed类型为复杂对象，但对象并未注解ApiModel，filed:{}",clzs.getName() + "#" + filed.getName());
+                            Log.warn("findApiModelPropertyAnnotatedfiledThe type is a complex object, but the object is not annotatedApiModel,filed:{}",clzs.getName() + "#" + filed.getName());
                             filedDes.type = filed.getType().getSimpleName().toLowerCase();
                         }else{
                             if(clzs == filed.getType()){
-                                Log.warn("发现循环引用：{}",clzs);
+                                Log.warn("Discovering circular references：{}",clzs);
                                 filedDes.type = "object&lt;" + clzs.getSimpleName().toLowerCase() + ">";
                             }else{
                                 filedDes.list =  classToResultDes(filed.getType());
@@ -495,7 +495,7 @@ public class DocTool {
             String appName = configurationLoader.getConfigItem("APP_NAME").getValue();
             File file = new File(tempFile);
             if (!file.exists()) {
-                throw new RuntimeException("模板文件不存在");
+                throw new RuntimeException("The template file does not exist");
             }
 
             File mdFile = new File(file.getParentFile().getAbsolutePath() + File.separator + "documents" + File.separator + appName + ".md");
@@ -509,7 +509,7 @@ public class DocTool {
             }
             try(BufferedWriter writer = new BufferedWriter(new FileWriter(mdFile,true))){
                 writer.newLine();
-                writer.write(new Heading("接口列表",2).toString());
+                writer.write(new Heading("Interface List",2).toString());
                 writer.newLine();
                 cmdDesList.forEach(cmd->{
                     writeMarkdown(cmd,writer);
@@ -540,15 +540,15 @@ public class DocTool {
         private static void buildResult(BufferedWriter writer, List<ResultDes> result) throws IOException {
             writer.newLine();
             writer.newLine();
-            writer.write(new Heading("返回值",4).toString());
+            writer.write(new Heading("Return value",4).toString());
             if(result == null){
                 writer.newLine();
-                writer.write("无返回值");
+                writer.write("No return value");
                 return;
             }
             Table.Builder tableBuilder = new Table.Builder()
                     .withAlignments(Table.ALIGN_LEFT, Table.ALIGN_CENTER,Table.ALIGN_LEFT)
-                    .addRow("字段名", "字段类型","参数描述");
+                    .addRow("Field Name", "Field type","Parameter Description");
             buildResult(tableBuilder,result,0);
             writer.newLine();
             writer.write(tableBuilder.build().toString());
@@ -565,17 +565,17 @@ public class DocTool {
 
         private static void buildParam(BufferedWriter writer, List<ResultDes> parameters) throws IOException {
             writer.newLine();
-            writer.write(new Heading("参数列表",4).toString());
+            writer.write(new Heading("parameter list",4).toString());
             if(parameters == null || parameters.isEmpty()){
                 writer.newLine();
-                writer.write("无参数");
+                writer.write("No parameters");
                 return;
             }
             Table.Builder tableBuilder = new Table.Builder()
                     .withAlignments(Table.ALIGN_LEFT, Table.ALIGN_CENTER,Table.ALIGN_LEFT,Table.ALIGN_CENTER)
-                    .addRow("参数名", "参数类型","参数描述","是否非空");
+                    .addRow("Parameter Name", "Parameter type","Parameter Description","Is it not empty");
 //            parameters.forEach(p->{
-//                tableBuilder.addRow(p.parameterName(),p.parameterType().toLowerCase(),p.parameterDes(),!p.canNull() ? "是" : "否");
+//                tableBuilder.addRow(p.parameterName(),p.parameterType().toLowerCase(),p.parameterDes(),!p.canNull() ? "yes" : "no");
 //            });
             buildParam(tableBuilder,parameters,0);
             writer.newLine();
@@ -584,7 +584,7 @@ public class DocTool {
 
         private static void buildParam(Table.Builder tableBuilder, List<ResultDes> result,int depth) {
             result.forEach(r->{
-                tableBuilder.addRow("&nbsp;".repeat(depth*8) + r.name,r.type.toLowerCase(),r.des,!r.canNull ? "是" : "否");
+                tableBuilder.addRow("&nbsp;".repeat(depth*8) + r.name,r.type.toLowerCase(),r.des,!r.canNull ? "yes" : "no");
                 if(r.list != null){
                     buildParam(tableBuilder,r.list,depth+1);
                 }

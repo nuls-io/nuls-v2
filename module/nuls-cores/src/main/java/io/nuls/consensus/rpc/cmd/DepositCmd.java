@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 共识委托相关接口
+ * Consensus delegation related interfaces
  * @author tag
  * 2018/11/7
  * */
@@ -24,16 +24,16 @@ public class DepositCmd extends BaseCmd {
     private DepositService service;
 
     /**
-     * 委托共识
+     * Commission consensus
      * */
-    @CmdAnnotation(cmd = "cs_depositToAgent", version = 1.0, description = "创建委托交易/deposit agent transaction")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
-    @Parameter(parameterName = "address", parameterType = "String", parameterDes = "账户地址")
-    @Parameter(parameterName = "agentHash", parameterType = "String", parameterDes = "节点HASH")
-    @Parameter(parameterName = "deposit", parameterType = "String", parameterDes = "委托金额")
-    @Parameter(parameterName = "password", parameterType = "String", parameterDes = "账户密码")
-    @ResponseData(name = "返回值", description = "加入共识交易Hash", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "txHash", description = "加入共识交易Hash")
+    @CmdAnnotation(cmd = "cs_depositToAgent", version = 1.0, description = "Create entrusted transactions/deposit agent transaction")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid")
+    @Parameter(parameterName = "address", parameterType = "String", parameterDes = "Account address")
+    @Parameter(parameterName = "agentHash", parameterType = "String", parameterDes = "nodeHASH")
+    @Parameter(parameterName = "deposit", parameterType = "String", parameterDes = "Entrusted amount")
+    @Parameter(parameterName = "password", parameterType = "String", parameterDes = "Account password")
+    @ResponseData(name = "Return value", description = "Join consensus tradingHash", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "txHash", description = "Join consensus tradingHash")
     }))
     public Response depositToAgent(Map<String,Object> params){
         Result result = service.depositToAgent(params);
@@ -44,15 +44,15 @@ public class DepositCmd extends BaseCmd {
     }
 
     /**
-     * 退出共识
+     * Exit consensus
      * */
-    @CmdAnnotation(cmd = "cs_withdraw", version = 1.0, description = "退出委托交易/withdraw deposit agent transaction")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
-    @Parameter(parameterName = "address", parameterType = "String", parameterDes = "账户地址")
-    @Parameter(parameterName = "txHash", parameterType = "String", parameterDes = "加入共识交易HASH")
-    @Parameter(parameterName = "password", parameterType = "String", parameterDes = "账户密码")
-    @ResponseData(name = "返回值", description = "退出共识交易Hash", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "txHash", description = "退出共识交易Hash")
+    @CmdAnnotation(cmd = "cs_withdraw", version = 1.0, description = "Exit entrusted transaction/withdraw deposit agent transaction")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid")
+    @Parameter(parameterName = "address", parameterType = "String", parameterDes = "Account address")
+    @Parameter(parameterName = "txHash", parameterType = "String", parameterDes = "Join consensus tradingHASH")
+    @Parameter(parameterName = "password", parameterType = "String", parameterDes = "Account password")
+    @ResponseData(name = "Return value", description = "Exit consensus tradingHash", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "txHash", description = "Exit consensus tradingHash")
     }))
     public Response withdraw(Map<String,Object> params){
         Result result = service.withdraw(params);
@@ -63,15 +63,15 @@ public class DepositCmd extends BaseCmd {
     }
 
     /**
-     * 查询委托信息列表
+     * Query delegation information list
      * */
-    @CmdAnnotation(cmd = "cs_getDepositList", version = 1.0, description = "查询指定账户或指定节点的委托信息/Query delegation information for a specified account or node")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
-    @Parameter(parameterName = "pageNumber", requestType = @TypeDescriptor(value = int.class), parameterDes = "页码")
-    @Parameter(parameterName = "pageSize", requestType = @TypeDescriptor(value = int.class), parameterDes = "每页数量")
-    @Parameter(parameterName = "address", parameterType = "String", parameterDes = "账户地址")
-    @Parameter(parameterName = "agentHash", parameterType = "String", parameterDes = "节点HASH")
-    @ResponseData(name = "返回值", description = "返回一个Page对象，这里只描述Page对象中的集合",
+    @CmdAnnotation(cmd = "cs_getDepositList", version = 1.0, description = "Query delegation information for a specified account or node/Query delegation information for a specified account or node")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid")
+    @Parameter(parameterName = "pageNumber", requestType = @TypeDescriptor(value = int.class), parameterDes = "Page number")
+    @Parameter(parameterName = "pageSize", requestType = @TypeDescriptor(value = int.class), parameterDes = "Quantity per page")
+    @Parameter(parameterName = "address", parameterType = "String", parameterDes = "Account address")
+    @Parameter(parameterName = "agentHash", parameterType = "String", parameterDes = "nodeHASH")
+    @ResponseData(name = "Return value", description = "Return aPageObject, only described herePageCollection in objects",
             responseType = @TypeDescriptor(value = List.class, collectionElement = DepositDTO.class)
     )
     public Response getDepositList(Map<String,Object> params){

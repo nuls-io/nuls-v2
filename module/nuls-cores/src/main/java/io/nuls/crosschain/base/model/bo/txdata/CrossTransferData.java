@@ -15,16 +15,16 @@ import java.io.IOException;
 /**
  * @Author: zhoulijun
  * @Time: 2020/7/30 13:38
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class CrossTransferData extends BaseNulsData {
 
     Integer sourceType;
 
     /**
-     * 来源链交易hash
-     * 只有在发起链为平行链的情况下，这个字段才有值
-     * 如果来源链交易hash为空，则来源链为nuls主网链，这种情况下，来源链，nuls主网链，接收链的交易hash完全一样。
+     * Source chain transactionshash
+     * This field only has a value if the initiating chain is a parallel chain
+     * If the source chain transactionhashIf it is empty, the source chain isnulsThe main network chain, in this case, the source chain,nulsMain network chain, receiving chain transactionshashIt's exactly the same.
      */
     byte[] sourceHash;
 

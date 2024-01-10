@@ -37,25 +37,25 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Json序列化与反序列化工具,使用了jackson作为工具包,优化时主要参考官方文档
+ * JsonSerialization and Deserialization Tools,UsedjacksonAs a toolkit,When optimizing, mainly refer to official documents
  * @see <a href="https://github.com/FasterXML/jackson-docs/wiki/Presentation:-Jackson-Performance">Jackson-Performance</a>
  * <br>
- * 以下列举的优化点重要程度递减
+ * The importance of the optimization points listed below decreases
  * <br>
- * 1.重用重量级对象: ObjectMapper (data-binding)       已实现
+ * 1.Reuse heavyweight objects: ObjectMapper (data-binding)       Implemented
  * <br>
- * 2.Close things that need to be closed: JsonParser, JsonGenerator     未用到
+ * 2.Close things that need to be closed: JsonParser, JsonGenerator     Not used
  * <br>
- * 3.输入输出尽量选择字节流,避免二次转换             已实现
+ * 3.Try to choose byte streams for input and output as much as possible,Avoid secondary conversion             Implemented
  *
- * 文档中还说要进一步优化,可以关注下面四点
+ * The document also states that further optimization is needed,You can pay attention to the following four points
  * 1.Compatible, not so easy: Use the Streaming API
  * 2.Non-compatible, easy: Smile binary "JSON"
  * 3.Non-compatible, easy: POJOs as JSON Arrays (Jackson 2.1)
  * 4.Compatible, easy: Afterburner
  * @author captain
  * @version 1.0
- * @date 2019/7/31 下午6:05
+ * @date 2019/7/31 afternoon6:05
  */
 public final class JSONUtils {
 
@@ -74,10 +74,10 @@ public final class JSONUtils {
     }
 
     /**
-     * javaBean,list,array convert to json string/对象转JSON字符串
+     * javaBean,list,array convert to json string/Object conversionJSONcharacter string
      *
-     * @param obj 需转换的对象
-     * @return 转换得到的JSON字符串
+     * @param obj Objects to be converted
+     * @return ConvertedJSONcharacter string
      */
     public static String obj2json(Object obj) throws JsonProcessingException {
         return OBJECT_MAPPER.writeValueAsString(obj);
@@ -88,11 +88,11 @@ public final class JSONUtils {
     }
 
     /**
-     * json string convert to javaBean/JSON字符串转普通对象
+     * json string convert to javaBean/JSONConvert strings to regular objects
      *
-     * @param jsonStr JSON字符串
-     * @param clazz   目标对象类型
-     * @return 转换得到的对象
+     * @param jsonStr JSONcharacter string
+     * @param clazz   Target Object Type
+     * @return The converted object
      */
     public static <T> T json2pojo(String jsonStr, Class<T> clazz) throws IOException {
         return OBJECT_MAPPER.readValue(jsonStr, clazz);
@@ -103,12 +103,12 @@ public final class JSONUtils {
     }
 
     /**
-     * JSON字符串转为复杂对象（list,map等）
+     * JSONConvert strings to complex objects（list,mapetc.）
      *
-     * @param json        JSON字符串
-     * @param entityClass 目标对象
-     * @param itemClass   List/Map保存的数据的类型
-     * @return 转换得到的对象
+     * @param json        JSONcharacter string
+     * @param entityClass Target object
+     * @param itemClass   List/MapThe type of data saved
+     * @return The converted object
      */
     public static <T> T json2pojo(String json, Class<T> entityClass, Class... itemClass) throws IOException {
         JavaType javaType = OBJECT_MAPPER.getTypeFactory().constructParametricType(entityClass, itemClass);
@@ -116,10 +116,10 @@ public final class JSONUtils {
     }
 
     /**
-     * json string convert to map/JSON字符串转MAP
+     * json string convert to map/JSONString conversionMAP
      *
-     * @param jsonStr JSON字符串
-     * @return 转换得到的MAP
+     * @param jsonStr JSONcharacter string
+     * @return ConvertedMAP
      */
     public static <T> Map<String, Object> json2map(String jsonStr)
             throws IOException {
@@ -127,10 +127,10 @@ public final class JSONUtils {
     }
 
     /**
-     * json string convert to map/JSON字符串转MAP
+     * json string convert to map/JSONString conversionMAP
      *
-     * @param jsonStr JSON字符串
-     * @return 转换得到的MAP
+     * @param jsonStr JSONcharacter string
+     * @return ConvertedMAP
      */
     public static <T> Map<String, T> jsonToMap(String jsonStr)
             throws IOException {
@@ -138,11 +138,11 @@ public final class JSONUtils {
     }
 
     /**
-     * json string convert to map with javaBean/JSON转MAP
+     * json string convert to map with javaBean/JSONturnMAP
      *
-     * @param jsonStr JSON字符串
-     * @param clazz   MAP中值的类型
-     * @return 转换得到的MAP
+     * @param jsonStr JSONcharacter string
+     * @param clazz   MAPThe type of median
+     * @return ConvertedMAP
      */
     public static <T> Map<String, T> json2map(String jsonStr, Class<T> clazz) throws IOException {
         Map<String, Map<String, Object>> map = OBJECT_MAPPER.readValue(jsonStr, new TypeReference<Map<String, Map<String, Object>>>() {
@@ -155,11 +155,11 @@ public final class JSONUtils {
     }
 
     /**
-     * json array string convert to list with javaBean/JSON字符串转List
+     * json array string convert to list with javaBean/JSONString conversionList
      *
-     * @param jsonArrayStr JSON字符串
-     * @param clazz        List存储的对象类型
-     * @return 转换后得到的List
+     * @param jsonArrayStr JSONcharacter string
+     * @param clazz        ListTypes of stored objects
+     * @return Obtained after conversionList
      */
     public static <T> List<T> json2list(String jsonArrayStr, Class<T> clazz) throws IOException {
         List<Map<String, Object>> list = OBJECT_MAPPER.readValue(jsonArrayStr, new TypeReference<List<Map<String, Object>>>() {
@@ -172,11 +172,11 @@ public final class JSONUtils {
     }
 
     /**
-     * map convert to javaBean/map转javabean
+     * map convert to javaBean/mapturnjavabean
      *
-     * @param map   需转化的MAP
-     * @param clazz 目标类型
-     * @return 得到的目标对象
+     * @param map   To be convertedMAP
+     * @param clazz Target type
+     * @return Target object obtained
      */
     public static <T> T map2pojo(Map map, Class<T> clazz) {
         return OBJECT_MAPPER.convertValue(map, clazz);

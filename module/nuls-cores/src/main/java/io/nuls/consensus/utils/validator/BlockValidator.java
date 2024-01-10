@@ -31,7 +31,7 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * 区块验证工具类
+ * Block verification tool class
  * Block Verification Tool Class
  *
  * @author tag
@@ -49,7 +49,7 @@ public class BlockValidator {
     private CoinDataManager coinDataManager;
 
     /**
-     * 区块头验证
+     * Block head verification
      * Block verification
      *
      * @param isDownload block status
@@ -58,11 +58,11 @@ public class BlockValidator {
      */
     public void validate(boolean isDownload, Chain chain, Block block) throws NulsException, IOException {
         BlockHeader blockHeader = block.getHeader();
-        //验证梅克尔哈希]
+        //Verify Merkle Hash]
         if (!blockHeader.getMerkleHash().equals(NulsHash.calcMerkleHash(block.getTxHashList()))) {
             throw new NulsException(ConsensusErrorCode.MERKEL_HASH_ERROR);
         }
-        //区块头签名验证
+        //Block header signature verification
         if (blockHeader.getBlockSignature().verifySignature(blockHeader.getHash()).isFailed()) {
             chain.getLogger().error("Block Header Verification Error!");
             throw new NulsException(ConsensusErrorCode.SIGNATURE_ERROR);
@@ -98,10 +98,10 @@ public class BlockValidator {
     }
 
     /**
-     * 区块轮次验证
+     * Block round validation
      * Block round validation
      *
-     * @param isDownload  block status 0同步中  1接收最新区块
+     * @param isDownload  block status 0Synchronizing  1Receive the latest block
      * @param chain       chain info
      * @param blockHeader block header info
      */
@@ -113,7 +113,7 @@ public class BlockValidator {
         RoundValidResult roundValidResult = new RoundValidResult();
 
       /*
-      该区块为本地最新区块之前的区块
+      This block is the block before the latest local block
       * */
         boolean isBeforeBlock = extendsData.getRoundIndex() < bestExtendsData.getRoundIndex() || (extendsData.getRoundIndex() == bestExtendsData.getRoundIndex() && extendsData.getPackingIndexOfRound() <= bestExtendsData.getPackingIndexOfRound());
         if (isBeforeBlock) {
@@ -164,7 +164,7 @@ public class BlockValidator {
             chain.getLogger().error("block height " + blockHeader.getHeight() + " packager count is error! hash :" + blockHeaderHash);
             throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
         }
-        // 验证打包人是否正确
+        // Verify if the packager is correct
         MeetingMember member = currentRound.getMember(extendsData.getPackingIndexOfRound());
         if (  !Arrays.equals(member.getAgent().getPackingAddress(), blockHeader.getPackingAddress(chain.getConfig().getChainId()))) {
             chain.getLogger().error("block height " + blockHeader.getHeight() + " packager error! hash :" + blockHeaderHash);
@@ -183,7 +183,7 @@ public class BlockValidator {
     }
 
     /**
-     * 区块惩罚交易验证
+     * Block penalty transaction verification
      * Block Penalty Trading Verification
      *
      * @param block        block info
@@ -197,7 +197,7 @@ public class BlockValidator {
         Transaction yellowPunishTx = null;
         Transaction tx;
       /*
-      检查区块交中是否存在多个黄牌交易
+      Check if there are multiple yellow card transactions in block trading
       Check whether there are multiple yellow trades in block handover
       */
         for (int index = 1; index < txs.size(); index++) {
@@ -218,7 +218,7 @@ public class BlockValidator {
             }
         }
       /*
-      校验区块交易中的黄牌交易是否正确
+      Verify whether yellow card transactions in block transactions are correct
       Check the correctness of yellow card trading in block trading
       */
         try {
@@ -236,7 +236,7 @@ public class BlockValidator {
             return false;
         }
       /*
-      区块中红牌交易验证
+      Verification of red card transactions in blocks
       Verification of Red Card Trading in Blocks
       */
         if (!redPunishTxList.isEmpty()) {
@@ -285,7 +285,7 @@ public class BlockValidator {
 
 
     /**
-     * 红牌交易验证
+     * Red card trading verification
      *
      * @param chain chain info
      * @param tx    transaction info
@@ -294,7 +294,7 @@ public class BlockValidator {
         RedPunishData punishData = new RedPunishData();
         punishData.parse(tx.getTxData(), 0);
       /*
-      红牌交易类型为连续分叉
+      The red card transaction type is a continuous fork
       The type of red card transaction is continuous bifurcation
       */
         if (punishData.getReasonCode() == PunishReasonEnum.BIFURCATION.getCode()) {
@@ -321,13 +321,13 @@ public class BlockValidator {
                 BlockExtendsData blockExtendsData = header1.getExtendsData();
                 roundIndex[i] = blockExtendsData.getRoundIndex();
             }
-            //验证三次分叉是否是100轮以内
+            //Verify if the three forks are100Within the wheel
             if (roundIndex[ConsensusConstant.REDPUNISH_BIFURCATION - 1] - roundIndex[0] > ConsensusConstant.VALUE_OF_ONE_HUNDRED) {
                 throw new NulsException(ConsensusErrorCode.BLOCK_RED_PUNISH_ERROR);
             }
         }
       /*
-      红牌交易类型为黄牌过多
+      The red card trading type is too many yellow cards
       The type of red card trading is too many yellow cards
       */
         else if (punishData.getReasonCode() != PunishReasonEnum.TOO_MUCH_YELLOW_PUNISH.getCode()) {
@@ -335,7 +335,7 @@ public class BlockValidator {
         }
 
       /*
-      CoinData验证
+      CoinDatavalidate
       CoinData verification
       */
         if (!coinDataValidate(chain, tx)) {
@@ -346,7 +346,7 @@ public class BlockValidator {
 
 
     /**
-     * 区块CoinBase交易验证
+     * blockCoinBaseTransaction verification
      * Block CoinBase transaction verification
      *
      * @param block        block info
@@ -389,12 +389,12 @@ public class BlockValidator {
     }
 
     /**
-     * CoinData 验证
+     * CoinData validate
      * CoinData Verification
      *
      * @param tx    red punish transaction
      * @param chain chain info
-     * @return 验证是否成功/Verify success
+     * @return Verify if successful/Verify success
      */
     private boolean coinDataValidate(Chain chain, Transaction tx) throws NulsException {
         Agent punishAgent = null;

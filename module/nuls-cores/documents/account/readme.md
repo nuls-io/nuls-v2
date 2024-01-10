@@ -1,12 +1,12 @@
-# 账户模块
-## 模块概述
-账户模块是提供关于账户各项功能的基础性模块。主要对账户的生成、安全和保管、信息的获取等几个方面的功能提供支持，其他模块可以根据账户模块提供的接口来使用账户的各种功能以及获取账户信息，用户或者其他应用可以根据RPC接口对账户进行更加实用性和个性化的操作。账户是基础模块，也是用户数据的载体 。
-## 接口功能
-- 账户的生成
-- 创建账户、导入账户
-- 账户的安全和保管
-- 账户的备份、设置账户密码、修改账户密码、移除账户
-- 账户信息的获取
-- 查询单个账户信息、获取多个账户信息、获取账户地址、查询账户余额、查询账户别名
-- 其他实用性和个性化功能  设置账户别名、设置账户备注、验证账户是否加密、签名、验证账户地址格式、验证账户密码是否正确等功能
+# Account module
+## Module Overview
+The account module is a fundamental module that provides information about various functions of the account. Mainly for account generation、Security and storage、Support is provided for several functions such as information acquisition, while other modules can use various functions of the account and obtain account information based on the interface provided by the account module. Users or other applications can useRPCThe interface provides more practical and personalized operations for accounts. Accounts are the basic module and also the carrier of user data .
+## Interface functions
+- Account generation
+- Create an account、Import account
+- Account security and custody
+- Account backup、Set account password、Change account password、Remove account
+- Obtaining account information
+- Query individual account information、Obtain information from multiple accounts、Obtain account address、Query account balance、Query account alias
+- Other practical and personalized features  Set account alias、Set account notes、Verify if the account is encrypted、autograph、Verify account address format、Verify account password correctness and other functions
 

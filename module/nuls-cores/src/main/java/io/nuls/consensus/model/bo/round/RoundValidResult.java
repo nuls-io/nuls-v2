@@ -1,6 +1,6 @@
 package io.nuls.consensus.model.bo.round;
 /**
- * 轮次信息验证结果类
+ * Round information verification result class
  * Information about rotation
  *
  * @author tag

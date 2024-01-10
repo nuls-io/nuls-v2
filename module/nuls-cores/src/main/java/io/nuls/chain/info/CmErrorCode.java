@@ -54,7 +54,7 @@ public interface CmErrorCode extends CommonCodeConstanst {
     ErrorCode ERROR_CHAIN_ACTIVE = ErrorCode.init("cm_1014");
     ErrorCode ERROR_CHAIN_SYSTEM_USED = ErrorCode.init("cm_1015");
     /**
-     * 错误编码
+     * Error code
      */
     ErrorCode ERROR_ASSET_SYMBOL = ErrorCode.init("cm_2000");
     ErrorCode ERROR_ASSET_SYMBOL_LENGTH = ErrorCode.init("cm_2001");

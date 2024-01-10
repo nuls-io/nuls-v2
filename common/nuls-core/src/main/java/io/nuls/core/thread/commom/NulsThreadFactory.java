@@ -37,16 +37,16 @@ public class NulsThreadFactory implements ThreadFactory {
     private AtomicInteger threadNo = new AtomicInteger(1);
 
     /**
-     * NulsThreadFactory构造函数
+     * NulsThreadFactoryConstructor
      *
-     * @param poolName 线程工厂名称（用于生成以后用该对象生成出来的线程的名称）
+     * @param poolName Thread Factory Name（The name of the thread used to generate future threads using this object）
             */
     public NulsThreadFactory(String poolName) {
         this.poolName = poolName;
     }
 
     /**
-     * 创建一个线程
+     * Create a thread
      *
      * @param r Runnable
      * @return Thread
@@ -70,7 +70,7 @@ public class NulsThreadFactory implements ThreadFactory {
     }
 
     /**
-     * 获取当前线程工厂名称
+     * Get the current thread factory name
      */
     public String getPoolName() {
         return poolName;

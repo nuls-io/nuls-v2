@@ -36,7 +36,7 @@ import io.nuls.core.core.annotation.Component;
 
 /**
  * @author zhoulijun
- * 修改密码
+ * Change password
  * update account password
  */
 @Component

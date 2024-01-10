@@ -12,7 +12,7 @@ public class EncoderTest {
 
         int count = 10000000;
 
-        String str = "ksajdflkjsadflkjdasf2u98fflsjflksajdflksadflkasjdflkasjdf90sadf09sadfi0asfdlckFD程序执行2315632335233123231322132速度v32dszxsjlkjslkdfsadfwer3奖励空间哦iLJLKJLKLJLJLLSFDASDsakdfjlkljdlkfjasd9f809asdfklajsd2e";
+        String str = "ksajdflkjsadflkjdasf2u98fflsjflksajdflksadflkasjdflkasjdf90sadf09sadfi0asfdlckFDprogram execution2315632335233123231322132speedv32dszxsjlkjslkdfsadfwer3Reward space OhiLJLKJLKLJLJLLSFDASDsakdfjlkljdlkfjasd9f809asdfklajsd2e";
 
         testHex(str, count);
 

@@ -3,14 +3,14 @@ package io.nuls.crosschain.nuls.utils.enumeration;
 import io.nuls.crosschain.base.constant.CrossChainConstant;
 
 /**
- * 交易属性
+ * Transaction attributes
  * Transaction attribute
  * @author tag
  * 2019/1/16
  */
 public enum TxProperty {
     /**
-     * 创建节点交易
+     * Create node transactions
      * Create node transactions
      * */
     CROSS_TX(CrossChainConstant.TX_TYPE_CROSS_CHAIN,false,false,true);

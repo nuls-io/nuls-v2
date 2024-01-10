@@ -98,7 +98,7 @@ public class DelayStopAgentProcessor implements TransactionProcessor {
                 commitResult = false;
             }
         }
-        //回滚已提交成功的交易
+        //Roll back transactions that have been successfully submitted
         if (!commitResult) {
             for (Transaction rollbackTx : commitSuccessList) {
                 try {
@@ -134,7 +134,7 @@ public class DelayStopAgentProcessor implements TransactionProcessor {
                 rollbackResult = false;
             }
         }
-        //保存已回滚成功的交易
+        //Save successfully rolled back transactions
         if (!rollbackResult) {
             for (Transaction commitTx : rollbackSuccessList) {
                 try {
@@ -156,7 +156,7 @@ public class DelayStopAgentProcessor implements TransactionProcessor {
         txData.parse(tx.getTxData(), 0);
 
         /*
-        找到被惩罚的节点
+        Find the penalized node
         Find the punished node
          */
         AgentPo agent = agentStorageService.get(txData.getAgentHash(), chainId);
@@ -166,7 +166,7 @@ public class DelayStopAgentProcessor implements TransactionProcessor {
         }
 
         /*
-        找到被惩罚节点的委托
+        Find the delegate of the penalized node
         Delegation to Find Penalized Nodes
          */
         List<DepositPo> depositPoList = depositStorageService.getList(chainId);
@@ -190,7 +190,7 @@ public class DelayStopAgentProcessor implements TransactionProcessor {
             updatedList.add(po);
         }
         /*
-         * 更新缓存
+         * Update cache
          * */
         if (!updatedList.isEmpty()) {
             for (DepositPo depositPo : updatedList) {
@@ -206,7 +206,7 @@ public class DelayStopAgentProcessor implements TransactionProcessor {
         DelayStopAgent txData = new DelayStopAgent();
         txData.parse(tx.getTxData(), 0);
         /*
-        找到被惩罚的节点
+        Find the penalized node
         Find the punished node
          */
         AgentPo agent1 = agentStorageService.get(txData.getAgentHash(), chainId);
@@ -216,7 +216,7 @@ public class DelayStopAgentProcessor implements TransactionProcessor {
         }
 
         /*
-        找到被惩罚节点的委托
+        Find the delegate of the penalized node
         Delegation to Find Penalized Nodes
          */
         List<DepositPo> depositPoList = depositStorageService.getList(chainId);
@@ -240,7 +240,7 @@ public class DelayStopAgentProcessor implements TransactionProcessor {
         }
 
         /*
-         * 修改缓存
+         * Modify cache
          * */
         if (!updatedList.isEmpty()) {
             for (DepositPo po2 : updatedList) {

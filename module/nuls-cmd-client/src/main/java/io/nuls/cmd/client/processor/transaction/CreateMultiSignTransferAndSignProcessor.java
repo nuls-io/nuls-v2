@@ -42,7 +42,7 @@ import java.math.BigInteger;
 
 /**
  * @author: zhoulijun
- * 创建多签交易并签名
+ * Create multiple signed transactions and sign them
  */
 @Component
 public class CreateMultiSignTransferAndSignProcessor extends TransactionBaseProcessor implements CommandProcessor {

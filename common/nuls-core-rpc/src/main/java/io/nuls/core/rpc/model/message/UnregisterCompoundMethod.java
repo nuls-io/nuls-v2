@@ -29,7 +29,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * 取消订阅多个远程方法
+ * Unsubscribe from multiple remote methods
  * Unsubscribe to multiple remote methods
  *
  * @author tangyi

@@ -9,14 +9,14 @@ import io.nuls.core.core.annotation.Component;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-21 11:59
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Component
 public class GetTranscationToAddressAdapter extends BaseAdapter<String, TransactionData> {
 
     @Override
     public String title() {
-        return "从交易对象中提取入金地址";
+        return "Extract deposit address from trading partner";
     }
 
     @Override

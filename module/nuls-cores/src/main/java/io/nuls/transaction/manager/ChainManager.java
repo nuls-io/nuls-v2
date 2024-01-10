@@ -46,7 +46,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 /**
- * 链管理类,负责各条链的初始化,运行,启动,参数维护等
+ * Chain management,Responsible for initializing each chain,working,start-up,Parameter maintenance, etc
  * Chain management class, responsible for the initialization, operation, start-up, parameter maintenance of each chain, etc.
  *
  * @author qinyifeng
@@ -64,7 +64,7 @@ public class ChainManager {
     private Map<Integer, Chain> chainMap = new ConcurrentHashMap<>();
 
     /**
-     * 初始化并启动链
+     * Initialize and start the chain
      * Initialize and start the chain
      */
     public void initChain() throws Exception {
@@ -85,7 +85,7 @@ public class ChainManager {
     }
 
     /**
-     * 初始化并启动链
+     * Initialize and start the chain
      * Initialize and start the chain
      */
     public void runChain() throws Exception {
@@ -100,10 +100,10 @@ public class ChainManager {
 
 
     /**
-     * 停止一条链
+     * Stop a chain
      * Delete a chain
      *
-     * @param chainId 链ID/chain id
+     * @param chainId chainID/chain id
      */
     public void stopChain(int chainId) {
 
@@ -111,19 +111,19 @@ public class ChainManager {
 
 
     /**
-     * 读取配置文件创建并初始化链
+     * Read configuration file to create and initialize chain
      * Read the configuration file to create and initialize the chain
      */
     private Map<Integer, ConfigBean> configChain() {
         try {
             /*
-            读取数据库链信息配置
+            Read database chain information configuration
             Read database chain information configuration
              */
             Map<Integer, ConfigBean> configMap = CommonContext.CONFIG_BEAN_MAP;
 
             /*
-            如果系统是第一次运行，则本地数据库没有存储链信息，此时需要从配置文件读取主链配置信息
+            If the system is running for the first time and there is no storage chain information in the local database, it is necessary to read the main chain configuration information from the configuration file
             If the system is running for the first time, the local database does not have chain information,
             and the main chain configuration information needs to be read from the configuration file at this time.
             */
@@ -139,7 +139,7 @@ public class ChainManager {
     }
 
     /**
-     * 初始化链相关表
+     * Initialize Chain Related Tables
      * Initialization chain correlation table
      *
      * @param chain
@@ -148,20 +148,20 @@ public class ChainManager {
         NulsLogger logger = chain.getLogger();
         int chainId = chain.getConfig().getChainId();
         try {
-            //未确认表
+            //Unconfirmed table
             if(RocksDBService.existTable(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId)){
                 RocksDBService.destroyTable(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId);
             }
 
             /*
-            创建已确认交易表
+            Create confirmed transaction table
             Create confirmed transaction table
             */
             RocksDBService.createTable(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + chainId);
 
 
             /*
-            已验证未打包交易 未确认
+            Verified Unpackaged Transactions Unconfirmed
             Verified transaction
             */
             RocksDBService.createTable(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId);
@@ -173,7 +173,7 @@ public class ChainManager {
     }
 
     /**
-     * 初始化链缓存数据
+     * Initialize chain cache data
      * Initialize chain caching entity
      *
      * @param chain chain info

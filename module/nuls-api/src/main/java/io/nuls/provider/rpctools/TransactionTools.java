@@ -21,14 +21,14 @@ import java.util.function.Function;
 /**
  * @Author: zhoulijun
  * @Time: 2019-06-12 17:57
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Component
 public class TransactionTools implements CallRpc {
 
 
     /**
-     * 验证新交易
+     * Verify new transactions
      */
     public Result validateTx(int chainId, String txStr) {
         Map<String, Object> params = new HashMap<>(2);
@@ -42,7 +42,7 @@ public class TransactionTools implements CallRpc {
     }
 
     /**
-     * 广播新交易
+     * Broadcast new transactions
      */
     public Result newTx(int chainId, String txStr) {
         Map<String, Object> params = new HashMap<>(2);
@@ -56,7 +56,7 @@ public class TransactionTools implements CallRpc {
     }
 
     /**
-     * 广播新交易
+     * Broadcast new transactions
      */
     public Result broadcastTxWithoutAnyValidation(int chainId, String txStr) {
         Map<String, Object> params = new HashMap<>(2);
@@ -70,7 +70,7 @@ public class TransactionTools implements CallRpc {
     }
 
     /**
-     * 向交易模块注册交易
+     * Register transactions with the trading module
      * Register transactions with the transaction module
      */
     public boolean registerTx(int chainId, String moduleName, int... txTyps) {
@@ -85,7 +85,7 @@ public class TransactionTools implements CallRpc {
                 detail.setVerifyFee(true);
                 txRegisterDetailList.add(detail);
             });
-            //向交易管理模块注册交易
+            //Register transactions with the transaction management module
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put(Constants.CHAIN_ID, chainId);

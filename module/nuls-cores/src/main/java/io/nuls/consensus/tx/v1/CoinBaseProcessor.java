@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * CoinBase交易处理器
+ * CoinBaseTransaction processor
  * @author tag
  * @date 2019/6/1
  */
@@ -48,7 +48,7 @@ public class CoinBaseProcessor implements TransactionProcessor {
             return true;
         }
         /*
-         * 借用CoinBase交易commit函数保存底层随机数
+         * borrowCoinBasetransactioncommitFunction saves underlying random numbers
          */
         try{
             Chain chain = chainManager.getChainMap().get(chainId);
@@ -71,7 +71,7 @@ public class CoinBaseProcessor implements TransactionProcessor {
             return true;
         }
         /*
-         * 借用CoinBase交易rollback函数回滚底层随机数
+         * borrowCoinBasetransactionrollbackFunction rollback of underlying random numbers
          */
         try {
             randomSeedService.rollbackBlock(chainId, blockHeader);

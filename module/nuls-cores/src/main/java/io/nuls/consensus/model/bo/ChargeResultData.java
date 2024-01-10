@@ -5,7 +5,7 @@ import io.nuls.consensus.constant.ConsensusConstant;
 import java.math.BigInteger;
 
 /**
- * 交易手续费返回结果类
+ * Transaction fee return result class
  * Transaction Fee Return Result Class
  *
  * @author tag

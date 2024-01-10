@@ -26,7 +26,7 @@ package io.nuls.consensus.utils.enumeration;
 import io.nuls.core.parse.I18nUtils;
 
 /**
- * 红牌惩罚原因枚举类
+ * Red card punishment reason enumeration class
  * Enumeration of Reasons for Red Card Punishment
  *
  * @author tag
@@ -34,19 +34,19 @@ import io.nuls.core.parse.I18nUtils;
  */
 public enum PunishReasonEnum {
     /*
-    连续分叉
+    Continuous bifurcation
     Bifurcate block chain
     */
     BIFURCATION((byte) 1, "cc_0036"),
 
     /*
-    双花
+    honeysuckle
     double spend
     */
     DOUBLE_SPEND((byte) 2, "cc_0037"),
 
     /*
-    连续x轮黄牌
+    continuityxWheel yellow card
     Continuous x round yellow card.
     */
     TOO_MUCH_YELLOW_PUNISH((byte) 3, "cc_0038"),;

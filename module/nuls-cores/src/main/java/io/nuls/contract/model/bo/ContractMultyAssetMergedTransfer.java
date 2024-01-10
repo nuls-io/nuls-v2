@@ -41,12 +41,12 @@ public class ContractMultyAssetMergedTransfer {
     private List<MultyAssetOutput> outputs;
 
     /**
-     * 智能合约交易hash
+     * Smart contract tradinghash
      */
     private NulsHash orginHash;
 
     /**
-     * 合约转账(从合约转出)交易hash
+     * Contract transfer(Transfer out from contract)transactionhash
      */
     private NulsHash hash;
 

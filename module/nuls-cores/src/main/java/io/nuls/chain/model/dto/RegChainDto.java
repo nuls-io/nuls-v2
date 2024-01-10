@@ -37,132 +37,132 @@ import java.util.List;
  * @date 2018/11/7
  * @description
  */
-@ApiModel(description = "资产所属链信息")
+@ApiModel(description = "Asset Chain Information")
 public class RegChainDto {
     /**
-     * 链序号
+     * Chain number
      * Chain ID
      */
-    @ApiModelProperty(description = "链id")
+    @ApiModelProperty(description = "chainid")
     private int chainId;
 
     /**
-     * 链名称
+     * Chain Name
      * Chain name
      */
-    @ApiModelProperty(description = "链名称")
+    @ApiModelProperty(description = "Chain Name")
     private String chainName;
 
     /**
-     * 地址类型（Nuls生态，其他）
+     * Address type（NulsEcology, Other）
      * Address type (Nuls ecology and others)
      */
-    @ApiModelProperty(description = "地址类型（1：Nuls生态，2：其他）")
+    @ApiModelProperty(description = "Address type（1：NulsEcology,2：other）")
     private String addressType;
 
     /**
-     * 地址前缀
+     * Address prefix
      * Address prefix
      */
-    @ApiModelProperty(description = "地址前缀")
+    @ApiModelProperty(description = "Address prefix")
     private String addressPrefix;
 
     /**
-     * 魔法参数（唯一）
+     * Magic parameters（only）
      * Magic number (Unique)
      */
-    @ApiModelProperty(description = "魔法参数")
+    @ApiModelProperty(description = "Magic parameters")
     private long magicNumber;
 
 
     /**
-     * 最小可用节点数
+     * Minimum number of available nodes
      * Minimum number of available nodes
      */
-    @ApiModelProperty(description = "最小可用节点数")
+    @ApiModelProperty(description = "Minimum number of available nodes")
     private int minAvailableNodeNum;
 
 
     /**
-     * 交易确认区块数
+     * Number of transaction confirmation blocks
      * Transaction confirmation block counts
      */
-    @ApiModelProperty(description = "交易确认区块数")
+    @ApiModelProperty(description = "Number of transaction confirmation blocks")
     private int txConfirmedBlockNum;
 
     /**
-     * 删除链时，设置为true
+     * When deleting a chain, set totrue
      * When deleting a chain, set to true
      */
-    @ApiModelProperty(description = "是否已注销")
+    @ApiModelProperty(description = "Has it been cancelled")
     private boolean isDelete = false;
 
     /**
-     * 创建时间
+     * Creation time
      * Create time
      */
-    @ApiModelProperty(description = "创建时间")
+    @ApiModelProperty(description = "Creation time")
     private long createTime;
 
 
     /**
-     * 注册链时使用的地址
+     * The address used when registering the chain
      * The address used when registering the chain
      */
-    @ApiModelProperty(description = "注册链时使用的地址")
+    @ApiModelProperty(description = "The address used when registering the chain")
     private String regAddress;
 
     /**
-     * 注册链时的交易哈希
+     * Transaction hash during registration chain
      * Transaction hash when registering the chain
      */
-    @ApiModelProperty(description = "注册链时的交易哈希")
+    @ApiModelProperty(description = "Transaction hash during registration chain")
     private String regTxHash;
 
     /**
-     * 注册链时添加的资产序号
+     * Asset serial number added during registration chain
      * The asset ID added when registering the chain
      */
-    @ApiModelProperty(description = "注册链时添加的资产序号")
+    @ApiModelProperty(description = "Asset serial number added during registration chain")
     private int regAssetId;
 
 
     /**
-     * 本链创建的所有资产，Key=chaiId_assetId
+     * All assets created in this chain,Key=chaiId_assetId
      * All assets created by this chain, Key=chaiId_assetId
      */
-    @ApiModelProperty(description = "本链创建的所有资产，Key=chaiId_assetId")
+    @ApiModelProperty(description = "All assets created in this chain,Key=chaiId_assetId")
     List<String> selfAssetKeyList = new ArrayList<>();
 
     /**
-     * 链上流通的所有资产，Key=chaiId_assetId
+     * All assets circulating on the chain,Key=chaiId_assetId
      * All assets circulating in the chain, Key=chaiId_assetId
      */
-    @ApiModelProperty(description = "链上流通的所有资产，Key=chaiId_assetId")
+    @ApiModelProperty(description = "All assets circulating on the chain,Key=chaiId_assetId")
     List<String> totalAssetKeyList = new ArrayList<>();
 
     /**
-     * 初始化验证人信息
+     * Initialize Verifier Information
      */
-    @ApiModelProperty(description = "验证人列表")
+    @ApiModelProperty(description = "Verifier List")
     List<String> verifierList = new ArrayList<String>();
     /**
-     * 按100来计算拜占庭比例
+     * according to100To calculate the Byzantine proportion
      */
-    @ApiModelProperty(description = "拜占庭比例")
+    @ApiModelProperty(description = "Byzantine proportion")
     int signatureByzantineRatio = 0;
     /**
-     * 最大签名数量
+     * Maximum number of signatures
      */
-    @ApiModelProperty(description = "最大签名数量")
+    @ApiModelProperty(description = "Maximum number of signatures")
     int maxSignatureCount = 0;
 
-    @ApiModelProperty(description = "主网验证人列表,逗号分隔")
+    @ApiModelProperty(description = "List of main network validators,Comma separated")
     String mainNetVerifierSeeds = "";
 
-    @ApiModelProperty(description = "跨链提供的主网连接种子,逗号分隔")
+    @ApiModelProperty(description = "Main network connection seeds provided across chains,Comma separated")
     String mainNetCrossConnectSeeds = "";
-    @ApiModelProperty(description = "是否可用")
+    @ApiModelProperty(description = "Is it available")
     boolean enable = true;
 
     public void buildRegChainDto(BlockChain blockChain) {

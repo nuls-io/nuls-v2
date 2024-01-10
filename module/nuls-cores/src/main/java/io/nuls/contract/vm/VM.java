@@ -120,7 +120,7 @@ public class VM {
 
     private List<Object> orderedInnerTxs = new ArrayList<>();
 
-    // add by pierre at 2020-11-03 可能影响兼容性，考虑协议升级
+    // add by pierre at 2020-11-03 May affect compatibility, consider protocol upgrade
     private LinkedList<String> stackTraces = new LinkedList<>();
 
     // add by pierre at 2022/6/1 p14
@@ -201,7 +201,7 @@ public class VM {
         programContext.setGasPrice(programInvoke.getPrice());
         programContext.setGas(programInvoke.getGasLimit());
         programContext.setValue(this.heap.newBigInteger(programInvoke.getValue().toString()));
-        // 转化多资产列表
+        // Convert multi asset list
         List<ProgramMultyAssetValue> multyAssetValues = programInvoke.getMultyAssetValues();
         if (multyAssetValues != null && !multyAssetValues.isEmpty()) {
             programContext.setMultyAssetValues(this.heap.multyAssetValueArrayToObjectRef(multyAssetValues));
@@ -245,7 +245,7 @@ public class VM {
         runArgs.add(objectRef);
         final List<VariableType> argsVariableType = methodCode.argsVariableType;
         int size = argsVariableType.size();
-        // 特殊处理方法参数，传入的二维数组就是此合约方法的第一个参数 - method: _payable(String[][] args)
+        // Special processing method parameters, the incoming two-dimensional array is the first parameter of this contract method - method: _payable(String[][] args)
         if(BALANCE_TRIGGER_METHOD_NAME.equals(methodCode.name) &&
                 BALANCE_TRIGGER_FOR_CONSENSUS_CONTRACT_METHOD_DESC_IN_VM.equals(methodCode.desc)) {
             //final VariableType variableType = argsVariableType.get(0);

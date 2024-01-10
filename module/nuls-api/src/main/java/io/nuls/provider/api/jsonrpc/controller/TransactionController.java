@@ -97,12 +97,12 @@ public class TransactionController {
     BlockService blockService = ServiceManager.get(BlockService.class);
 
     @RpcMethod("getTx")
-    @ApiOperation(description = "根据hash获取交易", order = 301)
+    @ApiOperation(description = "according tohashObtain transactions", order = 301)
     @Parameters({
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
-            @Parameter(parameterName = "hash", parameterDes = "交易hash")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid"),
+            @Parameter(parameterName = "hash", parameterDes = "transactionhash")
     })
-    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = TransactionDto.class))
+    @ResponseData(name = "Return value", responseType = @TypeDescriptor(value = TransactionDto.class))
     public RpcResult getTx(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
         int chainId;
@@ -139,13 +139,13 @@ public class TransactionController {
     }
 
     @RpcMethod("validateTx")
-    @ApiOperation(description = "验证交易", order = 302, detailDesc = "验证离线组装的交易,验证成功返回交易hash值,失败返回错误提示信息")
+    @ApiOperation(description = "Verify transactions", order = 302, detailDesc = "Verify transactions for offline assembly,Successful verification returns transactionhashvalue,Failure returns error message")
     @Parameters({
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
-            @Parameter(parameterName = "tx", parameterDes = "交易序列化字符串"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid"),
+            @Parameter(parameterName = "tx", parameterDes = "Transaction serialization string"),
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", description = "交易hash")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "transactionhash")
     }))
     public RpcResult validateTx(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
@@ -176,14 +176,14 @@ public class TransactionController {
     }
 
     @RpcMethod("broadcastTx")
-    @ApiOperation(description = "广播交易", order = 303, detailDesc = "广播离线组装的交易,成功返回true,失败返回错误提示信息")
+    @ApiOperation(description = "Broadcasting transactions", order = 303, detailDesc = "Broadcast offline assembly transactions,Successfully returnedtrue,Failure returns error message")
     @Parameters({
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
-            @Parameter(parameterName = "tx", parameterDes = "交易序列化16进制字符串"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid"),
+            @Parameter(parameterName = "tx", parameterDes = "Transaction serialization16Hexadecimal Strings"),
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", valueType = boolean.class, description = "是否成功"),
-            @Key(name = "hash", description = "交易hash")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", valueType = boolean.class, description = "Whether successful"),
+            @Key(name = "hash", description = "transactionhash")
     }))
     public RpcResult broadcastTx(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
@@ -309,14 +309,14 @@ public class TransactionController {
     }
 
     @RpcMethod("broadcastTxWithNoContractValidation")
-    @ApiOperation(description = "广播交易(不验证合约)", order = 304, detailDesc = "广播离线组装的交易(不验证合约),成功返回true,失败返回错误提示信息")
+    @ApiOperation(description = "Broadcasting transactions(Not verifying contracts)", order = 304, detailDesc = "Broadcast offline assembly transactions(Not verifying contracts),Successfully returnedtrue,Failure returns error message")
     @Parameters({
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
-            @Parameter(parameterName = "tx", parameterDes = "交易序列化16进制字符串"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid"),
+            @Parameter(parameterName = "tx", parameterDes = "Transaction serialization16Hexadecimal Strings"),
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", valueType = boolean.class, description = "是否成功"),
-            @Key(name = "hash", description = "交易hash")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", valueType = boolean.class, description = "Whether successful"),
+            @Key(name = "hash", description = "transactionhash")
     }))
     public RpcResult broadcastTxWithNoContractValidation(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
@@ -350,14 +350,14 @@ public class TransactionController {
     }
 
     @RpcMethod("broadcastTxWithoutAnyValidation")
-    @ApiOperation(description = "广播交易(不验证)", order = 305, detailDesc = "广播离线组装的交易(不验证),成功返回true,失败返回错误提示信息")
+    @ApiOperation(description = "Broadcasting transactions(Do not verify)", order = 305, detailDesc = "Broadcast offline assembly transactions(Do not verify),Successfully returnedtrue,Failure returns error message")
     @Parameters({
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
-            @Parameter(parameterName = "tx", parameterDes = "交易序列化16进制字符串"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid"),
+            @Parameter(parameterName = "tx", parameterDes = "Transaction serialization16Hexadecimal Strings"),
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", valueType = boolean.class, description = "是否成功"),
-            @Key(name = "hash", description = "交易hash")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", valueType = boolean.class, description = "Whether successful"),
+            @Key(name = "hash", description = "transactionhash")
     }))
     public RpcResult broadcastTxWithoutAnyValidation(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
@@ -392,19 +392,19 @@ public class TransactionController {
 
 
     @RpcMethod("transferOtherChainAsset")
-    @ApiOperation(description = "单笔转账", order = 306, detailDesc = "发起单账户单资产的转账交易,转账资产为链内的其他平行链资产")
+    @ApiOperation(description = "Single transfer", order = 306, detailDesc = "Initiate transfer transactions for a single account or asset,Transfer assets to other parallel chain assets within the chain")
     @Parameters({
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
-            @Parameter(parameterName = "assetChainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "资产链id"),
-            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterDes = "资产id"),
-            @Parameter(parameterName = "address", parameterDes = "转出账户地址"),
-            @Parameter(parameterName = "toAddress", parameterDes = "转入账户地址"),
-            @Parameter(parameterName = "password", parameterDes = "转出账户密码"),
-            @Parameter(parameterName = "amount", parameterDes = "转出金额"),
-            @Parameter(parameterName = "remark", parameterDes = "备注"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid"),
+            @Parameter(parameterName = "assetChainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "Asset Chainid"),
+            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterDes = "assetid"),
+            @Parameter(parameterName = "address", parameterDes = "Transfer account address"),
+            @Parameter(parameterName = "toAddress", parameterDes = "Transfer to account address"),
+            @Parameter(parameterName = "password", parameterDes = "Transfer account password"),
+            @Parameter(parameterName = "amount", parameterDes = "Transfer amount"),
+            @Parameter(parameterName = "remark", parameterDes = "Remarks"),
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "hash", description = "交易hash")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "hash", description = "transactionhash")
     }))
     public RpcResult transferOtherChainAsset(List<Object> params) {
         VerifyUtils.verifyParams(params, 8);
@@ -474,18 +474,18 @@ public class TransactionController {
     }
 
     @RpcMethod("transfer")
-    @ApiOperation(description = "单笔链内转账", order = 306, detailDesc = "发起单账户单资产的转账交易")
+    @ApiOperation(description = "Single in chain transfer", order = 306, detailDesc = "Initiate transfer transactions for a single account or asset")
     @Parameters({
-            @Parameter(parameterName = "assetChainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "资产链id"),
-            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterDes = "资产id"),
-            @Parameter(parameterName = "address", parameterDes = "转出账户地址"),
-            @Parameter(parameterName = "toAddress", parameterDes = "转入账户地址"),
-            @Parameter(parameterName = "password", parameterDes = "转出账户密码"),
-            @Parameter(parameterName = "amount", parameterDes = "转出金额"),
-            @Parameter(parameterName = "remark", parameterDes = "备注"),
+            @Parameter(parameterName = "assetChainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "Asset Chainid"),
+            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterDes = "assetid"),
+            @Parameter(parameterName = "address", parameterDes = "Transfer account address"),
+            @Parameter(parameterName = "toAddress", parameterDes = "Transfer to account address"),
+            @Parameter(parameterName = "password", parameterDes = "Transfer account password"),
+            @Parameter(parameterName = "amount", parameterDes = "Transfer amount"),
+            @Parameter(parameterName = "remark", parameterDes = "Remarks"),
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "hash", description = "交易hash")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "hash", description = "transactionhash")
     }))
     public RpcResult transfer(List<Object> params) {
         VerifyUtils.verifyParams(params, 7);
@@ -550,18 +550,18 @@ public class TransactionController {
     }
 
     @RpcMethod("crossTransfer")
-    @ApiOperation(description = "单笔跨链转账", order = 306, detailDesc = "发起单账户单资产的跨链转账交易")
+    @ApiOperation(description = "Single cross chain transfer", order = 306, detailDesc = "Initiate cross chain transfer transactions for single account and single asset transactions")
     @Parameters({
-            @Parameter(parameterName = "assetChainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "资产链id"),
-            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterDes = "资产id"),
-            @Parameter(parameterName = "address", parameterDes = "转出账户地址"),
-            @Parameter(parameterName = "toAddress", parameterDes = "转入账户地址"),
-            @Parameter(parameterName = "password", parameterDes = "转出账户密码"),
-            @Parameter(parameterName = "amount", parameterDes = "转出金额"),
-            @Parameter(parameterName = "remark", parameterDes = "备注"),
+            @Parameter(parameterName = "assetChainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "Asset Chainid"),
+            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterDes = "assetid"),
+            @Parameter(parameterName = "address", parameterDes = "Transfer account address"),
+            @Parameter(parameterName = "toAddress", parameterDes = "Transfer to account address"),
+            @Parameter(parameterName = "password", parameterDes = "Transfer account password"),
+            @Parameter(parameterName = "amount", parameterDes = "Transfer amount"),
+            @Parameter(parameterName = "remark", parameterDes = "Remarks"),
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "hash", description = "交易hash")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "hash", description = "transactionhash")
     }))
     public RpcResult crossTransfer(List<Object> params) {
         VerifyUtils.verifyParams(params, 7);
@@ -626,14 +626,14 @@ public class TransactionController {
 
 
     @RpcMethod("createTransferTxOffline")
-    @ApiOperation(description = "离线组装转账交易", order = 350, detailDesc = "根据inputs和outputs离线组装转账交易，用于单账户或多账户的转账交易。" +
-            "交易手续费为inputs里本链主资产金额总和，减去outputs里本链主资产总和")
+    @ApiOperation(description = "Offline assembly transfer transaction", order = 350, detailDesc = "according toinputsandoutputsOffline assembly transfer transaction, used for single account or multi account transfer transactions." +
+            "The transaction fee isinputsThe total amount of main assets in the Li Ben Chain, minusoutputsThe total amount of main assets in the Li Ben Chain")
     @Parameters({
-            @Parameter(parameterName = "transferDto", parameterDes = "转账交易表单", requestType = @TypeDescriptor(value = TransferDto.class))
+            @Parameter(parameterName = "transferDto", parameterDes = "Transfer transaction form", requestType = @TypeDescriptor(value = TransferDto.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "hash", description = "交易hash"),
-            @Key(name = "txHex", description = "交易序列化16进制字符串")
+    @ResponseData(name = "Return value", description = "Return aMapobject", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "hash", description = "transactionhash"),
+            @Key(name = "txHex", description = "Transaction serialization16Hexadecimal Strings")
     }))
     public RpcResult createTransferTxOffline(List<Object> params) {
         List<Map> inputList, outputList;
@@ -687,14 +687,14 @@ public class TransactionController {
     }
 
     @RpcMethod("createCrossTxOffline")
-    @ApiOperation(description = "离线组装转账交易", order = 350, detailDesc = "根据inputs和outputs离线组装跨链转账交易，用于单账户或多账户的跨链转账交易。" +
-            "交易手续费为inputs里本链主资产金额总和，减去outputs里本链主资产总和，加上跨链转账手续费（NULS）")
+    @ApiOperation(description = "Offline assembly transfer transaction", order = 350, detailDesc = "according toinputsandoutputsOffline assembly of cross chain transfer transactions, used for single account or multi account cross chain transfer transactions." +
+            "The transaction fee isinputsThe total amount of main assets in the Li Ben Chain, minusoutputsThe total amount of main assets in the Li Ben Chain, plus cross chain transfer fees（NULS）")
     @Parameters({
-            @Parameter(parameterName = "transferDto", parameterDes = "转账交易表单", requestType = @TypeDescriptor(value = TransferDto.class))
+            @Parameter(parameterName = "transferDto", parameterDes = "Transfer transaction form", requestType = @TypeDescriptor(value = TransferDto.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "hash", description = "交易hash"),
-            @Key(name = "txHex", description = "交易序列化16进制字符串")
+    @ResponseData(name = "Return value", description = "Return aMapobject", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "hash", description = "transactionhash"),
+            @Key(name = "txHex", description = "Transaction serialization16Hexadecimal Strings")
     }))
     public RpcResult createCrossTxOffline(List<Object> params) {
         List<Map> inputList, outputList;
@@ -749,12 +749,12 @@ public class TransactionController {
 
 
     @RpcMethod("calcTransferTxFee")
-    @ApiOperation(description = "计算离线创建转账交易所需手续费", order = 351)
+    @ApiOperation(description = "Calculate the transaction fee required for offline creation of transfer transactions", order = 351)
     @Parameters({
-            @Parameter(parameterName = "TransferTxFeeDto", parameterDes = "转账交易手续费", requestType = @TypeDescriptor(value = TransferTxFeeDto.class))
+            @Parameter(parameterName = "TransferTxFeeDto", parameterDes = "Transfer transaction fees", requestType = @TypeDescriptor(value = TransferTxFeeDto.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", description = "交易手续费"),
+    @ResponseData(name = "Return value", description = "Return aMapobject", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "Transaction fees"),
     }))
     public RpcResult calcTransferTxFee(List<Object> params) {
         int addressCount, fromLength, toLength;
@@ -802,12 +802,12 @@ public class TransactionController {
     }
 
     @RpcMethod("calcCrossTxFee")
-    @ApiOperation(description = "计算离线创建跨链转账交易所需手续费", order = 351)
+    @ApiOperation(description = "Calculate the transaction fee required for offline creation of cross chain transfer transactions", order = 351)
     @Parameters({
-            @Parameter(parameterName = "TransferTxFeeDto", parameterDes = "转账交易手续费", requestType = @TypeDescriptor(value = TransferTxFeeDto.class))
+            @Parameter(parameterName = "TransferTxFeeDto", parameterDes = "Transfer transaction fees", requestType = @TypeDescriptor(value = TransferTxFeeDto.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", description = "交易手续费"),
+    @ResponseData(name = "Return value", description = "Return aMapobject", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "Transaction fees"),
     }))
     public RpcResult calcCrossTxFee(List<Object> params) {
         int addressCount, fromLength, toLength;
@@ -846,14 +846,14 @@ public class TransactionController {
     }
 
     @RpcMethod("createMultiSignTransferTxOffline")
-    @ApiOperation(description = "离线组装转账交易", order = 352, detailDesc = "根据inputs和outputs离线组装转账交易，用于单账户或多账户的转账交易。" +
-            "交易手续费为inputs里本链主资产金额总和，减去outputs里本链主资产总和")
+    @ApiOperation(description = "Offline assembly transfer transaction", order = 352, detailDesc = "according toinputsandoutputsOffline assembly transfer transaction, used for single account or multi account transfer transactions." +
+            "The transaction fee isinputsThe total amount of main assets in the Li Ben Chain, minusoutputsThe total amount of main assets in the Li Ben Chain")
     @Parameters({
-            @Parameter(parameterName = "transferDto", parameterDes = "转账交易表单", requestType = @TypeDescriptor(value = MultiSignTransferDto.class))
+            @Parameter(parameterName = "transferDto", parameterDes = "Transfer transaction form", requestType = @TypeDescriptor(value = MultiSignTransferDto.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "hash", description = "交易hash"),
-            @Key(name = "txHex", description = "交易序列化16进制字符串")
+    @ResponseData(name = "Return value", description = "Return aMapobject", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "hash", description = "transactionhash"),
+            @Key(name = "txHex", description = "Transaction serialization16Hexadecimal Strings")
     }))
     public RpcResult createMultiSignTransferTxOffline(List<Object> params) {
         List<String> pubKeys;
@@ -922,12 +922,12 @@ public class TransactionController {
     }
 
     @RpcMethod("calcMultiSignTransferTxFee")
-    @ApiOperation(description = "计算离线创建转账交易所需手续费", order = 353)
+    @ApiOperation(description = "Calculate the transaction fee required for offline creation of transfer transactions", order = 353)
     @Parameters({
-            @Parameter(parameterName = "MultiSignTransferTxFeeDto", parameterDes = "转账交易手续费", requestType = @TypeDescriptor(value = MultiSignTransferTxFeeDto.class))
+            @Parameter(parameterName = "MultiSignTransferTxFeeDto", parameterDes = "Transfer transaction fees", requestType = @TypeDescriptor(value = MultiSignTransferTxFeeDto.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", description = "交易手续费"),
+    @ResponseData(name = "Return value", description = "Return aMapobject", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "Transaction fees"),
     }))
     public RpcResult calcMultiSignTransferTxFee(List<Object> params) {
         int pubKeyCount, fromLength, toLength;

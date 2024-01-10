@@ -35,7 +35,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 线程任务管理
+ * Thread Task Management
  * threads   manager
  *
  * @author lan
@@ -100,7 +100,7 @@ public class TaskManager extends BaseManager {
     }
 
     /**
-     * 启动时间同步线程
+     * Start time synchronization thread
      * Start the time synchronization thread.
      */
     private void timeServiceThreadStart() {

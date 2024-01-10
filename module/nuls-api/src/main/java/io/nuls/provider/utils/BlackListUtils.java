@@ -25,9 +25,9 @@
 //    Config config;
 //
 //    /**
-//     * 是否不在黑名单中
+//     * Are you not on the blacklist
 //     * @param address
-//     * @return 黑名单中存在返回false
+//     * @return There are returns in the blacklistfalse
 //     */
 //    public boolean isPass(String address){
 //        return !blackList.contains(address);
@@ -36,7 +36,7 @@
 //    @Override
 //    public void afterPropertiesSet() throws NulsException {
 //        if(StringUtils.isBlank(config.getBlackListPath())){
-//            Log.error("未配置黑名单地址");
+//            Log.error("No blacklist address configured");
 //            System.exit(0);
 //        }
 //        try {
@@ -47,9 +47,9 @@
 //                blackList.add(line);
 //            }
 //            buff.close();
-//            Log.info("初始化黑名单完成，共记录{}个黑名单地址", blackList.size());
+//            Log.info("Blacklist initialization completed, recorded in total{}Blacklisted addresses", blackList.size());
 //        } catch (FileNotFoundException e) {
-//            Log.error("黑名单地址错误，文件不存在");
+//            Log.error("Blacklist address error, file does not exist");
 //            System.exit(0);
 //        } catch (IOException e) {
 //            e.printStackTrace();

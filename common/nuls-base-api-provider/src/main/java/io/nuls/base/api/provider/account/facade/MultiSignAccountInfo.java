@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * @Author: zhoulijun
  * @Time: 2019-07-23 17:05
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class MultiSignAccountInfo {
 

@@ -5,7 +5,7 @@ import io.nuls.core.core.ioc.SpringLiteContext;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-20 10:18
- * @Description: 测试用例链
+ * @Description: Test case chain
  */
 public abstract class TestCaseChain extends BaseTestCase<Object,Object> {
 

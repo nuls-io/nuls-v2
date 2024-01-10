@@ -12,47 +12,47 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class StringUtils {
 
     /**
-     * 判断字符串是否为空（null或空字符串）
+     * Check if the string is empty（nullOr an empty string）
      *
-     * @param str 字符串
-     * @return 验证结果
+     * @param str character string
+     * @return Verification results
      */
     public static boolean isBlank(String str) {
         return null == str || str.trim().length() == 0;
     }
 
     /**
-     * 判断字符串是否为null
+     * Determine if the string isnull
      *
-     * @param str 字符串
-     * @return 验证结果
+     * @param str character string
+     * @return Verification results
      */
     public static boolean isNull(String str) {
         return null == str || str.trim().length() == 0 || "null".equalsIgnoreCase(str.trim());
     }
 
     /**
-     * 判断字符串是否不为空（null或空字符串）
+     * Check if the string is not empty（nullOr an empty string）
      *
-     * @param str 字符串
-     * @return 验证结果
+     * @param str character string
+     * @return Verification results
      */
     public static boolean isNotBlank(String str) {
         return !isBlank(str);
     }
 
     /**
-     * 判断字符串是否不为null
+     * Check if the string is notnull
      *
-     * @param str 字符串
-     * @return 验证结果
+     * @param str character string
+     * @return Verification results
      */
     public static boolean isNotNull(String str) {
         return !isNull(str);
     }
 
     /**
-     * 获取一个UUID
+     * Get aUUID
      *
      * @return UUID
      */
@@ -61,20 +61,20 @@ public class StringUtils {
     }
 
     /**
-     * 去掉字符串前后空格+验证是否为null
+     * Remove spaces before and after the string+Verify if it isnull
      *
-     * @param str 字符串
-     * @return 去掉前后空个的字符串
+     * @param str character string
+     * @return Remove empty strings before and after
      */
     public static String strTrim(String str) {
         return (isNull(str)) ? null : str.trim();
     }
 
     /**
-     * 是否为正整数
+     * Is it a positive integer
      *
-     * @param str 字符串
-     * @return 验证结果
+     * @param str character string
+     * @return Verification results
      */
     public static boolean isNumeric(String str) {
         for (int i = 0, len = str.length(); i < len; i++) {
@@ -89,10 +89,10 @@ public class StringUtils {
     private static final Pattern NUMBER_PATTERN = Pattern.compile("-?[0-9]+(\\.[0-9]+)?");
 
     /**
-     * 是否为数字
+     * Is it a number
      *
-     * @param str 字符串
-     * @return 验证结果
+     * @param str character string
+     * @return Verification results
      */
     public static boolean isNumber(String str) {
         if (StringUtils.isBlank(str)) {
@@ -105,10 +105,10 @@ public class StringUtils {
     private static final Pattern GT_ZERO_NUMBER_PATTERN = Pattern.compile("([1-9][0-9]*(\\.\\d+)?)|(0\\.\\d*[1-9]+0*)");
 
     /**
-     * 验证是大于0的数(包含小数,不限位数)
+     * Verification is greater than0The number of(Contains decimals,Unlimited number of digits)
      *
-     * @param str 字符串
-     * @return 验证结果
+     * @param str character string
+     * @return Verification results
      */
     public static boolean isNumberGtZero(String str) {
         if (StringUtils.isBlank(str)) {
@@ -119,10 +119,10 @@ public class StringUtils {
     }
 
     /**
-     * 去掉小数多余的.与0
+     * Remove excess decimals.Related to0
      *
-     * @param s 字符串
-     * @return 转换结果
+     * @param s character string
+     * @return Conversion results
      */
     private static String subZeroAndDot(String s) {
         if (s.indexOf(".") > 0) {
@@ -135,11 +135,11 @@ public class StringUtils {
     private static final Pattern NULS_PATTERN = Pattern.compile("([1-9]\\d*(\\.\\d{1,8})?)|(0\\.\\d{1,8})");
 
     /**
-     * 匹配是否是nuls
-     * 验证是大于0的数(包括小数, 小数点后有效位超过8位则不合法)
+     * Is the match correctnuls
+     * Verification is greater than0The number of(Including decimals, More than significant decimal places8Illegal position)
      *
-     * @param str 字符串
-     * @return 验证结果
+     * @param str character string
+     * @return Verification results
      */
     public static boolean isNuls(String str) {
         if (StringUtils.isBlank(str)) {
@@ -153,10 +153,10 @@ public class StringUtils {
     private static final Pattern GT_ZERO_NUMBER_LIMIT_2_PATTERN = Pattern.compile("([1-9]\\d*(\\.\\d{1,2})?)|(0\\.\\d{1,2})");
 
     /**
-     * 验证是大于0的数(包括小数, 小数点后有效位超过2位则不合法)
+     * Verification is greater than0The number of(Including decimals, More than significant decimal places2Illegal position)
      *
-     * @param str 字符串
-     * @return 验证结果
+     * @param str character string
+     * @return Verification results
      */
     public static boolean isNumberGtZeroLimitTwo(String str) {
         if (StringUtils.isBlank(str)) {
@@ -169,33 +169,33 @@ public class StringUtils {
 
 
     /**
-     * 字符串转为字节数组
+     * Convert string to byte array
      *
-     * @param value 字符串
-     * @return 转换得到的字节数组
+     * @param value character string
+     * @return Converted byte array
      */
     public static byte[] bytes(String value) {
         return (value == null) ? null : value.getBytes(UTF_8);
     }
 
     /**
-     * 比较两个非空(不是null，不是空串、不是空白)字符串是否"相等"
+     * Compare two non empty values(No, it's notnull, not an empty string、Not blank)Is the string"equal"
      *
-     * @param one      第一个需要比较的字符串
-     * @param theOther 另一个参与比较的字符串
-     * @return 当 两个字符串 都不为空串 且 内容完全一致 (剔除首尾空白后、大小写也一致)时返回 true
+     * @param one      The first string to be compared
+     * @param theOther Another string participating in the comparison
+     * @return When Two strings None of them are empty strings And The content is completely consistent (After removing the first and last blanks、Same capitalization)Time return true
      */
     public static boolean equals(String one, String theOther) {
         return equals(one, theOther, true, false);
     }
 
     /**
-     * 比较两个字符串是否 "相等"
+     * Compare two strings to see if "equal"
      *
-     * @param one         参与比较的第一个字符串
-     * @param theOther    参与比较的另一个字符串
-     * @param escapeSpace 是否需要剔除首尾空白 ( true 表示需要剔除首尾空白，false 表示不剔除 )
-     * @param ignoreCase  是否忽略大小写 ( true 表示忽略大小写 ，false 表示不忽略大小写 )
+     * @param one         The first string participating in the comparison
+     * @param theOther    Another string participating in the comparison
+     * @param escapeSpace Do you need to remove the first and last blanks ( true Indicates the need to remove first and last blanks,false Indicates not to exclude )
+     * @param ignoreCase  Do you want to ignore capitalization ( true Indicates ignoring capitalization ,false Indicates that case is not ignored )
      * @return
      */
     public static boolean equals(String one, String theOther, boolean escapeSpace, boolean ignoreCase) {

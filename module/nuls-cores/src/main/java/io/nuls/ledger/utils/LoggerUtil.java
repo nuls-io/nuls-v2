@@ -38,7 +38,7 @@ import java.util.Map;
  **/
 public class LoggerUtil {
     /**
-     * 日志
+     * journal
      */
     private static Map<String, NulsLogger> loggerMap = new HashMap<>();
     public static final NulsLogger COMMON_LOG = LoggerBuilder.getLogger(ModuleE.Constant.LEDGER);

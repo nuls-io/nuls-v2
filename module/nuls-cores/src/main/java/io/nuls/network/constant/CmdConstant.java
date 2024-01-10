@@ -31,88 +31,88 @@ package io.nuls.network.constant;
  **/
 public interface CmdConstant {
     /**
-     * cmd 获取网络时间
+     * cmd Get network time
      */
     String CMD_NW_CURRENT_TIME = "nw_currentTimeMillis";
     /**
-     * 注册网络指令协议
+     * Register Network Instruction Protocol
      */
     String CMD_NW_PROTOCOL_REGISTER = "nw_protocolRegister";
     String CMD_NW_PROTOCOL_PRIORITY_REGISTER = "protocolRegisterWithPriority";
     /**
-     * 广播消息
+     * Broadcast messages
      */
     String CMD_NW_BROADCAST = "nw_broadcast";
 
     String CMD_NW_CROSS_RANDOM_BROADCAST = "nw_crossRandomBroadcast";
     /**
-     * 发送消息
+     * send message
      */
     String CMD_NW_SEND_PEERS_MSG = "nw_sendPeersMsg";
 
     /**
-     * 获取网络信息
+     * Obtain network information
      */
     String CMD_NW_INFO = "nw_info";
 
     /**
-     * 查看网络节点
+     * View network nodes
      */
     String CMD_NW_NODES = "nw_nodes";
     /**
-     * 创建网络组
+     * Create a network group
      */
     String CMD_NW_CREATE_NODEGROUP = "nw_createNodeGroup";
     /**
-     * 激活跨链网络
+     * Activate cross chain network
      */
     String CMD_NW_ACTIVE_CROSS = "nw_activeCross";
     /**
-     * 获取网络组信息
+     * Get network group information
      */
     String CMD_NW_GET_GROUP_BY_CHAINID = "nw_getGroupByChainId";
     /**
-     * 获取连接信息
+     * Get connection information
      */
     String CMD_NW_GET_CHAIN_CONNECT_AMOUNT = "nw_getChainConnectAmount";
     /**
-     * 删除节点组
+     * Delete node group
      */
     String CMD_NW_GET_DELETE_NODEGROUP = "nw_delNodeGroup";
     /**
-     * 获取种子节点
+     * Get Seed Node
      */
     String CMD_NW_GET_SEEDS = "nw_getSeeds";
 
     String CMD_NW_GET_MAIN_NET_MAGIC_NUMBER = "nw_getMainMagicNumber";
     /**
-     * 重新连接
+     * Reconnect
      */
     String CMD_NW_RECONNECT = "nw_reconnect";
     /**
-     * 获取网络组信息
+     * Get network group information
      */
     String CMD_NW_GET_GROUPS = "nw_getGroups";
     /**
-     * 添加可连接节点信息
+     * Add connectable node information
      */
     String CMD_NW_ADD_NODES = "nw_addNodes";
     /**
-     * 删除节点信息
+     * Delete node information
      */
     String CMD_NW_DEL_NODES = "nw_delNodes";
     /**
-     * 获取节点信息
+     * Obtain node information
      */
     String CMD_NW_GET_NODES = "nw_getNodes";
     /**
-     * 更新节点信息
+     * Update node information
      */
     String CMD_NW_UPDATE_NODE_INFO = "nw_updateNodeInfo";
 
 
     /**
-     * 模块统一消息处理器RPC接口
+     * Module Unified Message ProcessorRPCinterface
      */
      String CMD_MSG_PROCESS = "msgProcess";
 }

@@ -34,13 +34,13 @@ import io.nuls.provider.model.form.Base;
 /**
  * @author Niels
  */
-@ApiModel(description = "删除共识节点表单数据")
+@ApiModel(description = "Delete consensus node form data")
 public class StopAgentForm extends Base {
 
-    @ApiModelProperty(description = "共识节点地址", required = true)
+    @ApiModelProperty(description = "Consensus node address", required = true)
     private String address;
 
-    @ApiModelProperty(description = "密码", required = true)
+    @ApiModelProperty(description = "password", required = true)
     private String password;
 
     public String getAddress() {

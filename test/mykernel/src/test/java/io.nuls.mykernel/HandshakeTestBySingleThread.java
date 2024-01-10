@@ -42,13 +42,13 @@ public class HandshakeTestBySingleThread {
 
 
             /*
-             * 和指定地址同步
+             * Synchronize with specified address
              * */
             ResponseMessageProcessor.syncKernel(url);
 
             long time = System.currentTimeMillis();
             ResponseMessageProcessor.handshake(url);
-            System.out.println("单次握手耗时：" + (System.currentTimeMillis() - time));
+            System.out.println("Single handshake time consumption：" + (System.currentTimeMillis() - time));
 
             long now = System.nanoTime();
 
@@ -61,7 +61,7 @@ public class HandshakeTestBySingleThread {
             long timeDiff = System.nanoTime() - now;
             float rate = timeDiff / (float) count;
 
-            System.out.println("请求 " + count + " 次耗时：" + (timeDiff / 1000000) + " ms , 平均每次请求耗时：" + (rate / 1000000) + " ms");
+            System.out.println("request " + count + " Secondary time consumption：" + (timeDiff / 1000000) + " ms , Average time spent per request：" + (rate / 1000000) + " ms");
 
             System.out.println("t1 : " + TimeContainer.t1 / 1000000d + " ms");
             System.out.println("t2 : " + TimeContainer.t2 / 1000000d + " ms");

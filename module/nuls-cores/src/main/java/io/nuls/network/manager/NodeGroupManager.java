@@ -39,7 +39,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * （节点组）管理
+ * （Node group）Administration
  * node group  manager
  *
  * @author lan
@@ -71,7 +71,7 @@ public class NodeGroupManager extends BaseManager {
     }
 
     /**
-     * 获取可分享的节点信息
+     * Obtain shareable node information
      *
      * @param node
      * @return
@@ -82,19 +82,19 @@ public class NodeGroupManager extends BaseManager {
         List<IpAddressShare> addressList = new ArrayList<>();
         List nodesList = new ArrayList();
         if (node.isCrossConnect()) {
-            //跨链节点的请求
-            //取本地网络地址去支持跨链连接,跨链的请求地址取的都是对方的本地网络IP
+            //Cross chain node requests
+            //Taking local network addresses to support cross chain connections,Cross chain request addresses are all taken from the other party's local networkIP
             if (networkConfig.isMoonNode()) {
-                //是主网节点，回复
+                //It is the main network node, reply
                 nodesList.addAll(NodeGroupManager.getInstance().getMoonMainNet().getLocalShareToCrossCanConnectNodes().values());
             } else {
                 nodesList.addAll(node.getNodeGroup().getLocalShareToCrossCanConnectNodes().values());
             }
         } else {
-            //非跨链节点的请求,分2种，一种是获取外界网络的跨链地址，一种是自身网络地址
+            //Non cross chain node requests,branch2There are two types: one is to obtain cross chain addresses from external networks, and the other is to obtain one's own network address
             NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByChainId(getChainId);
             if (isCrossAddress) {
-                //主网 跨链网络组
+                //Main network Cross chain network group
                 nodesList.addAll(nodeGroup.getCrossNodeContainer().getAllCanShareNodes().values());
             } else {
                 nodesList.addAll(nodeGroup.getLocalNetNodeContainer().getAllCanShareNodes().values());
@@ -109,7 +109,7 @@ public class NodeGroupManager extends BaseManager {
     private void addAddress(Collection<Node> nodes, List<IpAddressShare> list, String fromIp, boolean isCross) {
         for (Node peer : nodes) {
             /*
-             * 排除自身连接信息，比如组网A=====B，A向B请求地址，B给的地址列表需排除A地址。
+             * Exclude self connection information, such as networkingA=====B,AtowardsBRequest address,BThe given address list needs to be excludedAAddress.
              * Exclude self-connection information, such as networking A=====B,
              * A requests an address from B, and the address list given by B excludes the A address.
              */
@@ -117,7 +117,7 @@ public class NodeGroupManager extends BaseManager {
                 continue;
             }
             /*
-             * 只有主动连接的节点地址才可使用。
+             * Only actively connected node addresses can be used.
              * Only active node addresses are available for use.
              */
             if (Node.OUT == peer.getType()) {
@@ -206,25 +206,25 @@ public class NodeGroupManager extends BaseManager {
         NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
         NulsCoresConfig networkConfig = SpringLiteContext.getBean(NulsCoresConfig.class);
         /*
-         * 获取配置的信息，进行自有网络的nodeGroup配置初始化
+         * Obtain configuration information for self owned networknodeGroupConfiguration initialization
          * Obtain the configuration information and initialize the nodeGroup configuration of the own netw
          */
         NodeGroup nodeGroup = new NodeGroup();
         nodeGroupManager.addNodeGroup(networkConfig.getChainId(), nodeGroup);
 
         /*
-         *友链跨链部分等待跨链模块的初始化调用，卫星链的跨链group通过数据库进行初始化
-         *获取数据库中已有的nodeGroup跨链网络组信息
+         *The cross chain part of the friend chain waits for the initialization call of the cross chain module, and the cross chain of the satellite chaingroupInitialize through database
+         *Retrieve existing data from the databasenodeGroupCross chain network group information
          *  Friends chain cross-chain part waiting for the initialization call of the cross-chain module, the cross-chain group of the satellite chain is initialized through the database
          * Get the existing nodeGroup cross-chain network group information in the database
          */
         List<NodeGroup> list = storageManager.getAllNodeGroupFromDb();
         for (NodeGroup dbNodeGroup : list) {
             if (dbNodeGroup.getChainId() == nodeGroup.getChainId()) {
-                //配置的group优先,数据库存储的忽略
+                //Configuredgroupfirst,Ignoring database storage
                 continue;
             }
-            //主网的默认跨链网络组属性active
+            //The default cross chain network group properties of the main networkactive
             dbNodeGroup.setCrossActive(true);
             nodeGroupManager.addNodeGroup(dbNodeGroup.getChainId(), dbNodeGroup);
         }

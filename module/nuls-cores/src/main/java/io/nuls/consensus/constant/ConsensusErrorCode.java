@@ -4,7 +4,7 @@ import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.constant.ErrorCode;
 
 /**
- * 共识模块错误码对应类
+ * Consensus module error code corresponding class
  * @author tag
  * 2018/11/12
  * */

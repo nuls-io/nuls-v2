@@ -85,7 +85,7 @@ public class NetTxProcessTask implements Runnable {
                 }
                 List<TransactionNetPO> txNetList = new ArrayList<>(TxConstant.NET_TX_PROCESS_NUMBER_ONCE);
                 chain.getUnverifiedQueue().drainTo(txNetList, TxConstant.NET_TX_PROCESS_NUMBER_ONCE);
-                //分组 调验证器
+                //grouping Verifier
                 Map<String, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
                 Iterator<TransactionNetPO> it = txNetList.iterator();
                 int packableTxMapDataSize = 0;
@@ -95,9 +95,9 @@ public class NetTxProcessTask implements Runnable {
                 while (it.hasNext()) {
                     TransactionNetPO txNetPO = it.next();
                     Transaction tx = txNetPO.getTx();
-                    //待打包队列map超过预定值,则不再接受处理交易,直接转发交易完整交易
+                    //To be packaged queuemapExceeding the predetermined value,We will no longer accept transaction processing,Direct forwarding of complete transactions
                     if (TxUtil.discardTx(chain, packableTxMapDataSize, tx)) {
-                        //待打包队列map超过预定值, 不处理转发失败的情况
+                        //To be packaged queuemapExceeding the predetermined value, Do not handle forwarding failures
                         String hash = tx.getHash().toHex();
                         NetworkCall.broadcastTx(chain, tx, TxDuplicateRemoval.getExcludeNode(hash));
                         it.remove();
@@ -110,15 +110,15 @@ public class NetTxProcessTask implements Runnable {
                 if (txNetList.isEmpty()) {
                     continue;
                 }
-                //保存到rocksdb
+                //Save torocksdb
                 unconfirmedTxStorageService.putTxList(chain.getChainId(), txNetList);
                 for (TransactionNetPO txNet : txNetList) {
                     Transaction tx = txNet.getTx();
                     if (chain.getPackaging().get()) {
-                        //当节点是出块节点时, 才将交易放入待打包队列
+                        //When a node is a block out node, Only then will the transaction be placed in the queue to be packaged
                         packablePool.add(chain, tx);
                     }
-                    //网络交易不处理转发失败的情况
+                    //Network transactions do not handle forwarding failures
                     String hash = tx.getHash().toHex();
                     NetworkCall.forwardTxHash(chain, tx.getHash(), TxDuplicateRemoval.getExcludeNode(hash));
                 }
@@ -141,7 +141,7 @@ public class NetTxProcessTask implements Runnable {
             } catch (NulsException e) {
                 chain.getLogger().error("Net new tx verify failed -txModuleValidator Exception:{}, module-code:{}, count:{} , return count:{}",
                         BaseConstant.TX_VALIDATOR, moduleCode, moduleList.size(), txHashList.size());
-                //出错则删掉整个模块的交易
+                //If there is an error, delete the entire transaction of the module
                 Iterator<TransactionNetPO> its = txNetList.iterator();
                 while (its.hasNext()) {
                     Transaction tx = its.next().getTx();
@@ -157,7 +157,7 @@ public class NetTxProcessTask implements Runnable {
             }
             chain.getLogger().error("[Net new tx verify failed] module:{}, module-code:{}, count:{} , return count:{}",
                     BaseConstant.TX_VALIDATOR, moduleCode, moduleList.size(), txHashList.size());
-            /**冲突检测有不通过的, 执行清除和未确认回滚 从txNetList删除*/
+            /**Conflict detection has failed, Execute clear and unconfirmed rollback fromtxNetListdelete*/
             for (int i = 0; i < txHashList.size(); i++) {
                 String hash = txHashList.get(i);
                 Iterator<TransactionNetPO> its = txNetList.iterator();
@@ -189,7 +189,7 @@ public class NetTxProcessTask implements Runnable {
             while (it.hasNext()) {
                 TransactionNetPO transactionNetPO = it.next();
                 Transaction tx = transactionNetPO.getTx();
-                //去除账本验证失败的交易
+                //Remove transactions with failed ledger verification
                 for (String hash : failHashs) {
                     String hashStr = tx.getHash().toHex();
                     if (hash.equals(hashStr)) {
@@ -197,13 +197,13 @@ public class NetTxProcessTask implements Runnable {
                         continue removeAndGo;
                     }
                 }
-                //去除孤儿交易, 同时把孤儿交易放入孤儿池
+                //Remove orphan transactions, Simultaneously placing orphan transactions into the orphan pool
                 for (String hash : orphanHashs) {
                     String hashStr = tx.getHash().toHex();
                     if (hash.equals(hashStr)) {
-                        //孤儿交易
+                        //Orphan Trading
                         List<TransactionNetPO> chainOrphan = chain.getOrphanList();
-                        //孤儿交易集合数据总大小
+                        //The total size of orphan transaction set data
                         if (chain.getOrphanListDataSize().get() >= TxConstant.ORPHAN_LIST_MAX_DATA_SIZE) {
                             it.remove();
                             break;

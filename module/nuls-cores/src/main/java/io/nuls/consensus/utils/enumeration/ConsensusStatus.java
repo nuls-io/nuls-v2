@@ -27,7 +27,7 @@
 package io.nuls.consensus.utils.enumeration;
 
 /**
- * 共识状态枚举类
+ * Consensus state enumeration class
  * Consensus State Enumeration Class
  *
  * @author tag
@@ -36,7 +36,7 @@ package io.nuls.consensus.utils.enumeration;
 public enum ConsensusStatus {
 
     /*
-    警告，以下顺序不能调整，否则某些地方的判断会出错
+    Warning, the following order cannot be adjusted, otherwise certain judgments may be incorrect
     Warning, the following order cannot be adjusted, otherwise the judgment in some places may go wrong
     */
 

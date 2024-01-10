@@ -1,6 +1,6 @@
 package io.nuls.consensus.economic.nuls.model.bo;
 /**
- * 轮次相关信息
+ * Round related information
  * Round related information
  *
  * @author tag

@@ -56,7 +56,7 @@ public class ContractMultyTxTest extends BaseQuery {
     public void beforeTest() {
         contractCallContractSendTxTest = new ContractCallContractSendTxTest();
         contractNRC20TokenSendTxTest = new ContractNRC20TokenSendTxTest();
-        // TestAddress.createAccount 生成地址，得到 importPriKey 语句，放入 contractNRC20TokenSendTxTest.importPriKeyTest 中执行
+        // TestAddress.createAccount Generate address, obtain importPriKey Statement, placing contractNRC20TokenSendTxTest.importPriKeyTest Middle execution
     }
 
     @Test
@@ -127,8 +127,8 @@ public class ContractMultyTxTest extends BaseQuery {
     }
 
     /**
-     * 依赖于contractNRC20TokenSendTxTest.transfer()
-     * 35个sender 创建35个NRC20的合约
+     * Dependent oncontractNRC20TokenSendTxTest.transfer()
+     * 35individualsender establish35individualNRC20Contract
      */
     @Test
     public void multyCreateNRC20() throws Exception {
@@ -136,16 +136,16 @@ public class ContractMultyTxTest extends BaseQuery {
             contractNRC20TokenSendTxTest.setSender(address("getToAddress", i));
             contractNRC20TokenSendTxTest.createContract();
         }
-        // 执行后，复制contract module日志的合约地址，赋值给成员变量contractAddress_nrc20X (X -> [0,34])
+        // After execution, copycontract moduleThe contract address of the log, assigned to member variablescontractAddress_nrc20X (X -> [0,34])
     }
 
     /**
-     * 依赖于contractNRC20TokenSendTxTest.transfer()
-     * 35个sender 创建35个可内部调用的合约
+     * Dependent oncontractNRC20TokenSendTxTest.transfer()
+     * 35individualsender establish35Internally callable contracts
      */
     @Test
     public void multyCreateContractCallContract() throws Exception {
-        // 执行后，复制contract module日志的合约地址，赋值给成员变量contractAddressX (X -> [0,34])
+        // After execution, copycontract moduleThe contract address of the log, assigned to member variablescontractAddressX (X -> [0,34])
         for (int i = 0; i < 35; i++) {
             contractCallContractSendTxTest.setSender(address("getToAddress", i));
             contractCallContractSendTxTest.createContract();
@@ -153,7 +153,7 @@ public class ContractMultyTxTest extends BaseQuery {
     }
 
     /**
-     * 35个sender 调用一个NRC20合约，比较时间
+     * 35individualsender Call aNRC20Contract, comparing time
      */
     @Test
     public void multySenderCallOneContract() throws Exception {
@@ -168,7 +168,7 @@ public class ContractMultyTxTest extends BaseQuery {
     }
 
     /**
-     * 35个sender 调用35个NRC20合约，比较时间
+     * 35individualsender call35individualNRC20Contract, comparing time
      */
     @Test
     public void multySenderCallMultyContracts() throws Exception {
@@ -182,7 +182,7 @@ public class ContractMultyTxTest extends BaseQuery {
     }
 
     /**
-     * 35个sender 调用35个NRC20合约，向`contractCallContract`合约转入token
+     * 35individualsender call35individualNRC20Contract, to`contractCallContract`Contract transfertoken
      */
     @Test
     public void multySenderTokenTransferToMultyContracts() throws Exception {
@@ -196,7 +196,7 @@ public class ContractMultyTxTest extends BaseQuery {
     }
 
     /**
-     * 35个sender 每7个调用一个合约（一共5个合约），比较时间
+     * 35individualsender each7Call a contract one by one（altogether5Contracts）Compare time
      */
     @Test
     public void multySenderCallFiveContracts() throws Exception {
@@ -212,7 +212,7 @@ public class ContractMultyTxTest extends BaseQuery {
     }
 
     /**
-     * 35个sender 每5个调用一个合约（一共7个合约），方法为内部调用，内部调用的合约在外层7个合约当中，确保能够出现内部调用与外层调用冲突
+     * 35individualsender each5Call a contract one by one（altogether7Contracts）The method is an internal call, and the contract for internal calls is on the outer layer7Ensure that conflicts between internal and external calls can occur in each contract
      */
     @Test
     public void multySenderCallSevenContracts() throws Exception {

@@ -47,7 +47,7 @@ import java.util.Map;
 
 /**
  * Created by wangkun23 on 2018/11/22.
- * 校验rpc接口
+ * checkrpcinterface
  *
  * @author lanjinsheng
  */
@@ -63,23 +63,23 @@ public class ValidatorCmd extends BaseLedgerCmd {
 
     /**
      * validate coin entity
-     * 进行nonce-hash校验，进行可用余额校验
+     * carry outnonce-hashVerify and perform available balance verification
      *
      * @param params
      * @return
      */
 
     @CmdAnnotation(cmd = CmdConstant.CMD_VERIFY_COINDATA_BATCH_PACKAGED, version = 1.0,
-            description = "打包交易校验")
+            description = "Package transaction verification")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "txList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "[]交易列表（HEX值列表）")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Running ChainId,Value range[1-65535]"),
+            @Parameter(parameterName = "txList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "[]Transaction List（HEXValue List）")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象",
+    @ResponseData(name = "Return value", description = "Return aMapobject",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-                    @Key(name = "fail", valueType = List.class, valueElement = String.class, description = "校验失败Hash值列表"),
-                    @Key(name = "orphan", valueType = List.class, valueElement = String.class, description = "校验为孤儿的Hash值列表"),
-                    @Key(name = "success", valueType = List.class, valueElement = String.class, description = "校验成功的Hash值列表")
+                    @Key(name = "fail", valueType = List.class, valueElement = String.class, description = "Verification failedHashValue List"),
+                    @Key(name = "orphan", valueType = List.class, valueElement = String.class, description = "Verified as orphanedHashValue List"),
+                    @Key(name = "success", valueType = List.class, valueElement = String.class, description = "Verified successfullyHashValue List")
             })
     )
     public Response verifyCoinDataBatchPackaged(Map params) {
@@ -132,21 +132,21 @@ public class ValidatorCmd extends BaseLedgerCmd {
 
     /**
      * validate coin entity
-     * 进行nonce-hash校验，进行单笔交易的未确认校验
-     * 用于第三方打包交易校验
+     * carry outnonce-hashVerification, conducting unconfirmed verification for a single transaction
+     * Used for third-party packaging transaction verification
      *
      * @param params
      * @return
      */
     @CmdAnnotation(cmd = CmdConstant.CMD_VERIFY_COINDATA, version = 1.0,
-            description = "未确认交易校验")
+            description = "Unconfirmed transaction verification")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "tx", requestType = @TypeDescriptor(value = String.class), parameterDes = "交易Hex值")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Running ChainId,Value range[1-65535]"),
+            @Parameter(parameterName = "tx", requestType = @TypeDescriptor(value = String.class), parameterDes = "transactionHexvalue")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象",
+    @ResponseData(name = "Return value", description = "Return aMapobject",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-                    @Key(name = "orphan", valueType = Boolean.class, description = "true孤儿，false非孤儿")
+                    @Key(name = "orphan", valueType = Boolean.class, description = "trueOrphans,falseNon orphan")
             })
     )
     public Response verifyCoinData(Map params) {
@@ -182,20 +182,20 @@ public class ValidatorCmd extends BaseLedgerCmd {
     }
 
     /**
-     * 回滚打包确认交易状态
+     * Rolling back packaging to confirm transaction status
      *
      * @param params
      * @return
      */
     @CmdAnnotation(cmd = CmdConstant.CMD_ROLLBACKTX_VALIDATE_STATUS, version = 1.0,
-            description = "回滚打包校验状态")
+            description = "Rollback packaging verification status")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "tx", requestType = @TypeDescriptor(value = String.class), parameterDes = "交易Hex值")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Running ChainId,Value range[1-65535]"),
+            @Parameter(parameterName = "tx", requestType = @TypeDescriptor(value = String.class), parameterDes = "transactionHexvalue")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象",
+    @ResponseData(name = "Return value", description = "Return aMapobject",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-                    @Key(name = "value", valueType = Boolean.class, description = "true回滚成功，false回滚失败")
+                    @Key(name = "value", valueType = Boolean.class, description = "trueRollback successful,falseRollback failed")
             })
     )
     public Response rollbackTxValidateStatus(Map params) {
@@ -214,7 +214,7 @@ public class ValidatorCmd extends BaseLedgerCmd {
                 return failed("txHex is invalid");
             }
             LoggerUtil.logger(chainId).debug("rollbackrTxValidateStatus chainId={},txHash={}", chainId, tx.getHash().toHex());
-            //未确认回滚已被调用方处理过了
+            //Unconfirmed rollback has been processed by the caller
             if (coinDataValidator.rollbackTxValidateStatus(chainId, tx)) {
                 value = true;
             }
@@ -234,13 +234,13 @@ public class ValidatorCmd extends BaseLedgerCmd {
      * @return
      */
     @CmdAnnotation(cmd = CmdConstant.CMD_BATCH_VALIDATE_BEGIN, version = 1.0,
-            description = "开始批量打包:状态通知")
+            description = "Start bulk packaging:Status notification")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Running ChainId,Value range[1-65535]")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象",
+    @ResponseData(name = "Return value", description = "Return aMapobject",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-                    @Key(name = "value", valueType = Boolean.class, description = "true处理成功，false处理失败")
+                    @Key(name = "value", valueType = Boolean.class, description = "trueSuccessfully processed,falseProcessing failed")
             })
     )
     public Response batchValidateBegin(Map params) {
@@ -259,21 +259,21 @@ public class ValidatorCmd extends BaseLedgerCmd {
     }
 
     /**
-     * 接收到peer区块时调用验证
+     * ReceivedpeerCalling validation on block
      *
      * @param params
      * @return
      */
     @CmdAnnotation(cmd = CmdConstant.CMD_BLOCK_VALIDATE, version = 1.0, priority = CmdPriority.HIGH,
-            description = "整区块入账校验")
+            description = "Whole block accounting verification")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "txList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "[]交易Hex值列表"),
-            @Parameter(parameterName = "blockHeight", requestType = @TypeDescriptor(value = long.class), parameterDes = "区块高度")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Running ChainId,Value range[1-65535]"),
+            @Parameter(parameterName = "txList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "[]transactionHexValue List"),
+            @Parameter(parameterName = "blockHeight", requestType = @TypeDescriptor(value = long.class), parameterDes = "block height")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象",
+    @ResponseData(name = "Return value", description = "Return aMapobject",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-                    @Key(name = "value", valueType = Boolean.class, description = "true处理成功，false处理失败")
+                    @Key(name = "value", valueType = Boolean.class, description = "trueSuccessfully processed,falseProcessing failed")
             })
     )
     public Response blockValidate(Map params) {

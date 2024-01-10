@@ -20,7 +20,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 /**
- * 数据库相关操作测试
+ * Database related operation testing
  *
  * @author tag
  * 2018/12/1

@@ -37,7 +37,7 @@ import java.math.BigInteger;
 import java.util.*;
 
 /**
- * 多签账户相关交易接口实现类
+ * Implementation class for multi account related transaction interfaces
  * Implementation Class of Multi-Sign Account Related Transaction Interface
  *
  * @author tag

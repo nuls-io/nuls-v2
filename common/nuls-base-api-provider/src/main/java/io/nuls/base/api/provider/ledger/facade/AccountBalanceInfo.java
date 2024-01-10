@@ -5,7 +5,7 @@ import java.math.BigInteger;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-08 15:39
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class AccountBalanceInfo {
 

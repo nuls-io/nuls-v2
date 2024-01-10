@@ -24,7 +24,7 @@ import io.nuls.consensus.utils.manager.PunishManager;
 import java.util.*;
 
 /**
- * 红牌交易处理器
+ * Red card trading processor
  * @author tag
  * @date 2019/6/1
  */
@@ -71,7 +71,7 @@ public class RedPunishProcessor implements TransactionProcessor {
                 }
                 String addressHex = HexUtil.encode(redPunishData.getAddress());
                 /*
-                 * 重复的红牌交易不打包
+                 * Repeated red card transactions are not packaged
                  * */
                 if (!addressHexSet.add(addressHex)) {
                     invalidTxList.add(tx);
@@ -111,7 +111,7 @@ public class RedPunishProcessor implements TransactionProcessor {
                 commitResult = false;
             }
         }
-        //回滚已提交成功的交易
+        //Roll back transactions that have been successfully submitted
         if(!commitResult){
             for (Transaction rollbackTx:commitSuccessList) {
                 try {
@@ -147,7 +147,7 @@ public class RedPunishProcessor implements TransactionProcessor {
                 rollbackResult = false;
             }
         }
-        //保存已回滚成功的交易
+        //Save successfully rolled back transactions
         if(!rollbackResult){
             for (Transaction commitTx:rollbackSuccessList) {
                 try {
@@ -162,7 +162,7 @@ public class RedPunishProcessor implements TransactionProcessor {
     }
 
     private boolean verifyV4(Chain chain, RedPunishData punishData){
-        //验证红牌证据正确性
+        //Verify the correctness of red card evidence
         if (punishData.getReasonCode() == PunishReasonEnum.BIFURCATION.getCode()) {
             NulsByteBuffer byteBuffer = new NulsByteBuffer(punishData.getEvidence());
             Set<Long> heightSet = new HashSet<>();
@@ -176,17 +176,17 @@ public class RedPunishProcessor implements TransactionProcessor {
                     chain.getLogger().error(e.getMessage());
                     return false;
                 }
-                //证据是否重复
+                //Is the evidence duplicated
                 if(heightSet.contains(header1.getHeight())){
                     chain.getLogger().error("Bifurcated evidence with duplicate data");
                     return false;
                 }
-                //验证区块头签名是否正确
+                //Verify if the block header signature is correct
                 if (header1.getBlockSignature().verifySignature(header1.getHash()).isFailed() || header2.getBlockSignature().verifySignature(header2.getHash()).isFailed()) {
                     chain.getLogger().error("Signature verification failed in branching evidence");
                     return false;
                 }
-                //区块签名者是否为节点处罚者
+                //Is the block signer a node penalizer
                 Agent agent = agentManager.getAgentByAgentAddress(chain, punishData.getAddress());
                 if(!Arrays.equals(AddressTool.getAddress(header1.getBlockSignature().getPublicKey(), chain.getConfig().getChainId()), agent.getPackingAddress())
                         || !Arrays.equals(AddressTool.getAddress(header2.getBlockSignature().getPublicKey(), chain.getConfig().getChainId()), agent.getPackingAddress())){

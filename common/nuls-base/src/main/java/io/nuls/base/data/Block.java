@@ -44,7 +44,7 @@ public class Block extends BaseNulsData implements Cloneable {
     private List<Transaction> txs;
     private transient List<NulsHash> txHashList;
     /**
-     * 该区块来自哪个节点，主要用于孤儿区块的维护
+     * Which node does this block come from, mainly used for maintaining orphan blocks
      */
     private transient String nodeId;
 
@@ -104,7 +104,7 @@ public class Block extends BaseNulsData implements Cloneable {
     }
 
     //    /**
-//     * 从交易列表中循环取出所有的交易hash，顺序和交易列表保持一致
+//     * Retrieve all transactions from the transaction list in a loophashKeep the order consistent with the transaction list
 //     * Loop through the list of trades to remove all of the trading hash, in the same order as the list of transactions.
 //     */
     public List<NulsHash> getTxHashList() {

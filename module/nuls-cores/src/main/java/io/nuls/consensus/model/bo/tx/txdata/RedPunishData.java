@@ -37,7 +37,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * 红牌惩罚信息类
+ * Red card punishment information category
  * Red Card Punishment Information Category
  *
  * @author tag

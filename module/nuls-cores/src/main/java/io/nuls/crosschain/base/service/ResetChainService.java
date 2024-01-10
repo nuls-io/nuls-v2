@@ -8,7 +8,7 @@ import java.util.Map;
 
 public interface ResetChainService {
     /**
-     * 重置链信息交易初始化批量验证
+     * Reset chain information transaction initialization batch verification
      * @param chainId       chain ID
      * @param txs           cross chain transaction list
      * @param txMap         Consensus Module All Transaction Classification
@@ -19,7 +19,7 @@ public interface ResetChainService {
     Map<String, Object> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader);
 
     /**
-     * 重置链信息交易初始化提交
+     * Reset chain information transaction initialization submission
      * @param chainId       chain ID
      * @param txs           cross chain transaction list
      * @param blockHeader   block header
@@ -29,7 +29,7 @@ public interface ResetChainService {
     boolean commit(int chainId, List<Transaction> txs, BlockHeader blockHeader);
 
     /**
-     * 重置链信息交易初始化回滚
+     * Reset chain information transaction initialization rollback
      * @param chainId       chain ID
      * @param txs           cross chain transaction list
      * @param blockHeader   block header

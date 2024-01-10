@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * 主网验证人变更广播失败信息类
+ * Main network verifier change broadcast failure information class
  * Main Network Verifier Change Broadcast Failure Information Class
  *
  * @author tag

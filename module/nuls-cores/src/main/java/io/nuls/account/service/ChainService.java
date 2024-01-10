@@ -29,7 +29,7 @@ import io.nuls.core.basic.Result;
 import java.util.Map;
 
 /**
- * 管理链的运行和停止接口定义
+ * Definition of interface for running and stopping the management chain
  * Management chain run and stop interface definition
  * @author: qinyifeng
  * @date: 2018/12/13
@@ -37,17 +37,17 @@ import java.util.Map;
 public interface ChainService {
 
     /**
-     * 停止一条子链
+     * Stop a sub chain
      */
     Result stopChain(Map<String, Object> params);
 
     /**
-     * 运行一条子链
+     * Run a sub chain
      */
     Result runChain(Map<String, Object> params);
 
     /**
-     * 运行主链
+     * Running the main chain
      */
     Result runMainChain(Map<String, Object> params);
 

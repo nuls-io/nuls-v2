@@ -12,7 +12,7 @@ import io.nuls.core.core.annotation.Component;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-07 16:54
- * @Description: 导出账户到keystore文件中
+ * @Description: Export account tokeystoreIn the file
  */
 @Component
 public class BackupAccountProcessor extends AccountBaseProcessor implements CommandProcessor {

@@ -39,7 +39,7 @@ import java.io.File;
 import java.util.List;
 
 /**
- * 链管理类,负责各条链的初始化,运行,启动,参数维护等
+ * Chain management,Responsible for initializing each chain,working,start-up,Parameter maintenance, etc
  * Chain management class, responsible for the initialization, operation, start-up, parameter maintenance of each chain, etc.
  *
  * @author: PierreLuo
@@ -54,20 +54,20 @@ public class ChainManager {
     private NulsCoresConfig config;
 
     public void initChain() {
-        //加载配置
+        //load configuration
         ConfigLoader.load();
         RocksDBService.init(config.getDataPath() + File.separator + ModuleE.PU.name);
         ContextManager.chainIds.forEach(this::initTable);
     }
 
     /**
-     * 初始化并启动链
+     * Initialize and start the chain
      * Initialize and start the chain
      */
     public void runChain() {
         List<Integer> chainIds = ContextManager.chainIds;
         for (Integer chainId : chainIds) {
-            //服务初始化
+            //Service initialization
             protocolService.init(chainId);
             ProtocolContext context = ContextManager.getContext(chainId);
             NulsLogger logger = context.getLogger();
@@ -83,17 +83,17 @@ public class ChainManager {
     }
 
     /**
-     * 停止一条链
+     * Stop a chain
      * Delete a chain
      *
-     * @param chainId 链ID/chain id
+     * @param chainId chainID/chain id
      */
     public void stopChain(int chainId) {
 
     }
 
     /**
-     * 初始化链相关表
+     * Initialize Chain Related Tables
      * Initialization chain correlation table
      *
      * @param chainId

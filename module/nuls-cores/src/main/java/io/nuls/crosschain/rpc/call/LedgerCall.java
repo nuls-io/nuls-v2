@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 调用其他模块跟交易相关的接口
+ * Calling other modules and transaction related interfaces
  *
  * @author: tag
  * @date: 2019/4/12
@@ -28,7 +28,7 @@ import java.util.Map;
 public class LedgerCall {
 
     /**
-     * 查询nonce值
+     * querynoncevalue
      *
      * @param chain
      * @param address
@@ -55,7 +55,7 @@ public class LedgerCall {
 
 
     /**
-     * 查询账户特定资产的余额(包含未确认的余额)
+     * Query the balance of specific assets in the account(Including unconfirmed balances)
      * Check the balance of an account-specific asset
      */
     public static BigInteger getBalanceNonce(Chain chain, byte[] address, int assetChainId, int assetId) throws NulsException {
@@ -76,7 +76,7 @@ public class LedgerCall {
     }
 
     /**
-     * 获取可用余额和nonce
+     * Obtain available balance andnonce
      * Get the available balance and nonce
      *
      * @param chain
@@ -103,7 +103,7 @@ public class LedgerCall {
 
 
     /**
-     * 查询账户特定资产的余额(只获取已确认的余额)
+     * Query the balance of specific assets in the account(Only obtain confirmed balances)
      * Check the balance of an account-specific asset
      */
     public static BigInteger getBalance(Chain chain, byte[] address, int assetChainId, int assetId) throws NulsException {
@@ -124,7 +124,7 @@ public class LedgerCall {
     }
 
     /**
-     * 查询资产流通量
+     * Query asset turnover
      * Search for assets circulation
      * */
     @SuppressWarnings("unchecked")

@@ -28,7 +28,7 @@ import java.util.function.Function;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-11 09:37
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Provider(Provider.ProviderType.RPC)
 public class BlockServiceForRpc extends BaseRpcService implements BlockService {
@@ -99,7 +99,7 @@ public class BlockServiceForRpc extends BaseRpcService implements BlockService {
             res.setTxHashList(hashList);
             return success(res);
         } catch (NulsException e) {
-            Log.error("反序列化block header发生异常", e);
+            Log.error("Deserializationblock headerexception occurred", e);
             return fail(CommonCodeConstanst.DESERIALIZE_ERROR);
         }
     }

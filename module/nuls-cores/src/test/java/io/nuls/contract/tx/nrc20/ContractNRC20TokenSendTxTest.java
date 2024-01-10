@@ -57,14 +57,14 @@ import static io.nuls.contract.constant.ContractCmdConstant.*;
 public class ContractNRC20TokenSendTxTest extends BaseQuery {
 
     /**
-     * 创建合约
+     * Create Contract
      */
     @Test
     public void createContract() throws Exception {
         //sender = toAddress32;
         InputStream in = new FileInputStream(ContractTest.class.getResource("/contract/nrc20-locked-token").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
-        String remark = "create contract test - 空气币";
+        String remark = "create contract test - Air Coin";
         String name = "NulsSwap";
         String symbol = "NulsSwap";
         String amount = BigDecimal.TEN.pow(10).toPlainString();
@@ -81,7 +81,7 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
     }
 
     /**
-     * 调用合约
+     * Call Contract
      */
     @Test
     public void callContract() throws Exception {
@@ -94,7 +94,7 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
         }
         tokenReceiver = "tNULSeBaN5QRhYVp361kB9bvhvujN7QiBST4wf";
         String methodDesc = "";
-        String remark = "call contract test - 空气币转账";
+        String remark = "call contract test - Air coin transfer";
         String token = BigInteger.valueOf(200000000000000L).toString();
         Map params = this.makeCallParams(sender, value, "tNULSeBaN6fGF3hwSrQsHq7B2GhtQ1W1ZMT9Nx", methodName, methodDesc, remark, tokenReceiver, token);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
@@ -109,7 +109,7 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
         methodName = "transfer";
         tokenReceiver = toAddress1;
         String methodDesc = "";
-        String remark = "call contract test - 空气币转账";
+        String remark = "call contract test - Air coin transfer";
         String token = BigInteger.valueOf(800L).toString();
         Map params = this.makeCallParams(sender, value, gasLimit, contractAddress_nrc20, methodName, methodDesc, remark, tokenReceiver, token);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
@@ -120,7 +120,7 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
     }
 
     /**
-     * token转账
+     * tokenTransfer
      */
     @Test
     public void tokenTransfer() throws Exception {
@@ -135,7 +135,7 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
     }
 
     /**
-     * 调用合约的同时，向另外一个账户转账
+     * Transfer funds to another account while calling the contract
      */
     @Test
     public void callContractWithNulsValueToOthers() throws Exception {
@@ -151,7 +151,7 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
                 new AccountAmountDto(BigInteger.valueOf(300000000L), "tNULSeBaMkzsRE6qc9RVoeY6gHq8k1xSMcdrc7")
         };
         String methodDesc = "";
-        String remark = "call contract test - 空气币转账的同时，向另外一个账户转账";
+        String remark = "call contract test - At the same time as transferring the money to another account, transfer the money to another account";
         String token = BigInteger.valueOf(800L).toString();
         Map params = this.makeCallParams(
                 sender, value, 2000000L, 25L, contractAddress_nrc20, methodName, methodDesc, remark, null, amountDtos, new Object[]{tokenReceiver, token});
@@ -163,7 +163,7 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
     }
 
     /**
-     * 删除合约
+     * Delete contract
      */
     @Test
     public void delete() throws Exception {
@@ -187,7 +187,7 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
     }
 
     /**
-     * 向合约地址转账(失败情况，NRC20合约不接受NULS转账)
+     * Transfer to the contracted address(Failure situation,NRC20Contract not acceptedNULSTransfer)
      */
     @Test
     public void transfer2ContractFailed() throws Exception {

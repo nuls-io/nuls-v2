@@ -48,7 +48,7 @@ import java.util.Map;
 public class CmdChainAsset {
     //    String address = "JgT2JCQvKGRKRjKqyfxRAj2zSCpGca01f";
     String address = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
-    //入账金额
+    //Entry amount
     BigInteger amount = BigInteger.valueOf(100000000000000L);
 
     @Before

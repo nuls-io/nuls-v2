@@ -8,13 +8,13 @@ import java.util.Map;
 /**
  * @Author: zhoulijun
  * @Time: 2019-05-07 16:07
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public interface ChainManageProvider {
 
 
     /**
-     * 在主网注册一条友链，使其可以实现跨链交易
+     * Register a friend chain on the main network to enable cross chain transactions
      *
      * @param req
      * @return
@@ -28,7 +28,7 @@ public interface ChainManageProvider {
     Result<Map> updateChain(RegisterChainReq req);
 
     /**
-     * 注销资产
+     * Cancellation of assets
      *
      * @param req
      * @return
@@ -36,7 +36,7 @@ public interface ChainManageProvider {
     Result<String> disableCrossAsset(DisableAssetReq req);
 
     /**
-     * 增加链资产
+     * Increase chain assets
      *
      * @param req
      * @return
@@ -45,7 +45,7 @@ public interface ChainManageProvider {
     Result<String> addCrossLocalAsset(AddCrossLocalAssetReq req);
 
     /**
-     * 获取注册了跨链交易的链的注册信息
+     * Obtain registration information for chains registered for cross chain transactions
      *
      * @param req
      * @return

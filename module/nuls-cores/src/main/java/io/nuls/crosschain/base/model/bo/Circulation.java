@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 
 /**
- * 资产明细
+ * Asset details
  * Asset details
  *
  * @author tag

@@ -57,15 +57,15 @@ public class AcmTransactionCmd extends BaseCmd {
     @Autowired
     private AliasService aliasService;
 
-    @CmdAnnotation(cmd = "ac_transfer", version = 1.0, description = "创建普通转账交易/create transfer transaction")
+    @CmdAnnotation(cmd = "ac_transfer", version = 1.0, description = "Create a regular transfer transaction/create transfer transaction")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
-            @Parameter(parameterName = "inputs", requestType = @TypeDescriptor(value = List.class, collectionElement = CoinDTO.class), parameterDes = "交易支付方数据"),
-            @Parameter(parameterName = "outputs", requestType = @TypeDescriptor(value = List.class, collectionElement = CoinDTO.class), parameterDes = "交易接受方数据"),
-            @Parameter(parameterName = "remark", parameterType = "String", parameterDes = "交易备注")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid"),
+            @Parameter(parameterName = "inputs", requestType = @TypeDescriptor(value = List.class, collectionElement = CoinDTO.class), parameterDes = "Transaction payer data"),
+            @Parameter(parameterName = "outputs", requestType = @TypeDescriptor(value = List.class, collectionElement = CoinDTO.class), parameterDes = "Transaction recipient data"),
+            @Parameter(parameterName = "remark", parameterType = "String", parameterDes = "Transaction notes")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = RpcConstant.VALUE,  description = "交易hash")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = RpcConstant.VALUE,  description = "transactionhash")
     }))
     public Response transfer(Map params) {
         Chain chain = null;
@@ -99,19 +99,19 @@ public class AcmTransactionCmd extends BaseCmd {
 
     }
 
-    @CmdAnnotation(cmd = "ac_createMultiSignTransfer", version = 1.0, description = "创建多签地址转账交易/create multi sign transfer")
+    @CmdAnnotation(cmd = "ac_createMultiSignTransfer", version = 1.0, description = "Create multiple address transfer transactions/create multi sign transfer")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
-            @Parameter(parameterName = "inputs", requestType = @TypeDescriptor(value = List.class, collectionElement = BaseCoinDTO.class), parameterDes = "交易支付方数据"),
-            @Parameter(parameterName = "outputs", requestType = @TypeDescriptor(value = List.class, collectionElement = MultiSignCoinToDTO.class), parameterDes = "交易接受方数据"),
-            @Parameter(parameterName = "remark", parameterType = "String", parameterDes = "交易备注"),
-            @Parameter(parameterName = "signAddress", parameterType = "String", canNull = true, parameterDes = "第一个签名账户地址(不填则只创建交易不签名)"),
-            @Parameter(parameterName = "signPassword", parameterType = "String", canNull = true, parameterDes = "第一个签名账户密码(不填则只创建交易不签名)")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid"),
+            @Parameter(parameterName = "inputs", requestType = @TypeDescriptor(value = List.class, collectionElement = BaseCoinDTO.class), parameterDes = "Transaction payer data"),
+            @Parameter(parameterName = "outputs", requestType = @TypeDescriptor(value = List.class, collectionElement = MultiSignCoinToDTO.class), parameterDes = "Transaction recipient data"),
+            @Parameter(parameterName = "remark", parameterType = "String", parameterDes = "Transaction notes"),
+            @Parameter(parameterName = "signAddress", parameterType = "String", canNull = true, parameterDes = "First signature account address(If left blank, only create transactions without signing)"),
+            @Parameter(parameterName = "signPassword", parameterType = "String", canNull = true, parameterDes = "First signature account password(If left blank, only create transactions without signing)")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map,包含三个key", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "tx",  description = "完整交易序列化字符串,如果交易没达到最小签名数可继续签名"),
-            @Key(name = "txHash",  description = "交易hash"),
-            @Key(name = "completed", valueType = boolean.class, description = "true:交易已完成(已广播),false:交易没完成,没有达到最小签名数")
+    @ResponseData(name = "Return value", description = "Return aMap,Including threekey", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "tx",  description = "Complete transaction serialization string,If the transaction does not reach the minimum number of signatures, you can continue to sign"),
+            @Key(name = "txHash",  description = "transactionhash"),
+            @Key(name = "completed", valueType = boolean.class, description = "true:Transaction completed(Broadcasted),false:Transaction not completed,Not reaching the minimum number of signatures")
     }))
     public Response multiSignTransfer(Map params) {
         Chain chain = null;
@@ -152,17 +152,17 @@ public class AcmTransactionCmd extends BaseCmd {
         }
     }
 
-    @CmdAnnotation(cmd = "ac_signMultiSignTransaction", version = 1.0, description = "多签交易签名/sign MultiSign Transaction")
+    @CmdAnnotation(cmd = "ac_signMultiSignTransaction", version = 1.0, description = "Multiple transaction signatures/sign MultiSign Transaction")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
-            @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "交易数据字符串"),
-            @Parameter(parameterName = "signAddress", parameterType = "String", parameterDes = "签名账户地址"),
-            @Parameter(parameterName = "signPassword", parameterType = "String", parameterDes = "签名账户密码")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid"),
+            @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "Transaction data string"),
+            @Parameter(parameterName = "signAddress", parameterType = "String", parameterDes = "Signature account address"),
+            @Parameter(parameterName = "signPassword", parameterType = "String", parameterDes = "Signature account password")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map,包含三个key", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "tx",  description = "完整交易序列化字符串,如果交易没达到最小签名数可继续签名"),
-            @Key(name = "txHash",  description = "交易hash"),
-            @Key(name = "completed", valueType = boolean.class, description = "true:交易已完成(已广播),false:交易没完成,没有达到最小签名数")
+    @ResponseData(name = "Return value", description = "Return aMap,Including threekey", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "tx",  description = "Complete transaction serialization string,If the transaction does not reach the minimum number of signatures, you can continue to sign"),
+            @Key(name = "txHash",  description = "transactionhash"),
+            @Key(name = "completed", valueType = boolean.class, description = "true:Transaction completed(Broadcasted),false:Transaction not completed,Not reaching the minimum number of signatures")
     }))
     public Response signMultiSignTransaction(Map params) {
         Chain chain = null;
@@ -186,7 +186,7 @@ public class AcmTransactionCmd extends BaseCmd {
             String password = (String) passwordObj;
             String signAddress = (String) signAddressObj;
             String txStr = (String) txStrObj;
-            //查询出账户
+            //Retrieve account information
             Account account = accountService.getAccount(chainId, signAddress);
             if (account == null) {
                 throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);

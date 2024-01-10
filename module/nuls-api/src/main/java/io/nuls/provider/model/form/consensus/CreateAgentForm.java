@@ -34,20 +34,20 @@ import io.nuls.provider.model.form.Base;
 /**
  * @author Niels
  */
-@ApiModel(description = "创建共识节点表单数据")
+@ApiModel(description = "Create consensus node form data")
 public class CreateAgentForm extends Base {
 
-    @ApiModelProperty(description = "节点地址", required = true)
+    @ApiModelProperty(description = "Node address", required = true)
     private String agentAddress;
-    @ApiModelProperty(description = "节点出块地址", required = true)
+    @ApiModelProperty(description = "Node block address", required = true)
     private String packingAddress;
-    @ApiModelProperty(description = "奖励地址，默认节点地址", required = false)
+    @ApiModelProperty(description = "Reward address, default node address", required = false)
     private String rewardAddress;
-    @ApiModelProperty(description = "佣金比例", required = true)
+    @ApiModelProperty(description = "commission rate", required = true)
     private int commissionRate;
-    @ApiModelProperty(description = "抵押金额", required = true)
+    @ApiModelProperty(description = "Mortgage amount", required = true)
     private String deposit;
-    @ApiModelProperty(description = "密码", required = true)
+    @ApiModelProperty(description = "password", required = true)
     private String password;
 
     public String getPassword() {

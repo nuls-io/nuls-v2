@@ -11,7 +11,7 @@ import io.nuls.crosschain.utils.LoggerUtil;
 import io.nuls.crosschain.utils.manager.ChainManager;
 
 /**
- * 已注册跨链的交易数据库操作实现类
+ * Registered cross chain transaction database operation implementation class
  * Registered Cross-Chain Transaction Database Operations Implementation Class
  *
  * @author  tag
@@ -28,8 +28,8 @@ public class RegisteredCrossChainServiceImpl implements RegisteredCrossChainServ
     public boolean save(RegisteredChainMessage registeredChainMessage) {
         registeredChainMessage.getChainInfoList().stream().filter(d->d.getChainId() == 9)
                 .forEach(chainInfo -> {
-                    LoggerUtil.commonLog.info("chain id {} 验证人列表：{}",chainInfo.getChainId(),chainInfo.getVerifierList());
-                    LoggerUtil.commonLog.info("当前高度:{}",chainManager.getChainHeaderMap().get(1).getHeight() + 1);
+                    LoggerUtil.commonLog.info("chain id {} Verifier List：{}",chainInfo.getChainId(),chainInfo.getVerifierList());
+                    LoggerUtil.commonLog.info("Current height:{}",chainManager.getChainHeaderMap().get(1).getHeight() + 1);
                 });
         try {
             return RocksDBService.put(NulsCrossChainConstant.DB_NAME_REGISTERED_CHAIN, key,registeredChainMessage.serialize());
@@ -60,7 +60,7 @@ public class RegisteredCrossChainServiceImpl implements RegisteredCrossChainServ
     public boolean canCross(int assetChainId, int assetId) {
         RegisteredChainMessage all = get();
         if(all == null || all.getChainInfoList() == null){
-            Log.error("数据为空了");
+            Log.error("The data is empty");
             return false;
         }
         return all.getChainInfoList().stream().

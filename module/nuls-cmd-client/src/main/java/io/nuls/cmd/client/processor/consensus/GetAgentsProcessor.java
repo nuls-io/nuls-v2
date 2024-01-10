@@ -39,7 +39,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * 获取共识节点列表
+ * Obtain consensus node list
  * Get all the agent nodes
  *
  * @author: Charlie

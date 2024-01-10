@@ -22,7 +22,7 @@ public class CmdPriorityTest {
 
     @Test
     /**
-     * 获取当前轮次信息
+     * Obtain current round information
      * */
     public void cmdPriorityTest() throws Exception{
         Map<String,Object> params = new HashMap<>();

@@ -34,11 +34,11 @@ import static io.nuls.block.constant.CommandConstant.BLOCK_MESSAGE;
 
 
 /**
- * 处理收到的{@link BlockMessage},用于区块的同步
+ * Process received{@link BlockMessage},Used for block synchronization
  *
  * @author captain
  * @version 1.0
- * @date 18-11-14 下午4:23
+ * @date 18-11-14 afternoon4:23
  */
 @Component("BlockHandlerV1")
 public class BlockHandler implements MessageProcessor {
@@ -57,10 +57,10 @@ public class BlockHandler implements MessageProcessor {
             return;
         }
         Block block = message.getBlock();
-        //接收到的区块用于区块同步
+        //Received blocks for block synchronization
         if (message.isSyn()) {
             long height = block.getHeader().getHeight();
-            //接受到的区块高度比当前最新高度高，并且区块同步过程正在进行
+            //The received block height is higher than the current latest height, and the block synchronization process is in progress
             boolean b = height > context.getLatestHeight() && context.isNeedSyn();
             if (b && context.getBlockMap().put(height, block) == null) {
                 context.getCachedBlockSize().addAndGet(block.size());
