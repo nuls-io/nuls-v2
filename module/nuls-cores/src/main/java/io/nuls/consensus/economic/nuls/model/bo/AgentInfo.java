@@ -4,7 +4,7 @@ import java.math.BigInteger;
 import java.util.List;
 
 /**
- * 节点信息
+ * Node information
  * agent info
  *
  * @author tag

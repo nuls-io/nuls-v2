@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 节点信息管理实现类
+ * Node Information Management Implementation Class
  * Node Information Management Implementation Class
  *
  * @author tag

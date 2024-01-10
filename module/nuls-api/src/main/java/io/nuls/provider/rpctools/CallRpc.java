@@ -15,7 +15,7 @@ import java.util.function.Function;
 /**
  * @Author: zhoulijun
  * @Time: 2019-06-12 14:09
- * @Description: rpc工具类
+ * @Description: rpcTool class
  */
 public interface CallRpc {
 

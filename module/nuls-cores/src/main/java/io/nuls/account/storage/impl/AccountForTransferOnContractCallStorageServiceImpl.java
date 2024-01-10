@@ -56,7 +56,7 @@ public class AccountForTransferOnContractCallStorageServiceImpl implements Accou
         Map<byte[], byte[]> accountPoMap = new HashMap<>();
         try {
             for (AccountContractCallPO po : accountPOList) {
-                //序列化对象为byte数组存储
+                //Serializing objects asbyteArray storage
                 accountPoMap.put(po.getAddress(), po.serialize());
             }
             return RocksDBService.batchPut(AccountStorageConstant.DB_NAME_ACCOUNT_CONTRACT_CALL, accountPoMap);
@@ -87,7 +87,7 @@ public class AccountForTransferOnContractCallStorageServiceImpl implements Accou
             if (list != null) {
                 for (byte[] value : list) {
                     AccountContractCallPO accountPo = new AccountContractCallPO();
-                    //将byte数组反序列化为AccountPo返回
+                    //takebyteDeserialize an array asAccountPoreturn
                     accountPo.parse(value, 0);
                     accountPOList.add(accountPo);
                 }
@@ -107,7 +107,7 @@ public class AccountForTransferOnContractCallStorageServiceImpl implements Accou
         }
         AccountContractCallPO accountPo = new AccountContractCallPO();
         try {
-            //将byte数组反序列化为AccountPo返回
+            //takebyteDeserialize an array asAccountPoreturn
             accountPo.parse(accountBytes, 0);
         } catch (Exception e) {
             LoggerUtil.LOG.error(e.getMessage());

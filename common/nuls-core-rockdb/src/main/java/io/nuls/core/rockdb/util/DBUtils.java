@@ -74,10 +74,10 @@ public class DBUtils {
         cfg.setMultiSection(true);
         Ini ini = new Ini();
         ini.setConfig(cfg);
-        ini.load(new File("module.ncf"));  //可以读取到nuls_2.0项目根目录下的module.ncf,在生产环境读到jar同目录下的module.ncf
+        ini.load(new File("module.ncf"));  //Can be readnuls_2.0Under the root directory of the projectmodule.ncf,Read in production environmentjarUnder the same directorymodule.ncf
         IniEntity ie = new IniEntity(ini);
         String filePath = ie.getCfgValue("Module", "DataPath");
-//        Log.debug(filePath); //读取配置的data文件夹路径
+//        Log.debug(filePath); //Read ConfigurationdataFolder path
         return filePath;
     }
 

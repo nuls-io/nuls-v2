@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 验证通过的跨链交易数据库相关操作实现类
+ * Verified cross chain transaction database related operation implementation class
  * New Cross-Chain Transaction Database Related Operations
  *
  * @author  tag

@@ -1,6 +1,6 @@
 package io.nuls.consensus.model.dto.input;
 /**
- * 创建委托交易参数类
+ * Create entrusted transaction parameter class
  * Create delegate transaction parameter class
  *
  * @author tag

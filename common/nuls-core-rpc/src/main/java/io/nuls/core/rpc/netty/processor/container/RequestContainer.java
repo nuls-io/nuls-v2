@@ -29,7 +29,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 请求的数据存放容器
+ * The requested data storage container
  * Requested entity storage container
  *
  * @author ln

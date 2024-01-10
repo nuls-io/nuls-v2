@@ -44,7 +44,7 @@ import java.math.BigInteger;
 import java.util.*;
 
 /**
- * 交易排序测试，主要用于孤儿交易的排序问题
+ * Transaction sorting test, mainly used for sorting orphan transactions
  *
  * @author: Charlie
  * @date: 2019/5/6
@@ -88,8 +88,8 @@ public class TxCompareTest {
         Set<Integer> set = new HashSet<>();
         while (true) {
             Random rand = new Random();
-            //随机数范取值围应为0到list最大索引之间
-            //根据公式rand.nextInt((list.size() - 1) - 0 + 1) + 0;
+            //The range of values for the random number norm should be0reachlistBetween maximum indexes
+            //According to the formularand.nextInt((list.size() - 1) - 0 + 1) + 0;
             int ran = rand.nextInt(count);
             if (set.add(ran)) {
                 list.add(ran);
@@ -104,7 +104,7 @@ public class TxCompareTest {
         return list;
     }
 
-    //将交易的顺序打乱，再排序，来验证排序是否正确
+    //Shuffle the order of transactions and then sort them to verify if the sorting is correct
     @Test
     public void test() throws Exception {
         importPriKey("9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b", password);//20 tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
@@ -127,11 +127,11 @@ public class TxCompareTest {
             txs.addAll(txs1);
             txs.addAll(txs1);
 
-            System.out.println("正确的顺序");
+            System.out.println("Correct order");
             for (Transaction tx : txs) {
-                System.out.println("正确的顺序: " + tx.getHash().toHex());
+                System.out.println("Correct order: " + tx.getHash().toHex());
             }
-        /* 显示交易格式化完整信息
+        /* Display complete transaction formatting information
         for(Transaction tx : txs){
             TxUtil.txInformationDebugPrint(tx);
         }*/
@@ -155,28 +155,28 @@ public class TxCompareTest {
 //        txList.add(new TransactionNetPO(txs.get(8)));
 
 
-            System.out.println("排序前");
+            System.out.println("Before sorting");
             for (TransactionNetPO tx : txList) {
-                System.out.println("排序前的顺序: " + tx.getTx().getHash().toHex());
+                System.out.println("Order before sorting: " + tx.getTx().getHash().toHex());
             }
 //            OrphanSort orphanSort = new OrphanSort();
             long start = System.currentTimeMillis();
-            //排序
+            //sort
             rank(txList);
             long end = System.currentTimeMillis() - start;
-            System.out.println("执行时间：" + end);
+            System.out.println("execution time：" + end);
             System.out.println(txList.size());
-            System.out.println("排序后");
+            System.out.println("After sorting");
             for (TransactionNetPO tx : txList) {
-                System.out.println("排序后的顺序: " + tx.getTx().getHash().toHex());
+                System.out.println("Sorted order: " + tx.getTx().getHash().toHex());
             }
 
         }
     }
 
-    //排序
+    //sort
     private void rank(List<TransactionNetPO> txList) {
-        //分组：相同时间的一组，同时设置排序字段的值（10000*time），用于最终排序
+        //grouping：Set the value of the sorting field for a group at the same time（10000*time）, used for final sorting
         Map<Long, List<TransactionNetPO>> groupMap = new HashMap<>();
         for (TransactionNetPO tx : txList) {
             long second = tx.getTx().getTime();
@@ -188,11 +188,11 @@ public class TxCompareTest {
             tx.setOrphanSortSerial(second * 10000);
             subList.add(tx);
         }
-        //相同时间的组，进行细致排序，并更新排序字段的值
+        //Sort groups at the same time in detail and update the values of the sorting fields
         for (List<TransactionNetPO> list : groupMap.values()) {
             this.sameTimeRank(list);
         }
-        //重新排序
+        //Reorder
         Collections.sort(txList, new Comparator<TransactionNetPO>() {
             @Override
             public int compare(TransactionNetPO o1, TransactionNetPO o2) {
@@ -243,7 +243,7 @@ public class TxCompareTest {
                 gotIndex = i + 1;
                 added = true;
             } else if (val == 1 && gotNext) {
-//                需要找到之前的一串，挪动到现在的位置
+//                Need to find the previous string and move it to its current position
                 thisItem = result.getArray()[gotIndex];
                 if (i == gotIndex - 1) {
                     item.setHasFlower(true);
@@ -272,7 +272,7 @@ public class TxCompareTest {
                     thisItem.setHasFlower(true);
                 }
                 item.setHasFlower(true);
-                // 前移后面的元素
+                // Move elements forward and behind
                 for (int x = 0; x < result.getIndex() - gotIndex + 1; x++) {
                     int oldIndex = gotIndex + x + realCount;
                     if (oldIndex <= result.getIndex()) {
@@ -313,7 +313,7 @@ public class TxCompareTest {
                     }
                 }
                 thisItem.setFlower(flower);
-                // 前移后面的元素
+                // Move elements forward and behind
                 for (int x = 0; x < result.getIndex() - i + 1; x++) {
                     int oldIndex = i + x + realCount;
                     if (oldIndex <= result.getIndex()) {
@@ -358,7 +358,7 @@ public class TxCompareTest {
         }
     }
 
-    //组装一些 时间 账户 一致，nonce是连续的交易
+    //Assemble some time account Consistent,nonceIt's a continuous transaction
     private List<Transaction> createTxs(int count) throws Exception {
         Map map = CreateTx.createTransferTx(address21, address20, new BigInteger("100000"));
         long time = NulsDateUtils.getCurrentTimeSeconds();
@@ -376,7 +376,7 @@ public class TxCompareTest {
 
     public void importPriKey(String priKey, String pwd) {
         try {
-            //账户已存在则覆盖 If the account exists, it covers.
+            //Overwrite if account already exists If the account exists, it covers.
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put(Constants.CHAIN_ID, chainId);

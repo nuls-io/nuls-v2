@@ -35,65 +35,65 @@ import io.nuls.core.parse.SerializeUtils;
 import java.util.ArrayList;
 import java.util.List;
 /**
- * 轮次成员信息类
+ * Rotation member information class
  * Round Membership Information Class
  *
  * @author tag
  * 2018/11/12
  */
-@ApiModel(name = "轮次成员信息")
+@ApiModel(name = "Rotation member information")
 public class MeetingMember implements Comparable<MeetingMember> {
     /**
-    * 轮次下标
+    * Round index
     * Subscript in order
     * */
-    @ApiModelProperty(description = "轮次下标")
+    @ApiModelProperty(description = "Round index")
     private long roundIndex;
     /**
-    * 轮次开始打包时间
+    * Starting packaging time of the round
     * Round start packing time
     * */
-    @ApiModelProperty(description = "轮次开始时间")
+    @ApiModelProperty(description = "Start time of round")
     private long roundStartTime;
     /**
-    * 节点在轮次中的下标（第几个出块）
+    * The subscript of a node in a round（Which block is produced）
     * Subscription of Nodes in Rounds (Number of Blocks)
     * */
-    @ApiModelProperty(description = "该节点在本轮次中第几个出块")
+    @ApiModelProperty(description = "Which block did this node exit in this round")
     private int packingIndexOfRound;
     /**
-    * 共识节点对象
+    * Consensus Node Object
     * Consensus node object
     * */
-    @ApiModelProperty(description = "共识节点信息")
+    @ApiModelProperty(description = "Consensus node information")
     private Agent agent;
     /**
-    * 共识节--委托信息列表
+    * Consensus section--List of entrusted information
     * Consensus Festival - Delegation Information List
     * */
-    @ApiModelProperty(description = "当前节点委托信息", type = @TypeDescriptor(value = List.class, collectionElement = Deposit.class))
+    @ApiModelProperty(description = "Current node delegation information", type = @TypeDescriptor(value = List.class, collectionElement = Deposit.class))
     private List<Deposit> depositList = new ArrayList<>();
     /**
-    * 排序值
+    * Sorting values
     * Ranking value
     * */
-    @ApiModelProperty(description = "排序值")
+    @ApiModelProperty(description = "Sorting values")
     private String sortValue;
     /**
-    * 开始打包时间
+    * Start packaging time
     * Start packing time
     * */
-    @ApiModelProperty(description = "当前节点开始出块时间")
+    @ApiModelProperty(description = "Starting block time of the current node")
     private long packStartTime;
     /**
-    * 打包结束时间
+    * Packaging end time
     * end packing time
     * */
-    @ApiModelProperty(description = "当前节点出块结束时间")
+    @ApiModelProperty(description = "End time of current node block output")
     private long packEndTime;
 
     /**
-     * 计算节点打包排序值
+     * Calculate node packing and sorting values
      * Computing Packing Sort Value of Nodes
      * */
     public String getSortValue() {

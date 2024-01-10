@@ -34,7 +34,7 @@ import io.nuls.core.parse.SerializeUtils;
 import java.io.IOException;
 
 /**
- * 网络消息头，消息头中包含魔法参数、消息体大小、指令类型、校验参数
+ * Network message header, which contains magic parameters、Message body size、Instruction type、Verify parameters
  * Network message header, the message header contains
  * magic parameters, message body size, command, checksum.
  *
@@ -42,34 +42,34 @@ import java.io.IOException;
  */
 public class MessageHeader extends BaseNulsData {
     /**
-     * 魔法参数，用于隔离网段
+     * Magic parameters used to isolate network segments
      * Magic parameters used in the isolation section.
      */
 
     private long magicNumber;
 
     /**
-     * 消息体大小
+     * Message body size
      * the length of the msgBody
      */
 
     private long payloadLength;
 
     /**
-     * 消息指令
+     * Message instruction
      * ASCII string identifying the packet content, NULL padded
      */
 
     private byte[] command = new byte[]{(byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF};
 
     /**
-     * 校验字段
+     * Verify Fields
      * First 4 bytes of  sha256(sha256(payload))
      */
     private long checksum;
 
     /**
-     * 指令字符串
+     * Instruction string
      * String for command
      */
     private transient String commandStr = null;

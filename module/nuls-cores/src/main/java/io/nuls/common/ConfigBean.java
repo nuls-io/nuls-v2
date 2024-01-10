@@ -41,289 +41,289 @@ public class ConfigBean {
     private int assetId;
     /*-------------------------[Block]-----------------------------*/
     /**
-     * 区块大小阈值
+     * Block size threshold
      */
     private long blockMaxSize;
     /**
-     * 网络重置阈值
+     * Network reset threshold
      */
     private long resetTime;
     /**
-     * 分叉链比主链高几个区块就进行链切换
+     * Chain switching occurs when the fork chain is several blocks higher than the main chain
      */
     private byte chainSwtichThreshold;
     /**
-     * 分叉链、孤儿链区块最大缓存数量
+     * Forked chain、The maximum cache size of orphan chain blocks
      */
     private int cacheSize;
     /**
-     * 接收新区块的范围
+     * Scope of receiving new blocks
      */
     private int heightRange;
     /**
-     * 每次回滚区块最大值
+     * Maximum block size for each rollback
      */
     private int maxRollback;
     /**
-     * 一致节点比例
+     * Consistent node ratio
      */
     private byte consistencyNodePercent;
     /**
-     * 系统运行最小节点数
+     * Minimum number of nodes for system operation
      */
     private byte minNodeAmount;
     /**
-     * 每次从一个节点下载多少区块
+     * How many blocks are downloaded from a node each time
      */
     private byte downloadNumber;
     /**
-     * 区块头中扩展字段的最大长度
+     * The maximum length of the extended field in the block header
      */
     private int extendMaxSize;
     /**
-     * 为阻止恶意节点提前出块,设置此参数
-     * 区块时间戳大于当前时间多少就丢弃该区块
+     * To prevent malicious nodes from leaving the block prematurely,Set this parameter
+     * Discard the block if its timestamp is greater than the current time
      */
     private int validBlockInterval;
     /**
-     * 系统正常运行时最多缓存多少个从别的节点接收到的小区块
+     * How many cell blocks can be cached at most when the system is running normally and received from other nodes
      */
     private byte smallBlockCache;
     /**
-     * 孤儿链最大年龄
+     * Orphan Chain Maximum Age
      */
     private byte orphanChainMaxAge;
     /**
-     * 日志级别
+     * log level
      */
     private String logLevel;
     /**
-     * 下载单个区块的超时时间
+     * The timeout for downloading a single block
      */
     private int singleDownloadTimeout;
 
     /**
-     * 等待网络稳定的时间间隔
+     * Waiting for the time interval for network stability
      */
     private int waitNetworkInterval;
 
     /**
-     * 创世区块配置文件路径
+     * Genesis block configuration file path
      */
     private String genesisBlockPath;
 
     /**
-     * 区块同步过程中缓存的区块字节数上限
+     * Maximum number of cached block bytes during block synchronization process
      */
     private long cachedBlockSizeLimit;
     /*-------------------------[Protocol]-----------------------------*/
     /**
-     * 统计区间
+     * Statistical interval
      */
     private short interval;
     /**
-     * 每个统计区间内的最小生效比例
+     * The minimum effective ratio within each statistical interval
      */
     private byte effectiveRatioMinimum;
     /**
-     * 协议生效要满足的连续区间数最小值
+     * The minimum number of consecutive intervals that a protocol must meet in order to take effect
      */
     private short continuousIntervalCountMinimum;
     /*-------------------------[CrossChain]-----------------------------*/
     /**
-     * 最小链接数
+     * Minimum number of links
      * Minimum number of links
      * */
     private int minNodes;
 
     /**
-     * 最大链接数
+     * Maximum number of links
      * */
     private int maxOutAmount;
 
     /**
-     * 最大被链接数
+     * Maximum number of links
      * */
     private int maxInAmount;
 
     /**
-     * 跨链交易被打包多少块之后广播给其他链
+     * How many blocks are packaged for cross chain transactions and broadcast to other chains
      * */
     private int sendHeight;
 
     /**
-     * 拜占庭比例
+     * Byzantine proportion
      * */
     private int byzantineRatio;
 
     /**
-     * 最小签名数
+     * Minimum number of signatures
      * */
     private int minSignature;
 
     /**
-     * 主网验证人信息
+     * Main network verifier information
      * */
     private String verifiers;
 
     /**
-     * 主网拜占庭比例
+     * Main network Byzantine proportion
      * */
     private int mainByzantineRatio;
 
     /**
-     * 主网最大签名验证数
+     * Maximum number of signature verifications on the main network
      * */
     private int maxSignatureCount;
 
     /**
-     * 主网验证人列表
+     * List of main network validators
      * */
     private Set<String> verifierSet = new HashSet<>();
 
     /*-------------------------[Consensus]-----------------------------*/
 
     /**
-     * 打包间隔时间
+     * Packaging interval time
      * Packing interval time
      */
     private long packingInterval;
     /**
-     * 获得红牌保证金锁定时间
+     * Obtaining red card deposit lock up time
      * Lock-in time to get a red card margin
      */
     private long redPublishLockTime;
     /**
-     * 注销节点保证金锁定时间
+     * Cancellation of node margin locking time
      * Log-off node margin locking time
      */
     private long stopAgentLockTime;
     /**
-     * 佣金比例的最小值
+     * The minimum value of commission ratio
      * Minimum commission ratio
      */
     private byte commissionRateMin;
     /**
-     * 佣金比例的最大值
+     * Maximum commission ratio
      * Maximum commission ratio
      */
     private byte commissionRateMax;
     /**
-     * 创建节点的保证金最小值
+     * Minimum margin value for creating nodes
      * Minimum margin for creating nodes
      */
     private BigInteger depositMin;
     /**
-     * 创建节点的保证金最大值
+     * Maximum margin value for creating nodes
      * Maximum margin for creating nodes
      */
     private BigInteger depositMax;
     /**
-     * 节点出块委托金额最小值
+     * Minimum commissioned amount for node block output
      * Minimum Delegation Amount of Node Block
      */
     private BigInteger commissionMin;
     /**
-     * 节点委托金额最大值
+     * Maximum amount of node delegation
      * Maximum Node Delegation Amount
      */
     private BigInteger commissionMax;
 
     /**
-     * 委托最小金额
+     * Minimum amount entrusted
      * Minimum amount entrusted
      */
     private BigInteger entrusterDepositMin;
 
     /**
-     * 种子节点
+     * Seed node
      * Seed node
      */
     private String seedNodes;
 
     /**
-     * 出块节点密码
+     * Block node password
      * */
     private String password;
 
     /**
-     * 打包一个区块获得的共识奖励
-     * 每年通胀/每年出块数
+     * Consensus reward obtained by packaging a block
+     * Annual inflation/Annual output of blocks
      * */
     private BigInteger blockReward;
 
 
     /**
-     * 创建节点资产ID
+     * Create node assetsID
      * agent assets id
      */
     private int agentAssetId;
 
     /**
-     * 创建节点资产链ID
+     * Create a node asset chainID
      * Create node asset chain ID
      */
     private int agentChainId;
 
 
     /**
-     * 共识奖励资产ID
+     * Consensus reward assetsID
      * Award asset chain ID
      */
     private int awardAssetId;
 
     /**
-     * 交易手续费单价
+     * Transaction fee unit price
      * Transaction fee unit price
      */
     private long feeUnit;
 
     /**
-     * 总通缩量
+     * Total shrinkage
      * Total inflation amount
      */
     private BigInteger totalInflationAmount;
 
     /**
-     * 初始通胀金额
+     * Initial inflation amount
      * Initial Inflation Amount
      */
     private BigInteger inflationAmount;
 
     /**
-     * 通胀开始时间
+     * Inflation start time
      * */
     private long initTime;
 
     /**
-     * 通缩比例
+     * Deflationary ratio
      * */
     private double deflationRatio;
 
     /**
-     * 通缩间隔时间
+     * Deflation interval time
      * */
     private long deflationTimeInterval;
 
     /*-------------------------[SmartContract]-----------------------------*/
     /**
-     * view方法最大消耗gas
+     * viewMethod maximum consumptiongas
      */
     private long maxViewGas;
 
     /*-------------------------[Transaction]-----------------------------*/
-    /** 单个交易数据最大值(B)*/
+    /** Maximum value of individual transaction data(B)*/
     private long txMaxSize;
     /**
-     * 打包时在获取交易之后留给模块统一验证的时间阈值,
-     * 包括统一验证有被过滤掉的交易时需要重新验证等.
+     * The time threshold for module unified verification after obtaining transactions during packaging,
+     * Including the need to re validate transactions that have been filtered out through unified verification, etc.
      */
     private int moduleVerifyPercent;
-    /** 打包获取交易给RPC传输到共识的预留时间,超时则需要处理交易还原待打包队列*/
+    /** Package to obtain transactions forRPCReserve time for transmission to consensus,If the timeout occurs, the transaction needs to be processed to restore the queue to be packaged*/
     private int packageRpcReserveTime;
-    /** 接收网络新交易队列的最大容量 未处理的交易队列**/
+    /** The maximum capacity of receiving new transaction queues in the network Unprocessed transaction queue**/
     private long txUnverifiedQueueSize;
-    /** 孤儿交易生命时间,超过会被清理**/
+    /** Orphan Trading Lifetime,Exceeding will be cleared**/
     private int orphanTtl;
     /*----------------------------------------------------------------------*/
 

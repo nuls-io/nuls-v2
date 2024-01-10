@@ -29,7 +29,7 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * 脱出共识交易处理器
+ * Remove consensus trading processor
  * @author tag
  * @date 2019/6/1
  */
@@ -92,7 +92,7 @@ public class WithdrawProcessor implements TransactionProcessor {
                     errorCode = ConsensusErrorCode.AGENT_NOT_EXIST.getCode();
                     continue;
                 }
-                //验证签名是否正确
+                //Verify if the signature is correct
                 if (!verifyV4(chain, withdrawTx, depositPo.getAddress())) {
                     invalidTxList.add(withdrawTx);
                     continue;
@@ -104,7 +104,7 @@ public class WithdrawProcessor implements TransactionProcessor {
                     continue;
                 }
                 /*
-                 * 重复退出节点
+                 * Repeated exit node
                  * */
                 if (!hashSet.add(cancelDeposit.getJoinTxHash())) {
                     invalidTxList.add(withdrawTx);
@@ -148,7 +148,7 @@ public class WithdrawProcessor implements TransactionProcessor {
                 commitResult = false;
             }
         }
-        //回滚已提交成功的交易
+        //Roll back transactions that have been successfully submitted
         if(!commitResult){
             for (Transaction rollbackTx:commitSuccessList) {
                 try {
@@ -182,7 +182,7 @@ public class WithdrawProcessor implements TransactionProcessor {
                 rollbackResult = false;
             }
         }
-        //保存已回滚成功的交易
+        //Save successfully rolled back transactions
         if(!rollbackResult){
             for (Transaction commitTx:rollbackSuccessList) {
                 try {
@@ -197,11 +197,11 @@ public class WithdrawProcessor implements TransactionProcessor {
     }
 
     /**
-     * 版本三新增的验证
+     * Verification added in version three
      *
-     * @param chain   链信息
-     * @param tx      委托交易
-     * @param creator 委托账户地址
+     * @param chain   Chain information
+     * @param tx      Entrusted transaction
+     * @param creator Entrusted account address
      */
     private boolean verifyV4(Chain chain, Transaction tx, byte[] creator) throws NulsException {
         if (tx.getTransactionSignature() == null) {
@@ -226,12 +226,12 @@ public class WithdrawProcessor implements TransactionProcessor {
             }
             signer = AddressTool.getAddress(transactionSignature.getP2PHKSignatures().get(0).getPublicKey(), chain.getConfig().getChainId());
         }
-        //验证签名是否为委托者签名
+        //Verify if the signature is the signature of the delegate
         if (!Arrays.equals(creator, signer)) {
             chain.getLogger().error("The signature of the entrusted transaction is not the signature of the entrusting party");
             throw new NulsException(ConsensusErrorCode.TX_CREATOR_NOT_SIGNED);
         }
-        //验证from中地址与to中地址是否相同且为委托者
+        //validatefromMiddle address andtoIs the middle address the same and is it the principal
         CoinData coinData = tx.getCoinDataInstance();
         if (!Arrays.equals(creator, coinData.getFrom().get(0).getAddress()) || !Arrays.equals(creator, coinData.getTo().get(0).getAddress())) {
             chain.getLogger().error("From address or to address in coinData is not the principal address");

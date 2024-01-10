@@ -35,14 +35,14 @@ public class AliasStorageServiceTest {
 
     @BeforeClass
     public static void beforeTest() {
-        //初始化配置
+        //Initialize configuration
         SpringLiteContext.init("io.nuls.account", new ModularServiceMethodInterceptor());
         AccountBootstrap accountBootstrap = SpringLiteContext.getBean(AccountBootstrap.class);
-        //初始化配置
-        accountBootstrap.initCfg();        //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
+        //Initialize configuration
+        accountBootstrap.initCfg();        //Read the configuration file, store the data in the root directory, initialize and open all table connections in that directory, and place them in the cache
         RocksDBService.init(NulsConfig.DATA_PATH);
-        //springLite容器初始化
-        //启动时间同步线程
+        //springLiteContainer initialization
+        //Start time synchronization thread
         //TimeService.getInstance().start();
         aliasStorageService = SpringLiteContext.getBean(AliasStorageService.class);
         accountService = SpringLiteContext.getBean(AccountService.class);
@@ -126,7 +126,7 @@ public class AliasStorageServiceTest {
         configBean.setMaxViewGas(100000000L);
         chain.setConfig(configBean);
         List<Account> accounts = accountService.createAccount(chain,1,null);
-        String aliasStr = "Hi,我的别名是" + System.currentTimeMillis();
+        String aliasStr = "Hi,My alias is" + System.currentTimeMillis();
         Alias alias = new Alias();
         alias.setAddress(accounts.get(0).getAddress().getAddressBytes());
         alias.setAlias(aliasStr);

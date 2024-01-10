@@ -34,37 +34,37 @@ import io.nuls.core.crypto.HexUtil;
 
 public class AccountDTO {
     /**
-     * 账户地址
+     * Account address
      */
     private String address;
 
     /**
-     * 别名
+     * alias
      */
     private String alias;
 
     /**
-     * 公钥Hex.encode(byte[])
+     * Public keyHex.encode(byte[])
      */
     private String pubKey;
 
     /**
-     * 其他信息Hex.encode(byte[])
+     * Other informationHex.encode(byte[])
      */
     private String extend;
 
     /**
-     * 创建时间
+     * Creation time
      */
     private Long createTime;
 
     /**
-     * 账户是否加密
+     * Is the account encrypted
      */
     private boolean encrypted;
 
     /**
-     * 账户备注
+     * Account notes
      */
     private String remark;
 

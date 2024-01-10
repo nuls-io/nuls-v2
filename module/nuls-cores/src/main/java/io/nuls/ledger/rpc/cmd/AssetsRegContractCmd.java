@@ -45,7 +45,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 资产登记与管理接口
+ * Asset registration and management interface
  *
  * @author lanjinsheng .
  * @date 2019/10/22
@@ -64,31 +64,31 @@ public class AssetsRegContractCmd extends BaseLedgerCmd {
 
 
     /**
-     * 链内资产合约登记接口
+     * In chain asset contract registration interface
      *
      * @param params
      * @return
      */
     @CmdAnnotation(cmd = CmdConstant.CMD_CHAIN_ASSET_CONTRACT_REG, version = 1.0,
-            description = "链内资产合约登记接口")
+            description = "In chain asset contract registration interface")
     @Parameters(value = {
-            @Parameter(parameterName = "assetName", requestType = @TypeDescriptor(value = String.class), parameterDes = "资产名称: 大、小写字母、数字、下划线（下划线不能在两端）1~20字节"),
-            @Parameter(parameterName = "initNumber", requestType = @TypeDescriptor(value = BigInteger.class), parameterDes = "资产初始值"),
-            @Parameter(parameterName = "decimalPlace", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-18]", parameterDes = "资产最小分割位数"),
-            @Parameter(parameterName = "assetSymbol", requestType = @TypeDescriptor(value = String.class), parameterDes = "资产单位符号: 大、小写字母、数字、下划线（下划线不能在两端）1~20字节"),
-            @Parameter(parameterName = "contractAddress", requestType = @TypeDescriptor(value = String.class), parameterDes = "新资产智能合约地址"),
+            @Parameter(parameterName = "assetName", requestType = @TypeDescriptor(value = String.class), parameterDes = "Asset Name: large、Lowercase letters、number、Underline（The underline cannot be at both ends）1~20byte"),
+            @Parameter(parameterName = "initNumber", requestType = @TypeDescriptor(value = BigInteger.class), parameterDes = "Initial value of assets"),
+            @Parameter(parameterName = "decimalPlace", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-18]", parameterDes = "The minimum number of split digits for assets"),
+            @Parameter(parameterName = "assetSymbol", requestType = @TypeDescriptor(value = String.class), parameterDes = "Asset unit symbol: large、Lowercase letters、number、Underline（The underline cannot be at both ends）1~20byte"),
+            @Parameter(parameterName = "contractAddress", requestType = @TypeDescriptor(value = String.class), parameterDes = "New Asset Smart Contract Address"),
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象",
+    @ResponseData(name = "Return value", description = "Return aMapobject",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-                    @Key(name = "chainId", valueType = int.class, description = "链id"),
-                    @Key(name = "assetId", valueType = int.class, description = "资产id")
+                    @Key(name = "chainId", valueType = int.class, description = "chainid"),
+                    @Key(name = "assetId", valueType = int.class, description = "assetid")
             })
     )
     public Response chainAssetContractReg(Map params) {
         Map<String, Object> rtMap = new HashMap<>(3);
         try {
             LoggerUtil.COMMON_LOG.debug("params={}", JSONUtils.obj2json(params));
-            /* 组装Asset (Asset object) */
+            /* assembleAsset (Asset object) */
             params.put("chainId", ledgerConfig.getChainId());
             params.put("address", params.get("contractAddress"));
             LedgerAsset asset = new LedgerAsset();
@@ -105,26 +105,26 @@ public class AssetsRegContractCmd extends BaseLedgerCmd {
     }
 
     /**
-     * 链内资产合约登记回滚
+     * In chain asset contract registration rollback
      *
      * @param params
      * @return
      */
     @CmdAnnotation(cmd = CmdConstant.CMD_CHAIN_ASSET_CONTRACT_ROLL_BACK, version = 1.0,
-            description = "链内资产合约登记接口")
+            description = "In chain asset contract registration interface")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "链Id"),
-            @Parameter(parameterName = "contractAddress", requestType = @TypeDescriptor(value = String.class), parameterDes = "新资产智能合约地址"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "chainId"),
+            @Parameter(parameterName = "contractAddress", requestType = @TypeDescriptor(value = String.class), parameterDes = "New Asset Smart Contract Address"),
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象",
+    @ResponseData(name = "Return value", description = "Return aMapobject",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-                    @Key(name = "value", valueType = boolean.class, description = "成功true,失败false")
+                    @Key(name = "value", valueType = boolean.class, description = "successtrue,failfalse")
             })
     )
     public Response chainAssetContractRollBack(Map params) {
         Map<String, Object> rtMap = new HashMap<>(1);
         try {
-            /* 组装Asset (Asset object) */
+            /* assembleAsset (Asset object) */
             assetRegMngService.rollBackContractAsset(ledgerConfig.getChainId(), params.get("contractAddress").toString());
             rtMap.put("value", true);
         } catch (Exception e) {
@@ -135,20 +135,20 @@ public class AssetsRegContractCmd extends BaseLedgerCmd {
     }
 
     /**
-     * 资产合约地址查询
+     * Asset contract address inquiry
      *
      * @param params
      * @return
      */
     @CmdAnnotation(cmd = CmdConstant.CMD_CHAIN_ASSET_CONTRACT_ADDRESS, version = 1.0,
-            description = "资产合约地址查询")
+            description = "Asset contract address inquiry")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "链Id"),
-            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产id"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "chainId"),
+            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "assetid"),
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象",
+    @ResponseData(name = "Return value", description = "Return aMapobject",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-                    @Key(name = "contractAddress", valueType = String.class, description = "合约地址")
+                    @Key(name = "contractAddress", valueType = String.class, description = "Contract address")
             })
     )
     public Response getAssetContractAddress(Map params) {
@@ -164,20 +164,20 @@ public class AssetsRegContractCmd extends BaseLedgerCmd {
     }
 
     /**
-     * 资产合约地址查询
+     * Asset contract address inquiry
      *
      * @param params
      * @return
      */
     @CmdAnnotation(cmd = CmdConstant.CMD_CHAIN_ASSET_CONTRACT_ASSETID, version = 1.0,
-            description = "资产合约资产ID查询")
+            description = "Asset contract assetsIDquery")
     @Parameters(value = {
-            @Parameter(parameterName = "contractAddress", requestType = @TypeDescriptor(value = String.class), parameterDes = "合约地址")
+            @Parameter(parameterName = "contractAddress", requestType = @TypeDescriptor(value = String.class), parameterDes = "Contract address")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象",
+    @ResponseData(name = "Return value", description = "Return aMapobject",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-                    @Key(name = "chainId", valueType = int.class, description = "链Id"),
-                    @Key(name = "assetId", valueType = int.class, description = "资产Id")
+                    @Key(name = "chainId", valueType = int.class, description = "chainId"),
+                    @Key(name = "assetId", valueType = int.class, description = "assetId")
             })
     )
     public Response getAssetContractAssetId(Map params) {
@@ -196,19 +196,19 @@ public class AssetsRegContractCmd extends BaseLedgerCmd {
     }
 
     @CmdAnnotation(cmd = CmdConstant.CMD_CHAIN_ASSET_CONTRACT, version = 1.0,
-            description = "合约资产查询")
+            description = "Contract asset inquiry")
     @Parameters(value = {
-            @Parameter(parameterName = "contractAddress", requestType = @TypeDescriptor(value = String.class), parameterDes = "合约地址")
+            @Parameter(parameterName = "contractAddress", requestType = @TypeDescriptor(value = String.class), parameterDes = "Contract address")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象",
+    @ResponseData(name = "Return value", description = "Return aMapobject",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-                    @Key(name = "assetId", valueType = int.class, description = "资产id"),
-                    @Key(name = "assetType", valueType = int.class, description = "资产类型"),
-                    @Key(name = "assetOwnerAddress", valueType = String.class, description = "资产所有者地址"),
-                    @Key(name = "initNumber", valueType = BigInteger.class, description = "资产初始化值"),
-                    @Key(name = "decimalPlace", valueType = int.class, description = "小数点分割位数"),
-                    @Key(name = "assetName", valueType = String.class, description = "资产名"),
-                    @Key(name = "assetSymbol", valueType = String.class, description = "资产符号")
+                    @Key(name = "assetId", valueType = int.class, description = "assetid"),
+                    @Key(name = "assetType", valueType = int.class, description = "Asset type"),
+                    @Key(name = "assetOwnerAddress", valueType = String.class, description = "Address of asset owner"),
+                    @Key(name = "initNumber", valueType = BigInteger.class, description = "Asset initialization value"),
+                    @Key(name = "decimalPlace", valueType = int.class, description = "Decimal Division"),
+                    @Key(name = "assetName", valueType = String.class, description = "Asset Name"),
+                    @Key(name = "assetSymbol", valueType = String.class, description = "Asset symbols")
             })
     )
     public Response getAssetRegInfoByAddress(Map params) {

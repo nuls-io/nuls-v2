@@ -6,7 +6,7 @@ import io.nuls.crosschain.nuls.utils.enumeration.TxProperty;
 import java.lang.annotation.*;
 
 /**
- * 该注解用来标识需要向交易模块注册的方法
+ * This annotation is used to identify the method that needs to be registered with the transaction module
  * This annotation identifies the method that needs to be registered with the transaction module
  * @author tag
  * 2018/11/30

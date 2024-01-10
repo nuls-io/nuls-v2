@@ -37,7 +37,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * 停止节点信息类
+ * Stop node information class
  * Stop Node Information Class
  *
  * @author tag

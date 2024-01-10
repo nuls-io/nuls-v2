@@ -6,7 +6,7 @@ import io.nuls.core.log.logback.NulsLogger;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 /**
- * 链信息类
+ * Chain information class
  * Chain information class
  *
  * @author qinyifeng
@@ -14,13 +14,13 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
  **/
 public class Chain {
     /**
-     * 链基础配置信息
+     * Chain basic configuration information
      * Chain Foundation Configuration Information
      */
     private ConfigBean config;
 
     /**
-     * 运行状态
+     * running state
      * Chain running state
      */
     private AccountStatus accountStatus;
@@ -28,7 +28,7 @@ public class Chain {
     private NulsLogger logger;
 
     /**
-     * 任务线程池
+     * Task Thread Pool
      * Schedule thread pool
      */
     private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;

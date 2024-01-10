@@ -183,7 +183,7 @@ public class Base {
     }
 
     /**
-     * 调用合约视图方法
+     * Call Contract View Method
      */
     protected String invokeView(String contractAddress, String methodName, Object... args) throws Exception {
         String methodDesc = "";

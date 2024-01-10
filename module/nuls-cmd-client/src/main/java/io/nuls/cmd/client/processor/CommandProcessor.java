@@ -44,7 +44,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * 命令行处理接口，其他模块的RPC实现须实现该接口
+ * Command line processing interface, for other modulesRPCThe implementation must implement this interface
  */
 public interface CommandProcessor {
 

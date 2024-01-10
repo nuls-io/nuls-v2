@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * @Author: zhoulijun
  * @Time: 2019-05-06 16:56
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class CreateResetLocalVerifierTxReq extends BaseReq {
 

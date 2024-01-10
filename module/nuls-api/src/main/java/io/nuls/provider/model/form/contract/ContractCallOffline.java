@@ -39,29 +39,29 @@ import java.math.BigInteger;
 @ApiModel
 public class ContractCallOffline extends Base {
 
-    @ApiModelProperty(description = "交易创建者")
+    @ApiModelProperty(description = "Transaction Creator")
     private String sender;
-    @ApiModelProperty(description = "账户余额")
+    @ApiModelProperty(description = "Account balance")
     private BigInteger senderBalance;
-    @ApiModelProperty(description = "账户nonce值")
+    @ApiModelProperty(description = "accountnoncevalue")
     private String nonce;
-    @ApiModelProperty(description = "智能合约地址", required = true)
+    @ApiModelProperty(description = "Smart contract address", required = true)
     private String contractAddress;
-    @ApiModelProperty(description = "GAS限制")
+    @ApiModelProperty(description = "GASlimit")
     private long gasLimit;
-    @ApiModelProperty(description = "调用者向合约地址转入的主网资产金额，没有此业务时填0")
+    @ApiModelProperty(description = "The amount of main network assets transferred by the caller to the contracted address, to be filled in when this service is not available0")
     private BigInteger value;
-    @ApiModelProperty(description = "调用者向合约地址转入的其他资产金额，没有此业务时填空，规则: [[\\<value\\>,\\<assetChainId\\>,\\<assetId\\>,\\<nonce\\>]]", required = false)
+    @ApiModelProperty(description = "The amount of other assets transferred by the caller to the contract address, fill in the blank if there is no such business, rule: [[\\<value\\>,\\<assetChainId\\>,\\<assetId\\>,\\<nonce\\>]]", required = false)
     private String[][] multyAssetValues;
-    @ApiModelProperty(description = "方法名", required = true)
+    @ApiModelProperty(description = "Method name", required = true)
     private String methodName;
-    @ApiModelProperty(description = "方法描述，若合约内方法没有重载，则此参数可以为空", required = false)
+    @ApiModelProperty(description = "Method description, if the method in the contract is not overloaded, this parameter can be empty", required = false)
     private String methodDesc;
-    @ApiModelProperty(description = "参数列表", required = false)
+    @ApiModelProperty(description = "parameter list", required = false)
     private Object[] args;
-    @ApiModelProperty(description = "参数类型列表", required = false)
+    @ApiModelProperty(description = "Parameter Type List", required = false)
     private String[] argsType;
-    @ApiModelProperty(description = "备注", required = false)
+    @ApiModelProperty(description = "Remarks", required = false)
     private String remark;
 
     public String[][] getMultyAssetValues() {

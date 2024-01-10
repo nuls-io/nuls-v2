@@ -1,7 +1,7 @@
 package io.nuls.consensus.model.dto.input;
 
 /**
- * 查询所有节点参数类
+ * Query all node parameter classes
  * Query all node parameter classes
  *
  * @author tag

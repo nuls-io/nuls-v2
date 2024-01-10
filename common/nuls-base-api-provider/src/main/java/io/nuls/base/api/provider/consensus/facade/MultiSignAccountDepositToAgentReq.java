@@ -8,7 +8,7 @@ import java.math.BigInteger;
  * @Author: zhoulijun
  * @Time: 2019-03-11 11:53
  * @Description:
- * 委托共识
+ * Commission consensus
  */
 public class MultiSignAccountDepositToAgentReq extends BaseReq {
 

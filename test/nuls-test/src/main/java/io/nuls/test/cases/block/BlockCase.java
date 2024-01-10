@@ -9,16 +9,16 @@ import io.nuls.core.core.annotation.Component;
  * @Author: zhoulijun
  * @Time: 2019-03-20 20:12
  * @Description:
- * 区块查询相关指令测试
- * 0.获取本地最后一个区块数据
- * 1.获取远程节点最后一个区块数据。
- * 3.与本地进行比对。
- * 4.本地查询最新高度-1的高度的区块
- * 5.通过指定高度查询远程节点的区块。
- * 6.与本地结果进行比对
- * 7.本地通过【4】中的hash查询区块
- * 8.通过hash查询远程节点的区块
- * 9.与本地结果进行比对
+ * Block query related instruction testing
+ * 0.Get the last local block data
+ * 1.Obtain the last block data of the remote node.
+ * 3.Compare with the local area.
+ * 4.Local Query Latest Height-1A block of high height
+ * 5.Query the blocks of remote nodes by specifying a height.
+ * 6.Compare with local results
+ * 7.Local pass【4】MiddlehashQuery Block
+ * 8.adopthashQuery the blocks of remote nodes
+ * 9.Compare with local results
  */
 @TestCase("block")
 @Component
@@ -35,6 +35,6 @@ public class BlockCase extends TestCaseChain {
 
     @Override
     public String title() {
-        return "区块模块";
+        return "Block module";
     }
 }

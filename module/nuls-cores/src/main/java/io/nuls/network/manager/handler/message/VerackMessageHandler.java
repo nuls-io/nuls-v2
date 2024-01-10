@@ -61,7 +61,7 @@ public class VerackMessageHandler extends BaseMessageHandler {
     }
 
     /**
-     * 接收消息处理
+     * Receive message processing
      * Receive message processing
      *
      * @param message address message
@@ -75,7 +75,7 @@ public class VerackMessageHandler extends BaseMessageHandler {
         VerackMessage verackMessage = (VerackMessage) message;
         LoggerUtil.logger(nodeGroup.getChainId()).debug("VerackMessageHandler Recieve:{}-{}", node.getIp() + ":" + node.getRemotePort(), message.getHeader().getCommandStr());
         /*
-         *server端能收到verack消息,接收消息并将连接状态跃迁为握手完成
+         *serverEnd can receiveveracknews,Receive messages and transition the connection status to handshake completion
          *The server can receive the verack message, receive the message and transition the connection state to the handshake.
          */
         if (VerackMessageBody.VER_CONNECT_MAX == verackMessage.getMsgBody().getAckCode()) {
@@ -91,10 +91,10 @@ public class VerackMessageHandler extends BaseMessageHandler {
             } else {
                 node.getNodeGroup().getLocalNetNodeContainer().setLatestHandshakeSuccTime(TimeManager.currentTimeMillis());
             }
-            //作为server端主动回复地址列表
+            //As aserverProactively reply to address list on the end
             List<NodeGroup> nodeGroupList = NodeGroupManager.getInstance().getNodeGroups();
             nodeGroupList.forEach(nodeGroupShareAddrs -> {
-                //发送addr消息
+                //sendaddrnews
                 List<IpAddressShare> ipAddresses = NodeGroupManager.getInstance().getAvailableShareNodes(node, nodeGroupShareAddrs.getChainId(), true);
                 AddrMessage addressMessage = MessageFactory.getInstance().buildAddrMessage(ipAddresses, message.getHeader().getMagicNumber(),nodeGroupShareAddrs.getChainId() , (byte) 1);
                 if (addressMessage.getMsgBody().getIpAddressList().size() > 0) {

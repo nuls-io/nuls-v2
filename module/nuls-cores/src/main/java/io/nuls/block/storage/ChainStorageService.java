@@ -28,18 +28,18 @@ import java.util.Deque;
 import java.util.List;
 
 /**
- * 链存储服务
+ * Chain storage services
  *
  * @author captain
  * @version 1.0
- * @date 18-11-14 上午10:08
+ * @date 18-11-14 morning10:08
  */
 public interface ChainStorageService {
 
     /**
-     * 存储一条链
+     * Store a chain
      *
-     * @param chainId 链Id/chain id
+     * @param chainId chainId/chain id
      * @param blocks
      * @return
      * @throws Exception
@@ -47,9 +47,9 @@ public interface ChainStorageService {
     boolean save(int chainId, List<Block> blocks);
 
     /**
-     * 存储一个区块
+     * Store a block
      *
-     * @param chainId 链Id/chain id
+     * @param chainId chainId/chain id
      * @param block
      * @return
      * @throws Exception
@@ -57,9 +57,9 @@ public interface ChainStorageService {
     boolean save(int chainId, Block block);
 
     /**
-     * 查询一个区块
+     * Query a block
      *
-     * @param chainId 链Id/chain id
+     * @param chainId chainId/chain id
      * @param hash
      * @return
      * @throws NulsException
@@ -67,9 +67,9 @@ public interface ChainStorageService {
     Block query(int chainId, NulsHash hash);
 
     /**
-     * 查询一条链
+     * Query a chain
      *
-     * @param chainId 链Id/chain id
+     * @param chainId chainId/chain id
      * @param hashList
      * @return
      * @throws NulsException
@@ -77,9 +77,9 @@ public interface ChainStorageService {
     List<Block> query(int chainId, Deque<NulsHash> hashList);
 
     /**
-     * 移除一条链
+     * Remove a chain
      *
-     * @param chainId 链Id/chain id
+     * @param chainId chainId/chain id
      * @param hashList
      * @return
      * @throws Exception
@@ -87,9 +87,9 @@ public interface ChainStorageService {
     boolean remove(int chainId, Deque<NulsHash> hashList);
 
     /**
-     * 移除一个区块
+     * Remove a block
      *
-     * @param chainId 链Id/chain id
+     * @param chainId chainId/chain id
      * @param hash
      * @return
      * @throws Exception
@@ -97,9 +97,9 @@ public interface ChainStorageService {
     boolean remove(int chainId, NulsHash hash);
 
     /**
-     * 销毁链存储
+     * Destroy Chain Storage
      *
-     * @param chainId 链Id/chain id
+     * @param chainId chainId/chain id
      * @return
      * @throws Exception
      */

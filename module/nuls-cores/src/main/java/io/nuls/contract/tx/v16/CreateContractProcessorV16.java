@@ -134,7 +134,7 @@ public class CreateContractProcessorV16 implements TransactionProcessor {
         if (saveContractExecuteResult.isFailed()) {
             return saveContractExecuteResult;
         }
-        // 执行失败的合约直接返回
+        // Directly return failed contract execution
         if (!contractResult.isSuccess()) {
             return getSuccess();
         }
@@ -163,7 +163,7 @@ public class CreateContractProcessorV16 implements TransactionProcessor {
     private Result onRollback(int chainId, ContractWrapperTransaction tx) throws Exception {
         ContractData txData = tx.getContractData();
         byte[] contractAddress = txData.getContractAddress();
-        // 回滚代币转账交易
+        // Rollback token transfer transaction
         ContractResult contractResult = tx.getContractResult();
         if (contractResult == null) {
             contractResult = contractService.getContractExecuteResult(chainId, tx.getHash());

@@ -30,11 +30,11 @@ import java.io.IOException;
 import static io.nuls.block.utils.LoggerUtil.COMMON_LOG;
 
 /**
- * 发送一个高度
+ * Send a height
  *
  * @author captain
  * @version 1.0
- * @date 18-11-9 下午2:37
+ * @date 18-11-9 afternoon2:37
  */
 public class HeightMessage extends BaseBusinessMessage {
 

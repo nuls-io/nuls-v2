@@ -52,7 +52,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * 资产登记与管理接口
+ * Asset registration and management interface
  *
  * @author lanjinsheng .
  * @date 2019/10/22
@@ -131,12 +131,12 @@ public class AssetRegMngServiceImpl implements AssetRegMngService {
         if (null != errorCode) {
             return errorCode;
         }
-        //判断地址是否为本地chainId地址
+        //Determine if the address is localchainIdaddress
         boolean isAddressValidate = (AddressTool.getChainIdByAddress(txLedgerAsset.getAddress()) == chainId);
         if (!isAddressValidate) {
             return LedgerErrorCode.ERROR_ADDRESS_ERROR;
         }
-        //判断黑洞地址
+        //Determine the address of the black hole
         if (!Arrays.equals(address, AddressTool.getAddressByPubKeyStr(ledgerConfig.getBlackHolePublicKey(), chainId))) {
             LoggerUtil.COMMON_LOG.error("toAddress is not blackHole");
             return LedgerErrorCode.TX_IS_WRONG;
@@ -156,12 +156,12 @@ public class AssetRegMngServiceImpl implements AssetRegMngService {
         if (null != errorCode) {
             return errorCode;
         }
-        //判断地址是否为本地chainId地址
+        //Determine if the address is localchainIdaddress
         boolean isAddressValidate = (AddressTool.getChainIdByAddress(txLedgerAsset.getAddress()) == chainId);
         if (!isAddressValidate) {
             return LedgerErrorCode.ERROR_ADDRESS_ERROR;
         }
-        //判断黑洞地址
+        //Determine the address of the black hole
         if (!Arrays.equals(address, AddressTool.getAddressByPubKeyStr(ledgerConfig.getBlackHolePublicKey(), chainId))) {
             LoggerUtil.COMMON_LOG.error("toAddress is not blackHole");
             return LedgerErrorCode.TX_IS_WRONG;
@@ -227,10 +227,10 @@ public class AssetRegMngServiceImpl implements AssetRegMngService {
         }
         assetRegMngRepository.batchSaveLedgerAssetReg(chainId, assets, hashMap);
         getAndSetAssetIdByTemp(chainId, ledgerAssets.size());
-        //资产信息入账本
-        //更新链下资产种类，及资产地址集合数据。
+        //Asset information recorded in the ledger
+        //Update off chain asset types and asset address collection data.
         chainAssetsService.updateChainAssets(chainId, assetAddressIndex);
-        //更新账本
+        //Update ledger
         if (accountStatesMap.size() > 0) {
             assetRegMngRepository.batchUpdateAccountState(chainId, accountStatesMap);
         }
@@ -253,7 +253,7 @@ public class AssetRegMngServiceImpl implements AssetRegMngService {
         repository.clearAccountStateMem(chainId, delMap);
         assetRegMngRepository.batchRollBackLedgerAssetReg(chainId, list);
         assetRegMngRepository.batchDelAccountState(chainId, delKeys);
-        //回滚资产后，进行缓存数据重置
+        //After rolling back assets, perform cache data reset
         initDBAssetsIdMap();
     }
 

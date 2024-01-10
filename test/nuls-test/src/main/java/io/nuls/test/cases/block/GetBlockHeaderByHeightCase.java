@@ -9,21 +9,21 @@ import io.nuls.core.core.annotation.Component;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-20 20:07
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Component
 public class GetBlockHeaderByHeightCase extends BaseBlockCase<BlockHeaderData,BlockHeaderData> {
 
     @Override
     public String title() {
-        return "通过高度获取区块头";
+        return "Obtain block heads by height";
     }
 
     @Override
     public BlockHeaderData doTest(BlockHeaderData data, int depth) throws TestFailException {
         Result<BlockHeaderData> blockHeader = blockService.getBlockHeaderByHeight(new GetBlockHeaderByHeightReq(data.getHeight()));
         checkResultStatus(blockHeader);
-        check(blockHeader.getData().getHeight() == data.getHeight(),"高度不一致");
+        check(blockHeader.getData().getHeight() == data.getHeight(),"Height inconsistency");
         return blockHeader.getData();
     }
 }

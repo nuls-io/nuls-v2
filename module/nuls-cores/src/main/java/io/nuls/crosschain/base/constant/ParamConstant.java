@@ -1,6 +1,6 @@
 package io.nuls.crosschain.base.constant;
 /**
- * 跨链模块参数常量管理类
+ * Cross chain module parameter constant management class
  * @author tag
  * 2019/04/08
  */

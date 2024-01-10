@@ -46,7 +46,7 @@ public class BlockDownloaderTest {
         {
             long totalCount = 1000;
             int roundDownloads = 100;
-            //需要下载多少轮
+            //How many rounds need to be downloaded
             long round = (long) Math.ceil((double) totalCount / (roundDownloads));
             assertEquals(10, round);
         }
@@ -54,7 +54,7 @@ public class BlockDownloaderTest {
         {
             long totalCount = 1001;
             int roundDownloads = 100;
-            //需要下载多少轮
+            //How many rounds need to be downloaded
             long round = (long) Math.ceil((double) totalCount / (roundDownloads));
             assertEquals(11, round);
         }

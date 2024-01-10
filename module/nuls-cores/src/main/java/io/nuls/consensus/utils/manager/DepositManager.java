@@ -19,7 +19,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * 委托信息管理类，负责委托信息相关处理
+ * Entrusted information management class, responsible for entrusted information related processing
  * Delegated information management category, responsible for delegated information related processing
  *
  * @author tag
@@ -31,10 +31,10 @@ public class DepositManager {
     private DepositStorageService depositStorageService;
 
     /**
-     * 初始化委托信息
+     * Initialize delegation information
      * Initialize delegation information
      *
-     * @param chain 链信息/chain info
+     * @param chain Chain information/chain info
      */
     public void loadDeposits(Chain chain) throws Exception {
         List<Deposit> allDepositList = new ArrayList<>();
@@ -48,7 +48,7 @@ public class DepositManager {
     }
 
     /**
-     * 添加委托缓存
+     * Add delegate cache
      * Add delegation cache
      *
      * @param chain   chain info
@@ -59,7 +59,7 @@ public class DepositManager {
     }
 
     /**
-     * 修改委托缓存
+     * Modify delegation cache
      * modify delegation cache
      *
      * @param chain   chain
@@ -80,11 +80,11 @@ public class DepositManager {
     }
 
     /**
-     * 删除指定链的委托信息
+     * Delete delegation information for the specified chain
      * Delete delegate information for a specified chain
      *
      * @param chain  chain nfo
-     * @param txHash 创建该委托交易的Hash/Hash to create the delegated transaction
+     * @param txHash Create the entrusted transactionHash/Hash to create the delegated transaction
      */
     public void removeDeposit(Chain chain, NulsHash txHash) throws Exception {
         List<Deposit> depositList = chain.getDepositList();
@@ -166,17 +166,17 @@ public class DepositManager {
         int chainId = chain.getConfig().getChainId();
         CancelDeposit cancelDeposit = new CancelDeposit();
         cancelDeposit.parse(transaction.getTxData(), 0);
-        //获取该笔交易对应的加入共识委托交易
+        //Obtain the consensus delegation transaction corresponding to this transaction
         DepositPo po = depositStorageService.get(cancelDeposit.getJoinTxHash(), chainId);
-        //委托交易不存在
+        //The entrusted transaction does not exist
         if (po == null) {
             throw new NulsException(ConsensusErrorCode.DATA_NOT_EXIST);
         }
-        //委托交易已退出
+        //The entrusted transaction has been exited
         if (po.getDelHeight() > 0) {
             throw new NulsException(ConsensusErrorCode.DEPOSIT_WAS_CANCELED);
         }
-        //设置退出共识高度
+        //Set exit consensus height
         po.setDelHeight(header.getHeight());
         if (!depositStorageService.save(po, chainId)) {
             throw new NulsException(ConsensusErrorCode.SAVE_FAILED);
@@ -189,9 +189,9 @@ public class DepositManager {
         int chainId = chain.getConfig().getChainId();
         CancelDeposit cancelDeposit = new CancelDeposit();
         cancelDeposit.parse(transaction.getTxData(), 0);
-        //获取该笔交易对应的加入共识委托交易
+        //Obtain the consensus delegation transaction corresponding to this transaction
         DepositPo po = depositStorageService.get(cancelDeposit.getJoinTxHash(), chainId);
-        //委托交易不存在
+        //The entrusted transaction does not exist
         if (po == null) {
             throw new NulsException(ConsensusErrorCode.DATA_NOT_EXIST);
         }

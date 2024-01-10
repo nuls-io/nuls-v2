@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 
 
 /**
- * 跨链模块启动类
+ * Cross chain module startup class
  * Cross Chain Module Startup and Initialization Management
  * @author tag
  * 2019/4/10
@@ -67,7 +67,7 @@ public class CrossChainBootStrap implements INulsCoresBootstrap {
         try {
             chainManager.runChain();
             /*
-             * 注册协议,如果为非主网则需激活跨链网络
+             * Registration Agreement,If it is a non main network, cross chain network activation is required
              */
             for (Chain chain:chainManager.getChainMap().values()) {
                 if(!chain.isMainChain()){
@@ -75,7 +75,7 @@ public class CrossChainBootStrap implements INulsCoresBootstrap {
                 }
             }
             /*
-             * 如果为主网，向链管理模块过去完整的跨链注册信息
+             * If it is the main network, provide complete cross chain registration information to the chain management module
              */
             if (nulsCrossChainConfig.isMainNet()) {
                 RegisteredChainMessage registeredChainMessage = registeredCrossChainService.get();
@@ -88,7 +88,7 @@ public class CrossChainBootStrap implements INulsCoresBootstrap {
                 }
             }
 
-            //智能合约交易注册
+            //Smart contract transaction registration
             chainManager.registerContractTx();
 
             ConfigurationLoader configurationLoader = SpringLiteContext.getBean(ConfigurationLoader.class);
@@ -101,7 +101,7 @@ public class CrossChainBootStrap implements INulsCoresBootstrap {
     }
 
     /**
-     * 初始化数据库
+     * Initialize database
      * Initialization database
      */
     private void initDB() throws Exception {
@@ -110,10 +110,10 @@ public class CrossChainBootStrap implements INulsCoresBootstrap {
         RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_CONSUME_CONGIF);
         RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_LOCAL_VERIFIER);
         /*
-            已注册跨链的链信息操作表
+            Registered Cross Chain Chain Information Operation Table
             Registered Cross-Chain Chain Information Operating Table
             key：RegisteredChain
-            value:已注册链信息列表
+            value:Registered Chain Information List
             */
         RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_REGISTERED_CHAIN);
     }

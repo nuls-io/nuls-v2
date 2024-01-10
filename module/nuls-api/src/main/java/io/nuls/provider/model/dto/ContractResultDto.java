@@ -36,51 +36,51 @@ import java.util.List;
 @ApiModel
 public class ContractResultDto {
 
-    @ApiModelProperty(description = "合约执行是否成功")
+    @ApiModelProperty(description = "Whether the contract execution was successful")
     private boolean success;
-    @ApiModelProperty(description = "执行失败信息")
+    @ApiModelProperty(description = "Execution failure information")
     private String errorMessage;
-    @ApiModelProperty(description = "合约地址")
+    @ApiModelProperty(description = "Contract address")
     private String contractAddress;
-    @ApiModelProperty(description = "合约执行结果")
+    @ApiModelProperty(description = "Contract execution results")
     private String result;
-    @ApiModelProperty(description = "GAS限制")
+    @ApiModelProperty(description = "GASlimit")
     private long gasLimit;
-    @ApiModelProperty(description = "已使用GAS")
+    @ApiModelProperty(description = "UsedGAS")
     private long gasUsed;
-    @ApiModelProperty(description = "GAS单价")
+    @ApiModelProperty(description = "GASunit price")
     private long price;
-    @ApiModelProperty(description = "交易总手续费")
+    @ApiModelProperty(description = "Total transaction fees")
     private String totalFee;
-    @ApiModelProperty(description = "交易大小手续费")
+    @ApiModelProperty(description = "Transaction size handling fee")
     private String txSizeFee;
-    @ApiModelProperty(description = "实际执行合约手续费")
+    @ApiModelProperty(description = "Actual contract execution fee")
     private String actualContractFee;
-    @ApiModelProperty(description = "合约返回的手续费")
+    @ApiModelProperty(description = "Contract return handling fee")
     private String refundFee;
-    @ApiModelProperty(description = "调用者向合约地址转入的主网资产金额，没有此业务时则为0")
+    @ApiModelProperty(description = "The amount of main network assets transferred by the caller to the contracted address. If there is no such service, it is:0")
     private String value;
-    @ApiModelProperty(description = "异常堆栈踪迹")
+    @ApiModelProperty(description = "Abnormal stack trace")
     private String stackTrace;
-    @ApiModelProperty(description = "合约转账列表（从合约转出主资产）", type = @TypeDescriptor(value = List.class, collectionElement = ContractMergedTransferDto.class))
+    @ApiModelProperty(description = "Contract transfer list（Transfer of main assets from contract）", type = @TypeDescriptor(value = List.class, collectionElement = ContractMergedTransferDto.class))
     private List<ContractMergedTransferDto> transfers;
-    @ApiModelProperty(description = "合约转账列表（从合约转出其他资产）", type = @TypeDescriptor(value = List.class, collectionElement = ContractMultyAssetMergedTransferDto.class))
+    @ApiModelProperty(description = "Contract transfer list（Transferring other assets from the contract）", type = @TypeDescriptor(value = List.class, collectionElement = ContractMultyAssetMergedTransferDto.class))
     private List<ContractMultyAssetMergedTransferDto> multyAssetTransfers;
-    @ApiModelProperty(description = "合约事件列表", type = @TypeDescriptor(value = List.class, collectionElement = String.class))
+    @ApiModelProperty(description = "Contract Event List", type = @TypeDescriptor(value = List.class, collectionElement = String.class))
     private List<String> events;
-    @ApiModelProperty(description = "调式合约事件列表", type = @TypeDescriptor(value = List.class, collectionElement = String.class))
+    @ApiModelProperty(description = "Modal Contract Event List", type = @TypeDescriptor(value = List.class, collectionElement = String.class))
     private List<String> debugEvents;
-    @ApiModelProperty(description = "合约token转账列表", type = @TypeDescriptor(value = List.class, collectionElement = ContractTokenTransferDto.class))
+    @ApiModelProperty(description = "contracttokenTransfer List", type = @TypeDescriptor(value = List.class, collectionElement = ContractTokenTransferDto.class))
     private List<ContractTokenTransferDto> tokenTransfers;
-    @ApiModelProperty(description = "合约NRC721-token转账列表", type = @TypeDescriptor(value = List.class, collectionElement = ContractToken721TransferDto.class))
+    @ApiModelProperty(description = "contractNRC721-tokenTransfer List", type = @TypeDescriptor(value = List.class, collectionElement = ContractToken721TransferDto.class))
     private List<ContractToken721TransferDto> token721Transfers;
-    @ApiModelProperty(description = "合约调用外部命令的调用记录列表", type = @TypeDescriptor(value = List.class, collectionElement = ContractInvokeRegisterCmdDto.class))
+    @ApiModelProperty(description = "List of call records for contract calls to external commands", type = @TypeDescriptor(value = List.class, collectionElement = ContractInvokeRegisterCmdDto.class))
     private List<ContractInvokeRegisterCmdDto> invokeRegisterCmds;
-    @ApiModelProperty(description = "合约生成交易的序列化字符串列表", type = @TypeDescriptor(value = List.class, collectionElement = String.class))
+    @ApiModelProperty(description = "Serialized string list for contract generation transactions", type = @TypeDescriptor(value = List.class, collectionElement = String.class))
     private List<String> contractTxList;
-    @ApiModelProperty(description = "备注")
+    @ApiModelProperty(description = "Remarks")
     private String remark;
-    @ApiModelProperty(description = "内部创建的合约列表", type = @TypeDescriptor(value = List.class, collectionElement = ContractInternalCreateDto.class))
+    @ApiModelProperty(description = "List of contracts created internally", type = @TypeDescriptor(value = List.class, collectionElement = ContractInternalCreateDto.class))
     private List<ContractInternalCreateDto> internalCreates;
 
     public List<ContractMultyAssetMergedTransferDto> getMultyAssetTransfers() {

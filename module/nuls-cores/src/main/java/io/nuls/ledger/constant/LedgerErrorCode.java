@@ -42,7 +42,7 @@ public interface LedgerErrorCode extends CommonCodeConstanst {
     ErrorCode TX_AMOUNT_INVALIDATE = ErrorCode.init(ModuleE.LG.getPrefix() + "_1005");
     ErrorCode VALIDATE_FAIL = ErrorCode.init(ModuleE.LG.getPrefix() + "_1010");
     /**
-     * 新增资产注册交易错误码
+     * New asset registration transaction error code
      */
     ErrorCode ERROR_ASSET_DECIMALPLACES = ErrorCode.init(ModuleE.LG.getPrefix() + "_1011");
     ErrorCode ERROR_ASSET_SYMBOL = ErrorCode.init(ModuleE.LG.getPrefix() + "_1012");

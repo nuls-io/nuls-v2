@@ -79,7 +79,7 @@ public class TransactionTest {
         tx.setType(10);
         tx.setTime(System.currentTimeMillis()/1000);
         tx.setBlockHeight(100);
-        String remark = "试一试";
+        String remark = "Give it a try";
         tx.setRemark(StringUtils.bytes(remark));
         CoinData coinData = getCoinData();
 

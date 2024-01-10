@@ -34,7 +34,7 @@ import java.math.BigInteger;
 import java.util.*;
 
 /**
- * 共识模块RPC接口实现类
+ * Consensus moduleRPCInterface implementation class
  * Consensus Module RPC Interface Implementation Class
  *
  * @author tag
@@ -56,7 +56,7 @@ public class ChainServiceImpl implements ChainService {
     private DepositManager depositManager;
 
     /**
-     * 批量验证共识模块交易
+     * Batch Verify Consensus Module Transactions
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -169,7 +169,7 @@ public class ChainServiceImpl implements ChainService {
     }
 
     /**
-     * 区块分叉记录
+     * Block fork record
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -202,7 +202,7 @@ public class ChainServiceImpl implements ChainService {
     }
 
     /**
-     * 双花交易记录
+     * Shuanghua transaction records
      *
      * @param params
      * @return Result
@@ -245,7 +245,7 @@ public class ChainServiceImpl implements ChainService {
     }
 
     /**
-     * 获取全网信息
+     * Obtain full network information
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -264,7 +264,7 @@ public class ChainServiceImpl implements ChainService {
             return Result.getFailed(ConsensusErrorCode.DATA_NOT_EXIST);
         }
         List<Agent> handleList = new ArrayList<>();
-        //获取本地最新高度
+        //Get the latest local altitude
         long startBlockHeight = chain.getNewestHeader().getHeight();
         for (Agent agent : agentList) {
             if (agent.getDelHeight() != -1L && agent.getDelHeight() <= startBlockHeight) {
@@ -293,7 +293,7 @@ public class ChainServiceImpl implements ChainService {
     }
 
     /**
-     * 获取指定账户信息
+     * Obtain specified account information
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -320,7 +320,7 @@ public class ChainServiceImpl implements ChainService {
                 continue;
             }
             if (Arrays.equals(agent.getAgentAddress(), addressBytes)) {
-                //一个账户最多只能创建一个共识节点
+                //Each account can only create a maximum of one consensus node
                 agentCount = 1;
                 agentHash = agent.getTxHash().toHex();
                 break;
@@ -345,11 +345,11 @@ public class ChainServiceImpl implements ChainService {
         dto.setAgentCount(agentCount);
         dto.setAgentHash(agentHash);
         dto.setJoinAgentCount(agentSet.size());
-        //todo 统计账户奖励金
+        //todo Calculate account rewards
 
         dto.setTotalDeposit(String.valueOf(totalDeposit));
         try {
-            //todo 从账本模块获取账户可用余额
+            //todo Obtain available account balance from the ledger module
         } catch (Exception e) {
             chain.getLogger().error(e);
             dto.setUsableBalance(BigIntegerUtils.ZERO);
@@ -358,7 +358,7 @@ public class ChainServiceImpl implements ChainService {
     }
 
     /**
-     * 获取惩罚信息
+     * Obtain punishment information
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -380,7 +380,7 @@ public class ChainServiceImpl implements ChainService {
         List<PunishLogDTO> yellowPunishList = null;
         List<PunishLogDTO> redPunishList = null;
         int typeOfYellow = 2;
-        //查询红牌交易
+        //Query red card transactions
         if (type != 1) {
             redPunishList = new ArrayList<>();
             for (PunishLogPo po : chain.getRedPunishList()) {
@@ -406,7 +406,7 @@ public class ChainServiceImpl implements ChainService {
     }
 
     /**
-     * 获取当前轮次信息
+     * Obtain current round information
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -435,7 +435,7 @@ public class ChainServiceImpl implements ChainService {
 
 
     /**
-     * 获取指定区块轮次
+     * Obtain specified block rounds
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -473,7 +473,7 @@ public class ChainServiceImpl implements ChainService {
     }
 
     /**
-     * 获取共模块识配置信息
+     * Obtain common module recognition configuration information
      *
      * @param params
      * @return Result
@@ -528,7 +528,7 @@ public class ChainServiceImpl implements ChainService {
     }
 
     /**
-     * 停止一条链
+     * Stop a chain
      */
     @Override
     public Result stopChain(Map<String, Object> params) {
@@ -536,7 +536,7 @@ public class ChainServiceImpl implements ChainService {
     }
 
     /**
-     * 启动一条新链
+     * Start a new chain
      */
     @Override
     public Result runChain(Map<String, Object> params) {
@@ -605,7 +605,7 @@ public class ChainServiceImpl implements ChainService {
     }
 
     /**
-     * 获取种子节点列表
+     * Get a list of seed nodes
      *
      * @param params
      * @return Result

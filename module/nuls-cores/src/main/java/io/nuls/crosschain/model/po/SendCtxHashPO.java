@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 存入数据库的交易Hash列表
+ * Transactions stored in the databaseHashlist
  * Transaction Hash List in Database
  *
  * @author tag

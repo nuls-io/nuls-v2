@@ -30,32 +30,32 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 主要缓存孤儿链维护线程请求的单个区块
+ * The main cache orphan chain maintenance thread requests a single block
  *
  * @author captain
  * @version 1.0
- * @date 18-11-14 下午5:35
+ * @date 18-11-14 afternoon5:35
  */
 public class SingleBlockCacher {
 
     /**
-     * 单个下载区块请求-区块缓存
+     * Single download block request-Blockcache
      */
     private static Map<Integer, DataCacher<Block>> blockCacher = new ConcurrentHashMap<>();
 
     /**
-     * 初始化
+     * initialization
      *
-     * @param chainId 链Id/chain id
+     * @param chainId chainId/chain id
      */
     public static void init(int chainId) {
         blockCacher.put(chainId, new DataCacher<>());
     }
 
     /**
-     * 下载单个区块任务开始时,添加缓存
+     * At the beginning of downloading a single block task,Add cache
      *
-     * @param chainId     链Id/chain id
+     * @param chainId     chainId/chain id
      * @param requestHash
      * @return
      */
@@ -64,9 +64,9 @@ public class SingleBlockCacher {
     }
 
     /**
-     * 根据requestHash判断该区块是同步区块过程中收到的区块,还是孤儿链维护过程收到的区块,还是恶意区块,分别放入不同的缓存
+     * according torequestHashDetermine if the block was received during the synchronization process,Or the blocks received during the orphan chain maintenance process,Or malicious blocks,Put different caches separately
      *
-     * @param chainId 链Id/chain id
+     * @param chainId chainId/chain id
      * @param message
      */
     public static void receiveBlock(int chainId, BlockMessage message) {
@@ -76,9 +76,9 @@ public class SingleBlockCacher {
     }
 
     /**
-     * 移除缓存
+     * Remove cache
      *
-     * @param chainId 链Id/chain id
+     * @param chainId chainId/chain id
      * @param hash
      */
     public static void removeRequest(int chainId, NulsHash hash) {

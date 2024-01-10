@@ -190,7 +190,7 @@ public class TestCommonUtil {
     }
 
     public static String createContract(String account, String pwd, String code, Object[] args) throws Exception {
-        //账户已存在则覆盖 If the account exists, it covers.
+        //Overwrite if account already exists If the account exists, it covers.
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, VERSION);
         params.put(Constants.CHAIN_ID, CHAIN_ID);
@@ -213,7 +213,7 @@ public class TestCommonUtil {
     }
 
     public static String callContract(String account, String pwd, BigInteger value, String address, String methodName, Object[] args) throws Exception {
-        //账户已存在则覆盖 If the account exists, it covers.
+        //Overwrite if account already exists If the account exists, it covers.
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, VERSION);
         params.put(Constants.CHAIN_ID, CHAIN_ID);
@@ -238,7 +238,7 @@ public class TestCommonUtil {
     }
 
     public static String deleteContract(String account, String pwd, String address) throws Exception {
-        //账户已存在则覆盖 If the account exists, it covers.
+        //Overwrite if account already exists If the account exists, it covers.
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, VERSION);
         params.put(Constants.CHAIN_ID, CHAIN_ID);
@@ -256,7 +256,7 @@ public class TestCommonUtil {
 
     public static void importPriKey(String priKey, String pwd) {
         try {
-            //账户已存在则覆盖 If the account exists, it covers.
+            //Overwrite if account already exists If the account exists, it covers.
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, VERSION);
             params.put(Constants.CHAIN_ID, CHAIN_ID);
@@ -325,7 +325,7 @@ public class TestCommonUtil {
     }
 
     public static boolean setAlias(Chain chain, String address) throws Exception {
-        LOG.info("##########设置别名##########");
+        LOG.info("##########Set alias##########");
         BigInteger balance = getBalance(chain, address);
         LOG.info(address + "-----balance:{}", balance);
         {

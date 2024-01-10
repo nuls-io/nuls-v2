@@ -37,39 +37,39 @@ import java.math.BigInteger;
 
 /**
  *
- * 未确认交易对象，存储单笔交易中的未确认交易值
- * 是AccountStateUnconfirmed中 ,txUnconfirmedMap的 集合中的对象。
+ * Unconfirmed trading partner, storing unconfirmed transaction values in a single transaction
+ * yesAccountStateUnconfirmedin ,txUnconfirmedMapof Objects in the collection.
  * @author lanjinsheng
  * @date 2018/11/19
  */
 
 public class TxUnconfirmed extends BaseNulsData {
     /**
-     * 账户地址
+     * Account address
      */
     private String address;
     /**
-     * 账户资产链id
+     * Account Asset Chainid
      */
     private int assetChainId;
     /**
-     * 账户资产id
+     * Account assetsid
      */
     private int assetId;
     /**
-     * 交易对应的上一笔nonce值
+     * The previous transaction corresponding to the transactionnoncevalue
      */
     private byte[] fromNonce = LedgerConstant.getInitNonceByte();
     /**
-     * 交易对应的当前nonce值[hash后8位]
+     * The current corresponding transactionnoncevalue[hashafter8position]
      */
     private byte[] nonce = LedgerConstant.getInitNonceByte();
     /**
-     * 交易对应的下一笔nonce值
+     * The next transaction corresponding to the transactionnoncevalue
      */
     private byte[] nextNonce = LedgerConstant.getInitNonceByte();
     /**
-     * 交易对应的金额
+     * The amount corresponding to the transaction
      */
     private BigInteger amount = BigInteger.ZERO;
 

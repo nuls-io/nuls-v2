@@ -34,7 +34,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 拥有该注解的方法会被认为：对外提供的接口
+ * The method with this annotation will be considered：External provided interfaces
  * The methods which contain this annotation would be considered: the interface provided to the outside world
  *
  * @author tangyi
@@ -44,7 +44,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CmdAnnotation {
     /**
-     * 调用接口的字符串
+     * Calling the string of the interface
      * The string used to invoke method
      *
      * @return String
@@ -52,7 +52,7 @@ public @interface CmdAnnotation {
     String cmd();
 
     /**
-     * 接口的版本号
+     * The version number of the interface
      * The version of the method
      *
      * @return double
@@ -60,7 +60,7 @@ public @interface CmdAnnotation {
     double version();
 
     /**
-     * 接口权限级别，参考Constants.PUBLIC的注释，默认为PRIVATE
+     * Interface permission level, referenceConstants.PUBLICThe annotation for, defaults toPRIVATE
      * Interface permission level, refer to Constants.PUBLIC's annotation, default value is PRIVATE
      *
      * @return String
@@ -68,7 +68,7 @@ public @interface CmdAnnotation {
     String scope() default Constants.PUBLIC;
 
     /**
-     * 返回结果的改变次数
+     * Return the number of changes in the result
      * Number of changes of return value
      *
      * @return int
@@ -76,7 +76,7 @@ public @interface CmdAnnotation {
     int minEvent() default 0;
 
     /**
-     * 调用最小间隔，单位是秒
+     * Call the minimum interval in seconds
      * Minimum interval of call, unit is seconds
      *
      * @return int
@@ -84,13 +84,13 @@ public @interface CmdAnnotation {
     int minPeriod() default 0;
 
     /**
-     * 接口优先级
+     * interface priority
      * interface priority
      * */
     CmdPriority priority() default CmdPriority.DEFAULT;
 
     /**
-     * 方法描述信息
+     * Method description information
      * Description information of method
      *
      * @return String

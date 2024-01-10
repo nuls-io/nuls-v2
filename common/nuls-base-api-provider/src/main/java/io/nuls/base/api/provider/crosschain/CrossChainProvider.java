@@ -7,12 +7,12 @@ import io.nuls.base.data.Transaction;
 /**
  * @Author: zhoulijun
  * @Time: 2019-05-06 17:01
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public interface CrossChainProvider {
 
     /**
-     * 创建一笔跨链交易
+     * Create a cross chain transaction
      * @param req
      * @return
      */
@@ -20,7 +20,7 @@ public interface CrossChainProvider {
 
 
     /**
-     * 查询跨链交易在其他链的处理状态
+     * Query the processing status of cross chain transactions in other chains
      * @param req
      * @return
      */
@@ -28,21 +28,21 @@ public interface CrossChainProvider {
 
 
     /**
-     * 查询跨链交易在其他链的处理状态
+     * Query the processing status of cross chain transactions in other chains
      * @param req
      * @return
      */
     Result<Transaction> getCrossTx(GetCrossTxStateReq req);
 
     /**
-     * 给全网发信号，对指定跨链交易重新进行拜赞庭验证
+     * Send a signal to the entire network to re validate the designated cross chain transactions through the Byzantine Court
      * @param req
      * @return
      */
     Result<String> rehandleCtx(RehandleCtxReq req);
 
     /**
-     * 创建一个通知所有节点重置本地验证人列表的交易
+     * Create a transaction that notifies all nodes to reset the local validator list
      * @param req
      * @return
      */

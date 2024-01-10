@@ -40,96 +40,96 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.StampedLock;
 
 /**
- * 每个链ID对应一个{@link ChainContext},维护一些链运行期间的信息,并负责链的初始化、启动、停止、销毁操作
+ * Each chainIDCorresponding to one{@link ChainContext},Maintain information during chain operation,And responsible for initializing the chain、start-up、cease、Destruction operation
  *
  * @author captain
  * @version 1.0
- * @date 18-11-20 上午10:46
+ * @date 18-11-20 morning10:46
  */
 public class ChainContext {
     /**
-     * 代表该链的运行状态
+     * Represents the operational status of the chain
      */
     private StatusEnum status;
 
     /**
-     * 是否进行区块同步,中途发生异常置为false,终止同步
+     * Whether to perform block synchronization,If an abnormality occurs midway, set it asfalse,Terminate synchronization
      */
     private boolean needSyn;
 
     /**
-     * 链ID
+     * chainID
      */
     private int chainId;
 
     /**
-     * 该链的系统交易类型
+     * The system transaction type of this chain
      */
     private List<Integer> systemTransactionType;
 
     /**
-     * 网络最新高度
+     * The latest height of the internet
      */
     private long networkHeight;
 
     /**
-     * 最新区块
+     * Latest Block
      */
     private Block latestBlock;
 
     /**
-     * 创世区块
+     * Genesis Block
      */
     private Block genesisBlock;
 
     /**
-     * 链的运行时参数
+     * The runtime parameters of the chain
      */
     private ConfigBean parameters;
 
     /**
-     * 获取锁对象
-     * 清理数据库,区块同步,分叉链维护,孤儿链维护获取该锁
+     * Get lock object
+     * Clean up the database,Block synchronization,Forked chain maintenance,Orphan chain maintenance obtains the lock
      */
     private StampedLock lock;
 
     /**
-     * 记录通用日志
+     * Record General Logs
      */
     private NulsLogger logger;
 
     /**
-     * 分叉链、孤儿链中重复hash计数器
+     * Forked chain、Repeated in orphan chainhashcounter
      */
     private Map<String, AtomicInteger> duplicateBlockMap;
 
     /**
-     * 记录某个打包地址是否已经进行过分叉通知,每个地址只通知一次
+     * Record whether a packaging address has undergone fork notification,Notify each address only once
      */
     private List<String> packingAddressList;
 
     /**
-     * 缓存的hash与高度映射,用于设置节点高度
+     * CachedhashMapping to height,Used to set node height
      */
     private Map<NulsHash, Long> cachedHashHeightMap;
 
     /**
-     * 已缓存的区块字节数
+     * Number of cached block bytes
      */
     private AtomicInteger cachedBlockSize;
 
     /**
-     * 一次区块下载过程中用到的参数
+     * Parameters used during a block download process
      */
     private BlockDownloaderParams downloaderParams;
 
     /**
-     * 同步区块缓存
+     * Synchronize block cache
      */
     private Map<Long, Block> blockMap = new ConcurrentHashMap<>(100);
 
     /**
-     * 孤儿区块关联的节点,维护孤儿区块时优先从这些节点下载
+     * Orphan block associated nodes,Prioritize downloading orphan blocks from these nodes when maintaining them
      */
     private Map<NulsHash, List<String>> orphanBlockRelatedNodes;
 
@@ -293,7 +293,7 @@ public class ChainContext {
         systemTransactionType = new ArrayList<>();
         needSyn = true;
         lock = new StampedLock();
-        //各类缓存初始化
+        //Various types of cache initialization
         SmallBlockCacher.init(chainId);
         SingleBlockCacher.init(chainId);
         BlockChainManager.init(chainId);
@@ -313,7 +313,7 @@ public class ChainContext {
     }
 
     /**
-     * 打印当前链信息
+     * Print current chain information
      */
     public void printChains() {
         Chain masterChain = BlockChainManager.getMasterChain(chainId);

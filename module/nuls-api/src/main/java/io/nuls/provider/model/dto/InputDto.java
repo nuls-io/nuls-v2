@@ -35,17 +35,17 @@ import io.nuls.core.rpc.model.ApiModelProperty;
  */
 @ApiModel
 public class InputDto {
-    @ApiModelProperty(description = "输入地址")
+    @ApiModelProperty(description = "Enter address")
     private String address;
-    @ApiModelProperty(description = "资产链ID")
+    @ApiModelProperty(description = "Asset ChainID")
     private int assetsChainId;
-    @ApiModelProperty(description = "资产ID")
+    @ApiModelProperty(description = "assetID")
     private int assetsId;
-    @ApiModelProperty(description = "花费金额")
+    @ApiModelProperty(description = "Spending amount")
     private String amount;
-    @ApiModelProperty(description = "地址的账本nonce值")
+    @ApiModelProperty(description = "Address ledgernoncevalue")
     private String nonce;
-    @ApiModelProperty(description = "解锁交易的标签（0 - 非解锁交易，1 - 解锁交易）")
+    @ApiModelProperty(description = "Unlock transaction tags（0 - Non unlocked transactions,1 - Unlock transaction）")
     private byte locked;
 
     public String getAddress() {

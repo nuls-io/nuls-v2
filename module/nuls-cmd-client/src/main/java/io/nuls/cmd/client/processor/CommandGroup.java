@@ -4,7 +4,7 @@ package io.nuls.cmd.client.processor;
  * @Author: zhoulijun
  * @Time: 2019-03-12 17:01
  * @Description:
- *   命令组
+ *   Command Group
  *   command group
  */
 public enum CommandGroup {

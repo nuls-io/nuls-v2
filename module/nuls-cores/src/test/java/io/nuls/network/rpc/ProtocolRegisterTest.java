@@ -50,11 +50,11 @@ public class ProtocolRegisterTest {
                 .scanPackage(Set.of(packageC));
         String kernelUrl = "ws://" + HostInfo.getLocalIP() + ":7771";
         /*
-         * 链接到指定地址
+         * Link to specified address
          * */
         ConnectManager.getConnectByUrl(kernelUrl);
         /*
-         * 和指定地址同步
+         * Synchronize with specified address
          * */
         ResponseMessageProcessor.syncKernel(kernelUrl);
 

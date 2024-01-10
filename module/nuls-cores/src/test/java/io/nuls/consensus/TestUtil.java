@@ -10,19 +10,19 @@ public class TestUtil {
     public static void initTable(int chainId){
         try {
             /*
-            创建共识节点表
+            Create consensus node table
             Create consensus node tables
             */
             RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSENSUS_AGENT+chainId);
 
             /*
-            创建共识信息表
+            Create consensus information table
             Create consensus information tables
             */
             RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSENSUS_DEPOSIT+chainId);
 
             /*
-            创建红黄牌信息表
+            Create a red and yellow card information table
             Creating Red and Yellow Card Information Table
             */
             RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSENSUS_PUNISH+chainId);

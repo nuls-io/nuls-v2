@@ -13,7 +13,7 @@ import java.util.function.Function;
 /**
  * @Author: zhoulijun
  * @Time: 2020-01-15 18:17
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Provider(Provider.ProviderType.RPC)
 public class ProtocolProviderForRpc extends BaseRpcService implements ProtocolProvider {

@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-23 14:36
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Provider(Provider.ProviderType.RPC)
 public class ContractProviderForRpc extends BaseRpcService implements ContractProvider {

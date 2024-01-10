@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 智能合约跨链交易处理类
+ * Smart contract cross chain transaction processing class
  * Cross chain transaction Processing Class
  *
  * @author tag

@@ -1,41 +1,41 @@
-# 网络模块
+# Network module
 
-## 为什么要有《网络模块》
+## Why do we need to have《Network module》
 
-网络模块保障了去中心化节点间的通讯，为NULS基础模块之一，提供最底层的网络通信、节点发现等服务。区块链的网络基础就是Peer to  Peer,即P2P。P2P网络中的所有参与者，可以是提供服务（server），也可以是资源使用者（client）。P2P网络的特点：去中心化、可扩展性、健壮性、高性价比、隐私保护、负载均衡。
+The network module ensures communication between decentralized nodes, providingNULSOne of the basic modules, providing the lowest level network communication、Node discovery and other services. The network foundation of blockchain isPeer to  Peer,NamelyP2P.P2PAll participants in the network can provide services（server）, can also be a resource user（client）.P2PThe characteristics of the network：Decentralization、Scalability、Robustness、High cost performance ratio、Privacy protection、Load balancing.
 
-## 《网络模块》要做什么
+## 《Network module》What to do
 
-网络模块是整个系统的基础模块，用来管理节点、节点间的连接及连接的状态、数据的发送与接收。网络模块不涉及复杂的业务逻辑。
+The network module is the fundamental module of the entire system, used to manage nodes、The connections between nodes and their status、Sending and receiving data. The network module does not involve complex business logic.
 
-* 接收到的网络消息，根据内核模块中的指令服务映射关系，推送消息相应的处理模块中。
+* The received network message is pushed to the corresponding processing module based on the instruction service mapping relationship in the kernel module.
 
-* 开放接口供其他模块封装好的消息调用推送到指定的peer节点以及广播到指定的网络组中。
+* Open interfaces for message calls encapsulated by other modules to be pushed to the specifiedpeerNode and broadcast to the specified network group.
 
-## 《网络模块》在系统中的定位
+## 《Network module》Positioning in the system
 
-* 网络模块是底层应用模块，任何需要网络通讯的模块都要通过网络模块来进行消息的收发。
-* 网络模块依赖核心模块进行服务接口的治理。
-* 网络模块按网络id（魔法参数） 来进行不同网络的构建。
-* 网络模块在卫星链中的节点在进行跨链网络组建时，需要链管理模块提供跨链配置信息。
-* 网络模块在子链中的节点在进行跨链网络组建时，需要跨链模块提供跨链配置信息。
+* The network module is the underlying application module, and any module that requires network communication must transmit and receive messages through the network module.
+* The network module relies on the core module for service interface governance.
+* Network module by networkid（Magic parameters） To build different networks.
+* When the nodes in the satellite chain of the network module are constructing a cross chain network, the chain management module needs to provide cross chain configuration information.
+* When nodes in the sub chain of a network module are constructing a cross chain network, the cross chain module needs to provide cross chain configuration information.
 
 
 
-## 模块配置
+## Module Configuration
 
 ```
-#本链服务端口
+#This chain service port
 port=18001
-#跨链服务端口
+#Cross chain service port
 crossPort=18002
-#魔法参数
+#Magic parameters
 packetMagic=55886633
-#种子连接节点
+#Seed Connection Node
 selfSeedIps=192.168.1.12:18001
-#最大入网连接数
+#Maximum number of network connections
 maxInCount=100
-#最大出网连接数
+#Maximum number of outbound connections
 maxOutCount=20
 ```
 

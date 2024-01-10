@@ -6,7 +6,7 @@ import java.lang.annotation.*;
  * @Author: zhoulijun
  * @Time: 2019-03-15 16:51
  * @Description:
- *   配置项可持久化
+ *   Configuration items can be persisted
  *   can save config item
  */
 @Target({ElementType.TYPE,ElementType.FIELD})

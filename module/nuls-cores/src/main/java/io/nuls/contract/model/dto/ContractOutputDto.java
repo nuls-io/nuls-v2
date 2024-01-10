@@ -36,11 +36,11 @@ import static io.nuls.contract.util.ContractUtil.bigInteger2String;
  */
 @ApiModel
 public class ContractOutputDto {
-    @ApiModelProperty(description = "转入地址")
+    @ApiModelProperty(description = "Transfer address")
     private String to;
-    @ApiModelProperty(description = "转入金额")
+    @ApiModelProperty(description = "Transfer amount")
     private String value;
-    @ApiModelProperty(description = "转入金额锁定时间")
+    @ApiModelProperty(description = "Transfer amount lock time")
     private long lockTime;
 
     public ContractOutputDto() {

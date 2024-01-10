@@ -33,7 +33,7 @@ import io.nuls.core.exception.NulsException;
 import java.util.List;
 
 /**
- * 资产流通接口
+ * Asset circulation interface
  *
  * @author lan
  * @date 2019/02/21
@@ -42,7 +42,7 @@ public interface TxCirculateService {
     ChainEventResult circulateCommit(List<Transaction> txs) throws Exception;
 
     /**
-     * 获取资产列表
+     * Obtain asset list
      * @param coinDataByte
      * @return
      * @throws NulsException
@@ -50,7 +50,7 @@ public interface TxCirculateService {
     List<CoinDataAssets> getChainAssetList(byte[] coinDataByte) throws NulsException;
 
     /**
-     * 查询链上资产流通量
+     * Query the circulating volume of assets on the chain
      * @param circulateChainId
      * @param assetChainId
      * @param assetId

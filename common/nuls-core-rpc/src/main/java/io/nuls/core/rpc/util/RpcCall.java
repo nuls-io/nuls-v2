@@ -10,7 +10,7 @@ import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import java.util.Map;
 
 /**
- * RPC调用工具类
+ * RPCCall Tool Class
  *
  * @author captain
  * @version 1.0
@@ -22,7 +22,7 @@ public class RpcCall {
     }
 
     /**
-     * 调用其他模块接口
+     * Call other module interfaces
      * Call other module interfaces
      */
     public static Object request(String moduleCode, String cmd, Map params, Long timeout) throws NulsException {

@@ -128,3 +128,4 @@ NULS-Wallet-linux64-alpha*
 genesis-block_*.json
 module_*.ncf
 nuls-v2.zip
+*.w

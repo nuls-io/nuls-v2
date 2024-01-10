@@ -48,7 +48,7 @@ public class BlockSynchronizerTest {
     @Test
     public void statistics() {
         BlockSynchronizer blockSynchronizer = new BlockSynchronizer(CHAIN_ID);
-        //测试一致节点比例,一致节点超过80%
+        //Test the proportion of consistent nodes,Consistent nodes exceeding80%
         List<Node> nodeList = new ArrayList<>();
         for (int i = 0; i < 80; i++) {
             Node node = new Node();
@@ -67,7 +67,7 @@ public class BlockSynchronizerTest {
         BlockDownloaderParams params = blockSynchronizer.statistics(nodeList, null);
         Assert.assertTrue(params.getNodes().size() == 80);
 
-        //测试一致节点比例,一致节点低于80%
+        //Test the proportion of consistent nodes,Consistent nodes below80%
         nodeList.clear();
         for (int i = 0; i < 79; i++) {
             Node node = new Node();
@@ -86,7 +86,7 @@ public class BlockSynchronizerTest {
         params = blockSynchronizer.statistics(nodeList, null);
         Assert.assertTrue(params.getNodes().size() == 0);
 
-        //测试一致节点hash与高度是否正确
+        //Testing Consistent NodeshashIs the height correct
         nodeList.clear();
         for (int i = 0; i < 88; i++) {
             Node node = new Node();

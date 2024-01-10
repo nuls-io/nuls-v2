@@ -43,116 +43,116 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * 节点信息类
+ * Node information class
  * Node information class
  *
  * @author tag
  * 2018/11/6
  */
-@ApiModel(name = "节点信息")
+@ApiModel(name = "Node information")
 public class Agent extends BaseNulsData {
 
     /**
-    * 节点地址
+    * Node address
     * agent address
     **/
-    @ApiModelProperty(description = "节点地址")
+    @ApiModelProperty(description = "Node address")
     private byte[] agentAddress;
 
     /**
-    * 打包地址
+    * Packaging address
     * packing address
     **/
-    @ApiModelProperty(description = "出块地址")
+    @ApiModelProperty(description = "Block address")
     private byte[] packingAddress;
 
     /**
-    * 奖励地址
+    * Reward Address
     * reward address
     * */
-    @ApiModelProperty(description = "奖励地址")
+    @ApiModelProperty(description = "Reward Address")
     private byte[] rewardAddress;
 
     /**
-    * 保证金
+    * Margin
     * deposit
     * */
-    @ApiModelProperty(description = "保证金")
+    @ApiModelProperty(description = "Margin")
     private BigInteger deposit;
 
     /**
-    * 佣金比例
+    * commission rate
     * commission rate
     * */
-    @ApiModelProperty(description = "佣金比例")
+    @ApiModelProperty(description = "commission rate")
     private byte commissionRate;
 
     /**
-    * 创建时间
+    * Creation time
     * create time
     **/
-    @ApiModelProperty(description = "创建时间")
+    @ApiModelProperty(description = "Creation time")
     private transient long time;
 
     /**
-    * 所在区块高度
+    * Block height
     * block height
     * */
-    @ApiModelProperty(description = "所在区块高度")
+    @ApiModelProperty(description = "Block height")
     private transient long blockHeight = -1L;
 
     /**
-    * 该节点注销所在区块高度
+    * The height of the block where the node is deregistered is located
     * Block height where the node logs out
     * */
-    @ApiModelProperty(description = "节点注销高度")
+    @ApiModelProperty(description = "Node deregistration height")
     private transient long delHeight = -1L;
 
     /**
-    *0:待共识 unConsensus, 1:共识中 consensus
+    *0:Pending consensus unConsensus, 1:In consensus consensus
     * */
-    @ApiModelProperty(description = "状态，0:待共识 unConsensus, 1:共识中 consensus")
+    @ApiModelProperty(description = "Status,0:Pending consensus unConsensus, 1:In consensus consensus")
     private transient int status;
 
     /**
-    * 信誉值
+    * Reputation value
     * credit value
     * */
-    @ApiModelProperty(description = "信誉值")
+    @ApiModelProperty(description = "Reputation value")
     private transient double creditVal;
 
     /**
-     *  总委托金额
+     *  Total entrusted amount
      *Total amount entrusted
      * */
-    @ApiModelProperty(description = "节点总委托金额")
+    @ApiModelProperty(description = "Total entrusted amount of nodes")
     private transient BigInteger totalDeposit = BigInteger.ZERO;
 
     /**
-     * 总委托金额，用于页面展示（由于2.4.1智能合约BUG引起，临时添加字段，后续版本需要删除）
+     * Total commission amount, used for page display（Due to2.4.1Smart contractsBUGCausing temporary addition of fields, which need to be deleted in subsequent versions）
      *
      * */
     private transient BigInteger reTotalDeposit = BigInteger.ZERO;
 
     /**
-     * 交易HASH
+     * transactionHASH
      * transaction hash
      * */
-    @ApiModelProperty(description = "创建该节点的交易HASH")
+    @ApiModelProperty(description = "Create transactions for this nodeHASH")
     private transient NulsHash txHash;
 
     /**
-    * 参与共识人数
+    * Number of participants in consensus
     * Participation in consensus
     * */
-    @ApiModelProperty(description = "参与共识人数")
+    @ApiModelProperty(description = "Number of participants in consensus")
     private transient int memberCount;
 
     /**
-    *别名不序列化
+    *Aliases are not serialized
     * Aliases not serialized
     * */
-    @ApiModelProperty(description = "节点别名")
+    @ApiModelProperty(description = "net aliases")
     private transient String alais;
     @Override
     public int size() {
@@ -285,7 +285,7 @@ public class Agent extends BaseNulsData {
     }
 
     /**
-    * 就算节点剩余可委托金额
+    * Even if there is a remaining commission amount for the node
     * Even if the remaining amount of the node can be delegated
     **/
     public BigInteger getAvailableDepositAmount(Chain chain) {
@@ -293,7 +293,7 @@ public class Agent extends BaseNulsData {
     }
 
     /**
-    * 判断该节点是否可委托
+    * Determine whether the node can be delegated
     * Determine whether the node can be delegated
     * */
     public boolean canDeposit(Chain chain) {

@@ -52,7 +52,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 进行资产跨连交易流通的处理
+ * Processing of asset cross transaction circulation
  *
  * @author lan
  * @date 2019/02/21
@@ -76,22 +76,22 @@ public class TxCirculateCmd extends BaseChainCmd {
     private MessageService messageService;
 
     /**
-     * 查询链上资产
+     * Query on chain assets
      */
     @CmdAnnotation(cmd = RpcConstants.CMD_GET_CIRCULATE_CHAIN_ASSET, version = 1.0,
-            description = "查询资产信息")
+            description = "Query asset information")
     @Parameters(value = {
-            @Parameter(parameterName = "circulateChainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "运行的链ID,取值区间[1-65535]"),
-            @Parameter(parameterName = "assetChainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "资产Id,取值区间[1-65535]")
+            @Parameter(parameterName = "circulateChainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "Running ChainID,Value range[1-65535]"),
+            @Parameter(parameterName = "assetChainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "Asset ChainId,Value range[1-65535]"),
+            @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "assetId,Value range[1-65535]")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象",
+    @ResponseData(name = "Return value", description = "Return aMapobject",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-                    @Key(name = "circulateChainId", valueType = Integer.class, description = "运行的链ID"),
-                    @Key(name = "assetChainId", valueType = Integer.class, description = "资产链ID"),
-                    @Key(name = "assetId", valueType = Integer.class, description = "资产ID"),
-                    @Key(name = "initNumber", valueType = BigInteger.class, description = "初始资产数量"),
-                    @Key(name = "chainAssetAmount", valueType = BigInteger.class, description = "现有资产数量")
+                    @Key(name = "circulateChainId", valueType = Integer.class, description = "Running ChainID"),
+                    @Key(name = "assetChainId", valueType = Integer.class, description = "Asset ChainID"),
+                    @Key(name = "assetId", valueType = Integer.class, description = "assetID"),
+                    @Key(name = "initNumber", valueType = BigInteger.class, description = "Initial asset quantity"),
+                    @Key(name = "chainAssetAmount", valueType = BigInteger.class, description = "Number of existing assets")
             })
     )
     public Response getCirculateChainAsset(Map params) {
@@ -119,17 +119,17 @@ public class TxCirculateCmd extends BaseChainCmd {
 
 
     /**
-     * 跨链流通校验
+     * Cross chain circulation verification
      */
     @CmdAnnotation(cmd = RpcConstants.CMD_ASSET_CIRCULATE_VALIDATOR, version = 1.0,
-            description = "查询资产信息")
+            description = "Query asset information")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "运行的链ID,取值区间[1-65535]"),
-            @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "交易Hex值")
+            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "Running ChainID,Value range[1-65535]"),
+            @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "transactionHexvalue")
     })
-    @ResponseData(description = "无特定返回值，没有错误即验证成功")
+    @ResponseData(description = "No specific return value, validation successful without errors")
     public Response assetCirculateValidator(Map params) {
-        //提取 从哪条链 转 哪条链，是否是跨链，链 手续费共多少？
+        //extract From which chain turn Which chain, whether it is cross chain, chain How much is the total handling fee？
         try {
             String txHex = String.valueOf(params.get("tx"));
             Transaction tx = TxUtil.buildTxData(txHex);
@@ -159,18 +159,18 @@ public class TxCirculateCmd extends BaseChainCmd {
     }
 
     /**
-     * 跨链流通提交
+     * Cross chain circulation submission
      */
     @CmdAnnotation(cmd = RpcConstants.CMD_ASSET_CIRCULATE_COMMIT, version = 1.0,
-            description = "查询资产信息")
+            description = "Query asset information")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行的链ID,取值区间[1-65535]"),
-            @Parameter(parameterName = "txList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "交易Hex值列表"),
-            @Parameter(parameterName = "blockHeader", requestType = @TypeDescriptor(value = String.class), parameterDes = "区块头Hex值")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Running ChainID,Value range[1-65535]"),
+            @Parameter(parameterName = "txList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "transactionHexValue List"),
+            @Parameter(parameterName = "blockHeader", requestType = @TypeDescriptor(value = String.class), parameterDes = "Block headHexvalue")
     })
-    @ResponseData(description = "无特定返回值，没有错误即提交成功")
+    @ResponseData(description = "No specific return value, submit successfully without errors")
     public Response assetCirculateCommit(Map params) {
-        //A链转B链资产X，数量N ;A链X资产减少N, B链 X资产 增加N。
+        //AChain transferBChain assetsXquantityN ;AchainXAsset reductionN, Bchain Xasset increaseN.
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"));
             ObjectUtils.canNotEmpty(params.get("blockHeader"));
@@ -198,7 +198,7 @@ public class TxCirculateCmd extends BaseChainCmd {
                 /*end bak height*/
             } catch (Exception e) {
                 LoggerUtil.logger().error(e);
-                //进行回滚
+                //Performing a rollback
                 cacheDataService.rollBlockTxs(chainId, commitHeight);
                 return failed(e.getMessage());
             }
@@ -213,16 +213,16 @@ public class TxCirculateCmd extends BaseChainCmd {
     }
 
     /**
-     * 跨链流通回滚
+     * Cross chain circulation rollback
      */
     @CmdAnnotation(cmd = RpcConstants.CMD_ASSET_CIRCULATE_ROLLBACK, version = 1.0,
-            description = "查询资产信息")
+            description = "Query asset information")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行的链ID,取值区间[1-65535]"),
-            @Parameter(parameterName = "txList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "交易Hex值列表"),
-            @Parameter(parameterName = "blockHeader", requestType = @TypeDescriptor(value = String.class), parameterDes = "区块头Hex值")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Running ChainID,Value range[1-65535]"),
+            @Parameter(parameterName = "txList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "transactionHexValue List"),
+            @Parameter(parameterName = "blockHeader", requestType = @TypeDescriptor(value = String.class), parameterDes = "Block headHexvalue")
     })
-    @ResponseData(description = "无特定返回值，没有错误即验证成功")
+    @ResponseData(description = "No specific return value, validation successful without errors")
 
     public Response assetCirculateRollBack(Map params) {
         Map<String, Boolean> resultMap = new HashMap<>();
@@ -241,13 +241,13 @@ public class TxCirculateCmd extends BaseChainCmd {
             if (!parseResponse.isSuccess()) {
                 return parseResponse;
             }
-            //高度先回滚
+            //Roll back height first
             CacheDatas circulateTxDatas = cacheDataService.getCacheDatas(commitHeight - 1);
             if (null == circulateTxDatas) {
                 LoggerUtil.logger().info("chain module height ={} bak datas is null,maybe had rolled", commitHeight);
                 return success(resultMap);
             }
-            //进行数据回滚
+            //Performing data rollback
             cacheDataService.rollBlockTxs(chainId, commitHeight);
         } catch (Exception e) {
             Log.error(e);
@@ -257,16 +257,16 @@ public class TxCirculateCmd extends BaseChainCmd {
     }
 
     @CmdAnnotation(cmd = RpcConstants.CMD_UPDATE_CHAIN_ASSET, version = 1.0,
-            description = "查询更新流通资产信息")
+            description = "Query and update circulating asset information")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产链ID,取值区间[1-65535]"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Asset ChainID,Value range[1-65535]"),
             @Parameter(parameterName = "assets", requestType = @TypeDescriptor(value = List.class, collectionElement = Map.class, mapKeys = {
-                    @Key(name = "assetId", valueType = Integer.class, description = "资产id"),
-                    @Key(name = "availableAmount", valueType = BigInteger.class, description = "可用金额"),
-                    @Key(name = "freeze", valueType = BigInteger.class, description = "冻结金额"),
-            }), parameterDes = "资产id列表")
+                    @Key(name = "assetId", valueType = Integer.class, description = "assetid"),
+                    @Key(name = "availableAmount", valueType = BigInteger.class, description = "Available amount"),
+                    @Key(name = "freeze", valueType = BigInteger.class, description = "Freeze amount"),
+            }), parameterDes = "assetidlist")
     })
-    @ResponseData(description = "无特定返回值，没有错误即验证成功")
+    @ResponseData(description = "No specific return value, validation successful without errors")
     public Response updateChainAsset(Map params) {
         List<Map<String, Object>> assets = new ArrayList<>();
         int chainId = 0;

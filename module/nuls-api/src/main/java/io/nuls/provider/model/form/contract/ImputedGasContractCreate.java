@@ -34,14 +34,14 @@ import io.nuls.v2.util.ContractUtil;
  * @author: PierreLuo
  * @date: 2018/4/20
  */
-@ApiModel(description = "估算创建智能合约的Gas消耗的表单数据")
+@ApiModel(description = "Estimating the cost of creating a smart contractGasConsumed form data")
 public class ImputedGasContractCreate extends Base {
 
-    @ApiModelProperty(description = "交易创建者", required = true)
+    @ApiModelProperty(description = "Transaction Creator", required = true)
     private String sender;
-    @ApiModelProperty(description = "智能合约代码(字节码的Hex编码字符串)", required = true)
+    @ApiModelProperty(description = "Smart Contract Code(BytecodeHexEncoding string)", required = true)
     private String contractCode;
-    @ApiModelProperty(description = "参数列表", required = false)
+    @ApiModelProperty(description = "parameter list", required = false)
     private Object[] args;
 
     public String[][] getArgs(String[] types) {

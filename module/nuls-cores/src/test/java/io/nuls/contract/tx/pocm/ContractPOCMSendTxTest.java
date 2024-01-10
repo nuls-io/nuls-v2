@@ -55,7 +55,7 @@ import static io.nuls.contract.constant.ContractCmdConstant.*;
 public class ContractPOCMSendTxTest extends BaseQuery {
 
     /**
-     * 创建合约
+     * Create Contract
      */
     @Test
     public void createConsensusEnhancementContract() throws Exception {
@@ -84,7 +84,7 @@ public class ContractPOCMSendTxTest extends BaseQuery {
     }
 
     /**
-     * 创建节点
+     * Create nodes
      * */
     @Test
     public void createAgent()throws Exception{
@@ -101,7 +101,7 @@ public class ContractPOCMSendTxTest extends BaseQuery {
     }
 
     /**
-     * 创建节点2
+     * Create nodes2
      * */
     @Test
     public void createAgent2()throws Exception{
@@ -119,7 +119,7 @@ public class ContractPOCMSendTxTest extends BaseQuery {
 
 
     /**
-     * 停止节点
+     * Stop node
      * */
     @Test
     public void stopAgent()throws Exception{
@@ -142,7 +142,7 @@ public class ContractPOCMSendTxTest extends BaseQuery {
     }
 
     /**
-     * 委托节点
+     * Delegate node
      * */
     @Test
     public void depositAgent()throws Exception{
@@ -157,7 +157,7 @@ public class ContractPOCMSendTxTest extends BaseQuery {
     }
 
     /**
-     * 取消委托节点
+     * Cancel delegation node
      * */
     @Test
     public void withdraw()throws Exception{
@@ -171,7 +171,7 @@ public class ContractPOCMSendTxTest extends BaseQuery {
     }
 
     /**
-     * 流程 - 创建TOKEN, POCM, 添加节点，抵押，退出
+     * flow - establishTOKEN, POCM, Add node, mortgage, exit
      */
     @Test
     public void testConsensusDepositOthersProcessor() throws Exception {
@@ -241,7 +241,7 @@ public class ContractPOCMSendTxTest extends BaseQuery {
     }
 
     /**
-     * 流程 - 创建TOKEN, POCM, 抵押，领取
+     * flow - establishTOKEN, POCM, Mortgage, claim
      */
     @Test
     public void testConsensusDepositReceiveAwardsProcessor() throws Exception {
@@ -268,7 +268,7 @@ public class ContractPOCMSendTxTest extends BaseQuery {
     }
 
     /**
-     * 流程 - 指定合约地址 抵押、领取
+     * flow - Specify contract address mortgage、receive
      */
     @Test
     public void testDepositReceiveAwardsProcessor() throws Exception {
@@ -289,7 +289,7 @@ public class ContractPOCMSendTxTest extends BaseQuery {
     }
 
     /**
-     * 流程 - 指定合约地址 退出
+     * flow - Specify contract address quit
      */
     @Test
     public void testQuitProcessor() throws Exception {
@@ -308,7 +308,7 @@ public class ContractPOCMSendTxTest extends BaseQuery {
         String filePath = ContractPOCMSendTxTest.class.getResource("/pocmContract-v3").getFile();
         InputStream in = new FileInputStream(filePath);
         byte[] contractCode = IOUtils.toByteArray(in);
-        String remark = "POCM - consensus enhancement contract test - POCM_共识加强合约";
+        String remark = "POCM - consensus enhancement contract test - POCM_Consensus Strengthening Contract";
         Object[] args = new Object[]{nrc20Locked, 5000, 2, 500, 2, true, 1, authCode, null, null};
         Map params = this.makeCreateParams(sender, contractCode, "pocm_enhancement", remark, args);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
@@ -345,7 +345,7 @@ public class ContractPOCMSendTxTest extends BaseQuery {
         String filePath = ContractTest.class.getResource("/nrc20-locked-token").getFile();
         InputStream in = new FileInputStream(filePath);
         byte[] contractCode = IOUtils.toByteArray(in);
-        String remark = "create contract test - 锁定空气币";
+        String remark = "create contract test - Lock Air Coin";
         String name = "KQB";
         String symbol = "KongQiBi";
         String amount = BigDecimal.TEN.pow(10).toPlainString();
@@ -374,19 +374,19 @@ public class ContractPOCMSendTxTest extends BaseQuery {
         Assert.assertTrue(JSONUtils.obj2PrettyJson(map), (Boolean) ((Map)(map.get("contractResult"))).get("success"));
     }
     /**
-     * 调用合约 - 项目发布者创建节点
+     * Call Contract - Project publisher creates nodes
      */
     @Test
     public void createAgentByOwner() throws Exception {
         BigInteger value = BigInteger.valueOf(20000_00000000L);
         String methodName = "createAgentByOwner";
         String methodDesc = "";
-        String remark = "项目发布者创建节点";
+        String remark = "Project publisher creates nodes";
         this.invokeCall(sender, value, contractAddress, methodName, methodDesc, remark);
     }
 
     /**
-     * 调用合约
+     * Call Contract
      */
     @Test
     public void addOtherAgent() throws Exception {
@@ -399,25 +399,25 @@ public class ContractPOCMSendTxTest extends BaseQuery {
     }
 
     /**
-     * 调用合约 - 投资者抵押
+     * Call Contract - Investor collateral
      */
     @Test
     public void depositForOwn() throws Exception {
         BigInteger value = BigInteger.valueOf(30001_00000000L);
         String methodName = "depositForOwn";
         String methodDesc = "";
-        String remark = "投资者抵押";
+        String remark = "Investor collateral";
         this.invokeCall(sender, value, contractAddress, methodName, methodDesc, remark);
     }
     /**
-     * 调用合约 - 投资者退出抵押
+     * Call Contract - Investor withdrawal from mortgage
      */
     @Test
     public void quit() throws Exception {
         BigInteger value = BigInteger.ZERO;
         String methodName = "quit";
         String methodDesc = "";
-        String remark = "投资者退出抵押";
+        String remark = "Investor withdrawal from mortgage";
         this.invokeCall(sender, value, contractAddress, methodName, methodDesc, remark, 0);
     }
 
@@ -426,43 +426,43 @@ public class ContractPOCMSendTxTest extends BaseQuery {
         BigInteger value = BigInteger.ZERO;
         String methodName = "withdraw";
         String methodDesc = "";
-        String remark = "投资者退出抵押";
+        String remark = "Investor withdrawal from mortgage";
         this.invokeCall(sender, value, contractAddress, methodName, methodDesc, remark, 50000_00000000L);
     }
 
     /**
-     * 调用合约 - 共识保证金解锁后，退还所有申请过退出的用户的押金 - 合约拥有者操作
+     * Call Contract - After unlocking the consensus deposit, refund the deposit of all users who have applied for withdrawal - Contract owner operation
      */
     @Test
     public void refundAllUnLockDepositByOwner() throws Exception {
         BigInteger value = BigInteger.ZERO;
         String methodName = "refundAllUnLockDepositByOwner";
         String methodDesc = "";
-        String remark = "共识保证金解锁后，退还所有申请过退出的用户的押金 - 合约拥有者操作";
+        String remark = "After unlocking the consensus deposit, refund the deposit of all users who have applied for withdrawal - Contract owner operation";
         this.invokeCall(sender, value, contractAddress, methodName, methodDesc, remark);
     }
 
     /**
-     * 调用合约 - 共识保证金解锁后，退还申请过退出的用户的押金 - 投资用户操作
+     * Call Contract - After unlocking the consensus deposit, refund the deposit of users who have applied for withdrawal - Investment User Operations
      */
     @Test
     public void takeBackUnLockDeposit() throws Exception {
         BigInteger value = BigInteger.ZERO;
         String methodName = "takeBackUnLockDeposit";
         String methodDesc = "";
-        String remark = "共识保证金解锁后，退还申请过退出的用户的押金 - 投资用户操作";
+        String remark = "After unlocking the consensus deposit, refund the deposit of users who have applied for withdrawal - Investment User Operations";
         this.invokeCall(toAddress0, value, contractAddress, methodName, methodDesc, remark);
     }
 
     /**
-     * 调用合约 - 合约创建者获取共识奖励金额
+     * Call Contract - Contract creator obtains consensus reward amount
      */
     @Test
     public void transferConsensusReward() throws Exception {
         BigInteger value = BigInteger.ZERO;
         String methodName = "transferConsensusRewardByOwner";
         String methodDesc = "";
-        String remark = "合约创建者获取共识奖励金额";
+        String remark = "Contract creator obtains consensus reward amount";
         this.invokeCall(sender, value, contractAddress, methodName, methodDesc, remark);
     }
 
@@ -477,55 +477,55 @@ public class ContractPOCMSendTxTest extends BaseQuery {
     }
 
     /**
-     * 调用合约 - 合约拥有者赎回共识保证金
+     * Call Contract - Contract owner redeems consensus margin
      */
     @Test
     public void takeBackConsensusCreateAgentDepositByOwner() throws Exception {
         BigInteger value = BigInteger.ZERO;
         String methodName = "takeBackConsensusCreateAgentDepositByOwner";
         String methodDesc = "";
-        String remark = "合约拥有者赎回共识保证金";
+        String remark = "Contract owner redeems consensus margin";
         this.invokeCall(sender, value, contractAddress, methodName, methodDesc, remark);
     }
 
     /**
-     * 调用合约 - 合约拥有者委托自己的节点
+     * Call Contract - The contract owner entrusts their own node
      */
     @Test
     public void depositConsensusManuallyByOwner() throws Exception {
         BigInteger value = BigInteger.ZERO;
         String methodName = "depositConsensusManuallyByOwner";
         String methodDesc = "";
-        String remark = "合约拥有者委托自己的节点";
+        String remark = "The contract owner entrusts their own node";
         this.invokeCall(sender, value, contractAddress, methodName, methodDesc, remark);
     }
 
     /**
-     * 调用合约 - 合约拥有者注销节点
+     * Call Contract - Contract owner cancellation node
      */
     @Test
     public void stopAgentManuallyByOwner() throws Exception {
         BigInteger value = BigInteger.ZERO;
         String methodName = "stopAgentManuallyByOwner";
         String methodDesc = "";
-        String remark = "合约拥有者注销节点";
+        String remark = "Contract owner cancellation node";
         this.invokeCall(sender, value, contractAddress, methodName, methodDesc, remark);
     }
 
     /**
-     * 调用合约 - 调用_payable
+     * Call Contract - call_payable
      */
     @Test
     public void payable() throws Exception {
         BigInteger value = BigInteger.ZERO;
         String methodName = "_payable";
         String methodDesc = "";
-        String remark = "payable无参测试";
+        String remark = "payableNo parameter testing";
         this.invokeCall(sender, value, contractAddress, methodName, methodDesc, remark);
     }
 
     /**
-     * 向合约地址转账
+     * Transfer to the contracted address
      */
     @Test
     public void transfer2Contract() throws Exception {
@@ -540,7 +540,7 @@ public class ContractPOCMSendTxTest extends BaseQuery {
     }
 
     /**
-     * 调用视图方法 - 合约整体信息
+     * Call View Method - Overall contract information
      */
     @Test
     public void getContractWholeInfo() throws Exception {

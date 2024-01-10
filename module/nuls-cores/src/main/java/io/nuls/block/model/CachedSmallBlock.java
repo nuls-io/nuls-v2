@@ -30,28 +30,28 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 缓存的区块对象,用于区块广播、转发
+ * Cached block objects,Used for block broadcasting、transmit
  *
  * @author captain
  * @version 1.0
- * @date 18-12-13 下午3:01
+ * @date 18-12-13 afternoon3:01
  */
 public class CachedSmallBlock {
 
     /**
-     * 缺失的交易
+     * Missing transactions
      */
     private List<NulsHash> missingTransactions;
 
     private SmallBlock smallBlock;
 
     /**
-     * 已有的交易集合
+     * Existing transaction sets
      */
     private Map<NulsHash, Transaction> txMap;
 
     /**
-     * 来自哪个节点
+     * From which node
      */
     private String nodeId;
 

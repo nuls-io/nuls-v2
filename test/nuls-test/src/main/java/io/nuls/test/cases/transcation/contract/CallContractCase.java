@@ -46,7 +46,7 @@ public class CallContractCase extends BaseTestCase<String, Map> {
 
     @Override
     public String title() {
-        return "调用合约";
+        return "Call Contract";
     }
 
     @Override

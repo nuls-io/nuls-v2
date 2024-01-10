@@ -25,7 +25,7 @@
 package io.nuls.core.constant;
 
 /**
- * 交易状态枚举
+ * Transaction status enumeration
  * Enumeration of transaction status
  * 0: not packaged
  * 1: packaged and saved
@@ -35,17 +35,17 @@ package io.nuls.core.constant;
 public enum TxStatusEnum {
 
     /**
-     * 未确认状态
+     * Unconfirmed status
      * not packaged
      */
     UNCONFIRM((byte)0),
     /**
-     * 已确认状态
+     * Confirmed status
      * packaged and saved
      */
     CONFIRMED((byte)1),
     /**
-     * 已打包状态
+     * Packaged status
      * packaged and saved
      */
     BYZANTINE_COMPLETE((byte)2);

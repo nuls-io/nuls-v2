@@ -50,11 +50,11 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 虚拟核心模块启动类
+ * Virtual Core Module Startup Class
  *
  * @author captain
  * @version 1.0
- * @date 18-11-8 上午10:20
+ * @date 18-11-8 morning10:20
  */
 @Component
 @Setter
@@ -92,45 +92,45 @@ public class MyKernelBootstrap implements ModuleConfig {
     }
 
     /**
-     * 启动所有子模块
-     * 遍历/Modules/Nuls目录，通过判断目录中是否存在module.ncf文件来确定当前是否为可启动模块
-     * 找到模块后，调用./start.sh脚本启动子模块
+     * Start all sub modules
+     * ergodic/Modules/NulsDirectory, by determining whether it exists in the directorymodule.ncfFile to determine if it is currently a bootable module
+     * After finding the module, call./start.shScript startup submodule
      * @param args
      */
     private void startOtherModule(String[] args) {
-        //启动时第一个参数值为"startModule"时启动所有子模块
+        //The first parameter value at startup is"startModule"Start all submodules when
         if (args.length > 0 && "startModule".equals(args[0])) {
-            //增加程序结束的钩子，监听到主线程停止时，调用./stop.sh停止所有的子模块
+            //Add a hook to end the program and call when the main thread stops listening./stop.shStop all submodules
             Runtime.getRuntime().addShutdownHook(new Thread(()->{
                 log.info("jvm shutdown");
-                log.info("停止子模块");
-                log.info("停止脚本列表");
+                log.info("Stop submodule");
+                log.info("Stop Script List");
                 MODULE_STOP_LIST_SCRIPT.stream().forEach(log::info);
                 MODULE_STOP_LIST_SCRIPT.stream().forEach(stop->{
                     try {
                         printRuntimeConsole(Runtime.getRuntime().exec(stop));
-                        log.info("停止子模块:{}",stop);
+                        log.info("Stop submodule:{}",stop);
                     } catch (IOException e) {
-                        log.error("调用脚本停止模块出现异常：{}",stop);
+                        log.error("An exception occurred when calling the script to stop the module：{}",stop);
                     }
                 });
             }));
             ThreadUtils.createAndRunThread("startModule",()->{
                 try {
-                    //等待mykernel启动完毕
+                    //wait formykernelStart completed
                     while (!ConnectManager.isReady()) {
                         TimeUnit.SECONDS.sleep(5);
                     }
-                    //获取Modules目录
+                    //obtainModulescatalogue
                     File modules = new File(args[1]);
-                    //遍历modules目录查找带有module.ncf文件的目录
+                    //ergodicmodulesCatalog lookup withmodule.ncfDirectory of files
                     try{
                         findModule(modules);
                     }catch (Exception e1){
-                        log.error("启动模块发生错误:{}", modules.getName());
+                        log.error("Error in launching module:{}", modules.getName());
                     }
                 }catch(Exception e){
-                    log.error("启动模块发生错误");
+                    log.error("Error in launching module");
                 }
             });
 
@@ -138,7 +138,7 @@ public class MyKernelBootstrap implements ModuleConfig {
     }
 
     /**
-     * 递归遍历Modules目录
+     * Recursive traversalModulescatalogue
      * @param modules
      * @throws Exception
      */
@@ -154,13 +154,13 @@ public class MyKernelBootstrap implements ModuleConfig {
             try {
                 findModule(f);
             } catch (Exception e) {
-                log.error("启动模块发生错误:{}", f.getName(), e);
+                log.error("Error in launching module:{}", f.getName(), e);
             }
         });
     }
 
     /**
-     * 启动模块
+     * Start module
      * @param modules
      * @throws Exception
      */
@@ -192,7 +192,7 @@ public class MyKernelBootstrap implements ModuleConfig {
                     }
                     printRuntimeConsole(process);
                 } catch (IOException e) {
-                    log.error("启动模块异常",e);
+                    log.error("Abnormal startup module",e);
                 }
             });
         }

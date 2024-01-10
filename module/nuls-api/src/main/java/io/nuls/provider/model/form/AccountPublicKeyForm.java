@@ -33,13 +33,13 @@ import io.nuls.core.rpc.model.ApiModelProperty;
  * @author: PierreLuo
  * @date: 2020-04-07
  */
-@ApiModel(name = "根据账户公钥生成账户地址")
+@ApiModel(name = "Generate account address based on account public key")
 public class AccountPublicKeyForm {
 
-    @ApiModelProperty(description = "链ID")
+    @ApiModelProperty(description = "chainID")
     private int chainId;
 
-    @ApiModelProperty(description = "账户公钥")
+    @ApiModelProperty(description = "Account public key")
     private String publicKey;
 
     public String getPublicKey() {

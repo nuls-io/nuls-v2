@@ -1,6 +1,6 @@
 package io.nuls.consensus.model.dto.input;
 /**
- * 创建节点参数类
+ * Create node parameter class
  * Creating Node Parameter Classes
  *
  * @author tag

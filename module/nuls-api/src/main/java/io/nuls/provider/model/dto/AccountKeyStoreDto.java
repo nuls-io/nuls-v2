@@ -34,16 +34,16 @@ import java.util.Map;
 /**
  * @author: Charlie
  */
-@ApiModel(description = "账户KeyStoreJSON")
+@ApiModel(description = "accountKeyStoreJSON")
 public class AccountKeyStoreDto {
 
-    @ApiModelProperty(description = "账户地址")
+    @ApiModelProperty(description = "Account address")
     private String address;
-    @ApiModelProperty(description = "加密后的私钥")
+    @ApiModelProperty(description = "Encrypted private key")
     private String encryptedPrivateKey;
-    @ApiModelProperty(description = "公钥")
+    @ApiModelProperty(description = "Public key")
     private String pubKey;
-    @ApiModelProperty(description = "私钥")
+    @ApiModelProperty(description = "Private key")
     private String prikey;
 
     public AccountKeyStoreDto() {}

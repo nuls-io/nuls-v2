@@ -35,8 +35,8 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * 孤儿交易封装处理类
- * 按照交易nonce链，一笔交易可以有多个上笔交易(多个from), 但只有一笔下一个交易
+ * Orphan transaction encapsulation processing class
+ * According to the transactionnonceChain, a transaction can have multiple previous transactions(Multiplefrom), But there's only one next transaction
  *
  * @author: Charlie
  * @date: 2019/5/6
@@ -44,12 +44,12 @@ import java.util.List;
 public class Orphans {
 
     /**
-     * 当前孤儿交易
+     * Current Orphan Trading
      */
     private TransactionNetPO tx;
 
     /**
-     * 能连上当前交易的下一笔交易
+     * The next transaction that can connect to the current transaction
      */
     private Orphans next;
 
@@ -94,8 +94,8 @@ public class Orphans {
 
 
     /**
-     * 判断传入的交易是否是本交易的上一笔交易
-     * 本交易from中是否有nonce与传入交易的hash后8位匹配
+     * Determine whether the incoming transaction is the previous transaction of this transaction
+     * This transactionfromDoes it exist in the middlenonceRelated to incoming transactionshashafter8Bit matching
      * @param txNet
      * @return
      */
@@ -110,8 +110,8 @@ public class Orphans {
     }
 
     /**
-     * 判断传入的交易是否是本交易的后一笔交易
-     * 传入交易from中是否有nonce与本交易的hash后8位匹配
+     * Determine whether the incoming transaction is the next transaction of this transaction
+     * Incoming transactionfromDoes it exist in the middlenonceRelated to this transactionhashafter8Bit matching
      * @param txNet
      * @return
      */

@@ -8,7 +8,7 @@ import io.nuls.transaction.model.po.TransactionConfirmedPO;
 import java.util.List;
 
 /**
- * 已确认交易的服务接口
+ * Confirmed transaction service interface
  * @author: Charlie
  * @date: 2018/11/30
  */
@@ -17,7 +17,7 @@ public interface ConfirmedTxService {
     /**
      * Get a confirmed transaction
      *
-     * 获取一笔已打包进区块并且确认的交易
+     * Obtain a transaction that has been packaged into a block and confirmed
      * @param chain
      * @param hash
      * @return TransactionConfirmedPO
@@ -25,7 +25,7 @@ public interface ConfirmedTxService {
     TransactionConfirmedPO getConfirmedTransaction(Chain chain, NulsHash hash);
 
     /**
-     * 保存创世块的交易
+     * Save transactions for Genesis blocks
      * @param chain
      * @param txStrList
      * @param blockHeader
@@ -35,7 +35,7 @@ public interface ConfirmedTxService {
     boolean saveGengsisTxList(Chain chain, List<String> txStrList, String blockHeader) throws NulsException;
 
     /**
-     * 保存区块中已确认交易
+     * Save confirmed transactions in the block
      * @param chain
      * @param txStrList
      * @param blockHeader
@@ -46,7 +46,7 @@ public interface ConfirmedTxService {
 
 
     /**
-     * 批量回滚已确认交易
+     * Batch rollback of confirmed transactions
      * @param chain
      * @param txHashList
      * @param blockHeader
@@ -56,8 +56,8 @@ public interface ConfirmedTxService {
 
 
     /**
-     * 获取区块的完整交易 只从已确认的交易中查询
-     * 如果没有查询到,或者查询到的不是区块完整的交易数据 则返回空list
+     * Obtain complete transactions for blocks Only query from confirmed transactions
+     * If no query is found,Or the transaction data queried is not complete for the block Then return emptylist
      * @param chain
      * @param hashList
      * @return List<String> tx list
@@ -65,9 +65,9 @@ public interface ConfirmedTxService {
     List<String> getTxList(Chain chain, List<String> hashList);
 
     /**
-     * 获取区块的完整交易 先查未确认交易, 再查已确认交易
-     * allHits:true 如果没有查询到,或者查询到的不是区块完整的交易数据 则返回空list
-     * allHits:false 查到多少返回多少，如果没有查询到则返回空list
+     * Obtain complete transactions for blocks First check for unconfirmed transactions, Re check confirmed transactions
+     * allHits:true If no query is found,Or the transaction data queried is not complete for the block Then return emptylist
+     * allHits:false Return as much as found, if not found, return emptylist
      * @param chain
      * @param hashList
      * @return List<String> tx list
@@ -76,7 +76,7 @@ public interface ConfirmedTxService {
 
 
     /**
-     * 查询出入的交易hash中,在未确认库中不存在的交易hash
+     * Query incoming and outgoing transactionshashin,Transactions that do not exist in the unconfirmed databasehash
      * @param chain
      * @param hashList
      * @return

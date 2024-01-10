@@ -7,42 +7,42 @@ import java.util.List;
 public interface ProtocolVersionStorageService {
 
     /**
-     * 保存指定链的版本统计信息
+     * Save version statistics for the specified chain
      * Save configuration information for the specified chain
      *
-     * @param po      版本统计类/config bean
-     * @param chainId 链Id/chain id
-     * @return 保存是否成功/Is preservation successful?
+     * @param po      Version statistics class/config bean
+     * @param chainId chainId/chain id
+     * @return Whether the save was successful/Is preservation successful?
      * @throws
      */
     boolean save(int chainId, ProtocolVersionPo po);
 
     /**
-     * 查询某条链的版本统计信息
+     * Query version statistics of a certain chain
      * Query the configuration information of a chain
      *
-     * @param chainId 链Id/chain id
-     * @param version 区块高度
-     * @return 版本统计信息类/config bean
+     * @param chainId chainId/chain id
+     * @param version block height
+     * @return Version statistics information class/config bean
      */
     ProtocolVersionPo get(int chainId, short version);
 
     /**
-     * 删除某条链的版本统计信息
+     * Delete version statistics for a certain chain
      * Delete configuration information for a chain
      *
-     * @param chainId 链Id/chain id
-     * @param version 区块高度
-     * @return 删除是否成功/Delete success
+     * @param chainId chainId/chain id
+     * @param version block height
+     * @return Whether the deletion was successful/Delete success
      */
     boolean delete(int chainId, short version);
 
     /**
-     * 获取当前节点所有的链信息
+     * Obtain all chain information of the current node
      * Get all the chain information of the current node
      *
-     * @param chainId 链Id/chain id
-     * @return 节点信息列表/Node information list
+     * @param chainId chainId/chain id
+     * @return Node Information List/Node information list
      */
     List<ProtocolVersionPo> getList(int chainId);
 

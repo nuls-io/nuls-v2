@@ -64,7 +64,7 @@ public class ThreadTest2 {
     }
 
     /**
-     * 注册消息处理器
+     * Register Message Processor
      *
      * @return
      */

@@ -36,7 +36,7 @@ import java.io.IOException;
 
 
 /**
- * 节点信息广播消息
+ * Node information broadcast message
  * local info send message body
  *
  * @author lan

@@ -22,7 +22,7 @@ import java.math.BigInteger;
 import java.util.*;
 
 /**
- * 智能合约委托交易处理器
+ * Smart Contract Entrustment Transaction Processor
  *
  * @author tag
  * @date 2019/12/2
@@ -57,17 +57,17 @@ public class ContractDepositProcessor implements TransactionProcessor {
             result.put("errorCode", ConsensusErrorCode.CHAIN_NOT_EXIST.getCode());
             return result;
         }
-        //chain.getLogger().info("进入版本三验证器" );
+        //chain.getLogger().info("Enter version three validator" );
         List<Transaction> invalidTxList = new ArrayList<>();
         String errorCode = null;
         Set<NulsHash> invalidHashSet = txValidator.getInvalidAgentHash(txMap.get(TxType.RED_PUNISH), txMap.get(TxType.CONTRACT_STOP_AGENT), txMap.get(TxType.STOP_AGENT), chain);
-        //个节点总委托金额
+        //Total entrusted amount for each node
         Map<NulsHash, BigInteger> agentDepositTotalMap = new HashMap<>(16);
         for (Transaction contractDepositTx : txs) {
             try {
                 Deposit deposit = new Deposit();
                 deposit.parse(contractDepositTx.getTxData(), 0);
-                //coinData地址
+                //coinDataaddress
                 if (!verifyV3(chain, contractDepositTx.getCoinDataInstance(), deposit.getAddress())) {
                     invalidTxList.add(contractDepositTx);
                     continue;
@@ -84,7 +84,7 @@ public class ContractDepositProcessor implements TransactionProcessor {
                 }
                 NulsHash agentHash = deposit.getAgentHash();
                 BigInteger totalDeposit = BigInteger.ZERO;
-                //验证委托金额是否超出节点最大委托量（冲突检测）
+                //Verify if the delegated amount exceeds the maximum delegated amount of the node（Conflict detection）
                 if (agentDepositTotalMap.containsKey(agentHash)) {
                     totalDeposit = agentDepositTotalMap.get(agentHash).add(deposit.getDeposit());
                     if (totalDeposit.compareTo(chain.getConfig().getCommissionMax()) > 0) {
@@ -139,7 +139,7 @@ public class ContractDepositProcessor implements TransactionProcessor {
                 commitResult = false;
             }
         }
-        //回滚已提交成功的交易
+        //Roll back transactions that have been successfully submitted
         if (!commitResult) {
             for (Transaction rollbackTx : commitSuccessList) {
                 try {
@@ -178,7 +178,7 @@ public class ContractDepositProcessor implements TransactionProcessor {
                 rollbackResult = false;
             }
         }
-        //保存已回滚成功的交易
+        //Save successfully rolled back transactions
         if (!rollbackResult) {
             for (Transaction commitTx : rollbackSuccessList) {
                 try {
@@ -193,10 +193,10 @@ public class ContractDepositProcessor implements TransactionProcessor {
     }
 
     /**
-     * 版本三新增的验证
+     * Verification added in version three
      * */
     private boolean verifyV3(Chain chain, CoinData coinData, byte[] creator)throws NulsException{
-        //验证from中地址与to中地址是否相同且为委托者
+        //validatefromMiddle address andtoIs the middle address the same and is it the principal
         if (!Arrays.equals(creator, coinData.getFrom().get(0).getAddress()) || !Arrays.equals(creator, coinData.getTo().get(0).getAddress())) {
             chain.getLogger().error("From address or to address in coinData is not the principal address");
             throw new NulsException(ConsensusErrorCode.COIN_DATA_VALID_ERROR);

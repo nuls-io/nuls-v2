@@ -38,7 +38,7 @@ import io.nuls.core.crypto.HexUtil;
 import java.io.File;
 
 /**
- * 根据keystore批量导入账户,
+ * according tokeystoreBatch import of accounts,
  *
  * @author: Charlie
  */

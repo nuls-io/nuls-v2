@@ -42,13 +42,13 @@ import java.util.*;
 public class ContractCall {
 
     /**
-     * 打包智能合约通知
+     * Packaging smart contract notification
      * @param chain
      * @param blockHeight
      * @param blockTime
      * @param packingAddress
      * @param preStateRoot
-     * @param blockType 该调用的处理模式, 打包:0, 验证区块:1
+     * @param blockType The processing mode of this call, pack:0, Verify Block:1
      * @return
      * @throws NulsException
      */
@@ -70,10 +70,10 @@ public class ContractCall {
 
     }
     /**
-     * 调用智能合约, 合约执行成功与否,不影响交易的打包
+     * Calling smart contracts, Whether the contract execution is successful or not,Does not affect the packaging of transactions
      * @param chain
      * @param tx
-     * @param blockType 该调用的处理模式, 打包:0, 验证区块:1
+     * @param blockType The processing mode of this call, pack:0, Verify Block:1
      * @return
      * @throws NulsException
      */
@@ -102,10 +102,10 @@ public class ContractCall {
     }
 
     /**
-     * 调用智能合约, 合约执行成功与否,不影响交易的打包
+     * Calling smart contracts, Whether the contract execution is successful or not,Does not affect the packaging of transactions
      * @param chain
      * @param tx
-     * @param blockType 该调用的处理模式, 打包:0, 验证区块:1
+     * @param blockType The processing mode of this call, pack:0, Verify Block:1
      * @return
      * @throws NulsException
      */
@@ -133,10 +133,10 @@ public class ContractCall {
     }
 
     /**
-     * 调用智能合约
+     * Calling smart contracts
      * @param chain
      * @param blockHeight
-     * @param blockType 该调用的处理模式, 打包:0, 验证区块:1
+     * @param blockType The processing mode of this call, pack:0, Verify Block:1
      * @return
      * @throws NulsException
      */
@@ -158,7 +158,7 @@ public class ContractCall {
     }
 
     /**
-     * 调用智能合约执行 验证区块交易的时候调用
+     * Calling smart contract execution Called when verifying block transactions
      * @param chain
      * @param blockHeight
      * @return
@@ -182,7 +182,7 @@ public class ContractCall {
         }
     }
     /**
-     * 调用智能合约执行 打包的时候调用
+     * Calling smart contract execution Call during packaging
      * @param chain
      * @param blockHeight
      * @return

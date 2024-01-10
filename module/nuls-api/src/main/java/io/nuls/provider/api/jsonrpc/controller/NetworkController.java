@@ -47,13 +47,13 @@ public class NetworkController {
     private NetworkProvider networkProvider = ServiceManager.get(NetworkProvider.class);
 
     @RpcMethod("getNetworkInfo")
-    @ApiOperation(description = "获取本节点的网络状态信息", order = 201)
-    @ResponseData(name = "返回值", description = "返回网络状态", responseType = @TypeDescriptor(value = NetworkInfo.class, mapKeys = {
-            @Key(name = "localBestHeight", description = "本地高度"),
-            @Key(name = "netBestHeight", description = "网络高度"),
-            @Key(name = "timeOffset", description = "时间偏移值"),
-            @Key(name = "inCount", description = "接入节点数"),
-            @Key(name = "outCount", description = "连出节点数"),
+    @ApiOperation(description = "Obtain network status information for this node", order = 201)
+    @ResponseData(name = "Return value", description = "Return to network status", responseType = @TypeDescriptor(value = NetworkInfo.class, mapKeys = {
+            @Key(name = "localBestHeight", description = "Local height"),
+            @Key(name = "netBestHeight", description = "Network height"),
+            @Key(name = "timeOffset", description = "Time offset value"),
+            @Key(name = "inCount", description = "Number of access nodes"),
+            @Key(name = "outCount", description = "Number of connected nodes"),
     }))
     public RpcResult getVersion(List<Object> params) {
         Result<NetworkInfo> result = networkProvider.getInfo();

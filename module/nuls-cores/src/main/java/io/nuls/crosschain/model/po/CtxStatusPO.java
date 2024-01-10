@@ -35,7 +35,7 @@ import io.nuls.core.parse.SerializeUtils;
 import java.io.IOException;
 
 /**
- * 保存已确认交易的数据
+ * Save confirmed transaction data
  *
  * @author: Charlie
  * @date: 2019/3/12

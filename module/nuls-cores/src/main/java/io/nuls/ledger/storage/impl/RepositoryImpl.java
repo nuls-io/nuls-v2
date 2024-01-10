@@ -62,7 +62,7 @@ public class RepositoryImpl implements Repository, InitializingBean {
     @Autowired
     private NulsCoresConfig config;
     /**
-     * key1=chainId,  Map1=确认账户状态， key2= addr+assetkey  value=AccountState
+     * key1=chainId,  Map1=Confirm account status, key2= addr+assetkey  value=AccountState
      */
     Map<String, Map<String, AccountState>> memChainsAccounts = new ConcurrentHashMap<>(16);
 
@@ -144,7 +144,7 @@ public class RepositoryImpl implements Repository, InitializingBean {
 
     @Override
     public AccountState getAccountStateByMemory(int chainId, String key) {
-        //缓存有值,则直接获取
+        //Cache has value,Then directly obtain
         if (null != memChainsAccounts.get(String.valueOf(chainId))) {
             AccountState accountStateMem = memChainsAccounts.get(String.valueOf(chainId)).get(key);
             if (null != accountStateMem) {
@@ -219,7 +219,7 @@ public class RepositoryImpl implements Repository, InitializingBean {
     }
 
     /**
-     * 初始化数据库
+     * Initialize database
      */
     public void initChainDb(int addressChainId) {
         try {

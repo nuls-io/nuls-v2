@@ -13,12 +13,12 @@ import java.util.Map;
 public class CrossChainCall {
 
     /**
-     * 批量保存交易
+     * Batch save transactions
      *
-     * @param chainId 链Id/chain id
+     * @param chainId chainId/chain id
      * @param height
      * @param blockHeader
-     * @param download 0区块下载中,1接收到最新区块
+     * @param download 0Blocking download in progress,1Received the latest block
      * @return
      */
     public static void heightNotice(int chainId, long height, String blockHeader, int download) {

@@ -82,11 +82,11 @@ public class CmmChainCmd extends BaseChainCmd {
     NulsCoresConfig nulsChainConfig;
 
     @CmdAnnotation(cmd = RpcConstants.CMD_CHAIN, version = 1.0,
-            description = "查看链信息")
+            description = "View chain information")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Asset ChainId,Value range[1-65535]"),
     })
-    @ResponseData(description = "返回链信息", responseType = @TypeDescriptor(value = RegChainDto.class))
+    @ResponseData(description = "Return Chain Information", responseType = @TypeDescriptor(value = RegChainDto.class))
     public Response chain(Map params) {
         try {
             int chainId = Integer.parseInt(params.get("chainId").toString());
@@ -108,42 +108,42 @@ public class CmmChainCmd extends BaseChainCmd {
 
 
     @CmdAnnotation(cmd = RpcConstants.CMD_CHAIN_REG, version = 1.0,
-            description = "链注册-用于平行链的跨链注册")
+            description = "Chain registration-Cross chain registration for parallel chains")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[3-65535]", parameterDes = "资产链Id,取值区间[3-65535]"),
-            @Parameter(parameterName = "chainName", requestType = @TypeDescriptor(value = String.class), parameterDes = "链名称"),
-            @Parameter(parameterName = "addressType", requestType = @TypeDescriptor(value = int.class), parameterDes = "1 使用NULS框架构建的链 生态内，2生态外"),
-            @Parameter(parameterName = "addressPrefix", requestType = @TypeDescriptor(value = String.class), parameterDes = "链地址前缀,1-5字符"),
-            @Parameter(parameterName = "magicNumber", requestType = @TypeDescriptor(value = long.class), parameterDes = "网络魔法参数"),
-            @Parameter(parameterName = "minAvailableNodeNum", requestType = @TypeDescriptor(value = int.class), parameterDes = "最小连接数"),
-            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "symbol", requestType = @TypeDescriptor(value = String.class), parameterDes = "资产符号"),
-            @Parameter(parameterName = "assetName", requestType = @TypeDescriptor(value = String.class), parameterDes = "资产名称"),
-            @Parameter(parameterName = "initNumber", requestType = @TypeDescriptor(value = String.class), parameterDes = "资产初始值"),
-            @Parameter(parameterName = "decimalPlaces", requestType = @TypeDescriptor(value = short.class), parameterDes = "资产小数点位数"),
-            @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "创建交易的账户地址"),
-            @Parameter(parameterName = "password", requestType = @TypeDescriptor(value = String.class), parameterDes = "账户密码"),
-            @Parameter(parameterName = "verifierList", requestType = @TypeDescriptor(value = String.class), parameterDes = "验证者地址名单列表,逗号分割"),
-            @Parameter(parameterName = "signatureBFTRatio", requestType = @TypeDescriptor(value = Integer.class), parameterDes = "拜占庭比例,大于等于该值为有效确认"),
-            @Parameter(parameterName = "maxSignatureCount", requestType = @TypeDescriptor(value = Integer.class), parameterDes = "最大签名数量,限制验证者签名列表的最大数")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[3-65535]", parameterDes = "Asset ChainId,Value range[3-65535]"),
+            @Parameter(parameterName = "chainName", requestType = @TypeDescriptor(value = String.class), parameterDes = "Chain Name"),
+            @Parameter(parameterName = "addressType", requestType = @TypeDescriptor(value = int.class), parameterDes = "1 applyNULSThe chain of framework construction Within the ecosystem,2Outside the ecosystem"),
+            @Parameter(parameterName = "addressPrefix", requestType = @TypeDescriptor(value = String.class), parameterDes = "Chain Address Prefix,1-5character"),
+            @Parameter(parameterName = "magicNumber", requestType = @TypeDescriptor(value = long.class), parameterDes = "Network Magic Parameters"),
+            @Parameter(parameterName = "minAvailableNodeNum", requestType = @TypeDescriptor(value = int.class), parameterDes = "Minimum number of connections"),
+            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "assetId,Value range[1-65535]"),
+            @Parameter(parameterName = "symbol", requestType = @TypeDescriptor(value = String.class), parameterDes = "Asset symbols"),
+            @Parameter(parameterName = "assetName", requestType = @TypeDescriptor(value = String.class), parameterDes = "Asset Name"),
+            @Parameter(parameterName = "initNumber", requestType = @TypeDescriptor(value = String.class), parameterDes = "Initial value of assets"),
+            @Parameter(parameterName = "decimalPlaces", requestType = @TypeDescriptor(value = short.class), parameterDes = "Decimal Places of Assets"),
+            @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "Create an account address for the transaction"),
+            @Parameter(parameterName = "password", requestType = @TypeDescriptor(value = String.class), parameterDes = "Account password"),
+            @Parameter(parameterName = "verifierList", requestType = @TypeDescriptor(value = String.class), parameterDes = "Verifier Address List,Comma division"),
+            @Parameter(parameterName = "signatureBFTRatio", requestType = @TypeDescriptor(value = Integer.class), parameterDes = "Byzantine proportion,A value greater than or equal to this is a valid confirmation"),
+            @Parameter(parameterName = "maxSignatureCount", requestType = @TypeDescriptor(value = Integer.class), parameterDes = "Maximum number of signatures,Limit the maximum number of verifier signature lists")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象",
+    @ResponseData(name = "Return value", description = "Return aMapobject",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-                    @Key(name = "txHash", valueType = String.class, description = "交易hash值"),
-                    @Key(name = "mainNetVerifierList", valueType = String.class, description = "主网验证人列表,逗号分隔"),
-                    @Key(name = "mainNetCrossSeedList", valueType = String.class, description = "主网验种子节点列表,逗号分隔")
+                    @Key(name = "txHash", valueType = String.class, description = "transactionhashvalue"),
+                    @Key(name = "mainNetVerifierList", valueType = String.class, description = "List of main network validators,Comma separated"),
+                    @Key(name = "mainNetCrossSeedList", valueType = String.class, description = "Main network verification seed node list,Comma separated")
 
             })
     )
     public Response chainReg(Map params) {
-        /* 发送到交易模块 (Send to transaction module) */
+        /* Send to transaction module (Send to transaction module) */
         Map<String, Object> rtMap = new HashMap<>(1);
         try {
-            /*判断链与资产是否已经存在*/
-            /* 组装BlockChain (BlockChain object) */
+            /*Determine whether the chain and assets already exist*/
+            /* assembleBlockChain (BlockChain object) */
             BlockChain blockChain = new BlockChain();
             blockChain.map2pojo(params);
-            //todo 临时处理
+            //todo Temporary handling
 //            if (blockChain.getChainId() == BaseConstant.MAINNET_CHAIN_ID || blockChain.getChainId() == BaseConstant.TESTNET_CHAIN_ID) {
 //                return failed(CmErrorCode.ERROR_CHAIN_SYSTEM_USED);
 //            }
@@ -160,8 +160,8 @@ public class CmmChainCmd extends BaseChainCmd {
                     return failed(CmErrorCode.ERROR_CHAIN_ADDRESS_PREFIX);
                 }
             }
-            /* 组装Asset (Asset object) */
-            /* 取消int assetId = seqService.createAssetId(blockChain.getChainId());*/
+            /* assembleAsset (Asset object) */
+            /* cancelint assetId = seqService.createAssetId(blockChain.getChainId());*/
             Asset asset = new Asset();
             asset.map2pojo(params);
             if (asset.getDecimalPlaces() < Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMin()) || asset.getDecimalPlaces() > Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMax())) {
@@ -198,7 +198,7 @@ public class CmmChainCmd extends BaseChainCmd {
             if (chainService.hadExistChainName(blockChain.getChainName())) {
                 return failed(CmErrorCode.ERROR_CHAIN_NAME_EXIST);
             }
-            /* 组装交易发送 (Send transaction) */
+            /* Assembly transaction sending (Send transaction) */
             Transaction tx = new RegisterChainAndAssetTransaction();
             if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) >= CmConstants.LATEST_SUPPORT_VERSION) {
                 tx.setTxData(TxUtil.parseChainToTxV5(blockChain, asset).serialize());
@@ -222,7 +222,7 @@ public class CmmChainCmd extends BaseChainCmd {
             }
             tx.setCoinData(coinData.serialize());
 
-            /* 判断签名是否正确 (Determine if the signature is correct),取主网的chainid进行签名 */
+            /* Check if the signature is correct (Determine if the signature is correct),Take the main networkchainidSign */
             ErrorCode acErrorCode = rpcService.transactionSignature(CmRuntimeInfo.getMainIntChainId(), (String) params.get("address"), (String) params.get("password"), tx);
             if (null != acErrorCode) {
                 return failed(acErrorCode);
@@ -249,39 +249,39 @@ public class CmmChainCmd extends BaseChainCmd {
 
 
     @CmdAnnotation(cmd = RpcConstants.CMD_CHAIN_ACTIVE, version = 1.0,
-            description = "链更新激活-用于平行链的跨链更新激活（激活之前注销的链）")
+            description = "Chain update activation-Cross chain update activation for parallel chains（Activate previously logged out chains）")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "chainName", requestType = @TypeDescriptor(value = String.class), parameterDes = "链名称"),
-            @Parameter(parameterName = "addressType", requestType = @TypeDescriptor(value = int.class), parameterDes = "1 使用NULS框架构建的链 生态内，2生态外"),
-            @Parameter(parameterName = "addressPrefix", requestType = @TypeDescriptor(value = String.class), parameterDes = "链地址前缀,1-5字符"),
-            @Parameter(parameterName = "magicNumber", requestType = @TypeDescriptor(value = long.class), parameterDes = "网络魔法参数"),
-            @Parameter(parameterName = "minAvailableNodeNum", requestType = @TypeDescriptor(value = int.class), parameterDes = "最小连接数"),
-            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "symbol", requestType = @TypeDescriptor(value = String.class), parameterDes = "资产符号"),
-            @Parameter(parameterName = "assetName", requestType = @TypeDescriptor(value = String.class), parameterDes = "资产名称"),
-            @Parameter(parameterName = "initNumber", requestType = @TypeDescriptor(value = String.class), parameterDes = "资产初始值"),
-            @Parameter(parameterName = "decimalPlaces", requestType = @TypeDescriptor(value = short.class), parameterDes = "资产小数点位数"),
-            @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "创建交易的账户地址"),
-            @Parameter(parameterName = "password", requestType = @TypeDescriptor(value = String.class), parameterDes = "账户密码"),
-            @Parameter(parameterName = "verifierList", requestType = @TypeDescriptor(value = String.class), parameterDes = "验证者地址名单列表,逗号分割"),
-            @Parameter(parameterName = "signatureBFTRatio", requestType = @TypeDescriptor(value = Integer.class), parameterDes = "拜占庭比例,大于等于该值为有效确认"),
-            @Parameter(parameterName = "maxSignatureCount", requestType = @TypeDescriptor(value = Integer.class), parameterDes = "最大签名数量,限制验证者签名列表的最大数")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Asset ChainId,Value range[1-65535]"),
+            @Parameter(parameterName = "chainName", requestType = @TypeDescriptor(value = String.class), parameterDes = "Chain Name"),
+            @Parameter(parameterName = "addressType", requestType = @TypeDescriptor(value = int.class), parameterDes = "1 applyNULSThe chain of framework construction Within the ecosystem,2Outside the ecosystem"),
+            @Parameter(parameterName = "addressPrefix", requestType = @TypeDescriptor(value = String.class), parameterDes = "Chain Address Prefix,1-5character"),
+            @Parameter(parameterName = "magicNumber", requestType = @TypeDescriptor(value = long.class), parameterDes = "Network Magic Parameters"),
+            @Parameter(parameterName = "minAvailableNodeNum", requestType = @TypeDescriptor(value = int.class), parameterDes = "Minimum number of connections"),
+            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "assetId,Value range[1-65535]"),
+            @Parameter(parameterName = "symbol", requestType = @TypeDescriptor(value = String.class), parameterDes = "Asset symbols"),
+            @Parameter(parameterName = "assetName", requestType = @TypeDescriptor(value = String.class), parameterDes = "Asset Name"),
+            @Parameter(parameterName = "initNumber", requestType = @TypeDescriptor(value = String.class), parameterDes = "Initial value of assets"),
+            @Parameter(parameterName = "decimalPlaces", requestType = @TypeDescriptor(value = short.class), parameterDes = "Decimal Places of Assets"),
+            @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "Create an account address for the transaction"),
+            @Parameter(parameterName = "password", requestType = @TypeDescriptor(value = String.class), parameterDes = "Account password"),
+            @Parameter(parameterName = "verifierList", requestType = @TypeDescriptor(value = String.class), parameterDes = "Verifier Address List,Comma division"),
+            @Parameter(parameterName = "signatureBFTRatio", requestType = @TypeDescriptor(value = Integer.class), parameterDes = "Byzantine proportion,A value greater than or equal to this is a valid confirmation"),
+            @Parameter(parameterName = "maxSignatureCount", requestType = @TypeDescriptor(value = Integer.class), parameterDes = "Maximum number of signatures,Limit the maximum number of verifier signature lists")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象",
+    @ResponseData(name = "Return value", description = "Return aMapobject",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-                    @Key(name = "txHash", valueType = String.class, description = "交易hash值"),
-                    @Key(name = "mainNetVerifierSeeds", valueType = String.class, description = "主网验证人种子列表,逗号分隔"),
-                    @Key(name = "mainNetCrossConnectSeeds", valueType = String.class, description = "主网验种子节点列表,逗号分隔")
+                    @Key(name = "txHash", valueType = String.class, description = "transactionhashvalue"),
+                    @Key(name = "mainNetVerifierSeeds", valueType = String.class, description = "Main network validator seed list,Comma separated"),
+                    @Key(name = "mainNetCrossConnectSeeds", valueType = String.class, description = "Main network verification seed node list,Comma separated")
 
             })
     )
     public Response chainActive(Map params) {
-        /* 发送到交易模块 (Send to transaction module) */
+        /* Send to transaction module (Send to transaction module) */
         Map<String, Object> rtMap = new HashMap<>(1);
         try {
-            /*判断链与资产是否已经存在*/
-            /* 组装BlockChain (BlockChain object) */
+            /*Determine whether the chain and assets already exist*/
+            /* assembleBlockChain (BlockChain object) */
             BlockChain blockChain = new BlockChain();
             blockChain.map2pojo(params);
 //            if (blockChain.getChainId() == BaseConstant.MAINNET_CHAIN_ID || blockChain.getChainId() == BaseConstant.TESTNET_CHAIN_ID) {
@@ -300,8 +300,8 @@ public class CmmChainCmd extends BaseChainCmd {
                     return failed(CmErrorCode.ERROR_CHAIN_ADDRESS_PREFIX);
                 }
             }
-            /* 组装Asset (Asset object) */
-            /* 取消int assetId = seqService.createAssetId(blockChain.getChainId());*/
+            /* assembleAsset (Asset object) */
+            /* cancelint assetId = seqService.createAssetId(blockChain.getChainId());*/
             Asset asset = new Asset();
             asset.map2pojo(params);
             if (asset.getDecimalPlaces() < Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMin()) || asset.getDecimalPlaces() > Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMax())) {
@@ -338,7 +338,7 @@ public class CmmChainCmd extends BaseChainCmd {
                 LoggerUtil.COMMON_LOG.debug("######### delete={}", dbChain.isDelete());
                 return failed(CmErrorCode.ERROR_CHAIN_NAME_EXIST);
             }
-            /* 组装交易发送 (Send transaction) */
+            /* Assembly transaction sending (Send transaction) */
             Transaction tx = new RegisterChainAndAssetTransaction();
             if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) >= CmConstants.LATEST_SUPPORT_VERSION) {
                 tx.setTxData(TxUtil.parseChainToTxV5(blockChain, asset).serialize());
@@ -361,7 +361,7 @@ public class CmmChainCmd extends BaseChainCmd {
             }
             tx.setCoinData(coinData.serialize());
 
-            /* 判断签名是否正确 (Determine if the signature is correct),取主网的chainid进行签名 */
+            /* Check if the signature is correct (Determine if the signature is correct),Take the main networkchainidSign */
             ErrorCode acErrorCode = rpcService.transactionSignature(CmRuntimeInfo.getMainIntChainId(), (String) params.get("address"), (String) params.get("password"), tx);
             if (null != acErrorCode) {
                 return failed(acErrorCode);
@@ -387,11 +387,11 @@ public class CmmChainCmd extends BaseChainCmd {
     }
 
     @CmdAnnotation(cmd = RpcConstants.CMD_GET_CROSS_CHAIN_INFOS, version = 1.0,
-            description = "获取跨链注册资产信息")
+            description = "Obtain cross chain registration asset information")
 
-    @ResponseData(name = "返回值", description = "返回一个Map对象",
+    @ResponseData(name = "Return value", description = "Return aMapobject",
             responseType = @TypeDescriptor(value = Map.class, collectionElement = List.class, mapKeys = {
-                    @Key(name = "chainInfos", valueType = List.class, valueElement = ChainDto.class, description = "已注册的链与资产信息列表")
+                    @Key(name = "chainInfos", valueType = List.class, valueElement = ChainDto.class, description = "Registered Chain and Asset Information List")
             })
     )
     public Response getCrossChainInfos(Map params) {
@@ -414,11 +414,11 @@ public class CmmChainCmd extends BaseChainCmd {
     }
 
     @CmdAnnotation(cmd = RpcConstants.CMD_GET_CROSS_CHAIN_SIMPLE_INFOS, version = 1.0,
-            description = "获取跨链已注册链列表")
+            description = "Obtain a list of cross chain registered chains")
 
-    @ResponseData(name = "返回值", description = "返回一个Map对象",
+    @ResponseData(name = "Return value", description = "Return aMapobject",
             responseType = @TypeDescriptor(value = Map.class, collectionElement = List.class, mapKeys = {
-                    @Key(name = "chainInfos", valueType = List.class, valueElement = Map.class, description = "返回链及资产的简要信息列表")
+                    @Key(name = "chainInfos", valueType = List.class, valueElement = Map.class, description = "Return a brief list of chain and asset information")
             })
     )
     public Response getChainAssetsSimpleInfo(Map params) {

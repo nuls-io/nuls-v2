@@ -24,7 +24,7 @@ import java.math.BigInteger;
 import java.util.*;
 
 /**
- * 智能合约委托交易处理器
+ * Smart Contract Entrustment Transaction Processor
  *
  * @author tag
  * @date 2019/6/1
@@ -61,7 +61,7 @@ public class ContractDepositProcessor implements TransactionProcessor {
         List<Transaction> invalidTxList = new ArrayList<>();
         String errorCode = null;
         Set<NulsHash> invalidHashSet = txValidator.getInvalidAgentHash(txMap.get(TxType.RED_PUNISH), txMap.get(TxType.CONTRACT_STOP_AGENT), txMap.get(TxType.STOP_AGENT), chain);
-        //个节点总委托金额
+        //Total entrusted amount for each node
         Map<NulsHash, BigInteger> agentDepositTotalMap = new HashMap<>(16);
         for (Transaction contractDepositTx : txs) {
             try {
@@ -133,7 +133,7 @@ public class ContractDepositProcessor implements TransactionProcessor {
                 commitResult = false;
             }
         }
-        //回滚已提交成功的交易
+        //Roll back transactions that have been successfully submitted
         if (!commitResult) {
             for (Transaction rollbackTx : commitSuccessList) {
                 try {
@@ -172,7 +172,7 @@ public class ContractDepositProcessor implements TransactionProcessor {
                 rollbackResult = false;
             }
         }
-        //保存已回滚成功的交易
+        //Save successfully rolled back transactions
         if (!rollbackResult) {
             for (Transaction commitTx : rollbackSuccessList) {
                 try {

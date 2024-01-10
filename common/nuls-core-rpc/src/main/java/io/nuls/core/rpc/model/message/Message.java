@@ -30,7 +30,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Objects;
 
 /**
- * 所有消息都应该用该对象进行传输
+ * All messages should be transmitted using this object
  * All messages should be transmitted with this object
  *
  * @author tangyi
@@ -41,31 +41,31 @@ import com.google.common.base.Objects;
 public class Message {
 
     /**
-     * 消息号 / Message ID
+     * Message number / Message ID
      */
     @JsonProperty
     private String MessageID;
 
     /**
-     * 消息发送时间 / Message sending time
+     * Message sending time / Message sending time
      */
     @JsonProperty
     private String Timestamp;
 
     /**
-     * 消息发送时区 / Message sending Timezone
+     * Message sending time zone / Message sending Timezone
      */
     @JsonProperty
     private String TimeZone;
 
     /**
-     * 消息类型，共9种 / Message type, 9 types
+     * Message type, total9species / Message type, 9 types
      */
     @JsonProperty
     private String MessageType;
 
     /**
-     * 消息体，根据MessageType有不同的结构
+     * Message body, according toMessageTypeThere are different structures
      */
     @JsonProperty
     private Object MessageData;

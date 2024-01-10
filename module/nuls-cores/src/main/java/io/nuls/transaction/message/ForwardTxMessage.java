@@ -9,15 +9,15 @@ import io.nuls.core.exception.NulsException;
 import java.io.IOException;
 
 /**
- * 处理完来自其他节点的交易时，再转发出去
- * 转发来自其他节点的交易
- * 转发交易hash
+ * After processing transactions from other nodes, forward them again
+ * Forward transactions from other nodes
+ * Forwarding transactionshash
  * @author: Charlie
  * @date: 2019/04/17
  */
 public class ForwardTxMessage extends BaseBusinessMessage {
     /**
-     * 交易hash
+     * transactionhash
      */
     private NulsHash txHash;
 

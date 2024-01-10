@@ -5,7 +5,7 @@ import io.nuls.base.api.provider.BaseReq;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-23 16:55
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class GetAccountContractListReq extends BaseReq {
 

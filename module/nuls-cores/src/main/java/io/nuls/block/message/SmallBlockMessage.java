@@ -30,12 +30,12 @@ import io.nuls.core.parse.SerializeUtils;
 import java.io.IOException;
 
 /**
- * 广播区块消息
- * 从共识模块接收到新打包区块后,先进行验证,验证通过后保存到数据库并广播到网络上
+ * Broadcast block messages
+ * After receiving a new packaged block from the consensus module,Verify first,After verification, save to the database and broadcast to the network
  *
  * @author captain
  * @version 1.0
- * @date 18-11-9 下午2:37
+ * @date 18-11-9 afternoon2:37
  */
 public class SmallBlockMessage extends BaseBusinessMessage {
 

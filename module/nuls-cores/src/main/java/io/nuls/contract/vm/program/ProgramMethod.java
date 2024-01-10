@@ -30,26 +30,26 @@ import io.nuls.core.rpc.model.TypeDescriptor;
 
 import java.util.List;
 
-@ApiModel(name = "合约方法详情")
+@ApiModel(name = "Contract Method Details")
 public class ProgramMethod {
 
-    @ApiModelProperty(description = "方法名称")
+    @ApiModelProperty(description = "Method Name")
     private String name;
-    @ApiModelProperty(description = "方法描述")
+    @ApiModelProperty(description = "Method description")
     private String desc;
-    @ApiModelProperty(description = "方法参数列表", type = @TypeDescriptor(value = List.class, collectionElement = ProgramMethodArg.class))
+    @ApiModelProperty(description = "Method parameter list", type = @TypeDescriptor(value = List.class, collectionElement = ProgramMethodArg.class))
     private List<ProgramMethodArg> args;
-    @ApiModelProperty(description = "返回值类型")
+    @ApiModelProperty(description = "return type")
     private String returnArg;
-    @ApiModelProperty(description = "是否视图方法（调用此方法数据不上链）")
+    @ApiModelProperty(description = "View Method（Call this method and the data will not be linked）")
     private boolean view;
-    @ApiModelProperty(description = "是否是事件")
+    @ApiModelProperty(description = "Is it an event")
     private boolean event;
-    @ApiModelProperty(description = "是否是可接受主链资产转账的方法")
+    @ApiModelProperty(description = "Is it an acceptable method for transferring main chain assets")
     private boolean payable;
-    @ApiModelProperty(description = "是否是可接受其他资产转账的方法")
+    @ApiModelProperty(description = "Is it an acceptable method for transferring other assets")
     private boolean payableMultyAsset;
-    @ApiModelProperty(description = "方法返回值是否JSON序列化")
+    @ApiModelProperty(description = "Is the method return valueJSONserialize")
     private boolean jsonSerializable;
 
     public ProgramMethod() {
@@ -210,7 +210,7 @@ public class ProgramMethod {
         if (a.size() != b.size()) {
             return false;
         } else {
-            // 参数类型相同
+            // Same parameter types
             int size = a.size();
             ProgramMethodArg argA, argB;
             for (int i = 0; i < size; i++) {

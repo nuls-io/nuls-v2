@@ -34,12 +34,12 @@ import io.nuls.base.data.Transaction;
 public class MultiSignTransactionResultDTO {
 
     /**
-     * 是否已经广播
+     * Has it been broadcasted
      */
     private boolean isBroadcasted;
 
     /**
-     * 交易对象
+     * Trading partner
      */
     private Transaction transaction;
 

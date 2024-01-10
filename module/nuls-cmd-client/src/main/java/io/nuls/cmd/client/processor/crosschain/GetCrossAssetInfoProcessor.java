@@ -12,7 +12,7 @@ import io.nuls.core.core.annotation.Component;
 /**
  * @Author: zhoulijun
  * @Time: 2019-05-07 13:41
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Component
 public class GetCrossAssetInfoProcessor extends CrossChainBaseProcessor {

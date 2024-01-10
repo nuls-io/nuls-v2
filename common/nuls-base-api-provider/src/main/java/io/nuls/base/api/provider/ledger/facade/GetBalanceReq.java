@@ -6,7 +6,7 @@ import io.nuls.base.api.provider.BaseReq;
  * @Author: zhoulijun
  * @Time: 2019-03-08 15:36
  * @Description:
- * 获取指定账户余额
+ * Obtain the specified account balance
  * get account balance
  */
 

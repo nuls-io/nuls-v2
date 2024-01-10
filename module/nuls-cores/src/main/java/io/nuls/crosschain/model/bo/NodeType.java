@@ -1,7 +1,7 @@
 package io.nuls.crosschain.model.bo;
 
 /**
- * 节点类型
+ * Node type
  * @author tag
  * 2019/5/22
  * */

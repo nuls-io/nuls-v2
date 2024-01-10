@@ -39,15 +39,15 @@ public class AliasCmd extends BaseCmd {
     @Autowired
     private ChainManager chainManager;
 
-    @CmdAnnotation(cmd = "ac_setAlias", version = 1.0, description = "设置别名/Set the alias of account")
+    @CmdAnnotation(cmd = "ac_setAlias", version = 1.0, description = "Set alias/Set the alias of account")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
-            @Parameter(parameterName = "address", parameterType = "String",  parameterDes = "账户地址"),
-            @Parameter(parameterName = "password", parameterType = "String",  parameterDes = "账户密码"),
-            @Parameter(parameterName = "alias", parameterType = "String",  parameterDes = "别名")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid"),
+            @Parameter(parameterName = "address", parameterType = "String",  parameterDes = "Account address"),
+            @Parameter(parameterName = "password", parameterType = "String",  parameterDes = "Account password"),
+            @Parameter(parameterName = "alias", parameterType = "String",  parameterDes = "alias")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "txHash",  description = "设置别名交易hash")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "txHash",  description = "Set up alias transactionshash")
     }))
     public Response setAlias(Map params) {
         Chain chain = null;
@@ -84,13 +84,13 @@ public class AliasCmd extends BaseCmd {
         return success(result);
     }
 
-    @CmdAnnotation(cmd = "ac_getAliasByAddress", version = 1.0, description = "根据地址获取别名/get the alias by address")
+    @CmdAnnotation(cmd = "ac_getAliasByAddress", version = 1.0, description = "Retrieve aliases based on address/get the alias by address")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
-            @Parameter(parameterName = "address", parameterType = "String",  parameterDes = "账户地址")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid"),
+            @Parameter(parameterName = "address", parameterType = "String",  parameterDes = "Account address")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "alias",  description = "别名")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "alias",  description = "alias")
     }))
     public Response getAliasByAddress(Map params) {
         String alias;
@@ -127,13 +127,13 @@ public class AliasCmd extends BaseCmd {
      * @param params
      * @return CmdResponse
      */
-    @CmdAnnotation(cmd = "ac_isAliasUsable", version = 1.0, description = "检查别名是否可用/check whether the account is usable")
+    @CmdAnnotation(cmd = "ac_isAliasUsable", version = 1.0, description = "Check if aliases are available/check whether the account is usable")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
-            @Parameter(parameterName = "alias", parameterType = "String",  parameterDes = "别名")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid"),
+            @Parameter(parameterName = "alias", parameterType = "String",  parameterDes = "alias")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", valueType = Boolean.class, description = "别名是否可以使用")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", valueType = Boolean.class, description = "Can aliases be used")
     }))
     public Response isAliasUsable(Map params) {
         boolean isAliasUsable = false;

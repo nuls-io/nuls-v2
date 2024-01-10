@@ -12,7 +12,7 @@ import java.util.function.Function;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-19 21:20
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class Utils {
 

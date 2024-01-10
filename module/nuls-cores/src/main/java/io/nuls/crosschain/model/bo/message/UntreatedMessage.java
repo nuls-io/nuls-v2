@@ -2,7 +2,7 @@ package io.nuls.crosschain.model.bo.message;
 import io.nuls.base.data.NulsHash;
 import io.nuls.crosschain.base.message.base.BaseMessage;
 /**
- * 未处理消息类
+ * Unprocessed message class
  * Unprocessed message class
  *
  * @author tag

@@ -79,7 +79,7 @@ public class RocksDBBatchOperation implements BatchOperation {
 
     @Override
     public boolean executeBatch() throws Exception {
-        // 检查逻辑关闭
+        // Check logic shutdown
         if (checkClose()) {
             throw new Exception(DBErrorCode.DB_TABLE_FAILED_BATCH_CLOSE);
         }
@@ -90,7 +90,7 @@ public class RocksDBBatchOperation implements BatchOperation {
             throw new Exception(DBErrorCode.DB_UNKOWN_EXCEPTION);
         } finally {
             // Make sure you close the batch to avoid resource leaks.
-            // 关闭批量操作对象释放资源
+            // Close batch operation objects to release resources
             if (batch != null) {
                 this.close();
                 batch.close();

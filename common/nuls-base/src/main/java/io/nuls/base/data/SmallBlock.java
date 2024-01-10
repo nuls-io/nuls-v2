@@ -35,7 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 小区块，用于新区块打包完成后进行广播，小区块中包含区块头、块中交易hash列表、打包过程中产生的交易（其他节点一定没有的交易）
+ * Small block, used for broadcasting after the packaging of new blocks is completed, and the small block contains the block header、Block in block transactionshashlist、Transactions generated during the packaging process（Transactions that other nodes must not have）
  * Block block, used for broadcasting after the new block is packaged,
  * and the blocks in the block are included in the block header ,tx hash list of the block
  * and the transaction generated in the packaging process (other transactions that must not be made by other nodes).
@@ -45,19 +45,19 @@ import java.util.List;
  */
 public class SmallBlock extends BaseNulsData {
     /**
-     * 区块头
+     * Block head
      * block header
      */
     private BlockHeader header;
 
     /**
-     * 交易摘要列表
+     * Transaction Summary List
      * transaction hash list
      */
     private ArrayList<NulsHash> txHashList;
 
     /**
-     * 系统交易列表（其他节点一定没有的交易，如共识奖励交易、红牌交易、黄牌交易）
+     * System transaction list（Transactions that other nodes must not have, such as consensus reward transactions、Red card trading、Yellow card trading）
      * Consensus trading list (transactions that no other node must have)
      */
     private List<Transaction> systemTxList = new ArrayList<>();
@@ -110,7 +110,7 @@ public class SmallBlock extends BaseNulsData {
     }
 
     /**
-     * 区块头
+     * Block head
      * block header
      *
      * @return BlockHeader
@@ -124,7 +124,7 @@ public class SmallBlock extends BaseNulsData {
     }
 
     //    /**
-//     * 交易摘要列表
+//     * Transaction Summary List
 //     * transaction hash list
 //     */
     public ArrayList<NulsHash> getTxHashList() {
@@ -136,7 +136,7 @@ public class SmallBlock extends BaseNulsData {
     }
 
     //    /**
-//     * 共识交易列表（其他节点一定没有的交易）
+//     * Consensus Transaction List（Transactions that other nodes must not have）
 //     * Consensus trading list (transactions that no other node must have)
 //     */
     public List<Transaction> getSystemTxList() {

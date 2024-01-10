@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 /**
  * @Author: zhoulijun
  * @Time: 2019-04-25 14:03
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public abstract class CallRemoteTestCase<T,P> extends BaseTestCase<T,P> {
 
@@ -30,7 +30,7 @@ public abstract class CallRemoteTestCase<T,P> extends BaseTestCase<T,P> {
         Result<String> nodes = networkProvider.getNodes();
         Config config = SpringLiteContext.getBean(Config.class);
         if(!config.isMaster()){
-            throw new RuntimeException("非master节点不允许进行远程调用");
+            throw new RuntimeException("wrongmasterNode does not allow remote calls");
         }
         List<String> nodeList;
         if(StringUtils.isNotBlank(config.getTestNodeList())){

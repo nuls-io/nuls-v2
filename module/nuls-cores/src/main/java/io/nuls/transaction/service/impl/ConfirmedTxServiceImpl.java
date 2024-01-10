@@ -87,11 +87,11 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         if (null == chain || txStrList == null || txStrList.size() == 0) {
             throw new NulsException(TxErrorCode.PARAMETER_ERROR);
         }
-        //将智能合约交易(如果有)，从区块交易倒数第二个交易后插入
+        //Trading smart contracts(If there is any)Insert from the second to last transaction in the block transaction
         if(contractList.size() > 0){
             int ide = txStrList.size() - 1;
             String lastTxStr = txStrList.get(ide);
-            //如果区块最后一笔交易是智能合约返还GAS的交易, 则将contractList交易, 加入该交易之前,否则直接加入队尾
+            //If the last transaction of the block is a smart contract returnGASTransaction, Then thecontractListtransaction, Before joining this transaction,Otherwise, join the end of the team directly
             if (TxUtil.extractTxTypeFromTx(lastTxStr) == TxType.CONTRACT_RETURN_GAS) {
                 txStrList.remove(ide);
                 txStrList.addAll(contractList);
@@ -113,14 +113,14 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         List<Transaction> txList = new ArrayList<>();
         int chainId = chain.getChainId();
         List<byte[]> txHashs = new ArrayList<>();
-        //组装统一验证参数数据,key为各模块统一验证器cmd
+        //Assemble unified validation parameter data,keyUnify validators for each modulecmd
         Map<String, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         BlockHeader blockHeader;
         NulsLogger logger = chain.getLogger();
         List<String> crossChainTxList = new ArrayList<>();
         try {
             blockHeader = TxUtil.getInstanceRpcStr(blockHeaderStr, BlockHeader.class);
-            logger.debug("[保存区块] 开始 -----高度:{} -----数量:{}", blockHeader.getHeight(), txStrList.size());
+            logger.debug("[Save Block] start -----height:{} -----quantity:{}", blockHeader.getHeight(), txStrList.size());
             for (String txStr : txStrList) {
                 Transaction tx =TxUtil.getInstanceRpcStr(txStr, Transaction.class);
                 txList.add(tx);
@@ -129,7 +129,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                 if(TxManager.isSystemSmartContract(chain, tx.getType())) {
                     continue;
                 }
-                // add by pierre at 2019-12-01 把type10交易发送到合约模块筛选处理
+                // add by pierre at 2019-12-01 holdtype10Transaction sent to contract module for filtering and processing
                 if(TxType.CROSS_CHAIN == tx.getType()) {
                     crossChainTxList.add(txStr);
                 }
@@ -140,27 +140,27 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             logger.error(e);
             return false;
         }
-        logger.debug("[保存区块] 组装数据 执行时间:{}", NulsDateUtils.getCurrentTimeMillis() - start);
+        logger.debug("[Save Block] Assembly data execution time:{}", NulsDateUtils.getCurrentTimeMillis() - start);
 
         long dbStart = NulsDateUtils.getCurrentTimeMillis();
         if (!saveTxs(chain, txList, blockHeader.getHeight(), true)) {
             return false;
         }
-        logger.debug("[保存区块] 存已确认交易DB 执行时间:{}", NulsDateUtils.getCurrentTimeMillis()- dbStart);
+        logger.debug("[Save Block] Confirmed transactionsDB execution time:{}", NulsDateUtils.getCurrentTimeMillis()- dbStart);
 
-        // add by pierre at 2019-12-01 把type10交易发送到合约模块筛选处理，需要协议升级 done
+        // add by pierre at 2019-12-01 holdtype10Transaction sent to contract module for filtering and processing requires protocol upgrade done
         /*if (ProtocolGroupManager.getCurrentVersion(chain.getChainId()) >= TxContext.UPDATE_VERSION_V250
                 && !crossChainTxList.isEmpty() && txConfig.isCollectedSmartContractModule()) {
             List<String> contractList = moduleVerifyMap.computeIfAbsent(ResponseMessageProcessor.ROLE_MAPPING.get(ModuleE.SC.abbr), code -> new ArrayList<>());
             contractList.addAll(crossChainTxList);
-        } 模块合并后，所有交易都在一个module中，不必再单独添加，否则导致交易重复*/
+        } After the module merge, all transactions are in onemoduleIn the middle, there is no need to add it separately, otherwise it will result in duplicate transactions*/
         // end code by pierre
         long commitStart = NulsDateUtils.getCurrentTimeMillis();
         if (!commitTxs(chain, moduleVerifyMap, blockHeaderStr, true)) {
             removeTxs(chain, txList, blockHeader.getHeight(), false);
             return false;
         }
-        logger.debug("[保存区块] 交易业务提交 执行时间:{}", NulsDateUtils.getCurrentTimeMillis() - commitStart);
+        logger.debug("[Save Block] Transaction business submission execution time:{}", NulsDateUtils.getCurrentTimeMillis() - commitStart);
 
         long ledgerStart = NulsDateUtils.getCurrentTimeMillis();
         if (!commitLedger(chain, txStrList, blockHeader.getHeight())) {
@@ -170,13 +170,13 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             removeTxs(chain, txList, blockHeader.getHeight(), false);
             return false;
         }
-        logger.debug("[保存区块] 账本模块提交 执行时间:{}", NulsDateUtils.getCurrentTimeMillis() - ledgerStart);
+        logger.debug("[Save Block] Ledger module submission execution time:{}", NulsDateUtils.getCurrentTimeMillis() - ledgerStart);
 
-        //如果确认交易成功，则从未打包交易库中删除交易
+        //If the transaction is confirmed to be successful, delete the transaction from the unpackaged transaction library
         unconfirmedTxStorageService.removeTxList(chainId, txHashs);
-        //从待打包map中删除
+        //From pending packagingmapDelete in
         packablePool.clearConfirmedTxs(chain, txHashs);
-        logger.debug("[保存区块] 合计执行时间:{} - 高度:{}, - 交易数量:{}" + TxUtil.nextLine(),
+        logger.debug("[Save Block] Total execution time:{} - height:{}, - Transaction quantity:{}" + TxUtil.nextLine(),
                 NulsDateUtils.getCurrentTimeMillis() - start, blockHeader.getHeight(), txList.size());
         return true;
     }
@@ -200,7 +200,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
     }
 
     private boolean commitTxs(Chain chain, Map<String, List<String>> moduleVerifyMap, String blockHeader, boolean atomicity) {
-        //调用交易模块统一commit接口 批量
+        //Call the trading module uniformlycommitinterface batch
         Map<String, List<String>> successed = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         boolean result = true;
         for (Map.Entry<String, List<String>> entry : moduleVerifyMap.entrySet()) {
@@ -300,20 +300,20 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         List<Transaction> txList = new ArrayList<>();
         List<String> txStrList = new ArrayList<>();
         List<String> crossChainTxList = new ArrayList<>();
-        //组装统一验证参数数据,key为各模块统一验证器cmd
+        //Assemble unified validation parameter data,keyUnify validators for each modulecmd
         Map<String, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         try {
             for (NulsHash hash : txHashList) {
                 TransactionConfirmedPO txPO = confirmedTxStorageService.getTx(chainId, hash);
                 if (null == txPO) {
-                    //回滚的交易没有查出来就跳过，保存时该块可能中途中断，导致保存不全
+                    //Skipping the rolled back transaction without being detected may cause the block to be interrupted midway during save, resulting in incomplete save
                     continue;
                 }
                 Transaction tx = txPO.getTx();
                 txList.add(tx);
                 String txStr = RPCUtil.encode(tx.serialize());
                 txStrList.add(txStr);
-                // add by pierre at 2019-12-01 把type10交易发送到合约模块筛选处理
+                // add by pierre at 2019-12-01 holdtype10Transaction sent to contract module for filtering and processing
                 if(TxType.CROSS_CHAIN == tx.getType()) {
                     crossChainTxList.add(txStr);
                 }
@@ -328,27 +328,27 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             logger.error("[rollback error] block txs is empty . -hight:{}", blockHeight);
             return false;
         }
-        logger.debug("[回滚区块] 组装数据 执行时间:{}", NulsDateUtils.getCurrentTimeMillis() - start);
+        logger.debug("[Rolling back blocks] Assembly data execution time:{}", NulsDateUtils.getCurrentTimeMillis() - start);
 
         long ledgerStart = NulsDateUtils.getCurrentTimeMillis();
         if (!rollbackLedger(chain, txStrList, blockHeight)) {
             return false;
         }
-        logger.debug("[回滚区块] 回滚账本 执行时间:{}", NulsDateUtils.getCurrentTimeMillis() - ledgerStart);
+        logger.debug("[Rolling back blocks] Rollback ledger execution time:{}", NulsDateUtils.getCurrentTimeMillis() - ledgerStart);
 
-        // add by pierre at 2019-12-01 把type10交易发送到合约模块筛选处理，需要协议升级 done
+        // add by pierre at 2019-12-01 holdtype10Transaction sent to contract module for filtering and processing requires protocol upgrade done
         /*if (ProtocolGroupManager.getCurrentVersion(chain.getChainId()) >= TxContext.UPDATE_VERSION_V250
                 && !crossChainTxList.isEmpty() && txConfig.isCollectedSmartContractModule()) {
             List<String> contractList = moduleVerifyMap.computeIfAbsent(ResponseMessageProcessor.ROLE_MAPPING.get(ModuleE.SC.abbr), code -> new ArrayList<>());
             contractList.addAll(crossChainTxList);
-        } 模块合并后，所有交易都在一个module中，不必再单独添加，否则导致交易重复*/
+        } After the module merge, all transactions are in onemoduleIn the middle, there is no need to add it separately, otherwise it will result in duplicate transactions*/
         // end code by pierre
         long moduleStart = NulsDateUtils.getCurrentTimeMillis();
         if (!rollbackTxs(chain, moduleVerifyMap, blockHeaderStr, true)) {
             commitLedger(chain, txStrList, blockHeight);
             return false;
         }
-        logger.debug("[回滚区块] 回滚交易业务数据 执行时间:{}", NulsDateUtils.getCurrentTimeMillis() - moduleStart);
+        logger.debug("[Rolling back blocks] Rollback transaction business data execution time:{}", NulsDateUtils.getCurrentTimeMillis() - moduleStart);
 
 
         long dbStart = NulsDateUtils.getCurrentTimeMillis();
@@ -357,11 +357,11 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             saveTxs(chain, txList, blockHeight, false);
             return false;
         }
-        //计算待打包队列大小倒序放入未确认库, 和待打包队列
+        //Calculate the size of the queue to be packaged and place it in the unconfirmed library in reverse order, And the queue to be packaged
 
         int packableTxMapDataSize = 0;
         if(chain.getPackaging().get()) {
-            //是打包节点才计算待打包队列的当前容量
+            //It is the packaging node that calculates the current capacity of the queue to be packaged
             for (Transaction tx : chain.getPackableTxMap().values()) {
                 packableTxMapDataSize += tx.size();
             }
@@ -370,19 +370,19 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             Transaction tx = txList.get(i);
             if(!TxManager.isSystemTx(chain, tx)) {
                 unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
-                //不是系统交易,并且节点是打包节点,待打包队列没到最大值则重新放回待打包队列的最前端
+                //Not a system transaction,And the node is a packaging node,If the packaging queue does not reach its maximum value, it will be placed back at the forefront of the packaging queue
                 if (chain.getPackaging().get() && packableTxMapDataSize < TxConstant.PACKABLE_TX_MAP_MAX_DATA_SIZE) {
                     packablePool.offerFirst(chain, tx);
                 } 
             }
         }
-        logger.debug("[回滚区块] 回滚移除DB已存储的交易, 放入未确认库 执行时间:{}", NulsDateUtils.getCurrentTimeMillis() - dbStart);
+        logger.debug("[Rolling back blocks] Rollback removalDBStored transactions, Put into unconfirmed library execution time:{}", NulsDateUtils.getCurrentTimeMillis() - dbStart);
         logger.info("rollbackTxList success block height:{}", blockHeight);
         return true;
     }
 
     /**
-     * 批量实现
+     * Batch implementation
      * @param chain
      * @param hashList
      * @return
@@ -399,7 +399,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             keys.add(HexUtil.decode(hashHex));
         }
         List<Transaction> txList = confirmedTxStorageService.getTxList(chainId, keys);
-        //必须全部命中
+        //Must hit all
         if(txList.size() != hashList.size()){
             return txStrList;
         }
@@ -412,7 +412,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             chain.getLogger().error(e);
             return new ArrayList<>();
         }
-        //返回的顺序和参数list中hash顺序要一致
+        //Order and parameters returnedlistinhashThe order should be consistent
         for(String hash : hashList){
             txStrList.add(map.get(hash));
         }
@@ -437,10 +437,10 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         allTx.addAll(txConfirmedList);
         allTx.addAll(txUnconfirmedList);
         if(allHits && allTx.size() != hashList.size()){
-            //allHits为true时一旦有一个没有获取到, 直接返回空list
+            //allHitsbytrueOnce there is one that has not been obtained, Directly return emptylist
             return new ArrayList<>();
         }
-        //放入map中用于排序时取值
+        //InsertmapValue used for sorting in the middle
         Map<String, String> map = new HashMap<>(allTx.size() * 2);
         try {
             for(Transaction tx : allTx){
@@ -450,11 +450,11 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         } catch (IOException e) {
             chain.getLogger().error(e);
             if(allHits) {
-                //allHits为true时直接返回空list
+                //allHitsbytrueDirectly return empty whenlist
                 return new ArrayList<>();
             }
         }
-        //返回的顺序和参数list中hash顺序要一致
+        //Order and parameters returnedlistinhashThe order should be consistent
         for(String hash : hashList){
             String txHex = map.get(hash);
             if(null != txHex) {
@@ -475,13 +475,13 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         for(String hashHex : hashList){
             keys.add(HexUtil.decode(hashHex));
         }
-        //获取能查出来的交易
+        //Obtain detectable transactions
         List<String> txUnconfirmedList = unconfirmedTxStorageService.getExistKeysStr(chainId,keys);
         for(String hash : hashList){
             if(txUnconfirmedList.contains(hash)){
                 continue;
             }
-            //只添加txUnconfirmedList中不存在的hash
+            //Only addtxUnconfirmedListNon-existent inhash
             txHashList.add(hash);
         }
         return txHashList;

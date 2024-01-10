@@ -22,7 +22,7 @@ import java.nio.charset.Charset;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
- * 共识模块启动及初始化管理
+ * Consensus module startup and initialization management
  * Consensus Module Startup and Initialization Management
  *
  * @author tag
@@ -77,7 +77,7 @@ public class ConsensusBootStrap implements INulsCoresBootstrap {
     public void onDependenciesReady() {
         try {
             doStart();
-            //智能合约交易注册
+            //Smart contract transaction registration
             chainManager.registerContractTx();
             for (Chain chain : chainManager.getChainMap().values()) {
                 CallMethodUtils.sendState(chain, chain.isPacker());
@@ -90,7 +90,7 @@ public class ConsensusBootStrap implements INulsCoresBootstrap {
     }
 
     /**
-     * 初始化系统编码
+     * Initialize system encoding
      * Initialization System Coding
      */
     private void initSys() throws Exception {
@@ -101,7 +101,7 @@ public class ConsensusBootStrap implements INulsCoresBootstrap {
     }
 
     /**
-     * 初始化数据库
+     * Initialize database
      * Initialization database
      */
     private void initDB() throws Exception {

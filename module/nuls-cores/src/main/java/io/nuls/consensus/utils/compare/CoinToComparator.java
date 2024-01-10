@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 /**
- * CoinTo对比工具类
+ * CoinToComparison tools
  * Node Contrast Tool Class
  *
  * @author tag

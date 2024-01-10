@@ -34,17 +34,17 @@ import io.nuls.provider.model.form.Base;
  * @author: PierreLuo
  * @date: 2018/4/21
  */
-@ApiModel(name = "智能合约表单数据")
+@ApiModel(name = "Smart Contract Form Data")
 public class ContractBase extends Base {
-    @ApiModelProperty(description = "交易创建者")
+    @ApiModelProperty(description = "Transaction Creator")
     private String sender;
-    @ApiModelProperty(description = "最大gas消耗")
+    @ApiModelProperty(description = "maximumgasconsume")
     private long gasLimit;
-    @ApiModelProperty(description = "执行合约单价")
+    @ApiModelProperty(description = "Execution contract unit price")
     private long price;
-    @ApiModelProperty(description = "交易创建者账户密码")
+    @ApiModelProperty(description = "Transaction creator account password")
     private String password;
-    @ApiModelProperty(description = "备注", required = false)
+    @ApiModelProperty(description = "Remarks", required = false)
     private String remark;
 
     public ContractBase() {

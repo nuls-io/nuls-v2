@@ -31,7 +31,7 @@ import io.nuls.consensus.model.bo.tx.txdata.Deposit;
 import java.util.Comparator;
 
 /**
- * 委托信息比较器
+ * Commission Information Comparator
  * Delegation Information Comparator
  *
  * @author tag

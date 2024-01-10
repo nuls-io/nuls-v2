@@ -5,7 +5,7 @@ import io.nuls.crosschain.model.bo.Chain;
 import io.nuls.crosschain.utils.TxUtil;
 
 /**
- * 重置平行链上存储的主链验证人列表
+ * Reset the main chain validator list stored on the parallel chain
  */
 public class ResetOtherChainVerifierListHandler implements Runnable {
     private Chain chain;

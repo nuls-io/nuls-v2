@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-21 10:50
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public abstract class SleepAdapter extends BaseAdapter<Object,Object> {
 
@@ -17,7 +17,7 @@ public abstract class SleepAdapter extends BaseAdapter<Object,Object> {
 
     @Override
     public String title() {
-        return "等待"+this.sleepSec()+"秒";
+        return "wait for"+this.sleepSec()+"second";
     }
 
     @Override

@@ -30,7 +30,7 @@ import java.util.SortedSet;
 public class ChainTest {
 
     /**
-     * 主要测试Chain的比较排序
+     * Main testsChainComparison sorting of
      */
     @Test
     public void testComparator() {

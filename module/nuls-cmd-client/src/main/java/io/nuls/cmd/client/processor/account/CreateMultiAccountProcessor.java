@@ -41,7 +41,7 @@ import java.util.Arrays;
 
 /**
  * @author zhoulijun
- * 创建多签账户
+ * Create a multi signature account
  */
 @Component
 public class CreateMultiAccountProcessor extends AccountBaseProcessor implements CommandProcessor {
@@ -55,8 +55,8 @@ public class CreateMultiAccountProcessor extends AccountBaseProcessor implements
     public String getHelp() {
         CommandBuilder builder = new CommandBuilder();
         builder.newLine(getCommandDescription())
-                .newLine("\t<pubKeys> 参与多签的公钥列表，多个用\",\"隔开")
-                .newLine("\t[minSigns] 最小签名数量，默认全部");
+                .newLine("\t<pubKeys> List of public keys participating in multiple signatures, using multiple signatures\",\"Separate")
+                .newLine("\t[minSigns] Minimum number of signatures, default to all");
         return builder.toString();
     }
 

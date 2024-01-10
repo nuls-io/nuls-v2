@@ -42,7 +42,7 @@ import java.math.BigInteger;
 public class NulsSignData extends BaseNulsData {
 
     /**
-     * 签名字节组
+     * Signature Byte Group
      */
     protected byte[] signBytes;
 

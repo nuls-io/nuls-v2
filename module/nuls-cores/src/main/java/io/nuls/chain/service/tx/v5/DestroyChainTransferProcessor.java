@@ -46,9 +46,9 @@ public class DestroyChainTransferProcessor implements TransactionProcessor {
         rtData.put("errorCode", "");
         rtData.put("txList", errorList);
         try {
-            //1获取交易类型
-            //2进入不同验证器里处理
-            //3封装失败交易返回
+            //1Obtain transaction type
+            //2Enter different validators for processing
+            //3Encapsulation failed transaction return
             Map<String, Integer> chainMap = new HashMap<>();
             Map<String, Integer> assetMap = new HashMap<>();
             BlockChain blockChain = null;
@@ -90,10 +90,10 @@ public class DestroyChainTransferProcessor implements TransactionProcessor {
             }
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
-            //通知远程调用回滚
+            //Notify remote call to roll back
             try {
                 chainService.rpcBlockChainRollback(txs, blockHeader.getTime());
-                //进行回滚
+                //Performing a rollback
                 cacheDataService.rollBlockTxs(chainId, commitHeight);
             } catch (Exception e1) {
                 LoggerUtil.logger().error(e);

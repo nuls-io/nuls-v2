@@ -40,7 +40,7 @@ import java.util.List;
 
 
 /**
- * peer地址协议消息体
+ * peerAddress Protocol Message Body
  * addr protocol message body
  *
  * @author lan
@@ -100,7 +100,7 @@ public class AddrMessageBody extends BaseNulsData {
                 ipAddressList.add(address);
             }
         } catch (Exception e) {
-            //如果需要抛出异常则不需要打印日志，由异常捕获者打印日常
+            //If an exception needs to be thrown, there is no need to print the log, and the exception catcher prints the daily routine
             throw new NulsException(e);
         }
     }

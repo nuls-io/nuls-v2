@@ -13,7 +13,7 @@ import java.util.Arrays;
 /**
  * @Author: zhoulijun
  * @Time: 2019-02-28 14:27
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class NulsRpcModuleBootstrap {
 
@@ -37,7 +37,7 @@ public class NulsRpcModuleBootstrap {
         try {
             module = SpringLiteContext.getBean(RpcModule.class);
         } catch (NulsRuntimeException e) {
-            Log.error("加载RpcModule的实现类失败");
+            Log.error("loadingRpcModuleImplementation class failure for");
             return;
         }
 
@@ -56,20 +56,20 @@ public class NulsRpcModuleBootstrap {
                         }
                         switch (cmd) {
                             case "f":
-                                System.out.println("模块的追随者：");
+                                System.out.println("Followers of modules：");
                                 module.getFollowerList().entrySet().forEach(System.out::println);
                                 break;
                             case "d":
-                                System.out.println("依赖的模块列表");
+                                System.out.println("List of dependent modules");
                                 module.getDependencies().forEach(d -> {
                                     System.out.println(d.name + " is ready : " + module.isDependencieReady(d));
                                 });
                                 break;
                             case "s":
-                                System.out.println("当前状态：" + module.getState());
+                                System.out.println("current state：" + module.getState());
                                 break;
                             default:
-                                System.out.println("错误的输入,请输入f,d,s");
+                                System.out.println("Wrong input,Please enterf,d,s");
                                 break;
                         }
                     } catch (IOException e) {

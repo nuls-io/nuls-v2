@@ -83,9 +83,9 @@ public class AddAssetTransferProcessor implements TransactionProcessor {
             }
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
-            //通知远程调用回滚
+            //Notify remote call to roll back
             try {
-                //进行回滚
+                //Performing a rollback
                 cacheDataService.rollBlockTxs(chainId, commitHeight);
             } catch (Exception e1) {
                 LoggerUtil.logger().error(e);

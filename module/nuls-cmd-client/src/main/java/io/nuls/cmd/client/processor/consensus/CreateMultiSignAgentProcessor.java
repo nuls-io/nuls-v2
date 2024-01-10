@@ -39,7 +39,7 @@ import java.math.BigInteger;
 
 /**
  * @author: zhoulijun
- * 通过多签地址创建共识节点
+ * Creating consensus nodes through multiple signed addresses
  */
 @Component
 public class CreateMultiSignAgentProcessor extends ConsensusBaseProcessor implements CommandProcessor {
@@ -74,7 +74,7 @@ public class CreateMultiSignAgentProcessor extends ConsensusBaseProcessor implem
         checkIsNumeric(args[3],"commissionRate");
         checkArgs(()->{
             BigInteger commission = new BigInteger(args[3]);
-            //commission 取值范围 10~100
+            //commission Value range 10~100
             return commission.compareTo(BigInteger.TEN) >= 0 && commission.compareTo(BigInteger.valueOf(100L)) <= 0;
         },"commission rate (10~100)");
         return true;

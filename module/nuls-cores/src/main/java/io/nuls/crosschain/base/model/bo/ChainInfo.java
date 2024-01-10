@@ -16,29 +16,29 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * 链注册信息
+ * Chain registration information
  * @author tag
  * @date 2019/5/17
  */
 @ApiModel
 public class ChainInfo extends BaseMessage {
-    @ApiModelProperty(description = "链ID")
+    @ApiModelProperty(description = "chainID")
     private int chainId;
-    @ApiModelProperty(description = "链名称")
+    @ApiModelProperty(description = "Chain Name")
     private String chainName;
-    @ApiModelProperty(description = "最小链接数")
+    @ApiModelProperty(description = "Minimum number of links")
     private int minAvailableNodeNum;
-    @ApiModelProperty(description = "最大签名数")
+    @ApiModelProperty(description = "Maximum number of signatures")
     private int maxSignatureCount;
-    @ApiModelProperty(description = "签名拜占庭比例")
+    @ApiModelProperty(description = "Signature Byzantine Ratio")
     private int signatureByzantineRatio;
-    @ApiModelProperty(description = "链账户前缀")
+    @ApiModelProperty(description = "Chain account prefix")
     private String addressPrefix;
-    @ApiModelProperty(description = "链资产列表", type = @TypeDescriptor(value = List.class, collectionElement = AssetInfo.class))
+    @ApiModelProperty(description = "Chain Asset List", type = @TypeDescriptor(value = List.class, collectionElement = AssetInfo.class))
     private List<AssetInfo> assetInfoList;
-    @ApiModelProperty(description = "验证人列表")
+    @ApiModelProperty(description = "Verifier List")
     private Set<String> verifierList;
-    @ApiModelProperty(description = "注册时间")
+    @ApiModelProperty(description = "Registration time")
     private long registerTime;
 
     @Override

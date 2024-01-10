@@ -1,4 +1,4 @@
-# 通过docker hub镜像运行钱包
+# adoptdocker hubMirror running wallet
 
 ```
 docker run \
@@ -10,23 +10,23 @@ docker run \
     -v log:/nuls/Logs \
     nulsio/nuls-wallet:beta3
 ```
-其中18001为主链数据交换端口，18002为跨链交易数据交换接口，data为数据存储目录，logs为日志存储目录。
+among18001For the main chain data exchange port,18002For cross chain transaction data exchange interface,dataFor the data storage directory,logsStore directory for logs.
 
-# 本机构建镜像
+# Our institution creates a mirror image
 
 ```
 cd nuls-v2/docker
 docker build -t nuls:beta3 .
 ```
-# 进入命令和查看模块启动状态
+# Enter commands and view module startup status
 
 
 ```
-docker exec -it nuls-wallet cmd   #启动命令行
-docker exec -it nuls-wallet check-status #检查模块启动状态
+docker exec -it nuls-wallet cmd   #Start Command Line
+docker exec -it nuls-wallet check-status #Check the module startup status
 ```
 
-# 获取带区块链浏览器和网页轻钱包的镜像
+# Get an image of a lightweight wallet with a blockchain browser and web pages
 
 ```
 docker run \
@@ -40,8 +40,8 @@ docker run \
     -v log:/nuls/Logs \
     nulsio/nuls-wallet-pro:beta3
 ```
-其中18005为区块浏览器的http端口，18006为网页轻钱包的http端口。
+among18005For block browsershttpPort,18006For the lightweight wallet of web pageshttpPort.
 
-区块链浏览器网页访问地址: http://127.0.0.1:18005
-网页轻钱包网页访问地址  : http://127.0.0.1:18006
+Blockchain Browser Web Access Address: http://127.0.0.1:18005
+Web Light Wallet Web Access Address  : http://127.0.0.1:18006
 

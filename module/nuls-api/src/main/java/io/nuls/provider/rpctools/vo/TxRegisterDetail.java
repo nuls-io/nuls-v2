@@ -1,7 +1,7 @@
 package io.nuls.provider.rpctools.vo;
 
 /**
- * 交易注册类
+ * Transaction registration class
  * Transaction registration class
  *
  * @author tag
@@ -9,22 +9,22 @@ package io.nuls.provider.rpctools.vo;
  */
 public class TxRegisterDetail {
     /**
-     * 交易类型
+     * Transaction type
      * Transaction type
      */
     private int txType;
     /**
-     * 是否是系统交易
+     * Is it a system transaction
      * Is it a system transaction
      */
     private boolean systemTx;
     /**
-     * 是否是解锁交易
+     * Is it an unlocked transaction
      * Is it a system transaction
      */
     private boolean unlockTx;
     /**
-     * 交易是否需要签名
+     * Do transactions require signatures
      * Is it a system transaction
      */
     private boolean verifySignature;

@@ -24,7 +24,7 @@ import java.util.function.Function;
 /**
  * @Author: zhoulijun
  * @Time: 2019-06-12 17:31
- * @Description: 账本模块工具类
+ * @Description: Ledger module tool class
  */
 @Component
 public class LegderTools implements CallRpc {
@@ -35,7 +35,7 @@ public class LegderTools implements CallRpc {
     private LedgerAssetCache ledgerAssetCache;
 
     /**
-     * 获取可用余额和nonce
+     * Obtain available balance andnonce
      * Get the available balance and nonce
      */
     public Result<AccountBalance> getBalanceAndNonce(int chainId, int assetChainId, int assetId, String address) {

@@ -10,7 +10,7 @@ import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import java.util.*;
 
 /**
- * 帮助模块实现自动注册交易、注册消息的工具类
+ * Help the module achieve automatic registration of transactions、Tool class for registering messages
  *
  * @author captain
  * @version 1.0
@@ -19,7 +19,7 @@ import java.util.*;
 public class RegisterHelper {
 
     /**
-     * 向交易模块注册交易
+     * Register transactions with the trading module
      * Register transactions with the transaction module
      */
     public static boolean registerTx(int chainId, Protocol protocol, String moduleCode) {
@@ -38,7 +38,7 @@ public class RegisterHelper {
             if (txRegisterDetailList.isEmpty()) {
                 return true;
             }
-            //向交易管理模块注册交易
+            //Register transactions with the transaction management module
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put(Constants.CHAIN_ID, chainId);
@@ -57,7 +57,7 @@ public class RegisterHelper {
     }
 
     /**
-     * 向交易模块注册交易
+     * Register transactions with the trading module
      * Register transactions with the transaction module
      */
     public static boolean registerTx(int chainId, Protocol protocol) {
@@ -65,7 +65,7 @@ public class RegisterHelper {
     }
 
     /**
-     * 向网络模块注册消息
+     * Register messages with the network module
      *
      * @return
      */
@@ -87,7 +87,7 @@ public class RegisterHelper {
     }
 
     /**
-     * 向网络模块注册消息
+     * Register messages with the network module
      *
      * @return
      */
@@ -96,7 +96,7 @@ public class RegisterHelper {
     }
 
     /**
-     * 向协议升级模块注册多版本协议配置
+     * Register multi version protocol configuration with protocol upgrade module
      * Register transactions with the transaction module
      */
     public static boolean registerProtocol(int chainId) {

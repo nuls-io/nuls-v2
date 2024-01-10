@@ -34,9 +34,9 @@ import io.nuls.core.rpc.model.ApiModelProperty;
  */
 @ApiModel
 public class DeleteContractDataDto {
-    @ApiModelProperty(description = "交易创建者地址")
+    @ApiModelProperty(description = "Transaction creator address")
     private String sender;
-    @ApiModelProperty(description = "合约地址")
+    @ApiModelProperty(description = "Contract address")
     private String contractAddress;
 
     public DeleteContractDataDto(ContractData delete) {

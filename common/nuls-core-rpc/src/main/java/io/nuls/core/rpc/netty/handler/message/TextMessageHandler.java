@@ -46,7 +46,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 文本类型的消息处理器
+ * Text type message processor
  * Text type message handler
  *
  * @author ln
@@ -82,26 +82,26 @@ public class TextMessageHandler implements Runnable, Comparable<TextMessageHandl
             ConnectData connectData = ConnectManager.CHANNEL_DATA_MAP.get(channel);
 
             /*
-             * 获取该链接对应的ConnectData对象
+             * Get the corresponding linkConnectDataobject
              * Get the ConnectData object corresponding to the link
              * */
             switch (MessageType.valueOf(message.getMessageType())) {
                 case NegotiateConnection:
                     /*
-                    握手，直接响应
+                    Handshake, direct response
                      */
                     RequestMessageProcessor.negotiateConnectionResponse(channel, message);
                     break;
                 case Unsubscribe:
                     /*
-                    取消订阅，直接响应
+                    Unsubscribe and respond directly
                      */
                     RequestMessageProcessor.unsubscribe(connectData, message);
                     break;
                 case Request:
                     String messageId = message.getMessageID();
                     /*
-                    Request，根据是否需要定时推送放入不同队列，等待处理
+                    RequestAccording to whether it is necessary to schedule push to different queues and wait for processing
                     Request, put in different queues according to the response mode. Wait for processing
                      */
                     if (!ConnectManager.isPureDigital(request.getSubscriptionEventCounter())
@@ -115,7 +115,7 @@ public class TextMessageHandler implements Runnable, Comparable<TextMessageHandl
                             if(timeOut == 0 ||  currentTime< requestTime + timeOut){
                                 RequestMessageProcessor.callCommandsWithPeriod(channel, request.getRequestMethods(), messageId, false);
                             }else{
-                                Log.debug("请求超时丢弃请求，当前时间：{}，请求时间:{},超时时间:{},请求方法：{}", currentTime,requestTime,timeOut,request.getRequestMethods());
+                                Log.debug("Request timeout discarding request, current time：{}Request time:{},Timeout time:{},Request Method：{}", currentTime,requestTime,timeOut,request.getRequestMethods());
                             }
                         }
                     } else {
@@ -141,7 +141,7 @@ public class TextMessageHandler implements Runnable, Comparable<TextMessageHandl
                     }
 
                     /*
-                    如果需要一个Ack，则发送
+                    If you need aAckThen send
                     Send Ack if needed
                      */
                     if (Constants.BOOLEAN_TRUE.equals(request.getRequestAck())) {
@@ -158,7 +158,7 @@ public class TextMessageHandler implements Runnable, Comparable<TextMessageHandl
                 case Response:
                     Response response = JSONUtils.map2pojo((Map) message.getMessageData(), Response.class);
                     /*
-                    Response：还要判断是否需要自动处理
+                    Response：Also need to determine if automatic processing is required
                     Response: Determines whether automatic processing is required
                      */
                     if (ConnectManager.INVOKE_MAP.containsKey(response.getRequestID())) {

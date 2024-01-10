@@ -38,7 +38,7 @@ import java.util.List;
 
 /**
  * Group event monitor
- * 测试 定时打印连接信息
+ * test Timed printing of connection information
  *
  * @author lan
  * @create 2018/11/14

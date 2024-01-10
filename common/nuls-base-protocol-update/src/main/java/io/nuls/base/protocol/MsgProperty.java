@@ -1,7 +1,7 @@
 package io.nuls.base.protocol;
 
 /**
- * 交易属性
+ * Transaction attributes
  * Transaction attribute
  *
  * @author tag
@@ -10,39 +10,39 @@ package io.nuls.base.protocol;
 public enum MsgProperty {
 
     /**
-     * 批量获取区块结束时返回的结束消息
+     * End message returned at the end of bulk block retrieval
      */
     COMPLETE_MESSAGE("complete", "complete"),
     /**
-     * 完整的区块消息
+     * Complete block message
      */
     BLOCK_MESSAGE("block", "block"),
     /**
-     * 根据区块HASH获取区块
+     * Based on blocksHASHGet blocks
      */
     GET_BLOCK_MESSAGE("getBlock", "getBlock"),
     /**
-     * 转发区块
+     * Forwarding blocks
      */
     FORWARD_SMALL_BLOCK_MESSAGE("forward", "forward"),
     /**
-     * 批量获取小区块消息
+     * Batch acquisition of community block messages
      */
     GET_BLOCKS_BY_HEIGHT_MESSAGE("getBlocks", "getBlocks"),
     /**
-     * 批量获取交易
+     * Batch acquisition of transactions
      */
     GET_TXGROUP_MESSAGE("getTxs", "getTxs"),
     /**
-     * 小区块消息
+     * Community block messages
      */
     SMALL_BLOCK_MESSAGE("sBlock", "sBlock"),
     /**
-     * 获取小区块消息
+     * Get community block messages
      */
     GET_SMALL_BLOCK_MESSAGE("getsBlock", "getsBlock"),
     /**
-     * 批量交易消息
+     * Batch transaction messages
      */
     TXGROUP_MESSAGE("txs", "txs");
 

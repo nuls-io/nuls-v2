@@ -26,7 +26,7 @@
 package io.nuls.network.constant;
 
 /**
- * 配置常量
+ * Configure Constants
  *
  * @author lan
  */
@@ -42,21 +42,21 @@ public interface NetworkConstant {
     int READ_IDEL_TIME_OUT = 0;
     int WRITE_IDEL_TIME_OUT = 0;
     /**
-     * 读写都不存在情况下，60秒超时，单位s
+     * In the absence of both reading and writing,60Second timeout, in unitss
      * 60 seconds timeout, unit s when there is no reading or writing
      */
     int ALL_IDLE_TIME_OUT = 60;
     /**
-     * 在未正式传递握手业务数据前,允许的最大连接数
+     * Before formally transmitting handshake business data,Maximum allowed connections
      */
     // int MAX_ANONYMOUS_CONNECT_COUNT = 100;
     /**
-     * 记录该帧数据长度
+     * Record the data length of this frame
      * MAX FRAME LENGTH
      */
     int MAX_FRAME_LENGTH = 10 * 1024 * 1024;
     /**
-     * netty 发起连接的超时时间,单位秒
+     * netty The timeout for initiating a connection,Unit seconds
      * netty connect time out,unit s
      */
     int CONNETCI_TIME_OUT = 6000;
@@ -67,23 +67,23 @@ public interface NetworkConstant {
     int MAX_SAME_IP_PER_GROUP = 10;
 
     /**
-     * 10秒链内网络数量与高度无变更,则认为网络状态已稳定
+     * 10There is no change in the number and height of networks within the second chain,It is considered that the network status has stabilized
      * 10 seconds The number and speed of the network in the chain are unchanged, and the network status is considered stable.
      */
     int NODEGROUP_NET_STABLE_TIME_MILLIONS = 10 * 1000;
     /**
-     * 广播比例
+     * Broadcasting ratio
      */
     int FULL_BROADCAST_PERCENT = 100;
     /**
-     * 最少的PEER数量，小于等于这个值，将取消比例广播,按100%节点广播
+     * MinimalPEERQuantity, less than or equal to this value, proportional broadcasting will be cancelled,according to100%Node broadcasting
      */
     int BROADCAST_MIN_PEER_NUMBER = 7;
     /**
      * ========================================
      * --------[RPC CMD] -------
      * ========================================
-     * 内部协议指令
+     * Internal protocol instructions
      * Internal protocol directive
      */
     String CMD_MESSAGE_VERSION = "version";
@@ -100,7 +100,7 @@ public interface NetworkConstant {
      * ========================================
      * --------[RPC CMD] -------
      * ========================================
-     * 外部指令
+     * External instructions
      * External instruction
      */
     String CMD_BL_BEST_BLOCK_HEADER = "latestBlockHeader";

@@ -1,7 +1,7 @@
 package io.nuls.crosschain.base.constant;
 
 /**
- * 跨链模块常量管理类
+ * Cross chain module constant management class
  * @author tag
  * 2019/04/08
  */
@@ -33,7 +33,7 @@ public interface CrossChainConstant {
     String DB_NAME_CONSUME_CONGIF = "config";
 
     /**
-     * Map初始值
+     * MapInitial value
      * */
     int  INIT_CAPACITY =16;
 

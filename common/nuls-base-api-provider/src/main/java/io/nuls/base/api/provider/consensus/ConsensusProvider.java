@@ -43,7 +43,7 @@ public interface ConsensusProvider {
 
 
     /**
-     * 委托共识
+     * Commission consensus
      * @param req
      * @return
      */
@@ -51,7 +51,7 @@ public interface ConsensusProvider {
 
 
     /**
-     * 委托共识
+     * Commission consensus
      * @param req
      * @return
      */
@@ -59,7 +59,7 @@ public interface ConsensusProvider {
 
 
     /**
-     * 退出委托
+     * Exit the commission
      * @param req
      * @return
      */
@@ -67,7 +67,7 @@ public interface ConsensusProvider {
 
 
     /**
-     * 退出委托
+     * Exit the commission
      * @param req
      * @return
      */
@@ -75,7 +75,7 @@ public interface ConsensusProvider {
 
 
     /**
-     * 查询节点信息
+     * Query node information
      * @param req
      * @return
      */
@@ -83,14 +83,14 @@ public interface ConsensusProvider {
 
 
     /**
-     * 查询节点列表
+     * Query node list
      * @param req
      * @return
      */
     Result<AgentInfo> getAgentList(GetAgentListReq req);
 
     /**
-     * 查询委托列表
+     * Query delegation list
      * @param req
      * @return
      */

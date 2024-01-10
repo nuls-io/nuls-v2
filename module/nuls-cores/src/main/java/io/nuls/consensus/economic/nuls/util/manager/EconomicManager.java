@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 经济模型管理类
+ * Economic Model Management
  * @author tag
  * @date 2019/7/23
  */
@@ -31,18 +31,18 @@ public class EconomicManager {
     private static InflationInfo lastVisitInflationInfo = null;
     
     /**
-     * 分发共识奖励
-     * @param agentInfo        本地打包信息/local agent packing info
-     * @param roundInfo        本地最新轮次/local newest round info
-     * @param consensusConfig  链配置信息/chain config
-     * @param unlockHeight     解锁高度/unlock height
-     * @param awardAssetMap    手续费集合
-     * @return                 跨链交易分发集合
+     * Distribute consensus rewards
+     * @param agentInfo        Local packaging information/local agent packing info
+     * @param roundInfo        Latest local round/local newest round info
+     * @param consensusConfig  Chain configuration information/chain config
+     * @param unlockHeight     Unlocking height/unlock height
+     * @param awardAssetMap    Collection of handling fees
+     * @return                 Cross chain transaction distribution set
      * */
     public static List<CoinTo> getRewardCoin(AgentInfo agentInfo, RoundInfo roundInfo, ConsensusConfigInfo consensusConfig, long unlockHeight, Map<String, BigInteger> awardAssetMap)throws NulsException{
         List<CoinTo> rewardList = new ArrayList<>();
         /*
-        如果为种子节点，只领取交易手续费不计算共识奖励（种子节点保证金为0）
+        If it is a seed node, only receive transaction fees without calculating consensus rewards（The seed node deposit is0）
         If it is a seed node, it only receives transaction fee without calculating consensus award (seed node margin is 0)
         */
         if (BigIntegerUtils.isEqual(agentInfo.getDeposit(), BigInteger.ZERO)) {
@@ -62,16 +62,16 @@ public class EconomicManager {
         }
 
         /*
-        本轮次总的出块奖励金(本轮次出块节点数*共识基础奖励 )
+        The total reward for this round's block out bonus(The number of block nodes in this round*Consensus based rewards )
         Total reward in this round
         */
         BigDecimal totalAll =calcRoundConsensusReward(roundInfo,consensusConfig).setScale(2, 1);
-        Log.info("本轮次出块数量{}，本轮奖励总额：{}",roundInfo.getMemberCount(),totalAll );
+        Log.info("Number of blocks produced in this round{}The total amount of rewards in this round：{}",roundInfo.getMemberCount(),totalAll );
         BigInteger selfAllDeposit = agentInfo.getDeposit().add(agentInfo.getTotalDeposit());
         BigDecimal agentWeight = DoubleUtils.mul(new BigDecimal(selfAllDeposit), agentInfo.getCreditVal());
         if (roundInfo.getTotalWeight() > 0 && agentWeight.doubleValue() > 0) {
             /*
-            本节点共识奖励 = 节点权重/本轮次权重*共识基础奖励
+            Consensus reward for this node = Node weight/Weight for this round*Consensus based rewards
             Node Consensus Award = Node Weight/Round Weight*Consensus Foundation Award
             */
             BigInteger consensusReword = DoubleUtils.mul(totalAll, DoubleUtils.div(agentWeight, roundInfo.getTotalWeight())).toBigInteger();
@@ -85,7 +85,7 @@ public class EconomicManager {
         if(awardAssetMap == null || awardAssetMap.isEmpty()){
             return rewardList;
         }
-        //计算参与共识账户的权重
+        //Calculate the weight of participating consensus accounts
         Map<String,BigDecimal> depositWeightMap = getDepositWeight(agentInfo, selfAllDeposit);
         for (Map.Entry<String, BigInteger> rewardEntry:awardAssetMap.entrySet()) {
             String[] assetInfo = rewardEntry.getKey().split(NulsEconomicConstant.SEPARATOR);
@@ -97,11 +97,11 @@ public class EconomicManager {
 
 
     /**
-     * 计算参与共识的账户权重
+     * Calculate the weight of accounts participating in consensus
      * Calculating Account Weights for Participating in Consensus
-     * @param agentInfo      当前节点信息
-     * @param totalDeposit   当前节点本轮次总权重
-     * @return               参与共识的账户权重分配详情
+     * @param agentInfo      Current node information
+     * @param totalDeposit   The total weight of the current node in this round
+     * @return               Details of weight allocation for accounts participating in consensus
      * */
     private static Map<String,BigDecimal> getDepositWeight(AgentInfo agentInfo,BigInteger totalDeposit){
         Map<String,BigDecimal> depositWeightMap = new HashMap<>(NulsEconomicConstant.VALUE_OF_16);
@@ -113,7 +113,7 @@ public class EconomicManager {
         BigDecimal depositRate = new BigDecimal(1).subtract(commissionRate);
         BigInteger creatorDeposit = agentInfo.getDeposit();
         /*
-        计算各委托账户获得的奖励金
+        Calculate the reward received by each entrusted account
         Calculate the rewards for each entrusted account
         */
         for (DepositInfo deposit : agentInfo.getDepositList()) {
@@ -122,7 +122,7 @@ public class EconomicManager {
                 continue;
             }
             /*
-            计算各委托账户权重（委托金额/总的委托金)
+            Calculate the weight of each entrusted account（Entrusted amount/Total commission)
             Calculate the weight of each entrusted account (amount of entrusted account/total entrusted fee)
             */
             String depositAddress = AddressTool.getStringAddressByBytes(deposit.getAddress());
@@ -134,22 +134,22 @@ public class EconomicManager {
             }
         }
 
-        //节点创建者权重
+        //Node creator weight
         BigDecimal creatorWeight = new BigDecimal(creatorDeposit).divide(new BigDecimal(totalDeposit), 8, RoundingMode.HALF_DOWN);
         BigDecimal creatorCommissionWeight = BigDecimal.ONE.subtract(creatorWeight).multiply(commissionRate);
         creatorWeight = creatorWeight.add(creatorCommissionWeight);
         depositWeightMap.put(AddressTool.getStringAddressByBytes(agentInfo.getRewardAddress()), creatorWeight);
-        Log.debug("区块权重分配：{}",depositWeightMap.toString());
+        Log.debug("Block weight allocation：{}",depositWeightMap.toString());
         return depositWeightMap;
     }
 
     /**
-     * 组装CoinTo
-     * @param depositWeightMap   参与共识账户的权重分配
-     * @param assetChainId       资产链ID
-     * @param assetId            资产ID
-     * @param totalReward        总的奖励金
-     * @param unlockHeight       锁定高度
+     * assembleCoinTo
+     * @param depositWeightMap   Weight allocation for participating consensus accounts
+     * @param assetChainId       Asset ChainID
+     * @param assetId            assetID
+     * @param totalReward        Total reward
+     * @param unlockHeight       Lock height
      * @return                   CoinTo
      * */
     private static List<CoinTo> assembleCoinTo(Map<String,BigDecimal> depositWeightMap, int assetChainId, int assetId, BigDecimal totalReward, long unlockHeight){
@@ -166,20 +166,20 @@ public class EconomicManager {
 
 
     /**
-     * 计算本轮次总的共识奖励
+     * Calculate the total consensus reward for this round
      * Computing the general consensus awards for this round
      *
-     * @param roundInfo             轮次信息
-     * @param consensusConfig       共识配置
-     * @return                      本轮总共识奖励
+     * @param roundInfo             Round information
+     * @param consensusConfig       Consensus configuration
+     * @return                      The overall consensus reward for this round
      * */
     private static BigDecimal calcRoundConsensusReward(RoundInfo roundInfo, ConsensusConfigInfo consensusConfig)throws NulsException{
         BigDecimal totalAll = BigDecimal.ZERO;
-        //区块时间是出块结束时间，所以轮次出的第一个块时间是轮次开始时间+出块间隔时间
+        //The block time is the end time of block generation, so the first block time produced in a round is the start time of the round+Block output interval time
         long roundStartTime = roundInfo.getRoundStartTime() + consensusConfig.getPackingInterval();
         long roundEndTime = roundInfo.getRoundEndTime();
 
-        //区块回滚时导致通缩也回滚
+        //Deflation caused by block rollback also rolls back
         boolean changeInflationInfo = lastVisitInflationInfo == null || roundStartTime >= lastVisitInflationInfo.getEndTime() || roundEndTime <= lastVisitInflationInfo.getStartTime();
 
         InflationInfo inflationInfo = getInflationInfo(consensusConfig, roundStartTime);
@@ -191,12 +191,12 @@ public class EconomicManager {
         while(roundEndTime > inflationInfo.getEndTime()){
             currentCount = (inflationInfo.getEndTime() - roundStartTime)/consensusConfig.getPackingInterval() + 1;
             totalAll = totalAll.add(DoubleUtils.mul(new BigDecimal(currentCount), new BigDecimal(inflationInfo.getAwardUnit())));
-            Log.info("本轮共识奖励为{}的数量为{}", inflationInfo.getAwardUnit(),currentCount);
+            Log.info("The consensus reward for this round is{}The quantity is{}", inflationInfo.getAwardUnit(),currentCount);
             roundStartTime += currentCount * consensusConfig.getPackingInterval();
             inflationInfo = getInflationInfo(consensusConfig, roundStartTime);
         }
         currentCount = (roundEndTime - roundStartTime)/consensusConfig.getPackingInterval() + 1;
-        Log.info("本轮共识奖励为{}的数量为{}", inflationInfo.getAwardUnit(),currentCount);
+        Log.info("The consensus reward for this round is{}The quantity is{}", inflationInfo.getAwardUnit(),currentCount);
         totalAll = totalAll.add(DoubleUtils.mul(new BigDecimal(currentCount), new BigDecimal(inflationInfo.getAwardUnit())));
         if(changeInflationInfo){
             lastVisitInflationInfo = inflationInfo;
@@ -205,12 +205,12 @@ public class EconomicManager {
     }
 
     /**
-     * 计算指定时间点所在的通胀详情
+     * Calculate the inflation details at the specified time point
      * Calculate inflation details at specified time points
      *
-     * @param consensusConfig   共识配置
-     * @param time              时间点
-     * @return                  该时间点通胀信息
+     * @param consensusConfig   Consensus configuration
+     * @param time              time point
+     * @return                  Inflation information at this time point
      * */
     private static InflationInfo getInflationInfo(ConsensusConfigInfo consensusConfig , long time) throws NulsException {
         if(lastVisitInflationInfo != null && time >= lastVisitInflationInfo.getStartTime() && time <= lastVisitInflationInfo.getEndTime()){
@@ -222,7 +222,7 @@ public class EconomicManager {
 
         if(time < startTime){
             time = startTime;
-            Log.info("当前时间小于通缩开始时间！" );
+            Log.info("The current time is less than the start time of deflation！" );
         }
 
         if(time <= endTime){
@@ -243,7 +243,7 @@ public class EconomicManager {
             inflationInfo.setInflationAmount(inflationAmount);
             inflationInfo.setAwardUnit(calcAwardUnit(consensusConfig,inflationAmount));
         }
-        Log.info("通胀发生改变，当前通胀通胀开始时间{}：，当前阶段通胀结束时间：{},当前阶段通胀总数：{}，当前阶段出块单位奖励：{}", inflationInfo.getStartTime(),inflationInfo.getEndTime(),inflationInfo.getInflationAmount(),inflationInfo.getAwardUnit());
+        Log.info("Inflation changes, current inflation start time{}：The end time of inflation at the current stage：{},Total inflation at the current stage：{}At the current stage, unit rewards for block production：{}", inflationInfo.getStartTime(),inflationInfo.getEndTime(),inflationInfo.getInflationAmount(),inflationInfo.getAwardUnit());
         return inflationInfo;
     }
 

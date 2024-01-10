@@ -35,7 +35,7 @@ import static io.nuls.base.script.ScriptOpCodes.*;
  * protocol at a lower level.</p>
  */
 public class ScriptBuilder {
-    private List<ScriptChunk> chunks;               //命令列表
+    private List<ScriptChunk> chunks;               //Command List
 
     /**
      * Creates a fresh ScriptBuilder with an empty program.
@@ -60,7 +60,7 @@ public class ScriptBuilder {
 
     /**
      * Adds the given chunk at the given index in the program
-     * 添加创建好的命令到指定的下表
+     * Add the created command to the specified table below
      */
     public ScriptBuilder addChunk(int index, ScriptChunk chunk) {
         chunks.add(index, chunk);
@@ -69,7 +69,7 @@ public class ScriptBuilder {
 
     /**
      * Adds the given opcode to the end of the program.
-     * 添加指定命令到列表最后
+     * Add the specified command to the end of the list
      */
     public ScriptBuilder op(int opcode) {
         return op(chunks.size(), opcode);
@@ -77,7 +77,7 @@ public class ScriptBuilder {
 
     /**
      * Adds the given opcode to the given index in the program
-     * 添加指定命令到列表指定位置
+     * Add the specified command to the specified position in the list
      */
     public ScriptBuilder op(int index, int opcode) {
         checkArgument(opcode > OP_PUSHDATA4);
@@ -86,7 +86,7 @@ public class ScriptBuilder {
 
     /**
      * Adds a copy of the given byte array as a entity element (i.e. PUSHDATA) at the end of the program.
-     * 添加数据命令（只包含数据）到命令列表最后
+     * Add Data Command（Only containing data）To the end of the command list
      */
     public ScriptBuilder data(byte[] data) {
         if (data.length == 0) {
@@ -98,25 +98,25 @@ public class ScriptBuilder {
 
     /**
      * Adds a copy of the given byte array as a entity element (i.e. PUSHDATA) at the given index in the program.
-     * 添加数据命令（只包含数据）到命令列表指定位置
+     * Add Data Command（Only containing data）To the specified position in the command list
      */
     public ScriptBuilder data(int index, byte[] data) {
         // implements BIP62
         byte[] copy = Arrays.copyOf(data, data.length);
         int opcode;
         /**
-         * 如果数据长度为0，则添加OP_0命令
+         * If the data length is0Then addOP_0command
          * */
         if (data.length == 0) {
             opcode = OP_0;
         }
         /**
-         * 如果数据长度为1
+         * If the data length is1
          * */
         else if (data.length == 1) {
             byte b = data[0];
             /**
-             * 如果数据长度为1，而且该字符大于1小于16，则添加相应的命令
+             * If the data length is1And this character is greater than1less than16Then add the corresponding command
              * */
             if (b >= 1 && b <= 16) {
                 opcode = Script.encodeToOpN(b);
@@ -125,19 +125,19 @@ public class ScriptBuilder {
             }
         }
         /**
-         * 如果数据长度小于0x4c，则添加该数据长度的命令
+         * If the data length is less than0x4cThen add the command for the length of the data
          * */
         else if (data.length < OP_PUSHDATA1) {
             opcode = data.length;
         }
         /**
-         * 如果数据长度小于256，则添加OP_PUSHDATA1（0x4c）命令
+         * If the data length is less than256Then addOP_PUSHDATA1（0x4c）command
          * */
         else if (data.length < 256) {
             opcode = OP_PUSHDATA1;
         }
         /**
-         * 如果数据长度小于65536，则添加OP_PUSHDATA2（0x4d）命令
+         * If the data length is less than65536Then addOP_PUSHDATA2（0x4d）command
          * */
         else if (data.length < 65536) {
             opcode = OP_PUSHDATA2;
@@ -158,7 +158,7 @@ public class ScriptBuilder {
     /**
      * Adds the given number to the given index in the program. Automatically
      * uses shortest encoding possible.
-     * 添加数据命令（一个long数据）到命令列表指定位置
+     * Add Data Command（Alongdata）To the specified position in the command list
      */
     public ScriptBuilder number(int index, long num) {
         if (num == -1) {
@@ -209,7 +209,7 @@ public class ScriptBuilder {
      * This is intended to use for negative numbers or values > 16, and although
      * it will accept numbers in the range 0-16 inclusive, the encoding would be
      * considered non-standard.
-     * 将给定的数字作为命令添加到程序中的给定索引中
+     * Add the given number as a command to the given index in the program
      *
      * @see #(int)
      */
@@ -252,7 +252,7 @@ public class ScriptBuilder {
 
     /**
      * Creates a new immutable Script based on the state of the builder.
-     * 根据当前命令列表创建一个不可变脚本
+     * Create an immutable script based on the current command list
      */
     public Script build() {
         return new Script(chunks);
@@ -260,10 +260,10 @@ public class ScriptBuilder {
 
     /**
      * Creates a scriptPubKey that encodes payment to the given address.
-     * 根据地址创建一个OutputScript/scriptPublicKry     转账
+     * Create a new one based on the addressOutputScript/scriptPublicKry     Transfer
      */
     public static Script createOutputScript(byte[] address, int type) {
-        //如果是P2SH类型的创建P2SH对应的锁定脚本
+        //If it isP2SHCreation of typesP2SHCorresponding locking script
         if (type == 0) {
             // OP_HASH160 <scriptHash> OP_EQUAL
             return new ScriptBuilder()
@@ -285,8 +285,8 @@ public class ScriptBuilder {
 
     /**
      * Creates a scriptPubKey that encodes payment to the given raw public key.
-     * 根据公钥创建一个OutputScript/scriptPublicKry
-     * 创建P2PK（Pay-to-Public-Key）锁定脚本
+     * Create a public key based on itOutputScript/scriptPublicKry
+     * establishP2PK（Pay-to-Public-Key）Lock Script
      */
     public static Script createOutputScript(ECKey key) {
         return new ScriptBuilder().data(key.getPubKey()).op(OP_CHECKSIG).build();
@@ -295,7 +295,7 @@ public class ScriptBuilder {
     /**
      * Creates a scriptSig that can redeem a pay-to-address output.
      * If given signature is null, incomplete scriptSig will be created with OP_0 instead of signature
-     * 根据签名和公钥创建一个pay-to-address的inputScript/scriptSig用于解锁交易的OutputScript/scriptPublicKry
+     * Create a signature and public key based on itpay-to-addressofinputScript/scriptSigUsed to unlock transactionsOutputScript/scriptPublicKry
      */
     public static Script createInputScript(@Nullable TransactionSignature signature, ECKey pubKey) {
         byte[] pubkeyBytes = pubKey.getPubKey();
@@ -307,7 +307,7 @@ public class ScriptBuilder {
     /**
      * Creates a scriptSig that can redeem a pay-to-address output.
      * If given signature is null, incomplete scriptSig will be created with OP_0 instead of signature
-     * 根据签名和公钥创建一个pay-to-address的inputScript/scriptSig用于解锁交易的OutputScript/scriptPublicKry
+     * Create a signature and public key based on itpay-to-addressofinputScript/scriptSigUsed to unlock transactionsOutputScript/scriptPublicKry
      */
     public static Script createNulsInputScript(@Nullable byte[] signBytes, byte[] pubKeyBytes) {
         return new ScriptBuilder().data(signBytes).data(pubKeyBytes).build();
@@ -316,7 +316,7 @@ public class ScriptBuilder {
     /**
      * Creates a scriptSig that can redeem a pay-to-pubkey output.
      * If given signature is null, incomplete scriptSig will be created with OP_0 instead of signature
-     * 根据签名创建一个pay-to-public_key的inputScript/scriptSig用于解锁交易的OutputScript/scriptPublicKry
+     * Create a signature based on the signaturepay-to-public_keyofinputScript/scriptSigUsed to unlock transactionsOutputScript/scriptPublicKry
      */
     public static Script createInputScript(@Nullable TransactionSignature signature) {
         //byte[] sigBytes = signature != null ? signature.encodeToBitcoin() : new byte[]{};
@@ -326,12 +326,12 @@ public class ScriptBuilder {
 
     /**
      * Creates a program that requires at least N of the given keys to sign, using OP_CHECKMULTISIG.
-     * 根据多个公钥创建多重签名的OutputScript/scriptPublicKry
+     * Creating multiple signatures based on multiple public keysOutputScript/scriptPublicKry
      */
     public static Script createMultiSigOutputScript(int threshold, List<ECKey> pubkeys) {
         checkArgument(threshold > 0);
         checkArgument(threshold <= pubkeys.size());
-        checkArgument(pubkeys.size() <= 16);  // That's the max we can represent with a single opcode.这是我们可以用一个操作码来表示的最大值
+        checkArgument(pubkeys.size() <= 16);  // That's the max we can represent with a single opcode.This is the maximum value that we can represent with an opcode
         ScriptBuilder builder = new ScriptBuilder();
         builder.smallNum(threshold);
         for (ECKey key : pubkeys) {
@@ -344,12 +344,12 @@ public class ScriptBuilder {
 
     /**
      * Creates a program that requires at least N of the given keys to sign, using OP_CHECKMULTISIG.
-     * 根据多个公钥创建多重签名的OutputScript/scriptPublicKry
+     * Creating multiple signatures based on multiple public keysOutputScript/scriptPublicKry
      */
     public static Script createNulsMultiSigOutputScript(int threshold, List<String> pubkeys) {
         checkArgument(threshold > 0);
         checkArgument(threshold <= pubkeys.size());
-        checkArgument(pubkeys.size() <= 16);  // That's the max we can represent with a single opcode.这是我们可以用一个操作码来表示的最大值
+        checkArgument(pubkeys.size() <= 16);  // That's the max we can represent with a single opcode.This is the maximum value that we can represent with an opcode
         ScriptBuilder builder = new ScriptBuilder();
         builder.smallNum(threshold);
         for (String pubKey : pubkeys) {
@@ -362,12 +362,12 @@ public class ScriptBuilder {
 
     /**
      * Create a program that satisfies an OP_CHECKMULTISIG program.
-     * 根据多个签名创建inputScript/scriptSig解锁脚本
+     * Create based on multiple signaturesinputScript/scriptSigUnlock Script
      **/
     public static Script createByteNulsMultiSigOutputScript(int threshold, List<byte[]> pubkeys) {
         checkArgument(threshold > 0);
         checkArgument(threshold <= pubkeys.size());
-        checkArgument(pubkeys.size() <= 16);  // That's the max we can represent with a single opcode.这是我们可以用一个操作码来表示的最大值
+        checkArgument(pubkeys.size() <= 16);  // That's the max we can represent with a single opcode.This is the maximum value that we can represent with an opcode
         ScriptBuilder builder = new ScriptBuilder();
         builder.smallNum(threshold);
         for (byte[] pubkey : pubkeys) {
@@ -380,7 +380,7 @@ public class ScriptBuilder {
 
     /**
      * Create a program that satisfies an OP_CHECKMULTISIG program.
-     * 根据多个签名创建inputScript/scriptSig解锁脚本
+     * Create based on multiple signaturesinputScript/scriptSigUnlock Script
      **/
     public static Script createMultiSigInputScript(List<TransactionSignature> signatures) {
         List<byte[]> sigs = new ArrayList<byte[]>(signatures.size());
@@ -407,14 +407,14 @@ public class ScriptBuilder {
     /**
      * Create a program that satisfies a pay-to-script hashed OP_CHECKMULTISIG program.
      * If given signature list is null, incomplete scriptSig will be created with OP_0 instead of signatures
-     * P2SH（支付到脚本模式，使用多重签名就需要用到这种模式）
+     * P2SH（Payment to script mode, which is required for using multiple signatures）
      */
     public static Script createP2SHMultiSigInputScript(@Nullable List<TransactionSignature> signatures,
                                                        Script multisigProgram) {
         List<byte[]> sigs = new ArrayList<byte[]>();
         if (signatures == null) {
             // create correct number of empty signatures
-            int numSigs = multisigProgram.getNumberOfSignaturesRequiredToSpend();  //花费这笔UTXO需要的签名数量
+            int numSigs = multisigProgram.getNumberOfSignaturesRequiredToSpend();  //Spend thisUTXONumber of signatures required
             for (int i = 0; i < numSigs; i++) {
                 sigs.add(new byte[]{});
             }
@@ -429,14 +429,14 @@ public class ScriptBuilder {
     /**
      * Create a program that satisfies a pay-to-script hashed OP_CHECKMULTISIG program.
      * If given signature list is null, incomplete scriptSig will be created with OP_0 instead of signatures
-     * P2SH（支付到脚本模式，使用多重签名就需要用到这种模式）
+     * P2SH（Payment to script mode, which is required for using multiple signatures）
      */
     public static Script createNulsP2SHMultiSigInputScript(@Nullable List<byte[]> signatures,
                                                            Script multisigProgram) {
         List<byte[]> sigs = new ArrayList<byte[]>();
         if (signatures == null) {
             // create correct number of empty signatures
-            int numSigs = multisigProgram.getNumberOfSignaturesRequiredToSpend();  //花费这笔UTXO需要的签名数量
+            int numSigs = multisigProgram.getNumberOfSignaturesRequiredToSpend();  //Spend thisUTXONumber of signatures required
             for (int i = 0; i < numSigs; i++) {
                 sigs.add(new byte[]{});
             }
@@ -532,7 +532,7 @@ public class ScriptBuilder {
      * Creates a scriptPubKey that sends to the given script hash. Read
      * <a href="https://github.com/bitcoin/bips/blob/master/bip-0016.mediawiki">BIP 16</a> to learn more about this
      * kind of script.
-     * 根据hash创建P2SH锁定脚本
+     * according tohashestablishP2SHLock Script
      */
     public static Script createP2SHOutputScript(byte[] hash) {
         checkArgument(hash.length == 23);
@@ -541,7 +541,7 @@ public class ScriptBuilder {
 
     /**
      * Creates a scriptPubKey for the given redeem script.
-     * 根据赎回脚本创建P2SH的锁定脚本
+     * Create based on redemption scriptP2SHLock Script for
      */
 /*    public static Script createP2SHOutputScript(Script redeemScript) {
         Address address = new Address(BaseConstant.DEFAULT_CHAIN_ID, BaseConstant.P2SH_ADDRESS_TYPE, SerializeUtils.sha256hash160(redeemScript.getProgram()));
@@ -554,7 +554,7 @@ public class ScriptBuilder {
      * Creates a P2SH output script with given public keys and threshold. Given public keys will be placed in
      * redeem script in the lexicographical sorting order.
      * <p>
-     * 使用给定的公钥和阈值创建一个P2SH输出脚本。给定公共密钥将被放置在在字典排序顺序中赎回脚本
+     * Create a using the given public key and thresholdP2SHOutput script. The given public key will be placed in the dictionary sorting order to redeem the script
      */
 /*    public static Script createP2SHOutputScript(int threshold, List<ECKey> pubkeys) {
         Script redeemScript = createRedeemScript(threshold, pubkeys);

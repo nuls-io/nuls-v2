@@ -10,11 +10,11 @@ import io.nuls.core.parse.SerializeUtils;
 import java.io.IOException;
 
 /**
- * 发送完整交易的消息
+ * Send a complete transaction message
  */
 public class BroadcastTxMessage extends BaseBusinessMessage {
     /**
-     * 交易
+     * transaction
      */
     private Transaction tx;
 

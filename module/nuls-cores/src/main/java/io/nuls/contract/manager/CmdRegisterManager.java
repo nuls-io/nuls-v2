@@ -60,7 +60,7 @@ public class CmdRegisterManager implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws NulsException {
-        // 初始化合约调用外部模块注册的命令的请求器
+        // Requestor for initializing contract calls to external module registered commands
         this.requestAndResponseInterface = new RequestAndResponseInterface() {
             @Override
             public Response requestAndResponse(String moduleCode, String cmdName, Map argsMap) throws Exception {
@@ -70,13 +70,13 @@ public class CmdRegisterManager implements InitializingBean {
     }
 
     /**
-     * 不支持不同模块注册的重名方法
-     * 不支持相同模块注册的重载方法
-     * 注册的命令参数类型, 需定义为String或String Array
-     * 调用该命令后的返回值类型, 需定义为String或String Array
+     * Does not support duplicate name methods for registering different modules
+     * Overloading methods that do not support the same module registration
+     * Registered command parameter types, To be defined asStringorString Array
+     * The return value type after calling this command, To be defined asStringorString Array
      *
-     * @param moduleCmdRegisterDto 注册信息
-     * @return 执行成功与否
+     * @param moduleCmdRegisterDto Registration information
+     * @return Whether the execution was successful or not
      */
     public Result registerCmd(ModuleCmdRegisterDto moduleCmdRegisterDto) {
         int chainId = moduleCmdRegisterDto.getChainId();
@@ -99,13 +99,13 @@ public class CmdRegisterManager implements InitializingBean {
 
     /**
      *
-     * @param chain      链对象
-     * @param moduleCode 模块代码
-     * @param cmdName    模块提供的命令名称
-     * @param cmdMode    创建交易 or 查询数据
-     * @param argNames   命令的参数名, 注册的命令参数类型, 需定义为String或String Array
-     * @param returnType 调用该命令后的返回值类型, 需定义为String或String Array
-     * @return 执行成功与否
+     * @param chain      Chain Object
+     * @param moduleCode Module code
+     * @param cmdName    The command name provided by the module
+     * @param cmdMode    Create transaction or Query data
+     * @param argNames   The parameter name of the command, Registered command parameter types, To be defined asStringorString Array
+     * @param returnType The return value type after calling this command, To be defined asStringorString Array
+     * @return Whether the execution was successful or not
      * @see CmdRegisterMode
      * @see CmdRegisterReturnType
      */
@@ -119,12 +119,12 @@ public class CmdRegisterManager implements InitializingBean {
         CmdRegister cmdRegister;
         if ((cmdRegister = cmdRegisterMap.get(cmdName)) != null) {
             if (!cmdRegister.getModuleCode().equals(moduleCode)) {
-                // 不同模块注册了重复的cmd
+                // Different modules have registered duplicatecmd
                 Log.error("Different modules registered duplicate cmd, cmdName is {}, registerd module is {}, registering module is {}", cmdName, cmdRegister.getModuleCode(), moduleCode);
                 return Result.getFailed(ContractErrorCode.DUPLICATE_REGISTER_CMD);
             }
         }
-        // 没有则注册，存在则覆盖
+        // If not, register; if present, overwrite
         cmdRegister = new CmdRegister(moduleCode, cmdName, CmdRegisterMode.getMode(cmdMode), argNames, cmdRegisterReturnType);
         if (Log.isDebugEnabled()) {
             Log.debug("registered cmd info: {}", cmdRegister);
@@ -134,11 +134,11 @@ public class CmdRegisterManager implements InitializingBean {
     }
 
     /**
-     * 根据命令名获取注册的完整信息
+     * Obtain complete registration information based on the command name
      *
-     * @param chainId 链ID
-     * @param cmdName 命令名称
-     * @return 注册信息
+     * @param chainId chainID
+     * @param cmdName Command Name
+     * @return Registration information
      */
     public CmdRegister getCmdRegisterByCmdName(int chainId, String cmdName) {
         Chain chain = chainManager.getChainMap().get(chainId);
@@ -152,11 +152,11 @@ public class CmdRegisterManager implements InitializingBean {
     }
 
     /**
-     * 合约调用外部模块注册的命令的请求器
+     * Requestor for calling commands registered with external modules for contract calls
      *
-     * @param moduleCode 模块代码
-     * @param cmdName    命令名称
-     * @param args       参数
+     * @param moduleCode Module code
+     * @param cmdName    Command Name
+     * @param args       parameter
      * @return response
      * @throws Exception
      */

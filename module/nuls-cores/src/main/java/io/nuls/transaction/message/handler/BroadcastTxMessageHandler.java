@@ -16,7 +16,7 @@ import static io.nuls.transaction.constant.TxCmd.NW_RECEIVE_TX;
 import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 /**
- * 接收处理网络中其他节点广播的完整交易的消息
+ * Receive and process messages for complete transactions broadcasted by other nodes in the network
  */
 @Component("BroadcastTxMessageHandlerV1")
 public class BroadcastTxMessageHandler implements MessageProcessor {
@@ -36,26 +36,26 @@ public class BroadcastTxMessageHandler implements MessageProcessor {
         Chain chain = null;
         try {
             chain = chainManager.getChain(chainId);
-            //根据区块同步状态,决定是否开始处理交易
+            //Based on block synchronization status,Decide whether to start processing transactions
             if(!chain.getProcessTxStatus().get()){
                 return;
             }
-            //解析新的交易消息
+            //Analyze new transaction messages
             BroadcastTxMessage message = RPCUtil.getInstanceRpcStr(msgStr, BroadcastTxMessage.class);
             if (message == null) {
                 return;
             }
             Transaction transaction = message.getTx();
             String hash = transaction.getHash().toHex();
-            //交易缓存中是否已存在该交易hash
+            //Does the transaction already exist in the transaction cachehash
             boolean rs = TxDuplicateRemoval.insertAndCheck(hash);
-            //记录向本节点发送完整交易的其他网络节点，转发hash时排除掉
+            //Record other network nodes that send complete transactions to this node and forward themhashTime exclusion
             TxDuplicateRemoval.putExcludeNode(hash, nodeId);
             if (!rs) {
-                //该完整交易已经收到过
+                //The complete transaction has been received
                 return;
             }
-            //将交易放入待验证本地交易队列中
+            //Put the transaction into the local transaction queue to be verified
             txService.newBroadcastTx(chainManager.getChain(chainId), new TransactionNetPO(transaction, nodeId));
         } catch (Exception e) {
             errorLogProcess(chain, e);

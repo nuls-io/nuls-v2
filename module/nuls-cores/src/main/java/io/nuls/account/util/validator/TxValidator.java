@@ -50,7 +50,7 @@ import java.util.Map;
 import static io.nuls.account.util.TxUtil.getSuccess;
 
 /**
- * 交易验证工具类
+ * Transaction verification tools
  * Transaction Verification Tool Class
  *
  * @author qinyifeng
@@ -66,13 +66,13 @@ public class TxValidator {
     private MultiSignAccountService multiSignAccountService;
 
     /**
-     * 交易类型
-     * from的地址必须是发起链的地址（from里面的资产是否存在）
-     * to的地址必须是发起链的地址（to里面的资产是否存在）
-     * 交易手续费
+     * Transaction type
+     * fromThe address of must be the address of the initiating chain（fromDoes the asset inside exist）
+     * toThe address of must be the address of the initiating chain（toDoes the asset inside exist）
+     * Transaction fees
      *
-     * 转账交易验证器
-     * 交易基础验证已由交易管理验证
+     * Transfer transaction validator
+     * Basic transaction verification has been verified by transaction management
      *
      * @param chain
      * @param tx
@@ -96,11 +96,11 @@ public class TxValidator {
     }
 
     /**
-     * 验证除了手续费以外的资产 from中的资产金额是否大于等于to中的资产金额要对应相等
+     * Verify assets other than transaction fees fromIs the asset amount in greater than or equal totoThe asset amounts in must correspond equally
      * @return
      */
     public Result validateCoinDataAsset(Chain chain, CoinData coinData) throws NulsException{
-        //from中资产id-资产链id作为key，存一个资产的金额总和
+        //fromMedium assetsid-Asset ChainidAs akeyThe total amount of an asset stored
         Map<String, BigInteger> mapFrom = new HashMap<>(AccountConstant.INIT_CAPACITY_8);
         for (CoinFrom coinFrom : coinData.getFrom()) {
             if (!TxUtil.isChainAssetExist(chain, coinFrom)) {
@@ -114,7 +114,7 @@ public class TxValidator {
                 mapFrom.put(key, amount);
             }
         }
-        //to中资产id-资产链id作为key，存一个资产的金额总和
+        //toMedium assetsid-Asset ChainidAs akeyThe total amount of an asset stored
         Map<String, BigInteger> mapTo = new HashMap<>(AccountConstant.INIT_CAPACITY_8);
         for (CoinTo coinTO : coinData.getTo()) {
             if (!TxUtil.isChainAssetExist(chain, coinTO)) {
@@ -128,7 +128,7 @@ public class TxValidator {
                 mapTo.put(key, amount);
             }
         }
-        //比较from和to相同资产的值是否相等
+        //comparefromandtoIs the value of the same asset equal
         for(Map.Entry<String, BigInteger> entry : mapFrom.entrySet()){
             if(entry.getValue().compareTo(mapTo.get(entry.getKey())) == -1){
                 return Result.getFailed(AccountErrorCode.COINFROM_UNDERPAYMENT);
@@ -138,9 +138,9 @@ public class TxValidator {
     }
 
     /**
-     * 验证交易的付款方数据
-     * 1.发送方from中地址和资产对应的链id必须发起链id
-     * 2.验证资产是否存在
+     * Verify payment party data for transactions
+     * 1.SenderfromThe chain corresponding to the address and asset in the middleidChain must be initiatedid
+     * 2.Verify the existence of assets
      *
      * @param chain
      * @param listFrom
@@ -153,11 +153,11 @@ public class TxValidator {
         int chainId = chain.getConfig().getChainId();
         for (CoinFrom coinFrom : listFrom) {
             int addrChainId = AddressTool.getChainIdByAddress(coinFrom.getAddress());
-            //黑洞地址不能发起转账
+            //Black hole address cannot initiate transfer
             if(AddressTool.isBlackHoleAddress(NulsConfig.BLACK_HOLE_PUB_KEY,addrChainId,coinFrom.getAddress())){
                 return Result.getFailed(AccountErrorCode.ADDRESS_TRANSFER_BAN);
             }
-            // 发送方from中地址对应的链id必须是发起链的id
+            // SenderfromThe chain corresponding to the middle addressidMust be the initiator of the chainid
             if (chainId != addrChainId) {
                 return Result.getFailed(AccountErrorCode.CHAINID_ERROR);
             }
@@ -166,9 +166,9 @@ public class TxValidator {
     }
 
     /**
-     * 验证交易的收款方数据(coinTo是不是属于同一条链)
-     * 1.收款方所有地址和资产是不是属于同一条链
-     * 2.验证资产是否存在
+     * Verify the payee data of the transaction(coinToDo they belong to the same chain)
+     * 1.Do all addresses and assets of the payee belong to the same chain
+     * 2.Verify the existence of assets
      *
      * @param listTo
      * @return Result
@@ -180,7 +180,7 @@ public class TxValidator {
         int chainId = chain.getConfig().getChainId();
         for (CoinTo coinTo : listTo) {
             int addrChainId = AddressTool.getChainIdByAddress(coinTo.getAddress());
-            // 接收方to中地址对应的链id必须发起链id
+            // RecipienttoThe chain corresponding to the middle addressidChain must be initiatedid
             if (chainId != addrChainId) {
                 return Result.getFailed(AccountErrorCode.CHAINID_ERROR);
             }

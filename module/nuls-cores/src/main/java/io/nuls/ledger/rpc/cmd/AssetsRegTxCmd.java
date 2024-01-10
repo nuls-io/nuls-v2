@@ -57,7 +57,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 资产登记与管理接口
+ * Asset registration and management interface
  *
  * @author lanjinsheng .
  * @date 2019/10/22
@@ -75,7 +75,7 @@ public class AssetsRegTxCmd extends BaseLedgerCmd {
     AssetRegMngService assetRegMngService;
 
     /**
-     * 注册链或资产封装coinData,x%资产进入黑洞，y%资产进入锁定
+     * Registration chain or asset encapsulationcoinData,x%Assets enter the black hole,y%Asset entry lock
      */
     CoinData getRegCoinData(BigInteger destroyAsset, byte[] address, int chainId, int assetId, int txSize, AccountState accountState) throws NulsRuntimeException {
         long decimal = (long) Math.pow(10, Integer.valueOf(ledgerConfig.getDecimals()));
@@ -84,7 +84,7 @@ public class AssetsRegTxCmd extends BaseLedgerCmd {
         CoinData coinData = new CoinData();
         CoinTo to = new CoinTo(AddressTool.getAddressByPubKeyStr(ledgerConfig.getBlackHolePublicKey(), chainId), chainId, assetId, destroyAssetTx, 0);
         coinData.addTo(to);
-        //手续费
+        //Handling fees
         CoinFrom from = new CoinFrom(address, chainId, assetId, destroyAssetTx, accountState.getNonce(), (byte) 0);
         coinData.addFrom(from);
         txSize += to.size();
@@ -99,44 +99,44 @@ public class AssetsRegTxCmd extends BaseLedgerCmd {
     }
 
     /**
-     * 链内资产协议登记接口
+     * In chain asset protocol registration interface
      *
      * @param params
      * @return
      */
     @CmdAnnotation(cmd = CmdConstant.CMD_CHAIN_ASSET_TX_REG, version = 1.0,
-            description = "链内资产协议登记接口")
+            description = "In chain asset protocol registration interface")
     @Parameters(value = {
-            @Parameter(parameterName = "assetName", requestType = @TypeDescriptor(value = String.class), parameterDes = "资产名称: 大、小写字母、数字、下划线（下划线不能在两端）1~20字节"),
-            @Parameter(parameterName = "initNumber", requestType = @TypeDescriptor(value = BigInteger.class), parameterDes = "资产初始值"),
-            @Parameter(parameterName = "decimalPlace", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-18]", parameterDes = "资产最小分割位数"),
-            @Parameter(parameterName = "assetSymbol", requestType = @TypeDescriptor(value = String.class), parameterDes = "资产单位符号: 大、小写字母、数字、下划线（下划线不能在两端）1~20字节"),
-            @Parameter(parameterName = "assetOwnerAddress", requestType = @TypeDescriptor(value = String.class), parameterDes = "新资产所有者地址"),
-            @Parameter(parameterName = "txCreatorAddress", requestType = @TypeDescriptor(value = String.class), parameterDes = "交易创建者地址"),
-            @Parameter(parameterName = "password", requestType = @TypeDescriptor(value = String.class), parameterDes = "账户密码")
+            @Parameter(parameterName = "assetName", requestType = @TypeDescriptor(value = String.class), parameterDes = "Asset Name: large、Lowercase letters、number、Underline（The underline cannot be at both ends）1~20byte"),
+            @Parameter(parameterName = "initNumber", requestType = @TypeDescriptor(value = BigInteger.class), parameterDes = "Initial value of assets"),
+            @Parameter(parameterName = "decimalPlace", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-18]", parameterDes = "The minimum number of split digits for assets"),
+            @Parameter(parameterName = "assetSymbol", requestType = @TypeDescriptor(value = String.class), parameterDes = "Asset unit symbol: large、Lowercase letters、number、Underline（The underline cannot be at both ends）1~20byte"),
+            @Parameter(parameterName = "assetOwnerAddress", requestType = @TypeDescriptor(value = String.class), parameterDes = "Address of new asset owner"),
+            @Parameter(parameterName = "txCreatorAddress", requestType = @TypeDescriptor(value = String.class), parameterDes = "Transaction creator address"),
+            @Parameter(parameterName = "password", requestType = @TypeDescriptor(value = String.class), parameterDes = "Account password")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象",
+    @ResponseData(name = "Return value", description = "Return aMapobject",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-                    @Key(name = "txHash", valueType = String.class, description = "交易hash值"),
-                    @Key(name = "chainId", valueType = int.class, description = "链id")
+                    @Key(name = "txHash", valueType = String.class, description = "transactionhashvalue"),
+                    @Key(name = "chainId", valueType = int.class, description = "chainid")
             })
     )
     public Response chainAssetTxReg(Map params) {
         Map<String, Object> rtMap = new HashMap<>(3);
         try {
-            /* 组装Asset (Asset object) */
+            /* assembleAsset (Asset object) */
             TxLedgerAsset asset = LedgerUtil.map2TxLedgerAsset(params);
             ErrorCode errorCode = assetRegMngService.commonRegValidator(asset);
             if (null != errorCode) {
                 return failed(errorCode);
             }
-            //判断地址是否为本地chainId地址
+            //Determine if the address is localchainIdaddress
             boolean isAddressValidate = (AddressTool.getChainIdByAddress(asset.getAddress()) == ledgerConfig.getChainId());
             if (!isAddressValidate) {
                 return failed(LedgerErrorCode.ERROR_ADDRESS_ERROR);
             }
             String ledgerAddr = LedgerUtil.getRealAddressStr(params.get("txCreatorAddress").toString());
-            /* 组装交易发送 (Send transaction) */
+            /* Assembly transaction sending (Send transaction) */
             Transaction tx = new AssetRegTransaction();
             tx.setTxData(asset.serialize());
             tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
@@ -144,7 +144,7 @@ public class AssetsRegTxCmd extends BaseLedgerCmd {
             CoinData coinData = this.getRegCoinData(BigInteger.valueOf(ledgerConfig.getAssetRegDestroyAmount()), AddressTool.getAddress(params.get("txCreatorAddress").toString()), ledgerConfig.getChainId(),
                     ledgerConfig.getAssetId(), tx.size(), accountState);
             tx.setCoinData(coinData.serialize());
-            /* 判断账号是否正确 (Determine if the signature is correct) */
+            /* Check if the account is correct (Determine if the signature is correct) */
             ErrorCode acErrorCode = rpcService.transactionSignature(ledgerConfig.getChainId(), (String) params.get("txCreatorAddress"), (String) params.get("password"), tx);
             if (null != acErrorCode) {
                 return failed(acErrorCode);
@@ -163,28 +163,28 @@ public class AssetsRegTxCmd extends BaseLedgerCmd {
     }
 
     /**
-     * 查看链内注册资产信息-通过Hash值
+     * View registered asset information within the chain-adoptHashvalue
      *
      * @param params
      * @return
      */
     @CmdAnnotation(cmd = CmdConstant.CMD_CHAIN_ASSET_REG_INFO_BY_HASH, version = 1.0,
-            description = "通过Hash查看链内注册资产信息")
+            description = "adoptHashView registered asset information within the chain")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "txHash", requestType = @TypeDescriptor(value = String.class), parameterDes = "交易Hash")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Run ChainId,Value range[1-65535]"),
+            @Parameter(parameterName = "txHash", requestType = @TypeDescriptor(value = String.class), parameterDes = "transactionHash")
 
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象",
+    @ResponseData(name = "Return value", description = "Return aMapobject",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-                    @Key(name = "assetId", valueType = int.class, description = "资产id"),
-                    @Key(name = "assetType", valueType = int.class, description = "资产类型"),
-                    @Key(name = "assetOwnerAddress", valueType = String.class, description = "资产所有者地址"),
-                    @Key(name = "initNumber", valueType = BigInteger.class, description = "资产初始化值"),
-                    @Key(name = "decimalPlace", valueType = int.class, description = "小数点分割位数"),
-                    @Key(name = "assetName", valueType = String.class, description = "资产名"),
-                    @Key(name = "assetSymbol", valueType = String.class, description = "资产符号"),
-                    @Key(name = "txHash", valueType = String.class, description = "交易hash值")
+                    @Key(name = "assetId", valueType = int.class, description = "assetid"),
+                    @Key(name = "assetType", valueType = int.class, description = "Asset type"),
+                    @Key(name = "assetOwnerAddress", valueType = String.class, description = "Address of asset owner"),
+                    @Key(name = "initNumber", valueType = BigInteger.class, description = "Asset initialization value"),
+                    @Key(name = "decimalPlace", valueType = int.class, description = "Decimal Division"),
+                    @Key(name = "assetName", valueType = String.class, description = "Asset Name"),
+                    @Key(name = "assetSymbol", valueType = String.class, description = "Asset symbols"),
+                    @Key(name = "txHash", valueType = String.class, description = "transactionhashvalue")
             })
     )
     public Response getAssetRegInfoByHash(Map params) {

@@ -51,7 +51,7 @@ public class TimeMessageHandler extends BaseMessageHandler {
     }
 
     /**
-     * 接收消息处理
+     * Receive message processing
      * Receive message processing
      *
      * @param message address message
@@ -63,7 +63,7 @@ public class TimeMessageHandler extends BaseMessageHandler {
 //        NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByMagic(message.getHeader().getMagicNumber());
 //        LoggerUtil.logger(nodeGroup.getChainId()).debug("TimeMessageHandler Recieve:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
         /*
-         * 处理应答消息
+         * Processing response messages
          */
         TimeMessage timeMessage = (TimeMessage) message;
         TimeManager.addPeerTime(node.getId(), timeMessage.getMsgBody().getMessageId(), timeMessage.getMsgBody().getTime());

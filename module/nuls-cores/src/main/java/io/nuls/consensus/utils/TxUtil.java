@@ -18,7 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * 交易工具类
+ * Trading tools
  * Transaction Tool Class
  *
  * @author tag

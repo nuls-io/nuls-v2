@@ -23,7 +23,7 @@ import java.net.URISyntaxException;
 import java.util.concurrent.TimeUnit;
 
 /**
- * netty客服端启动实现类
+ * nettyCustomer service startup implementation class
  * Customer Service Start Implementation Class
  *
  * @author tag
@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class NettyClient {
     /**
-     * 连接服务器，返回连接通道
+     * Connect to the server and return the connection channel
      * Connect to the server and return to the connection channel
      */
     public static Channel createConnect(String uri) {
@@ -74,12 +74,12 @@ public class NettyClient {
                 try {
                     TimeUnit.SECONDS.sleep(3);
                 } catch (InterruptedException e1) {
-                    Log.error("重试ws连接时，休眠进程发生异常");
+                    Log.error("retrywsWhen connecting, the hibernation process encountered an exception");
                 }
-                Log.info("创建ws:{}失败，第{}重试", uri, tryCount + 1);
+                Log.info("establishws:{}Failed, No{}retry", uri, tryCount + 1);
                 return createConnect(uri, tryCount + 1);
             } else {
-                Log.error("创建ws连接失败：{}", uri, e);
+                Log.error("establishwsconnection failed：{}", uri, e);
                 return null;
             }
 

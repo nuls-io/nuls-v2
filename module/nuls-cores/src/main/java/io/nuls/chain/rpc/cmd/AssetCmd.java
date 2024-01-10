@@ -57,30 +57,30 @@ public class AssetCmd extends BaseChainCmd {
     private NulsCoresConfig nulsChainConfig;
 
     /**
-     * 资产注册
+     * Asset registration
      */
     @CmdAnnotation(cmd = RpcConstants.CMD_ASSET_REG, version = 1.0,
-            description = "资产注册")
+            description = "Asset registration")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "symbol", requestType = @TypeDescriptor(value = String.class), parameterDes = "资产符号"),
-            @Parameter(parameterName = "assetName", requestType = @TypeDescriptor(value = String.class), parameterDes = "资产名称"),
-            @Parameter(parameterName = "initNumber", requestType = @TypeDescriptor(value = BigInteger.class), parameterDes = "资产初始值"),
-            @Parameter(parameterName = "decimalPlaces", requestType = @TypeDescriptor(value = short.class), parameterDes = "资产小数点位数"),
-            @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "创建交易的账户地址"),
-            @Parameter(parameterName = "password", requestType = @TypeDescriptor(value = String.class), parameterDes = "账户密码")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Asset ChainId,Value range[1-65535]"),
+            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "assetId,Value range[1-65535]"),
+            @Parameter(parameterName = "symbol", requestType = @TypeDescriptor(value = String.class), parameterDes = "Asset symbols"),
+            @Parameter(parameterName = "assetName", requestType = @TypeDescriptor(value = String.class), parameterDes = "Asset Name"),
+            @Parameter(parameterName = "initNumber", requestType = @TypeDescriptor(value = BigInteger.class), parameterDes = "Initial value of assets"),
+            @Parameter(parameterName = "decimalPlaces", requestType = @TypeDescriptor(value = short.class), parameterDes = "Decimal Places of Assets"),
+            @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "Create an account address for the transaction"),
+            @Parameter(parameterName = "password", requestType = @TypeDescriptor(value = String.class), parameterDes = "Account password")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象",
+    @ResponseData(name = "Return value", description = "Return aMapobject",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-                    @Key(name = "txHash", valueType = String.class, description = "交易hash值")
+                    @Key(name = "txHash", valueType = String.class, description = "transactionhashvalue")
             })
     )
     public Response assetReg(Map params) {
-        /* 发送到交易模块 (Send to transaction module) */
+        /* Send to transaction module (Send to transaction module) */
         Map<String, String> rtMap = new HashMap<>(1);
         try {
-            /* 组装Asset (Asset object) */
+            /* assembleAsset (Asset object) */
             Asset asset = new Asset();
             asset.map2pojo(params);
             if (asset.getDecimalPlaces() < Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMin()) || asset.getDecimalPlaces() > Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMax())) {
@@ -112,7 +112,7 @@ public class AssetCmd extends BaseChainCmd {
             if (assetService.assetExistAndAvailable(asset)) {
                 return failed(CmErrorCode.ERROR_ASSET_ID_EXIST);
             }
-            /* 组装交易发送 (Send transaction) */
+            /* Assembly transaction sending (Send transaction) */
             Transaction tx = new AddAssetToChainTransaction();
             if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) >= CmConstants.LATEST_SUPPORT_VERSION) {
                 tx.setTxData(TxUtil.parseAssetToTxV5(asset).serialize());
@@ -136,7 +136,7 @@ public class AssetCmd extends BaseChainCmd {
 
             tx.setCoinData(coinData.serialize());
 
-            /* 判断签名是否正确 (Determine if the signature is correct) */
+            /* Check if the signature is correct (Determine if the signature is correct) */
             ErrorCode acErrorCode = rpcService.transactionSignature(CmRuntimeInfo.getMainIntChainId(), (String) params.get("address"), (String) params.get("password"), tx);
             if (null != acErrorCode) {
                 return failed(acErrorCode);
@@ -155,25 +155,25 @@ public class AssetCmd extends BaseChainCmd {
     }
 
     /**
-     * 链内资产注册
+     * In chain asset registration
      */
     @CmdAnnotation(cmd = RpcConstants.CMD_MAIN_NET_ASSET_REG, version = 1.0,
-            description = "资产注册")
+            description = "Asset registration")
     @Parameters(value = {
-            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "创建交易的账户地址"),
-            @Parameter(parameterName = "password", requestType = @TypeDescriptor(value = String.class), parameterDes = "账户密码")
+            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "assetId,Value range[1-65535]"),
+            @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "Create an account address for the transaction"),
+            @Parameter(parameterName = "password", requestType = @TypeDescriptor(value = String.class), parameterDes = "Account password")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象",
+    @ResponseData(name = "Return value", description = "Return aMapobject",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-                    @Key(name = "txHash", valueType = String.class, description = "交易hash值")
+                    @Key(name = "txHash", valueType = String.class, description = "transactionhashvalue")
             })
     )
     public Response mainNetAssetReg(Map params) {
-        /* 发送到交易模块 (Send to transaction module) */
+        /* Send to transaction module (Send to transaction module) */
         Map<String, String> rtMap = new HashMap<>(1);
         try {
-            /* 组装Asset (Asset object) */
+            /* assembleAsset (Asset object) */
             Asset asset = rpcService.getLocalAssetByLedger(CmRuntimeInfo.getMainIntChainId(), Integer.valueOf(params.get("assetId").toString()));
             asset.setAddress(AddressTool.getAddress((String) params.get("address")));
             if (asset.getDecimalPlaces() < Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMin()) || asset.getDecimalPlaces() > Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMax())) {
@@ -204,7 +204,7 @@ public class AssetCmd extends BaseChainCmd {
             if (assetService.assetExist(asset) && asset.isAvailable()) {
                 return failed(CmErrorCode.ERROR_ASSET_ID_EXIST);
             }
-            /* 组装交易发送 (Send transaction) */
+            /* Assembly transaction sending (Send transaction) */
             Transaction tx = new AddAssetToChainTransaction();
             LoggerUtil.COMMON_LOG.debug("version= {}", ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()));
             if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) >= CmConstants.LATEST_SUPPORT_VERSION) {
@@ -228,7 +228,7 @@ public class AssetCmd extends BaseChainCmd {
             }
             tx.setCoinData(coinData.serialize());
 
-            /* 判断签名是否正确 (Determine if the signature is correct) */
+            /* Check if the signature is correct (Determine if the signature is correct) */
             ErrorCode acErrorCode = rpcService.transactionSignature(CmRuntimeInfo.getMainIntChainId(), (String) params.get("address"), (String) params.get("password"), tx);
             if (null != acErrorCode) {
                 return failed(acErrorCode);
@@ -247,26 +247,26 @@ public class AssetCmd extends BaseChainCmd {
     }
 
     @CmdAnnotation(cmd = RpcConstants.CMD_ASSET_DISABLE, version = 1.0,
-            description = "资产注销")
+            description = "Asset cancellation")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "创建交易的账户地址"),
-            @Parameter(parameterName = "password", requestType = @TypeDescriptor(value = String.class), parameterDes = "账户密码")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Asset ChainId,Value range[1-65535]"),
+            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "assetId,Value range[1-65535]"),
+            @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "Create an account address for the transaction"),
+            @Parameter(parameterName = "password", requestType = @TypeDescriptor(value = String.class), parameterDes = "Account password")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象",
+    @ResponseData(name = "Return value", description = "Return aMapobject",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-                    @Key(name = "txHash", valueType = String.class, description = "交易hash值")
+                    @Key(name = "txHash", valueType = String.class, description = "transactionhashvalue")
             })
     )
     public Response assetDisable(Map params) {
-        /* 发送到交易模块 (Send to transaction module) */
+        /* Send to transaction module (Send to transaction module) */
         Map<String, String> rtMap = new HashMap<>(1);
         try {
             int chainId = Integer.parseInt(params.get("chainId").toString());
             int assetId = Integer.parseInt(params.get("assetId").toString());
             byte[] address = AddressTool.getAddress(params.get("address").toString());
-            /* 身份的校验，账户地址的校验 (Verification of account address) */
+            /* Identity verification and account address verification (Verification of account address) */
             String dealAssetKey = CmRuntimeInfo.getAssetKey(chainId, assetId);
             Asset asset = assetService.getAsset(dealAssetKey);
             if (asset == null) {
@@ -280,7 +280,7 @@ public class AssetCmd extends BaseChainCmd {
             }
 
             /*
-              判断链下是否只有这一个资产了，如果是，则进行带链注销交易
+              Determine if there is only one asset off the chain, and if so, proceed with a chain cancellation transaction
               Judging whether there is only one asset under the chain, and if so, proceeding with the chain cancellation transaction
              */
             BlockChain dbChain = chainService.getChain(chainId);
@@ -303,7 +303,7 @@ public class AssetCmd extends BaseChainCmd {
             }
             Transaction tx;
             if (activeAssetCount == 1 && activeKey.equalsIgnoreCase(dealAssetKey)) {
-                /* 注销资产和链 (Destroy assets and chains) */
+                /* Cancellation of assets and chains (Destroy assets and chains) */
                 tx = new DestroyAssetAndChainTransaction();
                 try {
                     if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) >= CmConstants.LATEST_SUPPORT_VERSION) {
@@ -316,7 +316,7 @@ public class AssetCmd extends BaseChainCmd {
                     return failed("parseToTransaction fail");
                 }
             } else {
-                /* 只注销资产 (Only destroy assets) */
+                /* Only cancel assets (Only destroy assets) */
                 tx = new RemoveAssetFromChainTransaction();
                 try {
                     if (ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()) >= CmConstants.LATEST_SUPPORT_VERSION) {
@@ -338,7 +338,7 @@ public class AssetCmd extends BaseChainCmd {
             tx.setCoinData(coinData.serialize());
             tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
 
-            /* 判断签名是否正确 (Determine if the signature is correct) */
+            /* Check if the signature is correct (Determine if the signature is correct) */
             ErrorCode acErrorCode = rpcService.transactionSignature(CmRuntimeInfo.getMainIntChainId(), (String) params.get("address"), (String) params.get("password"), tx);
             if (null != acErrorCode) {
                 return failed(acErrorCode);
@@ -356,18 +356,18 @@ public class AssetCmd extends BaseChainCmd {
     }
 
     @CmdAnnotation(cmd = RpcConstants.CMD_GET_CHAIN_ASSET, version = 1.0,
-            description = "资产查看")
+            description = "Asset View")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "assetChainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产Id,取值区间[1-65535]")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Run ChainId,Value range[1-65535]"),
+            @Parameter(parameterName = "assetChainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Asset ChainId,Value range[1-65535]"),
+            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "assetId,Value range[1-65535]")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象",
+    @ResponseData(name = "Return value", description = "Return aMapobject",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-                    @Key(name = "chainId", valueType = Integer.class, description = "运行链Id"),
-                    @Key(name = "assetChainId", valueType = Integer.class, description = "资产链id"),
-                    @Key(name = "assetId", valueType = Integer.class, description = "资产id"),
-                    @Key(name = "asset", valueType = BigInteger.class, description = "资产值"),
+                    @Key(name = "chainId", valueType = Integer.class, description = "Run ChainId"),
+                    @Key(name = "assetChainId", valueType = Integer.class, description = "Asset Chainid"),
+                    @Key(name = "assetId", valueType = Integer.class, description = "assetid"),
+                    @Key(name = "asset", valueType = BigInteger.class, description = "Asset value"),
             })
     )
     public Response getChainAsset(Map params) {
@@ -390,12 +390,12 @@ public class AssetCmd extends BaseChainCmd {
     }
 
     @CmdAnnotation(cmd = RpcConstants.CMD_ASSET, version = 1.0,
-            description = "资产注册信息查询")
+            description = "Asset registration information query")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产Id,取值区间[1-65535]")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Asset ChainId,Value range[1-65535]"),
+            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "assetId,Value range[1-65535]")
     })
-    @ResponseData(description = "返回链信息", responseType = @TypeDescriptor(value = RegAssetDto.class))
+    @ResponseData(description = "Return Chain Information", responseType = @TypeDescriptor(value = RegAssetDto.class))
     public Response getRegAsset(Map params) {
         int chainId = Integer.parseInt(params.get("chainId").toString());
         int assetId = Integer.parseInt(params.get("assetId").toString());

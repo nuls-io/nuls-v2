@@ -29,7 +29,7 @@ import io.nuls.core.rpc.model.message.Response;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * 结果数据存放容器
+ * Result data storage container
  * Response entity storage container
  *
  * @author ln

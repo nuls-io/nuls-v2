@@ -22,7 +22,7 @@ import java.util.Map;
  */
 public class Asset extends BaseNulsData {
     /**
-     * 资产是在哪条链上注册的
+     * On which chain is the asset registered
      * Which chain is the asset registered on
      */
     private int chainId = 0;
@@ -41,7 +41,7 @@ public class Asset extends BaseNulsData {
     private String txHash;
 
     /**
-     * 资产流通的链集合
+     * The Chain Collection of Asset Circulation
      */
     List<Integer> chainIds = new ArrayList<>();
 
