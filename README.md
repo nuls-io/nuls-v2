@@ -1,4 +1,4 @@
-# NULS v2
+# NULS V2 
 
 NULS v2 is the main running program of NULS 2.0 nodes. It contains 3 microservice modules:
 - nuls-cores
@@ -93,6 +93,7 @@ You are welcome to contribute to NULS! We sincerely invite developers with rich 
 https://nuls.io/community
 
 Documentation：https://docs.nuls.io
+
 NULS Brand Assets: https://nuls.io/brand-assets
 
 
