@@ -1,6 +1,6 @@
-# NULS v2
+# NULS2.0 Node Wallet Implemented in Java
 
-NULS v2 is the main running program of NULS 2.0 nodes. It contains 3 microservice modules:
+NULS v2 is the main running program of NULS2.0 nodes. It contains 3 microservice modules:
 - nuls-cores
 - nuls-cmd-client
 - nuls-api
@@ -17,7 +17,7 @@ Start a NULS node according to this boot.
 
 Download URL: [RELEASES](https://github.com/nuls-io/nuls-v2/releases)
 
-## Running NULS v2
+## Running NULS2.0
 
 ### Bootstrap
 
@@ -68,7 +68,7 @@ Please check the following documents:
 
 Note: Some documents are in the process of being updated, so please understand if there are some inconsistencies.
 
-## Contribute to NULS v2
+## Contribute to NULS2.0
 Click Star and Fork to start contributing improvements to NULS v2.
 Hope more contributors can submit improvement suggestions and bug reports here.
 Issues: https://github.com/nuls-io/nuls-v2/issues
@@ -107,7 +107,7 @@ Modules added in the future may be release under different license, will specifi
 - Website: https://nuls.io
 - Twitter: https://twitter.com/nuls
 - Discord:https://discord.gg/aRCwbj47WN
-- Telegram: https://t.me/Nulsio)
+- Telegram: https://t.me/Nulsio
 - Medium: https://nuls.medium.com
 - Forum: https://forum.nuls.io
 - GitHub: https://github.com/nuls-io
