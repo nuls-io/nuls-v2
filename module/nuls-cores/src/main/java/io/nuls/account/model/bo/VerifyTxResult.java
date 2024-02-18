@@ -25,15 +25,15 @@
 package io.nuls.account.model.bo;
 
 /**
- * 验证交易结果组合封装 返回结果
+ * Validate transaction result combination encapsulation Return results
  * @author: Charlie
  * @date: 2019-01-11
  */
 public class VerifyTxResult {
 
-    /** 1校验通过，2孤儿交易 3双花 4 其他异常 5重复交易(已确认过)*/
+    /** 1Verification passed,2Orphan Trading 3honeysuckle 4 Other abnormalities 5Repeated transactions(Confirmed)*/
     private int code;
-    /** 校验返回描述*/
+    /** Verification return description*/
     private String desc;
 
     public static final int SUCCESS = 1;
@@ -66,13 +66,13 @@ public class VerifyTxResult {
       /*  if(StringUtils.isBlank(this.desc)){
             switch (this.code){
                 case SUCCESS:
-                    return "验证通过";
+                    return "Verification passed";
                 case ORPHAN:
-                    return "孤儿交易";
+                    return "Orphan Trading";
                 case DOUBLE_SPENDING:
-                    return "双花交易";
+                    return "Double Flower Trading";
                 case OTHER_EXCEPTION:
-                    return "其他验证不通过情况";
+                    return "Other verification failures";
             }
         }*/
         return desc;

@@ -34,19 +34,19 @@ import io.nuls.provider.model.form.Base;
 /**
  * @author Niels
  */
-@ApiModel(name = "委托参与共识表单数据")
+@ApiModel(name = "Delegated participation consensus form data")
 public class DepositForm extends Base {
 
-    @ApiModelProperty(description = "参与共识账户地址", required = true)
+    @ApiModelProperty(description = "Participating Consensus Account Address", required = true)
     private String address;
 
-    @ApiModelProperty(description = "共识节点hash", required = true)
+    @ApiModelProperty(description = "Consensus nodehash", required = true)
     private String agentHash;
 
-    @ApiModelProperty(description = "参与共识的金额", required = true)
+    @ApiModelProperty(description = "Amount of participation in consensus", required = true)
     private String deposit;
 
-    @ApiModelProperty(description = "密码", required = true)
+    @ApiModelProperty(description = "password", required = true)
     private String password;
 
     public String getAddress() {

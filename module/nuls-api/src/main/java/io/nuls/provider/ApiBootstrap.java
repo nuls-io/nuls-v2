@@ -31,7 +31,7 @@ import static io.nuls.provider.api.constant.SdkConstant.SDK_API;
 /**
  * @Author: zhoulijun
  * @Time: 2019-06-10 19:27
- * @Description: 模块启动类
+ * @Description: Module startup class
  */
 @Service
 public class ApiBootstrap extends RpcModule {

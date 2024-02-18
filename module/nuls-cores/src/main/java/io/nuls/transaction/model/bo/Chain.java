@@ -20,7 +20,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * 链的基础数据和运行状态数据
+ * Basic data and operational status data of the chain
  * Chain information class
  * @author: Charlie
  * @date: 2019/04/16
@@ -28,45 +28,45 @@ import java.util.concurrent.locks.ReentrantLock;
 public class Chain {
 
     /**
-     * 链基础配置信息
+     * Chain basic configuration information
      * Chain Foundation Configuration Information
      */
     private ConfigBean config;
 
     /**
-     * 是否正在共识出块中
+     * Is consensus block being reached
      */
     private AtomicBoolean packaging;
 
     /**
-     * 是否处理交易
-     * block通知,由节点区块同步状态决定
+     * Whether to process the transaction
+     * blocknotice,Determined by the synchronization status of node blocks
      */
     private AtomicBoolean processTxStatus;
 
     /**
-     * 日志
+     * journal
      */
     private NulsLogger logger;
 
     /**
-     * 交易注册信息
+     * Transaction registration information
      */
     private Map<Integer, TxRegister> txRegisterMap;
 
     /**
-     * 可打包交易hash集合, 交易已完成交易管理模块的校验(打包的时候从这里取)
+     * Packable transactionshashaggregate, The transaction has been verified by the transaction management module(Take it from here when packing)
      */
     private BlockingDeque<ByteArrayWrapper> packableHashQueue;
 
     /**
-     * 可打包交易hash对应的交易map
+     * Packable transactionshashCorresponding transactionsmap
      */
     private Map<ByteArrayWrapper, Transaction> packableTxMap;
 
 
     /**
-     * 未进行验证的交易队列
+     * Unverified transaction queue
      */
     private BlockingDeque<TransactionNetPO> unverifiedQueue;
 
@@ -77,12 +77,12 @@ public class Chain {
 
     private AtomicInteger orphanListDataSize;
     /**
-     * 当前最新高度
+     * Current Latest Altitude
      */
     private long bestBlockHeight;
 
     /**
-     * 任务线程池
+     * Task Thread Pool
      * Schedule thread pool
      */
     @JsonIgnore
@@ -90,27 +90,27 @@ public class Chain {
 
 
     /**
-     * 是否有智能合约交易在打包时,
-     * 模块统一验证的二次验证时验证不通过.
-     * (这样在当次打包时就不需要获取智能合约的执行结果)
+     * Is there a smart contract transaction during packaging,
+     * Verification failed during the second round of module unified verification.
+     * (This way, there is no need to obtain the execution result of the smart contract during the packaging process)
      */
     private boolean contractTxFail;
 
     /**
-     * 打包时处理孤儿交易的map
+     * Handling orphan transactions during packagingmap
      */
     private Map<NulsHash, Integer> txPackageOrphanMap;
 
     private final Lock packageLock = new ReentrantLock();
 
     /**
-     * 是否可执行打包
-     * 交易在打包时,如果正在执行账本正在执行已确认提交或回滚, 则停止当前打包,并重新打包
+     * Can packaging be executed
+     * The transaction is being packaged,If the ledger is being executed and confirmed submission or rollback is being executed, Stop the current packaging,And repackage
      */
     private AtomicBoolean packableState;
 
     /**
-     * 执行协议升级的处理
+     * Handling protocol upgrades
      */
     private AtomicBoolean protocolUpgrade;
     private AtomicBoolean canProtocolUpgrade;

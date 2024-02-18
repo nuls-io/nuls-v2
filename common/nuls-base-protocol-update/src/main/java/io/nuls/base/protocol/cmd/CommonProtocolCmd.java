@@ -38,11 +38,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
 /**
- * 协议版本变更统一通知接口
+ * Unified Notification Interface for Protocol Version Changes
  *
  * @author captain
  * @version 1.0
- * @date 18-11-14 下午4:23
+ * @date 18-11-14 afternoon4:23
  */
 @Component
 @NulsCoresCmd(module = ModuleE.NC)

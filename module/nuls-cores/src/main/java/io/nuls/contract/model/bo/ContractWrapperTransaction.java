@@ -40,7 +40,7 @@ public class ContractWrapperTransaction extends Transaction {
     private ContractData contractData;
 
     /**
-     * 接收到的交易顺序
+     * Received transaction order
      */
     private int order;
 

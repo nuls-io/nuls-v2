@@ -73,11 +73,11 @@ public class TxCirculateServiceImpl implements TxCirculateService {
         Map<String, BigInteger> fromAssetMap = new HashMap<>(2);
         Map<String, BigInteger> toAssetMap = new HashMap<>(2);
 
-        // 打造CoinData
+        // makeCoinData
         CoinData coinData = new CoinData();
         coinData.parse(coinDataByte, 0);
 
-        // 从CoinData中取出from的资产信息，放入Map中（同类型相加）
+        // fromCoinDataRemove from the middlefromAsset information, placed inMapin（Same type addition）
         List<CoinFrom> listFrom = coinData.getFrom();
         for (CoinFrom coinFrom : listFrom) {
             fromChainId = AddressTool.getChainIdByAddress(coinFrom.getAddress());
@@ -90,7 +90,7 @@ public class TxCirculateServiceImpl implements TxCirculateService {
             fromAssetMap.put(assetKey, amount);
         }
 
-        // 从CoinData中取出to的资产信息，放入Map中（同类型相加）
+        // fromCoinDataRemove from the middletoAsset information, placed inMapin（Same type addition）
         List<CoinTo> listTo = coinData.getTo();
         for (CoinTo coinTo : listTo) {
             toChainId = AddressTool.getChainIdByAddress(coinTo.getAddress());
@@ -141,7 +141,7 @@ public class TxCirculateServiceImpl implements TxCirculateService {
             int toChainId = toCoinDataAssets.getChainId();
             Map<String, BigInteger> fromAssetMap = fromCoinDataAssets.getAssetsMap();
             Map<String, BigInteger> toAssetMap = toCoinDataAssets.getAssetsMap();
-            //from 的处理
+            //from Processing of
             Set<String> assetKeys = fromAssetMap.keySet();
             for (String assetKey : assetKeys) {
 
@@ -157,7 +157,7 @@ public class TxCirculateServiceImpl implements TxCirculateService {
                     BigInteger currentAsset = fromChainAsset.getOutNumber().add(tempAmount);
                     fromChainAsset.setOutNumber(currentAsset);
                 } else {
-                    //友链从to里获取金额，避免友链手续费的干扰。
+                    //Friendly link fromtoObtain the amount from within to avoid interference from friend chain transaction fees.
                     BigInteger tempAmount = toAssetMap.get(assetKey) == null ? BigInteger.ZERO : toAssetMap.get(assetKey);
                     BigInteger currentAsset = fromChainAsset.getOutNumber().add(tempAmount);
                     fromChainAsset.setOutNumber(currentAsset);
@@ -166,13 +166,13 @@ public class TxCirculateServiceImpl implements TxCirculateService {
             }
 
             if (!isMainChain(toChainId)) {
-                //toChainId == nuls chain  需要进行跨外链的 手续费在coinBase里已经增加了。
-                //toChainId != nuls chain 收取剩余x%的手续费
-                //提取toChainId的 手续费资产，如果存将手续费放入外链给的回执，则这部分可以取消外链手续费的收取。
+                //toChainId == nuls chain  Need to cross external chains The handling fee iscoinBaseIt has already been added.
+                //toChainId != nuls chain Collect surplusx%Handling fees for
+                //extracttoChainIdof If the transaction fee asset is deposited into the receipt provided by the external chain, the collection of external chain transaction fees can be cancelled.
                 String mainAssetKey = CmRuntimeInfo.getMainAssetKey();
                 BigInteger allFromMainAmount = fromAssetMap.get(mainAssetKey) == null ? BigInteger.ZERO : fromAssetMap.get(mainAssetKey);
                 BigInteger allToMainAmount = toAssetMap.get(mainAssetKey) == null ? BigInteger.ZERO : toAssetMap.get(mainAssetKey);
-                //40%的手续费归平台
+                //40%The handling fee belongs to the platform
                 BigInteger feeAmount = (allFromMainAmount.subtract(allToMainAmount))
                         .multiply(BigInteger.valueOf(nulsChainConfig.getNulsFeeOtherNetPercent())).divide(BigInteger.valueOf(100));
                 if (null != toAssetMap.get(mainAssetKey)) {
@@ -180,7 +180,7 @@ public class TxCirculateServiceImpl implements TxCirculateService {
                 }
                 toAssetMap.put(mainAssetKey, feeAmount);
             }
-            //to 的处理
+            //to Processing of
             Set<String> toAssetKeys = toAssetMap.keySet();
             for (String toAssetKey : toAssetKeys) {
                 String key = CmRuntimeInfo.getChainAssetKey(toChainId, toAssetKey);
@@ -194,7 +194,7 @@ public class TxCirculateServiceImpl implements TxCirculateService {
 
 
                 if (null == toChainAsset) {
-                    //链下加资产，资产下增加链
+                    //Add assets off the chain
                     BlockChain toChain = null;
                     Asset asset = null;
                     if (null != batchUpdateAsset.get(toAssetKey)) {
@@ -212,7 +212,7 @@ public class TxCirculateServiceImpl implements TxCirculateService {
                     asset.addChainId(toChainId);
                     batchUpdateBlockChain.put(String.valueOf(toChainId), toChain);
                     batchUpdateAsset.put(toAssetKey, asset);
-                    //更新资产
+                    //Update assets
                     toChainAsset = new ChainAsset();
                     toChainAsset.setAddressChainId(toChainId);
                     toChainAsset.setAssetChainId(asset.getChainId());

@@ -22,7 +22,7 @@ import static io.nuls.test.cases.Constants.REMARK;
 /**
  * @Author: zhoulijun
  * @Time: 2019-04-24 13:52
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Component
 public class BatchCreateTransferCase2 extends BaseTranscationCase<Boolean, BatchParam> {
@@ -36,7 +36,7 @@ public class BatchCreateTransferCase2 extends BaseTranscationCase<Boolean, Batch
 
     @Override
     public String title() {
-        return "批量创建交易";
+        return "Batch Create Transactions";
     }
 
     @Autowired
@@ -58,7 +58,7 @@ public class BatchCreateTransferCase2 extends BaseTranscationCase<Boolean, Batch
         AtomicInteger doneTotal = new AtomicInteger(0);
         AtomicInteger successTotal = new AtomicInteger(0);
         Long start = System.currentTimeMillis();
-        Log.info("开始创建交易");
+        Log.info("Start creating transaction");
         CountDownLatch latch = new CountDownLatch(THEADH_COUNT);
         for (int s = 0; s < THEADH_COUNT; s++) {
             ThreadUtils.createAndRunThread("batch-transfer", () -> {
@@ -77,7 +77,7 @@ public class BatchCreateTransferCase2 extends BaseTranscationCase<Boolean, Batch
                         checkResultStatus(result);
                         successTotal.getAndIncrement();
                     } catch (TestFailException e) {
-                        Log.error("创建交易失败:{}", e.getMessage());
+                        Log.error("Create transaction failed:{}", e.getMessage());
                     }
                     i = doneTotal.getAndIncrement();
                 }
@@ -89,7 +89,7 @@ public class BatchCreateTransferCase2 extends BaseTranscationCase<Boolean, Batch
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        Log.info("创建{}笔交易,成功{}笔，消耗时间:{}", count, successTotal, System.currentTimeMillis() - start);
+        Log.info("establish{}Transactions,success{}Pen, time-consuming:{}", count, successTotal, System.currentTimeMillis() - start);
         return true;
     }
 

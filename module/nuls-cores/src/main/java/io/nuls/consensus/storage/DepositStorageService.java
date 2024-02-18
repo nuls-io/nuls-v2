@@ -7,7 +7,7 @@ import io.nuls.core.exception.NulsException;
 import java.util.List;
 
 /**
- * 委托信息存储管理
+ * Entrust information storage management
  * Delegated Information Storage Management
  *
  *
@@ -16,50 +16,50 @@ import java.util.List;
  * */
 public interface DepositStorageService {
     /**
-     * 存储委托信息
+     * Storage delegation information
      * Storage delegate information
      *
-     * @param depositPo 委托对象/deposit bean
-     * @param chainID   链ID/chain id
+     * @param depositPo Entrusted object/deposit bean
+     * @param chainID   chainID/chain id
      * @return  boolean
      * */
     boolean save(DepositPo depositPo,int chainID);
 
     /**
-     * 获取委托信息
+     * Obtain commission information
      * Get delegate information
      *
-     * @param hash      委托交易HASH/deposit hash
-     * @param chainID   链ID/chain id
+     * @param hash      Entrusted transactionHASH/deposit hash
+     * @param chainID   chainID/chain id
      * @return DepositPo
      * */
     DepositPo get(NulsHash hash,int chainID);
 
     /**
-     * 删除委托信息
+     * Delete delegation information
      * Delete delegation information
      *
-     * @param hash     委托交易HASH/deposit transaction hash
-     * @param chainID  链ID/chain id
+     * @param hash     Entrusted transactionHASH/deposit transaction hash
+     * @param chainID  chainID/chain id
      * @return   boolean
      * */
     boolean delete(NulsHash hash,int chainID);
 
     /**
-     * 获取委托信息列表
+     * Obtain a list of delegation information
      * Get a list of delegation information
      *
-     * @param chainID  链ID/chain id
+     * @param chainID  chainID/chain id
      * @return List<DepositPo>
      * @exception
      * */
     List<DepositPo> getList(int chainID) throws NulsException;
 
     /**
-     * 获取委托信息长度
+     * Obtain the length of delegation information
      * Get the length of delegation information
      *
-     * @param chainID  链ID/chain id
+     * @param chainID  chainID/chain id
      * @return int
      **/
     int size(int chainID);

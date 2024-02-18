@@ -24,42 +24,42 @@ import io.nuls.base.data.BlockHeader;
 import io.nuls.core.exception.NulsException;
 
 /**
- * 区块服务
+ * Blockchain services
  *
  * @author captain
  * @version 1.0
- * @date 18-11-6 下午4:57
+ * @date 18-11-6 afternoon4:57
  */
 public interface ProtocolService {
 
     /**
-     * todo 待实现
-     * 启动一条链
+     * todo To be implemented
+     * Start a chain
      *
-     * @param chainId 链ID
+     * @param chainId chainID
      * @return
      */
     boolean startChain(int chainId);
 
     /**
-     * todo 待实现
-     * 停止一条链
+     * todo To be implemented
+     * Stop a chain
      *
-     * @param chainId   链ID
-     * @param cleanData 是否清理数据
+     * @param chainId   chainID
+     * @param cleanData Do you want to clean up the data
      * @return
      */
     boolean stopChain(int chainId, boolean cleanData);
 
     /**
-     * 初始化方法
+     * Initialization method
      *
      * @param chainId
      */
     void init(int chainId);
 
     /**
-     * 保存新区块头
+     * Save new block header
      *
      * @param chainId
      * @param blockHeader
@@ -70,7 +70,7 @@ public interface ProtocolService {
 
     /**
      *
-     * 回滚区块头
+     * Rollback block header
      * @param chainId
      * @param blockHeader
      * @return

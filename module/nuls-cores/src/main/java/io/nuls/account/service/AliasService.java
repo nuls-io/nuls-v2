@@ -32,7 +32,7 @@ import io.nuls.core.basic.Result;
 import io.nuls.core.exception.NulsException;
 
 /**
- * 账户模块内部功能服务类
+ * Account module internal function service class
  * Account module internal function service class
  *
  * @author: EdwardChan
@@ -41,7 +41,7 @@ public interface AliasService {
 
 
     /**
-     * 设置别名
+     * Set alias
      * set the alias of acount
      *
      * @param chain
@@ -87,10 +87,10 @@ public interface AliasService {
     Result aliasTxValidate(int chainId, Transaction transaction) throws NulsException;
 
     /**
-     * 别名交易提交
-     * 1.保存别名alias至数据库
-     * 2.从数据库取出对应的account账户,将别名设置进account然后保存至数据库
-     * 3.将修改后的account重新进行缓存
+     * Submission of alias transactions
+     * 1.Save aliasaliasTo database
+     * 2.Retrieve the corresponding from the databaseaccountaccount,Set alias intoaccountThen save to the database
+     * 3.Modify theaccountRe cache
      * aliasTxCommit
      * 1. Save the alias to the database.
      * 2. Take the corresponding account from the database, set the alias to account and save it to the database.
@@ -99,10 +99,10 @@ public interface AliasService {
     boolean aliasTxCommit(int chainId, Alias alias) throws NulsException;
 
     /**
-     * 回滚别名操作(删除别名(全网))
-     * 1.从数据库删除别名对象数据
-     * 2.取出对应的account将别名清除,重新存入数据库
-     * 3.重新缓存account
+     * Rollback alias operation(Delete alias(Whole network))
+     * 1.Delete alias object data from the database
+     * 2.Take out the correspondingaccountClear alias,Re save to database
+     * 3.Recacheaccount
      * rollbackAlias
      * 1.Delete the alias data from the database.
      * 2. Remove the corresponding account to clear the alias and restore it in the database.

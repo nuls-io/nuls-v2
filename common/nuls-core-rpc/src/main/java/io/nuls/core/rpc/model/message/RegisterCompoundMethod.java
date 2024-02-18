@@ -31,7 +31,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 /**
- * 订阅多个远程方法
+ * Subscribing to multiple remote methods
  * Subscribe to multiple remote methods
  *
  * @author tangyi

@@ -24,7 +24,7 @@ import java.math.BigInteger;
 import java.util.*;
 
 /**
- * 节点管理类，负责节点的相关操作
+ * Node management class, responsible for node related operations
  * Node management class, responsible for the operation of the node
  *
  * @author tag
@@ -44,10 +44,10 @@ public class AgentManager {
     private RoundManager roundManager;
 
     /**
-     * 加载节点信息
+     * Load node information
      * Initialize node information
      *
-     * @param chain 链信息/chain info
+     * @param chain Chain information/chain info
      */
     public void loadAgents(Chain chain) throws Exception {
         List<Agent> allAgentList = new ArrayList<>();
@@ -61,7 +61,7 @@ public class AgentManager {
     }
 
     /**
-     * 添加指定链节点
+     * Add specified chain nodes
      * Adding specified chain nodes
      *
      * @param chain chain info
@@ -72,7 +72,7 @@ public class AgentManager {
     }
 
     /**
-     * 修改指定链节点
+     * Modify specified chain nodes
      * Modifying specified chain nodes
      *
      * @param chain chain info
@@ -94,11 +94,11 @@ public class AgentManager {
     }
 
     /**
-     * 删除指定链节点
+     * Delete specified chain nodes
      * Delete the specified link node
      *
      * @param chain  chain info
-     * @param txHash 创建该节点交易的HASH/Creating the node transaction hash
+     * @param txHash Create transactions for this nodeHASH/Creating the node transaction hash
      */
     public void removeAgent(Chain chain, NulsHash txHash) {
         List<Agent> agentList = chain.getAgentList();
@@ -114,7 +114,7 @@ public class AgentManager {
     }
 
     /**
-     * 根据节点地址找节点
+     * Find nodes based on their addresses
      */
     public Agent getAgentByAgentAddress(Chain chain, byte[] agentAddress) {
         for (Agent agent : chain.getAgentList()) {
@@ -131,7 +131,7 @@ public class AgentManager {
     /**
      * AgentPo to Agent
      *
-     * @param agentPo agentPo对象/agentPo object
+     * @param agentPo agentPoobject/agentPo object
      * @return Agent
      */
     public Agent poToAgent(AgentPo agentPo) {
@@ -154,7 +154,7 @@ public class AgentManager {
     /**
      * Agent to AgentPo
      *
-     * @param agent Agent对象/Agent object
+     * @param agent Agentobject/Agent object
      * @return AgentPo
      */
     public AgentPo agentToPo(Agent agent) {
@@ -174,10 +174,10 @@ public class AgentManager {
     }
 
     /**
-     * 获取节点id
+     * Get nodesid
      * Get agent id
      *
-     * @param hash 节点HASH/Agent hash
+     * @param hash nodeHASH/Agent hash
      * @return String
      */
     public String getAgentId(NulsHash hash) {
@@ -209,14 +209,14 @@ public class AgentManager {
 
     public boolean stopAgentCommit(Transaction transaction, BlockHeader blockHeader, Chain chain) throws NulsException {
         int chainId = chain.getConfig().getChainId();
-        //找到需要注销的节点信息
+        //Find the node information that needs to be logged out
         StopAgent stopAgent = new StopAgent();
         stopAgent.parse(transaction.getTxData(), 0);
         AgentPo agentPo = agentStorageService.get(stopAgent.getCreateTxHash(), chain.getConfig().getChainId());
         if (agentPo == null || agentPo.getDelHeight() > 0) {
             throw new NulsException(ConsensusErrorCode.AGENT_NOT_EXIST);
         }
-        //找到该节点的委托信息,并设置委托状态为退出
+        //Find the delegation information for this node,And set the delegation status to exit
         List<DepositPo> depositPoList = depositStorageService.getList(chainId);
         for (DepositPo depositPo : depositPoList) {
             if (depositPo.getDelHeight() > -1L) {
@@ -233,7 +233,7 @@ public class AgentManager {
             depositManager.updateDeposit(chain, depositManager.poToDeposit(depositPo));
         }
         agentPo.setDelHeight(blockHeader.getHeight());
-        //保存数据库和缓存
+        //Save database and cache
         if (!agentStorageService.save(agentPo, chainId)) {
             throw new NulsException(ConsensusErrorCode.SAVE_FAILED);
         }
@@ -247,7 +247,7 @@ public class AgentManager {
         stopAgent.parse(transaction.getTxData(), 0);
         AgentPo agentPo = agentStorageService.get(stopAgent.getCreateTxHash(), chainId);
         agentPo.setDelHeight(-1);
-        //找到该节点的委托信息,并设置委托状态为退出
+        //Find the delegation information for this node,And set the delegation status to exit
         List<DepositPo> depositPoList = depositStorageService.getList(chainId);
         for (DepositPo depositPo : depositPoList) {
             if (depositPo.getDelHeight() != blockHeader.getHeight()) {
@@ -262,7 +262,7 @@ public class AgentManager {
             }
             depositManager.updateDeposit(chain, depositManager.poToDeposit(depositPo));
         }
-        //保存数据库和缓存
+        //Save database and cache
         if (!agentStorageService.save(agentPo, chainId)) {
             throw new NulsException(ConsensusErrorCode.ROLLBACK_FAILED);
         }

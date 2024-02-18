@@ -13,7 +13,7 @@ import io.nuls.core.core.annotation.Component;
 /**
  * @Author: zhoulijun
  * @Time: 2019-07-24 14:46
- * @Description: 对多签交易进行签名
+ * @Description: Sign multiple transactions
  */
 @Component
 public class SignMultiSingTransferProcessor  extends TransactionBaseProcessor implements CommandProcessor {

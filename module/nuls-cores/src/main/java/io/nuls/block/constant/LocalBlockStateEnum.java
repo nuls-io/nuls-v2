@@ -21,34 +21,34 @@
 package io.nuls.block.constant;
 
 /**
- * 标记本地区块与网络上区块的关系
+ * Mark the relationship between local blocks and blocks on the network
  *
  * @author captain
  * @version 1.0
- * @date 18-11-28 下午12:01
+ * @date 18-11-28 afternoon12:01
  */
 public enum LocalBlockStateEnum {
 
     /**
-     * 一致
+     * unanimous
      * Running exception
      */
     CONSISTENT,
 
     /**
-     * 不一致
+     * Inconsistent
      * Running exception
      */
     INCONSISTENT,
 
     /**
-     * 冲突
+     * conflict
      * Running exception
      */
     CONFLICT,
 
     /**
-     * 不确定
+     * Uncertain
      * Running exception
      */
     UNCERTAINTY;

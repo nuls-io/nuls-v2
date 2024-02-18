@@ -23,7 +23,7 @@ import java.util.Comparator;
 import java.util.Objects;
 
 /**
- * 封装数据键值对
+ * Encapsulate data key value pairs
  *
  * @param <K>
  * @param <V>

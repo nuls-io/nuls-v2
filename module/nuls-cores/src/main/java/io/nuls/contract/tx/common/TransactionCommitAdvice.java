@@ -75,7 +75,7 @@ public class TransactionCommitAdvice implements CommonAdvice {
 
                     List<byte[]> offlineTxHashList = batchInfo.getOfflineTxHashList();
                     if(offlineTxHashList != null && !offlineTxHashList.isEmpty()) {
-                        // 保存智能合约链下交易hash
+                        // Save smart contract off chain transactionshash
                         contractOfflineTxHashListStorageService.saveOfflineTxHashList(chainId, header.getHash().getBytes(), new ContractOfflineTxHashPo(offlineTxHashList));
                     }
                 }
@@ -86,12 +86,12 @@ public class TransactionCommitAdvice implements CommonAdvice {
 
                     List<byte[]> offlineTxHashList = contractPackageDto.getOfflineTxHashList();
                     if(offlineTxHashList != null && !offlineTxHashList.isEmpty()) {
-                        // 保存智能合约链下交易hash
+                        // Save smart contract off chain transactionshash
                         contractOfflineTxHashListStorageService.saveOfflineTxHashList(chainId, header.getHash().getBytes(), new ContractOfflineTxHashPo(contractPackageDto.getOfflineTxHashList()));
                     }
                 }
             }
-            // add by pierre at 2019-12-01 处理type10交易的业务提交, 需要协议升级 done
+            // add by pierre at 2019-12-01 handletype10Business submission for transactions, Protocol upgrade required done
             if(currentVersion >= ContractContext.UPDATE_VERSION_V250) {
                 List<Transaction> crossTxList = txList.stream().filter(tx -> tx.getType() == TxType.CROSS_CHAIN).collect(Collectors.toList());
                 if(currentVersion >= ContractContext.UPDATE_VERSION_CONTRACT_ASSET) {
@@ -110,7 +110,7 @@ public class TransactionCommitAdvice implements CommonAdvice {
     @Override
     public void end(int chainId, List<Transaction> txList, BlockHeader blockHeader) {
         Log.info("height: {} call end", blockHeader != null ? blockHeader.getHeight() : 0);
-        // 移除临时余额, 临时区块头等当前批次执行数据
+        // Remove temporary balance, Temporary block header and other current batch execution data
         Chain chain = contractHelper.getChain(chainId);
         if(ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_CONTRACT_ASSET ) {
             chain.setBatchInfoV8(null);

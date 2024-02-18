@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 /**
- * CoinFrom对比工具类
+ * CoinFromComparison tools
  * Node Contrast Tool Class
  *
  * @author tag

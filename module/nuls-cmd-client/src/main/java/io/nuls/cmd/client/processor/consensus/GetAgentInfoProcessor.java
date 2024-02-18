@@ -18,7 +18,7 @@ import java.util.Map;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-26 15:50
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Component
 public class GetAgentInfoProcessor extends ConsensusBaseProcessor {

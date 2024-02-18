@@ -52,7 +52,7 @@ public class BatchCreateAgentTest {
     public void batchCreateAgent() throws Exception{
         int agentCount = 20;
 
-        //创建创建节点地址并转账
+        //Create a node address and transfer funds
         List<String> agentAddressList = createAccount(chainId, agentCount, password);
         Log.info(agentAddressList.toString() );
         NulsHash hash = null;
@@ -71,14 +71,14 @@ public class BatchCreateAgentTest {
 
         Thread.sleep(30000L);
 
-        //创建出块账户，然后删除
+        //Create a block account and then delete it
         List<String> packAddressList = createAccount(chainId, agentCount, password);
         for (String packAddress:packAddressList) {
             getPrivateKey(packAddress);
             removeAccount(packAddress);
         }
 
-        //创建节点
+        //Create nodes
         List<String> agentHashList = new ArrayList<>();
         for (int index = 0; index < agentCount ; index++){
             agentHashList.add(createAgent(agentAddressList.get(index), packAddressList.get(index)));
@@ -86,7 +86,7 @@ public class BatchCreateAgentTest {
 
         Thread.sleep(30000);
 
-        //委托账户
+        //Entrusted account
         for (String agentHash:agentHashList) {
             boolean confirmed = getAgentInfo(agentHash);
             while (!confirmed){
@@ -204,7 +204,7 @@ public class BatchCreateAgentTest {
 
     private String createTransfer(String addressFrom, String addressTo, BigInteger amount) throws Exception {
         Map transferMap = this.createTransferParam(addressFrom, addressTo, amount);
-        //调用接口
+        //Calling interfaces
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
         if (!cmdResp.isSuccess()) {
             return "fail";

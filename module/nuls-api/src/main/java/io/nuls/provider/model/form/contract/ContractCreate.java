@@ -37,11 +37,11 @@ import io.nuls.v2.util.ContractUtil;
 @ApiModel
 public class ContractCreate extends ContractBase {
 
-    @ApiModelProperty(description = "智能合约代码(字节码的Hex编码字符串)", required = true)
+    @ApiModelProperty(description = "Smart Contract Code(BytecodeHexEncoding string)", required = true)
     private String contractCode;
-    @ApiModelProperty(description = "合约别名", required = true)
+    @ApiModelProperty(description = "Contract alias", required = true)
     private String alias;
-    @ApiModelProperty(description = "参数列表", required = false)
+    @ApiModelProperty(description = "parameter list", required = false)
     private Object[] args;
 
 

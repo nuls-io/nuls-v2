@@ -32,7 +32,7 @@ import io.nuls.base.data.Address;
 import java.util.List;
 
 /**
- * 调用合约允许普通转账的账户白名单
+ * Call the whitelist of accounts that allow regular transfers in the contract
  * @author: PierreLuo
  * @date: 2022/3/16
  */

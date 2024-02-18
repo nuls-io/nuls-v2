@@ -30,7 +30,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 注解类，Parameter的集合
+ * Annotations,ParameterCollection of
  * Annotation classes, sets of Parameters
  *
  * @author tangyi

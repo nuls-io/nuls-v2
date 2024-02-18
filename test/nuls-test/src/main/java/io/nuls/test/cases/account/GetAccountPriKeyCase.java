@@ -8,14 +8,14 @@ import io.nuls.core.core.annotation.Component;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-20 18:12
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Component
 public class GetAccountPriKeyCase extends BaseAccountCase<String,String> {
 
     @Override
     public String title() {
-        return "查询账户私钥";
+        return "Query account private key";
     }
 
     @Override

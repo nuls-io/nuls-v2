@@ -59,7 +59,7 @@ public class CmdTxTest {
     }
 
     /**
-     * 测试只有coinTo的交易
+     * Test onlycoinToTransaction
      *
      * @throws Exception
      */
@@ -75,7 +75,7 @@ public class CmdTxTest {
         params.put(Constants.CHAIN_ID, TestConfig.chainId);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
         String nonce = ((Map) ((Map) response.getResponseData()).get("getNonce")).get("nonce").toString();
-        //封装交易执行
+        //Encapsulation transaction execution
         Transaction tx = new Transaction();
         CoinData coinData = new CoinData();
         CoinFrom coinFrom = new CoinFrom();
@@ -105,7 +105,7 @@ public class CmdTxTest {
     }
 
     /**
-     * 测试只有coinTo的交易
+     * Test onlycoinToTransaction
      *
      * @throws Exception
      */
@@ -121,7 +121,7 @@ public class CmdTxTest {
         params.put(Constants.CHAIN_ID, TestConfig.chainId);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
         String nonce = ((Map) ((Map) response.getResponseData()).get("getNonce")).get("nonce").toString();
-        //封装交易执行
+        //Encapsulation transaction execution
         Transaction tx = new Transaction();
         CoinData coinData = new CoinData();
         CoinFrom coinFrom = new CoinFrom();
@@ -151,7 +151,7 @@ public class CmdTxTest {
     }
 
     /**
-     * 测试只有coinFrom的交易
+     * Test onlycoinFromTransaction
      *
      * @throws Exception
      */
@@ -167,7 +167,7 @@ public class CmdTxTest {
         params.put(Constants.CHAIN_ID, TestConfig.chainId);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
         String nonce = ((Map) ((Map) response.getResponseData()).get("getNonce")).get("nonce").toString();
-        //封装交易执行
+        //Encapsulation transaction execution
         Transaction tx = new Transaction();
         CoinData coinData = new CoinData();
         CoinFrom coinFrom = new CoinFrom();
@@ -197,7 +197,7 @@ public class CmdTxTest {
 
 
     /**
-     * 测试只有coinTo的交易
+     * Test onlycoinToTransaction
      *
      * @throws Exception
      */
@@ -214,7 +214,7 @@ public class CmdTxTest {
         params.put(Constants.CHAIN_ID, TestConfig.chainId);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
         String nonce = ((Map) ((Map) response.getResponseData()).get("getNonce")).get("nonce").toString();
-        //封装交易执行
+        //Encapsulation transaction execution
         Transaction tx = new Transaction();
         CoinData coinData = new CoinData();
         CoinFrom coinFrom = new CoinFrom();
@@ -243,13 +243,13 @@ public class CmdTxTest {
     }
 
     /**
-     * 测试含有coinFrom与coinTo的交易
+     * Test containscoinFromRelated tocoinToTransaction
      *
      * @throws Exception
      */
     //    String address = "JgT2JCQvKGRKRjKqyfxRAj2zSCpGca01f";
 
-    //入账金额
+    //Entry amount
     BigInteger amount = BigInteger.valueOf(100000000000L);
 
     public Transaction buildTx2() throws Exception {
@@ -263,7 +263,7 @@ public class CmdTxTest {
 
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
         String nonce = ((Map) ((Map) response.getResponseData()).get("getNonce")).get("nonce").toString();
-        //封装交易执行
+        //Encapsulation transaction execution
         Transaction tx = new Transaction();
         CoinData coinData = new CoinData();
         CoinFrom coinFrom = new CoinFrom();
@@ -313,7 +313,7 @@ public class CmdTxTest {
     }
 
     /**
-     * 测试只有coinTo的交易
+     * Test onlycoinToTransaction
      *
      * @throws Exception
      */
@@ -330,7 +330,7 @@ public class CmdTxTest {
         params.put(Constants.CHAIN_ID, TestConfig.chainId);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
         String nonce = ((Map) ((Map) response.getResponseData()).get("getNonce")).get("nonce").toString();
-        //封装交易执行
+        //Encapsulation transaction execution
         Transaction tx = new Transaction();
         CoinData coinData = new CoinData();
         CoinFrom coinFrom = new CoinFrom();

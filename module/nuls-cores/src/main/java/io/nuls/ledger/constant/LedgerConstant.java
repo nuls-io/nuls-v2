@@ -32,12 +32,12 @@ package io.nuls.ledger.constant;
  */
 public class LedgerConstant {
     /**
-     * 基础类型与合约类型
+     * Basic type and contract type
      */
     public static final short COMMON_ASSET_TYPE = 1;
     public static final short CONTRACT_ASSET_TYPE = 2;
     /**
-     * 资产小数分割位
+     * Decimal Division of Assets
      */
     public static final int DECIMAL_PLACES_MIN = 0;
     public static final int DECIMAL_PLACES_MAX = 18;
@@ -47,21 +47,21 @@ public class LedgerConstant {
 
 
     /**
-     * 高度解锁的阈值，大于这个值就是时间锁
+     * The threshold for height unlocking, greater than which is the time lock
      */
     public static final int MAX_HEIGHT_VALUE = 1000000000;
     public static final long LOCKED_ML_TIME_VALUE = 1000000000000L;
     /**
-     * 重新统计锁定的时间 1s
+     * Recalculate the locked time 1s
      */
     public static final int TIME_RECALCULATE_FREEZE = 1;
     /**
-     * FROM locked 解锁常量 0 普通交易，-1 时间解锁,1 高度解锁
+     * FROM locked Unlocking Constants 0 Ordinary transactions,-1 Time unlocking,1 Height unlocking
      */
     public static final int UNLOCKED_TIME = -1;
     public static final int UNLOCKED_HEIGHT = 1;
     /**
-     * To 永久锁定lockTime值 0 不锁定 -1 普通永久锁定，-2 dex永久锁定，x 锁定时间(s或ms)
+     * To Permanent locklockTimevalue 0 Not locked -1 Normal permanent lock,-2 dexPermanent lock,x Lock time(sorms)
      */
     public static final int PERMANENT_LOCK_COMMON = -1;
     public static final int PERMANENT_LOCK_DEX = -2;
@@ -70,16 +70,16 @@ public class LedgerConstant {
     public static byte[] blackHolePublicKey = null;
 
     /**
-     * 缓存的账户区块数量
+     * Number of cached account blocks
      */
     public static final int CACHE_ACCOUNT_BLOCK = 1000;
     /**
-     * 缓存同步统计数据的区块信息
+     * Block information of cache synchronization statistics data
      */
     public static final int CACHE_NONCE_INFO_BLOCK = 100;
 
     /**
-     * 缓存的账户初始化nonce
+     * Cache account initializationnonce
      */
 
     public static byte[] getInitNonceByte() {
@@ -89,7 +89,7 @@ public class LedgerConstant {
     public static final int NONCE_LENGHT = 8;
     public static String DEFAULT_ENCODING = "UTF-8";
     /**
-     * 未确认交易的过期时间-s，配置加载会重置该值
+     * Expiration time of unconfirmed transactions-sConfiguration loading will reset this value
      */
     public static int UNCONFIRM_NONCE_EXPIRED_TIME = 100;
 

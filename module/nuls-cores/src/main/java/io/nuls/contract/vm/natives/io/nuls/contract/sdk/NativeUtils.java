@@ -284,7 +284,7 @@ public class NativeUtils {
             if (isCollection || isMap) {
                 ObjectRef ref = (ObjectRef) value;
                 do {
-                    // 获取集合的值
+                    // Get the value of the collection
                     if (isCollection) {
                         ObjectRef resultRef = heap.getCollectionArrayRef(ref);
                         return toJson(resultRef.getVariableType(), resultRef, heap, methodArea, depth);
@@ -604,7 +604,7 @@ public class NativeUtils {
         }
         String[] args = (String[]) frame.heap.getObject(argsRef);
 
-        // 检查是否注册
+        // Check for registration
         CmdRegisterManager cmdRegisterManager = SpringLiteContext.getBean(CmdRegisterManager.class);
 
         CmdRegister cmdRegister = cmdRegisterManager.getCmdRegisterByCmdName(currentChainId, cmdName);
@@ -613,7 +613,7 @@ public class NativeUtils {
                     String.format("Invoke external cmd failed. There is no registration information. chainId: [%s] cmdName: [%s]",
                             currentChainId, cmdName), frame.vm.getGasUsed(), null);
         }
-        // 检查参数个数
+        // Check the number of parameters
         String moduleCode = cmdRegister.getModuleCode();
         List<String> argNames = cmdRegister.getArgNames();
         int argsSize;
@@ -638,16 +638,16 @@ public class NativeUtils {
         String contractSender = AddressTool.getStringAddressByBytes(senderBytes);
         String contractAddress = programInvoke.getAddress();
         byte[] contractAddressBytes = programInvoke.getContractAddress();
-        // 固定参数 - chainId、合约地址、合约调用者地址(Mode: All mode)
+        // Fixed parameters - chainId、Contract address、Contract caller address(Mode: All mode)
         argsMap.put("chainId", currentChainId);
         argsMap.put("contractAddress", contractAddress);
         argsMap.put("contractSender", contractSender);
-        // 固定参数 - 合约地址的当前余额和nonce, 当前打包的区块时间(Mode: NEW_TX)
+        // Fixed parameters - The current balance of the contract address andnonce, The current packaged block time(Mode: NEW_TX)
         CmdRegisterMode cmdRegisterMode = cmdRegister.getCmdRegisterMode();
         if (CmdRegisterMode.NEW_TX.equals(cmdRegisterMode)) {
             BlockHeaderDto blockHeaderDto = frame.vm.getBlockHeader(programInvoke.getNumber() + 1);
             long blockTime = blockHeaderDto.getTime();
-            // 使用虚拟机内部维护的合约余额
+            // Contract balance maintained internally using virtual machines
             ProgramAccount account = frame.vm.getProgramExecutor().getAccount(contractAddressBytes, CHAIN_ID, ASSET_ID);
             argsMap.put("contractBalance", account.getBalance().toString());
             argsMap.put("contractNonce", account.getNonce());
@@ -657,7 +657,7 @@ public class NativeUtils {
         ProgramInvokeRegisterCmd invokeRegisterCmd = new ProgramInvokeRegisterCmd(cmdName, argsMap, cmdRegisterMode);
         Result result;
         ObjectRef objectRef;
-        // add by pierre at 2019-11-01 token跨链转出命令 需要协议升级 done
+        // add by pierre at 2019-11-01 tokenCross chain transfer out command Protocol upgrade required done
         if(ContractConstant.CMD_TOKEN_OUT_CROSS_CHAIN.equals(cmdName)) {
             if(ProtocolGroupManager.getCurrentVersion(currentChainId) < ContractContext.UPDATE_VERSION_V250 ) {
                 throw new ErrorException(
@@ -667,9 +667,9 @@ public class NativeUtils {
             objectRef = NativeUtils.tokenOutCrossChainCmdProcessor(currentChainId, senderBytes, contractSender, args, contractAddress, contractAddressBytes, cmdRegisterManager, moduleCode, cmdName, argsMap, invokeRegisterCmd, frame);
         // end code by pierre
         } else {
-            // 调用外部接口
+            // Calling external interfaces
             Object cmdResult = requestAndResponse(cmdRegisterManager, moduleCode, cmdName, argsMap, frame);
-            // 处理返回值
+            // Processing return values
             objectRef = handleResult(currentChainId, contractAddressBytes, cmdResult, invokeRegisterCmd, cmdRegister, frame);
         }
         frame.vm.getInvokeRegisterCmds().add(invokeRegisterCmd);
@@ -681,9 +681,9 @@ public class NativeUtils {
         try {
             String codeAddress = args[0];
 
-            // 查找contractCode
+            // lookupcontractCode
             byte[] codeAddressBytes = AddressTool.getAddress(codeAddress);
-            // 验证codeAddress是合约地址
+            // validatecodeAddressIt is the contract address
             if (!NativeAddress.isContract(codeAddressBytes, frame)) {
                 throw new Exception("Not contract address");
             }
@@ -747,7 +747,7 @@ public class NativeUtils {
             String codeHash = args[1];
             String sender = args[2];
 
-            // 根据规则生成合约地址
+            // Generate contract address according to rules
             ProgramCreateData createData = new ProgramCreateData(
                     AddressTool.getAddress(sender),
                     Utils.dataToBytes(salt),
@@ -788,7 +788,7 @@ public class NativeUtils {
         ObjectRef argsRef = (ObjectRef) methodArgs.invokeArgs[1];
         String[] _args = (String[]) frame.heap.getObject(argsRef);
         int length = _args.length;
-        // 验证codeAddress是合约地址
+        // validatecodeAddressIt is the contract address
         String codeAddress = _args[0];
         byte[] codeAddressBytes = AddressTool.getAddress(codeAddress);
         if (!NativeAddress.isContract(codeAddressBytes, frame)) {
@@ -822,11 +822,11 @@ public class NativeUtils {
 
     private static ProgramResult createContract(int chainId, String salt, byte[] codeAddressBytes, String[][] args, Frame frame) throws IOException {
         ProgramInvoke programInvoke = frame.vm.getProgramInvoke();
-        // 查找contractCode
+        // lookupcontractCode
         byte[] codes = frame.vm.getRepository().getCode(codeAddressBytes);
         byte[] codeHash = frame.vm.getRepository().getCodeHash(codeAddressBytes);
 
-        // 根据规则生成合约地址
+        // Generate contract address according to rules
         ProgramCreateData createData = new ProgramCreateData(
                 programInvoke.getContractAddress(),
                 Utils.dataToBytes(salt),
@@ -885,7 +885,7 @@ public class NativeUtils {
         if(currentChainId == chainIdByAddress) {
             throw new ErrorException("The chainId of the recipient is not a cross-chain", frame.vm.getGasUsed(), null);
         }
-        // 检查此nrc20合约是否已注册跨链资产
+        // Check thisnrc20Has the contract been registered as a cross chain asset
         ChainManager chainManager = SpringLiteContext.getBean(ChainManager.class);
         Chain chain = chainManager.getChainMap().get(currentChainId);
         Map<String, ContractTokenAssetsInfo> tokenAssetsInfoMap = chain.getTokenAssetsInfoMap();
@@ -894,7 +894,7 @@ public class NativeUtils {
             throw new ErrorException("The token is not registered", frame.vm.getGasUsed(), null);
         }
         int assetId = tokenAssetsInfo.getAssetId();
-        // 增加资产id参数
+        // Increase assetsidparameter
         argsMap.put("assetId", assetId);
         try {
             boolean isCrossAssets = ChainManagerCall.isCrossAssets(currentChainId, assetId);
@@ -906,11 +906,11 @@ public class NativeUtils {
             throw new ErrorException("The asset is not a cross-chain asset[1]", frame.vm.getGasUsed(), null);
         }
         try {
-            // 检查转出人对系统合约的token授权额度
-            // 检查转出人是否有足够的token
-            // 转移转出人的token到系统合约当中
+            // Check the transferor's access to the system contracttokenAuthorization limit
+            // Check if the transferor has sufficient fundstoken
+            // Transfer the transferor'stokenIn the system contract
             NativeUtils.dealTokenOutCrossChain(contractAddress, contractSender, args, frame);
-            // 调用命令向跨链模块请求生成这笔交易
+            // Call the command to request the generation of this transaction from the cross chain module
             NativeUtils.newTokenOutCrossChainTx(currentChainId, contractAddressBytes, cmdRegisterManager, moduleCode, cmdName, argsMap, invokeRegisterCmd, frame);
             ProgramNewTx newTx = invokeRegisterCmd.getProgramNewTx();
             String txHash = newTx.getTxHash();
@@ -938,7 +938,7 @@ public class NativeUtils {
     }
 
     private static void dealTokenOutCrossChain(String currentContractAddress, String tokenContractAddress, String[] args, Frame frame) throws IOException {
-        // 检查转出人对系统合约的token授权额度
+        // Check the transferor's access to the system contracttokenAuthorization limit
         String fromAddress = args[0];
         String value = args[2];
         BigInteger valueBig = new BigInteger(value);
@@ -951,14 +951,14 @@ public class NativeUtils {
         if(authorizedmountsBig.compareTo(valueBig) < 0) {
             throw new ErrorException("No enough amount for authorization", frame.vm.getGasUsed(), null);
         }
-        // 检查转出人是否有足够的token
+        // Check if the transferor has sufficient fundstoken
         args1 = new String[][]{new String[]{fromAddress}};
         programResult = NativeAddress.call(tokenContractAddress, "balanceOf", "", args1, BigInteger.ZERO, frame);
         String balance = programResult.getResult();
         if(new BigInteger(balance).compareTo(valueBig) < 0) {
             throw new ErrorException("No enough balance of the token", frame.vm.getGasUsed(), null);
         }
-        // 转移转出人的token到系统合约当中
+        // Transfer the transferor'stokenIn the system contract
         args1 = new String[][]{
                 new String[]{fromAddress},
                 new String[]{currentContractAddress},
@@ -970,7 +970,7 @@ public class NativeUtils {
     }
 
     private static void newTokenOutCrossChainTx(int chainId, byte[] contractAddressBytes, CmdRegisterManager cmdRegisterManager, String moduleCode, String cmdName, Map argsMap, ProgramInvokeRegisterCmd invokeRegisterCmd, Frame frame) {
-        // 调用外部接口
+        // Calling external interfaces
         Object cmdResult = requestAndResponse(cmdRegisterManager, moduleCode, cmdName, argsMap, frame);
         String txHash;
         String txString;
@@ -988,7 +988,7 @@ public class NativeUtils {
                             cmdResult.getClass().getName()), frame.vm.getGasUsed(), null);
         }
         ContractNewTxFromOtherModuleHandler handler = SpringLiteContext.getBean(ContractNewTxFromOtherModuleHandler.class);
-        // 处理nonce和维护虚拟机内部的合约余额，不处理临时余额，外部再处理
+        // handlenonceMaintain the internal contract balance of the virtual machine, do not process temporary balances, and handle them externally
         Transaction tx = handler.updateNonceAndVmBalance(chainId, contractAddressBytes, txHash, txString, frame);
         ProgramNewTx programNewTx = new ProgramNewTx(txHash, txString, tx);
         invokeRegisterCmd.setProgramNewTx(programNewTx);
@@ -1035,20 +1035,20 @@ public class NativeUtils {
                                 cmdResult.getClass().getName()), frame.vm.getGasUsed(), null);
             }
             ContractNewTxFromOtherModuleHandler handler = SpringLiteContext.getBean(ContractNewTxFromOtherModuleHandler.class);
-            // 处理nonce和维护虚拟机内部的合约余额，不处理临时余额，外部再处理
+            // handlenonceMaintain the internal contract balance of the virtual machine, do not process temporary balances, and handle them externally
             Transaction tx = handler.updateNonceAndVmBalance(chainId, contractAddressBytes, txHash, txString, frame);
             ProgramNewTx programNewTx = new ProgramNewTx(txHash, txString, tx);
             invokeRegisterCmd.setProgramNewTx(programNewTx);
             frame.vm.getOrderedInnerTxs().add(programNewTx);
             objectRef = frame.heap.newString(txHash);
         } else {
-            // 根据返回值类型解析数据
+            // Parse data based on return value type
             CmdRegisterReturnType returnType = cmdRegister.getCmdRegisterReturnType();
             if (returnType.equals(CmdRegisterReturnType.STRING)) {
-                // 字符串类型
+                // String type
                 objectRef = frame.heap.newString((String) cmdResult);
             } else if (returnType.equals(CmdRegisterReturnType.STRING_ARRAY)) {
-                // 字符串数组类型
+                // String array type
                 if (cmdResult instanceof List) {
                     objectRef = listToObjectRef((List) cmdResult, frame);
                 } else if (cmdResult.getClass().isArray()) {
@@ -1059,7 +1059,7 @@ public class NativeUtils {
                                     cmdResult.getClass().getName()), frame.vm.getGasUsed(), null);
                 }
             } else if (returnType.equals(CmdRegisterReturnType.STRING_TWO_DIMENSIONAL_ARRAY)) {
-                // 字符串二维数组类型
+                // String two-dimensional array type
                 if (cmdResult instanceof List) {
                     List resultList = (List) cmdResult;
                     int size = resultList.size();

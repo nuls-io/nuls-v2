@@ -26,7 +26,7 @@
 package io.nuls.contract.constant;
 
 /**
- * 交易数据存储常量
+ * Transaction data storage constant
  * Transaction entity storage constants
  *
  * @author: PierreLuo
@@ -34,7 +34,7 @@ package io.nuls.contract.constant;
 public interface ContractDBConstant {
 
     /**
-     * 配置信息表名
+     * Configuration Information Table Name
      * chain configuration table name
      */
     String DB_NAME_CONGIF = "contract_config";

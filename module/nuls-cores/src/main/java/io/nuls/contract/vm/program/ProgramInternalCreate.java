@@ -28,27 +28,27 @@ package io.nuls.contract.vm.program;
 public class ProgramInternalCreate {
 
     /**
-     * 创建者
+     * creator
      */
     private byte[] sender;
 
     /**
-     * 合约地址
+     * Contract address
      */
     private byte[] contractAddress;
 
     /**
-     * 合约代码
+     * Contract code
      */
     private byte[] contractCode;
 
     /**
-     * 内部创建合约，所依据的合约
+     * Internal contract creation, based on the contract
      */
     private byte[] codeCopyBy;
 
     /**
-     * 参数列表
+     * parameter list
      */
     private String[][] args;
 

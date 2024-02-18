@@ -50,7 +50,7 @@ import java.util.Map;
 /**
  * @author lan
  * @description Open peer connection remote call node rpc
- * 开放 peer 连接的远程调用 node rpc
+ * Open peer Remote call for connection node rpc
  * @create 2018/11/09
  **/
 @Component
@@ -65,17 +65,17 @@ public class NodeRpc extends BaseCmd {
 
     /**
      * nw_addNodes
-     * 增加节点
+     * Add nodes
      */
 
     @CmdAnnotation(cmd = CmdConstant.CMD_NW_ADD_NODES, version = 1.0,
-            description = "增加待连接节点")
+            description = "Add nodes to be connected")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "连接的链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "isCross", requestType = @TypeDescriptor(value = int.class), parameterDes = "1跨链连接,0普通连接"),
-            @Parameter(parameterName = "nodes", requestType = @TypeDescriptor(value = String.class), parameterDes = "节点组ID，逗号拼接")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Connected ChainId,Value range[1-65535]"),
+            @Parameter(parameterName = "isCross", requestType = @TypeDescriptor(value = int.class), parameterDes = "1Cross chain connection,0Normal connection"),
+            @Parameter(parameterName = "nodes", requestType = @TypeDescriptor(value = String.class), parameterDes = "Node groupIDComma splicing")
     })
-    @ResponseData(description = "无特定返回值，没有错误即成功")
+    @ResponseData(description = "No specific return value, successful without errors")
     public Response addNodes(Map params) {
         int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
         int isCross = Integer.valueOf(String.valueOf(params.get("isCross")));
@@ -112,15 +112,15 @@ public class NodeRpc extends BaseCmd {
 
     /**
      * nw_delNodes
-     * 删除节点
+     * Delete node
      */
     @CmdAnnotation(cmd = CmdConstant.CMD_NW_DEL_NODES, version = 1.0,
-            description = "删除节点组节点")
+            description = "Delete node group node")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "连接的链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "nodes", requestType = @TypeDescriptor(value = String.class), parameterDes = "节点组ID，逗号拼接")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Connected ChainId,Value range[1-65535]"),
+            @Parameter(parameterName = "nodes", requestType = @TypeDescriptor(value = String.class), parameterDes = "Node groupIDComma splicing")
     })
-    @ResponseData(description = "无特定返回值，没有错误即成功")
+    @ResponseData(description = "No specific return value, successful without errors")
     public Response delNodes(Map params) {
         int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
         String nodes = String.valueOf(params.get("nodes"));
@@ -134,7 +134,7 @@ public class NodeRpc extends BaseCmd {
             if (null == nodeId) {
                 continue;
             }
-            //移除 peer
+            //remove peer
             Node node = nodeGroup.getLocalNetNodeContainer().getConnectedNodes().get(nodeId);
             if (null != node) {
                 node.close();
@@ -160,15 +160,15 @@ public class NodeRpc extends BaseCmd {
     }
 
     @CmdAnnotation(cmd = CmdConstant.CMD_NW_GET_NODES, version = 1.0,
-            description = "分页查看连接节点信息,startPage与pageSize 都为0时，不分页，返回所有节点信息")
+            description = "Paging to view connection node information,startPageRelated topageSize All for0When not paginated, returns all node information")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "连接的链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "state", requestType = @TypeDescriptor(value = int.class), parameterDes = "0:所有连接,1:已连接  2:未连接"),
-            @Parameter(parameterName = "isCross", requestType = @TypeDescriptor(value = boolean.class), parameterDes = "false:非跨链连接，true:跨链连接"),
-            @Parameter(parameterName = "startPage", requestType = @TypeDescriptor(value = int.class), parameterDes = "分页起始页数"),
-            @Parameter(parameterName = "pageSize", requestType = @TypeDescriptor(value = int.class), parameterDes = "每页显示数量")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Connected ChainId,Value range[1-65535]"),
+            @Parameter(parameterName = "state", requestType = @TypeDescriptor(value = int.class), parameterDes = "0:All connections,1:Connected  2:Not connected"),
+            @Parameter(parameterName = "isCross", requestType = @TypeDescriptor(value = boolean.class), parameterDes = "false:Non cross chain connection,true:Cross chain connection"),
+            @Parameter(parameterName = "startPage", requestType = @TypeDescriptor(value = int.class), parameterDes = "Number of starting pages for pagination"),
+            @Parameter(parameterName = "pageSize", requestType = @TypeDescriptor(value = int.class), parameterDes = "Display quantity per page")
     })
-    @ResponseData(description = "返回节点列表信息", responseType = @TypeDescriptor(value = NodeVo.class))
+    @ResponseData(description = "Return node list information", responseType = @TypeDescriptor(value = NodeVo.class))
     public Response getNodes(Map params) {
         int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
         int state = Integer.valueOf(String.valueOf(params.get("state")));
@@ -184,13 +184,13 @@ public class NodeRpc extends BaseCmd {
 
         if (isCross) {
             /*
-             * 跨链连接
+             * Cross chain connection
              * cross connection
              */
             addNode(nodes, state, nodeGroup.getCrossNodeContainer());
         } else {
             /*
-             * 普通连接
+             * Normal connection
              * comment connection
              */
             addNode(nodes, state, nodeGroup.getLocalNetNodeContainer());
@@ -242,17 +242,17 @@ public class NodeRpc extends BaseCmd {
 
     /**
      * nw_updateNodeInfo
-     * 更新区块高度与hash
+     * Update block height andhash
      */
     @CmdAnnotation(cmd = CmdConstant.CMD_NW_UPDATE_NODE_INFO, version = 1.0,
-            description = "更新连接节点信息")
+            description = "Update connection node information")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "连接的链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "nodeId", requestType = @TypeDescriptor(value = String.class), parameterDes = "连接节点ID"),
-            @Parameter(parameterName = "blockHeight", requestType = @TypeDescriptor(value = long.class), parameterDes = "区块高度"),
-            @Parameter(parameterName = "blockHash", requestType = @TypeDescriptor(value = String.class), parameterDes = "区块hash值")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Connected ChainId,Value range[1-65535]"),
+            @Parameter(parameterName = "nodeId", requestType = @TypeDescriptor(value = String.class), parameterDes = "Connecting nodesID"),
+            @Parameter(parameterName = "blockHeight", requestType = @TypeDescriptor(value = long.class), parameterDes = "block height"),
+            @Parameter(parameterName = "blockHash", requestType = @TypeDescriptor(value = String.class), parameterDes = "blockhashvalue")
     })
-    @ResponseData(description = "无特定返回值，没有错误即成功")
+    @ResponseData(description = "No specific return value, successful without errors")
     public Response updateNodeInfo(Map params) {
         int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
         String nodeId = String.valueOf(params.get("nodeId"));

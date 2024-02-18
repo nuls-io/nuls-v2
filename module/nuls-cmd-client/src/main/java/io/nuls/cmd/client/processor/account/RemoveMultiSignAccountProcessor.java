@@ -39,7 +39,7 @@ import io.nuls.core.core.annotation.Component;
 
 /**
  * @author: zhoulijun
- * 删除多签账户
+ * Delete multiple signed accounts
  */
 @Component
 public class RemoveMultiSignAccountProcessor extends AccountBaseProcessor implements CommandProcessor {

@@ -6,7 +6,7 @@ import io.nuls.base.data.Transaction;
 import java.util.List;
 
 /**
- * 验证通过的跨链交易数据库相关操作
+ * Verified cross chain transaction database related operations
  * New Cross-Chain Transaction Database Related Operations
  *
  * @author  tag
@@ -14,34 +14,34 @@ import java.util.List;
  * */
 public interface ConvertCtxService {
     /**
-     * 保存
-     * @param atxHash   友链协议跨链交易Hash
-     * @param ctx       主网协议跨链交易
-     * @param chainID   链ID
-     * @return          保存成功与否
+     * preserve
+     * @param atxHash   Friendly Chain Protocol Cross Chain TransactionsHash
+     * @param ctx       Main network protocol cross chain transactions
+     * @param chainID   chainID
+     * @return          Whether the save was successful or not
      * */
     boolean save(NulsHash atxHash, Transaction ctx, int chainID);
 
     /**
-     * 查询
-     * @param atxHash   友链协议跨链交易Hash
-     * @param chainID   链ID
-     * @return          Hash对应的交易
+     * query
+     * @param atxHash   Friendly Chain Protocol Cross Chain TransactionsHash
+     * @param chainID   chainID
+     * @return          HashCorresponding transactions
      * */
     Transaction get(NulsHash atxHash, int chainID);
 
     /**
-     * 删除
-     * @param atxHash   友链协议跨链交易Hash
-     * @param chainID   链ID
-     * @return          删除成功与否
+     * delete
+     * @param atxHash   Friendly Chain Protocol Cross Chain TransactionsHash
+     * @param chainID   chainID
+     * @return          Whether the deletion was successful or not
      * */
     boolean delete(NulsHash atxHash,int chainID);
 
     /**
-     * 查询所有
-     * @param chainID   链ID
-     * @return          该表所有数据
+     * Query All
+     * @param chainID   chainID
+     * @return          All data in this table
      * */
     List<Transaction> getList(int chainID);
 }

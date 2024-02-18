@@ -9,14 +9,14 @@ import io.nuls.core.core.annotation.Component;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-22 09:46
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Component
 public class GetAddressByAccountInfoAdapder extends BaseAdapter<String, AccountInfo> {
 
     @Override
     public String title() {
-        return "从account中提取address";
+        return "fromaccountMiddle extractionaddress";
     }
 
     @Override

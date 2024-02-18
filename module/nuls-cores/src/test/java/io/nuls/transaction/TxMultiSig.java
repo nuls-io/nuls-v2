@@ -52,7 +52,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 /**
- * 多签地址,多签地址转账交易测试
+ * Multiple signed addresses,Multiple address transfer transaction testing
  *
  * @author: Charlie
  * @date: 2019/7/12
@@ -72,7 +72,7 @@ public class TxMultiSig {
 
 
     /**
-     * 空地址
+     * Empty address
      * tNULSeBaMm8Kp5u7WU5xnCJqLe8fRFD49aZQdK
      * tNULSeBaMigwBrvikwVwbhAgAxip8cTScwcaT8
      */
@@ -101,8 +101,8 @@ public class TxMultiSig {
 
     @Test
     public void importPriKeyTest() {
-        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//种子出块地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
-//        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//种子出块地址 tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
+        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//Seed block address tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
+//        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//Seed block address tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
         importPriKey("9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b", password);//20 tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
         importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//21 tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
         importPriKey("8212e7ba23c8b52790c45b0514490356cd819db15d364cbe08659b5888339e78", password);//22 tNULSeBaMrbMRiFAUeeAt6swb4xVBNyi81YL24
@@ -117,12 +117,12 @@ public class TxMultiSig {
 
     @Test
     public void importPriKey() {
-        //创建多签账户的地址 3个
+        //Create addresses for multiple signed accounts 3individual
         importPriKey("ba5bc98030183e2680e15fc2defa97f24b45d6975dd8668ecc578596b6dd474d", password);// tNULSeBaMkUZYqaeFqe6cdx2gdBZxZh1fVcnM5 -pubkey: 035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b5
         importPriKey("32dae213420e32ec840a1467460b243cb7eb8e6fc15a37dd99252e87aa3bc3d1", password);// tNULSeBaMo8z73fktnukU3JsFFfogWgLd91uPM -pubkey: 026a4821178975d196d90a68d80e5838876a2b30f1018d304c4b814823f7275a60
         importPriKey("7cf2a34ee75b7560404c73b984cdf9d07f34941dbf0a61a971bdd8be73d10f9a", password);// tNULSeBaMti6qq57uGVncG1BgYQVSz3Yj4NVBi -pubkey: 02887a1e8bbb32a1885040849caf8ee194147c77ea4f227c18aad0b84ab79a3bf6
 
-        //备用地址
+        //Alternative address
         importPriKey("6d455b384b9dc81e6cf52b43ac2af5a90d5608a3419c0a062030a0e7978724e6", password);// tNULSeBaMmiWaeLshXCRNWBw5NpZNNvJHyG5aY -pubkey: 02dce420d8dd2c397c0fba283b5dde5558ce34d899dc740dac64e0bb72034838cb
         importPriKey("930f0be5000d7c8d5ca69e9ff8b6ab9ca7f8e27ebb3843b4fc991727ed8f3200", password);// tNULSeBaMsbHJStYcYdosBGphvdr5yFCeCPZ3L -pubkey: 03d9eb346464550ce5349825d43bd15b16df3d97a0a0771f1c03f1a0e283d29e5b
     }
@@ -158,7 +158,7 @@ public class TxMultiSig {
         }
     }
 
-    @Test //转账
+    @Test //Transfer
     public void transfer() throws Exception{
         String hash = createTransfer(address27, addressMultiSign, new BigInteger("100000000000000"));
 //        String hash = createMultiSignTransfer(addressMultiSign, address30,new BigInteger("1000000000"), null, null);
@@ -166,13 +166,13 @@ public class TxMultiSig {
     }
 
 
-    @Test //签名
+    @Test //autograph
     public void signMultiSignTransactionTest() throws Exception {
         String rs = signMultiSignTransaction(signAddress1, password,
                 "0200861e205e03616263008c0117020003c43a0d6d2dad2c5bfb3ab67a6e2ff905e709634d02000100a0509c3b000000000000000000000000000000000000000000000000000000000800000000000000000001170200016d4edcc73408d15f4b69779e7997f1ec9013bc4f0200010000ca9a3b000000000000000000000000000000000000000000000000000000000000000000000000d1020321035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b521026a4821178975d196d90a68d80e5838876a2b30f1018d304c4b814823f7275a602102887a1e8bbb32a1885040849caf8ee194147c77ea4f227c18aad0b84ab79a3bf621026a4821178975d196d90a68d80e5838876a2b30f1018d304c4b814823f7275a60463044022069bac56d70eeccbecb28b92ccb56d123f05b4243ad0eb34c22bddb9c7922386d02207c0924cddd77092f090e576f065464c849e52f8d900979013b2728643d3aa3f4");
     }
 
-    @Test //设置别名
+    @Test //Set alias
     public void setMultiSigAlias() throws Exception{
 
 //        String rs = alias(addressMultiSign, "charlie_m_sign", signAddress1, password);
@@ -191,12 +191,12 @@ public class TxMultiSig {
         System.out.println(balance4.longValue());
     }
 
-    @Test //查多签账户
+    @Test //Check multiple signed accounts
     public void getMAccount() throws Exception {
         getMultiSigAccount(addressMultiSign);
     }
 
-    @Test //是否是多签账户创建者之一
+    @Test //Are you one of the creators of the multi signature account
     public void isMultiSignAccountBuilder() throws Exception {
         isMultiSignAccountBuilder(addressMultiSign, "tNULSeBaMmiWaeLshXCRNWBw5NpZNNvJHyG5aY");
     }
@@ -250,7 +250,7 @@ public class TxMultiSig {
     }
 
     /**
-     * 创建3个账户,并获取公私钥,为创建多签账户准备数据
+     * establish3Accounts,And obtain public and private keys,Prepare data for creating multiple signed accounts
      */
     @Test
     public void initAccount() {
@@ -348,14 +348,14 @@ public class TxMultiSig {
     }
 
     /**
-     * 导入账户私钥
+     * Import account private key
      *
      * @param priKey
      * @param pwd
      */
     public void importPriKey(String priKey, String pwd) {
         try {
-            //账户已存在则覆盖 If the account exists, it covers.
+            //Overwrite if account already exists If the account exists, it covers.
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put(Constants.CHAIN_ID, chainId);
@@ -395,7 +395,7 @@ public class TxMultiSig {
 
     private String createMultiSignTransfer(String addressFrom, String addressTo, BigInteger amount, String signAddress, String signAddressPwd) throws Exception {
         Map transferMap = this.createMultiSignTransferTx(addressFrom, addressTo, amount, signAddress, signAddressPwd);
-        //调用接口
+        //Calling interfaces
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createMultiSignTransfer", transferMap);
         if (!cmdResp.isSuccess()) {
             return "fail";
@@ -416,7 +416,7 @@ public class TxMultiSig {
 
     private String createTransfer(String addressFrom, String addressTo, BigInteger amount) throws Exception {
         Map transferMap = this.createMultiSignTransferTx(addressFrom, addressTo, amount, null, null);
-        //调用接口
+        //Calling interfaces
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
         if (!cmdResp.isSuccess()) {
             return "fail";

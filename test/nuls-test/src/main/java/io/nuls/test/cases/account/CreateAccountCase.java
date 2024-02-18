@@ -9,14 +9,14 @@ import io.nuls.core.core.annotation.Component;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-20 10:25
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Component
 public class CreateAccountCase extends BaseAccountCase<String,Void> {
 
     @Override
     public String title() {
-        return "创建账户";
+        return "Create an account";
     }
 
     @Override
@@ -24,7 +24,7 @@ public class CreateAccountCase extends BaseAccountCase<String,Void> {
         Result<String> result = accountService.createAccount(new CreateAccountReq(1, Constants.PASSWORD));
         checkResultStatus(result);
         if(result.getList() == null || result.getList().isEmpty()){
-            throw new TestFailException("创建账户返回结果不符合预期，list为空");
+            throw new TestFailException("The result of creating an account does not meet expectations,listEmpty");
         }
         return result.getList().get(0);
     }

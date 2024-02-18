@@ -109,7 +109,7 @@ public class TransactionServiceImpl implements TransactionService {
         List<CoinDTO> toList = transferDTO.getOutputs();
         aliasTransferProcess(chainId, fromList, toList);
         for (CoinDTO from : fromList) {
-            //from中不能有多签地址
+            //fromMultiple signed addresses are not allowed in the middle
             if (AddressTool.isMultiSignAddress(from.getAddress())) {
                 throw new NulsException(AccountErrorCode.IS_MULTI_SIGNATURE_ADDRESS);
             }
@@ -118,9 +118,9 @@ public class TransactionServiceImpl implements TransactionService {
 //        if (!TxUtil.validTxRemark(remark)) {
 //            throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
 //        }
-        //创建组装一个交易
+        //Create and assemble a transaction
         Transaction tx = this.createNormalTransferTx(chain, fromList, toList, remark);
-        //发送给交易模块
+        //Send to transaction module
         TransactionCall.newTx(chain, tx);
         return tx;
     }
@@ -134,7 +134,7 @@ public class TransactionServiceImpl implements TransactionService {
         String address = null;
         for (CoinDTO from : fromList) {
             String addr = from.getAddress();
-            //from中有且只能有同一个多签地址
+            //fromThere can only be one address with multiple signatures in it
             if (!AddressTool.isMultiSignAddress(addr)) {
                 throw new NulsException(AccountErrorCode.IS_NOT_MULTI_SIGNATURE_ADDRESS);
             }
@@ -148,10 +148,10 @@ public class TransactionServiceImpl implements TransactionService {
 //        if (!TxUtil.validTxRemark(remark)) {
 //            throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
 //        }
-        //创建多签交易时需要本地有多签账户信息，计算签名大小和手续费的是必须的
+        //When creating a multi signature transaction, it is necessary to have local multi signature account information, and it is necessary to calculate the signature size and handling fee
         MultiSigAccount multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(address);
         Preconditions.checkNotNull(multiSigAccount, AccountErrorCode.MULTISIGN_ACCOUNT_NOT_EXIST);
-        //组装未签名交易
+        //Assembly unsigned transaction
         Transaction tx = assemblyUnsignedTransaction(chain, fromList, toList, remark);
         MultiSignTxSignature transactionSignature = new MultiSignTxSignature();
         transactionSignature.setM(multiSigAccount.getM());
@@ -162,12 +162,12 @@ public class TransactionServiceImpl implements TransactionService {
             throw new NulsException(AccountErrorCode.SERIALIZE_ERROR);
         }
         boolean isBroadcasted = false;
-        //是否需要进行第一次签名
+        //Do I need to sign for the first time
         if (null != multiSignTransferDTO.getSignAddress() && null != multiSignTransferDTO.getSignPassword()) {
-            //签名账户信息不为空则需要进行签名处理
+            //If the signature account information is not empty, signature processing is required
             Account account = accountService.getAccount(chainId, multiSignTransferDTO.getSignAddress());
             Preconditions.checkNotNull(account, AccountErrorCode.ACCOUNT_NOT_EXIST);
-            //验证签名账户是否属于多签账户的签名账户,如果不是多签账户下的地址则提示错误
+            //Verify whether the signing account belongs to the signing account of the multi signing account,If it is not an address under multiple account signatures, an error message will be displayed
             if (!AddressTool.validSignAddress(multiSigAccount.getPubKeyList(), account.getPubKey())) {
                 throw new NulsRuntimeException(AccountErrorCode.SIGN_ADDRESS_NOT_MATCH);
             }
@@ -182,7 +182,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     /**
-     * 转账时的别名转账的处理
+     * Processing of Aliases during Transfer
      *
      * @param chainId
      * @param fromList
@@ -193,7 +193,7 @@ public class TransactionServiceImpl implements TransactionService {
             throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
         }
         Function<CoinDTO, CoinDTO> checkAddress = cd -> {
-            //如果address 不是地址就当别名处理
+            //Ifaddress Treat it as an alias if it's not an address
             if (!AddressTool.validAddress(chainId, cd.getAddress())) {
                 AliasPO aliasPo = aliasStorageService.getAlias(chainId, cd.getAddress());
                 Preconditions.checkNotNull(aliasPo, AccountErrorCode.ALIAS_NOT_EXIST);
@@ -226,7 +226,7 @@ public class TransactionServiceImpl implements TransactionService {
         List<byte[]> accountPubKeyList = null;
         byte accountM = 0;
         if (null == txSignatureByte || txSignatureByte.length == 0) {
-            //如果交易没有签过名，需要本地有多签账户地址
+            //If the transaction has not been signed, multiple account addresses need to be signed locally
             multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(AddressTool.getStringAddressByBytes(address));
             if (multiSigAccount == null) {
                 throw new NulsRuntimeException(AccountErrorCode.MULTISIGN_ACCOUNT_NOT_EXIST);
@@ -235,8 +235,8 @@ public class TransactionServiceImpl implements TransactionService {
             accountPubKeyList = multiSigAccount.getPubKeyList();
         } else {
             /**
-             * 已有包含其他人签名, 验证一下签名对象中公钥列表和最小签名数是佛正确
-             * 用公钥列表和最小签名数，生成新的多签账户地址，与from中的地址比较
+             * Already contains signatures from others, Verify that the public key list and minimum number of signatures in the signature object are correct
+             * Generate a new multi signature account address using a public key list and minimum number of signatures, in conjunction withfromComparison of addresses in
              */
             MultiSignTxSignature transactionSignature = new MultiSignTxSignature();
             transactionSignature.parse(new NulsByteBuffer(transaction.getTransactionSignature()));
@@ -248,7 +248,7 @@ public class TransactionServiceImpl implements TransactionService {
                 byte[] hash160 = SerializeUtils.sha256hash160(AddressTool.createMultiSigAccountOriginBytes(chain.getChainId(), transactionSignature.getM(), pubKeys));
                 Address multiSignAddress = new Address(chain.getChainId(), BaseConstant.P2SH_ADDRESS_TYPE, hash160);
                 if (!Arrays.equals(address, multiSignAddress.getAddressBytes())) {
-                    chain.getLogger().error("已存在的签名数据生成的多签地址与From中地址不匹配, The multi-signature address generated by the existing signature data does not match the multi-signature address in the From");
+                    chain.getLogger().error("Multiple signature addresses generated from existing signature data are different fromFromMiddle address mismatch, The multi-signature address generated by the existing signature data does not match the multi-signature address in the From");
                     throw new NulsException(AccountErrorCode.SIGN_ADDRESS_NOT_MATCH);
                 }
             } catch (Exception e) {
@@ -259,7 +259,7 @@ public class TransactionServiceImpl implements TransactionService {
             accountPubKeyList = transactionSignature.getPubKeyList();
         }
 
-        //验证签名地址账户是否属于多签账户
+        //Verify if the signature address account belongs to a multi signature account
         if (!AddressTool.validSignAddress(accountPubKeyList, account.getPubKey())) {
             throw new NulsRuntimeException(AccountErrorCode.SIGN_ADDRESS_NOT_MATCH);
         }
@@ -281,7 +281,7 @@ public class TransactionServiceImpl implements TransactionService {
             p2PHKSignatures = transactionSignature.getP2PHKSignatures();
             for (P2PHKSignature p2PHKSignature : p2PHKSignatures) {
                 if (Arrays.equals(p2PHKSignature.getPublicKey(), account.getPubKey())) {
-                    //已经签过名了
+                    //I have already signed my name
                     throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ALREADY_SIGNED);
                 }
             }
@@ -306,7 +306,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     /**
-     * 多签账户设置别名
+     * Setting aliases for multiple signed accounts
      *
      * @param chain
      * @param address
@@ -320,7 +320,7 @@ public class TransactionServiceImpl implements TransactionService {
     public MultiSignTransactionResultDTO setMultiSignAccountAlias(Chain chain, String address, String aliasName, String signAddr, String password) throws NulsException {
         MultiSigAccount multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(address);
         Preconditions.checkNotNull(multiSigAccount, AccountErrorCode.MULTISIGN_ACCOUNT_NOT_EXIST);
-        //组装未签名的别名交易
+        //Assemble unsigned alias transactions
         Transaction tx = createSetAliasTxWithoutSign(chain, multiSigAccount.getAddress(), aliasName, multiSigAccount.getM());
         MultiSignTxSignature transactionSignature = new MultiSignTxSignature();
         transactionSignature.setM(multiSigAccount.getM());
@@ -332,7 +332,7 @@ public class TransactionServiceImpl implements TransactionService {
         }
         boolean isBroadcasted = false;
         if (null != signAddr && password != null) {
-            //签名账户和密码都不为空时则进行签名
+            //Sign when both the signing account and password are not empty
             Account account = accountService.getAccount(chain.getChainId(), signAddr);
             if (null == account) {
                 throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
@@ -352,7 +352,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     /**
-     * 组装一个不包含签名的设置别名的交易(适用于普通地址)
+     * Assemble a transaction with an alias setting that does not include a signature(Applicable to regular addresses)
      *
      * @param chain
      * @param address
@@ -366,12 +366,12 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     /**
-     * 组装一个不包含签名的设置别名的交易(适用于多签地址)
+     * Assemble a transaction with an alias setting that does not include a signature(Suitable for multiple signed addresses)
      *
      * @param chain
      * @param address
      * @param aliasName
-     * @param msign     多签地址最小签名数
+     * @param msign     Minimum number of signatures for multiple signed addresses
      * @return
      * @throws NulsException
      */
@@ -380,7 +380,7 @@ public class TransactionServiceImpl implements TransactionService {
         byte[] addressByte = address.getAddressBytes();
         AliasTransaction tx = new AliasTransaction();
         tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
-        //tx.setRemark(StringUtils.bytes(null));//默认没有备注
+        //tx.setRemark(StringUtils.bytes(null));//No notes by default
         Alias alias = new Alias(addressByte, aliasName);
         try {
             tx.setTxData(alias.serialize());
@@ -389,22 +389,22 @@ public class TransactionServiceImpl implements TransactionService {
         }
         int assetChainId = chain.getChainId();
         int assetId = chain.getConfig().getAssetId();
-        //查询账本获取nonce值
+        //Query ledger to obtainnoncevalue
         NonceBalance nonceBalance = TxUtil.getBalanceNonce(chain, assetChainId, assetId, addressByte);
         byte[] nonce = nonceBalance.getNonce();
         CoinFrom coinFrom = new CoinFrom(addressByte, assetChainId, assetId, AccountConstant.ALIAS_FEE, nonce, AccountConstant.NORMAL_TX_LOCKED);
-        //黑洞地址
+        //Black hole address
         byte[] blackHoleAddress = AddressTool.getAddress(NulsConfig.BLACK_HOLE_PUB_KEY, assetChainId);
         CoinTo coinTo = new CoinTo(blackHoleAddress, assetChainId, assetId, AccountConstant.ALIAS_FEE);
         int txSize = tx.size() + coinFrom.size() + coinTo.size() + msign * P2PHKSignature.SERIALIZE_LENGTH;
-        //计算手续费
+        //Calculate handling fees
         BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
-        //总费用为
+        //The total cost is
         BigInteger totalAmount = AccountConstant.ALIAS_FEE.add(fee);
         coinFrom.setAmount(totalAmount);
-        //检查余额是否充足
+        //Check if the balance is sufficient
         BigInteger mainAsset = nonceBalance.getAvailable();
-        //余额不足
+        //Insufficient balance
         if (BigIntegerUtils.isLessThan(mainAsset, totalAmount)) {
             throw new NulsRuntimeException(AccountErrorCode.INSUFFICIENT_FEE);
         }
@@ -421,7 +421,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     /**
-     * 组装一个标准的转账交易, 普通地址签名
+     * Assemble a standard transfer transaction, Ordinary address signature
      *
      * @param chain
      * @param fromList
@@ -432,15 +432,15 @@ public class TransactionServiceImpl implements TransactionService {
      */
     private Transaction createNormalTransferTx(Chain chain, List<CoinDTO> fromList, List<CoinDTO> toList, String remark) throws NulsException {
         Transaction tx = assemblyUnsignedTransaction(chain, fromList, toList, remark);
-        //创建ECKey用于签名
+        //establishECKeyUsed for signature
         List<ECKey> signEcKeys = new ArrayList<>();
         Set<String> addrs = new HashSet<>();
         for (CoinDTO from : fromList) {
             if (!addrs.add(from.getAddress())) {
-                //同一个地址只需要签一次名
+                //The same address only needs to be signed once
                 break;
             }
-            //检查账户是否存在
+            //Check if the account exists
             Account account = accountService.getAccount(chain.getChainId(), from.getAddress());
             if (null == account) {
                 throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
@@ -449,7 +449,7 @@ public class TransactionServiceImpl implements TransactionService {
             signEcKeys.add(ecKey);
         }
         try {
-            //交易签名
+            //Transaction signature
             SignatureUtil.createTransactionSignture(tx, signEcKeys);
         } catch (IOException e) {
             LoggerUtil.LOG.error("assemblyTransaction io exception.", e);
@@ -460,7 +460,7 @@ public class TransactionServiceImpl implements TransactionService {
 
 
     /**
-     * 组装一个未签名的交易
+     * Assemble an unsigned transaction
      *
      * @param chain
      * @param fromList
@@ -473,9 +473,9 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction tx = new Transaction(TxType.TRANSFER);
         tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
         tx.setRemark(StringUtils.bytes(remark));
-        //组装CoinData中的coinFrom、coinTo数据
+        //assembleCoinDataMiddlecoinFrom、coinTodata
         assemblyCoinData(tx, chain, fromList, toList);
-        //计算交易数据摘要哈希
+        //Calculate transaction data summary hash
         try {
             tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
         } catch (IOException e) {
@@ -485,7 +485,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     /**
-     * 组装CoinData数据
+     * assembleCoinDatadata
      * assembly coinFrom data
      *
      * @param tx
@@ -495,17 +495,17 @@ public class TransactionServiceImpl implements TransactionService {
      * @return
      */
     private Transaction assemblyCoinData(Transaction tx, Chain chain, List<CoinDTO> fromList, List<CoinDTO> toList) throws NulsException {
-        //组装coinFrom、coinTo数据
+        //assemblecoinFrom、coinTodata
         List<CoinFrom> coinFromList = assemblyCoinFrom(chain, fromList);
         List<CoinTo> coinToList = assemblyCoinTo(chain, toList);
-        //来源地址或转出地址为空
+        //The source address or transfer address is empty
         if (coinFromList.size() == 0 || coinToList.size() == 0) {
             LoggerUtil.LOG.warn("assemblyCoinData coinData params error");
             throw new NulsRuntimeException(AccountErrorCode.COINDATA_IS_INCOMPLETE);
         }
-        //交易总大小=交易数据大小+签名数据大小
+        //Total transaction size=Transaction data size+Signature data size
         int txSize = tx.size() + getSignatureSize(coinFromList);
-        //组装coinData数据
+        //assemblecoinDatadata
         CoinData coinData = getCoinData(chain, coinFromList, coinToList, txSize);
         try {
             tx.setCoinData(coinData.serialize());
@@ -516,7 +516,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     /**
-     * 组装coinFrom数据
+     * assemblecoinFromdata
      * assembly coinFrom data
      *
      * @param listFrom Initiator set coinFrom
@@ -529,19 +529,19 @@ public class TransactionServiceImpl implements TransactionService {
         for (CoinDTO coinDto : listFrom) {
             String address = coinDto.getAddress();
             byte[] addressByte = AddressTool.getAddress(address);
-            //转账交易转出地址必须是本链地址
+            //The transfer transaction transfer address must be a local chain address
             if (!AddressTool.validAddress(chainId, address)) {
                 chain.getLogger().error("assemblyCoinFrom address error");
                 throw new NulsException(AccountErrorCode.IS_NOT_CURRENT_CHAIN_ADDRESS);
             }
-            //转账交易不能含有智能合约地址
+            //Transfer transactions cannot contain smart contract addresses
             if (TxUtil.isLegalContractAddress(addressByte, chain)) {
                 chain.getLogger().error("Tx from cannot have contract address ");
                 throw new NulsException(AccountErrorCode.COINDATA_CANNOT_HAS_CONTRACT_ADDRESS);
             }
             int assetChainId = coinDto.getAssetsChainId();
             int assetId = coinDto.getAssetsId();
-            //检查对应资产余额是否足够
+            //Check if the corresponding asset balance is sufficient
             BigInteger amount = coinDto.getAmount();
             if (BigIntegerUtils.isLessThan(amount, BigInteger.ZERO)) {
                 chain.getLogger().error("assemblyCoinFrom amount too small");
@@ -553,7 +553,7 @@ public class TransactionServiceImpl implements TransactionService {
                 chain.getLogger().error("assemblyCoinFrom insufficient amount");
                 throw new NulsException(AccountErrorCode.INSUFFICIENT_BALANCE);
             }
-            //查询账本获取nonce值
+            //Query ledger to obtainnoncevalue
             byte[] nonce = nonceBalance.getNonce();
             CoinFrom coinFrom = new CoinFrom(addressByte, assetChainId, assetId, amount, nonce, AccountConstant.NORMAL_TX_LOCKED);
             coinFroms.add(coinFrom);
@@ -562,9 +562,9 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     /**
-     * 组装coinTo数据
+     * assemblecoinTodata
      * assembly coinTo data
-     * 条件：to中所有地址必须是同一条链的地址
+     * condition：toAll addresses in the must be addresses on the same chain
      *
      * @param listTo Initiator set coinTo
      * @return List<CoinTo>
@@ -576,19 +576,19 @@ public class TransactionServiceImpl implements TransactionService {
         for (CoinDTO coinDto : listTo) {
             String address = coinDto.getAddress();
             byte[] addressByte = AddressTool.getAddress(address);
-            //转账交易转出地址必须是本链地址
+            //The transfer transaction transfer address must be a local chain address
             if (!AddressTool.validAddress(chainId, address)) {
                 chain.getLogger().error("assemblyCoinFrom address error");
                 throw new NulsException(AccountErrorCode.IS_NOT_CURRENT_CHAIN_ADDRESS);
             }
-            //转账交易不能含有智能合约地址
+            //Transfer transactions cannot contain smart contract addresses
             if (TxUtil.isLegalContractAddress(addressByte, chain)) {
                 chain.getLogger().error("Tx to cannot have contract address ");
                 throw new NulsException(AccountErrorCode.COINDATA_CANNOT_HAS_CONTRACT_ADDRESS);
             }
             int assetsChainId = coinDto.getAssetsChainId();
             int assetId = coinDto.getAssetsId();
-            //检查金额是否小于0
+            //Check if the amount is less than0
             BigInteger amount = coinDto.getAmount();
             if (BigIntegerUtils.isLessThan(amount, BigInteger.ZERO)) {
                 chain.getLogger().error("assemblyCoinTo amount too small");
@@ -607,7 +607,7 @@ public class TransactionServiceImpl implements TransactionService {
 
 
     /**
-     * 组装coinData数据
+     * assemblecoinDatadata
      * assembly coinData
      *
      * @param listFrom
@@ -617,7 +617,7 @@ public class TransactionServiceImpl implements TransactionService {
      * @throws NulsException
      */
     private CoinData getCoinData(Chain chain, List<CoinFrom> listFrom, List<CoinTo> listTo, int txSize) throws NulsException {
-        //总来源费用
+        //Total source cost
         BigInteger feeTotalFrom = BigInteger.ZERO;
         for (CoinFrom coinFrom : listFrom) {
             txSize += coinFrom.size();
@@ -625,7 +625,7 @@ public class TransactionServiceImpl implements TransactionService {
                 feeTotalFrom = feeTotalFrom.add(coinFrom.getAmount());
             }
         }
-        //总转出费用
+        //Total transfer out expenses
         BigInteger feeTotalTo = BigInteger.ZERO;
         for (CoinTo coinTo : listTo) {
             txSize += coinTo.size();
@@ -633,22 +633,22 @@ public class TransactionServiceImpl implements TransactionService {
                 feeTotalTo = feeTotalTo.add(coinTo.getAmount());
             }
         }
-        //本交易预计收取的手续费
+        //The expected handling fee for this transaction
         BigInteger targetFee = TransactionFeeCalculator.getNormalTxFee(txSize);
-        //实际收取的手续费, 可能自己已经组装完成
+        //Actual transaction fees collected, Maybe I have already assembled it myself
         BigInteger actualFee = feeTotalFrom.subtract(feeTotalTo);
         if (BigIntegerUtils.isLessThan(actualFee, BigInteger.ZERO)) {
             chain.getLogger().error("insufficient fee");
-            //所有from中账户的当前链主资产余额总和小于to的总和，不够支付手续费
+            //AllfromThe total balance of the current chain master assets in the middle account is less thantoThe total amount is not enough to pay the handling fee
             throw new NulsException(AccountErrorCode.INSUFFICIENT_FEE);
         } else if (BigIntegerUtils.isLessThan(actualFee, targetFee)) {
-            //只从资产为当前链主资产的coinfrom中收取手续费
+            //Only from assets that are the main assets of the current chaincoinfromCollect handling fees in the middle
             actualFee = getFeeDirect(chain, listFrom, targetFee, actualFee);
             if (BigIntegerUtils.isLessThan(actualFee, targetFee)) {
-                //如果没收到足够的手续费，则从CoinFrom中资产不是当前链主资产的coin账户中查找当前链主资产余额，并组装新的coinfrom来收取手续费
+                //If you have not received enough transaction fees, you will receive them fromCoinFromThe intermediate asset is not the main asset of the current chaincoinSearch for the current balance of the main asset in the account and assemble a new onecoinfromTo collect handling fees
                 if (!getFeeIndirect(chain, listFrom, txSize, targetFee, actualFee)) {
                     chain.getLogger().error("insufficient fee");
-                    //所有from中账户的当前链主资产余额总和都不够支付手续费
+                    //AllfromThe total balance of the current chain master assets in the middle account is not enough to pay transaction fees
                     throw new NulsException(AccountErrorCode.INSUFFICIENT_FEE);
                 }
             }
@@ -661,25 +661,25 @@ public class TransactionServiceImpl implements TransactionService {
 
     /**
      * Only the fee is charged from the coin in CoinFrom for the current chain main asset, and the actual amount is returned.
-     * 只从CoinFrom中资产为当前链主资产的coin中收取手续费，返回实际收取的数额
+     * Only fromCoinFromThe intermediate asset is the main asset of the current chaincoinCollect transaction fees and return the actual amount collected
      *
-     * @param listFrom  All coins transferred out 转出的所有coin
-     * @param targetFee The amount of the fee that needs to be charged 需要收取的手续费数额
-     * @param actualFee Actual amount charged 实际收取的数额
-     * @return BigInteger The amount of the fee actually charged 实际收取的手续费数额
+     * @param listFrom  All coins transferred out All transferred outcoin
+     * @param targetFee The amount of the fee that needs to be charged The amount of handling fee to be charged
+     * @param actualFee Actual amount charged Actual amount collected
+     * @return BigInteger The amount of the fee actually charged The actual amount of handling fees collected
      * @throws NulsException
      */
     private BigInteger getFeeDirect(Chain chain, List<CoinFrom> listFrom, BigInteger targetFee, BigInteger actualFee) throws NulsException {
         for (CoinFrom coinFrom : listFrom) {
-            //必须为当前链主资产
+            //Must be the current chain master asset
             if (TxUtil.isChainAssetExist(chain, coinFrom)) {
                 NonceBalance nonceBalance = TxUtil.getBalanceNonce(chain, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), coinFrom.getAddress());
                 BigInteger mainAsset = nonceBalance.getAvailable();
-                //可用余额=当前余额减去本次转出
+                //Available balance=Current balance minus current transfer out
                 mainAsset = mainAsset.subtract(coinFrom.getAmount());
-                //当前还差的手续费
+                //Current outstanding handling fees
                 BigInteger current = targetFee.subtract(actualFee);
-                //如果余额大于等于目标手续费，则直接收取全额手续费
+                //If the balance is greater than or equal to the target handling fee, the full handling fee will be charged directly
                 if (BigIntegerUtils.isEqualOrGreaterThan(mainAsset, current)) {
                     coinFrom.setAmount(coinFrom.getAmount().add(current));
                     actualFee = actualFee.add(current);
@@ -695,10 +695,10 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     /**
-     * 从CoinFrom中资产不为当前链主资产的coin中收取当前链主资产手续费，返回是否收取完成
+     * fromCoinFromThe intermediate asset is not the main asset of the current chaincoinCollect the current transaction fee for the main asset of the chain, and return whether the collection has been completed
      * From the coin in CoinFrom, the current chain main asset handling fee is not collected in the coin of the current chain main asset, and the return is collected.
      *
-     * @param listFrom  All coins transferred out 转出的所有coin
+     * @param listFrom  All coins transferred out All transferred outcoin
      * @param txSize    Current transaction size
      * @param targetFee Estimated fee
      * @param actualFee actual Fee
@@ -710,9 +710,9 @@ public class TransactionServiceImpl implements TransactionService {
         out:
         while (iterator.hasNext()) {
             CoinFrom coinFrom = iterator.next();
-            //如果不为当前链主资产
+            //If it is not the current chain master asset
             if (!TxUtil.isChainAssetExist(chain, coinFrom)) {
-                //如果FROM中有相同地址有本链资产的coin, 说明前面计算并支出过手续费但余额不足.
+                //IfFROMThere are assets in this chain with the same address in the middlecoin, Explanation: Previously calculated and paid transaction fees, but the balance is insufficient.
                 for (CoinFrom coin : listFrom) {
                     if (Arrays.equals(coin.getAddress(), coinFrom.getAddress())
                             && TxUtil.isChainAssetExist(chain, coin)) {
@@ -721,23 +721,23 @@ public class TransactionServiceImpl implements TransactionService {
                 }
                 int assetsChainId = chain.getConfig().getChainId();
                 int assetsId = chain.getConfig().getAssetId();
-                //查询该地址在当前链的主资产余额
+                //Query the main asset balance of this address in the current chain
                 NonceBalance nonceBalance = TxUtil.getBalanceNonce(chain, assetsChainId, assetsId, coinFrom.getAddress());
                 BigInteger mainAsset = nonceBalance.getAvailable();
                 if (BigIntegerUtils.isEqualOrLessThan(mainAsset, BigInteger.ZERO)) {
                     continue;
                 }
-                //组装手续费作为CoinFrom
+                //Assembly handling fee asCoinFrom
                 CoinFrom feeCoinFrom = new CoinFrom();
                 byte[] address = coinFrom.getAddress();
                 feeCoinFrom.setAddress(address);
                 feeCoinFrom.setNonce(nonceBalance.getNonce());
                 txSize += feeCoinFrom.size();
-                //由于新增CoinFrom，需要重新计算本交易预计收取的手续费
+                //Due to the addition ofCoinFrom, it is necessary to recalculate the expected handling fee for this transaction
                 targetFee = TransactionFeeCalculator.getNormalTxFee(txSize);
-                //当前还差的手续费
+                //Current outstanding handling fees
                 BigInteger current = targetFee.subtract(actualFee);
-                //此账户可以支付的手续费
+                //The handling fees that this account can pay
                 BigInteger fee = BigIntegerUtils.isEqualOrGreaterThan(mainAsset, current) ? current : mainAsset;
                 feeCoinFrom.setLocked(AccountConstant.NORMAL_TX_LOCKED);
                 feeCoinFrom.setAssetsChainId(assetsChainId);
@@ -751,7 +751,7 @@ public class TransactionServiceImpl implements TransactionService {
                 }
             }
         }
-        //最终的实际收取数额大于等于预计收取数额，则可以正确组装CoinData
+        //If the final actual collection amount is greater than or equal to the expected collection amount, it can be assembled correctlyCoinData
         if (BigIntegerUtils.isEqualOrGreaterThan(actualFee, targetFee)) {
             return true;
         }
@@ -759,8 +759,8 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     /**
-     * 通过coinfrom计算签名数据的size
-     * 如果coinfrom有重复地址则只计算一次；如果有多签地址，只计算m个地址的size
+     * adoptcoinfromCalculate signature datasize
+     * IfcoinfromCalculate only once if there are duplicate addresses；If there are multiple addresses, only calculatemAddressessize
      *
      * @param coinFroms
      * @return
@@ -771,7 +771,7 @@ public class TransactionServiceImpl implements TransactionService {
         for (CoinFrom coinFrom : coinFroms) {
             String address = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
             if (AddressTool.isMultiSignAddress(coinFrom.getAddress())) {
-                //多签交易,允许多个from, 但是所有from中都必须是同一个多签地址,不能包含其他普通地址
+                //Multiple signing transactions,Allow multiplefrom, But all of itfromBoth must be the same multi signature address,Cannot include other regular addresses
                 MultiSigAccount multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(address);
                 size += multiSigAccount.getPubKeyList().size() * P2PHKSignature.SERIALIZE_LENGTH;
                 return size;
@@ -784,7 +784,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     /**
-     * 获取多重签名地址，最小签名数，签名后的size
+     * Obtain multiple signature addresses, minimum number of signatures, and signed addressessize
      *
      * @param signNumber m
      * @return int
@@ -795,12 +795,12 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     /**
-     * 多签交易处理
-     * 如果达到最少签名数则广播交易，否则什么也不做
+     * Multi signature transaction processing
+     * If the minimum number of signatures is reached, broadcast the transaction; otherwise, do nothing
      **/
     //@Override
     public boolean txMutilProcessing(Chain chain, byte m, Transaction tx, TransactionSignature txSignature) throws NulsException {
-        //当已签名数等于M则自动广播该交易
+        //When the number of signatures equalsMAutomatically broadcast the transaction
         if (m == txSignature.getP2PHKSignatures().size()) {
             TransactionCall.newTx(chain, tx);
             return true;

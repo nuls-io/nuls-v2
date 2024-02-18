@@ -11,7 +11,7 @@ import io.nuls.core.core.annotation.Component;
 import java.util.Map;
 
 /**
- * 提供给区块模块调用的接口
+ * Provide interfaces for block module calls
  * @author tag
  * @date 2019/4/25
  */
@@ -21,13 +21,13 @@ public class CcmBlockCmd extends BaseCmd {
     @Autowired
     private BlockService service;
     /**
-     * 区块模块高度变化通知跨链模块
+     * Block module height change notification cross chain module
      * */
-    @CmdAnnotation(cmd = "newBlockHeight", version = 1.0, description = "链区块高度变更/receive new block height")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
-    @Parameter(parameterName = "height", parameterType = "long", parameterDes = "链ID")
-    @Parameter(parameterName = "download", parameterType = "int", parameterDes = "download 0区块下载中,1接收到最新区块")
-    @ResponseData(description = "无特定返回值，没有错误即成功")
+    @CmdAnnotation(cmd = "newBlockHeight", version = 1.0, description = "Chain block height change/receive new block height")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainID")
+    @Parameter(parameterName = "height", parameterType = "long", parameterDes = "chainID")
+    @Parameter(parameterName = "download", parameterType = "int", parameterDes = "download 0Blocking download in progress,1Received the latest block")
+    @ResponseData(description = "No specific return value, successful without errors")
     public Response newBlockHeight(Map<String,Object> params){
         Result result = service.newBlockHeight(params);
         if(result.isFailed()){

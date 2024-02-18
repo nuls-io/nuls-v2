@@ -72,7 +72,7 @@ public class CreateAgentProcessor extends ConsensusBaseProcessor implements Comm
         checkIsNumeric(args[3],"commissionRate");
         checkArgs(()->{
             BigInteger commission = new BigInteger(args[3]);
-            //commission 取值范围 10~100
+            //commission Value range 10~100
             return commission.compareTo(BigInteger.TEN) >= 0 && commission.compareTo(BigInteger.valueOf(100L)) <= 0;
         },"commission rate (10~100)");
         return true;

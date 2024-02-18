@@ -80,7 +80,7 @@ public class LedgerCall {
     }
 
     /**
-     * 向账本注册NRC20资产
+     * Register with ledgerNRC20asset
      */
     public static Map commitNRC20Assets(int chainId, String name, String symbol, short decimal, BigInteger totalSupply, String nrc20ContractAddress) throws NulsException {
         String cmd = "chainAssetContractReg";
@@ -105,7 +105,7 @@ public class LedgerCall {
     }
 
     /**
-     * 调用账本回滚已注册的NRC20资产
+     * Call ledger to roll back registered dataNRC20asset
      */
     public static boolean rollBackNRC20Assets(int chainId, String nrc20ContractAddress) throws NulsException {
         String cmd = "chainAssetContractRollBack";
@@ -126,7 +126,7 @@ public class LedgerCall {
     }
 
     /**
-     * 获取已注册的token资产列表
+     * Get registeredtokenAsset List
      */
     public static List<Map> getRegTokenList(int chainId) throws NulsException {
         String cmd = "getAssetRegInfo";

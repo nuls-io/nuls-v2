@@ -13,7 +13,7 @@
 //
 //    @Test
 //    public void testSerialize() {
-//        //测试序列化和反序列化方法是否正确
+//        //Test whether the serialization and deserialization methods are correct
 //        String str = "267890267890267890";
 //        BigInteger value = new BigInteger(str);
 //
@@ -27,7 +27,7 @@
 //
 //    @Test
 //    public void testSmallEndian() {
-//        //确保使用小端序，验证方式：跟旧版本的long行序列化做对比
+//        //Ensure the use of small end sequences and verification methods：Same as the old versionlongComparing row serialization
 //        String str = "267890123";
 //        BigInteger value = new BigInteger(str);
 //

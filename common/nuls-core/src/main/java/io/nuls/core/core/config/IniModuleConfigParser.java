@@ -11,7 +11,7 @@ import java.util.Map;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-13 20:59
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class IniModuleConfigParser implements ModuleConfigParser {
     @Override
@@ -32,7 +32,7 @@ public class IniModuleConfigParser implements ModuleConfigParser {
             s.forEach((key, value) -> domainValues.put(key, new ConfigurationLoader.ConfigItem(configFile, value)));
             res.put(s.getName(),domainValues);
         });
-        Log.debug("{},加载配置：{}",configFile,res);
+        Log.debug("{},load configuration：{}",configFile,res);
         return res;
     }
 }

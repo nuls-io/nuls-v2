@@ -33,7 +33,7 @@ import io.nuls.network.storage.DbService;
 import java.util.List;
 
 /**
- * 维护节点高度的定时任务
+ * Timed tasks for maintaining node height
  *
  * @author: ln
  * @date: 2018/12/8
@@ -48,7 +48,7 @@ public class SaveNodeInfoTask implements Runnable {
     }
 
     /**
-     * 每5分钟一次，将整个NodeContainer对象存储到文件中
+     * each5Every minute, take the entireNodeContainerStore objects in files
      */
     @Override
     public void run() {

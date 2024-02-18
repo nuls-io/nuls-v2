@@ -13,7 +13,7 @@ import io.nuls.core.rpc.netty.initializer.ServerInitializer;
 import java.net.InetSocketAddress;
 
 /**
- * 消息处理器
+ * Message processor
  * Send message processor
  *
  * @author tag
@@ -44,11 +44,11 @@ public class StartServerProcessor implements Runnable {
     @Override
     public void run() {
         /*
-         * 用于处理客户端链接的线程组
+         * Thread group used to handle client links
          * */
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
         /*
-         * 用来进行网络通讯读写的线程组
+         * A thread group used for network communication read and write
          * */
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {

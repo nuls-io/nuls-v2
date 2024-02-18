@@ -67,7 +67,7 @@ public class NulsCrossChainTest {
                 Thread.sleep(100);
                 tx = getTx(hash);
             }
-            Log.info("第{}笔交易，hash{}",i,hash);
+            Log.info("Section{}A transaction,hash{}",i,hash);
         }
     }
 
@@ -76,7 +76,7 @@ public class NulsCrossChainTest {
         params.put(Constants.VERSION_KEY_STR, "1.0");
         params.put(Constants.CHAIN_ID, chainId);
         params.put("txHash", hash);
-        //调用接口
+        //Calling interfaces
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getTx", params);
         HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("tx_getTx"));
         return (String)result.get("tx");
@@ -94,10 +94,10 @@ public class NulsCrossChainTest {
             paramMap.put("listTo", toList);
             paramMap.put("chainId", chainId);
             paramMap.put("remark", "transfer test");
-            //调用接口
+            //Calling interfaces
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, "createCrossTx", paramMap);
             if (!cmdResp.isSuccess()) {
-                Log.info("接口调用失败！" );
+                Log.info("Interface call failed！" );
             }
             HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("createCrossTx"));
             String hash = (String) result.get("txHash");

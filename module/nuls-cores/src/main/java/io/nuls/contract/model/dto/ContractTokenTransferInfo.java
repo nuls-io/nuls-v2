@@ -38,7 +38,7 @@ public class ContractTokenTransferInfo implements Serializable {
     private String to;
     private String value;
     private String contractAddress;
-    // token类型, 0 - 非token, 1 - NRC20, 2 - NRC721, 3 - NRC1155
+    // tokentype, 0 - wrongtoken, 1 - NRC20, 2 - NRC721, 3 - NRC1155
     private int tokenType;
     private String name;
     private String symbol;

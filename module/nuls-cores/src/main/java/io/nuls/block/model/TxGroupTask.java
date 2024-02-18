@@ -7,18 +7,18 @@ import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 
 /**
- * TxGroup请求线程
+ * TxGroupRequest thread
  *
  * @author captain
  * @version 1.0
- * @date 18-12-4 下午8:29
+ * @date 18-12-4 afternoon8:29
  */
 public class TxGroupTask implements Delayed {
     private long id;
     private HashListMessage request;
     private String nodeId;
     /**
-     * 延迟时长,这个是必须的属性因为要按照这个判断延时时长。
+     * Delay duration,This is a necessary attribute because the delay duration needs to be determined based on it.
      */
     private long excuteTime;
 
@@ -64,7 +64,7 @@ public class TxGroupTask implements Delayed {
     }
 
     /**
-     * 自定义实现比较方法返回 1 0 -1三个参数
+     * Custom implementation comparison method return 1 0 -1Three parameters
      *
      * @param delayed
      * @return
@@ -77,9 +77,9 @@ public class TxGroupTask implements Delayed {
 
 
     /**
-     * 延迟任务是否到时
-     * 如果返回的是负数则说明到期
-     * 否则还没到期
+     * Will the delayed task arrive
+     * If a negative number is returned, it indicates expiration
+     * Otherwise, it hasn't expired yet
      *
      * @param unit
      * @return

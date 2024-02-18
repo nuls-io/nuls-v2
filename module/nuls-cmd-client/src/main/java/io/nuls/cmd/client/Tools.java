@@ -12,7 +12,7 @@ import io.nuls.core.parse.SerializeUtils;
 /**
  * @Author: zhoulijun
  * @Time: 2019-05-06 18:22
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class Tools {
 

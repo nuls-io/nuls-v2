@@ -38,7 +38,7 @@ import org.junit.Test;
 public class WsKernel {
     @Test
     public  void test() throws Exception {
-        //模拟启动内核模块
+        //Simulate boot kernel module
         NoUse.mockKernel();
     }
 }

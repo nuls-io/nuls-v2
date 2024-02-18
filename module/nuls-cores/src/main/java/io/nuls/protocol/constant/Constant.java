@@ -21,43 +21,43 @@
 package io.nuls.protocol.constant;
 
 /**
- * 常量
+ * constant
  *
  * @author captain
  * @version 1.0
- * @date 19-1-22 下午3:34
+ * @date 19-1-22 afternoon3:34
  */
 public interface Constant {
 
     /**
-     * 协议版本配置文件名称
+     * Protocol version configuration file name
      * Module configuration file name.
      */
     String PROTOCOL_CONFIG_FILE = "versions.json";
 
     /**
-     * 存储每条链的配置信息
+     * Store configuration information for each chain
      */
     String PROTOCOL_CONFIG = "protocol_config_json";
     /**
-     * 存储每条链的版本统计信息
+     * Store version statistics for each chain
      */
     String STATISTICS = "statistics_info_";
     /**
-     * 缓存每条链的版本信息
+     * Cache version information for each chain
      */
     String CACHED_INFO = "cached_info_";
     /**
-     * 已生效的协议信息
+     * Effective agreement information
      */
     String PROTOCOL_VERSION_PO = "protocol_version_po_";
 
     /**
-     * 默认扫描包路径
+     * Default scan package path
      */
     String DEFAULT_SCAN_PACKAGE = "io.nuls.protocol";
     /**
-     * RPC默认扫描包路径
+     * RPCDefault scan package path
      */
     String RPC_DEFAULT_SCAN_PACKAGE = "io.nuls.protocol.rpc";
 }

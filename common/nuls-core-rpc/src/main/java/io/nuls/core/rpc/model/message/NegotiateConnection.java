@@ -29,7 +29,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * 握手请求
+ * Handshake request
  * Handshake request
  *
  * @author tangyi

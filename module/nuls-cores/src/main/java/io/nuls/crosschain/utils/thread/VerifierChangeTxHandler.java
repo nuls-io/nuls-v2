@@ -24,14 +24,14 @@ public class VerifierChangeTxHandler implements Runnable {
     @Override
     public void run() {
         /*
-         * 1.如果为提交时
-         *   1.1.如果提交交易与缓存中正在处理交易不是同一笔交易，则返回
-         *   1.2.更新本地验证人列表,保存交易广播高度，等待广播
-         *   1.3.清除正在处理交易标志
-         * 2.如果为轮次变更时（交易刚创建）
-         *   2.1.判断是否有正在处理的验证人变更交易，如果有则合并
-         *   2.2.判断当前当前突出的节点数量是否大于30%的共识节点数量，如果大于30%则拆分交易
-         *   2.3.签名广播
+         * 1.If it is at the time of submission
+         *   1.1.If the submitted transaction is not the same as the transaction being processed in the cache, return
+         *   1.2.Update local validator list,Save transaction broadcast height and wait for broadcast
+         *   1.3.Clear processing transaction flag
+         * 2.If it is a round change（The transaction has just been created）
+         *   2.1.Determine if there are any validator change transactions currently being processed, and if so, merge them
+         *   2.2.Determine if the current number of prominent nodes is greater than30%The number of consensus nodes, if greater than30%Split the transaction
+         *   2.3.Signature Broadcast
          * */
         TxUtil.verifierChangeWait(chain, height);
         boolean result = true;
@@ -53,7 +53,7 @@ public class VerifierChangeTxHandler implements Runnable {
                     chain.getLogger().error(e);
                     return;
                 }
-                //如果当前正在处理交易退出的验证人大于等于当前验证人列表的30%则无需合并，等待正在处理的交易处理完成
+                //If the number of validators currently processing transaction exits is greater than or equal to the current list of validators30%Then there is no need to merge and wait for the transaction being processed to complete
                 if (processTxData.getCancelAgentList() != null && (processTxData.getCancelAgentList().size() + 1) > chain.getVerifierList().size() * NulsCrossChainConstant.VERIFIER_CANCEL_MAX_RATE / NulsCrossChainConstant.MAGIC_NUM_100) {
                     try {
                         TimeUnit.SECONDS.sleep(2);
@@ -68,19 +68,19 @@ public class VerifierChangeTxHandler implements Runnable {
                 }
             }
         } while (!result);
-        //判断交易是否需要拆分及处理
+        //Determine whether the transaction needs to be split and processed
         verifierSplitHandle(chain, transaction, height, txData, txChanged);
     }
 
     /**
-     * 如果当前有正在处理的验证人变更交易，则需要合并两个验证人变更交易
+     * If there are currently validator change transactions being processed, it is necessary to merge two validator change transactions
      * If there is currently a verifier change transaction being processed, two verifier change transactions need to be consolidated
      */
     private VerifierChangeData mergeVerifierChangeTx(VerifierChangeData txData, VerifierChangeData processTxData) {
         VerifierChangeData mergeTxData = new VerifierChangeData();
         /*
-         * 1.合并新增验证人，去重排序
-         * 2.合并注销的验证人，去重排序
+         * 1.Merge and add validators, remove reordering
+         * 2.Merge and cancel validators, remove reordering
          * */
         Set<String> appendSet = null;
         if (txData.getRegisterAgentList() != null && !txData.getRegisterAgentList().isEmpty()) {
@@ -123,7 +123,7 @@ public class VerifierChangeTxHandler implements Runnable {
     }
 
     /**
-     * 判断当前验证人变更交易是否需要拆分，如果退出的节点数大于等于当前节点数的30%则需要拆分
+     * Determine whether the current validator change transaction needs to be split. If the number of exiting nodes is greater than or equal to the current number of nodes30%Then it needs to be split
      * Judge whether the current verifier's change transaction needs to be split. If the number of exiting nodes is greater than or equal to 30% of the current number of nodes, it needs to be split
      */
     private void verifierSplitHandle(Chain chain, Transaction transaction,long height, VerifierChangeData txData, boolean txChanged){
@@ -138,14 +138,14 @@ public class VerifierChangeTxHandler implements Runnable {
             }
         }
         if(needSplit){
-            //如果交易已变更则前面已排过序,验证人排序，然后拆分退出验证人列表
+            //If the transaction has changed, it has already been sorted before,Sort the validators, then split and exit the validator list
             if(!txChanged){
                 txData.getCancelAgentList().sort(Comparator.naturalOrder());
             }
             List<String> firstCancelList = txData.getCancelAgentList().subList(0, maxCount);
             List<String> secondCancelList = txData.getCancelAgentList().subList(maxCount, cancelCount);
             try {
-                //第一笔交易优先处理，高度为当前高度，第二笔交易高度为当前高度之后2两个高度，避免广播时同时广播的情况
+                //The first transaction is prioritized, with a height of the current height, and the second transaction height is after the current height2Two heights to avoid simultaneous broadcasting during broadcasting
                 Transaction firstTx = TxUtil.createVerifierChangeTx(txData.getRegisterAgentList(), firstCancelList, transaction.getTime(), chain.getChainId());
                 Transaction secondTx = TxUtil.createVerifierChangeTx(new ArrayList<>(), secondCancelList, transaction.getTime(), chain.getChainId());
                 chain.getLogger().info("The exit node of the transaction changed by the verifier is greater than 30% of the current node, which is divided into two transactions,firstTx:{},secondTx:{}",firstTx.getHash().toHex(),secondTx.getHash().toHex());

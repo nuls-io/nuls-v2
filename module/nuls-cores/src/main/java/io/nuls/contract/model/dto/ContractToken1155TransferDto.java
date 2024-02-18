@@ -32,21 +32,21 @@ import io.nuls.core.rpc.model.ApiModelProperty;
  */
 @ApiModel
 public class ContractToken1155TransferDto {
-    @ApiModelProperty(description = "合约地址")
+    @ApiModelProperty(description = "Contract address")
     private String contractAddress;
-    @ApiModelProperty(description = "操作方")
+    @ApiModelProperty(description = "Operator")
     private String operator;
-    @ApiModelProperty(description = "付款方")
+    @ApiModelProperty(description = "Payer")
     private String from;
-    @ApiModelProperty(description = "收款方")
+    @ApiModelProperty(description = "Payee")
     private String to;
     @ApiModelProperty(description = "tokenId")
     private String[] ids;
-    @ApiModelProperty(description = "转账数量")
+    @ApiModelProperty(description = "Transfer quantity")
     private String[] values;
-    @ApiModelProperty(description = "token名称")
+    @ApiModelProperty(description = "tokenname")
     private String name;
-    @ApiModelProperty(description = "token符号")
+    @ApiModelProperty(description = "tokensymbol")
     private String symbol;
 
     public ContractToken1155TransferDto(ContractTokenTransferInfo info) {

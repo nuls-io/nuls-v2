@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 委托信息存储管理实现类
+ * Implementation class for entrusted information storage management
  * Delegated Information Storage Management Implementation Class
  *
  * @author tag

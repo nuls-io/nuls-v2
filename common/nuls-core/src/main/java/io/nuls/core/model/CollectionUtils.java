@@ -4,7 +4,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 集合工具类
+ * Collection tool class
  *
  * @author captain
  * @version 1.0
@@ -14,9 +14,9 @@ public class CollectionUtils {
     private static final int MAXIMUM_CAPACITY = 1 << 30;
 
     /**
-     * 获取距初始容量
-     * @param cap 初始容量
-     * @return 按规则转换后的容量
+     * Obtain distance from initial capacity
+     * @param cap Initial capacity
+     * @return Capacity converted according to rules
      * */
     private static int tableSizeFor(int cap) {
         int n = cap - 1;
@@ -29,9 +29,9 @@ public class CollectionUtils {
     }
 
     /**
-     * 创建一个指定容量的HashMap
-     * @param cap 容量
-     * @return 生成的HashMap
+     * Create a specified capacityHashMap
+     * @param cap capacity
+     * @return GeneratedHashMap
      * */
     public static HashMap createHashMap(int cap) {
         int capacity = tableSizeFor(cap) << 1;
@@ -39,9 +39,9 @@ public class CollectionUtils {
     }
 
     /**
-     * 创建一个指定容量的LinkedHashMap
-     * @param cap 容量
-     * @return 生成的LinkedHashMap
+     * Create a specified capacityLinkedHashMap
+     * @param cap capacity
+     * @return GeneratedLinkedHashMap
      * */
     public static LinkedHashMap createLinkedHashMap(int cap) {
         int capacity = tableSizeFor(cap) << 1;
@@ -49,9 +49,9 @@ public class CollectionUtils {
     }
 
     /**
-     * 创建一个指定容量的ConcurrentHashMap
-     * @param cap 容量
-     * @return 生成的ConcurrentHashMap
+     * Create a specified capacityConcurrentHashMap
+     * @param cap capacity
+     * @return GeneratedConcurrentHashMap
      * */
     public static ConcurrentHashMap createConcurrentHashMap(int cap) {
         int capacity = tableSizeFor(cap) << 1;
@@ -59,9 +59,9 @@ public class CollectionUtils {
     }
 
     /**
-     * 创建一个指定容量的HashSet
-     * @param cap 容量
-     * @return 生成的HashSet
+     * Create a specified capacityHashSet
+     * @param cap capacity
+     * @return GeneratedHashSet
      * */
     public static HashSet createHashSet(int cap) {
         int capacity = tableSizeFor(cap) << 1;
@@ -69,9 +69,9 @@ public class CollectionUtils {
     }
 
     /**
-     * 创建一个指定容量的ConcurrentHashMap的keySet
-     * @param cap 容量
-     * @return 生成的HashSet
+     * Create a specified capacityConcurrentHashMapofkeySet
+     * @param cap capacity
+     * @return GeneratedHashSet
      * */
     public static Set createConcurrentHashSet(int cap) {
         int capacity = tableSizeFor(cap) << 1;
@@ -79,9 +79,9 @@ public class CollectionUtils {
     }
 
     /**
-     * 将对象集合转为String
-     * @param list 对象集合
-     * @return     集合里的对象toString拼接后得到的字符串
+     * Convert object collection toString
+     * @param list Object Collection
+     * @return     Objects in the collectiontoStringThe concatenated string
      * */
     public static String join(List<?> list) {
         if (list == null) {
@@ -98,10 +98,10 @@ public class CollectionUtils {
     }
 
     /**
-     * 获取线程安全的固定大小的map
+     * Get thread safe fixed sizemap
      *
-     * @param size  map元素上限
-     * @return Map  map对象
+     * @param size  mapElement upper limit
+     * @return Map  mapobject
      */
     public static <K, V> Map<K, V> getSynSizedMap(int size) {
         return Collections.synchronizedMap(new LinkedHashMap<>(size) {
@@ -113,10 +113,10 @@ public class CollectionUtils {
     }
 
     /**
-     * 获取线程安全的固定大小的set
+     * Get thread safe fixed sizeset
      *
-     * @param size  set元素上限
-     * @return Set  set对象
+     * @param size  setElement upper limit
+     * @return Set  setobject
      */
     public static <T> Set<T> getSynSizedSet(int size) {
         return Collections.synchronizedSet(new TreeSet<>(){
@@ -131,16 +131,16 @@ public class CollectionUtils {
     }
 
     /**
-     * 获取线程安全的固定大小的list
+     * Get thread safe fixed sizelist
      *
-     * @return List  list对象
+     * @return List  listobject
      */
     public static <T> List<T> getSynList() {
         return Collections.synchronizedList(new ArrayList<>());
     }
 
     /**
-     * 比List.removeAll效率高
+     * thanList.removeAllefficient
      *
      * @param source
      * @param destination

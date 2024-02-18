@@ -35,7 +35,7 @@ import io.nuls.core.basic.Result;
 import io.nuls.core.exception.NulsException;
 
 /**
- * 账户相关交易接口定义
+ * Account related transaction interface definition
  * account service definition
  *
  * @author: qinyifeng
@@ -44,7 +44,7 @@ public interface TransactionService {
 
 
     /**
-     * 转账交易验证器(协议升级扫描)
+     * Transfer transaction validator(Protocol upgrade scan)
      *
      * @param chain
      * @param tx
@@ -54,9 +54,9 @@ public interface TransactionService {
     Result transferTxValidate(Chain chain, Transaction tx) throws NulsException;
 
     /**
-     * 多地址转账
+     * Multiple address transfer
      *
-     * @param chain    当前链ID
+     * @param chain    Current ChainID
      * @param transferDTO Data to be assembled
      * @return transfer transaction hash
      * @throws NulsException
@@ -65,7 +65,7 @@ public interface TransactionService {
 
 
     /**
-     * 创建多签交易, 交易from中只能有同一个多签地址
+     * Create multi signature transactions, transactionfromOnly the same multi signature address can exist in the
      * <p>
      * create multi sign transfer transaction
      *
@@ -77,7 +77,7 @@ public interface TransactionService {
 
 
     /**
-     * 多签交易签名
+     * Multiple transaction signatures
      * <p>
      * sign multi sign transaction
      *
@@ -92,7 +92,7 @@ public interface TransactionService {
             throws NulsException;
 
     /**
-     * 创建多签账户设置别名交易
+     * Create multi signature accounts and set alias transactions
      * @param chain
      * @param address
      * @param aliasName
@@ -104,7 +104,7 @@ public interface TransactionService {
     MultiSignTransactionResultDTO setMultiSignAccountAlias(Chain chain, String address, String aliasName, String signAddr, String password) throws NulsException;
 
     /**
-     * 组装一个不包含签名的设置别名的交易(适用于普通地址)
+     * Assemble a transaction with an alias setting that does not include a signature(Applicable to regular addresses)
      * @param chain
      * @param address
      * @param aliasName
@@ -114,19 +114,19 @@ public interface TransactionService {
     Transaction createSetAliasTxWithoutSign(Chain chain, Address address, String aliasName) throws NulsException;
 
     /**
-     * 组装一个不包含签名的设置别名的交易(适用于多签地址)
+     * Assemble a transaction with an alias setting that does not include a signature(Suitable for multiple signed addresses)
      * @param chain
      * @param address
      * @param aliasName
-     * @param msign 多签地址最小签名数
+     * @param msign Minimum number of signatures for multiple signed addresses
      * @return
      * @throws NulsException
      */
     Transaction createSetAliasTxWithoutSign(Chain chain, Address address, String aliasName, int msign) throws NulsException;
 
 //    /**
-//     * 多签交易处理
-//     * 如果达到最少签名数则广播交易，否则什么也不做
+//     * Multi signature transaction processing
+//     * If the minimum number of signatures is reached, broadcast the transaction; otherwise, do nothing
 //     **/
 //    boolean txMutilProcessing(Chain chain, MultiSigAccount multiSigAccount, Transaction tx, TransactionSignature txSignature) throws NulsException;
 

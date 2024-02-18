@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 惩罚存贮管理实现类
+ * Punishment storage management implementation class
  * Punishment Storage Management Implementation Class
  *
  * @author tag

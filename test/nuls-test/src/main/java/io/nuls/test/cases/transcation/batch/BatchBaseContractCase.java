@@ -52,7 +52,7 @@ public class BatchBaseContractCase extends BaseTestCase<String, Map> {
 
     @Override
     public String title() {
-        return "批量合约调用交易";
+        return "Batch contract call transaction";
     }
 
     @Override
@@ -65,7 +65,7 @@ public class BatchBaseContractCase extends BaseTestCase<String, Map> {
             AtomicInteger successTotal = new AtomicInteger(0);
             CountDownLatch latch = new CountDownLatch(THEADH_COUNT);
             Long start = System.currentTimeMillis();
-            Log.info("开始创建交易");
+            Log.info("Start creating transaction");
             for (int s = 0; s < THEADH_COUNT; s++) {
                 ThreadUtils.createAndRunThread("batch-transaction-"+s, () -> {
                     Log.info("Thread - {} begin", Thread.currentThread().getName());
@@ -94,7 +94,7 @@ public class BatchBaseContractCase extends BaseTestCase<String, Map> {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            Log.info("创建{}笔交易,成功{}笔，消耗时间:{}", count, successTotal, System.currentTimeMillis() - start);
+            Log.info("establish{}Transactions,success{}Pen, time-consuming:{}", count, successTotal, System.currentTimeMillis() - start);
         });
 
         return "success";

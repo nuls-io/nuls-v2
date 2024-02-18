@@ -4,7 +4,7 @@ package io.nuls.base.api.provider.protocol.facade;
 /**
  * @Author: zhoulijun
  * @Time: 2020-01-15 18:16
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class VersionInfo {
 

@@ -27,7 +27,7 @@ package io.nuls.core.rpc.model;
 import java.lang.annotation.*;
 
 /**
- * 注解类，用以描述对外提供接口的参数信息
+ * Annotation class, used to describe the parameter information of externally provided interfaces
  * Annotation classes to describe parameter information that provides interfaces to the outside world
  *
  * @author tangyi
@@ -38,7 +38,7 @@ import java.lang.annotation.*;
 @Repeatable(Parameters.class)
 public @interface Parameter {
     /**
-     * 参数名称
+     * Parameter Name
      * Parameter name
      *
      * @return String
@@ -47,7 +47,7 @@ public @interface Parameter {
     String parameterName() default "";
 
     /**
-     * 参数类型（可以是任何类型，包括基础类型或者自定义类型）
+     * Parameter type（Can be of any type, including base or custom types）
      * Parameter type(can be any type, including base type or custom type)
      *
      * @return String
@@ -56,7 +56,7 @@ public @interface Parameter {
     String parameterType() default "";
 
     /**
-     * 数值类型参数的范围，格式为：[(\[]\d+,\d+[)\]] 。例如：(1,100]表示1< x <=100
+     * The range of numerical type parameters, formatted as：[(\[]\d+,\d+[)\]] . for example：(1,100]express1< x <=100
      * The range of numerical type parameters, format: [(\[] d+, \ d+ [)]]. For example, (1,100] means 1 < x <=100
      *
      * @return String
@@ -64,7 +64,7 @@ public @interface Parameter {
     String parameterValidRange() default "";
 
     /**
-     * 字符类型参数的格式，值为正则表达式
+     * The format of character type parameters, with values as regular expressions
      * Format of character type parameters with regular expression
      *
      * @return String
@@ -73,7 +73,7 @@ public @interface Parameter {
 
 
     /**
-     * 参数描述
+     * Parameter Description
      *
      * @return
      */
@@ -82,7 +82,7 @@ public @interface Parameter {
 
 
     /**
-     * 是否可为空
+     * Can it be empty
      *
      * @return
      */

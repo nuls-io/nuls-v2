@@ -4,31 +4,31 @@ package io.nuls.base.api.provider.network.facade;
  * @Author: zhoulijun
  * @Time: 2019-03-12 16:13
  * @Description:
- * 网络信息
+ * network information
  * network info
  */
 public class NetworkInfo {
 
     /**
-     * 本地最新区块高度
+     * Local latest block height
      */
     long localBestHeight;
 
     /**
-     * 网络最新区块高度
+     * The latest block height in the network
      */
     long netBestHeight;
 
     /**
-     * 网络时间偏移值 毫秒数
+     * Network time offset value Msec
      */
     long timeOffset;
     /**
-     * 被动连接节点数量
+     * Number of passive connection nodes
      */
     int inCount;
     /**
-     * 主动连接节点数量
+     * Number of active connection nodes
      */
     int outCount;
 

@@ -40,7 +40,7 @@ import java.math.BigInteger;
 import java.util.*;
 
 /**
- * 智能合约与共识交互接口实现类
+ * Smart Contract and Consensus Interaction Interface Implementation Class
  *
  * @author tag
  * 2019/5/5
@@ -300,7 +300,7 @@ public class ContractServiceImpl implements ContractService {
                 value.add(AddressTool.getStringAddressByBytes(agent.getPackingAddress()));
                 value.add(AddressTool.getStringAddressByBytes(agent.getRewardAddress()));
                 value.add(agent.getDeposit().toString());
-                //协议升级
+                //Protocol upgrade
                 if(ProtocolGroupManager.getCurrentVersion(chain.getConfig().getChainId()) >= 5){
                     value.add(agentManager.getAgentDeposit(chain, agent).toString());
                 }else{

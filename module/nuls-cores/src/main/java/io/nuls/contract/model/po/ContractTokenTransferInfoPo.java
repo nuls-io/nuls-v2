@@ -47,7 +47,7 @@ public class ContractTokenTransferInfoPo implements Serializable {
     private long blockHeight;
     private long time;
     /**
-     * 0 - 确认中， 1 - 已确认， 2 - 失败 +
+     * 0 - Confirming, 1 - Confirmed, 2 - fail +
      */
     private byte status;
 

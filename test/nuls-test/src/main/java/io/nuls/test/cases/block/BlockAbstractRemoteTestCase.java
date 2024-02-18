@@ -6,7 +6,7 @@ import io.nuls.test.cases.SyncRemoteTestCase;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-20 20:09
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public abstract class BlockAbstractRemoteTestCase<T extends BlockHeaderData> extends SyncRemoteTestCase<T> {
 

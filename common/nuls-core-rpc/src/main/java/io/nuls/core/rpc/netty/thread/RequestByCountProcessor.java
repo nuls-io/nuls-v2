@@ -6,7 +6,7 @@ import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.log.Log;
 
 /**
- * 订阅事件处理线程
+ * Subscription event processing thread
  * Subscription event processing threads
  *
  * @author tag
@@ -20,7 +20,7 @@ public class RequestByCountProcessor implements Runnable {
     }
 
     /**
-     * 发送订阅的数据队列
+     * Send subscription data queue
      * Data queue for sending subscriptions
      */
     @Override

@@ -56,7 +56,7 @@ import static io.nuls.core.constant.CommonCodeConstanst.*;
 
 
 /**
- * 主网跨链模块特有方法
+ * Unique methods for cross chain modules in the main network
  *
  * @author tag
  * @date 2019/4/23
@@ -81,7 +81,7 @@ public class MainNetServiceImpl implements MainNetService {
     @SuppressWarnings("unchecked")
     public Result registerCrossChain(Map<String, Object> params) {
         if (params == null) {
-            LoggerUtil.commonLog.error("参数错误");
+            LoggerUtil.commonLog.error("Parameter error");
             return Result.getFailed(PARAMETER_ERROR);
         }
         ChainInfo chainInfo = JSONUtils.map2pojo(params, ChainInfo.class);
@@ -102,14 +102,14 @@ public class MainNetServiceImpl implements MainNetService {
                 return Result.getFailed(CommonCodeConstanst.DB_SAVE_ERROR);
             }
         }
-        chain.getLogger().info("有新链注册跨链，chainID:{},初始验证人列表：{}", chainInfo.getChainId(), chainInfo.getVerifierList().toString());
-        //创建验证人初始化交易
+        chain.getLogger().info("There is a new cross chain registration,chainID:{},Initial Verifier List：{}", chainInfo.getChainId(), chainInfo.getVerifierList().toString());
+        //Create validator initialization transaction
         try {
             int syncStatus = BlockCall.getBlockStatus(chain);
             chain.getCrossTxThreadPool().execute(new CrossTxHandler(chain, TxUtil.createVerifierInitTx(chain.getVerifierList(), chainInfo.getRegisterTime(), chainInfo.getChainId()),syncStatus));
 
             if(registeredChainMessage.haveOtherChain(chainInfo.getChainId(), chain.getChainId())){
-                chain.getLogger().info("将新注册的链信息广播给已注册的链");
+                chain.getLogger().info("Broadcast newly registered chain information to already registered chains");
                 chain.getCrossTxThreadPool().execute(new CrossTxHandler(chain, TxUtil.createCrossChainChangeTx(chainInfo,chainInfo.getRegisterTime(),chainInfo.getChainId(), ChainInfoChangeType.NEW_REGISTER_CHAIN.getType()),syncStatus));
             }
         } catch (IOException e) {
@@ -122,7 +122,7 @@ public class MainNetServiceImpl implements MainNetService {
     @Override
     public Result registerAssert(Map<String, Object> params) {
         if (params == null) {
-            LoggerUtil.commonLog.error("参数错误");
+            LoggerUtil.commonLog.error("Parameter error");
             return Result.getFailed(PARAMETER_ERROR);
         }
         Chain chain = chainManager.getChainMap().get(nulsCrossChainConfig.getMainChainId());
@@ -136,13 +136,13 @@ public class MainNetServiceImpl implements MainNetService {
         AssetInfo assetInfo = new AssetInfo(assetId, symbol, assetName, usable, decimalPlaces);
         chainManager.getChainInfo(chainId).getAssetInfoList().add(assetInfo);
         ChainInfo chainInfo = chainManager.getChainInfo(chainId);
-        //本地数据库保存最新的资产信息
+        //Save the latest asset information in the local database
         RegisteredChainMessage registeredChainMessage = registeredCrossChainService.get();
         registeredChainMessage.setChainInfoList(chainManager.getRegisteredCrossChainList());
         registeredCrossChainService.save(registeredChainMessage);
         try {
             int syncStatus = BlockCall.getBlockStatus(chain);
-            chain.getLogger().info("新跨链资产注册，chainId:{},assetId:{}",chainId,assetId);
+            chain.getLogger().info("New cross chain asset registration,chainId:{},assetId:{}",chainId,assetId);
             chain.getCrossTxThreadPool().execute(new CrossTxHandler(chain, TxUtil.createCrossChainChangeTx(chainInfo,time,chainInfo.getChainId(), ChainInfoChangeType.REGISTERED_CHAIN_CHANGE.getType()),syncStatus));
         }catch (IOException e){
             chain.getLogger().error(e);
@@ -154,7 +154,7 @@ public class MainNetServiceImpl implements MainNetService {
     @Override
     public Result cancelCrossChain(Map<String, Object> params) {
         if (params == null || params.get(ParamConstant.CHAIN_ID) == null || params.get(ParamConstant.ASSET_ID) == null) {
-            LoggerUtil.commonLog.error("参数错误");
+            LoggerUtil.commonLog.error("Parameter error");
             return Result.getFailed(PARAMETER_ERROR);
         }
         int chainId = (int) params.get(ParamConstant.CHAIN_ID);
@@ -165,7 +165,7 @@ public class MainNetServiceImpl implements MainNetService {
         int syncStatus = BlockCall.getBlockStatus(chain);
         boolean chainInvalid = true;
         ChainInfo realChainInfo = null;
-        chain.getLogger().info("跨链资产注销，chainId:{},assetId:{}",chainId,assetId);
+        chain.getLogger().info("Cross chain asset deregistration,chainId:{},assetId:{}",chainId,assetId);
         if (assetId == 0) {
             registeredChainMessage.getChainInfoList().removeIf(chainInfo -> chainInfo.getChainId() == chainId);
         } else {
@@ -189,7 +189,7 @@ public class MainNetServiceImpl implements MainNetService {
         }
         try {
             if(chainInvalid){
-                chain.getLogger().info("注销链，chainId:{}",chainId);
+                chain.getLogger().info("Unregister chain,chainId:{}",chainId);
                 chain.getCrossTxThreadPool().execute(new CrossTxHandler(chain, TxUtil.createCrossChainChangeTx(time,chainId, ChainInfoChangeType.REGISTERED_CHAIN_CHANGE.getType()),syncStatus));
             }else{
                 chain.getCrossTxThreadPool().execute(new CrossTxHandler(chain, TxUtil.createCrossChainChangeTx(realChainInfo,time,chainId, ChainInfoChangeType.REGISTERED_CHAIN_CHANGE.getType()),syncStatus));
@@ -206,29 +206,29 @@ public class MainNetServiceImpl implements MainNetService {
     @Override
     public Result crossChainRegisterChange(Map<String, Object> params) {
         if (params == null || params.get(ParamConstant.CHAIN_ID) == null) {
-            LoggerUtil.commonLog.error("参数错误");
+            LoggerUtil.commonLog.error("Parameter error");
             return Result.getFailed(PARAMETER_ERROR);
         }
         if (!nulsCrossChainConfig.isMainNet()) {
-            LoggerUtil.commonLog.error("本链不是主网");
+            LoggerUtil.commonLog.error("This chain is not the main network");
             return Result.getFailed(PARAMETER_ERROR);
         }
         int chainId = (int) params.get(ParamConstant.CHAIN_ID);
 
         if (chainId != nulsCrossChainConfig.getMainChainId()) {
-            LoggerUtil.commonLog.error("本链不是主网");
+            LoggerUtil.commonLog.error("This chain is not the main network");
             return Result.getFailed(PARAMETER_ERROR);
         }
         Chain chain = chainManager.getChainMap().get(chainId);
         if (chain == null) {
-            LoggerUtil.commonLog.error("链不存在");
+            LoggerUtil.commonLog.error("Chain does not exist");
             return Result.getFailed(NulsCrossChainErrorCode.CHAIN_NOT_EXIST);
         }
         try {
 
             chainManager.setRegisteredCrossChainList(ChainManagerCall.getRegisteredChainInfo(chainManager).getChainInfoList());
         } catch (Exception e) {
-            chain.getLogger().error("跨链注册信息更新失败");
+            chain.getLogger().error("Cross chain registration information update failed");
             chain.getLogger().error(e);
         }
         return Result.getSuccess(SUCCESS);
@@ -237,7 +237,7 @@ public class MainNetServiceImpl implements MainNetService {
     @Override
     public void receiveCirculation(int chainId, String nodeId, CirculationMessage messageBody) {
         Chain chain = chainManager.getChainMap().get(nulsCrossChainConfig.getMainChainId());
-        chain.getLogger().info("接收到友链:{}节点:{}发送的资产该链最新资产流通量信息\n\n", chainId, nodeId);
+        chain.getLogger().info("Received Friend Chain:{}node:{}The latest asset circulation information of the chain sent by the asset\n\n", chainId, nodeId);
         try {
             ChainManagerCall.sendCirculation(chainId, messageBody);
         } catch (NulsException e) {
@@ -267,7 +267,7 @@ public class MainNetServiceImpl implements MainNetService {
             return Result.getFailed(NulsCrossChainErrorCode.CHAIN_NOT_EXIST);
         }
         if (!chainManager.isCrossNetUseAble()) {
-            chain.getLogger().info("跨链网络组网异常！");
+            chain.getLogger().info("Cross chain network networking exception！");
             return Result.getFailed(NulsCrossChainErrorCode.CROSS_CHAIN_NETWORK_UNAVAILABLE);
         }
         int assetId = Integer.valueOf(params.get(ParamConstant.ASSET_ID).toString());
@@ -296,7 +296,7 @@ public class MainNetServiceImpl implements MainNetService {
             int txSize = tx.size();
             txSize += P2PHKSignature.SERIALIZE_LENGTH;
             txSize += coinData.size();
-            //计算手续费
+            //Calculate handling fees
             BigInteger targetFee = TransactionFeeCalculator.getCrossTxFee(txSize);
             CoinFrom feeFrom = new CoinFrom(AddressTool.getAddress(contractAddress), nulsCrossChainConfig.getMainChainId(), nulsCrossChainConfig.getMainAssetId(), targetFee, HexUtil.decode(contractToken), (byte) 0);
             txSize += feeFrom.size();
@@ -304,7 +304,7 @@ public class MainNetServiceImpl implements MainNetService {
             feeFrom.setAmount(targetFee);
             BigInteger available = new BigInteger(contractBalance);
             if (BigIntegerUtils.isLessThan(available, targetFee)) {
-                chain.getLogger().warn("手续费不足");
+                chain.getLogger().warn("Insufficient handling fees");
                 return Result.getFailed(NulsCrossChainErrorCode.INSUFFICIENT_FEE);
             }
             coinData.addFrom(feeFrom);

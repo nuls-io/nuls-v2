@@ -41,7 +41,7 @@ import java.io.IOException;
 public class AccountBlockInfo extends BaseNulsData {
 
     /**
-     * 1-增加白名单 2-删除白名单
+     * 1-Add whitelist 2-Delete whitelist
      */
     private int operationType;
     private int[] types;

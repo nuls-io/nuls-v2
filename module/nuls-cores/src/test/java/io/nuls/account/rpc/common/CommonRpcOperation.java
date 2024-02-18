@@ -26,7 +26,7 @@ import static org.junit.Assert.*;
 
 /**
  * @author: EdwardChan
- * @description: 测试过程中需要的公共的方法
+ * @description: Common methods required during the testing process
  * @date: Jan. 31th 2019
  */
 public class CommonRpcOperation {
@@ -40,14 +40,14 @@ public class CommonRpcOperation {
 
 
     /**
-     * 创建一个账户
+     * Create an account
      */
     public static List<String> createAccount() {
         return createAccount(chainId, 1, password);
     }
 
     /**
-     * 创建指定数量的账户
+     * Create a specified number of accounts
      **/
     public static List<String> createAccount(int count) {
         return createAccount(chainId, count, password);
@@ -109,7 +109,7 @@ public class CommonRpcOperation {
     }
 
     /**
-     * 根据地址查询别名
+     * Search for aliases based on address
      */
     public static String getAliasByAddress(String address) throws Exception {
         Map<String, Object> params = new HashMap<>();
@@ -126,7 +126,7 @@ public class CommonRpcOperation {
     }
 
     /**
-     * 创建多签账户
+     * Create a multi signature account
      **/
     public static MultiSigAccount createMultiSigAccount() throws Exception {
         MultiSigAccount multiSigAccount = new MultiSigAccount();
@@ -249,7 +249,7 @@ public class CommonRpcOperation {
     }
 
     /**
-     * 创建普通转账交易
+     * Create a regular transfer transaction
      *
      * @return
      */

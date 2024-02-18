@@ -82,7 +82,7 @@ public class ContractMultyAssetOfflineTest {
 
 
     /**
-     * 多账户调用合约 - 转入
+     * Multiple account call contracts - Transfer in
      */
     @Test
     public void transferInOfmanyAccountCall() throws Exception {
@@ -102,7 +102,7 @@ public class ContractMultyAssetOfflineTest {
     }
 
     /**
-     * 多账户调用合约 - 转入其他资产，如 2-2, 2-3
+     * Multiple account call contracts - Transfer to other assets, such as 2-2, 2-3
      */
     @Test
     public void transferInOfmanyAccountCallII() throws Exception {
@@ -126,7 +126,7 @@ public class ContractMultyAssetOfflineTest {
     }
 
     /**
-     * 多账户调用合约 - 同时转入NULS资产和其他资产，如 2-1, 2-2, 2-3
+     * Multiple account call contracts - Simultaneously transfer inNULSAssets and other assets, such as 2-1, 2-2, 2-3
      */
     @Test
     public void transferInOfmanyAccountCallIII() throws Exception {
@@ -150,7 +150,7 @@ public class ContractMultyAssetOfflineTest {
     }
 
     /**
-     * 多账户调用合约 - 转出
+     * Multiple account call contracts - Transfer out
      */
     @Test
     public void transferOutOfmanyAccountCall() throws Exception {
@@ -166,14 +166,14 @@ public class ContractMultyAssetOfflineTest {
         String methodName = "transferNuls";
         String methodDesc = "";
         String remark = "";
-        // 转出 0.1 NULS
+        // Transfer out 0.1 NULS
         Object[] args = new Object[]{"tNULSeBaMrbMRiFAUeeAt6swb4xVBNyi81YL24", new BigDecimal("0.1").multiply(BigDecimal.TEN.pow(8)).toBigInteger()};
         String[] argsType = new String[]{"Address", "BigInteger"};
         this.callTxOffline(feeAccount, feeAccountPri, sender, senderPri, value, contractAddress, methodName, methodDesc, remark, args, argsType, null, true);
     }
 
     /**
-     * 多账户调用合约 - 转出其他资产
+     * Multiple account call contracts - Transfer out of other assets
      */
     @Test
     public void transferOutOfmanyAccountOfOtherAssetCall() throws Exception {
@@ -189,7 +189,7 @@ public class ContractMultyAssetOfflineTest {
         String methodName = "transferDesignatedAsset";
         String methodDesc = "";
         String remark = "";
-        // 转出 0.1 NULS
+        // Transfer out 0.1 NULS
         Object[] args = new Object[]{"tNULSeBaMrbMRiFAUeeAt6swb4xVBNyi81YL24", new BigDecimal("3").multiply(BigDecimal.TEN.pow(8)).toBigInteger(), 55, 1};
         String[] argsType = new String[]{"Address", "BigInteger", "int", "int"};
         this.callTxOffline(feeAccount, feeAccountPri, sender, senderPri, value, contractAddress, methodName, methodDesc, remark, args, argsType, null, true);
@@ -254,7 +254,7 @@ public class ContractMultyAssetOfflineTest {
     }
 
     /**
-     * 两个账户支出同一个资产
+     * Spending the same asset on two accounts
      */
     protected void callTxOfflineII(String feeAccount, String feeAccountPri,
                                  String contractSender, String contractSenderPri,
@@ -328,7 +328,7 @@ public class ContractMultyAssetOfflineTest {
                                  String methodName, String methodDesc,
                                  String remark,
                                  Object[] args, String[] argsType, boolean isBroadcastTx) throws Exception{
-        // 生成参数的二维数组
+        // Generate a two-dimensional array of parameters
         String[][] finalArgs = null;
         if (args != null && args.length > 0) {
             if(argsType == null || argsType.length != args.length) {
@@ -337,7 +337,7 @@ public class ContractMultyAssetOfflineTest {
             finalArgs = ContractUtil.twoDimensionalArray(args, argsType);
         }
 
-        // 组装交易的txData
+        // Assembly transactionstxData
         byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
         byte[] senderBytes = AddressTool.getAddress(contractSender);
         CallContractData callContractData = new CallContractData();
@@ -358,7 +358,7 @@ public class ContractMultyAssetOfflineTest {
             tx.setRemark(remark.getBytes(StandardCharsets.UTF_8));
         }
         tx.setTime(System.currentTimeMillis() / 1000);
-        // 计算CoinData
+        // calculateCoinData
         CoinData coinData = new CoinData();
         coinData.setFrom(froms);
         coinData.setTo(tos);
@@ -400,7 +400,7 @@ public class ContractMultyAssetOfflineTest {
             throw new RuntimeException("Insufficient balance to pay fee");
         }*/
         tx.setCoinData(coinData.serialize());
-        // 签名
+        // autograph
         byte[] txBytes = tx.serialize();
         String txHex = HexUtil.encode(txBytes);
         Result<Map> signTxR = NulsSDKTool.sign(txSingers, txHex);
@@ -410,7 +410,7 @@ public class ContractMultyAssetOfflineTest {
         String signedTxHex = (String) resultData.get("txHex");
         System.out.println(String.format("signedTxHex: %s", signedTxHex));
 
-        // 在线接口 - 广播交易
+        // Online interface - Broadcasting transactions
         if (!isBroadcastTx) {
             return;
         }

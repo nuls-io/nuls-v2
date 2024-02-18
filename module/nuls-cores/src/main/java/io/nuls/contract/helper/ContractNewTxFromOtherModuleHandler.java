@@ -62,7 +62,7 @@ public class ContractNewTxFromOtherModuleHandler {
     @Autowired
     private NulsCoresConfig contractConfig;
     /**
-     * 更新临时nonce和vm内维护的合约余额
+     * Update TemporarynonceandvmContract balance maintained internally
      */
     public Transaction updateNonceAndVmBalance(int chainId, byte[] contractAddressBytes, String txHash, String txStr, Frame frame) {
         try {
@@ -74,7 +74,7 @@ public class ContractNewTxFromOtherModuleHandler {
 
             CoinData coinData = tx.getCoinDataInstance();
 
-            // 检查合约地址
+            // Check contract address
             List<CoinFrom> fromList = coinData.getFrom();
 
             boolean existContract = false;
@@ -91,14 +91,14 @@ public class ContractNewTxFromOtherModuleHandler {
             boolean isUnlockTx = contractFrom.getLocked() == (byte) -1;
             ProgramAccount account = frame.vm.getProgramExecutor().getAccount(contractAddressBytes, contractFrom.getAssetsChainId(), contractFrom.getAssetsId());
 
-            // 普通交易，更新nonce
+            // Regular transactions, updatingnonce
             if(!isUnlockTx) {
                 byte[] hashBytes = HexUtil.decode(txHash);
                 byte[] currentNonceBytes = Arrays.copyOfRange(hashBytes, hashBytes.length - 8, hashBytes.length);
                 account.setNonce(RPCUtil.encode(currentNonceBytes));
             }
 
-            // 更新vm balance
+            // updatevm balance
             LinkedHashMap<String, BigInteger>[] contracts = this.filterContractValue(chainId, List.of(tx));
             LinkedHashMap<String, BigInteger> contractFromValue = contracts[0];
             LinkedHashMap<String, BigInteger> contractFromLockValue = contracts[1];
@@ -108,7 +108,7 @@ public class ContractNewTxFromOtherModuleHandler {
             byte[] contractBytes;
             int assetChainId, assetId;
             ProgramExecutorImpl programExecutor = frame.vm.getProgramExecutor();
-            // 增加锁定转入
+            // Increase lock in transfer
             Set<Map.Entry<String, BigInteger>> lockTos = contractToLockValue.entrySet();
             for (Map.Entry<String, BigInteger> lockTo : lockTos) {
                 String key = lockTo.getKey();
@@ -118,7 +118,7 @@ public class ContractNewTxFromOtherModuleHandler {
                 assetId = Integer.parseInt(keySplit[2]);
                 programExecutor.getAccount(contractBytes, assetChainId, assetId).addFreeze(lockTo.getValue());
             }
-            // 增加转入
+            // Increase transfer in
             Set<Map.Entry<String, BigInteger>> _tos = contractToValue.entrySet();
             for (Map.Entry<String, BigInteger> to : _tos) {
                 String key = to.getKey();
@@ -128,7 +128,7 @@ public class ContractNewTxFromOtherModuleHandler {
                 assetId = Integer.parseInt(keySplit[2]);
                 programExecutor.getAccount(contractBytes, assetChainId, assetId).addBalance(to.getValue());
             }
-            // 扣除锁定转出
+            // Deduction lock out transfer
             Set<Map.Entry<String, BigInteger>> lockFroms = contractFromLockValue.entrySet();
             for (Map.Entry<String, BigInteger> lockFrom : lockFroms) {
                 String key = lockFrom.getKey();
@@ -138,7 +138,7 @@ public class ContractNewTxFromOtherModuleHandler {
                 assetId = Integer.parseInt(keySplit[2]);
                 programExecutor.getAccount(contractBytes, assetChainId, assetId).addFreeze(lockFrom.getValue().negate());
             }
-            // 扣除转出
+            // Deduction transfer out
             Set<Map.Entry<String, BigInteger>> _froms = contractFromValue.entrySet();
             for (Map.Entry<String, BigInteger> from : _froms) {
                 String key = from.getKey();
@@ -167,7 +167,7 @@ public class ContractNewTxFromOtherModuleHandler {
             LinkedHashMap<String, BigInteger> contractToLockValue = contracts[3];
             byte[] contractBytes;
             int assetChainId, assetId;
-            // 增加锁定转入
+            // Increase lock in transfer
             Set<Map.Entry<String, BigInteger>> lockTos = contractToLockValue.entrySet();
             for (Map.Entry<String, BigInteger> lockTo : lockTos) {
                 String key = lockTo.getKey();
@@ -175,11 +175,11 @@ public class ContractNewTxFromOtherModuleHandler {
                 contractBytes = asBytes(keySplit[0]);
                 assetChainId = Integer.parseInt(keySplit[1]);
                 assetId = Integer.parseInt(keySplit[2]);
-                // 初始化临时余额
+                // Initialize temporary balance
                 tempBalanceManager.getBalance(contractBytes, assetChainId, assetId);
                 tempBalanceManager.addLockedTempBalance(contractBytes, lockTo.getValue(), assetChainId, assetId);
             }
-            // 增加转入
+            // Increase transfer in
             Set<Map.Entry<String, BigInteger>> tos = contractToValue.entrySet();
             for (Map.Entry<String, BigInteger> to : tos) {
                 String key = to.getKey();
@@ -187,11 +187,11 @@ public class ContractNewTxFromOtherModuleHandler {
                 contractBytes = asBytes(keySplit[0]);
                 assetChainId = Integer.parseInt(keySplit[1]);
                 assetId = Integer.parseInt(keySplit[2]);
-                // 初始化临时余额
+                // Initialize temporary balance
                 tempBalanceManager.getBalance(contractBytes, assetChainId, assetId);
                 tempBalanceManager.addTempBalance(contractBytes, to.getValue(), assetChainId, assetId);
             }
-            // 扣除锁定转出
+            // Deduction lock out transfer
             Set<Map.Entry<String, BigInteger>> lockFroms = contractFromLockValue.entrySet();
             for (Map.Entry<String, BigInteger> lockFrom : lockFroms) {
                 String key = lockFrom.getKey();
@@ -199,11 +199,11 @@ public class ContractNewTxFromOtherModuleHandler {
                 contractBytes = asBytes(keySplit[0]);
                 assetChainId = Integer.parseInt(keySplit[1]);
                 assetId = Integer.parseInt(keySplit[2]);
-                // 初始化临时余额
+                // Initialize temporary balance
                 tempBalanceManager.getBalance(contractBytes, assetChainId, assetId);
                 tempBalanceManager.minusLockedTempBalance(contractBytes, lockFrom.getValue(), assetChainId, assetId);
             }
-            // 扣除转出
+            // Deduction transfer out
             Set<Map.Entry<String, BigInteger>> froms = contractFromValue.entrySet();
             for (Map.Entry<String, BigInteger> from : froms) {
                 String key = from.getKey();
@@ -211,7 +211,7 @@ public class ContractNewTxFromOtherModuleHandler {
                 contractBytes = asBytes(keySplit[0]);
                 assetChainId = Integer.parseInt(keySplit[1]);
                 assetId = Integer.parseInt(keySplit[2]);
-                // 初始化临时余额
+                // Initialize temporary balance
                 tempBalanceManager.getBalance(contractBytes, assetChainId, assetId);
                 tempBalanceManager.minusTempBalance(contractBytes, from.getValue(), assetChainId, assetId);
             }
@@ -293,7 +293,7 @@ public class ContractNewTxFromOtherModuleHandler {
             LinkedHashMap<String, BigInteger> contractToLockValue = contracts[3];
             byte[] contractBytes;
             int assetChainId, assetId;
-            // 增加转出
+            // Increase transfer out
             Set<Map.Entry<String, BigInteger>> froms = contractFromValue.entrySet();
             for (Map.Entry<String, BigInteger> from : froms) {
                 String key = from.getKey();
@@ -307,7 +307,7 @@ public class ContractNewTxFromOtherModuleHandler {
                 }
                 tempBalanceManager.addTempBalance(contractBytes, from.getValue(), assetChainId, assetId);
             }
-            // 增加锁定转出
+            // Increase lock transfer out
             Set<Map.Entry<String, BigInteger>> lockFroms = contractFromLockValue.entrySet();
             for (Map.Entry<String, BigInteger> lockFrom : lockFroms) {
                 String key = lockFrom.getKey();
@@ -321,7 +321,7 @@ public class ContractNewTxFromOtherModuleHandler {
                 }
                 tempBalanceManager.addLockedTempBalance(contractBytes, lockFrom.getValue(), assetChainId, assetId);
             }
-            // 扣除转入
+            // Deduction of transfer in
             Set<Map.Entry<String, BigInteger>> tos = contractToValue.entrySet();
             for (Map.Entry<String, BigInteger> to : tos) {
                 String key = to.getKey();
@@ -329,11 +329,11 @@ public class ContractNewTxFromOtherModuleHandler {
                 contractBytes = asBytes(keySplit[0]);
                 assetChainId = Integer.parseInt(keySplit[1]);
                 assetId = Integer.parseInt(keySplit[2]);
-                // 初始化临时余额
+                // Initialize temporary balance
                 tempBalanceManager.getBalance(contractBytes, assetChainId, assetId);
                 tempBalanceManager.minusTempBalance(contractBytes, to.getValue(), assetChainId, assetId);
             }
-            // 扣除锁定转入
+            // Deduction lock in transfer
             Set<Map.Entry<String, BigInteger>> lockTos = contractToLockValue.entrySet();
             for (Map.Entry<String, BigInteger> lockTo : lockTos) {
                 String key = lockTo.getKey();
@@ -341,7 +341,7 @@ public class ContractNewTxFromOtherModuleHandler {
                 contractBytes = asBytes(keySplit[0]);
                 assetChainId = Integer.parseInt(keySplit[1]);
                 assetId = Integer.parseInt(keySplit[2]);
-                // 初始化临时余额
+                // Initialize temporary balance
                 tempBalanceManager.getBalance(contractBytes, assetChainId, assetId);
                 tempBalanceManager.minusLockedTempBalance(contractBytes, lockTo.getValue(), assetChainId, assetId);
             }

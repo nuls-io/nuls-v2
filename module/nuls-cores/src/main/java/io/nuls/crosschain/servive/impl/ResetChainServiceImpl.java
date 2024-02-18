@@ -35,7 +35,7 @@ public class ResetChainServiceImpl implements ResetChainService {
     @Override
     public Map<String, Object> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {
 
-        //todo 验证是种子节点签名的交易（是否需要多个种子节点签名）
+        //todo Verify transactions signed by seed nodes（Do we need multiple seed node signatures）
         List<Transaction> errorList = new ArrayList<>();
         Map<String, Object> rtData = new HashMap<>(2);
         rtData.put("errorCode", "");
@@ -54,7 +54,7 @@ public class ResetChainServiceImpl implements ResetChainService {
             ErrorCode errorCode = NulsCrossChainErrorCode.DATA_ERROR;
             for (Transaction tx : txs) {
                 String txHash = tx.getHash().toHex();
-                //todo 验证是种子节点签名的交易
+                //todo Verify transactions signed by seed nodes
                 tx.getTransactionSignature();
                 Set<String> set = SignatureUtil.getAddressFromTX(tx, chainId);
                 for (String txAddress : set) {
@@ -109,7 +109,7 @@ public class ResetChainServiceImpl implements ResetChainService {
 
     @Override
     public boolean commit(int chainId, List<Transaction> txs, BlockHeader blockHeader) {
-        // 解析chain信息，如果有则覆盖，如果没有就存储（缓存和数据库）
+        // analysischainInformation, if available, overwrite; if not available, store（Cache and Database）
         Chain chain = chainManager.getChainMap().get(chainId);
         if (chain == null) {
             return false;
@@ -153,7 +153,7 @@ public class ResetChainServiceImpl implements ResetChainService {
 
     @Override
     public boolean rollback(int chainId, List<Transaction> txs, BlockHeader blockHeader) {
-        //todo 反向
+        //todo reverse
         return true;
     }
 }

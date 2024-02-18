@@ -32,16 +32,16 @@ import io.nuls.core.rpc.model.ApiModelProperty;
 /**
  * @author: Charlie
  */
-@ApiModel(name = "设置别名表单")
+@ApiModel(name = "Set alias form")
 public class SetAliasForm extends Base {
 
-    @ApiModelProperty(description = "账户地址")
+    @ApiModelProperty(description = "Account address")
     private String address;
 
-    @ApiModelProperty(description = "别名")
+    @ApiModelProperty(description = "alias")
     private String alias;
 
-    @ApiModelProperty(description = "账户密码")
+    @ApiModelProperty(description = "Account password")
     private String password;
 
     public String getAddress() {

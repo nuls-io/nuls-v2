@@ -29,7 +29,7 @@ import io.nuls.base.api.provider.BaseReq;
 /**
  * @Author: ljs
  * @Time: 2019-08-06 16:50
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class AddCrossAssetReq extends BaseReq {
     private int assetId;

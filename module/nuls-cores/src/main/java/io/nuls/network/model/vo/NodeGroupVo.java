@@ -32,35 +32,35 @@ import io.nuls.core.rpc.model.ApiModelProperty;
  * @author: lan
  * @create: 2018/11/09
  **/
-@ApiModel(name = "网络组详情")
+@ApiModel(name = "Network group details")
 public class NodeGroupVo implements Ivo {
-    @ApiModelProperty(description = "链ID")
+    @ApiModelProperty(description = "chainID")
     private int chainId;
-    @ApiModelProperty(description = "网络魔法参数")
+    @ApiModelProperty(description = "Network Magic Parameters")
     private long magicNumber;
-    @ApiModelProperty(description = "总连接数")
+    @ApiModelProperty(description = "Total number of connections")
     private int totalCount;
-    @ApiModelProperty(description = "本地网络已连接节点数")
+    @ApiModelProperty(description = "Number of connected nodes in the local network")
     private int connectCount;
-    @ApiModelProperty(description = "本地网络待接节点数")
+    @ApiModelProperty(description = "Number of local network waiting nodes")
     private int disConnectCount;
-    @ApiModelProperty(description = "本地网络入网连接节点数")
+    @ApiModelProperty(description = "Number of local network connection nodes")
     private int inCount;
-    @ApiModelProperty(description = "本地网络出网连接节点数")
+    @ApiModelProperty(description = "Number of local network outbound connection nodes")
     private int outCount;
-    @ApiModelProperty(description = "跨链网络连接节点数")
+    @ApiModelProperty(description = "Number of cross chain network connection nodes")
     private int connectCrossCount;
-    @ApiModelProperty(description = "跨链网络待接节点数")
+    @ApiModelProperty(description = "Number of waiting nodes in cross chain network")
     private int disConnectCrossCount;
-    @ApiModelProperty(description = "跨链网络入网节点数")
+    @ApiModelProperty(description = "Number of cross chain network access nodes")
     private int inCrossCount;
-    @ApiModelProperty(description = "跨链网络出网节点数")
+    @ApiModelProperty(description = "Number of outbound nodes in cross chain networks")
     private int outCrossCount;
-    @ApiModelProperty(description = "本地网络是否已工作")
+    @ApiModelProperty(description = "Is the local network working")
     private int isActive;
-    @ApiModelProperty(description = "跨链网络是否已工作")
+    @ApiModelProperty(description = "Is the cross chain network working")
     private int isCrossActive;
-    @ApiModelProperty(description = "网络组是否是主网链节点")
+    @ApiModelProperty(description = "Is the network group a primary network link node")
     private int isMoonNet;
 
     public int getChainId() {

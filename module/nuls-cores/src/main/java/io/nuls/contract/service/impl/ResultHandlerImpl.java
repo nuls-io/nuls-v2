@@ -72,16 +72,16 @@ public class ResultHandlerImpl implements ResultHanlder {
         try {
             BlockHeader currentBlockHeader = contractHelper.getBatchInfoCurrentBlockHeader(chainId);
             long blockTime = currentBlockHeader.getTime();
-            // 得到重新执行的合约结果
+            // Obtain the result of re executing the contract
             List<ContractResult> reCallResultList = this.reCall(batchExecutor, analyzerResult, chainId, preStateRoot);
-            // 处理调用失败的合约，把需要退还的NULS 生成一笔合约内部转账交易，退还给调用者
+            // Handle contracts that have failed calls and return those that need to be returnedNULS Generate an internal transfer transaction for a contract and return it to the caller
             this.handleFailedContract(chainId, analyzerResult, blockTime);
-            // 组装所有的合约结果
+            // Assemble all contract results
             List<ContractResult> finalResultList = new ArrayList<>();
             finalResultList.addAll(analyzerResult.getSuccessList());
             finalResultList.addAll(analyzerResult.getFailedSet());
             finalResultList.addAll(reCallResultList);
-            // 按接收交易的顺序升序排序
+            // Sort in ascending order of received transactions
             return finalResultList.stream().sorted(CompareTxOrderAsc.getInstance()).collect(Collectors.toList());
         } catch (IOException e) {
             Log.error(e);
@@ -121,7 +121,7 @@ public class ResultHandlerImpl implements ResultHanlder {
                 ContractTransferTransaction tx = new ContractTransferTransaction();
                 tx.setCoinDataObj(coinData);
                 tx.setTxDataObj(txData);
-                // 合约内部转账交易的时间的偏移量，用于排序
+                // The offset of the time for internal transfer transactions within the contract, used for sorting
                 //tx.setTime(blockTime + orginTx.getOrder());
                 tx.setTime(blockTime);
 
@@ -139,7 +139,7 @@ public class ResultHandlerImpl implements ResultHanlder {
     }
 
     private List<ContractResult> reCall(ProgramExecutor batchExecutor, AnalyzerResult analyzerResult, int chainId, String preStateRoot) throws NulsException {
-        // 重新执行合约
+        // Re execute the contract
         List<ContractResult> list = analyzerResult.getReCallTxList();
         List<ContractWrapperTransaction> collectTxs = list.stream().sorted(CompareTxOrderAsc.getInstance()).map(c -> c.getTx()).collect(Collectors.toList());
         List<ContractResult> resultList = contractCaller.reCallTx(batchExecutor, collectTxs, chainId, preStateRoot);

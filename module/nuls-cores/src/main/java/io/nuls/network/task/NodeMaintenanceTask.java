@@ -46,7 +46,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 /**
- * 节点维护任务
+ * Node maintenance tasks
  *
  * @author: ln
  * @date: 2018/12/8
@@ -78,9 +78,9 @@ public class NodeMaintenanceTask implements Runnable {
     private void process(NodeGroup nodeGroup, boolean isCross) {
         if (isCross) {
             if (nodeGroup.isMoonNode()) {
-                //主网节点，不用判断，主网卫星链不会存在高度0的情况
+                //Main network node, no need to judge, there will be no height in the main network satellite chain0The situation
             } else {
-                //看跨链节点的高度是否不为0
+                //Check if the height of cross chain nodes is not0
                 if (!nodeGroup.isHadBlockHeigh()) {
                     BlockRpcService blockRpcService = SpringLiteContext.getBean(BlockRpcServiceImpl.class);
                     BestBlockInfo bestBlockInfo = blockRpcService.getBestBlockHeader(nodeGroup.getChainId());
@@ -153,7 +153,7 @@ public class NodeMaintenanceTask implements Runnable {
         Collection<Node> connectedNodes = nodeGroup.getConnectedNodes(isCross);
         int maxOutCount = isCross ? nodeGroup.getMaxCrossOut() : nodeGroup.getMaxOut();
         if (connectedNodes.size() >= maxOutCount) {
-            //进行种子节点的断链
+            //Break the chain of seed nodes
             nodeGroup.stopConnectedSeeds(isCross);
             return null;
         }
@@ -182,7 +182,7 @@ public class NodeMaintenanceTask implements Runnable {
             }
         }
 
-        //最大需要连接的数量 大于 可用连接数的时候，直接返回可用连接数，否则进行选择性返回
+        //Maximum number of connections required greater than When there are available connections, return the available connections directly; otherwise, perform selective return
         int maxCount = maxOutCount - connectedNodes.size();
         if (nodeList.size() < maxCount) {
             return nodeList;

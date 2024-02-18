@@ -5,7 +5,7 @@ import io.nuls.base.api.provider.BaseReq;
 /**
  * @Author: zhoulijun
  * @Time: 2019-07-19 16:18
- * @Description: 删除多签账户
+ * @Description: Delete multiple signed accounts
  */
 public class RemoveMultiSignAccountReq extends BaseReq {
 

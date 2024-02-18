@@ -38,28 +38,28 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * 系统默认的服务拦截器
+ * System default service interceptor
  * System default service interceptor.
  *
  * @author Niels
  */
 public class ModularServiceMethodInterceptor implements MethodInterceptor {
     /**
-     * 线程安全的拦截器执行进度标识
+     * Thread safe interceptor execution progress identification
      * Thread-safe interceptors perform progress identification.
      */
     private ThreadLocal<Integer> threadLocal = new ThreadLocal<>();
 
     /**
-     * 拦截方法
+     * interceptor method
      * Intercept method
      *
-     * @param obj         方法所属对象/Method owner
-     * @param method      方法定义/Method definition
-     * @param params      方法参数列表/Method parameter list
-     * @param methodProxy 方法代理器
-     * @return 返回拦截的方法的返回值，可以对该值进行处理和替换/Returns the return value of the intercepting method, which can be processed and replaced.
-     * @throws Throwable 该方法可能抛出异常，请谨慎处理/This method may throw an exception, handle with care.
+     * @param obj         Object to which the method belongs/Method owner
+     * @param method      Method definition/Method definition
+     * @param params      Method parameter list/Method parameter list
+     * @param methodProxy Method proxy
+     * @return The return value of the intercepted method can be processed and replaced/Returns the return value of the intercepting method, which can be processed and replaced.
+     * @throws Throwable This method may throw exceptions, please handle with caution/This method may throw an exception, handle with care.
      */
     @Override
     public Object intercept(Object obj, Method method, Object[] params, MethodProxy methodProxy) throws Throwable {
@@ -78,15 +78,15 @@ public class ModularServiceMethodInterceptor implements MethodInterceptor {
     }
 
     /**
-     * 实际的拦截方法
+     * Actual interception methods
      * The actual intercept method
      *
-     * @param obj         方法所属对象/Method owner
-     * @param method      方法定义/Method definition
-     * @param params      方法参数列表/Method parameter list
-     * @param methodProxy 方法代理器
-     * @return 返回拦截的方法的返回值，可以对该值进行处理和替换/Returns the return value of the intercepting method, which can be processed and replaced.
-     * @throws Throwable 该方法可能抛出异常，请谨慎处理/This method may throw an exception, handle with care.
+     * @param obj         Object to which the method belongs/Method owner
+     * @param method      Method definition/Method definition
+     * @param params      Method parameter list/Method parameter list
+     * @param methodProxy Method proxy
+     * @return The return value of the intercepted method can be processed and replaced/Returns the return value of the intercepting method, which can be processed and replaced.
+     * @throws Throwable This method may throw exceptions, please handle with caution/This method may throw an exception, handle with care.
      */
     private Object doIntercept(Object obj, Method method, Object[] params, MethodProxy methodProxy) throws Throwable {
         List<Annotation> annotationList = new ArrayList<>();
@@ -104,12 +104,12 @@ public class ModularServiceMethodInterceptor implements MethodInterceptor {
     }
 
     /**
-     * 组装拦截器需要的注解实例列表
+     * List of annotation instances required for assembling interceptors
      * A list of annotated instances needed to assemble the interceptor.
      *
-     * @param annotationList 全部注解实例列表/Full annotation instance list.
-     * @param clazz          方法所属对象的类型/The type of the object that the method belongs to.
-     * @param method         方法定义/Method definition
+     * @param annotationList List of all annotated instances/Full annotation instance list.
+     * @param clazz          The type of object to which the method belongs/The type of the object that the method belongs to.
+     * @param method         Method definition/Method definition
      */
     private void fillAnnotationList(List<Annotation> annotationList, Class clazz, Method method) {
         Set<Class> classSet = new HashSet<>();

@@ -32,7 +32,7 @@ import io.nuls.core.rpc.model.ApiModelProperty;
 import java.math.BigInteger;
 
 /**
- * 组装交易数据统一处理对象
+ * Unified processing objects for assembling transaction data
  * @author: Charlie
  * @date: 2019/07/18
  */
@@ -40,12 +40,12 @@ import java.math.BigInteger;
 public class CoinDTO extends BaseCoinDTO implements Cloneable {
 
     /**
-     * address对应的密码，用于签名
+     * addressCorresponding password for signing
      */
-    @ApiModelProperty(description = "转出账户(from)的密码, 组装接收方(to)数据时忽略", required = false)
+    @ApiModelProperty(description = "Transfer out of account(from)Password for, Assembly recipient(to)Ignoring data", required = false)
     private String password;
 
-    @ApiModelProperty(description = "解锁时间, -1为一直锁定, 0为不锁定(默认)", required = false)
+    @ApiModelProperty(description = "Unlock time, -1To keep locked, 0To not lock(default)", required = false)
     private long lockTime = 0;
 
     public CoinDTO() {

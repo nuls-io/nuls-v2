@@ -5,7 +5,7 @@ import io.nuls.base.api.provider.BaseReq;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-26 15:46
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class GetAgentInfoReq extends BaseReq {
 

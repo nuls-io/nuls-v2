@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 共识模块RPC接口实现类
+ * Consensus moduleRPCInterface implementation class
  * Consensus Module RPC Interface Implementation Class
  *
  * @author tag
@@ -46,7 +46,7 @@ public class BlockServiceImpl implements BlockService {
     private BlockValidator blockValidator;
 
     /**
-     * 缓存最新区块
+     * Cache the latest block
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -77,7 +77,7 @@ public class BlockServiceImpl implements BlockService {
     }
 
     /**
-     * 链分叉区块回滚
+     * Chain fork block rollback
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -134,7 +134,7 @@ public class BlockServiceImpl implements BlockService {
     }
 
     /**
-     * 验证区块正确性
+     * Verify block correctness
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -148,7 +148,7 @@ public class BlockServiceImpl implements BlockService {
         }
         int chainId = dto.getChainId();
         /*
-         * 0区块下载中，1接收到最新区块
+         * 0In block downloading,1Received the latest block
          * */
         boolean isDownload = (dto.getDownload() == 0);
         String blockHex = dto.getBlock();

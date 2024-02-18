@@ -10,7 +10,7 @@ import io.nuls.core.core.annotation.Autowired;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-20 10:35
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public abstract class BaseAccountCase<T,P> extends BaseTestCase<T,P> {
 

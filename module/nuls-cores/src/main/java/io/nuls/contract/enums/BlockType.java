@@ -31,7 +31,7 @@ import java.util.Map;
  * @date: 2019-09-07
  */
 public enum BlockType {
-    // 打包区块 - 0, 验证区块 - 1
+    // Packaging blocks - 0, Verify Block - 1
     PACKAGE_BLOCK(0),
     VERIFY_BLOCK(1);
 

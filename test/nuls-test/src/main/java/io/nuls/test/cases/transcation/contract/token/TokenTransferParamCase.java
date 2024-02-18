@@ -42,7 +42,7 @@ public class TokenTransferParamCase extends CallContractParamCase {
 
     @Override
     public String title() {
-        return "token转账参数";
+        return "tokenTransfer parameters";
     }
 
     @Override

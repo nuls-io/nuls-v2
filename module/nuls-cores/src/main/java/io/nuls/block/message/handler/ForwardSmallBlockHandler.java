@@ -44,11 +44,11 @@ import static io.nuls.block.constant.CommandConstant.FORWARD_SMALL_BLOCK_MESSAGE
 import static io.nuls.block.constant.CommandConstant.GET_SMALL_BLOCK_MESSAGE;
 
 /**
- * 处理收到的{@link HashMessage},用于区块的广播与转发
+ * Process received{@link HashMessage},Broadcasting and forwarding for blocks
  *
  * @author captain
  * @version 1.0
- * @date 18-11-14 下午4:23
+ * @date 18-11-14 afternoon4:23
  */
 @Component("ForwardSmallBlockHandlerV1")
 public class ForwardSmallBlockHandler implements MessageProcessor {
@@ -78,11 +78,11 @@ public class ForwardSmallBlockHandler implements MessageProcessor {
             nodes.add(nodeId);
             logger.debug("add OrphanBlockRelatedNodes, blockHash-{}, nodeId-{}", blockHash, nodeId);
         }
-        //1.已收到完整区块,丢弃
+        //1.Received complete block,discard
         if (BlockForwardEnum.COMPLETE.equals(status)) {
             return;
         }
-        //2.已收到部分区块,还缺失交易信息,发送HashListMessage到源节点
+        //2.Received partial blocks,Transaction information is still missing,sendHashListMessageTo source node
         if (BlockForwardEnum.INCOMPLETE.equals(status) && !context.getStatus().equals(StatusEnum.SYNCHRONIZING)) {
             CachedSmallBlock block = SmallBlockCacher.getCachedSmallBlock(chainId, blockHash);
             if (block == null) {
@@ -99,7 +99,7 @@ public class ForwardSmallBlockHandler implements MessageProcessor {
             TxGroupRequestor.addTask(chainId, blockHash.toString(), task);
             return;
         }
-        //3.未收到区块
+        //3.Block not received
         if (BlockForwardEnum.EMPTY.equals(status)) {
             HashMessage request = new HashMessage();
             request.setRequestHash(blockHash);

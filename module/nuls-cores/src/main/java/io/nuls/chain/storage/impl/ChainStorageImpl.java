@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 关于链的所有操作：增删改查 key =chainId, value = BlockChain
+ * All operations on the chain：Add, delete, modify, and check key =chainId, value = BlockChain
  * All operations on the chain: Save, delete, update, query
  *
  * @author tangyi
@@ -26,7 +26,7 @@ public class ChainStorageImpl extends BaseStorage implements ChainStorage, InitD
     private final String TBL = "block_chain";
 
     /**
-     * 该方法在所有属性被设置之后调用，用于辅助对象初始化
+     * This method is called after all properties are set, and is used to initialize auxiliary objects
      * This method is invoked after all properties are set, and is used to assist object initialization.
      */
     @Override
@@ -35,7 +35,7 @@ public class ChainStorageImpl extends BaseStorage implements ChainStorage, InitD
     }
 
     /**
-     * 保存链到数据库
+     * Save Chain to Database
      * Save BlockChain to database
      *
      * @param key        Chain ID
@@ -48,7 +48,7 @@ public class ChainStorageImpl extends BaseStorage implements ChainStorage, InitD
     }
 
     /**
-     * 更新链信息
+     * Update chain information
      * Update BlockChain
      *
      * @param key        Chain ID
@@ -70,7 +70,7 @@ public class ChainStorageImpl extends BaseStorage implements ChainStorage, InitD
     }
 
     /**
-     * 从数据库彻底删除链
+     * Completely remove the chain from the database
      * Delete BlockChain in database
      *
      * @param key Chain ID
@@ -82,7 +82,7 @@ public class ChainStorageImpl extends BaseStorage implements ChainStorage, InitD
     }
 
     /**
-     * 根据序号获取链
+     * Retrieve chain based on serial number
      * Get the chain according to the ID
      *
      * @param key Chain ID

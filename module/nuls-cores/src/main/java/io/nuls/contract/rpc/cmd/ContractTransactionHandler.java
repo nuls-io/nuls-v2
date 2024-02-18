@@ -30,11 +30,11 @@ public class ContractTransactionHandler extends BaseCmd {
 
     @CmdAnnotation(cmd = CREATE_VALIDATOR, version = 1.0, description = "create contract validator")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链ID"),
-        @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "交易序列化字符串")
+        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "chainID"),
+        @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "Transaction serialization string")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-        @Key(name = "value", valueType = Boolean.class, description = "是否验证成功"),
+    @ResponseData(name = "Return value", description = "Return aMapobject", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+        @Key(name = "value", valueType = Boolean.class, description = "Verified successfully"),
     }))
     public Response createValidator(Map<String, Object> params) {
         try {
@@ -61,11 +61,11 @@ public class ContractTransactionHandler extends BaseCmd {
 
     @CmdAnnotation(cmd = CALL_VALIDATOR, version = 1.0, description = "call contract validator")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链ID"),
-        @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "交易序列化字符串")
+        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "chainID"),
+        @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "Transaction serialization string")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-        @Key(name = "value", valueType = Boolean.class, description = "是否验证成功"),
+    @ResponseData(name = "Return value", description = "Return aMapobject", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+        @Key(name = "value", valueType = Boolean.class, description = "Verified successfully"),
     }))
     public Response callValidator(Map<String, Object> params) {
         try {
@@ -92,11 +92,11 @@ public class ContractTransactionHandler extends BaseCmd {
 
     @CmdAnnotation(cmd = DELETE_VALIDATOR, version = 1.0, description = "delete contract validator")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链ID"),
-        @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "交易序列化字符串")
+        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "chainID"),
+        @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "Transaction serialization string")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-        @Key(name = "value", valueType = Boolean.class, description = "是否验证成功"),
+    @ResponseData(name = "Return value", description = "Return aMapobject", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+        @Key(name = "value", valueType = Boolean.class, description = "Verified successfully"),
     }))
     public Response deleteValidator(Map<String, Object> params) {
         try {

@@ -29,7 +29,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * 握手确认
+ * Handshake confirmation
  * Handshake confirmation
  *
  * @author tangyi

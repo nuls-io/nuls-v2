@@ -48,7 +48,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 捣乱数据测试
+ * Tampering data testing
  * Created by ljs on 2019/01/10.
  */
 public class CmdWrongDataTest {
@@ -59,7 +59,7 @@ public class CmdWrongDataTest {
     String address = "tNULSeBaMfi17CxRHVqFZbSFGYeyRLHWw2ctho";
     String addressTo = "tNULSeBaMmp4U2k653V5FmmPf4HDECWK2ExYVr";
     /**
-     * 校验孤儿交易，校验nonce双花
+     * Verify orphan transactions, verifynoncehoneysuckle
      * @throws Exception
      */
     @Test
@@ -70,7 +70,7 @@ public class CmdWrongDataTest {
         // Version information ("1.1" or 1.1 is both available)
 //        Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
 //        String nonce =  ((Map)((Map)response.getResponseData()).get("getNonce")).get("nonce").toString();
-        //封装交易执行
+        //Encapsulation transaction execution
         Transaction tx = new Transaction();
         CoinData coinData = new CoinData();
         CoinFrom coinFrom = new CoinFrom();
@@ -98,7 +98,7 @@ public class CmdWrongDataTest {
 
 
     /**
-     * 测试批量校验
+     * Test batch verification
      * @throws Exception
      */
     @Test
@@ -109,7 +109,7 @@ public class CmdWrongDataTest {
         // Version information ("1.1" or 1.1 is both available)
 //        Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
 //        String nonce =  ((Map)((Map)response.getResponseData()).get("getNonce")).get("nonce").toString();
-        //封装交易执行
+        //Encapsulation transaction execution
         Transaction tx = new Transaction();
         CoinData coinData = new CoinData();
         CoinFrom coinFrom = new CoinFrom();

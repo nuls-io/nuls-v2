@@ -40,7 +40,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 交易工具类
+ * Trading tools
  * Transaction Tool Class
  *
  * @author tag
@@ -62,7 +62,7 @@ public class TxUtil {
     private static ChainManager chainManager;
 
     /**
-     * 友链协议跨链交易转主网协议跨链交易
+     * Friendly chain protocol cross chain transaction to main network protocol cross chain transaction
      * Friendly Chain Protocol Cross-Chain Transaction to Main Network Protocol Cross-Chain Transaction
      */
     public static Transaction friendConvertToMain(Chain chain, Transaction friendCtx, int ctxType) throws NulsException, IOException {
@@ -70,7 +70,7 @@ public class TxUtil {
     }
 
     /**
-     * 友链协议跨链交易转主网协议跨链交易
+     * Friendly chain protocol cross chain transaction to main network protocol cross chain transaction
      * Friendly Chain Protocol Cross-Chain Transaction to Main Network Protocol Cross-Chain Transaction
      */
     public static Transaction friendConvertToMain(Chain chain, Transaction friendCtx, int ctxType, boolean needSign) throws NulsException, IOException {
@@ -78,12 +78,12 @@ public class TxUtil {
         mainCtx.setRemark(friendCtx.getRemark());
         mainCtx.setTime(friendCtx.getTime());
         mainCtx.setTxData(friendCtx.getTxData());
-        //还原并重新结算CoinData
+        //Restore and RechargeCoinData
         CoinData realCoinData = friendCtx.getCoinDataInstance();
         restoreCoinData(realCoinData);
         mainCtx.setCoinData(realCoinData.serialize());
         int fromChainId = AddressTool.getChainIdByAddress(realCoinData.getFrom().get(0).getAddress());
-        //如果是发起链则需要重构txData，将发起链的交易hash设置到txData中
+        //If it is the initiating chain, it needs to be refactoredtxDataInitiate chain transactionshashSet totxDatain
         if(chain.getChainId() == fromChainId){
             CrossTransferData crossTransferData = new CrossTransferData();
             crossTransferData.parse(friendCtx.getTxData(),0);
@@ -96,7 +96,7 @@ public class TxUtil {
             mainCtx.setTransactionSignature(friendCtx.getTransactionSignature());
         }
         /*
-        //如果是新建跨链交易则直接用账户信息签名，否则从原始签名中获取签名
+        //If creating a new cross chain transaction, directly sign with account information; otherwise, obtain the signature from the original signature
         TransactionSignature transactionSignature = new TransactionSignature();
         List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
         int fromChainId = AddressTool.getChainIdByAddress(realCoinData.getFrom().get(0).getAddress());
@@ -116,12 +116,12 @@ public class TxUtil {
             mainCtx.setTransactionSignature(friendCtx.getTransactionSignature());
         }*/
 
-        chain.getLogger().debug("本链协议跨链交易转主网协议跨链交易完成!");
+        chain.getLogger().debug("The cross chain transaction of this chain protocol is transferred to the main network protocol, and the cross chain transaction is completed!");
         return mainCtx;
     }
 
     /**
-     * 主网协议跨链交易转友链协议跨链交易
+     * Main network protocol cross chain transaction to friend chain protocol cross chain transaction
      * Main Network Protocol Cross-Chain Transaction Transfer Chain Protocol Cross-Chain Transaction
      */
     public static Transaction mainConvertToFriend(Transaction mainCtx, int ctxType) {
@@ -134,7 +134,7 @@ public class TxUtil {
     }
 
     /**
-     * 组装验证人变更交易
+     * Assembly Verifier Change Transaction
      * Assemble Verifier Change Transaction
      */
     public static Transaction createVerifierChangeTx(List<String> registerAgentList, List<String> cancelAgentList, long time, int chainId) throws IOException {
@@ -152,7 +152,7 @@ public class TxUtil {
     }
 
     /**
-     * 组装验证人初始化交易
+     * Assembly validator initializes transaction
      * Assemble Verifier Change Transaction
      */
     public static Transaction createVerifierInitTx(List<String> verifierList, long time, int registerChainId) throws IOException {
@@ -164,7 +164,7 @@ public class TxUtil {
     }
 
     /**
-     * 组装注册跨链变更交易交易
+     * Assembly registration cross chain change transaction
      * Assemble Verifier Change Transaction
      */
     public static Transaction createCrossChainChangeTx(long time, int registerChainId, int type) throws IOException {
@@ -177,7 +177,7 @@ public class TxUtil {
     }
 
     /**
-     * 组装注册跨链变更交易交易
+     * Assembly registration cross chain change transaction
      * Assemble Verifier Change Transaction
      */
     public static Transaction createCrossChainChangeTx(ChainInfo chainInfo, long time, int registerChainId, int type) throws IOException {
@@ -192,7 +192,7 @@ public class TxUtil {
     }
 
     /**
-     * 组装注册跨链变更交易交易
+     * Assembly registration cross chain change transaction
      * Assemble Verifier Change Transaction
      */
     public static Transaction createCrossChainChangeTx(List<ChainInfo> chainInfoList, long time, int registerChainId, int type) throws IOException {
@@ -204,7 +204,7 @@ public class TxUtil {
     }
 
     /**
-     * 验证人变更交易处理时需要等待高度变更
+     * Verifier change transaction processing requires waiting for high-level changes
      * When the verifier changes the transaction processing, it needs to wait for the height change
      */
     public static void verifierChangeWait(Chain chain, long height) {
@@ -218,7 +218,7 @@ public class TxUtil {
     }
 
     /**
-     * 本链发起的跨链交易被打包之后，发起拜占庭验证
+     * After the cross chain transactions initiated by this chain are packaged, Byzantine verification is initiated
      * After the cross chain transaction initiated by this chain is packaged, Byzantine verification is initiated
      */
     @SuppressWarnings("unchecked")
@@ -235,13 +235,13 @@ public class TxUtil {
 
             NulsHash convertHash = hash;
             if (!config.isMainNet()) {
-                //txData中存储来源链交易hash和nuls主链交易hash，如果发起链是nuls主链，来源链hash和nuls主链hash相同。
+                //txDataIntermediate storage source chain transactionshashandnulsMain chain transactionshashIf the initiating chain isnulsMain chain, source chainhashandnulsMain chainhashSame.
                 Transaction mainCtx = TxUtil.friendConvertToMain(chain, ctx, TxType.CROSS_CHAIN);
                 convertHash = mainCtx.getHash();
                 convertCtxService.save(hash, mainCtx, chainId);
             }
             CtxStatusPO ctxStatusPO = new CtxStatusPO(ctx, TxStatusEnum.UNCONFIRM.getStatus());
-            //如果本节点是共识节点，则需要签名并做拜占庭，否则只需广播本地收集到的签名信息
+            //If this node is a consensus node, it needs to be signed and Byzantine, otherwise only the locally collected signature information needs to be broadcasted
             if (!localPackers.isEmpty()) {
                 BroadCtxSignMessage message = new BroadCtxSignMessage();
                 message.setLocalHash(hash);
@@ -252,7 +252,7 @@ public class TxUtil {
                     List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
                     transactionSignature.setP2PHKSignatures(p2PHKSignatures);
                 }
-                //循环本地所有打包地址
+                //Loop all local packaging addresses
                 for (String packerAddress : localPackers) {
                     if (!chain.getVerifierList().contains(packerAddress)) {
                         continue;
@@ -276,9 +276,9 @@ public class TxUtil {
             } else {
                 ctxStatusService.save(hash, ctxStatusPO, chainId);
             }
-            //将收到的签名消息加入消息队列
+            //Add the received signed message to the message queue
             if (chain.getFutureMessageMap().containsKey(hash)) {
-                chain.getLogger().debug("将本跨链交易:{}已收到的签名放入消息队列中", hash.toHex());
+                chain.getLogger().debug("Transfer this cross chain transaction:{}Received signature placed in message queue", hash.toHex());
                 chain.getSignMessageByzantineQueue().addAll(chain.getFutureMessageMap().remove(hash));
             }
         } catch (NulsException | IOException e) {
@@ -288,7 +288,7 @@ public class TxUtil {
 
 
     /**
-     * 重置平行链存储的主链验证人列表
+     * Reset the main chain validator list for parallel chain storage
      * Cross-Chain Transaction Processing
      */
     @SuppressWarnings("unchecked")
@@ -297,7 +297,7 @@ public class TxUtil {
         NulsHash hash = ctx.getHash();
         String hashHex = hash.toHex();
         /*
-        判断本节点是否为共识节点，如果为共识节点则签名，如果不为共识节点则广播该交易
+        Determine whether this node is a consensus node. If it is a consensus node, sign it. If it is not a consensus node, broadcast the transaction
         */
         Map packerInfo;
         List<String> verifierList = chain.getVerifierList();
@@ -308,10 +308,10 @@ public class TxUtil {
         message.setLocalHash(hash);
         CtxStatusPO ctxStatusPO = new CtxStatusPO(ctx, TxStatusEnum.UNCONFIRM.getStatus());
         boolean byzantinePass = false;
-        //验证人变更，减少的验证人不签名
+        //Verifier changes, reduced verifiers do not sign
         boolean sign = verifierList.contains(address);
         if (sign) {
-            chain.getLogger().info("本节点为共识节点，对跨链交易签名,Hash:{}", hashHex);
+            chain.getLogger().info("This node is a consensus node that signs cross chain transactions,Hash:{}", hashHex);
             P2PHKSignature p2PHKSignature;
             try {
                 p2PHKSignature = AccountCall.signDigest(address, password, hash.getBytes());
@@ -324,18 +324,18 @@ public class TxUtil {
                 byzantinePass = MessageUtil.verifierInitLocalByzantine(chain, ctx, signature, verifierList,hash,1F);
             } catch (Exception e) {
                 chain.getLogger().error(e);
-                chain.getLogger().error("签名错误!,hash:{}", hashHex);
+                chain.getLogger().error("Signature error!,hash:{}", hashHex);
                 return;
             }
             if (!chain.getWaitBroadSignMap().keySet().contains(hash)) {
                 chain.getWaitBroadSignMap().put(hash, new HashSet<>());
             }
             /*
-            保存并广播该交易
+            Save and broadcast the transaction
             */
             chain.getWaitBroadSignMap().get(hash).add(new WaitBroadSignMessage(null, message));
         }else{
-            chain.getLogger().debug("本节点不是共识节点，不对交易此交易进行签名,Hash:{}",hashHex);
+            chain.getLogger().debug("This node is not a consensus node and will not sign this transaction,Hash:{}",hashHex);
             ctxStatusService.save(hash, ctxStatusPO, chainId);
         }
         if (byzantinePass) {
@@ -350,7 +350,7 @@ public class TxUtil {
 
 
     /**
-     * 跨链交易处理
+     * Cross chain transaction processing
      * Cross-Chain Transaction Processing
      */
     @SuppressWarnings("unchecked")
@@ -359,7 +359,7 @@ public class TxUtil {
         NulsHash hash = ctx.getHash();
         String hashHex = hash.toHex();
         /*
-        判断本节点是否为共识节点，如果为共识节点则签名，如果不为共识节点则广播该交易
+        Determine whether this node is a consensus node. If it is a consensus node, sign it. If it is not a consensus node, broadcast the transaction
         */
         Map packerInfo = ConsensusCall.getPackerInfo(chain);
         List<String> localPackers = (List<String>) packerInfo.get(ParamConstant.PARAM_ADDRESS + "es");
@@ -375,13 +375,13 @@ public class TxUtil {
 
         CtxStatusPO ctxStatusPO = new CtxStatusPO(ctx, TxStatusEnum.UNCONFIRM.getStatus());
         boolean byzantinePass = false;
-        //验证人变更，减少的验证人不签名
+        //Verifier changes, reduced verifiers do not sign
         boolean sign = !StringUtils.isBlank(address) && verifierList.contains(address);
         if (sign && cancelList != null) {
             sign = !cancelList.contains(address);
         }
         if (sign) {
-            chain.getLogger().info("本节点为共识节点，对跨链交易签名,Hash:{}", hashHex);
+            chain.getLogger().info("This node is a consensus node that signs cross chain transactions,Hash:{}", hashHex);
             TransactionSignature signature = new TransactionSignature();
             HashSet<WaitBroadSignMessage> messageList = new HashSet<>();
             List<P2PHKSignature> p2PHKSignatureList = new ArrayList<>();
@@ -396,7 +396,7 @@ public class TxUtil {
                     p2PHKSignatureList.add(p2PHKSignature);
                 } catch (Exception e) {
                     chain.getLogger().error(e);
-                    chain.getLogger().error("签名错误!,hash:{}", hashHex);
+                    chain.getLogger().error("Signature error!,hash:{}", hashHex);
                     return;
                 }
             }
@@ -406,11 +406,11 @@ public class TxUtil {
                 byzantinePass = MessageUtil.signByzantineInChain(chain, ctx, signature, verifierList, hash);
             } catch (Exception e) {
                 chain.getLogger().error(e);
-                chain.getLogger().error("签名错误!,hash:{}", hashHex);
+                chain.getLogger().error("Signature error!,hash:{}", hashHex);
                 return;
             }
             /*
-            保存并广播该交易
+            Save and broadcast the transaction
             */
             if (!chain.getWaitBroadSignMap().keySet().contains(hash)) {
                 chain.getWaitBroadSignMap().put(hash, messageList);
@@ -435,11 +435,11 @@ public class TxUtil {
     }
 
     /**
-     * 签名并广播交易（同步过程中的跨链交易只签名广播不做其他处理）
+     * Sign and broadcast the transaction（Cross chain transactions during synchronization are only signed and broadcasted without any other processing）
      * Sign and broadcast transactions
      *
-     * @param chain 链信息
-     * @param ctx   跨链交易
+     * @param chain Chain information
+     * @param ctx   Cross chain transactions
      */
     @SuppressWarnings("unchecked")
     public static void signAndBroad(Chain chain, Transaction ctx) {
@@ -462,7 +462,7 @@ public class TxUtil {
         Transaction realTx = ctx;
         try {
             if (ctx.getType() == TxType.CROSS_CHAIN) {
-                //如果不是主网则转为主网协议跨链交易
+                //If it is not the main network, switch to the main network protocol for cross chain transactions
                 if (!config.isMainNet()) {
                     realTx = TxUtil.friendConvertToMain(chain, ctx, TxType.CROSS_CHAIN);
                 }
@@ -477,11 +477,11 @@ public class TxUtil {
 
 
     /**
-     * 查询跨链交易处理状态
+     * Query the status of cross chain transaction processing
      */
     public static byte getCtxState(Chain chain, NulsHash ctxHash) {
         int chainId = chain.getChainId();
-        //查看本交易是否已经存在查询处理成功记录，如果有直接返回，否则需向主网节点验证
+        //Check if there is already a record of successful query processing in this transaction. If so, return it directly. Otherwise, verify with the main network node
         if (ctxStateService.get(ctxHash.getBytes(), chainId)) {
             return CtxStateEnum.CONFIRMED.getStatus();
         }
@@ -507,7 +507,7 @@ public class TxUtil {
             if (!chain.getCtxStateMap().containsKey(requestHash)) {
                 chain.getCtxStateMap().put(requestHash, new ArrayList<>());
             }
-            //统计处理结果
+            //Statistical processing results
             byte result = statisticsCtxState(chain, linkedChainId, requestHash);
             if (result == CtxStateEnum.CONFIRMED.getStatus()) {
                 ctxStateService.save(ctxHash.getBytes(), chainId);
@@ -562,11 +562,11 @@ public class TxUtil {
 
 
     /**
-     * 还原本链协议CoinData
+     * Restore this chain protocolCoinData
      * Restore the Chain Protocol CoinData
      */
     private static void restoreCoinData(CoinData coinData) {
-        //资产与手续费 key:assetChainId_assetId   value:from中该资产 - to中该资产总额
+        //Assets and handling fees key:assetChainId_assetId   value:fromIn this asset - toThe total amount of this asset
         Map<String, BigInteger> assetMap = new HashMap<>(NulsCrossChainConstant.INIT_CAPACITY_16);
         String key;
         String mainKey = config.getMainChainId() + "_" + config.getMainAssetId();
@@ -608,7 +608,7 @@ public class TxUtil {
     }
 
     /**
-     * 跨链交易签名拜占庭验证
+     * Cross chain transaction signature Byzantine verification
      * Byzantine Verification of Cross-Chain Transaction Signature
      */
     public static boolean signByzantineVerify(Chain chain, Transaction ctx, List<String> verifierList, int byzantineCount, int verifierChainId) throws NulsException {
@@ -619,12 +619,12 @@ public class TxUtil {
             chain.getLogger().error(e);
             throw e;
         }
-        //由于在3505754高度之前又验证人列表丢失的bug，所以在此高度之前只要有5个种子节点签名的交易就可以验证通过
+        //Due to the presence of3505754Verified that the list of people was lost before the height was reachedbugSo before this height, as long as there is5A transaction signed by a seed node can be verified as successful
         if (ctx.getBlockHeight() > 3505754 && transactionSignature.getP2PHKSignatures().size() < byzantineCount) {
-            chain.getLogger().error("跨链交易签名数量小于拜占庭数量，Hash:{},signCount:{},byzantineCount:{}", ctx.getHash().toHex(), transactionSignature.getP2PHKSignatures().size(), byzantineCount);
+            chain.getLogger().error("The number of cross chain transaction signatures is less than the number of Byzantine signatures,Hash:{},signCount:{},byzantineCount:{}", ctx.getHash().toHex(), transactionSignature.getP2PHKSignatures().size(), byzantineCount);
             return false;
         }
-        chain.getLogger().debug("当前验证人列表：{}", verifierList.toString());
+        chain.getLogger().debug("Current Verifier List：{}", verifierList.toString());
         Iterator<P2PHKSignature> iterator = transactionSignature.getP2PHKSignatures().iterator();
         int passCount = 0;
         Set<String> passedAddress = new HashSet<>();
@@ -641,12 +641,12 @@ public class TxUtil {
                 }
             }
         }
-        //由于在3505754高度之前又验证人列表丢失的bug，所以在此高度之前只要有5个种子节点签名的交易就可以验证通过
+        //Due to the presence of3505754Verified that the list of people was lost before the height was reachedbugSo before this height, as long as there is5A transaction signed by a seed node can be verified as successful
         if (ctx.getBlockHeight() <= 3505754 && passCount == 5) {
             return true;
         }
         if (passCount < byzantineCount ) {
-            chain.getLogger().error("跨链交易签名验证通过数小于拜占庭数量，Hash:{},passCount:{},byzantineCount:{}", ctx.getHash().toHex(), passCount, byzantineCount);
+            chain.getLogger().error("The number of cross chain transaction signature verifications passed is less than the Byzantine number,Hash:{},passCount:{},byzantineCount:{}", ctx.getHash().toHex(), passCount, byzantineCount);
             return false;
         }
         return true;

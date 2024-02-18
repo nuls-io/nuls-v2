@@ -94,11 +94,11 @@ public class AccountContractCallHelper {
             }
         }
         int addrChainId = AddressTool.getChainIdByAddress(coinFrom.getAddress());
-        //黑洞地址不能发起转账
+        //Black hole address cannot initiate transfer
         if (AddressTool.isBlackHoleAddress(NulsConfig.BLACK_HOLE_PUB_KEY, addrChainId, coinFrom.getAddress())) {
             return Result.getFailed(AccountErrorCode.ADDRESS_TRANSFER_BAN);
         }
-        // 发送方from中地址对应的链id必须是发起链的id
+        // SenderfromThe chain corresponding to the middle addressidMust be the initiator of the chainid
         if (chainId != addrChainId) {
             return Result.getFailed(AccountErrorCode.CHAINID_ERROR);
         }
@@ -108,7 +108,7 @@ public class AccountContractCallHelper {
         }
         for (CoinTo coinTo : listTo) {
             int toAddrChainId = AddressTool.getChainIdByAddress(coinTo.getAddress());
-            // 接收方to中地址对应的链id必须发起链id
+            // RecipienttoThe chain corresponding to the middle addressidChain must be initiatedid
             if (chainId != toAddrChainId) {
                 return Result.getFailed(AccountErrorCode.CHAINID_ERROR);
             }

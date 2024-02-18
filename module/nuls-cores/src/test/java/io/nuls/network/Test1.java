@@ -47,15 +47,15 @@ public class Test1 {
         System.out.println(ip.getBytes().length);
         try {
             InetAddress addr = InetAddress.getByAddress(new byte[]{1, 15, 1, 32});
-            System.out.println(addr.getHostAddress());// 这个快
+            System.out.println(addr.getHostAddress());// This is fast
 
             InetAddress addr2 = InetAddress.getByName("AD80:0000:0000:0000:ABAA:0000:00C2:0002");
-            System.out.println(addr2.getHostAddress());// 这个快
+            System.out.println(addr2.getHostAddress());// This is fast
 
             InetAddress addr3 = InetAddress.getByName("0.0.0.0");
-            System.out.println(addr3.getHostAddress());// 这个快
+            System.out.println(addr3.getHostAddress());// This is fast
 
-//            System.out.println(addr.getHostName());// 这个慢
+//            System.out.println(addr.getHostName());// This is slow
 //            System.out.println(new String(addr.getAddress()));
         } catch (UnknownHostException e) {
             LoggerUtil.COMMON_LOG.error(e);

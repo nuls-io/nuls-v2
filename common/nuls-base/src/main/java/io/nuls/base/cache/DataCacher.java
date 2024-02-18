@@ -27,11 +27,11 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * 异步请求响应结果缓存类
+ * Asynchronous request response result caching class
  *
  * @author captain
  * @version 1.0
- * @date 18-11-12 下午2:35
+ * @date 18-11-12 afternoon2:35
  */
 public class DataCacher<T> {
 

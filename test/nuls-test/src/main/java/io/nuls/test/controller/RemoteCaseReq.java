@@ -5,7 +5,7 @@ import io.nuls.test.cases.TestCaseIntf;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-20 11:09
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class RemoteCaseReq {
 

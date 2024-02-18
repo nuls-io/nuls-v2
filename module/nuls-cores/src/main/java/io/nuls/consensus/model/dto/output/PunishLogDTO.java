@@ -8,7 +8,7 @@ import io.nuls.core.rpc.util.NulsDateUtils;
 import java.util.Date;
 
 /**
- * 惩罚信息类
+ * Punishment information class
  * Punishment information category
  *
  * @author tag

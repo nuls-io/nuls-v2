@@ -50,7 +50,7 @@ import java.util.Random;
 
 
 /**
- * 消息工厂，用于组装消息
+ * Message factory, used to assemble messages
  * message  build factory
  *
  * @author lan
@@ -173,7 +173,7 @@ public class MessageFactory {
     }
 
     /**
-     * 主动构造地址消息：广播地址消息时使用
+     * Actively constructing address messages：Use when broadcasting address messages
      * Actively constructing address messages: used when broadcasting address messages
      *
      * @param ipAddressList  ip set
@@ -191,7 +191,7 @@ public class MessageFactory {
     }
 
     /**
-     * 构造时间请求消息
+     * Construction time request message
      *
      * @param magicNumber net id
      * @param messageId   messageId
@@ -204,7 +204,7 @@ public class MessageFactory {
     }
 
     /**
-     * 构造时间应答消息
+     * Construct Time Response Message
      *
      * @param magicNumber net id
      * @param messageId   messageId
@@ -231,7 +231,7 @@ public class MessageFactory {
     }
 
     /**
-     * 构造PeerInfoMessage消息
+     * structurePeerInfoMessagenews
      *
      * @param magicNumber
      * @param bestBlockInfo

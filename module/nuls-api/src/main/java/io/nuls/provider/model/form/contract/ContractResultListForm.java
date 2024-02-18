@@ -39,7 +39,7 @@ import java.util.List;
 @ApiModel
 public class ContractResultListForm extends Base {
 
-    @ApiModelProperty(description = "交易hash列表", type = @TypeDescriptor(value = List.class, collectionElement = String.class), required = true)
+    @ApiModelProperty(description = "transactionhashlist", type = @TypeDescriptor(value = List.class, collectionElement = String.class), required = true)
     private List<String> hashList;
 
     public ContractResultListForm() {

@@ -21,7 +21,7 @@ import java.util.Map;
 import static io.nuls.crosschain.base.constant.CommandConstant.*;
 
 /**
- * 与网络模块交互类
+ * Interaction with network modules
  * Interaction class with network module
  * @author tag
  * 2019/4/10
@@ -29,9 +29,9 @@ import static io.nuls.crosschain.base.constant.CommandConstant.*;
 public class NetWorkCall {
 
     /**
-     * 给网络上节点广播消息
+     * Broadcast messages to nodes on the network
      *
-     * @param chainId 该消息由那条链处理/chain id
+     * @param chainId The message is processed by which chain/chain id
      * @param message
      * @return
      */
@@ -40,11 +40,11 @@ public class NetWorkCall {
     }
 
     /**
-     * 给网络上节点广播消息
+     * Broadcast messages to nodes on the network
      *
-     * @param chainId 链Id/chain id
+     * @param chainId chainId/chain id
      * @param message
-     * @param excludeNodes 排除的节点
+     * @param excludeNodes Excluded nodes
      * @return
      */
     public static boolean broadcast(int chainId, BaseMessage message, String excludeNodes, String command,boolean isCross) {
@@ -69,9 +69,9 @@ public class NetWorkCall {
     }
 
     /**
-     * 给指定节点发送消息
+     * Send messages to specified nodes
      *
-     * @param chainId 链Id/chain id
+     * @param chainId chainId/chain id
      * @param message
      * @param nodeId
      * @return
@@ -92,11 +92,11 @@ public class NetWorkCall {
     }
 
     /**
-     * 获取网络节点连接数
+     * Get the number of network node connections
      *
      * @param chainId chain ID
-     * @param isCross 是否获取跨链节点连接数/Whether to Get the Number of Connections across Chains
-     * @return int    连接节点数/Number of Connecting Nodes
+     * @param isCross Whether to obtain the number of cross chain node connections/Whether to Get the Number of Connections across Chains
+     * @return int    Number of connected nodes/Number of Connecting Nodes
      */
     public static int getAvailableNodeAmount(int chainId, boolean isCross) throws NulsException {
         Map<String, Object> callParams = new HashMap<>(4);
@@ -115,11 +115,11 @@ public class NetWorkCall {
     }
 
     /**
-     * 激活跨链网络
-     * @param chainId    激活跨链的链Id
-     * @param maxIn      最多被多少节点链接
-     * @param maxOut     最多链接多少哥个节点
-     * @param seedIps    主网种子节点列表
+     * Activate cross chain network
+     * @param chainId    Activate cross chain chainsId
+     * @param maxIn      How many nodes can be linked at most
+     * @param maxOut     How many nodes can be linked at most
+     * @param seedIps    Main network seed node list
      * */
     public static void activeCrossNet(int chainId,int maxOut,int maxIn,String seedIps )throws NulsException{
         Map<String, Object> callParams = new HashMap<>(4);

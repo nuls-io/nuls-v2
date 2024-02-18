@@ -32,7 +32,7 @@ import io.nuls.core.rpc.model.message.Request;
 import io.nuls.core.log.Log;
 
 /**
- * 订阅定时返回数据处理线程
+ * Subscription scheduled return data processing thread
  * Subscription event processing threads
  *
  * @author tag
@@ -47,7 +47,7 @@ public class RequestByPeriodProcessor implements Runnable {
     }
 
     /**
-     * 轮流根据Period和EventCount定时推送消息
+     * Take turns according toPeriodandEventCountTimed push messages
      * Push messages on a periodic and EventCount basis in turn
      */
     @SuppressWarnings("InfiniteLoopStatement")
@@ -66,12 +66,12 @@ public class RequestByPeriodProcessor implements Runnable {
     }
 
     /**
-     * 发送队列的第一个对象，然后放入队列尾
+     * Send the first object in the queue and put it at the end of the queue
      * Send the first object of the queue and put it at the end of the queue
      */
     private void sendPeriodQueue() {
         /*
-        获取队列中的第一个对象
+        Get the first object in the queue
         Get the first item of the queue
          */
         Object[] objects = connectData.getRequestPeriodLoopQueue().poll();
@@ -79,7 +79,7 @@ public class RequestByPeriodProcessor implements Runnable {
         Request request = (Request) objects[1];
 
         /*
-        需要继续发送，添加回队列
+        Need to continue sending and add back to the queue
         Need to continue sending, add back to queue
          */
         boolean isContinue = RequestMessageProcessor.responseWithPeriod(connectData, message, request);

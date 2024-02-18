@@ -47,7 +47,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 简化版本的ROC框架，参考spring-framework的使用方式，实现简单的依赖注入和动态代理实现的面向切面编程
+ * Simplified versionROCFramework, referencespring-frameworkImplement simple dependency injection and dynamic proxy implementation for object-oriented programming using the
  * <p>
  * The simplified version of the ROC framework, referring to the use of the spring-framework,
  * implements a simple dependency injection and aspect-oriented programming for dynamic proxy implementations.
@@ -64,21 +64,21 @@ public class SpringLiteContext {
     private static MethodInterceptor interceptor;
 
     /**
-     * 使用默认的拦截器加载roc环境
+     * Load using default interceptorsrocenvironment
      * Load the roc environment with the default interceptor.
      *
-     * @param packName 扫描的根路径,The root package of the scan.
+     * @param packName Scanned root path,The root package of the scan.
      */
     public static void init(final String... packName) {
         init(new DefaultMethodInterceptor(), packName);
     }
 
     /**
-     * 根据传入的参数加载roc环境
+     * Load based on the passed in parametersrocenvironment
      * Load the roc environment based on the incoming parameters.
      *
-     * @param packName    扫描的根路径,The root package of the scan.
-     * @param interceptor 方法拦截器,Method interceptor
+     * @param packName    Scanned root path,The root package of the scan.
+     * @param interceptor method interceptors,Method interceptor
      */
     public static void init(final String packName, MethodInterceptor interceptor) {
         init(interceptor, packName);
@@ -93,7 +93,7 @@ public class SpringLiteContext {
         Set<Class> classes = new HashSet<>(ScanUtil.scan("io.nuls.core.core.config"));
         Arrays.stream(packName).forEach(pack -> classes.addAll(ScanUtil.scan(pack)));
         classes.stream()
-                //通过Order注解控制类加载顺序
+                //adoptOrderAnnotation control class loading order
                 .sorted((b1, b2) -> getOrderByClass(b1) > getOrderByClass(b2) ? 1 : -1)
                 .forEach(SpringLiteContext::checkBeanClass);
         configurationInjectToBean();
@@ -102,12 +102,12 @@ public class SpringLiteContext {
     }
 
     /**
-     * 将配置项注入到bean中
+     * Inject configuration items intobeanin
      * inject config to bean
      */
     private static void configurationInjectToBean() {
         ConfigurationLoader configLoader = getBean(ConfigurationLoader.class);
-        //加载配置项
+        //Load configuration items
         configLoader.load();
         Map<String, ConfigurationLoader.ConfigItem> values = new HashMap<>();
         BEAN_TEMP_MAP.forEach((key1, bean) -> {
@@ -147,7 +147,7 @@ public class SpringLiteContext {
                     Value annValue = field.getAnnotation(Value.class);
                     if (annValue != null) {
                         String key = annValue.value();
-                        //检查key在指定了domain的配置项列表里面是否出现多次
+                        //inspectkeyWhen specifieddomainDoes the configuration item list appear multiple times
                         if (configLoader.getConfigData().entrySet().stream().filter(entry -> !entry.getKey().equals(ConfigurationLoader.GLOBAL_DOMAIN) && entry.getValue().containsKey(key)).count() > 1) {
                             throw new IllegalArgumentException("io.nuls.tools.core.annotation.Value " + key + " config item Find more ");
                         }
@@ -178,7 +178,7 @@ public class SpringLiteContext {
     }
 
     /**
-     * 给对象中的属性自动赋值
+     * Automatically assign values to properties in an object
      * Automatically assign values to attributes in an object.
      */
     private static void autowireFields() {
@@ -189,7 +189,7 @@ public class SpringLiteContext {
                 injectionBeanFields(bean, BEAN_TYPE_MAP.get(key));
                 BEAN_OK_MAP.put(key, bean);
                 BEAN_TEMP_MAP.remove(key);
-                //call afterPropertiesSet 代码迁移到 callAfterPropertiesSet方法执行
+                //call afterPropertiesSet Code migration to callAfterPropertiesSetMethod execution
             } catch (Exception e) {
                 Log.error("spring lite autowire fields failed! ", e);
                 System.exit(0);
@@ -198,7 +198,7 @@ public class SpringLiteContext {
     }
 
     /**
-     * 对实现了InitializingBean接口的对象，调用afterPropertiesSet方法
+     * Yes, it has been implementedInitializingBeanObject of interface, callingafterPropertiesSetmethod
      */
     private static void callAfterPropertiesSet() {
         BEAN_OK_MAP.entrySet().stream()
@@ -219,11 +219,11 @@ public class SpringLiteContext {
     }
 
     /**
-     * 给对象的所有标记了Autowired注解的字段注入依赖
+     * Marked all objectsAutowiredAnnotated field injection dependency
      * All of the objects tagged with Autowired annotation are injected with dependencies.
      *
-     * @param obj     bean对象
-     * @param objType 对象类型
+     * @param obj     beanobject
+     * @param objType object type
      * @throws Exception
      */
     private static void injectionBeanFields(Object obj, Class objType) throws Exception {
@@ -234,10 +234,10 @@ public class SpringLiteContext {
     }
 
     /**
-     * 获取一个对象的所有字段
+     * Get all fields of an object
      * Gets all the fields of an object.
      *
-     * @param objType 对象类型
+     * @param objType object type
      */
     private static Set<Field> getFieldSet(Class objType) {
         Set<Field> set = new HashSet<>();
@@ -250,11 +250,11 @@ public class SpringLiteContext {
     }
 
     /**
-     * 检查某个对象的某个属性，如果对象被标记了Autowired注解，则去相应的依赖，并将依赖赋值给对象的该属性
+     * Check a certain property of an object, if the object is markedAutowiredAnnotate, remove the corresponding dependency, and assign the dependency to the property of the object
      * Check an attribute of an object, and if the object is marked with Autowired annotations,
      * it is dependent and will depend on the attribute that is assigned to the object.
-     *  @param obj   bean对象
-     * @param field 对象的一个属性
+     *  @param obj   beanobject
+     * @param field A property of an object
      */
     private static void injectionBeanField(Object obj, Field field) throws Exception {
         Annotation[] anns = field.getDeclaredAnnotations();
@@ -286,10 +286,10 @@ public class SpringLiteContext {
     }
 
     /**
-     * 根据名称获取bean
+     * Obtain by namebean
      * get model by model name
      *
-     * @param name 对象名称，Bean Name
+     * @param name Object name,Bean Name
      */
     private static Object getBean(String name) {
         Object value = BEAN_OK_MAP.get(name);
@@ -300,7 +300,7 @@ public class SpringLiteContext {
     }
 
     /**
-     * 根据对象类型字符串获取该类型实例的名称
+     * Obtain the name of the instance of the object type based on the object type string
      * Gets the name of the type instance according to the object type.
      */
     public static Object getBeanByClass(String clazzStr) {
@@ -323,7 +323,7 @@ public class SpringLiteContext {
     }
 
     /**
-     * 检查一个类型，如果这个类型上被注释了我们关心的注解，如：Service/Component/Interceptor,就对这个对象进行加载，并放入bean管理器中
+     * Check a type if it has been annotated with the annotations we care about, such as：Service/Component/Interceptor,Load this object and place it inbeanIn Manager
      * Check a type, if this is commented on the type annotation, we care about, such as: (Service/Component/Interceptor), is to load the object, and in the model manager
      *
      * @param clazz class type
@@ -392,7 +392,7 @@ public class SpringLiteContext {
     }
 
     /**
-     * 根据对象类型获取该类型实例的名称
+     * Obtain the name of an instance of this type based on the object type
      * Gets the name of the type instance according to the object type.
      */
     private static String getBeanName(Class clazz) {
@@ -406,11 +406,11 @@ public class SpringLiteContext {
     }
 
     /**
-     * 从数组中获取指定的注解类型的实例
+     * Get an instance of the specified annotation type from an array
      * Gets an instance of the specified annotation type from the array.
      *
-     * @param anns  注解实例数组，Annotated instance array
-     * @param clazz 目标注解类型，Target annotation type
+     * @param anns  Annotation instance array,Annotated instance array
+     * @param clazz Target annotation type,Target annotation type
      * @return Annotation
      */
     public static Annotation getFromArray(Annotation[] anns, Class clazz) {
@@ -423,13 +423,13 @@ public class SpringLiteContext {
     }
 
     /**
-     * 初始化该类型的实例，由参数决定是否使用动态代理的方式进行实例化，将实例化后的对象加入对象池
+     * Initialize an instance of this type, determine whether to use dynamic proxies for instantiation based on parameters, and add the instantiated object to the object pool
      * Instantiate an instance of this type by instantiating the instantiated object
      * into the object pool by determining whether the dynamic proxy is used.
      *
-     * @param beanName 对象名称
-     * @param clazz    对象类型
-     * @param proxy    是否返回动态代理的对象
+     * @param beanName Object Name
+     * @param clazz    object type
+     * @param proxy    Do you want to return the object of the dynamic proxy
      */
     private static void loadBean(String beanName, Class clazz, boolean proxy) throws NulsException {
         if (BEAN_OK_MAP.containsKey(beanName)) {
@@ -455,7 +455,7 @@ public class SpringLiteContext {
     }
 
     /**
-     * 使用动态代理的方式创建对象的实例
+     * Creating instances of objects using dynamic proxies
      * Create an instance of the object using a dynamic proxy.
      */
     private static Object createProxy(Class clazz, MethodInterceptor interceptor) {
@@ -466,11 +466,11 @@ public class SpringLiteContext {
     }
 
     /**
-     * 缓存类型和实例名称的关系
+     * The relationship between cache type and instance name
      * Cache the relationship between the cache type and the instance name.
      *
-     * @param clazz    对象类型
-     * @param beanName 对象实例名称
+     * @param clazz    object type
+     * @param beanName Object instance name
      */
     private static void addClassNameMap(Class clazz, String beanName) {
         Set<String> nameSet = CLASS_NAME_SET_MAP.computeIfAbsent(clazz, k -> new HashSet<>());
@@ -486,8 +486,8 @@ public class SpringLiteContext {
     }
 
     /**
-     * 返回bean的加载顺序权重值
-     * 默认权重值为1
+     * returnbeanThe loading order weight value of
+     * The default weight value is1
      *
      * @param clazz
      * @return
@@ -510,12 +510,12 @@ public class SpringLiteContext {
     }
 
     /**
-     * 根据类型获取对象池中的对象
+     * Retrieve objects from the object pool based on their type
      * Gets the object in the object pool according to the type.
      *
-     * @param beanClass 对象类型
-     * @param <T>       泛型
-     * @return 目标对象
+     * @param beanClass object type
+     * @param <T>       generic paradigm
+     * @return Target object
      */
     public static <T> T getBean(Class<T> beanClass) {
         Set<String> nameSet = CLASS_NAME_SET_MAP.get(beanClass);
@@ -535,10 +535,10 @@ public class SpringLiteContext {
     }
 
     /**
-     * 向上下文中加入一个托管对象，该对象是根据传入的类型，使用动态代理的方式实例化的
+     * Add a managed object to the context that is instantiated using dynamic proxies based on the type passed in
      * A managed object is added to the context, which is instantiated using a dynamic proxy based on the incoming type.
      *
-     * @param clazz 对象类型
+     * @param clazz object type
      */
     public static void putBean(Class clazz) throws NulsException {
         loadBean(getBeanName(clazz), clazz, true);
@@ -558,7 +558,7 @@ public class SpringLiteContext {
 
 
     /**
-     * 从上下文中删除一个类型的所有实例，请谨慎调用
+     * Delete all instances of a type from the context, please be cautious when calling
      * Delete all instances of a type from the context, please call carefully.
      */
     public static void removeBean(Class clazz) {
@@ -575,22 +575,22 @@ public class SpringLiteContext {
     }
 
     /**
-     * 检查实例的状态，是否已完成组装，即所有的属性都已自动赋值
+     * Check the status of the instance to see if assembly has been completed, i.e. all attributes have been automatically assigned values
      * Check the status of the instance, and whether the assembly has been completed, that is, all properties are automatically assigned.
      *
-     * @param bean 对象实例
+     * @param bean Object instance
      */
     public static boolean checkBeanOk(Object bean) {
         return BEAN_OK_MAP.containsValue(bean);
     }
 
     /**
-     * 获取一个类型的所有实例
+     * Get all instances of a type
      * Gets all instances of a type.
      *
-     * @param beanClass 类型
-     * @param <T>       泛型
-     * @return 该类型的所有实例，all instances of the type;
+     * @param beanClass type
+     * @param <T>       generic paradigm
+     * @return All instances of this type,all instances of the type;
      */
     public static <T> List<T> getBeanList(Class<T> beanClass) {
         Set<String> nameSet = CLASS_NAME_SET_MAP.get(beanClass);
@@ -615,12 +615,12 @@ public class SpringLiteContext {
     }
 
     /**
-     * 根据类型获取对象池中的对象
+     * Retrieve objects from the object pool based on their type
      * Gets the object in the object pool according to the type.
      *
-     * @param beanClass 对象类型
-     * @param <T>       泛型
-     * @return 目标对象
+     * @param beanClass object type
+     * @param <T>       generic paradigm
+     * @return Target object
      */
     public static <T> T getBean(Class<T> beanClass, String specifiedBeanName) {
         Set<String> nameSet = CLASS_NAME_SET_MAP.get(beanClass);

@@ -35,57 +35,57 @@ import java.util.List;
 public class ProgramCall {
 
     /**
-     * 当前块编号
+     * Current block number
      */
     private long number;
 
     /**
-     * 调用者
+     * caller
      */
     private byte[] sender;
     private byte[] senderPublicKey;
 
     /**
-     * 交易向合约转入的NULS的金额
+     * Transactions transferred to contractsNULSThe amount of
      */
     private BigInteger value;
     /**
-     * 交易向合约转入的其他资产的金额
+     * The amount of other assets transferred from transactions to contracts
      */
     private List<ProgramMultyAssetValue> multyAssetValues;
 
     /**
-     * 最大Gas消耗
+     * maximumGasconsume
      */
     private long gasLimit;
 
     /**
-     * 执行合约单价
+     * Execution contract unit price
      */
     private long price;
 
     /**
-     * 合约地址
+     * Contract address
      */
     private byte[] contractAddress;
 
     /**
-     * 方法名
+     * Method name
      */
     private String methodName;
 
     /**
-     * 方法签名，如果方法名不重复，可以不传
+     * Method signature, if the method name is not duplicated, it can be omitted
      */
     private String methodDesc;
 
     /**
-     * 参数列表
+     * parameter list
      */
     private String[][] args;
 
     /**
-     * 是否估计Gas
+     * Is it estimatedGas
      */
     private boolean estimateGas;
 

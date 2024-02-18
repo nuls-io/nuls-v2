@@ -78,12 +78,12 @@ public class ConsensusResource {
     @POST
     @Path("/agent")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "创建共识节点", order = 501)
+    @ApiOperation(description = "Create consensus nodes", order = 501)
     @Parameters({
-            @Parameter(parameterName = "CreateAgentForm", parameterDes = "创建共识节点表单", requestType = @TypeDescriptor(value = CreateAgentForm.class))
+            @Parameter(parameterName = "CreateAgentForm", parameterDes = "Create consensus node form", requestType = @TypeDescriptor(value = CreateAgentForm.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", description = "交易hash")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "transactionhash")
     }))
     public RpcClientResult createAgent(CreateAgentForm form) {
         if (form == null) {
@@ -108,12 +108,12 @@ public class ConsensusResource {
     @POST
     @Path("/agent/stop")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "注销共识节点", order = 502)
+    @ApiOperation(description = "Unregister consensus node", order = 502)
     @Parameters({
-            @Parameter(parameterName = "StopAgentForm", parameterDes = "注销共识节点表单", requestType = @TypeDescriptor(value = StopAgentForm.class))
+            @Parameter(parameterName = "StopAgentForm", parameterDes = "Unregister Consensus Node Form", requestType = @TypeDescriptor(value = StopAgentForm.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", description = "交易hash")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "transactionhash")
     }))
     public RpcClientResult stopAgent(StopAgentForm form) {
         if (form == null) {
@@ -134,11 +134,11 @@ public class ConsensusResource {
     @POST
     @Path("/agent/stopCoinData")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "注销共识节点的coinData", order = 502)
+    @ApiOperation(description = "Unregister consensus nodecoinData", order = 502)
     @Parameters({
-            @Parameter(parameterName = "StopAgentForm", parameterDes = "注销共识节点表单", requestType = @TypeDescriptor(value = StopAgentForm.class))
+            @Parameter(parameterName = "StopAgentForm", parameterDes = "Unregister Consensus Node Form", requestType = @TypeDescriptor(value = StopAgentForm.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = String.class))
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = String.class))
     public RpcClientResult getStopAgentCoinData(GetStopAgentCoinDataForm form) {
         if (form == null) {
             return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "form is empty"));
@@ -157,12 +157,12 @@ public class ConsensusResource {
     @POST
     @Path("/deposit")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "委托参与共识", order = 503)
+    @ApiOperation(description = "Entrusting participation in consensus", order = 503)
     @Parameters({
-            @Parameter(parameterName = "DepositForm", parameterDes = "委托参与共识表单", requestType = @TypeDescriptor(value = DepositForm.class))
+            @Parameter(parameterName = "DepositForm", parameterDes = "Delegated Participation Consensus Form", requestType = @TypeDescriptor(value = DepositForm.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", description = "交易hash")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "transactionhash")
     }))
     public RpcClientResult depositToAgent(DepositForm form) {
         if (form == null) {
@@ -185,12 +185,12 @@ public class ConsensusResource {
     @POST
     @Path("/withdraw")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "退出共识", order = 504)
+    @ApiOperation(description = "Exit consensus", order = 504)
     @Parameters({
-            @Parameter(parameterName = "退出共识", parameterDes = "退出共识表单", requestType = @TypeDescriptor(value = WithdrawForm.class))
+            @Parameter(parameterName = "Exit consensus", parameterDes = "Exit consensus form", requestType = @TypeDescriptor(value = WithdrawForm.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", description = "交易hash")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "transactionhash")
     }))
     public RpcClientResult withdraw(WithdrawForm form) {
         if (form == null) {
@@ -212,11 +212,11 @@ public class ConsensusResource {
     @GET
     @Path("/list/deposit/{agentHash}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "查询节点的委托共识列表", order = 505)
+    @ApiOperation(description = "Query the delegation consensus list of nodes", order = 505)
     @Parameters({
-            @Parameter(parameterName = "agentHash", parameterDes = "创建共识节点的交易hash")
+            @Parameter(parameterName = "agentHash", parameterDes = "Create transactions for consensus nodeshash")
     })
-    @ResponseData(name = "返回值", description = "返回委托共识集合", responseType = @TypeDescriptor(value = List.class, collectionElement = DepositInfoDto.class))
+    @ResponseData(name = "Return value", description = "Return the delegate consensus set", responseType = @TypeDescriptor(value = List.class, collectionElement = DepositInfoDto.class))
     public RpcClientResult getDepositList(@PathParam("agentHash") String agentHash) {
         if (!ValidateUtil.validHash(agentHash)) {
             return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "agentHash is invalid"));
@@ -246,11 +246,11 @@ public class ConsensusResource {
     @POST
     @Path("/random/seed/count")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "根据最大高度和原始种子个数生成一个随机种子并返回", order = 506, detailDesc = "包括最大高度往后退1000个区块，在这个区块区间内找到指定个数的原始种子，汇总生成一个随机种子并返回")
+    @ApiOperation(description = "Generate a random seed based on the maximum height and the number of original seeds and return it", order = 506, detailDesc = "Including maximum height backwards1000Find a specified number of original seeds within this block interval, aggregate them to generate a random seed, and return it")
     @Parameters(value = {
-            @Parameter(parameterName = "RandomSeedCountForm", parameterDes = "随机种子表单", requestType = @TypeDescriptor(value = RandomSeedCountForm.class))
+            @Parameter(parameterName = "RandomSeedCountForm", parameterDes = "Random Seed Form", requestType = @TypeDescriptor(value = RandomSeedCountForm.class))
     })
-    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = RandomSeedDTO.class))
+    @ResponseData(name = "Return value", responseType = @TypeDescriptor(value = RandomSeedDTO.class))
     public RpcClientResult getRandomSeedByCount(RandomSeedCountForm form) {
         if (form == null) {
             return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "form is empty"));
@@ -266,11 +266,11 @@ public class ConsensusResource {
     @POST
     @Path("/random/seed/height")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "根据高度区间生成一个随机种子并返回", order = 507, detailDesc = "在这个区块区间内找到所有有效的原始种子，汇总生成一个随机种子并返回")
+    @ApiOperation(description = "Generate a random seed based on the height interval and return it", order = 507, detailDesc = "Find all valid original seeds within this block interval, summarize them to generate a random seed, and return it")
     @Parameters(value = {
-            @Parameter(parameterName = "RandomSeedHeightForm", parameterDes = "随机种子表单", requestType = @TypeDescriptor(value = RandomSeedHeightForm.class))
+            @Parameter(parameterName = "RandomSeedHeightForm", parameterDes = "Random Seed Form", requestType = @TypeDescriptor(value = RandomSeedHeightForm.class))
     })
-    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = RandomSeedDTO.class))
+    @ResponseData(name = "Return value", responseType = @TypeDescriptor(value = RandomSeedDTO.class))
     public RpcClientResult getRandomSeedByHeight(RandomSeedHeightForm form) {
         if (form == null) {
             return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "form is empty"));
@@ -286,11 +286,11 @@ public class ConsensusResource {
     @POST
     @Path("/random/rawseed/count")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "根据最大高度和原始种子个数查找原始种子列表并返回", order = 508, detailDesc = "包括最大高度往后退1000个区块，在这个区块区间内找到指定个数的原始种子并返回")
+    @ApiOperation(description = "Find the original seed list based on the maximum height and the number of original seeds, and return it", order = 508, detailDesc = "Including maximum height backwards1000Find a specified number of original seeds within this block interval and return them")
     @Parameters(value = {
-            @Parameter(parameterName = "RandomRawSeedCountForm", parameterDes = "原始随机种子表单", requestType = @TypeDescriptor(value = RandomRawSeedCountForm.class))
+            @Parameter(parameterName = "RandomRawSeedCountForm", parameterDes = "Original random seed form", requestType = @TypeDescriptor(value = RandomRawSeedCountForm.class))
     })
-    @ResponseData(name = "原始种子列表", responseType = @TypeDescriptor(value = List.class, collectionElement = String.class))
+    @ResponseData(name = "Original Seed List", responseType = @TypeDescriptor(value = List.class, collectionElement = String.class))
     public RpcClientResult getRandomRawSeedsByCount(RandomRawSeedCountForm form) {
         if (form == null) {
             return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "form is empty"));
@@ -306,11 +306,11 @@ public class ConsensusResource {
     @POST
     @Path("/random/rawseed/height")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "根据高度区间查找原始种子列表并返回", order = 509, detailDesc = "在这个区块区间内找到所有有效的原始种子并返回")
+    @ApiOperation(description = "Search for the original seed list based on the height interval and return it", order = 509, detailDesc = "Find all valid original seeds within this block interval and return them")
     @Parameters(value = {
-            @Parameter(parameterName = "RandomRawSeedHeightForm", parameterDes = "原始随机种子表单", requestType = @TypeDescriptor(value = RandomRawSeedHeightForm.class))
+            @Parameter(parameterName = "RandomRawSeedHeightForm", parameterDes = "Original random seed form", requestType = @TypeDescriptor(value = RandomRawSeedHeightForm.class))
     })
-    @ResponseData(name = "原始种子列表", responseType = @TypeDescriptor(value = List.class, collectionElement = String.class))
+    @ResponseData(name = "Original Seed List", responseType = @TypeDescriptor(value = List.class, collectionElement = String.class))
     public RpcClientResult getRandomRawSeedsByHeight(RandomRawSeedHeightForm form) {
         if (form == null) {
             return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "form is empty"));
@@ -326,13 +326,13 @@ public class ConsensusResource {
     @POST
     @Path("/agent/offline")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "离线组装 - 创建共识节点交易", order = 550, detailDesc = "参与共识所需资产可通过查询链信息接口获取(agentChainId和agentAssetId)")
+    @ApiOperation(description = "Offline assembly - Create consensus node transactions", order = 550, detailDesc = "The required assets for participating in consensus can be obtained through the query chain information interface(agentChainIdandagentAssetId)")
     @Parameters({
-            @Parameter(parameterName = "ConsensusDto", parameterDes = "离线创建共识节点表单", requestType = @TypeDescriptor(value = ConsensusDto.class))
+            @Parameter(parameterName = "ConsensusDto", parameterDes = "Offline creation of consensus node form", requestType = @TypeDescriptor(value = ConsensusDto.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "hash", description = "交易hash"),
-            @Key(name = "txHex", description = "交易序列化字符串")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "hash", description = "transactionhash"),
+            @Key(name = "txHex", description = "Transaction serialization string")
     }))
     public RpcClientResult createAgentOffline(ConsensusDto form) {
         if (form == null) {
@@ -345,13 +345,13 @@ public class ConsensusResource {
     @POST
     @Path("/agent/stop/offline")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "离线组装 - 注销共识节点交易", order = 551, detailDesc = "组装交易的StopDepositDto信息，可通过查询节点的委托共识列表获取，input的nonce值可为空")
+    @ApiOperation(description = "Offline assembly - Unregister consensus node transactions", order = 551, detailDesc = "Assembly transactionsStopDepositDtoInformation can be obtained by querying the delegated consensus list of nodes,inputofnonceValue can be empty")
     @Parameters({
-            @Parameter(parameterName = "StopConsensusDto", parameterDes = "离线注销共识节点表单", requestType = @TypeDescriptor(value = StopConsensusDto.class))
+            @Parameter(parameterName = "StopConsensusDto", parameterDes = "Offline logout consensus node form", requestType = @TypeDescriptor(value = StopConsensusDto.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "hash", description = "交易hash"),
-            @Key(name = "txHex", description = "交易序列化字符串")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "hash", description = "transactionhash"),
+            @Key(name = "txHex", description = "Transaction serialization string")
     }))
     public RpcClientResult stopAgentOffline(StopConsensusDto form) {
         if (form == null) {
@@ -364,13 +364,13 @@ public class ConsensusResource {
     @POST
     @Path("/deposit/offline")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "离线组装 - 委托参与共识交易", order = 552, detailDesc = "参与共识所需资产可通过查询链信息接口获取(agentChainId和agentAssetId)")
+    @ApiOperation(description = "Offline assembly - Entrusted participation in consensus trading", order = 552, detailDesc = "The required assets for participating in consensus can be obtained through the query chain information interface(agentChainIdandagentAssetId)")
     @Parameters({
-            @Parameter(parameterName = "DepositDto", parameterDes = "离线委托参与共识表单", requestType = @TypeDescriptor(value = DepositDto.class))
+            @Parameter(parameterName = "DepositDto", parameterDes = "Offline Delegation Participation Consensus Form", requestType = @TypeDescriptor(value = DepositDto.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "hash", description = "交易hash"),
-            @Key(name = "txHex", description = "交易序列化字符串")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "hash", description = "transactionhash"),
+            @Key(name = "txHex", description = "Transaction serialization string")
     }))
     public RpcClientResult depositToAgentOffline(DepositDto form) {
         if (form == null) {
@@ -383,13 +383,13 @@ public class ConsensusResource {
     @POST
     @Path("/withdraw/offline")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "离线组装 - 退出共识交易", order = 553, detailDesc = "接口的input数据，则是委托共识交易的output数据，nonce值可为空")
+    @ApiOperation(description = "Offline assembly - Exit consensus trading", order = 553, detailDesc = "InterfaceinputData is entrusted for consensus tradingoutputdatanonceValue can be empty")
     @Parameters({
-            @Parameter(parameterName = "WithDrawDto", parameterDes = "离线退出共识表单", requestType = @TypeDescriptor(value = WithDrawDto.class))
+            @Parameter(parameterName = "WithDrawDto", parameterDes = "Offline exit consensus form", requestType = @TypeDescriptor(value = WithDrawDto.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "hash", description = "交易hash"),
-            @Key(name = "txHex", description = "交易序列化字符串")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "hash", description = "transactionhash"),
+            @Key(name = "txHex", description = "Transaction serialization string")
     }))
     public RpcClientResult withdrawOffline(WithDrawDto form) {
         if (form == null) {
@@ -402,13 +402,13 @@ public class ConsensusResource {
     @POST
     @Path("/multiSign/agent/offline")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "多签账户离线组装 - 创建共识节点交易", order = 554, detailDesc = "参与共识所需资产可通过查询链信息接口获取(agentChainId和agentAssetId)")
+    @ApiOperation(description = "Offline assembly of multiple signed accounts - Create consensus node transactions", order = 554, detailDesc = "The required assets for participating in consensus can be obtained through the query chain information interface(agentChainIdandagentAssetId)")
     @Parameters({
-            @Parameter(parameterName = "MultiSignConsensusDto", parameterDes = "多签账户离线创建共识节点表单", requestType = @TypeDescriptor(value = MultiSignConsensusDto.class))
+            @Parameter(parameterName = "MultiSignConsensusDto", parameterDes = "Offline creation of consensus node form for multiple account signatures", requestType = @TypeDescriptor(value = MultiSignConsensusDto.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "hash", description = "交易hash"),
-            @Key(name = "txHex", description = "交易序列化字符串")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "hash", description = "transactionhash"),
+            @Key(name = "txHex", description = "Transaction serialization string")
     }))
     public RpcClientResult createMultiSignAgentOffline(MultiSignConsensusDto form) {
         if (form == null) {
@@ -421,13 +421,13 @@ public class ConsensusResource {
     @POST
     @Path("/multiSign/deposit/offline")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "离线组装 - 多签账户委托参与共识交易", order = 555, detailDesc = "参与共识所需资产可通过查询链信息接口获取(agentChainId和agentAssetId)")
+    @ApiOperation(description = "Offline assembly - Delegate multiple account signatures to participate in consensus trading", order = 555, detailDesc = "The required assets for participating in consensus can be obtained through the query chain information interface(agentChainIdandagentAssetId)")
     @Parameters({
-            @Parameter(parameterName = "MultiSignDepositDto", parameterDes = "多签账户离线委托参与共识表单", requestType = @TypeDescriptor(value = MultiSignDepositDto.class))
+            @Parameter(parameterName = "MultiSignDepositDto", parameterDes = "Multiple account offline delegation participation consensus form", requestType = @TypeDescriptor(value = MultiSignDepositDto.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "hash", description = "交易hash"),
-            @Key(name = "txHex", description = "交易序列化字符串")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "hash", description = "transactionhash"),
+            @Key(name = "txHex", description = "Transaction serialization string")
     }))
     public RpcClientResult multiSignDepositToAgentOffline(MultiSignDepositDto form) {
         if (form == null) {
@@ -440,13 +440,13 @@ public class ConsensusResource {
     @POST
     @Path("/multiSign/withdraw/offline")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "离线组装 - 多签账户退出共识交易", order = 556, detailDesc = "接口的input数据，则是委托共识交易的output数据，nonce值可为空")
+    @ApiOperation(description = "Offline assembly - Sign multiple accounts to exit consensus transactions", order = 556, detailDesc = "InterfaceinputData is entrusted for consensus tradingoutputdatanonceValue can be empty")
     @Parameters({
-            @Parameter(parameterName = "WithDrawDto", parameterDes = "多签账户离线退出共识表单", requestType = @TypeDescriptor(value = MultiSignWithDrawDto.class))
+            @Parameter(parameterName = "WithDrawDto", parameterDes = "Multiple account offline exit consensus form with multiple signatures", requestType = @TypeDescriptor(value = MultiSignWithDrawDto.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "hash", description = "交易hash"),
-            @Key(name = "txHex", description = "交易序列化字符串")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "hash", description = "transactionhash"),
+            @Key(name = "txHex", description = "Transaction serialization string")
     }))
     public RpcClientResult MultiSignWithdrawOffline(MultiSignWithDrawDto form) {
         if (form == null) {
@@ -459,13 +459,13 @@ public class ConsensusResource {
     @POST
     @Path("/multiSign/agent/stop/offline")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "离线组装 - 多签账户注销共识节点交易", order = 557, detailDesc = "组装交易的StopDepositDto信息，可通过查询节点的委托共识列表获取，input的nonce值可为空")
+    @ApiOperation(description = "Offline assembly - Multiple account cancellation consensus node transactions", order = 557, detailDesc = "Assembly transactionsStopDepositDtoInformation can be obtained by querying the delegated consensus list of nodes,inputofnonceValue can be empty")
     @Parameters({
-            @Parameter(parameterName = "StopConsensusDto", parameterDes = "多签账户离线注销共识节点表单", requestType = @TypeDescriptor(value = MultiSignStopConsensusDto.class))
+            @Parameter(parameterName = "StopConsensusDto", parameterDes = "Multiple account offline cancellation consensus node form", requestType = @TypeDescriptor(value = MultiSignStopConsensusDto.class))
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "hash", description = "交易hash"),
-            @Key(name = "txHex", description = "交易序列化字符串")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "hash", description = "transactionhash"),
+            @Key(name = "txHex", description = "Transaction serialization string")
     }))
     public RpcClientResult multiSignStopAgentOffline(MultiSignStopConsensusDto form) {
         if (form == null) {

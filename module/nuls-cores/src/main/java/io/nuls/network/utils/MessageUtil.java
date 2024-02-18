@@ -35,7 +35,7 @@ import java.util.Map;
  */
 public class MessageUtil {
     /**
-     * 目前测试使用，后期使用协议注册来处理优先级。
+     * Currently being tested, protocol registration will be used in the later stages to handle priority.
      */
     public static Map<String, Integer> lowerLeverCmd = new HashMap<>();
 

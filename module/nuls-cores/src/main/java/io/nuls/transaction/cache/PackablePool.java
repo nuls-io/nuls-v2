@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 交易已完成交易管理模块的校验(打包的时候从这里取)
+ * The transaction has been verified by the transaction management module(Take it from here when packing)
  * Waiting for a packaged transaction pool
  *
  * @author: Charlie
@@ -24,7 +24,7 @@ public class PackablePool {
     private UnconfirmedTxStorageService unconfirmedTxStorageService;
 
     /**
-     * 将交易加入到待打包队列最前端，打包时最先取出
+     * Add the transaction to the forefront of the queue to be packaged, and retrieve it first during packaging
      * Add the transaction to the front of the queue to be packed, and take it out first when it is packed
      *
      * @param chain
@@ -44,7 +44,7 @@ public class PackablePool {
     }
 
     /**
-     * 只还hash 不需要还到map中
+     * Only returnhash No need to return itmapin
      * @param chain
      * @param tx
      * @return
@@ -61,7 +61,7 @@ public class PackablePool {
     }
 
     /**
-     * 将交易加入到待打包队列队尾
+     * Add the transaction to the end of the queue to be packaged
      * Add the transaction to the end of the queue to be packed
      *
      * @param chain
@@ -81,11 +81,11 @@ public class PackablePool {
     }
 
     /**
-     * 从待打包队列获取一笔交易
+     * Retrieve a transaction from the queue to be packaged
      * Gets a transaction from the queue to be packaged
      * <p>
-     * 1.从队列中取出hash，然后再去map中获取交易
-     * 2.如果map没有说明已经被打包确认，然后接着拿下一个，直到获取到一个交易，或者队列为空
+     * 1.Remove from queuehashThen go aheadmapObtain transactions in the middle
+     * 2.IfmapThere is no indication that it has been packaged and confirmed, and then the next one will be taken until a transaction is obtained or the queue is empty
      * <p>
      * 1.Fetch the hash from the queue, and then fetch the transaction from the map
      * 2.If the map does not indicate that it has been packaged for confirmation,
@@ -113,10 +113,10 @@ public class PackablePool {
     }
 
     /**
-     * 获取并移除此双端队列的最后一个元素；如果此双端队列为空，则返回 null
+     * Get and remove the last element of this dual end queue；If this dual end queue is empty, return null
      * Gets and removes the last element of the other double-ended queue; If this double-ended queue is empty, null is returned
      *
-     * 协议升级时需要重新处理未打包的交易
+     * Unpackaged transactions need to be reprocessed during protocol upgrade
      * When the agreement is upgraded, unpackaged transactions need to be reprocessed
      *
      * @param chain
@@ -154,7 +154,7 @@ public class PackablePool {
     }
 
     /**
-     * 判断交易是否在待打包队列的hash queue中，交易如果存在于待打包map中, 不一定存在于hash队列.
+     * Determine whether the transaction is in the queue to be packagedhash queueIf the transaction exists in the package to be packagedmapin, Not necessarily present inhashqueue.
      * Determine if the transaction is in the hash queue to be packaged;
      * if the transaction exists in the map, it does not necessarily exist in the hash queue to be packaged.
      *

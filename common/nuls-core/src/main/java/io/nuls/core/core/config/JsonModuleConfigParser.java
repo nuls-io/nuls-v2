@@ -11,7 +11,7 @@ import java.util.Map;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-13 17:51
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class JsonModuleConfigParser implements ModuleConfigParser {
     @Override
@@ -33,12 +33,12 @@ public class JsonModuleConfigParser implements ModuleConfigParser {
                         res.put(key, new ConfigurationLoader.ConfigItem(configFile, JSONUtils.obj2json(value)));
                     }
                 } catch (JsonProcessingException e) {
-                    throw new RuntimeException("json配置文件解析错误：" + key);
+                    throw new RuntimeException("jsonConfiguration file parsing error：" + key);
                 }
             });
             return Map.of(ConfigurationLoader.GLOBAL_DOMAIN,res);
         } catch (Exception e) {
-            throw new RuntimeException("json配置文件解析错误");
+            throw new RuntimeException("jsonConfiguration file parsing error");
         }
     }
 }

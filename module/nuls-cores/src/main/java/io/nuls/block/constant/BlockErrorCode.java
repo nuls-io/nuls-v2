@@ -26,11 +26,11 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.rpc.model.ModuleE;
 
 /**
- * 区块管理模块的错误信息表
+ * Error message table for block management module
  *
  * @author captain
  * @version 1.0
- * @date 18-11-20 上午11:01
+ * @date 18-11-20 morning11:01
  */
 public interface BlockErrorCode extends CommonCodeConstanst {
 

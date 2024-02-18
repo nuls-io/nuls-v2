@@ -8,11 +8,11 @@ import io.nuls.core.rpc.model.ApiModelProperty;
  * @author: Charlie
  * @date: 2018/10/29
  */
-@ApiModel(description = "备份ketstore表单")
+@ApiModel(description = "backupsketstoreform")
 public class AccountKeyStoreBackup {
-    @ApiModelProperty(description = "密码", required = true)
+    @ApiModelProperty(description = "password", required = true)
     private String password;
-    @ApiModelProperty(description = "文件路径")
+    @ApiModelProperty(description = "File path")
     private String path;
 
     public String getPassword() {

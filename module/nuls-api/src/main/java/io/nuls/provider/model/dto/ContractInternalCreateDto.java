@@ -32,13 +32,13 @@ import io.nuls.core.rpc.model.ApiModelProperty;
  */
 @ApiModel
 public class ContractInternalCreateDto {
-    @ApiModelProperty(description = "交易创建者地址")
+    @ApiModelProperty(description = "Transaction creator address")
     private String sender;
-    @ApiModelProperty(description = "创建的合约地址")
+    @ApiModelProperty(description = "Contract address created")
     private String contractAddress;
-    @ApiModelProperty(description = "内部创建所依据的合约")
+    @ApiModelProperty(description = "The contract on which internal creation is based")
     private String codeCopyBy;
-    @ApiModelProperty(description = "参数列表")
+    @ApiModelProperty(description = "parameter list")
     private String args;
 
     public String getSender() {

@@ -40,7 +40,7 @@ public class SyncTest {
             e.printStackTrace();
         }
 
-        System.out.println("总耗时：" + ((System.nanoTime() - time) / 10000) / 100f + " ms");
+        System.out.println("Total time consumption：" + ((System.nanoTime() - time) / 10000) / 100f + " ms");
 
     }
 }

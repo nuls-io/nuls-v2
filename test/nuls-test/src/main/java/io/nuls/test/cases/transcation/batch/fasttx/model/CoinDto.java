@@ -30,7 +30,7 @@ import io.nuls.test.utils.LoggerUtil;
 import java.math.BigInteger;
 
 /**
- * 转账资产
+ * Transfer assets
  * @author: qinyifeng
  * @date: 2018/12/10
  */
@@ -45,12 +45,12 @@ public class CoinDto implements Cloneable {
     private Integer assetsId;
 
     /**
-     * uint128 转出数量
+     * uint128 Transfer out quantity
      */
     private BigInteger amount;
 
     /**
-     * address对应的密码，用于签名
+     * addressCorresponding password for signing
      */
     private String password;
 

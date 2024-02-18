@@ -34,70 +34,70 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 每个链ID对应一个{@link ProtocolContext},维护一些链运行期间的信息,并负责链的初始化、启动、停止、销毁操作
+ * Each chainIDCorresponding to one{@link ProtocolContext},Maintain information during chain operation,And responsible for initializing the chain、start-up、cease、Destruction operation
  *
  * @author captain
  * @version 1.0
- * @date 18-11-20 上午10:46
+ * @date 18-11-20 morning10:46
  */
 public class ProtocolContext {
     /**
-     * 链ID
+     * chainID
      */
     private int chainId;
 
     /**
-     * 最新高度
+     * Latest height
      */
     private long latestHeight;
 
     /**
-     * 当前生效的协议版本(主网协议版本)
+     * The current effective protocol version(Main network protocol version)
      */
     private ProtocolVersion currentProtocolVersion;
 
     /**
-     * 当前本地的协议版本(本地节点协议版本)
+     * The current local protocol version(Local Node Protocol Version)
      */
     private ProtocolVersion localProtocolVersion;
 
     /**
-     * 当前生效的协议版本计数
+     * Current effective protocol version count
      */
     private int currentProtocolVersionCount;
 
     /**
-     * 所有生效的协议版本历史记录,回滚用
+     * History of all effective protocol versions,Rollback
      */
     private Deque<ProtocolVersion> protocolVersionHistory;
 
     /**
-     * 从配置文件读取的协议对象列表
+     * List of protocol objects read from configuration file
      */
     private List<ProtocolVersion> localVersionList;
 
     /**
-     * 缓存的未统计区间内各协议版本占比
+     * The proportion of different protocol versions within the unstatisfied interval of cache
      */
     private Map<ProtocolVersion, Integer> proportionMap;
 
     /**
-     * 缓存的未统计区间内区块数
+     * The number of cached blocks within an unstatisfied interval
      */
     private int count;
 
     /**
-     * 上一条缓存的统计信息
+     * Previous cache statistics
      */
     private StatisticsInfo lastValidStatisticsInfo;
 
     /**
-     * 链的运行时参数
+     * The runtime parameters of the chain
      */
     private ConfigBean parameters;
 
     /**
-     * 记录通用日志
+     * Record General Logs
      */
     private NulsLogger logger;
 

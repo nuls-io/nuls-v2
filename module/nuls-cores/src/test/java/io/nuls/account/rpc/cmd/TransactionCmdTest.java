@@ -54,7 +54,7 @@ public class TransactionCmdTest {
     String address4 = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
 
     static int assetId = 1;
-    //入账金额
+    //Entry amount
     static BigInteger amount = BigInteger.valueOf(1000000000000000L);
 
     Chain chain;
@@ -83,7 +83,7 @@ public class TransactionCmdTest {
     }
 
     /**
-     * 铸币
+     * Coinage
      *
      * @throws Exception
      */
@@ -109,13 +109,13 @@ public class TransactionCmdTest {
     }
 
     /**
-     * 铸币交易
+     * Coinage trading
      *
      * @return
      * @throws IOException
      */
     private Transaction buildTransaction(String address) throws IOException {
-        //封装交易执行
+        //Encapsulation transaction execution
         Transaction tx = new Transaction();
         CoinData coinData = new CoinData();
         CoinTo coinTo = new CoinTo();
@@ -147,7 +147,7 @@ public class TransactionCmdTest {
 
     @Test
     public void transfer() throws Exception {
-        //组装普通转账交易
+        //Assembly of ordinary transfer transactions
         //TransferDto transferDto = CommonRpcOperation.createTransferTx("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG","tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG",new BigInteger("10000000000"));
         TransferDTO transferDto = CommonRpcOperation.createTransferTx("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG","tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG",new BigInteger("199800000"));
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", JSONUtils.json2map(JSONUtils.obj2json(transferDto)));
@@ -157,28 +157,28 @@ public class TransactionCmdTest {
     }
 
     /**
-     * 别名转账测试用例
+     * Alias transfer test case
      */
     @Test
     public void transferByAlias() throws Exception {
-        //创建账户
+        //Create an account
         List<String> accoutList = CommonRpcOperation.createAccount(1);
         assertTrue(accoutList != null & accoutList.size() == 1);
         String fromAddress = address;
         String toAddress = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
-        //铸币
+        //Coinage
         //addGenesisAsset(fromAddress);
         //ddGenesisAsset(toAddress); //because the to address need to set alias
         BigInteger balance = LedgerCall.getBalance(chain, assetChainId, assetId, fromAddress);
         BigInteger balance2 = LedgerCall.getBalance(chain, assetChainId, assetId, toAddress);
         System.out.println(fromAddress + "=====" + balance.longValue());
         System.out.println(toAddress + "=====" + balance2.longValue());
-        //设置别名
+        //Set alias
         //String alias = "edwardtest";
         String alias = "alias_1550831248049";
         //String txHash = CommonRpcOperation.setAlias(toAddress, alias);
         //assertNotNull(txHash);
-        //查询设置别名是否成功
+        //Check if the alias setting was successful
 //        String afterSetALias;
 //        int i = 0;
 //        do {
@@ -192,9 +192,9 @@ public class TransactionCmdTest {
 //            LOG.warn("getAliasByAddress return null,retry times:{}", i);
 //        } while (i <= 10);
 //        assertNotNull(afterSetALias);
-        //转账前查询转入方余额
+        //Query the balance of the transferor before transfer
 
-        //别名转账
+        //Alias transfer
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.CHAIN_ID, chainId);
         params.put("address", fromAddress);
@@ -208,16 +208,16 @@ public class TransactionCmdTest {
         String txDigestHex = (String) result.get(RpcConstant.TX_HASH);
         System.out.println(txDigestHex);
         assertNotNull(txDigestHex);
-        //转账后查询转入方余额
-        //TODO 此处可能需要延时，因为涉及到交易广播与确认
+        //Query the balance of the transferee after the transfer
+        //TODO Delay may be required here as it involves transaction broadcasting and confirmation
     }
 
     /**
-     * 创建多签转账交易，包括别名转账以及非别名转账
+     * Create multi signature transfer transactions, including alias transfers and non alias transfers
      * <p>
-     * 1st:构建别名转账请求参数
-     * 2end:将请求发送到账户模块
-     * 3ird:检查返回结果
+     * 1st:Build alias transfer request parameters
+     * 2end:Send the request to the account module
+     * 3ird:Check the returned results
      */
     @Test
     public void createMultiSignTransferTest() throws Exception {
@@ -226,7 +226,7 @@ public class TransactionCmdTest {
     }
 
     /**
-     * 多签转账签名
+     * Multiple transfer signatures
      */
     @Test
     public void signMultiSignTransactionTest() throws Exception {
@@ -250,22 +250,22 @@ public class TransactionCmdTest {
 
     }
 
-    //连续交易测试
+    //Continuous trading test
     @Test
     public void contineCtx() throws Exception {
         for (int i = 0; i < 1; i++) {
-            //组装普通转账交易
+            //Assembly of ordinary transfer transactions
             TransferDTO transferDto = this.createTransferTx();
-            //调用接口
+            //Calling interfaces
 //            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", JSONUtils.json2map(JSONUtils.obj2json(transferDto)));
 //            HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
 //            Assert.assertTrue(null != result);
 //            Log.info("{}", result.get("value"));
 //            System.out.println("transfer: " + result.get("value"));
 
-            //组装创建节点交易
+            //Assemble and create node transactions
 //            Map agentTxMap = this.createAgentTx(address1, address2);
-//            //调用接口
+//            //Calling interfaces
 //            Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
 //            HashMap result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_createAgent"));
 //            Assert.assertTrue(null != result);
@@ -273,10 +273,10 @@ public class TransactionCmdTest {
 //            Log.info("{}", txHex);
 //            System.out.println("createAgent: " + txHex);
 
-            //创建节点交易提交
+            //Create node transaction submission
             //String agentHash=this.createAgentCommit(txHex);
 
-            //组装委托节点交易
+            //Assembly commission node transaction
 //            String agentHash="00208fb929d0d351f3bb402e94a24d407ea91e9b25f706496ddc69b234c589cd4e26";
 //            Map dpTxMap = this.depositToAgent(agentHash);
 //            Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_depositToAgent", dpTxMap);
@@ -284,7 +284,7 @@ public class TransactionCmdTest {
 //            String dpTxHex = (String) dpResult.get("txHex");
 //            System.out.println("createDeposit" + dpResp.getResponseData());
 //
-//            //组装退出委托交易
+//            //Assembly exit commission transaction
 //            withdraw();
 
             //Thread.sleep(3000L);
@@ -292,7 +292,7 @@ public class TransactionCmdTest {
     }
 
     /**
-     * 创建普通转账交易
+     * Create a regular transfer transaction
      *
      * @return
      */
@@ -301,7 +301,7 @@ public class TransactionCmdTest {
     }
 
     /**
-     * 创建节点
+     * Create nodes
      */
     public Map createAgentTx(String agentAddress, String packingAddress) throws Exception {
         Map<String, Object> params = new HashMap<>();
@@ -319,9 +319,9 @@ public class TransactionCmdTest {
     public void createAgentTx() throws Exception {
         BigInteger balance = LedgerCall.getBalance(chain, assetChainId, assetId, address1);
         System.out.println(balance.longValue());
-        //组装创建节点交易
+        //Assemble and create node transactions
         Map agentTxMap = this.createAgentTx(address1, address2);
-        //调用接口
+        //Calling interfaces
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_createAgent"));
         Assert.assertTrue(null != result);
@@ -331,13 +331,13 @@ public class TransactionCmdTest {
 
     @Test
     public void stopAgentTx() throws Exception {
-        //组装创建节点交易
+        //Assemble and create node transactions
         //Map agentTxMap=this.createAgentTx(address9, address1);
         Map<String, Object> txMap = new HashMap();
         txMap.put("chainId", chainId);
         txMap.put("address", address1);
         txMap.put("password", "");
-        //调用接口
+        //Calling interfaces
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_stopAgent", txMap);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_stopAgent"));
         Assert.assertTrue(null != result);
@@ -346,7 +346,7 @@ public class TransactionCmdTest {
     }
 
     /**
-     * 创建节点交易提交
+     * Create node transaction submission
      *
      * @param caTxHex
      * @return
@@ -354,7 +354,7 @@ public class TransactionCmdTest {
     public String createAgentCommit(String caTxHex) {
         String agentHash = null;
         try {
-            //创建节点交易提交
+            //Create node transaction submission
             Map<String, Object> caTxCommit = new HashMap<>();
             caTxCommit.put("chainId", chainId);
             BlockHeader blockHeader = new BlockHeader();
@@ -372,7 +372,7 @@ public class TransactionCmdTest {
     }
 
     /**
-     * 委托节点交易创建
+     * Entrust node transaction creation
      */
     public Map depositToAgent(String agentHash) {
         Map<String, Object> dpParams = new HashMap<>();
@@ -384,13 +384,13 @@ public class TransactionCmdTest {
     }
 
     /**
-     * 委托节点交易创建
+     * Entrust node transaction creation
      */
     @Test
     public void depositToAgent() throws Exception {
         BigInteger balance = LedgerCall.getBalance(chain, assetChainId, assetId, address4);
         System.out.println(balance.longValue());
-        //组装委托节点交易
+        //Assembly commission node transaction
         String agentHash = "00207ebda6a6a4a8089f358f2a6b96d9257a67ef20defb184acf2c571f54fdec6a08";
         Map<String, Object> dpParams = new HashMap<>();
         dpParams.put(Constants.CHAIN_ID, chainId);
@@ -406,7 +406,7 @@ public class TransactionCmdTest {
     }
 
     /**
-     * 退出共识
+     * Exit consensus
      *
      * @throws Exception
      */
@@ -423,7 +423,7 @@ public class TransactionCmdTest {
     }
 
     private Map<String, Object> createMultiSignTransfer() throws Exception {
-        //创建多签账户
+        //Create a multi signature account
         MultiSigAccount multiSigAccount = CommonRpcOperation.createMultiSigAccount();
         assertNotNull(multiSigAccount);
         //String fromAddress = AddressTool.getStringAddressByBytes(multiSigAccount.getAddress().getAddressBytes());
@@ -431,16 +431,16 @@ public class TransactionCmdTest {
         assertNotNull(fromAddress);
         String signAddress = AddressTool.getStringAddressByBytes(AddressTool.getAddress(multiSigAccount.getPubKeyList().get(0), chainId));
         assertNotNull(signAddress);
-        //创建一个接收方账户
+        //Create a recipient account
         List<String> accoutList = CommonRpcOperation.createAccount(1);
         assertTrue(accoutList != null & accoutList.size() == 1);
         String toAddress = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";//accoutList.get(0);
-        //铸币
+        //Coinage
         //addGenesisAsset(fromAddress);
         BigInteger balance = TxUtil.getBalance(chain, chainId, assetId, AddressTool.getAddress(fromAddress));
         System.out.println(balance);
 
-        //创建多签账户转账交易
+        //Create multi signature account transfer transactions
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.CHAIN_ID, chainId);
         params.put("address", fromAddress);
@@ -463,7 +463,7 @@ public class TransactionCmdTest {
     }
 
     /**
-     * 查询余额
+     * Query balance
      */
     @Test
     public void getBalance() {

@@ -33,7 +33,7 @@ import io.nuls.core.exception.NulsException;
 
 /**
  * @author lan
- * @description peer连接主动断开，拒绝业务消息连接
+ * @description peerActive disconnection of connection, rejecting business message connection
  * @date 2018/11/13
  **/
 public class ByeMessage extends BaseMessage {

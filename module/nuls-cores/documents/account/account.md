@@ -1,669 +1,669 @@
-# 账户模块
-## 模块概述
-账户模块是提供关于账户各项功能的基础性模块。主要对账户的生成、安全和保管、信息的获取等几个方面的功能提供支持，其他模块可以根据账户模块提供的接口来使用账户的各种功能以及获取账户信息，用户或者其他应用可以根据RPC接口对账户进行更加实用性和个性化的操作。账户是基础模块，也是用户数据的载体 。
-## 接口功能
-- 账户的生成
-- 创建账户、导入账户
-- 账户的安全和保管
-- 账户的备份、设置账户密码、修改账户密码、移除账户
-- 账户信息的获取
-- 查询单个账户信息、获取多个账户信息、获取账户地址、查询账户余额、查询账户别名
-- 其他实用性和个性化功能  设置账户别名、设置账户备注、验证账户是否加密、签名、验证账户地址格式、验证账户密码是否正确等功能
+# Account module
+## Module Overview
+The account module is a fundamental module that provides information about various functions of the account. Mainly for account generation、Security and storage、Support is provided for several functions such as information acquisition, while other modules can use various functions of the account and obtain account information based on the interface provided by the account module. Users or other applications can useRPCThe interface provides more practical and personalized operations for accounts. Accounts are the basic module and also the carrier of user data .
+## Interface functions
+- Account generation
+- Create an account、Import account
+- Account security and custody
+- Account backup、Set account password、Change account password、Remove account
+- Obtaining account information
+- Query individual account information、Obtain information from multiple accounts、Obtain account address、Query account balance、Query account alias
+- Other practical and personalized features  Set account alias、Set account notes、Verify if the account is encrypted、autograph、Verify account address format、Verify account password correctness and other functions
 
 
-## 接口列表
+## Interface List
 ### ac\_removeAccount
-移除指定账户/Remove specified account
+Remove specified account/Remove specified account
 #### scope:public
 #### version:1.0
 
-#### 参数列表
-| 参数名      |  参数类型  | 参数描述 | 是否非空 |
+#### parameter list
+| Parameter Name      |  Parameter type  | Parameter Description | Is it not empty |
 | -------- |:------:| ---- |:----:|
-| chainId  |  int   | 链id  |  是   |
-| address  | string | 账户地址 |  是   |
-| password | string | 账户密码 |  是   |
+| chainId  |  int   | chainid  |  yes   |
+| address  | string | Account address |  yes   |
+| password | string | Account password |  yes   |
 
-#### 返回值
-| 字段名   |  字段类型   | 参数描述 |
+#### Return value
+| Field Name   |  Field type   | Parameter Description |
 | ----- |:-------:| ---- |
-| value | boolean | 是否成功 |
+| value | boolean | Whether successful |
 
 ### ac\_getAccountList
-获取所有账户集合,并放入缓存/query all account collections and put them in cache
+Get all account collections,And put it in cache/query all account collections and put them in cache
 #### scope:public
 #### version:1.0
 
-#### 参数列表
-| 参数名     | 参数类型 | 参数描述 | 是否非空 |
+#### parameter list
+| Parameter Name     | Parameter type | Parameter Description | Is it not empty |
 | ------- |:----:| ---- |:----:|
-| chainId | int  | 链id  |  是   |
+| chainId | int  | chainid  |  yes   |
 
-#### 返回值
-| 字段名                                                                |      字段类型       | 参数描述   |
+#### Return value
+| Field Name                                                                |      Field type       | Parameter Description   |
 | ------------------------------------------------------------------ |:---------------:| ------ |
-| list                                                               | list&lt;object> | 返回账户集合 |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;address            |     string      | 账户地址   |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;alias              |     string      | 别名     |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pubkeyHex          |     string      | 公钥     |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;encryptedPrikeyHex |     string      | 已加密私钥  |
+| list                                                               | list&lt;object> | Return account collection |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;address            |     string      | Account address   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;alias              |     string      | alias     |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pubkeyHex          |     string      | Public key     |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;encryptedPrikeyHex |     string      | Encrypted private key  |
 
 ### ac\_signDigest
-数据摘要签名/Data digest signature
+Data Summary Signature/Data digest signature
 #### scope:public
 #### version:1.0
 
-#### 参数列表
-| 参数名      |  参数类型  | 参数描述  | 是否非空 |
+#### parameter list
+| Parameter Name      |  Parameter type  | Parameter Description  | Is it not empty |
 | -------- |:------:| ----- |:----:|
-| chainId  |  int   | 链id   |  是   |
-| address  | string | 账户地址  |  是   |
-| password | string | 账户密码  |  是   |
-| data     | string | 待签名数据 |  是   |
+| chainId  |  int   | chainid   |  yes   |
+| address  | string | Account address  |  yes   |
+| password | string | Account password  |  yes   |
+| data     | string | Data to be signed |  yes   |
 
-#### 返回值
-| 字段名       |  字段类型  | 参数描述  |
+#### Return value
+| Field Name       |  Field type  | Parameter Description  |
 | --------- |:------:| ----- |
-| signature | string | 签名后数据 |
+| signature | string | Data after signature |
 
 ### ac\_getAccountByAddress
-通过地址获取账户信息/get account info according to address
+Obtain account information through address/get account info according to address
 #### scope:public
 #### version:1.0
 
-#### 参数列表
-| 参数名     |  参数类型  | 参数描述 | 是否非空 |
+#### parameter list
+| Parameter Name     |  Parameter type  | Parameter Description | Is it not empty |
 | ------- |:------:| ---- |:----:|
-| chainId |  int   | 链id  |  是   |
-| address | string | 账户地址 |  是   |
+| chainId |  int   | chainid  |  yes   |
+| address | string | Account address |  yes   |
 
-#### 返回值
-| 字段名                |  字段类型  | 参数描述  |
+#### Return value
+| Field Name                |  Field type  | Parameter Description  |
 | ------------------ |:------:| ----- |
-| address            | string | 账户地址  |
-| alias              | string | 别名    |
-| pubkeyHex          | string | 公钥    |
-| encryptedPrikeyHex | string | 已加密私钥 |
+| address            | string | Account address  |
+| alias              | string | alias    |
+| pubkeyHex          | string | Public key    |
+| encryptedPrikeyHex | string | Encrypted private key |
 
 ### ac\_signBlockDigest
-区块数据摘要签名/Block data digest signature
+Block Data Summary Signature/Block data digest signature
 #### scope:public
 #### version:1.0
 
-#### 参数列表
-| 参数名      |  参数类型  | 参数描述  | 是否非空 |
+#### parameter list
+| Parameter Name      |  Parameter type  | Parameter Description  | Is it not empty |
 | -------- |:------:| ----- |:----:|
-| chainId  |  int   | 链id   |  是   |
-| address  | string | 账户地址  |  是   |
-| password | string | 账户密码  |  是   |
-| data     | string | 待签名数据 |  是   |
+| chainId  |  int   | chainid   |  yes   |
+| address  | string | Account address  |  yes   |
+| password | string | Account password  |  yes   |
+| data     | string | Data to be signed |  yes   |
 
-#### 返回值
-| 字段名       |  字段类型  | 参数描述  |
+#### Return value
+| Field Name       |  Field type  | Parameter Description  |
 | --------- |:------:| ----- |
-| signature | string | 签名后数据 |
+| signature | string | Data after signature |
 
 ### ac\_setRemark
-为账户设置备注/Set remark for accounts
+Set notes for the account/Set remark for accounts
 #### scope:public
 #### version:1.0
 
-#### 参数列表
-| 参数名     |  参数类型  | 参数描述 | 是否非空 |
+#### parameter list
+| Parameter Name     |  Parameter type  | Parameter Description | Is it not empty |
 | ------- |:------:| ---- |:----:|
-| chainId |  int   | 链id  |  是   |
-| address | string | 账户地址 |  是   |
-| remark  | string | 备注   |  是   |
+| chainId |  int   | chainid  |  yes   |
+| address | string | Account address |  yes   |
+| remark  | string | Remarks   |  yes   |
 
-#### 返回值
-| 字段名   |  字段类型   | 参数描述 |
+#### Return value
+| Field Name   |  Field type   | Parameter Description |
 | ----- |:-------:| ---- |
-| value | boolean | 是否成功 |
+| value | boolean | Whether successful |
 
 ### ac\_importAccountByPriKey
-根据私钥导入账户/Import accounts by private key
+Import account based on private key/Import accounts by private key
 #### scope:public
 #### version:1.0
 
-#### 参数列表
-| 参数名       |  参数类型   | 参数描述         | 是否非空 |
+#### parameter list
+| Parameter Name       |  Parameter type   | Parameter Description         | Is it not empty |
 | --------- |:-------:| ------------ |:----:|
-| chainId   |   int   | 链id          |  是   |
-| password  | string  | 设置新密码        |  是   |
-| priKey    | string  | 账户私钥         |  是   |
-| overwrite | boolean | 如果账户已存在,是否覆盖 |  是   |
+| chainId   |   int   | chainid          |  yes   |
+| password  | string  | Set a new password        |  yes   |
+| priKey    | string  | Account private key         |  yes   |
+| overwrite | boolean | If the account already exists,Is it covered |  yes   |
 
-#### 返回值
-| 字段名     |  字段类型  | 参数描述    |
+#### Return value
+| Field Name     |  Field type  | Parameter Description    |
 | ------- |:------:| ------- |
-| address | string | 导入的账户地址 |
+| address | string | Imported account address |
 
 ### ac\_createOfflineAccount
-创建离线账户, 该账户不保存到数据库, 并将直接返回账户的所有信息/create an offline account, which is not saved to the database and will directly return all information to the account.
+Create an offline account, This account is not saved to the database, And will directly return all information of the account/create an offline account, which is not saved to the database and will directly return all information to the account.
 #### scope:public
 #### version:1.0
 
-#### 参数列表
-| 参数名      |  参数类型  | 参数描述      | 是否非空 |
+#### parameter list
+| Parameter Name      |  Parameter type  | Parameter Description      | Is it not empty |
 | -------- |:------:| --------- |:----:|
-| chainId  |  int   | 链id       |  是   |
-| count    |  int   | 需要创建账户的数量 |  是   |
-| password | string | 账户密码      |  是   |
+| chainId  |  int   | chainid       |  yes   |
+| count    |  int   | Number of accounts to be created |  yes   |
+| password | string | Account password      |  yes   |
 
-#### 返回值
-| 字段名                                                             |      字段类型       | 参数描述   |
+#### Return value
+| Field Name                                                             |      Field type       | Parameter Description   |
 | --------------------------------------------------------------- |:---------------:| ------ |
-| list                                                            | list&lt;object> | 离线账户集合 |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;address         |     string      | 账户地址   |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pubKey          |     string      | 公钥     |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;priKey          |     string      | 私钥     |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;encryptedPriKey |     string      | 加密后的私钥 |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;extend          |     string      | 其他信息   |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;createTime      |      long       | 创建时间   |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;encrypted       |     boolean     | 账户是否加密 |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remark          |     string      | 账户备注   |
+| list                                                            | list&lt;object> | Offline account collection |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;address         |     string      | Account address   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pubKey          |     string      | Public key     |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;priKey          |     string      | Private key     |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;encryptedPriKey |     string      | Encrypted private key |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;extend          |     string      | Other information   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;createTime      |      long       | Creation time   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;encrypted       |     boolean     | Is the account encrypted |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remark          |     string      | Account notes   |
 
 ### ac\_createContractAccount
-创建智能合约账户/create smart contract account
+Create a smart contract account/create smart contract account
 #### scope:public
 #### version:1.0
 
-#### 参数列表
-| 参数名     | 参数类型 | 参数描述 | 是否非空 |
+#### parameter list
+| Parameter Name     | Parameter type | Parameter Description | Is it not empty |
 | ------- |:----:| ---- |:----:|
-| chainId | int  | 链id  |  是   |
+| chainId | int  | chainid  |  yes   |
 
-#### 返回值
-| 字段名     |  字段类型  | 参数描述   |
+#### Return value
+| Field Name     |  Field type  | Parameter Description   |
 | ------- |:------:| ------ |
-| address | string | 智能合约地址 |
+| address | string | Smart contract address |
 
 ### ac\_getEncryptedAddressList
-获取本地加密账户列表/Get a list of locally encrypted accounts
+Get a list of local encrypted accounts/Get a list of locally encrypted accounts
 #### scope:public
 #### version:1.0
 
-#### 参数列表
-| 参数名     | 参数类型 | 参数描述 | 是否非空 |
+#### parameter list
+| Parameter Name     | Parameter type | Parameter Description | Is it not empty |
 | ------- |:----:| ---- |:----:|
-| chainId | int  | 链id  |  是   |
+| chainId | int  | chainid  |  yes   |
 
-#### 返回值
-| 字段名  |      字段类型       | 参数描述     |
+#### Return value
+| Field Name  |      Field type       | Parameter Description     |
 | ---- |:---------------:| -------- |
-| list | list&lt;string> | 返回账户地址集合 |
+| list | list&lt;string> | Return account address set |
 
 ### ac\_getAddressList
-分页查询账户地址列表/Paging query account address list
+Pagination query account address list/Paging query account address list
 #### scope:public
 #### version:1.0
 
-#### 参数列表
-| 参数名        | 参数类型 | 参数描述   | 是否非空 |
+#### parameter list
+| Parameter Name        | Parameter type | Parameter Description   | Is it not empty |
 | ---------- |:----:| ------ |:----:|
-| chainId    | int  | 链id    |  是   |
-| pageNumber | int  | 页码     |  是   |
-| pageSize   | int  | 每一页记录数 |  是   |
+| chainId    | int  | chainid    |  yes   |
+| pageNumber | int  | Page number     |  yes   |
+| pageSize   | int  | Number of records per page |  yes   |
 
-#### 返回值
-| 字段名 |      字段类型       | 参数描述            |
+#### Return value
+| Field Name |      Field type       | Parameter Description            |
 | --- |:---------------:| --------------- |
-| 返回值 | list&lt;string> | 返回一个Page对象，账户集合 |
+| Return value | list&lt;string> | Return aPageObject, Account Collection |
 
 ### ac\_getPriKeyByAddress
-通过账户地址和密码,查询账户私匙/Inquire the account's private key according to the address
+By account address and password,Query account private key/Inquire the account's private key according to the address
 #### scope:public
 #### version:1.0
 
-#### 参数列表
-| 参数名      |  参数类型  | 参数描述 | 是否非空 |
+#### parameter list
+| Parameter Name      |  Parameter type  | Parameter Description | Is it not empty |
 | -------- |:------:| ---- |:----:|
-| chainId  |  int   | 链id  |  是   |
-| address  | string | 账户地址 |  是   |
-| password | string | 账户密码 |  是   |
+| chainId  |  int   | chainid  |  yes   |
+| address  | string | Account address |  yes   |
+| password | string | Account password |  yes   |
 
-#### 返回值
-| 字段名    |  字段类型  | 参数描述 |
+#### Return value
+| Field Name    |  Field type  | Parameter Description |
 | ------ |:------:| ---- |
-| priKey | string | 私钥   |
-| pubKey | string | 公钥   |
+| priKey | string | Private key   |
+| pubKey | string | Public key   |
 
 ### ac\_getAllPriKey
-获取所有本地账户账户私钥，必须保证所有账户密码一致，如果本地账户中的密码不一致，将返回错误信息/Get the all local private keys. if the password in the local account is different, the error message will be returned.
+To obtain all local account private keys, it is necessary to ensure that all account passwords are consistent. If the passwords in the local account are inconsistent, an error message will be returned/Get the all local private keys. if the password in the local account is different, the error message will be returned.
 #### scope:public
 #### version:1.0
 
-#### 参数列表
-| 参数名      |  参数类型  | 参数描述 | 是否非空 |
+#### parameter list
+| Parameter Name      |  Parameter type  | Parameter Description | Is it not empty |
 | -------- |:------:| ---- |:----:|
-| chainId  |  int   | 链id  |  是   |
-| password | string | 账户密码 |  是   |
+| chainId  |  int   | chainid  |  yes   |
+| password | string | Account password |  yes   |
 
-#### 返回值
-| 字段名  |      字段类型       | 参数描述 |
+#### Return value
+| Field Name  |      Field type       | Parameter Description |
 | ---- |:---------------:| ---- |
-| list | list&lt;string> | 私钥集合 |
+| list | list&lt;string> | Private key set |
 
 ### ac\_importAccountByKeystore
-根据AccountKeyStore导入账户/Import accounts by AccountKeyStore
+according toAccountKeyStoreImport account/Import accounts by AccountKeyStore
 #### scope:public
 #### version:1.0
 
-#### 参数列表
-| 参数名       |  参数类型   | 参数描述         | 是否非空 |
+#### parameter list
+| Parameter Name       |  Parameter type   | Parameter Description         | Is it not empty |
 | --------- |:-------:| ------------ |:----:|
-| chainId   |   int   | 链id          |  是   |
-| password  | string  | 设置新密码        |  是   |
-| keyStore  | string  | keyStore字符串  |  是   |
-| overwrite | boolean | 如果账户已存在,是否覆盖 |  是   |
+| chainId   |   int   | chainid          |  yes   |
+| password  | string  | Set a new password        |  yes   |
+| keyStore  | string  | keyStorecharacter string  |  yes   |
+| overwrite | boolean | If the account already exists,Is it covered |  yes   |
 
-#### 返回值
-| 字段名     |  字段类型  | 参数描述    |
+#### Return value
+| Field Name     |  Field type  | Parameter Description    |
 | ------- |:------:| ------- |
-| address | string | 导入的账户地址 |
+| address | string | Imported account address |
 
 ### ac\_exportKeyStoreJson
-导出AccountKeyStore字符串/export account KeyStore json
+exportAccountKeyStorecharacter string/export account KeyStore json
 #### scope:public
 #### version:1.0
 
-#### 参数列表
-| 参数名      |  参数类型  | 参数描述 | 是否非空 |
+#### parameter list
+| Parameter Name      |  Parameter type  | Parameter Description | Is it not empty |
 | -------- |:------:| ---- |:----:|
-| chainId  |  int   | 链id  |  是   |
-| address  | string | 账户地址 |  是   |
-| password | string | 账户密码 |  是   |
+| chainId  |  int   | chainid  |  yes   |
+| address  | string | Account address |  yes   |
+| password | string | Account password |  yes   |
 
-#### 返回值
-| 字段名      |  字段类型  | 参数描述        |
+#### Return value
+| Field Name      |  Field type  | Parameter Description        |
 | -------- |:------:| ----------- |
-| keyStore | string | keyStore字符串 |
+| keyStore | string | keyStorecharacter string |
 
 ### ac\_exportAccountKeyStore
-账户备份，导出AccountKeyStore字符串/export account KeyStore
+Account backup, exportAccountKeyStorecharacter string/export account KeyStore
 #### scope:public
 #### version:1.0
 
-#### 参数列表
-| 参数名      |  参数类型  | 参数描述 | 是否非空 |
+#### parameter list
+| Parameter Name      |  Parameter type  | Parameter Description | Is it not empty |
 | -------- |:------:| ---- |:----:|
-| chainId  |  int   | 链id  |  是   |
-| address  | string | 账户地址 |  是   |
-| password | string | 账户密码 |  是   |
-| filePath | string | 备份地址 |  否   |
+| chainId  |  int   | chainid  |  yes   |
+| address  | string | Account address |  yes   |
+| password | string | Account password |  yes   |
+| filePath | string | Backup address |  no   |
 
-#### 返回值
-| 字段名  |  字段类型  | 参数描述      |
+#### Return value
+| Field Name  |  Field type  | Parameter Description      |
 | ---- |:------:| --------- |
-| path | string | 实际备份文件的地址 |
+| path | string | The actual backup file address |
 
 ### ac\_updatePassword
-根据原密码修改账户密码/Modify the account password by the original password
+Change the account password based on the original password/Modify the account password by the original password
 #### scope:public
 #### version:1.0
 
-#### 参数列表
-| 参数名         |  参数类型  | 参数描述  | 是否非空 |
+#### parameter list
+| Parameter Name         |  Parameter type  | Parameter Description  | Is it not empty |
 | ----------- |:------:| ----- |:----:|
-| chainId     |  int   | 链id   |  是   |
-| address     | string | 账户地址  |  是   |
-| password    | string | 账户旧密码 |  是   |
-| newPassword | string | 账户新密码 |  是   |
+| chainId     |  int   | chainid   |  yes   |
+| address     | string | Account address  |  yes   |
+| password    | string | Old account password |  yes   |
+| newPassword | string | Account New Password |  yes   |
 
-#### 返回值
-| 字段名   |  字段类型   | 参数描述   |
+#### Return value
+| Field Name   |  Field type   | Parameter Description   |
 | ----- |:-------:| ------ |
-| value | boolean | 是否设置成功 |
+| value | boolean | Is it successfully set up |
 
 ### ac\_updateOfflineAccountPassword
-离线账户修改密码/Offline account change password
+Offline account password modification/Offline account change password
 #### scope:public
 #### version:1.0
 
-#### 参数列表
-| 参数名         |  参数类型  | 参数描述  | 是否非空 |
+#### parameter list
+| Parameter Name         |  Parameter type  | Parameter Description  | Is it not empty |
 | ----------- |:------:| ----- |:----:|
-| chainId     |  int   | 链id   |  是   |
-| address     | string | 账户地址  |  是   |
-| password    | string | 账户旧密码 |  是   |
-| newPassword | string | 账户新密码 |  是   |
-| priKey      | string | 账户私钥  |  是   |
+| chainId     |  int   | chainid   |  yes   |
+| address     | string | Account address  |  yes   |
+| password    | string | Old account password |  yes   |
+| newPassword | string | Account New Password |  yes   |
+| priKey      | string | Account private key  |  yes   |
 
-#### 返回值
-| 字段名             |  字段类型  | 参数描述       |
+#### Return value
+| Field Name             |  Field type  | Parameter Description       |
 | --------------- |:------:| ---------- |
-| encryptedPriKey | string | 返回修改后加密的私钥 |
+| encryptedPriKey | string | Return the encrypted private key after modification |
 
 ### ac\_validationPassword
-验证账户密码是否正确/Verify that the account password is correct
+Verify if the account password is correct/Verify that the account password is correct
 #### scope:public
 #### version:1.0
 
-#### 参数列表
-| 参数名      |  参数类型  | 参数描述 | 是否非空 |
+#### parameter list
+| Parameter Name      |  Parameter type  | Parameter Description | Is it not empty |
 | -------- |:------:| ---- |:----:|
-| chainId  |  int   | 链id  |  是   |
-| address  | string | 账户地址 |  是   |
-| password | string | 账户密码 |  是   |
+| chainId  |  int   | chainid  |  yes   |
+| address  | string | Account address |  yes   |
+| password | string | Account password |  yes   |
 
-#### 返回值
-| 字段名   |  字段类型   | 参数描述     |
+#### Return value
+| Field Name   |  Field type   | Parameter Description     |
 | ----- |:-------:| -------- |
-| value | boolean | 账户密码是否正确 |
+| value | boolean | Is the account password correct |
 
 ### ac\_verifySignData
-验证数据签名/Verification Data Signature
+Verify data signature/Verification Data Signature
 #### scope:public
 #### version:1.0
 
-#### 参数列表
-| 参数名    |  参数类型  | 参数描述  | 是否非空 |
+#### parameter list
+| Parameter Name    |  Parameter type  | Parameter Description  | Is it not empty |
 | ------ |:------:| ----- |:----:|
-| pubKey | string | 账户公钥  |  是   |
-| sig    | string | 签名    |  是   |
-| data   | string | 待签名数据 |  是   |
+| pubKey | string | Account public key  |  yes   |
+| sig    | string | autograph    |  yes   |
+| data   | string | Data to be signed |  yes   |
 
-#### 返回值
-| 字段名       |  字段类型   | 参数描述   |
+#### Return value
+| Field Name       |  Field type   | Parameter Description   |
 | --------- |:-------:| ------ |
-| signature | boolean | 签名是否正确 |
+| signature | boolean | Is the signature correct |
 
 ### ac\_createAccount
-创建指定个数的账户/create a specified number of accounts
+Create a specified number of accounts/create a specified number of accounts
 #### scope:public
 #### version:1.0
 
-#### 参数列表
-| 参数名      |  参数类型  | 参数描述      | 是否非空 |
+#### parameter list
+| Parameter Name      |  Parameter type  | Parameter Description      | Is it not empty |
 | -------- |:------:| --------- |:----:|
-| chainId  |  int   | 链id       |  是   |
-| count    |  int   | 需要创建账户的数量 |  是   |
-| password | string | 账户密码      |  是   |
+| chainId  |  int   | chainid       |  yes   |
+| count    |  int   | Number of accounts to be created |  yes   |
+| password | string | Account password      |  yes   |
 
-#### 返回值
-| 字段名  |      字段类型       | 参数描述      |
+#### Return value
+| Field Name  |      Field type       | Parameter Description      |
 | ---- |:---------------:| --------- |
-| list | list&lt;string> | 创建的账户地址集合 |
+| list | list&lt;string> | The set of account addresses created |
 
 ### ac\_getPubKey
-根据账户地址和密码,查询账户公钥/Get the account's public key
+Based on account address and password,Query account public key/Get the account's public key
 #### scope:public
 #### version:1.0
 
-#### 参数列表
-| 参数名      |  参数类型  | 参数描述 | 是否非空 |
+#### parameter list
+| Parameter Name      |  Parameter type  | Parameter Description | Is it not empty |
 | -------- |:------:| ---- |:----:|
-| chainId  |  int   | 链id  |  是   |
-| address  | string | 账户地址 |  是   |
-| password | string | 账户密码 |  是   |
+| chainId  |  int   | chainid  |  yes   |
+| address  | string | Account address |  yes   |
+| password | string | Account password |  yes   |
 
-#### 返回值
-| 字段名    |  字段类型  | 参数描述 |
+#### Return value
+| Field Name    |  Field type  | Parameter Description |
 | ------ |:------:| ---- |
-| pubKey | string | 公钥   |
+| pubKey | string | Public key   |
 
 ### ac\_getAliasByAddress
-根据地址获取别名/get the alias by address
+Retrieve aliases based on address/get the alias by address
 #### scope:public
 #### version:1.0
 
-#### 参数列表
-| 参数名     |  参数类型  | 参数描述 | 是否非空 |
+#### parameter list
+| Parameter Name     |  Parameter type  | Parameter Description | Is it not empty |
 | ------- |:------:| ---- |:----:|
-| chainId |  int   | 链id  |  是   |
-| address | string | 账户地址 |  是   |
+| chainId |  int   | chainid  |  yes   |
+| address | string | Account address |  yes   |
 
-#### 返回值
-| 字段名   |  字段类型  | 参数描述 |
+#### Return value
+| Field Name   |  Field type  | Parameter Description |
 | ----- |:------:| ---- |
-| alias | string | 别名   |
+| alias | string | alias   |
 
 ### ac\_setAlias
-设置别名/Set the alias of account
+Set alias/Set the alias of account
 #### scope:public
 #### version:1.0
 
-#### 参数列表
-| 参数名      |  参数类型  | 参数描述 | 是否非空 |
+#### parameter list
+| Parameter Name      |  Parameter type  | Parameter Description | Is it not empty |
 | -------- |:------:| ---- |:----:|
-| chainId  |  int   | 链id  |  是   |
-| address  | string | 账户地址 |  是   |
-| password | string | 账户密码 |  是   |
-| alias    | string | 别名   |  是   |
+| chainId  |  int   | chainid  |  yes   |
+| address  | string | Account address |  yes   |
+| password | string | Account password |  yes   |
+| alias    | string | alias   |  yes   |
 
-#### 返回值
-| 字段名    |  字段类型  | 参数描述       |
+#### Return value
+| Field Name    |  Field type  | Parameter Description       |
 | ------ |:------:| ---------- |
-| txHash | string | 设置别名交易hash |
+| txHash | string | Set up alias transactionshash |
 
 ### ac\_isAliasUsable
-检查别名是否可用/check whether the account is usable
+Check if aliases are available/check whether the account is usable
 #### scope:public
 #### version:1.0
 
-#### 参数列表
-| 参数名     |  参数类型  | 参数描述 | 是否非空 |
+#### parameter list
+| Parameter Name     |  Parameter type  | Parameter Description | Is it not empty |
 | ------- |:------:| ---- |:----:|
-| chainId |  int   | 链id  |  是   |
-| alias   | string | 别名   |  是   |
+| chainId |  int   | chainid  |  yes   |
+| alias   | string | alias   |  yes   |
 
-#### 返回值
-| 字段名   |  字段类型   | 参数描述     |
+#### Return value
+| Field Name   |  Field type   | Parameter Description     |
 | ----- |:-------:| -------- |
-| value | boolean | 别名是否可以使用 |
+| value | boolean | Can aliases be used |
 
 ### ac\_getAllAddressPrefix
-获取所有链的地址前缀
+Get address prefixes for all chains
 #### scope:public
 #### version:1.0
 
-#### 参数列表
-无参数
+#### parameter list
+No parameters
 
-#### 返回值
-| 字段名           |  字段类型   | 参数描述 |
+#### Return value
+| Field Name           |  Field type   | Parameter Description |
 | ------------- |:-------:| ---- |
-| chainId       | integer | 链id  |
-| addressPrefix | string  | 地址前缀 |
+| chainId       | integer | chainid  |
+| addressPrefix | string  | Address prefix |
 
 ### ac\_getAddressPrefixByChainId
-通过链id获取地址前缀
+By chainidGet address prefix
 #### scope:public
 #### version:1.0
 
-#### 参数列表
-| 参数名     | 参数类型 | 参数描述 | 是否非空 |
+#### parameter list
+| Parameter Name     | Parameter type | Parameter Description | Is it not empty |
 | ------- |:----:| ---- |:----:|
-| chainId | int  | 链id  |  是   |
+| chainId | int  | chainid  |  yes   |
 
-#### 返回值
-| 字段名           |  字段类型   | 参数描述 |
+#### Return value
+| Field Name           |  Field type   | Parameter Description |
 | ------------- |:-------:| ---- |
-| chainId       | integer | 链id  |
-| addressPrefix | string  | 地址前缀 |
+| chainId       | integer | chainid  |
+| addressPrefix | string  | Address prefix |
 
 ### ac\_addAddressPrefix
-添加地址前缀,链管理模块会调用该接口
+Add address prefix,The chain management module will call this interface
 #### scope:public
 #### version:1.0
 
-#### 参数列表
-| 参数名                                                           |  参数类型   | 参数描述    | 是否非空 |
+#### parameter list
+| Parameter Name                                                           |  Parameter type   | Parameter Description    | Is it not empty |
 | ------------------------------------------------------------- |:-------:| ------- |:----:|
-| prefixList                                                    |  list   | 链地址前缀列表 |  是   |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;chainId       | integer | 链id     |  是   |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;addressPrefix | string  | 地址前缀    |  是   |
+| prefixList                                                    |  list   | Chain Address Prefix List |  yes   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;chainId       | integer | chainid     |  yes   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;addressPrefix | string  | Address prefix    |  yes   |
 
-#### 返回值
-| 字段名 | 字段类型 | 参数描述           |
+#### Return value
+| Field Name | Field type | Parameter Description           |
 | --- |:----:| -------------- |
-| N/A | void | 无特定返回值，没有错误即成功 |
+| N/A | void | No specific return value, successful without errors |
 
 ### ac\_transfer
-创建普通转账交易/create transfer transaction
+Create a regular transfer transaction/create transfer transaction
 #### scope:public
 #### version:1.0
 
-#### 参数列表
-| 参数名                                                           |    参数类型    | 参数描述                          | 是否非空 |
+#### parameter list
+| Parameter Name                                                           |    Parameter type    | Parameter Description                          | Is it not empty |
 | ------------------------------------------------------------- |:----------:| ----------------------------- |:----:|
-| chainId                                                       |    int     | 链id                           |  是   |
-| inputs                                                        |    list    | 交易支付方数据                       |  是   |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;address       |   string   | 账户地址                          |  是   |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assetsChainId |  integer   | 资产的链ID                        |  是   |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assetsId      |  integer   | 资产ID                          |  是   |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;amount        | biginteger | 数量                            |  是   |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;password      |   string   | 转出账户(from)的密码, 组装接收方(to)数据时忽略 |  否   |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lockTime      |    long    | 解锁时间, -1为一直锁定, 0为不锁定(默认)      |  否   |
-| outputs                                                       |    list    | 交易接受方数据                       |  是   |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;address       |   string   | 账户地址                          |  是   |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assetsChainId |  integer   | 资产的链ID                        |  是   |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assetsId      |  integer   | 资产ID                          |  是   |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;amount        | biginteger | 数量                            |  是   |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;password      |   string   | 转出账户(from)的密码, 组装接收方(to)数据时忽略 |  否   |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lockTime      |    long    | 解锁时间, -1为一直锁定, 0为不锁定(默认)      |  否   |
-| remark                                                        |   string   | 交易备注                          |  是   |
+| chainId                                                       |    int     | chainid                           |  yes   |
+| inputs                                                        |    list    | Transaction payer data                       |  yes   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;address       |   string   | Account address                          |  yes   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assetsChainId |  integer   | The chain of assetsID                        |  yes   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assetsId      |  integer   | assetID                          |  yes   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;amount        | biginteger | quantity                            |  yes   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;password      |   string   | Transfer out of account(from)Password for, Assembly recipient(to)Ignoring data |  no   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lockTime      |    long    | Unlock time, -1To keep locked, 0To not lock(default)      |  no   |
+| outputs                                                       |    list    | Transaction recipient data                       |  yes   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;address       |   string   | Account address                          |  yes   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assetsChainId |  integer   | The chain of assetsID                        |  yes   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assetsId      |  integer   | assetID                          |  yes   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;amount        | biginteger | quantity                            |  yes   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;password      |   string   | Transfer out of account(from)Password for, Assembly recipient(to)Ignoring data |  no   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lockTime      |    long    | Unlock time, -1To keep locked, 0To not lock(default)      |  no   |
+| remark                                                        |   string   | Transaction notes                          |  yes   |
 
-#### 返回值
-| 字段名   |  字段类型  | 参数描述   |
+#### Return value
+| Field Name   |  Field type  | Parameter Description   |
 | ----- |:------:| ------ |
-| value | string | 交易hash |
+| value | string | transactionhash |
 
 ### ac\_createMultiSignTransfer
-创建多签地址转账交易/create multi sign transfer
+Create multiple address transfer transactions/create multi sign transfer
 #### scope:public
 #### version:1.0
 
-#### 参数列表
-| 参数名                                                           |    参数类型    | 参数描述                     | 是否非空 |
+#### parameter list
+| Parameter Name                                                           |    Parameter type    | Parameter Description                     | Is it not empty |
 | ------------------------------------------------------------- |:----------:| ------------------------ |:----:|
-| chainId                                                       |    int     | 链id                      |  是   |
-| inputs                                                        |    list    | 交易支付方数据                  |  是   |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;address       |   string   | 账户地址                     |  是   |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assetsChainId |  integer   | 资产的链ID                   |  是   |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assetsId      |  integer   | 资产ID                     |  是   |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;amount        | biginteger | 数量                       |  是   |
-| outputs                                                       |    list    | 交易接受方数据                  |  是   |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;address       |   string   | 账户地址                     |  是   |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assetsChainId |  integer   | 资产的链ID                   |  是   |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assetsId      |  integer   | 资产ID                     |  是   |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;amount        | biginteger | 数量                       |  是   |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lockTime      |    long    | 解锁时间, -1为一直锁定, 0为不锁定(默认) |  否   |
-| remark                                                        |   string   | 交易备注                     |  是   |
-| signAddress                                                   |   string   | 第一个签名账户地址(不填则只创建交易不签名)   |  否   |
-| signPassword                                                  |   string   | 第一个签名账户密码(不填则只创建交易不签名)   |  否   |
+| chainId                                                       |    int     | chainid                      |  yes   |
+| inputs                                                        |    list    | Transaction payer data                  |  yes   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;address       |   string   | Account address                     |  yes   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assetsChainId |  integer   | The chain of assetsID                   |  yes   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assetsId      |  integer   | assetID                     |  yes   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;amount        | biginteger | quantity                       |  yes   |
+| outputs                                                       |    list    | Transaction recipient data                  |  yes   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;address       |   string   | Account address                     |  yes   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assetsChainId |  integer   | The chain of assetsID                   |  yes   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assetsId      |  integer   | assetID                     |  yes   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;amount        | biginteger | quantity                       |  yes   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lockTime      |    long    | Unlock time, -1To keep locked, 0To not lock(default) |  no   |
+| remark                                                        |   string   | Transaction notes                     |  yes   |
+| signAddress                                                   |   string   | First signature account address(If left blank, only create transactions without signing)   |  no   |
+| signPassword                                                  |   string   | First signature account password(If left blank, only create transactions without signing)   |  no   |
 
-#### 返回值
-| 字段名       |  字段类型   | 参数描述                                  |
+#### Return value
+| Field Name       |  Field type   | Parameter Description                                  |
 | --------- |:-------:| ------------------------------------- |
-| tx        | string  | 完整交易序列化字符串,如果交易没达到最小签名数可继续签名          |
-| txHash    | string  | 交易hash                                |
-| completed | boolean | true:交易已完成(已广播),false:交易没完成,没有达到最小签名数 |
+| tx        | string  | Complete transaction serialization string,If the transaction does not reach the minimum number of signatures, you can continue to sign          |
+| txHash    | string  | transactionhash                                |
+| completed | boolean | true:Transaction completed(Broadcasted),false:Transaction not completed,Not reaching the minimum number of signatures |
 
 ### ac\_signMultiSignTransaction
-多签交易签名/sign MultiSign Transaction
+Multiple transaction signatures/sign MultiSign Transaction
 #### scope:public
 #### version:1.0
 
-#### 参数列表
-| 参数名          |  参数类型  | 参数描述    | 是否非空 |
+#### parameter list
+| Parameter Name          |  Parameter type  | Parameter Description    | Is it not empty |
 | ------------ |:------:| ------- |:----:|
-| chainId      |  int   | 链id     |  是   |
-| tx           | string | 交易数据字符串 |  是   |
-| signAddress  | string | 签名账户地址  |  是   |
-| signPassword | string | 签名账户密码  |  是   |
+| chainId      |  int   | chainid     |  yes   |
+| tx           | string | Transaction data string |  yes   |
+| signAddress  | string | Signature account address  |  yes   |
+| signPassword | string | Signature account password  |  yes   |
 
-#### 返回值
-| 字段名       |  字段类型   | 参数描述                                  |
+#### Return value
+| Field Name       |  Field type   | Parameter Description                                  |
 | --------- |:-------:| ------------------------------------- |
-| tx        | string  | 完整交易序列化字符串,如果交易没达到最小签名数可继续签名          |
-| txHash    | string  | 交易hash                                |
-| completed | boolean | true:交易已完成(已广播),false:交易没完成,没有达到最小签名数 |
+| tx        | string  | Complete transaction serialization string,If the transaction does not reach the minimum number of signatures, you can continue to sign          |
+| txHash    | string  | transactionhash                                |
+| completed | boolean | true:Transaction completed(Broadcasted),false:Transaction not completed,Not reaching the minimum number of signatures |
 
 ### ac\_createMultiSignAccount
-创建多签账户/create a multi sign account
+Create a multi signature account/create a multi sign account
 #### scope:public
 #### version:1.0
 
-#### 参数列表
-| 参数名      |      参数类型       | 参数描述                            | 是否非空 |
+#### parameter list
+| Parameter Name      |      Parameter type       | Parameter Description                            | Is it not empty |
 | -------- |:---------------:| ------------------------------- |:----:|
-| chainId  |       int       | 链id                             |  是   |
-| pubKeys  | list&lt;string> | 公钥集合(任意普通地址的公钥或存在于当前节点中的普通账户地址) |  是   |
-| minSigns |       int       | 最小签名数                           |  是   |
+| chainId  |       int       | chainid                             |  yes   |
+| pubKeys  | list&lt;string> | Public key set(Public key of any ordinary address or ordinary account address existing in the current node) |  yes   |
+| minSigns |       int       | Minimum number of signatures                           |  yes   |
 
-#### 返回值
-| 字段名     |  字段类型  | 参数描述   |
+#### Return value
+| Field Name     |  Field type  | Parameter Description   |
 | ------- |:------:| ------ |
-| address | string | 多签账户地址 |
+| address | string | Multiple account addresses signed |
 
 ### ac\_removeMultiSignAccount
-移除多签账户/remove the multi sign account
+Remove multiple signed accounts/remove the multi sign account
 #### scope:public
 #### version:1.0
 
-#### 参数列表
-| 参数名     |  参数类型  | 参数描述   | 是否非空 |
+#### parameter list
+| Parameter Name     |  Parameter type  | Parameter Description   | Is it not empty |
 | ------- |:------:| ------ |:----:|
-| chainId |  int   | 链id    |  是   |
-| address | string | 多签账户地址 |  是   |
+| chainId |  int   | chainid    |  yes   |
+| address | string | Multiple account addresses signed |  yes   |
 
-#### 返回值
-| 字段名   |  字段类型   | 参数描述   |
+#### Return value
+| Field Name   |  Field type   | Parameter Description   |
 | ----- |:-------:| ------ |
-| value | boolean | 是否移除成功 |
+| value | boolean | Was removal successful |
 
 ### ac\_setMultiSignAlias
-设置多签账户别名/set the alias of multi sign account
+Set multiple account aliases/set the alias of multi sign account
 #### scope:public
 #### version:1.0
 
-#### 参数列表
-| 参数名          |  参数类型  | 参数描述                   | 是否非空 |
+#### parameter list
+| Parameter Name          |  Parameter type  | Parameter Description                   | Is it not empty |
 | ------------ |:------:| ---------------------- |:----:|
-| chainId      |  int   | 链id                    |  是   |
-| address      | string | 多签账户地址                 |  是   |
-| alias        | string | 别名                     |  是   |
-| signAddress  | string | 第一个签名账户地址(不填则只创建交易不签名) |  否   |
-| signPassword | string | 第一个签名账户密码(不填则只创建交易不签名) |  否   |
+| chainId      |  int   | chainid                    |  yes   |
+| address      | string | Multiple account addresses signed                 |  yes   |
+| alias        | string | alias                     |  yes   |
+| signAddress  | string | First signature account address(If left blank, only create transactions without signing) |  no   |
+| signPassword | string | First signature account password(If left blank, only create transactions without signing) |  no   |
 
-#### 返回值
-| 字段名       |  字段类型   | 参数描述                                  |
+#### Return value
+| Field Name       |  Field type   | Parameter Description                                  |
 | --------- |:-------:| ------------------------------------- |
-| tx        | string  | 完整交易序列化字符串,如果交易没达到最小签名数可继续签名          |
-| txHash    | string  | 交易hash                                |
-| completed | boolean | true:交易已完成(已广播),false:交易没完成,没有达到最小签名数 |
+| tx        | string  | Complete transaction serialization string,If the transaction does not reach the minimum number of signatures, you can continue to sign          |
+| txHash    | string  | transactionhash                                |
+| completed | boolean | true:Transaction completed(Broadcasted),false:Transaction not completed,Not reaching the minimum number of signatures |
 
 ### ac\_getMultiSignAccount
-根据多签账户地址获取完整多签账户/Search for multi-signature account by address
+Obtain the complete multi signature account based on the address of the multi signature account/Search for multi-signature account by address
 #### scope:public
 #### version:1.0
 
-#### 参数列表
-| 参数名     |  参数类型  | 参数描述   | 是否非空 |
+#### parameter list
+| Parameter Name     |  Parameter type  | Parameter Description   | Is it not empty |
 | ------- |:------:| ------ |:----:|
-| chainId |  int   | 链id    |  是   |
-| address | string | 多签账户地址 |  是   |
+| chainId |  int   | chainid    |  yes   |
+| address | string | Multiple account addresses signed |  yes   |
 
-#### 返回值
-| 字段名   |  字段类型  | 参数描述         |
+#### Return value
+| Field Name   |  Field type  | Parameter Description         |
 | ----- |:------:| ------------ |
-| value | string | 多签账户序列化数据字符串 |
+| value | string | Serializing data strings for multiple account signatures |
 
 ### ac\_isMultiSignAccountBuilder
-验证是否多签账户的创建者之一/Whether it is multiSign account Builder
+Verify if one of the creators of the multi signed account/Whether it is multiSign account Builder
 #### scope:public
 #### version:1.0
 
-#### 参数列表
-| 参数名     |  参数类型  | 参数描述              | 是否非空 |
+#### parameter list
+| Parameter Name     |  Parameter type  | Parameter Description              | Is it not empty |
 | ------- |:------:| ----------------- |:----:|
-| chainId |  int   | 链id               |  是   |
-| address | string | 多签账户地址            |  是   |
-| pubKey  | string | 创建者公钥或已存在于当前节点的地址 |  是   |
+| chainId |  int   | chainid               |  yes   |
+| address | string | Multiple account addresses signed            |  yes   |
+| pubKey  | string | Creator public key or address that already exists on the current node |  yes   |
 
-#### 返回值
-| 字段名   |  字段类型   | 参数描述         |
+#### Return value
+| Field Name   |  Field type   | Parameter Description         |
 | ----- |:-------:| ------------ |
-| value | boolean | 是否多签账户的创建者之一 |
+| value | boolean | Is it one of the creators who signed multiple accounts |
 

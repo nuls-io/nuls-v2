@@ -36,7 +36,7 @@ import java.util.List;
  **/
 public interface BlockDataService {
     /**
-     * 初始化区块的数据清理
+     * Initialize data cleaning for blocks
      *
      * @throws Exception
      */
@@ -47,11 +47,11 @@ public interface BlockDataService {
      */
     void syncBlockHeight() throws Exception;
 
-    //获取确认高度
+    //Obtain confirmation height
     List<ChainHeight> getChainsBlockHeight() throws Exception;
 
     /**
-     * 同步区块
+     * sync block
      *
      * @param chainId
      * @param height
@@ -67,7 +67,7 @@ public interface BlockDataService {
     public void clearSurplusBakDatas(int addressChainId, long height);
 
     /**
-     * 执行区块同步的数据回滚
+     * Performing data rollback for block synchronization
      *
      * @param chainId
      * @param height

@@ -25,23 +25,23 @@ public class ThreadUtils {
     }
 
     /**
-     * 想线程缓存中添加一个线程
+     * Add a thread to the thread cache
      *
-     * @param poolName   线程工厂名称
-     * @param threadName 线程名称
-     * @param newThread  线程
+     * @param poolName   Thread Factory Name
+     * @param threadName Thread Name
+     * @param newThread  thread
      */
     public static final void putThread(String poolName, String threadName, Thread newThread) {
         THREAD_DATA_CACHE.putThread(poolName, threadName, newThread);
     }
 
     /**
-     * 创建线程池
+     * Create thread pool
      *
-     * @param threadCount 线程池的核心线程数
-     * @param queueSize   线程池所使用的缓冲队列长度
-     * @param factory     线程池创建线程使用的工厂
-     * @return ThreadPoolExecutor 线程池对象
+     * @param threadCount The number of core threads in the thread pool
+     * @param queueSize   The buffer queue length used by the thread pool
+     * @param factory     Factory used by thread pool to create threads
+     * @return ThreadPoolExecutor Thread Pool Object
      */
     public static final ThreadPoolExecutor createThreadPool(int threadCount, int queueSize, NulsThreadFactory factory) {
         if (threadCount == 0) {
@@ -62,11 +62,11 @@ public class ThreadUtils {
     }
 
     /**
-     * 创建一个ScheduledThreadPoolExecutor（定时执行的线程池）
+     * Create aScheduledThreadPoolExecutor（Timed thread pool for execution）
      *
-     * @param threadCount 线程池的核心线程数
-     * @param factory     线程池创建线程使用的工厂
-     * @return ScheduledThreadPoolExecutor 线程池对象
+     * @param threadCount The number of core threads in the thread pool
+     * @param factory     Factory used by thread pool to create threads
+     * @return ScheduledThreadPoolExecutor Thread Pool Object
      */
     public static final ScheduledThreadPoolExecutor createScheduledThreadPool(int threadCount, NulsThreadFactory factory) {
         if (factory == null) {
@@ -79,17 +79,17 @@ public class ThreadUtils {
 
 
     /**
-     * 创建一个核心线程数为1的ScheduledThreadPoolExecutor（定时执行的线程池）
+     * Create a core thread count of1ofScheduledThreadPoolExecutor（Timed thread pool for execution）
      *
-     * @param factory 线程池创建线程使用的工厂
-     * @return ScheduledThreadPoolExecutor 线程池对象
+     * @param factory Factory used by thread pool to create threads
+     * @return ScheduledThreadPoolExecutor Thread Pool Object
      */
     public static final ScheduledThreadPoolExecutor createScheduledThreadPool(NulsThreadFactory factory) {
         return createScheduledThreadPool(1, factory);
     }
 
     /**
-     * 通过线程池执行任务
+     * Execute tasks through thread pool
      *
      * @param callable
      * @param <V>
@@ -115,7 +115,7 @@ public class ThreadUtils {
     }
 
     /**
-     * 通过线程池执行任务
+     * Execute tasks through thread pool
      *
      * @param runnable Runnable
      */
@@ -138,9 +138,9 @@ public class ThreadUtils {
     }
 
     /**
-     * 创建一个守望线程并执行
+     * Create a watchful thread and execute it
      *
-     * @param threadName 线程名称
+     * @param threadName Thread Name
      * @param runnable   Runnable
      */
     public static final void createAndRunThread(String threadName, Runnable runnable) {
@@ -155,7 +155,7 @@ public class ThreadUtils {
     }
 
     /**
-     * 获取线程池中所有的线程
+     * Get all threads in the thread pool
      *
      * @return List<Thread>
      */
@@ -164,9 +164,9 @@ public class ThreadUtils {
     }
 
     /**
-     * 根据线程名称获取对应的线程
+     * Obtain the corresponding thread based on its name
      *
-     * @param threadName 线程名称
+     * @param threadName Thread Name
      * @return Thread
      */
     public static Thread getThread(String threadName) {
@@ -174,9 +174,9 @@ public class ThreadUtils {
     }
 
     /**
-     * 获取指定线程工厂名称创建的线程
+     * Retrieve the thread created by the specified thread factory name
      *
-     * @param poolName 线程工厂名称
+     * @param poolName Thread Factory Name
      * @return List<Thread>
      */
     public static List<Thread> getPoolThread(String poolName) {
@@ -184,7 +184,7 @@ public class ThreadUtils {
     }
 
     /**
-     * 停止当前正在执行的所有线程
+     * Stop all currently executing threads
      */
     public static void stopAllThread() {
         List<ThreadPoolExecutor> poolList = THREAD_DATA_CACHE.getPoolList();
@@ -203,9 +203,9 @@ public class ThreadUtils {
     }
 
     /**
-     * 停止指定名称的线程
+     * Stop the thread with the specified name
      *
-     * @param threadName 线程名称
+     * @param threadName Thread Name
      */
     public static void stopThread(String threadName) {
         Thread thread = THREAD_DATA_CACHE.getThread(threadName);

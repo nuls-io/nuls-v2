@@ -37,29 +37,29 @@ import io.nuls.core.rpc.model.ApiModelProperty;
 @ApiModel
 public class ContractTokenTransferTransactionDto {
 
-    @ApiModelProperty(description = "合约地址")
+    @ApiModelProperty(description = "Contract address")
     private String contractAddress;
-    @ApiModelProperty(description = "付款方")
+    @ApiModelProperty(description = "Payer")
     private String from;
-    @ApiModelProperty(description = "收款方")
+    @ApiModelProperty(description = "Payee")
     private String to;
-    @ApiModelProperty(description = "转账金额")
+    @ApiModelProperty(description = "Transfer amount")
     private String value;
-    @ApiModelProperty(description = "交易时间")
+    @ApiModelProperty(description = "Transaction time")
     private long time;
-    @ApiModelProperty(description = "交易状态（0 - 确认中， 1 - 已确认， 2 - 失败）")
+    @ApiModelProperty(description = "Transaction status（0 - Confirming, 1 - Confirmed, 2 - fail）")
     private byte status;
-    @ApiModelProperty(description = "交易hash")
+    @ApiModelProperty(description = "transactionhash")
     private String txHash;
-    @ApiModelProperty(description = "区块高度")
+    @ApiModelProperty(description = "block height")
     private long blockHeight;
-    @ApiModelProperty(description = "token名称")
+    @ApiModelProperty(description = "tokenname")
     private String name;
-    @ApiModelProperty(description = "token符号")
+    @ApiModelProperty(description = "tokensymbol")
     private String symbol;
-    @ApiModelProperty(description = "token支持的小数位数")
+    @ApiModelProperty(description = "tokenSupported Decimal Places")
     private long decimals;
-    @ApiModelProperty(description = "token资产变动信息")
+    @ApiModelProperty(description = "tokenAsset change information")
     private String info;
 
     public ContractTokenTransferTransactionDto(ContractTokenTransferInfoPo po, byte[] address) {

@@ -25,7 +25,7 @@ import io.nuls.consensus.utils.validator.TxValidator;
 import java.io.IOException;
 import java.util.*;
 /**
- * 智能合约停止节点处理器
+ * Smart contract stop node processor
  * @author tag
  * @date 2019/6/1
  */
@@ -147,7 +147,7 @@ public class ContractStopAgentProcessor implements TransactionProcessor {
                 commitResult = false;
             }
         }
-        //回滚已提交成功的交易
+        //Roll back transactions that have been successfully submitted
         if(!commitResult){
             for (Transaction rollbackTx:commitSuccessList) {
                 try {
@@ -186,7 +186,7 @@ public class ContractStopAgentProcessor implements TransactionProcessor {
                 rollbackResult = false;
             }
         }
-        //保存已回滚成功的交易
+        //Save successfully rolled back transactions
         if(!rollbackResult){
             for (Transaction commitTx:rollbackSuccessList) {
                 try {

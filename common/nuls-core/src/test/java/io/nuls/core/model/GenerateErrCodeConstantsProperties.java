@@ -6,7 +6,7 @@ import java.util.*;
 /**
  * @Author: zhoulijun
  * @Time: 2019-04-18 18:18
- * @Description: 生成语言包文件列表
+ * @Description: Generate language pack file list
  */
 public class GenerateErrCodeConstantsProperties {
 
@@ -26,9 +26,9 @@ public class GenerateErrCodeConstantsProperties {
         readLanguages(file, out);
         data.entrySet().forEach(entry -> {
             File outFile = new File(out.getAbsolutePath() + File.separator + entry.getKey());
-            System.out.println("创建语言包文件：" + out.getAbsolutePath() + File.separator + entry.getKey());
+            System.out.println("Creating Language Pack Files：" + out.getAbsolutePath() + File.separator + entry.getKey());
             if (outFile.exists()) {
-                System.out.println(out.getAbsolutePath() + File.separator + entry.getKey() + "已经存在，如果要覆盖，需要手动删除确认。");
+                System.out.println(out.getAbsolutePath() + File.separator + entry.getKey() + "It already exists. If you want to overwrite it, you need to manually delete and confirm.");
                 return ;
             }
             try {
@@ -47,9 +47,9 @@ public class GenerateErrCodeConstantsProperties {
             }
             Arrays.stream(LANGS).forEach(lang->{
                 File langFile = new File(out.getAbsolutePath() + File.separator + lang + ".properties");
-                System.out.println("创建语言包文件：" + out.getAbsolutePath() + File.separator + lang + ".properties");
+                System.out.println("Creating Language Pack Files：" + out.getAbsolutePath() + File.separator + lang + ".properties");
                 if(langFile.exists()){
-                    System.out.println(out.getAbsolutePath() + File.separator + lang + ".properties" + "已经存在，如果要覆盖，需要手动删除确认。");
+                    System.out.println(out.getAbsolutePath() + File.separator + lang + ".properties" + "It already exists. If you want to overwrite it, you need to manually delete and confirm.");
                     return ;
                 }
                 try {
@@ -87,7 +87,7 @@ public class GenerateErrCodeConstantsProperties {
                 if(!file.getName().startsWith("en"))return ;
                 File outFile = new File(outDir.getAbsolutePath() + File.separator + file.getName());
                 if (file.getAbsolutePath().equals(outFile.getAbsolutePath())) return;
-                System.out.println("找到语言文件：" + file.getAbsolutePath());
+                System.out.println("Find language file：" + file.getAbsolutePath());
                 if (!data.containsKey(file.getName())) {
                     data.put(file.getName(), new TreeMap<>((o1, o2) -> {
                         if (o1.length() > o2.length()) {

@@ -32,7 +32,7 @@ package io.nuls.chain.info;
 public interface RpcConstants {
 
     /**
-     * 内部指令
+     * Internal instructions
      */
     String CMD_ASSET_DISABLE = "cm_assetDisable";
     String CMD_ASSET_REG = "cm_assetReg";
@@ -53,21 +53,21 @@ public interface RpcConstants {
     String CMD_UPDATE_CHAIN_ASSET = "updateChainAsset";
 
 
-    /*CALL cmd 获取网络时间*/
+    /*CALL cmd Get network time*/
     String CMD_NW_GET_TIME_CALL = "nw_currentTimeMillis";
     /**
      * --------[call Transaction module RPC constants] -------
      */
     /**
-     * 发起新交易接口
+     * Initiate new transaction interface
      */
     String CMD_TX_NEW = "tx_newTx";
     /**
-     * 交易数据HEX编码
+     * transaction dataHEXcoding
      */
     String TX_DATA_HEX = "tx";
     /**
-     * 交易所属链ID
+     * Exchange ChainID
      */
     String TX_CHAIN_ID = "chainId";
 
@@ -77,19 +77,19 @@ public interface RpcConstants {
     String CMD_NW_GET_MAIN_NET_MAGIC_NUMBER = "nw_getMainMagicNumber";
 
     /**
-     * 创建交易
+     * Create transaction
      */
     String CMD_NW_CREATE_NODEGROUP = "nw_createNodeGroup";
 
     String CMD_NW_DELETE_NODEGROUP = "nw_delNodeGroup";
     /**
-     * 账本获取数据
+     * Obtaining data from the ledger
      */
     String CMD_LG_GET_COINDATA = "getBalanceNonce";
     String CMD_LG_GET_ASSETS_BY_ID = "getAssetsById";
     String CMD_LG_GET_ASSETS_REG_INFO_BY_ID ="getAssetRegInfoByAssetId";
     /**
-     * 账户信息校验部分
+     * Account information verification section
      */
     String CMD_AC_GET_PRI_KEY = "ac_getPriKeyByAddress";
     String VALID_RESULT = "valid";
@@ -101,7 +101,7 @@ public interface RpcConstants {
 
 
     /**
-     * 跨链协议接口
+     * Cross chain protocol interface
      */
     String CMD_GET_FRIEND_CHAIN_CIRCULATE = "getFriendChainCirculate";
 
@@ -111,7 +111,7 @@ public interface RpcConstants {
 
     String CMD_CROSS_CHAIN_REGISTER_CHANGE = "crossChainRegisterChange";
     /**
-     * 共识模块接口
+     * Consensus module interface
      */
     String CMD_CS_GET_SEED_NODE_INFO = "cs_getSeedNodeInfo";
 }

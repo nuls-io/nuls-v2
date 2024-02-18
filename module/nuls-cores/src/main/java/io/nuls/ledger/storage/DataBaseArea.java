@@ -35,56 +35,56 @@ public interface DataBaseArea {
 
     String TB_LEDGER_LOCK_TX = "locked_ledger";
     /**
-     *   存未确认交易数据及状态
+     *   Deposit unconfirmed transaction data and status
      */
     String TB_LEDGER_ACCOUNT_UNCONFIRMED = "account_unconfirmed";
     String TB_LEDGER_TX_UNCONFIRMED = "tx_unconfirmed";
     String TB_LEDGER_ACCOUNT_UNCFMD2CFMD = "account_uncfmd2cfmd";
     /**
-     *   按区块高度来进行上一个账号状态的
+     *   Perform the previous account status based on block height
      */
 
     String TB_LEDGER_ACCOUNT_BLOCK_SNAPSHOT = "account_block_snapshot";
 
     /**
-     *   存区块当前确认的高度
+     *   The current confirmed height of the storage block
      */
     String TB_LEDGER_BLOCK_HEIGHT = "chain_block_height";
 
 
     /**
-     *   存区块当前确认的高度
+     *   The current confirmed height of the storage block
      */
     String TB_SYNC_BLOCK = "chain_block_datas";
     /**
-     *   存打包的区块交易nonce值
+     *   Blocked transactions for storage and packagingnoncevalue
      */
     String TB_LEDGER_NONCES = "ledger_nonces";
 
     /**
-     *   存区块所有交易的hash值
+     *   Store all transactions in the blockhashvalue
      */
     String TB_LEDGER_HASH = "ledger_tx_hashs";
 
     /**
-     *   链资产索引
+     *   Chain Asset Index
      */
     String TB_LEDGER_ASSET_INDEX = "ledger_asset_index";
 
     /**
-     *   链资产地址索引
+     *   Chain Asset Address Index
      */
     String TB_LEDGER_ASSET_ADDR_INDEX = "ledger_asset_addr_index";
 
     /**
-     *   链资产注册表
+     *   Chain Asset Registry
      */
     String TB_LEDGER_ASSET_REG_MNG = "ledger_asset_reg_mng";
     String TB_LEDGER_ASSET_REG_HASH_INDEX = "ledger_asset_reg_hash_index";
     String TB_LEDGER_ASSET_REG_CONTRACT_INDEX = "ledger_asset_reg_contract_index";
 
     /**
-     *   跨链资产登记表
+     *   Cross chain asset registration form
      */
     String TB_LEDGER_CROSS_CHAIN_ASSET = "ledger_cross_chain_asset";
 }

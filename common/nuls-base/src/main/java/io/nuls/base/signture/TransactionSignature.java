@@ -41,7 +41,7 @@ public class TransactionSignature extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        // 旧签名数据写入流中
+        // Old signature data written to stream
         if (p2PHKSignatures != null && p2PHKSignatures.size() > 0) {
             for (P2PHKSignature p2PHKSignature : p2PHKSignatures) {
                 if (p2PHKSignature != null) {
@@ -53,12 +53,12 @@ public class TransactionSignature extends BaseNulsData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        // 从流中读取签名,兼容新老版本
+        // Read signature from stream,Compatible with both old and new versions
         int course = 0;
         List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
         while (!byteBuffer.isFinished()) {
             course = byteBuffer.getCursor();
-            //读取两个字节（脚本标识位），如果两个字节都为0x00则表示后面的数据流为脚本数据
+            //Read two bytes（Script identifier bit）If both bytes are0x00Then it indicates that the subsequent data stream is script data
             byteBuffer.setCursor(course);
             p2PHKSignatures.add(byteBuffer.readNulsData(new P2PHKSignature()));
         }
@@ -67,7 +67,7 @@ public class TransactionSignature extends BaseNulsData {
 
     @Override
     public int size() {
-        // 当前签名数据长度
+        // Current signature data length
         int size = 0;
         if (p2PHKSignatures != null && p2PHKSignatures.size() > 0) {
             for (P2PHKSignature p2PHKSignature : p2PHKSignatures) {

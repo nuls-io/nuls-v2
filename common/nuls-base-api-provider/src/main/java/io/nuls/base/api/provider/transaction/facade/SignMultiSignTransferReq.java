@@ -5,7 +5,7 @@ import io.nuls.base.api.provider.BaseReq;
 /**
  * @Author: zhoulijun
  * @Time: 2019-07-18 15:24
- * @Description: 多签交易签名
+ * @Description: Multiple transaction signatures
  */
 public class SignMultiSignTransferReq extends BaseReq {
 

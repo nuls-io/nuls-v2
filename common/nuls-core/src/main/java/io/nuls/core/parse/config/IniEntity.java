@@ -45,11 +45,11 @@ public class IniEntity {
     }
 
     /**
-     * 获取指定部分指定键的值
+     * Get the value of the specified key in the specified section
      *
-     * @param section 所属部分
-     * @param key     属性（键）
-     * @return String 键对应的值
+     * @param section Belonging part
+     * @param key     attribute（key）
+     * @return String The value corresponding to the key
      */
     public String getCfgValue(String section, String key) throws Exception {
         Profile.Section ps = ini.get(section);
@@ -64,12 +64,12 @@ public class IniEntity {
     }
 
     /**
-     * 获取指定部分指定键指定值类型的值
+     * Get the value of the specified value type for the specified key in the specified section
      *
-     * @param section      所属部分
-     * @param key          属性（键）
-     * @param defaultValue 值的类型
-     * @return T 键对应的值
+     * @param section      Belonging part
+     * @param key          attribute（key）
+     * @param defaultValue The type of value
+     * @return T The value corresponding to the key
      */
     public <T> T getCfgValue(String section, String key, T defaultValue) {
         Profile.Section ps = ini.get(section);
@@ -84,11 +84,11 @@ public class IniEntity {
     }
 
     /**
-     * 将String转为指定类型
+     * takeStringConvert to specified type
      *
      * @param value        String
-     * @param defaultValue 值类型
-     * @return T 值类型
+     * @param defaultValue Value type
+     * @return T Value type
      */
     protected static <T> T getValueByType(String value, T defaultValue) {
         if (defaultValue instanceof Integer) {
@@ -106,9 +106,9 @@ public class IniEntity {
     }
 
     /**
-     * 获取Section对象
+     * obtainSectionobject
      *
-     * @param section Section 键
+     * @param section Section key
      * @return Section
      */
     public Profile.Section getSection(String section) throws Exception {
@@ -121,7 +121,7 @@ public class IniEntity {
 
 
     /**
-     * 获取所有的Section键
+     * Get allSectionkey
      *
      * @return List<String>
      */
@@ -135,7 +135,7 @@ public class IniEntity {
     }
 
     /**
-     * 当前对象转String
+     * Current object conversionString
      *
      * @return String
      */

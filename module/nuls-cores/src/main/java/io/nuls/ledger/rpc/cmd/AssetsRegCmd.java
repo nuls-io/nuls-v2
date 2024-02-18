@@ -40,7 +40,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 资产登记与管理接口
+ * Asset registration and management interface
  *
  * @author lanjinsheng .
  * @date 2019/10/22
@@ -55,28 +55,28 @@ public class AssetsRegCmd extends BaseLedgerCmd {
 
 
     /**
-     * 查看链内注册资产信息
+     * View registered asset information within the chain
      *
      * @param params
      * @return
      */
     @CmdAnnotation(cmd = CmdConstant.CMD_CHAIN_ASSET_REG_INFO, version = 1.0,
-            description = "查看链内注册资产信息")
+            description = "View registered asset information within the chain")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "assetType", requestType = @TypeDescriptor(value = int.class), parameterDes = "资产类型")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Run ChainId,Value range[1-65535]"),
+            @Parameter(parameterName = "assetType", requestType = @TypeDescriptor(value = int.class), parameterDes = "Asset type")
 
     })
-    @ResponseData(name = "返回值", description = "返回一个list对象",
+    @ResponseData(name = "Return value", description = "Return alistobject",
             responseType = @TypeDescriptor(value = List.class, collectionElement = Map.class, mapKeys = {
-                    @Key(name = "assetId", valueType = int.class, description = "资产id"),
-                    @Key(name = "assetType", valueType = int.class, description = "资产类型"),
-                    @Key(name = "assetOwnerAddress", valueType = String.class, description = "资产所有者地址"),
-                    @Key(name = "initNumber", valueType = BigInteger.class, description = "资产初始化值"),
-                    @Key(name = "decimalPlace", valueType = int.class, description = "小数点分割位数"),
-                    @Key(name = "assetName", valueType = String.class, description = "资产名"),
-                    @Key(name = "assetSymbol", valueType = String.class, description = "资产符号"),
-                    @Key(name = "txHash", valueType = String.class, description = "交易hash值")
+                    @Key(name = "assetId", valueType = int.class, description = "assetid"),
+                    @Key(name = "assetType", valueType = int.class, description = "Asset type"),
+                    @Key(name = "assetOwnerAddress", valueType = String.class, description = "Address of asset owner"),
+                    @Key(name = "initNumber", valueType = BigInteger.class, description = "Asset initialization value"),
+                    @Key(name = "decimalPlace", valueType = int.class, description = "Decimal Division"),
+                    @Key(name = "assetName", valueType = String.class, description = "Asset Name"),
+                    @Key(name = "assetSymbol", valueType = String.class, description = "Asset symbols"),
+                    @Key(name = "txHash", valueType = String.class, description = "transactionhashvalue")
             })
     )
     public Response getAssetRegInfo(Map params) {
@@ -95,28 +95,28 @@ public class AssetsRegCmd extends BaseLedgerCmd {
     }
 
     /**
-     * 查看链内注册资产信息-通过资产id
+     * View registered asset information within the chain-Through assetsid
      *
      * @param params
      * @return
      */
     @CmdAnnotation(cmd = CmdConstant.CMD_CHAIN_ASSET_REG_INFO_BY_ASSETID, version = 1.0,
-            description = "通过资产id查看链内注册资产信息")
+            description = "Through assetsidView registered asset information within the chain")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = String.class), parameterValidRange = "[1-65535]", parameterDes = "资产id")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Run ChainId,Value range[1-65535]"),
+            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = String.class), parameterValidRange = "[1-65535]", parameterDes = "assetid")
 
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象",
+    @ResponseData(name = "Return value", description = "Return aMapobject",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-                    @Key(name = "assetId", valueType = int.class, description = "资产id"),
-                    @Key(name = "assetType", valueType = int.class, description = "资产类型"),
-                    @Key(name = "assetOwnerAddress", valueType = String.class, description = "资产所有者地址"),
-                    @Key(name = "initNumber", valueType = BigInteger.class, description = "资产初始化值"),
-                    @Key(name = "decimalPlace", valueType = int.class, description = "小数点分割位数"),
-                    @Key(name = "assetName", valueType = String.class, description = "资产名"),
-                    @Key(name = "assetSymbol", valueType = String.class, description = "资产符号"),
-                    @Key(name = "txHash", valueType = String.class, description = "交易hash值")
+                    @Key(name = "assetId", valueType = int.class, description = "assetid"),
+                    @Key(name = "assetType", valueType = int.class, description = "Asset type"),
+                    @Key(name = "assetOwnerAddress", valueType = String.class, description = "Address of asset owner"),
+                    @Key(name = "initNumber", valueType = BigInteger.class, description = "Asset initialization value"),
+                    @Key(name = "decimalPlace", valueType = int.class, description = "Decimal Division"),
+                    @Key(name = "assetName", valueType = String.class, description = "Asset Name"),
+                    @Key(name = "assetSymbol", valueType = String.class, description = "Asset symbols"),
+                    @Key(name = "txHash", valueType = String.class, description = "transactionhashvalue")
             })
     )
     public Response getAssetRegInfoByAssetId(Map params) {

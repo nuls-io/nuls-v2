@@ -88,14 +88,14 @@ public class OrphanTxProcessTask implements Runnable {
         if (chainOrphan.size() == 0) {
             return;
         }
-        //把孤儿交易list的交易全部取出来，然后清空；如果有验不过的 再加回去,避免阻塞新的孤儿交易的加入
+        //Trading OrphanslistRetrieve all transactions and clear them；If there is anything that cannot be verified Add it back,Avoid blocking the addition of new orphan transactions
         List<TransactionNetPO> orphanTxList = new LinkedList<>();
         synchronized (chainOrphan) {
             orphanTxList.addAll(chainOrphan);
             chainOrphan.clear();
         }
         try {
-            //孤儿排序
+            //Orphan sorting
             orphanSort.rank(orphanTxList);
             boolean flag = true;
             while (flag) {
@@ -112,7 +112,7 @@ public class OrphanTxProcessTask implements Runnable {
                     chain.getLogger().debug("[OrphanTxProcessTask] OrphanTxList size:{}", size);
                 }
             }
-            chain.getLogger().debug("处理完成，当前孤儿交易总数chainOrphan:{}", chainOrphan.size());
+            chain.getLogger().debug("Processing completed, current total number of orphan transactionschainOrphan:{}", chainOrphan.size());
         }
     }
 
@@ -120,7 +120,7 @@ public class OrphanTxProcessTask implements Runnable {
         boolean flag = false;
         Iterator<TransactionNetPO> it = orphanTxList.iterator();
         while (it.hasNext()) {
-            //协议升级,终止此次处理
+            //Protocol upgrade,Terminate this processing
             if(chain.getProtocolUpgrade().get()){
                 return false;
             }
@@ -129,7 +129,7 @@ public class OrphanTxProcessTask implements Runnable {
             if (rs) {
                 chain.getOrphanListDataSize().addAndGet(Math.negateExact(txNet.getTx().size()));
                 it.remove();
-                //有孤儿交易被处理
+                //An orphan transaction has been processed
                 flag = true;
             }
         }
@@ -137,12 +137,12 @@ public class OrphanTxProcessTask implements Runnable {
     }
 
     /**
-     * 处理孤儿交易
+     * Handling orphan transactions
      *
      * @param chain
      * @param txNet
-     * @return true     表示该需要从孤儿交易池中清理掉，1:验证通过的交易，2：在孤儿池中超时的交易，3：验证账本失败(异常等)
-     * false    表示仍然需要保留在孤儿交易池中(没有验证通过)
+     * @return true     Indicates that it needs to be cleared from the orphan trading pool,1:Verified transactions,2：Transactions that have exceeded the time limit in the orphan pool,3：Verification of ledger failed(Abnormalities, etc)
+     * false    Indicates that it still needs to be retained in the orphan trading pool(Failed verification)
      */
     private boolean processOrphanTx(Chain chain, TransactionNetPO txNet) {
         try {
@@ -151,13 +151,13 @@ public class OrphanTxProcessTask implements Runnable {
             if (txService.isTxExists(chain, tx.getHash())) {
                 return true;
             }
-            //待打包队列map超过预定值,则不再接受处理交易,直接转发交易完整交易
+            //To be packaged queuemapExceeding the predetermined value,We will no longer accept transaction processing,Direct forwarding of complete transactions
             int packableTxMapDataSize = 0;
             for(Transaction transaction : chain.getPackableTxMap().values()){
                 packableTxMapDataSize += transaction.size();
             }
             if(TxUtil.discardTx(chain, packableTxMapDataSize, tx)){
-                //待打包队列map超过预定值, 不处理转发失败的情况
+                //To be packaged queuemapExceeding the predetermined value, Do not handle forwarding failures
                 String hash = tx.getHash().toHex();
                 NetworkCall.broadcastTx(chain, tx, TxDuplicateRemoval.getExcludeNode(hash));
                 return true;
@@ -165,23 +165,23 @@ public class OrphanTxProcessTask implements Runnable {
             VerifyLedgerResult verifyLedgerResult = LedgerCall.commitUnconfirmedTx(chain, RPCUtil.encode(tx.serialize()));
             if (verifyLedgerResult.businessSuccess()) {
                 if (chain.getPackaging().get()) {
-                    //当节点是出块节点时, 才将交易放入待打包队列
+                    //When a node is a block out node, Only then will the transaction be placed in the queue to be packaged
                     packablePool.add(chain, tx);
                 }
                 unconfirmedTxStorageService.putTx(chainId, tx);
-                //转发交易hash,网络交易不处理转发失败的情况
+                //Forwarding transactionshash,Network transactions do not handle forwarding failures
                 String hash = tx.getHash().toHex();
                 NetworkCall.forwardTxHash(chain, tx.getHash(), TxDuplicateRemoval.getExcludeNode(hash));
                 return true;
             }
             if (!verifyLedgerResult.getSuccess()) {
-                //如果处理孤儿交易时，账本验证返回异常，则直接清理该交易
+                //If the ledger verification returns an exception when processing orphan transactions, the transaction will be cleared directly
                 chain.getLogger().error("[OrphanTxProcessTask] tx coinData verify fail - code:{}, type:{}, - txhash:{}",
                         verifyLedgerResult.getErrorCode() == null ? "" : verifyLedgerResult.getErrorCode().getCode(), tx.getType(), tx.getHash().toHex());
                 return true;
             }
             long currentTimeSeconds = NulsDateUtils.getCurrentTimeSeconds();
-            //超过指定时间仍旧是孤儿交易，则删除
+            //If it is still an orphan transaction after the specified time, delete it
             boolean rs = tx.getTime() < (currentTimeSeconds - (chain.getConfig().getOrphanTtl()));
             return rs;
         } catch (Exception e) {
@@ -201,14 +201,14 @@ public class OrphanTxProcessTask implements Runnable {
             Orphans orphans = entry.getValue();
 
             boolean isRemove = false;
-            //处理一个孤儿交易串
+            //Process an orphan transaction string
             Orphans currentOrphan = orphans;
             while (null != currentOrphan) {
                 if (processOrphanTx(chain, currentOrphan.getTx())) {
                     /**
-                     * 只要map中的孤儿交易通过了,则从map中删除该元素,
-                     * 同一个串中后续没有验证通过的则放弃，能在一个串中说明不会再试孤儿，其他原因验不过的则丢弃,
-                     * 孤儿map中只存有一个孤儿串的第一个Orphans
+                     * as long asmapThe orphan transaction in has been approved,Then frommapDelete this element from the middle,
+                     * If the subsequent validation in the same string does not pass, it will be abandoned. If it can be explained in the same string that orphan will not be tried again, it will be discarded if it cannot be verified for other reasons,
+                     * orphanmapThere is only one orphan string in the first oneOrphans
                      */
                     if (!isRemove) {
                         isRemove = true;
@@ -227,7 +227,7 @@ public class OrphanTxProcessTask implements Runnable {
         }
         int size = map.size();
         if (size > 0) {
-            chain.getLogger().debug("** 孤儿交易串数量：{} ", map.size());
+            chain.getLogger().debug("** Number of orphan transaction strings：{} ", map.size());
         }
         return rs;
     }

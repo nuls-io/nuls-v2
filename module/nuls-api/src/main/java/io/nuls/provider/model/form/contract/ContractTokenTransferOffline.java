@@ -7,24 +7,24 @@ import io.nuls.provider.model.form.Base;
 
 import java.math.BigInteger;
 
-@ApiModel(description = "token转账交易")
+@ApiModel(description = "tokenTransfer transaction")
 public class ContractTokenTransferOffline extends Base {
 
-    @ApiModelProperty(description = "转出者账户地址", required = true)
+    @ApiModelProperty(description = "Transferor's account address", required = true)
     private String fromAddress;
-    @ApiModelProperty(description = "转出者账户余额")
+    @ApiModelProperty(description = "Transferor account balance")
     private BigInteger senderBalance;
-    @ApiModelProperty(description = "转出者账户nonce值")
+    @ApiModelProperty(description = "Transferor's accountnoncevalue")
     private String nonce;
-    @ApiModelProperty(description = "转入者账户地址", required = true)
+    @ApiModelProperty(description = "Transferee's account address", required = true)
     private String toAddress;
-    @ApiModelProperty(description = "合约地址", required = true)
+    @ApiModelProperty(description = "Contract address", required = true)
     private String contractAddress;
-    @ApiModelProperty(description = "GAS限制")
+    @ApiModelProperty(description = "GASlimit")
     private long gasLimit;
-    @ApiModelProperty(description = "转出的token资产金额", required = true)
+    @ApiModelProperty(description = "Transferred outtokenAsset amount", required = true)
     private BigInteger amount;
-    @ApiModelProperty(description = "备注", required = false)
+    @ApiModelProperty(description = "Remarks", required = false)
     private String remark;
 
     public String getFromAddress() {

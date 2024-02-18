@@ -17,7 +17,7 @@ import java.util.function.Function;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-12 16:16
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Provider(Provider.ProviderType.RPC)
 public class NetworkProviderForRpc extends BaseRpcService implements NetworkProvider {

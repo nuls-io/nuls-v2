@@ -37,10 +37,10 @@ import java.util.Map;
  */
 public class KernelInvoke extends BaseInvoke {
     /**
-     * 自动回调的类需要重写的方法
+     * Methods that need to be rewritten for automatic callback classes
      * A method that needs to be rewritten for a class that calls back automatically
      *
-     * @param response 请求的响应信息，Response information to requests
+     * @param response Request response information,Response information to requests
      */
     @SuppressWarnings("unchecked")
     @Override
@@ -48,10 +48,10 @@ public class KernelInvoke extends BaseInvoke {
         Map responseData = (Map) response.getResponseData();
         Map methodMap = (Map) responseData.get("RegisterAPI");
         Map dependMap = (Map) methodMap.get("Dependencies");
-        StringBuilder logInfo = new StringBuilder("\n有模块信息改变，重新同步：\n");
+        StringBuilder logInfo = new StringBuilder("\nModule information has changed, please resynchronize：\n");
         for (Object object : dependMap.entrySet()) {
             Map.Entry<String, Map> entry = (Map.Entry<String, Map>) object;
-            logInfo.append("注入：[key=").append(entry.getKey()).append(",value=").append(entry.getValue()).append("]\n");
+            logInfo.append("injection：[key=").append(entry.getKey()).append(",value=").append(entry.getValue()).append("]\n");
             ConnectManager.ROLE_MAP.put(entry.getKey(), entry.getValue());
         }
         ConnectManager.updateStatus();

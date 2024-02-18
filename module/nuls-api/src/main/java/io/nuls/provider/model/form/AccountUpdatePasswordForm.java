@@ -32,13 +32,13 @@ import io.nuls.core.rpc.model.ApiModelProperty;
 /**
  * @author: Charlie
  */
-@ApiModel(description = "重置钱包密码")
+@ApiModel(description = "Reset wallet password")
 public class AccountUpdatePasswordForm {
 
-    @ApiModelProperty(description = "原始密码", required = true)
+    @ApiModelProperty(description = "Original password", required = true)
     private String password;
 
-    @ApiModelProperty(description = "新密码", required = true)
+    @ApiModelProperty(description = "New password", required = true)
     private String newPassword;
 
     public String getPassword() {

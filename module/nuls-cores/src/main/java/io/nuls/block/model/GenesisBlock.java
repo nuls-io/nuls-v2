@@ -45,53 +45,53 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 创世块
+ * Genesis block
  *
  * @author captain
  * @version 1.0
- * @date 18-11-13 下午5:11
+ * @date 18-11-13 afternoon5:11
  */
 public final class GenesisBlock extends Block {
 
     private static final String GENESIS_BLOCK_FILE = "genesis-block.json";
     /**
-     * 创世块生成时间,相比1970-01-01 08:00:00过去了多少秒
+     * Creation block generation time,compare1970-01-01 08:00:00How many seconds have passed
      */
     private static final String CONFIG_FILED_TIME = "time";
     /**
-     * 创世块高度,默认为0
+     * Creation block height,Default to0
      */
     private static final String CONFIG_FILED_HEIGHT = "height";
     /**
-     * 扩展字段,详细注释见${@link BlockExtendsData},如果不清楚如何设置extend的值,可以参考${@link BlockExtendsDataTest}
+     * Extended Fields,Detailed comments can be found in${@link BlockExtendsData},If you are unsure how to set it upextendValue of,You can refer to it${@link BlockExtendsDataTest}
      */
     private static final String CONFIG_FILED_EXTEND = "extend";
     /**
-     * 初始资产分配
+     * Initial asset allocation
      */
     private static final String CONFIG_FILED_TXS = "txs";
     /**
-     * 初始别名设定
+     * Initial alias setting
      */
     private static final String CONFIG_FILED_ALIAS = "alias";
     /**
-     * 分配地址
+     * Assign address
      */
     private static final String CONFIG_FILED_ADDRESS = "address";
     /**
-     * 分配金额
+     * Allocation amount
      */
     private static final String CONFIG_FILED_AMOUNT = "amount";
     /**
-     * 锁定时间
+     * Lock time
      */
     private static final String CONFIG_FILED_LOCK_TIME = "lockTime";
     /**
-     * 创世块中交易的备注
+     * Notes on transactions in the Genesis block
      */
     private static final String CONFIG_FILED_REMARK = "remark";
     /**
-     * 私钥,用来对创世块交易进行签名,没有其他用处
+     * Private key,Used to sign the Genesis block transaction,No other use
      */
     private static final String CONFIG_FILED_PRIVATE_KEY = "privateKey";
 

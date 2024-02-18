@@ -42,7 +42,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 
 /**
- * 节点发现任务
+ * Node Discovery Task
  *
  * @author: ln
  * @date: 2018/12/8
@@ -50,15 +50,15 @@ import java.util.concurrent.*;
 public class NodeDiscoverTask implements Runnable {
 
     /**
-     * 节点探测结果 -- 成功，能连接
+     * Node detection results -- Successful, able to connect
      */
     private final static int PROBE_STATUS_SUCCESS = 1;
     /**
-     * 节点探测结果 -- 失败，不能连接，节点不可用
+     * Node detection results -- Failed, unable to connect, node unavailable
      */
     private final static int PROBE_STATUS_FAIL = 2;
     /**
-     * 节点探测结果 -- 忽略，当断网时，也就是本地节点一个都没有连接时，不确定是对方连不上，还是本地没网，这时忽略
+     * Node detection results -- Neglecting, when the network is disconnected, that is, when none of the local nodes are connected, it is uncertain whether the other party cannot connect or the local network is unavailable. In this case, ignoring
      */
     private final static int PROBE_STATUS_IGNORE = 3;
 
@@ -77,16 +77,16 @@ public class NodeDiscoverTask implements Runnable {
             Collections.shuffle(list);
             for (NodeGroup nodeGroup : list) {
                 /**
-                 * 本地网络与跨链组网探测
+                 * Local network and cross chain networking detection
                  */
                 processNodes(nodeGroup.getLocalNetNodeContainer());
                 processNodes(nodeGroup.getCrossNodeContainer());
                 /**
-                 * 本地探测可用的跨链连接，成功则分享给跨链组
+                 * Local detection of available cross chain connections, successful sharing with cross chain groups
                  */
                 processLocalCrossNodes(nodeGroup.getLocalShareToCrossUncheckNodes(), nodeGroup.getLocalShareToCrossCanConnectNodes());
                 /**
-                 *失败节点探测
+                 *Failed node detection
                  */
                 processFailNodes(nodeGroup.getLocalNetNodeContainer());
                 processFailNodes(nodeGroup.getCrossNodeContainer());
@@ -138,7 +138,7 @@ public class NodeDiscoverTask implements Runnable {
                     node.setStatus(NodeStatusEnum.UNAVAILABLE);
                     node.setConnectStatus(NodeConnectStatusEnum.FAIL);
                     node.setFailCount(node.getFailCount() + 1);
-                    //重置成功探测时间
+                    //Reset successful detection time
                 }
             }
         }
@@ -197,7 +197,7 @@ public class NodeDiscoverTask implements Runnable {
                             verifyNodes.remove(node.getId());
                             if (status == PROBE_STATUS_SUCCESS) {
                                 node.setConnectStatus(NodeConnectStatusEnum.UNCONNECT);
-                                //代表断链次数，也可能是多次连接在握手时候断开。只有真正握手成功的才能重置为0
+                                //Represents the number of times a connection has been broken, or it may be multiple times a connection has been disconnected during a handshake. Only those who truly shake hands can reset to0
                                 node.setFailCount(node.getFailCount() + 1);
                                 if (nodesContainer.hadInConnection(node.getIp())) {
                                     node.setStatus(NodeStatusEnum.AVAILABLE);
@@ -207,7 +207,7 @@ public class NodeDiscoverTask implements Runnable {
                                 canConnectNodes.put(node.getId(), node);
 
                                 if (!node.isHadShare()) {
-                                    // 第一次探测且成功，只有在第一次探测成功时情况，才转发节点信息
+                                    // The first detection is successful, and node information is only forwarded when the first detection is successful
                                     doShare(node, false);
                                     node.setHadShare(true);
                                 }
@@ -245,11 +245,11 @@ public class NodeDiscoverTask implements Runnable {
     }
 
     private boolean checkNeedProbeNow(Node node, Map<String, Node> verifyNodes) {
-        // 探测间隔时间，根据失败的次数来决定，探测失败次数为failCount，探测间隔为probeInterval，定义分别如下：
-        // failCount : 0-10 ，probeInterval = 60s
-        // failCount : 11-20 ，probeInterval = 300s
-        // failCount : 21-30 ，probeInterval = 600s
-        // 当一个节点失败次数大于30时，将从节点列表中移除，除非再次收到该节点的分享，否则永远丢弃该节点
+        // The detection interval time is determined based on the number of failures, and the number of failed detections isfailCount, detection interval isprobeIntervalThe definitions are as follows：
+        // failCount : 0-10 ,probeInterval = 60s
+        // failCount : 11-20 ,probeInterval = 300s
+        // failCount : 21-30 ,probeInterval = 600s
+        // When a node fails more than once30When, it will be removed from the node list and will be permanently discarded unless it receives another share from that node
 
         long probeInterval;
         int failCount = node.getFailCount();
@@ -269,8 +269,8 @@ public class NodeDiscoverTask implements Runnable {
     }
 
     /*
-     * 执行探测
-     * @param int 探测结果 ： PROBE_STATUS_SUCCESS,成功  PROBE_STATUS_FAIL,失败  PROBE_STATUS_IGNORE,跳过（当断网时，也就是本地节点一个都没有连接时，不确定是对方连不上，还是本地没网，这时忽略）
+     * Perform detection
+     * @param int Detection results ： PROBE_STATUS_SUCCESS,success  PROBE_STATUS_FAIL,fail  PROBE_STATUS_IGNORE,skip（When the network is disconnected, that is, when none of the local nodes are connected, it is uncertain whether the other party cannot connect or the local network is unavailable. In this case, ignore）
      */
     private int doProbe(Node node) {
 
@@ -281,7 +281,7 @@ public class NodeDiscoverTask implements Runnable {
         CompletableFuture<Integer> future = new CompletableFuture<>();
         node.setConnectStatus(NodeConnectStatusEnum.CONNECTING);
         node.setConnectedListener(() -> {
-            //探测可连接后，断开连接
+            //After detecting connectivity, disconnect
             LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("verify node:{},connect success", node.getId());
             node.setConnectStatus(NodeConnectStatusEnum.CONNECTED);
             node.getChannel().close();
@@ -297,11 +297,11 @@ public class NodeDiscoverTask implements Runnable {
                 availableNodesCount = node.getNodeGroup().getLocalNetNodeContainer().getConnectedNodes().size();
             }
             if (node.getConnectStatus() == NodeConnectStatusEnum.CONNECTED) {
-                //探测可连接
+                //Detect connectable
                 node.setConnectStatus(NodeConnectStatusEnum.DISCONNECT);
                 future.complete(PROBE_STATUS_SUCCESS);
             } else if (availableNodesCount == 0) {
-                //可能网络不通
+                //Possible network connectivity
                 node.setConnectStatus(NodeConnectStatusEnum.UNCONNECT);
                 future.complete(PROBE_STATUS_IGNORE);
             } else {
@@ -322,33 +322,33 @@ public class NodeDiscoverTask implements Runnable {
     }
 
     /**
-     * 探测为可用的节点后广播给其他节点（可以是跨链节点）
+     * Broadcast to other nodes after detecting as available nodes（It can be a cross chain node）
      *
      * @param node
      */
     private void doShare(Node node, boolean isLocalToCrossShare) {
         LoggerUtil.COMMON_LOG.info("doShare node={},isLocalToCrossShare={}", node.getId(), isLocalToCrossShare);
         if (node.isCrossConnect()) {
-            //网络组内跨链节点不传播, 本地网分享传播给跨链外网
+            //Cross chain nodes within the network group do not propagate, Local network sharing and dissemination to cross chain external networks
             if (isLocalToCrossShare) {
                 NodeGroup nodeGroup = node.getNodeGroup();
                 if (nodeGroup.isMoonGroup()) {
-                    //分享给所有外链连接点(卫星链)
+                    //Share with all external link connection points(Satellite chain)
                     List<NodeGroup> nodeGroupList1 = NodeGroupManager.getInstance().getNodeGroups();
                     for (NodeGroup nodeGroup1 : nodeGroupList1) {
                         if (nodeGroup1.getChainId() == nodeGroup.getChainId()) {
                             continue;
                         }
-                        //分享给跨链节点,跨链节点的port为0
+                        //Share with cross chain nodes,Cross chain nodeportby0
                         broadcastNewAddr(node.getIp(), 0, node.getRemoteCrossPort(), nodeGroup1.getMagicNumber(), nodeGroup1.getChainId(), true, true);
                     }
                 } else {
-                    //分享给跨链节点,跨链节点的port为0
+                    //Share with cross chain nodes,Cross chain nodeportby0
                     broadcastNewAddr(node.getIp(), 0, node.getRemoteCrossPort(), node.getMagicNumber(), nodeGroup.getChainId(), true, true);
                 }
             }
         } else {
-            //自有网络广播
+            //Own network broadcasting
             broadcastNewAddr(node.getIp(), node.getRemotePort(), node.getRemoteCrossPort(), node.getMagicNumber(), node.getNodeGroup().getChainId(),
                     false, false);
         }

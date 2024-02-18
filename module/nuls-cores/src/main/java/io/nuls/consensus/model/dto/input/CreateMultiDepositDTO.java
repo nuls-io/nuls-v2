@@ -1,6 +1,6 @@
 package io.nuls.consensus.model.dto.input;
 /**
- * 多签账户委托共识参数
+ * Multiple account delegation consensus parameters
  * Multi-Signed Account Delegation Consensus Parameters
  *
  * @author tag

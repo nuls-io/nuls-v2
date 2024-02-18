@@ -25,7 +25,7 @@
 package io.nuls.account.model.bo;
 
 /**
- * 账户状态枚举类
+ * Account status enumeration class
  * Account Status Enumeration Class
  *
  * @author qinyifeng
@@ -34,7 +34,7 @@ package io.nuls.account.model.bo;
 public enum AccountStatus {
 
     /*
-    警告，以下顺序不能调整，否则某些地方的判断会出错
+    Warning, the following order cannot be adjusted, otherwise certain judgments may be incorrect
     Warning, the following order cannot be adjusted, otherwise the judgment in some places may go wrong
     */
     INITING,

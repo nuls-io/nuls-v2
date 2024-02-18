@@ -1,21 +1,21 @@
 package io.nuls.core.rpc.model;
 /**
- * 消息优先级
+ * Message Priority
  * Message Priority
  *
  * @author tag
  */
 public enum CmdPriority {
     /**
-     * 高优先级
+     * High priority
      * */
     HIGH(10),
     /**
-     * 默认优先级
+     * Default Priority
      * */
     DEFAULT(5),
     /**
-     * 低优先级
+     * Low priority
      * */
     LOWER(0);
 

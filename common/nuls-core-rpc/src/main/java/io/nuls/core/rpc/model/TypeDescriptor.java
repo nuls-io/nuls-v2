@@ -30,7 +30,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 类型描述
+ * Type Description
  *
  * @author: PierreLuo
  * @date: 2019-06-18

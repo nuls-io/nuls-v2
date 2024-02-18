@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 跨链交易处理类
+ * Cross chain transaction processing class
  * Cross chain transaction Processing Class
  *
  * @author tag

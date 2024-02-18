@@ -53,7 +53,7 @@ public class PeerInfoMessageHandler extends BaseMessageHandler {
     }
 
     /**
-     * 接收消息处理
+     * Receive message processing
      * Receive message processing
      *
      * @param message address message
@@ -64,7 +64,7 @@ public class PeerInfoMessageHandler extends BaseMessageHandler {
     public NetworkEventResult recieve(BaseMessage message, Node node) {
         NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByMagic(message.getHeader().getMagicNumber());
            /*
-         * 处理应答消息
+         * Processing response messages
          */
         PeerInfoMessage peerInfoMessage = (PeerInfoMessage) message;
         LoggerUtil.logger(nodeGroup.getChainId()).debug("PeerInfoMessageHandler Recieve:{},CMD={},height={} ", node.getId(), message.getHeader().getCommandStr(),peerInfoMessage.getMsgBody().getBlockHeight());

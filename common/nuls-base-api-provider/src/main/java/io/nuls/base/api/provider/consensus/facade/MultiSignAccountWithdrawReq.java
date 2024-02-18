@@ -6,7 +6,7 @@ import io.nuls.base.api.provider.BaseReq;
  * @Author: zhoulijun
  * @Time: 2019-03-11 11:57
  * @Description:
- * 退出共识
+ * Exit consensus
  */
 public class MultiSignAccountWithdrawReq extends BaseReq {
 

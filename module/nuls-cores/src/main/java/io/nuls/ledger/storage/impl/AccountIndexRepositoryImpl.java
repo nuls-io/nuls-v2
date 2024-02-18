@@ -61,7 +61,7 @@ public class AccountIndexRepositoryImpl implements AccountIndexRepository, Initi
         return  DataBaseArea.TB_LEDGER_ASSET_ADDR_INDEX+ "_" +addressChainId+ "_" +assetChainId+ "_" +assetId;
     }
     /**
-     * 初始化数据库
+     * Initialize database
      */
     public String initAssetsIndexDb(int addressChainId) {
         String table = getLedgerAssetIndexTableName(addressChainId);

@@ -20,7 +20,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * 链信息类
+ * Chain information class
  * Chain information class
  *
  * @author tag
@@ -28,82 +28,82 @@ import java.util.concurrent.locks.ReentrantLock;
  **/
 public class Chain {
     /**
-     * 是否为共识节点
+     * Is it a consensus node
      * Is it a consensus node
      */
     private boolean packer;
 
     /**
-     * 链基础配置信息
+     * Chain basic configuration information
      * Chain Foundation Configuration Information
      */
     private ConfigBean config;
 
     /**
-     * 运行状态
+     * running state
      * Chain running state
      */
     private ConsensusStatus consensusStatus;
 
     /**
-     * 打包状态
+     * Packaging status
      * Chain packing state
      */
     private boolean canPacking;
 
     /**
-     * 最新区块头
+     * Latest block head
      * The most new block
      */
     private BlockHeader newestHeader;
 
     /**
-     * 节点列表
+     * Node List
      * Agent list
      */
     private List<Agent> agentList;
 
     /**
-     * 委托信息列表
+     * List of entrusted information
      * Deposit list
      */
     private List<Deposit> depositList;
 
     /**
-     * 黄牌列表
+     * Yellow Card List
      * Yellow punish list
      */
     private List<PunishLogPo> yellowPunishList;
 
     /**
-     * 红牌列表
+     * Red Card List
      * Red punish list
      */
     private List<PunishLogPo> redPunishList;
 
     /**
-     * 记录链出块地址PackingAddress，同一个高度发出了两个不同的块的证据
-     * 下一轮正常则清零， 连续3轮将会被红牌惩罚
+     * Record chain block addressPackingAddressEvidence of two different blocks emitted from the same height
+     * If the next round is normal, reset to zero, continuity3Wheel will be penalized with a red card
      * Record the address of each chain out block Packing Address, and the same height gives evidence of two different blocks.
      * The next round of normal will be cleared, and three consecutive rounds will be punished by red cards.
      */
     private Map<String, List<Evidence>> evidenceMap;
 
     /**
-     * 保存本节点需打包的红牌交易,节点打包时需把该集合中所有红牌交易打包并删除
+     * Save the red card transactions that need to be packaged for this node,When packing nodes, all red card transactions in the set need to be packed and deleted
      * To save the red card transactions that need to be packaged by the node,
      * the node should pack and delete all the red card transactions in the set when packing.
      */
     private List<Transaction> redPunishTransactionList;
 
     /**
-     * 轮次列表
+     * Round List
      * Round list
      */
     private List<MeetingRound> roundList;
 
     /**
-     * 最新200轮区块头
+     * Latest200Wheel block head
      * The latest 200 rounds block
      */
     private List<BlockHeader> blockHeaderList;
@@ -115,7 +115,7 @@ public class Chain {
     private boolean cacheLoaded;
 
     /**
-     * 任务线程池
+     * Task Thread Pool
      * Schedule thread pool
      */
     private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
@@ -135,7 +135,7 @@ public class Chain {
     }
 
     /**
-     * 获取新建或达到出块要求的节点列表
+     * Obtain a list of newly created or block ready nodes
      * Get a list of nodes that meet block requirements
      *
      * @param height
@@ -156,7 +156,7 @@ public class Chain {
     }
 
     /**
-     * 获取达到出块要求的节点列表
+     * Obtain a list of nodes that meet the block output requirements
      * Get a list of nodes that meet block requirements
      *
      * @param height
@@ -172,7 +172,7 @@ public class Chain {
                 continue;
             }
             /*
-            获取节点委托信息，用于计算节点总的委托金额
+            Obtain node delegation information, used to calculate the total delegation amount of the node
             Get the node delegation information for calculating the total amount of the node delegation
             */
             List<Deposit> cdList = getDepositListByAgentId(agent.getTxHash(), height);
@@ -188,7 +188,7 @@ public class Chain {
     }
 
     /**
-     * 获取达到出块要求的节点地址列表
+     * Obtain a list of node addresses that meet the block output requirements
      * Get a list of nodes that meet block requirements
      *
      * @param height
@@ -204,7 +204,7 @@ public class Chain {
                 continue;
             }
             /*
-            获取节点委托信息，用于计算节点总的委托金额
+            Obtain node delegation information, used to calculate the total delegation amount of the node
             Get the node delegation information for calculating the total amount of the node delegation
             */
             List<Deposit> cdList = getDepositListByAgentId(agent.getTxHash(), height);
@@ -220,11 +220,11 @@ public class Chain {
     }
 
     /**
-     * 获取节点的委托信息
+     * Obtain node delegation information
      * Obtaining delegation information of nodes
      *
-     * @param agentHash        节点ID/agent hash
-     * @param startBlockHeight 上一轮次的起始区块高度/Initial blocks of the last round
+     * @param agentHash        nodeID/agent hash
+     * @param startBlockHeight The starting block height of the previous round/Initial blocks of the last round
      * @return List<Deposit>
      */
     private List<Deposit> getDepositListByAgentId(NulsHash agentHash, long startBlockHeight) {

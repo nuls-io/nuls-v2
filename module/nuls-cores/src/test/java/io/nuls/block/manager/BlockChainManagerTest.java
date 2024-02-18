@@ -118,7 +118,7 @@ public class BlockChainManagerTest {
     }
 
     /**
-     * 由于不想引进mock框架,下面的代码在注释一段与数据库交互的代码后会测试通过
+     * Due to not wanting to introducemockframe,The following code will pass the test after commenting on a section of code that interacts with the database
      *
      * @throws Exception
      */

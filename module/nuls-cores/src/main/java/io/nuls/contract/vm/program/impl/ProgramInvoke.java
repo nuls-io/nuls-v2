@@ -32,66 +32,66 @@ import java.util.List;
 public class ProgramInvoke {
 
     /**
-     * 合约地址
-     * 创建合约时候需要传入生成的新地址
+     * Contract address
+     * When creating a contract, it is necessary to pass in the generated new address
      */
     private byte[] contractAddress;
 
     private String address;
 
     /**
-     * 交易发起者地址
+     * Transaction initiator address
      */
     private byte[] sender;
     private byte[] senderPublicKey;
 
     /**
-     * 交易发起者配置的gas价格
+     * Transaction initiator configuredgasprice
      */
     private long price;
 
     /**
-     * 交易发起者提供的gas
+     * Provided by the initiator of the transactiongas
      */
     private long gasLimit;
 
     /**
-     * 交易向合约转入的NULS金额
+     * Transactions transferred to contractsNULSmoney
      */
     private BigInteger value;
 
     /**
-     * 交易向合约转入的其他资产的金额
+     * The amount of other assets transferred from transactions to contracts
      */
     private List<ProgramMultyAssetValue> multyAssetValues;
 
     /**
-     * 当前块编号
+     * Current block number
      */
     private long number;
 
     /**
-     * 合约创建时候，传入代码
+     * When creating a contract, pass in the code
      */
     private byte[] data;
 
     /**
-     * 调用方法名
+     * Call method name
      */
     private String methodName;
 
     /**
-     * 调用方法签名
+     * Calling method signature
      */
     private String methodDesc;
 
     /**
-     * 调用方法参数
+     * Calling method parameters
      */
     private String[][] args;
 
     /**
-     * 是否估计Gas
+     * Is it estimatedGas
      */
     private boolean estimateGas;
 

@@ -54,7 +54,7 @@ public class RocksDBService {
     }
 
     /**
-     * 如果表不存在就创建表
+     * If the table does not exist, create the table
      * if table not exist then create this;
      * @param table
      * @return
@@ -69,7 +69,7 @@ public class RocksDBService {
     }
 
     /**
-     * 判断表是否存在
+     * Check if the table exists
      *
      * @param table
      * @return

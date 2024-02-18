@@ -25,7 +25,7 @@
 package io.nuls.transaction.model.bo;
 
 /**
- * 孤儿交易排序工具类
+ * Orphan transaction sorting tool class
  * @author: Charlie
  * @date: 2019/7/23
  */

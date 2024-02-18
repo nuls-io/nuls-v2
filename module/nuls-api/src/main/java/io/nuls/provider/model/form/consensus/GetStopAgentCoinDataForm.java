@@ -34,10 +34,10 @@ import io.nuls.provider.model.form.Base;
 /**
  * @author Niels
  */
-@ApiModel(description = "获取停止节点表单数据")
+@ApiModel(description = "Get stop node form data")
 public class GetStopAgentCoinDataForm extends Base {
 
-    @ApiModelProperty(description = "共识节点hash", required = true)
+    @ApiModelProperty(description = "Consensus nodehash", required = true)
     private String agentHash;
 
     public String getAgentHash() {

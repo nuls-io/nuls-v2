@@ -1,27 +1,27 @@
-#### 为什么要有《跨链》模块
+#### Why do we need to have《Cross chain》module
 
-​	在NULS2.0的生态体系中允许多个不同协议的平行链同时运行交互，由于不同平行链间协议不同，所以他们之间的协议交互需要由NULS主网来中转，跨链模块就是用于将本链协议转换为NULS主网协议和将接收到的NULS主网协议转换为本链协议的功能模块。
+​	stayNULS2.0In the ecosystem, multiple parallel chains with different protocols are allowed to operate and interact simultaneously. Due to the different protocols between different parallel chains, their protocol interactions need to be handled byNULSThe main network is used for intermediary, and the cross chain module is used to convert the protocol of this chain intoNULSMain network protocol and what will be receivedNULSThe functional module that converts the main network protocol into the main chain protocol.
 
-#### 《跨链》要做什么
+#### 《Cross chain》What to do
 
-- 发起跨链交易，将跨链交易转换为主网协议交易
-- 跨链交易链内拜占庭签名
-- 广播跨链相关交易
-- 跨链交易协议转换
-- 链外跨链交易拜占庭验证
-- 链外资产管理
-- 跨链验证人维护
-- 验证人变更维护
+- Initiate cross chain transactions and convert them into main network protocol transactions
+- Byzantine signatures within cross chain transactions
+- Broadcast cross chain related transactions
+- Cross chain transaction protocol conversion
+- Byzantine verification of off chain cross chain transactions
+- Off chain asset management
+- Cross chain verifier maintenance
+- Verifier Change Maintenance
 
-#### 《跨链》在系统中的定位
+#### 《Cross chain》Positioning in the system
 
-​	在NULS2.0的生态体系中，跨链模块主要负责跨链交易的发起，验证，协议转换，链外资产维护，验证人变更维护等。
+​	stayNULS2.0In the ecosystem, cross chain modules are mainly responsible for initiating, verifying, protocol conversion, maintaining off chain assets, and maintaining verifier changes for cross chain transactions.
 
-依赖模块
+Dependent modules
 
-- 交易管理模块
-- 网络模块
-- 共识模块
-- 链管理模块（主网需要依赖，平行链不需要依赖）
-- 账本模块
+- Transaction Management Module
+- Network module
+- Consensus module
+- Chain management module（The main network requires dependencies, and parallel chains do not require dependencies）
+- Ledger module
 

@@ -45,7 +45,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 链管理类,负责各条链的初始化,运行,启动,参数维护等
+ * Chain management,Responsible for initializing each chain,working,start-up,Parameter maintenance, etc
  * Chain management class, responsible for the initialization, operation, start-up, parameter maintenance of each chain, etc.
  *
  * @author lanjinsheng
@@ -63,7 +63,7 @@ public class LedgerChainManager {
     Map<String, Object> localChainDefaultAsset = new HashMap<>(16);
 
     /**
-     * 增加链
+     * Add Chain
      *
      * @param chainId
      * @throws Exception
@@ -73,16 +73,16 @@ public class LedgerChainManager {
             return;
         }
         LedgerChain ledgerChain = new LedgerChain(chainId);
-        //建立日志
+        //Establishing logs
         LoggerUtil.createLogger(chainId);
-        //建立数据库
+        //set up a database
         SpringLiteContext.getBean(RepositoryImpl.class).initChainDb(chainId);
         SpringLiteContext.getBean(LgBlockSyncRepositoryImpl.class).initChainDb(chainId);
         chainMap.put(chainId, ledgerChain);
     }
 
     /**
-     * 初始化并启动链
+     * Initialize and start the chain
      * Initialize and start the chain
      */
     public void runChain(int chainId) throws Exception {
@@ -91,18 +91,18 @@ public class LedgerChainManager {
 
 
     /**
-     * 停止一条链
+     * Stop a chain
      * Delete a chain
      *
-     * @param chainId 链ID/chain id
+     * @param chainId chainID/chain id
      */
     public void stopChain(int chainId) {
 
     }
 
     /**
-     * 进行数据的校验处理,比如异常关闭模块造成的数据不一致。
-     * 确认的高度是x,则进行x高度的数据恢复处理
+     * Perform data validation processing,For example, data inconsistency caused by abnormal module shutdown.
+     * The confirmed height isx,Then proceed withxHighly efficient data recovery processing
      */
     private void initLedgerDatas() throws Exception {
         blockDataService.initBlockDatas();
@@ -110,7 +110,7 @@ public class LedgerChainManager {
     }
 
     /**
-     * 初始化数据库
+     * Initialize database
      */
     private void initRocksDb() {
         try {

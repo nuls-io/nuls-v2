@@ -13,7 +13,7 @@ import io.nuls.core.rpc.util.AddressPrefixDatas;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-06 17:07
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class CmdClientBootstrap {
     public static void main(String[] args) {
@@ -28,7 +28,7 @@ public class CmdClientBootstrap {
         ServiceManager.init(defaultChainId,providerType);
         try {
             NulsRpcModuleBootstrap.run("io.nuls.cmd.client",args);
-            //增加地址工具类初始化
+            //Add address tool class initialization
             AddressTool.init(new AddressPrefixDatas());
 
         }catch (Exception e){

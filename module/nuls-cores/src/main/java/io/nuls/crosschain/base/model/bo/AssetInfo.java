@@ -11,21 +11,21 @@ import io.nuls.crosschain.base.message.base.BaseMessage;
 import java.io.IOException;
 
 /**
- * 资产注册信息
+ * Asset registration information
  * @author tag
  * @date 2019/5/17
  */
 @ApiModel
 public class AssetInfo extends BaseMessage {
-    @ApiModelProperty(description = "资产ID")
+    @ApiModelProperty(description = "assetID")
     private int assetId;
-    @ApiModelProperty(description = "资产符号")
+    @ApiModelProperty(description = "Asset symbols")
     private String symbol;
-    @ApiModelProperty(description = "资产名称")
+    @ApiModelProperty(description = "Asset Name")
     private String assetName;
-    @ApiModelProperty(description = "是否可用")
+    @ApiModelProperty(description = "Is it available")
     private boolean usable;
-    @ApiModelProperty(description = "精度")
+    @ApiModelProperty(description = "accuracy")
     private int decimalPlaces;
 
     public AssetInfo(){}

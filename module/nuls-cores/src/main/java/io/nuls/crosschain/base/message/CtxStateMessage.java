@@ -10,14 +10,14 @@ import io.nuls.core.parse.SerializeUtils;
 import java.io.IOException;
 
 /**
- * 发起链接收跨链交易在主链的处理结果/主网接收接收链处理结果
+ * The processing results of initiating link collection cross chain transactions in the main chain/Main network receiving and receiving chain processing results
  * @author tag
  * @date 2019/4/4
  */
 public class CtxStateMessage extends BaseMessage {
     private NulsHash requestHash;
     /**
-     * 0未确认 1主网已确认 2接收链已确认
+     * 0Unconfirmed 1Main network confirmed 2Receiving chain confirmed
      */
     private byte handleResult;
 

@@ -10,7 +10,7 @@ import io.nuls.core.core.annotation.Component;
 import java.util.Map;
 
 /**
- * 测试接口，测试rpc服务稳定性
+ * Test interface, testingrpcService stability
  *
  * @author tag
  * @version 1.0

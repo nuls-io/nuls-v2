@@ -39,13 +39,13 @@ public class AccountBlockCmd extends BaseCmd {
     @Autowired
     private ChainManager chainManager;
 
-    @CmdAnnotation(cmd = "ac_isBlockAccount", version = 1.0, description = "检查账户是否锁定")
+    @CmdAnnotation(cmd = "ac_isBlockAccount", version = 1.0, description = "Check if the account is locked")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
-            @Parameter(parameterName = "address", parameterType = "String",  parameterDes = "地址")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid"),
+            @Parameter(parameterName = "address", parameterType = "String",  parameterDes = "address")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", valueType = Boolean.class, description = "账户是否锁定")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", valueType = Boolean.class, description = "Is the account locked")
     }))
     public Response isBlockAccount(Map params) {
         boolean isBlock;
@@ -76,11 +76,11 @@ public class AccountBlockCmd extends BaseCmd {
         return success(result);
     }
 
-    @CmdAnnotation(cmd = "ac_getAllBlockAccount", version = 1.0, description = "查询所有锁定账户")
+    @CmdAnnotation(cmd = "ac_getAllBlockAccount", version = 1.0, description = "Query all locked accounts")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid"),
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class))
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class))
     public Response getAllBlockAccount(Map params) {
         Chain chain = null;
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
@@ -110,13 +110,13 @@ public class AccountBlockCmd extends BaseCmd {
         }
     }
 
-    @CmdAnnotation(cmd = "ac_getBlockAccountBytes", version = 1.0, description = "查询锁定账户的信息")
+    @CmdAnnotation(cmd = "ac_getBlockAccountBytes", version = 1.0, description = "Query information about locked accounts")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
-            @Parameter(parameterName = "address", parameterType = "String",  parameterDes = "地址")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid"),
+            @Parameter(parameterName = "address", parameterType = "String",  parameterDes = "address")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", valueType = String.class, description = "锁定账户的序列化字符串")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", valueType = String.class, description = "Lock the serialized string of the account")
     }))
     public Response getBlockAccountBytes(Map params) {
         Chain chain = null;
@@ -152,12 +152,12 @@ public class AccountBlockCmd extends BaseCmd {
         }
     }
 
-    @CmdAnnotation(cmd = "ac_getBlockAccountInfo", version = 1.0, description = "查询锁定账户的信息")
+    @CmdAnnotation(cmd = "ac_getBlockAccountInfo", version = 1.0, description = "Query information about locked accounts")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
-            @Parameter(parameterName = "address", parameterType = "String",  parameterDes = "地址")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid"),
+            @Parameter(parameterName = "address", parameterType = "String",  parameterDes = "address")
     })
-    @ResponseData(name = "返回值", description = "返回一个对象", responseType = @TypeDescriptor(value = AccountBlockVO.class))
+    @ResponseData(name = "Return value", description = "Return an object", responseType = @TypeDescriptor(value = AccountBlockVO.class))
     public Response getBlockAccountInfo(Map params) {
         Chain chain = null;
         try {

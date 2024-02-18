@@ -26,7 +26,7 @@ import io.nuls.consensus.utils.compare.BlockHeaderComparator;
 import java.util.*;
 
 /**
- * 公共远程方法调用工具类
+ * Public Remote Method Calling Tool Class
  * Common Remote Method Call Tool Class
  *
  * @author tag
@@ -37,7 +37,7 @@ public class CallMethodUtils {
     public static final long TIME_OUT = 1000;
 
     /**
-     * 账户验证
+     * Account verification
      * account validate
      *
      * @param chainId
@@ -68,7 +68,7 @@ public class CallMethodUtils {
     }
 
     /**
-     * 创建多签账户
+     * Create a multi signature account
      * Create multi sign account
      *
      * @param chainId
@@ -102,7 +102,7 @@ public class CallMethodUtils {
     }
 
     /**
-     * 查询多签账户信息
+     * Query multi signature account information
      * Query for multi-signature account information
      *
      * @param chainId
@@ -134,7 +134,7 @@ public class CallMethodUtils {
 
 
     /**
-     * 交易签名
+     * Transaction signature
      * transaction signature
      *
      * @param chainId
@@ -174,7 +174,7 @@ public class CallMethodUtils {
     }
 
     /**
-     * 区块签名
+     * Block signature
      * block signature
      *
      * @param chain
@@ -204,11 +204,11 @@ public class CallMethodUtils {
     }
 
     /**
-     * 将打包的新区块发送给区块管理模块
+     * Send the packaged new blocks to the block management module
      *
      * @param chainId chain ID
      * @param block   new block Info
-     * @param timeOut 接口超时时间
+     * @param timeOut Interface timeout time
      * @return Successful Sending
      */
     @SuppressWarnings("unchecked")
@@ -224,11 +224,11 @@ public class CallMethodUtils {
     }
 
     /**
-     * 获取网络节点连接数
+     * Get the number of network node connections
      *
      * @param chainId chain ID
-     * @param isCross 是否获取跨链节点连接数/Whether to Get the Number of Connections across Chains
-     * @return int    连接节点数/Number of Connecting Nodes
+     * @param isCross Whether to obtain the number of cross chain node connections/Whether to Get the Number of Connections across Chains
+     * @return int    Number of connected nodes/Number of Connecting Nodes
      */
     public static int getAvailableNodeAmount(int chainId, boolean isCross) throws NulsException {
         Map<String, Object> callParams = new HashMap<>(4);
@@ -247,7 +247,7 @@ public class CallMethodUtils {
     }
 
     /**
-     * 获取可用余额和nonce
+     * Obtain available balance andnonce
      * Get the available balance and nonce
      *
      * @param chain
@@ -272,7 +272,7 @@ public class CallMethodUtils {
     }
 
     /**
-     * 获取账户锁定金额和可用余额
+     * Obtain account lock amount and available balance
      * Acquire account lock-in amount and available balance
      *
      * @param chain
@@ -297,7 +297,7 @@ public class CallMethodUtils {
     }
 
     /**
-     * 获取打包交易
+     * Get packaged transactions
      * Getting Packaged Transactions
      *
      * @param chain chain info
@@ -334,7 +334,7 @@ public class CallMethodUtils {
     }
 
     /**
-     * 获取指定交易
+     * Obtain specified transaction
      * Acquisition of transactions based on transactions Hash
      *
      * @param chain  chain info
@@ -372,7 +372,7 @@ public class CallMethodUtils {
 
 
     /**
-     * 将新创建的交易发送给交易管理模块
+     * Send the newly created transaction to the transaction management module
      * The newly created transaction is sent to the transaction management module
      *
      * @param chain chain info
@@ -402,7 +402,7 @@ public class CallMethodUtils {
     }
 
     /**
-     * 共识状态修改通知交易模块
+     * Consensus status modification notification transaction module
      * Consensus status modification notification transaction module
      *
      * @param chain   chain info
@@ -424,9 +424,9 @@ public class CallMethodUtils {
     }
 
     /**
-     * 批量验证交易
+     * Batch Verify Transactions
      *
-     * @param chainId      链Id/chain id
+     * @param chainId      chainId/chain id
      * @param transactions
      * @return
      */
@@ -450,7 +450,7 @@ public class CallMethodUtils {
     }
 
     /**
-     * 根据交易HASH获取NONCE（交易HASH后8位）
+     * According to the transactionHASHobtainNONCE（transactionHASHafter8position）
      * Obtain NONCE according to HASH (the last 8 digits of HASH)
      */
     public static String getNonce(String txHash) {
@@ -458,7 +458,7 @@ public class CallMethodUtils {
     }
 
     /**
-     * 根据交易HASH获取NONCE（交易HASH后8位）
+     * According to the transactionHASHobtainNONCE（transactionHASHafter8position）
      * Obtain NONCE according to HASH (the last 8 digits of HASH)
      */
     public static byte[] getNonce(byte[] txHash) {
@@ -468,7 +468,7 @@ public class CallMethodUtils {
     }
 
     /**
-     * 查询本地加密账户
+     * Query local encrypted account
      * Search for Locally Encrypted Accounts
      */
     @SuppressWarnings("unchecked")
@@ -491,7 +491,7 @@ public class CallMethodUtils {
     }
 
     /**
-     * 查询账户别名
+     * Query account alias
      * Query account alias
      * */
     public static String getAlias(Chain chain,String address){
@@ -514,7 +514,7 @@ public class CallMethodUtils {
     }
 
     /**
-     * 初始化链区块头数据，缓存指定数量的区块头
+     * Initialize chain block header data and cache a specified number of block headers
      * Initialize chain block header entity to cache a specified number of block headers
      *
      * @param chain chain info
@@ -540,7 +540,7 @@ public class CallMethodUtils {
                 blockHeaderHexs = (List<String>) result.get("value");
                 break;
             }
-            Log.debug("---------------------------区块加载失败！");
+            Log.debug("---------------------------Block loading failed！");
             Thread.sleep(1000);
         }
         List<BlockHeader> blockHeaders = new ArrayList<>();
@@ -552,12 +552,12 @@ public class CallMethodUtils {
         blockHeaders.sort(new BlockHeaderComparator());
         chain.setBlockHeaderList(blockHeaders);
         chain.setNewestHeader(blockHeaders.get(blockHeaders.size() - 1));
-        Log.debug("---------------------------区块加载成功！");
+        Log.debug("---------------------------Block loading successful！");
     }
 
 
     /**
-     * 初始化链区块头数据，缓存指定数量的区块头
+     * Initialize chain block header data and cache a specified number of block headers
      * Initialize chain block header entity to cache a specified number of block headers
      *
      * @param chain chain info
@@ -586,7 +586,7 @@ public class CallMethodUtils {
                 break;
             }
             tryCount++;
-            Log.debug("---------------------------回滚区块轮次变化从新加载区块失败！");
+            Log.debug("---------------------------Rollback block round change failed to load block from scratch！");
             Thread.sleep(1000);
         }
         List<BlockHeader> blockHeaders = new ArrayList<>();
@@ -597,12 +597,12 @@ public class CallMethodUtils {
         }
         blockHeaders.sort(new BlockHeaderComparator());
         chain.getBlockHeaderList().addAll(0, blockHeaders);
-        Log.debug("---------------------------回滚区块轮次变化从新加载区块成功！");
+        Log.debug("---------------------------Rollback block round change successfully reloading block from scratch！");
     }
 
 
     /**
-     * 验证交易CoinData
+     * Verify transactionsCoinData
      * Verifying transactions CoinData
      *
      * @param chain chain info
@@ -634,7 +634,7 @@ public class CallMethodUtils {
     }
 
     /**
-     * 回滚交易在账本模块的记录
+     * Rolling back transaction records in the ledger module
      * Rollback transactions recorded in the book module
      *
      * @param chain chain info
@@ -665,7 +665,7 @@ public class CallMethodUtils {
     }
 
     /**
-     * 交易基础验证
+     * Basic transaction verification
      * Transaction Basis Verification
      * @param chain chain info
      * @param tx transaction hex
@@ -690,7 +690,7 @@ public class CallMethodUtils {
     }
 
     /**
-     * 获取主网节点版本
+     * Obtain the version of the main network node
      * Acquire account lock-in amount and available balance
      *
      * @param chainId
@@ -711,7 +711,7 @@ public class CallMethodUtils {
     }
 
     /**
-     * 注册智能合约交易
+     * Registering smart contract transactions
      * Acquire account lock-in amount and available balance
      *
      * @param chainId
@@ -732,7 +732,7 @@ public class CallMethodUtils {
     }
 
     /**
-     * 触发CoinBase智能合约
+     * triggerCoinBaseSmart contracts
      * Acquire account lock-in amount and available balance
      *
      * @param chainId

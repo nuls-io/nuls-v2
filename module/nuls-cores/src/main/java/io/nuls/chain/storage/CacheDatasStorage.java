@@ -5,7 +5,7 @@ import io.nuls.chain.model.po.CacheDatas;
 
 /**
  *
- * 区块里关注的交易数据进行备份与还原
+ * Backup and restore transaction data that is closely related to the block
  * @author lan
  * @date 2019/01/05
  */

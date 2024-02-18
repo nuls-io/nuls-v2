@@ -25,9 +25,9 @@
 package io.nuls.base.data;
 
 /**
- * 本地发交易时缓存交易hash并且记录时间,
- * 下次发起交易计算nonce值时,
- * 如果已过期则nonce值从账本中获取
+ * Cache transactions when sending transactions locallyhashAnd record the time,
+ * Next transaction calculation initiatednonceValue time,
+ * If it has expired, thennonceValue obtained from ledger
  *
  * @author: Charlie
  * @date: 2019/3/11
@@ -35,12 +35,12 @@ package io.nuls.base.data;
 public class NonceHashData {
 
     /**
-     * 交易hash
+     * transactionhash
      */
     private NulsHash hash;
 
     /**
-     * hash值缓存时的时间戳
+     * hashTimestamp during value caching
      */
     private long cacheTimestamp;
 

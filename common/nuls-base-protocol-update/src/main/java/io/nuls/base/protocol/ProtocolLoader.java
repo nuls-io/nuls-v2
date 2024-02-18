@@ -10,7 +10,7 @@ import static io.nuls.base.protocol.ProtocolConstant.PROTOCOL_CONFIG_COMPARATOR;
 import static io.nuls.base.protocol.ProtocolConstant.PROTOCOL_CONFIG_FILE;
 
 /**
- * 把协议配置文件解析成对象
+ * Parse protocol configuration files into objects
  *
  * @author captain
  * @version 1.0
@@ -19,7 +19,7 @@ import static io.nuls.base.protocol.ProtocolConstant.PROTOCOL_CONFIG_FILE;
 public class ProtocolLoader {
 
     /**
-     * 默认的初始协议号
+     * Default initial protocol number
      */
     static final short DEFAULT_BEGIN_PROTOCOL_VERSION = 1;
 
@@ -49,9 +49,9 @@ public class ProtocolLoader {
                     List<String> msg = validMessages.stream().map(MessageDefine::getName).collect(Collectors.toList());
                     discardMsgs.addAll(parent.getInvalidMsgs());
                     discardMsgs.removeIf(msg::contains);
-                    //添加上一个版本的生效信息
+                    //Add the effective information of the previous version
                     msgList.addAll(parent.getAllowMsg());
-                    //实现更新功能
+                    //Implement update function
                     msgList.removeIf(e -> msg.contains(e.getName()));
                     List<Short> tx = validTransactions.stream().map(TxDefine::getType).collect(Collectors.toList());
                     discardTxs.addAll(parent.getInvalidTxs());
@@ -80,9 +80,9 @@ public class ProtocolLoader {
     }
 
     /**
-     * 加载协议
-     * @param chainId           链ID
-     * @param loadProtocol      是否加载消息及交易的协议信息
+     * Load Protocol
+     * @param chainId           chainID
+     * @param loadProtocol      Whether to load protocol information for messages and transactions
      * @throws Exception
      */
     public static void load(int chainId, boolean loadProtocol) throws Exception {

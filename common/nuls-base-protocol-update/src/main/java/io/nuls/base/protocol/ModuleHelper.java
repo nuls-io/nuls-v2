@@ -8,7 +8,7 @@ import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import java.util.Set;
 
 /**
- * 辅助类，判断节点是够支持一些额外的功能
+ * Auxiliary class, determining whether the node is capable of supporting some additional functions
  *
  * @author captain
  * @version 1.0
@@ -17,15 +17,15 @@ import java.util.Set;
 public class ModuleHelper {
 
     /**
-     * 是否支持协议升级功能
+     * Does it support protocol upgrade functionality
      */
     private static boolean supportProtocolUpdate;
     /**
-     * 是否支持智能合约功能
+     * Does it support smart contract functionality
      */
     private static boolean supportSmartContract;
     /**
-     * 是否支持跨链功能
+     * Does it support cross chain functionality
      */
     private static boolean supportCrossChain;
 

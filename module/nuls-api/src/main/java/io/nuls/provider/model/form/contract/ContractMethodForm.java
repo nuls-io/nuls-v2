@@ -36,11 +36,11 @@ import io.nuls.provider.model.form.Base;
 @ApiModel
 public class ContractMethodForm extends Base {
 
-    @ApiModelProperty(description = "智能合约地址", required = true)
+    @ApiModelProperty(description = "Smart contract address", required = true)
     private String contractAddress;
-    @ApiModelProperty(description = "方法名", required = true)
+    @ApiModelProperty(description = "Method name", required = true)
     private String methodName;
-    @ApiModelProperty(description = "方法描述，若合约内方法没有重载，则此参数可以为空", required = false)
+    @ApiModelProperty(description = "Method description, if the method in the contract is not overloaded, this parameter can be empty", required = false)
     private String methodDesc;
 
     public String getContractAddress() {

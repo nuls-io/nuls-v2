@@ -4,7 +4,7 @@ package io.nuls.test.cases;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-20 13:53
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class RemoteTestParam<T> {
 

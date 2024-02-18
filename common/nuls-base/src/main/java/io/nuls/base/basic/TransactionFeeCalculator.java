@@ -44,9 +44,9 @@ public class TransactionFeeCalculator {
     public static final int KB = 1024;
 
     /**
-     * 根据交易大小计算需要交纳的手续费
+     * Calculate the required transaction fees based on the size of the transaction
      * According to the transaction size calculate the handling fee.
-     * @param size 交易大小/size of the transaction
+     * @param size Transaction size/size of the transaction
      */
     public static final BigInteger getNormalTxFee(int size) {
         BigInteger fee = NORMAL_PRICE_PRE_1024_BYTES.multiply(new BigInteger(String.valueOf(size/KB)));
@@ -57,9 +57,9 @@ public class TransactionFeeCalculator {
     }
 
     /**
-     * 根据交易大小计算需要交纳的手续费
+     * Calculate the required transaction fees based on the size of the transaction
      * According to the transaction size calculate the handling fee.
-     * @param size 交易大小/size of the transaction
+     * @param size Transaction size/size of the transaction
      */
     public static final BigInteger getConsensusTxFee(int size,long unit) {
         BigInteger unitBigInteger = BigInteger.valueOf(unit);
@@ -71,9 +71,9 @@ public class TransactionFeeCalculator {
     }
 
     /**
-     * 根据未签名的交易大小计算需要交纳的手续费
-     * @param size 未签名的交易大小/ size of the unsigned transaction
-     * @return 交易手续费
+     * Calculate the handling fee to be paid based on the size of unsigned transactions
+     * @param size Unsigned transaction size/ size of the unsigned transaction
+     * @return Transaction fees
      */
     public static final BigInteger getNormalUnsignedTxFee(int size) {
         size += P2PHKSignature.SERIALIZE_LENGTH;
@@ -85,9 +85,9 @@ public class TransactionFeeCalculator {
     }
 
     /**
-     * 根据交易大小计算需要交纳的手续费
+     * Calculate the required transaction fees based on the size of the transaction
      * According to the transaction size calculate the handling fee.
-     * @param size 交易大小/size of the transaction
+     * @param size Transaction size/size of the transaction
      */
     public static final BigInteger getCrossTxFee(int size) {
         BigInteger fee = CROSSTX_PRICE_PRE_1024_BYTES.multiply(new BigInteger(String.valueOf(size/KB)));
@@ -98,9 +98,9 @@ public class TransactionFeeCalculator {
     }
 
     /**
-     * 根据交易大小计算需要交纳的手续费
+     * Calculate the required transaction fees based on the size of the transaction
      * According to the transaction size calculate the handling fee.
-     * @param size 交易大小/size of the transaction
+     * @param size Transaction size/size of the transaction
      */
     public static final BigInteger getFee(int size, BigInteger price) {
         if(price.compareTo(NORMAL_PRICE_PRE_1024_BYTES)<0){

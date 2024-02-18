@@ -1,7 +1,7 @@
 package io.nuls.consensus.economic.nuls.constant;
 
 /**
- * 经济模型模块常量类
+ * Economic model module constant class
  * Constant Class of Economic Model Modules
  *
  * @author tag

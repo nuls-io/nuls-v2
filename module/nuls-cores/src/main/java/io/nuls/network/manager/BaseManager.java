@@ -27,26 +27,26 @@ package io.nuls.network.manager;
 import io.nuls.network.constant.ManagerStatusEnum;
 
 /**
- * 基础管理
+ * Basic management
  *
  * @author lan
  * @date 2018/11/01
  */
 abstract public class BaseManager {
     /**
-     * 初始化
+     * initialization
      * init
      */
     public abstract void init()  throws Exception;
 
     /**
-     * 启动
+     * start-up
      * start
      */
     public abstract void start() throws Exception;
 
     /**
-     * 停止
+     * cease
      * stop
      */
     public abstract void change(ManagerStatusEnum toStatus) throws Exception;

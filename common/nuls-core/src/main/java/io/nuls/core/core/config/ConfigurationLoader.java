@@ -18,16 +18,16 @@ import java.util.stream.Collectors;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-13 17:36
- * @Description: 加载配置文件，将配置文件读取成key-value形式的属性列表
- * 加载顺序，优先级从下到上，属性名字相同后加载的覆盖先加载的
- * 读取resource路径下的module.* 文件
- * 读取user.dir相对路径下的module.* 文件
- * jvm-option中读取active.module项，此项应配置一个文件绝对路径
- * * 支持 json,properties,ncf 3种格式，优先级分别是ncf,properties,json
+ * @Description: Load the configuration file and read it askey-valueFormal attribute list
+ * Load order, priority from bottom to top, overwrite those loaded first with the same attribute name
+ * readresourceUnder the pathmodule.* file
+ * readuser.dirRelative pathmodule.* file
+ * jvm-optionRead fromactive.moduleThis item should be configured with an absolute path to a file
+ * * support json,properties,ncf 3The priority for each format isncf,properties,json
  * <p>
- * 读取完成后，将属性注入spring管理的类中，分两种情况注入
- * 1.类似spring的Configuration注解类，发现类有次注解后，会通过配置项的参数名与类的属性名比对，一致的就注入，注入过程中类型不匹配的情况抛出异常
- * 2.类中属性配置有Value注解，注入值到类属性中
+ * After reading, inject the attributespringIn the management class, injection is divided into two situations
+ * 1.similarspringofConfigurationAnnotate classes. If a class is annotated once, it will be compared with the property name of the class through the parameter name of the configuration item. If it is consistent, it will be injected. If the type does not match during the injection process, an exception will be thrown
+ * 2.The property configuration in the class includesValueAnnotation, injecting values into class properties
  */
 @Component
 public class ConfigurationLoader {
@@ -57,7 +57,7 @@ public class ConfigurationLoader {
     public static final String GLOBAL_DOMAIN = "global";
 
     /**
-     * 存储解析好的配置项
+     * Store parsed configuration items
      */
     Map<String, Map<String, ConfigItem>> configData = new HashMap<>();
 
@@ -93,7 +93,7 @@ public class ConfigurationLoader {
     }
 
     /**
-     * 通过jvm option -DXXX=XXX 的方式设置配置项
+     * adoptjvm option -DXXX=XXX How to set configuration items
      */
     private void loadJvmOptionConfigItem() {
         configData.values().forEach(configItemList -> {

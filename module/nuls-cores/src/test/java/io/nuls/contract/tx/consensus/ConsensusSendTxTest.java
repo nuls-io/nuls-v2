@@ -53,13 +53,13 @@ import static io.nuls.contract.constant.ContractCmdConstant.CREATE;
 public class ConsensusSendTxTest extends BaseQuery {
 
     /**
-     * 创建合约
+     * Create Contract
      */
     @Test
     public void createContract() throws Exception {
         InputStream in = new FileInputStream(ConsensusSendTxTest.class.getResource("/contract-consensus-test.jar").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
-        String remark = "consensus contract test - 共识合约";
+        String remark = "consensus contract test - Consensus contract";
         Map params = this.makeCreateParams(toAddress2, contractCode, "consensus", remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CREATE));
@@ -68,14 +68,14 @@ public class ConsensusSendTxTest extends BaseQuery {
     }
 
     /**
-     * 调用合约 - 创建共识节点
+     * Call Contract - Create consensus nodes
      */
     @Test
     public void createAgent() throws Exception {
         BigInteger value = BigInteger.valueOf(30001_00000000L);
         String methodName = "createAgent";
         String methodDesc = "";
-        String remark = "createAgent test - 合约创建节点";
+        String remark = "createAgent test - Contract creation node";
         String packingAddress = "tNULSeBaMtEPLXxUgyfnBt9bpb5Xv84dyJV98p";
 
         Map params = this.makeCallParams(sender, value, contractAddress, methodName, methodDesc, remark, packingAddress, 20001, 100);
@@ -86,14 +86,14 @@ public class ConsensusSendTxTest extends BaseQuery {
     }
 
     /**
-     * 调用合约 - 合约委托共识节点
+     * Call Contract - Contract delegation consensus node
      */
     @Test
     public void deposit() throws Exception {
         BigInteger value = BigInteger.valueOf(3000_00000000L);
         String methodName = "deposit";
         String methodDesc = "";
-        String remark = "contract deposit test - 合约委托共识节点";
+        String remark = "contract deposit test - Contract delegation consensus node";
         String agentHash = "3f5258f147113e11b510376465a06f6678e98d908e5740c2ce44af7749f081c4";
         int depositNuls = 2031;
 
@@ -105,14 +105,14 @@ public class ConsensusSendTxTest extends BaseQuery {
         Assert.assertTrue(null != result);
     }
     /**
-     * 调用合约 - 合约退出委托共识节点
+     * Call Contract - Contract exit delegation consensus node
      */
     @Test
     public void withdraw() throws Exception {
         BigInteger value = BigInteger.ZERO;
         String methodName = "withdraw";
         String methodDesc = "";
-        String remark = "contract deposit test - 合约退出委托共识节点";
+        String remark = "contract deposit test - Contract exit delegation consensus node";
         String joinAgentHash = "bed0a80fbf5ba512ce64cd91d6f6af776b1685eb778616bccc01f1506af8061d";
 
         Map params = this.makeCallParams(sender, value, contractAddress, methodName, methodDesc, remark,
@@ -123,14 +123,14 @@ public class ConsensusSendTxTest extends BaseQuery {
         Assert.assertTrue(null != result);
     }
     /**
-     * 调用合约 - 合约注销共识节点
+     * Call Contract - Contract Cancellation Consensus Node
      */
     @Test
     public void stopAgent() throws Exception {
         BigInteger value = BigInteger.ZERO;
         String methodName = "stopAgent";
         String methodDesc = "";
-        String remark = "contract stop agent test - 合约注销共识节点";
+        String remark = "contract stop agent test - Contract Cancellation Consensus Node";
 
         Map params = this.makeCallParams(toAddress1, value, contractAddress, methodName, methodDesc, remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
@@ -140,7 +140,7 @@ public class ConsensusSendTxTest extends BaseQuery {
     }
 
     /**
-     * 调用视图方法 - 合约委托信息
+     * Call View Method - Contract Entrustment Information
      */
     @Test
     public void getContractDepositInfo() throws Exception {
@@ -150,7 +150,7 @@ public class ConsensusSendTxTest extends BaseQuery {
     }
 
     /**
-     * 调用视图方法 - 合约节点信息
+     * Call View Method - Contract node information
      */
     @Test
     public void getContractAgentInfo() throws Exception {
@@ -160,7 +160,7 @@ public class ConsensusSendTxTest extends BaseQuery {
     }
 
     /**
-     * 调用视图方法 - 创建节点hash
+     * Call View Method - Create nodeshash
      */
     @Test
     public void getAgentHash() throws Exception {
@@ -169,7 +169,7 @@ public class ConsensusSendTxTest extends BaseQuery {
     }
 
     /**
-     * 调用视图方法 - 委托节点hash
+     * Call View Method - Delegate nodehash
      */
     @Test
     public void getDepositHash() throws Exception {
@@ -178,7 +178,7 @@ public class ConsensusSendTxTest extends BaseQuery {
     }
 
     /**
-     * 调用视图方法 - 退出节点hash
+     * Call View Method - Exit nodehash
      */
     @Test
     public void getWithdrawHash() throws Exception {
@@ -187,7 +187,7 @@ public class ConsensusSendTxTest extends BaseQuery {
     }
 
     /**
-     * 调用视图方法 - 注销节点hash
+     * Call View Method - Unregister nodehash
      */
     @Test
     public void getStopHash() throws Exception {
@@ -195,7 +195,7 @@ public class ConsensusSendTxTest extends BaseQuery {
         Log.info(invokeView(contractAddress, methodName));
     }
     /**
-     * 调用视图方法 - 获取指定地址的奖励明细
+     * Call View Method - Obtain reward details for the specified address
      */
     @Test
     public void getMinerInfo() throws Exception {
@@ -204,7 +204,7 @@ public class ConsensusSendTxTest extends BaseQuery {
         Log.info(invokeView(contractAddress, methodName, address));
     }
     /**
-     * 调用视图方法 - 获取所有委托人地址
+     * Call View Method - Obtain all client addresses
      */
     @Test
     public void getMiners() throws Exception {

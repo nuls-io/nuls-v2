@@ -33,9 +33,9 @@ import io.nuls.core.rpc.model.ApiModelProperty;
  */
 @ApiModel
 public class ContractConstructorInfoDto {
-    @ApiModelProperty(description = "合约构造函数详情")
+    @ApiModelProperty(description = "Contract constructor details")
     private ProgramMethod constructor;
-    @ApiModelProperty(description = "是否是NRC20合约")
+    @ApiModelProperty(description = "Is itNRC20contract")
     private boolean nrc20;
 
     public ProgramMethod getConstructor() {

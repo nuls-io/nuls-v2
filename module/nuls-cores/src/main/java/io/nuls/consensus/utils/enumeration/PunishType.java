@@ -27,7 +27,7 @@
 package io.nuls.consensus.utils.enumeration;
 
 /**
- * 惩罚类型枚举类
+ * Punishment type enumeration class
  * Punishment Type Enumeration Class
  *
  * @author tag
@@ -36,13 +36,13 @@ package io.nuls.consensus.utils.enumeration;
 public enum PunishType {
 
     /**
-     * 黄牌惩罚
+     * Yellow card punishment
      * yellow punish
      * */
     YELLOW(0),
 
     /**
-     * 红牌惩罚
+     * Red card punishment
      * red punish
      * */
     RED(1);
