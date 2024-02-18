@@ -359,7 +359,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                 repository.saveCode(contractAddressBytes, contractCodeData);
                 logTime("save code");
             } else {
-                if ("<init>".equals(methodName)) {
+                if (Constants.CONSTRUCTOR_NAME.equals(methodName)) {
                     return revert("can't invoke <init> method");
                 }
                 AccountState accountState = repository.getAccountState(contractAddressBytes);
@@ -443,6 +443,11 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             ClassCode contractClassCode = getContractClassCode(classCodes);
             String methodDesc = ProgramDescriptors.parseDesc(methodDescBase);
             MethodCode methodCode = vm.methodArea.loadMethod(contractClassCode.name, methodName, methodDesc);
+            if (ProtocolGroupManager.getCurrentVersion(getCurrentChainId()) >= ContractContext.PROTOCOL_19) {
+                if (methodCode != null && !programInvoke.isCreate() && (methodCode.isConstructor || Constants.CONSTRUCTOR_NAME.equals(methodCode.name))) {
+                    return revert("can't invoke constructor");
+                }
+            }
 
             ProgramResult checkExecute = this.checkExecute(programInvoke, methodCode);
             if (checkExecute != null) {
