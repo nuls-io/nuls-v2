@@ -201,9 +201,9 @@ public class AssetCmd extends BaseChainCmd {
             if (dbChain.isDelete()) {
                 return failed(CmErrorCode.ERROR_CHAIN_REG_CMD);
             }
-            if (assetService.assetExist(asset) && asset.isAvailable()) {
-                return failed(CmErrorCode.ERROR_ASSET_ID_EXIST);
-            }
+            //if (assetService.assetExist(asset) && asset.isAvailable()) {
+            //    return failed(CmErrorCode.ERROR_ASSET_ID_EXIST);
+            //}
             /* 组装交易发送 (Send transaction) */
             Transaction tx = new AddAssetToChainTransaction();
             LoggerUtil.COMMON_LOG.debug("version= {}", ChainManagerUtil.getVersion(CmRuntimeInfo.getMainIntChainId()));
