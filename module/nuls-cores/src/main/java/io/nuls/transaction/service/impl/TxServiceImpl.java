@@ -767,25 +767,47 @@ public class TxServiceImpl implements TxService {
             //为跨链交易并且不是交易发起链时,计算主网主资产为手续费NULS
             feeAssetChainId = txConfig.getMainChainId();
             feeAssetId = txConfig.getMainAssetId();
+            BigInteger fee = coinData.getFeeByAsset(feeAssetChainId, feeAssetId);
+            if (BigIntegerUtils.isEqualOrLessThan(fee, BigInteger.ZERO)) {
+                throw new NulsException(TxErrorCode.INSUFFICIENT_FEE);
+            }
+            //根据交易大小重新计算手续费，用来验证实际手续费
+            BigInteger targetFee;
+            if (TxManager.isCrossTx(type)) {
+                targetFee = TransactionFeeCalculator.getCrossTxFee(txSize);
+            } else {
+                targetFee = TransactionFeeCalculator.getNormalTxFee(txSize, chain.getConfig().getFeeUnit(feeAssetChainId, feeAssetId));
+            }
+            if (BigIntegerUtils.isLessThan(fee, targetFee)) {
+                throw new NulsException(TxErrorCode.INSUFFICIENT_FEE);
+            }
         } else {
-            //计算主资产为手续费
-            feeAssetChainId = chain.getConfig().getChainId();
-            feeAssetId = chain.getConfig().getAssetId();
+            boolean result = false;
+            Set<String> set = chain.getConfig().getFeeAssetsSet();
+            for (String tokenId : set) {
+                String[] arr = tokenId.split("-");
+                //计算主资产为手续费
+                feeAssetChainId = Integer.parseInt(arr[0]);
+                feeAssetId = Integer.parseInt(arr[0]);
+                BigInteger fee = coinData.getFeeByAsset(feeAssetChainId, feeAssetId);
+                if (BigIntegerUtils.isEqualOrLessThan(fee, BigInteger.ZERO)) {
+                    continue;
+                }
+                //根据交易大小重新计算手续费，用来验证实际手续费
+                BigInteger targetFee;
+                if (TxManager.isCrossTx(type)) {
+                    targetFee = TransactionFeeCalculator.getCrossTxFee(txSize);
+                } else {
+                    targetFee = TransactionFeeCalculator.getNormalTxFee(txSize, chain.getConfig().getFeeUnit(feeAssetChainId, feeAssetId));
+                }
+                if (BigIntegerUtils.isLessThan(fee, targetFee)) {
+                    continue;
+                }
+                result = true;
+                break;
+            }
         }
-        BigInteger fee = coinData.getFeeByAsset(feeAssetChainId, feeAssetId);
-        if (BigIntegerUtils.isEqualOrLessThan(fee, BigInteger.ZERO)) {
-            throw new NulsException(TxErrorCode.INSUFFICIENT_FEE);
-        }
-        //根据交易大小重新计算手续费，用来验证实际手续费
-        BigInteger targetFee;
-        if (TxManager.isCrossTx(type)) {
-            targetFee = TransactionFeeCalculator.getCrossTxFee(txSize);
-        } else {
-            targetFee = TransactionFeeCalculator.getNormalTxFee(txSize);
-        }
-        if (BigIntegerUtils.isLessThan(fee, targetFee)) {
-            throw new NulsException(TxErrorCode.INSUFFICIENT_FEE);
-        }
+
     }
 
     /**

@@ -29,7 +29,9 @@ import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.*;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
+import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.manager.ContractTxValidatorManager;
+import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.model.bo.ContractBalance;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.dto.AccountAmountDto;
@@ -111,7 +113,7 @@ public class ContractTxHelper {
     }
 
     public Result<CreateContractTransaction> newCreateTx(int chainId, String sender, byte[] senderBytes, byte[] contractAddressBytes, String alias, Long gasLimit, Long price,
-                                                          byte[] contractCode, String[][] args, String remark) {
+                                                         byte[] contractCode, String[][] args, String remark) {
         try {
             BigInteger value = BigInteger.ZERO;
 
@@ -267,8 +269,8 @@ public class ContractTxHelper {
                 }
             }
         }
-
-        BigInteger fee = TransactionFeeCalculator.getNormalUnsignedTxFee(txSize + calcSize(txData) + calcSize(coinData));
+        Chain chain = contractHelper.getChain(chainId);
+        BigInteger fee = TransactionFeeCalculator.getNormalUnsignedTxFee(txSize + calcSize(txData) + calcSize(coinData), chain.getConfig().getFeeUnit(assetChainId, assetId));
         totalValue = totalValue.add(fee);
         if (senderBalance.getBalance().compareTo(totalValue) < 0) {
             Log.error("Insufficient balance, asset: {}-{}", CHAIN_ID, ASSET_ID);

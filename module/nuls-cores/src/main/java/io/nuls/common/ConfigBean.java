@@ -24,20 +24,29 @@
  */
 package io.nuls.common;
 
+import io.nuls.core.model.StringUtils;
+
 import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
  * Transaction module chain setting
+ *
  * @author: Charlie
  * @date: 2019/03/14
  */
 public class ConfigBean {
 
-    /** chain id*/
+    /**
+     * chain id
+     */
     private int chainId;
-    /** assets id*/
+    /**
+     * assets id
+     */
     private int assetId;
     /*-------------------------[Block]-----------------------------*/
     /**
@@ -133,52 +142,52 @@ public class ConfigBean {
     /**
      * 最小链接数
      * Minimum number of links
-     * */
+     */
     private int minNodes;
 
     /**
      * 最大链接数
-     * */
+     */
     private int maxOutAmount;
 
     /**
      * 最大被链接数
-     * */
+     */
     private int maxInAmount;
 
     /**
      * 跨链交易被打包多少块之后广播给其他链
-     * */
+     */
     private int sendHeight;
 
     /**
      * 拜占庭比例
-     * */
+     */
     private int byzantineRatio;
 
     /**
      * 最小签名数
-     * */
+     */
     private int minSignature;
 
     /**
      * 主网验证人信息
-     * */
+     */
     private String verifiers;
 
     /**
      * 主网拜占庭比例
-     * */
+     */
     private int mainByzantineRatio;
 
     /**
      * 主网最大签名验证数
-     * */
+     */
     private int maxSignatureCount;
 
     /**
      * 主网验证人列表
-     * */
+     */
     private Set<String> verifierSet = new HashSet<>();
 
     /*-------------------------[Consensus]-----------------------------*/
@@ -243,13 +252,13 @@ public class ConfigBean {
 
     /**
      * 出块节点密码
-     * */
+     */
     private String password;
 
     /**
      * 打包一个区块获得的共识奖励
      * 每年通胀/每年出块数
-     * */
+     */
     private BigInteger blockReward;
 
 
@@ -273,12 +282,6 @@ public class ConfigBean {
     private int awardAssetId;
 
     /**
-     * 交易手续费单价
-     * Transaction fee unit price
-     */
-    private long feeUnit;
-
-    /**
      * 总通缩量
      * Total inflation amount
      */
@@ -292,17 +295,17 @@ public class ConfigBean {
 
     /**
      * 通胀开始时间
-     * */
+     */
     private long initTime;
 
     /**
      * 通缩比例
-     * */
+     */
     private double deflationRatio;
 
     /**
      * 通缩间隔时间
-     * */
+     */
     private long deflationTimeInterval;
 
     /*-------------------------[SmartContract]-----------------------------*/
@@ -312,20 +315,70 @@ public class ConfigBean {
     private long maxViewGas;
 
     /*-------------------------[Transaction]-----------------------------*/
-    /** 单个交易数据最大值(B)*/
+    /**
+     * 单个交易数据最大值(B)
+     */
     private long txMaxSize;
     /**
      * 打包时在获取交易之后留给模块统一验证的时间阈值,
      * 包括统一验证有被过滤掉的交易时需要重新验证等.
      */
     private int moduleVerifyPercent;
-    /** 打包获取交易给RPC传输到共识的预留时间,超时则需要处理交易还原待打包队列*/
+    /**
+     * 打包获取交易给RPC传输到共识的预留时间,超时则需要处理交易还原待打包队列
+     */
     private int packageRpcReserveTime;
-    /** 接收网络新交易队列的最大容量 未处理的交易队列**/
+    /**
+     * 接收网络新交易队列的最大容量 未处理的交易队列
+     **/
     private long txUnverifiedQueueSize;
-    /** 孤儿交易生命时间,超过会被清理**/
+    /**
+     * 孤儿交易生命时间,超过会被清理
+     **/
     private int orphanTtl;
+
+    private String feeAssets;
+    private String feeUnit;
+
+    private Map<String, Long> feeUnitMap;
     /*----------------------------------------------------------------------*/
+
+    private void initFeeUnitMap() {
+        if (StringUtils.isNotBlank(feeAssets) && StringUtils.isNotBlank(feeUnit) && feeUnitMap == null) {
+            feeUnitMap = new HashMap<>();
+            String[] keys = feeAssets.split(",");
+            String[] vals = feeUnit.split(",");
+            for (int i = 0; i < keys.length; i++) {
+                feeUnitMap.put(keys[i], Long.parseLong(vals[i]));
+            }
+        }
+    }
+
+    public Long getFeeUnit(int chainId, int assetId) {
+        return getFeeUnit(NCUtils.getTokenId(chainId, assetId));
+    }
+
+    public Long getFeeUnit(String tokenId) {
+        if (null == feeUnitMap) {
+            initFeeUnitMap();
+        }
+        return feeUnitMap.get(tokenId);
+    }
+
+    public void setFeeAssets(String feeAssets) {
+        this.feeAssets = feeAssets;
+    }
+
+    public Set<String> getFeeAssetsSet() {
+        if (null == feeUnitMap) {
+            initFeeUnitMap();
+        }
+        return feeUnitMap.keySet();
+    }
+
+    public void setFeeUnit(String feeUnit) {
+        this.feeUnit = feeUnit;
+    }
 
     public int getChainId() {
         return chainId;
@@ -717,14 +770,6 @@ public class ConfigBean {
 
     public void setAwardAssetId(int awardAssetId) {
         this.awardAssetId = awardAssetId;
-    }
-
-    public long getFeeUnit() {
-        return feeUnit;
-    }
-
-    public void setFeeUnit(long feeUnit) {
-        this.feeUnit = feeUnit;
     }
 
     public BigInteger getTotalInflationAmount() {

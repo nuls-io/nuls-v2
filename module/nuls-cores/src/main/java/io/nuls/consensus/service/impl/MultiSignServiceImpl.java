@@ -152,7 +152,7 @@ public class MultiSignServiceImpl implements MultiSignService {
             tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
             int txSignSize = multiSigAccount.getM() * P2PHKSignature.SERIALIZE_LENGTH;
             CoinData coinData = coinDataManager.getStopAgentCoinData(chain, agent, NulsDateUtils.getCurrentTimeSeconds() + chain.getConfig().getStopAgentLockTime());
-            BigInteger fee = TransactionFeeCalculator.getConsensusTxFee(tx.size() + txSignSize + coinData.serialize().length, chain.getConfig().getFeeUnit());
+            BigInteger fee = TransactionFeeCalculator.getConsensusTxFee(tx.size() + txSignSize + coinData.serialize().length, chain.getConfig().getFeeUnit( coinData.getTo().get(0).getAssetsChainId(), coinData.getTo().get(0).getAssetsId()));
             coinData.getTo().get(0).setAmount(coinData.getTo().get(0).getAmount().subtract(fee));
             tx.setCoinData(coinData.serialize());
 

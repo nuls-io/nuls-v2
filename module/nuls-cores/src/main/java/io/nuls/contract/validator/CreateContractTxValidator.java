@@ -72,13 +72,13 @@ public class CreateContractTxValidator {
         // 检查 toList, 除了黑洞地址外，其他不被允许 000000000000000000000000000000000000000000000000000000000000000000
         int toListSize = toList.size();
         do {
-            if(toListSize == 0) {
+            if (toListSize == 0) {
                 break;
             }
-            if(toListSize == 1) {
+            if (toListSize == 1) {
                 CoinTo coinTo = toList.get(0);
                 byte[] blockHoleAddress = AddressTool.getAddress(HexUtil.decode(contractConfig.getBlackHolePublicKey()), contractConfig.getChainId());
-                if(Arrays.equals(blockHoleAddress, coinTo.getAddress())) {
+                if (Arrays.equals(blockHoleAddress, coinTo.getAddress())) {
                     break;
                 }
             }
@@ -91,12 +91,12 @@ public class CreateContractTxValidator {
         boolean existSender = false;
         Chain chain = contractHelper.getChain(chainId);
         int assetsId = chain.getConfig().getAssetId();
-        for(CoinFrom from : fromList) {
-            if(from.getAssetsChainId() != chainId || from.getAssetsId() != assetsId) {
+        for (CoinFrom from : fromList) {
+            if (from.getAssetsChainId() != chainId || from.getAssetsId() != assetsId) {
                 Log.error("contract create error: The chain id or assets id of coin from is error.");
                 return Result.getFailed(CONTRACT_COIN_ASSETS_ERROR);
             }
-            if(!existSender && Arrays.equals(from.getAddress(), sender)) {
+            if (!existSender && Arrays.equals(from.getAddress(), sender)) {
                 existSender = true;
             }
         }
@@ -106,7 +106,7 @@ public class CreateContractTxValidator {
             return Result.getFailed(CONTRACT_CREATOR_ERROR);
         }
         String alias = txData.getAlias();
-        if(!FormatValidUtils.validAlias(alias)) {
+        if (!FormatValidUtils.validAlias(alias)) {
             Log.error("contract create error: The contract alias format error.");
             return Result.getFailed(CONTRACT_ALIAS_FORMAT_ERROR);
         }
@@ -126,7 +126,7 @@ public class CreateContractTxValidator {
         }
 
         BigInteger realFee = tx.getFee();
-        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size()).add(BigInteger.valueOf(txData.getGasLimit()).multiply(BigInteger.valueOf(txData.getPrice())));
+        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size(), chain.getConfig().getFeeUnit(chainId, assetsId)).add(BigInteger.valueOf(txData.getGasLimit()).multiply(BigInteger.valueOf(txData.getPrice())));
         if (realFee.compareTo(fee) >= 0) {
             return getSuccess();
         } else {

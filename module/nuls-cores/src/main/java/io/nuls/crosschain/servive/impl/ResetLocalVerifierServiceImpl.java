@@ -36,7 +36,6 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static io.nuls.base.basic.TransactionFeeCalculator.NORMAL_PRICE_PRE_1024_BYTES;
 import static io.nuls.core.constant.CommonCodeConstanst.PARAMETER_ERROR;
 
 /**
@@ -63,7 +62,6 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
     LocalVerifierManager localVerifierManager;
 
 
-
     /**
      * 缓存重置异构链存储的主链验证人的初始化验证人交易的hash
      * 用于在处理拜占庭签名时与普通的初始化验证人交易进行区别
@@ -84,13 +82,15 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
         Map<String, Object> result = LedgerCall.getBalanceAndNonce(chain, addressStr, assetChainId, assetId);
         byte[] nonce = RPCUtil.decode((String) result.get("nonce"));
         BigInteger balance = new BigInteger(result.get("available").toString());
+
+        BigInteger NORMAL_PRICE_PRE_1024_BYTES = BigInteger.valueOf(chain.getConfig().getFeeUnit(chain.getChainId(), 1));
         if (BigIntegerUtils.isLessThan(balance, NORMAL_PRICE_PRE_1024_BYTES)) {
             chain.getLogger().error("账户余额不足");
             throw new NulsException(NulsCrossChainErrorCode.INSUFFICIENT_BALANCE);
         }
         CoinData coinData = new CoinData();
         coinData.setFrom(List.of(new CoinFrom(address, assetChainId, assetId, NORMAL_PRICE_PRE_1024_BYTES, nonce, NulsCrossChainConstant.UNLOCKED_TX)));
-        coinData.setTo(List.of(new CoinTo(address,assetChainId,assetId,BigInteger.ZERO)));
+        coinData.setTo(List.of(new CoinTo(address, assetChainId, assetId, BigInteger.ZERO)));
         return coinData;
     }
 
@@ -117,7 +117,7 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
         try {
             Transaction tx = new Transaction(TxType.RESET_LOCAL_VERIFIER_LIST);
             tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
-            tx.setCoinData(assemblyCoinFrom(chain,address).serialize());
+            tx.setCoinData(assemblyCoinFrom(chain, address).serialize());
             TransactionSignature transactionSignature = new TransactionSignature();
             List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
             P2PHKSignature p2PHKSignature = AccountCall.signDigest(address, password, tx.getHash().getBytes());
@@ -131,11 +131,11 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
             Map<String, Object> result = new HashMap<>(2);
             result.put(ParamConstant.TX_HASH, tx.getHash().toHex());
             return Result.getSuccess(CommonCodeConstanst.SUCCESS).setData(result);
-        }catch (NulsException e){
-            chain.getLogger().error("创建重置本链验证人列表交易时捕获异常",e);
+        } catch (NulsException e) {
+            chain.getLogger().error("创建重置本链验证人列表交易时捕获异常", e);
             return Result.getFailed(e.getErrorCode());
-        }catch (Throwable e){
-            chain.getLogger().error("创建重置本链验证人列表交易时捕获到未知异常,{}",e.getMessage(),e);
+        } catch (Throwable e) {
+            chain.getLogger().error("创建重置本链验证人列表交易时捕获到未知异常,{}", e.getMessage(), e);
             return Result.getFailed(CommonCodeConstanst.SYS_UNKOWN_EXCEPTION);
         }
 
@@ -159,7 +159,7 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
             return result;
         }
         //一个区块只处理一条重置交易，其他的丢掉
-        List<Transaction> invalidCtxList =  txs.stream().skip(1).collect(Collectors.toList());
+        List<Transaction> invalidCtxList = txs.stream().skip(1).collect(Collectors.toList());
         String errorCode = null;
         Transaction tx = txs.get(0);
         try {
@@ -227,13 +227,13 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
         Transaction tx = txs.get(0);
         Set<String> allAgentPackingAddress = new HashSet<>(ConsensusCall.getWorkAgentList(chain));
         allAgentPackingAddress.addAll(nulsCrossChainConfig.getSeedNodeList());
-        chain.getLogger().info("获取到当前网络最新的出块地址列表（包括种子节点）:{}",allAgentPackingAddress);
+        chain.getLogger().info("获取到当前网络最新的出块地址列表（包括种子节点）:{}", allAgentPackingAddress);
         //备份当前本链验证人列表
-        localVerifierService.backup(chainId,blockHeader.getHeight());
+        localVerifierService.backup(chainId, blockHeader.getHeight());
         chain.getSwitchVerifierLock().writeLock().lock();
-        try{
-            boolean res = LocalVerifierManager.initLocalVerifier(chain,new ArrayList<>(allAgentPackingAddress));
-            if(!res){
+        try {
+            boolean res = LocalVerifierManager.initLocalVerifier(chain, new ArrayList<>(allAgentPackingAddress));
+            if (!res) {
                 chain.getLogger().error("重置本链验证人列表失败");
                 return false;
             }
@@ -242,31 +242,30 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
         } finally {
             chain.getSwitchVerifierLock().writeLock().unlock();
         }
-        chain.getLogger().info("重置本链验证人列表完成:{}",chain.getVerifierList());
+        chain.getLogger().info("重置本链验证人列表完成:{}", chain.getVerifierList());
         int syncStatus = BlockCall.getBlockStatus(chain);
-        List<ChainInfo> otherChainInfoList = chainManager.getRegisteredCrossChainList().stream().filter(d->d.getChainId() != chainId).collect(Collectors.toList());
+        List<ChainInfo> otherChainInfoList = chainManager.getRegisteredCrossChainList().stream().filter(d -> d.getChainId() != chainId).collect(Collectors.toList());
         List<Transaction> newTxList = Lists.newArrayList();
         otherChainInfoList.forEach(chainInfo -> {
             try {
-                    //组装一个重置平行链存储的主网验证人列表的交易
-                    newTxList.add(TxUtil.createVerifierInitTx(chain.getVerifierList(), tx.getTime(), chainInfo.getChainId()));
+                //组装一个重置平行链存储的主网验证人列表的交易
+                newTxList.add(TxUtil.createVerifierInitTx(chain.getVerifierList(), tx.getTime(), chainInfo.getChainId()));
             } catch (IOException e) {
-                chain.getLogger().error("组装重置平行链存储的主网验证人列表的交易失败",e);
+                chain.getLogger().error("组装重置平行链存储的主网验证人列表的交易失败", e);
             }
         });
-        if(otherChainInfoList.size() != newTxList.size()){
+        if (otherChainInfoList.size() != newTxList.size()) {
             return false;
         }
-        newTxList.forEach(initOtherVerifierTx->{
+        newTxList.forEach(initOtherVerifierTx -> {
             chain.getCrossTxThreadPool().execute(
-                    new ResetOtherChainVerifierListHandler(chain, initOtherVerifierTx,syncStatus));
+                    new ResetOtherChainVerifierListHandler(chain, initOtherVerifierTx, syncStatus));
             String txHash = initOtherVerifierTx.getHash().toHex();
             resetOtherVerifierTxList.add(txHash);
-            chain.getLogger().info("发起一笔重置平行链存储的主链验证人列表的交易,txHash:{}",txHash);
+            chain.getLogger().info("发起一笔重置平行链存储的主链验证人列表的交易,txHash:{}", txHash);
         });
         return true;
     }
-
 
 
     @Override
@@ -275,7 +274,7 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
         if (chain == null) {
             return false;
         }
-        return localVerifierService.rollback(chainId,blockHeader.getHeight());
+        return localVerifierService.rollback(chainId, blockHeader.getHeight());
     }
 
     @Override

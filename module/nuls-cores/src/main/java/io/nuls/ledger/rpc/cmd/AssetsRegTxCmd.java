@@ -56,6 +56,8 @@ import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
+import static io.nuls.common.CommonConstant.NORMAL_PRICE_PRE_1024_BYTES_NULS;
+
 /**
  * 资产登记与管理接口
  *
@@ -89,7 +91,7 @@ public class AssetsRegTxCmd extends BaseLedgerCmd {
         coinData.addFrom(from);
         txSize += to.size();
         txSize += from.size();
-        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
+        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize, NORMAL_PRICE_PRE_1024_BYTES_NULS);
         BigInteger fromAmount = destroyAssetTx.add(fee);
         if (BigIntegerUtils.isLessThan(accountState.getAvailableAmount(), fromAmount)) {
             throw new NulsRuntimeException(LedgerErrorCode.BALANCE_NOT_ENOUGH);

@@ -268,7 +268,10 @@ public class AgentServiceImpl implements AgentService {
             long txTime = NulsDateUtils.getCurrentTimeSeconds();
             tx.setTime(txTime);
             CoinData coinData = coinDataManager.getStopAgentCoinData(chain, agent, txTime + chain.getConfig().getStopAgentLockTime());
-            BigInteger fee = TransactionFeeCalculator.getConsensusTxFee(tx.size() + P2PHKSignature.SERIALIZE_LENGTH + coinData.serialize().length, chain.getConfig().getFeeUnit());
+
+            int agentChainId = chain.getConfig().getAgentChainId();
+            int agentAssetId = chain.getConfig().getAgentAssetId();
+            BigInteger fee = TransactionFeeCalculator.getConsensusTxFee(tx.size() + P2PHKSignature.SERIALIZE_LENGTH + coinData.serialize().length, chain.getConfig().getFeeUnit(agentChainId+"-"+agentAssetId));
             coinData.getTo().get(0).setAmount(coinData.getTo().get(0).getAmount().subtract(fee));
             tx.setCoinData(coinData.serialize());
             //交易签名

@@ -74,12 +74,12 @@ public class CallContractTxValidator {
         boolean existSender = false;
         Chain chain = contractHelper.getChain(chainId);
         int assetsId = chain.getConfig().getAssetId();
-        for(CoinFrom from : fromList) {
-            if(from.getAssetsChainId() != chainId || from.getAssetsId() != assetsId) {
+        for (CoinFrom from : fromList) {
+            if (from.getAssetsChainId() != chainId || from.getAssetsId() != assetsId) {
                 Log.error("contract call error: The chain id or assets id of coin from is error.");
                 return Result.getFailed(CONTRACT_COIN_ASSETS_ERROR);
             }
-            if(!existSender && Arrays.equals(from.getAddress(), sender)) {
+            if (!existSender && Arrays.equals(from.getAddress(), sender)) {
                 existSender = true;
             }
         }
@@ -107,7 +107,7 @@ public class CallContractTxValidator {
 
         BigInteger contractReceivedValue = BigInteger.ZERO;
         for (CoinTo coin : toList) {
-            if(coin.getAssetsChainId() != chainId || coin.getAssetsId() != assetsId) {
+            if (coin.getAssetsChainId() != chainId || coin.getAssetsId() != assetsId) {
                 Log.error("contract call error: The chain id or assets id of coin to is error.");
                 return Result.getFailed(CONTRACT_COIN_ASSETS_ERROR);
             }
@@ -137,7 +137,8 @@ public class CallContractTxValidator {
         }
 
         BigInteger realFee = tx.getFee();
-        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size()).add(BigInteger.valueOf(txData.getGasLimit()).multiply(BigInteger.valueOf(txData.getPrice())));
+
+        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size(), chain.getConfig().getFeeUnit(chainId, assetsId)).add(BigInteger.valueOf(txData.getGasLimit()).multiply(BigInteger.valueOf(txData.getPrice())));
         if (realFee.compareTo(fee) >= 0) {
             return getSuccess();
         } else {
@@ -176,7 +177,7 @@ public class CallContractTxValidator {
         int assetChainId, assetId;
         String assetKey;
         BigInteger nulsValue = BigInteger.ZERO;
-        for(CoinFrom from : fromList) {
+        for (CoinFrom from : fromList) {
             assetChainId = from.getAssetsChainId();
             assetId = from.getAssetsId();
             assetKey = assetChainId + "_" + assetId;
@@ -231,7 +232,7 @@ public class CallContractTxValidator {
         for (String multyAssetKey : multyAssetKeys) {
             assetKeyFrom = multyAssetMap.get(multyAssetKey + "from");
             assetKeyTo = multyAssetMap.get(multyAssetKey + "to");
-            if(null == assetKeyFrom){
+            if (null == assetKeyFrom) {
                 Log.error("contract call error: Illegal coinFrom in the contract.");
                 return Result.getFailed(CONTRACT_COIN_FROM_ERROR);
             }
@@ -260,7 +261,8 @@ public class CallContractTxValidator {
         }
 
         BigInteger realFee = coinData.getFeeByAsset(CHAIN_ID, ASSET_ID);
-        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size()).add(BigInteger.valueOf(txData.getGasLimit()).multiply(BigInteger.valueOf(txData.getPrice())));
+        Chain chain = contractHelper.getChain(chainId);
+        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size(), chain.getConfig().getFeeUnit(CHAIN_ID, ASSET_ID)).add(BigInteger.valueOf(txData.getGasLimit()).multiply(BigInteger.valueOf(txData.getPrice())));
         if (realFee.compareTo(fee) >= 0) {
             return getSuccess();
         } else {
@@ -302,7 +304,7 @@ public class CallContractTxValidator {
         int assetChainId, assetId;
         String assetKey;
         BigInteger nulsValue = BigInteger.ZERO;
-        for(CoinFrom from : fromList) {
+        for (CoinFrom from : fromList) {
             assetChainId = from.getAssetsChainId();
             assetId = from.getAssetsId();
             assetKey = assetChainId + "_" + assetId;
@@ -367,7 +369,7 @@ public class CallContractTxValidator {
         for (String multyAssetKey : multyAssetKeys) {
             assetKeyFrom = multyAssetMap.get(multyAssetKey + "from");
             assetKeyTo = multyAssetMap.get(multyAssetKey + "to");
-            if(null == assetKeyFrom){
+            if (null == assetKeyFrom) {
                 Log.error("contract call error: Illegal coinFrom in the contract.");
                 return Result.getFailed(CONTRACT_COIN_FROM_ERROR);
             }
@@ -396,7 +398,8 @@ public class CallContractTxValidator {
         }
 
         BigInteger realFee = coinData.getFeeByAsset(CHAIN_ID, ASSET_ID);
-        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size()).add(BigInteger.valueOf(txData.getGasLimit()).multiply(BigInteger.valueOf(txData.getPrice())));
+        Chain chain = contractHelper.getChain(chainId);
+        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size(), chain.getConfig().getFeeUnit(CHAIN_ID, ASSET_ID)).add(BigInteger.valueOf(txData.getGasLimit()).multiply(BigInteger.valueOf(txData.getPrice())));
         if (realFee.compareTo(fee) >= 0) {
             return getSuccess();
         } else {
@@ -404,6 +407,7 @@ public class CallContractTxValidator {
             return Result.getFailed(FEE_NOT_RIGHT);
         }
     }
+
     /**
      * 1. 新增功能，调用合约时支持多签地址
      */
@@ -447,7 +451,7 @@ public class CallContractTxValidator {
         int assetChainId, assetId;
         String assetKey;
         BigInteger nulsValue = BigInteger.ZERO;
-        for(CoinFrom from : fromList) {
+        for (CoinFrom from : fromList) {
             assetChainId = from.getAssetsChainId();
             assetId = from.getAssetsId();
             assetKey = assetChainId + "_" + assetId;
@@ -512,7 +516,7 @@ public class CallContractTxValidator {
         for (String multyAssetKey : multyAssetKeys) {
             assetKeyFrom = multyAssetMap.get(multyAssetKey + "from");
             assetKeyTo = multyAssetMap.get(multyAssetKey + "to");
-            if(null == assetKeyFrom){
+            if (null == assetKeyFrom) {
                 Log.error("contract call error: Illegal coinFrom in the contract.");
                 return Result.getFailed(CONTRACT_COIN_FROM_ERROR);
             }
@@ -541,7 +545,9 @@ public class CallContractTxValidator {
         }
 
         BigInteger realFee = coinData.getFeeByAsset(CHAIN_ID, ASSET_ID);
-        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size()).add(BigInteger.valueOf(txData.getGasLimit()).multiply(BigInteger.valueOf(txData.getPrice())));
+
+        Chain chain = contractHelper.getChain(chainId);
+        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size(), chain.getConfig().getFeeUnit(CHAIN_ID, ASSET_ID)).add(BigInteger.valueOf(txData.getGasLimit()).multiply(BigInteger.valueOf(txData.getPrice())));
         if (realFee.compareTo(fee) >= 0) {
             return getSuccess();
         } else {

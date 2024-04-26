@@ -78,6 +78,8 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static io.nuls.common.CommonConstant.NORMAL_PRICE_PRE_1024_BYTES_NULS;
+
 /**
  * @author: qinyifeng
  */
@@ -398,7 +400,7 @@ public class TransactionServiceImpl implements TransactionService {
         CoinTo coinTo = new CoinTo(blackHoleAddress, assetChainId, assetId, AccountConstant.ALIAS_FEE);
         int txSize = tx.size() + coinFrom.size() + coinTo.size() + msign * P2PHKSignature.SERIALIZE_LENGTH;
         //计算手续费
-        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
+        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize, NORMAL_PRICE_PRE_1024_BYTES_NULS);
         //总费用为
         BigInteger totalAmount = AccountConstant.ALIAS_FEE.add(fee);
         coinFrom.setAmount(totalAmount);
@@ -634,7 +636,7 @@ public class TransactionServiceImpl implements TransactionService {
             }
         }
         //本交易预计收取的手续费
-        BigInteger targetFee = TransactionFeeCalculator.getNormalTxFee(txSize);
+        BigInteger targetFee = TransactionFeeCalculator.getNormalTxFee(txSize, NORMAL_PRICE_PRE_1024_BYTES_NULS);
         //实际收取的手续费, 可能自己已经组装完成
         BigInteger actualFee = feeTotalFrom.subtract(feeTotalTo);
         if (BigIntegerUtils.isLessThan(actualFee, BigInteger.ZERO)) {
@@ -734,7 +736,7 @@ public class TransactionServiceImpl implements TransactionService {
                 feeCoinFrom.setNonce(nonceBalance.getNonce());
                 txSize += feeCoinFrom.size();
                 //由于新增CoinFrom，需要重新计算本交易预计收取的手续费
-                targetFee = TransactionFeeCalculator.getNormalTxFee(txSize);
+                targetFee = TransactionFeeCalculator.getNormalTxFee(txSize, NORMAL_PRICE_PRE_1024_BYTES_NULS);
                 //当前还差的手续费
                 BigInteger current = targetFee.subtract(actualFee);
                 //此账户可以支付的手续费
