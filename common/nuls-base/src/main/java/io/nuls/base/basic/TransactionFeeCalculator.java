@@ -37,8 +37,7 @@ import java.math.BigInteger;
  * 2018/11/27
  */
 public class TransactionFeeCalculator {
-
-    public static final BigInteger NORMAL_PRICE_PRE_1024_BYTES = BigInteger.valueOf(100000);
+ 
     public static final BigInteger CROSSTX_PRICE_PRE_1024_BYTES = BigInteger.valueOf(1000000);
 
     public static final int KB = 1024;
@@ -48,7 +47,8 @@ public class TransactionFeeCalculator {
      * According to the transaction size calculate the handling fee.
      * @param size Transaction size/size of the transaction
      */
-    public static final BigInteger getNormalTxFee(int size) {
+    public static final BigInteger getNormalTxFee(int size,long feeUnit) {
+        BigInteger NORMAL_PRICE_PRE_1024_BYTES = BigInteger.valueOf(feeUnit);
         BigInteger fee = NORMAL_PRICE_PRE_1024_BYTES.multiply(new BigInteger(String.valueOf(size/KB)));
         if (size % KB > 0) {
             fee = fee.add(NORMAL_PRICE_PRE_1024_BYTES);
@@ -75,7 +75,8 @@ public class TransactionFeeCalculator {
      * @param size Unsigned transaction size/ size of the unsigned transaction
      * @return Transaction fees
      */
-    public static final BigInteger getNormalUnsignedTxFee(int size) {
+    public static final BigInteger getNormalUnsignedTxFee(int size,long feeUnit) {
+        BigInteger NORMAL_PRICE_PRE_1024_BYTES = BigInteger.valueOf(feeUnit);
         size += P2PHKSignature.SERIALIZE_LENGTH;
         BigInteger fee = NORMAL_PRICE_PRE_1024_BYTES.multiply(new BigInteger(String.valueOf(size/KB)));
         if (size % KB > 0) {
@@ -102,7 +103,8 @@ public class TransactionFeeCalculator {
      * According to the transaction size calculate the handling fee.
      * @param size Transaction size/size of the transaction
      */
-    public static final BigInteger getFee(int size, BigInteger price) {
+    public static final BigInteger getFee(int size, BigInteger price,long feeUnit) {
+        BigInteger NORMAL_PRICE_PRE_1024_BYTES = BigInteger.valueOf(feeUnit);
         if(price.compareTo(NORMAL_PRICE_PRE_1024_BYTES)<0){
             throw new NulsRuntimeException(new Exception("entity is error"));
         }

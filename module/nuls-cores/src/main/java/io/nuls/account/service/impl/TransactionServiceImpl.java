@@ -78,6 +78,8 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static io.nuls.common.CommonConstant.NORMAL_PRICE_PRE_1024_BYTES_NULS;
+
 /**
  * @author: qinyifeng
  */
@@ -398,7 +400,7 @@ public class TransactionServiceImpl implements TransactionService {
         CoinTo coinTo = new CoinTo(blackHoleAddress, assetChainId, assetId, AccountConstant.ALIAS_FEE);
         int txSize = tx.size() + coinFrom.size() + coinTo.size() + msign * P2PHKSignature.SERIALIZE_LENGTH;
         //Calculate handling fees
-        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
+        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize, NORMAL_PRICE_PRE_1024_BYTES_NULS);
         //The total cost is
         BigInteger totalAmount = AccountConstant.ALIAS_FEE.add(fee);
         coinFrom.setAmount(totalAmount);
@@ -634,7 +636,7 @@ public class TransactionServiceImpl implements TransactionService {
             }
         }
         //The expected handling fee for this transaction
-        BigInteger targetFee = TransactionFeeCalculator.getNormalTxFee(txSize);
+        BigInteger targetFee = TransactionFeeCalculator.getNormalTxFee(txSize, NORMAL_PRICE_PRE_1024_BYTES_NULS);
         //Actual transaction fees collected, Maybe I have already assembled it myself
         BigInteger actualFee = feeTotalFrom.subtract(feeTotalTo);
         if (BigIntegerUtils.isLessThan(actualFee, BigInteger.ZERO)) {
@@ -734,7 +736,7 @@ public class TransactionServiceImpl implements TransactionService {
                 feeCoinFrom.setNonce(nonceBalance.getNonce());
                 txSize += feeCoinFrom.size();
                 //Due to the addition ofCoinFrom, it is necessary to recalculate the expected handling fee for this transaction
-                targetFee = TransactionFeeCalculator.getNormalTxFee(txSize);
+                targetFee = TransactionFeeCalculator.getNormalTxFee(txSize, NORMAL_PRICE_PRE_1024_BYTES_NULS);
                 //Current outstanding handling fees
                 BigInteger current = targetFee.subtract(actualFee);
                 //The handling fees that this account can pay

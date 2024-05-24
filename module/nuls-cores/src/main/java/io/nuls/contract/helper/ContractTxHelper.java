@@ -29,7 +29,9 @@ import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.*;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
+import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.manager.ContractTxValidatorManager;
+import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.model.bo.ContractBalance;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.dto.AccountAmountDto;
@@ -64,8 +66,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static io.nuls.contract.config.ContractContext.ASSET_ID;
-import static io.nuls.contract.config.ContractContext.CHAIN_ID;
+import static io.nuls.contract.config.ContractContext.LOCAL_MAIN_ASSET_ID;
+import static io.nuls.contract.config.ContractContext.LOCAL_CHAIN_ID;
 import static io.nuls.contract.constant.ContractConstant.MAX_GASLIMIT;
 import static io.nuls.contract.constant.ContractConstant.UNLOCKED_TX;
 import static io.nuls.contract.constant.ContractErrorCode.*;
@@ -111,7 +113,7 @@ public class ContractTxHelper {
     }
 
     public Result<CreateContractTransaction> newCreateTx(int chainId, String sender, byte[] senderBytes, byte[] contractAddressBytes, String alias, Long gasLimit, Long price,
-                                                          byte[] contractCode, String[][] args, String remark) {
+                                                         byte[] contractCode, String[][] args, String remark) {
         try {
             BigInteger value = BigInteger.ZERO;
 
@@ -232,8 +234,8 @@ public class ContractTxHelper {
         BigInteger imputedValue = BigInteger.valueOf(LongUtils.mul(gasUsed, price));
         // Total expenses
         BigInteger totalValue = imputedValue;
-        int assetChainId = CHAIN_ID;
-        int assetId = ASSET_ID;
+        int assetChainId = LOCAL_CHAIN_ID;
+        int assetId = LOCAL_MAIN_ASSET_ID;
         totalValue = totalValue.add(value);
         if (value.compareTo(BigInteger.ZERO) > 0) {
             coinData.addTo(new CoinTo(contractAddress, assetChainId, assetId, value));
@@ -267,11 +269,11 @@ public class ContractTxHelper {
                 }
             }
         }
-
-        BigInteger fee = TransactionFeeCalculator.getNormalUnsignedTxFee(txSize + calcSize(txData) + calcSize(coinData));
+        Chain chain = contractHelper.getChain(chainId);
+        BigInteger fee = TransactionFeeCalculator.getNormalUnsignedTxFee(txSize + calcSize(txData) + calcSize(coinData), chain.getConfig().getFeeUnit(assetChainId, assetId));
         totalValue = totalValue.add(fee);
         if (senderBalance.getBalance().compareTo(totalValue) < 0) {
-            Log.error("Insufficient balance, asset: {}-{}", CHAIN_ID, ASSET_ID);
+            Log.error("Insufficient balance, asset: {}-{}", LOCAL_CHAIN_ID, LOCAL_MAIN_ASSET_ID);
             return Result.getFailed(INSUFFICIENT_BALANCE);
         }
         coinFrom.setAmount(totalValue);
@@ -625,7 +627,7 @@ public class ContractTxHelper {
                 return Result.getFailed(ContractErrorCode.CONTRACT_DELETE_CREATER);
             }
 
-            ContractBalance balance = contractHelper.getRealBalance(chainId, CHAIN_ID, ASSET_ID, contractAddress);
+            ContractBalance balance = contractHelper.getRealBalance(chainId, LOCAL_CHAIN_ID, LOCAL_MAIN_ASSET_ID, contractAddress);
             BigInteger totalBalance = balance.getTotal();
             if (totalBalance.compareTo(BigInteger.ZERO) != 0) {
                 return Result.getFailed(ContractErrorCode.CONTRACT_DELETE_BALANCE);

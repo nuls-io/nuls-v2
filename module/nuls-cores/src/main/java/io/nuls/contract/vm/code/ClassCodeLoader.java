@@ -123,13 +123,13 @@ public class ClassCodeLoader {
     }
 
     public static ClassCode getFromResource(String className) {
-        if (ProtocolGroupManager.getCurrentVersion(ContractContext.CHAIN_ID) >= ContractContext.PROTOCOL_15) {
+        if (ProtocolGroupManager.getCurrentVersion(ContractContext.LOCAL_CHAIN_ID) >= ContractContext.PROTOCOL_15) {
             return RESOURCE_CLASS_CODES_V15.get(className);
         }
-        if (ProtocolGroupManager.getCurrentVersion(ContractContext.CHAIN_ID) >= ContractContext.PROTOCOL_14) {
+        if (ProtocolGroupManager.getCurrentVersion(ContractContext.LOCAL_CHAIN_ID) >= ContractContext.PROTOCOL_14) {
             return RESOURCE_CLASS_CODES_V14.get(className);
         }
-        if (ProtocolGroupManager.getCurrentVersion(ContractContext.CHAIN_ID) >= ContractContext.UPDATE_VERSION_CONTRACT_ASSET) {
+        if (ProtocolGroupManager.getCurrentVersion(ContractContext.LOCAL_CHAIN_ID) >= ContractContext.UPDATE_VERSION_CONTRACT_ASSET) {
             return RESOURCE_CLASS_CODES_V8.get(className);
         }
         return RESOURCE_CLASS_CODES.get(className);

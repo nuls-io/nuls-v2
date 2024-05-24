@@ -231,7 +231,7 @@ public class TxValidator {
                     size -= tx.getTransactionSignature().length;
                 }
 
-                BigInteger fee = TransactionFeeCalculator.getConsensusTxFee(size, chain.getConfig().getFeeUnit());
+                BigInteger fee = TransactionFeeCalculator.getConsensusTxFee(size, chain.getConfig().getFeeUnit(chain.getConfig().getAgentChainId(), chain.getConfig().getAgentAssetId()));
                 if (fee.compareTo(consensusManager.getFee(coinData, chain.getConfig().getAgentChainId(), chain.getConfig().getAgentAssetId())) > 0) {
                     chain.getLogger().error("Insufficient handling fees！");
                     throw new NulsException(ConsensusErrorCode.FEE_NOT_ENOUGH);
@@ -344,7 +344,7 @@ public class TxValidator {
                     size += transactionSignature.getM() * P2PHKSignature.SERIALIZE_LENGTH;
                     size -= tx.getTransactionSignature().length;
                 }
-                BigInteger fee = TransactionFeeCalculator.getConsensusTxFee(size, chain.getConfig().getFeeUnit());
+                BigInteger fee = TransactionFeeCalculator.getConsensusTxFee(size, chain.getConfig().getFeeUnit(chain.getConfig().getAgentChainId(), chain.getConfig().getAgentAssetId()));
                 if (fee.compareTo(consensusManager.getFee(coinData, chain.getConfig().getAgentChainId(), chain.getConfig().getAgentAssetId())) > 0) {
                     chain.getLogger().error("Insufficient handling fees！");
                     throw new NulsException(ConsensusErrorCode.FEE_NOT_ENOUGH);
@@ -457,7 +457,7 @@ public class TxValidator {
                 size += transactionSignature.getM() * P2PHKSignature.SERIALIZE_LENGTH;
             }
             size -= tx.getTransactionSignature().length;
-            BigInteger fee = TransactionFeeCalculator.getNormalTxFee(size);
+            BigInteger fee = TransactionFeeCalculator.getNormalTxFee(size, chain.getConfig().getFeeUnit(chain.getConfig().getChainId(), 1));
             last.setAmount(last.getAmount().subtract(fee));
         }
         return Arrays.equals(coinData.serialize(), localCoinData.serialize());

@@ -48,8 +48,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import static io.nuls.contract.config.ContractContext.ASSET_ID;
-import static io.nuls.contract.config.ContractContext.CHAIN_ID;
+import static io.nuls.contract.config.ContractContext.LOCAL_MAIN_ASSET_ID;
+import static io.nuls.contract.config.ContractContext.LOCAL_CHAIN_ID;
 import static io.nuls.contract.constant.ContractErrorCode.*;
 import static io.nuls.contract.util.ContractUtil.getSuccess;
 
@@ -107,7 +107,7 @@ public class DeleteContractTxValidator {
             return Result.getFailed(CONTRACT_OWNER_ERROR);
         }
 
-        ContractBalance balance = contractHelper.getRealBalance(chainId, CHAIN_ID, ASSET_ID, AddressTool.getStringAddressByBytes(contractAddressBytes));
+        ContractBalance balance = contractHelper.getRealBalance(chainId, LOCAL_CHAIN_ID, LOCAL_MAIN_ASSET_ID, AddressTool.getStringAddressByBytes(contractAddressBytes));
         if (balance == null) {
             Log.error("contract delete error: That balance of the contract is abnormal.");
             return Result.getFailed(CONTRACT_BALANCE_ERROR);
