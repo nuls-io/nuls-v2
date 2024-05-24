@@ -31,6 +31,7 @@ import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.signture.SignatureUtil;
+import io.nuls.common.NCUtils;
 import io.nuls.common.NulsCoresConfig;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.model.bo.Chain;
@@ -50,6 +51,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+import static io.nuls.contract.config.ContractContext.FEE_ASSETS_SET;
 import static io.nuls.contract.constant.ContractErrorCode.*;
 import static io.nuls.contract.util.ContractUtil.getSuccess;
 
@@ -90,15 +92,19 @@ public class CreateContractTxValidator {
         byte[] sender = txData.getSender();
         boolean existSender = false;
         Chain chain = contractHelper.getChain(chainId);
-        int assetsId = chain.getConfig().getAssetId();
+        int feeAssetId = chain.getConfig().getAssetId();
+        int feeAssetChainId = chain.getConfig().getAssetId();
         for (CoinFrom from : fromList) {
-            if (from.getAssetsChainId() != chainId || from.getAssetsId() != assetsId) {
+            if (!FEE_ASSETS_SET.contains(NCUtils.getTokenId(from.getAssetsChainId(), from.getAssetsId()))) {
                 Log.error("contract create error: The chain id or assets id of coin from is error.");
                 return Result.getFailed(CONTRACT_COIN_ASSETS_ERROR);
             }
             if (!existSender && Arrays.equals(from.getAddress(), sender)) {
                 existSender = true;
             }
+
+            feeAssetId = from.getAssetsId();
+            feeAssetChainId = from.getAssetsChainId();
         }
         Set<String> addressSet = SignatureUtil.getAddressFromTX(tx, chainId);
         if (!existSender || !addressSet.contains(AddressTool.getStringAddressByBytes(sender))) {
@@ -126,7 +132,7 @@ public class CreateContractTxValidator {
         }
 
         BigInteger realFee = tx.getFee();
-        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size(), chain.getConfig().getFeeUnit(chainId, assetsId)).add(BigInteger.valueOf(txData.getGasLimit()).multiply(BigInteger.valueOf(txData.getPrice())));
+        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size(), chain.getConfig().getFeeUnit(feeAssetChainId, feeAssetId)).add(BigInteger.valueOf(txData.getGasLimit()).multiply(BigInteger.valueOf(txData.getPrice())));
         if (realFee.compareTo(fee) >= 0) {
             return getSuccess();
         } else {

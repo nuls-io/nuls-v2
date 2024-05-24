@@ -93,8 +93,9 @@ public class SmartContractBootStrap implements INulsCoresBootstrap {
         ContractContext.DATA_PATH = contractConfig.getDataPath() + File.separator + ModuleE.SC.name;
         ContractContext.MAIN_ASSETS_ID = contractConfig.getMainAssetId();
         ContractContext.MAIN_CHAIN_ID = contractConfig.getMainChainId();
-        ContractContext.CHAIN_ID = contractConfig.getChainId();
-        ContractContext.ASSET_ID = contractConfig.getAssetId();
+        ContractContext.LOCAL_CHAIN_ID = contractConfig.getChainId();
+        ContractContext.LOCAL_MAIN_ASSET_ID = contractConfig.getAssetId();
+        ContractContext.FEE_ASSETS_SET = contractConfig.getFeeAssetsSet();
         if (StringUtils.isNotBlank(contractConfig.getCrossTokenSystemContract())) {
             ContractContext.CROSS_CHAIN_SYSTEM_CONTRACT = AddressTool.getAddress(contractConfig.getCrossTokenSystemContract());
         }

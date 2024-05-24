@@ -62,8 +62,8 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-import static io.nuls.contract.config.ContractContext.ASSET_ID;
-import static io.nuls.contract.config.ContractContext.CHAIN_ID;
+import static io.nuls.contract.config.ContractContext.LOCAL_CHAIN_ID;
+import static io.nuls.contract.config.ContractContext.LOCAL_MAIN_ASSET_ID;
 import static io.nuls.contract.constant.ContractConstant.*;
 import static io.nuls.contract.constant.ContractErrorCode.ADDRESS_ERROR;
 import static io.nuls.contract.util.ContractUtil.*;
@@ -849,7 +849,7 @@ public class ContractHelper {
             Set<Map.Entry<ByteArrayWrapper, BigInteger>> entries = returnMap.entrySet();
             CoinTo returnCoin;
             for (Map.Entry<ByteArrayWrapper, BigInteger> entry : entries) {
-                returnCoin = new CoinTo(entry.getKey().getBytes(), CHAIN_ID, ASSET_ID, entry.getValue(), 0L);
+                returnCoin = new CoinTo(entry.getKey().getBytes(), LOCAL_CHAIN_ID, LOCAL_MAIN_ASSET_ID, entry.getValue(), 0L);
                 toList.add(returnCoin);
             }
             ContractReturnGasTransaction tx = new ContractReturnGasTransaction();

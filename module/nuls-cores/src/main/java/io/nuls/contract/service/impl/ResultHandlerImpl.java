@@ -49,8 +49,8 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static io.nuls.contract.config.ContractContext.ASSET_ID;
-import static io.nuls.contract.config.ContractContext.CHAIN_ID;
+import static io.nuls.contract.config.ContractContext.LOCAL_MAIN_ASSET_ID;
+import static io.nuls.contract.config.ContractContext.LOCAL_CHAIN_ID;
 import static io.nuls.core.constant.TxType.CALL_CONTRACT;
 
 /**
@@ -110,7 +110,7 @@ public class ResultHandlerImpl implements ResultHanlder {
                 ContractTransferData txData = new ContractTransferData(orginTx.getHash(), contractAddress);
 
                 CoinData coinData = new CoinData();
-                ContractBalance balance = tempBalanceManager.getBalance(contractAddress, CHAIN_ID, ASSET_ID).getData();
+                ContractBalance balance = tempBalanceManager.getBalance(contractAddress, LOCAL_CHAIN_ID, LOCAL_MAIN_ASSET_ID).getData();
                 byte[] nonceBytes = RPCUtil.decode(balance.getNonce());
 
                 CoinFrom coinFrom = new CoinFrom(contractAddress, chainId, assetsId, value, nonceBytes, (byte) 0);

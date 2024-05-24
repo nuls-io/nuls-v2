@@ -70,8 +70,8 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
 
-import static io.nuls.contract.config.ContractContext.ASSET_ID;
-import static io.nuls.contract.config.ContractContext.CHAIN_ID;
+import static io.nuls.contract.config.ContractContext.LOCAL_MAIN_ASSET_ID;
+import static io.nuls.contract.config.ContractContext.LOCAL_CHAIN_ID;
 import static io.nuls.contract.constant.ContractConstant.RPC_RESULT_KEY;
 import static io.nuls.contract.vm.natives.NativeMethod.NOT_SUPPORT_NATIVE;
 import static io.nuls.contract.vm.natives.NativeMethod.SUPPORT_NATIVE;
@@ -648,7 +648,7 @@ public class NativeUtils {
             BlockHeaderDto blockHeaderDto = frame.vm.getBlockHeader(programInvoke.getNumber() + 1);
             long blockTime = blockHeaderDto.getTime();
             // 使用虚拟机内部维护的合约余额
-            ProgramAccount account = frame.vm.getProgramExecutor().getAccount(contractAddressBytes, CHAIN_ID, ASSET_ID);
+            ProgramAccount account = frame.vm.getProgramExecutor().getAccount(contractAddressBytes, LOCAL_CHAIN_ID, LOCAL_MAIN_ASSET_ID);
             argsMap.put("contractBalance", account.getBalance().toString());
             argsMap.put("contractNonce", account.getNonce());
             argsMap.put("blockTime", blockTime);

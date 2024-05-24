@@ -56,8 +56,8 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 
-import static io.nuls.contract.config.ContractContext.ASSET_ID;
-import static io.nuls.contract.config.ContractContext.CHAIN_ID;
+import static io.nuls.contract.config.ContractContext.LOCAL_CHAIN_ID;
+import static io.nuls.contract.config.ContractContext.LOCAL_MAIN_ASSET_ID;
 import static io.nuls.contract.util.ContractUtil.extractPublicKey;
 import static io.nuls.contract.util.ContractUtil.makeContractResult;
 import static io.nuls.core.constant.TxType.*;
@@ -213,7 +213,7 @@ public class ContractTxCallableV8 {
             assetChainId = from.getAssetsChainId();
             assetId = from.getAssetsId();
             //assetKey = assetChainId + "_" + assetId;
-            if (CHAIN_ID != assetChainId || ASSET_ID != assetId) {
+            if (LOCAL_CHAIN_ID != assetChainId || LOCAL_MAIN_ASSET_ID != assetId) {
                 //multyAssetMap.put(assetKey, from.getAddress());
                 // 多个账户向合约转入多个资产，合约执行失败后，退还转入的资产金额
                 ContractTransferTransaction tx = this.generateContractTransferTransaction(orginTxHash, contractAddress, from.getAddress(), from.getAmount(), assetChainId, assetId);
@@ -228,7 +228,7 @@ public class ContractTxCallableV8 {
             if (sender == null) {
                 sender = contractData.getSender();
             }
-            ContractTransferTransaction tx = this.generateContractTransferTransaction(orginTxHash, contractAddress, sender, value, CHAIN_ID, ASSET_ID);
+            ContractTransferTransaction tx = this.generateContractTransferTransaction(orginTxHash, contractAddress, sender, value, LOCAL_CHAIN_ID, LOCAL_MAIN_ASSET_ID);
             contractResult.getContractTransferList().add(tx);
         }
         /*int toSize = toList.size();

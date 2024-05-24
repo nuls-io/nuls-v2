@@ -23,9 +23,6 @@
  */
 package io.nuls.contract.callable;
 
-import io.nuls.base.data.CoinData;
-import io.nuls.base.data.CoinTo;
-import io.nuls.base.data.Transaction;
 import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.helper.ContractConflictChecker;
@@ -34,7 +31,6 @@ import io.nuls.contract.helper.ContractNewTxHandler;
 import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.manager.ContractTempBalanceManager;
 import io.nuls.contract.model.bo.*;
-import io.nuls.contract.model.txdata.CallContractData;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.service.ContractExecutor;
 import io.nuls.contract.util.ContractUtil;
@@ -51,8 +47,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
-import static io.nuls.contract.config.ContractContext.ASSET_ID;
-import static io.nuls.contract.config.ContractContext.CHAIN_ID;
 import static io.nuls.contract.util.ContractUtil.*;
 import static io.nuls.core.constant.TxType.*;
 

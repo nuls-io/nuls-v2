@@ -78,7 +78,7 @@ public class Invokevirtual {
             return;
         }
 
-        if (ProtocolGroupManager.getCurrentVersion(ContractContext.CHAIN_ID) >= ContractContext.UPDATE_VERSION_CONTRACT_BALANCE) {
+        if (ProtocolGroupManager.getCurrentVersion(ContractContext.LOCAL_CHAIN_ID) >= ContractContext.UPDATE_VERSION_CONTRACT_BALANCE) {
             if (methodCode.isMethod(RESIZE_CLASS_NAME, RESIZE_METHOD_NAME, RESIZE_METHOD_DESC)) {
                 // HashMap 扩容限制
                 MethodCode sizeMethod = frame.vm.methodArea.loadMethod(className, Constants.SIZE, Constants.SIZE_DESC);

@@ -340,7 +340,10 @@ public class ConfigBean {
     private String feeAssets;
     private String feeUnit;
 
+    private String feeCoefficient;
+
     private Map<String, Long> feeUnitMap;
+    private Map<String, Double> feeCoeffMap;
     /*----------------------------------------------------------------------*/
 
     private void initFeeUnitMap() {
@@ -352,7 +355,16 @@ public class ConfigBean {
                 feeUnitMap.put(keys[i], Long.parseLong(vals[i]));
             }
         }
+        if (StringUtils.isNotBlank(feeAssets) && StringUtils.isNotBlank(feeCoefficient) && feeCoeffMap == null) {
+            feeCoeffMap = new HashMap<>();
+            String[] keys = feeAssets.split(",");
+            String[] vals = feeCoefficient.split(",");
+            for (int i = 0; i < keys.length; i++) {
+                feeCoeffMap.put(keys[i], Double.parseDouble(vals[i]));
+            }
+        }
     }
+
 
     public Long getFeeUnit(int chainId, int assetId) {
         return getFeeUnit(NCUtils.getTokenId(chainId, assetId));
@@ -363,6 +375,17 @@ public class ConfigBean {
             initFeeUnitMap();
         }
         return feeUnitMap.get(tokenId);
+    }
+
+    public Double getFeeCoefficient(int chainId, int assetId) {
+        return getFeeCoefficient(NCUtils.getTokenId(chainId, assetId));
+    }
+
+    public Double getFeeCoefficient(String tokenId) {
+        if (null == feeCoeffMap) {
+            initFeeUnitMap();
+        }
+        return feeCoeffMap.get(tokenId);
     }
 
     public void setFeeAssets(String feeAssets) {

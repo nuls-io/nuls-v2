@@ -77,9 +77,6 @@ agentChainId=2
 agentAssetId=1
 #共识奖励资产ID(共识奖励必须为本链资产)
 awardAssetId=1
-#共识交易手续费单价
-feeAssets=2-1,2-2,2-3
-feeUnit=100000,10000,100000000000000
 #总通胀量
 totalInflationAmount=11000000000000000
 #初始通胀金额500w/265*30
@@ -90,6 +87,8 @@ initTime=1594483200
 deflationRatio=0.4
 #通缩间隔时间(单位：S),30天
 deflationTimeInterval=2592000
+feeAssets=2-1,2-2,2-3
+feeUnit=100000,10000,100000000000000
 
 
 [smart-contract]
@@ -97,6 +96,8 @@ deflationTimeInterval=2592000
 maxViewGas=100000000
 systemLogLevel=WARN
 crossTokenSystemContract=tNULSeBaMy9k29Nj4rd3U4tonVr93mrDLHMNNd
+# 单位gasPrice小数点位移
+feeCoefficient=1,0.0001,10000000
 
 [public-service]
 #public-service模块对外的rpc端口号

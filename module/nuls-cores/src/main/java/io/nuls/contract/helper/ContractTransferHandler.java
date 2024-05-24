@@ -45,8 +45,8 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
 
-import static io.nuls.contract.config.ContractContext.ASSET_ID;
-import static io.nuls.contract.config.ContractContext.CHAIN_ID;
+import static io.nuls.contract.config.ContractContext.LOCAL_MAIN_ASSET_ID;
+import static io.nuls.contract.config.ContractContext.LOCAL_CHAIN_ID;
 import static io.nuls.contract.constant.ContractConstant.MININUM_TRANSFER_AMOUNT;
 import static io.nuls.contract.constant.ContractErrorCode.TOO_SMALL_AMOUNT;
 import static io.nuls.contract.util.ContractUtil.*;
@@ -252,7 +252,7 @@ public class ContractTransferHandler {
             return getSuccess();
         }
         for (ProgramTransfer transfer : transfers) {
-            if (transfer.getAssetChainId() == CHAIN_ID && transfer.getAssetId() == ASSET_ID && transfer.getValue().compareTo(MININUM_TRANSFER_AMOUNT) < 0) {
+            if (transfer.getAssetChainId() == LOCAL_CHAIN_ID && transfer.getAssetId() == LOCAL_MAIN_ASSET_ID && transfer.getValue().compareTo(MININUM_TRANSFER_AMOUNT) < 0) {
                 return Result.getFailed(TOO_SMALL_AMOUNT);
             }
         }
@@ -353,7 +353,7 @@ public class ContractTransferHandler {
             CoinFrom coinFrom = coinData.getFrom().get(0);
             int assetChainId = coinFrom.getAssetsChainId();
             int assetId = coinFrom.getAssetsId();
-            if (CHAIN_ID != assetChainId || ASSET_ID != assetId) {
+            if (LOCAL_CHAIN_ID != assetChainId || LOCAL_MAIN_ASSET_ID != assetId) {
                 resultList.add(this.transformMultyAssetMergedTransfer(tx.getHash(), transfer));
             }
         }
@@ -367,7 +367,7 @@ public class ContractTransferHandler {
             CoinFrom coinFrom = coinData.getFrom().get(0);
             int assetChainId = coinFrom.getAssetsChainId();
             int assetId = coinFrom.getAssetsId();
-            if (CHAIN_ID == assetChainId && ASSET_ID == assetId) {
+            if (LOCAL_CHAIN_ID == assetChainId && LOCAL_MAIN_ASSET_ID == assetId) {
                 resultList.add(this.transformMergedTransfer(tx.getHash(), transfer));
             }
         }

@@ -34,6 +34,8 @@ import io.nuls.core.basic.Result;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -63,11 +65,11 @@ public class ContractContext {
     /**
      * 当前链ID
      */
-    public static int CHAIN_ID = 1;
+    public static int LOCAL_CHAIN_ID = 1;
     /**
      * 当前链资产ID
      */
-    public static int ASSET_ID = 1;
+    public static int LOCAL_MAIN_ASSET_ID = 1;
 
     /**
      * 代币跨链系统合约地址
@@ -88,7 +90,9 @@ public class ContractContext {
     public static short PROTOCOL_16 = 16;
     public static short PROTOCOL_17 = 17;
     public static short PROTOCOL_19 = 19;
+    public static short PROTOCOL_20 = 20;
     private static final LoadingCache<String, ContractAddressInfoPo> CONTRACT_INFO_CACHE;
+    public static Set<String> FEE_ASSETS_SET = new HashSet<>();
     private static ContractHelper contractHelper;
 
     static {
@@ -99,7 +103,7 @@ public class ContractContext {
                 .build(new CacheLoader<String, ContractAddressInfoPo>() {
                     @Override
                     public ContractAddressInfoPo load(String contract) {
-                        Result<ContractAddressInfoPo> contractAddressInfoResult = contractHelper.getContractAddressInfo(CHAIN_ID, AddressTool.getAddress(contract));
+                        Result<ContractAddressInfoPo> contractAddressInfoResult = contractHelper.getContractAddressInfo(LOCAL_CHAIN_ID, AddressTool.getAddress(contract));
                         ContractAddressInfoPo po = contractAddressInfoResult.getData();
                         return po;
                     }

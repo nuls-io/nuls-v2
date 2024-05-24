@@ -42,8 +42,8 @@ import io.nuls.core.model.StringUtils;
 import java.math.BigInteger;
 import java.util.*;
 
-import static io.nuls.contract.config.ContractContext.ASSET_ID;
-import static io.nuls.contract.config.ContractContext.CHAIN_ID;
+import static io.nuls.contract.config.ContractContext.LOCAL_MAIN_ASSET_ID;
+import static io.nuls.contract.config.ContractContext.LOCAL_CHAIN_ID;
 
 /**
  * @author: PierreLuo
@@ -92,7 +92,7 @@ public class ContractNewTxHandler {
                 if (Arrays.equals(to.getAddress(), contractAddress)) {
                     assetChainId = to.getAssetsChainId();
                     assetId = to.getAssetsId();
-                    mainAsset = assetChainId == CHAIN_ID && assetId == ASSET_ID;
+                    mainAsset = assetChainId == LOCAL_CHAIN_ID && assetId == LOCAL_MAIN_ASSET_ID;
                     if (!mainAsset) {
                         // 初始化其他资产的临时余额
                         tempBalanceManager.getBalance(contractAddress, assetChainId, assetId);
@@ -105,8 +105,8 @@ public class ContractNewTxHandler {
         BigInteger value = contractData.getValue();
         if (value.compareTo(BigInteger.ZERO) > 0) {
             // 初始化NULS主资产临时余额
-            tempBalanceManager.getBalance(contractAddress, CHAIN_ID, ASSET_ID);
-            tempBalanceManager.addTempBalance(contractAddress, value, CHAIN_ID, ASSET_ID);
+            tempBalanceManager.getBalance(contractAddress, LOCAL_CHAIN_ID, LOCAL_MAIN_ASSET_ID);
+            tempBalanceManager.addTempBalance(contractAddress, value, LOCAL_CHAIN_ID, LOCAL_MAIN_ASSET_ID);
         }
 
         boolean isSuccess = true;
@@ -173,14 +173,14 @@ public class ContractNewTxHandler {
         if (!isSuccess) {
             // 回滚 - 扣除调用合约时转入的金额
             if (value.compareTo(BigInteger.ZERO) > 0) {
-                tempBalanceManager.minusTempBalance(contractAddress, value, CHAIN_ID, ASSET_ID);
+                tempBalanceManager.minusTempBalance(contractAddress, value, LOCAL_CHAIN_ID, LOCAL_MAIN_ASSET_ID);
             }
             if (toList != null && !toList.isEmpty()) {
                 for (CoinTo to : toList) {
                     if (Arrays.equals(to.getAddress(), contractAddress)) {
                         assetChainId = to.getAssetsChainId();
                         assetId = to.getAssetsId();
-                        mainAsset = assetChainId == CHAIN_ID && assetId == ASSET_ID;
+                        mainAsset = assetChainId == LOCAL_CHAIN_ID && assetId == LOCAL_MAIN_ASSET_ID;
                         if (!mainAsset) {
                             // 回滚 - 扣除其他资产的临时余额
                             tempBalanceManager.minusTempBalance(contractAddress, to.getAmount(), assetChainId, assetId);

@@ -39,8 +39,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import static io.nuls.contract.config.ContractContext.ASSET_ID;
-import static io.nuls.contract.config.ContractContext.CHAIN_ID;
+import static io.nuls.contract.config.ContractContext.LOCAL_MAIN_ASSET_ID;
+import static io.nuls.contract.config.ContractContext.LOCAL_CHAIN_ID;
 import static io.nuls.contract.vm.natives.NativeMethod.NOT_SUPPORT_NATIVE;
 import static io.nuls.contract.vm.natives.NativeMethod.SUPPORT_NATIVE;
 
@@ -133,11 +133,11 @@ public class NativeAddress {
     }
 
     private static BigInteger balance(byte[] address, Frame frame) {
-        return frame.vm.getProgramExecutor().getAccount(address, CHAIN_ID, ASSET_ID).getBalance();
+        return frame.vm.getProgramExecutor().getAccount(address, LOCAL_CHAIN_ID, LOCAL_MAIN_ASSET_ID).getBalance();
     }
 
     private static BigInteger totalBalance(byte[] address, Frame frame) {
-        return frame.vm.getProgramExecutor().getAccount(address, CHAIN_ID, ASSET_ID).getTotalBalance();
+        return frame.vm.getProgramExecutor().getAccount(address, LOCAL_CHAIN_ID, LOCAL_MAIN_ASSET_ID).getTotalBalance();
     }
 
     public static final String balance = TYPE + "." + "balance" + "()Ljava/math/BigInteger;";
@@ -206,12 +206,12 @@ public class NativeAddress {
      * see Address#transfer(BigInteger)
      */
     private static Result transfer(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        return transferBase(methodCode, methodArgs, frame, CHAIN_ID, ASSET_ID, 0);
+        return transferBase(methodCode, methodArgs, frame, LOCAL_CHAIN_ID, LOCAL_MAIN_ASSET_ID, 0);
     }
 
     private static Result transferLocked(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         long lockedTime = (long) methodArgs.invokeArgs[1];
-        return transferBase(methodCode, methodArgs, frame, CHAIN_ID, ASSET_ID, lockedTime);
+        return transferBase(methodCode, methodArgs, frame, LOCAL_CHAIN_ID, LOCAL_MAIN_ASSET_ID, lockedTime);
     }
 
     private static Result transferOfDesignatedAsset(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
@@ -235,7 +235,7 @@ public class NativeAddress {
 
         frame.vm.addGasUsed(GasCost.TRANSFER);
 
-        boolean mainAsset = assetChainId == CHAIN_ID && assetId == ASSET_ID;
+        boolean mainAsset = assetChainId == LOCAL_CHAIN_ID && assetId == LOCAL_MAIN_ASSET_ID;
         if (frame.heap.existContract(to)) {
             if (lockedTime > 0) {
                 throw new ErrorException(String.format("Cannot transfer the locked amount to the contract address %s", address), frame.vm.getGasUsed(), null);
@@ -380,9 +380,9 @@ public class NativeAddress {
         programCall.setInternalCall(true);
 
         if (programCall.getValue().compareTo(BigInteger.ZERO) > 0) {
-            checkBalance(programCall.getSender(), CHAIN_ID, ASSET_ID, programCall.getValue(), frame);
-            frame.vm.getProgramExecutor().getAccount(programCall.getSender(), CHAIN_ID, ASSET_ID).addBalance(programCall.getValue().negate());
-            ProgramTransfer programTransfer = new ProgramTransfer(programCall.getSender(), programCall.getContractAddress(), programCall.getValue(), CHAIN_ID, ASSET_ID, 0);
+            checkBalance(programCall.getSender(), LOCAL_CHAIN_ID, LOCAL_MAIN_ASSET_ID, programCall.getValue(), frame);
+            frame.vm.getProgramExecutor().getAccount(programCall.getSender(), LOCAL_CHAIN_ID, LOCAL_MAIN_ASSET_ID).addBalance(programCall.getValue().negate());
+            ProgramTransfer programTransfer = new ProgramTransfer(programCall.getSender(), programCall.getContractAddress(), programCall.getValue(), LOCAL_CHAIN_ID, LOCAL_MAIN_ASSET_ID, 0);
             frame.vm.getTransfers().add(programTransfer);
             // add by pierre at 2019-11-23 标记 按合约执行顺序添加合约生成交易，按此顺序处理合约生成交易的业务 不确定 需要协议升级
             frame.vm.getOrderedInnerTxs().add(programTransfer);

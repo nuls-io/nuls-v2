@@ -55,6 +55,9 @@ public class ContractTxValidatorManager {
     }
 
     public Result callValidator(int chainId, CallContractTransaction tx) throws NulsException {
+        if (ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.PROTOCOL_20) {
+            return callContractTxValidator.validateV20(chainId, tx);
+        }
         if (ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.PROTOCOL_14) {
             return callContractTxValidator.validateV14(chainId, tx);
         }

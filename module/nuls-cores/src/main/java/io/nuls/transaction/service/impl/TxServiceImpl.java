@@ -33,6 +33,7 @@ import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.base.protocol.TxRegisterDetail;
 import io.nuls.base.signture.MultiSignTxSignature;
 import io.nuls.base.signture.SignatureUtil;
+import io.nuls.contract.config.ContractContext;
 import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TxStatusEnum;
@@ -788,7 +789,10 @@ public class TxServiceImpl implements TxService {
                 String[] arr = tokenId.split("-");
                 //计算主资产为手续费
                 feeAssetChainId = Integer.parseInt(arr[0]);
-                feeAssetId = Integer.parseInt(arr[0]);
+                feeAssetId = Integer.parseInt(arr[1]);
+                if (feeAssetId != 1 && ProtocolGroupManager.getCurrentVersion(chain.getChainId()) < ContractContext.PROTOCOL_20) {
+                    continue;
+                }
                 BigInteger fee = coinData.getFeeByAsset(feeAssetChainId, feeAssetId);
                 if (BigIntegerUtils.isEqualOrLessThan(fee, BigInteger.ZERO)) {
                     continue;
@@ -805,6 +809,9 @@ public class TxServiceImpl implements TxService {
                 }
                 result = true;
                 break;
+            }
+            if (!result) {
+                throw new NulsException(TxErrorCode.INSUFFICIENT_FEE);
             }
         }
 
