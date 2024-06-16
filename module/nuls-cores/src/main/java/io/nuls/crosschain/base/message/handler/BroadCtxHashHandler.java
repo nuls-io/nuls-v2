@@ -22,7 +22,7 @@ public class BroadCtxHashHandler implements MessageProcessor {
     @Autowired
     private ProtocolService protocolService;
 
-    private HashSetTimeDuplicateProcessor processor = new HashSetTimeDuplicateProcessor(2000, 300000L);
+    private HashSetTimeDuplicateProcessor processor = new HashSetTimeDuplicateProcessor(1000, 300000L);
 
     @Override
     public String getCmd() {

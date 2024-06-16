@@ -7,6 +7,7 @@ import io.nuls.core.core.annotation.Component;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.BroadCtxSignMessage;
 import io.nuls.crosschain.base.service.ProtocolService;
+import io.nuls.crosschain.base.utils.HashSetTimeDuplicateProcessor;
 
 /**
  * BroadCtxSignMessageProcessing class
@@ -21,6 +22,8 @@ public class BroadCtxSignHandler implements MessageProcessor {
     @Autowired
     private ProtocolService protocolService;
 
+    private HashSetTimeDuplicateProcessor processor = new HashSetTimeDuplicateProcessor(1000, 300000L);
+
     @Override
     public String getCmd() {
         return CommandConstant.BROAD_CTX_SIGN_MESSAGE;
@@ -32,6 +35,8 @@ public class BroadCtxSignHandler implements MessageProcessor {
         if (message == null) {
             return;
         }
-        protocolService.receiveCtxSign(chainId, nodeId, realMessage);
+        if (processor.insertAndCheck(nodeId + realMessage.getLocalHash().toHex())) {
+            protocolService.receiveCtxSign(chainId, nodeId, realMessage);
+        }
     }
 }

@@ -16,7 +16,7 @@ import io.nuls.crosschain.utils.MessageUtil;
 public class SignMessageByzantineHandler implements Runnable {
     private Chain chain;
 
-    private HashSetTimeDuplicateProcessor processor = new HashSetTimeDuplicateProcessor(2000, 300000L);
+    private HashSetTimeDuplicateProcessor processor = new HashSetTimeDuplicateProcessor(1000, 300000L);
 
     public SignMessageByzantineHandler(Chain chain) {
         this.chain = chain;
