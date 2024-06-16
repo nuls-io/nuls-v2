@@ -7,6 +7,7 @@ import io.nuls.core.core.annotation.Component;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.BroadCtxHashMessage;
 import io.nuls.crosschain.base.service.ProtocolService;
+import io.nuls.crosschain.base.utils.HashSetTimeDuplicateProcessor;
 
 /**
  * BroadCtxHashMessageProcessing class
@@ -21,6 +22,8 @@ public class BroadCtxHashHandler implements MessageProcessor {
     @Autowired
     private ProtocolService protocolService;
 
+    private HashSetTimeDuplicateProcessor processor = new HashSetTimeDuplicateProcessor(2000, 300000L);
+
     @Override
     public String getCmd() {
         return CommandConstant.BROAD_CTX_HASH_MESSAGE;
@@ -32,6 +35,8 @@ public class BroadCtxHashHandler implements MessageProcessor {
         if (message == null) {
             return;
         }
-        protocolService.receiveCtxHash(chainId, nodeId, realMessage);
+        if (processor.insertAndCheck(nodeId + realMessage)) {
+            protocolService.receiveCtxHash(chainId, nodeId, realMessage);
+        }
     }
 }

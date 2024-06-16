@@ -29,6 +29,7 @@ package io.nuls.base.basic;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.core.exception.NulsRuntimeException;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 
@@ -37,7 +38,7 @@ import java.math.BigInteger;
  * 2018/11/27
  */
 public class TransactionFeeCalculator {
- 
+
     public static final BigInteger CROSSTX_PRICE_PRE_1024_BYTES = BigInteger.valueOf(1000000);
 
     public static final int KB = 1024;
@@ -45,11 +46,12 @@ public class TransactionFeeCalculator {
     /**
      * Calculate the required transaction fees based on the size of the transaction
      * According to the transaction size calculate the handling fee.
+     *
      * @param size Transaction size/size of the transaction
      */
-    public static final BigInteger getNormalTxFee(int size,long feeUnit) {
+    public static final BigInteger getNormalTxFee(int size, long feeUnit) {
         BigInteger NORMAL_PRICE_PRE_1024_BYTES = BigInteger.valueOf(feeUnit);
-        BigInteger fee = NORMAL_PRICE_PRE_1024_BYTES.multiply(new BigInteger(String.valueOf(size/KB)));
+        BigInteger fee = NORMAL_PRICE_PRE_1024_BYTES.multiply(new BigInteger(String.valueOf(size / KB)));
         if (size % KB > 0) {
             fee = fee.add(NORMAL_PRICE_PRE_1024_BYTES);
         }
@@ -59,11 +61,12 @@ public class TransactionFeeCalculator {
     /**
      * Calculate the required transaction fees based on the size of the transaction
      * According to the transaction size calculate the handling fee.
+     *
      * @param size Transaction size/size of the transaction
      */
-    public static final BigInteger getConsensusTxFee(int size,long unit) {
+    public static final BigInteger getConsensusTxFee(int size, long unit) {
         BigInteger unitBigInteger = BigInteger.valueOf(unit);
-        BigInteger fee = unitBigInteger.multiply(new BigInteger(String.valueOf(size/KB)));
+        BigInteger fee = unitBigInteger.multiply(new BigInteger(String.valueOf(size / KB)));
         if (size % KB > 0) {
             fee = fee.add(unitBigInteger);
         }
@@ -72,15 +75,20 @@ public class TransactionFeeCalculator {
 
     /**
      * Calculate the handling fee to be paid based on the size of unsigned transactions
+     *
      * @param size Unsigned transaction size/ size of the unsigned transaction
      * @return Transaction fees
      */
-    public static final BigInteger getNormalUnsignedTxFee(int size,long feeUnit) {
+    public static final BigInteger getNormalUnsignedTxFee(int size, long feeUnit, double feeCoefficient) {
         BigInteger NORMAL_PRICE_PRE_1024_BYTES = BigInteger.valueOf(feeUnit);
         size += P2PHKSignature.SERIALIZE_LENGTH;
-        BigInteger fee = NORMAL_PRICE_PRE_1024_BYTES.multiply(new BigInteger(String.valueOf(size/KB)));
+        BigInteger fee = NORMAL_PRICE_PRE_1024_BYTES.multiply(new BigInteger(String.valueOf(size / KB)));
         if (size % KB > 0) {
             fee = fee.add(NORMAL_PRICE_PRE_1024_BYTES);
+        }
+        if (1 != feeCoefficient) {
+            BigDecimal deci = BigDecimal.valueOf(feeCoefficient);
+            fee = deci.multiply(new BigDecimal(fee)).toBigInteger();
         }
         return fee;
     }
@@ -88,10 +96,11 @@ public class TransactionFeeCalculator {
     /**
      * Calculate the required transaction fees based on the size of the transaction
      * According to the transaction size calculate the handling fee.
+     *
      * @param size Transaction size/size of the transaction
      */
     public static final BigInteger getCrossTxFee(int size) {
-        BigInteger fee = CROSSTX_PRICE_PRE_1024_BYTES.multiply(new BigInteger(String.valueOf(size/KB)));
+        BigInteger fee = CROSSTX_PRICE_PRE_1024_BYTES.multiply(new BigInteger(String.valueOf(size / KB)));
         if (size % KB > 0) {
             fee = fee.add(CROSSTX_PRICE_PRE_1024_BYTES);
         }
@@ -101,17 +110,18 @@ public class TransactionFeeCalculator {
     /**
      * Calculate the required transaction fees based on the size of the transaction
      * According to the transaction size calculate the handling fee.
+     *
      * @param size Transaction size/size of the transaction
      */
-    public static final BigInteger getFee(int size, BigInteger price,long feeUnit) {
+    public static final BigInteger getFee(int size, BigInteger price, long feeUnit) {
         BigInteger NORMAL_PRICE_PRE_1024_BYTES = BigInteger.valueOf(feeUnit);
-        if(price.compareTo(NORMAL_PRICE_PRE_1024_BYTES)<0){
+        if (price.compareTo(NORMAL_PRICE_PRE_1024_BYTES) < 0) {
             throw new NulsRuntimeException(new Exception("entity is error"));
         }
-        if(price.compareTo(CROSSTX_PRICE_PRE_1024_BYTES)>0) {
+        if (price.compareTo(CROSSTX_PRICE_PRE_1024_BYTES) > 0) {
             throw new NulsRuntimeException(new Exception("entity is error"));
         }
-        BigInteger fee = price.multiply(new BigInteger(String.valueOf(size/KB)));
+        BigInteger fee = price.multiply(new BigInteger(String.valueOf(size / KB)));
         if (size % KB > 0) {
             fee = fee.add(price);
         }

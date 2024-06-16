@@ -270,7 +270,7 @@ public class ContractTxHelper {
             }
         }
         Chain chain = contractHelper.getChain(chainId);
-        BigInteger fee = TransactionFeeCalculator.getNormalUnsignedTxFee(txSize + calcSize(txData) + calcSize(coinData), chain.getConfig().getFeeUnit(assetChainId, assetId));
+        BigInteger fee = TransactionFeeCalculator.getNormalUnsignedTxFee(txSize + calcSize(txData) + calcSize(coinData), chain.getConfig().getFeeUnit(assetChainId, assetId), chain.getConfig().getFeeCoefficient(assetChainId, assetId));
         totalValue = totalValue.add(fee);
         if (senderBalance.getBalance().compareTo(totalValue) < 0) {
             Log.error("Insufficient balance, asset: {}-{}", LOCAL_CHAIN_ID, LOCAL_MAIN_ASSET_ID);
