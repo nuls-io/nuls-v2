@@ -77,8 +77,6 @@ agentChainId=1
 agentAssetId=1
 #Consensus reward assetsID(Consensus rewards must be assets of the same chain)
 awardAssetId=1
-#Consensus transaction fee unit price
-feeUnit=100000
 #Total Inflation
 totalInflationAmount=11000000000000000
 #Initial inflation amount500w/365*30
@@ -89,11 +87,15 @@ initTime=1594483200
 deflationRatio=0.4
 #Deflation interval time(unit：S),30day
 deflationTimeInterval=2592000
+feeAssets=1-1,9-787,9-2
+feeUnit=100000,10000,100000000000000
 
 [smart-contract]
 #The maximum consumption of contract view method callsGas
 maxViewGas=100000000
 crossTokenSystemContract=NULSd6HgsyGNK1xTcx2GnC9y3Jr1DKd3qL2HS
+# 单位gasPrice小数点位移
+feeCoefficient=1,0.0001,10000000
 
 [public-service]
 #public-serviceModule ExternalrpcPort number
