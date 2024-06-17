@@ -11,7 +11,7 @@ import io.nuls.core.parse.JSONUtils;
 import java.util.Map;
 
 /**
- * 接口公共调用封装类
+ * Interface public call encapsulation class
  *
  * @author: tag
  * @date: 2019/4/12
@@ -22,7 +22,7 @@ public class CommonCall {
         return request(moduleCode, cmd, params, null);
     }
     /**
-     * 调用其他模块接口
+     * Call other module interfaces
      * Call other module interfaces
      */
     public static Object request(String moduleCode, String cmd, Map params, Long timeout) throws NulsException {

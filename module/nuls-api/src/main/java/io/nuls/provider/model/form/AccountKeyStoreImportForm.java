@@ -32,13 +32,13 @@ import io.nuls.core.rpc.model.ApiModelProperty;
 /**
  * @author: Charlie
  */
-@ApiModel(description = "导入账户KeyStore")
+@ApiModel(description = "Import accountKeyStore")
 public class AccountKeyStoreImportForm {
 
-    @ApiModelProperty(description = "本地keystore文件路径", required = true)
+    @ApiModelProperty(description = "localkeystoreFile path", required = true)
     private String path;
 
-    @ApiModelProperty(description = "密码")
+    @ApiModelProperty(description = "password")
     private String password;
 
     public String getPath() {

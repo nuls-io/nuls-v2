@@ -29,7 +29,7 @@ import io.nuls.consensus.model.bo.Chain;
 import io.nuls.consensus.utils.thread.process.ConsensusProcess;
 
 /**
- * 共识任务
+ * Consensus task
  * Consensus task
  *
  * @author tag

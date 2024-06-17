@@ -31,7 +31,7 @@ import java.util.Map;
  * @date: 2019-03-25
  */
 public enum BatchInfoStatus {
-    // 0 - 未开始, 1 - 已开始
+    // 0 - Not started yet, 1 - Started
     NOT_STARTING(0),
     STARTING(1);
 

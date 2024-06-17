@@ -85,11 +85,11 @@ public class VoteTest {
         byte[] prevStateRoot = HexUtil.decode("56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421");
         List transactions = createTransactions();
         prevStateRoot = testBatch(prevStateRoot, transactions);
-        System.out.println("第1个块");
+        System.out.println("Section1Blocks");
         for (int i = 0; i < 1; i++) {
             transactions = transactions();
             prevStateRoot = testBatch(prevStateRoot, transactions);
-            System.out.println("第" + (i + 2) + "个块");
+            System.out.println("Section" + (i + 2) + "Blocks");
         }
     }
 
@@ -98,11 +98,11 @@ public class VoteTest {
         byte[] prevStateRoot = HexUtil.decode("56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421");
         List transactions = createTransactions();
         prevStateRoot = testOne(prevStateRoot, transactions);
-        System.out.println("第1个块");
+        System.out.println("Section1Blocks");
         for (int i = 0; i < 1; i++) {
             transactions = transactions();
             prevStateRoot = testOne(prevStateRoot, transactions);
-            System.out.println("第" + (i + 2) + "个块");
+            System.out.println("Section" + (i + 2) + "Blocks");
         }
     }
 
@@ -133,21 +133,21 @@ public class VoteTest {
 
                 System.out.println(programResult);
             }
-            System.out.println("交易" + i + ", 耗时：" + (System.currentTimeMillis() - transactionStart) + "ms");
+            System.out.println("transaction" + i + ", time consuming：" + (System.currentTimeMillis() - transactionStart) + "ms");
         }
 
         long time = System.currentTimeMillis() - start;
-        System.out.println("完成" + transactions.size() + "笔交易， 耗时：" + time + "ms，平均：" + (time / transactions.size()) + "ms");
+        System.out.println("complete" + transactions.size() + "A transaction, time consuming：" + time + "ms, average：" + (time / transactions.size()) + "ms");
 
-        System.out.println("提交");
+        System.out.println("Submit");
         long commitStart = System.currentTimeMillis();
         track.commit();
-        System.out.println("提交耗时：" + (System.currentTimeMillis() - commitStart) + "ms");
+        System.out.println("Submission time：" + (System.currentTimeMillis() - commitStart) + "ms");
 
         byte[] root = track.getRoot();
 
         System.out.println("stateRoot: " + HexUtil.encode(root));
-        System.out.println("总耗时：" + (System.currentTimeMillis() - start) + "ms");
+        System.out.println("Total time consumption：" + (System.currentTimeMillis() - start) + "ms");
         return root;
     }
 
@@ -184,19 +184,19 @@ public class VoteTest {
                 prevStateRoot = track.getRoot();
                 System.out.println("stateRoot: " + HexUtil.encode(prevStateRoot));
             }
-            System.out.println("交易" + i + ", 耗时：" + (System.currentTimeMillis() - transactionStart) + "ms");
+            System.out.println("transaction" + i + ", time consuming：" + (System.currentTimeMillis() - transactionStart) + "ms");
         }
 
         long time = System.currentTimeMillis() - start;
-        System.out.println("完成" + transactions.size() + "笔交易， 耗时：" + time + "ms，平均：" + (time / transactions.size()) + "ms");
+        System.out.println("complete" + transactions.size() + "A transaction, time consuming：" + time + "ms, average：" + (time / transactions.size()) + "ms");
 
-//        System.out.println("提交");
+//        System.out.println("Submit");
 //        long commitStart = System.currentTimeMillis();
 //        track.commit();
-//        System.out.println("提交耗时：" + (System.currentTimeMillis() - commitStart) + "ms");
+//        System.out.println("Submission time：" + (System.currentTimeMillis() - commitStart) + "ms");
 
         //System.out.println("stateRoot: " + HexUtil.encode(track.getRoot()));
-        //System.out.println("总耗时：" + (System.currentTimeMillis() - start) + "ms");
+        //System.out.println("Total time consumption：" + (System.currentTimeMillis() - start) + "ms");
         return prevStateRoot;
     }
 
@@ -234,7 +234,7 @@ public class VoteTest {
             programCall.setMethodDesc("");
             programCall.setValue(new BigInteger("10000"));
             String[][] args = new String[][]{
-                    {"投票"}, {"这是一个投票"}, {"选项1", "选项2", "选项3"},
+                    {"vote"}, {"This is a vote"}, {"option1", "option2", "option3"},
                     {String.valueOf(System.currentTimeMillis() - 1000)}, {String.valueOf(System.currentTimeMillis() + 1000 * 60)}, {"true"}, {"3"}, {"true"}
             };
             programCall.setArgs(args);

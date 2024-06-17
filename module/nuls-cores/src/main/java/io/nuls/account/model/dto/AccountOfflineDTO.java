@@ -33,54 +33,54 @@ import io.nuls.core.rpc.model.ApiModelProperty;
  * @author: qinyifeng
  * @date: 2018/11/09
  */
-@ApiModel(name = "离线账户数据")
+@ApiModel(name = "Offline account data")
 public class AccountOfflineDTO {
     /**
-     * 账户地址
+     * Account address
      */
-    @ApiModelProperty(description = "账户地址")
+    @ApiModelProperty(description = "Account address")
     private String address;
 
     /**
-     * 公钥Hex.encode(byte[])
+     * Public keyHex.encode(byte[])
      */
-    @ApiModelProperty(description = "公钥")
+    @ApiModelProperty(description = "Public key")
     private String pubKey;
 
     /**
-     * 私钥Hex.encode(byte[])
+     * Private keyHex.encode(byte[])
      */
-    @ApiModelProperty(description = "私钥")
+    @ApiModelProperty(description = "Private key")
     private String priKey;
 
     /**
-     * 加密后的私钥Hex.encode(byte[])
+     * Encrypted private keyHex.encode(byte[])
      */
-    @ApiModelProperty(description = "加密后的私钥")
+    @ApiModelProperty(description = "Encrypted private key")
     private String encryptedPriKey;
 
     /**
-     * 其他信息Hex.encode(byte[])
+     * Other informationHex.encode(byte[])
      */
-    @ApiModelProperty(description = "其他信息")
+    @ApiModelProperty(description = "Other information")
     private String extend;
 
     /**
-     * 创建时间
+     * Creation time
      */
-    @ApiModelProperty(description = "创建时间")
+    @ApiModelProperty(description = "Creation time")
     private Long createTime;
 
     /**
-     * 账户是否加密
+     * Is the account encrypted
      */
-    @ApiModelProperty(description = "账户是否加密")
+    @ApiModelProperty(description = "Is the account encrypted")
     private boolean encrypted;
 
     /**
-     * 账户备注
+     * Account notes
      */
-    @ApiModelProperty(description = "账户备注")
+    @ApiModelProperty(description = "Account notes")
     private String remark;
 
 

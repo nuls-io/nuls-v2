@@ -7,10 +7,10 @@ import java.math.BigInteger;
  * */
 public class LongUtils {
     /**
-     * 两个long型数据相加
-     * @param val1  被加数
-     * @param val2  加数
-     * @return      和
+     * TwolongType data addition
+     * @param val1  Addend
+     * @param val2  Addend
+     * @return      and
      * */
     public static long add(long val1, long val2) {
         BigInteger value1 = BigInteger.valueOf(val1);
@@ -20,10 +20,10 @@ public class LongUtils {
 
 
     /**
-     * 两个long型数据相差
-     * @param val1  被减数
-     * @param val2  减数
-     * @return      差
+     * TwolongType data difference
+     * @param val1  Subtracted number
+     * @param val2  Subtraction
+     * @return      difference
      * */
     public static long sub(long val1, long val2) {
         BigInteger value1 = BigInteger.valueOf(val1);
@@ -32,10 +32,10 @@ public class LongUtils {
     }
 
     /**
-     * 两个long型数据相乘
-     * @param val1  被乘数
-     * @param val2  乘数
-     * @return      积
+     * TwolongMultiplying Type Data
+     * @param val1  Multiplicand
+     * @param val2  multiplier
+     * @return      product
      * */
     public static long mul(long val1, long val2) {
         BigInteger value1 = BigInteger.valueOf(val1);
@@ -45,10 +45,10 @@ public class LongUtils {
 
 
     /**
-     * 两个long型数据相除，保留默认小数位（8位）
-     * @param val1  被除数
-     * @param val2  除数
-     * @return      商
+     * TwolongDividing data by type, retaining default decimal places（8position）
+     * @param val1  Dividend
+     * @param val2  Divisor
+     * @return      merchant
      * */
     public static double exactDiv(long val1, long val2) {
         return DoubleUtils.div(val1, val2);
@@ -56,10 +56,10 @@ public class LongUtils {
 
 
     /**
-     * 两个long型数据相除，去掉小数位
-     * @param val1  被除数
-     * @param val2  除数
-     * @return      商
+     * TwolongDividing data by removing decimal places
+     * @param val1  Dividend
+     * @param val2  Divisor
+     * @return      merchant
      * */
     public static long div(long val1, long val2) {
         BigInteger value1 = BigInteger.valueOf(val1);
@@ -68,10 +68,10 @@ public class LongUtils {
     }
 
     /**
-     * 两个long型数据求余数
-     * @param val1  被除数
-     * @param val2  除数
-     * @return      余数
+     * TwolongRemainder calculation for type data
+     * @param val1  Dividend
+     * @param val2  Divisor
+     * @return      Remainder
      * */
     public static long mod(long val1, long val2) {
         BigInteger value1 = BigInteger.valueOf(val1);
@@ -80,7 +80,7 @@ public class LongUtils {
     }
 
     /**
-     * 随机生成一个Long型数据
+     * Randomly generate aLongType data
      * @return  long
      * */
     public static long randomLong() {

@@ -118,7 +118,7 @@ public class ValidateServiceImpl implements ValidateService {
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_CHAIN_NOT_FOUND);
         }
         BlockChain dbChain = chainService.getChain(blockChain.getChainId());
-        /*获取链下剩余的资产*/
+        /*Obtain remaining assets off the chain*/
         List<String> keys = dbChain.getSelfAssetKeyList();
         if (keys.size() == 0) {
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_CHAIN_ASSET_MUTI);
@@ -139,7 +139,7 @@ public class ValidateServiceImpl implements ValidateService {
     public ChainEventResult batchChainRegBaseValidator(BlockChain blockChain, Asset asset, Map<String, Integer> tempChains,
                                                        Map<String, Integer> tempAssets) throws Exception {
            /*
-            判断链ID是否已经存在
+            Judgment chainIDDoes it already exist
             Determine if the chain ID already exists
              */
         BlockChain dbChain = chainService.getChain(blockChain.getChainId());
@@ -197,7 +197,7 @@ public class ValidateServiceImpl implements ValidateService {
         if (!FormatValidUtils.validTokenNameOrSymbol(asset.getAssetName())) {
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_NAME);
         }
-        //判断黑洞资产与锁定资产
+        //Judging between Black Hole Assets and Locked Assets
         if (!BigIntegerUtils.isEqual(asset.getDepositNuls(), nulsChainConfig.getAssetDepositNuls())) {
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_DEPOSITNULS);
         }
@@ -235,7 +235,7 @@ public class ValidateServiceImpl implements ValidateService {
         if (!FormatValidUtils.validTokenNameOrSymbol(asset.getAssetName())) {
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_NAME);
         }
-        //判断黑洞资产与锁定资产
+        //Judging between Black Hole Assets and Locked Assets
         if (!BigIntegerUtils.isEqual(asset.getDepositNuls(), nulsChainConfig.getAssetDepositNuls())) {
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_DEPOSITNULS);
         }
@@ -261,7 +261,7 @@ public class ValidateServiceImpl implements ValidateService {
             Log.info("toChain is delete,chainId={}", toChain.getChainId());
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_CHAIN_NOT_FOUND);
         }
-        //获取链内 资产 状态是否正常
+        //Get in chain asset Is the status normal
         Set<String> toAssets = toAssetMap.keySet();
         for (Object toAsset : toAssets) {
             String assetKey = toAsset.toString();
@@ -271,7 +271,7 @@ public class ValidateServiceImpl implements ValidateService {
                 return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_NOT_EXIST);
             }
         }
-        //校验from 资产是否足够
+        //checkfrom Whether the assets are sufficient
         Set<String> fromAssets = fromAssetMap.keySet();
         for (Object fromAsset : fromAssets) {
             String assetKey = fromAsset.toString();
@@ -307,7 +307,7 @@ public class ValidateServiceImpl implements ValidateService {
         if (!FormatValidUtils.validTokenNameOrSymbol(asset.getAssetName())) {
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_NAME);
         }
-//        //判断黑洞资产与锁定资产
+//        //Judging between Black Hole Assets and Locked Assets
 //        if(!BigIntegerUtils.isEqual(asset.getDepositNuls(),nulsChainConfig.getAssetDepositNuls())){
 //            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_DEPOSITNULS);
 //        }
@@ -331,7 +331,7 @@ public class ValidateServiceImpl implements ValidateService {
         if (!FormatValidUtils.validTokenNameOrSymbolV15(asset.getAssetName())) {
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_NAME);
         }
-//        //判断黑洞资产与锁定资产
+//        //Judging between Black Hole Assets and Locked Assets
 //        if(!BigIntegerUtils.isEqual(asset.getDepositNuls(),nulsChainConfig.getAssetDepositNuls())){
 //            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_DEPOSITNULS);
 //        }
@@ -354,7 +354,7 @@ public class ValidateServiceImpl implements ValidateService {
         if (!FormatValidUtils.validTokenNameOrSymbol(asset.getAssetName())) {
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_NAME);
         }
-        //判断黑洞资产与锁定资产
+        //Judging between Black Hole Assets and Locked Assets
 //        if (!BigIntegerUtils.isEqual(asset.getDepositNuls(), nulsChainConfig.getAssetDepositNuls())) {
 //            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_DEPOSITNULS);
 //        }
@@ -378,7 +378,7 @@ public class ValidateServiceImpl implements ValidateService {
         if (!FormatValidUtils.validTokenNameOrSymbol(asset.getAssetName())) {
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_NAME);
         }
-        //判断黑洞资产与锁定资产
+        //Judging between Black Hole Assets and Locked Assets
 //        if (!BigIntegerUtils.isEqual(asset.getDepositNuls(), nulsChainConfig.getAssetDepositNuls())) {
 //            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_DEPOSITNULS);
 //        }
@@ -402,7 +402,7 @@ public class ValidateServiceImpl implements ValidateService {
         if (!FormatValidUtils.validTokenNameOrSymbolV15(asset.getAssetName())) {
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_NAME);
         }
-        //判断黑洞资产与锁定资产
+        //Judging between Black Hole Assets and Locked Assets
 //        if (!BigIntegerUtils.isEqual(asset.getDepositNuls(), nulsChainConfig.getAssetDepositNuls())) {
 //            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_DEPOSITNULS);
 //        }

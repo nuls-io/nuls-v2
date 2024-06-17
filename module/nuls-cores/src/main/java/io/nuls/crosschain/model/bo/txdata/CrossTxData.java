@@ -10,19 +10,19 @@ import io.nuls.core.parse.SerializeUtils;
 import java.io.IOException;
 
 /**
- * 跨链交易的txData
+ * Cross chain transactionstxData
  *
  * @author tag
  * 2019/5/16
  */
 public class CrossTxData extends BaseNulsData {
     /**
-     * 发起链链id
+     * Initiate Chainid
      */
     private int chainId;
 
     /**
-     * 原始交易hash
+     * Original transactionhash
      */
     private NulsHash originalTxHash;
 

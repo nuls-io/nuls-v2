@@ -57,37 +57,37 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
 @ApiModel
 public class ContractTransactionDto {
 
-    @ApiModelProperty(description = "交易hash")
+    @ApiModelProperty(description = "transactionhash")
     private String hash;
-    @ApiModelProperty(description = "交易类型")
+    @ApiModelProperty(description = "Transaction type")
     private Integer type;
-    @ApiModelProperty(description = "交易时间")
+    @ApiModelProperty(description = "Transaction time")
     private Long time;
-    @ApiModelProperty(description = "区块高度")
+    @ApiModelProperty(description = "block height")
     private Long blockHeight;
-    @ApiModelProperty(description = "交易手续费")
+    @ApiModelProperty(description = "Transaction fees")
     private String fee;
-    @ApiModelProperty(description = "交易金额")
+    @ApiModelProperty(description = "Transaction amount")
     private String value;
-    @ApiModelProperty(description = "备注")
+    @ApiModelProperty(description = "Remarks")
     private String remark;
-    @ApiModelProperty(description = "签名信息")
+    @ApiModelProperty(description = "Signature information")
     private String scriptSig;
-    @ApiModelProperty(description = "交易状态（0 - 确认中，1 - 已确认）")
+    @ApiModelProperty(description = "Transaction status（0 - Confirming,1 - Confirmed）")
     private Integer status;
-    @ApiModelProperty(description = "交易确认次数")
+    @ApiModelProperty(description = "Number of transaction confirmations")
     private Long confirmCount;
-    @ApiModelProperty(description = "交易大小")
+    @ApiModelProperty(description = "Transaction size")
     private int size;
-    @ApiModelProperty(description = "交易输入集合", type = @TypeDescriptor(value = List.class, collectionElement = InputDto.class))
+    @ApiModelProperty(description = "Transaction Input Set", type = @TypeDescriptor(value = List.class, collectionElement = InputDto.class))
     private List<InputDto> inputs;
-    @ApiModelProperty(description = "交易输出集合", type = @TypeDescriptor(value = List.class, collectionElement = OutputDto.class))
+    @ApiModelProperty(description = "Transaction output set", type = @TypeDescriptor(value = List.class, collectionElement = OutputDto.class))
     private List<OutputDto> outputs;
-    @ApiModelProperty(description = "合约交易业务数据", type = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "data", description = "根据合约交易类型反映不同的业务数据（这里为了描述四种情况，四种业务放在一起描述，实际上不同时存在，只存在一个）", valueType = ContractTransactionTxDataDescriptor.class)
+    @ApiModelProperty(description = "Contract trading business data", type = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "data", description = "Reflect different business data based on contract transaction types（Here, in order to describe four situations, the four businesses are described together, but in reality, they do not exist simultaneously, only one exists）", valueType = ContractTransactionTxDataDescriptor.class)
     }))
     private Map<String, Object> txData;
-    @ApiModelProperty(description = "合约执行结果")
+    @ApiModelProperty(description = "Contract execution results")
     private ContractResultDto contractResult;
 
     public ContractTransactionDto(int chainId, ContractBaseTransaction tx) throws NulsException {
@@ -149,13 +149,13 @@ public class ContractTransactionDto {
 
     @ApiModel
     private static class ContractTransactionTxDataDescriptor {
-        @ApiModelProperty(description = "发布合约交易的业务数据")
+        @ApiModelProperty(description = "Publish business data for contract transactions")
         private CreateContractDataDto create;
-        @ApiModelProperty(description = "调用合约交易的业务数据")
+        @ApiModelProperty(description = "Call business data for contract transactions")
         private CallContractDataDto call;
-        @ApiModelProperty(description = "删除合约交易的业务数据")
+        @ApiModelProperty(description = "Delete business data for contract transactions")
         private DeleteContractDataDto delete;
-        @ApiModelProperty(description = "合约转账交易的业务数据")
+        @ApiModelProperty(description = "Business data for contract transfer transactions")
         private ContractTransferDataDto transfer;
 
         public CreateContractDataDto getCreate() {

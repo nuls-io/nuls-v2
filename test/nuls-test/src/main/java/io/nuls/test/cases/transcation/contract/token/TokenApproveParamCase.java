@@ -42,7 +42,7 @@ public class TokenApproveParamCase extends CallContractParamCase {
 
     @Override
     public String title() {
-        return "token授权参数";
+        return "tokenAuthorization parameters";
     }
 
     @Override

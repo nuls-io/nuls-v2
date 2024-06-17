@@ -10,9 +10,9 @@ public class BigIntegerUtils {
     public static final String ZERO = String.valueOf(0);
 
     /**
-     * String 转 BigInteger
+     * String turn BigInteger
      *
-     * @param str 数字字符串
+     * @param str Number string
      */
     public static BigInteger stringToBigInteger(String str) {
         BigInteger bigInteger = new BigInteger("0");
@@ -23,9 +23,9 @@ public class BigIntegerUtils {
     }
 
     /**
-     * BigInteger 转 String
+     * BigInteger turn String
      *
-     * @param bigInteger 数字
+     * @param bigInteger number
      */
     public static String bigIntegerToString(BigInteger bigInteger) {
         return String.valueOf(bigInteger);
@@ -50,7 +50,7 @@ public class BigIntegerUtils {
     }
 
     /**
-     * 两个数字字符串相加
+     * Adding Two Numeric Strings
      *
      * @param str1
      * @param str2
@@ -64,7 +64,7 @@ public class BigIntegerUtils {
     }
 
     /**
-     * 两个数字字符串相减
+     * Subtracting two numeric strings
      *
      * @param str1
      * @param str2
@@ -78,7 +78,7 @@ public class BigIntegerUtils {
     }
 
     /**
-     * 两个数字字符串相乘
+     * Multiplying two numeric strings
      *
      * @param str1
      * @param str2
@@ -98,7 +98,7 @@ public class BigIntegerUtils {
     }
 
     /**
-     * 两个数字字符串相除
+     * Dividing Two Numeric Strings
      *
      * @param str1
      * @param str2
@@ -118,7 +118,7 @@ public class BigIntegerUtils {
     }
 
     /**
-     * 两个数字字符串取模
+     * Module two numeric strings
      *
      * @param str1
      * @param str2
@@ -138,7 +138,7 @@ public class BigIntegerUtils {
     }
 
     /**
-     * 两个数字字符串求余
+     * Taking the remainder of two numeric strings
      *
      * @param str1
      * @param str2
@@ -158,14 +158,14 @@ public class BigIntegerUtils {
     }
 
     /**
-     * 两个数字字符串比较大小
+     * Comparing the size of two numeric strings
      */
     public static int compare(String str1, String str2) {
         return stringToBigInteger(str1).compareTo(stringToBigInteger(str2));
     }
 
     /**
-     * 第一个是等于第二个数
+     * The first number is equal to the second number
      */
     public static boolean isEqual(String str1, String str2) {
         return compare(str1, str2) == 0;
@@ -176,7 +176,7 @@ public class BigIntegerUtils {
     }
 
     /**
-     * 第一个是小于第二个数
+     * The first number is less than the second number
      */
     public static boolean isLessThan(String str1, String str2) {
         return compare(str1, str2) < 0;
@@ -187,7 +187,7 @@ public class BigIntegerUtils {
     }
 
     /**
-     * 第一个是大于第二个数
+     * The first number is greater than the second number
      */
     public static boolean isGreaterThan(String str1, String str2) {
         return compare(str1, str2) > 0;
@@ -198,14 +198,14 @@ public class BigIntegerUtils {
     }
 
     /**
-     * 第一个是大于等于第二个数
+     * The first number is greater than or equal to the second number
      */
     public static boolean isEqualOrGreaterThan(BigInteger b1, BigInteger b2) {
         return b1.compareTo(b2) >= 0;
     }
 
     /**
-     * 第一个小于等于第二个数
+     * The first number is less than or equal to the second number
      */
     public static boolean isEqualOrLessThan(BigInteger b1, BigInteger b2) {
         return b1.compareTo(b2) <= 0;

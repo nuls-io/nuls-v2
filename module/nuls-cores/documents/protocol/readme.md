@@ -1,10 +1,10 @@
-# 协议升级改造说明
+# Protocol upgrade and renovation instructions
 
-## 协议升级配置文件
+## Protocol upgrade configuration file
 
-每个涉及到网络消息收发、交易处理的模块都需要在项目resources目录下新建一个protocol-config.json文件.protocol-config.json的加载、解析不需要各模块自己写代码,最后会融合到RpcModule中(未完成).
+Each involving network message sending and receiving、The modules for transaction processing need to be included in the projectresourcesCreate a new one in the directoryprotocol-config.jsonfile.protocol-config.jsonLoading of、Parsing does not require each module to write their own code,Finally, it will merge intoRpcModulein(Incomplete).
 
-### 文件格式
+### file format
 
 ```json
 [
@@ -47,76 +47,76 @@
 ]
 ```
 
-### 主要字段说明
+### Main Field Description
 
-version:版本号
+version:Version number
 
-extend:继承哪个版本的配置
+extend:Inherit which version of the configuration
 
-validTxs:该版本有效的交易配置
+validTxs:The valid transaction configuration for this version
 
-    type:交易类型
-    systemTx:是否系统交易
-    unlockTx:是否解锁交易
-    verifySignature:是否验证签名
-    verifyFee:是否验证手续费
-    handler:交易处理类
+    type:Transaction type
+    systemTx:Is it a system transaction
+    unlockTx:Whether to unlock the transaction
+    verifySignature:Whether to verify signature
+    verifyFee:Whether to verify the handling fee
+    handler:Transaction processing class
 
-validMsgs:该版本有效的网络消息配置
+validMsgs:The valid network message configuration for this version
 
-    name:消息类名
-    protocolCmd:消息对应的网络处理接口(向网络模块注册消息时使用)
-    handlers:消息处理类
+    name:Message class name
+    protocolCmd:The network processing interface corresponding to the message(Use when registering messages with network modules)
+    handlers:Message processing class
 
-invalidTxs:该版本无效的交易配置(填入要废弃的交易类型)
+invalidTxs:This version has invalid transaction configurations(Fill in the transaction type to be scrapped)
 
-invalidMsgs:该版本无效的网络消息配置(填入要废弃的消息类名)
+invalidMsgs:This version has invalid network message configuration(Fill in the name of the message class to be discarded)
 
-## 协议升级统计原理
+## Principles of Protocol Upgrade Statistics
 
-区块头中有四个字段跟协议升级有关
+There are four fields in the block header related to protocol upgrade
 ```java
 public class BlockExtendsData extends BaseNulsData {
 
     /**
-     * 主网当前生效的版本
+     * The current effective version of the main network
      */
     private short mainVersion;
 
     /**
-     * 区块的版本,可以理解为本地钱包的版本
+     * Version of blocks,Can be understood as the version of a local wallet
      */
     private short blockVersion;
 
     /**
-     * 每个统计区间内的最小生效比例(60-100)
+     * The minimum effective ratio within each statistical interval(60-100)
      */
     private byte effectiveRatio;
 
     /**
-     * 协议生效要满足的连续区间数(50-1000)
+     * The number of consecutive intervals that the agreement must meet in order to take effect(50-1000)
      */
     private short continuousIntervalCount;
 }
 ```
-收到新区块时,区块模块会通知协议升级模块,协议升级模块会解析上面四个字段,每隔1000[^1]个区块统计一次该区间内的协议版本比例,新的协议版本比例大于effectiveRatio时,新协议的生效区间数+1,累计够continuousIntervalCount时,新协议生效；中途如果有一个区间新协议版本比例低于effectiveRatio,累计计数清零.
+When receiving the new block,The block module will notify the protocol upgrade module,The protocol upgrade module will parse the above four fields,every other1000[^1]Count the proportion of protocol versions in each block within that interval once,The proportion of new protocol versions is greater thaneffectiveRatioTime,The number of effective intervals for the new agreement+1,Accumulated enoughcontinuousIntervalCountTime,New agreement takes effect；If there is a new protocol version ratio lower thaneffectiveRatio,Zero cumulative count.
 
-## 协议升级改造实例
+## Example of protocol upgrade and transformation
 
-增加MessageProcessor和TransactionProcessor两个接口,消息处理类继承MessageProcessor,交易处理类继承TransactionProcessor,并使用@Component注解标识出beanName
+increaseMessageProcessorandTransactionProcessorTwo interfaces,Message processing class inheritanceMessageProcessor,Transaction processing class inheritanceTransactionProcessor,And use it@ComponentAnnotations indicatebeanName
 
 ```java
 public interface MessageProcessor {
 
     /**
-     * 获取要处理的消息对应的cmd
+     * Obtain the corresponding message to be processedcmd
      *
      * @return
      */
     String getCmd();
 
     /**
-     * 消息处理方法
+     * Message processing methods
      *
      * @param chainId
      * @param message
@@ -130,54 +130,54 @@ public interface MessageProcessor {
 public interface TransactionProcessor {
 
     /**
-     * 获取该交易器绑定的交易类型,参见{@link TxType}
+     * Obtain the transaction type bound to this trader,See also{@link TxType}
      *
      * @return
      */
     int getType();
 
     /**
-     * 根据处理优先级进行排序
+     * Sort based on processing priority
      */
     Comparator<TransactionProcessor> COMPARATOR = Comparator.comparingInt(TransactionProcessor::getPriority);
 
     /**
-     * 验证接口
+     * Verify Interface
      *
-     * @param chainId       链Id
-     * @param txs           类型为{@link #getType()}的所有交易集合
-     * @param txMap         不同交易类型与其对应交易列表键值对
-     * @param blockHeader   区块头
-     * @return 验证错误码和未通过验证的交易,需要丢弃
+     * @param chainId       chainId
+     * @param txs           Type is{@link #getType()}All transaction sets for
+     * @param txMap         Different transaction types and their corresponding transaction list key value pairs
+     * @param blockHeader   Block head
+     * @return Verification error codes and transactions that did not pass verification,Need to discard
      */
-    @ResponseData(description = "返回一个map，map中包含验证错误码和未通过验证的交易", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "errorCode", description = "错误码"),
-            @Key(name = "txList", valueType = List.class, valueElement = Transaction.class, description = "返回类型为List<Transaction>")
+    @ResponseData(description = "Return amap,mapIt contains verification error codes and transactions that did not pass verification", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "errorCode", description = "Error code"),
+            @Key(name = "txList", valueType = List.class, valueElement = Transaction.class, description = "The return type isList<Transaction>")
     }))
     Map<String, Object> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader);
 
     /**
-     * 提交接口
+     * Submit Interface
      *
-     * @param chainId       链Id
-     * @param txs           类型为{@link #getType()}的所有交易集合
-     * @param blockHeader   区块头
-     * @return 是否提交成功
+     * @param chainId       chainId
+     * @param txs           Type is{@link #getType()}All transaction sets for
+     * @param blockHeader   Block head
+     * @return Whether the submission was successful
      */
     boolean commit(int chainId, List<Transaction> txs, BlockHeader blockHeader);
 
     /**
-     * 回滚接口
+     * Rollback interface
      *
-     * @param chainId       链Id
-     * @param txs           类型为{@link #getType()}的所有交易集合
-     * @param blockHeader   区块头
-     * @return 是否回滚成功
+     * @param chainId       chainId
+     * @param txs           Type is{@link #getType()}All transaction sets for
+     * @param blockHeader   Block head
+     * @return Is the rollback successful
      */
     boolean rollback(int chainId, List<Transaction> txs, BlockHeader blockHeader);
 
     /**
-     * 获取处理优先级,数字越大,优先级越高
+     * Get processing priority,The larger the number, the more,The higher the priority, the higher the priority
      *
      * @return
      */
@@ -187,44 +187,44 @@ public interface TransactionProcessor {
 }
 ```
 
-注意几个地方
+Pay attention to a few places
 
-- beanName与protocol-config.json中保持一致
+- beanNameRelated toprotocol-config.jsonMaintain consistency in the middle
 
-## 协议升级拦截实现方式
+## Implementation method for protocol upgrade interception
 
-新增TransactionDispatcher统一转发处理本模块的所有类型交易
+New additionTransactionDispatcherUnified forwarding and processing of all types of transactions in this module
 
 ```java
     /**
-     * 模块统一交易验证器RPC接口
+     * Module Unified Transaction VerifierRPCinterface
      */
     public static final String TX_VALIDATOR = "txValidator";
 
     /**
-     * 模块统一交易提交RPC接口
+     * Module Unified Transaction SubmissionRPCinterface
      */
     public static final String TX_COMMIT = "txCommit";
 
     /**
-     * 模块统一交易回滚RPC接口
+     * Module Unified Transaction RollbackRPCinterface
      */
     public static final String TX_ROLLBACK = "txRollback";
 ```
 
-新增MessageDispatcher统一转发处理本模块的所有类型消息
+New additionMessageDispatcherUnified forwarding and processing of all types of messages in this module
 
-## 协议升级测试案例
+## Protocol upgrade test cases
 
-- 测试不升级
-- 测试连续升级(中途统计没有波动,没有跨版本升级)
-- 测试连续升级(中途统计有波动,没有跨版本升级)
-- 测试连续升级(中途统计没有波动,有跨版本升级)
-- 测试连续升级(中途统计有波动,有跨版本升级)
-- 测试连续升级后连续回滚降级(中途统计没有波动,没有跨版本升级)
-- 测试连续升级后连续回滚降级(中途统计有波动,没有跨版本升级)
-- 测试连续升级后连续回滚降级(中途统计没有波动,有跨版本升级)
-- 测试连续升级后连续回滚降级(中途统计有波动,有跨版本升级)
+- Testing without upgrading
+- Testing continuous upgrades(There is no fluctuation in the midway statistics,No cross version upgrade)
+- Testing continuous upgrades(There are fluctuations in the midway statistics,No cross version upgrade)
+- Testing continuous upgrades(There is no fluctuation in the midway statistics,There are cross version upgrades available)
+- Testing continuous upgrades(There are fluctuations in the midway statistics,There are cross version upgrades available)
+- Test continuous upgrade followed by continuous rollback and degradation(There is no fluctuation in the midway statistics,No cross version upgrade)
+- Test continuous upgrade followed by continuous rollback and degradation(There are fluctuations in the midway statistics,No cross version upgrade)
+- Test continuous upgrade followed by continuous rollback and degradation(There is no fluctuation in the midway statistics,There are cross version upgrades available)
+- Test continuous upgrade followed by continuous rollback and degradation(There are fluctuations in the midway statistics,There are cross version upgrades available)
 
-[^1]:可配置,同一条链内保持一致
+[^1]:Configurable,Maintain consistency within the same chain
 

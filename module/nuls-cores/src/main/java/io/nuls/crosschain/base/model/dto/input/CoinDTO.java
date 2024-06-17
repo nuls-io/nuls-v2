@@ -36,19 +36,19 @@ import java.math.BigInteger;
  */
 @ApiModel
 public class CoinDTO implements Cloneable {
-    @ApiModelProperty(description = "账户地址")
+    @ApiModelProperty(description = "Account address")
     private String address;
 
-    @ApiModelProperty(description = "资产链ID")
+    @ApiModelProperty(description = "Asset ChainID")
     private Integer assetsChainId;
 
-    @ApiModelProperty(description = "资产ID")
+    @ApiModelProperty(description = "assetID")
     private Integer assetsId;
 
-    @ApiModelProperty(description = "转出金额")
+    @ApiModelProperty(description = "Transfer amount")
     private BigInteger amount;
 
-    @ApiModelProperty(description = "账户密码")
+    @ApiModelProperty(description = "Account password")
     private String password;
 
     public CoinDTO() {

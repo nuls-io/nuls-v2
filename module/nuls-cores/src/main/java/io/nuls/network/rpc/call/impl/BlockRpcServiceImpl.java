@@ -42,7 +42,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 调用区块模块的RPC接口
+ * Calling block modulesRPCinterface
  *
  * @author lan
  * @description
@@ -51,7 +51,7 @@ import java.util.Map;
 @Component
 public class BlockRpcServiceImpl implements BlockRpcService {
     /**
-     * 获取最近区块高度与hash
+     * Obtain the closest block height andhash
      *
      * @param chainId chainId
      * @return

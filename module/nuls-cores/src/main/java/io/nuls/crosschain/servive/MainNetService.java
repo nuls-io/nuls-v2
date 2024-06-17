@@ -6,13 +6,13 @@ import io.nuls.crosschain.base.message.CirculationMessage;
 import java.util.Map;
 
 /**
- * 主网跨链模块特有方法
+ * Unique methods for cross chain modules in the main network
  * @author tag
  * @date 2019/4/23
  */
 public interface MainNetService {
     /**
-     * 注册新的跨链交易
+     * Register a new cross chain transaction
      * Register new cross-chain transactions
      *
      * @param params
@@ -21,7 +21,7 @@ public interface MainNetService {
     Result registerCrossChain(Map<String,Object> params);
 
     /**
-     * 注册链新资产
+     * Register new assets in the chain
      * Register new cross-chain transactions
      *
      * @param params
@@ -30,7 +30,7 @@ public interface MainNetService {
     Result registerAssert(Map<String,Object> params);
 
     /**
-     * 注销跨链交易
+     * Cancelling Cross Chain Transactions
      * Cancellation of cross-chain transactions
      *
      * @param params
@@ -39,7 +39,7 @@ public interface MainNetService {
     Result cancelCrossChain(Map<String,Object> params);
 
     /**
-     * 跨链注册消息变更
+     * Cross chain registration message change
      * Cross-Chain Registration Message Change
      *
      * @param params
@@ -48,17 +48,17 @@ public interface MainNetService {
     Result crossChainRegisterChange(Map<String, Object> params);
 
     /**
-     * 接收链资产统计消息
+     * Receive chain asset statistics messages
      * Receive Chain Asset Statistics Message
      *
-     * @param chainId     消息所属链Id
-     * @param nodeId      发送此消息的节点Id
-     * @param message 消息体
+     * @param chainId     Chain to which the message belongsId
+     * @param nodeId      The node that sent this messageId
+     * @param message Message Body
      * */
     void receiveCirculation(int chainId, String nodeId, CirculationMessage message);
 
     /**
-     * 主网链管理模块向跨链模块获取友链资产信息
+     * The main network chain management module obtains friend chain asset information from the cross chain module
      * Access to Friendship Chain Asset Information
      *
      * @param params
@@ -67,7 +67,7 @@ public interface MainNetService {
     Result getFriendChainCirculation(Map<String,Object> params);
 
     /**
-     * 智能合约资产跨链
+     * Smart contract assets cross chain
      * Smart contract assets cross chain
      *
      * @param params

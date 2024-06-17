@@ -6,14 +6,14 @@ import io.nuls.v2.model.dto.SignDto;
 
 import java.util.List;
 
-@ApiModel(description = "单账户签名表单")
+@ApiModel(description = "Single account signature form")
 public class EncryptedPriKeysSignForm {
 
-    @ApiModelProperty(description = "交易序列化Hex字符串")
+    @ApiModelProperty(description = "Transaction serializationHexcharacter string")
     private String txHex;
-    @ApiModelProperty(description = "地址链ID")
+    @ApiModelProperty(description = "Address chainID")
     private int chainId;
-    @ApiModelProperty(description = "地址前缀")
+    @ApiModelProperty(description = "Address prefix")
     private String prefix;
 
     private List<SignDto> signDtoList;

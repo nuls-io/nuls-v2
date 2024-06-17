@@ -36,37 +36,37 @@ import java.util.List;
  */
 @ApiModel
 public class ContractInfoDto {
-    @ApiModelProperty(description = "发布合约的交易hash")
+    @ApiModelProperty(description = "Transactions for publishing contractshash")
     private String createTxHash;
-    @ApiModelProperty(description = "合约地址")
+    @ApiModelProperty(description = "Contract address")
     private String address;
-    @ApiModelProperty(description = "合约创建者地址")
+    @ApiModelProperty(description = "Contract Creator Address")
     private String creater;
-    @ApiModelProperty(description = "合约别名")
+    @ApiModelProperty(description = "Contract alias")
     private String alias;
-    @ApiModelProperty(description = "合约创建时间（单位：秒）")
+    @ApiModelProperty(description = "Contract creation time（unit：second）")
     private long createTime;
-    @ApiModelProperty(description = "合约创建时的区块高度")
+    @ApiModelProperty(description = "Block height during contract creation")
     private long blockHeight;
-    @ApiModelProperty(description = "是否接受直接转账")
+    @ApiModelProperty(description = "Do you accept direct transfer")
     private boolean isDirectPayable;
-    @ApiModelProperty(description = "是否接受其他资产直接转账")
+    @ApiModelProperty(description = "Do you accept direct transfers of other assets")
     private boolean directPayableByOtherAsset;
-    @ApiModelProperty(description = "token类型, 0 - 非token, 1 - NRC20, 2 - NRC721")
+    @ApiModelProperty(description = "tokentype, 0 - wrongtoken, 1 - NRC20, 2 - NRC721")
     private int tokenType;
-    @ApiModelProperty(description = "是否是NRC20合约")
+    @ApiModelProperty(description = "Is itNRC20contract")
     private boolean isNrc20;
-    @ApiModelProperty(description = "NRC20-token名称")
+    @ApiModelProperty(description = "NRC20-tokenname")
     private String nrc20TokenName;
-    @ApiModelProperty(description = "NRC20-token符号")
+    @ApiModelProperty(description = "NRC20-tokensymbol")
     private String nrc20TokenSymbol;
-    @ApiModelProperty(description = "NRC20-token支持的小数位数")
+    @ApiModelProperty(description = "NRC20-tokenSupported Decimal Places")
     private long decimals;
-    @ApiModelProperty(description = "NRC20-token发行总量")
+    @ApiModelProperty(description = "NRC20-tokenTotal issuance amount")
     private String totalSupply;
-    @ApiModelProperty(description = "合约状态（not_found, normal, stop）")
+    @ApiModelProperty(description = "Contract status（not_found, normal, stop）")
     private String status;
-    @ApiModelProperty(description = "合约方法列表", type = @TypeDescriptor(value = List.class, collectionElement = ProgramMethod.class))
+    @ApiModelProperty(description = "List of Contract Methods", type = @TypeDescriptor(value = List.class, collectionElement = ProgramMethod.class))
     private List<ProgramMethod> method;
 
     public ContractInfoDto() {

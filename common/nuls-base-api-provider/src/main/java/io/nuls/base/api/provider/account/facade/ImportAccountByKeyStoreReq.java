@@ -6,7 +6,7 @@ import io.nuls.base.api.provider.BaseReq;
  * @Author: zhoulijun
  * @Time: 2019-03-07 20:44
  * @Description:
- *   通过key store导入账户
+ *   adoptkey storeImport account
  *   import account by key store
  */
 public class ImportAccountByKeyStoreReq extends BaseReq {

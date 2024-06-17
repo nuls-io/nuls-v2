@@ -52,7 +52,7 @@ public class KernelCmd4Test extends BaseCmd {
     public Response registerAPI(Map<String, Object> map) {
         try {
             RegisterApi registerApi = JSONUtils.map2pojo(map, RegisterApi.class);
-            Log.info("注册的方法：" + JSONUtils.obj2json(registerApi));
+            Log.info("Registration method：" + JSONUtils.obj2json(registerApi));
             if (registerApi != null) {
                 Map<String, Object> role = new HashMap<>(3);
                 role.put(Constants.KEY_IP, registerApi.getConnectionInformation().get(Constants.KEY_IP));
@@ -62,7 +62,7 @@ public class KernelCmd4Test extends BaseCmd {
                 if(connectData != null){
                     connectData.addCloseEvent(() -> {
                         if (!ConnectManager.ROLE_CHANNEL_MAP.containsKey(registerApi.getAbbreviation())) {
-                            Log.warn("RMB:{}模块触发连接断开事件", registerApi.getAbbreviation());
+                            Log.warn("RMB:{}Module triggers connection disconnection event", registerApi.getAbbreviation());
                             ConnectManager.ROLE_MAP.remove(registerApi.getAbbreviation());
                         }
                     });

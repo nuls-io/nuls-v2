@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 拦截器管理器
+ * Interceptor Manager
  * Interceptor manager.
  *
  * @author Niels Wang
@@ -42,17 +42,17 @@ import java.util.Map;
 public class BeanMethodInterceptorManager {
 
     /**
-     * 拦截器池
+     * Interceptor pool
      * The interceptor pool
      */
     private static final Map<Class, BeanMethodInterceptorChain> INTERCEPTOR_MAP = new HashMap<>();
 
     /**
-     * 添加方法拦截器到管理器中
+     * Add method interceptors to the manager
      * Add a method interceptor to the manager.
      *
-     * @param annotationType 注解类型
-     * @param interceptor    拦截器
+     * @param annotationType annotation type
+     * @param interceptor    Interceptor
      */
     public static void addBeanMethodInterceptor(Class annotationType, BeanMethodInterceptor interceptor) {
         BeanMethodInterceptorChain interceptorChain = INTERCEPTOR_MAP.get(annotationType);
@@ -64,16 +64,16 @@ public class BeanMethodInterceptorManager {
     }
 
     /**
-     * 执行一个方法，根据方法的注解组装拦截器链，并放入拦截器链中执行
+     * Execute a method, assemble an interceptor chain based on the method's annotations, and place it into the interceptor chain for execution
      * Implement a method that assembles the interceptor chain according to the method's annotations and puts it into the interceptor chain.
      *
-     * @param annotations 方法上标注的注解列表/Method annotated list of annotations.
-     * @param object      方法所属对象/Method owner
-     * @param method      方法定义/Method definition
-     * @param params      方法参数列表/Method parameter list
-     * @param methodProxy 方法代理器
-     * @return 返回拦截的方法的返回值，可以对该值进行处理和替换/Returns the return value of the intercepting method, which can be processed and replaced.
-     * @throws Throwable 该方法可能抛出异常，请谨慎处理/This method may throw an exception, handle with care.
+     * @param annotations List of annotations annotated on the method/Method annotated list of annotations.
+     * @param object      Object to which the method belongs/Method owner
+     * @param method      Method definition/Method definition
+     * @param params      Method parameter list/Method parameter list
+     * @param methodProxy Method proxy
+     * @return The return value of the intercepted method can be processed and replaced/Returns the return value of the intercepting method, which can be processed and replaced.
+     * @throws Throwable This method may throw exceptions, please handle with caution/This method may throw an exception, handle with care.
      */
     public static Object doInterceptor(Annotation[] annotations, Object object, Method method, Object[] params, MethodProxy methodProxy) throws Throwable {
         List<Annotation> annotationList = new ArrayList<>();

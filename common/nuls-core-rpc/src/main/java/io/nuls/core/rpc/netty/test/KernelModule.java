@@ -18,7 +18,7 @@ import java.util.Set;
  */
 public class KernelModule {
     /**
-     * 模拟核心模块（Manager），测试专用
+     * Simulate core modules（Manager）, dedicated to testing
      * For internal debugging only
      * Simulate a kernel module
      */
@@ -44,7 +44,7 @@ public class KernelModule {
     }
 
     /**
-     * 模拟启动模块，单元测试专用
+     * Simulated startup module, dedicated to unit testing
      * Analog Startup Module, Unit Test Specific
      */
     public static void mockModule() throws Exception {
@@ -58,7 +58,7 @@ public class KernelModule {
     }
 
     /**
-     * 模拟启动模块，单元测试专用
+     * Simulated startup module, dedicated to unit testing
      * Analog Startup Module, Unit Test Specific
      */
     public static void mockModule1() throws Exception {

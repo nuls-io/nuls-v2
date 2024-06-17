@@ -54,89 +54,89 @@ import static io.nuls.contract.constant.ContractCmdConstant.CREATE;
 import static io.nuls.contract.util.ContractUtil.*;
 
 /**
- * 测试场景:
+ * Test scenario:
  * <p>
- * 1. 双合约测试，调用者向A合约转入100，A调用B转入100，B保留30，转移70给调用者
- * 期望执行结果中
- * 有退回到调用者的70
- * A有0
- * B有30
- * <p>
- * <p>
- * 2. 双合约测试，调用者向A合约转入100，A调用B转入100，B转移20给A，转移70给调用者
- * 期望执行结果中
- * 有退回到调用者的70
- * A有20
- * B有10
- * <p>
- * 3. 双合约测试，调用者向A合约转入100，A调用B转入100，B转移20给A，转移60给调用者，转移10锁定给调用者
- * 期望执行结果中
- * 有退回到调用者的60可用，10锁定
- * A有20
- * B有10
- * <p>
- * 4. 双合约测试，调用者向A合约转入100，A调用B转入100，B转移20给A，B转移30给sender，B转移10锁定给sender，B调用A转移25给A，A转移15给B，A转移20给sender，A转移10锁定给sender
- * 期望执行结果中
- * 有退回到调用者的50可用，20锁定
- * A有0
- * B有30
- * <p>
- * 6. 双合约测试，调用者向A合约转入100，A调用B转入100，B转移110给A
- * 期望执行结果中
- * 执行失败，余额不足
- * <p>
- * 7. 双合约测试，调用者向A合约转入100，A调用B转入100，B转移10给A, B转移100给sender
- * 期望执行结果中
- * 执行失败，余额不足
- * <p>
- * 8. 双合约测试，调用者向A合约转入100，A调用B转入100，B转移20给A，B转移30给sender，B转移10锁定给sender，B调用A转移25给A，A转移15给B，A转移30给sender，A转移10锁定给sender
- * 期望执行结果中
- * 执行失败，余额不足
- * <p>
- * 9. 双合约测试，调用者向A合约转入100，A调用B转入100，B转移10给A，转移10锁定给A
- * 期望执行结果中
- * 执行失败，不允许转移锁定资产给合约地址
- * <p>
- * 11. 双合约测试，调用者向A合约转入100，A调用B转入100，B保留30，转移70给调用者
- * 期望执行结果中
- * 有退回到调用者的70
- * A有0
- * B有30
+ * 1. Dual contract testing, caller toAContract transfer100,AcallBTransfer in100,Bhold30Transfer70To the caller
+ * Expected execution results
+ * Returned to the caller70
+ * Ahave0
+ * Bhave30
  * <p>
  * <p>
- * 12. 双合约测试，调用者向A合约转入100，A调用B转入100，B转移20给A，转移70给调用者
- * 期望执行结果中
- * 有退回到调用者的70
- * A有20
- * B有10
+ * 2. Dual contract testing, caller toAContract transfer100,AcallBTransfer in100,Btransfer20toATransfer70To the caller
+ * Expected execution results
+ * Returned to the caller70
+ * Ahave20
+ * Bhave10
  * <p>
- * 13. 双合约测试，调用者向A合约转入100，A调用B转入100，B转移20给A，转移60给调用者，转移10锁定给调用者
- * 期望执行结果中
- * 有退回到调用者的60可用，10锁定
- * A有20
- * B有10
+ * 3. Dual contract testing, caller toAContract transfer100,AcallBTransfer in100,Btransfer20toATransfer60To the caller, transfer10Lock to caller
+ * Expected execution results
+ * Returned to the caller60Available,10locking
+ * Ahave20
+ * Bhave10
  * <p>
- * 14. 双合约测试，调用者向A合约转入100，A调用B转入100，B转移20给A，B转移30给sender，B转移10锁定给sender，B调用A转移25给A，A转移15给B，A转移20给sender，A转移10锁定给sender
- * 期望执行结果中
- * 有退回到调用者的50可用，20锁定
- * A有0
- * B有30
+ * 4. Dual contract testing, caller toAContract transfer100,AcallBTransfer in100,Btransfer20toA,Btransfer30tosender,Btransfer10Locked tosender,BcallAtransfer25toA,Atransfer15toB,Atransfer20tosender,Atransfer10Locked tosender
+ * Expected execution results
+ * Returned to the caller50Available,20locking
+ * Ahave0
+ * Bhave30
  * <p>
- * 16. 双合约测试，调用者向A合约转入100，A调用B转入100，B转移110给A
- * 期望执行结果中
- * 执行失败，余额不足
+ * 6. Dual contract testing, caller toAContract transfer100,AcallBTransfer in100,Btransfer110toA
+ * Expected execution results
+ * Execution failed due to insufficient balance
  * <p>
- * 17. 双合约测试，调用者向A合约转入100，A调用B转入100，B转移10给A, B转移100给sender
- * 期望执行结果中
- * 执行失败，余额不足
+ * 7. Dual contract testing, caller toAContract transfer100,AcallBTransfer in100,Btransfer10toA, Btransfer100tosender
+ * Expected execution results
+ * Execution failed due to insufficient balance
  * <p>
- * 18. 双合约测试，调用者向A合约转入100，A调用B转入100，B转移20给A，B转移30给sender，B转移10锁定给sender，B调用A转移25给A，A转移15给B，A转移30给sender，A转移10锁定给sender
- * 期望执行结果中
- * 执行失败，余额不足
+ * 8. Dual contract testing, caller toAContract transfer100,AcallBTransfer in100,Btransfer20toA,Btransfer30tosender,Btransfer10Locked tosender,BcallAtransfer25toA,Atransfer15toB,Atransfer30tosender,Atransfer10Locked tosender
+ * Expected execution results
+ * Execution failed due to insufficient balance
  * <p>
- * 19. 双合约测试，调用者向A合约转入100，A调用B转入100，B转移10给A，转移10锁定给A
- * 期望执行结果中
- * 执行失败，不允许转移锁定资产给合约地址
+ * 9. Dual contract testing, caller toAContract transfer100,AcallBTransfer in100,Btransfer10toATransfer10Locked toA
+ * Expected execution results
+ * Execution failed, transfer of locked assets to contract address not allowed
+ * <p>
+ * 11. Dual contract testing, caller toAContract transfer100,AcallBTransfer in100,Bhold30Transfer70To the caller
+ * Expected execution results
+ * Returned to the caller70
+ * Ahave0
+ * Bhave30
+ * <p>
+ * <p>
+ * 12. Dual contract testing, caller toAContract transfer100,AcallBTransfer in100,Btransfer20toATransfer70To the caller
+ * Expected execution results
+ * Returned to the caller70
+ * Ahave20
+ * Bhave10
+ * <p>
+ * 13. Dual contract testing, caller toAContract transfer100,AcallBTransfer in100,Btransfer20toATransfer60To the caller, transfer10Lock to caller
+ * Expected execution results
+ * Returned to the caller60Available,10locking
+ * Ahave20
+ * Bhave10
+ * <p>
+ * 14. Dual contract testing, caller toAContract transfer100,AcallBTransfer in100,Btransfer20toA,Btransfer30tosender,Btransfer10Locked tosender,BcallAtransfer25toA,Atransfer15toB,Atransfer20tosender,Atransfer10Locked tosender
+ * Expected execution results
+ * Returned to the caller50Available,20locking
+ * Ahave0
+ * Bhave30
+ * <p>
+ * 16. Dual contract testing, caller toAContract transfer100,AcallBTransfer in100,Btransfer110toA
+ * Expected execution results
+ * Execution failed due to insufficient balance
+ * <p>
+ * 17. Dual contract testing, caller toAContract transfer100,AcallBTransfer in100,Btransfer10toA, Btransfer100tosender
+ * Expected execution results
+ * Execution failed due to insufficient balance
+ * <p>
+ * 18. Dual contract testing, caller toAContract transfer100,AcallBTransfer in100,Btransfer20toA,Btransfer30tosender,Btransfer10Locked tosender,BcallAtransfer25toA,Atransfer15toB,Atransfer30tosender,Atransfer10Locked tosender
+ * Expected execution results
+ * Execution failed due to insufficient balance
+ * <p>
+ * 19. Dual contract testing, caller toAContract transfer100,AcallBTransfer in100,Btransfer10toATransfer10Locked toA
+ * Expected execution results
+ * Execution failed, transfer of locked assets to contract address not allowed
  *
  * @author: PierreLuo
  * @date: 2019-06-11
@@ -154,11 +154,11 @@ public class ContractVmV8SendTxTest extends BaseQuery {
 
     @Before
     public void createAndInit() throws Exception {
-        // 加载协议升级的数据
+        // Load protocol upgrade data
         ContractContext.CHAIN_ID = chainId;
 
         if (!createContract) {
-            // 注册链内资产
+            // Register in chain assets
             //assetRegisterTest();
             // -------------------------------------------------------------------------------------//
             //InputStream inA = new FileInputStream(getClass().getResource("/contract-vm-v8-testA-1.0-SNAPSHOT.jar").getFile());
@@ -457,7 +457,7 @@ public class ContractVmV8SendTxTest extends BaseQuery {
 
     protected void testAsset(String contract, String sender, String method, String[] args, BigInteger value, int assetChainId, int assetId, boolean setAsset, String[] addresses, long... expectBalances) throws Exception {
         try {
-            Assert.assertTrue("地址与期望余额参数不合法", addresses.length * 2 == expectBalances.length);
+            Assert.assertTrue("The address and expected balance parameters are illegal", addresses.length * 2 == expectBalances.length);
             BigInteger[][] prevBalances = new BigInteger[addresses.length][];
             int k = 0;
             for (String address : addresses) {
@@ -469,7 +469,7 @@ public class ContractVmV8SendTxTest extends BaseQuery {
             } else {
                 programResult = this.callByParams(contract, sender, method, value.toString(), args);
             }
-            Assert.assertTrue(String.format("测试方法[%s]expect success, errorMsg: %s, stackTrace: %s", method, programResult.getErrorMessage(), programResult.getStackTrace()), programResult.isSuccess());
+            Assert.assertTrue(String.format("test method[%s]expect success, errorMsg: %s, stackTrace: %s", method, programResult.getErrorMessage(), programResult.getStackTrace()), programResult.isSuccess());
 
             List<ProgramTransfer> transfers = new ArrayList<>();
             List<ContractMergedTransferDto> transferDtos = programResult.getTransfers();
@@ -493,12 +493,12 @@ public class ContractVmV8SendTxTest extends BaseQuery {
             for (ProgramTransfer transfer : transfers) {
                 Log.info("transfer: {}", transfer.toString());
             }
-            Assert.assertTrue(String.format("测试方法[%s]期望 A: %s, 实际: %s", method, expectBalances[0], toNuls(balanceA)), balanceA.longValue() == toNa(BigDecimal.valueOf(expectBalances[0])).longValue());
-            Assert.assertTrue(String.format("测试方法[%s]期望 B: %s, 实际: %s", method, expectBalances[1], toNuls(balanceB)), balanceB.longValue() == toNa(BigDecimal.valueOf(expectBalances[1])).longValue());
-            Assert.assertTrue(String.format("测试方法[%s]期望 sender: %s, 实际: %s", method, expectBalances[2], toNuls(balanceSender)), balanceSender.longValue() == toNa(BigDecimal.valueOf(expectBalances[2])).longValue());
-            Assert.assertTrue(String.format("测试方法[%s]期望 A-锁定: %s, 实际: %s", method, expectBalances[3], toNuls(balanceALock)), balanceALock.longValue() == toNa(BigDecimal.valueOf(expectBalances[3])).longValue());
-            Assert.assertTrue(String.format("测试方法[%s]期望 B-锁定: %s, 实际: %s", method, expectBalances[4], toNuls(balanceBLock)), balanceBLock.longValue() == toNa(BigDecimal.valueOf(expectBalances[4])).longValue());
-            Assert.assertTrue(String.format("测试方法[%s]期望 sender-锁定: %s, 实际: %s", method, expectBalances[5], toNuls(balanceSenderLock)), balanceSenderLock.longValue() == toNa(BigDecimal.valueOf(expectBalances[5])).longValue());
+            Assert.assertTrue(String.format("test method[%s]expect A: %s, actual: %s", method, expectBalances[0], toNuls(balanceA)), balanceA.longValue() == toNa(BigDecimal.valueOf(expectBalances[0])).longValue());
+            Assert.assertTrue(String.format("test method[%s]expect B: %s, actual: %s", method, expectBalances[1], toNuls(balanceB)), balanceB.longValue() == toNa(BigDecimal.valueOf(expectBalances[1])).longValue());
+            Assert.assertTrue(String.format("test method[%s]expect sender: %s, actual: %s", method, expectBalances[2], toNuls(balanceSender)), balanceSender.longValue() == toNa(BigDecimal.valueOf(expectBalances[2])).longValue());
+            Assert.assertTrue(String.format("test method[%s]expect A-locking: %s, actual: %s", method, expectBalances[3], toNuls(balanceALock)), balanceALock.longValue() == toNa(BigDecimal.valueOf(expectBalances[3])).longValue());
+            Assert.assertTrue(String.format("test method[%s]expect B-locking: %s, actual: %s", method, expectBalances[4], toNuls(balanceBLock)), balanceBLock.longValue() == toNa(BigDecimal.valueOf(expectBalances[4])).longValue());
+            Assert.assertTrue(String.format("test method[%s]expect sender-locking: %s, actual: %s", method, expectBalances[5], toNuls(balanceSenderLock)), balanceSenderLock.longValue() == toNa(BigDecimal.valueOf(expectBalances[5])).longValue());
 
 
             BigInteger[][] currentBalances = new BigInteger[addresses.length][];
@@ -517,16 +517,16 @@ public class ContractVmV8SendTxTest extends BaseQuery {
             balanceALock = currentBalances[0][1].subtract(prevBalances[0][1]);
             balanceBLock = currentBalances[1][1].subtract(prevBalances[1][1]);
             balanceSenderLock = currentBalances[2][1].subtract(prevBalances[2][1]);
-            Assert.assertTrue(String.format("测试方法[%s]期望 A: %s, 实际: %s", method, expectBalances[0], toNuls(balanceA)), balanceA.longValue() == toNa(BigDecimal.valueOf(expectBalances[0])).longValue());
-            Assert.assertTrue(String.format("测试方法[%s]期望 B: %s, 实际: %s", method, expectBalances[1], toNuls(balanceB)), balanceB.longValue() == toNa(BigDecimal.valueOf(expectBalances[1])).longValue());
-            Assert.assertTrue(String.format("测试方法[%s]期望 sender: %s, 实际: %s", method, expectBalances[2], toNuls(balanceSender)), balanceSender.longValue() == toNa(BigDecimal.valueOf(expectBalances[2])).longValue());
-            Assert.assertTrue(String.format("测试方法[%s]期望 A-锁定: %s, 实际: %s", method, expectBalances[3], toNuls(balanceALock)), balanceALock.longValue() == toNa(BigDecimal.valueOf(expectBalances[3])).longValue());
-            Assert.assertTrue(String.format("测试方法[%s]期望 B-锁定: %s, 实际: %s", method, expectBalances[4], toNuls(balanceBLock)), balanceBLock.longValue() == toNa(BigDecimal.valueOf(expectBalances[4])).longValue());
-            Assert.assertTrue(String.format("测试方法[%s]期望 sender-锁定: %s, 实际: %s", method, expectBalances[5], toNuls(balanceSenderLock)), balanceSenderLock.longValue() == toNa(BigDecimal.valueOf(expectBalances[5])).longValue());
+            Assert.assertTrue(String.format("test method[%s]expect A: %s, actual: %s", method, expectBalances[0], toNuls(balanceA)), balanceA.longValue() == toNa(BigDecimal.valueOf(expectBalances[0])).longValue());
+            Assert.assertTrue(String.format("test method[%s]expect B: %s, actual: %s", method, expectBalances[1], toNuls(balanceB)), balanceB.longValue() == toNa(BigDecimal.valueOf(expectBalances[1])).longValue());
+            Assert.assertTrue(String.format("test method[%s]expect sender: %s, actual: %s", method, expectBalances[2], toNuls(balanceSender)), balanceSender.longValue() == toNa(BigDecimal.valueOf(expectBalances[2])).longValue());
+            Assert.assertTrue(String.format("test method[%s]expect A-locking: %s, actual: %s", method, expectBalances[3], toNuls(balanceALock)), balanceALock.longValue() == toNa(BigDecimal.valueOf(expectBalances[3])).longValue());
+            Assert.assertTrue(String.format("test method[%s]expect B-locking: %s, actual: %s", method, expectBalances[4], toNuls(balanceBLock)), balanceBLock.longValue() == toNa(BigDecimal.valueOf(expectBalances[4])).longValue());
+            Assert.assertTrue(String.format("test method[%s]expect sender-locking: %s, actual: %s", method, expectBalances[5], toNuls(balanceSenderLock)), balanceSenderLock.longValue() == toNa(BigDecimal.valueOf(expectBalances[5])).longValue());
 
-            System.out.println(String.format("method [%s] 测试通过", method));
+            System.out.println(String.format("method [%s] Test passed", method));
         } catch (Throwable e) {
-            System.err.println(String.format("method [%s] 测试失败", method));
+            System.err.println(String.format("method [%s] Test failed", method));
             e.printStackTrace();
         }
 
@@ -534,7 +534,7 @@ public class ContractVmV8SendTxTest extends BaseQuery {
 
     protected void testFailed(String contract, String sender, String method, String[] args, BigInteger value, int assetChainId, int assetId, boolean setAsset, String errorMsgKey) throws Exception {
         try {
-            System.out.println("清空合约余额");
+            System.out.println("Clear contract balance");
             ContractResultDto contractResult;
             contractResult = this.callByParams(contractA, toAddress, "clearBalance", "0", new String[]{});
             Assert.assertTrue("expect success, " + contractResult.getErrorMessage() + ", " + contractResult.getStackTrace(), contractResult.isSuccess());
@@ -548,12 +548,12 @@ public class ContractVmV8SendTxTest extends BaseQuery {
                 programResult = this.callByParams(contract, sender, method, value.toString(), args);
             }
             System.out.println("errorMsg: " + programResult.getErrorMessage());
-            Assert.assertFalse(String.format("测试方法[%s]expect failed, errorMsg: %s, stackTrace: %s", method, programResult.getErrorMessage(), programResult.getStackTrace()), programResult.isSuccess());
+            Assert.assertFalse(String.format("test method[%s]expect failed, errorMsg: %s, stackTrace: %s", method, programResult.getErrorMessage(), programResult.getStackTrace()), programResult.isSuccess());
         } catch (Throwable e) {
             if (e.getMessage() != null && e.getMessage().contains(errorMsgKey)) {
-                System.out.println(String.format("method [%s] 测试通过，期望: %s", method, errorMsgKey));
+                System.out.println(String.format("method [%s] Test passed, expected: %s", method, errorMsgKey));
             } else {
-                System.err.println(String.format("method [%s] 测试失败, error: %s", method, e.getMessage()));
+                System.err.println(String.format("method [%s] Test failed, error: %s", method, e.getMessage()));
             }
         }
     }

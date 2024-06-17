@@ -47,27 +47,27 @@ public class ContractResult {
     private int txOrder;
     private long blockHeight;
     /**
-     * 交易创建者
+     * Transaction Creator
      */
     private byte[] sender;
     /**
-     * 合约地址
+     * Contract address
      */
     private byte[] contractAddress;
     /**
-     * 合约执行结果
+     * Contract execution results
      */
     private String result;
     /**
-     * 已使用Gas
+     * UsedGas
      */
     private long gasUsed;
     /**
-     * 单价
+     * unit price
      */
     private long price;
     /**
-     * 调用者向合约转入的资金
+     * Funds transferred by the caller to the contract
      */
     private long value;
     private boolean revert;
@@ -75,7 +75,7 @@ public class ContractResult {
     private String errorMessage;
     private String stackTrace;
     private boolean acceptDirectTransfer;
-    // token类型, 0 - 非token, 1 - NRC20, 2 - NRC721, 3 - NRC1155
+    // tokentype, 0 - wrongtoken, 1 - NRC20, 2 - NRC721, 3 - NRC1155
     private int tokenType;
     private boolean isNrc20;
     private String tokenName;
@@ -83,14 +83,14 @@ public class ContractResult {
     private int tokenDecimals;
     private BigInteger tokenTotalSupply;
     /**
-     * 合约转账(从合约转出)交易
+     * Contract transfer(Transfer out from contract)transaction
      */
     private List<ProgramTransfer> transfers = new ArrayList<>();
     private List<ContractMergedTransfer> mergedTransferList = new ArrayList<>();
     private transient List<ContractTransferTransaction> contractTransferList = new ArrayList<>();
     private List<String> contractTransferTxStringList = new ArrayList<>();
     /**
-     * 消息事件
+     * Message Event
      */
     private List<String> events = new ArrayList<>();
     private List<String> debugEvents = new ArrayList<>();

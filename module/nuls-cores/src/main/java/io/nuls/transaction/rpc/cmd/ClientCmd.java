@@ -78,15 +78,15 @@ public class ClientCmd extends BaseCmd {
     @Autowired
     private PackablePool packablePool;
 
-    @CmdAnnotation(cmd = TxCmd.CLIENT_GETTX, version = 1.0, description = "根据hash获取交易，先查未确认，查不到再查已确认/Get transaction by tx hash")
+    @CmdAnnotation(cmd = TxCmd.CLIENT_GETTX, version = 1.0, description = "according tohashObtain the transaction, first check for unconfirmed information, then check for confirmed information if not found/Get transaction by tx hash")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
-            @Parameter(parameterName = "txHash", parameterType = "String", parameterDes = "待查询交易hash")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid"),
+            @Parameter(parameterName = "txHash", parameterType = "String", parameterDes = "Transaction to be queriedhash")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象，包含三个key", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "tx", description = "获取到的交易的序列化数据的字符串"),
-            @Key(name = "height", description = "获取到的交易的确认高度，未确认交易高度为-1"),
-            @Key(name = "status", description = "获取到的交易是否确认的状态")
+    @ResponseData(name = "Return value", description = "Return aMapObject, containing threekey", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "tx", description = "The string of serialized data obtained from the transaction"),
+            @Key(name = "height", description = "The confirmation height of the transaction obtained, while the unconfirmed transaction height is-1"),
+            @Key(name = "status", description = "The status of whether the obtained transaction is confirmed or not")
     }))
     public Response getTx(Map params) {
         Chain chain = null;
@@ -120,15 +120,15 @@ public class ClientCmd extends BaseCmd {
         }
     }
 
-    @CmdAnnotation(cmd = TxCmd.CLIENT_GETTX_CONFIRMED, version = 1.0, description = "根据hash获取已确认交易(只查已确认)/Get confirmed transaction by tx hash")
+    @CmdAnnotation(cmd = TxCmd.CLIENT_GETTX_CONFIRMED, version = 1.0, description = "according tohashObtain confirmed transactions(Only check confirmed)/Get confirmed transaction by tx hash")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
-            @Parameter(parameterName = "txHash", parameterType = "String", parameterDes = "待查询交易hash")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid"),
+            @Parameter(parameterName = "txHash", parameterType = "String", parameterDes = "Transaction to be queriedhash")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象，包含三个key", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "tx", description = "获取到的交易的序列化数据的字符串"),
-            @Key(name = "height", description = "获取到的交易的确认高度"),
-            @Key(name = "status", description = "获取到的交易是否确认的状态")
+    @ResponseData(name = "Return value", description = "Return aMapObject, containing threekey", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "tx", description = "The string of serialized data obtained from the transaction"),
+            @Key(name = "height", description = "The confirmation height of the transaction obtained"),
+            @Key(name = "status", description = "The status of whether the obtained transaction is confirmed or not")
     }))
     public Response getConfirmedTx(Map params) {
         Chain chain = null;
@@ -165,13 +165,13 @@ public class ClientCmd extends BaseCmd {
     }
 
 
-    @CmdAnnotation(cmd = TxCmd.TX_VERIFYTX, version = 1.0, description = "验证交易接口，包括含基础验证、验证器、账本验证/Verify transation")
+    @CmdAnnotation(cmd = TxCmd.TX_VERIFYTX, version = 1.0, description = "Verify transaction interfaces, including basic verification、Validator、Ledger verification/Verify transation")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
-            @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "待验证交易完整字符串")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid"),
+            @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "Complete transaction string to be verified")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", description = "交易hash")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "transactionhash")
     }))
     public Response verifyTx(Map params) {
         Chain chain = null;
@@ -183,7 +183,7 @@ public class ClientCmd extends BaseCmd {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
             String txStr = (String) params.get("tx");
-            //将txStr转换为Transaction对象
+            //taketxStrConvert toTransactionobject
             Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
 
             VerifyResult verifyResult = txService.verify(chain, tx);

@@ -35,7 +35,7 @@ import java.util.Enumeration;
 import java.util.Random;
 
 /**
- * 获取本地IP地址，兼容Windows、Linux
+ * Get LocalIPAddress, compatibleWindows、Linux
  * Get the local IP address, compatible with Windows, Linux
  *
  * @author tangyi
@@ -45,7 +45,7 @@ public class HostInfo {
 
 
     /**
-     * 获取本地IP地址
+     * Get LocalIPaddress
      * Get local IP address
      *
      * @return String
@@ -65,7 +65,7 @@ public class HostInfo {
 
 
     /**
-     * 判断操作系统是否是Windows
+     * Determine if the operating system isWindows
      * Determine whether the operating system is Windows?
      *
      * @return boolean
@@ -82,7 +82,7 @@ public class HostInfo {
 
 
     /**
-     * 获取Linux下的IP地址
+     * obtainLinuxLowerIPaddress
      * Getting IP Address under Linux
      *
      * @return String
@@ -92,7 +92,7 @@ public class HostInfo {
         String ip = "";
 
         /*
-        遍历本机所有的物理网络接口和逻辑网络接口
+        Traverse all physical and logical network interfaces of this machine
         Loop all the physical and logical network interfaces of the local machine
          */
         for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements(); ) {
@@ -103,14 +103,14 @@ public class HostInfo {
             }
 
             /*
-            使用NetworkInterface(网络接口)返回本地ip
+            applyNetworkInterface(network interface)Return to localip
             Return local IP using NetworkInterface
              */
             for (Enumeration<InetAddress> enumIpAddress = networkInterface.getInetAddresses(); enumIpAddress.hasMoreElements(); ) {
                 InetAddress inetAddress = enumIpAddress.nextElement();
 
                 /*
-                排除回送地址 / Exclude loopback address
+                Exclude return addresses / Exclude loopback address
                  */
                 if (inetAddress.isLoopbackAddress()) {
                     continue;
@@ -118,14 +118,14 @@ public class HostInfo {
 
                 String ipAddress = inetAddress.getHostAddress();
                 /*
-                排除IPV6 / Exclude IPV6
+                eliminateIPV6 / Exclude IPV6
                  */
                 if (ipAddress.contains("::") || ipAddress.contains("0:0:") || ipAddress.contains("fe80")) {
                     continue;
                 }
 
                 /*
-                排除127.0.0.1，返回真正的IPV4地址
+                eliminate127.0.0.1, return to the trueIPV4address
                 Exclude 127.0.0.1 and return the true IPV4 address
                  */
                 if ("127.0.0.1".equals(ip) || ipAddress.length() > 16) {
@@ -141,7 +141,7 @@ public class HostInfo {
 
 
     /**
-     * 在10000-20000中随机生成端口号，如果已经被使用则重新生成
+     * stay10000-20000Randomly generate port numbers in, if already in use, regenerate them
      * Randomly get the port number, range from 10,000 to 20,000
      * Re-random if the port already exists
      *
@@ -162,7 +162,7 @@ public class HostInfo {
 
 
     /**
-     * 验证端口是否已经在本地被使用
+     * Verify if the port has been used locally
      * Test if the local port is being used
      *
      * @param port Port

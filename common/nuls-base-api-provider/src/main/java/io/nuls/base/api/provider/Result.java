@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-06 15:45
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class Result<T> {
 

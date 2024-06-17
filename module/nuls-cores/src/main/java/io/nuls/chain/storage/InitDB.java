@@ -4,7 +4,7 @@ import io.nuls.core.exception.NulsException;
 
 public interface InitDB {
     /**
-     * 初始化表
+     * Initialize Table
      */
     void initTableName() throws NulsException;
 }

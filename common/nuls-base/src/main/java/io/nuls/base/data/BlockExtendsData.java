@@ -39,47 +39,47 @@ import java.io.IOException;
 public class BlockExtendsData extends BaseNulsData {
 
     /**
-     * 轮次
+     * Round
      */
     private long roundIndex;
 
     /**
-     * 共识节点数
+     * Number of consensus nodes
      */
     private int consensusMemberCount;
 
     /**
-     * 轮次起始时间
+     * Start time of round
      */
     private long roundStartTime;
 
     /**
-     * 轮次中的顺序
+     * Order in rounds
      */
     private int packingIndexOfRound;
 
     /**
-     * 主网当前生效的版本
+     * The current effective version of the main network
      */
     private short mainVersion;
 
     /**
-     * 区块的版本，可以理解为本地钱包的版本
+     * The version of the block can be understood as the version of the local wallet
      */
     private short blockVersion;
 
     /**
-     * 每个统计区间内的最小生效比例(60-100)
+     * The minimum effective ratio within each statistical interval(60-100)
      */
     private byte effectiveRatio;
 
     /**
-     * 协议生效要满足的连续区间数(50-1000)
+     * The number of consecutive intervals that the agreement must meet in order to take effect(50-1000)
      */
     private short continuousIntervalCount;
 
     /**
-     * 智能合约初始状态根
+     * Initial state root of smart contract
      */
     private byte[] stateRoot;
 
@@ -131,8 +131,8 @@ public class BlockExtendsData extends BaseNulsData {
     }
 
     /**
-     * 根据轮次开始时间计算轮次结束时间
-     * @param packingInterval 打包间隔时间（单位：秒）
+     * Calculate the end time of the round based on the start time of the round
+     * @param packingInterval Packaging interval time（unit：second）
      * */
     public long getRoundEndTime(long packingInterval) {
         return roundStartTime + consensusMemberCount * packingInterval;

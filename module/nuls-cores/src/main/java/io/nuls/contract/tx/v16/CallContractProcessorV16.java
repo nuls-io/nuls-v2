@@ -144,7 +144,7 @@ public class CallContractProcessorV16 implements TransactionProcessor {
             ContractResult contractResult = tx.getContractResult();
             contractResult.setBlockHeight(blockHeight);
 
-            // 保存代币交易
+            // Save token transactions
             ContractData callContractData = tx.getContractData();
             byte[] contractAddress = callContractData.getContractAddress();
             String contractAddressStr = AddressTool.getStringAddressByBytes(contractAddress);
@@ -156,7 +156,7 @@ public class CallContractProcessorV16 implements TransactionProcessor {
 
             Map<String, ContractAddressInfoPo> infoPoMap = new HashMap<>();
             infoPoMap.put(contractAddressStr, contractAddressInfoPo);
-            // 处理内部创建合约
+            // Process internal contract creation
             List<ContractInternalCreate> internalCreates = contractResult.getInternalCreates();
             if (internalCreates != null && !internalCreates.isEmpty()) {
                 for (ContractInternalCreate internalCreate : internalCreates) {
@@ -167,7 +167,7 @@ public class CallContractProcessorV16 implements TransactionProcessor {
                     }
                 }
             }
-            // 保存合约执行结果
+            // Save contract execution results
             return contractService.saveContractExecuteResult(chainId, tx.getHash(), contractResult);
         } catch (Exception e) {
             Log.error("save call contract tx error.", e);
@@ -177,7 +177,7 @@ public class CallContractProcessorV16 implements TransactionProcessor {
 
     private Result onRollback(int chainId, ContractWrapperTransaction tx) {
         try {
-            // 回滚代币转账交易
+            // Rollback token transfer transaction
             ContractResult contractResult = tx.getContractResult();
             if (contractResult == null) {
                 contractResult = contractService.getContractExecuteResult(chainId, tx.getHash());
@@ -191,7 +191,7 @@ public class CallContractProcessorV16 implements TransactionProcessor {
             } catch (Exception e) {
                 Log.warn("failed to trace call rollback log, error is {}", e.getMessage());
             }
-            // 处理内部创建合约
+            // Process internal contract creation
             List<ContractInternalCreate> internalCreates = contractResult.getInternalCreates();
             if (internalCreates != null && !internalCreates.isEmpty()) {
                 for (ContractInternalCreate internalCreate : internalCreates) {
@@ -201,7 +201,7 @@ public class CallContractProcessorV16 implements TransactionProcessor {
                     }
                 }
             }
-            // 删除合约执行结果
+            // Delete contract execution results
             return contractService.deleteContractExecuteResult(chainId, tx.getHash());
         } catch (Exception e) {
             Log.error("rollback call contract tx error.", e);

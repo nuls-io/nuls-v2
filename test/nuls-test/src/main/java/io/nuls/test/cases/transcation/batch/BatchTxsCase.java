@@ -34,7 +34,7 @@ import java.util.concurrent.ExecutorService;
 /**
  * @Author: ljs
  * @Time: 2019-04-25 12:08
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Component
 public class BatchTxsCase extends BaseTestCase<String, Map> {
@@ -55,7 +55,7 @@ public class BatchTxsCase extends BaseTestCase<String, Map> {
     static String address29 = "tNULSeBaMqywZjfSrKNQKBfuQtVxAHBQ8rB2Zn";
 
     /**
-     * 空地址
+     * Empty address
      * tNULSeBaMm8Kp5u7WU5xnCJqLe8fRFD49aZQdK
      * tNULSeBaMigwBrvikwVwbhAgAxip8cTScwcaT8
      */
@@ -72,8 +72,8 @@ public class BatchTxsCase extends BaseTestCase<String, Map> {
 
 
     public void importPriKeyTest() {
-//        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//种子出块地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
-//        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//种子出块地址 tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
+//        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//Seed block address tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
+//        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//Seed block address tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
         importPriKey("9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b", password);//20 tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
         importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//21 tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
         importPriKey("8212e7ba23c8b52790c45b0514490356cd819db15d364cbe08659b5888339e78", password);//22 tNULSeBaMrbMRiFAUeeAt6swb4xVBNyi81YL24
@@ -88,7 +88,7 @@ public class BatchTxsCase extends BaseTestCase<String, Map> {
 
     public void importPriKey(String priKey, String pwd) {
         try {
-            //账户已存在则覆盖 If the account exists, it covers.
+            //Overwrite if account already exists If the account exists, it covers.
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put(Constants.CHAIN_ID, chainId);
@@ -148,13 +148,13 @@ public class BatchTxsCase extends BaseTestCase<String, Map> {
         for (CoinDto coinDto : listFrom) {
             String address = coinDto.getAddress();
             byte[] addressByte = AddressTool.getAddress(address);
-            //检查该链是否有该资产
+            //Check if the chain has the asset
             int assetChainId = coinDto.getAssetsChainId();
             int assetId = coinDto.getAssetsId();
 
-            //检查对应资产余额是否足够
+            //Check if the corresponding asset balance is sufficient
             BigInteger amount = coinDto.getAmount();
-            //查询账本获取nonce值
+            //Query ledger to obtainnoncevalue
             byte[] nonce = getNonceByPreHash(createChain(), address, hash);
             CoinFrom coinFrom = new CoinFrom(addressByte, assetChainId, assetId, amount, nonce, (byte) 0);
             coinFroms.add(coinFrom);
@@ -207,14 +207,14 @@ public class BatchTxsCase extends BaseTestCase<String, Map> {
         for (CoinDto coinDto : listTo) {
             String address = coinDto.getAddress();
             byte[] addressByte = AddressTool.getAddress(address);
-            //转账交易转出地址必须是本链地址
+            //The transfer transaction transfer address must be a local chain address
             if (!AddressTool.validAddress(chainId, address)) {
                 Log.debug("failed");
             }
-            //检查该链是否有该资产
+            //Check if the chain has the asset
             int assetsChainId = coinDto.getAssetsChainId();
             int assetId = coinDto.getAssetsId();
-            //检查金额是否小于0
+            //Check if the amount is less than0
             BigInteger amount = coinDto.getAmount();
             if (BigIntegerUtils.isLessThan(amount, BigInteger.ZERO)) {
                 Log.debug("failed");
@@ -231,16 +231,16 @@ public class BatchTxsCase extends BaseTestCase<String, Map> {
 
     private Transaction assemblyCoinData(Transaction tx, int chainId, List<CoinDto> fromList, List<CoinDto> toList, NulsHash hash) throws NulsException {
         try {
-            //组装coinFrom、coinTo数据
+            //assemblecoinFrom、coinTodata
             List<CoinFrom> coinFromList = assemblyCoinFrom(chainId, fromList, hash);
             List<CoinTo> coinToList = assemblyCoinTo(chainId, toList);
-            //来源地址或转出地址为空
+            //The source address or transfer address is empty
             if (coinFromList.size() == 0 || coinToList.size() == 0) {
                 return null;
             }
-            //交易总大小=交易数据大小+签名数据大小
+            //Total transaction size=Transaction data size+Signature data size
             int txSize = tx.size() + getSignatureSize(coinFromList);
-            //组装coinData数据
+            //assemblecoinDatadata
             CoinData coinData = getCoinData(chainId, coinFromList, coinToList, txSize);
             tx.setCoinData(coinData.serialize());
         } catch (Exception e) {
@@ -271,12 +271,12 @@ public class BatchTxsCase extends BaseTestCase<String, Map> {
         tx.setTime(NulsDateUtils.getCurrentTimeMillis() / 1000);
         tx.setRemark(StringUtils.bytes(remark));
         try {
-            //组装CoinData中的coinFrom、coinTo数据
+            //assembleCoinDataMiddlecoinFrom、coinTodata
             assemblyCoinData(tx, chainId, fromList, toList, hash);
-            //计算交易数据摘要哈希
+            //Calculate transaction data summary hash
             byte[] bytes = tx.serializeForHash();
             tx.setHash(NulsHash.calcHash(bytes));
-            //创建ECKey用于签名
+            //establishECKeyUsed for signature
 //            List<ECKey> signEcKeys = new ArrayList<>();
             TransactionSignature transactionSignature = new TransactionSignature();
             List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
@@ -297,7 +297,7 @@ public class BatchTxsCase extends BaseTestCase<String, Map> {
 
                 p2PHKSignatures.add(signature);
             }
-            //交易签名
+            //Transaction signature
             transactionSignature.setP2PHKSignatures(p2PHKSignatures);
             tx.setTransactionSignature(transactionSignature.serialize());
             return tx;
@@ -309,9 +309,9 @@ public class BatchTxsCase extends BaseTestCase<String, Map> {
 
     private List<String> doAccountsCreateAndGiveMoney(int addrCount, BigInteger amount, String richAddr) throws Exception {
         List<String> list = createAddress(addrCount);
-        //给新生成账户转账
+        //Transfer funds to the newly generated account
         NulsHash hash = null;
-        Log.info("交易账户余额初始化...");
+        Log.info("Transaction account balance initialization...");
         for (int i = 0; i < addrCount; i++) {
             String address = list.get(i);
             Map transferMap = this.createTransferTx(richAddr, address, new BigInteger("90000000000"));
@@ -324,13 +324,13 @@ public class BatchTxsCase extends BaseTestCase<String, Map> {
             hash = tx.getHash();
             HashMap result = (HashMap) requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
         }
-        //睡30秒
+        //sleep30second
         Thread.sleep(30000L);
         return list;
     }
 
     /**
-     * 调用其他模块接口
+     * Call other module interfaces
      * Call other module interfaces
      */
     public static Object requestAndResponse(String moduleCode, String cmd, Map params) throws NulsException {
@@ -410,19 +410,19 @@ public class BatchTxsCase extends BaseTestCase<String, Map> {
 
     public void mAddressTransferLjs(String address1, String address2) throws Exception {
         int count = 10000;
-        Log.info("创建转账账户...");
+        Log.info("Create a transfer account...");
         List<String> list1 = doAccountsCreateAndGiveMoney(count, new BigInteger("80000000000"), address1);
         List<String> list2 = doAccountsCreateAndGiveMoney(count, new BigInteger("80000000000"), address2);
-        //睡30秒
+        //sleep30second
         Thread.sleep(30000L);
-        //新生成账户各执行一笔转账
+        //Execute one transfer for each newly generated account
         Log.debug("{}", System.currentTimeMillis());
         long countTx = 0;
         Map<String, NulsHash> preHashMap = new HashMap<>();
         long x = 0;
         while (true) {
             x++;
-            Log.info("start Transfer {} 笔,  * 第 {} 次", countTx, x);
+            Log.info("start Transfer {} pen,  * Section {} second", countTx, x);
             long startTime = System.currentTimeMillis();
             countTx = countTx + doTrans(preHashMap, list1, list2, count);
             countTx = countTx + doTrans(preHashMap, list2, list1, count);

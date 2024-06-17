@@ -44,7 +44,7 @@ public class InvokeTestBySingleThread {
             ResponseMessageProcessor.handshake(url);
 
             /*
-             * 和指定地址同步
+             * Synchronize with specified address
              * */
             ResponseMessageProcessor.syncKernel(url);
 
@@ -61,7 +61,7 @@ public class InvokeTestBySingleThread {
                         }
                     });
 
-            System.out.println("消息ID：" + msId + "，耗时：" + (System.currentTimeMillis() - time));
+            System.out.println("newsID：" + msId + "Time consumption：" + (System.currentTimeMillis() - time));
 
         } catch (Exception e) {
             e.printStackTrace();

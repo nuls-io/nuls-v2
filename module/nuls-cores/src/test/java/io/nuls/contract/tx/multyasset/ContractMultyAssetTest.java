@@ -82,7 +82,7 @@ public class ContractMultyAssetTest extends BaseQuery {
     protected String offlineContract = "tNULSeBaN9hZLrqjvCrmHrdvKZPfBh9A2uneZc";
 
     /**
-     * 创建合约
+     * Create Contract
      */
     @Test
     public void createContract() throws Exception {
@@ -101,7 +101,7 @@ public class ContractMultyAssetTest extends BaseQuery {
     }
 
     /**
-     * 注册一个资产
+     * Register an asset
      */
     @Test
     public void assetRegisterTest() throws Exception {
@@ -118,100 +118,100 @@ public class ContractMultyAssetTest extends BaseQuery {
     }
 
     /**
-     * 转入NULS，转出NULS，转出NULS锁定
+     * Transfer inNULSTransfer outNULSTransfer outNULSlocking
      */
     @Test
     public void nulsTest() throws Exception {
-        // 转入 3.2 NULS
+        // Transfer in 3.2 NULS
         this.callByParams("_payable", "6.2", null);
-        // 转出 1.1 NULS
+        // Transfer out 1.1 NULS
         Object[] args = new Object[]{toAddress17, new BigDecimal("1.1").multiply(BigDecimal.TEN.pow(8)).toBigInteger()};
         this.callByParams("transferNuls", "0", args);
-        // 转出 1.2 NULS
+        // Transfer out 1.2 NULS
         Object[] argsLock = new Object[]{toAddress17, new BigDecimal("1.2").multiply(BigDecimal.TEN.pow(8)).toBigInteger(), minutes_3};
         this.callByParams("transferNulsLock", "0", argsLock);
     }
 
     /**
-     * 其他资产转入、转出、转出锁定
+     * Transfer of other assets、Transfer out、Transfer out lock
      * <p>
-     * 如 2-2, 假设资产decimals=8
+     * as 2-2, Assuming assetsdecimals=8
      */
     @Test
     public void otherAssetTest() throws Exception {
-        // 转入 3.2
+        // Transfer in 3.2
         this.callOfDesignatedAssetByParams(contractAddress, "_payableMultyAsset", "3.2", null, 2, 2);
-        // 转出 1.1
+        // Transfer out 1.1
         Object[] args = new Object[]{toAddress17, new BigDecimal("1.1").multiply(BigDecimal.TEN.pow(8)).toBigInteger(), 2, 2};
         this.callByParams("transferDesignatedAsset", "0", args);
-        // 转出 1.2
+        // Transfer out 1.2
         Object[] argsLock = new Object[]{toAddress17, new BigDecimal("1.2").multiply(BigDecimal.TEN.pow(8)).toBigInteger(), 2, 2, minutes_3};
         this.callByParams("transferDesignatedAssetLock", "0", argsLock);
     }
 
 
     /**
-     * 内部调用其他合约, 转入NULS，转出NULS，转出NULS(锁定)
+     * Internal call to other contracts, Transfer inNULSTransfer outNULSTransfer outNULS(locking)
      */
     @Test
     public void innerCall() throws Exception {
         String methodName = "callOtherContract";
-        // 转入 6.6 NULS (外部合约)
+        // Transfer in 6.6 NULS (External contracts)
         this.callByParams("_payable", "6.6", null);
-        // 转入 6.6 NULS (内部合约)
+        // Transfer in 6.6 NULS (Internal contract)
         this.innerCallByParams(methodName, otherContract, "_payable", null, "6.6");
-        // 转出 3.3 NULS
+        // Transfer out 3.3 NULS
         Object[] innerArgs = new Object[]{toAddress17, new BigDecimal("3.3").multiply(BigDecimal.TEN.pow(8)).toBigInteger()};
         this.innerCallByParams(methodName, otherContract, "transferNuls", innerArgs, "0");
-        // 转出 1.1 NULS(锁定)
+        // Transfer out 1.1 NULS(locking)
         Object[] innerArgsLock = new Object[]{toAddress17, new BigDecimal("1.1").multiply(BigDecimal.TEN.pow(8)).toBigInteger(), minutes_3};
         this.innerCallByParams(methodName, otherContract, "transferNulsLock", innerArgsLock, "0");
     }
 
     /**
-     * 内部调用其他合约, 转入NULS，转出NULS，转出NULS(锁定)
+     * Internal call to other contracts, Transfer inNULSTransfer outNULSTransfer outNULS(locking)
      * <p>
-     * 内部调用带返回值
+     * Internal call with return value
      */
     @Test
     public void innerCallWithReturnValue() throws Exception {
         String methodName = "callWithReturnValueOfOtherContract";
-        // 转入 6.6 NULS (外部合约)
+        // Transfer in 6.6 NULS (External contracts)
         this.callByParams("_payable", "6.6", null);
-        // 转入 6.6 NULS (内部合约)
+        // Transfer in 6.6 NULS (Internal contract)
         this.innerCallByParams(methodName, otherContract, "_payable", null, "6.6");
-        // 转出 3.3 NULS
+        // Transfer out 3.3 NULS
         Object[] innerArgs = new Object[]{toAddress17, new BigDecimal("3.3").multiply(BigDecimal.TEN.pow(8)).toBigInteger()};
         this.innerCallByParams(methodName, otherContract, "transferNuls", innerArgs, "0");
-        // 转出 1.1 NULS(锁定)
+        // Transfer out 1.1 NULS(locking)
         Object[] innerArgsLock = new Object[]{toAddress17, new BigDecimal("1.1").multiply(BigDecimal.TEN.pow(8)).toBigInteger(), minutes_3};
         this.innerCallByParams(methodName, otherContract, "transferNulsLock", innerArgsLock, "0");
     }
 
     /**
-     * 内部调用其他合约, 转入、转出、转出锁定 其他资产
-     * 如 2-2, 假设资产decimals=8
-     * 内部调用带返回值
+     * Internal call to other contracts, Transfer in、Transfer out、Transfer out lock other assets
+     * as 2-2, Assuming assetsdecimals=8
+     * Internal call with return value
      */
     @Test
     public void innerCallWithReturnValueOfDesignatedAsset() throws Exception {
         String methodName = "callWithReturnValueOfOtherContractOfDesignatedAsset";
 
-        // 转入 6.6 2-2 (外部合约)
+        // Transfer in 6.6 2-2 (External contracts)
         this.callOfDesignatedAssetByParams(contractAddress,"_payableMultyAsset", "6.6", null, 2, 2);
-        // 转入 6.6 2-2 (内部合约)
+        // Transfer in 6.6 2-2 (Internal contract)
         this.innerCallOfDesignatedAssetByParams(methodName, otherContract, "_payableMultyAsset", null, "6.6", 2, 2);
 
-        // 转出 3.3 2-2
+        // Transfer out 3.3 2-2
         Object[] innerArgs = new Object[]{toAddress17, new BigDecimal("3.3").multiply(BigDecimal.TEN.pow(8)).toBigInteger(), 2, 2};
         this.innerCallOfDesignatedAssetByParams(methodName, otherContract, "transferDesignatedAsset", innerArgs, "0", 0, 0);
-        // 转出 3.3 2-2(锁定)
+        // Transfer out 3.3 2-2(locking)
         Object[] innerArgsLock = new Object[]{toAddress17, new BigDecimal("3.3").multiply(BigDecimal.TEN.pow(8)).toBigInteger(), 2, 2, minutes_3};
         this.innerCallOfDesignatedAssetByParams(methodName, otherContract, "transferDesignatedAssetLock", innerArgsLock, "0", 0, 0);
     }
 
     /**
-     * 调用合约的同时，向另外一个账户转账
+     * Transfer funds to another account while calling the contract
      */
     @Test
     public void callContractWithNulsValueToOthers() throws Exception {
@@ -231,7 +231,7 @@ public class ContractMultyAssetTest extends BaseQuery {
                 new ProgramMultyAssetValue(BigInteger.valueOf(3_0000_0000L), 2, 3)
         };
         String methodDesc = "";
-        String remark = "call contract test - 向合约转账的同时，向另外一个账户转账";
+        String remark = "call contract test - At the same time as transferring funds to the contract, transfer them to another account";
         Map params = this.makeCallParams(
                 sender, value, 2000000L, 25L, contractAddress, methodName, methodDesc, remark, multyAssetValues, amountDtos, new Object[]{});
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
@@ -242,7 +242,7 @@ public class ContractMultyAssetTest extends BaseQuery {
     }
 
     /**
-     * 根据注册资产的交易hash查询资产信息
+     * According to the transaction of registered assetshashQuery asset information
      */
     @Test
     public void getAssetRegInfoByHashTest() throws Exception {
@@ -255,7 +255,7 @@ public class ContractMultyAssetTest extends BaseQuery {
     }
 
     /**
-     * 多账户调用合约 - 转入
+     * Multiple account call contracts - Transfer in
      */
     @Test
     public void transferInOfmanyAccountCall() throws Exception {
@@ -275,7 +275,7 @@ public class ContractMultyAssetTest extends BaseQuery {
     }
 
     /**
-     * 多账户调用合约 - 转入其他资产，如 2-2, 2-3
+     * Multiple account call contracts - Transfer to other assets, such as 2-2, 2-3
      */
     @Test
     public void transferInOfmanyAccountCallII() throws Exception {
@@ -299,7 +299,7 @@ public class ContractMultyAssetTest extends BaseQuery {
     }
 
     /**
-     * 多账户调用合约 - 同时转入NULS资产和其他资产，如 2-1, 2-2, 2-3
+     * Multiple account call contracts - Simultaneously transfer inNULSAssets and other assets, such as 2-1, 2-2, 2-3
      */
     @Test
     public void transferInOfmanyAccountCallIII() throws Exception {
@@ -323,7 +323,7 @@ public class ContractMultyAssetTest extends BaseQuery {
     }
 
     /**
-     * 多账户调用合约 - 转出
+     * Multiple account call contracts - Transfer out
      */
     @Test
     public void transferOutOfmanyAccountCall() throws Exception {
@@ -339,7 +339,7 @@ public class ContractMultyAssetTest extends BaseQuery {
         String methodName = "transferNuls";
         String methodDesc = "";
         String remark = "";
-        // 转出 0.1 NULS
+        // Transfer out 0.1 NULS
         Object[] args = new Object[]{toAddress17, new BigDecimal("0.1").multiply(BigDecimal.TEN.pow(8)).toBigInteger()};
         String[] argsType = new String[]{"Address", "BigInteger"};
         this.callTxOffline(feeAccount, feeAccountPri, sender, senderPri, value, contractAddress, methodName, methodDesc, remark, args, argsType, null, true);
@@ -347,7 +347,7 @@ public class ContractMultyAssetTest extends BaseQuery {
 
     @Test
     public void sendPayableMultyAssetTest() throws Exception {
-        // 转入
+        // Transfer in
         this.callOfDesignatedAssetByParams("tNULSeBaN7mVkoh9ArP6RGvwgs7wmMpRsD5tuM", "_payableMultyAsset", "1000000", null, 2, 2);
     }
 
@@ -400,7 +400,7 @@ public class ContractMultyAssetTest extends BaseQuery {
     }
 
     /**
-     * 两个账户支出同一个资产
+     * Spending the same asset on two accounts
      */
     protected void callTxOfflineII(String feeAccount, String feeAccountPri,
                                  String contractSender, String contractSenderPri,
@@ -474,7 +474,7 @@ public class ContractMultyAssetTest extends BaseQuery {
                                  String methodName, String methodDesc,
                                  String remark,
                                  Object[] args, String[] argsType, boolean isBroadcastTx) throws Exception{
-        // 生成参数的二维数组
+        // Generate a two-dimensional array of parameters
         String[][] finalArgs = null;
         if (args != null && args.length > 0) {
             if(argsType == null || argsType.length != args.length) {
@@ -483,7 +483,7 @@ public class ContractMultyAssetTest extends BaseQuery {
             finalArgs = ContractUtil.twoDimensionalArray(args, argsType);
         }
 
-        // 组装交易的txData
+        // Assembly transactionstxData
         byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
         byte[] senderBytes = AddressTool.getAddress(contractSender);
         CallContractData callContractData = new CallContractData();
@@ -504,7 +504,7 @@ public class ContractMultyAssetTest extends BaseQuery {
             tx.setRemark(remark.getBytes(StandardCharsets.UTF_8));
         }
         tx.setTime(System.currentTimeMillis() / 1000);
-        // 计算CoinData
+        // calculateCoinData
         CoinData coinData = new CoinData();
         coinData.setFrom(froms);
         coinData.setTo(tos);
@@ -546,7 +546,7 @@ public class ContractMultyAssetTest extends BaseQuery {
             throw new RuntimeException("Insufficient balance to pay fee");
         }*/
         tx.setCoinData(coinData.serialize());
-        // 签名
+        // autograph
         byte[] txBytes = tx.serialize();
         String txHex = HexUtil.encode(txBytes);
         Result<Map> signTxR = NulsSDKTool.sign(txSingers, txHex);
@@ -556,7 +556,7 @@ public class ContractMultyAssetTest extends BaseQuery {
         String signedTxHex = (String) resultData.get("txHex");
         System.out.println(String.format("signedTxHex: %s", signedTxHex));
 
-        // 在线接口 - 广播交易
+        // Online interface - Broadcasting transactions
         if (!isBroadcastTx) {
             return;
         }

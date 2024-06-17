@@ -34,9 +34,9 @@ import java.math.BigInteger;
  */
 @ApiModel
 public class AccountAmountDto {
-    @ApiModelProperty(description = "转入金额")
+    @ApiModelProperty(description = "Transfer amount")
     private BigInteger value;
-    @ApiModelProperty(description = "转入地址")
+    @ApiModelProperty(description = "Transfer address")
     private String to;
 
     public AccountAmountDto(BigInteger value, String to) {

@@ -36,27 +36,27 @@ import io.nuls.core.rpc.model.ApiModelProperty;
 @ApiModel
 public class SimpleAccountDTO {
     /**
-     * 账户地址
+     * Account address
      */
-    @ApiModelProperty(description = "账户地址")
+    @ApiModelProperty(description = "Account address")
     private String address;
 
     /**
-     * 别名
+     * alias
      */
-    @ApiModelProperty(description = "别名")
+    @ApiModelProperty(description = "alias")
     private String alias;
 
     /**
-     * 公钥Hex.encode(byte[])
+     * Public keyHex.encode(byte[])
      */
-    @ApiModelProperty(description = "公钥")
+    @ApiModelProperty(description = "Public key")
     private String pubkeyHex;
 
     /**
-     * 已加密私钥Hex.encode(byte[])
+     * Encrypted private keyHex.encode(byte[])
      */
-    @ApiModelProperty(description = "已加密私钥")
+    @ApiModelProperty(description = "Encrypted private key")
     private String encryptedPrikeyHex;
 
     public SimpleAccountDTO() {

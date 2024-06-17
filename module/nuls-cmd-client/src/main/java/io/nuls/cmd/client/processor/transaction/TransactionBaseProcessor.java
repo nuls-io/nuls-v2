@@ -8,7 +8,7 @@ import io.nuls.cmd.client.processor.CommandGroup;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-12 17:10
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public abstract class TransactionBaseProcessor implements CommandProcessor {
 

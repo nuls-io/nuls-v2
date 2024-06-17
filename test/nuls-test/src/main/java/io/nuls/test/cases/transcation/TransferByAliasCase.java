@@ -19,7 +19,7 @@ import static io.nuls.test.cases.Constants.TRANSFER_AMOUNT;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-21 15:00
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Component
 public class TransferByAliasCase extends BaseTranscationCase<String,String> {
@@ -31,14 +31,14 @@ public class TransferByAliasCase extends BaseTranscationCase<String,String> {
 
     @Override
     public String title() {
-        return "通过别名转账到指定地址";
+        return "Transfer via alias to specified address";
     }
 
     @Override
     public String doTest(String address, int depth) throws TestFailException {
         String toAddress = createAccountCase.check(null,depth);
         AccountInfo accountInfo = accountService.getAccountByAddress(new GetAccountByAddressReq(address)).getData();
-        check(StringUtils.isNotBlank(accountInfo.getAlias()),"别名转账异常，转出账户别名为空");
+        check(StringUtils.isNotBlank(accountInfo.getAlias()),"Anonymous transfer exception, transfer account alias is empty");
         TransferReq.TransferReqBuilder builder =
                 new TransferReq.TransferReqBuilder(config.getChainId(), config.getAssetsId())
                         .addForm(accountInfo.getAlias(), Constants.PASSWORD, TRANSFER_AMOUNT)

@@ -39,23 +39,23 @@ import java.math.BigInteger;
 @ApiModel
 public class ContractCreateOffline extends Base {
 
-    @ApiModelProperty(description = "交易创建者")
+    @ApiModelProperty(description = "Transaction Creator")
     private String sender;
-    @ApiModelProperty(description = "账户余额")
+    @ApiModelProperty(description = "Account balance")
     private BigInteger senderBalance;
-    @ApiModelProperty(description = "账户nonce值")
+    @ApiModelProperty(description = "accountnoncevalue")
     private String nonce;
-    @ApiModelProperty(description = "合约别名")
+    @ApiModelProperty(description = "Contract alias")
     private String alias;
-    @ApiModelProperty(description = "智能合约代码(字节码的Hex编码字符串)")
+    @ApiModelProperty(description = "Smart Contract Code(BytecodeHexEncoding string)")
     private String contractCode;
-    @ApiModelProperty(description = "GAS限制")
+    @ApiModelProperty(description = "GASlimit")
     private long gasLimit;
-    @ApiModelProperty(description = "参数列表", required = false)
+    @ApiModelProperty(description = "parameter list", required = false)
     private Object[] args;
-    @ApiModelProperty(description = "参数类型列表", required = false)
+    @ApiModelProperty(description = "Parameter Type List", required = false)
     private String[] argsType;
-    @ApiModelProperty(description = "备注", required = false)
+    @ApiModelProperty(description = "Remarks", required = false)
     private String remark;
 
 

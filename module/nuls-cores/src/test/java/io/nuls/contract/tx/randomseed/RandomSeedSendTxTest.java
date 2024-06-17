@@ -50,7 +50,7 @@ import static io.nuls.contract.constant.ContractCmdConstant.CREATE;
 public class RandomSeedSendTxTest extends BaseQuery {
 
     /**
-     * 创建合约
+     * Create Contract
      */
     @Test
     public void createContract() throws Exception {
@@ -149,7 +149,7 @@ public class RandomSeedSendTxTest extends BaseQuery {
     }
 
     /**
-     * 调用视图方法 - 合约整体信息
+     * Call View Method - Overall contract information
      */
     @Test
     public void getContractWholeInfo() throws Exception {

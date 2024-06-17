@@ -52,11 +52,11 @@ public class HexTest {
     //    String address = "JgT2JCQvKGRKRjKqyfxRAj2zSCpGca01f";
     String address = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
     int assetId = 1;
-    //入账金额
+    //Entry amount
     BigInteger amount = BigInteger.valueOf(100000000000000L);
 
     Transaction buildTransaction() throws IOException {
-        //封装交易执行
+        //Encapsulation transaction execution
         Transaction tx = new Transaction();
         CoinData coinData = new CoinData();
         CoinTo coinTo = new CoinTo();

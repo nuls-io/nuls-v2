@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 验证人变更交易实现类
+ * Verifier change transaction implementation class
  *
  * @author tag
  * @date 2019/6/19
@@ -66,21 +66,21 @@ public class VerifierChangeTxServiceImpl implements VerifierChangeTxService {
                 boolean haveCancelVerifier = cancelList != null && !cancelList.isEmpty();
                 boolean dataValid = haveCancelVerifier || (registerList != null && !registerList.isEmpty());
                 if (!dataValid || verifierChainId <= 0) {
-                    chain.getLogger().error("验证人变更信息无效,chainId:{}", verifierChainId);
+                    chain.getLogger().error("Verifier change information is invalid,chainId:{}", verifierChainId);
                 }
-                //如果为本链验证人变更，验证拜占庭
+                //If the verifier of this chain changes, verify Byzantium
                 if(verifierChainId == chainId){
                     verifierList = new ArrayList<>(chain.getVerifierList());
                 }else{
                     chainInfo = chainManager.getChainInfo(verifierChainId);
                     if (chainInfo == null) {
-                        chain.getLogger().error("链未注册,chainId:{}", verifierChainId);
+                        chain.getLogger().error("Chain not registered,chainId:{}", verifierChainId);
                         throw new NulsException(NulsCrossChainErrorCode.CHAIN_UNREGISTERED);
                     }
                     verifierList = new ArrayList<>(chainInfo.getVerifierList());
                 }
                 if(haveCancelVerifier){
-                    //如果退出的验证人大于30%则无效
+                    //If the exiting verifier is greater than30%Invalid
                     int maxCancelCount = verifierList.size() * NulsCrossChainConstant.VERIFIER_CANCEL_MAX_RATE / NulsCrossChainConstant.MAGIC_NUM_100;
                     if (cancelList.size() > maxCancelCount) {
                         chain.getLogger().error("Abnormal change of transaction data of verifier: the verifier who exits is more than 30%,cancelCount:{},maxCancelCount:{},totalCount:{}", cancelList.size(), maxCancelCount, verifierList.size());
@@ -92,15 +92,15 @@ public class VerifierChangeTxServiceImpl implements VerifierChangeTxService {
                 minPassCount = CommonUtil.getByzantineCount(chain, verifierList.size());
 
                 if (verifierList.isEmpty()) {
-                    chain.getLogger().error("链还未注册验证人,chainId:{}", verifierChainId);
+                    chain.getLogger().error("The chain has not registered a verifier yet,chainId:{}", verifierChainId);
                     throw new NulsException(NulsCrossChainErrorCode.CHAIN_UNREGISTERED_VERIFIER);
                 }
                 if (!SignatureUtil.validateCtxSignture(verifierChangeTx)) {
-                    chain.getLogger().error("主网协议跨链交易签名验证失败！");
+                    chain.getLogger().error("Main network protocol cross chain transaction signature verification failed！");
                     throw new NulsException(NulsCrossChainErrorCode.SIGNATURE_ERROR);
                 }
                 if (!TxUtil.signByzantineVerify(chain, verifierChangeTx, verifierList, minPassCount,verifierChainId)) {
-                    chain.getLogger().error("签名拜占庭验证失败！");
+                    chain.getLogger().error("Signature Byzantine verification failed！");
                     throw new NulsException(NulsCrossChainErrorCode.CTX_SIGN_BYZANTINE_FAIL);
                 }
             } catch (NulsException e) {
@@ -135,7 +135,7 @@ public class VerifierChangeTxServiceImpl implements VerifierChangeTxService {
                 List<String> registerList = verifierChangeData.getRegisterAgentList();
                 List<String> cancelList = verifierChangeData.getCancelAgentList();
                 int verifierChainId = verifierChangeData.getChainId();
-                //如果为本链验证人变更，则保存更新本地验证人
+                //If there is a change in the verifier for this chain, save and update the local verifier
                 if(verifierChainId == chainId){
                     if(chain.getVerifierChangeTx() != null && !ctxHash.equals(chain.getVerifierChangeTx().getHash())){
                         chain.getLogger().warn("Local processing verifier change transaction changed,commitHash:{},cacheHash:{}",ctxHash.toHex(),chain.getVerifierChangeTx().getHash().toHex());
@@ -155,16 +155,16 @@ public class VerifierChangeTxServiceImpl implements VerifierChangeTxService {
                     commitSuccessList.add(verifierChangeTx);
                 }else{
                     ChainInfo chainInfo = chainManager.getChainInfo(verifierChainId);
-                    chain.getLogger().info("链{}当前验证人列表为：{}",verifierChainId,chainInfo.getVerifierList().toString() );
+                    chain.getLogger().info("chain{}The current list of validators is：{}",verifierChainId,chainInfo.getVerifierList().toString() );
                     if(registerList != null && !registerList.isEmpty()){
                         chainInfo.getVerifierList().addAll(registerList);
-                        chain.getLogger().info("新增验证列表为：{}" ,registerList.toString());
+                        chain.getLogger().info("Add validation list as：{}" ,registerList.toString());
                     }
                     if(cancelList != null && !cancelList.isEmpty()){
                         chainInfo.getVerifierList().removeAll(cancelList);
-                        chain.getLogger().info("注销的验证人列表为：{}",cancelList.toString() );
+                        chain.getLogger().info("The list of verifiers to be logged out is：{}",cancelList.toString() );
                     }
-                    chain.getLogger().info("链{}更新后的验证列表为{}",verifierChainId,chainInfo.getVerifierList().toString() );
+                    chain.getLogger().info("chain{}The updated validation list is{}",verifierChainId,chainInfo.getVerifierList().toString() );
                     RegisteredChainMessage registeredChainMessage = new RegisteredChainMessage();
                     registeredChainMessage.setChainInfoList(chainManager.getRegisteredCrossChainList());
                     if(!registeredCrossChainService.save(registeredChainMessage)){

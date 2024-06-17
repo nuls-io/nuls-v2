@@ -43,15 +43,15 @@ import static io.nuls.block.constant.StatusEnum.RUNNING;
 import static io.nuls.block.constant.StatusEnum.UPDATE_ORPHAN_CHAINS;
 
 /**
- * 孤儿链的形成原因分析：因为网络问题,在没有收到Block(100)的情况下,已经收到了Block(101),此时Block(101)不能连接到主链上,形成孤儿链
- * 孤儿链定时维护处理器
- * 孤儿链处理大致流程：
- * 1.清理无效数据
- * 2.维护现有数据
+ * Analysis of the Causes of Orphan Chain Formation：Due to network issues,I haven't received it yetBlock(100)In the case of,I have received itBlock(101),hereBlock(101)Unable to connect to the main chain,Forming an orphan chain
+ * Orphan Chain Timed Maintenance Processor
+ * The general process of handling orphan chains：
+ * 1.Clean up invalid data
+ * 2.Maintain existing data
  *
  * @author captain
  * @version 1.0
- * @date 18-11-14 下午3:54
+ * @date 18-11-14 afternoon3:54
  */
 public class OrphanChainsMaintainer extends BaseMonitor {
 
@@ -94,12 +94,12 @@ public class OrphanChainsMaintainer extends BaseMonitor {
                 }
                 // exclusive access
                 List<Node> availableNodes = NetworkCall.getAvailableNodes(chainId);
-                //维护现有孤儿链,尝试在链首增加区块
+                //Maintain existing orphan chains,Attempt to add blocks at the beginning of the chain
                 context.setStatus(UPDATE_ORPHAN_CHAINS);
                 long l = System.nanoTime();
                 for (Chain orphanChain : orphanChains) {
                     maintainOrphanChain(chainId, orphanChain, availableNodes, orphanChainMaxAge);
-                    //孤儿链维护时间超过十秒，就退出
+                    //If the maintenance time of the orphan chain exceeds ten seconds, exit
                     if (System.nanoTime() - l > 10000000000L) {
                         break;
                     }
@@ -115,22 +115,22 @@ public class OrphanChainsMaintainer extends BaseMonitor {
     }
 
     /**
-     * 维护孤儿链,向其他节点请求孤儿链起始区块的上一个区块,仅限于没有父链的孤儿链
+     * Maintaining orphan chains,Requesting the previous block of the orphan chain starting block from other nodes,Limited to orphan chains without a parent chain
      *
-     * @param chainId 链Id/chain id
+     * @param chainId chainId/chain id
      * @param orphanChain
      * @param orphanChainMaxAge
      */
     private void maintainOrphanChain(int chainId, Chain orphanChain, List<Node> availableNodes, int orphanChainMaxAge) {
         ChainContext context = ContextManager.getContext(chainId);
         Map<NulsHash, List<String>> orphanBlockRelatedNodes = context.getOrphanBlockRelatedNodes();
-        //有父链的孤儿链,是从某孤儿链分叉得到的,不需要进行链首维护
-        //链首高度为1时,不需要进行链首维护
+        //Orphan chains with parent chains,It was obtained from a fork in an orphan chain,No need for chain head maintenance
+        //The height of the chain head is1Time,No need for chain head maintenance
         if (orphanChain.getParent() != null || orphanChain.getStartHeight() <= 1) {
             return;
         }
         AtomicInteger age = orphanChain.getAge();
-        //孤儿链年龄超过限制,不需要进行链首维护
+        //Orphan chain age exceeds limit,No need for chain head maintenance
         if (age.get() > orphanChainMaxAge) {
             return;
         }
@@ -146,28 +146,28 @@ public class OrphanChainsMaintainer extends BaseMonitor {
                 nodes.addAll(list);
             }
         }
-        //过滤可用的孤儿块维护节点
+        //Filter available orphan block maintenance nodes
         Set<String> set = availableNodes.stream().map(Node::getId).collect(Collectors.toSet());
         nodes.retainAll(set);
         Block block;
-        //向其他节点请求孤儿链起始区块的上一个区块
+        //Requesting the previous block of the orphan chain starting block from other nodes
         long l = System.nanoTime();
         for (String availableNode : nodes) {
             block = BlockUtil.downloadBlockByHash(chainId, previousHash, availableNode, orphanChain.getStartHeight() - 1);
             if (block != null) {
-                //从节点下载区块成功
+                //Successfully downloaded block from node
                 orphanChain.addFirst(block);
                 chainStorageService.save(chainId, block);
                 return;
             } else {
-                //下载不到或者超时，把这个节点剔除
+                //Unable to download or timed out, remove this node
                 for (NulsHash nulsHash : orphanChain.getHashList()) {
                     List<String> list = orphanBlockRelatedNodes.get(nulsHash);
                     list.remove(availableNode);
                     context.getLogger().warn("get block timeout, kick out this node-" + availableNode);
                 }
             }
-            //请求区块失败,孤儿链年龄加一
+            //Request block failed,Orphan Chain Age Plus One
             age.incrementAndGet();
             if (age.get() > orphanChainMaxAge) {
                 return;

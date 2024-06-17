@@ -31,7 +31,7 @@ import io.nuls.core.core.annotation.Component;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 /**
- * 线程任务管理
+ * Thread Task Management
  * threads   manager
  *
  * @author lan

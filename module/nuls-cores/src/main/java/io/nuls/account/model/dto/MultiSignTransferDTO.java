@@ -33,17 +33,17 @@ import java.util.List;
  */
 public class MultiSignTransferDTO {
     /**
-     * 链ID
+     * chainID
      */
     private Integer chainId;
 
     /**
-     * 交易输入
+     * Transaction Input
      */
     private List<BaseCoinDTO> inputs;
 
     /**
-     * 交易输出
+     * Transaction output
      */
     private List<MultiSignCoinToDTO> outputs;
 
@@ -52,12 +52,12 @@ public class MultiSignTransferDTO {
     private String signPassword;
 
     /**
-     * 备注
+     * Remarks
      */
     private String remark;
 
     /**
-     * 将多签交易客户端参数转换成交易统一处理对象
+     * Convert multi signature transaction client parameters into transaction unified processing objects
      * @return
      */
     public List<CoinDTO> inputsConvert(){
@@ -68,7 +68,7 @@ public class MultiSignTransferDTO {
         return list;
     }
     /**
-     * 将多签交易客户端参数转换成交易统一处理对象
+     * Convert multi signature transaction client parameters into transaction unified processing objects
      * @return
      */
     public List<CoinDTO> outputsConvert(){

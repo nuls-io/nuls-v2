@@ -33,7 +33,7 @@ import java.util.Map;
  */
 public interface AddressPrefixInf {
     /**
-     * 同步地址前缀信息
+     * Synchronize address prefix information
      */
     Map<Integer, String> syncAddressPrefix();
 }

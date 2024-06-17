@@ -5,7 +5,7 @@ import io.nuls.base.api.provider.BaseReq;
 /**
  * @Author: zhoulijun
  * @Time: 2019-05-06 16:50
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class RegisterChainReq extends BaseReq {
 
@@ -20,7 +20,7 @@ public class RegisterChainReq extends BaseReq {
      * txConfirmedBlockNum : 30
      * address : NsdxSexqXF4eVXkcGLPpZCPKo92A8xpp
      * symbol : NULS
-     * assetName : 纳斯
+     * assetName : Nass
      * initNumber : 1000000000
      * decimalPlaces : 8
      * password : xxxxxxxxxxxxx
@@ -33,15 +33,15 @@ public class RegisterChainReq extends BaseReq {
     private Long magicNumber;
 
     /**
-     * 初始化验证人信息
+     * Initialize Verifier Information
      */
     private String verifierList = "";
     /**
-     * 按100来计算拜占庭比例
+     * according to100To calculate the Byzantine proportion
      */
     private int signatureByzantineRatio = 0;
     /**
-     * 最大签名数量
+     * Maximum number of signatures
      */
     private int maxSignatureCount = 0;
 

@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 /**
- * 查询跨链模块数据
+ * Query cross chain module data
  *
  * @author: PierreLuo
  * @date: 2022/3/10

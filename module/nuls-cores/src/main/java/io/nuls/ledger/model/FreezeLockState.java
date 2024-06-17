@@ -34,29 +34,29 @@ import java.math.BigInteger;
  * Created by lanjinsheng on 2019/04/03
  * @author lanjinsheng
  */
-@ApiModel(name = "锁定资金")
+@ApiModel(name = "Lock in funds")
 public class FreezeLockState {
     /**
-     * 交易的hash值
+     * Transactionalhashvalue
      */
-    @ApiModelProperty(description = "交易hash")
+    @ApiModelProperty(description = "transactionhash")
     private String txHash;
     /**
-     * 锁定金额
+     * Lock in amount
      */
-    @ApiModelProperty(description = "锁定金额")
+    @ApiModelProperty(description = "Lock in amount")
     private BigInteger amount;
 
     /**
-     * 锁定时间或高度，-1为永久锁定
+     * Lock time or height,-1To permanently lock
      */
-    @ApiModelProperty(description = "锁定时间或高度，-1为永久锁定")
+    @ApiModelProperty(description = "Lock time or height,-1To permanently lock")
     private long lockedValue;
 
     /**
-     * 交易产生时间
+     * Transaction generation time
      */
-    @ApiModelProperty(description = "交易产生时间,秒")
+    @ApiModelProperty(description = "Transaction generation time,second")
     private long time;
 
     public String getTxHash() {

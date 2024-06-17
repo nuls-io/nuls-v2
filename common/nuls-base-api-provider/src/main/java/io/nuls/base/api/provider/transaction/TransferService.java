@@ -7,18 +7,18 @@ import io.nuls.base.data.Transaction;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-08 16:18
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public interface TransferService {
 
     //todo
     /**
-     * 测试批量发交易 要删
+     * Test batch trading To delete
      */
     Result transferTest(int method, String addr1, String addr2,String amount);
 
     /**
-     *  发起交易
+     *  Initiate transaction
      *  transfer
      * @param req
      * @return
@@ -26,14 +26,14 @@ public interface TransferService {
     Result<String> transfer(TransferReq req);
 
     /**
-     * 创建多签交易
+     * Create multi signature transactions
      * @param req
      * @return
      */
     Result<MultiSignTransferRes> multiSignTransfer(CreateMultiSignTransferReq req);
 
     /**
-     * 签名多签交易
+     * Multiple signature transactions
      * @param req
      * @return
      */
@@ -41,7 +41,7 @@ public interface TransferService {
 
 
     /**
-     * 通过别名转账
+     * Transfer through alias
      * transfer by account alias
      * @param req
      * @return
@@ -49,7 +49,7 @@ public interface TransferService {
     Result<String> transferByAlias(TransferReq req);
 
     /**
-     * 通过hash获取交易信息 包含未确认的交易
+     * adopthashObtain transaction information Including unconfirmed transactions
      * get transaction by hash
      * contains unconfirmed transaction
      * @param req
@@ -58,7 +58,7 @@ public interface TransferService {
     Result<Transaction> getTxByHash(GetTxByHashReq req);
 
     /**
-     * 通过hash获取已确认交易信息
+     * adopthashObtain confirmed transaction information
      * get confirmed transaction by hash
      * @param req
      * @return
@@ -66,7 +66,7 @@ public interface TransferService {
     Result<Transaction> getConfirmedTxByHash(GetConfirmedTxByHashReq req);
 
     /**
-     * 通过hash获取已确认的交易的简要数据
+     * adopthashObtain brief data on confirmed transactions
      * @param req
      * @return
      */

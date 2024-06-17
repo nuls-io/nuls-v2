@@ -32,13 +32,13 @@ import io.nuls.core.rpc.util.NulsDateUtils;
 import static io.nuls.block.constant.Constant.MODULE_WAITING;
 
 /**
- * 区块高度监控器
- * 每隔固定时间间隔启动
- * 如果发现区块高度没更新,通知网络模块重置可用节点,并重启区块同步线程
+ * Block height monitor
+ * Start every fixed time interval
+ * If it is found that the block height has not been updated,Notify the network module to reset available nodes,And restart the block synchronization thread
  *
  * @author captain
  * @version 1.0
- * @date 18-11-14 下午3:53
+ * @date 18-11-14 afternoon3:53
  */
 public class NetworkResetMonitor extends BaseMonitor {
 
@@ -53,13 +53,13 @@ public class NetworkResetMonitor extends BaseMonitor {
         ConfigBean parameters = context.getParameters();
         long reset = parameters.getResetTime();
         long time = context.getLatestBlock().getHeader().getTime() * 1000;
-        //如果(当前时间戳-最新区块时间戳)>重置网络阈值,通知网络模块重置可用节点
+        //If(Current timestamp-Latest block timestamp)>Reset network threshold,Notify the network module to reset available nodes
         long currentTime = NulsDateUtils.getCurrentTimeMillis();
         commonLog.debug("chainId-" + chainId + ",currentTime-" + currentTime + ",blockTime-" + time + ",diffrence-" + (currentTime - time));
         if (currentTime - time > reset) {
             commonLog.info("chainId-" + chainId + ",NetworkReset!");
             NetworkCall.resetNetwork(chainId);
-            //重新开启区块同步线程
+            //Restart the block synchronization thread
             ConsensusCall.notice(chainId, MODULE_WAITING);
             TransactionCall.notice(chainId, MODULE_WAITING);
             BlockSynchronizer.syn(chainId);

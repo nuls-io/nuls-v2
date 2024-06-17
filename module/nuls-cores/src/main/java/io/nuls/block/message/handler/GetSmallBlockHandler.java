@@ -36,11 +36,11 @@ import static io.nuls.block.constant.CommandConstant.GET_SMALL_BLOCK_MESSAGE;
 import static io.nuls.block.constant.CommandConstant.SMALL_BLOCK_MESSAGE;
 
 /**
- * 处理收到的{@link HashMessage},用于区块的广播与转发
+ * Process received{@link HashMessage},Broadcasting and forwarding for blocks
  *
  * @author captain
  * @version 1.0
- * @date 18-11-14 下午4:23
+ * @date 18-11-14 afternoon4:23
  */
 @Component("GetSmallBlockHandlerV1")
 public class GetSmallBlockHandler implements MessageProcessor {

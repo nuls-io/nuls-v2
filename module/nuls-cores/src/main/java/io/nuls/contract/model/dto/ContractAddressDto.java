@@ -39,22 +39,22 @@ import io.nuls.core.rpc.model.ApiModelProperty;
 @ApiModel
 public class ContractAddressDto {
 
-    @ApiModelProperty(description = "合约地址")
+    @ApiModelProperty(description = "Contract address")
     private String contractAddress;
-    @ApiModelProperty(description = "合约创建时间")
+    @ApiModelProperty(description = "Contract creation time")
     private long createTime;
-    @ApiModelProperty(description = "合约创建时区块高度")
+    @ApiModelProperty(description = "Block height during contract creation")
     private long height;
-    @ApiModelProperty(description = "合约创建确认次数")
+    @ApiModelProperty(description = "Contract creation confirmation times")
     private long confirmCount;
-    @ApiModelProperty(description = "合约别名")
+    @ApiModelProperty(description = "Contract alias")
     private String alias;
     /**
      *  enum - ContractStatus
      */
-    @ApiModelProperty(description = "合约状态（0 - 不存在或者创建中, 1 - 正常, 2 - 已删除, 3 - 创建失败, 4 - 锁定中）")
+    @ApiModelProperty(description = "Contract status（0 - Does not exist or is being created, 1 - normal, 2 - Removed, 3 - Creation failed, 4 - Locked）")
     private int status;
-    @ApiModelProperty(description = "合约创建失败的错误信息")
+    @ApiModelProperty(description = "Error message for contract creation failure")
     private String msg;
 
     public ContractAddressDto() {

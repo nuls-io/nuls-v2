@@ -31,7 +31,7 @@ import java.util.Map;
  * @date: 2019-04-03
  */
 public enum LedgerUnConfirmedTxStatus {
-    // 1 校验通过，2 孤儿交易 3 双花  4 其他异常  5 交易已存在
+    // 1 Verification passed,2 Orphan Trading 3 honeysuckle  4 Other abnormalities  5 Transaction already exists
     SUCCESS(1),
     ORPHAN(2),
     DOUBLE_SPEND(3),

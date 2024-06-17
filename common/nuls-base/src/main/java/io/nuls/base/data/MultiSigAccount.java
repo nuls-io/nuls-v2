@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 多签地址账户
+ * Multiple address accounts
  *
  * @author: qinyifeng
  * @date: 2018/12/12

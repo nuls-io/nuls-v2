@@ -37,18 +37,18 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 
 /**
- * AES加密 对称加密
+ * AESencryption Symmetric encryption
  *
  * @author ln
  */
 public class AESEncrypt {
 
     /**
-     * 数据通过password加密
+     * Data passed throughpasswordencryption
      *
-     * @param plainBytes 需要加密的数据
-     * @param password   秘钥
-     * @return 加密后的数据
+     * @param plainBytes Data that requires encryption
+     * @param password   Secret key
+     * @return Encrypted data
      */
     public static byte[] encrypt(byte[] plainBytes, String password) {
         EncryptedData ed = encrypt(plainBytes, new KeyParameter(Sha256Hash.hash(password.getBytes())));
@@ -57,23 +57,23 @@ public class AESEncrypt {
     }
 
     /**
-     * 数据通过KeyParameter加密
+     * Data passed throughKeyParameterencryption
      *
-     * @param plainBytes 需要加密的数据
-     * @param aesKey     秘钥
-     * @return 加密后的数据
+     * @param plainBytes Data that requires encryption
+     * @param aesKey     Secret key
+     * @return Encrypted data
      */
     public static EncryptedData encrypt(byte[] plainBytes, KeyParameter aesKey) {
         return encrypt(plainBytes, null, aesKey);
     }
 
     /**
-     * 数据通过KeyParameter和初始化向量加密
+     * Data passed throughKeyParameterAnd initialize vector encryption
      *
-     * @param plainBytes 需要加密的数据
-     * @param iv         初始化向量
-     * @param aesKey     秘钥
-     * @return 加密后的数据
+     * @param plainBytes Data that requires encryption
+     * @param iv         Initialize vector
+     * @param aesKey     Secret key
+     * @return Encrypted data
      */
     public static EncryptedData encrypt(byte[] plainBytes, byte[] iv, KeyParameter aesKey) throws RuntimeException {
         HexUtil.checkNotNull(plainBytes);
@@ -98,11 +98,11 @@ public class AESEncrypt {
     }
 
     /**
-     * 数据通过password解密
+     * Data passed throughpasswordDecryption
      *
-     * @param dataToDecrypt 需要解密的数据
-     * @param password      秘钥
-     * @return 解密后的数据
+     * @param dataToDecrypt Data that needs to be decrypted
+     * @param password      Secret key
+     * @return Decrypted data
      */
     public static byte[] decrypt(byte[] dataToDecrypt, String password) throws CryptoException {
         byte[] defaultiv = new byte[16];
@@ -112,12 +112,12 @@ public class AESEncrypt {
     }
 
     /**
-     * 数据通过password和指定编码规则解密
+     * Data passed throughpasswordDecrypt with specified encoding rules
      *
-     * @param dataToDecrypt 需要解密的数据
-     * @param password      秘钥
-     * @param charset       编码规则
-     * @return 解密后的数据
+     * @param dataToDecrypt Data that needs to be decrypted
+     * @param password      Secret key
+     * @param charset       Encoding rules
+     * @return Decrypted data
      */
     public static byte[] decrypt(byte[] dataToDecrypt, String password, String charset) throws CryptoException, UnsupportedEncodingException {
         byte[] defaultiv = new byte[16];
@@ -126,11 +126,11 @@ public class AESEncrypt {
     }
 
     /**
-     * 数据通过KeyParameter解密
+     * Data passed throughKeyParameterDecryption
      *
-     * @param dataToDecrypt 需要解密的数据
-     * @param aesKey        秘钥
-     * @return 解密后的数据
+     * @param dataToDecrypt Data that needs to be decrypted
+     * @param aesKey        Secret key
+     * @return Decrypted data
      */
     public static byte[] decrypt(EncryptedData dataToDecrypt, KeyParameter aesKey) throws CryptoException {
         HexUtil.checkNotNull(dataToDecrypt);

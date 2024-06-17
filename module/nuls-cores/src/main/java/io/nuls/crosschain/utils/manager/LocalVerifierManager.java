@@ -27,7 +27,7 @@ public class LocalVerifierManager {
     private static CtxStatusService ctxStatusService;
 
     /**
-     * 加载本地验证人列表
+     * Load local validator list
      * Load local verifier list
      * */
     public static void loadLocalVerifier(Chain chain){
@@ -40,7 +40,7 @@ public class LocalVerifierManager {
     }
 
     /**
-     * 初始化本地验证人
+     * Initialize local validator
      * Initialize local verifier list
      * */
     public static boolean initLocalVerifier(Chain chain, List<String> verifierList){
@@ -59,7 +59,7 @@ public class LocalVerifierManager {
     }
 
     /**
-     * 验证人变更提交
+     * Verifier change submission
      * Change of verifier
      * */
     public static boolean localVerifierChangeCommit(Chain chain, Transaction ctx, List<String> reduceList, List<String> appendList, long height, NulsHash txHash, int syncStatus){
@@ -81,7 +81,7 @@ public class LocalVerifierManager {
                 chain.getLogger().error("Failed to update local initialization verifier list");
                 return false;
             }
-            //跨链交易状态不用回滚
+            //Cross chain transaction status does not require rollback
             CtxStatusPO ctxStatusPO = new CtxStatusPO(ctx, TxStatusEnum.CONFIRMED.getStatus());
             saveResult = ctxStatusService.save(txHash, ctxStatusPO, chain.getChainId());
             if(!saveResult){
@@ -110,7 +110,7 @@ public class LocalVerifierManager {
     }
 
     /**
-     * 验证人变更提交回滚
+     * Verifier change submission rollback
      * Change of verifier
      * */
     public static boolean localVerifierChangeRollback(Chain chain, List<String> reduceList, List<String> appendList,long height, NulsHash txHash){

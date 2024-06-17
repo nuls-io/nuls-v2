@@ -31,7 +31,7 @@ import io.nuls.network.model.message.body.PeerInfoMessageBody;
 import io.nuls.core.exception.NulsException;
 
 /**
- * 请求 时间协议消息
+ * request Time Protocol Message
  * get time message
  *
  * @author lan

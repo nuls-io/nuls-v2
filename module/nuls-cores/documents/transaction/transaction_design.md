@@ -1,297 +1,297 @@
-# 交易管理模块设计文档
+# Transaction Management Module Design Document
 
 [TOC]
 
-##  总体概览
+##  Overall Overview
 
-### 模块概述
+### Module Overview
 
-#### 为什么有交易模块
+#### Why is there a trading module
 
-​	在NULS2.0的生态体系中，交易会在链中或者链与链之间流转，各条链的节点不仅要处理链内的交易，可能还会处理跨链的交易，于是每个节点需要处理的交易会越来越多，并且更复杂，因此我们需要一个但单独的模块来统一处理各种交易。而从NULS2.0的架构设计来看，我们需要一个独立的模块来处理交易的收集、验证、存储以及转发等功能，对于所有交易来说，这些功能具有共用性、统一性，因此我们把交易管理作为一个独立的模块来运行。
+​	stayNULS2.0In the ecosystem, transactions will flow within or between chains, and nodes in each chain not only need to handle transactions within the chain, but may also handle transactions across chains. Therefore, each node needs to handle more and more complex transactions, so we need a separate module to handle various transactions uniformly. And fromNULS2.0From the perspective of architecture design, we need an independent module to handle transaction collection、validate、Storage and forwarding functions are shared for all transactions、Uniformity, therefore we operate transaction management as an independent module.
 
-#### 交易模块要做什么
+#### What should the transaction module do
 
-##### 对本地交易进行处理
+##### Process local transactions
 
-- 收集交易
-- 本地验证
-- 提取可打包的交易
-- 提交、回滚交易
-- 保存未确认的、可打包的以及已确认的交易
-- 提供交易的数据
+- Collect transactions
+- Local verification
+- Extract packable transactions
+- Submit、Rollback transaction
+- Save unconfirmed、Packable and confirmed transactions
+- Provide transaction data
 
 
 
-#### 交易模块在系统中的定位
+#### Positioning of transaction modules in the system
 
-在整个系统中，交易模块管理着所有交易的收集，验证，为区块链中的各个区块提供安全的交易数据，为已确认的区块提供交易的存储和查询。
+In the entire system, the transaction module manages the collection and verification of all transactions, providing secure transaction data for each block in the blockchain, and storing and querying transactions for confirmed blocks.
 
-正常运行时需要依赖
+Dependent on during normal operation
 
-- 核心模块
-- 网络模块
-- 账本模块
-- 区块模块
-- 链管理模块
+- Core modules
+- Network module
+- Ledger module
+- Block module
+- Chain management module
 
 ![](./img/tx-manager-context.png)
 
-### 架构图
+### Architecture diagram
 
 ![](https://raw.githubusercontent.com/nuls-io/nuls-v2/develop/module/nuls-transaction/documents/img/architecture.png)
 
-整个模块大致分为3个部分: 接口、实现层、本地存储
+The entire module is roughly divided into3Parts: interface、Implementation layer、Local storage
 
-实现层中含有4个部分
+The implementation layer contains4Parts
 
-- 接口的功能实现逻辑
-- 管理器，交易管理器，链的管理器
-- 交易管理器，缓存各个交易的注册信息，包含交易的验证器，业务提交与回滚的接口名。
-- 各种队列，用于交易接收、异步验证处理以及推送共识等操作
-- 缓存，链数据等基础数据
+- The implementation logic of interface functions
+- Manager, Transaction Manager, Chain Manager
+- Transaction manager, caching registration information for each transaction, including transaction validators, interface names for business submission and rollback.
+- Various queues for transaction reception、Asynchronous verification processing and consensus push operations
+- Cache, chain data, and other basic data
 
-## 功能设计
+## functional design
 
-### 功能架构图
+### Functional architecture diagram
 
 ![](./img/functional-architecture.png)
 
-### 核心流程 
+### Core processes 
 
 
 
-#### 初始化链
+#### Initialize Chain
 
-模块启动时需要读取已存在的所有链的配置信息来对各条链进行初始化，第一次将启动配置的默认链。
+When the module starts, it needs to read the configuration information of all existing chains to initialize each chain, and the default chain for configuration will be started the first time.
 
-- 初始化链的基本信息
+- Basic information of initialization chain
 
-  ​	加载链的配置信息，初始化运行链时的各种标识、状态等。
+  ​	Load the configuration information of the chain, initialize various identifiers when running the chain、Status, etc.
 
-- 初始化链RocksDB表
+- Initialize ChainRocksDBsurface
 
-  ​	创建链运行时的各项数据存储的DB表。
+  ​	Creating various data stores for chain runtimeDBTable.
 
-- 初始化链的日志
+- Log for initializing the chain
 
-  ​	创建链的各个打印日志对象。
+  ​	Create various print log objects for the chain.
 
-- 初始化链的缓存
+- Initialize the cache of the chain
 
-  ​	创建链运行时的缓存和队列。
+  ​	Create a cache and queue for chain runtime.
 
-- 初始化链交易模块的交易，如跨链交易
+- Initialize transactions in the chain trading module, such as cross chain transactions
 
-  ​	注册交易模块中的跨链交易，将维护一个以交易类型为key，交易注册对象为value的Map，交易注册对象中含有交易验证器、交易业务提交接口、交易业务回滚接口的API接口名称，以及交易自身的一些信息。
+  ​	Cross chain transactions in the registration transaction module will maintain a transaction type ofkeyThe registered transaction object isvalueofMapThe registered transaction object contains a transaction validator、Transaction Business Submission Interface、Transaction business rollback interfaceAPIInterface name, as well as some information about the transaction itself.
 
-- 初始化链任务调度器
+- Initialize chain task scheduler
 
-  ​	创建链运行时的各种定时任务
-
-  
-
-#### 收集处理交易流程
-
-![新交易处理流程](./img/new-tx.png)
-
-- 收集本节点各模块新创建的交易
-
-  ​	NULS2.0的节点是模块化运行的，所以节点是由多个核心模块组成的一个整体，而交易模块作为节点的交易处理中心，却并非是节点所有交易的组装者，节点的各种交易是由对应的各个功能模块所创建的。因此交易模块的首要工作就是要收集各个模块所组装的交易。
-
-  ​	功能模块根据用户提供的数据进行交易组装，组装完成后首先要执行交易验证器对交易进行基础数据和业务数据的验证，然后通过账本模块进行账本的验证，通过验证的交易，直接发送给交易模块进行以下几个操作，然后等待进入下一步流程。
-
-  - DB未确认存储
-  - 共识节点会将交易放入待打包队列
-  - 广播给其他节点
+  ​	Various scheduled tasks for creating chain runtime
 
   
 
-- 收集其他节点广播的交易
+#### Collect and process transaction processes
 
-  ​	其他节点广播的交易，将会通过网络消息的方式进行发送，首先发送的是交易的hash，交易管理模块收到后再发送索取完整交易的消息，之后才会接收到完整的交易。
+![New transaction processing flow](./img/new-tx.png)
 
-  ​	由于节点是由模块组成的一个整体，所以在节点内部，模块之间是可信的，而节点之间是不可信的，因此与接收模块的新交易不同，当交易模块收到其他节点的交易时，要对该交易进行严格的验证，然后等待进入下一步流程。
+- Collect newly created transactions from each module of this node
 
-  - 去重复(在未确认和已确认数据库中验证是否已存在)
-  - 调用交易对应的验证器进行验证
-  - 调用账本进行验证
-  - DB未确认存储
-  - 共识节点会将交易放入待打包队列
-  - 转发给其他节点
+  ​	NULS2.0The node operates in a modular manner, so it is composed of multiple core modules as a whole. As the transaction processing center of the node, the transaction module is not the assembler of all transactions of the node. Various transactions of the node are created by corresponding functional modules. Therefore, the primary task of the transaction module is to collect the transactions assembled by each module.
 
-  只有仅仅因为是孤儿交易而没有验证通过的交易会被暂时放入孤儿池等待处理，其他所有未验证通过的交易会被丢弃。
+  ​	The functional module assembles transactions based on the data provided by the user. After assembly, the transaction validator first verifies the basic and business data of the transaction, and then verifies the ledger through the ledger module. The verified transactions are directly sent to the transaction module for the following operations, and then wait to enter the next step of the process.
 
-> 孤儿交易：是指交易数据能通过验证，交易nonce值未被其他交易使用，但不能连上已存在的交易，会被判定为孤儿交易。
+  - DBUnconfirmed storage
+  - The consensus node will put the transaction into the queue to be packaged
+  - Broadcast to other nodes
 
+  
 
+- Collect transactions broadcasted by other nodes
 
-#### 节点打包新区块的交易
+  ​	Transactions broadcasted by other nodes will be sent through network messages, with the transaction being the first to be senthashThe transaction management module will send a message requesting a complete transaction after receiving it, and only then will it receive the complete transaction.
 
-​	只有共识节点才会有打包新区快交易的流程，交易模块开始打包新区块交易的指令是由共识模块发出的，共识提供组装交易的执行截止时间，当前区块可打包交易总容量大小等数据，交由交易模块进行打包。
+  ​	Due to the fact that a node is composed of modules as a whole, within the node, modules are trusted between each other, while nodes are untrusted between them. Therefore, unlike new transactions from receiving modules, when the transaction module receives transactions from other nodes, it must strictly verify the transaction and then wait to enter the next step of the process.
 
-​	交易模块打包区块交易时，首先从PackablePool待打包队列（先进先出）中取出交易，然后到账本模块进行交易的账本验证，账本验证时批量进行的，为了在大批量交易时减少模块间的RPC调用。为了网络的稳定性，一个块打包的交易数是有限制，在不包含系统交易的情况下，默认一个块最大为1万笔交易。
+  - To repeat(Verify existence in unconfirmed and confirmed databases)
+  - Call the validator corresponding to the transaction for verification
+  - Calling the ledger for verification
+  - DBUnconfirmed storage
+  - The consensus node will put the transaction into the queue to be packaged
+  - Forward to other nodes
 
-​	账本验证不通过的交易与已确认的交易将不会放入可打包交易集合中（如果是孤儿交易，将会重新放入待打包队列里，为了防止出现永久性的孤儿交易重复的被取出和放回对系统成影响，放回的次数会被限制）
+  Only transactions that fail verification solely because they are orphan transactions will be temporarily placed in the orphan pool for processing, and all other transactions that fail verification will be discarded.
 
-​	通过账本验证后，如果是智能合约交易还需要执行智能合约，然后再将交易按交易注册的模块进行分组，在达到预留的统一验证时间阈值后，停止从队列里面继续获取交易，并按分好的组，分别调用各个模块的统一验证器，对交易进行验证与冲突检测。
-
-​	如果在模块统一验证阶段，有验证不通过的交易，将会从取出的可打包交易集合中移除该交易，如果是孤儿交易，仍然重新放入待打包队列里，并且所有取出的可打包交易将重新执行打包的完整验证逻辑，直到全部的交易都通过各模块的统一验证。如果有执行过智能合约交易，这时将会去智能合约模块获取智能合约结果，并将新产生的交易加入可打包交易结合队尾，然后返回所有交易给共识模块进行打包。
-
-> - 在打包新区块交易的过程中，如果本地最新高度产生变化，即收到新区块并保存成功，则放弃本次打包，所有取出的交易放回待打包队列，然后重新开始执行新的区块交易打包。
-> - 在打包新区块交易时，如果执行时间超过截止时间，共识将组装没有交易的新区块。
-
-
-
-#### 验证区块中的交易
-
-​	验证区块的交易是区块模块处理新区块的流程之一，交易模块得到一个完整区块中的所有交易，首先依次取出交易，并对交易进行基础校验，然后调用账本进行验证；如果不是本链产生的跨链交易，还要核对跨链交易的跨链验证结果；如果是智能合约交易，需要执行一次智能合约，然后比较已有的结果和新产生的结果是否一致，最后进行分组，调用模块统一验证器进行验证；所有验证有一项不通过则整个区块交易都验证失败，直接返回不通过。
-
-​	如果收到的区块中含有跨链交易，验证时需要核对跨链验证的结果。
+> Orphan Trading：It refers to the ability of transaction data to be verified and tradednonceIf the value is not used by other transactions but cannot be linked to existing transactions, it will be considered an orphan transaction.
 
 
 
-#### 保存区块中的交易
+#### Transaction of node packaging for new blocks
 
-​	保存区块的交易是区块模块处理区块的流程之一，表名该区块的数据已经通过验证进入保存阶段，保存交易时，首先将所有交易保存到已确认DB数据库；然后分别调用所有交易的业务提交接口，对交易的业务数据执行处理；然后提交到账本模块，对账本和nonce值进行提交；最后从未确认DB中删除对应的交易。如果中途有操作失败，将对已操作成功的流程进行回滚。
+​	Only consensus nodes have the process of packaging new area fast transactions. The instruction for the transaction module to start packaging new area block transactions is issued by the consensus module. The consensus provides the execution deadline for the assembly transaction, the total transaction capacity of the current block that can be packaged, and other data, which are then packaged by the transaction module.
 
-> 回滚区块交易的流程就是倒序执行保存区块交易的流程
+​	When packaging block transactions in the transaction module, the first step is to start with thePackablePoolTo be packaged queue（First in, first out）Retrieve transactions from the database and then perform ledger verification on the ledger module. This verification is done in batches to reduce inter module interactions during large-scale transactionsRPCCall. For the stability of the network, there is a limit on the number of transactions packaged in a block. In the absence of system transactions, the default maximum for a block is110000 transactions.
+
+​	Transactions that fail ledger verification and confirmed transactions will not be included in the packable transaction set（If it is an orphan transaction, it will be placed back in the waiting queue for packaging. In order to prevent permanent orphan transactions from being repeatedly retrieved and put back, the number of times they can be put back will be limited to affect the system）
+
+​	After verifying the ledger, if it is a smart contract transaction, it is necessary to execute the smart contract, and then group the transactions according to the registered modules. After reaching the reserved unified verification time threshold, stop continuing to retrieve transactions from the queue, and call the unified validators of each module according to the divided groups to verify and conflict detect the transactions.
+
+​	If there is a transaction that fails verification during the module unified verification stage, it will be removed from the extracted packable transaction set. If it is an orphan transaction, it will still be placed back in the waiting queue for packaging, and all extracted packable transactions will be re executed with the complete verification logic until all transactions pass the unified verification of each module. If a smart contract transaction has been executed, the smart contract module will be used to obtain the smart contract result, and the newly generated transaction will be added to the packable transaction combination queue, and then all transactions will be returned to the consensus module for packaging.
+
+> - During the process of packaging new block transactions, if there is a change in the local latest height, that is, if the new block is received and saved successfully, the packaging will be abandoned. All retrieved transactions will be put back into the queue to be packaged, and then the new block transaction packaging will be restarted.
+> - When packaging new block transactions, if the execution time exceeds the deadline, consensus will assemble new blocks without transactions.
 
 
 
-## 通用交易协议
+#### Verify transactions in the block
 
-NULS采用通用的交易协议格式，主要由以下字段组成：
+​	Verifying the transactions of a block is one of the processes for the block module to process new blocks. The transaction module gets all the transactions in a complete block, first takes out the transactions in turn, performs basic verification on the transactions, and then calls the ledger for verification；If it is not a cross chain transaction generated by this chain, the cross chain verification results of the cross chain transaction should also be verified；If it is a smart contract transaction, it is necessary to execute the smart contract once, compare the existing results with the newly generated results, and finally group them, calling the module's unified validator for verification；If one of the verifications fails, the entire block transaction will fail verification, and it will be returned as failed.
+
+​	If the received block contains cross chain transactions, the results of cross chain verification need to be verified during verification.
+
+
+
+#### Save transactions in blocks
+
+​	Saving block transactions is one of the processes in which the block module processes the block. The data in the table name block has been validated and entered the save phase. When saving transactions, all transactions are first saved to the confirmed stageDBdatabase；Then call the business submission interfaces of all transactions separately and perform processing on the business data of the transactions；Then submit it to the ledger module, and compare the ledger andnonceValue submission；Finally, it was never confirmedDBDelete the corresponding transaction in. If there is an operation failure midway, the process that has been successfully operated will be rolled back.
+
+> The process of rolling back block transactions is to execute the process of saving block transactions in reverse order
+
+
+
+## Universal Transaction Protocol
+
+NULSAdopting a universal transaction protocol format, it mainly consists of the following fields：
 
 | Len  | Fields   | Data Type | Remark             |
 | ---- | -------- | --------- | ------------------ |
-| 2    | type     | uint16    | 交易类型           |
-| 4    | time     | uint32    | 时间，精确到秒     |
-| ？   | txData   | VarByte   | 业务数据           |
-| ？   | coinData | VarByte   | 资产数据           |
-| ？   | remark   | VarString | 备注               |
-| ？   | sigData  | VarByte   | 包含公钥和签名数据 |
+| 2    | type     | uint16    | Transaction type           |
+| 4    | time     | uint32    | Time, accurate to seconds     |
+| ？   | txData   | VarByte   | Business data           |
+| ？   | coinData | VarByte   | Asset data           |
+| ？   | remark   | VarString | Remarks               |
+| ？   | sigData  | VarByte   | Contains public key and signature data |
 
 
 
 **type**
 
-用于区分不同的业务交易，每个模块可以注册多个交易类型，每个交易类型可以有不同的验证逻辑、处理逻辑。取值范围是1~65535。
-不同的交易类型不应该设置重复的type，系统不允许重复的type进行注册。
-系统对扩展的支持：大于100的type
+Used to distinguish different business transactions, each module can register multiple transaction types, and each transaction type can have different verification logic、Processing logic. The range of values is1~65535.
+Different transaction types should not have duplicate settingstypeThe system does not allow duplicatetypeRegister.
+System support for extensions：greater than100oftype
 
 **time** 
 
-交易发生的时间，精确到秒，不做强制限制，取值范围可以是任何uint32内的数字。
+The time of transaction occurrence, accurate to seconds, without mandatory restrictions, can be any value rangeuint32The number inside.
 
 **txData**  
 
-用于扩展业务数据，账本不验证txData内容，这里可以存放任何数据。目前NULS内置的交易类型中的业务数据都是存储在txData字段中。业务模块在注册了交易类型后，会提供三个接口来验证和处理txData中的数据（verifyTx，commitTx，rollbackTx）。
+Used for expanding business data, ledger not validatedtxDataContent, any data can be stored here. at presentNULSThe business data in the built-in transaction types is stored intxDataIn the field. After registering a transaction type, the business module will provide three interfaces for verification and processingtxDataData in（verifyTx,commitTx,rollbackTx）.
 
 **CoinData**  
 
-交易的资产数据，NULS目前定义了一套通用的CoinData格式，具体如下
+Asset data for transactions,NULSCurrently, a universal set ofCoinDataThe format is as follows
 
 ```
-froms://List<CoinFrom>格式，
-tos://List<CoinTo>格式
+froms://List<CoinFrom>Format,
+tos://List<CoinTo>format
 ```
 
-注：支持多个账户同一笔交易中转出不同资产到不同的账户中
+notes：Support transferring different assets from multiple accounts to different accounts in the same transaction
 
-CoinFrom结构[70]
-
-```
-address:  //byte[24] 账户地址  
-assetsChainId://uint16 资产发行链的
-assetsId: //uint16 资产
-amount：  //uint128，转出数量
-nonce  ： //byte[8] 交易顺序号，前一笔交易的hash的后8个字节
-locked ： //byte 是否是锁定状态(locktime:-1),1代表锁定，0代表非锁定
-```
-
-CoinTo结构[68]
+CoinFromstructure[70]
 
 ```
-address:  //byte[24],目标地址
-assetsChainId://uint16 资产发行链的
-assetsId: //uint16 资产
-amount :  //uint128，转账金额
-lockTime：//uint32,解锁高度或解锁时间，-1为永久锁定
+address:  //byte[24] Account address  
+assetsChainId://uint16 Asset issuance chain
+assetsId: //uint16 asset
+amount：  //uint128Transfer out quantity
+nonce  ： //byte[8] Transaction sequence number, from the previous transactionhashAfter8Bytes
+locked ： //byte Is it in a locked state(locktime:-1),1Represents locking,0Representing non locked
 ```
 
-手续费
+CoinTostructure[68]
 
 ```
-froms-tos剩余的部分就是手续费（模型中支持多种资产缴纳手续费，约束条件由经济模型设计决定）
+address:  //byte[24],Target address
+assetsChainId://uint16 Asset issuance chain
+assetsId: //uint16 asset
+amount :  //uint128Transfer amount
+lockTime：//uint32,Unlocking height or unlocking time,-1To permanently lock
+```
+
+Handling fees
+
+```
+froms-tosThe remaining part is the handling fee（The model supports multiple asset payment fees, and the constraint conditions are determined by the economic model design）
 ```
 
 **remark**  
 
-备注，此内容的数据，会通过utf-8编码转换为字符串显示在浏览器和钱包中。也可以用remark字段进行交易的业务扩展。
+Note that the data for this content will be passed throughutf-8Convert the encoding to a string and display it in the browser and wallet. It can also be usedremarkBusiness extension for field based transactions.
 
 **sigData** 
 
-签名数据支持多个账户的签名，每个签名包括四个部分：公钥长度、公钥、签名数据长度、签名数据。
+Signature data supports signatures from multiple accounts, with each signature consisting of four parts：Public key length、Public key、Signature data length、Signature data.
 
-**交易的Hash计算** 
+**TransactionalHashcalculate** 
 
-将交易除sigData外的数据进行序列化，获得完整的字节数组。使用Sha-256对数据进行两次计算，得到32位的Hash值。
-
-
-
-## 模块服务
-
-参考[交易管理模块RPC-API接口文档](./transaction.md)
+Divide the transactionsigDataSerialize the external data to obtain a complete byte array. applySha-256Perform two calculations on the data to obtain32BitwiseHashValue.
 
 
 
-## 网络消息体协议 
+## Module Services
+
+reference[Transaction Management ModuleRPC-APIInterface documentation](./transaction.md)
+
+
+
+## Network Message Body Protocol 
 
 ### ForwardTxMessage
 
-- 消息说明：节点接收并验证网络其他节点发送的新交易之后转发交易hash给其他节点
+- Message Description：After receiving and verifying new transactions sent by other nodes in the network, the node forwards the transactionhashTo other nodes
 - cmd：newHash
 
 | Length | Fields | Type   | Remark           |
 | ------ | ------ | ------ | ---------------- |
 | 32     | hash   | byte[] | transaction hash |
 
-- 消息处理
-  - newHash处理该消息，发送索要该完整交易的消息
+- Message processing
+  - newHashProcess the message and send a message requesting the complete transaction
 
 
 
 ### BroadcastTxMessage
 
-- 消息说明：向链内其他节点广播完整交易
+- Message Description：Broadcast complete transactions to other nodes in the chain
 - cmd：receiveTx
 
 | Length | Fields               | Data Type | Remark         |
 | ------ | -------------------- | --------- | -------------- |
-| 2      | type                 | uint16    | 交易类型       |
-| 4      | time                 | uint32    | 交易时间       |
-| ？     | txData               | VarByte   | 交易数据       |
-| ？     | coinData             | VarByte   | 交易输入和输出 |
-| ？     | remark               | VarString | 备注           |
-| ？     | transactionSignature | VarByte   | 交易签名       |
+| 2      | type                 | uint16    | Transaction type       |
+| 4      | time                 | uint32    | Transaction time       |
+| ？     | txData               | VarByte   | transaction data       |
+| ？     | coinData             | VarByte   | Transaction inputs and outputs |
+| ？     | remark               | VarString | Remarks           |
+| ？     | transactionSignature | VarByte   | Transaction signature       |
 
-- 消息处理
-  - receiveTx进入新的交易流程
+- Message processing
+  - receiveTxEnter a new transaction process
 
 
 
 ### GetTxMessage
 
-- 消息说明：收到其他节点转发的交易hash，向发送者索要完整交易
+- Message Description：Received transactions forwarded by other nodeshashRequest the complete transaction from the sender
 - cmd：askTx
 
 | Length | Fields | Type   | Remark           |
 | ------ | ------ | ------ | ---------------- |
 | 32     | hash   | byte[] | transaction hash |
 
-- 消息处理
-  - askTx处理该消息，发送完整交易回去
+- Message processing
+  - askTxProcess the message and send the complete transaction back
 
 
 

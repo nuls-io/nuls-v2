@@ -35,7 +35,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * 消息工具类，用于构造常用的基本消息体
+ * Message tool class, used to construct commonly used basic message bodies
  * Message Tool Class for Constructing Commonly Used Basic Message Body
  *
  * @author tangyi
@@ -44,7 +44,7 @@ import java.util.Objects;
 public class MessageUtil {
 
     /**
-     * 默认Message对象
+     * defaultMessageobject
      * Default Message object
      *
      * @param messageType Message type
@@ -61,7 +61,7 @@ public class MessageUtil {
 
 
     /**
-     * 默认握手对象
+     * Default handshake object
      * Default NegotiateConnection object
      *
      * @return NegotiateConnection
@@ -76,7 +76,7 @@ public class MessageUtil {
     }
 
     /**
-     * 构造默认Request对象
+     * Construct defaultRequestobject
      * Constructing a default Request object
      *
      * @return Request
@@ -94,14 +94,14 @@ public class MessageUtil {
 
 
     /**
-     * 根据参数构造Request对象，然后发送Request
+     * Construct based on parametersRequestObject, then sendRequest
      * Construct the Request object according to the parameters, and then send the Request
      *
      * @param cmd                      Cmd of remote method
      * @param params                   Parameters of remote method
      * @param ack                      Need an Ack?
-     * @param subscriptionPeriod       远程方法调用频率（秒），Frequency of remote method (Second)
-     * @param subscriptionEventCounter 远程方法调用频率（改变次数），Frequency of remote method (Change count)
+     * @param subscriptionPeriod       Remote method call frequency（second）,Frequency of remote method (Second)
+     * @param subscriptionEventCounter Remote method call frequency（Change frequency）,Frequency of remote method (Change count)
      * @return Request
      */
     public static Request newRequest(String cmd, Map params, String ack, String subscriptionPeriod, String subscriptionEventCounter) {
@@ -115,7 +115,7 @@ public class MessageUtil {
 
 
     /**
-     * 构造一个Response对象
+     * Construct aResponseobject
      * Constructing a new Response object
      *
      * @param requestId Message ID of request
@@ -133,7 +133,7 @@ public class MessageUtil {
     }
 
     /**
-     * 构造一个执行成功的Response对象
+     * Construct a successful executionResponseobject
      * Constructing a new Response object
      *
      * @param requestId Message ID of request
@@ -144,7 +144,7 @@ public class MessageUtil {
     }
 
     /**
-     * 构造一个执行成功的Response对象
+     * Construct a successful executionResponseobject
      * Constructing a new Response object
      *
      * @param requestId Message ID of request
@@ -155,7 +155,7 @@ public class MessageUtil {
     }
 
     /**
-     * 构造一个执行失败的Response对象
+     * Construct a failed executionResponseobject
      * Constructing a new Response object
      *
      * @param requestId Message ID of request
@@ -166,7 +166,7 @@ public class MessageUtil {
     }
 
     /**
-     * 构造一个执行失败的Response对象
+     * Construct a failed executionResponseobject
      * Constructing a new Response object
      *
      * @param requestId Message ID of request

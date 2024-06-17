@@ -13,29 +13,29 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * 版本统计信息,实质上也是由生效高度串联的一条链
+ * Version Statistics,Essentially, it is also a chain that is highly interconnected by its effectiveness
  *
  * @author captain
  * @version 1.0
- * @date 18-12-10 下午3:50
+ * @date 18-12-10 afternoon3:50
  */
 public class StatisticsInfo extends BaseNulsData {
 
     /**
-     * 本次统计信息生效高度
+     * The effective height of this statistical information
      */
     private long height;
     /**
-     * 统计信息连续确认数
+     * Number of consecutive confirmations of statistical information
      */
     private short count;
     /**
-     * 生效协议版本
+     * Effective Agreement Version
      */
     private ProtocolVersion protocolVersion;
 
     /**
-     * 统计区间内所有协议的占比
+     * The proportion of all protocols within the statistical interval
      */
     private Map<ProtocolVersion,Integer> protocolVersionMap;
 

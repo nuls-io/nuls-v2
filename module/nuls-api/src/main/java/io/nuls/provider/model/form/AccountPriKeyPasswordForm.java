@@ -32,16 +32,16 @@ import io.nuls.core.rpc.model.ApiModelProperty;
 /**
  * @author: Charlie
  */
-@ApiModel(description = "私钥导入密码")
+@ApiModel(description = "Private key import password")
 public class AccountPriKeyPasswordForm {
 
-    @ApiModelProperty(description = "私钥", required = true)
+    @ApiModelProperty(description = "Private key", required = true)
     private String priKey;
 
-    @ApiModelProperty(description = "密码")
+    @ApiModelProperty(description = "password")
     private String password;
 
-    @ApiModelProperty(description = "是否覆盖账户: false:不覆盖导入, true:覆盖导入")
+    @ApiModelProperty(description = "Whether to overwrite the account: false:Do not overwrite import, true:Overwrite import")
     private Boolean overwrite = false;
 
     public String getPriKey() {

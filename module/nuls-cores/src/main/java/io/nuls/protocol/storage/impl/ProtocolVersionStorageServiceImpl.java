@@ -35,7 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 统计信息持久化类实现
+ * Implementation of statistical information persistence class
  *
  * @author captain
  * @version 1.0

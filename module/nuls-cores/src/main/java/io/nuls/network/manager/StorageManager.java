@@ -41,7 +41,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 存储管理
+ * Storage Management
  * storage  manager
  *
  * @author lan

@@ -36,24 +36,24 @@ import java.util.Map;
  */
 public class AccountKeyStoreDTO {
     /**
-     * 账户地址
+     * Account address
      */
     private String address;
     /**
-     * 加密后的私钥
+     * Encrypted private key
      */
     private String encryptedPrivateKey;
     /**
-     * 公钥
+     * Public key
      */
     private String pubKey;
     /**
-     * 私钥
+     * Private key
      */
     private String prikey;
 
     /**
-     * 兼容1.0KeyStore，2.0KeyStore中没有alias
+     * compatible1.0KeyStore,2.0KeyStoreNone in the middlealias
      */
     @JsonIgnore
     private String alias;

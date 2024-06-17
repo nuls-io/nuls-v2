@@ -9,7 +9,7 @@ import io.nuls.crosschain.base.message.CirculationMessage;
 import io.nuls.crosschain.servive.MainNetService;
 
 /**
- * CirculationMessage处理类
+ * CirculationMessageProcessing class
  * CirculationMessage Processing Class
  *
  * @author tag

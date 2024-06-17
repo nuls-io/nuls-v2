@@ -94,11 +94,11 @@ public class ContractTxCreateUnconfirmedManager {
             if (unconfirmedOfAccountMap == null) {
                 return;
             }
-            // 合约创建成功，删除未确认交易
+            // Contract created successfully, delete unconfirmed transactions
             if (contractResult.isSuccess()) {
                 unconfirmedOfAccountMap.remove(contractAddress);
             } else {
-                // 合约执行失败，保留未确认交易，并标注错误信息
+                // Contract execution failed, keep unconfirmed transactions and indicate error information
                 Map<String, String> dataMap = unconfirmedOfAccountMap.get(contractAddress);
                 if (dataMap != null) {
                     dataMap.put("success", "false");

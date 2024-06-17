@@ -2,7 +2,7 @@ package io.nuls.consensus.economic.nuls.model.bo;
 
 import java.math.BigDecimal;
 /**
- * 当前通胀阶段详情
+ * Details of current inflation stage
  * Details of the current inflation stage
  *
  * @author tag

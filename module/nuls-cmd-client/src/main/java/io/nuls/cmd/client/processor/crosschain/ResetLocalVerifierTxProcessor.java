@@ -16,7 +16,7 @@ import java.math.BigInteger;
 /**
  * @Author: zhoulijun
  * @Time: 2019-05-06 17:34
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Component
 public class ResetLocalVerifierTxProcessor extends CrossChainBaseProcessor {

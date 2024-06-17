@@ -1,6 +1,6 @@
 package io.nuls.consensus.model.dto.input;
 /**
- * 多签账户停止节点参数
+ * Stop node parameters for multi account signing
  * Multi-Sign Account Stop Node Parameters
  *
  * @author tag

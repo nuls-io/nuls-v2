@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 关于链的所有操作：增删改查
+ * All operations on the chain：Add, delete, modify, and check
  * All operations on the chain: Save, delete, update, query
  *
  * @author tangyi
@@ -16,7 +16,7 @@ import java.util.Map;
 public interface ChainStorage {
 
     /**
-     * 保存链到数据库
+     * Save Chain to Database
      * Save BlockChain to database
      *
      * @param key        Chain ID
@@ -26,7 +26,7 @@ public interface ChainStorage {
     void save(int key, BlockChain blockChain) throws Exception;
 
     /**
-     * 更新链信息
+     * Update chain information
      * Update BlockChain
      *
      * @param key        Chain ID
@@ -43,7 +43,7 @@ public interface ChainStorage {
     void batchUpdate(Map<byte[], byte[]> kvs) throws Exception;
 
     /**
-     * 从数据库彻底删除链
+     * Completely remove the chain from the database
      * Delete BlockChain in database
      *
      * @param key Chain ID
@@ -53,7 +53,7 @@ public interface ChainStorage {
 
 
     /**
-     * 根据序号获取链
+     * Retrieve chain based on serial number
      * Get the chain according to the ID
      *
      * @param key Chain ID

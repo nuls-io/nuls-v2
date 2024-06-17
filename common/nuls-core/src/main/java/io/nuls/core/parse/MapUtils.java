@@ -13,8 +13,8 @@ import java.util.*;
 public class MapUtils {
 
     /**
-     * 将对象装换为linkedmap
-     * map顺序按照 key值的acsii码进行排序
+     * Replace the object withlinkedmap
+     * mapIn order keyValue ofacsiiSort by code
      * @param bean
      * @return
      */
@@ -32,7 +32,7 @@ public class MapUtils {
     }
 
     /**
-     * 将对象装换为map
+     * Replace the object withmap
      *
      * @param bean
      * @return
@@ -49,7 +49,7 @@ public class MapUtils {
     }
 
     /**
-     * 将map装换为javabean对象
+     * takemapReplace withjavabeanobject
      *
      * @param map
      * @param bean
@@ -62,7 +62,7 @@ public class MapUtils {
     }
 
     /**
-     * 将List<T>转换为List<Map<String, Object>>
+     * takeList<T>Convert toList<Map<String, Object>>
      *
      * @param objList
      * @return
@@ -84,7 +84,7 @@ public class MapUtils {
     }
 
     /**
-     * 将List<Map<String,Object>>转换为List<T>
+     * takeList<Map<String,Object>>Convert toList<T>
      *
      * @param maps
      * @param clazz

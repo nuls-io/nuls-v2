@@ -19,7 +19,7 @@ import java.math.BigInteger;
 import java.util.*;
 
 /**
- * 关于链的所有操作：增删改查
+ * All operations on the chain：Add, delete, modify, and check
  * All operations on the chain: Save, delete, update, query
  *
  * @author tangyi
@@ -73,7 +73,7 @@ public class ChainServiceImpl implements ChainService {
     }
 
     /**
-     * 把Nuls2.0主网默认注册到Nuls2.0上（便于进行链资产的统一处理）
+     * holdNuls2.0The main network is registered by default toNuls2.0upper（Facilitate unified processing of chain assets）
      * Register the Nuls2.0 main network to Nuls2.0 by default (Nuls2.0 main network can be considered as the first friend chain of Nurs2.0 ecosystem)
      *
      * @throws Exception Any error will throw an exception
@@ -120,7 +120,7 @@ public class ChainServiceImpl implements ChainService {
     }
 
     /**
-     * 保存链信息
+     * Save Chain Information
      * Save chain
      *
      * @param blockChain The BlockChain saved
@@ -133,7 +133,7 @@ public class ChainServiceImpl implements ChainService {
     }
 
     /**
-     * 更新链信息
+     * Update chain information
      * Update chain
      *
      * @param blockChain The BlockChain updated
@@ -158,7 +158,7 @@ public class ChainServiceImpl implements ChainService {
     }
 
     /**
-     * 删除链信息
+     * Delete Chain Information
      * Delete chain
      *
      * @param blockChain The BlockChain deleted
@@ -170,7 +170,7 @@ public class ChainServiceImpl implements ChainService {
     }
 
     /**
-     * 根据序号获取链
+     * Retrieve chain based on serial number
      * Get the chain according to the ID
      *
      * @param chainId Chain ID
@@ -190,7 +190,7 @@ public class ChainServiceImpl implements ChainService {
 
 
     /**
-     * 注册链
+     * Registration Chain
      * Register a new chain
      *
      * @param blockChain The BlockChain saved
@@ -200,15 +200,15 @@ public class ChainServiceImpl implements ChainService {
     @Override
     public void registerBlockChain(BlockChain blockChain, Asset asset) throws Exception {
         /*
-        1. 插入资产表
-        2. 插入资产流通表
+        1. Insert Asset Table
+        2. Insert Asset Circulation Table
          */
         assetService.createAsset(asset);
 
 
         saveChain(blockChain);
         /*
-            通知网络模块创建链
+            Notify the network module to create a chain
         */
         rpcService.createCrossGroup(blockChain);
     }
@@ -220,7 +220,7 @@ public class ChainServiceImpl implements ChainService {
     @Override
     public void rpcBlockChainRollback(List<Transaction> txs, long time) throws Exception {
         /*
-            通知网络模块创建链
+            Notify the network module to create a chain
         */
         for (Transaction tx : txs) {
             switch (tx.getType()) {
@@ -263,7 +263,7 @@ public class ChainServiceImpl implements ChainService {
     @Override
     public void rpcBlockChainRollbackV4(List<Transaction> txs, long time) throws Exception {
         /*
-            通知网络模块创建链
+            Notify the network module to create a chain
         */
         for (Transaction tx : txs) {
             switch (tx.getType()) {
@@ -300,7 +300,7 @@ public class ChainServiceImpl implements ChainService {
         }
     }
     /**
-     * 销毁链
+     * Destruction chain
      * Destroy a exist BlockChain
      *
      * @param blockChain The BlockChain destroyed
@@ -309,16 +309,16 @@ public class ChainServiceImpl implements ChainService {
      */
     @Override
     public BlockChain destroyBlockChain(BlockChain blockChain) throws Exception {
-        //更新资产
+        //Update assets
         assetService.setStatus(CmRuntimeInfo.getAssetKey(blockChain.getChainId(), blockChain.getDelAssetId()), false);
-        //更新链
+        //Update Chain
         BlockChain dbChain = getChain(blockChain.getChainId());
         dbChain.setDelAddress(blockChain.getDelAddress());
         dbChain.setDelAssetId(blockChain.getDelAssetId());
         dbChain.setDelTxHash(blockChain.getDelTxHash());
         dbChain.setDelete(true);
         updateChain(dbChain);
-        //通知销毁链
+        //Notify to destroy the chain
         rpcService.destroyCrossGroup(dbChain);
         removeChainMapInfo(blockChain.getMagicNumber(), blockChain.getChainName());
         return dbChain;

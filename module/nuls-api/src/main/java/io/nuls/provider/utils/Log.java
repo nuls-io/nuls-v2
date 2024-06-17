@@ -42,15 +42,15 @@ public class Log {
     public static Map<Integer, NulsLogger> BASIC_LOGGER_MAP = new HashMap<>(4);
 
     /**
-     * 不允许实例化该类
+     * Instantiation of this class is not allowed
      */
     private Log() {
     }
 
     /**
-     * 提供debug级别基本的日志输出
+     * providedebugBasic level log output
      *
-     * @param msg 需要显示的消息
+     * @param msg Message to be displayed
      */
     public static void debug(String msg) {
         getBasicLogger().debug(wrapperLogContent(msg));
@@ -61,10 +61,10 @@ public class Log {
     }
 
     /**
-     * 提供debug级别基本的日志输出
+     * providedebugBasic level log output
      *
-     * @param msg       需要显示的消息
-     * @param throwable 异常信息
+     * @param msg       Message to be displayed
+     * @param throwable Abnormal information
      */
     public static void debug(String msg, Throwable throwable) {
         getBasicLogger().debug(wrapperLogContent(msg), throwable);
@@ -91,9 +91,9 @@ public class Log {
     }
 
     /**
-     * 提供info级别基本的日志输出
+     * provideinfoBasic level log output
      *
-     * @param msg 需要显示的消息
+     * @param msg Message to be displayed
      */
     public static void info(String msg) {
         getBasicLogger().info(wrapperLogContent(msg));
@@ -104,19 +104,19 @@ public class Log {
     }
 
     /**
-     * 提供info级别基本的日志输出
+     * provideinfoBasic level log output
      *
-     * @param msg       需要显示的消息
-     * @param throwable 异常信息
+     * @param msg       Message to be displayed
+     * @param throwable Abnormal information
      */
     public static void info(String msg, Throwable throwable) {
         getBasicLogger().info(wrapperLogContent(msg), throwable);
     }
 
     /**
-     * 提供warn级别基本的日志输出
+     * providewarnBasic level log output
      *
-     * @param msg 需要显示的消息
+     * @param msg Message to be displayed
      */
     public static void warn(String msg) {
         getBasicLogger().warn(wrapperLogContent(msg));
@@ -127,19 +127,19 @@ public class Log {
     }
 
     /**
-     * 提供warn级别基本的日志输出
+     * providewarnBasic level log output
      *
-     * @param msg       需要显示的消息
-     * @param throwable 异常信息
+     * @param msg       Message to be displayed
+     * @param throwable Abnormal information
      */
     public static void warn(String msg, Throwable throwable) {
         getBasicLogger().warn(wrapperLogContent(msg), throwable);
     }
 
     /**
-     * 提供error级别基本的日志输出
+     * provideerrorBasic level log output
      *
-     * @param msg 需要显示的消息
+     * @param msg Message to be displayed
      */
     public static void error(String msg) {
         getBasicLogger().error(wrapperLogContent(msg));
@@ -151,10 +151,10 @@ public class Log {
     }
 
     /**
-     * 提供error级别基本的日志输出
+     * provideerrorBasic level log output
      *
-     * @param msg       需要显示的消息
-     * @param throwable 异常信息
+     * @param msg       Message to be displayed
+     * @param throwable Abnormal information
      */
     public static void error(String msg, Throwable throwable) {
         getBasicLogger().error(wrapperLogContent(msg), throwable);
@@ -165,19 +165,19 @@ public class Log {
     }
 
     /**
-     * 提供trace级别基本的日志输出
+     * providetraceBasic level log output
      *
-     * @param msg 需要显示的消息
+     * @param msg Message to be displayed
      */
     public static void trace(String msg) {
         getBasicLogger().trace(wrapperLogContent(msg));
     }
 
     /**
-     * 提供trace级别基本的日志输出
+     * providetraceBasic level log output
      *
-     * @param msg       需要显示的消息
-     * @param throwable 异常信息
+     * @param msg       Message to be displayed
+     * @param throwable Abnormal information
      */
     public static void trace(String msg, Throwable throwable) {
         getBasicLogger().trace(wrapperLogContent(msg), throwable);

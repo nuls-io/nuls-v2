@@ -31,7 +31,7 @@ import io.nuls.base.data.Address;
 import java.util.List;
 
 /**
- * 账户数据存储服务接口
+ * Account Data Storage Service Interface
  * Account data storage service interface
  *
  * @author: qinyifeng
@@ -39,16 +39,16 @@ import java.util.List;
 public interface AccountStorageService {
 
     /**
-     * 创建账户多个账户
+     * Create multiple accounts
      * Create accounts
-     * @param accountPOList 待创建的账户集合
+     * @param accountPOList Account set to be created
      * @param accountPOList Account collection to be created
      * @return the result of the opration
      */
     boolean saveAccountList(List<AccountPO> accountPOList);
 
     /**
-     * 创建账户
+     * Create an account
      * Create account
      * @param account
      * @return
@@ -56,7 +56,7 @@ public interface AccountStorageService {
     boolean saveAccount(AccountPO account);
 
     /**
-     * 删除账户
+     * Delete account
      * Delete account
      * @param address Account address to be deleted
      * @return the result of the opration
@@ -64,13 +64,13 @@ public interface AccountStorageService {
     boolean removeAccount(Address address);
 
     /**
-     * 获取所有账户
+     * Get all accounts
      * @return the result of the opration and Result<List<Account>>
      */
     List<AccountPO> getAccountList();
 
     /**
-     * 根据账户获取账户信息
+     * Obtain account information based on the account
      * According to the account to obtain account information
      * @param address
      * @return the result of the opration
@@ -78,7 +78,7 @@ public interface AccountStorageService {
     AccountPO getAccount(byte[] address);
 
     /**
-     * 根据账户更新账户信息
+     * Update account information based on account
      * Update account information according to the account.
      * @param account The account to be updated.
      * @return the result of the opration

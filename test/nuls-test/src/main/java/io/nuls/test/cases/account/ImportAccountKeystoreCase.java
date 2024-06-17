@@ -12,14 +12,14 @@ import java.io.File;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-20 18:07
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Component
 public class ImportAccountKeystoreCase extends BaseAccountCase<String,String> {
 
     @Override
     public String title() {
-        return "通过keystore导入账户";
+        return "adoptkeystoreImport account";
     }
 
     @Override
@@ -28,8 +28,8 @@ public class ImportAccountKeystoreCase extends BaseAccountCase<String,String> {
         String keystore = accountService.getAccountKeystoreDto(keystoreFile);
         Result<String> result = accountService.importAccountByKeyStore(new ImportAccountByKeyStoreReq(PASSWORD, HexUtil.encode(keystore.getBytes()),true));
         checkResultStatus(result);
-        check(result.getData().equals(param),"导入地址与预期不一致");
-        check(accountService.getAccountByAddress(new GetAccountByAddressReq(param)).getData() != null,"导入账户失败");
+        check(result.getData().equals(param),"The import address does not match the expected one");
+        check(accountService.getAccountByAddress(new GetAccountByAddressReq(param)).getData() != null,"Import account failed");
         new File(keystoreFile).delete();
         return param;
     }

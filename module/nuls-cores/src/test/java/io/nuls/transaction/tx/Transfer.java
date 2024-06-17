@@ -66,7 +66,7 @@ public class Transfer implements Runnable {
     public void run() {
         try {
             String name = Thread.currentThread().getName();
-            Log.info("{}线程执行中...", name);
+            Log.info("{}Thread execution in progress...", name);
             long startTime = System.currentTimeMillis();
             for (int i = 0; i < txCount; i++) {
                 String hash = createTransfer(addressFrom, addressTo);
@@ -75,7 +75,7 @@ public class Transfer implements Runnable {
             }
             long endTime = System.currentTimeMillis();
             long executionTime = endTime - startTime;
-            Log.info("{}线程执行结束, tx count:{} - execution time:{} milliseconds,  about≈:{}seconds",  name, txCount, executionTime, executionTime/1000);
+            Log.info("{}Thread execution ended, tx count:{} - execution time:{} milliseconds,  about≈:{}seconds",  name, txCount, executionTime, executionTime/1000);
 
         } catch (Exception e) {
             Log.error(e);
@@ -84,7 +84,7 @@ public class Transfer implements Runnable {
 
     private String createTransfer(String addressFrom, String addressTo) throws Exception {
         Map transferMap = this.createTransferTx(addressFrom, addressTo);
-        //调用接口
+        //Calling interfaces
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
         HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
         Assert.assertTrue(null != result);
@@ -95,7 +95,7 @@ public class Transfer implements Runnable {
 
 
     /**
-     * 创建普通转账交易
+     * Create a regular transfer transaction
      *
      * @return
      */

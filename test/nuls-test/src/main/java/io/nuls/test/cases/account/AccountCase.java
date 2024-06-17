@@ -9,18 +9,18 @@ import io.nuls.core.core.annotation.Component;
  * @Author: zhoulijun
  * @Time: 2019-03-20 10:30
  * @Description:
- * 账户操作指令集成测试
- * 测试流程如下
- * 0.创建一个账户。
- * 1.通过1中的地址查询账户
- * 2.备份此账户到{user.dir}目录
- * 3.删除这个账户
- * 4.通过【2】中的keystore导入账户
- * 5.通过address和密码查询这个账户的私钥
- * 6.删除账户，通过私钥再次导入账户
- * 7.修改账户密码
- * 8.查询账户列表，验证列表中是否有次账户
- * 9.删除此账户，删除【2】中的keystore
+ * Account operation instruction integration test
+ * The testing process is as follows
+ * 0.Create an account.
+ * 1.adopt1Address inquiry account in
+ * 2.Back up this account to{user.dir}catalogue
+ * 3.Delete this account
+ * 4.adopt【2】MiddlekeystoreImport account
+ * 5.adoptaddressCheck the private key of this account with the password
+ * 6.Delete the account and import it again using the private key
+ * 7.Change account password
+ * 8.Query the account list and verify if there are any secondary accounts in the list
+ * 9.Delete this account, delete【2】Middlekeystore
  */
 @TestCase("account")
 @Component
@@ -44,7 +44,7 @@ public class AccountCase extends TestCaseChain {
 
     @Override
     public String title() {
-        return "账户模块集成测试";
+        return "Account module integration testing";
     }
 
 }

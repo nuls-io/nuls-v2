@@ -24,24 +24,24 @@ public class NulsCoresConfig extends ConfigBean implements ModuleConfig {
 
     private String dataPath;
 
-    /** 模块code*/
+    /** modulecode*/
     private String moduleCode;
 
-    /** 主链链ID*/
+    /** Main chainID*/
     private int mainChainId;
 
-    /** 主链主资产ID*/
+    /** Main asset of the main chainID*/
     private int mainAssetId;
 
-    /** 语言*/
+    /** language*/
     private String language;
 
-    /** 编码*/
+    /** coding*/
     private String encoding;
     private String blackHolePublicKey;
 
     /**
-     * 链ID
+     * chainID
      */
     private int chainId;
     private int assetId;
@@ -51,14 +51,14 @@ public class NulsCoresConfig extends ConfigBean implements ModuleConfig {
     private String logLevel = "DEBUG";
 
     /*-------------------------[Transaction]-----------------------------*/
-    /** 未确认交易过期时间秒 */
+    /** Unconfirmed transaction expiration time in seconds */
     private long unconfirmedTxExpire;
 
 
     private String blackListPath;
     private String accountBlockManagerPublicKeys;
     /**
-     *  是否已连接智能合约模块
+     *  Has the smart contract module been connected
      */
     private volatile boolean collectedSmartContractModule;
 
@@ -93,7 +93,7 @@ public class NulsCoresConfig extends ConfigBean implements ModuleConfig {
     private List<String> localIps = new ArrayList<>();
     private int updatePeerInfoType = 0;
     /**
-     * 中心化网络服务接口
+     * Centralized Network Service Interface
      */
     private String timeServers;
 
@@ -107,67 +107,67 @@ public class NulsCoresConfig extends ConfigBean implements ModuleConfig {
 
     private boolean mainNet;
 
-    /**默认链接到的跨链节点*/
+    /**Default cross chain node linked to*/
     private String crossSeedIps;
 
     /**
-     * 种子节点列表
+     * Seed node list
      */
     private Set<String> seedNodeList;
     /*-------------------------[Block]-----------------------------*/
 
     /**
-     * 分叉链监视线程执行间隔
+     * Fork chain monitoring thread execution interval
      */
     private int forkChainsMonitorInterval;
 
     /**
-     * 孤儿链监视线程执行间隔
+     * Orphan chain monitoring thread execution interval
      */
     private int orphanChainsMonitorInterval;
 
     /**
-     * 孤儿链维护线程执行间隔
+     * Orphan chain maintenance thread execution interval
      */
     private int orphanChainsMaintainerInterval;
 
     /**
-     * 数据库监视线程执行间隔
+     * Database monitoring thread execution interval
      */
     private int storageSizeMonitorInterval;
 
     /**
-     * 网络监视线程执行间隔
+     * Network monitoring thread execution interval
      */
     private int networkResetMonitorInterval;
 
     /**
-     * 节点数量监控线程执行间隔
+     * Node count monitoring thread execution interval
      */
     private int nodesMonitorInterval;
 
     /**
-     * TxGroup请求器线程执行间隔
+     * TxGroupRequestor thread execution interval
      */
     private int txGroupRequestorInterval;
 
     /**
-     * TxGroup请求器任务执行延时
+     * TxGroupRequestor task execution delay
      */
     private int txGroupTaskDelay;
 
     /**
-     * 启动后自动回滚多少个区块
+     * How many blocks will be automatically rolled back after startup
      */
     private int testAutoRollbackAmount;
 
     /**
-     * 回滚到指定高度
+     * Rollback to specified height
      */
     private int rollbackHeight;
     /*-------------------------[Account]-----------------------------*/
     /**
-     * key store 存储文件夹
+     * key store Storage folder
      */
     private String keystoreFolder;
 
@@ -177,7 +177,7 @@ public class NulsCoresConfig extends ConfigBean implements ModuleConfig {
 
 
     /**
-     * 跨链交易手续费主链收取手续费比例
+     * Cross chain transaction fees: The proportion of fees charged by the main chain
      * Cross-Chain Transaction Fee Proportion of Main Chain Fee Collection
      * */
     private int mainChainCommissionRatio;
@@ -194,7 +194,7 @@ public class NulsCoresConfig extends ConfigBean implements ModuleConfig {
 
     /*-------------------------[Chain Manager]-----------------------------*/
     /**
-     * 初始配置参数
+     * Initial configuration parameters
      */
     private String chainNameMax;
     private String assetSymbolMax;

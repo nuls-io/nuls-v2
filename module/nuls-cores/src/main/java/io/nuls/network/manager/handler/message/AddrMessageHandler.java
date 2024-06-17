@@ -68,7 +68,7 @@ public class AddrMessageHandler extends BaseMessageHandler {
      * @param message address message
      * @param node    peer node
      * @return NetworkEventResult
-     * @description 接收消息处理
+     * @description Receive message processing
      * Receive message processing
      */
     @Override
@@ -78,7 +78,7 @@ public class AddrMessageHandler extends BaseMessageHandler {
 //        LoggerUtil.logger(chainId).info("AddrMessageHandler Recieve:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
         AddrMessage addrMessage = (AddrMessage) message;
         /*
-         *空消息错误返回
+         *Empty message error return
          *Empty message error return
          */
         if (null == addrMessage.getMsgBody()) {
@@ -94,7 +94,7 @@ public class AddrMessageHandler extends BaseMessageHandler {
             if (addrMessageBody.getIsCross() == (byte) 1) {
                 int getMessageChainId = addrMessageBody.getChainId();
                 NodeGroup messageNodeGroup = NodeGroupManager.getInstance().getNodeGroupByChainId(getMessageChainId);
-                //可能本地还未同步到对应的Group，则丢弃这部分地址消息
+                //Perhaps the local synchronization has not been made to the corresponding one yetGroupThen discard this part of the address message
                 if (null != messageNodeGroup) {
                     return crossNetRecieveMessage(ipAddressList, messageNodeGroup);
                 }else{
@@ -118,7 +118,7 @@ public class AddrMessageHandler extends BaseMessageHandler {
 
     private NetworkEventResult commonNetRecieveMessage(List<IpAddressShare> ipAddressList, NodeGroup nodeGroup, Node node) {
         /*
-         * 判断地址是否本地已经拥有，如果拥有不转发
+         * Check if the address is already locally owned, and if so, do not forward it
          * Determine whether the address is already owned locally. If it does not forward
          */
         Map<String, Node> allNodes = nodeGroup.getLocalNetNodeContainer().getAllCanShareNodes();
@@ -142,7 +142,7 @@ public class AddrMessageHandler extends BaseMessageHandler {
             }
             nodeGroup.addNeedCheckNode(ipAddress.getIp().getHostAddress(), ipAddress.getPort(), ipAddress.getCrossPort(), node.isCrossConnect());
         }
-        //有个特殊逻辑，之前的种子节点并没有跨链端口存在，此时分享的地址里含有了跨链端口信息，则需要补充进行新的广播
+        //There is a special logic that the previous seed node did not have a cross chain port, and the shared address now contains cross chain port information. Therefore, a new broadcast needs to be added
         if (reShareAddrList.size() > 0) {
             AddrMessage reSendAddrMessage = MessageFactory.getInstance().buildAddrMessage(reShareAddrList, nodeGroup.getMagicNumber(), nodeGroup.getChainId(), (byte) 0);
             LoggerUtil.logger(chainId).debug("reSendAddrMessage addrSize = {}", reShareAddrList.size());
@@ -152,7 +152,7 @@ public class AddrMessageHandler extends BaseMessageHandler {
     }
 
     /**
-     * 跨链网络连接接收到地址
+     * Cross chain network connection received address
      *
      * @param ipAddressList
      * @param nodeGroup

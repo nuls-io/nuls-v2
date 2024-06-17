@@ -19,7 +19,7 @@ import io.nuls.crosschain.base.service.ProtocolService;
 import java.util.Map;
 
 /**
- * 跨链模块协议处理接口类
+ * Cross chain module protocol processing interface class
  * @author tag
  * @date 2019/4/8
  */
@@ -29,13 +29,13 @@ public class CrossChainProtocolCmd extends BaseCmd {
     private ProtocolService service;
 
     /**
-     * 跨链节点获取完整跨链交易
+     * Cross chain node acquisition of complete cross chain transactions
      * */
-    @CmdAnnotation(cmd = CommandConstant.GET_OTHER_CTX_MESSAGE, version = 1.0, description = "跨链节点向本节点获取完整交易/Cross-chain nodes obtain complete transactions from their own nodes")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
-    @Parameter(parameterName = "nodeId", parameterType = "String", parameterDes = "节点IP")
-    @Parameter(parameterName = "messageBody", parameterType = "String", parameterDes = "消息体")
-    @ResponseData(description = "无特定返回值，没有错误即成功")
+    @CmdAnnotation(cmd = CommandConstant.GET_OTHER_CTX_MESSAGE, version = 1.0, description = "Cross chain nodes obtain complete transactions from this node/Cross-chain nodes obtain complete transactions from their own nodes")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainID")
+    @Parameter(parameterName = "nodeId", parameterType = "String", parameterDes = "nodeIP")
+    @Parameter(parameterName = "messageBody", parameterType = "String", parameterDes = "Message Body")
+    @ResponseData(description = "No specific return value, successful without errors")
     public Response getOtherCtx(Map<String,Object> params){
         int chainId = Integer.parseInt(params.get("chainId").toString());
         String nodeId = params.get("nodeId").toString();
@@ -51,13 +51,13 @@ public class CrossChainProtocolCmd extends BaseCmd {
     }
 
     /**
-     * 查询跨链交易处理状态
+     * Query the status of cross chain transaction processing
      * */
-    @CmdAnnotation(cmd = CommandConstant.GET_CTX_STATE_MESSAGE, version = 1.0, description = "获取跨链交易处理状态/Getting the state of cross-chain transaction processing")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
-    @Parameter(parameterName = "nodeId", parameterType = "String", parameterDes = "节点IP")
-    @Parameter(parameterName = "messageBody", parameterType = "String", parameterDes = "消息体")
-    @ResponseData(description = "无特定返回值，没有错误即成功")
+    @CmdAnnotation(cmd = CommandConstant.GET_CTX_STATE_MESSAGE, version = 1.0, description = "Obtaining Cross Chain Transaction Processing Status/Getting the state of cross-chain transaction processing")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainID")
+    @Parameter(parameterName = "nodeId", parameterType = "String", parameterDes = "nodeIP")
+    @Parameter(parameterName = "messageBody", parameterType = "String", parameterDes = "Message Body")
+    @ResponseData(description = "No specific return value, successful without errors")
     public Response getCtxState(Map<String,Object> params){
         int chainId = Integer.parseInt(params.get("chainId").toString());
         String nodeId = params.get("nodeId").toString();
@@ -73,13 +73,13 @@ public class CrossChainProtocolCmd extends BaseCmd {
     }
 
     /**
-     * 发起链接收主网发送来的跨链交易处理结果
+     * Initiate link to receive cross chain transaction processing results sent by the main network
      * */
-    @CmdAnnotation(cmd = CommandConstant.CTX_STATE_MESSAGE, version = 1.0, description = "跨链交易处理状态消息/receive cross transaction state")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
-    @Parameter(parameterName = "nodeId", parameterType = "String", parameterDes = "节点IP")
-    @Parameter(parameterName = "messageBody", parameterType = "String", parameterDes = "消息体")
-    @ResponseData(description = "无特定返回值，没有错误即成功")
+    @CmdAnnotation(cmd = CommandConstant.CTX_STATE_MESSAGE, version = 1.0, description = "Cross chain transaction processing status messages/receive cross transaction state")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainID")
+    @Parameter(parameterName = "nodeId", parameterType = "String", parameterDes = "nodeIP")
+    @Parameter(parameterName = "messageBody", parameterType = "String", parameterDes = "Message Body")
+    @ResponseData(description = "No specific return value, successful without errors")
     public Response recvCtxState(Map<String,Object> params){
         int chainId = Integer.parseInt(params.get("chainId").toString());
         String nodeId = params.get("nodeId").toString();
@@ -95,13 +95,13 @@ public class CrossChainProtocolCmd extends BaseCmd {
     }
 
     /**
-     * 发起链接收主网发送来获取链资产消息
+     * Initiate a link to the main network to receive chain asset messages
      * */
-    @CmdAnnotation(cmd = CommandConstant.GET_CIRCULLAT_MESSAGE, version = 1.0, description = "查询本链资产信息消息/get chain circulation")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
-    @Parameter(parameterName = "nodeId", parameterType = "String", parameterDes = "节点IP")
-    @Parameter(parameterName = "messageBody", parameterType = "String", parameterDes = "消息体")
-    @ResponseData(description = "无特定返回值，没有错误即成功")
+    @CmdAnnotation(cmd = CommandConstant.GET_CIRCULLAT_MESSAGE, version = 1.0, description = "Query the asset information message of this chain/get chain circulation")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainID")
+    @Parameter(parameterName = "nodeId", parameterType = "String", parameterDes = "nodeIP")
+    @Parameter(parameterName = "messageBody", parameterType = "String", parameterDes = "Message Body")
+    @ResponseData(description = "No specific return value, successful without errors")
     public Response getCirculat(Map<String,Object> params){
         int chainId = Integer.parseInt(params.get("chainId").toString());
         String nodeId = params.get("nodeId").toString();
@@ -118,13 +118,13 @@ public class CrossChainProtocolCmd extends BaseCmd {
 
 
     /**
-     * 接收其他链发送的跨链交易
+     * Receive cross chain transactions sent by other chains
      * */
-    @CmdAnnotation(cmd = CommandConstant.NEW_OTHER_CTX_MESSAGE, version = 1.0, description = "接收跨链节点广播的完整交易/Receiving Complete Transactions for Cross-Chain Node Broadcasting")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
-    @Parameter(parameterName = "nodeId", parameterType = "String", parameterDes = "节点IP")
-    @Parameter(parameterName = "messageBody", parameterType = "String", parameterDes = "消息体")
-    @ResponseData(description = "无特定返回值，没有错误即成功")
+    @CmdAnnotation(cmd = CommandConstant.NEW_OTHER_CTX_MESSAGE, version = 1.0, description = "Receive complete transactions broadcasted across chain nodes/Receiving Complete Transactions for Cross-Chain Node Broadcasting")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainID")
+    @Parameter(parameterName = "nodeId", parameterType = "String", parameterDes = "nodeIP")
+    @Parameter(parameterName = "messageBody", parameterType = "String", parameterDes = "Message Body")
+    @ResponseData(description = "No specific return value, successful without errors")
     public Response recvOtherCtx(Map<String,Object> params){
         int chainId = Integer.parseInt(params.get("chainId").toString());
         String nodeId = params.get("nodeId").toString();
@@ -141,13 +141,13 @@ public class CrossChainProtocolCmd extends BaseCmd {
 
 
     /**
-     * 接收链广播跨链交易Hash给链内其他节点
+     * Receive Chain Broadcast Cross Chain TransactionsHashTo other nodes in the chain
      * */
-    @CmdAnnotation(cmd = CommandConstant.BROAD_CTX_HASH_MESSAGE, version = 1.0, description = "接收跨链节点广播的交易Hash/Transaction Hash receiving cross-link node broadcasting")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
-    @Parameter(parameterName = "nodeId", parameterType = "String", parameterDes = "节点IP")
-    @Parameter(parameterName = "messageBody", parameterType = "String", parameterDes = "消息体")
-    @ResponseData(description = "无特定返回值，没有错误即成功")
+    @CmdAnnotation(cmd = CommandConstant.BROAD_CTX_HASH_MESSAGE, version = 1.0, description = "Receive transactions broadcasted across chain nodesHash/Transaction Hash receiving cross-link node broadcasting")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainID")
+    @Parameter(parameterName = "nodeId", parameterType = "String", parameterDes = "nodeIP")
+    @Parameter(parameterName = "messageBody", parameterType = "String", parameterDes = "Message Body")
+    @ResponseData(description = "No specific return value, successful without errors")
     public Response recvCtxHash(Map<String,Object> params){
         int chainId = Integer.parseInt(params.get("chainId").toString());
         String nodeId = params.get("nodeId").toString();
@@ -163,13 +163,13 @@ public class CrossChainProtocolCmd extends BaseCmd {
     }
 
     /**
-     * 接收链广播跨链交易Hash给链内其他节点
+     * Receive Chain Broadcast Cross Chain TransactionsHashTo other nodes in the chain
      * */
-    @CmdAnnotation(cmd = CommandConstant.BROAD_CTX_SIGN_MESSAGE, version = 1.0, description = "接收链内节点广播的交易签名/Transaction signature for broadcasting in receiving chain")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
-    @Parameter(parameterName = "nodeId", parameterType = "String", parameterDes = "节点IP")
-    @Parameter(parameterName = "messageBody", parameterType = "String", parameterDes = "消息体")
-    @ResponseData(description = "无特定返回值，没有错误即成功")
+    @CmdAnnotation(cmd = CommandConstant.BROAD_CTX_SIGN_MESSAGE, version = 1.0, description = "Receive transaction signatures broadcasted by nodes within the chain/Transaction signature for broadcasting in receiving chain")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainID")
+    @Parameter(parameterName = "nodeId", parameterType = "String", parameterDes = "nodeIP")
+    @Parameter(parameterName = "messageBody", parameterType = "String", parameterDes = "Message Body")
+    @ResponseData(description = "No specific return value, successful without errors")
     public Response recvCtxSign(Map<String,Object> params){
         int chainId = Integer.parseInt(params.get("chainId").toString());
         String nodeId = params.get("nodeId").toString();

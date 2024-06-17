@@ -14,19 +14,19 @@ import java.util.function.Function;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-07 19:46
- * @Description: rpc provider 基础类
+ * @Description: rpc provider Basic class
  */
 public abstract class BaseRpcService extends BaseService {
 
     public static final ErrorCode RPC_ERROR_CODE = ErrorCode.init("10016");
 
     /**
-     * 调用其他模块rpc接口
-     * @param module 模块名称
-     * @param method rpc接口名称
-     * @param req 业务参数对象
-     * @param callback 回调函数
-     * @param <T> 返回值泛型类型
+     * Call other modulesrpcinterface
+     * @param module Module Name
+     * @param method rpcInterface Name
+     * @param req Business parameter object
+     * @param callback Callback function
+     * @param <T> Return value generic type
      * @return
      */
     protected <T,R> Result<T> callRpc(String module,String method,Object req,Function<R,Result> callback) {

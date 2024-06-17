@@ -44,10 +44,10 @@ import java.util.Properties;
 public class ConfigLoader {
 
     /**
-     * 读取properties配置文件
+     * readpropertiesconfiguration file
      *
-     * @param fileName 配置文件名称
-     * @return properties配置文件类
+     * @param fileName Configuration file name
+     * @return propertiesConfiguration file class
      */
     public static Properties loadProperties(String fileName) throws IOException {
         InputStream is = ConfigLoader.class.getClassLoader().getResourceAsStream(fileName);
@@ -73,10 +73,10 @@ public class ConfigLoader {
 
 //
 //    /**
-//     * 读取ini配置文件
+//     * readiniconfiguration file
 //     *
-//     * @param fileName 配置文件名称
-//     * @return ini配置文件类
+//     * @param fileName Configuration file name
+//     * @return iniConfiguration file class
 //     */
 //    public static IniEntity loadIni(String fileName) throws IOException {
 //        Config cfg = new Config();
@@ -89,10 +89,10 @@ public class ConfigLoader {
 //    }
 //
 //    /**
-//     * 读取ini配置文件
+//     * readiniconfiguration file
 //     *
-//     * @param inputStream 配置文件
-//     * @return ini配置文件类
+//     * @param inputStream configuration file
+//     * @return iniConfiguration file class
 //     */
 //    public static IniEntity loadIni(InputStream inputStream) throws IOException {
 //        Config cfg = new Config();
@@ -104,7 +104,7 @@ public class ConfigLoader {
 //    }
 //
 //    /**
-//     * 读取json配置文件
+//     * readjsonconfiguration file
 //     * @param fileName
 //     * @throws Exception
 //     */

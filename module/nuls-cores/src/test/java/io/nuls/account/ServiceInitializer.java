@@ -7,7 +7,7 @@ package io.nuls.account;
  *
  * Initialize the Service before test
  *
- * 单元测试需要自动运行，不一样依赖于其它的进程，所以后续尝试将手动启动WsKernal,AcccountBootStrap放到这里统一初始化
+ * Unit testing needs to run automatically and is not dependent on other processes, so subsequent attempts will be made to manually start itWsKernal,AcccountBootStrapPut it here for unified initialization
  *
  *
  * **/

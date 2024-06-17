@@ -45,7 +45,7 @@ import static io.nuls.transaction.constant.TxCmd.*;
 import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 /**
- * 网络消息发送
+ * Network message sending
  *
  * @author: Charlie
  * @date: 2019/04/16
@@ -53,13 +53,13 @@ import static io.nuls.transaction.utils.LoggerUtil.LOG;
 public class NetworkCall {
 
     /**
-     * 给网络上节点广播消息
-     * 1.转发交易hash
-     * 2.广播完整交易
+     * Broadcast messages to nodes on the network
+     * 1.Forwarding transactionshash
+     * 2.Broadcast complete transactions
      *
      * @param chain
      * @param message
-     * @param excludeNodes 排除的节点
+     * @param excludeNodes Excluded nodes
      * @return
      */
     public static boolean broadcast(Chain chain, BaseBusinessMessage message, String excludeNodes, String cmd, int percent) throws NulsException {
@@ -84,7 +84,7 @@ public class NetworkCall {
     }
 
     /**
-     * 给指定节点发送消息
+     * Send messages to specified nodes
      *
      * @param chain
      * @param message
@@ -112,8 +112,8 @@ public class NetworkCall {
     }
 
     /**
-     * 转发交易
-     * 发送hash到其他节点
+     * Forwarding transactions
+     * sendhashTo other nodes
      * Forward transaction hash to other peer nodes
      *
      * @param chain
@@ -126,8 +126,8 @@ public class NetworkCall {
 
 
     /**
-     * 转发交易
-     * 发送hash到其他节点
+     * Forwarding transactions
+     * sendhashTo other nodes
      * Forward transaction hash to other peer nodes
      *
      * @param chain
@@ -141,8 +141,8 @@ public class NetworkCall {
     }
 
     /**
-     * 广播完整新交易交易到网络中
-     * 只有创建该交易的节点才会直接广播完整交易到网络中，因为其他节点肯定没有该笔交易
+     * Broadcast complete new transactions to the network
+     * Only the node that created the transaction will directly broadcast the complete transaction to the network, as other nodes will definitely not have the transaction
      * Send the complete transaction to the specified node
      *
      * @param chain
@@ -156,8 +156,8 @@ public class NetworkCall {
     }
 
     /**
-     * 广播完整新交易交易到网络中
-     * 只有创建该交易的节点才会直接广播完整交易到网络中，因为其他节点肯定没有该笔交易
+     * Broadcast complete new transactions to the network
+     * Only the node that created the transaction will directly broadcast the complete transaction to the network, as other nodes will definitely not have the transaction
      * Send the complete transaction to the specified node
      *
      * @param chain
@@ -170,7 +170,7 @@ public class NetworkCall {
 
 
     /**
-     * 发送完整交易到指定节点
+     * Send complete transaction to specified node
      * Send the complete transaction to the specified node
      *
      * @param chain

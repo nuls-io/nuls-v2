@@ -5,7 +5,7 @@ import java.math.BigInteger;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-20 10:27
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class Constants {
 

@@ -3,16 +3,16 @@ package io.nuls.provider.model.form;
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
 
-@ApiModel(description = "离线获取明文私钥表单")
+@ApiModel(description = "Offline acquisition of plaintext private key form")
 public class ResetPasswordForm {
 
-    @ApiModelProperty(description = "账户地址")
+    @ApiModelProperty(description = "Account address")
     private String address;
-    @ApiModelProperty(description = "账户密文私钥")
+    @ApiModelProperty(description = "Account ciphertext private key")
     private String encryptedPriKey;
-    @ApiModelProperty(description = "账户原密码")
+    @ApiModelProperty(description = "Account original password")
     private String oldPassword;
-    @ApiModelProperty(description = "账户新密码")
+    @ApiModelProperty(description = "Account New Password")
     private String newPassword;
 
     public String getAddress() {

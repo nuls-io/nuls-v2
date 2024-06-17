@@ -38,7 +38,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 /**
- * 存入数据库的惩罚信息类
+ * Penalty information stored in the database
  * Punishment information classes stored in database
  *
  * @author tag
@@ -46,17 +46,17 @@ import java.util.Arrays;
  */
 public class PunishLogPo extends BaseNulsData {
     /**
-    * 惩罚类型
+    * Punishment type
     * Types of punishment
     * */
     private byte type;
     /**
-    * 出块地址
+    * Block address
     * Block address
     * */
     private byte[] address;
     /**
-    * 惩罚时间
+    * Punishment time
     * Penalty time
     * */
     private long time;
@@ -65,17 +65,17 @@ public class PunishLogPo extends BaseNulsData {
     * */
     private long height;
     /**
-    * 轮次下标
+    * Round index
     * round index
     * */
     private long roundIndex;
     /**
-    * 惩罚原因
+    * Reason for punishment
     * reason
     * */
     private short reasonCode;
     /**
-    * 证据
+    * evidence
     * evidence
     * */
     private byte[] evidence;

@@ -56,7 +56,7 @@ public class Address {
     private int chainId;
 
     /**
-     * 字符串格式表示的地址
+     * Address represented in string format
      */
     private String addressStr;
 
@@ -180,7 +180,7 @@ public class Address {
     }
 
     /**
-     * 默认返回base58编码的地址
+     * Default returnbase58Encoded address
      *
      * @return
      */

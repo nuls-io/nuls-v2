@@ -3,7 +3,7 @@ package io.nuls.base.protocol;
 import java.util.Set;
 
 /**
- * 协议信息
+ * Protocol Information
  *
  * @author captain
  * @version 1.0

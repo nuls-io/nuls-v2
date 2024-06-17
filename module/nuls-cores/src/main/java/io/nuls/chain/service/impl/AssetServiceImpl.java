@@ -107,7 +107,7 @@ public class AssetServiceImpl implements AssetService {
     }
 
     /**
-     * 全网的可流通资产数量，含跨链转出的资产数
+     * The number of circulating assets across the entire network, including the number of assets transferred out across chains
      *
      * @param key
      * @param amount
@@ -121,9 +121,9 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void registerAsset(Asset asset) throws Exception {
-        //提交asset
+        //Submitasset
         createAsset(asset);
-        //获取链信息
+        //Obtain chain information
         BlockChain dbChain = chainService.getChain(asset.getChainId());
         List<String> selfAssets = dbChain.getSelfAssetKeyList();
         boolean notExist = true;
@@ -141,7 +141,7 @@ public class AssetServiceImpl implements AssetService {
             dbChain.setSelfAssetKeyList(TxUtil.moveRepeatInfo(dbChain.getSelfAssetKeyList()));
             dbChain.setTotalAssetKeyList(TxUtil.moveRepeatInfo(dbChain.getTotalAssetKeyList()));
         }
-        //更新chain
+        //updatechain
         chainService.updateChain(dbChain);
     }
 
@@ -179,7 +179,7 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public Asset getAsset(String assetKey) throws Exception {
         Asset asset =  assetStorage.load(assetKey);
-        //todo 临时测试用
+        //todo For temporary testing purposes
 //        if(assetKey.equals("2-0")&&asset==null){
 //            asset = new Asset();
 //            asset.setAssetId(0);

@@ -44,7 +44,7 @@ import java.util.Comparator;
 public class BlockHeader extends BaseNulsData {
 
     /**
-     * 区块头排序器
+     * Block header sorter
      */
     public static final Comparator<BlockHeader> BLOCK_HEADER_COMPARATOR = Comparator.comparingLong(BlockHeader::getHeight);
 
@@ -58,7 +58,7 @@ public class BlockHeader extends BaseNulsData {
     private byte[] extend;
     private transient BlockExtendsData extendsData;
     /**
-     * pierre add 智能合约世界状态根
+     * pierre add Smart Contract World State Root
      */
     private transient byte[] stateRoot;
 

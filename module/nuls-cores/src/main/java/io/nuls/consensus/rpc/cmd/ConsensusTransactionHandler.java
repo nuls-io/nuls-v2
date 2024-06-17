@@ -12,7 +12,7 @@ import io.nuls.consensus.service.DepositService;
 import java.util.Map;
 
 /**
- * 共识模块交易验证器
+ * Consensus module transaction validator
  * @author tag
  * @date 2019/6/1
  */
@@ -27,13 +27,13 @@ public class ConsensusTransactionHandler extends BaseCmd {
     private DepositService depositService;
 
     /**
-     * 注销节点交易验证
+     * Cancel node transaction verification
      */
     @CmdAnnotation(cmd = "stopAgentValid", version = 1.0, description = "stop agent transaction validate")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
-    @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "交易")
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value",valueType = Boolean.class, description = "停止节点交易验证结果")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid")
+    @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "transaction")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value",valueType = Boolean.class, description = "Stop node transaction verification results")
     }))
     public Response stopAgentValid(Map<String, Object> params) {
         Result result = agentService.stopAgentValid(params);
@@ -44,13 +44,13 @@ public class ConsensusTransactionHandler extends BaseCmd {
     }
 
     /**
-     * 节点验证
+     * Node validation
      */
     @CmdAnnotation(cmd = "createAgentValid", version = 1.0, description = "create agent transaction validate")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
-    @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "交易")
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value",valueType = Boolean.class, description = "创建节点验证结果")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid")
+    @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "transaction")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value",valueType = Boolean.class, description = "Create node validation results")
     }))
     public Response createAgentValid(Map<String, Object> params) {
         Result result = agentService.createAgentValid(params);
@@ -61,13 +61,13 @@ public class ConsensusTransactionHandler extends BaseCmd {
     }
 
     /**
-     * 退出共识交易验证
+     * Exit consensus transaction verification
      */
     @CmdAnnotation(cmd = "withdrawValid", version = 1.0, description = "withdraw deposit agent transaction validate")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
-    @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "交易")
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value",valueType = Boolean.class, description = "退出共识交易验证结果")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid")
+    @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "transaction")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value",valueType = Boolean.class, description = "Exit consensus transaction verification result")
     }))
     public Response withdrawValid(Map<String, Object> params) {
         Result result = depositService.withdrawValid(params);
@@ -78,13 +78,13 @@ public class ConsensusTransactionHandler extends BaseCmd {
     }
 
     /**
-     * 委托共识交易验证
+     * Entrusted consensus transaction verification
      */
     @CmdAnnotation(cmd = "depositValid", version = 1.0, description = "deposit agent transaction validate")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
-    @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "交易")
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value",valueType = Boolean.class, description = "委托交易验证结果")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid")
+    @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "transaction")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value",valueType = Boolean.class, description = "Verification results of entrusted transactions")
     }))
     public Response depositValid(Map<String, Object> params) {
         Result result = depositService.depositValid(params);

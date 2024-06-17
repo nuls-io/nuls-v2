@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * @Author: zhoulijun
  * @Time: 2019-04-25 11:09
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Component
 public class BatchCreateAccountCase2 extends BaseAccountCase<Long, BatchParam> {
@@ -46,7 +46,7 @@ public class BatchCreateAccountCase2 extends BaseAccountCase<Long, BatchParam> {
 
     @Override
     public String title() {
-        return "批量准备账户";
+        return "Batch preparation of accounts";
     }
 
     @Override
@@ -74,7 +74,7 @@ public class BatchCreateAccountCase2 extends BaseAccountCase<Long, BatchParam> {
                 perHash = result.getData();
                 successTotal++;
             } catch (TestFailException e) {
-                Log.error("创建交易失败:{}",e.getMessage());
+                Log.error("Create transaction failed:{}",e.getMessage());
                 continue;
             }
             result = fastTransfer.transfer(formAddress,account.getList().get(1),TRANSFER_AMOUNT.multiply(FEE_AMOUNT),param.formAddressPriKey,perHash);
@@ -83,13 +83,13 @@ public class BatchCreateAccountCase2 extends BaseAccountCase<Long, BatchParam> {
                 perHash = result.getData();
                 successTotal++;
             } catch (TestFailException e) {
-                Log.error("创建交易失败:{}",e.getMessage());
+                Log.error("Create transaction failed:{}",e.getMessage());
                 continue;
             }
             formList.add(account.getList().get(0));
             toList.add(account.getList().get(1));
         }
-        Log.info("创建{}笔交易,成功{}笔，消耗时间:{}", MAX_ACCOUNT ,successTotal, System.currentTimeMillis() - start);
+        Log.info("establish{}Transactions,success{}Pen, time-consuming:{}", MAX_ACCOUNT ,successTotal, System.currentTimeMillis() - start);
         return param.count;
     }
 

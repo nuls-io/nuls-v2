@@ -16,7 +16,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
- * 链信息类
+ * Chain information class
  * Chain information class
  *
  * @author tag
@@ -24,128 +24,128 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  **/
 public class Chain {
     /**
-     * 链基础配置信息
+     * Chain basic configuration information
      * Chain Foundation Configuration Information
      */
     private ConfigBean config;
 
     /**
-     * 接收到的其他链发送的交易Hash与当前链节点键值对
-     * key:交易Hash
+     * Received transactions sent by other chainsHashPaired with the current chain node key value
+     * key:transactionHash
      * value:nodeId
      * */
     private Map<NulsHash, List<NodeType>> otherHashNodeIdMap;
 
 
     /**
-     * 其他链广播的跨链交易在本链中状态
+     * The status of cross chain transactions broadcasted by other chains in this chain
      * Transactions under processing
-     * key:交易Hash
-     * value:跨链交易状态1.待接收 2.已收到
+     * key:transactionHash
+     * value:Cross chain transaction status1.To be received 2.Received
      * */
     private Map<NulsHash, Integer> otherCtxStageMap;
 
     /**
-     * 跨链交易处理结果
+     * Cross chain transaction processing results
      * Cross-Chain Transaction Processing Results
-     * key:交易Hash
-     * value:处理结果列表 0未确认 1主网已确认 2接收链已确认
+     * key:transactionHash
+     * value:Processing result list 0Unconfirmed 1Main network confirmed 2Receiving chain confirmed
      * */
     private Map<NulsHash, List<Byte>> ctxStateMap;
 
     /**
-     * 待广播的跨链交易Hash和签名
+     * Cross chain transactions to be broadcastedHashAnd signature
      * Cross-Chain Transaction Hash and Signature to be Broadcast
-     * key:交易Hash
-     * value:待广播的交易签名列表
+     * key:transactionHash
+     * value:List of transaction signatures to be broadcasted
      * */
     private Map<NulsHash, Set<WaitBroadSignMessage>> waitBroadSignMap;
 
     /**
-     * 未处理的其他链广播来的跨链交易Hash消息
+     * Unprocessed cross chain transactions broadcasted from other chainsHashnews
      * */
     private LinkedBlockingQueue<UntreatedMessage> hashMessageQueue;
 
     /**
-     * 未处理的本链节点广播来的跨链交易签名消息
+     * Unprocessed cross chain transaction signature messages broadcasted by nodes in this chain
      * */
     private LinkedBlockingQueue<UntreatedMessage> signMessageByzantineQueue;
 
     /**
-     * 未处理的本链节点广播来的完整跨链交易消息
+     * Complete cross chain transaction messages broadcasted by unprocessed nodes in this chain
      * */
     private LinkedBlockingQueue<UntreatedMessage> otherCtxMessageQueue;
 
     /**
-     * 为处理的跨链验证交易状态请求消息
+     * Cross chain verification transaction status request message for processing
      * */
     private LinkedBlockingQueue<UntreatedMessage> getCtxStateQueue;
 
 
     /**
-     * 线程池
+     * Thread pool
      * */
     private final ExecutorService threadPool = ThreadUtils.createThreadPool(8, 100, new NulsThreadFactory("CrossChainProcessor"));
 
     /**
-     * 跨连模块日志
+     * Cross connect module logs
      * */
     private NulsLogger logger;
 
     /**
-     * 在本节点还未提交的跨链
+     * Cross chain not yet submitted at this node
      * key:ctxHash
-     * value:投票消息列表
+     * value:Voting message list
      * */
     private Map<NulsHash,List<UntreatedMessage>> futureMessageMap;
 
     /**
-     * 本链最新投票节点列表（当前最新轮次与当前轮次交集）
+     * The latest list of voting nodes in this chain（Intersection between the latest and current rounds）
      * */
     private List<String> verifierList;
 
     /**
-     * 本链是否为主网
+     * Is this chain the main network
      * */
     private boolean mainChain;
 
     /**
-     * 最后一次验证人变更高度,广播跨链转账交易时需要验证当前高度与该高度的大小
+     * The height of the last verifier change,When broadcasting cross chain transfer transactions, it is necessary to verify the current height and the size of that height
      * */
     private long lastChangeHeight;
 
     /**
-     * 当前正在处理的验证人变更交易
-     * 同一时间最多只有一笔验证人变更交易被处理
+     * Currently processing validator change transactions
+     * At most one validator change transaction can be processed at the same time
      * */
     private Transaction verifierChangeTx;
 
     /**
-     * 已拜占庭完成，高度最小的待广播跨链转账交易
-     * key:链ID
-     * value:最小高度的跨链转账交易
+     * Completed by Byzantium, the smallest pending broadcast cross chain transfer transaction
+     * key:chainID
+     * value:Cross chain transfer transactions with minimum height
      * */
     private Map<Integer,Long> crossChainTxMap;
 
     /**
-     * 已拜占庭完成，高度最小的待广验证人变更交易
-     * key:链ID
-     * value:最小高度的验证人变更交易
+     * Completed by Byzantium, with the smallest height of pending witness change transaction
+     * key:chainID
+     * value:Minimum height validator change transaction
      * */
     private Map<Integer,Long> verifierChangeTxMap;
 
     /**
-     * 更新验证人时需要的锁（如：拜占庭验证与更新验证人需要互斥执行，防止拜占庭验证时验证人错误的情况）
+     * Locks required for updating validators（as：Byzantine verification and update validators need to be mutually exclusive to prevent errors in validators during Byzantine verification）
      * */
     private final ReentrantReadWriteLock switchVerifierLock = new ReentrantReadWriteLock();
 
     /**
-     * 节点同步状态
+     * Node synchronization status
      * */
     private int syncStatus = 0;
 
     /**
-     * 处理跨链交易的线程池
+     * Thread pool for handling cross chain transactions
      * */
     private final ExecutorService crossTxThreadPool = ThreadUtils.createThreadPool(4, 10000, new NulsThreadFactory("CROSS_TX_THREAD_POOL"));
     public Chain(){

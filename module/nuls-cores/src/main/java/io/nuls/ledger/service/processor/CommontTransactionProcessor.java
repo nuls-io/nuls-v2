@@ -33,7 +33,7 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 
 /**
- * 普通交易处理
+ * Ordinary transaction processing
  * Created by lanjinsheng on 2018/12/29.
  * @author lanjinsheng
  */

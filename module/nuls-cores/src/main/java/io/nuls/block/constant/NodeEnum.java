@@ -21,29 +21,29 @@
 package io.nuls.block.constant;
 
 /**
- * 同步时节点运行状态
+ * Node running status during synchronization
  * The module runs state enumeration.
  *
  * @author captain
  * @version 1.0
- * @date 18-11-28 下午5:58
+ * @date 18-11-28 afternoon5:58
  */
 public enum NodeEnum {
 
     /**
-     * 工作中
+     * At work
      * working
      */
     WORKING,
 
     /**
-     * 空闲
+     * free
      * idle
      */
     IDLE,
 
     /**
-     * 超时(节点连续三次下载区块超时、一次同步过程中累计十次下载超时，都会被标记为超时节点)
+     * overtime(Node timed out downloading blocks three times in a row、Ten download timeouts accumulated during a synchronization process will be marked as timeout nodes)
      * time out
      */
     TIMEOUT;

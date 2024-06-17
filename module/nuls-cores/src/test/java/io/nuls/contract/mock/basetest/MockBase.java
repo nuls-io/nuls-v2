@@ -71,7 +71,7 @@ public abstract class MockBase extends Base {
 
     @Before
     public void setUp() {
-        // 加载协议升级的数据
+        // Load protocol upgrade data
         ContractContext.CHAIN_ID = chainId;
         ContractContext.ASSET_ID = assetId;
 

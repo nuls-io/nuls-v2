@@ -4,7 +4,7 @@ import io.nuls.consensus.model.bo.consensus.Evidence;
 
 import java.util.Comparator;
 /**
- * 证据信息比较器
+ * Evidence information comparator
  * Evidence Information Comparator
  *
  * @author  tag

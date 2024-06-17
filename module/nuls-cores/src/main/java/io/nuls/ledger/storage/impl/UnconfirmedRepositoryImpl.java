@@ -48,7 +48,7 @@ public class UnconfirmedRepositoryImpl implements UnconfirmedRepository, Initial
     }
 
     /**
-     * key1=chainId,  Map1=未确认账户状态， key2= addr+assetkey  value=AccountStateUnconfirmed
+     * key1=chainId,  Map1=Unconfirmed account status, key2= addr+assetkey  value=AccountStateUnconfirmed
      */
     Map<String, Map<String, AccountStateUnconfirmed>> chainAccountUnconfirmed = new ConcurrentHashMap<>(16);
 
@@ -123,7 +123,7 @@ public class UnconfirmedRepositoryImpl implements UnconfirmedRepository, Initial
     }
 
     /**
-     * 清除未确认交易,其后关联的交易一并移除
+     * Clear unconfirmed transactions,Remove all subsequent related transactions together
      *
      * @param chainId
      * @param accountKey
@@ -149,7 +149,7 @@ public class UnconfirmedRepositoryImpl implements UnconfirmedRepository, Initial
     }
 
     /**
-     * 账号对应的未确认全部清空
+     * Clear all unconfirmed items corresponding to the account
      *
      * @param chainId
      * @param accountKey
@@ -164,7 +164,7 @@ public class UnconfirmedRepositoryImpl implements UnconfirmedRepository, Initial
     }
 
     /**
-     * 清空链所有未确认交易
+     * Clear all unconfirmed transactions in the chain
      *
      * @param chainId
      */

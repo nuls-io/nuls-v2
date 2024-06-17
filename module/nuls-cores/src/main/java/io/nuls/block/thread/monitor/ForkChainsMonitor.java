@@ -37,12 +37,12 @@ import static io.nuls.block.constant.Constant.MODULE_WAITING;
 import static io.nuls.block.constant.Constant.MODULE_WORKING;
 
 /**
- * 分叉链的形成原因分析:由于网络延迟,同时有两个矿工发布同一高度的区块,或者被恶意节点攻击
- * 分叉链定时处理器,如果发现某分叉链比主链更长,需要切换该分叉链为主链
+ * Analysis of the formation reasons of forked chains:Due to network latency,Two miners simultaneously release blocks of the same height,Or attacked by malicious nodes
+ * Forked chain timing processor,If a forked chain is found to be longer than the main chain,Need to switch the fork chain to the main chain
  *
  * @author captain
  * @version 1.0
- * @date 18-11-14 下午3:54
+ * @date 18-11-14 afternoon3:54
  */
 public class ForkChainsMonitor extends BaseMonitor {
 
@@ -71,7 +71,7 @@ public class ForkChainsMonitor extends BaseMonitor {
                     break;
                 }
                 context.printChains();
-                //遍历当前分叉链,与主链进行比对,找出最大高度差,与默认参数chainSwtichThreshold对比,确定要切换的分叉链
+                //Traverse the current forked chain,Compare with the main chain,Find the maximum height difference,Same as default parameterschainSwtichThresholdcontrast,Determine the fork chain to switch between
                 Chain masterChain = BlockChainManager.getMasterChain(chainId);
                 ConfigBean parameters = context.getParameters();
                 int chainSwtichThreshold = parameters.getChainSwtichThreshold();
@@ -85,7 +85,7 @@ public class ForkChainsMonitor extends BaseMonitor {
                     }
                 }
                 commonLog.debug("chainId-" + chainId + ", maxHeightDifference:" + maxHeightDifference + ", chainSwtichThreshold:" + chainSwtichThreshold);
-                //高度差不够
+                //Insufficient height difference
                 if (maxHeightDifference < chainSwtichThreshold) {
                     break;
                 }
@@ -94,7 +94,7 @@ public class ForkChainsMonitor extends BaseMonitor {
                     continue;
                 }
                 // exclusive access
-                //进行切换,切换前变更模块运行状态
+                //Switch,Change module operation status before switching
                 context.setStatus(StatusEnum.SWITCHING);
                 ConsensusCall.notice(chainId, MODULE_WAITING);
                 TransactionCall.notice(chainId, MODULE_WAITING);

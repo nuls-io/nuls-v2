@@ -88,10 +88,10 @@ public class CreateContractTxProcessor {
         byte[] sender = txData.getSender();
         String senderStr = AddressTool.getStringAddressByBytes(sender);
         String contractAddressStr = AddressTool.getStringAddressByBytes(contractAddress);
-        // 移除未确认的创建合约交易
+        // Remove unconfirmed contract creation transactions
         contractHelper.getChain(chainId).getContractTxCreateUnconfirmedManager().removeLocalUnconfirmedCreateContractTransaction(senderStr, contractAddressStr, contractResult);
 
-        // 执行失败的合约直接返回
+        // Directly return failed contract execution
         if (!contractResult.isSuccess()) {
             return getSuccess();
         }
@@ -112,9 +112,9 @@ public class CreateContractTxProcessor {
         info.setAcceptDirectTransfer(acceptDirectTransfer);
         info.setNrc20(isNrc20Contract);
         info.setTokenType(contractResult.getTokenType());
-        // 获取 token tracker
+        // obtain token tracker
         if (isNrc20Contract) {
-            // NRC20 token 标准方法获取名称数据
+            // NRC20 token Standard method for obtaining name data
             String tokenName = contractResult.getTokenName();
             String tokenSymbol = contractResult.getTokenSymbol();
             int tokenDecimals = contractResult.getTokenDecimals();
@@ -123,7 +123,7 @@ public class CreateContractTxProcessor {
             info.setNrc20TokenSymbol(tokenSymbol);
             info.setDecimals(tokenDecimals);
             info.setTotalSupply(tokenTotalSupply);
-            // add by pierre at 2019-11-02 调用账本模块，登记资产id，当NRC20合约存在[transferCrossChain]方法时，才登记资产id 需要协议升级 done
+            // add by pierre at 2019-11-02 Call the ledger module to register assetsidWhenNRC20Contract exists[transferCrossChain]Only register assets when using the methodid Protocol upgrade required done
             if(ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_V250 ) {
                 List<ProgramMethod> methods = contractHelper.getAllMethods(chainId, txData.getCode());
                 boolean isNewNrc20 = false;
@@ -135,10 +135,10 @@ public class CreateContractTxProcessor {
                     }
                 }
                 if(isNewNrc20) {
-                    Log.info("CROSS-NRC20-TOKEN contract [{}] 向账本注册合约资产", contractAddressStr);
+                    Log.info("CROSS-NRC20-TOKEN contract [{}] Register contract assets with the ledger", contractAddressStr);
                     Map resultMap = LedgerCall.commitNRC20Assets(chainId, tokenName, tokenSymbol, (short) tokenDecimals, tokenTotalSupply, contractAddressStr);
                     if(resultMap != null) {
-                        // 缓存合约地址和合约资产ID
+                        // Cache contract addresses and contract assetsID
                         int assetId = Integer.parseInt(resultMap.get("assetId").toString());
                         Chain chain = contractHelper.getChain(chainId);
                         Map<String, ContractTokenAssetsInfo> tokenAssetsInfoMap = chain.getTokenAssetsInfoMap();
@@ -157,7 +157,7 @@ public class CreateContractTxProcessor {
         ContractData txData = tx.getContractData();
         byte[] contractAddress = txData.getContractAddress();
 
-        // 回滚代币转账交易
+        // Rollback token transfer transaction
         ContractResult contractResult = tx.getContractResult();
         if (contractResult == null) {
             contractResult = contractService.getContractExecuteResult(chainId, tx.getHash());
@@ -171,10 +171,10 @@ public class CreateContractTxProcessor {
         } catch (Exception e) {
             Log.warn("failed to trace create rollback log, error is {}", e.getMessage());
         }
-        // add by pierre at 2019-11-02 调用账本模块，回滚已登记的资产id 需要协议升级 done
+        // add by pierre at 2019-11-02 Call the ledger module to roll back registered assetsid Protocol upgrade required done
         if(ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_V250 && contractResult.isNrc20()) {
             LedgerCall.rollBackNRC20Assets(chainId, AddressTool.getStringAddressByBytes(contractAddress));
-            // 清理缓存
+            // Clear cache
             Chain chain = contractHelper.getChain(chainId);
             Map<String, ContractTokenAssetsInfo> tokenAssetsInfoMap = chain.getTokenAssetsInfoMap();
             ContractTokenAssetsInfo tokenAssetsInfo = tokenAssetsInfoMap.remove(contractAddress);
@@ -206,7 +206,7 @@ public class CreateContractTxProcessor {
         byte[] sender = txData.getSender();
         String contractAddressStr = AddressTool.getStringAddressByBytes(contractAddress);
 
-        // 执行失败的合约直接返回
+        // Directly return failed contract execution
         if (!contractResult.isSuccess()) {
             return getSuccess();
         }
@@ -232,8 +232,8 @@ public class CreateContractTxProcessor {
             if (!isNrc20Contract && !isNrc721Contract) {
                 break;
             }
-            // 获取 token tracker
-            // 处理NRC20/NRC721 token数据
+            // obtain token tracker
+            // handleNRC20/NRC721 tokendata
             String tokenName = contractResult.getTokenName();
             String tokenSymbol = contractResult.getTokenSymbol();
             int tokenDecimals = contractResult.getTokenDecimals();
@@ -243,10 +243,10 @@ public class CreateContractTxProcessor {
             if (!isNrc20Contract) {
                 break;
             }
-            // 处理NRC20 token数据
+            // handleNRC20 tokendata
             info.setDecimals(tokenDecimals);
             info.setTotalSupply(tokenTotalSupply);
-            // add by pierre at 2019-11-02 调用账本模块，登记资产id，当NRC20合约存在[transferCrossChain]方法时，才登记资产id 需要协议升级 done
+            // add by pierre at 2019-11-02 Call the ledger module to register assetsidWhenNRC20Contract exists[transferCrossChain]Only register assets when using the methodid Protocol upgrade required done
             if(ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_V250 ) {
                 List<ProgramMethod> methods = contractHelper.getAllMethods(chainId, txData.getCode());
                 boolean isNewNrc20 = false;
@@ -258,10 +258,10 @@ public class CreateContractTxProcessor {
                     }
                 }
                 if(isNewNrc20) {
-                    Log.info("CROSS-NRC20-TOKEN contract [{}] 向账本注册合约资产", contractAddressStr);
+                    Log.info("CROSS-NRC20-TOKEN contract [{}] Register contract assets with the ledger", contractAddressStr);
                     Map resultMap = LedgerCall.commitNRC20Assets(chainId, tokenName, tokenSymbol, (short) tokenDecimals, tokenTotalSupply, contractAddressStr);
                     if(resultMap != null) {
-                        // 缓存合约地址和合约资产ID
+                        // Cache contract addresses and contract assetsID
                         int assetId = Integer.parseInt(resultMap.get("assetId").toString());
                         Chain chain = contractHelper.getChain(chainId);
                         Map<String, ContractTokenAssetsInfo> tokenAssetsInfoMap = chain.getTokenAssetsInfoMap();
@@ -281,7 +281,7 @@ public class CreateContractTxProcessor {
         ContractData txData = tx.getContractData();
         byte[] contractAddress = txData.getContractAddress();
 
-        // 回滚代币转账交易
+        // Rollback token transfer transaction
         ContractResult contractResult = tx.getContractResult();
         if (contractResult == null) {
             contractResult = contractService.getContractExecuteResult(chainId, tx.getHash());
@@ -295,10 +295,10 @@ public class CreateContractTxProcessor {
         } catch (Exception e) {
             Log.warn("failed to trace create rollback log, error is {}", e.getMessage());
         }
-        // add by pierre at 2019-11-02 调用账本模块，回滚已登记的资产id 需要协议升级 done
+        // add by pierre at 2019-11-02 Call the ledger module to roll back registered assetsid Protocol upgrade required done
         if(ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_V250 && contractResult.isNrc20()) {
             LedgerCall.rollBackNRC20Assets(chainId, AddressTool.getStringAddressByBytes(contractAddress));
-            // 清理缓存
+            // Clear cache
             Chain chain = contractHelper.getChain(chainId);
             Map<String, ContractTokenAssetsInfo> tokenAssetsInfoMap = chain.getTokenAssetsInfoMap();
             ContractTokenAssetsInfo tokenAssetsInfo = tokenAssetsInfoMap.remove(contractAddress);
@@ -326,7 +326,7 @@ public class CreateContractTxProcessor {
         if (saveContractExecuteResult.isFailed()) {
             return saveContractExecuteResult;
         }
-        // 执行失败的合约直接返回
+        // Directly return failed contract execution
         if (!contractResult.isSuccess()) {
             return getSuccess();
         }
@@ -351,7 +351,7 @@ public class CreateContractTxProcessor {
     public Result onRollbackV14(int chainId, ContractWrapperTransaction tx) throws Exception {
         ContractData txData = tx.getContractData();
         byte[] contractAddress = txData.getContractAddress();
-        // 回滚代币转账交易
+        // Rollback token transfer transaction
         ContractResult contractResult = tx.getContractResult();
         if (contractResult == null) {
             contractResult = contractService.getContractExecuteResult(chainId, tx.getHash());

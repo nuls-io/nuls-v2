@@ -5,7 +5,7 @@ import io.nuls.base.api.provider.BaseReq;
 /**
  * @Author: zhoulijun
  * @Time: 2019-07-18 14:26
- * @Description: 创建多签交易
+ * @Description: Create multi signature transactions
  */
 public class CreateMultiSignTransferReq extends TransferReq {
 

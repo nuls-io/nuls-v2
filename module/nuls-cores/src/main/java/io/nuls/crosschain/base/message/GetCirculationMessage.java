@@ -7,7 +7,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 
 /**
- * 主网向友链获取链资产发行量
+ * Main network obtains chain asset issuance from friend chains
  * @author tag
  * @date 2019/4/4
  */

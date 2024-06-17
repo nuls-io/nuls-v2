@@ -10,17 +10,17 @@ import io.nuls.core.parse.SerializeUtils;
 
 import java.io.IOException;
 /**
- * 跨链间跨链交易消息
+ * Cross chain cross chain transaction messages
  * @author tag
  * @date 2019/4/4
  */
 public class NewOtherCtxMessage extends BaseMessage {
     /**
-     * 被请求链协议的跨链交易
+     * Cross chain transactions of the requested chain protocol
      * */
     private Transaction ctx;
     /**
-     * 被请求链协议跨链交易Hash
+     * Cross chain transaction of requested chain protocolHash
      * */
     private NulsHash requestHash;
     @Override

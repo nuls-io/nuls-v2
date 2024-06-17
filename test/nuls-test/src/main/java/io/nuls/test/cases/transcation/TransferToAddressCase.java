@@ -10,14 +10,14 @@ import static io.nuls.test.cases.Constants.*;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-21 10:13
- * @Description: 从种子账户注入10个Nuls到指定账户
+ * @Description: Inject from seed account10individualNulsTo the designated account
  */
 @Component
 public class TransferToAddressCase extends BaseTranscationCase<String, String> {
 
     @Override
     public String title() {
-        return "转账到指定账户";
+        return "Transfer to designated account";
     }
 
     @Override

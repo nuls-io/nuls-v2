@@ -35,7 +35,7 @@ import io.nuls.core.rpc.util.NulsDateUtils;
 import java.io.IOException;
 
 /**
- * 未确认交易的保存, 封装是为了记录交易进入[未确认保存]时的时间,以便作为未确认交易清理机制清理的依据
+ * Save unconfirmed transactions, Encapsulation is to record transaction entry[Unconfirmed save]Time of hour,In order to serve as the basis for clearing unconfirmed transactions through the clearing mechanism
  * @author: Charlie
  * @date: 2019/4/18
  */
@@ -44,7 +44,7 @@ public class TransactionUnconfirmedPO extends BaseNulsData {
     private Transaction tx;
 
     /**
-     * 加入未确认数据库时的时间(非交易创建时间)
+     * The time when joining an unconfirmed database(Non transaction creation time)
      */
     private long createTime;
 

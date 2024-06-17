@@ -57,11 +57,11 @@ public class CrossChainController {
     }
 
     @RpcMethod("rehandlectx")
-    @ApiOperation(description = "重发已经卡主的交易", order = 901, detailDesc = "重发只代表本节点的尝试，不能保证最终结果")
+    @ApiOperation(description = "Resend transactions that have already been held by the cardholder", order = 901, detailDesc = "Resending only represents the attempt of this node and cannot guarantee the final result")
     @Parameters(value = {
-            @Parameter(parameterName = "hash", requestType = @TypeDescriptor(value = String.class), parameterDes = "跨链交易的hash")
+            @Parameter(parameterName = "hash", requestType = @TypeDescriptor(value = String.class), parameterDes = "Cross chain transactionshash")
     })
-    @ResponseData(name = "返回值", description = "是否成功", responseType = @TypeDescriptor(value = Boolean.class))
+    @ResponseData(name = "Return value", description = "Whether successful", responseType = @TypeDescriptor(value = Boolean.class))
     public RpcResult createAccount(List<Object> params) {
         VerifyUtils.verifyParams(params, 1);
         String hash;

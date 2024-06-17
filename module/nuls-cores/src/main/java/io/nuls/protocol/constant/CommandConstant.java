@@ -21,33 +21,33 @@
 package io.nuls.protocol.constant;
 
 /**
- * 存储对外提供的接口命令
+ * Store interface commands provided externally
  *
  * @author captain
  * @version 1.0
- * @date 18-11-9 下午2:15
+ * @date 18-11-9 afternoon2:15
  */
 public interface CommandConstant {
 
-    //普通服务对应的RPC命令
+    //Corresponding to ordinary servicesRPCcommand
     /**
-     * 获取协议版本
+     * Get Protocol Version
      */
     String GET_VERSION = "getVersion";
     /**
-     * 验证新区块协议版本号
+     * Verify the version number of the new block protocol
      */
     String CHECK_BLOCK_VERSION = "checkBlockVersion";
     /**
-     * 保存区块通知
+     * Save Block Notification
      */
     String SAVE_BLOCK = "saveBlock";
     /**
-     * 回滚区块通知
+     * Rollback block notification
      */
     String ROLLBACK_BLOCK = "rollbackBlock";
     /**
-     * 注册多版本协议
+     * Registering Multi Version Protocol
      */
     String REGISTER_PROTOCOL = "registerProtocol";
 }

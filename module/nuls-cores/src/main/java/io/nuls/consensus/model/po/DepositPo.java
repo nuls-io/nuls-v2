@@ -37,7 +37,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 
 /**
- * 存入数据库的委托信息类
+ * Entrusted information stored in the database
  * Delegation information class stored in database
  *
  * @author tag

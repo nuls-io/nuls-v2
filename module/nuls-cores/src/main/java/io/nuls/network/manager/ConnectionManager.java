@@ -54,7 +54,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
 /**
- * 连接管理器,连接的启动，停止，连接引用缓存管理
+ * Connection Manager,Connection start, stop, connection reference cache management
  * Connection manager, connection start, stop, connection reference cache management
  *
  * @author lan
@@ -66,12 +66,12 @@ public class ConnectionManager extends BaseManager {
     NettyServer serverCross = null;
     private static ConnectionManager instance = new ConnectionManager();
     /**
-     * 作为Server 被动连接的peer
+     * As aServer Passively connectedpeer
      * Passer as a server passive connection
      */
     private Map<String, Node> cacheConnectNodeInMap = new ConcurrentHashMap<>();
     /**
-     * 作为client 主动连接的peer
+     * As aclient Actively connectedpeer
      * As the client actively connected peer
      */
     private Map<String, Node> cacheConnectNodeOutMap = new ConcurrentHashMap<>();
@@ -88,7 +88,7 @@ public class ConnectionManager extends BaseManager {
     }
 
     /**
-     * 节点连接失败
+     * Node connection failure
      *
      * @param node
      */
@@ -107,7 +107,7 @@ public class ConnectionManager extends BaseManager {
     }
 
     /**
-     * 加载种子节点
+     * Load seed nodes
      * loadSeedsNode
      */
     private void loadSeedsNode() {
@@ -141,7 +141,7 @@ public class ConnectionManager extends BaseManager {
         nodesContainer.getCanConnectNodes().remove(node.getId());
         node.setConnectStatus(NodeConnectStatusEnum.CONNECTED);
         LoggerUtil.logger(nodeGroup.getChainId()).debug("client node {} connect success !", node.getId());
-        //发送握手
+        //Send handshake
         VersionMessage versionMessage = MessageFactory.getInstance().buildVersionMessage(node, nodeGroup.getMagicNumber());
         MessageManager.getInstance().sendHandlerMsg(versionMessage, node, true);
     }
@@ -163,7 +163,7 @@ public class ConnectionManager extends BaseManager {
 
     public boolean nodeConnectIn(String ip, int port, SocketChannel channel) {
         boolean isCross = false;
-        //client 连接 server的端口是跨链端口?
+        //client connect serverThe port is a cross chain port?
         if (channel.localAddress().getPort() == networkConfig.getCrossPort()) {
             isCross = true;
         }
@@ -172,7 +172,7 @@ public class ConnectionManager extends BaseManager {
             return false;
         }
         LoggerUtil.COMMON_LOG.debug("peer = {}:{} connectIn isCross={}", ip, port, isCross);
-        //此时无法判定业务所属的网络id，所以无法归属哪个group,只有在version消息处理时才能知道
+        //At this time, it is impossible to determine the network to which the business belongsidSo it's impossible to belong to which onegroup,Only inversionOnly during message processing can we know
         Node node = new Node(0L, ip, port, 0, Node.IN, isCross);
         node.setConnectStatus(NodeConnectStatusEnum.CONNECTED);
         node.setChannel(channel);
@@ -191,10 +191,10 @@ public class ConnectionManager extends BaseManager {
         } else {
             nodesContainer = nodeGroup.getLocalNetNodeContainer();
         }
-        //连接断开后,判断是否是为连接成功，还是连接成功后断开
+        //After disconnection,Determine whether it is a successful connection or a disconnection after a successful connection
 
         if (node.getConnectStatus() == NodeConnectStatusEnum.AVAILABLE) {
-            //重置一些信息
+            //Reset some information
             node.setFailCount(0);
             node.setHadShare(false);
             node.setConnectStatus(NodeConnectStatusEnum.DISCONNECT);
@@ -202,9 +202,9 @@ public class ConnectionManager extends BaseManager {
             nodesContainer.getConnectedNodes().remove(node.getId());
 //            Log.info("node {} disconnect !", node.getId());
         } else {
-            // 如果是未连接成功，标记为连接失败，失败次数+1，记录当前失败时间，供下次尝试连接使用
+            // If the connection is unsuccessful, mark it as connection failure, with the number of failures+1Record the current failure time for the next attempt to connect
             if (node.getConnectStatus() == NodeConnectStatusEnum.CONNECTED) {
-                //socket连接上了，但是业务没握手成功，判定为失败连接
+                //socketConnected, but the business handshake was not successful, indicating a failed connection
                 nodesContainer.getConnectedNodes().remove(node.getId());
             }
             nodeConnectFail(node);
@@ -265,10 +265,10 @@ public class ConnectionManager extends BaseManager {
         Collection<NodeGroup> nodeGroups = NodeGroupManager.getInstance().getNodeGroupCollection();
         for (NodeGroup nodeGroup : nodeGroups) {
             if (!nodeGroup.isMoonCrossGroup()) {
-                //自有网络组，增加种子节点的加载，主网的跨链网络组，则无此步骤
+                //This step is not required for self owned network groups, loading seed nodes, and cross chain network groups of the main network
                 loadSeedsNode();
             }
-            //数据库获取node
+            //Database acquisitionnode
             GroupNodesPo groupNodesPo = storageManager.getNodesByChainId(nodeGroup.getChainId());
             nodeGroup.loadNodes(groupNodesPo);
         }
@@ -288,10 +288,10 @@ public class ConnectionManager extends BaseManager {
     public void change(ManagerStatusEnum toStatus) throws Exception {
         status = toStatus;
         if (toStatus == ManagerStatusEnum.STOPED) {
-            //暂时不关闭netty
+            //Temporarily not closednetty
 
         } else if (toStatus == ManagerStatusEnum.RUNNING) {
-            //不处理
+            //Not processed
         }
 
     }

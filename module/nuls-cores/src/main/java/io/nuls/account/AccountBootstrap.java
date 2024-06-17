@@ -42,7 +42,7 @@ public class AccountBootstrap implements INulsCoresBootstrap {
     }
 
     /**
-     * 返回当前模块的描述信息
+     * Return the description information of the current module
      *
      * @return
      */
@@ -57,13 +57,13 @@ public class AccountBootstrap implements INulsCoresBootstrap {
     }
 
     /**
-     * 初始化模块信息，比如初始化RockDB等，在此处初始化后，可在其他bean的afterPropertiesSet中使用
+     * Initialize module information, such as initializationRockDBWait, after initialization here, you can use other optionsbeanofafterPropertiesSetUsed in
      */
     public void init() {
         try {
-            //初始化配置项
+            //Initialize configuration items
             initCfg();
-            //初始化数据库
+            //Initialize database
             initDB();
             chainManager.initChain();
         } catch (Exception e) {
@@ -88,7 +88,7 @@ public class AccountBootstrap implements INulsCoresBootstrap {
             NulsConfig.MAIN_CHAIN_ID = accountConfig.getMainChainId();
             NulsConfig.BLACK_HOLE_PUB_KEY = HexUtil.decode(accountConfig.getBlackHolePublicKey());
             /**
-             * 地址工具初始化
+             * Address tool initialization
              */
             AddressTool.init(addressPrefixDatas);
             AddressTool.addPrefix(accountConfig.getChainId(), accountConfig.getAddressPrefix());
@@ -102,13 +102,13 @@ public class AccountBootstrap implements INulsCoresBootstrap {
     }
 
     /**
-     * 初始化数据库
+     * Initialize database
      * Initialization database
      */
     private void initDB() throws Exception {
-        //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
+        //Read the configuration file, store the data in the root directory, initialize and open all table connections in that directory, and place them in the cache
         RocksDBService.init(accountConfig.getDataPath() + File.separator + ModuleE.AC.name);
-        //初始化表
+        //Initialize Table
         try {
             //If tables do not exist, create tables.
             if (!RocksDBService.existTable(AccountStorageConstant.DB_NAME_ACCOUNT)) {

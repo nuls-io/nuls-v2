@@ -52,7 +52,7 @@ import static io.nuls.contract.constant.ContractCmdConstant.*;
 public class ContractCallContractQueryTest extends BaseQuery {
 
     /**
-     * 验证创建合约
+     * Verify contract creation
      */
     @Test
     public void validateCreate() throws Exception {
@@ -76,7 +76,7 @@ public class ContractCallContractQueryTest extends BaseQuery {
     }
 
     /**
-     * 估算创建合约的gas
+     * Estimating the cost of creating a contractgas
      */
     @Test
     public void imputedCreateGas() throws Exception {
@@ -99,7 +99,7 @@ public class ContractCallContractQueryTest extends BaseQuery {
     }
 
     /**
-     * 验证调用合约 - 合约内部转账
+     * Verify Call Contract - Internal transfer of contract
      */
     @Test
     public void validateCall() throws Exception {
@@ -131,7 +131,7 @@ public class ContractCallContractQueryTest extends BaseQuery {
     }
 
     /**
-     * 验证调用合约 - 合约调用合约
+     * Verify Call Contract - Contract Call Contract
      */
     @Test
     public void validateCall_contractCallContract() throws Exception {
@@ -151,7 +151,7 @@ public class ContractCallContractQueryTest extends BaseQuery {
     }
 
     /**
-     * 估算调用合约的gas - 合约内部转账
+     * Estimating the Call Contractgas - Internal transfer of contract
      */
     @Test
     public void imputedCallGas() throws Exception {
@@ -182,7 +182,7 @@ public class ContractCallContractQueryTest extends BaseQuery {
     }
 
     /**
-     * 估算调用合约的gas - 合约调用合约
+     * Estimating the Call Contractgas - Contract Call Contract
      */
     @Test
     public void imputedCallGas_contractCallContract() throws Exception {
@@ -205,7 +205,7 @@ public class ContractCallContractQueryTest extends BaseQuery {
 
 
     /**
-     * 获取向合约地址转账的手续费
+     * Obtain transaction fees for transferring funds to the contracted address
      */
     @Test
     public void transfer2ContractFee() throws Exception {
@@ -230,7 +230,7 @@ public class ContractCallContractQueryTest extends BaseQuery {
 
 
     /**
-     * token余额
+     * tokenbalance
      */
     @Test
     public void tokenBalance() throws Exception {
@@ -250,7 +250,7 @@ public class ContractCallContractQueryTest extends BaseQuery {
     }
 
     /**
-     * 账户token资产
+     * accounttokenasset
      */
     @Test
     public void tokenAssetsList() throws Exception {
@@ -271,7 +271,7 @@ public class ContractCallContractQueryTest extends BaseQuery {
     }
 
     /**
-     * 账户token交易列表
+     * accounttokenTransaction List
      */
     @Test
     public void tokenTransferList() throws Exception {
@@ -293,7 +293,7 @@ public class ContractCallContractQueryTest extends BaseQuery {
 
 
     /**
-     * 调用合约视图方法
+     * Call Contract View Method
      */
     @Test
     public void invokeView() throws Exception {
@@ -302,7 +302,7 @@ public class ContractCallContractQueryTest extends BaseQuery {
     }
 
     /**
-     * 获取合约构造函数
+     * Get contract constructor
      */
     @Test
     public void constructor() throws Exception {
@@ -323,7 +323,7 @@ public class ContractCallContractQueryTest extends BaseQuery {
     }
 
     /**
-     * 验证删除合约
+     * Verify deletion of contract
      */
     @Test
     public void validateDelete() throws Exception {
@@ -342,7 +342,7 @@ public class ContractCallContractQueryTest extends BaseQuery {
     }
 
     /**
-     * 查交易模块的确认交易
+     * Confirm transactions in the transaction module
      */
     @Test
     public void getConfirmTx() throws Exception {

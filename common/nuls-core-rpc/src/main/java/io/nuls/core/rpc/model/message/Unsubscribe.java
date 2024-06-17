@@ -29,7 +29,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * 取消订阅
+ * Unsubscribe
  * unsubscribe
  *
  * @author tangyi

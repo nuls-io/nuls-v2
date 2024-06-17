@@ -9,7 +9,7 @@ import io.nuls.core.log.Log;
 /**
  * @Author: zhoulijun
  * @Time: 2020/7/28 16:25
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class SignCheck {
 

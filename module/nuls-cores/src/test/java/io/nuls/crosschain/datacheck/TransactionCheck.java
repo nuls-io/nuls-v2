@@ -12,7 +12,7 @@ import io.nuls.crosschain.base.model.bo.txdata.VerifierChangeData;
 /**
  * @Author: zhoulijun
  * @Time: 2020/7/30 17:30
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class TransactionCheck {
 

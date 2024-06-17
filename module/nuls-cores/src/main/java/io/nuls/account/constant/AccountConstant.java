@@ -35,7 +35,7 @@ import java.util.Comparator;
 
 /**
  * @author: qinyifeng
- * @description: 配置常量
+ * @description: Configure Constants
  */
 public interface AccountConstant {
 
@@ -45,31 +45,31 @@ public interface AccountConstant {
      * ----[ System] ----
      */
     /**
-     * 系统配置项section名称
+     * System configuration itemssectionname
      * The configuration item section name of the kernel module.
      */
     String CFG_SYSTEM_SECTION = "system";
 
     /**
-     * 系统配置中语言设置的字段名
+     * Field names for language settings in system configuration
      * The field name of the language set in the system configuration.
      */
     String CFG_SYSTEM_LANGUAGE = "language";
 
     /**
-     * 系统配置中编码设置的字段名
+     * Field names for coding settings in system configuration
      * The field name of the code setting in the system configuration.
      */
     String CFG_SYSTEM_DEFAULT_ENCODING = "encoding";
 
     /**
-     * 系统配置中语言设置的字段名
+     * Field names for language settings in system configuration
      * The field name of the language set in the system configuration.
      */
     String CFG_SYSTEM_TKEYSTORE_FOLDER = "keyDir";
 
     /**
-     * 内核模块地址端口
+     * Kernel module address port
      * Kernel module address port
      */
     String KERNEL_MODULE_PORT = "kernelPort";
@@ -85,12 +85,12 @@ public interface AccountConstant {
      */
     String CFG_CHAIN_SECTION = "chain";
     /**
-     * 主链ID（卫星链ID）
+     * Main chainID（Satellite chainID）
      */
     String MAIN_CHAIN_ID = "mainChainId";
 
     /**
-     * 主链资产ID（卫星链资产ID）
+     * Main chain assetsID（Satellite chain assetsID）
      */
     String MAIN_ASSETS_ID = "mainAssetsId";
 
@@ -103,13 +103,13 @@ public interface AccountConstant {
     String ACCOUNT_LIST_CACHE = "ACCOUNT_LIST";
 
     /**
-     * 设置别名的费用(烧毁)
+     * The cost of setting an alias(Burn down)
      * The cost of setting an alias
      */
     BigInteger ALIAS_FEE = BigInteger.valueOf(100000000);
 
     /**
-     * 导出accountkeystore文件的后缀名
+     * exportaccountkeystoreThe suffix name of the file
      * The suffix of the accountkeystore file
      */
     String ACCOUNTKEYSTORE_FILE_SUFFIX = ".keystore";
@@ -143,19 +143,19 @@ public interface AccountConstant {
      * --------[EVENT constant] -------
      */
     /**
-     * 创建账户事件的主题
+     * Theme for creating account events
      * topic of account create events
      */
     String EVENT_TOPIC_CREATE_ACCOUNT = "evt_ac_createAccount";
 
     /**
-     * 移除账户事件的主题
+     * Remove the theme of account events
      * topic of account remove events
      */
     String EVENT_TOPIC_REMOVE_ACCOUNT = "evt_ac_removeAccount";
 
     /**
-     * 修改账户密码事件的主题
+     * The theme of the account password modification event
      * topic of update account password events
      */
     String EVENT_TOPIC_UPDATE_PASSWORD = "evt_ac_updatePassword";
@@ -164,7 +164,7 @@ public interface AccountConstant {
      * --------[OTHER constant] -------
      */
     /**
-     * Map初始值
+     * MapInitial value
      */
     int INIT_CAPACITY_16 = 16;
     int INIT_CAPACITY_8 = 8;
@@ -182,7 +182,7 @@ public interface AccountConstant {
     String RPC_PATH = "io.nuls.account.rpc";
 
     /**
-     * 普通交易为非解锁交易：0，解锁金额交易（退出共识，退出委托）：-1
+     * Ordinary transactions are non unlocked transactions：0Unlock amount transaction（Exit consensus, exit delegation）：-1
      */
     byte NORMAL_TX_LOCKED = 0;
 
@@ -195,20 +195,20 @@ public interface AccountConstant {
         }
     };
     /**
-     * 操作系统名称
+     * Operating System Name
      */
     String OS_NAME = "os.name";
     /**
-     * WINDOWS系统
+     * WINDOWSsystem
      */
     String OS_WINDOWS = "WINDOWS";
     /**
-     * 路径斜杠
+     * Path slash
      */
     String SLASH = "/";
 
     /**
-     * 交易相关
+     * Transaction related
      */
     int TX_REMARK_MAX_LEN = 100;
 }

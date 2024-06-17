@@ -9,7 +9,7 @@ import io.nuls.core.core.annotation.Component;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-20 13:42
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Component
 public class SyncGetLastBlockHeaderCase extends BaseBlockCase<BlockHeaderData,Integer> {
@@ -19,7 +19,7 @@ public class SyncGetLastBlockHeaderCase extends BaseBlockCase<BlockHeaderData,In
 
     @Override
     public String title() {
-        return "最新区块网络一致性";
+        return "Latest blocknetwork consistency";
     }
 
     @Override
@@ -31,14 +31,14 @@ public class SyncGetLastBlockHeaderCase extends BaseBlockCase<BlockHeaderData,In
         Boolean res = new BlockAbstractRemoteTestCase<>() {
             @Override
             public String title() {
-                return "远程节点区块头数据一致性";
+                return "Remote node block header data consistency";
             }
         }.check(new RemoteTestParam(GetLastBlockHeaderCase.class,blockHeader,null),depth);
         if(!res){
             if(testCount <= 3){
                 return doTest(testCount + 1,depth);
             }
-            throw new TestFailException(title() + "失败，本地节点与远程节点数据不一致");
+            throw new TestFailException(title() + "Failed, local node and remote node data are inconsistent");
         }
         return blockHeader;
     }

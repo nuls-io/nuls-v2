@@ -11,7 +11,7 @@ import io.nuls.core.core.annotation.Component;
 import java.util.Map;
 
 /**
- * 共识区块相关接口
+ * Consensus Block Related Interface
  * @author tag
  * 2018/11/7
  * */
@@ -22,13 +22,13 @@ public class BlockCmd extends BaseCmd {
     private BlockService service;
 
     /**
-     * 缓存新区块头
+     * Cache new block header
      * */
-    @CmdAnnotation(cmd = "cs_addBlock", version = 1.0, description = "接收并缓存新区块/Receiving and caching new blocks")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
-    @Parameter(parameterName = "blockHeader", parameterType = "String", parameterDes = "区块头")
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value",valueType = Boolean.class, description = "接口执行成功与否")
+    @CmdAnnotation(cmd = "cs_addBlock", version = 1.0, description = "Receive and cache new blocks/Receiving and caching new blocks")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid")
+    @Parameter(parameterName = "blockHeader", parameterType = "String", parameterDes = "Block head")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value",valueType = Boolean.class, description = "Whether the interface execution is successful or not")
     }))
     public Response addBlock(Map<String,Object> params){
         Result result = service.addBlock(params);
@@ -39,14 +39,14 @@ public class BlockCmd extends BaseCmd {
     }
 
     /**
-     * 验证区块正确性
+     * Verify block correctness
      * */
-    @CmdAnnotation(cmd = "cs_validBlock", version = 1.0, description = "验证区块/verify block correctness")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
-    @Parameter(parameterName = "download", requestType = @TypeDescriptor(value = int.class), parameterDes = "区块状态")
-    @Parameter(parameterName = "block", parameterType = "String", parameterDes = "区块信息")
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value",valueType = Boolean.class, description = "验证结果")
+    @CmdAnnotation(cmd = "cs_validBlock", version = 1.0, description = "Verify Block/verify block correctness")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid")
+    @Parameter(parameterName = "download", requestType = @TypeDescriptor(value = int.class), parameterDes = "Block status")
+    @Parameter(parameterName = "block", parameterType = "String", parameterDes = "Block information")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value",valueType = Boolean.class, description = "Verification results")
     }))
     public Response validBlock(Map<String,Object> params){
         Result result = service.validBlock(params);
@@ -57,13 +57,13 @@ public class BlockCmd extends BaseCmd {
     }
 
     /**
-     * 接收需缓存的区块
+     * Receive blocks that require caching
      * */
-    @CmdAnnotation(cmd = "cs_receiveHeaderList", version = 1.0, description = "接收并缓存区块列表/Receive and cache block lists")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class),parameterDes = "链id")
-    @Parameter(parameterName = "headerList", parameterType = "List<String>",parameterDes = "区块头列表")
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value",valueType = Boolean.class, description = "是否成功接收处理")
+    @CmdAnnotation(cmd = "cs_receiveHeaderList", version = 1.0, description = "Receive and cache block list/Receive and cache block lists")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class),parameterDes = "chainid")
+    @Parameter(parameterName = "headerList", parameterType = "List<String>",parameterDes = "Block header list")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value",valueType = Boolean.class, description = "Successfully received and processed")
     }))
     public Response receiveHeaderList(Map<String,Object> params){
         Result result = service.receiveHeaderList(params);
@@ -74,13 +74,13 @@ public class BlockCmd extends BaseCmd {
     }
 
     /**
-     * 区块回滚
+     * Block rollback
      * */
-    @CmdAnnotation(cmd = "cs_chainRollBack", version = 1.0, description = "区块回滚/chain rollback")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class),parameterDes = "链id")
-    @Parameter(parameterName = "height", requestType = @TypeDescriptor(value = int.class),parameterDes = "区块回滚到的高度")
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value",valueType = Boolean.class, description = "区块回滚结果")
+    @CmdAnnotation(cmd = "cs_chainRollBack", version = 1.0, description = "Block rollback/chain rollback")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class),parameterDes = "chainid")
+    @Parameter(parameterName = "height", requestType = @TypeDescriptor(value = int.class),parameterDes = "The height to which the block is rolled back")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value",valueType = Boolean.class, description = "Block rollback result")
     }))
     public Response chainRollBack(Map<String,Object> params){
         Result result = service.chainRollBack(params);

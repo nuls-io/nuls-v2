@@ -31,11 +31,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import static io.nuls.block.utils.LoggerUtil.COMMON_LOG;
 
 /**
- * Context管理器
+ * ContextManager
  *
  * @author captain
  * @version 1.0
- * @date 18-11-20 上午10:46
+ * @date 18-11-20 morning10:46
  */
 public class ContextManager {
 

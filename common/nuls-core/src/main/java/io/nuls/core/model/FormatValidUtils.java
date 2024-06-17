@@ -11,8 +11,8 @@ public class FormatValidUtils {
     /**
      *  Check the difficulty of the password
      *  length between 8 and 20, the combination of characters and numbers
-     *  密码验证规则
-     *  @param password   需验证的密码
+     *  Password verification rules
+     *  @param password   Password to be verified
      *  @return boolean
      */
     public static boolean validPassword(String password) {
@@ -33,9 +33,9 @@ public class FormatValidUtils {
     }
 
     /**
-     * 别名规则:只允许使用小写字母、数字、下划线（下划线不能在两端）1~20字节
-     * @param alias  别名
-     * @return       验证结果
+     * Alias rules:Only lowercase letters are allowed、number、Underline（The underline cannot be at both ends）1~20byte
+     * @param alias  alias
+     * @return       Verification results
      */
     public static boolean validAlias(String alias) {
         if (StringUtils.isBlank(alias)) {
@@ -50,9 +50,9 @@ public class FormatValidUtils {
     }
 
     /**
-     * token命名规则:只允许使用大、小写字母、数字、下划线（下划线不能在两端）1~20字节
+     * tokenNaming rules:Only allow the use of large、Lowercase letters、number、Underline（The underline cannot be at both ends）1~20byte
      * @param name   token
-     * @return       验证结果
+     * @return       Verification results
      */
     public static boolean validTokenNameOrSymbol(String name) {
         if (StringUtils.isBlank(name)) {
@@ -87,9 +87,9 @@ public class FormatValidUtils {
         return name.matches("^([a-zA-Z0-9]+[a-zA-Z0-9_]*[a-zA-Z0-9]+)|[a-zA-Z0-9]+${1,20}");
     }
     /**
-     * 备注规则: 可以为空,或者不大于60字节
-     * @param remark   备注
-     * @return         验证结果
+     * Note rules: Can be empty,Or not greater than60byte
+     * @param remark   Remarks
+     * @return         Verification results
      */
     public static boolean validRemark(String remark) {
         if (null == remark) {

@@ -30,7 +30,7 @@ import io.nuls.base.protocol.TxRegisterDetail;
 import java.util.List;
 
 /**
- * 各个模块需要向交易管理模块注册自己的每个交易的验证器，整个模块的验证器
+ * Each module needs to register its own validator for each transaction with the transaction management module, and the validator for the entire module
  * @author: qinyifeng
  * @date: 2018/11/30
  */
@@ -38,12 +38,12 @@ public class ModuleTxRegisterDTO {
 
     private Integer chainId;
     /**
-     * 模块编码
+     * Module coding
      */
     private String moduleCode;
 
     /**
-     * 交易验证器
+     * Transaction validator
      */
     private List<TxRegisterDetail> list;
     private List<Integer> delList;

@@ -11,7 +11,7 @@ import java.util.Arrays;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-07 18:33
- * @Description: 在请求参数中注入默认chainId
+ * @Description: Inject default in request parameterschainId
  */
 public class ServiceProxy implements MethodInterceptor {
 

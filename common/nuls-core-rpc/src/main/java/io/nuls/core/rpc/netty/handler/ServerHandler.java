@@ -24,7 +24,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 服务器端事件触发处理类
+ * Server side event trigger processing class
  * Server-side event trigger processing class
  *
  * @author tag
@@ -75,7 +75,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
                         connectData.getRequestOnlyQueue().offer(new RequestOnly(request, messageSize));
                         connectData.addRequestOnlyQueueMemSize(messageSize);
                     }else{
-                        Log.debug("RequestOnly队列缓存已满，丢弃新接收到的消息，messageId:{},队列所占内存：{}", message.getMessageID(),connectData.getRequestOnlyQueueMemSize());
+                        Log.debug("RequestOnlyThe queue cache is full, discarding newly received messages,messageId:{},Memory occupied by queue：{}", message.getMessageID(),connectData.getRequestOnlyQueueMemSize());
                     }
                 }else{
                     requestExecutorService.execute(messageHandler);

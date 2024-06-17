@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 待广播给其他链节点的区块高度和广播的跨链交易Hash列表数据库相关操作
+ * The block height to be broadcasted to other chain nodes and the cross chain transactions to be broadcastedHashList database related operations
  * Block Height Broadcast to Other Chain Nodes and Related Operation of Broadcast Cross-Chain Transaction Hash List Database
  *
  * @author  tag

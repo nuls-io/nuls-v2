@@ -46,31 +46,31 @@ public class ContractContext {
     public static Charset DEFAULT_ENCODING = StandardCharsets.UTF_8;
 
     /**
-     * 数据库存储地址
+     * Database storage address
      * database path
      */
     public static String DATA_PATH;
 
     /**
-     * 主网链ID（卫星链ID）
+     * Main network chainID（Satellite chainID）
      */
     public static int MAIN_CHAIN_ID = 1;
 
     /**
-     * 主网链资产ID（卫星链资产ID，NULS资产）
+     * Main network chain assetsID（Satellite chain assetsID,NULSasset）
      */
     public static int MAIN_ASSETS_ID = 1;
     /**
-     * 当前链ID
+     * Current ChainID
      */
     public static int CHAIN_ID = 1;
     /**
-     * 当前链资产ID
+     * Current Chain AssetsID
      */
     public static int ASSET_ID = 1;
 
     /**
-     * 代币跨链系统合约地址
+     * Token Cross Chain System Contract Address
      */
     public static byte[] CROSS_CHAIN_SYSTEM_CONTRACT;
 
@@ -87,6 +87,7 @@ public class ContractContext {
     public static short PROTOCOL_15 = 15;
     public static short PROTOCOL_16 = 16;
     public static short PROTOCOL_17 = 17;
+    public static short PROTOCOL_19 = 19;
     private static final LoadingCache<String, ContractAddressInfoPo> CONTRACT_INFO_CACHE;
     private static ContractHelper contractHelper;
 

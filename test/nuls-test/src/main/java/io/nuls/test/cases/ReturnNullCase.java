@@ -5,7 +5,7 @@ import io.nuls.core.core.annotation.Component;
 /**
  * @Author: zhoulijun
  * @Time: 2019-04-10 15:29
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Component
 public class ReturnNullCase extends BaseTestCase<String,String> {

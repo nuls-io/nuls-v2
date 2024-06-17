@@ -1,93 +1,93 @@
 
-# Nuls_2.0-alpha-3 CLI 使用指南
-## 介绍
+# Nuls_2.0-alpha-3 CLI Usage Guide
+## introduce
 
-本文档为NULS2.0 alpha3版本测试网Linux版全节点钱包的使用指南，阅读本文档前用户需了解Linux系统的基本操作和使用方式，本文介绍了在Linux系统中如何利用NULS钱包创建账户、导入账户、转账、建立节点、委托等操作。我们建议用户利用Linux系统服务器建立稳定的NULS节点。
+This document is forNULS2.0 alpha3Version Testing NetworkLinuxThe user guide for the full node wallet version requires understanding before reading this documentLinuxThe basic operation and usage of the system are introduced in this articleLinuxHow to utilize in the systemNULSWallet creation account、Import account、Transfer、Establish nodes、Entrust and other operations. We suggest that users utilizeLinuxEstablish a stable system serverNULSNode.
 
-## 版本更新记录
+## Version update records
 
-|  版本  |  更新日期  |        内容        |
+|  version  |  Update date  |        content        |
 | :----: | :--------: | :----------------: |
-| V1.0.0 | 2019-03-18 | alpha版功能 |
-| V1.0.1 | 2019-05-13|alpha3版功能|
+| V1.0.0 | 2019-03-18 | alphaVersion function |
+| V1.0.1 | 2019-05-13|alpha3Version function|
 
-## 准备
+## prepare
 
-### 服务器硬件配置
+### Server hardware configuration
 
 
-**建立NULS节点的服务器不低于如下配置：**
+**establishNULSThe server of the node should not be lower than the following configuration：**
 
-|     CPU     | 内存 |   硬盘   |  宽带   |
+|     CPU     | Memory |   Hard disk   |  broadband   |
 | :---------: | :---: | :------: | :-----: |
-| 四核 3.0GHz | 16G  | 128G硬盘 | 20M上行 |
+| Tetranuclear 3.0GHz | 16G  | 128GHard disk | 20Mupstream |
 
 
-**推荐配置：**
+**Recommended configuration：**
 
-|     CPU     | 内存 |   硬盘   |   宽带   |
+|     CPU     | Memory |   Hard disk   |   broadband   |
 | :---------: | :---: | :------: | :------: |
-| 八核 3.0GHz | 32G  | 256G硬盘 | 100M上行 |
+| Eight core 3.0GHz | 32G  | 256GHard disk | 100Mupstream |
 
 
 
-### 系统及内核版本
+### System and kernel versions
 
-**Linux系统**
+**Linuxsystem**
 
 - CentOS 6,7
 - Ubuntu 14 +
 
-Linux内核版本推荐使用 2.6.32及以上
+LinuxRecommended kernel version for use 2.6.32And above
 
-## 开始
+## start
 
-### 下载
+### download
 
-- 最新版本的全节点钱包NULS官网下载地址：http://nuls.io/wallet；GitHub地址：https://github.com/nuls-io/nuls-wallet-release
+- The latest version of the full node walletNULSOfficial website download address：http://nuls.io/wallet；GitHubaddress：https://github.com/nuls-io/nuls-wallet-release
 
-- 进入[NULS官网钱包下载](http://nuls.io/wallet)界面后，选择Linux download，我们提供了MEGA和百度云盘两种下载方式，用户可自行选择。
+- enter[NULSOfficial website wallet download](http://nuls.io/wallet)After the interface, selectLinux downloadWe provideMEGAThere are two download methods, Baidu Cloud Disk and Baidu Cloud Disk, which users can choose by themselves.
 
-  Linux系统中下载v2.0.0-alpha-1版的钱包可以使用如下命令：
+  LinuxDownload in the systemv2.0.0-alpha-1The version of the wallet can use the following commands：
 
   ```shell
   $ wget https://media.githubusercontent.com/media/nuls-io/nuls-wallet-release/master/NULS-Wallet-linux64-2.0.0-alpha-3.tar.gz
   ```
 
-  注：如果后续有其他版本，下载地址可能会不同。
+  notes：If there are other versions in the future, the download address may be different.
 
-### 安装
+### install
 
-- 在Linux中解压已下载的文件
+- stayLinuxDecompression of downloaded files
 
   ```shell
   $ tar -zxf NULS-Wallet-linux64-2.0.0-alpha-3.tar.gz
   ```
 
-### 运行
+### working
 
-- 进入解压后的目录，并运行启动脚本，启动全节点钱包
+- Enter the decompressed directory and run the startup script to start the full node wallet
 
   ```shell
   $ cd NULS-Wallet-linux64-2.0.0-alpha-3
   $ ./start.sh
   ```
 
-## 使用钱包
+## Using a wallet
 
-### 快速入门
+### quick get start
 
-- 在确定钱包已经启动后，启动钱包的命令行程序，可对钱包进行操作。
+- After confirming that the wallet has been started, start the command line program of the wallet to operate it.
 
-  进入钱包根目录，执行如下命令：
+  Enter the root directory of the wallet and execute the following command：
 
   ```shell
   $ ./cmd
   ```
 
-  将会出现NULS命名输入提示符`nuls>>>  ` ，然后可直接输入NULS钱包操作命令，来进行操作。
+  Will appearNULSNamed input prompt`nuls>>>  ` , and then you can directly inputNULSThe wallet operation command is used to perform the operation.
 
-  例如，创建账户的示例如下：
+  For example, an example of creating an account is as follows：
 
   ```shell
   nuls>>> create
@@ -98,36 +98,36 @@ Linux内核版本推荐使用 2.6.32及以上
   nuls>>>
   ```
 
-  执行`create`命令表示创建单个账户，然后输入密码，以及再次确认输入的密码，创建成功后将会返回账户的地址。
+  implement`create`The command indicates creating a single account, then entering the password, and confirming the password again. After successful creation, the account address will be returned.
 
 
 
-## 约定
+## convention
 
-- 设置密码规则：密码长度在8至20位，必须同时包含字母和数字。
-- 命令参数说明： &lt;parameter&gt; 表示必填参数；[parameter] 表示选填参数。"|" 在参数中表示或者，表示前后参数只能选其一。
+- Set password rules：The password length is within8to20Bits must contain both letters and numbers.
+- Command parameter description： &lt;parameter&gt; Indicates mandatory parameters；[parameter] Indicates optional parameters."|" In the parameter, represents or, indicating that only one of the preceding and following parameters can be selected.
 
-## 钱包命令
+## Wallet command
 
-### 帮助命令
+### Help Command
 
-输出打印所有的命令，
+Output and print all commands,
 
-- **命令： help [-a]|[group]|[command]**
+- **command： help [-a]|[group]|[command]**
 
-| 参数 | 说明                 |
+| parameter | explain                 |
 | :--- | :------------------- |
-| -a   | 格式化打印命令，选填 |
-| command|查看指定命令使用说明|
-| group|查看指定命令组的所有命令使用说明|
+| -a   | Format printing command, optional |
+| command|View instructions for using specified commands|
+| group|View all command usage instructions for the specified command group|
 
-返回信息 help
+Return Information help
 
 ```json
 getaccount <address> --get account information
 ```
 
-返回信息 help -a
+Return Information help -a
 
 ```json
 getaccount <address> --get account information
@@ -135,7 +135,7 @@ getaccount <address> --get account information
 	<address> the account address - Required
 ```
 
-示例
+Example
 
 ```shell
 nuls>>> help
@@ -146,27 +146,27 @@ nuls>>> help create
 
 
 
-### 创建账户
+### Create an account
 
-创建账户，返回账户地址集合
+Create an account and return a set of account addresses
 
-- **命令： create [number]**
+- **command： create [number]**
 
-| 参数     | 说明                 |
+| parameter     | explain                 |
 | :------- | :------------------- |
-| [number] | 创建账户的数量，选填 |
+| [number] | Number of accounts created, optional |
 
-创建账户时，将会提示输入密码，为了保证资产安全，必须给账户设置密码；
+When creating an account, a password will be prompted. To ensure asset security, a password must be set for the account；
 
-返回账户集合
+Return account collection
 
 ```json
 [ "5MR_2CkDZtZRHGLD43JreUc8LsFBertsc9r", "5MR_2CXCCU89fj9RyQj9MgZVE7Pq3Mmk77p" ]
 ```
 
-示例 
+Example 
 
-创建1个账户
+establish1Accounts
 
 
 ```shell
@@ -176,7 +176,7 @@ Enter your new password:**********
 Please confirm new password:**********
 [ "5MR_2CetN1KeWAVsaUsqD7JwMBwjGuRGpGW" ]
 ```
-一次创建多个账户
+Create multiple accounts at once
 
 ```
 nuls>>> create 3
@@ -189,24 +189,24 @@ Please confirm new password:**********
 
 
 
-### 备份账户
+### Backup account
 
-备份账户，将生成一个名称为账户地址，扩展名为.keystore的文件，该文件为账户的备份文件
+Backup account will generate an account address with an extension of.keystoreThe file is a backup file for the account
 
-- **命令：backup &lt;address&gt; [path]**
+- **command：backup &lt;address&gt; [path]**
 
-| 参数            | 说明                                                 |
+| parameter            | explain                                                 |
 | --------------- | ---------------------------------------------------- |
-| &lt;address&gt; | 账户地址，必填                                       |
-| [path]          | 文件生成备份文件的目标文件夹，默认为当前文件夹，选填 |
+| &lt;address&gt; | Account address, required                                       |
+| [path]          | The target folder for generating backup files, default to the current folder, optional |
 
-返回信息
+Return Information
 
 ```shell
 The path to the backup file is /nuls/bin/NsdyM1Ls5qw8wutvAQsr93jxgq8qYAZy.keystore
 ```
 
-示例 备份一个有密码的账户
+Example Back up an account with a password
 
 ```shell
 nuls>>> backup 5MR_2CetN1KeWAVsaUsqD7JwMBwjGuRGpGW /Users/zlj
@@ -215,23 +215,23 @@ Enter account password
 The path to the backup file is /Users/zlj/5MR_2CetN1KeWAVsaUsqD7JwMBwjGuRGpGW.keystore
 ```
 
-### 移除账户
+### Remove account
 
-根据账户地址移除本地账户，需要输入密码
+To remove a local account based on the account address, a password needs to be entered
 
-- **命令：remove &lt;address&gt;**
+- **command：remove &lt;address&gt;**
 
-| 参数            | 说明             |
+| parameter            | explain             |
 | --------------- | ---------------- |
-| &lt;address&gt; | 账户的地址，必填 |
+| &lt;address&gt; | Account address, required |
 
-返回信息
+Return Information
 
 ```json
 Success
 ```
 
-示例
+Example
 
 ```shell
 nuls>>> remove 5MR_2CetN1KeWAVsaUsqD7JwMBwjGuRGpGW
@@ -240,23 +240,23 @@ Success
 ```
 
 
-### 修改账户密码
+### Change account password
 
-根据账户地址和账户密码重新设置新密码。
+Reset the new password based on the account address and password.
 
-- **命令：resetpwd &lt;address&gt;**
+- **command：resetpwd &lt;address&gt;**
 
-| 参数            | 说明             |
+| parameter            | explain             |
 | --------------- | ---------------- |
-| &lt;address&gt; | 账户的地址，必填 |
+| &lt;address&gt; | Account address, required |
 
-返回信息
+Return Information
 
 ```json
 Success
 ```
 
-示例
+Example
 
 ```shell
 nuls>>> resetpwd 5MR_2CWdfU2VDERgQbWS1quGYAGD1iDDM4N
@@ -268,24 +268,24 @@ Success
 
 
 
-### 设置别名
+### Set alias
 
-给账户设置一个别名，如果用此账户建立节点，别名将作为节点来源显示
+Set an alias for the account. If a node is created using this account, the alias will be displayed as the source of the node
 
-- **命令：setalias &lt;address&gt; &lt;alias&gt;**
+- **command：setalias &lt;address&gt; &lt;alias&gt;**
 
-| 参数            | 说明             |
+| parameter            | explain             |
 | --------------- | ---------------- |
-| &lt;address&gt; | 账户的地址，必填 |
-| &lt;alias&gt;   | 别名名称，必填   |
+| &lt;address&gt; | Account address, required |
+| &lt;alias&gt;   | Alias name, required   |
 
-返回信息 交易hash
+Return Information transactionhash
 
 ```json
 txHash:0020f94f36aefd59f9cca9bff3c018fc287dc6c0bcd7fbeb047133cadb5747e7d98d"
 ```
 
-示例
+Example
 
 ```shell
 nuls>>> setalias 5MR_2CXrzwoCoP4vnUxHJ5gdUUXZJhCpjq9 zlj
@@ -295,25 +295,25 @@ txHash:0020830971e02527f18f8f9e32f974d8c73ce6bd249de859cae170476b87d0ec9582
 
 
 
-### 导入账户keystore
+### Import accountkeystore
 
-导入账户keystore文件，生成本地账户，如果本地已有该账户将无法导入。
+Import accountkeystoreFile, generate a local account. If the account already exists locally, it cannot be imported.
 
-- **命令：importkeystore &lt;path&gt;**
+- **command：importkeystore &lt;path&gt;**
 
-| 参数         | 说明                           |
+| parameter         | explain                           |
 | ------------ | ------------------------------ |
-| &lt;path&gt; | 待导入的keystore文件地址，必填 |
+| &lt;path&gt; | To be importedkeystoreFile address, mandatory |
 
-注意：导入keystore文件生成账户时，需要原始密码
+take care：ImportkeystoreWhen generating an account for files, the original password is required
 
-返回信息 导入的账户地址
+Return Information Imported account address
 
 ```json
 "NsdyM1Ls5qw8wutvAQsr93jxgq8qYAZy"
 ```
 
-示例
+Example
 
 ```shell
 nuls>>> importkeystore /Users/zhoulijun/5MR_2CetN1KeWAVsaUsqD7JwMBwjGuRGpGW.keystore
@@ -324,22 +324,22 @@ Enter your password:**********
 
 
 
-### 导入账户私钥
+### Import account private key
 
-导入账户私钥，生成本地账户，如果本地已有该账户将覆盖,导入时需要给账户设置密码。此功能可以用于忘记账户密码后，通过私钥重新找回账户。
+Import the account private key and generate a local account. If the account already exists locally, it will be overwritten,When importing, a password needs to be set for the account. This function can be used to retrieve the account through the private key after forgetting the account password.
 
-- **命令：import &lt;privatekey&gt;**
+- **command：import &lt;privatekey&gt;**
 
-| 参数               | 说明             |
+| parameter               | explain             |
 | ------------------ | ---------------- |
-| &lt;privatekey&gt; | 账户的私钥，必填 |
+| &lt;privatekey&gt; | The private key of the account, required |
 
 
 ```json
 "NsdyM1Ls5qw8wutvAQsr93jxgq8qYAZy"
 ```
 
-示例
+Example
 
 ```shell
 nuls>>> import 1c2b9fd4417c1aad8ae9f24c982ff294eb50a6462b873b79a879e805a9990346
@@ -349,70 +349,70 @@ Please confirm new password:**********
 5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu
 ```
 
-### 查询账户信息
+### Query account information
 
-根据账户地址查询账户信息
+Query account information based on account address
 
-- **命令：getaccount &lt;address&gt;**
+- **command：getaccount &lt;address&gt;**
 
-| 参数            | 说明           |
+| parameter            | explain           |
 | --------------- | :------------- |
-| &lt;address&gt; | 账户地址，必填 |
+| &lt;address&gt; | Account address, required |
 
-返回信息
+Return Information
 
 ```json
 {
-  "encryptedPrikeyHex" : "724d68268849f3680d480c9257f33229c0fac88890d5355c0e4d9c457af5c6e8b8f9f7ca9fd52fbd8079fbce1782052d",  //加密后的私钥
-  "alias" : "zlj",  //别名
+  "encryptedPrikeyHex" : "724d68268849f3680d480c9257f33229c0fac88890d5355c0e4d9c457af5c6e8b8f9f7ca9fd52fbd8079fbce1782052d",  //Encrypted private key
+  "alias" : "zlj",  //alias
   "baglance" : {  
-    "freeze" : 0,   //冻结的资产数量
-    "total" : 997999999800000,     //总的资产数量
-    "available" : 997999999800000  //可用的资产数量
+    "freeze" : 0,   //Number of frozen assets
+    "total" : 997999999800000,     //Total number of assets
+    "available" : 997999999800000  //Number of available assets
   },
-  "address" : "5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu",  //账户地址
-  "pubkeyHex" : "0211c45f28710cd26a2c45fb790895a0ff2e095a290f1825b31d80ebc30913c486" //公钥
+  "address" : "5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu",  //Account address
+  "pubkeyHex" : "0211c45f28710cd26a2c45fb790895a0ff2e095a290f1825b31d80ebc30913c486" //Public key
 }
 ```
 
-示例
+Example
 
 ```shell
 nuls>>> getaccount 5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu
 {
-  "encryptedPrikeyHex" : "724d68268849f3680d480c9257f33229c0fac88890d5355c0e4d9c457af5c6e8b8f9f7ca9fd52fbd8079fbce1782052d",  //加密后的私钥
-  "alias" : "zlj",  //别名
+  "encryptedPrikeyHex" : "724d68268849f3680d480c9257f33229c0fac88890d5355c0e4d9c457af5c6e8b8f9f7ca9fd52fbd8079fbce1782052d",  //Encrypted private key
+  "alias" : "zlj",  //alias
   "baglance" : {  
-    "freeze" : 0,   //冻结的资产数量
-    "total" : 997999999800000,     //总的资产数量
-    "available" : 997999999800000  //可用的资产数量
+    "freeze" : 0,   //Number of frozen assets
+    "total" : 997999999800000,     //Total number of assets
+    "available" : 997999999800000  //Number of available assets
   },
-  "address" : "5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu",  //账户地址
-  "pubkeyHex" : "0211c45f28710cd26a2c45fb790895a0ff2e095a290f1825b31d80ebc30913c486" //加密后的公钥
+  "address" : "5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu",  //Account address
+  "pubkeyHex" : "0211c45f28710cd26a2c45fb790895a0ff2e095a290f1825b31d80ebc30913c486" //Encrypted public key
 }
 ```
 
 
 
-### 查询账户列表
+### Query account list
 
-根据分页参数查询账户列表，所有账户以创建时间倒序输出。
+Query the account list based on pagination parameters, and output all accounts in reverse order of creation time.
 
-- **命令：getaccounts &lt;pageNumber&gt; &lt;pageSize&gt;**
+- **command：getaccounts &lt;pageNumber&gt; &lt;pageSize&gt;**
 
-| 参数               | 说明                             |
+| parameter               | explain                             |
 | ------------------ | -------------------------------- |
-| &lt;pageNumber&gt; | 页数，需要获取第几页的数据，必填 |
-| &lt;pageSize&gt;   | 每一页显示的数据条数，必填       |
+| &lt;pageNumber&gt; | Page number, which page of data needs to be obtained, mandatory |
+| &lt;pageSize&gt;   | The number of data displayed on each page is mandatory       |
 
-返回信息，将输出账户集合
+Return information to output the account set
 
 ```json
 [ {
-  "address" : "5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu",  //地址
-  "alias" : null,  //别名
-  "pubkeyHex" : "0211c45f28710cd26a2c45fb790895a0ff2e095a290f1825b31d80ebc30913c486",  //公钥
-  "encryptedPrikeyHex" : "724d68268849f3680d480c9257f33229c0fac88890d5355c0e4d9c457af5c6e8b8f9f7ca9fd52fbd8079fbce1782052d"  //私钥
+  "address" : "5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu",  //address
+  "alias" : null,  //alias
+  "pubkeyHex" : "0211c45f28710cd26a2c45fb790895a0ff2e095a290f1825b31d80ebc30913c486",  //Public key
+  "encryptedPrikeyHex" : "724d68268849f3680d480c9257f33229c0fac88890d5355c0e4d9c457af5c6e8b8f9f7ca9fd52fbd8079fbce1782052d"  //Private key
 }, {
   "address" : "5MR_2CetN1KeWAVsaUsqD7JwMBwjGuRGpGW",
   "alias" : null,
@@ -428,15 +428,15 @@ nuls>>> getaccount 5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu
 
 
 
-示例 获取账户列表
+Example Get account list
 
 ```shell
 nuls>>> getaccounts
 [ {
-  "address" : "5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu",  //地址
-  "alias" : null,  //别名
-  "pubkeyHex" : "0211c45f28710cd26a2c45fb790895a0ff2e095a290f1825b31d80ebc30913c486",  //加密后的公钥
-  "encryptedPrikeyHex" : "724d68268849f3680d480c9257f33229c0fac88890d5355c0e4d9c457af5c6e8b8f9f7ca9fd52fbd8079fbce1782052d"  //加密后的私钥
+  "address" : "5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu",  //address
+  "alias" : null,  //alias
+  "pubkeyHex" : "0211c45f28710cd26a2c45fb790895a0ff2e095a290f1825b31d80ebc30913c486",  //Encrypted public key
+  "encryptedPrikeyHex" : "724d68268849f3680d480c9257f33229c0fac88890d5355c0e4d9c457af5c6e8b8f9f7ca9fd52fbd8079fbce1782052d"  //Encrypted private key
 }, {
   "address" : "5MR_2CetN1KeWAVsaUsqD7JwMBwjGuRGpGW",
   "alias" : null,
@@ -452,23 +452,23 @@ nuls>>> getaccounts
 
 
 
-### 查询账户私钥
+### Query account private key
 
-根据账户地址个密码查询账户私钥
+Query account private key based on account address and password
 
-- **命令：getprikey &lt;address&gt;**
+- **command：getprikey &lt;address&gt;**
 
-| 参数            | 说明             |
+| parameter            | explain             |
 | --------------- | ---------------- |
-| &lt;address&gt; | 账户的地址，必填 |
+| &lt;address&gt; | Account address, required |
 
-返回信息 导入的账户的私钥（未加密）
+Return Information The private key of the imported account（unencrypted）
 
 ```json
 00a166d10c2cc4cd8f76449ff699ab3eee44fe4f82b4bb866f7bba02751a6fd655
 ```
 
-示例
+Example
 
 ```shell
 nuls>>> getprikey 5MR_2CXrzwoCoP4vnUxHJ5gdUUXZJhCpjq9
@@ -478,27 +478,27 @@ Enter your account password**********
 
 
 
-### 查询账户余额
+### Query account balance
 
-根据账户地址查询账户余额
+Query account balance based on account address
 
-- **命令：getbalance &lt;address&gt;**
+- **command：getbalance &lt;address&gt;**
 
-| 参数            | 说明             |
+| parameter            | explain             |
 | --------------- | ---------------- |
-| &lt;address&gt; | 账户的地址，必填 |
+| &lt;address&gt; | Account address, required |
 
-返回信息 导入的账户地址
+Return Information Imported account address
 
 ```json
 {
-  "total" : "9999998.99",//余额
-  "freeze" : "0",//已锁定余额
-  "available" : "9999998.99"//可用余额
+  "total" : "9999998.99",//balance
+  "freeze" : "0",//Locked balance
+  "available" : "9999998.99"//Available balance
 }
 ```
 
-示例
+Example
 
 ```shell
 nuls>>> getbalance Nse2TpVsJd4gLoj79MAY8NHwEsYuXwtT
@@ -511,31 +511,31 @@ nuls>>> getbalance Nse2TpVsJd4gLoj79MAY8NHwEsYuXwtT
 
 
 
-### 转账
+### Transfer
 
-根据账户地址或别名将NULS转入另一账户地址或别名中
+According to the account address or aliasNULSTransfer to another account address or alias
 
-- **命令：transfer &lt;formAddress&gt;|<formAlias> &lt;toAddress&gt;|<toAlias> &lt;amount&gt; [remark] **
+- **command：transfer &lt;formAddress&gt;|<formAlias> &lt;toAddress&gt;|<toAlias> &lt;amount&gt; [remark] **
 
-| 参数              | 说明                                            |
+| parameter              | explain                                            |
 | ----------------- | ----------------------------------------------- |
-| &lt;formAddress&gt; | 转出地址(与formAlias任选一项）                                |
-|<formAlias>|转出地址别名(与formAddress任选一项）|
-| &lt;toAddress&gt; | 接收地址(与toAlias任选一项）                               |
-|<toAlias>|接收地址别名(与toAddress任选一项）|
-| &lt;amount&gt;    | 转账数量，必填 |
-| [remark]          | 备注信息，选填                                  |
+| &lt;formAddress&gt; | Transfer address(Related toformAliasChoose any one option）                                |
+|<formAlias>|Transfer address alias(Related toformAddressChoose any one option）|
+| &lt;toAddress&gt; | Receiving address(Related totoAliasChoose any one option）                               |
+|<toAlias>|Receive address alias(Related totoAddressChoose any one option）|
+| &lt;amount&gt;    | Transfer quantity, required |
+| [remark]          | Note information, optional                                  |
 
-返回信息 转账交易hash
+Return Information Transfer transactionhash
 
 ```json
 "00200bef73ad728c48146c8a5eb0d76fe7325b85803c61d8357c16dba09ea33b3596"
 ```
 
-示例
+Example
 
 ```shell
-nuls>>> transfer Nse2TpVsJd4gLoj79MAY8NHwEsYuXwtT NsdtmV5XkgSdpBXi65ueTsrv2W5beV2T 100 转账
+nuls>>> transfer Nse2TpVsJd4gLoj79MAY8NHwEsYuXwtT NsdtmV5XkgSdpBXi65ueTsrv2W5beV2T 100 Transfer
 Please enter the password.
 Enter your password:**********
 "00200bef73ad728c48146c8a5eb0d76fe7325b85803c61d8357c16dba09ea33b3596"
@@ -543,21 +543,21 @@ Enter your password:**********
 
 
 
-### 查询交易详情
+### Query transaction details
 
-根据交易hash查询交易详细信息
+According to the transactionhashQuery transaction details
 
-- **命令：gettx &lt;hash&gt;**
+- **command：gettx &lt;hash&gt;**
 
-| 参数         | 说明           |
+| parameter         | explain           |
 | ------------ | -------------- |
-| &lt;hash&gt; | 交易hash，必填 |
+| &lt;hash&gt; | transactionhash, mandatory |
 
-返回信息 交易详细信息
+Return Information Transaction Details
 
 ```json
 {
-  "type" : 2,  //交易类型（枚举说明见下表【type 枚举类型说明】）
+  "type" : 2,  //Transaction type（The enumeration instructions are shown in the table below【type Description of enumeration types】）
   "coinData" : "ARc5MAGYBT3XNVp+BIuhGvGcejuTev8DODkwAQCgZ/cFAAAAAAAAAAAAAAAACO/WnDT4pvmsAAEXOTABL/80LO1f8vxvfNXc5l9eeIDTGKM5MAEAAOH1BQAAAAAAAAAAAAAAAAA=",
   "txData" : null,
   "time" : 1552979783918,
@@ -568,8 +568,8 @@ Enter your password:**********
     "digestBytes" : "CivAIHpVyqNr/h87/FWk7vXsXqBekHJ+3kQc5mZp+H8=", 
     "digestHex" : "00200a2bc0207a55caa36bfe1f3bfc55a4eef5ec5ea05e90727ede441ce66669f87f" 
   },
-  "blockHeight" : 341,   //区块高度
-  "status" : "CONFIRMED",  //确认状态
+  "blockHeight" : 341,   //block height
+  "status" : "CONFIRMED",  //Confirm status
   "size" : 225,
   "inBlockIndex" : 0,
   "coinDataInstance" : {  
@@ -589,17 +589,17 @@ Enter your password:**********
       "lockTime" : 0
     } ]
   },
-  "fee" : 100000,  //手续费
+  "fee" : 100000,  //Handling fees
   "multiSignTx" : false
 }
 ```
 
-示例 查询转账交易
+Example Query transfer transactions
 
 ```shell
 nuls>>> gettx 00200a2bc0207a55caa36bfe1f3bfc55a4eef5ec5ea05e90727ede441ce66669f87f
 {
-  "type" : 2,  //交易类型（枚举说明见下表【type 枚举类型说明】）
+  "type" : 2,  //Transaction type（The enumeration instructions are shown in the table below【type Description of enumeration types】）
   "coinData" : "ARc5MAGYBT3XNVp+BIuhGvGcejuTev8DODkwAQCgZ/cFAAAAAAAAAAAAAAAACO/WnDT4pvmsAAEXOTABL/80LO1f8vxvfNXc5l9eeIDTGKM5MAEAAOH1BQAAAAAAAAAAAAAAAAA=",
   "txData" : null,
   "time" : 1552979783918,
@@ -610,8 +610,8 @@ nuls>>> gettx 00200a2bc0207a55caa36bfe1f3bfc55a4eef5ec5ea05e90727ede441ce66669f8
     "digestBytes" : "CivAIHpVyqNr/h87/FWk7vXsXqBekHJ+3kQc5mZp+H8=", 
     "digestHex" : "00200a2bc0207a55caa36bfe1f3bfc55a4eef5ec5ea05e90727ede441ce66669f87f" 
   },
-  "blockHeight" : 341,   //区块高度
-  "status" : "CONFIRMED",  //确认状态
+  "blockHeight" : 341,   //block height
+  "status" : "CONFIRMED",  //Confirm status
   "size" : 225,
   "inBlockIndex" : 0,
   "coinDataInstance" : {  
@@ -631,69 +631,69 @@ nuls>>> gettx 00200a2bc0207a55caa36bfe1f3bfc55a4eef5ec5ea05e90727ede441ce66669f8
       "lockTime" : 0
     } ]
   },
-  "fee" : 100000,  //手续费
+  "fee" : 100000,  //Handling fees
   "multiSignTx" : false
 }
 ```
-#### type 枚举类型说明
+#### type Description of enumeration types
 
 ```
-/** coinbase交易*/
+/** coinbasetransaction*/
     int TX_TYPE_COINBASE = 1;
-    /** 转账交易*/
+    /** Transfer transaction*/
     int TX_TYPE_TRANSFER = 2;
-    /** 设置别名*/
+    /** Set alias*/
     int TX_TYPE_ALIAS = 3;
-    /** 创建共识节点交易*/
+    /** Create consensus node transactions*/
     int TX_TYPE_REGISTER_AGENT = 4;
-    /** 委托交易(加入共识)*/
+    /** Entrusted transaction(Join consensus)*/
     int TX_TYPE_JOIN_CONSENSUS = 5;
-    /** 取消委托交易(退出共识)*/
+    /** Cancel entrusted transaction(Exit consensus)*/
     int TX_TYPE_CANCEL_DEPOSIT = 6;
-    /** 黄牌惩罚*/
+    /** Yellow card punishment*/
     int TX_TYPE_YELLOW_PUNISH = 7;
-    /** 红牌惩罚*/
+    /** Red card punishment*/
     int TX_TYPE_RED_PUNISH = 8;
-    /** 停止节点(删除共识节点)*/
+    /** Stop node(Delete consensus node)*/
     int TX_TYPE_STOP_AGENT = 9;
-    /** 跨链转账交易*/
+    /** Cross chain transfer transactions*/
     int TX_TYPE_CROSS_CHAIN_TRANSFER = 10;
-    /** 注册链交易*/
+    /** Registration Chain Transaction*/
     int TX_TYPE_REGISTER_CHAIN_AND_ASSET = 11;
-    /** 销毁链*/
+    /** Destruction chain*/
     int TX_TYPE_DESTROY_CHAIN_AND_ASSET = 12;
-    /** 为链新增一种资产*/
+    /** Add an asset to the chain*/
     int TX_TYPE_ADD_ASSET_TO_CHAIN = 13;
-    /** 删除链上资产*/
+    /** Delete on chain assets*/
     int TX_TYPE_REMOVE_ASSET_FROM_CHAIN = 14;
-    /** 创建智能合约交易*/
+    /** Create smart contract transactions*/
     int TX_TYPE_CREATE_CONTRACT = 100;
-    /** 调用智能合约交易*/
+    /** Calling smart contract transactions*/
     int TX_TYPE_CALL_CONTRACT = 101;
-    /** 删除智能合约交易*/
+    /** Delete smart contract transactions*/
     int TX_TYPE_DELETE_CONTRACT = 102;
 ```
 
-### 创建节点
+### Create nodes
 
-根据账户地址创建节点,创建节点时需要提供两个地址，第一个地址为节点地址，需要输入节点地址账户密码，第二地址为打包地址，不需要输入密码。同时需要至少20000NULS的保证金。
+Create nodes based on account addresses,When creating a node, two addresses need to be provided. The first address is the node address, and the node address account password needs to be entered. The second address is the packaging address, and no password needs to be entered. At least20000NULSThe security deposit.
 
-- **命令：createagent &lt;agentAddress&gt; &lt;packingAddress&gt; &lt;commissionRate&gt; &lt;deposit&gt;**
+- **command：createagent &lt;agentAddress&gt; &lt;packingAddress&gt; &lt;commissionRate&gt; &lt;deposit&gt;**
 
-| 参数                   | 说明                                                         |
+| parameter                   | explain                                                         |
 | ---------------------- | ------------------------------------------------------------ |
-| &lt;agentAddress&gt;   | 创建节点的账户地址，必填                                     |
-| &lt;packingAddress&gt; | 节点打包账户地址，必填（注：该账户不能设置密码，否则节点不能打包出块） |
-| &lt;commissionRate&gt; | 代理佣金比例，范围：10~100，必填                             |
-| &lt;deposit&gt;        | 创建节点的保证金，不能低于20000NULS，必填                    |
+| &lt;agentAddress&gt;   | Account address for creating node, required                                     |
+| &lt;packingAddress&gt; | Node packaging account address, mandatory（notes：This account cannot be set with a password, otherwise the node cannot package blocks） |
+| &lt;commissionRate&gt; | Agency commission ratio, range：10~100, mandatory                             |
+| &lt;deposit&gt;        | The margin for creating nodes cannot be lower than20000NULS, mandatory                    |
 
-返回信息 返回节点的agent hash
+Return Information Return node'sagent hash
 
 ```json
 "002006a5b7eb1d32ed6d7d54e24e219b112d4fdb8530db5506ee953b6f65a0fdb55e"
 ```
 
-示例 创建一个节点，佣金比例为10%，押金20000NULS。
+Example Create a node with a commission ratio of10%Deposit20000NULS.
 
 ```shell
 nuls>>> createagent Nse2TpVsJd4gLoj79MAY8NHwEsYuXwtT NsdvAnqc8oEiNiGgcp6pEusfiRFZi4vt 10 20000
@@ -701,19 +701,19 @@ Please enter the password.
 Enter your password:**********
 "002006a5b7eb1d32ed6d7d54e24e219b112d4fdb8530db5506ee953b6f65a0fdb55e"
 ```
-### 查询共识节点信息
-根据agentHash查询指定节点信息
+### Query consensus node information
+according toagentHashQuery specified node information
 
--**命令：getagent <agentHash>**
-| 参数              | 说明                                   |
+-**command：getagent <agentHash>**
+| parameter              | explain                                   |
 | ----------------- | -------------------------------------- |
-| &lt;agentHash&gt;   | 节点hash                        |
-返回值
+| &lt;agentHash&gt;   | nodehash                        |
+Return value
 
 ```
-略 见示例
+slightly See example
 ```
-示例
+Example
 
 ```
 nuls>>> getagent 0020623133fe6e9a530b5658873439c6db3673cbeaa092d4a0c837ee00245f3b7eb7
@@ -738,20 +738,20 @@ nuls>>> getagent 0020623133fe6e9a530b5658873439c6db3673cbeaa092d4a0c837ee00245f3
 }
 ```
 
-### 查询共识节点列表
-查询共识节点列表
--**命令：getagents [pageNumber] [pageSize] [keyWord]**
-| 参数              | 说明                                   |
+### Query consensus node list
+Query consensus node list
+-**command：getagents [pageNumber] [pageSize] [keyWord]**
+| parameter              | explain                                   |
 | ----------------- | -------------------------------------- |
-| [pageNumber];   | 列表页号位置                      |
-| [pageSize]; | 每页显示条数                  |
-| [keyWord];   | 匹配节点别名关键字 |
-返回值
+| [pageNumber];   | List page number position                      |
+| [pageSize]; | Number of displayed items per page                  |
+| [keyWord];   | Matching node alias keywords |
+Return value
 
 ```
-略 见示例
+slightly See example
 ```
-示例 获取第1页，共10条，别名带nuls的节点列表
+Example Get the number1Page of10Bar, alias bandnulsNode list for
 ```
 nuls>>> getagents 1 10 nuls
 [ {
@@ -777,25 +777,25 @@ nuls>>> getagents 1 10 nuls
 
 
 
-### 加入共识（委托节点）
+### Join consensus（Delegate node）
 
-根据账户地址和节点agentHash，加入共识，至少需要2000NULS
+Based on account address and nodeagentHashJoining consensus requires at least2000NULS
 
-- **命令：deposit &lt;address&gt; &lt;agentHash&gt; &lt;deposit&gt;**
+- **command：deposit &lt;address&gt; &lt;agentHash&gt; &lt;deposit&gt;**
 
-| 参数              | 说明                                   |
+| parameter              | explain                                   |
 | ----------------- | -------------------------------------- |
-| &lt;address&gt;   | 账户地址，必填                         |
-| &lt;agentHash&gt; | 节点的agentHash，必填                  |
-| &lt;deposit&gt;   | 加入共识保证金，不能低于2000NULS，必填 |
+| &lt;address&gt;   | Account address, required                         |
+| &lt;agentHash&gt; | Node'sagentHash, mandatory                  |
+| &lt;deposit&gt;   | Joining consensus margin, cannot be lower than2000NULS, mandatory |
 
-返回信息 加入共识的交易hash，如果要退出这笔共识，则需要该hash。
+Return Information Joining consensus on transactionshashIf you want to withdraw from this consensus, you need tohash.
 
 ```json
 "0020d349b7ad322ff958e3abfa799d9ac76341afa6e1fb4d3857353a5adc74ba3fd0"
 ```
 
-示例
+Example
 
 ```shell
 nuls>>> deposit NsdtmV5XkgSdpBXi65ueTsrv2W5beV2T 002006a5b7eb1d32ed6d7d54e24e219b112d4fdb8530db5506ee953b6f65a0fdb55e 5000
@@ -804,24 +804,24 @@ nuls>>> deposit NsdtmV5XkgSdpBXi65ueTsrv2W5beV2T 002006a5b7eb1d32ed6d7d54e24e219
 
 
 
-### 退出共识（退出委托）
+### Exit consensus（Exit the commission）
 
-根据账户地址和加入共识时的交易hash来退出共识(委托)，单个账户多次委托节点时，每次委托的交易是独立的，所以退出时也要通过单次委托时的交易hash来退出对应的那一次委托，而不会一次退出所有委托。
+Based on account address and transactions upon joining consensushashTo withdraw from the consensus(entrust)When a single account entrusts nodes multiple times, each transaction entrusted is independent, so when exiting, it also needs to go through the transaction during the single entrustmenthashExit the corresponding delegate instead of exiting all delegates at once.
 
-- **命令：withdraw &lt;address&gt; &lt;txHash&gt;**
+- **command：withdraw &lt;address&gt; &lt;txHash&gt;**
 
-| 参数            | 说明                   |
+| parameter            | explain                   |
 | --------------- | ---------------------- |
-| &lt;address&gt; | 账户地址，必填         |
-| &lt;txHash&gt;  | 委托时的交易hash，必填 |
+| &lt;address&gt; | Account address, required         |
+| &lt;txHash&gt;  | Transaction at the time of commissionhash, mandatory |
 
-返回信息 退出共识交易hash
+Return Information Exit consensus tradinghash
 
 ```json
 "00201d70ac37b53d41c0e813ad245fc42e1d3a5d174d9148fbbbaed3c18d4d67bdbf"
 ```
 
-示例
+Example
 
 ```shell
 nuls>>> withdraw NsdtmV5XkgSdpBXi65ueTsrv2W5beV2T 0020d349b7ad322ff958e3abfa799d9ac76341afa6e1fb4d3857353a5adc74ba3fd0
@@ -830,23 +830,23 @@ nuls>>> withdraw NsdtmV5XkgSdpBXi65ueTsrv2W5beV2T 0020d349b7ad322ff958e3abfa799d
 
 
 
-### 停止节点
+### Stop node
 
-停止节点，所有委托给节点的NULS将被退回，节点创建者账户的保证金将会被锁定72小时。
+Stop the node, all delegated tasks to the nodeNULSWill be refunded, and the deposit in the node creator's account will be locked72Hours.
 
-- **命令：stopagent &lt;address&gt;**
+- **command：stopagent &lt;address&gt;**
 
-| 参数            | 说明           |
+| parameter            | explain           |
 | --------------- | -------------- |
-| &lt;address&gt; | 账户地址，必填 |
+| &lt;address&gt; | Account address, required |
 
-返回信息 停止节点交易hash
+Return Information Stop node transactionshash
 
 ```json
 "0020f15eecd7c85be76521ed6af4d58a3810f7df58e536481cff4a96af6d4fddec5f"
 ```
 
-示例
+Example
 
 ```shell
 nuls>>> stopagent Nse2TpVsJd4gLoj79MAY8NHwEsYuXwtT
@@ -856,25 +856,25 @@ Enter your password:**********
 ```
 
 
-### 获取最新的区块头信息
+### Get the latest block header information
 
-获取最新的区块头信息
+Get the latest block header information
 
-- **命令：getbestblockheader**
+- **command：getbestblockheader**
 
-返回信息
+Return Information
 
 ```json
 {
-  "hash" : "0020b446a0244e4e46f8736f1ab56c33616facb836bc8344367f2f048b703f0c8f57",  //区块hash
-  "preHash" : "0020c0dcf9209f66ee7e7778c817ba7c04d67b5e6a056b42dec7fbfe44eb5f91bdfc",  //上一个区块hash
+  "hash" : "0020b446a0244e4e46f8736f1ab56c33616facb836bc8344367f2f048b703f0c8f57",  //blockhash
+  "preHash" : "0020c0dcf9209f66ee7e7778c817ba7c04d67b5e6a056b42dec7fbfe44eb5f91bdfc",  //Previous blockhash
   "merkleHash" : "00200511ced5779c54aa2170b941a1f9a7ae08dfd009b1dfaacc3679d15da9fb9c3e",  //merkle hash
-  "time" : "2019-03-19 18:26:20.020",  //打包时间
-  "height" : 1479, //区块高度
-  "txCount" : 1,   //包含的交易数
-  "blockSignature" : "00473045022100b1a07f6da3d4ce46cab278967d76875483527e3fc749a460afdf0c375f2ec2ae022053e40e8b4d8bf4e571284e45f18c46c31163ed640a2328f3ba90ac7708808365", //区块签名
-  "size" : 0, //区块大小
-  "packingAddress" : null,  //打包地址
+  "time" : "2019-03-19 18:26:20.020",  //Packaging time
+  "height" : 1479, //block height
+  "txCount" : 1,   //Number of transactions included
+  "blockSignature" : "00473045022100b1a07f6da3d4ce46cab278967d76875483527e3fc749a460afdf0c375f2ec2ae022053e40e8b4d8bf4e571284e45f18c46c31163ed640a2328f3ba90ac7708808365", //Block signature
+  "size" : 0, //block size
+  "packingAddress" : null,  //Packaging address
   "roundIndex" : 155299118, 
   "consensusMemberCount" : 100,
   "roundStartTime" : "2019-03-19 18:26:10.010",
@@ -885,7 +885,7 @@ Enter your password:**********
 }
 ```
 
-示例
+Example
 
 ```shell
 nuls>>> getbestblockheader
@@ -911,30 +911,30 @@ nuls>>> getbestblockheader
 
 
 
-### 查询区块头信息
+### Query block header information
 
-根据区块高度或者区块hash，查询区块信息，必须并且只能选择一种参数作为查询条件。
+Based on block height or blockshashTo query block information, only one parameter must be selected as the query criterion.
 
-- **命令：getblock &lt;hash&gt; | &lt;height&gt;**
+- **command：getblock &lt;hash&gt; | &lt;height&gt;**
 
-| 参数           | 说明         |
+| parameter           | explain         |
 | -------------- | ------------ |
-| &lt;hash&gt;   | 区块的hash值 |
-| &lt;height&gt; | 区块的高度   |
+| &lt;hash&gt;   | Blockedhashvalue |
+| &lt;height&gt; | The height of the block   |
 
-返回信息
+Return Information
 
 ```json
 {
-  "hash" : "0020b446a0244e4e46f8736f1ab56c33616facb836bc8344367f2f048b703f0c8f57",  //区块hash
-  "preHash" : "0020c0dcf9209f66ee7e7778c817ba7c04d67b5e6a056b42dec7fbfe44eb5f91bdfc",  //上一个区块hash
+  "hash" : "0020b446a0244e4e46f8736f1ab56c33616facb836bc8344367f2f048b703f0c8f57",  //blockhash
+  "preHash" : "0020c0dcf9209f66ee7e7778c817ba7c04d67b5e6a056b42dec7fbfe44eb5f91bdfc",  //Previous blockhash
   "merkleHash" : "00200511ced5779c54aa2170b941a1f9a7ae08dfd009b1dfaacc3679d15da9fb9c3e",  //merkle hash
-  "time" : "2019-03-19 18:26:20.020",  //打包时间
-  "height" : 1479, //区块高度
-  "txCount" : 1,   //包含的交易数
-  "blockSignature" : "00473045022100b1a07f6da3d4ce46cab278967d76875483527e3fc749a460afdf0c375f2ec2ae022053e40e8b4d8bf4e571284e45f18c46c31163ed640a2328f3ba90ac7708808365", //区块签名
-  "size" : 0, //区块大小
-  "packingAddress" : null,  //打包地址
+  "time" : "2019-03-19 18:26:20.020",  //Packaging time
+  "height" : 1479, //block height
+  "txCount" : 1,   //Number of transactions included
+  "blockSignature" : "00473045022100b1a07f6da3d4ce46cab278967d76875483527e3fc749a460afdf0c375f2ec2ae022053e40e8b4d8bf4e571284e45f18c46c31163ed640a2328f3ba90ac7708808365", //Block signature
+  "size" : 0, //block size
+  "packingAddress" : null,  //Packaging address
   "roundIndex" : 155299118, 
   "consensusMemberCount" : 100,
   "roundStartTime" : "2019-03-19 18:26:10.010",
@@ -945,20 +945,20 @@ nuls>>> getbestblockheader
 }
 ```
 
-示例 根据高度获取区块
+Example Obtain blocks based on height
 
 ```shell
 nuls>>> getblock 28115
 {
-  "hash" : "0020b446a0244e4e46f8736f1ab56c33616facb836bc8344367f2f048b703f0c8f57",  //区块hash
-  "preHash" : "0020c0dcf9209f66ee7e7778c817ba7c04d67b5e6a056b42dec7fbfe44eb5f91bdfc",  //上一个区块hash
+  "hash" : "0020b446a0244e4e46f8736f1ab56c33616facb836bc8344367f2f048b703f0c8f57",  //blockhash
+  "preHash" : "0020c0dcf9209f66ee7e7778c817ba7c04d67b5e6a056b42dec7fbfe44eb5f91bdfc",  //Previous blockhash
   "merkleHash" : "00200511ced5779c54aa2170b941a1f9a7ae08dfd009b1dfaacc3679d15da9fb9c3e",  //merkle hash
-  "time" : "2019-03-19 18:26:20.020",  //打包时间
-  "height" : 1479, //区块高度
-  "txCount" : 1,   //包含的交易数
-  "blockSignature" : "00473045022100b1a07f6da3d4ce46cab278967d76875483527e3fc749a460afdf0c375f2ec2ae022053e40e8b4d8bf4e571284e45f18c46c31163ed640a2328f3ba90ac7708808365", //区块签名
-  "size" : 0, //区块大小
-  "packingAddress" : null,  //打包地址
+  "time" : "2019-03-19 18:26:20.020",  //Packaging time
+  "height" : 1479, //block height
+  "txCount" : 1,   //Number of transactions included
+  "blockSignature" : "00473045022100b1a07f6da3d4ce46cab278967d76875483527e3fc749a460afdf0c375f2ec2ae022053e40e8b4d8bf4e571284e45f18c46c31163ed640a2328f3ba90ac7708808365", //Block signature
+  "size" : 0, //block size
+  "packingAddress" : null,  //Packaging address
   "roundIndex" : 155299118, 
   "consensusMemberCount" : 100,
   "roundStartTime" : "2019-03-19 18:26:10.010",
@@ -971,41 +971,41 @@ nuls>>> getblock 28115
 
 
 
-### 查询区块头信息
+### Query block header information
 
-根据区块高度或者区块hash，查询区块头信息，必须并且只能选择一种参数作为查询条件。
+Based on block height or blockshashTo query block header information, only one parameter must be selected as the query criterion.
 
-- **命令：getblockheader &lt;hash&gt; | &lt;height&gt;**
+- **command：getblockheader &lt;hash&gt; | &lt;height&gt;**
 
-| 参数           | 说明         |
+| parameter           | explain         |
 | -------------- | ------------ |
-| &lt;hash&gt;   | 区块的hash值 |
-| &lt;height&gt; | 区块的高度   |
+| &lt;hash&gt;   | Blockedhashvalue |
+| &lt;height&gt; | The height of the block   |
 
-返回信息
+Return Information
 
 ```json
 {
-  "hash" : "0020c40f471756c88e7487fcc0d428545232120071b58f35e450891237d7b41eb817",//区块hash
-  "preHash" : "0020fb1fd03cda7e2b6585256f4da85bdac7d8fc8bafa0740b8eb0ed577f3020b954",//前一区块hash
-  "merkleHash" : "0020474c5a353f235e8e8514328e1e98d6b653d4a5445473d160691e39121cd8b158",//梅克尔hash
-  "time" : "2018-07-16 16:29:30",//区块生成时间
-  "height" : 28115,//区块高度
-  "txCount" : 2,//区块打包交易数量
-  "packingAddress" : "NsdyF8gBxAfxCyiNbLzsENUvbJZ27mWw",//打包地址
-  "roundIndex" : 662578,//共识轮次
-  "consensusMemberCount" : 1,//参与共识成员数量
-  "roundStartTime" : "2018-07-16 16:29:20",//当前轮次开始时间
-  "packingIndexOfRound" : 1,//当前轮次打包出块的名次
-  "reward" : "0.001",//共识奖励
-  "fee" : "0.001",//区块的打包手续费
-  "confirmCount" : 6174,//确认次数
-  "size" : 507,//区块大小
-  "scriptSig" : "210381e44e0c2fffadc94603a41514f3e5b1c5fd53166be73eb8f49ce8c297059e5600473045022100d25b815fa30376247692fad856d3984acf45c9b49edd3d222e3afdab3169520c02200565a486e33358301848bf3d704c187ff8b2d1e859c93b704f713abb984584bf"//签名
+  "hash" : "0020c40f471756c88e7487fcc0d428545232120071b58f35e450891237d7b41eb817",//blockhash
+  "preHash" : "0020fb1fd03cda7e2b6585256f4da85bdac7d8fc8bafa0740b8eb0ed577f3020b954",//Previous blockhash
+  "merkleHash" : "0020474c5a353f235e8e8514328e1e98d6b653d4a5445473d160691e39121cd8b158",//Merkelhash
+  "time" : "2018-07-16 16:29:30",//Block generation time
+  "height" : 28115,//block height
+  "txCount" : 2,//Number of block packaging transactions
+  "packingAddress" : "NsdyF8gBxAfxCyiNbLzsENUvbJZ27mWw",//Packaging address
+  "roundIndex" : 662578,//Consensus round
+  "consensusMemberCount" : 1,//Number of members participating in consensus
+  "roundStartTime" : "2018-07-16 16:29:20",//Current round start time
+  "packingIndexOfRound" : 1,//The ranking of the blocks packaged in the current round
+  "reward" : "0.001",//Consensus rewards
+  "fee" : "0.001",//Packaging fees for blocks
+  "confirmCount" : 6174,//Confirmation frequency
+  "size" : 507,//block size
+  "scriptSig" : "210381e44e0c2fffadc94603a41514f3e5b1c5fd53166be73eb8f49ce8c297059e5600473045022100d25b815fa30376247692fad856d3984acf45c9b49edd3d222e3afdab3169520c02200565a486e33358301848bf3d704c187ff8b2d1e859c93b704f713abb984584bf"//autograph
 }
 ```
 
-示例 根据高度获取区块头
+Example Obtain block heads based on height
 
 ```shell
 nuls>>> getblockheader 28115
@@ -1029,29 +1029,29 @@ nuls>>> getblockheader 28115
 }
 ```
 
-### 创建智能合约
-调用此接口在链上创建一个智能合约
+### Create a smart contract
+Call this interface to create a smart contract on the chain
 
-- **命令：createcontract &lt;sender> &lt;gaslimt> &lt;price> &lt;contractCode> [remark]**
+- **command：createcontract &lt;sender> &lt;gaslimt> &lt;price> &lt;contractCode> [remark]**
 
-| 参数           | 说明         |
+| parameter           | explain         |
 | -------------- | ------------ |
-| &lt;sender&gt;   | 创建智能合约的账户地址 |
-| &lt;gaslimt&gt; | 本次创建合约最大消耗的Gas   |
-| &lt;price&gt; | 单价，每一个Gas值多少Na，Na是NULS的最小单位，1Nuls=1亿Na，系统最小单价是25Na/Gas   |
-| &lt;contractCode> | 合约代码的hex编码 |
-| [remark]|备注|
+| &lt;sender&gt;   | Account address for creating smart contract |
+| &lt;gaslimt&gt; | The maximum consumption for this contract creationGas   |
+| &lt;price&gt; | Unit price, eachGasWhat is the valueNa,NayesNULSThe minimum unit of,1Nuls=1BillionNaThe minimum unit price of the system is25Na/Gas   |
+| &lt;contractCode> | Contract codehexcoding |
+| [remark]|Remarks|
 
 
-返回信息 创建合约的交易hash和合约的地址
+Return Information Create transactions for contractshashAddress of the contract
 
 ```
 {
-  "txHash" : "00205fb44fd0924a57857e71d06ec0549366b5d879b2cbd68488ed88a2dbf96c130f",  //交易hash
-  "contractAddress" : "tNULSeBaN6ofkEqsPJmWVaeMpENTgmC5ifWtz9" //合约地址
+  "txHash" : "00205fb44fd0924a57857e71d06ec0549366b5d879b2cbd68488ed88a2dbf96c130f",  //transactionhash
+  "contractAddress" : "tNULSeBaN6ofkEqsPJmWVaeMpENTgmC5ifWtz9" //Contract address
 }
 ```
-示例 创建一个合约（contractCode 省略中间部分）
+Example Create a contract（contractCode Omit the middle part）
 
 ```
 nuls>>> createcontract tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD 200000 25 504b03040a........000000800080051020000b31600000000 remarkdemo
@@ -1080,22 +1080,22 @@ Enter the arguments:"KQB","KQB",10000,2
   "contractAddress" : "tNULSeBaNBYK9MQcWWbfgFTHj2U4j8KQGDzzuK"
 }
 ```
-### 获取合约基本信息
-获取智能合约的描述信息以及构造函数、调用方法的参数列表
+### Obtain basic contract information
+Obtain the description information and constructor of the smart contract、List of parameters for calling methods
 
-- **命令：getcontractinfo &lt;contract address>**
+- **command：getcontractinfo &lt;contract address>**
 
-| 参数           | 说明         |
+| parameter           | explain         |
 | -------------- | ------------ |
-| &lt;contract address&gt;   | 合约地址 |
+| &lt;contract address&gt;   | Contract address |
 
 
-返回信息
+Return Information
 
 ```
-略 ，见示例
+slightly See example
 ```
-示例
+Example
 
 ```
 
@@ -1137,7 +1137,7 @@ getcontractinfo tNULSeBaMz7vkyhgqLXVdcT75dC5udULVs1D2L
     "view" : false,
     "event" : false,
     "payable" : false
-  }，{
+  },{
     "name" : "transfer",
     "desc" : "(Address to, BigInteger value) return boolean",
     "args" : [ {
@@ -1158,28 +1158,28 @@ getcontractinfo tNULSeBaMz7vkyhgqLXVdcT75dC5udULVs1D2L
 
 ```
 
-### 调用智能合约
-调用智能合约提供的函数
+### Calling smart contracts
+Calling functions provided by smart contracts
 
-- **命令：callcontract &lt;sender> &lt;gasLimit> &lt;price> &lt;contractAddress> &lt;methodName> &lt;value> [-d methodDesc] [-r remark]**
+- **command：callcontract &lt;sender> &lt;gasLimit> &lt;price> &lt;contractAddress> &lt;methodName> &lt;value> [-d methodDesc] [-r remark]**
 
-| 参数           | 说明         |
+| parameter           | explain         |
 | -------------- | ------------ |
-|&lt;senderAddress&gt;   | 调动合约的账户地址 |
-|&lt;gasLimit>|本次合约执行最大消耗的Gas|
-|&lt;price>|单价，每一个Gas值多少Na，Na是NULS的最小单位，1Nuls=1亿Na，系统最小单价是25Na/Gas|
-|&lt;contractAddress|调用的合约地址|
-|&lt;methodName>|合约的方法名|
-|&lt;value>|如果要向合约转账，转账的数量|
-|[-d methodDesc]|如果合约中有同名方法时，使用此方法来描述参数列表|
-|[-r remark]|备注信息|
+|&lt;senderAddress&gt;   | Transfer the account address of the contract |
+|&lt;gasLimit>|The maximum consumption during the execution of this contractGas|
+|&lt;price>|Unit price, eachGasWhat is the valueNa,NayesNULSThe minimum unit of,1Nuls=1BillionNaThe minimum unit price of the system is25Na/Gas|
+|&lt;contractAddress|Contract address called|
+|&lt;methodName>|Method name of the contract|
+|&lt;value>|If you want to transfer money to the contract, the number of transfers|
+|[-d methodDesc]|If there is a method with the same name in the contract, use this method to describe the parameter list|
+|[-r remark]|Remarks|
 
-返回信息 本次调用的交易hash
+Return Information The transaction being called this timehash
 
 ```
-"0020c9079e0f0454103adceed798d40171c41a8db04586dba966fbe7f2ab722583ad" //交易hash
+"0020c9079e0f0454103adceed798d40171c41a8db04586dba966fbe7f2ab722583ad" //transactionhash
 ```
-示例 调用一个指定合约的NRC20-Token转账函数, 示例中`tNULSeBaMz7vkyhgqLXVdcT75dC5udULVs1D2L`为NRC20合约地址，输入的参数为 接收地址和转账数量
+Example Invoke a specified contract'sNRC20-TokenTransfer function, In the example`tNULSeBaMz7vkyhgqLXVdcT75dC5udULVs1D2L`byNRC20Contract address, input parameters are Receiving address and transfer quantity
 
 ```
 nuls>>> callcontract tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD 200000 25 tNULSeBaMz7vkyhgqLXVdcT75dC5udULVs1D2L transfer 0 -r call
@@ -1192,21 +1192,21 @@ Enter the arguments:"tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG",2
 "0020c9079e0f0454103adceed798d40171c41a8db04586dba966fbe7f2ab722583ad"
 ```
 
-### 删除智能合约
-停止一个可用的智能合约
+### Delete smart contract
+Stop an available smart contract
 
-- **命令：deletecontract &lt;senderAddress> &lt;contractAddress>**
+- **command：deletecontract &lt;senderAddress> &lt;contractAddress>**
 
-| 参数           | 说明         |
+| parameter           | explain         |
 | -------------- | ------------ |
-| &lt;senderAddress&gt;   | 调用合约的账户地址 |
-| &lt;contractAddress>|调用的合约地址|
-返回值 交易hash
+| &lt;senderAddress&gt;   | Call the account address of the contract |
+| &lt;contractAddress>|Contract address called|
+Return value transactionhash
 
 ```
-"0020c55e885dd910dad0b2c49f5b71b62691b57884ca21fd47668f1f5cadc84daad6" //交易hash
+"0020c55e885dd910dad0b2c49f5b71b62691b57884ca21fd47668f1f5cadc84daad6" //transactionhash
 ```
-示例
+Example
 
 ```
 nuls>>> deletecontract tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD tNULSeBaMz7vkyhgqLXVdcT75dC5udULVs1D2L
@@ -1216,22 +1216,22 @@ Please enter your account passwordzhoujun172
 "0020c55e885dd910dad0b2c49f5b71b62691b57884ca21fd47668f1f5cadc84daad6"
 ```
 
-### 调用合约视图方法
-调用合约的视图方法，会立即返回结果，不会产生交易
+### Call Contract View Method
+Calling the view method of the contract will immediately return the result without generating a transaction
 
-- **命令：deletecontractviewcontract &lt;contractAddress> &lt;methodName> [-d methodDesc] --view contract**
+- **command：deletecontractviewcontract &lt;contractAddress> &lt;methodName> [-d methodDesc] --view contract**
 
-| 参数           | 说明         |
+| parameter           | explain         |
 | -------------- | ------------ |
-|&lt;contractAddress>|调用的合约地址|
-|&lt;methodName>|调用的方法|
-|[-d methodDesc]|如果合约中有同名方法时，使用此方法来描述参数列表|
-返回值
+|&lt;contractAddress>|Contract address called|
+|&lt;methodName>|Method called|
+|[-d methodDesc]|If there is a method with the same name in the contract, use this method to describe the parameter list|
+Return value
 
 ```
-根据具体调用函数返回值不同
+Depending on the specific function call, the return value may vary
 ```
-示例 调用NRC20-Token合约的查询Token余额函数查询指定地址的Token余额
+Example callNRC20-TokenContract inquiryTokenThe balance function queries the specified addressTokenbalance
 
 ```
 nuls>>> viewcontract tNULSeBaN6pwyVwXjfpm5BMH5eiirvthoZDVEc balanceOf
@@ -1245,24 +1245,24 @@ Enter the arguments:"tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD"
 }
 ```
 
-### 向合约地址转账
+### Transfer to the contracted address
 
-向指定的合约地址转入主网币
+Transfer main network currency to the specified contract address
 
-- **命令：transfertocontract &lt;senderAddress> &lt;contractAddress> &lt;amount> [remark]**
+- **command：transfertocontract &lt;senderAddress> &lt;contractAddress> &lt;amount> [remark]**
 
-| 参数           | 说明         |
+| parameter           | explain         |
 | -------------- | ------------ |
-|&lt;senderAddress>|转出账户地址|
-|&lt;contractAddress|转入的合约地址|
-|&lt;amount>|转入数量|
-|[remark]|备注|
-返回值 交易hash
+|&lt;senderAddress>|Transfer account address|
+|&lt;contractAddress|Transferred contract address|
+|&lt;amount>|Transferred quantity|
+|[remark]|Remarks|
+Return value transactionhash
 
 ```
 "0020f5d6b87c246595d1b060a3fa8bac6a2992490e38fdfcad40db2a3908297e7979"
 ```
-示例 向指定合约转入2个NULS
+Example Transfer to designated contract2individualNULS
 
 ```
 nuls>>> transfertocontract tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD tNULSeBaN1NRtaj1ZPAmEmTqcpkyCLqv64PR7U 2 remark
@@ -1271,25 +1271,25 @@ Please enter your account password
 "0020f5d6b87c246595d1b060a3fa8bac6a2992490e38fdfcad40db2a3908297e7979"
 ```
 
-### token转账
+### tokenTransfer
 
-NRC20 token转账
+NRC20 tokenTransfer
 
-- **命令：tokentransfer &lt;formAddress> &lt;toAddress> &lt;contractAddress> &lt;amount> [remark]**
+- **command：tokentransfer &lt;formAddress> &lt;toAddress> &lt;contractAddress> &lt;amount> [remark]**
 
-| 参数           | 说明         |
+| parameter           | explain         |
 | -------------- | ------------ |
-|&lt;formAddress>|转出账户地址|
-|&lt;toAddress|转入的账户地址|
-|&lt;contractAddress>|合约地址|
-|&lt;amount>|转入数量|
-|[remark]|备注|
-返回值 交易hash
+|&lt;formAddress>|Transfer account address|
+|&lt;toAddress|Transferred account address|
+|&lt;contractAddress>|Contract address|
+|&lt;amount>|Transferred quantity|
+|[remark]|Remarks|
+Return value transactionhash
 
 ```
 "002022dffd96026b493945d2cf9ad276c4bc9655c735b72e6fcc85a2d19f6cbe25e8"
 ```
-示例 token转账:
+Example tokenTransfer:
 
 ```
 nuls>>> tokentransfer tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD  tNULSeBaNBh9RUsVrVmMy8NHcZJ2BhNVsM1Vta  tNULSeBaN6pwyVwXjfpm5BMH5eiirvthoZDVEc 200000 25 10000
@@ -1299,22 +1299,22 @@ Please enter your account password
 ```
 
 
-### 获取合约交易
+### Obtaining contract transactions
 
-获取合约的交易信息, 包含交易详情，合约调用参数，合约执行结果
+Obtain transaction information for contracts, Including transaction details, contract call parameters, and contract execution results
 
-- **命令：getcontracttx &lt;hash>**
+- **command：getcontracttx &lt;hash>**
 
-| 参数           | 说明         |
+| parameter           | explain         |
 | -------------- | ------------ |
-| &lt;hash>|交易hash|
+| &lt;hash>|transactionhash|
 
-返回值
+Return value
 
 ```
-略 见示例
+slightly See example
 ```
-示例
+Example
 
 ```
 nuls>>> getcontracttx 00203a48dcfc26426152805be49830c72005b4648d0182bbf6c2e8980380364eb59f
@@ -1387,22 +1387,22 @@ getcontracttx 00203a48dcfc26426152805be49830c72005b4648d0182bbf6c2e8980380364eb5
 ```
 
 
-### 获取合约执行结果
+### Obtain contract execution results
 
-获取一个合约的执行结果
+Obtain the execution result of a contract
 
-- **命令:getcontractresult &lt;hash>**
+- **command:getcontractresult &lt;hash>**
 
-| 参数           | 说明         |
+| parameter           | explain         |
 | -------------- | ------------ |
-|&lt;hash>|交易hash|
+|&lt;hash>|transactionhash|
 
-返回值
+Return value
 
 ```
-略 见示例
+slightly See example
 ```
-示例
+Example
 
 ```
 nuls>>> getcontractresult 00203a48dcfc26426152805be49830c72005b4648d0182bbf6c2e8980380364eb59f
@@ -1439,22 +1439,22 @@ nuls>>> getcontractresult 00203a48dcfc26426152805be49830c72005b4648d0182bbf6c2e8
 ```
 
 
-### 获取合约构造函数
+### Get contract constructor
 
-获取创建指定合约时需要传入的参数列表
+Get the list of parameters that need to be passed in when creating a specified contract
 
-- **命令：getcontractcontructor &lt;contractCode>**
+- **command：getcontractcontructor &lt;contractCode>**
 
-| 参数           | 说明         |
+| parameter           | explain         |
 | -------------- | ------------ |
-|&lt;contractCode>|合约代码的hex编码|
+|&lt;contractCode>|Contract codehexcoding|
 
-返回值
+Return value
 
 ```
-略 见示例
+slightly See example
 ```
-示例
+Example
 
 ```
 nuls>>> getcontractcontructor 504b03040a000008000.........20000b31600000000
@@ -1490,17 +1490,17 @@ nuls>>> getcontractcontructor 504b03040a000008000.........20000b31600000000
 ```
 
 
-### 获取指定账户创建的合约列表
+### Obtain the list of contracts created by the specified account
 
-获取指定账户地址所创建的合约列表
+Obtain the list of contracts created by the specified account address
 
-- **命令：getaccountcontracts &lt;createAddress>**
+- **command：getaccountcontracts &lt;createAddress>**
 
-| 参数           | 说明         |
+| parameter           | explain         |
 | -------------- | ------------ |
-|&lt;createAddress>|账户地址|
+|&lt;createAddress>|Account address|
 
-返回值
+Return value
 
 ```
 {
@@ -1514,7 +1514,7 @@ nuls>>> getcontractcontructor 504b03040a000008000.........20000b31600000000
   "create" : true
 }
 ```
-示例
+Example
 
 ```
 nuls>>> getaccountcontracts tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
@@ -1548,25 +1548,25 @@ nuls>>> getaccountcontracts tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
 } ]
 ```
 
-### 查询网络信息
+### Query network information
 
-查询网络基本信息
+Query basic network information
 
-- **命令：network info**
+- **command：network info**
 
-返回信息
+Return Information
 
 ```json
 {
-  "localBestHeight" : 35317,//本地最新区块高度
-  "netBestHeight" : 35317,//网络最新区块高度
-  "timeOffset" : "0ms",//网络时间偏移值
-  "inCount" : 0,//被动连接节点数量
-  "outCount" : 1//主动连接节点数量
+  "localBestHeight" : 35317,//Local latest block height
+  "netBestHeight" : 35317,//The latest block height in the network
+  "timeOffset" : "0ms",//Network time offset value
+  "inCount" : 0,//Number of passive connection nodes
+  "outCount" : 1//Number of active connection nodes
 }
 ```
 
-示例
+Example
 
 ```shell
 nuls>>> network info
@@ -1581,57 +1581,57 @@ nuls>>> network info
 
 
 
-### 查询网络节点IP
+### Query network nodesIP
 
-查询网络节点IP
+Query network nodesIP
 
-- **命令：network nodes**
+- **command：network nodes**
 
-返回信息
+Return Information
 
 ```json
 [ "192.168.1.223" ]
 ```
 
-示例 根据高度获取区块
+Example Obtain blocks based on height
 
 ```shell
 nuls>>> network nodes
 [ "192.168.1.223" ]
 ```
 
-### 在主链注册侧链
-侧链需要进行跨链交易，需要先在主链完成注册，此命令需要在主网节点运行
-- **命令： registercrosschain &lt;address> &lt;chainId> &lt;chainName> &lt;addressPrefix> &lt;magicNumber> &lt;maxSignatureCount> &lt;signatureBFTRatio>&lt;verifierList>&lt;assetId> &lt;symbol> &lt;assetName> &lt;initNumber> [decimalPlaces] [minAvailableNodeNum] [txConfirmedBlockNum]**
+### Register side chains on the main chain
+The side chain needs to conduct cross chain transactions, and registration needs to be completed on the main chain first. This command needs to be run on the main network node
+- **command： registercrosschain &lt;address> &lt;chainId> &lt;chainName> &lt;addressPrefix> &lt;magicNumber> &lt;maxSignatureCount> &lt;signatureBFTRatio>&lt;verifierList>&lt;assetId> &lt;symbol> &lt;assetName> &lt;initNumber> [decimalPlaces] [minAvailableNodeNum] [txConfirmedBlockNum]**
 
-| 参数           | 说明         |
+| parameter           | explain         |
 | -------------- | ------------ |
-|&lt;address>|注册跨链费用支付账户|
-|&lt;chainId>|注册的链id|
-|&lt;chainName>|注册的链名称|
-|&lt;addressPrefix>|地址前缀|
-|&lt;magicNumber>|注册链的运行的网络魔法参数|
-|&lt;maxSignatureCount>|注册链最大签名数量|
-|&lt;signatureBFTRatio>|拜占庭比例 [67-100]|
-|&lt;verifierList>|注册链的初始验证人列表|
-|&lt;assetId>|注册的资产id|
-|&lt;symbol>|资产简称 e.g. BTC|
-|&lt;assetName>|资产名称|
-|&lt;initNumber>|资产发现总量|
-|[decimalPlaces]|资产小数位数 默认8|
-|[minAvailableNodeNum]|跨链交易可用条件：最小可用节点数量，默认5|
-|[txConfirmedBlockNum]|注册交易的确认块数，默认30|
-返回值
+|&lt;address>|Register a cross chain fee payment account|
+|&lt;chainId>|Registered Chainid|
+|&lt;chainName>|Registered chain name|
+|&lt;addressPrefix>|Address prefix|
+|&lt;magicNumber>|The network magic parameters for the operation of the registration chain|
+|&lt;maxSignatureCount>|Maximum number of signatures in the registration chain|
+|&lt;signatureBFTRatio>|Byzantine proportion [67-100]|
+|&lt;verifierList>|Initial Verifier List for Registration Chain|
+|&lt;assetId>|Registered assetsid|
+|&lt;symbol>|Asset abbreviation e.g. BTC|
+|&lt;assetName>|Asset Name|
+|&lt;initNumber>|Total discovered assets|
+|[decimalPlaces]|Decimal places of assets default8|
+|[minAvailableNodeNum]|Available conditions for cross chain transactions：Minimum number of available nodes, default5|
+|[txConfirmedBlockNum]|Number of confirmation blocks for registration transactions, default30|
+Return value
 
 ```
 {
-  "mainNetVerifierSeeds" : "tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp",#主网验证人列表
-  "txHash" : "25b3a57507086d5d895895b41ef744a160f3251f4e5db118b7ca833eb6c9fff3",#交易hash
-  "mainNetCrossConnectSeeds" : "192.168.1.192:8088"#主网跨链种子连接节点
+  "mainNetVerifierSeeds" : "tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp",#List of main network validators
+  "txHash" : "25b3a57507086d5d895895b41ef744a160f3251f4e5db118b7ca833eb6c9fff3",#transactionhash
+  "mainNetCrossConnectSeeds" : "192.168.1.192:8088"#Main network cross chain seed connection nodes
 }
 
 ```
-示例
+Example
 
 ```
 nuls>>>registercrosschain tNULSeBaMqywZjfSrKNQKBfuQtVxAHBQ8rB2Zn 12 nbtc btc 20197777 12  67 LJScusmPf5EfdEwbA8nRZEYqMbRXKp6y3oCb 1 btc bt 100000000 8 1
@@ -1649,29 +1649,29 @@ Enter your password:**********
 
 
 
-### 在主链添加需要跨链交易的侧链资产
+### Add side chain assets that require cross chain transactions to the main chain
 
-侧链是多资产的，需要在已存在的链上进行跨链资产的添加，此命令需要在主网节点运行
+Side chains are multi asset and require cross chain asset addition on existing chains. This command needs to be run on the main network node
 
-- **命令： addcrossasset &lt;address> &lt;chainId> &lt;assetId> &lt;symbol> &lt;assetName> &lt;initNumber> [decimalPlaces] **
+- **command： addcrossasset &lt;address> &lt;chainId> &lt;assetId> &lt;symbol> &lt;assetName> &lt;initNumber> [decimalPlaces] **
 
-| 参数            | 说明                     |
+| parameter            | explain                     |
 | --------------- | ------------------------ |
-| &lt;address>    | 添加资产指令费用支付账户 |
-| &lt;chainId>    | 注册的链id               |
-| &lt;assetId>    | 注册的资产id             |
-| &lt;symbol>     | 资产简称 e.g. BTC        |
-| &lt;assetName>  | 资产名称                 |
-| &lt;initNumber> | 资产发现总量             |
-| [decimalPlaces] | 资产小数位数 默认8       |
+| &lt;address>    | Add asset instruction fee payment account |
+| &lt;chainId>    | Registered Chainid               |
+| &lt;assetId>    | Registered assetsid             |
+| &lt;symbol>     | Asset abbreviation e.g. BTC        |
+| &lt;assetName>  | Asset Name                 |
+| &lt;initNumber> | Total discovered assets             |
+| [decimalPlaces] | Decimal places of assets default8       |
 
-返回值
+Return value
 
 ```
-  "txHash" : "25b3a57507086d5d895895b41ef744a160f3251f4e5db118b7ca833eb6c9fff3",#交易hash
+  "txHash" : "25b3a57507086d5d895895b41ef744a160f3251f4e5db118b7ca833eb6c9fff3",#transactionhash
 ```
 
-示例
+Example
 
 ```
 nuls>>>addcrossasset tNULSeBaMqywZjfSrKNQKBfuQtVxAHBQ8rB2Zn  10 2 yuer CCY 300000000 8
@@ -1685,25 +1685,25 @@ Enter your password:**********
 
 
 
-### 在主链移除跨链交易的侧链资产
+### Remove side chain assets for cross chain transactions from the main chain
 
-侧链是多资产的，在主网上要停止该资产的跨链交易时，使用移除指令，如果剩下最后一个资产，则该指令执行后，对应的链也将停止工作。此命令需要在主网节点运行
+Side chains are multi asset, and when the cross chain transaction of that asset needs to be stopped on the main network, a removal instruction is used. If the last asset is left, the corresponding chain will also stop working after the instruction is executed. This command needs to be run on the main network node
 
-- **命令： disablecrossasset &lt;address> &lt;chainId> &lt;assetId>**
+- **command： disablecrossasset &lt;address> &lt;chainId> &lt;assetId>**
 
-| 参数         | 说明                   |
+| parameter         | explain                   |
 | ------------ | ---------------------- |
-| &lt;address> | 添加资产时候使用的地址 |
-| &lt;chainId> | 移除注册的链id         |
-| &lt;assetId> | 移除注册的资产id       |
+| &lt;address> | Address used when adding assets |
+| &lt;chainId> | Remove registered chainsid         |
+| &lt;assetId> | Remove registered assetsid       |
 
-返回值
+Return value
 
 ```
-  "txHash" : "25b3a57507086d5d895895b41ef744a160f3251f4e5db118b7ca833eb6c9fff3",#交易hash
+  "txHash" : "25b3a57507086d5d895895b41ef744a160f3251f4e5db118b7ca833eb6c9fff3",#transactionhash
 ```
 
-示例
+Example
 
 ```
 nuls>>>disablecrossasset tNULSeBaMqywZjfSrKNQKBfuQtVxAHBQ8rB2Zn  10 3
@@ -1716,42 +1716,42 @@ Enter your password:**********
 
 
 
-### 在主链恢复侧链
+### Restore side chains on the main chain
 
-侧链在主网注册并且删除后，需要恢复，则可以通过如下命令进行恢复并更新信息，此命令需要在主网节点运行
+After registering and deleting the side chain on the main network, if it needs to be restored, the following command can be used to restore and update information. This command needs to be run on the main network node
 
-- **命令： updatecrosschain &lt;address> &lt;chainId> &lt;chainName> &lt;addressPrefix> &lt;magicNumber> &lt;maxSignatureCount> &lt;signatureBFTRatio>&lt;verifierList>&lt;assetId> &lt;symbol> &lt;assetName> &lt;initNumber> [decimalPlaces] [minAvailableNodeNum] [txConfirmedBlockNum]**
+- **command： updatecrosschain &lt;address> &lt;chainId> &lt;chainName> &lt;addressPrefix> &lt;magicNumber> &lt;maxSignatureCount> &lt;signatureBFTRatio>&lt;verifierList>&lt;assetId> &lt;symbol> &lt;assetName> &lt;initNumber> [decimalPlaces] [minAvailableNodeNum] [txConfirmedBlockNum]**
 
-| 参数                   | 说明                                      |
+| parameter                   | explain                                      |
 | ---------------------- | ----------------------------------------- |
-| &lt;address>           | 注册跨链费用支付账户                      |
-| &lt;chainId>           | 注册的链id                                |
-| &lt;chainName>         | 注册的链名称                              |
-| &lt;addressPrefix>     | 地址前缀                                  |
-| &lt;magicNumber>       | 注册链的运行的网络魔法参数                |
-| &lt;maxSignatureCount> | 注册链最大签名数量                        |
-| &lt;signatureBFTRatio> | 拜占庭比例 [67-100]                       |
-| &lt;verifierList>      | 注册链的初始验证人列表                    |
-| &lt;assetId>           | 注册的资产id                              |
-| &lt;symbol>            | 资产简称 e.g. BTC                         |
-| &lt;assetName>         | 资产名称                                  |
-| &lt;initNumber>        | 资产发现总量                              |
-| [decimalPlaces]        | 资产小数位数 默认8                        |
-| [minAvailableNodeNum]  | 跨链交易可用条件：最小可用节点数量，默认5 |
-| [txConfirmedBlockNum]  | 注册交易的确认块数，默认30                |
+| &lt;address>           | Register a cross chain fee payment account                      |
+| &lt;chainId>           | Registered Chainid                                |
+| &lt;chainName>         | Registered chain name                              |
+| &lt;addressPrefix>     | Address prefix                                  |
+| &lt;magicNumber>       | The network magic parameters for the operation of the registration chain                |
+| &lt;maxSignatureCount> | Maximum number of signatures in the registration chain                        |
+| &lt;signatureBFTRatio> | Byzantine proportion [67-100]                       |
+| &lt;verifierList>      | Initial Verifier List for Registration Chain                    |
+| &lt;assetId>           | Registered assetsid                              |
+| &lt;symbol>            | Asset abbreviation e.g. BTC                         |
+| &lt;assetName>         | Asset Name                                  |
+| &lt;initNumber>        | Total discovered assets                              |
+| [decimalPlaces]        | Decimal places of assets default8                        |
+| [minAvailableNodeNum]  | Available conditions for cross chain transactions：Minimum number of available nodes, default5 |
+| [txConfirmedBlockNum]  | Number of confirmation blocks for registration transactions, default30                |
 
-返回值
+Return value
 
 ```
 {
-  "mainNetVerifierSeeds" : "tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp",#主网验证人列表
-  "txHash" : "25b3a57507086d5d895895b41ef744a160f3251f4e5db118b7ca833eb6c9fff3",#交易hash
-  "mainNetCrossConnectSeeds" : "192.168.1.192:8088"#主网跨链种子连接节点
+  "mainNetVerifierSeeds" : "tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp",#List of main network validators
+  "txHash" : "25b3a57507086d5d895895b41ef744a160f3251f4e5db118b7ca833eb6c9fff3",#transactionhash
+  "mainNetCrossConnectSeeds" : "192.168.1.192:8088"#Main network cross chain seed connection nodes
 }
 
 ```
 
-示例
+Example
 
 ```
 nuls>>>registercrosschain tNULSeBaMqywZjfSrKNQKBfuQtVxAHBQ8rB2Zn 12 nbtc btc 20197777 12  67 LJScusmPf5EfdEwbA8nRZEYqMbRXKp6y3oCb 1 btc bt 100000000 8 1
@@ -1768,17 +1768,17 @@ Enter your password:**********
 
 
 
-### 查询侧链注册信息
+### Query sidechain registration information
 
-在主网查询某条侧链的注册信息
+Query the registration information of a certain side chain on the main network
 
-- **命令：crosschaininfo &lt;chainId>**
+- **command：crosschaininfo &lt;chainId>**
 
-| 参数         | 说明       |
+| parameter         | explain       |
 | ------------ | ---------- |
-| &lt;chainId> | 注册链的id |
+| &lt;chainId> | Registration chainid |
 
-返回值
+Return value
 
 ```{
  {
@@ -1796,40 +1796,40 @@ Enter your password:**********
   "signatureByzantineRatio" : 67,
   "maxSignatureCount" : 12,
   "selfAssetKeyList" : [ "3-10" ],
-  "totalAssetKeyList" : [ "3-10" ]，
+  "totalAssetKeyList" : [ "3-10" ],
   "mainNetVerifierSeeds" : "tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp",
   "mainNetCrossConnectSeeds" : "192.168.1.192:8088",
   "enable" : true
 }
 ```
 
-返回参数说明
+Return parameter description
 
 | parameter                | required | type   | description                                |
 | ------------------------ | -------- | ------ | ------------------------------------------ |
-| chainId                  | true     | int    | 链标识                                     |
-| assetId                  | true     | int    | 资产id                                     |
-| chainName                | true     | string | 链名称                                     |
-| addressType              | true     | int    | 链上创建的账户的地址类型：1生态内2非生态内 |
-| addressPrefix            | true     | string | 地址前缀 1-5个 大写字母或数字              |
-| magicNumber              | true     | string | 网络魔法参数                               |
-| minAvailableNodeNum      | true     | int    | 最小可用节点数量                           |
-| txConfirmBlockNum        | true     | int    | 交易确认块数                               |
-| regAddress               | true     | string | 注册支付地址                               |
-| regTxHash                | true     | string | 交易hash                                   |
-| createTime               | true     | long   | 交易提交时间 ，1970相差的秒数              |
-| verifierList             | true     | string | 验证人列表                                 |
-| signatureByzantineRatio  | true     | int    | 拜占庭比例 [67-100]                        |
-| maxSignatureCount        | true     | int    | 最大签名数                                 |
-| symbol                   | true     | string | 资产符号                                   |
-| assetName                | true     | string | 资产名称                                   |
-| initNumber               | true     | string | 资产初始值                                 |
-| decimalPlaces            | true     | int    | 最小资产可分割位数                         |
-| mainNetVerifierSeeds     | true     | string | 主网种子验证人地址                         |
-| mainNetCrossConnectSeeds | true     | string | 主网种子连接节点地址                       |
-| enable                   | true     | string | 是否使用中                                 |
+| chainId                  | true     | int    | Chain identification                                     |
+| assetId                  | true     | int    | assetid                                     |
+| chainName                | true     | string | Chain Name                                     |
+| addressType              | true     | int    | The address type of the account created on the chain：1Within the ecosystem2Non ecological interior |
+| addressPrefix            | true     | string | Address prefix 1-5individual Capital letters or numbers              |
+| magicNumber              | true     | string | Network Magic Parameters                               |
+| minAvailableNodeNum      | true     | int    | Minimum number of available nodes                           |
+| txConfirmBlockNum        | true     | int    | Number of transaction confirmation blocks                               |
+| regAddress               | true     | string | Registered payment address                               |
+| regTxHash                | true     | string | transactionhash                                   |
+| createTime               | true     | long   | Transaction submission time ,1970The number of seconds of difference              |
+| verifierList             | true     | string | Verifier List                                 |
+| signatureByzantineRatio  | true     | int    | Byzantine proportion [67-100]                        |
+| maxSignatureCount        | true     | int    | Maximum number of signatures                                 |
+| symbol                   | true     | string | Asset symbols                                   |
+| assetName                | true     | string | Asset Name                                   |
+| initNumber               | true     | string | Initial value of assets                                 |
+| decimalPlaces            | true     | int    | Minimum divisible digits of assets                         |
+| mainNetVerifierSeeds     | true     | string | Main network seed verifier address                         |
+| mainNetCrossConnectSeeds | true     | string | Main network seed connection node address                       |
+| enable                   | true     | string | Is it in use                                 |
 
-示例
+Example
 
 ```
 nuls>>> crosschaininfo 10
@@ -1857,18 +1857,18 @@ nuls>>> crosschaininfo 10
 
 
 
-### 查询侧链注册资产信息
+### Query sidechain registered asset information
 
-在主网查询某条侧链资产的注册信息
+Query the registration information of a certain side chain asset on the main website
 
-- **命令：crosschaininfo &lt;chainId>**
+- **command：crosschaininfo &lt;chainId>**
 
-| 参数         | 说明       |
+| parameter         | explain       |
 | ------------ | ---------- |
-| &lt;chainId> | 注册链的id |
-| &lt;assetId> | 资产id     |
+| &lt;chainId> | Registration chainid |
+| &lt;assetId> | assetid     |
 
-返回值
+Return value
 
 ```{
  {
@@ -1887,24 +1887,24 @@ nuls>>> crosschaininfo 10
 }
 ```
 
-返回参数说明
+Return parameter description
 
 | parameter     | required | type    | description                  |
 | ------------- | -------- | ------- | ---------------------------- |
-| chainId       | true     | int     | 链标识                       |
-| assetId       | true     | int     | 资产id                       |
-| &lt;symbol>   | true     | string  | 资产简称 e.g. BTC            |
-| assetName     | true     | string  | 资产名称                     |
-| depositNuls   | true     | long    | 抵押的主网资产数量           |
-| destroyNuls   | true     | long    | 销毁的主网资产数量           |
-| initNumber    | true     | string  | 资产初始值                   |
-| decimalPlaces | true     | int     | 资产可切割位数               |
-| enable        | true     | boolean | 是否可用 true可用,false 停用 |
-| createTime    | true     | long    | 交易产生时间                 |
-| address       | true     | String  | 交易支付地址                 |
-| txHash        | true     | String  | 交易hash                     |
+| chainId       | true     | int     | Chain identification                       |
+| assetId       | true     | int     | assetid                       |
+| &lt;symbol>   | true     | string  | Asset abbreviation e.g. BTC            |
+| assetName     | true     | string  | Asset Name                     |
+| depositNuls   | true     | long    | Number of main network assets mortgaged           |
+| destroyNuls   | true     | long    | Number of main network assets destroyed           |
+| initNumber    | true     | string  | Initial value of assets                   |
+| decimalPlaces | true     | int     | Asset divisible digits               |
+| enable        | true     | boolean | Is it available trueavailable,false Deactivate |
+| createTime    | true     | long    | Transaction generation time                 |
+| address       | true     | String  | Transaction payment address                 |
+| txHash        | true     | String  | transactionhash                     |
 
-示例
+Example
 
 ```
 
@@ -1937,24 +1937,24 @@ nuls>>> crossassetinfo 10 2
 
 
 
-### 创建跨链交易
+### Create cross chain transactions
 
-- **命令：createcrosstx &lt;formAddress> &lt;toAddress> &lt;assetChainId> &lt;assetId> &lt;amount> [remark]**
+- **command：createcrosstx &lt;formAddress> &lt;toAddress> &lt;assetChainId> &lt;assetId> &lt;amount> [remark]**
 
 
-| 参数           | 说明         |
+| parameter           | explain         |
 | -------------- | ------------ |
-|&lt;formAddress>|转出地址|
-|&lt;toAddress>|转入地址|
-|&lt;assetChainId>|转账资产的chainId|
-|&lt;assetId>|转账资产id|
-|&lt;amount>|转账资产数量|
-|&lt;remark>|转账备注|
-返回值:交易hash
+|&lt;formAddress>|Transfer address|
+|&lt;toAddress>|Transfer address|
+|&lt;assetChainId>|Transfer of assetschainId|
+|&lt;assetId>|Transfer assetsid|
+|&lt;amount>|Number of transferred assets|
+|&lt;remark>|Transfer remarks|
+Return value:transactionhash
 ```
 529bb34c0f4760fa55dd98b92d3e913ed2306b7ac1f93c4491007e266bb04ef5
 ```
-示例
+Example
 
 ```
 nuls>>> createcrosstx tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD M9busmFhQeu1Efn6rDyeQkFjHxv2dSzkuH8 2 1 1
@@ -1962,19 +1962,19 @@ Please enter the password.
 Enter your password:**********
 529bb34c0f4760fa55dd98b92d3e913ed2306b7ac1f93c4491007e266bb04ef5
 ```
-### 查询跨链交易确认状态
-- **命令：getcrosstxstate  &lt;txHash>**
+### Query cross chain transaction confirmation status
+- **command：getcrosstxstate  &lt;txHash>**
 
-| 参数           | 说明         |
+| parameter           | explain         |
 | -------------- | ------------ |
-|&lt;txHash>|交易hash|
+|&lt;txHash>|transactionhash|
 
-返回值
+Return value
 
 ```
 Confirmed | Unconfirmed
 ```
-示例
+Example
 
 ```
 nuls>>> getcrosstxstate 529bb34c0f4760fa55dd98b92d3e913ed2306b7ac1f93c4491007e266bb04ef5
@@ -1982,13 +1982,13 @@ Unconfirmed
 ```
 
 
-### 退出钱包命令程序
+### Exit wallet command program
 
-退出操作钱包的命令行程序，不会退出已启动的钱包节点。
+Exiting the command line program for operating the wallet will not exit the launched wallet node.
 
-- **命令：exit**
+- **command：exit**
 
-示例
+Example
 
 ```shell
 nuls>>> exit

@@ -36,13 +36,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 调用外部接口
+ * Calling external interfaces
  *
  * @author lan
  */
 public interface RpcService {
     /**
-     * 跨链种子节点获取
+     * Cross chain seed node acquisition
      *
      * @return
      */
@@ -87,7 +87,7 @@ public interface RpcService {
     boolean cancelCrossChain(Map<String, Object> chainAssetIds, long cancelTime);
 
     /**
-     * 发送链地址前缀
+     * Send chain address prefix
      *
      * @param prefixList
      * @return
@@ -95,7 +95,7 @@ public interface RpcService {
     boolean addAcAddressPrefix(List<Map<String, Object>> prefixList);
 
     /**
-     * 获取账户余额
+     * Obtain account balance
      *
      * @param address
      * @param accountBalance
@@ -107,7 +107,7 @@ public interface RpcService {
 
 
     /**
-     * 交易签名
+     * Transaction signature
      * transaction signature
      *
      * @param chainId

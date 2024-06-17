@@ -54,7 +54,7 @@ public class CmdRollBackTest {
     //    String address = "JgT2JCQvKGRKRjKqyfxRAj2zSCpGca01f";
     String address = "tNULSeBaMfi17CxRHVqFZbSFGYeyRLHWw2ctho";
     String addressTo = "tNULSeBaMmp4U2k653V5FmmPf4HDECWK2ExYVr";
-    //入账金额
+    //Entry amount
     BigInteger amount = BigInteger.valueOf(100000000000L);
 
     @Before
@@ -73,7 +73,7 @@ public class CmdRollBackTest {
         params.put("assetId", TestConfig.assetId);
         params.put(Constants.CHAIN_ID, TestConfig.chainId);
         String nonce = "0000000000000000";
-        //封装交易执行
+        //Encapsulation transaction execution
         Transaction tx = new Transaction();
         CoinData coinData = new CoinData();
         CoinFrom coinFrom = new CoinFrom();

@@ -21,23 +21,23 @@ import java.util.Map;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-12 16:04
- * @Description: 网络信息查询接口
+ * @Description: Network information query interface
  */
 @Component
 @NulsCoresCmd(module = ModuleE.NW)
 public class NetworkInfoRpc extends BaseCmd {
 
     @CmdAnnotation(cmd = CmdConstant.CMD_NW_INFO, version = 1.0,
-            description = "获取节点网络基本信息")
+            description = "Obtain basic information about node networks")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "连接的链Id,取值区间[1-65535]")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Connected ChainId,Value range[1-65535]")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "localBestHeight", valueType = Long.class, description = "本地节点区块高度"),
-            @Key(name = "netBestHeight", valueType = Long.class, description = "网络节点区块最高高度"),
-            @Key(name = "timeOffset", valueType = Long.class, description = "节点与网络时间相差值"),
-            @Key(name = "inCount", valueType = Integer.class, description = "最为Server,peer接入数量"),
-            @Key(name = "outCount", valueType = Integer.class, description = "作为client连接外部Server数量")
+    @ResponseData(name = "Return value", description = "Return aMapobject", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "localBestHeight", valueType = Long.class, description = "Local node block height"),
+            @Key(name = "netBestHeight", valueType = Long.class, description = "The highest height of network node blocks"),
+            @Key(name = "timeOffset", valueType = Long.class, description = "Node and network time difference value"),
+            @Key(name = "inCount", valueType = Integer.class, description = "the mostServer,peerAccess quantity"),
+            @Key(name = "outCount", valueType = Integer.class, description = "As aclientConnect externalServerquantity")
     }))
     public Response getNetworkInfo(Map<String, Object> params) {
         int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
@@ -64,32 +64,32 @@ public class NetworkInfoRpc extends BaseCmd {
         } else {
             localBestHeight = blockRpcService.getBestBlockHeader(chainId).getBlockHeight();
         }
-        //本地最新高度
+        //Latest local altitude
         res.put("localBestHeight", localBestHeight);
-        //网络最新高度
+        //The latest height of the internet
         if (localBestHeight > netBestHeight) {
             netBestHeight = localBestHeight;
         }
         res.put("netBestHeight", netBestHeight);
-        //网络时间偏移
+        //Network time offset
         res.put("timeOffset", TimeManager.netTimeOffset);
-        //被动连接节点数量
+        //Number of passive connection nodes
         res.put("inCount", inCount);
-        //主动连接节点数量
+        //Number of active connection nodes
         res.put("outCount", outCount);
         return success(res);
     }
 
     @CmdAnnotation(cmd = CmdConstant.CMD_NW_NODES, version = 1.0,
-            description = "获取网络连接节点信息")
+            description = "Obtain network connection node information")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "连接的链Id,取值区间[1-65535]")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Connected ChainId,Value range[1-65535]")
     })
-    @ResponseData(name = "返回值", description = "返回一个List对象",
+    @ResponseData(name = "Return value", description = "Return aListobject",
             responseType = @TypeDescriptor(value = List.class, collectionElement = Map.class, mapKeys = {
-                    @Key(name = "peer", valueType = String.class, description = "peer节点ID"),
-                    @Key(name = "blockHeight", valueType = Long.class, description = "节点高度"),
-                    @Key(name = "blockHash", valueType = String.class, description = "节点Hash")
+                    @Key(name = "peer", valueType = String.class, description = "peernodeID"),
+                    @Key(name = "blockHeight", valueType = Long.class, description = "Node height"),
+                    @Key(name = "blockHash", valueType = String.class, description = "nodeHash")
             })
     )
     public Response getNetworkNodeList(Map<String, Object> params) {

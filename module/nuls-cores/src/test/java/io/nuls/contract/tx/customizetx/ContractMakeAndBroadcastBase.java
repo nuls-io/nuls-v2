@@ -159,7 +159,7 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
             if (accountResult.isFailed()) {
                 return accountResult;
             }
-            // 生成一个地址作为智能合约地址
+            // Generate an address as the smart contract address
             String contractAddress = AccountCall.createContractAddress(chainId);
             byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
             byte[] senderBytes = AddressTool.getAddress(sender);
@@ -240,9 +240,9 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
     private void signContractTx(ContractBaseTransaction tx) throws IOException, NulsException {
         CoinData coinDataObj = tx.getCoinDataObj();
         byte[] txCreator = coinDataObj.getFrom().get(0).getAddress();
-        // 生成交易hash
+        // Generate transactionshash
         tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
-        // 生成签名
+        // Generate signature
         AccountCall.transactionSignature(chainId, AddressTool.getStringAddressByBytes(txCreator), password, tx);
     }
 
@@ -250,15 +250,15 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
         try {
             String txData = RPCUtil.encode(tx.serialize());
 
-            //// 通知账本
+            //// Notification ledger
             //int commitStatus = LedgerCall.commitUnconfirmedTx(chainId, txData);
             //if(commitStatus != LedgerUnConfirmedTxStatus.SUCCESS.status()) {
             //    return getFailed().setMsg(LedgerUnConfirmedTxStatus.getStatus(commitStatus).name());
             //}
-            // 广播交易
+            // Broadcasting transactions
             boolean broadcast = TransactionCall.newTx(chainId, txData);
             if (!broadcast) {
-                // 广播失败，回滚账本的未确认交易
+                // Broadcast failed, rolling back unconfirmed transactions in ledger
                 //LedgerCall.rollBackUnconfirmTx(chainId, txData);
                 return getFailed();
             }
@@ -347,7 +347,7 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
             Log.info("wait create.");
             InputStream in = new FileInputStream(ContractTest.class.getResource("/nrc20").getFile());
             byte[] contractCode = IOUtils.toByteArray(in);
-            String remark = "create contract test - 空气币";
+            String remark = "create contract test - Air Coin";
             String name = "KQB";
             String symbol = "KongQiBi";
             String amount = BigDecimal.TEN.pow(10).toPlainString();
@@ -389,7 +389,7 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
 
         void broadcast() throws IOException {
             if(tx != null) {
-                // 广播交易
+                // Broadcasting transactions
                 Result result = broadcastCreateTx(tx);
                 Log.info("createContract-result:{}", JSONUtils.obj2PrettyJson(result));
             } else {
@@ -399,10 +399,10 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
 
         void signAndBroadcast() throws Exception {
             if(tx != null) {
-                // 签名
+                // autograph
                 this.sign();
 
-                // 广播交易
+                // Broadcasting transactions
                 Result result = broadcastCreateTx(tx);
                 Log.info("createContract-result:{}", JSONUtils.obj2PrettyJson(result));
             } else {
@@ -499,7 +499,7 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
 
         void broadcast() throws IOException {
             if(tx != null) {
-                // 广播交易
+                // Broadcasting transactions
                 Result result = broadcastCallTx(tx);
                 Log.info("callContract-result:{}", JSONUtils.obj2PrettyJson(result));
             } else {
@@ -509,10 +509,10 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
 
         void signAndBroadcast() throws Exception {
             if(tx != null) {
-                // 签名
+                // autograph
                 this.sign();
 
-                // 广播交易
+                // Broadcasting transactions
                 Result result = broadcastCallTx(tx);
                 Log.info("callContract-result:{}", JSONUtils.obj2PrettyJson(result));
             } else {
@@ -564,7 +564,7 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
 
         void broadcast() throws IOException {
             if(tx != null) {
-                // 广播交易
+                // Broadcasting transactions
                 Result result = broadcastDeleteTx(tx);
                 Log.info("deleteContract-result:{}", JSONUtils.obj2PrettyJson(result));
             } else {
@@ -574,10 +574,10 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
 
         void signAndBroadcast() throws Exception {
             if(tx != null) {
-                // 签名
+                // autograph
                 this.sign();
 
-                // 广播交易
+                // Broadcasting transactions
                 Result result = broadcastDeleteTx(tx);
                 Log.info("deleteContract-result:{}", JSONUtils.obj2PrettyJson(result));
             } else {

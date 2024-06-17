@@ -31,24 +31,24 @@ import io.nuls.core.rpc.model.ApiModelProperty;
 
 
 /**
- * 全网共识信息类
+ * Network wide consensus information
  * Network-wide Consensus Information Class
  *
  * @author tag
  * 2018/11/20
  * */
-@ApiModel(name = "全网共识信息")
+@ApiModel(name = "Network wide consensus information")
 public class WholeNetConsensusInfoDTO {
-    @ApiModelProperty(description = "节点数量")
+    @ApiModelProperty(description = "Number of nodes")
     private int agentCount;
-    @ApiModelProperty(description = "总委托两")
+    @ApiModelProperty(description = "Total commission two")
     private String totalDeposit;
     @JsonIgnore
-    @ApiModelProperty(description = "当天共识奖励总量")
+    @ApiModelProperty(description = "Total amount of consensus rewards for the day")
     private String rewardOfDay;
-    @ApiModelProperty(description = "参与共识人数")
+    @ApiModelProperty(description = "Number of participants in consensus")
     private int consensusAccountNumber;
-    @ApiModelProperty(description = "当前轮次出块节点数量")
+    @ApiModelProperty(description = "Number of block nodes in the current round")
     private int packingAgentCount;
     public int getConsensusAccountNumber() {
         return consensusAccountNumber;

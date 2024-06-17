@@ -13,13 +13,13 @@ import java.net.URLDecoder;
  * @Author: zhoulijun
  * @Time: 2019-03-06 14:29
  * @Description:
- *    账户服务
+ *    Account Services
  *    account service
  */
 public interface AccountService {
 
     /**
-     * 创建账户
+     * Create an account
      * create account
      * @param req
      * @return
@@ -27,7 +27,7 @@ public interface AccountService {
     Result<String> createAccount(CreateAccountReq req);
 
     /**
-     * 备份账户到key store
+     * Backup account tokey store
      * backup account to key store
      * @param req
      * @return
@@ -35,7 +35,7 @@ public interface AccountService {
     Result<String> backupAccount(BackupAccountReq req);
 
     /**
-     * 获取账户keyStore
+     * Obtain accountkeyStore
      * get account's keystore
      * @param req
      * @return
@@ -44,7 +44,7 @@ public interface AccountService {
 
 
     /**
-     * 通过私钥导入账户
+     * Import account through private key
      * import account by private key
      * @param req
      * @return
@@ -53,7 +53,7 @@ public interface AccountService {
 
 
     /**
-     * 通过key store导入账户
+     * adoptkey storeImport account
      * import account by key store
      * @param req
      * @return
@@ -62,7 +62,7 @@ public interface AccountService {
 
     Result<String> importKeyStoreFiles(ImportKeyStoreFilesReq req);
     /**
-     * 修改账户密码
+     * Change account password
      * reset account password
      * @param req
      * @return
@@ -71,7 +71,7 @@ public interface AccountService {
 
 
     /**
-     * 根据地址获取账户信息
+     * Obtain account information based on address
      * get account info by address
      * @param req
      * @return
@@ -79,14 +79,14 @@ public interface AccountService {
     Result<AccountInfo> getAccountByAddress(GetAccountByAddressReq req);
 
     /**
-     * 获取多签账户信息
+     * Obtain multi signature account information
      * @param req
      * @return
      */
     Result<MultiSigAccount> getMultiSignAccount(GetMultiSignAccountByAddressReq req);
 
     /**
-     * 获取账户列表
+     * Get account list
      * get all account list
      * @return
      */
@@ -94,7 +94,7 @@ public interface AccountService {
 
 
     /**
-     * 删除指定账户
+     * Delete specified account
      * remove account by address
      * @param req
      * @return
@@ -102,7 +102,7 @@ public interface AccountService {
     Result<Boolean> removeAccount(RemoveAccountReq req);
 
     /**
-     * 查询账户私钥
+     * Query account private key
      * get account private key
      * @param req
      * @return
@@ -111,7 +111,7 @@ public interface AccountService {
 
 
     /**
-     * 设置账户别名
+     * Set account alias
      * set account alias
      * @param req
      * @return
@@ -119,28 +119,28 @@ public interface AccountService {
     Result<String> setAccountAlias(SetAccountAliasReq req);
 
     /**
-     * 创建多签账户
+     * Create a multi signature account
      * @param req
      * @return
      */
     Result<String> createMultiSignAccount(GenerateMultiSignAccountReq req);
 
     /**
-     * 移除一个多签账户
+     * Remove a multi signature account
      * @param req
      * @return
      */
     Result<Boolean> removeMultiSignAccount(RemoveMultiSignAccountReq req);
 
     /**
-     * 多签账户设置别名
+     * Setting aliases for multiple signed accounts
      * @param req
      * @return
      */
     Result<MultiSignTransferRes> setMultiSignAccountAlias(SetMultiSignAccountAliasReq req);
 
     /**
-     * 根据文件地址获取AccountKeystoreDto对象
+     * Obtain based on file addressAccountKeystoreDtoobject
      * Gets the AccountKeystoreDto object based on the file address
      * @param path
      * @return
@@ -150,7 +150,7 @@ public interface AccountService {
         try {
             file = new File(URLDecoder.decode(path, "UTF-8"));
         } catch (UnsupportedEncodingException e) {
-            Log.error("未找到文件", e);
+            Log.error("no files found", e);
         }
         if (null != file && file.isFile()) {
             StringBuilder ks = new StringBuilder();

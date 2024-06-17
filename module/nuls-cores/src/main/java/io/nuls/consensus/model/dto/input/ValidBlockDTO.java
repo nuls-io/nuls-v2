@@ -1,7 +1,7 @@
 package io.nuls.consensus.model.dto.input;
 
 /**
- * 区块验证参数
+ * Block validation parameters
  * Block validation parameter
  *
  * @author tag
