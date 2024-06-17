@@ -148,6 +148,10 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             chain.getLogger().debug("Cross chain transactions have been processed at this node,Hash:{}\n\n", nativeHex);
             return;
         }
+        if(System.currentTimeMillis()/1000 - ctxStatusPO.getTx().getTime()>30*24*3600){
+            chain.getLogger().debug("Cross chain transaction id old,Hash:{}\n\n", nativeHex);
+            return;
+        }
         try {
             UntreatedMessage untreatedSignMessage = new UntreatedMessage(chainId,nodeId,messageBody,localHash);
             chain.getSignMessageByzantineQueue().offer(untreatedSignMessage);

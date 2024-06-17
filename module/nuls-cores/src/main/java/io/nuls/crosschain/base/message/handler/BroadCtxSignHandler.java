@@ -22,7 +22,7 @@ public class BroadCtxSignHandler implements MessageProcessor {
     @Autowired
     private ProtocolService protocolService;
 
-    private HashSetTimeDuplicateProcessor processor = new HashSetTimeDuplicateProcessor(1000, 300000L);
+    private HashSetTimeDuplicateProcessor processor = new HashSetTimeDuplicateProcessor(1000, 60000L);
 
     @Override
     public String getCmd() {
@@ -35,7 +35,7 @@ public class BroadCtxSignHandler implements MessageProcessor {
         if (message == null) {
             return;
         }
-        if (processor.insertAndCheck(nodeId + realMessage.getLocalHash().toHex())) {
+        if (processor.insertAndCheck(realMessage.getLocalHash().toHex())) {
             protocolService.receiveCtxSign(chainId, nodeId, realMessage);
         }
     }

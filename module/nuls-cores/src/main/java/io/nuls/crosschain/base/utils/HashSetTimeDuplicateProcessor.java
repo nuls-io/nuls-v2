@@ -49,13 +49,13 @@ public class HashSetTimeDuplicateProcessor {
     }
 
     public synchronized boolean insertAndCheck(String hash) {
-        long start = map1.get(hash);
+
         boolean result = map1.containsKey(hash);
         if (!result) {
             map1.put(hash, System.currentTimeMillis());
             return result;
         }
-
+        Long start = map1.get(hash);
         long sub = System.currentTimeMillis() - start;
         long timeVal = System.currentTimeMillis();
         if (sub >= timeoutMs) {

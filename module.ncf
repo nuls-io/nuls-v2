@@ -87,7 +87,7 @@ initTime=1594483200
 deflationRatio=0.4
 #Deflation interval time(unit：S),30day
 deflationTimeInterval=2592000
-feeAssets=2-1,2-2,2-3
+feeAssets=1-1,9-787,9-2
 feeUnit=100000,10000,100000000000000
 
 [smart-contract]
