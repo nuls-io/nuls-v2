@@ -20,7 +20,7 @@ import java.util.Map;
 import static io.nuls.core.constant.CommonCodeConstanst.*;
 
 /**
- * 经济模型接口实现类
+ * Economic Model Interface Implementation Class
  * @author tag
  * @date 2019/7/22
  */

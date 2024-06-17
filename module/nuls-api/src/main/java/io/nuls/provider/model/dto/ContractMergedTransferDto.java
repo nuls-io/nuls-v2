@@ -35,15 +35,15 @@ import java.util.List;
  */
 @ApiModel
 public class ContractMergedTransferDto {
-    @ApiModelProperty(description = "合约生成交易：合约转账交易hash")
+    @ApiModelProperty(description = "Contract generation transaction：Contract transfer transactionhash")
     private String txHash;
-    @ApiModelProperty(description = "转出的合约地址")
+    @ApiModelProperty(description = "Transferred contract address")
     private String from;
-    @ApiModelProperty(description = "转账金额")
+    @ApiModelProperty(description = "Transfer amount")
     private String value;
-    @ApiModelProperty(description = "转入的地址列表", type = @TypeDescriptor(value = List.class, collectionElement = ContractOutputDto.class))
+    @ApiModelProperty(description = "Transferred address list", type = @TypeDescriptor(value = List.class, collectionElement = ContractOutputDto.class))
     private List<ContractOutputDto> outputs;
-    @ApiModelProperty(description = "调用合约交易hash（源交易hash，合约交易由调用合约交易派生而来）")
+    @ApiModelProperty(description = "Call contract transactionshash（Source transactionhashContract trading is derived from calling contract trading）")
     private String orginTxHash;
 
     public String getTxHash() {

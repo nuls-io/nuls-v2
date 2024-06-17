@@ -90,7 +90,7 @@ public class RegChainTransferProcessor implements TransactionProcessor {
                 blockChain = TxUtil.buildChainWithTxDataV4(tx, false);
                 asset = TxUtil.buildAssetWithTxChainV4(tx);
                 BlockChain dbChain = chainService.getChain(blockChain.getChainId());
-                //继承数据
+                //Inherit data
                 if (null != dbChain) {
                     blockChain.setSelfAssetKeyList(TxUtil.moveRepeatInfo(dbChain.getSelfAssetKeyList()));
                     blockChain.setTotalAssetKeyList(TxUtil.moveRepeatInfo(dbChain.getTotalAssetKeyList()));
@@ -108,10 +108,10 @@ public class RegChainTransferProcessor implements TransactionProcessor {
             }
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
-            //通知远程调用回滚
+            //Notify remote call to roll back
             try {
                 chainService.rpcBlockChainRollback(txs, blockHeader.getTime());
-                //进行回滚
+                //Performing a rollback
                 cacheDataService.rollBlockTxs(chainId, commitHeight);
             } catch (Exception e1) {
                 LoggerUtil.logger().error(e);

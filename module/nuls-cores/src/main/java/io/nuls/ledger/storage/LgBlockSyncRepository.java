@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 数据存储接口
+ * Data storage interface
  *
  * @author lanjinsheng
  */
@@ -40,7 +40,7 @@ public interface LgBlockSyncRepository {
 
 
     /**
-     * 获取区块高度
+     * Obtain block height
      *
      * @param chainId
      * @return
@@ -48,7 +48,7 @@ public interface LgBlockSyncRepository {
     long getSyncBlockHeight(int chainId);
 
     /**
-     * 保存或更新区块高度
+     * Save or update block height
      *
      * @param chainId
      * @param height
@@ -69,14 +69,14 @@ public interface LgBlockSyncRepository {
     void delBlockHash(int chainId, long height);
 
     /**
-     * 保存账本使用过的nonce
+     * Save the used ledgernonce
      * @param chainId
      * @param noncesMap
      * @throws Exception
      */
     void saveAccountNonces(int chainId, Map<byte[], byte[]> noncesMap) throws Exception;
     /**
-     * 删除账本存储的nonce
+     * Delete ledger storagenonce
      *
      * @param chainId
      * @param accountNonceKey
@@ -85,7 +85,7 @@ public interface LgBlockSyncRepository {
     void deleteAccountNonces(int chainId, String accountNonceKey) throws Exception;
 
     /**
-     * 判断账号的nonce是否已被使用
+     * Determine the account'snonceHas it been used
      *
      * @param chainId
      * @param accountNonceKey
@@ -96,7 +96,7 @@ public interface LgBlockSyncRepository {
 
 
     /**
-     * 保存账本使用过的hash
+     * Save the used ledgerhash
      *
      * @param chainId
      * @param hashMap
@@ -119,7 +119,7 @@ public interface LgBlockSyncRepository {
     public void batchDeleteAccountNonces(int chainId, List<String> noncesList) throws Exception;
 
     /**
-     * 删除账本存储的hash
+     * Delete ledger storagehash
      *
      * @param chainId
      * @param hash
@@ -128,7 +128,7 @@ public interface LgBlockSyncRepository {
     void deleteAccountHash(int chainId, String hash) throws Exception;
 
     /**
-     * 判断账号的hash是否已被使用
+     * Determine the account'shashHas it been used
      *
      * @param chainId
      * @param hash
@@ -138,7 +138,7 @@ public interface LgBlockSyncRepository {
     boolean existAccountHash(int chainId, String hash) throws Exception;
 
     /**
-     * 初始化数据表
+     * Initialize Data Table
      *
      * @throws NulsException
      */

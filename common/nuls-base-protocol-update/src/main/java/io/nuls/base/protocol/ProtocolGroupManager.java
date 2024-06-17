@@ -65,7 +65,7 @@ public class ProtocolGroupManager {
     }
 
     /**
-     * 获取当前生效的协议版本号
+     * Obtain the current effective protocol version number
      *
      * @param chainId
      * @return
@@ -75,7 +75,7 @@ public class ProtocolGroupManager {
     }
 
     /**
-     * 获取当前生效的协议版本(包含消息、交易详细信息)
+     * Obtain the current effective protocol version(Include messages、Transaction Details)
      *
      * @param chainId
      * @return
@@ -104,7 +104,7 @@ public class ProtocolGroupManager {
             }
             ProtocolGroup protocolGroup = protocolGroupMap.get(chainId);
             Protocol protocol = protocolGroup.getProtocolsMap().get(protocolVersion);
-            //如果不存在给定版本号的协议信息，则取比当前版本号小的最大的一个协议
+            //If there is no protocol information for the given version number, take the largest protocol smaller than the current version number
             if (protocol == null) {
                 Set<Short> sortKey = new TreeSet<>(protocolGroup.getProtocolsMap().keySet());
                 short effectiveVersion = 1;

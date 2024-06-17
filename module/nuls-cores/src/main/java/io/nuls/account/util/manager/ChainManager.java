@@ -43,7 +43,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 链管理类,负责各条链的初始化,运行,启动,参数维护等
+ * Chain management,Responsible for initializing each chain,working,start-up,Parameter maintenance, etc
  * Chain management class, responsible for the initialization, operation, start-up, parameter maintenance of each chain, etc.
  *
  * @author qinyifeng
@@ -59,7 +59,7 @@ public class ChainManager {
 
 
     /**
-     * 初始化链
+     * Initialize Chain
      * Initialize and start the chain
      */
     public void initChain() throws Exception {
@@ -67,7 +67,7 @@ public class ChainManager {
         if (configMap == null || configMap.size() == 0) {
             return;
         }
-       /* 根据配置信息创建初始化链
+       /* Create an initialization chain based on configuration information
         Initialize chains based on configuration information
         */
         for (Map.Entry<Integer, ConfigBean> entry : configMap.entrySet()) {
@@ -76,7 +76,7 @@ public class ChainManager {
             chain.setConfig(entry.getValue());
             initLogger(chain);
             /*
-            初始化链数据库表
+            Initialize Chain Database Table
             Initialize linked database tables
             */
             initTable(chainId);
@@ -89,7 +89,7 @@ public class ChainManager {
 
 
     /**
-     * 加载链的数据
+     * Load chain data
      * Initialize and start the chain
      */
     public void runChain() {
@@ -97,10 +97,10 @@ public class ChainManager {
     }
 
     /**
-     * 停止一条链
+     * Stop a chain
      * Delete a chain
      *
-     * @param chainId 链ID/chain id
+     * @param chainId chainID/chain id
      */
     public void stopChain(int chainId) {
 
@@ -108,7 +108,7 @@ public class ChainManager {
 
 
     /**
-     * 读取配置文件创建并初始化链
+     * Read configuration file to create and initialize chain
      * Read the configuration file to create and initialize the chain
      */
     private Map<Integer, ConfigBean> configChain() {
@@ -124,7 +124,7 @@ public class ChainManager {
     }
 
     /**
-     * 初始化链相关表
+     * Initialize Chain Related Tables
      * Initialization chain correlation table
      *
      * @param chainId chain id
@@ -132,7 +132,7 @@ public class ChainManager {
     private void initTable(int chainId) {
         try {
             /*
-            创建账户别名表
+            Create an account alias table
             Create account alias tables
             */
             if (!RocksDBService.existTable(AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS_KEY_ALIAS + chainId)) {

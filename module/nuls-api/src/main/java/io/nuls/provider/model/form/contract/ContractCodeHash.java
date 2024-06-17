@@ -33,10 +33,10 @@ import io.nuls.provider.model.form.Base;
  * @author: PierreLuo
  * @date: 2022/6/17
  */
-@ApiModel(description = "获取合约的codeHash表单数据")
+@ApiModel(description = "Obtaining contractscodeHashForm Data")
 public class ContractCodeHash extends Base {
 
-    @ApiModelProperty(description = "合约地址", required = true)
+    @ApiModelProperty(description = "Contract address", required = true)
     private String contractAddress;
 
     public String getContractAddress() {

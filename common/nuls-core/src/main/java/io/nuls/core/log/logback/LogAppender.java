@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 
 /**
- * 日志打印管理类，日志文件创建，日志文件大小，保存时间，日志输出格式等设置管理
+ * Log printing management class, log file creation, log file size, save time, log output format, and other settings management
  * Log Printing Management Class, Log File Creation, Log File Size, Save Time, Log Output Format and other settings management
  *
  * @author tag
@@ -28,7 +28,7 @@ public class LogAppender {
     public static String PROJECT_PATH = StringUtils.isNotBlank(System.getProperty("log.path")) ? System.getProperty("log.path") : (System.getProperty("user.dir") + File.separator + "logs");
 
     /**
-     * 通过传入的名字和级别，动态设置appender
+     * Dynamically set by passing in the name and levelappender
      *
      * @param fileName
      * @return
@@ -44,47 +44,47 @@ public class LogAppender {
         }
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
         RollingFileAppender appender = new RollingFileAppender();
-        /*设置上下文，每个logger都关联到logger上下文，默认上下文名称为default。
-        但可以使用<contextName>设置成其他名字，用于区分不同应用程序的记录。一旦设置，不能修改。*/
+        /*Set context for eachloggerAll associated withloggerContext, default context name isdefault.
+        But it can be used<contextName>Set to a different name to distinguish records from different applications. Once set, it cannot be modified.*/
         appender.setContext(context);
 
-        //这里设置级别过滤器
+        //Set level filters here
         LogFilter levelController = new LogFilter();
         ThresholdFilter levelFilter = levelController.getThresholdFilter(level);
         levelFilter.start();
         appender.addFilter(levelFilter);
 
-        //设置文件名
+        //Set file name
         appender.setFile(OptionHelper.substVars(rootPath+fileName + ".log",context));
         appender.setAppend(true);
         appender.setPrudent(false);
-        //设置文件创建时间及大小的类
+        //Class for setting file creation time and size
         SizeAndTimeBasedRollingPolicy policy = new SizeAndTimeBasedRollingPolicy();
-        //文件名格式
+        //File Name Format
         String fp = OptionHelper.substVars(rootPath+ fileName + ".%d{yyyy-MM-dd}.%i.zip",context);
-        //最大日志文件大小
+        //Maximum log file size
         policy.setMaxFileSize(FileSize.valueOf("100MB"));
-        //设置文件名模式
+        //Set file name mode
         policy.setFileNamePattern(fp);
-        //设置保存最近3天的日志
+        //Set Save Recent3Days of logs
         policy.setMaxHistory(3);
-        //总大小限制
+        //Total size limit
         policy.setContext(context);
         policy.setTotalSizeCap(FileSize.valueOf("1GB"));
-        //设置父节点是appender
+        //Set parent node asappender
         policy.setParent(appender);
-        //设置上下文，每个logger都关联到logger上下文，默认上下文名称为default。
-        //但可以使用<contextName>设置成其他名字，用于区分不同应用程序的记录。一旦设置，不能修改。
+        //Set context for eachloggerAll associated withloggerContext, default context name isdefault.
+        //But it can be used<contextName>Set to a different name to distinguish records from different applications. Once set, it cannot be modified.
         policy.start();
         PatternLayoutEncoder encoder = new PatternLayoutEncoder();
-        //设置上下文，每个logger都关联到logger上下文，默认上下文名称为default。
-        //但可以使用<contextName>设置成其他名字，用于区分不同应用程序的记录。一旦设置，不能修改。
+        //Set context for eachloggerAll associated withloggerContext, default context name isdefault.
+        //But it can be used<contextName>Set to a different name to distinguish records from different applications. Once set, it cannot be modified.
         encoder.setContext(context);
-        //设置格式
+        //Format
         /*encoder.setPattern("%d{yyyy-MM-dd HH:mm:ss.SSS} %5p [%t] %replace(%caller{1}){'\\t|Caller.{1}0|\\r\\n', ''} - %msg%n");*/
         encoder.setPattern("%d %p [%t] - %msg%n");
         encoder.start();
-        //加入下面两个节点
+        //Join the following two nodes
         appender.setRollingPolicy(policy);
         appender.setEncoder(encoder);
         appender.start();
@@ -96,20 +96,20 @@ public class LogAppender {
         ConsoleAppender appender = new ConsoleAppender();
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
         appender.setContext(context);
-        //这里设置级别过滤器
+        //Set level filters here
         LogFilter levelController = new LogFilter();
         ThresholdFilter levelFilter = levelController.getThresholdFilter(level);
         levelFilter.start();
         appender.addFilter(levelFilter);
 
         PatternLayoutEncoder encoder = new PatternLayoutEncoder();
-        //设置上下文，每个logger都关联到logger上下文，默认上下文名称为default。
-        //但可以使用<contextName>设置成其他名字，用于区分不同应用程序的记录。一旦设置，不能修改。
+        //Set context for eachloggerAll associated withloggerContext, default context name isdefault.
+        //But it can be used<contextName>Set to a different name to distinguish records from different applications. Once set, it cannot be modified.
         encoder.setContext(context);
-        //设置格式
+        //Format
         encoder.setPattern("%d %p [%t] - %msg%n");
         encoder.start();
-        //加入下面两个节点
+        //Join the following two nodes
         appender.setEncoder(encoder);
         appender.start();
         return appender;

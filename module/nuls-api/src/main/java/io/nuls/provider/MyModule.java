@@ -10,7 +10,7 @@ import io.nuls.v2.SDKContext;
 /**
  * @Author: zhoulijun
  * @Time: 2019-06-10 20:54
- * @Description: 模块业务实现类
+ * @Description: Module Business Implementation Class
  */
 @Component
 public class MyModule {
@@ -21,13 +21,13 @@ public class MyModule {
     private Config config;
 
     /**
-     * 启动模块
-     * 模块启动后，当申明的依赖模块都已经准备就绪将调用此函数
+     * Start module
+     * After the module is started, this function will be called when all declared dependent modules are ready
      * @param moduleName
      * @return
      */
     public RpcModuleState startModule(String moduleName){
-        //注册交易
+        //Registration transaction
         //transactionTools.registerTx(moduleName,200);
         SDKContext.addressPrefix = config.getAddressPrefix();
         return RpcModuleState.Running;

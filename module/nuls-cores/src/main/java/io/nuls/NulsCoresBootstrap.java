@@ -97,7 +97,7 @@ public class NulsCoresBootstrap extends RpcModule {
             super.init();
             CommonVersionChangeInvoker.addProcess(TxVersionChangeInvoker.instance());
             CommonVersionChangeInvoker.addProcess(SmartContractVersionChangeInvoker.instance());
-            //初始化配置项
+            //Initialize configuration items
             initCfg();
             ModuleHelper.init(this);
         } catch (Exception e) {
@@ -121,7 +121,7 @@ public class NulsCoresBootstrap extends RpcModule {
                         coreList.add((INulsCoresBootstrap) object);
                     }
                 }
-                // 按指定顺序执行异构链注册
+                // Perform heterogeneous chain registration in the specified order
                 coreList.sort(new Comparator<INulsCoresBootstrap>() {
                     @Override
                     public int compare(INulsCoresBootstrap o1, INulsCoresBootstrap o2) {
@@ -186,12 +186,12 @@ public class NulsCoresBootstrap extends RpcModule {
             Provider.ProviderType providerType = Provider.ProviderType.RPC;
             ServiceManager.init(config.getChainId(), providerType);
             /**
-             * 地址工具初始化
+             * Address tool initialization
              */
             AddressTool.init(addressPrefixDatas);
             AddressTool.addPrefix(config.getChainId(), config.getAddressPrefix());
 
-            // 核心模块cmd集合
+            // Core modulescmdaggregate
             List<BaseCmd> cmdList = SpringLiteContext.getBeanList(BaseCmd.class);
             for (BaseCmd cmd : cmdList) {
                 Class<?> clazs = cmd.getClass();
@@ -215,7 +215,7 @@ public class NulsCoresBootstrap extends RpcModule {
                     ResponseMessageProcessor.INVOKE_BEAN_MAP.put(moduleAbbr + "_" + cmdName, new InvokeBean(cmd, method));
                 }
             }
-            // 配置合并模块前，每个模块下的交易
+            // Before configuring the merge module, the transactions under each module
             Object[][] txTypeModules = new Object[][] {
                     new Object[]{ModuleE.AC.abbr, new int[]{2, 3, 63, 64, 65}},
                     new Object[]{ModuleE.BL.abbr, new int[]{}},
@@ -246,7 +246,7 @@ public class NulsCoresBootstrap extends RpcModule {
     }
 
     /**
-     * 初始化系统编码
+     * Initialize system encoding
      */
     private static void initSys() throws Exception {
         try {

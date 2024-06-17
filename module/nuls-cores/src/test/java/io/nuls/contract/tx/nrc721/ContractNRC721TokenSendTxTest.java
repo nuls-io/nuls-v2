@@ -50,7 +50,7 @@ import static io.nuls.contract.constant.ContractCmdConstant.CREATE;
 public class ContractNRC721TokenSendTxTest extends BaseQuery {
 
     /**
-     * 创建合约
+     * Create Contract
      */
     @Test
     public void createContract() throws Exception {
@@ -58,7 +58,7 @@ public class ContractNRC721TokenSendTxTest extends BaseQuery {
         //InputStream in = new FileInputStream(ContractTest.class.getResource("/NRC721Metadata-test.jar").getFile());
         InputStream in = new FileInputStream(new File("/Users/pierreluo/IdeaProjects/NRC721Metadata/target/NRC721Metadata-test.jar"));
         byte[] contractCode = IOUtils.toByteArray(in);
-        String remark = "create contract test - 空气币";
+        String remark = "create contract test - Air Coin";
         String name = "KQB";
         String symbol = "KongQiBi";
         Map params = this.makeCreateParams(sender, contractCode, "kqb", remark, name, symbol);

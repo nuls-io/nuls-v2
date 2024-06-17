@@ -45,7 +45,7 @@ import static io.nuls.transaction.utils.LoggerUtil.LOG;
 public class OrphanSort {
 
     public void rank(List<TransactionNetPO> txList) {
-        //分组：相同时间的一组，同时设置排序字段的值（10000*time），用于最终排序
+        //grouping：Set the value of the sorting field for a group at the same time（10000*time）, used for final sorting
         Map<Long, List<TransactionNetPO>> groupMap = new HashMap<>();
         for (TransactionNetPO tx : txList) {
             long second = tx.getTx().getTime();
@@ -57,11 +57,11 @@ public class OrphanSort {
             tx.setOrphanSortSerial(second * 10000);
             subList.add(tx);
         }
-        //相同时间的组，进行细致排序，并更新排序字段的值
+        //Sort groups at the same time in detail and update the values of the sorting fields
         for (List<TransactionNetPO> list : groupMap.values()) {
             this.sameTimeRank(list);
         }
-        //重新排序
+        //Reorder
         Collections.sort(txList, new Comparator<TransactionNetPO>() {
             @Override
             public int compare(TransactionNetPO o1, TransactionNetPO o2) {
@@ -113,7 +113,7 @@ public class OrphanSort {
                 gotIndex = i + 1;
                 added = true;
             } else if (val == 1 && gotNext) {
-//                需要找到之前的一串，挪动到现在的位置
+//                Need to find the previous string and move it to its current position
                 thisItem = result.getArray()[gotIndex];
                 if (i == gotIndex - 1) {
                     item.setHasFlower(true);
@@ -142,7 +142,7 @@ public class OrphanSort {
                     thisItem.setHasFlower(true);
                 }
                 item.setHasFlower(true);
-                // 前移后面的元素
+                // Move elements forward and behind
                 for (int x = 0; x < result.getIndex() - gotIndex + 1; x++) {
                     int oldIndex = gotIndex + x + realCount;
                     if (oldIndex <= result.getIndex()) {
@@ -183,7 +183,7 @@ public class OrphanSort {
                     }
                 }
                 thisItem.setFlower(flower);
-                // 前移后面的元素
+                // Move elements forward and behind
                 for (int x = 0; x < result.getIndex() - i + 1; x++) {
                     int oldIndex = i + x + realCount;
                     if (oldIndex <= result.getIndex()) {
@@ -228,7 +228,7 @@ public class OrphanSort {
     }
 
     /**
-     * 两个交易根据nonce 来排序
+     * Two transactions based onnonce To sort
      * @param txNeto1
      * @param txNeto2
      * @return
@@ -249,7 +249,7 @@ public class OrphanSort {
             return 0;
         }
 
-        //比较交易hash和nonce的关系
+        //Comparative transactionshashandnonceThe relationship between
         try {
             if (null == o1.getCoinData() && null == o2.getCoinData()) {
                 return 0;
@@ -284,8 +284,8 @@ public class OrphanSort {
             byte[] o2HashPrefix = TxUtil.getNonce(o2.getHash().getBytes());
             for (CoinFrom o1CoinFrom : o1CoinData.getFrom()) {
                 if (Arrays.equals(o2HashPrefix, o1CoinFrom.getNonce())) {
-                    //o1其中一个账户的nonce等于o2的hash，则需要交换位置(说明o2是o1的前一笔交易)
-                    //命中一个from直接返回
+                    //o1One of the accountsnonceequal too2ofhash, then it is necessary to exchange positions(explaino2yeso1The previous transaction of)
+                    //Hit onefromDirectly return
                     return 1;
                 }
             }
@@ -293,8 +293,8 @@ public class OrphanSort {
             byte[] o1HashPrefix = TxUtil.getNonce(o1.getHash().getBytes());
             for (CoinFrom o2CoinFrom : o2CoinData.getFrom()) {
                 if (Arrays.equals(o1HashPrefix, o2CoinFrom.getNonce())) {
-                    //o2其中一个账户的nonce等于o1的hash，则不需要交换位置(说明o1是o2的前一笔交易)
-                    //命中一个from直接返回
+                    //o2One of the accountsnonceequal too1ofhashThen there is no need to swap positions(explaino1yeso2The previous transaction of)
+                    //Hit onefromDirectly return
                     return -1;
                 }
             }

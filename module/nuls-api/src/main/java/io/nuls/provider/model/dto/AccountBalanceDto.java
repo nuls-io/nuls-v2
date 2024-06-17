@@ -11,19 +11,19 @@ import io.nuls.provider.rpctools.vo.AccountBalance;
 @ApiModel
 public class AccountBalanceDto {
 
-    @ApiModelProperty(description = "总余额")
+    @ApiModelProperty(description = "Total balance")
     private String total;
-    @ApiModelProperty(description = "锁定金额")
+    @ApiModelProperty(description = "Lock in amount")
     private String freeze;
-    @ApiModelProperty(description = "可用余额")
+    @ApiModelProperty(description = "Available balance")
     private String available;
-    @ApiModelProperty(description = "时间锁定金额")
+    @ApiModelProperty(description = "Time lock amount")
     private String timeLock;
-    @ApiModelProperty(description = " 共识锁定金额")
+    @ApiModelProperty(description = " Consensus locking amount")
     private String consensusLock;
-    @ApiModelProperty(description = "账户资产nonce值")
+    @ApiModelProperty(description = "Account assetsnoncevalue")
     private String nonce;
-    @ApiModelProperty(description = "1：已确认的nonce值,0：未确认的nonce值")
+    @ApiModelProperty(description = "1：Confirmednoncevalue,0：unacknowledgednoncevalue")
     private int nonceType;
 
     public AccountBalanceDto() {

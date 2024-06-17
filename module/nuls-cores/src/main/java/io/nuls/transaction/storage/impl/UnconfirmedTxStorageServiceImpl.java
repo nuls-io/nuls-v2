@@ -24,7 +24,7 @@ import java.util.Map;
 import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 /**
- * 验证通过但未打包的交易
+ * Transactions that have been validated but not packaged
  * Save verified transaction (unpackaged)
  *
  * @author: Charlie
@@ -60,7 +60,7 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
             for (TransactionNetPO txNetPO : txNetPOList) {
                 Transaction tx = txNetPO.getTx();
                 TransactionUnconfirmedPO txPO = new TransactionUnconfirmedPO(tx, NulsDateUtils.getCurrentTimeSeconds());
-                //序列化对象为byte数组存储
+                //Serializing objects asbyteArray storage
                 txPOMap.put(tx.getHash().getBytes(), txPO.serialize());
             }
             return RocksDBService.batchPut(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, txPOMap);
@@ -138,7 +138,7 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
             return null;
         }
         List<Transaction> txList = new ArrayList<>();
-        //根据交易hash批量查询交易数据
+        //According to the transactionhashBatch query of transaction data
         List<byte[]> list = RocksDBService.multiGetAsList(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hashList);
         if (list != null) {
             for (byte[] txBytes : list) {
@@ -184,7 +184,7 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
             return null;
         }
         List<TransactionUnconfirmedPO> txPOList = new ArrayList<>();
-        //根据交易hash批量查询交易数据
+        //According to the transactionhashBatch query of transaction data
         List<byte[]> list = RocksDBService.multiGetAsList(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hashList);
         if (list != null) {
             for (byte[] txBytes : list) {
@@ -205,7 +205,7 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
         if (hashList == null || hashList.size() == 0) {
             return null;
         }
-        //根据交易hash批量查询交易数据
+        //According to the transactionhashBatch query of transaction data
         return RocksDBService.multiGetKeyList(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hashList);
     }
 

@@ -14,7 +14,7 @@ import java.util.Set;
 /**
  * @Author: zhoulijun
  * @Time: 2019-02-28 14:52
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class RegisterInvoke extends BaseInvoke {
 
@@ -39,10 +39,10 @@ public class RegisterInvoke extends BaseInvoke {
             }
             Map methodMap = (Map) responseData.get("RegisterAPI");
             Map dependMap = (Map) methodMap.get("Dependencies");
-            StringBuilder logInfo = new StringBuilder("\n有模块信息改变，重新同步：\n");
+            StringBuilder logInfo = new StringBuilder("\nModule information has changed, please resynchronize：\n");
             for (Object object : dependMap.entrySet()) {
                 Map.Entry<String, Map> entry = (Map.Entry<String, Map>) object;
-                logInfo.append("注入：[key=").append(entry.getKey()).append(",value=").append(entry.getValue()).append("]\n");
+                logInfo.append("injection：[key=").append(entry.getKey()).append(",value=").append(entry.getValue()).append("]\n");
                 ConnectManager.ROLE_MAP.put(entry.getKey(), entry.getValue());
             }
             Log.debug(logInfo.toString());
@@ -70,7 +70,7 @@ public class RegisterInvoke extends BaseInvoke {
                         }
                     });
 
-//                    //是当前模块的依赖模块
+//                    //It is a dependency module of the current module
 //                    Request request = MessageUtil.defaultRequest();
 //                    request.getRequestMethods().put("registerModuleDependencies", module);
 //                    Message message = MessageUtil.basicMessage(MessageType.Request);

@@ -26,32 +26,32 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 一次区块下载过程中用到的参数
+ * Parameters used during a block download process
  *
  * @author captain
  * @version 1.0
- * @date 18-11-9 上午10:58
+ * @date 18-11-9 morning10:58
  */
 public class BlockDownloaderParams {
 
     /**
-     * 网络最新区块高度
+     * The latest block height in the network
      */
     private long netLatestHeight;
     /**
-     * 网络最新区块hash
+     * The latest blocks in the networkhash
      */
     private NulsHash netLatestHash;
     /**
-     * 本地最新区块高度
+     * Local latest block height
      */
     private long localLatestHeight;
     /**
-     * 本地最新区块hash
+     * Latest local blockshash
      */
     private NulsHash localLatestHash;
     /**
-     * 网络上一致可用的节点
+     * Consistently available nodes on the network
      */
     private List<Node> nodes;
     /**
@@ -59,7 +59,7 @@ public class BlockDownloaderParams {
      */
     private Map<String, Node> nodeMap;
     /**
-     * 网络上可用节点数>=nodes.size()
+     * Number of available nodes on the network>=nodes.size()
      */
     private int availableNodesCount;
 

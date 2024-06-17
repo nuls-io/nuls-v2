@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 账户缓存服务类
+ * Account caching service class
  * Account Cache Service
  *
  * @author: Charlie
@@ -41,7 +41,7 @@ public class AccountCacheService {
     private static final AccountCacheService INSTANCE = new AccountCacheService();
 
     /**
-     * 本地账户集合
+     * Local account collection
      * Collection of local accounts
      */
     private Map<String, Account> localAccountMaps;

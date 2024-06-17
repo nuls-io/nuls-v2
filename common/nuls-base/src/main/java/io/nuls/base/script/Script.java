@@ -198,7 +198,7 @@ public class Script {
      * This is necessary to render the to/from addresses of transactions in a user interface.
      * Bitcoin Core does something similar.</p>
      * <p>
-     * 将输入流解析为脚本
+     * Parse input stream into script
      */
     private void parse(byte[] program) throws ScriptException {
         chunks = new ArrayList<ScriptChunk>(5);   // Common size.
@@ -259,7 +259,7 @@ public class Script {
      * of operation being susceptible to man-in-the-middle attacks. It is still used in coinbase outputs and can be
      * useful more exotic types of transaction, but today most payments are to addresses.
      * <p>
-     * 根据公钥生成的脚本(scriptPublicKey)
+     * Script generated based on public key(scriptPublicKey)
      */
     public boolean isSentToRawPubKey() {
         return chunks.size() == 2 && chunks.get(1).equalsOpCode(OP_CHECKSIG) &&
@@ -272,7 +272,7 @@ public class Script {
      * to send somebody money with a written code because their node is offline, but over time has become the standard
      * way to make payments due to the short and recognizable base58 form addresses come in.
      * <p>
-     * 判断脚本类型是否为发送到地址
+     * Determine if the script type is send to address
      */
     public boolean isSentToAddress() {
         return chunks.size() == 5 &&
@@ -302,7 +302,7 @@ public class Script {
      *
      * <p>Otherwise it throws a ScriptException.</p>
      * <p>
-     * 获取公钥HASH
+     * Obtain public keyHASH
      */
     public byte[] getPubKeyHash() throws ScriptException {
         if (isSentToAddress()) {
@@ -322,7 +322,7 @@ public class Script {
      *
      * @throws ScriptException if the script is none of the named forms.
      *                         <p>
-     *                         获取公钥
+     *                         Obtain public key
      */
     public byte[] getPubKey() throws ScriptException {
         if (chunks.size() != 2) {
@@ -380,7 +380,7 @@ public class Script {
      * For 2-element [input] scripts assumes that the paid-to-address can be derived from the public key.
      * The concept of a "from address" isn't well defined in Bitcoin and you should not assume the sender of a
      * transaction can actually receive coins on it. This method may be removed in future.
-     * 获取支付地址
+     * Obtain payment address
      *
      */
     /*@Deprecated
@@ -390,7 +390,7 @@ public class Script {
 
     /**
      * Gets the destination address from this script, if it's in the required form (see getPubKey).
-     * 获取接受地址
+     * Obtain acceptance address
      */
     /*public Address getToAddress(NetworkParameters params) throws ScriptException {
         return getToAddress(params, false);
@@ -420,7 +420,7 @@ public class Script {
      * Writes out the given byte buffer to the output stream with the correct opcode prefix
      * To write an integer call writeBytes(out, SerializeUtils.reverseBytes(SerializeUtils.encodeMPI(val, false)));
      * <p>
-     * 将输出流按正确的方式写入到字节缓冲区
+     * Write the output stream to the byte buffer in the correct way
      */
     public static void writeBytes(OutputStream os, byte[] buf) throws IOException {
         if (buf.length < OP_PUSHDATA1) {
@@ -442,7 +442,7 @@ public class Script {
 
     /**
      * Creates a program that requires at least N of the given keys to sign, using OP_CHECKMULTISIG.
-     * 将OutputScript/scriptPublicKry  转为字节数组 用于传输
+     * takeOutputScript/scriptPublicKry  Convert to byte array Used for transmission
      */
     public static byte[] createMultiSigOutputScript(int threshold, List<ECKey> pubkeys) {
         checkArgument(threshold > 0);
@@ -466,7 +466,7 @@ public class Script {
     }
 
     /**
-     * 根据签名和公钥的字节数组转为inputScript/scriptSig 字节数组用于网络传播
+     * Convert the byte array based on the signature and public key toinputScript/scriptSig Byte arrays for network propagation
      **/
     public static byte[] createInputScript(byte[] signature, byte[] pubkey) {
         try {
@@ -481,7 +481,7 @@ public class Script {
     }
 
     /**
-     * 根据签名的字节数组转为inputScript/scriptSig 字节数组用于网络传播
+     * Convert the signed byte array toinputScript/scriptSig Byte arrays for network propagation
      **/
     public static byte[] createInputScript(byte[] signature) {
         try {
@@ -500,7 +500,7 @@ public class Script {
      * Having incomplete input script allows to pass around partially signed tx.
      * It is expected that this program later on will be updated with proper signatures.
      * <p>
-     * 创建一个空Script
+     * Create an emptyScript
      */
     public Script createEmptyInputScript(@Nullable ECKey key, @Nullable Script redeemScript) {
         if (isSentToAddress()) {
@@ -950,11 +950,11 @@ public class Script {
      * is useful if you need more precise control or access to the final state of the stack. This interface is very
      * likely to change in future.
      *
-     * @param txContainingThis 交易
-     * @param index            解锁脚本的索引
-     * @param script           锁定脚本
-     * @param stack            命令队列
-     * @param verifyFlags      验证类型集合
+     * @param txContainingThis transaction
+     * @param index            Unlock the index of the script
+     * @param script           Lock Script
+     * @param stack            Command queue
+     * @param verifyFlags      Validation Type Collection
      **/
     public static void executeScript(@Nullable Transaction txContainingThis, long index,
                                      Script script, LinkedList<byte[]> stack, Set<VerifyFlag> verifyFlags) throws ScriptException {
@@ -1739,15 +1739,15 @@ public class Script {
 
     /**
      * Verifies that this script (interpreted as a scriptSig) correctly spends the given scriptPubKey, enabling all
-     * validation rules.验证此脚本（解锁脚本）是否正确地使用给定的scriptPubKey（锁定脚本），启用所有验证规则
+     * validation rules.Verify this script（Unlock Script）Whether to use the given correctlyscriptPubKey（Lock Script）Enable all validation rules
      *
      * @param txContainingThis The transaction in which this input scriptSig resides.
      *                         Accessing txContainingThis from another thread while this method runs results in undefined behavior.
-     * @param scriptSigIndex   交易中包含的解锁脚本的索引The index in txContainingThis of the scriptSig (note: NOT the index of the scriptPubKey).
-     * @param scriptPubKey     锁定脚本The connected scriptPubKey containing the conditions needed to claim the value.
+     * @param scriptSigIndex   Index of unlocking scripts included in the transactionThe index in txContainingThis of the scriptSig (note: NOT the index of the scriptPubKey).
+     * @param scriptPubKey     Lock ScriptThe connected scriptPubKey containing the conditions needed to claim the value.
      *                         instead so that verification flags do not change as new verification options
      *                         are added.
-     *                         交易，解锁脚本下标，锁定脚本 txContainingThis+scriptSigIndex用于定位解锁脚本（因为一笔交易中有可能有多个Input）
+     *                         Trading, unlocking script index, locking script txContainingThis+scriptSigIndexUsed to locate unlocking scripts（Because there may be multiple transactions in one transactionInput）
      */
     @Deprecated
     public boolean correctlySpends(Transaction txContainingThis, long scriptSigIndex, Script scriptPubKey) {
@@ -1761,14 +1761,14 @@ public class Script {
     /**
      * Verifies that this script (interpreted as a scriptSig) correctly spends the given scriptPubKey.
      *
-     * @param txContainingThis 交易 The transaction in which this input scriptSig resides.
+     * @param txContainingThis transaction The transaction in which this input scriptSig resides.
      *                         Accessing txContainingThis from another thread while this method runs results in undefined behavior.
-     * @param scriptSigIndex   scriptSig脚本索引 The index in txContainingThis of the scriptSig (note: NOT the index of the scriptPubKey).
+     * @param scriptSigIndex   scriptSigScript Index The index in txContainingThis of the scriptSig (note: NOT the index of the scriptPubKey).
      * @param scriptPubKey     scriptPubKey   The connected scriptPubKey containing the conditions needed to claim the value.
-     * @param verifyFlags      验证标识 Each flag enables one validation rule. If in doubt, use {@link #correctlySpends(Transaction, long, Script)}
+     * @param verifyFlags      Verification identification Each flag enables one validation rule. If in doubt, use {@link #correctlySpends(Transaction, long, Script)}
      *                         which sets all flags.
      *                         <p>
-     *                         验证此脚本scriptSig是否正确地使用给定的scriptPubKey
+     *                         Verify this scriptscriptSigWhether to use the given correctlyscriptPubKey
      */
     public boolean correctlySpends(Transaction txContainingThis, long scriptSigIndex, Script scriptPubKey, Set<VerifyFlag> verifyFlags) {
         try {
@@ -1860,7 +1860,7 @@ public class Script {
 
 
     /**
-     * 签名验证
+     * Signature verification
      */
     public static boolean verifySign(byte[] digestData, byte[] signData, byte[] publicKey) {
         return ECKey.verify(digestData, signData, publicKey);

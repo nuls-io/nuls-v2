@@ -38,7 +38,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * 单元测试工具类, 造数据等
+ * Unit testing tools, Create data, etc
  *
  * @author: Charlie
  * @date: 2019-01-09
@@ -151,7 +151,7 @@ public class TestConstant {
         tx.setType(10);
         tx.setTime(System.currentTimeMillis()/1000);
         tx.setBlockHeight(100);
-        String remark = "这是一笔跨链转账交易";
+        String remark = "This is a cross chain transfer transaction";
         tx.setRemark(StringUtils.bytes(remark));
         return tx;
     }
@@ -162,7 +162,7 @@ public class TestConstant {
         tx.setType(2);
         tx.setTime(System.currentTimeMillis()/1000);
         tx.setBlockHeight(100);
-        String remark = "这是一笔普通转账交易";
+        String remark = "This is a regular transfer transaction";
         tx.setRemark(StringUtils.bytes(remark));
         return tx;
     }
@@ -182,7 +182,7 @@ public class TestConstant {
 
 
     /**
-     * 判断两个list中元素的序列化数据是否相等
+     * Judging twolistIs the serialized data of the middle element equal
      */
     public static boolean equals(List<? extends BaseNulsData> listA, List<? extends BaseNulsData> listB) {
         if (null == listA && null == listB) {

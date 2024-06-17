@@ -27,11 +27,11 @@ import io.nuls.block.utils.LoggerUtil;
 import java.util.StringJoiner;
 
 /**
- * 节点
+ * node
  *
  * @author captain
  * @version 1.0
- * @date 18-11-30 下午2:48
+ * @date 18-11-30 afternoon2:48
  */
 public class Node {
 
@@ -40,35 +40,35 @@ public class Node {
      */
     private String id;
     /**
-     * 最新区块高度
+     * Latest block height
      */
     private long height;
     /**
-     * 该节点关联的下载任务区间的起始高度
+     * The starting height of the download task interval associated with this node
      */
     private long startHeight;
     /**
-     * 该节点关联的下载任务区间的结束高度
+     * The end height of the download task interval associated with this node
      */
     private long endHeight;
     /**
-     * 最新区块hash
+     * Latest Blockhash
      */
     private NulsHash hash;
     /**
-     * 下载信用值,初始值50
+     * Download credit value,Initial value50
      */
     private int credit = 50;
     /**
-     * 累计失败次数
+     * Accumulated number of failures
      */
     private int failedCount = 0;
     /**
-     * 批量下载任务开始时间
+     * Batch download task start time
      */
     private long startTime = 0;
     /**
-     * 节点状态
+     * Node status
      */
     private NodeEnum nodeEnum;
 
@@ -141,12 +141,12 @@ public class Node {
     }
 
     public void setCredit(int credit) {
-        //主动设置的下载信用值不低于10
+        //The download credit value set proactively shall not be lower than10
         this.credit = Math.max(credit, 10);
     }
 
     /**
-     * 根据下载是否成功、下载耗费时间调整信用值
+     * Based on whether the download was successful or not、Download takes time to adjust credit value
      */
     public synchronized void adjustCredit(boolean success) {
         if (nodeEnum.equals(NodeEnum.TIMEOUT)) {
@@ -154,10 +154,10 @@ public class Node {
         }
         int oldCredit = credit;
         if (success) {
-            //下载成功,信用值加10,初始值50,上限为100
+            //Download successful,Credit Value Plus10,Initial value50,The upper limit is100
             credit = Math.min(100, credit + 10);
         } else {
-            //下载失败,信用值降为原值的八分之一,下限为0,从最大信用值100下降到0，需要连续三次
+            //Download failed,Reduce credit value to one eighth of the original value,The lower limit is0,From maximum credit value100Descend to0, needs to be done three times in a row
             credit >>= 3;
             failedCount++;
             if (credit == 0 || failedCount > 10) {

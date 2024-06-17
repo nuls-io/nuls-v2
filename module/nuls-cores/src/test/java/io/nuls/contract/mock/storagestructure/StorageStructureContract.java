@@ -112,10 +112,10 @@ public class StorageStructureContract extends MockBase {
 
     @Test
     public void testMapAdd() throws Exception {
-        // eaa90d836849ec31698bdbaa7a7e94fd9a4292e33a0f405565a10128375bc9c8 12288 再添加一个，就触发resize
-        // 8fd0a0b82976ecdc98d6f14e406b0ec8409d3c64b85da0f98b319944db15ecc6 接eaa, 扩容因子被改变成1
-        // 87fa8f0b5f708c909961ab4abab30777c2e1455ca58aa6e5adae5601826501af 接eaa, 被扩容到65536
-        // 096917a2d4a70bcdbecef243887f87feeba693d1e8ac518460ae2f8e7b58b243 接87f
+        // eaa90d836849ec31698bdbaa7a7e94fd9a4292e33a0f405565a10128375bc9c8 12288 Add another one and it will triggerresize
+        // 8fd0a0b82976ecdc98d6f14e406b0ec8409d3c64b85da0f98b319944db15ecc6 meeteaa, The expansion factor has been changed to1
+        // 87fa8f0b5f708c909961ab4abab30777c2e1455ca58aa6e5adae5601826501af meeteaa, Expanded to65536
+        // 096917a2d4a70bcdbecef243887f87feeba693d1e8ac518460ae2f8e7b58b243 meet87f
         byte[] prevStateRoot = HexUtil.decode("6ee749e0360819359387c0c089928b27faaeab91fbd71427afc52c457df47e5c");
         Object[] objects = super.call(prevStateRoot, SENDER, "addMap", new String[]{"q", "1"});
         byte[] stateRoot = (byte[]) objects[0];

@@ -77,7 +77,7 @@ public interface ContractConstant {
 
 
     /**
-     * 合约资产跨链
+     * Cross chain contract assets
      */
     long CROSS_CHAIN_GASLIMIT = 300000;
     String CROSS_CHAIN_SYSTEM_CONTRACT_TRANSFER_IN_METHOD_NAME = "crossChainTokenTransfer";
@@ -135,7 +135,7 @@ public interface ContractConstant {
     String MODULE_CONFIG_FILE = "module.json";
 
     /**
-     * 最小转账金额 - 0.01 NULS
+     * Minimum transfer amount - 0.01 NULS
      * Minimum transfer amount - 0.01 NULS
      */
     BigInteger MININUM_TRANSFER_AMOUNT = BigInteger.TEN.pow(6);

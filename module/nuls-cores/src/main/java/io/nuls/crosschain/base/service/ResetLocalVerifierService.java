@@ -12,20 +12,20 @@ import java.util.Map;
 /**
  * @Author: zhoulijun
  * @Time: 2020/11/23 11:15
- * @Description: 重新对齐本链验证人列表的数据
+ * @Description: Realign the data of the witness list for this chain
  *
  */
 public interface ResetLocalVerifierService {
 
     /**
-     * 创建重置本地验证人交易
+     * Create a reset local validator transaction
      *
      * @return processor result
      * */
     Result createResetLocalVerifierTx(int chainId,String address,String password) ;
 
     /**
-     * 交易验证
+     * Transaction verification
      * @param chainId       chain ID
      * @param txs           cross chain transaction list
      * @param blockHeader   block header
@@ -35,7 +35,7 @@ public interface ResetLocalVerifierService {
     Map<String,Object> validate(int chainId, List<Transaction> txs, BlockHeader blockHeader);
 
     /**
-     * 交易提交
+     * Transaction submission
      * @param chainId       chain ID
      * @param txs           cross chain transaction list
      * @param blockHeader   block header
@@ -45,7 +45,7 @@ public interface ResetLocalVerifierService {
     boolean commitTx(int chainId, List<Transaction> txs, BlockHeader blockHeader);
 
     /**
-     * 交易回滚
+     * Transaction Rollback
      * @param chainId       chain ID
      * @param txs           cross chain transaction list
      * @param blockHeader   block header
@@ -55,14 +55,14 @@ public interface ResetLocalVerifierService {
     boolean rollbackTx(int chainId, List<Transaction> txs, BlockHeader blockHeader);
 
     /**
-     * 判断初始化验证人交易是不是用于重置平行链上的主链验证人列表
+     * Determine if the initialization validator transaction is used to reset the main chain validator list on the parallel chain
      * @param txHash
      * @return
      */
     boolean isResetOtherVerifierTx(String txHash);
 
     /**
-     * 重置平行链上的主链验证人交易已经完成拜占庭签名，从缓存中移除
+     * Reset the main chain verifier transaction on the parallel chain. Byzantine signature has been completed and removed from the cache
      * @param txHash
      */
     void finishResetOtherVerifierTx(String txHash);

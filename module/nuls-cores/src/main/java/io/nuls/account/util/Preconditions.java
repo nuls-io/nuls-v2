@@ -6,7 +6,7 @@ import io.nuls.core.exception.NulsRuntimeException;
 import javax.annotation.Nullable;
 
 /**
- * 检查对象是否满足条件类
+ * Check if the object meets the condition class
  * <p>
  * check the object is satisfy the condition
  *
@@ -23,7 +23,7 @@ public class Preconditions {
     }
 
     /**
-     * 检查参数是否为null
+     * Check if the parameters arenull
      * <p>
      * Check if the object is null ,if is null ,it will throw NulsRuntimeException
      *
@@ -37,7 +37,7 @@ public class Preconditions {
     }
 
     /**
-     * 检查参数是否为空
+     * Check if the parameter is empty
      * <p>
      * Check if the object is null, if the object is String, check the String is contain nothing or only space
      *
@@ -54,7 +54,7 @@ public class Preconditions {
     }
 
     /**
-     * 检查参数是否为空
+     * Check if the parameter is empty
      * <p>
      * Check if the object is null ,if is null ,it will throw NulsRuntimeException
      *

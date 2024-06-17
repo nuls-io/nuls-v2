@@ -33,18 +33,18 @@ import io.nuls.v2.util.ContractUtil;
 /**
  * @author: PierreLuo
  */
-@ApiModel(description = "验证发布智能合约表单数据")
+@ApiModel(description = "Verify and publish smart contract form data")
 public class ContractValidateCreate extends Base {
 
-    @ApiModelProperty(description = "交易创建者", required = true)
+    @ApiModelProperty(description = "Transaction Creator", required = true)
     private String sender;
-    @ApiModelProperty(description = "最大gas消耗", required = true)
+    @ApiModelProperty(description = "maximumgasconsume", required = true)
     private long gasLimit;
-    @ApiModelProperty(description = "执行合约单价", required = true)
+    @ApiModelProperty(description = "Execution contract unit price", required = true)
     private long price;
-    @ApiModelProperty(description = "智能合约代码(字节码的Hex编码字符串)", required = true)
+    @ApiModelProperty(description = "Smart Contract Code(BytecodeHexEncoding string)", required = true)
     private String contractCode;
-    @ApiModelProperty(description = "参数列表", required = false)
+    @ApiModelProperty(description = "parameter list", required = false)
     private Object[] args;
 
     public String[][] getArgs(String[] types) {

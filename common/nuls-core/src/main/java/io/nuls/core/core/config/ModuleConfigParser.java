@@ -6,7 +6,7 @@ import java.util.Map;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-13 17:47
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public interface ModuleConfigParser {
 
@@ -17,13 +17,13 @@ public interface ModuleConfigParser {
     }
 
     /**
-     * 解析文件类型的后缀
+     * Parsing file type suffixes
      * @return
      */
     String fileSuffix();
 
     /**
-     * 解析配置项到map中
+     * Parsing configuration items tomapin
      * @param fileName
      * @param inputStream
      * @return

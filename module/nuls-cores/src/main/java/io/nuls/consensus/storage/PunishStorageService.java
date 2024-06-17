@@ -5,39 +5,39 @@ import io.nuls.consensus.model.po.PunishLogPo;
 import java.util.List;
 
 /**
- * 惩罚存储管理类
+ * Punish storage management class
  * Penalty Storage Management Class
  *
  * @author tag
  * */
 public interface PunishStorageService {
     /**
-     * 保存
+     * preserve
      * save
      *
-     * @param po          红黄牌对象/Red and yellow card objects
-     * @param chainID     链ID/chain id
+     * @param po          Red and yellow card objects/Red and yellow card objects
+     * @param chainID     chainID/chain id
      * @return boolean
      * */
     boolean save(PunishLogPo po,int chainID);
 
     /**
-     * 删除
+     * delete
      * delete
      *
-     * @param key      键/key
-     * @param chainID  链ID/chain id
+     * @param key      key/key
+     * @param chainID  chainID/chain id
      * @return  boolean
      * */
     boolean delete(byte[] key,int chainID);
 
     /**
-     * 获取列表
+     * Get List
      * get list
      *
-     * @param chainID  链ID/chain id
+     * @param chainID  chainID/chain id
      * @return List<PunishLogPo>
-     * @exception Exception 数据查询失败
+     * @exception Exception Data query failed
      * */
     List<PunishLogPo> getPunishList(int chainID) throws Exception;
 }

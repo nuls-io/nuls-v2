@@ -80,7 +80,7 @@ public class Invokevirtual {
 
         if (ProtocolGroupManager.getCurrentVersion(ContractContext.CHAIN_ID) >= ContractContext.UPDATE_VERSION_CONTRACT_BALANCE) {
             if (methodCode.isMethod(RESIZE_CLASS_NAME, RESIZE_METHOD_NAME, RESIZE_METHOD_DESC)) {
-                // HashMap 扩容限制
+                // HashMap Expansion restrictions
                 MethodCode sizeMethod = frame.vm.methodArea.loadMethod(className, Constants.SIZE, Constants.SIZE_DESC);
                 frame.vm.run(sizeMethod, methodArgs.frameArgs, false);
                 Object sizeResult = frame.vm.getResultValue();
@@ -90,7 +90,7 @@ public class Invokevirtual {
                     return;
                 }
                 if (size > Constants.MAP_MIN_TRIGGER_RESIZE_CAPACITY) {
-                    // 扩容机制
+                    // Expansion mechanism
                     MethodCode capacityMethod = frame.vm.methodArea.loadMethod(className, CAPACITY_METHOD_NAME, CAPACITY_METHOD_DESC);
                     frame.vm.run(capacityMethod, methodArgs.frameArgs, false);
                     Object capacityResult = frame.vm.getResultValue();

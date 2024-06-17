@@ -27,7 +27,7 @@ package io.nuls.transaction.model.bo;
 import io.nuls.base.data.Transaction;
 
 /**
- * 验证区块交易时的交易包装器
+ * Transaction wrapper for verifying block transactions
  * @author: Charlie
  * @date: 2019/6/26
  */

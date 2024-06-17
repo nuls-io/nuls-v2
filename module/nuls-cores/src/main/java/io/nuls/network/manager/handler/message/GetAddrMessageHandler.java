@@ -40,7 +40,7 @@ import io.nuls.network.utils.LoggerUtil;
 import java.util.List;
 
 /**
- * 发送与接收 连接地址 协议消息处理类
+ * send and receive Connection address Protocol message processing class
  * get address message handler
  * Send and receive connection address protocol message processing class
  *
@@ -60,7 +60,7 @@ public class GetAddrMessageHandler extends BaseMessageHandler {
     }
 
     /**
-     * 接收消息处理
+     * Receive message processing
      * Receive message processing
      *
      * @param message address message
@@ -72,7 +72,7 @@ public class GetAddrMessageHandler extends BaseMessageHandler {
         int chainId = node.getNodeGroup().getChainId();
         LoggerUtil.logger(chainId).info("GetAddrMessageHandler Recieve:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
         GetAddrMessageBody getAddrMessageBody = (GetAddrMessageBody) message.getMsgBody();
-        //发送addr消息
+        //sendaddrnews
         List<IpAddressShare> ipAddresses = NodeGroupManager.getInstance().getAvailableShareNodes(node, getAddrMessageBody.getChainId(), (getAddrMessageBody.getIsCrossAddress() == (byte) 1 ? true : false));
         AddrMessage addressMessage = MessageFactory.getInstance().buildAddrMessage(ipAddresses, message.getHeader().getMagicNumber(), getAddrMessageBody.getChainId(), getAddrMessageBody.getIsCrossAddress());
         if (0 == addressMessage.getMsgBody().getIpAddressList().size()) {

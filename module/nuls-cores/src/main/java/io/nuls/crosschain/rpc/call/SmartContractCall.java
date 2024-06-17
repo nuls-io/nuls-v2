@@ -12,14 +12,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 调用其他模块跟交易相关的接口
+ * Calling other modules and transaction related interfaces
  *
  * @author tag
  * 2018/12/26
  */
 public class SmartContractCall {
     /**
-     * 注册智能合约交易
+     * Registering smart contract transactions
      * Acquire account lock-in amount and available balance
      *
      * @param chainId

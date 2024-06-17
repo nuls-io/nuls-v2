@@ -5,13 +5,13 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author lan
- * @description 全局锁, 用于同步代码片段
+ * @description Global lock, Used to synchronize code snippets
  * Lockers
  * @date 2018/11/13
  **/
 public class Lockers {
     /**
-     * 用于同步锁定协议注册与清理
+     * Used for synchronizing lock protocol registration and cleaning
      * Used for synchronous lock protocol registration and cleanup
      */
     public final static Lock PROTOCOL_HANDLERS_REGISTER_LOCK = new ReentrantLock();

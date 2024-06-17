@@ -25,7 +25,7 @@ import io.nuls.consensus.utils.validator.TxValidator;
 import java.io.IOException;
 import java.util.*;
 /**
- * 智能合约退出共识处理器
+ * Smart contract exit consensus processor
  * @author tag
  * @date 2019/6/1
  */
@@ -83,7 +83,7 @@ public class ContractWithdrawProcessor implements TransactionProcessor {
                     continue;
                 }
                 /*
-                 * 重复退出节点
+                 * Repeated exit node
                  * */
                 if (!hashSet.add(cancelDeposit.getJoinTxHash())) {
                     invalidTxList.add(contractWithdrawTx);
@@ -127,7 +127,7 @@ public class ContractWithdrawProcessor implements TransactionProcessor {
                 commitResult = false;
             }
         }
-        //回滚已提交成功的交易
+        //Roll back transactions that have been successfully submitted
         if(!commitResult){
             for (Transaction rollbackTx:commitSuccessList) {
                 try {
@@ -166,7 +166,7 @@ public class ContractWithdrawProcessor implements TransactionProcessor {
                 rollbackResult = false;
             }
         }
-        //保存已回滚成功的交易
+        //Save successfully rolled back transactions
         if(!rollbackResult){
             for (Transaction commitTx:rollbackSuccessList) {
                 try {

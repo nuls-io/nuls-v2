@@ -9,7 +9,7 @@ import io.nuls.crosschain.base.model.bo.txdata.VerifierChangeData;
 /**
  * @Author: zhoulijun
  * @Time: 2020/10/12 17:05
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class TestVerifierChange {
     public static void main(String[] args) throws NulsException {

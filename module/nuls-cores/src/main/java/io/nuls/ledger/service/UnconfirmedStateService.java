@@ -42,7 +42,7 @@ import java.util.Map;
 public interface UnconfirmedStateService {
 
     /**
-     * 未确认账本信息
+     * Unconfirmed ledger information
      * @param address
      * @param addressChainId
      * @param assetChainId
@@ -64,7 +64,7 @@ public interface UnconfirmedStateService {
     AccountStateUnconfirmed getUnconfirmedInfoAndClear(String address, int addressChainId, int assetChainId, int assetId,AccountState accountState);
 
     /**
-     * 获取账本nonce信息
+     * Obtain ledgernonceinformation
      *
      * @param accountState
      * @return
@@ -72,7 +72,7 @@ public interface UnconfirmedStateService {
     AccountStateUnconfirmed getUnconfirmedJustNonce(String address, int addressChainId, int assetChainId, int assetId,AccountState accountState);
 
     /**
-     * 回滚信息
+     * rollback information
      * @param addressChainId
      * @param accountState
      * @param assetKey
@@ -82,7 +82,7 @@ public interface UnconfirmedStateService {
     void mergeUnconfirmedNonce(int addressChainId,AccountState accountState, String assetKey, Map<String, TxUnconfirmed> txsUnconfirmed, AccountStateUnconfirmed accountStateUnconfirmed);
 
     /**
-     * 回滚未确认账本交易
+     * Rollback unconfirmed ledger transactions
      *
      * @param addressChainId
      * @param assetKey

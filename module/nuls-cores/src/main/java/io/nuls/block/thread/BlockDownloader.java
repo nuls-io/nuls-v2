@@ -41,16 +41,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static io.nuls.block.constant.CommandConstant.GET_BLOCKS_BY_HEIGHT_MESSAGE;
 
 /**
- * 区块下载管理器
+ * Block Download Manager
  *
  * @author captain
  * @version 1.0
- * @date 18-11-9 下午4:25
+ * @date 18-11-9 afternoon4:25
  */
 public class BlockDownloader implements Callable<Boolean> {
 
     /**
-     * 链ID
+     * chainID
      */
     private int chainId;
 
@@ -84,7 +84,7 @@ public class BlockDownloader implements Callable<Boolean> {
                         return false;
                     }
                 }
-                //下载的区块字节数达到缓存阈值的80%时，降慢下载速度
+                //The number of downloaded block bytes has reached the cache threshold80%When downloading, slow down the download speed
                 if (cachedSize > limit) {
                     nodes.forEach(e -> e.setCredit(e.getCredit() / 2));
                 }
@@ -100,9 +100,9 @@ public class BlockDownloader implements Callable<Boolean> {
                     size = (int) (netLatestHeight - startHeight + 1);
                 }
                 long endHeight = startHeight + size - 1;
-                //组装批量获取区块消息
+                //Batch assembly to obtain block messages
                 HeightRangeMessage message = new HeightRangeMessage(startHeight, endHeight);
-                //发送消息给目标节点
+                //Send a message to the target node
                 boolean b = NetworkCall.sendToNode(chainId, message, node.getId(), GET_BLOCKS_BY_HEIGHT_MESSAGE);
                 if (b) {
                     node.setNodeEnum(NodeEnum.WORKING);

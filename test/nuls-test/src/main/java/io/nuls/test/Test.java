@@ -14,7 +14,7 @@ import org.bouncycastle.util.encoders.Hex;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-21 17:41
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class Test {
 

@@ -22,12 +22,12 @@ public class ConfirmedTxStorageServiceTest {
 
     @BeforeClass
     public static void beforeTest() throws Exception {
-        //初始化数据库配置文件
+        //Initialize database configuration file
         new TransactionBootstrap().initDB();
-        //初始化上下文
+        //Initialize Context
         SpringLiteContext.init(TestConstant.CONTEXT_PATH);
         confirmedTxStorageService = SpringLiteContext.getBean(ConfirmedTxStorageService.class);
-        //启动链
+        //Start Chain
         SpringLiteContext.getBean(ChainManager.class).runChain();
     }
 
@@ -51,7 +51,7 @@ public class ConfirmedTxStorageServiceTest {
     }
 
     /**
-     * 测试交易批量保存、批量查询、批量删除、单个查询
+     * Batch save of test transactions、Batch Query、Batch deletion、Single query
      *
      * @throws Exception
      */

@@ -6,7 +6,7 @@ import io.nuls.core.constant.ErrorCode;
 
 
 /**
- * 跨链模块错误码管理类
+ * Cross chain module error code management class
  * @author tag
  * 2019/04/08
  * */
@@ -41,11 +41,11 @@ public interface NulsCrossChainErrorCode extends CommonCodeConstanst {
     ErrorCode CROSS_ASSERT_VALID_ERROR = ErrorCode.init("cc_0028");
     ErrorCode TO_ADDRESS_ERROR = ErrorCode.init("cc_0029");
     ErrorCode TO_MANY_VERIFIER_EXIT = ErrorCode.init("cc_0030");
-    //资产没有注册跨链
+    //Asset not registered cross chain
     ErrorCode ASSET_NOT_REG_CROSS_CHAIN = ErrorCode.init("cc_0031");
 
     /**
-     * 交易必须种子节点签名
+     * The transaction must be signed by the seed node
      */
     ErrorCode MUST_SEED_ADDRESS_SIGN = ErrorCode.init("cc_0032");
 }

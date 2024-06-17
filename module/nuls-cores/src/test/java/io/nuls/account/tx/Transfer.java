@@ -240,7 +240,7 @@ public class Transfer implements Runnable {
         tx.setTxData(data.serialize());
         tx.setTime(System.currentTimeMillis() / 1000);
         tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
-        System.out.println(String.format("交易大小: %s", tx.size()));
+        System.out.println(String.format("Transaction size: %s", tx.size()));
 
         String[] pubkeys = new String[]{
                 "0225a6a872a4110c9b9c9a71bfdbe896e04bc83bb9fe38e27f3e18957d9b2a25ad",
@@ -296,7 +296,7 @@ public class Transfer implements Runnable {
         tx.setCoinData(coinData.serialize());
 
         List<Object[]> blockDatas = new ArrayList<>();
-        // 锁定列表: 地址，操作类型(1-加入白名单 2-移除白名单)，白名单交易类型清单，白名单合约地址清单
+        // Lock List: Address, operation type(1-Join the whitelist 2-Remove whitelist)List of whitelist transaction types and whitelist contract addresses
         blockDatas.add(new Object[]{"NULSd6HgZkPDuWG7vZP8yQiLwMSxEFzY1rUNr", 1, List.of(16), List.of("NULSd6HgntyX6aBo9ipFSxh9v7Tp2JZmG4rSA")});
         AccountBlockData data = this.makeTxData(blockDatas);
         /*File file0 = new File("/Users/pierreluo/Nuls/pocm_deposit.txt");
@@ -309,7 +309,7 @@ public class Transfer implements Runnable {
             String contract = split[1].trim();
             String user = split[2].trim();
             if (unLockUsers.contains(user)) {
-                System.out.println(String.format("用户[%s]未锁定[已检查]", user));
+                System.out.println(String.format("user[%s]Unlocked[Checked]", user));
                 continue;
             }
             RpcResult request = JsonRpcUtil.request(rpcAddress, "isBlockAccount", List.of(chainId, user));
@@ -317,20 +317,20 @@ public class Transfer implements Runnable {
             Boolean isBlock = (Boolean) result.get("value");
             if (!isBlock) {
                 unLockUsers.add(user);
-                System.out.println(String.format("用户[%s]未锁定", user));
+                System.out.println(String.format("user[%s]Unlocked", user));
                 continue;
             }
             Set<String> userContractList = userMap.computeIfAbsent(user, u -> new HashSet<>());
             userContractList.add(contract);
         }
-        // 锁定列表: 地址，操作类型(1-加入白名单 2-移除白名单)，白名单交易类型清单，白名单合约地址清单
+        // Lock List: Address, operation type(1-Join the whitelist 2-Remove whitelist)List of whitelist transaction types and whitelist contract addresses
         List<Object[]> blockDatas = new ArrayList<>();
         Set<Map.Entry<String, Set<String>>> entries = userMap.entrySet();
         for (Map.Entry<String, Set<String>> entry : entries) {
             String user = entry.getKey();
             Set<String> contracts = entry.getValue();
             if (contracts.isEmpty()) {
-                System.out.println(String.format("用户[%s]没有质押的合约", user));
+                System.out.println(String.format("user[%s]Contract without pledge", user));
             }
             blockDatas.add(new Object[]{user, 1, List.of(16), contracts.stream().collect(Collectors.toList())});
         }
@@ -339,7 +339,7 @@ public class Transfer implements Runnable {
         tx.setTxData(data.serialize());
         tx.setTime(System.currentTimeMillis() / 1000);
         tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
-        System.out.println(String.format("交易大小: %s", tx.size()));
+        System.out.println(String.format("Transaction size: %s", tx.size()));
 
         String[] pubkeys = new String[]{
                 "0225a6a872a4110c9b9c9a71bfdbe896e04bc83bb9fe38e27f3e18957d9b2a25ad",
@@ -385,20 +385,20 @@ public class Transfer implements Runnable {
             Map result = (Map) request.getResult();
             Boolean isBlock = (Boolean) result.get("value");
             if (!isBlock) {
-                System.out.println(String.format("用户[%s]未锁定", user));
+                System.out.println(String.format("user[%s]Unlocked", user));
                 continue;
             }
             Set<String> userContractList = userMap.computeIfAbsent(user, u -> new HashSet<>());
             userContractList.add(contract);
         }
-        // 锁定列表: 地址，操作类型(1-加入白名单 2-移除白名单)，白名单交易类型清单，白名单合约地址清单
+        // Lock List: Address, operation type(1-Join the whitelist 2-Remove whitelist)List of whitelist transaction types and whitelist contract addresses
         List<Object[]> blockDatas = new ArrayList<>();
         Set<Map.Entry<String, Set<String>>> entries = userMap.entrySet();
         for (Map.Entry<String, Set<String>> entry : entries) {
             String user = entry.getKey();
             Set<String> contracts = entry.getValue();
             if (contracts.isEmpty()) {
-                System.out.println(String.format("用户[%s]没有质押的合约", user));
+                System.out.println(String.format("user[%s]Contract without pledge", user));
             }
             blockDatas.add(new Object[]{user, 1, List.of(16), contracts.stream().collect(Collectors.toList())});
         }
@@ -592,7 +592,7 @@ public class Transfer implements Runnable {
         tx.setCoinData(coinData.serialize());
 
         List<Object[]> blockDatas = new ArrayList<>();
-        // 锁定列表: 地址，操作类型(1-加入白名单 2-移除白名单)，白名单交易类型清单
+        // Lock List: Address, operation type(1-Join the whitelist 2-Remove whitelist)List of whitelist transaction types
         blockDatas.add(new Object[]{"tNULSeBaMtkzQ1tH8JWBGZDCmRHCmySevE4frM", 2, List.of(3)});
         blockDatas.add(new Object[]{"tNULSeBaMhKaLzhQh1AhhecUqh15ZKw98peg29", 2, List.of(), List.of("tNULSeBaNA8cXq6wxnAwtgCJrYX9P1iosCzd1H")});
         blockDatas.add(new Object[]{"tNULSeBaMv8q3pWzS7bHpQWW8yypNGo8auRoPf", 1, List.of(2, 3)});
@@ -604,12 +604,12 @@ public class Transfer implements Runnable {
         tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
         TransactionSignature transactionSignature = new TransactionSignature();
         List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
-        //根据密码获得ECKey get ECKey from Password
+        //Obtained based on passwordECKey get ECKey from Password
         ECKey ecKey = ECKey.fromPrivate(new BigInteger(1, HexUtil.decode(fromKey)));
         byte[] signBytes = SignatureUtil.signDigest(tx.getHash().getBytes(), ecKey).serialize();
         P2PHKSignature signature = new P2PHKSignature(signBytes, ecKey.getPubKey()); // TxUtil.getInstanceRpcStr(signatureStr, P2PHKSignature.class);
         p2PHKSignatures.add(signature);
-        //交易签名
+        //Transaction signature
         transactionSignature.setP2PHKSignatures(p2PHKSignatures);
         tx.setTransactionSignature(transactionSignature.serialize());
         Response response = this.newTx(tx);
@@ -647,12 +647,12 @@ public class Transfer implements Runnable {
         tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
         TransactionSignature transactionSignature = new TransactionSignature();
         List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
-        //根据密码获得ECKey get ECKey from Password
+        //Obtained based on passwordECKey get ECKey from Password
         ECKey ecKey = ECKey.fromPrivate(new BigInteger(1, HexUtil.decode(fromKey)));
         byte[] signBytes = SignatureUtil.signDigest(tx.getHash().getBytes(), ecKey).serialize();
         P2PHKSignature signature = new P2PHKSignature(signBytes, ecKey.getPubKey()); // TxUtil.getInstanceRpcStr(signatureStr, P2PHKSignature.class);
         p2PHKSignatures.add(signature);
-        //交易签名
+        //Transaction signature
         transactionSignature.setP2PHKSignatures(p2PHKSignatures);
         tx.setTransactionSignature(transactionSignature.serialize());
         Response response = this.newTx(tx);
@@ -660,12 +660,12 @@ public class Transfer implements Runnable {
     }
 
     /**
-     * 设置 调用合约允许普通转账的账户白名单
+     * set up Call the whitelist of accounts that allow regular transfers in the contract
      */
     @Test
     public void accountForTransferOnContractCallTest() throws Exception {
         setDev();
-        // 设置增加或者移除白名单
+        // Set up adding or removing whitelists
         String type = "ADD"; // ADD or REMOVE
 
         Chain chain = new Chain();
@@ -691,7 +691,7 @@ public class Transfer implements Runnable {
                 "tNULSeBaMfXDQeT4MJZim1RusCJRPx5j9bMKQN"
         });
         if (!"ADD".equalsIgnoreCase(type) && !"REMOVE".equalsIgnoreCase(type)) {
-            throw new Exception("错误的类型，设置增加或者移除白名单。ADD or REMOVE");
+            throw new Exception("Wrong type, set to add or remove whitelist.ADD or REMOVE");
         }
         data.setType("ADD".equalsIgnoreCase(type) ? 1 : 2);
         tx.setTxData(data.serialize());
@@ -700,12 +700,12 @@ public class Transfer implements Runnable {
         tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
         TransactionSignature transactionSignature = new TransactionSignature();
         List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
-        //根据密码获得ECKey get ECKey from Password
+        //Obtained based on passwordECKey get ECKey from Password
         ECKey ecKey = ECKey.fromPrivate(new BigInteger(1, HexUtil.decode(fromKey)));
         byte[] signBytes = SignatureUtil.signDigest(tx.getHash().getBytes(), ecKey).serialize();
         P2PHKSignature signature = new P2PHKSignature(signBytes, ecKey.getPubKey()); // TxUtil.getInstanceRpcStr(signatureStr, P2PHKSignature.class);
         p2PHKSignatures.add(signature);
-        //交易签名
+        //Transaction signature
         transactionSignature.setP2PHKSignatures(p2PHKSignatures);
         tx.setTransactionSignature(transactionSignature.serialize());
         Response response = this.newTx(tx);
@@ -717,7 +717,7 @@ public class Transfer implements Runnable {
         //setMain();
         setTest();
 
-        // 设置增加或者移除白名单
+        // Set up adding or removing whitelists
         String type = "ADD"; // ADD or REMOVE
         String[] whitelist = {
                 "tNULSeBaMkzsRE6qc9RVoeY6gHq8k1xSMcdrc7"
@@ -750,13 +750,13 @@ public class Transfer implements Runnable {
         AccountContractCallData data = new AccountContractCallData();
         data.setAddresses(whitelist);
         if (!"ADD".equalsIgnoreCase(type) && !"REMOVE".equalsIgnoreCase(type)) {
-            throw new Exception("错误的类型，设置增加或者移除白名单。ADD or REMOVE");
+            throw new Exception("Wrong type, set to add or remove whitelist.ADD or REMOVE");
         }
         data.setType("ADD".equalsIgnoreCase(type) ? 1 : 2);
         tx.setTxData(data.serialize());
         tx.setTime(System.currentTimeMillis() / 1000);
         tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
-        System.out.println(String.format("交易大小: %s", tx.size()));
+        System.out.println(String.format("Transaction size: %s", tx.size()));
 
         String[] pubkeys = new String[]{
                 "0225a6a872a4110c9b9c9a71bfdbe896e04bc83bb9fe38e27f3e18957d9b2a25ad",

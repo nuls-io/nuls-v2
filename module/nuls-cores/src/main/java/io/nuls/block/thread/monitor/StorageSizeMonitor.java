@@ -33,13 +33,13 @@ import java.util.TreeSet;
 import java.util.concurrent.locks.StampedLock;
 
 /**
- * 分叉链、孤儿链数据库定时清理器
- * 因为使用了rocksDb,清理记录后,数据文件大小不能实时变化,所以不能按数据库文件大小来做判断标准,每次按区块的百分比清理
- * 触发条件:某链ID的数据库缓存的区块总数超过超出cacheSize(可配置)
+ * Forked chain、Orphan Chain Database Timer Cleaner
+ * Because it was usedrocksDb,After cleaning the records,The size of the data file cannot change in real time,So we cannot use the database file size as a criterion for judgment,Clean up by block percentage each time
+ * Trigger conditions:A certain chainIDThe total number of cached blocks in the database exceedscacheSize(Configurable)
  *
  * @author captain
  * @version 1.0
- * @date 18-11-14 下午3:54
+ * @date 18-11-14 afternoon3:54
  */
 public class StorageSizeMonitor extends BaseMonitor {
 
@@ -51,7 +51,7 @@ public class StorageSizeMonitor extends BaseMonitor {
 
     @Override
     protected void process(int chainId, ChainContext context, NulsLogger commonLog) {
-        //获取配置项
+        //Get configuration items
         ConfigBean parameters = ContextManager.getContext(chainId).getParameters();
         int heightRange = parameters.getHeightRange();
         int orphanChainMaxAge = parameters.getOrphanChainMaxAge();
@@ -74,7 +74,7 @@ public class StorageSizeMonitor extends BaseMonitor {
                     continue;
                 }
                 // possibly racy reads
-                //1.获取某链ID的数据库缓存的所有区块数量
+                //1.Obtain a certain chainIDThe number of all blocks cached in the database
                 int actualSize = BlockChainManager.getForkChains(chainId).stream().mapToInt(e -> e.getHashList().size()).sum();
                 actualSize += BlockChainManager.getOrphanChains(chainId).stream().mapToInt(e -> e.getHashList().size()).sum();
                 logger.debug("cacheSize:" + cacheSize + ", actualSize:" + actualSize);
@@ -89,16 +89,16 @@ public class StorageSizeMonitor extends BaseMonitor {
                     continue;
                 }
                 // exclusive access
-                //与阈值比较
+                //Compared to threshold
                 while (actualSize > cacheSize) {
                     logger.info("before clear, chainId:" + chainId + ", cacheSize:" + cacheSize + ", actualSize:" + actualSize);
-                    //2.清理孤儿链
+                    //2.Cleaning up orphan chains
                     SortedSet<Chain> orphanChains = BlockChainManager.getOrphanChains(chainId);
                     if (!orphanChains.isEmpty()) {
                         Chain chain = orphanChains.first();
                         BlockChainManager.deleteOrphanChain(chainId, chain);
                     }
-                    //3.清理分叉链
+                    //3.Cleaning fork chains
                     SortedSet<Chain> forkChains = BlockChainManager.getForkChains(chainId);
                     if (!forkChains.isEmpty()) {
                         Chain chain = forkChains.first();
@@ -118,7 +118,7 @@ public class StorageSizeMonitor extends BaseMonitor {
     }
 
     /**
-     * 清理分叉链
+     * Cleaning fork chains
      *
      * @param chainId
      * @param heightRange
@@ -134,7 +134,7 @@ public class StorageSizeMonitor extends BaseMonitor {
                     continue;
                 }
                 // possibly racy reads
-                //1.清理链起始高度位于主链最新高度增减30(可配置)范围外的分叉链
+                //1.The starting height of the cleaning chain is located at the latest height increase or decrease of the main chain30(Configurable)Out of range forked chain
                 SortedSet<Chain> forkChains = BlockChainManager.getForkChains(chainId);
                 if (!lock.validate(stamp)) {
                     continue;
@@ -150,14 +150,14 @@ public class StorageSizeMonitor extends BaseMonitor {
                 Chain masterChain = BlockChainManager.getMasterChain(chainId);
                 long latestHeight = masterChain.getEndHeight();
                 SortedSet<Chain> deleteSet = new TreeSet<>(Chain.COMPARATOR);
-                //1.标记
+                //1.sign
                 for (Chain forkChain : forkChains) {
                     if (latestHeight - forkChain.getStartHeight() > heightRange || masterChain.getHashList().contains(forkChain.getEndHash())) {
-                        //清理orphanChain,并递归清理orphanChain的所有子链
+                        //clean uporphanChain,And recursively clean uporphanChainAll sub chains of
                         deleteSet.add(forkChain);
                     }
                 }
-                //2.清理
+                //2.clean up
                 for (Chain chain : deleteSet) {
                     BlockChainManager.deleteForkChain(chainId, chain, true);
                     logger.info("remove fork chain, chain:" + chain);
@@ -172,7 +172,7 @@ public class StorageSizeMonitor extends BaseMonitor {
     }
 
     /**
-     * 清理孤儿链
+     * Cleaning up orphan chains
      * @param chainId
      * @param heightRange
      * @param context
@@ -188,7 +188,7 @@ public class StorageSizeMonitor extends BaseMonitor {
                     continue;
                 }
                 // possibly racy reads
-                //1.清理链起始高度位于主链最新高度增减30(可配置)范围外的孤儿链
+                //1.The starting height of the cleaning chain is located at the latest height increase or decrease of the main chain30(Configurable)Orphan chains outside of scope
                 SortedSet<Chain> orphanChains = BlockChainManager.getOrphanChains(chainId);
                 if (!lock.validate(stamp)) {
                     continue;
@@ -204,14 +204,14 @@ public class StorageSizeMonitor extends BaseMonitor {
                 Chain masterChain = BlockChainManager.getMasterChain(chainId);
                 long latestHeight = masterChain.getEndHeight();
                 SortedSet<Chain> deleteSet = new TreeSet<>(Chain.COMPARATOR);
-                //1.标记
+                //1.sign
                 for (Chain orphanChain : orphanChains) {
                     if (Math.abs(orphanChain.getStartHeight() - latestHeight) > heightRange || orphanChain.getAge().get() > orphanChainMaxAge) {
-                        //清理orphanChain,并递归清理orphanChain的所有子链
+                        //clean uporphanChain,And recursively clean uporphanChainAll sub chains of
                         deleteSet.add(orphanChain);
                     }
                 }
-                //2.清理
+                //2.clean up
                 for (Chain chain : deleteSet) {
                     BlockChainManager.deleteOrphanChain(chainId, chain);
                     logger.info("remove orphan chain, chain:" + chain);

@@ -8,7 +8,7 @@ import io.nuls.core.log.Log;
 import java.util.List;
 
 /**
- * 跨链交易处理结果数据库相关操作类
+ * Cross chain transaction processing results database related operations
  * Cross-Chain Transaction Processing Result Database Related Operating Classes
  *
  * @author  tag

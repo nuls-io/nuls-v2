@@ -92,7 +92,7 @@ public class ContractTxHelper {
                 return accountResult;
             }
 
-            // 生成一个地址作为智能合约地址
+            // Generate an address as the smart contract address
             String contractAddress = AccountCall.createContractAddress(chainId);
 
             byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
@@ -121,15 +121,15 @@ public class ContractTxHelper {
             }
             tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
 
-            // 组装txData
+            // assembletxData
             CreateContractData createContractData = this.getCreateContractData(senderBytes, contractAddressBytes, alias, gasLimit, price, contractCode, args);
 
-            // 计算CoinData
+            // calculateCoinData
             /*
-             * 智能合约计算手续费以消耗的Gas*Price为根据，然而创建交易时并不执行智能合约，
-             * 所以此时交易的CoinData是不固定的，比实际要多，
-             * 打包时执行智能合约，真实的手续费已算出，然而tx的手续费已扣除，
-             * 多扣除的费用会以ContractReturnGasTransaction交易还给Sender
+             * Smart contract calculates transaction fees for consumptionGas*PriceAs a basis, however, smart contracts are not executed when creating transactions,
+             * So at this point, the transactionCoinDataIt's not fixed, more than it actually is,
+             * The smart contract is executed during packaging, and the actual transaction fee has been calculated. HowevertxThe handling fee has been deducted,
+             * Excess deductions will result inContractReturnGasTransactionTransaction returnSender
              */
             CoinData coinData = new CoinData();
             Result makeCoinDataResult = this.makeCoinData(chainId, sender, senderBytes, contractAddressBytes, gasLimit, price, value, tx.size(), createContractData, coinData, null, null);
@@ -164,14 +164,14 @@ public class ContractTxHelper {
             }
 
             BlockHeader blockHeader = BlockCall.getLatestBlockHeader(chainId);
-            // 当前区块高度
+            // Current block height
             long blockHeight = blockHeader.getHeight();
-            // 当前区块状态根
+            // Current block state root
             byte[] prevStateRoot = ContractUtil.getStateRoot(blockHeader);
 
-            // 获取VM执行器
+            // obtainVMActuator
             ProgramExecutor programExecutor = contractHelper.getProgramExecutor(chainId);
-            // 执行VM验证合法性
+            // implementVMVerify legality
             ProgramCreate programCreate = new ProgramCreate();
             programCreate.setContractAddress(contractAddress);
             programCreate.setSender(sender);
@@ -183,12 +183,12 @@ public class ContractTxHelper {
                 programCreate.setArgs(args);
             }
             ProgramExecutor track = programExecutor.begin(prevStateRoot);
-            // 验证合约时跳过Gas验证
+            // Skip when verifying contractGasvalidate
             long realGasLimit = gasLimit;
             programCreate.setGasLimit(MAX_GASLIMIT);
             ProgramResult programResult = track.create(programCreate);
 
-            // 执行结果失败时，交易直接返回错误，不上链，不消耗Gas，
+            // When the execution result fails, the transaction returns an error directly, without being linked or consumedGas,
             if (!programResult.isSuccess()) {
                 Log.error(programResult.getErrorMessage() + ", " + programResult.getStackTrace());
                 Result result = Result.getFailed(DATA_ERROR);
@@ -197,7 +197,7 @@ public class ContractTxHelper {
                 addDebugEvents(programResult.getDebugEvents(), result);
                 return result;
             } else {
-                // 其他合法性都通过后，再验证Gas
+                // After all other legality passes, verify againGas
                 if (realGasLimit != MAX_GASLIMIT) {
                     programCreate.setGasLimit(realGasLimit);
                     track = programExecutor.begin(prevStateRoot);
@@ -223,14 +223,14 @@ public class ContractTxHelper {
             return 0;
         }
         int size = nulsData.size();
-        // 计算tx.size()时，当coinData和txData为空时，计算了1个长度，若此时nulsData不为空，则要扣减这1个长度
+        // calculatetx.size()WhencoinDataandtxDataWhen empty, calculated1Length, if at this timenulsDataIf it is not empty, it will be deducted1Length
         return VarInt.sizeOf(size) + size - 1;
     }
 
     public Result makeCoinData(int chainId, String sender, byte[] senderBytes, byte[] contractAddress, long gasLimit, long price, BigInteger value, int txSize, NulsData txData, CoinData coinData, List<ProgramMultyAssetValue> multyAssetValues, List<AccountAmountDto> nulsValueToOtherList) {
         long gasUsed = gasLimit;
         BigInteger imputedValue = BigInteger.valueOf(LongUtils.mul(gasUsed, price));
-        // 总花费
+        // Total expenses
         BigInteger totalValue = imputedValue;
         int assetChainId = CHAIN_ID;
         int assetId = ASSET_ID;
@@ -329,15 +329,15 @@ public class ContractTxHelper {
             }
             tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
 
-            // 组装txData
+            // assembletxData
             CallContractData callContractData = this.getCallContractData(senderBytes, contractAddressBytes, value, gasLimit, price, methodName, methodDesc, args);
 
-            // 计算CoinData
+            // calculateCoinData
             /*
-             * 智能合约计算手续费以消耗的Gas*Price为根据，然而创建交易时并不执行智能合约，
-             * 所以此时交易的CoinData是不固定的，比实际要多，
-             * 打包时执行智能合约，真实的手续费已算出，然而tx的手续费已扣除，
-             * 多扣除的费用会以CoinBase交易还给Sender
+             * Smart contract calculates transaction fees for consumptionGas*PriceAs a basis, however, smart contracts are not executed when creating transactions,
+             * So at this point, the transactionCoinDataIt's not fixed, more than it actually is,
+             * The smart contract is executed during packaging, and the actual transaction fee has been calculated. HowevertxThe handling fee has been deducted,
+             * Excess deductions will result inCoinBaseTransaction returnSender
              */
             CoinData coinData = new CoinData();
             Result makeCoinDataResult = this.makeCoinData(chainId, sender, senderBytes, contractAddressBytes, gasLimit, price, value, tx.size(), callContractData, coinData, multyAssetValues, nulsValueToOtherList);
@@ -383,12 +383,12 @@ public class ContractTxHelper {
             }
 
             BlockHeader blockHeader = BlockCall.getLatestBlockHeader(chainId);
-            // 当前区块高度
+            // Current block height
             long blockHeight = blockHeader.getHeight();
-            // 当前区块状态根
+            // Current block state root
             byte[] prevStateRoot = ContractUtil.getStateRoot(blockHeader);
 
-            // 组装VM执行数据
+            // assembleVMExecution data
             ProgramCall programCall = new ProgramCall();
             programCall.setContractAddress(contractAddressBytes);
             programCall.setSender(senderBytes);
@@ -401,25 +401,25 @@ public class ContractTxHelper {
             if (method == null) {
                 return Result.getFailed(CONTRACT_METHOD_NOT_EXIST);
             }
-            // 如果方法是不上链的合约调用，同步执行合约代码，不改变状态根，并返回值
+            // If the method is a contract call that is not linked, execute the contract code synchronously without changing the state root and return a value
             if (method.isView()) {
                 return Result.getFailed(CONTRACT_NOT_EXECUTE_VIEW);
             }
-            // 创建链上交易，包含智能合约
+            // Create on chain transactions, including smart contracts
             programCall.setValue(value);
             programCall.setMultyAssetValues(multyAssetValues);
             programCall.setPrice(price.longValue());
 
-            // 获取VM执行器
+            // obtainVMActuator
             ProgramExecutor programExecutor = contractHelper.getProgramExecutor(chainId);
-            // 执行VM验证合法性
+            // implementVMVerify legality
             ProgramExecutor track = programExecutor.begin(prevStateRoot);
-            // 验证合约时跳过Gas验证
+            // Skip when verifying contractGasvalidate
             long realGasLimit = gasLimit;
             programCall.setGasLimit(MAX_GASLIMIT);
             ProgramResult programResult = track.call(programCall);
 
-            // 执行结果失败时，交易直接返回错误，不上链，不消耗Gas
+            // When the execution result fails, the transaction returns an error directly, without being linked or consumedGas
             if (!programResult.isSuccess()) {
                 Log.error("sender[{}], contractAddress[{}]" + programResult.getErrorMessage() + ", " + programResult.getStackTrace(), AddressTool.getStringAddressByBytes(senderBytes), AddressTool.getStringAddressByBytes(contractAddressBytes));
                 Result result = Result.getFailed(DATA_ERROR);
@@ -428,7 +428,7 @@ public class ContractTxHelper {
                 addDebugEvents(programResult.getDebugEvents(), result);
                 return result;
             } else {
-                // 其他合法性都通过后，再验证Gas
+                // After all other legality passes, verify againGas
                 if (realGasLimit != MAX_GASLIMIT) {
                     programCall.setGasLimit(realGasLimit);
                     track = programExecutor.begin(prevStateRoot);
@@ -458,12 +458,12 @@ public class ContractTxHelper {
             }
 
             BlockHeader blockHeader = BlockCall.getLatestBlockHeader(chainId);
-            // 当前区块高度
+            // Current block height
             long blockHeight = blockHeader.getHeight();
-            // 当前区块状态根
+            // Current block state root
             byte[] prevStateRoot = ContractUtil.getStateRoot(blockHeader);
 
-            // 组装VM执行数据
+            // assembleVMExecution data
             ProgramCall programCall = new ProgramCall();
             programCall.setContractAddress(contractAddressBytes);
             programCall.setSender(senderBytes);
@@ -476,25 +476,25 @@ public class ContractTxHelper {
             if (method == null) {
                 return Result.getFailed(CONTRACT_METHOD_NOT_EXIST);
             }
-            // 如果方法是不上链的合约调用，同步执行合约代码，不改变状态根，并返回值
+            // If the method is a contract call that is not linked, execute the contract code synchronously without changing the state root and return a value
             if (method.isView()) {
                 return Result.getFailed(CONTRACT_NOT_EXECUTE_VIEW);
             }
-            // 创建链上交易，包含智能合约
+            // Create on chain transactions, including smart contracts
             programCall.setValue(value);
             // add by pierre at 2020-10-29
             programCall.setMultyAssetValues(multyAssetValues);
             // end code by pierre
             programCall.setPrice(price.longValue());
 
-            // 获取VM执行器
+            // obtainVMActuator
             ProgramExecutor programExecutor = contractHelper.getProgramExecutor(chainId);
-            // 执行VM验证合法性
+            // implementVMVerify legality
             ProgramExecutor track = programExecutor.begin(prevStateRoot);
             programCall.setGasLimit(gasLimit);
             ProgramResult programResult = track.call(programCall);
 
-            // 执行结果失败时，交易直接返回错误，不上链，不消耗Gas
+            // When the execution result fails, the transaction returns an error directly, without being linked or consumedGas
             if (!programResult.isSuccess()) {
                 Log.error("sender[{}], contractAddress[{}]" + programResult.getErrorMessage() + ", " + programResult.getStackTrace(), AddressTool.getStringAddressByBytes(senderBytes), AddressTool.getStringAddressByBytes(contractAddressBytes));
                 Result result = Result.getFailed(DATA_ERROR);
@@ -511,10 +511,10 @@ public class ContractTxHelper {
             contractResult.setSender(senderBytes);
             contractResult.setValue(value.longValue());
             contractResult.setRemark(ContractConstant.PREVIEW_CALL_REMARK);
-            // 批量提交方式，交易track放置到外部处理合约执行结果的方法里去提交
+            // Batch submission method, transactiontrackPlace it in the external method for processing contract execution results and submit it
             contractResult.setDebugEvents(programResult.getDebugEvents());
 
-            // 返回调用结果、已使用Gas、状态根、消息事件、合约转账(从合约转出)等
+            // Return the call result、UsedGas、State root、Message Event、Contract transfer(Transfer out from contract)etc.
             contractResult.setError(false);
             contractResult.setRevert(false);
             contractResult.setResult(programResult.getResult());
@@ -565,12 +565,12 @@ public class ContractTxHelper {
             }
             tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
 
-            // 组装txData
+            // assembletxData
             DeleteContractData deleteContractData = this.getDeleteContractData(contractAddressBytes, senderBytes);
 
-            // 计算CoinData
+            // calculateCoinData
             /*
-             * 没有Gas消耗，在终止智能合约里
+             * absenceGasConsumption, in terminating smart contracts
              */
             CoinData coinData = new CoinData();
             Result makeCoinDataResult = this.makeCoinData(chainId, sender, senderBytes, contractAddressBytes, 0L, 0L, BigInteger.ZERO, tx.size(), deleteContractData, coinData, null, null);
@@ -611,9 +611,9 @@ public class ContractTxHelper {
 
             BlockHeader blockHeader = BlockCall.getLatestBlockHeader(chainId);
 
-            // 当前区块状态根
+            // Current block state root
             byte[] stateRoot = ContractUtil.getStateRoot(blockHeader);
-            // 获取合约当前状态
+            // Obtain the current status of the contract
             ProgramStatus status = contractHelper.getContractStatus(chainId, stateRoot, contractAddressBytes);
             boolean isTerminatedContract = ContractUtil.isTerminatedContract(status.ordinal());
             if (isTerminatedContract) {
@@ -640,14 +640,14 @@ public class ContractTxHelper {
 
     public Result signAndBroadcastTx(int chainId, String sender, String password, Transaction tx) {
         try {
-            // 生成签名
+            // Generate signature
             AccountCall.transactionSignature(chainId, sender, password, tx);
             String txData = RPCUtil.encode(tx.serialize());
 
-            // 发送交易到交易模块
+            // Send transaction to transaction module
             boolean broadcast = TransactionCall.newTx(chainId, txData);
             if (!broadcast) {
-                // 发送交易到交易模块失败，回滚账本的未确认交易
+                // Sending transaction to transaction module failed, rolling back unconfirmed transactions in ledger
                 return getFailed();
             }
             return getSuccess();

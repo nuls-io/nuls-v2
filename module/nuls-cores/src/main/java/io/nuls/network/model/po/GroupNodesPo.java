@@ -38,12 +38,12 @@ import java.io.IOException;
  **/
 public class GroupNodesPo extends BasePo {
     /**
-     * self net-自有网络的节点
+     * self net-Nodes in their own network
      */
     private NodesContainerPo selfNodeContainer = new NodesContainerPo();
 
     /**
-     * 跨链-跨链连接的节点
+     * Cross chain-Cross chain connected nodes
      */
     private NodesContainerPo crossNodeContainer = new NodesContainerPo();
 

@@ -37,15 +37,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 1.用于备份用户某高度的账本信息，key值是高度
- * 2.该部分的nonces 集合是包含了该高度里对应的账户需要回滚的所有nonce值。
+ * 1.Used to backup user's ledger information at a certain height,keyValue is height
+ * 2.This section'snonces The set contains all the accounts corresponding to that height that need to be rolled backnonceValue.
  *
  * @author lanjinsheng
  * @date 2018/11/19
  */
 public class AccountStateSnapshot extends BaseNulsData {
     /**
-     * 需要备份的账户信息，与accountState比较，增加了地址与资产信息，用于回滚使用。
+     * Account information that needs to be backed up, andaccountStateComparison, added address and asset information for rollback use.
      */
     private String address;
 
@@ -57,7 +57,7 @@ public class AccountStateSnapshot extends BaseNulsData {
 
     AccountState accountState;
     /**
-     * 区块中对应账户的所有nonce值集合
+     * All corresponding accounts in the blocknonceValue set
      */
     private List<AmountNonce> nonces = new ArrayList<>();
 

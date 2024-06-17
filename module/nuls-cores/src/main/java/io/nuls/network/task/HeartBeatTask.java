@@ -54,7 +54,7 @@ public class HeartBeatTask implements Runnable {
             List<Node> nodes = crossNodesContainer.getAvailableNodes();
             PingMessage pingMessage = MessageFactory.getInstance().buildPingMessage(nodeGroup.getMagicNumber());
             for (Node node : nodes) {
-                //client端发起ping请求
+                //clientEnd initiatedpingrequest
                 if (node.getType() == Node.OUT) {
                     MessageManager.getInstance().sendToNode(pingMessage, node, true);
                 }

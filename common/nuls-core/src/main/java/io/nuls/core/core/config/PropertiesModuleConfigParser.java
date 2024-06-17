@@ -10,7 +10,7 @@ import java.util.Properties;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-13 20:53
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class PropertiesModuleConfigParser implements ModuleConfigParser {
     @Override

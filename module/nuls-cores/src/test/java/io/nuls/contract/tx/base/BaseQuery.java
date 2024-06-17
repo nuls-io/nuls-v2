@@ -83,9 +83,9 @@ public class BaseQuery extends Base {
 
     @Test
     public void importPriKeyTest() {
-        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//打包地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
-        //importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//打包地址 tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
-        importPriKey("fbcae491407b54aa3904ff295f2d644080901fda0d417b2b427f5c1487b2b499", password);//打包地址 tNULSeBaMmShSTVwbU4rHkZjpD98JgFgg6rmhF
+        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//Packaging address tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
+        //importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//Packaging address tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
+        importPriKey("fbcae491407b54aa3904ff295f2d644080901fda0d417b2b427f5c1487b2b499", password);//Packaging address tNULSeBaMmShSTVwbU4rHkZjpD98JgFgg6rmhF
 
         importPriKey("9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b", password);//25 tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
         importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//26 tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
@@ -301,7 +301,7 @@ public class BaseQuery extends Base {
     }
 
     /**
-     * 获取账户创建的合约列表
+     * Obtain the list of contracts created by the account
      */
     @Test
     public void accountContracts() throws Exception {
@@ -322,7 +322,7 @@ public class BaseQuery extends Base {
     }
 
     /**
-     * 获取合约基本信息
+     * Obtain basic contract information
      */
     @Test
     public void contractInfo() throws Exception {
@@ -341,7 +341,7 @@ public class BaseQuery extends Base {
     }
 
     /**
-     * 获取合约执行结果
+     * Obtain contract execution results
      */
     @Test
     public void contractResult() throws Exception {
@@ -351,7 +351,7 @@ public class BaseQuery extends Base {
     }
 
     /**
-     * 获取合约执行结果列表
+     * Obtain a list of contract execution results
      */
     @Test
     public void contractResultList() throws Exception {
@@ -366,7 +366,7 @@ public class BaseQuery extends Base {
     }
 
     /**
-     * 获取合约交易
+     * Obtaining contract transactions
      */
     @Test
     public void contractTx() throws Exception {
@@ -376,7 +376,7 @@ public class BaseQuery extends Base {
     }
 
     /**
-     * 查交易
+     * Check transactions
      */
     @Test
     public void getTxClient() throws Exception {
@@ -427,7 +427,7 @@ public class BaseQuery extends Base {
     }
 
     /**
-     * 查询所有资产
+     * Query all assets
      */
     @Test
     public void getAllAssetReg() throws Exception {
@@ -447,7 +447,7 @@ public class BaseQuery extends Base {
 
     private void importPriKey(String priKey, String pwd) {
         try {
-            //账户已存在则覆盖 If the account exists, it covers.
+            //Overwrite if account already exists If the account exists, it covers.
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put(Constants.CHAIN_ID, chainId);

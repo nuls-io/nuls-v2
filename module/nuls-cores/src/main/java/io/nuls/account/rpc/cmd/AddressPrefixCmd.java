@@ -26,11 +26,11 @@ import java.util.Map;
 @NulsCoresCmd(module = ModuleE.AC)
 public class AddressPrefixCmd extends BaseCmd {
 
-    @CmdAnnotation(cmd = "ac_getAllAddressPrefix", version = 1.0, description = "获取所有链的地址前缀")
-    @ResponseData(name = "返回值", description = "返回一个List", responseType = @TypeDescriptor(value = List.class,
+    @CmdAnnotation(cmd = "ac_getAllAddressPrefix", version = 1.0, description = "Get address prefixes for all chains")
+    @ResponseData(name = "Return value", description = "Return aList", responseType = @TypeDescriptor(value = List.class,
             collectionElement = Map.class, mapKeys = {
-            @Key(name = "chainId", valueType = Integer.class, description = "链id"),
-            @Key(name = "addressPrefix", valueType = String.class, description = "地址前缀")
+            @Key(name = "chainId", valueType = Integer.class, description = "chainid"),
+            @Key(name = "addressPrefix", valueType = String.class, description = "Address prefix")
     }))
     public Response getAllAddressPrefix(Map params) {
         List<Map<String, Object>> rtList = new ArrayList<>();
@@ -49,13 +49,13 @@ public class AddressPrefixCmd extends BaseCmd {
         return success(rtList);
     }
 
-    @CmdAnnotation(cmd = "ac_getAddressPrefixByChainId", version = 1.0, description = "通过链id获取地址前缀")
+    @CmdAnnotation(cmd = "ac_getAddressPrefixByChainId", version = 1.0, description = "By chainidGet address prefix")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "chainId", valueType = Integer.class, description = "链id"),
-            @Key(name = "addressPrefix", valueType = String.class, description = "地址前缀")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "chainId", valueType = Integer.class, description = "chainid"),
+            @Key(name = "addressPrefix", valueType = String.class, description = "Address prefix")
     }))
     public Response getAddressPrefixByChainId(Map params) {
         Preconditions.checkNotNull(params, AccountErrorCode.NULL_PARAMETER);
@@ -75,14 +75,14 @@ public class AddressPrefixCmd extends BaseCmd {
         return success(rtValue);
     }
 
-    @CmdAnnotation(cmd = "ac_addAddressPrefix", version = 1.0, description = "添加地址前缀,链管理模块会调用该接口")
+    @CmdAnnotation(cmd = "ac_addAddressPrefix", version = 1.0, description = "Add address prefix,The chain management module will call this interface")
     @Parameters(value = {
             @Parameter(parameterName = "prefixList", requestType = @TypeDescriptor(value = List.class, collectionElement = Map.class, mapKeys = {
-                    @Key(name = "chainId", valueType = Integer.class, description = "链id"),
-                    @Key(name = "addressPrefix", valueType = String.class, description = "地址前缀")
-            }), parameterDes = "链地址前缀列表")
+                    @Key(name = "chainId", valueType = Integer.class, description = "chainid"),
+                    @Key(name = "addressPrefix", valueType = String.class, description = "Address prefix")
+            }), parameterDes = "Chain Address Prefix List")
     })
-    @ResponseData(description = "无特定返回值，没有错误即成功")
+    @ResponseData(description = "No specific return value, successful without errors")
     public Response addAddressPrefix(Map params) {
         List<Map<String, Object>> prefixList = (List) params.get("prefixList");
         for (Map<String, Object> prefixMap : prefixList) {

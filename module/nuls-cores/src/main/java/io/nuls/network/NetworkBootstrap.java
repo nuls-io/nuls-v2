@@ -91,7 +91,7 @@ public class NetworkBootstrap implements INulsCoresBootstrap {
     }
 
     /**
-     * 配置信息初始化
+     * Configuration information initialization
      * Configuration information initialization
      */
     private void jsonCfgInit() throws Exception {
@@ -134,7 +134,7 @@ public class NetworkBootstrap implements INulsCoresBootstrap {
     }
 
     /**
-     * 管理器初始化
+     * Manager initialization
      * Manager initialization
      */
     private void managerInit() throws Exception {
@@ -176,7 +176,7 @@ public class NetworkBootstrap implements INulsCoresBootstrap {
     }
 
     /**
-     * onDependenciesReady 会在依赖模块重新ready后再次执行
+     * onDependenciesReady Will be re evaluated in the dependent modulereadyExecute again later
      *
      * @return
      */
@@ -190,7 +190,7 @@ public class NetworkBootstrap implements INulsCoresBootstrap {
                 TaskManager.getInstance().start();
                 hadRun = true;
             } else {
-                //恢复连接
+                //Restore Connection
                 ConnectionManager.getInstance().change(ManagerStatusEnum.RUNNING);
                 NodeGroupManager.getInstance().change(ManagerStatusEnum.RUNNING);
             }

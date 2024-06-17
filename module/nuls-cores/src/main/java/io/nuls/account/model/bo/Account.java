@@ -51,13 +51,13 @@ public class Account implements Serializable {
     private int chainId;
 
     /**
-     * 账户地址
+     * Account address
      */
 
     private transient Address address;
 
     /**
-     * 账户别名
+     * Account Aliases
      */
 
     private String alias;
@@ -69,19 +69,19 @@ public class Account implements Serializable {
     private int status;
 
     /**
-     * 账户公钥
+     * Account public key
      */
 
     private byte[] pubKey;
 
     /**
-     * 扩展字段
+     * Extended Fields
      */
 
     private byte[] extend;
 
     /**
-     * 创建时间
+     * Creation time
      */
 
     private Long createTime;
@@ -106,7 +106,7 @@ public class Account implements Serializable {
 
 
     /**
-     * 账户是否被加密(是否设置过密码)
+     * Is the account encrypted(Have you ever set a password)
      * Whether the account is encrypted (Whether the password is set)
      */
     public boolean isEncrypted() {
@@ -114,7 +114,7 @@ public class Account implements Serializable {
     }
 
     /**
-     * 锁定账户
+     * Lock account
      * Lock account
      */
     public void lock() {
@@ -134,7 +134,7 @@ public class Account implements Serializable {
     }
 
     /**
-     * 根据密码解锁账户
+     * Unlock account based on password
      * Unlock account based on password
      */
     public boolean unlock(String password) throws NulsException {
@@ -143,7 +143,7 @@ public class Account implements Serializable {
     }
 
     /**
-     * 账户是否被锁定(是否有明文私钥) 有私钥表示解锁
+     * Is the account locked(Do you have a plaintext private key) Having a private key indicates unlocking
      * Whether the account is locked (is there a cleartext private key)
      *
      * @return true: Locked, false: not Locked
@@ -153,7 +153,7 @@ public class Account implements Serializable {
     }
 
     /**
-     * 验证账户密码是否正确
+     * Verify if the account password is correct
      * Verify that the account password is correct
      */
     public boolean validatePassword(String password) {
@@ -174,7 +174,7 @@ public class Account implements Serializable {
     }
 
     /**
-     * 根据密码加密账户(给账户设置密码)
+     * Encrypt account based on password(Set password for account)
      * Password-encrypted account (set password for account)
      */
     public void encrypt(String password) throws NulsException {
@@ -182,7 +182,7 @@ public class Account implements Serializable {
     }
 
     /**
-     * 根据密码加密账户(给账户设置密码)
+     * Encrypt account based on password(Set password for account)
      * Password-encrypted account (set password for account)
      */
     public void encrypt(String password, boolean isForce) throws NulsException {
@@ -206,7 +206,7 @@ public class Account implements Serializable {
     }
 
     /**
-     * 根据解密账户, 包括生成账户明文私钥
+     * According to the decryption account, Including generating account plaintext private keys
      * According to the decryption account, including generating the account plaintext private key
      */
     private boolean decrypt(String password) throws NulsException {
@@ -343,11 +343,11 @@ public class Account implements Serializable {
     }
 
     /**
-     * 根据密码获取ECKey
+     * Obtain based on passwordECKey
      */
     public ECKey getEcKey(String password) throws NulsException {
         ECKey eckey = null;
-        //判断当前账户是否存在私钥，如果不存在私钥这为加密账户
+        //Check if there is a private key in the current account. If there is no private key, it is an encrypted account
         BigInteger newPriv;
         if (this.isEncrypted()) {
             ObjectUtils.canNotEmpty(password, "the password can not be empty");

@@ -4,7 +4,7 @@ package io.nuls.test.controller;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-20 11:43
- * @Description: 功能描述
+ * @Description: Function Description
  */
 
 public class RemoteResult<T> {

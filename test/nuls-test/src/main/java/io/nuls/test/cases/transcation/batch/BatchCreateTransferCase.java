@@ -20,7 +20,7 @@ import static io.nuls.test.cases.Constants.REMARK;
 /**
  * @Author: zhoulijun
  * @Time: 2019-04-24 13:52
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Component
 public class BatchCreateTransferCase extends BaseTranscationCase<Boolean, Long> {
@@ -34,7 +34,7 @@ public class BatchCreateTransferCase extends BaseTranscationCase<Boolean, Long> 
 
     @Override
     public String title() {
-        return "批量创建交易";
+        return "Batch Create Transactions";
     }
 
     @Override
@@ -43,7 +43,7 @@ public class BatchCreateTransferCase extends BaseTranscationCase<Boolean, Long> 
             AtomicInteger doneTotal = new AtomicInteger(0);
             AtomicInteger successTotal = new AtomicInteger(0);
             Long start = System.currentTimeMillis();
-            Log.info("开始创建交易");
+            Log.info("Start creating transaction");
             for (int s = 0; s < THEADH_COUNT; s++) {
                 ThreadUtils.createAndRunThread("batch-transfer", () -> {
                     int i = doneTotal.getAndIncrement();
@@ -61,13 +61,13 @@ public class BatchCreateTransferCase extends BaseTranscationCase<Boolean, Long> 
                             checkResultStatus(result);
                             successTotal.getAndIncrement();
                         } catch (TestFailException e) {
-                            Log.error("创建交易失败:{}", e.getMessage());
+                            Log.error("Create transaction failed:{}", e.getMessage());
                         }
                         i = doneTotal.getAndIncrement();
                     }
                 });
             }
-            Log.info("创建{}笔交易,成功{}笔，消耗时间:{}", count, successTotal, System.currentTimeMillis() - start);
+            Log.info("establish{}Transactions,success{}Pen, time-consuming:{}", count, successTotal, System.currentTimeMillis() - start);
         });
         return true;
     }

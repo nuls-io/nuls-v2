@@ -44,7 +44,7 @@ import static io.nuls.contract.constant.ContractConstant.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
- * 智能合约模块启动及初始化管理
+ * Smart contract module startup and initialization management
  * Smart Contract Module Startup and Initialization Management
  *
  * @author: PierreLuo
@@ -102,7 +102,7 @@ public class SmartContractBootStrap implements INulsCoresBootstrap {
     }
 
     /**
-     * 初始化系统编码
+     * Initialize system encoding
      * Initialization System Coding
      */
     private static void systemConfig() throws Exception {
@@ -114,7 +114,7 @@ public class SmartContractBootStrap implements INulsCoresBootstrap {
     }
 
     /**
-     * 初始化模块日志
+     * Initialize module logs
      */
     private void initContractDefaultLog() {
         LogUtil.configDefaultLog(ContractConstant.LOG_FILE_NAME, contractConfig.getPackageLogPackages(), contractConfig.getPackageLogLevels());
@@ -122,7 +122,7 @@ public class SmartContractBootStrap implements INulsCoresBootstrap {
     }
 
     /**
-     * 初始化NRC20合约标准格式
+     * initializationNRC20Standard Contract Format
      */
     private void initNRC20Standard() {
         String json = null;
@@ -147,7 +147,7 @@ public class SmartContractBootStrap implements INulsCoresBootstrap {
     }
 
     /**
-     * 初始化NRC721合约标准格式
+     * initializationNRC721Standard Contract Format
      */
     private void initNRC721Standard() {
         String json = null;
@@ -172,7 +172,7 @@ public class SmartContractBootStrap implements INulsCoresBootstrap {
     }
 
     /**
-     * 初始化NRC1155合约标准格式
+     * initializationNRC1155Standard Contract Format
      */
     private void initNRC1155Standard() {
         String json = null;
@@ -197,7 +197,7 @@ public class SmartContractBootStrap implements INulsCoresBootstrap {
     }
 
     /**
-     * 初始化数据库
+     * Initialize database
      * Initialization database
      */
     private void initDB() throws Exception {
@@ -208,7 +208,7 @@ public class SmartContractBootStrap implements INulsCoresBootstrap {
     }
 
     /**
-     * 返回当前模块的描述信息
+     * Return the description information of the current module
      *
      * @return
      */
@@ -229,8 +229,8 @@ public class SmartContractBootStrap implements INulsCoresBootstrap {
     public void onDependenciesReady() {
         doStart();
         Log.info("all dependency module ready");
-        // add by pierre at 2019-11-02 需要协议升级 done
-        // 缓存token注册资产的资产ID和token合约地址
+        // add by pierre at 2019-11-02 Protocol upgrade required done
+        // cachetokenRegistered assetsIDandtokenContract address
         Map<Integer, Chain> chainMap = chainManager.getChainMap();
         for (Chain chain : chainMap.values()) {
             int chainId = chain.getChainId();

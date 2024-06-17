@@ -22,7 +22,7 @@ import java.util.function.Function;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-06 14:41
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Provider(Provider.ProviderType.RPC)
 public class AccountServiceForRpc extends BaseRpcService implements AccountService {

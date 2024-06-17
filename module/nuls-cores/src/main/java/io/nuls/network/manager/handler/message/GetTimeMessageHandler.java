@@ -54,7 +54,7 @@ public class GetTimeMessageHandler extends BaseMessageHandler {
     }
 
     /**
-     * 接收消息处理
+     * Receive message processing
      * Receive message processing
      *
      * @param message address message
@@ -66,7 +66,7 @@ public class GetTimeMessageHandler extends BaseMessageHandler {
         LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("GetTimeMessageHandler Recieve:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
         GetTimeMessage getTimeMessage = (GetTimeMessage) message;
         /*
-         *  回复时间消息
+         *  Reply time message
          */
         TimeMessage timeMessage = MessageFactory.getInstance().buildTimeResponseMessage(message.getHeader().getMagicNumber(), getTimeMessage.getMsgBody().getMessageId());
         MessageManager.getInstance().sendHandlerMsg(timeMessage, node, true);

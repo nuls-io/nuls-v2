@@ -301,8 +301,8 @@ public final class Na implements Comparable<Na>, Serializable {
 
 
     //    /**
-//     * Long 或者 Integer Na 转成 NUSL(double)
-//     * 如果已经是小数类型说明已经是NUSL 则直接返回
+//     * Long perhaps Integer Na Convert into NUSL(double)
+//     * If it is already a decimal type, it means it is already a decimal typeNUSL Then return directly
 //     * @param object
 //     * @return
 //     */

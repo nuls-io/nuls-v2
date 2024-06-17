@@ -36,7 +36,7 @@ import java.util.List;
 public class Utils {
 
     /**
-     * 对交易进行签名，并将签名传入交易中
+     * Sign the transaction and pass the signature into the transaction
      * @param transaction
      * @param priKey
      * @param pubKey
@@ -49,7 +49,7 @@ public class Utils {
         List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
         ECKey eckey = null;
         byte[] unencryptedPrivateKey;
-        //判断当前账户是否存在私钥，如果不存在私钥这为加密账户
+        //Check if there is a private key in the current account. If there is no private key, it is an encrypted account
         BigInteger newPriv = null;
         ObjectUtils.canNotEmpty(password, "the password can not be empty");
         try {
@@ -91,7 +91,7 @@ public class Utils {
         int max = depth;
         try{
             for (Field field : fields) {
-                // 每次循环初始化最初的层级
+                // Initialize the initial level of each loop
                 int initial = depth;
                 if (ApiDocTool.baseType.contains(field.getType())) {
                     continue;

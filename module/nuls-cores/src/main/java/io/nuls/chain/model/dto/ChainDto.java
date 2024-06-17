@@ -35,22 +35,22 @@ import java.util.List;
  * @date 2019/06/17
  * @description
  */
-@ApiModel(description = "链信息")
+@ApiModel(description = "Chain information")
 public class ChainDto {
     /**
-     * 链序号
+     * Chain number
      * Chain ID
      */
-    @ApiModelProperty(description = "链id")
+    @ApiModelProperty(description = "chainid")
     private int chainId;
 
-    @ApiModelProperty(description = "链名称")
+    @ApiModelProperty(description = "Chain Name")
     private String chainName;
 
-    @ApiModelProperty(description = "最小连接数")
+    @ApiModelProperty(description = "Minimum number of connections")
     private int minAvailableNodeNum;
 
-    @ApiModelProperty(description = "资产信息列表")
+    @ApiModelProperty(description = "Asset Information List")
     List<AssetDto> assetInfoList = new ArrayList<>();
 
     public int getChainId() {

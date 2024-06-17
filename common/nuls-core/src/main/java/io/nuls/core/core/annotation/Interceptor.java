@@ -29,7 +29,7 @@ import java.lang.annotation.*;
 import io.nuls.core.core.inteceptor.base.BeanMethodInterceptor;
 
 /**
- * 拦截器注解，标注了该注解的对象，需要实现{@link BeanMethodInterceptor}接口，可以拦截标注了指定注解的方法或对象的全部方法
+ * Interceptor annotation, annotated with the object of the annotation, needs to be implemented{@link BeanMethodInterceptor}Interface that can intercept all methods or objects annotated with specified annotations
  * The interceptor annotation, annotated with the object of the annotation, needs to implement the {@link BeanMethodInterceptor} interface,
  * which intercepts all methods or objects that annotate the specified annotation.
  *
@@ -41,7 +41,7 @@ import io.nuls.core.core.inteceptor.base.BeanMethodInterceptor;
 @Documented
 public @interface Interceptor {
     /**
-     * 该拦截器关心的注解类型,该注解可以标注在类型或者方法上，在类型上时，会拦截该类的所有方法，在方法上时，只拦截标记了的方法,不可以为空
+     * The annotation types that this interceptor is concerned about,This annotation can be annotated on a type or method. When on a type, all methods of that class will be intercepted, and when on a method, only the marked methods will be intercepted,Cannot be empty
      * The interceptor CARES about the type of annotation, the annotations can be marked on the type or method, on the type,
      * can intercept all the methods of the class, on the way, only intercept marked method, cannot be empty
      *

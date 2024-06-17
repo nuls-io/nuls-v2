@@ -3,12 +3,12 @@ package io.nuls.provider.model.form;
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
 
-@ApiModel(description = "获取账户余额表单信息")
+@ApiModel(description = "Obtain account balance form information")
 public class BalanceForm {
 
-    @ApiModelProperty(description = "资产的链ID")
+    @ApiModelProperty(description = "The chain of assetsID")
     private int assetChainId;
-    @ApiModelProperty(description = "资产ID")
+    @ApiModelProperty(description = "assetID")
     private int assetId;
 
 

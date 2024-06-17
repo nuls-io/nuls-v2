@@ -104,7 +104,7 @@ public class ContractCreateSendTxTest extends BaseQuery {
     }
 
     /**
-     * token转账
+     * tokenTransfer
      */
     @Test
     public void tokenTransfer() throws Exception {
@@ -131,7 +131,7 @@ public class ContractCreateSendTxTest extends BaseQuery {
 
 
     private String createContractA() throws Exception {
-        Log.info("开始创建虚拟机测试合约A");
+        Log.info("Start creating virtual machine testing contractA");
         InputStream in = new FileInputStream("/Users/pierreluo/IdeaProjects/contract-vm-testA/target/contract-vm-testA-testA.jar");
         byte[] contractCode = IOUtils.toByteArray(in);
         String remark = "create test A";

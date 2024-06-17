@@ -27,7 +27,7 @@ package io.nuls.test.cases.transcation.batch.fasttx.model;
 import java.io.Serializable;
 
 /**
- * 账户模块配置类
+ * Account module configuration class
  * Account Module Configuration Class
  *
  * @author qinyifeng
@@ -35,7 +35,7 @@ import java.io.Serializable;
  */
 public class ConfigBean implements Serializable {
     /**
-     * 资产ID
+     * assetID
      * assets id
      */
     private int assetsId;

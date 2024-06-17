@@ -36,37 +36,37 @@ import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.model.BigIntegerUtils;
 
 /**
- * 共识信息类
+ * Consensus Information
  * Consensus information class
  *
  * @author tag
  * 2018/11/20
  */
-@ApiModel(name = "委托信息")
+@ApiModel(name = "Entrustment information")
 public class DepositDTO {
-    @ApiModelProperty(description = "委托金额")
+    @ApiModelProperty(description = "Entrusted amount")
     private String deposit;
-    @ApiModelProperty(description = "节点HASH")
+    @ApiModelProperty(description = "nodeHASH")
     private String agentHash;
-    @ApiModelProperty(description = "账户地址")
+    @ApiModelProperty(description = "Account address")
     private String address;
-    @ApiModelProperty(description = "委托时间")
+    @ApiModelProperty(description = "Entrustment time")
     private Long time;
-    @ApiModelProperty(description = "委托交易HASH")
+    @ApiModelProperty(description = "Entrusted transactionHASH")
     private String txHash;
-    @ApiModelProperty(description = "委托交易被打包高度")
+    @ApiModelProperty(description = "The packaging height of entrusted transactions")
     private Long blockHeight;
-    @ApiModelProperty(description = "退出委托高度")
+    @ApiModelProperty(description = "Exit commission height")
     private Long delHeight;
 
     /**
-     * 0:待共识, 1:已共识
+     * 0:Pending consensus, 1:Consensus reached
      */
-    @ApiModelProperty(description = "节点状态 0:待共识, 1:已共识")
+    @ApiModelProperty(description = "Node status 0:Pending consensus, 1:Consensus reached")
     private int status;
-    @ApiModelProperty(description = "节点名称")
+    @ApiModelProperty(description = "Node Name")
     private String agentName;
-    @ApiModelProperty(description = "节点地址")
+    @ApiModelProperty(description = "Node address")
     private String agentAddress;
 
     public DepositDTO(Deposit deposit) {

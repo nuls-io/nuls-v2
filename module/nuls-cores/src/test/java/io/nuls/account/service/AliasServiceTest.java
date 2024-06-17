@@ -30,13 +30,13 @@ public class AliasServiceTest {
 
     @BeforeClass
     public static void beforeTest() {
-        //初始化配置
+        //Initialize configuration
         SpringLiteContext.init("io.nuls.account", new ModularServiceMethodInterceptor());
         AccountBootstrap accountBootstrap = SpringLiteContext.getBean(AccountBootstrap.class);
-        //初始化配置
-        accountBootstrap.initCfg();        //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
+        //Initialize configuration
+        accountBootstrap.initCfg();        //Read the configuration file, store the data in the root directory, initialize and open all table connections in that directory, and place them in the cache
         RocksDBService.init(NulsConfig.DATA_PATH);
-        //启动时间同步线程
+        //Start time synchronization thread
 //        TimeService.getInstance().start();
         accountService = SpringLiteContext.getBean(AccountService.class);
         aliasService = SpringLiteContext.getBean(AliasService.class);

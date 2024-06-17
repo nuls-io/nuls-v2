@@ -30,7 +30,7 @@ import io.nuls.ledger.model.po.LedgerAsset;
 import java.util.List;
 
 /**
- * 跨链资产登记
+ * Cross chain asset registration
  *
  * @author: PierreLuo
  * @date: 2020-05-11

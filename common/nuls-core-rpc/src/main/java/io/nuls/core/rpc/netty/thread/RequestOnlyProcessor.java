@@ -5,7 +5,7 @@ import io.nuls.core.rpc.model.message.Request;
 import io.nuls.core.rpc.netty.channel.ConnectData;
 import io.nuls.core.rpc.netty.processor.RequestMessageProcessor;
 /**
- * 不需要回执的请求处理线程
+ * Request processing thread that does not require a receipt
  * Request processing threads that do not require a receipt
  *
  * @author tag
@@ -19,7 +19,7 @@ public class RequestOnlyProcessor implements Runnable{
     }
 
     /**
-     * 消费从服务端获取的消息
+     * Consumption of messages obtained from the server
      * Consume the messages from servers
      */
     @SuppressWarnings("InfiniteLoopStatement")
@@ -28,7 +28,7 @@ public class RequestOnlyProcessor implements Runnable{
         while (connectData.isConnected()) {
             try {
                 /*
-                获取队列中的第一个对象
+                Get the first object in the queue
                 Get the first item of the queue
                  */
                 RequestOnly requestOnly = connectData.getRequestOnlyQueue().take();

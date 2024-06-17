@@ -45,7 +45,7 @@ import java.util.Map;
 import static io.nuls.block.constant.CommandConstant.*;
 
 /**
- * 需要单节点运行起来,再执行这个测试类,测试的都是RPC接口
+ * Need to run on a single node,Execute this test class again,All the tests areRPCinterface
  */
 public class BlockResourceTest {
 

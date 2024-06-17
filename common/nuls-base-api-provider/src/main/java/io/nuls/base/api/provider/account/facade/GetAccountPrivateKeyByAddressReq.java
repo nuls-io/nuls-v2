@@ -6,7 +6,7 @@ import io.nuls.base.api.provider.BaseReq;
  * @Author: zhoulijun
  * @Time: 2019-03-07 17:50
  * @Description:
- * 查询账户私钥
+ * Query account private key
  * get account private key
  */
 public class GetAccountPrivateKeyByAddressReq extends BaseReq {

@@ -63,7 +63,7 @@ import static io.nuls.contract.constant.ContractCmdConstant.*;
 public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
 
     /**
-     * 创建合约
+     * Create Contract
      */
     @Test
     public void createContract() throws Exception {
@@ -88,7 +88,7 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
     }
 
     /**
-     * token转账
+     * tokenTransfer
      */
     @Test
     public void tokenTransfer() throws Exception {
@@ -151,7 +151,7 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
     }
 
     /**
-     * 0. 平行链注册
+     * 0. Parallel chain registration
      */
     @Test
     public void chainRegCommit() throws Exception {
@@ -180,9 +180,9 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
     }
 
     /**
-     * 1. 流程 - 创建NRC20合约
-     *          创建系统合约
-     *          合约资产向链管理模块注册跨链
+     * 1. flow - establishNRC20contract
+     *          Create system contract
+     *          Contract assets register cross chain with the chain management module
      */
     @Test
     public void testCreateProcessor() throws Exception {
@@ -190,14 +190,14 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
         String sys = createCrossSystemContract();
         TimeUnit.SECONDS.sleep(1);
         Integer assetId = this.getAssetId(nrc20);
-        Log.info("开始向链管理模块注册跨链");
+        Log.info("Start registering cross chain with the chain management module");
         this.mainNetAssetReg(assetId);
         Log.info("nrc20 is [{}], assetId is [{}], sys is [{}]", nrc20, assetId, sys);
 
     }
 
     /**
-     * 2. 调用合约 - 调用token跨链转账
+     * 2. Call Contract - calltokenCross chain transfer
      */
     @Test
     public void callTransferCrossChain() throws Exception {
@@ -205,7 +205,7 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
         methodName = "transferCrossChain";
         BigInteger value = BigInteger.valueOf(1_0000_0000L);
         String methodDesc = "";
-        String remark = "call contract test - token跨链转账";
+        String remark = "call contract test - tokenCross chain transfer";
         String to = "XXOOdjJQw4LJdjtCd5Gda17FCNgSgTcPUUdSA";
         String token = BigInteger.valueOf(8_0000_0000L).toString();
         String[] args = {to, token};
@@ -218,7 +218,7 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
     }
 
     /**
-     * 3. 转移主链资产到平行链地址
+     * 3. Transfer main chain assets to parallel chain addresses
      */
     @Test
     public void mainAssetTransferTest(){
@@ -234,10 +234,10 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
             paramMap.put("listTo", toList);
             paramMap.put("chainId", chainId);
             paramMap.put("remark", "transfer test");
-            //调用接口
+            //Calling interfaces
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, "createCrossTx", paramMap);
             if (!cmdResp.isSuccess()) {
-                Log.info("接口调用失败！" );
+                Log.info("Interface call failed！" );
             }
             HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("createCrossTx"));
             String hash = (String) result.get("txHash");
@@ -257,7 +257,7 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
     }
 
     /**
-     * 4. (平行链调用) 查询账本资产
+     * 4. (Parallel chain call) Query ledger assets
      */
     @Test
     public void balanceTest() throws Exception {
@@ -267,7 +267,7 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
     }
 
     /**
-     * 5. (平行链调用) 转移主链代币资产回到主链
+     * 5. (Parallel chain call) Transfer main chain token assets back to the main chain
      */
     @Test
     public void tokenAssetTransferBackTest() throws Exception {
@@ -283,10 +283,10 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
             paramMap.put("listTo", toList);
             paramMap.put("chainId", chainId);
             paramMap.put("remark", "transfer test");
-            //调用接口
+            //Calling interfaces
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, "createCrossTx", paramMap);
             if (!cmdResp.isSuccess()) {
-                Log.info("接口调用失败！{}", JSONUtils.obj2PrettyJson(cmdResp));
+                Log.info("Interface call failed！{}", JSONUtils.obj2PrettyJson(cmdResp));
             }
             HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("createCrossTx"));
             String hash = (String) result.get("txHash");
@@ -309,7 +309,7 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
     }
 
     private String createCrossNrc20Contract() throws Exception {
-        Log.info("开始创建跨链特性的NRC20合约");
+        Log.info("Starting to create cross chain featuresNRC20contract");
         //InputStream in = new FileInputStream(ContractTest.class.getResource("/nuls-cross-chain-nrc20-test.jar").getFile());
         InputStream in = new FileInputStream("/Users/pierreluo/IdeaProjects/nuls-cross-chain-nrc20/target/nuls-cross-chain-nrc20-test.jar");
         byte[] contractCode = IOUtils.toByteArray(in);
@@ -330,7 +330,7 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
     }
 
     private String createCrossSystemContract() throws Exception {
-        Log.info("开始创建跨链特性的System合约");
+        Log.info("Starting to create cross chain featuresSystemcontract");
         //InputStream in = new FileInputStream(ContractTest.class.getResource("/cross-token-system-contract-test1.jar").getFile());
         InputStream in = new FileInputStream("/Users/pierreluo/IdeaProjects/cross-token-system-contract/target/cross-token-system-contract-test1.jar");
         byte[] contractCode = IOUtils.toByteArray(in);
@@ -355,7 +355,7 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
         Log.info("nrc20 is [{}], assetId is [{}]", nrc20, assetId);
     }
     /**
-     * 流程: 测试合约内部临时存储
+     * flow: Temporary storage within the testing contract
      */
     @Test
     public void testContractRepositoryProcessor() throws Exception {
@@ -450,7 +450,7 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
     }
 
     private String createTempNrc20Contract() throws Exception {
-        Log.info("开始创建测试合约存储的NRC20合约");
+        Log.info("Start creating test contract storageNRC20contract");
         InputStream in = new FileInputStream("/Users/pierreluo/IdeaProjects/contract-vm-storage-test/target/contract-vm-storage-test-test1.jar");
         byte[] contractCode = IOUtils.toByteArray(in);
         String remark = "create cross token";
@@ -470,7 +470,7 @@ public class ContractNRC20CrossTokenSendTxTest extends BaseQuery {
     }
 
     private String createTempContract() throws Exception {
-        Log.info("开始创建Temp合约");
+        Log.info("Start creatingTempcontract");
         InputStream in = new FileInputStream("/Users/pierreluo/IdeaProjects/mavenplugin/target/maven-plugin-test.jar");
         byte[] contractCode = IOUtils.toByteArray(in);
         String remark = "create temp contract";

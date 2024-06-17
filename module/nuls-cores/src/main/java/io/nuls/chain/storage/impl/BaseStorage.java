@@ -35,7 +35,7 @@ import io.nuls.core.rockdb.service.RocksDBService;
  **/
 public abstract class BaseStorage {
     /**
-     * 初始化表
+     * Initialize Table
      */
     void initTableName(String tableName) throws NulsException {
         try {

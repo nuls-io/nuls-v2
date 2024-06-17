@@ -3,7 +3,7 @@ package io.nuls.core.rpc.model;
 import io.nuls.core.rpc.model.message.Request;
 
 /**
- * 请求调用远程方法且不需返回
+ * Request to call remote method without returning
  * Request calls to remote methods without requiring return
  *
  * @author tag

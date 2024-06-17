@@ -31,7 +31,7 @@ import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.constant.ErrorCode;
 
 /**
- * 错误码管理器
+ * Error Code Manager
  * NetworkErrorCode
  *
  * @author Lan

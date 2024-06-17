@@ -52,7 +52,7 @@ import java.math.BigInteger;
 import java.util.*;
 
 /**
- * 共识模块RPC接口实现类
+ * Consensus moduleRPCInterface implementation class
  * Consensus Module RPC Interface Implementation Class
  *
  * @author tag
@@ -80,7 +80,7 @@ public class AgentServiceImpl implements AgentService {
     private RoundManager roundManager;
 
     /**
-     * 创建节点
+     * Create nodes
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -106,22 +106,22 @@ public class AgentServiceImpl implements AgentService {
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
         try {
-            //1.参数验证
+            //1.Parameter validation
             if (!AddressTool.isNormalAddress(dto.getPackingAddress(), dto.getChainId())) {
                 throw new NulsRuntimeException(ConsensusErrorCode.ADDRESS_ERROR);
             }
-            //2.账户验证
+            //2.Account verification
             HashMap callResult = CallMethodUtils.accountValid(dto.getChainId(), dto.getAgentAddress(), dto.getPassword());
-            //3.组装创建节点交易
+            //3.Assemble and create node transactions
             Transaction tx = new Transaction(TxType.REGISTER_AGENT);
             tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
-            //3.1.组装共识节点信息
+            //3.1.Assembly consensus node information
             Agent agent = TxUtil.createAgent(dto);
             tx.setTxData(agent.serialize());
-            //3.2.组装coinData
+            //3.2.assemblecoinData
             CoinData coinData = coinDataManager.getCoinData(agent.getAgentAddress(), chain, new BigInteger(dto.getDeposit()), ConsensusConstant.CONSENSUS_LOCK_TIME, tx.size() + P2PHKSignature.SERIALIZE_LENGTH, chain.getConfig().getAgentChainId(), chain.getConfig().getAgentAssetId());
             tx.setCoinData(coinData.serialize());
-            //4.交易签名
+            //4.Transaction signature
             String priKey = (String) callResult.get("priKey");
             CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAgentAddress(), dto.getPassword(), priKey, tx);
             String txStr = RPCUtil.encode(tx.serialize());
@@ -146,7 +146,7 @@ public class AgentServiceImpl implements AgentService {
     }
 
     /**
-     * 创建节点交易验证
+     * Create node transaction verification
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -221,7 +221,7 @@ public class AgentServiceImpl implements AgentService {
     }
 
     /**
-     * 停止节点
+     * Stop node
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -271,7 +271,7 @@ public class AgentServiceImpl implements AgentService {
             BigInteger fee = TransactionFeeCalculator.getConsensusTxFee(tx.size() + P2PHKSignature.SERIALIZE_LENGTH + coinData.serialize().length, chain.getConfig().getFeeUnit());
             coinData.getTo().get(0).setAmount(coinData.getTo().get(0).getAmount().subtract(fee));
             tx.setCoinData(coinData.serialize());
-            //交易签名
+            //Transaction signature
             String priKey = (String) callResult.get("priKey");
             CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAddress(), dto.getPassword(), priKey, tx);
             String txStr = RPCUtil.encode(tx.serialize());
@@ -294,7 +294,7 @@ public class AgentServiceImpl implements AgentService {
 
 
     /**
-     * 停止节点交易验证
+     * Stop node transaction verification
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -331,7 +331,7 @@ public class AgentServiceImpl implements AgentService {
     }
 
     /**
-     * 获取节点列表信息
+     * Get node list information
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -372,7 +372,7 @@ public class AgentServiceImpl implements AgentService {
                 String agentAddress = AddressTool.getStringAddressByBytes(agent.getAgentAddress()).toUpperCase();
                 String packingAddress = AddressTool.getStringAddressByBytes(agent.getPackingAddress()).toUpperCase();
                 String agentId = agentManager.getAgentId(agent.getTxHash()).toUpperCase();
-                //从账户模块获取账户别名
+                //Obtain account alias from account module
                 String agentAlias = CallMethodUtils.getAlias(chain, agentAddress);
                 String packingAlias = CallMethodUtils.getAlias(chain, packingAddress);
                 boolean b = agentId.contains(keyword);
@@ -392,7 +392,7 @@ public class AgentServiceImpl implements AgentService {
         }
         int start = pageNumber * pageSize - pageSize;
         Page<AgentDTO> page = new Page<>(pageNumber, pageSize, handleList.size());
-        //表示查询的起始位置大于数据总数即查询的该页不存在数据
+        //Indicates that the starting position of the query is greater than the total number of data, indicating that there is no data on the page being queried
         if (start >= page.getTotal()) {
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(page);
         }
@@ -406,7 +406,7 @@ public class AgentServiceImpl implements AgentService {
     }
 
     /**
-     * 获取指定节点信息
+     * Get specified node information
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -445,7 +445,7 @@ public class AgentServiceImpl implements AgentService {
     }
 
     /**
-     * 获取指定节点状态
+     * Get the specified node status
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -477,7 +477,7 @@ public class AgentServiceImpl implements AgentService {
     }
 
     /**
-     * 修改节点共识状态
+     * Modify node consensus status
      */
     @Override
     public Result updateAgentConsensusStatus(Map<String, Object> params) {
@@ -493,12 +493,12 @@ public class AgentServiceImpl implements AgentService {
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
         chain.setConsensusStatus(ConsensusStatus.RUNNING);
-        chain.getLogger().info("updateAgentConsensusStatus-修改节点共识状态成功......");
+        chain.getLogger().info("updateAgentConsensusStatus-Successfully modified node consensus status......");
         return Result.getSuccess(ConsensusErrorCode.SUCCESS);
     }
 
     /**
-     * 修改节点打包状态
+     * Modify node packaging status
      */
     @Override
     public Result updateAgentStatus(Map<String, Object> params) {
@@ -516,17 +516,17 @@ public class AgentServiceImpl implements AgentService {
         }
         if (status == 1) {
             chain.setCanPacking(true);
-            chain.getLogger().info("updateAgentStatus--节点打包状态修改成功，修改后状态为：可打包状态");
+            chain.getLogger().info("updateAgentStatus--The node packaging status has been successfully modified, and the modified status is：Packable status");
         } else {
             chain.setCanPacking(false);
-            chain.getLogger().info("updateAgentStatus--节点打包状态修改成功，修改后状态为：不可打包状态");
+            chain.getLogger().info("updateAgentStatus--The node packaging status has been successfully modified, and the modified status is：Unpackable status");
         }
         return Result.getSuccess(ConsensusErrorCode.SUCCESS);
 
     }
 
     /**
-     * 获取当前节点出块地址
+     * Get the current node's outbound address
      *
      * @param params
      * @return Result
@@ -567,7 +567,7 @@ public class AgentServiceImpl implements AgentService {
     }
 
     /**
-     * 获取所有节点出块地址/指定N个区块出块指定
+     * Get all node block addresses/specifyNBlock assignment
      *
      * @param params
      * @return Result
@@ -592,7 +592,7 @@ public class AgentServiceImpl implements AgentService {
     }
 
     /**
-     * 获取当前节点的出块账户信息
+     * Obtain the outbound account information of the current node
      *
      * @param params
      * @return Result

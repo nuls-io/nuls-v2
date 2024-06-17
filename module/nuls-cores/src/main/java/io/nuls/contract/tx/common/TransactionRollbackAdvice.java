@@ -62,9 +62,9 @@ public class TransactionRollbackAdvice implements CommonAdvice {
         try {
             ChainManager.chainHandle(chainId, BlockType.VERIFY_BLOCK.type());
             Short currentVersion = ProtocolGroupManager.getCurrentVersion(chainId);
-            // 删除智能合约链下交易hash
+            // Delete smart contract off chain transactionshash
             contractOfflineTxHashListStorageService.deleteOfflineTxHashList(chainId, header.getHash().getBytes());
-            // add by pierre at 2019-12-01 处理type10交易的业务回滚, 需要协议升级 done
+            // add by pierre at 2019-12-01 handletype10Business rollback of transactions, Protocol upgrade required done
             if(currentVersion >= ContractContext.UPDATE_VERSION_V250) {
                 List<Transaction> crossTxList = txList.stream().filter(tx -> tx.getType() == TxType.CROSS_CHAIN).collect(Collectors.toList());
                 if(currentVersion >= ContractContext.UPDATE_VERSION_CONTRACT_ASSET ) {

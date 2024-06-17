@@ -39,7 +39,7 @@ public class ContractBalance implements Serializable {
     private BigInteger freeze;
     private String nonce;
     /**
-     * 存储合约内部连续转账的第一个交易的nonce，用于回滚连续转账(当连续转账发生错误，那么这一次连续转账全部回滚)
+     * The first transaction of consecutive transfers within the storage contractnonce, used to roll back continuous transfers(When there is an error in consecutive transfers, then all consecutive transfers will be rolled back)
      */
     private String preNonce;
 

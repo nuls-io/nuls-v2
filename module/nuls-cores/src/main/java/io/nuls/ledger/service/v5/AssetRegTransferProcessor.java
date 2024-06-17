@@ -108,7 +108,7 @@ public class AssetRegTransferProcessor implements TransactionProcessor {
             assetRegMngService.registerTxAssets(chainId, assets);
         } catch (Exception e) {
             LoggerUtil.COMMON_LOG.error(e);
-            //通知远程调用回滚
+            //Notify remote call to roll back
             return false;
         }
         return true;

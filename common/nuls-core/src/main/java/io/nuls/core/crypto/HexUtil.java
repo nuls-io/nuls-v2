@@ -33,10 +33,10 @@ import org.apache.commons.codec.binary.Hex;
 
 public class HexUtil {
     /**
-     * 对字节数据进行16进制编码。
+     * Performing byte data16Binary encoding.
      *
-     * @param src 源字节数组
-     * @return String 编码后的字符串
+     * @param src Source byte array
+     * @return String Encoded string
      */
     public static String encode(byte[] src) {
         return Hex.encodeHexString(src);
@@ -54,10 +54,10 @@ public class HexUtil {
     }
 
     /**
-     * 对16进制编码的字符串进行解码。
+     * right16Decode a string encoded in hexadecimal.
      *
-     * @param hexString 源字串
-     * @return byte[] 解码后的字节数组
+     * @param hexString Source string
+     * @return byte[] Decoded byte array
      */
     public static byte[] decode(String hexString) {
         try {
@@ -74,9 +74,9 @@ public class HexUtil {
 
 
     /**
-     * 验证对象不为null
+     * The verification object is notnull
      *
-     * @param t 对象
+     * @param t object
      * @return T
      */
     public static <T> T checkNotNull(T t) {

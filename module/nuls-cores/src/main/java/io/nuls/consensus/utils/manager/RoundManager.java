@@ -26,7 +26,7 @@ import java.math.BigInteger;
 import java.util.*;
 
 /**
- * 轮次信息管理类
+ * Round information management
  * Round Information Management Class
  *
  * @author tag
@@ -39,11 +39,11 @@ public class RoundManager {
     private FixRedPunishBugHelper fixRedPunishBugHelper;
 
     /**
-     * 添加轮次信息到轮次列表中
+     * Add round information to the round list
      * Add Round Information to Round List
      *
      * @param chain        chain info
-     * @param meetingRound 需添加的轮次信息/round info
+     * @param meetingRound Round information to be added/round info
      */
     public void addRound(Chain chain, MeetingRound meetingRound) {
         List<MeetingRound> roundList = chain.getRoundList();
@@ -63,10 +63,10 @@ public class RoundManager {
     }
 
     /**
-     * 回滚本地轮次到指定轮次
+     * Rollback local round to specified round
      *
-     * @param roundIndex 回滚到指定轮次
-     * @param chain      链信息
+     * @param roundIndex Rollback to specified round
+     * @param chain      Chain information
      */
     public void rollBackRound(Chain chain, long roundIndex) {
         List<MeetingRound> roundList = chain.getRoundList();
@@ -80,11 +80,11 @@ public class RoundManager {
     }
 
     /**
-     * 清理指定链的轮次信息
+     * Clean up the round information of the specified chain
      * Clean up the wheel number information of the specified chain
      *
      * @param chain chain info
-     * @param count 保留几轮轮次信息/Keep several rounds of information
+     * @param count Keep several rounds of information/Keep several rounds of information
      * @return boolean
      */
     public boolean clearRound(Chain chain, int count) {
@@ -98,11 +98,11 @@ public class RoundManager {
     }
 
     /**
-     * 清理比指定轮次之后的轮次信息
+     * Clean up the round information after the specified round
      * Clean up the wheel number information of the specified chain
      *
      * @param chain chain info
-     * @param roundIndex 保留几轮轮次信息/Keep several rounds of information
+     * @param roundIndex Keep several rounds of information/Keep several rounds of information
      * @return boolean
      */
     public boolean clearRound(Chain chain, long roundIndex) {
@@ -120,11 +120,11 @@ public class RoundManager {
     }
 
     /**
-     * 获取指定下标的轮次信息
+     * Obtain the round information of the specified index
      * Get round information for specified Subscripts
      *
      * @param chain      chain info
-     * @param roundIndex 轮次下标/round index
+     * @param roundIndex Round index/round index
      * @return MeetingRound
      */
     public MeetingRound getRoundByIndex(Chain chain, long roundIndex) {
@@ -142,15 +142,15 @@ public class RoundManager {
     }
 
     /**
-     * 检查是否需要重置轮次
+     * Check if it is necessary to reset the round
      * Check if you need to reset rounds
      *
      * @param chain chain info
      */
     public void checkIsNeedReset(Chain chain) throws Exception {
         /*
-        1.如果本地不存在轮次信息,则初始化本地轮次信息
-        2.如果存在且，本地最新区块轮次小于本地计算的最新轮次，则重置本地轮次信息
+        1.If there is no round information available locally,Initialize local round information
+        2.If it exists and the local latest block round is less than the locally calculated latest round, reset the local round information
         1. Initialize local round information if there is no local round information
         2. If there is and the latest local block rounds are less than the latest local rounds, the local rounds information will be reset.
         */
@@ -175,7 +175,7 @@ public class RoundManager {
     }
 
     /**
-     * 获取本地最新轮次信息
+     * Get the latest local round information
      * Get the latest local rounds
      *
      * @param chain chain info
@@ -195,7 +195,7 @@ public class RoundManager {
     }
 
     /**
-     * 初始化轮次信息（重新计算轮次信息）
+     * Initialize round information（Recalculate round information）
      * Initialize Round Information (recalculate Round Information)
      *
      * @param chain chain info
@@ -204,7 +204,7 @@ public class RoundManager {
         //resetRound(chain,false);
         MeetingRound currentRound = resetRound(chain, false);
         /*
-        如果当前没有设置它的上一轮次，则找到它的上一轮的轮次并设置
+        If its previous round is not currently set, find its previous round and set it
         If the previous round is not currently set, find the previous round and set it.
         */
         if (currentRound.getPreRound() == null) {
@@ -224,11 +224,11 @@ public class RoundManager {
     }
 
     /**
-     * 重设最新轮次信息
+     * Reset the latest round information
      * Reset the latest round information
      *
      * @param chain      chain info
-     * @param isRealTime 是否根据最新时间计算轮次/Whether to calculate rounds based on current time
+     * @param isRealTime Is the round calculated based on the latest time/Whether to calculate rounds based on current time
      * @return MeetingRound
      */
     public MeetingRound resetRound(Chain chain, boolean isRealTime) throws Exception {
@@ -237,7 +237,7 @@ public class RoundManager {
             MeetingRound round = getCurrentRound(chain);
             if (isRealTime) {
                 /*
-                如果本地最新轮次为空或本地最新轮次打包结束时间小于当前时间则需要计算下一轮次信息
+                If the local latest round is empty or the packaging end time of the local latest round is less than the current time, the next round information needs to be calculated
                 If the local latest round is empty or the local latest round is packaged less than the current time,
                 the next round of information needs to be calculated.
                 */
@@ -254,7 +254,7 @@ public class RoundManager {
             BlockExtendsData extendsData = blockHeader.getExtendsData();
 
             /*
-            如果本地最新轮次信息不为空&&本地最新轮次与最新区块轮次相等&&最新区块不是本轮次最后一个打包区块则直接返回本地最新轮次
+            If the latest local round information is not empty&&The latest local round is equal to the latest block round&&If the latest block is not the last packaged block in this round, it will be directly returned to the local latest round
             If the latest local rounds are not empty & the latest local rounds are equal to the latest block rounds & if the latest block is not the last packaged block in this round,
              the latest local rounds will be returned directly to the latest local rounds
             */
@@ -263,7 +263,7 @@ public class RoundManager {
             }
             MeetingRound nextRound = getRound(chain, extendsData, false);
             /*
-            如果当前轮次不为空且计算出的下一轮次下标小于当前轮次下标则直接返回计算出的下一轮次信息
+            If the current round is not empty and the calculated next round index is less than the current round index, the calculated next round information will be directly returned
             If the current round is not empty and the calculated next round subscript is less than the current round subscript,
             the calculated next round information will be returned directly.
             */
@@ -279,12 +279,12 @@ public class RoundManager {
     }
 
     /**
-     * 获取下一轮的轮次信息
+     * Obtain information on the next round of rounds
      * Get the next round of round objects
      *
      * @param chain      chain info
-     * @param roundData  轮次数据/block extends entity
-     * @param isRealTime 是否根据最新时间计算轮次/Whether to calculate rounds based on current time
+     * @param roundData  Round data/block extends entity
+     * @param isRealTime Is the round calculated based on the latest time/Whether to calculate rounds based on current time
      * @return MeetingRound
      */
     public MeetingRound getRound(Chain chain, BlockExtendsData roundData, boolean isRealTime) throws Exception {
@@ -337,7 +337,7 @@ public class RoundManager {
 
 
     /**
-     * 根据时间计算下一轮次信息
+     * Calculate next round information based on time
      * Calculate the next round of information based on time
      *
      * @param chain chain info
@@ -351,7 +351,7 @@ public class RoundManager {
         if (startBlockHeader.getHeight() != 0L) {
             long roundIndex = bestRoundData.getRoundIndex();
             /*
-            本地最新区块所在轮次已经打包结束，则轮次下标需要加1,则需找到本地最新区块轮次中出的第一个块来计算下一轮的轮次信息
+            If the round of packaging for the latest local block has ended, the round index needs to be added1,Then it is necessary to find the first block from the latest local block round to calculate the next round information
             If the latest block in this area has been packaged, the subscription of the round will need to be added 1.
             */
             if (bestRoundData.getConsensusMemberCount() == bestRoundData.getPackingIndexOfRound() || NulsDateUtils.getCurrentTimeSeconds() >= bestRoundEndTime) {
@@ -364,7 +364,7 @@ public class RoundManager {
         long startTime;
         long packingInterval = chain.getConfig().getPackingInterval();
         /*
-        找到需计算的轮次下标及轮次开始时间,如果当前时间<本地最新区块时间，则表示需计算轮次就是本地最新区块轮次
+        Find the index and start time of the round to be calculated,If the current time<The latest local block time indicates that the round to be calculated is the latest local block round
         Find the rounds subscripts to be calculated and the start time of rounds
         */
         if (nowTime < bestRoundEndTime) {
@@ -384,7 +384,7 @@ public class RoundManager {
     }
 
     /**
-     * 根据最新区块数据计算下一轮轮次信息
+     * Calculate the next round information based on the latest block data
      * Calculate next round information based on the latest block entity
      *
      * @param chain chain info
@@ -399,11 +399,11 @@ public class RoundManager {
     }
 
     /**
-     * 根据指定区块数据计算所在轮次信息
+     * Calculate the round information based on the specified block data
      * Calculate next round information based on the latest block entity
      *
      * @param chain     chain info
-     * @param roundData 区块里的轮次信息/block extends entity
+     * @param roundData Round information in the block/block extends entity
      * @return MeetingRound
      */
     private MeetingRound getRoundByExpectedRound(Chain chain, BlockExtendsData roundData) throws Exception {
@@ -425,13 +425,13 @@ public class RoundManager {
     }
 
     /**
-     * 计算轮次信息
+     * Calculate round information
      * Calculate wheel information
      *
      * @param chain            chain info
-     * @param startBlockHeader 上一轮次的起始区块/Initial blocks of the last round
-     * @param index            轮次下标/round index
-     * @param startTime        轮次开始打包时间/start time
+     * @param startBlockHeader Starting block of the previous round/Initial blocks of the last round
+     * @param index            Round index/round index
+     * @param startTime        Starting packaging time of the round/start time
      */
     @SuppressWarnings("unchecked")
     private MeetingRound calculationRound(Chain chain, BlockHeader startBlockHeader, long index, long startTime) throws Exception {
@@ -443,25 +443,25 @@ public class RoundManager {
         if (!packingAddressList.isEmpty()) {
             round.calcLocalPacker(packingAddressList, chain);
         }
-        chain.getLogger().debug("当前轮次为：" + round.getIndex() + ";当前轮次开始打包时间：" + NulsDateUtils.convertDate(new Date(startTime * 1000)));
+        chain.getLogger().debug("The current round is：" + round.getIndex() + ";Starting packaging time of the current round：" + NulsDateUtils.convertDate(new Date(startTime * 1000)));
         chain.getLogger().debug("\ncalculation||index:{},startTime:{},startHeight:{},hash:{}\n" + round.toString() + "\n\n", index, startTime * 1000, startBlockHeader.getHeight(), startBlockHeader.getHash());
         return round;
     }
 
     /**
-     * 设置轮次中打包节点信息
+     * Set packaging node information in the round
      * Setting Packing Node Information in Rounds
      *
      * @param chain            chain info
-     * @param round            轮次信息/round info
-     * @param startBlockHeader 上一轮次的起始区块/Initial blocks of the last round
+     * @param round            Round information/round info
+     * @param startBlockHeader Starting block of the previous round/Initial blocks of the last round
      */
     private void setMemberList(Chain chain, MeetingRound round, BlockHeader startBlockHeader) throws NulsException {
         List<MeetingMember> memberList = new ArrayList<>();
         String seedNodesStr = chain.getConfig().getSeedNodes();
         String[] seedNodes;
         /*
-        种子节点打包信息组装
+        Seed node packaging information assembly
         Seed node packaging information assembly
         */
         if (StringUtils.isNotBlank(seedNodesStr)) {
@@ -494,7 +494,7 @@ public class RoundManager {
             MeetingMember member = new MeetingMember();
             member.setRoundStartTime(round.getStartTime());
             /*
-            获取节点委托信息，用于计算节点总的委托金额
+            Obtain node delegation information, used to calculate the total delegation amount of the node
             Get the node delegation information for calculating the total amount of the node delegation
             */
             List<Deposit> cdList = getDepositListByAgentId(chain, realAgent.getTxHash(), startBlockHeader.getHeight());
@@ -508,7 +508,7 @@ public class RoundManager {
             member.setRoundIndex(round.getIndex());
             member.setAgent(realAgent);
             /*
-            节点总的委托金额是否达到出块节点的最小值
+            Does the total entrusted amount of the node reach the minimum value of the outgoing node
             Does the total delegation amount of the node reach the minimum value of the block node?
             */
             boolean isItIn = realAgent.getTotalDeposit().compareTo(chain.getConfig().getCommissionMin()) >= 0 ? true : false;
@@ -521,12 +521,12 @@ public class RoundManager {
     }
 
     /**
-     * 获取节点的委托信息
+     * Obtain node delegation information
      * Obtaining delegation information of nodes
      *
      * @param chain            chain info
-     * @param agentHash        节点ID/agent hash
-     * @param startBlockHeight 上一轮次的起始区块高度/Initial blocks of the last round
+     * @param agentHash        nodeID/agent hash
+     * @param startBlockHeight The starting block height of the previous round/Initial blocks of the last round
      * @return List<Deposit>
      */
     private List<Deposit> getDepositListByAgentId(Chain chain, NulsHash agentHash, long startBlockHeight) {
@@ -549,11 +549,11 @@ public class RoundManager {
     }
 
     /**
-     * 获取网络中有效的节点列表
+     * Obtain a list of valid nodes in the network
      * Getting a list of valid nodes in the network
      *
      * @param chain            chain info
-     * @param startBlockHeight 上一轮次的起始区块高度/Initial blocks of the last round
+     * @param startBlockHeight The starting block height of the previous round/Initial blocks of the last round
      * @return List<Agent>
      */
     private List<Agent> getAliveAgentList(Chain chain, long startBlockHeight) {
@@ -575,12 +575,12 @@ public class RoundManager {
 
 
     /**
-     * 计算节点的信誉值
+     * Calculate the reputation value of nodes
      * Calculating the Node's Credit Value
      *
      * @param chain       chain info
-     * @param member      打包成员对象/packing info
-     * @param blockHeader 区块头/block header
+     * @param member      Packaging member objects/packing info
+     * @param blockHeader Block head/block header
      * @return double
      */
     private double calcCreditVal(Chain chain, MeetingMember member, BlockHeader blockHeader) throws NulsException {
@@ -590,7 +590,7 @@ public class RoundManager {
             roundStart = 0;
         }
         /*
-        信誉值计算是通过限定轮次内节点出块数与黄牌数计算出的
+        The calculation of reputation value is based on the number of blocks and yellow cards produced by nodes within a limited number of rounds
         Credit value is calculated by limiting the number of blocks and yellow cards of nodes in rounds.
         */
         long blockCount = getBlockCountByAddress(chain, member.getAgent().getPackingAddress(), roundStart, roundData.getRoundIndex() - 1);
@@ -604,14 +604,14 @@ public class RoundManager {
     }
 
     /**
-     * 获取指定地址获得的红黄牌惩罚数量
+     * Obtain the number of red and yellow card penalties obtained from the specified address
      * Get the number of red and yellow card penalties for the specified address
      *
      * @param chain      chain info
-     * @param address    地址/address
-     * @param roundStart 起始轮次/round start index
-     * @param roundEnd   结束轮次/round end index
-     * @param code       红黄牌标识/Red and yellow logo
+     * @param address    address/address
+     * @param roundStart Starting round/round start index
+     * @param roundEnd   End round/round end index
+     * @param code       Red and yellow card identification/Red and yellow logo
      * @return long
      */
     private long getPunishCountByAddress(Chain chain, byte[] address, long roundStart, long roundEnd, int code) throws NulsException {
@@ -637,7 +637,7 @@ public class RoundManager {
             }
         }
         /*
-        每一轮的惩罚都有可能包含上一轮次的惩罚记录，即计算从a到a+99轮的惩罚记录时，a轮的惩罚中可能是惩罚某个地址在a-1轮未出块，导致100轮最多可能有101个惩罚记录，在这里处理下
+        Each round of punishment may include the punishment record from the previous round, i.e. calculating fromareacha+99When recording the punishment for a round,aIn the punishment of the round, it may be that a certain address is penalizeda-1The wheel did not come out of the block, resulting in100The maximum possible number of wheels101Punishment records, process them here
         Each round of punishment is likely to contain a rounds punishment record, calculated from a to a + 99 rounds of punishment record,
         a round of punishment is likely to be punished in an address in a - 1 round not out of the blocks,
         lead to round up to 100 May be 101 punishment record, treatment here
@@ -650,11 +650,11 @@ public class RoundManager {
 
 
     /**
-     * 获取指定轮次前一轮打包的第一个区块
+     * Get the first block packaged in the previous round of the specified round
      * Gets the first block packaged in the previous round of the specified round
      *
      * @param chain      chain info
-     * @param roundIndex 轮次下标
+     * @param roundIndex Round index
      */
     public BlockHeader getFirstBlockOfPreRound(Chain chain, long roundIndex) {
         BlockHeader firstBlockHeader = null;
@@ -685,11 +685,11 @@ public class RoundManager {
     }
 
     /**
-     * 获取指定轮次的前一轮轮次信息
+     * Obtain information about the previous round of the specified round
      * Gets the first block packaged in the previous round of the specified round
      *
      * @param chain      chain info
-     * @param roundIndex 轮次下标
+     * @param roundIndex Round index
      */
     public MeetingRound getPreRound(Chain chain, long roundIndex)throws Exception{
         List<BlockHeader> blockHeaderList = chain.getBlockHeaderList();
@@ -709,13 +709,13 @@ public class RoundManager {
     }
 
     /**
-     * 获取地址出块数量
+     * Obtain address block quantity
      * Get the number of address blocks
      *
      * @param chain          chain info
-     * @param packingAddress 出块地址
-     * @param roundStart     起始轮次
-     * @param roundEnd       结束轮次
+     * @param packingAddress Block address
+     * @param roundStart     Starting round
+     * @param roundEnd       End round
      */
     private long getBlockCountByAddress(Chain chain, byte[] packingAddress, long roundStart, long roundEnd) {
         long count = 0;
@@ -738,13 +738,13 @@ public class RoundManager {
 
 
     /**
-     * 查询两轮次之间新增的共识节点和注销的共识节点
+     * Query newly added consensus nodes and logged out consensus nodes between two rounds
      * New consensus nodes and unregistered consensus nodes between queries
      *
      * @param chain                  chain
-     * @param lastExtendsData        上一轮的轮次信息
-     * @param currentExtendsData     本轮轮次信息
-     * @return                       两轮次之间节点变化信息
+     * @param lastExtendsData        Previous round information
+     * @param currentExtendsData     Current round information
+     * @return                       Node change information between two rounds
      * */
     public Map<String,List<String>> getAgentChangeInfo(Chain chain, BlockExtendsData lastExtendsData, BlockExtendsData currentExtendsData){
         Map<String, List<String>> resultMap = new HashMap<>(2);
@@ -780,11 +780,11 @@ public class RoundManager {
     }
 
     /**
-     * 获取两轮次之间新增或减少的节点列表
-     * @param lastRound        上一轮
-     * @param currentRound     本轮
-     * @param isRegister       获取增加节点列表（true）或获取减少的节点列表（false）
-     * @return                 节点变化列表
+     * Obtain a list of newly added or decreased nodes between two rounds
+     * @param lastRound        Previous round
+     * @param currentRound     This round
+     * @param isRegister       Obtain the list of added nodes（true）Or obtain a list of reduced nodes（false）
+     * @return                 Node Change List
      * */
     private List<String> getAgentChangeList(MeetingRound lastRound, MeetingRound currentRound , boolean isRegister){
         List<String> lastRoundAgentList = new ArrayList<>();

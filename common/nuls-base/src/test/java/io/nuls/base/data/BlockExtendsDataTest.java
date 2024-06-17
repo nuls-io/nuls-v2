@@ -8,7 +8,7 @@ import org.junit.Test;
 import java.io.IOException;
 
 /**
- * 测试extend字段
+ * testextendfield
  *
  * @author captain
  * @version 1.0
@@ -17,7 +17,7 @@ import java.io.IOException;
 public class BlockExtendsDataTest {
 
     /**
-     * 测试扩展字段hex
+     * Test Extension Fieldshex
      *
      * @throws NulsException
      * @throws IOException
@@ -39,7 +39,7 @@ public class BlockExtendsDataTest {
     }
 
     /**
-     * 设置扩展字段的值，并返回hex，通常用于设置创世块
+     * Set the value of the extended field and return ithex, usually used to set up Genesis blocks
      *
      * @throws NulsException
      * @throws IOException

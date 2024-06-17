@@ -93,16 +93,16 @@ public class ContractCmd extends BaseCmd {
     @Autowired
     private NulsCoresConfig contractConfig;
 
-    @CmdAnnotation(cmd = BATCH_BEGIN, version = 1.0, description = "执行合约一个批次的开始通知，生成当前批次的信息/batch begin")
+    @CmdAnnotation(cmd = BATCH_BEGIN, version = 1.0, description = "Execute the start notification for a batch of contracts, generate information for the current batch/batch begin")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
-        @Parameter(parameterName = "blockType", parameterType = "int", parameterDes = "区块处理模式, 打包区块 - 0, 验证区块 - 1"),
-        @Parameter(parameterName = "blockHeight", parameterType = "long", parameterDes = "当前打包的区块高度"),
-        @Parameter(parameterName = "blockTime", parameterType = "long", parameterDes = "当前打包的区块时间"),
-        @Parameter(parameterName = "packingAddress", parameterType = "String", parameterDes = "当前打包的区块打包地址"),
-        @Parameter(parameterName = "preStateRoot", parameterType = "String", parameterDes = "上一个stateRoot")
+        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "chainid"),
+        @Parameter(parameterName = "blockType", parameterType = "int", parameterDes = "Block processing mode, Packaging blocks - 0, Verify Block - 1"),
+        @Parameter(parameterName = "blockHeight", parameterType = "long", parameterDes = "The height of the currently packaged blocks"),
+        @Parameter(parameterName = "blockTime", parameterType = "long", parameterDes = "The current packaged block time"),
+        @Parameter(parameterName = "packingAddress", parameterType = "String", parameterDes = "The current block packaging address"),
+        @Parameter(parameterName = "preStateRoot", parameterType = "String", parameterDes = "PreviousstateRoot")
     })
-    @ResponseData(description = "无特定返回值，没有错误即成功")
+    @ResponseData(description = "No specific return value, successful without errors")
     public Response batchBegin(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
@@ -125,13 +125,13 @@ public class ContractCmd extends BaseCmd {
         }
     }
 
-    @CmdAnnotation(cmd = INVOKE_CONTRACT, version = 1.0, description = "批次通知开始后，一笔一笔执行合约/invoke contract one by one")
+    @CmdAnnotation(cmd = INVOKE_CONTRACT, version = 1.0, description = "After the batch notification starts, execute the contract one by one/invoke contract one by one")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
-        @Parameter(parameterName = "blockType", parameterType = "int", parameterDes = "区块处理模式, 打包区块 - 0, 验证区块 - 1"),
-        @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "交易序列化的HEX编码字符串")
+        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "chainid"),
+        @Parameter(parameterName = "blockType", parameterType = "int", parameterDes = "Block processing mode, Packaging blocks - 0, Verify Block - 1"),
+        @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "Serialized transactionHEXEncoding string")
     })
-    @ResponseData(description = "无特定返回值，没有错误即成功，如果返回错误，则丢弃这笔交易")
+    @ResponseData(description = "No specific return value, successful without errors. If an error is returned, the transaction will be discarded")
     public Response invokeContractOneByOne(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
@@ -189,19 +189,19 @@ public class ContractCmd extends BaseCmd {
         }
     }
 
-    @CmdAnnotation(cmd = BATCH_BEFORE_END, version = 1.0, description = "交易模块打包完交易，在做统一验证前，通知合约模块，合约模块停止接收交易，开始异步处理这个批次的结果/batch before end")
+    @CmdAnnotation(cmd = BATCH_BEFORE_END, version = 1.0, description = "After the transaction module has packaged the transaction, before conducting unified verification, notify the contract module to stop receiving transactions and start asynchronous processing of the results of this batch/batch before end")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
-        @Parameter(parameterName = "blockType", parameterType = "int", parameterDes = "区块处理模式, 打包区块 - 0, 验证区块 - 1"),
-        @Parameter(parameterName = "blockHeight", parameterType = "long", parameterDes = "当前打包的区块高度")
+        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "chainid"),
+        @Parameter(parameterName = "blockType", parameterType = "int", parameterDes = "Block processing mode, Packaging blocks - 0, Verify Block - 1"),
+        @Parameter(parameterName = "blockHeight", parameterType = "long", parameterDes = "The height of the currently packaged blocks")
     })
-    @ResponseData(description = "无特定返回值，没有错误即成功，如果返回错误，则废弃这个批次，批次内已执行的合约交易退还到待打包交易队列中")
+    @ResponseData(description = "No specific return value, success is achieved without errors. If an error is returned, the batch is discarded, and all executed contract transactions within the batch are returned to the queue for packaging transactions")
     public Response batchBeforeEnd(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
             Integer blockType = (Integer) params.get("blockType");
             ChainManager.chainHandle(chainId, blockType);
-            // 版本8及以上，跳过处理
+            // version8Above and above, skip processing
             if(ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.UPDATE_VERSION_CONTRACT_ASSET ) {
                 return success();
             }
@@ -218,14 +218,14 @@ public class ContractCmd extends BaseCmd {
         }
     }
 
-    @CmdAnnotation(cmd = BATCH_END, version = 1.0, description = "通知当前批次结束并返回结果/batch end")
+    @CmdAnnotation(cmd = BATCH_END, version = 1.0, description = "Notify the end of the current batch and return the result/batch end")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
-        @Parameter(parameterName = "blockHeight", parameterType = "long", parameterDes = "当前打包的区块高度")
+        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "chainid"),
+        @Parameter(parameterName = "blockHeight", parameterType = "long", parameterDes = "The height of the currently packaged blocks")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象，包含两个key", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-        @Key(name = "stateRoot", description = "当前stateRoot"),
-        @Key(name = "txList", valueType = List.class, valueElement = String.class, description = "合约新生成的交易序列化字符串列表(可能有合约转账、合约共识、合约返回GAS), 版本8及以上只返回合约返回GAS交易")
+    @ResponseData(name = "Return value", description = "Return aMapObject, containing twokey", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+        @Key(name = "stateRoot", description = "currentstateRoot"),
+        @Key(name = "txList", valueType = List.class, valueElement = String.class, description = "List of newly generated transaction serialization strings for contracts(There may be a contract transfer、Contract consensus、Contract returnGAS), version8Only return the contract and aboveGAStransaction")
     }))
     public Response batchEnd(Map<String, Object> params) {
         try {
@@ -253,7 +253,7 @@ public class ContractCmd extends BaseCmd {
             resultMap.put("stateRoot", RPCUtil.encode(dto.getStateRoot()));
             resultMap.put("txList", resultTxDataList);
             resultMap.put("originTxList", dto.getResultOrginTxList());
-            // 存放未处理的交易
+            // Store unprocessed transactions
             resultMap.put("pendingTxHashList", pendingTxHashList);
             Log.info("[End Contract Batch] Gas total cost is [{}], packaging blockHeight is [{}], packaging StateRoot is [{}]", batchInfo.getGasCostTotal(), blockHeight, RPCUtil.encode(dto.getStateRoot()));
             return success(resultMap);
@@ -263,14 +263,14 @@ public class ContractCmd extends BaseCmd {
         }
     }
 
-    @CmdAnnotation(cmd = PACKAGE_BATCH_END, version = 1.0, description = "打包结束 - 通知当前批次结束并返回结果/batch end")
+    @CmdAnnotation(cmd = PACKAGE_BATCH_END, version = 1.0, description = "Packaging completed - Notify the end of the current batch and return the result/batch end")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
-            @Parameter(parameterName = "blockHeight", parameterType = "long", parameterDes = "当前打包的区块高度")
+            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "chainid"),
+            @Parameter(parameterName = "blockHeight", parameterType = "long", parameterDes = "The height of the currently packaged blocks")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象，包含两个key", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "stateRoot", description = "当前stateRoot"),
-            @Key(name = "txList", valueType = List.class, valueElement = String.class, description = "合约新生成的交易序列化字符串列表(可能有合约转账、合约共识、合约返回GAS), 版本8及以上只返回合约返回GAS交易")
+    @ResponseData(name = "Return value", description = "Return aMapObject, containing twokey", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "stateRoot", description = "currentstateRoot"),
+            @Key(name = "txList", valueType = List.class, valueElement = String.class, description = "List of newly generated transaction serialization strings for contracts(There may be a contract transfer、Contract consensus、Contract returnGAS), version8Only return the contract and aboveGAStransaction")
     }))
     public Response packageBatchEnd(Map<String, Object> params) {
         try {
@@ -300,7 +300,7 @@ public class ContractCmd extends BaseCmd {
             resultMap.put("stateRoot", RPCUtil.encode(dto.getStateRoot()));
             resultMap.put("txList", resultTxDataList);
             resultMap.put("originTxList", dto.getResultOrginTxList());
-            // 存放未处理的交易
+            // Store unprocessed transactions
             resultMap.put("pendingTxHashList", pendingTxHashList);
             Log.info("[End Package Contract Batch] Gas total cost is [{}], packaging blockHeight is [{}], packaging StateRoot is [{}]", batchInfo.getGasCostTotal(), blockHeight, RPCUtil.encode(dto.getStateRoot()));
             return success(resultMap);
@@ -319,7 +319,7 @@ public class ContractCmd extends BaseCmd {
 //            ChainManager.chainHandle(chainId);
 //            //List<String> txHexList = (List<String>) params.get("txHexList");
 //            /**
-//             *  暂无统一验证器
+//             *  There is currently no unified validator available
 //             */
 //            Map<String, Object> result = new HashMap<>(2);
 //            result.put(RPC_COLLECTION_RESULT_KEY, new ArrayList<>());
@@ -379,13 +379,13 @@ public class ContractCmd extends BaseCmd {
 //        }
 //    }
 
-    @CmdAnnotation(cmd = CONTRACT_OFFLINE_TX_HASH_LIST, version = 1.0, description = "返回指定区块中合约生成交易（合约返回GAS交易除外）的hash列表（合约新生成的交易除合约返回GAS交易外，不保存到区块中，合约模块保存了这些交易和指定区块的关系）/contract offline tx hash list")
+    @CmdAnnotation(cmd = CONTRACT_OFFLINE_TX_HASH_LIST, version = 1.0, description = "Return the contract generated transaction in the specified block（Contract returnGASExcluding transactions）ofhashlist（Newly generated transactions in the contract except for contract returnsGASExcept for transactions, they are not saved to the block. The contract module saves the relationship between these transactions and the specified block）/contract offline tx hash list")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
-        @Parameter(parameterName = "blockHash", parameterType = "String", parameterDes = "区块hash")
+        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "chainid"),
+        @Parameter(parameterName = "blockHash", parameterType = "String", parameterDes = "blockhash")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象，包含两个key", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-        @Key(name = "list", valueType = List.class, valueElement = String.class, description = "合约交易序列化字符串列表(可能有合约转账、合约共识)")
+    @ResponseData(name = "Return value", description = "Return aMapObject, containing twokey", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+        @Key(name = "list", valueType = List.class, valueElement = String.class, description = "Contract transaction serialization string list(There may be a contract transfer、Contract consensus)")
     }))
     public Response contractOfflineTxHashList(Map<String, Object> params) {
         try {
@@ -417,13 +417,13 @@ public class ContractCmd extends BaseCmd {
         }
     }
 
-    @CmdAnnotation(cmd = CONTRACT_OFFLINE_TX_LIST, version = 1.0, description = "返回指定区块中合约生成交易（合约返回GAS交易除外）的列表（合约新生成的交易除合约返回GAS交易外，不保存到区块中，合约模块保存了这些交易和指定区块的关系）/contract offline tx hash list")
+    @CmdAnnotation(cmd = CONTRACT_OFFLINE_TX_LIST, version = 1.0, description = "Return the contract generated transaction in the specified block（Contract returnGASExcluding transactions）List of（Newly generated transactions in the contract except for contract returnsGASExcept for transactions, they are not saved to the block. The contract module saves the relationship between these transactions and the specified block）/contract offline tx hash list")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
-        @Parameter(parameterName = "blockHash", parameterType = "String", parameterDes = "区块hash")
+        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "chainid"),
+        @Parameter(parameterName = "blockHash", parameterType = "String", parameterDes = "blockhash")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-        @Key(name = "txList", valueType = List.class, valueElement = String.class, description = "返回交易序列化数据字符串集合")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+        @Key(name = "txList", valueType = List.class, valueElement = String.class, description = "Returns a collection of transaction serialization data strings")
     }))
     public Response contractOfflineTxList(Map<String, Object> params) {
         try {
@@ -447,17 +447,17 @@ public class ContractCmd extends BaseCmd {
     }
 
     /**
-     * 其他模块向合约模块注册可被合约调用的命令
+     * Other modules register commands that can be called by the contract with the contract module
      *
-     * @see ModuleCmdRegisterDto#cmdRegisterList cmdRegisterList结构
+     * @see ModuleCmdRegisterDto#cmdRegisterList cmdRegisterListstructure
      */
-    @CmdAnnotation(cmd = REGISTER_CMD_FOR_CONTRACT, version = 1.0, description = "其他模块向合约模块注册可被合约调用的命令，注册后，可在合约代码内调用注册的命令/register cmd for contract")
+    @CmdAnnotation(cmd = REGISTER_CMD_FOR_CONTRACT, version = 1.0, description = "Other modules register commands that can be called by the contract with the contract module, and after registration, the registered commands can be called within the contract code/register cmd for contract")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
-        @Parameter(parameterName = "moduleCode", parameterType = "String", parameterDes = "模块代码"),
-        @Parameter(parameterName = "cmdRegisterList", parameterType = "List", parameterDes = "注册信息列表")
+        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "chainid"),
+        @Parameter(parameterName = "moduleCode", parameterType = "String", parameterDes = "Module code"),
+        @Parameter(parameterName = "cmdRegisterList", parameterType = "List", parameterDes = "Registration Information List")
     })
-    @ResponseData(description = "无特定返回值，没有错误即成功")
+    @ResponseData(description = "No specific return value, successful without errors")
     public Response registerCmdForContract(Map<String, Object> params) {
         try {
             String errorMsg = PARAMETER_ERROR.getMsg();
@@ -488,22 +488,22 @@ public class ContractCmd extends BaseCmd {
     }
 
     /**
-     * 共识奖励收益地址是合约地址时，会触发合约的_payable(String[][] args)方法，参数是节点收益地址明细
+     * When the consensus reward return address is the contract address, it will trigger the contract_payable(String[][] args)Method, parameter is node revenue address details
      * args[0] = new String[]{address, amount}
      * ...
      *
-     * @return 变化后的stateRoot
+     * @return After changesstateRoot
      */
-    @CmdAnnotation(cmd = TRIGGER_PAYABLE_FOR_CONSENSUS_CONTRACT, version = 1.0, description = "共识奖励收益地址是合约地址时，会触发合约的_payable(String[][] args)方法，参数是节点收益地址明细<br>args[0] = new String[]{address, amount}<br>...<br>/trigger payable for consensus contract")
+    @CmdAnnotation(cmd = TRIGGER_PAYABLE_FOR_CONSENSUS_CONTRACT, version = 1.0, description = "When the consensus reward return address is the contract address, it will trigger the contract_payable(String[][] args)Method, parameter is node revenue address details<br>args[0] = new String[]{address, amount}<br>...<br>/trigger payable for consensus contract")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
-        @Parameter(parameterName = "stateRoot", parameterType = "String", parameterDes = "当前的stateRoot"),
-        @Parameter(parameterName = "blockHeight", parameterType = "Long", parameterDes = "当前最新的区块高度"),
-        @Parameter(parameterName = "contractAddress", parameterType = "String", parameterDes = "合约地址"),
-        @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "当前打包区块中的CoinBase交易序列化字符串")
+        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "chainid"),
+        @Parameter(parameterName = "stateRoot", parameterType = "String", parameterDes = "CurrentstateRoot"),
+        @Parameter(parameterName = "blockHeight", parameterType = "Long", parameterDes = "The current latest block height"),
+        @Parameter(parameterName = "contractAddress", parameterType = "String", parameterDes = "Contract address"),
+        @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "The current packaging block containsCoinBaseTransaction serialization string")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-        @Key(name = "value", description = "变化后的stateRoot"),
+    @ResponseData(name = "Return value", description = "Return aMapobject", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+        @Key(name = "value", description = "After changesstateRoot"),
     }))
     public Response triggerPayableForConsensusContract(Map<String, Object> params) {
         try {
@@ -541,9 +541,9 @@ public class ContractCmd extends BaseCmd {
             }
 
             byte[] stateRootBytes = RPCUtil.decode(stateRoot);
-            // 获取VM执行器
+            // obtainVMActuator
             ProgramExecutor programExecutor = contractHelper.getProgramExecutor(chainId);
-            // 执行VM
+            // implementVM
             ProgramExecutor batchExecutor = programExecutor.begin(stateRootBytes);
 
             BigInteger agentValue = BigInteger.ZERO;
@@ -576,7 +576,7 @@ public class ContractCmd extends BaseCmd {
                     continue;
                 }
                 element = new String[]{AddressTool.getStringAddressByBytes(address), value.toString()};
-                // 当CoinBase交易中出现委托节点的合约地址时，触发这个合约的_payable(String[][] args)方法，参数为这个合约地址的收益金额 eg. [[address, amount]]
+                // WhenCoinBaseWhen the contract address of the entrusted node appears in the transaction, it triggers the contract_payable(String[][] args)Method, parameter is the revenue amount of this contract address eg. [[address, amount]]
                 if(AddressTool.validContractAddress(address, chainId)) {
                     depositArgs[0] = element;
                     result = this.callDepositContract(chainId, address, value, blockHeight, depositArgs, batchExecutor, stateRootBytes);
@@ -586,9 +586,9 @@ public class ContractCmd extends BaseCmd {
                 }
                 agentArgs[i++] = element;
             }
-            // 当这个区块的打包节点的收益地址是合约地址时，触发这个合约的_payable(String[][] args)方法，参数是这个区块的所有收益地址明细 eg. [[address, amount], [address, amount], ...]
+            // When the profit address of the packaging node in this block is the contract address, the contract is triggered_payable(String[][] args)Method, parameter is a detailed list of all revenue addresses for this block eg. [[address, amount], [address, amount], ...]
             if(hasAgentContract) {
-                // 把合约地址的收益放在参数列表的首位
+                // Place the revenue of the contract address at the top of the parameter list
                 agentArgs[0] = new String[]{contractAddress, agentValue.toString()};
                 result = this.callAgentContract(chainId, contractAddressBytes, agentValue, blockHeight, agentArgs, batchExecutor, stateRootBytes);
                 if(result.isFailed()) {
@@ -612,10 +612,10 @@ public class ContractCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = GET_CROSS_TOKEN_SYSTEM_CONTRACT, version = 1.0, description = "get cross token system contract")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid"),
     })
-    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", description = "代币跨链系统合约地址")
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "Token Cross Chain System Contract Address")
     }))
     public Response getCrossTokenSystemContract(Map<String, Object> params) {
         try {
@@ -656,7 +656,7 @@ public class ContractCmd extends BaseCmd {
 
     private Result callConsensusContract(int chainId, byte[] contractAddressBytes, BigInteger value, Long blockHeight, String[][] args,
                                          ProgramExecutor batchExecutor, byte[] stateRootBytes, boolean isAgentContract) {
-        // 验证此合约是否接受直接转账
+        // Verify if this contract accepts direct transfer
         ProgramMethod methodInfo = contractHelper.getMethodInfoByContractAddress(chainId, stateRootBytes,
                 BALANCE_TRIGGER_METHOD_NAME, BALANCE_TRIGGER_FOR_CONSENSUS_CONTRACT_METHOD_DESC, contractAddressBytes);
         if(methodInfo == null) {
@@ -668,7 +668,7 @@ public class ContractCmd extends BaseCmd {
         if(!methodInfo.isPayable()) {
             return Result.getFailed(CONTRACT_NO_ACCEPT_DIRECT_TRANSFER);
         }
-        // 组装VM执行数据
+        // assembleVMExecution data
         ProgramCall programCall = new ProgramCall();
         programCall.setContractAddress(contractAddressBytes);
         programCall.setSender(null);
@@ -694,7 +694,7 @@ public class ContractCmd extends BaseCmd {
             result = checkVmResultAndReturn(programResult.getErrorMessage(), result);
             return result;
         }
-        // 限制不能token转账、不能发送事件、不能内部转账、不能内部调用合约、不能产生新交易
+        // Restriction cannottokenTransfer、Unable to send event、Internal transfer not allowed、Cannot call contract internally、Cannot generate new transactions
         List<String> events = programResult.getEvents();
         List<ProgramTransfer> transfers = programResult.getTransfers();
         List<ProgramInternalCall> internalCalls = programResult.getInternalCalls();

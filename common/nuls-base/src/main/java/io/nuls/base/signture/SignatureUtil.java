@@ -46,7 +46,7 @@ import java.math.BigInteger;
 import java.util.*;
 
 /**
- * 交易签名工具类
+ * Transaction signature tool class
  * Transaction Signature Tool Class
  *
  * @author tag
@@ -58,13 +58,13 @@ public class SignatureUtil {
     private static final int MAIN_CHAIN_ID = 1;
 
     /**
-     * 验证交易中所有签名正确性
+     * Verify the correctness of all signatures in the transaction
      *
-     * @param chainId 当前链ID
-     * @param tx      交易
+     * @param chainId Current ChainID
+     * @param tx      transaction
      */
     public static boolean validateTransactionSignture(int chainId, Transaction tx) throws NulsException {
-        // 判断硬分叉,需要一个高度
+        // Determine hard fork,Need a height
         long hardForkingHeight = 878000;
         boolean forked = tx.getBlockHeight() <= 0 || tx.getBlockHeight() > hardForkingHeight;
         if (chainId != MAIN_CHAIN_ID) {
@@ -81,7 +81,7 @@ public class SignatureUtil {
                     throw new NulsException(new Exception("Transaction unsigned ！"));
                 }
                 if (forked) {
-                    //这里用硬分叉后的新逻辑
+                    //The new logic after using hard forks here
                     for (P2PHKSignature signature : transactionSignature.getP2PHKSignatures()) {
                         if (!ECKey.verify(tx.getHash().getBytes(), signature.getSignData().getSignBytes(), signature.getPublicKey())) {
                             throw new NulsException(new Exception("Transaction signature error !"));
@@ -129,9 +129,9 @@ public class SignatureUtil {
     }
 
     /**
-     * 跨链交易验证签名
+     * Cross chain transaction verification signature
      *
-     * @param tx 交易
+     * @param tx transaction
      */
     public static boolean ctxSignatureValid(int chainId, Transaction tx) throws NulsException {
         if (tx.getTransactionSignature() == null || tx.getTransactionSignature().length == 0) {
@@ -167,9 +167,9 @@ public class SignatureUtil {
     }
 
     /**
-     * 跨链交易验证签名
+     * Cross chain transaction verification signature
      *
-     * @param tx 交易
+     * @param tx transaction
      */
     public static boolean validateCtxSignture(Transaction tx) throws NulsException {
         if (tx.getTransactionSignature() == null || tx.getTransactionSignature().length == 0) {
@@ -189,7 +189,7 @@ public class SignatureUtil {
     }
 
     /**
-     * 验证数据签名
+     * Verify data signature
      *
      * @param digestBytes
      * @param p2PHKSignature
@@ -207,9 +207,9 @@ public class SignatureUtil {
     }
 
     /**
-     * 判断交易是否存在某地址
+     * Determine if a certain address exists in the transaction
      *
-     * @param tx 交易
+     * @param tx transaction
      */
     public static boolean containsAddress(Transaction tx, byte[] address, int chainId) throws NulsException {
         Set<String> addressSet = getAddressFromTX(tx, chainId);
@@ -220,9 +220,9 @@ public class SignatureUtil {
     }
 
     /**
-     * 获取交易签名地址
+     * Obtain transaction signature address
      *
-     * @param tx 交易
+     * @param tx transaction
      */
     public static Set<String> getAddressFromTX(Transaction tx, int chainId) throws NulsException {
         Set<String> addressSet = new HashSet<>();
@@ -257,7 +257,7 @@ public class SignatureUtil {
     }
 
     /**
-     *  验证签名（不包含多签），如果签名验证通过则返回签名中的地址
+     *  Verify signature（Excluding multiple signatures）If the signature verification is successful, return the address in the signature
      * @param chainId
      * @param data
      * @param signatureBytes
@@ -295,7 +295,7 @@ public class SignatureUtil {
     }
 
     /**
-     * 从签名中提取地址列表（不验证签名）
+     * Extract address list from signature（Do not verify signature）
      * @param chainId
      * @param signatureBytes
      * @return
@@ -324,10 +324,10 @@ public class SignatureUtil {
         return addressSet;
     }
     /**
-     * 生成交易TransactionSignture
+     * Generate transactionsTransactionSignture
      *
-     * @param tx         交易
-     * @param signEckeys 需要生成普通签名的秘钥
+     * @param tx         transaction
+     * @param signEckeys A key that needs to generate a regular signature
      */
     public static void createTransactionSignture(Transaction tx, List<ECKey> signEckeys) throws IOException {
         if (signEckeys == null || signEckeys.size() == 0) {
@@ -347,10 +347,10 @@ public class SignatureUtil {
     }
 
     /**
-     * 生成交易多个传统签名（多地址转账可能会用到）
+     * Generate multiple traditional signatures for transactions（Multiple address transfers may require）
      *
-     * @param tx     交易
-     * @param eckeys 秘钥列表
+     * @param tx     transaction
+     * @param eckeys Key List
      */
     public static List<P2PHKSignature> createSignaturesByEckey(Transaction tx, List<ECKey> eckeys) {
         List<P2PHKSignature> signatures = new ArrayList<>();
@@ -369,30 +369,30 @@ public class SignatureUtil {
     }
 
     /**
-     * 生成交易的签名传统
+     * Traditional signature generation for transactions
      *
-     * @param tx     交易
-     * @param priKey 私钥
+     * @param tx     transaction
+     * @param priKey Private key
      */
     public static P2PHKSignature createSignatureByPriKey(Transaction tx, String priKey) {
         ECKey ecKey = ECKey.fromPrivate(new BigInteger(1, HexUtil.decode(priKey)));
         P2PHKSignature p2PHKSignature = new P2PHKSignature();
         p2PHKSignature.setPublicKey(ecKey.getPubKey());
-        //用当前交易的hash和账户的私钥账户
+        //Using the current transaction'shashAnd the private key account of the account
         p2PHKSignature.setSignData(signDigest(tx.getHash().getBytes(), ecKey));
         return p2PHKSignature;
     }
 
     /**
-     * 生成交易的签名传统
+     * Traditional signature generation for transactions
      *
-     * @param tx    交易
-     * @param ecKey 秘钥
+     * @param tx    transaction
+     * @param ecKey Secret key
      */
     public static P2PHKSignature createSignatureByEckey(Transaction tx, ECKey ecKey) {
         P2PHKSignature p2PHKSignature = new P2PHKSignature();
         p2PHKSignature.setPublicKey(ecKey.getPubKey());
-        //用当前交易的hash和账户的私钥账户
+        //Using the current transaction'shashAnd the private key account of the account
         p2PHKSignature.setSignData(signDigest(tx.getHash().getBytes(), ecKey));
         return p2PHKSignature;
     }
@@ -401,23 +401,23 @@ public class SignatureUtil {
     public static P2PHKSignature createSignatureByEckey(NulsHash hash, ECKey ecKey) {
         P2PHKSignature p2PHKSignature = new P2PHKSignature();
         p2PHKSignature.setPublicKey(ecKey.getPubKey());
-        //用当前交易的hash和账户的私钥账户
+        //Using the current transaction'shashAnd the private key account of the account
         p2PHKSignature.setSignData(signDigest(hash.getBytes(), ecKey));
         return p2PHKSignature;
     }
 
     /**
-     * 生成多个解锁脚本
+     * Generate multiple unlock scripts
      *
-     * @param signtures 签名列表
-     * @param pubkeys   公钥列表
+     * @param signtures Signature List
+     * @param pubkeys   Public Key List
      */
     public static List<Script> createInputScripts(List<byte[]> signtures, List<byte[]> pubkeys) {
         List<Script> scripts = new ArrayList<>();
         if (signtures == null || pubkeys == null || signtures.size() != pubkeys.size()) {
             return null;
         }
-        //生成解锁脚本
+        //Generate unlock script
         for (int i = 0; i < signtures.size(); i++) {
             scripts.add(createInputScript(signtures.get(i), pubkeys.get(i)));
         }
@@ -425,10 +425,10 @@ public class SignatureUtil {
     }
 
     /**
-     * 生成单个解锁脚本
+     * Generate a single unlock script
      *
-     * @param signture 签名列表
-     * @param pubkey   公钥列表
+     * @param signture Signature List
+     * @param pubkey   Public Key List
      */
     public static Script createInputScript(byte[] signture, byte[] pubkey) {
         Script script = null;
@@ -439,7 +439,7 @@ public class SignatureUtil {
     }
 
     /**
-     * 生成单个鎖定脚本
+     * Generate a single locking script
      */
     public static Script createOutputScript(byte[] address) {
         Script script = null;
@@ -456,14 +456,14 @@ public class SignatureUtil {
     }
 
     /**
-     * 生成交易的锁定脚本
+     * Generate locking scripts for transactions
      *
-     * @param tx 交易
+     * @param tx transaction
      */
-    //TODO (修改Transaction引起的编译错误)
+    //TODO (modifyTransactionCompilation errors caused by)
 /*    public static boolean createOutputScript(Transaction tx) {
         CoinData coinData = tx.getCoinData();
-        //生成锁定脚本
+        //Generate lock script
         for (Coin coin : coinData.getTo()) {
             Script scriptPubkey = null;
             byte[] toAddr = coin.getAddress();
@@ -480,32 +480,32 @@ public class SignatureUtil {
     }*/
 
     /**
-     * 生成交易的脚本（多重签名，P2SH）
+     * Script for generating transactions（Multiple signatures,P2SH）
      *
-     * @param signtures 签名列表
-     * @param pubkeys   公钥列表
+     * @param signtures Signature List
+     * @param pubkeys   Public Key List
      */
     public static Script createP2shScript(List<byte[]> signtures, List<byte[]> pubkeys, int m) {
         Script scriptSig = null;
-        //生成赎回脚本
+        //Generate redemption script
         Script redeemScript = ScriptBuilder.createByteNulsRedeemScript(m, pubkeys);
-        //根据赎回脚本创建解锁脚本
+        //Create an unlock script based on the redemption script
         scriptSig = ScriptBuilder.createNulsP2SHMultiSigInputScript(signtures, redeemScript);
         return scriptSig;
     }
 
 
     /**
-     * 验证的脚本（多重签名，P2SH）
+     * Verified script（Multiple signatures,P2SH）
      *
-     * @param digestBytes 验证的签名数据
-     * @param chunks      需要验证的脚本
+     * @param digestBytes Verified signature data
+     * @param chunks      Script that needs to be verified
      */
     public static boolean validScriptSign(byte[] digestBytes, List<ScriptChunk> chunks) {
         if (chunks == null || chunks.size() < 2) {
             return false;
         }
-        //如果脚本是以OP_0开头则代表该脚本为多重签名/P2SH脚本
+        //If the script is written inOP_0The beginning represents that the script is multi signed/P2SHscript
         if (chunks.get(0).opcode == ScriptOpCodes.OP_0) {
             byte[] redeemByte = chunks.get(chunks.size() - 1).data;
             Script redeemScript = new Script(redeemByte);
@@ -541,16 +541,16 @@ public class SignatureUtil {
 
 
     /**
-     * 从赎回脚本中获取需要多少人签名
+     * How many signatures are required to obtain from the redemption script
      *
-     * @param redeemScript 赎回脚本
+     * @param redeemScript Redemption script
      */
     public static int getM(Script redeemScript) {
         return Script.decodeFromOpN(redeemScript.getChunks().get(0).opcode);
     }
 
     /**
-     * 获取脚本中的公钥
+     * Get the public key from the script
      */
 /*    public static String getScriptAddress(List<ScriptChunk> chunks) {
         if (chunks.get(0).opcode == ScriptOpCodes.OP_0) {
@@ -564,10 +564,10 @@ public class SignatureUtil {
     }*/
 
     /**
-     * 多重签名脚本签名验证
+     * Multi signature script signature verification
      *
-     * @param digestBytes 验证的签名数据
-     * @param signtures   签名列表
+     * @param digestBytes Verified signature data
+     * @param signtures   Signature List
      */
     public static boolean validMultiScriptSign(byte[] digestBytes, LinkedList<byte[]> signtures, LinkedList<byte[]> pubkeys) {
         while (signtures.size() > 0) {
@@ -583,10 +583,10 @@ public class SignatureUtil {
     }
 
     /**
-     * 生成交易签名
+     * Generate transaction signature
      *
-     * @param digest 需要签名的交易数据
-     * @param ecKey  签名的私钥
+     * @param digest Transaction data that requires signature
+     * @param ecKey  Signature private key
      */
     public static NulsSignData signDigest(byte[] digest, ECKey ecKey) {
         byte[] signbytes = ecKey.sign(digest);

@@ -4,7 +4,7 @@ package io.nuls.base.api.provider.contract.facade;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-23 14:33
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class CreateContractReq extends Contract {
 

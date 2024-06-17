@@ -13,11 +13,11 @@ public class CmRuntimeInfo {
     public static final String MID_LINE = "-";
 
     /**
-     * 主网资产链id
+     * Main network asset chainid
      */
     public static String nulsChainId;
     /**
-     * 主网资产id
+     * Main network assetsid
      */
     public static String nulsAssetId;
 

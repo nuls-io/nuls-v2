@@ -31,7 +31,7 @@ import io.nuls.consensus.model.bo.tx.txdata.Agent;
 import java.util.Comparator;
 
 /**
- * 节点对比工具类
+ * Node comparison tool class
  * Node Contrast Tool Class
  *
  * @author tag

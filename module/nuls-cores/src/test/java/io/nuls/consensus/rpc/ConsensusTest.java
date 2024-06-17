@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 共识模块相关配置操作测试
+ * Consensus module related configuration operation test
  * Configuration Operation Test of Consensus Module
  *
  * @author tag
@@ -35,7 +35,7 @@ public class ConsensusTest {
 
     @Test
     /**
-     * 获取当前轮次信息
+     * Obtain current round information
      * */
     public void getRoundInfo() throws Exception{
         Map<String,Object> params = new HashMap<>();
@@ -46,7 +46,7 @@ public class ConsensusTest {
 
     @Test
     /**
-     * 修改节点共识状态
+     * Modify node consensus status
      * */
     public void updateAgentConsensusStatus()throws Exception{
         Map<String,Object> params = new HashMap<>();
@@ -57,7 +57,7 @@ public class ConsensusTest {
 
     @Test
     /**
-     * 修改节点打包状态
+     * Modify node packaging status
      * */
     public void updateAgentStatus()throws Exception{
         Map<String,Object> params = new HashMap<>();
@@ -69,7 +69,7 @@ public class ConsensusTest {
 
     @Test
     /**
-     * 获取全网共识信息
+     * Obtain consensus information from the entire network
      * */
     public void getWholeInfo()throws Exception{
         Map<String,Object> params = new HashMap<>();
@@ -80,7 +80,7 @@ public class ConsensusTest {
 
     @Test
     /**
-     * 获取指定账户的共识信息
+     * Obtain consensus information for the specified account
      * */
     public void getInfo()throws Exception{
         Address agentAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("a5WhgP1iu2Qwt5CiaPTV4Fe2Xqmfd".getBytes()));
@@ -93,7 +93,7 @@ public class ConsensusTest {
 
     @Test
     /**
-     * 获取全网或指定账户惩罚信息
+     * Obtain penalty information for the entire network or specified account
      * */
     public void  getPunishList()throws Exception{
         Map<String,Object>params = new HashMap<>();
@@ -107,11 +107,11 @@ public class ConsensusTest {
     }
 
     /**
-     * 节点创建到打包数据准备
+     * Node creation to packaging data preparation
      * */
     @Test
     public void packing(){
-        //1.创建账户
+        //1.Create an account
         List<String> accountList;
         try {
             Map<String, Object> params = new HashMap<>();
@@ -129,7 +129,7 @@ public class ConsensusTest {
             }
             System.out.println("accountList:"+accountList);
 
-            //2.创建节点交易创建
+            //2.Create node transactions
             String packingAddress = accountList.get(0);
             String agentAddress = accountList.get(1);
             String rewardAddress = accountList.get(2);
@@ -146,7 +146,7 @@ public class ConsensusTest {
             String caTxHex = (String)caResult.get("txHex");
             System.out.println("createAgent:"+caResp.getResponseData());
 
-            //3.创建节点交易提交
+            //3.Create node transaction submission
             Map<String,Object>caTxCommit = new HashMap<>();
             caTxCommit.put("chainId",2);
             BlockHeader blockHeader = new BlockHeader();
@@ -159,7 +159,7 @@ public class ConsensusTest {
             System.out.println("createAgentCommit:"+caCommitResp.getResponseData());
 
 
-            //4.委托节点交易创建
+            //4.Entrust node transaction creation
             String depositAddress = accountList.get(3);
             Map<String,Object> dpParams = new HashMap<>();
             dpParams.put(Constants.CHAIN_ID,2);
@@ -171,7 +171,7 @@ public class ConsensusTest {
             String dpTxHex = (String)dpResult.get("txHex");
             System.out.println("createDeposit"+cmdResp.getResponseData());
 
-            //5.委托交易提交
+            //5.Entrusted transaction submission
             Map<String,Object>dpTxCommitParams = new HashMap<>();
             dpTxCommitParams.put(Constants.CHAIN_ID,2);
             BlockHeader blockHeader1 = new BlockHeader();

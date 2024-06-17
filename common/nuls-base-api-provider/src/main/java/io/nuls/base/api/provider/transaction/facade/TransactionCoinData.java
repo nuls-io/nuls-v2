@@ -5,27 +5,27 @@ import java.math.BigInteger;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-21 16:40
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class TransactionCoinData {
 
     /**
-     * byte[24] 账户地址
+     * byte[24] Account address
      */
     protected String address;
 
     /**
-     * uint16 资产发行链的id
+     * uint16 Asset issuance chainid
      */
     protected int assetsChainId;
 
     /**
-     * uint16 资产id
+     * uint16 assetid
      */
     protected int assetsId;
 
     /**
-     * uint128 数量
+     * uint128 quantity
      */
     protected BigInteger amount;
 

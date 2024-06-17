@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-20 11:48
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public abstract class SyncRemoteTestCase<T> extends BaseTestCase<Boolean, RemoteTestParam<T>> {
 
@@ -41,7 +41,7 @@ public abstract class SyncRemoteTestCase<T> extends BaseTestCase<Boolean, Remote
         Result<String> nodes = networkProvider.getNodes();
         Config config = SpringLiteContext.getBean(Config.class);
         if(!config.isMaster()){
-            throw new RuntimeException("非master节点不允许进行远程调用");
+            throw new RuntimeException("wrongmasterNode does not allow remote calls");
         }
         List<String> nodeList;
         if(StringUtils.isNotBlank(config.getTestNodeList())){
@@ -65,7 +65,7 @@ public abstract class SyncRemoteTestCase<T> extends BaseTestCase<Boolean, Remote
 //        try {
 //            req.setParam(JSONUtils.obj2json(param));
 //        } catch (JsonProcessingException e) {
-//            throw new TestFailException("序列化远程测试参数错误", e);
+//            throw new TestFailException("Serializing remote test parameters error", e);
 //        }
             RestFulUtils.getInstance().setServerUri("http://" + node.split(":")[0] + ":" + config.getHttpPort() + "/api");
             Log.debug("call {} remote case:{}",node,req);
@@ -88,7 +88,7 @@ public abstract class SyncRemoteTestCase<T> extends BaseTestCase<Boolean, Remote
             if(!sync){
                 return false;
             }
-            Utils.success(depthSpace(depth)+"节点【"+node+"】测试通过");
+            Utils.success(depthSpace(depth)+"node【"+node+"】Test passed");
         }
         return true;
     }

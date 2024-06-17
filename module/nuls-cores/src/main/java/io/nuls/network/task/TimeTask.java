@@ -29,7 +29,7 @@ import io.nuls.network.manager.TimeManager;
 import io.nuls.network.utils.LoggerUtil;
 
 /**
- * 时间服务类：用于同步网络标准时间
+ * Time service category：Used to synchronize network standard time
  * Time service class:Used to synchronize network standard time.
  *
  * @author vivi & lan
@@ -38,7 +38,7 @@ public class TimeTask implements Runnable {
     TimeManager timeManager = TimeManager.getInstance();
 
     /**
-     * 循环调用同步网络时间方法
+     * Loop calling synchronous network time method
      * Loop call synchronous network time method.
      */
     @Override
@@ -51,7 +51,7 @@ public class TimeTask implements Runnable {
                 LoggerUtil.COMMON_LOG.debug("local time changed ：{}", newTime - lastTime);
                 timeManager.syncWebTime();
             } else if (TimeManager.currentTimeMillis() - TimeManager.lastSyncTime > TimeManager.NET_REFRESH_TIME) {
-                //每隔一段时间更新网络时间
+                //Update network time periodically
                 timeManager.syncWebTime();
             }
             lastTime = newTime;

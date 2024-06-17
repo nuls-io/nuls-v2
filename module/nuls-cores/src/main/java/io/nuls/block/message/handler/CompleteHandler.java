@@ -33,11 +33,11 @@ import io.nuls.core.log.logback.NulsLogger;
 import static io.nuls.block.constant.CommandConstant.COMPLETE_MESSAGE;
 
 /**
- * 处理收到的{@link CompleteMessage},用于区块的同步
+ * Process received{@link CompleteMessage},Used for block synchronization
  *
  * @author captain
  * @version 1.0
- * @date 18-11-14 下午4:23
+ * @date 18-11-14 afternoon4:23
  */
 @Component("CompleteHandlerV1")
 public class CompleteHandler implements MessageProcessor {

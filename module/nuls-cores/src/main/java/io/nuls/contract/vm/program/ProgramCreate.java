@@ -36,48 +36,48 @@ import static io.nuls.contract.util.ContractUtil.argToString;
 public class ProgramCreate {
 
     /**
-     * 当前块编号
+     * Current block number
      */
     private long number;
 
     /**
-     * 创建者
+     * creator
      */
     private byte[] sender;
     private byte[] senderPublicKey;
 
     /**
-     * 交易附带的货币量
+     * The amount of currency attached to the transaction
      */
     private BigInteger value;
 
     /**
-     * 最大Gas消耗
+     * maximumGasconsume
      */
     private long gasLimit;
 
     /**
-     * 执行合约单价
+     * Execution contract unit price
      */
     private long price;
 
     /**
-     * 合约地址
+     * Contract address
      */
     private byte[] contractAddress;
 
     /**
-     * 合约代码
+     * Contract code
      */
     private byte[] contractCode;
 
     /**
-     * 参数列表
+     * parameter list
      */
     private String[][] args;
 
     /**
-     * 是否估计Gas
+     * Is it estimatedGas
      */
     private boolean estimateGas;
     // add by pierre at 2022/6/1 p14

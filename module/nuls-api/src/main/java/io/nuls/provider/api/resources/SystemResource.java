@@ -61,21 +61,21 @@ public class SystemResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult desc() {
-        return RpcClientResult.getSuccess("支持两种方式，restful - http://{ip}:{port}/api & jsonrpc - http://{ip}:{port}/jsonrpc");
+        return RpcClientResult.getSuccess("Supports two methods,restful - http://{ip}:{port}/api & jsonrpc - http://{ip}:{port}/jsonrpc");
     }
 
     @GET
     @Path("api/info")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "获取本链相关信息", order = 001)
-    @ResponseData(name = "返回值", description = "返回本链信息", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "chainId", description = "本链的ID"),
-            @Key(name = "assetId", description = "本链默认主资产的ID"),
-            @Key(name = "inflationAmount", description = "本链默认主资产的初始数量"),
-            @Key(name = "agentChainId", description = "本链共识资产的链ID"),
-            @Key(name = "agentAssetId", description = "本链共识资产的ID"),
-            @Key(name = "addressPrefix", description = "本链地址前缀"),
-            @Key(name = "symbol", description = "本链主资产符号")
+    @ApiOperation(description = "Obtain information related to this chain", order = 001)
+    @ResponseData(name = "Return value", description = "Return this chain information", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "chainId", description = "This chain'sID"),
+            @Key(name = "assetId", description = "This chain defaults to the main asset'sID"),
+            @Key(name = "inflationAmount", description = "The initial quantity of the default main asset in this chain"),
+            @Key(name = "agentChainId", description = "The chain of consensus assets in this chainID"),
+            @Key(name = "agentAssetId", description = "The consensus assets of this chainID"),
+            @Key(name = "addressPrefix", description = "Prefix for this chain address"),
+            @Key(name = "symbol", description = "Main asset symbol of this chain")
     }))
     public RpcClientResult info() {
         Result<Map> result = blockTools.getInfo(config.getChainId());

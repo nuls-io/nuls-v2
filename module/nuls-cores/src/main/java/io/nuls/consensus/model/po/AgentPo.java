@@ -38,7 +38,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 
 /**
- * 存入数据库的节点信息类
+ * Node information stored in the database
  * Node information class stored in database
  *
  * @author tag

@@ -107,7 +107,7 @@ public class CallContractProcessorV13 implements TransactionProcessor {
             CallContractData call;
             for (Transaction tx : txs) {
                 if (tx.getType() == TxType.CROSS_CHAIN) {
-                    // add by pierre at 2019-12-01 处理type10交易的业务回滚, 需要协议升级 done
+                    // add by pierre at 2019-12-01 handletype10Business rollback of transactions, Protocol upgrade required done
                     if(ProtocolGroupManager.getCurrentVersion(chainId) < ContractContext.UPDATE_VERSION_V250) {
                         continue;
                     }

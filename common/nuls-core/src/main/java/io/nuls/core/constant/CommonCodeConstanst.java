@@ -3,7 +3,7 @@ package io.nuls.core.constant;
 /**
  * @Author: zhoulijun
  * @Time: 2019-04-18 17:48
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public interface CommonCodeConstanst {
 

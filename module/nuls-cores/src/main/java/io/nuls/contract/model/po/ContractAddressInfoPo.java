@@ -41,7 +41,7 @@ public class ContractAddressInfoPo {
     private long createTime;
     private long blockHeight;
     private boolean acceptDirectTransfer;
-    //token类型, 0 - 非token, 1 - NRC20, 2 - NRC721
+    //tokentype, 0 - wrongtoken, 1 - NRC20, 2 - NRC721
     private int tokenType;
     private boolean isNrc20;
     private String nrc20TokenName;

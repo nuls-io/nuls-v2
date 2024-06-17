@@ -8,34 +8,34 @@ import java.math.BigInteger;
  * @Author: zhoulijun
  * @Time: 2019-03-11 09:25
  * @Description:
- * 通过别名转账
+ * Transfer through alias
  * transfer by account alias
  */
 public class TransferByAliasReq extends BaseReq {
 
     /**
-     * 发出资产账户别名
+     * Send asset account alias
      */
     private String alias;
 
     /**
-     * 接收地址
+     * Receiving address
      */
     private String address;
 
     /**
-     * 转账金额
+     * Transfer amount
      */
     private BigInteger amount;
 
     /**
-     * 账户密码
+     * Account password
      *
      */
     private String password;
 
     /**
-     * 备注
+     * Remarks
      */
     private String remark;
 

@@ -31,24 +31,24 @@ import io.nuls.core.rpc.model.ApiModelProperty;
  * @author: PierreLuo
  * @date: 2018/8/19
  */
-@ApiModel(name = "合约代币详情")
+@ApiModel(name = "Contract Token Details")
 public class ContractTokenInfoDto {
 
-    @ApiModelProperty(description = "合约地址")
+    @ApiModelProperty(description = "Contract address")
     private String contractAddress;
-    @ApiModelProperty(description = "token名称")
+    @ApiModelProperty(description = "tokenname")
     private String name;
-    @ApiModelProperty(description = "token符号")
+    @ApiModelProperty(description = "tokensymbol")
     private String symbol;
-    @ApiModelProperty(description = "token可用数量")
+    @ApiModelProperty(description = "tokenAvailable quantity")
     private String amount;
-    @ApiModelProperty(description = "token锁定数量")
+    @ApiModelProperty(description = "tokenLock quantity")
     private String lockAmount;
-    @ApiModelProperty(description = "token支持的小数位数")
+    @ApiModelProperty(description = "tokenSupported Decimal Places")
     private long decimals;
-    @ApiModelProperty(description = "合约创建时的区块高度")
+    @ApiModelProperty(description = "Block height during contract creation")
     private long blockHeight;
-    @ApiModelProperty(description = "合约状态(0-不存在, 1-正常, 2-终止)")
+    @ApiModelProperty(description = "Contract status(0-Not present, 1-normal, 2-termination)")
     private int status;
 
     public String getContractAddress() {

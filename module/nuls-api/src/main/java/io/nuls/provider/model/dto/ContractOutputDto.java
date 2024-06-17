@@ -33,9 +33,9 @@ import io.nuls.core.rpc.model.ApiModelProperty;
  */
 @ApiModel
 public class ContractOutputDto {
-    @ApiModelProperty(description = "转入地址")
+    @ApiModelProperty(description = "Transfer address")
     private String to;
-    @ApiModelProperty(description = "转入金额")
+    @ApiModelProperty(description = "Transfer amount")
     private String value;
 
     public String getTo() {

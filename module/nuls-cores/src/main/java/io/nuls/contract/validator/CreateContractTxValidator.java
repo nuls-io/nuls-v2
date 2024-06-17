@@ -69,7 +69,7 @@ public class CreateContractTxValidator {
         CoinData coinData = tx.getCoinDataInstance();
         List<CoinFrom> fromList = coinData.getFrom();
         List<CoinTo> toList = coinData.getTo();
-        // 检查 toList, 除了黑洞地址外，其他不被允许 000000000000000000000000000000000000000000000000000000000000000000
+        // inspect toList, Except for the black hole address, others are not allowed 000000000000000000000000000000000000000000000000000000000000000000
         int toListSize = toList.size();
         do {
             if(toListSize == 0) {

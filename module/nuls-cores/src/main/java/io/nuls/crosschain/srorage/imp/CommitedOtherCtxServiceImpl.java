@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 已打包的其他链签名拜占庭通过的交易数据库操作相关实现类
+ * Implementation classes related to transaction database operations passed by Byzantium for other packaged chain signatures
  * Other packaged chain signatures Byzantine-approved transactions
  *
  * @author  tag

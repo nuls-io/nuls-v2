@@ -29,7 +29,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 
 /**
- * 远程调用的方法的结果
+ * The result of a method called remotely
  * Result of a remotely invoked method
  *
  * @author tangyi
@@ -84,7 +84,7 @@ public class Response {
     private String ResponseErrorCode;
 
     /**
-     * 回复是否正确 / Whether the response is correct
+     * Is the reply correct / Whether the response is correct
      *
      * @return boolean
      */

@@ -34,7 +34,7 @@ import java.util.List;
  */
 public interface ContractAddressStorageService {
     /**
-     * 保存合约地址以及创建合约的交易hash
+     * Save the contract address and create transactions for the contracthash
      *
      * @param account
      * @param hash
@@ -43,7 +43,7 @@ public interface ContractAddressStorageService {
     Result saveContractAddress(int chainId, byte[] contractAddressBytes, ContractAddressInfoPo info);
 
     /**
-     * 获取创建合约的合约信息 - 创建者、创建交易hash、创建时间
+     * Obtain contract information for creating contracts - creator、Create transactionhash、Creation time
      *
      * @param contractAddressBytes
      * @return
@@ -51,7 +51,7 @@ public interface ContractAddressStorageService {
     Result<ContractAddressInfoPo> getContractAddressInfo(int chainId, byte[] contractAddressBytes);
 
     /**
-     * 删除合约地址
+     * Delete contract address
      *
      * @param contractAddressBytes
      * @return
@@ -59,7 +59,7 @@ public interface ContractAddressStorageService {
     Result deleteContractAddress(int chainId, byte[] contractAddressBytes) throws Exception;
 
     /**
-     * 根据地址检查是否存在这个合约地址
+     * Check if this contract address exists based on the address
      *
      * @param contractAddressBytes
      * @return
@@ -67,14 +67,14 @@ public interface ContractAddressStorageService {
     boolean isExistContractAddress(int chainId, byte[] contractAddressBytes);
 
     /**
-     * 根据创建者获取合约列表
+     * Obtain contract list based on creator
      *
      * @return
      */
     Result<List<ContractAddressInfoPo>> getContractInfoList(int chainId, byte[] creater);
 
     /**
-     * 获取全网所有合约
+     * Obtain all contracts across the entire network
      *
      * @return
      */

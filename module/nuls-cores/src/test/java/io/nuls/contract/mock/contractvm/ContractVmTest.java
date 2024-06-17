@@ -47,208 +47,208 @@ import java.math.BigInteger;
 import java.util.List;
 
 /**
- * 测试场景:
- *  1. 单合约测试，修改一个值a=2
- *  期望返回值a=2，调用view方法期望相同的值a=2
+ * Test scenario:
+ *  1. Single contract testing, modifying a valuea=2
+ *  Expected return valuea=2, callingviewMethod expects the same valuea=2
  *
- *  2. 单合约测试，同一个方法内，修改一个值a两次a=2，a=3，
- *  期望返回值a=3，调用view方法期望相同的值a=3
+ *  2. Single contract testing, modifying a value within the same methodaTwicea=2,a=3,
+ *  Expected return valuea=3, callingviewMethod expects the same valuea=3
  *
- *  3. 单合约测试，方法内，修改值为a=2，方法内调用私有方法，私有方法修改值为a=3，
- *  期望返回值a=3，调用view方法期望相同的值a=3
+ *  3. Single contract testing, within the method, modify the value toa=2Calling private methods within a method, modifying the value of the private method toa=3,
+ *  Expected return valuea=3, callingviewMethod expects the same valuea=3
  *
- *  4. 双合约测试，A合约有一个值a=1，A调用B，执行：B合约调用A合约查询a，使B局部变量t=a, B合约调用A合约修改a=t+5
- *  期望返回值a=6，调用view方法期望a=6
+ *  4. Dual contract testing,AThe contract has a valuea=1,AcallB, execute：BContract CallAContract inquirya, makeBlocal variablet=a, BContract CallAContract modificationa=t+5
+ *  Expected return valuea=6, callingviewMethod Expectationsa=6
  *
- *  5. 双合约测试，A合约有一个值a=1，A调用B，执行：B合约调用A合约查询a，使B局部变量t1=a, B合约调用A合约修改a=t1+5
- *  B合约调用A合约查询a，使B局部变量t2=a, B合约调用A合约修改a=t2+3
- *  期望返回值a=9，调用view方法期望a=9
+ *  5. Dual contract testing,AThe contract has a valuea=1,AcallB, execute：BContract CallAContract inquirya, makeBlocal variablet1=a, BContract CallAContract modificationa=t1+5
+ *  BContract CallAContract inquirya, makeBlocal variablet2=a, BContract CallAContract modificationa=t2+3
+ *  Expected return valuea=9, callingviewMethod Expectationsa=9
  *
- *  6. 双合约测试，A合约有一个值a=1，A调用B，执行：B合约调用A合约查询a，使B局部变量t1=a, B合约调用A合约修改a=t1+5
- *  B合约调用A合约查询a，使B局部变量t2=a, B合约调用A合约修改a=t2+3, B合约返回66给A
- *  A合约修改 a = a + 66 + 1
- *  期望返回值a=76，调用view方法期望a=76
+ *  6. Dual contract testing,AThe contract has a valuea=1,AcallB, execute：BContract CallAContract inquirya, makeBlocal variablet1=a, BContract CallAContract modificationa=t1+5
+ *  BContract CallAContract inquirya, makeBlocal variablet2=a, BContract CallAContract modificationa=t2+3, BContract return66toA
+ *  AContract modification a = a + 66 + 1
+ *  Expected return valuea=76, callingviewMethod Expectationsa=76
  *
- *  7. 双合约测试，A合约修改一个值a=2，A调用B，执行：B合约调用A合约查询a，B局部变量t1=a，B合约调用A合约修改a=t1+5
- *  B调用A查询a，B局部变量t2=a+1，B返回t2给A，A修改a=t2+a
- *  期望返回值a=15，调用view方法期望a=15
+ *  7. Dual contract testing,AContract modification of a valuea=2,AcallB, execute：BContract CallAContract inquirya,Blocal variablet1=a,BContract CallAContract modificationa=t1+5
+ *  BcallAquerya,Blocal variablet2=a+1,Breturnt2toA,Amodifya=t2+a
+ *  Expected return valuea=15, callingviewMethod Expectationsa=15
  *
- *  8. 双合约测试，A合约修改一个值a=2，A调用B，执行：B合约调用A合约查询a，B局部变量t1=a，B合约调用A合约修改a=t1+5
- *  B调用A查询a，B局部变量t2=a+1，B合约调用A合约修改a=t2+3, B返回t2给A，A修改a=t2+a
- *  期望返回值a=19，调用view方法期望a=19
+ *  8. Dual contract testing,AContract modification of a valuea=2,AcallB, execute：BContract CallAContract inquirya,Blocal variablet1=a,BContract CallAContract modificationa=t1+5
+ *  BcallAquerya,Blocal variablet2=a+1,BContract CallAContract modificationa=t2+3, Breturnt2toA,Amodifya=t2+a
+ *  Expected return valuea=19, callingviewMethod Expectationsa=19
  *
- *  9. 双合约测试，A合约有一个值a=1，A调用B查询b=1，A修改a=a+b
- *  期望返回值a=2，调用view方法期望a=2
+ *  9. Dual contract testing,AThe contract has a valuea=1,AcallBqueryb=1,Amodifya=a+b
+ *  Expected return valuea=2, callingviewMethod Expectationsa=2
  *
- *  10. 双合约测试，A合约有一个值a=1，B合约有一个值b=1，A调用B查询b，A修改a=a+b，A调用B修改b=2，A调用B查询b，A修改a=a+b
- *  期望返回值a=4，调用view方法期望a=4, b=2
+ *  10. Dual contract testing,AThe contract has a valuea=1,BThe contract has a valueb=1,AcallBqueryb,Amodifya=a+b,AcallBmodifyb=2,AcallBqueryb,Amodifya=a+b
+ *  Expected return valuea=4, callingviewMethod Expectationsa=4, b=2
  *
- *  11. 双合约测试，B有一个值b=1，A调用B修改b=2，A调用B修改b=3
- *  期望返回值b=3，调用view方法期望b=3
+ *  11. Dual contract testing,BThere is a valueb=1,AcallBmodifyb=2,AcallBmodifyb=3
+ *  Expected return valueb=3, callingviewMethod Expectationsb=3
  *
- *  12. 双合约测试，A有一个值a=1，B有一个值b=1，A调用B修改b=2，A调用B修改b=3，b返回给A，A修改a=b
- *  期望返回值a=3，调用view方法期望a=3，b=3
+ *  12. Dual contract testing,AThere is a valuea=1,BThere is a valueb=1,AcallBmodifyb=2,AcallBmodifyb=3,bReturn toA,Amodifya=b
+ *  Expected return valuea=3, callingviewMethod Expectationsa=3,b=3
  *
- *  13. 双合约测试，A有一个map1，map2, map1[a]值为100，map2[a]值为100, 修改map1[a]值为60，A调用B，执行：B调用A查询map1[a]，发debugEvent，更改成员变量b为map1[a]
- *  B调用A修改map2[a]值为80
- *  期望view方法查询map[1]a值为60，map2[a]为80, b=60
+ *  13. Dual contract testing,AThere is onemap1,map2, map1[a]Value is100,map2[a]Value is100, modifymap1[a]Value is60,AcallB, execute：BcallAquerymap1[a], senddebugEventChange member variablesbbymap1[a]
+ *  BcallAmodifymap2[a]Value is80
+ *  expectviewMethod Querymap[1]aValue is60,map2[a]by80, b=60
  *
- *  14. 双合约测试，A合约有map1，map1[a]值为1, A调用B，执行：B合约调用A合约查询map1[a]，使B局部变量t=a, B合约调用A合约修改map1[a]=t+5
- *  期望返回值map1[a]=105，调用view方法期望map1[a]=105
+ *  14. Dual contract testing,AThe contract includesmap1,map1[a]Value is1, AcallB, execute：BContract CallAContract inquirymap1[a], makeBlocal variablet=a, BContract CallAContract modificationmap1[a]=t+5
+ *  Expected return valuemap1[a]=105, callingviewMethod Expectationsmap1[a]=105
  *
- *  15. 双合约测试，调用者向A合约转入100，A调用B转入100，B使用30，转移70给调用者
- *  期望执行结果中，有退回到调用者的70
+ *  15. Dual contract testing, caller toAContract transfer100,AcallBTransfer in100,Bapply30Transfer70To the caller
+ *  In the expected execution result, there is a return to the caller70
  *
- *  16. 单合约测试，A有一个int数组变量，长度为3，值为[0, 1, 2]，修改数组第二个元素为8
- *                  有一个String数组变量，长度为3，值为["a", "b", "c"]，修改数组第二个元素为f
- *                  有一个Integer数组变量，长度为4，值为[5, 6, 7, 8]，修改数组第一个元素为2
- *                  有一个double数组变量，长度为5, 值为[2.3, 4.5, 6.7, 8.9, 10.11]，修改第五个元素为12.13
- *  期望返回值a=082 afc 2678 2.34.56.78.912.13，调用view方法期望a=a82 afc 2678 2.34.56.78.912.13
+ *  16. Single contract testing,AThere is oneintArray variable, length of3, value is[0, 1, 2]Modify the second element of the array to8
+ *                  There is oneStringArray variable, length of3, value is["a", "b", "c"]Modify the second element of the array tof
+ *                  There is oneIntegerArray variable, length of4, value is[5, 6, 7, 8]Modify the first element of the array to2
+ *                  There is onedoubleArray variable, length of5, Value is[2.3, 4.5, 6.7, 8.9, 10.11]Modify the fifth element to12.13
+ *  Expected return valuea=082 afc 2678 2.34.56.78.912.13, callingviewMethod Expectationsa=a82 afc 2678 2.34.56.78.912.13
  *
- *  17. 单合约测试，A有一个int数组变量，长度为3，值为[0, 1, 2]，修改数组第二个元素为8，再修改为7
- *                  有一个String数组变量，长度为3，值为["a", "b", "c"]，修改数组第二个元素为f，再修改为g
- *                  有一个Integer数组变量，长度为4，值为[5, 6, 7, 8]，修改数组第一个元素为2，再修改为1
- *                  有一个double数组变量，长度为5, 值为[2.3, 4.5, 6.7, 8.9, 10.11]，修改第五个元素为12.13，再修改为11.13
- *  期望返回值a=072 agc 1678 2.34.56.78.911.13，调用view方法期望a=a72 agc 1678 2.34.56.78.911.13
+ *  17. Single contract testing,AThere is oneintArray variable, length of3, value is[0, 1, 2]Modify the second element of the array to8, then modify to7
+ *                  There is oneStringArray variable, length of3, value is["a", "b", "c"]Modify the second element of the array tof, then modify tog
+ *                  There is oneIntegerArray variable, length of4, value is[5, 6, 7, 8]Modify the first element of the array to2, then modify to1
+ *                  There is onedoubleArray variable, length of5, Value is[2.3, 4.5, 6.7, 8.9, 10.11]Modify the fifth element to12.13, then modify to11.13
+ *  Expected return valuea=072 agc 1678 2.34.56.78.911.13, callingviewMethod Expectationsa=a72 agc 1678 2.34.56.78.911.13
  *
- *  18. 单合约测试，A有一个int数组变量，长度为3，值为[0, 1, 2]，修改数组第二个元素为8，私有方法再修改为7
- *                  有一个String数组变量，长度为3，值为["a", "b", "c"]，修改数组第二个元素为f，再修改为g
- *                  有一个Integer数组变量，长度为4，值为[5, 6, 7, 8]，修改数组第一个元素为2，在修改为1
- *                  有一个double数组变量，长度为5, 值为[2.3, 4.5, 6.7, 8.9, 10.11]，修改第五个元素为12.13，再修改为11.13
- *  期望返回值a=072 agc 1678 2.34.56.78.911.13，调用view方法期望a=a72 agc 1678 2.34.56.78.911.13
+ *  18. Single contract testing,AThere is oneintArray variable, length of3, value is[0, 1, 2]Modify the second element of the array to8Modify the private method to7
+ *                  There is oneStringArray variable, length of3, value is["a", "b", "c"]Modify the second element of the array tof, then modify tog
+ *                  There is oneIntegerArray variable, length of4, value is[5, 6, 7, 8]Modify the first element of the array to2, modify to1
+ *                  There is onedoubleArray variable, length of5, Value is[2.3, 4.5, 6.7, 8.9, 10.11]Modify the fifth element to12.13, then modify to11.13
+ *  Expected return valuea=072 agc 1678 2.34.56.78.911.13, callingviewMethod Expectationsa=a72 agc 1678 2.34.56.78.911.13
  *
- *  19. 双合约测试，A有一个int数组变量，长度为3，值为[0, 1, 2]，
- *                  有一个String数组变量，长度为3，值为["a", "b", "c"]，
- *                  有一个Integer数组变量，长度为4，值为[5, 6, 7, 8]，
- *                  有一个double数组变量，长度为5, 值为[2.3, 4.5, 6.7, 8.9, 10.11]，
- *         A调用B执行：B调用A，修改int数组第二个元素为8，私有方法再修改为7
- *                          修改String数组第二个元素为f，再修改为g
- *                          修改Integer数组第一个元素为2，在修改为1
- *                          修改double数组第五个元素为12.13，再修改为11.13
- *  期望返回值a=072 agc 1678 2.34.56.78.911.13，调用view方法期望a=a72 agc 1678 2.34.56.78.911.13
+ *  19. Dual contract testing,AThere is oneintArray variable, length of3, value is[0, 1, 2],
+ *                  There is oneStringArray variable, length of3, value is["a", "b", "c"],
+ *                  There is oneIntegerArray variable, length of4, value is[5, 6, 7, 8],
+ *                  There is onedoubleArray variable, length of5, Value is[2.3, 4.5, 6.7, 8.9, 10.11],
+ *         AcallBimplement：BcallA, modifyintThe second element of the array is8Modify the private method to7
+ *                          modifyStringThe second element of the array isf, then modify tog
+ *                          modifyIntegerThe first element of the array is2, modify to1
+ *                          modifydoubleThe fifth element of the array is12.13, then modify to11.13
+ *  Expected return valuea=072 agc 1678 2.34.56.78.911.13, callingviewMethod Expectationsa=a72 agc 1678 2.34.56.78.911.13
  *
- *  20. 双合约测试，A有一个int数组变量，长度为3，值为[0, 1, 2]，修改数组第二个元素为8
- *                  有一个String数组变量，长度为3，值为["a", "b", "c"]，修改数组第二个元素为f
- *                  有一个Integer数组变量，长度为4，值为[5, 6, 7, 8]，修改数组第一个元素为2
- *                  有一个double数组变量，长度为5， 值为[2.3, 4.5, 6.7, 8.9, 10.11]，修改第五个元素为12.13
- *         A调用B执行：B调用A，查询t1=int[1], t2=String[1], t3=Integer[0], t4=double[4]
- *                   B调用A，修改以下数据
- *                          修改int数组第二个元素为 int[1] + t1  ->(8 + 8)
- *                          修改String数组第三个元素为 String[2] + t2  ->("c" + "f")
- *                          修改Integer数组第二个元素为 Integer[0] + t3  ->(2 + 2)
- *                          修改double数组第三个元素为 double[1] + t4  ->(4.5 + 12.13)
- *  期望返回值a=0162 afcf 2478 2.34.516.638.912.13，调用view方法期望a=0162 afcf 2478 2.34.516.638.912.13
+ *  20. Dual contract testing,AThere is oneintArray variable, length of3, value is[0, 1, 2]Modify the second element of the array to8
+ *                  There is oneStringArray variable, length of3, value is["a", "b", "c"]Modify the second element of the array tof
+ *                  There is oneIntegerArray variable, length of4, value is[5, 6, 7, 8]Modify the first element of the array to2
+ *                  There is onedoubleArray variable, length of5, Value is[2.3, 4.5, 6.7, 8.9, 10.11]Modify the fifth element to12.13
+ *         AcallBimplement：BcallA, Queryt1=int[1], t2=String[1], t3=Integer[0], t4=double[4]
+ *                   BcallAModify the following data
+ *                          modifyintThe second element of the array is int[1] + t1  ->(8 + 8)
+ *                          modifyStringThe third element of the array is String[2] + t2  ->("c" + "f")
+ *                          modifyIntegerThe second element of the array is Integer[0] + t3  ->(2 + 2)
+ *                          modifydoubleThe third element of the array is double[1] + t4  ->(4.5 + 12.13)
+ *  Expected return valuea=0162 afcf 2478 2.34.516.638.912.13, callingviewMethod Expectationsa=0162 afcf 2478 2.34.516.638.912.13
  *
- *  21. 双合约测试，A有一个int数组变量，长度为3，值为[0, 1, 2]，修改数组第二个元素为8
- *                  有一个String数组变量，长度为3，值为["a", "b", "c"]，修改数组第二个元素为f
- *                  有一个Integer数组变量，长度为4，值为[5, 6, 7, 8]，修改数组第一个元素为2
- *                  有一个double数组变量，长度为5， 值为[2.3, 4.5, 6.7, 8.9, 10.11]，修改第五个元素为12.13
- *         A调用B执行：B调用A，查询t1=int[1], t2=String[1], t3=Integer[0], t4=double[4]
- *                   B调用A，修改以下数据
- *                          修改int数组第二个元素为 int[1] + t1  ->(8 + 8)
- *                          修改String数组第三个元素为 String[2] + t2  ->("c" + "f")
- *                          修改Integer数组第二个元素为 Integer[0] + t3  ->(2 + 2)
- *                          修改double数组第三个元素为 double[1] + t4  ->(4.5 + 12.13)
- *         此时a=0162 afcf 2478 2.34.516.638.912.13
- *         A修改以下数据
- *                  修改int数组第二个元素为7
- *                  修改String数组第二个元素为g
- *                  修改Integer数组第一个元素为1
- *                  修改double数组第五个元素为11.13
- *  期望返回值a=072 agcf 1478 2.34.516.638.911.13，调用view方法期望a=072 agcf 1478 2.34.516.638.911.13
+ *  21. Dual contract testing,AThere is oneintArray variable, length of3, value is[0, 1, 2]Modify the second element of the array to8
+ *                  There is oneStringArray variable, length of3, value is["a", "b", "c"]Modify the second element of the array tof
+ *                  There is oneIntegerArray variable, length of4, value is[5, 6, 7, 8]Modify the first element of the array to2
+ *                  There is onedoubleArray variable, length of5, Value is[2.3, 4.5, 6.7, 8.9, 10.11]Modify the fifth element to12.13
+ *         AcallBimplement：BcallA, Queryt1=int[1], t2=String[1], t3=Integer[0], t4=double[4]
+ *                   BcallAModify the following data
+ *                          modifyintThe second element of the array is int[1] + t1  ->(8 + 8)
+ *                          modifyStringThe third element of the array is String[2] + t2  ->("c" + "f")
+ *                          modifyIntegerThe second element of the array is Integer[0] + t3  ->(2 + 2)
+ *                          modifydoubleThe third element of the array is double[1] + t4  ->(4.5 + 12.13)
+ *         herea=0162 afcf 2478 2.34.516.638.912.13
+ *         AModify the following data
+ *                  modifyintThe second element of the array is7
+ *                  modifyStringThe second element of the array isg
+ *                  modifyIntegerThe first element of the array is1
+ *                  modifydoubleThe fifth element of the array is11.13
+ *  Expected return valuea=072 agcf 1478 2.34.516.638.911.13, callingviewMethod Expectationsa=072 agcf 1478 2.34.516.638.911.13
  *
- *  22. 双合约测试，A有一个int数组变量，长度为3，值为[0, 1, 2]，修改数组第二个元素为8
- *                  有一个String数组变量，长度为3，值为["a", "b", "c"]，修改数组第二个元素为f
- *                  有一个Integer数组变量，长度为4，值为[5, 6, 7, 8]，修改数组第一个元素为2
- *                  有一个double数组变量，长度为5， 值为[2.3, 4.5, 6.7, 8.9, 10.11]，修改第五个元素为12.13
+ *  22. Dual contract testing,AThere is oneintArray variable, length of3, value is[0, 1, 2]Modify the second element of the array to8
+ *                  There is oneStringArray variable, length of3, value is["a", "b", "c"]Modify the second element of the array tof
+ *                  There is oneIntegerArray variable, length of4, value is[5, 6, 7, 8]Modify the first element of the array to2
+ *                  There is onedoubleArray variable, length of5, Value is[2.3, 4.5, 6.7, 8.9, 10.11]Modify the fifth element to12.13
  *                  0,8,2| a,f,c| 2,6,7,8| 2.3,4.5,6.7,8.9,12.13
- *         A调用B执行：B调用A，查询t1=int[1], t2=String[1], t3=Integer[0], t4=double[4]
- *                   B调用A，修改以下数据
- *                          修改int数组第二个元素为 int[1] + t1  ->(8 + 8)
- *                          修改String数组第三个元素为 String[2] + t2  ->("c" + "f")
- *                          修改Integer数组第二个元素为 Integer[0] + t3  ->(2 + 2)
- *                          修改double数组第三个元素为 double[1] + t4  ->(4.5 + 12.13)
- *                   此时数组值依次为
+ *         AcallBimplement：BcallA, Queryt1=int[1], t2=String[1], t3=Integer[0], t4=double[4]
+ *                   BcallAModify the following data
+ *                          modifyintThe second element of the array is int[1] + t1  ->(8 + 8)
+ *                          modifyStringThe third element of the array is String[2] + t2  ->("c" + "f")
+ *                          modifyIntegerThe second element of the array is Integer[0] + t3  ->(2 + 2)
+ *                          modifydoubleThe third element of the array is double[1] + t4  ->(4.5 + 12.13)
+ *                   At this point, the array values are sequentially
  *                   0,16,2| a,f,cf| 2,4,7,8| 2.3,4.5,16.63,8.9,12.13
- *                   B调用A，查询y1=int[2], y2=String[2], y3=Integer[2], y4=double[2]
- *                   B调用A，修改以下数据
- *                          修改int数组第三个元素为 int[1] + y1  ->(16 + 2)
- *                          修改String数组第一个元素为 String[0] + y2  ->("a" + "cf")
- *                          修改Integer数组第三个元素为 Integer[1] + y3  ->(4 + 7)
- *                          修改double数组第四个元素为 double[1] + y4  ->(4.5 + 16.63)
- *                   B 成员变量 B-int数组[t1, y1]  ->8, 2
- *                             B-String数组[t2, y2]  -> "f", "cf"
- *                             B-Integer数组[t3, y3]  -> 2, 7
- *                             B-double数组[t4, y4]  -> 12.13, 16.63
- *  期望返回值a=01618 acffcf 24118 2.34.516.6321.1312.13|82 fcf 27 12.1316.63
- *  调用view方法期望a=01618 acffcf 24118 2.34.516.6321.1312.13
- *  调用view方法期望b=82 fcf 27 12.1316.63
+ *                   BcallA, Queryy1=int[2], y2=String[2], y3=Integer[2], y4=double[2]
+ *                   BcallAModify the following data
+ *                          modifyintThe third element of the array is int[1] + y1  ->(16 + 2)
+ *                          modifyStringThe first element of the array is String[0] + y2  ->("a" + "cf")
+ *                          modifyIntegerThe third element of the array is Integer[1] + y3  ->(4 + 7)
+ *                          modifydoubleThe fourth element of the array is double[1] + y4  ->(4.5 + 16.63)
+ *                   B Member variables B-intarray[t1, y1]  ->8, 2
+ *                             B-Stringarray[t2, y2]  -> "f", "cf"
+ *                             B-Integerarray[t3, y3]  -> 2, 7
+ *                             B-doublearray[t4, y4]  -> 12.13, 16.63
+ *  Expected return valuea=01618 acffcf 24118 2.34.516.6321.1312.13|82 fcf 27 12.1316.63
+ *  callviewMethod Expectationsa=01618 acffcf 24118 2.34.516.6321.1312.13
+ *  callviewMethod Expectationsb=82 fcf 27 12.1316.63
  *
- *  23. 双合约测试，A有一个int数组变量，长度为3，值为[0, 1, 2]，
- *                  有一个String数组变量，长度为3，值为["a", "b", "c"]，
- *                  有一个Integer数组变量，长度为4，值为[5, 6, 7, 8]，
- *                  有一个double数组变量，长度为5， 值为[2.3, 4.5, 6.7, 8.9, 10.11]，
- *                B有一个int数组变量，长度为2，值为[10, 11]，
- *                  有一个String数组变量，长度为2，值为["qa", "qb"]，
- *                  有一个Integer数组变量，长度为2，值为[25, 26]，
- *                  有一个double数组变量，长度为2， 值为[32.3, 34.5]，
- *         A调用B，查询t1=B-int[1], t2=B-String[1], t3=B-Integer[1], t4=B-double[1]
- *         A修改以下数据
- *                  修改int数组第二个元素为 int[1] + t1  ->(1 + 11)
- *                  修改String数组第三个元素为 String[2] + t2  ->("c" + "qb")
- *                  修改Integer数组第二个元素为 Integer[0] + t3  ->(5 + 26)
- *                  修改double数组第三个元素为 double[1] + t4  ->(4.5 + 34.5)
- *         此时A数据为
+ *  23. Dual contract testing,AThere is oneintArray variable, length of3, value is[0, 1, 2],
+ *                  There is oneStringArray variable, length of3, value is["a", "b", "c"],
+ *                  There is oneIntegerArray variable, length of4, value is[5, 6, 7, 8],
+ *                  There is onedoubleArray variable, length of5, Value is[2.3, 4.5, 6.7, 8.9, 10.11],
+ *                BThere is oneintArray variable, length of2, value is[10, 11],
+ *                  There is oneStringArray variable, length of2, value is["qa", "qb"],
+ *                  There is oneIntegerArray variable, length of2, value is[25, 26],
+ *                  There is onedoubleArray variable, length of2, Value is[32.3, 34.5],
+ *         AcallB, Queryt1=B-int[1], t2=B-String[1], t3=B-Integer[1], t4=B-double[1]
+ *         AModify the following data
+ *                  modifyintThe second element of the array is int[1] + t1  ->(1 + 11)
+ *                  modifyStringThe third element of the array is String[2] + t2  ->("c" + "qb")
+ *                  modifyIntegerThe second element of the array is Integer[0] + t3  ->(5 + 26)
+ *                  modifydoubleThe third element of the array is double[1] + t4  ->(4.5 + 34.5)
+ *         hereAThe data is
  *         0,12,2 a,b,cqb 5,31,7,8 2.3,4.5,39,8.9,10.11
- *         A调用B执行：修改以下数据
- *                          修改B-int[0]为 2
- *                          修改B-String[0]为 2
- *                          修改B-Integer[0]为 2
- *                          修改B-double[0]为 2
- *                   此时B数组值依次为
+ *         AcallBimplement：Modify the following data
+ *                          modifyB-int[0]by 2
+ *                          modifyB-String[0]by 2
+ *                          modifyB-Integer[0]by 2
+ *                          modifyB-double[0]by 2
+ *                   hereBThe array values are sequentially
  *                   211 2qb 226 234.5
- *         A调用B，查询y1=B-int[0], y2=B-String[0], y3=B-Integer[0], y4=B-double[0]
- *         A修改以下数据
- *                  修改int数组第二个元素为 int[1] + y1  ->(12 + 2)
- *                  修改String数组第三个元素为 String[2] + y2  ->("cqb" + "2")
- *                  修改Integer数组第二个元素为 Integer[0] + y3  ->(5 + 2)
- *                  修改double数组第三个元素为 double[1] + y4  ->(4.5 + 2)
- *  期望返回值a=0142 abcqb2 5778 2.34.56.58.910.11|211 2qb 226 234.5
- *  调用view方法期望a=0142 abcqb2 5778 2.34.56.58.910.11
- *  调用view方法期望b=211 2qb 226 234.5
+ *         AcallB, Queryy1=B-int[0], y2=B-String[0], y3=B-Integer[0], y4=B-double[0]
+ *         AModify the following data
+ *                  modifyintThe second element of the array is int[1] + y1  ->(12 + 2)
+ *                  modifyStringThe third element of the array is String[2] + y2  ->("cqb" + "2")
+ *                  modifyIntegerThe second element of the array is Integer[0] + y3  ->(5 + 2)
+ *                  modifydoubleThe third element of the array is double[1] + y4  ->(4.5 + 2)
+ *  Expected return valuea=0142 abcqb2 5778 2.34.56.58.910.11|211 2qb 226 234.5
+ *  callviewMethod Expectationsa=0142 abcqb2 5778 2.34.56.58.910.11
+ *  callviewMethod Expectationsb=211 2qb 226 234.5
  *
- *  24. 双合约测试，A有一个int数组变量，长度为3，值为[0, 1, 2]，
- *                  有一个String数组变量，长度为3，值为["a", "b", "c"]，
- *                  有一个Integer数组变量，长度为4，值为[5, 6, 7, 8]，
- *                  有一个double数组变量，长度为5， 值为[2.3, 4.5, 6.7, 8.9, 10.11]，
- *                B有一个int数组变量，长度为2，值为[10, 11]，
- *                  有一个String数组变量，长度为2，值为["qa", "qb"]，
- *                  有一个Integer数组变量，长度为2，值为[25, 26]，
- *                  有一个double数组变量，长度为2， 值为[32.3, 34.5]，
- *         A调用B执行：修改以下数据
- *                          修改B-int[0]为 2
- *                          修改B-String[0]为 2
- *                          修改B-Integer[0]为 2
- *                          修改B-double[0]为 2
- *                   此时B数组值依次为
+ *  24. Dual contract testing,AThere is oneintArray variable, length of3, value is[0, 1, 2],
+ *                  There is oneStringArray variable, length of3, value is["a", "b", "c"],
+ *                  There is oneIntegerArray variable, length of4, value is[5, 6, 7, 8],
+ *                  There is onedoubleArray variable, length of5, Value is[2.3, 4.5, 6.7, 8.9, 10.11],
+ *                BThere is oneintArray variable, length of2, value is[10, 11],
+ *                  There is oneStringArray variable, length of2, value is["qa", "qb"],
+ *                  There is oneIntegerArray variable, length of2, value is[25, 26],
+ *                  There is onedoubleArray variable, length of2, Value is[32.3, 34.5],
+ *         AcallBimplement：Modify the following data
+ *                          modifyB-int[0]by 2
+ *                          modifyB-String[0]by 2
+ *                          modifyB-Integer[0]by 2
+ *                          modifyB-double[0]by 2
+ *                   hereBThe array values are sequentially
  *                   211 2qb 226 234.5
- *         A调用B执行：修改以下数据
- *                          修改B-int[0]为 3
- *                          修改B-String[0]为 3
- *                          修改B-Integer[0]为 3
- *                          修改B-double[0]为 3
- *                   此时B数组值依次为
+ *         AcallBimplement：Modify the following data
+ *                          modifyB-int[0]by 3
+ *                          modifyB-String[0]by 3
+ *                          modifyB-Integer[0]by 3
+ *                          modifyB-double[0]by 3
+ *                   hereBThe array values are sequentially
  *                   311 3qb 326 334.5
- *         A分割返回值`311 3qb 326 334.5`，得到
+ *         ASplit return value`311 3qb 326 334.5`Obtain
  *                      y1=311, y2="3qb", y3=326, y4=334.5
- *         A修改以下数据
- *                  修改int数组第二个元素为 int[1] + y1  ->(1 + 311)
- *                  修改String数组第三个元素为 String[2] + y2  ->("c" + "3qb")
- *                  修改Integer数组第二个元素为 Integer[0] + y3  ->(5 + 326)
- *                  修改double数组第三个元素为 double[1] + y4  ->(4.5 + 334.5)
- *  期望返回值a=03122 abc3qb 533178 2.34.5339.08.910.11|311 3qb 326 334.5
- *  调用view方法期望a=03122 abc3qb 533178 2.34.5339.08.910.11
- *  调用view方法期望b=311 3qb 326 334.5
+ *         AModify the following data
+ *                  modifyintThe second element of the array is int[1] + y1  ->(1 + 311)
+ *                  modifyStringThe third element of the array is String[2] + y2  ->("c" + "3qb")
+ *                  modifyIntegerThe second element of the array is Integer[0] + y3  ->(5 + 326)
+ *                  modifydoubleThe third element of the array is double[1] + y4  ->(4.5 + 334.5)
+ *  Expected return valuea=03122 abc3qb 533178 2.34.5339.08.910.11|311 3qb 326 334.5
+ *  callviewMethod Expectationsa=03122 abc3qb 533178 2.34.5339.08.910.11
+ *  callviewMethod Expectationsb=311 3qb 326 334.5
  *
  *
  * @author: PierreLuo
@@ -315,13 +315,13 @@ public class ContractVmTest extends MockBase {
     public void test4_integer() throws Exception{
         byte[] currentStateRoot = this.callVmTest(prevStateRoot, "test4_integer", "6", false);
         String integerValue = super.view(contractA, currentStateRoot, "getIntegerValue", new String[]{});
-        Assert.assertTrue(String.format("测试方法[test4_integer]view期望integerValue=6, 实际integerValue=%s", integerValue), "6".equals(integerValue));
+        Assert.assertTrue(String.format("test method[test4_integer]viewexpectintegerValue=6, actualintegerValue=%s", integerValue), "6".equals(integerValue));
     }
     @Test
     public void test4_int() throws Exception{
         byte[] currentStateRoot = this.callVmTest(prevStateRoot, "test4_int", "6", false);
         String intValue = super.view(contractA, currentStateRoot, "getIntValue", new String[]{});
-        Assert.assertTrue(String.format("测试方法[test4_int]view期望intValue=6, 实际intValue=%s", intValue), "6".equals(intValue));
+        Assert.assertTrue(String.format("test method[test4_int]viewexpectintValue=6, actualintValue=%s", intValue), "6".equals(intValue));
     }
     @Test
     public void test5() throws Exception{
@@ -346,7 +346,7 @@ public class ContractVmTest extends MockBase {
         byte[] currentStateRoot;
         currentStateRoot = this.callVmTest(prevStateRoot, "test10", "4");
         String b = super.view(contractB, currentStateRoot, "viewB", new String[]{});
-        Assert.assertTrue(String.format("测试方法[test10]期望b=2, 实际b=%s", b), "2".equals(b));
+        Assert.assertTrue(String.format("test method[test10]expectb=2, actualb=%s", b), "2".equals(b));
     }
 
     @Test
@@ -355,7 +355,7 @@ public class ContractVmTest extends MockBase {
         String b;
         currentStateRoot = this.callVmTest(prevStateRoot, "test11", "3", false);
         b = super.view(contractB, currentStateRoot, "viewB", new String[]{});
-        Assert.assertTrue(String.format("测试方法[test11]期望b=3, 实际b=%s", b), "3".equals(b));
+        Assert.assertTrue(String.format("test method[test11]expectb=3, actualb=%s", b), "3".equals(b));
     }
 
     @Test
@@ -364,7 +364,7 @@ public class ContractVmTest extends MockBase {
         String b;
         currentStateRoot = this.callVmTest(prevStateRoot, "test12", "3");
         b = super.view(contractB, currentStateRoot, "viewB", new String[]{});
-        Assert.assertTrue(String.format("测试方法[test12]期望b=3, 实际b=%s", b), "3".equals(b));
+        Assert.assertTrue(String.format("test method[test12]expectb=3, actualb=%s", b), "3".equals(b));
     }
 
     @Test
@@ -373,21 +373,21 @@ public class ContractVmTest extends MockBase {
         String a, b;
         Object[] objects;
         ProgramResult programResult;
-        //期望view方法查询map[1]a值为60，map2[a]为80, b=60
+        //expectviewMethod Querymap[1]aValue is60,map2[a]by80, b=60
         objects = super.call(contractA, prevStateRoot, SENDER, "test13", new String[]{});
         currentStateRoot = (byte[]) objects[0];
         programResult = (ProgramResult) objects[1];
-        Assert.assertTrue("测试方法[test13]expect success, " + programResult.getErrorMessage() + ", " + programResult.getStackTrace(), programResult.isSuccess());
-        Assert.assertTrue(String.format("测试方法[test13]返回值期望map2a=80, 实际map2a=%s", programResult.getResult()), "80".equals(programResult.getResult()));
+        Assert.assertTrue("test method[test13]expect success, " + programResult.getErrorMessage() + ", " + programResult.getStackTrace(), programResult.isSuccess());
+        Assert.assertTrue(String.format("test method[test13]Expected return valuemap2a=80, actualmap2a=%s", programResult.getResult()), "80".equals(programResult.getResult()));
 
         a = super.view(contractA, currentStateRoot, "viewMap1ByKey", new String[]{"a"});
-        Assert.assertTrue(String.format("测试方法[test13]View期望map1a=60, 实际map1a=%s", a), "60".equals(a));
+        Assert.assertTrue(String.format("test method[test13]Viewexpectmap1a=60, actualmap1a=%s", a), "60".equals(a));
 
         a = super.view(contractA, currentStateRoot, "viewMap2ByKey", new String[]{"a"});
-        Assert.assertTrue(String.format("测试方法[test13]View期望map2a=80, 实际map2a=%s", a), "80".equals(a));
+        Assert.assertTrue(String.format("test method[test13]Viewexpectmap2a=80, actualmap2a=%s", a), "80".equals(a));
 
         b = super.view(contractB, currentStateRoot, "viewB", new String[]{});
-        Assert.assertTrue(String.format("测试方法[test13]期望b=60, 实际b=%s", b), "60".equals(b));
+        Assert.assertTrue(String.format("test method[test13]expectb=60, actualb=%s", b), "60".equals(b));
     }
 
     @Test
@@ -396,15 +396,15 @@ public class ContractVmTest extends MockBase {
         String a;
         Object[] objects;
         ProgramResult programResult;
-        //期望返回值map1[a]=105，调用view方法期望map1[a]=105
+        //Expected return valuemap1[a]=105, callingviewMethod Expectationsmap1[a]=105
         objects = super.call(contractA, prevStateRoot, SENDER, "test14", new String[]{});
         currentStateRoot = (byte[]) objects[0];
         programResult = (ProgramResult) objects[1];
-        Assert.assertTrue("测试方法[test14]expect success, " + programResult.getErrorMessage() + ", " + programResult.getStackTrace(), programResult.isSuccess());
-        Assert.assertTrue(String.format("测试方法[test14]返回值期望map1a=105, 实际map1a=%s", programResult.getResult()), "105".equals(programResult.getResult()));
+        Assert.assertTrue("test method[test14]expect success, " + programResult.getErrorMessage() + ", " + programResult.getStackTrace(), programResult.isSuccess());
+        Assert.assertTrue(String.format("test method[test14]Expected return valuemap1a=105, actualmap1a=%s", programResult.getResult()), "105".equals(programResult.getResult()));
 
         a = super.view(contractA, currentStateRoot, "viewMap1ByKey", new String[]{"a"});
-        Assert.assertTrue(String.format("测试方法[test14]View期望map1a=105, 实际map1a=%s", a), "105".equals(a));
+        Assert.assertTrue(String.format("test method[test14]Viewexpectmap1a=105, actualmap1a=%s", a), "105".equals(a));
     }
 
     @Test
@@ -416,7 +416,7 @@ public class ContractVmTest extends MockBase {
         objects = super.call(contractA, prevStateRoot, SENDER, "test15", new String[]{}, BigInteger.valueOf(100L));
         currentStateRoot = (byte[]) objects[0];
         programResult = (ProgramResult) objects[1];
-        Assert.assertTrue("测试方法[test15]expect success, " + programResult.getErrorMessage() + ", " + programResult.getStackTrace(), programResult.isSuccess());
+        Assert.assertTrue("test method[test15]expect success, " + programResult.getErrorMessage() + ", " + programResult.getStackTrace(), programResult.isSuccess());
 
         List<ProgramTransfer> transfers = programResult.getTransfers();
         boolean success = false;
@@ -429,7 +429,7 @@ public class ContractVmTest extends MockBase {
                 break;
             }
         }
-        Assert.assertTrue("测试方法[test15]期望 退回70", success);
+        Assert.assertTrue("test method[test15]expect return70", success);
     }
 
     @Test
@@ -466,27 +466,27 @@ public class ContractVmTest extends MockBase {
     public void test22() throws Exception{
         byte[] currentStateRoot = this.callVmTest(prevStateRoot, "test22", "01618 acffcf 24118 2.34.516.6321.1312.13|82 fcf 27 12.1316.63", false);
         String a = super.view(contractA, currentStateRoot, "arrayContact", new String[]{});
-        Assert.assertTrue(String.format("测试方法[test22]view期望a=\"01618 acffcf 24118 2.34.516.6321.1312.13\", 实际a=%s", a), "01618 acffcf 24118 2.34.516.6321.1312.13".equals(a));
+        Assert.assertTrue(String.format("test method[test22]viewexpecta=\"01618 acffcf 24118 2.34.516.6321.1312.13\", actuala=%s", a), "01618 acffcf 24118 2.34.516.6321.1312.13".equals(a));
         String b = super.view(contractB, currentStateRoot, "arrayContact", new String[]{});
-        Assert.assertTrue(String.format("测试方法[test22]view期望b=\"82 fcf 27 12.1316.63\", 实际b=%s", b), "82 fcf 27 12.1316.63".equals(b));
+        Assert.assertTrue(String.format("test method[test22]viewexpectb=\"82 fcf 27 12.1316.63\", actualb=%s", b), "82 fcf 27 12.1316.63".equals(b));
     }
 
     @Test
     public void test23() throws Exception{
         byte[] currentStateRoot = this.callVmTest(prevStateRoot, "test23", "0142 abcqb2 5778 2.34.56.58.910.11|211 2qb 226 234.5", false);
         String a = super.view(contractA, currentStateRoot, "arrayContact", new String[]{});
-        Assert.assertTrue(String.format("测试方法[test23]view期望a=\"0142 abcqb2 5778 2.34.56.58.910.11\", 实际a=%s", a), "0142 abcqb2 5778 2.34.56.58.910.11".equals(a));
+        Assert.assertTrue(String.format("test method[test23]viewexpecta=\"0142 abcqb2 5778 2.34.56.58.910.11\", actuala=%s", a), "0142 abcqb2 5778 2.34.56.58.910.11".equals(a));
         String b = super.view(contractB, currentStateRoot, "arrayContact", new String[]{});
-        Assert.assertTrue(String.format("测试方法[test23]view期望b=\"211 2qb 226 234.5\", 实际b=%s", b), "211 2qb 226 234.5".equals(b));
+        Assert.assertTrue(String.format("test method[test23]viewexpectb=\"211 2qb 226 234.5\", actualb=%s", b), "211 2qb 226 234.5".equals(b));
     }
 
     @Test
     public void test24() throws Exception{
         byte[] currentStateRoot = this.callVmTest(prevStateRoot, "test24", "03122 abc3qb 533178 2.34.5339.08.910.11|311 3qb 326 334.5", false);
         String a = super.view(contractA, currentStateRoot, "arrayContact", new String[]{});
-        Assert.assertTrue(String.format("测试方法[test24]view期望a=\"03122 abc3qb 533178 2.34.5339.08.910.11\", 实际a=%s", a), "03122 abc3qb 533178 2.34.5339.08.910.11".equals(a));
+        Assert.assertTrue(String.format("test method[test24]viewexpecta=\"03122 abc3qb 533178 2.34.5339.08.910.11\", actuala=%s", a), "03122 abc3qb 533178 2.34.5339.08.910.11".equals(a));
         String b = super.view(contractB, currentStateRoot, "arrayContact", new String[]{});
-        Assert.assertTrue(String.format("测试方法[test24]view期望b=\"311 3qb 326 334.5\", 实际b=%s", b), "311 3qb 326 334.5".equals(b));
+        Assert.assertTrue(String.format("test method[test24]viewexpectb=\"311 3qb 326 334.5\", actualb=%s", b), "311 3qb 326 334.5".equals(b));
     }
 
     private byte[] callVmTest(byte[] prevStateRoot, String method, String expect, String viewMethod) throws Exception {
@@ -495,24 +495,24 @@ public class ContractVmTest extends MockBase {
         //objects = super.call(contractA, prevStateRoot, SENDER, "resetA", new String[]{});
         //prevStateRoot = (byte[]) objects[0];
         //programResult = (ProgramResult) objects[1];
-        //Assert.assertTrue("重置方法[resetA]expect success, " + programResult.getErrorMessage() + ", " + programResult.getStackTrace(), programResult.isSuccess());
-        //Assert.assertTrue(String.format("重置方法[resetA]期望a=1, 实际a=%s", programResult.getResult()), "1".equals(programResult.getResult()));
+        //Assert.assertTrue("Reset method[resetA]expect success, " + programResult.getErrorMessage() + ", " + programResult.getStackTrace(), programResult.isSuccess());
+        //Assert.assertTrue(String.format("Reset method[resetA]expecta=1, actuala=%s", programResult.getResult()), "1".equals(programResult.getResult()));
         //
         //objects = super.call(contractB, prevStateRoot, SENDER, "resetB", new String[]{});
         //prevStateRoot = (byte[]) objects[0];
         //programResult = (ProgramResult) objects[1];
-        //Assert.assertTrue("重置方法[resetB]expect success, " + programResult.getErrorMessage() + ", " + programResult.getStackTrace(), programResult.isSuccess());
-        //Assert.assertTrue(String.format("重置方法[resetB]期望b=1, 实际b=%s", programResult.getResult()), "1".equals(programResult.getResult()));
+        //Assert.assertTrue("Reset method[resetB]expect success, " + programResult.getErrorMessage() + ", " + programResult.getStackTrace(), programResult.isSuccess());
+        //Assert.assertTrue(String.format("Reset method[resetB]expectb=1, actualb=%s", programResult.getResult()), "1".equals(programResult.getResult()));
 
         objects = super.call(contractA, prevStateRoot, SENDER, method, new String[]{});
         prevStateRoot = (byte[]) objects[0];
         programResult = (ProgramResult) objects[1];
-        Assert.assertTrue("测试方法["+method+"]expect success, " + programResult.getErrorMessage() + ", " + programResult.getStackTrace(), programResult.isSuccess());
-        Assert.assertTrue(String.format("测试方法[%s]返回值期望a=%s, 实际a=%s", method, expect, programResult.getResult()), expect.equals(programResult.getResult()));
+        Assert.assertTrue("test method["+method+"]expect success, " + programResult.getErrorMessage() + ", " + programResult.getStackTrace(), programResult.isSuccess());
+        Assert.assertTrue(String.format("test method[%s]Expected return valuea=%s, actuala=%s", method, expect, programResult.getResult()), expect.equals(programResult.getResult()));
 
         if(StringUtils.isNotBlank(viewMethod)) {
             String a = super.view(contractA, prevStateRoot, viewMethod, new String[]{});
-            Assert.assertTrue(String.format("测试方法[%s]View期望a=%s, 实际a=%s", method, expect, a), expect.equals(a));
+            Assert.assertTrue(String.format("test method[%s]Viewexpecta=%s, actuala=%s", method, expect, a), expect.equals(a));
         }
         return prevStateRoot;
     }
@@ -559,13 +559,13 @@ public class ContractVmTest extends MockBase {
         //byte[] currentStateRoot;
         //String a;
         // ------------------------------test1----------------------------------------------------//
-        //this.callVmTest(prevStateRoot, "test5", "9");// 失败 tNULSeBaN5xpQLvYBMJuybAzgzRkRXL4r3tqMx
-        //this.callVmTest(prevStateRoot, "test6", "76");// 失败
+        //this.callVmTest(prevStateRoot, "test5", "9");// fail tNULSeBaN5xpQLvYBMJuybAzgzRkRXL4r3tqMx
+        //this.callVmTest(prevStateRoot, "test6", "76");// fail
         //this.callVmTest(prevStateRoot, "test7", "15");
         //this.callVmTest(prevStateRoot, "test8", "19");
 
-        //this.callVmTest(prevStateRoot, "test4_integer", "6");// 失败 1
-        //this.callVmTest(prevStateRoot, "test4_int", "6");// 失败 1
+        //this.callVmTest(prevStateRoot, "test4_integer", "6");// fail 1
+        //this.callVmTest(prevStateRoot, "test4_int", "6");// fail 1
         //this.callVmTest(prevStateRoot, "test1", "2");
         //this.callVmTest(prevStateRoot, "test2", "3");
         //this.callVmTest(prevStateRoot, "test3", "3");
@@ -574,41 +574,41 @@ public class ContractVmTest extends MockBase {
         //// ------------------------------test10----------------------------------------------------//
         //currentStateRoot = this.callVmTest(prevStateRoot, "test10", "4");
         //String b = super.view(contractB, currentStateRoot, "viewB", new String[]{});
-        //Assert.assertTrue(String.format("测试方法[test10]期望b=2, 实际b=%s", b), "2".equals(b));
+        //Assert.assertTrue(String.format("test method[test10]expectb=2, actualb=%s", b), "2".equals(b));
         //// ------------------------------test11----------------------------------------------------//
         //currentStateRoot = this.callVmTest(prevStateRoot, "test11", "3", false);
         //b = super.view(contractB, currentStateRoot, "viewB", new String[]{});
-        //Assert.assertTrue(String.format("测试方法[test11]期望b=3, 实际b=%s", b), "3".equals(b));
+        //Assert.assertTrue(String.format("test method[test11]expectb=3, actualb=%s", b), "3".equals(b));
         //// ------------------------------test12----------------------------------------------------//
         //currentStateRoot = this.callVmTest(prevStateRoot, "test12", "3");
         //b = super.view(contractB, currentStateRoot, "viewB", new String[]{});
-        //Assert.assertTrue(String.format("测试方法[test12]期望b=3, 实际b=%s", b), "3".equals(b));
+        //Assert.assertTrue(String.format("test method[test12]expectb=3, actualb=%s", b), "3".equals(b));
         //// ------------------------------test13----------------------------------------------------//
-        ////期望view方法查询map[1]a值为60，map2[a]为80, b=60
+        ////expectviewMethod Querymap[1]aValue is60,map2[a]by80, b=60
         //objects = super.call(contractA, prevStateRoot, SENDER, "test13", new String[]{});
         //currentStateRoot = (byte[]) objects[0];
         //programResult = (ProgramResult) objects[1];
-        //Assert.assertTrue("测试方法[test13]expect success, " + programResult.getErrorMessage() + ", " + programResult.getStackTrace(), programResult.isSuccess());
-        //Assert.assertTrue(String.format("测试方法[test13]返回值期望map2a=80, 实际map2a=%s", programResult.getResult()), "80".equals(programResult.getResult()));
+        //Assert.assertTrue("test method[test13]expect success, " + programResult.getErrorMessage() + ", " + programResult.getStackTrace(), programResult.isSuccess());
+        //Assert.assertTrue(String.format("test method[test13]Expected return valuemap2a=80, actualmap2a=%s", programResult.getResult()), "80".equals(programResult.getResult()));
         //
         //a = super.view(contractA, currentStateRoot, "viewMap1ByKey", new String[]{"a"});
-        //Assert.assertTrue(String.format("测试方法[test13]View期望map1a=60, 实际map1a=%s", a), "60".equals(a));
+        //Assert.assertTrue(String.format("test method[test13]Viewexpectmap1a=60, actualmap1a=%s", a), "60".equals(a));
         //
         //a = super.view(contractA, currentStateRoot, "viewMap2ByKey", new String[]{"a"});
-        //Assert.assertTrue(String.format("测试方法[test13]View期望map2a=80, 实际map2a=%s", a), "80".equals(a));
+        //Assert.assertTrue(String.format("test method[test13]Viewexpectmap2a=80, actualmap2a=%s", a), "80".equals(a));
         //
         //b = super.view(contractB, currentStateRoot, "viewB", new String[]{});
-        //Assert.assertTrue(String.format("测试方法[test13]期望b=60, 实际b=%s", b), "60".equals(b));
+        //Assert.assertTrue(String.format("test method[test13]expectb=60, actualb=%s", b), "60".equals(b));
         //// ------------------------------test14----------------------------------------------------//
-        ////期望返回值map1[a]=105，调用view方法期望map1[a]=105
+        ////Expected return valuemap1[a]=105, callingviewMethod Expectationsmap1[a]=105
         //objects = super.call(contractA, prevStateRoot, SENDER, "test14", new String[]{});
         //currentStateRoot = (byte[]) objects[0];
         //programResult = (ProgramResult) objects[1];
-        //Assert.assertTrue("测试方法[test14]expect success, " + programResult.getErrorMessage() + ", " + programResult.getStackTrace(), programResult.isSuccess());
-        //Assert.assertTrue(String.format("测试方法[test14]返回值期望map1a=105, 实际map1a=%s", programResult.getResult()), "105".equals(programResult.getResult()));
+        //Assert.assertTrue("test method[test14]expect success, " + programResult.getErrorMessage() + ", " + programResult.getStackTrace(), programResult.isSuccess());
+        //Assert.assertTrue(String.format("test method[test14]Expected return valuemap1a=105, actualmap1a=%s", programResult.getResult()), "105".equals(programResult.getResult()));
         //
         //a = super.view(contractA, currentStateRoot, "viewMap1ByKey", new String[]{"a"});
-        //Assert.assertTrue(String.format("测试方法[test14]View期望map1a=105, 实际map1a=%s", a), "105".equals(a));
+        //Assert.assertTrue(String.format("test method[test14]Viewexpectmap1a=105, actualmap1a=%s", a), "105".equals(a));
         //// -------------------------------------------------------------------------------------//
     }
 

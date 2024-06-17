@@ -34,7 +34,7 @@ import io.nuls.core.parse.SerializeUtils;
 import java.io.IOException;
 
 /**
- * 收到网络广播的交易后，记录发送者，转发时排除发送者
+ * After receiving transactions from online broadcasts, record the sender and exclude the sender during forwarding
  * @author: Charlie
  * @date: 2019/4/23
  */
@@ -45,7 +45,7 @@ public class TransactionNetPO extends BaseNulsData {
     private String excludeNode;
 
     /**
-     * 主要用于孤儿交易排序
+     * Mainly used for sorting orphan transactions
      */
     private transient long orphanSortSerial;
 

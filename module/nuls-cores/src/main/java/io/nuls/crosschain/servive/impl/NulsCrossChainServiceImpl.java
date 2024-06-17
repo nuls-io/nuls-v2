@@ -42,7 +42,7 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * 跨链模块默认接口实现类
+ * Cross chain module default interface implementation class
  *
  * @author tag
  * @date 2019/4/9
@@ -97,7 +97,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             return Result.getFailed(NulsCrossChainErrorCode.CHAIN_NOT_EXIST);
         }
         if (!chainManager.isCrossNetUseAble()) {
-            chain.getLogger().info("跨链网络组网异常！");
+            chain.getLogger().info("Cross chain network networking exception！");
             return Result.getFailed(NulsCrossChainErrorCode.CROSS_CHAIN_NETWORK_UNAVAILABLE);
         }
         Transaction tx = new Transaction(config.getCrossCtxType());
@@ -112,7 +112,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             CoinData coinData = coinDataManager.getCrossCoinData(chain, coinFromList, coinToList, txSize, config.isMainNet());
             tx.setCoinData(coinData.serialize());
             tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
-            //签名
+            //autograph
             TransactionSignature transactionSignature = new TransactionSignature();
             List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
             List<String> signedAddressList = new ArrayList<>();
@@ -124,14 +124,14 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                 }
             }
             if (!txValidator.coinDataValid(chain, coinData, tx.size())) {
-                chain.getLogger().error("跨链交易CoinData验证失败！\n\n");
+                chain.getLogger().error("Cross chain transactionsCoinDataVerification failed！\n\n");
                 return Result.getFailed(NulsCrossChainErrorCode.COINDATA_VERIFY_FAIL);
             }
             transactionSignature.setP2PHKSignatures(p2PHKSignatures);
             tx.setTransactionSignature(transactionSignature.serialize());
 
             if (!TransactionCall.sendTx(chain, RPCUtil.encode(tx.serialize()))) {
-                chain.getLogger().error("跨链交易发送交易模块失败\n\n");
+                chain.getLogger().error("Cross chain transaction sending transaction module failed\n\n");
                 throw new NulsException(NulsCrossChainErrorCode.INTERFACE_CALL_FAILED);
             }
             Map<String, Object> result = new HashMap<>(2);
@@ -166,12 +166,12 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             tx.parse(RPCUtil.decode(txStr), 0);
             CoinData coinData = tx.getCoinDataInstance();
             if (!txValidator.coinDataValid(chain, coinData, tx.size())) {
-                chain.getLogger().error("跨链交易CoinData验证失败！\n\n");
+                chain.getLogger().error("Cross chain transactionsCoinDataVerification failed！\n\n");
                 return Result.getFailed(NulsCrossChainErrorCode.COINDATA_VERIFY_FAIL);
             }
 
             if (!TransactionCall.sendTx(chain, RPCUtil.encode(tx.serialize()))) {
-                chain.getLogger().error("跨链交易发送交易模块失败\n\n");
+                chain.getLogger().error("Cross chain transaction sending transaction module failed\n\n");
                 throw new NulsException(NulsCrossChainErrorCode.INTERFACE_CALL_FAILED);
             }
 
@@ -207,12 +207,12 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             Transaction transaction = new Transaction();
             transaction.parse(RPCUtil.decode(txStr), 0);
             if (!txValidator.validateTx(chain, transaction, null)) {
-                chain.getLogger().error("跨链交易验证失败,Hash:{}\n", transaction.getHash().toHex());
+                chain.getLogger().error("Cross chain transaction verification failed,Hash:{}\n", transaction.getHash().toHex());
                 return Result.getFailed(NulsCrossChainErrorCode.TX_DATA_VALIDATION_ERROR);
             }
             Map<String, Object> validResult = new HashMap<>(2);
             validResult.put(ParamConstant.VALUE, true);
-            chain.getLogger().info("跨链交易验证成功，Hash:{}\n", transaction.getHash().toHex());
+            chain.getLogger().info("Cross chain transaction verification successful,Hash:{}\n", transaction.getHash().toHex());
             return Result.getSuccess(CommonCodeConstanst.SUCCESS).setData(validResult);
         } catch (NulsException e) {
             chain.getLogger().error(e);
@@ -244,7 +244,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                 int fromChainId = AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress());
                 int toChainId = AddressTool.getChainIdByAddress(coinData.getTo().get(0).getAddress());
                 if (chainId == toChainId) {
-                    //跨入
+                    //Step in
                     NulsHash convertHash = ctxHash;
                     if (!config.isMainNet()) {
                         convertHash = TxUtil.friendConvertToMain(chain, ctx, TxType.CROSS_CHAIN).getHash();
@@ -260,7 +260,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                     }
                     otherCtxList.add(convertHash);
                 } else {
-                    //跨出
+                    //step forward
                     if (!config.isMainNet()) {
                         NulsHash convertHash = TxUtil.friendConvertToMain(chain, ctx, TxType.CROSS_CHAIN).getHash();
                         if (!convertHashService.save(convertHash, ctxHash, chainId)) {
@@ -269,7 +269,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                         }
                         convertHashList.add(convertHash);
                     }
-                    //如果当前链不为发起链，则本链为主网中转链需清空签名在对交易对签名拜占庭，避免其他链向本链获取交易时失败
+                    //If the current chain is not the initiating chain, then the main network intermediary chain needs to clear the signature before signing the transaction pair Byzantine, to avoid other chains from failing to obtain transactions from this chain
                     if (chainId != fromChainId) {
                         ctx.setTransactionSignature(null);
                         if (!otherCtxService.save(ctxHash, ctx, chainId)) {
@@ -278,22 +278,22 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                         }
                         otherCtxList.add(ctxHash);
                     }
-                    //回滚重新打包，如果当前跨链交易已处理完成，则不需要重复处理
+                    //Roll back and repackage. If the current cross chain transaction has been processed, there is no need for duplicate processing
                     CtxStatusPO ctxStatusPO = ctxStatusService.get(ctxHash, chainId);
                     if(ctxStatusPO != null){
                         if(ctxStatusPO.getStatus() == TxStatusEnum.CONFIRMED.getStatus()){
-                            chain.getLogger().info("该跨链转账交易之前已处理完成，不需重复处理：{}",ctxHash.toHex() );
+                            chain.getLogger().info("The cross chain transfer transaction has been processed before and does not need to be processed again：{}",ctxHash.toHex() );
                             continue;
                         }
                     }
                     ctxStatusList.add(ctxHash);
-                    chain.getLogger().debug("跨链交易提交完成，对跨链转账交易做拜占庭验证：{}", ctxHash.toHex());
-                    //发起拜占庭验证
+                    chain.getLogger().debug("Cross chain transaction submission completed, perform Byzantine verification on cross chain transfer transactions：{}", ctxHash.toHex());
+                    //Initiate Byzantine verification
                     ctx.setTransactionSignature(null);
                     chain.getCrossTxThreadPool().execute(new CrossTxHandler(chain, ctx, syncStatus));
                 }
             }
-            //如果本链为主网通知跨链管理模块发起链与接收链资产变更
+            //If this chain is the main network, notify the cross chain management module to initiate and receive chain asset changes
             if(config.isMainNet()){
                 List<String> txStrList = new ArrayList<>();
                 for (Transaction tx : txs) {
@@ -302,7 +302,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                 String headerStr = RPCUtil.encode(blockHeader.serialize());
                 ChainManagerCall.ctxAssetCirculateCommit(chainId, txStrList, headerStr);
             }
-            chain.getLogger().info("高度：{} 的跨链交易提交完成\n", blockHeader.getHeight());
+            chain.getLogger().info("height：{} Cross chain transaction submission completed\n", blockHeader.getHeight());
             return true;
         } catch (Exception e) {
             chain.getLogger().error(e);
@@ -327,7 +327,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                     CtxStatusPO ctxStatusPO = ctxStatusService.get(ctxHash, chainId);
                     if(ctxStatusPO != null){
                         if(ctxStatusPO.getStatus() == TxStatusEnum.CONFIRMED.getStatus()){
-                            chain.getLogger().info("该跨链转账交易已处理完成，不需回滚：{}",ctxHash.toHex() );
+                            chain.getLogger().info("The cross chain transfer transaction has been processed and does not need to be rolled back：{}",ctxHash.toHex() );
                             continue;
                         }
                     }
@@ -346,7 +346,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                     CtxStatusPO ctxStatusPO = ctxStatusService.get(ctxHash, chainId);
                     if(ctxStatusPO != null){
                         if(ctxStatusPO.getStatus() == TxStatusEnum.CONFIRMED.getStatus()){
-                            chain.getLogger().info("该跨链转账交易已处理完成，不需回滚：{}",ctxHash.toHex() );
+                            chain.getLogger().info("The cross chain transfer transaction has been processed and does not need to be rolled back：{}",ctxHash.toHex() );
                             continue;
                         }
                     }
@@ -355,7 +355,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                     }
                 }
             }
-            //如果为主网通知跨链管理模块发起链与接收链资产变更
+            //If the main network notifies the cross chain management module to initiate and receive chain asset changes
             if (config.isMainNet()) {
                 List<String> txStrList = new ArrayList<>();
                 for (Transaction tx : txs) {
@@ -440,7 +440,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
     @SuppressWarnings("unchecked")
     public Result getRegisteredChainInfoList(Map<String, Object> params) {
         Map<String, Object> result = new HashMap<>(2);
-        LoggerUtil.commonLog.info("------获取跨链资产信息---总长度：" + chainManager.getRegisteredCrossChainList().size());
+        LoggerUtil.commonLog.info("------Obtain cross chain asset information---Total length：" + chainManager.getRegisteredCrossChainList().size());
         result.put(ParamConstant.LIST, chainManager.getRegisteredCrossChainList());
         return Result.getSuccess(CommonCodeConstanst.SUCCESS).setData(result);
     }

@@ -37,7 +37,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * 退出委托信息类（交易中的txData）
+ * Exit delegation information class（In transactionstxData）
  * Withdrawal from the delegated information class
  *
  * @author: tag

@@ -102,7 +102,7 @@ public class LedgerUtil {
     }
 
     /**
-     * 判断资产是否属于本地节点账户
+     * Determine whether the asset belongs to the local node account
      *
      * @param chainId chainId
      * @param address address
@@ -156,7 +156,7 @@ public class LedgerUtil {
             return false;
         }
         String contractAddress = AddressTool.getStringAddressByBytes(address);
-        // add by pierre at 2020-04-02 协议升级黑洞地址
+        // add by pierre at 2020-04-02 Protocol upgrade black hole address
         if (LedgerUtil.getVersion(chainId) >= 5) {
             return AddressTool.BLOCK_HOLE_ADDRESS_SET.contains(contractAddress) ||
                     AddressTool.BLOCK_HOLE_ADDRESS_SET_5.contains(contractAddress);

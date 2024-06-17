@@ -35,11 +35,11 @@ import java.math.BigInteger;
 public class MultiSignCoinToDTO extends BaseCoinDTO {
 
 
-    @ApiModelProperty(description = "解锁时间, -1为一直锁定, 0为不锁定(默认)", required = false)
+    @ApiModelProperty(description = "Unlock time, -1To keep locked, 0To not lock(default)", required = false)
     private long lockTime = 0;
 
     /**
-     * 将多签交易客户端参数转换成交易统一处理对象
+     * Convert multi signature transaction client parameters into transaction unified processing objects
      * @return
      */
     @Override

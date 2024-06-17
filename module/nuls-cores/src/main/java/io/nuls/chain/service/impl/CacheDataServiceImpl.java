@@ -68,7 +68,7 @@ public class CacheDataServiceImpl implements CacheDataService {
 
     @Override
     public void initBlockDatas() throws Exception {
-        //获取确认高度
+        //Obtain confirmation height
         BlockHeight blockHeight = blockHeightStorage.getBlockHeight(CmRuntimeInfo.getMainIntChainId());
         if (null != blockHeight) {
             if (!blockHeight.isCommit()) {
@@ -84,7 +84,7 @@ public class CacheDataServiceImpl implements CacheDataService {
     }
 
     public void rollDatas(List<BlockChain> blockChains, List<Asset> assets, List<ChainAsset> chainAssets) throws Exception {
-        //取回滚的信息，进行回滚
+        //Retrieve rolled back information and perform a rollback
         for (BlockChain blockChain : blockChains) {
             chainStorage.update(blockChain.getChainId(), blockChain);
         }
@@ -104,33 +104,33 @@ public class CacheDataServiceImpl implements CacheDataService {
         Map<String, Integer> assets = new HashMap<>();
         Map<String, Integer> chainAssets = new HashMap<>();
         long preHeight = height - 1;
-        //获取当前数据库高度的备份，进行merge
+        //Obtain a backup of the current database height formerge
         CacheDatas moduleTxDatas = cacheDatasStorage.load(preHeight);
         if (null != moduleTxDatas) {
-            //如果已经存在备份数据，则说明有业务（跨链交易）或者链注册管理交易 已经处理过了。
+            //If backup data already exists, it indicates that there is business involved（Cross chain transactions）Or chain registration management transaction It has already been processed.
             return;
         }
         moduleTxDatas = new CacheDatas();
-        //获取需要备份的链及资产
+        //Obtain the chains and assets that need to be backed up
         if (isCirculate) {
-            //构建跨链流通数据
+            //Building cross chain circulation data
             buildCirculateDatas(txList, blockChains, assets, chainAssets);
         } else {
-            //构建链资产数据
+            //Building Chain Asset Data
             buildDatas(txList, blockChains, assets, chainAssets);
         }
         for (Map.Entry<String, Integer> entry : blockChains.entrySet()) {
-            //缓存数据
+            //Caching data
             BlockChain blockChain = chainStorage.load(Integer.valueOf(entry.getKey()));
             moduleTxDatas.addBlockChain(blockChain);
         }
         for (Map.Entry<String, Integer> entry : assets.entrySet()) {
-            //缓存数据
+            //Caching data
             Asset asset = assetStorage.load(entry.getKey());
             moduleTxDatas.addAsset(asset);
         }
         for (Map.Entry<String, Integer> entry : chainAssets.entrySet()) {
-            //缓存数据
+            //Caching data
             ChainAsset chainAsset = assetService.getChainAsset(entry.getKey());
             moduleTxDatas.addChainAsset(chainAsset);
         }
@@ -142,10 +142,10 @@ public class CacheDataServiceImpl implements CacheDataService {
         for (Transaction tx : txList) {
             int fromChainId = 0;
             int toChainId = 0;
-            // 打造CoinData
+            // makeCoinData
             CoinData coinData = new CoinData();
             coinData.parse(tx.getCoinData(), 0);
-            // 从CoinData中取出from的资产信息，放入Map中
+            // fromCoinDataRemove from the middlefromAsset information, placed inMapin
             List<CoinFrom> listFrom = coinData.getFrom();
             for (CoinFrom coinFrom : listFrom) {
                 fromChainId = AddressTool.getChainIdByAddress(coinFrom.getAddress());
@@ -153,7 +153,7 @@ public class CacheDataServiceImpl implements CacheDataService {
                 blockChains.put(String.valueOf(fromChainId), 1);
                 chainAssets.put(CmRuntimeInfo.getChainAssetKey(fromChainId, assetKey), 1);
             }
-            // 从CoinData中取出to的资产信息，放入Map中
+            // fromCoinDataRemove from the middletoAsset information, placed inMapin
             List<CoinTo> listTo = coinData.getTo();
             for (CoinTo coinTo : listTo) {
                 toChainId = AddressTool.getChainIdByAddress(coinTo.getAddress());
@@ -226,14 +226,14 @@ public class CacheDataServiceImpl implements CacheDataService {
 
     @Override
     public void rollBlockTxs(int chainId, long height) throws Exception {
-        //开始回滚
+        //Start rollback
         BlockHeight saveBlockHeight = blockHeightStorage.getBlockHeight(chainId);
         if (null == saveBlockHeight) {
             return;
         }
         saveBlockHeight.setCommit(false);
         blockHeightStorage.saveOrUpdateBlockHeight(chainId, saveBlockHeight);
-        //取回滚的信息，进行回滚
+        //Retrieve rolled back information and perform a rollback
         CacheDatas moduleTxDatas = cacheDatasStorage.load(height - 1);
         if (null != moduleTxDatas) {
             for (BlockChain blockChain : moduleTxDatas.getBlockChains()) {
@@ -247,17 +247,17 @@ public class CacheDataServiceImpl implements CacheDataService {
                 chainAssetStorage.save(CmRuntimeInfo.getChainAssetKey(chainAsset.getAddressChainId(), assetKey), chainAsset);
             }
         }
-        //提交回滚
+        //Submit rollback
         saveBlockHeight.setBlockHeight(height - 1);
         saveBlockHeight.setCommit(true);
         blockHeightStorage.saveOrUpdateBlockHeight(chainId, saveBlockHeight);
-        //删除备份信息
+        //Delete backup information
         cacheDatasStorage.delete(height - 1);
     }
 
     @Override
     public CacheDatas getCacheDatas(long height) throws Exception {
-        //取回滚的信息，进行回滚
+        //Retrieve rolled back information and perform a rollback
         return cacheDatasStorage.load(height);
     }
 
@@ -273,7 +273,7 @@ public class CacheDataServiceImpl implements CacheDataService {
 
     @Override
     public void beginBakBlockHeight(int chainId, long blockHeight) throws Exception {
-        // 存储区块高度 save block height
+        // Storage block height save block height
         BlockHeight saveBlockHeight = blockHeightStorage.getBlockHeight(chainId);
         if (null == saveBlockHeight) {
             saveBlockHeight = new BlockHeight();
@@ -285,7 +285,7 @@ public class CacheDataServiceImpl implements CacheDataService {
 
     @Override
     public void endBakBlockHeight(int chainId, long blockHeight) throws Exception {
-        // 存储区块高度 save block height
+        // Storage block height save block height
         BlockHeight saveBlockHeight = blockHeightStorage.getBlockHeight(chainId);
         saveBlockHeight.setCommit(true);
         blockHeightStorage.saveOrUpdateBlockHeight(chainId, saveBlockHeight);

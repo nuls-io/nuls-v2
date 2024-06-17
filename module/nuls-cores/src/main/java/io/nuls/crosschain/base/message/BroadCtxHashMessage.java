@@ -9,7 +9,7 @@ import io.nuls.crosschain.base.message.base.BaseMessage;
 import java.io.IOException;
 
 /**
- * 广播跨链交易Hash给链接到的主网节点
+ * Broadcast Cross Chain TransactionsHashTo link to the main network node
  * @author tag
  * @date 2019/4/4
  */

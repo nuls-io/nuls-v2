@@ -1,7 +1,7 @@
 package io.nuls.consensus.model.dto.input;
 
 /**
- * 智能合约委托共识参数
+ * Smart contract delegation consensus parameters
  * Intelligent Contract Delegation Consensus Parameters
  *
  * @author tag

@@ -2,7 +2,7 @@ package io.nuls.consensus.economic.nuls.model.bo;
 import java.math.BigInteger;
 
 /**
- * 节点委托信息
+ * Node delegation information
  * deposit info
  *
  * @author tag

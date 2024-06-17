@@ -34,7 +34,7 @@ import java.math.BigInteger;
 @ApiModel
 public class ContractComputeAddress {
 
-    @ApiModelProperty(description = "交易创建者")
+    @ApiModelProperty(description = "Transaction Creator")
     private String sender;
     @ApiModelProperty(description = "codeHash")
     private String codeHash;

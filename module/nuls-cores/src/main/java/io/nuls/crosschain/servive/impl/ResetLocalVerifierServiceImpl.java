@@ -42,7 +42,7 @@ import static io.nuls.core.constant.CommonCodeConstanst.PARAMETER_ERROR;
 /**
  * @Author: zhoulijun
  * @Time: 2020/11/23 11:17
- * @Description: 功能描述
+ * @Description: Function Description
  */
 @Component
 public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService {
@@ -65,27 +65,27 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
 
 
     /**
-     * 缓存重置异构链存储的主链验证人的初始化验证人交易的hash
-     * 用于在处理拜占庭签名时与普通的初始化验证人交易进行区别
-     * 本节点处理完此交易后交易hash从此列表移除
+     * Cache reset for heterogeneous chain storage, initialization of main chain validators, validator transactionshash
+     * Used to distinguish from regular initialization validator transactions when processing Byzantine signatures
+     * After processing this transaction at this node, proceed with the transactionhashRemove from this list
      */
     private Set<String> resetOtherVerifierTxList = new HashSet<>();
 
     private CoinData assemblyCoinFrom(Chain chain, String addressStr) throws NulsException {
         byte[] address = AddressTool.getAddress(addressStr);
         if (!AddressTool.validAddress(chain.getChainId(), addressStr)) {
-            //转账交易转出地址必须是本链地址
-            chain.getLogger().error("跨链交易转出账户不为本链账户");
+            //The transfer transaction transfer address must be a local chain address
+            chain.getLogger().error("Cross chain transaction transfer out account is not a local chain account");
             throw new NulsException(NulsCrossChainErrorCode.ADDRESS_IS_NOT_THE_CURRENT_CHAIN);
         }
         int assetChainId = chain.getChainId();
         int assetId = nulsCrossChainConfig.getAssetId();
-        //检查对应资产余额 是否足够
+        //Check the corresponding asset balance Is it sufficient
         Map<String, Object> result = LedgerCall.getBalanceAndNonce(chain, addressStr, assetChainId, assetId);
         byte[] nonce = RPCUtil.decode((String) result.get("nonce"));
         BigInteger balance = new BigInteger(result.get("available").toString());
         if (BigIntegerUtils.isLessThan(balance, NORMAL_PRICE_PRE_1024_BYTES)) {
-            chain.getLogger().error("账户余额不足");
+            chain.getLogger().error("Insufficient account balance");
             throw new NulsException(NulsCrossChainErrorCode.INSUFFICIENT_BALANCE);
         }
         CoinData coinData = new CoinData();
@@ -95,7 +95,7 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
     }
 
     /**
-     * 创建并广播一个重置本链验证人交易
+     * Create and broadcast a reset chain validator transaction
      *
      * @return
      */
@@ -125,24 +125,24 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
             transactionSignature.setP2PHKSignatures(p2PHKSignatures);
             tx.setTransactionSignature(transactionSignature.serialize());
             if (!TransactionCall.sendTx(chain, RPCUtil.encode(tx.serialize()))) {
-                chain.getLogger().error("重置本链验证人列表交易发送交易模块失败\n\n");
+                chain.getLogger().error("Failed to reset the transaction sending module of this chain's validator list transaction\n\n");
                 throw new NulsException(NulsCrossChainErrorCode.INTERFACE_CALL_FAILED);
             }
             Map<String, Object> result = new HashMap<>(2);
             result.put(ParamConstant.TX_HASH, tx.getHash().toHex());
             return Result.getSuccess(CommonCodeConstanst.SUCCESS).setData(result);
         }catch (NulsException e){
-            chain.getLogger().error("创建重置本链验证人列表交易时捕获异常",e);
+            chain.getLogger().error("Exception caught while creating and resetting the validator list transaction in this chain",e);
             return Result.getFailed(e.getErrorCode());
         }catch (Throwable e){
-            chain.getLogger().error("创建重置本链验证人列表交易时捕获到未知异常,{}",e.getMessage(),e);
+            chain.getLogger().error("Unknown exception caught during the creation and reset of this chain's validator list transaction,{}",e.getMessage(),e);
             return Result.getFailed(CommonCodeConstanst.SYS_UNKOWN_EXCEPTION);
         }
 
     }
 
     /**
-     * 验证此交易的coin data中的from中只能有1个种子节点签名的交易
+     * Verify this transaction'scoin dataMiddlefromOnly in the middle can there be1Transactions signed by seed nodes
      *
      * @param chainId     chain ID
      * @param txs         cross chain transaction list
@@ -158,19 +158,19 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
             result.put("errorCode", NulsCrossChainErrorCode.CHAIN_NOT_EXIST.getCode());
             return result;
         }
-        //一个区块只处理一条重置交易，其他的丢掉
+        //One block only handles one reset transaction, discard the rest
         List<Transaction> invalidCtxList =  txs.stream().skip(1).collect(Collectors.toList());
         String errorCode = null;
         Transaction tx = txs.get(0);
         try {
             CoinData coinData = tx.getCoinDataInstance();
-            //只能有一个from
+            //There can only be onefrom
             if (coinData.getFrom().size() != 1) {
                 result.put("txList", txs);
                 result.put("errorCode", NulsCrossChainErrorCode.COINDATA_VERIFY_FAIL.getCode());
                 return result;
             }
-            //必须是种子节点发出的交易
+            //Must be a transaction sent by a seed node
             if (coinData.getFromAddressList().stream().noneMatch(d -> nulsCrossChainConfig.getSeedNodeList().contains(d))) {
                 result.put("txList", txs);
                 result.put("errorCode", NulsCrossChainErrorCode.MUST_SEED_ADDRESS_SIGN.getCode());
@@ -179,19 +179,19 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
             TransactionSignature transactionSignature = new TransactionSignature();
             transactionSignature.parse(tx.getTransactionSignature(), 0);
             byte[] txHashByte = tx.getHash().getBytes();
-            //只能有一个签名
+            //Only one signature is allowed
             if (transactionSignature.getP2PHKSignatures().size() != 1) {
                 chain.getLogger().error("signatures can not be null");
                 throw new NulsException(NulsCrossChainErrorCode.SIGNATURE_ERROR);
             }
 
-            //验证签名
+            //Verify signature
             P2PHKSignature signature = transactionSignature.getP2PHKSignatures().get(0);
             if (!ECKey.verify(txHashByte, signature.getSignData().getSignBytes(), signature.getPublicKey())) {
                 chain.getLogger().error("Signature verification failed");
                 throw new NulsException(NulsCrossChainErrorCode.SIGNATURE_ERROR);
             }
-            //签名必须是种子节点
+            //The signature must be a seed node
             String signAddress = AddressTool.getStringAddressByBytes(AddressTool.getAddress(signature.getPublicKey(), chain.getChainId()));
             if (!nulsCrossChainConfig.getSeedNodeList().contains(signAddress)) {
                 chain.getLogger().error("Signature verification failed");
@@ -209,9 +209,9 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
     }
 
     /**
-     * 1.将当前的本链验证人列表存储在old_local_verifier表中 key为高度
-     * 2.从共识模块获取最新的节点列表，将出块地址刷新到本链验证人列表中。
-     * 3.组装一个平行链验证人初始化交易广播到平行链,所有注册的平行链都要广播。
+     * 1.Store the current list of validators in this chainold_local_verifierIn the table keyFor height
+     * 2.Retrieve the latest node list from the consensus module and refresh the block address to the list of validators in this chain.
+     * 3.Assemble a parallel chain validator to initialize the transaction broadcast to the parallel chain,All registered parallel chains must be broadcasted.
      *
      * @param chainId     chain ID
      * @param txs         cross chain transaction list
@@ -227,14 +227,14 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
         Transaction tx = txs.get(0);
         Set<String> allAgentPackingAddress = new HashSet<>(ConsensusCall.getWorkAgentList(chain));
         allAgentPackingAddress.addAll(nulsCrossChainConfig.getSeedNodeList());
-        chain.getLogger().info("获取到当前网络最新的出块地址列表（包括种子节点）:{}",allAgentPackingAddress);
-        //备份当前本链验证人列表
+        chain.getLogger().info("Obtain the latest block address list for the current network（Including seed nodes）:{}",allAgentPackingAddress);
+        //Back up the current list of validators in this chain
         localVerifierService.backup(chainId,blockHeader.getHeight());
         chain.getSwitchVerifierLock().writeLock().lock();
         try{
             boolean res = LocalVerifierManager.initLocalVerifier(chain,new ArrayList<>(allAgentPackingAddress));
             if(!res){
-                chain.getLogger().error("重置本链验证人列表失败");
+                chain.getLogger().error("Failed to reset the list of validators on this chain");
                 return false;
             }
         } catch (Exception e) {
@@ -242,16 +242,16 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
         } finally {
             chain.getSwitchVerifierLock().writeLock().unlock();
         }
-        chain.getLogger().info("重置本链验证人列表完成:{}",chain.getVerifierList());
+        chain.getLogger().info("Reset the list of validators in this chain completed:{}",chain.getVerifierList());
         int syncStatus = BlockCall.getBlockStatus(chain);
         List<ChainInfo> otherChainInfoList = chainManager.getRegisteredCrossChainList().stream().filter(d->d.getChainId() != chainId).collect(Collectors.toList());
         List<Transaction> newTxList = Lists.newArrayList();
         otherChainInfoList.forEach(chainInfo -> {
             try {
-                    //组装一个重置平行链存储的主网验证人列表的交易
+                    //Assemble a transaction to reset the main network validator list for parallel chain storage
                     newTxList.add(TxUtil.createVerifierInitTx(chain.getVerifierList(), tx.getTime(), chainInfo.getChainId()));
             } catch (IOException e) {
-                chain.getLogger().error("组装重置平行链存储的主网验证人列表的交易失败",e);
+                chain.getLogger().error("Transaction failure in assembling and resetting the main network validator list for parallel chain storage",e);
             }
         });
         if(otherChainInfoList.size() != newTxList.size()){
@@ -262,7 +262,7 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
                     new ResetOtherChainVerifierListHandler(chain, initOtherVerifierTx,syncStatus));
             String txHash = initOtherVerifierTx.getHash().toHex();
             resetOtherVerifierTxList.add(txHash);
-            chain.getLogger().info("发起一笔重置平行链存储的主链验证人列表的交易,txHash:{}",txHash);
+            chain.getLogger().info("Initiate a transaction to reset the main chain verifier list stored in parallel chains,txHash:{}",txHash);
         });
         return true;
     }

@@ -5,7 +5,7 @@ import io.nuls.crosschain.model.po.SendCtxHashPO;
 import java.util.Map;
 
 /**
- * 已广播给其他链节点的区块高度和广播的跨链交易Hash列表数据库相关操作
+ * The height of blocks broadcasted to other chain nodes and the cross chain transactions broadcastedHashList database related operations
  * Block Height Broadcast to Other Chain Nodes and Related Operation of Broadcast Cross-Chain Transaction Hash List Database
  *
  * @author  tag
@@ -13,34 +13,34 @@ import java.util.Map;
  * */
 public interface SendedHeightService {
     /**
-     * 保存
-     * @param height            友链协议跨链交易Hash
+     * preserve
+     * @param height            Friendly Chain Protocol Cross Chain TransactionsHash
      * @param po                po
-     * @param chainID           链ID
-     * @return                  保存成功与否
+     * @param chainID           chainID
+     * @return                  Whether the save was successful or not
      * */
     boolean save(long height, SendCtxHashPO po, int chainID);
 
     /**
-     * 查询
-     * @param height    友链协议跨链交易Hash
-     * @param chainID   链ID
-     * @return          高度对应的交易Hash列表
+     * query
+     * @param height    Friendly Chain Protocol Cross Chain TransactionsHash
+     * @param chainID   chainID
+     * @return          Highly Corresponding TransactionsHashlist
      * */
     SendCtxHashPO get(long height, int chainID);
 
     /**
-     * 删除
-     * @param height    删除的键
-     * @param chainID   链ID
-     * @return          删除成功与否
+     * delete
+     * @param height    Delete key
+     * @param chainID   chainID
+     * @return          Whether the deletion was successful or not
      * */
     boolean delete(long height,int chainID);
 
     /**
-     * 查询所有
-     * @param chainID   链ID
-     * @return          该表所有数据
+     * Query All
+     * @param chainID   chainID
+     * @return          All data in this table
      * */
     Map<Long , SendCtxHashPO> getList(int chainID);
 }

@@ -10,13 +10,13 @@ import io.nuls.core.parse.SerializeUtils;
 import java.io.IOException;
 
 /**
- * 接收跨链交易在主网节点的处理结果
+ * Receive the processing results of cross chain transactions at the main network node
  * @author tag
  * @date 2019/4/4
  */
 public class GetCtxStateMessage extends BaseMessage {
     /**
-     * 请求连协议跨链交易Hash
+     * Request protocol cross chain transactionHash
      * */
     private NulsHash requestHash;
 

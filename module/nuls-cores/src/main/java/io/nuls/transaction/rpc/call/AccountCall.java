@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 调用其他模块跟交易相关的接口
+ * Calling other modules and transaction related interfaces
  *
  * @author: qinyifeng
  * @date: 2018/12/20
@@ -27,7 +27,7 @@ import java.util.Map;
 public class AccountCall {
 
     /**
-     * 查询多签账户
+     * Query multiple signed accounts
      * Query multi-sign account
      *
      * @param multiSignAddress

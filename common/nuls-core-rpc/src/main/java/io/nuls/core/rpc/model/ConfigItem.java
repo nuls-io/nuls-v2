@@ -28,7 +28,7 @@ package io.nuls.core.rpc.model;
 
 
 /**
- * 模块的自定义参数
+ * Custom parameters for modules
  * User defined parameters of module
  *
  * @author tangyi

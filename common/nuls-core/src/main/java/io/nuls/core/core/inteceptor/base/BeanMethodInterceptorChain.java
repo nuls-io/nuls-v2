@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 方法拦截器链：一个方法可以被多个拦截器拦截，多个拦截器之间顺序的组成了一条拦截器链，没个拦截器可以决定是否继续执行后面拦截器
+ * Method Interceptor Chain：A method can be intercepted by multiple interceptors, and the sequence of these interceptors forms a chain of interceptors. Each interceptor can decide whether to continue executing subsequent interceptors
  * Method the interceptor chain: one method can be more interceptors to intercept,
  * between multiple interceptors sequence formed a chain of interceptors, behind each blocker can decide whether to continue the interceptor
  *
@@ -41,44 +41,44 @@ import java.util.List;
 public class BeanMethodInterceptorChain {
 
     /**
-     * 链中的拦截器列表
+     * List of interceptors in the chain
      * List of interceptors in the interceptors chain.
      */
     protected List<BeanMethodInterceptor> interceptorList = new ArrayList<>();
 
     /**
-     * 线程安全的执行缓存，用于标记当前执行进度
+     * Thread safe execution cache, used to mark the current execution progress
      * Thread-safe execution cache to mark the current execution progress.
      */
     private ThreadLocal<Integer> index = new ThreadLocal<>();
 
     /**
-     * 方法代理器缓存，线程安全
+     * Method proxy cache, thread safe
      * Method agent cache, thread safe.
      */
     private ThreadLocal<MethodProxy> methodProxyThreadLocal = new ThreadLocal<>();
 
     /**
-     * 像链中添加一个方法拦截器
+     * Add a method interceptor to the chain
      * Add a method interceptor to the chain.
      *
-     * @param interceptor 拦截器
+     * @param interceptor Interceptor
      */
     protected void add(BeanMethodInterceptor interceptor) {
         interceptorList.add(interceptor);
     }
 
     /**
-     * 将一个方法放入该拦截器链中执行，获取返回结果
+     * Put a method into the interceptor chain for execution, and obtain the return result
      * Puts a method in the interceptor chain to retrieve the returned result.
      *
-     * @param annotation  拦截方法的注解实例/Annotation instances of the intercepting method.
-     * @param object      方法所属对象/Method owner
-     * @param method      方法定义/Method definition
-     * @param params      方法参数列表/Method parameter list
-     * @param methodProxy 方法代理器
-     * @return 返回拦截的方法的返回值，可以对该值进行处理和替换/Returns the return value of the intercepting method, which can be processed and replaced.
-     * @throws Throwable 该方法可能抛出异常，请谨慎处理/This method may throw an exception, handle with care.
+     * @param annotation  Annotation instance of interception method/Annotation instances of the intercepting method.
+     * @param object      Object to which the method belongs/Method owner
+     * @param method      Method definition/Method definition
+     * @param params      Method parameter list/Method parameter list
+     * @param methodProxy Method proxy
+     * @return The return value of the intercepted method can be processed and replaced/Returns the return value of the intercepting method, which can be processed and replaced.
+     * @throws Throwable This method may throw exceptions, please handle with caution/This method may throw an exception, handle with care.
      */
     public Object startInterceptor(Annotation annotation, Object object, Method method, Object[] params, MethodProxy methodProxy) throws Throwable {
         methodProxyThreadLocal.set(methodProxy);
@@ -95,7 +95,7 @@ public class BeanMethodInterceptorChain {
 
 
     /**
-     * 调用一个具体的拦截器
+     * Call a specific interceptor
      * Call a specific interceptor.
      */
     public Object execute(Annotation annotation, Object object, Method method, Object[] params) throws Throwable {

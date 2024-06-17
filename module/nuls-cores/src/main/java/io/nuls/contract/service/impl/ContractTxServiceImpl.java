@@ -78,7 +78,7 @@ public class ContractTxServiceImpl implements ContractTxService {
 
             tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
 
-            // 签名、发送交易到交易模块
+            // autograph、Send transaction to transaction module
             Result signAndBroadcastTxResult = contractTxHelper.signAndBroadcastTx(chainId, sender, password, tx);
             if(signAndBroadcastTxResult.isFailed()) {
                 return signAndBroadcastTxResult;
@@ -88,7 +88,7 @@ public class ContractTxServiceImpl implements ContractTxService {
             String contractAddressStr = AddressTool.getStringAddressByBytes(tx.getTxDataObj().getContractAddress());
             resultMap.put("txHash", txHash);
             resultMap.put("contractAddress", contractAddressStr);
-            // 保留未确认的创建合约交易到内存中
+            // Keep unconfirmed contract creation transactions in memory
             contractHelper.getChain(chainId).getContractTxCreateUnconfirmedManager().saveLocalUnconfirmedCreateContractTransaction(sender, resultMap, tx.getTime());
             return getSuccess().setData(resultMap);
         } catch (NulsException e) {
@@ -122,13 +122,13 @@ public class ContractTxServiceImpl implements ContractTxService {
 
             tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
 
-            // 签名、发送交易到交易模块
+            // autograph、Send transaction to transaction module
             Result signAndBroadcastTxResult = contractTxHelper.signAndBroadcastTx(chainId, sender, password, tx);
             if(signAndBroadcastTxResult.isFailed()) {
                 return signAndBroadcastTxResult;
             }
 
-            /*// 保存未确认Token转账
+            /*// Save unconfirmedTokenTransfer
             Result<byte[]> unConfirmedTokenTransferResult = this.saveUnConfirmedTokenTransfer(chainId, tx, sender, contractAddress, methodName, args);
             if (unConfirmedTokenTransferResult.isFailed()) {
                 return unConfirmedTokenTransferResult;
@@ -170,7 +170,7 @@ public class ContractTxServiceImpl implements ContractTxService {
             DeleteContractTransaction tx = result.getData();
             tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
 
-            // 签名、发送交易到交易模块
+            // autograph、Send transaction to transaction module
             Result signAndBroadcastTxResult = contractTxHelper.signAndBroadcastTx(chainId, sender, password, tx);
             if(signAndBroadcastTxResult.isFailed()) {
                 return signAndBroadcastTxResult;

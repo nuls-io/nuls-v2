@@ -18,7 +18,7 @@ import java.util.Map;
 public class VersionChangeNotifier {
 
     /**
-     * 协议升级后通知各模块
+     * Notify all modules after protocol upgrade
      * @param chainId
      * @param version
      * @return
@@ -59,7 +59,7 @@ public class VersionChangeNotifier {
     }
 
     /**
-     * 协议版本变化时,重新注册交易、消息
+     * When the protocol version changes,Re register transaction、news
      *
      * @param chainId
      * @param context

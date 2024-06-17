@@ -1,7 +1,7 @@
 package io.nuls.crosschain.base.constant;
 
 /**
- * 跨链模块命令常量管理类
+ * Cross chain module command constant management class
  *
  * @author tag
  * 2019/04/08
@@ -9,57 +9,57 @@ package io.nuls.crosschain.base.constant;
 public interface CommandConstant {
 
     /**
-     * 向其他链节点获取跨链交易
+     * Obtain cross chain transactions from other chain nodes
      */
     String GET_OTHER_CTX_MESSAGE = "getOtherCtx";
 
     /**
-     * 发起链接收主网发送过来的验证跨链交易消息
+     * Initiate a link to receive verification cross chain transaction messages sent from the main network
      */
     String VERIFY_CTX_MESSAGE = "verifyCtx";
 
     /**
-     * 发起链接收跨链交易在主链的处理结果
+     * The processing results of initiating link collection cross chain transactions in the main chain
      */
     String CTX_STATE_MESSAGE = "recvCtxState";
     /**
-     * 发起链接收到主网发送的获取链资产统计
+     * Initiate link and receive asset statistics for the acquisition chain sent by the main network
      */
     String GET_CIRCULLAT_MESSAGE = "getCirculat";
 
 
     /**
-     * 接收其他链节点发来的跨链交易
+     * Receive cross chain transactions from other chain nodes
      */
     String NEW_OTHER_CTX_MESSAGE = "recvOtherCtx";
 
     /**
-     * 接收链接收到主网发来的跨链交易验证结果
+     * Receive link and receive cross chain transaction verification results from the main network
      */
     String CTX_VERIFY_RESULT_MESSAGE = "recvVerifyRs";
 
     /**
-     * 接收链收到主网发送的获取跨链交易处理结果消息
+     * The receiving chain receives a message from the main network to obtain cross chain transaction processing results
      */
     String GET_CTX_STATE_MESSAGE = "getCtxState";
 
     /**
-     * 接收链接收主网广播的跨链交易Hash
+     * Cross chain transactions for receiving links and broadcasting from the main networkHash
      */
     String BROAD_CTX_HASH_MESSAGE = "recvCtxHash";
 
     /**
-     * 接收链向链内节点广播交易Hash和签名
+     * Broadcast transactions from the receiving chain to nodes within the chainHashAnd signature
      */
     String BROAD_CTX_SIGN_MESSAGE = "recvCtxSign";
 
     /**
-     * 主网接收到友链发送的资产发行量统计消息
+     * The main network received an asset issuance statistics message sent by the friend chain
      * */
     String  CIRCULATION_MESSAGE = "recvCirculat";
 
     /**
-     * 对指定跨链交易重新进行拜赞庭签名广播
+     * Re broadcast the Byzantine signature for the specified cross chain transaction
      */
     String CROSS_TX_REHANDLE_MESSAGE = "ctxRehandle";
 

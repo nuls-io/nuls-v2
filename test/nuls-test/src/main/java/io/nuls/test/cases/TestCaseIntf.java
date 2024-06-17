@@ -6,10 +6,10 @@ import io.nuls.test.utils.Utils;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-19 20:48
- * @Description: 测试用例接口
+ * @Description: Test Case Interface
  *
- * @param <T>  测试完后返回类型
- * @param <P>  进入测试的参数类型
+ * @param <T>  After testing, return the type
+ * @param <P>  Enter parameter types for testing
  */
 public interface TestCaseIntf<T,P> {
 
@@ -22,12 +22,12 @@ public interface TestCaseIntf<T,P> {
             param = initParam();
         }
         if(this.caseType() == CaseType.Test){
-            Utils.success(depthSpace(depth)+"开始测试【"+title()+"】");
+            Utils.success(depthSpace(depth)+"Start testing【"+title()+"】");
             T res = doTest(param,depth+1);
-            Utils.success(depthSpace(depth) + title() + "测试通过");
+            Utils.success(depthSpace(depth) + title() + "Test passed");
             return res;
         }else{
-            Utils.msg(depthSpace(depth)+"执行:【"+this.title()+"】");
+            Utils.msg(depthSpace(depth)+"implement:【"+this.title()+"】");
             return doTest(param,depth+1);
         }
     }
@@ -37,14 +37,14 @@ public interface TestCaseIntf<T,P> {
             throw new TestFailException(result.getStatus() + " : " + result.getMessage());
         }
         if(result.getList() == null && result.getData() == null){
-            throw new TestFailException(title() + "测试返回值不符合预期，返回数据为空");
+            throw new TestFailException(title() + "The test return value does not meet expectations, and the return data is empty");
         }
 
     }
 
     default void check(boolean condition,String msg) throws TestFailException {
         if(!condition){
-            throw new TestFailException(title() + "测试结果不符合预期，" + msg);
+            throw new TestFailException(title() + "The test results did not meet expectations," + msg);
         }
     }
 

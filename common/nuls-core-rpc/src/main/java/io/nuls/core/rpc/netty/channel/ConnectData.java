@@ -20,7 +20,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
- * 链接基础类
+ * Link Foundation Class
  * Link base class
  *
  * @author tag
@@ -31,37 +31,37 @@ public class ConnectData {
     private final SocketChannel channel;
 
     /**
-     * 链接关闭断开标识
+     * Link closure and disconnection identification
      * Link Close Disconnection Identification
      */
     private boolean connected = true;
 
     /**
-     * 当前RequestOnly队列占内存大小
+     * currentRequestOnlyQueue occupied memory size
      * Current memory size of RequestOnly queue
      * */
     private long requestOnlyQueueMemSize = 0;
 
     /**
-     * 从服务端得到的自动处理的应答消息
+     * The automatically processed response message obtained from the server
      * Response that need to be handled Automatically from the server
      */
     private final LinkedBlockingQueue<Response> responseAutoQueue = new LinkedBlockingQueue<>();
 
     /**
-     * 客户端不需要相应的请求
+     * The client does not require corresponding requests
      * Client does not need corresponding requests
      */
     private final LinkedBlockingQueue<RequestOnly> requestOnlyQueue = new LinkedBlockingQueue<>(Constants.QUEUE_SIZE);
 
     /**
-     * 请求超时的请求
+     * Request timed out
      * Request for timeout
      */
     private final List<String> timeOutMessageList = new ArrayList<>();
 
     /**
-     * 接口最近调用时间（订阅间隔指定时间返回会用到）
+     * Last interface call time（Subscription interval specified time return will use）
      * Recent call time of interface
      * Key: Message
      * Value: Time(long)
@@ -69,25 +69,25 @@ public class ConnectData {
     private final Map<Message, Long> cmdInvokeTime = new ConcurrentHashMap<>();
 
     /**
-     * 多次响应队列（根据时间间隔订阅/Period），Message
+     * Multiple response queues（Subscription based on time intervals/Period）,Message
      * Multiply called queue (Period).Message.
      */
     private final LinkedBlockingQueue<Object[]> requestPeriodLoopQueue = new LinkedBlockingQueue<>();
 
     /**
-     * 多次响应（根据时间触发次数订阅/Event count），Message
+     * Multiple responses（Subscription based on the number of time triggers/Event count）,Message
      * Multiply called (Event count). Message.
      */
     private final List<Message> requestEventCountLoopList = new CopyOnWriteArrayList<>();
 
     /**
-     * 当前链接订阅接口待返回结果列表
+     * List of results to be returned from the current link subscription interface
      * Current Link Subscription Interface to Return Result List
      */
     private final LinkedBlockingQueue<Response> requestEventResponseQueue = new LinkedBlockingQueue<>();
 
     /**
-     * 按时间订阅消息的消息ID与详细键值对
+     * Message subscription by timeIDPair with detailed key values
      * <p>
      * Key:MessageID
      * Value:Message
@@ -95,7 +95,7 @@ public class ConnectData {
     private final Map<String, Message> idToPeriodMessageMap = new ConcurrentHashMap<>();
 
     /**
-     * 按时间触发次数订阅消息的消息ID与详细键值对
+     * Message subscription based on time triggered timesIDPair with detailed key values
      * <p>
      * Key:MessageID
      * Value:Message
@@ -103,22 +103,22 @@ public class ConnectData {
     private final Map<String, Message> idToEventMessageMap = new ConcurrentHashMap<>();
 
     /**
-     * 订阅接口时接口被改变的初始次数
+     * The initial number of times the interface is changed when subscribing to it
      * Initial number of interface changes when subscribing to an interface
      * <p>
      * Key:cmd_messageId
-     * Value:订阅时接口已改变次数/Number of interface changes at subscription time
+     * Value:The number of times the interface has changed during subscription/Number of interface changes at subscription time
      */
     private final Map<String, Integer> subscribeInitCount = new ConcurrentHashMap<>();
 
 
     /**
-     * 存储连接断开的事件监听
+     * Event listening for storage connection disconnection
      */
     private final List<EventListener> closeEventListenerList = new ArrayList<>();
 
     /**
-     * 判断指定消息是否为订阅消息，且是按指定间隔时间返回数据
+     * Determine whether the specified message is a subscription message and whether the data is returned at the specified interval time
      * Determines whether the specified message is a subscription message and returns entity at a specified interval
      *
      * @param messageId
@@ -128,7 +128,7 @@ public class ConnectData {
     }
 
     /**
-     * 判断指定消息是否为订阅消息，且是事件触发次数返回数据
+     * Determine whether the specified message is a subscription message and the number of event triggers returns data
      * Determines whether the specified message is a subscription message and returns entity on the number of event triggers
      *
      * @param messageId
@@ -138,13 +138,13 @@ public class ConnectData {
     }
 
     /**
-     * 该链接处理消息的需要的线程
+     * The thread required for processing messages in this link
      * The thread that the link needs to process the message
      */
     private final ExecutorService threadPool = ThreadUtils.createThreadPool(6, 100, new NulsThreadFactory("ServerProcessor"));
 
     /**
-     * 订阅事件（接口改变次数）
+     * Subscription events（Number of interface changes）
      * Subscription events (number of interface changes)
      */
     public void subscribeByEvent(Message message, Request request) {
@@ -155,7 +155,7 @@ public class ConnectData {
     }
 
     /**
-     * 取消订阅 / unsubscribe
+     * Unsubscribe / unsubscribe
      *
      * @param messageId
      */
@@ -174,7 +174,7 @@ public class ConnectData {
     }
 
     /**
-     * 添加订阅接口初始次数
+     * Add subscription interface initial count
      * Initial number of subscription interfaces added
      */
     public void addSubscribeInitCount(Message message) {
@@ -189,7 +189,7 @@ public class ConnectData {
     }
 
     /**
-     * 刪除订阅接口初始次数
+     * Delete subscription interface initial count
      * Initial number of subscription interfaces added
      */
     public void removeSubscribeInitCount(Message message) {
@@ -219,7 +219,7 @@ public class ConnectData {
             responseAutoQueue.clear();
             responseAutoQueue.offer(new Response());
             requestPeriodLoopQueue.clear();
-            emitCloseEvent(); //广播连接关闭事件
+            emitCloseEvent(); //Broadcast connection closure event
         }
     }
 
@@ -292,7 +292,7 @@ public class ConnectData {
     }
 
     /**
-     * 监听连接关闭事件
+     * Listening for connection closure events
      *
      * @param eventListener
      */
@@ -301,7 +301,7 @@ public class ConnectData {
     }
 
     /**
-     * 触发连接关闭事件
+     * Trigger connection closure event
      */
     public void emitCloseEvent() {
         this.closeEventListenerList.forEach(f -> f.apply());

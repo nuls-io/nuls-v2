@@ -34,24 +34,24 @@ import io.nuls.common.ConfigBean;
 import java.util.ArrayDeque;
 
 /**
- * 链生成器
+ * Chain Generator
  *
  * @author captain
  * @version 1.0
- * @date 18-11-29 下午2:52
+ * @date 18-11-29 afternoon2:52
  */
 public class ChainGenerator {
 
     /**
-     * 测试专用
-     * 生成一条链
+     * Test specific
+     * Generate a chain
      *
-     * @param startHeight  链起始高度(包括在链内)
-     * @param endHeight    链终止高度(包括在链内)
-     * @param symbol       链标志,生成的hashList与这个字段有关,便与判断测试结果
-     * @param parent       父链
-     * @param parentSymbol 父链标志
-     * @param chainId 链Id/chain id
+     * @param startHeight  Chain starting height(Include within the chain)
+     * @param endHeight    Chain termination height(Include within the chain)
+     * @param symbol       Chain marker,GeneratedhashListRelated to this field,Judgment test results
+     * @param parent       Parent Chain
+     * @param parentSymbol Parent Chain Flag
+     * @param chainId chainId/chain id
      * @return
      */
     public static Chain newChain(long startHeight, long endHeight, String symbol, Chain parent, String parentSymbol, int chainId, ChainTypeEnum type) {
@@ -75,12 +75,12 @@ public class ChainGenerator {
     }
 
     /**
-     * 测试专用
-     * 生成一条主链
+     * Test specific
+     * Generate a main chain
      *
-     * @param endHeight 链终止高度(包括在链内)
-     * @param symbol    链标志,生成的hashList与这个字段有关,便与判断测试结果
-     * @param chainId 链Id/chain id
+     * @param endHeight Chain termination height(Include within the chain)
+     * @param symbol    Chain marker,GeneratedhashListRelated to this field,Judgment test results
+     * @param chainId chainId/chain id
      * @return
      */
     public static Chain newMasterChain(long endHeight, String symbol, int chainId) {
@@ -99,11 +99,11 @@ public class ChainGenerator {
     }
 
     /**
-     * 使用一个区块生成一条链
+     * Generate a chain using a block
      *
-     * @param chainId 链Id/chain id
+     * @param chainId chainId/chain id
      * @param block
-     * @param parent  生成分叉链时传父链,生成孤儿链时传null
+     * @param parent  When generating a forked chain, pass on the parent chain,Transferred when generating orphan chainsnull
      * @return
      */
     public static Chain generate(int chainId, Block block, Chain parent, ChainTypeEnum type) {
@@ -129,9 +129,9 @@ public class ChainGenerator {
     }
 
     /**
-     * 系统初始化时,由本地的最新区块生成主链
+     * During system initialization,Generate the main chain from the latest local blocks
      *
-     * @param chainId 链Id/chain id
+     * @param chainId chainId/chain id
      * @param block
      * @param blockService
      * @return
@@ -152,7 +152,7 @@ public class ChainGenerator {
         int heightRange = parameters.getHeightRange();
         long start = height - heightRange + 1;
         start = start >= 0 ? start : 0;
-        //加载主链上的区块hash
+        //Load blocks on the main chainhash
         for (long i = start; i <= height; i++) {
             hashs.add(blockService.getBlockHash(chainId, i));
         }

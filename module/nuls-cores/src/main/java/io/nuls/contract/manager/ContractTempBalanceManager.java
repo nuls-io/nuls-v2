@@ -71,7 +71,7 @@ public class ContractTempBalanceManager {
     }
 
     /**
-     * 获取账户可用余额
+     * Obtain available account balance
      *
      * @param address
      * @param bestHeight
@@ -86,9 +86,9 @@ public class ContractTempBalanceManager {
 
             String addressKey = balanceKey(address, assetChainId,  assetId);
             ContractBalance balance = tempBalanceMap.get(addressKey);
-            // 临时余额区没有余额，则从真实余额中取值
+            // If there is no balance in the temporary balance area, take the value from the actual balance
             if (balance == null) {
-                // 初始化临时余额区
+                // Initialize temporary balance area
                 balance = contractHelper.getRealBalance(chainId, assetChainId, assetId, AddressTool.getStringAddressByBytes(address));
                 tempBalanceMap.put(addressKey, balance);
             }

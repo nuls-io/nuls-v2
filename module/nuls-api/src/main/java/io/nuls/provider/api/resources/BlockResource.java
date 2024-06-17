@@ -77,11 +77,11 @@ public class BlockResource {
     @GET
     @Path("/header/height/{height}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "根据区块高度查询区块头", order = 201)
+    @ApiOperation(description = "Query block headers based on block height", order = 201)
     @Parameters({
-            @Parameter(parameterName = "height", requestType = @TypeDescriptor(value = Long.class), parameterDes = "区块高度")
+            @Parameter(parameterName = "height", requestType = @TypeDescriptor(value = Long.class), parameterDes = "block height")
     })
-    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = BlockHeaderDto.class))
+    @ResponseData(name = "Return value", responseType = @TypeDescriptor(value = BlockHeaderDto.class))
     public RpcClientResult getBlockHeaderByHeight(@PathParam("height") Long height) {
         if (height == null || height < 0) {
             return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "height is invalid"));
@@ -102,11 +102,11 @@ public class BlockResource {
     @GET
     @Path("/header/hash/{hash}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "根据区块hash查询区块头", order = 202)
+    @ApiOperation(description = "Based on blockshashQuery block header", order = 202)
     @Parameters({
-            @Parameter(parameterName = "hash", parameterDes = "区块hash")
+            @Parameter(parameterName = "hash", parameterDes = "blockhash")
     })
-    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = BlockHeaderDto.class))
+    @ResponseData(name = "Return value", responseType = @TypeDescriptor(value = BlockHeaderDto.class))
     public RpcClientResult getBlockHeaderByHash(@PathParam("hash") String hash) {
         if (hash == null || !ValidateUtil.validHash(hash)) {
             return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "hash is invalid"));
@@ -127,8 +127,8 @@ public class BlockResource {
     @GET
     @Path("/header/newest")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "查询最新区块头信息", order = 203)
-    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = BlockHeaderDto.class))
+    @ApiOperation(description = "Query the latest block header information", order = 203)
+    @ResponseData(name = "Return value", responseType = @TypeDescriptor(value = BlockHeaderDto.class))
     public RpcClientResult getBestBlockHeader() {
         GetBlockHeaderByLastHeightReq req = new GetBlockHeaderByLastHeightReq();
         req.setChainId(config.getChainId());
@@ -146,8 +146,8 @@ public class BlockResource {
     @GET
     @Path("/newest")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "查询最新区块", order = 204, detailDesc = "包含区块打包的所有交易信息，此接口返回数据量较多，谨慎调用")
-    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = BlockDto.class))
+    @ApiOperation(description = "Query the latest block", order = 204, detailDesc = "This interface contains all transaction information packaged in blocks. It returns a large amount of data and should be called with caution")
+    @ResponseData(name = "Return value", responseType = @TypeDescriptor(value = BlockDto.class))
     public RpcClientResult getBestBlock() {
         Result<Block> result = blockTools.getBestBlock(Context.getChainId());
         RpcClientResult clientResult = ResultUtil.getRpcClientResult(result);
@@ -165,11 +165,11 @@ public class BlockResource {
     @GET
     @Path("/height/{height}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "根据区块高度查询区块", order = 205, detailDesc = "包含区块打包的所有交易信息，此接口返回数据量较多，谨慎调用")
+    @ApiOperation(description = "Query blocks based on block height", order = 205, detailDesc = "This interface contains all transaction information packaged in blocks. It returns a large amount of data and should be called with caution")
     @Parameters({
-            @Parameter(parameterName = "height", requestType = @TypeDescriptor(value = Long.class), parameterDes = "区块高度")
+            @Parameter(parameterName = "height", requestType = @TypeDescriptor(value = Long.class), parameterDes = "block height")
     })
-    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = BlockDto.class))
+    @ResponseData(name = "Return value", responseType = @TypeDescriptor(value = BlockDto.class))
     public RpcClientResult getBlockByHeight(@PathParam("height") Long height) {
         if (height == null || height < 0) {
             return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "height is invalid"));
@@ -192,11 +192,11 @@ public class BlockResource {
     @GET
     @Path("/hash/{hash}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "根据区块hash查询区块", order = 206, detailDesc = "包含区块打包的所有交易信息，此接口返回数据量较多，谨慎调用")
+    @ApiOperation(description = "Based on blockshashQuery Block", order = 206, detailDesc = "This interface contains all transaction information packaged in blocks. It returns a large amount of data and should be called with caution")
     @Parameters({
-            @Parameter(parameterName = "hash", parameterDes = "区块hash")
+            @Parameter(parameterName = "hash", parameterDes = "blockhash")
     })
-    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = BlockDto.class))
+    @ResponseData(name = "Return value", responseType = @TypeDescriptor(value = BlockDto.class))
     public RpcClientResult getBlockByHash(@PathParam("hash") String hash) {
         if (hash == null || !ValidateUtil.validHash(hash)) {
             return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "hash is invalid"));
@@ -219,11 +219,11 @@ public class BlockResource {
     @GET
     @Path("/serialization/height/{height}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "根据区块高度查询区块序列化字符串", order = 207, detailDesc = "包含区块打包的所有交易信息，此接口返回数据量较多，谨慎调用")
+    @ApiOperation(description = "Query block serialization strings based on block height", order = 207, detailDesc = "This interface contains all transaction information packaged in blocks. It returns a large amount of data and should be called with caution")
     @Parameters({
-            @Parameter(parameterName = "height", requestType = @TypeDescriptor(value = Long.class), parameterDes = "区块高度")
+            @Parameter(parameterName = "height", requestType = @TypeDescriptor(value = Long.class), parameterDes = "block height")
     })
-    @ResponseData(name = "返回值", description = "返回区块序列化后的HEX字符串", responseType = @TypeDescriptor(value = String.class))
+    @ResponseData(name = "Return value", description = "Return the serialized blockHEXcharacter string", responseType = @TypeDescriptor(value = String.class))
     public RpcClientResult getBlockSerializationByHeight(@PathParam("height") Long height) {
         if (height == null || height < 0) {
             return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "height is invalid"));
@@ -236,11 +236,11 @@ public class BlockResource {
     @GET
     @Path("/serialization/hash/{hash}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(description = "根据区块hash查询区块序列化字符串", order = 208, detailDesc = "包含区块打包的所有交易信息，此接口返回数据量较多，谨慎调用")
+    @ApiOperation(description = "Based on blockshashQuery block serialization string", order = 208, detailDesc = "This interface contains all transaction information packaged in blocks. It returns a large amount of data and should be called with caution")
     @Parameters({
-            @Parameter(parameterName = "hash", parameterDes = "区块hash")
+            @Parameter(parameterName = "hash", parameterDes = "blockhash")
     })
-    @ResponseData(name = "返回值", description = "返回区块序列化后的HEX字符串", responseType = @TypeDescriptor(value = String.class))
+    @ResponseData(name = "Return value", description = "Return the serialized blockHEXcharacter string", responseType = @TypeDescriptor(value = String.class))
     public RpcClientResult getBlockSerializationByHash(@PathParam("hash") String hash) {
         if (hash == null || !ValidateUtil.validHash(hash)) {
             return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "hash is invalid"));

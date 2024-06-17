@@ -22,7 +22,7 @@ public class CoinFrom extends Coin {
     private byte[] nonce;
 
     /**
-     * 0普通交易，-1解锁金额交易（退出共识，退出委托）
+     * 0Ordinary transactions,-1Unlock amount transaction（Exit consensus, exit delegation）
      */
     private byte locked;
 

@@ -27,7 +27,7 @@ package io.nuls.transaction.model.bo;
 import java.util.List;
 
 /**
- * 交易打包结果封装类
+ * Transaction packaging result encapsulation class
  * @author: Charlie
  * @date: 2019/3/15
  */

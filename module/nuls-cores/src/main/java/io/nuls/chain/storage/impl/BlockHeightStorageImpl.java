@@ -45,7 +45,7 @@ public class BlockHeightStorageImpl  extends  BaseStorage implements BlockHeight
 
 
     /**
-     * 该方法在所有属性被设置之后调用，用于辅助对象初始化
+     * This method is called after all properties are set, and is used to initialize auxiliary objects
      * This method is invoked after all properties are set, and is used to assist object initialization.
      */
     @Override

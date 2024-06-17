@@ -36,9 +36,9 @@ import io.nuls.core.rpc.model.ApiModelProperty;
 @ApiModel
 public class CoinFromDto extends CoinDto{
 
-    @ApiModelProperty(description = "账户nonce值的Hex字符串，防止双花交易，取上一笔交易hash的最后8个字节")
+    @ApiModelProperty(description = "accountnonceValue ofHexString, prevent double flower transactions, retrieve the previous transactionhashAt the end of8Bytes")
     private String nonce;
-    @ApiModelProperty(description = "0普通交易，-1解锁金额交易（退出共识，退出委托）")
+    @ApiModelProperty(description = "0Ordinary transactions,-1Unlock amount transaction（Exit consensus, exit delegation）")
     private byte locked;
 
     public CoinFromDto() {}

@@ -37,14 +37,14 @@ import java.util.List;
  **/
 public interface CacheDataService {
     /**
-     * 初始化区块数据
+     * Initialize block data
      *
      * @throws Exception
      */
     void initBlockDatas() throws Exception;
 
     /**
-     * 备份区块数据
+     * Backup block data
      *
      * @param chainId
      * @param height
@@ -55,7 +55,7 @@ public interface CacheDataService {
     void bakBlockTxs(int chainId, long height, List<Transaction> txList, boolean isCirculate) throws Exception;
 
     /**
-     * 回滚区块数据
+     * Rolling back block data
      *
      * @param chainId
      * @param height
@@ -64,7 +64,7 @@ public interface CacheDataService {
     void rollBlockTxs(int chainId, long height) throws Exception;
 
     /**
-     * 获取区块高度
+     * Obtain block height
      *
      * @param chainId
      * @return
@@ -73,7 +73,7 @@ public interface CacheDataService {
     BlockHeight getBlockHeight(int chainId) throws Exception;
 
     /**
-     * 开始事务高度
+     * Start transaction height
      *
      * @param chainId
      * @param blockHeight
@@ -82,7 +82,7 @@ public interface CacheDataService {
     void beginBakBlockHeight(int chainId, long blockHeight) throws Exception;
 
     /**
-     * 结束事务高度
+     * End transaction height
      *
      * @param chainId
      * @param blockHeight
@@ -91,7 +91,7 @@ public interface CacheDataService {
     void endBakBlockHeight(int chainId, long blockHeight) throws Exception;
 
     /**
-     * 获取缓存信息
+     * Get cache information
      *
      * @param height
      * @return

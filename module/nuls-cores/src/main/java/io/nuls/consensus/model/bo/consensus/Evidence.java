@@ -28,7 +28,7 @@ package io.nuls.consensus.model.bo.consensus;
 import io.nuls.base.data.BlockHeader;
 
 /**
- * 分叉证据信息类
+ * Bifurcation Evidence Information Class
  * Bifurcated Evidence Information Class
  *
  * @author: tag

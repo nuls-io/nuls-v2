@@ -35,7 +35,7 @@ import io.nuls.ledger.model.po.sub.FreezeLockTimeState;
 import java.util.List;
 
 /**
- * 交易处理器
+ * Transaction processor
  * Created by ljs on 2018/12/29.
  * @author lanjinsheng
  */

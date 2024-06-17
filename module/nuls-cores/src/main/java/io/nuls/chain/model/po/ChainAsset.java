@@ -16,27 +16,27 @@ import java.math.BigInteger;
  */
 public class ChainAsset extends BaseNulsData {
     /**
-     *资产所在链
+     *Asset Chain
      */
     private int addressChainId;
     /**
-     *资产产生链
+     *Asset generation chain
      */
     private int assetChainId;
     /**
-     *资产id
+     *assetid
      */
     private int assetId;
     /**
-     * 初始值,也可以动态由查询来进行变更
+     * Initial value,Changes can also be dynamically made through queries
      */
     private BigInteger initNumber = BigInteger.ZERO;
     /**
-     * 入账，增加资产值
+     * Accounting and increasing asset value
      */
     private BigInteger inNumber = BigInteger.ZERO;
     /**
-     * 出账，减少资产值
+     * Debit and reduce asset value
      */
     private BigInteger outNumber = BigInteger.ZERO;
 

@@ -33,13 +33,13 @@ import io.nuls.provider.model.dto.AccountKeyStoreDto;
 /**
  * @author: Charlie
  */
-@ApiModel(description = "导入账户KeyStore字符串")
+@ApiModel(description = "Import accountKeyStorecharacter string")
 public class AccountKeyStoreJsonImportForm {
 
-    @ApiModelProperty(description = "keystore字符串", required = true)
+    @ApiModelProperty(description = "keystorecharacter string", required = true)
     private AccountKeyStoreDto keystore;
 
-    @ApiModelProperty(description = "密码")
+    @ApiModelProperty(description = "password")
     private String password;
 
     public AccountKeyStoreDto getKeystore() {

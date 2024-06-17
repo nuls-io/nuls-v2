@@ -27,8 +27,8 @@ public class LedgerAssetCache {
     private CrossChainTools crossChainTools;
     @Autowired
     private Config config;
-    private long lastCrossAssetQueryRecordTime;// 最近一次跨链资产查询时间
-    private long minitus_2 = 60 * 2 * 1000l;// 两分钟
+    private long lastCrossAssetQueryRecordTime;// Last cross chain asset query time
+    private long minitus_2 = 60 * 2 * 1000l;// Two minutes
     private Map<String, AssetInfo> CACHE_MAP = new HashMap<>();
 
     public void initial(int chainId) {

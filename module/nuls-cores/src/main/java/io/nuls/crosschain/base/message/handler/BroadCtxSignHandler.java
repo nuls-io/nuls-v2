@@ -9,7 +9,7 @@ import io.nuls.crosschain.base.message.BroadCtxSignMessage;
 import io.nuls.crosschain.base.service.ProtocolService;
 
 /**
- * BroadCtxSignMessage处理类
+ * BroadCtxSignMessageProcessing class
  * BroadCtxSignMessage Processing Class
  *
  * @author tag

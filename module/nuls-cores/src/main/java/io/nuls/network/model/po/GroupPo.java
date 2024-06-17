@@ -45,24 +45,24 @@ public class GroupPo extends BasePo {
     private int maxOut = 0;
     private int maxIn = 0;
     /**
-     * 友链跨链最大连接数
+     * Maximum number of cross chain connections for friend chains
      */
     private int maxCrossOut = 0;
     private int maxCrossIn = 0;
 
     private int minAvailableCount = 0;
     /**
-     * 跨链网络是否激活,卫星链上的默认跨链true,
-     * 友链默认false，在跨链模块请求时候这个属性才为true
+     * Is the cross chain network activated,Default cross chain on satellite chaintrue,
+     * Friend Chain DefaultfalseThis property is only applicable when requesting cross chain modulestrue
      */
     private boolean isCrossActive = false;
 
     /**
-     * 卫星链注册的跨链Group时为false
+     * Cross chain registration of satellite chainsGroupWhen isfalse
      */
     private boolean isSelf = true;
     /**
-     * 是否卫星网络,只要卫星链上的节点就是true，如果是友链节点为false
+     * Is it a satellite network,As long as the nodes on the satellite chain aretrueIf it is a friend chain node, it isfalse
      */
     private boolean isMoonNet = false;
 

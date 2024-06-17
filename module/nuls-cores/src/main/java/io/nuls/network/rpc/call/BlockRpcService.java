@@ -28,12 +28,12 @@ import io.nuls.network.model.dto.BestBlockInfo;
 
 /**
  * @author lan
- * @description 调用外部区块模块接口
+ * @description Calling external block module interfaces
  * @date 2018/12/07
  **/
 public interface BlockRpcService {
     /**
-     * 获取区块高度
+     * Obtain block height
      *
      * @param chainId chainId
      * @return BestBlockInfo

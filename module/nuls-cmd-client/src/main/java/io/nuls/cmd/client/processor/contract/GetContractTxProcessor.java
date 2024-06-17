@@ -139,7 +139,7 @@ public class GetContractTxProcessor extends ContractBaseProcessor {
     }
 
     /**
-     * 状态 0:usable(未花费), 1:timeLock(高度锁定), 2:consensusLock(参与共识锁定), 3:spent(已花费)
+     * state 0:usable(Not spent), 1:timeLock(Height lock), 2:consensusLock(Participate in consensus locking), 3:spent(Expended)
      *
      * @param status
      * @return

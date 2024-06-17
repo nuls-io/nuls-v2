@@ -35,18 +35,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 调用协议升级模块接口的工具类
+ * Tool class for calling protocol upgrade module interfaces
  *
  * @author captain
  * @version 1.0
- * @date 18-11-9 上午10:43
+ * @date 18-11-9 morning10:43
  */
 public class ProtocolCall {
 
     /**
-     * 回滚区块时通知协议升级模块
+     * Notify protocol upgrade module when rolling back blocks
      *
-     * @param chainId 链Id/chain id
+     * @param chainId chainId/chain id
      * @return
      */
     public static boolean rollbackNotice(int chainId, BlockHeader blockHeader) {
@@ -69,9 +69,9 @@ public class ProtocolCall {
     }
 
     /**
-     * 新增区块时通知协议升级模块
+     * Notify protocol upgrade module when adding blocks
      *
-     * @param chainId 链Id/chain id
+     * @param chainId chainId/chain id
      * @return
      */
     public static boolean saveNotice(int chainId, BlockHeader blockHeader) {

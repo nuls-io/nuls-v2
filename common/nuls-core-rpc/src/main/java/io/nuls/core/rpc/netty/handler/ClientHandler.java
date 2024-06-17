@@ -25,7 +25,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 客户端事件触发处理类
+ * Client Event Trigger Processing Class
  * Client Event Triggering Processing Class
  *
  * @author tag
@@ -82,9 +82,9 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
         if (!this.handShaker.isHandshakeComplete()) {
             try {
                 response = (FullHttpResponse) msg;
-                //握手协议返回，设置结束握手
+                //Handshake protocol return, set to end handshake
                 this.handShaker.finishHandshake(ch, response);
-                //设置成功
+                //Set successfully
                 this.handshakeFuture.setSuccess();
                 Log.debug("WebSocket Client connected! response headers[sec-webSocket-extensions]:{}" + response.headers());
             } catch (WebSocketHandshakeException var7) {
@@ -133,7 +133,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
                             connectData.getRequestOnlyQueue().offer(new RequestOnly(request, messageSize));
                             connectData.addRequestOnlyQueueMemSize(messageSize);
                         }else{
-                            Log.debug("RequestOnly队列缓存已满，丢弃新接收到的消息，messageId:{},队列所占内存：{}", message.getMessageID(),connectData.getRequestOnlyQueueMemSize());
+                            Log.debug("RequestOnlyThe queue cache is full, discarding newly received messages,messageId:{},Memory occupied by queue：{}", message.getMessageID(),connectData.getRequestOnlyQueueMemSize());
                         }
                     }else{
                         requestExecutorService.execute(messageHandler);

@@ -40,7 +40,7 @@ import java.util.*;
 
 
 /**
- * 共识模块RPC接口实现类
+ * Consensus moduleRPCInterface implementation class
  * Consensus Module RPC Interface Implementation Class
  *
  * @author tag
@@ -57,7 +57,7 @@ public class DepositServiceImpl implements DepositService {
     private TxValidator validatorManager;
 
     /**
-     * 委托共识
+     * Commission consensus
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -85,7 +85,7 @@ public class DepositServiceImpl implements DepositService {
             if (!AddressTool.validAddress(dto.getChainId(), dto.getAddress())) {
                 throw new NulsException(ConsensusErrorCode.ADDRESS_ERROR);
             }
-            //账户验证
+            //Account verification
             HashMap callResult = CallMethodUtils.accountValid(dto.getChainId(), dto.getAddress(), dto.getPassword());
             Transaction tx = new Transaction(TxType.DEPOSIT);
             Deposit deposit = TxUtil.createDeposit(dto);
@@ -93,7 +93,7 @@ public class DepositServiceImpl implements DepositService {
             tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
             CoinData coinData = coinDataManager.getCoinData(deposit.getAddress(), chain, new BigInteger(dto.getDeposit()), ConsensusConstant.CONSENSUS_LOCK_TIME, tx.size() + P2PHKSignature.SERIALIZE_LENGTH,chain.getConfig().getAgentChainId(),chain.getConfig().getAgentAssetId());
             tx.setCoinData(coinData.serialize());
-            //交易签名
+            //Transaction signature
             String priKey = (String) callResult.get("priKey");
             CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAddress(), dto.getPassword(), priKey, tx);
             String txStr = RPCUtil.encode(tx.serialize());
@@ -115,7 +115,7 @@ public class DepositServiceImpl implements DepositService {
     }
 
     /**
-     * 委托共识交易验证
+     * Entrusted consensus transaction verification
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -153,7 +153,7 @@ public class DepositServiceImpl implements DepositService {
 
 
     /**
-     * 退出共识
+     * Exit consensus
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -173,7 +173,7 @@ public class DepositServiceImpl implements DepositService {
             if (!AddressTool.validAddress( dto.getChainId(), dto.getAddress())) {
                 return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
             }
-            //账户验证
+            //Account verification
             HashMap callResult = CallMethodUtils.accountValid(dto.getChainId(), dto.getAddress(), dto.getPassword());
             NulsHash hash = NulsHash.fromHex(dto.getTxHash());
             Transaction depositTransaction = CallMethodUtils.getTransaction(chain,dto.getTxHash());
@@ -204,7 +204,7 @@ public class DepositServiceImpl implements DepositService {
             coinData.getFrom().get(0).setNonce(CallMethodUtils.getNonce(hash.getBytes()));
             cancelDepositTransaction.setCoinData(coinData.serialize());
             cancelDepositTransaction.setTime(NulsDateUtils.getCurrentTimeSeconds());
-            //交易签名
+            //Transaction signature
             String priKey = (String) callResult.get("priKey");
             CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAddress(), dto.getPassword(), priKey, cancelDepositTransaction);
             String txStr = RPCUtil.encode(cancelDepositTransaction.serialize());
@@ -226,7 +226,7 @@ public class DepositServiceImpl implements DepositService {
     }
 
     /**
-     * 退出共识交易验证
+     * Exit consensus transaction verification
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -263,7 +263,7 @@ public class DepositServiceImpl implements DepositService {
     }
 
     /**
-     * 获取委托列表信息
+     * Obtain delegation list information
      */
     @Override
     @SuppressWarnings("unchecked")

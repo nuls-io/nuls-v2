@@ -47,7 +47,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 时间服务类：用于同步网络标准时间
+ * Time service category：Used to synchronize network standard time
  * Time service class:Used to synchronize network standard time.
  *
  * @author vivi & lan
@@ -55,37 +55,37 @@ import java.util.concurrent.TimeUnit;
 public class TimeManager {
     private static TimeManager instance = new TimeManager();
     /**
-     * NTP服务器网站url集合，用于同步网络时间
+     * NTPServer websiteurlCollection for synchronizing network time
      */
     private List<String> ntpSeverUrlList = new ArrayList<>();
 
     private List<NetTimeUrl> netTimeSevers = new CopyOnWriteArrayList<>();
     /**
-     * 时间偏移差距触发点，超过该值会导致本地时间重设，单位毫秒
+     * Trigger point for time offset difference, exceeding this value will cause local time reset in milliseconds
      * Time migration gap trigger point, which can cause local time reset, unit milliseconds.
      **/
     public static final long TIME_OFFSET_BOUNDARY = 3000L;
     /**
-     * 等待对等节点回复时间
+     * Waiting for peer node reply time
      **/
     public static final long TIME_WAIT_PEER_RESPONSE = 2000L;
     /**
-     * 重新同步时间间隔
+     * Resynchronization interval
      * Resynchronize the interval.
      * 2 minutes;
      */
     public static final long NET_REFRESH_TIME = 2 * 60 * 1000L;
     /**
-     * 网络时间偏移值
+     * Network time offset value
      */
     public static long netTimeOffset;
     /**
-     * 上次同步时间点
+     * Last synchronization time point
      * The last synchronization point.
      */
     public static long lastSyncTime;
 
-    //询问对等节点网络时间最大数量
+    //Inquire about the maximum number of network times for peer nodes
     private static final int MAX_REQ_PEER_NUMBER = 8;
     private static Map<String, Long> peerTimesMap = new ConcurrentHashMap<>();
     private static long currentRequestId;
@@ -109,8 +109,8 @@ public class TimeManager {
     }
 
     /**
-     * 初始化时，同步网络时间，将同步成功的放入集合备用
-     * 并按相应时间排序
+     * During initialization, synchronize the network time and place the successfully synchronized ones in the set backup
+     * And sort according to the corresponding time
      */
     public void initWebTimeServer() {
         CountDownLatch latch = new CountDownLatch(ntpSeverUrlList.size());
@@ -128,24 +128,24 @@ public class TimeManager {
         try {
             latch.await(5, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
-            Log.error("等待获取网络时间发生异常");
+            Log.error("An exception occurred while waiting to obtain network time");
             System.exit(0);
         }
         if(netTimeSevers.size() < 3){
-            LoggerUtil.COMMON_LOG.warn("可用服务器小于3个");
+            LoggerUtil.COMMON_LOG.warn("Available servers are less than3individual");
         }
         Collections.sort(netTimeSevers);
-        LoggerUtil.COMMON_LOG.info("初始化时间服务器完成");
+        LoggerUtil.COMMON_LOG.info("Initialize time server completed");
         LoggerUtil.COMMON_LOG.info("=".repeat(100));
         netTimeSevers.forEach(d->{
-            LoggerUtil.COMMON_LOG.info("site:{} 耗时:{}",d.getUrl(),d.getTime());
+            LoggerUtil.COMMON_LOG.info("site:{} time consuming:{}",d.getUrl(),d.getTime());
         });
         LoggerUtil.COMMON_LOG.info("=".repeat(100));
     }
 
     /**
-     * 同步网络时间
-     * 如果成功同步到三个即可
+     * Synchronize network time
+     * If successfully synchronized to three, it is sufficient
      */
     public void syncWebTime() {
         int count = 0;
@@ -160,7 +160,7 @@ public class TimeManager {
             times[count] = (netTime + (syncEndTime - syncStartTime) / 2) - syncEndTime;
             count++;
             /*
-             * 有3个网络时间正常返回就可以
+             * have3Once the network time is normal, it can be returned
              */
             if (count >= 3) {
                 break;
@@ -169,7 +169,7 @@ public class TimeManager {
         if (count == 3) {
             calNetTimeOffset(times[0], times[1], times[2]);
         } else {
-            //从对等网络去获取时间
+            //Obtaining time from peer-to-peer networks
             LoggerUtil.COMMON_LOG.debug("count={} syncPeerTime .....", count);
             syncPeerTime();
         }
@@ -177,7 +177,7 @@ public class TimeManager {
     }
 
     public static void calNetTimeOffset(long time1, long time2, long time3) {
-        //3个网络时间里去除 与其他2个偏差大于500ms的时间值。
+        //3Remove from network time Compared to others2Deviation greater than500msThe time value of.
         long differMs = 500;
         int count = 3;
         if (Math.abs(time1 - time2) > differMs && Math.abs(time1 - time3) > differMs) {
@@ -198,15 +198,15 @@ public class TimeManager {
     }
 
     /**
-     * 向对等节点同步时间
+     * Synchronize time with peer nodes
      */
     private synchronized void syncPeerTime() {
-        //设置请求id
+        //Set requestid
         currentRequestId = System.currentTimeMillis();
         long beginTime = currentRequestId;
-        // peerTimesMap 清空
+        // peerTimesMap empty
         peerTimesMap.clear();
-        //随机发出请求
+        //Randomly send requests
         List<NodeGroup> list = NodeGroupManager.getInstance().getNodeGroups();
         if (list.size() == 0) {
             return;
@@ -232,7 +232,7 @@ public class TimeManager {
             return;
         }
 
-        //数量或时间满足要求
+        //Quantity or time meets the requirements
         long intervalTime = 0;
         while (peerTimesMap.size() < MAX_REQ_PEER_NUMBER && intervalTime < TIME_WAIT_PEER_RESPONSE) {
             try {
@@ -248,7 +248,7 @@ public class TimeManager {
         if (size > 0) {
             long sum = 0L;
             Set set = peerTimesMap.keySet();
-            //计算
+            //calculate
             for (Object aSet : set) {
                 sum += peerTimesMap.get(aSet.toString());
             }
@@ -275,7 +275,7 @@ public class TimeManager {
     }
 
     /**
-     * 获取网络时间
+     * Get network time
      *
      * @return long
      */
@@ -297,7 +297,7 @@ public class TimeManager {
     }
 
     /**
-     * 获取当前网络时间毫秒数
+     * Get the current network time in milliseconds
      * Gets the current network time in milliseconds.
      *
      * @return long

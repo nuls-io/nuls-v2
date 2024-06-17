@@ -33,28 +33,28 @@ import java.math.BigInteger;
 /**
  * @author Facjas
  */
-@ApiModel(name = "转账表单数据")
+@ApiModel(name = "Transfer form data")
 public class CrossTransferForm {
 
-    @ApiModelProperty(description = "账户地址")
+    @ApiModelProperty(description = "Account address")
     private String address;
 
-    @ApiModelProperty(description = "账户地址")
+    @ApiModelProperty(description = "Account address")
     private String toAddress;
 
-    @ApiModelProperty(description = "账户密码")
+    @ApiModelProperty(description = "Account password")
     private String password;
 
-    @ApiModelProperty(description = "资产chainId")
+    @ApiModelProperty(description = "assetchainId")
     private int assetChainId;
 
-    @ApiModelProperty(description = "资产Id")
+    @ApiModelProperty(description = "assetId")
     private int assetId;
 
-    @ApiModelProperty(description = "金额")
+    @ApiModelProperty(description = "money")
     private BigInteger amount;
 
-    @ApiModelProperty(description = "备注", required = false)
+    @ApiModelProperty(description = "Remarks", required = false)
     private String remark;
 
     public String getAddress() {

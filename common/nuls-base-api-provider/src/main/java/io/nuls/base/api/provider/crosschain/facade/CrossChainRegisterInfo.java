@@ -5,22 +5,22 @@ import java.util.List;
 /**
  * @Author: zhoulijun
  * @Time: 2019-05-07 11:41
- * @Description: 功能描述
+ * @Description: Function Description
  */
 public class CrossChainRegisterInfo {
 
     /**
-     * chainId : 链标识
-     * chainName : 链名称
-     * addressType : 链上创建的账户的地址类型：1生态内 2非生态内
-     * magicNumber : 网络魔法参数
-     * minAvailableNodeNum : 最小可用节点数量
-     * txConfirmedBlockNum : 跨链交易确认块数
+     * chainId : Chain identification
+     * chainName : Chain Name
+     * addressType : The address type of the account created on the chain：1Within the ecosystem 2Non ecological interior
+     * magicNumber : Network Magic Parameters
+     * minAvailableNodeNum : Minimum number of available nodes
+     * txConfirmedBlockNum : Number of cross chain transaction confirmation blocks
      * regAddress : NsdxSexqXF4eVXkcGLPpZCPKo92A8xpp
      * regTxHash : FFFFF
-     * selfAssetKeyList : 链下注册的资产列表，由chainId_assetId 组合的资产key值
-     * totalAssetKeyList : 链下流通的资产列表，由chainId_assetId 组合的资产key值
-     * createTime : 创建时间
+     * selfAssetKeyList : List of assets registered off the chain, bychainId_assetId Portfolio assetskeyvalue
+     * totalAssetKeyList : The list of assets circulating off the chain, consisting ofchainId_assetId Portfolio assetskeyvalue
+     * createTime : Creation time
      * seeds : xxx.xxx.xxx.xxx:8001,xxx.xxx.xxx.xxx:8002
      */
 
@@ -35,11 +35,11 @@ public class CrossChainRegisterInfo {
     private long createTime;
     List<String> verifierList;
     /**
-     * 按100来计算拜占庭比例
+     * according to100To calculate the Byzantine proportion
      */
     int signatureByzantineRatio = 0;
     /**
-     * 最大签名数量
+     * Maximum number of signatures
      */
     int maxSignatureCount = 0;
 

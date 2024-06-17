@@ -74,7 +74,7 @@ public class TransactionBootstrap implements INulsCoresBootstrap {
 
     public void init() {
         try {
-            //初始化数据库配置文件
+            //Initialize database configuration file
             initDB();
             initTransactionContext();
             chainManager.initChain();
@@ -101,7 +101,7 @@ public class TransactionBootstrap implements INulsCoresBootstrap {
     @Override
     public void onDependenciesReady() {
         doStart();
-        // add by pierre at 2019-12-04 增加与智能合约模块的连接标志
+        // add by pierre at 2019-12-04 Add connection flags to the smart contract module
         txConfig.setCollectedSmartContractModule(true);
         // end code by pierre
     }
@@ -113,7 +113,7 @@ public class TransactionBootstrap implements INulsCoresBootstrap {
 
     public void initDB() {
         try {
-            //数据文件存储地址
+            //Data file storage address
             RocksDBService.init(txConfig.getDataPath() + File.separator + ModuleE.TX.name);
         } catch (Exception e) {
             LOG.error(e);

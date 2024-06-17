@@ -49,11 +49,11 @@ public class NodesContainer implements Serializable {
     private Map<String, Node> failNodes = new ConcurrentHashMap<>();
     private Map<String, Node> uncheckNodes = new ConcurrentHashMap<>();
     /**
-     * 记录作为server的连接记录
+     * Record asserverConnection records for
      */
     private Map<String, Integer> inNodes = new ConcurrentHashMap<>();
     /**
-     * 最近一次握手成功时间
+     * Last successful handshake time
      */
     private volatile long latestHandshakeSuccTime = 0;
     private volatile boolean hadShareAddr = false;
@@ -152,7 +152,7 @@ public class NodesContainer implements Serializable {
     }
 
     /**
-     * 获取已经连接的种子节点
+     * Get connected seed nodes
      *
      * @return
      */
