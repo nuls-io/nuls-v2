@@ -16,21 +16,21 @@ import java.util.Objects;
  * @date 2024/6/17 14:09
  * @COPYRIGHT nabox.io
  */
-public class CxtFullSignMessage extends BaseMessage {
+public class CtxFullSignMessage extends BaseMessage {
 
-    private NulsHash txHash;
+    private NulsHash localTxHash;
 
     private byte[] transactionSignature;
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.write(txHash.getBytes());
+        stream.write(localTxHash.getBytes());
         stream.writeBytesWithLength(transactionSignature);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.txHash = byteBuffer.readHash();
+        this.localTxHash = byteBuffer.readHash();
         this.transactionSignature = byteBuffer.readByLengthByte();
     }
 
@@ -42,13 +42,6 @@ public class CxtFullSignMessage extends BaseMessage {
         return size;
     }
 
-    public NulsHash getTxHash() {
-        return txHash;
-    }
-
-    public void setTxHash(NulsHash txHash) {
-        this.txHash = txHash;
-    }
 
     public byte[] getTransactionSignature() {
         return transactionSignature;
@@ -58,17 +51,25 @@ public class CxtFullSignMessage extends BaseMessage {
         this.transactionSignature = transactionSignature;
     }
 
+    public NulsHash getLocalTxHash() {
+        return localTxHash;
+    }
+
+    public void setLocalTxHash(NulsHash localTxHash) {
+        this.localTxHash = localTxHash;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        CxtFullSignMessage that = (CxtFullSignMessage) o;
-        return Objects.equals(txHash, that.txHash) && Arrays.equals(transactionSignature, that.transactionSignature);
+        CtxFullSignMessage that = (CtxFullSignMessage) o;
+        return Objects.equals(localTxHash, that.localTxHash) && Arrays.equals(transactionSignature, that.transactionSignature);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(txHash);
+        int result = Objects.hash(localTxHash);
         result = 31 * result + Arrays.hashCode(transactionSignature);
         return result;
     }
