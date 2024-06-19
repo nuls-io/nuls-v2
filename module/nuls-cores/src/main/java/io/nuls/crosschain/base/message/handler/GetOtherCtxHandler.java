@@ -7,6 +7,7 @@ import io.nuls.core.core.annotation.Component;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.GetOtherCtxMessage;
 import io.nuls.crosschain.base.service.ProtocolService;
+import io.nuls.crosschain.base.utils.HashSetTimeDuplicateProcessor;
 
 /**
  * GetOtherCtxMessageProcessing class
@@ -21,6 +22,8 @@ public class GetOtherCtxHandler implements MessageProcessor {
     @Autowired
     private ProtocolService protocolService;
 
+    private HashSetTimeDuplicateProcessor processor = new HashSetTimeDuplicateProcessor(1000, 300000L);
+
     @Override
     public String getCmd() {
         return CommandConstant.GET_OTHER_CTX_MESSAGE;
@@ -32,6 +35,9 @@ public class GetOtherCtxHandler implements MessageProcessor {
         if (message == null) {
             return;
         }
-        protocolService.getOtherCtx(chainId, nodeId, realMessage);
+        if (processor.insertAndCheck(nodeId + realMessage.getRequestHash().toHex())) {
+            protocolService.getOtherCtx(chainId, nodeId, realMessage);
+        }
+
     }
 }

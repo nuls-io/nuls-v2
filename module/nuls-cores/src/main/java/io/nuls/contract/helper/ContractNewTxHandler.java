@@ -42,8 +42,8 @@ import io.nuls.core.model.StringUtils;
 import java.math.BigInteger;
 import java.util.*;
 
-import static io.nuls.contract.config.ContractContext.ASSET_ID;
-import static io.nuls.contract.config.ContractContext.CHAIN_ID;
+import static io.nuls.contract.config.ContractContext.LOCAL_MAIN_ASSET_ID;
+import static io.nuls.contract.config.ContractContext.LOCAL_CHAIN_ID;
 
 /**
  * @author: PierreLuo
@@ -92,7 +92,7 @@ public class ContractNewTxHandler {
                 if (Arrays.equals(to.getAddress(), contractAddress)) {
                     assetChainId = to.getAssetsChainId();
                     assetId = to.getAssetsId();
-                    mainAsset = assetChainId == CHAIN_ID && assetId == ASSET_ID;
+                    mainAsset = assetChainId == LOCAL_CHAIN_ID && assetId == LOCAL_MAIN_ASSET_ID;
                     if (!mainAsset) {
                         // Initialize temporary balances for other assets
                         tempBalanceManager.getBalance(contractAddress, assetChainId, assetId);
@@ -105,8 +105,8 @@ public class ContractNewTxHandler {
         BigInteger value = contractData.getValue();
         if (value.compareTo(BigInteger.ZERO) > 0) {
             // initializationNULSTemporary balance of main assets
-            tempBalanceManager.getBalance(contractAddress, CHAIN_ID, ASSET_ID);
-            tempBalanceManager.addTempBalance(contractAddress, value, CHAIN_ID, ASSET_ID);
+            tempBalanceManager.getBalance(contractAddress, LOCAL_CHAIN_ID, LOCAL_MAIN_ASSET_ID);
+            tempBalanceManager.addTempBalance(contractAddress, value, LOCAL_CHAIN_ID, LOCAL_MAIN_ASSET_ID);
         }
 
         boolean isSuccess = true;
@@ -173,14 +173,14 @@ public class ContractNewTxHandler {
         if (!isSuccess) {
             // RollBACK - Deducting the amount transferred when calling the contract
             if (value.compareTo(BigInteger.ZERO) > 0) {
-                tempBalanceManager.minusTempBalance(contractAddress, value, CHAIN_ID, ASSET_ID);
+                tempBalanceManager.minusTempBalance(contractAddress, value, LOCAL_CHAIN_ID, LOCAL_MAIN_ASSET_ID);
             }
             if (toList != null && !toList.isEmpty()) {
                 for (CoinTo to : toList) {
                     if (Arrays.equals(to.getAddress(), contractAddress)) {
                         assetChainId = to.getAssetsChainId();
                         assetId = to.getAssetsId();
-                        mainAsset = assetChainId == CHAIN_ID && assetId == ASSET_ID;
+                        mainAsset = assetChainId == LOCAL_CHAIN_ID && assetId == LOCAL_MAIN_ASSET_ID;
                         if (!mainAsset) {
                             // RollBACK - Temporary balance after deducting other assets
                             tempBalanceManager.minusTempBalance(contractAddress, to.getAmount(), assetChainId, assetId);

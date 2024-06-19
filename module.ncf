@@ -1,9 +1,9 @@
 [global]
 encoding=UTF-8
 language=en
-logPath=/Users/wangzhijian/workspace/nuls-v2/logs
+logPath=/Users/wangzhijian/workspace/nuls-v2/Logs
 logLevel=INFO
-dataPath=/Users/wangzhijian/workspace/nuls-v2/data
+dataPath=/Volumes/Niels-1T/version-data/data
 #Default This ChainID
 chainId=1
 #Address prefix
@@ -30,18 +30,18 @@ packageVersion=%PACKAGE_VERSION%
 port=8001
 crossPort=8002
 #Magic parameters
-packetMagic=20194444
+packetMagic=20191222
 #Seed node
-selfSeedIps=127.0.0.1:8001
+selfSeedIps=seeda.nuls.io:8001,seedb.nuls.io:8001,seedc.nuls.io:8001,seedd.nuls.io:8001,seede.nuls.io:8001,seedf.nuls.io:8001
 #Cross chain seed connection nodes of the main network
-moonSeedIps=127.0.0.1:8002
+moonSeedIps=seeda.nuls.io:8002,seedb.nuls.io:8002,seedc.nuls.io:8002,seedd.nuls.io:8002,seede.nuls.io:8002,seedf.nuls.io:8002
 #Maximum number of network connections
 maxInCount=300
 #Maximum number of outbound connections
 maxOutCount=20
 
 [account]
-blockAccountManager=NULSd6Hgck6xuMvGasN6yo4Ep8DatJfqpqhKZ
+blockAccountManager=NULSd6Hh5e4o3N3y6FnHeGhECFXrETqSzbapx
 keystoreFolder=/keystore/backup
 
 [block]
@@ -52,7 +52,7 @@ extendMaxSize=1024
 #Threshold of height difference that triggers fork chain switching
 chainSwtichThreshold=3
 #Minimum number of linked nodes,When the network node linked to is below this parameter,Will continue to wait
-minNodeAmount=0
+minNodeAmount=2
 #During block synchronization process,The number of blocks downloaded from nodes on the network each time
 downloadNumber=10
 #The timeout for downloading a single block from a network node
@@ -66,9 +66,9 @@ genesisBlockPath=genesis-block.json
 
 [consensus]
 #Seed node list
-seedNodes=NULSd6Hgck6xuMvGasN6yo4Ep8DatJfqpqhKZ
+seedNodes=NULSd6Hge7xHDnvsSpnzbR2gWHd31zJ1How11,NULSd6Hgc5VNP4rF4wxdiXEQKpBKUE4w5RS22,NULSd6HgeQwXLdre69ArkqVZNDqMLU4CaAz33,NULSd6HgcjAKAgq8jjXgBCcNLEJUvJEYcoj44,NULSd6HgiDdTjcuvhqzm3bomyBFZmosV3ei55
 #Block address password
-password=nuls123456
+password=6hWMhWLSmVVbVoZPjW5M
 #Block output interval time(unit：s)
 packingInterval=10
 #Consensus entrusted mortgage asset chainID
@@ -77,8 +77,6 @@ agentChainId=1
 agentAssetId=1
 #Consensus reward assetsID(Consensus rewards must be assets of the same chain)
 awardAssetId=1
-#Consensus transaction fee unit price
-feeUnit=100000
 #Total Inflation
 totalInflationAmount=11000000000000000
 #Initial inflation amount500w/365*30
@@ -89,11 +87,16 @@ initTime=1594483200
 deflationRatio=0.4
 #Deflation interval time(unit：S),30day
 deflationTimeInterval=2592000
+feeAssets=1-1,9-787,9-2
+feeUnit=100000,10000,100000000000000
 
 [smart-contract]
 #The maximum consumption of contract view method callsGas
 maxViewGas=100000000
 crossTokenSystemContract=NULSd6HgsyGNK1xTcx2GnC9y3Jr1DKd3qL2HS
+# 单位gasPrice小数点位移
+feeCoefficient=1,0.0001,10000000
+
 
 [public-service]
 #public-serviceModule ExternalrpcPort number
@@ -127,9 +130,9 @@ sendHeight=6
 #Byzantine proportion of cross chain transactions
 byzantineRatio=66
 #Main network cross chain seed node list
-crossSeedIps=127.0.0.1:8002
+crossSeedIps=seeda.nuls.io:8002,seedb.nuls.io:8002,seedc.nuls.io:8002,seedd.nuls.io:8002,seede.nuls.io:8002,seedf.nuls.io:8002
 #List of main network validators
-verifiers=NULSd6Hgck6xuMvGasN6yo4Ep8DatJfqpqhKZ
+verifiers=NULSd6Hge7xHDnvsSpnzbR2gWHd31zJ1How11,NULSd6Hgc5VNP4rF4wxdiXEQKpBKUE4w5RS22,NULSd6HgeQwXLdre69ArkqVZNDqMLU4CaAz33,NULSd6HgcjAKAgq8jjXgBCcNLEJUvJEYcoj44,NULSd6HgiDdTjcuvhqzm3bomyBFZmosV3ei55
 #Main network signature Byzantine comparison
 mainByzantineRatio=66
 #Maximum number of signatures on the main network

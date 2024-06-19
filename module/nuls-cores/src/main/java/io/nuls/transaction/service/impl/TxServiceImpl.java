@@ -33,6 +33,7 @@ import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.base.protocol.TxRegisterDetail;
 import io.nuls.base.signture.MultiSignTxSignature;
 import io.nuls.base.signture.SignatureUtil;
+import io.nuls.contract.config.ContractContext;
 import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TxStatusEnum;
@@ -767,25 +768,53 @@ public class TxServiceImpl implements TxService {
             //When initiating a chain for cross chain transactions and not for transactions,Calculate the main assets of the main network as transaction feesNULS
             feeAssetChainId = txConfig.getMainChainId();
             feeAssetId = txConfig.getMainAssetId();
+            BigInteger fee = coinData.getFeeByAsset(feeAssetChainId, feeAssetId);
+            if (BigIntegerUtils.isEqualOrLessThan(fee, BigInteger.ZERO)) {
+                throw new NulsException(TxErrorCode.INSUFFICIENT_FEE);
+            }
+            //根据交易大小重新计算手续费，用来验证实际手续费
+            BigInteger targetFee;
+            if (TxManager.isCrossTx(type)) {
+                targetFee = TransactionFeeCalculator.getCrossTxFee(txSize);
+            } else {
+                targetFee = TransactionFeeCalculator.getNormalTxFee(txSize, chain.getConfig().getFeeUnit(feeAssetChainId, feeAssetId));
+            }
+            if (BigIntegerUtils.isLessThan(fee, targetFee)) {
+                throw new NulsException(TxErrorCode.INSUFFICIENT_FEE);
+            }
         } else {
-            //Calculate the main asset as a handling fee
-            feeAssetChainId = chain.getConfig().getChainId();
-            feeAssetId = chain.getConfig().getAssetId();
-        }
-        BigInteger fee = coinData.getFeeByAsset(feeAssetChainId, feeAssetId);
-        if (BigIntegerUtils.isEqualOrLessThan(fee, BigInteger.ZERO)) {
-            throw new NulsException(TxErrorCode.INSUFFICIENT_FEE);
-        }
+            boolean result = false;
+            Set<String> set = chain.getConfig().getFeeAssetsSet();
+            for (String tokenId : set) {
+                String[] arr = tokenId.split("-");
+        //Calculate the main asset as a handling fee
+                feeAssetChainId = Integer.parseInt(arr[0]);
+                feeAssetId = Integer.parseInt(arr[1]);
+                if (feeAssetId != 1 && ProtocolGroupManager.getCurrentVersion(chain.getChainId()) < ContractContext.PROTOCOL_20) {
+                    continue;
+                }
+                BigInteger fee = coinData.getFeeByAsset(feeAssetChainId, feeAssetId);
+                if (BigIntegerUtils.isEqualOrLessThan(fee, BigInteger.ZERO)) {
+                    continue;
+                }
         //Recalculate transaction fees based on transaction size to verify actual transaction fees
-        BigInteger targetFee;
-        if (TxManager.isCrossTx(type)) {
-            targetFee = TransactionFeeCalculator.getCrossTxFee(txSize);
-        } else {
-            targetFee = TransactionFeeCalculator.getNormalTxFee(txSize);
+                BigInteger targetFee;
+                if (TxManager.isCrossTx(type)) {
+                    targetFee = TransactionFeeCalculator.getCrossTxFee(txSize);
+                } else {
+                    targetFee = TransactionFeeCalculator.getNormalTxFee(txSize, chain.getConfig().getFeeUnit(feeAssetChainId, feeAssetId));
+                }
+                if (BigIntegerUtils.isLessThan(fee, targetFee)) {
+                    continue;
+                }
+                result = true;
+                break;
+            }
+            if (!result) {
+                throw new NulsException(TxErrorCode.INSUFFICIENT_FEE);
+            }
         }
-        if (BigIntegerUtils.isLessThan(fee, targetFee)) {
-            throw new NulsException(TxErrorCode.INSUFFICIENT_FEE);
-        }
+
     }
 
     /**

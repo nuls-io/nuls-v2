@@ -75,6 +75,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static io.nuls.account.util.TxUtil.getSuccess;
+import static io.nuls.common.CommonConstant.NORMAL_PRICE_PRE_1024_BYTES_NULS;
 
 /**
  * @author: EdwardChan
@@ -318,7 +319,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         CoinTo coinTo = new CoinTo(AddressTool.getAddress(NulsConfig.BLACK_HOLE_PUB_KEY,account.getChainId()), account.getChainId(), assetsId, AccountConstant.ALIAS_FEE);
         int txSize = tx.size() + coinFrom.size() + coinTo.size() + P2PHKSignature.SERIALIZE_LENGTH;
         //Calculate handling fees
-        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
+        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize,NORMAL_PRICE_PRE_1024_BYTES_NULS);
         //The total cost is
         BigInteger totalAmount = AccountConstant.ALIAS_FEE.add(fee);
         coinFrom.setAmount(totalAmount);
