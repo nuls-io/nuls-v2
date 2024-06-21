@@ -314,15 +314,15 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         Chain chain = chainManager.getChainMap().get(handleChainId);
 
         if (messageBody.getTransactionSignature() == null || messageBody.getTransactionSignature().length == 0) {
-            chain.getLogger().error("The full signature of the cross chain transaction is empty,txHash:{}", messageBody.getTxHash().toHex());
+            chain.getLogger().error("The full signature of the cross chain transaction is empty,txHash:{}", messageBody.getLocalTxHash().toHex());
             return;
         }
 
         chain.getLogger().debug("Received the full Byzantine signature of a cross-chain transaction from another node,txHash:{},sign:{}"
-                , messageBody.getTxHash().toHex()
+                , messageBody.getLocalTxHash().toHex()
                 , HexUtil.encode(messageBody.getTransactionSignature()));
 
-        UntreatedMessage untreatedSignMessage = new UntreatedMessage(chainId,nodeId,messageBody,messageBody.getLocalHash());
+        UntreatedMessage untreatedSignMessage = new UntreatedMessage(chainId,nodeId,messageBody,messageBody.getLocalTxHash());
         chain.getHashMessageQueue().offer(untreatedSignMessage);
 //        Transaction tx = ctxStatusPO.getTx();
 //        List<String> packAddressList = getPackingAddressList(tx, tx.getHash(), chain);
