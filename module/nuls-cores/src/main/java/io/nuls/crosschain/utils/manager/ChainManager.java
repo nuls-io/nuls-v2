@@ -9,17 +9,16 @@ import io.nuls.core.log.Log;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.crosschain.base.model.bo.ChainInfo;
 import io.nuls.crosschain.base.model.bo.txdata.RegisteredChainMessage;
+import io.nuls.crosschain.base.service.ResetLocalVerifierService;
 import io.nuls.crosschain.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.model.bo.Chain;
 import io.nuls.crosschain.model.bo.CmdRegisterDto;
 import io.nuls.crosschain.rpc.call.BlockCall;
 import io.nuls.crosschain.rpc.call.SmartContractCall;
+import io.nuls.crosschain.srorage.CtxStatusService;
 import io.nuls.crosschain.srorage.RegisteredCrossChainService;
 import io.nuls.crosschain.utils.LoggerUtil;
-import io.nuls.crosschain.utils.thread.handler.GetCtxStateHandler;
-import io.nuls.crosschain.utils.thread.handler.HashMessageHandler;
-import io.nuls.crosschain.utils.thread.handler.OtherCtxMessageHandler;
-import io.nuls.crosschain.utils.thread.handler.SignMessageByzantineHandler;
+import io.nuls.crosschain.utils.thread.handler.*;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,6 +36,14 @@ public class ChainManager {
     private NulsCoresConfig config;
     @Autowired
     private RegisteredCrossChainService registeredCrossChainService;
+
+
+    @Autowired
+    CtxStatusService ctxStatusService;
+
+    @Autowired
+    private static ResetLocalVerifierService resetLocalVerifierService;
+
     /**
      * Chain cache
      * Chain cache
@@ -136,6 +143,7 @@ public class ChainManager {
             chain.getThreadPool().execute(new OtherCtxMessageHandler(chain));
             chain.getThreadPool().execute(new GetCtxStateHandler(chain));
             chain.getThreadPool().execute(new SignMessageByzantineHandler(chain));
+            chain.getThreadPool().execute(new SaveCtxFullSignHandler(chain,ctxStatusService,resetLocalVerifierService));
             int syncStatus = BlockCall.getBlockStatus(chain);
             chain.getLogger().info("The current status of the node is:{}",syncStatus);
             chain.setSyncStatus(syncStatus);

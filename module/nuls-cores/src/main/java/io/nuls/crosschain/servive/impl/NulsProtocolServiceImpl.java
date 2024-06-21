@@ -16,11 +16,14 @@ import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.*;
 import io.nuls.crosschain.base.model.bo.Circulation;
 import io.nuls.crosschain.base.service.ProtocolService;
+import io.nuls.crosschain.base.service.ResetLocalVerifierService;
 import io.nuls.crosschain.constant.NulsCrossChainConstant;
+import io.nuls.crosschain.constant.ParamConstant;
 import io.nuls.crosschain.model.bo.Chain;
 import io.nuls.crosschain.model.bo.CtxStateEnum;
 import io.nuls.crosschain.model.bo.message.UntreatedMessage;
 import io.nuls.crosschain.model.po.CtxStatusPO;
+import io.nuls.crosschain.rpc.call.ConsensusCall;
 import io.nuls.crosschain.rpc.call.LedgerCall;
 import io.nuls.crosschain.rpc.call.NetWorkCall;
 import io.nuls.crosschain.srorage.*;
@@ -56,6 +59,9 @@ public class NulsProtocolServiceImpl implements ProtocolService {
 
     @Autowired
     private CtxStateService ctxStateService;
+
+    @Autowired
+    private static ResetLocalVerifierService resetLocalVerifierService;
 
     @Override
     /**
@@ -301,4 +307,40 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             chain.getLogger().error(e);
         }
     }
+
+
+    @Override
+    public void receiveCtxFullSign(int chainId, String nodeId, CtxFullSignMessage messageBody) {
+        int handleChainId = chainId;
+        if (config.isMainNet()) {
+            handleChainId = config.getMainChainId();
+        }
+        Chain chain = chainManager.getChainMap().get(handleChainId);
+
+        if (messageBody.getTransactionSignature() == null || messageBody.getTransactionSignature().length == 0) {
+            chain.getLogger().error("The full signature of the cross chain transaction is empty,txHash:{}", messageBody.getTxHash().toHex());
+            return;
+        }
+
+        chain.getLogger().debug("Received the full Byzantine signature of a cross-chain transaction from another node,txHash:{},sign:{}"
+                , messageBody.getTxHash().toHex()
+                , HexUtil.encode(messageBody.getTransactionSignature()));
+
+        UntreatedMessage untreatedSignMessage = new UntreatedMessage(chainId,nodeId,messageBody,messageBody.getLocalHash());
+        chain.getHashMessageQueue().offer(untreatedSignMessage);
+//        Transaction tx = ctxStatusPO.getTx();
+//        List<String> packAddressList = getPackingAddressList(tx, tx.getHash(), chain);
+//        TransactionSignature transactionSignature = new TransactionSignature();
+//        try {
+//            transactionSignature.parse(messageBody.getTransactionSignature(),0);
+//            List<P2PHKSignature> signList = CommonUtil.getMisMatchSigns(chain,transactionSignature,packAddressList);
+//
+//        } catch (NulsException e) {
+//            throw new RuntimeException(e);
+//        }
+
+
+    }
+
+
 }
