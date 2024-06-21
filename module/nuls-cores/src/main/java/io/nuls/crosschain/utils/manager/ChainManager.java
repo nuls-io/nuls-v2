@@ -15,6 +15,7 @@ import io.nuls.crosschain.model.bo.Chain;
 import io.nuls.crosschain.model.bo.CmdRegisterDto;
 import io.nuls.crosschain.rpc.call.BlockCall;
 import io.nuls.crosschain.rpc.call.SmartContractCall;
+import io.nuls.crosschain.srorage.ConvertCtxService;
 import io.nuls.crosschain.srorage.CtxStatusService;
 import io.nuls.crosschain.srorage.RegisteredCrossChainService;
 import io.nuls.crosschain.utils.LoggerUtil;
@@ -43,7 +44,8 @@ public class ChainManager {
 
     @Autowired
     private static ResetLocalVerifierService resetLocalVerifierService;
-
+    @Autowired
+    private ConvertCtxService convertCtxService;
     /**
      * Chain cache
      * Chain cache
@@ -143,7 +145,7 @@ public class ChainManager {
             chain.getThreadPool().execute(new OtherCtxMessageHandler(chain));
             chain.getThreadPool().execute(new GetCtxStateHandler(chain));
             chain.getThreadPool().execute(new SignMessageByzantineHandler(chain));
-            chain.getThreadPool().execute(new SaveCtxFullSignHandler(chain,ctxStatusService,resetLocalVerifierService));
+            chain.getThreadPool().execute(new SaveCtxFullSignHandler(chain,config,ctxStatusService,resetLocalVerifierService,convertCtxService));
             int syncStatus = BlockCall.getBlockStatus(chain);
             chain.getLogger().info("The current status of the node is:{}",syncStatus);
             chain.setSyncStatus(syncStatus);
