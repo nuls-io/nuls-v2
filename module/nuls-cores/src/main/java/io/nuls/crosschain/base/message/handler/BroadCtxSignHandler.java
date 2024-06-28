@@ -48,4 +48,18 @@ public class BroadCtxSignHandler implements MessageProcessor {
             chain.getLogger().info("A discard ： " + nodeId + "," + hash);
         }
     }
+//
+//    public static void main(String[] args) throws InterruptedException {
+//        String key = "sdfesgjlsdflksdf";
+//        HashSetTimeDuplicateProcessor processor = new HashSetTimeDuplicateProcessor(1000, 60000L);
+//        boolean b = processor.insertAndCheck(key);
+//        System.out.println(b);
+//        b = processor.insertAndCheck(key);
+//        System.out.println(b);
+//        Thread.sleep(60001L);
+//        b = processor.insertAndCheck(key);
+//        System.out.println(b);
+//        b = processor.insertAndCheck(key);
+//        System.out.println(b);
+//    }
 }

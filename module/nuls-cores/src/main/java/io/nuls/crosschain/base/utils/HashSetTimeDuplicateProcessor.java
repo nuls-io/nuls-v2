@@ -53,7 +53,7 @@ public class HashSetTimeDuplicateProcessor {
         boolean result = map1.containsKey(hash);
         if (!result) {
             map1.put(hash, System.currentTimeMillis());
-            return result;
+            return true;
         }
         Long start = map1.get(hash);
         long sub = System.currentTimeMillis() - start;
@@ -62,8 +62,9 @@ public class HashSetTimeDuplicateProcessor {
             result = true;
         } else {
             timeVal = start;
+            result = false;
         }
-
+        map1.put(hash, timeVal);
         int size = map1.size();
         if (size >= maxSize) {
             map2.put(hash, timeVal);
