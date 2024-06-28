@@ -39,11 +39,12 @@ public class BroadCtxHashHandler implements MessageProcessor {
         if (message == null) {
             return;
         }
+        Chain chain = chainManager.getChainMap().get(chainId);
         if (processor.insertAndCheck(nodeId + realMessage)) {
+            chain.getLogger().info("C process ： " + nodeId + "," + message);
             protocolService.receiveCtxHash(chainId, nodeId, realMessage);
         } else {
-            Chain chain = chainManager.getChainMap().get(chainId);
-            chain.getLogger().info("C discard： " + nodeId + "," + message);
+            chain.getLogger().info("C discard ： " + nodeId + "," + message);
         }
     }
 }

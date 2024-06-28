@@ -40,11 +40,12 @@ public class GetOtherCtxHandler implements MessageProcessor {
             return;
         }
         String hash = realMessage.getRequestHash().toHex();
+        Chain chain = chainManager.getChainMap().get(chainId);
         if (processor.insertAndCheck(nodeId + hash)) {
+            chain.getLogger().info("B process ： " + nodeId + "," + hash);
             protocolService.getOtherCtx(chainId, nodeId, realMessage);
         } else {
-            Chain chain = chainManager.getChainMap().get(chainId);
-            chain.getLogger().info("B discard： " + nodeId + "," + hash);
+            chain.getLogger().info("B discard ： " + nodeId + "," + hash);
         }
 
     }

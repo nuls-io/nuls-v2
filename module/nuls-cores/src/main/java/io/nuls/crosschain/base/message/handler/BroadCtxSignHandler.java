@@ -39,12 +39,13 @@ public class BroadCtxSignHandler implements MessageProcessor {
         if (realMessage == null || realMessage.getLocalHash() == null) {
             return;
         }
+        Chain chain = chainManager.getChainMap().get(chainId);
         String hash = realMessage.getLocalHash().toHex();
         if (processor.insertAndCheck(nodeId + hash)) {
             protocolService.receiveCtxSign(chainId, nodeId, realMessage);
+            chain.getLogger().info("A process ： " + nodeId + "," + hash);
         } else {
-            Chain chain = chainManager.getChainMap().get(chainId);
-            chain.getLogger().info("A discard： " + nodeId + "," + hash);
+            chain.getLogger().info("A discard ： " + nodeId + "," + hash);
         }
     }
 }
