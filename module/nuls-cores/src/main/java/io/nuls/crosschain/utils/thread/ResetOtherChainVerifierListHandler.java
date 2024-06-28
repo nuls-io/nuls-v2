@@ -12,18 +12,19 @@ public class ResetOtherChainVerifierListHandler implements Runnable {
     private Transaction transaction;
     private int syncStatus;
 
-    public ResetOtherChainVerifierListHandler(Chain chain, Transaction transaction, int syncStatus){
+    public ResetOtherChainVerifierListHandler(Chain chain, Transaction transaction, int syncStatus) {
         this.chain = chain;
         this.transaction = transaction;
         this.syncStatus = syncStatus;
+        chain.getLogger().info("TxHash: {}", transaction.getHash().toHex());
     }
 
     @Override
     public void run() {
-        if(syncStatus == 0){
+        if (syncStatus == 0) {
             TxUtil.signAndBroad(chain, transaction);
             return;
         }
-        TxUtil.handleResetOtherVerifierListCtx(transaction,chain);
+        TxUtil.handleResetOtherVerifierListCtx(transaction, chain);
     }
 }

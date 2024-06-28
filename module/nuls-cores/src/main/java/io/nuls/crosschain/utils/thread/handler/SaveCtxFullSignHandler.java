@@ -60,7 +60,7 @@ public class SaveCtxFullSignHandler implements Runnable {
             try {
                 UntreatedMessage untreatedMessage = chain.getTxFullSignMessageQueue().take();
                 CtxFullSignMessage message = (CtxFullSignMessage) untreatedMessage.getMessage();
-                chain.getLogger().debug("Start storing cross-chain transaction signatures pushed by other nodes: localTxHash:{},sign:{}"
+                chain.getLogger().info("Start storing cross-chain transaction signatures pushed by other nodes: localTxHash:{},sign:{}"
                         , message.getLocalTxHash().toHex()
                         , HexUtil.encode(message.getTransactionSignature())
                 );
@@ -74,7 +74,7 @@ public class SaveCtxFullSignHandler implements Runnable {
                 Transaction tx = ctxStatusPO.getTx();
                 List<String> packAddressList = getPackingAddressList(tx, tx.getHash(), chain);
 
-                chain.getLogger().debug("Gets the number of validators address listed:{}",packAddressList.size());
+                chain.getLogger().info("Gets the number of validators address listed:{}",packAddressList.size());
 
                 TransactionSignature localTxSign = new TransactionSignature();
                 localTxSign.parse(tx.getTransactionSignature(),0);
@@ -88,7 +88,7 @@ public class SaveCtxFullSignHandler implements Runnable {
                 if (!config.isMainNet() && convertCtx.getType() == config.getCrossCtxType()) {
                     convertCtx = convertCtxService.get(message.getLocalTxHash(), chain.getChainId());
                 }
-                chain.getLogger().debug("Signature verification hash:{}",convertCtx.getHash().toHex());
+                chain.getLogger().info("Signature verification hash:{}",convertCtx.getHash().toHex());
                 int signVerifyPassNumber = 0;
                 for (P2PHKSignature sign: messageTxSign.getP2PHKSignatures()
                      ) {
@@ -106,7 +106,7 @@ public class SaveCtxFullSignHandler implements Runnable {
                 ctxStatusPO.setTx(tx);
 
                 ctxStatusService.save(message.getLocalTxHash(),ctxStatusPO,chain.getChainId());
-                chain.getLogger().debug("Save transaction transaction signature:{}",untreatedMessage.getCacheHash().toHex());
+                chain.getLogger().info("Save transaction transaction signature:{}",untreatedMessage.getCacheHash().toHex());
             } catch (Exception e) {
                 chain.getLogger().error("An error occurred processing the full signature pushed by another node",e);
             }
