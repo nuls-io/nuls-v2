@@ -35,7 +35,7 @@ public class BroadCtxSignHandler implements MessageProcessor {
         if (message == null) {
             return;
         }
-        if (processor.insertAndCheck(realMessage.getLocalHash().toHex())) {
+        if (processor.insertAndCheck(nodeId + realMessage.getLocalHash().toHex())) {
             protocolService.receiveCtxSign(chainId, nodeId, realMessage);
         }
     }
