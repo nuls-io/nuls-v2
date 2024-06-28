@@ -86,7 +86,7 @@ public class BlockServiceImpl implements BlockService {
         int chainId = (int) params.get(ParamConstant.CHAIN_ID);
         Chain chain = chainManager.getChainMap().get(chainId);
         long height = Long.valueOf(params.get(ParamConstant.NEW_BLOCK_HEIGHT).toString());
-        chain.getLogger().info("Received block height update information, the latest block height is：{}", height);
+        chain.getLogger().debug("Received block height update information, the latest block height is：{}", height);
         //Check if there are cross chain transactions waiting to be broadcasted
         Map<Long, SendCtxHashPO> sendHeightMap = sendHeightService.getList(chainId);
         if (sendHeightMap != null && sendHeightMap.size() > 0) {
