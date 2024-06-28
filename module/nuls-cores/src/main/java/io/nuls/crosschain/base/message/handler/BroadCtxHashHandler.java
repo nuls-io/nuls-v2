@@ -8,6 +8,8 @@ import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.BroadCtxHashMessage;
 import io.nuls.crosschain.base.service.ProtocolService;
 import io.nuls.crosschain.base.utils.HashSetTimeDuplicateProcessor;
+import io.nuls.crosschain.model.bo.Chain;
+import io.nuls.crosschain.utils.manager.ChainManager;
 
 /**
  * BroadCtxHashMessageProcessing class
@@ -19,6 +21,8 @@ import io.nuls.crosschain.base.utils.HashSetTimeDuplicateProcessor;
 
 @Component("BroadCtxHashHandlerV1")
 public class BroadCtxHashHandler implements MessageProcessor {
+    @Autowired
+    private ChainManager chainManager;
     @Autowired
     private ProtocolService protocolService;
 
@@ -37,6 +41,9 @@ public class BroadCtxHashHandler implements MessageProcessor {
         }
         if (processor.insertAndCheck(nodeId + realMessage)) {
             protocolService.receiveCtxHash(chainId, nodeId, realMessage);
+        } else {
+            Chain chain = chainManager.getChainMap().get(chainId);
+            chain.getLogger().info("C discard： " + nodeId + "," + message);
         }
     }
 }
