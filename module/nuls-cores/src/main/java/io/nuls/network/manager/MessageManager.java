@@ -29,6 +29,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.ByteUtils;
@@ -167,7 +168,9 @@ public class MessageManager extends BaseManager {
                 }
             }
         } catch (Exception e) {
-            Log.error("node==={},{}", node.getId(), e);
+            Log.error("node==={},{}", node.getId(), HexUtil.encode(byteBuffer.getPayload()));
+            Log.error("",e);
+
         }
     }
 
