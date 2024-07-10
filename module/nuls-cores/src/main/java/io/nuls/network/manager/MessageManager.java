@@ -167,7 +167,7 @@ public class MessageManager extends BaseManager {
                 }
             }
         } catch (Exception e) {
-            Log.error("node={},{}", node.getId(), e);
+            Log.error("node==={},{}", node.getId(), e);
         }
     }
 
