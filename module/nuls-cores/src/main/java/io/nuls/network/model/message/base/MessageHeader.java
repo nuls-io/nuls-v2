@@ -28,6 +28,8 @@ package io.nuls.network.model.message.base;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.contract.util.Log;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 
@@ -134,6 +136,7 @@ public class MessageHeader extends BaseNulsData {
             command = buffer.readBytes(12);
             checksum = buffer.readUint32();
         } catch (Exception e) {
+            Log.error("Message error: {}", HexUtil.encode(buffer.getPayload()));
             throw new NulsException(e);
         }
     }
