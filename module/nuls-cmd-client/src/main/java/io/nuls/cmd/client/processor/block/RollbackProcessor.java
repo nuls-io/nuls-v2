@@ -87,7 +87,7 @@ public class RollbackProcessor implements CommandProcessor {
         if(height>1000){
             return CommandResult.getFailed("The count is too big");
         }
-        Result<BlockHeaderData> result = blockService.rollback(new GetBlockHeaderByHeightReq(height));
+        Result result = blockService.rollback(new GetBlockHeaderByHeightReq(height));
 
         if(result.isFailed()){
             return CommandResult.getFailed(result);

@@ -124,11 +124,11 @@ public class BlockServiceImpl implements BlockService {
                         if (height - cacheHeight < ONE_DAY_HEIGHT) {
                             po.setHashList(broadFailCtxHash);
                             sendHeightService.save(cacheHeight, po, chainId);
-                            chain.getLogger().error("The block height is{}Cross chain transaction broadcast failed for", cacheHeight);
+                            chain.getLogger().error("The block height is {} Cross chain transaction broadcast failed for {}", cacheHeight, broadFailCtxHash);
                         }
                     } else {
                         sendHeightService.delete(cacheHeight, chainId);
-                        chain.getLogger().info("The block height is{}Cross chain transaction broadcast successful", cacheHeight);
+                        chain.getLogger().info("The block height is {} Cross chain transaction broadcast successful", cacheHeight);
                     }
                 } else {
                     continue;
