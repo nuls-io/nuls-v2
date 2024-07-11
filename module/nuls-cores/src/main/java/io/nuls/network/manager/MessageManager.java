@@ -166,7 +166,7 @@ public class MessageManager extends BaseManager {
                 } else {
                     //External messages, converting to external interfaces
                     OtherModuleMessageHandler handler = MessageHandlerFactory.getInstance().getOtherModuleHandler();
-                    Log.info("RecieveMessage2 : {}, {} ,{}", header.getCommandStr(), message.getClass().getTypeName(), handler.getClass().getTypeName());
+                    Log.info("RecieveMessage2 : {}, {}˚", header.getCommandStr(), handler.getClass().getTypeName());
                     result = handler.recieve(header, payLoadBody, node);
                     byteBuffer.setCursor(payLoad.length);
                 }
