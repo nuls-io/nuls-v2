@@ -6,6 +6,7 @@ import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.common.NulsCoresConfig;
+import io.nuls.contract.util.Log;
 import io.nuls.core.basic.Result;
 import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.core.annotation.Autowired;
@@ -81,6 +82,7 @@ public class BlockServiceImpl implements BlockService {
     public Result newBlockHeight(Map<String, Object> params) {
         Result result = paramValid(params);
         if (result.isFailed()) {
+            Log.error(result.getMsg());
             return result;
         }
         int chainId = (int) params.get(ParamConstant.CHAIN_ID);
