@@ -173,9 +173,6 @@ public class MessageManager extends BaseManager {
                 if (!result.isSuccess()) {
                     LoggerUtil.logger(chainId).error("receiveMessage deal fail:" + result.getErrorCode().getMsg());
                 }
-                if ((message instanceof VersionMessage) && byteBuffer.getCursor() == byteBuffer.getPayload().length - 1) {
-                    break;
-                }
             }
         } catch (Exception e) {
             if (null != message) {
