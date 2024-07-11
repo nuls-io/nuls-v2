@@ -161,12 +161,12 @@ public class MessageManager extends BaseManager {
                 if (null != message) {
                     message = byteBuffer.readNulsData(message);
                     BaseMeesageHandlerInf handler = MessageHandlerFactory.getInstance().getHandler(header.getCommandStr());
-                    Log.info("RecieveMessage1 : {}, {} ,{}", header.getCommandStr(), message.getClass().getTypeName(), handler.getClass().getTypeName());
+//                    Log.info("RecieveMessage1 : {}, {} ,{}", header.getCommandStr(), message.getClass().getTypeName(), handler.getClass().getTypeName());
                     result = handler.recieve(message, node);
                 } else {
                     //External messages, converting to external interfaces
                     OtherModuleMessageHandler handler = MessageHandlerFactory.getInstance().getOtherModuleHandler();
-                    Log.info("RecieveMessage2 : {}, {}˚", header.getCommandStr(), handler.getClass().getTypeName());
+//                    Log.info("RecieveMessage2 : {}, {}˚", header.getCommandStr(), handler.getClass().getTypeName());
                     result = handler.recieve(header, payLoadBody, node);
                     byteBuffer.setCursor(payLoad.length);
                 }

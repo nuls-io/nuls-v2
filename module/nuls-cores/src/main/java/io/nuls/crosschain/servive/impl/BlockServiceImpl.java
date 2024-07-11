@@ -135,7 +135,7 @@ public class BlockServiceImpl implements BlockService {
                 }
             }
         }
-        chain.getLogger().debug("Block height update message processing completed,Height:{}\n\n", height);
+        chain.getLogger().info("Block height update message processing completed,Height:{}\n\n", height);
         return Result.getSuccess(CommonCodeConstanst.SUCCESS);
     }
 
@@ -177,6 +177,7 @@ public class BlockServiceImpl implements BlockService {
                     BlockExtendsData localExtendsData = localHeader.getExtendsData();
                     if (blockExtendsData.getRoundIndex() == localExtendsData.getRoundIndex()) {
                         chainManager.getChainHeaderMap().put(chainId, blockHeader);
+                        chain.getLogger().info("ChainHeaderMap put : {} -- {}", chainId, blockHeader.getHeight());
                         return Result.getSuccess(CommonCodeConstanst.SUCCESS);
                     }
                     agentChangeMap = ConsensusCall.getAgentChangeInfo(chain, localHeader.getExtend(), blockHeader.getExtend());
@@ -201,6 +202,7 @@ public class BlockServiceImpl implements BlockService {
                 }
             }
             chainManager.getChainHeaderMap().put(chainId, blockHeader);
+            chain.getLogger().info("ChainHeaderMap put : {} -- {}", chainId, blockHeader.getHeight());
         } catch (Exception e) {
             chain.getLogger().error(e);
             return Result.getFailed(CommonCodeConstanst.DATA_PARSE_ERROR);
