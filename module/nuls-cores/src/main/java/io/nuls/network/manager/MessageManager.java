@@ -185,17 +185,6 @@ public class MessageManager extends BaseManager {
         }
     }
 
-    public static void main(String[] args) throws NulsException {
-        byte[] bytes = HexUtil.decode("c63d34012f00000076657273696f6effffffffff790934430000000000000000000000000000ffff12d8980f524600000000000000000000ffff038e118a6a4200000000000000");
-        NulsByteBuffer buffer = new NulsByteBuffer(bytes, 0);
-        VersionMessage message = new VersionMessage();
-        buffer.readNulsData(message);
-
-        System.out.println(message);
-
-    }
-
-
     public NetworkEventResult broadcastSelfAddrToAllNode(Collection<Node> connectNodes, IpAddressShare ipAddress, boolean isCrossAddress, boolean asyn) {
         for (Node connectNode : connectNodes) {
             List<IpAddressShare> addressesList = new ArrayList<>();
