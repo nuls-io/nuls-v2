@@ -38,11 +38,11 @@ public class BroadCtxHashHandler implements MessageProcessor {
         if (message == null) {
             return;
         }
-//        if (processor.insertAndCheck(nodeId + realMessage)) {
-        Log.info("C process ： " + nodeId + "," + message);
-        protocolService.receiveCtxHash(chainId, nodeId, realMessage);
-//        } else {
-//            chain.getLogger().info("C discard ： " + nodeId + "," + message);
-//        }
+        if (processor.insertAndCheck(nodeId + realMessage)) {
+//            Log.info("C process ： " + nodeId + "," + message);
+            protocolService.receiveCtxHash(chainId, nodeId, realMessage);
+        } else {
+//            Log.info("C discard ： " + nodeId + "," + message);
+        }
     }
 }

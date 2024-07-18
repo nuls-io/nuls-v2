@@ -34,19 +34,18 @@ public class GetOtherCtxHandler implements MessageProcessor {
 
     @Override
     public void process(int chainId, String nodeId, String message) {
-        Log.info("B-process ： " + nodeId + "," + message);
         GetOtherCtxMessage realMessage = RPCUtil.getInstanceRpcStr(message, GetOtherCtxMessage.class);
         if (realMessage == null || realMessage.getRequestHash() == null) {
-            Log.info("0 discard ： " + nodeId + "," + message);
+//            Log.info("0 discard ： " + nodeId + "," + message);
             return;
         }
         String hash = realMessage.getRequestHash().toHex();
-//        if (processor.insertAndCheck(nodeId + hash)) {
-        Log.info("B process ： " + nodeId + "," + hash);
+        if (processor.insertAndCheck(nodeId + hash)) {
+//            Log.info("B process ： " + nodeId + "," + hash);
             protocolService.getOtherCtx(chainId, nodeId, realMessage);
-//        } else {
-//            chain.getLogger().info("B discard ： " + nodeId + "," + hash);
-//        }
+        } else {
+//            Log.info("B discard ： " + nodeId + "," + hash);
+        }
 
     }
 }

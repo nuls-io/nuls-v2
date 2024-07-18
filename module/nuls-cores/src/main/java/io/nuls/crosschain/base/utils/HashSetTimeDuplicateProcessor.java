@@ -49,7 +49,6 @@ public class HashSetTimeDuplicateProcessor {
     }
 
     public synchronized boolean insertAndCheck(String hash) {
-
         boolean result = map1.containsKey(hash);
         if (!result) {
             map1.put(hash, System.currentTimeMillis());
@@ -84,5 +83,40 @@ public class HashSetTimeDuplicateProcessor {
     public void remove(String hash) {
         map1.remove(hash);
         map2.remove(hash);
+    }
+
+    public static void main(String[] args) {
+        HashSetTimeDuplicateProcessor processor = new HashSetTimeDuplicateProcessor(1000,10000L);
+        assertTrueTest(processor.insertAndCheck("1"));
+        assertTrueTest(processor.insertAndCheck("2"));
+        assertTrueTest(processor.insertAndCheck("3"));
+
+        assertFlaseTest(processor.insertAndCheck("1"));
+        assertFlaseTest(processor.insertAndCheck("2"));
+
+        try {
+            Thread.sleep(10000L);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        assertTrueTest(processor.insertAndCheck("1"));
+        assertTrueTest(processor.insertAndCheck("2"));
+        assertTrueTest(processor.insertAndCheck("3"));
+        assertFlaseTest(processor.insertAndCheck("1"));
+        assertFlaseTest(processor.insertAndCheck("2"));
+
+    }
+
+    private static void assertTrueTest(boolean b) {
+        if(!b){
+            throw new RuntimeException("预期为true，实际得到false");
+        }
+    }
+
+    private static void assertFlaseTest(boolean b) {
+        if(b){
+            throw new RuntimeException("预期为false，实际得到true");
+        }
     }
 }
