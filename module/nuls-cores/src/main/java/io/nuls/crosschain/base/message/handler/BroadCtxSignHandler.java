@@ -4,6 +4,7 @@ import io.nuls.base.RPCUtil;
 import io.nuls.base.protocol.MessageProcessor;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.log.Log;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.BroadCtxSignMessage;
 import io.nuls.crosschain.base.service.ProtocolService;
@@ -22,8 +23,6 @@ import io.nuls.crosschain.utils.manager.ChainManager;
 @Component("BroadCtxSignHandlerV1")
 public class BroadCtxSignHandler implements MessageProcessor {
     @Autowired
-    private ChainManager chainManager;
-    @Autowired
     private ProtocolService protocolService;
 
     private HashSetTimeDuplicateProcessor processor = new HashSetTimeDuplicateProcessor(1000, 60000L);
@@ -39,11 +38,10 @@ public class BroadCtxSignHandler implements MessageProcessor {
         if (realMessage == null || realMessage.getLocalHash() == null) {
             return;
         }
-        Chain chain = chainManager.getChainMap().get(chainId);
         String hash = realMessage.getLocalHash().toHex();
 //        if (processor.insertAndCheck(nodeId + hash)) {
-            protocolService.receiveCtxSign(chainId, nodeId, realMessage);
-            chain.getLogger().info("A process ： " + nodeId + "," + hash);
+        protocolService.receiveCtxSign(chainId, nodeId, realMessage);
+        Log.info("A process ： " + nodeId + "," + hash);
 //        } else {
 //            chain.getLogger().info("A discard ： " + nodeId + "," + hash);
 //        }

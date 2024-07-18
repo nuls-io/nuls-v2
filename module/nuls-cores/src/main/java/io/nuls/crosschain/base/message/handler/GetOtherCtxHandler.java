@@ -4,6 +4,7 @@ import io.nuls.base.RPCUtil;
 import io.nuls.base.protocol.MessageProcessor;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.log.Log;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.GetOtherCtxMessage;
 import io.nuls.crosschain.base.service.ProtocolService;
@@ -22,8 +23,6 @@ import io.nuls.crosschain.utils.manager.ChainManager;
 @Component("GetOtherCtxHandlerV1")
 public class GetOtherCtxHandler implements MessageProcessor {
     @Autowired
-    private ChainManager chainManager;
-    @Autowired
     private ProtocolService protocolService;
 
     private HashSetTimeDuplicateProcessor processor = new HashSetTimeDuplicateProcessor(1000, 300000L);
@@ -35,16 +34,15 @@ public class GetOtherCtxHandler implements MessageProcessor {
 
     @Override
     public void process(int chainId, String nodeId, String message) {
-        Chain chain = chainManager.getChainMap().get(chainId);
-        chain.getLogger().info("B-process ： " + nodeId + "," + message);
+        Log.info("B-process ： " + nodeId + "," + message);
         GetOtherCtxMessage realMessage = RPCUtil.getInstanceRpcStr(message, GetOtherCtxMessage.class);
         if (realMessage == null || realMessage.getRequestHash() == null) {
-            chain.getLogger().info("0 discard ： " + nodeId + "," + message);
+            Log.info("0 discard ： " + nodeId + "," + message);
             return;
         }
         String hash = realMessage.getRequestHash().toHex();
 //        if (processor.insertAndCheck(nodeId + hash)) {
-            chain.getLogger().info("B process ： " + nodeId + "," + hash);
+        Log.info("B process ： " + nodeId + "," + hash);
             protocolService.getOtherCtx(chainId, nodeId, realMessage);
 //        } else {
 //            chain.getLogger().info("B discard ： " + nodeId + "," + hash);
