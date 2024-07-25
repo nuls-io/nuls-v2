@@ -106,9 +106,9 @@ public class GetBalanceProcessor implements CommandProcessor {
         }
         Integer decimalInt = AssetsUtil.getCrossAssetDecimal(assetChainId, assetId);
         Map<String,Object> r = new HashMap<>(3);
-        r.put("available",config.toBigUnit(result.getData().getAvailable(),decimalInt));
-        r.put("freeze",config.toBigUnit(result.getData().getFreeze(),decimalInt));
-        r.put("total",config.toBigUnit(result.getData().getTotal(),decimalInt));
+        r.put("available",AssetsUtil.toBigUnit(result.getData().getAvailable(),decimalInt));
+        r.put("freeze",AssetsUtil.toBigUnit(result.getData().getFreeze(),decimalInt));
+        r.put("total",AssetsUtil.toBigUnit(result.getData().getTotal(),decimalInt));
         return CommandResult.getSuccess(new Result(r));
     }
 

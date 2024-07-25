@@ -14,6 +14,7 @@ public class CrossTxHandler implements Runnable {
         this.chain = chain;
         this.transaction = transaction;
         this.syncStatus = syncStatus;
+        chain.getLogger().info("TxHash: {}",transaction.getHash().toHex());
     }
 
     @Override

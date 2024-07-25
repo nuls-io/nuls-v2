@@ -49,8 +49,8 @@ public class BlockServiceForRpc extends BaseRpcService implements BlockService {
     }
 
     @Override
-    public Result<BlockHeaderData> rollback(GetBlockHeaderByHeightReq req) {
-        return _call("roll_back", req, this::tranderBlockHeader);
+    public Result rollback(GetBlockHeaderByHeightReq req) {
+        return _call("roll_back", req, this::tranderString);
     }
 
     @Override
@@ -60,6 +60,14 @@ public class BlockServiceForRpc extends BaseRpcService implements BlockService {
 
     private Result<BlockHeaderData> _call(String method, Object req, Function<Map, Result> callback) {
         return call(method, req, callback);
+    }
+
+    private Result<String> tranderString(Map result) {
+        String hexString = (String) result.get("value");
+        if (StringUtils.isBlank(hexString)) {
+            return success(null);
+        }
+        return success(hexString);
     }
 
     private Result<BlockHeaderData> tranderBlockHeader(Map result) {

@@ -86,6 +86,9 @@ public class VersionMessageBody extends BaseNulsData {
             blockHeight = buffer.readUint32();
             blockHash = buffer.readString();
             extend = buffer.readString();
+            if(!buffer.isFinished()){
+                buffer.readByte();
+            }
         } catch (Exception e) {
             throw new NulsException(e);
         }

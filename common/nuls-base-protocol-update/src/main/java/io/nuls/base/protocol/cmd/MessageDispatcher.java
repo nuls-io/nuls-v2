@@ -62,7 +62,11 @@ public final class MessageDispatcher extends BaseCmd {
         String msgStr = (String) params.get("messageBody");
         for (MessageProcessor processor : processors) {
             if (cmd.equals(processor.getCmd())) {
-                processor.process(chainId, nodeId, msgStr);
+                try {
+                    processor.process(chainId, nodeId, msgStr);
+                } catch (Exception e) {
+                    Log.error("", e);
+                }
             }
         }
         return success();

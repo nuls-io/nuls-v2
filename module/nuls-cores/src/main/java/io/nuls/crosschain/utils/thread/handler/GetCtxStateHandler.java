@@ -21,6 +21,7 @@ public class GetCtxStateHandler implements Runnable {
         while (chain.getGetCtxStateQueue() != null) {
             try {
                 UntreatedMessage untreatedMessage = chain.getGetCtxStateQueue().take();
+                chain.getLogger().info("TxHash: {}",untreatedMessage.getCacheHash().toHex());
                 TxUtil.getCtxState(chain, untreatedMessage.getCacheHash());
             } catch (Exception e) {
                 chain.getLogger().error(e);

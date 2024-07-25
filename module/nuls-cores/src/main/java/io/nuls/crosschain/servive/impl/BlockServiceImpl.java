@@ -6,6 +6,7 @@ import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.common.NulsCoresConfig;
+import io.nuls.contract.util.Log;
 import io.nuls.core.basic.Result;
 import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.core.annotation.Autowired;
@@ -81,12 +82,13 @@ public class BlockServiceImpl implements BlockService {
     public Result newBlockHeight(Map<String, Object> params) {
         Result result = paramValid(params);
         if (result.isFailed()) {
+            Log.error(result.getMsg());
             return result;
         }
         int chainId = (int) params.get(ParamConstant.CHAIN_ID);
         Chain chain = chainManager.getChainMap().get(chainId);
         long height = Long.valueOf(params.get(ParamConstant.NEW_BLOCK_HEIGHT).toString());
-        chain.getLogger().info("Received block height update information, the latest block height is：{}", height);
+        chain.getLogger().debug("Received block height update information, the latest block height is：{}", height);
         //Check if there are cross chain transactions waiting to be broadcasted
         Map<Long, SendCtxHashPO> sendHeightMap = sendHeightService.getList(chainId);
         if (sendHeightMap != null && sendHeightMap.size() > 0) {
@@ -124,18 +126,18 @@ public class BlockServiceImpl implements BlockService {
                         if (height - cacheHeight < ONE_DAY_HEIGHT) {
                             po.setHashList(broadFailCtxHash);
                             sendHeightService.save(cacheHeight, po, chainId);
-                            chain.getLogger().error("The block height is{}Cross chain transaction broadcast failed for", cacheHeight);
+                            chain.getLogger().error("The block height is {} Cross chain transaction broadcast failed for {}", cacheHeight, broadFailCtxHash);
                         }
                     } else {
                         sendHeightService.delete(cacheHeight, chainId);
-                        chain.getLogger().info("The block height is{}Cross chain transaction broadcast successful", cacheHeight);
+                        chain.getLogger().info("The block height is {} Cross chain transaction broadcast successful", cacheHeight);
                     }
                 } else {
                     continue;
                 }
             }
         }
-        chain.getLogger().debug("Block height update message processing completed,Height:{}\n\n", height);
+        chain.getLogger().info("Block height update message processing completed,Height:{}\n\n", height);
         return Result.getSuccess(CommonCodeConstanst.SUCCESS);
     }
 
@@ -177,6 +179,7 @@ public class BlockServiceImpl implements BlockService {
                     BlockExtendsData localExtendsData = localHeader.getExtendsData();
                     if (blockExtendsData.getRoundIndex() == localExtendsData.getRoundIndex()) {
                         chainManager.getChainHeaderMap().put(chainId, blockHeader);
+                        chain.getLogger().info("ChainHeaderMap put : {} -- {}", chainId, blockHeader.getHeight());
                         return Result.getSuccess(CommonCodeConstanst.SUCCESS);
                     }
                     agentChangeMap = ConsensusCall.getAgentChangeInfo(chain, localHeader.getExtend(), blockHeader.getExtend());
@@ -201,6 +204,7 @@ public class BlockServiceImpl implements BlockService {
                 }
             }
             chainManager.getChainHeaderMap().put(chainId, blockHeader);
+            chain.getLogger().info("ChainHeaderMap put : {} -- {}", chainId, blockHeader.getHeight());
         } catch (Exception e) {
             chain.getLogger().error(e);
             return Result.getFailed(CommonCodeConstanst.DATA_PARSE_ERROR);

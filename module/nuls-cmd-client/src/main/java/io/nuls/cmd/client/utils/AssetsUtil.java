@@ -10,12 +10,15 @@ import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
  * Asset instruments
+ *
  * @author lanjinsheng
  * @description
  * @date 2019/11/07
@@ -32,7 +35,17 @@ public class AssetsUtil {
         if (null == ASSETS_DECIMALS.get(key)) {
             initRegisteredChainInfo();
         }
-        return ASSETS_DECIMALS.get(key);
+        Integer val = ASSETS_DECIMALS.get(key);
+        if (null != val) {
+            return val;
+        }
+        if (chainId == 2 && assetId == 201) {
+            return 8;
+        }
+        if (chainId == 2 && assetId == 202) {
+            return 18;
+        }
+        return null;
     }
 
     public static Result initRegisteredChainInfo() {
@@ -98,5 +111,11 @@ public class AssetsUtil {
             }
             throw new NulsException(ErrorCodeConstants.SYSTEM_ERR, e.getMessage());
         }
+    }
+
+    public static BigDecimal toBigUnit(BigInteger val, Integer decimals) {
+        BigDecimal decimal = BigDecimal.TEN.pow(decimals);
+        BigDecimal dval = new BigDecimal(val);
+        return dval.divide(decimal);
     }
 }

@@ -2,6 +2,7 @@ package io.nuls.crosschain.utils;
 
 import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
@@ -97,9 +98,9 @@ public class MessageUtil {
             p2PHKSignature.parse(messageBody.getSignature(), 0);
             Transaction convertCtx = ctxStatusPO.getTx();
 
-            if(config.getCrossTxDropTime() > convertCtx.getTime()){
+            if (config.getCrossTxDropTime() > convertCtx.getTime()) {
                 chain.getLogger().warn("The cross-chain transaction has expired and is no longer processed");
-                return ;
+                return;
             }
 
             if (!config.isMainNet() && convertCtx.getType() == config.getCrossCtxType()) {
@@ -206,7 +207,7 @@ public class MessageUtil {
             NetWorkCall.sendToNode(chainId, ctxFullSignMessage, excludeNodes, CommandConstant.CROSS_CTX_FULL_SIGN_MESSAGE);
         }
         NetWorkCall.broadcast(chainId, messageBody, excludeNodes, CommandConstant.BROAD_CTX_SIGN_MESSAGE, false);
-        chain.getLogger().info("Broadcast newly received cross chain transaction signatures to other nodes linked to them,Hash:{},autograph:{}\n\n", nativeHex, signHex);
+        chain.getLogger().info("Broadcast newly received cross chain transaction signatures to other nodes linked to them,Hash:{} ,autograph:{} ,node: {}", nativeHex, signHex, excludeNodes);
     }
 
     /**
@@ -372,7 +373,11 @@ public class MessageUtil {
             TransactionSignature signature,
             NulsHash realHash) throws NulsException, IOException {
         List<String> handleAddressList;
-        long broadHeight = chainManager.getChainHeaderMap().get(chain.getChainId()).getHeight();
+        BlockHeader blockheader = chainManager.getChainHeaderMap().get(chain.getChainId());
+        if (null == blockheader) {
+            chain.getLogger().info("ChainHeaderMap get failed : {} -of- {}", chain.getChainId(), chainManager.getChainHeaderMap().size());
+        }
+        long broadHeight = blockheader.getHeight();
         try {
             chain.getSwitchVerifierLock().readLock().lock();
             handleAddressList = new ArrayList<>(chain.getVerifierList());

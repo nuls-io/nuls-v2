@@ -138,7 +138,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         if (messageBody.getSignature() != null) {
             signHex = HexUtil.encode(messageBody.getSignature());
         }
-        chain.getLogger().debug("Received in chain node{}Cross chain transactions broadcasted overHashAnd signature,Hash:{},autograph:{}", nodeId, nativeHex, signHex);
+        chain.getLogger().info("Received in chain node{}Cross chain transactions broadcasted overHashAnd signature,Hash:{},autograph:{}", nodeId, nativeHex, signHex);
         //If the transaction is received for the first time, obtain the complete cross chain transaction from the broadcast node
         CtxStatusPO ctxStatusPO = ctxStatusService.get(localHash, handleChainId);
         if (ctxStatusPO == null) {
@@ -146,7 +146,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             chain.getFutureMessageMap().putIfAbsent(localHash, new ArrayList<>());
             chain.getFutureMessageMap().get(localHash).add(untreatedSignMessage);
             //TODO pierre test
-            chain.getLogger().debug("The current node has not yet confirmed the cross chain transaction, caching signature messages");
+            chain.getLogger().info("The current node has not yet confirmed the cross chain transaction, caching signature messages");
             return;
         }
         //If the transaction has been confirmed at this node, there is no need for further signature processing
@@ -155,7 +155,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             return;
         }
         if(System.currentTimeMillis()/1000 - ctxStatusPO.getTx().getTime()>30*24*3600){
-            chain.getLogger().debug("Cross chain transaction id old,Hash:{}\n\n", nativeHex);
+            chain.getLogger().info("Cross chain transaction id old,Hash:{}\n\n", nativeHex);
             return;
         }
         try {
@@ -179,10 +179,10 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         //Cross chain transmission involves main network protocol transactionsHASH
         NulsHash mainHash = messageBody.getConvertHash();
         String mainHex = mainHash.toHex();
-        chain.getLogger().debug("Received other chain nodes{}Cross chain transactions broadcasted over,Hash：{}", nodeId, mainHex);
+        chain.getLogger().info("Received other chain nodes{}Cross chain transactions broadcasted over,Hash：{}", nodeId, mainHex);
         //Determine if the transaction has been received,If it has been received, it will be returned directly. If it has not been received, it will be sent to the broadcast node to obtain the complete cross chain transaction message
         if (convertHashService.get(mainHash, handleChainId) != null) {
-            chain.getLogger().debug("This node has already received the cross chain transaction,Hash：{}\n\n", mainHex);
+            chain.getLogger().info("This node has already received the cross chain transaction,Hash：{}\n\n", mainHex);
             return;
         }
         if (chain.getOtherCtxStageMap().get(mainHash) == null && chain.getOtherCtxStageMap().putIfAbsent(mainHash, NulsCrossChainConstant.CTX_STAGE_WAIT_RECEIVE) == null) {
@@ -195,7 +195,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             UntreatedMessage untreatedSignMessage = new UntreatedMessage(chainId,nodeId,messageBody,mainHash);
             chain.getHashMessageQueue().offer(untreatedSignMessage);
         }
-        chain.getLogger().debug("Cross chain transactions of other chain broadcastsHashMessage reception completed,Hash：{}\n\n", mainHex);
+        chain.getLogger().info("Cross chain transactions of other chain broadcastsHashMessage reception completed,Hash：{}\n\n", mainHex);
     }
 
     @Override
