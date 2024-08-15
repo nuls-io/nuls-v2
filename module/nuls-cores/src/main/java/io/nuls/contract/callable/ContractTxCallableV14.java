@@ -56,8 +56,8 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 
-import static io.nuls.contract.config.ContractContext.ASSET_ID;
-import static io.nuls.contract.config.ContractContext.CHAIN_ID;
+import static io.nuls.contract.config.ContractContext.LOCAL_MAIN_ASSET_ID;
+import static io.nuls.contract.config.ContractContext.LOCAL_CHAIN_ID;
 import static io.nuls.contract.util.ContractUtil.extractPublicKey;
 import static io.nuls.contract.util.ContractUtil.makeContractResult;
 import static io.nuls.core.constant.TxType.*;
@@ -220,7 +220,7 @@ public class ContractTxCallableV14 {
         for(CoinFrom from : fromList) {
             assetChainId = from.getAssetsChainId();
             assetId = from.getAssetsId();
-            if (CHAIN_ID != assetChainId || ASSET_ID != assetId) {
+            if (LOCAL_CHAIN_ID != assetChainId || LOCAL_MAIN_ASSET_ID != assetId) {
                 // Multiple accounts transfer multiple assets to the contract, and if the contract fails to execute, the amount of transferred assets will be refunded
                 ContractTransferTransaction tx = this.generateContractTransferTransaction(orginTxHash, contractAddress, from.getAddress(), from.getAmount(), assetChainId, assetId);
                 contractResult.getContractTransferList().add(tx);
@@ -234,7 +234,7 @@ public class ContractTxCallableV14 {
             if (sender == null) {
                 sender = contractData.getSender();
             }
-            ContractTransferTransaction tx = this.generateContractTransferTransaction(orginTxHash, contractAddress, sender, value, CHAIN_ID, ASSET_ID);
+            ContractTransferTransaction tx = this.generateContractTransferTransaction(orginTxHash, contractAddress, sender, value, LOCAL_CHAIN_ID, LOCAL_MAIN_ASSET_ID);
             contractResult.getContractTransferList().add(tx);
         }
         contractResult.setMergedTransferList(contractTransferHandler.contractTransfer2mergedTransfer(orginTx, contractResult.getContractTransferList()));

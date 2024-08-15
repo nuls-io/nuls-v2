@@ -63,4 +63,7 @@ public interface CommandConstant {
      */
     String CROSS_TX_REHANDLE_MESSAGE = "ctxRehandle";
 
+
+    String CROSS_CTX_FULL_SIGN_MESSAGE = "recvCtxFullSign";
+
 }

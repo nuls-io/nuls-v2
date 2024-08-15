@@ -82,6 +82,8 @@ public class Chain {
     private LinkedBlockingQueue<UntreatedMessage> getCtxStateQueue;
 
 
+    private LinkedBlockingQueue<UntreatedMessage> txFullSignMessageQueue;
+
     /**
      * Thread pool
      * */
@@ -157,6 +159,9 @@ public class Chain {
         signMessageByzantineQueue = new LinkedBlockingQueue<>();
         otherCtxMessageQueue = new LinkedBlockingQueue<>();
         getCtxStateQueue = new LinkedBlockingQueue<>();
+
+        txFullSignMessageQueue = new LinkedBlockingQueue<>();
+
         futureMessageMap = new ConcurrentHashMap<>();
         verifierList = new ArrayList<>();
         mainChain = false;
@@ -329,5 +334,9 @@ public class Chain {
             return null;
         }
         return this.verifierChangeTx;
+    }
+
+    public LinkedBlockingQueue<UntreatedMessage> getTxFullSignMessageQueue() {
+        return txFullSignMessageQueue;
     }
 }

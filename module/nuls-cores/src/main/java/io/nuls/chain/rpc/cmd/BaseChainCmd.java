@@ -51,6 +51,8 @@ import io.nuls.core.rpc.model.message.Response;
 import java.math.BigInteger;
 import java.util.List;
 
+import static io.nuls.common.CommonConstant.NORMAL_PRICE_PRE_1024_BYTES_NULS;
+
 /**
  * @author lan
  * @date 2018/11/28
@@ -97,7 +99,7 @@ public class BaseChainCmd extends BaseCmd {
         txSize += to1.size();
         txSize += to2.size();
         txSize += from.size();
-        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
+        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize, NORMAL_PRICE_PRE_1024_BYTES_NULS);
         String fromAmount = BigIntegerUtils.bigIntegerToString(asset.getDepositNuls().add(fee));
         if (BigIntegerUtils.isLessThan(accountBalance.getAvailable(), fromAmount)) {
             throw new NulsRuntimeException(CmErrorCode.BALANCE_NOT_ENOUGH);
@@ -120,7 +122,7 @@ public class BaseChainCmd extends BaseCmd {
         coinData.addTo(to);
 
         txSize += from.size();
-        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
+        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize, NORMAL_PRICE_PRE_1024_BYTES_NULS);
         String fromAmount = BigIntegerUtils.bigIntegerToString(fee);
         if (BigIntegerUtils.isLessThan(accountBalance.getAvailable(), fromAmount)) {
             throw new NulsRuntimeException(CmErrorCode.BALANCE_NOT_ENOUGH);
@@ -146,7 +148,7 @@ public class BaseChainCmd extends BaseCmd {
             coinData.addFrom(from);
             coinData.addTo(to);
             txSize += from.size();
-            BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
+            BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize, NORMAL_PRICE_PRE_1024_BYTES_NULS);
             String fromAmount = BigIntegerUtils.bigIntegerToString(fee);
             if (BigIntegerUtils.isLessThan(accountBalance.getAvailable(), fromAmount)) {
                 throw new NulsRuntimeException(CmErrorCode.BALANCE_NOT_ENOUGH);
@@ -158,7 +160,7 @@ public class BaseChainCmd extends BaseCmd {
             coinData.addTo(to);
             txSize += to.size();
             txSize += from.size();
-            BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
+            BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize, NORMAL_PRICE_PRE_1024_BYTES_NULS);
             //The handling fee is deducted from the mortgage
             to.setAmount(lockAmount.subtract(fee));
         }

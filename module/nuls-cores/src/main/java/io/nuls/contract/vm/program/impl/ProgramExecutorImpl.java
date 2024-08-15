@@ -61,8 +61,8 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static io.nuls.contract.config.ContractContext.ASSET_ID;
-import static io.nuls.contract.config.ContractContext.CHAIN_ID;
+import static io.nuls.contract.config.ContractContext.LOCAL_MAIN_ASSET_ID;
+import static io.nuls.contract.config.ContractContext.LOCAL_CHAIN_ID;
 import static io.nuls.contract.constant.ContractConstant.BALANCE_TRIGGER_FOR_CONSENSUS_CONTRACT_METHOD_DESC;
 import static io.nuls.contract.constant.ContractConstant.BALANCE_TRIGGER_METHOD_NAME;
 import static io.nuls.contract.util.ContractUtil.addressKey;
@@ -359,7 +359,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                 repository.saveCode(contractAddressBytes, contractCodeData);
                 logTime("save code");
             } else {
-                if ("<init>".equals(methodName)) {
+                if (Constants.CONSTRUCTOR_NAME.equals(methodName)) {
                     return revert("can't invoke <init> method");
                 }
                 AccountState accountState = repository.getAccountState(contractAddressBytes);
@@ -443,6 +443,11 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             ClassCode contractClassCode = getContractClassCode(classCodes);
             String methodDesc = ProgramDescriptors.parseDesc(methodDescBase);
             MethodCode methodCode = vm.methodArea.loadMethod(contractClassCode.name, methodName, methodDesc);
+            if (ProtocolGroupManager.getCurrentVersion(getCurrentChainId()) >= ContractContext.PROTOCOL_19) {
+                if (methodCode != null && !programInvoke.isCreate() && (methodCode.isConstructor || Constants.CONSTRUCTOR_NAME.equals(methodCode.name))) {
+                    return revert("can't invoke constructor");
+                }
+            }
 
             ProgramResult checkExecute = this.checkExecute(programInvoke, methodCode);
             if (checkExecute != null) {
@@ -525,7 +530,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
             if (transferValue.compareTo(BigInteger.ZERO) > 0) {
                 // Changes in asset balances corresponding to contracts
-                getAccount(contractAddressBytes, CHAIN_ID, ASSET_ID).addBalance(transferValue);
+                getAccount(contractAddressBytes, LOCAL_CHAIN_ID, LOCAL_MAIN_ASSET_ID).addBalance(transferValue);
             }
             if (multyAssetValues != null && !multyAssetValues.isEmpty()) {
                 for (ProgramMultyAssetValue assetValue : multyAssetValues) {
@@ -669,7 +674,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             return revert("only the owner can stop the contract");
         }
         // Chain Master Asset
-        BigInteger balance = getTotalBalance(address, null, CHAIN_ID, ASSET_ID);
+        BigInteger balance = getTotalBalance(address, null, LOCAL_CHAIN_ID, LOCAL_MAIN_ASSET_ID);
         if (BigInteger.ZERO.compareTo(balance) != 0) {
             return revert("contract balance is not zero");
         }

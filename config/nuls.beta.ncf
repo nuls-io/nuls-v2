@@ -32,10 +32,10 @@ port=18001
 crossPort=18002
 #Magic parameters
 packetMagic=20200120
-#Seed node
-selfSeedIps=39.98.226.51:18001,47.244.186.65:18001,47.254.234.223:18001,47.74.86.85:18001,192.168.1.145:18001
-#Cross chain seed connection nodes of the main network
-moonSeedIps=39.98.226.51:18002,47.244.186.65:18002,47.254.234.223:18002,47.74.86.85:18002
+#种子节点
+selfSeedIps=seedt1.nuls.io:18001,seedt2.nuls.io:18001,seedt3.nuls.io:18001
+#主网的跨链种子连接节点
+moonSeedIps=seedt1.nuls.io:18002,seedt2.nuls.io:18002,seedt3.nuls.io:18002
 #Maximum number of network connections
 maxInCount=100
 #Maximum number of outbound connections
@@ -77,8 +77,6 @@ agentChainId=2
 agentAssetId=1
 #Consensus reward assetsID(Consensus rewards must be assets of the same chain)
 awardAssetId=1
-#Consensus transaction fee unit price
-feeUnit=100000
 #Total Inflation
 totalInflationAmount=11000000000000000
 #Initial inflation amount500w/265*30
@@ -89,13 +87,16 @@ initTime=1594483200
 deflationRatio=0.4
 #Deflation interval time(unit：S),30day
 deflationTimeInterval=2592000
-
+feeAssets=2-1,2-201,2-202
+feeUnit=100000,10000,100000000000000
 
 [smart-contract]
 #The maximum consumption of contract view method callsGas
 maxViewGas=100000000
 systemLogLevel=WARN
 crossTokenSystemContract=tNULSeBaMy9k29Nj4rd3U4tonVr93mrDLHMNNd
+# 单位gasPrice小数点位移
+feeCoefficient=1,0.0001,10000000
 
 [public-service]
 #public-serviceModule ExternalrpcPort number
@@ -127,7 +128,7 @@ sendHeight=6
 #Byzantine proportion of cross chain transactions
 byzantineRatio=66
 #Main network cross chain seed node list
-crossSeedIps=39.98.226.51:18002,47.244.186.65:18002,47.254.234.223:18002,47.74.86.85:18002,192.168.1.145:18002
+crossSeedIps=seedt1.nuls.io:18001,seedt2.nuls.io:18001,seedt3.nuls.io:18001
 #List of main network validators
 verifiers=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMmShSTVwbU4rHkZjpD98JgFgg6rmhF,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
 #Main network signature Byzantine comparison

@@ -20,5 +20,5 @@ public interface BlockService {
     Result<BlockHeaderData> getBlockHeaderByLastHeight(GetBlockHeaderByLastHeightReq req);
 
 
-    Result<BlockHeaderData> rollback(GetBlockHeaderByHeightReq getBlockHeaderByHeightReq);
+    Result rollback(GetBlockHeaderByHeightReq getBlockHeaderByHeightReq);
 }

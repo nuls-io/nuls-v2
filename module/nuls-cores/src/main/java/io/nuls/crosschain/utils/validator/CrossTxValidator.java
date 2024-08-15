@@ -79,7 +79,7 @@ public class CrossTxValidator {
                 throw new NulsException(NulsCrossChainErrorCode.TO_ADDRESS_ERROR);
             }
         }
-        
+        chain.getLogger().info("Cross chain tx : {}",tx.getHash().toHex());
         if(toChainId == 0){
             throw new NulsException(NulsCrossChainErrorCode.TO_ADDRESS_ERROR);
         }

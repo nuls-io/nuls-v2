@@ -223,6 +223,11 @@ public class TxUtil {
      */
     @SuppressWarnings("unchecked")
     public static void localCtxByzantine(Transaction ctx, Chain chain) {
+        if(config.getCrossTxDropTime() > ctx.getTime()){
+            chain.getLogger().warn("The cross-chain transaction has expired and is no longer signed locally");
+            return ;
+        }
+
         int chainId = chain.getChainId();
         NulsHash hash = ctx.getHash();
         try {
