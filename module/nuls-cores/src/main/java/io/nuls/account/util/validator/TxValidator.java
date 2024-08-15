@@ -103,7 +103,7 @@ public class TxValidator {
         //fromMedium assetsid-Asset ChainidAs akeyThe total amount of an asset stored
         Map<String, BigInteger> mapFrom = new HashMap<>(AccountConstant.INIT_CAPACITY_8);
         for (CoinFrom coinFrom : coinData.getFrom()) {
-            if (!TxUtil.isChainAssetExist(chain, coinFrom)) {
+//            if (!TxUtil.isChainAssetExist(chain, coinFrom)) {
                 String key = coinFrom.getAssetsChainId() + "-" + coinFrom.getAssetsId();
                 BigInteger amount = mapFrom.get(key);
                 if(null != amount) {
@@ -112,12 +112,12 @@ public class TxValidator {
                     amount = coinFrom.getAmount();
                 }
                 mapFrom.put(key, amount);
-            }
+//            }
         }
         //toMedium assetsid-Asset ChainidAs akeyThe total amount of an asset stored
         Map<String, BigInteger> mapTo = new HashMap<>(AccountConstant.INIT_CAPACITY_8);
         for (CoinTo coinTO : coinData.getTo()) {
-            if (!TxUtil.isChainAssetExist(chain, coinTO)) {
+//            if (!TxUtil.isChainAssetExist(chain, coinTO)) {
                 String key = coinTO.getAssetsChainId() + "-" + coinTO.getAssetsId();
                 BigInteger amount = mapTo.get(key);
                 if(null != amount) {
@@ -126,7 +126,7 @@ public class TxValidator {
                     amount = coinTO.getAmount();
                 }
                 mapTo.put(key, amount);
-            }
+//            }
         }
         //comparefromandtoIs the value of the same asset equal
         for(Map.Entry<String, BigInteger> entry : mapTo.entrySet()){
