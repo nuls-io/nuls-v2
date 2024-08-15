@@ -129,8 +129,8 @@ public class TxValidator {
             }
         }
         //comparefromandtoIs the value of the same asset equal
-        for(Map.Entry<String, BigInteger> entry : mapFrom.entrySet()){
-            if(entry.getValue().compareTo(mapTo.get(entry.getKey())) == -1){
+        for(Map.Entry<String, BigInteger> entry : mapTo.entrySet()){
+            if(entry.getValue().compareTo(mapFrom.get(entry.getKey())) == 1){
                 return Result.getFailed(AccountErrorCode.COINFROM_UNDERPAYMENT);
             }
         }
