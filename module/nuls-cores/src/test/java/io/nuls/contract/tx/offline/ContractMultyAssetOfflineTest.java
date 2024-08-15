@@ -80,7 +80,6 @@ public class ContractMultyAssetOfflineTest {
     protected String apiURL = "http://beta.api.nuls.io/";
 
 
-
     /**
      * Multiple account call contracts - Transfer in
      */
@@ -200,7 +199,7 @@ public class ContractMultyAssetOfflineTest {
                                  BigInteger value, String contractAddress,
                                  String methodName, String methodDesc,
                                  String remark,
-                                 Object[] args, String[] argsType, ProgramMultyAssetValue[] multyAssetValues, boolean isBroadcastTx) throws Exception{
+                                 Object[] args, String[] argsType, ProgramMultyAssetValue[] multyAssetValues, boolean isBroadcastTx) throws Exception {
         List<SignDto> txSingers = new ArrayList<>();
         SignDto dto1 = new SignDto();
         dto1.setAddress(contractSender);
@@ -257,11 +256,11 @@ public class ContractMultyAssetOfflineTest {
      * Spending the same asset on two accounts
      */
     protected void callTxOfflineII(String feeAccount, String feeAccountPri,
-                                 String contractSender, String contractSenderPri,
-                                 BigInteger value, String contractAddress,
-                                 String methodName, String methodDesc,
-                                 String remark,
-                                 Object[] args, String[] argsType, ProgramMultyAssetValue[] multyAssetValues, boolean isBroadcastTx) throws Exception{
+                                   String contractSender, String contractSenderPri,
+                                   BigInteger value, String contractAddress,
+                                   String methodName, String methodDesc,
+                                   String remark,
+                                   Object[] args, String[] argsType, ProgramMultyAssetValue[] multyAssetValues, boolean isBroadcastTx) throws Exception {
         List<SignDto> txSingers = new ArrayList<>();
         SignDto dto1 = new SignDto();
         dto1.setAddress(contractSender);
@@ -322,16 +321,16 @@ public class ContractMultyAssetOfflineTest {
 
 
     protected void callTxOfflineBase(List<SignDto> txSingers, List<CoinFrom> froms, List<CoinTo> tos,
-                                 String feeAccount,
-                                 String contractSender,
-                                 BigInteger value, String contractAddress,
-                                 String methodName, String methodDesc,
-                                 String remark,
-                                 Object[] args, String[] argsType, boolean isBroadcastTx) throws Exception{
+                                     String feeAccount,
+                                     String contractSender,
+                                     BigInteger value, String contractAddress,
+                                     String methodName, String methodDesc,
+                                     String remark,
+                                     Object[] args, String[] argsType, boolean isBroadcastTx) throws Exception {
         // Generate a two-dimensional array of parameters
         String[][] finalArgs = null;
         if (args != null && args.length > 0) {
-            if(argsType == null || argsType.length != args.length) {
+            if (argsType == null || argsType.length != args.length) {
                 Assert.assertTrue("size of 'argsType' array not match 'args' array", false);
             }
             finalArgs = ContractUtil.twoDimensionalArray(args, argsType);
@@ -393,7 +392,7 @@ public class ContractMultyAssetOfflineTest {
         tx.setCoinData(coinData.serialize());
         tx.setTxData(callContractData.serialize());
 
-        BigInteger txSizeFee = TransactionFeeCalculator.getNormalUnsignedTxFee(tx.getSize() + 130 * froms.size());
+        BigInteger txSizeFee = TransactionFeeCalculator.getNormalUnsignedTxFee(tx.getSize() + 130 * froms.size(), 100000, 1);
         feeAccountFrom.setAmount(feeAccountFrom.getAmount().add(txSizeFee));
         /*if (feeAccountBalance.getBalance().compareTo(feeValue) < 0) {
             // Insufficient balance

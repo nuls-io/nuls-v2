@@ -5,43 +5,45 @@ logPath=/Users/wangzhijian/workspace/nuls-v2/logs
 logLevel=INFO
 dataPath=/Users/wangzhijian/workspace/nuls-v2/data
 #Default This ChainID
-chainId=1
+chainId=2
 #Address prefix
-addressPrefix=NULS
+addressPrefix=tNULS
 #Default main asset of this chainID
 assetId=1
-#Default Decimal Places for Assets
-decimals=8
 #Default Chain Name
-chainName=nuls
+chainName=nuls2
 #The default asset symbol for this chain
 symbol=NULS
+#The exact decimal places of default assets
+decimals=8
 #Main network chainid
-mainChainId=1
+mainChainId=2
 #Main network assetsid
 mainAssetId=1
 #Main network main asset symbol
 mainSymbol=NULS
 blackHolePublicKey=000000000000000000000000000000000000000000000000000000000000000000
-packageVersion=%PACKAGE_VERSION%
+packageVersion=2.7.0-a4354e9
+
 
 
 [network]
-port=8001
-crossPort=8002
+port=18001
+crossPort=18002
 #Magic parameters
-packetMagic=20194444
-#Seed node
-selfSeedIps=127.0.0.1:8001
-#Cross chain seed connection nodes of the main network
-moonSeedIps=127.0.0.1:8002
+packetMagic=20200120
+#种子节点
+selfSeedIps=seedt1.nuls.io:18001,seedt2.nuls.io:18001,seedt3.nuls.io:18001
+#主网的跨链种子连接节点
+moonSeedIps=seedt1.nuls.io:18002,seedt2.nuls.io:18002,seedt3.nuls.io:18002
 #Maximum number of network connections
-maxInCount=300
+maxInCount=100
 #Maximum number of outbound connections
 maxOutCount=20
 
+
 [account]
-blockAccountManager=NULSd6Hgck6xuMvGasN6yo4Ep8DatJfqpqhKZ
+blockAccountManager=tNULSeBaNE8nFpFo6qYiPiNHSbsGyKSceJLwQt
 keystoreFolder=/keystore/backup
 
 [block]
@@ -52,7 +54,7 @@ extendMaxSize=1024
 #Threshold of height difference that triggers fork chain switching
 chainSwtichThreshold=3
 #Minimum number of linked nodes,When the network node linked to is below this parameter,Will continue to wait
-minNodeAmount=0
+minNodeAmount=2
 #During block synchronization process,The number of blocks downloaded from nodes on the network each time
 downloadNumber=10
 #The timeout for downloading a single block from a network node
@@ -62,26 +64,22 @@ cachedBlockSizeLimit=20971520
 #Genesis block file path(Supports absolute and relative paths,Relative path relative to the directory of this configuration file)
 genesisBlockPath=genesis-block.json
 
-
-
 [consensus]
 #Seed node list
-seedNodes=NULSd6Hgck6xuMvGasN6yo4Ep8DatJfqpqhKZ
+seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMmShSTVwbU4rHkZjpD98JgFgg6rmhF
 #Block address password
 password=nuls123456
 #Block output interval time(unit：s)
 packingInterval=10
 #Consensus entrusted mortgage asset chainID
-agentChainId=1
+agentChainId=2
 #Consensus entrusted mortgage assetsID
 agentAssetId=1
 #Consensus reward assetsID(Consensus rewards must be assets of the same chain)
 awardAssetId=1
-#Consensus transaction fee unit price
-feeUnit=100000
 #Total Inflation
 totalInflationAmount=11000000000000000
-#Initial inflation amount500w/365*30
+#Initial inflation amount500w/265*30
 inflationAmount=41095890410959
 #Inflation start calculation time(unit:S)2020-07-12 00:00:00
 initTime=1594483200
@@ -89,15 +87,20 @@ initTime=1594483200
 deflationRatio=0.4
 #Deflation interval time(unit：S),30day
 deflationTimeInterval=2592000
+feeAssets=2-1,2-201,2-202
+feeUnit=100000,10000,100000000000000
 
 [smart-contract]
 #The maximum consumption of contract view method callsGas
 maxViewGas=100000000
-crossTokenSystemContract=NULSd6HgsyGNK1xTcx2GnC9y3Jr1DKd3qL2HS
+systemLogLevel=WARN
+crossTokenSystemContract=tNULSeBaMy9k29Nj4rd3U4tonVr93mrDLHMNNd
+# 单位gasPrice小数点位移
+feeCoefficient=1,0.0001,10000000
 
 [public-service]
 #public-serviceModule ExternalrpcPort number
-rpcPort=8003
+rpcPort=18003
 #databaseurladdress
 databaseUrl=127.0.0.1
 #Database port number
@@ -106,53 +109,50 @@ databasePort=27017
 maxAliveConnect=20
 #Maximum waiting time for connection
 maxWaitTime=120000
-#Maximum duration of connection
-socketTimeout=300000
 #Connection timeout
 connectTimeOut=30000
-developerNodeAddress=NULSd6Hgf15aUZj6918tEwy9aT4JG1ZQotXRF
-ambassadorNodeAddress=NULSd6HgcfGtsmm79QDoBK1MAjqNmm3rgKXSj
-mappingAddress=NULSd6HgcfwWCD5TLEfehrJ1fFYuZ6nqGbfiu,NULSd6HggAGpQbhhSHU9R1yRxKKuCCTFwayaB
-businessAddress=NULSd6HhDrCkRJBj9nX1Gr1PnuQP7bpQz3YfH,NULSd6HhDMDJASAH7VxLRY9Btff1k3ezpM66w
-teamAddress=NULSd6Hh6m73yRYCn8ff2jo9qN93bh4GpzFDn
-communityAddress=NULSd6Hh76ja8dHkTdYvTJS9gEAygiU1uLRGR,NULSd6Hh84g7u61ntrWhrdEMjXvM9STRPxFZx,NULSd6Hh8xn55HeTWKwRAG31fj2eHtq6Aw2Rg
+developerNodeAddress=tNULSeBaMuKuKY4UstKpXvGxd7LEvEBtd3NXAG,tNULSeBaMns1C6kTePxcQS7rGAu37foAwAMpri
+ambassadorNodeAddress=tNULSeBaMhWyQBHc54oXLXB13WhJsyrTobMYYU,tNULSeBaMtCmUuBHMDAjKVSoVBsAEvLoWCspyE
+mappingAddress=tNULSeBaMqTC6rnF56dnJqz1Fb8gMdVxGGvxSf,tNULSeBaMkroWKUKj6X4zURBE3V47VZwMJdHPm
+businessAddress=tNULSeBaMnf1qfX7emr14att2DsSb2TSPcPBSL
+teamAddress=tNULSeBaMqTvaS2NEEZfdrmPzoRvd8zN6T57LH
+communityAddress=tNULSeBaMm9RQLKKUBXKJ1rQ7g4iobmWAB73mS
 syncCoinBase=false
 syncAddress=
 
 [cross-chain]
 #The minimum value of cross chain node links
-minNodes=3
+minNodes=2
 #Maximum value of cross chain node links
 sendHeight=6
 #Byzantine proportion of cross chain transactions
 byzantineRatio=66
 #Main network cross chain seed node list
-crossSeedIps=127.0.0.1:8002
+crossSeedIps=seedt1.nuls.io:18001,seedt2.nuls.io:18001,seedt3.nuls.io:18001
 #List of main network validators
-verifiers=NULSd6Hgck6xuMvGasN6yo4Ep8DatJfqpqhKZ
+verifiers=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMmShSTVwbU4rHkZjpD98JgFgg6rmhF,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
 #Main network signature Byzantine comparison
 mainByzantineRatio=66
 #Maximum number of signatures on the main network
 maxSignatureCount=100
 
+
+[nuls-module-explorer]
+apiModuleApi=http://127.0.0.1:18003/
+explorerPort=1999
+explorerHost=0.0.0.0
+
+[nuls-module-web-wallet]
+apiModuleApi=http://127.0.0.1:18003/
+webWalletPort=18006
+webWalletHost=0.0.0.0
+
 [protocol-update]
 #How many blocks do we count the proportion of protocols per second
-interval=1000
+interval=10
 
 [nuls-api]
 #httpServerStart ofip
 serverIp=0.0.0.0
 #httpServerStart ofport
-serverPort=8004
-
-
-[nuls-module-web-wallet]
-apiModuleApi=http://127.0.0.1:8003/
-webWalletPort=8006
-webWalletHost=0.0.0.0
-
-[nuls-module-explorer]
-apiModuleApi=http://127.0.0.1:8003/
-explorerPort=1999
-explorerHost=0.0.0.0
-
+serverPort=18004

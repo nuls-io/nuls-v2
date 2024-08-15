@@ -118,7 +118,7 @@ public class CommonUtil {
                 iterator.remove();
             }
         }
-        chain.getLogger().info("Verification successful account list,signedList:{}",signedList);
+        chain.getLogger().debug("Verification successful account list,signedList:{}",signedList);
         return misMatchSignList;
     }
 

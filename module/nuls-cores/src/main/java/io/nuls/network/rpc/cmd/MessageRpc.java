@@ -149,7 +149,7 @@ public class MessageRpc extends BaseCmd {
             MessageManager messageManager = MessageManager.getInstance();
             NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
             if (null == nodeGroup) {
-                LoggerUtil.logger(chainId).error("chain is not exist!");
+//                LoggerUtil.logger(chainId).error("chain is not exist!");
                 return failed(NetworkErrorCode.PARAMETER_ERROR);
             }
             long magicNumber = nodeGroup.getMagicNumber();

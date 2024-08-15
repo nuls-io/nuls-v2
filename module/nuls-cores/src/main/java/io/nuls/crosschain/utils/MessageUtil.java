@@ -2,6 +2,7 @@ package io.nuls.crosschain.utils;
 
 import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
@@ -19,6 +20,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.constant.CrossChainConstant;
 import io.nuls.crosschain.base.message.BroadCtxSignMessage;
+import io.nuls.crosschain.base.message.CtxFullSignMessage;
 import io.nuls.crosschain.base.message.GetOtherCtxMessage;
 import io.nuls.crosschain.base.model.bo.ChainInfo;
 import io.nuls.crosschain.base.model.bo.txdata.VerifierChangeData;
@@ -95,6 +97,12 @@ public class MessageUtil {
             P2PHKSignature p2PHKSignature = new P2PHKSignature();
             p2PHKSignature.parse(messageBody.getSignature(), 0);
             Transaction convertCtx = ctxStatusPO.getTx();
+
+            if (config.getCrossTxDropTime() > convertCtx.getTime()) {
+                chain.getLogger().warn("The cross-chain transaction has expired and is no longer processed");
+                return;
+            }
+
             if (!config.isMainNet() && convertCtx.getType() == config.getCrossCtxType()) {
                 convertCtx = convertCtxService.get(hash, handleChainId);
             }
@@ -190,9 +198,16 @@ public class MessageUtil {
         } else {
             packAddressList = chain.getVerifierList();
         }
-        signByzantineInChain(chain, ctx, signature, packAddressList, realHash, signCountOverflow);
+        boolean byzantineSignIsDone = signByzantineInChain(chain, ctx, signature, packAddressList, realHash, signCountOverflow);
+        if (byzantineSignIsDone) {
+            chain.getLogger().debug("The local Byzantine signature collection is complete and the signature is passed back to the node that sent the signature,to node:{}", excludeNodes);
+            CtxFullSignMessage ctxFullSignMessage = new CtxFullSignMessage();
+            ctxFullSignMessage.setLocalTxHash(realHash);
+            ctxFullSignMessage.setTransactionSignature(ctx.getTransactionSignature());
+            NetWorkCall.sendToNode(chainId, ctxFullSignMessage, excludeNodes, CommandConstant.CROSS_CTX_FULL_SIGN_MESSAGE);
+        }
         NetWorkCall.broadcast(chainId, messageBody, excludeNodes, CommandConstant.BROAD_CTX_SIGN_MESSAGE, false);
-        chain.getLogger().info("Broadcast newly received cross chain transaction signatures to other nodes linked to them,Hash:{},autograph:{}\n\n", nativeHex, signHex);
+        chain.getLogger().info("Broadcast newly received cross chain transaction signatures to other nodes linked to them,Hash:{} ,autograph:{} ,node: {}", nativeHex, signHex, excludeNodes);
     }
 
     /**
@@ -358,7 +373,11 @@ public class MessageUtil {
             TransactionSignature signature,
             NulsHash realHash) throws NulsException, IOException {
         List<String> handleAddressList;
-        long broadHeight = chainManager.getChainHeaderMap().get(chain.getChainId()).getHeight();
+        BlockHeader blockheader = chainManager.getChainHeaderMap().get(chain.getChainId());
+        if (null == blockheader) {
+            chain.getLogger().info("ChainHeaderMap get failed : {} -of- {}", chain.getChainId(), chainManager.getChainHeaderMap().size());
+        }
+        long broadHeight = blockheader.getHeight();
         try {
             chain.getSwitchVerifierLock().readLock().lock();
             handleAddressList = new ArrayList<>(chain.getVerifierList());

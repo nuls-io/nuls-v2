@@ -1,4 +1,5 @@
 package io.nuls.crosschain.utils.thread;
+
 import io.nuls.base.data.Transaction;
 import io.nuls.core.exception.NulsException;
 import io.nuls.crosschain.base.model.bo.txdata.VerifierChangeData;
@@ -15,10 +16,11 @@ public class VerifierChangeTxHandler implements Runnable {
     private Transaction transaction;
     private long height;
 
-    public VerifierChangeTxHandler(Chain chain, Transaction transaction,long height) {
+    public VerifierChangeTxHandler(Chain chain, Transaction transaction, long height) {
         this.chain = chain;
         this.transaction = transaction;
         this.height = height;
+        chain.getLogger().info("TxHash: {}", transaction.getHash().toHex());
     }
 
     @Override
@@ -45,7 +47,7 @@ public class VerifierChangeTxHandler implements Runnable {
         }
         do {
             Transaction processTx = chain.isExistVerifierChangeTx(transaction);
-            if(processTx != null){
+            if (processTx != null) {
                 VerifierChangeData processTxData = new VerifierChangeData();
                 try {
                     processTxData.parse(processTx.getTxData(), 0);
@@ -126,20 +128,20 @@ public class VerifierChangeTxHandler implements Runnable {
      * Determine whether the current validator change transaction needs to be split. If the number of exiting nodes is greater than or equal to the current number of nodes30%Then it needs to be split
      * Judge whether the current verifier's change transaction needs to be split. If the number of exiting nodes is greater than or equal to 30% of the current number of nodes, it needs to be split
      */
-    private void verifierSplitHandle(Chain chain, Transaction transaction,long height, VerifierChangeData txData, boolean txChanged){
+    private void verifierSplitHandle(Chain chain, Transaction transaction, long height, VerifierChangeData txData, boolean txChanged) {
         boolean needSplit = false;
         int maxCount = 0;
         int cancelCount = 0;
-        if(txData.getCancelAgentList() != null && !txData.getCancelAgentList().isEmpty() && txData.getCancelAgentList().size() > 1){
+        if (txData.getCancelAgentList() != null && !txData.getCancelAgentList().isEmpty() && txData.getCancelAgentList().size() > 1) {
             maxCount = chain.getVerifierList().size() * NulsCrossChainConstant.VERIFIER_CANCEL_MAX_RATE / NulsCrossChainConstant.MAGIC_NUM_100;
             cancelCount = txData.getCancelAgentList().size();
-            if(txData.getCancelAgentList().size() > maxCount){
+            if (txData.getCancelAgentList().size() > maxCount) {
                 needSplit = true;
             }
         }
-        if(needSplit){
+        if (needSplit) {
             //If the transaction has changed, it has already been sorted before,Sort the validators, then split and exit the validator list
-            if(!txChanged){
+            if (!txChanged) {
                 txData.getCancelAgentList().sort(Comparator.naturalOrder());
             }
             List<String> firstCancelList = txData.getCancelAgentList().subList(0, maxCount);
@@ -148,21 +150,21 @@ public class VerifierChangeTxHandler implements Runnable {
                 //The first transaction is prioritized, with a height of the current height, and the second transaction height is after the current height2Two heights to avoid simultaneous broadcasting during broadcasting
                 Transaction firstTx = TxUtil.createVerifierChangeTx(txData.getRegisterAgentList(), firstCancelList, transaction.getTime(), chain.getChainId());
                 Transaction secondTx = TxUtil.createVerifierChangeTx(new ArrayList<>(), secondCancelList, transaction.getTime(), chain.getChainId());
-                chain.getLogger().info("The exit node of the transaction changed by the verifier is greater than 30% of the current node, which is divided into two transactions,firstTx:{},secondTx:{}",firstTx.getHash().toHex(),secondTx.getHash().toHex());
+                chain.getLogger().info("The exit node of the transaction changed by the verifier is greater than 30% of the current node, which is divided into two transactions,firstTx:{},secondTx:{}", firstTx.getHash().toHex(), secondTx.getHash().toHex());
                 chain.getCrossTxThreadPool().execute(new VerifierChangeTxHandler(chain, firstTx, height));
                 try {
                     TimeUnit.SECONDS.sleep(1);
-                }catch (InterruptedException e){
+                } catch (InterruptedException e) {
                     chain.getLogger().error(e);
                 }
                 chain.getCrossTxThreadPool().execute(new VerifierChangeTxHandler(chain, secondTx, height + 2));
-            }catch (IOException e){
+            } catch (IOException e) {
                 chain.getLogger().error(e);
             }
-        }else{
+        } else {
             try {
                 transaction.setTxData(txData.serialize());
-            }catch (IOException e){
+            } catch (IOException e) {
                 chain.getLogger().error(e);
                 return;
             }

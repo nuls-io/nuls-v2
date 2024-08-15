@@ -67,8 +67,8 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static io.nuls.contract.config.ContractContext.ASSET_ID;
-import static io.nuls.contract.config.ContractContext.CHAIN_ID;
+import static io.nuls.contract.config.ContractContext.LOCAL_CHAIN_ID;
+import static io.nuls.contract.config.ContractContext.LOCAL_MAIN_ASSET_ID;
 import static io.nuls.contract.constant.ContractConstant.*;
 import static io.nuls.contract.constant.ContractErrorCode.FAILED;
 import static io.nuls.core.constant.TxType.*;
@@ -952,7 +952,7 @@ public class ContractUtil {
         }
         List<ProgramMultyAssetValue> list = null;
         for (CoinTo to : toList) {
-            if (to.getAssetsChainId() == CHAIN_ID && to.getAssetsId() == ASSET_ID) {
+            if (to.getAssetsChainId() == LOCAL_CHAIN_ID && to.getAssetsId() == LOCAL_MAIN_ASSET_ID) {
                 continue;
             }
             if (list == null) {

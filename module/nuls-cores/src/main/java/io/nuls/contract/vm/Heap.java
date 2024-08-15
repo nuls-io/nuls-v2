@@ -186,7 +186,7 @@ public class Heap {
         }
         byte[] value = dataWord.getNoLeadZeroesData();
         Map<String, Object> map = (Map<String, Object>) JsonUtils.decode(new String(value), classNames);
-        if (ProtocolGroupManager.getCurrentVersion(ContractContext.CHAIN_ID) < ContractContext.UPDATE_VERSION_CONTRACT_BALANCE ) {
+        if (ProtocolGroupManager.getCurrentVersion(ContractContext.LOCAL_CHAIN_ID) < ContractContext.UPDATE_VERSION_CONTRACT_BALANCE ) {
             return map;
         }
         if (!VariableType.HASH_MAP_TYPE.getDesc().equals(objectRef.getDesc())) {

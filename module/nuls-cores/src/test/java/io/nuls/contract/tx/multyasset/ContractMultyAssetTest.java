@@ -539,7 +539,7 @@ public class ContractMultyAssetTest extends BaseQuery {
         tx.setCoinData(coinData.serialize());
         tx.setTxData(callContractData.serialize());
 
-        BigInteger txSizeFee = TransactionFeeCalculator.getNormalUnsignedTxFee(tx.getSize() + 130 * froms.size());
+        BigInteger txSizeFee = TransactionFeeCalculator.getNormalUnsignedTxFee(tx.getSize() + 130 * froms.size(),100000,1);
         feeAccountFrom.setAmount(feeAccountFrom.getAmount().add(txSizeFee));
         /*if (feeAccountBalance.getBalance().compareTo(feeValue) < 0) {
             // Insufficient balance

@@ -24,20 +24,29 @@
  */
 package io.nuls.common;
 
+import io.nuls.core.model.StringUtils;
+
 import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
  * Transaction module chain setting
+ *
  * @author: Charlie
  * @date: 2019/03/14
  */
 public class ConfigBean {
 
-    /** chain id*/
+    /**
+     * chain id
+     */
     private int chainId;
-    /** assets id*/
+    /**
+     * assets id
+     */
     private int assetId;
     /*-------------------------[Block]-----------------------------*/
     /**
@@ -133,7 +142,7 @@ public class ConfigBean {
     /**
      * Minimum number of links
      * Minimum number of links
-     * */
+     */
     private int minNodes;
 
     /**
@@ -273,12 +282,6 @@ public class ConfigBean {
     private int awardAssetId;
 
     /**
-     * Transaction fee unit price
-     * Transaction fee unit price
-     */
-    private long feeUnit;
-
-    /**
      * Total shrinkage
      * Total inflation amount
      */
@@ -325,7 +328,72 @@ public class ConfigBean {
     private long txUnverifiedQueueSize;
     /** Orphan Trading Lifetime,Exceeding will be cleared**/
     private int orphanTtl;
+
+    private String feeAssets;
+    private String feeUnit;
+
+    private String feeCoefficient;
+
+    private Map<String, Long> feeUnitMap;
+    private Map<String, Double> feeCoeffMap;
     /*----------------------------------------------------------------------*/
+
+    private void initFeeUnitMap() {
+        if (StringUtils.isNotBlank(feeAssets) && StringUtils.isNotBlank(feeUnit) && feeUnitMap == null) {
+            feeUnitMap = new HashMap<>();
+            String[] keys = feeAssets.split(",");
+            String[] vals = feeUnit.split(",");
+            for (int i = 0; i < keys.length; i++) {
+                feeUnitMap.put(keys[i], Long.parseLong(vals[i]));
+            }
+        }
+        if (StringUtils.isNotBlank(feeAssets) && StringUtils.isNotBlank(feeCoefficient) && feeCoeffMap == null) {
+            feeCoeffMap = new HashMap<>();
+            String[] keys = feeAssets.split(",");
+            String[] vals = feeCoefficient.split(",");
+            for (int i = 0; i < keys.length; i++) {
+                feeCoeffMap.put(keys[i], Double.parseDouble(vals[i]));
+            }
+        }
+    }
+
+
+    public Long getFeeUnit(int chainId, int assetId) {
+        return getFeeUnit(NCUtils.getTokenId(chainId, assetId));
+    }
+
+    public Long getFeeUnit(String tokenId) {
+        if (null == feeUnitMap) {
+            initFeeUnitMap();
+        }
+        return feeUnitMap.get(tokenId);
+    }
+
+    public Double getFeeCoefficient(int chainId, int assetId) {
+        return getFeeCoefficient(NCUtils.getTokenId(chainId, assetId));
+    }
+
+    public Double getFeeCoefficient(String tokenId) {
+        if (null == feeCoeffMap) {
+            initFeeUnitMap();
+        }
+        return feeCoeffMap.get(tokenId);
+    }
+
+    public void setFeeAssets(String feeAssets) {
+        this.feeAssets = feeAssets;
+    }
+
+    public Set<String> getFeeAssetsSet() {
+        if (null == feeUnitMap) {
+            initFeeUnitMap();
+        }
+        return feeUnitMap.keySet();
+    }
+
+    public void setFeeUnit(String feeUnit) {
+        this.feeUnit = feeUnit;
+    }
 
     public int getChainId() {
         return chainId;
@@ -717,14 +785,6 @@ public class ConfigBean {
 
     public void setAwardAssetId(int awardAssetId) {
         this.awardAssetId = awardAssetId;
-    }
-
-    public long getFeeUnit() {
-        return feeUnit;
-    }
-
-    public void setFeeUnit(long feeUnit) {
-        this.feeUnit = feeUnit;
     }
 
     public BigInteger getTotalInflationAmount() {

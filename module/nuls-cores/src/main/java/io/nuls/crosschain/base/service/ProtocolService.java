@@ -65,4 +65,13 @@ public interface ProtocolService {
      * @param messageBody Message Body
      * */
     void receiveCtxSign(int chainId,String nodeId,BroadCtxSignMessage messageBody);
+
+
+    /**
+     * Receive cross chain full transaction signature
+     * @param chainId
+     * @param nodeId
+     * @param messageBody
+     */
+    void receiveCtxFullSign(int chainId, String nodeId, CtxFullSignMessage messageBody);
 }

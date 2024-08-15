@@ -36,7 +36,6 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static io.nuls.base.basic.TransactionFeeCalculator.NORMAL_PRICE_PRE_1024_BYTES;
 import static io.nuls.core.constant.CommonCodeConstanst.PARAMETER_ERROR;
 
 /**
@@ -63,7 +62,6 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
     LocalVerifierManager localVerifierManager;
 
 
-
     /**
      * Cache reset for heterogeneous chain storage, initialization of main chain validators, validator transactionshash
      * Used to distinguish from regular initialization validator transactions when processing Byzantine signatures
@@ -84,13 +82,15 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
         Map<String, Object> result = LedgerCall.getBalanceAndNonce(chain, addressStr, assetChainId, assetId);
         byte[] nonce = RPCUtil.decode((String) result.get("nonce"));
         BigInteger balance = new BigInteger(result.get("available").toString());
+
+        BigInteger NORMAL_PRICE_PRE_1024_BYTES = BigInteger.valueOf(chain.getConfig().getFeeUnit(chain.getChainId(), 1));
         if (BigIntegerUtils.isLessThan(balance, NORMAL_PRICE_PRE_1024_BYTES)) {
             chain.getLogger().error("Insufficient account balance");
             throw new NulsException(NulsCrossChainErrorCode.INSUFFICIENT_BALANCE);
         }
         CoinData coinData = new CoinData();
         coinData.setFrom(List.of(new CoinFrom(address, assetChainId, assetId, NORMAL_PRICE_PRE_1024_BYTES, nonce, NulsCrossChainConstant.UNLOCKED_TX)));
-        coinData.setTo(List.of(new CoinTo(address,assetChainId,assetId,BigInteger.ZERO)));
+        coinData.setTo(List.of(new CoinTo(address, assetChainId, assetId, BigInteger.ZERO)));
         return coinData;
     }
 
@@ -117,7 +117,7 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
         try {
             Transaction tx = new Transaction(TxType.RESET_LOCAL_VERIFIER_LIST);
             tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
-            tx.setCoinData(assemblyCoinFrom(chain,address).serialize());
+            tx.setCoinData(assemblyCoinFrom(chain, address).serialize());
             TransactionSignature transactionSignature = new TransactionSignature();
             List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
             P2PHKSignature p2PHKSignature = AccountCall.signDigest(address, password, tx.getHash().getBytes());
@@ -244,7 +244,7 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
         }
         chain.getLogger().info("Reset the list of validators in this chain completed:{}",chain.getVerifierList());
         int syncStatus = BlockCall.getBlockStatus(chain);
-        List<ChainInfo> otherChainInfoList = chainManager.getRegisteredCrossChainList().stream().filter(d->d.getChainId() != chainId).collect(Collectors.toList());
+        List<ChainInfo> otherChainInfoList = chainManager.getRegisteredCrossChainList().stream().filter(d -> d.getChainId() != chainId).collect(Collectors.toList());
         List<Transaction> newTxList = Lists.newArrayList();
         otherChainInfoList.forEach(chainInfo -> {
             try {
@@ -254,12 +254,12 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
                 chain.getLogger().error("Transaction failure in assembling and resetting the main network validator list for parallel chain storage",e);
             }
         });
-        if(otherChainInfoList.size() != newTxList.size()){
+        if (otherChainInfoList.size() != newTxList.size()) {
             return false;
         }
-        newTxList.forEach(initOtherVerifierTx->{
+        newTxList.forEach(initOtherVerifierTx -> {
             chain.getCrossTxThreadPool().execute(
-                    new ResetOtherChainVerifierListHandler(chain, initOtherVerifierTx,syncStatus));
+                    new ResetOtherChainVerifierListHandler(chain, initOtherVerifierTx, syncStatus));
             String txHash = initOtherVerifierTx.getHash().toHex();
             resetOtherVerifierTxList.add(txHash);
             chain.getLogger().info("Initiate a transaction to reset the main chain verifier list stored in parallel chains,txHash:{}",txHash);
@@ -268,14 +268,13 @@ public class ResetLocalVerifierServiceImpl implements ResetLocalVerifierService 
     }
 
 
-
     @Override
     public boolean rollbackTx(int chainId, List<Transaction> txs, BlockHeader blockHeader) {
         Chain chain = chainManager.getChainMap().get(chainId);
         if (chain == null) {
             return false;
         }
-        return localVerifierService.rollback(chainId,blockHeader.getHeight());
+        return localVerifierService.rollback(chainId, blockHeader.getHeight());
     }
 
     @Override

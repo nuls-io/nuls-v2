@@ -29,9 +29,12 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.crypto.Sha256Hash;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.ByteUtils;
+import io.nuls.crosschain.base.message.GetOtherCtxMessage;
 import io.nuls.network.constant.ManagerStatusEnum;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkErrorCode;
@@ -46,6 +49,7 @@ import io.nuls.network.model.dto.IpAddressShare;
 import io.nuls.network.model.dto.PeerCacheMessage;
 import io.nuls.network.model.message.AddrMessage;
 import io.nuls.network.model.message.GetAddrMessage;
+import io.nuls.network.model.message.VersionMessage;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.base.MessageHeader;
 import io.nuls.network.utils.LoggerUtil;
@@ -133,11 +137,13 @@ public class MessageManager extends BaseManager {
 
     public void receiveMessage(NulsByteBuffer byteBuffer, Node node) {
         //Unified message reception and processing
+        if (null == byteBuffer) {
+            return;
+        }
+        MessageHeader header = new MessageHeader();
+        BaseMessage message = null;
         try {
-            if (null == byteBuffer) {
-                return;
-            }
-            MessageHeader header = new MessageHeader();
+
             int headerSize = header.size();
             byte[] payLoad = byteBuffer.getPayload();
             byte[] payLoadBody = ByteUtils.subBytes(payLoad, headerSize, payLoad.length - headerSize);
@@ -148,17 +154,19 @@ public class MessageManager extends BaseManager {
                 LoggerUtil.logger(chainId).error("validate  false ======================cmd:{}", header.getCommandStr());
                 return;
             }
-            BaseMessage message = MessageManager.getInstance().getMessageInstance(header.getCommandStr());
+            message = MessageManager.getInstance().getMessageInstance(header.getCommandStr());
             byteBuffer.setCursor(0);
             while (!byteBuffer.isFinished()) {
                 NetworkEventResult result = null;
                 if (null != message) {
                     message = byteBuffer.readNulsData(message);
                     BaseMeesageHandlerInf handler = MessageHandlerFactory.getInstance().getHandler(header.getCommandStr());
+//                    Log.info("RecieveMessage1 : {}, {} ,{}", header.getCommandStr(), message.getClass().getTypeName(), handler.getClass().getTypeName());
                     result = handler.recieve(message, node);
                 } else {
                     //External messages, converting to external interfaces
                     OtherModuleMessageHandler handler = MessageHandlerFactory.getInstance().getOtherModuleHandler();
+//                    Log.info("RecieveMessage2 : {}, {}˚", header.getCommandStr(), handler.getClass().getTypeName());
                     result = handler.recieve(header, payLoadBody, node);
                     byteBuffer.setCursor(payLoad.length);
                 }
@@ -167,10 +175,15 @@ public class MessageManager extends BaseManager {
                 }
             }
         } catch (Exception e) {
-            Log.error("node={},{}", node.getId(), e);
+            if (null != message) {
+                Log.error("node==={} , {} , {} , {}", node.getId(), HexUtil.encode(byteBuffer.getPayload()), header.getCommandStr(), message.getClass().getTypeName());
+            } else {
+                Log.error("node==={} , {} , {}", node.getId(), HexUtil.encode(byteBuffer.getPayload()), header.getCommandStr());
+            }
+            Log.error("", e);
+
         }
     }
-
 
     public NetworkEventResult broadcastSelfAddrToAllNode(Collection<Node> connectNodes, IpAddressShare ipAddress, boolean isCrossAddress, boolean asyn) {
         for (Node connectNode : connectNodes) {
@@ -237,7 +250,7 @@ public class MessageManager extends BaseManager {
         for (Node node : nodes) {
             if (NodeConnectStatusEnum.AVAILABLE == node.getConnectStatus()) {
                 GetAddrMessage getAddrMessage = MessageFactory.getInstance()
-                        .buildGetAddrMessage(messageNodeGroup.getChainId(),connectNodeGroup.getMagicNumber(), isCrossAddress);
+                        .buildGetAddrMessage(messageNodeGroup.getChainId(), connectNodeGroup.getMagicNumber(), isCrossAddress);
                 sendHandlerMsg(getAddrMessage, node, asyn);
             }
         }

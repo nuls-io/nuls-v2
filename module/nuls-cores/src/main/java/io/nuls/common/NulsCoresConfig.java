@@ -219,6 +219,10 @@ public class NulsCoresConfig extends ConfigBean implements ModuleConfig {
     private String defaultDecimalPlaces = "8";
 
     private int chainAssetsTaskIntervalMinute;
+
+
+    //Cross-chain transaction drop time
+    private long crossTxDropTime = 0;
     /*----------------------------------------------------------------------*/
 
     public boolean isCollectedSmartContractModule() {
@@ -227,6 +231,14 @@ public class NulsCoresConfig extends ConfigBean implements ModuleConfig {
 
     public void setCollectedSmartContractModule(boolean collectedSmartContractModule) {
         this.collectedSmartContractModule = collectedSmartContractModule;
+    }
+
+    public long getCrossTxDropTime() {
+        return crossTxDropTime;
+    }
+
+    public void setCrossTxDropTime(long crossTxDropTime) {
+        this.crossTxDropTime = crossTxDropTime;
     }
 
     public List<String> getLocalIps() {

@@ -34,12 +34,12 @@ public class OtherCtxMessageHandler implements Runnable {
                 otherHash = untreatedMessage.getCacheHash();
                 String otherHex = otherHash.toHex();
                 int fromChainId = untreatedMessage.getChainId();
-                chain.getLogger().debug("Start processing other chain nodes：{}Cross chain transactions sent,Hash:{}", untreatedMessage.getNodeId(), otherHex);
+                chain.getLogger().info("Start processing other chain nodes：{}Cross chain transactions sent,Hash:{}", untreatedMessage.getNodeId(), otherHex);
                 boolean handleResult = MessageUtil.handleOtherChainCtx(messageBody.getCtx(), chain, fromChainId);
                 if (!handleResult && chain.getOtherHashNodeIdMap().get(otherHash) != null && !chain.getOtherHashNodeIdMap().get(otherHash).isEmpty()) {
                     regainCtx(chain, fromChainId, otherHash, otherHex);
                 }
-                chain.getLogger().debug("New transaction processing completed,Hash:{}\n\n", otherHex);
+                chain.getLogger().info("New transaction processing completed,Hash:{}\n\n", otherHex);
             } catch (Exception e) {
                 chain.getLogger().error(e);
             } finally {
