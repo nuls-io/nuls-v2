@@ -1,6 +1,5 @@
 package io.nuls.contract.util;
 
-import ch.qos.logback.classic.Level;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.core.io.IoUtils;
 import io.nuls.core.log.logback.NulsLogger;
