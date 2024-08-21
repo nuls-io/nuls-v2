@@ -26,15 +26,10 @@ package io.nuls.contract.util;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
-import ch.qos.logback.core.rolling.RollingFileAppender;
-import io.nuls.core.log.logback.LogAppender;
 import io.nuls.core.log.logback.LoggerBuilder;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.StringUtils;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
 
 /**
  * @author: PierreLuo
