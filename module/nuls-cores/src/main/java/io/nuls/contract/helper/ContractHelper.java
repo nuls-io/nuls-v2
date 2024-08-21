@@ -804,7 +804,16 @@ public class ContractHelper {
             return;
         }
         CoinData coinData = tx.getCoinDataInstance();
-        List<ProgramMultyAssetValue> list = extractMultyAssetInfoFromCallTransaction(coinData);
+        List<ProgramMultyAssetValue> list;
+        if (ProtocolGroupManager.getCurrentVersion(LOCAL_CHAIN_ID) >= ContractContext.PROTOCOL_20) {
+            if (LOCAL_CHAIN_ID == 2 && ContractContext.bestHeight() < 10881424) {
+                list = extractMultyAssetInfoFromCallTransactionBeforeP20(coinData);
+            } else {
+                list = extractMultyAssetInfoFromCallTransactionAfterP20(contractData, coinData);
+            }
+        } else {
+            list = extractMultyAssetInfoFromCallTransactionBeforeP20(coinData);
+        }
         contractData.setMultyAssetValues(list);
     }
 

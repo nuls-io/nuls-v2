@@ -27,6 +27,8 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import io.nuls.base.basic.AddressTool;
+import io.nuls.block.manager.ContextManager;
+import io.nuls.block.model.ChainContext;
 import io.nuls.contract.enums.TokenTypeStatus;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
@@ -137,6 +139,14 @@ public class ContractContext {
             return;
         }
         ContractContext.contractHelper = contractHelper;
+    }
+
+    public static long bestHeight() {
+        ChainContext context = ContextManager.getContext(LOCAL_CHAIN_ID);
+        if (context == null) {
+            return 0;
+        }
+        return context.getLatestHeight();
     }
 
 }
