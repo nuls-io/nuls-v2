@@ -46,6 +46,7 @@ import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.BigIntegerUtils;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 
@@ -707,7 +708,9 @@ public class CallContractTxValidator {
         }
 
         Chain chain = contractHelper.getChain(chainId);
-        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size(), chain.getConfig().getFeeUnit(arr[0], arr[1])).add(BigInteger.valueOf(txData.getGasLimit()).multiply(BigInteger.valueOf(txData.getPrice())));
+        BigInteger scFee = BigInteger.valueOf(txData.getGasLimit()).multiply(BigInteger.valueOf(txData.getPrice()));
+        scFee = new BigDecimal(scFee).multiply(BigDecimal.valueOf(chain.getConfig().getFeeCoefficient(arr[0], arr[1]))).toBigInteger();
+        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size(), chain.getConfig().getFeeUnit(arr[0], arr[1])).add(scFee);
         if (realFee.compareTo(fee) >= 0) {
             return getSuccess();
         } else {

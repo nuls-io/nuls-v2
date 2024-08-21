@@ -46,6 +46,7 @@ import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.FormatValidUtils;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
@@ -132,7 +133,12 @@ public class CreateContractTxValidator {
         }
 
         BigInteger realFee = tx.getFee();
-        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size(), chain.getConfig().getFeeUnit(feeAssetChainId, feeAssetId)).add(BigInteger.valueOf(txData.getGasLimit()).multiply(BigInteger.valueOf(txData.getPrice())));
+
+
+        BigInteger scFee = BigInteger.valueOf(txData.getGasLimit()).multiply(BigInteger.valueOf(txData.getPrice()));
+        scFee = new BigDecimal(scFee).multiply(BigDecimal.valueOf(chain.getConfig().getFeeCoefficient(feeAssetChainId, feeAssetId))).toBigInteger();
+
+        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size(), chain.getConfig().getFeeUnit(feeAssetChainId, feeAssetId)).add(scFee);
         if (realFee.compareTo(fee) >= 0) {
             return getSuccess();
         } else {
