@@ -155,7 +155,7 @@ public class ContractVmV8SendTxTest extends BaseQuery {
     @Before
     public void createAndInit() throws Exception {
         // Load protocol upgrade data
-        ContractContext.CHAIN_ID = chainId;
+        ContractContext.LOCAL_CHAIN_ID = chainId;
 
         if (!createContract) {
             // Register in chain assets
