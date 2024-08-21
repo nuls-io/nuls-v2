@@ -72,8 +72,8 @@ public abstract class MockBase extends Base {
     @Before
     public void setUp() {
         // Load protocol upgrade data
-        ContractContext.CHAIN_ID = chainId;
-        ContractContext.ASSET_ID = assetId;
+        ContractContext.LOCAL_CHAIN_ID = chainId;
+        ContractContext.LOCAL_MAIN_ASSET_ID = assetId;
 
         Chain chain = new Chain();
         ConfigBean configBean = new ConfigBean();
