@@ -31,7 +31,7 @@ packageVersion=2.7.0-a4354e9
 port=18001
 crossPort=18002
 #Magic parameters
-packetMagic=20200120
+packetMagic=20240822
 #种子节点
 selfSeedIps=seedt1.nuls.io:18001,seedt2.nuls.io:18001,seedt3.nuls.io:18001
 #主网的跨链种子连接节点
