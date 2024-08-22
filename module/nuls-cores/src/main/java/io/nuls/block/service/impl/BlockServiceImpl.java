@@ -580,10 +580,10 @@ public class BlockServiceImpl implements BlockService {
         NulsLogger logger = context.getLogger();
         BlockHeader header = block.getHeader();
         //0.Version verification：By obtainingblockinextendsVersion number of the field
-//        if (header.getHeight() > 0 && !ProtocolCall.checkBlockVersion(chainId, header)) {
-//            logger.error("checkBlockVersion failed! height-" + header.getHeight());
-//            return Result.getFailed(BlockErrorCode.BLOCK_VERIFY_ERROR);
-//        }
+        if (header.getHeight() > 0 && !ProtocolCall.checkBlockVersion(chainId, header)) {
+            logger.error("checkBlockVersion failed! height-" + header.getHeight());
+            return Result.getFailed(BlockErrorCode.BLOCK_VERIFY_ERROR);
+        }
 
         //1.Verify some basic information such as block size restrictions、Non empty field validation
         boolean basicVerify = BlockUtil.basicVerify(chainId, block);
