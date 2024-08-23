@@ -95,7 +95,7 @@ public class ContractContext {
     public static short PROTOCOL_20 = 20;
     private static final LoadingCache<String, ContractAddressInfoPo> CONTRACT_INFO_CACHE;
     public static Set<String> FEE_ASSETS_SET = new HashSet<>();
-    private static ContractHelper contractHelper;
+    public static ContractHelper contractHelper;
 
     static {
         CONTRACT_INFO_CACHE = CacheBuilder.newBuilder()
@@ -141,6 +141,7 @@ public class ContractContext {
         ContractContext.contractHelper = contractHelper;
     }
 
+    // from block module
     public static long bestHeight() {
         ChainContext context = ContextManager.getContext(LOCAL_CHAIN_ID);
         if (context == null) {
