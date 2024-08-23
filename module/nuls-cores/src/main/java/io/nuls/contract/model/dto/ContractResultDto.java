@@ -24,12 +24,12 @@
 package io.nuls.contract.model.dto;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.CoinData;
+import io.nuls.common.NCUtils;
+import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.enums.CmdRegisterMode;
 import io.nuls.contract.enums.TokenTypeStatus;
-import io.nuls.contract.model.bo.ContractInternalCreate;
-import io.nuls.contract.model.bo.ContractMergedTransfer;
-import io.nuls.contract.model.bo.ContractMultyAssetMergedTransfer;
-import io.nuls.contract.model.bo.ContractResult;
+import io.nuls.contract.model.bo.*;
 import io.nuls.contract.model.tx.ContractBaseTransaction;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.util.ContractUtil;
@@ -41,6 +41,7 @@ import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
 import io.nuls.core.rpc.model.TypeDescriptor;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -48,6 +49,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static io.nuls.contract.config.ContractContext.FEE_ASSETS_SET;
 import static io.nuls.contract.util.ContractUtil.bigInteger2String;
 
 /**
@@ -103,6 +105,8 @@ public class ContractResultDto {
     private String remark;
     @ApiModelProperty(description = "List of contracts created internally", type = @TypeDescriptor(value = List.class, collectionElement = ContractInternalCreateDto.class))
     private List<ContractInternalCreateDto> internalCreates;
+    @ApiModelProperty(description = "FeeAsset")
+    private String feeAsset;
 
     public ContractResultDto() {
     }
@@ -112,16 +116,29 @@ public class ContractResultDto {
         this.gasLimit = contractData.getGasLimit();
         this.gasUsed = result.getGasUsed();
         this.price = result.getPrice();
-        BigInteger totalFee = tx.getCoinDataObj().getFeeByAsset(chainId, 1);
+
+        CoinData coinData = tx.getCoinDataObj();
+        BigInteger totalFee = BigInteger.ZERO;
+        int[] arr = new int[0];
+        for (String key : FEE_ASSETS_SET) {
+            if (totalFee.compareTo(BigInteger.ZERO) != 0) {
+                break;
+            }
+            this.feeAsset = key;
+            arr = NCUtils.splitTokenId(key);
+            totalFee = coinData.getFeeByAsset(arr[0], arr[1]);
+        }
         this.totalFee = bigInteger2String(totalFee);
+        Chain chain = ContractContext.contractHelper.getChain(chainId);
+        BigDecimal feeCoefficient = BigDecimal.valueOf(chain.getConfig().getFeeCoefficient(arr[0], arr[1]));
         // pierre sign
         if(tx.getType() == TxType.CROSS_CHAIN) {
             this.txSizeFee = this.totalFee;
             // end code by pierre 
         } else {
-            BigInteger actualContractFee = BigInteger.valueOf(LongUtils.mul(this.gasUsed, this.price));
+            BigInteger actualContractFee = BigDecimal.valueOf(LongUtils.mul(this.gasUsed, this.price)).multiply(feeCoefficient).toBigInteger();
             this.actualContractFee = bigInteger2String(actualContractFee);
-            BigInteger contractFee = BigInteger.valueOf(LongUtils.mul(gasLimit, price));
+            BigInteger contractFee = BigDecimal.valueOf(LongUtils.mul(gasLimit, price)).multiply(feeCoefficient).toBigInteger();
             this.refundFee = bigInteger2String(contractFee.subtract(actualContractFee));
             this.txSizeFee = bigInteger2String(totalFee.subtract(contractFee));
         }
@@ -146,6 +163,7 @@ public class ContractResultDto {
         }
     }
 
+    // for log trace
     public ContractResultDto(int chainId, ContractResult result, long gasLimit) throws NulsException {
         this.gasLimit = gasLimit;
         this.gasUsed = result.getGasUsed();
@@ -432,5 +450,13 @@ public class ContractResultDto {
 
     public void setToken1155Transfers(List<ContractToken1155TransferDto> token1155Transfers) {
         this.token1155Transfers = token1155Transfers;
+    }
+
+    public String getFeeAsset() {
+        return feeAsset;
+    }
+
+    public void setFeeAsset(String feeAsset) {
+        this.feeAsset = feeAsset;
     }
 }
