@@ -49,6 +49,7 @@ public class NulsCoresConfig extends ConfigBean implements ModuleConfig {
     private String  symbol;
     private String addressPrefix;
     private String logLevel = "DEBUG";
+    private boolean devMode;
 
     /*-------------------------[Transaction]-----------------------------*/
     /** Unconfirmed transaction expiration time in seconds */
@@ -861,6 +862,14 @@ public class NulsCoresConfig extends ConfigBean implements ModuleConfig {
 
     public void setChainAssetsTaskIntervalMinute(int chainAssetsTaskIntervalMinute) {
         this.chainAssetsTaskIntervalMinute = chainAssetsTaskIntervalMinute;
+    }
+
+    public boolean isDevMode() {
+        return devMode;
+    }
+
+    public void setDevMode(boolean devMode) {
+        this.devMode = devMode;
     }
 
     @Override
