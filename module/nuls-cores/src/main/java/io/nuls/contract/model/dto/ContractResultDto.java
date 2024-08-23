@@ -139,7 +139,7 @@ public class ContractResultDto {
             BigInteger actualContractFee = BigDecimal.valueOf(LongUtils.mul(this.gasUsed, this.price)).multiply(feeCoefficient).toBigInteger();
             this.actualContractFee = bigInteger2String(actualContractFee);
             BigInteger contractFee = BigDecimal.valueOf(LongUtils.mul(gasLimit, price)).multiply(feeCoefficient).toBigInteger();
-            this.refundFee = bigInteger2String(contractFee.subtract(actualContractFee));
+            this.refundFee = bigInteger2String(BigDecimal.valueOf(LongUtils.mul(gasLimit - gasUsed, price)).multiply(feeCoefficient).toBigInteger());
             this.txSizeFee = bigInteger2String(totalFee.subtract(contractFee));
         }
         this.value = String.valueOf(result.getValue());
@@ -170,8 +170,7 @@ public class ContractResultDto {
         this.price = result.getPrice();
         BigInteger actualContractFee = BigInteger.valueOf(LongUtils.mul(this.gasUsed, this.price));
         this.actualContractFee = bigInteger2String(actualContractFee);
-        BigInteger contractFee = BigInteger.valueOf(LongUtils.mul(gasLimit, price));
-        this.refundFee = bigInteger2String(contractFee.subtract(actualContractFee));
+        this.refundFee = bigInteger2String(BigInteger.valueOf(LongUtils.mul(gasLimit - this.gasUsed, price)));
         this.value = String.valueOf(result.getValue());
         this.contractAddress = AddressTool.getStringAddressByBytes(result.getContractAddress());
         this.result = result.getResult();
