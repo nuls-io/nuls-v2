@@ -31,7 +31,7 @@ packageVersion=2.7.0-a4354e9
 port=18001
 crossPort=18002
 #Magic parameters
-packetMagic=20240822
+packetMagic=123413223
 #种子节点
 selfSeedIps=seedt1.nuls.io:18001,seedt2.nuls.io:18001,seedt3.nuls.io:18001
 #主网的跨链种子连接节点
@@ -54,7 +54,7 @@ extendMaxSize=1024
 #Threshold of height difference that triggers fork chain switching
 chainSwtichThreshold=3
 #Minimum number of linked nodes,When the network node linked to is below this parameter,Will continue to wait
-minNodeAmount=1
+minNodeAmount=0
 #During block synchronization process,The number of blocks downloaded from nodes on the network each time
 downloadNumber=10
 #The timeout for downloading a single block from a network node
@@ -66,7 +66,7 @@ genesisBlockPath=genesis-block.json
 
 [consensus]
 #Seed node list
-seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMmShSTVwbU4rHkZjpD98JgFgg6rmhF
+seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
 #Block address password
 password=nuls123456
 #Block output interval time(unit：s)
