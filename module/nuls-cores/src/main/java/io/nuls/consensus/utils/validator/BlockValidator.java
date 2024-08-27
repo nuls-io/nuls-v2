@@ -88,13 +88,13 @@ public class BlockValidator {
             }
             throw new NulsException(ConsensusErrorCode.BLOCK_PUNISH_VALID_ERROR);
         }
-//        validResult = coinBaseValidate(block, currentRound, member, chain, blockHeaderHash);
-//        if ( !validResult) {
-//            if (roundValidResult.isValidResult()) {
-//                roundManager.rollBackRound(chain, currentRound.getIndex());
-//            }
-//            throw new NulsException(ConsensusErrorCode.BLOCK_COINBASE_VALID_ERROR);
-//        }
+        validResult = coinBaseValidate(block, currentRound, member, chain, blockHeaderHash);
+        if ( !validResult) {
+            if (roundValidResult.isValidResult()) {
+                roundManager.rollBackRound(chain, currentRound.getIndex());
+            }
+            throw new NulsException(ConsensusErrorCode.BLOCK_COINBASE_VALID_ERROR);
+        }
     }
 
     /**
