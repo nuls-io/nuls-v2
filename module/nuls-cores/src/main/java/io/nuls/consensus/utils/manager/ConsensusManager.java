@@ -124,8 +124,6 @@ public class ConsensusManager {
      */
     private List<CoinTo> calcReward(Chain chain, List<Transaction> txList, MeetingMember self, MeetingRound localRound, long unlockHeight) throws NulsException {
         int chainId = chain.getConfig().getChainId();
-        int assetsId = chain.getConfig().getAssetId();
-        String chainKey = chainId + ConsensusConstant.SEPARATOR + assetsId;
         /*
         Asset and consensus reward key value pairs
         Assets and Consensus Award Key Value Pairs
@@ -138,6 +136,7 @@ public class ConsensusManager {
         Calculating intra-chain and cross-chain handling fees for transactions in blocks
         */
         BigInteger returnGas = BigInteger.ZERO;
+        Map<String,BigInteger> gasReturnMap = new HashMap<>();
         for (Transaction tx : txList) {
             int txType = tx.getType();
             if (txType != TxType.COIN_BASE && txType != TxType.CONTRACT_TRANSFER && txType != TxType.CONTRACT_RETURN_GAS && txType != TxType.CONTRACT_CREATE_AGENT
@@ -164,17 +163,42 @@ public class ConsensusManager {
                 coinData.parse(tx.getCoinData(), 0);
                 for (CoinTo to : coinData.getTo()) {
                     returnGas = returnGas.add(to.getAmount());
+                    String chainKey = to.getAssetsChainId() + ConsensusConstant.SEPARATOR + to.getAssetsId();
+                    BigInteger amount = gasReturnMap.get(chainKey);
+                    if(null == amount){
+                        gasReturnMap.put(chainKey,to.getAmount());
+                    }else {
+                        gasReturnMap.put(chainKey,to.getAmount().add(amount));
+                    }
                 }
             }
         }
-        BigInteger chainFee = awardAssetMap.get(chainKey);
-        if (returnGas.compareTo(BigInteger.ZERO) > 0) {
-            chainFee = awardAssetMap.get(chainKey).subtract(returnGas);
-        }
-        if (chainFee == null || chainFee.compareTo(BigInteger.ZERO) <= 0) {
-            awardAssetMap.remove(chainKey);
-        } else {
-            awardAssetMap.put(chainKey, chainFee);
+        if (ProtocolGroupManager.getCurrentVersion(chainId) < 20) {
+            int assetsId = chain.getConfig().getAssetId();
+            String chainKey = chainId + ConsensusConstant.SEPARATOR + assetsId;
+            BigInteger chainFee = awardAssetMap.get(chainKey);
+            if (returnGas.compareTo(BigInteger.ZERO) > 0) {
+                chainFee = awardAssetMap.get(chainKey).subtract(returnGas);
+            }
+            if (chainFee == null || chainFee.compareTo(BigInteger.ZERO) <= 0) {
+                awardAssetMap.remove(chainKey);
+            } else {
+                awardAssetMap.put(chainKey, chainFee);
+            }
+        }else {
+            for(Map.Entry<String,BigInteger> entry:gasReturnMap.entrySet()){
+                String chainKey = entry.getKey();
+                BigInteger _returnGas = entry.getValue();
+                BigInteger chainFee = awardAssetMap.get(chainKey);
+                if (_returnGas.compareTo(BigInteger.ZERO) > 0) {
+                    chainFee = awardAssetMap.get(chainKey).subtract(_returnGas);
+                }
+                if (chainFee == null || chainFee.compareTo(BigInteger.ZERO) <= 0) {
+                    awardAssetMap.remove(chainKey);
+                } else {
+                    awardAssetMap.put(chainKey, chainFee);
+                }
+            }
         }
 
         /*
