@@ -4,13 +4,13 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Address;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.Transaction;
+import io.nuls.contract.model.txdata.CallContractData;
 import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.DoubleUtils;
 import io.nuls.core.parse.SerializeUtils;
-import io.nuls.sdk.core.model.CallContractData;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertEquals;
@@ -22,7 +22,7 @@ import static junit.framework.TestCase.assertTrue;
 public class AddressToolTest {
 
     @Test
-    public void test7y() throws NulsException, io.nuls.sdk.core.exception.NulsException {
+    public void test7y() throws NulsException, NulsException {
 //        String address = "NULSd6Hgam8YajetEDnCoJBdEFkMNP41PfH7y";
 //        System.out.println(AddressTool.validAddress(1,address));
         Block block = new Block();

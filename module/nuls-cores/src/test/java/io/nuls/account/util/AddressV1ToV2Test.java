@@ -2,12 +2,11 @@ package io.nuls.account.util;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Address;
+import io.nuls.core.basic.Result;
 import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.HexUtil;
-import io.nuls.sdk.core.model.Result;
-import io.nuls.sdk.core.utils.RestFulUtils;
-import io.nuls.sdk.core.utils.SerializeUtils;
+import io.nuls.core.parse.SerializeUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -18,7 +17,7 @@ import java.util.Map;
  */
 public class AddressV1ToV2Test {
 
-    public static void main(String[] args) {
+    /*public static void main(String[] args) {
         int wrong = 0;
         for (int i = 0; i < 1000000; i++) {
             String params = "{ \"count\": 10, \"password\": \"\"}";
@@ -46,7 +45,7 @@ public class AddressV1ToV2Test {
                 System.out.println(address + "=======" + AddressTool.getStringAddressByBytes(addressV2) + "======" + wrong);
             }
         }
-    }
+    }*/
 
     private static byte[] getAddressV2(byte[] pubKeyHash) {
         Address address = new Address(1, "NULS", BaseConstant.DEFAULT_ADDRESS_TYPE, pubKeyHash);

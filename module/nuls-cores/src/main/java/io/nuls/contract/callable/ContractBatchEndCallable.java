@@ -159,6 +159,9 @@ public class ContractBatchEndCallable implements Callable<ContractPackageDto> {
         } catch (ExecutionException e) {
             Log.error("", e);
             return null;
+        } catch (Exception e) {
+            Log.error("",e);
+            return null;
         }
     }
 
