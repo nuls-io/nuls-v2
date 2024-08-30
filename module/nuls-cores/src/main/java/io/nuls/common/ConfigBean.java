@@ -27,8 +27,8 @@ package io.nuls.common;
 import io.nuls.core.model.StringUtils;
 
 import java.math.BigInteger;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -340,7 +340,7 @@ public class ConfigBean {
 
     private void initFeeUnitMap() {
         if (StringUtils.isNotBlank(feeAssets) && StringUtils.isNotBlank(feeUnit) && feeUnitMap == null) {
-            feeUnitMap = new HashMap<>();
+            feeUnitMap = new LinkedHashMap<>();
             String[] keys = feeAssets.split(",");
             String[] vals = feeUnit.split(",");
             for (int i = 0; i < keys.length; i++) {
@@ -348,7 +348,7 @@ public class ConfigBean {
             }
         }
         if (StringUtils.isNotBlank(feeAssets) && StringUtils.isNotBlank(feeCoefficient) && feeCoeffMap == null) {
-            feeCoeffMap = new HashMap<>();
+            feeCoeffMap = new LinkedHashMap<>();
             String[] keys = feeAssets.split(",");
             String[] vals = feeCoefficient.split(",");
             for (int i = 0; i < keys.length; i++) {

@@ -3,6 +3,7 @@ package io.nuls.consensus.utils.manager;
 import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
+import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.common.NulsCoresConfig;
 import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.economic.base.service.EconomicService;
@@ -123,8 +124,6 @@ public class ConsensusManager {
      */
     private List<CoinTo> calcReward(Chain chain, List<Transaction> txList, MeetingMember self, MeetingRound localRound, long unlockHeight) throws NulsException {
         int chainId = chain.getConfig().getChainId();
-        int assetsId = chain.getConfig().getAssetId();
-        String chainKey = chainId + ConsensusConstant.SEPARATOR + assetsId;
         /*
         Asset and consensus reward key value pairs
         Assets and Consensus Award Key Value Pairs
@@ -137,16 +136,26 @@ public class ConsensusManager {
         Calculating intra-chain and cross-chain handling fees for transactions in blocks
         */
         BigInteger returnGas = BigInteger.ZERO;
+        Map<String,BigInteger> gasReturnMap = new HashMap<>();
         for (Transaction tx : txList) {
             int txType = tx.getType();
             if (txType != TxType.COIN_BASE && txType != TxType.CONTRACT_TRANSFER && txType != TxType.CONTRACT_RETURN_GAS && txType != TxType.CONTRACT_CREATE_AGENT
                     && txType != TxType.CONTRACT_STOP_AGENT && txType != TxType.CONTRACT_DEPOSIT && txType != TxType.CONTRACT_CANCEL_DEPOSIT) {
-                ChargeResultData resultData = getFee(tx, chain);
-                String key = resultData.getKey();
-                if(awardAssetMap.keySet().contains(key)){
-                    awardAssetMap.put(key, awardAssetMap.get(key).add(resultData.getFee()));
-                }else{
-                    awardAssetMap.put(key, resultData.getFee());
+                List<ChargeResultData> resultData = null;
+
+                if (ProtocolGroupManager.getCurrentVersion(chainId) < 20) {
+                    resultData = getFeeV1(tx, chain);
+                } else {
+                    resultData = getFeeV20(tx, chain);
+                }
+
+                for (ChargeResultData data : resultData) {
+                    String key = data.getKey();
+                    if (awardAssetMap.keySet().contains(key)) {
+                        awardAssetMap.put(key, awardAssetMap.get(key).add(data.getFee()));
+                    } else {
+                        awardAssetMap.put(key, data.getFee());
+                    }
                 }
             }
             if (txType == TxType.CONTRACT_RETURN_GAS) {
@@ -154,17 +163,42 @@ public class ConsensusManager {
                 coinData.parse(tx.getCoinData(), 0);
                 for (CoinTo to : coinData.getTo()) {
                     returnGas = returnGas.add(to.getAmount());
+                    String chainKey = to.getAssetsChainId() + ConsensusConstant.SEPARATOR + to.getAssetsId();
+                    BigInteger amount = gasReturnMap.get(chainKey);
+                    if(null == amount){
+                        gasReturnMap.put(chainKey,to.getAmount());
+                    }else {
+                        gasReturnMap.put(chainKey,to.getAmount().add(amount));
+                    }
                 }
             }
         }
-        BigInteger chainFee = awardAssetMap.get(chainKey);
-        if(returnGas.compareTo(BigInteger.ZERO) > 0){
-            chainFee = awardAssetMap.get(chainKey).subtract(returnGas);
-        }
-        if(chainFee == null || chainFee.compareTo(BigInteger.ZERO) <= 0){
-            awardAssetMap.remove(chainKey);
-        }else{
-            awardAssetMap.put(chainKey, chainFee);
+        if (ProtocolGroupManager.getCurrentVersion(chainId) < 20) {
+            int assetsId = chain.getConfig().getAssetId();
+            String chainKey = chainId + ConsensusConstant.SEPARATOR + assetsId;
+            BigInteger chainFee = awardAssetMap.get(chainKey);
+            if (returnGas.compareTo(BigInteger.ZERO) > 0) {
+                chainFee = awardAssetMap.get(chainKey).subtract(returnGas);
+            }
+            if (chainFee == null || chainFee.compareTo(BigInteger.ZERO) <= 0) {
+                awardAssetMap.remove(chainKey);
+            } else {
+                awardAssetMap.put(chainKey, chainFee);
+            }
+        }else {
+            for(Map.Entry<String,BigInteger> entry:gasReturnMap.entrySet()){
+                String chainKey = entry.getKey();
+                BigInteger _returnGas = entry.getValue();
+                BigInteger chainFee = awardAssetMap.get(chainKey);
+                if (_returnGas.compareTo(BigInteger.ZERO) > 0) {
+                    chainFee = awardAssetMap.get(chainKey).subtract(_returnGas);
+                }
+                if (chainFee == null || chainFee.compareTo(BigInteger.ZERO) <= 0) {
+                    awardAssetMap.remove(chainKey);
+                } else {
+                    awardAssetMap.put(chainKey, chainFee);
+                }
+            }
         }
 
         /*
@@ -179,9 +213,9 @@ public class ConsensusManager {
      * Create blocks
      * create block
      *
-     * @param chain          chain info
-     * @param blockData      block entity/Block data
-     * @param packingAddress packing address/Packaging address
+     * @param chain                chain info
+     * @param blockData            block entity/Block data
+     * @param packingAddress       packing address/Packaging address
      * @param packingAddressString packing address/Packaging address
      * @return Block
      */
@@ -232,7 +266,79 @@ public class ConsensusManager {
      * @param chain chain info
      * @return ChargeResultData
      */
-    private ChargeResultData getFee(Transaction tx, Chain chain) throws NulsException {
+    private List<ChargeResultData> getFeeV20(Transaction tx, Chain chain) throws NulsException {
+        List<ChargeResultData> list = new ArrayList<>();
+        CoinData coinData = new CoinData();
+        coinData.parse(tx.getCoinData(), 0);
+        /*
+        Cross chain transaction calculation fees
+        Cross-Chain Transactions Calculate Processing Fees
+        */
+        boolean isCrossTx = tx.getType() == TxType.CROSS_CHAIN;
+        if (config.getMainChainId() == chain.getConfig().getChainId()) {
+            isCrossTx = isCrossTx || tx.getType() == TxType.CONTRACT_TOKEN_CROSS_TRANSFER;
+        }
+        if (isCrossTx) {
+            int feeChainId = chain.getConfig().getChainId();
+            int feeAssetId = chain.getConfig().getAssetId();
+            /*
+            Calculate in chain transaction fees,fromMain assets within the medium chain - toSum of main assets within the mid chain
+            Calculate in-chain handling fees, from in-chain main assets - to in-chain main assets and
+            */
+            if (AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress()) == feeChainId && feeChainId != config.getMainChainId()) {
+                list.add(new ChargeResultData(getFee(coinData, feeChainId, feeAssetId), feeChainId, feeAssetId));
+                return list;
+            }
+            /*
+            Calculate main chain and friend chain transaction fees,First, calculateCoinDataTotal cross chain handling fees in the middle, and then divide the cross chain handling fees according to the proportion
+            Calculate the main chain and friendship chain handling fees, first calculate the total cross-chain handling fees in CoinData,
+            and then divide the cross-chain handling fees according to the proportion.
+            */
+            BigInteger fee = getFee(coinData, config.getMainChainId(), config.getMainAssetId());
+            /*
+            If the current chain is the main chain,If the cross chain transaction target is the main chain, the main chain will charge all cross chain transaction fees. If the target is other chains, the main chain will charge a certain proportion of cross chain transaction fees
+            If the current chain is the main chain and the target of cross-chain transaction is connected to the main chain, the main chain charges all cross-chain handling fees,
+            and if the target is connected to other chains, the main chain charges a certain proportion of cross-chain handling fees.
+            */
+            int mainCommissionRatio = config.getMainChainCommissionRatio();
+            if (feeChainId == config.getMainChainId()) {
+                int toChainId = AddressTool.getChainIdByAddress(coinData.getTo().get(0).getAddress());
+                if (toChainId == config.getMainChainId()) {
+                    list.add(new ChargeResultData(fee, config.getMainChainId(), config.getMainAssetId()));
+                    return list;
+                }
+                list.add(new ChargeResultData(fee.multiply(new BigInteger(String.valueOf(mainCommissionRatio))).divide(new BigInteger(String.valueOf(ConsensusConstant.VALUE_OF_ONE_HUNDRED))), config.getMainChainId(), config.getMainAssetId()));
+                return list;
+            }
+            list.add(new ChargeResultData(fee.multiply(new BigInteger(String.valueOf(ConsensusConstant.VALUE_OF_ONE_HUNDRED - mainCommissionRatio))).divide(new BigInteger(String.valueOf(ConsensusConstant.VALUE_OF_ONE_HUNDRED))), config.getMainChainId(), config.getMainAssetId()));
+            return list;
+        } else if (tx.getType() == TxType.REGISTER_AGENT || tx.getType() == TxType.STOP_AGENT || tx.getType() == TxType.DEPOSIT || tx.getType() == TxType.CANCEL_DEPOSIT) {
+            int feeChainId = chain.getConfig().getChainId();
+            int feeAssetId = chain.getConfig().getAssetId();
+            list.add(new ChargeResultData(getFee(coinData, feeChainId, feeAssetId), feeChainId, feeAssetId));
+        } else {
+            for (CoinFrom from : coinData.getFrom()) {
+                BigInteger amount = getFee(coinData, from.getAssetsChainId(), from.getAssetsId());
+                if (amount != null && amount.compareTo(BigInteger.ZERO) > 0) {
+                    list.add(new ChargeResultData(amount, from.getAssetsChainId(), from.getAssetsId()));
+                }
+            }
+        }
+        if (list.isEmpty()) {
+            int feeChainId = chain.getConfig().getChainId();
+            int feeAssetId = chain.getConfig().getAssetId();
+            list.add(new ChargeResultData(BigInteger.ZERO, feeChainId, feeAssetId));
+        }
+        return list;
+    }
+
+    private List<ChargeResultData> getFeeV1(Transaction tx, Chain chain) throws NulsException {
+        List<ChargeResultData> list = new ArrayList<>();
+        list.add(getRealFeeV1(tx, chain));
+        return list;
+    }
+
+    private ChargeResultData getRealFeeV1(Transaction tx, Chain chain) throws NulsException {
         CoinData coinData = new CoinData();
         int feeChainId = chain.getConfig().getChainId();
         int feeAssetId = chain.getConfig().getAssetId();
@@ -242,7 +348,7 @@ public class ConsensusManager {
         Cross-Chain Transactions Calculate Processing Fees
         */
         boolean isCrossTx = tx.getType() == TxType.CROSS_CHAIN;
-        if(config.getMainChainId() == chain.getConfig().getChainId()){
+        if (config.getMainChainId() == chain.getConfig().getChainId()) {
             isCrossTx = isCrossTx || tx.getType() == TxType.CONTRACT_TOKEN_CROSS_TRANSFER;
         }
         if (isCrossTx) {
@@ -282,12 +388,13 @@ public class ConsensusManager {
 
     /**
      * Calculate designated handling fees
-     * @param coinData         coinData
-     * @param assetChainId     Designated asset chainID
-     * @param assetId          Designated assetsID
-     * @return                 Handling fee size
-     * */
-    public BigInteger getFee(CoinData coinData , int assetChainId, int assetId){
+     *
+     * @param coinData     coinData
+     * @param assetChainId Designated asset chainID
+     * @param assetId      Designated assetsID
+     * @return Handling fee size
+     */
+    public BigInteger getFee(CoinData coinData, int assetChainId, int assetId) {
         BigInteger fromAmount = BigInteger.ZERO;
         BigInteger toAmount = BigInteger.ZERO;
         for (CoinFrom from : coinData.getFrom()) {
@@ -305,27 +412,28 @@ public class ConsensusManager {
 
     /**
      * Distribute consensus rewards
-     * @param self             Local packaging information/local agent packing info
-     * @param localRound       Latest local round/local newest round info
-     * @param unlockHeight     Unlocking height/unlock height
-     * @param awardAssetMap    Collection of handling fees
-     * @param chain            chain info
-     * @return                 Cross chain transaction distribution set
-     * */
+     *
+     * @param self          Local packaging information/local agent packing info
+     * @param localRound    Latest local round/local newest round info
+     * @param unlockHeight  Unlocking height/unlock height
+     * @param awardAssetMap Collection of handling fees
+     * @param chain         chain info
+     * @return Cross chain transaction distribution set
+     */
     @SuppressWarnings("unchecked")
-    private List<CoinTo> getRewardCoin(MeetingMember self, MeetingRound localRound, long unlockHeight,Map<String, BigInteger> awardAssetMap, Chain chain)throws NulsException{
-        Map<String,Object> param = new HashMap<>(4);
+    private List<CoinTo> getRewardCoin(MeetingMember self, MeetingRound localRound, long unlockHeight, Map<String, BigInteger> awardAssetMap, Chain chain) throws NulsException {
+        Map<String, Object> param = new HashMap<>(4);
 
-        RoundInfo roundInfo = new RoundInfo(localRound.getTotalWeight(),localRound.getStartTime(),localRound.getEndTime(),localRound.getMemberCount());
+        RoundInfo roundInfo = new RoundInfo(localRound.getTotalWeight(), localRound.getStartTime(), localRound.getEndTime(), localRound.getMemberCount());
 
         List<DepositInfo> depositList = new ArrayList<>();
         for (Deposit deposit : self.getDepositList()) {
-            DepositInfo depositInfo = new DepositInfo(deposit.getDeposit(),deposit.getAddress());
+            DepositInfo depositInfo = new DepositInfo(deposit.getDeposit(), deposit.getAddress());
             depositList.add(depositInfo);
         }
 
         Agent agent = self.getAgent();
-        AgentInfo agentInfo = new AgentInfo(agent.getCommissionRate(),agent.getDeposit(),agent.getRewardAddress(),agent.getTotalDeposit(),agent.getCreditVal(),depositList);
+        AgentInfo agentInfo = new AgentInfo(agent.getCommissionRate(), agent.getDeposit(), agent.getRewardAddress(), agent.getTotalDeposit(), agent.getCreditVal(), depositList);
 
         param.put(ParamConstant.CHAIN_ID, chain.getConfig().getChainId());
         param.put(ParamConstant.ROUND_INFO, roundInfo);
@@ -333,11 +441,11 @@ public class ConsensusManager {
         param.put(ParamConstant.AWARD_ASSERT_MAP, awardAssetMap);
 
         Result result = economicService.calcReward(param);
-        if(result.isFailed()){
+        if (result.isFailed()) {
             chain.getLogger().error("Miscalculation of Consensus Reward");
             throw new NulsException(result.getErrorCode());
         }
-        return (List<CoinTo>) ((Map<String,Object>) result.getData()).get("coinToList");
+        return (List<CoinTo>) ((Map<String, Object>) result.getData()).get("coinToList");
     }
 
     /**
@@ -347,7 +455,7 @@ public class ConsensusManager {
      * @param unlockHeight     Unlocking height/unlock height
      * @param awardAssetMap    Collection of handling fees
      * @param chain            chain info
-     * @return                 Cross chain transaction distribution set
+     * @return Cross chain transaction distribution set
      * */
     /*private List<CoinTo> getRewardCoin(MeetingMember self, MeetingRound localRound, long unlockHeight,Map<String, BigInteger> awardAssetMap, Chain chain){
         List<CoinTo> rewardList = new ArrayList<>();
@@ -405,7 +513,7 @@ public class ConsensusManager {
      * Calculating Account Weights for Participating in Consensus
      * @param self           Current node information
      * @param totalDeposit   The total weight of the current node in this round
-     * @return               Details of weight allocation for accounts participating in consensus
+     * @return Details of weight allocation for accounts participating in consensus
      * */
     /*private Map<String,BigDecimal> getDepositWeight(MeetingMember self,BigInteger totalDeposit){
         Map<String,BigDecimal> depositWeightMap = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
@@ -443,7 +551,7 @@ public class ConsensusManager {
      * @param assetId            assetID
      * @param totalReward        Total reward
      * @param unlockHeight       Lock height
-     * @return                   CoinTo
+     * @return CoinTo
      * */
     /*private List<CoinTo> assembleCoinTo(Map<String,BigDecimal> depositWeightMap,int assetChainId,int assetId,BigDecimal totalReward, long unlockHeight){
         List<CoinTo> coinToList = new ArrayList<>();

@@ -143,7 +143,7 @@ public class ProtocolServiceImpl implements ProtocolService {
         statisticsInfo.setHeight(0);
         statisticsInfo.setProtocolVersion(genesisProtocolVersion);
         statisticsInfo.setProtocolVersionMap(proportionMap);
-        statisticsInfo.setCount((short) 1);
+        statisticsInfo.setCount(1);
 
         boolean b = service.save(chainId, statisticsInfo);
         logger.info("height-0, save-" + b + ", new statisticsInfo-" + statisticsInfo);
@@ -220,9 +220,9 @@ public class ProtocolServiceImpl implements ProtocolService {
                     statisticsInfo.setProtocolVersionMap(proportionMap);
                     //Count statistics
                     if (lastValidStatisticsInfo.getProtocolVersion().equals(statictisProtocolVersion)) {
-                        statisticsInfo.setCount((short) (lastValidStatisticsInfo.getCount() + 1));
+                        statisticsInfo.setCount(lastValidStatisticsInfo.getCount() + 1);
                     } else {
-                        statisticsInfo.setCount((short) 1);
+                        statisticsInfo.setCount(1);
                     }
                     boolean b = service.save(chainId, statisticsInfo);
                     logger.info("height-" + height + ", save-" + b + ", new statisticsInfo-" + statisticsInfo);
@@ -267,7 +267,7 @@ public class ProtocolServiceImpl implements ProtocolService {
             statisticsInfo.setProtocolVersion(currentProtocolVersion);
             statisticsInfo.setProtocolVersionMap(proportionMap);
             //Count statistics
-            statisticsInfo.setCount((short) (context.getCurrentProtocolVersionCount() + 1));
+            statisticsInfo.setCount(context.getCurrentProtocolVersionCount() + 1);
             context.setCurrentProtocolVersionCount(context.getCurrentProtocolVersionCount() + 1);
             protocolService.saveCurrentProtocolVersionCount(chainId, context.getCurrentProtocolVersionCount());
             boolean b = service.save(chainId, statisticsInfo);
