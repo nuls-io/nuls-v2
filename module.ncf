@@ -1,9 +1,9 @@
 [global]
 encoding=UTF-8
 language=en
-logPath=/Users/wangzhijian/workspace/nuls-v2/Logs
+logPath=Logs
 logLevel=INFO
-dataPath=/Volumes/Niels-1T/version-data/data
+dataPath=data
 #Default This ChainID
 chainId=1
 #Address prefix
