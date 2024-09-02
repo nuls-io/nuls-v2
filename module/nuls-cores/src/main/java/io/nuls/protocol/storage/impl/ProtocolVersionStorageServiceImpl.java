@@ -97,9 +97,9 @@ public class ProtocolVersionStorageServiceImpl implements ProtocolVersionStorage
     }
 
     @Override
-    public boolean saveCurrentProtocolVersionCount(int chainId, int currentProtocolVersionCount) {
+    public boolean saveCurrentProtocolVersionCount(int chainId, long currentProtocolVersionCount) {
         try {
-            boolean b = RocksDBService.put(Constant.CACHED_INFO + chainId, "currentProtocolVersionCount".getBytes(), ByteUtils.intToBytes(currentProtocolVersionCount));
+            boolean b = RocksDBService.put(Constant.CACHED_INFO + chainId, "currentProtocolVersionCount".getBytes(), ByteUtils.longToBytes(currentProtocolVersionCount));
             ContextManager.getContext(chainId).getLogger().debug("saveCurrentProtocolVersionCount, currentProtocolVersionCount-" + currentProtocolVersionCount + ",b-" + b);
             return b;
         } catch (Exception e) {
@@ -109,10 +109,19 @@ public class ProtocolVersionStorageServiceImpl implements ProtocolVersionStorage
     }
 
     @Override
-    public int getCurrentProtocolVersionCount(int chainId) {
+    public long getCurrentProtocolVersionCount(int chainId) {
         try {
             byte[] bytes = RocksDBService.get(Constant.CACHED_INFO + chainId, "currentProtocolVersionCount".getBytes());
-            return ByteUtils.bytesToInt(bytes);
+            long value = 0;
+            if (bytes.length == 4) {
+                value = ByteUtils.bytesToInt(bytes);
+            } else {
+                value = ByteUtils.byteToLong(bytes);
+            }
+            if (value < 0) {
+                value = 65536 + value;
+            }
+            return value;
         } catch (Exception e) {
             ContextManager.getContext(chainId).getLogger().error(e);
             return 0;

@@ -127,11 +127,28 @@ public class BaseQuery extends Base {
 
     }
 
+    /**
+     * Register an asset
+     */
+    @Test
+    public void testAssetRegister() throws Exception {
+        Map<String, Object> params = new HashMap<>();
+        params.put("assetSymbol", "ETH");
+        params.put("assetName", "ETH");
+        params.put("initNumber", 100000000);
+        params.put("decimalPlace", 18);
+        params.put("txCreatorAddress", toAddress);
+        params.put("assetOwnerAddress", toAddress);
+        params.put("password", "nuls123456");
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "chainAssetTxReg", params);
+        System.out.println(JSONUtils.obj2PrettyJson(response));
+    }
 
     @Test
     public void transfer() {
         TransferReq.TransferReqBuilder builder = new TransferReq.TransferReqBuilder(chain.getChainId(), chain.getConfig().getAssetId())
-                .addForm(sender, password, BigInteger.valueOf(33_1000_0000_0000L))
+                .addForm(sender, password, BigInteger.valueOf(34_1000_0000_0000L))
+                .addTo(toAddress, BigInteger.valueOf(10000_0000_0000L))
                 .addTo(toAddress5, BigInteger.valueOf(1000000000000L))
                 .addTo(toAddress6, BigInteger.valueOf(1000000000000L))
                 .addTo(toAddress7, BigInteger.valueOf(1000000000000L))

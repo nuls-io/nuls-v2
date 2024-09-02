@@ -46,7 +46,7 @@ public interface ProtocolVersionStorageService {
      */
     List<ProtocolVersionPo> getList(int chainId);
 
-    boolean saveCurrentProtocolVersionCount(int chainId, int currentProtocolVersionCount);
+    boolean saveCurrentProtocolVersionCount(int chainId, long currentProtocolVersionCount);
 
-    int getCurrentProtocolVersionCount(int chainId);
+    long getCurrentProtocolVersionCount(int chainId);
 }

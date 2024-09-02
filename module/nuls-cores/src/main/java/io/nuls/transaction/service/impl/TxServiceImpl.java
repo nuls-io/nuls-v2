@@ -794,6 +794,7 @@ public class TxServiceImpl implements TxService {
                     continue;
                 }
                 BigInteger fee = coinData.getFeeByAsset(feeAssetChainId, feeAssetId);
+                chain.getLogger().info("{}-{} ::###:: {}");
                 if (BigIntegerUtils.isEqualOrLessThan(fee, BigInteger.ZERO)) {
                     continue;
                 }
