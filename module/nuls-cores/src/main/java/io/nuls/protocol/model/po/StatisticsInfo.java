@@ -28,7 +28,8 @@ public class StatisticsInfo extends BaseNulsData {
     /**
      * Number of consecutive confirmations of statistical information
      */
-    private short count;
+    private short oldCount;
+    private long count;
     /**
      * Effective Agreement Version
      */
@@ -37,7 +38,7 @@ public class StatisticsInfo extends BaseNulsData {
     /**
      * The proportion of all protocols within the statistical interval
      */
-    private Map<ProtocolVersion,Integer> protocolVersionMap;
+    private Map<ProtocolVersion, Integer> protocolVersionMap;
 
     public long getHeight() {
         return height;
@@ -47,14 +48,16 @@ public class StatisticsInfo extends BaseNulsData {
         this.height = height;
     }
 
-    public short getCount() {
+    public long getCount() {
         return count;
     }
 
-    public void setCount(short count) {
+    public void setCount(long count) {
+        if (count < 0) {
+            count = 65536 + count;
+        }
         this.count = count;
     }
-
     public ProtocolVersion getProtocolVersion() {
         return protocolVersion;
     }
@@ -78,13 +81,14 @@ public class StatisticsInfo extends BaseNulsData {
         for (int i = 0; i < protocolVersionMap.size(); i++) {
             size += 7;
         }
+        size += SerializeUtils.sizeOfInt64();
         return size;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeInt64(height);
-        stream.writeShort(count);
+        stream.writeShort(oldCount);
         stream.writeNulsData(protocolVersion);
         stream.writeShort((short) protocolVersionMap.size());
         Set<Map.Entry<ProtocolVersion, Integer>> entries = protocolVersionMap.entrySet();
@@ -92,17 +96,23 @@ public class StatisticsInfo extends BaseNulsData {
             stream.writeNulsData(entry.getKey());
             stream.writeUint16(entry.getValue());
         }
+        stream.writeInt64(count);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.height = byteBuffer.readInt64();
-        this.count = byteBuffer.readShort();
+        this.oldCount = byteBuffer.readShort();
         this.protocolVersion = byteBuffer.readNulsData(new ProtocolVersion());
         short size = byteBuffer.readShort();
         this.protocolVersionMap = new HashMap<>(size);
         for (int i = 0; i < size; i++) {
             protocolVersionMap.put(byteBuffer.readNulsData(new ProtocolVersion()), byteBuffer.readUint16());
+        }
+        if (byteBuffer.isFinished()) {
+            this.count = oldCount;
+        } else {
+            this.count = byteBuffer.readInt64();
         }
     }
 

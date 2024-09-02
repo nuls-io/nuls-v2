@@ -27,6 +27,8 @@ package io.nuls.contract.helper;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.base.protocol.ProtocolGroupManager;
+import io.nuls.common.NCUtils;
+import io.nuls.common.NulsCoresConfig;
 import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
@@ -51,6 +53,7 @@ import io.nuls.contract.vm.program.*;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.ByteArrayWrapper;
 import io.nuls.core.model.FormatValidUtils;
@@ -58,12 +61,12 @@ import io.nuls.core.model.LongUtils;
 import io.nuls.core.model.StringUtils;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-import static io.nuls.contract.config.ContractContext.LOCAL_CHAIN_ID;
-import static io.nuls.contract.config.ContractContext.LOCAL_MAIN_ASSET_ID;
+import static io.nuls.contract.config.ContractContext.*;
 import static io.nuls.contract.constant.ContractConstant.*;
 import static io.nuls.contract.constant.ContractErrorCode.ADDRESS_ERROR;
 import static io.nuls.contract.util.ContractUtil.*;
@@ -81,6 +84,8 @@ public class ContractHelper {
     private ContractAddressStorageService contractAddressStorageService;
     @Autowired
     private ContractService contractService;
+    @Autowired
+    private NulsCoresConfig contractConfig;
 
     private static final BigInteger MAXIMUM_DECIMALS = BigInteger.valueOf(18L);
     private static final BigInteger MAXIMUM_TOTAL_SUPPLY = BigInteger.valueOf(2L).pow(256).subtract(BigInteger.ONE);
@@ -804,11 +809,104 @@ public class ContractHelper {
             return;
         }
         CoinData coinData = tx.getCoinDataInstance();
-        List<ProgramMultyAssetValue> list = extractMultyAssetInfoFromCallTransaction(coinData);
+        List<ProgramMultyAssetValue> list;
+        if (ProtocolGroupManager.getCurrentVersion(LOCAL_CHAIN_ID) >= ContractContext.PROTOCOL_20) {
+            if (LOCAL_CHAIN_ID == 2 && !contractConfig.isDevMode() && ContractContext.bestHeight() < 10881424) {
+                list = extractMultyAssetInfoFromCallTransactionBeforeP20(coinData);
+            } else {
+                list = extractMultyAssetInfoFromCallTransactionAfterP20(contractData, coinData);
+            }
+        } else {
+            list = extractMultyAssetInfoFromCallTransactionBeforeP20(coinData);
+        }
         contractData.setMultyAssetValues(list);
     }
 
-    public ContractReturnGasTransaction makeReturnGasTx(List<ContractResult> resultList, long time) throws IOException {
+    public ContractReturnGasTransaction makeReturnGasTx(List<ContractResult> resultList, long time) throws Exception {
+        if (ProtocolGroupManager.getCurrentVersion(LOCAL_CHAIN_ID) >= ContractContext.PROTOCOL_20) {
+            if (LOCAL_CHAIN_ID == 2 && !contractConfig.isDevMode() && ContractContext.bestHeight() < 10891000) {
+                // old
+                return this._makeReturnGasTx(resultList, time);
+            } else {
+                // new
+                return this._makeReturnGasTxAfterP20(resultList, time);
+            }
+        } else {
+            // old
+            return this._makeReturnGasTx(resultList, time);
+        }
+    }
+
+    private ContractReturnGasTransaction _makeReturnGasTxAfterP20(List<ContractResult> resultList, long time) throws Exception {
+        ContractWrapperTransaction wrapperTx;
+        ContractData contractData;
+        Map<String, BigInteger> returnMap = new HashMap<>();
+        for (ContractResult contractResult : resultList) {
+            wrapperTx = contractResult.getTx();
+            // Termination of contract without consumptionGasSkip
+            if (wrapperTx.getType() == DELETE_CONTRACT) {
+                continue;
+            }
+            // add by pierre at 2019-12-03 The contract call for token cross chain transactions is a system call and not calculatedGasConsumption, skipping
+            if (wrapperTx.getType() == CROSS_CHAIN) {
+                continue;
+            }
+            // end code by pierre
+
+            CoinData coinData = wrapperTx.getCoinDataInstance();
+            BigInteger totalFee = BigInteger.ZERO;
+            int[] arr = new int[0];
+            String feeAsset = null;
+            for (String key : FEE_ASSETS_SET) {
+                if (totalFee.compareTo(BigInteger.ZERO) != 0) {
+                    break;
+                }
+                arr = NCUtils.splitTokenId(key);
+                feeAsset = key;
+                totalFee = coinData.getFeeByAsset(arr[0], arr[1]);
+            }
+            Chain chain = ContractContext.contractHelper.getChain(LOCAL_CHAIN_ID);
+            BigDecimal feeCoefficient = BigDecimal.valueOf(chain.getConfig().getFeeCoefficient(arr[0], arr[1]));
+
+            contractData = wrapperTx.getContractData();
+            long realGasUsed = contractResult.getGasUsed();
+            long txGasUsed = contractData.getGasLimit();
+            long returnGas;
+
+            BigInteger returnValue;
+            if (txGasUsed > realGasUsed) {
+                returnGas = txGasUsed - realGasUsed;
+                returnValue = BigDecimal.valueOf(LongUtils.mul(returnGas, contractData.getPrice())).multiply(feeCoefficient).toBigInteger();
+
+                String senderKey = HexUtil.encode(contractData.getSender()) + "," + feeAsset;
+                BigInteger senderValue = returnMap.get(senderKey);
+                if (senderValue == null) {
+                    senderValue = returnValue;
+                } else {
+                    senderValue = senderValue.add(returnValue);
+                }
+                returnMap.put(senderKey, senderValue);
+            }
+        }
+        if (!returnMap.isEmpty()) {
+            CoinData coinData = new CoinData();
+            List<CoinTo> toList = coinData.getTo();
+            returnMap.forEach((senderKey, senderValue) -> {
+                String[] split = senderKey.split(",");
+                int[] assetInfo = NCUtils.splitTokenId(split[1]);
+                CoinTo returnCoin = new CoinTo(HexUtil.decode(split[0]), assetInfo[0], assetInfo[1], senderValue, 0L);
+                toList.add(returnCoin);
+            });
+            ContractReturnGasTransaction tx = new ContractReturnGasTransaction();
+            tx.setTime(time);
+            tx.setCoinData(coinData.serialize());
+            tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
+            return tx;
+        }
+        return null;
+    }
+
+    private ContractReturnGasTransaction _makeReturnGasTx(List<ContractResult> resultList, long time) throws IOException {
         ContractWrapperTransaction wrapperTx;
         ContractData contractData;
         Map<ByteArrayWrapper, BigInteger> returnMap = new HashMap<>();

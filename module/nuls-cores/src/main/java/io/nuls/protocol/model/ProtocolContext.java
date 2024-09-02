@@ -64,7 +64,7 @@ public class ProtocolContext {
     /**
      * Current effective protocol version count
      */
-    private int currentProtocolVersionCount;
+    private long currentProtocolVersionCount;
 
     /**
      * History of all effective protocol versions,Rollback
@@ -143,11 +143,11 @@ public class ProtocolContext {
         this.currentProtocolVersion = currentProtocolVersion;
     }
 
-    public int getCurrentProtocolVersionCount() {
+    public long getCurrentProtocolVersionCount() {
         return currentProtocolVersionCount;
     }
 
-    public void setCurrentProtocolVersionCount(int currentProtocolVersionCount) {
+    public void setCurrentProtocolVersionCount(long currentProtocolVersionCount) {
         this.currentProtocolVersionCount = currentProtocolVersionCount;
     }
 

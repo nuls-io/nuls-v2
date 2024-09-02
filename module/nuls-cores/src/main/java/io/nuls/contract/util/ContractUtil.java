@@ -945,7 +945,7 @@ public class ContractUtil {
         result.setMsg(msg);
     }
 
-    public static List<ProgramMultyAssetValue> extractMultyAssetInfoFromCallTransaction(CoinData coinData) {
+    public static List<ProgramMultyAssetValue> extractMultyAssetInfoFromCallTransactionBeforeP20(CoinData coinData) {
         List<CoinTo> toList = coinData.getTo();
         if (toList == null || toList.isEmpty()) {
             return null;
@@ -953,6 +953,29 @@ public class ContractUtil {
         List<ProgramMultyAssetValue> list = null;
         for (CoinTo to : toList) {
             if (to.getAssetsChainId() == LOCAL_CHAIN_ID && to.getAssetsId() == LOCAL_MAIN_ASSET_ID) {
+                continue;
+            }
+            if (list == null) {
+                list = new ArrayList<>();
+            }
+            list.add(new ProgramMultyAssetValue(to.getAmount(), to.getAssetsChainId(), to.getAssetsId()));
+        }
+        return list;
+    }
+
+    public static List<ProgramMultyAssetValue> extractMultyAssetInfoFromCallTransactionAfterP20(CallContractData callContractData, CoinData coinData) {
+        List<CoinTo> toList = coinData.getTo();
+        if (toList == null || toList.isEmpty()) {
+            return null;
+        }
+        List<ProgramMultyAssetValue> list = null;
+        for (CoinTo to : toList) {
+            // skip main asset
+            if (to.getAssetsChainId() == LOCAL_CHAIN_ID && to.getAssetsId() == LOCAL_MAIN_ASSET_ID) {
+                continue;
+            }
+            // skip other address
+            if (!Arrays.equals(to.getAddress(), callContractData.getContractAddress())) {
                 continue;
             }
             if (list == null) {
