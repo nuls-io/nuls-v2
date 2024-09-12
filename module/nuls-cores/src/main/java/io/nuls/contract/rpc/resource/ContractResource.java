@@ -1614,4 +1614,22 @@ public class ContractResource extends BaseCmd {
         }
     }
 
+    @CmdAnnotation(cmd = CONTRACT_REWARD_LOG_BY_CONSENSUS, version = 1.0, description = "CONTRACT_REWARD_LOG_BY_CONSENSUS")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid"),
+            @Parameter(parameterName = "address", parameterDes = "address")
+    })
+    @ResponseData(name = "Return value", description = "returnMap", responseType = @TypeDescriptor(value = Map.class))
+    public Response getAssetsMapAboutContractRewardLogByConsensus(Map<String, Object> params) {
+        try {
+            Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
+            String address = (String) params.get("address");
+            Map<String, String> res = contractHelper.getAssetsMapAboutContractRewardLogByConsensus(chainId, AddressTool.getAddress(address));
+            return success(res);
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
 }
