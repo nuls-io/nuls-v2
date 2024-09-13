@@ -85,7 +85,7 @@ public class BaseQuery extends Base {
     public void importPriKeyTest() {
         importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//Packaging address tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
         //importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//Packaging address tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
-        importPriKey("fbcae491407b54aa3904ff295f2d644080901fda0d417b2b427f5c1487b2b499", password);//Packaging address tNULSeBaMmShSTVwbU4rHkZjpD98JgFgg6rmhF
+        //importPriKey("fbcae491407b54aa3904ff295f2d644080901fda0d417b2b427f5c1487b2b499", password);//Packaging address tNULSeBaMmShSTVwbU4rHkZjpD98JgFgg6rmhF
 
         importPriKey("9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b", password);//25 tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
         importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//26 tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
@@ -133,6 +133,20 @@ public class BaseQuery extends Base {
     @Test
     public void testAssetRegister() throws Exception {
         Map<String, Object> params = new HashMap<>();
+        params.put("assetSymbol", "BTC");
+        params.put("assetName", "BTC");
+        params.put("initNumber", 100000000);
+        params.put("decimalPlace", 8);
+        params.put("txCreatorAddress", toAddress);
+        params.put("assetOwnerAddress", toAddress);
+        params.put("password", "nuls123456");
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "chainAssetTxReg", params);
+        System.out.println(JSONUtils.obj2PrettyJson(response));
+    }
+
+    @Test
+    public void testAssetRegister2() throws Exception {
+        Map<String, Object> params = new HashMap<>();
         params.put("assetSymbol", "ETH");
         params.put("assetName", "ETH");
         params.put("initNumber", 100000000);
@@ -147,8 +161,8 @@ public class BaseQuery extends Base {
     @Test
     public void transfer() {
         TransferReq.TransferReqBuilder builder = new TransferReq.TransferReqBuilder(chain.getChainId(), chain.getConfig().getAssetId())
-                .addForm(sender, password, BigInteger.valueOf(34_1000_0000_0000L))
-                .addTo(toAddress, BigInteger.valueOf(10000_0000_0000L))
+                .addForm(sender, password, BigInteger.valueOf(134_1000_0000_0000L))
+                .addTo(toAddress, BigInteger.valueOf(1010000_0000_0000L))
                 .addTo(toAddress5, BigInteger.valueOf(1000000000000L))
                 .addTo(toAddress6, BigInteger.valueOf(1000000000000L))
                 .addTo(toAddress7, BigInteger.valueOf(1000000000000L))

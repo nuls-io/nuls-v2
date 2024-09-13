@@ -64,12 +64,12 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
         //sender = toAddress32;
         InputStream in = new FileInputStream(ContractTest.class.getResource("/contract/nrc20-locked-token").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
-        String remark = "create contract test - Air Coin";
-        String name = "FeeCoin";
-        String symbol = "FeeCoin";
+        String remark = "create contract test - Award Coin";
+        String name = "AwardCoin";
+        String symbol = "AwardCoin";
         String amount = BigDecimal.TEN.pow(10).toPlainString();
-        String decimals = "18";
-        Map params = this.makeCreateParams("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", contractCode, "fee", remark, name, symbol, amount, decimals);
+        String decimals = "8";
+        Map params = this.makeCreateParams("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", contractCode, "award", remark, name, symbol, amount, decimals);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CREATE));
         assertTrue(cmdResp2, result);

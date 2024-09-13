@@ -613,6 +613,7 @@ public class ContractCmd extends BaseCmd {
                     Log.error("agent contract address [{}] trigger payable error [{}], blockHeight is {}", AddressTool.getStringAddressByBytes(contractAddressBytes), extractMsg(result), packageHeight);
                 }
             }
+            //assetRewardList.forEach(a -> Log.info("[Contract CS] height: {}, CoinTo detail: {}", blockHeight, a.toString()));
             // record reward from consensus after P21
             contractHelper.saveContractRewardLogByConsensus(chainId, assetRewardList);
 
