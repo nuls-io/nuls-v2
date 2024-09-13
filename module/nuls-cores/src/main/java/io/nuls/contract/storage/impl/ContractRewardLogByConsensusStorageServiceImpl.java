@@ -123,7 +123,7 @@ public class ContractRewardLogByConsensusStorageServiceImpl implements ContractR
         }
         for (CoinTo to : tos) {
             byte[] assetsKey = this.assetsKey(to.getAddress());
-            Set<String> assets = this.getAssets(chainId, assetsKey);
+            Set<String> assets = this.getAssetsByKey(chainId, assetsKey);
             String assetKey = to.getAssetsChainId() + "-" + to.getAssetsId();
             if (assets.add(assetKey)) {
                 StringBuilder sb = new StringBuilder();
