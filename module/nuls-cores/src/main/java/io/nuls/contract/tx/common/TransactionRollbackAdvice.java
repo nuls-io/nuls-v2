@@ -23,7 +23,11 @@
  */
 package io.nuls.contract.tx.common;
 
+import io.nuls.base.RPCUtil;
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.CoinData;
+import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.protocol.CommonAdvice;
 import io.nuls.base.protocol.ProtocolGroupManager;
@@ -32,14 +36,22 @@ import io.nuls.contract.enums.BlockType;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.storage.ContractOfflineTxHashListStorageService;
+import io.nuls.contract.storage.ContractRewardLogByConsensusStorageService;
 import io.nuls.contract.tx.v1.CallContractProcessor;
 import io.nuls.contract.tx.v8.CallContractProcessorV8;
+import io.nuls.contract.util.Log;
+import io.nuls.contract.vm.program.ProgramExecutor;
+import io.nuls.core.basic.Result;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 
-import java.util.List;
+import java.math.BigInteger;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static io.nuls.contract.constant.ContractConstant.RPC_RESULT_KEY;
+import static io.nuls.core.constant.CommonCodeConstanst.PARAMETER_ERROR;
 
 /**
  * @author: PierreLuo
@@ -62,6 +74,7 @@ public class TransactionRollbackAdvice implements CommonAdvice {
         try {
             ChainManager.chainHandle(chainId, BlockType.VERIFY_BLOCK.type());
             Short currentVersion = ProtocolGroupManager.getCurrentVersion(chainId);
+            Log.info("[Rollback] height: {}, blockHash: {}, begin", header != null ? header.getHeight() : 0, header != null ? header.getHash().toHex() : "empty");
             // Delete smart contract off chain transactionshash
             contractOfflineTxHashListStorageService.deleteOfflineTxHashList(chainId, header.getHash().getBytes());
             // add by pierre at 2019-12-01 handletype10Business rollback of transactions, Protocol upgrade required done
@@ -81,5 +94,43 @@ public class TransactionRollbackAdvice implements CommonAdvice {
 
     @Override
     public void end(int chainId, List<Transaction> txList, BlockHeader blockHeader) {
+    }
+
+    @Override
+    public void coinbase(int chainId, Transaction tx, BlockHeader blockHeader) {
+        try {
+            if (ProtocolGroupManager.getCurrentVersion(chainId) < ContractContext.PROTOCOL_21) {
+                return;
+            }
+            if(TxType.COIN_BASE != tx.getType()) {
+                return;
+            }
+            Log.info("Rollback contractRewardLogByConsensus, height: {}, coinbase hash: {}", blockHeader.getHeight(), tx.getHash().toHex());
+            CoinData coinData = tx.getCoinDataInstance();
+            List<CoinTo> toList = coinData.getTo();
+            int toListSize = toList.size();
+            if (toListSize == 0) {
+                return;
+            }
+            byte[] address;
+            BigInteger value;
+            List<CoinTo> assetRewardList = new ArrayList<>();
+            for(CoinTo to : toList) {
+                address = to.getAddress();
+                value = to.getAmount();
+                if (value.compareTo(BigInteger.ZERO) < 0) {
+                    Log.error("address [{}] - error amount [{}]", AddressTool.getStringAddressByBytes(address), value.toString());
+                    return;
+                }
+                if(AddressTool.validContractAddress(address, chainId)) {
+                    assetRewardList.add(to);
+                }
+            }
+            // rollback -> record reward from consensus after P21
+            contractHelper.deleteContractRewardLogByConsensus(chainId, assetRewardList);
+            Log.info("Rollback contractRewardLogByConsensus end, assetRewardList size: {}", assetRewardList.size());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -4,6 +4,7 @@ import io.nuls.base.RPCUtil;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.protocol.CommonAdvice;
+import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.base.protocol.TransactionProcessor;
 import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.constant.CommonCodeConstanst;
@@ -21,10 +22,7 @@ import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -144,6 +142,73 @@ public final class TransactionDispatcher extends BaseCmd {
     @Parameter(parameterName = "blockHeader", parameterType = "String")
     public Response txCommit(Map params) {
         ObjectUtils.canNotEmpty(params.get(Constants.CHAIN_ID), CommonCodeConstanst.PARAMETER_ERROR.getMsg());
+        int chainId = Integer.parseInt(params.get(Constants.CHAIN_ID).toString());
+        if (ProtocolGroupManager.getCurrentVersion(chainId) >= 21) {
+            return _txCommitAfterP21(params);
+        } else {
+            return _txCommit(params);
+        }
+    }
+
+    private Response _txCommitAfterP21(Map params) {
+        ObjectUtils.canNotEmpty(params.get(Constants.CHAIN_ID), CommonCodeConstanst.PARAMETER_ERROR.getMsg());
+        ObjectUtils.canNotEmpty(params.get("txList"), CommonCodeConstanst.PARAMETER_ERROR.getMsg());
+        ObjectUtils.canNotEmpty(params.get("blockHeader"), CommonCodeConstanst.PARAMETER_ERROR.getMsg());
+        int chainId = Integer.parseInt(params.get(Constants.CHAIN_ID).toString());
+        String blockHeaderStr = (String) params.get("blockHeader");
+        BlockHeader blockHeader = RPCUtil.getInstanceRpcStr(blockHeaderStr, BlockHeader.class);
+        List<String> txList = (List<String>) params.get("txList");
+        List<Transaction> txs = new ArrayList<>();
+        for (String txStr : txList) {
+            Transaction tx = RPCUtil.getInstanceRpcStr(txStr, Transaction.class);
+            txs.add(tx);
+        }
+        Map<Integer, List<Transaction>> map = new HashMap<>();
+        for (TransactionProcessor processor : processors) {
+            for (Transaction tx : txs) {
+                List<Transaction> transactions = map.computeIfAbsent(processor.getType(), k -> new ArrayList<>());
+                if (tx.getType() == processor.getType()) {
+                    transactions.add(tx);
+                }
+            }
+        }
+        Set<CommonAdvice> executed = new HashSet<>();
+        Map<String, Boolean> resultMap = new HashMap<>(2);
+        List<TransactionProcessor> completedProcessors = new ArrayList<>();
+        for (TransactionProcessor processor : processors) {
+            List<Transaction> transactions = map.get(processor.getType());
+            if (transactions.isEmpty()) {
+                continue;
+            }
+            // Call according to actual module
+            String moduleCode = ResponseMessageProcessor.TX_TYPE_MODULE_MAP.get(processor.getType());
+            CommonAdvice commitAdvice = commitAdviceMap.get(moduleCode);
+            if (commitAdvice == null) {
+                commitAdvice = commitAdviceMap.get(String.valueOf(processor.getType()));
+            }
+            if (commitAdvice != null && !executed.contains(commitAdvice)) {
+                commitAdvice.begin(chainId, txs, blockHeader);
+                executed.add(commitAdvice);
+            }
+
+            boolean commit = processor.commit(chainId, transactions, blockHeader);
+            if (!commit) {
+                completedProcessors.forEach(e -> e.rollback(chainId, map.get(e.getType()), blockHeader));
+                resultMap.put("value", commit);
+                return success(resultMap);
+            } else {
+                completedProcessors.add(processor);
+            }
+        }
+        resultMap.put("value", true);
+        if (!executed.isEmpty()) {
+            executed.forEach(c -> c.end(chainId, txs, blockHeader));
+        }
+        return success(resultMap);
+    }
+
+    private Response _txCommit(Map params) {
+        ObjectUtils.canNotEmpty(params.get(Constants.CHAIN_ID), CommonCodeConstanst.PARAMETER_ERROR.getMsg());
         ObjectUtils.canNotEmpty(params.get("txList"), CommonCodeConstanst.PARAMETER_ERROR.getMsg());
         ObjectUtils.canNotEmpty(params.get("blockHeader"), CommonCodeConstanst.PARAMETER_ERROR.getMsg());
         int chainId = Integer.parseInt(params.get(Constants.CHAIN_ID).toString());
@@ -213,6 +278,78 @@ public final class TransactionDispatcher extends BaseCmd {
     @Parameter(parameterName = "txList", parameterType = "List")
     @Parameter(parameterName = "blockHeader", parameterType = "String")
     public Response txRollback(Map params) {
+        ObjectUtils.canNotEmpty(params.get(Constants.CHAIN_ID), CommonCodeConstanst.PARAMETER_ERROR.getMsg());
+        int chainId = Integer.parseInt(params.get(Constants.CHAIN_ID).toString());
+        if (ProtocolGroupManager.getCurrentVersion(chainId) >= 21) {
+            return _txRollbackAfterP21(params);
+        } else {
+            return _txRollback(params);
+        }
+    }
+
+    private Response _txRollbackAfterP21(Map params) {
+        ObjectUtils.canNotEmpty(params.get(Constants.CHAIN_ID), CommonCodeConstanst.PARAMETER_ERROR.getMsg());
+        ObjectUtils.canNotEmpty(params.get("txList"), CommonCodeConstanst.PARAMETER_ERROR.getMsg());
+        ObjectUtils.canNotEmpty(params.get("blockHeader"), CommonCodeConstanst.PARAMETER_ERROR.getMsg());
+        int chainId = Integer.parseInt(params.get(Constants.CHAIN_ID).toString());
+        String blockHeaderStr = (String) params.get("blockHeader");
+        BlockHeader blockHeader = RPCUtil.getInstanceRpcStr(blockHeaderStr, BlockHeader.class);
+        List<String> txList = (List<String>) params.get("txList");
+        List<Transaction> txs = new ArrayList<>();
+        Transaction coinbase = null;
+        for (String txStr : txList) {
+            Transaction tx = RPCUtil.getInstanceRpcStr(txStr, Transaction.class);
+            if (coinbase == null && tx.getType() == TxType.COIN_BASE) {
+                coinbase = tx;
+            }
+            txs.add(tx);
+        }
+        Map<Integer, List<Transaction>> map = new HashMap<>();
+        for (TransactionProcessor processor : processors) {
+            for (Transaction tx : txs) {
+                List<Transaction> transactions = map.computeIfAbsent(processor.getType(), k -> new ArrayList<>());
+                if (tx.getType() == processor.getType()) {
+                    transactions.add(tx);
+                }
+            }
+        }
+        Set<CommonAdvice> executed = new HashSet<>();
+        Map<String, Boolean> resultMap = new HashMap<>(2);
+        List<TransactionProcessor> completedProcessors = new ArrayList<>();
+        for (TransactionProcessor processor : processors) {
+            List<Transaction> transactions = map.get(processor.getType());
+            if (transactions.isEmpty()) {
+                continue;
+            }
+            // Call according to actual module
+            String moduleCode = ResponseMessageProcessor.TX_TYPE_MODULE_MAP.get(processor.getType());
+            CommonAdvice rollbackAdvice = rollbackAdviceMap.get(moduleCode);
+            if (rollbackAdvice == null) {
+                rollbackAdvice = rollbackAdviceMap.get(String.valueOf(processor.getType()));
+            }
+            if (rollbackAdvice != null && !executed.contains(rollbackAdvice)) {
+                rollbackAdvice.begin(chainId, txs, blockHeader);
+                rollbackAdvice.coinbase(chainId, coinbase, blockHeader);
+                executed.add(rollbackAdvice);
+            }
+
+            boolean rollback = processor.rollback(chainId, transactions, blockHeader);
+            if (!rollback) {
+                completedProcessors.forEach(e -> e.commit(chainId, map.get(e.getType()), blockHeader));
+                resultMap.put("value", rollback);
+                return success(resultMap);
+            } else {
+                completedProcessors.add(processor);
+            }
+        }
+        resultMap.put("value", true);
+        if (!executed.isEmpty()) {
+            executed.forEach(r -> r.end(chainId, txs, blockHeader));
+        }
+        return success(resultMap);
+    }
+
+    private Response _txRollback(Map params) {
         ObjectUtils.canNotEmpty(params.get(Constants.CHAIN_ID), CommonCodeConstanst.PARAMETER_ERROR.getMsg());
         ObjectUtils.canNotEmpty(params.get("txList"), CommonCodeConstanst.PARAMETER_ERROR.getMsg());
         ObjectUtils.canNotEmpty(params.get("blockHeader"), CommonCodeConstanst.PARAMETER_ERROR.getMsg());

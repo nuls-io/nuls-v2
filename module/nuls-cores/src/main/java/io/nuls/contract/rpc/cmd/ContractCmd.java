@@ -46,6 +46,8 @@ import io.nuls.contract.model.dto.ModuleCmdRegisterDto;
 import io.nuls.contract.model.po.ContractOfflineTxHashPo;
 import io.nuls.contract.rpc.call.TransactionCall;
 import io.nuls.contract.service.ContractService;
+import io.nuls.contract.storage.ContractOfflineTxHashListStorageService;
+import io.nuls.contract.storage.ContractRewardLogByConsensusStorageService;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.util.MapUtil;
@@ -496,16 +498,140 @@ public class ContractCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = TRIGGER_PAYABLE_FOR_CONSENSUS_CONTRACT, version = 1.0, description = "When the consensus reward return address is the contract address, it will trigger the contract_payable(String[][] args)Method, parameter is node revenue address details<br>args[0] = new String[]{address, amount}<br>...<br>/trigger payable for consensus contract")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "chainid"),
-        @Parameter(parameterName = "stateRoot", parameterType = "String", parameterDes = "CurrentstateRoot"),
-        @Parameter(parameterName = "blockHeight", parameterType = "Long", parameterDes = "The current latest block height"),
-        @Parameter(parameterName = "contractAddress", parameterType = "String", parameterDes = "Contract address"),
-        @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "The current packaging block containsCoinBaseTransaction serialization string")
+            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "chainid"),
+            @Parameter(parameterName = "stateRoot", parameterType = "String", parameterDes = "CurrentstateRoot"),
+            @Parameter(parameterName = "blockHeight", parameterType = "Long", parameterDes = "The current latest block height"),
+            @Parameter(parameterName = "contractAddress", parameterType = "String", parameterDes = "Contract address"),
+            @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "The current packaging block contains CoinBase Transaction serialization string")
     })
     @ResponseData(name = "Return value", description = "Return aMapobject", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-        @Key(name = "value", description = "After changesstateRoot"),
+            @Key(name = "value", description = "After changes stateRoot"),
     }))
     public Response triggerPayableForConsensusContract(Map<String, Object> params) {
+        Integer chainId = (Integer) params.get("chainId");
+        ObjectUtils.canNotEmpty(chainId, PARAMETER_ERROR.getMsg());
+        if (ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.PROTOCOL_21 ) {
+            return this._triggerPayableForConsensusContractAfterP21(params);
+        } else {
+            return this._triggerPayableForConsensusContract(params);
+        }
+    }
+
+    private Response _triggerPayableForConsensusContractAfterP21(Map<String, Object> params) {
+        try {
+            String errorMsg = PARAMETER_ERROR.getMsg();
+            Integer chainId = (Integer) params.get("chainId");
+            ObjectUtils.canNotEmpty(chainId, errorMsg);
+            ChainManager.chainHandle(chainId);
+
+            String stateRoot = (String) params.get("stateRoot");
+            Long blockHeight = Long.parseLong(params.get("blockHeight").toString());
+            Long packageHeight = blockHeight + 1;
+            if (Log.isDebugEnabled()) {
+                Log.debug("contract trigger payable for consensus rewarding, blockHeight is {}, preStateRoot is {}",
+                        packageHeight, stateRoot);
+            }
+            String contractAddress = (String) params.get("contractAddress");
+            boolean hasAgentContract = StringUtils.isNotBlank(contractAddress);
+            if (hasAgentContract && !AddressTool.validAddress(chainId, contractAddress)) {
+                return failed(ADDRESS_ERROR);
+            }
+
+            String txString = (String) params.get("tx");
+            Transaction tx = new Transaction();
+            tx.parse(RPCUtil.decode(txString), 0);
+            if(TxType.COIN_BASE != tx.getType()) {
+                return failed(PARAMETER_ERROR);
+            }
+            CoinData coinData = tx.getCoinDataInstance();
+            List<CoinTo> toList = coinData.getTo();
+            int toListSize = toList.size();
+            if(toListSize == 0) {
+                Map rpcResult = new HashMap(2);
+                rpcResult.put(RPC_RESULT_KEY, stateRoot);
+                return success(rpcResult);
+            }
+
+            byte[] stateRootBytes = RPCUtil.decode(stateRoot);
+            // obtainVMActuator
+            ProgramExecutor programExecutor = contractHelper.getProgramExecutor(chainId);
+            // implementVM
+            ProgramExecutor batchExecutor = programExecutor.begin(stateRootBytes);
+
+            BigInteger agentValue = BigInteger.ZERO;
+            BigInteger value;
+
+            byte[] contractAddressBytes = null;
+            if(hasAgentContract) {
+                contractAddressBytes = AddressTool.getAddress(contractAddress);
+            }
+
+            List<String[]> agentArgList = new ArrayList<>();
+            String[][] depositArgs = new String[1][];
+            byte[] address;
+            String[] element;
+            Result result;
+            List<CoinTo> assetRewardList = new ArrayList<>();
+            for(CoinTo to : toList) {
+                address = to.getAddress();
+                value = to.getAmount();
+                if (value.compareTo(BigInteger.ZERO) < 0) {
+                    Log.error("address [{}] - error amount [{}]", AddressTool.getStringAddressByBytes(address), value.toString());
+                    return failed(PARAMETER_ERROR);
+                }
+                if (to.getAssetsChainId() != ContractContext.LOCAL_CHAIN_ID || to.getAssetsId() != ContractContext.LOCAL_MAIN_ASSET_ID) {
+                    if(AddressTool.validContractAddress(address, chainId)) {
+                        assetRewardList.add(to);
+                    }
+                    continue;
+                }
+                if(hasAgentContract && Arrays.equals(address, contractAddressBytes)) {
+                    agentValue = to.getAmount();
+                    assetRewardList.add(to);
+                    continue;
+                }
+                element = new String[]{AddressTool.getStringAddressByBytes(address), value.toString()};
+                // WhenCoinBaseWhen the contract address of the entrusted node appears in the transaction, it triggers the contract_payable(String[][] args)Method, parameter is the revenue amount of this contract address eg. [[address, amount]]
+                if(AddressTool.validContractAddress(address, chainId)) {
+                    assetRewardList.add(to);
+                    depositArgs[0] = element;
+                    result = this.callDepositContract(chainId, address, value, blockHeight, depositArgs, batchExecutor, stateRootBytes);
+                    if(result.isFailed()) {
+                        Log.error("deposit contract address [{}] trigger payable error [{}], blockHeight is {}", AddressTool.getStringAddressByBytes(address), extractMsg(result), packageHeight);
+                    }
+                }
+                agentArgList.add(element);
+            }
+            // When the profit address of the packaging node in this block is the contract address, the contract is triggered_payable(String[][] args)Method, parameter is a detailed list of all revenue addresses for this block eg. [[address, amount], [address, amount], ...]
+            if(hasAgentContract) {
+                agentArgList.add(0, new String[]{contractAddress, agentValue.toString()});
+                // Place the revenue of the contract address at the top of the parameter list
+                String[][] agentArgs = new String[agentArgList.size()][];
+                agentArgList.toArray(agentArgs);
+                result = this.callAgentContract(chainId, contractAddressBytes, agentValue, blockHeight, agentArgs, batchExecutor, stateRootBytes);
+                if(result.isFailed()) {
+                    Log.error("agent contract address [{}] trigger payable error [{}], blockHeight is {}", AddressTool.getStringAddressByBytes(contractAddressBytes), extractMsg(result), packageHeight);
+                }
+            }
+            //assetRewardList.forEach(a -> Log.info("[Contract CS] height: {}, CoinTo detail: {}", blockHeight, a.toString()));
+            // record reward from consensus after P21
+            contractHelper.saveContractRewardLogByConsensus(chainId, assetRewardList);
+
+            batchExecutor.commit();
+            byte[] newStateRootBytes = batchExecutor.getRoot();
+            if(Log.isDebugEnabled()) {
+                Log.debug("contract trigger payable for consensus rewarding, blockHeight is {}, preStateRoot is {}, currentStateRoot is {}", packageHeight, stateRoot, HexUtil.encode(newStateRootBytes));
+            }
+            Map rpcResult = new HashMap(2);
+            rpcResult.put(RPC_RESULT_KEY, RPCUtil.encode(newStateRootBytes));
+            return success(rpcResult);
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
+    private Response _triggerPayableForConsensusContract(Map<String, Object> params) {
         try {
             String errorMsg = PARAMETER_ERROR.getMsg();
             Integer chainId = (Integer) params.get("chainId");
