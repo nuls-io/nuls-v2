@@ -74,7 +74,9 @@ public class ContractPOCMSendTxTest extends BaseQuery {
         //boolean openConsensus,
         //boolean openAwardConsensusNodeProvider,
         //String authorizationCode
-        Object[] args = new Object[]{"tNULSeBaN6fGF3hwSrQsHq7B2GhtQ1W1ZMT9Nx", 0, 0, 20000000, 200000000000000L, 1, 10000000000L, 10000000_0000_0000L, true, false, "qwerqwerasd"};
+        //int operatingModel
+        //int rewardDrawRatioForLp
+        Object[] args = new Object[]{"tNULSeBaMwB4nKCwEGiwjzzGHseHEeeSAEtChf", 0, 0, 2000_0000, 2000000_00000000L, 1, 100_00000000L, 10000000_0000_0000L, true, false, "qwerqwerasd", 0, 0};
         Map params = this.makeCreateParams(sender, contractCode, "pocm_new", remark, args);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CREATE));
@@ -93,7 +95,7 @@ public class ContractPOCMSendTxTest extends BaseQuery {
         params.put(Constants.CHAIN_ID,2);
         params.put("deposit","2000000000000");
         params.put("commissionRate",10);
-        params.put("packingAddress","tNULSeBaMqywZjfSrKNQKBfuQtVxAHBQ8rB2Zn");
+        params.put("packingAddress","tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe");
         params.put("password","nuls123456");
         params.put("rewardAddress","tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG");
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", params);
@@ -110,7 +112,7 @@ public class ContractPOCMSendTxTest extends BaseQuery {
         params.put(Constants.CHAIN_ID,2);
         params.put("deposit","2000000000000");
         params.put("commissionRate",10);
-        params.put("packingAddress","tNULSeBaMuU6sq72mptyghDXDWQXKJ5QUaWhGj");
+        params.put("packingAddress","tNULSeBaMmShSTVwbU4rHkZjpD98JgFgg6rmhF");
         params.put("password","nuls123456");
         params.put("rewardAddress","tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD");
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", params);
@@ -149,8 +151,8 @@ public class ContractPOCMSendTxTest extends BaseQuery {
         Map<String,Object> params = new HashMap<>();
         params.put(Constants.CHAIN_ID,2);
         params.put("address",sender);
-        params.put("agentHash","60ae9570af85f4542c4a8a3851c489db4e7753f4f22d31824e16c8d21031e280");
-        params.put("deposit", new BigDecimal("140000").movePointRight(8).toString());
+        params.put("agentHash","af24e302e1dd381890e7c2e9e853b5a2b2c0c991466c1cc4dd5c897566adf244");
+        params.put("deposit", new BigDecimal("210000").movePointRight(8).toString());
         params.put("password", "nuls123456");
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_depositToAgent", params);
         System.out.println(cmdResp.getResponseData());
@@ -188,9 +190,11 @@ public class ContractPOCMSendTxTest extends BaseQuery {
         this.invokeCall(sender, BigInteger.ZERO, contractAddress, "addOtherAgent", null, "remark", List.of("4dce090750b1900c1e741b961b32e75ce9f9d9c69997388ec73e9dd62cb8c835").toArray());
         Log.info("begin depositForOwn {}", sender);*/
 
-        String nrc20Locked = "tNULSeBaN6fGF3hwSrQsHq7B2GhtQ1W1ZMT9Nx";
+        String nrc20Locked = "tNULSeBaN17QmugpEbzHHd8spVUZ5DDjx8beAb";
         contractAddress_nrc20 = nrc20Locked;
-        String pocm = "tNULSeBaN9gTYbwYwFGj8D74U8VVYuUxfKwsT1";
+        String pocm = "tNULSeBaMwECYR7GWGPvQT6chX5RzDZ1gtmvTS";
+        this.contractAddress = pocm;
+        tokenTransfer();
         //this.invokeCall(sender, BigInteger.ZERO, contractAddress, "removeAgent", null, "remark", List.of("4dce090750b1900c1e741b961b32e75ce9f9d9c69997388ec73e9dd62cb8c835").toArray());
         //this.invokeCall(sender, BigInteger.ZERO, contractAddress, "addOtherAgent", null, "remark", List.of("4dce090750b1900c1e741b961b32e75ce9f9d9c69997388ec73e9dd62cb8c835").toArray());
 
@@ -201,7 +205,7 @@ public class ContractPOCMSendTxTest extends BaseQuery {
         //Log.info("begin quit {}", toAddress6);
         //this.invokeCall(toAddress6, BigInteger.ZERO, contractAddress, "quit", null, "remark", "0");
         //
-        this.invokeCall(sender, BigInteger.valueOf(150000_00000000L), pocm, "depositForOwn", null, "remark");
+        //this.invokeCall(sender, BigInteger.valueOf(150000_00000000L), pocm, "depositForOwn", null, "remark");
         //Log.info("begin depositForOwn {}", toAddress5);
         //this.invokeCall(toAddress5, BigInteger.valueOf(2100_00000000L), contractAddress, "depositForOwn", null, "remark");
         //Log.info("begin depositForOwn {}", toAddress6);
@@ -363,9 +367,9 @@ public class ContractPOCMSendTxTest extends BaseQuery {
 
     private void tokenTransfer() throws Exception {
         Log.info("begin tokenTransfer");
-        BigInteger value = BigInteger.TEN.pow(10);
+        BigInteger value = new BigDecimal("2000000").movePointRight(8).toBigInteger();
         String remark = "token transfer to " + contractAddress;
-        Map params = this.makeTokenTransferParams(sender, contractAddress, contractAddress_nrc20, value, remark);
+        Map params = this.makeTokenTransferParams(toAddress, contractAddress, contractAddress_nrc20, value, remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TOKEN_TRANSFER, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(TOKEN_TRANSFER));
         assertTrue(cmdResp2, result);

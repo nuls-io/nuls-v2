@@ -36,6 +36,8 @@ import java.util.Set;
  */
 public class HashSetTimeDuplicateProcessor {
 
+    private static final long allowMs = 60000;
+
     private final int maxSize;
     private final int percent90;
     private final long timeoutMs;
@@ -57,7 +59,7 @@ public class HashSetTimeDuplicateProcessor {
         Long start = map1.get(hash);
         long sub = System.currentTimeMillis() - start;
         long timeVal = System.currentTimeMillis();
-        if (sub >= timeoutMs) {
+        if (sub >= timeoutMs || sub < allowMs) {
             result = true;
         } else {
             timeVal = start;
@@ -86,26 +88,41 @@ public class HashSetTimeDuplicateProcessor {
     }
 
     public static void main(String[] args) {
-        HashSetTimeDuplicateProcessor processor = new HashSetTimeDuplicateProcessor(1000,10000L);
+        HashSetTimeDuplicateProcessor processor = new HashSetTimeDuplicateProcessor(1000,100000L);
         assertTrueTest(processor.insertAndCheck("1"));
         assertTrueTest(processor.insertAndCheck("2"));
         assertTrueTest(processor.insertAndCheck("3"));
 
+        assertTrueTest(processor.insertAndCheck("1"));
+        assertTrueTest(processor.insertAndCheck("2"));
+
+        try {
+            Thread.sleep(60000L);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         assertFlaseTest(processor.insertAndCheck("1"));
         assertFlaseTest(processor.insertAndCheck("2"));
 
         try {
-            Thread.sleep(10000L);
+            Thread.sleep(100000L);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-
         assertTrueTest(processor.insertAndCheck("1"));
         assertTrueTest(processor.insertAndCheck("2"));
         assertTrueTest(processor.insertAndCheck("3"));
+
+        assertTrueTest(processor.insertAndCheck("1"));
+        assertTrueTest(processor.insertAndCheck("2"));
+        try {
+            Thread.sleep(60000L);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         assertFlaseTest(processor.insertAndCheck("1"));
         assertFlaseTest(processor.insertAndCheck("2"));
-
+        System.out.println("Success!!");
     }
 
     private static void assertTrueTest(boolean b) {

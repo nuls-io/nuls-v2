@@ -72,13 +72,13 @@ public class ConsensusSendTxTest extends BaseQuery {
      */
     @Test
     public void createAgent() throws Exception {
-        BigInteger value = BigInteger.valueOf(30001_00000000L);
+        BigInteger value = BigInteger.valueOf(20000_00000000L);
         String methodName = "createAgent";
         String methodDesc = "";
         String remark = "createAgent test - Contract creation node";
-        String packingAddress = "tNULSeBaMtEPLXxUgyfnBt9bpb5Xv84dyJV98p";
+        String packingAddress = "tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe";
 
-        Map params = this.makeCallParams(sender, value, contractAddress, methodName, methodDesc, remark, packingAddress, 20001, 100);
+        Map params = this.makeCallParams(toAddress, value, contractAddress, methodName, methodDesc, remark, packingAddress, 20001, 100);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
         Log.info("call-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));

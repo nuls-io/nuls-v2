@@ -65,6 +65,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import static io.nuls.contract.constant.ContractConstant.BALANCE_TRIGGER_FOR_CONSENSUS_CONTRACT_METHOD_DESC_IN_VM;
 import static io.nuls.contract.constant.ContractConstant.BALANCE_TRIGGER_METHOD_NAME;
@@ -1345,6 +1346,22 @@ public class VM {
 
     public void setGas(long gas) {
         this.gas = gas;
+    }
+
+    public Set<String> getAssetsAbountContractRewardLogByConsensus(int chainId, byte[] address) {
+        if (this.vmContext != null) {
+            return this.vmContext.getAssetsAbountContractRewardLogByConsensus(chainId, address);
+        } else {
+            throw new RuntimeException(String.format("vmContext is null, parms: %s, %s", chainId, address));
+        }
+    }
+
+    public BigInteger getAssetAmountAbountContractRewardLogByConsensus(int chainId, byte[] address, int assetChainId, int assetId) {
+        if (this.vmContext != null) {
+            return this.vmContext.getAssetAmountAbountContractRewardLogByConsensus(chainId, address, assetChainId, assetId);
+        } else {
+            throw new RuntimeException(String.format("vmContext is null, parms: %s, %s, %s, %s", chainId, address, assetChainId, assetId));
+        }
     }
 
 }

@@ -76,4 +76,5 @@ public interface ContractCmdConstant {
     String CODE_HASH = "sc_code_hash";
     String CONTRACT_CODE = "sc_contract_code";
     String COMPUTE_ADDRESS = "sc_compute_address";
+    String CONTRACT_REWARD_LOG_BY_CONSENSUS = "sc_contract_reward_log_by_consensus";
 }

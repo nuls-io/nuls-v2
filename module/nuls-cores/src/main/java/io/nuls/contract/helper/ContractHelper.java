@@ -46,6 +46,7 @@ import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.contract.rpc.call.LedgerCall;
 import io.nuls.contract.service.ContractService;
 import io.nuls.contract.storage.ContractAddressStorageService;
+import io.nuls.contract.storage.ContractRewardLogByConsensusStorageService;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.util.VMContext;
@@ -86,6 +87,8 @@ public class ContractHelper {
     private ContractService contractService;
     @Autowired
     private NulsCoresConfig contractConfig;
+    @Autowired
+    private ContractRewardLogByConsensusStorageService contractRewardLogByConsensusStorageService;
 
     private static final BigInteger MAXIMUM_DECIMALS = BigInteger.valueOf(18L);
     private static final BigInteger MAXIMUM_TOTAL_SUPPLY = BigInteger.valueOf(2L).pow(256).subtract(BigInteger.ONE);
@@ -1051,5 +1054,23 @@ public class ContractHelper {
 
     public Result onRollbackForCreateV16(int chainId, byte[] contractAddress, boolean isNrc20) throws Exception {
         return this.onRollbackForCreateV14(chainId, contractAddress, isNrc20);
+    }
+
+    public Result saveContractRewardLogByConsensus(int chainId, List<CoinTo> tos) throws Exception {
+        return contractRewardLogByConsensusStorageService.save(chainId, tos);
+    }
+
+    public Result deleteContractRewardLogByConsensus(int chainId, List<CoinTo> tos) throws Exception {
+        return contractRewardLogByConsensusStorageService.delete(chainId, tos);
+    }
+
+    public Set<String> getAssetsAboutContractRewardLogByConsensus(int chainId, byte[] address) {
+        return contractRewardLogByConsensusStorageService.getAssets(chainId, address);
+    }
+    public Map<String, String> getAssetsMapAboutContractRewardLogByConsensus(int chainId, byte[] address) {
+        return contractRewardLogByConsensusStorageService.getAssetsMap(chainId, address);
+    }
+    public BigInteger getAssetAmountAboutContractRewardLogByConsensus(int chainId, byte[] address, int assetChainId, int assetId) {
+        return contractRewardLogByConsensusStorageService.getAssetAmount(chainId, address, assetChainId, assetId);
     }
 }

@@ -25,7 +25,7 @@ public class BroadCtxSignHandler implements MessageProcessor {
     @Autowired
     private ProtocolService protocolService;
 
-    private HashSetTimeDuplicateProcessor processor = new HashSetTimeDuplicateProcessor(1000, 60000L);
+    private HashSetTimeDuplicateProcessor processor = new HashSetTimeDuplicateProcessor(1000, 300000L);
 
     @Override
     public String getCmd() {
