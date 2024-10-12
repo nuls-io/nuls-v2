@@ -251,6 +251,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         Map<String, List<String>> successed = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         boolean result = true;
         for (Map.Entry<String, List<String>> entry : moduleVerifyMap.entrySet()) {
+            chain.getLogger().info("[Rollback], module: {}, txCount: {}", entry.getKey(), entry.getValue() == null ? 0 : entry.getValue().size());
             boolean rs = TransactionCall.txProcess(chain, BaseConstant.TX_ROLLBACK,
                     entry.getKey(), entry.getValue(), blockHeader);
             if (!rs) {
