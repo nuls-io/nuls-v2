@@ -46,6 +46,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -279,5 +280,13 @@ public class VMContext {
 
     public String getCrossTokenSystemContract() {
         return contractConfig.getCrossTokenSystemContract();
+    }
+
+    public Set<String> getAssetsAbountContractRewardLogByConsensus(int chainId, byte[] address) {
+        return contractHelper.getAssetsAboutContractRewardLogByConsensus(chainId, address);
+    }
+
+    public BigInteger getAssetAmountAbountContractRewardLogByConsensus(int chainId, byte[] address, int assetChainId, int assetId) {
+        return contractHelper.getAssetAmountAboutContractRewardLogByConsensus(chainId, address, assetChainId, assetId);
     }
 }

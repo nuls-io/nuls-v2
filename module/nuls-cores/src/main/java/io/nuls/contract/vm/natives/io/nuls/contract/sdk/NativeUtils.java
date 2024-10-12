@@ -601,6 +601,18 @@ public class NativeUtils {
                 String[] args = (String[]) frame.heap.getObject(argsRef);
                 return keccak(args, methodCode, frame);
             }
+        } else if ("consensusRewardAssets".equals(cmdName)) {
+            // add at 2024/09/12 p21
+            if(ProtocolGroupManager.getCurrentVersion(currentChainId) >= ContractContext.PROTOCOL_21 ) {
+                String[] args = (String[]) frame.heap.getObject(argsRef);
+                return consensusRewardAssets(args, methodCode, frame);
+            }
+        } else if ("consensusRewardAssetAmount".equals(cmdName)) {
+            // add at 2024/09/12 p21
+            if(ProtocolGroupManager.getCurrentVersion(currentChainId) >= ContractContext.PROTOCOL_21 ) {
+                String[] args = (String[]) frame.heap.getObject(argsRef);
+                return consensusRewardAssetAmount(args, methodCode, frame);
+            }
         }
         String[] args = (String[]) frame.heap.getObject(argsRef);
 
@@ -705,6 +717,37 @@ public class NativeUtils {
             return result;
         } catch (Exception e) {
             throw new ErrorException("Invoke external cmd failed. When keccak.", frame.vm.getGasUsed(), e.getMessage());
+        }
+    }
+    private static Result consensusRewardAssets(String[] args, MethodCode methodCode, Frame frame) {
+        try {
+            String address = args[0];
+            byte[] addressBytes = AddressTool.getAddress(address);
+            int currentChainId = frame.vm.getProgramExecutor().getCurrentChainId();
+            Set<String> set = frame.vm.getAssetsAbountContractRewardLogByConsensus(currentChainId, addressBytes);
+            String[] res = new String[set.size()];
+            set.toArray(res);
+            Object objectRef = frame.heap.stringArrayToObjectRef(res);
+            Result result = NativeMethod.result(methodCode, objectRef, frame);
+            return result;
+        } catch (Exception e) {
+            throw new ErrorException("Invoke external cmd failed. When consensusRewardAssets.", frame.vm.getGasUsed(), e.getMessage());
+        }
+    }
+
+    private static Result consensusRewardAssetAmount(String[] args, MethodCode methodCode, Frame frame) {
+        try {
+            String address = args[0];
+            int assetChainId = Integer.parseInt(args[1]);
+            int assetId = Integer.parseInt(args[2]);
+            byte[] addressBytes = AddressTool.getAddress(address);
+            int currentChainId = frame.vm.getProgramExecutor().getCurrentChainId();
+            BigInteger amount = frame.vm.getAssetAmountAbountContractRewardLogByConsensus(currentChainId, addressBytes, assetChainId, assetId);
+            Object resultValue = frame.heap.newString(amount.toString());
+            Result result = NativeMethod.result(methodCode, resultValue, frame);
+            return result;
+        } catch (Exception e) {
+            throw new ErrorException("Invoke external cmd failed. When consensusRewardAssets.", frame.vm.getGasUsed(), e.getMessage());
         }
     }
 

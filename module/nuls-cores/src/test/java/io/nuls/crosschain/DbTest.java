@@ -23,8 +23,11 @@
  */
 package io.nuls.crosschain;
 
+import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.NulsHash;
+import io.nuls.chain.model.po.BlockChain;
 import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.core.rockdb.service.RocksDBService;
@@ -33,10 +36,16 @@ import io.nuls.crosschain.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.model.po.CtxStatusPO;
 import io.nuls.crosschain.model.po.LocalVerifierPO;
 import io.nuls.crosschain.model.po.SendCtxHashPO;
+import io.nuls.protocol.constant.Constant;
+import io.nuls.protocol.manager.ContextManager;
+import io.nuls.protocol.model.po.ProtocolVersionPo;
+import io.nuls.protocol.model.po.StatisticsInfo;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -49,7 +58,63 @@ public class DbTest {
     @BeforeClass
     public static void before() {
         Log.info("init");
-        RocksDBService.init("/Users/pierreluo/IdeaProjects/nuls_newer_2.0/data/cross-chain/");
+        RocksDBService.init("/Users/pierreluo/Nuls/protocol-update");
+        System.out.println();
+    }
+
+    @Test
+    public void getCurrentProtocolVersionCount() {
+        try {
+            byte[] bytes = RocksDBService.get(Constant.CACHED_INFO + 2, "currentProtocolVersionCount".getBytes());
+            System.out.println(ByteUtils.bytesToInt(bytes));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void StatisticsInfoTest() throws Exception {
+        try {
+            var pos = new ArrayList<StatisticsInfo>();
+            List<byte[]> valueList = RocksDBService.valueList(Constant.STATISTICS + 2);
+            for (byte[] bytes : valueList) {
+                var po = new StatisticsInfo();
+                po.parse(new NulsByteBuffer(bytes));
+                pos.add(po);
+            }
+            pos.forEach(p -> System.out.println(p.toString()));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void poTest() throws Exception {
+        var pos = new ArrayList<ProtocolVersionPo>();
+        List<byte[]> valueList = RocksDBService.valueList(Constant.PROTOCOL_VERSION_PO + 2);
+        for (byte[] bytes : valueList) {
+            var po = new ProtocolVersionPo();
+            po.parse(new NulsByteBuffer(bytes));
+            pos.add(po);
+        }
+        pos.forEach(p -> System.out.println(p.toString()));
+    }
+
+
+
+    @Test
+    public void blockChainInChainManager() throws Exception {
+        List<BlockChain> blockChains = new ArrayList<>();
+        List<byte[]> list = RocksDBService.valueList("block_chain");
+        if (list == null) {
+            return;
+        }
+        for (byte[] blockChainByte : list) {
+            BlockChain blockChain = new BlockChain();
+            blockChain.parse(blockChainByte, 0);
+            blockChains.add(blockChain);
+            System.out.println(blockChain.getChainId() + " - " + blockChain.getChainName());
+        }
         System.out.println();
     }
 

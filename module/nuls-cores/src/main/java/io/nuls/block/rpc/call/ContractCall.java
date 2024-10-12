@@ -64,7 +64,11 @@ public class ContractCall {
             }
             Map data = (Map) response.getResponseData();
             Map result = (Map) data.get(cmd);
-            logger.debug("moduleCode:{}, -cmd:{}, -contractProcess -rs: {}", ModuleE.SC.abbr, "sc_contract_offline_tx_hash_list", JSONUtils.obj2json(result));
+            try {
+                logger.info("moduleCode:{}, -cmd:{}, blockhash: {}, contractProcess -rs: {}", ModuleE.SC.abbr, "sc_contract_offline_tx_hash_list", blockHash, JSONUtils.obj2json(result));
+            } catch (Exception e) {
+                logger.warn("failed to trace sc_contract_offline_tx_hash_list log, error is {}", e.getMessage());
+            }
             Object obj = result.get("list");
             if (null == obj) {
                 return List.of();
@@ -72,13 +76,6 @@ public class ContractCall {
             List<NulsHash> hashList = new ArrayList<>();
             for (String hashStr : (List<String>) obj) {
                 hashList.add(NulsHash.fromHex(hashStr));
-            }
-            try {
-                if(!hashList.isEmpty()) {
-                    logger.info("moduleCode:{}, -cmd:{}, -contractProcess -rs: {}", ModuleE.SC.abbr, "sc_contract_offline_tx_hash_list", JSONUtils.obj2json(result));
-                }
-            } catch (Exception e) {
-                logger.warn("failed to trace sc_contract_offline_tx_hash_list log, error is {}", e.getMessage());
             }
 
             return hashList;

@@ -718,7 +718,6 @@ public class ContractController {
         }
     }
 
-
     @RpcMethod("validateContractCreate")
     @ApiOperation(description = "Verify release contract" ,order = 413)
     @Parameters(value = {
@@ -1011,6 +1010,72 @@ public class ContractController {
         }
         Result<Map> mapResult = contractTools.contractCode(chainId, params.get(1));
         return ResultUtil.getJsonRpcResult(mapResult);
+    }
+
+    @RpcMethod("getContractOfflineTxHashListByBlockHash")
+    @ApiOperation(description = "Return the contract generated transaction in the specified block（Contract returnGASExcluding transactions）List of（Newly generated transactions in the contract except for contract returnsGASExcept for transactions, they are not saved to the block. The contract module saves the relationship between these transactions and the specified block）/contract offline tx hash list", order = 422)
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "chainid"),
+            @Parameter(parameterName = "blockHash", parameterType = "String", parameterDes = "blockhash")
+    })
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "txList", valueType = List.class, valueElement = String.class, description = "Returns a collection of transaction serialization data strings")
+    }))
+    public RpcResult getContractOfflineTxHashListByBlockHash(List<Object> params) {
+        VerifyUtils.verifyParams(params, 2);
+        int chainId;
+        String blockHash;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is invalid");
+        }
+        try {
+            blockHash = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[blockHash] is invalid");
+        }
+        if (!Context.isChainExist(chainId)) {
+            return RpcResult.paramError(String.format("chainId [%s] is invalid", chainId));
+        }
+        Map<String, Object> params1 = new HashMap<>(8);
+        params1.put("chainId", chainId);
+        params1.put("blockHash", blockHash);
+
+        Result result = contractTools.commonRequest("sc_contract_offline_tx_hash_list", params1);
+        return ResultUtil.getJsonRpcResult(result);
+    }
+
+    @RpcMethod("getAssetsMapAboutContractRewardLogByConsensus")
+    @ApiOperation(description = "getAssetsMapAboutContractRewardLogByConsensus", order = 423)
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "chainid"),
+            @Parameter(parameterName = "address", parameterType = "String", parameterDes = "address")
+    })
+    @ResponseData(name = "Return value", description = "Return aMap", responseType = @TypeDescriptor(value = Map.class))
+    public RpcResult getAssetsMapAboutContractRewardLogByConsensus(List<Object> params) {
+        VerifyUtils.verifyParams(params, 2);
+        int chainId;
+        String address;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is invalid");
+        }
+        try {
+            address = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[address] is invalid");
+        }
+        if (!Context.isChainExist(chainId)) {
+            return RpcResult.paramError(String.format("chainId [%s] is invalid", chainId));
+        }
+        Map<String, Object> params1 = new HashMap<>(8);
+        params1.put("chainId", chainId);
+        params1.put("address", address);
+
+        Result result = contractTools.commonRequest("sc_contract_reward_log_by_consensus", params1);
+        return ResultUtil.getJsonRpcResult(result);
     }
 
 
