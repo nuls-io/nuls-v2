@@ -234,27 +234,27 @@ public class ContractTxHelper {
         BigInteger imputedValue = BigInteger.valueOf(LongUtils.mul(gasUsed, price));
         // Total expenses
         BigInteger totalValue = imputedValue;
-        int assetChainId = LOCAL_CHAIN_ID;
-        int assetId = LOCAL_MAIN_ASSET_ID;
+        int nulsAssetChainId = LOCAL_CHAIN_ID;
+        int nulsAssetId = LOCAL_MAIN_ASSET_ID;
         totalValue = totalValue.add(value);
         if (value.compareTo(BigInteger.ZERO) > 0) {
-            coinData.addTo(new CoinTo(contractAddress, assetChainId, assetId, value));
+            coinData.addTo(new CoinTo(contractAddress, nulsAssetChainId, nulsAssetId, value));
         }
         if (nulsValueToOtherList != null && !nulsValueToOtherList.isEmpty()) {
             for (AccountAmountDto dto : nulsValueToOtherList) {
                 totalValue = totalValue.add(dto.getValue());
-                coinData.addTo(new CoinTo(AddressTool.getAddress(dto.getTo()), assetChainId, assetId, dto.getValue()));
+                coinData.addTo(new CoinTo(AddressTool.getAddress(dto.getTo()), nulsAssetChainId, nulsAssetId, dto.getValue()));
             }
         }
-        ContractBalance senderBalance = contractHelper.getUnConfirmedBalanceAndNonce(chainId, assetChainId, assetId, sender);
-        CoinFrom coinFrom = new CoinFrom(senderBytes, assetChainId, assetId, totalValue, RPCUtil.decode(senderBalance.getNonce()), UNLOCKED_TX);
+        ContractBalance senderBalance = contractHelper.getUnConfirmedBalanceAndNonce(chainId, nulsAssetChainId, nulsAssetId, sender);
+        CoinFrom coinFrom = new CoinFrom(senderBytes, nulsAssetChainId, nulsAssetId, totalValue, RPCUtil.decode(senderBalance.getNonce()), UNLOCKED_TX);
         coinData.addFrom(coinFrom);
 
         if (multyAssetValues != null && !multyAssetValues.isEmpty()) {
             BigInteger _value;
             for (ProgramMultyAssetValue multyAssetValue : multyAssetValues) {
-                assetChainId = multyAssetValue.getAssetChainId();
-                assetId = multyAssetValue.getAssetId();
+                int assetChainId = multyAssetValue.getAssetChainId();
+                int assetId = multyAssetValue.getAssetId();
                 _value = multyAssetValue.getValue();
                 ContractBalance senderBalanceOfTransfer = contractHelper.getUnConfirmedBalanceAndNonce(chainId, assetChainId, assetId, sender);
                 if (_value.compareTo(BigInteger.ZERO) > 0) {
@@ -270,7 +270,7 @@ public class ContractTxHelper {
             }
         }
         Chain chain = contractHelper.getChain(chainId);
-        BigInteger fee = TransactionFeeCalculator.getNormalUnsignedTxFee(txSize + calcSize(txData) + calcSize(coinData), chain.getConfig().getFeeUnit(assetChainId, assetId), chain.getConfig().getFeeCoefficient(assetChainId, assetId));
+        BigInteger fee = TransactionFeeCalculator.getNormalUnsignedTxFee(txSize + calcSize(txData) + calcSize(coinData), chain.getConfig().getFeeUnit(nulsAssetChainId, nulsAssetId), chain.getConfig().getFeeCoefficient(nulsAssetChainId, nulsAssetId));
         totalValue = totalValue.add(fee);
         if (senderBalance.getBalance().compareTo(totalValue) < 0) {
             Log.error("Insufficient balance, asset: {}-{}", LOCAL_CHAIN_ID, LOCAL_MAIN_ASSET_ID);
