@@ -44,6 +44,16 @@ public class ContractViewCall {
     private String methodDesc;
     @ApiModelProperty(description = "parameter list", required = false)
     private Object[] args;
+    @ApiModelProperty(description = "height", required = false)
+    private Long height;
+
+    public Long getHeight() {
+        return height;
+    }
+
+    public void setHeight(Long height) {
+        this.height = height;
+    }
 
     public String[][] getArgs(String[] types) {
         return ContractUtil.twoDimensionalArray(args, types);
