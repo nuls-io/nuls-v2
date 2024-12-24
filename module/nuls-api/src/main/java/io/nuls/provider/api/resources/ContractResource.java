@@ -576,7 +576,7 @@ public class ContractResource {
         if (form == null) {
             return RpcClientResult.getFailed(new ErrorData(CommonCodeConstanst.PARAMETER_ERROR.getCode(), "form data is empty"));
         }
-        Result<Map> mapResult = contractTools.invokeView(config.getChainId(),
+        Result<Map> mapResult = contractTools.invokeView(config.getChainId(), form.getHeight() == null ? 0 : form.getHeight(),
                 form.getContractAddress(),
                 form.getMethodName(),
                 form.getMethodDesc(),
