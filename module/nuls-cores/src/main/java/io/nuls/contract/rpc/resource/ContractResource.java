@@ -215,7 +215,9 @@ public class ContractResource extends BaseCmd {
                 gasUsed = gasUsed > MAX_GASLIMIT ? MAX_GASLIMIT : gasUsed;
                 resultMap.put("gasLimit", gasUsed);
             } else if (StringUtils.isNotBlank(errorMsg)) {
-                resultMap.put("errorMsg", errorMsg);
+                Result failed = Result.getFailed(ContractErrorCode.DATA_ERROR);
+                failed.setMsg(errorMsg);
+                return wrapperFailed(failed);
             }
 
             return success(resultMap);
@@ -677,7 +679,9 @@ public class ContractResource extends BaseCmd {
                 gasUsed = gasUsed > MAX_GASLIMIT ? MAX_GASLIMIT : gasUsed;
                 resultMap.put("gasLimit", gasUsed);
             } else if (StringUtils.isNotBlank(errorMsg)) {
-                resultMap.put("errorMsg", errorMsg);
+                Result failed = Result.getFailed(ContractErrorCode.DATA_ERROR);
+                failed.setMsg(errorMsg);
+                return wrapperFailed(failed);
             }
 
             return success(resultMap);

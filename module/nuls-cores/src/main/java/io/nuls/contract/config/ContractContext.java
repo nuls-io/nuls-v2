@@ -94,6 +94,7 @@ public class ContractContext {
     public static short PROTOCOL_19 = 19;
     public static short PROTOCOL_20 = 20;
     public static short PROTOCOL_21 = 21;
+    public static short PROTOCOL_22 = 22;
     private static final LoadingCache<String, ContractAddressInfoPo> CONTRACT_INFO_CACHE;
     public static Set<String> FEE_ASSETS_SET = new HashSet<>();
     public static ContractHelper contractHelper;

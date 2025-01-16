@@ -26,6 +26,8 @@ package io.nuls.contract.helper;
 import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
+import io.nuls.base.protocol.ProtocolGroupManager;
+import io.nuls.contract.config.ContractContext;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.manager.ContractTempBalanceManager;
 import io.nuls.contract.model.bo.*;
@@ -217,8 +219,13 @@ public class ContractTransferHandler {
         if (transfers != null && transfers.size() > 0) {
             Result result;
             do {
-                // Verify contract transfer(Transfer out from contract)Minimum transfer amount for transactions
-                result = this.verifyTransfer(transfers);
+                if (ProtocolGroupManager.getCurrentVersion(chainId) >= ContractContext.PROTOCOL_22) {
+                    // Verify contract transfer(Transfer out from contract)Minimum transfer amount for transactions
+                    result = this.verifyTransferP22(transfers);
+                } else {
+                    // Verify contract transfer(Transfer out from contract)Minimum transfer amount for transactions
+                    result = this.verifyTransfer(transfers);
+                }
                 if (result.isFailed()) {
                     isCorrectContractTransfer = false;
                     break;
@@ -256,6 +263,10 @@ public class ContractTransferHandler {
                 return Result.getFailed(TOO_SMALL_AMOUNT);
             }
         }
+        return getSuccess();
+    }
+
+    private Result verifyTransferP22(List<ProgramTransfer> transfers) {
         return getSuccess();
     }
 
