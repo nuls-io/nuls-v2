@@ -651,7 +651,9 @@ public class ContractResource extends BaseCmd {
                 ProgramMethod method = contractHelper.getMethodInfoByContractAddress(chainId, prevStateRoot, methodName, methodDesc, contractAddressBytes);
                 String[][] convertArgs = null;
                 if (method != null) {
-                    convertArgs = ContractUtil.twoDimensionalArray(args, method.argsType2Array());
+                    String[] argsType2Array = method.argsType2Array();
+                    resultMap.put("argsType", argsType2Array);
+                    convertArgs = ContractUtil.twoDimensionalArray(args, argsType2Array);
                 }
 
                 List<ProgramMultyAssetValue> multyAssetValueList = null;
