@@ -215,7 +215,9 @@ public class ContractResource extends BaseCmd {
                 gasUsed = gasUsed > MAX_GASLIMIT ? MAX_GASLIMIT : gasUsed;
                 resultMap.put("gasLimit", gasUsed);
             } else if (StringUtils.isNotBlank(errorMsg)) {
-                resultMap.put("errorMsg", errorMsg);
+                Result failed = Result.getFailed(ContractErrorCode.DATA_ERROR);
+                failed.setMsg(errorMsg);
+                return wrapperFailed(failed);
             }
 
             return success(resultMap);
@@ -649,7 +651,9 @@ public class ContractResource extends BaseCmd {
                 ProgramMethod method = contractHelper.getMethodInfoByContractAddress(chainId, prevStateRoot, methodName, methodDesc, contractAddressBytes);
                 String[][] convertArgs = null;
                 if (method != null) {
-                    convertArgs = ContractUtil.twoDimensionalArray(args, method.argsType2Array());
+                    String[] argsType2Array = method.argsType2Array();
+                    resultMap.put("argsType", argsType2Array);
+                    convertArgs = ContractUtil.twoDimensionalArray(args, argsType2Array);
                 }
 
                 List<ProgramMultyAssetValue> multyAssetValueList = null;
@@ -677,7 +681,9 @@ public class ContractResource extends BaseCmd {
                 gasUsed = gasUsed > MAX_GASLIMIT ? MAX_GASLIMIT : gasUsed;
                 resultMap.put("gasLimit", gasUsed);
             } else if (StringUtils.isNotBlank(errorMsg)) {
-                resultMap.put("errorMsg", errorMsg);
+                Result failed = Result.getFailed(ContractErrorCode.DATA_ERROR);
+                failed.setMsg(errorMsg);
+                return wrapperFailed(failed);
             }
 
             return success(resultMap);

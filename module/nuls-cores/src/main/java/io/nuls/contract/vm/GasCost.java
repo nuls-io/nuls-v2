@@ -57,4 +57,6 @@ public class GasCost {
     public static final int CREATE_PER_BYTE = 7;
     public static final int OBJ_TO_JSON_PER_CHAR = 4;
 
+    public static final int TRANSFER_P22 = 20000;//Transfer transaction
+
 }
