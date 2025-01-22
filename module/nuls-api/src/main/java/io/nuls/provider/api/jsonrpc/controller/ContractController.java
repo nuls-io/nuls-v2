@@ -912,7 +912,8 @@ public class ContractController {
             @Parameter(parameterName = "contractAddress", parameterDes = "Contract address"),
             @Parameter(parameterName = "methodName", parameterDes = "Contract method"),
             @Parameter(parameterName = "methodDesc", parameterDes = "Contract method description, if the method in the contract is not overloaded, this parameter can be empty", canNull = true),
-            @Parameter(parameterName = "args", requestType = @TypeDescriptor(value = Object[].class), parameterDes = "parameter list", canNull = true)
+            @Parameter(parameterName = "args", requestType = @TypeDescriptor(value = Object[].class), parameterDes = "parameter list", canNull = true),
+            @Parameter(parameterName = "height", parameterDes = "height")
     })
     @ResponseData(name = "Return value", description = "returnMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "result", description = "The call result of the view method")
@@ -928,7 +929,16 @@ public class ContractController {
         if (!Context.isChainExist(chainId)) {
             return RpcResult.paramError(String.format("chainId [%s] is invalid", chainId));
         }
+        long height = 0;
+        if (params.size() > 5) {
+            try {
+                height = Long.parseLong(params.get(5).toString());
+            } catch (Exception e) {
+                return RpcResult.paramError("[chainId] is invalid");
+            }
+        }
         Result<Map> mapResult = contractTools.invokeView(chainId,
+                height,
                 params.get(1),
                 params.get(2),
                 params.get(3),

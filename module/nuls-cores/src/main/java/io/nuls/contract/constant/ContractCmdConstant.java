@@ -61,6 +61,7 @@ public interface ContractCmdConstant {
     String TOKEN_TRANSFER = "sc_token_transfer";
     String TOKEN_BALANCE = "sc_token_balance";
     String INVOKE_VIEW = "sc_invoke_view";
+    String INVOKE_VIEW_BY_HEIGHT = "sc_invoke_view_by_height";
     String CONSTRUCTOR = "sc_constructor";
     String IMPUTED_CREATE_GAS = "sc_imputed_create_gas";
     String IMPUTED_CALL_GAS = "sc_imputed_call_gas";
