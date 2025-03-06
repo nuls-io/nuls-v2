@@ -1,5 +1,22 @@
 [
   {
+    "version": "22",
+    "extend": "21",
+    "validTxs": [
+      {
+        "type": "16",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "CallContractProcessorV22"
+      }
+    ],
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  },
+  {
     "version": "21",
     "extend": "20",
     "validTxs": [],

@@ -70,7 +70,7 @@ public class TxValidator {
      * fromThe address of must be the address of the initiating chain（fromDoes the asset inside exist）
      * toThe address of must be the address of the initiating chain（toDoes the asset inside exist）
      * Transaction fees
-     *
+     * <p>
      * Transfer transaction validator
      * Basic transaction verification has been verified by transaction management
      *
@@ -97,40 +97,45 @@ public class TxValidator {
 
     /**
      * Verify assets other than transaction fees fromIs the asset amount in greater than or equal totoThe asset amounts in must correspond equally
+     *
      * @return
      */
-    public Result validateCoinDataAsset(Chain chain, CoinData coinData) throws NulsException{
+    public Result validateCoinDataAsset(Chain chain, CoinData coinData) throws NulsException {
         //fromMedium assetsid-Asset ChainidAs akeyThe total amount of an asset stored
         Map<String, BigInteger> mapFrom = new HashMap<>(AccountConstant.INIT_CAPACITY_8);
         for (CoinFrom coinFrom : coinData.getFrom()) {
 //            if (!TxUtil.isChainAssetExist(chain, coinFrom)) {
-                String key = coinFrom.getAssetsChainId() + "-" + coinFrom.getAssetsId();
-                BigInteger amount = mapFrom.get(key);
-                if(null != amount) {
-                    amount = amount.add(coinFrom.getAmount());
-                }else{
-                    amount = coinFrom.getAmount();
-                }
-                mapFrom.put(key, amount);
+            String key = coinFrom.getAssetsChainId() + "-" + coinFrom.getAssetsId();
+            BigInteger amount = mapFrom.get(key);
+            if (null != amount) {
+                amount = amount.add(coinFrom.getAmount());
+            } else {
+                amount = coinFrom.getAmount();
+            }
+            mapFrom.put(key, amount);
 //            }
         }
         //toMedium assetsid-Asset ChainidAs akeyThe total amount of an asset stored
         Map<String, BigInteger> mapTo = new HashMap<>(AccountConstant.INIT_CAPACITY_8);
         for (CoinTo coinTO : coinData.getTo()) {
 //            if (!TxUtil.isChainAssetExist(chain, coinTO)) {
-                String key = coinTO.getAssetsChainId() + "-" + coinTO.getAssetsId();
-                BigInteger amount = mapTo.get(key);
-                if(null != amount) {
-                    amount = amount.add(coinTO.getAmount());
-                }else{
-                    amount = coinTO.getAmount();
-                }
-                mapTo.put(key, amount);
+            String key = coinTO.getAssetsChainId() + "-" + coinTO.getAssetsId();
+            BigInteger amount = mapTo.get(key);
+            if (null != amount) {
+                amount = amount.add(coinTO.getAmount());
+            } else {
+                amount = coinTO.getAmount();
+            }
+            mapTo.put(key, amount);
 //            }
         }
         //comparefromandtoIs the value of the same asset equal
-        for(Map.Entry<String, BigInteger> entry : mapTo.entrySet()){
-            if(entry.getValue().compareTo(mapFrom.get(entry.getKey())) == 1){
+        for (Map.Entry<String, BigInteger> entry : mapTo.entrySet()) {
+            BigInteger value = mapFrom.get(entry.getKey());
+            if (null == value) {
+                return Result.getFailed(AccountErrorCode.COINFROM_UNDERPAYMENT);
+            }
+            if (entry.getValue().compareTo(value) == 1) {
                 return Result.getFailed(AccountErrorCode.COINFROM_UNDERPAYMENT);
             }
         }
@@ -154,7 +159,7 @@ public class TxValidator {
         for (CoinFrom coinFrom : listFrom) {
             int addrChainId = AddressTool.getChainIdByAddress(coinFrom.getAddress());
             //Black hole address cannot initiate transfer
-            if(AddressTool.isBlackHoleAddress(NulsConfig.BLACK_HOLE_PUB_KEY,addrChainId,coinFrom.getAddress())){
+            if (AddressTool.isBlackHoleAddress(NulsConfig.BLACK_HOLE_PUB_KEY, addrChainId, coinFrom.getAddress())) {
                 return Result.getFailed(AccountErrorCode.ADDRESS_TRANSFER_BAN);
             }
             // SenderfromThe chain corresponding to the middle addressidMust be the initiator of the chainid
