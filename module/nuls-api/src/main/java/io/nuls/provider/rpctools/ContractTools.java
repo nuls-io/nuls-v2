@@ -256,15 +256,16 @@ public class ContractTools implements CallRpc {
         }
     }
 
-    public Result<Map> invokeView(int chainId, Object contractAddress, Object methodName, Object methodDesc, Object args) {
+    public Result<Map> invokeView(int chainId, Object height, Object contractAddress, Object methodName, Object methodDesc, Object args) {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.CHAIN_ID, chainId);
+        params.put("height", height);
         params.put("contractAddress", contractAddress);
         params.put("methodName", methodName);
         params.put("methodDesc", methodDesc);
         params.put("args", args);
         try {
-            return callRpc(ModuleE.SC.abbr, INVOKE_VIEW, params,(Function<Map<String,Object>, Result<Map>>) res->{
+            return callRpc(ModuleE.SC.abbr, INVOKE_VIEW_BY_HEIGHT, params,(Function<Map<String,Object>, Result<Map>>) res->{
                 if(res == null){
                     return null;
                 }
