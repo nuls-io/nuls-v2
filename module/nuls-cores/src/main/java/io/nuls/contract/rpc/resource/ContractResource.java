@@ -215,7 +215,9 @@ public class ContractResource extends BaseCmd {
                 gasUsed = gasUsed > MAX_GASLIMIT ? MAX_GASLIMIT : gasUsed;
                 resultMap.put("gasLimit", gasUsed);
             } else if (StringUtils.isNotBlank(errorMsg)) {
-                resultMap.put("errorMsg", errorMsg);
+                Result failed = Result.getFailed(ContractErrorCode.DATA_ERROR);
+                failed.setMsg(errorMsg);
+                return wrapperFailed(failed);
             }
 
             return success(resultMap);
@@ -649,7 +651,9 @@ public class ContractResource extends BaseCmd {
                 ProgramMethod method = contractHelper.getMethodInfoByContractAddress(chainId, prevStateRoot, methodName, methodDesc, contractAddressBytes);
                 String[][] convertArgs = null;
                 if (method != null) {
-                    convertArgs = ContractUtil.twoDimensionalArray(args, method.argsType2Array());
+                    String[] argsType2Array = method.argsType2Array();
+                    resultMap.put("argsType", argsType2Array);
+                    convertArgs = ContractUtil.twoDimensionalArray(args, argsType2Array);
                 }
 
                 List<ProgramMultyAssetValue> multyAssetValueList = null;
@@ -677,7 +681,9 @@ public class ContractResource extends BaseCmd {
                 gasUsed = gasUsed > MAX_GASLIMIT ? MAX_GASLIMIT : gasUsed;
                 resultMap.put("gasLimit", gasUsed);
             } else if (StringUtils.isNotBlank(errorMsg)) {
-                resultMap.put("errorMsg", errorMsg);
+                Result failed = Result.getFailed(ContractErrorCode.DATA_ERROR);
+                failed.setMsg(errorMsg);
+                return wrapperFailed(failed);
             }
 
             return success(resultMap);
@@ -958,8 +964,35 @@ public class ContractResource extends BaseCmd {
     }))
     public Response invokeView(Map<String, Object> params) {
         try {
+            params.put("height", 0);
+            return invokeViewByHeight(params);
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
+    @CmdAnnotation(cmd = INVOKE_VIEW_BY_HEIGHT, version = 1.0, description = "invoke view contract")
+    @Parameters(value = {
+        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid"),
+        @Parameter(parameterName = "height", parameterDes = "height"),
+        @Parameter(parameterName = "contractAddress", parameterDes = "Contract address"),
+        @Parameter(parameterName = "methodName", parameterDes = "Contract method"),
+        @Parameter(parameterName = "methodDesc", parameterDes = "Contract method description, if the method in the contract is not overloaded, this parameter can be empty", canNull = true),
+        @Parameter(parameterName = "args", requestType = @TypeDescriptor(value = Object[].class), parameterDes = "parameter list", canNull = true)
+    })
+    @ResponseData(name = "Return value", description = "returnMap", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "result", description = "The call result of the view method")
+    }))
+    public Response invokeViewByHeight(Map<String, Object> params) {
+        try {
             Integer chainId = (Integer) params.get("chainId");
             ChainManager.chainHandle(chainId);
+            long height = 0;
+            Object objectHeight = params.get("height");
+            if (objectHeight != null) {
+                height = Long.parseLong(objectHeight.toString());
+            }
             String contractAddress = (String) params.get("contractAddress");
             String methodName = (String) params.get("methodName");
             String methodDesc = (String) params.get("methodDesc");
@@ -978,7 +1011,12 @@ public class ContractResource extends BaseCmd {
             if (!ContractLedgerUtil.isExistContractAddress(chainId, contractAddressBytes)) {
                 return failed(CONTRACT_ADDRESS_NOT_EXIST);
             }
-            BlockHeader blockHeader = BlockCall.getLatestBlockHeader(chainId);
+            BlockHeader blockHeader;
+            if (height <= 0) {
+                blockHeader = BlockCall.getLatestBlockHeader(chainId);
+            } else {
+                blockHeader = BlockCall.getBlockHeader(chainId, height);
+            }
             // Current block state root
             byte[] prevStateRoot = ContractUtil.getStateRoot(blockHeader);
 

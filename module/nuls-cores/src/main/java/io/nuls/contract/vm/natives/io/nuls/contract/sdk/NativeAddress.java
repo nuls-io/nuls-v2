@@ -233,7 +233,13 @@ public class NativeAddress {
         }
         checkBalance(from, assetChainId, assetId, value, frame);
 
-        frame.vm.addGasUsed(GasCost.TRANSFER);
+        int currentChainId = frame.vm.getProgramExecutor().getCurrentChainId();
+        if (ProtocolGroupManager.getCurrentVersion(currentChainId) >= ContractContext.PROTOCOL_22) {
+            frame.vm.addGasUsed(GasCost.TRANSFER_P22);
+        } else {
+            frame.vm.addGasUsed(GasCost.TRANSFER);
+        }
+
 
         boolean mainAsset = assetChainId == LOCAL_CHAIN_ID && assetId == LOCAL_MAIN_ASSET_ID;
         if (frame.heap.existContract(to)) {

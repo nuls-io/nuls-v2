@@ -29,6 +29,7 @@ import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.callable.ContractTxCallableV14;
+import io.nuls.contract.callable.ContractTxCallableV22;
 import io.nuls.contract.callable.ContractTxCallableV8;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.enums.CmdRegisterMode;
@@ -300,6 +301,42 @@ public class ContractServiceImpl implements ContractService {
         }
     }
 
+    @Override
+    public Result invokeContractOneByOneV22(int chainId, ContractTempTransaction tx) {
+        try {
+            Log.info("[Invoke Contract] TxType is [{}], hash is [{}]", tx.getType(), tx.getHash().toString());
+            tx.setChainId(chainId);
+            ContractWrapperTransaction wrapperTx = ContractUtil.parseContractTransaction(tx, chainManager);
+            if (wrapperTx == null) {
+                return getSuccess();
+            }
+            Chain chain = contractHelper.getChain(chainId);
+            BatchInfoV8 batchInfo = chain.getBatchInfoV8();
+            wrapperTx.setOrder(batchInfo.getAndIncreaseTxCounter());
+            // Verify contract transactions
+            Result validResult = this.validContractTx(chainId, tx);
+            if (validResult.isFailed()) {
+                return validResult;
+            }
+            String preStateRoot = batchInfo.getPreStateRoot();
+            ProgramExecutor batchExecutor = batchInfo.getBatchExecutor();
+            // Execution of contract
+            Result result = callTxV22(chainId, batchExecutor, wrapperTx, preStateRoot, batchInfo);
+            if (result.isSuccess()) {
+                Map<String, Object> _result = new HashMap<>();
+                Map<String, Object> map = (Map<String, Object>) result.getData();
+                _result.put("success", map.get("success"));
+                _result.put("gasUsed", map.get("gasUsed"));
+                _result.put("txList", map.get("txList"));
+                return result.setData(_result);
+            }
+            return result;
+        } catch (NulsException e) {
+            Log.error(e);
+            return Result.getFailed(e.getErrorCode() == null ? FAILED : e.getErrorCode());
+        }
+    }
+
     protected Result callTx(int chainId, ProgramExecutor batchExecutor, ContractWrapperTransaction tx, String preStateRoot, BatchInfoV8 batchInfo) {
         try {
             ContractData contractData = tx.getContractData();
@@ -332,6 +369,28 @@ public class ContractServiceImpl implements ContractService {
             long blockTime = currentBlockHeader.getTime();
             long lastestHeight = currentBlockHeader.getHeight() - 1;
             ContractTxCallableV14 txCallable = new ContractTxCallableV14(chainId, blockType, blockTime, batchExecutor, contract, tx, lastestHeight, preStateRoot);
+            ContractResult contractResult = txCallable.call();
+            batchInfo.getContractResultMap().put(tx.getHash().toString(), contractResult);
+            // Extract the result data that needs to be returned
+            Map<String, Object> result = this.extractDataFromContractResult(contractResult);
+            batchInfo.getOfflineTxHashList().addAll((List<byte[]>)result.get("txHashList"));
+            return getSuccess().setData(result);
+        } catch (Exception e) {
+            Log.error(e);
+            return getFailed();
+        }
+    }
+
+    protected Result callTxV22(int chainId, ProgramExecutor batchExecutor, ContractWrapperTransaction tx, String preStateRoot, BatchInfoV8 batchInfo) {
+        try {
+            ContractData contractData = tx.getContractData();
+            Integer blockType = Chain.currentThreadBlockType();
+            byte[] contractAddressBytes = contractData.getContractAddress();
+            String contract = AddressTool.getStringAddressByBytes(contractAddressBytes);
+            BlockHeader currentBlockHeader = batchInfo.getCurrentBlockHeader();
+            long blockTime = currentBlockHeader.getTime();
+            long lastestHeight = currentBlockHeader.getHeight() - 1;
+            ContractTxCallableV22 txCallable = new ContractTxCallableV22(chainId, blockType, blockTime, batchExecutor, contract, tx, lastestHeight, preStateRoot);
             ContractResult contractResult = txCallable.call();
             batchInfo.getContractResultMap().put(tx.getHash().toString(), contractResult);
             // Extract the result data that needs to be returned
