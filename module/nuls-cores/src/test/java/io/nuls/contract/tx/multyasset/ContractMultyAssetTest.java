@@ -140,7 +140,7 @@ public class ContractMultyAssetTest extends BaseQuery {
     @Test
     public void otherAssetTest() throws Exception {
         // Transfer in 3.2
-        this.callOfDesignatedAssetByParams(contractAddress, "_payableMultyAsset", "3.2", null, 2, 2);
+        this.callOfDesignatedAssetByParams(contractAddress, "_payableMultyAsset", "3.2", null, 8, 2, 2);
         // Transfer out 1.1
         Object[] args = new Object[]{toAddress17, new BigDecimal("1.1").multiply(BigDecimal.TEN.pow(8)).toBigInteger(), 2, 2};
         this.callByParams("transferDesignatedAsset", "0", args);
@@ -198,7 +198,7 @@ public class ContractMultyAssetTest extends BaseQuery {
         String methodName = "callWithReturnValueOfOtherContractOfDesignatedAsset";
 
         // Transfer in 6.6 2-2 (External contracts)
-        this.callOfDesignatedAssetByParams(contractAddress,"_payableMultyAsset", "6.6", null, 2, 2);
+        this.callOfDesignatedAssetByParams(contractAddress,"_payableMultyAsset", "6.6", null, 8, 2, 2);
         // Transfer in 6.6 2-2 (Internal contract)
         this.innerCallOfDesignatedAssetByParams(methodName, otherContract, "_payableMultyAsset", null, "6.6", 2, 2);
 
@@ -348,7 +348,14 @@ public class ContractMultyAssetTest extends BaseQuery {
     @Test
     public void sendPayableMultyAssetTest() throws Exception {
         // Transfer in
-        this.callOfDesignatedAssetByParams("tNULSeBaN7mVkoh9ArP6RGvwgs7wmMpRsD5tuM", "_payableMultyAsset", "1000000", null, 2, 2);
+        this.callOfDesignatedAssetByParams("tNULSeBaN2dmNYedZAVPkyKPRYapmgEtw4hJbg", "_payableMultyAsset", "200000", null, 8, 2, 2);
+    }
+
+    @Test
+    public void pocmDepositMultyAssetTest() throws Exception {
+        sender = toAddress0;
+        // Transfer in
+        this.callOfDesignatedAssetByParams("tNULSeBaMzvhVo4x4yFfSQ6BrueTY3X7ice2KU", "depositForOwn", "2.1", null, 18, 2, 3);
     }
 
     protected void callTxOffline(String feeAccount, String feeAccountPri,
@@ -591,8 +598,8 @@ public class ContractMultyAssetTest extends BaseQuery {
         Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(waitGetContractTx(hash)));
     }
 
-    protected void callOfDesignatedAssetByParams(String contractAddress, String methodName, String valueStr, Object[] args, int assetChainId, int assetId) throws Exception {
-        BigInteger value = new BigDecimal(valueStr).multiply(BigDecimal.TEN.pow(8)).toBigInteger();
+    protected void callOfDesignatedAssetByParams(String contractAddress, String methodName, String valueStr, Object[] args, int decimals, int assetChainId, int assetId) throws Exception {
+        BigInteger value = new BigDecimal(valueStr).multiply(BigDecimal.TEN.pow(decimals)).toBigInteger();
         Map params = this.makeCallParams(sender, null, gasLimit, gasPrice, contractAddress, methodName, null, "", new ProgramMultyAssetValue[]{new ProgramMultyAssetValue(value, assetChainId, assetId)}, args);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));

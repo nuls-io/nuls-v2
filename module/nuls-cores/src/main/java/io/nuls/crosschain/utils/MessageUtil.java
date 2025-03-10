@@ -629,6 +629,10 @@ public class MessageUtil {
         List<P2PHKSignature> signatureList = signature.getP2PHKSignatures();
         if (signatureList == null || signatureList.size() < minPassCount) {
             chain.getLogger().error("The number of cross chain transaction signatures is less than the minimum number of Byzantine verifications,signCount{},minPassCount{}", signatureList == null ? 0 : signatureList.size(), minPassCount);
+            try {
+                chain.getLogger().error(HexUtil.encode(ctx.serialize()));
+            } catch (IOException e) {
+            }
             return false;
         }
         byte[] hashByte = ctx.getHash().getBytes();

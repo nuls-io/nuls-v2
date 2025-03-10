@@ -77,6 +77,7 @@ public interface CommandConstant {
     String CONTRACT_RESULT_LIST = "sc_contract_result_list";
     //Call the contract not on chain method
     String INVOKE_VIEW = "sc_invoke_view";
+    String INVOKE_VIEW_BY_HEIGHT = "sc_invoke_view_by_height";
     //queryNRC20-TOKENbalance
     String TOKEN_BALANCE = "sc_token_balance";
     //Query registered cross chain information
