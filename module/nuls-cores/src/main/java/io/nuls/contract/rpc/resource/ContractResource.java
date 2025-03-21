@@ -60,6 +60,7 @@ import io.nuls.core.crypto.KeccakHash;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.FormatValidUtils;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.parse.SerializeUtils;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.info.Constants;
@@ -69,6 +70,7 @@ import io.nuls.core.rpc.model.message.Response;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static io.nuls.contract.constant.ContractCmdConstant.*;
 import static io.nuls.contract.constant.ContractConstant.*;
@@ -1665,6 +1667,59 @@ public class ContractResource extends BaseCmd {
             String address = (String) params.get("address");
             Map<String, String> res = contractHelper.getAssetsMapAboutContractRewardLogByConsensus(chainId, AddressTool.getAddress(address));
             return success(res);
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
+    @CmdAnnotation(cmd = CONTRACT_TX_EVENTS, version = 1.0, description = "contract tx events")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid"),
+            @Parameter(parameterName = "hash", parameterDes = "transactionhash")
+    })
+    @ResponseData(description = "Return contract transaction events", responseType = @TypeDescriptor(value = List.class))
+    public Response contractTxEvents(Map<String, Object> params) {
+        try {
+            Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
+            String hash = (String) params.get("hash");
+
+            if (StringUtils.isBlank(hash)) {
+                return failed(NULL_PARAMETER);
+            }
+            if (!NulsHash.validHash(hash)) {
+                return failed(PARAMETER_ERROR);
+            }
+
+            NulsHash txHash = NulsHash.fromHex(hash);
+            Transaction tx = TransactionCall.getConfirmedTx(chainId, hash);
+            if (tx == null) {
+                return failed(TX_NOT_EXIST);
+            } else {
+                if (!ContractUtil.isGasCostContractTransaction(tx)) {
+                    return failed(NON_CONTRACTUAL_TRANSACTION);
+                }
+            }
+
+            ContractResult contractExecuteResult = contractService.getContractExecuteResult(chainId, txHash);
+            if (contractExecuteResult == null) {
+                return success();
+            }
+
+            List<String> events = contractExecuteResult.getEvents();
+            if (events == null || events.isEmpty()) {
+                return success();
+            }
+            List<Map<String, Object>> results = events.stream().map(e -> {
+                try {
+                    return JSONUtils.json2map(e);
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }).collect(Collectors.toList());
+
+            return success(results);
         } catch (Exception e) {
             Log.error(e);
             return failed(e.getMessage());
