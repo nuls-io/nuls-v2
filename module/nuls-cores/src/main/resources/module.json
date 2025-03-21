@@ -67,6 +67,7 @@
   "depositMax": 20000000000000,
   "commissionMin": 20000000000000,
   "commissionMax": 50000000000000,
+  "commissionMaxV23": 200000000000000,
   "entrusterDepositMin": 200000000000,
   "blockReward": 0,
   "maxAgentCountOfAddress": "1",
