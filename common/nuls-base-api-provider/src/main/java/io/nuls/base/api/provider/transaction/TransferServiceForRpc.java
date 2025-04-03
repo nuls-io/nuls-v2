@@ -151,7 +151,13 @@ public class TransferServiceForRpc extends BaseRpcService implements TransferSer
             }).collect(Collectors.toList()));
             res.setTo(transaction.getCoinDataInstance().getTo().stream().map((to)->{
                 TransactionCoinData toData = this.buildTransactionCoinData(to);
-                toData.setLockTime(to.getLockTime());
+                if(to.getLockTime() == -1){
+                    toData.setLockTime("No fixed time");
+                }else if(to.getLockTime() == 0){
+                    toData.setLockTime("No lock");
+                }else {
+                    toData.setLockTime(DateUtils.timeStamp2DateStr(to.getLockTime()*1000));
+                }
                 return toData;
             }).collect(Collectors.toList()));
             return success(res);

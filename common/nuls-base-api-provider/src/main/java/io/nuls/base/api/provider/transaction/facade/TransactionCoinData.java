@@ -34,7 +34,7 @@ public class TransactionCoinData {
      */
     private String nonce;
 
-    private long lockTime;
+    private String lockTime;
 
     public String getAddress() {
         return address;
@@ -76,11 +76,11 @@ public class TransactionCoinData {
         this.nonce = nonce;
     }
 
-    public long getLockTime() {
+    public String getLockTime() {
         return lockTime;
     }
 
-    public void setLockTime(long lockTime) {
+    public void setLockTime(String lockTime) {
         this.lockTime = lockTime;
     }
 
