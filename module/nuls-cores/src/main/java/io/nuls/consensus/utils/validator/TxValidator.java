@@ -34,6 +34,8 @@ import io.nuls.consensus.utils.manager.AgentManager;
 import io.nuls.consensus.utils.manager.ChainManager;
 import io.nuls.consensus.utils.manager.CoinDataManager;
 import io.nuls.consensus.utils.manager.ConsensusManager;
+import io.nuls.protocol.manager.ContextManager;
+import io.nuls.protocol.model.ProtocolContext;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -482,13 +484,18 @@ public class TxValidator {
         if (total.compareTo(chain.getConfig().getEntrusterDepositMin()) < 0) {
             throw new NulsException(ConsensusErrorCode.DEPOSIT_NOT_ENOUGH);
         }
-        if (total.compareTo(chain.getConfig().getCommissionMax()) > 0) {
+        ProtocolContext context = ContextManager.getContext(chain.getConfig().getChainId());
+        BigInteger commissionMax = chain.getConfig().getCommissionMax();
+        if (context != null && context.getCurrentProtocolVersion() != null && context.getCurrentProtocolVersion().getVersion() >= 23) {
+            commissionMax = chain.getConfig().getCommissionMaxV23();
+        }
+        if (total.compareTo(commissionMax) > 0) {
             throw new NulsException(ConsensusErrorCode.DEPOSIT_OVER_AMOUNT);
         }
         for (DepositPo cd : poList) {
             total = total.add(cd.getDeposit());
         }
-        if (total.compareTo(chain.getConfig().getCommissionMax()) > 0) {
+        if (total.compareTo(commissionMax) > 0) {
             throw new NulsException(ConsensusErrorCode.DEPOSIT_OVER_AMOUNT);
         }
         return true;

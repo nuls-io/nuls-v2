@@ -81,6 +81,7 @@ public class ContractDepositProcessor implements TransactionProcessor {
                 BigInteger totalDeposit = BigInteger.ZERO;
                 if (agentDepositTotalMap.containsKey(agentHash)) {
                     totalDeposit = agentDepositTotalMap.get(agentHash).add(deposit.getDeposit());
+                    水电费水电费
                     if (totalDeposit.compareTo(chain.getConfig().getCommissionMax()) > 0) {
                         invalidTxList.add(contractDepositTx);
                         chain.getLogger().info("Node delegation amount exceeds maximum delegation amount");

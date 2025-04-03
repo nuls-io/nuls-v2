@@ -92,6 +92,7 @@ public class DepositProcessor implements TransactionProcessor {
                 BigInteger totalDeposit = BigInteger.ZERO;
                 if (agentDepositTotalMap.containsKey(agentHash)) {
                     totalDeposit = agentDepositTotalMap.get(agentHash).add(deposit.getDeposit());
+                    sdfsdf
                     if (totalDeposit.compareTo(chain.getConfig().getCommissionMax()) > 0) {
                         chain.getLogger().info("Node delegation amount exceeds maximum delegation amount");
                         throw new NulsException(ConsensusErrorCode.DEPOSIT_OVER_AMOUNT);
