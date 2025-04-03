@@ -43,6 +43,15 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class SchedulerManager {
 
+    /**
+     * Creates transaction processing schedulers
+     * This method initializes and starts multiple threads for processing different types of transactions
+     * It includes the creation of online transaction processing threads, orphan transaction processing schedulers, and unconfirmed transaction cleanup mechanism schedulers
+     * The purpose is to ensure that transactions are processed in a timely and effective manner, improving the efficiency and stability of the system
+     *
+     * @param chain The chain object, representing the specific blockchain network in which the transactions are processed
+     * @return Returns a boolean value indicating whether the transaction processing scheduler was successfully created and started
+     */
     public boolean createTransactionScheduler(Chain chain) {
         //New online transactions
         ThreadUtils.createAndRunThread(TxConstant.TX_THREAD, new NetTxProcessTask(chain));
