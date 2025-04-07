@@ -11,7 +11,7 @@ import java.io.IOException;
 /**
  * After processing transactions from other nodes, forward them again
  * Forward transactions from other nodes
- * Forwarding transactionshash
+ * Forwarding transactions hash
  * @author: Charlie
  * @date: 2019/04/17
  */
