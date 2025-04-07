@@ -31,6 +31,7 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.Address;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.base.data.NulsHash;
+import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
 import io.nuls.consensus.model.bo.Chain;
@@ -291,9 +292,8 @@ public class Agent extends BaseNulsData {
      * Even if the remaining amount of the node can be delegated
      **/
     public BigInteger getAvailableDepositAmount(Chain chain) {
-        ProtocolContext context = ContextManager.getContext(chain.getConfig().getChainId());
         BigInteger commissionMax = chain.getConfig().getCommissionMax();
-        if (context != null && context.getCurrentProtocolVersion() != null && context.getCurrentProtocolVersion().getVersion() >= 23) {
+        if (ProtocolGroupManager.getCurrentVersion(chain.getConfig().getChainId()) >= 23) {
             commissionMax = chain.getConfig().getCommissionMaxV23();
         }
         return commissionMax.subtract(this.getTotalDeposit());

@@ -6,6 +6,7 @@ import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
+import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.base.signture.MultiSignTxSignature;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.TransactionSignature;
@@ -484,9 +485,8 @@ public class TxValidator {
         if (total.compareTo(chain.getConfig().getEntrusterDepositMin()) < 0) {
             throw new NulsException(ConsensusErrorCode.DEPOSIT_NOT_ENOUGH);
         }
-        ProtocolContext context = ContextManager.getContext(chain.getConfig().getChainId());
         BigInteger commissionMax = chain.getConfig().getCommissionMax();
-        if (context != null && context.getCurrentProtocolVersion() != null && context.getCurrentProtocolVersion().getVersion() >= 23) {
+        if (ProtocolGroupManager.getCurrentVersion(chain.getConfig().getChainId()) >= 23) {
             commissionMax = chain.getConfig().getCommissionMaxV23();
         }
         if (total.compareTo(commissionMax) > 0) {

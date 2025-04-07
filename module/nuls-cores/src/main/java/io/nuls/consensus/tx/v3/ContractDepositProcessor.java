@@ -1,6 +1,7 @@
 package io.nuls.consensus.tx.v3;
 
 import io.nuls.base.data.*;
+import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.base.protocol.TransactionProcessor;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
@@ -87,8 +88,11 @@ public class ContractDepositProcessor implements TransactionProcessor {
                 //Verify if the delegated amount exceeds the maximum delegated amount of the node（Conflict detection）
                 if (agentDepositTotalMap.containsKey(agentHash)) {
                     totalDeposit = agentDepositTotalMap.get(agentHash).add(deposit.getDeposit());
-                    sdfsdf
-                    if (totalDeposit.compareTo(chain.getConfig().getCommissionMax()) > 0) {
+                    BigInteger commissionMax = chain.getConfig().getCommissionMax();;
+                    if (ProtocolGroupManager.getCurrentVersion(chainId) >= 23) {
+                        commissionMax = chain.getConfig().getCommissionMaxV23();;
+                    }
+                    if (totalDeposit.compareTo(commissionMax) > 0) {
                         invalidTxList.add(contractDepositTx);
                         chain.getLogger().info("Node delegation amount exceeds maximum delegation amount");
                         throw new NulsException(ConsensusErrorCode.DEPOSIT_OVER_AMOUNT);
