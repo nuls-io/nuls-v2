@@ -62,6 +62,9 @@ public class ChainManager {
 
     private Map<Integer, Chain> chainMap = new ConcurrentHashMap<>();
 
+    public ChainManager( ) {
+    }
+
     public ChainManager(SchedulerManager schedulerManager, NulsCoresConfig txConfig) {
         this.schedulerManager = schedulerManager;
         this.txConfig = txConfig;
