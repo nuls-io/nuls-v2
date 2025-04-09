@@ -2,6 +2,7 @@ package io.nuls.consensus.tx.v4;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
+import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.base.protocol.TransactionProcessor;
 import io.nuls.base.signture.MultiSignTxSignature;
 import io.nuls.base.signture.TransactionSignature;
@@ -92,7 +93,11 @@ public class DepositProcessor implements TransactionProcessor {
                 BigInteger totalDeposit = BigInteger.ZERO;
                 if (agentDepositTotalMap.containsKey(agentHash)) {
                     totalDeposit = agentDepositTotalMap.get(agentHash).add(deposit.getDeposit());
-                    if (totalDeposit.compareTo(chain.getConfig().getCommissionMax()) > 0) {
+                    BigInteger commissionMax = chain.getConfig().getCommissionMax();;
+                    if (ProtocolGroupManager.getCurrentVersion(chainId) >= 23) {
+                        commissionMax = chain.getConfig().getCommissionMaxV23();;
+                    }
+                    if (totalDeposit.compareTo(commissionMax) > 0) {
                         chain.getLogger().info("Node delegation amount exceeds maximum delegation amount");
                         throw new NulsException(ConsensusErrorCode.DEPOSIT_OVER_AMOUNT);
                     } else {

@@ -139,6 +139,17 @@ public class PackablePool {
         }
     }
 
+    /**
+     * Removes the confirmed transactions from the packable transaction map.
+     *
+     * This method iterates through a list of transaction hashes that have been confirmed,
+     * wraps each hash into a ByteArrayWrapper object, and removes the corresponding transaction
+     * from the packable transaction map of the given chain. This ensures that confirmed
+     * transactions are no longer considered for packaging.
+     *
+     * @param chain The blockchain instance containing the packable transaction map.
+     * @param txHashs A list of byte arrays representing the hashes of confirmed transactions to be removed.
+     */
     public void clearConfirmedTxs(Chain chain, List<byte[]> txHashs) {
         Map<ByteArrayWrapper, Transaction> map = chain.getPackableTxMap();
         for (byte[] hash : txHashs) {
@@ -147,6 +158,17 @@ public class PackablePool {
         }
     }
 
+    /**
+     * Removes an invalid transaction from the packable transaction map.
+     *
+     * This method retrieves the packable transaction map from the given chain object,
+     * wraps the transaction hash into a ByteArrayWrapper, and removes the corresponding
+     * transaction from the map. This ensures that invalid transactions are no longer
+     * considered for packaging.
+     *
+     * @param chain The blockchain instance containing the packable transaction map.
+     * @param tx The transaction to be removed from the packable transaction map.
+     */
     public void removeInvalidTxFromMap(Chain chain, Transaction tx) {
         Map<ByteArrayWrapper, Transaction> map = chain.getPackableTxMap();
         ByteArrayWrapper wrapper = new ByteArrayWrapper(tx.getHash().getBytes());

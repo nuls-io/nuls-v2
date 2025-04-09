@@ -1088,6 +1088,38 @@ public class ContractController {
         return ResultUtil.getJsonRpcResult(result);
     }
 
+    @RpcMethod("contractTxEvents")
+    @ApiOperation(description = "contractTxEvents", order = 424)
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid"),
+            @Parameter(parameterName = "hash", parameterDes = "transactionhash")
+    })
+    @ResponseData(description = "Return contract transaction events", responseType = @TypeDescriptor(value = List.class))
+    public RpcResult contractTxEvents(List<Object> params) {
+        VerifyUtils.verifyParams(params, 2);
+        int chainId;
+        String hash;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is invalid");
+        }
+        try {
+            hash = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[hash] is invalid");
+        }
+        if (!Context.isChainExist(chainId)) {
+            return RpcResult.paramError(String.format("chainId [%s] is invalid", chainId));
+        }
+        Map<String, Object> params1 = new HashMap<>(8);
+        params1.put("chainId", chainId);
+        params1.put("hash", hash);
+
+        Result result = contractTools.commonRequest("sc_contract_tx_events", params1);
+        return ResultUtil.getJsonRpcResult(result);
+    }
+
 
     @RpcMethod("contractCreateOffline")
     @ApiOperation(description = "off-line - Publish contract transactions", order = 450)
