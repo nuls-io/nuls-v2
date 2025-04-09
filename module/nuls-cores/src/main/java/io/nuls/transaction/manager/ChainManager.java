@@ -24,7 +24,6 @@
  */
 package io.nuls.transaction.manager;
 
-import io.nuls.base.protocol.ProtocolLoader;
 import io.nuls.common.CommonContext;
 import io.nuls.common.ConfigBean;
 import io.nuls.core.core.annotation.Autowired;
@@ -63,9 +62,19 @@ public class ChainManager {
 
     private Map<Integer, Chain> chainMap = new ConcurrentHashMap<>();
 
+    public ChainManager( ) {
+    }
+
+    public ChainManager(SchedulerManager schedulerManager, NulsCoresConfig txConfig) {
+        this.schedulerManager = schedulerManager;
+        this.txConfig = txConfig;
+    }
+
+
     /**
-     * Initialize and start the chain
-     * Initialize and start the chain
+     * Initializes the chain system by creating and configuring chain instances based on the provided configuration.
+     *
+     * @throws Exception if an error occurs during the initialization process
      */
     public void initChain() throws Exception {
         Map<Integer, ConfigBean> configMap = configChain();
@@ -84,9 +93,14 @@ public class ChainManager {
         }
     }
 
+
     /**
-     * Initialize and start the chain
-     * Initialize and start the chain
+     * Runs the initialization and scheduling process for all chains.
+     * This method iterates through the chain mapping and performs cache initialization,
+     * scheduler creation, and chain state updates for each chain.
+     *
+     * @throws Exception If an error occurs during the initialization or scheduling process of a chain,
+     *                   an exception may be thrown.
      */
     public void runChain() throws Exception {
 

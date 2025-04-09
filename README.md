@@ -40,12 +40,12 @@ Note: The command will automatically end when all modules are started.
 
 ## Executables
 
-| Command      | Command                                                      |
-| ------------ | ------------------------------------------------------------ |
-| start        | Start the program and start all NULS modules one after another. |
-| shutdown     | Stop the program and stop all NULS modules one after another. |
+| Command      | Command                                                                                               |
+|--------------|-------------------------------------------------------------------------------------------------------|
+| start        | Start the program and start all NULS modules one after another.                                       |
+| shutdown     | Stop the program and stop all NULS modules one after another.                                         |
 | check-status | Check the running status of all modules; stop screen output when all modules are successfully started |
-|              |                                                              |
+|              |                                                                                                       |
 
 ## Docker Quick Start
 
@@ -82,7 +82,7 @@ NULS — Making It Easier To Innovate
 
 ## Introduction
 
-NULS is a blockchain infrastructure that provides customizable services and is also a global open-source community blockchain project. NULS adopts micro-services to achieve a highly modular underlying architecture, using smart contracts and cross-chain technologies, combined with the ability of ChainBox to quickly build chains, reduce development costs, and accelerate blockchain business application landing.
+NULS is a blockchain infrastructure that provides customizable services and is also a global open-source community blockchain project. NULS adopts microservices to achieve a highly modular underlying architecture, using smart contracts and cross-chain technologies, combined with the ability of ChainBox to quickly build chains, reduce development costs, and accelerate blockchain business application landing.
 
 ## Contribute to NULS
 We are committed to making blockchain technology simpler and our slogan is "NULS Making It Easier to Innovate".
@@ -102,7 +102,7 @@ NULS Brand Assets: https://nuls.io/brand-assets
 ## License
 
 NULS is released under the [MIT](http://opensource.org/licenses/MIT) license.
-Modules added in the future may be release under different license, will specified in the module library path.
+Modules added in the future may be release under different license, will specify in the module library path.
 
 ## Community
 
