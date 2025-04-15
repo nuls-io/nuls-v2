@@ -78,4 +78,6 @@ public interface ContractCmdConstant {
     String CONTRACT_CODE = "sc_contract_code";
     String COMPUTE_ADDRESS = "sc_compute_address";
     String CONTRACT_REWARD_LOG_BY_CONSENSUS = "sc_contract_reward_log_by_consensus";
+
+    String CONTRACT_TX_EVENTS = "sc_contract_tx_events";
 }

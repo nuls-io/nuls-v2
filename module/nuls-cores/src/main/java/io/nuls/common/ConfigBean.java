@@ -237,6 +237,7 @@ public class ConfigBean {
      * Maximum Node Delegation Amount
      */
     private BigInteger commissionMax;
+    private BigInteger commissionMaxV23;
 
     /**
      * Minimum amount entrusted
@@ -729,6 +730,14 @@ public class ConfigBean {
 
     public void setCommissionMax(BigInteger commissionMax) {
         this.commissionMax = commissionMax;
+    }
+
+    public BigInteger getCommissionMaxV23() {
+        return commissionMaxV23;
+    }
+
+    public void setCommissionMaxV23(BigInteger commissionMaxV23) {
+        this.commissionMaxV23 = commissionMaxV23;
     }
 
     public BigInteger getEntrusterDepositMin() {

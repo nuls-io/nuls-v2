@@ -31,11 +31,14 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.Address;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.base.data.NulsHash;
+import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
 import io.nuls.consensus.model.bo.Chain;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
+import io.nuls.protocol.manager.ContextManager;
+import io.nuls.protocol.model.ProtocolContext;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -53,107 +56,107 @@ import java.util.Set;
 public class Agent extends BaseNulsData {
 
     /**
-    * Node address
-    * agent address
-    **/
+     * Node address
+     * agent address
+     **/
     @ApiModelProperty(description = "Node address")
     private byte[] agentAddress;
 
     /**
-    * Packaging address
-    * packing address
-    **/
+     * Packaging address
+     * packing address
+     **/
     @ApiModelProperty(description = "Block address")
     private byte[] packingAddress;
 
     /**
-    * Reward Address
-    * reward address
-    * */
+     * Reward Address
+     * reward address
+     */
     @ApiModelProperty(description = "Reward Address")
     private byte[] rewardAddress;
 
     /**
-    * Margin
-    * deposit
-    * */
+     * Margin
+     * deposit
+     */
     @ApiModelProperty(description = "Margin")
     private BigInteger deposit;
 
     /**
-    * commission rate
-    * commission rate
-    * */
+     * commission rate
+     * commission rate
+     */
     @ApiModelProperty(description = "commission rate")
     private byte commissionRate;
 
     /**
-    * Creation time
-    * create time
-    **/
+     * Creation time
+     * create time
+     **/
     @ApiModelProperty(description = "Creation time")
     private transient long time;
 
     /**
-    * Block height
-    * block height
-    * */
+     * Block height
+     * block height
+     */
     @ApiModelProperty(description = "Block height")
     private transient long blockHeight = -1L;
 
     /**
-    * The height of the block where the node is deregistered is located
-    * Block height where the node logs out
-    * */
+     * The height of the block where the node is deregistered is located
+     * Block height where the node logs out
+     */
     @ApiModelProperty(description = "Node deregistration height")
     private transient long delHeight = -1L;
 
     /**
-    *0:Pending consensus unConsensus, 1:In consensus consensus
-    * */
+     * 0:Pending consensus unConsensus, 1:In consensus consensus
+     */
     @ApiModelProperty(description = "Status,0:Pending consensus unConsensus, 1:In consensus consensus")
     private transient int status;
 
     /**
-    * Reputation value
-    * credit value
-    * */
+     * Reputation value
+     * credit value
+     */
     @ApiModelProperty(description = "Reputation value")
     private transient double creditVal;
 
     /**
-     *  Total entrusted amount
-     *Total amount entrusted
-     * */
+     * Total entrusted amount
+     * Total amount entrusted
+     */
     @ApiModelProperty(description = "Total entrusted amount of nodes")
     private transient BigInteger totalDeposit = BigInteger.ZERO;
 
     /**
      * Total commission amount, used for page display（Due to2.4.1Smart contractsBUGCausing temporary addition of fields, which need to be deleted in subsequent versions）
-     *
-     * */
+     */
     private transient BigInteger reTotalDeposit = BigInteger.ZERO;
 
     /**
      * transactionHASH
      * transaction hash
-     * */
+     */
     @ApiModelProperty(description = "Create transactions for this nodeHASH")
     private transient NulsHash txHash;
 
     /**
-    * Number of participants in consensus
-    * Participation in consensus
-    * */
+     * Number of participants in consensus
+     * Participation in consensus
+     */
     @ApiModelProperty(description = "Number of participants in consensus")
     private transient int memberCount;
 
     /**
-    *Aliases are not serialized
-    * Aliases not serialized
-    * */
+     * Aliases are not serialized
+     * Aliases not serialized
+     */
     @ApiModelProperty(description = "net aliases")
     private transient String alais;
+
     @Override
     public int size() {
         int size = 0;
@@ -224,7 +227,7 @@ public class Agent extends BaseNulsData {
         return creditVal < 0d ? 0D : this.creditVal;
     }
 
-    public double getRealCreditVal(){
+    public double getRealCreditVal() {
         return this.creditVal;
     }
 
@@ -285,20 +288,24 @@ public class Agent extends BaseNulsData {
     }
 
     /**
-    * Even if there is a remaining commission amount for the node
-    * Even if the remaining amount of the node can be delegated
-    **/
+     * Even if there is a remaining commission amount for the node
+     * Even if the remaining amount of the node can be delegated
+     **/
     public BigInteger getAvailableDepositAmount(Chain chain) {
-        return chain.getConfig().getCommissionMax().subtract(this.getTotalDeposit());
+        BigInteger commissionMax = chain.getConfig().getCommissionMax();
+        if (ProtocolGroupManager.getCurrentVersion(chain.getConfig().getChainId()) >= 23) {
+            commissionMax = chain.getConfig().getCommissionMaxV23();
+        }
+        return commissionMax.subtract(this.getTotalDeposit());
     }
 
     /**
-    * Determine whether the node can be delegated
-    * Determine whether the node can be delegated
-    * */
+     * Determine whether the node can be delegated
+     * Determine whether the node can be delegated
+     */
     public boolean canDeposit(Chain chain) {
         int flag = getAvailableDepositAmount(chain).compareTo(chain.getConfig().getCommissionMin());
-        if(flag >= 1){
+        if (flag >= 1) {
             return true;
         }
         return false;
