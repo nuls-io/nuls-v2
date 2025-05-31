@@ -137,18 +137,22 @@ public class RocksDbDataSource implements DbSource<byte[]> {
              * Optimize reading performance plan
              */
             options.setAllowMmapReads(true);
-            options.setCompressionType(CompressionType.NO_COMPRESSION);
+            options.setCompressionType(CompressionType.LZ4_COMPRESSION);
             options.setMaxOpenFiles(-1);
 
             BlockBasedTableConfig tableOption = new BlockBasedTableConfig();
-            tableOption.setBlockCache(new LRUCache(32 * 1024 * 1024));
-            tableOption.setCacheIndexAndFilterBlocks(true);
-            tableOption.setPinL0FilterAndIndexBlocksInCache(true);
-            tableOption.setBlockRestartInterval(4);
+            tableOption.setBlockCacheSize(1024 * 1024 * 1024); // 1024MB
+            tableOption.setNoBlockCache(false);
+
+            tableOption.setBlockRestartInterval(16);
             tableOption.setFilterPolicy(new BloomFilter(10, true));
             options.setTableFormatConfig(tableOption);
 
-            options.setNewTableReaderForCompactionInputs(true);
+            options.setMaxBackgroundCompactions(16);
+            //For compressed input, openRocksDBPre reading of layers
+            options.setCompactionReadaheadSize(128 * SizeUnit.KB);
+
+//            options.setNewTableReaderForCompactionInputs(true);
             //For compressed input, openRocksDBPre reading of layers
             options.setCompactionReadaheadSize(128 * SizeUnit.KB);
             return RocksDB.open(options, dataPath);

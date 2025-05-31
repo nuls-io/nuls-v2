@@ -469,7 +469,7 @@ public class RocksDBManager {
         }
         try {
             RocksDB db = TABLES.get(table);
-            boolean rs = db.keyMayExist(key, new StringBuilder());
+            boolean rs = db.keyMayExist(key, new Holder<>());
             return rs && (db.get(key) != null);
         } catch (Exception e) {
             Log.error("keyMayExist table={}: error",table);
@@ -486,7 +486,7 @@ public class RocksDBManager {
      * @param keys  Batch query keywords
      * @return Batch query result key value pair set
      */
-    public static Map<byte[], byte[]> multiGet(final String table, final List<byte[]> keys) {
+    public static List<byte[]> multiGet(final String table, final List<byte[]> keys) {
         if (!baseCheckTable(table)) {
             Log.error("multiGet table={}: error",table);
             return null;
@@ -496,7 +496,7 @@ public class RocksDBManager {
         }
         try {
             RocksDB db = TABLES.get(table);
-            return db.multiGet(keys);
+            return db.multiGetAsList(keys);
         } catch (Exception ex) {
             Log.error("multiGet table={}: error",table);
             Log.error(ex);
@@ -552,11 +552,7 @@ public class RocksDBManager {
         }
         try {
             RocksDB db = TABLES.get(table);
-            Map<byte[], byte[]> map = db.multiGet(keys);
-            if (map != null && map.size() > 0) {
-                list.addAll(map.values());
-            }
-            return list;
+            return db.multiGetAsList(keys);
         } catch (Exception ex) {
             Log.error("multiGetValueList table={}: error",table);
             Log.error(ex);
@@ -583,11 +579,7 @@ public class RocksDBManager {
         }
         try {
             RocksDB db = TABLES.get(table);
-            Map<byte[], byte[]> map = db.multiGet(keys);
-            if (map != null && map.size() > 0) {
-                list.addAll(map.keySet());
-            }
-            return list;
+            return db.multiGetAsList(keys);
         } catch (Exception ex) {
             Log.error("multiGetKeyList table={}: error",table);
             Log.error(ex);
