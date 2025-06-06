@@ -1305,7 +1305,9 @@ public class ContractResource extends BaseCmd {
             dto.setMethod(methods);
             dto.setDirectPayable(po.isAcceptDirectTransfer());
             dto.setDirectPayableByOtherAsset(isAcceptDirectTransferByOtherAsset);
-            dto.setCodeHash(HexUtil.encode(codeHash));
+            if (codeHash != null) {
+                dto.setCodeHash(HexUtil.encode(codeHash));
+            }
             return success(dto);
         } catch (Exception e) {
             Log.error(e);

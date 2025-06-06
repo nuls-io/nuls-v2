@@ -137,7 +137,7 @@ public class RocksDbDataSource implements DbSource<byte[]> {
              * Optimize reading performance plan
              */
             options.setAllowMmapReads(true);
-            options.setCompressionType(CompressionType.NO_COMPRESSION);
+            options.setCompressionType(CompressionType.LZ4_COMPRESSION);
             options.setMaxOpenFiles(-1);
 
             BlockBasedTableConfig tableOption = new BlockBasedTableConfig();
@@ -148,7 +148,7 @@ public class RocksDbDataSource implements DbSource<byte[]> {
             tableOption.setFilterPolicy(new BloomFilter(10, true));
             options.setTableFormatConfig(tableOption);
 
-            options.setNewTableReaderForCompactionInputs(true);
+//            options.setNewTableReaderForCompactionInputs(true);
             //For compressed input, openRocksDBPre reading of layers
             options.setCompactionReadaheadSize(128 * SizeUnit.KB);
             return RocksDB.open(options, dataPath);

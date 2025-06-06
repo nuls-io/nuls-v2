@@ -364,7 +364,7 @@ public class TransactionDBManager {
      * @param keys  Batch query keywords
      * @return Batch query result key value pair set
      */
-    public static Map<byte[], byte[]> multiGet(final String table, final List<byte[]> keys) {
+    public static List<byte[]> multiGet(final String table, final List<byte[]> keys) {
         if (!baseCheckTable(table)) {
             return null;
         }
@@ -373,7 +373,7 @@ public class TransactionDBManager {
         }
         try {
             TransactionDB db = TABLES.get(table);
-            return db.multiGet(keys);
+            return db.multiGetAsList(keys);
         } catch (Exception ex) {
             return null;
         }
@@ -397,9 +397,9 @@ public class TransactionDBManager {
         }
         try {
             TransactionDB db = TABLES.get(table);
-            Map<byte[], byte[]> map = db.multiGet(keys);
+            List<byte[]> map = db.multiGetAsList(keys);
             if (map != null && map.size() > 0) {
-                list.addAll(map.values());
+                list.addAll(map);
             }
             return list;
         } catch (Exception ex) {
@@ -425,9 +425,9 @@ public class TransactionDBManager {
         }
         try {
             TransactionDB db = TABLES.get(table);
-            Map<byte[], byte[]> map = db.multiGet(keys);
+            List<byte[]> map = db.multiGetAsList(keys);
             if (map != null && map.size() > 0) {
-                list.addAll(map.keySet());
+                list.addAll(map);
             }
             return list;
         } catch (Exception ex) {
