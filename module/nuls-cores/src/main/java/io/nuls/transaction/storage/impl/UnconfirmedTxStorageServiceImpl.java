@@ -214,6 +214,9 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
 
         List<String> list = new ArrayList<>();
         for(byte[] hash : getExistKeys(chainId, hashList)){
+            if(null == hash){
+                continue;
+            }
             list.add(HexUtil.encode(hash));
         }
         return list;

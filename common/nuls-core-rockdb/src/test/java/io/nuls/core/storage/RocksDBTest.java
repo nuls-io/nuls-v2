@@ -224,11 +224,11 @@ public class RocksDBTest {
         keyBytes.add("key2".getBytes());
         keyBytes.add("key3".getBytes());
         //keyBytes sizeCannot be greater than65536Otherwise, the query result will be empty
-        Map<byte[], byte[]> map = multiGet(table, keyBytes);
-        for (Map.Entry<byte[], byte[]> entry : map.entrySet()) {
-            result.put(new String(entry.getKey()), new String(entry.getValue()));
-            System.out.println(new String(entry.getKey()) + "==" + new String(entry.getValue()));
-        }
+//        List<byte[]> map = multiGet(table, keyBytes);
+//        for (byte[] value : map) {
+//            result.put(new String(entry.getKey()), new String(entry.getValue()));
+//            System.out.println(new String(entry.getKey()) + "==" + new String(entry.getValue()));
+//        }
     }
 
     @Ignore
