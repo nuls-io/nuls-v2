@@ -82,6 +82,9 @@ public class ApiBootstrap extends RpcModule {
             Context.accessLimit = Boolean.parseBoolean(configItemMap.get("accessLimit").getValue());
         }
         NulsSDKBootStrap.init(defaultChainId, "");
+        if (defaultChainId == 2) {
+            Context.multicall = "tNULSeBaMwP81fGuNPRRSpKxLto1o1hQPnUTJQ";
+        }
         try {
             I18nUtils.setLanguage("en");
         } catch (NulsException e) {
