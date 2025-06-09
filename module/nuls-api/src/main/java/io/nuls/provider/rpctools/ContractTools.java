@@ -3,11 +3,16 @@ package io.nuls.provider.rpctools;
 import io.nuls.base.api.provider.Result;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.log.Log;
+import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.parse.MapUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.provider.api.config.Context;
 import io.nuls.provider.model.dto.ContractTokenInfoDto;
 
+import java.math.BigInteger;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -253,6 +258,26 @@ public class ContractTools implements CallRpc {
             });
         } catch (NulsRuntimeException e) {
             return Result.fail(e.getCode(), e.getMessage());
+        }
+    }
+
+    public Result<List<String>> multicall(int chainId, Object height, List contracts, List methods, List params) {
+        try {
+            Result<Map> result = invokeView(chainId, height, Context.multicall, "aggregateStrict", null, new Object[]{
+                    contracts.toArray(),
+                    methods.toArray(),
+                    params.toArray(),
+                    false
+            });
+            Map dataMap = result.getData();
+            if (dataMap == null) {
+                return new Result<>(Collections.emptyList());
+            }
+            List<String> list = JSONUtils.json2pojo(dataMap.get("result").toString(), List.class);
+            return new Result<List<String>>(list);
+        } catch (Exception e) {
+            Log.error(e);
+            return new Result<>(Collections.emptyList());
         }
     }
 

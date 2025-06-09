@@ -31,6 +31,22 @@ public class AccountBalance {
     @ApiModelProperty(description = "1：Confirmednoncevalue,0：unacknowledgednoncevalue")
     private int nonceType;
 
+    public AccountBalanceWithDecimals toAccountBalanceWithDecimals(int decimals) {
+        AccountBalanceWithDecimals accountBalance = new AccountBalanceWithDecimals();
+        accountBalance.setAssetChainId(assetChainId);
+        accountBalance.setAssetId(assetId);
+        accountBalance.setContractAddress(contractAddress);
+        accountBalance.setTotalBalance(totalBalance);
+        accountBalance.setBalance(balance);
+        accountBalance.setTimeLock(timeLock);
+        accountBalance.setConsensusLock(consensusLock);
+        accountBalance.setFreeze(freeze);
+        accountBalance.setNonce(nonce);
+        accountBalance.setNonceType(nonceType);
+        accountBalance.setDecimals(decimals);
+        return accountBalance;
+    }
+
     public String getTotalBalance() {
         return totalBalance;
     }

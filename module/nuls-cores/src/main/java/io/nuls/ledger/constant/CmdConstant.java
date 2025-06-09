@@ -73,6 +73,7 @@ public interface CmdConstant {
      * Obtain information containing unconfirmed transactions
      */
     String CMD_GET_BALANCE_NONCE = "getBalanceNonce";
+    String CMD_GET_BALANCE_NONCE_LIST = "getBalanceNonceList";
     /**
      * Obtain accountnoncevalue
      */

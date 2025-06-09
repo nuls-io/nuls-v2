@@ -104,7 +104,7 @@ public class RocksDBService {
     }
 
     public static List<byte[]> multiGet(String table, List<byte[]> keys) {
-        return RocksDBManager.multiGetAsList(table, keys);
+        return RocksDBManager.multiGet(table, keys);
     }
 
     public static List<byte[]> multiGetAsList(String table, List<byte[]> keys) {
