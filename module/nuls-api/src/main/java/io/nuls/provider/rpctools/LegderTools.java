@@ -13,6 +13,7 @@ import io.nuls.provider.api.model.AssetInfo;
 import io.nuls.provider.model.dto.ContractTokenInfoDto;
 import io.nuls.provider.rpctools.vo.AccountBalance;
 import io.nuls.provider.rpctools.vo.AccountBalanceWithDecimals;
+import io.nuls.provider.utils.Log;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -99,6 +100,7 @@ public class LegderTools implements CallRpc {
                 return new Result<Map<String, AccountBalance>>(resultMap);
             });
         } catch (NulsRuntimeException e) {
+            Log.error(e);
             return Result.fail(e.getCode(), e.getMessage());
         }
     }
@@ -131,6 +133,7 @@ public class LegderTools implements CallRpc {
                 return new Result<>(balanceInfo);
             });
         } catch (NulsRuntimeException e) {
+            Log.error(e);
             return Result.fail(e.getCode(), e.getMessage());
         }
     }
@@ -261,6 +264,7 @@ public class LegderTools implements CallRpc {
             }
             return new Result<List<AccountBalanceWithDecimals>>(accountBalanceList);
         } catch (NulsRuntimeException e) {
+            Log.error(e);
             return Result.fail(e.getCode(), e.getMessage());
         }
 
@@ -342,6 +346,7 @@ public class LegderTools implements CallRpc {
             }
             return new Result<List<AccountBalance>>(accountBalanceList);
         } catch (NulsRuntimeException e) {
+            Log.error(e);
             return Result.fail(e.getCode(), e.getMessage());
         }
 
