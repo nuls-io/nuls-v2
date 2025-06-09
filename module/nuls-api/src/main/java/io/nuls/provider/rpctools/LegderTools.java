@@ -13,6 +13,7 @@ import io.nuls.provider.api.model.AssetInfo;
 import io.nuls.provider.model.dto.ContractTokenInfoDto;
 import io.nuls.provider.rpctools.vo.AccountBalance;
 import io.nuls.provider.rpctools.vo.AccountBalanceWithDecimals;
+import io.nuls.provider.utils.Log;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -75,10 +76,13 @@ public class LegderTools implements CallRpc {
                     return null;
                 }
                 Map<String, AccountBalance> resultMap = new LinkedHashMap<>();
-                List<Map> dataList = (List<Map>) _map.get("list");
-                for (int i = 0; i < dataList.size(); i++) {
-                    Map map = dataList.get(i);
+                Map<String, Map> dataMap = (Map<String, Map>) _map.get("list");
+                for (int i = 0; i < assetKeyList.size(); i++) {
                     String assetKey = assetKeyList.get(i);
+                    Map map = dataMap.get(assetKey);
+                    if (map == null) {
+                        continue;
+                    }
 
                     AccountBalance balanceInfo = new AccountBalance();
                     balanceInfo.setBalance(map.get("available").toString());
@@ -96,6 +100,7 @@ public class LegderTools implements CallRpc {
                 return new Result<Map<String, AccountBalance>>(resultMap);
             });
         } catch (NulsRuntimeException e) {
+            Log.error(e);
             return Result.fail(e.getCode(), e.getMessage());
         }
     }
@@ -128,6 +133,7 @@ public class LegderTools implements CallRpc {
                 return new Result<>(balanceInfo);
             });
         } catch (NulsRuntimeException e) {
+            Log.error(e);
             return Result.fail(e.getCode(), e.getMessage());
         }
     }
@@ -258,6 +264,7 @@ public class LegderTools implements CallRpc {
             }
             return new Result<List<AccountBalanceWithDecimals>>(accountBalanceList);
         } catch (NulsRuntimeException e) {
+            Log.error(e);
             return Result.fail(e.getCode(), e.getMessage());
         }
 
@@ -339,6 +346,7 @@ public class LegderTools implements CallRpc {
             }
             return new Result<List<AccountBalance>>(accountBalanceList);
         } catch (NulsRuntimeException e) {
+            Log.error(e);
             return Result.fail(e.getCode(), e.getMessage());
         }
 

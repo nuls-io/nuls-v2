@@ -387,7 +387,7 @@ public class AccountStateCmd extends BaseLedgerCmd {
         if (!chainHanlder(chainId)) {
             return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
         }
-        Map<String, Map> resultList = new HashMap<>();
+        Map<String, Map> resultDataMap = new HashMap<>();
         Map<String, Object> resultMap = new HashMap<>();
         for (int i = 0; i < assetKeyList.size(); i++) {
             String assetKey = assetKeyList.get(i);
@@ -429,9 +429,9 @@ public class AccountStateCmd extends BaseLedgerCmd {
             rtMap.put("permanentLocked", permanentLocked);
             rtMap.put("timeHeightLocked", timeHeightLocked);
 
-            resultList.put(assetKey, rtMap);
+            resultDataMap.put(assetKey, rtMap);
         }
-        resultMap.put("list", resultList);
+        resultMap.put("list", resultDataMap);
         Response response = success(resultMap);
         return response;
     }
