@@ -75,10 +75,13 @@ public class LegderTools implements CallRpc {
                     return null;
                 }
                 Map<String, AccountBalance> resultMap = new LinkedHashMap<>();
-                List<Map> dataList = (List<Map>) _map.get("list");
-                for (int i = 0; i < dataList.size(); i++) {
-                    Map map = dataList.get(i);
+                Map<String, Map> dataMap = (Map<String, Map>) _map.get("list");
+                for (int i = 0; i < assetKeyList.size(); i++) {
                     String assetKey = assetKeyList.get(i);
+                    Map map = dataMap.get(assetKey);
+                    if (map == null) {
+                        continue;
+                    }
 
                     AccountBalance balanceInfo = new AccountBalance();
                     balanceInfo.setBalance(map.get("available").toString());
