@@ -83,8 +83,12 @@ public class LegderTools implements CallRpc {
                     if (map == null) {
                         continue;
                     }
-
+                    String[] split = assetKey.split("-");
+                    int assetChainId = Integer.parseInt(split[0]);
+                    int assetId = Integer.parseInt(split[1]);
                     AccountBalance balanceInfo = new AccountBalance();
+                    balanceInfo.setAssetChainId(assetChainId);
+                    balanceInfo.setAssetId(assetId);
                     balanceInfo.setBalance(map.get("available").toString());
                     balanceInfo.setTimeLock(map.get("timeHeightLocked").toString());
                     balanceInfo.setConsensusLock(map.get("permanentLocked").toString());
@@ -186,7 +190,7 @@ public class LegderTools implements CallRpc {
                 int assetChainId = (int) map.get("chainId");
                 int assetId = (int) map.get("assetId");
                 String contractAddress = (String) map.get("contractAddress");
-                if (StringUtils.isBlank(contractAddress)) {
+                if (StringUtils.isNotBlank(contractAddress)) {
                     contractList.add(contractAddress);
                     contractList.add(contractAddress);
                     contractList.add(contractAddress);
@@ -256,7 +260,7 @@ public class LegderTools implements CallRpc {
                 int assetChainId = (int) map.get("chainId");
                 int assetId = (int) map.get("assetId");
                 String contractAddress = (String) map.get("contractAddress");
-                if (StringUtils.isBlank(contractAddress)) {
+                if (StringUtils.isNotBlank(contractAddress)) {
                     accountBalanceList.add(allDataMap.get(contractAddress));
                 } else {
                     accountBalanceList.add(allDataMap.get(assetChainId + "-" + assetId));
@@ -283,7 +287,7 @@ public class LegderTools implements CallRpc {
                 int assetChainId = (int) map.get("chainId");
                 int assetId = (int) map.get("assetId");
                 String contractAddress = (String) map.get("contractAddress");
-                if (StringUtils.isBlank(contractAddress)) {
+                if (StringUtils.isNotBlank(contractAddress)) {
                     contractList.add(contractAddress);
                     contractList.add(contractAddress);
                     methods.add("balanceOf");
@@ -338,7 +342,7 @@ public class LegderTools implements CallRpc {
                 int assetChainId = (int) map.get("chainId");
                 int assetId = (int) map.get("assetId");
                 String contractAddress = (String) map.get("contractAddress");
-                if (StringUtils.isBlank(contractAddress)) {
+                if (StringUtils.isNotBlank(contractAddress)) {
                     accountBalanceList.add(allDataMap.get(contractAddress));
                 } else {
                     accountBalanceList.add(allDataMap.get(assetChainId + "-" + assetId));
