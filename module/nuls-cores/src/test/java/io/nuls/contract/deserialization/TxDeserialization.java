@@ -29,6 +29,7 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.*;
+import io.nuls.base.signture.MultiSignTxSignature;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
@@ -85,6 +86,19 @@ public class TxDeserialization {
         //
         //System.out.println(JSONUtils.obj2PrettyJson(tx2));
         TransactionSignature ts = new TransactionSignature();
+        ts.parse(tx1.getTransactionSignature(), 0);
+        System.out.println();
+
+    }
+
+    @Test
+    public void multiTest() throws NulsException, JsonProcessingException {
+        String txStr1 = "020004d2006800008c01170200034fa1d67bb9024a233cdc0dc0fc41ec849bf4b47702000100a067f7050000000000000000000000000000000000000000000000000000000008f7b0376f52e93d4400011702000147979ecc36c9f00e218462e83b2a20cfa3e6bd2b0200010000e1f505000000000000000000000000000000000000000000000000000000000000000000000000fd3c0102032102eb32aa9ba4205ed1fb20a45462728173dca8cbd3fc0c05a0596ecb5490710992210305d2555fa74fcd7dffe902560a03f631e23a01bcdb76343beff386d63a36ad472103aa2e95d94e20942e496ba7c55eab1897d650d46ca9508c4377e131caa11bab4a2103aa2e95d94e20942e496ba7c55eab1897d650d46ca9508c4377e131caa11bab4a48304602210098f3dfcaa7715090f41a3f7af222592e2b8887439d40a31251784b29e3b9d915022100ce3c789146f272f5583b4eba69bc60357d86722fcc7415a6077c1495e8c0fc142102eb32aa9ba4205ed1fb20a45462728173dca8cbd3fc0c05a0596ecb549071099246304402205693d0cde3b085615d520fecf7ce1c6d57ec5f8982458f33637fd6ab1eae79ed02205e8eefd6ac0d2ee21e641796d39f477178f50e861d785924a0b72fdd6fef8e5f";
+
+        Transaction tx1 = new Transaction();
+        tx1.parse(new NulsByteBuffer(HexUtil.decode(txStr1)));
+
+        MultiSignTxSignature ts = new MultiSignTxSignature();
         ts.parse(tx1.getTransactionSignature(), 0);
         System.out.println();
 

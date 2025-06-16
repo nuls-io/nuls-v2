@@ -48,6 +48,7 @@ public class Context {
 
     public static ChainInfo defaultChain;
     public static boolean accessLimit;
+    public static String multicall = "NULSd6Hgrnv1oxcdyhzZmsu7HWgk7vcaR6nMR";
 
 
 
