@@ -397,11 +397,7 @@ public class TransactionDBManager {
         }
         try {
             TransactionDB db = TABLES.get(table);
-            List<byte[]> map = db.multiGetAsList(keys);
-            if (map != null && map.size() > 0) {
-                list.addAll(map);
-            }
-            return list;
+            return db.multiGetAsList(keys);
         } catch (Exception ex) {
             return list;
         }
@@ -425,11 +421,7 @@ public class TransactionDBManager {
         }
         try {
             TransactionDB db = TABLES.get(table);
-            List<byte[]> map = db.multiGetAsList(keys);
-            if (map != null && map.size() > 0) {
-                list.addAll(map);
-            }
-            return list;
+            return db.multiGetAsList(keys);
         } catch (Exception ex) {
             return list;
         }

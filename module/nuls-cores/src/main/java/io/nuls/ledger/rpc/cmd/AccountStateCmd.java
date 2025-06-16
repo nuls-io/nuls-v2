@@ -360,4 +360,80 @@ public class AccountStateCmd extends BaseLedgerCmd {
         return response;
     }
 
+    @CmdAnnotation(cmd = "getBalanceNonceList", version = 1.0,
+            description = "Obtain a collection of account assets")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "Running ChainId,Value range[1-65535]"),
+            @Parameter(parameterName = "assetKeyList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "assetkeyaggregate, [assetChainId-assetId]"),
+            @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "Asset location address"),
+            @Parameter(parameterName = "isConfirmedList", requestType = @TypeDescriptor(value = List.class, collectionElement = boolean.class), parameterDes = "isConfirmed, [boolean]")
+    })
+    @ResponseData(name = "Return value", description = "Return aMapobject",
+            responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+                    @Key(name = "list", valueType = Map.class, description = "Account asset collection")
+            })
+    )
+    public Response getBalanceNonceList(Map params) {
+        Integer chainId = (Integer) params.get("chainId");
+        List<String> assetKeyList = (List<String>) params.get("assetKeyList");
+        if (assetKeyList == null) {
+            return failed(LedgerErrorCode.PARAMETER_ERROR, "invalid `assetKeyList`");
+        }
+        String address = LedgerUtil.getRealAddressStr((String) params.get("address"));
+        List<Boolean> isConfirmedList = (List<Boolean>) params.get("isConfirmedList");
+        if (assetKeyList == null) {
+            return failed(LedgerErrorCode.PARAMETER_ERROR, "invalid `isConfirmedList`");
+        }
+        if (!chainHanlder(chainId)) {
+            return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
+        }
+        Map<String, Map> resultDataMap = new HashMap<>();
+        Map<String, Object> resultMap = new HashMap<>();
+        for (int i = 0; i < assetKeyList.size(); i++) {
+            String assetKey = assetKeyList.get(i);
+            assetKey = assetKey.trim();
+            String[] assetInfo = assetKey.split("-");
+            int assetChainId = Integer.parseInt(assetInfo[0].trim());
+            int assetId = Integer.parseInt(assetInfo[1].trim());
+            Boolean isConfirmed = isConfirmedList.get(i);
+
+            AccountState accountState = accountStateService.getAccountStateReCal(address, chainId, assetChainId, assetId);
+            Map<String, Object> rtMap = new HashMap<>(6);
+            AccountStateUnconfirmed accountStateUnconfirmed = unconfirmedStateService.getUnconfirmedInfo(address, chainId, assetChainId, assetId, accountState);
+            BigInteger available;
+            if (isConfirmed || null == accountStateUnconfirmed) {
+                rtMap.put("nonce", RPCUtil.encode(accountState.getNonce()));
+                rtMap.put("nonceType", LedgerConstant.CONFIRMED_NONCE);
+                available = accountState.getAvailableAmount();
+            } else {
+                available = accountState.getAvailableAmount().subtract(accountStateUnconfirmed.getAmount());
+                rtMap.put("nonce", RPCUtil.encode(accountStateUnconfirmed.getNonce()));
+                rtMap.put("nonceType", LedgerConstant.UNCONFIRMED_NONCE);
+            }
+
+            rtMap.put("freeze", accountState.getFreezeTotal());
+            rtMap.put("total", available.add(accountState.getFreezeTotal()));
+            rtMap.put("available", available);
+            BigInteger permanentLocked = BigInteger.ZERO;
+            BigInteger timeHeightLocked = BigInteger.ZERO;
+            for (FreezeLockTimeState freezeLockTimeState : accountState.getFreezeLockTimeStates()) {
+                if (LedgerUtil.isPermanentLock(freezeLockTimeState.getLockTime())) {
+                    permanentLocked = permanentLocked.add(freezeLockTimeState.getAmount());
+                } else {
+                    timeHeightLocked = timeHeightLocked.add(freezeLockTimeState.getAmount());
+                }
+            }
+            for (FreezeHeightState freezeHeightState : accountState.getFreezeHeightStates()) {
+                timeHeightLocked = timeHeightLocked.add(freezeHeightState.getAmount());
+            }
+            rtMap.put("permanentLocked", permanentLocked);
+            rtMap.put("timeHeightLocked", timeHeightLocked);
+
+            resultDataMap.put(assetKey, rtMap);
+        }
+        resultMap.put("list", resultDataMap);
+        Response response = success(resultMap);
+        return response;
+    }
+
 }
