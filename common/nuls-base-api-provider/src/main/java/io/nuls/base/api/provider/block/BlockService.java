@@ -17,6 +17,10 @@ public interface BlockService {
 
     Result<BlockHeaderData> getBlockHeaderByHeight(GetBlockHeaderByHeightReq req);
 
+    Result<String> getBlockHexByHash(GetBlockHeaderByHashReq req);
+
+    Result<String> getBlockHexByHeight(GetBlockHeaderByHeightReq req);
+
     Result<BlockHeaderData> getBlockHeaderByLastHeight(GetBlockHeaderByLastHeightReq req);
 
 
