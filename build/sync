@@ -1,0 +1,60 @@
+#!/bin/bash
+
+STARTEXISTS=1
+STOPEXISTS=1
+
+if [ ! -d "./data" ]
+then
+  echo "The 'data' folder is not present in the current directory, if you want to download the whole blockchain please do it from https://github.com/nuls-io/nuls-v2/releases"
+  exit 1  
+fi
+
+if [ ! -f "./start" ]
+then
+  STARTEXISTS=0  
+fi
+if [ ! -f "./stop" ]
+then
+  STOPEXISTS=0  
+fi
+
+if [ $STARTEXISTS -eq 0 ] || [ $STOPEXISTS -eq 0 ] 
+then	
+  echo "The script assumes that 'start' and 'stop' scripts are present in your directory, you will need to stop manually before continuing."
+fi
+
+read -p "Addresses loaded in the node will be deleted and you will need to import manually after syncing completes. Are you ready to proceed? " -n 1 -r
+echo    
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+    echo "LFG!"
+    if  [ $STOPEXISTS -eq 1 ]
+    then	    
+      echo "Stopping the blockchain ..."
+      ./stop
+      sleep 4
+      echo "Complete!"
+    fi  
+
+    echo
+    echo "Establishing connection and start syncing ..."
+    rsync -ar --protect-args --delete --info=progress2  -e "ssh -p 23" u263147-sub5@data.nuls.io:"/home/data/" "./data/"
+    echo
+
+    if [ $? -eq "0" ]
+    then
+      echo "Blockchain Sync finished successfully!"
+      if  [ $STARTEXISTS -eq 1 ]
+      then	      
+        echo "Starting the blockchain ..."
+        ./start
+        sleep 5      	
+	echo "Complete!"
+      fi
+      exit 0
+    else
+      echo "Error while running rsync"
+      exit 1
+    fi
+fi
+

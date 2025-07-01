@@ -469,7 +469,7 @@ public class RocksDBManager {
         }
         try {
             RocksDB db = TABLES.get(table);
-            boolean rs = db.keyMayExist(key, new StringBuilder());
+            boolean rs = db.keyMayExist(key, new Holder<>());
             return rs && (db.get(key) != null);
         } catch (Exception e) {
             Log.error("keyMayExist table={}: error",table);
@@ -486,7 +486,7 @@ public class RocksDBManager {
      * @param keys  Batch query keywords
      * @return Batch query result key value pair set
      */
-    public static Map<byte[], byte[]> multiGet(final String table, final List<byte[]> keys) {
+    public static List<byte[]> multiGet(final String table, final List<byte[]> keys) {
         if (!baseCheckTable(table)) {
             Log.error("multiGet table={}: error",table);
             return null;
@@ -496,7 +496,7 @@ public class RocksDBManager {
         }
         try {
             RocksDB db = TABLES.get(table);
-            return db.multiGet(keys);
+            return db.multiGetAsList(keys);
         } catch (Exception ex) {
             Log.error("multiGet table={}: error",table);
             Log.error(ex);
@@ -552,11 +552,7 @@ public class RocksDBManager {
         }
         try {
             RocksDB db = TABLES.get(table);
-            Map<byte[], byte[]> map = db.multiGet(keys);
-            if (map != null && map.size() > 0) {
-                list.addAll(map.values());
-            }
-            return list;
+            return db.multiGetAsList(keys);
         } catch (Exception ex) {
             Log.error("multiGetValueList table={}: error",table);
             Log.error(ex);
@@ -583,11 +579,7 @@ public class RocksDBManager {
         }
         try {
             RocksDB db = TABLES.get(table);
-            Map<byte[], byte[]> map = db.multiGet(keys);
-            if (map != null && map.size() > 0) {
-                list.addAll(map.keySet());
-            }
-            return list;
+            return db.multiGetAsList(keys);
         } catch (Exception ex) {
             Log.error("multiGetKeyList table={}: error",table);
             Log.error(ex);
@@ -689,23 +681,21 @@ public class RocksDBManager {
         Options options = new Options();
 
         options.setCreateIfMissing(createIfMissing);
-        /**
-         * Optimize reading performance plan
-         */
+
         options.setAllowMmapReads(true);
-        options.setCompressionType(CompressionType.NO_COMPRESSION);
+        options.setCompressionType(CompressionType.LZ4_COMPRESSION);
         options.setMaxOpenFiles(-1);
         BlockBasedTableConfig tableOption = new BlockBasedTableConfig();
-        tableOption.setNoBlockCache(true);
-        tableOption.setBlockRestartInterval(4);
+        tableOption.setBlockCacheSize(1024 * 1024 * 1024); // 1024MB
+        tableOption.setNoBlockCache(false);
+
+        tableOption.setBlockRestartInterval(16);
         tableOption.setFilterPolicy(new BloomFilter(10, true));
         options.setTableFormatConfig(tableOption);
 
         options.setMaxBackgroundCompactions(16);
-        options.setNewTableReaderForCompactionInputs(true);
         //For compressed input, openRocksDBPre reading of layers
         options.setCompactionReadaheadSize(128 * SizeUnit.KB);
-        options.setNewTableReaderForCompactionInputs(true);
 
         return options;
     }

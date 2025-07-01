@@ -88,7 +88,7 @@ deflationRatio=0.4
 #Deflation interval time(unit：S),30day
 deflationTimeInterval=2592000
 feeAssets=2-1,2-201,2-202
-feeUnit=100000,10000,100000000000000
+feeUnit=100000,100,20000000000000
 
 [smart-contract]
 #The maximum consumption of contract view method callsGas

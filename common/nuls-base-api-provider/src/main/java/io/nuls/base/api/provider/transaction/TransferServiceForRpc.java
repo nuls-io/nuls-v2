@@ -149,7 +149,17 @@ public class TransferServiceForRpc extends BaseRpcService implements TransferSer
                 tcd.setNonce(HexUtil.encode(coinData.getNonce()));
                 return tcd;
             }).collect(Collectors.toList()));
-            res.setTo(transaction.getCoinDataInstance().getTo().stream().map(this::buildTransactionCoinData).collect(Collectors.toList()));
+            res.setTo(transaction.getCoinDataInstance().getTo().stream().map((to)->{
+                TransactionCoinData toData = this.buildTransactionCoinData(to);
+                if(to.getLockTime() == -1){
+                    toData.setLockTime("No fixed time");
+                }else if(to.getLockTime() == 0){
+                    toData.setLockTime("No lock");
+                }else {
+                    toData.setLockTime(DateUtils.timeStamp2DateStr(to.getLockTime()*1000));
+                }
+                return toData;
+            }).collect(Collectors.toList()));
             return success(res);
         } catch (NulsException e) {
             Log.error("Deserializationtransactionexception occurred",e);
