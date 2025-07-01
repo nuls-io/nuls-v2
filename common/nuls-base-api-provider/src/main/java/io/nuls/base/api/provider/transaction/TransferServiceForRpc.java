@@ -26,6 +26,7 @@ import io.nuls.core.rpc.model.message.MessageUtil;
 import io.nuls.core.rpc.model.message.Request;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -89,6 +90,15 @@ public class TransferServiceForRpc extends BaseRpcService implements TransferSer
     @Override
     public Result<Transaction> getTxByHash(GetTxByHashReq req) {
         return getTx("tx_getTxClient",req) ;
+    }
+    @Override
+    public Result<String> getTxHexByHash(GetConfirmedTxByHashReq req) {
+        Result<Transaction> result =  getTx("tx_getTxClient",req) ;
+        try {
+            return success(HexUtil.encode(result.getData().serialize()));
+        } catch (IOException e) {
+            return Result.fail("failed","serialize failed!");
+        }
     }
 
     @Override
