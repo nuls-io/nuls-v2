@@ -99,6 +99,23 @@ public class TransactionTools implements CallRpc {
         return true;
     }
 
+    public Result<String> getTxHex(int chainId, String txHash) {
+        Map<String, Object> params = new HashMap(4);
+        params.put(Constants.CHAIN_ID, chainId);
+        params.put("txHash", txHash);
+        try {
+            return callRpc(ModuleE.TX.abbr, "tx_getTxClient", params, (Function<Map<String, Object>, Result<String>>) res -> {
+                if (res == null || res.get("tx") == null) {
+                    return Result.fail(CommonCodeConstanst.DATA_NOT_FOUND.getCode(), CommonCodeConstanst.DATA_NOT_FOUND.getMsg());
+                }
+                String txStr = (String) res.get("tx");
+                return new Result(txStr);
+            });
+        } catch (NulsRuntimeException e) {
+            return Result.fail(e.getCode(), e.getMessage());
+        }
+    }
+
     public Result<TransactionDto> getTx(int chainId, String txHash) {
         Map<String, Object> params = new HashMap(4);
         params.put(Constants.CHAIN_ID, chainId);

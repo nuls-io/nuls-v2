@@ -96,6 +96,39 @@ public class TransactionController {
 
     BlockService blockService = ServiceManager.get(BlockService.class);
 
+
+    @RpcMethod("getTxHex")
+    @ApiOperation(description = "according tohashObtain transaction hex", order = 301)
+    @Parameters({
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid"),
+            @Parameter(parameterName = "hash", parameterDes = "transactionhash")
+    })
+    @ResponseData(name = "Return value", responseType = @TypeDescriptor(value = TransactionDto.class))
+    public RpcResult getTxHex(List<Object> params) {
+        VerifyUtils.verifyParams(params, 2);
+        int chainId;
+        String txHash;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        try {
+            txHash = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[txHash] is inValid");
+        }
+        if (!Context.isChainExist(chainId)) {
+            return RpcResult.dataNotFound();
+        }
+        if (StringUtils.isBlank(txHash) || !ValidateUtil.validHash(txHash)) {
+            return RpcResult.paramError("[txHash] is inValid");
+        }
+        Result<String> result = transactionTools.getTxHex(chainId, txHash);
+
+        return ResultUtil.getJsonRpcResult(result);
+    }
+
     @RpcMethod("getTx")
     @ApiOperation(description = "according tohashObtain transactions", order = 301)
     @Parameters({

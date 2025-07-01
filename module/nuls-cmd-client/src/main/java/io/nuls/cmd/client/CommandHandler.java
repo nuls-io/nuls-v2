@@ -31,6 +31,7 @@ import io.nuls.cmd.client.processor.CommandProcessor;
 import io.nuls.cmd.client.processor.account.*;
 import io.nuls.cmd.client.processor.block.GetBestBlockHeaderProcessor;
 import io.nuls.cmd.client.processor.block.GetBlockHeaderProcessor;
+import io.nuls.cmd.client.processor.block.GetBlockHexProcessor;
 import io.nuls.cmd.client.processor.block.RollbackProcessor;
 import io.nuls.cmd.client.processor.consensus.*;
 import io.nuls.cmd.client.processor.contract.*;
@@ -120,10 +121,12 @@ public class CommandHandler implements InitializingBean {
         register(getBean(GetBestBlockHeaderProcessor.class));
         //get block header by hash or height
         register(getBean(GetBlockHeaderProcessor.class));
+        register(getBean(GetBlockHexProcessor.class));
         register(getBean(RollbackProcessor.class));
 
         //get tx by hash
         register(getBean(GetTxProcessor.class));
+        register(getBean(GetTxHexProcessor.class));
 
         //get account balance
         register(getBean(GetBalanceProcessor.class));

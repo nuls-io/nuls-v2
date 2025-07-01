@@ -100,6 +100,7 @@ public interface CommandConstant {
      * Obtain block headers based on block heightPO
      */
     String GET_BLOCK_HEADER_PO_BY_HEIGHT = "getBlockHeaderPoByHeight";
+    String GET_BLOCK_HEX_BY_HEIGHT = "getBlockHexByHeight";
     /**
      * Obtain blocks based on block height
      */
@@ -112,6 +113,7 @@ public interface CommandConstant {
      * Based on blocksHASHGet block headerPO
      */
     String GET_BLOCK_HEADER_PO_BY_HASH = "getBlockHeaderPoByHash";
+    String GET_BLOCK_HEX_BY_HASH = "getBlockHexByHash";
     /**
      * Based on blocksHASHGet blocks
      */

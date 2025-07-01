@@ -44,6 +44,16 @@ public class BlockServiceForRpc extends BaseRpcService implements BlockService {
     }
 
     @Override
+    public Result<String> getBlockHexByHash(GetBlockHeaderByHashReq req) {
+        return call("getBlockHexByHash", req, this::tranderString);
+    }
+
+    @Override
+    public Result<String> getBlockHexByHeight(GetBlockHeaderByHeightReq req) {
+        return call("getBlockHexByHeight", req, this::tranderString);
+    }
+
+    @Override
     public Result<BlockHeaderData> getBlockHeaderByLastHeight(GetBlockHeaderByLastHeightReq req) {
         return _call("latestBlockHeaderPo", req, this::tranderBlockHeader);
     }
