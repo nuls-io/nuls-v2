@@ -581,6 +581,67 @@ public class BlockResource extends BaseCmd {
     }
 
     /**
+     * according tohashGet block header
+     *
+     * @param map
+     * @return
+     */
+    @CmdAnnotation(cmd = GET_BLOCK_HEX_BY_HASH, version = 1.0, description = "get a block header po by hash")
+    @Parameters({
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainID"),
+            @Parameter(parameterName = "hash", requestType = @TypeDescriptor(value = String.class), parameterDes = "blockhash")
+    })
+    @ResponseData(name = "Return value", description = "Return block headerPOSerializedHEXcharacter string", responseType = @TypeDescriptor(value = String.class))
+    public Response getBlockHexPoByHash(Map map) {
+        try {
+            int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
+            ChainContext context = ContextManager.getContext(chainId);
+            if (context == null) {
+                return success();
+            }
+            NulsHash hash = NulsHash.fromHex(map.get("hash").toString());
+            Block block = service.getBlock(chainId, hash);
+            Map<String, String> responseData = new HashMap<>(2);
+            if (block == null) {
+                return success(responseData);
+            }
+            responseData.put("value", RPCUtil.encode(block.serialize()));
+            return success(responseData);
+        } catch (Exception e) {
+            COMMON_LOG.error("", e);
+            return failed(e.getMessage());
+        }
+    }
+
+    @CmdAnnotation(cmd = GET_BLOCK_HEX_BY_HEIGHT, version = 1.0, description = "get a block header po by hash")
+    @Parameters({
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainID"),
+            @Parameter(parameterName = "height", requestType = @TypeDescriptor(value = Long.class), parameterDes = "block height")
+    })
+    @ResponseData(name = "Return value", description = "Return block headerPOSerializedHEXcharacter string", responseType = @TypeDescriptor(value = String.class))
+    public Response getBlockHexPoByHeight(Map map) {
+        try {
+
+            int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
+            ChainContext context = ContextManager.getContext(chainId);
+            if (context == null) {
+                return success();
+            }
+            long height = Long.parseLong(map.get("height").toString());
+            Block block = service.getBlock(chainId, height);
+            Map<String, String> responseData = new HashMap<>(2);
+            if (block == null) {
+                return success(responseData);
+            }
+            responseData.put("value", RPCUtil.encode(block.serialize()));
+            return success(responseData);
+        } catch (Exception e) {
+            COMMON_LOG.error("", e);
+            return failed(e.getMessage());
+        }
+    }
+
+    /**
      * according tohashGet blocks
      *
      * @param map

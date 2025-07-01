@@ -71,5 +71,6 @@ public interface TransferService {
      * @return
      */
     Result<TransactionData> getSimpleTxDataByHash(GetConfirmedTxByHashReq req);
+    Result<String> getTxHexByHash(GetConfirmedTxByHashReq req);
 
 }
