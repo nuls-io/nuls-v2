@@ -6,6 +6,7 @@ import io.nuls.base.data.*;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.DoubleUtils;
@@ -28,6 +29,7 @@ import io.nuls.consensus.utils.manager.PunishManager;
 import io.nuls.consensus.utils.manager.RoundManager;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.*;
 
 /**
@@ -381,8 +383,36 @@ public class BlockValidator {
             originTransaction.setCoinData(originCoinData.serialize());
 
             if (!originTransaction.getHash().equals(coinBaseTransaction.getHash())) {
-                chain.getLogger().error("the coin base tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + blockHeaderHash);
-                return false;
+
+                boolean fromEmpty = originCoinData.getFrom().isEmpty() && coinBaseCoinData.getFrom().isEmpty();
+
+                boolean result = false;
+                if (fromEmpty && originCoinData.getTo().isEmpty()) {
+                    for (CoinTo to : coinBaseCoinData.getTo()) {
+                        result = to.getAmount().compareTo(BigInteger.ZERO) == 0;
+                        if (!result) {
+                            break;
+                        }
+                    }
+                    chain.getLogger().error("the coin base tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + blockHeaderHash);
+
+                } else if (fromEmpty && coinBaseCoinData.getTo().isEmpty()) {
+
+                    for (CoinTo to : originCoinData.getTo()) {
+                        result = to.getAmount().compareTo(BigInteger.ZERO) == 0;
+                        if (!result) {
+                            break;
+                        }
+                    }
+                    chain.getLogger().error("the coin base tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + blockHeaderHash);
+
+                }
+                if(!result) {
+                    chain.getLogger().error("originTx:  {}", HexUtil.encode(originTransaction.serialize()));
+                    chain.getLogger().error("coinBaseTx： {}", HexUtil.encode(coinBaseTransaction.serialize()));
+                    chain.getLogger().error("the coin base tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + blockHeaderHash);
+                }
+                return result;
             }
         }
         return true;
@@ -426,6 +456,9 @@ public class BlockValidator {
             txCoinData.getTo().sort(toComparator);
             if (!Arrays.equals(coinData.serialize(), txCoinData.serialize())) {
                 chain.getLogger().error("++++++++++ RedPunish verification does not pass, redPunish type:{}, - height:{}, - redPunish tx timestamp:{}", punishData.getReasonCode(), tx.getBlockHeight(), tx.getTime());
+//                if (tx.getBlockHeight() < 19144000 && coinData.getTo().size() == 1 && txCoinData.getTo().size() > 1) {
+//                    return true;
+//                }
                 return false;
             }
         } catch (IOException e) {

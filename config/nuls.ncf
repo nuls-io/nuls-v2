@@ -30,7 +30,7 @@ packageVersion=%PACKAGE_VERSION%
 port=8001
 crossPort=8002
 #Magic parameters
-packetMagic=20191222
+packetMagic=20251018
 #Seed node
 selfSeedIps=seeda.nuls.io:8001,seedb.nuls.io:8001,seedc.nuls.io:8001,seedd.nuls.io:8001,seede.nuls.io:8001,seedf.nuls.io:8001,seedg.nuls.io:8001,seedh.nuls.io:8001
 #Cross chain seed connection nodes of the main network

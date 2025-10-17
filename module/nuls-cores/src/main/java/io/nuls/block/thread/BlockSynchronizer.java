@@ -359,8 +359,16 @@ public class BlockSynchronizer implements Runnable {
         Map<String, List<Node>> nodeMap = new HashMap<>(filterAvailableNodes.size());
         //AkeyCount the number of times for the primary key
         Map<String, Integer> countMap = new HashMap<>(filterAvailableNodes.size());
+        String highestKey = null;
+        long highest = 0;
         for (Node node : filterAvailableNodes) {
             String tempKey = node.getHash().toHex() + node.getHeight();
+
+            if(node.getHeight()>highest){
+                highestKey  = tempKey;
+                highest = node.getHeight();
+            }
+
             if (countMap.containsKey(tempKey)) {
                 //tempKeyExisting,Count the number of times added1
                 countMap.put(tempKey, countMap.get(tempKey) + 1);
@@ -390,7 +398,7 @@ public class BlockSynchronizer implements Runnable {
         double div = DoubleUtils.div(count, filterAvailableNodes.size(), 2);
         byte percent = calculateConsistencyNodePercent(parameters.getConsistencyNodePercent(), filterAvailableNodes.size());
         if (div * 100 < percent) {
-            return params;
+            key = highestKey;
         }
         List<Node> nodeList = nodeMap.get(key);
         params.setNodes(nodeList);
